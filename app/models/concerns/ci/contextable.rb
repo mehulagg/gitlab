@@ -9,7 +9,7 @@ module Ci
     ##
     # Variables in the environment name scope.
     #
-    def scoped_variables(environment: expanded_environment_name)
+    def scoped_variables(environment: expanded_environment_name, dependencies: true)
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
         variables.concat(predefined_variables)
         variables.concat(project.predefined_variables)
@@ -18,9 +18,9 @@ module Ci
         variables.concat(deployment_variables(environment: environment))
         variables.concat(yaml_variables)
         variables.concat(user_variables)
-        variables.concat(dependency_variables)
+        variables.concat(dependency_variables) if dependencies
         variables.concat(secret_instance_variables)
-        variables.concat(secret_group_variables)
+        variables.concat(secret_group_variables(environment: environment))
         variables.concat(secret_project_variables(environment: environment))
         variables.concat(trigger_request.user_variables) if trigger_request
         variables.concat(pipeline.variables)
@@ -29,19 +29,17 @@ module Ci
     end
 
     ##
-    # Regular Ruby hash of scoped variables, without duplicates that are
-    # possible to be present in an array of hashes returned from `variables`.
-    #
-    def scoped_variables_hash
-      scoped_variables.to_hash
-    end
-
-    ##
     # Variables that do not depend on the environment name.
     #
     def simple_variables
       strong_memoize(:simple_variables) do
         scoped_variables(environment: nil).to_runner_variables
+      end
+    end
+
+    def simple_variables_without_dependencies
+      strong_memoize(:variables_without_dependencies) do
+        scoped_variables(environment: nil, dependencies: false).to_runner_variables
       end
     end
 
@@ -87,13 +85,13 @@ module Ci
       project.ci_instance_variables_for(ref: git_ref)
     end
 
-    def secret_group_variables
+    def secret_group_variables(environment: expanded_environment_name)
       return [] unless project.group
 
-      project.group.ci_variables_for(git_ref, project)
+      project.group.ci_variables_for(git_ref, project, environment: environment)
     end
 
-    def secret_project_variables(environment: persisted_environment)
+    def secret_project_variables(environment: expanded_environment_name)
       project.ci_variables_for(ref: git_ref, environment: environment)
     end
 

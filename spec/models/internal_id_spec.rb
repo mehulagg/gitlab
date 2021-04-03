@@ -6,8 +6,9 @@ RSpec.describe InternalId do
   let(:project) { create(:project) }
   let(:usage) { :issues }
   let(:issue) { build(:issue, project: project) }
+  let(:id_subject) { issue }
   let(:scope) { { project: project } }
-  let(:init) { ->(s) { s.project.issues.size } }
+  let(:init) { ->(issue, scope) { issue&.project&.issues&.size || Issue.where(**scope).count } }
 
   it_behaves_like 'having unique enum values'
 
@@ -39,7 +40,7 @@ RSpec.describe InternalId do
   end
 
   describe '.generate_next' do
-    subject { described_class.generate_next(issue, scope, usage, init) }
+    subject { described_class.generate_next(id_subject, scope, usage, init) }
 
     context 'in the absence of a record' do
       it 'creates a record if not yet present' do
@@ -88,6 +89,33 @@ RSpec.describe InternalId do
 
       expect(normalized).to eq((0..seq.size - 1).to_a)
     end
+
+    context 'there are no instances to pass in' do
+      let(:id_subject) { Issue }
+
+      it 'accepts classes instead' do
+        expect(subject).to eq(1)
+      end
+    end
+
+    context 'when executed outside of transaction' do
+      it 'increments counter with in_transaction: "false"' do
+        expect(ActiveRecord::Base.connection).to receive(:transaction_open?) { false }
+        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+          .with(operation: :generate, usage: 'issues', in_transaction: 'false').and_call_original
+
+        subject
+      end
+    end
+
+    context 'when executed within transaction' do
+      it 'increments counter with in_transaction: "true"' do
+        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+          .with(operation: :generate, usage: 'issues', in_transaction: 'true').and_call_original
+
+        InternalId.transaction { subject }
+      end
+    end
   end
 
   describe '.reset' do
@@ -125,12 +153,35 @@ RSpec.describe InternalId do
         described_class.generate_next(issue, scope, usage, init)
       end
     end
+
+    context 'when executed outside of transaction' do
+      let(:value) { 2 }
+
+      it 'increments counter with in_transaction: "false"' do
+        expect(ActiveRecord::Base.connection).to receive(:transaction_open?) { false }
+        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+          .with(operation: :reset, usage: 'issues', in_transaction: 'false').and_call_original
+
+        subject
+      end
+    end
+
+    context 'when executed within transaction' do
+      let(:value) { 2 }
+
+      it 'increments counter with in_transaction: "true"' do
+        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+          .with(operation: :reset, usage: 'issues', in_transaction: 'true').and_call_original
+
+        InternalId.transaction { subject }
+      end
+    end
   end
 
   describe '.track_greatest' do
     let(:value) { 9001 }
 
-    subject { described_class.track_greatest(issue, scope, usage, value, init) }
+    subject { described_class.track_greatest(id_subject, scope, usage, value, init) }
 
     context 'in the absence of a record' do
       it 'creates a record if not yet present' do
@@ -164,6 +215,33 @@ RSpec.describe InternalId do
         described_class.create!(**scope, usage: usage, last_value: 10_001)
 
         expect(subject).to eq 10_001
+      end
+    end
+
+    context 'there are no instances to pass in' do
+      let(:id_subject) { Issue }
+
+      it 'accepts classes instead' do
+        expect(subject).to eq(value)
+      end
+    end
+
+    context 'when executed outside of transaction' do
+      it 'increments counter with in_transaction: "false"' do
+        expect(ActiveRecord::Base.connection).to receive(:transaction_open?) { false }
+        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+          .with(operation: :track_greatest, usage: 'issues', in_transaction: 'false').and_call_original
+
+        subject
+      end
+    end
+
+    context 'when executed within transaction' do
+      it 'increments counter with in_transaction: "true"' do
+        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+          .with(operation: :track_greatest, usage: 'issues', in_transaction: 'true').and_call_original
+
+        InternalId.transaction { subject }
       end
     end
   end

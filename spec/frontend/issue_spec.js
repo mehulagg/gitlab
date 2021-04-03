@@ -1,257 +1,90 @@
-/* eslint-disable one-var, no-use-before-define */
-
-import $ from 'jquery';
+import { getByText } from '@testing-library/dom';
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 import Issue from '~/issue';
-import '~/lib/utils/text_utility';
+import axios from '~/lib/utils/axios_utils';
 
 describe('Issue', () => {
   let testContext;
+  let mock;
 
   beforeEach(() => {
+    mock = new MockAdapter(axios);
+    mock.onGet(/(.*)\/related_branches$/).reply(200, {});
+
     testContext = {};
+    testContext.issue = new Issue();
   });
 
-  let $boxClosed, $boxOpen, $btn;
+  afterEach(() => {
+    mock.restore();
+    testContext.issue.dispose();
+  });
 
-  preloadFixtures('issues/closed-issue.html');
-  preloadFixtures('issues/issue-with-task-list.html');
-  preloadFixtures('issues/open-issue.html');
-  preloadFixtures('static/issue_with_mermaid_graph.html');
-
-  function expectErrorMessage() {
-    const $flashMessage = $('div.flash-alert');
-
-    expect($flashMessage).toExist();
-    expect($flashMessage).toBeVisible();
-    expect($flashMessage).toHaveText('Unable to update this issue at this time.');
-  }
-
-  function expectIssueState(isIssueOpen) {
-    expectVisibility($boxClosed, !isIssueOpen);
-    expectVisibility($boxOpen, isIssueOpen);
-
-    expect($btn).toHaveText(isIssueOpen ? 'Close issue' : 'Reopen issue');
-  }
-
-  function expectNewBranchButtonState(isPending, canCreate) {
-    if (Issue.$btnNewBranch.length === 0) {
-      return;
-    }
-
-    const $available = Issue.$btnNewBranch.find('.available');
-
-    expect($available).toHaveText('New branch');
-
-    if (!isPending && canCreate) {
-      expect($available).toBeVisible();
-    } else {
-      expect($available).toBeHidden();
-    }
-
-    const $unavailable = Issue.$btnNewBranch.find('.unavailable');
-
-    expect($unavailable).toHaveText('New branch unavailable');
-
-    if (!isPending && !canCreate) {
-      expect($unavailable).toBeVisible();
-    } else {
-      expect($unavailable).toBeHidden();
-    }
-  }
-
-  function expectVisibility($element, shouldBeVisible) {
-    if (shouldBeVisible) {
-      expect($element).not.toHaveClass('hidden');
-    } else {
-      expect($element).toHaveClass('hidden');
-    }
-  }
-
-  function findElements(isIssueInitiallyOpen) {
-    $boxClosed = $('div.status-box-issue-closed');
-
-    expect($boxClosed).toExist();
-    expect($boxClosed).toHaveText('Closed');
-
-    $boxOpen = $('div.status-box-open');
-
-    expect($boxOpen).toExist();
-    expect($boxOpen).toHaveText('Open');
-
-    $btn = $('.js-issuable-close-button');
-
-    expect($btn).toExist();
-    expect($btn).toHaveText(isIssueInitiallyOpen ? 'Close issue' : 'Reopen issue');
-  }
-
-  [true, false].forEach(isIssueInitiallyOpen => {
-    describe(`with ${isIssueInitiallyOpen ? 'open' : 'closed'} issue`, () => {
-      const action = isIssueInitiallyOpen ? 'close' : 'reopen';
-      let mock;
-
-      function setup() {
-        testContext.issue = new Issue();
-        expectIssueState(isIssueInitiallyOpen);
-
-        testContext.$projectIssuesCounter = $('.issue_counter').first();
-        testContext.$projectIssuesCounter.text('1,001');
-      }
-
-      function mockCloseButtonResponseSuccess(url, response) {
-        mock.onPut(url).reply(() => {
-          expectNewBranchButtonState(true, false);
-
-          return [200, response];
-        });
-      }
-
-      function mockCloseButtonResponseError(url) {
-        mock.onPut(url).networkError();
-      }
-
-      function mockCanCreateBranch(canCreateBranch) {
-        mock.onGet(/(.*)\/can_create_branch$/).reply(200, {
-          can_create_branch: canCreateBranch,
-          suggested_branch_name: 'foo-99',
-        });
-      }
-
-      beforeEach(() => {
-        if (isIssueInitiallyOpen) {
-          loadFixtures('issues/open-issue.html');
-        } else {
-          loadFixtures('issues/closed-issue.html');
-        }
-
-        mock = new MockAdapter(axios);
-        mock.onGet(/(.*)\/related_branches$/).reply(200, {});
-        jest.spyOn(axios, 'get');
-
-        findElements(isIssueInitiallyOpen);
-        testContext.$triggeredButton = $btn;
-      });
-
-      afterEach(() => {
-        mock.restore();
-        $('div.flash-alert').remove();
-      });
-
-      it(`${action}s the issue`, done => {
-        mockCloseButtonResponseSuccess(testContext.$triggeredButton.attr('href'), {
-          id: 34,
-        });
-        mockCanCreateBranch(!isIssueInitiallyOpen);
-
-        setup();
-        testContext.$triggeredButton.trigger('click');
-
-        setImmediate(() => {
-          expectIssueState(!isIssueInitiallyOpen);
-
-          expect(testContext.$triggeredButton.get(0).getAttribute('disabled')).toBeNull();
-          expect(testContext.$projectIssuesCounter.text()).toBe(
-            isIssueInitiallyOpen ? '1,000' : '1,002',
-          );
-          expectNewBranchButtonState(false, !isIssueInitiallyOpen);
-
-          done();
-        });
-      });
-
-      it(`fails to ${action} the issue if saved:false`, done => {
-        mockCloseButtonResponseSuccess(testContext.$triggeredButton.attr('href'), {
-          saved: false,
-        });
-        mockCanCreateBranch(isIssueInitiallyOpen);
-
-        setup();
-        testContext.$triggeredButton.trigger('click');
-
-        setImmediate(() => {
-          expectIssueState(isIssueInitiallyOpen);
-
-          expect(testContext.$triggeredButton.get(0).getAttribute('disabled')).toBeNull();
-          expectErrorMessage();
-
-          expect(testContext.$projectIssuesCounter.text()).toBe('1,001');
-          expectNewBranchButtonState(false, isIssueInitiallyOpen);
-
-          done();
-        });
-      });
-
-      it(`fails to ${action} the issue if HTTP error occurs`, done => {
-        mockCloseButtonResponseError(testContext.$triggeredButton.attr('href'));
-        mockCanCreateBranch(isIssueInitiallyOpen);
-
-        setup();
-        testContext.$triggeredButton.trigger('click');
-
-        setImmediate(() => {
-          expectIssueState(isIssueInitiallyOpen);
-
-          expect(testContext.$triggeredButton.get(0).getAttribute('disabled')).toBeNull();
-          expectErrorMessage();
-
-          expect(testContext.$projectIssuesCounter.text()).toBe('1,001');
-          expectNewBranchButtonState(false, isIssueInitiallyOpen);
-
-          done();
-        });
-      });
-
-      it('disables the new branch button if Ajax call fails', () => {
-        mockCloseButtonResponseError(testContext.$triggeredButton.attr('href'));
-        mock.onGet(/(.*)\/can_create_branch$/).networkError();
-
-        setup();
-        testContext.$triggeredButton.trigger('click');
-
-        expectNewBranchButtonState(false, false);
-      });
-
-      it('does not trigger Ajax call if new branch button is missing', done => {
-        mockCloseButtonResponseError(testContext.$triggeredButton.attr('href'));
-
-        document.querySelector('#related-branches').remove();
-        document.querySelector('.create-mr-dropdown-wrap').remove();
-
-        setup();
-        testContext.$triggeredButton.trigger('click');
-
-        setImmediate(() => {
-          expect(axios.get).not.toHaveBeenCalled();
-
-          done();
-        });
-      });
+  const getIssueCounter = () => document.querySelector('.issue_counter');
+  const getOpenStatusBox = () =>
+    getByText(document, (_, el) => el.textContent.match(/Open/), {
+      selector: '.status-box-open',
     });
-  });
+  const getClosedStatusBox = () =>
+    getByText(document, (_, el) => el.textContent.match(/Closed/), {
+      selector: '.status-box-issue-closed',
+    });
 
-  describe('when not displaying blocked warning', () => {
-    describe('when clicking a mermaid graph inside an issue description', () => {
-      let mock;
-      let spy;
+  describe.each`
+    desc                                | isIssueInitiallyOpen | expectedCounterText
+    ${'with an initially open issue'}   | ${true}              | ${'1,000'}
+    ${'with an initially closed issue'} | ${false}             | ${'1,002'}
+  `('$desc', ({ isIssueInitiallyOpen, expectedCounterText }) => {
+    beforeEach(() => {
+      if (isIssueInitiallyOpen) {
+        loadFixtures('issues/open-issue.html');
+      } else {
+        loadFixtures('issues/closed-issue.html');
+      }
 
+      testContext.issueCounter = getIssueCounter();
+      testContext.statusBoxClosed = getClosedStatusBox();
+      testContext.statusBoxOpen = getOpenStatusBox();
+
+      testContext.issueCounter.textContent = '1,001';
+    });
+
+    it(`has the proper visible status box when ${isIssueInitiallyOpen ? 'open' : 'closed'}`, () => {
+      if (isIssueInitiallyOpen) {
+        expect(testContext.statusBoxClosed).toHaveClass('hidden');
+        expect(testContext.statusBoxOpen).not.toHaveClass('hidden');
+      } else {
+        expect(testContext.statusBoxClosed).not.toHaveClass('hidden');
+        expect(testContext.statusBoxOpen).toHaveClass('hidden');
+      }
+    });
+
+    describe('when vue app triggers change', () => {
       beforeEach(() => {
-        loadFixtures('static/issue_with_mermaid_graph.html');
-        mock = new MockAdapter(axios);
-        spy = jest.spyOn(axios, 'put');
+        document.dispatchEvent(
+          new CustomEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, {
+            detail: {
+              data: { id: 1 },
+              isClosed: isIssueInitiallyOpen,
+            },
+          }),
+        );
       });
 
-      afterEach(() => {
-        mock.restore();
-        jest.clearAllMocks();
+      it('displays correct status box', () => {
+        if (isIssueInitiallyOpen) {
+          expect(testContext.statusBoxClosed).not.toHaveClass('hidden');
+          expect(testContext.statusBoxOpen).toHaveClass('hidden');
+        } else {
+          expect(testContext.statusBoxClosed).toHaveClass('hidden');
+          expect(testContext.statusBoxOpen).not.toHaveClass('hidden');
+        }
       });
 
-      it('does not make a PUT request', () => {
-        Issue.prototype.initIssueBtnEventListeners();
-
-        $('svg a.js-issuable-actions').trigger('click');
-
-        expect(spy).not.toHaveBeenCalled();
+      it('updates issueCounter text', () => {
+        expect(testContext.issueCounter).toBeVisible();
+        expect(testContext.issueCounter).toHaveText(expectedCounterText);
       });
     });
   });

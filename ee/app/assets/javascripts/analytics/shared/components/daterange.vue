@@ -90,8 +90,9 @@ export default {
       :default-max-date="maxDate"
       :same-day-selection="includeSelectedDate"
       theme="animate-picker"
-      start-picker-class="js-daterange-picker-from d-flex flex-column flex-lg-row align-items-lg-center mr-lg-2 mb-2 mb-md-0"
+      start-picker-class="js-daterange-picker-from gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-lg-align-items-center gl-lg-mr-3 gl-mb-2 gl-lg-mb-0"
       end-picker-class="js-daterange-picker-to d-flex flex-column flex-lg-row align-items-lg-center"
+      label-class="gl-mb-2 gl-lg-mb-0"
     />
     <div
       v-if="maxDateRange"

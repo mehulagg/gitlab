@@ -1,36 +1,41 @@
-import { TestStatus } from '~/pipelines/constants';
-import { formatTime, secondsToMilliseconds } from '~/lib/utils/datetime_utility';
+import { __, sprintf } from '../../../locale';
+import { TestStatus } from '../../constants';
+
+/**
+ * Removes `./` from the beginning of a file path so it can be appended onto a blob path
+ * @param {String} file
+ * @returns {String}  - formatted value
+ */
+export function formatFilePath(file) {
+  return file.replace(/^\.?\/*/, '');
+}
 
 export function iconForTestStatus(status) {
   switch (status) {
-    case 'success':
-      return 'status_success_borderless';
-    case 'failed':
-      return 'status_failed_borderless';
+    case TestStatus.SUCCESS:
+      return 'status_success';
+    case TestStatus.FAILED:
+      return 'status_failed';
+    case TestStatus.ERROR:
+      return 'status_warning';
+    case TestStatus.SKIPPED:
+      return 'status_skipped';
+    case TestStatus.UNKNOWN:
     default:
-      return 'status_skipped_borderless';
+      return 'status_notfound';
   }
 }
 
-export const formattedTime = timeInSeconds => formatTime(secondsToMilliseconds(timeInSeconds));
+export const formattedTime = (seconds = 0) => {
+  if (seconds < 1) {
+    const milliseconds = seconds * 1000;
+    return sprintf(__('%{milliseconds}ms'), { milliseconds: milliseconds.toFixed(2) });
+  }
+  return sprintf(__('%{seconds}s'), { seconds: seconds.toFixed(2) });
+};
 
-export const addIconStatus = testCase => ({
+export const addIconStatus = (testCase) => ({
   ...testCase,
   icon: iconForTestStatus(testCase.status),
   formattedTime: formattedTime(testCase.execution_time),
 });
-
-export const sortTestCases = (a, b) => {
-  if (a.status === b.status) {
-    return 0;
-  }
-
-  switch (b.status) {
-    case TestStatus.SUCCESS:
-      return -1;
-    case TestStatus.FAILED:
-      return 1;
-    default:
-      return 0;
-  }
-};

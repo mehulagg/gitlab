@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlPagination, GlTable } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 
 import AuditEventsTable from 'ee/audit_events/components/audit_events_table.vue';
 import createEvents from '../mock_data';
@@ -20,13 +20,7 @@ describe('AuditEventsTable component', () => {
   };
 
   const getCell = (trIdx, tdIdx) => {
-    return wrapper
-      .find(GlTable)
-      .find('tbody')
-      .findAll('tr')
-      .at(trIdx)
-      .findAll('td')
-      .at(tdIdx);
+    return wrapper.find(GlTable).find('tbody').findAll('tr').at(trIdx).findAll('td').at(tdIdx);
   };
 
   beforeEach(() => {
@@ -49,23 +43,6 @@ describe('AuditEventsTable component', () => {
       wrapper.setProps({ events: [] });
       wrapper.vm.$nextTick(() => {
         expect(getCell(0, 0).text()).toBe('There are no records to show');
-      });
-    });
-
-    it('should not set the QA selector if not provided', () => {
-      wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper.find('[data-testid="audit-events-table"]').attributes('data-qa-selector'),
-        ).toBeUndefined();
-      });
-    });
-
-    it('should set the QA selector if provided', () => {
-      wrapper.setProps({ qaSelector: 'qa_selector' });
-      wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper.find('[data-testid="audit-events-table"]').attributes('data-qa-selector'),
-        ).toEqual('qa_selector');
       });
     });
   });

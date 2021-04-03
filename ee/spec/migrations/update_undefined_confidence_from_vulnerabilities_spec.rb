@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-
-require Rails.root.join('db', 'post_migrate', '20200511092714_update_undefined_confidence_from_vulnerabilities.rb')
+require_migration!
 
 RSpec.describe UpdateUndefinedConfidenceFromVulnerabilities, :migration do
   let(:vulnerabilities) { table(:vulnerabilities) }

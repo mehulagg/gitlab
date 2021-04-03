@@ -21,11 +21,19 @@ module Gitlab
       @authentication_abilities &= [:download_code, :push_code]
     end
 
+    override :project
+    def project
+      container.project if container.is_a?(ProjectSnippet)
+    end
+
     override :check
     def check(cmd, changes)
       check_snippet_accessibility!
 
-      super
+      super.tap do |_|
+        # Ensure HEAD points to the default branch in case it is not master
+        snippet.change_head_to_default_branch
+      end
     end
 
     override :download_ability
@@ -46,41 +54,35 @@ module Gitlab
       # snippets never return custom actions, such as geo replication.
     end
 
-    override :project?
-    def project?
-      project_snippet?
-    end
-
-    override :project
-    def project
-      snippet&.project
-    end
-
     override :check_valid_actor!
     def check_valid_actor!
       # TODO: Investigate if expanding actor/authentication types are needed.
       # https://gitlab.com/gitlab-org/gitlab/issues/202190
-      if actor && !actor.is_a?(User) && !actor.instance_of?(Key)
-        raise ForbiddenError, ERROR_MESSAGES[:authentication_mechanism]
+      if actor && !allowed_actor?
+        raise ForbiddenError, error_message(:authentication_mechanism)
       end
 
       super
     end
 
-    def project_snippet?
-      snippet.is_a?(ProjectSnippet)
+    def allowed_actor?
+      actor.is_a?(User) || actor.instance_of?(Key)
     end
 
     override :check_push_access!
     def check_push_access!
-      raise ForbiddenError, ERROR_MESSAGES[:update_snippet] unless user
+      raise ForbiddenError, error_message(:update_snippet) unless user
+
+      if snippet&.repository_read_only?
+        raise ForbiddenError, error_message(:read_only)
+      end
 
       check_change_access!
     end
 
     def check_snippet_accessibility!
       if snippet.blank?
-        raise NotFoundError, ERROR_MESSAGES[:snippet_not_found]
+        raise NotFoundError, error_message(:snippet_not_found)
       end
     end
 
@@ -96,14 +98,14 @@ module Gitlab
       passed = guest_can_download_code? || user_can_download_code?
 
       unless passed
-        raise ForbiddenError, ERROR_MESSAGES[:read_snippet]
+        raise ForbiddenError, error_message(:read_snippet)
       end
     end
 
     override :check_change_access!
     def check_change_access!
       unless user_can_push?
-        raise ForbiddenError, ERROR_MESSAGES[:update_snippet]
+        raise ForbiddenError, error_message(:update_snippet)
       end
 
       check_size_before_push!
@@ -119,8 +121,8 @@ module Gitlab
 
     override :check_single_change_access
     def check_single_change_access(change, _skip_lfs_integrity_check: false)
-      Checks::SnippetCheck.new(change, logger: logger).validate!
-      Checks::PushFileCountCheck.new(change, repository: repository, limit: Snippet.max_file_limit(user), logger: logger).validate!
+      Checks::SnippetCheck.new(change, default_branch: snippet.default_branch, root_ref: snippet.repository.root_ref, logger: logger).validate!
+      Checks::PushFileCountCheck.new(change, repository: repository, limit: Snippet.max_file_limit, logger: logger).validate!
     rescue Checks::TimedLogger::TimeoutError
       raise TimeoutError, logger.full_message
     end
@@ -138,3 +140,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::GitAccessSnippet.prepend_if_ee('EE::Gitlab::GitAccessSnippet')

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Alias import callbacks under the /users/auth endpoint so that
 # the OAuth2 callback URL can be restricted under http://example.com/users/auth
 # instead of http://example.com.
@@ -8,6 +10,8 @@ Devise.omniauth_providers.map(&:downcase).each do |provider|
 end
 
 namespace :import do
+  resources :available_namespaces, only: [:index], controller: :available_namespaces
+
   resource :github, only: [:create, :new], controller: :github do
     post :personal_access_token
     get :status
@@ -40,15 +44,6 @@ namespace :import do
     get :realtime_changes
   end
 
-  resource :google_code, only: [:create, :new], controller: :google_code do
-    get :status
-    post :callback
-    get :jobs
-
-    get   :new_user_map,    path: :user_map
-    post  :create_user_map, path: :user_map
-  end
-
   resource :fogbugz, only: [:create, :new], controller: :fogbugz do
     get :status
     post :callback
@@ -67,9 +62,15 @@ namespace :import do
     post :authorize
   end
 
+  resource :bulk_imports, only: [:create] do
+    post :configure
+    get :status
+    get :realtime_changes
+  end
+
   resource :manifest, only: [:create, :new], controller: :manifest do
     get :status
-    get :jobs
+    get :realtime_changes
     post :upload
   end
 

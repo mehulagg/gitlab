@@ -2,13 +2,15 @@ import Vue from 'vue';
 import { parseBooleanDataAttributes } from '~/lib/utils/dom_utils';
 import SecurityConfigurationApp from './components/app.vue';
 
-export default function init() {
-  const el = document.getElementById('js-security-configuration');
+export const initSecurityConfiguration = (el) => {
+  if (!el) {
+    return null;
+  }
+
   const {
     autoDevopsHelpPagePath,
     autoDevopsPath,
     features,
-    helpPagePath,
     latestPipelinePath,
     autoFixEnabled,
     autoFixHelpPath,
@@ -16,7 +18,7 @@ export default function init() {
     containerScanningHelpPath,
     dependencyScanningHelpPath,
     toggleAutofixSettingEndpoint,
-    createSastMergeRequestPath,
+    gitlabCiHistoryPath,
   } = el.dataset;
 
   return new Vue({
@@ -30,14 +32,13 @@ export default function init() {
           autoDevopsHelpPagePath,
           autoDevopsPath,
           features: JSON.parse(features),
-          helpPagePath,
           latestPipelinePath,
-          createSastMergeRequestPath,
           ...parseBooleanDataAttributes(el, [
             'autoDevopsEnabled',
             'canEnableAutoDevops',
             'gitlabCiPresent',
           ]),
+          gitlabCiHistoryPath,
           autoFixSettingsProps: {
             autoFixEnabled: JSON.parse(autoFixEnabled),
             autoFixHelpPath,
@@ -51,4 +52,4 @@ export default function init() {
       });
     },
   });
-}
+};

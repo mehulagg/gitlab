@@ -30,7 +30,7 @@ export default {
 </script>
 <template>
   <div>
-    <div class="d-flex justify-content-between bold prepend-top-10 gl-mb-3">
+    <div class="d-flex justify-content-between bold gl-mt-3 gl-mb-3">
       <div class="js-selected-plan">
         {{ sprintf($options.i18n.selectedPlanText, { selectedPlanText }) }}
         <span v-if="usersPresent" class="js-number-of-users">{{

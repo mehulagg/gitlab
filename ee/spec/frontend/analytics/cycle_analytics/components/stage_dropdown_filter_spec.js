@@ -1,5 +1,5 @@
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlNewDropdown as GlDropdown, GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
 import StageDropdownFilter from 'ee/analytics/cycle_analytics/components/stage_dropdown_filter.vue';
 
 const stages = [
@@ -38,23 +38,15 @@ describe('StageDropdownFilter component', () => {
   });
 
   const findDropdown = () => wrapper.find(GlDropdown);
-  const selectDropdownItemAtIndex = index =>
-    findDropdown()
-      .findAll(GlDropdownItem)
-      .at(index)
-      .vm.$emit('click');
+  const selectDropdownItemAtIndex = (index) =>
+    findDropdown().findAll(GlDropdownItem).at(index).vm.$emit('click');
 
   describe('on stage click', () => {
     describe('clicking a selected stage', () => {
       it('should remove from selection', () => {
         selectDropdownItemAtIndex(0);
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[stages[1], stages[2]]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[stages[1], stages[2]]]]);
       });
     });
 
@@ -66,15 +58,9 @@ describe('StageDropdownFilter component', () => {
       it('should add to selection', () => {
         selectDropdownItemAtIndex(0);
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[stages[1], stages[2]]],
-          },
-          {
-            name: 'selected',
-            args: [[stages[1], stages[2], stages[0]]],
-          },
+        expect(wrapper.emitted().selected).toEqual([
+          [[stages[1], stages[2]]],
+          [[stages[1], stages[2], stages[0]]],
         ]);
       });
     });

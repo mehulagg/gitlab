@@ -1,11 +1,7 @@
 <script>
 import { GlIcon, GlFormGroup, GlFormRadio, GlFormRadioGroup, GlLink } from '@gitlab/ui';
-import {
-  SNIPPET_VISIBILITY,
-  SNIPPET_VISIBILITY_PRIVATE,
-  SNIPPET_VISIBILITY_INTERNAL,
-  SNIPPET_VISIBILITY_PUBLIC,
-} from '~/snippets/constants';
+import { SNIPPET_LEVELS_RESTRICTED, SNIPPET_LEVELS_DISABLED } from '~/snippets/constants';
+import { defaultSnippetVisibilityLevels } from '../utils/blob';
 
 export default {
   components: {
@@ -15,6 +11,7 @@ export default {
     GlFormRadioGroup,
     GlLink,
   },
+  inject: ['visibilityLevels', 'multipleLevelsRestricted'],
   props: {
     helpLink: {
       type: String,
@@ -28,19 +25,16 @@ export default {
     },
     value: {
       type: String,
-      required: false,
-      default: SNIPPET_VISIBILITY_PRIVATE,
+      required: true,
     },
   },
   computed: {
-    visibilityOptions() {
-      return [
-        SNIPPET_VISIBILITY_PRIVATE,
-        SNIPPET_VISIBILITY_INTERNAL,
-        SNIPPET_VISIBILITY_PUBLIC,
-      ].map(key => ({ value: key, ...SNIPPET_VISIBILITY[key] }));
+    defaultVisibilityLevels() {
+      return defaultSnippetVisibilityLevels(this.visibilityLevels);
     },
   },
+  SNIPPET_LEVELS_DISABLED,
+  SNIPPET_LEVELS_RESTRICTED,
 };
 </script>
 <template>
@@ -51,17 +45,22 @@ export default {
         ><gl-icon :size="12" name="question"
       /></gl-link>
     </label>
-    <gl-form-group id="visibility-level-setting">
-      <gl-form-radio-group v-bind="$attrs" :checked="value" stacked v-on="$listeners">
+    <gl-form-group id="visibility-level-setting" class="gl-mb-0">
+      <gl-form-radio-group :checked="value" stacked v-bind="$attrs" v-on="$listeners">
         <gl-form-radio
-          v-for="option in visibilityOptions"
+          v-for="option in defaultVisibilityLevels"
           :key="option.value"
           :value="option.value"
           class="mb-3"
         >
           <div class="d-flex align-items-center">
             <gl-icon :size="16" :name="option.icon" />
-            <span class="font-weight-bold ml-1 js-visibility-option">{{ option.label }}</span>
+            <span
+              class="font-weight-bold ml-1 js-visibility-option"
+              data-qa-selector="visibility_content"
+              :data-qa-visibility="option.label"
+              >{{ option.label }}</span
+            >
           </div>
           <template #help>{{
             isProjectSnippet && option.description_project
@@ -71,5 +70,14 @@ export default {
         </gl-form-radio>
       </gl-form-radio-group>
     </gl-form-group>
+
+    <div class="text-muted" data-testid="restricted-levels-info">
+      <template v-if="!defaultVisibilityLevels.length">{{
+        $options.SNIPPET_LEVELS_DISABLED
+      }}</template>
+      <template v-else-if="multipleLevelsRestricted">{{
+        $options.SNIPPET_LEVELS_RESTRICTED
+      }}</template>
+    </div>
   </div>
 </template>

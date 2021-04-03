@@ -1,39 +1,40 @@
-import Vuex from 'vuex';
+import { GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 import { setTestTimeout } from 'helpers/timeout';
-import invalidUrl from '~/lib/utils/invalid_url';
 import axios from '~/lib/utils/axios_utils';
-import { GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
+import invalidUrl from '~/lib/utils/invalid_url';
 import AlertWidget from '~/monitoring/components/alert_widget.vue';
 
+import MonitorAnomalyChart from '~/monitoring/components/charts/anomaly.vue';
+import MonitorBarChart from '~/monitoring/components/charts/bar.vue';
+import MonitorColumnChart from '~/monitoring/components/charts/column.vue';
+import MonitorEmptyChart from '~/monitoring/components/charts/empty_chart.vue';
+import MonitorHeatmapChart from '~/monitoring/components/charts/heatmap.vue';
+import MonitorSingleStatChart from '~/monitoring/components/charts/single_stat.vue';
+import MonitorStackedColumnChart from '~/monitoring/components/charts/stacked_column.vue';
+import MonitorTimeSeriesChart from '~/monitoring/components/charts/time_series.vue';
 import DashboardPanel from '~/monitoring/components/dashboard_panel.vue';
+import { panelTypes } from '~/monitoring/constants';
+
+import { createStore, monitoringDashboard } from '~/monitoring/stores';
+import { createStore as createEmbedGroupStore } from '~/monitoring/stores/embed_group';
+import { dashboardProps, graphData, graphDataEmpty } from '../fixture_data';
 import {
+  anomalyGraphData,
+  singleStatGraphData,
+  heatmapGraphData,
+  barGraphData,
+} from '../graph_data';
+import {
+  mockAlert,
   mockLogsHref,
   mockLogsPath,
   mockNamespace,
   mockNamespacedData,
   mockTimeRange,
-  barMockData,
 } from '../mock_data';
-import { dashboardProps, graphData, graphDataEmpty } from '../fixture_data';
-import { anomalyGraphData, singleStatGraphData, heatmapGraphData } from '../graph_data';
-
-import { panelTypes } from '~/monitoring/constants';
-
-import MonitorEmptyChart from '~/monitoring/components/charts/empty_chart.vue';
-import MonitorTimeSeriesChart from '~/monitoring/components/charts/time_series.vue';
-import MonitorAnomalyChart from '~/monitoring/components/charts/anomaly.vue';
-import MonitorSingleStatChart from '~/monitoring/components/charts/single_stat.vue';
-import MonitorHeatmapChart from '~/monitoring/components/charts/heatmap.vue';
-import MonitorColumnChart from '~/monitoring/components/charts/column.vue';
-import MonitorBarChart from '~/monitoring/components/charts/bar.vue';
-import MonitorStackedColumnChart from '~/monitoring/components/charts/stacked_column.vue';
-
-import { createStore, monitoringDashboard } from '~/monitoring/stores';
-import { createStore as createEmbedGroupStore } from '~/monitoring/stores/embed_group';
-
-global.URL.createObjectURL = jest.fn();
 
 const mocks = {
   $toast: {
@@ -54,10 +55,11 @@ describe('Dashboard Panel', () => {
   const findTitle = () => wrapper.find({ ref: 'graphTitle' });
   const findCtxMenu = () => wrapper.find({ ref: 'contextualMenu' });
   const findMenuItems = () => wrapper.findAll(GlDropdownItem);
-  const findMenuItemByText = text => findMenuItems().filter(i => i.text() === text);
+  const findMenuItemByText = (text) => findMenuItems().filter((i) => i.text() === text);
+  const findAlertsWidget = () => wrapper.find(AlertWidget);
 
-  const createWrapper = (props, options) => {
-    wrapper = shallowMount(DashboardPanel, {
+  const createWrapper = (props, { mountFn = shallowMount, ...options } = {}) => {
+    wrapper = mountFn(DashboardPanel, {
       propsData: {
         graphData,
         settingsPath: dashboardProps.settingsPath,
@@ -78,6 +80,9 @@ describe('Dashboard Panel', () => {
     });
   };
 
+  const setMetricsSavedToDb = (val) =>
+    monitoringDashboard.getters.metricsSavedToDb.mockReturnValue(val);
+
   beforeEach(() => {
     setTestTimeout(1000);
 
@@ -85,6 +90,8 @@ describe('Dashboard Panel', () => {
     state = store.state.monitoringDashboard;
 
     axiosMock = new AxiosMockAdapter(axios);
+
+    jest.spyOn(URL, 'createObjectURL');
   });
 
   afterEach(() => {
@@ -97,7 +104,7 @@ describe('Dashboard Panel', () => {
         {},
         {
           slots: {
-            topLeft: `<div class="top-left-content">OK</div>`,
+            'top-left': `<div class="top-left-content">OK</div>`,
           },
         },
       );
@@ -132,7 +139,6 @@ describe('Dashboard Panel', () => {
 
     it('The Empty Chart component is rendered and is a Vue instance', () => {
       expect(wrapper.find(MonitorEmptyChart).exists()).toBe(true);
-      expect(wrapper.find(MonitorEmptyChart).isVueInstance()).toBe(true);
     });
   });
 
@@ -161,7 +167,6 @@ describe('Dashboard Panel', () => {
 
     it('The Empty Chart component is rendered and is a Vue instance', () => {
       expect(wrapper.find(MonitorEmptyChart).exists()).toBe(true);
-      expect(wrapper.find(MonitorEmptyChart).isVueInstance()).toBe(true);
     });
   });
 
@@ -207,7 +212,7 @@ describe('Dashboard Panel', () => {
     });
 
     describe('Supports different panel types', () => {
-      const dataWithType = type => {
+      const dataWithType = (type) => {
         return {
           ...graphData,
           type,
@@ -217,13 +222,11 @@ describe('Dashboard Panel', () => {
       it('empty chart is rendered for empty results', () => {
         createWrapper({ graphData: graphDataEmpty });
         expect(wrapper.find(MonitorEmptyChart).exists()).toBe(true);
-        expect(wrapper.find(MonitorEmptyChart).isVueInstance()).toBe(true);
       });
 
       it('area chart is rendered by default', () => {
         createWrapper();
         expect(wrapper.find(MonitorTimeSeriesChart).exists()).toBe(true);
-        expect(wrapper.find(MonitorTimeSeriesChart).isVueInstance()).toBe(true);
       });
 
       describe.each`
@@ -235,7 +238,7 @@ describe('Dashboard Panel', () => {
         ${dataWithType(panelTypes.COLUMN)}         | ${MonitorColumnChart}        | ${false}
         ${dataWithType(panelTypes.STACKED_COLUMN)} | ${MonitorStackedColumnChart} | ${false}
         ${heatmapGraphData()}                      | ${MonitorHeatmapChart}       | ${false}
-        ${barMockData}                             | ${MonitorBarChart}           | ${false}
+        ${barGraphData()}                          | ${MonitorBarChart}           | ${false}
       `('when $data.type data is provided', ({ data, component, hasCtxMenu }) => {
         const attrs = { attr1: 'attr1Value', attr2: 'attr2Value' };
 
@@ -245,12 +248,40 @@ describe('Dashboard Panel', () => {
 
         it(`renders the chart component and binds attributes`, () => {
           expect(wrapper.find(component).exists()).toBe(true);
-          expect(wrapper.find(component).isVueInstance()).toBe(true);
           expect(wrapper.find(component).attributes()).toMatchObject(attrs);
         });
 
         it(`contextual menu is ${hasCtxMenu ? '' : 'not '}shown`, () => {
           expect(findCtxMenu().exists()).toBe(hasCtxMenu);
+        });
+      });
+    });
+
+    describe('computed', () => {
+      describe('fixedCurrentTimeRange', () => {
+        it('returns fixed time for valid time range', () => {
+          state.timeRange = mockTimeRange;
+          return wrapper.vm.$nextTick(() => {
+            expect(findTimeChart().props('timeRange')).toEqual(
+              expect.objectContaining({
+                start: expect.any(String),
+                end: expect.any(String),
+              }),
+            );
+          });
+        });
+
+        it.each`
+          input           | output
+          ${''}           | ${{}}
+          ${undefined}    | ${{}}
+          ${null}         | ${{}}
+          ${'2020-12-03'} | ${{}}
+        `('returns $output for invalid input like $input', ({ input, output }) => {
+          state.timeRange = input;
+          return wrapper.vm.$nextTick(() => {
+            expect(findTimeChart().props('timeRange')).toEqual(output);
+          });
         });
       });
     });
@@ -510,7 +541,6 @@ describe('Dashboard Panel', () => {
     });
 
     it('it renders a time series chart with no errors', () => {
-      expect(wrapper.find(MonitorTimeSeriesChart).isVueInstance()).toBe(true);
       expect(wrapper.find(MonitorTimeSeriesChart).exists()).toBe(true);
     });
   });
@@ -572,10 +602,6 @@ describe('Dashboard Panel', () => {
   });
 
   describe('panel alerts', () => {
-    const setMetricsSavedToDb = val =>
-      monitoringDashboard.getters.metricsSavedToDb.mockReturnValue(val);
-    const findAlertsWidget = () => wrapper.find(AlertWidget);
-
     beforeEach(() => {
       mockGetterReturnValue('metricsSavedToDb', []);
 
@@ -699,6 +725,58 @@ describe('Dashboard Panel', () => {
       createWrapperWithLinks();
 
       expect(findManageLinksItem().exists()).toBe(false);
+    });
+  });
+
+  describe('Runbook url', () => {
+    const findRunbookLinks = () => wrapper.findAll('[data-testid="runbookLink"]');
+    const { metricId } = graphData.metrics[0];
+    const { alert_path: alertPath } = mockAlert;
+
+    const mockRunbookAlert = {
+      ...mockAlert,
+      metricId,
+    };
+
+    beforeEach(() => {
+      mockGetterReturnValue('metricsSavedToDb', []);
+    });
+
+    it('does not show a runbook link when alerts are not present', () => {
+      createWrapper();
+
+      expect(findRunbookLinks().length).toBe(0);
+    });
+
+    describe('when alerts are present', () => {
+      beforeEach(() => {
+        setMetricsSavedToDb([metricId]);
+
+        createWrapper({
+          alertsEndpoint: '/endpoint',
+          prometheusAlertsAvailable: true,
+        });
+      });
+
+      it('does not show a runbook link when a runbook is not set', async () => {
+        findAlertsWidget().vm.$emit('setAlerts', alertPath, {
+          ...mockRunbookAlert,
+          runbookUrl: '',
+        });
+
+        await wrapper.vm.$nextTick();
+
+        expect(findRunbookLinks().length).toBe(0);
+      });
+
+      it('shows a runbook link when a runbook is set', async () => {
+        findAlertsWidget().vm.$emit('setAlerts', alertPath, mockRunbookAlert);
+
+        await wrapper.vm.$nextTick();
+
+        expect(findRunbookLinks().length).toBe(1);
+        expect(findRunbookLinks().at(0).attributes('href')).toBe(invalidUrl);
+      });
     });
   });
 });

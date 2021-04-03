@@ -8,38 +8,56 @@ module Types
       graphql_name 'DiffPosition'
 
       field :diff_refs, Types::DiffRefsType, null: false,
-            description: 'Information about the branch, HEAD, and base at the time of commenting'
+            description: 'Information about the branch, HEAD, and base at the time of commenting.'
 
       field :file_path, GraphQL::STRING_TYPE, null: false,
-            description: 'Path of the file that was changed'
+            description: 'Path of the file that was changed.'
       field :old_path, GraphQL::STRING_TYPE, null: true,
-            description: 'Path of the file on the start SHA'
+            description: 'Path of the file on the start SHA.'
       field :new_path, GraphQL::STRING_TYPE, null: true,
-            description: 'Path of the file on the HEAD SHA'
+            description: 'Path of the file on the HEAD SHA.'
       field :position_type, Types::Notes::PositionTypeEnum, null: false,
-            description: 'Type of file the position refers to'
+            description: 'Type of file the position refers to.'
 
       # Fields for text positions
       field :old_line, GraphQL::INT_TYPE, null: true,
-            description: 'Line on start SHA that was changed',
-            resolve: -> (position, _args, _ctx) { position.old_line if position.on_text? }
+            description: 'Line on start SHA that was changed.'
       field :new_line, GraphQL::INT_TYPE, null: true,
-            description: 'Line on HEAD SHA that was changed',
-            resolve: -> (position, _args, _ctx) { position.new_line if position.on_text? }
+            description: 'Line on HEAD SHA that was changed.'
 
       # Fields for image positions
       field :x, GraphQL::INT_TYPE, null: true,
-            description: 'X position of the note',
-            resolve: -> (position, _args, _ctx) { position.x if position.on_image? }
+            description: 'X position of the note.'
       field :y, GraphQL::INT_TYPE, null: true,
-            description: 'Y position of the note',
-            resolve: -> (position, _args, _ctx) { position.y if position.on_image? }
+            description: 'Y position of the note.'
       field :width, GraphQL::INT_TYPE, null: true,
-            description: 'Total width of the image',
-            resolve: -> (position, _args, _ctx) { position.width if position.on_image? }
+            description: 'Total width of the image.'
       field :height, GraphQL::INT_TYPE, null: true,
-            description: 'Total height of the image',
-            resolve: -> (position, _args, _ctx) { position.height if position.on_image? }
+            description: 'Total height of the image.'
+
+      def old_line
+        object.old_line if object.on_text?
+      end
+
+      def new_line
+        object.new_line if object.on_text?
+      end
+
+      def x
+        object.x if object.on_image?
+      end
+
+      def y
+        object.y if object.on_image?
+      end
+
+      def width
+        object.width if object.on_image?
+      end
+
+      def height
+        object.height if object.on_image?
+      end
     end
     # rubocop: enable Graphql/AuthorizeTypes
   end

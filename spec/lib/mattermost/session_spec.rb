@@ -39,7 +39,7 @@ RSpec.describe Mattermost::Session, type: :request do
 
     context 'with oauth_uri' do
       let!(:doorkeeper) do
-        Doorkeeper::Application.create(
+        Doorkeeper::Application.create!(
           name: 'GitLab Mattermost',
           redirect_uri: "#{mattermost_url}/signup/gitlab/complete\n#{mattermost_url}/login/gitlab/complete",
           scopes: '')
@@ -61,6 +61,7 @@ RSpec.describe Mattermost::Session, type: :request do
             redirect_uri: "#{mattermost_url}/signup/gitlab/complete",
             state: state }
         end
+
         let(:location) do
           "#{gitlab_url}/oauth/authorize?#{URI.encode_www_form(params)}"
         end

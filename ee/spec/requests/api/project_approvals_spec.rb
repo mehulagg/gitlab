@@ -20,6 +20,13 @@ RSpec.describe API::ProjectApprovals do
         get api(url, user)
       end
 
+      it 'returns expected boolean values for merge request related attributes' do
+        expect(json_response["disable_overriding_approvers_per_merge_request"]).to be false
+        expect(json_response["merge_requests_author_approval"]).to be false
+        expect(json_response["merge_requests_disable_committers_approval"]).to be false
+        expect(json_response["require_password_to_approve"]).to be false
+      end
+
       it 'returns 200 status' do
         expect(response).to have_gitlab_http_status(:ok)
       end
@@ -101,21 +108,19 @@ RSpec.describe API::ProjectApprovals do
     shared_examples 'updates merge requests settings when possible' do
       using RSpec::Parameterized::TableSyntax
 
-      where(:license_value, :setting_value, :param_value, :final_value) do
-        false | false | false | false
-        false | true  | false | false
-        false | false | true  | true
-        false | true  | true  | true
-        true  | false | false | false
-        true  | true  | false | false
-        true  | false | true  | true
-        true  | true  | true  | true
+      where(:permission_value, :param_value, :final_value) do
+        false | false | false
+        false | true  | false
+        true  | false | false
+        true  | true  | true
       end
 
       with_them do
         before do
-          stub_licensed_features(admin_merge_request_approvers_rules: license_value)
-          stub_application_setting(app_setting => setting_value)
+          project.update_column(setting, false)
+
+          allow(Ability).to receive(:allowed?).and_call_original
+          allow(Ability).to receive(:allowed?).with(current_user, permission, project).and_return(permission_value)
         end
 
         it 'changes settings properly' do
@@ -124,9 +129,8 @@ RSpec.describe API::ProjectApprovals do
           }
 
           post api(url, current_user), params: settings
-          project.reload
 
-          expect(project[setting]).to eq(final_value)
+          expect(project.reload[setting]).to eq(final_value)
         end
       end
     end
@@ -147,20 +151,20 @@ RSpec.describe API::ProjectApprovals do
       context 'updates merge requests settings' do
         it_behaves_like 'updates merge requests settings when possible' do
           let(:current_user) { admin }
-          let(:app_setting) { :disable_overriding_approvers_per_merge_request }
+          let(:permission) { :modify_approvers_rules }
           let(:setting) { :disable_overriding_approvers_per_merge_request }
         end
 
         it_behaves_like 'updates merge requests settings when possible' do
           let(:current_user) { admin }
-          let(:app_setting) { :prevent_merge_requests_committers_approval }
+          let(:permission) { :modify_merge_request_committer_setting }
           let(:setting) { :merge_requests_disable_committers_approval }
         end
 
         it_behaves_like 'updates merge requests settings when possible' do
           let(:current_user) { admin }
-          let(:app_setting) { :prevent_merge_requests_committers_approval }
-          let(:setting) { :merge_requests_disable_committers_approval }
+          let(:permission) { :modify_merge_request_author_setting }
+          let(:setting) { :merge_requests_author_approval }
         end
       end
     end
@@ -168,92 +172,6 @@ RSpec.describe API::ProjectApprovals do
     context 'as a user without access' do
       it 'returns 403' do
         post api(url, user2), params: { approvals_before_merge: 4 }
-
-        expect(response).to have_gitlab_http_status(:forbidden)
-      end
-    end
-  end
-
-  describe 'PUT /projects/:id/approvers' do
-    let(:url) { "/projects/#{project.id}/approvers" }
-
-    shared_examples_for 'a user with access' do
-      it 'removes all approvers if no params are given' do
-        project.approvers.create(user: approver)
-
-        expect do
-          put api(url, current_user), params: { approver_ids: [], approver_group_ids: [] }.to_json, headers: { CONTENT_TYPE: 'application/json' }
-        end.to change { project.approvers.count }.from(1).to(0)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['approvers']).to be_empty
-        expect(json_response['approver_groups']).to be_empty
-      end
-
-      context 'when sending form-encoded data' do
-        it 'removes all approvers if no params are given' do
-          project.approvers.create(user: approver)
-
-          expect do
-            put api(url, current_user), params: { approver_ids: '', approver_group_ids: '' }
-          end.to change { project.approvers.count }.from(1).to(0)
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['approvers']).to be_empty
-          expect(json_response['approver_groups']).to be_empty
-        end
-      end
-
-      it 'sets approvers and approver groups' do
-        project.approvers.create(user: approver)
-
-        expect do
-          put api(url, current_user), params: { approver_ids: [approver.id], approver_group_ids: [group.id] }
-        end.to change { project.approvers.count }.by(0).and change { project.approver_groups.count }.from(0).to(1)
-
-        expect(project.approvers.count).to eq(1)
-        expect(project.approvers.first.user_id).to eq(approver.id)
-        expect(project.approver_groups.first.group_id).to eq(group.id)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['approvers'][0]['user']['username']).to eq(approver.username)
-        expect(json_response['approver_groups'][0]['group']['name']).to eq(group.name)
-      end
-
-      it 'only shows approver groups that are visible to the current user' do
-        private_group = create(:group, :private)
-        project.approvers.create(user: approver)
-
-        expect do
-          put api(url, current_user), params: { approver_ids: [approver.id], approver_group_ids: [private_group.id] }
-        end.to change { project.approver_groups.count }.from(0).to(1)
-
-        expect(response).to match_response_schema('public_api/v4/project_approvers', dir: 'ee')
-        expect(json_response["approver_groups"].size).to eq(visible_approver_groups_count)
-      end
-    end
-
-    context 'as a project admin' do
-      it_behaves_like 'a user with access' do
-        let(:current_user) { user }
-        let(:visible_approver_groups_count) { 0 }
-      end
-    end
-
-    context 'as a global admin' do
-      it_behaves_like 'a user with access' do
-        let(:current_user) { admin }
-        let(:visible_approver_groups_count) { 1 }
-      end
-    end
-
-    context 'as a random user' do
-      it 'returns 403' do
-        project.approvers.create(user: approver)
-
-        expect do
-          put api(url, user2), params: { approver_ids: [], approver_group_ids: [] }.to_json, headers: { CONTENT_TYPE: 'application/json' }
-        end.not_to change { project.approvers.count }
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe GroupsFinder do
+  include AdminModeHelper
+
   describe '#execute' do
     let(:user) { create(:user) }
 
@@ -23,11 +25,16 @@ RSpec.describe GroupsFinder do
         :external | { all_available: false } | %i(user_public_group user_internal_group user_private_group)
         :external | {} | %i(public_group user_public_group user_internal_group user_private_group)
 
-        :admin | { all_available: true } | %i(public_group internal_group private_group user_public_group
-                                              user_internal_group user_private_group)
-        :admin | { all_available: false } | %i(user_public_group user_internal_group user_private_group)
-        :admin | {} | %i(public_group internal_group private_group user_public_group user_internal_group
-                         user_private_group)
+        :admin_without_admin_mode | { all_available: true } | %i(public_group internal_group user_public_group
+                                                                 user_internal_group user_private_group)
+        :admin_without_admin_mode | { all_available: false } | %i(user_public_group user_internal_group user_private_group)
+        :admin_without_admin_mode | {} | %i(public_group internal_group user_public_group user_internal_group user_private_group)
+
+        :admin_with_admin_mode | { all_available: true } | %i(public_group internal_group private_group user_public_group
+                                                              user_internal_group user_private_group)
+        :admin_with_admin_mode | { all_available: false } | %i(user_public_group user_internal_group user_private_group)
+        :admin_with_admin_mode | {} | %i(public_group internal_group private_group user_public_group user_internal_group
+                                         user_private_group)
       end
 
       with_them do
@@ -52,8 +59,12 @@ RSpec.describe GroupsFinder do
                 create(:user)
               when :external
                 create(:user, external: true)
-              when :admin
+              when :admin_without_admin_mode
                 create(:user, :admin)
+              when :admin_with_admin_mode
+                admin = create(:user, :admin)
+                enable_admin_mode!(admin)
+                admin
               end
             @groups.values_at(:user_private_group, :user_internal_group, :user_public_group).each do |group|
               group.add_developer(user)
@@ -150,6 +161,70 @@ RSpec.describe GroupsFinder do
               end
             end
           end
+
+          context 'being minimal access member of parent group' do
+            it 'do not return group with minimal_access access' do
+              create(:group_member, :minimal_access, user: user, source: parent_group)
+
+              is_expected.to contain_exactly(public_subgroup, internal_subgroup)
+            end
+          end
+        end
+      end
+    end
+
+    context 'with include parent group descendants' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:parent_group) { create(:group, :public) }
+      let_it_be(:public_subgroup) { create(:group, :public, parent: parent_group) }
+      let_it_be(:internal_sub_subgroup) { create(:group, :internal, parent: public_subgroup) }
+      let_it_be(:private_sub_subgroup) { create(:group, :private, parent: public_subgroup) }
+      let_it_be(:public_sub_subgroup) { create(:group, :public, parent: public_subgroup) }
+      let(:params) { { include_parent_descendants: true, parent: parent_group } }
+
+      context 'with nil parent' do
+        it 'returns all accessible groups' do
+          params[:parent] = nil
+          expect(described_class.new(user, params).execute).to contain_exactly(
+            parent_group,
+            public_subgroup,
+            internal_sub_subgroup,
+            public_sub_subgroup
+          )
+        end
+      end
+
+      context 'without a user' do
+        it 'only returns the group public descendants' do
+          expect(described_class.new(nil, params).execute).to contain_exactly(
+            public_subgroup,
+            public_sub_subgroup
+          )
+        end
+      end
+
+      context 'when a user is present' do
+        it 'returns the group public and internal descendants' do
+          expect(described_class.new(user, params).execute).to contain_exactly(
+            public_subgroup,
+            public_sub_subgroup,
+            internal_sub_subgroup
+          )
+        end
+      end
+
+      context 'when a parent group member is present' do
+        before do
+          parent_group.add_developer(user)
+        end
+
+        it 'returns all group descendants' do
+          expect(described_class.new(user, params).execute).to contain_exactly(
+            public_subgroup,
+            public_sub_subgroup,
+            internal_sub_subgroup,
+            private_sub_subgroup
+          )
         end
       end
     end

@@ -11,6 +11,8 @@ class Groups::ContributionAnalyticsController < Groups::ApplicationController
 
   track_unique_visits :show, target_id: 'g_analytics_contribution'
 
+  feature_category :planning_analytics
+
   def show
     @start_date = data_collector.from
 
@@ -38,7 +40,7 @@ class Groups::ContributionAnalyticsController < Groups::ApplicationController
   end
 
   def authorize_read_contribution_analytics!
-    render_403 unless user_has_access_to_feature?
+    render_promotion unless user_has_access_to_feature?
   end
 
   def render_promotion

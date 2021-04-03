@@ -1,6 +1,6 @@
 import createState from 'ee/security_dashboard/store/modules/project_selector/state';
-import mutations from 'ee/security_dashboard/store/modules/vulnerable_projects/mutations';
 import * as types from 'ee/security_dashboard/store/modules/vulnerable_projects/mutation_types';
+import mutations from 'ee/security_dashboard/store/modules/vulnerable_projects/mutations';
 
 describe('Vulnerable projects mutations', () => {
   let state;

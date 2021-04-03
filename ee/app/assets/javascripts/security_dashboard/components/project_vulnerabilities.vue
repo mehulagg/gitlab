@@ -1,26 +1,30 @@
 <script>
+import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
+import produce from 'immer';
 import { __ } from '~/locale';
-import { GlAlert, GlDeprecatedButton, GlIntersectionObserver } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import VulnerabilityList from './vulnerability_list.vue';
-import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.graphql';
-import securityScannersQuery from '../graphql/project_security_scanners.graphql';
+import securityScannersQuery from '../graphql/queries/project_security_scanners.query.graphql';
+import vulnerabilitiesQuery from '../graphql/queries/project_vulnerabilities.query.graphql';
+import { preparePageInfo } from '../helpers';
 import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import VulnerabilityList from './vulnerability_list.vue';
 
 export default {
   name: 'ProjectVulnerabilitiesApp',
   components: {
     GlAlert,
-    GlDeprecatedButton,
+    GlLoadingIcon,
     GlIntersectionObserver,
     VulnerabilityList,
   },
-  mixins: [glFeatureFlagsMixin()],
-  props: {
+  inject: {
     projectFullPath: {
-      type: String,
-      required: true,
+      default: '',
     },
+    hasJiraVulnerabilitiesIntegrationEnabled: {
+      default: false,
+    },
+  },
+  props: {
     filters: {
       type: Object,
       required: false,
@@ -33,6 +37,8 @@ export default {
       vulnerabilities: [],
       securityScanners: {},
       errorLoadingVulnerabilities: false,
+      sortBy: 'severity',
+      sortDirection: 'desc',
     };
   },
   apollo: {
@@ -42,12 +48,14 @@ export default {
         return {
           fullPath: this.projectFullPath,
           first: VULNERABILITIES_PER_PAGE,
+          sort: this.sort,
+          includeExternalIssueLinks: this.hasJiraVulnerabilitiesIntegrationEnabled,
           ...this.filters,
         };
       },
-      update: ({ project }) => project.vulnerabilities.nodes,
+      update: ({ project }) => project?.vulnerabilities.nodes || [],
       result({ data }) {
-        this.pageInfo = data.project.vulnerabilities.pageInfo;
+        this.pageInfo = preparePageInfo(data?.project?.vulnerabilities?.pageInfo);
       },
       error() {
         this.errorLoadingVulnerabilities = true;
@@ -63,18 +71,16 @@ export default {
       error() {
         this.securityScanners = {};
       },
-      update({ project: { securityScanners = {} } = {} }) {
-        const { available = [], enabled = [], pipelineRun = [] } = securityScanners;
-        const translateScannerName = scannerName => this.$options.i18n[scannerName] || scannerName;
+      update({ project = {} }) {
+        const { available = [], enabled = [], pipelineRun = [] } = project?.securityScanners || {};
+        const translateScannerName = (scannerName) =>
+          this.$options.i18n[scannerName] || scannerName;
 
         return {
           available: available.map(translateScannerName),
           enabled: enabled.map(translateScannerName),
           pipelineRun: pipelineRun.map(translateScannerName),
         };
-      },
-      skip() {
-        return !this.glFeatures.scannerAlerts;
       },
     },
   },
@@ -85,6 +91,19 @@ export default {
     isLoadingFirstVulnerabilities() {
       return this.isLoadingVulnerabilities && this.vulnerabilities.length === 0;
     },
+    sort() {
+      return `${this.sortBy}_${this.sortDirection}`;
+    },
+  },
+  watch: {
+    filters() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
+    sort() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
   },
   methods: {
     fetchNextPage() {
@@ -92,22 +111,25 @@ export default {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const newResult = { ...fetchMoreResult };
-            previousResult.project.vulnerabilities.nodes.push(
-              ...fetchMoreResult.project.vulnerabilities.nodes,
-            );
-            newResult.project.vulnerabilities.nodes = previousResult.project.vulnerabilities.nodes;
-            return newResult;
+            return produce(fetchMoreResult, (draftData) => {
+              draftData.project.vulnerabilities.nodes = [
+                ...previousResult.project.vulnerabilities.nodes,
+                ...draftData.project.vulnerabilities.nodes,
+              ];
+            });
           },
         });
       }
     },
-    refetchVulnerabilities() {
-      this.$apollo.queries.vulnerabilities.refetch();
+    handleSortChange({ sortBy, sortDesc }) {
+      this.sortDirection = sortDesc ? 'desc' : 'asc';
+      this.sortBy = sortBy;
     },
   },
   i18n: {
+    API_FUZZING: __('API Fuzzing'),
     CONTAINER_SCANNING: __('Container Scanning'),
+    COVERAGE_FUZZING: __('Coverage Fuzzing'),
     SECRET_DETECTION: __('Secret Detection'),
     DEPENDENCY_SCANNING: __('Dependency Scanning'),
   },
@@ -128,22 +150,16 @@ export default {
       :is-loading="isLoadingFirstVulnerabilities"
       :filters="filters"
       :vulnerabilities="vulnerabilities"
-      :should-show-identifier="true"
-      :should-show-report-type="true"
       :security-scanners="securityScanners"
-      @refetch-vulnerabilities="refetchVulnerabilities"
+      @sort-changed="handleSortChange"
     />
     <gl-intersection-observer
       v-if="pageInfo.hasNextPage"
       class="text-center"
       @appear="fetchNextPage"
     >
-      <gl-deprecated-button
-        :loading="isLoadingVulnerabilities"
-        :disabled="isLoadingVulnerabilities"
-        @click="fetchNextPage"
-        >{{ s__('SecurityReports|Load more vulnerabilities') }}</gl-deprecated-button
-      >
+      <gl-loading-icon v-if="isLoadingVulnerabilities" size="md" />
+      <span v-else>&nbsp;</span>
     </gl-intersection-observer>
   </div>
 </template>

@@ -74,16 +74,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
       it { is_expected.to be_falsey }
     end
 
-    context 'when config does not contain script' do
-      let(:name) { :build }
-
-      let(:config) do
-        { before_script: "cd ${PROJ_DIR} " }
-      end
-
-      it { is_expected.to be_truthy }
-    end
-
     context 'when using the default job without script' do
       let(:name) { :default }
       let(:config) do
@@ -103,14 +93,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
       end
 
       it { is_expected.to be_truthy }
-    end
-
-    context 'there are no shared keys between jobs and bridges' do
-      subject(:shared_values) do
-        described_class::ALLOWED_KEYS & Gitlab::Ci::Config::Entry::Bridge::ALLOWED_KEYS
-      end
-
-      it { is_expected.to be_empty }
     end
   end
 
@@ -555,7 +537,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
 
       it 'overrides default config' do
         expect(entry[:image].value).to eq(name: 'some_image')
-        expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push')
+        expect(entry[:cache].value).to eq([key: 'test', policy: 'pull-push', when: 'on_success'])
       end
     end
 
@@ -570,7 +552,43 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
 
       it 'uses config from default entry' do
         expect(entry[:image].value).to eq 'specified'
-        expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push')
+        expect(entry[:cache].value).to eq([key: 'test', policy: 'pull-push', when: 'on_success'])
+      end
+    end
+
+    context 'with multiple_cache_per_job FF disabled' do
+      before do
+        stub_feature_flags(multiple_cache_per_job: false)
+      end
+
+      context 'when job config overrides default config' do
+        before do
+          entry.compose!(deps)
+        end
+
+        let(:config) do
+          { script: 'rspec', image: 'some_image', cache: { key: 'test' } }
+        end
+
+        it 'overrides default config' do
+          expect(entry[:image].value).to eq(name: 'some_image')
+          expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push', when: 'on_success')
+        end
+      end
+
+      context 'when job config does not override default config' do
+        before do
+          allow(default).to receive('[]').with(:image).and_return(specified)
+
+          entry.compose!(deps)
+        end
+
+        let(:config) { { script: 'ls', cache: { key: 'test' } } }
+
+        it 'uses config from default entry' do
+          expect(entry[:image].value).to eq 'specified'
+          expect(entry[:cache].value).to eq(key: 'test', policy: 'pull-push', when: 'on_success')
+        end
       end
     end
 
@@ -645,6 +663,8 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
                    after_script: %w[cleanup],
                    only: { refs: %w[branches tags] },
                    variables: {},
+                   job_variables: {},
+                   root_variables_inheritance: true,
                    scheduling_type: :stage)
         end
       end
@@ -688,6 +708,10 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
   end
 
   describe '#ignored?' do
+    before do
+      entry.compose!
+    end
+
     context 'when job is a manual action' do
       context 'when it is not specified if job is allowed to fail' do
         let(:config) do
@@ -718,6 +742,16 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
           expect(entry).not_to be_ignored
         end
       end
+
+      context 'when job is dynamically allowed to fail' do
+        let(:config) do
+          { script: 'deploy', when: 'manual', allow_failure: { exit_codes: 42 } }
+        end
+
+        it 'is not an ignored job' do
+          expect(entry).not_to be_ignored
+        end
+      end
     end
 
     context 'when job is not a manual action' do
@@ -727,6 +761,10 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
         it 'is not an ignored job' do
           expect(entry).not_to be_ignored
         end
+
+        it 'does not return allow_failure' do
+          expect(entry.value.key?(:allow_failure_criteria)).to be_falsey
+        end
       end
 
       context 'when job is allowed to fail' do
@@ -735,6 +773,10 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
         it 'is an ignored job' do
           expect(entry).to be_ignored
         end
+
+        it 'does not return allow_failure_criteria' do
+          expect(entry.value.key?(:allow_failure_criteria)).to be_falsey
+        end
       end
 
       context 'when job is not allowed to fail' do
@@ -742,6 +784,22 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job do
 
         it 'is not an ignored job' do
           expect(entry).not_to be_ignored
+        end
+
+        it 'does not return allow_failure_criteria' do
+          expect(entry.value.key?(:allow_failure_criteria)).to be_falsey
+        end
+      end
+
+      context 'when job is dynamically allowed to fail' do
+        let(:config) { { script: 'deploy', allow_failure: { exit_codes: 42 } } }
+
+        it 'is not an ignored job' do
+          expect(entry).not_to be_ignored
+        end
+
+        it 'returns allow_failure_criteria' do
+          expect(entry.value[:allow_failure_criteria]).to match(exit_codes: [42])
         end
       end
     end

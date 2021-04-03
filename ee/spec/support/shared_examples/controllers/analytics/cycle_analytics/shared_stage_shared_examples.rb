@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'cycle analytics stages controller' do
+RSpec.shared_examples 'Value Stream Analytics Stages controller' do
   before do
-    stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
     stub_licensed_features(cycle_analytics_for_groups: true)
 
     group.add_reporter(user)
@@ -198,17 +197,43 @@ RSpec.shared_examples 'cycle analytics stages controller' do
       it 'matches the response schema' do
         subject
 
-        expect(response).to match_response_schema('analytics/cycle_analytics/median', dir: 'ee')
+        expect(response).to match_response_schema('analytics/cycle_analytics/number_or_nil_value', dir: 'ee')
       end
 
-      include_examples 'cycle analytics data endpoint examples'
+      include_examples 'Value Stream Analytics data endpoint examples'
+    end
+
+    describe 'GET #average' do
+      subject { get :average, params: params }
+
+      it 'matches the response schema' do
+        subject
+
+        expect(response).to match_response_schema('analytics/cycle_analytics/number_or_nil_value', dir: 'ee')
+      end
+
+      include_examples 'Value Stream Analytics data endpoint examples'
     end
 
     describe 'GET #records' do
       subject { get :records, params: params }
 
-      include_examples 'cycle analytics data endpoint examples'
+      include_examples 'Value Stream Analytics data endpoint examples'
       include_examples 'group permission check on the controller level'
+
+      context 'sort params' do
+        before do
+          params.merge!(sort: 'duration', direction: 'asc')
+        end
+
+        it 'accepts sort params' do
+          expect(Gitlab::Analytics::CycleAnalytics::Sorting).to receive(:apply).with(kind_of(ActiveRecord::Relation), kind_of(Analytics::CycleAnalytics::GroupStage), :duration, :asc).and_call_original
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
     end
 
     describe 'GET #duration_chart' do
@@ -223,7 +248,7 @@ RSpec.shared_examples 'cycle analytics stages controller' do
         expect(response).to match_response_schema('analytics/cycle_analytics/duration_chart', dir: 'ee')
       end
 
-      include_examples 'cycle analytics data endpoint examples'
+      include_examples 'Value Stream Analytics data endpoint examples'
       include_examples 'group permission check on the controller level'
     end
   end
@@ -236,18 +261,6 @@ RSpec.shared_examples 'group permission check on the controller level' do
     end
 
     it 'renders `not_found` when group is missing' do
-      subject
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-  end
-
-  context 'when feature flag is disabled' do
-    before do
-      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => false)
-    end
-
-    it 'renders `not_found` response' do
       subject
 
       expect(response).to have_gitlab_http_status(:not_found)
@@ -293,7 +306,7 @@ RSpec.shared_context 'when invalid stage parameters are given' do
   end
 end
 
-RSpec.shared_examples 'cycle analytics data endpoint examples' do
+RSpec.shared_examples 'Value Stream Analytics data endpoint examples' do
   before do
     params[:created_after] = '2019-01-01'
     params[:created_before] = '2019-04-01'
@@ -336,7 +349,7 @@ RSpec.shared_examples 'cycle analytics data endpoint examples' do
     end
 
     it 'succeeds' do
-      Timecop.travel '2019-04-01' do
+      travel_to '2019-04-01' do
         subject
 
         expect(response).to be_successful

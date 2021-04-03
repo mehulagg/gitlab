@@ -2,5 +2,7 @@ export default () => ({
   isLoading: false,
 
   durationData: [],
-  durationMedianData: [],
+
+  errorCode: null,
+  errorMessage: '',
 });

@@ -1,9 +1,18 @@
 <script>
-import { GlButton, GlCard, GlCollapse, GlCollapseToggleDirective, GlSprintf } from '@gitlab/ui';
-import { __ } from '~/locale';
+import {
+  GlButton,
+  GlCard,
+  GlCollapse,
+  GlCollapseToggleDirective,
+  GlSprintf,
+  GlModalDirective,
+  GlLink,
+} from '@gitlab/ui';
+import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
 import AccessorUtilities from '~/lib/utils/accessor';
-import { getFormattedSummary } from '../helpers';
+import { __ } from '~/locale';
 import { COLLAPSE_SECURITY_REPORTS_SUMMARY_LOCAL_STORAGE_KEY as LOCAL_STORAGE_KEY } from '../constants';
+import { getFormattedSummary } from '../helpers';
 
 export default {
   name: 'SecurityReportsSummary',
@@ -12,9 +21,12 @@ export default {
     GlCard,
     GlCollapse,
     GlSprintf,
+    Modal,
+    GlLink,
   },
   directives: {
     collapseToggle: GlCollapseToggleDirective,
+    GlModal: GlModalDirective,
   },
   props: {
     summary: {
@@ -54,6 +66,14 @@ export default {
       this.isVisible = !shouldHideSummaryDetails;
     }
   },
+  methods: {
+    hasScannedResources(scanSummary) {
+      return scanSummary.scannedResources?.nodes?.length > 0;
+    },
+    downloadLink(scanSummary) {
+      return scanSummary.scannedResourcesCsvPath || '';
+    },
+  },
 };
 </script>
 
@@ -86,9 +106,43 @@ export default {
             "
           />
           <template v-if="scanSummary.scannedResourcesCount !== undefined">
-            (<gl-sprintf
-              :message="n__('%d URL scanned', '%d URLs scanned', scanSummary.scannedResourcesCount)"
-            />)
+            <gl-button
+              v-if="hasScannedResources(scanSummary)"
+              v-gl-modal.dastUrl
+              variant="link"
+              data-testid="modal-button"
+            >
+              (<gl-sprintf
+                :message="
+                  n__('%d URL scanned', '%d URLs scanned', scanSummary.scannedResourcesCount)
+                "
+              />)
+            </gl-button>
+
+            <template v-else>
+              (<gl-sprintf
+                :message="
+                  n__('%d URL scanned', '%d URLs scanned', scanSummary.scannedResourcesCount)
+                "
+              />)
+            </template>
+
+            <modal
+              v-if="hasScannedResources(scanSummary)"
+              :scanned-urls="scanSummary.scannedResources.nodes"
+              :scanned-resources-count="scanSummary.scannedResourcesCount"
+              :download-link="downloadLink(scanSummary)"
+            />
+          </template>
+          <template v-else-if="scanSummary.scannedResourcesCsvPath">
+            <gl-link
+              download
+              :href="downloadLink(scanSummary)"
+              class="gl-ml-1"
+              data-testid="download-link"
+            >
+              ({{ s__('SecurityReports|Download scanned resources') }})
+            </gl-link>
           </template>
         </div>
       </div>

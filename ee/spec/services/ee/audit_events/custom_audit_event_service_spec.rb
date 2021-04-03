@@ -10,7 +10,6 @@ RSpec.describe EE::AuditEvents::CustomAuditEventService do
       let(:entity) { create(:project) }
       let(:entity_type) { 'Project' }
       let(:custom_message) { 'Custom Event' }
-      let(:target_details) { nil }
       let(:service) { described_class.new(user, entity, ip_address, custom_message) }
     end
   end

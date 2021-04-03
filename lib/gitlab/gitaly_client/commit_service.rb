@@ -107,6 +107,8 @@ module Gitlab
         entry.data = data.join
 
         entry unless entry.oid.blank?
+      rescue GRPC::NotFound
+        nil
       end
 
       def tree_entries(repository, revision, path, recursive)
@@ -216,6 +218,23 @@ module Gitlab
         response.flat_map(&:stats)
       end
 
+      def find_changed_paths(commits)
+        request = Gitaly::FindChangedPathsRequest.new(
+          repository: @gitaly_repo,
+          commits: commits
+        )
+
+        response = GitalyClient.call(@repository.storage, :diff_service, :find_changed_paths, request, timeout: GitalyClient.medium_timeout)
+        response.flat_map do |msg|
+          msg.paths.map do |path|
+            Gitlab::Git::ChangedPath.new(
+              status: path.status,
+              path:  EncodingHelper.encode!(path.path)
+            )
+          end
+        end
+      end
+
       def find_all_commits(opts = {})
         request = Gitaly::FindAllCommitsRequest.new(
           repository: @gitaly_repo,
@@ -318,7 +337,8 @@ module Gitlab
           all:          !!options[:all],
           first_parent: !!options[:first_parent],
           global_options: parse_global_options!(options),
-          disable_walk: true # This option is deprecated. The 'walk' implementation is being removed.
+          disable_walk: true, # This option is deprecated. The 'walk' implementation is being removed.
+          trailers: options[:trailers]
         )
         request.after    = GitalyClient.timestamp(options[:after]) if options[:after]
         request.before   = GitalyClient.timestamp(options[:before]) if options[:before]

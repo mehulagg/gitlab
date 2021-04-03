@@ -3,20 +3,32 @@
 module Snippets
   class CreateService < Snippets::BaseService
     def execute
+      # NOTE: disable_spam_action_service can be removed when the ':snippet_spam' feature flag is removed.
+      disable_spam_action_service = params.delete(:disable_spam_action_service) == true
+      @request = params.delete(:request)
+      @spam_params = Spam::SpamActionService.filter_spam_params!(params)
+
       @snippet = build_from_params
 
       return invalid_params_error(@snippet) unless valid_params?
 
-      unless visibility_allowed?(@snippet, @snippet.visibility_level)
-        return forbidden_visibility_error(@snippet)
+      unless visibility_allowed?(snippet, snippet.visibility_level)
+        return forbidden_visibility_error(snippet)
       end
 
       @snippet.author = current_user
 
-      spam_check(@snippet, current_user, action: :create)
+      unless disable_spam_action_service
+        Spam::SpamActionService.new(
+          spammable: @snippet,
+          request: request,
+          user: current_user,
+          action: :create
+        ).execute(spam_params: spam_params)
+      end
 
       if save_and_commit
-        UserAgentDetailService.new(@snippet, @request).create
+        UserAgentDetailService.new(@snippet, request).create
         Gitlab::UsageDataCounters::SnippetCounter.count(:create)
 
         move_temporary_files
@@ -28,6 +40,8 @@ module Snippets
     end
 
     private
+
+    attr_reader :snippet, :request, :spam_params
 
     def build_from_params
       if project
@@ -56,10 +70,10 @@ module Snippets
 
       snippet_saved
     rescue => e # Rescuing all because we can receive Creation exceptions, GRPC exceptions, Git exceptions, ...
-      log_error(e.message)
+      Gitlab::ErrorTracking.log_exception(e, service: 'Snippets::CreateService')
 
       # If the commit action failed we need to remove the repository if exists
-      @snippet.repository.remove if @snippet.repository_exists?
+      delete_repository(@snippet) if @snippet.repository_exists?
 
       # If the snippet was created, we need to remove it as we
       # would do like if it had had any validation error
@@ -81,12 +95,9 @@ module Snippets
     end
 
     def create_commit
-      commit_attrs = {
-        branch_name: 'master',
-        message: 'Initial commit'
-      }
+      attrs = commit_attrs(@snippet, INITIAL_COMMIT_MSG)
 
-      @snippet.snippet_repository.multi_files_action(current_user, files_to_commit(@snippet), commit_attrs)
+      @snippet.snippet_repository.multi_files_action(current_user, files_to_commit(@snippet), **attrs)
     end
 
     def move_temporary_files

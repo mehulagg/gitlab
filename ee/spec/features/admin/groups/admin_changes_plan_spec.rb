@@ -5,13 +5,14 @@ require 'spec_helper'
 RSpec.describe 'Changes GL.com plan for group' do
   include WaitForRequests
 
-  let!(:silver_plan) { create(:silver_plan) }
+  let!(:premium_plan) { create(:premium_plan) }
   let(:admin) { create(:admin) }
 
   before do
     allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
 
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   describe 'for group namespace' do
@@ -27,7 +28,7 @@ RSpec.describe 'Changes GL.com plan for group' do
 
       click_button('Save changes')
 
-      expect(page).to have_content('Plan: Silver')
+      expect(page).to have_content('Plan: Premium')
     end
   end
 
@@ -44,7 +45,7 @@ RSpec.describe 'Changes GL.com plan for group' do
 
       click_button('Save changes')
 
-      expect(page).to have_content('Plan: Silver')
+      expect(page).to have_content('Plan: Premium')
     end
   end
 end

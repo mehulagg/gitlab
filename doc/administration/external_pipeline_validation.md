@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -9,25 +9,33 @@ type: reference, howto
 
 You can use an external service for validating a pipeline before it's created.
 
-CAUTION: **Warning:**
+WARNING:
 This is an experimental feature and subject to change without notice.
 
 ## Usage
 
-GitLab will send a POST request to the external service URL with the pipeline
-data as payload. GitLab will then invalidate the pipeline based on the response
-code. If there's an error or the request times out, the pipeline will not be
+GitLab sends a POST request to the external service URL with the pipeline
+data as payload. GitLab then invalidates the pipeline based on the response
+code. If there's an error or the request times out, the pipeline is not
 invalidated.
 
 Response Code Legend:
 
 - `200` - Accepted
-- `4xx` - Not Accepted
+- `406` - Not Accepted
 - Other Codes - Accepted and Logged
 
 ## Configuration
 
-Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
+To configure external pipeline validation:
+
+1. Set the `EXTERNAL_VALIDATION_SERVICE_URL` environment variable to the external
+   service URL.
+1. Enable the `ci_external_validation_service` feature flag.
+
+By default, requests to the external service time out after five seconds. To override
+the default, set the `EXTERNAL_VALIDATION_SERVICE_TIMEOUT` environment variable to the
+required number of seconds.
 
 ## Payload Schema
 
@@ -38,18 +46,21 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
     "project",
     "user",
     "pipeline",
-    "builds"
+    "builds",
+    "namespace"
   ],
   "properties" : {
     "project": {
       "type": "object",
       "required": [
         "id",
-        "path"
+        "path",
+        "created_at"
       ],
       "properties": {
         "id": { "type": "integer" },
-        "path": { "type": "string" }
+        "path": { "type": "string" },
+        "created_at": { "type": ["string", "null"], "format": "date-time" }
       }
     },
     "user": {
@@ -57,12 +68,14 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
       "required": [
         "id",
         "username",
-        "email"
+        "email",
+        "created_at"
       ],
       "properties": {
         "id": { "type": "integer" },
         "username": { "type": "string" },
-        "email": { "type": "string" }
+        "email": { "type": "string" },
+        "created_at": { "type": ["string", "null"], "format": "date-time" }
       }
     },
     "pipeline": {
@@ -103,8 +116,18 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL.
           }
         }
       }
+    },
+    "namespace": {
+      "type": "object",
+      "required": [
+        "plan",
+        "trial"
+      ],
+      "properties": {
+        "plan": { "type": "string" },
+        "trial": { "type": "boolean" }
+      }
     }
-  },
-  "additionalProperties": false
+  }
 }
 ```

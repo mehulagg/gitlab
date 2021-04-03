@@ -1,16 +1,10 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import tooltip from '~/vue_shared/directives/tooltip';
-import Icon from '~/vue_shared/components/icon.vue';
 import IdeSidebarNav from '../ide_sidebar_nav.vue';
 
 export default {
   name: 'CollapsibleSidebar',
-  directives: {
-    tooltip,
-  },
   components: {
-    Icon,
     IdeSidebarNav,
   },
   props: {
@@ -41,13 +35,13 @@ export default {
       return `${this.side}Pane`;
     },
     tabs() {
-      return this.extensionTabs.filter(tab => tab.show);
+      return this.extensionTabs.filter((tab) => tab.show);
     },
     tabViews() {
-      return this.tabs.map(tab => tab.views).flat();
+      return this.tabs.map((tab) => tab.views).flat();
     },
     aliveTabViews() {
-      return this.tabViews.filter(view => this.isAliveView(view.name));
+      return this.tabViews.filter((view) => this.isAliveView(view.name));
     },
   },
   methods: {

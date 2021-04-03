@@ -28,9 +28,9 @@ module EE
     end
 
     def size_limit_message_for_group(group)
-      show_lfs = group.lfs_enabled? ? 'and their respective LFS files' : ''
+      show_lfs = group.lfs_enabled? ? 'including LFS files' : ''
 
-      "Repositories within this group #{show_lfs} will be restricted to this maximum size. Can be overridden inside each project. 0 for unlimited. Leave empty to inherit the global value."
+      "Max size for repositories within this group #{show_lfs}. Can be overridden inside each project. For no limit, enter 0. To inherit the global value, leave blank."
     end
 
     override :group_packages_nav_link_paths
@@ -74,14 +74,10 @@ module EE
     end
 
     def show_discover_group_security?(group)
-      security_feature_available_at = DateTime.new(2019, 11, 1)
-
       !!current_user &&
         ::Gitlab.com? &&
-        current_user.created_at > security_feature_available_at &&
         !@group.feature_available?(:security_dashboard) &&
-        can?(current_user, :admin_group, @group) &&
-        current_user.ab_feature_enabled?(:discover_security)
+        can?(current_user, :admin_group, @group)
     end
 
     def show_group_activity_analytics?
@@ -121,8 +117,10 @@ module EE
     def get_group_sidebar_links
       links = super
 
-      if can?(current_user, :read_group_cycle_analytics, @group)
-        links << :cycle_analytics
+      resources = [:cycle_analytics, :merge_request_analytics, :repository_analytics]
+
+      links += resources.select do |resource|
+        can?(current_user, "read_group_#{resource}".to_sym, @group)
       end
 
       if can?(current_user, :read_group_contribution_analytics, @group) || show_promotions?
@@ -147,6 +145,14 @@ module EE
 
       if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.feature_available?(:iterations) && can?(current_user, :read_iteration, @group)
         links << :iterations
+      end
+
+      if ::Feature.enabled?(:group_ci_cd_analytics_page, @group, default_enabled: true) && @group.feature_available?(:group_ci_cd_analytics) && can?(current_user, :view_group_ci_cd_analytics, @group)
+        links << :group_ci_cd_analytics
+      end
+
+      if can?(current_user, :view_group_devops_adoption, @group)
+        links << :group_devops_adoption
       end
 
       links

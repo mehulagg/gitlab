@@ -1,19 +1,12 @@
-import * as types from './mutation_types';
-import {
-  parseIntPagination,
-  normalizeHeaders,
-  convertObjectPropsToCamelCase,
-} from '~/lib/utils/common_utils';
+import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { GROUP_PAGE_TYPE } from '../constants';
+import * as types from './mutation_types';
 
 export default {
   [types.SET_INITIAL_STATE](state, config) {
     const { comingSoonJson, ...rest } = config;
-    const comingSoonObj = JSON.parse(comingSoonJson);
-
     state.config = {
       ...rest,
-      comingSoon: comingSoonObj && convertObjectPropsToCamelCase(comingSoonObj),
       isGroupPage: config.pageType === GROUP_PAGE_TYPE,
     };
   },
@@ -35,11 +28,7 @@ export default {
     state.sorting = { ...state.sorting, ...sorting };
   },
 
-  [types.SET_SELECTED_TYPE](state, type) {
-    state.selectedType = type;
-  },
-
-  [types.SET_FILTER](state, query) {
-    state.filterQuery = query;
+  [types.SET_FILTER](state, filter) {
+    state.filter = filter;
   },
 };

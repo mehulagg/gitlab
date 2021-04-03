@@ -25,8 +25,8 @@ RSpec.describe 'User Cluster', :js do
     before do
       visit group_clusters_path(group)
 
-      click_link 'Add Kubernetes cluster'
-      click_link 'Add existing cluster'
+      click_link 'Integrate with a cluster certificate'
+      click_link 'Connect existing cluster'
     end
 
     context 'when user filled form with valid parameters' do
@@ -66,6 +66,10 @@ RSpec.describe 'User Cluster', :js do
           expect(page.find_field('cluster[platform_kubernetes_attributes][authorization_type]', disabled: true)).to be_checked
         end
       end
+
+      it 'user sees namespace per environment is enabled by default' do
+        expect(page).to have_checked_field('Namespace per environment')
+      end
     end
 
     context 'when user filled form with invalid parameters' do
@@ -93,7 +97,7 @@ RSpec.describe 'User Cluster', :js do
     context 'when user disables the cluster' do
       before do
         page.find(:css, '.js-cluster-enable-toggle-area .js-project-feature-toggle').click
-        page.within('.js-cluster-integration-form') { click_button 'Save changes' }
+        page.within('.js-cluster-details-form') { click_button 'Save changes' }
       end
 
       it 'user sees the successful message' do
@@ -125,7 +129,7 @@ RSpec.describe 'User Cluster', :js do
 
       it 'user sees creation form with the successful message' do
         expect(page).to have_content('Kubernetes cluster integration was successfully removed.')
-        expect(page).to have_link('Add Kubernetes cluster')
+        expect(page).to have_link('Integrate with a cluster certificate')
       end
     end
   end

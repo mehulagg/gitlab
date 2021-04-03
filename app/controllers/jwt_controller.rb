@@ -8,8 +8,11 @@ class JwtController < ApplicationController
   # Add this before other actions, since we want to have the user or project
   prepend_before_action :auth_user, :authenticate_project_or_user
 
+  feature_category :authentication_and_authorization
+
   SERVICES = {
-    Auth::ContainerRegistryAuthenticationService::AUDIENCE => Auth::ContainerRegistryAuthenticationService
+    ::Auth::ContainerRegistryAuthenticationService::AUDIENCE => ::Auth::ContainerRegistryAuthenticationService,
+    ::Auth::DependencyProxyAuthenticationService::AUDIENCE => ::Auth::DependencyProxyAuthenticationService
   }.freeze
 
   def auth

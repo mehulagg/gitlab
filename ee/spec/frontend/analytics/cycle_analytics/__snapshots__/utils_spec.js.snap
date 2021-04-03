@@ -1,15 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Cycle analytics utils transformRawStages retains all the stage properties 1`] = `
+exports[`Value Stream Analytics utils transformRawStages retains all the stage properties 1`] = `
 Array [
   Object {
     "custom": false,
     "description": "Time before an issue gets scheduled",
+    "endEventHtmlDescription": "<p data-sourcepos=\\"1:1-1:71\\" dir=\\"auto\\">Issue first associated with a milestone or issue first added to a board</p>",
     "hidden": false,
     "id": 1,
     "legend": "",
     "name": "Issue",
     "slug": 1,
+    "startEventHtmlDescription": "<p data-sourcepos=\\"1:1-1:13\\" dir=\\"auto\\">Issue created</p>",
     "title": "Issue",
   },
   Object {

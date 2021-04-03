@@ -1,5 +1,5 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 
 import SidebarLabels from 'ee/epic/components/sidebar_items/sidebar_labels.vue';
 import createStore from 'ee/epic/store';
@@ -22,6 +22,7 @@ describe('SidebarLabelsComponent', () => {
       propsData: { canUpdate: false, sidebarCollapsed: false },
       store,
       stubs: {
+        LabelsSelectVue: true,
         GlLabel: true,
       },
     });
@@ -115,6 +116,22 @@ describe('SidebarLabelsComponent', () => {
 
         expect(wrapper.vm.epicContext.labels).toHaveLength(1);
         expect(wrapper.vm.epicContext.labels[0].id).toBe(mockLabels[0].id);
+      });
+    });
+
+    describe('handleLabelRemove', () => {
+      it('calls action `updateEpicLabels` with the label ID to remove', () => {
+        const labelIdToRemove = 9;
+
+        jest.spyOn(wrapper.vm, 'updateEpicLabels').mockImplementation();
+
+        store.state.labels = mockLabels;
+
+        wrapper.vm.handleLabelRemove(labelIdToRemove);
+
+        expect(wrapper.vm.updateEpicLabels).toHaveBeenCalledWith(
+          expect.arrayContaining([{ id: labelIdToRemove, set: false }]),
+        );
       });
     });
 

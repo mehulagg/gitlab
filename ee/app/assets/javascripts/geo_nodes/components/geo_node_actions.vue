@@ -1,8 +1,8 @@
 <script>
 import { GlIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
-import eventHub from '../event_hub';
 import { NODE_ACTIONS } from '../constants';
+import eventHub from '../event_hub';
 
 export default {
   components: {
@@ -98,7 +98,7 @@ export default {
     >
       <span class="gl-display-flex gl-align-items-center">
         <gl-icon v-if="!node.current" name="external-link" class="gl-mr-2" />
-        {{ __('Open projects') }}
+        {{ __('Replication details') }}
       </span>
     </gl-button>
     <template v-if="nodeActionsAllowed">

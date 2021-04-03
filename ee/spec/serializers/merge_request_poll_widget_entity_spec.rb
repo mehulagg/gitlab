@@ -24,7 +24,7 @@ RSpec.describe MergeRequestPollWidgetEntity do
 
     before do
       stub_licensed_features(merge_pipelines: true, merge_trains: true)
-      project.update!(merge_pipelines_enabled: true)
+      project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
     end
 
     it 'has merge train entity' do

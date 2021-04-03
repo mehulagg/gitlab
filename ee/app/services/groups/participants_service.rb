@@ -7,8 +7,14 @@ module Groups
     def execute(noteable)
       @noteable = noteable
 
-      participants = noteable_owner + participants_in_noteable + all_members + groups + group_members
-      participants.uniq
+      participants =
+        noteable_owner +
+        participants_in_noteable +
+        all_members +
+        groups +
+        group_members
+
+      render_participants_as_hash(participants.uniq)
     end
 
     def all_members

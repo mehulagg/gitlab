@@ -6,7 +6,7 @@ module Geo
   # This finders works slightly different than the ones used to trigger
   # synchronization, as we are concerned in filtering for displaying rather then
   # filtering for processing.
-  class ProjectRegistryStatusFinder < RegistryFinder
+  class ProjectRegistryStatusFinder
     # Returns all project registry
     #
     def all_projects
@@ -67,16 +67,6 @@ module Geo
           .or(repository_verification_failed)
           .or(repository_checksum_mismatch)
       ).with_routes
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
-
-    # Return any project registry that has never been fully synced
-    #
-    # We don't include projects without a corresponding ProjectRegistry
-    # for performance reasons.
-    # rubocop: disable CodeReuse/ActiveRecord
-    def never_synced_projects
-      Geo::ProjectRegistry.where(last_repository_successful_sync_at: nil).with_routes
     end
     # rubocop: enable CodeReuse/ActiveRecord
 

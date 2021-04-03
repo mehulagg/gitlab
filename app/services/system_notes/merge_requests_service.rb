@@ -26,16 +26,16 @@ module SystemNotes
       create_note(NoteSummary.new(noteable, project, author, body, action: 'merge'))
     end
 
-    def handle_merge_request_wip
-      prefix = noteable.work_in_progress? ? "marked" : "unmarked"
+    def handle_merge_request_draft
+      action = noteable.work_in_progress? ? "draft" : "ready"
 
-      body = "#{prefix} as a **Work In Progress**"
+      body = "marked this merge request as **#{action}**"
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'title'))
     end
 
-    def add_merge_request_wip_from_commit(commit)
-      body = "marked as a **Work In Progress** from #{commit.to_reference(project)}"
+    def add_merge_request_draft_from_commit(commit)
+      body = "marked this merge request as **draft** from #{commit.to_reference(project)}"
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'title'))
     end
@@ -83,16 +83,26 @@ module SystemNotes
     # Called when a branch in Noteable is changed
     #
     # branch_type - 'source' or 'target'
+    # event_type  - the source of event: 'update' or 'delete'
     # old_branch  - old branch name
     # new_branch  - new branch name
+
+    # Example Note text is based on event_type:
     #
-    # Example Note text:
-    #
-    #   "changed target branch from `Old` to `New`"
+    #   update: "changed target branch from `Old` to `New`"
+    #   delete: "deleted the `Old` branch. This merge request now targets the `New` branch"
     #
     # Returns the created Note object
-    def change_branch(branch_type, old_branch, new_branch)
-      body = "changed #{branch_type} branch from `#{old_branch}` to `#{new_branch}`"
+    def change_branch(branch_type, event_type, old_branch, new_branch)
+      body =
+        case event_type.to_s
+        when 'delete'
+          "deleted the `#{old_branch}` branch. This merge request now targets the `#{new_branch}` branch"
+        when 'update'
+          "changed #{branch_type} branch from `#{old_branch}` to `#{new_branch}`"
+        else
+          raise ArgumentError, "invalid value for event_type: #{event_type}"
+        end
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'branch'))
     end

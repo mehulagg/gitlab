@@ -1,0 +1,21 @@
+fragment AlertListItem on AlertManagementAlert {
+  iid
+  title
+  severity
+  status
+  startedAt
+  eventCount
+  issue {
+    iid
+    state
+    title
+  }
+  assignees {
+    nodes {
+      name
+      username
+      avatarUrl
+      webUrl
+    }
+  }
+}

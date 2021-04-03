@@ -20,7 +20,7 @@ module API
           model
         end
 
-        expose :variables
+        expose :runner_variables, as: :variables
         expose :steps, using: Entities::JobRequest::Step
         expose :image, using: Entities::JobRequest::Image
         expose :services, using: Entities::JobRequest::Service
@@ -33,3 +33,5 @@ module API
     end
   end
 end
+
+API::Entities::JobRequest::Response.prepend_if_ee('EE::API::Entities::JobRequest::Response')

@@ -19,8 +19,10 @@ RSpec.describe Ci::JobArtifact do
 
   it_behaves_like 'having unique enum values'
 
-  it_behaves_like 'UpdateProjectStatistics' do
-    subject { build(:ci_job_artifact, :archive, size: 107464) }
+  it_behaves_like 'UpdateProjectStatistics', :with_counter_attribute do
+    let_it_be(:job, reload: true) { create(:ci_build) }
+
+    subject { build(:ci_job_artifact, :archive, job: job, size: 107464) }
   end
 
   describe '.not_expired' do
@@ -42,7 +44,7 @@ RSpec.describe Ci::JobArtifact do
       let!(:metrics_report) { create(:ci_job_artifact, :junit) }
       let!(:codequality_report) { create(:ci_job_artifact, :codequality) }
 
-      it { is_expected.to eq([metrics_report, codequality_report]) }
+      it { is_expected.to match_array([metrics_report, codequality_report]) }
     end
   end
 
@@ -88,6 +90,22 @@ RSpec.describe Ci::JobArtifact do
     end
 
     context 'when there are no coverage reports' do
+      let!(:artifact) { create(:ci_job_artifact, :archive) }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
+  describe '.codequality_reports' do
+    subject { described_class.codequality_reports }
+
+    context 'when there is a codequality report' do
+      let!(:artifact) { create(:ci_job_artifact, :codequality) }
+
+      it { is_expected.to eq([artifact]) }
+    end
+
+    context 'when there are no codequality reports' do
       let!(:artifact) { create(:ci_job_artifact, :archive) }
 
       it { is_expected.to be_empty }
@@ -198,6 +216,39 @@ RSpec.describe Ci::JobArtifact do
 
       expect(described_class.for_job_name(first_job.name)).to eq([first_artifact])
       expect(described_class.for_job_name(second_job.name)).to eq([second_artifact])
+    end
+  end
+
+  describe '.unlocked' do
+    let_it_be(:job_artifact) { create(:ci_job_artifact) }
+
+    context 'with locked pipelines' do
+      before do
+        job_artifact.job.pipeline.artifacts_locked!
+      end
+
+      it 'returns an empty array' do
+        expect(described_class.unlocked).to be_empty
+      end
+    end
+
+    context 'with unlocked pipelines' do
+      before do
+        job_artifact.job.pipeline.unlocked!
+      end
+
+      it 'returns the artifact' do
+        expect(described_class.unlocked).to eq([job_artifact])
+      end
+    end
+  end
+
+  describe '.order_expired_desc' do
+    let_it_be(:first_artifact) { create(:ci_job_artifact, expire_at: 2.days.ago) }
+    let_it_be(:second_artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
+
+    it 'returns ordered artifacts' do
+      expect(described_class.order_expired_desc).to eq([second_artifact, first_artifact])
     end
   end
 
@@ -343,42 +394,6 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
-  describe '#each_blob' do
-    context 'when file format is gzip' do
-      context 'when gzip file contains one file' do
-        let(:artifact) { build(:ci_job_artifact, :junit) }
-
-        it 'iterates blob once' do
-          expect { |b| artifact.each_blob(&b) }.to yield_control.once
-        end
-      end
-
-      context 'when gzip file contains three files' do
-        let(:artifact) { build(:ci_job_artifact, :junit_with_three_testsuites) }
-
-        it 'iterates blob three times' do
-          expect { |b| artifact.each_blob(&b) }.to yield_control.exactly(3).times
-        end
-      end
-    end
-
-    context 'when file format is raw' do
-      let(:artifact) { build(:ci_job_artifact, :codequality, file_format: :raw) }
-
-      it 'iterates blob once' do
-        expect { |b| artifact.each_blob(&b) }.to yield_control.once
-      end
-    end
-
-    context 'when there are no adapters for the file format' do
-      let(:artifact) { build(:ci_job_artifact, :junit, file_format: :zip) }
-
-      it 'raises an error' do
-        expect { |b| artifact.each_blob(&b) }.to raise_error(described_class::NotSupportedAdapterError)
-      end
-    end
-  end
-
   describe 'expired?' do
     subject { artifact.expired? }
 
@@ -483,11 +498,7 @@ RSpec.describe Ci::JobArtifact do
     subject { create(:ci_job_artifact, :archive) }
 
     context 'when existing object has local store' do
-      it 'is stored locally' do
-        expect(subject.file_store).to be(ObjectStorage::Store::LOCAL)
-        expect(subject.file).to be_file_storage
-        expect(subject.file.object_store).to eq(ObjectStorage::Store::LOCAL)
-      end
+      it_behaves_like 'mounted file in local store'
     end
 
     context 'when direct upload is enabled' do
@@ -496,11 +507,7 @@ RSpec.describe Ci::JobArtifact do
       end
 
       context 'when file is stored' do
-        it 'is stored remotely' do
-          expect(subject.file_store).to eq(ObjectStorage::Store::REMOTE)
-          expect(subject.file).not_to be_file_storage
-          expect(subject.file.object_store).to eq(ObjectStorage::Store::REMOTE)
-        end
+        it_behaves_like 'mounted file in object store'
       end
     end
   end

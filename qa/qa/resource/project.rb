@@ -12,6 +12,8 @@ module QA
       attr_accessor :repository_storage # requires admin access
       attr_writer :initialize_with_readme
       attr_writer :auto_devops_enabled
+      attr_writer :github_personal_access_token
+      attr_writer :github_repository_path
 
       attribute :id
       attribute :name
@@ -21,6 +23,7 @@ module QA
       attribute :runners_token
       attribute :visibility
       attribute :template_name
+      attribute :import
 
       attribute :group do
         Group.fabricate!
@@ -56,6 +59,7 @@ module QA
         @auto_devops_enabled = false
         @visibility = :public
         @template_name = nil
+        @import = false
 
         self.name = "the_awesome_project"
       end
@@ -65,6 +69,8 @@ module QA
       end
 
       def fabricate!
+        return if @import
+
         unless @standalone
           group.visit!
           Page::Group::Show.perform(&:go_to_new_project)
@@ -103,6 +109,24 @@ module QA
         response.any? { |file| file[:path] == file_path }
       end
 
+      def has_branch?(branch)
+        has_branches?(Array(branch))
+      end
+
+      def has_branches?(branches)
+        branches.all? do |branch|
+          response = get(Runtime::API::Request.new(api_client, "#{api_repository_branches_path}/#{branch}").url)
+          response.code == HTTP_STATUS_OK
+        end
+      end
+
+      def has_tags?(tags)
+        tags.all? do |tag|
+          response = get(Runtime::API::Request.new(api_client, "#{api_repository_tags_path}/#{tag}").url)
+          response.code == HTTP_STATUS_OK
+        end
+      end
+
       def api_get_path
         "/projects/#{CGI.escape(path_with_namespace)}"
       end
@@ -119,12 +143,32 @@ module QA
         "#{api_get_path}/members"
       end
 
+      def api_merge_requests_path
+        "#{api_get_path}/merge_requests"
+      end
+
       def api_runners_path
         "#{api_get_path}/runners"
       end
 
+      def api_registry_repositories_path
+        "#{api_get_path}/registry/repositories"
+      end
+
+      def api_packages_path
+        "#{api_get_path}/packages"
+      end
+
+      def api_commits_path
+        "#{api_get_path}/repository/commits"
+      end
+
       def api_repository_branches_path
         "#{api_get_path}/repository/branches"
+      end
+
+      def api_repository_tags_path
+        "#{api_get_path}/repository/tags"
       end
 
       def api_repository_tree_path
@@ -163,6 +207,10 @@ module QA
         post_body
       end
 
+      def api_delete_path
+        "/projects/#{id}"
+      end
+
       def change_repository_storage(new_storage)
         put_body = { repository_storage: new_storage }
         response = put Runtime::API::Request.new(api_client, api_put_path).url, put_body
@@ -174,6 +222,14 @@ module QA
         wait_until(sleep_interval: 1) { Runtime::API::RepositoryStorageMoves.has_status?(self, 'finished', new_storage) }
       rescue Support::Repeater::RepeaterConditionExceededError
         raise Runtime::API::RepositoryStorageMoves::RepositoryStorageMovesError, 'Timed out while waiting for the repository storage move to finish'
+      end
+
+      def commits
+        parse_body(get(Runtime::API::Request.new(api_client, api_commits_path).url))
+      end
+
+      def default_branch
+        reload!.api_response[:default_branch] || Runtime::Env.default_branch
       end
 
       def import_status
@@ -190,6 +246,14 @@ module QA
         result[:import_status]
       end
 
+      def merge_requests
+        parse_body(get(Runtime::API::Request.new(api_client, api_merge_requests_path).url))
+      end
+
+      def merge_request_with_title(title)
+        merge_requests.find { |mr| mr[:title] == title }
+      end
+
       def runners(tag_list: nil)
         response = if tag_list
                      get Runtime::API::Request.new(api_client, "#{api_runners_path}?tag_list=#{tag_list.compact.join(',')}").url
@@ -200,8 +264,22 @@ module QA
         parse_body(response)
       end
 
+      def registry_repositories
+        response = get Runtime::API::Request.new(api_client, "#{api_registry_repositories_path}").url
+        parse_body(response)
+      end
+
+      def packages
+        response = get Runtime::API::Request.new(api_client, "#{api_packages_path}").url
+        parse_body(response)
+      end
+
       def repository_branches
         parse_body(get(Runtime::API::Request.new(api_client, api_repository_branches_path).url))
+      end
+
+      def repository_tags
+        parse_body(get(Runtime::API::Request.new(api_client, api_repository_tags_path).url))
       end
 
       def repository_tree
@@ -210,10 +288,6 @@ module QA
 
       def pipelines
         parse_body(get(Runtime::API::Request.new(api_client, api_pipelines_path).url))
-      end
-
-      def share_with_group(invitee, access_level = Resource::Members::AccessLevel::DEVELOPER)
-        post Runtime::API::Request.new(api_client, "/projects/#{id}/share").url, { group_id: invitee.id, group_access: access_level }
       end
 
       private

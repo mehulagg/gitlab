@@ -1,10 +1,10 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import * as actions from '~/admin/statistics_panel/store/actions';
 import * as types from '~/admin/statistics_panel/store/mutation_types';
 import getInitialState from '~/admin/statistics_panel/store/state';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import mockStatistics from '../mock_data';
 
 describe('Admin statistics panel actions', () => {
@@ -22,7 +22,7 @@ describe('Admin statistics panel actions', () => {
         mock.onGet(/api\/(.*)\/application\/statistics/).replyOnce(200, mockStatistics);
       });
 
-      it('dispatches success with received data', done =>
+      it('dispatches success with received data', (done) =>
         testAction(
           actions.fetchStatistics,
           null,
@@ -46,7 +46,7 @@ describe('Admin statistics panel actions', () => {
         mock.onGet(/api\/(.*)\/application\/statistics/).replyOnce(500);
       });
 
-      it('dispatches error', done =>
+      it('dispatches error', (done) =>
         testAction(
           actions.fetchStatistics,
           null,
@@ -67,7 +67,7 @@ describe('Admin statistics panel actions', () => {
   });
 
   describe('requestStatistic', () => {
-    it('should commit the request mutation', done =>
+    it('should commit the request mutation', (done) =>
       testAction(
         actions.requestStatistics,
         null,
@@ -79,7 +79,7 @@ describe('Admin statistics panel actions', () => {
   });
 
   describe('receiveStatisticsSuccess', () => {
-    it('should commit received data', done =>
+    it('should commit received data', (done) =>
       testAction(
         actions.receiveStatisticsSuccess,
         mockStatistics,
@@ -96,7 +96,7 @@ describe('Admin statistics panel actions', () => {
   });
 
   describe('receiveStatisticsError', () => {
-    it('should commit error', done => {
+    it('should commit error', (done) => {
       testAction(
         actions.receiveStatisticsError,
         500,

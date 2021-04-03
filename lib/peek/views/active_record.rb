@@ -21,23 +21,50 @@ module Peek
         @thresholds ||= THRESHOLDS.fetch(Rails.env.to_sym, DEFAULT_THRESHOLDS)
       end
 
+      def results
+        super.merge(summary: summary)
+      end
+
       private
+
+      def summary
+        detail_store.each_with_object({}) do |item, count|
+          count_summary(item, count)
+        end
+      end
+
+      def count_summary(item, count)
+        if item[:cached].present?
+          count[item[:cached]] ||= 0
+          count[item[:cached]] += 1
+        end
+
+        if item[:transaction].present?
+          count[item[:transaction]] ||= 0
+          count[item[:transaction]] += 1
+        end
+      end
 
       def setup_subscribers
         super
 
         subscribe('sql.active_record') do |_, start, finish, _, data|
-          if Gitlab::PerformanceBar.enabled_for_request?
-            unless data[:cached]
-              detail_store << {
-                duration: finish - start,
-                sql: data[:sql].strip,
-                backtrace: Gitlab::BacktraceCleaner.clean_backtrace(caller)
-              }
-            end
-          end
+          detail_store << generate_detail(start, finish, data) if Gitlab::PerformanceBar.enabled_for_request?
         end
+      end
+
+      def generate_detail(start, finish, data)
+        {
+          start: start,
+          duration: finish - start,
+          sql: data[:sql].strip,
+          backtrace: Gitlab::BacktraceCleaner.clean_backtrace(caller),
+          cached: data[:cached] ? 'Cached' : '',
+          transaction: data[:connection].transaction_open? ? 'In a transaction' : ''
+        }
       end
     end
   end
 end
+
+Peek::Views::ActiveRecord.prepend_if_ee('EE::Peek::Views::ActiveRecord')

@@ -1,8 +1,8 @@
 ---
 type: reference, howto
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Create a Pages website by using a CI/CD template
@@ -41,7 +41,7 @@ configuration for the Pages site to generate properly.
 
 If everything is configured correctly, the site can take approximately 30 minutes to deploy.
 
-You can watch the pipeline run by going to **CI / CD > Pipelines**.
+You can watch the pipeline run by navigating to **CI/CD > Pipelines**.
 When the pipeline is finished, go to **Settings > Pages** to find the link to
 your Pages website.
 

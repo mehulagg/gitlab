@@ -26,4 +26,10 @@ RSpec.describe BasePolicy do
       is_expected.to be_allowed(:read_all_resources)
     end
   end
+
+  describe 'admin all resources' do
+    it 'forbids auditors' do
+      is_expected.to be_disallowed(:admin_all_resources)
+    end
+  end
 end

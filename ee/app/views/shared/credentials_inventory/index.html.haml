@@ -12,6 +12,10 @@
     = nav_link(html_options: { class: active_when(show_ssh_keys?) }) do
       = link_to credentials_inventory_path(filter: 'ssh_keys') do
         = s_('CredentialsInventory|SSH Keys')
+    - if gpg_keys_available?
+      = nav_link(html_options: { class: active_when(show_gpg_keys?) }) do
+        = link_to credentials_inventory_path(filter: 'gpg_keys') do
+          = s_('CredentialsInventory|GPG Keys')
 
 - if @credentials.empty?
   .nothing-here-block.border-top-0
@@ -21,5 +25,7 @@
     = render 'shared/credentials_inventory/personal_access_tokens', credentials: @credentials
   - elsif show_ssh_keys?
     = render 'shared/credentials_inventory/ssh_keys', credentials: @credentials
+  - elsif show_gpg_keys?
+    = render 'shared/credentials_inventory/gpg_keys', credentials: @credentials
 
 = paginate_without_count @credentials

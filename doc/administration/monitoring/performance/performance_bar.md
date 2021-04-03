@@ -1,10 +1,12 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Monitor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Performance Bar
+# Performance Bar **(FREE SELF)**
+
+> The **Stats** field [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/271551) in GitLab SaaS 13.9.
 
 You can display the GitLab Performance Bar to see statistics for the performance
 of a page. When activated, it looks as follows:
@@ -15,7 +17,7 @@ From left to right, it displays:
 
 - **Current Host**: the current host serving the page.
 - **Database queries**: the time taken (in milliseconds) and the total number
-  of database queries, displayed in the format `00ms / 00pg`. Click to display
+  of database queries, displayed in the format `00ms / 00 (00 cached) pg`. Click to display
   a modal window with more details:
   ![SQL profiling using the Performance Bar](img/performance_bar_sql_queries.png)
 - **Gitaly calls**: the time taken (in milliseconds) and the total number of
@@ -23,7 +25,7 @@ From left to right, it displays:
   details:
   ![Gitaly profiling using the Performance Bar](img/performance_bar_gitaly_calls.png)
 - **Rugged calls**: the time taken (in milliseconds) and the total number of
-  [Rugged](../../high_availability/nfs.md#improving-nfs-performance-with-gitlab) calls.
+  [Rugged](../../nfs.md#improving-nfs-performance-with-gitlab) calls.
   Click to display a modal window with more details:
   ![Rugged profiling using the Performance Bar](img/performance_bar_rugged_calls.png)
 - **Redis calls**: the time taken (in milliseconds) and the total number of
@@ -31,6 +33,10 @@ From left to right, it displays:
   ![Redis profiling using the Performance Bar](img/performance_bar_redis_calls.png)
 - **Elasticsearch calls**: the time taken (in milliseconds) and the total number of
   Elasticsearch calls. Click to display a modal window with more details.
+- **External HTTP calls**: the time taken (in milliseconds) and the total
+  number of external calls to other systems. Click to display a modal window
+  with more details
+  ![External call details in the Performance Bar](img/performance_bar_external_http_calls.png)
 - **Load timings** of the page: if your browser supports load timings (Chromium
   and Chrome) several values in milliseconds, separated by slashes.
   Click to display a modal window with more details. The values, from left to right:
@@ -49,6 +55,8 @@ From left to right, it displays:
 - **Request Selector**: a select box displayed on the right-hand side of the
   Performance Bar which enables you to view these metrics for any requests made while
   the current page was open. Only the first two requests per unique URL are captured.
+- **Stats** (optional): if the `GITLAB_PERFORMANCE_BAR_STATS_URL` environment variable is set,
+  this URL is displayed in the bar. In GitLab 13.9 and later, used only in GitLab SaaS.
 
 ## Request warnings
 
@@ -67,13 +75,13 @@ Requests with warnings display `(!)` after their path in the **Request selector*
 
 ![Request selector showing dropdown](img/performance_bar_request_selector_warning_expanded.png)
 
-## Enable the Performance Bar via the Admin panel
+## Enable the Performance Bar via the Admin Area
 
 The GitLab Performance Bar is disabled by default. To enable it for a given group:
 
 1. Sign in as a user with Administrator [permissions](../../../user/permissions.md).
-1. In the menu bar, click the **{admin}** **Admin Area** icon.
-1. Navigate to **{settings}** **Settings > Metrics and profiling**
+1. In the menu bar, click **Admin Area**.
+1. Go to **Settings > Metrics and profiling**
    (`admin/application_settings/metrics_and_profiling`), and expand the section
    **Profiling - Performance bar**.
 1. Click **Enable access to the Performance Bar**.

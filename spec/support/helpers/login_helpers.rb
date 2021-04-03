@@ -40,7 +40,7 @@ module LoginHelpers
       if user_or_role.is_a?(User)
         user_or_role
       else
-        create(user_or_role)
+        create(user_or_role) # rubocop:disable Rails/SaveBang
       end
 
     gitlab_sign_in_with(user, **kwargs)
@@ -111,6 +111,11 @@ module LoginHelpers
     FakeU2fDevice.new(page, nil).fake_u2f_authentication
   end
 
+  def fake_successful_webauthn_authentication
+    allow_any_instance_of(Webauthn::AuthenticateService).to receive(:execute).and_return(true)
+    FakeWebauthnDevice.new(page, nil).fake_webauthn_authentication
+  end
+
   def mock_auth_hash_with_saml_xml(provider, uid, email, saml_response)
     response_object = { document: saml_xml(saml_response) }
     mock_auth_hash(provider, uid, email, response_object: response_object)
@@ -133,13 +138,15 @@ module LoginHelpers
         secret: 'mock_secret'
       },
       extra: {
-        raw_info: {
-          info: {
-            name: 'mockuser',
-            email: email,
-            image: 'mock_user_thumbnail_url'
+        raw_info: OneLogin::RubySaml::Attributes.new(
+          {
+            info: {
+              name: 'mockuser',
+              email: email,
+              image: 'mock_user_thumbnail_url'
+            }
           }
-        },
+        ),
         response_object: response_object
       }
     }).merge(additional_info) { |_, old_hash, new_hash| old_hash.merge(new_hash) }
@@ -193,7 +200,7 @@ module LoginHelpers
     env['omniauth.error.strategy'] = strategy
   end
 
-  def stub_omniauth_saml_config(messages, context: Rails.application)
+  def stub_omniauth_saml_config(context: Rails.application, **messages)
     set_devise_mapping(context: context)
     routes = Rails.application.routes
     routes.disable_clear_and_finalize = true

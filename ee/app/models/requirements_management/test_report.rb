@@ -13,6 +13,8 @@ module RequirementsManagement
 
     enum state: { passed: 1, failed: 2 }
 
+    scope :without_build, -> { where(build_id: nil) }
+    scope :with_build, -> { where.not(build_id: nil) }
     scope :for_user_build, ->(user_id, build_id) { where(author_id: user_id, build_id: build_id) }
 
     class << self
@@ -26,6 +28,16 @@ module RequirementsManagement
                   end
 
         bulk_insert!(reports)
+      end
+
+      def build_report(author: nil, state:, requirement:, build: nil, timestamp: Time.current)
+        new(
+          requirement_id: requirement.id,
+          build_id: build&.id,
+          author_id: build&.user_id || author&.id,
+          created_at: timestamp,
+          state: state
+        )
       end
 
       private
@@ -51,16 +63,6 @@ module RequirementsManagement
             reports << build_report(state: new_state, requirement: requirement, build: build, timestamp: timestamp)
           end
         end
-      end
-
-      def build_report(state:, requirement:, build:, timestamp:)
-        new(
-          requirement_id: requirement.id,
-          build_id: build.id,
-          author_id: build.user_id,
-          created_at: timestamp,
-          state: state
-        )
       end
     end
   end

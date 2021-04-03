@@ -10,8 +10,8 @@ RSpec.describe Vulnerabilities::Statistics::ScheduleWorker do
     let(:deleted_project) { create(:project, pending_delete: true) }
 
     before do
-      create(:vulnerability, project: project)
-      create(:vulnerability, project: deleted_project)
+      project.project_setting.update!(has_vulnerabilities: true)
+      deleted_project.project_setting.update!(has_vulnerabilities: true)
 
       allow(Vulnerabilities::Statistics::AdjustmentWorker).to receive(:perform_in)
     end

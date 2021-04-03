@@ -13,7 +13,7 @@ RSpec.describe ProtectedBranchPolicy do
 
   before do
     project.add_maintainer(user)
-    project.project_group_links.create(group: allowed_group)
+    project.project_group_links.create!(group: allowed_group)
   end
 
   context 'when unprotection is limited by access levels' do

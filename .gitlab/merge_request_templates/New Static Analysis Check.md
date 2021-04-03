@@ -1,3 +1,8 @@
+<!--
+When creating a new cop that could be applied to multiple applications,
+we encourage you to add it to https://gitlab.com/gitlab-org/gitlab-styles gem.
+-->
+
 ## Description of the proposal
 
 <!--
@@ -22,6 +27,6 @@ Please describe the proposal and add a link to the source (for example, http://w
   - [ ] In the relevant Slack channels (e.g. `#development`, `#backend`, `#frontend`)
   - [ ] (Optional depending on the impact of the change) In the Engineering Week in Review
 
-/label ~"Engineering Productivity" ~"Style decision" ~"development guidelines" ~"static analysis"
+/label ~"Engineering Productivity" ~"development guidelines" ~"static code analysis"
 
 /cc @gitlab-org/maintainers/rails-backend

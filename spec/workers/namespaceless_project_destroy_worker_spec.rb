@@ -49,7 +49,7 @@ RSpec.describe NamespacelessProjectDestroyWorker do
           subject.perform(project.id)
         end
 
-        it 'does not do anything in Project#remove_pages method' do
+        it 'does not do anything in Project#legacy_remove_pages method' do
           expect(Gitlab::PagesTransfer).not_to receive(:new)
 
           subject.perform(project.id)
@@ -60,7 +60,7 @@ RSpec.describe NamespacelessProjectDestroyWorker do
         let!(:parent_project) { create(:project) }
         let(:project) do
           namespaceless_project = fork_project(parent_project)
-          namespaceless_project.save
+          namespaceless_project.save!
           namespaceless_project
         end
 

@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectImport < Grape::API::Instance
+  class ProjectImport < ::API::Base
     include PaginationParams
-
-    MAXIMUM_FILE_SIZE = 50.megabytes
 
     helpers Helpers::ProjectsHelpers
     helpers Helpers::FileUploadHelpers
     helpers Helpers::RateLimiter
+
+    feature_category :importers
 
     helpers do
       def import_params
@@ -67,7 +67,7 @@ module API
 
         check_rate_limit! :project_import, [current_user, :project_import]
 
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42437')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20823')
 
         validate_file!
 

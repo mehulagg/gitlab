@@ -2,18 +2,17 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import Vuex, { mapState, mapActions, mapGetters } from 'vuex';
+import { isInViewport } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
 import DropdownValueCollapsed from '~/vue_shared/components/sidebar/labels_select/dropdown_value_collapsed.vue';
 
-import labelsSelectModule from './store';
-
-import DropdownTitle from './dropdown_title.vue';
-import DropdownValue from './dropdown_value.vue';
+import { DropdownVariant } from './constants';
 import DropdownButton from './dropdown_button.vue';
 import DropdownContents from './dropdown_contents.vue';
-
-import { DropdownVariant } from './constants';
+import DropdownTitle from './dropdown_title.vue';
+import DropdownValue from './dropdown_value.vue';
+import labelsSelectModule from './store';
 
 Vue.use(Vuex);
 
@@ -27,13 +26,20 @@ export default {
     DropdownValueCollapsed,
   },
   props: {
+    allowLabelRemove: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     allowLabelEdit: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     allowLabelCreate: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     allowMultiselect: {
       type: Boolean,
@@ -42,7 +48,8 @@ export default {
     },
     allowScopedLabels: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     variant: {
       type: String,
@@ -74,6 +81,11 @@ export default {
       required: false,
       default: '',
     },
+    labelsFilterParam: {
+      type: String,
+      required: false,
+      default: 'label_name',
+    },
     dropdownButtonText: {
       type: String,
       required: false,
@@ -99,6 +111,16 @@ export default {
       required: false,
       default: __('Manage group labels'),
     },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      contentIsOnViewport: true,
+    };
   },
   computed: {
     ...mapState(['showDropdownButton', 'showDropdownContents']),
@@ -117,10 +139,19 @@ export default {
         selectedLabels,
       });
     },
+    showDropdownContents(showDropdownContents) {
+      this.setContentIsOnViewport(showDropdownContents);
+    },
+    isEditing(newVal) {
+      if (newVal) {
+        this.toggleDropdownContents();
+      }
+    },
   },
   mounted() {
     this.setInitialState({
       variant: this.variant,
+      allowLabelRemove: this.allowLabelRemove,
       allowLabelEdit: this.allowLabelEdit,
       allowLabelCreate: this.allowLabelCreate,
       allowMultiselect: this.allowMultiselect,
@@ -130,6 +161,7 @@ export default {
       labelsFetchPath: this.labelsFetchPath,
       labelsManagePath: this.labelsManagePath,
       labelsFilterBasePath: this.labelsFilterBasePath,
+      labelsFilterParam: this.labelsFilterParam,
       labelsListTitle: this.labelsListTitle,
       labelsCreateTitle: this.labelsCreateTitle,
       footerCreateLabelTitle: this.footerCreateLabelTitle,
@@ -140,9 +172,11 @@ export default {
       after: this.handleVuexActionDispatch,
     });
 
+    document.addEventListener('mousedown', this.handleDocumentMousedown);
     document.addEventListener('click', this.handleDocumentClick);
   },
   beforeDestroy() {
+    document.removeEventListener('mousedown', this.handleDocumentMousedown);
     document.removeEventListener('click', this.handleDocumentClick);
   },
   methods: {
@@ -157,8 +191,20 @@ export default {
         !state.showDropdownButton &&
         !state.showDropdownContents
       ) {
-        this.handleDropdownClose(state.labels.filter(label => label.touched));
+        let filterFn = (label) => label.touched;
+        if (this.isDropdownVariantEmbedded) {
+          filterFn = (label) => label.set;
+        }
+        this.handleDropdownClose(state.labels.filter(filterFn));
       }
+    },
+    /**
+     * This method stores a mousedown event's target.
+     * Required by the click listener because the click
+     * event itself has no reference to this element.
+     */
+    handleDocumentMousedown({ target }) {
+      this.mousedownTarget = target;
     },
     /**
      * This method listens for document-wide click event
@@ -166,6 +212,23 @@ export default {
      * the dropdown while dropdown is visible.
      */
     handleDocumentClick({ target }) {
+      // We also perform the toggle exception check for the
+      // last mousedown event's target to avoid hiding the
+      // box when the mousedown happened inside the box and
+      // only the mouseup did not.
+      if (
+        this.showDropdownContents &&
+        !this.preventDropdownToggleOnClick(target) &&
+        !this.preventDropdownToggleOnClick(this.mousedownTarget)
+      ) {
+        this.toggleDropdownContents();
+      }
+    },
+    /**
+     * This method checks whether a given click target
+     * should prevent the dropdown from being toggled.
+     */
+    preventDropdownToggleOnClick(target) {
       // This approach of element detection is needed
       // as the dropdown wrapper is not using `GlDropdown` as
       // it will also require us to use `BDropdownForm`
@@ -175,24 +238,25 @@ export default {
         'js-btn-cancel-create',
         'js-sidebar-dropdown-toggle',
       ].some(
-        className =>
+        (className) =>
           target?.classList.contains(className) ||
-          target?.parentElement.classList.contains(className),
+          target?.parentElement?.classList.contains(className),
       );
 
-      const hadExceptionParent = ['.js-btn-back', '.js-labels-list'].some(
-        className => $(target).parents(className).length,
+      const hasExceptionParent = ['.js-btn-back', '.js-labels-list'].some(
+        (className) => $(target).parents(className).length,
       );
 
-      if (
-        this.showDropdownContents &&
-        !hadExceptionParent &&
-        !hasExceptionClass &&
-        !this.$refs.dropdownButtonCollapsed?.$el.contains(target) &&
-        !this.$refs.dropdownContents?.$el.contains(target)
-      ) {
-        this.toggleDropdownContents();
-      }
+      const isInDropdownButtonCollapsed = this.$refs.dropdownButtonCollapsed?.$el.contains(target);
+
+      const isInDropdownContents = this.$refs.dropdownContents?.$el.contains(target);
+
+      return (
+        hasExceptionClass ||
+        hasExceptionParent ||
+        isInDropdownButtonCollapsed ||
+        isInDropdownContents
+      );
     },
     handleDropdownClose(labels) {
       // Only emit label updates if there are any labels to update
@@ -202,6 +266,20 @@ export default {
     },
     handleCollapsedValueClick() {
       this.$emit('toggleCollapse');
+    },
+    setContentIsOnViewport(showDropdownContents) {
+      if (!this.isDropdownVariantEmbedded || !showDropdownContents) {
+        this.contentIsOnViewport = true;
+
+        return;
+      }
+
+      this.$nextTick(() => {
+        if (this.$refs.dropdownContents) {
+          const offset = { top: 100 };
+          this.contentIsOnViewport = isInViewport(this.$refs.dropdownContents.$el, offset);
+        }
+      });
     },
   },
 };
@@ -225,12 +303,15 @@ export default {
         :allow-label-edit="allowLabelEdit"
         :labels-select-in-progress="labelsSelectInProgress"
       />
-      <dropdown-value v-show="!showDropdownButton">
+      <dropdown-value
+        :disable-labels="labelsSelectInProgress"
+        @onLabelRemove="$emit('onLabelRemove', $event)"
+      >
         <slot></slot>
       </dropdown-value>
-      <dropdown-button v-show="dropdownButtonVisible" />
+      <dropdown-button v-show="dropdownButtonVisible" class="gl-mt-2" />
       <dropdown-contents
-        v-if="dropdownButtonVisible && showDropdownContents"
+        v-show="dropdownButtonVisible && showDropdownContents"
         ref="dropdownContents"
       />
     </template>
@@ -239,6 +320,7 @@ export default {
       <dropdown-contents
         v-if="dropdownButtonVisible && showDropdownContents"
         ref="dropdownContents"
+        :render-on-top="!contentIsOnViewport"
       />
     </template>
   </div>

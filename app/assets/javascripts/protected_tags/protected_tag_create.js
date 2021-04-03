@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import ProtectedTagAccessDropdown from './protected_tag_access_dropdown';
-import CreateItemDropdown from '../create_item_dropdown';
 import { __ } from '~/locale';
+import CreateItemDropdown from '../create_item_dropdown';
+import ProtectedTagAccessDropdown from './protected_tag_access_dropdown';
 
 export default class ProtectedTagCreate {
   constructor() {
@@ -23,7 +23,7 @@ export default class ProtectedTagCreate {
     });
 
     // Select default
-    $allowedToCreateDropdown.data('glDropdown').selectRowAtIndex(0);
+    $allowedToCreateDropdown.data('deprecatedJQueryDropdown').selectRowAtIndex(0);
 
     // Protected tag dropdown
     this.createItemDropdown = new CreateItemDropdown({

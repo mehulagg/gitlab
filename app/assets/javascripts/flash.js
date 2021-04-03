@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import { escape } from 'lodash';
 import { spriteIcon } from './lib/utils/common_utils';
 
@@ -33,7 +34,7 @@ const hideFlash = (flashEl, fadeTransition = true) => {
   if (!fadeTransition) flashEl.dispatchEvent(new Event('transitionend'));
 };
 
-const createAction = config => `
+const createAction = (config) => `
   <a
     href="${config.href || '#'}"
     class="flash-action"
@@ -65,23 +66,28 @@ const removeFlashClickListener = (flashEl, fadeTransition) => {
  *  along with ability to provide actionConfig which can be used to show
  *  additional action or link on banner next to message
  *
- *  @param {String} message           Flash message text
- *  @param {String} type              Type of Flash, it can be `notice`, `success`, `warning` or `alert` (default)
- *  @param {Object} parent            Reference to parent element under which Flash needs to appear
- *  @param {Object} actonConfig       Map of config to show action on banner
- *    @param {String} href            URL to which action config should point to (default: '#')
- *    @param {String} title           Title of action
- *    @param {Function} clickHandler  Method to call when action is clicked on
- *  @param {Boolean} fadeTransition   Boolean to determine whether to fade the alert out
+ *  @param {Object} options                   Options to control the flash message
+ *  @param {String} options.message           Flash message text
+ *  @param {String} options.type              Type of Flash, it can be `notice`, `success`, `warning` or `alert` (default)
+ *  @param {Object} options.parent            Reference to parent element under which Flash needs to appear
+ *  @param {Object} options.actionConfig      Map of config to show action on banner
+ *    @param {String} href                    URL to which action config should point to (default: '#')
+ *    @param {String} title                   Title of action
+ *    @param {Function} clickHandler          Method to call when action is clicked on
+ *  @param {Boolean} options.fadeTransition   Boolean to determine whether to fade the alert out
+ *  @param {Boolean} options.captureError     Boolean to determine whether to send error to sentry
+ *  @param {Object} options.error              Error to be captured in sentry
  */
-const createFlash = function createFlash(
+const createFlash = function createFlash({
   message,
   type = FLASH_TYPES.ALERT,
   parent = document,
   actionConfig = null,
   fadeTransition = true,
   addBodyClass = false,
-) {
+  captureError = false,
+  error = null,
+}) {
   const flashContainer = parent.querySelector('.flash-container');
 
   if (!flashContainer) return null;
@@ -91,26 +97,54 @@ const createFlash = function createFlash(
   const flashEl = flashContainer.querySelector(`.flash-${type}`);
 
   if (actionConfig) {
-    flashEl.innerHTML += createAction(actionConfig);
+    flashEl.insertAdjacentHTML('beforeend', createAction(actionConfig));
 
     if (actionConfig.clickHandler) {
       flashEl
         .querySelector('.flash-action')
-        .addEventListener('click', e => actionConfig.clickHandler(e));
+        .addEventListener('click', (e) => actionConfig.clickHandler(e));
     }
   }
 
   removeFlashClickListener(flashEl, fadeTransition);
 
-  flashContainer.style.display = 'block';
+  flashContainer.classList.add('gl-display-block');
 
   if (addBodyClass) document.body.classList.add('flash-shown');
+
+  if (captureError && error) Sentry.captureException(error);
 
   return flashContainer;
 };
 
+/*
+ *  Flash banner supports different types of Flash configurations
+ *  along with ability to provide actionConfig which can be used to show
+ *  additional action or link on banner next to message
+ *
+ *  @param {String} message           Flash message text
+ *  @param {String} type              Type of Flash, it can be `notice`, `success`, `warning` or `alert` (default)
+ *  @param {Object} parent            Reference to parent element under which Flash needs to appear
+ *  @param {Object} actionConfig      Map of config to show action on banner
+ *    @param {String} href            URL to which action config should point to (default: '#')
+ *    @param {String} title           Title of action
+ *    @param {Function} clickHandler  Method to call when action is clicked on
+ *  @param {Boolean} fadeTransition   Boolean to determine whether to fade the alert out
+ */
+const deprecatedCreateFlash = function deprecatedCreateFlash(
+  message,
+  type,
+  parent,
+  actionConfig,
+  fadeTransition,
+  addBodyClass,
+) {
+  return createFlash({ message, type, parent, actionConfig, fadeTransition, addBodyClass });
+};
+
 export {
   createFlash as default,
+  deprecatedCreateFlash,
   createFlashEl,
   createAction,
   hideFlash,

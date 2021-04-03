@@ -43,7 +43,7 @@ export default {
       if (this.moreTagsDisplay) {
         return this.tags
           .slice(this.tagDisplayLimit)
-          .map(x => x.name)
+          .map((x) => x.name)
           .join(', ');
       }
 
@@ -70,7 +70,7 @@ export default {
 <template>
   <div class="gl-display-flex gl-align-items-center">
     <div v-if="!hideLabel" data-testid="tagLabel" class="gl-display-flex gl-align-items-center">
-      <gl-icon name="labels" class="gl-text-gray-700 gl-mr-3" />
+      <gl-icon name="labels" class="gl-text-gray-500 gl-mr-3" />
       <span class="gl-font-weight-bold">{{ tagsDisplay }}</span>
     </div>
 
@@ -80,6 +80,7 @@ export default {
       data-testid="tagBadge"
       :class="tagBadgeClass(index)"
       variant="info"
+      size="sm"
       >{{ tag.name }}</gl-badge
     >
 
@@ -89,7 +90,8 @@ export default {
       data-testid="moreBadge"
       variant="muted"
       :title="moreTagsTooltip"
-      class="gl-display-none d-md-flex gl-ml-2"
+      size="sm"
+      class="gl-display-none gl-md-display-flex gl-ml-2"
       ><gl-sprintf :message="__('+%{tags} more')">
         <template #tags>
           {{ moreTagsDisplay }}
@@ -101,7 +103,7 @@ export default {
       v-if="moreTagsDisplay && hideLabel"
       data-testid="moreBadge"
       variant="muted"
-      class="d-md-none gl-ml-2"
+      class="gl-md-display-none gl-ml-2"
       >{{ tagsDisplay }}</gl-badge
     >
   </div>

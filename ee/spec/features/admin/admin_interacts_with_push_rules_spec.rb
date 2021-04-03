@@ -10,11 +10,12 @@ RSpec.describe "Admin interacts with push rules" do
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
     sign_in(user)
+    gitlab_enable_admin_mode_sign_in(user)
   end
 
   push_rules_with_titles = {
     reject_unsigned_commits: "Reject unsigned commits",
-    commit_committer_check: "Committer restriction"
+    commit_committer_check: "Reject unverified users"
   }
 
   push_rules_with_titles.each do |rule_attr, title|
@@ -45,8 +46,8 @@ RSpec.describe "Admin interacts with push rules" do
     end
 
     it "creates new rule" do
-      fill_in("Commit message", with: "my_string")
-      click_button("Save Push Rules")
+      fill_in("Require expression in commit messages", with: "my_string")
+      click_button("Save push rules")
 
       expect(page).to have_selector("input[value='my_string']")
     end

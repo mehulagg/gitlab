@@ -3,7 +3,7 @@ import { mapActions } from 'vuex';
 export default {
   computed: {
     diffFileDiscussions() {
-      return this.allDiscussions.filter(d => !d.isDraft);
+      return this.allDiscussions.filter((d) => !d.isDraft);
     },
   },
   methods: {

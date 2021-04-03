@@ -5,17 +5,29 @@ require 'securerandom'
 module QA
   module Resource
     class User < Base
+      InvalidUserError = Class.new(RuntimeError)
+
       attr_reader :unique_id
       attr_writer :username, :password
-      attr_accessor :admin, :provider, :extern_uid
+      attr_accessor :admin, :provider, :extern_uid, :expect_fabrication_success
 
       attribute :id
       attribute :name
+      attribute :first_name
+      attribute :last_name
       attribute :email
 
       def initialize
         @admin = false
         @unique_id = SecureRandom.hex(8)
+        @expect_fabrication_success = true
+      end
+
+      def self.default
+        Resource::User.new.tap do |user|
+          user.username = Runtime::User.ldap_user? ? Runtime::User.ldap_username : Runtime::User.username
+          user.password = Runtime::User.ldap_user? ? Runtime::User.ldap_password : Runtime::User.password
+        end
       end
 
       def admin?
@@ -25,13 +37,23 @@ module QA
       def username
         @username || "qa-user-#{unique_id}"
       end
+      alias_method :ldap_username, :username
 
       def password
         @password || 'password'
       end
+      alias_method :ldap_password, :password
 
       def name
         @name ||= api_resource&.dig(:name) || "QA User #{unique_id}"
+      end
+
+      def first_name
+        name.split(' ').first
+      end
+
+      def last_name
+        name.split(' ').drop(1).join(' ')
       end
 
       def email
@@ -64,12 +86,7 @@ module QA
             login.sign_in_using_credentials(user: self)
           end
         else
-          Page::Main::Login.perform do |login|
-            login.switch_to_register_tab
-          end
-          Page::Main::SignUp.perform do |signup|
-            signup.sign_up!(self)
-          end
+          Flow::SignUp.sign_up!(self)
         end
       end
 
@@ -132,8 +149,8 @@ module QA
         return {} unless extern_uid && provider
 
         {
-            extern_uid: extern_uid,
-            provider: provider
+          extern_uid: extern_uid,
+          provider: provider
         }
       end
 
@@ -148,7 +165,7 @@ module QA
       end
 
       def fetching_own_data?
-        user&.username == username || Runtime::User.username == username
+        api_user&.username == username || Runtime::User.username == username
       end
     end
   end

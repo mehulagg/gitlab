@@ -2,13 +2,16 @@
 
 module Issues
   class UpdateService < Issues::BaseService
-    include SpamCheckMethods
+    extend ::Gitlab::Utils::Override
 
     def execute(issue)
       handle_move_between_ids(issue)
-      filter_spam_check_params
+
+      @request = params.delete(:request)
+      @spam_params = Spam::SpamActionService.filter_spam_params!(params)
+
       change_issue_duplicate(issue)
-      move_issue_to_new_project(issue) || update_task_event(issue) || update(issue)
+      move_issue_to_new_project(issue) || clone_issue(issue) || update_task_event(issue) || update(issue)
     end
 
     def update(issue)
@@ -17,12 +20,30 @@ module Issues
       super
     end
 
+    override :filter_params
+    def filter_params(issue)
+      super
+
+      # filter confidential in `Issues::UpdateService` and not in `IssuableBaseService#filtr_params`
+      # because we do allow users that cannot admin issues to set confidential flag when creating an issue
+      unless can_admin_issuable?(issue)
+        params.delete(:confidential)
+      end
+    end
+
     def before_update(issue, skip_spam_check: false)
-      spam_check(issue, current_user, action: :update) unless skip_spam_check
+      return if skip_spam_check
+
+      Spam::SpamActionService.new(
+        spammable: issue,
+        request: request,
+        user: current_user,
+        action: :update
+      ).execute(spam_params: spam_params)
     end
 
     def after_update(issue)
-      IssuesChannel.broadcast_to(issue, event: 'updated') if Feature.enabled?(:broadcast_issue_updates, issue.project)
+      IssuesChannel.broadcast_to(issue, event: 'updated') if Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:broadcast_issue_updates, issue.project)
     end
 
     def handle_changes(issue, options)
@@ -43,13 +64,15 @@ module Issues
       if issue.assignees != old_assignees
         create_assignee_note(issue, old_assignees)
         notification_service.async.reassigned_issue(issue, current_user, old_assignees)
-        todo_service.reassigned_issuable(issue, current_user, old_assignees)
+        todo_service.reassigned_assignable(issue, current_user, old_assignees)
+        track_incident_action(current_user, issue, :incident_assigned)
       end
 
       if issue.previous_changes.include?('confidential')
         # don't enqueue immediately to prevent todos removal in case of a mistake
         TodosDestroyer::ConfidentialIssueWorker.perform_in(Todo::WAIT_FOR_DELETE, issue.id) if issue.confidential?
         create_confidentiality_note(issue)
+        track_usage_event(:incident_management_incident_change_confidential, current_user.id)
       end
 
       added_labels = issue.labels - old_labels
@@ -73,16 +96,13 @@ module Issues
     end
 
     def handle_move_between_ids(issue)
-      return unless params[:move_between_ids]
+      super
 
-      after_id, before_id = params.delete(:move_between_ids)
-      board_group_id = params.delete(:board_group_id)
+      rebalance_if_needed(issue)
+    end
 
-      issue_before = get_issue_if_allowed(before_id, board_group_id)
-      issue_after = get_issue_if_allowed(after_id, board_group_id)
-      raise ActiveRecord::RecordNotFound unless issue_before || issue_after
-
-      issue.move_between(issue_before, issue_after)
+    def positioning_scope_key
+      :board_group_id
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -110,6 +130,20 @@ module Issues
     end
 
     private
+
+    attr_reader :request, :spam_params
+
+    def clone_issue(issue)
+      target_project = params.delete(:target_clone_project)
+      with_notes = params.delete(:clone_with_notes)
+
+      return unless target_project &&
+        issue.can_clone?(current_user, target_project)
+
+      # we've pre-empted this from running in #execute, so let's go ahead and update the Issue now.
+      update(issue)
+      Issues::CloneService.new(project, current_user).execute(issue, target_project, with_notes: with_notes)
+    end
 
     def create_merge_request_from_quick_action
       create_merge_request_params = params.delete(:create_merge_request)
@@ -147,7 +181,7 @@ module Issues
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def get_issue_if_allowed(id, board_group_id = nil)
+    def issuable_for_positioning(id, board_group_id = nil)
       return unless id
 
       issue =

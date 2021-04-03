@@ -6,4 +6,4 @@
       %br
       %strong= _('Removed group can not be restored!')
 
-    = button_to _('Remove group'), '#', class: 'btn btn-remove js-confirm-danger', data: { 'confirm-danger-message' => remove_group_message(group) }
+    = render 'groups/settings/remove_button', group: group

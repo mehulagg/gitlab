@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import eventHub from '~/filtered_search/event_hub';
 import RecentSearchesDropdownContent from '~/filtered_search/components/recent_searches_dropdown_content.vue';
+import eventHub from '~/filtered_search/event_hub';
 import IssuableFilteredSearchTokenKeys from '~/filtered_search/issuable_filtered_search_token_keys';
 
 describe('Recent Searches Dropdown Content', () => {
@@ -10,7 +10,7 @@ describe('Recent Searches Dropdown Content', () => {
   const findDropdownItems = () => wrapper.findAll({ ref: 'dropdownItem' });
   const findDropdownNote = () => wrapper.find({ ref: 'dropdownNote' });
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(RecentSearchesDropdownContent, {
       propsData: {
         allowedKeys: IssuableFilteredSearchTokenKeys.getKeys(),
@@ -57,7 +57,11 @@ describe('Recent Searches Dropdown Content', () => {
 
     beforeEach(() => {
       createComponent({
-        items: ['foo', 'author:@root label:~foo bar'],
+        items: [
+          'foo',
+          'author:@root label:~foo bar',
+          [{ type: 'author_username', value: { data: 'toby', operator: '=' } }],
+        ],
         isLocalStorageAvailable: true,
       });
     });
@@ -76,22 +80,15 @@ describe('Recent Searches Dropdown Content', () => {
     });
 
     it('renders a correct amount of dropdown items', () => {
-      expect(findDropdownItems()).toHaveLength(2);
+      expect(findDropdownItems()).toHaveLength(2); // Ignore non-string recent item
     });
 
     it('expect second dropdown to have 2 tokens', () => {
-      expect(
-        findDropdownItems()
-          .at(1)
-          .findAll('.js-dropdown-token'),
-      ).toHaveLength(2);
+      expect(findDropdownItems().at(1).findAll('.js-dropdown-token')).toHaveLength(2);
     });
 
     it('emits recentSearchesItemSelected on dropdown item click', () => {
-      findDropdownItems()
-        .at(0)
-        .find('.js-dropdown-button')
-        .trigger('click');
+      findDropdownItems().at(0).find('.js-dropdown-button').trigger('click');
 
       expect(onRecentSearchesItemSelectedSpy).toHaveBeenCalledWith('foo');
     });

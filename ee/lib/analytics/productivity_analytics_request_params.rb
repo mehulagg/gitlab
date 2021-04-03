@@ -66,6 +66,7 @@ module Analytics
     def project_data_attributes
       {
         id: project.id,
+        gid: project.to_gid.to_s,
         name: project.name,
         path_with_namespace: project.path_with_namespace,
         avatar_url: project.avatar_url

@@ -1,12 +1,12 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdownItem, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 
 import DashboardsDropdown from '~/monitoring/components/dashboards_dropdown.vue';
 
-import { dashboardGitResponse, selfMonitoringDashboardGitResponse } from '../mock_data';
+import { dashboardGitResponse } from '../mock_data';
 
 const defaultBranch = 'master';
-const modalId = 'duplicateDashboardModalId';
 const starredDashboards = dashboardGitResponse.filter(({ starred }) => starred);
 const notStarredDashboards = dashboardGitResponse.filter(({ starred }) => !starred);
 
@@ -17,33 +17,28 @@ describe('DashboardsDropdown', () => {
 
   function createComponent(props, opts = {}) {
     const storeOpts = {
-      methods: {
-        duplicateSystemDashboard: jest.fn(),
-      },
       computed: {
         allDashboards: () => mockDashboards,
         selectedDashboard: () => mockSelectedDashboard,
       },
     };
 
-    return shallowMount(DashboardsDropdown, {
+    wrapper = shallowMount(DashboardsDropdown, {
       propsData: {
         ...props,
         defaultBranch,
-        modalId,
       },
-      sync: false,
       ...storeOpts,
       ...opts,
     });
   }
 
   const findItems = () => wrapper.findAll(GlDropdownItem);
-  const findItemAt = i => wrapper.findAll(GlDropdownItem).at(i);
+  const findItemAt = (i) => wrapper.findAll(GlDropdownItem).at(i);
   const findSearchInput = () => wrapper.find({ ref: 'monitorDashboardsDropdownSearch' });
   const findNoItemsMsg = () => wrapper.find({ ref: 'monitorDashboardsDropdownMsg' });
   const findStarredListDivider = () => wrapper.find({ ref: 'starredListDivider' });
-  const setSearchTerm = searchTerm => wrapper.setData({ searchTerm });
+  const setSearchTerm = (searchTerm) => wrapper.setData({ searchTerm });
 
   beforeEach(() => {
     mockDashboards = dashboardGitResponse;
@@ -52,7 +47,7 @@ describe('DashboardsDropdown', () => {
 
   describe('when it receives dashboards data', () => {
     beforeEach(() => {
-      wrapper = createComponent();
+      createComponent();
     });
 
     it('displays an item for each dashboard', () => {
@@ -77,29 +72,39 @@ describe('DashboardsDropdown', () => {
       expect(findNoItemsMsg().isVisible()).toBe(false);
     });
 
-    it('filters dropdown items when searched for item exists in the list', () => {
-      const searchTerm = 'Default';
+    it('filters dropdown items when searched for item exists in the list', async () => {
+      const searchTerm = 'Overview';
       setSearchTerm(searchTerm);
+      await nextTick();
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findItems()).toHaveLength(1);
-      });
+      expect(findItems()).toHaveLength(1);
     });
 
-    it('shows no items found message when searched for item does not exists in the list', () => {
+    it('shows no items found message when searched for item does not exists in the list', async () => {
       const searchTerm = 'does-not-exist';
       setSearchTerm(searchTerm);
+      await nextTick();
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findNoItemsMsg().isVisible()).toBe(true);
-      });
+      expect(findNoItemsMsg().isVisible()).toBe(true);
+    });
+  });
+
+  describe('when a dashboard is selected', () => {
+    beforeEach(() => {
+      [mockSelectedDashboard] = starredDashboards;
+      createComponent();
+    });
+
+    it('dashboard item is selected', () => {
+      expect(findItemAt(0).props('isChecked')).toBe(true);
+      expect(findItemAt(1).props('isChecked')).toBe(false);
     });
   });
 
   describe('when the dashboard is missing a display name', () => {
     beforeEach(() => {
-      mockDashboards = dashboardGitResponse.map(d => ({ ...d, display_name: undefined }));
-      wrapper = createComponent();
+      mockDashboards = dashboardGitResponse.map((d) => ({ ...d, display_name: undefined }));
+      createComponent();
     });
 
     it('displays items with the dashboard path, with starred dashboards first', () => {
@@ -112,7 +117,7 @@ describe('DashboardsDropdown', () => {
   describe('when it receives starred dashboards', () => {
     beforeEach(() => {
       mockDashboards = starredDashboards;
-      wrapper = createComponent();
+      createComponent();
     });
 
     it('displays an item for each dashboard', () => {
@@ -133,7 +138,7 @@ describe('DashboardsDropdown', () => {
   describe('when it receives only not-starred dashboards', () => {
     beforeEach(() => {
       mockDashboards = notStarredDashboards;
-      wrapper = createComponent();
+      createComponent();
     });
 
     it('displays an item for each dashboard', () => {
@@ -150,90 +155,9 @@ describe('DashboardsDropdown', () => {
     });
   });
 
-  const duplicableCases = [
-    dashboardGitResponse[0],
-    dashboardGitResponse[2],
-    selfMonitoringDashboardGitResponse[0],
-  ];
-
-  describe.each(duplicableCases)('when the selected dashboard can be duplicated', dashboard => {
-    let duplicateDashboardAction;
-    let modalDirective;
-
-    beforeEach(() => {
-      mockSelectedDashboard = dashboard;
-      modalDirective = jest.fn();
-      duplicateDashboardAction = jest.fn().mockResolvedValue();
-
-      wrapper = createComponent(
-        {},
-        {
-          directives: {
-            GlModal: modalDirective,
-          },
-          methods: {
-            // Mock vuex actions
-            duplicateSystemDashboard: duplicateDashboardAction,
-          },
-        },
-      );
-    });
-
-    it('displays a dropdown item for each dashboard', () => {
-      expect(findItems().length).toEqual(dashboardGitResponse.length + 1);
-    });
-
-    it('displays one "duplicate dashboard" dropdown item with a directive attached', () => {
-      const item = wrapper.findAll('[data-testid="duplicateDashboardItem"]');
-
-      expect(item.length).toBe(1);
-    });
-
-    it('"duplicate dashboard" dropdown item directive works', () => {
-      const item = wrapper.find('[data-testid="duplicateDashboardItem"]');
-
-      item.trigger('click');
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(modalDirective).toHaveBeenCalled();
-      });
-    });
-
-    it('id is correct, as the value of modal directive binding matches modal id', () => {
-      expect(modalDirective).toHaveBeenCalledTimes(1);
-
-      // Binding's second argument contains the modal id
-      expect(modalDirective.mock.calls[0][1]).toEqual(
-        expect.objectContaining({
-          value: modalId,
-        }),
-      );
-    });
-  });
-
-  const nonDuplicableCases = [dashboardGitResponse[1], selfMonitoringDashboardGitResponse[1]];
-
-  describe.each(nonDuplicableCases)(
-    'when the selected dashboard can not be duplicated',
-    dashboard => {
-      beforeEach(() => {
-        mockSelectedDashboard = dashboard;
-
-        wrapper = createComponent();
-      });
-
-      it('displays a dropdown list item for each dashboard, but no list item for "duplicate dashboard"', () => {
-        const item = wrapper.findAll('[data-testid="duplicateDashboardItem"]');
-
-        expect(findItems()).toHaveLength(dashboardGitResponse.length);
-        expect(item.length).toBe(0);
-      });
-    },
-  );
-
   describe('when a dashboard gets selected by the user', () => {
     beforeEach(() => {
-      wrapper = createComponent();
+      createComponent();
       findItemAt(1).vm.$emit('click');
     });
 

@@ -16,10 +16,10 @@ RSpec.describe 'Merge request > User sees avatars on diff notes', :js do
       diff_refs: merge_request.diff_refs
     )
   end
+
   let!(:note) { create(:diff_note_on_merge_request, project: project, noteable: merge_request, position: position) }
 
   before do
-    stub_feature_flags(diffs_batch_load: false)
     project.add_maintainer(user)
     sign_in user
 
@@ -37,7 +37,7 @@ RSpec.describe 'Merge request > User sees avatars on diff notes', :js do
     end
 
     it 'does not render avatars after commenting on discussion tab' do
-      click_button 'Reply...'
+      find_field('Reply…').click
 
       page.within('.js-discussion-note-form') do
         find('.note-textarea').native.send_keys('Test comment')
@@ -132,7 +132,7 @@ RSpec.describe 'Merge request > User sees avatars on diff notes', :js do
       end
 
       it 'adds avatar when commenting' do
-        click_button 'Reply...'
+        find_field('Reply…', match: :first).click
 
         page.within '.js-discussion-note-form' do
           find('.js-note-text').native.send_keys('Test')
@@ -151,7 +151,7 @@ RSpec.describe 'Merge request > User sees avatars on diff notes', :js do
 
       it 'adds multiple comments' do
         3.times do
-          click_button 'Reply...'
+          find_field('Reply…', match: :first).click
 
           page.within '.js-discussion-note-form' do
             find('.js-note-text').native.send_keys('Test')

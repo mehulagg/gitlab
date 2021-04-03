@@ -1,11 +1,11 @@
-import Vuex from 'vuex';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlPagination } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import GeoReplicable from 'ee/geo_replicable/components/geo_replicable.vue';
+import GeoReplicableItem from 'ee/geo_replicable/components/geo_replicable_item.vue';
 import initStore from 'ee/geo_replicable/store';
 
 import * as types from 'ee/geo_replicable/store/mutation_types';
-import GeoReplicable from 'ee/geo_replicable/components/geo_replicable.vue';
-import GeoReplicableItem from 'ee/geo_replicable/components/geo_replicable_item.vue';
 import {
   MOCK_BASIC_FETCH_DATA_MAP,
   MOCK_REPLICABLE_TYPE,
@@ -21,7 +21,7 @@ describe('GeoReplicable', () => {
   let wrapper;
   let store;
 
-  const createStore = options => {
+  const createStore = (options) => {
     store = initStore({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null, ...options });
     jest.spyOn(store, 'dispatch').mockImplementation();
   };

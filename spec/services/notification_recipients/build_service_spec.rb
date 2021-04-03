@@ -44,7 +44,7 @@ RSpec.describe NotificationRecipients::BuildService do
     context 'when there are multiple subscribers' do
       def create_user
         subscriber = create(:user)
-        issue.subscriptions.create(user: subscriber, project: project, subscribed: true)
+        issue.subscriptions.create!(user: subscriber, project: project, subscribed: true)
       end
 
       include_examples 'no N+1 queries'
@@ -96,7 +96,7 @@ RSpec.describe NotificationRecipients::BuildService do
     context 'when there are multiple subscribers' do
       def create_user
         subscriber = create(:user)
-        merge_request.subscriptions.create(user: subscriber, project: project, subscribed: true)
+        merge_request.subscriptions.create!(user: subscriber, project: project, subscribed: true)
       end
 
       include_examples 'no N+1 queries'
@@ -107,6 +107,30 @@ RSpec.describe NotificationRecipients::BuildService do
         end
 
         include_examples 'no N+1 queries'
+      end
+    end
+  end
+
+  describe '#build_requested_review_recipients' do
+    let(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
+
+    before do
+      merge_request.reviewers.push(assignee)
+    end
+
+    shared_examples 'no N+1 queries' do
+      it 'avoids N+1 queries', :request_store do
+        create_user
+
+        service.build_requested_review_recipients(note)
+
+        control_count = ActiveRecord::QueryRecorder.new do
+          service.build_requested_review_recipients(note)
+        end
+
+        create_user
+
+        expect { service.build_requested_review_recipients(note) }.not_to exceed_query_limit(control_count)
       end
     end
   end

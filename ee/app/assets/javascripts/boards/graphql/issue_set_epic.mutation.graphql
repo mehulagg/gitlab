@@ -1,0 +1,12 @@
+#import "~/graphql_shared/fragments/epic.fragment.graphql"
+
+mutation issueSetEpic($input: IssueSetEpicInput!) {
+  issueSetEpic(input: $input) {
+    issue {
+      epic {
+        ...EpicNode
+      }
+    }
+    errors
+  }
+}

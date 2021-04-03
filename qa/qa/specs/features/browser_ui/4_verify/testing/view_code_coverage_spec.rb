@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker, :runner do
+  RSpec.describe 'Verify', :runner do
     describe 'Code coverage statistics' do
       let(:simplecov) { '\(\d+.\d+\%\) covered' }
       let(:executor) { "qa-runner-#{Time.now.to_i}" }
@@ -33,7 +33,7 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'creates an MR with code coverage statistics' do
+      it 'creates an MR with code coverage statistics', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1740' do
         runner.project.visit!
         configure_code_coverage(simplecov)
         merge_request.visit!
@@ -42,7 +42,7 @@ module QA
           Support::Retrier.retry_until(max_attempts: 5, sleep_interval: 5) do
             mr_widget.has_pipeline_status?(/Pipeline #\d+ passed/)
           end
-          expect(mr_widget).to have_content('Coverage 66.67%')
+          expect(mr_widget).to have_content('Test coverage 66.67%')
         end
       end
     end

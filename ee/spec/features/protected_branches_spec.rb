@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe 'Protected Branches', :js do
   include ProtectedBranchHelpers
 
-  let(:user) { create(:user, :admin) }
   let(:project) { create(:project, :repository) }
+  let(:user) { project.owner }
 
   before do
     sign_in(user)
@@ -185,6 +185,16 @@ RSpec.describe 'Protected Branches', :js do
           expect(page).to have_content(/(Team Awesome|Team B) and (Team Awesome|Team B)/)
         end
       end
+    end
+  end
+
+  context 'when the users for protected branches feature is on' do
+    before do
+      stub_licensed_features(protected_refs_for_users: true)
+    end
+
+    include_examples 'Deploy keys with protected branches' do
+      let(:all_dropdown_sections) { %w(Roles Users Deploy\ Keys) }
     end
   end
 end

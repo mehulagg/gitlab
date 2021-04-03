@@ -1,0 +1,13 @@
+#import "../fragments/user.fragment.graphql"
+
+query usersSearch($search: String!, $fullPath: ID!) {
+  workspace: project(fullPath: $fullPath) {
+    users: projectMembers(search: $search) {
+      nodes {
+        user {
+          ...User
+        }
+      }
+    }
+  }
+}

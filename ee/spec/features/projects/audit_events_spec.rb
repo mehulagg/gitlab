@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Projects > Audit Events', :js do
+  include Spec::Support::Helpers::Features::MembersHelpers
+
   let(:user) { create(:user) }
   let(:pete) { create(:user, name: 'Pete') }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
@@ -40,6 +42,10 @@ RSpec.describe 'Projects > Audit Events', :js do
       allow(LicenseHelper).to receive(:show_promotions?).and_return(true)
     end
 
+    include_context '"Security & Compliance" permissions' do
+      let(:response) { inspect_requests { visit project_audit_events_path(project) }.first }
+    end
+
     it 'returns 200' do
       reqs = inspect_requests do
         visit project_audit_events_path(project)
@@ -48,8 +54,8 @@ RSpec.describe 'Projects > Audit Events', :js do
       expect(reqs.first.status_code).to eq(200)
     end
 
-    it 'does not have Audit Events button in head nav bar' do
-      visit edit_project_path(project)
+    it 'has Audit Events button in head nav bar' do
+      visit project_audit_events_path(project)
 
       expect(page).to have_link('Audit Events')
     end
@@ -62,7 +68,7 @@ RSpec.describe 'Projects > Audit Events', :js do
   end
 
   it 'has Audit Events button in head nav bar' do
-    visit edit_project_path(project)
+    visit project_audit_events_path(project)
 
     expect(page).to have_link('Audit Events')
   end
@@ -91,7 +97,7 @@ RSpec.describe 'Projects > Audit Events', :js do
       visit project_deploy_keys_path(project)
 
       accept_confirm do
-        find('.ic-remove').click
+        find('[data-testid="remove-icon"]').click
       end
 
       visit project_audit_events_path(project)
@@ -110,16 +116,15 @@ RSpec.describe 'Projects > Audit Events', :js do
     it "appears in the project's audit events" do
       visit project_project_members_path(project)
 
-      project_member = project.project_member(pete)
-
-      page.within "#project_member_#{project_member.id}" do
+      page.within find_member_row(pete) do
         click_button 'Developer'
-        click_link 'Maintainer'
+        click_button 'Maintainer'
       end
 
-      find(:link, text: 'Settings').click
-
-      click_link 'Audit Events'
+      page.within('.qa-project-sidebar') do
+        find(:link, text: 'Security & Compliance').click
+        click_link 'Audit Events'
+      end
 
       page.within('.audit-log-table') do
         expect(page).to have_content 'Changed access level from Developer to Maintainer'
@@ -148,7 +153,7 @@ RSpec.describe 'Projects > Audit Events', :js do
       end
 
       page.within('.qa-project-sidebar') do
-        find(:link, text: 'Settings').click
+        find(:link, text: 'Security & Compliance').click
         click_link 'Audit Events'
       end
 
@@ -166,10 +171,28 @@ RSpec.describe 'Projects > Audit Events', :js do
   describe 'filter by date' do
     let!(:audit_event_1) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 5.days.ago) }
     let!(:audit_event_2) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 3.days.ago) }
-    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 1.day.ago) }
+    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: Date.current) }
     let!(:events_path) { :project_audit_events_path }
     let!(:entity) { project }
 
     it_behaves_like 'audit events date filter'
+  end
+
+  describe 'combined list of authenticated and unauthenticated users' do
+    let!(:audit_event_1) { create(:project_audit_event, :unauthenticated, entity_type: 'Project', entity_id: project.id) }
+    let!(:audit_event_2) { create(:project_audit_event, author_id: non_existing_record_id, entity_type: 'Project', entity_id: project.id) }
+    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id) }
+
+    it 'displays the correct authors names' do
+      visit project_audit_events_path(project)
+
+      wait_for_all_requests
+
+      page.within('.audit-log-table') do
+        expect(page).to have_content('An unauthenticated user')
+        expect(page).to have_content("#{audit_event_2.author_name} (removed)")
+        expect(page).to have_content(audit_event_3.user.name)
+      end
+    end
   end
 end

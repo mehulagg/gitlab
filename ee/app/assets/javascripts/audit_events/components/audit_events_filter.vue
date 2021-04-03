@@ -19,15 +19,10 @@ export default {
       default: () => AUDIT_FILTER_CONFIGS,
       validator: filterTokenOptionsValidator,
     },
-    qaSelector: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
   },
   data() {
     return {
-      filterTokens: this.filterTokenOptions.map(option => ({
+      filterTokens: this.filterTokenOptions.map((option) => ({
         ...AUDIT_FILTER_CONFIGS.find(({ type }) => type === option.type),
         ...option,
       })),
@@ -35,14 +30,14 @@ export default {
   },
   computed: {
     tokenSearchTerm() {
-      return this.value.find(term => this.filterTokens.find(token => token.type === term.type));
+      return this.value.find((term) => this.filterTokens.find((token) => token.type === term.type));
     },
     enabledTokens() {
       const { tokenSearchTerm } = this;
 
       // If a user has searched for a term within a token, limit the user to that one token
       if (tokenSearchTerm) {
-        return this.filterTokens.map(token => ({
+        return this.filterTokens.map((token) => ({
           ...token,
           disabled: tokenSearchTerm.type !== token.type,
         }));
@@ -63,11 +58,7 @@ export default {
 </script>
 
 <template>
-  <div
-    class="input-group bg-white flex-grow-1"
-    data-testid="audit-events-filter"
-    :data-qa-selector="qaSelector"
-  >
+  <div class="input-group bg-white flex-grow-1" data-testid="audit-events-filter">
     <gl-filtered-search
       :value="value"
       :placeholder="__('Search')"

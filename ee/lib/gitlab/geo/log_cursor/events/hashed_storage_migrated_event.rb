@@ -10,7 +10,7 @@ module Gitlab
           def process
             return unless event.project_id
 
-            job_id = hashed_storage_migrate unless skippable?
+            job_id = hashed_storage_migrate unless registry_exists?
             log_event(job_id)
           end
 
@@ -34,7 +34,7 @@ module Gitlab
                 new_storage_version: event.new_storage_version,
                 old_disk_path: event.old_disk_path,
                 new_disk_path: event.new_disk_path,
-                skippable: skippable?,
+                skippable: registry_exists?,
                 job_id: job_id)
           end
         end

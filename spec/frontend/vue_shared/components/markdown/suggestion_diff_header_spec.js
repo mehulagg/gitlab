@@ -1,5 +1,6 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import ApplySuggestion from '~/vue_shared/components/markdown/apply_suggestion.vue';
 import SuggestionDiffHeader from '~/vue_shared/components/markdown/suggestion_diff_header.vue';
 
 const DEFAULT_PROPS = {
@@ -9,31 +10,30 @@ const DEFAULT_PROPS = {
   isBatched: false,
   isApplyingBatch: false,
   helpPagePath: 'path_to_docs',
+  defaultCommitMessage: 'Apply suggestion',
 };
 
 describe('Suggestion Diff component', () => {
   let wrapper;
 
-  const createComponent = (props, glFeatures = {}) => {
+  const createComponent = (props) => {
     wrapper = shallowMount(SuggestionDiffHeader, {
       propsData: {
         ...DEFAULT_PROPS,
         ...props,
       },
-      provide: {
-        glFeatures: {
-          batchSuggestions: true,
-          ...glFeatures,
-        },
-      },
     });
   };
+
+  beforeEach(() => {
+    window.gon.current_user_id = 1;
+  });
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findApplyButton = () => wrapper.find('.js-apply-btn');
+  const findApplyButton = () => wrapper.find(ApplySuggestion);
   const findApplyBatchButton = () => wrapper.find('.js-apply-batch-btn');
   const findAddToBatchButton = () => wrapper.find('.js-add-to-batch-btn');
   const findRemoveFromBatchButton = () => wrapper.find('.js-remove-from-batch-btn');
@@ -57,7 +57,9 @@ describe('Suggestion Diff component', () => {
   });
 
   it('renders apply suggestion and add to batch buttons', () => {
-    createComponent();
+    createComponent({
+      suggestionsCount: 2,
+    });
 
     const applyBtn = findApplyButton();
     const addToBatchBtn = findAddToBatchButton();
@@ -69,18 +71,23 @@ describe('Suggestion Diff component', () => {
     expect(addToBatchBtn.html().includes('Add suggestion to batch')).toBe(true);
   });
 
+  it('does not render apply suggestion button with anonymous user', () => {
+    window.gon.current_user_id = null;
+
+    createComponent();
+
+    expect(findApplyButton().exists()).toBe(false);
+  });
+
   describe('when apply suggestion is clicked', () => {
     beforeEach(() => {
       createComponent();
 
-      findApplyButton().vm.$emit('click');
+      findApplyButton().vm.$emit('apply');
     });
 
     it('emits apply', () => {
-      expect(wrapper.emittedByOrder()).toContainEqual({
-        name: 'apply',
-        args: [expect.any(Function)],
-      });
+      expect(wrapper.emitted().apply).toEqual([[expect.any(Function), undefined]]);
     });
 
     it('does not render apply suggestion and add to batch buttons', () => {
@@ -107,14 +114,13 @@ describe('Suggestion Diff component', () => {
 
   describe('when add to batch is clicked', () => {
     it('emits addToBatch', () => {
-      createComponent();
+      createComponent({
+        suggestionsCount: 2,
+      });
 
       findAddToBatchButton().vm.$emit('click');
 
-      expect(wrapper.emittedByOrder()).toContainEqual({
-        name: 'addToBatch',
-        args: [],
-      });
+      expect(wrapper.emitted().addToBatch).toEqual([[]]);
     });
   });
 
@@ -124,10 +130,7 @@ describe('Suggestion Diff component', () => {
 
       findRemoveFromBatchButton().vm.$emit('click');
 
-      expect(wrapper.emittedByOrder()).toContainEqual({
-        name: 'removeFromBatch',
-        args: [],
-      });
+      expect(wrapper.emitted().removeFromBatch).toEqual([[]]);
     });
   });
 
@@ -137,10 +140,7 @@ describe('Suggestion Diff component', () => {
 
       findApplyBatchButton().vm.$emit('click');
 
-      expect(wrapper.emittedByOrder()).toContainEqual({
-        name: 'applyBatch',
-        args: [],
-      });
+      expect(wrapper.emitted().applyBatch).toEqual([[]]);
     });
   });
 
@@ -202,18 +202,6 @@ describe('Suggestion Diff component', () => {
         expect(findRemoveFromBatchButton().exists()).toBe(false);
         expect(findApplyBatchButton().exists()).toBe(false);
       });
-    });
-  });
-
-  describe('batchSuggestions feature flag is set to false', () => {
-    beforeEach(() => {
-      createComponent({}, { batchSuggestions: false });
-    });
-
-    it('disables add to batch buttons but keeps apply suggestion enabled', () => {
-      expect(findApplyButton().exists()).toBe(true);
-      expect(findAddToBatchButton().exists()).toBe(false);
-      expect(findApplyButton().attributes('disabled')).not.toBe('true');
     });
   });
 

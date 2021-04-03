@@ -1,11 +1,11 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import store from '~/mr_notes/stores';
-import notesApp from '../notes/components/notes_app.vue';
-import discussionKeyboardNavigator from '../notes/components/discussion_keyboard_navigator.vue';
-import initWidget from '../vue_merge_request_widget';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import store from '~/mr_notes/stores';
+import discussionNavigator from '../notes/components/discussion_navigator.vue';
+import notesApp from '../notes/components/notes_app.vue';
+import initWidget from '../vue_merge_request_widget';
 
 export default () => {
   // eslint-disable-next-line no-new
@@ -25,6 +25,9 @@ export default () => {
 
       return {
         noteableData,
+        endpoints: {
+          metadata: notesDataset.endpointMetadata,
+        },
         currentUserData: JSON.parse(notesDataset.currentUserData),
         notesData: JSON.parse(notesDataset.notesData),
         helpPagePath: notesDataset.helpPagePath,
@@ -33,7 +36,7 @@ export default () => {
     computed: {
       ...mapGetters(['discussionTabCounter']),
       ...mapState({
-        activeTab: state => state.page.activeTab,
+        activeTab: (state) => state.page.activeTab,
       }),
       isShowTabActive() {
         return this.activeTab === 'show';
@@ -54,6 +57,9 @@ export default () => {
     },
     created() {
       this.setActiveTab(window.mrTabs.getCurrentAction());
+      this.setEndpoints(this.endpoints);
+
+      this.fetchMrMetadata();
     },
     mounted() {
       this.notesCountBadge = $('.issuable-details').find('.notes-tab .badge');
@@ -65,17 +71,17 @@ export default () => {
       window.mrTabs.eventHub.$off('MergeRequestTabChange', this.setActiveTab);
     },
     methods: {
-      ...mapActions(['setActiveTab']),
+      ...mapActions(['setActiveTab', 'setEndpoints', 'fetchMrMetadata']),
       updateDiscussionTabCounter() {
         this.notesCountBadge.text(this.discussionTabCounter);
       },
     },
     render(createElement) {
-      // NOTE: Even though `discussionKeyboardNavigator` is added to the `notes-app`,
+      // NOTE: Even though `discussionNavigator` is added to the `notes-app`,
       // it adds a global key listener so it works on the diffs tab as well.
       // If we create a single Vue app for all of the MR tabs, we should move this
       // up the tree, to the root.
-      return createElement(discussionKeyboardNavigator, [
+      return createElement(discussionNavigator, [
         createElement('notes-app', {
           props: {
             noteableData: this.noteableData,

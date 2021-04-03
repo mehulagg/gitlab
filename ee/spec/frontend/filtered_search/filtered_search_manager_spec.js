@@ -1,8 +1,8 @@
-import { FILTERED_SEARCH } from '~/pages/constants';
 import FilteredSearchManager from 'ee/filtered_search/filtered_search_manager';
 import IssuableFilteredSearchTokenKeys from 'ee/filtered_search/issuable_filtered_search_token_keys';
-import FilteredSearchDropdownManager from '~/filtered_search/filtered_search_dropdown_manager';
 import FilteredSearchSpecHelper from 'helpers/filtered_search_spec_helper';
+import FilteredSearchDropdownManager from '~/filtered_search/filtered_search_dropdown_manager';
+import { FILTERED_SEARCH } from '~/pages/constants';
 
 const TEST_EPICS_ENDPOINT = '/test/epics/endpoint';
 
@@ -33,7 +33,7 @@ describe('Filtered Search Manager (EE)', () => {
             ${FilteredSearchSpecHelper.createInputHTML()}
           </ul>
           <button class="clear-search" type="button">
-            <i class="fa fa-times"></i>
+            <svg class="s16 clear-search-icon" data-testid="close-icon"><use xlink:href="icons.svg#close" /></svg>
           </button>
         </form>
       </div>

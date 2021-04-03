@@ -1,7 +1,10 @@
 import Vue from 'vue';
-import ReleaseListApp from './components/app_index.vue';
+import Vuex from 'vuex';
+import ReleaseIndexApp from './components/app_index.vue';
 import createStore from './stores';
-import listModule from './stores/modules/list';
+import createIndexModule from './stores/modules/index';
+
+Vue.use(Vuex);
 
 export default () => {
   const el = document.getElementById('js-releases-page');
@@ -10,12 +13,14 @@ export default () => {
     el,
     store: createStore({
       modules: {
-        list: listModule,
+        index: createIndexModule(el.dataset),
+      },
+      featureFlags: {
+        graphqlReleaseData: Boolean(gon.features?.graphqlReleaseData),
+        graphqlReleasesPage: Boolean(gon.features?.graphqlReleasesPage),
+        graphqlMilestoneStats: Boolean(gon.features?.graphqlMilestoneStats),
       },
     }),
-    render: h =>
-      h(ReleaseListApp, {
-        props: el.dataset,
-      }),
+    render: (h) => h(ReleaseIndexApp),
   });
 };

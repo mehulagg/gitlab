@@ -2,7 +2,7 @@
 type: howto
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Migrating from SVN to GitLab
@@ -30,7 +30,7 @@ There are two approaches to SVN to Git migration:
 migration. It creates a writable Git mirror of a local or remote Subversion
 repository and that way you can use both Subversion and Git as long as you like.
 It requires access to your GitLab server as it talks with the Git repositories
-directly in a filesystem level.
+directly in a file system level.
 
 ### SubGit prerequisites
 

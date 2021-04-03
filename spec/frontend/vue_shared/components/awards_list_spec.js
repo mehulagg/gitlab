@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import AwardsList from '~/vue_shared/components/awards_list.vue';
 
 const createUser = (id, name) => ({ id, name });
@@ -41,6 +41,8 @@ const TEST_AWARDS = [
 ];
 const TEST_ADD_BUTTON_CLASS = 'js-test-add-button-class';
 
+const REACTION_CONTROL_CLASSES = ['btn', 'gl-mr-3', 'btn-default', 'btn-md', 'gl-button'];
+
 describe('vue_shared/components/awards_list', () => {
   let wrapper;
 
@@ -54,16 +56,16 @@ describe('vue_shared/components/awards_list', () => {
       throw new Error('There should only be one wrapper created per test');
     }
 
-    wrapper = shallowMount(AwardsList, { propsData: props });
+    wrapper = mount(AwardsList, { propsData: props });
   };
-  const matchingEmojiTag = name => expect.stringMatching(`gl-emoji data-name="${name}"`);
-  const findAwardButtons = () => wrapper.findAll('[data-testid="award-button"');
+  const matchingEmojiTag = (name) => expect.stringMatching(`gl-emoji data-name="${name}"`);
+  const findAwardButtons = () => wrapper.findAll('[data-testid="award-button"]');
   const findAwardsData = () =>
-    findAwardButtons().wrappers.map(x => {
+    findAwardButtons().wrappers.map((x) => {
       return {
         classes: x.classes(),
-        title: x.attributes('data-original-title'),
-        html: x.find('[data-testid="award-html"]').element.innerHTML,
+        title: x.attributes('title'),
+        html: x.find('[data-testid="award-html"]').html(),
         count: Number(x.find('.js-counter').text()),
       };
     });
@@ -86,43 +88,43 @@ describe('vue_shared/components/awards_list', () => {
     it('shows awards in correct order', () => {
       expect(findAwardsData()).toEqual([
         {
-          classes: ['btn', 'award-control'],
+          classes: REACTION_CONTROL_CLASSES,
           count: 3,
           html: matchingEmojiTag(EMOJI_THUMBSUP),
           title: 'Ada, Leonardo, and Marie',
         },
         {
-          classes: ['btn', 'award-control', 'active'],
+          classes: [...REACTION_CONTROL_CLASSES, 'selected'],
           count: 3,
           html: matchingEmojiTag(EMOJI_THUMBSDOWN),
           title: 'You, Ada, and Marie',
         },
         {
-          classes: ['btn', 'award-control'],
+          classes: REACTION_CONTROL_CLASSES,
           count: 2,
           html: matchingEmojiTag(EMOJI_SMILE),
           title: 'Ada and Jane',
         },
         {
-          classes: ['btn', 'award-control', 'active'],
+          classes: [...REACTION_CONTROL_CLASSES, 'selected'],
           count: 4,
           html: matchingEmojiTag(EMOJI_OK),
           title: 'You, Ada, Jane, and Leonardo',
         },
         {
-          classes: ['btn', 'award-control', 'active'],
+          classes: [...REACTION_CONTROL_CLASSES, 'selected'],
           count: 1,
           html: matchingEmojiTag(EMOJI_CACTUS),
           title: 'You',
         },
         {
-          classes: ['btn', 'award-control'],
+          classes: REACTION_CONTROL_CLASSES,
           count: 1,
           html: matchingEmojiTag(EMOJI_A),
           title: 'Marie',
         },
         {
-          classes: ['btn', 'award-control', 'active'],
+          classes: [...REACTION_CONTROL_CLASSES, 'selected'],
           count: 1,
           html: matchingEmojiTag(EMOJI_B),
           title: 'You',
@@ -133,9 +135,7 @@ describe('vue_shared/components/awards_list', () => {
     it('with award clicked, it emits award', () => {
       expect(wrapper.emitted().award).toBeUndefined();
 
-      findAwardButtons()
-        .at(2)
-        .trigger('click');
+      findAwardButtons().at(2).vm.$emit('click');
 
       expect(wrapper.emitted().award).toEqual([[EMOJI_SMILE]]);
     });
@@ -160,9 +160,7 @@ describe('vue_shared/components/awards_list', () => {
     it('when clicked, it emits award as number', () => {
       expect(wrapper.emitted().award).toBeUndefined();
 
-      findAwardButtons()
-        .at(0)
-        .trigger('click');
+      findAwardButtons().at(0).vm.$emit('click');
 
       expect(wrapper.emitted().award).toEqual([[Number(EMOJI_100)]]);
     });
@@ -207,7 +205,7 @@ describe('vue_shared/components/awards_list', () => {
       const buttons = findAwardButtons();
 
       expect(buttons.length).toBe(7);
-      expect(buttons.wrappers.every(x => x.classes('disabled'))).toBe(true);
+      expect(buttons.wrappers.every((x) => x.classes('disabled'))).toBe(true);
     });
   });
 
@@ -225,26 +223,26 @@ describe('vue_shared/components/awards_list', () => {
     it('shows awards in correct order', () => {
       expect(findAwardsData()).toEqual([
         {
-          classes: ['btn', 'award-control'],
+          classes: REACTION_CONTROL_CLASSES,
           count: 0,
           html: matchingEmojiTag(EMOJI_THUMBSUP),
           title: '',
         },
         {
-          classes: ['btn', 'award-control'],
+          classes: REACTION_CONTROL_CLASSES,
           count: 0,
           html: matchingEmojiTag(EMOJI_THUMBSDOWN),
           title: '',
         },
         // We expect the EMOJI_100 before the EMOJI_SMILE because it was given as a defaultAward
         {
-          classes: ['btn', 'award-control'],
+          classes: REACTION_CONTROL_CLASSES,
           count: 1,
           html: matchingEmojiTag(EMOJI_100),
           title: 'Marie',
         },
         {
-          classes: ['btn', 'award-control'],
+          classes: REACTION_CONTROL_CLASSES,
           count: 1,
           html: matchingEmojiTag(EMOJI_SMILE),
           title: 'Marie',

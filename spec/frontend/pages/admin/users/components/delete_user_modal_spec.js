@@ -1,5 +1,5 @@
+import { GlButton, GlFormInput } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton, GlFormInput } from '@gitlab/ui';
 import DeleteUserModal from '~/pages/admin/users/components/delete_user_modal.vue';
 import ModalStub from './stubs/modal_stub';
 
@@ -11,21 +11,21 @@ describe('User Operation confirmation modal', () => {
   let wrapper;
   let formSubmitSpy;
 
-  const findButton = variant =>
+  const findButton = (variant, category) =>
     wrapper
-      .findAll(GlDeprecatedButton)
-      .filter(w => w.attributes('variant') === variant)
+      .findAll(GlButton)
+      .filter((w) => w.attributes('variant') === variant && w.attributes('category') === category)
       .at(0);
   const findForm = () => wrapper.find('form');
   const findUsernameInput = () => wrapper.find(GlFormInput);
-  const findPrimaryButton = () => findButton('danger');
-  const findSecondaryButton = () => findButton('warning');
+  const findPrimaryButton = () => findButton('danger', 'primary');
+  const findSecondaryButton = () => findButton('danger', 'secondary');
   const findAuthenticityToken = () => new FormData(findForm().element).get('authenticity_token');
   const getUsername = () => findUsernameInput().attributes('value');
   const getMethodParam = () => new FormData(findForm().element).get('_method');
   const getFormAction = () => findForm().attributes('action');
 
-  const setUsername = username => {
+  const setUsername = (username) => {
     findUsernameInput().vm.$emit('input', username);
   };
 

@@ -1,7 +1,6 @@
 <script>
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '../../../../locale';
-import Icon from '../../../../vue_shared/components/icon.vue';
-import tooltip from '../../../../vue_shared/directives/tooltip';
 
 const directions = {
   up: 'up',
@@ -10,10 +9,10 @@ const directions = {
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     direction: {
@@ -46,7 +45,7 @@ export default {
 
 <template>
   <div
-    v-tooltip
+    v-gl-tooltip
     :title="tooltipTitle"
     class="controllers-buttons"
     data-container="body"
@@ -58,7 +57,7 @@ export default {
       type="button"
       @click="clickedScroll"
     >
-      <icon :name="iconName" />
+      <gl-icon :name="iconName" />
     </button>
   </div>
 </template>

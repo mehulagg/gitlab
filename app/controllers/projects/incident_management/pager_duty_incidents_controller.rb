@@ -10,6 +10,8 @@ module Projects
 
       prepend_before_action :project_without_auth
 
+      feature_category :incident_management
+
       def create
         result = webhook_processor.execute(params[:token])
 
@@ -24,7 +26,7 @@ module Projects
       end
 
       def webhook_processor
-        ::IncidentManagement::PagerDuty::ProcessWebhookService.new(project, nil, payload)
+        ::IncidentManagement::PagerDuty::ProcessWebhookService.new(project, payload)
       end
 
       def payload

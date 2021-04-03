@@ -13,6 +13,12 @@ class Feature
       end
     end
 
+    TYPES.each do |type, _|
+      define_method("#{type}?") do
+        attributes[:type].to_sym == type
+      end
+    end
+
     def initialize(path, opts = {})
       @path = path
       @attributes = {}
@@ -65,9 +71,7 @@ class Feature
           "a valid syntax: #{TYPES.dig(type, :example)}"
       end
 
-      # We accept an array of defaults as some features are undefined
-      # and have `default_enabled: true/false`
-      unless Array(default_enabled).include?(default_enabled_in_code)
+      unless default_enabled_in_code == :yaml || default_enabled == default_enabled_in_code
         # Raise exception in test and dev
         raise Feature::InvalidFeatureFlagError, "The `default_enabled:` of `#{key}` is not equal to config: " \
           "#{default_enabled_in_code} vs #{default_enabled}. Ensure to update #{path}"
@@ -84,21 +88,26 @@ class Feature
       end
 
       def definitions
-        @definitions ||= {}
+        # We lazily load all definitions
+        # The hot reloading might request a feature flag
+        # before we can properly call `load_all!`
+        @definitions ||= load_all!
       end
 
-      def load_all!
-        definitions.clear
+      def get(key)
+        definitions[key.to_sym]
+      end
 
-        paths.each do |glob_path|
-          load_all_from_path!(glob_path)
-        end
+      def reload!
+        @definitions = load_all!
+      end
 
-        definitions
+      def has_definition?(key)
+        definitions.has_key?(key.to_sym)
       end
 
       def valid_usage!(key, type:, default_enabled:)
-        if definition = definitions[key.to_sym]
+        if definition = get(key)
           definition.valid_usage!(type_in_code: type, default_enabled_in_code: default_enabled)
         elsif type_definition = self::TYPES[type]
           raise InvalidFeatureFlagError, "Missing feature definition for `#{key}`" unless type_definition[:optional]
@@ -107,7 +116,36 @@ class Feature
         end
       end
 
+      def default_enabled?(key)
+        if definition = get(key)
+          definition.default_enabled
+        else
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(
+            InvalidFeatureFlagError.new("The feature flag YAML definition for '#{key}' does not exist"))
+
+          false
+        end
+      end
+
+      def register_hot_reloader!
+        # Reload feature flags on change of this file or any `.yml`
+        file_watcher = Rails.configuration.file_watcher.new(reload_files, reload_directories) do
+          Feature::Definition.reload!
+        end
+
+        Rails.application.reloaders << file_watcher
+        Rails.application.reloader.to_run { file_watcher.execute_if_updated }
+
+        file_watcher
+      end
+
       private
+
+      def load_all!
+        paths.each_with_object({}) do |glob_path, definitions|
+          load_all_from_path!(definitions, glob_path)
+        end
+      end
 
       def load_from_file(path)
         definition = File.read(path)
@@ -119,7 +157,7 @@ class Feature
         raise Feature::InvalidFeatureFlagError, "Invalid definition for `#{path}`: #{e.message}"
       end
 
-      def load_all_from_path!(glob_path)
+      def load_all_from_path!(definitions, glob_path)
         Dir.glob(glob_path).each do |path|
           definition = load_from_file(path)
 
@@ -128,6 +166,19 @@ class Feature
           end
 
           definitions[definition.key] = definition
+        end
+      end
+
+      def reload_files
+        []
+      end
+
+      def reload_directories
+        paths.each_with_object({}) do |path, result|
+          path = File.dirname(path)
+          Dir.glob(path).each do |matching_dir|
+            result[matching_dir] = 'yml'
+          end
         end
       end
     end

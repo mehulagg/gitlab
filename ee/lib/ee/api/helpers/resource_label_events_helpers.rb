@@ -9,9 +9,11 @@ module EE
         class_methods do
           extend ::Gitlab::Utils::Override
 
-          override :eventable_types
-          def eventable_types
-            [::Epic, *super]
+          override :feature_category_per_eventable_type
+          def feature_category_per_eventable_type
+            super.merge!(
+              ::Epic => :issue_tracking
+            )
           end
         end
       end

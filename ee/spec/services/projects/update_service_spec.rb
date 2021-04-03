@@ -108,11 +108,31 @@ RSpec.describe Projects::UpdateService, '#execute' do
       end
     end
 
+    describe '#default_branch' do
+      include_examples 'audit event logging' do
+        let(:operation) { update_project(project, user, default_branch: 'feature') }
+        let(:fail_condition!) do
+          allow_next_instance_of(Project) do |project|
+            allow(project).to receive(:change_head).and_return(false)
+          end
+        end
+
+        let(:attributes) do
+          audit_event_params.tap do |param|
+            param[:details].merge!(
+              custom_message: "Default branch changed from master to feature"
+            )
+          end
+        end
+      end
+    end
+
     describe '#visibility' do
       include_examples 'audit event logging' do
         let(:operation) do
           update_project(project, user, visibility_level: Gitlab::VisibilityLevel::INTERNAL)
         end
+
         let(:fail_condition!) do
           allow_any_instance_of(Project).to receive(:update).and_return(false)
         end
@@ -141,7 +161,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
 
       context 'when enabling a wiki' do
         it 'creates a RepositoryUpdatedEvent' do
-          project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+          project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
           project.reload
 
           expect do
@@ -156,7 +176,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
       context 'when we update project but not enabling a wiki' do
         context 'when the wiki is disabled' do
           it 'does not create a RepositoryUpdatedEvent' do
-            project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+            project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
             expect do
               result = update_project(project, user, { name: 'test1' })
@@ -169,7 +189,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
 
         context 'when the wiki was already enabled' do
           it 'does not create a RepositoryUpdatedEvent' do
-            project.project_feature.update(wiki_access_level: ProjectFeature::ENABLED)
+            project.project_feature.update!(wiki_access_level: ProjectFeature::ENABLED)
 
             expect do
               result = update_project(project, user, { name: 'test1' })
@@ -188,7 +208,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
       end
 
       it 'does not create a RepositoryUpdatedEvent when enabling a wiki' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
         project.reload
 
         expect do
@@ -229,7 +249,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
   context 'when there are merge requests in merge train' do
     before do
       stub_licensed_features(merge_pipelines: true, merge_trains: true)
-      project.update(merge_pipelines_enabled: true)
+      project.update!(merge_pipelines_enabled: true)
     end
 
     let!(:first_merge_request) do
@@ -257,22 +277,27 @@ RSpec.describe Projects::UpdateService, '#execute' do
     end
   end
 
-  context 'when compliance frameworks is set' do
-    let(:project_setting) { create(:compliance_framework_project_setting) }
+  context 'when custom compliance frameworks are disabled' do
+    let(:project_setting) { create(:compliance_framework_project_setting, :gdpr) }
 
     before do
       stub_licensed_features(compliance_framework: true)
+      stub_feature_flags(ff_custom_compliance_frameworks: false)
       project.update!(compliance_framework_setting: project_setting)
     end
 
     context 'when framework is not blank' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS_BY_IDENTIFIER[:hipaa] }
+      let(:opts) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
 
       it 'saves the framework' do
-        update_project(project, user, opts)
-
-        expect(project.reload.compliance_framework_setting.framework).to eq(framework)
+        expect { update_project(project, user, opts) }.to change {
+          project
+            .reload
+            .compliance_framework_setting
+            .compliance_management_framework
+            .name
+        }.from('GDPR').to('HIPAA')
       end
     end
 
@@ -287,7 +312,55 @@ RSpec.describe Projects::UpdateService, '#execute' do
     end
   end
 
+  context 'when ff_custom_compliance_frameworks flag is enabled' do
+    let(:framework) { create(:compliance_framework, namespace: project.namespace) }
+    let(:opts) { { compliance_framework_setting_attributes: { framework: framework.id } } }
+
+    before do
+      stub_feature_flags(ff_custom_compliance_frameworks: true)
+    end
+
+    context 'when current_user has :admin_compliance_framework ability' do
+      before do
+        stub_licensed_features(compliance_framework: true)
+      end
+
+      it 'updates the framework' do
+        expect { update_project(project, user, opts) }.to change {
+          project
+            .reload
+            .compliance_management_framework
+        }.from(nil).to(framework)
+      end
+
+      it 'unassigns a framework from a project' do
+        project.compliance_management_framework = framework
+
+        expect { update_project(project, user, { compliance_framework_setting_attributes: { framework: nil } }) }.to change {
+          project
+            .reload
+            .compliance_management_framework
+        }.from(framework).to(nil)
+      end
+    end
+
+    context 'when current_user does not have :admin_compliance_framework ability' do
+      before do
+        stub_licensed_features(compliance_framework: false)
+      end
+
+      it 'does not set a framework' do
+        update_project(project, user, opts)
+
+        expect(project.reload.compliance_management_framework).not_to be_present
+      end
+    end
+  end
+
   context 'when compliance framework feature is disabled' do
+    let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS_BY_IDENTIFIER[:sox] }
+    let(:opts) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
+
     before do
       stub_licensed_features(compliance_framework: false)
     end
@@ -299,20 +372,12 @@ RSpec.describe Projects::UpdateService, '#execute' do
         project.update!(compliance_framework_setting: project_setting)
       end
 
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
-
       it 'does not save the new framework and retains the old setting' do
-        update_project(project, user, opts)
-
-        expect(project.reload.compliance_framework_setting.framework).to eq(project_setting.framework)
+        expect { update_project(project, user, opts) }.not_to change { framework.name }
       end
     end
 
     context 'the project never had the feature' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
-
       it 'does not save the framework' do
         update_project(project, user, opts)
 

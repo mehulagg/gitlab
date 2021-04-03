@@ -100,4 +100,24 @@ RSpec.describe 'SAML access enforcement' do
       end
     end
   end
+
+  context 'when SAML session expires' do
+    before do
+      mock_group_saml(uid: identity.extern_uid)
+    end
+
+    it 'shows loading screen and link used for auto-redirect' do
+      visit group_path(group)
+
+      click_link 'Sign in with Single Sign-On'
+
+      days_after_timeout = Gitlab::Auth::GroupSaml::SsoEnforcer::DEFAULT_SESSION_TIMEOUT + 2.days
+      travel_to(days_after_timeout.from_now) do
+        visit group_path(group)
+
+        expect(page).to have_content('Reauthenticating with SAML provider.')
+        expect(page).to have_selector('#js-auto-redirect-to-provider', visible: false)
+      end
+    end
+  end
 end

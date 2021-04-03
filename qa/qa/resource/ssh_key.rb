@@ -14,6 +14,7 @@ module QA
 
       def initialize
         self.title = Time.now.to_f
+        @expires_at = Date.today + 2
       end
 
       def key
@@ -21,7 +22,7 @@ module QA
       end
 
       def fabricate!
-        Page::Main::Menu.perform(&:click_settings_link)
+        Page::Main::Menu.perform(&:click_edit_profile_link)
         Page::Profile::Menu.perform(&:click_ssh_keys)
 
         Page::Profile::SSHKeys.perform do |profile_page|
@@ -73,6 +74,15 @@ module QA
 
           response.code == QA::Support::Api::HTTP_STATUS_OK &&
             parse_body(response)[:title].include?(title)
+        end
+      end
+
+      private
+
+      def api_get
+        with_paginated_response_body(Runtime::API::Request.new(api_client, '/user/keys', per_page: '100').url) do |page|
+          key = page.find { |key| key[:title] == title }
+          break process_api_response(key) if key
         end
       end
     end

@@ -23,7 +23,7 @@ class PgReplicationSlot
   def self.slots_retained_bytes
     ApplicationRecord.connection.execute(<<-SQL.squish)
       SELECT slot_name, database,
-             active, #{Gitlab::Database.pg_wal_lsn_diff}(#{Gitlab::Database.pg_current_wal_insert_lsn}(), restart_lsn)
+             active, pg_wal_lsn_diff(pg_current_wal_insert_lsn(), restart_lsn)
         AS retained_bytes
         FROM pg_replication_slots;
     SQL
@@ -33,7 +33,7 @@ class PgReplicationSlot
   # returns the max number WAL space (in bytes) being used across the replication slots
   def self.max_retained_wal
     ApplicationRecord.connection.execute(<<-SQL.squish)
-      SELECT COALESCE(MAX(#{Gitlab::Database.pg_wal_lsn_diff}(#{Gitlab::Database.pg_current_wal_insert_lsn}(), restart_lsn)), 0)
+      SELECT COALESCE(MAX(pg_wal_lsn_diff(pg_current_wal_insert_lsn(), restart_lsn)), 0)
         FROM pg_replication_slots;
     SQL
     .first.fetch('coalesce').to_i

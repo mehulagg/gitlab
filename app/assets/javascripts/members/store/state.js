@@ -1,0 +1,21 @@
+export default ({
+  members,
+  tableFields,
+  tableAttrs,
+  tableSortableFields,
+  memberPath,
+  requestFormatter,
+  filteredSearchBar,
+}) => ({
+  members,
+  tableFields,
+  tableAttrs,
+  tableSortableFields,
+  memberPath,
+  requestFormatter,
+  filteredSearchBar,
+  showError: false,
+  errorMessage: '',
+  removeGroupLinkModalVisible: false,
+  groupLinkToRemove: null,
+});

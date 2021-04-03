@@ -60,14 +60,48 @@ RSpec.describe GraphqlController do
       it 'updates the users last_activity_on field' do
         expect { post :execute }.to change { user.reload.last_activity_on }
       end
+
+      it "sets context's sessionless value as false" do
+        post :execute
+
+        expect(assigns(:context)[:is_sessionless_user]).to be false
+      end
+
+      it 'calls the track api when trackable method' do
+        agent = 'vs-code-gitlab-workflow/3.11.1 VSCode/1.52.1 Node.js/12.14.1 (darwin; x64)'
+        request.env['HTTP_USER_AGENT'] = agent
+
+        expect(Gitlab::UsageDataCounters::VSCodeExtensionActivityUniqueCounter)
+          .to receive(:track_api_request_when_trackable).with(user_agent: agent, user: user)
+
+        post :execute
+      end
     end
 
     context 'when user uses an API token' do
       let(:user) { create(:user, last_activity_on: Date.yesterday) }
       let(:token) { create(:personal_access_token, user: user, scopes: [:api]) }
 
+      subject { post :execute, params: { access_token: token.token } }
+
       it 'updates the users last_activity_on field' do
-        expect { post :execute, params: { access_token: token.token } }.to change { user.reload.last_activity_on }
+        expect { subject }.to change { user.reload.last_activity_on }
+      end
+
+      it "sets context's sessionless value as true" do
+        subject
+
+        expect(assigns(:context)[:is_sessionless_user]).to be true
+      end
+
+      it 'calls the track api when trackable method' do
+        agent = 'vs-code-gitlab-workflow/3.11.1 VSCode/1.52.1 Node.js/12.14.1 (darwin; x64)'
+        request.env['HTTP_USER_AGENT'] = agent
+
+        expect(Gitlab::UsageDataCounters::VSCodeExtensionActivityUniqueCounter)
+          .to receive(:track_api_request_when_trackable).with(user_agent: agent, user: user)
+
+        subject
       end
     end
 
@@ -77,6 +111,18 @@ RSpec.describe GraphqlController do
 
         expect(response).to have_gitlab_http_status(:ok)
       end
+
+      it "sets context's sessionless value as false" do
+        post :execute
+
+        expect(assigns(:context)[:is_sessionless_user]).to be false
+      end
+    end
+
+    it 'includes request object in context' do
+      post :execute
+
+      expect(assigns(:context)[:request]).to eq request
     end
   end
 
@@ -125,6 +171,48 @@ RSpec.describe GraphqlController do
           expect(json_response['data']['project']['name']).to eq(project.name)
         end
       end
+    end
+  end
+
+  describe '#append_info_to_payload' do
+    let(:query_1) { { query: graphql_query_for('project', { 'fullPath' => 'foo' }, %w(id name), 'getProject_1') } }
+    let(:query_2) { { query: graphql_query_for('project', { 'fullPath' => 'bar' }, %w(id), 'getProject_2') } }
+    let(:graphql_queries) { [query_1, query_2] }
+    let(:log_payload) { {} }
+    let(:expected_logs) do
+      [
+        {
+          operation_name: 'getProject_1',
+          complexity: 3,
+          depth: 2,
+          used_deprecated_fields: [],
+          used_fields: ['Project.id', 'Project.name', 'Query.project'],
+          variables: '{}'
+        },
+        {
+          operation_name: 'getProject_2',
+          complexity: 2,
+          depth: 2,
+          used_deprecated_fields: [],
+          used_fields: ['Project.id', 'Query.project'],
+          variables: '{}'
+        }
+      ]
+    end
+
+    before do
+      RequestStore.clear!
+
+      allow(controller).to receive(:append_info_to_payload).and_wrap_original do |method, *|
+        method.call(log_payload)
+      end
+    end
+
+    it 'appends metadata for logging' do
+      post :execute, params: { _json: graphql_queries }
+
+      expect(controller).to have_received(:append_info_to_payload)
+      expect(log_payload.dig(:metadata, :graphql)).to match_array(expected_logs)
     end
   end
 end

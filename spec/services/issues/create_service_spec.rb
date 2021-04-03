@@ -3,18 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe Issues::CreateService do
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
+  let_it_be_with_reload(:project) { create(:project) }
+  let_it_be(:user) { create(:user) }
 
   describe '#execute' do
+    let_it_be(:assignee) { create(:user) }
+    let_it_be(:milestone) { create(:milestone, project: project) }
     let(:issue) { described_class.new(project, user, opts).execute }
-    let(:assignee) { create(:user) }
-    let(:milestone) { create(:milestone, project: project) }
 
     context 'when params are valid' do
-      let(:labels) { create_pair(:label, project: project) }
+      let_it_be(:labels) { create_pair(:label, project: project) }
 
-      before do
+      before_all do
         project.add_maintainer(user)
         project.add_maintainer(assignee)
       end
@@ -25,10 +25,13 @@ RSpec.describe Issues::CreateService do
           assignee_ids: [assignee.id],
           label_ids: labels.map(&:id),
           milestone_id: milestone.id,
+          milestone: milestone,
           due_date: Date.tomorrow }
       end
 
       it 'creates the issue with the given params' do
+        expect(Issuable::CommonSystemNotesService).to receive_message_chain(:new, :execute)
+
         expect(issue).to be_persisted
         expect(issue.title).to eq('Awesome issue')
         expect(issue.assignees).to eq [assignee]
@@ -37,14 +40,56 @@ RSpec.describe Issues::CreateService do
         expect(issue.due_date).to eq Date.tomorrow
       end
 
+      context 'when skip_system_notes is true' do
+        let(:issue) { described_class.new(project, user, opts).execute(skip_system_notes: true) }
+
+        it 'does not call Issuable::CommonSystemNotesService' do
+          expect(Issuable::CommonSystemNotesService).not_to receive(:new)
+
+          issue
+        end
+      end
+
+      it_behaves_like 'not an incident issue'
+
+      context 'issue is incident type' do
+        before do
+          opts.merge!(issue_type: 'incident')
+        end
+
+        let(:current_user) { user }
+        let(:incident_label_attributes) { attributes_for(:label, :incident) }
+
+        subject { issue }
+
+        it_behaves_like 'incident issue'
+        it_behaves_like 'has incident label'
+        it_behaves_like 'an incident management tracked event', :incident_management_incident_created
+
+        it 'does create an incident label' do
+          expect { subject }
+            .to change { Label.where(incident_label_attributes).count }.by(1)
+        end
+
+        context 'when invalid' do
+          before do
+            opts.merge!(title: '')
+          end
+
+          it 'does not create an incident label prematurely' do
+            expect { subject }.not_to change(Label, :count)
+          end
+        end
+      end
+
       it 'refreshes the number of open issues', :use_clean_rails_memory_store_caching do
         expect { issue }.to change { project.open_issues_count }.from(0).to(1)
       end
 
       context 'when current user cannot admin issues in the project' do
-        let(:guest) { create(:user) }
+        let_it_be(:guest) { create(:user) }
 
-        before do
+        before_all do
           project.add_guest(guest)
         end
 
@@ -58,6 +103,12 @@ RSpec.describe Issues::CreateService do
           expect(issue.labels).to be_empty
           expect(issue.milestone).to be_nil
           expect(issue.due_date).to be_nil
+        end
+
+        it 'creates confidential issues' do
+          issue = described_class.new(project, guest, confidential: true).execute
+
+          expect(issue.confidential).to be_truthy
         end
       end
 
@@ -75,6 +126,12 @@ RSpec.describe Issues::CreateService do
         expect(Todo.where(attributes).count).to eq 1
       end
 
+      it 'moves the issue to the end, in an asynchronous worker' do
+        expect(IssuePlacementWorker).to receive(:perform_async).with(be_nil, Integer)
+
+        described_class.new(project, user, opts).execute
+      end
+
       context 'when label belongs to project group' do
         let(:group) { create(:group) }
         let(:group_labels) { create_pair(:group_label, group: group) }
@@ -88,7 +145,7 @@ RSpec.describe Issues::CreateService do
         end
 
         before do
-          project.update(group: group)
+          project.update!(group: group)
         end
 
         it 'assigns group labels' do
@@ -229,11 +286,17 @@ RSpec.describe Issues::CreateService do
 
         issue
       end
+
+      it 'schedules a namespace onboarding create action worker' do
+        expect(Namespaces::OnboardingIssueCreatedWorker).to receive(:perform_async).with(project.namespace.id)
+
+        issue
+      end
     end
 
     context 'issue create service' do
       context 'assignees' do
-        before do
+        before_all do
           project.add_maintainer(user)
         end
 
@@ -264,7 +327,7 @@ RSpec.describe Issues::CreateService do
 
         context "when issuable feature is private" do
           before do
-            project.project_feature.update(issues_access_level: ProjectFeature::PRIVATE,
+            project.project_feature.update!(issues_access_level: ProjectFeature::PRIVATE,
                                            merge_requests_access_level: ProjectFeature::PRIVATE)
           end
 
@@ -272,7 +335,7 @@ RSpec.describe Issues::CreateService do
 
           levels.each do |level|
             it "removes not authorized assignee when project is #{Gitlab::VisibilityLevel.level_name(level)}" do
-              project.update(visibility_level: level)
+              project.update!(visibility_level: level)
               opts = { title: 'Title', description: 'Description', assignee_ids: [assignee.id] }
 
               issue = described_class.new(project, user, opts).execute
@@ -299,7 +362,7 @@ RSpec.describe Issues::CreateService do
           }
         end
 
-        before do
+        before_all do
           project.add_maintainer(user)
           project.add_maintainer(assignee)
         end
@@ -313,11 +376,11 @@ RSpec.describe Issues::CreateService do
     end
 
     context 'resolving discussions' do
-      let(:discussion) { create(:diff_note_on_merge_request).to_discussion }
-      let(:merge_request) { discussion.noteable }
-      let(:project) { merge_request.source_project }
+      let_it_be(:discussion) { create(:diff_note_on_merge_request).to_discussion }
+      let_it_be(:merge_request) { discussion.noteable }
+      let_it_be(:project) { merge_request.source_project }
 
-      before do
+      before_all do
         project.add_maintainer(user)
       end
 
@@ -395,162 +458,50 @@ RSpec.describe Issues::CreateService do
     end
 
     context 'checking spam' do
-      include_context 'includes Spam constants'
+      let(:request) { double(:request) }
+      let(:api) { true }
+      let(:captcha_response) { 'abc123' }
+      let(:spam_log_id) { 1 }
 
-      let(:title) { 'Legit issue' }
-      let(:description) { 'please fix' }
-      let(:opts) do
+      let(:params) do
         {
-          title: title,
-          description: description,
-          request: double(:request, env: {})
+          title: 'Spam issue',
+          request: request,
+          api: api,
+          captcha_response: captcha_response,
+          spam_log_id: spam_log_id
         }
       end
 
-      subject { described_class.new(project, user, opts) }
+      subject do
+        described_class.new(project, user, params)
+      end
 
       before do
-        stub_feature_flags(allow_possible_spam: false)
-      end
-
-      context 'when reCAPTCHA was verified' do
-        let(:log_user)  { user }
-        let(:spam_logs) { create_list(:spam_log, 2, user: log_user, title: title) }
-        let(:target_spam_log) { spam_logs.last }
-
-        before do
-          opts[:recaptcha_verified] = true
-          opts[:spam_log_id] = target_spam_log.id
-
-          expect(Spam::SpamVerdictService).not_to receive(:new)
-        end
-
-        it 'does not mark an issue as spam' do
-          expect(issue).not_to be_spam
-        end
-
-        it 'creates a valid issue' do
-          expect(issue).to be_valid
-        end
-
-        it 'does not assign a spam_log to the issue' do
-          expect(issue.spam_log).to be_nil
-        end
-
-        it 'marks related spam_log as recaptcha_verified' do
-          expect { issue }.to change { target_spam_log.reload.recaptcha_verified }.from(false).to(true)
-        end
-
-        context 'when spam log does not belong to a user' do
-          let(:log_user) { create(:user) }
-
-          it 'does not mark spam_log as recaptcha_verified' do
-            expect { issue }.not_to change { target_spam_log.reload.recaptcha_verified }
-          end
+        allow_next_instance_of(UserAgentDetailService) do |instance|
+          allow(instance).to receive(:create)
         end
       end
 
-      context 'when reCAPTCHA was not verified' do
-        before do
-          expect_next_instance_of(Spam::SpamActionService) do |spam_service|
-            expect(spam_service).to receive_messages(check_for_spam?: true)
-          end
+      it 'executes SpamActionService' do
+        spam_params = Spam::SpamParams.new(
+          api: api,
+          captcha_response: captcha_response,
+          spam_log_id: spam_log_id
+        )
+        expect_next_instance_of(
+          Spam::SpamActionService,
+          {
+            spammable: an_instance_of(Issue),
+            request: request,
+            user: user,
+            action: :create
+          }
+        ) do |instance|
+          expect(instance).to receive(:execute).with(spam_params: spam_params)
         end
 
-        context 'when SpamVerdictService requires reCAPTCHA' do
-          before do
-            expect_next_instance_of(Spam::SpamVerdictService) do |verdict_service|
-              expect(verdict_service).to receive(:execute).and_return(CONDITIONAL_ALLOW)
-            end
-          end
-
-          it 'does not mark the issue as spam' do
-            expect(issue).not_to be_spam
-          end
-
-          it 'marks the issue as needing reCAPTCHA' do
-            expect(issue.needs_recaptcha?).to be_truthy
-          end
-
-          it 'invalidates the issue' do
-            expect(issue).to be_invalid
-          end
-
-          it 'creates a new spam_log' do
-            expect { issue }
-                .to have_spam_log(title: title, description: description, user_id: user.id, noteable_type: 'Issue')
-          end
-        end
-
-        context 'when SpamVerdictService disallows creation' do
-          before do
-            expect_next_instance_of(Spam::SpamVerdictService) do |verdict_service|
-              expect(verdict_service).to receive(:execute).and_return(DISALLOW)
-            end
-          end
-
-          context 'when allow_possible_spam feature flag is false' do
-            it 'marks the issue as spam' do
-              expect(issue).to be_spam
-            end
-
-            it 'does not mark the issue as needing reCAPTCHA' do
-              expect(issue.needs_recaptcha?).to be_falsey
-            end
-
-            it 'invalidates the issue' do
-              expect(issue).to be_invalid
-            end
-
-            it 'creates a new spam_log' do
-              expect { issue }
-                  .to have_spam_log(title: title, description: description, user_id: user.id, noteable_type: 'Issue')
-            end
-          end
-
-          context 'when allow_possible_spam feature flag is true' do
-            before do
-              stub_feature_flags(allow_possible_spam: true)
-            end
-
-            it 'does not mark the issue as spam' do
-              expect(issue).not_to be_spam
-            end
-
-            it 'does not mark the issue as needing reCAPTCHA' do
-              expect(issue.needs_recaptcha?).to be_falsey
-            end
-
-            it 'creates a valid issue' do
-              expect(issue).to be_valid
-            end
-
-            it 'creates a new spam_log' do
-              expect { issue }
-                  .to have_spam_log(title: title, description: description, user_id: user.id, noteable_type: 'Issue')
-            end
-          end
-        end
-
-        context 'when the SpamVerdictService allows creation' do
-          before do
-            expect_next_instance_of(Spam::SpamVerdictService) do |verdict_service|
-              expect(verdict_service).to receive(:execute).and_return(ALLOW)
-            end
-          end
-
-          it 'does not mark an issue as spam' do
-            expect(issue).not_to be_spam
-          end
-
-          it 'creates a valid issue' do
-            expect(issue).to be_valid
-          end
-
-          it 'does not assign a spam_log to an issue' do
-            expect(issue.spam_log).to be_nil
-          end
-        end
+        subject.execute
       end
     end
   end

@@ -3,12 +3,17 @@
 module QA
   RSpec.describe 'Configure' do
     describe 'AutoDevOps Templates', only: { subdomain: :staging } do
+      # specify jobs to be disabled in the pipeline.
+      # CANARY_ENABLED will allow the pipeline to be
+      # blocked by a manual job, rather than fail
+      # during the production run
       let(:optional_jobs) do
         %w[
           LICENSE_MANAGEMENT_DISABLED
           SAST_DISABLED DAST_DISABLED
           DEPENDENCY_SCANNING_DISABLED
           CONTAINER_SCANNING_DISABLED
+          CANARY_ENABLED
         ]
       end
 
@@ -17,7 +22,7 @@ module QA
       end
 
       with_them do
-        let(:project) do
+        let!(:project) do
           Resource::Project.fabricate_via_api! do |project|
             project.name = "#{template}-autodevops-project-template"
             project.template_name = template
@@ -40,8 +45,8 @@ module QA
           Flow::Login.sign_in
         end
 
-        it 'works with Auto DevOps' do
-          %w[build test].each do |job|
+        it 'works with Auto DevOps', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/240946', type: :flaky } do
+          %w[build code_quality test].each do |job|
             pipeline.visit!
 
             Page::Project::Pipeline::Show.perform do |show_page|

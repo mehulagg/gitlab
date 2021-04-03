@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe QA::Resource::Base do
+RSpec.describe QA::Resource::Base do
   include Helpers::StubENV
 
   let(:resource) { spy('resource') }
@@ -226,6 +226,7 @@ describe QA::Resource::Base do
           end
         end
       end
+
       let(:first_resource) do
         Class.new(base) do
           attribute :test do
@@ -233,6 +234,7 @@ describe QA::Resource::Base do
           end
         end
       end
+
       let(:second_resource) do
         Class.new(base) do
           attribute :test do

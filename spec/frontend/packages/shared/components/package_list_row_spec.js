@@ -1,6 +1,8 @@
-import { mount, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import PackagesListRow from '~/packages/shared/components/package_list_row.vue';
+import PackagePath from '~/packages/shared/components/package_path.vue';
 import PackageTags from '~/packages/shared/components/package_tags.vue';
+import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import { packageList } from '../../mock_data';
 
 describe('packages_list_row', () => {
@@ -10,21 +12,19 @@ describe('packages_list_row', () => {
   const [packageWithoutTags, packageWithTags] = packageList;
 
   const findPackageTags = () => wrapper.find(PackageTags);
-  const findProjectLink = () => wrapper.find('[data-testid="packages-row-project"]');
+  const findPackagePath = () => wrapper.find(PackagePath);
   const findDeleteButton = () => wrapper.find('[data-testid="action-delete"]');
   const findPackageType = () => wrapper.find('[data-testid="package-type"]');
 
   const mountComponent = ({
     isGroup = false,
     packageEntity = packageWithoutTags,
-    shallow = true,
     showPackageType = true,
     disableDelete = false,
   } = {}) => {
-    const mountFunc = shallow ? shallowMount : mount;
-
-    wrapper = mountFunc(PackagesListRow, {
+    wrapper = shallowMount(PackagesListRow, {
       store,
+      stubs: { ListItem },
       propsData: {
         packageLink: 'foo',
         packageEntity,
@@ -60,16 +60,11 @@ describe('packages_list_row', () => {
   });
 
   describe('when is is group', () => {
-    beforeEach(() => {
+    it('has a package path component', () => {
       mountComponent({ isGroup: true });
-    });
 
-    it('has project field', () => {
-      expect(findProjectLink().exists()).toBe(true);
-    });
-
-    it('does not show the delete button', () => {
-      expect(findDeleteButton().exists()).toBe(false);
+      expect(findPackagePath().exists()).toBe(true);
+      expect(findPackagePath().props()).toMatchObject({ path: 'foo/bar/baz' });
     });
   });
 
@@ -95,18 +90,27 @@ describe('packages_list_row', () => {
     });
   });
 
-  describe('delete event', () => {
-    beforeEach(() =>
-      mountComponent({ isGroup: false, packageEntity: packageWithoutTags, shallow: false }),
-    );
+  describe('delete button', () => {
+    it('exists and has the correct props', () => {
+      mountComponent({ packageEntity: packageWithoutTags });
 
-    it('emits the packageToDelete event when the delete button is clicked', () => {
-      findDeleteButton().trigger('click');
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.emitted('packageToDelete')).toBeTruthy();
-        expect(wrapper.emitted('packageToDelete')[0]).toEqual([packageWithoutTags]);
+      expect(findDeleteButton().exists()).toBe(true);
+      expect(findDeleteButton().attributes()).toMatchObject({
+        icon: 'remove',
+        category: 'secondary',
+        variant: 'danger',
+        title: 'Remove package',
       });
+    });
+
+    it('emits the packageToDelete event when the delete button is clicked', async () => {
+      mountComponent({ packageEntity: packageWithoutTags });
+
+      findDeleteButton().vm.$emit('click');
+
+      await wrapper.vm.$nextTick();
+      expect(wrapper.emitted('packageToDelete')).toBeTruthy();
+      expect(wrapper.emitted('packageToDelete')[0]).toEqual([packageWithoutTags]);
     });
   });
 });

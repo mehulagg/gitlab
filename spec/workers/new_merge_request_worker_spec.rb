@@ -11,15 +11,15 @@ RSpec.describe NewMergeRequestWorker do
         expect(EventCreateService).not_to receive(:new)
         expect(NotificationService).not_to receive(:new)
 
-        worker.perform(99, create(:user).id)
+        worker.perform(non_existing_record_id, create(:user).id)
       end
 
       it 'logs an error' do
         user = create(:user)
 
-        expect(Rails.logger).to receive(:error).with('NewMergeRequestWorker: couldn\'t find MergeRequest with ID=99, skipping job')
+        expect(Gitlab::AppLogger).to receive(:error).with("NewMergeRequestWorker: couldn't find MergeRequest with ID=#{non_existing_record_id}, skipping job")
 
-        worker.perform(99, user.id)
+        worker.perform(non_existing_record_id, user.id)
       end
     end
 
@@ -28,36 +28,63 @@ RSpec.describe NewMergeRequestWorker do
         expect(EventCreateService).not_to receive(:new)
         expect(NotificationService).not_to receive(:new)
 
-        worker.perform(create(:merge_request).id, 99)
+        worker.perform(create(:merge_request).id, non_existing_record_id)
       end
 
       it 'logs an error' do
         merge_request = create(:merge_request)
 
-        expect(Rails.logger).to receive(:error).with('NewMergeRequestWorker: couldn\'t find User with ID=99, skipping job')
+        expect(Gitlab::AppLogger).to receive(:error).with("NewMergeRequestWorker: couldn't find User with ID=#{non_existing_record_id}, skipping job")
 
-        worker.perform(merge_request.id, 99)
+        worker.perform(merge_request.id, non_existing_record_id)
       end
     end
 
-    context 'when everything is ok' do
+    context 'with a user' do
       let(:project) { create(:project, :public) }
       let(:mentioned) { create(:user) }
-      let(:user) { create(:user) }
+      let(:user) { nil }
       let(:merge_request) do
         create(:merge_request, source_project: project, description: "mr for #{mentioned.to_reference}")
       end
 
-      it 'creates a new event record' do
-        expect { worker.perform(merge_request.id, user.id) }.to change { Event.count }.from(0).to(1)
+      shared_examples 'a new merge request where the author cannot trigger notifications' do
+        it 'does not create a notification for the mentioned user' do
+          expect(Notify).not_to receive(:new_merge_request_email)
+            .with(mentioned.id, merge_request.id, NotificationReason::MENTIONED)
+
+          expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: user.id, klass: merge_request.class.to_s, object_id: merge_request.id)
+
+          worker.perform(merge_request.id, user.id)
+        end
       end
 
-      it 'creates a notification for the mentioned user' do
-        expect(Notify).to receive(:new_merge_request_email)
-                            .with(mentioned.id, merge_request.id, NotificationReason::MENTIONED)
-                            .and_return(double(deliver_later: true))
+      context 'when the merge request author is blocked' do
+        let(:user) { create(:user, :blocked) }
 
-        worker.perform(merge_request.id, user.id)
+        it_behaves_like 'a new merge request where the author cannot trigger notifications'
+      end
+
+      context 'when the merge request author is a ghost' do
+        let(:user) { create(:user, :ghost) }
+
+        it_behaves_like 'a new merge request where the author cannot trigger notifications'
+      end
+
+      context 'when everything is ok' do
+        let(:user) { create(:user) }
+
+        it 'creates a new event record' do
+          expect { worker.perform(merge_request.id, user.id) }.to change { Event.count }.from(0).to(1)
+        end
+
+        it 'creates a notification for the mentioned user' do
+          expect(Notify).to receive(:new_merge_request_email)
+            .with(mentioned.id, merge_request.id, NotificationReason::MENTIONED)
+            .and_return(double(deliver_later: true))
+
+          worker.perform(merge_request.id, user.id)
+        end
       end
     end
   end

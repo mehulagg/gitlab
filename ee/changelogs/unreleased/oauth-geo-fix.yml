@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix OAuth authentication with relative URL used on secondary'
-merge_request: 37083
-author:
-type: fixed

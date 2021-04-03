@@ -17,6 +17,7 @@ module EE
     def filter_projects(collection)
       collection = super(collection)
       collection = by_plans(collection)
+      collection = by_aimed_for_deletion(collection)
       collection
     end
 
@@ -25,6 +26,14 @@ module EE
         collection.for_plan_name(names)
       else
         collection
+      end
+    end
+
+    def by_aimed_for_deletion(items)
+      if ::Gitlab::Utils.to_boolean(params[:aimed_for_deletion])
+        items.aimed_for_deletion(Date.current)
+      else
+        items
       end
     end
   end

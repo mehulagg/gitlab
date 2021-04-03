@@ -1,8 +1,8 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import createStore from 'ee/subscriptions/new/store';
-import Component from 'ee/subscriptions/new/components/checkout.vue';
+import Vuex from 'vuex';
 import ProgressBar from 'ee/registrations/components/progress_bar.vue';
+import Component from 'ee/subscriptions/new/components/checkout.vue';
+import createStore from 'ee/subscriptions/new/store';
 
 describe('Checkout', () => {
   const localVue = createLocalVue();
@@ -28,7 +28,10 @@ describe('Checkout', () => {
     wrapper.destroy();
   });
 
-  describe.each([[true, true], [false, false]])('when isNewUser=%s', (isNewUser, visible) => {
+  describe.each([
+    [true, true],
+    [false, false],
+  ])('when isNewUser=%s', (isNewUser, visible) => {
     beforeEach(() => {
       store.state.isNewUser = isNewUser;
     });
@@ -49,21 +52,6 @@ describe('Checkout', () => {
         'Checkout',
         'Your GitLab group',
       ]);
-    });
-
-    describe('when part of the onboarding issues experiment', () => {
-      beforeEach(() => {
-        store.state.isOnboardingIssuesExperimentEnabled = true;
-      });
-
-      it('passes the steps', () => {
-        expect(findProgressBar().props('steps')).toEqual([
-          'Your profile',
-          'Checkout',
-          'Your GitLab group',
-          'Your first project',
-        ]);
-      });
     });
 
     it('passes the current step', () => {

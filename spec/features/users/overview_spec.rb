@@ -21,15 +21,15 @@ RSpec.describe 'Overview tab on a user profile', :js do
     sign_in user
   end
 
-  describe 'activities section' do
-    shared_context 'visit overview tab' do
-      before do
-        visit user.username
-        page.find('.js-overview-tab a').click
-        wait_for_requests
-      end
+  shared_context 'visit overview tab' do
+    before do
+      visit user.username
+      page.find('.js-overview-tab a').click
+      wait_for_requests
     end
+  end
 
+  describe 'activities section' do
     describe 'user has no activities' do
       include_context 'visit overview tab'
 
@@ -84,14 +84,6 @@ RSpec.describe 'Overview tab on a user profile', :js do
   end
 
   describe 'projects section' do
-    shared_context 'visit overview tab' do
-      before do
-        visit user.username
-        page.find('.js-overview-tab a').click
-        wait_for_requests
-      end
-    end
-
     describe 'user has no personal projects' do
       include_context 'visit overview tab'
 
@@ -155,6 +147,180 @@ RSpec.describe 'Overview tab on a user profile', :js do
         page.within('.projects-block') do
           expect(page).not_to have_selector('.gl-pagination')
         end
+      end
+    end
+  end
+
+  describe 'followers section' do
+    describe 'user has no followers' do
+      before do
+        visit user.username
+        page.find('.js-followers-tab a').click
+        wait_for_requests
+      end
+
+      it 'shows an empty followers list with an info message' do
+        page.within('#followers') do
+          expect(page).to have_content('You do not have any followers')
+          expect(page).not_to have_selector('.gl-card.gl-mb-5')
+          expect(page).not_to have_selector('.gl-pagination')
+        end
+      end
+    end
+
+    describe 'user has less then 20 followers' do
+      let(:follower) { create(:user) }
+
+      before do
+        follower.follow(user)
+        visit user.username
+        page.find('.js-followers-tab a').click
+        wait_for_requests
+      end
+
+      it 'shows followers' do
+        page.within('#followers') do
+          expect(page).to have_content(follower.name)
+          expect(page).to have_selector('.gl-card.gl-mb-5')
+          expect(page).not_to have_selector('.gl-pagination')
+        end
+      end
+    end
+
+    describe 'user has more then 20 followers' do
+      let(:other_users) { create_list(:user, 21) }
+
+      before do
+        other_users.each do |follower|
+          follower.follow(user)
+        end
+
+        visit user.username
+        page.find('.js-followers-tab a').click
+        wait_for_requests
+      end
+      it 'shows paginated followers' do
+        page.within('#followers') do
+          other_users.each_with_index do |follower, i|
+            break if i == 20
+
+            expect(page).to have_content(follower.name)
+          end
+          expect(page).to have_selector('.gl-card.gl-mb-5')
+          expect(page).to have_selector('.gl-pagination')
+          expect(page).to have_selector('.gl-pagination .js-pagination-page', count: 2)
+        end
+      end
+    end
+  end
+
+  describe 'following section' do
+    describe 'user is not following others' do
+      before do
+        visit user.username
+        page.find('.js-following-tab a').click
+        wait_for_requests
+      end
+
+      it 'shows an empty following list with an info message' do
+        page.within('#following') do
+          expect(page).to have_content('You are not following other users')
+          expect(page).not_to have_selector('.gl-card.gl-mb-5')
+          expect(page).not_to have_selector('.gl-pagination')
+        end
+      end
+    end
+
+    describe 'user is following less then 20 people' do
+      let(:followee) { create(:user) }
+
+      before do
+        user.follow(followee)
+        visit user.username
+        page.find('.js-following-tab a').click
+        wait_for_requests
+      end
+
+      it 'shows following user' do
+        page.within('#following') do
+          expect(page).to have_content(followee.name)
+          expect(page).to have_selector('.gl-card.gl-mb-5')
+          expect(page).not_to have_selector('.gl-pagination')
+        end
+      end
+    end
+
+    describe 'user is following more then 20 people' do
+      let(:other_users) { create_list(:user, 21) }
+
+      before do
+        other_users.each do |followee|
+          user.follow(followee)
+        end
+
+        visit user.username
+        page.find('.js-following-tab a').click
+        wait_for_requests
+      end
+      it 'shows paginated following' do
+        page.within('#following') do
+          other_users.each_with_index do |followee, i|
+            break if i == 20
+
+            expect(page).to have_content(followee.name)
+          end
+          expect(page).to have_selector('.gl-card.gl-mb-5')
+          expect(page).to have_selector('.gl-pagination')
+          expect(page).to have_selector('.gl-pagination .js-pagination-page', count: 2)
+        end
+      end
+    end
+  end
+
+  describe 'bot user' do
+    let(:bot_user) { create(:user, user_type: :security_bot) }
+
+    shared_context "visit bot's overview tab" do
+      before do
+        visit bot_user.username
+        page.find('.js-overview-tab a').click
+        wait_for_requests
+      end
+    end
+
+    describe 'feature flag enabled' do
+      before do
+        stub_feature_flags(security_auto_fix: true)
+      end
+
+      include_context "visit bot's overview tab"
+
+      it "activity panel's title is 'Bot activity'" do
+        page.within('.activities-block') do
+          expect(page).to have_text('Bot activity')
+        end
+      end
+
+      it 'does not show projects panel' do
+        expect(page).not_to have_selector('.projects-block')
+      end
+    end
+
+    describe 'feature flag disabled' do
+      before do
+        stub_feature_flags(security_auto_fix: false)
+      end
+
+      include_context "visit bot's overview tab"
+
+      it "activity panel's title is not 'Bot activity'" do
+        page.within('.activities-block') do
+          expect(page).not_to have_text('Bot activity')
+        end
+      end
+
+      it 'shows projects panel' do
+        expect(page).to have_selector('.projects-block')
       end
     end
   end

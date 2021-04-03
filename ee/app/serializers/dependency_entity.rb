@@ -3,12 +3,17 @@
 class DependencyEntity < Grape::Entity
   include RequestAwareEntity
 
+  class AncestorEntity < Grape::Entity
+    expose :name, :version
+  end
+
   class LocationEntity < Grape::Entity
-    expose :blob_path, :path
+    expose :blob_path, :path, :top_level
+    expose :ancestors, using: AncestorEntity
   end
 
   class VulnerabilityEntity < Grape::Entity
-    expose :name, :severity
+    expose :name, :severity, :id, :url
   end
 
   class LicenseEntity < Grape::Entity

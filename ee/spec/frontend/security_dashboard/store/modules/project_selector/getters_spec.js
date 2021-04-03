@@ -1,5 +1,5 @@
-import createState from 'ee/security_dashboard/store/modules/project_selector/state';
 import * as getters from 'ee/security_dashboard/store/modules/project_selector/getters';
+import createState from 'ee/security_dashboard/store/modules/project_selector/state';
 
 describe('project selector module getters', () => {
   let state;

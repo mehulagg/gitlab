@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class GeoNodes < Grape::API::Instance
+  class GeoNodes < ::API::Base
     include PaginationParams
     include APIGuard
     include ::Gitlab::Utils::StrongMemoize
+
+    feature_category :geo_replication
 
     before do
       authenticate_admin_or_geo_node!
@@ -106,18 +108,19 @@ module API
         not_found!('Geo node not found') unless Gitlab::Geo.current_node
         forbidden!('Failures can only be requested from a secondary node') unless Gitlab::Geo.current_node.secondary?
 
-        finder_klass = case params[:failure_type]
-                       when 'sync'
-                         ::Geo::ProjectRegistrySyncFailedFinder
-                       when 'verification'
-                         ::Geo::ProjectRegistryVerificationFailedFinder
-                       when 'checksum_mismatch'
-                         ::Geo::ProjectRegistryMismatchFinder
-                       else
-                         not_found!('Failure type unknown')
-                       end
+        type = params[:type].to_s.to_sym
 
-        project_registries = finder_klass.new(current_node: Gitlab::Geo.current_node, type: params[:type]).execute
+        project_registries =
+          case params[:failure_type]
+          when 'sync'
+            ::Geo::ProjectRegistry.sync_failed(type)
+          when 'verification'
+            ::Geo::ProjectRegistry.verification_failed(type)
+          when 'checksum_mismatch'
+            ::Geo::ProjectRegistry.mismatch(type)
+          else
+            not_found!('Failure type unknown')
+          end
 
         present paginate(project_registries), with: ::GeoProjectRegistryEntity
       end

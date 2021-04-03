@@ -7,4 +7,5 @@ export default () => ({
   errorLoadingEnvironments: false,
   currentEnvironmentId: -1,
   currentTimeWindow: defaultTimeRange.name,
+  allEnvironments: false,
 });

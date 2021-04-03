@@ -73,7 +73,7 @@ RSpec.describe Ci::DagPipelineEntity do
         end
       end
 
-      it 'performs the smallest number of queries' do
+      it 'performs the smallest number of queries', :request_store do
         log = ActiveRecord::QueryRecorder.new { subject }
 
         # stages, project, builds, build_needs

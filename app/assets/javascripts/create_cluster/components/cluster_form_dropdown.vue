@@ -1,14 +1,14 @@
 <script>
-import { isNil } from 'lodash';
-import $ from 'jquery';
 import { GlIcon } from '@gitlab/ui';
-import DropdownSearchInput from '~/vue_shared/components/dropdown/dropdown_search_input.vue';
-import DropdownHiddenInput from '~/vue_shared/components/dropdown/dropdown_hidden_input.vue';
+import $ from 'jquery';
+import { isNil } from 'lodash';
 import DropdownButton from '~/vue_shared/components/dropdown/dropdown_button.vue';
+import DropdownHiddenInput from '~/vue_shared/components/dropdown/dropdown_hidden_input.vue';
+import DropdownSearchInput from '~/vue_shared/components/dropdown/dropdown_search_input.vue';
 
-const toArray = value => (isNil(value) ? [] : [].concat(value));
-const itemsProp = (items, prop) => items.map(item => item[prop]);
-const defaultSearchFn = (searchQuery, labelProp) => item =>
+const toArray = (value) => (isNil(value) ? [] : [].concat(value));
+const itemsProp = (items, prop) => items.map((item) => item[prop]);
+const defaultSearchFn = (searchQuery, labelProp) => (item) =>
   item[labelProp].toLowerCase().indexOf(searchQuery) > -1;
 
 export default {
@@ -135,7 +135,7 @@ export default {
       const valueList = toArray(this.value);
       const items = this.getItemsOrEmptyList();
 
-      return items.filter(item => valueList.some(value => item[valueProp] === value));
+      return items.filter((item) => valueList.some((value) => item[valueProp] === value));
     },
     selectedItemsLabels() {
       return itemsProp(this.selectedItems, this.labelProperty).join(', ');
@@ -154,6 +154,7 @@ export default {
       });
   },
   beforeDestroy() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     $(this.$refs.dropdown).off();
   },
   methods: {

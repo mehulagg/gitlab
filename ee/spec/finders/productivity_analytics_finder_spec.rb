@@ -5,7 +5,8 @@ require 'spec_helper'
 RSpec.describe ProductivityAnalyticsFinder do
   subject { described_class.new(current_user, search_params.merge(state: :merged)) }
 
-  let(:current_user) { create(:admin) }
+  let(:project) { create(:project) }
+  let(:current_user) { project.owner }
   let(:search_params) { {} }
 
   describe '.array_params' do
@@ -23,19 +24,19 @@ RSpec.describe ProductivityAnalyticsFinder do
   describe '#execute' do
     let(:long_mr) do
       metrics_data = { merged_at: 1.day.ago }
-      create(:merge_request, :merged, :with_productivity_metrics, created_at: 31.days.ago, metrics_data: metrics_data)
+      create(:merge_request, :merged, :with_productivity_metrics, project: project, created_at: 31.days.ago, metrics_data: metrics_data)
     end
 
     let(:short_mr) do
       metrics_data = { merged_at: 28.days.ago }
-      create(:merge_request, :merged, :with_productivity_metrics, created_at: 31.days.ago, metrics_data: metrics_data)
+      create(:merge_request, :merged, :with_productivity_metrics, project: project, created_at: 31.days.ago, metrics_data: metrics_data)
     end
 
     context 'allows to filter by days_to_merge' do
       let(:search_params) { { days_to_merge: [30] } }
 
       it 'returns all MRs with merged_at - created_at IN specified values' do
-        Timecop.freeze do
+        freeze_time do
           long_mr
           short_mr
           expect(subject.execute).to match_array([long_mr])
@@ -51,7 +52,7 @@ RSpec.describe ProductivityAnalyticsFinder do
       end
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       context 'with merged_after specified as timestamp' do
@@ -90,7 +91,7 @@ RSpec.describe ProductivityAnalyticsFinder do
 
         it 'uses start_date as filter value' do
           metrics_data = { merged_at: (2.years + 1.day).ago }
-          create(:merge_request, :merged, :with_productivity_metrics, created_at: 800.days.ago, metrics_data: metrics_data)
+          create(:merge_request, :merged, :with_productivity_metrics, project: project, created_at: 800.days.ago, metrics_data: metrics_data)
           long_mr
 
           expect(subject.execute).to match_array([long_mr])

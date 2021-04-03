@@ -13,6 +13,14 @@ RSpec.describe Projects::LicensesController do
       sign_in(user)
     end
 
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { get :index, params: params }
+
+      before_request do
+        project.add_reporter(user)
+      end
+    end
+
     context 'with authorized user' do
       context 'when feature is available' do
         before do
@@ -61,7 +69,7 @@ RSpec.describe Projects::LicensesController do
           end
 
           context 'with existing report' do
-            let!(:pipeline) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
+            let!(:pipeline) { create(:ci_pipeline, project: project, builds: [create(:ee_ci_build, :success, :license_scan_v2_1)]) }
 
             before do
               get_licenses
@@ -72,18 +80,27 @@ RSpec.describe Projects::LicensesController do
             end
 
             it 'returns a hash with licenses' do
-              expect(json_response).to be_a(Hash)
-              expect(json_response['licenses'].length).to eq(4)
+              expect(json_response['licenses'].length).to eq(3)
               expect(json_response['licenses'][0]).to include({
                 'id' => nil,
-                'spdx_identifier' => 'Apache-2.0',
                 'classification' => 'unclassified',
-                'name' => 'Apache 2.0',
-                'url' => 'http://www.apache.org/licenses/LICENSE-2.0.txt',
-                'components' => [{
-                  "blob_path" => nil,
-                  "name" => "thread_safe"
-                }]
+                'name' => "BSD 3-Clause \"New\" or \"Revised\" License",
+                'spdx_identifier' => "BSD-3-Clause",
+                'url' => "https://opensource.org/licenses/BSD-3-Clause",
+                'components' => [
+                  {
+                    "name" => "b",
+                    "package_manager" => "yarn",
+                    "version" => "0.1.0",
+                    "blob_path" => project_blob_path(project, "#{project.default_branch}/yarn.lock")
+                  },
+                  {
+                    "name" => "c",
+                    "package_manager" => "bundler",
+                    "version" => "1.1.0",
+                    "blob_path" => project_blob_path(project, "#{project.default_branch}/Gemfile.lock")
+                  }
+                ]
               })
             end
 
@@ -96,7 +113,7 @@ RSpec.describe Projects::LicensesController do
             end
 
             context 'with pagination params' do
-              let(:params) { { namespace_id: project.namespace, project_id: project, per_page: 3, page: 2 } }
+              let(:params) { { namespace_id: project.namespace, project_id: project, per_page: 2, page: 2 } }
 
               it 'return only 1 license' do
                 expect(json_response['licenses'].length).to eq(1)
@@ -338,6 +355,7 @@ RSpec.describe Projects::LicensesController do
   end
 
   describe "POST #create" do
+    let(:current_user) { create(:user) }
     let(:project) { create(:project, :repository, :private) }
     let(:mit_license) { create(:software_license, :mit) }
     let(:default_params) do
@@ -351,9 +369,16 @@ RSpec.describe Projects::LicensesController do
       }
     end
 
-    context "when authenticated" do
-      let(:current_user) { create(:user) }
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { post :create, xhr: true, params: default_params }
 
+      before_request do
+        project.add_reporter(current_user)
+        sign_in(current_user)
+      end
+    end
+
+    context "when authenticated" do
       before do
         stub_licensed_features(license_scanning: true)
         sign_in(current_user)
@@ -456,6 +481,7 @@ RSpec.describe Projects::LicensesController do
   end
 
   describe "PATCH #update" do
+    let(:current_user) { create(:user) }
     let(:project) { create(:project, :repository, :private) }
     let(:software_license_policy) { create(:software_license_policy, project: project, software_license: mit_license) }
     let(:mit_license) { create(:software_license, :mit) }
@@ -469,9 +495,16 @@ RSpec.describe Projects::LicensesController do
       }
     end
 
-    context "when authenticated" do
-      let(:current_user) { create(:user) }
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { post :create, xhr: true, params: default_params }
 
+      before_request do
+        project.add_reporter(current_user)
+        sign_in(current_user)
+      end
+    end
+
+    context "when authenticated" do
       before do
         stub_licensed_features(license_scanning: true)
         sign_in(current_user)

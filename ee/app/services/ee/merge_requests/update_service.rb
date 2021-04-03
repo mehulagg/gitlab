@@ -42,8 +42,15 @@ module EE
 
       private
 
+      override :after_update
+      def after_update(merge_request)
+        super
+
+        ::MergeRequests::SyncCodeOwnerApprovalRules.new(merge_request).execute
+      end
+
       override :create_branch_change_note
-      def create_branch_change_note(merge_request, branch_type, old_branch, new_branch)
+      def create_branch_change_note(merge_request, branch_type, event_type, old_branch, new_branch)
         super
 
         reset_approvals(merge_request)

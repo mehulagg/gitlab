@@ -15,6 +15,17 @@ RSpec.describe Ci::Build do
 
   let(:job) { create(:ci_build, pipeline: pipeline) }
   let(:artifact) { create(:ee_ci_job_artifact, :sast, job: job, project: job.project) }
+  let(:valid_secrets) do
+    {
+      DATABASE_PASSWORD: {
+        vault: {
+          engine: { name: 'kv-v2', path: 'kv-v2' },
+          path: 'production/db',
+          field: 'password'
+        }
+      }
+    }
+  end
 
   describe '.license_scan' do
     subject(:build) { described_class.license_scan.first }
@@ -87,7 +98,7 @@ RSpec.describe Ci::Build do
 
     %w(success drop cancel).each do |event|
       it "for event #{event}", :sidekiq_might_not_need_inline do
-        expect(UpdateBuildMinutesService)
+        expect(Ci::Minutes::UpdateBuildMinutesService)
           .to receive(:new).and_call_original
 
         job.public_send(event)
@@ -105,7 +116,7 @@ RSpec.describe Ci::Build do
       expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
         .with(:build, job.id)
 
-      job.update(status: :running)
+      job.update!(status: :running)
     end
   end
 
@@ -118,7 +129,7 @@ RSpec.describe Ci::Build do
       end
 
       before do
-        job.update(environment: 'staging')
+        job.update!(environment: 'staging')
         create(:environment, name: 'staging', project: job.project)
 
         variable =
@@ -131,9 +142,52 @@ RSpec.describe Ci::Build do
 
       context 'when there is a plan for the group' do
         it 'GITLAB_FEATURES should include the features for that plan' do
-          is_expected.to include({ key: 'GITLAB_FEATURES', value: anything, public: true, masked: false })
+          expect(subject.to_runner_variables).to include({ key: 'GITLAB_FEATURES', value: anything, public: true, masked: false })
           features_variable = subject.find { |v| v[:key] == 'GITLAB_FEATURES' }
           expect(features_variable[:value]).to include('multiple_ldap_servers')
+        end
+      end
+
+      context 'when there is a dast_profile associated with the pipeline' do
+        let_it_be(:project) { create(:project, :repository) }
+        let_it_be(:dast_profile) { create(:dast_profile, project: project) }
+        let_it_be(:dast_site_profile_secret_variable) { create(:dast_site_profile_secret_variable, key: 'DAST_PASSWORD_BASE64', dast_site_profile: dast_profile.dast_site_profile) }
+
+        let(:pipeline) { create(:ci_pipeline, pipeline_params.merge!(project: project, dast_profile: dast_profile) ) }
+
+        let(:key) { dast_site_profile_secret_variable.key }
+        let(:value) { dast_site_profile_secret_variable.value }
+
+        shared_examples 'a pipeline with no dast on-demand variables' do
+          it 'does not include variables associated with the profile' do
+            keys = subject.to_runner_variables.map { |var| var[:key] }
+
+            expect(keys).not_to include(key)
+          end
+        end
+
+        it_behaves_like 'a pipeline with no dast on-demand variables' do
+          let(:pipeline_params) { { config_source: :parameter_source } }
+        end
+
+        it_behaves_like 'a pipeline with no dast on-demand variables' do
+          let(:pipeline_params) { { source: :ondemand_dast_scan } }
+        end
+
+        context 'when the dast on-demand pipeline is correctly configured' do
+          let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+
+          it 'includes variables associated with the profile' do
+            expect(subject.to_runner_variables).to include(key: key, value: value, public: false, masked: true)
+          end
+        end
+
+        it_behaves_like 'a pipeline with no dast on-demand variables' do
+          let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+
+          before do
+            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
+          end
         end
       end
     end
@@ -157,7 +211,7 @@ RSpec.describe Ci::Build do
   end
 
   describe '#collect_security_reports!' do
-    let(:security_reports) { ::Gitlab::Ci::Reports::Security::Reports.new(pipeline.sha) }
+    let(:security_reports) { ::Gitlab::Ci::Reports::Security::Reports.new(pipeline) }
 
     subject { job.collect_security_reports!(security_reports) }
 
@@ -227,15 +281,15 @@ RSpec.describe Ci::Build do
   describe '#collect_license_scanning_reports!' do
     subject { job.collect_license_scanning_reports!(license_scanning_report) }
 
-    let(:license_scanning_report) { Gitlab::Ci::Reports::LicenseScanning::Report.new }
-
-    before do
-      stub_licensed_features(license_scanning: true)
-    end
+    let(:license_scanning_report) { build(:license_scanning_report) }
 
     it { expect(license_scanning_report.licenses.count).to eq(0) }
 
-    context 'when build has a license scanning report' do
+    context 'when the build has a license scanning report' do
+      before do
+        stub_licensed_features(license_scanning: true)
+      end
+
       context 'when there is a new type report' do
         before do
           create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
@@ -272,19 +326,6 @@ RSpec.describe Ci::Build do
         it 'returns an empty report' do
           expect { subject }.not_to raise_error
           expect(license_scanning_report).to be_empty
-        end
-      end
-
-      context 'when Feature flag is disabled for License Scanning reports parsing' do
-        before do
-          stub_feature_flags(parse_license_management_reports: false)
-          create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
-        end
-
-        it 'does NOT parse license scanning report' do
-          subject
-
-          expect(license_scanning_report.licenses.count).to eq(0)
         end
       end
 
@@ -332,6 +373,7 @@ RSpec.describe Ci::Build do
 
       before do
         stub_licensed_features(dependency_scanning: true)
+        stub_feature_flags(standalone_vuln_dependency_list: false)
       end
 
       subject { job.collect_dependency_list_reports!(dependency_list_report) }
@@ -470,12 +512,6 @@ RSpec.describe Ci::Build do
 
       it { is_expected.to be true }
     end
-
-    context 'with pipeline for merge train' do
-      let(:merge_request) { create(:merge_request, :on_train, :with_merge_train_pipeline) }
-
-      it { is_expected.to be false }
-    end
   end
 
   describe ".license_scan" do
@@ -488,7 +524,15 @@ RSpec.describe Ci::Build do
   end
 
   describe 'ci_secrets_management_available?' do
-    subject(:build) { job.ci_secrets_management_available? }
+    subject { job.ci_secrets_management_available? }
+
+    context 'when build has no project' do
+      before do
+        job.update!(project: nil)
+      end
+
+      it { is_expected.to be false }
+    end
 
     context 'when secrets management feature is available' do
       before do
@@ -508,17 +552,6 @@ RSpec.describe Ci::Build do
   end
 
   describe '#runner_required_feature_names' do
-    let(:valid_secrets) do
-      {
-        DATABASE_PASSWORD: {
-          vault: {
-            engine: { name: 'kv-v2', path: 'kv-v2' },
-            path: 'production/db',
-            field: 'password'
-          }
-        }
-      }
-    end
     let(:build) { create(:ci_build, secrets: secrets) }
 
     subject { build.runner_required_feature_names }
@@ -531,13 +564,13 @@ RSpec.describe Ci::Build do
       context 'when there are secrets defined' do
         let(:secrets) { valid_secrets }
 
-        it { is_expected.to include(:secrets) }
+        it { is_expected.to include(:vault_secrets) }
       end
 
       context 'when there are no secrets defined' do
         let(:secrets) { {} }
 
-        it { is_expected.not_to include(:secrets) }
+        it { is_expected.not_to include(:vault_secrets) }
       end
     end
 
@@ -549,13 +582,65 @@ RSpec.describe Ci::Build do
       context 'when there are secrets defined' do
         let(:secrets) { valid_secrets }
 
-        it { is_expected.not_to include(:secrets) }
+        it { is_expected.not_to include(:vault_secrets) }
       end
 
       context 'when there are no secrets defined' do
         let(:secrets) { {} }
 
-        it { is_expected.not_to include(:secrets) }
+        it { is_expected.not_to include(:vault_secrets) }
+      end
+    end
+  end
+
+  describe "secrets management usage data" do
+    context 'when secrets management feature is not available' do
+      before do
+        stub_licensed_features(ci_secrets_management: false)
+      end
+
+      it 'does not track unique users' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+        create(:ci_build, secrets: valid_secrets)
+      end
+    end
+
+    context 'when secrets management feature is available' do
+      before do
+        stub_licensed_features(ci_secrets_management: true)
+      end
+
+      context 'when there are secrets defined' do
+        context 'on create' do
+          it 'tracks unique users' do
+            ci_build = build(:ci_build, secrets: valid_secrets)
+
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with('i_ci_secrets_management_vault_build_created', values: ci_build.user_id)
+
+            ci_build.save!
+          end
+        end
+
+        context 'on update' do
+          it 'does not track unique users' do
+            ci_build = create(:ci_build, secrets: valid_secrets)
+
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+            ci_build.success
+          end
+        end
+      end
+    end
+
+    context 'when there are no secrets defined' do
+      let(:secrets) { {} }
+
+      it 'does not track unique users' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+        create(:ci_build, secrets: {})
       end
     end
   end

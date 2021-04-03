@@ -18,7 +18,7 @@ RSpec.describe Admin::ApplicationsController do
 
       expect do
         post :create, params: { doorkeeper_application: create_params }
-      end.to change { SecurityEvent.count }.by(1)
+      end.to change { AuditEvent.count }.by(1)
     end
   end
 end

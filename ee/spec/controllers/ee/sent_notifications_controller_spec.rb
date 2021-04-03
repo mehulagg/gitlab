@@ -11,6 +11,7 @@ RSpec.describe SentNotificationsController do
         epic.subscriptions.create!(user: user, project: nil, subscribed: true)
       end
     end
+
     let(:sent_notification) { create(:sent_notification, project: nil, noteable: epic, recipient: user) }
 
     before do

@@ -1,9 +1,9 @@
 <script>
 import { diffViewerModes, diffModes } from '~/ide/constants';
-import ImageDiffViewer from './viewers/image_diff_viewer.vue';
 import DownloadDiffViewer from './viewers/download_diff_viewer.vue';
-import RenamedFile from './viewers/renamed.vue';
+import ImageDiffViewer from './viewers/image_diff_viewer.vue';
 import ModeChanged from './viewers/mode_changed.vue';
+import RenamedFile from './viewers/renamed.vue';
 
 export default {
   props: {
@@ -106,7 +106,13 @@ export default {
       :a-mode="aMode"
       :b-mode="bMode"
     >
-      <slot slot="image-overlay" name="image-overlay"></slot>
+      <template #image-overlay="{ renderedWidth, renderedHeight }">
+        <slot
+          :rendered-width="renderedWidth"
+          :rendered-height="renderedHeight"
+          name="image-overlay"
+        ></slot>
+      </template>
     </component>
     <slot></slot>
   </div>

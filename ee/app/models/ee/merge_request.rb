@@ -14,11 +14,28 @@ module EE
       include Elastic::ApplicationVersionedSearch
       include DeprecatedApprovalsBeforeMerge
       include UsageStatistics
+      include IterationEventable
 
       has_many :approvers, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
-      has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request
+      has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request do
+        def applicable_to_branch(branch)
+          ActiveRecord::Associations::Preloader.new.preload(
+            self,
+            [:users, :groups, approval_project_rule: [:users, :groups, :protected_branches]]
+          )
+
+          self.select do |rule|
+            next true unless rule.approval_project_rule.present?
+            next true if rule.overridden?
+
+            rule.approval_project_rule.applies_to_branch?(branch)
+          end
+        end
+      end
+      has_many :approval_merge_request_rule_sources, through: :approval_rules
+      has_many :approval_project_rules, through: :approval_merge_request_rule_sources
       has_one :merge_train, inverse_of: :merge_request, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
       has_many :blocks_as_blocker,
@@ -35,25 +52,6 @@ module EE
 
       delegate :sha, to: :head_pipeline, prefix: :head_pipeline, allow_nil: true
       delegate :sha, to: :base_pipeline, prefix: :base_pipeline, allow_nil: true
-      delegate :merge_requests_author_approval?, to: :target_project, allow_nil: true
-      delegate :merge_requests_disable_committers_approval?, to: :target_project, allow_nil: true
-
-      scope :without_approvals, -> { left_outer_joins(:approvals).where(approvals: { id: nil }) }
-      scope :with_approvals, -> { joins(:approvals) }
-      scope :approved_by_users_with_ids, -> (*user_ids) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { id: user_ids })
-          .group(:id)
-          .having("COUNT(users.id) = ?", user_ids.size)
-      end
-      scope :approved_by_users_with_usernames, -> (*usernames) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { username: usernames })
-          .group(:id)
-          .having("COUNT(users.id) = ?", usernames.size)
-      end
 
       accepts_nested_attributes_for :approval_rules, allow_destroy: true
 
@@ -67,19 +65,27 @@ module EE
           :author, :approved_by_users, :metrics,
           latest_merge_request_diff: :merge_request_diff_files, target_project: :namespace, milestone: :project)
       end
+
+      scope :including_merge_train, -> do
+        includes(:merge_train)
+      end
+
+      def merge_requests_author_approval?
+        !!target_project&.merge_requests_author_approval?
+      end
+
+      def merge_requests_disable_committers_approval?
+        !!target_project&.merge_requests_disable_committers_approval?
+      end
     end
 
     class_methods do
-      def select_from_union(relations)
-        where(id: from_union(relations))
-      end
-
       # This is an ActiveRecord scope in CE
       def with_api_entity_associations
-        super.preload(:blocking_merge_requests)
+        super.preload(:blocking_merge_requests, target_project: [group: :saml_provider])
       end
 
-      def sort_by_attribute(method, *args)
+      def sort_by_attribute(method, *args, **kwargs)
         if method.to_s == 'review_time_desc'
           order_review_time_desc
         else
@@ -99,7 +105,7 @@ module EE
     end
 
     override :mergeable?
-    def mergeable?(skip_ci_check: false)
+    def mergeable?(skip_ci_check: false, skip_discussions_check: false)
       return false unless approved?
       return false if has_denied_policies?
       return false if merge_blocked_by_other_mrs?
@@ -120,6 +126,10 @@ module EE
 
     def allows_multiple_assignees?
       project.feature_available?(:multiple_merge_request_assignees)
+    end
+
+    def allows_multiple_reviewers?
+      project.feature_available?(:multiple_merge_request_reviewers)
     end
 
     def visible_blocking_merge_requests(user)
@@ -145,7 +155,6 @@ module EE
     end
 
     def has_denied_policies?
-      return false if ::Feature.disabled?(:license_compliance_denies_mr, project, default_enabled: false)
       return false unless has_license_scanning_reports?
 
       return false if has_approved_license_check?
@@ -160,8 +169,14 @@ module EE
         dast: report_type_enabled?(:dast),
         dependency_scanning: report_type_enabled?(:dependency_scanning),
         license_scanning: report_type_enabled?(:license_scanning),
-        coverage_fuzzing: report_type_enabled?(:coverage_fuzzing)
+        coverage_fuzzing: report_type_enabled?(:coverage_fuzzing),
+        secret_detection: report_type_enabled?(:secret_detection),
+        api_fuzzing: report_type_enabled?(:api_fuzzing)
       }
+    end
+
+    def has_security_reports?
+      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.security_reports)
     end
 
     def has_dependency_scanning_reports?
@@ -188,26 +203,6 @@ module EE
       compare_reports(::Ci::CompareSecurityReportsService, current_user, 'container_scanning')
     end
 
-    def has_sast_reports?
-      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.sast_reports)
-    end
-
-    def has_secret_detection_reports?
-      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.secret_detection_reports)
-    end
-
-    def compare_sast_reports(current_user)
-      return missing_report_error("SAST") unless has_sast_reports?
-
-      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'sast')
-    end
-
-    def compare_secret_detection_reports(current_user)
-      return missing_report_error("secret detection") unless has_secret_detection_reports?
-
-      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'secret_detection')
-    end
-
     def has_dast_reports?
       !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.dast_reports)
     end
@@ -219,7 +214,7 @@ module EE
     end
 
     def compare_license_scanning_reports(current_user)
-      return missing_report_error("license scanning") unless has_license_scanning_reports?
+      return missing_report_error("license scanning") unless actual_head_pipeline&.license_scan_completed?
 
       compare_reports(::Ci::CompareLicenseScanningReportsService, current_user)
     end
@@ -244,6 +239,16 @@ module EE
       compare_reports(::Ci::CompareSecurityReportsService, current_user, 'coverage_fuzzing')
     end
 
+    def has_api_fuzzing_reports?
+      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.api_fuzzing_reports)
+    end
+
+    def compare_api_fuzzing_reports(current_user)
+      return missing_report_error('api fuzzing') unless has_api_fuzzing_reports?
+
+      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'api_fuzzing')
+    end
+
     def synchronize_approval_rules_from_target_project
       return if merged?
 
@@ -253,20 +258,28 @@ module EE
       end
     end
 
+    def missing_security_scan_types
+      return [] unless actual_head_pipeline && base_pipeline
+
+      (base_pipeline.security_scans.pluck(:scan_type) - actual_head_pipeline.security_scans.pluck(:scan_type)).uniq
+    end
+
+    def applicable_approval_rules_for_user(user_id)
+      wrapped_approval_rules.select do |rule|
+        rule.approvers.pluck(:id).include?(user_id)
+      end
+    end
+
+    def security_reports_up_to_date?
+      project.security_reports_up_to_date_for_ref?(target_branch)
+    end
+
     private
 
     def has_approved_license_check?
       if rule = approval_rules.license_compliance.last
         ApprovalWrappedRule.wrap(self, rule).approved?
       end
-    end
-
-    def missing_report_error(report_type)
-      { status: :error, status_reason: "This merge request does not have #{report_type} reports" }
-    end
-
-    def report_type_enabled?(report_type)
-      !!actual_head_pipeline&.batch_lookup_report_artifact_for_file_type(report_type)
     end
   end
 end

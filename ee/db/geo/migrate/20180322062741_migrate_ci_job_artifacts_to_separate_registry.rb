@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MigrateCiJobArtifactsToSeparateRegistry < ActiveRecord::Migration[4.2]
   def up
     tracking_db.create_table :job_artifact_registry, force: :cascade do |t|
@@ -38,7 +40,7 @@ class MigrateCiJobArtifactsToSeparateRegistry < ActiveRecord::Migration[4.2]
           $BODY$
           LANGUAGE 'plpgsql'
           VOLATILE;
-          EOF
+      EOF
 
       execute <<~EOF
           CREATE TRIGGER replicate_job_artifact_registry

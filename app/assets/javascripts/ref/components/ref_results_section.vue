@@ -1,16 +1,22 @@
 <script>
-import { GlNewDropdownHeader, GlNewDropdownItem, GlBadge, GlIcon } from '@gitlab/ui';
+import { GlDropdownSectionHeader, GlDropdownItem, GlBadge, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
 
 export default {
   name: 'RefResultsSection',
   components: {
-    GlNewDropdownHeader,
-    GlNewDropdownItem,
+    GlDropdownSectionHeader,
+    GlDropdownItem,
     GlBadge,
     GlIcon,
   },
   props: {
+    showHeader: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+
     sectionTitle: {
       type: String,
       required: true,
@@ -39,7 +45,7 @@ export default {
     items: {
       type: Array,
       required: true,
-      validator: items => Array.isArray(items) && items.every(item => item.name),
+      validator: (items) => Array.isArray(items) && items.every((item) => item.name),
     },
 
     /**
@@ -84,12 +90,12 @@ export default {
 
 <template>
   <div>
-    <gl-new-dropdown-header>
+    <gl-dropdown-section-header v-if="showHeader">
       <div class="gl-display-flex align-items-center" data-testid="section-header">
         <span class="gl-mr-2 gl-mb-1">{{ sectionTitle }}</span>
         <gl-badge variant="neutral">{{ totalCountText }}</gl-badge>
       </div>
-    </gl-new-dropdown-header>
+    </gl-dropdown-section-header>
     <template v-if="error">
       <div class="gl-display-flex align-items-start text-danger gl-ml-4 gl-mr-4 gl-mb-3">
         <gl-icon name="error" class="gl-mr-2 gl-mt-2 gl-flex-shrink-0" />
@@ -97,7 +103,7 @@ export default {
       </div>
     </template>
     <template v-else>
-      <gl-new-dropdown-item
+      <gl-dropdown-item
         v-for="item in items"
         :key="item.name"
         @click="$emit('selected', item.value || item.name)"
@@ -111,14 +117,14 @@ export default {
 
           <div class="gl-flex-grow-1 gl-display-flex gl-flex-direction-column">
             <span class="gl-font-monospace">{{ item.name }}</span>
-            <span class="gl-text-gray-600">{{ item.subtitle }}</span>
+            <span class="gl-text-gray-400">{{ item.subtitle }}</span>
           </div>
 
           <gl-badge v-if="item.default" size="sm" variant="info">{{
             s__('DefaultBranchLabel|default')
           }}</gl-badge>
         </div>
-      </gl-new-dropdown-item>
+      </gl-dropdown-item>
     </template>
   </div>
 </template>

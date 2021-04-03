@@ -53,9 +53,13 @@ RSpec.shared_examples "chat service" do |service_name|
       end
 
       it "calls #{service_name} API" do
-        subject.execute(sample_data)
+        result = subject.execute(sample_data)
 
-        expect(WebMock).to have_requested(:post, webhook_url).with { |req| req.body =~ /\A{"#{content_key}":.+}\Z/ }.once
+        expect(result).to be(true)
+        expect(WebMock).to have_requested(:post, webhook_url).once.with { |req|
+          json_body = Gitlab::Json.parse(req.body).with_indifferent_access
+          expect(json_body).to include(payload)
+        }
       end
     end
 
@@ -67,7 +71,8 @@ RSpec.shared_examples "chat service" do |service_name|
       it "does not call #{service_name} API" do
         result = subject.execute(sample_data)
 
-        expect(result).to be_falsy
+        expect(result).to be(false)
+        expect(WebMock).not_to have_requested(:post, webhook_url)
       end
     end
 
@@ -198,6 +203,7 @@ RSpec.shared_examples "chat service" do |service_name|
           message: "user created page: Awesome wiki_page"
         }
       end
+
       let(:wiki_page) { create(:wiki_page, wiki: project.wiki, **opts) }
       let(:sample_data) { Gitlab::DataBuilder::WikiPage.build(wiki_page, user, "create") }
 
@@ -250,6 +256,7 @@ RSpec.shared_examples "chat service" do |service_name|
                project: project, status: status,
                sha: project.commit.sha, ref: project.default_branch)
       end
+
       let(:sample_data) { Gitlab::DataBuilder::Pipeline.build(pipeline) }
 
       context "with failed pipeline" do

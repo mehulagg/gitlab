@@ -1,25 +1,31 @@
+# frozen_string_literal: true
+
 module RuboCop
   # Module containing helper methods for writing migration cops.
   module MigrationHelpers
-    WHITELISTED_TABLES = %i[
+    # Tables with permanently small number of records
+    SMALL_TABLES = %i[
       application_settings
       plan_limits
     ].freeze
 
-    # Blacklisted tables due to:
-    #   - number of columns (> 50 on GitLab.com as of 03/2020)
-    #   - number of records
+    # Tables with large number of columns (> 50 on GitLab.com as of 01/2021)
     WIDE_TABLES = %i[
-      users
-      projects
       ci_builds
+      namespaces
+      projects
+      users
     ].freeze
 
     # List of helpers that add new columns, either directly (ADD_COLUMN_METHODS)
     # or through a create/alter table (TABLE_METHODS)
     ADD_COLUMN_METHODS = %i(add_column add_column_with_default change_column_type_concurrently).freeze
 
-    TABLE_METHODS = %i(create_table create_table_if_not_exists change_table).freeze
+    TABLE_METHODS = %i(create_table create_table_if_not_exists change_table create_table_with_constraints).freeze
+
+    def high_traffic_tables
+      @high_traffic_tables ||= rubocop_migrations_config.dig('Migration/UpdateLargeTable', 'HighTrafficTables')
+    end
 
     # Returns true if the given node originated from the db/migrate directory.
     def in_migration?(node)
@@ -52,6 +58,14 @@ module RuboCop
 
     def dirname(node)
       File.dirname(node.location.expression.source_buffer.name)
+    end
+
+    def rubocop_migrations_config
+      @rubocop_migrations_config ||= YAML.load_file(File.join(rubocop_path, 'rubocop-migrations.yml'))
+    end
+
+    def rubocop_path
+      File.expand_path(__dir__)
     end
   end
 end

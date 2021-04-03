@@ -55,9 +55,17 @@ module Gitlab
       end
 
       def project_tree
-        @project_tree ||= Gitlab::ImportExport::Project::TreeRestorer.new(user: current_user,
-                                                                        shared: shared,
-                                                                        project: project)
+        @project_tree ||= project_tree_class.new(user: current_user,
+                                                 shared: shared,
+                                                 project: project)
+      end
+
+      def project_tree_class
+        sample_data_template? ? Gitlab::ImportExport::Project::Sample::TreeRestorer : Gitlab::ImportExport::Project::TreeRestorer
+      end
+
+      def sample_data_template?
+        project&.import_data&.data&.dig('sample_data')
       end
 
       def avatar_restorer
@@ -67,20 +75,19 @@ module Gitlab
       def repo_restorer
         Gitlab::ImportExport::RepoRestorer.new(path_to_bundle: repo_path,
                                                shared: shared,
-                                               project: project)
+                                               importable: project)
       end
 
       def wiki_restorer
-        Gitlab::ImportExport::WikiRestorer.new(path_to_bundle: wiki_repo_path,
+        Gitlab::ImportExport::RepoRestorer.new(path_to_bundle: wiki_repo_path,
                                                shared: shared,
-                                               project: ProjectWiki.new(project),
-                                               wiki_enabled: project.wiki_enabled?)
+                                               importable: ProjectWiki.new(project))
       end
 
       def design_repo_restorer
         Gitlab::ImportExport::DesignRepoRestorer.new(path_to_bundle: design_repo_path,
                                                      shared: shared,
-                                                     project: project)
+                                                     importable: project)
       end
 
       def uploads_restorer

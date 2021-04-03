@@ -1,23 +1,19 @@
 <script>
+import { GlTooltipDirective, GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui';
 import { mapGetters, mapActions, mapState } from 'vuex';
-
-import { GlTooltipDirective, GlLoadingIcon, GlDeprecatedButton } from '@gitlab/ui';
 
 import { __ } from '~/locale';
 
-import Icon from '~/vue_shared/components/icon.vue';
-
-import TreeItemBody from './tree_item_body.vue';
-
 import { ChildType } from '../constants';
+import TreeItemBody from './tree_item_body.vue';
 
 export default {
   ChildType,
   components: {
-    Icon,
+    GlIcon,
     TreeItemBody,
     GlLoadingIcon,
-    GlDeprecatedButton,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -87,7 +83,7 @@ export default {
     }"
   >
     <div class="list-item-body d-flex align-items-center">
-      <gl-deprecated-button
+      <gl-button
         v-if="!childrenFetchInProgress && hasChildren"
         v-gl-tooltip.viewport.hover
         :title="chevronTooltip"
@@ -96,8 +92,8 @@ export default {
         class="btn-svg btn-tree-item-chevron align-self-start"
         @click="handleChevronClick"
       >
-        <icon :name="chevronType" />
-      </gl-deprecated-button>
+        <gl-icon :name="chevronType" />
+      </gl-button>
       <gl-loading-icon v-if="childrenFetchInProgress" class="loading-icon" size="sm" />
       <tree-item-body
         class="tree-item-row"

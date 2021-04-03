@@ -35,6 +35,7 @@ RSpec.describe TestSuiteComparerEntity do
         end
         expect(subject[:resolved_failures]).to be_empty
         expect(subject[:existing_failures]).to be_empty
+        expect(subject[:suite_errors]).to be_nil
       end
     end
 
@@ -56,6 +57,7 @@ RSpec.describe TestSuiteComparerEntity do
         end
         expect(subject[:resolved_failures]).to be_empty
         expect(subject[:existing_failures]).to be_empty
+        expect(subject[:suite_errors]).to be_nil
       end
     end
 
@@ -77,6 +79,7 @@ RSpec.describe TestSuiteComparerEntity do
           expect(existing_failure[:execution_time]).to eq(test_case_failed.execution_time)
           expect(existing_failure[:system_output]).to eq(test_case_failed.system_output)
         end
+        expect(subject[:suite_errors]).to be_nil
       end
     end
 
@@ -98,110 +101,47 @@ RSpec.describe TestSuiteComparerEntity do
           expect(resolved_failure[:system_output]).to eq(test_case_success.system_output)
         end
         expect(subject[:existing_failures]).to be_empty
+        expect(subject[:suite_errors]).to be_nil
       end
     end
 
-    context 'limits amount of tests returned' do
+    context 'when head suite has suite error' do
       before do
-        stub_const('TestSuiteComparerEntity::DEFAULT_MAX_TESTS', 2)
-        stub_const('TestSuiteComparerEntity::DEFAULT_MIN_TESTS', 1)
+        allow(head_suite).to receive(:suite_error).and_return('some error')
       end
 
-      context 'prefers new over existing and resolved' do
-        before do
-          3.times { add_new_failure }
-          3.times { add_new_error }
-          3.times { add_existing_failure }
-          3.times { add_existing_error }
-          3.times { add_resolved_failure }
-          3.times { add_resolved_error }
-        end
+      it 'contains suite error for head suite' do
+        expect(subject[:suite_errors]).to eq(
+          head: 'some error',
+          base: nil
+        )
+      end
+    end
 
-        it 'returns 2 of each new category, and 1 of each resolved and existing' do
-          expect(subject[:summary]).to include(total: 18, resolved: 6, failed: 6, errored: 6)
-          expect(subject[:new_failures].count).to eq(2)
-          expect(subject[:new_errors].count).to eq(2)
-          expect(subject[:existing_failures].count).to eq(1)
-          expect(subject[:existing_errors].count).to eq(1)
-          expect(subject[:resolved_failures].count).to eq(1)
-          expect(subject[:resolved_errors].count).to eq(1)
-        end
+    context 'when base suite has suite error' do
+      before do
+        allow(base_suite).to receive(:suite_error).and_return('some error')
       end
 
-      context 'prefers existing over resolved' do
-        before do
-          3.times { add_existing_failure }
-          3.times { add_existing_error }
-          3.times { add_resolved_failure }
-          3.times { add_resolved_error }
-        end
+      it 'contains suite error for head suite' do
+        expect(subject[:suite_errors]).to eq(
+          head: nil,
+          base: 'some error'
+        )
+      end
+    end
 
-        it 'returns 2 of each existing category, and 1 of each resolved' do
-          expect(subject[:summary]).to include(total: 12, resolved: 6, failed: 3, errored: 3)
-          expect(subject[:new_failures].count).to eq(0)
-          expect(subject[:new_errors].count).to eq(0)
-          expect(subject[:existing_failures].count).to eq(2)
-          expect(subject[:existing_errors].count).to eq(2)
-          expect(subject[:resolved_failures].count).to eq(1)
-          expect(subject[:resolved_errors].count).to eq(1)
-        end
+    context 'when base and head suite both have suite errors' do
+      before do
+        allow(head_suite).to receive(:suite_error).and_return('head error')
+        allow(base_suite).to receive(:suite_error).and_return('base error')
       end
 
-      context 'limits amount of resolved' do
-        before do
-          3.times { add_resolved_failure }
-          3.times { add_resolved_error }
-        end
-
-        it 'returns 2 of each resolved category' do
-          expect(subject[:summary]).to include(total: 6, resolved: 6, failed: 0, errored: 0)
-          expect(subject[:new_failures].count).to eq(0)
-          expect(subject[:new_errors].count).to eq(0)
-          expect(subject[:existing_failures].count).to eq(0)
-          expect(subject[:existing_errors].count).to eq(0)
-          expect(subject[:resolved_failures].count).to eq(2)
-          expect(subject[:resolved_errors].count).to eq(2)
-        end
-      end
-
-      private
-
-      def add_new_failure
-        failed_case = create_test_case_rspec_failed(SecureRandom.hex)
-        head_suite.add_test_case(failed_case)
-      end
-
-      def add_new_error
-        error_case = create_test_case_rspec_error(SecureRandom.hex)
-        head_suite.add_test_case(error_case)
-      end
-
-      def add_existing_failure
-        failed_case = create_test_case_rspec_failed(SecureRandom.hex)
-        base_suite.add_test_case(failed_case)
-        head_suite.add_test_case(failed_case)
-      end
-
-      def add_existing_error
-        error_case = create_test_case_rspec_error(SecureRandom.hex)
-        base_suite.add_test_case(error_case)
-        head_suite.add_test_case(error_case)
-      end
-
-      def add_resolved_failure
-        case_name = SecureRandom.hex
-        failed_case = create_test_case_java_failed(case_name)
-        success_case = create_test_case_java_success(case_name)
-        base_suite.add_test_case(failed_case)
-        head_suite.add_test_case(success_case)
-      end
-
-      def add_resolved_error
-        case_name = SecureRandom.hex
-        error_case = create_test_case_java_error(case_name)
-        success_case = create_test_case_java_success(case_name)
-        base_suite.add_test_case(error_case)
-        head_suite.add_test_case(success_case)
+      it 'contains suite error for head suite' do
+        expect(subject[:suite_errors]).to eq(
+          head: 'head error',
+          base: 'base error'
+        )
       end
     end
   end

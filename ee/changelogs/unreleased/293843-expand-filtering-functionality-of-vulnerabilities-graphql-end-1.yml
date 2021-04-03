@@ -1,0 +1,5 @@
+---
+title: Add GraphQL field for vulnerability scanner ID
+merge_request: 56041
+author:
+type: changed

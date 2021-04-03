@@ -27,7 +27,7 @@ RSpec.describe 'Protected Branches', :js do
         fill_in 'branch-search', with: 'fix'
         find('#branch-search').native.send_keys(:enter)
 
-        expect(page).to have_css('.btn-remove.disabled')
+        expect(page).to have_css('.btn-danger.disabled')
       end
     end
   end
@@ -69,6 +69,7 @@ RSpec.describe 'Protected Branches', :js do
   context 'logged in as admin' do
     before do
       sign_in(admin)
+      gitlab_enable_admin_mode_sign_in(admin)
     end
 
     describe "explicit protected branches" do
@@ -161,6 +162,16 @@ RSpec.describe 'Protected Branches', :js do
       end
 
       include_examples "protected branches > access control > CE"
+    end
+  end
+
+  context 'when the users for protected branches feature is off' do
+    before do
+      stub_licensed_features(protected_refs_for_users: false)
+    end
+
+    include_examples 'Deploy keys with protected branches' do
+      let(:all_dropdown_sections) { %w(Roles Deploy\ Keys) }
     end
   end
 end

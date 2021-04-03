@@ -14,7 +14,7 @@ RSpec.describe 'Groups > Push Rules', :js do
 
   push_rules_with_titles = {
     reject_unsigned_commits: 'Reject unsigned commits',
-    commit_committer_check: 'Committer restriction'
+    commit_committer_check: 'Reject unverified users'
   }
 
   push_rules_with_titles.each do |rule_attr, title|
@@ -59,7 +59,7 @@ RSpec.describe 'Groups > Push Rules', :js do
 
           context 'when enabled' do
             it 'renders the setting checkbox' do
-              create(:gitlab_subscription, :gold, namespace: group)
+              create(:gitlab_subscription, :ultimate, namespace: group)
 
               visit edit_group_push_rules_path(group)
 

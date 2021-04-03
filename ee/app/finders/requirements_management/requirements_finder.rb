@@ -4,10 +4,13 @@ module RequirementsManagement
   class RequirementsFinder
     include Gitlab::Utils::StrongMemoize
 
+    ALLOWED_LAST_TEST_REPORT_STATE_VALUES = TestReport.states.keys.push("missing").freeze
+
     # Params:
     # project_id: integer
     # iids: integer[]
     # state: string[]
+    # last_test_report_state: string
     # sort: string
     # search: string
     # author_username: string
@@ -22,6 +25,7 @@ module RequirementsManagement
       items = by_iid(items)
       items = by_author(items)
       items = by_search(items)
+      items = by_last_test_report_state(items)
 
       sort(items)
     end
@@ -58,6 +62,17 @@ module RequirementsManagement
       items.with_author(authors)
     end
 
+    def by_last_test_report_state(items)
+      return items unless params[:last_test_report_state]
+      return items unless ALLOWED_LAST_TEST_REPORT_STATE_VALUES.include?(params[:last_test_report_state])
+
+      if params[:last_test_report_state] == 'missing'
+        items.without_test_reports
+      else
+        items.with_last_test_report_state(params[:last_test_report_state])
+      end
+    end
+
     def get_authors(username_param)
       # Save a DB hit if the current_user is the only author, or there are none.
       return current_user if [username_param].flatten == [current_user&.username]
@@ -79,7 +94,7 @@ module RequirementsManagement
 
     def sort(items)
       sorts = RequirementsManagement::Requirement.simple_sorts.keys
-      sort = sorts.include?(params[:sort]) ? params[:sort] : 'id_desc'
+      sort = sorts.include?(params[:sort]&.to_s) ? params[:sort] : 'id_desc'
 
       items.order_by(sort)
     end

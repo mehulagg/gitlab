@@ -18,23 +18,36 @@ module MembershipActions
   def update
     update_params = params.require(root_params_key).permit(:access_level, :expires_at)
     member = membershipable.members_and_requesters.find(params[:id])
-    member = Members::UpdateService
+    result = Members::UpdateService
       .new(current_user, update_params)
       .execute(member)
 
-    member = present_members([member]).first
+    member = result[:member]
 
-    respond_to do |format|
-      format.js { render 'shared/members/update', locals: { member: member } }
+    member_data = if member.expires?
+                    {
+                      expires_in: helpers.distance_of_time_in_words_to_now(member.expires_at),
+                      expires_soon: member.expires_soon?,
+                      expires_at_formatted: member.expires_at.to_time.in_time_zone.to_s(:medium)
+                    }
+                  else
+                    {}
+                  end
+
+    if result[:status] == :success
+      render json: member_data
+    else
+      render json: { message: result[:message] }, status: :unprocessable_entity
     end
   end
 
   def destroy
     member = membershipable.members_and_requesters.find(params[:id])
+    skip_subresources = !ActiveRecord::Type::Boolean.new.cast(params.delete(:remove_sub_memberships))
     # !! is used in case unassign_issuables contains empty string which would result in nil
     unassign_issuables = !!ActiveRecord::Type::Boolean.new.cast(params.delete(:unassign_issuables))
 
-    Members::DestroyService.new(current_user).execute(member, unassign_issuables: unassign_issuables)
+    Members::DestroyService.new(current_user).execute(member, skip_subresources: skip_subresources, unassign_issuables: unassign_issuables)
 
     respond_to do |format|
       format.html do
@@ -42,7 +55,11 @@ module MembershipActions
           begin
             case membershipable
             when Namespace
-              _("User was successfully removed from group and any subresources.")
+              if skip_subresources
+                _("User was successfully removed from group.")
+              else
+                _("User was successfully removed from group and any subgroups and projects.")
+              end
             else
               _("User was successfully removed from project.")
             end
@@ -101,7 +118,7 @@ module MembershipActions
   # rubocop: enable CodeReuse/ActiveRecord
 
   def resend_invite
-    member = membershipable.members.find(params[:id])
+    member = membershipable_members.find(params[:id])
 
     if member.invite?
       member.resend_invite
@@ -115,6 +132,10 @@ module MembershipActions
   protected
 
   def membershipable
+    raise NotImplementedError
+  end
+
+  def membershipable_members
     raise NotImplementedError
   end
 

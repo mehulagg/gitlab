@@ -4,7 +4,7 @@ class Route < ApplicationRecord
   include CaseSensitivity
   include Gitlab::SQL::Pattern
 
-  belongs_to :source, polymorphic: true # rubocop:disable Cop/PolymorphicAssociations
+  belongs_to :source, polymorphic: true, inverse_of: :route # rubocop:disable Cop/PolymorphicAssociations
   validates :source, presence: true
 
   validates :path,
@@ -20,6 +20,7 @@ class Route < ApplicationRecord
 
   scope :inside_path, -> (path) { where('routes.path LIKE ?', "#{sanitize_sql_like(path)}/%") }
   scope :for_routable, -> (routable) { where(source: routable) }
+  scope :for_routable_type, -> (routable_type) { where(source_type: routable_type) }
   scope :sort_by_path_length, -> { order('LENGTH(routes.path)', :path) }
 
   def rename_descendants

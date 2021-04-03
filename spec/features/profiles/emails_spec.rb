@@ -42,8 +42,8 @@ RSpec.describe 'Profile > Emails' do
     end
   end
 
-  it 'User removes email' do
-    user.emails.create(email: 'my@email.com')
+  it 'user removes email' do
+    user.emails.create!(email: 'my@email.com')
     visit profile_emails_path
     expect(page).to have_content("my@email.com")
 
@@ -51,8 +51,8 @@ RSpec.describe 'Profile > Emails' do
     expect(page).not_to have_content("my@email.com")
   end
 
-  it 'User confirms email' do
-    email = user.emails.create(email: 'my@email.com')
+  it 'user confirms email' do
+    email = user.emails.create!(email: 'my@email.com')
     visit profile_emails_path
     expect(page).to have_content("#{email.email} Unverified")
 
@@ -63,8 +63,8 @@ RSpec.describe 'Profile > Emails' do
     expect(page).to have_content("#{email.email} Verified")
   end
 
-  it 'User re-sends confirmation email' do
-    email = user.emails.create(email: 'my@email.com')
+  it 'user re-sends confirmation email' do
+    email = user.emails.create!(email: 'my@email.com')
     visit profile_emails_path
 
     expect { click_link("Resend confirmation email") }.to have_enqueued_job.on_queue('mailers')
@@ -72,7 +72,7 @@ RSpec.describe 'Profile > Emails' do
   end
 
   it 'old unconfirmed emails show Send Confirmation button' do
-    email = user.emails.create(email: 'my@email.com')
+    email = user.emails.create!(email: 'my@email.com')
     email.update_attribute(:confirmation_sent_at, nil)
     visit profile_emails_path
 

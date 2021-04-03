@@ -1,8 +1,8 @@
+import { GlButton, GlToggle } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { TEST_HOST } from 'helpers/test_constants';
 import SelfMonitor from '~/self_monitor/components/self_monitor_form.vue';
 import { createStore } from '~/self_monitor/store';
-import { TEST_HOST } from 'helpers/test_constants';
 
 describe('self monitor component', () => {
   let wrapper;
@@ -42,7 +42,7 @@ describe('self monitor component', () => {
       it('renders as an expand button by default', () => {
         wrapper = shallowMount(SelfMonitor, { store });
 
-        const button = wrapper.find(GlDeprecatedButton);
+        const button = wrapper.find(GlButton);
 
         expect(button.text()).toBe('Expand');
       });
@@ -79,11 +79,16 @@ describe('self monitor component', () => {
         wrapper = shallowMount(SelfMonitor, { store });
 
         expect(
-          wrapper
-            .find({ ref: 'selfMonitoringFormText' })
-            .find('a')
-            .attributes('href'),
+          wrapper.find({ ref: 'selfMonitoringFormText' }).find('a').attributes('href'),
         ).toEqual(`${TEST_HOST}/instance-administrators-random/gitlab-self-monitoring`);
+      });
+
+      it('renders toggle', () => {
+        wrapper = shallowMount(SelfMonitor, { store });
+
+        expect(wrapper.findComponent(GlToggle).props('label')).toBe(
+          SelfMonitor.formLabels.createProject,
+        );
       });
     });
   });

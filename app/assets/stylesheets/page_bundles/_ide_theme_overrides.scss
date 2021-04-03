@@ -6,9 +6,10 @@
   $bs-input-focus-box-shadow: rgba(0, 123, 255, 0.25);
 
   a:not(.btn),
-  .btn-link:hover,
-  .btn-link:focus,
-  .btn-link:active {
+  .gl-button.btn-link,
+  .gl-button.btn-link:hover,
+  .gl-button.btn-link:focus,
+  .gl-button.btn-link:active {
     color: var(--ide-link-color, $blue-600);
   }
 
@@ -33,23 +34,26 @@
   .ide-pipeline .top-bar .controllers .controllers-buttons,
   .controllers-buttons svg,
   .nav-links li a.active,
+  .gl-tabs-nav li a.gl-tab-nav-item-active,
   .md-area.is-focused {
     color: var(--ide-text-color, $gl-text-color);
   }
 
   .badge.badge-pill {
-    color: var(--ide-text-color, $gray-800);
+    color: var(--ide-text-color, $gray-700);
     background-color: var(--ide-background, $badge-bg);
   }
 
   .nav-links:not(.quick-links) li:not(.md-header-toolbar) a,
+  .gl-tabs-nav li a,
   .dropdown-menu-inner-content,
   .file-row .file-row-icon svg,
   .file-row:hover .file-row-icon svg {
     color: var(--ide-text-color-secondary, $gl-text-color-secondary);
   }
 
-  .nav-links:not(.quick-links) li:not(.md-header-toolbar) {
+  .nav-links:not(.quick-links) li:not(.md-header-toolbar),
+  .gl-tabs-nav li {
     &:hover a,
     &.active a,
     a:hover,
@@ -59,6 +63,10 @@
         color: var(--ide-text-color, $black);
         border-color: var(--ide-input-border, $gray-darkest);
       }
+    }
+
+    a.gl-tab-nav-item-active {
+      box-shadow: inset 0 -2px 0 0 var(--ide-input-border, $gray-darkest);
     }
   }
 
@@ -84,12 +92,12 @@
     color: var(--ide-input-border, $gl-text-color-tertiary);
   }
 
-  .dropdown-input .fa {
-    color: var(--ide-input-border, $dropdown-input-fa-color);
+  .dropdown-input .dropdown-input-clear {
+    color: var(--ide-input-border, $gray-500);
   }
 
   .ide-nav-form .input-icon {
-    color: var(--ide-input-border, $dropdown-input-fa-color);
+    color: var(--ide-input-border, $gray-500);
   }
 
   code {
@@ -141,6 +149,7 @@
   .md table:not(.code) tbody td,
   .md table:not(.code) tr th,
   .nav-links:not(.quick-links),
+  .gl-tabs-nav,
   .common-note-form .md-area.is-focused .nav-links {
     border-color: var(--ide-border-color-alt, $white-dark);
   }
@@ -149,7 +158,7 @@
     border-color: var(--ide-border-color-alt, $gray-100);
 
     code {
-      background-color: var(--ide-border-color, inherit);
+      background-color: var(--ide-empty-state-background, inherit);
     }
   }
 
@@ -172,6 +181,10 @@
 
     .dropdown-menu .nav-links li a.active {
       border-color: var(--ide-highlight-accent, $gl-text-color);
+    }
+
+    .gl-tabs-nav li a.gl-tab-nav-item-active {
+      box-shadow: inset 0 -2px 0 0 var(--ide-highlight-accent, $gl-text-color);
     }
 
     // for other themes, suppress different avatar default colors for simplicity
@@ -224,23 +237,22 @@
     @return calc(#{$original-padding + $original-border} - var(--ide-btn-hover-border-width, #{$original-border}));
   }
 
-  .btn:not(.btn-link):not([disabled]):hover {
+  .btn:not(.gl-button):not(.btn-link):not([disabled]):hover {
     border-width: var(--ide-btn-hover-border-width, 1px);
     padding: calc-btn-hover-padding(6px) calc-btn-hover-padding(10px);
   }
 
-  .btn:not([disabled]).btn-sm:hover {
+  .btn:not(.gl-button):not([disabled]).btn-sm:hover {
     padding: calc-btn-hover-padding(4px) calc-btn-hover-padding(10px);
   }
 
-  .btn:not([disabled]).btn-block:hover {
+  .btn:not(.gl-button):not([disabled]).btn-block:hover {
     padding: calc-btn-hover-padding(6px) 0;
   }
 
-  .btn-default,
+  .btn-default:not(.gl-button),
   .dropdown,
   .dropdown-menu-toggle {
-    background-color: var(--ide-input-background, $white) !important;
     color: var(--ide-input-color, $gl-text-color) !important;
     border-color: var(--ide-btn-default-border, $border-color);
   }
@@ -256,7 +268,7 @@
   }
 
   // In IDE, the only inverted buttons are `.btn-remove`
-  .btn-inverted.btn-remove {
+  .btn-inverted.btn-remove:not(.gl-button) {
     color: var(--ide-input-color, $red-500) !important;
     background-color: var(--ide-input-background, $white) !important;
     border-color: var(--ide-btn-default-border, $red-500);
@@ -275,17 +287,21 @@
     }
   }
 
-  .btn-default {
+  // todo: remove this block after all default buttons have been migrated to gl-button
+  .btn-default:not(.gl-button) {
+    background-color: var(--ide-btn-default-background, $white) !important;
+    border-color: var(--ide-btn-default-border, $border-color);
+
     &:hover,
     &:focus {
       border-color: var(--ide-btn-default-hover-border, $border-white-normal) !important;
-      background-color: var(--ide-input-background, $white-normal) !important;
+      background-color: var(--ide-btn-default-background, $white-normal) !important;
     }
 
     &:active,
     .active {
       border-color: var(--ide-btn-default-hover-border, $border-white-normal) !important;
-      background-color: var(--ide-input-background, $white-dark) !important;
+      background-color: var(--ide-btn-default-background, $white-dark) !important;
     }
   }
 
@@ -297,6 +313,11 @@
     .nav-links:not(.quick-links) {
       background-color: var(--ide-dropdown-hover-background, $white);
       border-color: var(--ide-dropdown-hover-background, $border-color);
+    }
+
+    .gl-tabs-nav {
+      background-color: var(--ide-dropdown-hover-background, $white);
+      box-shadow: inset 0 -2px 0 0 var(--ide-dropdown-hover-background, $border-color);
     }
 
     .divider {
@@ -319,8 +340,9 @@
     border-color: var(--ide-dropdown-hover-background, $gray-100) !important;
   }
 
-  .btn-primary,
-  .btn-info {
+  // todo: remove this block after all primary/info buttons have been migrated to gl-button
+  .btn-primary:not(.gl-button),
+  .btn-info:not(.gl-button) {
     background-color: var(--ide-btn-primary-background, $blue-500);
     border-color: var(--ide-btn-primary-border, $blue-600) !important;
 
@@ -337,7 +359,8 @@
     }
   }
 
-  .btn-success {
+  // todo: remove this block after all success buttons have been migrated to gl-button
+  .btn-success:not(.gl-button) {
     background-color: var(--ide-btn-success-background, $green-500);
     border-color: var(--ide-btn-success-border, $green-600) !important;
 
@@ -354,14 +377,72 @@
     }
   }
 
-  .btn[disabled] {
+  // todo: remove this block after all disabled buttons have been migrated to gl-button
+  .btn[disabled]:not(.gl-button) {
     background-color: var(--ide-btn-default-background, $gray-light) !important;
     border: 1px solid var(--ide-btn-disabled-border, $gray-100) !important;
     color: var(--ide-btn-disabled-color, $gl-text-color-disabled) !important;
   }
 
+  @function ide-btn-var($btn-type, $var-type, $value) {
+    @return var(--ide-btn-#{$btn-type}-#{$var-type}, $value);
+  }
+
+  @mixin ide-gl-button($btn-type, $bg-normal, $bg-hover, $bg-active, $border-normal, $border-hover, $border-focus, $border-active, $border-width-hover: 2px, $box-shadow-hover: $t-gray-a-08, $box-shadow-focus: 0 0 0 4px rgba($blue-500, 0.25)) {
+    background-color: ide-btn-var($btn-type, background, $bg-normal);
+    box-shadow: inset 0 0 0 1px ide-btn-var($btn-type, border, $border-normal);
+
+    &:hover,
+    &:focus {
+      background-color: ide-btn-var($btn-type, background, $bg-hover);
+    }
+
+    &:hover {
+      box-shadow: inset 0 0 0 ide-btn-var($btn-type, hover-border-width, $border-width-hover) ide-btn-var($btn-type, hover-border, $border-hover),
+        0 2px 2px 0 $box-shadow-hover;
+    }
+
+    &:focus {
+      box-shadow: inset 0 0 0 ide-btn-var($btn-type, hover-border-width, $border-width-hover) ide-btn-var($btn-type, hover-border, $border-focus),
+        ide-btn-var($btn-type, focus-box-shadow, $box-shadow-focus);
+    }
+
+    &:active:focus {
+      background-color: ide-btn-var($btn-type, background, $bg-active);
+      box-shadow: inset 0 0 0 ide-btn-var($btn-type, hover-border-width, $border-width-hover) ide-btn-var($btn-type, hover-border, $border-active),
+        ide-btn-var($btn-type, focus-box-shadow, $box-shadow-focus);
+    }
+  }
+
+  .btn-default.gl-button.gl-button {
+    color: var(--ide-input-color, $gl-text-color);
+
+    @include ide-gl-button(default, $white, $gray-50, $gray-100, $gray-200, $gray-300, $gray-300, $gray-400);
+  }
+
+  .btn-success.gl-button.gl-button {
+    @include ide-gl-button(success, $green-500, $green-600, $green-800, $green-600, $green-800, $green-800, $green-900);
+  }
+
+  .btn-info.gl-button.gl-button,
+  .btn-primary.gl-button.gl-button {
+    @include ide-gl-button(primary, $blue-500, $blue-600, $blue-800, $blue-600, $blue-800, $blue-800, $blue-900);
+  }
+
+  .btn-danger.btn-danger-secondary.gl-button.gl-button {
+    color: var(--ide-input-color, $red-500);
+
+    @include ide-gl-button(danger-secondary, $white, $red-50, $red-100, $red-500, $red-600, $red-600, $red-700);
+  }
+
+  .btn[disabled].gl-button.gl-button {
+    color: var(--ide-btn-disabled-color, $gl-text-color-disabled);
+
+    @include ide-gl-button(disabled, $gray-10, $gray-10, $gray-10, $gray-100, $gray-100, $gray-100, $gray-100, 1px, transparent, transparent);
+  }
+
   .md table:not(.code) tbody {
-    background-color: var(--ide-border-color, $white);
+    background-color: var(--ide-empty-state-background, $white);
   }
 
   .animation-container {

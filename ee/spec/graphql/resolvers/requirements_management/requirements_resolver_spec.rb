@@ -10,6 +10,10 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
   let_it_be(:third_user) { create(:user) }
   let_it_be(:project) { create(:project) }
 
+  specify do
+    expect(described_class).to have_nullable_graphql_type(::Types::RequirementsManagement::RequirementType.connection_type)
+  end
+
   context 'with a project' do
     let_it_be(:requirement1) { create(:requirement, project: project, state: :opened, created_at: 5.hours.ago, title: 'it needs to do the thing', author: current_user) }
     let_it_be(:requirement2) { create(:requirement, project: project, state: :archived, created_at: 3.hours.ago, title: 'it needs to not break', author: other_user) }
@@ -38,14 +42,35 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
         expect(resolve_requirements(iids: [requirement1.iid, requirement3.iid])).to contain_exactly(requirement1, requirement3)
       end
 
+      context 'when filtering by last test report state' do
+        before do
+          create(:test_report, state: :failed)
+          create(:test_report, requirement: requirement1, state: :passed)
+          create(:test_report, requirement: requirement1, state: :failed)
+          create(:test_report, requirement: requirement3, state: :passed)
+        end
+
+        it 'filters by failed requirements' do
+          expect(resolve_requirements(last_test_report_state: 'failed')).to contain_exactly(requirement1)
+        end
+
+        it 'filters by passed requirements' do
+          expect(resolve_requirements(last_test_report_state: 'passed')).to contain_exactly(requirement3)
+        end
+
+        it 'filters requirements without test reports' do
+          expect(resolve_requirements(last_test_report_state: 'missing')).to contain_exactly(requirement2)
+        end
+      end
+
       describe 'sorting' do
         context 'when sorting by created_at' do
           it 'sorts requirements ascending' do
-            expect(resolve_requirements(sort: 'created_asc')).to eq([requirement1, requirement3, requirement2])
+            expect(resolve_requirements(sort: 'created_asc').to_a).to eq([requirement1, requirement3, requirement2])
           end
 
           it 'sorts requirements descending' do
-            expect(resolve_requirements(sort: 'created_desc')).to eq([requirement2, requirement3, requirement1])
+            expect(resolve_requirements(sort: 'created_desc').to_a).to eq([requirement2, requirement3, requirement1])
           end
         end
       end
@@ -55,16 +80,6 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
         create(:requirement, project: another_project, iid: requirement1.iid)
 
         expect(resolve_requirements).to contain_exactly(requirement1, requirement2, requirement3)
-      end
-    end
-
-    context 'when `requirements_management` flag is disabled' do
-      before do
-        stub_feature_flags(requirements_management: false)
-      end
-
-      it 'returns an empty list' do
-        expect(resolve_requirements).to be_empty
       end
     end
 
@@ -95,7 +110,7 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
 
       context 'single author exists' do
         let(:params) do
-          { author_username: other_user.username }
+          { author_username: [other_user.username] }
         end
 
         it 'filters requirements by author' do
@@ -105,7 +120,7 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
 
       context 'single nonexistent author' do
         let(:params) do
-          { author_username: "nonsense" }
+          { author_username: ["nonsense"] }
         end
 
         it_behaves_like 'returns no items'
@@ -122,14 +137,6 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
       context 'single author is not supplied' do
         let(:params) do
           {}
-        end
-
-        it_behaves_like 'returns unfiltered'
-      end
-
-      context 'single author is nil' do
-        let(:params) do
-          { author_username: nil }
         end
 
         it_behaves_like 'returns unfiltered'

@@ -1,3 +1,6 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+#import "./requirement.fragment.graphql"
+
 query projectRequirementsEE(
   $projectPath: ID!
   $state: RequirementState
@@ -6,8 +9,9 @@ query projectRequirementsEE(
   $prevPageCursor: String = ""
   $nextPageCursor: String = ""
   $authorUsernames: [String!] = []
+  $status: RequirementStatusFilter
   $search: String = ""
-  $sortBy: Sort = created_desc
+  $sortBy: Sort = CREATED_DESC
 ) {
   project(fullPath: $projectPath) {
     requirements(
@@ -17,38 +21,15 @@ query projectRequirementsEE(
       before: $prevPageCursor
       state: $state
       authorUsername: $authorUsernames
+      lastTestReportState: $status
       search: $search
       sort: $sortBy
     ) {
       nodes {
-        iid
-        title
-        createdAt
-        updatedAt
-        state
-        testReports(first: 1, sort: created_desc) {
-          nodes {
-            id
-            state
-            createdAt
-          }
-        }
-        userPermissions {
-          updateRequirement
-          adminRequirement
-        }
-        author {
-          name
-          username
-          avatarUrl
-          webUrl
-        }
+        ...Requirement
       }
       pageInfo {
-        hasPreviousPage
-        hasNextPage
-        startCursor
-        endCursor
+        ...PageInfo
       }
     }
   }

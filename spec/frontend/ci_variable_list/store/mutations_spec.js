@@ -1,6 +1,6 @@
-import state from '~/ci_variable_list/store/state';
-import mutations from '~/ci_variable_list/store/mutations';
 import * as types from '~/ci_variable_list/store/mutation_types';
+import mutations from '~/ci_variable_list/store/mutations';
+import state from '~/ci_variable_list/store/state';
 
 describe('CI variable list mutations', () => {
   let stateCopy;
@@ -73,7 +73,7 @@ describe('CI variable list mutations', () => {
   });
 
   describe('ADD_WILD_CARD_SCOPE', () => {
-    it('should add wild card scope to enviroments array and sort', () => {
+    it('should add wild card scope to environments array and sort', () => {
       stateCopy.environments = ['dev', 'staging'];
       mutations[types.ADD_WILD_CARD_SCOPE](stateCopy, 'production');
 

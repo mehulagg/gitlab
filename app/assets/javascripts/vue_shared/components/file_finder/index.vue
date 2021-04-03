@@ -1,18 +1,21 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import Mousetrap from 'mousetrap';
 import VirtualList from 'vue-virtual-scroll-list';
-import Item from './item.vue';
+import { keysFor, MR_GO_TO_FILE } from '~/behaviors/shortcuts/keybindings';
 import { UP_KEY_CODE, DOWN_KEY_CODE, ENTER_KEY_CODE, ESC_KEY_CODE } from '~/lib/utils/keycodes';
+import Item from './item.vue';
 
 export const MAX_FILE_FINDER_RESULTS = 40;
 export const FILE_FINDER_ROW_HEIGHT = 55;
 export const FILE_FINDER_EMPTY_ROW_HEIGHT = 33;
 
-const originalStopCallback = Mousetrap.stopCallback;
+const originalStopCallback = Mousetrap.prototype.stopCallback;
 
 export default {
   components: {
+    GlIcon,
     Item,
     VirtualList,
   },
@@ -126,7 +129,7 @@ export default {
       this.focusedIndex = 0;
     }
 
-    Mousetrap.bind(['t', 'command+p', 'ctrl+p'], e => {
+    Mousetrap.bind(keysFor(MR_GO_TO_FILE), (e) => {
       if (e.preventDefault) {
         e.preventDefault();
       }
@@ -134,7 +137,18 @@ export default {
       this.toggle(!this.visible);
     });
 
-    Mousetrap.stopCallback = (e, el, combo) => this.mousetrapStopCallback(e, el, combo);
+    Mousetrap.prototype.stopCallback = function customStopCallback(e, el, combo) {
+      if (
+        (combo === 't' && el.classList.contains('dropdown-input-field')) ||
+        el.classList.contains('inputarea')
+      ) {
+        return true;
+      } else if (combo === 'mod+p') {
+        return false;
+      }
+
+      return originalStopCallback.call(this, e, el, combo);
+    };
   },
   methods: {
     toggle(visible) {
@@ -199,18 +213,6 @@ export default {
       this.cancelMouseOver = false;
       this.onMouseOver(index);
     },
-    mousetrapStopCallback(e, el, combo) {
-      if (
-        (combo === 't' && el.classList.contains('dropdown-input-field')) ||
-        el.classList.contains('inputarea')
-      ) {
-        return true;
-      } else if (combo === 'command+p' || combo === 'ctrl+p') {
-        return false;
-      }
-
-      return originalStopCallback(e, el, combo);
-    },
   },
 };
 </script>
@@ -229,19 +231,18 @@ export default {
           @keydown="onKeydown($event)"
           @keyup="onKeyup($event)"
         />
-        <i
-          :class="{
-            hidden: showClearInputButton,
-          }"
-          aria-hidden="true"
-          class="fa fa-search dropdown-input-search"
-        ></i>
-        <i
-          :aria-label="__('Clear search input')"
+        <gl-icon
+          name="search"
+          class="dropdown-input-search"
+          :class="{ hidden: showClearInputButton }"
+        />
+        <gl-icon
+          name="close"
+          class="dropdown-input-clear"
           role="button"
-          class="fa fa-times dropdown-input-clear"
+          :aria-label="__('Clear search input')"
           @click="clearSearchInput"
-        ></i>
+        />
       </div>
       <div>
         <virtual-list ref="virtualScrollList" :size="listHeight" :remain="listShowCount" wtag="ul">

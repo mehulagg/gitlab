@@ -8,18 +8,25 @@ module EE
 
       override :execute
       def execute
-        return false if prevent_elasticsearch_indexing_update?
-
         # Repository size limit comes as MB from the view
         limit = params.delete(:repository_size_limit)
         application_setting.repository_size_limit = ::Gitlab::Utils.try_megabytes_to_bytes(limit) if limit
+
+        if params[:maintenance_mode] == false || params[:maintenance_mode_message] == ''
+          params[:maintenance_mode_message] = nil
+        end
+
+        elasticsearch_shards = params.delete(:elasticsearch_shards)
+        elasticsearch_replicas = params.delete(:elasticsearch_replicas)
 
         elasticsearch_namespace_ids = params.delete(:elasticsearch_namespace_ids)
         elasticsearch_project_ids = params.delete(:elasticsearch_project_ids)
 
         if result = super
+          find_or_create_elasticsearch_index
           update_elasticsearch_containers(ElasticsearchIndexedNamespace, elasticsearch_namespace_ids)
           update_elasticsearch_containers(ElasticsearchIndexedProject, elasticsearch_project_ids)
+          update_elasticsearch_index_settings(number_of_replicas: elasticsearch_replicas, number_of_shards: elasticsearch_shards)
         end
 
         result
@@ -41,12 +48,48 @@ module EE
         new_container_ids.each { |id| klass.create!(klass.target_attr_name => id) }
       end
 
+      def update_elasticsearch_index_settings(number_of_replicas:, number_of_shards:)
+        return if number_of_replicas.nil? && number_of_shards.nil?
+
+        Elastic::IndexSetting.default.update!(
+          number_of_replicas: number_of_replicas.to_i,
+          number_of_shards: number_of_shards.to_i
+        )
+      end
+
       private
 
-      def prevent_elasticsearch_indexing_update?
-        !application_setting.elasticsearch_indexing &&
-          ::Gitlab::Utils.to_boolean(params[:elasticsearch_indexing]) &&
-          !::Gitlab::Elastic::Helper.default.index_exists?
+      def should_auto_approve_blocked_users?
+        super || user_cap_increased?
+      end
+
+      def user_cap_increased?
+        return false unless application_setting.previous_changes.key?(:new_user_signups_cap)
+
+        previous_user_cap, current_user_cap = application_setting.previous_changes[:new_user_signups_cap]
+
+        return false if previous_user_cap.nil?
+
+        current_user_cap.nil? || current_user_cap > previous_user_cap
+      end
+
+      def find_or_create_elasticsearch_index
+        # The order of checks is important. We should not attempt to create a new index
+        # unless elasticsearch_indexing is enabled
+        return unless application_setting.elasticsearch_indexing
+        return if elasticsearch_helper.index_exists?
+
+        elasticsearch_helper.create_empty_index
+      rescue Faraday::Error => e
+        log_error(e)
+      end
+
+      def elasticsearch_helper
+        @elasticsearch_helper ||= ::Gitlab::Elastic::Helper.new(client: elasticsearch_client)
+      end
+
+      def elasticsearch_client
+        ::Gitlab::Elastic::Client.build(application_setting.elasticsearch_config)
       end
     end
   end

@@ -1,10 +1,16 @@
-# Code Intelligence
+---
+stage: Create
+group: Code Review
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
+# Code Intelligence **(FREE)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/1576) in GitLab 13.1.
 
 This document describes the design behind [Code Intelligence](../../user/project/code_intelligence.md).
 
-GitLab's built-in Code Intelligence is powered by
+The built-in Code Intelligence in GitLab is powered by
 [LSIF](https://lsif.dev) and comes down to generating an LSIF document for a
 project in a CI job, processing the data, uploading it as a CI artifact and
 displaying this information for the files in the project.
@@ -39,7 +45,7 @@ sequenceDiagram
    GitLab Rails to authorize the upload.
 
 1. GitLab Rails validates whether the artifact can be uploaded and sends
-   `ProcessLsif: true` header if the lsif artifact can be processed.
+   `ProcessLsif: true` header if the LSIF artifact can be processed.
 
 1. Workhorse reads the LSIF document line by line and generates code intelligence
    data for each file in the project. The output is a zipped directory of JSON

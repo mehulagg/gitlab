@@ -43,7 +43,15 @@ module EE
             params.delete(:file_template_project_id) unless
               group.feature_available?(:custom_file_templates_for_namespace)
 
+            params.delete(:prevent_forking_outside_group) unless
+              can?(current_user, :change_prevent_group_forking, group)
+
             super
+          end
+
+          override :authorize_group_creation!
+          def authorize_group_creation!
+            authorize! :create_group_via_api
           end
 
           def check_audit_events_available!(group)
@@ -51,7 +59,13 @@ module EE
           end
 
           def audit_log_finder_params
-            params.slice(:created_after, :created_before)
+            params
+              .slice(:created_after, :created_before)
+              .then { |params| filter_by_author(params) }
+          end
+
+          def filter_by_author(params)
+            can?(current_user, :admin_group, user_group) ? params : params.merge(author_id: current_user.id)
           end
 
           override :delete_group
@@ -87,8 +101,9 @@ module EE
 
           segment ':id/audit_events' do
             before do
-              authorize! :admin_group, user_group
+              authorize! :read_group_audit_events, user_group
               check_audit_events_available!(user_group)
+              increment_unique_values('a_compliance_audit_events_api', current_user.id)
             end
 
             desc 'Get a list of audit events in this group.' do

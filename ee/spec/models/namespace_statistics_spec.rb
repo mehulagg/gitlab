@@ -3,93 +3,226 @@
 require 'spec_helper'
 
 RSpec.describe NamespaceStatistics do
+  include WikiHelpers
+
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:group_wiki) do
+    create(:group_wiki, group: group).tap do |group_wiki|
+      group_wiki.create_page('home', 'test content')
+    end
+  end
+
   it { is_expected.to belong_to(:namespace) }
 
   it { is_expected.to validate_presence_of(:namespace) }
 
-  describe '#shared_runners_minutes' do
-    let(:namespace_statistics) { build(:namespace_statistics, shared_runners_seconds: 120) }
+  describe '#refresh!' do
+    let(:namespace) { group }
+    let(:statistics) { create(:namespace_statistics, namespace: namespace) }
+    let(:columns) { [] }
 
-    it { expect(namespace_statistics.shared_runners_minutes).to eq(2) }
+    subject { statistics.refresh!(only: columns) }
+
+    context 'when database is read_only' do
+      it 'does not save the object' do
+        allow(Gitlab::Database).to receive(:read_only?).and_return(true)
+
+        expect(statistics).not_to receive(:save!)
+
+        subject
+      end
+    end
+
+    context 'when namespace belong to a user' do
+      let(:namespace) { user.namespace }
+
+      it 'does not save the object' do
+        expect(statistics).not_to receive(:save!)
+
+        subject
+      end
+    end
+
+    shared_examples 'creates the namespace statistics' do
+      specify do
+        expect(statistics).to receive(:save!)
+
+        subject
+      end
+    end
+
+    context 'when invalid option is passed' do
+      let(:columns) { [:foo] }
+
+      it 'does not update any column' do
+        expect(statistics).not_to receive(:update_wiki_size)
+
+        subject
+      end
+
+      it_behaves_like 'creates the namespace statistics'
+    end
+
+    context 'when no option is passed' do
+      it 'updates the wiki size' do
+        expect(statistics).to receive(:update_wiki_size)
+
+        subject
+      end
+
+      it_behaves_like 'creates the namespace statistics'
+    end
+
+    context 'when wiki_size option is passed' do
+      let(:columns) { [:wiki_size] }
+
+      it 'updates the wiki size' do
+        expect(statistics).to receive(:update_wiki_size)
+
+        subject
+      end
+
+      it_behaves_like 'creates the namespace statistics'
+    end
   end
 
-  describe '#extra_shared_runners_minutes' do
-    subject { namespace_statistics.extra_shared_runners_minutes }
+  describe '#update_storage_size' do
+    let_it_be(:statistics, reload: true) { create(:namespace_statistics, namespace: group) }
 
-    let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
-    let(:namespace_statistics) { create(:namespace_statistics, namespace: namespace) }
+    it 'sets storage_size to the wiki_size' do
+      statistics.wiki_size = 3
 
-    context 'when limit is defined' do
-      before do
-        namespace.update_attribute(:extra_shared_runners_minutes_limit, 50)
-      end
+      statistics.update_storage_size
 
-      context 'when usage is above the main quota' do
-        before do
-          namespace_statistics.update_attribute(:shared_runners_seconds, 101 * 60)
-        end
+      expect(statistics.storage_size).to eq 3
+    end
+  end
 
-        it { is_expected.to eq(1) }
-      end
+  describe '#update_wiki_size' do
+    let_it_be(:statistics, reload: true) { create(:namespace_statistics, namespace: group) }
 
-      context 'when usage is below the main quota' do
-        before do
-          namespace_statistics.update_attribute(:shared_runners_seconds, 99 * 60)
-        end
+    subject { statistics.update_wiki_size }
 
-        it { is_expected.to eq(0) }
+    context 'when group_wikis feature is not enabled' do
+      it 'does not update the wiki size' do
+        stub_group_wikis(false)
+
+        subject
+
+        expect(statistics.wiki_size).to be_zero
       end
     end
 
-    context 'without limit' do
+    context 'when group_wikis feature is enabled enabled' do
       before do
-        namespace.update_attribute(:extra_shared_runners_minutes_limit, nil)
+        stub_group_wikis(true)
       end
 
-      it { is_expected.to eq(0) }
+      it 'updates the wiki size' do
+        subject
+
+        expect(statistics.wiki_size).to eq group.wiki.repository.size.megabytes.to_i
+      end
+
+      context 'when namespace does not belong to a group' do
+        let(:statistics) { create(:namespace_statistics, namespace: user.namespace) }
+
+        it 'does not update the wiki size' do
+          expect(statistics).not_to receive(:wiki)
+
+          subject
+
+          expect(statistics.wiki_size).to be_zero
+        end
+      end
+    end
+  end
+
+  context 'before saving statistics' do
+    let(:statistics) { create(:namespace_statistics, namespace: group, wiki_size: 10) }
+
+    it 'updates storage size' do
+      expect(statistics).to receive(:update_storage_size).and_call_original
+
+      statistics.save!
+
+      expect(statistics.storage_size).to eq 10
+    end
+  end
+
+  context 'after saving statistics', :aggregate_failures do
+    let(:statistics) { create(:namespace_statistics, namespace: namespace) }
+    let(:namespace) { group }
+
+    context 'when storage_size is not updated' do
+      it 'does not enqueue the job to update root storage statistics' do
+        expect(statistics).not_to receive(:update_root_storage_statistics)
+        expect(Namespaces::ScheduleAggregationWorker).not_to receive(:perform_async)
+
+        statistics.save!
+      end
     end
 
-    context 'when limit is defined globally' do
+    context 'when storage_size is updated' do
       before do
-        namespace.update_attribute(:shared_runners_minutes_limit, nil)
-
-        stub_application_setting(shared_runners_minutes: 100)
+        # we have to update this value instead of `storage_size` because the before_save
+        # hook we have. If we don't do it, storage_size will be set to the wiki_size value
+        # which is 0.
+        statistics.wiki_size = 10
       end
 
-      context 'when usage is above the main quota' do
-        before do
-          namespace_statistics.update_attribute(:shared_runners_seconds, 101 * 60)
-        end
+      it 'enqueues the job to update root storage statistics' do
+        expect(statistics).to receive(:update_root_storage_statistics).and_call_original
+        expect(Namespaces::ScheduleAggregationWorker).to receive(:perform_async).with(group.id)
 
-        context 'and extra CI minutes have been assigned' do
-          before do
-            namespace.update_attribute(:extra_shared_runners_minutes_limit, 50)
-          end
-
-          it { is_expected.to eq(1) }
-        end
-
-        context 'and extra CI minutes have not been assigned' do
-          before do
-            namespace.update_attribute(:extra_shared_runners_minutes_limit, nil)
-          end
-
-          it { is_expected.to eq(0) }
-        end
+        statistics.save!
       end
 
-      context 'when usage is below the main quota' do
-        before do
-          namespace_statistics.update_attribute(:shared_runners_seconds, 90 * 60)
-        end
+      context 'when namespace does not belong to a group' do
+        let(:namespace) { user.namespace }
 
-        context 'and extra CI minutes have been assigned' do
-          before do
-            namespace.update_attribute(:extra_shared_runners_minutes_limit, 50)
-          end
+        it 'does not enqueue the job to update root storage statistics' do
+          expect(statistics).to receive(:update_root_storage_statistics).and_call_original
+          expect(Namespaces::ScheduleAggregationWorker).not_to receive(:perform_async)
 
-          it { is_expected.to eq(0) }
+          statistics.save!
         end
+      end
+    end
+
+    context 'when other columns are updated' do
+      it 'does not enqueue the job to update root storage statistics' do
+        columns_to_update = NamespaceStatistics.columns_hash.except('id', 'namespace_id', 'wiki_size', 'storage_size').keys
+        columns_to_update.each { |c| statistics[c] = 10 }
+
+        expect(statistics).not_to receive(:update_root_storage_statistics)
+        expect(Namespaces::ScheduleAggregationWorker).not_to receive(:perform_async)
+
+        statistics.save!
+      end
+    end
+  end
+
+  context 'after destroy statistics', :aggregate_failures do
+    let(:statistics) { create(:namespace_statistics, namespace: namespace) }
+    let(:namespace) { group }
+
+    it 'enqueues the job to update root storage statistics' do
+      expect(statistics).to receive(:update_root_storage_statistics).and_call_original
+      expect(Namespaces::ScheduleAggregationWorker).to receive(:perform_async).with(group.id)
+
+      statistics.destroy!
+    end
+
+    context 'when namespace belongs to a group' do
+      let(:namespace) { user.namespace }
+
+      it 'does not enqueue the job to update root storage statistics' do
+        expect(statistics).to receive(:update_root_storage_statistics).and_call_original
+        expect(Namespaces::ScheduleAggregationWorker).not_to receive(:perform_async)
+
+        statistics.destroy!
       end
     end
   end

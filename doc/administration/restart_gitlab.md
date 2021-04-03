@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # How to restart GitLab
 
 Depending on how you installed GitLab, there are different methods to restart
@@ -134,7 +140,7 @@ your server in `/etc/init.d/gitlab`.
 
 ---
 
-If you are using other init systems, like systemd, you can check the
+If you are using other init systems, like `systemd`, you can check the
 [GitLab Recipes](https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/init) repository for some unofficial services. These are
 **not** officially supported so use them at your own risk.
 

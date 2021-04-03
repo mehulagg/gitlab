@@ -36,15 +36,16 @@ module EE
         resource :namespaces, requirements: ::API::API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
           helpers do
             params :gitlab_subscription_optional_attributes do
-              optional :start_date, type: Date, desc: 'The date when subscription was started'
-              optional :seats, type: Integer, desc: 'The number of seats purchased'
-              optional :max_seats_used, type: Integer, desc: 'The max number of active users detected in the last month'
-              optional :plan_code, type: String, desc: 'The code of the purchased plan'
-              optional :end_date, type: Date, desc: 'The date when subscription expires'
-              optional :auto_renew, type: Grape::API::Boolean, desc: 'Whether the subscription auto renews'
-              optional :trial, type: Grape::API::Boolean, desc: 'Whether the subscription is trial'
-              optional :trial_ends_on, type: Date, desc: 'The date when the trial expires'
-              optional :trial_starts_on, type: Date, desc: 'The date when the trial starts'
+              optional :start_date, type: Date, desc: 'Start date of subscription'
+              optional :seats, type: Integer, desc: 'Number of seats in subscription'
+              optional :max_seats_used, type: Integer, desc: 'Highest number of active users in the last month'
+              optional :plan_code, type: String, desc: 'Subscription tier code'
+              optional :end_date, type: Date, desc: 'End date of subscription'
+              optional :auto_renew, type: Grape::API::Boolean, desc: 'Whether subscription will auto renew on end date'
+              optional :trial, type: Grape::API::Boolean, desc: 'Whether the subscription is a trial'
+              optional :trial_ends_on, type: Date, desc: 'End date of trial'
+              optional :trial_starts_on, type: Date, desc: 'Start date of trial'
+              optional :trial_extension_type, type: Integer, desc: 'Whether subscription is an extended or reactivated trial'
             end
           end
 
@@ -123,6 +124,7 @@ module EE
 
             subscription_params = declared_params(include_missing: false)
             subscription_params[:trial_starts_on] ||= subscription_params[:start_date] if subscription_params[:trial]
+            subscription_params[:updated_at] = Time.current
 
             if subscription.update(subscription_params)
               present subscription, with: ::EE::API::Entities::GitlabSubscription

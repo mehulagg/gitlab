@@ -1,4 +1,10 @@
-# GitLab as OpenID Connect identity provider
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
+# GitLab as OpenID Connect identity provider **(FREE)**
 
 This document is about using GitLab as an OpenID Connect identity provider
 to sign in to other services.
@@ -6,17 +12,18 @@ to sign in to other services.
 ## Introduction to OpenID Connect
 
 [OpenID Connect](https://openid.net/connect/) \(OIDC) is a simple identity layer on top of the
-OAuth 2.0 protocol. It allows clients to verify the identity of the end-user
-based on the authentication performed by GitLab, as well as to obtain
-basic profile information about the end-user in an interoperable and
-REST-like manner. OIDC performs many of the same tasks as OpenID 2.0,
-but does so in a way that is API-friendly, and usable by native and
+OAuth 2.0 protocol. It allows clients to:
+
+- Verify the identity of the end-user based on the authentication performed by GitLab.
+- Obtain basic profile information about the end-user in an interoperable and REST-like manner.
+
+OIDC performs many of the same tasks as OpenID 2.0, but is API-friendly and usable by native and
 mobile applications.
 
 On the client side, you can use [OmniAuth::OpenIDConnect](https://github.com/jjbohn/omniauth-openid-connect/) for Rails
 applications, or any of the other available [client implementations](https://openid.net/developers/libraries/#connect).
 
-GitLab's implementation uses the [doorkeeper-openid_connect](https://github.com/doorkeeper-gem/doorkeeper-openid_connect "Doorkeeper::OpenidConnect website") gem, refer
+The GitLab implementation uses the [doorkeeper-openid_connect](https://github.com/doorkeeper-gem/doorkeeper-openid_connect "Doorkeeper::OpenidConnect website") gem, refer
 to its README for more details about which parts of the specifications
 are supported.
 
@@ -28,7 +35,7 @@ is select the `openid` scope in the application settings.
 
 ## Shared information
 
-Currently the following user information is shared with clients:
+The following user information is shared with clients:
 
 | Claim            | Type      | Description |
 |:-----------------|:----------|:------------|

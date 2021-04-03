@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
+import DurationBadge from '~/jobs/components/log/duration_badge.vue';
 import LineHeader from '~/jobs/components/log/line_header.vue';
 import LineNumber from '~/jobs/components/log/line_number.vue';
-import DurationBadge from '~/jobs/components/log/duration_badge.vue';
 
 describe('Job Log Header Line', () => {
   let wrapper;
@@ -38,7 +38,7 @@ describe('Job Log Header Line', () => {
     });
 
     it('renders the line number component', () => {
-      expect(wrapper.contains(LineNumber)).toBe(true);
+      expect(wrapper.find(LineNumber).exists()).toBe(true);
     });
 
     it('renders a span the provided text', () => {
@@ -90,7 +90,7 @@ describe('Job Log Header Line', () => {
     });
 
     it('renders the duration badge', () => {
-      expect(wrapper.contains(DurationBadge)).toBe(true);
+      expect(wrapper.find(DurationBadge).exists()).toBe(true);
     });
   });
 });

@@ -1,7 +1,14 @@
-import axios from '~/lib/utils/axios_utils';
+import sidebarDetailsIssueQuery from 'ee_else_ce/sidebar/queries/sidebarDetails.query.graphql';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import sidebarDetailsQuery from 'ee_else_ce/sidebar/queries/sidebarDetails.query.graphql';
-import sidebarDetailsForHealthStatusFeatureFlagQuery from 'ee_else_ce/sidebar/queries/sidebarDetailsForHealthStatusFeatureFlag.query.graphql';
+import axios from '~/lib/utils/axios_utils';
+import reviewerRereviewMutation from '../queries/reviewer_rereview.mutation.graphql';
+import sidebarDetailsMRQuery from '../queries/sidebarDetailsMR.query.graphql';
+
+const queries = {
+  merge_request: sidebarDetailsMRQuery,
+  issue: sidebarDetailsIssueQuery,
+};
 
 export const gqClient = createGqClient(
   {},
@@ -19,6 +26,7 @@ export default class SidebarService {
       this.projectsAutocompleteEndpoint = endpointMap.projectsAutocompleteEndpoint;
       this.fullPath = endpointMap.fullPath;
       this.iid = endpointMap.iid;
+      this.issuableType = endpointMap.issuableType;
 
       SidebarService.singleton = this;
     }
@@ -27,20 +35,20 @@ export default class SidebarService {
   }
 
   get() {
-    const hasHealthStatusFeatureFlag = gon.features && gon.features.saveIssuableHealthStatus;
-
     return Promise.all([
       axios.get(this.endpoint),
       gqClient.query({
-        query: hasHealthStatusFeatureFlag
-          ? sidebarDetailsForHealthStatusFeatureFlagQuery
-          : sidebarDetailsQuery,
+        query: this.sidebarDetailsQuery(),
         variables: {
           fullPath: this.fullPath,
           iid: this.iid.toString(),
         },
       }),
     ]);
+  }
+
+  sidebarDetailsQuery() {
+    return queries[this.issuableType];
   }
 
   update(key, data) {
@@ -73,6 +81,17 @@ export default class SidebarService {
   moveIssue(moveToProjectId) {
     return axios.post(this.moveIssueEndpoint, {
       move_to_project_id: moveToProjectId,
+    });
+  }
+
+  requestReview(userId) {
+    return gqClient.mutate({
+      mutation: reviewerRereviewMutation,
+      variables: {
+        userId: convertToGraphQLId('User', `${userId}`), // eslint-disable-line @gitlab/require-i18n-strings
+        projectPath: this.fullPath,
+        iid: this.iid.toString(),
+      },
     });
   }
 }

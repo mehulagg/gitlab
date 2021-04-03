@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :container_repository_registry, class: 'Geo::ContainerRepositoryRegistry' do
+  factory :geo_container_repository_registry, aliases: [:container_repository_registry], class: 'Geo::ContainerRepositoryRegistry' do
     container_repository
     last_sync_failure { nil }
     last_synced_at { nil }
@@ -23,6 +23,10 @@ FactoryBot.define do
       state { :started }
       last_synced_at { 1.day.ago }
       retry_count { 0 }
+    end
+
+    trait :with_repository_id do
+      sequence(:container_repository_id)
     end
   end
 end

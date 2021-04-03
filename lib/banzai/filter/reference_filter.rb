@@ -25,14 +25,12 @@ module Banzai
       def initialize(doc, context = nil, result = nil)
         super
 
-        if update_nodes_enabled?
-          @new_nodes = {}
-          @nodes = self.result[:reference_filter_nodes]
-        end
+        @new_nodes = {}
+        @nodes = self.result[:reference_filter_nodes]
       end
 
       def call_and_update_nodes
-        update_nodes_enabled? ? with_update_nodes { call } : call
+        with_update_nodes { call }
       end
 
       # Returns a data attribute String to attach to a reference link
@@ -55,7 +53,6 @@ module Banzai
         attributes[:reference_type] ||= self.class.reference_type
         attributes[:container] ||= 'body'
         attributes[:placement] ||= 'top'
-        attributes[:html] ||= 'true'
         attributes.delete(:original) if context[:no_original_data]
         attributes.map do |key, value|
           %Q(data-#{key.to_s.dasherize}="#{escape_once(value)}")
@@ -77,6 +74,10 @@ module Banzai
 
       def group
         context[:group]
+      end
+
+      def user
+        context[:user]
       end
 
       def skip_project_check?
@@ -118,12 +119,16 @@ module Banzai
 
       # Yields the link's URL and inner HTML whenever the node is a valid <a> tag.
       def yield_valid_link(node)
-        link = CGI.unescape(node.attr('href').to_s)
+        link = unescape_link(node.attr('href').to_s)
         inner_html = node.inner_html
 
         return unless link.force_encoding('UTF-8').valid_encoding?
 
         yield link, inner_html
+      end
+
+      def unescape_link(href)
+        CGI.unescape(href)
       end
 
       def replace_text_when_pattern_matches(node, index, pattern)
@@ -165,11 +170,7 @@ module Banzai
       end
 
       def replace_text_with_html(node, index, html)
-        if update_nodes_enabled?
-          replace_and_update_new_nodes(node, index, html)
-        else
-          node.replace(html)
-        end
+        replace_and_update_new_nodes(node, index, html)
       end
 
       def replace_and_update_new_nodes(node, index, html)
@@ -208,10 +209,6 @@ module Banzai
           nodes[index, 1] = new_nodes
         end
         result[:reference_filter_nodes] = nodes
-      end
-
-      def update_nodes_enabled?
-        Feature.enabled?(:update_nodes_for_banzai_reference_filter, project)
       end
     end
   end

@@ -1,5 +1,5 @@
-import { shallowMount, RouterLinkStub } from '@vue/test-utils';
 import { GlBadge, GlLink, GlIcon } from '@gitlab/ui';
+import { shallowMount, RouterLinkStub } from '@vue/test-utils';
 import TableRow from '~/repository/components/table/row.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { FILE_SYMLINK_MODE } from '~/vue_shared/constants';
@@ -18,6 +18,9 @@ function factory(propsData = {}) {
       name: propsData.path,
       projectPath: 'gitlab-org/gitlab-ce',
       url: `https://test.com`,
+    },
+    provide: {
+      glFeatures: { refactorBlobViewer: true },
     },
     mocks: {
       $router,
@@ -81,7 +84,7 @@ describe('Repository table row component', () => {
   it.each`
     type        | component         | componentName
     ${'tree'}   | ${RouterLinkStub} | ${'RouterLink'}
-    ${'file'}   | ${'a'}            | ${'hyperlink'}
+    ${'blob'}   | ${RouterLinkStub} | ${'RouterLink'}
     ${'commit'} | ${'a'}            | ${'hyperlink'}
   `('renders a $componentName for type $type', ({ type, component }) => {
     factory({

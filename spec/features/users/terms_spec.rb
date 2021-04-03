@@ -26,6 +26,21 @@ RSpec.describe 'Users > Terms' do
     expect(page).not_to have_content('Continue')
   end
 
+  context 'when user is a project bot' do
+    let(:project_bot) { create(:user, :project_bot) }
+
+    before do
+      enforce_terms
+    end
+
+    it 'auto accepts the terms' do
+      visit terms_path
+
+      expect(page).not_to have_content('Accept terms')
+      expect(project_bot.terms_accepted?).to be(true)
+    end
+  end
+
   context 'when signed in' do
     let(:user) { create(:user) }
 
@@ -106,7 +121,7 @@ RSpec.describe 'Users > Terms' do
 
         enforce_terms
 
-        click_button 'Submit issue'
+        click_button 'Create issue'
 
         expect(current_path).to eq(terms_path)
 

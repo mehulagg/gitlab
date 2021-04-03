@@ -16,13 +16,16 @@ class AuthorizedProjectsWorker
   if Rails.env.test?
     def self.bulk_perform_and_wait(args_list, timeout: 10)
     end
+
+    def self.bulk_perform_inline(args_list)
+    end
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(user_id)
     user = User.find_by(id: user_id)
 
-    user&.refresh_authorized_projects
+    user&.refresh_authorized_projects(source: self.class.name)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end

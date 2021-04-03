@@ -26,6 +26,7 @@ module Gitlab
           build_name: build.name,
           build_stage: build.stage,
           build_status: build.status,
+          build_created_at: build.created_at,
           build_started_at: build.started_at,
           build_finished_at: build.finished_at,
           build_duration: build.duration,
@@ -62,7 +63,9 @@ module Gitlab
             git_http_url: project.http_url_to_repo,
             git_ssh_url: project.ssh_url_to_repo,
             visibility_level: project.visibility_level
-          }
+          },
+
+          environment: build_environment(build)
         }
 
         data
@@ -82,7 +85,16 @@ module Gitlab
           id: runner.id,
           description: runner.description,
           active: runner.active?,
-          is_shared: runner.instance_type?
+          tags: runner.tags&.map(&:name)
+        }
+      end
+
+      def build_environment(build)
+        return unless build.has_environment?
+
+        {
+          name: build.expanded_environment_name,
+          action: build.environment_action
         }
       end
     end

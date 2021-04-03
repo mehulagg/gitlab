@@ -5,4 +5,6 @@ export default () => ({
   errorLoadingPolicies: false,
   isUpdatingPolicy: false,
   errorUpdatingPolicy: false,
+  isRemovingPolicy: false,
+  errorRemovingPolicy: false,
 });

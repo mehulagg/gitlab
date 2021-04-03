@@ -7,7 +7,7 @@ RSpec.describe SearchController, type: :request do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, :public, :repository, :wiki_repo, name: 'awesome project', group: group) }
 
-  before_all do
+  before do
     login_as(user)
   end
 
@@ -67,6 +67,16 @@ RSpec.describe SearchController, type: :request do
         #   - one count for open MRs
         #   - one count for open Issues
         let(:threshold) { 9 }
+
+        it_behaves_like 'an efficient database result'
+      end
+
+      context 'for notes scope' do
+        let(:creation_traits) { [:on_commit] }
+        let(:object) { :note }
+        let(:creation_args) { { project: project } }
+        let(:params) { { search: '*', scope: 'notes' } }
+        let(:threshold) { 0 }
 
         it_behaves_like 'an efficient database result'
       end

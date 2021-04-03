@@ -1,11 +1,9 @@
 <script>
+import { GlFormInput, GlIcon, GlButton } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
-import { GlFormInput } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 
 export default {
-  components: { GlFormInput, Icon, LoadingButton },
+  components: { GlFormInput, GlIcon, GlButton },
   computed: {
     ...mapState(['apiHost', 'connectError', 'connectSuccessful', 'isLoadingProjects', 'token']),
     tokenInputState() {
@@ -35,7 +33,7 @@ export default {
           <p class="form-text text-muted">
             {{
               s__(
-                "ErrorTracking|If you self-host Sentry, enter the full URL of your Sentry instance. If you're using Sentry's hosted solution, enter https://sentry.io",
+                "ErrorTracking|If you self-host Sentry, enter your Sentry instance's full URL. If you use Sentry's hosted solution, enter https://sentry.io",
               )
             }}
           </p>
@@ -58,13 +56,17 @@ export default {
           />
         </div>
         <div class="col-4 col-md-3 gl-pl-0">
-          <loading-button
+          <gl-button
             class="js-error-tracking-connect gl-ml-2 d-inline-flex"
-            :label="isLoadingProjects ? __('Connecting') : __('Connect')"
+            category="secondary"
+            variant="default"
             :loading="isLoadingProjects"
             @click="fetchProjects"
-          />
-          <icon
+          >
+            {{ isLoadingProjects ? __('Connecting') : __('Connect') }}
+          </gl-button>
+
+          <gl-icon
             v-show="connectSuccessful"
             class="js-error-tracking-connect-success gl-ml-2 text-success align-middle"
             :aria-label="__('Projects Successfully Retrieved')"
@@ -73,12 +75,12 @@ export default {
         </div>
       </div>
       <p v-if="connectError" class="gl-field-error">
-        {{ s__('ErrorTracking|Connection has failed. Re-check Auth Token and try again.') }}
+        {{ s__('ErrorTracking|Connection failed. Check Auth Token and try again.') }}
       </p>
       <p v-else class="form-text text-muted">
         {{
           s__(
-            "ErrorTracking|After adding your Auth Token, use the 'Connect' button to load projects",
+            'ErrorTracking|After adding your Auth Token, select the Connect button to load projects.',
           )
         }}
       </p>

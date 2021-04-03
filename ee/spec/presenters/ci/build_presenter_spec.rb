@@ -14,4 +14,26 @@ RSpec.describe Ci::BuildPresenter do
                                 'Only users with permission may successfully run this job.'
     end
   end
+
+  describe '#retryable?' do
+    subject { presenter.retryable? }
+
+    let_it_be(:build) { create(:ci_build, :canceled) }
+
+    context 'when the build exists in a pipeline for merge train' do
+      before do
+        allow(build).to receive(:merge_train_pipeline?) { true }
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when the build does not exist in a pipeline for merge train' do
+      before do
+        allow(build).to receive(:merge_train_pipeline?) { false }
+      end
+
+      it { is_expected.to be true }
+    end
+  end
 end

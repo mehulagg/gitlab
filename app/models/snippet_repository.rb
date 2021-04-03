@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class SnippetRepository < ApplicationRecord
+  include EachBatch
   include Shardable
 
   DEFAULT_EMPTY_FILE_NAME = 'snippetfile'
@@ -12,7 +13,7 @@ class SnippetRepository < ApplicationRecord
 
   belongs_to :snippet, inverse_of: :snippet_repository
 
-  delegate :repository, to: :snippet
+  delegate :repository, :repository_storage, to: :snippet
 
   class << self
     def find_snippet(disk_path)
@@ -93,7 +94,7 @@ class SnippetRepository < ApplicationRecord
   end
 
   def get_last_empty_file_index
-    repository.ls_files(nil).inject(0) do |max, file|
+    repository.ls_files(snippet.default_branch).inject(0) do |max, file|
       idx = file[EMPTY_FILE_PATTERN, 1].to_i
       [idx, max].max
     end
@@ -131,3 +132,5 @@ class SnippetRepository < ApplicationRecord
     action[:action] == :update && action[:content].nil?
   end
 end
+
+SnippetRepository.prepend_if_ee('EE::SnippetRepository')

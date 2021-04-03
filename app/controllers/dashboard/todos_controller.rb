@@ -9,6 +9,8 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   before_action :authorize_read_group!, only: :index
   before_action :find_todos, only: [:index, :destroy_all]
 
+  feature_category :issue_tracking
+
   def index
     @sort = params[:sort]
     @todos = @todos.page(params[:page])
@@ -50,7 +52,7 @@ class Dashboard::TodosController < Dashboard::ApplicationController
   end
 
   def bulk_restore
-    TodoService.new.restore_todos(current_user.todos.for_ids(params[:ids]), current_user)
+    TodoService.new.restore_todos(current_user.todos.id_in(params[:ids]), current_user)
 
     render json: todos_counts
   end

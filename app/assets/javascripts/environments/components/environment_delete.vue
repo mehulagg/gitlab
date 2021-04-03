@@ -1,23 +1,21 @@
 <script>
 /**
  * Renders the delete button that allows deleting a stopped environment.
- * Used in the environments table and the environment detail view.
+ * Used in the environments table.
  */
 
-import $ from 'jquery';
-import { GlTooltipDirective } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTooltipDirective, GlButton, GlModalDirective } from '@gitlab/ui';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
-import LoadingButton from '../../vue_shared/components/loading_button.vue';
 
 export default {
   components: {
-    Icon,
-    LoadingButton,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlModalDirective,
   },
   props: {
     environment: {
@@ -43,7 +41,7 @@ export default {
   },
   methods: {
     onClick() {
-      $(this.$el).tooltip('dispose');
+      this.$root.$emit(BV_HIDE_TOOLTIP, this.$options.deleteEnvironmentTooltipId);
       eventHub.$emit('requestDeleteEnvironment', this.environment);
     },
     onDeleteEnvironment(environment) {
@@ -52,19 +50,20 @@ export default {
       }
     },
   },
+  deleteEnvironmentTooltipId: 'delete-environment-button-tooltip',
 };
 </script>
 <template>
-  <loading-button
-    v-gl-tooltip
+  <gl-button
+    v-gl-tooltip="{ id: $options.deleteEnvironmentTooltipId }"
+    v-gl-modal-directive="'delete-environment-modal'"
     :loading="isLoading"
     :title="title"
     :aria-label="title"
-    container-class="btn btn-danger d-none d-sm-none d-md-block"
-    data-toggle="modal"
-    data-target="#delete-environment-modal"
+    class="gl-display-none gl-md-display-block"
+    variant="danger"
+    category="primary"
+    icon="remove"
     @click="onClick"
-  >
-    <icon name="remove" />
-  </loading-button>
+  />
 </template>

@@ -1,0 +1,14 @@
+fragment BoardEpicNode on BoardEpic {
+  id
+  iid
+  title
+  state
+  reference
+  webPath
+  webUrl
+  createdAt
+  closedAt
+  userPermissions {
+    adminEpic
+  }
+}

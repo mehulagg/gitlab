@@ -14,7 +14,7 @@ RSpec.describe 'Projects > Push Rules', :js do
 
   push_rules_with_titles = {
     reject_unsigned_commits: 'Reject unsigned commits',
-    commit_committer_check: 'Committer restriction'
+    commit_committer_check: 'Reject unverified users'
   }
 
   push_rules_with_titles.each do |rule_attr, title|
@@ -33,7 +33,7 @@ RSpec.describe 'Projects > Push Rules', :js do
 
       context 'licensed' do
         let(:bronze_plan) { create(:bronze_plan) }
-        let(:gold_plan) { create(:gold_plan) }
+        let(:ultimate_plan) { create(:ultimate_plan) }
 
         before do
           stub_licensed_features(rule_attr => true)
@@ -62,7 +62,7 @@ RSpec.describe 'Projects > Push Rules', :js do
 
           context 'when enabled' do
             it 'renders the setting checkbox' do
-              create(:gitlab_subscription, :gold, namespace: project.namespace)
+              create(:gitlab_subscription, :ultimate, namespace: project.namespace)
 
               visit project_settings_repository_path(project)
 

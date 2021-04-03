@@ -1,16 +1,15 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { GlLoadingIcon, GlTab } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
-import List from '~/ide/components/pipelines/list.vue';
-import JobsList from '~/ide/components/jobs/list.vue';
-import Tab from '~/vue_shared/components/tabs/tab.vue';
-import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import { pipelines } from 'jest/ide/mock_data';
+import JobsList from '~/ide/components/jobs/list.vue';
+import List from '~/ide/components/pipelines/list.vue';
 import IDEServices from '~/ide/services';
+import CiIcon from '~/vue_shared/components/ci_icon.vue';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 jest.mock('~/ide/services', () => ({
   pingUsage: jest.fn(),
@@ -20,13 +19,12 @@ describe('IDE pipelines list', () => {
   let wrapper;
 
   const defaultState = {
-    links: { ciHelpPagePath: TEST_HOST },
     pipelinesEmptyStateSvgPath: TEST_HOST,
-    pipelines: {
-      stages: [],
-      failedStages: [],
-      isLoadingJobs: false,
-    },
+  };
+  const defaultPipelinesState = {
+    stages: [],
+    failedStages: [],
+    isLoadingJobs: false,
   };
 
   const fetchLatestPipelineMock = jest.fn();
@@ -34,23 +32,20 @@ describe('IDE pipelines list', () => {
   const failedStagesGetterMock = jest.fn().mockReturnValue([]);
   const fakeProjectPath = 'alpha/beta';
 
-  const createComponent = (state = {}) => {
-    const { pipelines: pipelinesState, ...restOfState } = state;
-    const { defaultPipelines, ...defaultRestOfState } = defaultState;
-
-    const fakeStore = new Vuex.Store({
+  const createStore = (rootState, pipelinesState) => {
+    return new Vuex.Store({
       getters: {
         currentProject: () => ({ web_url: 'some/url ', path_with_namespace: fakeProjectPath }),
       },
       state: {
-        ...defaultRestOfState,
-        ...restOfState,
+        ...defaultState,
+        ...rootState,
       },
       modules: {
         pipelines: {
           namespaced: true,
           state: {
-            ...defaultPipelines,
+            ...defaultPipelinesState,
             ...pipelinesState,
           },
           actions: {
@@ -63,16 +58,14 @@ describe('IDE pipelines list', () => {
             failedStages: failedStagesGetterMock,
             pipelineFailed: () => false,
           },
-          methods: {
-            fetchLatestPipeline: jest.fn(),
-          },
         },
       },
     });
+  };
 
+  const createComponent = (state = {}, pipelinesState = {}) => {
     wrapper = shallowMount(List, {
-      localVue,
-      store: fakeStore,
+      store: createStore(state, pipelinesState),
     });
   };
 
@@ -94,31 +87,33 @@ describe('IDE pipelines list', () => {
 
   describe('when loading', () => {
     let defaultPipelinesLoadingState;
+
     beforeAll(() => {
       defaultPipelinesLoadingState = {
-        ...defaultState.pipelines,
         isLoadingPipeline: true,
       };
     });
 
     it('does not render when pipeline has loaded before', () => {
-      createComponent({
-        pipelines: {
+      createComponent(
+        {},
+        {
           ...defaultPipelinesLoadingState,
           hasLoadedPipeline: true,
         },
-      });
+      );
 
       expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
     });
 
     it('renders loading state', () => {
-      createComponent({
-        pipelines: {
+      createComponent(
+        {},
+        {
           ...defaultPipelinesLoadingState,
           hasLoadedPipeline: false,
         },
-      });
+      );
 
       expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
     });
@@ -126,21 +121,22 @@ describe('IDE pipelines list', () => {
 
   describe('when loaded', () => {
     let defaultPipelinesLoadedState;
+
     beforeAll(() => {
       defaultPipelinesLoadedState = {
-        ...defaultState.pipelines,
         isLoadingPipeline: false,
         hasLoadedPipeline: true,
       };
     });
 
     it('renders empty state when no latestPipeline', () => {
-      createComponent({ pipelines: { ...defaultPipelinesLoadedState, latestPipeline: null } });
+      createComponent({}, { ...defaultPipelinesLoadedState, latestPipeline: null });
       expect(wrapper.element).toMatchSnapshot();
     });
 
     describe('with latest pipeline loaded', () => {
       let withLatestPipelineState;
+
       beforeAll(() => {
         withLatestPipelineState = {
           ...defaultPipelinesLoadedState,
@@ -149,12 +145,12 @@ describe('IDE pipelines list', () => {
       });
 
       it('renders ci icon', () => {
-        createComponent({ pipelines: withLatestPipelineState });
+        createComponent({}, withLatestPipelineState);
         expect(wrapper.find(CiIcon).exists()).toBe(true);
       });
 
       it('renders pipeline data', () => {
-        createComponent({ pipelines: withLatestPipelineState });
+        createComponent({}, withLatestPipelineState);
 
         expect(wrapper.text()).toContain('#1');
       });
@@ -162,13 +158,9 @@ describe('IDE pipelines list', () => {
       it('renders list of jobs', () => {
         const stages = [];
         const isLoadingJobs = true;
-        createComponent({ pipelines: { ...withLatestPipelineState, stages, isLoadingJobs } });
+        createComponent({}, { ...withLatestPipelineState, stages, isLoadingJobs });
 
-        const jobProps = wrapper
-          .findAll(Tab)
-          .at(0)
-          .find(JobsList)
-          .props();
+        const jobProps = wrapper.findAll(GlTab).at(0).find(JobsList).props();
         expect(jobProps.stages).toBe(stages);
         expect(jobProps.loading).toBe(isLoadingJobs);
       });
@@ -177,13 +169,9 @@ describe('IDE pipelines list', () => {
         const failedStages = [];
         failedStagesGetterMock.mockReset().mockReturnValue(failedStages);
         const isLoadingJobs = true;
-        createComponent({ pipelines: { ...withLatestPipelineState, isLoadingJobs } });
+        createComponent({}, { ...withLatestPipelineState, isLoadingJobs });
 
-        const jobProps = wrapper
-          .findAll(Tab)
-          .at(1)
-          .find(JobsList)
-          .props();
+        const jobProps = wrapper.findAll(GlTab).at(1).find(JobsList).props();
         expect(jobProps.stages).toBe(failedStages);
         expect(jobProps.loading).toBe(isLoadingJobs);
       });
@@ -191,12 +179,13 @@ describe('IDE pipelines list', () => {
       describe('with YAML error', () => {
         it('renders YAML error', () => {
           const yamlError = 'test yaml error';
-          createComponent({
-            pipelines: {
+          createComponent(
+            {},
+            {
               ...defaultPipelinesLoadedState,
               latestPipeline: { ...pipelines[0], yamlError },
             },
-          });
+          );
 
           expect(wrapper.text()).toContain('Found errors in your .gitlab-ci.yml:');
           expect(wrapper.text()).toContain(yamlError);

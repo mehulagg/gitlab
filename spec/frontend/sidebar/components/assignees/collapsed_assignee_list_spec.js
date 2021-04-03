@@ -1,7 +1,8 @@
+import { GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import UsersMockHelper from 'helpers/user_mock_data_helper';
-import CollapsedAssigneeList from '~/sidebar/components/assignees/collapsed_assignee_list.vue';
 import CollapsedAssignee from '~/sidebar/components/assignees/collapsed_assignee.vue';
+import CollapsedAssigneeList from '~/sidebar/components/assignees/collapsed_assignee_list.vue';
 
 const DEFAULT_MAX_COUNTER = 99;
 
@@ -20,7 +21,7 @@ describe('CollapsedAssigneeList component', () => {
     });
   }
 
-  const findNoUsersIcon = () => wrapper.find('i[aria-label=None]');
+  const findNoUsersIcon = () => wrapper.find(GlIcon);
   const findAvatarCounter = () => wrapper.find('.avatar-counter');
   const findAssignees = () => wrapper.findAll(CollapsedAssignee);
   const getTooltipTitle = () => wrapper.attributes('title');
@@ -38,6 +39,7 @@ describe('CollapsedAssigneeList component', () => {
 
     it('has no users', () => {
       expect(findNoUsersIcon().exists()).toBe(true);
+      expect(findNoUsersIcon().props('name')).toBe('user');
     });
   });
 
@@ -99,7 +101,7 @@ describe('CollapsedAssigneeList component', () => {
 
     beforeEach(() => {
       users = UsersMockHelper.createNumberRandomUsers(3);
-      userNames = users.map(x => x.name).join(', ');
+      userNames = users.map((x) => x.name).join(', ');
     });
 
     describe('default', () => {
@@ -185,4 +187,26 @@ describe('CollapsedAssigneeList component', () => {
       expect(findAvatarCounter().text()).toEqual(`${DEFAULT_MAX_COUNTER}+`);
     });
   });
+
+  const [busyUser] = UsersMockHelper.createNumberRandomUsers(1);
+  const [canMergeUser] = UsersMockHelper.createNumberRandomUsers(1);
+  busyUser.availability = 'busy';
+  canMergeUser.can_merge = true;
+
+  describe.each`
+    users                       | busy | canMerge | expected
+    ${[busyUser, canMergeUser]} | ${1} | ${1}     | ${`${busyUser.name} (Busy), ${canMergeUser.name} (1/2 can merge)`}
+    ${[busyUser]}               | ${1} | ${0}     | ${`${busyUser.name} (Busy) (cannot merge)`}
+    ${[canMergeUser]}           | ${0} | ${1}     | ${`${canMergeUser.name}`}
+    ${[]}                       | ${0} | ${0}     | ${'Assignee(s)'}
+  `(
+    'with $users.length users, $busy is busy and $canMerge that can merge',
+    ({ users, expected }) => {
+      it('generates the tooltip text', () => {
+        createComponent({ users });
+
+        expect(getTooltipTitle()).toEqual(expected);
+      });
+    },
+  );
 });

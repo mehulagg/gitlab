@@ -1,945 +1,296 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# Gitaly
+# Gitaly and Gitaly Cluster **(FREE SELF)**
 
-[Gitaly](https://gitlab.com/gitlab-org/gitaly) is the service that provides high-level RPC access to
-Git repositories. Without it, no GitLab components can read or write Git data.
+[Gitaly](https://gitlab.com/gitlab-org/gitaly) provides high-level RPC access to Git repositories.
+It is used by GitLab to read and write Git data.
 
-In the Gitaly documentation:
+Gitaly implements a client-server architecture:
 
-- **Gitaly server** refers to any node that runs Gitaly itself.
-- **Gitaly client** refers to any node that runs a process that makes requests of the
-  Gitaly server. Processes include, but are not limited to:
+- A Gitaly server is any node that runs Gitaly itself.
+- A Gitaly client is any node that runs a process that makes requests of the Gitaly server. These
+  include, but are not limited to:
   - [GitLab Rails application](https://gitlab.com/gitlab-org/gitlab).
   - [GitLab Shell](https://gitlab.com/gitlab-org/gitlab-shell).
   - [GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse).
 
-GitLab end users do not have direct access to Gitaly. Gitaly only manages Git
-repository access for GitLab. Other types of GitLab data aren't accessed using Gitaly.
+The following illustrates the Gitaly client-server architecture:
 
-CAUTION: **Caution:**
-From GitLab 13.0, Gitaly support for NFS is deprecated. In GitLab 14.0, Gitaly support
-for NFS is scheduled to be removed. Upgrade to [Gitaly Cluster](praefect.md) as soon as
-possible.
+```mermaid
+flowchart TD
+  subgraph Gitaly clients
+    A[GitLab Rails]
+    B[GitLab Workhorse]
+    C[GitLab Shell]
+    D[...]
+  end
 
-## Architecture
+  subgraph Gitaly
+    E[Git integration]
+  end
 
-The following is a high-level architecture overview of how Gitaly is used.
+F[Local filesystem]
 
-![Gitaly architecture diagram](img/architecture_v12_4.png)
+A -- gRPC --> Gitaly
+B -- gRPC--> Gitaly
+C -- gRPC --> Gitaly
+D -- gRPC --> Gitaly
+
+E --> F
+```
+
+End users do not have direct access to Gitaly. Gitaly manages only Git repository access for GitLab.
+Other types of GitLab data aren't accessed using Gitaly.
+
+<!-- vale gitlab.FutureTense = NO -->
+
+WARNING:
+From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories will no longer be
+considered and customer technical support will be considered out of scope.
+[Read more about Gitaly and NFS](#nfs-deprecation-notice).
+
+<!-- vale gitlab.FutureTense = YES -->
 
 ## Configure Gitaly
 
-The Gitaly service itself is configured via a [TOML configuration file](reference.md).
-
-To change Gitaly settings:
-
-**For Omnibus GitLab**
-
-1. Edit `/etc/gitlab/gitlab.rb` and add or change the
-   [Gitaly settings](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/1dd07197c7e5ae23626aad5a4a070a800b670380/files/gitlab-config-template/gitlab.rb.template#L1622-1676).
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-
-**For installations from source**
-
-1. Edit `/home/git/gitaly/config.toml` and add or change the [Gitaly settings](https://gitlab.com/gitlab-org/gitaly/blob/master/config.toml.example).
-1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
+Gitaly comes pre-configured with Omnibus GitLab, which is a configuration
+[suitable for up to 1000 users](../reference_architectures/1k_users.md). For:
 
-The following configuration options are also available:
+- Omnibus GitLab installations for up to 2000 users, see [specific Gitaly configuration instructions](../reference_architectures/2k_users.md#configure-gitaly).
+- Source installations or custom Gitaly installations, see [Configure Gitaly](#configure-gitaly).
 
-- Enabling [TLS support](#enable-tls-support).
-- Configuring the [number of `gitaly-ruby` workers](#configure-number-of-gitaly-ruby-workers).
-- Limiting [RPC concurrency](#limit-rpc-concurrency).
+GitLab installations for more than 2000 users should use Gitaly Cluster.
 
-## Run Gitaly on its own server
+## Gitaly Cluster
 
-By default, Gitaly is run on the same server as Gitaly clients and is
-[configured as above](#configure-gitaly). Single-server installations are best served by
-this default configuration used by:
+Gitaly, the service that provides storage for Git repositories, can
+be run in a clustered configuration to scale the Gitaly service and increase
+fault tolerance. In this configuration, every Git repository is stored on every
+Gitaly node in the cluster.
 
-- [Omnibus GitLab](https://docs.gitlab.com/omnibus/).
-- The GitLab [source installation guide](../../install/installation.md).
+Using a Gitaly Cluster increases fault tolerance by:
 
-However, Gitaly can be deployed to its own server, which can benefit GitLab installations that span
-multiple machines.
+- Replicating write operations to warm standby Gitaly nodes.
+- Detecting Gitaly node failures.
+- Automatically routing Git requests to an available Gitaly node.
 
-NOTE: **Note:**
-When configured to run on their own servers, Gitaly servers
-[must be upgraded](https://docs.gitlab.com/omnibus/update/#upgrading-gitaly-servers) before Gitaly
-clients in your cluster.
+NOTE:
+Technical support for Gitaly clusters is limited to GitLab Premium and Ultimate
+customers.
 
-The process for setting up Gitaly on its own server is:
+The availability objectives for Gitaly clusters are:
 
-1. [Install Gitaly](#install-gitaly).
-1. [Configure authentication](#configure-authentication).
-1. [Configure Gitaly servers](#configure-gitaly-servers).
-1. [Configure Gitaly clients](#configure-gitaly-clients).
-1. [Disable Gitaly where not required](#disable-gitaly-where-not-required-optional) (optional).
+- **Recovery Point Objective (RPO):** Less than 1 minute.
 
-When running Gitaly on its own server, note the following regarding GitLab versions:
+  Writes are replicated asynchronously. Any writes that have not been replicated
+  to the newly promoted primary are lost.
 
-- From GitLab 11.4, Gitaly was able to serve all Git requests without requiring a shared NFS mount
-  for Git repository data, except for the
-  [Elasticsearch indexer](https://gitlab.com/gitlab-org/gitlab-elasticsearch-indexer).
-- From GitLab 11.8, the Elasticsearch indexer uses Gitaly for data access as well. NFS can still be
-  leveraged for redundancy on block-level Git data, but only has to be mounted on the Gitaly
-  servers.
-- From GitLab 11.8 to 12.2, it is possible to use Elasticsearch in a Gitaly setup that doesn't use
-  NFS. In order to use Elasticsearch in these versions, the
-  [repository indexer](../../integration/elasticsearch.md#elasticsearch-repository-indexer)
-  must be enabled in your GitLab configuration.
-- [Since GitLab 12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/6481), the new indexer is
-  the default and no configuration is required.
+  [Strong consistency](praefect.md#strong-consistency) can be used to avoid loss in some
+  circumstances.
 
-### Network architecture
+- **Recovery Time Objective (RTO):** Less than 10 seconds.
+  Outages are detected by a health check run by each Praefect node every
+  second. Failover requires ten consecutive failed health checks on each
+  Praefect node.
 
-The following list depicts the network architecture of Gitaly:
+  [Faster outage detection](https://gitlab.com/gitlab-org/gitaly/-/issues/2608)
+  is planned to improve this to less than 1 second.
 
-- GitLab Rails shards repositories into [repository storages](../repository_storage_paths.md).
-- `/config/gitlab.yml` contains a map from storage names to `(Gitaly address, Gitaly token)` pairs.
-- The `storage name` -\> `(Gitaly address, Gitaly token)` map in `/config/gitlab.yml` is the single
-  source of truth for the Gitaly network topology.
-- A `(Gitaly address, Gitaly token)` corresponds to a Gitaly server.
-- A Gitaly server hosts one or more storages.
-- A Gitaly client can use one or more Gitaly servers.
-- Gitaly addresses must be specified in such a way that they resolve correctly for **all** Gitaly
-  clients.
-- Gitaly clients are:
-  - Puma or Unicorn.
-  - Sidekiq.
-  - GitLab Workhorse.
-  - GitLab Shell.
-  - Elasticsearch indexer.
-  - Gitaly itself.
-- A Gitaly server must be able to make RPC calls **to itself** via its own
-  `(Gitaly address, Gitaly token)` pair as specified in `/config/gitlab.yml`.
-- Authentication is done through a static token which is shared among the Gitaly and GitLab Rails
-  nodes.
+Gitaly Cluster supports:
 
-DANGER: **Danger:**
-Gitaly servers must not be exposed to the public internet as Gitaly's network traffic is unencrypted
-by default. The use of firewall is highly recommended to restrict access to the Gitaly server.
-Another option is to [use TLS](#enable-tls-support).
+- [Strong consistency](praefect.md#strong-consistency) of the secondary replicas.
+- [Automatic failover](praefect.md#automatic-failover-and-leader-election) from the primary to the secondary.
+- Reporting of possible data loss if replication queue is non-empty.
+- Marking repositories as [read only](praefect.md#read-only-mode) if data loss is detected to prevent data inconsistencies.
 
-In the following sections, we describe how to configure two Gitaly servers with secret token
-`abc123secret`:
+Follow the [Gitaly Cluster epic](https://gitlab.com/groups/gitlab-org/-/epics/1489)
+for improvements including
+[horizontally distributing reads](https://gitlab.com/groups/gitlab-org/-/epics/2013).
 
-- `gitaly1.internal`.
-- `gitaly2.internal`.
+### Overview
 
-We assume your GitLab installation has three repository storages:
+Git storage is provided through the Gitaly service in GitLab, and is essential
+to the operation of the GitLab application. When the number of
+users, repositories, and activity grows, it is important to scale Gitaly
+appropriately by:
 
-- `default`.
-- `storage1`.
-- `storage2`.
+- Increasing the available CPU and memory resources available to Git before
+  resource exhaustion degrades Git, Gitaly, and GitLab application performance.
+- Increase available storage before storage limits are reached causing write
+  operations to fail.
+- Improve fault tolerance by removing single points of failure. Git should be
+  considered mission critical if a service degradation would prevent you from
+  deploying changes to production.
 
-You can use as few as one server with one repository storage if desired.
+### Moving beyond NFS
 
-NOTE: **Note:**
-The token referred to throughout the Gitaly documentation is just an arbitrary password selected by
-the administrator. It is unrelated to tokens created for the GitLab API or other similar web API
-tokens.
+WARNING:
+From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,
+support for NFS for Git repositories is scheduled to be removed. Upgrade to
+Gitaly Cluster as soon as possible.
 
-### Install Gitaly
+[Network File System (NFS)](https://en.wikipedia.org/wiki/Network_File_System)
+is not well suited to Git workloads which are CPU and IOPS sensitive.
+Specifically:
 
-Install Gitaly on each Gitaly server using either Omnibus GitLab or install it from source:
+- Git is sensitive to file system latency. Even simple operations require many
+  read operations. Operations that are fast on block storage can become an order of
+  magnitude slower. This significantly impacts GitLab application performance.
+- NFS performance optimizations that prevent the performance gap between
+  block storage and NFS being even wider are vulnerable to race conditions. We have observed
+  [data inconsistencies](https://gitlab.com/gitlab-org/gitaly/-/issues/2589)
+  in production environments caused by simultaneous writes to different NFS
+  clients. Data corruption is not an acceptable risk.
 
-- For Omnibus GitLab, [download and install](https://about.gitlab.com/install/) the Omnibus GitLab
-  package you want but **do not** provide the `EXTERNAL_URL=` value.
-- To install from source, follow the steps at
-  [Install Gitaly](../../install/installation.md#install-gitaly).
+Gitaly Cluster is purpose built to provide reliable, high performance, fault
+tolerant Git storage.
 
-### Configure authentication
+Further reading:
 
-Gitaly and GitLab use two shared secrets for authentication:
+- Blog post: [The road to Gitaly v1.0 (aka, why GitLab doesn't require NFS for storing Git data anymore)](https://about.gitlab.com/blog/2018/09/12/the-road-to-gitaly-1-0/)
+- Blog post: [How we spent two weeks hunting an NFS bug in the Linux kernel](https://about.gitlab.com/blog/2018/11/14/how-we-spent-two-weeks-hunting-an-nfs-bug/)
 
-- One to authenticate gRPC requests to Gitaly.
-- A second for authentication callbacks from GitLab Shell to the GitLab internal API.
+### Where Gitaly Cluster fits
 
-**For Omnibus GitLab**
+GitLab accesses [repositories](../../user/project/repository/index.md) through the configured
+[repository storages](../repository_storage_paths.md). Each new repository is stored on one of the
+repository storages based on their configured weights. Each repository storage is either:
 
-To configure the Gitaly token:
+- A Gitaly storage served directly by Gitaly. These map to a directory on the file system of a
+  Gitaly node.
+- A [virtual storage](#virtual-storage-or-direct-gitaly-storage) served by Praefect. A virtual
+  storage is a cluster of Gitaly storages that appear as a single repository storage.
 
-1. On the Gitaly clients, edit `/etc/gitlab/gitlab.rb`:
+Virtual storages are a feature of Gitaly Cluster. They support replicating the repositories to
+multiple storages for fault tolerance. Virtual storages can improve performance by distributing
+requests across Gitaly nodes. Their distributed nature makes it viable to have a single repository
+storage in GitLab to simplify repository management.
 
-   ```ruby
-   gitlab_rails['gitaly_token'] = 'abc123secret'
-   ```
+### Components of Gitaly Cluster
 
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. On the Gitaly server, edit `/etc/gitlab/gitlab.rb`:
+Gitaly Cluster consists of multiple components:
 
-   ```ruby
-   gitaly['auth_token'] = 'abc123secret'
-   ```
+- [Load balancer](praefect.md#load-balancer) for distributing requests and providing fault-tolerant access to
+  Praefect nodes.
+- [Praefect](praefect.md#praefect) nodes for managing the cluster and routing requests to Gitaly nodes.
+- [PostgreSQL database](praefect.md#postgresql) for persisting cluster metadata and [PgBouncer](praefect.md#pgbouncer),
+  recommended for pooling Praefect's database connections.
+- Gitaly nodes to provide repository storage and Git access.
 
-1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+![Cluster example](img/cluster_example_v13_3.png)
 
-There are two ways to configure the GitLab Shell token.
+In this example:
 
-Method 1:
+- Repositories are stored on a virtual storage called `storage-1`.
+- Three Gitaly nodes provide `storage-1` access: `gitaly-1`, `gitaly-2`, and `gitaly-3`.
+- The three Gitaly nodes store data on their file systems.
 
-1. Copy `/etc/gitlab/gitlab-secrets.json` from the Gitaly client to same path on the Gitaly servers
-   (and any other Gitaly clients).
-1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) on Gitaly servers.
+### Virtual storage or direct Gitaly storage
 
-Method 2:
+Gitaly supports multiple models of scaling:
 
-1. On the Gitaly clients, edit `/etc/gitlab/gitlab.rb`:
+- Clustering using Gitaly Cluster, where each repository is stored on multiple Gitaly nodes in the
+  cluster. Read requests are distributed between repository replicas and write requests are
+  broadcast to repository replicas. GitLab accesses virtual storage.
+- Direct access to Gitaly storage using [repository storage paths](../repository_storage_paths.md),
+  where each repository is stored on the assigned Gitaly node. All requests are routed to this node.
 
-   ```ruby
-   gitlab_shell['secret_token'] = 'shellsecret'
-   ```
+The following is Gitaly set up to use direct access to Gitaly instead of Gitaly Cluster:
 
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. On the Gitaly servers, edit `/etc/gitlab/gitlab.rb`:
+![Shard example](img/shard_example_v13_3.png)
 
-   ```ruby
-   gitlab_shell['secret_token'] = 'shellsecret'
-   ```
+In this example:
 
-1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+- Each repository is stored on one of three Gitaly storages: `storage-1`, `storage-2`,
+  or `storage-3`.
+- Each storage is serviced by a Gitaly node.
+- The three Gitaly nodes store data in three separate hashed storage locations.
 
-**For installations from source**
+Generally, virtual storage with Gitaly Cluster can replace direct Gitaly storage configurations, at
+the expense of additional storage needed to store each repository on multiple Gitaly nodes. The
+benefit of using Gitaly Cluster over direct Gitaly storage is:
 
-1. Copy `/home/git/gitlab/.gitlab_shell_secret` from the Gitaly client to the same path on the
-   Gitaly servers (and any other Gitaly clients).
-1. On the Gitaly clients, edit `/home/git/gitlab/config/gitlab.yml`:
+- Improved fault tolerance, because each Gitaly node has a copy of every repository.
+- Improved resource utilization, reducing the need for over-provisioning for shard-specific peak
+  loads, because read loads are distributed across replicas.
+- Manual rebalancing for performance is not required, because read loads are distributed across
+  replicas.
+- Simpler management, because all Gitaly nodes are identical.
 
-   ```yaml
-   gitlab:
-     gitaly:
-       token: 'abc123secret'
-   ```
+Under some workloads, CPU and memory requirements may require a large fleet of Gitaly nodes. It
+can be uneconomical to have one to one replication factor.
 
-1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
-1. On the Gitaly servers, edit `/home/git/gitaly/config.toml`:
+A hybrid approach can be used in these instances, where each shard is configured as a smaller
+cluster. [Variable replication factor](https://gitlab.com/groups/gitlab-org/-/epics/3372) is planned
+to provide greater flexibility for extremely large GitLab instances.
 
-   ```toml
-   [auth]
-   token = 'abc123secret'
-   ```
+### Gitaly Cluster compared to Geo
 
-1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
+Gitaly Cluster and [Geo](../geo/index.md) both provide redundancy. However the redundancy of:
 
-### Configure Gitaly servers
+- Gitaly Cluster provides fault tolerance for data storage and is invisible to the user. Users are
+  not aware when Gitaly Cluster is used.
+- Geo provides [replication](../geo/index.md) and [disaster recovery](../geo/disaster_recovery/index.md) for
+  an entire instance of GitLab. Users know when they are using Geo for
+  [replication](../geo/index.md). Geo [replicates multiple data types](../geo/replication/datatypes.md#limitations-on-replicationverification),
+  including Git data.
 
-On the Gitaly servers, you must configure storage paths and enable the network listener.
+The following table outlines the major differences between Gitaly Cluster and Geo:
 
-If you want to reduce the risk of downtime when you enable authentication, you can temporarily
-disable enforcement. For more information, see the documentation on configuring
-[Gitaly authentication](https://gitlab.com/gitlab-org/gitaly/blob/master/doc/configuration/README.md#authentication).
+| Tool           | Nodes    | Locations | Latency tolerance  | Failover                                                        | Consistency                              | Provides redundancy for |
+|:---------------|:---------|:----------|:-------------------|:----------------------------------------------------------------|:-----------------------------------------|:------------------------|
+| Gitaly Cluster | Multiple | Single    | Approximately 1 ms | [Automatic](praefect.md#automatic-failover-and-leader-election) | [Strong](praefect.md#strong-consistency) | Data storage in Git     |
+| Geo            | Multiple | Multiple  | Up to one minute   | [Manual](../geo/disaster_recovery/index.md)                     | Eventual                                 | Entire GitLab instance  |
 
-**For Omnibus GitLab**
+For more information, see:
 
-1. Edit `/etc/gitlab/gitlab.rb`:
+- Geo [use cases](../geo/index.md#use-cases).
+- Geo [architecture](../geo/index.md#architecture).
 
-   <!--
-   updates to following example must also be made at
-   https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/advanced/external-gitaly/external-omnibus-gitaly.md#configure-omnibus-gitlab
-   -->
+### Architecture
 
-   ```ruby
-   # /etc/gitlab/gitlab.rb
+Praefect is a router and transaction manager for Gitaly, and a required
+component for running a Gitaly Cluster.
 
-   # Avoid running unnecessary services on the Gitaly server
-   postgresql['enable'] = false
-   redis['enable'] = false
-   nginx['enable'] = false
-   puma['enable'] = false
-   sidekiq['enable'] = false
-   gitlab_workhorse['enable'] = false
-   grafana['enable'] = false
-   gitlab_exporter['enable'] = false
+![Architecture diagram](img/praefect_architecture_v12_10.png)
 
-   # If you run a separate monitoring node you can disable these services
-   alertmanager['enable'] = false
-   prometheus['enable'] = false
+For more information, see [Gitaly High Availability (HA) Design](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/design_ha.md).
 
-   # If you don't run a separate monitoring node you can
-   # enable Prometheus access & disable these extra services.
-   # This makes Prometheus listen on all interfaces. You must use firewalls to restrict access to this address/port.
-   # prometheus['listen_address'] = '0.0.0.0:9090'
-   # prometheus['monitor_kubernetes'] = false
+### Configure Gitaly Cluster
 
-   # If you don't want to run monitoring services uncomment the following (not recommended)
-   # node_exporter['enable'] = false
+For more information on configuring Gitaly Cluster, see [Configure Gitaly Cluster](praefect.md).
 
-   # Prevent database connections during 'gitlab-ctl reconfigure'
-   gitlab_rails['rake_cache_clear'] = false
-   gitlab_rails['auto_migrate'] = false
+## Do not bypass Gitaly
 
-   # Configure the gitlab-shell API callback URL. Without this, `git push` will
-   # fail. This can be your 'front door' GitLab URL or an internal load
-   # balancer.
-   # Don't forget to copy `/etc/gitlab/gitlab-secrets.json` from Gitaly client to Gitaly server.
-   gitlab_rails['internal_api_url'] = 'https://gitlab.example.com'
+GitLab doesn't advise directly accessing Gitaly repositories stored on disk with a Git client,
+because Gitaly is being continuously improved and changed. These improvements may invalidate
+your assumptions, resulting in performance degradation, instability, and even data loss. For example:
 
-   # Make Gitaly accept connections on all network interfaces. You must use
-   # firewalls to restrict access to this address/port.
-   # Comment out following line if you only want to support TLS connections
-   gitaly['listen_addr'] = "0.0.0.0:8075"
-   ```
+- Gitaly has optimizations such as the [`info/refs` advertisement cache](https://gitlab.com/gitlab-org/gitaly/blob/master/doc/design_diskcache.md),
+  that rely on Gitaly controlling and monitoring access to repositories by using the official gRPC
+  interface.
+- [Gitaly Cluster](praefect.md) has optimizations, such as fault tolerance and
+  [distributed reads](praefect.md#distributed-reads), that depend on the gRPC interface and database
+  to determine repository state.
 
-1. Append the following to `/etc/gitlab/gitlab.rb` for each respective Gitaly server:
-
-   <!--
-   updates to following example must also be made at
-   https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/advanced/external-gitaly/external-omnibus-gitaly.md#configure-omnibus-gitlab
-   -->
-
-   On `gitaly1.internal`:
-
-   ```ruby
-   git_data_dirs({
-     'default' => {
-       'path' => '/var/opt/gitlab/git-data'
-     },
-     'storage1' => {
-       'path' => '/mnt/gitlab/git-data'
-     },
-   })
-   ```
-
-   On `gitaly2.internal`:
-
-   ```ruby
-   git_data_dirs({
-     'storage2' => {
-       'path' => '/srv/gitlab/git-data'
-     },
-   })
-   ```
-
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Run `sudo /opt/gitlab/embedded/service/gitlab-shell/bin/check -config /opt/gitlab/embedded/service/gitlab-shell/config.yml`
-   to confirm that Gitaly can perform callbacks to the GitLab internal API.
-
-**For installations from source**
-
-1. Edit `/home/git/gitaly/config.toml`:
-
-   ```toml
-   listen_addr = '0.0.0.0:8075'
-
-   internal_socket_dir = '/var/opt/gitlab/gitaly'
-
-   [logging]
-   format = 'json'
-   level = 'info'
-   dir = '/var/log/gitaly'
-   ```
-
-1. Append the following to `/home/git/gitaly/config.toml` for each respective Gitaly server:
-
-   On `gitaly1.internal`:
-
-   ```toml
-   [[storage]]
-   name = 'default'
-   path = '/var/opt/gitlab/git-data/repositories'
-
-   [[storage]]
-   name = 'storage1'
-   path = '/mnt/gitlab/git-data/repositories'
-   ```
-
-   On `gitaly2.internal`:
-
-   ```toml
-   [[storage]]
-   name = 'storage2'
-   path = '/srv/gitlab/git-data/repositories'
-   ```
-
-1. Edit `/home/git/gitlab-shell/config.yml`:
-
-   ```yaml
-   gitlab_url: https://gitlab.example.com
-   ```
-
-1. Save the files and [restart GitLab](../restart_gitlab.md#installations-from-source).
-1. Run `sudo -u git /home/git/gitlab-shell/bin/check -config /home/git/gitlab-shell/config.yml`
-   to confirm that Gitaly can perform callbacks to the GitLab internal API.
-
-### Configure Gitaly clients
-
-As the final step, you must update Gitaly clients to switch from using local Gitaly service to use
-the Gitaly servers you just configured.
-
-This can be risky because anything that prevents your Gitaly clients from reaching the Gitaly
-servers will cause all Gitaly requests to fail. For example, any sort of network, firewall, or name
-resolution problems.
-
-Additionally, you must [disable Rugged](../high_availability/nfs.md#improving-nfs-performance-with-gitlab)
-if previously enabled manually.
-
-Gitaly makes the following assumptions:
-
-- Your `gitaly1.internal` Gitaly server can be reached at `gitaly1.internal:8075` from your Gitaly
-  clients, and that Gitaly server can read and write to `/mnt/gitlab/default` and
-  `/mnt/gitlab/storage1`.
-- Your `gitaly2.internal` Gitaly server can be reached at `gitaly2.internal:8075` from your Gitaly
-  clients, and that Gitaly server can read and write to `/mnt/gitlab/storage2`.
-- Your `gitaly1.internal` and `gitaly2.internal` Gitaly servers can reach each other.
-
-You can't define Gitaly servers with some as a local Gitaly server
-(without `gitaly_address`) and some as remote
-server (with `gitaly_address`) unless you setup with special
-[mixed configuration](#mixed-configuration).
-
-**For Omnibus GitLab**
-
-1. Edit `/etc/gitlab/gitlab.rb`:
-
-   ```ruby
-   git_data_dirs({
-     'default' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
-     'storage1' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
-     'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075' },
-   })
-   ```
-
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Run `sudo gitlab-rake gitlab:gitaly:check` to confirm the Gitaly client can connect to Gitaly
-   servers.
-1. Tail the logs to see the requests:
-
-   ```shell
-   sudo gitlab-ctl tail gitaly
-   ```
-
-**For installations from source**
-
-1. Edit `/home/git/gitlab/config/gitlab.yml`:
-
-   ```yaml
-   gitlab:
-     repositories:
-       storages:
-         default:
-           gitaly_address: tcp://gitaly1.internal:8075
-           path: /some/dummy/path
-         storage1:
-           gitaly_address: tcp://gitaly1.internal:8075
-           path: /some/dummy/path
-         storage2:
-           gitaly_address: tcp://gitaly2.internal:8075
-           path: /some/dummy/path
-   ```
-
-   NOTE: **Note:**
-   `/some/dummy/path` should be set to a local folder that exists, however no data will be stored in
-   this folder. This will no longer be necessary after
-   [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
-
-1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
-1. Run `sudo -u git -H bundle exec rake gitlab:gitaly:check RAILS_ENV=production` to confirm the
-   Gitaly client can connect to Gitaly servers.
-1. Tail the logs to see the requests:
-
-   ```shell
-   tail -f /home/git/gitlab/log/gitaly.log
-   ```
-
-When you tail the Gitaly logs on your Gitaly server, you should see requests coming in. One sure way
-to trigger a Gitaly request is to clone a repository from GitLab over HTTP or HTTPS.
-
-DANGER: **Danger:**
-If you have [server hooks](../server_hooks.md) configured, either per repository or globally, you
-must move these to the Gitaly servers. If you have multiple Gitaly servers, copy your server hooks
-to all Gitaly servers.
-
-#### Mixed configuration
-
-GitLab can reside on the same server as one of many Gitaly servers, but doesn't support
-configuration that mixes local and remote configuration. The following setup is incorrect, because:
-
-- All addresses must be reachable from the other Gitaly servers.
-- `storage1` will be assigned a Unix socket for `gitaly_address` which is
-  invalid for some of the Gitaly servers.
-
-```ruby
-git_data_dirs({
-  'default' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
-  'storage1' => { 'path' => '/mnt/gitlab/git-data' },
-  'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075' },
-})
-```
-
-To combine local and remote Gitaly servers, use an external address for the local Gitaly server. For
-example:
-
-```ruby
-git_data_dirs({
-  'default' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
-  # Address of the GitLab server that has Gitaly running on it
-  'storage1' => { 'gitaly_address' => 'tcp://gitlab.internal:8075', 'path' => '/mnt/gitlab/git-data' },
-  'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075' },
-})
-```
-
-`path` can only be included for storage shards on the local Gitaly server.
-If it's excluded, default Git storage directory will be used for that storage shard.
-
-### Disable Gitaly where not required (optional)
-
-If you are running Gitaly [as a remote service](#run-gitaly-on-its-own-server) you may want to
-disable the local Gitaly service that runs on your GitLab server by default, leaving it only running
-where required.
-
-Disabling Gitaly on the GitLab instance only makes sense when you run GitLab in a custom cluster configuration, where
-Gitaly runs on a separate machine from the GitLab instance. Disabling Gitaly on all machines in the cluster is not
-a valid configuration (some machines much act as Gitaly servers).
-
-To disable Gitaly on a GitLab server:
-
-**For Omnibus GitLab**
-
-1. Edit `/etc/gitlab/gitlab.rb`:
-
-   ```ruby
-   gitaly['enable'] = false
-   ```
-
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-
-**For installations from source**
-
-1. Edit `/etc/default/gitlab`:
-
-   ```shell
-   gitaly_enabled=false
-   ```
-
-1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
-
-## Enable TLS support
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22602) in GitLab 11.8.
-
-Gitaly supports TLS encryption. To communicate with a Gitaly instance that listens for secure
-connections, you must use `tls://` URL scheme in the `gitaly_address` of the corresponding
-storage entry in the GitLab configuration.
-
-You must supply your own certificates as this isn't provided automatically. The certificate
-corresponding to each Gitaly server must be installed on that Gitaly server.
-
-Additionally, the certificate (or its certificate authority) must be installed on all:
-
-- Gitaly servers, including the Gitaly server using the certificate.
-- Gitaly clients that communicate with it.
-
-The process is documented in the
-[GitLab custom certificate configuration](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates)
-and repeated below.
-
-Note the following:
-
-- The certificate must specify the address you use to access the Gitaly server. If you are:
-  - Addressing the Gitaly server by a hostname, you can either use the Common Name field for this,
-    or add it as a Subject Alternative Name.
-  - Addressing the Gitaly server by its IP address, you must add it as a Subject Alternative Name to
-    the certificate. [gRPC does not support using an IP address as Common Name in a certificate](https://github.com/grpc/grpc/issues/2691).
-- You can configure Gitaly servers with both an unencrypted listening address `listen_addr` and an
-  encrypted listening address `tls_listen_addr` at the same time. This allows you to gradually
-  transition from unencrypted to encrypted traffic if necessary.
-
-To configure Gitaly with TLS:
-
-**For Omnibus GitLab**
-
-1. Create certificates for Gitaly servers.
-1. On the Gitaly clients, copy the certificates (or their certificate authority) into
-   `/etc/gitlab/trusted-certs`:
-
-   ```shell
-   sudo cp cert.pem /etc/gitlab/trusted-certs/
-   ```
-
-1. On the Gitaly clients, edit `git_data_dirs` in `/etc/gitlab/gitlab.rb` as follows:
-
-   ```ruby
-   git_data_dirs({
-     'default' => { 'gitaly_address' => 'tls://gitaly1.internal:9999' },
-     'storage1' => { 'gitaly_address' => 'tls://gitaly1.internal:9999' },
-     'storage2' => { 'gitaly_address' => 'tls://gitaly2.internal:9999' },
-   })
-   ```
-
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. On the Gitaly servers, create the `/etc/gitlab/ssl` directory and copy your key and certificate
-   there:
-
-   ```shell
-   sudo mkdir -p /etc/gitlab/ssl
-   sudo chmod 755 /etc/gitlab/ssl
-   sudo cp key.pem cert.pem /etc/gitlab/ssl/
-   sudo chmod 644 key.pem cert.pem
-   ```
-
-1. Copy all Gitaly server certificates (or their certificate authority) to
-   `/etc/gitlab/trusted-certs` so that Gitaly servers will trust the certificate when calling into themselves
-   or other Gitaly servers:
-
-   ```shell
-   sudo cp cert1.pem cert2.pem /etc/gitlab/trusted-certs/
-   ```
-
-1. Edit `/etc/gitlab/gitlab.rb` and add:
-
-   <!--
-   updates to following example must also be made at
-   https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/advanced/external-gitaly/external-omnibus-gitaly.md#configure-omnibus-gitlab
-   -->
-
-   ```ruby
-   gitaly['tls_listen_addr'] = "0.0.0.0:9999"
-   gitaly['certificate_path'] = "/etc/gitlab/ssl/cert.pem"
-   gitaly['key_path'] = "/etc/gitlab/ssl/key.pem"
-   ```
-
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Verify Gitaly traffic is being served over TLS by
-   [observing the types of Gitaly connections](#observe-type-of-gitaly-connections).
-1. (Optional) Improve security by:
-   1. Disabling non-TLS connections by commenting out or deleting `gitaly['listen_addr']` in
-      `/etc/gitlab/gitlab.rb`.
-   1. Saving the file.
-   1. [Reconfiguring GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-
-**For installations from source**
-
-1. Create certificates for Gitaly servers.
-1. On the Gitaly clients, copy the certificates into the system trusted certificates:
-
-   ```shell
-   sudo cp cert.pem /usr/local/share/ca-certificates/gitaly.crt
-   sudo update-ca-certificates
-   ```
-
-1. On the Gitaly clients, edit `storages` in `/home/git/gitlab/config/gitlab.yml` as follows:
-
-   ```yaml
-   gitlab:
-     repositories:
-       storages:
-         default:
-           gitaly_address: tls://gitaly1.internal:9999
-           path: /some/dummy/path
-         storage1:
-           gitaly_address: tls://gitaly1.internal:9999
-           path: /some/dummy/path
-         storage2:
-           gitaly_address: tls://gitaly2.internal:9999
-           path: /some/dummy/path
-   ```
-
-   NOTE: **Note:**
-   `/some/dummy/path` should be set to a local folder that exists, however no data will be stored
-   in this folder. This will no longer be necessary after
-   [Gitaly issue #1282](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
-
-1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
-1. On the Gitaly servers, create or edit `/etc/default/gitlab` and add:
-
-   ```shell
-   export SSL_CERT_DIR=/etc/gitlab/ssl
-   ```
-
-1. On the Gitaly servers, create the `/etc/gitlab/ssl` directory and copy your key and certificate there:
-
-   ```shell
-   sudo mkdir -p /etc/gitlab/ssl
-   sudo chmod 755 /etc/gitlab/ssl
-   sudo cp key.pem cert.pem /etc/gitlab/ssl/
-   sudo chmod 644 key.pem cert.pem
-   ```
-
-1. Copy all Gitaly server certificates (or their certificate authority) to the system trusted
-   certificates folder so Gitaly server will trust the certificate when calling into itself or other Gitaly
-   servers.
-
-   ```shell
-   sudo cp cert.pem /usr/local/share/ca-certificates/gitaly.crt
-   sudo update-ca-certificates
-   ```
-
-1. Edit `/home/git/gitaly/config.toml` and add:
-
-   ```toml
-   tls_listen_addr = '0.0.0.0:9999'
-
-   [tls]
-   certificate_path = '/etc/gitlab/ssl/cert.pem'
-   key_path = '/etc/gitlab/ssl/key.pem'
-   ```
-
-1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
-1. Verify Gitaly traffic is being served over TLS by
-   [observing the types of Gitaly connections](#observe-type-of-gitaly-connections).
-1. (Optional) Improve security by:
-   1. Disabling non-TLS connections by commenting out or deleting `listen_addr` in
-      `/home/git/gitaly/config.toml`.
-   1. Saving the file.
-   1. [Restarting GitLab](../restart_gitlab.md#installations-from-source).
-
-### Observe type of Gitaly connections
-
-[Prometheus](../monitoring/prometheus/index.md) can be used observe what type of connections Gitaly
-is serving a production environment. Use the following Prometheus query:
-
-```prometheus
-sum(rate(gitaly_connections_total[5m])) by (type)
-```
-
-## `gitaly-ruby`
-
-Gitaly was developed to replace the Ruby application code in GitLab.
-
-To save time and avoid the risk of rewriting existing application logic, we chose to copy some
-application code from GitLab into Gitaly.
-
-To be able to run that code, `gitaly-ruby` was created, which is a "sidecar" process for the main
-Gitaly Go process. Some examples of things that are implemented in `gitaly-ruby` are:
-
-- RPCs that deal with wikis.
-- RPCs that create commits on behalf of a user, such as merge commits.
-
-### Configure number of `gitaly-ruby` workers
-
-`gitaly-ruby` has much less capacity than Gitaly implemented in Go. If your Gitaly server has to handle lots of
-requests, the default setting of having just one active `gitaly-ruby` sidecar might not be enough.
-
-If you see `ResourceExhausted` errors from Gitaly, it's very likely that you have not enough
-`gitaly-ruby` capacity.
-
-You can increase the number of `gitaly-ruby` processes on your Gitaly server with the following
-settings:
-
-**For Omnibus GitLab**
-
-1. Edit `/etc/gitlab/gitlab.rb`:
-
-   ```ruby
-   # Default is 2 workers. The minimum is 2; 1 worker is always reserved as
-   # a passive stand-by.
-   gitaly['ruby_num_workers'] = 4
-   ```
-
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-
-**For installations from source**
-
-1. Edit `/home/git/gitaly/config.toml`:
-
-   ```toml
-   [gitaly-ruby]
-   num_workers = 4
-   ```
-
-1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
-
-## Limit RPC concurrency
-
-Clone traffic can put a large strain on your Gitaly service. The bulk of the work gets done in the
-either of the following RPCs:
-
-- `SSHUploadPack` (for Git SSH).
-- `PostUploadPack` (for Git HTTP).
-
-To prevent such workloads from overwhelming your Gitaly server, you can set concurrency limits in
-Gitaly's configuration file. For example:
-
-```ruby
-# in /etc/gitlab/gitlab.rb
-
-gitaly['concurrency'] = [
-  {
-    'rpc' => "/gitaly.SmartHTTPService/PostUploadPack",
-    'max_per_repo' => 20
-  },
-  {
-    'rpc' => "/gitaly.SSHService/SSHUploadPack",
-    'max_per_repo' => 20
-  }
-]
-```
-
-This limits the number of in-flight RPC calls for the given RPCs. The limit is applied per
-repository. In the example above:
-
-- Each repository served by the Gitaly server can have at most 20 simultaneous `PostUploadPack` RPC
-  calls in flight, and the same for `SSHUploadPack`.
-- If another request comes in for a repository that has used up its 20 slots, that request gets
-  queued.
-
-You can observe the behavior of this queue using the Gitaly logs and Prometheus:
-
-- In the Gitaly logs, look for the string (or structured log field) `acquire_ms`. Messages that have
-  this field are reporting about the concurrency limiter.
-- In Prometheus, look for the following metrics:
-
-  - `gitaly_rate_limiting_in_progress`.
-  - `gitaly_rate_limiting_queued`.
-  - `gitaly_rate_limiting_seconds`.
-
-NOTE: **Note:**
-Though the name of the Prometheus metric contains `rate_limiting`, it is a concurrency limiter, not
-a rate limiter. If a Gitaly client makes 1000 requests in a row very quickly, concurrency will not
-exceed 1 and the concurrency limiter has no effect.
-
-## Rotate Gitaly authentication token
-
-Rotating credentials in a production environment often requires downtime, causes outages, or both.
-
-However, you can rotate Gitaly credentials without a service interruption. Rotating a Gitaly
-authentication token involves:
-
-- [Verifying authentication monitoring](#verify-authentication-monitoring).
-- [Enabling "auth transitioning" mode](#enable-auth-transitioning-mode).
-- [Updating Gitaly authentication tokens](#update-gitaly-authentication-token).
-- [Ensuring there are no authentication failures](#ensure-there-are-no-authentication-failures).
-- [Disabling "auth transitioning" mode](#disable-auth-transitioning-mode).
-- [Verifying authentication is enforced](#verify-authentication-is-enforced).
-
-This procedure also works if you are running GitLab on a single server. In that case, "Gitaly
-server" and "Gitaly client" refers to the same machine.
-
-### Verify authentication monitoring
-
-Before rotating a Gitaly authentication token, verify that you can monitor the authentication
-behavior of your GitLab installation using Prometheus. Use the following Prometheus query:
-
-```prometheus
-sum(rate(gitaly_authentications_total[5m])) by (enforced, status)
-```
-
-In a system where authentication is configured correctly and where you have live traffic, you will
-see something like this:
-
-```prometheus
-{enforced="true",status="ok"}  4424.985419441742
-```
-
-There may also be other numbers with rate 0. We only care about the non-zero numbers.
-
-The only non-zero number should have `enforced="true",status="ok"`. If you have other non-zero
-numbers, something is wrong in your configuration.
-
-The `status="ok"` number reflects your current request rate. In the example above, Gitaly is
-handling about 4000 requests per second.
-
-Now that you have established that you can monitor the Gitaly authentication behavior of your GitLab
-installation, you can begin the rest of the procedure.
-
-### Enable "auth transitioning" mode
-
-Temporarily disable Gitaly authentication on the Gitaly servers by putting them into "auth
-transitioning" mode as follows:
-
-```ruby
-# in /etc/gitlab/gitlab.rb
-gitaly['auth_transitioning'] = true
-```
-
-After you have made this change, your [Prometheus query](#verify-authentication-monitoring)
-should return something like:
-
-```prometheus
-{enforced="false",status="would be ok"}  4424.985419441742
-```
-
-Because `enforced="false"`, it is safe to start rolling out the new token.
-
-### Update Gitaly authentication token
-
-To update to a new Gitaly authentication token, on each Gitaly client **and** Gitaly server:
-
-1. Update the configuration:
-
-   ```ruby
-   # in /etc/gitlab/gitlab.rb
-
-   gitaly['auth_token'] = '<new secret token>'
-   ```
-
-1. Restart Gitaly:
-
-   ```shell
-   gitlab-ctl restart gitaly
-   ```
-
-If you run your [Prometheus query](#verify-authentication-monitoring) while this change is
-being rolled out, you will see non-zero values for the `enforced="false",status="denied"` counter.
-
-### Ensure there are no authentication failures
-
-After the new token is set, and all services involved have been restarted, you will
-[temporarily see](#verify-authentication-monitoring) a mix of:
-
-- `status="would be ok"`.
-- `status="denied"`.
-
-After the new token has been picked up by all Gitaly clients and Gitaly servers, the
-**only non-zero rate** should be `enforced="false",status="would be ok"`.
-
-### Disable "auth transitioning" mode
-
-To re-enable Gitaly authentication, disable "auth transitioning" mode. Update the configuration on
-your Gitaly servers as follows:
-
-```ruby
-# in /etc/gitlab/gitlab.rb
-gitaly['auth_transitioning'] = false
-```
-
-CAUTION: **Caution:**
-Without completing this step, you have **no Gitaly authentication**.
-
-### Verify authentication is enforced
-
-Refresh your [Prometheus query](#verify-authentication-monitoring). You should now see a similar
-result as you did at the start. For example:
-
-```prometheus
-{enforced="true",status="ok"}  4424.985419441742
-```
-
-Note that `enforced="true"` means that authentication is being enforced.
-
-## Direct Git access bypassing Gitaly
-
-While it is possible to access Gitaly repositories stored on disk directly with a Git client,
-it is not advisable because Gitaly is being continuously improved and changed. Theses improvements may invalidate assumptions, resulting in performance degradation, instability, and even data loss.
-
-Gitaly has optimizations, such as the
-[`info/refs` advertisement cache](https://gitlab.com/gitlab-org/gitaly/blob/master/doc/design_diskcache.md),
-that rely on Gitaly controlling and monitoring access to repositories via the
-official gRPC interface. Likewise, Praefect has optimizations, such as fault
-tolerance and distributed reads, that depend on the gRPC interface and
-database to determine repository state.
-
-For these reasons, **accessing repositories directly is done at your own risk
-and is not supported**.
+WARNING:
+Accessing Git repositories directly is done at your own risk and is not supported.
 
 ## Direct access to Git in GitLab
 
 Direct access to Git uses code in GitLab known as the "Rugged patches".
 
-### History
+Before Gitaly existed, what are now Gitaly clients accessed Git repositories directly, either:
 
-Before Gitaly existed, what are now Gitaly clients used to access Git repositories directly, either:
-
-- On a local disk in the case of a single-machine Omnibus GitLab installation
+- On a local disk in the case of a single-machine Omnibus GitLab installation.
 - Using NFS in the case of a horizontally-scaled GitLab installation.
 
-Besides running plain `git` commands, GitLab used to use a Ruby library called
+In addition to running plain `git` commands, GitLab used a Ruby library called
 [Rugged](https://github.com/libgit2/rugged). Rugged is a wrapper around
 [libgit2](https://libgit2.org/), a stand-alone implementation of Git in the form of a C library.
 
@@ -950,21 +301,21 @@ not an external process, there was very little overhead between:
 - GitLab application code that tried to look up data in Git repositories.
 - The Git implementation itself.
 
-Because the combination of Rugged and Unicorn was so efficient, GitLab's application code ended up with lots of
-duplicate Git object lookups. For example, looking up the `master` commit a dozen times in one
-request. We could write inefficient code without poor performance.
+Because the combination of Rugged and Unicorn was so efficient, the GitLab application code ended up
+with lots of duplicate Git object lookups. For example, looking up the default branch commit a dozen
+times in one request. We could write inefficient code without poor performance.
 
 When we migrated these Git lookups to Gitaly calls, we suddenly had a much higher fixed cost per Git
 lookup. Even when Gitaly is able to re-use an already-running `git` process (for example, to look up
 a commit), you still have:
 
 - The cost of a network roundtrip to Gitaly.
-- Within Gitaly, a write/read roundtrip on the Unix pipes that connect Gitaly to the `git` process.
+- Inside Gitaly, a write/read roundtrip on the Unix pipes that connect Gitaly to the `git` process.
 
 Using GitLab.com to measure, we reduced the number of Gitaly calls per request until the loss of
 Rugged's efficiency was no longer felt. It also helped that we run Gitaly itself directly on the Git
-file severs, rather than via NFS mounts. This gave us a speed boost that counteracted the negative
-effect of not using Rugged anymore.
+file servers, rather than by using NFS mounts. This gave us a speed boost that counteracted the
+negative effect of not using Rugged anymore.
 
 Unfortunately, other deployments of GitLab could not remove NFS like we did on GitLab.com, and they
 got the worst of both worlds:
@@ -986,21 +337,30 @@ enables direct Git access.
 When GitLab calls a function that has a "Rugged patch", it performs two checks:
 
 - Is the feature flag for this patch set in the database? If so, the feature flag setting controls
-  GitLab's use of "Rugged patch" code.
-- If the feature flag is not set, GitLab tries accessing the filesystem underneath the
-  Gitaly server directly. If it can, it will use the "Rugged patch".
+  the GitLab use of "Rugged patch" code.
+- If the feature flag is not set, GitLab tries accessing the file system underneath the
+  Gitaly server directly. If it can, it uses the "Rugged patch":
+  - If using Unicorn.
+  - If using Puma and [thread count](../../install/requirements.md#puma-threads) is set
+    to `1`.
 
-The result of both of these checks is cached.
+The result of these checks is cached.
 
-To see if GitLab can access the repository filesystem directly, we use the following heuristic:
+To see if GitLab can access the repository file system directly, we use the following heuristic:
 
-- Gitaly ensures that the filesystem has a metadata file in its root with a UUID in it.
-- Gitaly reports this UUID to GitLab via the `ServerInfo` RPC.
+- Gitaly ensures that the file system has a metadata file in its root with a UUID in it.
+- Gitaly reports this UUID to GitLab by using the `ServerInfo` RPC.
 - GitLab Rails tries to read the metadata file directly. If it exists, and if the UUID's match,
   assume we have direct access.
 
 Direct Git access is enable by default in Omnibus GitLab because it fills in the correct repository
 paths in the GitLab configuration file `config/gitlab.yml`. This satisfies the UUID check.
+
+WARNING:
+If directly copying repository data from a GitLab server to Gitaly, ensure that the metadata file,
+default path `/var/opt/gitlab/git-data/repositories/.gitaly-metadata`, is not included in the transfer.
+Copying this file causes GitLab to use the Rugged patches for repositories hosted on the Gitaly server,
+leading to `Error creating pipeline` and `Commit not found` errors, or stale data.
 
 ### Transition to Gitaly Cluster
 
@@ -1014,17 +374,40 @@ There are two facets to our efforts to remove direct Git access in GitLab:
   NFS.
 
 The second facet presents the only real solution. For this, we developed
-[Gitaly Cluster](praefect.md).
+[Gitaly Cluster](#gitaly-cluster).
+
+## NFS deprecation notice
+
+<!-- vale gitlab.FutureTense = NO -->
+
+From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories will no longer be
+considered and customer technical support will be considered out of scope.
+
+Additional information:
+
+- [Recommended NFS mount options and known issues with Gitaly and NFS](../nfs.md#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
+- [GitLab statement of support](https://about.gitlab.com/support/statement-of-support.html#gitaly-and-nfs).
+
+<!-- vale gitlab.FutureTense = YES -->
+
+GitLab recommends:
+
+- Creating a [Gitaly Cluster](#gitaly-cluster) as soon as possible.
+- [Moving your projects](praefect.md#migrate-existing-repositories-to-gitaly-cluster) from NFS-based
+storage to the Gitaly Cluster.
+
+We welcome your feedback on this process: raise a support ticket, or [comment on the epic](https://gitlab.com/groups/gitlab-org/-/epics/4916).
 
 ## Troubleshooting Gitaly
 
-### Checking versions when using standalone Gitaly servers
+Check [Gitaly timeouts](../../user/admin_area/settings/gitaly_timeouts.md) when troubleshooting
+Gitaly.
+
+### Check versions when using standalone Gitaly servers
 
 When using standalone Gitaly servers, you must make sure they are the same version
-as GitLab to ensure full compatibility. Check **Admin Area > Gitaly Servers** on
-your GitLab instance and confirm all Gitaly Servers are `Up to date`.
-
-![Gitaly standalone software versions diagram](img/gitlab_gitaly_version_mismatch_v12_4.png)
+as GitLab to ensure full compatibility. Check **Admin Area > Overview > Gitaly Servers** on
+your GitLab instance and confirm all Gitaly servers indicate that they are up to date.
 
 ### `gitaly-debug`
 
@@ -1055,13 +438,13 @@ gitaly-debug -h
 remote: GitLab: 401 Unauthorized
 ```
 
-You will need to sync your `gitlab-secrets.json` file with your Gitaly clients (GitLab
+You need to sync your `gitlab-secrets.json` file with your Gitaly clients (GitLab
 app nodes).
 
 ### Client side gRPC logs
 
 Gitaly uses the [gRPC](https://grpc.io/) RPC framework. The Ruby gRPC
-client has its own log file which may contain useful information when
+client has its own log file which may contain debugging information when
 you are seeing Gitaly errors. You can control the log level of the
 gRPC client with the `GRPC_LOG_LEVEL` environment variable. The
 default level is `WARN`.
@@ -1072,20 +455,38 @@ You can run a gRPC trace with:
 sudo GRPC_TRACE=all GRPC_VERBOSITY=DEBUG gitlab-rake gitlab:gitaly:check
 ```
 
+### Correlating Git processes with RPCs
+
+Sometimes you need to find out which Gitaly RPC created a particular Git process.
+
+One method for doing this is by using `DEBUG` logging. However, this needs to be enabled
+ahead of time and the logs produced are quite verbose.
+
+A lightweight method for doing this correlation is by inspecting the environment
+of the Git process (using its `PID`) and looking at the `CORRELATION_ID` variable:
+
+```shell
+PID=<Git process ID>
+sudo cat /proc/$PID/environ | tr '\0' '\n' | grep ^CORRELATION_ID=
+```
+
+This method isn't reliable for `git cat-file` processes, because Gitaly
+internally pools and re-uses those across RPCs.
+
 ### Observing `gitaly-ruby` traffic
 
-[`gitaly-ruby`](#gitaly-ruby) is an internal implementation detail of Gitaly,
+[`gitaly-ruby`](configure_gitaly.md#gitaly-ruby) is an internal implementation detail of Gitaly,
 so, there's not that much visibility into what goes on inside
 `gitaly-ruby` processes.
 
 If you have Prometheus set up to scrape your Gitaly process, you can see
 request rates and error codes for individual RPCs in `gitaly-ruby` by
 querying `grpc_client_handled_total`. Strictly speaking, this metric does
-not differentiate between `gitaly-ruby` and other RPCs, but in practice
-(as of GitLab 11.9), all gRPC calls made by Gitaly itself are internal
-calls from the main Gitaly process to one of its `gitaly-ruby` sidecars.
+not differentiate between `gitaly-ruby` and other RPCs. However from GitLab 11.9,
+all gRPC calls made by Gitaly itself are internal calls from the main Gitaly process to one of its
+`gitaly-ruby` sidecars.
 
-Assuming your `grpc_client_handled_total` counter only observes Gitaly,
+Assuming your `grpc_client_handled_total` counter observes only Gitaly,
 the following query shows you RPCs are (most likely) internally
 implemented as calls to `gitaly-ruby`:
 
@@ -1095,16 +496,19 @@ sum(rate(grpc_client_handled_total[5m])) by (grpc_method) > 0
 
 ### Repository changes fail with a `401 Unauthorized` error
 
-If you're running Gitaly on its own server and notice that users can
-successfully clone and fetch repositories (via both SSH and HTTPS), but can't
-push to them or make changes to the repository in the web UI without getting a
-`401 Unauthorized` message, then it's possible Gitaly is failing to authenticate
-with the Gitaly client due to having the [wrong secrets file](#configure-gitaly-servers).
+If you run Gitaly on its own server and notice these conditions:
+
+- Users can successfully clone and fetch repositories by using both SSH and HTTPS.
+- Users can't push to repositories, or receive a `401 Unauthorized` message when attempting to
+  make changes to them in the web UI.
+
+Gitaly may be failing to authenticate with the Gitaly client because it has the
+[wrong secrets file](configure_gitaly.md#configure-gitaly-servers).
 
 Confirm the following are all true:
 
 - When any user performs a `git push` to any repository on this Gitaly server, it
-  fails with the following error (note the `401 Unauthorized`):
+  fails with a `401 Unauthorized` error:
 
   ```shell
   remote: GitLab: 401 Unauthorized
@@ -1115,11 +519,11 @@ Confirm the following are all true:
 
 - When any user adds or modifies a file from the repository using the GitLab
   UI, it immediately fails with a red `401 Unauthorized` banner.
-- Creating a new project and [initializing it with a README](../../gitlab-basics/create-project.md#blank-projects)
-  successfully creates the project but doesn't create the README.
+- Creating a new project and [initializing it with a README](../../user/project/working_with_projects.md#blank-projects)
+  successfully creates the project, but doesn't create the README.
 - When [tailing the logs](https://docs.gitlab.com/omnibus/settings/logs.html#tail-logs-in-a-console-on-the-server)
   on a Gitaly client and reproducing the error, you get `401` errors
-  when reaching the `/api/v4/internal/allowed` endpoint:
+  when reaching the [`/api/v4/internal/allowed`](../../development/internal_api.md) endpoint:
 
   ```shell
   # api_json.log
@@ -1180,18 +584,19 @@ Confirm the following are all true:
   [IP] - - [18/Jul/2019:00:30:14 +0000] "POST /api/v4/internal/allowed HTTP/1.1" 401 30 "" "Ruby"
   ```
 
-To fix this problem, confirm that your [`gitlab-secrets.json` file](#configure-gitaly-servers)
+To fix this problem, confirm that your [`gitlab-secrets.json` file](configure_gitaly.md#configure-gitaly-servers)
 on the Gitaly server matches the one on Gitaly client. If it doesn't match,
 update the secrets file on the Gitaly server to match the Gitaly client, then
 [reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 ### Command line tools cannot connect to Gitaly
 
-If you are having trouble connecting to a Gitaly server with command line (CLI) tools,
-and certain actions result in a `14: Connect Failed` error message,
-it means that gRPC cannot reach your Gitaly server.
+gRPC cannot reach your Gitaly server if:
 
-Verify that you can reach Gitaly via TCP:
+- You can't connect to a Gitaly server with command-line tools.
+- Certain actions result in a `14: Connect Failed` error message.
+
+Verify you can reach Gitaly by using TCP:
 
 ```shell
 sudo gitlab-rake gitlab:tcp_check[GITALY_SERVER_IP,GITALY_LISTEN_PORT]
@@ -1221,23 +626,11 @@ unset http_proxy
 unset https_proxy
 ```
 
-### Gitaly not listening on new address after reconfiguring
-
-When updating the `gitaly['listen_addr']` or `gitaly['prometheus_listen_addr']`
-values, Gitaly may continue to listen on the old address after a `sudo gitlab-ctl reconfigure`.
-
-When this occurs, performing a `sudo gitlab-ctl restart` will resolve the issue. This will no longer be necessary after [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/2521) is resolved.
-
 ### Permission denied errors appearing in Gitaly logs when accessing repositories from a standalone Gitaly server
 
 If this error occurs even though file permissions are correct, it's likely that
 the Gitaly server is experiencing
 [clock drift](https://en.wikipedia.org/wiki/Clock_drift).
 
-Please ensure that the Gitaly clients and servers are synchronized and use an NTP time
-server to keep them synchronized if possible.
-
-### Praefect
-
-Praefect is a router and transaction manager for Gitaly, and a required
-component for running a Gitaly Cluster. For more information see [Gitaly Cluster](praefect.md).
+Ensure the Gitaly clients and servers are synchronized, and use an NTP time
+server to keep them synchronized, if possible.

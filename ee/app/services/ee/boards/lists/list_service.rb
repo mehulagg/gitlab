@@ -6,30 +6,29 @@ module EE
       module ListService
         extend ::Gitlab::Utils::Override
 
-        # When adding a new licensed type, make sure to also add
-        # it on license.rb with the pattern "board_<list_type>_lists"
-        LICENSED_LIST_TYPES = %i[assignee milestone].freeze
-
         override :execute
         def execute(board, create_default_lists: true)
-          not_available_lists = list_type_features_availability(board)
-            .select { |_, available| !available }
+          list_types = unavailable_list_types_for(board)
 
-          if not_available_lists.any?
-            super.where.not(list_type: not_available_lists.keys) # rubocop: disable CodeReuse/ActiveRecord
-          else
-            super
-          end
+          super.without_types(list_types)
         end
 
         private
 
-        def list_type_features_availability(board)
+        def unavailable_list_types_for(board)
+          list_types = super
+          list_types += unlicensed_lists_for(board)
+          list_types << ::List.list_types[:iteration] if ::Feature.disabled?(:iteration_board_lists, board.resource_parent)
+
+          list_types.uniq
+        end
+
+        def unlicensed_lists_for(board)
           parent = board.resource_parent
 
-          LICENSED_LIST_TYPES.each_with_object({}) do |list_type, hash|
+          List::LICENSED_LIST_TYPES.each_with_object([]) do |list_type, lists|
             list_type_key = ::List.list_types[list_type]
-            hash[list_type_key] = parent&.feature_available?(:"board_#{list_type}_lists")
+            lists << list_type_key unless parent&.feature_available?(:"board_#{list_type}_lists")
           end
         end
       end

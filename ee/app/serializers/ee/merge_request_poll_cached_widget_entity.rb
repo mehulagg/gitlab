@@ -12,6 +12,20 @@ module EE
       expose :policy_violation do |merge_request|
         presenter(merge_request).has_denied_policies?
       end
+
+      expose :missing_security_scan_types do |merge_request|
+        presenter(merge_request).missing_security_scan_types
+      end
+
+      expose :jira_associations, if: -> (mr) { mr.project.jira_issue_association_required_to_merge_enabled? } do
+        expose :enforced do |merge_request|
+          presenter(merge_request).project.prevent_merge_without_jira_issue
+        end
+
+        expose :issue_keys do |merge_request|
+          presenter(merge_request).issue_keys
+        end
+      end
     end
   end
 end

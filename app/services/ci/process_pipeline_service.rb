@@ -8,20 +8,14 @@ module Ci
       @pipeline = pipeline
     end
 
-    def execute(trigger_build_ids = nil, initial_process: false)
+    def execute
       increment_processing_counter
 
       update_retried
 
-      if ::Gitlab::Ci::Features.atomic_processing?(pipeline.project)
-        Ci::PipelineProcessing::AtomicProcessingService
-          .new(pipeline)
-          .execute
-      else
-        Ci::PipelineProcessing::LegacyProcessingService
-          .new(pipeline)
-          .execute(trigger_build_ids, initial_process: initial_process)
-      end
+      Ci::PipelineProcessing::AtomicProcessingService
+        .new(pipeline)
+        .execute
     end
 
     def metrics
@@ -36,17 +30,26 @@ module Ci
     # this updates only when there are data that needs to be updated, there are two groups with no retried flag
     # rubocop: disable CodeReuse/ActiveRecord
     def update_retried
+      return if Feature.enabled?(:ci_remove_update_retried_from_process_pipeline, pipeline.project, default_enabled: :yaml)
+
       # find the latest builds for each name
-      latest_statuses = pipeline.statuses.latest
+      latest_statuses = pipeline.latest_statuses
         .group(:name)
         .having('count(*) > 1')
         .pluck(Arel.sql('MAX(id)'), 'name')
 
       # mark builds that are retried
-      pipeline.statuses.latest
-        .where(name: latest_statuses.map(&:second))
-        .where.not(id: latest_statuses.map(&:first))
-        .update_all(retried: true) if latest_statuses.any?
+      if latest_statuses.any?
+        updated_count = pipeline.latest_statuses
+                          .where(name: latest_statuses.map(&:second))
+                          .where.not(id: latest_statuses.map(&:first))
+                          .update_all(retried: true)
+
+        # This counter is temporary. It will be used to check whether if we still use this method or not
+        # after setting correct value of `GenericCommitStatus#retried`.
+        # More info: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50465#note_491657115
+        metrics.legacy_update_jobs_counter.increment if updated_count > 0
+      end
     end
     # rubocop: enable CodeReuse/ActiveRecord
 

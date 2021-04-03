@@ -5,7 +5,7 @@
       - if project.shared_runners_enabled?
         Enabled
         - if project.shared_runners_minutes_limit_enabled?
-          - limit = project.actual_shared_runners_minutes_limit.to_i
+          - limit = project.ci_minutes_quota.total_minutes
           (Limited to #{limit} pipeline minutes per month)
         - else
           (Unlimited pipeline minutes)

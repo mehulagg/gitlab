@@ -1,14 +1,14 @@
-import { shallowMount } from '@vue/test-utils';
 import {
   GlLink,
-  GlSkeletonLoading,
-  GlDeprecatedBadge as GlBadge,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlBadge,
   GlFriendlyWrap,
 } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import LicenseComponentLinks from 'ee/license_compliance/components/license_component_links.vue';
 import LicensesTableRow from 'ee/license_compliance/components/licenses_table_row.vue';
-import { makeLicense } from './utils';
 import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import { makeLicense } from './utils';
 
 describe('LicensesTableRow component', () => {
   let wrapper;
@@ -102,7 +102,7 @@ describe('LicensesTableRow component', () => {
 
       expect(nameSection.find(GlLink).exists()).toBe(true);
       expect(nameSection.find(GlFriendlyWrap).exists()).toBe(true);
-      expect(nameSection.find(GlFriendlyWrap).props().text).toBe(license.name);
+      expect(nameSection.find(GlFriendlyWrap).attributes().text).toBe(license.name);
     });
   });
 

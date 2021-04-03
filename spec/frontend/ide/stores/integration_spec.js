@@ -36,8 +36,6 @@ describe('IDE store integration', () => {
     beforeEach(() => {
       const { entries, treeList } = decorateFiles({
         data: [`${TEST_PATH_DIR}/`, TEST_PATH, 'README.md'],
-        projectId: TEST_PROJECT_ID,
-        branchId: TEST_BRANCH,
       });
 
       Object.assign(entries[TEST_PATH], {
@@ -86,7 +84,7 @@ describe('IDE store integration', () => {
         store.dispatch('commit/updateFilesAfterCommit', { data: {} });
 
         expect(store.state.entries[TEST_PATH]).toEqual(expected);
-        expect(store.state.entries[TEST_PATH_DIR].tree.find(x => x.path === TEST_PATH)).toEqual(
+        expect(store.state.entries[TEST_PATH_DIR].tree.find((x) => x.path === TEST_PATH)).toEqual(
           expected,
         );
       });

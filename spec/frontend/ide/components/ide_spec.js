@@ -1,128 +1,190 @@
-import Vue from 'vue';
-import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import waitForPromises from 'helpers/wait_for_promises';
+import CannotPushCodeAlert from '~/ide/components/cannot_push_code_alert.vue';
+import ErrorMessage from '~/ide/components/error_message.vue';
+import Ide from '~/ide/components/ide.vue';
+import { MSG_CANNOT_PUSH_CODE_GO_TO_FORK, MSG_GO_TO_FORK } from '~/ide/messages';
 import { createStore } from '~/ide/stores';
-import ide from '~/ide/components/ide.vue';
 import { file } from '../helpers';
 import { projectData } from '../mock_data';
-import extendStore from '~/ide/stores/extend';
 
-let store;
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
-function bootstrap(projData) {
-  store = createStore();
+const TEST_FORK_IDE_PATH = '/test/ide/path';
 
-  extendStore(store, document.createElement('div'));
+describe('WebIDE', () => {
+  const emptyProjData = { ...projectData, empty_repo: true, branches: {} };
 
-  const Component = Vue.extend(ide);
+  let store;
+  let wrapper;
 
-  store.state.currentProjectId = 'abcproject';
-  store.state.currentBranchId = 'master';
-  store.state.projects.abcproject = { ...projData };
-  Vue.set(store.state.trees, 'abcproject/master', {
-    tree: [],
-    loading: false,
-  });
+  const createComponent = ({ projData = emptyProjData, state = {} } = {}) => {
+    store.state.currentProjectId = 'abcproject';
+    store.state.currentBranchId = 'master';
+    store.state.projects.abcproject = projData && { ...projData };
+    store.state.trees['abcproject/master'] = {
+      tree: [],
+      loading: false,
+    };
+    Object.keys(state).forEach((key) => {
+      store.state[key] = state[key];
+    });
 
-  return createComponentWithStore(Component, store, {
-    emptyStateSvgPath: 'svg',
-    noChangesStateSvgPath: 'svg',
-    committedStateSvgPath: 'svg',
-  });
-}
+    wrapper = shallowMount(Ide, {
+      store,
+      localVue,
+    });
+  };
 
-describe('ide component, empty repo', () => {
-  let vm;
+  const findAlert = () => wrapper.findComponent(CannotPushCodeAlert);
 
   beforeEach(() => {
-    const emptyProjData = { ...projectData, empty_repo: true, branches: {} };
-    vm = bootstrap(emptyProjData);
-    vm.$mount();
+    store = createStore();
   });
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
 
-  it('renders "New file" button in empty repo', done => {
-    vm.$nextTick(() => {
-      expect(vm.$el.querySelector('.ide-empty-state button[title="New file"]')).not.toBeNull();
-      done();
+  describe('ide component, empty repo', () => {
+    beforeEach(() => {
+      createComponent({
+        projData: {
+          empty_repo: true,
+        },
+      });
+    });
+
+    it('renders "New file" button in empty repo', async () => {
+      expect(wrapper.find('[title="New file"]').exists()).toBe(true);
     });
   });
-});
 
-describe('ide component, non-empty repo', () => {
-  let vm;
+  describe('ide component, non-empty repo', () => {
+    describe('error message', () => {
+      it.each`
+        errorMessage         | exists
+        ${null}              | ${false}
+        ${{ text: 'error' }} | ${true}
+      `(
+        'should error message exists=$exists when errorMessage=$errorMessage',
+        async ({ errorMessage, exists }) => {
+          createComponent({
+            state: {
+              errorMessage,
+            },
+          });
 
-  beforeEach(() => {
-    vm = bootstrap(projectData);
-    vm.$mount();
+          await waitForPromises();
+
+          expect(wrapper.find(ErrorMessage).exists()).toBe(exists);
+        },
+      );
+    });
+
+    describe('onBeforeUnload', () => {
+      it('returns undefined when no staged files or changed files', () => {
+        createComponent();
+        expect(wrapper.vm.onBeforeUnload()).toBe(undefined);
+      });
+
+      it('returns warning text when their are changed files', () => {
+        createComponent({
+          state: {
+            changedFiles: [file()],
+          },
+        });
+
+        expect(wrapper.vm.onBeforeUnload()).toBe('Are you sure you want to lose unsaved changes?');
+      });
+
+      it('returns warning text when their are staged files', () => {
+        createComponent({
+          state: {
+            stagedFiles: [file()],
+          },
+        });
+
+        expect(wrapper.vm.onBeforeUnload()).toBe('Are you sure you want to lose unsaved changes?');
+      });
+
+      it('updates event object', () => {
+        const event = {};
+        createComponent({
+          state: {
+            stagedFiles: [file()],
+          },
+        });
+
+        wrapper.vm.onBeforeUnload(event);
+
+        expect(event.returnValue).toBe('Are you sure you want to lose unsaved changes?');
+      });
+    });
+
+    describe('non-existent branch', () => {
+      it('does not render "New file" button for non-existent branch when repo is not empty', () => {
+        createComponent({
+          state: {
+            projects: {},
+          },
+        });
+
+        expect(wrapper.find('[title="New file"]').exists()).toBe(false);
+      });
+    });
+
+    describe('branch with files', () => {
+      beforeEach(() => {
+        createComponent({
+          projData: {
+            empty_repo: false,
+          },
+        });
+      });
+
+      it('does not render "New file" button', () => {
+        expect(wrapper.find('[title="New file"]').exists()).toBe(false);
+      });
+    });
   });
 
-  afterEach(() => {
-    vm.$destroy();
-  });
-
-  it('shows error message when set', done => {
-    expect(vm.$el.querySelector('.gl-alert')).toBe(null);
-
-    vm.$store.state.errorMessage = {
-      text: 'error',
+  it('when user cannot push code, shows alert', () => {
+    store.state.links = {
+      forkInfo: {
+        ide_path: TEST_FORK_IDE_PATH,
+      },
     };
 
-    vm.$nextTick(() => {
-      expect(vm.$el.querySelector('.gl-alert')).not.toBe(null);
+    createComponent({
+      projData: {
+        userPermissions: {
+          pushCode: false,
+        },
+      },
+    });
 
-      done();
+    expect(findAlert().props()).toMatchObject({
+      message: MSG_CANNOT_PUSH_CODE_GO_TO_FORK,
+      action: {
+        href: TEST_FORK_IDE_PATH,
+        text: MSG_GO_TO_FORK,
+      },
     });
   });
 
-  describe('onBeforeUnload', () => {
-    it('returns undefined when no staged files or changed files', () => {
-      expect(vm.onBeforeUnload()).toBe(undefined);
+  it.each`
+    desc                           | projData
+    ${'when user can push code'}   | ${{ userPermissions: { pushCode: true } }}
+    ${'when project is not ready'} | ${null}
+  `('$desc, no alert is shown', ({ projData }) => {
+    createComponent({
+      projData,
     });
 
-    it('returns warning text when their are changed files', () => {
-      vm.$store.state.changedFiles.push(file());
-
-      expect(vm.onBeforeUnload()).toBe('Are you sure you want to lose unsaved changes?');
-    });
-
-    it('returns warning text when their are staged files', () => {
-      vm.$store.state.stagedFiles.push(file());
-
-      expect(vm.onBeforeUnload()).toBe('Are you sure you want to lose unsaved changes?');
-    });
-
-    it('updates event object', () => {
-      const event = {};
-      vm.$store.state.stagedFiles.push(file());
-
-      vm.onBeforeUnload(event);
-
-      expect(event.returnValue).toBe('Are you sure you want to lose unsaved changes?');
-    });
-  });
-
-  describe('non-existent branch', () => {
-    it('does not render "New file" button for non-existent branch when repo is not empty', done => {
-      vm.$nextTick(() => {
-        expect(vm.$el.querySelector('.ide-empty-state button[title="New file"]')).toBeNull();
-        done();
-      });
-    });
-  });
-
-  describe('branch with files', () => {
-    beforeEach(() => {
-      store.state.trees['abcproject/master'].tree = [file()];
-    });
-
-    it('does not render "New file" button', done => {
-      vm.$nextTick(() => {
-        expect(vm.$el.querySelector('.ide-empty-state button[title="New file"]')).toBeNull();
-        done();
-      });
-    });
+    expect(findAlert().exists()).toBe(false);
   });
 });

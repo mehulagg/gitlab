@@ -5,8 +5,8 @@ module Gitlab
     class PumaWorkerKillerInitializer
       def self.start(
         puma_options,
-          puma_per_worker_max_memory_mb: 850,
-          puma_master_max_memory_mb: 550,
+          puma_per_worker_max_memory_mb: 1024,
+          puma_master_max_memory_mb: 800,
           additional_puma_dev_max_memory_mb: 200
       )
         require 'puma_worker_killer'
@@ -34,6 +34,10 @@ module Gitlab
           # Ideally we'll never hit the maximum amount of memory. Restart the workers
           # regularly rather than rely on OOM behavior for periodic restarting.
           config.rolling_restart_frequency = 43200 # 12 hours in seconds.
+
+          # Spread the rolling restarts out over 1 hour to avoid too many simultaneous
+          # process startups.
+          config.rolling_restart_splay_seconds = 0.0..3600.0 # 0 to 1 hour in seconds.
 
           observer = Gitlab::Cluster::PumaWorkerKillerObserver.new
           config.pre_term = observer.callback

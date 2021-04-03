@@ -5,14 +5,27 @@ module QA
     describe 'LDAP Group sync' do
       include Support::Api
 
+      let(:group) do
+        Resource::Group.fabricate_via_api! do |resource|
+          resource.path = "#{group_name}-#{SecureRandom.hex(4)}"
+        end
+      end
+
       before(:all) do
+        @original_personal_access_token = Runtime::Env.personal_access_token
+
+        # Todo: Remove the 5 lines below when invite_members_group_modal feature flag is enabled by default or removed
+        # We need to nil out any existing personal token generated for the non-admin LDAP user and also set Runtime::Env.ldap_username=nil so that a new admin token is created for use to enable the feature flag.
+        Runtime::Env.personal_access_token = nil
+        ldap_username = Runtime::Env.ldap_username
+        Runtime::Env.ldap_username = nil
+        Runtime::Feature.enable(:invite_members_group_modal)
+        Runtime::Env.ldap_username = ldap_username
+
         # Create the sandbox group as the LDAP user. Without this the admin user
         # would own the sandbox group and then in subsequent tests the LDAP user
         # would not have enough permission to push etc.
         Resource::Sandbox.fabricate_via_api!
-
-        # Create an admin personal access token and use it for the remaining API calls
-        @original_personal_access_token = Runtime::Env.personal_access_token
 
         Page::Main::Menu.perform do |menu|
           menu.sign_out if menu.has_personal_area?
@@ -21,7 +34,7 @@ module QA
         Runtime::Browser.visit(:gitlab, Page::Main::Login)
         Page::Main::Login.perform(&:sign_in_using_admin_credentials)
 
-        Runtime::Env.personal_access_token = Resource::PersonalAccessToken.fabricate!.access_token
+        Runtime::Env.personal_access_token = Resource::PersonalAccessToken.fabricate!.token
         Page::Main::Menu.perform(&:sign_out)
       end
 
@@ -58,13 +71,20 @@ module QA
             }
           ]
         end
+
         let(:owner_user) { 'enguser1' }
         let(:sync_users) { ['ENG User 2', 'ENG User 3'] }
 
+        let(:group_name) { 'Synched-engineering-group' }
+
         before do
-          @created_users = create_users_via_api(ldap_users)
-          group = create_group_and_add_user_via_api(owner_user, 'Synched-engineering-group', Resource::Members::AccessLevel::OWNER)
-          signin_and_visit_group_as_user(owner_user, group)
+          created_users = create_users_via_api(ldap_users)
+
+          group.add_member(created_users[owner_user], Resource::Members::AccessLevel::OWNER)
+
+          signin_as_user(owner_user)
+
+          group.visit!
 
           Page::Group::Menu.perform(&:go_to_ldap_sync_settings)
 
@@ -77,7 +97,7 @@ module QA
           Page::Group::Menu.perform(&:click_group_members_item)
         end
 
-        it 'has LDAP users synced' do
+        it 'has LDAP users synced', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/670' do
           verify_users_synced(sync_users)
         end
       end
@@ -108,15 +128,20 @@ module QA
             }
           ]
         end
+
         let(:owner_user) { 'hruser1' }
         let(:sync_users) { ['HR User 2', 'HR User 3'] }
 
+        let(:group_name) { 'Synched-human-resources-group' }
+
         before do
-          @created_users = create_users_via_api(ldap_users)
+          created_users = create_users_via_api(ldap_users)
 
-          group = create_group_and_add_user_via_api(owner_user, 'Synched-human-resources-group', Resource::Members::AccessLevel::OWNER)
+          group.add_member(created_users[owner_user], Resource::Members::AccessLevel::OWNER)
 
-          signin_and_visit_group_as_user(owner_user, group)
+          signin_as_user(owner_user)
+
+          group.visit!
 
           Page::Group::Menu.perform(&:go_to_ldap_sync_settings)
 
@@ -128,7 +153,7 @@ module QA
           Page::Group::Menu.perform(&:click_group_members_item)
         end
 
-        it 'has LDAP users synced' do
+        it 'has LDAP users synced', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/669' do
           verify_users_synced(sync_users)
         end
       end
@@ -158,23 +183,23 @@ module QA
         group
       end
 
-      def signin_and_visit_group_as_user(user_name, group)
+      def signin_as_user(user_name)
         user = Struct.new(:ldap_username, :ldap_password).new(user_name, 'password')
 
         Runtime::Browser.visit(:gitlab, Page::Main::Login)
         Page::Main::Login.perform do |login_page|
           login_page.sign_in_using_ldap_credentials(user: user)
         end
-
-        group.visit!
       end
 
       def verify_users_synced(expected_users)
         EE::Page::Group::Members.perform do |members|
           members.click_sync_now
+
           users_synchronised = members.retry_until(reload: true) do
             expected_users.map { |user| members.has_content?(user) }.all?
           end
+
           expect(users_synchronised).to be_truthy
         end
       end

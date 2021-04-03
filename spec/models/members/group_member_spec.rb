@@ -4,9 +4,10 @@ require 'spec_helper'
 
 RSpec.describe GroupMember do
   context 'scopes' do
+    let_it_be(:user_1) { create(:user) }
+    let_it_be(:user_2) { create(:user) }
+
     it 'counts users by group ID' do
-      user_1 = create(:user)
-      user_2 = create(:user)
       group_1 = create(:group)
       group_2 = create(:group)
 
@@ -23,6 +24,15 @@ RSpec.describe GroupMember do
         group_member = create(:group_member, :ldap)
 
         expect(described_class.of_ldap_type).to eq([group_member])
+      end
+    end
+
+    describe '.with_user' do
+      it 'returns requested user' do
+        group_member = create(:group_member, user: user_2)
+        create(:group_member, user: user_1)
+
+        expect(described_class.with_user(user_2)).to eq([group_member])
       end
     end
   end
@@ -55,6 +65,12 @@ RSpec.describe GroupMember do
   end
 
   it_behaves_like 'members notifications', :group
+
+  describe '#namespace_id' do
+    subject { build(:group_member, source_id: 1).namespace_id }
+
+    it { is_expected.to eq 1 }
+  end
 
   describe '#real_source_type' do
     subject { create(:group_member).real_source_type }
@@ -111,6 +127,18 @@ RSpec.describe GroupMember do
           let(:entity) { create(:group, parent: parent_entity) }
         end
       end
+    end
+  end
+
+  context 'when group member expiration date is updated' do
+    let_it_be(:group_member) { create(:group_member) }
+
+    it 'emails the user that their group membership expiry has changed' do
+      expect_next_instance_of(NotificationService) do |notification|
+        allow(notification).to receive(:updated_group_member_expiration).with(group_member)
+      end
+
+      group_member.update!(expires_at: 5.days.from_now)
     end
   end
 end

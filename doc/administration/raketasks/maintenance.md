@@ -1,4 +1,10 @@
-# Maintenance Rake tasks **(CORE ONLY)**
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
+# Maintenance Rake tasks **(FREE SELF)**
 
 GitLab provides Rake tasks for general maintenance.
 
@@ -23,37 +29,45 @@ Example output:
 
 ```plaintext
 System information
-System:           Debian 7.8
-Current User:     git
-Using RVM:        no
-Ruby Version:     2.1.5p273
-Gem Version:      2.4.3
-Bundler Version:  1.7.6
-Rake Version:     10.3.2
-Redis Version:    3.2.5
-Sidekiq Version:  2.17.8
+System:         Ubuntu 20.04
+Proxy:          no
+Current User:   git
+Using RVM:      no
+Ruby Version:   2.6.6p146
+Gem Version:    2.7.10
+Bundler Version:1.17.3
+Rake Version:   12.3.3
+Redis Version:  5.0.9
+Git Version:    2.27.0
+Sidekiq Version:5.2.9
+Go Version:     unknown
 
 GitLab information
-Version:          7.7.1
-Revision:         41ab9e1
-Directory:        /home/git/gitlab
-DB Adapter:       postgresql
-URL:              https://gitlab.example.com
-HTTP Clone URL:   https://gitlab.example.com/some-project.git
-SSH Clone URL:    git@gitlab.example.com:some-project.git
-Using LDAP:       no
-Using Omniauth:   no
+Version:        13.2.2-ee
+Revision:       618883a1f9d
+Directory:      /opt/gitlab/embedded/service/gitlab-rails
+DB Adapter:     PostgreSQL
+DB Version:     11.7
+URL:            http://gitlab.example.com
+HTTP Clone URL: http://gitlab.example.com/some-group/some-project.git
+SSH Clone URL:  git@gitlab.example.com:some-group/some-project.git
+Elasticsearch:  no
+Geo:            no
+Using LDAP:     no
+Using Omniauth: yes
+Omniauth Providers:
 
 GitLab Shell
-Version:          2.4.1
-Repositories:     /home/git/repositories/
-Hooks:            /home/git/gitlab-shell/hooks/
-Git:              /usr/bin/git
+Version:    13.3.0
+Repository storage paths:
+- default:  /var/opt/gitlab/git-data/repositories
+GitLab Shell path:      /opt/gitlab/embedded/service/gitlab-shell
 ```
 
-## Show GitLab license information **(STARTER ONLY)**
+## Show GitLab license information **(PREMIUM SELF)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20501) in GitLab Starter 12.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20501) in GitLab 12.6.
+> - [Moved](../../subscriptions/bronze_starter.md) to GitLab Premium in 13.9.
 
 This command shows information about your [GitLab license](../../user/admin_area/license.md) and
 how many seats are used. It is only available on GitLab Enterprise
@@ -94,9 +108,9 @@ The `gitlab:check` Rake task runs the following Rake tasks:
 - `gitlab:sidekiq:check`
 - `gitlab:app:check`
 
-It will check that each component was set up according to the installation guide and suggest fixes
-for issues found. This command must be run from your application server and will not work correctly on
-component servers like [Gitaly](../gitaly/index.md#run-gitaly-on-its-own-server).
+It checks that each component was set up according to the installation guide and suggest fixes
+for issues found. This command must be run from your application server and doesn't work correctly on
+component servers like [Gitaly](../gitaly/configure_gitaly.md#run-gitaly-on-its-own-server).
 
 You may also have a look at our troubleshooting guides for:
 
@@ -117,7 +131,6 @@ sudo gitlab-rake gitlab:check
 bundle exec rake gitlab:check RAILS_ENV=production
 ```
 
-NOTE: **Note:**
 Use `SANITIZE=true` for `gitlab:check` if you want to omit project names from the output.
 
 Example output:
@@ -233,8 +246,9 @@ have been corrupted, you should reinstall the omnibus package.
 ## Check TCP connectivity to a remote site
 
 Sometimes you need to know if your GitLab installation can connect to a TCP
-service on another machine - perhaps a PostgreSQL or HTTPS server. A Rake task
-is included to help you with this:
+service on another machine (for example a PostgreSQL or web server)
+in order to troubleshoot proxy issues.
+A Rake task is included to help you with this.
 
 **Omnibus Installation**
 
@@ -260,7 +274,7 @@ clear it.
 
 To clear all exclusive leases:
 
-DANGER: **Danger:**
+WARNING:
 Don't run it while GitLab or Sidekiq is running
 
 ```shell
@@ -279,7 +293,7 @@ sudo gitlab-rake gitlab:exclusive_lease:clear[project_housekeeping:4]
 
 ## Display status of database migrations
 
-See the [upgrade documentation](../../update/README.md#checking-for-background-migrations-before-upgrading)
+See the [upgrade documentation](../../update/index.md#checking-for-background-migrations-before-upgrading)
 for how to check that migrations are complete when upgrading GitLab.
 
 To check the status of specific migrations, you can use the following Rake task:
@@ -288,7 +302,7 @@ To check the status of specific migrations, you can use the following Rake task:
 sudo gitlab-rake db:migrate:status
 ```
 
-This will output a table with a `Status` of `up` or `down` for
+This outputs a table with a `Status` of `up` or `down` for
 each Migration ID.
 
 ```shell
@@ -301,7 +315,7 @@ database: gitlabhq_production
 
 ## Run incomplete database migrations
 
-Database migrations can be stuck in an incomplete state. That is, they'll have a `down`
+Database migrations can be stuck in an incomplete state, with a `down`
 status in the output of the `sudo gitlab-rake db:migrate:status` command.
 
 To complete these migrations, use the following Rake task:
@@ -312,6 +326,39 @@ sudo gitlab-rake db:migrate
 
 After the command completes, run `sudo gitlab-rake db:migrate:status` to check if all
 migrations are completed (have an `up` status).
+
+## Rebuild database indexes
+
+WARNING:
+This is an experimental feature that isn't enabled by default.
+
+Database indexes can be rebuilt regularly to reclaim space and maintain healthy levels of index bloat over time.
+
+In order to rebuild the two indexes with the highest estimated bloat, use the following Rake task:
+
+```shell
+sudo gitlab-rake gitlab:db:reindex
+```
+
+In order to target a specific index, use the following Rake task:
+
+```shell
+sudo gitlab-rake gitlab:db:reindex['public.a_specific_index']
+```
+
+The following index types are not supported:
+
+1. Unique and primary key indexes
+1. Indexes used for constraint exclusion
+1. Partitioned indexes
+1. Expression indexes
+
+Optionally, this Rake task sends annotations to a Grafana (4.6 or later) endpoint. Use the following custom environment variables in order to enable annotations:
+
+1. `GRAFANA_API_URL` - Grafana's base URL, for example `http://some-host:3000`.
+1. `GRAFANA_API_KEY` - Grafana API key with at least `Editor role`.
+
+You can also [enable reindexing as a regular cron job](https://docs.gitlab.com/omnibus/settings/database.html#automatic-database-reindexing).
 
 ## Import common metrics
 

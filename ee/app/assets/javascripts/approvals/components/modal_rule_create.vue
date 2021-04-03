@@ -25,13 +25,27 @@ export default {
       rule: 'data',
     }),
     title() {
-      return this.rule ? __('Update approval rule') : __('Add approval rule');
+      return !this.rule || this.defaultRuleName
+        ? __('Add approval rule')
+        : __('Update approval rule');
+    },
+    defaultRuleName() {
+      return this.rule?.defaultRuleName;
+    },
+    primaryActionProps() {
+      return {
+        text: this.title,
+        attributes: [{ variant: 'confirm' }],
+      };
     },
   },
   methods: {
     submit() {
       this.$refs.form.submit();
     },
+  },
+  cancelActionProps: {
+    text: __('Cancel'),
   },
 };
 </script>
@@ -41,12 +55,16 @@ export default {
     modal-module="createModal"
     :modal-id="modalId"
     :title="title"
-    :ok-title="title"
-    ok-variant="success"
-    :cancel-title="__('Cancel')"
+    :action-primary="primaryActionProps"
+    :action-cancel="$options.cancelActionProps"
     size="sm"
     @ok.prevent="submit"
   >
-    <rule-form ref="form" :init-rule="rule" :is-mr-edit="isMrEdit" />
+    <rule-form
+      ref="form"
+      :init-rule="rule"
+      :is-mr-edit="isMrEdit"
+      :default-rule-name="defaultRuleName"
+    />
   </gl-modal-vuex>
 </template>

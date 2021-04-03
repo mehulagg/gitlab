@@ -73,6 +73,15 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
         end
       end
 
+      context 'when resource_group key is not a string' do
+        let(:config) { { resource_group: 123 } }
+
+        it 'returns error about wrong value type' do
+          expect(entry).not_to be_valid
+          expect(entry.errors).to include "job resource group should be a string"
+        end
+      end
+
       context 'when it uses both "when:" and "rules:"' do
         let(:config) do
           {
@@ -230,6 +239,12 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
       end
     end
 
+    shared_examples 'has no warnings' do
+      it 'does not raise the warning' do
+        expect(entry.warnings).to be_empty
+      end
+    end
+
     context 'when workflow rules is used' do
       let(:workflow) { double('workflow', 'has_rules?' => true) }
 
@@ -254,6 +269,106 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
       end
     end
 
+    context 'when workflow rules is not used' do
+      let(:workflow) { double('workflow', 'has_rules?' => false) }
+      let(:feature_flag_value) { true }
+
+      before do
+        stub_feature_flags(ci_raise_job_rules_without_workflow_rules_warning: feature_flag_value)
+        entry.compose!(deps)
+      end
+
+      context 'when rules are valid' do
+        let(:config) do
+          {
+            script: 'ls',
+            rules: [
+              { if: '$CI_COMMIT_BRANCH', when: 'on_success' },
+              last_rule
+            ]
+          }
+        end
+
+        context 'when last rule contains only `when`' do
+          let(:last_rule) { { when: when_value } }
+
+          context 'and its value is not `never`' do
+            let(:when_value) { 'on_success' }
+
+            it 'raises a warning' do
+              expect(entry.warnings).to contain_exactly(/may allow multiple pipelines/)
+            end
+
+            context 'when feature flag is disabled' do
+              let(:feature_flag_value) { false }
+
+              it_behaves_like 'has no warnings'
+            end
+          end
+
+          context 'and its value is `never`' do
+            let(:when_value) { 'never' }
+
+            it_behaves_like 'has no warnings'
+          end
+        end
+
+        context 'when last rule does not contain only `when`' do
+          let(:last_rule) { { if: '$CI_MERGE_REQUEST_ID', when: 'always' } }
+
+          it_behaves_like 'has no warnings'
+        end
+      end
+
+      context 'when rules are invalid' do
+        let(:config) { { script: 'ls', rules: { when: 'always' } } }
+
+        it_behaves_like 'has no warnings'
+      end
+    end
+
+    context 'when workflow rules is used' do
+      let(:workflow) { double('workflow', 'has_rules?' => true) }
+
+      before do
+        entry.compose!(deps)
+      end
+
+      context 'when last rule contains only `when' do
+        let(:config) do
+          {
+            script: 'ls',
+            rules: [
+              { if: '$CI_COMMIT_BRANCH', when: 'on_success' },
+              { when: 'always' }
+            ]
+          }
+        end
+
+        it_behaves_like 'has no warnings'
+      end
+    end
+
+    context 'with resource group' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:resource_group, :result) do
+        'iOS'                         | 'iOS'
+        'review/$CI_COMMIT_REF_NAME'  | 'review/$CI_COMMIT_REF_NAME'
+        nil                           | nil
+      end
+
+      with_them do
+        let(:config) { { script: 'ls', resource_group: resource_group }.compact }
+
+        it do
+          entry.compose!(deps)
+
+          expect(entry.resource_group).to eq(result)
+        end
+      end
+    end
+
     context 'with inheritance' do
       context 'of variables' do
         let(:config) do
@@ -267,21 +382,39 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
         context 'with only job variables' do
           it 'does return defined variables' do
             expect(entry.value).to include(
+              variables: { 'A' => 'job', 'B' => 'job' },
+              job_variables: { 'A' => 'job', 'B' => 'job' },
+              root_variables_inheritance: true
+            )
+          end
+        end
+
+        context 'when FF ci_workflow_rules_variables is disabled' do
+          before do
+            stub_feature_flags(ci_workflow_rules_variables: false)
+          end
+
+          it 'does not return job_variables and root_variables_inheritance' do
+            expect(entry.value).to include(
               variables: { 'A' => 'job', 'B' => 'job' }
             )
+            expect(entry.value).not_to have_key(:job_variables)
+            expect(entry.value).not_to have_key(:root_variables_inheritance)
           end
         end
 
         context 'when root yaml variables are used' do
           let(:variables) do
             Gitlab::Ci::Config::Entry::Variables.new(
-              A: 'root', C: 'root', D: 'root'
+              { A: 'root', C: 'root', D: 'root' }
             ).value
           end
 
-          it 'does return all variables and overwrite them' do
+          it 'does return job and root variables' do
             expect(entry.value).to include(
-              variables: { 'A' => 'job', 'B' => 'job', 'C' => 'root', 'D' => 'root' }
+              variables: { 'A' => 'job', 'B' => 'job', 'C' => 'root', 'D' => 'root' },
+              job_variables: { 'A' => 'job', 'B' => 'job' },
+              root_variables_inheritance: true
             )
           end
 
@@ -293,9 +426,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
               }
             end
 
-            it 'does return only job variables' do
+            it 'does return job and root variables' do
               expect(entry.value).to include(
-                variables: { 'A' => 'job', 'B' => 'job' }
+                variables: { 'A' => 'job', 'B' => 'job' },
+                job_variables: { 'A' => 'job', 'B' => 'job' },
+                root_variables_inheritance: false
               )
             end
           end
@@ -308,9 +443,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
               }
             end
 
-            it 'does return only job variables' do
+            it 'does return job and root variables' do
               expect(entry.value).to include(
-                variables: { 'A' => 'job', 'B' => 'job', 'D' => 'root' }
+                variables: { 'A' => 'job', 'B' => 'job', 'D' => 'root' },
+                job_variables: { 'A' => 'job', 'B' => 'job' },
+                root_variables_inheritance: ['D']
               )
             end
           end
@@ -378,8 +515,25 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
             name: :rspec,
             stage: 'test',
             only: { refs: %w[branches tags] },
-            variables: {}
+            variables: {},
+            job_variables: {},
+            root_variables_inheritance: true
           )
+        end
+
+        context 'when FF ci_workflow_rules_variables is disabled' do
+          before do
+            stub_feature_flags(ci_workflow_rules_variables: false)
+          end
+
+          it 'does not return job_variables and root_variables_inheritance' do
+            expect(entry.value).to eq(
+              name: :rspec,
+              stage: 'test',
+              only: { refs: %w[branches tags] },
+              variables: {}
+            )
+          end
         end
       end
     end

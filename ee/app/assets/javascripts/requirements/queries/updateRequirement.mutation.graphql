@@ -1,12 +1,11 @@
+#import "./requirement.fragment.graphql"
+
 mutation updateRequirement($updateRequirementInput: UpdateRequirementInput!) {
   updateRequirement(input: $updateRequirementInput) {
     clientMutationId
     errors
     requirement {
-      iid
-      title
-      state
-      updatedAt
+      ...Requirement
     }
   }
 }

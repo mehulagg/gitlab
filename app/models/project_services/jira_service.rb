@@ -1,12 +1,20 @@
 # frozen_string_literal: true
 
+# Accessible as Project#external_issue_tracker
 class JiraService < IssueTrackerService
   extend ::Gitlab::Utils::Override
   include Gitlab::Routing
   include ApplicationHelper
   include ActionView::Helpers::AssetUrlHelper
+  include Gitlab::Utils::StrongMemoize
 
   PROJECTS_PER_PAGE = 50
+
+  # TODO: use jira_service.deployment_type enum when https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37003 is merged
+  DEPLOYMENT_TYPES = {
+    server: 'SERVER',
+    cloud: 'CLOUD'
+  }.freeze
 
   validates :url, public_url: true, presence: true, if: :activated?
   validates :api_url, public_url: true, allow_blank: true
@@ -23,9 +31,11 @@ class JiraService < IssueTrackerService
 
   # TODO: we can probably just delegate as part of
   # https://gitlab.com/gitlab-org/gitlab/issues/29404
-  data_field :username, :password, :url, :api_url, :jira_issue_transition_id, :project_key, :issues_enabled
+  data_field :username, :password, :url, :api_url, :jira_issue_transition_automatic, :jira_issue_transition_id, :project_key, :issues_enabled,
+    :vulnerabilities_enabled, :vulnerabilities_issuetype
 
   before_update :reset_password
+  after_commit :update_deployment_type, on: [:create, :update], if: :update_deployment_type?
 
   enum comment_detail: {
     standard: 1,
@@ -115,11 +125,35 @@ class JiraService < IssueTrackerService
 
   def fields
     [
-      { type: 'text', name: 'url', title: s_('JiraService|Web URL'), placeholder: 'https://jira.example.com', required: true },
-      { type: 'text', name: 'api_url', title: s_('JiraService|Jira API URL'), placeholder: s_('JiraService|If different from Web URL') },
-      { type: 'text', name: 'username', title: s_('JiraService|Username or Email'), placeholder: s_('JiraService|Use a username for server version and an email for cloud version'), required: true },
-      { type: 'password', name: 'password', title: s_('JiraService|Password or API token'), placeholder: s_('JiraService|Use a password for server version and an API token for cloud version'), required: true },
-      { type: 'text', name: 'jira_issue_transition_id', title: s_('JiraService|Transition ID(s)'), placeholder: s_('JiraService|Use , or ; to separate multiple transition IDs') }
+      {
+        type: 'text',
+        name: 'url',
+        title: s_('JiraService|Web URL'),
+        placeholder: 'https://jira.example.com',
+        required: true
+      },
+      {
+        type: 'text',
+        name: 'api_url',
+        title: s_('JiraService|Jira API URL'),
+        placeholder: s_('JiraService|If different from Web URL')
+      },
+      {
+        type: 'text',
+        name: 'username',
+        title: s_('JiraService|Username or Email'),
+        placeholder: s_('JiraService|Use a username for server version and an email for cloud version'),
+        required: true
+      },
+      {
+        type: 'password',
+        name: 'password',
+        title: s_('JiraService|Password or API token'),
+        non_empty_password_title: s_('JiraService|Enter new password or API token'),
+        non_empty_password_help: s_('JiraService|Leave blank to use your current password or API token'),
+        placeholder: s_('JiraService|Use a password for server version and an API token for cloud version'),
+        required: true
+      }
     ]
   end
 
@@ -146,10 +180,19 @@ class JiraService < IssueTrackerService
     # support any events.
   end
 
-  def close_issue(entity, external_issue)
-    issue = jira_request { client.Issue.find(external_issue.iid) }
+  def find_issue(issue_key, rendered_fields: false, transitions: false)
+    expands = []
+    expands << 'renderedFields' if rendered_fields
+    expands << 'transitions' if transitions
+    options = { expand: expands.join(',') } if expands.any?
 
-    return if issue.nil? || has_resolution?(issue) || !jira_issue_transition_id.present?
+    jira_request { client.Issue.find(issue_key, options || {}) }
+  end
+
+  def close_issue(entity, external_issue, current_user)
+    issue = find_issue(external_issue.iid, transitions: jira_issue_transition_automatic)
+
+    return if issue.nil? || has_resolution?(issue) || !issue_transition_enabled?
 
     commit_id = case entity
                 when Commit then entity.id
@@ -161,8 +204,9 @@ class JiraService < IssueTrackerService
     # Depending on the Jira project's workflow, a comment during transition
     # may or may not be allowed. Refresh the issue after transition and check
     # if it is closed, so we don't have one comment for every commit.
-    issue = jira_request { client.Issue.find(issue.key) } if transition_issue(issue)
+    issue = find_issue(issue.key) if transition_issue(issue)
     add_issue_solved_comment(issue, commit_id, commit_url) if has_resolution?(issue)
+    log_usage(:close_issue, current_user)
   end
 
   def create_cross_reference_note(mentioned, noteable, author)
@@ -170,7 +214,7 @@ class JiraService < IssueTrackerService
       return s_("JiraService|Events for %{noteable_model_name} are disabled.") % { noteable_model_name: noteable.model_name.plural.humanize(capitalize: false) }
     end
 
-    jira_issue = jira_request { client.Issue.find(mentioned.id) }
+    jira_issue = find_issue(mentioned.id)
 
     return unless jira_issue.present?
 
@@ -198,7 +242,7 @@ class JiraService < IssueTrackerService
       }
     }
 
-    add_comment(data, jira_issue)
+    add_comment(data, jira_issue).tap { log_usage(:cross_reference, author) }
   end
 
   def valid_connection?
@@ -206,7 +250,7 @@ class JiraService < IssueTrackerService
   end
 
   def test(_)
-    result = test_settings
+    result = server_info
     success = result.present?
     result = @error&.message unless success
 
@@ -223,12 +267,16 @@ class JiraService < IssueTrackerService
     true
   end
 
+  def issue_transition_enabled?
+    jira_issue_transition_automatic || jira_issue_transition_id.present?
+  end
+
   private
 
-  def test_settings
-    return unless client_url.present?
-
-    jira_request { client.ServerInfo.all.attrs }
+  def server_info
+    strong_memoize(:server_info) do
+      client_url.present? ? jira_request { client.ServerInfo.all.attrs } : nil
+    end
   end
 
   def can_cross_reference?(noteable)
@@ -243,20 +291,50 @@ class JiraService < IssueTrackerService
   # the issue is transitioned at the order given by the user
   # if any transition fails it will log the error message and stop the transition sequence
   def transition_issue(issue)
-    jira_issue_transition_id.scan(Gitlab::Regex.jira_transition_id_regex).each do |transition_id|
-      issue.transitions.build.save!(transition: { id: transition_id })
-    rescue => error
-      log_error(
-        "Issue transition failed",
-          error: {
-            exception_class: error.class.name,
-            exception_message: error.message,
-            exception_backtrace: Gitlab::BacktraceCleaner.clean_backtrace(error.backtrace)
-          },
-         client_url: client_url
-      )
-      return false
+    return transition_issue_to_done(issue) if jira_issue_transition_automatic
+
+    jira_issue_transition_id.scan(Gitlab::Regex.jira_transition_id_regex).all? do |transition_id|
+      transition_issue_to_id(issue, transition_id)
     end
+  end
+
+  def transition_issue_to_id(issue, transition_id)
+    issue.transitions.build.save!(
+      transition: { id: transition_id }
+    )
+
+    true
+  rescue => error
+    log_error(
+      "Issue transition failed",
+        error: {
+          exception_class: error.class.name,
+          exception_message: error.message,
+          exception_backtrace: Gitlab::BacktraceCleaner.clean_backtrace(error.backtrace)
+        },
+        client_url: client_url
+    )
+
+    false
+  end
+
+  def transition_issue_to_done(issue)
+    transitions = issue.transitions rescue []
+
+    transition = transitions.find do |transition|
+      status = transition&.to&.statusCategory
+      status && status['key'] == 'done'
+    end
+
+    return false unless transition
+
+    transition_issue_to_id(issue, transition.id)
+  end
+
+  def log_usage(action, user)
+    key = "i_ecosystem_jira_service_#{action}"
+
+    Gitlab::UsageDataCounters::HLLRedisCounter.track_event(key, values: user.id)
   end
 
   def add_issue_solved_comment(issue, commit_id, commit_url)
@@ -375,7 +453,6 @@ class JiraService < IssueTrackerService
   def build_entity_url(noteable_type, entity_id)
     polymorphic_url(
       [
-        self.project.namespace.becomes(Namespace),
         self.project,
         noteable_type.to_sym
       ],
@@ -429,6 +506,26 @@ class JiraService < IssueTrackerService
     return false if api_url.present?
 
     url_changed?
+  end
+
+  def update_deployment_type?
+    (api_url_changed? || url_changed? || username_changed? || password_changed?) &&
+      can_test?
+  end
+
+  def update_deployment_type
+    clear_memoization(:server_info) # ensure we run the request when we try to update deployment type
+    results = server_info
+    return data_fields.deployment_unknown! unless results.present?
+
+    case results['deploymentType']
+    when 'Server'
+      data_fields.deployment_server!
+    when 'Cloud'
+      data_fields.deployment_cloud!
+    else
+      data_fields.deployment_unknown!
+    end
   end
 
   def self.event_description(event)

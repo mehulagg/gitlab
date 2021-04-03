@@ -12,10 +12,12 @@ class ElasticClusterReindexingCronWorker
   idempotent!
 
   def perform
-    task = Elastic::ReindexingTask.current
-    return false unless task
-
     in_lock(self.class.name.underscore, ttl: 1.hour, retries: 10, sleep_sec: 1) do
+      Elastic::ReindexingTask.drop_old_indices!
+
+      task = Elastic::ReindexingTask.current
+      break false unless task
+
       service.execute
     end
   end

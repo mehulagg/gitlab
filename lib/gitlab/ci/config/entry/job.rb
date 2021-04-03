@@ -14,7 +14,7 @@ module Gitlab
           ALLOWED_KEYS = %i[tags script type image services start_in artifacts
                             cache dependencies before_script after_script
                             environment coverage retry parallel interruptible timeout
-                            resource_group release secrets].freeze
+                            release secrets].freeze
 
           REQUIRED_BY_NEEDS = %i[stage].freeze
 
@@ -22,22 +22,15 @@ module Gitlab
             validates :config, allowed_keys: ALLOWED_KEYS + PROCESSABLE_ALLOWED_KEYS
             validates :config, required_keys: REQUIRED_BY_NEEDS, if: :has_needs?
             validates :script, presence: true
-            validates :config,
-              disallowed_keys: {
-                in: %i[release],
-                message: 'release features are not enabled'
-              },
-              unless: -> { Gitlab::Ci::Features.release_generation_enabled? }
 
             with_options allow_nil: true do
-              validates :allow_failure, boolean: true
               validates :when, inclusion: {
                 in: ALLOWED_WHEN,
                 message: "should be one of: #{ALLOWED_WHEN.join(', ')}"
               }
 
               validates :dependencies, array_of_strings: true
-              validates :resource_group, type: String
+              validates :allow_failure, hash_or_boolean: true
             end
 
             validates :start_in, duration: { limit: '1 week' }, if: :delayed?
@@ -124,43 +117,18 @@ module Gitlab
             description: 'Parallel configuration for this job.',
             inherit: false
 
-          attributes :script, :tags, :allow_failure, :when, :dependencies,
+          entry :allow_failure, ::Gitlab::Ci::Config::Entry::AllowFailure,
+            description: 'Indicates whether this job is allowed to fail or not.',
+            inherit: false
+
+          attributes :script, :tags, :when, :dependencies,
                      :needs, :retry, :parallel, :start_in,
-                     :interruptible, :timeout, :resource_group, :release
-
-          Matcher = Struct.new(:name, :config) do
-            def applies?
-              job_is_not_hidden? &&
-              config_is_a_hash? &&
-              has_job_keys?
-            end
-
-            private
-
-            def job_is_not_hidden?
-              !name.to_s.start_with?('.')
-            end
-
-            def config_is_a_hash?
-              config.is_a?(Hash)
-            end
-
-            def has_job_keys?
-              if name == :default
-                config.key?(:script)
-              else
-                (ALLOWED_KEYS & config.keys).any?
-              end
-            end
-          end
+                     :interruptible, :timeout,
+                     :release, :allow_failure
 
           def self.matching?(name, config)
-            if Gitlab::Ci::Features.job_entry_matches_all_keys?
-              Matcher.new(name, config).applies?
-            else
-              !name.to_s.start_with?('.') &&
-                config.is_a?(Hash) && config.key?(:script)
-            end
+            !name.to_s.start_with?('.') &&
+              config.is_a?(Hash) && config.key?(:script)
           end
 
           def self.visible?
@@ -177,16 +145,8 @@ module Gitlab
             end
           end
 
-          def manual_action?
-            self.when == 'manual'
-          end
-
           def delayed?
             self.when == 'delayed'
-          end
-
-          def ignored?
-            allow_failure.nil? ? manual_action? : allow_failure
           end
 
           def value
@@ -211,10 +171,28 @@ module Gitlab
               release: release_value,
               after_script: after_script_value,
               ignore: ignored?,
+              allow_failure_criteria: allow_failure_criteria,
               needs: needs_defined? ? needs_value : nil,
-              resource_group: resource_group,
               scheduling_type: needs_defined? ? :dag : :stage
             ).compact
+          end
+
+          def ignored?
+            allow_failure_defined? ? static_allow_failure : manual_action?
+          end
+
+          private
+
+          def allow_failure_criteria
+            if allow_failure_defined? && allow_failure_value.is_a?(Hash)
+              allow_failure_value
+            end
+          end
+
+          def static_allow_failure
+            return false if allow_failure_value.is_a?(Hash)
+
+            allow_failure_value
           end
         end
       end

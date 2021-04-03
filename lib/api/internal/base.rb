@@ -3,20 +3,31 @@
 module API
   # Internal access API
   module Internal
-    class Base < Grape::API::Instance
+    class Base < ::API::Base
       before { authenticate_by_gitlab_shell_token! }
 
       before do
+        api_endpoint = env['api.endpoint']
+        feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
+
+        header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
+
         Gitlab::ApplicationContext.push(
           user: -> { actor&.user },
           project: -> { project },
-          caller_id: route.origin
+          caller_id: api_endpoint.endpoint_id,
+          remote_ip: request.ip,
+          feature_category: feature_category
         )
       end
 
       helpers ::API::Helpers::InternalHelpers
 
-      UNKNOWN_CHECK_RESULT_ERROR = 'Unknown check result'.freeze
+      UNKNOWN_CHECK_RESULT_ERROR = 'Unknown check result'
+
+      VALID_PAT_SCOPES = Set.new(
+        Gitlab::Auth::API_SCOPES + Gitlab::Auth::REPOSITORY_SCOPES + Gitlab::Auth::REGISTRY_SCOPES
+      ).freeze
 
       helpers do
         def response_with_status(code: 200, success: true, message: nil, **extra_options)
@@ -24,10 +35,10 @@ module API
           { status: success, message: message }.merge(extra_options).compact
         end
 
-        def lfs_authentication_url(project)
+        def lfs_authentication_url(container)
           # This is a separate method so that EE can alter its behaviour more
           # easily.
-          project.http_url_to_repo
+          container.lfs_http_url_to_repo
         end
 
         def check_allowed(params)
@@ -41,18 +52,20 @@ module API
           actor.update_last_used_at!
 
           check_result = begin
-                           access_check!(actor, params)
-                         rescue Gitlab::GitAccess::ForbiddenError => e
-                           # The return code needs to be 401. If we return 403
-                           # the custom message we return won't be shown to the user
-                           # and, instead, the default message 'GitLab: API is not accessible'
-                           # will be displayed
-                           return response_with_status(code: 401, success: false, message: e.message)
-                         rescue Gitlab::GitAccess::TimeoutError => e
-                           return response_with_status(code: 503, success: false, message: e.message)
-                         rescue Gitlab::GitAccess::NotFoundError => e
-                           return response_with_status(code: 404, success: false, message: e.message)
-                         end
+            with_admin_mode_bypass!(actor.user&.id) do
+              access_check!(actor, params)
+            end
+          rescue Gitlab::GitAccess::ForbiddenError => e
+            # The return code needs to be 401. If we return 403
+            # the custom message we return won't be shown to the user
+            # and, instead, the default message 'GitLab: API is not accessible'
+            # will be displayed
+            return response_with_status(code: 401, success: false, message: e.message)
+          rescue Gitlab::GitAccess::TimeoutError => e
+            return response_with_status(code: 503, success: false, message: e.message)
+          rescue Gitlab::GitAccess::NotFoundError => e
+            return response_with_status(code: 404, success: false, message: e.message)
+          end
 
           log_user_activity(actor.user)
 
@@ -95,6 +108,29 @@ module API
             @project = @container = access_checker.container
           end
         end
+
+        def validate_actor(actor)
+          return 'Could not find the given key' unless actor.key
+
+          'Could not find a user for the given key' unless actor.user
+        end
+
+        def two_factor_otp_check
+          { success: false, message: 'Feature is not available' }
+        end
+
+        def with_admin_mode_bypass!(actor_id)
+          return yield unless Gitlab::CurrentSettings.admin_mode
+
+          Gitlab::Auth::CurrentUserMode.bypass_session!(actor_id) do
+            yield
+          end
+        end
+
+        # Overridden in EE
+        def geo_proxy
+          {}
+        end
       end
 
       namespace 'internal' do
@@ -110,13 +146,15 @@ module API
         #   changes - changes as "oldrev newrev ref", see Gitlab::ChangesList
         #   check_ip - optional, only in EE version, may limit access to
         #     group resources based on its IP restrictions
-        post "/allowed" do
+        post "/allowed", feature_category: :source_code_management do
           # It was moved to a separate method so that EE can alter its behaviour more
           # easily.
           check_allowed(params)
         end
 
-        post "/lfs_authenticate" do
+        post "/lfs_authenticate", feature_category: :source_code_management do
+          not_found! unless container&.lfs_enabled?
+
           status 200
 
           unless actor.key_or_user
@@ -127,14 +165,14 @@ module API
 
           Gitlab::LfsToken
             .new(actor.key_or_user)
-            .authentication_payload(lfs_authentication_url(project))
+            .authentication_payload(lfs_authentication_url(container))
         end
 
         #
         # Get a ssh key using the fingerprint
         #
         # rubocop: disable CodeReuse/ActiveRecord
-        get '/authorized_keys' do
+        get '/authorized_keys', feature_category: :source_code_management do
           fingerprint = params.fetch(:fingerprint) do
             Gitlab::InsecureKeyFingerprint.new(params.fetch(:key)).fingerprint
           end
@@ -147,11 +185,11 @@ module API
         #
         # Discover user by ssh key, user id or username
         #
-        get '/discover' do
+        get '/discover', feature_category: :authentication_and_authorization do
           present actor.user, with: Entities::UserSafe
         end
 
-        get '/check' do
+        get '/check', feature_category: :not_owned do
           {
             api_version: API.version,
             gitlab_version: Gitlab::VERSION,
@@ -159,27 +197,22 @@ module API
             redis: redis_ping
           }
         end
-        post '/two_factor_recovery_codes' do
+
+        post '/two_factor_recovery_codes', feature_category: :authentication_and_authorization do
           status 200
 
           actor.update_last_used_at!
           user = actor.user
 
-          if params[:key_id]
-            unless actor.key
-              break { success: false, message: 'Could not find the given key' }
-            end
+          error_message = validate_actor(actor)
 
-            if actor.key.is_a?(DeployKey)
-              break { success: false, message: 'Deploy keys cannot be used to retrieve recovery codes' }
-            end
-
-            unless user
-              break { success: false, message: 'Could not find a user for the given key' }
-            end
-          elsif params[:user_id] && user.nil?
+          if params[:user_id] && user.nil?
             break { success: false, message: 'Could not find the given user' }
+          elsif error_message
+            break { success: false, message: error_message }
           end
+
+          break { success: false, message: 'Deploy keys cannot be used to retrieve recovery codes' } if actor.key.is_a?(DeployKey)
 
           unless user.two_factor_enabled?
             break { success: false, message: 'Two-factor authentication is not enabled for this user' }
@@ -194,7 +227,57 @@ module API
           { success: true, recovery_codes: codes }
         end
 
-        post '/pre_receive' do
+        post '/personal_access_token', feature_category: :authentication_and_authorization do
+          status 200
+
+          actor.update_last_used_at!
+          user = actor.user
+
+          error_message = validate_actor(actor)
+
+          break { success: false, message: 'Deploy keys cannot be used to create personal access tokens' } if actor.key.is_a?(DeployKey)
+
+          if params[:user_id] && user.nil?
+            break { success: false, message: 'Could not find the given user' }
+          elsif error_message
+            break { success: false, message: error_message }
+          end
+
+          if params[:name].blank?
+            break { success: false, message: "No token name specified" }
+          end
+
+          if params[:scopes].blank?
+            break { success: false, message: "No token scopes specified" }
+          end
+
+          invalid_scope = params[:scopes].find { |scope| VALID_PAT_SCOPES.exclude?(scope.to_sym) }
+
+          if invalid_scope
+            valid_scopes = VALID_PAT_SCOPES.map(&:to_s).sort
+            break { success: false, message: "Invalid scope: '#{invalid_scope}'. Valid scopes are: #{valid_scopes}" }
+          end
+
+          begin
+            expires_at = params[:expires_at].presence && Date.parse(params[:expires_at])
+          rescue ArgumentError
+            break { success: false, message: "Invalid token expiry date: '#{params[:expires_at]}'" }
+          end
+
+          result = ::PersonalAccessTokens::CreateService.new(
+            current_user: user, target_user: user, params: { name: params[:name], scopes: params[:scopes], expires_at: expires_at }
+          ).execute
+
+          unless result.status == :success
+            break { success: false, message: "Failed to create token: #{result.message}" }
+          end
+
+          access_token = result.payload[:personal_access_token]
+
+          { success: true, token: access_token.token, scopes: access_token.scopes, expires_at: access_token.expires_at }
+        end
+
+        post '/pre_receive', feature_category: :source_code_management do
           status 200
 
           reference_counter_increased = Gitlab::ReferenceCounter.new(params[:gl_repository]).increase
@@ -202,12 +285,51 @@ module API
           { reference_counter_increased: reference_counter_increased }
         end
 
-        post '/post_receive' do
+        post '/post_receive', feature_category: :source_code_management do
           status 200
 
           response = PostReceiveService.new(actor.user, repository, project, params).execute
 
           present response, with: Entities::InternalPostReceive::Response
+        end
+
+        # This endpoint was added in https://gitlab.com/gitlab-org/gitlab/-/issues/212308
+        # It was added with the plan to be used by  GitLab PAM module but we
+        # decided to pursue a different approach, so it's currently not used.
+        # We might revive the PAM module though as it provides better user
+        # flow.
+        post '/two_factor_config', feature_category: :authentication_and_authorization do
+          status 200
+
+          break { success: false } unless Feature.enabled?(:two_factor_for_cli)
+
+          actor.update_last_used_at!
+          user = actor.user
+
+          error_message = validate_actor(actor)
+
+          if error_message
+            { success: false, message: error_message }
+          elsif actor.key.is_a?(DeployKey)
+            { success: true, two_factor_required: false }
+          else
+            {
+              success: true,
+              two_factor_required: user.two_factor_enabled?
+            }
+          end
+        end
+
+        post '/two_factor_otp_check', feature_category: :authentication_and_authorization do
+          status 200
+
+          two_factor_otp_check
+        end
+
+        # Workhorse calls this to determine if it is a Geo secondary site
+        # that should proxy requests. FOSS can quickly return empty data.
+        get '/geo_proxy', feature_category: :geo_replication do
+          geo_proxy
         end
       end
     end

@@ -1,14 +1,14 @@
-import AxiosMockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlSearchBoxByType } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import AxiosMockAdapter from 'axios-mock-adapter';
 import { nextTick } from 'vue';
-import createFlash from '~/flash';
+import waitForPromises from 'helpers/wait_for_promises';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import ForkGroupsList from '~/pages/projects/forks/new/components/fork_groups_list.vue';
 import ForkGroupsListItem from '~/pages/projects/forks/new/components/fork_groups_list_item.vue';
-import waitForPromises from 'helpers/wait_for_promises';
 
-jest.mock('~/flash', () => jest.fn());
+jest.mock('~/flash');
 
 describe('Fork groups list component', () => {
   let wrapper;
@@ -16,12 +16,11 @@ describe('Fork groups list component', () => {
 
   const DEFAULT_PROPS = {
     endpoint: '/dummy',
-    hasReachedProjectLimit: false,
   };
 
   const replyWith = (...args) => axiosMock.onGet(DEFAULT_PROPS.endpoint).reply(...args);
 
-  const createWrapper = propsData => {
+  const createWrapper = (propsData) => {
     wrapper = shallowMount(ForkGroupsList, {
       propsData: {
         ...DEFAULT_PROPS,
@@ -70,7 +69,7 @@ describe('Fork groups list component', () => {
     replyWith(() => new Promise(() => {}));
     createWrapper();
 
-    expect(wrapper.contains(GlLoadingIcon)).toBe(true);
+    expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
   });
 
   it('displays empty text if no groups are available', async () => {
@@ -89,27 +88,23 @@ describe('Fork groups list component', () => {
 
     await waitForPromises();
 
-    expect(wrapper.contains(GlSearchBoxByType)).toBe(true);
+    expect(wrapper.find(GlSearchBoxByType).exists()).toBe(true);
   });
 
   it('renders list items for each available group', async () => {
     const namespaces = [{ name: 'dummy1' }, { name: 'dummy2' }, { name: 'otherdummy' }];
-    const hasReachedProjectLimit = true;
 
     replyWith(200, { namespaces });
-    createWrapper({ hasReachedProjectLimit });
+    createWrapper();
 
     await waitForPromises();
 
     expect(wrapper.findAll(ForkGroupsListItem)).toHaveLength(namespaces.length);
 
     namespaces.forEach((namespace, idx) => {
-      expect(
-        wrapper
-          .findAll(ForkGroupsListItem)
-          .at(idx)
-          .props(),
-      ).toStrictEqual({ group: namespace, hasReachedProjectLimit });
+      expect(wrapper.findAll(ForkGroupsListItem).at(idx).props()).toStrictEqual({
+        group: namespace,
+      });
     });
   });
 
@@ -123,11 +118,6 @@ describe('Fork groups list component', () => {
     await nextTick();
 
     expect(wrapper.findAll(ForkGroupsListItem)).toHaveLength(1);
-    expect(
-      wrapper
-        .findAll(ForkGroupsListItem)
-        .at(0)
-        .props().group.name,
-    ).toBe('otherdummy');
+    expect(wrapper.findAll(ForkGroupsListItem).at(0).props().group.name).toBe('otherdummy');
   });
 });

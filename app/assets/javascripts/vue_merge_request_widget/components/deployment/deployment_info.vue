@@ -3,8 +3,16 @@ import { GlLink, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
+import {
+  MANUAL_DEPLOY,
+  WILL_DEPLOY,
+  RUNNING,
+  SUCCESS,
+  FAILED,
+  CANCELED,
+  SKIPPED,
+} from './constants';
 import MemoryUsage from './memory_usage.vue';
-import { MANUAL_DEPLOY, WILL_DEPLOY, RUNNING, SUCCESS, FAILED, CANCELED } from './constants';
 
 export default {
   name: 'DeploymentInfo',
@@ -38,6 +46,7 @@ export default {
     [SUCCESS]: __('Deployed to'),
     [FAILED]: __('Failed to deploy to'),
     [CANCELED]: __('Canceled deployment to'),
+    [SKIPPED]: __('Skipped deployment to'),
   },
   computed: {
     deployTimeago() {

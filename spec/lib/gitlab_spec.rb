@@ -26,18 +26,17 @@ RSpec.describe Gitlab do
       end
 
       it 'returns the actual Git revision' do
-        expect(File).to receive(:read)
-                          .with(described_class.root.join('REVISION'))
-                          .and_return("abc123\n")
+        expect_file_read(described_class.root.join('REVISION'), content: "abc123\n")
 
         expect(described_class.revision).to eq('abc123')
       end
 
       it 'memoizes the revision' do
+        stub_file_read(described_class.root.join('REVISION'), content: "abc123\n")
+
         expect(File).to receive(:read)
-                          .once
-                          .with(described_class.root.join('REVISION'))
-                          .and_return("abc123\n")
+          .once
+          .with(described_class.root.join('REVISION'))
 
         2.times { described_class.revision }
       end
@@ -93,6 +92,26 @@ RSpec.describe Gitlab do
       stub_config_setting(url: 'http://example.com')
 
       expect(described_class.com?).to eq false
+    end
+  end
+
+  describe '.com' do
+    subject { described_class.com { true } }
+
+    before do
+      allow(described_class).to receive(:com?).and_return(gl_com)
+    end
+
+    context 'when on GitLab.com' do
+      let(:gl_com) { true }
+
+      it { is_expected.to be true }
+    end
+
+    context 'when not on GitLab.com' do
+      let(:gl_com) { false }
+
+      it { is_expected.to be_nil }
     end
   end
 
@@ -328,6 +347,31 @@ RSpec.describe Gitlab do
 
     it 'returns false when not set' do
       expect(described_class.http_proxy_env?).to eq(false)
+    end
+  end
+
+  describe '.maintenance_mode?' do
+    it 'returns true when maintenance mode is enabled' do
+      stub_maintenance_mode_setting(true)
+
+      expect(described_class.maintenance_mode?).to eq(true)
+    end
+
+    it 'returns false when maintenance mode is disabled' do
+      stub_maintenance_mode_setting(false)
+
+      expect(described_class.maintenance_mode?).to eq(false)
+    end
+
+    it 'returns false when maintenance mode column is not present' do
+      stub_maintenance_mode_setting(true)
+
+      allow(::Gitlab::CurrentSettings.current_application_settings)
+        .to receive(:respond_to?)
+        .with(:maintenance_mode, false)
+        .and_return(false)
+
+      expect(described_class.maintenance_mode?).to eq(false)
     end
   end
 end

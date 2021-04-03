@@ -7,8 +7,11 @@ class Projects::InsightsController < Projects::ApplicationController
   helper_method :project_insights_config
 
   before_action :authorize_read_project!
+  before_action :authorize_read_insights!
 
   track_unique_visits :show, target_id: 'p_analytics_insights'
+
+  feature_category :insights
 
   private
 

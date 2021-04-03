@@ -3,8 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe 'User views releases', :js do
+  let_it_be(:today) { Time.zone.now }
+  let_it_be(:yesterday) { today - 1.day }
+  let_it_be(:tomorrow) { today + 1.day }
+
   let_it_be(:project) { create(:project, :repository, :private) }
-  let_it_be(:release) { create(:release, project: project, name: 'The first release' ) }
+  let_it_be(:release_v1) { create(:release, project: project, tag: 'v1', name: 'The first release', released_at: yesterday, created_at: today) }
+  let_it_be(:release_v2) { create(:release, project: project, tag: 'v2-with-a/slash', name: 'The second release', released_at: today, created_at: yesterday) }
+  let_it_be(:release_v3) { create(:release, project: project, tag: 'v3', name: 'The third release', released_at: tomorrow, created_at: tomorrow) }
   let_it_be(:maintainer) { create(:user) }
   let_it_be(:guest) { create(:user) }
 
@@ -13,42 +19,40 @@ RSpec.describe 'User views releases', :js do
     project.add_guest(guest)
   end
 
-  context('when the user is a maintainer') do
-    before do
-      gitlab_sign_in(maintainer)
-    end
+  shared_examples 'releases page' do
+    context('when the user is a maintainer') do
+      before do
+        sign_in(maintainer)
 
-    it 'sees the release' do
-      visit project_releases_path(project)
+        visit project_releases_path(project)
+      end
 
-      expect(page).to have_content(release.name)
-      expect(page).to have_content(release.tag)
-      expect(page).not_to have_content('Upcoming Release')
-    end
+      it 'sees the release' do
+        page.within("##{release_v1.tag}") do
+          expect(page).to have_content(release_v1.name)
+          expect(page).to have_content(release_v1.tag)
+          expect(page).not_to have_content('Upcoming Release')
+        end
+      end
 
-    shared_examples 'asset link tests' do
       context 'when there is a link as an asset' do
-        let!(:release_link) { create(:release_link, release: release, url: url ) }
+        let!(:release_link) { create(:release_link, release: release_v1, url: url ) }
         let(:url) { "#{project.web_url}/-/jobs/1/artifacts/download" }
-        let(:direct_asset_link) { Gitlab::Routing.url_helpers.project_release_url(project, release) << release_link.filepath }
+        let(:direct_asset_link) { Gitlab::Routing.url_helpers.project_release_url(project, release_v1) << "/downloads#{release_link.filepath}" }
 
         it 'sees the link' do
-          visit project_releases_path(project)
-
-          page.within('.js-assets-list') do
+          page.within("##{release_v1.tag} .js-assets-list") do
             expect(page).to have_link release_link.name, href: direct_asset_link
             expect(page).not_to have_css('[data-testid="external-link-indicator"]')
           end
         end
 
         context 'when there is a link redirect' do
-          let!(:release_link) { create(:release_link, release: release, name: 'linux-amd64 binaries', filepath: '/binaries/linux-amd64', url: url) }
+          let!(:release_link) { create(:release_link, release: release_v1, name: 'linux-amd64 binaries', filepath: '/binaries/linux-amd64', url: url) }
           let(:url) { "#{project.web_url}/-/jobs/1/artifacts/download" }
 
           it 'sees the link' do
-            visit project_releases_path(project)
-
-            page.within('.js-assets-list') do
+            page.within("##{release_v1.tag} .js-assets-list") do
               expect(page).to have_link release_link.name, href: direct_asset_link
               expect(page).not_to have_css('[data-testid="external-link-indicator"]')
             end
@@ -59,71 +63,99 @@ RSpec.describe 'User views releases', :js do
           let(:url) { 'http://google.com/download' }
 
           it 'sees that the link is external resource' do
-            visit project_releases_path(project)
-
-            page.within('.js-assets-list') do
+            page.within("##{release_v1.tag} .js-assets-list") do
               expect(page).to have_css('[data-testid="external-link-indicator"]')
             end
           end
         end
       end
-    end
 
-    context 'when the release_asset_link_type feature flag is enabled' do
-      before do
-        stub_feature_flags(release_asset_link_type: true)
+      context 'with an upcoming release' do
+        it 'sees the upcoming tag' do
+          page.within("##{release_v3.tag}") do
+            expect(page).to have_content('Upcoming Release')
+          end
+        end
       end
 
-      it_behaves_like 'asset link tests'
-    end
-
-    context 'when the release_asset_link_type feature flag is disabled' do
-      before do
-        stub_feature_flags(release_asset_link_type: false)
+      context 'with a tag containing a slash' do
+        it 'sees the release' do
+          page.within("##{release_v2.tag.parameterize}") do
+            expect(page).to have_content(release_v2.name)
+            expect(page).to have_content(release_v2.tag)
+          end
+        end
       end
 
-      it_behaves_like 'asset link tests'
+      context 'sorting' do
+        def sort_page(by:, direction:)
+          within '[data-testid="releases-sort"]' do
+            find('.dropdown-toggle').click
+
+            click_button(by, class: 'dropdown-item')
+
+            find('.sorting-direction-button').click if direction == :ascending
+          end
+        end
+
+        shared_examples 'releases sort order' do
+          it "sorts the releases #{description}" do
+            card_titles = page.all('.release-block .card-title', minimum: expected_releases.count)
+
+            card_titles.each_with_index do |title, index|
+              expect(title).to have_content(expected_releases[index].name)
+            end
+          end
+        end
+
+        context "when the page is sorted by the default sort order" do
+          let(:expected_releases) { [release_v3, release_v2, release_v1] }
+
+          it_behaves_like 'releases sort order'
+        end
+
+        context "when the page is sorted by created_at ascending " do
+          let(:expected_releases) { [release_v2, release_v1, release_v3] }
+
+          before do
+            sort_page by: 'Created date', direction: :ascending
+          end
+
+          it_behaves_like 'releases sort order'
+        end
+      end
     end
 
-    context 'with an upcoming release' do
-      let(:tomorrow) { Time.zone.now + 1.day }
-      let!(:release) { create(:release, project: project, released_at: tomorrow ) }
+    context('when the user is a guest') do
+      before do
+        sign_in(guest)
+      end
 
-      it 'sees the upcoming tag' do
+      it 'renders release info except for Git-related data' do
         visit project_releases_path(project)
 
-        expect(page).to have_content('Upcoming Release')
-      end
-    end
+        within('.release-block', match: :first) do
+          expect(page).to have_content(release_v3.description)
 
-    context 'with a tag containing a slash' do
-      it 'sees the release' do
-        release = create :release, project: project, tag: 'debian/2.4.0-1'
-        visit project_releases_path(project)
-
-        expect(page).to have_content(release.name)
-        expect(page).to have_content(release.tag)
+          # The following properties (sometimes) include Git info,
+          # so they are not rendered for Guest users
+          expect(page).not_to have_content(release_v3.name)
+          expect(page).not_to have_content(release_v3.tag)
+          expect(page).not_to have_content(release_v3.commit.short_id)
+        end
       end
     end
   end
 
-  context('when the user is a guest') do
+  context 'when the graphql_releases_page feature flag is enabled' do
+    it_behaves_like 'releases page'
+  end
+
+  context 'when the graphql_releases_page feature flag is disabled' do
     before do
-      gitlab_sign_in(guest)
+      stub_feature_flags(graphql_releases_page: false)
     end
 
-    it 'renders release info except for Git-related data' do
-      visit project_releases_path(project)
-
-      within('.release-block') do
-        expect(page).to have_content(release.description)
-
-        # The following properties (sometimes) include Git info,
-        # so they are not rendered for Guest users
-        expect(page).not_to have_content(release.name)
-        expect(page).not_to have_content(release.tag)
-        expect(page).not_to have_content(release.commit.short_id)
-      end
-    end
+    it_behaves_like 'releases page'
   end
 end

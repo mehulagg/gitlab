@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Sidekiq
   module Worker
     EnqueueFromTransactionError = Class.new(StandardError)
@@ -28,7 +30,7 @@ module Sidekiq
                 Use an `after_commit` hook, or include `AfterCommitQueue` and use a `run_after_commit` block instead.
                 MSG
               rescue Sidekiq::Worker::EnqueueFromTransactionError => e
-                ::Rails.logger.error(e.message) if ::Rails.env.production?
+                Gitlab::AppLogger.error(e.message) if ::Rails.env.production?
                 Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
               end
             end
@@ -46,7 +48,7 @@ end
 module ActiveRecord
   class Base
     module SkipTransactionCheckAfterCommit
-      def committed!(*)
+      def committed!(*args, **kwargs)
         Sidekiq::Worker.skipping_transaction_check { super }
       end
     end

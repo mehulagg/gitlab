@@ -1,12 +1,12 @@
 <script>
 import { GlResizeObserverDirective } from '@gitlab/ui';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { makeDataSeries } from '~/helpers/monitor_helper';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { chartHeight } from '../../constants';
-import { makeDataSeries } from '~/helpers/monitor_helper';
+import { timezones } from '../../format_date';
 import { graphDataValidatorForValues } from '../../utils';
 import { getTimeAxisOptions, getYAxisOptions, getChartGrid } from './options';
-import { timezones } from '../../format_date';
 
 export default {
   components: {
@@ -35,18 +35,14 @@ export default {
     };
   },
   computed: {
-    chartData() {
-      const queryData = this.graphData.metrics.reduce((acc, query) => {
+    barChartData() {
+      return this.graphData.metrics.reduce((acc, query) => {
         const series = makeDataSeries(query.result || [], {
           name: this.formatLegendLabel(query),
         });
 
         return acc.concat(series);
       }, []);
-
-      return {
-        values: queryData[0].data,
-      };
     },
     chartOptions() {
       const xAxis = getTimeAxisOptions({ timezone: this.timezone });
@@ -94,7 +90,7 @@ export default {
     },
     setSvg(name) {
       getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }
@@ -109,7 +105,7 @@ export default {
     <gl-column-chart
       ref="columnChart"
       v-bind="$attrs"
-      :data="chartData"
+      :bars="barChartData"
       :option="chartOptions"
       :width="width"
       :height="height"

@@ -7,7 +7,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
 
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
-  let(:assignee) { create(:user) }
+  let(:user2) { create(:user) }
 
   describe '#execute' do
     context 'valid params' do
@@ -26,7 +26,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
 
       before do
         project.add_maintainer(user)
-        project.add_developer(assignee)
+        project.add_developer(user2)
         allow(service).to receive(:execute_hooks)
       end
 
@@ -47,16 +47,6 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
           .to change { project.open_merge_requests_count }.from(0).to(1)
       end
 
-      it 'does not creates todos' do
-        attributes = {
-          project: project,
-          target_id: merge_request.id,
-          target_type: merge_request.class.name
-        }
-
-        expect(Todo.where(attributes).count).to be_zero
-      end
-
       it 'creates exactly 1 create MR event', :sidekiq_might_not_need_inline do
         attributes = {
           action: :created,
@@ -75,7 +65,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
               description: "well this is not done yet\n/wip",
               source_branch: 'feature',
               target_branch: 'master',
-              assignees: [assignee]
+              assignees: [user2]
             }
           end
 
@@ -91,7 +81,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
               description: "well this is not done yet\n/wip",
               source_branch: 'feature',
               target_branch: 'master',
-              assignees: [assignee]
+              assignees: [user2]
             }
           end
 
@@ -108,24 +98,30 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
             description: 'please fix',
             source_branch: 'feature',
             target_branch: 'master',
-            assignees: [assignee]
+            assignees: [user2]
           }
         end
 
-        it { expect(merge_request.assignees).to eq([assignee]) }
+        it { expect(merge_request.assignees).to eq([user2]) }
+      end
 
-        it 'creates a todo for new assignee' do
-          attributes = {
-            project: project,
-            author: user,
-            user: assignee,
-            target_id: merge_request.id,
-            target_type: merge_request.class.name,
-            action: Todo::ASSIGNED,
-            state: :pending
+      context 'when reviewer is assigned' do
+        let(:opts) do
+          {
+            title: 'Awesome merge_request',
+            description: 'please fix',
+            source_branch: 'feature',
+            target_branch: 'master',
+            reviewers: [user2]
           }
+        end
 
-          expect(Todo.where(attributes).count).to eq 1
+        it { expect(merge_request.reviewers).to eq([user2]) }
+
+        it 'invalidates counter cache for reviewers', :use_clean_rails_memory_store_caching do
+          expect { merge_request }
+            .to change { user2.review_requested_open_merge_requests_count }
+            .by(1)
         end
       end
 
@@ -212,7 +208,8 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
             end
 
             before do
-              target_project.add_developer(assignee)
+              stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
+              target_project.add_developer(user2)
               target_project.add_maintainer(user)
             end
 
@@ -293,12 +290,6 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         end
       end
 
-      it 'increments the usage data counter of create event' do
-        counter = Gitlab::UsageDataCounters::MergeRequestCounter
-
-        expect { service.execute }.to change { counter.read(:create) }.by(1)
-      end
-
       context 'after_save callback to store_mentions' do
         let(:labels) { create_pair(:label, project: project) }
         let(:milestone) { create(:milestone, project: project) }
@@ -338,6 +329,10 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
           end
         end
       end
+
+      it_behaves_like 'reviewer_ids filter' do
+        let(:execute) { service.execute }
+      end
     end
 
     it_behaves_like 'issuable record that supports quick actions' do
@@ -347,6 +342,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
           target_branch: 'master'
         }
       end
+
       let(:issuable) { described_class.new(project, user, params).execute }
     end
 
@@ -360,7 +356,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
             assignee_ids: create(:user).id,
             milestone_id: 1,
             title: 'Title',
-            description: %(/assign @#{assignee.username}\n/milestone %"#{milestone.name}"),
+            description: %(/assign @#{user2.username}\n/milestone %"#{milestone.name}"),
             source_branch: 'feature',
             target_branch: 'master'
           }
@@ -368,12 +364,12 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
 
         before do
           project.add_maintainer(user)
-          project.add_maintainer(assignee)
+          project.add_maintainer(user2)
         end
 
         it 'assigns and sets milestone to issuable from command' do
           expect(merge_request).to be_persisted
-          expect(merge_request.assignees).to eq([assignee])
+          expect(merge_request.assignees).to eq([user2])
           expect(merge_request.milestone).to eq(milestone)
         end
       end
@@ -381,7 +377,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
 
     context 'merge request create service' do
       context 'asssignee_id' do
-        let(:assignee) { create(:user) }
+        let(:user2) { create(:user) }
 
         before do
           project.add_maintainer(user)
@@ -404,12 +400,12 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         end
 
         it 'saves assignee when user id is valid' do
-          project.add_maintainer(assignee)
-          opts = { title: 'Title', description: 'Description', assignee_ids: [assignee.id] }
+          project.add_maintainer(user2)
+          opts = { title: 'Title', description: 'Description', assignee_ids: [user2.id] }
 
           merge_request = described_class.new(project, user, opts).execute
 
-          expect(merge_request.assignees).to eq([assignee])
+          expect(merge_request.assignees).to eq([user2])
         end
 
         context 'when assignee is set' do
@@ -417,24 +413,24 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
             {
               title: 'Title',
               description: 'Description',
-              assignee_ids: [assignee.id],
+              assignee_ids: [user2.id],
               source_branch: 'feature',
               target_branch: 'master'
             }
           end
 
           it 'invalidates open merge request counter for assignees when merge request is assigned' do
-            project.add_maintainer(assignee)
+            project.add_maintainer(user2)
 
             described_class.new(project, user, opts).execute
 
-            expect(assignee.assigned_open_merge_requests_count).to eq 1
+            expect(user2.assigned_open_merge_requests_count).to eq 1
           end
         end
 
         context "when issuable feature is private" do
           before do
-            project.project_feature.update(issues_access_level: ProjectFeature::PRIVATE,
+            project.project_feature.update!(issues_access_level: ProjectFeature::PRIVATE,
                                            merge_requests_access_level: ProjectFeature::PRIVATE)
           end
 
@@ -442,8 +438,8 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
 
           levels.each do |level|
             it "removes not authorized assignee when project is #{Gitlab::VisibilityLevel.level_name(level)}" do
-              project.update(visibility_level: level)
-              opts = { title: 'Title', description: 'Description', assignee_ids: [assignee.id] }
+              project.update!(visibility_level: level)
+              opts = { title: 'Title', description: 'Description', assignee_ids: [user2.id] }
 
               merge_request = described_class.new(project, user, opts).execute
 
@@ -451,35 +447,6 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
             end
           end
         end
-      end
-    end
-
-    context 'while saving references to issues that the created merge request closes' do
-      let(:first_issue) { create(:issue, project: project) }
-      let(:second_issue) { create(:issue, project: project) }
-
-      let(:opts) do
-        {
-          title: 'Awesome merge_request',
-          source_branch: 'feature',
-          target_branch: 'master',
-          force_remove_source_branch: '1'
-        }
-      end
-
-      before do
-        project.add_maintainer(user)
-        project.add_developer(assignee)
-      end
-
-      it 'creates a `MergeRequestsClosingIssues` record for each issue' do
-        issue_closing_opts = opts.merge(description: "Closes #{first_issue.to_reference} and #{second_issue.to_reference}")
-        service = described_class.new(project, user, issue_closing_opts)
-        allow(service).to receive(:execute_hooks)
-        merge_request = service.execute
-
-        issue_ids = MergeRequestsClosingIssues.where(merge_request: merge_request).pluck(:issue_id)
-        expect(issue_ids).to match_array([first_issue.id, second_issue.id])
       end
     end
 
@@ -497,7 +464,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
 
       context 'when user can not access source project' do
         before do
-          target_project.add_developer(assignee)
+          target_project.add_developer(user2)
           target_project.add_maintainer(user)
         end
 
@@ -509,7 +476,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
 
       context 'when user can not access target project' do
         before do
-          target_project.add_developer(assignee)
+          target_project.add_developer(user2)
           target_project.add_maintainer(user)
         end
 
@@ -529,14 +496,6 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
           merge_request = described_class.new(project, user, opts).execute
 
           expect(merge_request).to be_persisted
-        end
-
-        it 'calls MergeRequests::LinkLfsObjectsService#execute', :sidekiq_might_not_need_inline do
-          expect_next_instance_of(MergeRequests::LinkLfsObjectsService) do |service|
-            expect(service).to receive(:execute).with(instance_of(MergeRequest))
-          end
-
-          described_class.new(project, user, opts).execute
         end
 
         it 'does not create the merge request when the target project is archived' do
@@ -561,7 +520,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
       end
 
       before do
-        project.add_developer(assignee)
+        project.add_developer(user2)
         project.add_maintainer(user)
       end
 

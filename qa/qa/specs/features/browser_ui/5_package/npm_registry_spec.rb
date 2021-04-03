@@ -1,26 +1,37 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Package', :docker, :orchestrated, :packages do
-    describe 'NPM registry' do
+  RSpec.describe 'Package', :orchestrated, :packages do
+    describe 'npm registry' do
       include Runtime::Fixtures
 
-      let(:registry_scope) { project.group.sandbox.path }
-      let(:package_name) { "@#{registry_scope}/#{project.name}" }
+      let!(:registry_scope) { project.group.sandbox.path }
       let(:auth_token) do
         unless Page::Main::Menu.perform(&:signed_in?)
           Flow::Login.sign_in
         end
 
-        Resource::PersonalAccessToken.fabricate!.access_token
+        Resource::PersonalAccessToken.fabricate!.token
       end
-      let(:project) do
+
+      let!(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'npm-registry-project'
         end
       end
 
-      it 'publishes an npm package and then deletes it' do
+      let(:package) do
+        Resource::Package.new.tap do |package|
+          package.name = "@#{registry_scope}/#{project.name}"
+          package.project = project
+        end
+      end
+
+      after do
+        package.remove_via_api!
+      end
+
+      it 'publishes an npm package and then deletes it', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/944' do
         uri = URI.parse(Runtime::Scenario.gitlab_address)
         gitlab_host_with_port = "#{uri.host}:#{uri.port}"
         gitlab_address_with_port = "#{uri.scheme}://#{uri.host}:#{uri.port}"
@@ -28,9 +39,9 @@ module QA
           file_path: 'package.json',
           content: <<~JSON
             {
-              "name": "#{package_name}",
+              "name": "#{package.name}",
               "version": "1.0.0",
-              "description": "Example package for GitLab NPM registry",
+              "description": "Example package for GitLab npm registry",
               "publishConfig": {
                 "@#{registry_scope}:registry": "#{gitlab_address_with_port}/api/v4/projects/#{project.id}/packages/npm/"
               }
@@ -55,20 +66,20 @@ module QA
         Page::Project::Menu.perform(&:click_packages_link)
 
         Page::Project::Packages::Index.perform do |index|
-          expect(index).to have_package(package_name)
+          expect(index).to have_package(package.name)
 
-          index.click_package(package_name)
+          index.click_package(package.name)
         end
 
         Page::Project::Packages::Show.perform do |show|
-          expect(show).to have_package_info(package_name, "1.0.0")
+          expect(show).to have_package_info(package.name, "1.0.0")
 
           show.click_delete
         end
 
         Page::Project::Packages::Index.perform do |index|
-          expect(index).to have_content("Package was removed")
-          expect(index).to have_no_package(package_name)
+          expect(index).to have_content("Package deleted successfully")
+          expect(index).not_to have_package(package.name)
         end
       end
     end

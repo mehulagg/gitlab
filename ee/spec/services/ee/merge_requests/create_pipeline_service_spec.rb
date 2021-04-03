@@ -49,7 +49,7 @@ RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_
         subject
 
         expect(merge_request.all_pipelines.count).to eq(1)
-        expect(merge_request.all_pipelines.last).not_to be_merge_request_pipeline
+        expect(merge_request.all_pipelines.last).not_to be_merged_result_pipeline
         expect(merge_request.all_pipelines.last).to be_detached_merge_request_pipeline
       end
     end
@@ -58,7 +58,7 @@ RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_
       subject
 
       expect(merge_request.all_pipelines.count).to eq(1)
-      expect(merge_request.all_pipelines.last).to be_merge_request_pipeline
+      expect(merge_request.all_pipelines.last).to be_merged_result_pipeline
       expect(merge_request.all_pipelines.last).not_to be_detached_merge_request_pipeline
     end
 

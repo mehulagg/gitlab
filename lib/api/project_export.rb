@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectExport < Grape::API::Instance
+  class ProjectExport < ::API::Base
     helpers Helpers::RateLimiter
+
+    feature_category :importers
 
     before do
       not_found! unless Gitlab::CurrentSettings.project_export_enabled?
@@ -55,7 +57,7 @@ module API
         export_strategy = if after_export_params[:url].present?
                             params = after_export_params.slice(:url, :http_method).symbolize_keys
 
-                            Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy.new(params)
+                            Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy.new(**params)
                           end
 
         if export_strategy&.invalid?

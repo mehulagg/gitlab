@@ -22,7 +22,7 @@ module Gitlab
         keys = keys.map { |key| cache_key(key) }
 
         Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
-          unlink_or_delete(redis, keys)
+          redis.unlink(*keys)
         end
       end
     end
@@ -51,6 +51,19 @@ module Gitlab
       with { |redis| redis.sismember(cache_key(key), value) }
     end
 
+    # Like include?, but also tells us if the cache was populated when it ran
+    # by returning two booleans: [member_exists, set_exists]
+    def try_include?(key, value)
+      full_key = cache_key(key)
+
+      with do |redis|
+        redis.multi do
+          redis.sismember(full_key, value)
+          redis.exists(full_key)
+        end
+      end
+    end
+
     def ttl(key)
       with { |redis| redis.ttl(cache_key(key)) }
     end
@@ -59,18 +72,6 @@ module Gitlab
 
     def with(&blk)
       Gitlab::Redis::Cache.with(&blk) # rubocop:disable CodeReuse/ActiveRecord
-    end
-
-    def unlink_or_delete(redis, keys)
-      if Feature.enabled?(:repository_set_cache_unlink, default_enabled: true)
-        redis.unlink(*keys)
-      else
-        redis.del(*keys)
-      end
-    rescue ::Redis::CommandError => e
-      Gitlab::ErrorTracking.log_exception(e)
-
-      redis.del(*keys)
     end
   end
 end

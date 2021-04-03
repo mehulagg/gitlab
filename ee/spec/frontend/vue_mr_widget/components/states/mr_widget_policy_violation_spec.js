@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import MrWidgetPolicyViolation from 'ee/vue_merge_request_widget/components/states/mr_widget_policy_violation.vue';
 
 describe('EE MrWidgetPolicyViolation', () => {
@@ -26,6 +26,6 @@ describe('EE MrWidgetPolicyViolation', () => {
   });
 
   it('shows the disabled reason', () => {
-    expect(wrapper.text()).toContain('You can only merge once the denied license is removed');
+    expect(wrapper.text()).toContain('You can merge after removing denied licenses');
   });
 });

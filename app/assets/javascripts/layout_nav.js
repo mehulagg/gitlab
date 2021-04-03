@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import ContextualSidebar from './contextual_sidebar';
 import initFlyOutNav from './fly_out_nav';
+import { setNotification } from './whats_new/utils/notification';
 
 function hideEndFade($scrollingTabs) {
   $scrollingTabs.each(function scrollTabsLoop() {
@@ -13,6 +14,18 @@ function hideEndFade($scrollingTabs) {
 
 function initDeferred() {
   $(document).trigger('init.scrolling-tabs');
+
+  const appEl = document.getElementById('whats-new-app');
+  if (!appEl) return;
+
+  setNotification(appEl);
+  document.querySelector('.js-whats-new-trigger').addEventListener('click', () => {
+    import(/* webpackChunkName: 'whatsNewApp' */ '~/whats_new')
+      .then(({ default: initWhatsNew }) => {
+        initWhatsNew(appEl);
+      })
+      .catch(() => {});
+  });
 }
 
 export default function initLayoutNav() {

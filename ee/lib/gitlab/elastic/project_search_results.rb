@@ -6,48 +6,43 @@ module Gitlab
     # superclass inside a module, because autoloading can occur in a
     # different order between execution environments.
     class ProjectSearchResults < Gitlab::Elastic::SearchResults
-      attr_reader :project, :repository_ref
+      attr_reader :project, :repository_ref, :filters
 
-      delegate :users, to: :generic_search_results
-      delegate :limited_users_count, to: :generic_search_results
-
-      def initialize(current_user, query, project, repository_ref = nil)
-        @current_user = current_user
+      def initialize(current_user, query, project:, repository_ref: nil, order_by: nil, sort: nil, filters: {})
         @project = project
         @repository_ref = repository_ref.presence || project.default_branch
-        @query = query
-        @public_and_internal_projects = false
-      end
 
-      def generic_search_results
-        @generic_search_results ||= Gitlab::ProjectSearchResults.new(current_user, project, query, repository_ref)
+        super(current_user, query, [project.id], public_and_internal_projects: false, order_by: order_by, sort: sort, filters: filters)
       end
 
       private
 
-      def blobs(page: 1, per_page: DEFAULT_PER_PAGE)
+      def blobs(page: 1, per_page: DEFAULT_PER_PAGE, count_only: false, preload_method: nil)
         return Kaminari.paginate_array([]) unless Ability.allowed?(@current_user, :download_code, project)
         return Kaminari.paginate_array([]) if project.empty_repo? || query.blank?
         return Kaminari.paginate_array([]) unless root_ref?
 
-        strong_memoize(:blobs) do
+        strong_memoize(memoize_key(:blobs, count_only: count_only)) do
           project.repository.__elasticsearch__.elastic_search_as_found_blob(
             query,
             page: (page || 1).to_i,
-            per: per_page
+            per: per_page,
+            options: { count_only: count_only },
+            preload_method: preload_method
           )
         end
       end
 
-      def wiki_blobs(page: 1, per_page: DEFAULT_PER_PAGE)
+      def wiki_blobs(page: 1, per_page: DEFAULT_PER_PAGE, count_only: false)
         return Kaminari.paginate_array([]) unless Ability.allowed?(@current_user, :read_wiki, project)
 
         if project.wiki_enabled? && !project.wiki.empty? && query.present?
-          strong_memoize(:wiki_blobs) do
+          strong_memoize(memoize_key(:wiki_blobs, count_only: count_only)) do
             project.wiki.__elasticsearch__.elastic_search_as_wiki_page(
               query,
               page: (page || 1).to_i,
-              per: per_page
+              per: per_page,
+              options: { count_only: count_only }
             )
           end
         else
@@ -55,19 +50,20 @@ module Gitlab
         end
       end
 
-      def notes
-        strong_memoize(:notes) do
+      def notes(count_only: false)
+        strong_memoize(memoize_key(:notes, count_only: count_only)) do
           opt = {
             project_ids: limit_project_ids,
             current_user: @current_user,
-            public_and_internal_projects: @public_and_internal_projects
+            public_and_internal_projects: @public_and_internal_projects,
+            count_only: count_only
           }
 
           Note.elastic_search(query, options: opt)
         end
       end
 
-      def commits(page: 1, per_page: DEFAULT_PER_PAGE, preload_method: nil)
+      def commits(page: 1, per_page: DEFAULT_PER_PAGE, preload_method: nil, count_only: false)
         return Kaminari.paginate_array([]) unless Ability.allowed?(@current_user, :download_code, project)
 
         if project.empty_repo? || query.blank?
@@ -75,12 +71,13 @@ module Gitlab
         else
           # We use elastic for default branch only
           if root_ref?
-            strong_memoize(:commits) do
+            strong_memoize(memoize_key(:commits, count_only: count_only)) do
               project.repository.find_commits_by_message_with_elastic(
                 query,
                 page: (page || 1).to_i,
                 per_page: per_page,
-                preload_method: preload_method
+                preload_method: preload_method,
+                options: { count_only: count_only }
               )
             end
           else
@@ -93,10 +90,6 @@ module Gitlab
             )
           end
         end
-      end
-
-      def limit_project_ids
-        [project.id]
       end
 
       def root_ref?

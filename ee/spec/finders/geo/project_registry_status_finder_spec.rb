@@ -65,15 +65,4 @@ RSpec.describe Geo::ProjectRegistryStatusFinder, :geo, :geo_tracking_db do
       )
     end
   end
-
-  describe '#never_synced_projects' do
-    it 'returns only never fully synced registries' do
-      result = subject.never_synced_projects
-
-      expect(result).to contain_exactly(
-        never_synced_registry,
-        never_synced_registry_with_failure
-      )
-    end
-  end
 end

@@ -1,43 +1,38 @@
-import Vue from 'vue';
-
+import { GlToggle } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import SidebarSubscription from 'ee/epic/components/sidebar_items/sidebar_subscription.vue';
 import createStore from 'ee/epic/store';
-
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
-import { mockEpicMeta, mockEpicData } from '../../mock_data';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('SidebarSubscriptionComponent', () => {
-  let vm;
-  let store;
+  let wrapper;
 
   beforeEach(() => {
-    const Component = Vue.extend(SidebarSubscription);
-    store = createStore();
-    store.dispatch('setEpicMeta', mockEpicMeta);
-    store.dispatch('setEpicData', mockEpicData);
-
-    vm = mountComponentWithStore(Component, {
-      store,
-      props: { sidebarCollapsed: false },
-    });
+    wrapper = extendedWrapper(
+      mount(SidebarSubscription, {
+        store: createStore(),
+        propsData: { sidebarCollapsed: false },
+      }),
+    );
   });
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
 
   describe('template', () => {
     it('renders subscription toggle element container', () => {
-      expect(vm.$el.classList.contains('block')).toBe(true);
-      expect(vm.$el.classList.contains('subscription')).toBe(true);
+      expect(wrapper.classes('block')).toBe(true);
+      expect(wrapper.classes('subscription')).toBe(true);
     });
 
     it('renders toggle title text', () => {
-      expect(vm.$el.querySelector('.issuable-header-text').innerText.trim()).toBe('Notifications');
+      expect(wrapper.findByTestId('subscription-title').text()).toBe('Notifications');
     });
 
     it('renders toggle button element', () => {
-      expect(vm.$el.querySelector('.js-issuable-subscribe-button button')).not.toBeNull();
+      expect(wrapper.findComponent(GlToggle).exists()).toBe(true);
     });
   });
 });

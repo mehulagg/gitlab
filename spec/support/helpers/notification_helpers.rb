@@ -3,16 +3,16 @@
 module NotificationHelpers
   extend self
 
-  def send_notifications(*new_mentions)
+  def send_notifications(*new_mentions, current_user: @u_disabled)
     mentionable.description = new_mentions.map(&:to_reference).join(' ')
 
-    notification.send(notification_method, mentionable, new_mentions, @u_disabled)
+    notification.send(notification_method, mentionable, new_mentions, current_user)
   end
 
   def create_global_setting_for(user, level)
     setting = user.global_notification_setting
     setting.level = level
-    setting.save
+    setting.save!
 
     user
   end
@@ -27,7 +27,7 @@ module NotificationHelpers
   def create_notification_setting(user, resource, level)
     setting = user.notification_settings_for(resource)
     setting.level = level
-    setting.save
+    setting.save!
   end
 
   # Create custom notifications

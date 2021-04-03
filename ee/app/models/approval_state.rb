@@ -207,7 +207,7 @@ class ApprovalState
     strong_memoize(:wrapped_rules) do
       merge_request_rules = merge_request.approval_rules.applicable_to_branch(target_branch)
 
-      merge_request_rules.map do |rule|
+      merge_request_rules.map! do |rule|
         ApprovalWrappedRule.wrap(merge_request, rule)
       end
     end

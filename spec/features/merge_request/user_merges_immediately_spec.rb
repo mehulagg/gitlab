@@ -12,6 +12,7 @@ RSpec.describe 'Merge requests > User merges immediately', :js do
                                       head_pipeline: pipeline,
                                       source_branch: pipeline.ref)
   end
+
   let(:pipeline) do
     create(:ci_pipeline, project: project,
                          ref: 'master',
@@ -33,7 +34,7 @@ RSpec.describe 'Merge requests > User merges immediately', :js do
         find('.dropdown-toggle').click
 
         Sidekiq::Testing.fake! do
-          click_link 'Merge immediately'
+          click_button 'Merge immediately'
 
           expect(find('.accept-merge-request.btn-info')).to have_content('Merge in progress')
 

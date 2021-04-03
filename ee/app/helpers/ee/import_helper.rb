@@ -70,7 +70,7 @@ module EE
       if has_ci_cd_only_params?
         personal_access_token_link = link_to _('Personal Access Token'), 'https://github.com/settings/tokens'
 
-        _('To connect GitHub repositories, you can use a %{personal_access_token_link}. When you create your Personal Access Token, you will need to select the <code>repo</code> scope, so we can display a list of your public and private repositories which are available to connect.').html_safe % { personal_access_token_link: personal_access_token_link }
+        html_escape(_('To connect GitHub repositories, you can use a %{personal_access_token_link}. When you create your Personal Access Token, you will need to select the %{code_open}repo%{code_close} scope, so we can display a list of your public and private repositories which are available to connect.')) % { personal_access_token_link: personal_access_token_link, code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
       else
         super
       end

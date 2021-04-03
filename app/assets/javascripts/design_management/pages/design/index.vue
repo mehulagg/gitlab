@@ -1,30 +1,36 @@
 <script>
-import Mousetrap from 'mousetrap';
 import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import Mousetrap from 'mousetrap';
 import { ApolloMutation } from 'vue-apollo';
+import { keysFor, ISSUE_CLOSE_DESIGN } from '~/behaviors/shortcuts/keybindings';
 import createFlash from '~/flash';
 import { fetchPolicies } from '~/lib/graphql';
-import allVersionsMixin from '../../mixins/all_versions';
-import Toolbar from '../../components/toolbar/index.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DesignDestroyer from '../../components/design_destroyer.vue';
-import DesignScaler from '../../components/design_scaler.vue';
-import DesignPresentation from '../../components/design_presentation.vue';
 import DesignReplyForm from '../../components/design_notes/design_reply_form.vue';
+import DesignPresentation from '../../components/design_presentation.vue';
+import DesignScaler from '../../components/design_scaler.vue';
 import DesignSidebar from '../../components/design_sidebar.vue';
-import getDesignQuery from '../../graphql/queries/get_design.query.graphql';
-import appDataQuery from '../../graphql/queries/app_data.query.graphql';
+import Toolbar from '../../components/toolbar/index.vue';
+import { ACTIVE_DISCUSSION_SOURCE_TYPES, DESIGN_DETAIL_LAYOUT_CLASSLIST } from '../../constants';
 import createImageDiffNoteMutation from '../../graphql/mutations/create_image_diff_note.mutation.graphql';
-import updateImageDiffNoteMutation from '../../graphql/mutations/update_image_diff_note.mutation.graphql';
+import repositionImageDiffNoteMutation from '../../graphql/mutations/reposition_image_diff_note.mutation.graphql';
 import updateActiveDiscussionMutation from '../../graphql/mutations/update_active_discussion.mutation.graphql';
+import getDesignQuery from '../../graphql/queries/get_design.query.graphql';
+import allVersionsMixin from '../../mixins/all_versions';
+import { DESIGNS_ROUTE_NAME } from '../../router/constants';
+import {
+  updateStoreAfterAddImageDiffNote,
+  updateStoreAfterRepositionImageDiffNote,
+} from '../../utils/cache_update';
 import {
   extractDiscussions,
   extractDesign,
-  updateImageDiffNoteOptimisticResponse,
+  repositionImageDiffNoteOptimisticResponse,
+  toDiffNoteGid,
+  extractDesignNoteId,
+  getPageLayoutElement,
 } from '../../utils/design_management_utils';
-import {
-  updateStoreAfterAddImageDiffNote,
-  updateStoreAfterUpdateImageDiffNote,
-} from '../../utils/cache_update';
 import {
   ADD_DISCUSSION_COMMENT_ERROR,
   ADD_IMAGE_DIFF_NOTE_ERROR,
@@ -32,11 +38,12 @@ import {
   DESIGN_NOT_FOUND_ERROR,
   DESIGN_VERSION_NOT_EXIST_ERROR,
   UPDATE_NOTE_ERROR,
+  TOGGLE_TODO_ERROR,
   designDeletionError,
 } from '../../utils/error_messages';
-import { trackDesignDetailView } from '../../utils/tracking';
-import { DESIGNS_ROUTE_NAME } from '../../router/constants';
-import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../../constants';
+import { trackDesignDetailView, usagePingDesignDetailView } from '../../utils/tracking';
+
+const DEFAULT_SCALE = 1;
 
 export default {
   components: {
@@ -50,7 +57,28 @@ export default {
     GlAlert,
     DesignSidebar,
   },
-  mixins: [allVersionsMixin],
+  mixins: [allVersionsMixin, glFeatureFlagsMixin()],
+  beforeRouteUpdate(to, from, next) {
+    // reset scale when the active design changes
+    this.scale = DEFAULT_SCALE;
+    next();
+  },
+  beforeRouteEnter(to, from, next) {
+    const pageEl = getPageLayoutElement();
+    if (pageEl) {
+      pageEl.classList.add(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
+    }
+
+    next();
+  },
+  beforeRouteLeave(to, from, next) {
+    const pageEl = getPageLayoutElement();
+    if (pageEl) {
+      pageEl.classList.remove(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
+    }
+
+    next();
+  },
   props: {
     id: {
       type: String,
@@ -62,22 +90,12 @@ export default {
       design: {},
       comment: '',
       annotationCoordinates: null,
-      projectPath: '',
       errorMessage: '',
-      issueIid: '',
-      scale: 1,
+      scale: DEFAULT_SCALE,
       resolvedDiscussionsExpanded: false,
     };
   },
   apollo: {
-    appData: {
-      query: appDataQuery,
-      manual: true,
-      result({ data: { projectPath, issueIid } }) {
-        this.projectPath = projectPath;
-        this.issueIid = issueIid;
-      },
-    },
     design: {
       query: getDesignQuery,
       // We want to see cached design version if we have one, and fetch newer version on the background to update discussions
@@ -85,7 +103,7 @@ export default {
       variables() {
         return this.designVariables;
       },
-      update: data => extractDesign(data),
+      update: (data) => extractDesign(data),
       result(res) {
         this.onDesignQueryResult(res);
       },
@@ -143,7 +161,7 @@ export default {
       return Boolean(this.annotationCoordinates);
     },
     resolvedDiscussions() {
-      return this.discussions.filter(discussion => discussion.resolved);
+      return this.discussions.filter((discussion) => discussion.resolved);
     },
   },
   watch: {
@@ -154,21 +172,19 @@ export default {
     },
   },
   mounted() {
-    Mousetrap.bind('esc', this.closeDesign);
-    this.trackEvent();
-    // We need to reset the active discussion when opening a new design
-    this.updateActiveDiscussion();
+    Mousetrap.bind(keysFor(ISSUE_CLOSE_DESIGN), this.closeDesign);
+    this.trackPageViewEvent();
+
+    // Set active discussion immediately.
+    // This will ensure that, if a note is specified in the URL hash,
+    // the browser will scroll to, and highlight, the note in the UI
+    this.updateActiveDiscussionFromUrl();
   },
   beforeDestroy() {
-    Mousetrap.unbind('esc', this.closeDesign);
+    Mousetrap.unbind(keysFor(ISSUE_CLOSE_DESIGN));
   },
   methods: {
-    addImageDiffNoteToStore(
-      store,
-      {
-        data: { createImageDiffNote },
-      },
-    ) {
+    addImageDiffNoteToStore(store, { data: { createImageDiffNote } }) {
       updateStoreAfterAddImageDiffNote(
         store,
         createImageDiffNote,
@@ -176,15 +192,10 @@ export default {
         this.designVariables,
       );
     },
-    updateImageDiffNoteInStore(
-      store,
-      {
-        data: { updateImageDiffNote },
-      },
-    ) {
-      return updateStoreAfterUpdateImageDiffNote(
+    updateImageDiffNoteInStore(store, { data: { repositionImageDiffNote } }) {
+      return updateStoreAfterRepositionImageDiffNote(
         store,
-        updateImageDiffNote,
+        repositionImageDiffNote,
         getDesignQuery,
         this.designVariables,
       );
@@ -196,7 +207,7 @@ export default {
       );
 
       const mutationPayload = {
-        optimisticResponse: updateImageDiffNoteOptimisticResponse(note, {
+        optimisticResponse: repositionImageDiffNoteOptimisticResponse(note, {
           position,
         }),
         variables: {
@@ -205,11 +216,11 @@ export default {
             position,
           },
         },
-        mutation: updateImageDiffNoteMutation,
+        mutation: repositionImageDiffNoteMutation,
         update: this.updateImageDiffNoteInStore,
       };
 
-      return this.$apollo.mutate(mutationPayload).catch(e => this.onUpdateImageDiffNoteError(e));
+      return this.$apollo.mutate(mutationPayload).catch((e) => this.onUpdateImageDiffNoteError(e));
     },
     onDesignQueryResult({ data, loading }) {
       // On the initial load with cache-and-network policy data is undefined while loading is true
@@ -227,12 +238,12 @@ export default {
     onQueryError(message) {
       // because we redirect user to /designs (the issue page),
       // we want to create these flashes on the issue page
-      createFlash(message);
+      createFlash({ message });
       this.$router.push({ name: this.$options.DESIGNS_ROUTE_NAME });
     },
     onError(message, e) {
       this.errorMessage = message;
-      throw e;
+      if (e) throw e;
     },
     onCreateImageDiffNoteError(e) {
       this.onError(ADD_IMAGE_DIFF_NOTE_ERROR, e);
@@ -252,6 +263,9 @@ export default {
     onResolveDiscussionError(e) {
       this.onError(UPDATE_IMAGE_DIFF_NOTE_ERROR, e);
     },
+    onTodoError(e) {
+      this.onError(e?.message || TOGGLE_TODO_ERROR, e);
+    },
     openCommentForm(annotationCoordinates) {
       this.annotationCoordinates = annotationCoordinates;
       if (this.$refs.newDiscussionForm) {
@@ -268,7 +282,7 @@ export default {
         query: this.$route.query,
       });
     },
-    trackEvent() {
+    trackPageViewEvent() {
       // TODO: This needs to be made aware of referers, or if it's rendered in a different context than a Issue
       trackDesignDetailView(
         'issue-design-collection',
@@ -276,15 +290,24 @@ export default {
         this.$route.query.version || this.latestVersionId,
         this.isLatestVersion,
       );
+
+      if (this.glFeatures.usageDataDesignAction) {
+        usagePingDesignDetailView();
+      }
     },
-    updateActiveDiscussion(id) {
+    updateActiveDiscussion(id, source = ACTIVE_DISCUSSION_SOURCE_TYPES.discussion) {
       this.$apollo.mutate({
         mutation: updateActiveDiscussionMutation,
         variables: {
           id,
-          source: ACTIVE_DISCUSSION_SOURCE_TYPES.discussion,
+          source,
         },
       });
+    },
+    updateActiveDiscussionFromUrl() {
+      const noteId = extractDesignNoteId(this.$route.hash);
+      const diffNoteGid = noteId ? toDiffNoteGid(noteId) : undefined;
+      return this.updateActiveDiscussion(diffNoteGid, ACTIVE_DISCUSSION_SOURCE_TYPES.url);
     },
     toggleResolvedComments() {
       this.resolvedDiscussionsExpanded = !this.resolvedDiscussionsExpanded;
@@ -297,11 +320,13 @@ export default {
 
 <template>
   <div
-    class="design-detail js-design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
+    class="design-detail js-design-detail fixed-top gl-w-full gl-bottom-0 gl-display-flex gl-justify-content-center gl-flex-direction-column gl-lg-flex-direction-row"
   >
-    <gl-loading-icon v-if="isFirstLoading" size="xl" class="align-self-center" />
+    <gl-loading-icon v-if="isFirstLoading" size="xl" class="gl-align-self-center" />
     <template v-else>
-      <div class="d-flex overflow-hidden flex-grow-1 flex-column position-relative">
+      <div
+        class="gl-display-flex gl-overflow-hidden gl-flex-grow-1 gl-flex-direction-column gl-relative"
+      >
         <design-destroyer
           :filenames="[design.filename]"
           :project-path="projectPath"
@@ -320,7 +345,7 @@ export default {
           </template>
         </design-destroyer>
 
-        <div v-if="errorMessage" class="p-3">
+        <div v-if="errorMessage" class="gl-p-5">
           <gl-alert variant="danger" @dismiss="errorMessage = null">
             {{ errorMessage }}
           </gl-alert>
@@ -337,7 +362,9 @@ export default {
           @moveNote="onMoveNote"
         />
 
-        <div class="design-scaler-wrapper position-absolute mb-4 d-flex-center">
+        <div
+          class="design-scaler-wrapper gl-absolute gl-mb-6 gl-display-flex gl-justify-content-center gl-align-items-center"
+        >
           <design-scaler @scale="scale = $event" />
         </div>
       </div>
@@ -350,8 +377,9 @@ export default {
         @updateNoteError="onUpdateNoteError"
         @resolveDiscussionError="onResolveDiscussionError"
         @toggleResolvedComments="toggleResolvedComments"
+        @todoError="onTodoError"
       >
-        <template #replyForm>
+        <template #reply-form>
           <apollo-mutation
             v-if="isAnnotating"
             #default="{ mutate, loading }"
@@ -368,8 +396,8 @@ export default {
               v-model="comment"
               :is-saving="loading"
               :markdown-preview-path="markdownPreviewPath"
-              @submitForm="mutate"
-              @cancelForm="closeCommentForm"
+              @submit-form="mutate"
+              @cancel-form="closeCommentForm"
             /> </apollo-mutation
         ></template>
       </design-sidebar>

@@ -1,12 +1,11 @@
 <script>
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { visitUrl } from '~/lib/utils/url_utility';
 
 export default {
   components: {
     GlDropdown,
     GlDropdownItem,
-    Icon,
   },
   props: {
     buttons: {
@@ -19,9 +18,11 @@ export default {
       default: false,
     },
   },
-  data: () => ({
-    selectedButton: {},
-  }),
+  data() {
+    return {
+      selectedButton: {},
+    };
+  },
   created() {
     this.setButton(this.buttons[0]);
   },
@@ -30,7 +31,11 @@ export default {
       this.selectedButton = button;
     },
     handleClick() {
-      this.$emit(this.selectedButton.action);
+      if (this.selectedButton.href) {
+        visitUrl(this.selectedButton.href, true);
+      } else {
+        this.$emit(this.selectedButton.action);
+      }
     },
   },
 };
@@ -40,24 +45,22 @@ export default {
   <gl-dropdown
     v-if="selectedButton"
     :disabled="disabled"
-    no-caret
-    right
-    split
     variant="success"
     :text="selectedButton.name"
+    :href="selectedButton.href"
+    split
     @click="handleClick"
   >
-    <gl-dropdown-item v-for="button in buttons" :key="button.action" @click="setButton(button)">
-      <div class="media">
-        <div>
-          <icon v-if="selectedButton === button" class="gl-mr-2" name="mobile-issue-close" />
-        </div>
-        <div class="media-body" :class="{ 'prepend-left-20': selectedButton !== button }">
-          <strong>{{ button.name }}</strong>
-          <br />
-          <span>{{ button.tagline }}</span>
-        </div>
-      </div>
+    <gl-dropdown-item
+      v-for="button in buttons"
+      :key="button.action"
+      :is-checked="selectedButton === button"
+      is-check-item
+      @click="setButton(button)"
+    >
+      <strong>{{ button.name }}</strong>
+      <br />
+      <span>{{ button.tagline }}</span>
     </gl-dropdown-item>
   </gl-dropdown>
 </template>

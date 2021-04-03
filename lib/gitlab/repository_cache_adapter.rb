@@ -58,11 +58,22 @@ module Gitlab
         # wrong answer. We handle that by querying the full list - which fills
         # the cache - and using it directly to answer the question.
         define_method("#{name}_include?") do |value|
-          if strong_memoized?(name) || !redis_set_cache.exist?(name)
-            return __send__(name).include?(value) # rubocop:disable GitlabSecurity/PublicSend
-          end
+          ivar = "@#{name}_include"
+          memoized = instance_variable_get(ivar) || {}
+          lookup = proc { __send__(name).include?(value) } # rubocop:disable GitlabSecurity/PublicSend
 
-          redis_set_cache.include?(name, value)
+          next memoized[value] if memoized.key?(value)
+
+          memoized[value] =
+            if strong_memoized?(name)
+              lookup.call
+            else
+              result, exists = redis_set_cache.try_include?(name, value)
+
+              exists ? result : lookup.call
+            end
+
+          instance_variable_set(ivar, memoized)[value]
         end
       end
 
@@ -210,7 +221,7 @@ module Gitlab
     def expire_method_caches(methods)
       methods.each do |name|
         unless cached_methods.include?(name.to_sym)
-          Rails.logger.error "Requested to expire non-existent method '#{name}' for Repository" # rubocop:disable Gitlab/RailsLogger
+          Gitlab::AppLogger.error "Requested to expire non-existent method '#{name}' for Repository"
           next
         end
 
@@ -241,7 +252,7 @@ module Gitlab
     end
 
     def expire_redis_hash_method_caches(methods)
-      methods.each { |name| redis_hash_cache.delete(name) }
+      redis_hash_cache.delete(*methods)
     end
 
     # All cached repository methods depend on the existence of a Git repository,

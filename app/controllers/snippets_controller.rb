@@ -6,12 +6,11 @@ class SnippetsController < Snippets::ApplicationController
   include ToggleAwardEmoji
   include SpammableActions
 
-  before_action :snippet, only: [:show, :edit, :destroy, :update, :raw, :toggle_award_emoji, :mark_as_spam]
+  before_action :snippet, only: [:show, :edit, :raw, :toggle_award_emoji, :mark_as_spam]
 
-  before_action :authorize_create_snippet!, only: [:new, :create]
+  before_action :authorize_create_snippet!, only: :new
   before_action :authorize_read_snippet!, only: [:show, :raw]
-  before_action :authorize_update_snippet!, only: [:edit, :update]
-  before_action :authorize_admin_snippet!, only: [:destroy]
+  before_action :authorize_update_snippet!, only: :edit
 
   skip_before_action :authenticate_user!, only: [:index, :show, :raw]
 
@@ -25,6 +24,7 @@ class SnippetsController < Snippets::ApplicationController
         .execute
         .page(params[:page])
         .inc_author
+        .inc_statistics
 
       return if redirect_out_of_range(@snippets)
 
@@ -40,18 +40,6 @@ class SnippetsController < Snippets::ApplicationController
     @snippet = PersonalSnippet.new
   end
 
-  def create
-    create_params = snippet_params.merge(files: params.delete(:files))
-    service_response = Snippets::CreateService.new(nil, current_user, create_params).execute
-    @snippet = service_response.payload[:snippet]
-
-    if service_response.error? && @snippet.errors[:repository].present?
-      handle_repository_error(:new)
-    else
-      recaptcha_check_with_fallback { render :new }
-    end
-  end
-
   protected
 
   alias_method :awardable, :snippet
@@ -59,9 +47,5 @@ class SnippetsController < Snippets::ApplicationController
 
   def spammable_path
     snippet_path(@snippet)
-  end
-
-  def snippet_params
-    params.require(:personal_snippet).permit(:title, :content, :file_name, :private, :visibility_level, :description).merge(spammable_params)
   end
 end

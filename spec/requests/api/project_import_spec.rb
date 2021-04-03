@@ -5,12 +5,11 @@ require 'spec_helper'
 RSpec.describe API::ProjectImport do
   include WorkhorseHelpers
 
+  include_context 'workhorse headers'
+
   let(:user) { create(:user) }
   let(:file) { File.join('spec', 'features', 'projects', 'import_export', 'test_project_export.tar.gz') }
   let(:namespace) { create(:group) }
-
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
 
   before do
     namespace.add_owner(user)
@@ -303,7 +302,7 @@ RSpec.describe API::ProjectImport do
       subject
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+      expect(response.media_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
       expect(json_response['TempPath']).to eq(ImportExportUploader.workhorse_local_upload_path)
     end
 
@@ -325,7 +324,7 @@ RSpec.describe API::ProjectImport do
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+          expect(response.media_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
           expect(json_response).not_to have_key('TempPath')
           expect(json_response['RemoteObject']).to have_key('ID')
           expect(json_response['RemoteObject']).to have_key('GetURL')
@@ -344,7 +343,7 @@ RSpec.describe API::ProjectImport do
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+          expect(response.media_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
           expect(json_response['TempPath']).to eq(ImportExportUploader.workhorse_local_upload_path)
           expect(json_response['RemoteObject']).to be_nil
         end

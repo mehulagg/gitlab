@@ -1,37 +1,56 @@
-import initIssuableSidebar from '~/init_issuable_sidebar';
-import Issue from '~/issue';
+import loadAwardsHandler from '~/awards_handler';
 import ShortcutsIssuable from '~/behaviors/shortcuts/shortcuts_issuable';
-import ZenMode from '~/zen_mode';
+import initIssuableSidebar from '~/init_issuable_sidebar';
+import initInviteMemberModal from '~/invite_member/init_invite_member_modal';
+import initInviteMemberTrigger from '~/invite_member/init_invite_member_trigger';
+import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
+import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
+import { IssuableType } from '~/issuable_show/constants';
+import Issue from '~/issue';
 import '~/notes/index';
+import initIncidentApp from '~/issue_show/incident';
+import { initIssuableApp, initIssueHeaderActions } from '~/issue_show/issue';
+import { parseIssuableData } from '~/issue_show/utils/parse_data';
 import { store } from '~/notes/stores';
-import initIssueableApp from '~/issue_show';
-import initIssuableHeaderWarning from '~/vue_shared/components/issuable/init_issuable_header_warning';
-import initSentryErrorStackTraceApp from '~/sentry_error_stack_trace';
 import initRelatedMergeRequestsApp from '~/related_merge_requests';
-import initVueIssuableSidebarApp from '~/issuable_sidebar/sidebar_bundle';
+import initSentryErrorStackTraceApp from '~/sentry_error_stack_trace';
+import initIssuableHeaderWarning from '~/vue_shared/components/issuable/init_issuable_header_warning';
+import ZenMode from '~/zen_mode';
 
-export default function() {
-  initIssueableApp();
+export default function initShowIssue() {
+  const initialDataEl = document.getElementById('js-issuable-app');
+  const { issueType, ...issuableData } = parseIssuableData(initialDataEl);
+
+  switch (issueType) {
+    case IssuableType.Incident:
+      initIncidentApp(issuableData);
+      break;
+    case IssuableType.Issue:
+      initIssuableApp(issuableData, store);
+      break;
+    default:
+      break;
+  }
+
   initIssuableHeaderWarning(store);
+  initIssueHeaderActions(store);
   initSentryErrorStackTraceApp();
   initRelatedMergeRequestsApp();
+  initInviteMembersModal();
+  initInviteMembersTrigger();
 
   import(/* webpackChunkName: 'design_management' */ '~/design_management')
-    .then(module => module.default())
+    .then((module) => module.default())
     .catch(() => {});
 
-  // This will be removed when we remove the `design_management_moved` feature flag
-  // See https://gitlab.com/gitlab-org/gitlab/-/issues/223197
-  import(/* webpackChunkName: 'design_management' */ '~/design_management_new')
-    .then(module => module.default())
-    .catch(() => {});
-
-  new Issue(); // eslint-disable-line no-new
-  new ShortcutsIssuable(); // eslint-disable-line no-new
   new ZenMode(); // eslint-disable-line no-new
-  if (gon.features && gon.features.vueIssuableSidebar) {
-    initVueIssuableSidebarApp();
-  } else {
+
+  if (issueType !== IssuableType.TestCase) {
+    new Issue(); // eslint-disable-line no-new
+    new ShortcutsIssuable(); // eslint-disable-line no-new
     initIssuableSidebar();
+    loadAwardsHandler();
+    initInviteMemberModal();
+    initInviteMemberTrigger();
   }
 }

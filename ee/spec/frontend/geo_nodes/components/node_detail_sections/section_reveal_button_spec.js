@@ -63,7 +63,7 @@ describe('SectionRevealButton', () => {
   describe('template', () => {
     it('renders button element', () => {
       expect(vm.$el.classList.contains('btn-link')).toBe(true);
-      expect(vm.$el.querySelector('svg use').getAttribute('xlink:href')).toContain('#angle-down');
+      expect(vm.$el.querySelector('svg').getAttribute('data-testid')).toBe('angle-down-icon');
       expect(vm.$el.querySelector('span').innerText.trim()).toBe('Foo button');
     });
   });

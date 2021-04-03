@@ -1,3 +1,3 @@
 - if ci_cd_projects_available?
   %p
-    = _('To only use CI/CD features for an external repository, choose <strong>CI/CD for external repo</strong>.').html_safe
+    = html_escape(_('To only use CI/CD features for an external repository, choose %{strong_open}CI/CD for external repo%{strong_close}.')) % { strong_open: '<strong>'.html_safe, strong_close: '</strong>'.html_safe }

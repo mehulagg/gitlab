@@ -4,16 +4,15 @@ module API
   module Helpers
     module Packages
       module BasicAuthHelpers
+        extend ::Gitlab::Utils::Override
+
         module Constants
-          AUTHENTICATE_REALM_HEADER = 'Www-Authenticate: Basic realm'
-          AUTHENTICATE_REALM_NAME = 'GitLab Packages Registry'
+          AUTHENTICATE_REALM_HEADER = 'WWW-Authenticate'
+          AUTHENTICATE_REALM_NAME = 'Basic realm="GitLab Packages Registry"'
         end
 
         include Constants
-
-        def find_personal_access_token
-          find_personal_access_token_from_http_basic_auth
-        end
+        include Gitlab::Utils::StrongMemoize
 
         def unauthorized_user_project
           @unauthorized_user_project ||= find_project(params[:id])
@@ -37,6 +36,18 @@ module API
           project
         end
 
+        def find_authorized_group!
+          strong_memoize(:authorized_group) do
+            group = find_group(params[:id])
+
+            unless group && can?(current_user, :read_group, group)
+              next unauthorized_or! { not_found! }
+            end
+
+            group
+          end
+        end
+
         def authorize!(action, subject = :global, reason = nil)
           return if can?(current_user, action, subject)
 
@@ -44,12 +55,13 @@ module API
         end
 
         def unauthorized_or!
-          current_user ? yield : unauthorized_with_header!
+          current_user ? yield : unauthorized!
         end
 
-        def unauthorized_with_header!
+        override :unauthorized!
+        def unauthorized!
           header(AUTHENTICATE_REALM_HEADER, AUTHENTICATE_REALM_NAME)
-          unauthorized!
+          super
         end
       end
     end

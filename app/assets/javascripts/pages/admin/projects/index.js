@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import ProjectsList from '~/projects_list';
 import NamespaceSelect from '~/namespace_select';
+import ProjectsList from '~/projects_list';
 import RemoveMemberModal from '~/vue_shared/components/remove_member_modal.vue';
 
 function mountRemoveMemberModal() {
@@ -17,12 +17,10 @@ function mountRemoveMemberModal() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  mountRemoveMemberModal();
+mountRemoveMemberModal();
 
-  new ProjectsList(); // eslint-disable-line no-new
+new ProjectsList(); // eslint-disable-line no-new
 
-  document
-    .querySelectorAll('.js-namespace-select')
-    .forEach(dropdown => new NamespaceSelect({ dropdown }));
-});
+document
+  .querySelectorAll('.js-namespace-select')
+  .forEach((dropdown) => new NamespaceSelect({ dropdown }));

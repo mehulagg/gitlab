@@ -19,7 +19,7 @@ RSpec.describe Boards::ListsController do
       read_board_list user: user, board: board
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(response.content_type).to eq 'application/json'
+      expect(response.media_type).to eq 'application/json'
     end
 
     it 'returns a list of board lists' do
@@ -52,16 +52,56 @@ RSpec.describe Boards::ListsController do
 
   describe 'POST create' do
     context 'with valid params' do
-      it 'returns a successful 200 response' do
-        create_board_list user: user, board: board, label_id: label.id
+      context 'for label lists' do
+        it 'returns a successful 200 response' do
+          create_board_list user: user, board: board, label_id: label.id
 
-        expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to match_response_schema('list', dir: 'ee')
+        end
       end
 
-      it 'returns the created list' do
-        create_board_list user: user, board: board, label_id: label.id
+      context 'for iteration lists' do
+        let_it_be(:iteration) { create(:iteration, group: group) }
 
-        expect(response).to match_response_schema('list', dir: 'ee')
+        context 'when iteration_board_lists is disabled' do
+          before do
+            stub_feature_flags(iteration_board_lists: false)
+          end
+
+          it 'returns an error' do
+            create_board_list user: user, board: board, iteration_id: iteration.id
+
+            expect(response).to have_gitlab_http_status(:unprocessable_entity)
+            expect(json_response['errors']).to eq(['iteration_board_lists feature flag is disabled'])
+          end
+        end
+
+        context 'when license is available' do
+          before do
+            stub_licensed_features(board_iteration_lists: true)
+          end
+
+          it 'returns a successful 200 response' do
+            create_board_list user: user, board: board, iteration_id: iteration.id
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response).to match_response_schema('list', dir: 'ee')
+          end
+        end
+
+        context 'when license is unavailable' do
+          before do
+            stub_licensed_features(board_iteration_lists: false)
+          end
+
+          it 'returns an error' do
+            create_board_list user: user, board: board, iteration_id: iteration.id
+
+            expect(response).to have_gitlab_http_status(:unprocessable_entity)
+            expect(json_response['errors']).to eq(['Iteration lists not available with your current license'])
+          end
+        end
       end
     end
 
@@ -77,7 +117,7 @@ RSpec.describe Boards::ListsController do
 
       context 'without licensed wip limits' do
         before do
-          stub_feature_flags(wip_limits: false)
+          stub_licensed_features(wip_limits: false)
         end
 
         it 'ignores max issue count' do
@@ -101,7 +141,7 @@ RSpec.describe Boards::ListsController do
 
       context 'without licensed wip limits' do
         before do
-          stub_feature_flags(wip_limits: false)
+          stub_licensed_features(wip_limits: false)
         end
 
         it 'ignores max issue count' do
@@ -153,7 +193,7 @@ RSpec.describe Boards::ListsController do
 
       context 'without licensed wip limits' do
         before do
-          stub_feature_flags(wip_limits: false)
+          stub_licensed_features(wip_limits: false)
         end
 
         it 'ignores limit metric setting' do
@@ -166,21 +206,23 @@ RSpec.describe Boards::ListsController do
     end
 
     context 'with invalid params' do
-      context 'when label is nil' do
-        it 'returns a not found 404 response' do
-          create_board_list user: user, board: board, label_id: nil
+      context 'when label is empty' do
+        it 'returns an unprocessable entity 422 response' do
+          create_board_list user: user, board: board, label_id: ''
 
-          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+          expect(json_response['errors']).to eq(['Label not found'])
         end
       end
 
       context 'when label that does not belongs to group' do
-        it 'returns a not found 404 response' do
+        it 'returns an unprocessable entity 422 response' do
           label = create(:label, name: 'Development')
 
           create_board_list user: user, board: board, label_id: label.id
 
-          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+          expect(json_response['errors']).to eq(['Label not found'])
         end
       end
     end
@@ -193,12 +235,12 @@ RSpec.describe Boards::ListsController do
       end
     end
 
-    def create_board_list(user:, board:, label_id:, params: {})
+    def create_board_list(user:, board:, label_id: nil, iteration_id: nil, params: {})
       sign_in(user)
 
       post :create, params: {
                       board_id: board.to_param,
-                      list: { label_id: label_id }.merge(params)
+                      list: { label_id: label_id, iteration_id: iteration_id }.compact.merge!(params)
                     },
                     format: :json
     end
@@ -425,7 +467,7 @@ RSpec.describe Boards::ListsController do
 
       context 'when wip limits are not licensed' do
         before do
-          stub_feature_flags(wip_limits: false)
+          stub_licensed_features(wip_limits: false)
         end
 
         it 'fails to update max issue count with expected status' do

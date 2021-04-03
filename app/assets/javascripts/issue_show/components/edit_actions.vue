@@ -1,8 +1,8 @@
 <script>
-/* eslint-disable @gitlab/vue-require-i18n-strings */
+import { GlButton } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import updateMixin from '../mixins/update';
 import eventHub from '../event_hub';
+import updateMixin from '../mixins/update';
 
 const issuableTypes = {
   issue: __('Issue'),
@@ -10,6 +10,9 @@ const issuableTypes = {
 };
 
 export default {
+  components: {
+    GlButton,
+  },
   mixins: [updateMixin],
   props: {
     canDestroy: {
@@ -42,15 +45,23 @@ export default {
     shouldShowDeleteButton() {
       return this.canDestroy && this.showDeleteButton;
     },
+    deleteIssuableButtonText() {
+      return sprintf(__('Delete %{issuableType}'), {
+        issuableType: issuableTypes[this.issuableType].toLowerCase(),
+      });
+    },
   },
   methods: {
     closeForm() {
       eventHub.$emit('close.form');
     },
     deleteIssuable() {
-      const confirmMessage = sprintf(__('%{issuableType} will be removed! Are you sure?'), {
-        issuableType: issuableTypes[this.issuableType],
-      });
+      const confirmMessage =
+        this.issuableType === 'epic'
+          ? __('Delete this epic and all descendants?')
+          : sprintf(__('%{issuableType} will be removed! Are you sure?'), {
+              issuableType: issuableTypes[this.issuableType],
+            });
       // eslint-disable-next-line no-alert
       if (window.confirm(confirmMessage)) {
         this.deleteLoading = true;
@@ -64,28 +75,30 @@ export default {
 
 <template>
   <div class="gl-mt-3 gl-mb-3 clearfix">
-    <button
-      :class="{ disabled: formState.updateLoading || !isSubmitEnabled }"
+    <gl-button
+      :loading="formState.updateLoading"
       :disabled="formState.updateLoading || !isSubmitEnabled"
-      class="btn btn-success float-left qa-save-button"
+      category="primary"
+      variant="confirm"
+      class="float-left qa-save-button gl-mr-3"
       type="submit"
       @click.prevent="updateIssuable"
     >
-      Save changes
-      <i v-if="formState.updateLoading" class="fa fa-spinner fa-spin" aria-hidden="true"> </i>
-    </button>
-    <button class="btn btn-default float-right" type="button" @click="closeForm">
+      {{ __('Save changes') }}
+    </gl-button>
+    <gl-button @click="closeForm">
       {{ __('Cancel') }}
-    </button>
-    <button
+    </gl-button>
+    <gl-button
       v-if="shouldShowDeleteButton"
-      :class="{ disabled: deleteLoading }"
+      :loading="deleteLoading"
       :disabled="deleteLoading"
-      class="btn btn-danger float-right gl-mr-3 qa-delete-button"
-      type="button"
+      category="secondary"
+      variant="danger"
+      class="float-right qa-delete-button"
       @click="deleteIssuable"
     >
-      Delete <i v-if="deleteLoading" class="fa fa-spinner fa-spin" aria-hidden="true"> </i>
-    </button>
+      {{ deleteIssuableButtonText }}
+    </gl-button>
   </div>
 </template>

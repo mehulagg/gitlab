@@ -97,8 +97,8 @@ RSpec.describe Admin::UsersController do
       stub_licensed_features(extended_audit_events: true)
     end
 
-    it 'creates an audit log record' do
-      expect { post :impersonate, params: { id: user.username } }.to change { SecurityEvent.count }.by(1)
+    it 'creates an AuditEvent record' do
+      expect { post :impersonate, params: { id: user.username } }.to change { AuditEvent.count }.by(1)
     end
   end
 end

@@ -14,7 +14,6 @@ settings:
 globals:
   getJSONFixture: false
   loadFixtures: false
-  preloadFixtures: false
   setFixtures: false
 rules:
   jest/expect-expect:
@@ -25,3 +24,6 @@ rules:
         - 'testAction'
   jest/no-test-callback:
     - off
+  "@gitlab/no-global-event-off":
+    - off
+

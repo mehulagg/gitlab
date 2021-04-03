@@ -10,28 +10,6 @@ RSpec.describe DashboardHelper, type: :helper do
       allow(helper).to receive(:current_user).and_return(user)
     end
 
-    describe 'analytics' do
-      context 'and the user has no access to instance statistics features' do
-        before do
-          stub_user_permissions_for(:analytics, false)
-        end
-
-        it 'does not include analytics' do
-          expect(helper.dashboard_nav_links).not_to include(:analytics)
-        end
-      end
-
-      context 'and the user has access to instance statistics features' do
-        before do
-          stub_user_permissions_for(:analytics, true)
-        end
-
-        it 'does include analytics' do
-          expect(helper.dashboard_nav_links).to include(:analytics)
-        end
-      end
-    end
-
     describe 'operations dashboard link' do
       context 'when the feature is available on the license' do
         context 'and the user is authenticated' do
@@ -160,11 +138,9 @@ RSpec.describe DashboardHelper, type: :helper do
     def stub_user_permissions_for(feature, enabled)
       allow(helper).to receive(:can?).with(user, :read_cross_project).and_return(false)
 
-      can_read_instance_statistics = enabled && feature == :analytics
       can_read_operations_dashboard = enabled && feature == :operations
       can_read_instance_security_dashboard = enabled && feature == :security
 
-      allow(helper).to receive(:can?).with(user, :read_instance_statistics).and_return(can_read_instance_statistics)
       allow(helper).to receive(:can?).with(user, :read_operations_dashboard).and_return(can_read_operations_dashboard)
       allow_next_instance_of(InstanceSecurityDashboard) do |dashboard|
         allow(helper).to(
@@ -185,7 +161,7 @@ RSpec.describe DashboardHelper, type: :helper do
     end
 
     with_them do
-      let(:user) { create(current_user) }
+      let(:user) { create(current_user) } # rubocop:disable Rails/SaveBang
       let(:license) { has_license && create(:license) }
       subject { helper.has_start_trial? }
 
@@ -195,34 +171,6 @@ RSpec.describe DashboardHelper, type: :helper do
       end
 
       it { is_expected.to eq(output) }
-    end
-  end
-
-  describe 'analytics_nav_url' do
-    before do
-      allow(helper).to receive(:current_user).and_return(user)
-    end
-
-    context 'when analytics features are disabled' do
-      context 'and user has access to instance statistics features' do
-        before do
-          allow(helper).to receive(:can?) { true }
-        end
-
-        it 'returns the instance statistics root path' do
-          expect(helper.analytics_nav_url).to match(instance_statistics_root_path)
-        end
-      end
-
-      context 'and user does not have access to instance statistics features' do
-        before do
-          allow(helper).to receive(:can?) { false }
-        end
-
-        it 'returns the not found path' do
-          expect(helper.analytics_nav_url).to match('errors/not_found')
-        end
-      end
     end
   end
 end

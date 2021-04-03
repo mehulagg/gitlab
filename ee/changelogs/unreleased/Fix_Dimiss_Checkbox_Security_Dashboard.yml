@@ -1,6 +1,0 @@
----
-title: changed the default value of checkbox to false from a dynamic value on first
-  page load
-merge_request: 36646
-author: Uday Aggarwal @uday.agg97
-type: fixed

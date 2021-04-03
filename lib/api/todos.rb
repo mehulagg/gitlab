@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class Todos < Grape::API::Instance
+  class Todos < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :issue_tracking
 
     ISSUABLE_TYPES = {
       'merge_requests' => ->(iid) { find_merge_request_with_access(iid) },
@@ -26,6 +28,11 @@ module API
         end
         post ":id/#{type}/:#{type_id_str}/todo" do
           issuable = instance_exec(params[type_id_str], &finder)
+
+          unless can?(current_user, :read_merge_request, issuable.project)
+            not_found!(type.split("_").map(&:capitalize).join(" "))
+          end
+
           todo = TodoService.new.mark_todo(issuable, current_user).first
 
           if todo
@@ -39,8 +46,17 @@ module API
 
     resource :todos do
       helpers do
+        params :todo_filters do
+          optional :action, String, values: Todo::ACTION_NAMES.values.map(&:to_s)
+          optional :author_id, Integer
+          optional :state, String, values: Todo.state_machine.states.map(&:name).map(&:to_s)
+          optional :type, String, values: TodosFinder.todo_types
+          optional :project_id, Integer
+          optional :group_id, Integer
+        end
+
         def find_todos
-          TodosFinder.new(current_user, params).execute
+          TodosFinder.new(current_user, declared_params(include_missing: false)).execute
         end
 
         def issuable_and_awardable?(type)
@@ -72,7 +88,7 @@ module API
         success Entities::Todo
       end
       params do
-        use :pagination
+        use :pagination, :todo_filters
       end
       get do
         todos = paginate(find_todos.with_entity_associations)

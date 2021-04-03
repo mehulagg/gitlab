@@ -16,6 +16,9 @@
             "title": { "type": "string" },
             "url": { "type": "string" }
           }
+        },
+        "health_status": {
+          "type": ["string",  "null"]
         }
       }
     }

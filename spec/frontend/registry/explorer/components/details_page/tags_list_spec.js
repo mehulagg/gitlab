@@ -1,20 +1,20 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import component from '~/registry/explorer/components/details_page/tags_list.vue';
 import TagsListRow from '~/registry/explorer/components/details_page/tags_list_row.vue';
 import { TAGS_LIST_TITLE, REMOVE_TAGS_BUTTON_TITLE } from '~/registry/explorer/constants/index';
-import { tagsListResponse } from '../../mock_data';
+import { tagsMock } from '../../mock_data';
 
 describe('Tags List', () => {
   let wrapper;
-  const tags = [...tagsListResponse.data];
-  const readOnlyTags = tags.map(t => ({ ...t, destroy_path: undefined }));
+  const tags = [...tagsMock];
+  const readOnlyTags = tags.map((t) => ({ ...t, canDelete: false }));
 
   const findTagsListRow = () => wrapper.findAll(TagsListRow);
   const findDeleteButton = () => wrapper.find(GlButton);
   const findListTitle = () => wrapper.find('[data-testid="list-title"]');
 
-  const mountComponent = (propsData = { tags, isDesktop: true }) => {
+  const mountComponent = (propsData = { tags, isMobile: false }) => {
     wrapper = shallowMount(component, {
       propsData,
     });
@@ -41,15 +41,15 @@ describe('Tags List', () => {
 
   describe('delete button', () => {
     it.each`
-      inputTags       | isDesktop | isVisible
-      ${tags}         | ${true}   | ${true}
-      ${tags}         | ${false}  | ${false}
-      ${readOnlyTags} | ${true}   | ${false}
-      ${readOnlyTags} | ${false}  | ${false}
+      inputTags       | isMobile | isVisible
+      ${tags}         | ${false} | ${true}
+      ${tags}         | ${true}  | ${false}
+      ${readOnlyTags} | ${false} | ${false}
+      ${readOnlyTags} | ${true}  | ${false}
     `(
-      'is $isVisible that delete button exists when tags is $inputTags and isDesktop is $isDesktop',
-      ({ inputTags, isDesktop, isVisible }) => {
-        mountComponent({ tags: inputTags, isDesktop });
+      'is $isVisible that delete button exists when tags is $inputTags and isMobile is $isMobile',
+      ({ inputTags, isMobile, isVisible }) => {
+        mountComponent({ tags: inputTags, isMobile });
 
         expect(findDeleteButton().exists()).toBe(isVisible);
       },
@@ -70,29 +70,32 @@ describe('Tags List', () => {
       });
     });
 
-    it('is disabled when no item is selected', () => {
-      mountComponent();
+    it.each`
+      disabled | doSelect | buttonDisabled
+      ${true}  | ${false} | ${'true'}
+      ${true}  | ${true}  | ${'true'}
+      ${false} | ${false} | ${'true'}
+      ${false} | ${true}  | ${undefined}
+    `(
+      'is $buttonDisabled that the button is disabled when the component disabled state is $disabled and is $doSelect that the user selected a tag',
+      async ({ disabled, buttonDisabled, doSelect }) => {
+        mountComponent({ tags, disabled, isMobile: false });
 
-      expect(findDeleteButton().attributes('disabled')).toBe('true');
-    });
+        if (doSelect) {
+          findTagsListRow().at(0).vm.$emit('select');
+          await wrapper.vm.$nextTick();
+        }
 
-    it('is enabled when at least one item is selected', async () => {
-      mountComponent();
-      findTagsListRow()
-        .at(0)
-        .vm.$emit('select');
-      await wrapper.vm.$nextTick();
-      expect(findDeleteButton().attributes('disabled')).toBe(undefined);
-    });
+        expect(findDeleteButton().attributes('disabled')).toBe(buttonDisabled);
+      },
+    );
 
     it('click event emits a deleted event with selected items', () => {
       mountComponent();
-      findTagsListRow()
-        .at(0)
-        .vm.$emit('select');
+      findTagsListRow().at(0).vm.$emit('select');
 
       findDeleteButton().vm.$emit('click');
-      expect(wrapper.emitted('delete')).toEqual([[{ centos6: true }]]);
+      expect(wrapper.emitted('delete')).toEqual([[{ 'beta-24753': true }]]);
     });
   });
 
@@ -104,42 +107,28 @@ describe('Tags List', () => {
     });
 
     it('the correct props are bound to it', () => {
-      mountComponent();
+      mountComponent({ tags, disabled: true });
 
       const rows = findTagsListRow();
 
       expect(rows.at(0).attributes()).toMatchObject({
         first: 'true',
-        isdesktop: 'true',
-      });
-
-      // The list has only two tags and for some reasons .at(-1) does not work
-      expect(rows.at(1).attributes()).toMatchObject({
-        last: 'true',
-        isdesktop: 'true',
+        disabled: 'true',
       });
     });
 
     describe('events', () => {
       it('select event update the selected items', async () => {
         mountComponent();
-        findTagsListRow()
-          .at(0)
-          .vm.$emit('select');
+        findTagsListRow().at(0).vm.$emit('select');
         await wrapper.vm.$nextTick();
-        expect(
-          findTagsListRow()
-            .at(0)
-            .attributes('selected'),
-        ).toBe('true');
+        expect(findTagsListRow().at(0).attributes('selected')).toBe('true');
       });
 
       it('delete event emit a delete event', () => {
         mountComponent();
-        findTagsListRow()
-          .at(0)
-          .vm.$emit('delete');
-        expect(wrapper.emitted('delete')).toEqual([[{ centos6: true }]]);
+        findTagsListRow().at(0).vm.$emit('delete');
+        expect(wrapper.emitted('delete')).toEqual([[{ 'beta-24753': true }]]);
       });
     });
   });

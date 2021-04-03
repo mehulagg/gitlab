@@ -37,33 +37,30 @@ class RepositoryUpdateMirrorWorker # rubocop:disable Scalability/IdempotentWorke
 
   private
 
-  # rubocop:disable Gitlab/RailsLogger
   def start_mirror(project)
     import_state = project.import_state
 
     if start(import_state)
-      Rails.logger.info("Mirror update for #{project.full_path} started. Waiting duration: #{import_state.mirror_waiting_duration}")
+      Gitlab::AppLogger.info("Mirror update for #{project.full_path} started. Waiting duration: #{import_state.mirror_waiting_duration}")
       metric_mirror_waiting_duration_seconds.observe({}, import_state.mirror_waiting_duration)
 
       true
     else
-      Rails.logger.info("Project #{project.full_path} was in inconsistent state: #{import_state.status}")
+      Gitlab::AppLogger.info("Project #{project.full_path} was in inconsistent state: #{import_state.status}")
       false
     end
   end
-  # rubocop:enable Gitlab/RailsLogger
 
   def fail_mirror(project, message)
     project.import_state.mark_as_failed(message)
-
-    Rails.logger.error("Mirror update for #{project.full_path} failed with the following message: #{message}") # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger.error("Mirror update for #{project.full_path} failed with the following message: #{message}")
   end
 
   def finish_mirror(project)
     import_state = project.import_state
     import_state.finish
 
-    Rails.logger.info("Mirror update for #{project.full_path} successfully finished. Update duration: #{import_state.mirror_update_duration}}.") # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger.info("Mirror update for #{project.full_path} successfully finished. Update duration: #{import_state.mirror_update_duration}}.")
     metric_mirror_update_duration_seconds.observe({}, import_state.mirror_update_duration)
   end
 

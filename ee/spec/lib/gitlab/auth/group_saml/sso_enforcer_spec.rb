@@ -24,7 +24,7 @@ RSpec.describe Gitlab::Auth::GroupSaml::SsoEnforcer do
     end
 
     it 'stores the current time for later comparison' do
-      Timecop.freeze do
+      freeze_time do
         subject.update_session
 
         expect(session[:active_group_sso_sign_ins][saml_provider.id]).to eq DateTime.now
@@ -58,7 +58,7 @@ RSpec.describe Gitlab::Auth::GroupSaml::SsoEnforcer do
         subject.update_session
 
         days_after_timeout = Gitlab::Auth::GroupSaml::SsoEnforcer::DEFAULT_SESSION_TIMEOUT + 2.days
-        Timecop.freeze(days_after_timeout) do
+        travel_to(days_after_timeout.from_now) do
           expect(subject).not_to be_active_session
         end
       end
@@ -112,11 +112,28 @@ RSpec.describe Gitlab::Auth::GroupSaml::SsoEnforcer do
 
         expect(described_class).to be_group_access_restricted(sub_group)
       end
+    end
 
-      it 'for a project' do
-        project = create(:project, group: root_group)
+    context 'for group owner' do
+      let(:user) { create(:user) }
 
-        expect(described_class).to be_group_access_restricted(project)
+      before do
+        create(:group_saml_identity, user: user, saml_provider: root_group.saml_provider)
+        root_group.add_owner(user)
+      end
+
+      context 'for a root group' do
+        it 'is not restricted' do
+          expect(described_class).not_to be_group_access_restricted(root_group, user: user)
+        end
+      end
+
+      context 'for a subgroup' do
+        it 'is restricted' do
+          sub_group = create(:group, parent: root_group)
+
+          expect(described_class).to be_group_access_restricted(sub_group, user: user)
+        end
       end
     end
 

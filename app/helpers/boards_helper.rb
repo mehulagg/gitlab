@@ -11,14 +11,25 @@ module BoardsHelper
       lists_endpoint: board_lists_path(board),
       board_id: board.id,
       disabled: (!can?(current_user, :create_non_backlog_issues, board)).to_s,
-      issue_link_base: build_issue_link_base,
       root_path: root_path,
       full_path: full_path,
       bulk_update_path: @bulk_issues_path,
+      can_update: (!!can?(current_user, :admin_issue, board)).to_s,
       time_tracking_limit_to_hours: Gitlab::CurrentSettings.time_tracking_limit_to_hours.to_s,
       recent_boards_endpoint: recent_boards_path,
-      parent: current_board_parent.model_name.param_key
+      parent: current_board_parent.model_name.param_key,
+      group_id: group_id,
+      labels_filter_base_path: build_issue_link_base,
+      labels_fetch_path: labels_fetch_path,
+      labels_manage_path: labels_manage_path,
+      board_type: board.to_type
     }
+  end
+
+  def group_id
+    return @group.id if board.group_board?
+
+    @project&.group&.id
   end
 
   def full_path
@@ -34,6 +45,22 @@ module BoardsHelper
       "#{group_path(@board.group)}/:project_path/issues"
     else
       project_issues_path(@project)
+    end
+  end
+
+  def labels_fetch_path
+    if board.group_board?
+      group_labels_path(@group, format: :json, only_group_labels: true, include_ancestor_groups: true)
+    else
+      project_labels_path(@project, format: :json, include_ancestor_groups: true)
+    end
+  end
+
+  def labels_manage_path
+    if board.group_board?
+      group_labels_path(@group)
+    else
+      project_labels_path(@project)
     end
   end
 
@@ -76,23 +103,6 @@ module BoardsHelper
       namespace_path: @namespace_path,
       project_path: @project&.path,
       group_path: @group&.path
-    }
-  end
-
-  def board_sidebar_user_data
-    dropdown_options = assignees_dropdown_options('issue')
-
-    {
-      toggle: 'dropdown',
-      field_name: 'issue[assignee_ids][]',
-      first_user: current_user&.username,
-      current_user: 'true',
-      project_id: @project&.id,
-      group_id: @group&.id,
-      null_user: 'true',
-      multi_select: 'true',
-      'dropdown-header': dropdown_options[:data][:'dropdown-header'],
-      'max-select': dropdown_options[:data][:'max-select']
     }
   end
 

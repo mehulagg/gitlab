@@ -1,5 +1,4 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlModal } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import ConfirmModal from '~/vue_shared/components/confirm_modal.vue';
 
@@ -21,9 +20,14 @@ describe('vue_shared/components/confirm_modal', () => {
     selector: '.test-button',
   };
 
-  const actionSpies = {
-    openModal: jest.fn(),
-    closeModal: jest.fn(),
+  const popupMethods = {
+    hide: jest.fn(),
+    show: jest.fn(),
+  };
+
+  const GlModalStub = {
+    template: '<div><slot></slot></div>',
+    methods: popupMethods,
   };
 
   let wrapper;
@@ -34,8 +38,8 @@ describe('vue_shared/components/confirm_modal', () => {
         ...defaultProps,
         ...props,
       },
-      methods: {
-        ...actionSpies,
+      stubs: {
+        GlModal: GlModalStub,
       },
     });
   };
@@ -44,12 +48,12 @@ describe('vue_shared/components/confirm_modal', () => {
     wrapper.destroy();
   });
 
-  const findModal = () => wrapper.find(GlModal);
+  const findModal = () => wrapper.find(GlModalStub);
   const findForm = () => wrapper.find('form');
   const findFormData = () =>
     findForm()
       .findAll('input')
-      .wrappers.map(x => ({ name: x.attributes('name'), value: x.attributes('value') }));
+      .wrappers.map((x) => ({ name: x.attributes('name'), value: x.attributes('value') }));
 
   describe('template', () => {
     describe('when modal data is set', () => {
@@ -58,7 +62,7 @@ describe('vue_shared/components/confirm_modal', () => {
         wrapper.vm.modalAttributes = MOCK_MODAL_DATA.modalAttributes;
       });
 
-      it('renders GlModal wtih data', () => {
+      it('renders GlModal with data', () => {
         expect(findModal().exists()).toBeTruthy();
         expect(findModal().attributes()).toEqual(
           expect.objectContaining({
@@ -66,6 +70,24 @@ describe('vue_shared/components/confirm_modal', () => {
             okvariant: MOCK_MODAL_DATA.modalAttributes.okVariant,
           }),
         );
+      });
+    });
+
+    describe.each`
+      desc                             | attrs                                                                         | expectation
+      ${'when message is simple text'} | ${{}}                                                                         | ${`<div>${MOCK_MODAL_DATA.modalAttributes.message}</div>`}
+      ${'when message has html'}       | ${{ messageHtml: '<p>Header</p><ul onhover="alert(1)"><li>First</li></ul>' }} | ${'<p>Header</p><ul><li>First</li></ul>'}
+    `('$desc', ({ attrs, expectation }) => {
+      beforeEach(() => {
+        createComponent();
+        wrapper.vm.modalAttributes = {
+          ...MOCK_MODAL_DATA.modalAttributes,
+          ...attrs,
+        };
+      });
+
+      it('renders message', () => {
+        expect(findForm().element.innerHTML).toContain(expectation);
       });
     });
   });
@@ -80,6 +102,22 @@ describe('vue_shared/components/confirm_modal', () => {
 
       it('does not submit form', () => {
         expect(findForm().element.submit).not.toHaveBeenCalled();
+      });
+
+      describe('with handleSubmit prop', () => {
+        const handleSubmit = jest.fn();
+        beforeEach(() => {
+          createComponent({ handleSubmit });
+          findModal().vm.$emit('primary');
+        });
+
+        it('will call handleSubmit', () => {
+          expect(handleSubmit).toHaveBeenCalled();
+        });
+
+        it('does not submit the form', () => {
+          expect(findForm().element.submit).not.toHaveBeenCalled();
+        });
       });
 
       describe('when modal submitted', () => {
@@ -103,7 +141,7 @@ describe('vue_shared/components/confirm_modal', () => {
       });
 
       it('does not close modal', () => {
-        expect(actionSpies.closeModal).not.toHaveBeenCalled();
+        expect(popupMethods.hide).not.toHaveBeenCalled();
       });
 
       describe('when modal closed', () => {
@@ -112,7 +150,7 @@ describe('vue_shared/components/confirm_modal', () => {
         });
 
         it('closes modal', () => {
-          expect(actionSpies.closeModal).toHaveBeenCalled();
+          expect(popupMethods.hide).toHaveBeenCalled();
         });
       });
     });

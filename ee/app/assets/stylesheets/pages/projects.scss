@@ -6,10 +6,6 @@
 }
 
 .project-mirror-settings {
-  .fingerprint-verified {
-    color: $green-500;
-  }
-
   .ssh-public-key,
   .btn-copy-ssh-public-key {
     float: left;
@@ -126,7 +122,6 @@
   .template-header,
   .template-option {
     padding: $gl-padding $gl-padding-8;
-    border-top: 1px solid $border-color;
   }
 
   .template-header {

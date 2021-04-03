@@ -99,7 +99,7 @@ RSpec.describe 'Merge request > User sees approval widget', :js do
           click_on 'View eligible approvers'
           wait_for_requests
 
-          within('.mr-widget-workflow table .monospace') do
+          within('.mr-widget-workflow table .gl-font-monospace') do
             code_owner_row = find(:xpath, "//tr[td[contains(.,'#{code_owner_rule.name}')]]")
 
             expect(code_owner_row).to have_content('Optional')
@@ -123,7 +123,7 @@ RSpec.describe 'Merge request > User sees approval widget', :js do
             click_on 'View eligible approvers'
             wait_for_requests
 
-            within('.mr-widget-workflow table .monospace') do
+            within('.mr-widget-workflow table .gl-font-monospace') do
               code_owner_row = find(:xpath, "//tr[td[contains(.,'#{code_owner_rule.name}')]]")
 
               expect(code_owner_row).to have_content('0 of 1')

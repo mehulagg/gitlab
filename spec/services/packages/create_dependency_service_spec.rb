@@ -5,7 +5,7 @@ RSpec.describe Packages::CreateDependencyService do
   describe '#execute' do
     let_it_be(:namespace) {create(:namespace)}
     let_it_be(:version) { '1.0.1' }
-    let_it_be(:package_name) { "@#{namespace.path}/my-app".freeze }
+    let_it_be(:package_name) { "@#{namespace.path}/my-app" }
 
     context 'when packages are published' do
       let(:json_file) { 'packages/npm/payload.json' }
@@ -15,6 +15,7 @@ RSpec.describe Packages::CreateDependencyService do
                 .gsub('1.0.1', version))
                 .with_indifferent_access
       end
+
       let(:package_version) { params[:versions].each_key.first }
       let(:dependencies) { params[:versions][package_version] }
       let(:package) { create(:npm_package) }

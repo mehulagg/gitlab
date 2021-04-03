@@ -1,12 +1,19 @@
 <script>
-import animateMixin from '../mixins/animate';
+import { GlButton, GlTooltipDirective, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { __ } from '~/locale';
 import eventHub from '../event_hub';
-import tooltip from '../../vue_shared/directives/tooltip';
-import { spriteIcon } from '../../lib/utils/common_utils';
+import animateMixin from '../mixins/animate';
 
 export default {
+  i18n: {
+    editTitleAndDescription: __('Edit title and description'),
+  },
+  components: {
+    GlButton,
+  },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
+    SafeHtml,
   },
   mixins: [animateMixin],
   props: {
@@ -40,11 +47,6 @@ export default {
       titleEl: document.querySelector('title'),
     };
   },
-  computed: {
-    pencilIcon() {
-      return spriteIcon('pencil', 'link-highlight');
-    },
-  },
   watch: {
     titleHtml() {
       this.setPageTitle();
@@ -67,25 +69,22 @@ export default {
 <template>
   <div class="title-container">
     <h2
+      v-safe-html="titleHtml"
       :class="{
         'issue-realtime-pre-pulse': preAnimation,
         'issue-realtime-trigger-pulse': pulseAnimation,
       }"
       class="title qa-title"
       dir="auto"
-      v-html="titleHtml"
     ></h2>
-    <button
+    <gl-button
       v-if="showInlineEditButton && canUpdate"
-      v-tooltip
-      type="button"
-      class="btn btn-default btn-edit btn-svg js-issuable-edit
-      qa-edit-button"
-      title="Edit title and description"
-      data-placement="bottom"
-      data-container="body"
+      v-gl-tooltip.bottom
+      icon="pencil"
+      class="btn-edit js-issuable-edit qa-edit-button"
+      :title="$options.i18n.editTitleAndDescription"
+      :aria-label="$options.i18n.editTitleAndDescription"
       @click="edit"
-      v-html="pencilIcon"
-    ></button>
+    />
   </div>
 </template>

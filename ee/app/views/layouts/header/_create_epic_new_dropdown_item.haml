@@ -1,4 +1,3 @@
-- create_group_epic = can?(current_user, :create_epic, @group)
-- return unless create_group_epic && Feature.enabled?(:create_epic_form)
+- return unless can?(current_user, :create_epic, @group)
 
 %li= link_to _('New epic'), new_group_epic_path(@group)

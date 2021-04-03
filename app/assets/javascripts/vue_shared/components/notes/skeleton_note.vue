@@ -1,5 +1,5 @@
 <script>
-import { GlSkeletonLoading } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 
 export default {
@@ -12,7 +12,7 @@ export default {
 </script>
 
 <template>
-  <timeline-entry-item class="note note-wrapper" data-qa-selector="skeleton_note">
+  <timeline-entry-item class="note note-wrapper" data-qa-selector="skeleton_note_placeholder">
     <div class="timeline-icon"></div>
     <div class="timeline-content">
       <div class="note-header"></div>

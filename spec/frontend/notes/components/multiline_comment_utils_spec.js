@@ -7,7 +7,7 @@ import {
 
 describe('Multiline comment utilities', () => {
   describe('get start & end line numbers', () => {
-    const lineRanges = ['old', 'new', null].map(type => ({
+    const lineRanges = ['old', 'new', null].map((type) => ({
       start: { new_line: 1, old_line: 1, type },
       end: { new_line: 2, old_line: 2, type },
     }));
@@ -34,8 +34,17 @@ describe('Multiline comment utilities', () => {
       expect(getSymbol(type)).toEqual(result);
     });
   });
-  describe('getCommentedLines', () => {
-    const diffLines = [{ line_code: '1' }, { line_code: '2' }, { line_code: '3' }];
+  const inlineDiffLines = [{ line_code: '1' }, { line_code: '2' }, { line_code: '3' }];
+  const parallelDiffLines = inlineDiffLines.map((line) => ({
+    left: { ...line },
+    right: { ...line },
+  }));
+
+  describe.each`
+    view          | diffLines
+    ${'inline'}   | ${inlineDiffLines}
+    ${'parallel'} | ${parallelDiffLines}
+  `('getCommentedLines $view view', ({ diffLines }) => {
     it('returns a default object when `selectedCommentPosition` is not provided', () => {
       expect(getCommentedLines(undefined, diffLines)).toEqual({ startLine: 4, endLine: 4 });
     });

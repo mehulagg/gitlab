@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :web_hook do
     desc "GitLab | Webhook | Adds a webhook to the projects"
@@ -37,7 +39,10 @@ namespace :gitlab do
       web_hooks.find_each do |hook|
         next unless hook.url == web_hook_url
 
-        hook.destroy!
+        result = WebHooks::DestroyService.new(nil).sync_destroy(hook)
+
+        raise "Unable to destroy Web hook" unless result[:status] == :success
+
         count += 1
       end
 

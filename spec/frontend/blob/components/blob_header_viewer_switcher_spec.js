@@ -1,3 +1,4 @@
+import { GlButtonGroup, GlButton } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import BlobHeaderViewerSwitcher from '~/blob/components/blob_header_viewer_switcher.vue';
 import {
@@ -6,7 +7,6 @@ import {
   SIMPLE_BLOB_VIEWER,
   SIMPLE_BLOB_VIEWER_TITLE,
 } from '~/blob/components/constants';
-import { GlButtonGroup, GlButton } from '@gitlab/ui';
 
 describe('Blob Header Viewer Switcher', () => {
   let wrapper;

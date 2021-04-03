@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class EpicLinks < Grape::API::Instance
+  class EpicLinks < ::API::Base
     include ::Gitlab::Utils::StrongMemoize
+
+    feature_category :epics
 
     before do
       authenticate!
@@ -74,12 +76,14 @@ module API
       end
       params do
         requires :title, type: String, desc: 'The title of a child epic'
+        optional :confidential, type: Boolean, desc: 'Indicates if the epic is confidential. Will be ignored if `confidential_epics` feature flag is disabled'
       end
       post ':id/(-/)epics/:epic_iid/epics' do
         authorize_subepics_feature!
         authorize_can_admin_epic_link!
 
-        create_params = { parent_id: epic.id, title: params[:title] }
+        confidential = params[:confidential].nil? ? epic.confidential : params[:confidential]
+        create_params = { parent_id: epic.id, title: params[:title], confidential: confidential }
 
         child_epic = ::Epics::CreateService.new(user_group, current_user, create_params).execute
 
@@ -105,8 +109,8 @@ module API
       desc 'Reorder child epics'
       params do
         use :child_epic_id
-        optional :move_before_id, type: Integer, desc: 'The id of the epic that should be positioned before the child epic'
-        optional :move_after_id, type: Integer, desc: 'The id of the epic that should be positioned after the child epic'
+        optional :move_before_id, type: Integer, desc: 'The ID of the epic that should be positioned before the child epic'
+        optional :move_after_id, type: Integer, desc: 'The ID of the epic that should be positioned after the child epic'
       end
       put ':id/(-/)epics/:epic_iid/epics/:child_epic_id' do
         authorize_subepics_feature!

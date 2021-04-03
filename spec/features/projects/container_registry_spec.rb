@@ -3,11 +3,17 @@
 require 'spec_helper'
 
 RSpec.describe 'Container Registry', :js do
+  include_context 'container registry tags'
+
   let(:user) { create(:user) }
   let(:project) { create(:project) }
 
   let(:container_repository) do
     create(:container_repository, name: 'my/image')
+  end
+
+  let(:nameless_container_repository) do
+    create(:container_repository, name: '')
   end
 
   before do
@@ -76,7 +82,13 @@ RSpec.describe 'Container Registry', :js do
       end
 
       it 'shows the image title' do
-        expect(page).to have_content 'my/image tags'
+        expect(page).to have_content 'my/image'
+      end
+
+      it 'shows the image tags' do
+        expect(page).to have_content 'Image tags'
+        first_tag = first('[data-testid="name"]')
+        expect(first_tag).to have_content '1'
       end
 
       it 'user removes a specific tag from container repository' do
@@ -90,30 +102,60 @@ RSpec.describe 'Container Registry', :js do
       end
 
       it('pagination navigate to the second page') do
-        visit_second_page
+        visit_next_page
+
         expect(page).to have_content '20'
       end
+    end
+
+    describe 'with a tag missing digest' do
+      before do
+        stub_container_registry_tags(repository: %r{my/image}, tags: %w[latest stable])
+        stub_next_container_registry_tags_call(:digest, nil)
+        visit_container_registry_details 'my/image'
+      end
+
+      it 'renders the tags list correctly' do
+        expect(page).to have_content('latest')
+        expect(page).to have_content('stable')
+        expect(page).to have_content('Digest: N/A')
+      end
+    end
+  end
+
+  describe 'image repo details when image has no name' do
+    before do
+      stub_container_registry_tags(tags: %w[latest], with_manifest: true)
+      project.container_repositories << nameless_container_repository
+      visit_container_registry
+    end
+
+    it 'renders correctly' do
+      find('a[data-testid="details-link"]').click
+
+      expect(page).to have_content 'latest'
     end
   end
 
   context 'when there are more than 10 images' do
     before do
-      create_list(:container_repository, 12, project: project)
       project.container_repositories << container_repository
+      create_list(:container_repository, 12, project: project)
+
       visit_container_registry
     end
 
     it 'shows pagination' do
-      expect(page).to have_css '.gl-pagination'
+      expect(page).to have_css '.gl-keyset-pagination'
     end
 
     it 'pagination goes to second page' do
-      visit_second_page
+      visit_next_page
       expect(page).to have_content 'my/image'
     end
 
     it 'pagination is preserved after navigating back from details' do
-      visit_second_page
+      visit_next_page
       click_link 'my/image'
       breadcrumb = find '.breadcrumbs'
       breadcrumb.click_link 'Container Registry'
@@ -130,8 +172,8 @@ RSpec.describe 'Container Registry', :js do
     click_link name
   end
 
-  def visit_second_page
-    pagination = find '.gl-pagination'
-    pagination.click_link '2'
+  def visit_next_page
+    pagination = find '.gl-keyset-pagination'
+    pagination.click_button 'Next'
   end
 end

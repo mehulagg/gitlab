@@ -1,24 +1,26 @@
 <script>
 /* eslint-disable @gitlab/vue-require-i18n-strings */
-import { GlLoadingIcon } from '@gitlab/ui';
-import Flash from '~/flash';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlLoadingIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import { s__, __ } from '~/locale';
+import { OPEN_REVERT_MODAL, OPEN_CHERRY_PICK_MODAL } from '~/projects/commit/constants';
+import modalEventHub from '~/projects/commit/event_hub';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
+import eventHub from '../../event_hub';
 import MrWidgetAuthorTime from '../mr_widget_author_time.vue';
 import statusIcon from '../mr_widget_status_icon.vue';
-import eventHub from '../../event_hub';
 
 export default {
   name: 'MRWidgetMerged',
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     MrWidgetAuthorTime,
     statusIcon,
     ClipboardButton,
     GlLoadingIcon,
+    GlButton,
   },
   props: {
     mr: {
@@ -77,14 +79,17 @@ export default {
       return s__('mrWidget|Cherry-pick');
     },
   },
+  mounted() {
+    document.dispatchEvent(new CustomEvent('merged:UpdateActions'));
+  },
   methods: {
     removeSourceBranch() {
       this.isMakingRequest = true;
 
       this.service
         .removeSourceBranch()
-        .then(res => res.data)
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/26
           // eslint-disable-next-line @gitlab/require-i18n-strings
           if (data.message === 'Branch was deleted') {
@@ -97,6 +102,12 @@ export default {
           this.isMakingRequest = false;
           Flash(__('Something went wrong. Please try again.'));
         });
+    },
+    openRevertModal() {
+      modalEventHub.$emit(OPEN_REVERT_MODAL);
+    },
+    openCherryPickModal() {
+      modalEventHub.$emit(OPEN_CHERRY_PICK_MODAL);
     },
   },
 };
@@ -112,48 +123,49 @@ export default {
           :date-title="mr.metrics.mergedAt"
           :date-readable="mr.metrics.readableMergedAt"
         />
-        <a
+        <gl-button
           v-if="mr.canRevertInCurrentMR"
-          v-tooltip
+          v-gl-tooltip.hover
           :title="revertTitle"
-          class="btn btn-close btn-sm"
-          href="#modal-revert-commit"
-          data-toggle="modal"
-          data-container="body"
+          size="small"
+          category="secondary"
+          variant="warning"
+          @click="openRevertModal"
         >
           {{ revertLabel }}
-        </a>
-        <a
+        </gl-button>
+        <gl-button
           v-else-if="mr.revertInForkPath"
-          v-tooltip
+          v-gl-tooltip.hover
           :href="mr.revertInForkPath"
           :title="revertTitle"
-          class="btn btn-close btn-sm"
+          size="small"
+          category="secondary"
+          variant="warning"
           data-method="post"
         >
           {{ revertLabel }}
-        </a>
-        <a
+        </gl-button>
+        <gl-button
           v-if="mr.canCherryPickInCurrentMR"
-          v-tooltip
+          v-gl-tooltip.hover
           :title="cherryPickTitle"
-          class="btn btn-default btn-sm"
-          href="#modal-cherry-pick-commit"
-          data-toggle="modal"
-          data-container="body"
+          size="small"
+          data-qa-selector="cherry_pick_button"
+          @click="openCherryPickModal"
         >
           {{ cherryPickLabel }}
-        </a>
-        <a
+        </gl-button>
+        <gl-button
           v-else-if="mr.cherryPickInForkPath"
-          v-tooltip
+          v-gl-tooltip.hover
           :href="mr.cherryPickInForkPath"
           :title="cherryPickTitle"
-          class="btn btn-default btn-sm"
+          size="small"
           data-method="post"
         >
           {{ cherryPickLabel }}
-        </a>
+        </gl-button>
       </div>
       <section class="mr-info-list" data-qa-selector="merged_status_content">
         <p>
@@ -172,7 +184,9 @@ export default {
             <clipboard-button
               :title="__('Copy commit SHA')"
               :text="mr.mergeCommitSha"
-              css-class="btn-default btn-transparent btn-clipboard js-mr-merged-copy-sha"
+              css-class="js-mr-merged-copy-sha"
+              category="tertiary"
+              size="small"
             />
           </template>
         </p>
@@ -181,14 +195,14 @@ export default {
         </p>
         <p v-if="shouldShowRemoveSourceBranch" class="space-children">
           <span>{{ s__('mrWidget|You can delete the source branch now') }}</span>
-          <button
+          <gl-button
             :disabled="isMakingRequest"
-            type="button"
-            class="btn btn-sm btn-default js-remove-branch-button"
+            size="small"
+            class="js-remove-branch-button"
             @click="removeSourceBranch"
           >
             {{ s__('mrWidget|Delete source branch') }}
-          </button>
+          </gl-button>
         </p>
         <p v-if="shouldShowSourceBranchRemoving">
           <gl-loading-icon :inline="true" />

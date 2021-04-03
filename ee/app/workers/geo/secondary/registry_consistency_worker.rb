@@ -16,12 +16,18 @@ module Geo
       feature_category :geo_replication
 
       REGISTRY_CLASSES = [
+        Geo::ContainerRepositoryRegistry,
         Geo::DesignRegistry,
         Geo::JobArtifactRegistry,
         Geo::LfsObjectRegistry,
+        Geo::MergeRequestDiffRegistry,
         Geo::PackageFileRegistry,
+        Geo::PipelineArtifactRegistry,
         Geo::ProjectRegistry,
-        Geo::UploadRegistry
+        Geo::TerraformStateVersionRegistry,
+        Geo::UploadRegistry,
+        Geo::SnippetRepositoryRegistry,
+        Geo::GroupWikiRepositoryRegistry
       ].freeze
 
       BATCH_SIZE = 10000

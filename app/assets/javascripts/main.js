@@ -1,4 +1,5 @@
 /* global $ */
+/* eslint-disable import/order */
 
 import jQuery from 'jquery';
 import Cookies from 'js-cookie';
@@ -9,37 +10,31 @@ import './commons';
 import './behaviors';
 
 // lib/utils
-import {
-  handleLocationHash,
-  addSelectOnFocusBehaviour,
-  getCspNonceValue,
-} from './lib/utils/common_utils';
+import applyGitLabUIConfig from '@gitlab/ui/dist/config';
+import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
+import { initRails } from '~/lib/utils/rails_ujs';
+import * as popovers from '~/popovers';
+import * as tooltips from '~/tooltips';
+import initAlertHandler from './alert_handler';
+import { removeFlashClickListener } from './flash';
+import initTodoToggle from './header';
+import initLayoutNav from './layout_nav';
+import { handleLocationHash, addSelectOnFocusBehaviour } from './lib/utils/common_utils';
 import { localTimeAgo } from './lib/utils/datetime_utility';
 import { getLocationHash, visitUrl } from './lib/utils/url_utility';
 
 // everything else
-import loadAwardsHandler from './awards_handler';
-import applyGitLabUIConfig from '@gitlab/ui/dist/config';
-import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
-import Flash, { removeFlashClickListener } from './flash';
-import './gl_dropdown';
-import initTodoToggle from './header';
-import initImporterStatus from './importer_status';
-import initLayoutNav from './layout_nav';
-import './feature_highlight/feature_highlight_options';
+import initFeatureHighlight from './feature_highlight';
 import LazyLoader from './lazy_loader';
 import initLogoAnimation from './logo';
 import initFrequentItemDropdowns from './frequent_items';
 import initBreadcrumbs from './breadcrumb';
+import initPersistentUserCallouts from './persistent_user_callouts';
+import { initUserTracking, initDefaultTrackers } from './tracking';
 import initUsagePingConsent from './usage_ping_consent';
-import initPerformanceBar from './performance_bar';
-import initSearchAutocomplete from './search_autocomplete';
 import GlFieldErrors from './gl_field_errors';
 import initUserPopovers from './user_popovers';
 import initBroadcastNotifications from './broadcast_notification';
-import initPersistentUserCallouts from './persistent_user_callouts';
-import { initUserTracking } from './tracking';
-import { __ } from './locale';
 
 import 'ee_else_ce/main_ee';
 
@@ -49,39 +44,19 @@ applyGitLabUIConfig();
 window.jQuery = jQuery;
 window.$ = jQuery;
 
-// Add nonce to jQuery script handler
-jQuery.ajaxSetup({
-  converters: {
-    // eslint-disable-next-line @gitlab/require-i18n-strings, func-names
-    'text script': function(text) {
-      jQuery.globalEval(text, { nonce: getCspNonceValue() });
-      return text;
-    },
-  },
-});
-
-function disableJQueryAnimations() {
-  $.fx.off = true;
-}
-
-// Disable jQuery animations
-if (gon?.disable_animations) {
-  disableJQueryAnimations();
-}
-
 // inject test utilities if necessary
 if (process.env.NODE_ENV !== 'production' && gon?.test_env) {
-  disableJQueryAnimations();
-  import(/* webpackMode: "eager" */ './test_utils/'); // eslint-disable-line no-unused-expressions
+  import(/* webpackMode: "eager" */ './test_utils/');
 }
 
 document.addEventListener('beforeunload', () => {
   // Unbind scroll events
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $(document).off('scroll');
   // Close any open tooltips
-  $('.has-tooltip, [data-toggle="tooltip"]').tooltip('dispose');
+  tooltips.dispose(document.querySelectorAll('.has-tooltip, [data-toggle="tooltip"]'));
   // Close any open popover
-  $('[data-toggle="popover"]').popover('dispose');
+  popovers.dispose();
 });
 
 window.addEventListener('hashchange', handleLocationHash);
@@ -99,12 +74,13 @@ gl.lazyLoader = new LazyLoader({
   observerNode: '#content-body',
 });
 
+initRails();
+
 // Put all initialisations here that can also wait after everything is rendered and ready
 function deferredInitialisation() {
   const $body = $('body');
 
   initBreadcrumbs();
-  initImporterStatus();
   initTodoToggle();
   initLogoAnimation();
   initUsagePingConsent();
@@ -112,16 +88,31 @@ function deferredInitialisation() {
   initBroadcastNotifications();
   initFrequentItemDropdowns();
   initPersistentUserCallouts();
+  initDefaultTrackers();
+  initFeatureHighlight();
 
-  if (document.querySelector('.search')) initSearchAutocomplete();
+  const search = document.querySelector('#search');
+  if (search) {
+    search.addEventListener(
+      'focus',
+      () => {
+        import(/* webpackChunkName: 'globalSearch' */ './search_autocomplete')
+          .then(({ default: initSearchAutocomplete }) => {
+            const searchDropdown = initSearchAutocomplete();
+            searchDropdown.onSearchInputFocus();
+          })
+          .catch(() => {});
+      },
+      { once: true },
+    );
+  }
 
   addSelectOnFocusBehaviour('.js-select-on-focus');
 
   $('.remove-row').on('ajax:success', function removeRowAjaxSuccessCallback() {
-    $(this)
-      .tooltip('dispose')
-      .closest('li')
-      .fadeOut();
+    tooltips.dispose(this);
+
+    $(this).closest('li').addClass('gl-display-none!');
   });
 
   $('.js-remove-tr').on('ajax:before', function removeTRAjaxBeforeCallback() {
@@ -129,17 +120,14 @@ function deferredInitialisation() {
   });
 
   $('.js-remove-tr').on('ajax:success', function removeTRAjaxSuccessCallback() {
-    // eslint-disable-next-line no-jquery/no-fade
-    $(this)
-      .closest('tr')
-      .fadeOut();
+    $(this).closest('tr').addClass('gl-display-none!');
   });
 
   const glTooltipDelay = localStorage.getItem('gl-tooltip-delay');
   const delay = glTooltipDelay ? JSON.parse(glTooltipDelay) : 0;
 
   // Initialize tooltips
-  $body.tooltip({
+  tooltips.initTooltips({
     selector: '.has-tooltip, [data-toggle="tooltip"]',
     trigger: 'hover',
     boundary: 'viewport',
@@ -147,15 +135,10 @@ function deferredInitialisation() {
   });
 
   // Initialize popovers
-  $body.popover({
-    selector: '[data-toggle="popover"]',
-    trigger: 'focus',
-    // set the viewport to the main content, excluding the navigation bar, so
-    // the navigation can't overlap the popover
-    viewport: '.layout-page',
-  });
+  popovers.initPopovers();
 
-  loadAwardsHandler();
+  // Adding a helper class to activate animations only after all is rendered
+  setTimeout(() => $body.addClass('page-initialised'), 1000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -163,10 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const $document = $(document);
   const bootstrapBreakpoint = bp.getBreakpointSize();
 
-  if (document.querySelector('#js-peek')) initPerformanceBar({ container: '#js-peek' });
-
   initUserTracking();
   initLayoutNav();
+  initAlertHandler();
 
   // Set the default path for all cookies to GitLab's root directory
   Cookies.defaults.path = gon.relative_url_root || '/';
@@ -231,17 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // eslint-disable-next-line no-jquery/no-ajax-events
-  $(document).ajaxError((e, xhrObj) => {
-    const ref = xhrObj.status;
-
-    if (ref === 401) {
-      Flash(__('You need to be logged in.'));
-    } else if (ref === 404 || ref === 500) {
-      Flash(__('Something went wrong on our end.'));
-    }
-  });
-
   $('.navbar-toggler').on('click', () => {
     $('.header-content').toggleClass('menu-expanded');
   });
@@ -264,18 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     e.preventDefault();
 
-    $this.toggleClass('active');
+    $this.toggleClass('selected');
 
     if ($this.hasClass('active')) {
-      notesHolders
-        .show()
-        .find('.hide, .content')
-        .show();
+      notesHolders.show().find('.hide, .content').show();
     } else {
-      notesHolders
-        .hide()
-        .find('.content')
-        .hide();
+      notesHolders.hide().find('.content').hide();
     }
 
     $(document).trigger('toggle.comments');
@@ -297,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (flashContainer && flashContainer.children.length) {
     flashContainer
       .querySelectorAll('.flash-alert, .flash-notice, .flash-success')
-      .forEach(flashEl => {
+      .forEach((flashEl) => {
         removeFlashClickListener(flashEl);
       });
   }

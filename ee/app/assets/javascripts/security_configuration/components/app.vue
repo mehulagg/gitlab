@@ -1,18 +1,21 @@
 <script>
-import { GlAlert, GlLink, GlSprintf, GlTable } from '@gitlab/ui';
-import { s__, __, sprintf } from '~/locale';
+import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
+import { parseBoolean } from '~/lib/utils/common_utils';
+import { s__, __ } from '~/locale';
+import { scanners } from '~/security_configuration/components/scanners_constants';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AutoFixSettings from './auto_fix_settings.vue';
-import CreateMergeRequestButton from './create_merge_request_button.vue';
+import ConfigurationTable from './configuration_table.vue';
 
 export default {
   components: {
     GlAlert,
     GlLink,
     GlSprintf,
-    GlTable,
     AutoFixSettings,
-    CreateMergeRequestButton,
+    LocalStorageSync,
+    ConfigurationTable,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -20,10 +23,6 @@ export default {
       type: Boolean,
       required: false,
       default: false,
-    },
-    helpPagePath: {
-      type: String,
-      required: true,
     },
     autoDevopsHelpPagePath: {
       type: String,
@@ -47,6 +46,11 @@ export default {
       required: false,
       default: false,
     },
+    gitlabCiHistoryPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     autoDevopsPath: {
       type: String,
       required: false,
@@ -57,18 +61,17 @@ export default {
       required: false,
       default: false,
     },
-    // TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/227575
-    createSastMergeRequestPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
+  },
+  data() {
+    return {
+      autoDevopsAlertDismissed: 'false',
+    };
   },
   computed: {
     devopsMessage() {
       return this.autoDevopsEnabled
         ? __(
-            'All security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project',
+            'Several security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project',
           )
         : __(
             `The status of the table below only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}. Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan.`,
@@ -77,58 +80,39 @@ export default {
     devopsUrl() {
       return this.autoDevopsEnabled ? this.autoDevopsHelpPagePath : this.latestPipelinePath;
     },
-    fields() {
-      const borderClasses = 'gl-border-b-1! gl-border-b-solid! gl-border-gray-100!';
-      const thClass = `gl-text-gray-900 gl-bg-transparent! ${borderClasses}`;
-
-      return [
-        {
-          key: 'feature',
-          label: s__('SecurityConfiguration|Security Control'),
-          thClass,
-        },
-        {
-          key: 'configured',
-          label: s__('SecurityConfiguration|Status'),
-          thClass,
-          formatter: this.getStatusText,
-        },
-        {
-          key: 'manage',
-          label: s__('SecurityConfiguration|Manage'),
-          thClass,
-        },
-      ];
-    },
     shouldShowAutoDevopsAlert() {
-      return Boolean(!this.autoDevopsEnabled && !this.gitlabCiPresent && this.canEnableAutoDevops);
+      return Boolean(
+        !parseBoolean(this.autoDevopsAlertDismissed) &&
+          !this.autoDevopsEnabled &&
+          !this.gitlabCiPresent &&
+          this.canEnableAutoDevops,
+      );
+    },
+    featuresForDisplay() {
+      const featuresByType = this.features.reduce((acc, feature) => {
+        acc[feature.type] = feature;
+        return acc;
+      }, {});
+
+      return scanners.map((scanner) => {
+        const feature = featuresByType[scanner.type] ?? {};
+
+        return {
+          ...feature,
+          ...scanner,
+        };
+      });
     },
   },
   methods: {
-    getStatusText(value) {
-      if (value) {
-        return this.autoDevopsEnabled
-          ? s__('SecurityConfiguration|Enabled with Auto DevOps')
-          : s__('SecurityConfiguration|Enabled');
-      }
-
-      return s__('SecurityConfiguration|Not enabled');
-    },
-    getFeatureDocumentationLinkLabel(featureName) {
-      return sprintf(s__('SecurityConfiguration|Feature documentation for %{featureName}'), {
-        featureName,
-      });
-    },
-    // TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/227575
-    canCreateSASTMergeRequest(feature) {
-      return Boolean(
-        feature.type === 'sast' && this.createSastMergeRequestPath && !this.gitlabCiPresent,
-      );
+    dismissAutoDevopsAlert() {
+      this.autoDevopsAlertDismissed = 'true';
     },
   },
   autoDevopsAlertMessage: s__(`
     SecurityConfiguration|You can quickly enable all security scanning tools by
     enabling %{linkStart}Auto DevOps%{linkEnd}.`),
+  autoDevopsAlertStorageKey: 'security_configuration_auto_devops_dismissed',
 };
 </script>
 
@@ -146,13 +130,18 @@ export default {
       </p>
     </header>
 
+    <local-storage-sync
+      v-model="autoDevopsAlertDismissed"
+      :storage-key="$options.autoDevopsAlertStorageKey"
+    />
+
     <gl-alert
       v-if="shouldShowAutoDevopsAlert"
       :title="__('Auto DevOps')"
       :primary-button-text="__('Enable Auto DevOps')"
       :primary-button-link="autoDevopsPath"
-      :dismissible="false"
       class="gl-mb-5"
+      @dismiss="dismissAutoDevopsAlert"
     >
       <gl-sprintf :message="$options.autoDevopsAlertMessage">
         <template #link="{ content }">
@@ -161,31 +150,13 @@ export default {
       </gl-sprintf>
     </gl-alert>
 
-    <gl-table ref="securityControlTable" :items="features" :fields="fields" stacked="md">
-      <template #cell(feature)="{ item }">
-        <div class="gl-text-gray-900">{{ item.name }}</div>
-        <div>
-          {{ item.description }}
-        </div>
-      </template>
+    <configuration-table
+      :features="featuresForDisplay"
+      :auto-devops-enabled="autoDevopsEnabled"
+      :gitlab-ci-present="gitlabCiPresent"
+      :gitlab-ci-history-path="gitlabCiHistoryPath"
+    />
 
-      <template #cell(manage)="{ item }">
-        <create-merge-request-button
-          v-if="canCreateSASTMergeRequest(item)"
-          :auto-devops-enabled="autoDevopsEnabled"
-          :endpoint="createSastMergeRequestPath"
-        />
-
-        <gl-link
-          v-else
-          target="_blank"
-          :href="item.link"
-          :aria-label="getFeatureDocumentationLinkLabel(item.name)"
-        >
-          {{ s__('SecurityConfiguration|See documentation') }}
-        </gl-link>
-      </template>
-    </gl-table>
     <auto-fix-settings v-if="glFeatures.securityAutoFix" v-bind="autoFixSettingsProps" />
   </article>
 </template>

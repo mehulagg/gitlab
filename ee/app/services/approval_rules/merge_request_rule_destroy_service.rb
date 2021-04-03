@@ -17,5 +17,12 @@ module ApprovalRules
         error(rule.errors.messages)
       end
     end
+
+    def success
+      merge_request_activity_counter
+        .track_approval_rule_deleted_action(user: current_user)
+
+      super
+    end
   end
 end

@@ -275,6 +275,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
           File.join(shared.export_path, Gitlab::ImportExport.project_filename)
         end
       end
+
       let(:shared) { project.import_export_shared }
       let(:params) { {} }
 
@@ -348,14 +349,22 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
             project_tree_saver.save
           end
 
-          it 'exports group members as admin' do
-            expect(member_emails).to include('group@member.com')
+          context 'when admin mode is enabled', :enable_admin_mode do
+            it 'exports group members as admin' do
+              expect(member_emails).to include('group@member.com')
+            end
+
+            it 'exports group members as project members' do
+              member_types = subject.map { |pm| pm['source_type'] }
+
+              expect(member_types).to all(eq('Project'))
+            end
           end
 
-          it 'exports group members as project members' do
-            member_types = subject.map { |pm| pm['source_type'] }
-
-            expect(member_types).to all(eq('Project'))
+          context 'when admin mode is disabled' do
+            it 'does not export group members' do
+              expect(member_emails).not_to include('group@member.com')
+            end
           end
         end
       end
@@ -379,12 +388,6 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
         ActiveRecord::Base.connection.execute("UPDATE merge_request_diff_files SET diff = '---\n- :diff: !binary |-\n    LS0tIC9kZXYvbnVsbAorKysgYi9pbWFnZXMvbnVjb3IucGRmCkBAIC0wLDAg\n    KzEsMTY3OSBAQAorJVBERi0xLjUNJeLjz9MNCisxIDAgb2JqDTw8L01ldGFk\n    YXR'")
 
         expect(project_tree_saver.save).to be true
-      end
-
-      it 'has no when YML attributes but only the DB column' do
-        expect_any_instance_of(Gitlab::Ci::YamlProcessor).not_to receive(:build_attributes)
-
-        project_tree_saver.save
       end
     end
   end

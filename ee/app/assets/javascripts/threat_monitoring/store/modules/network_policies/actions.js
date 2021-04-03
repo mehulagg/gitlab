@@ -1,36 +1,45 @@
-import { s__, sprintf } from '~/locale';
-import axios from '~/lib/utils/axios_utils';
 import createFlash, { FLASH_TYPES } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { joinPaths } from '~/lib/utils/url_utility';
+import { s__, sprintf } from '~/locale';
 import * as types from './mutation_types';
 
 export const setEndpoints = ({ commit }, endpoints) => {
   commit(types.SET_ENDPOINT, endpoints.networkPoliciesEndpoint);
 };
 
-const commitReceivePoliciesError = (commit, payload) => {
+const commitReceivePoliciesError = (commit, data) => {
   const error =
-    payload?.error || s__('NetworkPolicies|Something went wrong, unable to fetch policies');
-  commit(types.RECEIVE_POLICIES_ERROR, error);
-  createFlash(error);
+    data?.error || s__('NetworkPolicies|Something went wrong, unable to fetch policies');
+  const policies = data?.payload?.length ? data.payload : [];
+  commit(types.RECEIVE_POLICIES_ERROR, policies);
+  createFlash({
+    message: error,
+  });
 };
 
 export const fetchPolicies = ({ state, commit }, environmentId) => {
-  if (!state.policiesEndpoint || !environmentId) return commitReceivePoliciesError(commit);
+  if (!state.policiesEndpoint) return commitReceivePoliciesError(commit);
 
   commit(types.REQUEST_POLICIES);
 
+  const params = environmentId ? { params: { environment_id: environmentId } } : {};
+
   return axios
-    .get(state.policiesEndpoint, { params: { environment_id: environmentId } })
+    .get(state.policiesEndpoint, params)
     .then(({ data }) => commit(types.RECEIVE_POLICIES_SUCCESS, data))
-    .catch(error => commitReceivePoliciesError(commit, error?.response?.data));
+    .catch(({ response }) => {
+      commitReceivePoliciesError(commit, response?.data);
+    });
 };
 
 const commitPolicyError = (commit, type, payload) => {
   const error =
     payload?.error || s__('NetworkPolicies|Something went wrong, failed to update policy');
   commit(type, error);
-  createFlash(error);
+  createFlash({
+    message: error,
+  });
 };
 
 export const createPolicy = ({ state, commit }, { environmentId, policy }) => {
@@ -44,18 +53,18 @@ export const createPolicy = ({ state, commit }, { environmentId, policy }) => {
     .post(state.policiesEndpoint, {
       environment_id: environmentId,
       manifest: policy.manifest,
-      is_standard: policy.isStandard,
     })
     .then(({ data }) => {
       commit(types.RECEIVE_CREATE_POLICY_SUCCESS, data);
-      createFlash(
-        sprintf(s__('NetworkPolicies|Policy %{policyName} was successfully changed'), {
+      createFlash({
+        message: sprintf(s__('NetworkPolicies|Policy %{policyName} was successfully changed'), {
           policyName: policy.name,
         }),
-        FLASH_TYPES.SUCCESS,
-      );
+
+        type: FLASH_TYPES.SUCCESS,
+      });
     })
-    .catch(error =>
+    .catch((error) =>
       commitPolicyError(commit, types.RECEIVE_CREATE_POLICY_ERROR, error?.response?.data),
     );
 };
@@ -72,21 +81,45 @@ export const updatePolicy = ({ state, commit }, { environmentId, policy }) => {
       environment_id: environmentId,
       manifest: policy.manifest,
       enabled: policy.isEnabled,
-      is_standard: policy.isStandard,
     })
     .then(({ data }) => {
       commit(types.RECEIVE_UPDATE_POLICY_SUCCESS, {
         policy,
         updatedPolicy: data,
       });
-      createFlash(
-        sprintf(s__('NetworkPolicies|Policy %{policyName} was successfully changed'), {
+      createFlash({
+        message: sprintf(s__('NetworkPolicies|Policy %{policyName} was successfully changed'), {
           policyName: policy.name,
         }),
-        FLASH_TYPES.SUCCESS,
-      );
+
+        type: FLASH_TYPES.SUCCESS,
+      });
     })
-    .catch(error =>
+    .catch((error) =>
       commitPolicyError(commit, types.RECEIVE_UPDATE_POLICY_ERROR, error?.response?.data),
+    );
+};
+
+export const deletePolicy = ({ state, commit }, { environmentId, policy }) => {
+  if (!state.policiesEndpoint || !environmentId || !policy) {
+    return commitPolicyError(commit, types.RECEIVE_DELETE_POLICY_ERROR);
+  }
+
+  commit(types.REQUEST_DELETE_POLICY);
+
+  return axios
+    .delete(joinPaths(state.policiesEndpoint, policy.name), {
+      params: {
+        environment_id: environmentId,
+        manifest: policy.manifest,
+      },
+    })
+    .then(() => {
+      commit(types.RECEIVE_DELETE_POLICY_SUCCESS, {
+        policy,
+      });
+    })
+    .catch((error) =>
+      commitPolicyError(commit, types.RECEIVE_DELETE_POLICY_ERROR, error?.response?.data),
     );
 };

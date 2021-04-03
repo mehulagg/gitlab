@@ -2,29 +2,7 @@
 
 class ProjectPolicy < BasePolicy
   include CrudPolicyHelpers
-
-  READONLY_FEATURES_WHEN_ARCHIVED = %i[
-    issue
-    list
-    merge_request
-    label
-    milestone
-    snippet
-    wiki
-    design
-    note
-    pipeline
-    pipeline_schedule
-    build
-    trigger
-    environment
-    deployment
-    commit_status
-    container_image
-    pages
-    cluster
-    release
-  ].freeze
+  include ReadonlyAbilities
 
   desc "User is a project owner"
   condition :owner do
@@ -51,6 +29,9 @@ class ProjectPolicy < BasePolicy
 
   desc "User has maintainer access"
   condition(:maintainer) { team_access_level >= Gitlab::Access::MAINTAINER }
+
+  desc "User is a project bot"
+  condition(:project_bot) { user.project_bot? && team_member? }
 
   desc "Project is public"
   condition(:public_project, scope: :subject, score: 0) { project.public? }
@@ -101,7 +82,7 @@ class ProjectPolicy < BasePolicy
 
   with_scope :subject
   condition(:metrics_dashboard_allowed) do
-    feature_available?(:metrics_dashboard)
+    access_allowed_to?(:metrics_dashboard)
   end
 
   with_scope :global
@@ -125,6 +106,10 @@ class ProjectPolicy < BasePolicy
 
   with_scope :subject
   condition(:service_desk_enabled) { @subject.service_desk_enabled? }
+
+  with_scope :subject
+  condition(:resource_access_token_feature_available) { resource_access_token_feature_available? }
+  condition(:resource_access_token_creation_allowed) { resource_access_token_creation_allowed? }
 
   # We aren't checking `:read_issue` or `:read_merge_request` in this case
   # because it could be possible for a user to see an issuable-iid
@@ -154,6 +139,10 @@ class ProjectPolicy < BasePolicy
     ::Feature.enabled?(:build_service_proxy, @subject)
   end
 
+  condition(:user_defined_variables_allowed) do
+    !@subject.restrict_user_defined_variables?
+  end
+
   with_scope :subject
   condition(:packages_disabled) { !@subject.packages_enabled }
 
@@ -166,12 +155,15 @@ class ProjectPolicy < BasePolicy
     builds
     pages
     metrics_dashboard
+    analytics
+    operations
+    security_and_compliance
   ]
 
   features.each do |f|
     # these are scored high because they are unlikely
     desc "Project has #{f} disabled"
-    condition(:"#{f}_disabled", score: 32) { !feature_available?(f.to_sym) }
+    condition(:"#{f}_disabled", score: 32) { !access_allowed_to?(f.to_sym) }
   end
 
   # `:read_project` may be prevented in EE, but `:read_project_for_iids` should
@@ -213,8 +205,8 @@ class ProjectPolicy < BasePolicy
   rule { can?(:guest_access) }.policy do
     enable :read_project
     enable :create_merge_request_in
-    enable :read_board
-    enable :read_list
+    enable :read_issue_board
+    enable :read_issue_board_list
     enable :read_wiki
     enable :read_issue
     enable :read_label
@@ -230,6 +222,8 @@ class ProjectPolicy < BasePolicy
     enable :award_emoji
     enable :read_pages_content
     enable :read_release
+    enable :read_analytics
+    enable :read_insights
   end
 
   # These abilities are not allowed to admins that are not members of the project,
@@ -238,7 +232,7 @@ class ProjectPolicy < BasePolicy
   rule { guest & can?(:read_container_image) }.enable :build_read_container_image
 
   rule { can?(:reporter_access) }.policy do
-    enable :admin_board
+    enable :admin_issue_board
     enable :download_code
     enable :read_statistics
     enable :download_wiki_code
@@ -247,10 +241,12 @@ class ProjectPolicy < BasePolicy
     enable :reopen_issue
     enable :admin_issue
     enable :admin_label
-    enable :admin_list
+    enable :admin_issue_board_list
+    enable :admin_issue_link
     enable :read_commit_status
     enable :read_build
     enable :read_container_image
+    enable :read_deploy_board
     enable :read_pipeline
     enable :read_pipeline_schedule
     enable :read_environment
@@ -258,12 +254,13 @@ class ProjectPolicy < BasePolicy
     enable :read_merge_request
     enable :read_sentry_issue
     enable :update_sentry_issue
-    enable :read_incidents
     enable :read_prometheus
     enable :read_metrics_dashboard_annotation
     enable :metrics_dashboard
     enable :read_confidential_issues
     enable :read_package
+    enable :read_product_analytics
+    enable :read_group_timelogs
   end
 
   # We define `:public_user_access` separately because there are cases in gitlab-ee
@@ -290,6 +287,19 @@ class ProjectPolicy < BasePolicy
     prevent(:metrics_dashboard)
   end
 
+  rule { operations_disabled }.policy do
+    prevent(*create_read_update_admin_destroy(:feature_flag))
+    prevent(*create_read_update_admin_destroy(:environment))
+    prevent(*create_read_update_admin_destroy(:sentry_issue))
+    prevent(*create_read_update_admin_destroy(:alert_management_alert))
+    prevent(*create_read_update_admin_destroy(:cluster))
+    prevent(*create_read_update_admin_destroy(:terraform_state))
+    prevent(*create_read_update_admin_destroy(:deployment))
+    prevent(:metrics_dashboard)
+    prevent(:read_pod_logs)
+    prevent(:read_prometheus)
+  end
+
   rule { can?(:metrics_dashboard) }.policy do
     enable :read_prometheus
     enable :read_deployment
@@ -311,7 +321,7 @@ class ProjectPolicy < BasePolicy
 
   rule { can?(:developer_access) }.policy do
     enable :create_package
-    enable :admin_board
+    enable :admin_issue_board
     enable :admin_merge_request
     enable :admin_milestone
     enable :update_merge_request
@@ -341,8 +351,16 @@ class ProjectPolicy < BasePolicy
     enable :read_alert_management_alert
     enable :update_alert_management_alert
     enable :create_design
+    enable :move_design
     enable :destroy_design
     enable :read_terraform_state
+    enable :read_pod_logs
+    enable :read_feature_flag
+    enable :create_feature_flag
+    enable :update_feature_flag
+    enable :destroy_feature_flag
+    enable :admin_feature_flag
+    enable :admin_feature_flags_user_lists
   end
 
   rule { can?(:developer_access) & user_confirmed? }.policy do
@@ -353,7 +371,7 @@ class ProjectPolicy < BasePolicy
 
   rule { can?(:maintainer_access) }.policy do
     enable :destroy_package
-    enable :admin_board
+    enable :admin_issue_board
     enable :push_to_delete_protected_branch
     enable :update_snippet
     enable :admin_snippet
@@ -382,7 +400,6 @@ class ProjectPolicy < BasePolicy
     enable :admin_operations
     enable :read_deploy_token
     enable :create_deploy_token
-    enable :read_pod_logs
     enable :destroy_deploy_token
     enable :read_prometheus_alerts
     enable :admin_terraform_state
@@ -390,6 +407,7 @@ class ProjectPolicy < BasePolicy
     enable :read_freeze_period
     enable :update_freeze_period
     enable :destroy_freeze_period
+    enable :admin_feature_flags_client
   end
 
   rule { public_project & metrics_dashboard_allowed }.policy do
@@ -404,24 +422,17 @@ class ProjectPolicy < BasePolicy
   rule { can?(:push_code) }.enable :admin_tag
 
   rule { archived }.policy do
-    prevent :push_code
-    prevent :push_to_delete_protected_branch
-    prevent :request_access
-    prevent :upload_file
-    prevent :resolve_note
-    prevent :create_merge_request_from
-    prevent :create_merge_request_in
-    prevent :award_emoji
+    prevent(*readonly_abilities)
 
-    READONLY_FEATURES_WHEN_ARCHIVED.each do |feature|
+    readonly_features.each do |feature|
       prevent(*create_update_admin_destroy(feature))
     end
   end
 
   rule { issues_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:issue))
-    prevent(*create_read_update_admin_destroy(:board))
-    prevent(*create_read_update_admin_destroy(:list))
+    prevent(*create_read_update_admin_destroy(:issue_board))
+    prevent(*create_read_update_admin_destroy(:issue_board_list))
   end
 
   rule { merge_requests_disabled | repository_disabled }.policy do
@@ -439,6 +450,13 @@ class ProjectPolicy < BasePolicy
 
   rule { snippets_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:snippet))
+  end
+
+  rule { analytics_disabled }.policy do
+    prevent(:read_analytics)
+    prevent(:read_insights)
+    prevent(:read_cycle_analytics)
+    prevent(:read_repository_graphs)
   end
 
   rule { wiki_disabled }.policy do
@@ -473,6 +491,8 @@ class ProjectPolicy < BasePolicy
     prevent :read_pipeline
     prevent :read_pipeline_schedule
     prevent(*create_read_update_admin_destroy(:release))
+    prevent(*create_read_update_admin_destroy(:feature_flag))
+    prevent(:admin_feature_flags_user_lists)
   end
 
   rule { container_registry_disabled }.policy do
@@ -489,8 +509,8 @@ class ProjectPolicy < BasePolicy
   rule { can?(:public_access) }.policy do
     enable :read_package
     enable :read_project
-    enable :read_board
-    enable :read_list
+    enable :read_issue_board
+    enable :read_issue_board_list
     enable :read_wiki
     enable :read_label
     enable :read_milestone
@@ -500,6 +520,8 @@ class ProjectPolicy < BasePolicy
     enable :read_note
     enable :read_pipeline
     enable :read_pipeline_schedule
+    enable :read_environment
+    enable :read_deployment
     enable :read_commit_status
     enable :read_container_image
     enable :download_code
@@ -507,6 +529,8 @@ class ProjectPolicy < BasePolicy
     enable :download_wiki_code
     enable :read_cycle_analytics
     enable :read_pages_content
+    enable :read_analytics
+    enable :read_insights
 
     # NOTE: may be overridden by IssuePolicy
     enable :read_issue
@@ -559,11 +583,14 @@ class ProjectPolicy < BasePolicy
     prevent :create_pipeline
   end
 
-  rule { admin }.enable :change_repository_storage
-
   rule { can?(:read_issue) }.policy do
     enable :read_design
     enable :read_design_activity
+    enable :read_issue_link
+  end
+
+  rule { can?(:developer_access) }.policy do
+    enable :read_security_configuration
   end
 
   # Design abilities could also be prevented in the issue policy.
@@ -572,6 +599,7 @@ class ProjectPolicy < BasePolicy
     prevent :read_design_activity
     prevent :create_design
     prevent :destroy_design
+    prevent :move_design
   end
 
   rule { read_package_registry_deploy_token }.policy do
@@ -581,6 +609,7 @@ class ProjectPolicy < BasePolicy
 
   rule { write_package_registry_deploy_token }.policy do
     enable :create_package
+    enable :read_package
     enable :read_project
   end
 
@@ -602,10 +631,38 @@ class ProjectPolicy < BasePolicy
     prevent :read_project
   end
 
+  rule { project_bot }.enable :project_bot_access
+
+  rule { can?(:admin_project) & resource_access_token_feature_available }.policy do
+    enable :read_resource_access_tokens
+    enable :destroy_resource_access_tokens
+  end
+
+  rule { can?(:read_resource_access_tokens) & resource_access_token_creation_allowed }.policy do
+    enable :create_resource_access_tokens
+  end
+
+  rule { can?(:project_bot_access) }.policy do
+    prevent :create_resource_access_tokens
+  end
+
+  rule { user_defined_variables_allowed | can?(:maintainer_access) }.policy do
+    enable :set_pipeline_variables
+  end
+
+  rule { ~security_and_compliance_disabled & can?(:developer_access) }.policy do
+    enable :access_security_and_compliance
+  end
+
   private
+
+  def user_is_user?
+    user.is_a?(User)
+  end
 
   def team_member?
     return false if @user.nil?
+    return false unless user_is_user?
 
     greedy_load_subject = false
 
@@ -633,6 +690,7 @@ class ProjectPolicy < BasePolicy
   # rubocop: disable CodeReuse/ActiveRecord
   def project_group_member?
     return false if @user.nil?
+    return false unless user_is_user?
 
     project.group &&
       (
@@ -644,6 +702,7 @@ class ProjectPolicy < BasePolicy
 
   def team_access_level
     return -1 if @user.nil?
+    return -1 unless user_is_user?
 
     lookup_access_level!
   end
@@ -656,7 +715,7 @@ class ProjectPolicy < BasePolicy
     project.team.max_member_access(@user.id)
   end
 
-  def feature_available?(feature)
+  def access_allowed_to?(feature)
     return false unless project.project_feature
 
     case project.project_feature.access_level(feature)
@@ -667,6 +726,18 @@ class ProjectPolicy < BasePolicy
     else
       true
     end
+  end
+
+  def resource_access_token_feature_available?
+    true
+  end
+
+  def resource_access_token_creation_allowed?
+    group = project.group
+
+    return true unless group # always enable for projects in personal namespaces
+
+    group.resource_access_token_creation_allowed
   end
 
   def project

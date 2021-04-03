@@ -1,10 +1,15 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Codeowners' do
-      context 'when the project is in the root group' do
-        let(:approver) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
+      context 'when the project is in the root group', :requires_admin do
+        let(:approver) do
+          Resource::User.fabricate_via_api! do |resource|
+            resource.api_client = Runtime::API::Client.as_admin
+          end
+        end
+
         let(:root_group) { Resource::Sandbox.fabricate_via_api! }
         let(:project) do
           Resource::Project.fabricate_via_api! do |project|
@@ -15,6 +20,9 @@ module QA
         end
 
         before do
+          Runtime::Feature.enable(:invite_members_group_modal, project: project)
+          Runtime::Feature.enable(:invite_members_group_modal, group: root_group)
+
           group_or_project.add_member(approver, Resource::Members::AccessLevel::MAINTAINER)
 
           Flow::Login.sign_in
@@ -24,6 +32,8 @@ module QA
 
         after do
           group_or_project.remove_member(approver)
+          approver.remove_via_api!
+          project.remove_via_api!
         end
 
         context 'and the code owner is the root group' do

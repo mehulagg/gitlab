@@ -1,4 +1,3 @@
-import { generateConanRecipe } from '../utils';
 import { PackageType } from '../../shared/constants';
 import { getPackageTypeLabel } from '../../shared/utils';
 import { NpmManager } from '../constants';
@@ -20,10 +19,8 @@ export const packageIcon = ({ packageEntity }) => {
 };
 
 export const conanInstallationCommand = ({ packageEntity }) => {
-  const recipe = generateConanRecipe(packageEntity);
-
   // eslint-disable-next-line @gitlab/require-i18n-strings
-  return `conan install ${recipe} --remote=gitlab`;
+  return `conan install ${packageEntity.name} --remote=gitlab`;
 };
 
 export const conanSetupCommand = ({ conanPath }) =>
@@ -84,10 +81,10 @@ export const npmSetupCommand = ({ packageEntity, npmPath }) => (type = NpmManage
   const scope = packageEntity.name.substring(0, packageEntity.name.indexOf('/'));
 
   if (type === NpmManager.NPM) {
-    return `echo ${scope}:registry=${npmPath} >> .npmrc`;
+    return `echo ${scope}:registry=${npmPath}/ >> .npmrc`;
   }
 
-  return `echo \\"${scope}:registry\\" \\"${npmPath}\\" >> .yarnrc`;
+  return `echo \\"${scope}:registry\\" \\"${npmPath}/\\" >> .yarnrc`;
 };
 
 export const nugetInstallationCommand = ({ packageEntity }) =>
@@ -98,9 +95,35 @@ export const nugetSetupCommand = ({ nugetPath }) =>
 
 export const pypiPipCommand = ({ pypiPath, packageEntity }) =>
   // eslint-disable-next-line @gitlab/require-i18n-strings
-  `pip install ${packageEntity.name} --index-url ${pypiPath}`;
+  `pip install ${packageEntity.name} --extra-index-url ${pypiPath}`;
 
 export const pypiSetupCommand = ({ pypiSetupPath }) => `[gitlab]
 repository = ${pypiSetupPath}
 username = __token__
 password = <your personal access token>`;
+
+export const composerRegistryInclude = ({ composerPath, composerConfigRepositoryName }) =>
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  `composer config repositories.${composerConfigRepositoryName} '{"type": "composer", "url": "${composerPath}"}'`;
+
+export const composerPackageInclude = ({ packageEntity }) =>
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  `composer req ${[packageEntity.name]}:${packageEntity.version}`;
+
+export const gradleGroovyInstalCommand = ({ packageEntity }) => {
+  const {
+    app_group: group = '',
+    app_name: name = '',
+    app_version: version = '',
+  } = packageEntity.maven_metadatum;
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  return `implementation '${group}:${name}:${version}'`;
+};
+
+export const gradleGroovyAddSourceCommand = ({ mavenPath }) =>
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  `maven {
+  url '${mavenPath}'
+}`;
+
+export const groupExists = ({ groupListUrl }) => groupListUrl.length > 0;

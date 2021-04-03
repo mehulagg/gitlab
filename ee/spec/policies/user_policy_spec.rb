@@ -96,4 +96,34 @@ RSpec.describe UserPolicy do
       it_behaves_like 'changing a user', :update_name
     end
   end
+
+  describe ':destroy_user' do
+    context 'when user is not self', :enable_admin_mode do
+      let(:current_user) { create(:user, :admin) }
+
+      it { is_expected.to be_allowed(:destroy_user) }
+    end
+
+    context 'when user is self' do
+      let(:current_user) { user }
+
+      it { is_expected.to be_allowed(:destroy_user) }
+
+      context 'when the user password is automatically set' do
+        before do
+          current_user.update!(password_automatically_set: true)
+        end
+
+        it { is_expected.to be_allowed(:destroy_user) }
+
+        context 'on GitLab.com' do
+          before do
+            allow(::Gitlab).to receive(:com?).and_return(true)
+          end
+
+          it { is_expected.not_to be_allowed(:destroy_user) }
+        end
+      end
+    end
+  end
 end

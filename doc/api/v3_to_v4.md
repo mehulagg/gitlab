@@ -1,6 +1,12 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # API V3 to API V4
 
-Since GitLab 9.0, API V4 is the preferred version to be used.
+In GitLab 9.0 and later, API V4 is the preferred version to be used.
 
 API V3 was unsupported from GitLab 9.5, released on August
 22, 2017. API v3 was removed in [GitLab 11.0](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/36819).
@@ -65,7 +71,7 @@ Below are the changes made between V3 and V4.
 - Notes do not return deprecated field `upvote` and `downvote` [!9384](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9384)
 - Return HTTP status code `400` for all validation errors when creating or updating a member instead of sometimes `422` error. [!9523](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9523)
 - Remove `GET /groups/owned`. Use `GET /groups?owned=true` instead [!9505](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9505)
-- Return 202 with JSON body on async removals on V4 API (`DELETE /projects/:id/repository/merged_branches` and `DELETE /projects/:id`) [!9449](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9449)
+- Return 202 with JSON body on asynchronous removals on V4 API (`DELETE /projects/:id/repository/merged_branches` and `DELETE /projects/:id`) [!9449](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9449)
 - `GET /projects/:id/milestones?iid[]=x&iid[]=y` array filter has been renamed to `iids` [!9096](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9096)
 - Return basic information about pipeline in `GET /projects/:id/pipelines` [!8875](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8875)
 - Renamed all `build` references to `job` [!9463](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9463)
@@ -74,8 +80,8 @@ Below are the changes made between V3 and V4.
   - `POST /projects/:id/trigger/builds` to `POST /projects/:id/trigger/pipeline`
   - Require description when creating a new trigger `POST /projects/:id/triggers`
 - Simplify project payload exposed on Environment endpoints [!9675](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9675)
-- API uses merge request `IID`s (internal ID, as in the web UI) rather than `ID`s. This affects the merge requests, award emoji, todos, and time tracking APIs. [!9530](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9530)
-- API uses issue `IID`s (internal ID, as in the web UI) rather than `ID`s. This affects the issues, award emoji, todos, and time tracking APIs. [!9530](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9530)
+- API uses merge request `IID`s (internal ID, as in the web UI) rather than `ID`s. This affects the merge requests, award emoji, to-dos, and time tracking APIs. [!9530](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9530)
+- API uses issue `IID`s (internal ID, as in the web UI) rather than `ID`s. This affects the issues, award emoji, to-dos, and time tracking APIs. [!9530](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9530)
 - Change initial page from `0` to `1` on `GET /projects/:id/repository/commits` (like on the rest of the API) [!9679](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9679)
 - Return correct `Link` header data for `GET /projects/:id/repository/commits` [!9679](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9679)
 - Update endpoints for repository files [!9637](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9637)

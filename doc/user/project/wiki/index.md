@@ -1,64 +1,67 @@
-# Wiki
+---
+stage: Create
+group: Editor
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference, how-to
+---
 
-A separate system for documentation called Wiki, is built right into each
-GitLab project. It is enabled by default on all new projects and you can find
-it under **Wiki** in your project.
+# Wiki **(FREE)**
 
-Wikis are very convenient if you don't want to keep your documentation in your
-repository, but you do want to keep it in the same project where your code
-resides.
+If you don't want to keep your documentation in your repository, but you do want
+to keep it in the same project as your code, you can use the wiki GitLab provides
+in each GitLab project. Every wiki is a separate Git repository, so you can create
+wiki pages in the web interface, or [locally using Git](#create-or-edit-wiki-pages-locally).
 
-You can create Wiki pages in the web interface or
-[locally using Git](#adding-and-editing-wiki-pages-locally) since every Wiki is
-a separate Git repository.
+To access the wiki for a project or group, go to the page for your project or group
+and, in the left sidebar, select **Wiki**. If **Wiki** is not listed in the
+left sidebar, a project administrator has [disabled it](#enable-or-disable-a-project-wiki).
 
-## First time creating the Home page
+## Create the wiki home page
 
-The first time you visit a Wiki, you will be directed to create the Home page.
-The Home page is necessary to be created since it serves as the landing page
-when viewing a Wiki. You only have to fill in the **Content** section and click
-**Create page**. You can always edit it later, so go ahead and write a welcome
-message.
+When a wiki is created, it is empty. On your first visit, GitLab instructs you
+to create a page to serve as the landing page when a user views the wiki:
 
-![New home page](img/wiki_create_home_page.png)
+1. Select a **Format** for [styling your text](#style-your-wiki-content).
+1. Add a welcome message in the **Content** section. You can always edit it later.
+1. Add a **Commit message**. Git requires a commit message, so GitLab creates one
+   if you don't enter one yourself.
+1. Select **Create page**.
 
-## Creating a new wiki page
+## Create a new wiki page
 
-NOTE: **Note:**
-Requires Developer [permissions](../../permissions.md).
+Users with Developer [permissions](../../permissions.md) can create new wiki pages:
 
-Create a new page by clicking the **New page** button that can be found
-in all wiki pages.
+1. Go to the page for your project or group.
+1. In the left sidebar, select **Wiki**.
+1. Select **New page** on this page, or any other wiki page.
+1. Select a [content format](#style-your-wiki-content).
+1. Add a title for your new page. You can specify a full path for the wiki page
+   by using `/` in the title to indicate subdirectories. GitLab creates any missing
+   subdirectories in the path. For example, a title of `docs/my-page` creates a wiki
+   page with a path `/wikis/docs/my-page`.
+1. Add content to your wiki page.
+1. Add a **Commit message**. Git requires a commit message, so GitLab creates one
+   if you don't enter one yourself.
+1. Select **Create page**.
 
-You will be asked to fill in a title for your new wiki page.
+## Style your wiki content
 
-You can specify a full path for the wiki page by using '/' in the
-title to indicate subdirectories. Any missing directories will be created
-automatically. For example, a title of `docs/my-page` will create a wiki
-page with a path `/wikis/docs/my-page`.
+GitLab wikis support Markdown, RDoc, AsciiDoc, and Org for content.
 
-Once you enter the page name, it's time to fill in its content. GitLab wikis
-support Markdown, RDoc, AsciiDoc, and Org. For Markdown based pages, all the
-[Markdown features](../../markdown.md) are supported and for links there is
-some [wiki specific](../../markdown.md#wiki-specific-markdown) behavior.
+Wiki pages written in Markdown support all [Markdown features](../../markdown.md),
+and also provide some [wiki-specific behavior](../../markdown.md#wiki-specific-markdown)
+for links.
 
-In the web interface the commit message is optional, but the GitLab Wiki is
-based on Git and needs a commit message, so one will be created for you if you
-do not enter one.
+### Store attachments for wiki pages
 
-When you're ready, click the **Create page** and the new page will be created.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/33475) in GitLab 11.3.
 
-![New page](img/wiki_create_new_page.png)
+When you upload a file to the wiki through the GitLab interface, the file is stored
+in the wiki's Git repository. The file is available to you if you clone the
+wiki repository locally.
 
-### Attachment storage
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/33475) in GitLab 11.3.
-
-Starting with GitLab 11.3, any file that is uploaded to the wiki via GitLab's
-interface will be stored in the wiki Git repository, and it will be available
-if you clone the wiki repository locally. All uploaded files prior to GitLab
-11.3 are stored in GitLab itself. If you want them to be part of the wiki's Git
-repository, you will have to upload them again.
+Files uploaded to a wiki in GitLab 11.3 and earlier are stored in GitLab itself.
+You must re-upload the files to add them to the wiki's Git repository.
 
 ### Special characters in page titles
 
@@ -70,7 +73,7 @@ Wiki pages are stored as files in a Git repository, so certain characters have a
 
 ### Length restrictions for file and directory names
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24364) in GitLab 12.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24364) in GitLab 12.8.
 
 Many common file systems have a [limit of 255 bytes for file and directory names](https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits), and while Git and GitLab both support paths exceeding those limits, the presence of them makes it impossible for users on those file systems to checkout a wiki repository locally.
 
@@ -84,145 +87,121 @@ Please note that:
 - Non-ASCII characters take up more than one byte.
 - It's still possible to create files and directories exceeding those limits locally through Git, but this might break on other people's machines.
 
-## Editing a wiki page
+## Edit a wiki page
 
-NOTE: **Note:**
-Requires Developer [permissions](../../permissions.md).
+You need Developer [permissions](../../permissions.md) or higher to edit a wiki page.
+To do so:
 
-To edit a page, simply click on the **Edit** button. From there on, you can
-change its content. When done, click **Save changes** for the changes to take
-effect.
+1. Select the edit icon (**{pencil}**).
+1. Edit the content.
+1. Select **Save changes**.
 
-### Adding a table of contents
+### Create a table of contents
 
 To generate a table of contents from the headings in a Wiki page, use the `[[_TOC_]]` tag.
 For an example, see [Table of contents](../../markdown.md#table-of-contents).
 
-## Deleting a wiki page
+## Delete a wiki page
 
-NOTE: **Note:**
-Requires Maintainer [permissions](../../permissions.md).
+You need Maintainer [permissions](../../permissions.md) or higher to delete a wiki page.
+To do so:
 
-You can find the **Delete** button only when editing a page. Click on it and
-confirm you want the page to be deleted.
+1. Open the page you want to delete.
+1. Select **Delete page**.
+1. Confirm the deletion.
 
-## Moving a wiki page
+## Move a wiki page
 
-You can move a wiki page from one directory to another by specifying the full
-path in the wiki page title in the [edit](#editing-a-wiki-page) form.
+You need Developer [permissions](../../permissions.md) or higher to move a wiki page.
+To do so:
 
-![Moving a page](img/wiki_move_page_1.png)
+1. Select the edit icon (**{pencil}**).
+1. Add the new path to the **Title** field.
+1. Select **Save changes**.
 
-![After moving a page](img/wiki_move_page_2.png)
+For example, if you have a wiki page called `about` under `company` and you want to
+move it to the wiki's root:
 
-In order to move a wiki page to the root directory, the wiki page title must
-be preceded by the slash (`/`) character.
+1. Select the edit icon (**{pencil}**).
+1. Change the **Title** from `about` to `/about`.
+1. Select **Save changes**.
 
-## Viewing a list of all created wiki pages
+If you want to do the opposite:
+
+1. Select the edit icon (**{pencil}**).
+1. Change the **Title** from `about` to `company/about`.
+1. Select **Save changes**.
+
+## View list of all wiki pages
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17673/) in GitLab 13.5, wiki pages are displayed as a nested tree in the sidebar and pages overview.
 
 Every wiki has a sidebar from which a short list of the created pages can be
 found. The list is ordered alphabetically.
 
-![Wiki sidebar](img/wiki_sidebar.png)
+![Wiki sidebar](img/wiki_sidebar_v13_5.png)
 
-If you have many pages, not all will be listed in the sidebar. Click on
+If you have many pages, not all are listed in the sidebar. Select
 **View All Pages** to see all of them.
 
-## Viewing the history of a wiki page
+## View history of a wiki page
 
 The changes of a wiki page over time are recorded in the wiki's Git repository,
-and you can view them by clicking the **Page history** button.
+and you can view them by selecting **Page history**.
 
 From the history page you can see the revision of the page (Git commit SHA), its
 author, the commit message, and when it was last updated.
-To see how a previous version of the page looked like, click on a revision
+To see how a previous version of the page looked like, select a revision
 number in the **Page version** column.
 
 ![Wiki page history](img/wiki_page_history.png)
 
-### Viewing the changes between page versions
+### View changes between page versions
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15242) in GitLab 13.2.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15242) in GitLab 13.2.
 
 Similar to versioned diff file views, you can see the changes made in a given Wiki page version:
 
 1. Navigate to the Wiki page you're interested in.
-1. Click on **Page history** to see all page versions.
-1. Click on the commit message in the **Changes** column for the version you're interested in:
+1. Select **Page history** to see all page versions.
+1. Select the commit message in the **Changes** column for the version you're interested in.
 
    ![Wiki page changes](img/wiki_page_diffs_v13_2.png)
 
-## Wiki activity records
+## Track wiki events
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14902) in **GitLab 12.10.**
-> - Git events were [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216014) in **GitLab 13.0.**
-> - It's enabled on GitLab.com.
-> - Git access activity creation is managed by a feature flag.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-wiki-events-in-git-core-only). **(CORE ONLY)**
+> - Git events were [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216014) in **GitLab 13.0.**
+> - [Feature flag for Git events was removed](https://gitlab.com/gitlab-org/gitlab/-/issues/258665) in **GitLab 13.5**
 
 Wiki events (creation, deletion, and updates) are tracked by GitLab and
-displayed on the [user profile](../../profile/index.md#user-profile),
+displayed on the [user profile](../../profile/index.md#access-your-user-profile),
 [group](../../group/index.md#view-group-activity),
-and [project](../index.md#project-activity) activity pages.
+and [project](../working_with_projects.md#project-activity) activity pages.
 
-### Enable or disable Wiki events in Git **(CORE ONLY)**
-
-Tracking wiki events through Git is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it for your instance.
-
-To enable it:
-
-```ruby
-Feature.enable(:wiki_events_on_git_push)
-```
-
-To enable for just a particular project:
-
-```ruby
-project = Project.find_by_full_path('your-group/your-project')
-Feature.enable(:wiki_events_on_git_push, project)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:wiki_events_on_git_push)
-```
-
-To disable for just a particular project:
-
-```ruby
-project = Project.find_by_full_path('your-group/your-project')
-Feature.disable(:wiki_events_on_git_push, project)
-```
-
-## Adding and editing wiki pages locally
+## Create or edit wiki pages locally
 
 Since wikis are based on Git repositories, you can clone them locally and edit
 them like you would do with every other Git repository.
 
-On the right sidebar, click on **Clone repository** and follow the on-screen
+In the right sidebar, select **Clone repository** and follow the on-screen
 instructions.
 
 Files that you add to your wiki locally must have one of the following
 supported extensions, depending on the markup language you wish to use,
-otherwise they will not display when pushed to GitLab:
+otherwise they don't display when pushed to GitLab:
 
 - Markdown extensions: `.mdown`, `.mkd`, `.mkdn`, `.md`, `.markdown`.
 - AsciiDoc extensions: `.adoc`, `.ad`, `.asciidoc`.
 - Other markup extensions: `.textile`, `.rdoc`, `.org`, `.creole`, `.wiki`, `.mediawiki`, `.rst`.
 
-## Customizing sidebar
+## Customize sidebar
 
-On the project's Wiki page, there is a right side navigation that renders the full Wiki pages list by default, with hierarchy.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23109) in GitLab 13.8, the sidebar can be customized by selecting the **Edit sidebar** button.
 
-To customize the sidebar, you can create a file named `_sidebar` to fully replace the default navigation.
+To customize the Wiki's navigation sidebar, you need Developer permissions to the project.
 
-CAUTION: **Warning:**
-Unless you link the `_sidebar` file from your custom nav, to edit it you'll have to access it directly
-from the browser's address bar by typing: `https://gitlab.com/<namespace>/<project_name>/-/wikis/_sidebar` (for self-managed GitLab instances, replace `gitlab.com` with your instance's URL).
+In the top-right, select **Edit sidebar** and make your changes. This creates a wiki page named `_sidebar` which fully replaces the default sidebar navigation.
 
 Example for `_sidebar` (using Markdown format):
 
@@ -238,4 +217,38 @@ Example for `_sidebar` (using Markdown format):
 - [Sidebar](_sidebar)
 ```
 
-Support for displaying a generated TOC with a custom side navigation is planned.
+Support for displaying a generated table of contents with a custom side navigation is planned.
+
+## Group wikis **(PREMIUM)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13195) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
+
+Group wikis work the same way as project wikis. Their usage is similar to project wikis, with a few limitations.
+
+Group wikis can be edited by members with [Developer permissions](../../permissions.md#group-members-permissions)
+and above.
+
+You can move group wiki repositories by using the [Group repository storage moves API](../../../api/group_repository_storage_moves.md).
+
+There are a few limitations compared to project wikis:
+
+- Git LFS is not supported.
+- Group wikis are not included in global search.
+- Changes to group wikis don't show up in the group's activity feed.
+
+For updates, follow [the epic that tracks feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
+
+## Enable or disable a project wiki
+
+Wikis are enabled by default in GitLab. Project [administrators](../../permissions.md)
+can enable or disable the project wiki by following the instructions in
+[Sharing and permissions](../settings/index.md#sharing-and-permissions).
+
+Administrators for self-managed GitLab installs can
+[configure additional wiki settings](../../../administration/wikis/index.md).
+
+## Resources
+
+- [Wiki settings for administrators](../../../administration/wikis/index.md)
+- [Project wikis API](../../../api/wikis.md)
+- [Group wikis API](../../../api/group_wikis.md)

@@ -24,6 +24,8 @@ module Gitlab
     # Returns "yes" the user chose to continue
     # Raises Gitlab::TaskAbortedByUserError if the user chose *not* to continue
     def ask_to_continue
+      return if Gitlab::Utils.to_boolean(ENV['GITLAB_ASSUME_YES'])
+
       answer = prompt("Do you want to continue (yes/no)? ".color(:blue), %w{yes no})
       raise Gitlab::TaskAbortedByUserError unless answer == "yes"
     end
@@ -64,6 +66,18 @@ module Gitlab
       answer
     end
 
+    # Prompt the user to input a password
+    #
+    # message - custom message to display before input
+    def prompt_for_password(message = 'Enter password: ')
+      unless STDIN.tty?
+        print(message)
+        return STDIN.gets.chomp
+      end
+
+      STDIN.getpass(message)
+    end
+
     # Runs the given command and matches the output against the given pattern
     #
     # Returns nil if nothing matched
@@ -95,7 +109,7 @@ module Gitlab
     def run_command!(command)
       output, status = Gitlab::Popen.popen(command)
 
-      raise Gitlab::TaskFailedError.new(output) unless status.zero?
+      raise Gitlab::TaskFailedError.new(output) unless status == 0
 
       output
     end

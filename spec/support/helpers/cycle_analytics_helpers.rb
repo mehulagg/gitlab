@@ -3,6 +3,32 @@
 module CycleAnalyticsHelpers
   include GitHelpers
 
+  def wait_for_stages_to_load
+    expect(page).to have_selector '.js-stage-table'
+    wait_for_requests
+  end
+
+  def select_group(target_group)
+    visit group_analytics_cycle_analytics_path(target_group)
+
+    wait_for_stages_to_load
+  end
+
+  def toggle_dropdown(field)
+    page.within("[data-testid*='#{field}']") do
+      find('.dropdown-toggle').click
+
+      wait_for_requests
+
+      expect(find('.dropdown-menu')).to have_selector('.dropdown-item')
+    end
+  end
+
+  def select_dropdown_option_by_value(name, value, elem = '.dropdown-item')
+    toggle_dropdown name
+    page.find("[data-testid*='#{name}'] .dropdown-menu").find("#{elem}[value='#{value}']").click
+  end
+
   def create_commit_referencing_issue(issue, branch_name: generate(:branch))
     project.repository.add_branch(user, branch_name, 'master')
     create_commit("Commit for ##{issue.iid}", issue.project, user, branch_name)
@@ -37,7 +63,7 @@ module CycleAnalyticsHelpers
   end
 
   def create_cycle(user, project, issue, mr, milestone, pipeline)
-    issue.update(milestone: milestone)
+    issue.update!(milestone: milestone)
     pipeline.run
 
     ci_build = create(:ci_build, pipeline: pipeline, status: :success, author: user)
@@ -126,17 +152,15 @@ module CycleAnalyticsHelpers
   end
 
   def mock_gitaly_multi_action_dates(repository, commit_time)
-    allow(repository.raw).to receive(:multi_action).and_wrap_original do |m, *args|
+    allow(repository.raw).to receive(:multi_action).and_wrap_original do |m, user, kargs|
       new_date = commit_time || Time.now
-      branch_update = m.call(*args)
+      branch_update = m.call(user, **kargs)
 
       if branch_update.newrev
-        _, opts = args
-
         commit = rugged_repo(repository).rev_parse(branch_update.newrev)
 
         branch_update.newrev = commit.amend(
-          update_ref: "#{Gitlab::Git::BRANCH_REF_PREFIX}#{opts[:branch_name]}",
+          update_ref: "#{Gitlab::Git::BRANCH_REF_PREFIX}#{kargs[:branch_name]}",
           author: commit.author.merge(time: new_date),
           committer: commit.committer.merge(time: new_date)
         )

@@ -10,6 +10,7 @@ module ApplicationWorker
   include Sidekiq::Worker # rubocop:disable Cop/IncludeSidekiqWorker
   include WorkerAttributes
   include WorkerContext
+  include Gitlab::SidekiqVersioning::Worker
 
   LOGGING_EXTRA_KEY = 'extra'
 
@@ -17,8 +18,8 @@ module ApplicationWorker
     set_queue
 
     def structured_payload(payload = {})
-      context = Labkit::Context.current.to_h.merge(
-        'class' => self.class,
+      context = Gitlab::ApplicationContext.current.merge(
+        'class' => self.class.name,
         'job_status' => 'running',
         'queue' => self.class.queue,
         'jid' => jid

@@ -1,17 +1,30 @@
 # frozen_string_literal: true
 
-def gitlab_danger
-  @gitlab_danger ||= GitlabDanger.new(helper.gitlab_helper)
+def feature_mr?
+  (helper.mr_labels & %w[feature::addition feature::enhancement]).any?
 end
 
-docs_paths_to_review = helper.changes_by_category[:docs]
+DOCUMENTATION_UPDATE_MISSING = <<~MSG
+~"feature::addition" and ~"feature::enhancement" merge requests normally have a documentation change. Consider adding a documentation update or confirming the documentation plan with the [Technical Writer counterpart](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers).
 
-return if docs_paths_to_review.empty?
+For more information, see:
 
-message 'This merge request adds or changes files that require a review ' \
-  'from the Technical Writing team.'
+- The Handbook page on [merge request types](https://about.gitlab.com/handbook/engineering/metrics/#data-classification).
+- The [definition of done](https://docs.gitlab.com/ee/development/contributing/merge_request_workflow.html#definition-of-done) documentation.
+MSG
 
-return unless gitlab_danger.ci?
+docs_paths_to_review = project_helper.changes_by_category[:docs]
+
+# Documentation should be updated for feature::addition and feature::enhancement
+if docs_paths_to_review.empty?
+  warn(DOCUMENTATION_UPDATE_MISSING) if feature_mr?
+
+  return
+end
+
+message 'This merge request adds or changes documentation files. A review from the Technical Writing team before you merge is **recommended**. Reviews can happen after you merge.'
+
+return unless helper.ci?
 
 markdown(<<~MARKDOWN)
   ## Documentation review
@@ -22,12 +35,7 @@ markdown(<<~MARKDOWN)
 
   The review does not need to block merging this merge request. See the:
 
-  - [Technical Writers assignments](https://about.gitlab.com/handbook/engineering/technical-writing/#designated-technical-writers) for the appropriate technical writer for this review.
+  - [Metadata for the `*.md` files](https://docs.gitlab.com/ee/development/documentation/#metadata) that you've changed. The first few lines of each `*.md` file identify the stage and group most closely associated with your docs change.
+  - The [Technical Writer assigned](https://about.gitlab.com/handbook/engineering/technical-writing/#designated-technical-writers) for that stage and group.
   - [Documentation workflows](https://docs.gitlab.com/ee/development/documentation/workflow.html) for information on when to assign a merge request for review.
 MARKDOWN
-
-unless gitlab.mr_labels.include?('documentation')
-  gitlab.api.update_merge_request(gitlab.mr_json['project_id'],
-                                  gitlab.mr_json['iid'],
-                                  labels: (gitlab.mr_labels + ['documentation']).join(','))
-end

@@ -1,0 +1,7 @@
+- add_to_breadcrumbs _('General Settings'), edit_group_path(@group)
+- title = s_('ComplianceFramework|New Compliance Framework')
+- page_title title
+
+%h3.page-title= title
+
+#js-compliance-frameworks-form{ data: compliance_frameworks_form_data(@group) }

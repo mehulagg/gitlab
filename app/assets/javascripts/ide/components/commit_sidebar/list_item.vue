@@ -1,18 +1,17 @@
 <script>
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions } from 'vuex';
-import tooltip from '~/vue_shared/directives/tooltip';
-import Icon from '~/vue_shared/components/icon.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
-import { viewerTypes } from '../../constants';
 import getCommitIconMap from '../../commit_icon';
+import { viewerTypes } from '../../constants';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     FileIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     file: {
@@ -64,7 +63,7 @@ export default {
       return this.openPendingTab({
         file: this.file,
         keyPrefix: this.keyPrefix,
-      }).then(changeViewer => {
+      }).then((changeViewer) => {
         if (changeViewer) {
           this.updateViewer(viewerTypes.diff);
         }
@@ -77,7 +76,7 @@ export default {
 <template>
   <div class="multi-file-commit-list-item position-relative">
     <div
-      v-tooltip
+      v-gl-tooltip
       :title="tooltipTitle"
       :class="{
         'is-active': isActive,
@@ -86,7 +85,11 @@ export default {
       role="button"
       @click="openFileInEditor"
     >
-      <span class="multi-file-commit-list-file-path d-flex align-items-center">
+      <span
+        class="multi-file-commit-list-file-path d-flex align-items-center"
+        data-qa-selector="file_to_commit_content"
+        :data-qa-file-name="file.name"
+      >
         <file-icon :file-name="file.name" class="gl-mr-3" />
         <template v-if="file.prevName && file.prevName !== file.name">
           {{ file.prevName }} &#x2192;
@@ -95,7 +98,7 @@ export default {
       </span>
       <div class="ml-auto d-flex align-items-center">
         <div class="d-flex align-items-center ide-commit-list-changed-icon">
-          <icon :name="iconName" :size="16" :class="iconClass" />
+          <gl-icon :name="iconName" :size="16" :class="iconClass" />
         </div>
       </div>
     </div>

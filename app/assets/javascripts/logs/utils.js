@@ -1,5 +1,5 @@
-import { secondsToMilliseconds } from '~/lib/utils/datetime_utility';
 import dateFormat from 'dateformat';
+import { secondsToMilliseconds } from '~/lib/utils/datetime_utility';
 import { dateFormatMask } from './constants';
 
 /**
@@ -22,6 +22,4 @@ export const getTimeRange = (seconds = 0) => {
   };
 };
 
-export const formatDate = timestamp => dateFormat(timestamp, dateFormatMask);
-
-export default {};
+export const formatDate = (timestamp) => dateFormat(timestamp, dateFormatMask);

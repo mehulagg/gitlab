@@ -76,5 +76,92 @@ RSpec.describe RequirementsManagement::Requirement do
         it { is_expected.to contain_exactly(requirement_one) }
       end
     end
+
+    describe '.with_last_test_report_state' do
+      let_it_be(:requirement1) { create(:requirement) }
+      let_it_be(:requirement2) { create(:requirement) }
+      let_it_be(:requirement3) { create(:requirement) }
+
+      before do
+        create(:test_report, requirement: requirement1, state: :passed)
+        create(:test_report, requirement: requirement1, state: :failed)
+        create(:test_report, requirement: requirement2, state: :failed)
+        create(:test_report, requirement: requirement2, state: :passed)
+        create(:test_report, requirement: requirement3, state: :passed)
+      end
+
+      subject { described_class.with_last_test_report_state(state) }
+
+      context 'for passed state' do
+        let(:state) { 'passed' }
+
+        it { is_expected.to contain_exactly(requirement2, requirement3) }
+      end
+
+      context 'for failed state' do
+        let(:state) { 'failed' }
+
+        it { is_expected.to contain_exactly(requirement1) }
+      end
+    end
+  end
+
+  describe '.without_test_reports' do
+    let_it_be(:requirement1) { create(:requirement) }
+    let_it_be(:requirement2) { create(:requirement) }
+
+    before do
+      create(:test_report, requirement: requirement2, state: :passed)
+    end
+
+    it 'returns requirements without test reports' do
+      expect(described_class.without_test_reports).to contain_exactly(requirement1)
+    end
+  end
+
+  describe '#last_test_report_state' do
+    let_it_be(:requirement) { create(:requirement) }
+
+    context 'when latest test report is passing' do
+      it 'returns passing' do
+        create(:test_report, requirement: requirement, state: :passed, build: nil)
+
+        expect(requirement.last_test_report_state).to eq('passed')
+      end
+    end
+
+    context 'when latest test report is failing' do
+      it 'returns failing' do
+        create(:test_report, requirement: requirement, state: :failed, build: nil)
+
+        expect(requirement.last_test_report_state).to eq('failed')
+      end
+    end
+
+    context 'when there are no test reports' do
+      it 'returns nil' do
+        expect(requirement.last_test_report_state).to eq(nil)
+      end
+    end
+  end
+
+  describe '#status_manually_updated' do
+    let_it_be(:requirement) { create(:requirement) }
+
+    context 'when latest test report has a build' do
+      it 'returns false' do
+        create(:test_report, requirement: requirement, state: :passed)
+
+        expect(requirement.last_test_report_manually_created?).to eq(false)
+      end
+    end
+
+    context 'when latest test report does not have a build' do
+      it 'returns true' do
+        create(:test_report, requirement: requirement, state: :passed, build: nil)
+
+        expect(requirement.last_test_report_manually_created?).to eq(true)
+      end
+    end
   end
 end

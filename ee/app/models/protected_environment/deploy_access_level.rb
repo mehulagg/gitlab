@@ -3,25 +3,25 @@ class ProtectedEnvironment::DeployAccessLevel < ApplicationRecord
   ALLOWED_ACCESS_LEVELS = [
     Gitlab::Access::MAINTAINER,
     Gitlab::Access::DEVELOPER,
+    Gitlab::Access::REPORTER,
     Gitlab::Access::ADMIN
   ].freeze
 
   HUMAN_ACCESS_LEVELS = {
-    Gitlab::Access::MAINTAINER => 'Maintainers'.freeze,
-    Gitlab::Access::DEVELOPER => 'Developers + Maintainers'.freeze
+    Gitlab::Access::MAINTAINER => 'Maintainers',
+    Gitlab::Access::DEVELOPER => 'Developers + Maintainers'
   }.freeze
 
   belongs_to :user
   belongs_to :group
   belongs_to :protected_environment
 
-  validates :access_level, presence: true, if: :role?, inclusion: {
-    in: ALLOWED_ACCESS_LEVELS
-  }
+  validates :access_level, presence: true, inclusion: { in: ALLOWED_ACCESS_LEVELS }
 
   delegate :project, to: :protected_environment
 
   def check_access(user)
+    return false unless user
     return true if user.admin?
     return user.id == user_id if user_type?
     return group.users.exists?(user.id) if group_type?

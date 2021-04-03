@@ -5,8 +5,13 @@ require 'spec_helper'
 RSpec.describe 'Project > Members > Invite group and members', :js do
   include Select2Helper
   include ActionView::Helpers::DateHelper
+  include Spec::Support::Helpers::Features::MembersHelpers
 
   let(:maintainer) { create(:user) }
+
+  before do
+    stub_feature_flags(invite_members_group_modal: false)
+  end
 
   describe 'Share group lock' do
     shared_examples 'the project cannot be shared with groups' do
@@ -66,16 +71,40 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
       context 'when the group has "Share with group lock" and "Member lock" disabled' do
         it_behaves_like 'the project can be shared with groups and members'
 
-        it 'the project can be shared with another group' do
+        it 'allows the project to be shared with another group using the invite form' do
+          stub_feature_flags(invite_members_group_modal: false)
+
           visit project_project_members_path(project)
 
           click_on 'invite-group-tab'
 
           select2 group_to_share_with.id, from: '#link_group_id'
           page.find('body').click
-          find('.btn-success').click
+          find('.btn-confirm').click
 
-          page.within('.project-members-groups') do
+          click_link 'Groups'
+
+          page.within(members_table) do
+            expect(page).to have_content(group_to_share_with.name)
+          end
+        end
+
+        it 'allows the project to be shared with another group using the invite modal' do
+          stub_feature_flags(invite_members_group_modal: true)
+
+          visit project_project_members_path(project)
+
+          click_on 'Invite a group'
+
+          click_on 'Select a group'
+          wait_for_requests
+          click_button group_to_share_with.name
+          click_button 'Invite'
+
+          visit project_project_members_path(project)
+          click_link 'Groups'
+
+          page.within(members_table) do
             expect(page).to have_content(group_to_share_with.name)
           end
         end
@@ -99,7 +128,7 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
       context 'when the group has membership lock and "Share with group lock" enabled' do
         before do
-          project.namespace.update(share_with_group_lock: true, membership_lock: true)
+          project.namespace.update!(share_with_group_lock: true, membership_lock: true)
         end
 
         it_behaves_like 'the project cannot be shared with groups and members'
@@ -139,7 +168,7 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
         context 'when the group has membership lock and "Share with group lock" enabled' do
           before do
-            subgroup.update(share_with_group_lock: true, membership_lock: true)
+            subgroup.update!(share_with_group_lock: true, membership_lock: true)
           end
 
           it_behaves_like 'the project cannot be shared with groups and members'
@@ -148,7 +177,7 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
       context 'when the root_group has "Share with group lock" and membership lock enabled' do
         before do
-          root_group.update(share_with_group_lock: true, membership_lock: true)
+          root_group.update!(share_with_group_lock: true, membership_lock: true)
           subgroup.reload
         end
 
@@ -158,7 +187,7 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
         context 'when the subgroup has "Share with group lock" and membership lock disabled (parent overridden)' do
           before do
-            subgroup.update(share_with_group_lock: false, membership_lock: false)
+            subgroup.update!(share_with_group_lock: false, membership_lock: false)
           end
 
           it_behaves_like 'the project can be shared with groups and members'
@@ -184,7 +213,7 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
         context 'when the subgroup has "Share with group lock" and membership lock enabled' do
           before do
-            subgroup.update(membership_lock: true, share_with_group_lock: true)
+            subgroup.update!(membership_lock: true, share_with_group_lock: true)
           end
 
           it_behaves_like 'the project cannot be shared with groups and members'

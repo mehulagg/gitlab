@@ -29,9 +29,7 @@ class PostReceiveService
       response.add_alert_message(message)
     end
 
-    broadcast_message = BroadcastMessage.current_banner_messages&.last&.message
     response.add_alert_message(broadcast_message)
-
     response.add_merge_request_urls(merge_request_urls)
 
     # Neither User nor Project are guaranteed to be returned; an orphaned write deploy
@@ -42,13 +40,15 @@ class PostReceiveService
 
       response.add_basic_message(redirect_message)
       response.add_basic_message(project_created_message)
+
+      record_onboarding_progress
     end
 
     response
   end
 
   def process_mr_push_options(push_options, changes)
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/61359')
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/28494')
     return unless repository
 
     unless repository.repo_type.project?
@@ -73,6 +73,28 @@ class PostReceiveService
     return [] unless repository&.repo_type&.project?
 
     ::MergeRequests::GetUrlsService.new(project).execute(params[:changes])
+  end
+
+  private
+
+  def broadcast_message
+    banner = nil
+
+    if project
+      scoped_messages = BroadcastMessage.current_banner_messages(project.full_path).select do |message|
+        message.target_path.present? && message.matches_current_path(project.full_path)
+      end
+
+      banner = scoped_messages.last
+    end
+
+    banner ||= BroadcastMessage.current_banner_messages.last
+
+    banner&.message
+  end
+
+  def record_onboarding_progress
+    OnboardingProgressService.new(project.namespace).execute(action: :git_write)
   end
 end
 

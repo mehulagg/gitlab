@@ -11,7 +11,7 @@ class MergeRequests::PipelineEntity < Grape::Entity
   end
 
   expose :flags do
-    expose :merge_request_pipeline?, as: :merge_request_pipeline
+    expose :merged_result_pipeline?, as: :merge_request_pipeline
   end
 
   expose :commit, using: CommitEntity
@@ -21,11 +21,21 @@ class MergeRequests::PipelineEntity < Grape::Entity
       pipeline.present.name
     end
 
+    expose :artifacts do |pipeline, options|
+      rel = pipeline.downloadable_artifacts
+
+      if Feature.enabled?(:non_public_artifacts, type: :development)
+        rel = rel.select { |artifact| can?(request.current_user, :read_job_artifacts, artifact.job) }
+      end
+
+      BuildArtifactEntity.represent(rel, options)
+    end
+
     expose :detailed_status, as: :status, with: DetailedStatusEntity do |pipeline|
       pipeline.detailed_status(request.current_user)
     end
 
-    expose :ordered_stages, as: :stages, using: StageEntity
+    expose :stages, using: StageEntity
   end
 
   # Coverage isn't always necessary (e.g. when displaying project pipelines in

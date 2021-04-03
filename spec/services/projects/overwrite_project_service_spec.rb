@@ -16,6 +16,8 @@ RSpec.describe Projects::OverwriteProjectService do
   subject { described_class.new(project_to, user) }
 
   before do
+    project_to.project_feature.reload
+
     allow(project_to).to receive(:import_data).and_return(double(data: { 'original_path' => project_from.path }))
   end
 
@@ -109,9 +111,9 @@ RSpec.describe Projects::OverwriteProjectService do
           create_list(:deploy_keys_project, 2, project: project_from)
           create_list(:notification_setting, 2, source: project_from)
           create_list(:users_star_project, 2, project: project_from)
-          project_from.project_group_links.create(group: maintainer_group, group_access: Gitlab::Access::MAINTAINER)
-          project_from.project_group_links.create(group: developer_group, group_access: Gitlab::Access::DEVELOPER)
-          project_from.project_group_links.create(group: reporter_group, group_access: Gitlab::Access::REPORTER)
+          project_from.project_group_links.create!(group: maintainer_group, group_access: Gitlab::Access::MAINTAINER)
+          project_from.project_group_links.create!(group: developer_group, group_access: Gitlab::Access::DEVELOPER)
+          project_from.project_group_links.create!(group: reporter_group, group_access: Gitlab::Access::REPORTER)
           project_from.add_maintainer(maintainer_user)
           project_from.add_developer(developer_user)
           project_from.add_reporter(reporter_user)

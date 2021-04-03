@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import 'vendor/jquery.endless-scroll';
-import { getParameterByName } from '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
+import { getParameterByName } from '~/lib/utils/common_utils';
 import { removeParams } from '~/lib/utils/url_utility';
 
 const ENDLESS_SCROLL_BOTTOM_PX = 400;
@@ -16,7 +16,6 @@ export default {
     callback = $.noop,
     container = '',
   ) {
-    this.url = $('.content_list').data('href') || removeParams(['limit', 'offset']);
     this.limit = limit;
     this.offset = parseInt(getParameterByName('offset'), 10) || this.limit;
     this.disable = disable;
@@ -32,8 +31,10 @@ export default {
 
   getOld() {
     this.loading.show();
+    const url = $('.content_list').data('href') || removeParams(['limit', 'offset']);
+
     axios
-      .get(this.url, {
+      .get(url, {
         params: {
           limit: this.limit,
           offset: this.offset,
@@ -72,6 +73,7 @@ export default {
   },
 
   initLoadMore() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     $(document).off('scroll');
     $(document).endlessScroll({
       bottomPixels: ENDLESS_SCROLL_BOTTOM_PX,

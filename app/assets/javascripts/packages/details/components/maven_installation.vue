@@ -1,22 +1,37 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
-import { s__ } from '~/locale';
-import CodeInstruction from './code_instruction.vue';
-import { TrackingActions, TrackingLabels } from '../constants';
 import { mapGetters, mapState } from 'vuex';
-import InstallationTabs from './installation_tabs.vue';
+import { s__ } from '~/locale';
+import InstallationTitle from '~/packages/details/components/installation_title.vue';
+import CodeInstruction from '~/vue_shared/components/registry/code_instruction.vue';
+
+import { TrackingActions, TrackingLabels } from '../constants';
 
 export default {
   name: 'MavenInstallation',
   components: {
+    InstallationTitle,
     CodeInstruction,
     GlLink,
     GlSprintf,
-    InstallationTabs,
+  },
+  data() {
+    return {
+      instructionType: 'maven',
+    };
   },
   computed: {
     ...mapState(['mavenHelpPath']),
-    ...mapGetters(['mavenInstallationXml', 'mavenInstallationCommand', 'mavenSetupXml']),
+    ...mapGetters([
+      'mavenInstallationXml',
+      'mavenInstallationCommand',
+      'mavenSetupXml',
+      'gradleGroovyInstalCommand',
+      'gradleGroovyAddSourceCommand',
+    ]),
+    showMaven() {
+      return this.instructionType === 'maven';
+    },
   },
   i18n: {
     xmlText: s__(
@@ -30,14 +45,23 @@ export default {
     ),
   },
   trackingActions: { ...TrackingActions },
-  trackingLabel: TrackingLabels.MAVEN_INSTALLATION,
+  TrackingLabels,
+  installOptions: [
+    { value: 'maven', label: s__('PackageRegistry|Show Maven commands') },
+    { value: 'groovy', label: s__('PackageRegistry|Show Gradle Groovy DSL commands') },
+  ],
 };
 </script>
 
 <template>
-  <installation-tabs :tracking-label="$options.trackingLabel">
-    <template #installation>
-      <p class="gl-mt-3 font-weight-bold">{{ s__('PackageRegistry|Maven XML') }}</p>
+  <div>
+    <installation-title
+      package-type="maven"
+      :options="$options.installOptions"
+      @change="instructionType = $event"
+    />
+
+    <template v-if="showMaven">
       <p>
         <gl-sprintf :message="$options.i18n.xmlText">
           <template #code="{ content }">
@@ -45,26 +69,24 @@ export default {
           </template>
         </gl-sprintf>
       </p>
+
       <code-instruction
         :instruction="mavenInstallationXml"
         :copy-text="s__('PackageRegistry|Copy Maven XML')"
-        class="js-maven-xml"
-        multiline
         :tracking-action="$options.trackingActions.COPY_MAVEN_XML"
+        :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+        multiline
       />
 
-      <p class="gl-mt-3 font-weight-bold">
-        {{ s__('PackageRegistry|Maven Command') }}
-      </p>
       <code-instruction
+        :label="s__('PackageRegistry|Maven Command')"
         :instruction="mavenInstallationCommand"
         :copy-text="s__('PackageRegistry|Copy Maven command')"
-        class="js-maven-command"
         :tracking-action="$options.trackingActions.COPY_MAVEN_COMMAND"
+        :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
       />
-    </template>
 
-    <template #setup>
+      <h3 class="gl-font-lg">{{ s__('PackageRegistry|Registry setup') }}</h3>
       <p>
         <gl-sprintf :message="$options.i18n.setupText">
           <template #code="{ content }">
@@ -75,9 +97,9 @@ export default {
       <code-instruction
         :instruction="mavenSetupXml"
         :copy-text="s__('PackageRegistry|Copy Maven registry XML')"
-        class="js-maven-setup-xml"
-        multiline
         :tracking-action="$options.trackingActions.COPY_MAVEN_SETUP"
+        :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+        multiline
       />
       <gl-sprintf :message="$options.i18n.helpText">
         <template #link="{ content }">
@@ -85,5 +107,23 @@ export default {
         </template>
       </gl-sprintf>
     </template>
-  </installation-tabs>
+    <template v-else>
+      <code-instruction
+        class="gl-mb-5"
+        :label="s__('PackageRegistry|Gradle Groovy DSL install command')"
+        :instruction="gradleGroovyInstalCommand"
+        :copy-text="s__('PackageRegistry|Copy Gradle Groovy DSL install command')"
+        :tracking-action="$options.trackingActions.COPY_GRADLE_INSTALL_COMMAND"
+        :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+      />
+      <code-instruction
+        :label="s__('PackageRegistry|Add Gradle Groovy DSL repository command')"
+        :instruction="gradleGroovyAddSourceCommand"
+        :copy-text="s__('PackageRegistry|Copy add Gradle Groovy DSL repository command')"
+        :tracking-action="$options.trackingActions.COPY_GRADLE_ADD_TO_SOURCE_COMMAND"
+        :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+        multiline
+      />
+    </template>
+  </div>
 </template>

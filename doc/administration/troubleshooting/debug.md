@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Debugging Tips
 
 Sometimes things don't work the way they should. Here are some tips on debugging issues out
@@ -5,22 +11,14 @@ in production.
 
 ## Starting a Rails console session
 
-Troubleshooting and debugging your GitLab instance often requires a
-[Rails console](https://guides.rubyonrails.org/command_line.html#rails-console).
+Troubleshooting and debugging your GitLab instance often requires a Rails console.
 
-**For Omnibus installations**
+Your type of GitLab installation determines how
+[to start a rails console](../operations/rails_console.md).
+See also:
 
-```shell
-sudo gitlab-rails console
-```
-
-**For installations from source**
-
-```shell
-sudo -u git -H bundle exec rails console -e production
-```
-
-Kubernetes: the console is in the task-runner pod, refer to our [Kubernetes cheat sheet](kubernetes_cheat_sheet.md#gitlab-specific-kubernetes-information) for details.
+- [GitLab Rails Console Cheat Sheet](gitlab_rails_cheat_sheet.md).
+- [Navigating GitLab via Rails console](navigating_gitlab_via_rails_console.md).
 
 ### Enabling Active Record logging
 
@@ -60,10 +58,10 @@ easy to copy and save for future reference, you can run:
 puts Readline::HISTORY.to_a
 ```
 
-## Using the Rails Runner
+## Using the Rails runner
 
 If you need to run some Ruby code in the context of your GitLab production
-environment, you can do so using the [Rails Runner](https://guides.rubyonrails.org/command_line.html#rails-runner). When executing a script file, the script must be accessible by the `git` user.
+environment, you can do so using the [Rails runner](https://guides.rubyonrails.org/command_line.html#rails-runner). When executing a script file, the script must be accessible by the `git` user.
 
 **For Omnibus installations**
 
@@ -94,7 +92,7 @@ sudo -u git -H bundle exec rails runner -e production /path/to/script.rb
 A common problem is that mails are not being sent for some reason. Suppose you configured
 an SMTP server, but you're not seeing mail delivered. Here's how to check the settings:
 
-1. Run a [Rails console](#starting-a-rails-console-session).
+1. Run a [Rails console](../operations/rails_console.md#starting-a-rails-console-session).
 
 1. Look at the ActionMailer `delivery_method` to make sure it matches what you
    intended. If you configured SMTP, it should say `:smtp`. If you're using
@@ -128,7 +126,7 @@ an SMTP server, but you're not seeing mail delivered. Here's how to check the se
 
 For more advanced issues, `gdb` is a must-have tool for debugging issues.
 
-### The GNU Project Debugger (gdb)
+### The GNU Project Debugger (GDB)
 
 To install on Ubuntu/Debian:
 
@@ -142,9 +140,13 @@ On CentOS:
 sudo yum install gdb
 ```
 
+<!-- vale gitlab.Spelling = NO -->
+
 ### rbtrace
 
-GitLab 11.2 ships with [rbtrace](https://github.com/tmm1/rbtrace), which
+<!-- vale gitlab.Spelling = YES -->
+
+GitLab 11.2 ships with [`rbtrace`](https://github.com/tmm1/rbtrace), which
 allows you to trace Ruby code, view all running threads, take memory dumps,
 and more. However, this is not enabled by default. To enable it, define the
 `ENABLE_RBTRACE` variable to the environment. For example, in Omnibus:
@@ -177,7 +179,7 @@ downtime. Otherwise skip to the next section.
 
 1. Load the problematic URL
 1. Run `sudo gdb -p <PID>` to attach to the Unicorn process.
-1. In the gdb window, type:
+1. In the GDB window, type:
 
    ```plaintext
    call (void) rb_backtrace()
@@ -212,7 +214,7 @@ downtime. Otherwise skip to the next section.
    ```
 
 Note that if the Unicorn process terminates before you are able to run these
-commands, gdb will report an error. To buy more time, you can always raise the
+commands, GDB will report an error. To buy more time, you can always raise the
 Unicorn timeout. For omnibus users, you can edit `/etc/gitlab/gitlab.rb` and
 increase it from 60 seconds to 300:
 
@@ -233,8 +235,8 @@ separate Rails process to debug the issue:
 
 1. Log in to your GitLab account.
 1. Copy the URL that is causing problems (e.g. `https://gitlab.com/ABC`).
-1. Create a Personal Access Token for your user (Profile Settings -> Access Tokens).
-1. Bring up the [GitLab Rails console.](#starting-a-rails-console-session)
+1. Create a Personal Access Token for your user (User Settings -> Access Tokens).
+1. Bring up the [GitLab Rails console.](../operations/rails_console.md#starting-a-rails-console-session)
 1. At the Rails console, run:
 
    ```ruby
@@ -248,12 +250,12 @@ separate Rails process to debug the issue:
    ```
 
 1. In a new window, run `top`. It should show this Ruby process using 100% CPU. Write down the PID.
-1. Follow step 2 from the previous section on using gdb.
+1. Follow step 2 from the previous section on using GDB.
 
 ### GitLab: API is not accessible
 
 This often occurs when GitLab Shell attempts to request authorization via the
-internal API (e.g., `http://localhost:8080/api/v4/internal/allowed`), and
+[internal API](../../development/internal_api.md) (e.g., `http://localhost:8080/api/v4/internal/allowed`), and
 something in the check fails. There are many reasons why this may happen:
 
 1. Timeout connecting to a database (e.g., PostgreSQL or Redis)
@@ -269,8 +271,8 @@ strace -ttTfyyy -s 1024 -p <PID of unicorn worker> -o /tmp/unicorn.txt
 ```
 
 If you cannot isolate which Unicorn worker is the issue, try to run `strace`
-on all the Unicorn workers to see where the `/internal/allowed` endpoint gets
-stuck:
+on all the Unicorn workers to see where the
+[`/internal/allowed`](../../development/internal_api.md) endpoint gets stuck:
 
 ```shell
 ps auwx | grep unicorn | awk '{ print " -p " $2}' | xargs  strace -ttTfyyy -s 1024 -o /tmp/unicorn.txt
@@ -281,4 +283,4 @@ The output in `/tmp/unicorn.txt` may help diagnose the root cause.
 ## More information
 
 - [Debugging Stuck Ruby Processes](https://blog.newrelic.com/engineering/debugging-stuck-ruby-processes-what-to-do-before-you-kill-9/)
-- [Cheatsheet of using gdb and Ruby processes](gdb-stuck-ruby.txt)
+- [Cheat sheet of using GDB and Ruby processes](gdb-stuck-ruby.txt)

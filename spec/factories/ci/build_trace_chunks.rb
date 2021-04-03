@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :ci_build_trace_chunk, class: 'Ci::BuildTraceChunk' do
     build factory: :ci_build
-    chunk_index { 0 }
+    chunk_index { generate(:iid) }
     data_store { :redis }
 
     trait :redis_with_data do
@@ -52,6 +52,19 @@ FactoryBot.define do
 
     trait :fog_without_data do
       data_store { :fog }
+    end
+
+    trait :persisted do
+      data_store { :database}
+
+      transient do
+        initial_data { 'test data' }
+      end
+
+      after(:build) do |chunk, evaluator|
+        Ci::BuildTraceChunks::Database.new.set_data(chunk, evaluator.initial_data)
+        chunk.checksum = chunk.class.crc32(evaluator.initial_data)
+      end
     end
   end
 end

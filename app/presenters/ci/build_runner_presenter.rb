@@ -32,6 +32,14 @@ module Ci
       end.to_i
     end
 
+    def runner_variables
+      if Feature.enabled?(:variable_inside_variable, project)
+        variables.sort_and_expand_all(project, keep_undefined: true).to_runner_variables
+      else
+        variables.to_runner_variables
+      end
+    end
+
     def refspecs
       specs = []
       specs << refspec_for_persistent_ref if persistent_ref_exist?
@@ -46,6 +54,18 @@ module Ci
 
       specs
     end
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def all_dependencies
+      dependencies = super
+
+      if Feature.enabled?(:preload_associations_jobs_request_api_endpoint, project, default_enabled: :yaml)
+        ActiveRecord::Associations::Preloader.new.preload(dependencies, :job_artifacts_archive)
+      end
+
+      dependencies
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     private
 
@@ -93,7 +113,10 @@ module Ci
     end
 
     def refspec_for_persistent_ref
-      "+#{persistent_ref_path}:#{persistent_ref_path}"
+      # Use persistent_ref.sha because it sometimes causes 'git fetch' to do
+      # less work. See
+      # https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/746.
+      "+#{pipeline.persistent_ref.sha}:#{pipeline.persistent_ref.path}"
     end
 
     def persistent_ref_exist?
@@ -107,10 +130,6 @@ module Ci
       pipeline.persistent_ref.exist?
     end
 
-    def persistent_ref_path
-      pipeline.persistent_ref.path
-    end
-
     def git_depth_variable
       strong_memoize(:git_depth_variable) do
         variables&.find { |variable| variable[:key] == 'GIT_DEPTH' }
@@ -118,3 +137,5 @@ module Ci
     end
   end
 end
+
+Ci::BuildRunnerPresenter.prepend_if_ee('EE::Ci::BuildRunnerPresenter')

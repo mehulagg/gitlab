@@ -2,13 +2,47 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state do
-  let(:build) { create(:ci_build) }
+RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state, factory_default: :keep do
+  let_it_be(:project) { create_default(:project).freeze }
+  let_it_be_with_reload(:build) { create(:ci_build) }
   let(:trace) { described_class.new(build) }
 
   describe "associations" do
     it { expect(trace).to respond_to(:job) }
     it { expect(trace).to delegate_method(:old_trace).to(:job) }
+  end
+
+  context 'when trace is migrated to object storage' do
+    let!(:job) { create(:ci_build, :trace_artifact) }
+    let!(:artifact1) { job.job_artifacts_trace }
+    let!(:artifact2) { job.reload.job_artifacts_trace }
+    let(:test_data) { "hello world" }
+
+    before do
+      stub_artifacts_object_storage
+
+      artifact1.file.migrate!(ObjectStorage::Store::REMOTE)
+    end
+
+    it 'reloads the trace after is it migrated' do
+      stub_const('Gitlab::HttpIO::BUFFER_SIZE', test_data.length)
+
+      expect_next_instance_of(Gitlab::HttpIO) do |http_io|
+        expect(http_io).to receive(:get_chunk).and_return(test_data, "")
+      end
+
+      expect(artifact2.job.trace.raw).to eq(test_data)
+    end
+
+    it 'reloads the trace in case of a chunk error' do
+      chunk_error = described_class::ChunkedIO::FailedToGetChunkError
+
+      allow_any_instance_of(described_class::Stream)
+        .to receive(:raw).and_raise(chunk_error)
+
+      expect(build).to receive(:reset).and_return(build)
+      expect { trace.raw }.to raise_error(chunk_error)
+    end
   end
 
   context 'when live trace feature is disabled' do
@@ -29,9 +63,7 @@ RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state do
 
   describe '#update_interval' do
     context 'it is not being watched' do
-      it 'returns 30 seconds' do
-        expect(trace.update_interval).to eq(30.seconds)
-      end
+      it { expect(trace.update_interval).to eq(60.seconds) }
     end
 
     context 'it is being watched' do
@@ -85,6 +117,15 @@ RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state do
     context 'gitlab:ci:trace:<job.id>:watched in redis is not set' do
       it 'returns false' do
         expect(trace.being_watched?).to be(false)
+      end
+    end
+  end
+
+  describe '#lock' do
+    it 'acquires an exclusive lease on the trace' do
+      trace.lock do
+        expect { trace.lock }
+          .to raise_error described_class::LockedError
       end
     end
   end

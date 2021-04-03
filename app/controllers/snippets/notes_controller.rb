@@ -8,6 +8,8 @@ class Snippets::NotesController < ApplicationController
   before_action :authorize_read_snippet!, only: [:show, :index]
   before_action :authorize_create_note!, only: [:create]
 
+  feature_category :snippets
+
   private
 
   def note
@@ -21,7 +23,7 @@ class Snippets::NotesController < ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def snippet
-    PersonalSnippet.find_by(id: params[:snippet_id])
+    @snippet ||= PersonalSnippet.find_by(id: params[:snippet_id])
   end
   # rubocop: enable CodeReuse/ActiveRecord
   alias_method :noteable, :snippet

@@ -1,7 +1,12 @@
 const IS_EE = require('./config/helpers/is_ee_env');
 const isESLint = require('./config/helpers/is_eslint');
 
-module.exports = path => {
+module.exports = (path, options = {}) => {
+  const {
+    moduleNameMapper: extModuleNameMapper = {},
+    moduleNameMapperEE: extModuleNameMapperEE = {},
+  } = options;
+
   const reporters = ['default'];
 
   // To have consistent date time parsing both in local and CI environments we set
@@ -12,7 +17,8 @@ module.exports = path => {
     reporters.push([
       'jest-junit',
       {
-        output: './junit_jest.xml',
+        outputName: './junit_jest.xml',
+        addFileAttribute: 'true',
       },
     ]);
   }
@@ -26,20 +32,26 @@ module.exports = path => {
   // workaround for eslint-import-resolver-jest only resolving in test files
   // see https://github.com/JoinColony/eslint-import-resolver-jest#note
   if (isESLint(module)) {
-    testMatch = testMatch.map(path => path.replace('_spec.js', ''));
+    testMatch = testMatch.map((modulePath) => modulePath.replace('_spec.js', ''));
   }
+
+  const TEST_FIXTURES_PATTERN = 'test_fixtures(/.*)$';
 
   const moduleNameMapper = {
     '^~(/.*)$': '<rootDir>/app/assets/javascripts$1',
     '^ee_component(/.*)$':
       '<rootDir>/app/assets/javascripts/vue_shared/components/empty_component.js',
+    '^shared_queries(/.*)$': '<rootDir>/app/graphql/queries$1',
     '^ee_else_ce(/.*)$': '<rootDir>/app/assets/javascripts$1',
-    '^helpers(/.*)$': '<rootDir>/spec/frontend/helpers$1',
+    '^helpers(/.*)$': '<rootDir>/spec/frontend/__helpers__$1',
     '^vendor(/.*)$': '<rootDir>/vendor/assets/javascripts$1',
+    [TEST_FIXTURES_PATTERN]: '<rootDir>/tmp/tests/frontend/fixtures$1',
     '\\.(jpg|jpeg|png|svg|css)$': '<rootDir>/spec/frontend/__mocks__/file_mock.js',
     'emojis(/.*).json': '<rootDir>/fixtures/emojis$1.json',
-    '^spec/test_constants$': '<rootDir>/spec/frontend/helpers/test_constants',
+    '^spec/test_constants$': '<rootDir>/spec/frontend/__helpers__/test_constants',
     '^jest/(.*)$': '<rootDir>/spec/frontend/$1',
+    '^jquery$': '<rootDir>/node_modules/jquery/dist/jquery.slim.js',
+    ...extModuleNameMapper,
   };
 
   const collectCoverageFrom = ['<rootDir>/app/assets/javascripts/**/*.{js,vue}'];
@@ -51,6 +63,8 @@ module.exports = path => {
       '^ee_component(/.*)$': rootDirEE,
       '^ee_else_ce(/.*)$': rootDirEE,
       '^ee_jest/(.*)$': '<rootDir>/ee/spec/frontend/$1',
+      [TEST_FIXTURES_PATTERN]: '<rootDir>/tmp/tests/frontend/fixtures-ee$1',
+      ...extModuleNameMapperEE,
     });
 
     collectCoverageFrom.push(rootDirEE.replace('$1', '/**/*.{js,vue}'));
@@ -75,15 +89,16 @@ module.exports = path => {
     cacheDirectory: '<rootDir>/tmp/cache/jest',
     modulePathIgnorePatterns: ['<rootDir>/.yarn-cache/'],
     reporters,
-    setupFilesAfterEnv: ['<rootDir>/spec/frontend/test_setup.js', 'jest-canvas-mock'],
+    setupFilesAfterEnv: [`<rootDir>/${path}/test_setup.js`, 'jest-canvas-mock'],
     restoreMocks: true,
     transform: {
       '^.+\\.(gql|graphql)$': 'jest-transform-graphql',
       '^.+\\.js$': 'babel-jest',
       '^.+\\.vue$': 'vue-jest',
+      '^.+\\.(md|zip|png)$': 'jest-raw-loader',
     },
     transformIgnorePatterns: [
-      'node_modules/(?!(@gitlab/ui|bootstrap-vue|three|monaco-editor|monaco-yaml)/)',
+      'node_modules/(?!(@gitlab/ui|@gitlab/favicon-overlay|bootstrap-vue|three|monaco-editor|monaco-yaml|fast-mersenne-twister)/)',
     ],
     timers: 'fake',
     testEnvironment: '<rootDir>/spec/frontend/environment.js',

@@ -13,7 +13,9 @@ export const fetchGeoSettings = ({ commit }) => {
       });
     })
     .catch(() => {
-      createFlash(__('There was an error fetching the Geo Settings'));
+      createFlash({
+        message: __('There was an error fetching the Geo Settings'),
+      });
       commit(types.RECEIVE_GEO_SETTINGS_ERROR);
     });
 };
@@ -31,7 +33,9 @@ export const updateGeoSettings = ({ commit, state }) => {
       });
     })
     .catch(() => {
-      createFlash(__('There was an error updating the Geo Settings'));
+      createFlash({
+        message: __('There was an error updating the Geo Settings'),
+      });
       commit(types.RECEIVE_UPDATE_GEO_SETTINGS_ERROR);
     });
 };

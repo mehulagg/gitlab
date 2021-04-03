@@ -1,11 +1,13 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
-date: 2016-06-28
 ---
 
-# How to install GitLab on OpenShift Origin 3
+# How to install GitLab on OpenShift Origin 3 **(FREE SELF)**
 
-CAUTION: **Deprecated:**
+WARNING:
 This article is deprecated. Use the official Kubernetes Helm charts for
 installing GitLab to OpenShift. Check out the
 [official installation docs](https://docs.gitlab.com/charts/installation/cloud/openshift.html)
@@ -13,11 +15,11 @@ for details.
 
 ## Introduction
 
-[OpenShift Origin](https://www.okd.io/) (**Note:** renamed to OKD in Aug 2018) is an open source container application
+[OpenShift Origin](https://www.okd.io/) (**Note:** renamed to OKD in August 2018) is an open source container application
 platform created by [RedHat](https://www.redhat.com/en), based on [Kubernetes](https://kubernetes.io/) and [Docker](https://www.docker.com). That means
 you can host your own PaaS for free and almost with no hassle.
 
-In this tutorial, we will see how to deploy GitLab in OpenShift using GitLab's
+In this tutorial, we will see how to deploy GitLab in OpenShift using the GitLab
 official Docker image while getting familiar with the web interface and CLI
 tools that will help us achieve our goal.
 
@@ -25,28 +27,28 @@ For a video demonstration on installing GitLab on OpenShift, check the article [
 
 ## Prerequisites
 
-CAUTION: **Caution:**
+WARNING:
 This information is no longer up to date, as the current versions
 have changed and products have been renamed.
 
 OpenShift 3 is not yet deployed on RedHat's offered [Online platform](https://www.openshift.com/),
-so in order to test it, we will use an [all-in-one Virtualbox image](https://www.okd.io/minishift/) that is
+so in order to test it, we will use an [all-in-one VirtualBox image](https://www.okd.io/minishift/) that is
 offered by the OpenShift developers and managed by Vagrant. If you haven't done
 already, go ahead and install the following components as they are essential to
 test OpenShift easily:
 
 - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-- [Vagrant](https://www.vagrantup.com/downloads.html)
+- [Vagrant](https://www.vagrantup.com/downloads)
 - [OpenShift Client](https://docs.okd.io/3.11/cli_reference/get_started_cli.html) (`oc` for short)
 
 It is also important to mention that for the purposes of this tutorial, the
 latest Origin release is used:
 
-- **oc** `v1.3.0` (must be [installed](https://github.com/openshift/origin/releases/tag/v1.3.0) locally on your computer)
+- **`oc`** `v1.3.0` (must be [installed](https://github.com/openshift/origin/releases/tag/v1.3.0) locally on your computer)
 - **OpenShift** `v1.3.0` (is pre-installed in the [VM image](https://app.vagrantup.com/openshift/boxes/origin-all-in-one))
 - **Kubernetes** `v1.3.0` (is pre-installed in the [VM image](https://app.vagrantup.com/openshift/boxes/origin-all-in-one))
 
-NOTE: **Note:**
+NOTE:
 If you intend to deploy GitLab on a production OpenShift cluster, there are some
 limitations to bare in mind. Read on the [limitations](#current-limitations)
 section for more information and follow the linked links for the relevant
@@ -57,8 +59,8 @@ on your computer.
 
 ## Getting familiar with OpenShift Origin
 
-The environment we are about to use is based on CentOS 7 which comes with all
-the tools needed pre-installed: Docker, Kubernetes, OpenShift, etcd.
+The environment we are about to use is based on CentOS 7, which comes with all
+the tools needed pre-installed, including Docker, Kubernetes, and OpenShift.
 
 ### Test OpenShift using Vagrant
 
@@ -98,14 +100,14 @@ order to proceed.
 Let's login as admin with username/password `admin/admin`. This is what the
 landing page looks like:
 
-![openshift web console](img/web-console.png)
+![OpenShift web console](img/web-console.png)
 
 You can see that a number of [projects](https://docs.okd.io/3.11/dev_guide/projects.html) are already created for testing purposes.
 
 If you head over the `openshift-infra` project, a number of services with their
 respective pods are there to explore.
 
-![openshift web console](img/openshift-infra-project.png)
+![OpenShift web console](img/openshift-infra-project.png)
 
 We are not going to explore the whole interface, but if you want to learn about
 the key concepts of OpenShift, read the [core concepts reference](https://docs.okd.io/3.11/architecture/core_concepts/index.html)
@@ -181,9 +183,9 @@ Using the all-in-one VM gives you the ability to test OpenShift whenever you
 want. That means you get to play with it, shutdown the VM, and pick up where
 you left off.
 
-Sometimes though, you may encounter some issues, like OpenShift not running
-when booting up the VM. The web UI may not responding or you may see issues
-when trying to login with `oc`, like:
+Occasionally, you may encounter issues, like OpenShift not running when booting
+up the VM. The web UI may not respond, or you may see issues when trying to sign
+in with `oc`, like:
 
 ```plaintext
 The connection to the server 10.2.2.2:8443 was refused - did you specify the right host or port?
@@ -211,8 +213,7 @@ In that case, the OpenShift service might not be running, so in order to fix it:
    systemctl status openshift -l
    ```
 
-Now you will be able to login using `oc` (like we did before) and visit the web
-console.
+You can now sign in by using `oc` (like we did before) and visit the web console.
 
 ## Deploy GitLab
 
@@ -266,7 +267,7 @@ And then let's import it in OpenShift:
 oc create -f openshift-template.json -n openshift
 ```
 
-NOTE: **Note:**
+NOTE:
 The `-n openshift` namespace flag is a trick to make the template available to all
 projects. If you recall from when we created the `gitlab` project, `oc` switched
 to it automatically, and that can be verified by the `oc status` command. If
@@ -313,11 +314,11 @@ If you are deploying to production you will want to change the **GitLab instance
 hostname** and use greater values for the volume sizes. If you don't provide a
 password for PostgreSQL, it will be created automatically.
 
-NOTE: **Note:**
+NOTE:
 The `gitlab.apps.10.2.2.2.nip.io` hostname that is used by default will
 resolve to the host with IP `10.2.2.2` which is the IP our VM uses. It is a
 trick to have distinct FQDNs pointing to services that are on our local network.
-Read more on how this works in <https://nip.io>.
+Read more on how this works at [nip.io](https://nip.io).
 
 Now that we configured this, let's see how to manage and scale GitLab.
 
@@ -325,8 +326,8 @@ Now that we configured this, let's see how to manage and scale GitLab.
 
 Setting up GitLab for the first time might take a while depending on your
 internet connection and the resources you have attached to the all-in-one VM.
-GitLab's Docker image is quite big (~500MB), so you'll have to wait until
-it's downloaded and configured before you use it.
+The GitLab Docker image is quite big (approximately 500 MB), so you'll have to
+wait until it's downloaded and configured before you use it.
 
 ### Watch while GitLab gets deployed
 
@@ -342,7 +343,7 @@ created the GitLab app? This is where you can see them in action.
 
 ![Running pods](img/running-pods.png)
 
-You can see GitLab being reconfigured by taking look at the logs in realtime.
+You can see GitLab being reconfigured by taking look at the logs in real time.
 Click on `gitlab-ce-2-j7ioe` (your ID will be different) and go to the **Logs**
 tab.
 
@@ -372,7 +373,7 @@ running scaled to 2.
 
 Upping the GitLab pods is actually like adding new application servers to your
 cluster. You can see how that would work if you didn't use GitLab with
-OpenShift by following the [HA documentation](../../administration/high_availability/gitlab.md) for the application servers.
+OpenShift by following the [HA documentation](../../administration/reference_architectures/index.md) for the application servers.
 
 Bare in mind that you may need more resources (CPU, RAM, disk space) when you
 scale up. If a pod is in pending state for too long, you can navigate to
@@ -463,7 +464,7 @@ OpenShift's website about [autoscaling](https://docs.okd.io/3.11/dev_guide/pod_a
 As stated in the [all-in-one VM](https://www.okd.io/minishift/) page:
 
 > By default, OpenShift will not allow a container to run as root or even a
-non-random container assigned userid. Most Docker images in the Dockerhub do not
+non-random container assigned user ID. Most Docker images in Docker Hub do not
 follow this best practice and instead run as root.
 
 The all-in-one VM we are using has this security turned off so it will not
@@ -495,14 +496,13 @@ oc adm policy add-scc-to-user anyuid system:serviceaccount:gitlab:gitlab-ce-user
 
 ## Conclusion
 
-By now, you should have an understanding of the basic OpenShift Origin concepts
-and a sense of how things work using the web console or the CLI.
+You should now have an understanding of the basic OpenShift Origin concepts, and
+a sense of how things work using the web console or the CLI.
 
-GitLab was hard to install in previous versions of OpenShift,
-but now that belongs to the past. Upload a template, create a project, add an
-application and you are done. You are ready to login to your new GitLab instance.
+Upload a template, create a project, add an application, and you're done. You're
+ready to sign in to your new GitLab instance.
 
-And remember that in this tutorial we just scratched the surface of what Origin
-is capable of. As always, you can refer to the detailed
-[documentation](https://docs.okd.io) to learn more about deploying your own OpenShift
-PaaS and managing your applications with the ease of containers.
+Remember that this tutorial doesn't address all that Origin is capable of. As
+always, refer to the detailed [documentation](https://docs.okd.io) to learn more
+about deploying your own OpenShift PaaS and managing your applications with
+containers.

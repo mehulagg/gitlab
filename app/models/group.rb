@@ -15,13 +15,15 @@ class Group < Namespace
   include WithUploads
   include Gitlab::Utils::StrongMemoize
   include GroupAPICompatibility
+  include EachBatch
+  include HasTimelogsReport
 
   ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
-  UpdateSharedRunnersError = Class.new(StandardError)
-
-  has_many :group_members, -> { where(requested_at: nil) }, dependent: :destroy, as: :source # rubocop:disable Cop/ActiveRecordDependent
+  has_many :all_group_members, -> { where(requested_at: nil) }, dependent: :destroy, as: :source, class_name: 'GroupMember' # rubocop:disable Cop/ActiveRecordDependent
+  has_many :group_members, -> { where(requested_at: nil).where.not(members: { access_level: Gitlab::Access::MINIMAL_ACCESS }) }, dependent: :destroy, as: :source # rubocop:disable Cop/ActiveRecordDependent
   alias_method :members, :group_members
+
   has_many :users, through: :group_members
   has_many :owners,
     -> { where(members: { access_level: Gitlab::Access::OWNER }) },
@@ -32,7 +34,7 @@ class Group < Namespace
   has_many :members_and_requesters, as: :source, class_name: 'GroupMember'
 
   has_many :milestones
-  has_many :iterations
+  has_many :services
   has_many :shared_group_links, foreign_key: :shared_with_group_id, class_name: 'GroupGroupLink'
   has_many :shared_with_group_links, foreign_key: :shared_group_id, class_name: 'GroupGroupLink'
   has_many :shared_groups, through: :shared_group_links, source: :shared_group
@@ -46,6 +48,7 @@ class Group < Namespace
 
   has_many :labels, class_name: 'GroupLabel'
   has_many :variables, class_name: 'Ci::GroupVariable'
+  has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult'
   has_many :custom_attributes, class_name: 'GroupCustomAttribute'
 
   has_many :boards
@@ -64,15 +67,26 @@ class Group < Namespace
 
   has_one :import_state, class_name: 'GroupImportState', inverse_of: :group
 
+  has_many :group_deploy_keys_groups, inverse_of: :group
+  has_many :group_deploy_keys, through: :group_deploy_keys_groups
   has_many :group_deploy_tokens
   has_many :deploy_tokens, through: :group_deploy_tokens
+  has_many :oauth_applications, class_name: 'Doorkeeper::Application', as: :owner, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+
+  has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
+  has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
+  has_many :dependency_proxy_manifests, class_name: 'DependencyProxy::Manifest'
+
+  # debian_distributions and associated component_files must be destroyed by ruby code in order to properly remove carrierwave uploads
+  has_many :debian_distributions, class_name: 'Packages::Debian::GroupDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   accepts_nested_attributes_for :variables, allow_destroy: true
 
   validate :visibility_level_allowed_by_projects
   validate :visibility_level_allowed_by_sub_groups
   validate :visibility_level_allowed_by_parent
-  validates :variables, variable_duplicates: true
+  validate :two_factor_authentication_allowed
+  validates :variables, nested_attributes_duplicates: true
 
   validates :two_factor_grace_period, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
@@ -92,6 +106,20 @@ class Group < Namespace
   scope :with_users, -> { includes(:users) }
 
   scope :by_id, ->(groups) { where(id: groups) }
+
+  scope :for_authorized_group_members, -> (user_ids) do
+    joins(:group_members)
+      .where("members.user_id IN (?)", user_ids)
+      .where("access_level >= ?", Gitlab::Access::GUEST)
+  end
+
+  scope :for_authorized_project_members, -> (user_ids) do
+    joins(projects: :project_authorizations)
+      .where("project_authorizations.user_id IN (?)", user_ids)
+  end
+
+  delegate :default_branch_name, to: :namespace_settings
+  delegate :resource_access_token_creation_allowed, :resource_access_token_creation_allowed=, :resource_access_token_creation_allowed?, to: :namespace_settings
 
   class << self
     def sort_by_attribute(method)
@@ -135,6 +163,24 @@ class Group < Namespace
       end
     end
 
+    def without_integration(integration)
+      services = Service
+        .select('1')
+        .where('services.group_id = namespaces.id')
+        .where(type: integration.type)
+
+      where('NOT EXISTS (?)', services)
+    end
+
+    # This method can be used only if all groups have the same top-level
+    # group
+    def preset_root_ancestor_for(groups)
+      return groups if groups.size < 2
+
+      root = groups.first.root_ancestor
+      groups.drop(1).each { |group| group.root_ancestor = root }
+    end
+
     private
 
     def public_to_user_arel(user)
@@ -174,6 +220,10 @@ class Group < Namespace
 
   def packages_feature_enabled?
     ::Gitlab.config.packages.enabled
+  end
+
+  def dependency_proxy_feature_available?
+    ::Gitlab.config.dependency_proxy.enabled
   end
 
   def notification_email_for(user)
@@ -293,6 +343,13 @@ class Group < Namespace
     has_owner?(user) && members_with_parents.owners.size == 1
   end
 
+  def last_blocked_owner?(user)
+    return false if members_with_parents.owners.any?
+
+    blocked_owners = members.blocked.where(access_level: Gitlab::Access::OWNER)
+    blocked_owners.size == 1 && blocked_owners.exists?(user_id: user)
+  end
+
   def ldap_synced?
     false
   end
@@ -316,21 +373,42 @@ class Group < Namespace
   # rubocop: enable CodeReuse/ServiceClass
 
   # rubocop: disable CodeReuse/ServiceClass
-  def refresh_members_authorized_projects(blocking: true, priority: UserProjectAccessChangedService::HIGH_PRIORITY)
+  def refresh_members_authorized_projects(
+    blocking: true,
+    priority: UserProjectAccessChangedService::HIGH_PRIORITY,
+    direct_members_only: false
+  )
+
+    user_ids = if direct_members_only
+                 users_ids_of_direct_members
+               else
+                 user_ids_for_project_authorizations
+               end
+
     UserProjectAccessChangedService
-      .new(user_ids_for_project_authorizations)
+      .new(user_ids)
       .execute(blocking: blocking, priority: priority)
   end
   # rubocop: enable CodeReuse/ServiceClass
 
+  def users_ids_of_direct_members
+    direct_members.pluck(:user_id)
+  end
+
   def user_ids_for_project_authorizations
-    members_with_parents.pluck(:user_id)
+    members_with_parents.pluck(Arel.sql('DISTINCT members.user_id'))
   end
 
   def self_and_ancestors_ids
     strong_memoize(:self_and_ancestors_ids) do
       self_and_ancestors.pluck(:id)
     end
+  end
+
+  def direct_members
+    GroupMember.active_without_invites_and_requests
+               .non_minimal_access
+               .where(source_id: id)
   end
 
   def members_with_parents
@@ -343,6 +421,7 @@ class Group < Namespace
       end
 
     group_hierarchy_members = GroupMember.active_without_invites_and_requests
+                                         .non_minimal_access
                                          .where(source_id: source_ids)
 
     GroupMember.from_union([group_hierarchy_members,
@@ -364,6 +443,13 @@ class Group < Namespace
   def direct_and_indirect_members
     GroupMember
       .active_without_invites_and_requests
+      .where(source_id: self_and_hierarchy.reorder(nil).select(:id))
+  end
+
+  def direct_and_indirect_members_with_inactive
+    GroupMember
+      .non_request
+      .non_invite
       .where(source_id: self_and_hierarchy.reorder(nil).select(:id))
   end
 
@@ -393,6 +479,24 @@ class Group < Namespace
     ])
   end
 
+  # Returns all users (also inactive) that are members of the group because:
+  # 1. They belong to the group
+  # 2. They belong to a project that belongs to the group
+  # 3. They belong to a sub-group or project in such sub-group
+  # 4. They belong to an ancestor group
+  def direct_and_indirect_users_with_inactive
+    User.from_union([
+      User
+        .where(id: direct_and_indirect_members_with_inactive.select(:user_id))
+        .reorder(nil),
+      project_users_with_descendants
+    ])
+  end
+
+  def users_count
+    members.count
+  end
+
   # Returns all users that are members of projects
   # belonging to the current group or sub-groups
   def project_users_with_descendants
@@ -401,10 +505,17 @@ class Group < Namespace
       .where(namespaces: { id: self_and_descendants.select(:id) })
   end
 
-  def max_member_access_for_user(user)
+  # Return the highest access level for a user
+  #
+  # A special case is handled here when the user is a GitLab admin
+  # which implies it has "OWNER" access everywhere, but should not
+  # officially appear as a member of a group unless specifically added to it
+  #
+  # @param user [User]
+  # @param only_concrete_membership [Bool] whether require admin concrete membership status
+  def max_member_access_for_user(user, only_concrete_membership: false)
     return GroupMember::NO_ACCESS unless user
-
-    return GroupMember::OWNER if user.admin?
+    return GroupMember::OWNER if user.can_admin_all_resources? && !only_concrete_membership
 
     max_member_access = members_with_parents.where(user_id: user)
                                             .reorder(access_level: :desc)
@@ -424,15 +535,11 @@ class Group < Namespace
     }
   end
 
-  def ci_variables_for(ref, project)
-    cache_key = "ci_variables_for:group:#{self&.id}:project:#{project&.id}:ref:#{ref}"
+  def ci_variables_for(ref, project, environment: nil)
+    cache_key = "ci_variables_for:group:#{self&.id}:project:#{project&.id}:ref:#{ref}:environment:#{environment}"
 
     ::Gitlab::SafeRequestStore.fetch(cache_key) do
-      list_of_ids = [self] + ancestors
-      variables = Ci::GroupVariable.where(group: list_of_ids)
-      variables = variables.unprotected unless project.protected_for?(ref)
-      variables = variables.group_by(&:group_id)
-      list_of_ids.reverse.flat_map { |group| variables[group.id] }.compact
+      uncached_ci_variables_for(ref, project, environment: environment)
     end
   end
 
@@ -512,53 +619,41 @@ class Group < Namespace
     preloader.preload(self, shared_with_group_links: [shared_with_group: :route])
   end
 
-  def shared_runners_allowed?
-    shared_runners_enabled? || allow_descendants_override_disabled_shared_runners?
+  def update_shared_runners_setting!(state)
+    raise ArgumentError unless SHARED_RUNNERS_SETTINGS.include?(state)
+
+    case state
+    when 'disabled_and_unoverridable' then disable_shared_runners! # also disallows override
+    when 'disabled_with_override' then disable_shared_runners_and_allow_override!
+    when 'enabled' then enable_shared_runners! # set both to true
+    end
   end
 
-  def parent_allows_shared_runners?
+  def default_owner
+    owners.first || parent&.default_owner || owner
+  end
+
+  def default_branch_name
+    namespace_settings&.default_branch_name
+  end
+
+  def access_level_roles
+    GroupMember.access_level_roles
+  end
+
+  def access_level_values
+    access_level_roles.values
+  end
+
+  def parent_allows_two_factor_authentication?
     return true unless has_parent?
 
-    parent.shared_runners_allowed?
+    ancestor_settings = ancestors.find_by(parent_id: nil).namespace_settings
+    ancestor_settings.allow_mfa_for_subgroups
   end
 
-  def parent_enabled_shared_runners?
-    return true unless has_parent?
-
-    parent.shared_runners_enabled?
-  end
-
-  def enable_shared_runners!
-    raise UpdateSharedRunnersError, 'Shared Runners disabled for the parent group' unless parent_enabled_shared_runners?
-
-    update_column(:shared_runners_enabled, true)
-  end
-
-  def disable_shared_runners!
-    group_ids = self_and_descendants
-    return if group_ids.empty?
-
-    Group.by_id(group_ids).update_all(shared_runners_enabled: false)
-
-    all_projects.update_all(shared_runners_enabled: false)
-  end
-
-  def allow_descendants_override_disabled_shared_runners!
-    raise UpdateSharedRunnersError, 'Shared Runners enabled' if shared_runners_enabled?
-    raise UpdateSharedRunnersError, 'Group level shared Runners not allowed' unless parent_allows_shared_runners?
-
-    update_column(:allow_descendants_override_disabled_shared_runners, true)
-  end
-
-  def disallow_descendants_override_disabled_shared_runners!
-    raise UpdateSharedRunnersError, 'Shared Runners enabled' if shared_runners_enabled?
-
-    group_ids = self_and_descendants
-    return if group_ids.empty?
-
-    Group.by_id(group_ids).update_all(allow_descendants_override_disabled_shared_runners: false)
-
-    all_projects.update_all(shared_runners_enabled: false)
+  def has_project_with_service_desk_enabled?
+    Gitlab::ServiceDesk.supported? && all_projects.service_desk_enabled.exists?
   end
 
   private
@@ -566,7 +661,7 @@ class Group < Namespace
   def update_two_factor_requirement
     return unless saved_change_to_require_two_factor_authentication? || saved_change_to_two_factor_grace_period?
 
-    members_with_descendants.find_each(&:update_two_factor_requirement)
+    direct_and_indirect_members.find_each(&:update_two_factor_requirement)
   end
 
   def path_changed_hook
@@ -589,6 +684,15 @@ class Group < Namespace
     return if visibility_level_allowed_by_sub_groups?
 
     errors.add(:visibility_level, "#{visibility} is not allowed since there are sub-groups with higher visibility.")
+  end
+
+  def two_factor_authentication_allowed
+    return unless has_parent?
+    return unless require_two_factor_authentication
+
+    return if parent_allows_two_factor_authentication?
+
+    errors.add(:require_two_factor_authentication, _('is forbidden by a top-level group'))
   end
 
   def members_from_self_and_ancestor_group_shares
@@ -624,6 +728,7 @@ class Group < Namespace
       .where(group_member_table[:requested_at].eq(nil))
       .where(group_member_table[:source_id].eq(group_group_link_table[:shared_with_group_id]))
       .where(group_member_table[:source_type].eq('Namespace'))
+      .non_minimal_access
   end
 
   def smallest_value_arel(args, column_alias)
@@ -636,6 +741,62 @@ class Group < Namespace
     Gitlab::ObjectHierarchy
       .new(Group.where(id: group_ids))
       .base_and_descendants
+  end
+
+  def disable_shared_runners!
+    update!(
+      shared_runners_enabled: false,
+      allow_descendants_override_disabled_shared_runners: false)
+
+    group_ids = descendants
+    unless group_ids.empty?
+      Group.by_id(group_ids).update_all(
+        shared_runners_enabled: false,
+        allow_descendants_override_disabled_shared_runners: false)
+    end
+
+    all_projects.update_all(shared_runners_enabled: false)
+  end
+
+  def disable_shared_runners_and_allow_override!
+    # enabled -> disabled_with_override
+    if shared_runners_enabled?
+      update!(
+        shared_runners_enabled: false,
+        allow_descendants_override_disabled_shared_runners: true)
+
+      group_ids = descendants
+      unless group_ids.empty?
+        Group.by_id(group_ids).update_all(shared_runners_enabled: false)
+      end
+
+      all_projects.update_all(shared_runners_enabled: false)
+
+    # disabled_and_unoverridable -> disabled_with_override
+    else
+      update!(allow_descendants_override_disabled_shared_runners: true)
+    end
+  end
+
+  def enable_shared_runners!
+    update!(shared_runners_enabled: true)
+  end
+
+  def uncached_ci_variables_for(ref, project, environment: nil)
+    list_of_ids = [self] + ancestors
+    variables = Ci::GroupVariable.where(group: list_of_ids)
+    variables = variables.unprotected unless project.protected_for?(ref)
+
+    if Feature.enabled?(:scoped_group_variables, self, default_enabled: :yaml)
+      variables = if environment
+                    variables.on_environment(environment)
+                  else
+                    variables.where(environment_scope: '*')
+                  end
+    end
+
+    variables = variables.group_by(&:group_id)
+    list_of_ids.reverse.flat_map { |group| variables[group.id] }.compact
   end
 end
 

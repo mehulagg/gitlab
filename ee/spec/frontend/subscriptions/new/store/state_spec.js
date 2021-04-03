@@ -1,13 +1,12 @@
-import createState from 'ee/subscriptions/new/store/state';
 import * as constants from 'ee/subscriptions/new/constants';
+import createState from 'ee/subscriptions/new/store/state';
 
-constants.STEPS = ['firstStep', 'secondStep'];
 constants.TAX_RATE = 0;
 
 describe('projectsSelector default state', () => {
-  const planData = [
-    { id: 'firstPlanId', code: 'bronze', price_per_year: 48 },
-    { id: 'secondPlanId', code: 'silver', price_per_year: 228 },
+  const availablePlans = [
+    { id: 'firstPlanId', code: 'bronze', price_per_year: 48, name: 'Bronze Plan' },
+    { id: 'secondPlanId', code: 'premium', price_per_year: 228, name: 'Premium Plan' },
   ];
 
   const groupData = [
@@ -16,7 +15,7 @@ describe('projectsSelector default state', () => {
   ];
 
   const initialData = {
-    planData: JSON.stringify(planData),
+    availablePlans: JSON.stringify(availablePlans),
     groupData: JSON.stringify(groupData),
     planId: 'secondPlanId',
     namespaceId: null,
@@ -31,27 +30,23 @@ describe('projectsSelector default state', () => {
 
   const state = createState(initialData);
 
-  it('sets the currentStep to the first item of the STEPS constant', () => {
-    expect(state.currentStep).toEqual('firstStep');
-  });
-
   describe('availablePlans', () => {
-    it('sets the availablePlans to the provided parsed planData', () => {
+    it('sets the availablePlans to the provided parsed availablePlans', () => {
       expect(state.availablePlans).toEqual([
-        { value: 'firstPlanId', text: 'Bronze', pricePerUserPerYear: 48 },
-        { value: 'secondPlanId', text: 'Silver', pricePerUserPerYear: 228 },
+        { value: 'firstPlanId', text: 'Bronze Plan', pricePerUserPerYear: 48 },
+        { value: 'secondPlanId', text: 'Premium Plan', pricePerUserPerYear: 228 },
       ]);
     });
 
-    it('sets the availablePlans to an empty array when no planData provided', () => {
-      const modifiedState = createState({ ...initialData, ...{ planData: undefined } });
+    it('sets the availablePlans to an empty array when no availablePlans provided', () => {
+      const modifiedState = createState({ ...initialData, ...{ availablePlans: undefined } });
 
       expect(modifiedState.availablePlans).toEqual([]);
     });
   });
 
   describe('selectedPlan', () => {
-    it('sets the selectedPlan to the provided planId if it is present in the provided planData', () => {
+    it('sets the selectedPlan to the provided planId if it is present in the provided availablePlans', () => {
       expect(state.selectedPlan).toEqual('secondPlanId');
     });
 
@@ -68,7 +63,7 @@ describe('projectsSelector default state', () => {
     });
 
     it('sets the selectedPlan to an empty string if availablePlans are not present', () => {
-      const modifiedState = createState({ ...initialData, ...{ planData: '[]' } });
+      const modifiedState = createState({ ...initialData, ...{ availablePlans: '[]' } });
 
       expect(modifiedState.selectedPlan).toBeUndefined();
     });

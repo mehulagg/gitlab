@@ -25,20 +25,6 @@ RSpec.describe Epics::CreateService do
       expect(epic.confidential).to be_truthy
       expect(NewEpicWorker).to have_received(:perform_async).with(epic.id, user.id)
     end
-
-    context 'when confidential_epics is disabled' do
-      before do
-        stub_feature_flags(confidential_epics: false)
-      end
-
-      it 'ignores confidential attribute' do
-        expect { subject }.to change { Epic.count }.by(1)
-
-        epic = Epic.last
-        expect(epic).to be_persisted
-        expect(epic.confidential).to be_falsey
-      end
-    end
   end
 
   context 'handling fixed dates' do
@@ -94,6 +80,63 @@ RSpec.describe Epics::CreateService do
 
           expect { subject }.not_to change { EpicUserMention.count }
           expect(subject.valid?).to be false
+        end
+      end
+
+      context 'when description param has quick action' do
+        before do
+          stub_licensed_features(epics: true, subepics: true)
+          group.add_developer(user)
+        end
+
+        context 'for /parent_epic' do
+          it 'assigns parent epic' do
+            parent_epic = create(:epic, group: group)
+            description = "/parent_epic #{parent_epic.to_reference}"
+            params = { title: 'New epic with parent', description: description }
+
+            epic = described_class.new(group, user, params).execute
+
+            expect(epic.parent).to eq(parent_epic)
+          end
+
+          context 'when parent epic cannot be assigned' do
+            it 'does not assign parent epic' do
+              other_group = create(:group, :private)
+              parent_epic = create(:epic, group: other_group)
+              description = "/parent_epic #{parent_epic.to_reference(group)}"
+              params = { title: 'New epic with parent', description: description }
+
+              epic = described_class.new(group, user, params).execute
+
+              expect(epic.parent).to eq(nil)
+            end
+          end
+        end
+
+        context 'for /child_epic' do
+          it 'sets a child epic' do
+            child_epic = create(:epic, group: group)
+            description = "/child_epic #{child_epic.to_reference}"
+            params = { title: 'New epic with child', description: description }
+
+            epic = described_class.new(group, user, params).execute
+
+            expect(epic.reload.children).to include(child_epic)
+          end
+
+          context 'when child epic cannot be assigned' do
+            it 'does not set child epic' do
+              other_group = create(:group, :private)
+              child_epic = create(:epic, group: other_group)
+              description = "/child_epic #{child_epic.to_reference(group)}"
+              params = { title: 'New epic with child', description: description }
+
+              epic = described_class.new(group, user, params).execute
+
+              expect(epic.reload.children).to be_empty
+            end
+          end
         end
       end
     end

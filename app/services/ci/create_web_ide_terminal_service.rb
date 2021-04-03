@@ -6,7 +6,7 @@ module Ci
 
     TerminalCreationError = Class.new(StandardError)
 
-    TERMINAL_NAME = 'terminal'.freeze
+    TERMINAL_NAME = 'terminal'
 
     attr_reader :terminal
 
@@ -32,7 +32,7 @@ module Ci
 
         Ci::ProcessPipelineService
           .new(pipeline)
-          .execute(nil, initial_process: true)
+          .execute
 
         pipeline_created_counter.increment(source: :webide)
       end
@@ -58,7 +58,8 @@ module Ci
         builds: [terminal_build_seed]
       }
 
-      Gitlab::Ci::Pipeline::Seed::Stage.new(pipeline, attributes, [])
+      seed_context = Gitlab::Ci::Pipeline::Seed::Context.new(pipeline)
+      Gitlab::Ci::Pipeline::Seed::Stage.new(seed_context, attributes, [])
     end
 
     def terminal_build_seed
@@ -70,7 +71,7 @@ module Ci
     end
 
     def load_terminal_config!
-      result = ::Ci::WebIdeConfigService.new(project, current_user, sha: sha).execute
+      result = ::Ide::TerminalConfigService.new(project, current_user, sha: sha).execute
       raise TerminalCreationError, result[:message] if result[:status] != :success
 
       @terminal = result[:terminal]

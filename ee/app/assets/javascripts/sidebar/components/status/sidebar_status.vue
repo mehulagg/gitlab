@@ -1,6 +1,8 @@
 <script>
-import Flash from '~/flash';
+import { mapGetters } from 'vuex';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
+import { OPENED, REOPENED } from '~/notes/constants';
 import Status from './status.vue';
 
 export default {
@@ -16,10 +18,18 @@ export default {
       },
     },
   },
+  computed: {
+    ...mapGetters(['getNoteableData']),
+    isOpen() {
+      return this.getNoteableData.state === OPENED || this.getNoteableData.state === REOPENED;
+    },
+  },
   methods: {
     handleDropdownClick(status) {
       this.mediator.updateStatus(status).catch(() => {
-        Flash(__('Error occurred while updating the issue status'));
+        createFlash({
+          message: __('Error occurred while updating the issue status'),
+        });
       });
     },
   },
@@ -28,6 +38,7 @@ export default {
 
 <template>
   <status
+    :is-open="isOpen"
     :is-editable="mediator.store.editable"
     :is-fetching="mediator.store.isFetching.status"
     :status="mediator.store.status"

@@ -5,17 +5,13 @@ require 'spec_helper'
 RSpec.describe GitlabSubscription do
   using RSpec::Parameterized::TableSyntax
 
-  before do
-    stub_feature_flags(elasticsearch_index_only_paid_groups: false)
-  end
-
-  %i[free_plan bronze_plan silver_plan gold_plan early_adopter_plan].each do |plan|
+  %i[free_plan bronze_plan premium_plan ultimate_plan].each do |plan|
     let_it_be(plan) { create(plan) }
   end
 
   describe 'default values' do
     it do
-      Timecop.freeze(Date.today + 30) do
+      travel_to(Date.today + 30) do
         expect(subject.start_date).to eq(Date.today)
       end
     end
@@ -38,22 +34,20 @@ RSpec.describe GitlabSubscription do
 
   describe 'scopes' do
     describe '.with_hosted_plan' do
-      let!(:gold_subscription) { create(:gitlab_subscription, hosted_plan: gold_plan) }
-      let!(:silver_subscription) { create(:gitlab_subscription, hosted_plan: silver_plan) }
-      let!(:early_adopter_subscription) { create(:gitlab_subscription, hosted_plan: early_adopter_plan) }
+      let!(:ultimate_subscription) { create(:gitlab_subscription, hosted_plan: ultimate_plan) }
+      let!(:premium_subscription) { create(:gitlab_subscription, hosted_plan: premium_plan) }
 
-      let!(:trial_subscription) { create(:gitlab_subscription, hosted_plan: gold_plan, trial: true) }
+      let!(:trial_subscription) { create(:gitlab_subscription, hosted_plan: ultimate_plan, trial: true) }
 
       it 'scopes to the plan' do
-        expect(described_class.with_hosted_plan('gold')).to contain_exactly(gold_subscription)
-        expect(described_class.with_hosted_plan('silver')).to contain_exactly(silver_subscription)
-        expect(described_class.with_hosted_plan('early_adopter')).to contain_exactly(early_adopter_subscription)
+        expect(described_class.with_hosted_plan('ultimate')).to contain_exactly(ultimate_subscription)
+        expect(described_class.with_hosted_plan('premium')).to contain_exactly(premium_subscription)
         expect(described_class.with_hosted_plan('bronze')).to be_empty
       end
     end
   end
 
-  describe '#seats_in_use' do
+  describe '#calculate_seats_in_use' do
     let!(:user_1)         { create(:user) }
     let!(:user_2)         { create(:user) }
     let!(:blocked_user)   { create(:user, :blocked) }
@@ -68,14 +62,14 @@ RSpec.describe GitlabSubscription do
     it 'returns count of members' do
       group.add_developer(user_1)
 
-      expect(gitlab_subscription.seats_in_use).to eq(1)
+      expect(gitlab_subscription.calculate_seats_in_use).to eq(1)
     end
 
     it 'also counts users from subgroups' do
       group.add_developer(user_1)
       subgroup_1.add_developer(user_2)
 
-      expect(gitlab_subscription.seats_in_use).to eq(2)
+      expect(gitlab_subscription.calculate_seats_in_use).to eq(2)
     end
 
     it 'does not count duplicated members' do
@@ -83,7 +77,7 @@ RSpec.describe GitlabSubscription do
       subgroup_1.add_developer(user_2)
       subgroup_2.add_developer(user_2)
 
-      expect(gitlab_subscription.seats_in_use).to eq(2)
+      expect(gitlab_subscription.calculate_seats_in_use).to eq(2)
     end
 
     it 'does not count blocked members' do
@@ -91,7 +85,7 @@ RSpec.describe GitlabSubscription do
       group.add_developer(blocked_user)
 
       expect(group.member_count).to eq(2)
-      expect(gitlab_subscription.seats_in_use).to eq(1)
+      expect(gitlab_subscription.calculate_seats_in_use).to eq(1)
     end
 
     context 'with guest members' do
@@ -99,20 +93,20 @@ RSpec.describe GitlabSubscription do
         group.add_guest(user_1)
       end
 
-      context 'with a gold plan' do
+      context 'with a ultimate plan' do
         it 'excludes these members' do
-          gitlab_subscription.update!(plan_code: 'gold')
+          gitlab_subscription.update!(plan_code: 'ultimate')
 
-          expect(gitlab_subscription.seats_in_use).to eq(0)
+          expect(gitlab_subscription.calculate_seats_in_use).to eq(0)
         end
       end
 
       context 'with other plans' do
-        %w[bronze silver].each do |plan|
+        %w[bronze premium].each do |plan|
           it 'excludes these members' do
             gitlab_subscription.update!(plan_code: plan)
 
-            expect(gitlab_subscription.seats_in_use).to eq(1)
+            expect(gitlab_subscription.calculate_seats_in_use).to eq(1)
           end
         end
       end
@@ -127,16 +121,16 @@ RSpec.describe GitlabSubscription do
       end
 
       it 'always returns 1 seat' do
-        [bronze_plan, silver_plan, gold_plan].each do |plan|
+        [bronze_plan, premium_plan, ultimate_plan].each do |plan|
           gitlab_subscription.update!(hosted_plan: plan)
 
-          expect(gitlab_subscription.seats_in_use).to eq(1)
+          expect(gitlab_subscription.calculate_seats_in_use).to eq(1)
         end
       end
     end
   end
 
-  describe '#seats_owed' do
+  describe '#calculate_seats_owed' do
     let!(:gitlab_subscription) { create(:gitlab_subscription, subscription_attrs) }
 
     before do
@@ -145,7 +139,7 @@ RSpec.describe GitlabSubscription do
 
     shared_examples 'always returns a total of 0' do
       it 'does not update max_seats_used' do
-        expect(gitlab_subscription.seats_owed).to eq(0)
+        expect(gitlab_subscription.calculate_seats_owed).to eq(0)
       end
     end
 
@@ -161,18 +155,107 @@ RSpec.describe GitlabSubscription do
       include_examples 'always returns a total of 0'
     end
 
-    context 'with an early adopter plan' do
-      let(:subscription_attrs) { { hosted_plan: early_adopter_plan } }
-
-      include_examples 'always returns a total of 0'
-    end
-
     context 'with a paid plan' do
       let(:subscription_attrs) { { hosted_plan: bronze_plan } }
 
       it 'calculates the number of owed seats' do
-        expect(gitlab_subscription.reload.seats_owed).to eq(5)
+        expect(gitlab_subscription.reload.calculate_seats_owed).to eq(5)
       end
+    end
+  end
+
+  describe '#refresh_seat_attributes!' do
+    subject { create(:gitlab_subscription, seats: 3, max_seats_used: 2) }
+
+    before do
+      expect(subject).to receive(:calculate_seats_in_use).and_return(calculate_seats_in_use)
+    end
+
+    context 'when current seats in use is lower than recorded max_seats_used' do
+      let(:calculate_seats_in_use) { 1 }
+
+      it 'does not increase max_seats_used' do
+        expect do
+          subject.refresh_seat_attributes!
+        end.to change(subject, :seats_in_use).from(0).to(1)
+          .and not_change(subject, :max_seats_used)
+          .and not_change(subject, :seats_owed)
+      end
+    end
+
+    context 'when current seats in use is higher than seats and max_seats_used' do
+      let(:calculate_seats_in_use) { 4 }
+
+      it 'increases seats and max_seats_used' do
+        expect do
+          subject.refresh_seat_attributes!
+        end.to change(subject, :seats_in_use).from(0).to(4)
+          .and change(subject, :max_seats_used).from(2).to(4)
+          .and change(subject, :seats_owed).from(0).to(1)
+      end
+    end
+  end
+
+  describe '#seats_in_use' do
+    let(:group) { create(:group) }
+    let!(:group_member) { create(:group_member, :developer, user: create(:user), group: group) }
+    let(:hosted_plan) { nil }
+    let(:seats_in_use) { 5 }
+    let(:trial) { false }
+
+    let(:gitlab_subscription) do
+      create(:gitlab_subscription, namespace: group, trial: trial, hosted_plan: hosted_plan, seats_in_use: seats_in_use)
+    end
+
+    shared_examples 'a disabled feature' do
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(seats_in_use_for_free_or_trial: false)
+        end
+
+        it 'returns the previously calculated seats in use' do
+          expect(subject).to eq(5)
+        end
+      end
+    end
+
+    subject { gitlab_subscription.seats_in_use }
+
+    context 'with a paid hosted plan' do
+      let(:hosted_plan) { ultimate_plan }
+
+      it 'returns the previously calculated seats in use' do
+        expect(subject).to eq(5)
+      end
+
+      context 'when seats in use is 0' do
+        let(:seats_in_use) { 0 }
+
+        it 'returns 0 too' do
+          expect(subject).to eq(0)
+        end
+      end
+    end
+
+    context 'with a trial plan' do
+      let(:hosted_plan) { ultimate_plan }
+      let(:trial) { true }
+
+      it 'returns the current seats in use' do
+        expect(subject).to eq(1)
+      end
+
+      it_behaves_like 'a disabled feature'
+    end
+
+    context 'with a free plan' do
+      let(:hosted_plan) { free_plan }
+
+      it 'returns the current seats in use' do
+        expect(subject).to eq(1)
+      end
+
+      it_behaves_like 'a disabled feature'
     end
   end
 
@@ -182,7 +265,7 @@ RSpec.describe GitlabSubscription do
     subject { gitlab_subscription.expired? }
 
     context 'when end_date is expired' do
-      let(:end_date) { Date.yesterday }
+      let(:end_date) { Date.current.advance(days: -1) }
 
       it { is_expected.to be(true) }
     end
@@ -205,18 +288,15 @@ RSpec.describe GitlabSubscription do
 
     let(:subscription) { build(:gitlab_subscription) }
 
-    where(:plan_name, :seats, :hosted, :result) do
-      'bronze'        | 0 | true  | false
-      'bronze'        | 1 | true  | true
-      'bronze'        | 1 | false | false
-      'silver'        | 1 | true  | true
-      'early_adopter' | 1 | true  | false
+    where(:plan_name, :seats, :result) do
+      'bronze'        | 0 | false
+      'bronze'        | 1 | true
+      'premium'       | 1 | true
     end
 
     with_them do
       before do
         plan = build(:plan, name: plan_name)
-        allow(subscription).to receive(:hosted?).and_return(hosted)
         subscription.assign_attributes(hosted_plan: plan, seats: seats)
       end
 
@@ -232,10 +312,10 @@ RSpec.describe GitlabSubscription do
     let(:subscription) { build(:gitlab_subscription) }
 
     where(:plan_name, :paid_hosted_plan, :expired, :result) do
-      'bronze' | true | false  | true
-      'bronze' | true | true   | false
-      'silver' | true | false  | true
-      'gold'   | true | false  | false
+      'bronze'   | true | false  | true
+      'bronze'   | true | true   | false
+      'premium'  | true | false  | true
+      'ultimate' | true | false  | false
     end
 
     with_them do
@@ -254,45 +334,67 @@ RSpec.describe GitlabSubscription do
 
   describe 'callbacks' do
     context 'after_commit :index_namespace' do
-      where(:elasticsearch_index_only_paid_groups_setting, :operation, :initial_plan, :should_update_plan?, :should_index_namespace?) do
-        false   | :create   | :bronze         | false   | false
-        true    | :create   | :bronze         | false   | true
-        true    | :create   | :free           | false   | false
-        true    | :create   | { trial: true } | false   | false
-        false   | :update   | :bronze         | false   | false
-        true    | :update   | :bronze         | false   | false
-        true    | :update   | :bronze         | true    | true
-        true    | :update   | :free           | true    | true
-        true    | :update   | { trial: true } | true    | true
+      let_it_be(:namespace) { create(:namespace) }
+
+      let(:gitlab_subscription) { build(:gitlab_subscription, plan, namespace: namespace) }
+      let(:dev_env_or_com) { true }
+      let(:expiration_date) { Date.today + 10 }
+      let(:plan) { :bronze }
+
+      before do
+        allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
+        gitlab_subscription.end_date = expiration_date
       end
 
-      with_them do
-        let!(:gitlab_subscription) { operation == :create ? build(:gitlab_subscription, initial_plan) : create(:gitlab_subscription, initial_plan) }
+      it 'indexes the namespace' do
+        expect(ElasticsearchIndexedNamespace).to receive(:safe_find_or_create_by!).with(namespace_id: gitlab_subscription.namespace_id)
 
-        before do
-          stub_feature_flags(elasticsearch_index_only_paid_groups: elasticsearch_index_only_paid_groups_setting)
+        gitlab_subscription.save!
+      end
+
+      context 'when it is a trial' do
+        let(:gitlab_subscription) { build(:gitlab_subscription, :active_trial, namespace: namespace) }
+
+        it 'indexes the namespace' do
+          expect(ElasticsearchIndexedNamespace).to receive(:safe_find_or_create_by!).with(namespace_id: gitlab_subscription.namespace_id)
+
+          gitlab_subscription.save!
         end
+      end
 
-        it 'indexes namespace' do
-          if should_index_namespace?
-            expect(ElasticsearchIndexedNamespace).to receive(:safe_find_or_create_by!).with(namespace_id: gitlab_subscription.namespace_id)
-          else
-            expect(ElasticsearchIndexedNamespace).not_to receive(:safe_find_or_create_by!)
-          end
+      context 'when not ::Gitlab.dev_env_or_com?' do
+        let(:dev_env_or_com) { false }
 
-          case operation
-          when :create
-            gitlab_subscription.save!
-          when :update
-            update_attributes = should_update_plan? ? { hosted_plan: create(:silver_plan), trial: false } : { max_seats_used: 32 }
-            gitlab_subscription.update!(update_attributes)
-          end
+        it 'does not index the namespace' do
+          expect(ElasticsearchIndexedNamespace).not_to receive(:safe_find_or_create_by!)
+
+          gitlab_subscription.save!
+        end
+      end
+
+      context 'when the plan has expired' do
+        let(:expiration_date) { Date.today - 8.days }
+
+        it 'does not index the namespace' do
+          expect(ElasticsearchIndexedNamespace).not_to receive(:safe_find_or_create_by!)
+
+          gitlab_subscription.save!
+        end
+      end
+
+      context 'when it is a free plan' do
+        let(:plan) { :free }
+
+        it 'does not index the namespace' do
+          expect(ElasticsearchIndexedNamespace).not_to receive(:safe_find_or_create_by!)
+
+          gitlab_subscription.save!
         end
       end
     end
 
     it 'gitlab_subscription columns are contained in gitlab_subscription_history columns' do
-      diff_attrs = %w(updated_at)
+      diff_attrs = %w(updated_at seats_in_use seats_owed)
       expect(described_class.attribute_names - GitlabSubscriptionHistory.attribute_names).to eq(diff_attrs)
     end
 
@@ -303,12 +405,13 @@ RSpec.describe GitlabSubscription do
 
     context 'before_update' do
       it 'logs previous state to gitlab subscription history' do
-        subject.update! max_seats_used: 42, seats: 13
-        subject.update! max_seats_used: 32
+        gitlab_subscription = create(:gitlab_subscription, max_seats_used: 42, seats: 13, namespace: create(:namespace))
+
+        gitlab_subscription.update! max_seats_used: 32
 
         expect(GitlabSubscriptionHistory.count).to eq(1)
         expect(GitlabSubscriptionHistory.last.attributes).to include(
-          'gitlab_subscription_id' => subject.id,
+          'gitlab_subscription_id' => gitlab_subscription.id,
           'change_type' => 'gitlab_subscription_updated',
           'max_seats_used' => 42,
           'seats' => 13
@@ -335,6 +438,189 @@ RSpec.describe GitlabSubscription do
           'gitlab_subscription_created_at' => db_created_at
         )
       end
+    end
+  end
+
+  describe '.yield_long_expired_indexed_namespaces' do
+    let_it_be(:not_expired_subscription1) { create(:gitlab_subscription, :bronze, end_date: Date.today + 2) }
+    let_it_be(:not_expired_subscription2) { create(:gitlab_subscription, :bronze, end_date: Date.today + 100) }
+    let_it_be(:recently_expired_subscription) { create(:gitlab_subscription, :bronze, end_date: Date.today - 4) }
+    let_it_be(:expired_subscription1) { create(:gitlab_subscription, :bronze, end_date: Date.today - 8) }
+    let_it_be(:expired_subscription2) { create(:gitlab_subscription, :bronze, end_date: Date.today - 10) }
+
+    before do
+      allow(::Gitlab).to receive(:dev_env_or_com?).and_return(true)
+      ElasticsearchIndexedNamespace.safe_find_or_create_by!(namespace_id: not_expired_subscription1.namespace_id)
+      ElasticsearchIndexedNamespace.safe_find_or_create_by!(namespace_id: not_expired_subscription2.namespace_id)
+      ElasticsearchIndexedNamespace.safe_find_or_create_by!(namespace_id: recently_expired_subscription.namespace_id)
+      ElasticsearchIndexedNamespace.safe_find_or_create_by!(namespace_id: expired_subscription1.namespace_id)
+      ElasticsearchIndexedNamespace.safe_find_or_create_by!(namespace_id: expired_subscription2.namespace_id)
+    end
+
+    it 'yields ElasticsearchIndexedNamespace that belong to subscriptions that expired over a week ago' do
+      results = []
+
+      described_class.yield_long_expired_indexed_namespaces do |result|
+        results << result
+      end
+
+      expect(results).to contain_exactly(
+        expired_subscription1.namespace.elasticsearch_indexed_namespace,
+        expired_subscription2.namespace.elasticsearch_indexed_namespace
+      )
+    end
+  end
+
+  context 'when in a trial' do
+    let_it_be(:gitlab_subscription, reload: true) { create(:gitlab_subscription, :active_trial) }
+
+    let(:start_trial_on) { nil }
+    let(:end_trial_on) { nil }
+    let(:trial_extension_type) { nil }
+
+    before do
+      gitlab_subscription.trial_starts_on = start_trial_on if start_trial_on
+      gitlab_subscription.trial_ends_on = end_trial_on if end_trial_on
+      gitlab_subscription.trial_extension_type = trial_extension_type
+    end
+
+    describe '#trial_extended_or_reactivated?' do
+      subject { gitlab_subscription.trial_extended_or_reactivated? }
+
+      where(:trial_extension_type, :extended_or_reactivated) do
+        nil | false
+        1   | true
+        2   | true
+      end
+
+      with_them do
+        it { is_expected.to be(extended_or_reactivated) }
+      end
+    end
+
+    describe '#trial_days_remaining' do
+      subject { gitlab_subscription.trial_days_remaining }
+
+      context 'at the beginning of a trial' do
+        let(:start_trial_on) { Date.current }
+        let(:end_trial_on) { Date.current.advance(days: 30) }
+
+        it { is_expected.to eq(30) }
+      end
+
+      context 'in the middle of a trial' do
+        it { is_expected.to eq(15) }
+      end
+
+      context 'at the end of a trial' do
+        let(:start_trial_on) { Date.current.advance(days: -30) }
+        let(:end_trial_on) { Date.current }
+
+        it { is_expected.to eq(0) }
+      end
+    end
+
+    describe '#trial_duration' do
+      subject { gitlab_subscription.trial_duration }
+
+      context 'for a default trial duration' do
+        it { is_expected.to eq(30) }
+      end
+
+      context 'for a custom trial duration' do
+        let(:start_trial_on) { Date.current.advance(days: -5) }
+        let(:end_trial_on) { Date.current.advance(days: 5) }
+
+        it { is_expected.to eq(10) }
+      end
+    end
+
+    describe '#trial_days_used' do
+      subject { gitlab_subscription.trial_days_used }
+
+      context 'at the beginning of a trial' do
+        let(:start_trial_on) { Date.current }
+        let(:end_trial_on) { Date.current.advance(days: 30) }
+
+        it { is_expected.to eq(0) }
+      end
+
+      context 'in the middle of a trial' do
+        it { is_expected.to eq(15) }
+      end
+
+      context 'at the end of a trial' do
+        let(:start_trial_on) { Date.current.advance(days: -30) }
+        let(:end_trial_on) { Date.current }
+
+        it { is_expected.to eq(30) }
+      end
+    end
+
+    describe '#trial_percentage_complete' do
+      subject { gitlab_subscription.trial_percentage_complete }
+
+      context 'at the beginning of a trial' do
+        let(:start_trial_on) { Date.current }
+        let(:end_trial_on) { Date.current.advance(days: 30) }
+
+        it { is_expected.to eq(0.0) }
+      end
+
+      context 'in the middle of a trial' do
+        it { is_expected.to eq(50.0) }
+      end
+
+      context 'at the end of a trial' do
+        let(:start_trial_on) { Date.current.advance(days: -30) }
+        let(:end_trial_on) { Date.current }
+
+        it { is_expected.to eq(100.0) }
+      end
+
+      context 'rounding' do
+        let(:start_trial_on) { Date.current.advance(days: -10) }
+        let(:end_trial_on) { Date.current.advance(days: 20) }
+
+        context 'by default' do
+          it 'rounds to 2 decimal places' do
+            is_expected.to eq(33.33)
+          end
+        end
+
+        context 'with custom rounding options' do
+          subject { gitlab_subscription.trial_percentage_complete(4) }
+
+          it 'rounds to the given number of decimal places' do
+            is_expected.to eq(33.3333)
+          end
+        end
+      end
+    end
+  end
+
+  describe '#legacy?' do
+    let_it_be(:eoa_rollout_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date }
+    let!(:gitlab_subscription) { create(:gitlab_subscription, start_date: start_date) }
+
+    subject { gitlab_subscription.legacy? }
+
+    context 'when a subscription was purchased before the EoA rollout date' do
+      let(:start_date) { eoa_rollout_date - 1.day }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when a subscription was purchased on the EoA rollout date' do
+      let(:start_date) { eoa_rollout_date }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when a subscription was purchased after the EoA rollout date' do
+      let(:start_date) { eoa_rollout_date + 1.day}
+
+      it { is_expected.to be_falsey }
     end
   end
 end

@@ -1,9 +1,10 @@
-import flash from '~/flash';
-import { __ } from '~/locale';
+import { isEmpty } from 'lodash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { scrollToElement } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
+import { CHANGES_TAB, DISCUSSION_TAB, SHOW_TAB } from '../../../constants';
 import service from '../../../services/drafts_service';
 import * as types from './mutation_types';
-import { CHANGES_TAB, DISCUSSION_TAB, SHOW_TAB } from '../../../constants';
 
 export const saveDraft = ({ dispatch }, draft) =>
   dispatch('saveNote', { ...draft, isDraft: true }, { root: true });
@@ -11,8 +12,8 @@ export const saveDraft = ({ dispatch }, draft) =>
 export const addDraftToDiscussion = ({ commit }, { endpoint, data }) =>
   service
     .addDraftToDiscussion(endpoint, data)
-    .then(res => res.data)
-    .then(res => {
+    .then((res) => res.data)
+    .then((res) => {
       commit(types.ADD_NEW_DRAFT, res);
       return res;
     })
@@ -23,8 +24,8 @@ export const addDraftToDiscussion = ({ commit }, { endpoint, data }) =>
 export const createNewDraft = ({ commit }, { endpoint, data }) =>
   service
     .createNewDraft(endpoint, data)
-    .then(res => res.data)
-    .then(res => {
+    .then((res) => res.data)
+    .then((res) => {
       commit(types.ADD_NEW_DRAFT, res);
       return res;
     })
@@ -43,8 +44,8 @@ export const deleteDraft = ({ commit, getters }, draft) =>
 export const fetchDrafts = ({ commit, getters }) =>
   service
     .fetchDrafts(getters.getNotesData.draftsPath)
-    .then(res => res.data)
-    .then(data => commit(types.SET_BATCH_COMMENTS_DRAFTS, data))
+    .then((res) => res.data)
+    .then((data) => commit(types.SET_BATCH_COMMENTS_DRAFTS, data))
     .catch(() => flash(__('An error occurred while fetching pending comments')));
 
 export const publishSingleDraft = ({ commit, dispatch, getters }, draftId) => {
@@ -67,38 +68,44 @@ export const publishReview = ({ commit, dispatch, getters }) => {
     .catch(() => commit(types.RECEIVE_PUBLISH_REVIEW_ERROR));
 };
 
-export const updateDiscussionsAfterPublish = ({ dispatch, getters, rootGetters }) =>
-  dispatch('fetchDiscussions', { path: getters.getNotesData.discussionsPath }, { root: true }).then(
-    () =>
-      dispatch('diffs/assignDiscussionsToDiff', rootGetters.discussionsStructuredByLineCode, {
-        root: true,
-      }),
-  );
+export const updateDiscussionsAfterPublish = async ({ dispatch, getters, rootGetters }) => {
+  if (window.gon?.features?.paginatedNotes) {
+    await dispatch('stopPolling', null, { root: true });
+    await dispatch('fetchData', null, { root: true });
+    await dispatch('restartPolling', null, { root: true });
+  } else {
+    await dispatch(
+      'fetchDiscussions',
+      { path: getters.getNotesData.discussionsPath },
+      { root: true },
+    );
+  }
 
-export const discardReview = ({ commit, getters }) => {
-  commit(types.REQUEST_DISCARD_REVIEW);
-
-  return service
-    .discard(getters.getNotesData.draftsDiscardPath)
-    .then(() => commit(types.RECEIVE_DISCARD_REVIEW_SUCCESS))
-    .catch(() => commit(types.RECEIVE_DISCARD_REVIEW_ERROR));
+  dispatch('diffs/assignDiscussionsToDiff', rootGetters.discussionsStructuredByLineCode, {
+    root: true,
+  });
 };
 
 export const updateDraft = (
   { commit, getters },
   { note, noteText, resolveDiscussion, position, callback },
-) =>
-  service
-    .update(getters.getNotesData.draftsPath, {
-      draftId: note.id,
-      note: noteText,
-      resolveDiscussion,
-      position: JSON.stringify(position),
-    })
-    .then(res => res.data)
-    .then(data => commit(types.RECEIVE_DRAFT_UPDATE_SUCCESS, data))
+) => {
+  const params = {
+    draftId: note.id,
+    note: noteText,
+    resolveDiscussion,
+  };
+  // Stringifying an empty object yields `{}` which breaks graphql queries
+  // https://gitlab.com/gitlab-org/gitlab/-/issues/298827
+  if (!isEmpty(position)) params.position = JSON.stringify(position);
+
+  return service
+    .update(getters.getNotesData.draftsPath, params)
+    .then((res) => res.data)
+    .then((data) => commit(types.RECEIVE_DRAFT_UPDATE_SUCCESS, data))
     .then(callback)
     .catch(() => flash(__('An error occurred while updating the comment')));
+};
 
 export const scrollToDraft = ({ dispatch, rootGetters }, draft) => {
   const discussion = draft.discussion_id && rootGetters.getDiscussion(draft.discussion_id);
@@ -107,8 +114,6 @@ export const scrollToDraft = ({ dispatch, rootGetters }, draft) => {
   const tabEl = tab === CHANGES_TAB ? CHANGES_TAB : DISCUSSION_TAB;
   const draftID = `note_${draft.id}`;
   const el = document.querySelector(`#${tabEl} #${draftID}`);
-
-  dispatch('closeReviewDropdown');
 
   window.location.hash = draftID;
 
@@ -125,21 +130,10 @@ export const scrollToDraft = ({ dispatch, rootGetters }, draft) => {
   }
 };
 
-export const toggleReviewDropdown = ({ dispatch, state }) => {
-  if (state.showPreviewDropdown) {
-    dispatch('closeReviewDropdown');
-  } else {
-    dispatch('openReviewDropdown');
-  }
-};
-
-export const openReviewDropdown = ({ commit }) => commit(types.OPEN_REVIEW_DROPDOWN);
-export const closeReviewDropdown = ({ commit }) => commit(types.CLOSE_REVIEW_DROPDOWN);
-
 export const expandAllDiscussions = ({ dispatch, state }) =>
   state.drafts
-    .filter(draft => draft.discussion_id)
-    .forEach(draft => {
+    .filter((draft) => draft.discussion_id)
+    .forEach((draft) => {
       dispatch('expandDiscussion', { discussionId: draft.discussion_id }, { root: true });
     });
 

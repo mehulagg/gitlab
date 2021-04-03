@@ -1,3 +1,9 @@
+---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Jobs API
 
 ## List project jobs
@@ -48,10 +54,14 @@ Example of response
       {"file_type": "junit", "size": 750, "filename": "junit.xml.gz", "file_format": "gzip"}
     ],
     "artifacts_expire_at": "2016-01-23T17:54:27.895Z",
+    "tag_list": [
+      "docker runner", "ubuntu18"
+    ],
     "id": 7,
     "name": "teaspoon",
     "pipeline": {
       "id": 6,
+      "project_id": 1,
       "ref": "master",
       "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
       "status": "pending"
@@ -98,10 +108,14 @@ Example of response
     "finished_at": "2015-12-24T17:54:24.921Z",
     "duration": 0.192,
     "artifacts_expire_at": "2016-01-23T17:54:24.921Z",
+    "tag_list": [
+      "docker runner", "win10-2004"
+    ],
     "id": 6,
     "name": "rspec:other",
     "pipeline": {
       "id": 6,
+      "project_id": 1,
       "ref": "master",
       "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
       "status": "pending"
@@ -142,11 +156,12 @@ Get a list of jobs for a pipeline.
 GET /projects/:id/pipelines/:pipeline_id/jobs
 ```
 
-| Attribute     | Type                           | Required | Description                                                                                                                                                                                                    |
-|---------------|--------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`          | integer/string                 | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.                                                                                               |
-| `pipeline_id` | integer                        | yes      | ID of a pipeline.                                                                                                                                                                                          |
-| `scope`       | string **or** array of strings | no       | Scope of jobs to show. Either one of or an array of the following: `created`, `pending`, `running`, `failed`, `success`, `canceled`, `skipped`, or `manual`. All jobs are returned if `scope` is not provided. |
+| Attribute         | Type                           | Required | Description                                                                                                                                                                                                    |
+|-------------------|--------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`              | integer/string                 | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.                                                                                                   |
+| `pipeline_id`     | integer                        | yes      | ID of a pipeline.                                                                                                                                                                                              |
+| `scope`           | string **or** array of strings | no       | Scope of jobs to show. Either one of or an array of the following: `created`, `pending`, `running`, `failed`, `success`, `canceled`, `skipped`, or `manual`. All jobs are returned if `scope` is not provided. |
+| `include_retried` | boolean                        | no       | Include retried jobs in the response. Defaults to `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/272627) in GitLab 13.9.                                                                  |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/pipelines/6/jobs?scope[]=pending&scope[]=running"
@@ -173,10 +188,14 @@ Example of response
     "finished_at": "2015-12-24T17:54:24.921Z",
     "duration": 0.192,
     "artifacts_expire_at": "2016-01-23T17:54:24.921Z",
+    "tag_list": [
+      "docker runner", "ubuntu18"
+    ],
     "id": 6,
     "name": "rspec:other",
     "pipeline": {
       "id": 6,
+      "project_id": 1,
       "ref": "master",
       "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
       "status": "pending"
@@ -233,16 +252,19 @@ Example of response
       {"file_type": "junit", "size": 750, "filename": "junit.xml.gz", "file_format": "gzip"}
     ],
     "artifacts_expire_at": "2016-01-23T17:54:27.895Z",
+    "tag_list": [
+      "docker runner", "ubuntu18"
+    ],
     "id": 7,
     "name": "teaspoon",
     "pipeline": {
       "id": 6,
+      "project_id": 1,
       "ref": "master",
       "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
       "status": "pending"
     },
     "ref": "master",
-    "artifacts": [],
     "runner": null,
     "stage": "test",
     "status": "failed",
@@ -269,8 +291,14 @@ Example of response
 ]
 ```
 
-Since GitLab 13.2, this endpoint [returns data for any pipeline](pipelines.md#single-pipeline-requests)
+In GitLab 13.3 and later, this endpoint [returns data for any pipeline](pipelines.md#single-pipeline-requests)
 including [child pipelines](../ci/parent_child_pipelines.md).
+
+In GitLab 13.5 and later, this endpoint does not return retried jobs in the response
+by default.
+
+In GitLab 13.9 and later, this endpoint can include retried jobs in the response
+with `include_retried` set to `true`.
 
 ## List pipeline bridges
 
@@ -287,7 +315,7 @@ GET /projects/:id/pipelines/:pipeline_id/bridges
 | `scope`       | string **or** array of strings | no       | Scope of jobs to show. Either one of or an array of the following: `created`, `pending`, `running`, `failed`, `success`, `canceled`, `skipped`, or `manual`. All jobs are returned if `scope` is not provided. |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/1/pipelines/6/bridges?scope[]=pending&scope[]=running'
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/pipelines/6/bridges?scope[]=pending&scope[]=running"
 ```
 
 Example of response
@@ -314,6 +342,7 @@ Example of response
     "name": "teaspoon",
     "pipeline": {
       "id": 6,
+      "project_id": 1,
       "ref": "master",
       "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
       "status": "pending",
@@ -356,6 +385,79 @@ Example of response
 ]
 ```
 
+## Get job token's job
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51727) in GitLab 13.10.
+
+Retrieve the job that generated a job token.
+
+```plaintext
+GET /job
+```
+
+Examples
+
+```shell
+curl --header "JOB-TOKEN: <your_job_token>" "https://gitlab.example.com/api/v4/job"
+curl "https://gitlab.example.com/api/v4/job?job_token=<your_job_token>"
+```
+
+Example of response
+
+```json
+{
+  "commit": {
+    "author_email": "admin@example.com",
+    "author_name": "Administrator",
+    "created_at": "2015-12-24T16:51:14.000+01:00",
+    "id": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
+    "message": "Test the CI integration.",
+    "short_id": "0ff3ae19",
+    "title": "Test the CI integration."
+  },
+  "coverage": null,
+  "allow_failure": false,
+  "created_at": "2015-12-24T15:51:21.880Z",
+  "started_at": "2015-12-24T17:54:30.733Z",
+  "finished_at": "2015-12-24T17:54:31.198Z",
+  "duration": 0.465,
+  "artifacts_expire_at": "2016-01-23T17:54:31.198Z",
+  "id": 8,
+  "name": "rubocop",
+  "pipeline": {
+    "id": 6,
+    "project_id": 1,
+    "ref": "master",
+    "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
+    "status": "pending"
+  },
+  "ref": "master",
+  "artifacts": [],
+  "runner": null,
+  "stage": "test",
+  "status": "failed",
+  "tag": false,
+  "web_url": "https://example.com/foo/bar/-/jobs/8",
+  "user": {
+    "id": 1,
+    "name": "Administrator",
+    "username": "root",
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
+    "web_url": "http://gitlab.dev/root",
+    "created_at": "2015-12-21T13:14:24.077Z",
+    "bio": null,
+    "location": null,
+    "public_email": "",
+    "skype": "",
+    "linkedin": "",
+    "twitter": "",
+    "website_url": "",
+    "organization": ""
+  }
+}
+```
+
 ## Get a single job
 
 Get a single job of a project
@@ -393,10 +495,14 @@ Example of response
   "finished_at": "2015-12-24T17:54:31.198Z",
   "duration": 0.465,
   "artifacts_expire_at": "2016-01-23T17:54:31.198Z",
+  "tag_list": [
+      "docker runner", "macos-10.15"
+    ],
   "id": 8,
   "name": "rubocop",
   "pipeline": {
     "id": 6,
+    "project_id": 1,
     "ref": "master",
     "sha": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
     "status": "pending"
@@ -427,198 +533,6 @@ Example of response
   }
 }
 ```
-
-## Get job artifacts
-
-> **Notes**:
->
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/2893) in GitLab 8.5.
-> - The use of `CI_JOB_TOKEN` in the artifacts download API was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/2346)
->   in [GitLab Premium](https://about.gitlab.com/pricing/) 9.5.
-
-Get the job's artifacts zipped archive of a project.
-
-```plaintext
-GET /projects/:id/jobs/:job_id/artifacts
-```
-
-| Attribute   | Type           | Required | Description                                                                                                                                     |
-|-------------|----------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`        | integer/string | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.                                |
-| `job_id`    | integer        | yes      | ID of a job.                                                                                                                                |
-| `job_token` **(PREMIUM)** | string         | no       | To be used with [triggers](../ci/triggers/README.md#when-a-pipeline-depends-on-the-artifacts-of-another-pipeline-premium) for multi-project pipelines. It should be invoked only inside `.gitlab-ci.yml`. Its value is always `$CI_JOB_TOKEN`. |
-
-Example request using the `PRIVATE-TOKEN` header:
-
-```shell
-curl --output artifacts.zip --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/jobs/42/artifacts"
-```
-
-To use this in a [`script` definition](../ci/yaml/README.md#script) inside
-`.gitlab-ci.yml` **(PREMIUM)**, you can use either:
-
-- The `JOB-TOKEN` header with the GitLab-provided `CI_JOB_TOKEN` variable.
-  For example, the following job will download the artifacts of the job with ID
-  `42`. Note that the command is wrapped into single quotes since it contains a
-  colon (`:`):
-
-  ```yaml
-  artifact_download:
-    stage: test
-    script:
-      - 'curl --location --output artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.example.com/api/v4/projects/1/jobs/42/artifacts"'
-  ```
-
-- Or the `job_token` attribute with the GitLab-provided `CI_JOB_TOKEN` variable.
-  For example, the following job will download the artifacts of the job with ID `42`:
-
-  ```yaml
-  artifact_download:
-    stage: test
-    script:
-      - 'curl --location --output artifacts.zip "https://gitlab.example.com/api/v4/projects/1/jobs/42/artifacts?job_token=$CI_JOB_TOKEN"'
-  ```
-
-Possible response status codes:
-
-| Status    | Description                     |
-|-----------|---------------------------------|
-| 200       | Serves the artifacts file.      |
-| 404       | Build not found or no artifacts.|
-
-## Download the artifacts archive
-
-> **Notes**:
->
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5347) in GitLab 8.10.
-> - The use of `CI_JOB_TOKEN` in the artifacts download API was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/2346)
->   in [GitLab Premium](https://about.gitlab.com/pricing/) 9.5.
-
-Download the artifacts zipped archive from the latest successful pipeline for
-the given reference name and job, provided the job finished successfully. This
-is the same as [getting the job's artifacts](#get-job-artifacts), but by
-defining the job's name instead of its ID.
-
-```plaintext
-GET /projects/:id/jobs/artifacts/:ref_name/download?job=name
-```
-
-Parameters
-
-| Attribute   | Type           | Required | Description                                                                                                                                     |
-|-------------|----------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`        | integer/string | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.                                |
-| `ref_name`  | string         | yes      | Branch or tag name in repository. HEAD or SHA references are not supported.                                                                     |
-| `job`       | string         | yes      | The name of the job.                                                                                                                            |
-| `job_token` **(PREMIUM)** | string         | no       | To be used with [triggers](../ci/triggers/README.md#when-a-pipeline-depends-on-the-artifacts-of-another-pipeline-premium) for multi-project pipelines. It should be invoked only inside `.gitlab-ci.yml`. Its value is always `$CI_JOB_TOKEN`. |
-
-Example request using the `PRIVATE-TOKEN` header:
-
-```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/jobs/artifacts/master/download?job=test"
-```
-
-To use this in a [`script` definition](../ci/yaml/README.md#script) inside
-`.gitlab-ci.yml` **(PREMIUM)**, you can use either:
-
-- The `JOB-TOKEN` header with the GitLab-provided `CI_JOB_TOKEN` variable.
-  For example, the following job will download the artifacts of the `test` job
-  of the `master` branch. Note that the command is wrapped into single quotes
-  since it contains a colon (`:`):
-
-  ```yaml
-  artifact_download:
-    stage: test
-    script:
-      - 'curl --location --output artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.example.com/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/master/download?job=test"'
-  ```
-
-- Or the `job_token` attribute with the GitLab-provided `CI_JOB_TOKEN` variable.
-  For example, the following job will download the artifacts of the `test` job
-  of the `master` branch:
-
-  ```yaml
-  artifact_download:
-    stage: test
-    script:
-      - 'curl --location --output artifacts.zip "https://gitlab.example.com/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/master/download?job=test&job_token=$CI_JOB_TOKEN"'
-  ```
-
-Possible response status codes:
-
-| Status    | Description                     |
-|-----------|---------------------------------|
-| 200       | Serves the artifacts file.      |
-| 404       | Build not found or no artifacts.|
-
-## Download a single artifact file by job ID
-
-> Introduced in GitLab 10.0
-
-Download a single artifact file from a job with a specified ID from within
-the job's artifacts zipped archive. The file is extracted from the archive and
-streamed to the client.
-
-```plaintext
-GET /projects/:id/jobs/:job_id/artifacts/*artifact_path
-```
-
-Parameters
-
-| Attribute       | Type           | Required | Description                                                                                                      |
-|-----------------|----------------|----------|------------------------------------------------------------------------------------------------------------------|
-| `id`            | integer/string | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
-| `job_id`        | integer        | yes      | The unique job identifier.                                                                                       |
-| `artifact_path` | string         | yes      | Path to a file inside the artifacts archive.                                                                     |
-
-Example request:
-
-```shell
-curl --location --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/jobs/5/artifacts/some/release/file.pdf"
-```
-
-Possible response status codes:
-
-| Status    | Description                          |
-|-----------|--------------------------------------|
-| 200       | Sends a single artifact file         |
-| 400       | Invalid path provided                |
-| 404       | Build not found or no file/artifacts |
-
-## Download a single artifact file from specific tag or branch
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/23538) in GitLab 11.5.
-
-Download a single artifact file for a specific job of the latest successful
-pipeline for the given reference name from within the job's artifacts archive.
-The file is extracted from the archive and streamed to the client.
-
-```plaintext
-GET /projects/:id/jobs/artifacts/:ref_name/raw/*artifact_path?job=name
-```
-
-Parameters:
-
-| Attribute       | Type           | Required | Description                                                                                                      |
-|-----------------|----------------|----------|------------------------------------------------------------------------------------------------------------------|
-| `id`            | integer/string | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
-| `ref_name`      | string         | yes      | Branch or tag name in repository. HEAD or SHA references are not supported.                                      |
-| `artifact_path` | string         | yes      | Path to a file inside the artifacts archive.                                                                     |
-| `job`           | string         | yes      | The name of the job.                                                                                             |
-
-Example request:
-
-```shell
-curl --location --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/jobs/artifacts/master/raw/some/release/file.pdf?job=pdf"
-```
-
-Possible response status codes:
-
-| Status    | Description                          |
-|-----------|--------------------------------------|
-| 200       | Sends a single artifact file         |
-| 400       | Invalid path provided                |
-| 404       | Build not found or no file/artifacts |
 
 ## Get a log file
 
@@ -795,86 +709,6 @@ Example of response
   "user": null
 }
 ```
-
-## Keep artifacts
-
-Prevents artifacts from being deleted when expiration is set.
-
-```plaintext
-POST /projects/:id/jobs/:job_id/artifacts/keep
-```
-
-Parameters
-
-| Attribute | Type           | Required | Description                                                                                                      |
-|-----------|----------------|----------|------------------------------------------------------------------------------------------------------------------|
-| `id`      | integer/string | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
-| `job_id`  | integer        | yes      | ID of a job.                                                                                                 |
-
-Example request:
-
-```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/jobs/1/artifacts/keep"
-```
-
-Example response:
-
-```json
-{
-  "commit": {
-    "author_email": "admin@example.com",
-    "author_name": "Administrator",
-    "created_at": "2015-12-24T16:51:14.000+01:00",
-    "id": "0ff3ae198f8601a285adcf5c0fff204ee6fba5fd",
-    "message": "Test the CI integration.",
-    "short_id": "0ff3ae19",
-    "title": "Test the CI integration."
-  },
-  "coverage": null,
-  "allow_failure": false,
-  "download_url": null,
-  "id": 42,
-  "name": "rubocop",
-  "ref": "master",
-  "artifacts": [],
-  "runner": null,
-  "stage": "test",
-  "created_at": "2016-01-11T10:13:33.506Z",
-  "started_at": "2016-01-11T10:13:33.506Z",
-  "finished_at": "2016-01-11T10:15:10.506Z",
-  "duration": 97.0,
-  "status": "failed",
-  "tag": false,
-  "web_url": "https://example.com/foo/bar/-/jobs/42",
-  "user": null
-}
-```
-
-## Delete artifacts
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/25522) in GitLab 11.9.
-
-Delete artifacts of a job.
-
-```plaintext
-DELETE /projects/:id/jobs/:job_id/artifacts
-```
-
-| Attribute | Type           | Required | Description                                                                                                      |
-|-----------|----------------|----------|------------------------------------------------------------------------------------------------------------------|
-| `id`      | integer/string | yes      | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
-| `job_id`  | integer        | yes      | ID of a job.                                                                |
-
-Example request:
-
-```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/jobs/1/artifacts"
-```
-
-NOTE: **Note:**
-At least Maintainer role is required to delete artifacts.
-
-If the artifacts were deleted successfully, a response with status `204 No Content` is returned.
 
 ## Play a job
 

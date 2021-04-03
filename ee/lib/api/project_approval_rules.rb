@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectApprovalRules < ::Grape::API::Instance
+  class ProjectApprovalRules < ::API::Base
     before { authenticate! }
 
     helpers ::API::Helpers::ProjectApprovalRulesHelpers
+
+    feature_category :source_code_management
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
@@ -15,7 +17,7 @@ module API
           success EE::API::Entities::ProjectApprovalRule
         end
         get do
-          authorize_create_merge_request_in_project
+          authorize_read_project_approval_rule!
 
           present user_project.visible_approval_rules, with: EE::API::Entities::ProjectApprovalRule, current_user: current_user
         end
@@ -31,6 +33,17 @@ module API
         end
 
         segment ':approval_rule_id' do
+          desc 'Get a single approval rule' do
+            success EE::API::Entities::ProjectApprovalRule
+          end
+          get do
+            authorize_read_project_approval_rule!
+
+            approval_rule = user_project.approval_rules.find(params[:approval_rule_id])
+
+            present approval_rule, with: EE::API::Entities::ProjectApprovalRule, current_user: current_user
+          end
+
           desc 'Update project approval rule' do
             success EE::API::Entities::ProjectApprovalRule
           end

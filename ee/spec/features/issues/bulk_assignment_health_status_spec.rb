@@ -62,10 +62,6 @@ RSpec.describe 'Issues > Health status bulk assignment' do
     end
   end
 
-  before do
-    stub_feature_flags(vue_issuables_list: false)
-  end
-
   context 'as an allowed user', :js do
     before do
       allow(group).to receive(:feature_enabled?).and_return(true)
@@ -117,7 +113,7 @@ RSpec.describe 'Issues > Health status bulk assignment' do
     page.within('.issues-bulk-update') do
       click_button 'Select health status'
       items.map do |item|
-        find('.gl-button-text', { text: item }).click
+        find('[data-testid="health-status-dropdown-item"]', text: item).click
       end
     end
   end

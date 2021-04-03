@@ -3,8 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe 'GlobalSearch', :elastic do
+  include AdminModeHelper
+
   let(:features) { %i(issues merge_requests repository builds wiki snippets) }
-  let(:admin) { create :user, admin: true }
+  let(:admin_with_admin_mode) { create :user, admin: true }
+  let(:admin_without_admin_mode) { create :user, admin: true }
   let(:auditor) {create :user, auditor: true }
   let(:non_member) { create :user }
   let(:external_non_member) { create :user, external: true }
@@ -19,9 +22,11 @@ RSpec.describe 'GlobalSearch', :elastic do
     project.add_developer(member)
     project.add_developer(external_member)
     project.add_guest(guest)
+
+    enable_admin_mode!(admin_with_admin_mode)
   end
 
-  context "Respect feature visibility levels" do
+  context "Respect feature visibility levels", :aggregate_failures do
     context "Private projects" do
       let(:project) { create(:project, :private, :repository, :wiki_repo) }
 
@@ -29,7 +34,8 @@ RSpec.describe 'GlobalSearch', :elastic do
       it "does not find items if features are disabled" do
         create_items(project, feature_settings(:disabled))
 
-        expect_no_items_to_be_found(admin)
+        expect_no_items_to_be_found(admin_with_admin_mode)
+        expect_no_items_to_be_found(admin_without_admin_mode)
         expect_no_items_to_be_found(auditor)
         expect_no_items_to_be_found(member)
         expect_no_items_to_be_found(external_member)
@@ -42,7 +48,8 @@ RSpec.describe 'GlobalSearch', :elastic do
       it "shows items to member only if features are enabled" do
         create_items(project, feature_settings(:enabled))
 
-        expect_items_to_be_found(admin)
+        expect_items_to_be_found(admin_with_admin_mode)
+        expect_no_items_to_be_found(admin_without_admin_mode)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
         expect_items_to_be_found(external_member)
@@ -60,7 +67,8 @@ RSpec.describe 'GlobalSearch', :elastic do
       it "does not find items if features are disabled" do
         create_items(project, feature_settings(:disabled))
 
-        expect_no_items_to_be_found(admin)
+        expect_no_items_to_be_found(admin_with_admin_mode)
+        expect_no_items_to_be_found(admin_without_admin_mode)
         expect_no_items_to_be_found(auditor)
         expect_no_items_to_be_found(member)
         expect_no_items_to_be_found(external_member)
@@ -73,7 +81,8 @@ RSpec.describe 'GlobalSearch', :elastic do
       it "shows items to member only if features are enabled" do
         create_items(project, feature_settings(:enabled))
 
-        expect_items_to_be_found(admin)
+        expect_items_to_be_found(admin_with_admin_mode)
+        expect_items_to_be_found(admin_without_admin_mode)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
         expect_items_to_be_found(external_member)
@@ -86,7 +95,8 @@ RSpec.describe 'GlobalSearch', :elastic do
       it "shows items to member only if features are private" do
         create_items(project, feature_settings(:private))
 
-        expect_items_to_be_found(admin)
+        expect_items_to_be_found(admin_with_admin_mode)
+        expect_no_items_to_be_found(admin_without_admin_mode)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
         expect_items_to_be_found(external_member)
@@ -104,7 +114,8 @@ RSpec.describe 'GlobalSearch', :elastic do
       it "does not find items if features are disabled" do
         create_items(project, feature_settings(:disabled))
 
-        expect_no_items_to_be_found(admin)
+        expect_no_items_to_be_found(admin_with_admin_mode)
+        expect_no_items_to_be_found(admin_without_admin_mode)
         expect_no_items_to_be_found(auditor)
         expect_no_items_to_be_found(member)
         expect_no_items_to_be_found(external_member)
@@ -117,7 +128,8 @@ RSpec.describe 'GlobalSearch', :elastic do
       it "finds items if features are enabled" do
         create_items(project, feature_settings(:enabled))
 
-        expect_items_to_be_found(admin)
+        expect_items_to_be_found(admin_with_admin_mode)
+        expect_items_to_be_found(admin_without_admin_mode)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
         expect_items_to_be_found(external_member)
@@ -127,10 +139,11 @@ RSpec.describe 'GlobalSearch', :elastic do
         expect_items_to_be_found(nil)
       end
 
-      it "shows items to member only if features are private" do
+      it "shows items to member only if features are private", :aggregate_failures do
         create_items(project, feature_settings(:private))
 
-        expect_items_to_be_found(admin)
+        expect_items_to_be_found(admin_with_admin_mode)
+        expect_no_items_to_be_found(admin_without_admin_mode)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
         expect_items_to_be_found(external_member)
@@ -178,9 +191,9 @@ RSpec.describe 'GlobalSearch', :elastic do
 
     check_count = lambda do |feature, c|
       if arr.include?(feature)
-        expect(c).to be > 0
+        expect(c).to be > 0, "Search returned no #{feature} for #{user}"
       else
-        expect(c).to eq(0)
+        expect(c).to eq(0), "Search returned #{feature} for #{user}"
       end
     end
 

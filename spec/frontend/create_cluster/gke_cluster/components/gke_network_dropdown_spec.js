@@ -1,7 +1,7 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import GkeNetworkDropdown from '~/create_cluster/gke_cluster/components/gke_network_dropdown.vue';
+import Vuex from 'vuex';
 import ClusterFormDropdown from '~/create_cluster/components/cluster_form_dropdown.vue';
+import GkeNetworkDropdown from '~/create_cluster/gke_cluster/components/gke_network_dropdown.vue';
 import createClusterDropdownState from '~/create_cluster/store/cluster_dropdown/state';
 
 const localVue = createLocalVue();
@@ -121,23 +121,19 @@ describe('GkeNetworkDropdown', () => {
     });
 
     it('cleans selected subnetwork', () => {
-      expect(setSubnetwork).toHaveBeenCalledWith(expect.anything(), '', undefined);
+      expect(setSubnetwork).toHaveBeenCalledWith(expect.anything(), '');
     });
 
     it('dispatches the setNetwork action', () => {
-      expect(setNetwork).toHaveBeenCalledWith(expect.anything(), selectedNetwork, undefined);
+      expect(setNetwork).toHaveBeenCalledWith(expect.anything(), selectedNetwork);
     });
 
     it('fetches subnetworks for the selected project, region, and network', () => {
-      expect(fetchSubnetworks).toHaveBeenCalledWith(
-        expect.anything(),
-        {
-          project: projectId,
-          region,
-          network: selectedNetwork.selfLink,
-        },
-        undefined,
-      );
+      expect(fetchSubnetworks).toHaveBeenCalledWith(expect.anything(), {
+        project: projectId,
+        region,
+        network: selectedNetwork.selfLink,
+      });
     });
   });
 });

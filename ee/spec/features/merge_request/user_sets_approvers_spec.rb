@@ -11,6 +11,26 @@ RSpec.describe 'Merge request > User sets approvers', :js do
   let!(:config_selector) { '.js-approval-rules' }
   let!(:modal_selector) { '#mr-edit-approvals-create-modal' }
 
+  context 'with feature flag off' do
+    let!(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
+
+    def visit_mr(mr_collapsed_approval_rules: false)
+      stub_feature_flags(mr_collapsed_approval_rules: mr_collapsed_approval_rules)
+      project.add_developer(user)
+      sign_in(user)
+      visit edit_project_merge_request_path(project, merge_request)
+    end
+
+    def non_collapse_approval_rules
+      expect(page).to have_button('Add approval rule')
+    end
+
+    it 'does not hide approval rules inside collapse when mr_collapsed_approval_rules is off' do
+      visit_mr(mr_collapsed_approval_rules: false)
+      non_collapse_approval_rules
+    end
+  end
+
   context 'when editing an MR with a different author' do
     let(:author) { create(:user) }
     let(:merge_request) { create(:merge_request, author: author, source_project: project) }
@@ -89,7 +109,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
           click_button 'Add approval rule'
         end
 
-        click_on("Submit merge request")
+        click_on("Create merge request")
         wait_for_all_requests
 
         expect(page).to have_content("Requires approval.")
@@ -114,7 +134,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         end
 
         click_button 'Update approval rule'
-        click_on("Submit merge request")
+        click_on("Create merge request")
         wait_for_all_requests
         click_on("View eligible approvers") if page.has_button?("View eligible approvers")
         wait_for_requests
@@ -208,9 +228,9 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         find('.merge-request').click_on 'Edit'
         open_modal
 
-        expect(page).to have_field 'No. approvals required', exact: 2
+        expect(page).to have_field 'approvals_required', exact: 2
 
-        fill_in 'No. approvals required', with: '3'
+        fill_in 'approvals_required', with: '3'
 
         click_button 'Update approval rule'
         click_on('Save changes')
@@ -225,7 +245,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
 
         open_modal
 
-        expect(page).to have_field 'No. approvals required', exact: 3
+        expect(page).to have_field 'approvals_required', exact: 3
       end
     end
   end

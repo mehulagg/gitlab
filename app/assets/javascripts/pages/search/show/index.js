@@ -1,3 +1,3 @@
-import Search from './search';
+import { initSearchApp } from '~/search';
 
-document.addEventListener('DOMContentLoaded', () => new Search());
+initSearchApp();

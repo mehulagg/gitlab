@@ -162,7 +162,7 @@ RSpec.describe IssuesHelper do
     context 'with linked issue' do
       context 'with moved issue' do
         before do
-          issue.update(moved_to: new_issue)
+          issue.update!(moved_to: new_issue)
         end
 
         context 'when user has permission to see new issue' do
@@ -181,7 +181,7 @@ RSpec.describe IssuesHelper do
 
       context 'with duplicated issue' do
         before do
-          issue.update(duplicated_to: new_issue)
+          issue.update!(duplicated_to: new_issue)
         end
 
         context 'when user has permission to see new issue' do
@@ -203,7 +203,7 @@ RSpec.describe IssuesHelper do
       let(:user) { project.owner }
 
       before do
-        issue.update(moved_to: nil, duplicated_to: nil)
+        issue.update!(moved_to: nil, duplicated_to: nil)
       end
 
       it_behaves_like 'does not display link'
@@ -220,7 +220,7 @@ RSpec.describe IssuesHelper do
       allow(Gitlab::IncomingEmail).to receive(:enabled?) { true }
       allow(Gitlab::IncomingEmail).to receive(:supports_wildcard?) { true }
 
-      old_issue.update(moved_to: new_issue)
+      old_issue.update!(moved_to: new_issue)
     end
 
     it 'is true when moved issue project has service desk disabled' do
@@ -231,6 +231,98 @@ RSpec.describe IssuesHelper do
 
     it 'is false when moved issue project has service desk enabled' do
       expect(helper.show_moved_service_desk_issue_warning?(new_issue)).to be(false)
+    end
+  end
+
+  describe '#use_startup_call' do
+    it "returns false when a query param is present" do
+      allow(controller.request).to receive(:query_parameters).and_return({ foo: 'bar' })
+
+      expect(helper.use_startup_call?).to eq(false)
+    end
+
+    it "returns false when user has stored sort preference" do
+      controller.instance_variable_set(:@sort, 'updated_asc')
+
+      expect(helper.use_startup_call?).to eq(false)
+    end
+
+    it 'returns true when request.query_parameters is empty with default sorting preference' do
+      controller.instance_variable_set(:@sort, 'created_date')
+      allow(controller.request).to receive(:query_parameters).and_return({})
+
+      expect(helper.use_startup_call?).to eq(true)
+    end
+  end
+
+  describe '#issue_header_actions_data' do
+    let(:current_user) { create(:user) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:can?).and_return(true)
+    end
+
+    it 'returns expected result' do
+      expected = {
+        can_create_issue: "true",
+        can_reopen_issue: "true",
+        can_report_spam: "false",
+        can_update_issue: "true",
+        iid: issue.iid,
+        is_issue_author: "false",
+        issue_type: "issue",
+        new_issue_path: new_project_issue_path(project),
+        project_path: project.full_path,
+        report_abuse_path: new_abuse_report_path(user_id: issue.author.id, ref_url: issue_url(issue)),
+        submit_as_spam_path: mark_as_spam_project_issue_path(project, issue)
+      }
+
+      expect(helper.issue_header_actions_data(project, issue, current_user)).to include(expected)
+    end
+  end
+
+  shared_examples 'issues list data' do
+    it 'returns expected result' do
+      finder = double.as_null_object
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:finder).and_return(finder)
+      allow(helper).to receive(:can?).and_return(true)
+      allow(helper).to receive(:url_for).and_return('#')
+      allow(helper).to receive(:import_csv_namespace_project_issues_path).and_return('#')
+
+      expected = {
+        calendar_path: '#',
+        can_bulk_update: 'true',
+        can_edit: 'true',
+        email: current_user&.notification_email,
+        endpoint: expose_path(api_v4_projects_issues_path(id: project.id)),
+        export_csv_path: export_csv_project_issues_path(project),
+        full_path: project.full_path,
+        import_csv_issues_path: '#',
+        issues_path: project_issues_path(project),
+        max_attachment_size: number_to_human_size(Gitlab::CurrentSettings.max_attachment_size.megabytes),
+        new_issue_path: new_project_issue_path(project, issue: { assignee_id: finder.assignee.id, milestone_id: finder.milestones.first.id }),
+        project_import_jira_path: project_import_jira_path(project),
+        rss_path: '#',
+        show_new_issue_link: 'true'
+      }
+
+      expect(helper.issues_list_data(project, current_user, finder)).to include(expected)
+    end
+  end
+
+  describe '#issues_list_data' do
+    context 'when user is signed in' do
+      it_behaves_like 'issues list data' do
+        let(:current_user) { double.as_null_object }
+      end
+    end
+
+    context 'when user is anonymous' do
+      it_behaves_like 'issues list data' do
+        let(:current_user) { nil }
+      end
     end
   end
 end

@@ -52,7 +52,7 @@ module QA
           using_wait_time 0 do
             set_initial_password_if_present
 
-            raise NotImplementedError if Runtime::User.ldap_user? && user&.credentials_given?
+            raise 'If an LDAP user is provided, it must be used for sign-in', QA::Resource::User::InvalidUserError if Runtime::User.ldap_user? && user && user.username != Runtime::User.ldap_username
 
             if Runtime::User.ldap_user?
               sign_in_using_ldap_credentials(user: user || Runtime::User)
@@ -125,9 +125,9 @@ module QA
           click_element :sign_in_tab
         end
 
-        def switch_to_register_tab
+        def switch_to_register_page
           set_initial_password_if_present
-          click_element :register_tab
+          click_element :register_link
         end
 
         def switch_to_ldap_tab

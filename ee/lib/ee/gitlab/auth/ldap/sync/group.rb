@@ -15,7 +15,7 @@ module EE
 
                 begin
                   group.start_ldap_sync
-                  Rails.logger.debug { "Started syncing all providers for '#{group.name}' group" } # rubocop:disable Gitlab/RailsLogger
+                  ::Gitlab::AppLogger.debug "Started syncing all providers for '#{group.name}' group"
 
                   # Shuffle providers to prevent a scenario where sync fails after a time
                   # and only the first provider or two get synced. This shuffles the order
@@ -28,9 +28,9 @@ module EE
                   end
 
                   group.finish_ldap_sync
-                  Rails.logger.debug { "Finished syncing all providers for '#{group.name}' group" } # rubocop:disable Gitlab/RailsLogger
+                  ::Gitlab::AppLogger.debug "Finished syncing all providers for '#{group.name}' group"
                 rescue ::Gitlab::Auth::Ldap::LdapConnectionError
-                  Rails.logger.warn("Error syncing all providers for '#{group.name}' group") # rubocop:disable Gitlab/RailsLogger
+                  ::Gitlab::AppLogger.warn("Error syncing all providers for '#{group.name}' group")
                   group.fail_ldap_sync
                 end
               end
@@ -41,15 +41,15 @@ module EE
 
                 begin
                   group.start_ldap_sync
-                  Rails.logger.debug { "Started syncing '#{proxy.provider}' provider for '#{group.name}' group" } # rubocop:disable Gitlab/RailsLogger
+                  ::Gitlab::AppLogger.debug "Started syncing '#{proxy.provider}' provider for '#{group.name}' group"
 
                   sync_group = new(group, proxy)
                   sync_group.update_permissions
 
                   group.finish_ldap_sync
-                  Rails.logger.debug { "Finished syncing '#{proxy.provider}' provider for '#{group.name}' group" } # rubocop:disable Gitlab/RailsLogger
+                  ::Gitlab::AppLogger.debug "Finished syncing '#{proxy.provider}' provider for '#{group.name}' group"
                 rescue ::Gitlab::Auth::Ldap::LdapConnectionError
-                  Rails.logger.warn("Error syncing '#{proxy.provider}' provider for '#{group.name}' group") # rubocop:disable Gitlab/RailsLogger
+                  ::Gitlab::AppLogger.warn("Error syncing '#{proxy.provider}' provider for '#{group.name}' group")
                   group.fail_ldap_sync
                 end
               end
@@ -59,7 +59,7 @@ module EE
 
                 return true unless group.ldap_sync_started?
 
-                Rails.logger.warn "Group '#{group.name}' is not ready for LDAP sync. Skipping" # rubocop:disable Gitlab/RailsLogger
+                ::Gitlab::AppLogger.warn "Group '#{group.name}' is not ready for LDAP sync. Skipping"
                 false
               end
 
@@ -111,13 +111,13 @@ module EE
               # so we must propagate any higher inherited permissions unconditionally.
               inherit_higher_access_levels(group, access_levels)
 
-              logger.debug do
+              logger.debug(
                 <<-MSG.strip_heredoc.tr("\n", ' ')
                   Resolved '#{group.name}' group member access,
                   propagating any higher access inherited from a parent group:
                   #{access_levels.to_hash}
                 MSG
-              end
+              )
 
               update_existing_group_membership(group, access_levels)
               add_new_members(group, access_levels)
@@ -129,9 +129,7 @@ module EE
               if member_dns = get_member_dns(group_link)
                 access_levels.set(member_dns, to: group_link.group_access)
 
-                logger.debug do
-                  "Resolved '#{group.name}' group member access: #{access_levels.to_hash}"
-                end
+                logger.debug "Resolved '#{group.name}' group member access: #{access_levels.to_hash}"
               end
             end
 
@@ -141,7 +139,7 @@ module EE
 
             def dns_for_group_cn(group_cn)
               if config.group_base.blank?
-                logger.debug { "No `group_base` configured for '#{provider}' provider and group link CN #{group_cn}. Skipping" }
+                logger.debug "No `group_base` configured for '#{provider}' provider and group link CN #{group_cn}. Skipping"
 
                 return
               end
@@ -172,7 +170,7 @@ module EE
             # rubocop: enable CodeReuse/ActiveRecord
 
             def update_existing_group_membership(group, access_levels)
-              logger.debug { "Updating existing membership for '#{group.name}' group" }
+              logger.debug "Updating existing membership for '#{group.name}' group"
 
               multiple_ldap_providers = ::Gitlab::Auth::Ldap::Config.providers.count > 1
               existing_members = select_and_preload_group_members(group)
@@ -228,7 +226,7 @@ module EE
             end
 
             def add_new_members(group, access_levels)
-              logger.debug { "Adding new members to '#{group.name}' group" }
+              logger.debug "Adding new members to '#{group.name}' group"
 
               return unless access_levels.present?
 
@@ -247,14 +245,14 @@ module EE
                     access_level
                   )
                 else
-                  logger.debug do
+                  logger.debug(
                     <<-MSG.strip_heredoc.tr("\n", ' ')
                       #{self.class.name}: User with DN `#{member_dn}` should have access
                       to '#{group.name}' group but there is no user in GitLab with that
                       identity. Membership will be updated once the user signs in for
                       the first time.
                     MSG
-                  end
+                  )
                 end
               end
             end
@@ -276,13 +274,13 @@ module EE
             end
 
             def warn_cannot_remove_last_owner(user, group)
-              logger.warn do
+              logger.warn(
                 <<-MSG.strip_heredoc.tr("\n", ' ')
                   #{self.class.name}: LDAP group sync cannot remove #{user.name}
                   (#{user.id}) from group #{group.name} (#{group.id}) as this is
                   the group's last owner
                 MSG
-              end
+              )
             end
 
             # rubocop: disable CodeReuse/ActiveRecord
@@ -310,7 +308,7 @@ module EE
             # rubocop: enable CodeReuse/ActiveRecord
 
             def logger
-              Rails.logger # rubocop:disable Gitlab/RailsLogger
+              ::Gitlab::AppLogger
             end
 
             def config

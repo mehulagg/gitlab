@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 import { ApolloMutation } from 'vue-apollo';
 import DesignNote from '~/design_management/components/design_notes/design_note.vue';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import DesignReplyForm from '~/design_management/components/design_notes/design_reply_form.vue';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
 const scrollIntoViewMock = jest.fn();
 const note = {
@@ -15,6 +15,7 @@ const note = {
   userPermissions: {
     adminNote: false,
   },
+  createdAt: '2019-07-26T15:02:20Z',
 };
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock;
 
@@ -79,21 +80,10 @@ describe('Design note component', () => {
 
   it('should render a time ago tooltip if note has createdAt property', () => {
     createComponent({
-      note: {
-        ...note,
-        createdAt: '2019-07-26T15:02:20Z',
-      },
-    });
-
-    expect(wrapper.find(TimeAgoTooltip).exists()).toBe(true);
-  });
-
-  it('should trigger a scrollIntoView method', () => {
-    createComponent({
       note,
     });
 
-    expect(scrollIntoViewMock).toHaveBeenCalled();
+    expect(wrapper.find(TimeAgoTooltip).exists()).toBe(true);
   });
 
   it('should not render edit icon when user does not have a permission', () => {
@@ -143,8 +133,8 @@ describe('Design note component', () => {
         expect(findReplyForm().exists()).toBe(true);
       });
 
-      it('hides the form on hideForm event', () => {
-        findReplyForm().vm.$emit('cancelForm');
+      it('hides the form on cancel-form event', () => {
+        findReplyForm().vm.$emit('cancel-form');
 
         return wrapper.vm.$nextTick().then(() => {
           expect(findReplyForm().exists()).toBe(false);
@@ -152,8 +142,8 @@ describe('Design note component', () => {
         });
       });
 
-      it('calls a mutation on submitForm event and hides a form', () => {
-        findReplyForm().vm.$emit('submitForm');
+      it('calls a mutation on submit-form event and hides a form', () => {
+        findReplyForm().vm.$emit('submit-form');
         expect(mutate).toHaveBeenCalled();
 
         return mutate()

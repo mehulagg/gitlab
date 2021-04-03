@@ -5,18 +5,19 @@ require 'spec_helper'
 RSpec.describe 'Merge request > User sees versions', :js do
   let(:merge_request) do
     create(:merge_request).tap do |mr|
-      mr.merge_request_diff.destroy
+      mr.merge_request_diff.destroy!
     end
   end
+
   let(:project) { merge_request.source_project }
   let(:user) { project.creator }
-  let!(:merge_request_diff1) { merge_request.merge_request_diffs.create(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9') }
-  let!(:merge_request_diff2) { merge_request.merge_request_diffs.create(head_commit_sha: nil) }
-  let!(:merge_request_diff3) { merge_request.merge_request_diffs.create(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e') }
+  let!(:merge_request_diff1) { merge_request.merge_request_diffs.create!(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9') }
+  let!(:merge_request_diff2) { merge_request.merge_request_diffs.create!(head_commit_sha: nil) }
+  let!(:merge_request_diff3) { merge_request.merge_request_diffs.create!(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e') }
   let!(:params) { {} }
 
   before do
-    stub_feature_flags(diffs_batch_load: false)
+    stub_feature_flags(diffs_gradual_load: false)
 
     project.add_maintainer(user)
     sign_in(user)
@@ -74,12 +75,12 @@ RSpec.describe 'Merge request > User sees versions', :js do
 
     it 'shows the commit SHAs for every version in the dropdown' do
       page.within '.mr-version-dropdown' do
-        find('.btn-default').click
+        find('.gl-dropdown-toggle').click
+      end
 
-        page.within('.dropdown-content') do
-          shas = merge_request.merge_request_diffs.map { |diff| Commit.truncate_sha(diff.head_commit_sha) }
-          shas.each { |sha| expect(page).to have_content(sha) }
-        end
+      page.within '.mr-version-dropdown' do
+        shas = merge_request.merge_request_diffs.map { |diff| Commit.truncate_sha(diff.head_commit_sha) }
+        shas.each { |sha| expect(page).to have_content(sha) }
       end
     end
 
@@ -183,14 +184,14 @@ RSpec.describe 'Merge request > User sees versions', :js do
 
     it 'has 0 chages between versions' do
       page.within '.mr-version-compare-dropdown' do
-        expect(find('.dropdown-menu-toggle')).to have_content 'version 1'
+        expect(find('.gl-dropdown-toggle')).to have_content 'version 1'
       end
 
       page.within '.mr-version-dropdown' do
         find('.btn-default').click
         click_link 'version 1'
       end
-      expect(page).to have_content '0 files'
+      expect(page).to have_content 'No changes between version 1 and version 1'
     end
   end
 
@@ -204,7 +205,7 @@ RSpec.describe 'Merge request > User sees versions', :js do
 
     it 'sets the compared versions to be the same' do
       page.within '.mr-version-compare-dropdown' do
-        expect(find('.dropdown-menu-toggle')).to have_content 'version 2'
+        expect(find('.gl-dropdown-toggle')).to have_content 'version 2'
       end
 
       page.within '.mr-version-dropdown' do
@@ -216,7 +217,7 @@ RSpec.describe 'Merge request > User sees versions', :js do
         expect(page).to have_content 'version 1'
       end
 
-      expect(page).to have_content '0 files'
+      expect(page).to have_content 'No changes between version 1 and version 1'
     end
   end
 

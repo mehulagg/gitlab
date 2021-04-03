@@ -4,7 +4,7 @@ module QA
   module Runtime
     module API
       class Request
-        API_VERSION = 'v4'.freeze
+        API_VERSION = 'v4'
 
         def initialize(api_client, path, **query_string)
           query_string[:private_token] ||= api_client.personal_access_token unless query_string[:oauth_access_token]
@@ -34,7 +34,11 @@ module QA
         #
         # Returns the relative path to the requested API resource
         def request_path(path, version: API_VERSION, **query_string)
-          full_path = ::File.join('/api', version, path)
+          full_path = if path == '/graphql'
+                        ::File.join('/api', path)
+                      else
+                        ::File.join('/api', version, path)
+                      end
 
           if query_string.any?
             full_path << (path.include?('?') ? '&' : '?')

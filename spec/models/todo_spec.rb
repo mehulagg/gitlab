@@ -200,26 +200,42 @@ RSpec.describe Todo do
   describe '#self_assigned?' do
     let(:user_1) { build(:user) }
 
-    before do
-      subject.user = user_1
-      subject.author = user_1
-      subject.action = Todo::ASSIGNED
+    context 'when self_added' do
+      before do
+        subject.user = user_1
+        subject.author = user_1
+      end
+
+      it 'returns true for ASSIGNED' do
+        subject.action = Todo::ASSIGNED
+
+        expect(subject).to be_self_assigned
+      end
+
+      it 'returns true for REVIEW_REQUESTED' do
+        subject.action = Todo::REVIEW_REQUESTED
+
+        expect(subject).to be_self_assigned
+      end
+
+      it 'returns false for other action' do
+        subject.action = Todo::MENTIONED
+
+        expect(subject).not_to be_self_assigned
+      end
     end
 
-    it 'is true when todo is ASSIGNED and self_added' do
-      expect(subject).to be_self_assigned
-    end
+    context 'when todo is not self_added' do
+      before do
+        subject.user = user_1
+        subject.author = build(:user)
+      end
 
-    it 'is false when the todo is not ASSIGNED' do
-      subject.action = Todo::MENTIONED
+      it 'returns false' do
+        subject.action = Todo::ASSIGNED
 
-      expect(subject).not_to be_self_assigned
-    end
-
-    it 'is false when todo is not self_added' do
-      subject.author = build(:user)
-
-      expect(subject).not_to be_self_assigned
+        expect(subject).not_to be_self_assigned
+      end
     end
   end
 
@@ -347,23 +363,6 @@ RSpec.describe Todo do
     end
   end
 
-  describe '.for_ids' do
-    it 'returns the expected todos' do
-      todo1 = create(:todo)
-      todo2 = create(:todo)
-      todo3 = create(:todo)
-      create(:todo)
-
-      expect(described_class.for_ids([todo2.id, todo1.id, todo3.id])).to contain_exactly(todo1, todo2, todo3)
-    end
-
-    it 'returns an empty collection when no ids are given' do
-      create(:todo)
-
-      expect(described_class.for_ids([])).to be_empty
-    end
-  end
-
   describe '.for_user' do
     it 'returns the expected todos' do
       user1 = create(:user)
@@ -427,7 +426,7 @@ RSpec.describe Todo do
     it 'updates updated_at' do
       create(:todo, :pending)
 
-      Timecop.freeze(1.day.from_now) do
+      travel_to(1.day.from_now) do
         expected_update_date = Time.current.utc
 
         ids = described_class.batch_update(state: :done)
@@ -435,5 +434,13 @@ RSpec.describe Todo do
         expect(Todo.where(id: ids).map(&:updated_at)).to all(be_like_time(expected_update_date))
       end
     end
+  end
+
+  describe '.pluck_user_id' do
+    subject { described_class.pluck_user_id }
+
+    let_it_be(:todo) { create(:todo) }
+
+    it { is_expected.to eq([todo.user_id]) }
   end
 end

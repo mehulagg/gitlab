@@ -15,7 +15,7 @@ module Gitlab
           include ::Gitlab::Config::Entry::Inheritable
 
           PROCESSABLE_ALLOWED_KEYS = %i[extends stage only except rules variables
-                                        inherit allow_failure when needs].freeze
+                                        inherit allow_failure when needs resource_group].freeze
 
           included do
             validations do
@@ -32,6 +32,7 @@ module Gitlab
               with_options allow_nil: true do
                 validates :extends, array_of_strings_or_string: true
                 validates :rules, array_of_hashes: true
+                validates :resource_group, type: String
               end
             end
 
@@ -64,7 +65,7 @@ module Gitlab
               inherit: false,
               default: {}
 
-            attributes :extends, :rules
+            attributes :extends, :rules, :resource_group
           end
 
           def compose!(deps = nil)
@@ -83,14 +84,27 @@ module Gitlab
                 @entries.delete(:except) unless except_defined? # rubocop:disable Gitlab/ModuleWithInstanceVariables
               end
 
-              if has_rules? && !has_workflow_rules && Gitlab::Ci::Features.raise_job_rules_without_workflow_rules_warning?
-                add_warning('uses `rules` without defining `workflow:rules`')
+              unless has_workflow_rules
+                validate_against_warnings
               end
 
               # inherit root variables
               @root_variables_value = deps&.variables_value # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
               yield if block_given?
+            end
+          end
+
+          def validate_against_warnings
+            # If rules are valid format and workflow rules are not specified
+            return unless rules_value
+            return unless Gitlab::Ci::Features.raise_job_rules_without_workflow_rules_warning?
+
+            last_rule = rules_value.last
+
+            if last_rule&.keys == [:when] && last_rule[:when] != 'never'
+              docs_url = 'read more: https://docs.gitlab.com/ee/ci/troubleshooting.html#pipeline-warnings'
+              add_warning("may allow multiple pipelines to run for a single action due to `rules:when` clause with no `workflow:rules` - #{docs_url}")
             end
           end
 
@@ -110,9 +124,12 @@ module Gitlab
               stage: stage_value,
               extends: extends,
               rules: rules_value,
-              variables: root_and_job_variables_value,
+              variables: root_and_job_variables_value, # https://gitlab.com/gitlab-org/gitlab/-/issues/300581
+              job_variables: job_variables,
+              root_variables_inheritance: root_variables_inheritance,
               only: only_value,
-              except: except_value }.compact
+              except: except_value,
+              resource_group: resource_group }.compact
           end
 
           def root_and_job_variables_value
@@ -122,6 +139,22 @@ module Gitlab
             end
 
             root_variables.merge(variables_value.to_h)
+          end
+
+          def job_variables
+            return unless ::Feature.enabled?(:ci_workflow_rules_variables, default_enabled: :yaml)
+
+            variables_value.to_h
+          end
+
+          def root_variables_inheritance
+            return unless ::Feature.enabled?(:ci_workflow_rules_variables, default_enabled: :yaml)
+
+            inherit_entry&.variables_entry&.value
+          end
+
+          def manual_action?
+            self.when == 'manual'
           end
         end
       end

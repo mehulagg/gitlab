@@ -13,6 +13,7 @@ module EE
     def setup_database_cleaner
       if ::Gitlab::Geo.geo_database_configured?
         ::DatabaseCleaner[:active_record, { connection: ::Geo::BaseRegistry }]
+        TestProf::BeforeAll.adapter = ::EE::BeforeAllAdapter
       end
 
       super

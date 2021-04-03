@@ -7,12 +7,10 @@ module Notes
 
       old_mentioned_users = note.mentioned_users(current_user).to_a
 
-      note.assign_attributes(params.merge(updated_by: current_user))
+      note.assign_attributes(params)
 
-      note.with_transaction_returning_status do
-        update_confidentiality(note)
-        note.save
-      end
+      track_note_edit_usage_for_issues(note) if note.for_issue?
+      track_note_edit_usage_for_merge_requests(note) if note.for_merge_request?
 
       only_commands = false
 
@@ -25,7 +23,16 @@ module Notes
         note.note = content
       end
 
-      unless only_commands
+      if note.note_changed?
+        note.assign_attributes(last_edited_at: Time.current, updated_by: current_user)
+      end
+
+      note.with_transaction_returning_status do
+        update_confidentiality(note)
+        note.save
+      end
+
+      unless only_commands || note.for_personal_snippet?
         note.create_new_cross_references!(current_user)
 
         update_todos(note, old_mentioned_users)
@@ -88,6 +95,14 @@ module Notes
       return unless note.start_of_discussion? # don't update all notes if a response is being updated
 
       Note.id_in(note.discussion.notes.map(&:id)).update_all(confidential: params[:confidential])
+    end
+
+    def track_note_edit_usage_for_issues(note)
+      Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_comment_edited_action(author: note.author)
+    end
+
+    def track_note_edit_usage_for_merge_requests(note)
+      Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter.track_edit_comment_action(note: note)
     end
   end
 end

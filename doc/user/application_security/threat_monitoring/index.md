@@ -1,8 +1,8 @@
 ---
 type: reference, howto
-stage: Defend
+stage: Protect
 group: Container Security
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Threat Monitoring **(ULTIMATE)**
@@ -66,7 +66,7 @@ global:
     enabled: true
     metrics:
       enabled:
-      - 'flow:sourceContext=namespace;destinationContext=namespace'
+        - 'flow:sourceContext=namespace;destinationContext=namespace'
 ```
 
 The **Container Network Policy** section displays the following information
@@ -88,8 +88,9 @@ investigate it for potential threats by
 
 The **Threat Monitoring** page's **Policy** tab displays deployed
 network policies for all available environments. You can check a
-network policy's `yaml` manifest and toggle the policy's enforcement
-status. This section has the following prerequisites:
+network policy's `yaml` manifest, toggle the policy's enforcement
+status, and create and edit deployed policies. This section has the
+following prerequisites:
 
 - Your project contains at least one [environment](../../../ci/environments/index.md)
 - You've [installed Cilium](../../clusters/applications.md#install-cilium-using-gitlab-cicd)
@@ -100,15 +101,14 @@ reflected upon refresh. Enforcement status changes are deployed
 directly to a deployment namespace of the selected environment.
 
 By default, the network policy list contains predefined policies in a
-disabled state. Once enabled,a predefined policy deploys to the
+disabled state. Once enabled, a predefined policy deploys to the
 selected environment's deployment platform and you can manage it like
 the regular policies.
 
-NOTE: **Note:**
-If you're using [Auto DevOps](../../../topics/autodevops/index.md) and
-change a policy in this section, your `auto-deploy-values.yaml` file
-doesn't update. Auto DevOps users must make changes by following
-the [Container Network Policy documentation](../../../topics/autodevops/stages.md#network-policy).
+Note that if you're using [Auto DevOps](../../../topics/autodevops/index.md)
+and change a policy in this section, your `auto-deploy-values.yaml` file doesn't update. Auto DevOps
+users must make changes by following the
+[Container Network Policy documentation](../../../topics/autodevops/stages.md#network-policy).
 
 ### Changing enforcement status
 
@@ -118,9 +118,111 @@ To change a network policy's enforcement status:
 - Click the **Enforcement status** toggle to update the selected policy.
 - Click the **Apply changes** button to deploy network policy changes.
 
-NOTE: **Note:**
-Disabled network policies have the
-`network-policy.gitlab.com/disabled_by: gitlab` selector inside the
-`podSelector` block. This narrows the scope of such a policy and as a
-result it doesn't affect any pods. The policy itself is still deployed
-to the corresponding deployment namespace.
+Disabled network policies have the `network-policy.gitlab.com/disabled_by: gitlab` selector inside
+the `podSelector` block. This narrows the scope of such a policy and as a result it doesn't affect
+any pods. The policy itself is still deployed to the corresponding deployment namespace.
+
+### Container Network Policy editor
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3403) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.4.
+
+You can use the policy editor to create, edit, and delete policies.
+
+- To create a new policy, click the **New policy** button located in the **Policy** tab's header.
+- To edit an existing policy, click **Edit policy** in the selected policy drawer.
+
+The policy editor only supports the [CiliumNetworkPolicy](https://docs.cilium.io/en/v1.8/policy/)
+specification. Regular Kubernetes [NetworkPolicy](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.19/#networkpolicy-v1-networking-k8s-io)
+resources aren't supported.
+
+The policy editor has two modes:
+
+- The visual _Rule_ mode allows you to construct and preview policy
+  rules using rule blocks and related controls.
+- YAML mode allows you to enter a policy definition in `.yaml` format
+  and is aimed at expert users and cases that the Rule mode doesn't
+  support.
+
+You can use both modes interchangeably and switch between them at any
+time. If a YAML resource is incorrect, Rule mode is automatically
+disabled. You must use YAML mode to fix your policy before Rule mode
+is available again.
+
+Rule mode supports the following rule types:
+
+- [Labels](https://docs.cilium.io/en/v1.8/policy/language/#labels-based).
+- [Entities](https://docs.cilium.io/en/v1.8/policy/language/#entities-based).
+- [IP/CIDR](https://docs.cilium.io/en/v1.8/policy/language/#ip-cidr-based). Only
+  the `toCIDR` block without `except` is supported.
+- [DNS](https://docs.cilium.io/en/v1.8/policy/language/#dns-based).
+- [Level 4](https://docs.cilium.io/en/v1.8/policy/language/#layer-4-examples)
+  can be added to all other rules.
+
+Once your policy is complete, save it by pressing the **Save policy**
+button at the bottom of the editor. Existing policies can also be
+removed from the editor interface by clicking the **Delete policy**
+button at the bottom of the editor.
+
+### Configuring Network Policy Alerts
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3438) and [enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/287676) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.9.
+
+You can use policy alerts to track your policy's impact. Alerts are only available if you've
+[installed](../../clusters/agent/repository.md)
+and [configured](../../clusters/agent/index.md#create-an-agent-record-in-gitlab)
+a Kubernetes Agent for this project.
+
+There are two ways to create policy alerts:
+
+- In the [policy editor UI](#container-network-policy-editor),
+  by clicking **Add alert**.
+- In the policy editor's YAML mode, through the `metadata.annotations` property:
+
+  ```yaml
+  metadata:
+    annotations:
+      app.gitlab.com/alert: 'true'
+  ```
+
+Once added, the UI updates and displays a warning about the dangers of too many alerts.
+
+#### Enable or disable Policy Alerts **(ULTIMATE)**
+
+Policy Alerts is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:threat_monitoring_alerts)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:threat_monitoring_alerts)
+```
+
+### Container Network Policy Alert list
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3438) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.9.
+
+The policy alert list displays your policy's alert activity. You can sort the list by the
+**Date and time** column, and the **Status** column. Use the selector menu in the **Status** column
+to set the status for each alert:
+
+- Unreviewed
+- In review
+- Resolved
+- Dismissed
+
+By default, the list doesn't display resolved or dismissed alerts. To show these alerts, clear the
+checkbox **Hide dismissed alerts**.
+
+![Policy Alert List](img/threat_monitoring_policy_alert_list_v13_11.png)
+
+Clicking an alert's name takes the user to the [alert details page](../../../operations/incident_management/alerts.md#alert-details-page).
+
+For information on work in progress for the alerts dashboard, see [this epic](https://gitlab.com/groups/gitlab-org/-/epics/5041).

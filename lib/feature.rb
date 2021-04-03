@@ -64,6 +64,9 @@ class Feature
         Feature::Definition.valid_usage!(key, type: type, default_enabled: default_enabled)
       end
 
+      # If `default_enabled: :yaml` we fetch the value from the YAML definition instead.
+      default_enabled = Feature::Definition.default_enabled?(key) if default_enabled == :yaml
+
       # During setup the database does not exist yet. So we haven't stored a value
       # for the feature yet and return the default.
       return default_enabled unless Gitlab::Database.exists?
@@ -83,40 +86,39 @@ class Feature
     end
 
     def enable(key, thing = true)
+      log(key: key, action: __method__, thing: thing)
       get(key).enable(thing)
     end
 
     def disable(key, thing = false)
+      log(key: key, action: __method__, thing: thing)
       get(key).disable(thing)
     end
 
-    def enable_group(key, group)
-      get(key).enable_group(group)
-    end
-
-    def disable_group(key, group)
-      get(key).disable_group(group)
-    end
-
     def enable_percentage_of_time(key, percentage)
+      log(key: key, action: __method__, percentage: percentage)
       get(key).enable_percentage_of_time(percentage)
     end
 
     def disable_percentage_of_time(key)
+      log(key: key, action: __method__)
       get(key).disable_percentage_of_time
     end
 
     def enable_percentage_of_actors(key, percentage)
+      log(key: key, action: __method__, percentage: percentage)
       get(key).enable_percentage_of_actors(percentage)
     end
 
     def disable_percentage_of_actors(key)
+      log(key: key, action: __method__)
       get(key).disable_percentage_of_actors
     end
 
     def remove(key)
       return unless persisted_name?(key)
 
+      log(key: key, action: __method__)
       get(key).remove
     end
 
@@ -127,14 +129,22 @@ class Feature
 
     # This method is called from config/initializers/flipper.rb and can be used
     # to register Flipper groups.
-    # See https://docs.gitlab.com/ee/development/feature_flags.html#feature-groups
+    # See https://docs.gitlab.com/ee/development/feature_flags/index.html
     def register_feature_groups
     end
 
     def register_definitions
+      Feature::Definition.reload!
+    end
+
+    def register_hot_reloader
       return unless check_feature_flags_definition?
 
-      Feature::Definition.load_all!
+      Feature::Definition.register_hot_reloader!
+    end
+
+    def logger
+      @logger ||= Feature::Logger.build
     end
 
     private
@@ -154,7 +164,7 @@ class Feature
 
       # Redis L2 cache
       redis_cache_adapter =
-        Flipper::Adapters::ActiveSupportCacheStore.new(
+        ActiveSupportCacheStoreAdapter.new(
           active_record_adapter,
           l2_cache_backend,
           expires_in: 1.hour)
@@ -183,6 +193,14 @@ class Feature
 
     def l2_cache_backend
       Rails.cache
+    end
+
+    def log(key:, action:, **extra)
+      extra ||= {}
+      extra = extra.transform_keys { |k| "extra.#{k}" }
+      extra = extra.transform_values { |v| v.respond_to?(:flipper_id) ? v.flipper_id : v }
+      extra = extra.transform_values(&:to_s)
+      logger.info(key: key, action: action, **extra)
     end
   end
 
@@ -231,4 +249,4 @@ class Feature
   end
 end
 
-Feature.prepend_if_ee('EE::Feature')
+Feature::ActiveSupportCacheStoreAdapter.prepend_if_ee('EE::Feature::ActiveSupportCacheStoreAdapter')

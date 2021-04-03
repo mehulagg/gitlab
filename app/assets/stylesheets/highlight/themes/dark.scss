@@ -24,8 +24,8 @@ $dark-pre-hll-bg: #373b41;
 $dark-hll-bg: #373b41;
 $dark-over-bg: #9f9ab5;
 $dark-expanded-bg: #3e3e3e;
-$dark-coverage: #b5bd68;
-$dark-no-coverage: #de935f;
+$dark-coverage: #b3e841;
+$dark-no-coverage: #ff4f33;
 $dark-c: #969896;
 $dark-err: #c66;
 $dark-k: #b294bb;
@@ -38,7 +38,7 @@ $dark-cp: #969896;
 $dark-c1: #969896;
 $dark-cs: #969896;
 $dark-gd: #c66;
-$dark-gh: #c5c8c6;
+$dark-gh: #8abeb7;
 $dark-gi: #b5bd68;
 $dark-gp: #969896;
 $dark-gu: #8abeb7;
@@ -90,6 +90,10 @@ $dark-il: #de935f;
 
 .code.dark {
   // Line numbers
+  .file-line-num {
+    @include line-number-link($dark-line-num-color);
+  }
+  
   .line-numbers,
   .diff-line-num {
     background-color: $dark-main-bg;
@@ -125,6 +129,9 @@ $dark-il: #de935f;
       @include dark-diff-match-line;
     }
 
+    .diff-td.diff-line-num.hll:not(.empty-cell),
+    .diff-td.line-coverage.hll:not(.empty-cell),
+    .diff-td.line_content.hll:not(.empty-cell),
     td.diff-line-num.hll:not(.empty-cell),
     td.line-coverage.hll:not(.empty-cell),
     td.line_content.hll:not(.empty-cell) {
@@ -158,15 +165,17 @@ $dark-il: #de935f;
       }
     }
 
+    .diff-grid-left:hover,
+    .diff-grid-right:hover {
+      .diff-line-num:not(.empty-cell) {
+        @include line-number-hover($dark-over-bg);
+      }
+    }
+
     .diff-line-num {
       &.is-over,
       &.hll:not(.empty-cell).is-over {
-        background-color: $dark-over-bg;
-        border-color: darken($dark-over-bg, 5%);
-
-        a {
-          color: darken($dark-over-bg, 15%);
-        }
+        @include line-number-hover($dark-over-bg);
       }
     }
 
@@ -192,6 +201,8 @@ $dark-il: #de935f;
       }
     }
   }
+
+  @include conflict-colors('dark');
 
   // highlight line via anchor
   pre .hll {

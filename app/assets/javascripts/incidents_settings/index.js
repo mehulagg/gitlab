@@ -20,6 +20,10 @@ export default () => {
       pagerdutyActive,
       pagerdutyWebhookUrl,
       pagerdutyResetKeyPath,
+      autoCloseIncident,
+      slaActive,
+      slaMinutes,
+      slaFeatureAvailable,
     },
   } = el;
 
@@ -33,10 +37,16 @@ export default () => {
         createIssue: parseBoolean(createIssue),
         issueTemplateKey,
         sendEmail: parseBoolean(sendEmail),
+        autoCloseIncident: parseBoolean(autoCloseIncident),
       },
       pagerDutySettings: {
         active: parseBoolean(pagerdutyActive),
         webhookUrl: pagerdutyWebhookUrl,
+      },
+      serviceLevelAgreementSettings: {
+        active: parseBoolean(slaActive),
+        minutes: slaMinutes,
+        available: parseBoolean(slaFeatureAvailable),
       },
     },
     render(createElement) {

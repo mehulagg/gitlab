@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import PreviewItem from '~/batch_comments/components/preview_item.vue';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
+import PreviewItem from '~/batch_comments/components/preview_item.vue';
 import { createStore } from '~/batch_comments/stores';
 import diffsModule from '~/diffs/store/modules';
 import notesModule from '~/notes/stores/modules';
@@ -43,22 +43,6 @@ describe('Batch comments draft preview item component', () => {
     );
   });
 
-  it('adds is last class', () => {
-    createComponent(true);
-
-    expect(vm.$el.classList).toContain('is-last');
-  });
-
-  it('scrolls to draft on click', () => {
-    createComponent();
-
-    jest.spyOn(vm.$store, 'dispatch').mockImplementation();
-
-    vm.$el.click();
-
-    expect(vm.$store.dispatch).toHaveBeenCalledWith('batchComments/scrollToDraft', vm.draft);
-  });
-
   describe('for file', () => {
     it('renders file path', () => {
       createComponent(false, { file_path: 'index.js', file_hash: 'abc', position: {} });
@@ -72,17 +56,30 @@ describe('Batch comments draft preview item component', () => {
       createComponent(false, {
         file_path: 'index.js',
         file_hash: 'abc',
-        position: { new_line: 1 },
+        position: {
+          line_range: {
+            start: {
+              new_line: 1,
+              type: 'new',
+            },
+          },
+        },
       });
 
-      expect(vm.$el.querySelector('.bold').textContent).toContain(':1');
+      expect(vm.$el.querySelector('.bold').textContent).toContain(':+1');
     });
 
     it('renders old line position', () => {
       createComponent(false, {
         file_path: 'index.js',
         file_hash: 'abc',
-        position: { old_line: 2 },
+        position: {
+          line_range: {
+            start: {
+              old_line: 2,
+            },
+          },
+        },
       });
 
       expect(vm.$el.querySelector('.bold').textContent).toContain(':2');
@@ -101,7 +98,7 @@ describe('Batch comments draft preview item component', () => {
 
   describe('for thread', () => {
     beforeEach(() => {
-      createComponent(false, { discussion_id: '1', resolve_discussion: true }, store => {
+      createComponent(false, { discussion_id: '1', resolve_discussion: true }, (store) => {
         store.state.notes.discussions.push({
           id: '1',
           notes: [

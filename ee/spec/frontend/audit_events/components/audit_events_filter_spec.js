@@ -10,7 +10,8 @@ describe('AuditEventsFilter', () => {
   const value = [{ type: 'project', value: { data: 1, operator: '=' } }];
   const findFilteredSearch = () => wrapper.find(GlFilteredSearch);
   const getAvailableTokens = () => findFilteredSearch().props('availableTokens');
-  const getAvailableTokenProps = type => getAvailableTokens().find(token => token.type === type);
+  const getAvailableTokenProps = (type) =>
+    getAvailableTokens().find((token) => token.type === type);
 
   const initComponent = (props = {}) => {
     wrapper = shallowMount(AuditEventsFilter, {
@@ -110,29 +111,6 @@ describe('AuditEventsFilter', () => {
     it('only the enabled tokens type is available for selection', () => {
       expect(getAvailableTokens().length).toEqual(1);
       expect(getAvailableTokens()).toMatchObject([{ type }]);
-    });
-  });
-
-  describe('when setting the QA selector', () => {
-    beforeEach(() => {
-      initComponent();
-    });
-
-    it('should not set the QA selector if not provided', () => {
-      wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper.find('[data-testid="audit-events-filter"]').attributes('data-qa-selector'),
-        ).toBeUndefined();
-      });
-    });
-
-    it('should set the QA selector if provided', () => {
-      wrapper.setProps({ qaSelector: 'qa_selector' });
-      wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper.find('[data-testid="audit-events-filter"]').attributes('data-qa-selector'),
-        ).toEqual('qa_selector');
-      });
     });
   });
 });

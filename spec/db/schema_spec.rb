@@ -11,31 +11,32 @@ RSpec.describe 'Database schema' do
   let(:columns_name_with_jsonb) { retrieve_columns_name_with_jsonb }
 
   # List of columns historically missing a FK, don't add more columns
-  # See: https://docs.gitlab.com/ce/development/foreign_keys.html#naming-foreign-keys
+  # See: https://docs.gitlab.com/ee/development/foreign_keys.html#naming-foreign-keys
   IGNORED_FK_COLUMNS = {
     abuse_reports: %w[reporter_id user_id],
     application_settings: %w[performance_bar_allowed_group_id slack_app_id snowplow_app_id eks_account_id eks_access_key_id],
     approvals: %w[user_id],
     approver_groups: %w[target_id],
     approvers: %w[target_id user_id],
-    audit_events: %w[author_id entity_id],
-    audit_events_part_5fc467ac26: %w[author_id entity_id],
+    audit_events: %w[author_id entity_id target_id],
+    audit_events_archived: %w[author_id entity_id target_id],
     award_emoji: %w[awardable_id user_id],
     aws_roles: %w[role_external_id],
-    boards: %w[milestone_id],
+    boards: %w[milestone_id iteration_id],
     chat_names: %w[chat_id team_id user_id],
     chat_teams: %w[team_id],
     ci_builds: %w[erased_by_id runner_id trigger_request_id user_id],
+    ci_namespace_monthly_usages: %w[namespace_id],
     ci_pipelines: %w[user_id],
     ci_runner_projects: %w[runner_id],
     ci_trigger_requests: %w[commit_id],
     cluster_providers_aws: %w[security_group_id vpc_id access_key_id],
     cluster_providers_gcp: %w[gcp_project_id operation_id],
+    compliance_management_frameworks: %w[group_id],
     commit_user_mentions: %w[commit_id],
     deploy_keys_projects: %w[deploy_key_id],
     deployments: %w[deployable_id environment_id user_id],
     draft_notes: %w[discussion_id commit_id],
-    emails: %w[user_id],
     epics: %w[updated_by_id last_edited_by_id state_id],
     events: %w[target_id],
     forked_project_links: %w[forked_from_project_id],
@@ -86,7 +87,7 @@ RSpec.describe 'Database schema' do
     users_star_projects: %w[user_id],
     vulnerability_identifiers: %w[external_id],
     vulnerability_scanners: %w[external_id],
-    web_hooks: %w[service_id group_id]
+    web_hook_logs_part_0c5294f417: %w[web_hook_id]
   }.with_indifferent_access.freeze
 
   context 'for table' do
@@ -101,14 +102,19 @@ RSpec.describe 'Database schema' do
         context 'all foreign keys' do
           # for index to be effective, the FK constraint has to be at first place
           it 'are indexed' do
-            first_indexed_column = indexes.map(&:columns).map(&:first)
+            first_indexed_column = indexes.map(&:columns).map do |columns|
+              # In cases of complex composite indexes, a string is returned eg:
+              # "lower((extern_uid)::text), group_id"
+              columns = columns.split(',') if columns.is_a?(String)
+              columns.first.chomp
+            end
             foreign_keys_columns = foreign_keys.map(&:column)
 
             # Add the primary key column to the list of indexed columns because
             # postgres and mysql both automatically create an index on the primary
             # key. Also, the rails connection.indexes() method does not return
             # automatically generated indexes (like the primary key index).
-            first_indexed_column = first_indexed_column.push(primary_key_column)
+            first_indexed_column.push(primary_key_column)
 
             expect(first_indexed_column.uniq).to include(*foreign_keys_columns)
           end
@@ -165,6 +171,9 @@ RSpec.describe 'Database schema' do
 
   context 'for enums' do
     ApplicationRecord.descendants.each do |model|
+      # skip model if it is an abstract class as it would not have an associated DB table
+      next if model.abstract_class?
+
       describe model do
         let(:ignored_enums) { ignored_limit_enums(model.name) }
         let(:enums) { model.defined_enums.keys - ignored_enums }
@@ -181,11 +190,14 @@ RSpec.describe 'Database schema' do
     "ApplicationSetting" => %w[repository_storages_weighted],
     "AlertManagement::Alert" => %w[payload],
     "Ci::BuildMetadata" => %w[config_options config_variables],
+    "ExperimentSubject" => %w[context],
+    "ExperimentUser" => %w[context],
     "Geo::Event" => %w[payload],
     "GeoNodeStatus" => %w[status],
     "Operations::FeatureFlagScope" => %w[strategies],
     "Operations::FeatureFlags::Strategy" => %w[parameters],
     "Packages::Composer::Metadatum" => %w[composer_json],
+    "RawUsageData" => %w[payload], # Usage data payload changes often, we cannot use one schema
     "Releases::Evidence" => %w[summary]
   }.freeze
 
@@ -231,6 +243,26 @@ RSpec.describe 'Database schema' do
 
     it 'we do not have unexpected schemas' do
       expect(get_schemas.size).to eq(Gitlab::Database::EXTRA_SCHEMAS.size + 1)
+    end
+  end
+
+  context 'primary keys' do
+    let(:exceptions) do
+      %i(
+        elasticsearch_indexed_namespaces
+        elasticsearch_indexed_projects
+        merge_request_context_commit_diff_files
+      )
+    end
+
+    it 'expects every table to have a primary key defined' do
+      connection = ActiveRecord::Base.connection
+
+      problematic_tables = connection.tables.select do |table|
+        !connection.primary_key(table).present?
+      end.map(&:to_sym)
+
+      expect(problematic_tables - exceptions).to be_empty
     end
   end
 

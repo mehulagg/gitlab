@@ -1,9 +1,8 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
+import { pypiPackage as packageEntity } from 'jest/packages/mock_data';
+import InstallationTitle from '~/packages/details/components/installation_title.vue';
 import PypiInstallation from '~/packages/details/components/pypi_installation.vue';
-import InstallationTabs from '~/packages/details/components/installation_tabs.vue';
-import { pypiPackage as packageEntity } from '../../mock_data';
-import { GlTabs } from '@gitlab/ui';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -25,17 +24,15 @@ describe('PypiInstallation', () => {
     },
   });
 
-  const findTabs = () => wrapper.find(GlTabs);
   const pipCommand = () => wrapper.find('[data-testid="pip-command"]');
   const setupInstruction = () => wrapper.find('[data-testid="pypi-setup-content"]');
+
+  const findInstallationTitle = () => wrapper.findComponent(InstallationTitle);
 
   function createComponent() {
     wrapper = shallowMount(PypiInstallation, {
       localVue,
       store,
-      stubs: {
-        InstallationTabs,
-      },
     });
   }
 
@@ -45,13 +42,20 @@ describe('PypiInstallation', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
-  describe('it renders', () => {
-    it('with GlTabs', () => {
-      expect(findTabs().exists()).toBe(true);
+  describe('install command switch', () => {
+    it('has the installation title component', () => {
+      expect(findInstallationTitle().exists()).toBe(true);
+      expect(findInstallationTitle().props()).toMatchObject({
+        packageType: 'pypi',
+        options: [{ value: 'pypi', label: 'Show PyPi commands' }],
+      });
     });
+  });
+
+  it('renders all the messages', () => {
+    expect(wrapper.element).toMatchSnapshot();
   });
 
   describe('installation commands', () => {

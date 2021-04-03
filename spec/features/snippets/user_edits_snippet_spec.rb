@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'User edits snippet', :js do
   include DropzoneHelper
+  include Spec::Support::Helpers::Features::SnippetSpecHelpers
 
   let_it_be(:file_name) { 'test.rb' }
   let_it_be(:content) { 'puts "test"' }
@@ -11,9 +12,6 @@ RSpec.describe 'User edits snippet', :js do
   let_it_be(:snippet, reload: true) { create(:personal_snippet, :repository, :public, file_name: file_name, content: content, author: user) }
 
   before do
-    stub_feature_flags(snippets_vue: false)
-    stub_feature_flags(snippets_edit_vue: false)
-
     sign_in(user)
 
     visit edit_snippet_path(snippet)
@@ -24,14 +22,14 @@ RSpec.describe 'User edits snippet', :js do
     blob = snippet.blobs.first
 
     aggregate_failures do
-      expect(page.find_field('personal_snippet_file_name').value).to eq blob.path
-      expect(page.find('.file-content')).to have_content(blob.data.strip)
-      expect(page.find('.snippet-file-content', visible: false).value).to eq blob.data
+      expect(snippet_get_first_blob_path).to eq blob.path
+      expect(snippet_get_first_blob_value).to have_content(blob.data.strip)
     end
   end
 
   it 'updates the snippet' do
-    fill_in 'personal_snippet_title', with: 'New Snippet Title'
+    snippet_fill_in_title('New Snippet Title')
+    expect(page).not_to have_selector('.gl-spinner')
 
     click_button('Save changes')
     wait_for_requests
@@ -41,7 +39,7 @@ RSpec.describe 'User edits snippet', :js do
 
   it 'updates the snippet with files attached' do
     dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
-    expect(page.find_field('personal_snippet_description').value).to have_content('banana_sample')
+    expect(snippet_description_value).to have_content('banana_sample')
 
     click_button('Save changes')
     wait_for_requests
@@ -51,7 +49,7 @@ RSpec.describe 'User edits snippet', :js do
   end
 
   it 'updates the snippet to make it internal' do
-    choose 'Internal'
+    snippet_fill_in_visibility('Internal')
 
     click_button 'Save changes'
     wait_for_requests
@@ -61,7 +59,7 @@ RSpec.describe 'User edits snippet', :js do
   end
 
   it 'updates the snippet to make it public' do
-    choose 'Public'
+    snippet_fill_in_visibility('Public')
 
     click_button 'Save changes'
     wait_for_requests
@@ -76,14 +74,13 @@ RSpec.describe 'User edits snippet', :js do
         allow(instance).to receive(:create_commit).and_raise(StandardError, 'Error Message')
       end
 
-      fill_in 'personal_snippet_title', with: 'New Snippet Title'
-      fill_in 'personal_snippet_file_name', with: 'new_file_name'
+      snippet_fill_in_form(title: 'New Snippet Title', file_name: 'new_file_name')
 
       click_button('Save changes')
     end
 
     it 'renders edit page and displays the error' do
-      expect(page.find('.flash-container span').text).to eq('Error updating the snippet - Error Message')
+      expect(page.find('.flash-container')).to have_content('Error updating the snippet - Error Message')
       expect(page).to have_content('Edit Snippet')
     end
   end

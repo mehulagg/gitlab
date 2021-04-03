@@ -6,6 +6,8 @@ module Groups
     before_action :group
     skip_cross_project_access_check :index
 
+    feature_category :subgroups
+
     def index
       shared_projects = GroupProjectsFinder.new(
         group: group,
@@ -23,13 +25,13 @@ module Groups
 
     def finder_params
       @finder_params ||= begin
-                           # Make the `search` param consistent for the frontend,
-                           # which will be using `filter`.
-                           params[:search] ||= params[:filter] if params[:filter]
-                           # Don't show archived projects
-                           params[:non_archived] = true
-                           params.permit(:sort, :search, :non_archived)
-                         end
+        # Make the `search` param consistent for the frontend,
+        # which will be using `filter`.
+        params[:search] ||= params[:filter] if params[:filter]
+        # Don't show archived projects
+        params[:non_archived] = true
+        params.permit(:sort, :search, :non_archived)
+      end
     end
   end
 end

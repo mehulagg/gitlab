@@ -111,7 +111,7 @@ module Gitlab
     end
 
     def self.count_by_queue(queues)
-      queues.each_with_object(Hash.new(0)) { |element, hash| hash[element] += 1 }
+      queues.tally
     end
 
     def self.proc_details(counts)
@@ -126,7 +126,7 @@ module Gitlab
 
     def self.concurrency(queues, min_concurrency, max_concurrency)
       concurrency_from_queues = queues.length + 1
-      max = max_concurrency.positive? ? max_concurrency : concurrency_from_queues
+      max = max_concurrency > 0 ? max_concurrency : concurrency_from_queues
       min = [min_concurrency, max].min
 
       concurrency_from_queues.clamp(min, max)

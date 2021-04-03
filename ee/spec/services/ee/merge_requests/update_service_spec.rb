@@ -36,6 +36,11 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       let(:parent) { project }
     end
 
+    it_behaves_like 'service with multiple reviewers' do
+      let(:opts) { {} }
+      let(:execute) { update_merge_request(opts) }
+    end
+
     def update_merge_request(opts)
       described_class.new(project, user, opts).execute(merge_request)
     end
@@ -224,7 +229,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
     context 'when reassigned' do
       it 'schedules for analytics metric update' do
         expect(Analytics::CodeReviewMetricsWorker)
-          .to receive(:perform_async).with('Analytics::RefreshReassignData', merge_request.id, {})
+          .to receive(:perform_async).with('Analytics::RefreshReassignData', merge_request.id)
 
         update_merge_request({ assignee_ids: [user2.id] })
       end
@@ -315,6 +320,34 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         end
 
         it_behaves_like 'undeletable existing approval rules'
+      end
+    end
+
+    it 'updates code owner approval rules' do
+      expect_next_instance_of(::MergeRequests::SyncCodeOwnerApprovalRules) do |instance|
+        expect(instance).to receive(:execute)
+      end
+
+      update_merge_request(title: 'Title')
+    end
+
+    context 'updating assignee_ids' do
+      it 'updates the tracking when user ids are valid' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .to receive(:track_users_assigned_to_mr)
+          .with(users: [user, user2])
+
+        update_merge_request(assignee_ids: [user.id, user2.id])
+      end
+    end
+
+    context 'updating reviewers_ids' do
+      it 'updates the tracking when user ids are valid' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .to receive(:track_users_review_requested)
+          .with(users: [user, user2])
+
+        update_merge_request(reviewer_ids: [user.id, user2.id])
       end
     end
   end

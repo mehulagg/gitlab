@@ -30,13 +30,23 @@ module EE
             def find_by_kerberos_principal(principal, adapter)
               uid, domain = principal.split('@', 2)
               return unless uid && domain
-
-              # In multi-forest setups, there may be several users with matching
-              # uids but differing DNs, so skip adapters configured to connect to
-              # non-matching domains
-              return unless domain.casecmp(domain_from_dn(adapter.config.base)) == 0
+              return unless allowed_realm?(domain, adapter)
 
               find_by_uid(uid, adapter)
+            end
+
+            def allowed_realm?(domain, adapter)
+              return domain.casecmp(domain_from_dn(adapter.config.base)) == 0 unless simple_ldap_linking?
+
+              simple_ldap_linking_allowed_realms.select { |realm| domain.casecmp(realm) == 0 }.any?
+            end
+
+            def simple_ldap_linking_allowed_realms
+              ::Gitlab.config.kerberos.simple_ldap_linking_allowed_realms
+            end
+
+            def simple_ldap_linking?
+              simple_ldap_linking_allowed_realms.present?
             end
 
             # Extracts the rightmost unbroken set of domain components from an
@@ -46,7 +56,7 @@ module EE
               ::Gitlab::Auth::Ldap::DN.new(dn).each_pair { |name, value| dn_components << { name: name, value: value } }
               dn_components
                 .reverse
-                .take_while { |rdn| rdn[:name].casecmp('DC').zero? } # Domain Component
+                .take_while { |rdn| rdn[:name].casecmp('DC') == 0 } # Domain Component
                 .map { |rdn| rdn[:value] }
                 .reverse
                 .join('.')

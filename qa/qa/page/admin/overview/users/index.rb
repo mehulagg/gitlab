@@ -6,8 +6,9 @@ module QA
       module Overview
         module Users
           class Index < QA::Page::Base
-            view 'app/views/admin/users/index.html.haml' do
+            view 'app/views/admin/users/_users.html.haml' do
               element :user_search_field
+              element :pending_approval_tab
             end
 
             view 'app/views/admin/users/_user.html.haml' do
@@ -20,6 +21,10 @@ module QA
 
             def search_user(username)
               find_element(:user_search_field).set(username).send_keys(:return)
+            end
+
+            def click_pending_approval_tab
+              click_element :pending_approval_tab
             end
 
             def click_user(username)

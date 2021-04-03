@@ -5,11 +5,18 @@ require 'spec_helper'
 RSpec.describe 'User uses header search field', :js do
   include FilteredSearchHelpers
 
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:reporter) { create(:user) }
+  let_it_be(:developer) { create(:user) }
+
+  let(:user) { reporter }
+
+  before_all do
+    project.add_reporter(reporter)
+    project.add_developer(developer)
+  end
 
   before do
-    project.add_reporter(user)
     sign_in(user)
   end
 
@@ -28,21 +35,23 @@ RSpec.describe 'User uses header search field', :js do
 
     context 'when using the keyboard shortcut' do
       before do
-        find('#search.js-autocomplete-disabled')
+        find('#search')
         find('body').native.send_keys('s')
+
+        wait_for_all_requests
       end
 
-      it 'shows the category search dropdown' do
+      it 'shows the category search dropdown', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/250285' do
         expect(page).to have_selector('.dropdown-header', text: /#{scope_name}/i)
       end
     end
 
     context 'when clicking the search field' do
       before do
-        page.find('#search.js-autocomplete-disabled').click
+        page.find('#search').click
       end
 
-      it 'shows category search dropdown' do
+      it 'shows category search dropdown', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/250285' do
         expect(page).to have_selector('.dropdown-header', text: /#{scope_name}/i)
       end
 
@@ -89,9 +98,7 @@ RSpec.describe 'User uses header search field', :js do
 
     context 'when entering text into the search field' do
       it 'does not display the category search dropdown' do
-        page.within('.search-input-wrap') do
-          fill_in('search', with: scope_name.first(4))
-        end
+        fill_in_search(scope_name.first(4))
 
         expect(page).not_to have_selector('.dropdown-header', text: /#{scope_name}/i)
       end
@@ -104,10 +111,8 @@ RSpec.describe 'User uses header search field', :js do
       let(:scope_name) { 'All GitLab' }
     end
 
-    it 'displays search options' do
-      page.within('.search-input-wrap') do
-        fill_in('search', with: 'test')
-      end
+    it 'displays search options', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/251076' do
+      fill_in_search('test')
 
       expect(page).to have_selector(scoped_search_link('test'))
     end
@@ -134,15 +139,17 @@ RSpec.describe 'User uses header search field', :js do
       let(:group) { create(:group) }
       let(:project) { create(:project, namespace: group) }
 
+      before do
+        project.add_reporter(user)
+      end
+
       include_examples 'search field examples' do
         let(:url) { project_path(project) }
         let(:scope_name) { project.name }
       end
 
       it 'displays search options' do
-        page.within('.search-input-wrap') do
-          fill_in('search', with: 'test')
-        end
+        fill_in_search('test')
 
         expect(page).to have_selector(scoped_search_link('test'))
         expect(page).to have_selector(scoped_search_link('test', group_id: group.id))
@@ -157,13 +164,40 @@ RSpec.describe 'User uses header search field', :js do
       end
 
       it 'displays search options' do
-        page.within('.search-input-wrap') do
-          fill_in('search', with: 'test')
-        end
+        fill_in_search('test')
 
         expect(page).to have_selector(scoped_search_link('test'))
         expect(page).not_to have_selector(scoped_search_link('test', group_id: project.namespace_id))
         expect(page).to have_selector(scoped_search_link('test', project_id: project.id))
+      end
+
+      it 'displays a link to project merge requests' do
+        fill_in_search('Merge')
+
+        within(dashboard_search_options_popup_menu) do
+          expect(page).to have_text('Merge Requests')
+        end
+      end
+
+      it 'does not display a link to project feature flags' do
+        fill_in_search('Feature')
+
+        within(dashboard_search_options_popup_menu) do
+          expect(page).to have_text('"Feature" in all GitLab')
+          expect(page).to have_no_text('Feature Flags')
+        end
+      end
+
+      context 'and user is a developer' do
+        let(:user) { developer }
+
+        it 'displays a link to project feature flags' do
+          fill_in_search('Feature')
+
+          within(dashboard_search_options_popup_menu) do
+            expect(page).to have_text('Feature Flags')
+          end
+        end
       end
     end
   end
@@ -182,9 +216,7 @@ RSpec.describe 'User uses header search field', :js do
     end
 
     it 'displays search options' do
-      page.within('.search-input-wrap') do
-        fill_in('search', with: 'test')
-      end
+      fill_in_search('test')
 
       expect(page).to have_selector(scoped_search_link('test'))
       expect(page).to have_selector(scoped_search_link('test', group_id: group.id))
@@ -208,9 +240,7 @@ RSpec.describe 'User uses header search field', :js do
     end
 
     it 'displays search options' do
-      page.within('.search-input-wrap') do
-        fill_in('search', with: 'test')
-      end
+      fill_in_search('test')
 
       expect(page).to have_selector(scoped_search_link('test'))
       expect(page).to have_selector(scoped_search_link('test', group_id: subgroup.id))
@@ -226,5 +256,9 @@ RSpec.describe 'User uses header search field', :js do
     href.concat("&group_id=#{group_id}") if group_id
 
     ".dropdown a[href='#{href}']"
+  end
+
+  def dashboard_search_options_popup_menu
+    "div[data-testid='dashboard-search-options']"
   end
 end

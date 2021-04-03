@@ -1,11 +1,11 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/analytics/cycle_analytics/store/modules/custom_stages/actions';
 import * as types from 'ee/analytics/cycle_analytics/store/modules/custom_stages/mutation_types';
+import testAction from 'helpers/vuex_action_helper';
 import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
-import { selectedGroup, endpoints, rawCustomStage } from '../../../mock_data';
+import { currentGroup, endpoints, rawCustomStage } from '../../../mock_data';
 
 jest.mock('~/flash');
 
@@ -14,18 +14,13 @@ describe('Custom stage actions', () => {
   let mock;
   const selectedStage = rawCustomStage;
 
-  const shouldFlashAMessage = (msg, type = null) => {
-    const args = type ? [msg, type] : [msg];
-    expect(createFlash).toHaveBeenCalledWith(...args);
-  };
-
   beforeEach(() => {
     mock = new MockAdapter(axios);
   });
 
   afterEach(() => {
     mock.restore();
-    state = { selectedGroup: null };
+    state = { currentGroup: null };
   });
 
   describe('createStage', () => {
@@ -37,7 +32,7 @@ describe('Custom stage actions', () => {
       };
 
       beforeEach(() => {
-        state = { ...state, selectedGroup };
+        state = { ...state, currentGroup };
         mock.onPost(endpoints.baseStagesEndpointstageData).reply(201, customStageData);
       });
 
@@ -70,7 +65,7 @@ describe('Custom stage actions', () => {
       };
 
       beforeEach(() => {
-        state = { ...state, selectedGroup };
+        state = { ...state, currentGroup };
         mock
           .onPost(endpoints.baseStagesEndpointstageData)
           .reply(httpStatusCodes.UNPROCESSABLE_ENTITY, {
@@ -128,7 +123,9 @@ describe('Custom stage actions', () => {
           response,
         )
         .then(() => {
-          shouldFlashAMessage('There was a problem saving your custom stage, please try again');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was a problem saving your custom stage, please try again',
+          });
         });
     });
 
@@ -147,7 +144,7 @@ describe('Custom stage actions', () => {
             },
           )
           .then(() => {
-            shouldFlashAMessage("'uh oh' stage already exists");
+            expect(createFlash).toHaveBeenCalledWith({ message: "'uh oh' stage already exists" });
           });
       });
     });
@@ -180,7 +177,9 @@ describe('Custom stage actions', () => {
             response,
           )
           .then(() => {
-            shouldFlashAMessage('There was a problem refreshing the data, please try again');
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'There was a problem refreshing the data, please try again',
+            });
           }));
     });
   });

@@ -32,6 +32,8 @@ module Packages
             )
           end
         end
+      rescue ActiveRecord::RecordInvalid => e
+        raise InvalidMetadataError.new(e.message)
       end
 
       private
@@ -66,7 +68,8 @@ module Packages
       def update_linked_package
         @package_file.package.update!(
           name: package_name,
-          version: package_version
+          version: package_version,
+          status: :default
         )
 
         ::Packages::Nuget::CreateDependencyService.new(@package_file.package, package_dependencies)

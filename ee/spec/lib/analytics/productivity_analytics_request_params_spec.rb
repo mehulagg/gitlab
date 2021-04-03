@@ -68,7 +68,7 @@ RSpec.describe Analytics::ProductivityAnalyticsRequestParams do
 
   describe 'default values' do
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     describe '`merged_before`' do

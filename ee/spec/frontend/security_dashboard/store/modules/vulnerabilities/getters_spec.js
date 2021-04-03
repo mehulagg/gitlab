@@ -1,7 +1,4 @@
-import createState from 'ee/security_dashboard/store/modules/vulnerabilities/state';
-import { DAYS } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import * as getters from 'ee/security_dashboard/store/modules/vulnerabilities/getters';
-import mockHistoryData from './data/mock_data_vulnerabilities_history.json';
 
 describe('vulnerabilities module getters', () => {
   describe('dashboardError', () => {
@@ -54,55 +51,6 @@ describe('vulnerabilities module getters', () => {
       const result = getters.dashboardListError(state);
 
       expect(result).toBe(false);
-    });
-  });
-
-  describe('getFilteredVulnerabilitiesHistory', () => {
-    let state;
-
-    const mockedGetters = () => {
-      const getVulnerabilityHistoryByName = name =>
-        getters.getVulnerabilityHistoryByName(state)(name);
-      return { getVulnerabilityHistoryByName };
-    };
-
-    beforeEach(() => {
-      state = createState();
-      state.vulnerabilitiesHistory = mockHistoryData;
-
-      const mockDate = new Date(2019, 1, 2);
-      const originalDate = Date;
-      jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
-      global.Date.now = originalDate.now;
-      global.Date.parse = originalDate.parse;
-      global.Date.UTC = originalDate.UTC;
-    });
-
-    it('should filter the data to the last 30 days and days we have data for', () => {
-      state.vulnerabilitiesHistoryDayRange = DAYS.THIRTY;
-      const filteredResults = getters.getFilteredVulnerabilitiesHistory(state, mockedGetters())(
-        'critical',
-      );
-
-      expect(filteredResults).toHaveLength(28);
-    });
-
-    it('should filter the data to the last 60 days and days we have data for', () => {
-      state.vulnerabilitiesHistoryDayRange = DAYS.SIXTY;
-      const filteredResults = getters.getFilteredVulnerabilitiesHistory(state, mockedGetters())(
-        'critical',
-      );
-
-      expect(filteredResults).toHaveLength(58);
-    });
-
-    it('should filter the data to the last 90 days and days we have data for', () => {
-      state.vulnerabilitiesHistoryDayRange = DAYS.NINETY;
-      const filteredResults = getters.getFilteredVulnerabilitiesHistory(state, mockedGetters())(
-        'critical',
-      );
-
-      expect(filteredResults).toHaveLength(88);
     });
   });
 

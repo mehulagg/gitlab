@@ -99,7 +99,8 @@ RSpec.describe Groups::ClustersController do
     describe 'security' do
       let(:cluster) { create(:cluster, :provided_by_gcp, cluster_type: :group_type, groups: [group]) }
 
-      it { expect { go }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }
@@ -180,8 +181,11 @@ RSpec.describe Groups::ClustersController do
       end
     end
 
+    include_examples 'GET new cluster shared examples'
+
     describe 'security' do
-      it { expect { go }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }
@@ -269,6 +273,7 @@ RSpec.describe Groups::ClustersController do
           expect(cluster).to be_kubernetes
           expect(cluster.provider_gcp).to be_legacy_abac
           expect(cluster).to be_managed
+          expect(cluster).to be_namespace_per_environment
         end
 
         context 'when legacy_abac param is false' do
@@ -313,7 +318,8 @@ RSpec.describe Groups::ClustersController do
         allow(WaitForClusterCreationWorker).to receive(:perform_in).and_return(nil)
       end
 
-      it { expect { go }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }
@@ -356,6 +362,7 @@ RSpec.describe Groups::ClustersController do
           expect(cluster).to be_user
           expect(cluster).to be_kubernetes
           expect(cluster).to be_managed
+          expect(cluster).to be_namespace_per_environment
         end
       end
 
@@ -385,6 +392,7 @@ RSpec.describe Groups::ClustersController do
           expect(cluster).to be_user
           expect(cluster).to be_kubernetes
           expect(cluster).to be_platform_kubernetes_rbac
+          expect(cluster).to be_namespace_per_environment
         end
       end
 
@@ -413,7 +421,8 @@ RSpec.describe Groups::ClustersController do
     end
 
     describe 'security' do
-      it { expect { go }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }
@@ -471,7 +480,7 @@ RSpec.describe Groups::ClustersController do
         expect { post_create_aws }.not_to change { Clusters::Cluster.count }
 
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq('application/json')
+        expect(response.media_type).to eq('application/json')
         expect(response.body).to include('is invalid')
       end
     end
@@ -481,7 +490,8 @@ RSpec.describe Groups::ClustersController do
         allow(WaitForClusterCreationWorker).to receive(:perform_in)
       end
 
-      it { expect { post_create_aws }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { post_create_aws }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { post_create_aws }.to be_denied_for(:admin) }
       it { expect { post_create_aws }.to be_allowed_for(:owner).of(group) }
       it { expect { post_create_aws }.to be_allowed_for(:maintainer).of(group) }
       it { expect { post_create_aws }.to be_denied_for(:developer).of(group) }
@@ -493,14 +503,13 @@ RSpec.describe Groups::ClustersController do
   end
 
   describe 'POST authorize AWS role for EKS cluster' do
-    let(:role_arn) { 'arn:aws:iam::123456789012:role/role-name' }
-    let(:role_external_id) { '12345' }
+    let!(:role) { create(:aws_role, user: user) }
 
+    let(:role_arn) { 'arn:new-role' }
     let(:params) do
       {
         cluster: {
-          role_arn: role_arn,
-          role_external_id: role_external_id
+          role_arn: role_arn
         }
       }
     end
@@ -514,29 +523,34 @@ RSpec.describe Groups::ClustersController do
         .and_return(double(execute: double))
     end
 
-    it 'creates an Aws::Role record' do
-      expect { go }.to change { Aws::Role.count }
+    it 'updates the associated role with the supplied ARN' do
+      go
 
       expect(response).to have_gitlab_http_status(:ok)
-
-      role = Aws::Role.last
-      expect(role.user).to eq user
-      expect(role.role_arn).to eq role_arn
-      expect(role.role_external_id).to eq role_external_id
+      expect(role.reload.role_arn).to eq(role_arn)
     end
 
-    context 'role cannot be created' do
+    context 'supplied role is invalid' do
       let(:role_arn) { 'invalid-role' }
 
-      it 'does not create a record' do
-        expect { go }.not_to change { Aws::Role.count }
+      it 'does not update the associated role' do
+        expect { go }.not_to change { role.role_arn }
 
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
     end
 
     describe 'security' do
-      it { expect { go }.to be_allowed_for(:admin) }
+      before do
+        allow_next_instance_of(Clusters::Aws::AuthorizeRoleService) do |service|
+          response = double(status: :ok, body: double)
+
+          allow(service).to receive(:execute).and_return(response)
+        end
+      end
+
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }
@@ -572,7 +586,8 @@ RSpec.describe Groups::ClustersController do
     end
 
     describe 'security' do
-      it { expect { go }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }
@@ -611,7 +626,8 @@ RSpec.describe Groups::ClustersController do
     end
 
     describe 'security' do
-      it { expect { go }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }
@@ -643,7 +659,8 @@ RSpec.describe Groups::ClustersController do
     end
 
     describe 'security' do
-      it { expect { go }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }
@@ -711,6 +728,7 @@ RSpec.describe Groups::ClustersController do
                 enabled: false,
                 name: 'my-new-cluster-name',
                 managed: false,
+                namespace_per_environment: false,
                 domain: domain
               }
             }
@@ -724,6 +742,7 @@ RSpec.describe Groups::ClustersController do
             expect(cluster.enabled).to be_falsey
             expect(cluster.name).to eq('my-new-cluster-name')
             expect(cluster).not_to be_managed
+            expect(cluster).not_to be_namespace_per_environment
           end
         end
 
@@ -749,7 +768,8 @@ RSpec.describe Groups::ClustersController do
     describe 'security' do
       let_it_be(:cluster) { create(:cluster, :provided_by_gcp, cluster_type: :group_type, groups: [group]) }
 
-      it { expect { go }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }
@@ -817,7 +837,8 @@ RSpec.describe Groups::ClustersController do
     describe 'security' do
       let_it_be(:cluster) { create(:cluster, :provided_by_gcp, :production_environment, cluster_type: :group_type, groups: [group]) }
 
-      it { expect { go }.to be_allowed_for(:admin) }
+      it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { go }.to be_allowed_for(:admin) }
+      it('is denied for admin when admin mode is disabled') { expect { go }.to be_denied_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
       it { expect { go }.to be_allowed_for(:maintainer).of(group) }
       it { expect { go }.to be_denied_for(:developer).of(group) }

@@ -98,6 +98,10 @@ module QA
 
             # Disable /dev/shm use in CI. See https://gitlab.com/gitlab-org/gitlab/issues/4252
             options.add_argument("disable-dev-shm-usage") if QA::Runtime::Env.running_in_ci?
+
+            # Specify the user-agent to allow challenges to be bypassed
+            # See https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/11938
+            options.add_argument("user-agent=#{QA::Runtime::Env.user_agent}") if QA::Runtime::Env.user_agent
           end
 
           # Use the same profile on QA runs if CHROME_REUSE_PROFILE is true.
@@ -133,7 +137,7 @@ module QA
         Capybara::Screenshot.append_timestamp = false
 
         Capybara::Screenshot.register_filename_prefix_formatter(:rspec) do |example|
-          ::File.join(QA::Runtime::Namespace.name, example.full_description.downcase.parameterize(separator: "_")[0..99])
+          ::File.join(QA::Runtime::Namespace.name(reset_cache: false), example.full_description.downcase.parameterize(separator: "_")[0..99])
         end
 
         Capybara.configure do |config|

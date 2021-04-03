@@ -1,0 +1,5 @@
+---
+title: Remove N+1 DB queries from indexing projects in Elasticsearch
+merge_request: 57794
+author:
+type: performance

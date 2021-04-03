@@ -22,9 +22,9 @@ RSpec.describe SnippetInputAction do
       :move    | 'foobar'  | 'foobar' | nil      | nil                | false | :previous_path
       :move    | 'foobar'  | 'foobar' | ''       | nil                | false | :previous_path
       :move    | 'foobar'  | 'foobar' | 'foobar' | nil                | false | :file_path
-      :move    | nil       | 'foobar' | 'foobar' | nil                | false | :file_path
-      :move    | ''        | 'foobar' | 'foobar' | nil                | false | :file_path
-      :move    | nil       | 'foobar' | 'foo1'   | nil                | false | :file_path
+      :move    | nil       | 'foobar' | 'foobar' | nil                | true  | nil
+      :move    | ''        | 'foobar' | 'foobar' | nil                | true  | nil
+      :move    | nil       | 'foobar' | 'foo1'   | nil                | true  | nil
       :move    | 'foobar'  | nil      | 'foo1'   | nil                | true  | nil
       :move    | 'foobar'  | ''       | 'foo1'   | nil                | true  | nil
       :create  | 'foobar'  | nil      | 'foobar' | nil                | false | :content
@@ -67,7 +67,7 @@ RSpec.describe SnippetInputAction do
     let(:options)          { { action: action, file_path: file_path, content: content, previous_path: previous_path } }
     let(:expected_options) { options.merge(action: action.to_sym) }
 
-    subject { described_class.new(options).to_commit_action }
+    subject { described_class.new(**options).to_commit_action }
 
     it 'transforms attributes to commit action' do
       expect(subject).to eq(expected_options)

@@ -10,7 +10,11 @@ module Ci
     def self.failure_reasons
       { unknown_failure: 'Unknown pipeline failure!',
         config_error: 'CI/CD YAML configuration error!',
-        external_validation_failure: 'External pipeline validation failed!' }
+        external_validation_failure: 'External pipeline validation failed!',
+        activity_limit_exceeded: 'Pipeline activity limit exceeded!',
+        size_limit_exceeded: 'Pipeline size limit exceeded!',
+        job_activity_limit_exceeded: 'Pipeline job activity limit exceeded!',
+        deployments_limit_exceeded: 'Pipeline deployments limit exceeded!' }
     end
 
     presents :pipeline
@@ -57,7 +61,7 @@ module Ci
             link_to_merge_request: link_to_merge_request,
             link_to_merge_request_source_branch: link_to_merge_request_source_branch
           }
-      elsif pipeline.merge_request_pipeline?
+      elsif pipeline.merged_result_pipeline?
         _("for %{link_to_merge_request} with %{link_to_merge_request_source_branch} into %{link_to_merge_request_target_branch}")
           .html_safe % {
             link_to_merge_request: link_to_merge_request,

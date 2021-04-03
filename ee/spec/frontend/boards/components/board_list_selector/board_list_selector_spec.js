@@ -5,10 +5,16 @@ import mountComponent from 'helpers/vue_mount_component_helper';
 
 import { mockAssigneesList } from 'jest/boards/mock_data';
 import { TEST_HOST } from 'spec/test_constants';
-import axios from '~/lib/utils/axios_utils';
+import { createStore } from '~/boards/stores';
 import boardsStore from '~/boards/stores/boards_store';
+import axios from '~/lib/utils/axios_utils';
 
 describe('BoardListSelector', () => {
+  global.gon.features = {
+    ...(global.gon.features || {}),
+    graphqlBoardLists: false,
+  };
+
   const dummyEndpoint = `${TEST_HOST}/users.json`;
 
   const createComponent = () =>
@@ -28,6 +34,7 @@ describe('BoardListSelector', () => {
 
     setFixtures('<div class="flash-container"></div>');
     vm = createComponent();
+    vm.vuexStore = createStore();
   });
 
   afterEach(() => {
@@ -44,7 +51,7 @@ describe('BoardListSelector', () => {
 
   describe('methods', () => {
     describe('loadList', () => {
-      it('calls axios.get and sets response to store.state.assignees', done => {
+      it('calls axios.get and sets response to store.state.assignees', (done) => {
         mock.onGet(dummyEndpoint).reply(200, mockAssigneesList);
         boardsStore.state.assignees = [];
 
@@ -57,7 +64,7 @@ describe('BoardListSelector', () => {
           .catch(done.fail);
       });
 
-      it('does not call axios.get when store.state.assignees is not empty', done => {
+      it('does not call axios.get when store.state.assignees is not empty', (done) => {
         jest.spyOn(axios, 'get').mockReturnValue(Promise.resolve());
         boardsStore.state.assignees = mockAssigneesList;
 
@@ -69,7 +76,7 @@ describe('BoardListSelector', () => {
           .catch(done.fail);
       });
 
-      it('calls axios.get and shows Flash error when request fails', done => {
+      it('calls axios.get and shows Flash error when request fails', (done) => {
         mock.onGet(dummyEndpoint).replyOnce(500, {});
         boardsStore.state.assignees = [];
 
@@ -86,14 +93,28 @@ describe('BoardListSelector', () => {
     });
 
     describe('handleItemClick', () => {
-      it('creates new list in a store instance', () => {
-        jest.spyOn(vm.store, 'new').mockImplementation(() => {});
+      it('graphqlBoardLists FF off - creates new list in a store instance', () => {
+        jest.spyOn(vm.store, 'new').mockReturnValue({});
         const assignee = mockAssigneesList[0];
 
         expect(vm.store.findList('title', assignee.name)).not.toBeDefined();
         vm.handleItemClick(assignee);
 
         expect(vm.store.new).toHaveBeenCalledWith(expect.any(Object));
+      });
+
+      it('graphqlBoardLists FF on - creates new list in a store instance', () => {
+        global.gon.features.graphqlBoardLists = true;
+
+        jest.spyOn(vm.vuexStore, 'dispatch').mockReturnValue({});
+        const assignee = mockAssigneesList[0];
+
+        expect(vm.vuexStore.getters.getListByTitle(assignee.name)).not.toBeDefined();
+        vm.handleItemClick(assignee);
+
+        expect(vm.vuexStore.dispatch).toHaveBeenCalledWith('createList', {
+          assigneeId: 'gid://gitlab/User/2',
+        });
       });
     });
   });

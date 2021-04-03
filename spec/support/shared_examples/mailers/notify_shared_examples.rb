@@ -225,7 +225,7 @@ RSpec.shared_examples 'a note email' do
     sender = subject.header[:from].addrs[0]
 
     aggregate_failures do
-      expect(sender.display_name).to eq(note_author.name)
+      expect(sender.display_name).to eq("#{note_author.name} (@#{note_author.username})")
       expect(sender.address).to eq(gitlab_sender)
       expect(subject).to deliver_to(recipient.notification_email)
     end
@@ -264,6 +264,21 @@ RSpec.shared_examples 'appearance header and footer not enabled' do
 
       expect(subject.text_part).not_to have_body_text(/^Foo/)
       expect(subject.text_part).not_to have_body_text(/Bar$/)
+    end
+  end
+end
+
+RSpec.shared_examples 'no email is sent' do
+  it 'does not send an email' do
+    expect(subject.message).to be_a_kind_of(ActionMailer::Base::NullMail)
+  end
+end
+
+RSpec.shared_examples 'does not render a manage notifications link' do
+  it do
+    aggregate_failures do
+      expect(subject).not_to have_body_text("Manage all notifications")
+      expect(subject).not_to have_body_text(profile_notifications_url)
     end
   end
 end

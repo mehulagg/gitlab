@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, :wiki_repo, namespace: user.namespace) }
+  let(:projects) { create_list(:project, 5, :public, :repository, :wiki_repo) }
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
@@ -22,7 +23,11 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       control_count = ActiveRecord::QueryRecorder.new { visit path }.count
       expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
 
-      create_list(object, 10, *creation_traits, creation_args)
+      projects.each do |project|
+        creation_args[:source_project] = project if creation_args.key?(:source_project)
+        creation_args[:project] = project if creation_args.key?(:project)
+        create(object, *creation_traits, creation_args)
+      end
 
       ensure_elasticsearch_index!
 
@@ -40,7 +45,9 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       let(:object) { :issue }
       let(:creation_args) { { project: project, title: 'initial' } }
       let(:path) { search_path(search: 'initial', scope: 'issues') }
-      let(:query_count_multiplier) { 0 }
+      # N+1 queries still exist and will be fixed per
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/230712
+      let(:query_count_multiplier) { 1 }
 
       it_behaves_like 'an efficient database result'
     end
@@ -59,8 +66,8 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
 
     context 'searching merge requests' do
       let(:object) { :merge_request }
-      let(:creation_traits) { [:sequence_source_branch] }
-      let(:creation_args) { { source_project: project, title: 'initial' } }
+      let(:creation_traits) { [:unique_branches, :unique_author] }
+      let(:creation_args) { { title: 'initial', source_project: project } }
       let(:path) { search_path(search: '*', scope: 'merge_requests') }
       let(:query_count_multiplier) { 0 }
 
@@ -74,6 +81,28 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       let(:query_count_multiplier) { 0 }
 
       it_behaves_like 'an efficient database result'
+    end
+
+    context 'searching code' do
+      let(:path) { search_path(search: '*', scope: 'blobs') }
+
+      it 'avoids N+1 database queries' do
+        project.repository.index_commits_and_blobs
+
+        ensure_elasticsearch_index!
+
+        control = ActiveRecord::QueryRecorder.new { visit path }
+        expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
+
+        projects.each do |project|
+          project.repository.index_commits_and_blobs
+        end
+
+        ensure_elasticsearch_index!
+
+        expect { visit path }.not_to exceed_query_limit(control.count)
+        expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
+      end
     end
   end
 
@@ -132,7 +161,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       expect(page).to have_selector("span.line[lang='javascript']")
     end
 
-    it 'Ignores nonexistent projects from stale index' do
+    it 'ignores nonexistent projects from stale index' do
       stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
 
       project_2.repository.create_file(
@@ -146,7 +175,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
 
       ensure_elasticsearch_index!
 
-      project_2.destroy
+      project_2.destroy!
 
       visit dashboard_projects_path
 
@@ -164,15 +193,14 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       ensure_elasticsearch_index!
     end
 
-    it "finds files" do
+    it "finds wiki pages" do
       visit dashboard_projects_path
 
       submit_search('term')
       select_search_scope('Wiki')
 
-      expect(page).to have_selector('.file-content .code')
-
-      expect(page).to have_selector("span.line[lang='markdown']")
+      expect(page).to have_selector('.search-result-row .description', text: 'term')
+      expect(page).to have_link('test')
     end
   end
 
@@ -230,43 +258,22 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       expect(page).to have_content('Users 0')
     end
   end
-
-  context 'when no results are returned' do
-    it 'allows basic search without Elasticsearch' do
-      visit dashboard_projects_path
-
-      # Disable sidekiq to ensure it does not end up in the index
-      Sidekiq::Testing.disable! do
-        create(:project, namespace: user.namespace, name: 'Will not be found but searchable')
-      end
-
-      submit_search('searchable')
-
-      expect(page).not_to have_content('Will not be found')
-
-      # Since there are no results you have the option to instead use basic
-      # search
-      click_link 'basic search'
-
-      # Project is found now that we are using basic search
-      expect(page).to have_content('Will not be found')
-    end
-
-    context 'when performing Commits search' do
-      it 'does not allow basic search' do
-        visit dashboard_projects_path
-
-        submit_search('project')
-        select_search_scope('Commits')
-
-        expect(page).not_to have_link('basic search')
-      end
-    end
-  end
 end
 
 RSpec.describe 'Global elastic search redactions', :elastic do
-  it_behaves_like 'a redacted search results page' do
-    let(:search_path) { explore_root_path }
+  context 'when block_anonymous_global_searches is disabled' do
+    before do
+      stub_feature_flags(block_anonymous_global_searches: false)
+    end
+
+    it_behaves_like 'a redacted search results page' do
+      let(:search_path) { explore_root_path }
+    end
+  end
+
+  context 'when block_anonymous_global_searches is enabled' do
+    it_behaves_like 'a redacted search results page', include_anonymous: false do
+      let(:search_path) { explore_root_path }
+    end
   end
 end

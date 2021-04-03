@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import SummaryRow from '~/reports/components/summary_row.vue';
 
 describe('Summary row', () => {
@@ -14,16 +15,19 @@ describe('Summary row', () => {
   };
 
   const createComponent = ({ propsData = {}, slots = {} } = {}) => {
-    wrapper = mount(SummaryRow, {
-      propsData: {
-        ...props,
-        ...propsData,
-      },
-      slots,
-    });
+    wrapper = extendedWrapper(
+      mount(SummaryRow, {
+        propsData: {
+          ...props,
+          ...propsData,
+        },
+        slots,
+      }),
+    );
   };
 
-  const findSummary = () => wrapper.find('.report-block-list-issue-description-text');
+  const findSummary = () => wrapper.findByTestId('summary-row-description');
+  const findStatusIcon = () => wrapper.findByTestId('summary-row-icon');
 
   afterEach(() => {
     wrapper.destroy();
@@ -32,14 +36,12 @@ describe('Summary row', () => {
 
   it('renders provided summary', () => {
     createComponent();
-    expect(findSummary().text()).toEqual(props.summary);
+    expect(findSummary().text()).toContain(props.summary);
   });
 
   it('renders provided icon', () => {
     createComponent();
-    expect(wrapper.find('.report-block-list-icon span').classes()).toContain(
-      'js-ci-status-icon-warning',
-    );
+    expect(findStatusIcon().classes()).toContain('js-ci-status-icon-warning');
   });
 
   describe('summary slot', () => {
@@ -48,7 +50,7 @@ describe('Summary row', () => {
       createComponent({ slots: { summary: summarySlotContent } });
 
       expect(wrapper.text()).not.toContain(props.summary);
-      expect(findSummary().text()).toEqual(summarySlotContent);
+      expect(findSummary().text()).toContain(summarySlotContent);
     });
   });
 });

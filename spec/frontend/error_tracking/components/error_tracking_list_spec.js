@@ -1,12 +1,12 @@
+import { GlEmptyState, GlLoadingIcon, GlFormInput, GlPagination, GlDropdown } from '@gitlab/ui';
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlEmptyState, GlLoadingIcon, GlFormInput, GlPagination, GlDropdown } from '@gitlab/ui';
 import stubChildren from 'helpers/stub_children';
-import ErrorTrackingList from '~/error_tracking/components/error_tracking_list.vue';
 import ErrorTrackingActions from '~/error_tracking/components/error_tracking_actions.vue';
+import ErrorTrackingList from '~/error_tracking/components/error_tracking_list.vue';
 import { trackErrorListViewsOptions, trackErrorStatusUpdateOptions } from '~/error_tracking/utils';
-import errorsList from './list_mock.json';
 import Tracking from '~/tracking';
+import errorsList from './list_mock.json';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -19,18 +19,9 @@ describe('ErrorTrackingList', () => {
   const findErrorListTable = () => wrapper.find('table');
   const findErrorListRows = () => wrapper.findAll('tbody tr');
   const dropdownsArray = () => wrapper.findAll(GlDropdown);
-  const findRecentSearchesDropdown = () =>
-    dropdownsArray()
-      .at(0)
-      .find(GlDropdown);
-  const findStatusFilterDropdown = () =>
-    dropdownsArray()
-      .at(1)
-      .find(GlDropdown);
-  const findSortDropdown = () =>
-    dropdownsArray()
-      .at(2)
-      .find(GlDropdown);
+  const findRecentSearchesDropdown = () => dropdownsArray().at(0).find(GlDropdown);
+  const findStatusFilterDropdown = () => dropdownsArray().at(1).find(GlDropdown);
+  const findSortDropdown = () => dropdownsArray().at(2).find(GlDropdown);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findPagination = () => wrapper.find(GlPagination);
   const findErrorActions = () => wrapper.find(ErrorTrackingActions);
@@ -61,7 +52,6 @@ describe('ErrorTrackingList', () => {
 
   beforeEach(() => {
     actions = {
-      getErrorList: () => {},
       startPolling: jest.fn(),
       restartPolling: jest.fn().mockName('restartPolling'),
       addRecentSearch: jest.fn(),
@@ -156,8 +146,8 @@ describe('ErrorTrackingList', () => {
     });
 
     it('each error in the list should have an action button set', () => {
-      findErrorListRows().wrappers.forEach(row => {
-        expect(row.contains(ErrorTrackingActions)).toBe(true);
+      findErrorListRows().wrappers.forEach((row) => {
+        expect(row.find(ErrorTrackingActions).exists()).toBe(true);
       });
     });
 
@@ -243,7 +233,6 @@ describe('ErrorTrackingList', () => {
         stubs: {
           GlTable: false,
           GlLink: false,
-          GlDeprecatedButton: false,
         },
       });
     });
@@ -253,23 +242,15 @@ describe('ErrorTrackingList', () => {
         errorId: errorsList[0].id,
         status: 'ignored',
       });
-      expect(actions.updateStatus).toHaveBeenCalledWith(
-        expect.anything(),
-        {
-          endpoint: `/project/test/-/error_tracking/${errorsList[0].id}.json`,
-          status: 'ignored',
-        },
-        undefined,
-      );
+      expect(actions.updateStatus).toHaveBeenCalledWith(expect.anything(), {
+        endpoint: `/project/test/-/error_tracking/${errorsList[0].id}.json`,
+        status: 'ignored',
+      });
     });
 
     it('calls an action to remove the item from the list', () => {
       findErrorActions().vm.$emit('update-issue-status', { errorId: '1', status: undefined });
-      expect(actions.removeIgnoredResolvedErrors).toHaveBeenCalledWith(
-        expect.anything(),
-        '1',
-        undefined,
-      );
+      expect(actions.removeIgnoredResolvedErrors).toHaveBeenCalledWith(expect.anything(), '1');
     });
   });
 
@@ -282,7 +263,6 @@ describe('ErrorTrackingList', () => {
         stubs: {
           GlTable: false,
           GlLink: false,
-          GlDeprecatedButton: false,
         },
       });
     });
@@ -292,23 +272,15 @@ describe('ErrorTrackingList', () => {
         errorId: errorsList[0].id,
         status: 'resolved',
       });
-      expect(actions.updateStatus).toHaveBeenCalledWith(
-        expect.anything(),
-        {
-          endpoint: `/project/test/-/error_tracking/${errorsList[0].id}.json`,
-          status: 'resolved',
-        },
-        undefined,
-      );
+      expect(actions.updateStatus).toHaveBeenCalledWith(expect.anything(), {
+        endpoint: `/project/test/-/error_tracking/${errorsList[0].id}.json`,
+        status: 'resolved',
+      });
     });
 
     it('calls an action to remove the item from the list', () => {
       findErrorActions().vm.$emit('update-issue-status', { errorId: '1', status: undefined });
-      expect(actions.removeIgnoredResolvedErrors).toHaveBeenCalledWith(
-        expect.anything(),
-        '1',
-        undefined,
-      );
+      expect(actions.removeIgnoredResolvedErrors).toHaveBeenCalledWith(expect.anything(), '1');
     });
   });
 
@@ -325,9 +297,7 @@ describe('ErrorTrackingList', () => {
     });
 
     it('shows empty state', () => {
-      expect(wrapper.find('a').attributes('href')).toBe(
-        '/help/user/project/operations/error_tracking.html',
-      );
+      expect(wrapper.find(GlEmptyState).isVisible()).toBe(true);
     });
   });
 
@@ -437,7 +407,6 @@ describe('ErrorTrackingList', () => {
           expect(actions.fetchPaginatedResults).toHaveBeenLastCalledWith(
             expect.anything(),
             'previousCursor',
-            undefined,
           );
         });
       });
@@ -456,7 +425,6 @@ describe('ErrorTrackingList', () => {
           expect(actions.fetchPaginatedResults).toHaveBeenLastCalledWith(
             expect.anything(),
             'nextCursor',
-            undefined,
           );
         });
       });
@@ -472,7 +440,6 @@ describe('ErrorTrackingList', () => {
         stubs: {
           GlTable: false,
           GlLink: false,
-          GlDeprecatedButton: false,
         },
       });
     });

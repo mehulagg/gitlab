@@ -11,6 +11,8 @@ module Geo::ReplicableRegistry
   }.freeze
 
   class_methods do
+    include Delay
+
     def state_value(state_string)
       STATE_VALUES[state_string]
     end
@@ -22,17 +24,41 @@ module Geo::ReplicableRegistry
     def declarative_policy_class
       'Geo::RegistryPolicy'
     end
+
+    def registry_consistency_worker_enabled?
+      replicator_class.enabled?
+    end
+
+    # Fail syncs for records which started syncing a long time ago
+    def fail_sync_timeouts
+      attrs = {
+        state: state_value(:failed),
+        last_sync_failure: "Sync timed out after #{replicator_class.sync_timeout}",
+        retry_count: 1,
+        retry_at: next_retry_time(1)
+      }
+
+      sync_timed_out.all.each_batch do |relation|
+        relation.update_all(attrs)
+      end
+    end
+  end
+
+  def replicator_class
+    Gitlab::Geo::Replicator.for_class_name(self)
   end
 
   included do
     include ::Delay
 
-    scope :never, -> { where(last_synced_at: nil) }
     scope :failed, -> { with_state(:failed) }
-    scope :synced, -> { with_state(:synced) }
+    scope :needs_sync_again, -> { failed.retry_due.order(Gitlab::Database.nulls_first_order(:retry_at)) }
+    scope :never_attempted_sync, -> { pending.where(last_synced_at: nil) }
+    scope :ordered, -> { order(:id) }
     scope :pending, -> { with_state(:pending) }
     scope :retry_due, -> { where(arel_table[:retry_at].eq(nil).or(arel_table[:retry_at].lt(Time.current))) }
-    scope :ordered, -> { order(:id) }
+    scope :synced, -> { with_state(:synced) }
+    scope :sync_timed_out, -> { with_state(:started).where("last_synced_at < ?", replicator_class.sync_timeout.ago) }
 
     state_machine :state, initial: :pending do
       state :pending, value: STATE_VALUES[:pending]
@@ -87,6 +113,10 @@ module Geo::ReplicableRegistry
       self.last_sync_failure += ": #{error.message}" if error.respond_to?(:message)
 
       super()
+    end
+
+    def replicator
+      self.class.replicator_class.new(model_record_id: model_record_id)
     end
   end
 end

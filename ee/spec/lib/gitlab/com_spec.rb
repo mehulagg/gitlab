@@ -6,7 +6,7 @@ RSpec.describe Gitlab::Com do
   it { expect(described_class.l1_cache_backend).to eq(Gitlab::ProcessMemoryCache.cache_backend) }
   it { expect(described_class.l2_cache_backend).to eq(Rails.cache) }
 
-  describe '.gitlab_team_member?' do
+  describe '.gitlab_com_group_member_id?' do
     subject { described_class.gitlab_com_group_member_id?(user&.id) }
 
     let(:user) { create(:user) }

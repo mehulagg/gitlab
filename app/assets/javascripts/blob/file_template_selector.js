@@ -12,10 +12,24 @@ export default class FileTemplateSelector {
 
     this.$dropdown = $(cfg.dropdown);
     this.$wrapper = $(cfg.wrapper);
-    this.$loadingIcon = this.$wrapper.find('.fa-chevron-down');
+    this.$dropdownIcon = this.$wrapper.find('.dropdown-menu-toggle-icon');
+    this.$loadingIcon = $(
+      '<div class="gl-spinner gl-spinner-orange gl-spinner-sm gl-absolute gl-top-3 gl-right-3 gl-display-none"></div>',
+    ).insertAfter(this.$dropdownIcon);
     this.$dropdownToggleText = this.$wrapper.find('.dropdown-toggle-text');
 
     this.initDropdown();
+    this.selectInitialTemplate();
+  }
+
+  selectInitialTemplate() {
+    const template = this.$dropdown.data('selected');
+
+    if (!template) {
+      return;
+    }
+
+    this.mediator.selectTemplateFile(this, template);
   }
 
   show() {
@@ -33,7 +47,7 @@ export default class FileTemplateSelector {
   }
 
   isHidden() {
-    return this.$wrapper.hasClass('hidden');
+    return !this.$wrapper || this.$wrapper.hasClass('hidden');
   }
 
   getToggleText() {
@@ -45,11 +59,13 @@ export default class FileTemplateSelector {
   }
 
   renderLoading() {
-    this.$loadingIcon.addClass('fa-spinner fa-spin').removeClass('fa-chevron-down');
+    this.$loadingIcon.removeClass('gl-display-none');
+    this.$dropdownIcon.addClass('gl-display-none');
   }
 
   renderLoaded() {
-    this.$loadingIcon.addClass('fa-chevron-down').removeClass('fa-spinner fa-spin');
+    this.$loadingIcon.addClass('gl-display-none');
+    this.$dropdownIcon.removeClass('gl-display-none');
   }
 
   reportSelection(options) {
@@ -61,6 +77,8 @@ export default class FileTemplateSelector {
   reportSelectionName(options) {
     const opts = options;
     opts.query = options.selectedObj.name;
+    opts.data = options.selectedObj;
+    opts.data.source_template_project_id = options.selectedObj.project_id;
 
     this.reportSelection(opts);
   }

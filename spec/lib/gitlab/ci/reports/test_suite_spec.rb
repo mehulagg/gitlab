@@ -50,9 +50,11 @@ RSpec.describe Gitlab::Ci::Reports::TestSuite do
     before do
       test_suite.add_test_case(test_case_success)
       test_suite.add_test_case(test_case_failed)
+      test_suite.add_test_case(test_case_skipped)
+      test_suite.add_test_case(test_case_error)
     end
 
-    it { is_expected.to eq(2) }
+    it { is_expected.to eq(4) }
   end
 
   describe '#total_status' do
@@ -89,7 +91,7 @@ RSpec.describe Gitlab::Ci::Reports::TestSuite do
     subject { test_suite.with_attachment! }
 
     context 'when test cases do not contain an attachment' do
-      let(:test_case) { build(:test_case, :failed)}
+      let(:test_case) { build(:report_test_case, :failed)}
 
       before do
         test_suite.add_test_case(test_case)
@@ -101,7 +103,7 @@ RSpec.describe Gitlab::Ci::Reports::TestSuite do
     end
 
     context 'when test cases contain an attachment' do
-      let(:test_case_with_attachment) { build(:test_case, :failed_with_attachment)}
+      let(:test_case_with_attachment) { build(:report_test_case, :failed_with_attachment)}
 
       before do
         test_suite.add_test_case(test_case_with_attachment)
@@ -174,6 +176,37 @@ RSpec.describe Gitlab::Ci::Reports::TestSuite do
     end
   end
 
+  describe '#sorted' do
+    subject { test_suite.sorted }
+
+    context 'when there are multiple failed test cases' do
+      before do
+        test_suite.add_test_case(create_test_case_rspec_failed('test_spec_1', 1.11))
+        test_suite.add_test_case(create_test_case_rspec_failed('test_spec_2', 4.44))
+      end
+
+      it 'returns test cases sorted by execution time desc' do
+        expect(subject.test_cases['failed'].each_value.first.execution_time).to eq(4.44)
+        expect(subject.test_cases['failed'].values.second.execution_time).to eq(1.11)
+      end
+    end
+
+    context 'when there are multiple test cases' do
+      let(:status_ordered) { %w(error failed success skipped) }
+
+      before do
+        test_suite.add_test_case(test_case_success)
+        test_suite.add_test_case(test_case_failed)
+        test_suite.add_test_case(test_case_error)
+        test_suite.add_test_case(test_case_skipped)
+      end
+
+      it 'returns test cases sorted by status' do
+        expect(subject.test_cases.keys).to eq(status_ordered)
+      end
+    end
+  end
+
   Gitlab::Ci::Reports::TestCase::STATUS_TYPES.each do |status_type|
     describe "##{status_type}" do
       subject { test_suite.public_send("#{status_type}") }
@@ -193,6 +226,20 @@ RSpec.describe Gitlab::Ci::Reports::TestSuite do
           is_expected.to be_empty
         end
       end
+    end
+  end
+
+  describe '#each_test_case' do
+    before do
+      test_suite.add_test_case(test_case_success)
+      test_suite.add_test_case(test_case_failed)
+      test_suite.add_test_case(test_case_skipped)
+      test_suite.add_test_case(test_case_error)
+    end
+
+    it 'yields each test case to given block' do
+      expect { |b| test_suite.each_test_case(&b) }
+        .to yield_successive_args(test_case_success, test_case_failed, test_case_skipped, test_case_error)
     end
   end
 

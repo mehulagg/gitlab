@@ -20,7 +20,9 @@ module Geo
     end
 
     def max_capacity
-      current_node.files_max_capacity
+      # Transition-period-solution.
+      # Explained in https://gitlab.com/gitlab-org/gitlab/-/issues/213872#note_336828581
+      [current_node.files_max_capacity / 2, 1].max
     end
 
     def schedule_job(object_type, object_db_id)
@@ -33,22 +35,23 @@ module Geo
     #
     # @return [Array] resources to be transferred
     def load_pending_resources
-      resources = find_unsynced_jobs(batch_size: db_retrieve_batch_size)
+      resources = find_jobs_never_attempted_sync(batch_size: db_retrieve_batch_size)
       remaining_capacity = db_retrieve_batch_size - resources.count
 
-      if remaining_capacity.zero?
+      if remaining_capacity == 0
         resources
       else
         resources + find_low_priority_jobs(batch_size: remaining_capacity)
       end
     end
 
-    # Get a batch of unsynced resources, taking equal parts from each resource.
+    # Get a batch of resources that never have an attempt to sync, taking
+    # equal parts from each resource.
     #
-    # @return [Array] job arguments of unsynced resources
-    def find_unsynced_jobs(batch_size:)
+    # @return [Array] job arguments of resources that never have an attempt to sync
+    def find_jobs_never_attempted_sync(batch_size:)
       jobs = job_finders.reduce([]) do |jobs, job_finder|
-        jobs << job_finder.find_unsynced_jobs(batch_size: batch_size)
+        jobs << job_finder.find_jobs_never_attempted_sync(batch_size: batch_size)
       end
 
       take_batch(*jobs, batch_size: batch_size)
@@ -60,8 +63,8 @@ module Geo
     # @return [Array] job arguments of low priority resources
     def find_low_priority_jobs(batch_size:)
       jobs = job_finders.reduce([]) do |jobs, job_finder|
-        jobs << job_finder.find_failed_jobs(batch_size: batch_size)
-        jobs << job_finder.find_synced_missing_on_primary_jobs(batch_size: batch_size)
+        jobs << job_finder.find_jobs_needs_sync_again(batch_size: batch_size)
+        jobs << job_finder.find_jobs_synced_missing_on_primary(batch_size: batch_size)
       end
 
       take_batch(*jobs, batch_size: batch_size)

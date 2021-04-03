@@ -21,15 +21,16 @@ RSpec.describe Projects::DestroyService do
   end
 
   context 'when project is a mirror' do
-    it 'decrements capacity if mirror was scheduled' do
-      max_capacity = Gitlab::CurrentSettings.mirror_max_capacity
-      project_mirror = create(:project, :mirror, :repository, :import_scheduled)
+    let(:max_capacity) { Gitlab::CurrentSettings.mirror_max_capacity }
+    let_it_be(:project_mirror) { create(:project, :mirror, :repository, :import_scheduled) }
+    let(:result) { described_class.new(project_mirror, project_mirror.owner, {}).execute }
 
+    before do
       Gitlab::Mirror.increment_capacity(project_mirror.id)
+    end
 
-      expect do
-        described_class.new(project_mirror, project_mirror.owner, {}).execute
-      end.to change { Gitlab::Mirror.available_capacity }.from(max_capacity - 1).to(max_capacity)
+    it 'decrements capacity if mirror was scheduled' do
+      expect {result}.to change { Gitlab::Mirror.available_capacity }.from(max_capacity - 1).to(max_capacity)
     end
   end
 
@@ -44,15 +45,14 @@ RSpec.describe Projects::DestroyService do
     it 'logs an event to the Geo event log' do
       # Run Sidekiq immediately to check that renamed repository will be removed
       Sidekiq::Testing.inline! do
-        expect(subject).to receive(:log_destroy_event).and_call_original
+        expect(subject).to receive(:log_destroy_events).and_call_original
         expect { subject.execute }.to change(Geo::RepositoryDeletedEvent, :count).by(1)
       end
     end
 
     it 'does not log event to the Geo log if project deletion fails' do
       expect(subject).to receive(:log_destroy_event).and_call_original
-      expect_any_instance_of(Project)
-        .to receive(:destroy!).and_raise(StandardError.new('Other error message'))
+      expect(project).to receive(:destroy!).and_raise(StandardError.new('Other error message'))
 
       Sidekiq::Testing.inline! do
         expect { subject.execute }.not_to change(Geo::RepositoryDeletedEvent, :count)
@@ -63,23 +63,24 @@ RSpec.describe Projects::DestroyService do
   context 'audit events' do
     include_examples 'audit event logging' do
       let(:operation) { subject.execute }
+
       let(:fail_condition!) do
-        expect_any_instance_of(Project)
-          .to receive(:destroy!).and_raise(StandardError.new('Other error message'))
+        expect(project).to receive(:destroy!).and_raise(StandardError.new('Other error message'))
       end
+
       let(:attributes) do
         {
-           author_id: user.id,
-           entity_id: project.id,
-           entity_type: 'Project',
-           details: {
-             remove: 'project',
-             author_name: user.name,
-             target_id: project.full_path,
-             target_type: 'Project',
-             target_details: project.full_path
-           }
-         }
+          author_id: user.id,
+          entity_id: project.id,
+          entity_type: 'Project',
+          details: {
+            remove: 'project',
+            author_name: user.name,
+            target_id: project.id,
+            target_type: 'Project',
+            target_details: project.full_path
+          }
+        }
       end
     end
   end

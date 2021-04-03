@@ -3,14 +3,17 @@
 module Projects
   module Security
     class DashboardController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
       include SecurityDashboardsPermissions
 
       alias_method :vulnerable, :project
 
       before_action only: [:index] do
-        push_frontend_feature_flag(:hide_dismissed_vulnerabilities)
-        push_frontend_feature_flag(:scanner_alerts, default_enabled: true)
+        push_frontend_feature_flag(:security_auto_fix, project, default_enabled: false)
+        push_frontend_feature_flag(:vulnerability_management_survey, type: :ops, default_enabled: :yaml)
       end
+
+      feature_category :static_application_security_testing
     end
   end
 end

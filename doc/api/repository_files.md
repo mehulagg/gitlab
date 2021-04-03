@@ -1,4 +1,11 @@
-# Repository files API
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference, api
+---
+
+# Repository files API **(FREE)**
 
 **CRUD for repository files**
 
@@ -50,7 +57,7 @@ Parameters:
 - `file_path` (required) - URL encoded full path to new file. Ex. lib%2Fclass%2Erb
 - `ref` (required) - The name of branch, tag or commit
 
-NOTE: **Note:**
+NOTE:
 `blob_id` is the blob SHA, see [repositories - Get a blob from repository](repositories.md#get-a-blob-from-repository)
 
 In addition to the `GET` method, you can also use `HEAD` to get just file metadata.
@@ -125,7 +132,7 @@ Parameters:
 - `file_path` (required) - URL encoded full path to new file. Ex. lib%2Fclass%2Erb
 - `ref` (required) - The name of branch, tag or commit
 
-NOTE: **Note:**
+NOTE:
 `HEAD` method return just file metadata as in [Get file from repository](repository_files.md#get-file-from-repository).
 
 ```shell
@@ -164,7 +171,7 @@ Parameters:
 - `file_path` (required) - URL encoded full path to new file. Ex. lib%2Fclass%2Erb
 - `ref` (required) - The name of branch, tag or commit
 
-NOTE: **Note:**
+NOTE:
 Like [Get file from repository](repository_files.md#get-file-from-repository) you can use `HEAD` to get just file metadata.
 
 ## Create new file in repository
@@ -196,7 +203,7 @@ Parameters:
 - `file_path` (required) - URL encoded full path to new file. Ex. lib%2Fclass%2Erb
 - `branch` (required) - Name of the branch
 - `start_branch` (optional) - Name of the branch to start the new commit from
-- `encoding` (optional) - Change encoding to 'base64'. Default is text.
+- `encoding` (optional) - Change encoding to `base64`. Default is `text`.
 - `author_email` (optional) - Specify the commit author's email address
 - `author_name` (optional) - Specify the commit author's name
 - `content` (required) - File content
@@ -231,7 +238,7 @@ Parameters:
 - `file_path` (required) - URL encoded full path to new file. Ex. lib%2Fclass%2Erb
 - `branch` (required) - Name of the branch
 - `start_branch` (optional) - Name of the branch to start the new commit from
-- `encoding` (optional) - Change encoding to 'base64'. Default is text.
+- `encoding` (optional) - Change encoding to `base64`. Default is `text`.
 - `author_email` (optional) - Specify the commit author's email address
 - `author_name` (optional) - Specify the commit author's name
 - `content` (required) - New file content

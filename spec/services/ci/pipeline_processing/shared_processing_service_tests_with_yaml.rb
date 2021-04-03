@@ -1,21 +1,19 @@
 # frozen_string_literal: true
 
 RSpec.shared_context 'Pipeline Processing Service Tests With Yaml' do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user)    { project.owner }
+
   where(:test_file_path) do
     Dir.glob(Rails.root.join('spec/services/ci/pipeline_processing/test_cases/*.yml'))
   end
 
   with_them do
     let(:test_file) { YAML.load_file(test_file_path) }
-
-    let(:user)     { create(:user) }
-    let(:project)  { create(:project, :repository) }
     let(:pipeline) { Ci::CreatePipelineService.new(project, user, ref: 'master').execute(:pipeline) }
 
     before do
       stub_ci_pipeline_yaml_file(YAML.dump(test_file['config']))
-      stub_not_protect_default_branch
-      project.add_developer(user)
     end
 
     it 'follows transitions' do
@@ -42,16 +40,22 @@ RSpec.shared_context 'Pipeline Processing Service Tests With Yaml' do
 
       {
         pipeline: pipeline.status,
-        stages: pipeline.ordered_stages.pluck(:name, :status).to_h,
-        jobs: pipeline.statuses.latest.pluck(:name, :status).to_h
+        stages: pipeline.stages.pluck(:name, :status).to_h,
+        jobs: pipeline.latest_statuses.pluck(:name, :status).to_h
       }
     end
 
     def event_on_jobs(event, job_names)
-      statuses = pipeline.statuses.latest.by_name(job_names).to_a
+      statuses = pipeline.latest_statuses.by_name(job_names).to_a
       expect(statuses.count).to eq(job_names.count) # ensure that we have the same counts
 
-      statuses.each { |status| status.public_send("#{event}!") }
+      statuses.each do |status|
+        if event == 'play'
+          status.play(user)
+        else
+          status.public_send("#{event}!")
+        end
+      end
     end
   end
 end

@@ -1,5 +1,20 @@
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
 
+export const artifacts = [
+  {
+    text: 'result.txt',
+    url: 'bar',
+    job_name: 'generate-artifact',
+    job_path: 'bar',
+  },
+  {
+    text: 'foo.txt',
+    url: 'foo',
+    job_name: 'foo-artifact',
+    job_path: 'foo',
+  },
+];
+
 export default {
   id: 132,
   iid: 22,
@@ -37,7 +52,11 @@ export default {
   target_project_id: 19,
   target_project_full_path: '/group2/project2',
   merge_request_add_ci_config_path: '/group2/project2/new/pipeline',
+  is_dismissed_suggest_pipeline: false,
+  user_callouts_path: 'some/callout/path',
+  suggest_pipeline_feature_id: 'suggest_pipeline',
   new_project_pipeline_path: '/group2/project2/pipelines/new',
+  source_project_default_url: '/gitlab-org/html5-boilerplate.git',
   metrics: {
     merged_by: {
       name: 'Administrator',
@@ -80,6 +99,7 @@ export default {
     coverage: '92.16',
     path: '/root/acets-app/pipelines/172',
     details: {
+      artifacts,
       status: {
         icon: 'status_success',
         favicon: 'favicon_status_success',
@@ -123,7 +143,6 @@ export default {
           dropdown_path: '/root/acets-app/pipelines/172/stage.json?stage=review',
         },
       ],
-      artifacts: [],
       manual_actions: [
         {
           name: 'stop_review',
@@ -190,6 +209,10 @@ export default {
     updated_at: '2017-04-07T15:28:44.800Z',
   },
   pipelineCoverageDelta: '15.25',
+  buildsWithCoverage: [
+    { name: 'karma', coverage: '40.2' },
+    { name: 'rspec', coverage: '80.4' },
+  ],
   work_in_progress: false,
   source_branch_exists: false,
   mergeable_discussions_state: true,
@@ -258,12 +281,16 @@ export default {
   merge_trains_enabled: true,
   merge_trains_count: 3,
   merge_train_index: 1,
+  security_reports_docs_path: 'security-reports-docs-path',
+  sast_comparison_path: '/sast_comparison_path',
+  secret_scanning_comparison_path: '/secret_scanning_comparison_path',
 };
 
 export const mockStore = {
   pipeline: {
     id: 0,
     details: {
+      artifacts,
       status: {
         details_path: '/root/review-app-tester/pipelines/66',
         favicon:
@@ -283,6 +310,7 @@ export const mockStore = {
   mergePipeline: {
     id: 1,
     details: {
+      artifacts,
       status: {
         details_path: '/root/review-app-tester/pipelines/66',
         favicon:

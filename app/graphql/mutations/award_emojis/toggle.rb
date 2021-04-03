@@ -5,14 +5,12 @@ module Mutations
     class Toggle < Base
       graphql_name 'AwardEmojiToggle'
 
-      field :toggledOn, GraphQL::BOOLEAN_TYPE, null: false,
+      field :toggled_on, GraphQL::BOOLEAN_TYPE, null: false,
             description: 'Indicates the status of the emoji. ' \
             'True if the toggle awarded the emoji, and false if the toggle removed the emoji.'
 
       def resolve(args)
         awardable = authorized_find!(id: args[:awardable_id])
-
-        check_object_is_awardable!(awardable)
 
         service = ::AwardEmojis::ToggleService.new(awardable, args[:name], current_user).execute
 

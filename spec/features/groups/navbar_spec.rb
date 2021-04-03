@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Group navbar' do
   include NavbarStructureHelper
+  include WikiHelpers
 
   include_context 'group navbar structure'
 
@@ -29,9 +30,11 @@ RSpec.describe 'Group navbar' do
         ]
       },
       {
-        nav_item: _('Merge Requests'),
+        nav_item: _('Merge requests'),
         nav_sub_items: []
       },
+      (security_and_compliance_nav_item if Gitlab.ee?),
+      (push_rules_nav_item if Gitlab.ee?),
       {
         nav_item: _('Kubernetes'),
         nav_sub_items: []
@@ -47,9 +50,10 @@ RSpec.describe 'Group navbar' do
   before do
     insert_package_nav(_('Kubernetes'))
 
-    stub_feature_flags(group_push_rules: false)
     stub_feature_flags(group_iterations: false)
-    stub_feature_flags(group_wiki: false)
+    stub_config(dependency_proxy: { enabled: false })
+    stub_config(registry: { enabled: false })
+    stub_group_wikis(false)
     group.add_maintainer(user)
     sign_in(user)
   end
@@ -64,7 +68,19 @@ RSpec.describe 'Group navbar' do
     before do
       stub_config(registry: { enabled: true })
 
-      insert_container_nav(_('Kubernetes'))
+      insert_container_nav
+
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when dependency proxy is available' do
+    before do
+      stub_config(dependency_proxy: { enabled: true })
+
+      insert_dependency_proxy_nav
 
       visit group_path(group)
     end

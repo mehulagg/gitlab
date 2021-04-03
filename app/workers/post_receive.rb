@@ -2,6 +2,7 @@
 
 class PostReceive # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+  include Gitlab::Experiment::Dsl
 
   feature_category :source_code_management
   urgency :high
@@ -12,15 +13,15 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
   def perform(gl_repository, identifier, changes, push_options = {})
     container, project, repo_type = Gitlab::GlRepository.parse(gl_repository)
 
-    if project.nil? && (!repo_type.snippet? || container.is_a?(ProjectSnippet))
-      log("Triggered hook for non-existing project with gl_repository \"#{gl_repository}\"")
+    if container.nil? || (container.is_a?(ProjectSnippet) && project.nil?)
+      log("Triggered hook for non-existing gl_repository \"#{gl_repository}\"")
       return false
     end
 
     changes = Base64.decode64(changes) unless changes.include?(' ')
     # Use Sidekiq.logger so arguments can be correlated with execution
     # time and thread ID's.
-    Sidekiq.logger.info "changes: #{changes.inspect}" if ENV['SIDEKIQ_LOG_ARGUMENTS']
+    Sidekiq.logger.info "changes: #{changes.inspect}" if SidekiqLogArguments.enabled?
     post_received = Gitlab::GitPostReceive.new(container, identifier, changes, push_options)
 
     if repo_type.wiki?
@@ -59,18 +60,15 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
     after_project_changes_hooks(project, user, changes.refs, changes.repository_data)
   end
 
-  def process_wiki_changes(post_received, project)
-    project.touch(:last_activity_at, :last_repository_updated_at)
-    project.wiki.repository.expire_statistics_caches
-    ProjectCacheWorker.perform_async(project.id, [], [:wiki_size])
-
+  def process_wiki_changes(post_received, wiki)
     user = identify_user(post_received)
     return false unless user
 
     # We only need to expire certain caches once per push
-    expire_caches(post_received, project.wiki.repository)
+    expire_caches(post_received, wiki.repository)
+    wiki.repository.expire_statistics_caches
 
-    ::Git::WikiPushService.new(project, user, changes: post_received.changes).execute
+    ::Git::WikiPushService.new(wiki, user, changes: post_received.changes).execute
   end
 
   def process_snippet_changes(post_received, snippet)
@@ -78,8 +76,14 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
 
     return false unless user
 
+    replicate_snippet_changes(snippet)
+
     expire_caches(post_received, snippet.repository)
     Snippets::UpdateStatisticsService.new(snippet).execute
+  end
+
+  def replicate_snippet_changes(snippet)
+    # Used by Gitlab Geo
   end
 
   # Expire the repository status, branch, and tag cache once per push.
@@ -118,6 +122,8 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
   end
 
   def after_project_changes_hooks(project, user, refs, changes)
+    experiment(:new_project_readme, actor: user).track_initial_writes(project)
+    experiment(:empty_repo_upload, project: project).track(:initial_write) if project.empty_repo?
     repository_update_hook_data = Gitlab::DataBuilder::Repository.update(project, user, changes, refs)
     SystemHooksService.new.execute_hooks(repository_update_hook_data, :repository_update_hooks)
     Gitlab::UsageDataCounters::SourceCodeCounter.count(:pushes)

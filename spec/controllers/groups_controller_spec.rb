@@ -2,18 +2,24 @@
 
 require 'spec_helper'
 
-RSpec.describe GroupsController do
+RSpec.describe GroupsController, factory_default: :keep do
   include ExternalAuthorizationServiceHelpers
+  include AdminModeHelper
 
-  let(:user) { create(:user) }
-  let(:admin) { create(:admin) }
-  let(:group) { create(:group, :public) }
-  let(:project) { create(:project, namespace: group) }
-  let!(:group_member) { create(:group_member, group: group, user: user) }
-  let!(:owner) { group.add_owner(create(:user)).user }
-  let!(:maintainer) { group.add_maintainer(create(:user)).user }
-  let!(:developer) { group.add_developer(create(:user)).user }
-  let!(:guest) { group.add_guest(create(:user)).user }
+  let_it_be_with_refind(:group) { create_default(:group, :public) }
+  let_it_be_with_refind(:project) { create(:project, namespace: group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:admin_with_admin_mode) { create(:admin) }
+  let_it_be(:admin_without_admin_mode) { create(:admin) }
+  let_it_be(:group_member) { create(:group_member, group: group, user: user) }
+  let_it_be(:owner) { group.add_owner(create(:user)).user }
+  let_it_be(:maintainer) { group.add_maintainer(create(:user)).user }
+  let_it_be(:developer) { group.add_developer(create(:user)).user }
+  let_it_be(:guest) { group.add_guest(create(:user)).user }
+
+  before do
+    enable_admin_mode!(admin_with_admin_mode)
+  end
 
   shared_examples 'member with ability to create subgroups' do
     it 'renders the new page' do
@@ -57,7 +63,6 @@ RSpec.describe GroupsController do
   describe 'GET #show' do
     before do
       sign_in(user)
-      project
     end
 
     let(:format) { :html }
@@ -82,7 +87,6 @@ RSpec.describe GroupsController do
   describe 'GET #details' do
     before do
       sign_in(user)
-      project
     end
 
     let(:format) { :html }
@@ -107,10 +111,10 @@ RSpec.describe GroupsController do
       [true, false].each do |can_create_group_status|
         context "and can_create_group is #{can_create_group_status}" do
           before do
-            User.where(id: [admin, owner, maintainer, developer, guest]).update_all(can_create_group: can_create_group_status)
+            User.where(id: [admin_with_admin_mode, admin_without_admin_mode, owner, maintainer, developer, guest]).update_all(can_create_group: can_create_group_status)
           end
 
-          [:admin, :owner, :maintainer].each do |member_type|
+          [:admin_with_admin_mode, :owner, :maintainer].each do |member_type|
             context "and logged in as #{member_type.capitalize}" do
               it_behaves_like 'member with ability to create subgroups' do
                 let(:member) { send(member_type) }
@@ -118,7 +122,7 @@ RSpec.describe GroupsController do
             end
           end
 
-          [:guest, :developer].each do |member_type|
+          [:guest, :developer, :admin_without_admin_mode].each do |member_type|
             context "and logged in as #{member_type.capitalize}" do
               it_behaves_like 'member without ability to create subgroups' do
                 let(:member) { send(member_type) }
@@ -131,12 +135,9 @@ RSpec.describe GroupsController do
   end
 
   describe 'GET #activity' do
-    render_views
-
     context 'as json' do
       before do
         sign_in(user)
-        project
       end
 
       it 'includes events from all projects in group and subgroups', :sidekiq_might_not_need_inline do
@@ -157,10 +158,6 @@ RSpec.describe GroupsController do
     end
 
     context 'when user has no permission to see the event' do
-      let(:user) { create(:user) }
-      let(:group) { create(:group) }
-      let(:project) { create(:project, group: group) }
-
       let(:project_with_restricted_access) do
         create(:project, :public, issues_access_level: ProjectFeature::PRIVATE, group: group)
       end
@@ -316,62 +313,60 @@ RSpec.describe GroupsController do
       end
     end
 
-    describe 'tracking group creation for onboarding issues experiment' do
+    context 'when creating a group with captcha protection' do
       before do
         sign_in(user)
+
+        stub_application_setting(recaptcha_enabled: true)
       end
 
-      subject(:create_namespace) { post :create, params: { group: { name: 'new_group', path: 'new_group' } } }
-
-      context 'experiment disabled' do
-        before do
-          stub_experiment(onboarding_issues: false)
-        end
-
-        it 'does not track anything' do
-          expect(Gitlab::Tracking).not_to receive(:event)
-
-          create_namespace
+      after do
+        # Avoid test ordering issue and ensure `verify_recaptcha` returns true
+        unless Recaptcha.configuration.skip_verify_env.include?('test')
+          Recaptcha.configuration.skip_verify_env << 'test'
         end
       end
 
-      context 'experiment enabled' do
+      it 'displays an error when the reCAPTCHA is not solved' do
+        allow(controller).to receive(:verify_recaptcha).and_return(false)
+
+        post :create, params: { group: { name: 'new_group', path: "new_group" } }
+
+        expect(response).to render_template(:new)
+        expect(flash[:alert]).to eq(_('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.'))
+      end
+
+      it 'allows creating a group when the reCAPTCHA is solved' do
+        expect do
+          post :create, params: { group: { name: 'new_group', path: "new_group" } }
+        end.to change { Group.count }.by(1)
+
+        expect(response).to have_gitlab_http_status(:found)
+      end
+
+      it 'allows creating a sub-group without checking the captcha' do
+        expect(controller).not_to receive(:verify_recaptcha)
+
+        expect do
+          post :create, params: { group: { name: 'new_group', path: "new_group", parent_id: group.id } }
+        end.to change { Group.count }.by(1)
+
+        expect(response).to have_gitlab_http_status(:found)
+      end
+
+      context 'with feature flag switched off' do
         before do
-          stub_experiment(onboarding_issues: true)
+          stub_feature_flags(recaptcha_on_top_level_group_creation: false)
         end
 
-        context 'and the user is part of the control group' do
-          before do
-            stub_experiment_for_user(onboarding_issues: false)
-          end
+        it 'allows creating a group without the reCAPTCHA' do
+          expect(controller).not_to receive(:verify_recaptcha)
 
-          it 'tracks the event with the "created_namespace" action with the "control_group" property' do
-            expect(Gitlab::Tracking).to receive(:event).with(
-              'Growth::Conversion::Experiment::OnboardingIssues',
-              'created_namespace',
-              label: anything,
-              property: 'control_group'
-            )
+          expect do
+            post :create, params: { group: { name: 'new_group', path: "new_group" } }
+          end.to change { Group.count }.by(1)
 
-            create_namespace
-          end
-        end
-
-        context 'and the user is part of the experimental group' do
-          before do
-            stub_experiment_for_user(onboarding_issues: true)
-          end
-
-          it 'tracks the event with the "created_namespace" action with the "experimental_group" property' do
-            expect(Gitlab::Tracking).to receive(:event).with(
-              'Growth::Conversion::Experiment::OnboardingIssues',
-              'created_namespace',
-              label: anything,
-              property: 'experimental_group'
-            )
-
-            create_namespace
-          end
+          expect(response).to have_gitlab_http_status(:found)
         end
       end
     end
@@ -398,8 +393,8 @@ RSpec.describe GroupsController do
   end
 
   describe 'GET #issues', :sidekiq_might_not_need_inline do
-    let(:issue_1) { create(:issue, project: project, title: 'foo') }
-    let(:issue_2) { create(:issue, project: project, title: 'bar') }
+    let_it_be(:issue_1) { create(:issue, project: project, title: 'foo') }
+    let_it_be(:issue_2) { create(:issue, project: project, title: 'bar') }
 
     before do
       create_list(:award_emoji, 3, awardable: issue_2)
@@ -422,10 +417,6 @@ RSpec.describe GroupsController do
     end
 
     context 'searching' do
-      before do
-        stub_feature_flags(attempt_group_search_optimizations: true)
-      end
-
       it 'works with popularity sort' do
         get :issues, params: { id: group.to_param, search: 'foo', sort: 'popularity' }
 
@@ -552,6 +543,50 @@ RSpec.describe GroupsController do
           expect(response).to have_gitlab_http_status(:found)
           expect(group.reload.default_branch_protection).not_to eq(::Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
         end
+      end
+    end
+
+    context "updating default_branch_name" do
+      let(:example_branch_name) { "example_branch_name" }
+
+      subject(:update_action) do
+        put :update,
+          params: {
+            id: group.to_param,
+            group: { default_branch_name: example_branch_name }
+          }
+      end
+
+      it "updates the attribute" do
+        expect { subject }
+          .to change { group.namespace_settings.reload.default_branch_name }
+          .from(nil)
+          .to(example_branch_name)
+
+        expect(response).to have_gitlab_http_status(:found)
+      end
+
+      context "to empty string" do
+        let(:example_branch_name) { '' }
+
+        it "does not update the attribute" do
+          subject
+
+          expect(group.namespace_settings.reload.default_branch_name).not_to eq('')
+        end
+      end
+    end
+
+    context 'when there is a conflicting group path' do
+      let!(:conflict_group) { create(:group, path: SecureRandom.hex(12) ) }
+      let!(:old_name) { group.name }
+
+      it 'does not render references to the conflicting group' do
+        put :update, params: { id: group.to_param, group: { path: conflict_group.path } }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(group.reload.name).to eq(old_name)
+        expect(response.body).not_to include(conflict_group.path)
       end
     end
 
@@ -783,6 +818,7 @@ RSpec.describe GroupsController do
 
     context 'when transferring to a subgroup goes right' do
       let(:new_parent_group) { create(:group, :public) }
+      let(:group) { create(:group, :public) }
       let!(:group_member) { create(:group_member, :owner, group: group, user: user) }
       let!(:new_parent_group_member) { create(:group_member, :owner, group: new_parent_group, user: user) }
 
@@ -794,11 +830,8 @@ RSpec.describe GroupsController do
           }
       end
 
-      it 'returns a notice' do
+      it 'returns a notice and redirects to the new path' do
         expect(flash[:notice]).to eq("Group '#{group.name}' was successfully transferred.")
-      end
-
-      it 'redirects to the new path' do
         expect(response).to redirect_to("/#{new_parent_group.path}/#{group.path}")
       end
     end
@@ -815,17 +848,15 @@ RSpec.describe GroupsController do
           }
       end
 
-      it 'returns a notice' do
+      it 'returns a notice and redirects to the new path' do
         expect(flash[:notice]).to eq("Group '#{group.name}' was successfully transferred.")
-      end
-
-      it 'redirects to the new path' do
         expect(response).to redirect_to("/#{group.path}")
       end
     end
 
     context 'When the transfer goes wrong' do
       let(:new_parent_group) { create(:group, :public) }
+      let(:group) { create(:group, :public) }
       let!(:group_member) { create(:group_member, :owner, group: group, user: user) }
       let!(:new_parent_group_member) { create(:group_member, :owner, group: new_parent_group, user: user) }
 
@@ -839,17 +870,15 @@ RSpec.describe GroupsController do
           }
       end
 
-      it 'returns an alert' do
+      it 'returns an alert and redirects to the current path' do
         expect(flash[:alert]).to eq "Transfer failed: namespace directory cannot be moved"
-      end
-
-      it 'redirects to the current path' do
         expect(response).to redirect_to(edit_group_path(group))
       end
     end
 
     context 'when the user is not allowed to transfer the group' do
       let(:new_parent_group) { create(:group, :public) }
+      let(:group) { create(:group, :public) }
       let!(:group_member) { create(:group_member, :guest, group: group, user: user) }
       let!(:new_parent_group_member) { create(:group_member, :guest, group: new_parent_group, user: user) }
 
@@ -868,6 +897,7 @@ RSpec.describe GroupsController do
 
     context 'transferring when a project has container images' do
       let(:group) { create(:group, :public, :nested) }
+      let(:project) { create(:project, namespace: group) }
       let!(:group_member) { create(:group_member, :owner, group: group, user: user) }
 
       before do
@@ -890,6 +920,12 @@ RSpec.describe GroupsController do
   end
 
   describe 'POST #export' do
+    let(:admin) { create(:admin) }
+
+    before do
+      enable_admin_mode!(admin)
+    end
+
     context 'when the group export feature flag is not enabled' do
       before do
         sign_in(admin)
@@ -952,6 +988,12 @@ RSpec.describe GroupsController do
   end
 
   describe 'GET #download_export' do
+    let(:admin) { create(:admin) }
+
+    before do
+      enable_admin_mode!(admin)
+    end
+
     context 'when there is a file available to download' do
       let(:export_file) { fixture_file_upload('spec/fixtures/group_export.tar.gz') }
 
@@ -1138,9 +1180,7 @@ RSpec.describe GroupsController do
 
     describe "GET #activity as JSON" do
       include DesignManagementTestHelpers
-      render_views
 
-      let(:project) { create(:project, :public, group: group) }
       let(:other_project) { create(:project, :public, group: group) }
 
       def get_activity
@@ -1176,6 +1216,62 @@ RSpec.describe GroupsController do
       subject { get :merge_requests, params: { id: group.to_param } }
 
       it_behaves_like 'disabled when using an external authorization service'
+    end
+  end
+
+  describe 'GET #unfoldered_environment_names' do
+    it 'shows the environment names of a public project to an anonymous user' do
+      public_project = create(:project, :public, namespace: group)
+
+      create(:environment, project: public_project, name: 'foo')
+
+      get(
+        :unfoldered_environment_names,
+        params: { id: group, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+
+    it 'does not show environment names of private projects to anonymous users' do
+      create(:environment, project: project, name: 'foo')
+
+      get(
+        :unfoldered_environment_names,
+        params: { id: group, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to be_empty
+    end
+
+    it 'shows environment names of a private project to a group member' do
+      create(:environment, project: project, name: 'foo')
+      sign_in(developer)
+
+      get(
+        :unfoldered_environment_names,
+        params: { id: group, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq(%w[foo])
+    end
+
+    it 'does not show environment names of private projects to a logged-in non-member' do
+      alice = create(:user)
+
+      create(:environment, project: project, name: 'foo')
+      sign_in(alice)
+
+      get(
+        :unfoldered_environment_names,
+        params: { id: group, format: :json }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to be_empty
     end
   end
 end

@@ -1,6 +1,7 @@
 <script>
-import { mapActions } from 'vuex';
+/* eslint-disable vue/no-v-html */
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import { mapActions } from 'vuex';
 
 export default {
   components: {

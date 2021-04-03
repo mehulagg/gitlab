@@ -13,6 +13,38 @@ RSpec.describe ::SystemNotes::IssuablesService do
 
   let(:service) { described_class.new(noteable: noteable, project: project, author: author) }
 
+  describe '#relate_issue' do
+    let(:noteable_ref) { create(:issue) }
+
+    subject { service.relate_issue(noteable_ref) }
+
+    it_behaves_like 'a system note' do
+      let(:action) { 'relate' }
+    end
+
+    context 'when issue marks another as related' do
+      it 'sets the note text' do
+        expect(subject.note).to eq "marked this issue as related to #{noteable_ref.to_reference(project)}"
+      end
+    end
+  end
+
+  describe '#unrelate_issue' do
+    let(:noteable_ref) { create(:issue) }
+
+    subject { service.unrelate_issue(noteable_ref) }
+
+    it_behaves_like 'a system note' do
+      let(:action) { 'unrelate' }
+    end
+
+    context 'when issue relation is removed' do
+      it 'sets the note text' do
+        expect(subject.note).to eq "removed the relation with #{noteable_ref.to_reference(project)}"
+      end
+    end
+  end
+
   describe '#change_assignee' do
     subject { service.change_assignee(assignee) }
 
@@ -96,60 +128,61 @@ RSpec.describe ::SystemNotes::IssuablesService do
     end
   end
 
-  describe '#change_milestone' do
-    subject { service.change_milestone(milestone) }
+  describe '#change_issuable_reviewers' do
+    subject { service.change_issuable_reviewers([reviewer]) }
 
-    context 'for a project milestone' do
-      let(:milestone) { create(:milestone, project: project) }
+    let_it_be(:noteable) { create(:merge_request, :simple, source_project: project) }
+    let_it_be(:reviewer) { create(:user) }
+    let_it_be(:reviewer1) { create(:user) }
+    let_it_be(:reviewer2) { create(:user) }
+    let_it_be(:reviewer3) { create(:user) }
 
-      it_behaves_like 'a system note' do
-        let(:action) { 'milestone' }
-      end
-
-      context 'when milestone added' do
-        it 'sets the note text' do
-          reference = milestone.to_reference(format: :iid)
-
-          expect(subject.note).to eq "changed milestone to #{reference}"
-        end
-
-        it_behaves_like 'a note with overridable created_at'
-      end
-
-      context 'when milestone removed' do
-        let(:milestone) { nil }
-
-        it 'sets the note text' do
-          expect(subject.note).to eq 'removed milestone'
-        end
-
-        it_behaves_like 'a note with overridable created_at'
-      end
+    it_behaves_like 'a system note' do
+      let(:action) { 'reviewer' }
     end
 
-    context 'for a group milestone' do
-      let(:milestone) { create(:milestone, group: group) }
+    def build_note(old_reviewers, new_reviewers)
+      noteable.reviewers = new_reviewers
+      service.change_issuable_reviewers(old_reviewers).note
+    end
 
-      it_behaves_like 'a system note' do
-        let(:action) { 'milestone' }
-      end
+    it 'builds a correct phrase when a reviewer is added to a non-assigned merge request' do
+      expect(build_note([], [reviewer1])).to eq "requested review from @#{reviewer1.username}"
+    end
 
-      context 'when milestone added' do
-        it 'sets the note text to use the milestone name' do
-          expect(subject.note).to eq "changed milestone to #{milestone.to_reference(format: :name)}"
-        end
+    it 'builds a correct phrase when reviewer is removed' do
+      expect(build_note([reviewer], [])).to eq "removed review request for @#{reviewer.username}"
+    end
 
-        it_behaves_like 'a note with overridable created_at'
-      end
+    it 'builds a correct phrase when reviewers changed' do
+      expect(build_note([reviewer1], [reviewer2])).to(
+        eq("requested review from @#{reviewer2.username} and removed review request for @#{reviewer1.username}")
+      )
+    end
 
-      context 'when milestone removed' do
-        let(:milestone) { nil }
+    it 'builds a correct phrase when three reviewers removed and one added' do
+      expect(build_note([reviewer, reviewer1, reviewer2], [reviewer3])).to(
+        eq("requested review from @#{reviewer3.username} and removed review request for @#{reviewer.username}, @#{reviewer1.username}, and @#{reviewer2.username}")
+      )
+    end
 
-        it 'sets the note text' do
-          expect(subject.note).to eq 'removed milestone'
-        end
+    it 'builds a correct phrase when one reviewer is changed from a set' do
+      expect(build_note([reviewer, reviewer1], [reviewer, reviewer2])).to(
+        eq("requested review from @#{reviewer2.username} and removed review request for @#{reviewer1.username}")
+      )
+    end
 
-        it_behaves_like 'a note with overridable created_at'
+    it 'builds a correct phrase when one reviewer removed from a set' do
+      expect(build_note([reviewer, reviewer1, reviewer2], [reviewer, reviewer1])).to(
+        eq( "removed review request for @#{reviewer2.username}")
+      )
+    end
+
+    it 'builds a correct phrase when the locale is different' do
+      Gitlab::I18n.with_locale('pt-BR') do
+        expect(build_note([reviewer, reviewer1, reviewer2], [reviewer3])).to(
+          eq("requested review from @#{reviewer3.username} and removed review request for @#{reviewer.username}, @#{reviewer1.username}, and @#{reviewer2.username}")
+        )
       end
     end
   end
@@ -157,43 +190,11 @@ RSpec.describe ::SystemNotes::IssuablesService do
   describe '#change_status' do
     subject { service.change_status(status, source) }
 
-    context 'when resource state event tracking is enabled' do
-      let(:status) { 'reopened' }
-      let(:source) { nil }
+    let(:status) { 'reopened' }
+    let(:source) { nil }
 
-      it 'does not change note count' do
-        expect { subject }.not_to change { Note.count }
-      end
-    end
-
-    context 'with status reopened' do
-      before do
-        stub_feature_flags(track_resource_state_change_events: false)
-      end
-
-      let(:status) { 'reopened' }
-      let(:source) { nil }
-
-      it_behaves_like 'a note with overridable created_at'
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'opened' }
-      end
-    end
-
-    context 'with a source' do
-      before do
-        stub_feature_flags(track_resource_state_change_events: false)
-      end
-
-      let(:status) { 'opened' }
-      let(:source) { double('commit', gfm_reference: 'commit 123456') }
-
-      it_behaves_like 'a note with overridable created_at'
-
-      it 'sets the note text' do
-        expect(subject.note).to eq "#{status} via commit 123456"
-      end
+    it 'creates a resource state event' do
+      expect { subject }.to change { ResourceStateEvent.count }.by(1)
     end
   end
 
@@ -372,7 +373,7 @@ RSpec.describe ::SystemNotes::IssuablesService do
         before do
           # Mention issue (noteable) from commit0
           system_note = service.cross_reference(commit0)
-          system_note.update(note: system_note.note.capitalize)
+          system_note.update!(note: system_note.note.capitalize)
         end
 
         it 'is truthy when already mentioned' do
@@ -406,7 +407,7 @@ RSpec.describe ::SystemNotes::IssuablesService do
         before do
           # Mention commit1 from commit0
           system_note = service.cross_reference(commit1)
-          system_note.update(note: system_note.note.capitalize)
+          system_note.update!(note: system_note.note.capitalize)
         end
 
         it 'is truthy when already mentioned' do
@@ -435,7 +436,7 @@ RSpec.describe ::SystemNotes::IssuablesService do
       context 'legacy capitalized cross reference' do
         before do
           system_note = service.cross_reference(commit0)
-          system_note.update(note: system_note.note.capitalize)
+          system_note.update!(note: system_note.note.capitalize)
         end
 
         it 'is true when a fork mentions an external issue' do
@@ -521,6 +522,91 @@ RSpec.describe ::SystemNotes::IssuablesService do
     end
   end
 
+  describe '#noteable_cloned' do
+    let(:new_project) { create(:project) }
+    let(:new_noteable) { create(:issue, project: new_project) }
+
+    subject do
+      service.noteable_cloned(new_noteable, direction)
+    end
+
+    shared_examples 'cross project mentionable' do
+      include MarkupHelper
+
+      it 'contains cross reference to new noteable' do
+        expect(subject.note).to include cross_project_reference(new_project, new_noteable)
+      end
+
+      it 'mentions referenced noteable' do
+        expect(subject.note).to include new_noteable.to_reference
+      end
+
+      it 'mentions referenced project' do
+        expect(subject.note).to include new_project.full_path
+      end
+    end
+
+    context 'cloned to' do
+      let(:direction) { :to }
+
+      it_behaves_like 'cross project mentionable'
+
+      it_behaves_like 'a system note' do
+        let(:action) { 'cloned' }
+      end
+
+      it 'notifies about noteable being cloned to' do
+        expect(subject.note).to match('cloned to')
+      end
+    end
+
+    context 'cloned from' do
+      let(:direction) { :from }
+
+      it_behaves_like 'cross project mentionable'
+
+      it_behaves_like 'a system note' do
+        let(:action) { 'cloned' }
+      end
+
+      it 'notifies about noteable being cloned from' do
+        expect(subject.note).to match('cloned from')
+      end
+    end
+
+    context 'invalid direction' do
+      let(:direction) { :invalid }
+
+      it 'raises error' do
+        expect { subject }.to raise_error StandardError, /Invalid direction/
+      end
+    end
+
+    context 'metrics' do
+      context 'cloned from' do
+        let(:direction) { :from }
+
+        it 'does not tracks usage' do
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter)
+            .not_to receive(:track_issue_cloned_action).with(author: author)
+
+          subject
+        end
+      end
+
+      context 'cloned to' do
+        let(:direction) { :to }
+
+        it 'tracks usage' do
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter)
+            .to receive(:track_issue_cloned_action).with(author: author)
+
+          subject
+        end
+      end
+    end
+  end
+
   describe '#mark_duplicate_issue' do
     subject { service.mark_duplicate_issue(canonical_issue) }
 
@@ -581,7 +667,7 @@ RSpec.describe ::SystemNotes::IssuablesService do
 
       it 'creates the note text correctly' do
         [:issue, :merge_request].each do |type|
-          issuable = create(type)
+          issuable = create(type) # rubocop:disable Rails/SaveBang
 
           service = described_class.new(noteable: issuable, author: author)
           expect(service.discussion_lock.note)
@@ -643,12 +729,14 @@ RSpec.describe ::SystemNotes::IssuablesService do
 
       it 'is false with issue tracker supporting referencing' do
         create(:jira_service, project: project)
+        project.reload
 
         expect(service.cross_reference_disallowed?(noteable)).to be_falsey
       end
 
       it 'is true with issue tracker not supporting referencing' do
         create(:bugzilla_service, project: project)
+        project.reload
 
         expect(service.cross_reference_disallowed?(noteable)).to be_truthy
       end
@@ -662,67 +750,26 @@ RSpec.describe ::SystemNotes::IssuablesService do
   describe '#close_after_error_tracking_resolve' do
     subject { service.close_after_error_tracking_resolve }
 
-    context 'when state tracking is enabled' do
-      before do
-        stub_feature_flags(track_resource_state_change_events: true)
-      end
+    it 'creates the expected state event' do
+      subject
 
-      it 'creates the expected state event' do
-        subject
+      event = ResourceStateEvent.last
 
-        event = ResourceStateEvent.last
-
-        expect(event.close_after_error_tracking_resolve).to eq(true)
-        expect(event.state).to eq('closed')
-      end
-    end
-
-    context 'when state tracking is disabled' do
-      before do
-        stub_feature_flags(track_resource_state_change_events: false)
-      end
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'closed' }
-      end
-
-      it 'creates the expected system note' do
-        expect(subject.note)
-          .to eq('resolved the corresponding error and closed the issue.')
-      end
+      expect(event.close_after_error_tracking_resolve).to eq(true)
+      expect(event.state).to eq('closed')
     end
   end
 
   describe '#auto_resolve_prometheus_alert' do
     subject { service.auto_resolve_prometheus_alert }
 
-    context 'when state tracking is enabled' do
-      before do
-        stub_feature_flags(track_resource_state_change_events: true)
-      end
+    it 'creates the expected state event' do
+      subject
 
-      it 'creates the expected state event' do
-        subject
+      event = ResourceStateEvent.last
 
-        event = ResourceStateEvent.last
-
-        expect(event.close_auto_resolve_prometheus_alert).to eq(true)
-        expect(event.state).to eq('closed')
-      end
-    end
-
-    context 'when state tracking is disabled' do
-      before do
-        stub_feature_flags(track_resource_state_change_events: false)
-      end
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'closed' }
-      end
-
-      it 'creates the expected system note' do
-        expect(subject.note).to eq('automatically closed this issue because the alert resolved.')
-      end
+      expect(event.close_auto_resolve_prometheus_alert).to eq(true)
+      expect(event.state).to eq('closed')
     end
   end
 end

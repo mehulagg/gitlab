@@ -1,24 +1,24 @@
 import IssuableFilteredSearchTokenKeys from 'ee_else_ce/filtered_search/issuable_filtered_search_token_keys';
-import initIssuablesList from '~/issuables_list';
-import projectSelect from '~/project_select';
-import initFilteredSearch from '~/pages/search/init_filtered_search';
 import issuableInitBulkUpdateSidebar from '~/issuable_init_bulk_update_sidebar';
-import { FILTERED_SEARCH } from '~/pages/constants';
+import initIssuablesList from '~/issues_list';
 import initManualOrdering from '~/manual_ordering';
+import { FILTERED_SEARCH } from '~/pages/constants';
+import initFilteredSearch from '~/pages/search/init_filtered_search';
+import projectSelect from '~/project_select';
 
 const ISSUE_BULK_UPDATE_PREFIX = 'issue_';
 
-document.addEventListener('DOMContentLoaded', () => {
-  IssuableFilteredSearchTokenKeys.addExtraTokensForIssues();
-  issuableInitBulkUpdateSidebar.init(ISSUE_BULK_UPDATE_PREFIX);
+IssuableFilteredSearchTokenKeys.addExtraTokensForIssues();
+IssuableFilteredSearchTokenKeys.removeTokensForKeys('release');
+issuableInitBulkUpdateSidebar.init(ISSUE_BULK_UPDATE_PREFIX);
 
-  initIssuablesList();
+initIssuablesList();
 
-  initFilteredSearch({
-    page: FILTERED_SEARCH.ISSUES,
-    isGroupDecendent: true,
-    filteredSearchTokenKeys: IssuableFilteredSearchTokenKeys,
-  });
-  projectSelect();
-  initManualOrdering();
+initFilteredSearch({
+  page: FILTERED_SEARCH.ISSUES,
+  isGroupDecendent: true,
+  useDefaultState: true,
+  filteredSearchTokenKeys: IssuableFilteredSearchTokenKeys,
 });
+projectSelect();
+initManualOrdering();

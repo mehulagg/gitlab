@@ -1,9 +1,10 @@
 <script>
-import { mapState } from 'vuex';
 import { GlButton, GlIcon, GlLoadingIcon, GlTooltip } from '@gitlab/ui';
+import { mapState } from 'vuex';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __, n__ } from '~/locale';
-import eventHub from '../event_hub';
 import { EPIC_LEVEL_MARGIN } from '../constants';
+import eventHub from '../event_hub';
 
 export default {
   components: {
@@ -48,8 +49,11 @@ export default {
     itemId() {
       return this.epic.id;
     },
+    epicGroupId() {
+      return getIdFromGraphQLId(this.epic.group.id);
+    },
     isEpicGroupDifferent() {
-      return this.currentGroupId !== this.epic.groupId;
+      return this.currentGroupId !== this.epicGroupId;
     },
     isExpandIconHidden() {
       return !this.epic.hasChildren;
@@ -121,12 +125,7 @@ export default {
           :aria-label="expandIconLabel"
           @click="toggleIsEpicExpanded"
         >
-          <gl-icon
-            v-if="!childrenFetchInProgress"
-            :name="expandIconName"
-            class="text-secondary"
-            aria-hidden="true"
-          />
+          <gl-icon v-if="!childrenFetchInProgress" :name="expandIconName" class="text-secondary" />
           <gl-loading-icon v-if="childrenFetchInProgress" size="sm" />
         </gl-button>
       </span>
@@ -152,10 +151,10 @@ export default {
         <div class="epic-group-timeframe d-flex text-secondary">
           <span
             v-if="isEpicGroupDifferent && !epic.hasParent"
-            :title="epic.groupFullName"
+            :title="epic.group.fullName"
             class="epic-group"
           >
-            {{ epic.groupName }}
+            {{ epic.group.name }}
           </span>
           <span v-if="isEpicGroupDifferent && !epic.hasParent" class="mx-1" aria-hidden="true"
             >&middot;</span
@@ -165,7 +164,7 @@ export default {
       </div>
       <template v-if="allowSubEpics">
         <div ref="childEpicsCount" class="gl-mt-1 d-flex text-secondary text-nowrap">
-          <gl-icon name="epic" class="align-text-bottom mr-1" aria-hidden="true" />
+          <gl-icon name="epic" class="align-text-bottom mr-1" />
           <p class="m-0" :aria-label="childEpicsCountText">{{ childEpicsCount }}</p>
         </div>
         <gl-tooltip ref="childEpicsCountTooltip" :target="() => $refs.childEpicsCount">

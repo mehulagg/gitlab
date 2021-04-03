@@ -25,11 +25,10 @@ module Geo
     def execute
       return unless Gitlab::Geo.secondary?
 
-      uploads = Geo::Fdw::Upload.for_model(project)
+      uploads = Upload.for_model(project)
       log_info("Expiring replicated attachments after project rename", count: uploads.count)
 
       schedule_file_removal(uploads)
-      mark_for_resync!
     end
 
     # Project's base directory for attachments storage
@@ -51,17 +50,13 @@ module Geo
 
           log_info("Scheduled to remove file", file_path: file_path)
         end
+
+        Geo::UploadRegistry.where(file_id: upload.id).delete_all
       end
 
       Geo::FileRemovalWorker.bulk_perform_async(paths_to_remove) # rubocop:disable Scalability/BulkPerformWithContext
     end
     # rubocop: enable CodeReuse/ActiveRecord
-
-    def mark_for_resync!
-      Gitlab::Geo::Fdw::UploadRegistryQueryBuilder.new
-        .for_model(project)
-        .delete_all
-    end
 
     # This is called by LogHelpers to build json log with context info
     #

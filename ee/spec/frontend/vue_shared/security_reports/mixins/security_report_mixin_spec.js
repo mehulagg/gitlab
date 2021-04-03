@@ -26,6 +26,6 @@ describe('securityReportMixin', () => {
     expect(mixinLink).toContain(`href="${link}`);
     expect(mixinLink).toContain('target="_blank"');
     expect(mixinLink).toContain('rel="noopener noreferrer"');
-    expect(mixinLink).toContain('<i class="fa fa-external-link" aria-hidden="true"></i>');
+    expect(mixinLink).toContain('external-link');
   });
 });

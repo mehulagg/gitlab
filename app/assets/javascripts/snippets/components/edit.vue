@@ -1,38 +1,44 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 
-import Flash from '~/flash';
+import eventHub from '~/blob/components/eventhub';
+import { deprecatedCreateFlash as Flash } from '~/flash';
+import { redirectTo, joinPaths } from '~/lib/utils/url_utility';
 import { __, sprintf } from '~/locale';
-import TitleField from '~/vue_shared/components/form/title.vue';
-import { redirectTo } from '~/lib/utils/url_utility';
-import FormFooterActions from '~/vue_shared/components/form/form_footer_actions.vue';
-
-import UpdateSnippetMutation from '../mutations/updateSnippet.mutation.graphql';
-import CreateSnippetMutation from '../mutations/createSnippet.mutation.graphql';
-import { getSnippetMixin } from '../mixins/snippets';
 import {
-  SNIPPET_VISIBILITY_PRIVATE,
-  SNIPPET_CREATE_MUTATION_ERROR,
-  SNIPPET_UPDATE_MUTATION_ERROR,
-  SNIPPET_BLOB_ACTION_CREATE,
-  SNIPPET_BLOB_ACTION_UPDATE,
-  SNIPPET_BLOB_ACTION_MOVE,
-} from '../constants';
-import SnippetBlobEdit from './snippet_blob_edit.vue';
-import SnippetVisibilityEdit from './snippet_visibility_edit.vue';
+  SNIPPET_MARK_EDIT_APP_START,
+  SNIPPET_MEASURE_BLOBS_CONTENT,
+} from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
+import FormFooterActions from '~/vue_shared/components/form/form_footer_actions.vue';
+import TitleField from '~/vue_shared/components/form/title.vue';
+
+import { SNIPPET_CREATE_MUTATION_ERROR, SNIPPET_UPDATE_MUTATION_ERROR } from '../constants';
+import { getSnippetMixin } from '../mixins/snippets';
+import CreateSnippetMutation from '../mutations/createSnippet.mutation.graphql';
+import UpdateSnippetMutation from '../mutations/updateSnippet.mutation.graphql';
+import { markBlobPerformance } from '../utils/blob';
+import { getErrorMessage } from '../utils/error';
+
+import SnippetBlobActionsEdit from './snippet_blob_actions_edit.vue';
 import SnippetDescriptionEdit from './snippet_description_edit.vue';
+import SnippetVisibilityEdit from './snippet_visibility_edit.vue';
+
+eventHub.$on(SNIPPET_MEASURE_BLOBS_CONTENT, markBlobPerformance);
 
 export default {
   components: {
     SnippetDescriptionEdit,
     SnippetVisibilityEdit,
-    SnippetBlobEdit,
+    SnippetBlobActionsEdit,
     TitleField,
     FormFooterActions,
+    CaptchaModal: () => import('~/captcha/captcha_modal.vue'),
     GlButton,
     GlLoadingIcon,
   },
   mixins: [getSnippetMixin],
+  inject: ['selectedLevel'],
   props: {
     markdownPreviewPath: {
       type: String,
@@ -55,25 +61,37 @@ export default {
   },
   data() {
     return {
-      blobsActions: {},
       isUpdating: false,
-      newSnippet: false,
+      actions: [],
+      snippet: {
+        title: '',
+        description: '',
+        visibilityLevel: this.selectedLevel,
+      },
+      captchaResponse: '',
+      needsCaptchaResponse: false,
+      captchaSiteKey: '',
+      spamLogId: '',
     };
   },
   computed: {
-    getActionsEntries() {
-      return Object.values(this.blobsActions);
+    hasBlobChanges() {
+      return this.actions.length > 0;
     },
-    allBlobsHaveContent() {
-      const entries = this.getActionsEntries;
-      return entries.length > 0 && !entries.find(action => !action.content);
+    hasNoChanges() {
+      return (
+        this.actions.every(
+          (action) => !action.content && !action.filePath && !action.previousPath,
+        ) &&
+        !this.snippet.title &&
+        !this.snippet.description
+      );
     },
-    allBlobChangesRegistered() {
-      const entries = this.getActionsEntries;
-      return entries.length > 0 && !entries.find(action => action.action === '');
+    hasValidBlobs() {
+      return this.actions.every((x) => x.content);
     },
     updatePrevented() {
-      return this.snippet.title === '' || !this.allBlobsHaveContent || this.isUpdating;
+      return this.snippet.title === '' || !this.hasValidBlobs || this.isUpdating;
     },
     isProjectSnippet() {
       return Boolean(this.projectPath);
@@ -84,7 +102,9 @@ export default {
         title: this.snippet.title,
         description: this.snippet.description,
         visibilityLevel: this.snippet.visibilityLevel,
-        blobActions: this.getActionsEntries.filter(entry => entry.action !== ''),
+        blobActions: this.actions,
+        ...(this.spamLogId && { spamLogId: this.spamLogId }),
+        ...(this.captchaResponse && { captchaResponse: this.captchaResponse }),
       };
     },
     saveButtonLabel() {
@@ -95,16 +115,13 @@ export default {
     },
     cancelButtonHref() {
       if (this.newSnippet) {
-        return this.projectPath ? `/${this.projectPath}/-/snippets` : `/-/snippets`;
+        return joinPaths('/', gon.relative_url_root, this.projectPath, '-/snippets');
       }
       return this.snippet.webUrl;
     },
-    titleFieldId() {
-      return `${this.isProjectSnippet ? 'project' : 'personal'}_snippet_title`;
-    },
-    descriptionFieldId() {
-      return `${this.isProjectSnippet ? 'project' : 'personal'}_snippet_description`;
-    },
+  },
+  beforeCreate() {
+    performanceMarkAndMeasure({ mark: SNIPPET_MARK_EDIT_APP_START });
   },
   created() {
     window.addEventListener('beforeunload', this.onBeforeUnload);
@@ -116,47 +133,10 @@ export default {
     onBeforeUnload(e = {}) {
       const returnValue = __('Are you sure you want to lose unsaved changes?');
 
-      if (!this.allBlobChangesRegistered || this.isUpdating) return undefined;
+      if (!this.hasBlobChanges || this.hasNoChanges || this.isUpdating) return undefined;
 
       Object.assign(e, { returnValue });
       return returnValue;
-    },
-    updateBlobActions(args = {}) {
-      // `_constants` is the internal prop that
-      // should not be sent to the mutation. Hence we filter it out from
-      // the argsToUpdateAction that is the data-basis for the mutation.
-      const { _constants: blobConstants, ...argsToUpdateAction } = args;
-      const { previousPath, filePath, content } = argsToUpdateAction;
-      let actionEntry = this.blobsActions[blobConstants.id] || {};
-      let tunedActions = {
-        action: '',
-        previousPath,
-      };
-
-      if (this.newSnippet) {
-        // new snippet, hence new blob
-        tunedActions = {
-          action: SNIPPET_BLOB_ACTION_CREATE,
-          previousPath: '',
-        };
-      } else if (previousPath && filePath) {
-        // renaming of a blob + renaming & content update
-        const renamedToOriginal = filePath === blobConstants.originalPath;
-        tunedActions = {
-          action: renamedToOriginal ? SNIPPET_BLOB_ACTION_UPDATE : SNIPPET_BLOB_ACTION_MOVE,
-          previousPath: !renamedToOriginal ? blobConstants.originalPath : '',
-        };
-      } else if (content !== blobConstants.originalContent) {
-        // content update only
-        tunedActions = {
-          action: SNIPPET_BLOB_ACTION_UPDATE,
-          previousPath: '',
-        };
-      }
-
-      actionEntry = { ...actionEntry, ...argsToUpdateAction, ...tunedActions };
-
-      this.$set(this.blobsActions, blobConstants.id, actionEntry);
     },
     flashAPIFailure(err) {
       const defaultErrorMsg = this.newSnippet
@@ -165,23 +145,9 @@ export default {
       Flash(sprintf(defaultErrorMsg, { err }));
       this.isUpdating = false;
     },
-    onNewSnippetFetched() {
-      this.newSnippet = true;
-      this.snippet = this.$options.newSnippetSchema;
-    },
-    onExistingSnippetFetched() {
-      this.newSnippet = false;
-    },
-    onSnippetFetch(snippetRes) {
-      if (snippetRes.data.snippets.edges.length === 0) {
-        this.onNewSnippetFetched();
-      } else {
-        this.onExistingSnippetFetched();
-      }
-    },
     getAttachedFiles() {
       const fileInputs = Array.from(this.$el.querySelectorAll('[name="files[]"]'));
-      return fileInputs.map(node => node.value);
+      return fileInputs.map((node) => node.value);
     },
     createMutation() {
       return {
@@ -210,29 +176,68 @@ export default {
         .then(({ data }) => {
           const baseObj = this.newSnippet ? data?.createSnippet : data?.updateSnippet;
 
+          if (baseObj.needsCaptchaResponse) {
+            // If we need a captcha response, start process for receiving captcha response.
+            // We will resubmit after the response is obtained.
+            this.requestCaptchaResponse(baseObj.captchaSiteKey, baseObj.spamLogId);
+            return;
+          }
+
           const errors = baseObj?.errors;
           if (errors.length) {
             this.flashAPIFailure(errors[0]);
           } else {
-            this.originalContent = this.content;
             redirectTo(baseObj.snippet.webUrl);
           }
         })
-        .catch(e => {
-          this.flashAPIFailure(e);
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.error('[gitlab] unexpected error while updating snippet', e);
+
+          this.flashAPIFailure(getErrorMessage(e));
         });
     },
-  },
-  newSnippetSchema: {
-    title: '',
-    description: '',
-    visibilityLevel: SNIPPET_VISIBILITY_PRIVATE,
+    updateActions(actions) {
+      this.actions = actions;
+    },
+    /**
+     * Start process for getting captcha response from user
+     *
+     * @param captchaSiteKey Stored in data and used to display the captcha.
+     * @param spamLogId Stored in data and included when the form is re-submitted.
+     */
+    requestCaptchaResponse(captchaSiteKey, spamLogId) {
+      this.captchaSiteKey = captchaSiteKey;
+      this.spamLogId = spamLogId;
+      this.needsCaptchaResponse = true;
+    },
+    /**
+     * Handle the captcha response from the user
+     *
+     * @param captchaResponse The captchaResponse value emitted from the modal.
+     */
+    receivedCaptchaResponse(captchaResponse) {
+      this.needsCaptchaResponse = false;
+      this.captchaResponse = captchaResponse;
+
+      if (this.captchaResponse) {
+        // If the user solved the captcha, resubmit the form.
+        // NOTE: we do not need to clear out the captchaResponse and spamLogId
+        // data values after submit, because this component always does a full page reload.
+        // Otherwise, we would need to.
+        this.handleFormSubmit();
+      } else {
+        // If the user didn't solve the captcha (e.g. they just closed the modal),
+        // finish the update and allow them to continue editing or manually resubmit the form.
+        this.isUpdating = false;
+      }
+    },
   },
 };
 </script>
 <template>
   <form
-    class="snippet-form js-requires-input js-quick-submit common-note-form"
+    class="snippet-form js-quick-submit common-note-form"
     :data-snippet-type="isProjectSnippet ? 'project' : 'personal'"
     data-testid="snippet-edit-form"
     @submit.prevent="handleFormSubmit"
@@ -241,31 +246,27 @@ export default {
       v-if="isLoading"
       :label="__('Loading snippet')"
       size="lg"
-      class="loading-animation prepend-top-20 append-bottom-20"
+      class="loading-animation prepend-top-20 gl-mb-6"
     />
     <template v-else>
+      <captcha-modal
+        :captcha-site-key="captchaSiteKey"
+        :needs-captcha-response="needsCaptchaResponse"
+        @receivedCaptchaResponse="receivedCaptchaResponse"
+      />
       <title-field
-        :id="titleFieldId"
+        id="snippet-title"
         v-model="snippet.title"
         data-qa-selector="snippet_title_field"
         required
         :autofocus="true"
       />
       <snippet-description-edit
-        :id="descriptionFieldId"
         v-model="snippet.description"
         :markdown-preview-path="markdownPreviewPath"
         :markdown-docs-path="markdownDocsPath"
       />
-      <template v-if="blobs.length">
-        <snippet-blob-edit
-          v-for="blob in blobs"
-          :key="blob.name"
-          :blob="blob"
-          @blob-updated="updateBlobActions"
-        />
-      </template>
-      <snippet-blob-edit v-else @blob-updated="updateBlobActions" />
+      <snippet-blob-actions-edit :init-blobs="blobs" @actions="updateActions" />
 
       <snippet-visibility-edit
         v-model="snippet.visibilityLevel"

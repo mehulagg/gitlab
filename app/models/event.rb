@@ -242,6 +242,8 @@ class Event < ApplicationRecord
     target if note?
   end
 
+  # rubocop: disable Metrics/CyclomaticComplexity
+  # rubocop: disable Metrics/PerceivedComplexity
   def action_name
     if push_action?
       push_action_name
@@ -267,10 +269,14 @@ class Event < ApplicationRecord
       'updated'
     elsif created_project_action?
       created_project_action_name
+    elsif approved_action?
+      'approved'
     else
       "opened"
     end
   end
+  # rubocop: enable Metrics/CyclomaticComplexity
+  # rubocop: enable Metrics/PerceivedComplexity
 
   def target_iid
     target.respond_to?(:iid) ? target.iid : target_id
@@ -288,8 +294,12 @@ class Event < ApplicationRecord
     note? && target && target.for_merge_request?
   end
 
-  def project_snippet_note?
+  def snippet_note?
     note? && target && target.for_snippet?
+  end
+
+  def project_snippet_note?
+    note? && target && target.for_project_snippet?
   end
 
   def personal_snippet_note?
@@ -321,14 +331,6 @@ class Event < ApplicationRecord
     else
       note_target.to_reference
     end
-  end
-
-  def note_target_type
-    if target.noteable_type.present?
-      target.noteable_type.titleize
-    else
-      "Wall"
-    end.downcase
   end
 
   def body?

@@ -56,9 +56,23 @@ module Projects
         raise ValidationError.new(s_('UpdateProject|Cannot rename project because it contains container registry tags!'))
       end
 
-      if changing_default_branch?
-        raise ValidationError.new(s_("UpdateProject|Could not set the default branch")) unless project.change_head(params[:default_branch])
+      validate_default_branch_change
+    end
+
+    def validate_default_branch_change
+      return unless changing_default_branch?
+
+      previous_default_branch = project.default_branch
+
+      if project.change_head(params[:default_branch])
+        after_default_branch_change(previous_default_branch)
+      else
+        raise ValidationError.new(s_("UpdateProject|Could not set the default branch"))
       end
+    end
+
+    def after_default_branch_change(previous_default_branch)
+      # overridden by EE module
     end
 
     def remove_unallowed_params
@@ -85,11 +99,6 @@ module Projects
         after_rename_service(project).execute
       else
         system_hook_service.execute_hooks_for(project, :update)
-      end
-
-      if project.visibility_level_decreased? && project.unlink_forks_upon_visibility_decrease_enabled?
-        # It's a system-bounded operation, so no extra authorization check is required.
-        Projects::UnlinkForkService.new(project, current_user).execute
       end
 
       update_pages_config if changing_pages_related_config?
@@ -135,14 +144,16 @@ module Projects
     end
 
     def ensure_wiki_exists
-      ProjectWiki.new(project, project.owner).wiki
-    rescue Wiki::CouldNotCreateWikiError
+      return if project.create_wiki
+
       log_error("Could not create wiki for #{project.full_name}")
       Gitlab::Metrics.counter(:wiki_can_not_be_created_total, 'Counts the times we failed to create a wiki').increment
     end
 
     def update_pages_config
-      Projects::UpdatePagesConfigurationService.new(project).execute
+      return unless project.pages_deployed?
+
+      PagesUpdateConfigurationWorker.perform_async(project.id)
     end
 
     def changing_pages_https_only?

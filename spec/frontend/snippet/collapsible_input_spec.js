@@ -1,5 +1,5 @@
-import setupCollapsibleInputs from '~/snippet/collapsible_input';
 import { setHTMLFixture } from 'helpers/fixtures';
+import setupCollapsibleInputs from '~/snippet/collapsible_input';
 
 describe('~/snippet/collapsible_input', () => {
   let formEl;
@@ -38,12 +38,12 @@ describe('~/snippet/collapsible_input', () => {
     setupCollapsibleInputs();
   });
 
-  const findInput = el => el.querySelector('textarea,input');
-  const findCollapsed = el => el.querySelector('.js-collapsed');
-  const findExpanded = el => el.querySelector('.js-expanded');
-  const findCollapsedInput = el => findInput(findCollapsed(el));
-  const findExpandedInput = el => findInput(findExpanded(el));
-  const focusIn = target => target.dispatchEvent(new Event('focusin', { bubbles: true }));
+  const findInput = (el) => el.querySelector('textarea,input');
+  const findCollapsed = (el) => el.querySelector('.js-collapsed');
+  const findExpanded = (el) => el.querySelector('.js-expanded');
+  const findCollapsedInput = (el) => findInput(findCollapsed(el));
+  const findExpandedInput = (el) => findInput(findExpanded(el));
+  const focusIn = (target) => target.dispatchEvent(new Event('focusin', { bubbles: true }));
   const expectIsCollapsed = (el, isCollapsed) => {
     expect(findCollapsed(el).classList.contains('d-none')).toEqual(!isCollapsed);
     expect(findExpanded(el).classList.contains('d-none')).toEqual(isCollapsed);

@@ -1,20 +1,19 @@
 <script>
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { GlButton, GlIcon } from '@gitlab/ui';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 
 import { __ } from '~/locale';
 
-import tooltip from '~/vue_shared/directives/tooltip';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
-import epicUtils from '../utils/epic_utils';
 import { statusType } from '../constants';
+import epicUtils from '../utils/epic_utils';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltipDirective,
   },
   components: {
     GlIcon,
@@ -24,7 +23,6 @@ export default {
     GitlabTeamMemberBadge: () =>
       import('ee_component/vue_shared/components/user_avatar/badges/gitlab_team_member_badge.vue'),
   },
-  mixins: [glFeatureFlagsMixin()],
   computed: {
     ...mapState([
       'sidebarCollapsed',
@@ -50,9 +48,6 @@ export default {
     actionButtonText() {
       return this.isEpicOpen ? __('Close epic') : __('Reopen epic');
     },
-    userCanCreate() {
-      return this.canCreate && this.glFeatures.createEpicForm;
-    },
   },
   mounted() {
     /**
@@ -64,7 +59,7 @@ export default {
      * across the UI so we directly call `requestEpicStatusChangeSuccess` action
      * to update store state.
      */
-    epicUtils.bindDocumentEvent('issuable_vue_app:change', (e, isClosed) => {
+    epicUtils.bindDocumentEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, (e, isClosed) => {
       const isEpicOpen = e.detail ? !e.detail.isClosed : !isClosed;
       this.requestEpicStatusChangeSuccess({
         state: isEpicOpen ? statusType.open : statusType.close,
@@ -96,7 +91,7 @@ export default {
         >
           <gl-icon name="eye-slash" class="icon" />
         </div>
-        {{ __('Opened') }}
+        {{ __('Created') }}
         <timeago-tooltip :time="created" />
         {{ __('by') }}
         <strong class="text-nowrap">
@@ -120,10 +115,9 @@ export default {
       type="button"
       class="float-right gl-display-block d-sm-none gl-align-self-center gutter-toggle issuable-gutter-toggle"
       data-testid="sidebar-toggle"
+      icon="chevron-double-lg-left"
       @click="toggleSidebar({ sidebarCollapsed })"
-    >
-      <i class="fa fa-angle-double-left"></i>
-    </gl-button>
+    />
     <div
       class="detail-page-header-actions gl-display-flex gl-flex-wrap gl-align-items-center gl-w-full gl-sm-w-auto!"
       data-testid="action-buttons"
@@ -133,18 +127,19 @@ export default {
         :loading="epicStatusChangeInProgress"
         :class="actionButtonClass"
         category="secondary"
-        variant="warning"
-        class="qa-close-reopen-epic-button gl-mt-3 gl-sm-mt-0! gl-w-full gl-sm-w-auto!"
+        variant="default"
+        class="gl-mt-3 gl-sm-mt-0! gl-w-full gl-sm-w-auto!"
+        data-qa-selector="close_reopen_epic_button"
         data-testid="toggle-status-button"
         @click="toggleEpicStatus(isEpicOpen)"
       >
         {{ actionButtonText }}
       </gl-button>
       <gl-button
-        v-if="userCanCreate"
+        v-if="canCreate"
         :href="newEpicWebUrl"
         category="secondary"
-        variant="success"
+        variant="confirm"
         class="gl-mt-3 gl-sm-mt-0! gl-sm-ml-3 gl-w-full gl-sm-w-auto!"
         data-testid="new-epic-button"
       >

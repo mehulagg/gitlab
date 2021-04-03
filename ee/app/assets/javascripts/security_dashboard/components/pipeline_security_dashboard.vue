@@ -1,12 +1,11 @@
 <script>
-import { mapActions } from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
-import { s__ } from '~/locale';
-import SecurityReportsSummary from './security_reports_summary.vue';
-import SecurityDashboard from './security_dashboard_vuex.vue';
+import { mapActions } from 'vuex';
 import { fetchPolicies } from '~/lib/graphql';
-import pipelineSecurityReportSummaryQuery from '../graphql/pipeline_security_report_summary.query.graphql';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { s__ } from '~/locale';
+import pipelineSecurityReportSummaryQuery from '../graphql/queries/pipeline_security_report_summary.query.graphql';
+import SecurityDashboard from './security_dashboard_vuex.vue';
+import SecurityReportsSummary from './security_reports_summary.vue';
 
 export default {
   name: 'PipelineSecurityDashboard',
@@ -15,7 +14,6 @@ export default {
     SecurityReportsSummary,
     SecurityDashboard,
   },
-  mixins: [glFeatureFlagsMixin()],
   apollo: {
     securityReportSummary: {
       query: pipelineSecurityReportSummaryQuery,
@@ -28,10 +26,7 @@ export default {
       },
       update(data) {
         const summary = data?.project?.pipeline?.securityReportSummary;
-        return Object.keys(summary).length ? summary : null;
-      },
-      skip() {
-        return !this.glFeatures.pipelinesSecurityReportSummary;
+        return summary && Object.keys(summary).length ? summary : null;
       },
     },
   },
@@ -61,10 +56,6 @@ export default {
       required: true,
     },
     vulnerabilitiesEndpoint: {
-      type: String,
-      required: true,
-    },
-    vulnerabilityFeedbackHelpPath: {
       type: String,
       required: true,
     },
@@ -113,17 +104,16 @@ export default {
     <security-reports-summary
       v-if="securityReportSummary"
       :summary="securityReportSummary"
-      class="gl-mt-5"
+      class="gl-my-5"
     />
     <security-dashboard
       :vulnerabilities-endpoint="vulnerabilitiesEndpoint"
-      :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
       :lock-to-project="{ id: projectId }"
       :pipeline-id="pipelineId"
       :loading-error-illustrations="loadingErrorIllustrations"
       :security-report-summary="securityReportSummary"
     >
-      <template #emptyState>
+      <template #empty-state>
         <gl-empty-state v-bind="emptyStateProps" />
       </template>
     </security-dashboard>

@@ -8,11 +8,7 @@ RSpec.describe GroupSaml::Identity::DestroyService do
   subject { described_class.new(identity) }
 
   before do
-    link_group_membership
-  end
-
-  def link_group_membership
-    Gitlab::Auth::GroupSaml::MembershipUpdater.new(identity.user, identity.saml_provider).execute
+    identity.saml_provider.group.add_guest(identity.user)
   end
 
   it "prevents future Group SAML logins" do
@@ -50,6 +46,6 @@ RSpec.describe GroupSaml::Identity::DestroyService do
   it 'logs an audit event' do
     expect do
       subject.execute
-    end.to change { SecurityEvent.count }.by(1)
+    end.to change { AuditEvent.count }.by(1)
   end
 end

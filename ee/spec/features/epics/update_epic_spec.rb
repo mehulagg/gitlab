@@ -84,7 +84,8 @@ RSpec.describe 'Update Epic', :js do
       it 'creates a todo only for mentioned users' do
         mentioned = create(:user)
 
-        fill_in 'issue-description', with: "FYI #{mentioned.to_reference}"
+        # Add a trailing space to close mention auto-complete dialog, which might block the save button
+        fill_in 'issue-description', with: "FYI #{mentioned.to_reference} "
 
         click_button 'Save changes'
 
@@ -114,7 +115,7 @@ RSpec.describe 'Update Epic', :js do
       end
 
       it 'uploads a file when dragging into textarea' do
-        link_css = 'a.no-attachment-icon img[alt="banana_sample"]'
+        link_css = 'a.no-attachment-icon img.js-lazy-loaded[alt="banana_sample"]'
         link_match = %r{/groups/#{Regexp.escape(group.full_path)}/-/uploads/\h{32}/banana_sample\.gif\z}
         dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
 
@@ -149,8 +150,8 @@ RSpec.describe 'Update Epic', :js do
       it 'opens datepicker when clicking Edit button' do
         page.within('.issuable-sidebar .block.start-date') do
           click_button('Edit')
-          expect(find('.value-type-fixed')).to have_selector('.pikaday-container')
-          expect(find('.value-type-fixed')).to have_selector('.pikaday-container .pika-single.is-bound')
+          expect(find('.value-type-fixed')).to have_selector('.gl-datepicker')
+          expect(find('.value-type-fixed')).to have_selector('.gl-datepicker .pika-single.is-bound')
         end
       end
     end

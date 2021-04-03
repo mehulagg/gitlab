@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Scim < Grape::API::Instance
+  class Scim < ::API::Base
     include ::Gitlab::Utils::StrongMemoize
+
+    feature_category :authentication_and_authorization
 
     prefix 'api/scim'
     version 'v2'
@@ -54,6 +56,7 @@ module API
           @group = find_group(group_path)
 
           scim_not_found!(message: "Group #{group_path} not found") unless @group
+          scim_not_found!(message: "Group #{group_path} does not have SAML SSO configured") unless @group.saml_provider
 
           check_access_to_group!(@group)
 
@@ -66,7 +69,7 @@ module API
           parsed_hash = parser.update_params
 
           if parser.deprovision_user?
-            deprovision(identity)
+            patch_deprovision(identity)
           elsif reprovisionable?(identity) && parser.reprovision_user?
             reprovision(identity)
           elsif parsed_hash[:extern_uid]
@@ -96,29 +99,32 @@ module API
 
         def find_user_identity(group, extern_uid)
           return unless group.saml_provider
-          return group.scim_identities.with_extern_uid(extern_uid).first if scim_identities_enabled?
 
-          GroupSamlIdentityFinder.find_by_group_and_uid(group: group, uid: extern_uid)
+          group.scim_identities.with_extern_uid(extern_uid).first
         end
 
-        def scim_identities_enabled?
-          strong_memoize(:scim_identities_enabled) do
-            ::EE::Gitlab::Scim::Feature.scim_identities_enabled?(@group)
-          end
-        end
+        # delete_deprovision handles the response and returns either no_content! or a detailed error message.
+        def delete_deprovision(identity)
+          service = ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
 
-        def deprovision(identity)
-          if scim_identities_enabled?
-            ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
+          if service.success?
+            no_content!
           else
-            GroupSaml::Identity::DestroyService.new(identity).execute(transactional: true)
+            logger.error(identity: identity, error: service.class.name, message: service.message, source: "#{__FILE__}:#{__LINE__}")
+            scim_error!(message: service.message)
           end
+        end
 
-          true
-        rescue => e
-          logger.error(identity: identity, error: e.class.name, message: e.message, source: "#{__FILE__}:#{__LINE__}")
+        # The method that calls patch_deprovision, update_scim_user, expects a truthy/falsey value, and then continues to handle the request.
+        def patch_deprovision(identity)
+          service = ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
 
-          false
+          if service.success?
+            true
+          else
+            logger.error(identity: identity, error: service.class.name, message: service.message, source: "#{__FILE__}:#{__LINE__}")
+            false
+          end
         end
 
         def reprovision(identity)
@@ -220,11 +226,7 @@ module API
 
           scim_not_found!(message: "Resource #{params[:id]} not found") unless identity
 
-          destroyed = deprovision(identity)
-
-          scim_not_found!(message: "Resource #{params[:id]} not found") unless destroyed
-
-          no_content!
+          delete_deprovision(identity)
         end
       end
     end

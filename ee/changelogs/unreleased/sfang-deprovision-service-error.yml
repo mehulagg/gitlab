@@ -1,0 +1,5 @@
+---
+title: Allow SCIM deprovisioning for minimal access users
+merge_request: 57178
+author:
+type: fixed

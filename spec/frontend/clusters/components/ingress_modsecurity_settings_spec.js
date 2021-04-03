@@ -1,7 +1,7 @@
+import { GlAlert, GlToggle, GlDropdown } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import IngressModsecuritySettings from '~/clusters/components/ingress_modsecurity_settings.vue';
 import { APPLICATION_STATUS, INGRESS } from '~/clusters/constants';
-import { GlAlert, GlToggle, GlDropdown } from '@gitlab/ui';
 import eventHub from '~/clusters/event_hub';
 
 const { UPDATING } = APPLICATION_STATUS;
@@ -28,8 +28,10 @@ describe('IngressModsecuritySettings', () => {
     });
   };
 
-  const findSaveButton = () => wrapper.find('.btn-success');
-  const findCancelButton = () => wrapper.find('[variant="secondary"]');
+  const findSaveButton = () =>
+    wrapper.find('[data-qa-selector="save_ingress_modsecurity_settings"]');
+  const findCancelButton = () =>
+    wrapper.find('[data-qa-selector="cancel_ingress_modsecurity_settings"]');
   const findModSecurityToggle = () => wrapper.find(GlToggle);
   const findModSecurityDropdown = () => wrapper.find(GlDropdown);
 
@@ -55,6 +57,12 @@ describe('IngressModsecuritySettings', () => {
             modsecurity_enabled: true,
           },
         });
+      });
+
+      it('renders toggle with label', () => {
+        expect(findModSecurityToggle().props('label')).toBe(
+          IngressModsecuritySettings.i18n.modSecurityEnabled,
+        );
       });
 
       it('renders save and cancel buttons', () => {

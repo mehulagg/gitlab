@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Ci::Subscriptions::Project do
-  let(:upstream_project) { create(:project, :public) }
+  let_it_be(:upstream_project) { create(:project, :public) }
+  let_it_be(:downstream_project) { create(:project) }
 
   describe 'Relations' do
     it { is_expected.to belong_to(:downstream_project).required }
@@ -11,7 +12,7 @@ RSpec.describe Ci::Subscriptions::Project do
   end
 
   it_behaves_like 'includes Limitable concern' do
-    subject { build(:ci_subscriptions_project, upstream_project: upstream_project) }
+    subject { build(:ci_subscriptions_project, upstream_project: upstream_project, downstream_project: downstream_project) }
   end
 
   describe 'Validations' do
@@ -20,7 +21,7 @@ RSpec.describe Ci::Subscriptions::Project do
     it { is_expected.to validate_uniqueness_of(:upstream_project_id).scoped_to(:downstream_project_id) }
 
     it 'validates that upstream project is public' do
-      upstream_project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+      upstream_project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
       expect(subscription).not_to be_valid
     end

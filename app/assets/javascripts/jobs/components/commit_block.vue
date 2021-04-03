@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable @gitlab/vue-require-i18n-strings */
 import { GlLink } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
@@ -18,40 +17,30 @@ export default {
       required: false,
       default: null,
     },
-    isLastBlock: {
-      type: Boolean,
-      required: true,
-    },
   },
 };
 </script>
 <template>
-  <div
-    :class="{
-      'block-last': isLastBlock,
-      block: !isLastBlock,
-    }"
-  >
-    <p class="gl-mb-2">
-      <span class="font-weight-bold">{{ __('Commit') }}</span>
+  <div>
+    <span class="gl-font-weight-bold">{{ __('Commit') }}</span>
 
-      <gl-link :href="commit.commit_path" class="js-commit-sha commit-sha link-commit">
-        {{ commit.short_id }}
-      </gl-link>
+    <gl-link :href="commit.commit_path" class="gl-text-blue-600!" data-testid="commit-sha">
+      {{ commit.short_id }}
+    </gl-link>
 
-      <clipboard-button
-        :text="commit.id"
-        :title="__('Copy commit SHA')"
-        css-class="btn btn-clipboard btn-transparent"
-      />
+    <clipboard-button
+      :text="commit.id"
+      :title="__('Copy commit SHA')"
+      category="tertiary"
+      size="small"
+    />
 
-      <span v-if="mergeRequest">
-        in
-        <gl-link :href="mergeRequest.path" class="js-link-commit link-commit"
-          >!{{ mergeRequest.iid }}</gl-link
-        >
-      </span>
-    </p>
+    <span v-if="mergeRequest">
+      {{ __('in') }}
+      <gl-link :href="mergeRequest.path" class="gl-text-blue-600!" data-testid="link-commit"
+        >!{{ mergeRequest.iid }}</gl-link
+      >
+    </span>
 
     <p class="gl-mb-0">{{ commit.title }}</p>
   </div>

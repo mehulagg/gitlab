@@ -1,12 +1,14 @@
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+
 const defaultTimezone = { name: 'UTC', offset: 0 };
 const defaults = {
   $inputEl: null,
   $dropdownEl: null,
   onSelectTimezone: null,
-  displayFormat: item => item.name,
+  displayFormat: (item) => item.name,
 };
 
-export const formatUtcOffset = offset => {
+export const formatUtcOffset = (offset) => {
   const parsed = parseInt(offset, 10);
   if (Number.isNaN(parsed) || parsed === 0) {
     return `0`;
@@ -15,11 +17,11 @@ export const formatUtcOffset = offset => {
   return `${prefix} ${Math.abs(offset / 3600)}`;
 };
 
-export const formatTimezone = item => `[UTC ${formatUtcOffset(item.offset)}] ${item.name}`;
+export const formatTimezone = (item) => `[UTC ${formatUtcOffset(item.offset)}] ${item.name}`;
 
 export const findTimezoneByIdentifier = (tzList = [], identifier = null) => {
   if (tzList && tzList.length && identifier && identifier.length) {
-    return tzList.find(tz => tz.identifier === identifier) || null;
+    return tzList.find((tz) => tz.identifier === identifier) || null;
   }
   return null;
 };
@@ -42,7 +44,7 @@ export default class TimezoneDropdown {
   }
 
   initDropdown() {
-    this.$dropdown.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdown, {
       data: this.timezoneData,
       filterable: true,
       selectable: true,
@@ -50,8 +52,8 @@ export default class TimezoneDropdown {
       search: {
         fields: ['name'],
       },
-      clicked: cfg => this.updateInputValue(cfg),
-      text: item => formatTimezone(item),
+      clicked: (cfg) => this.updateInputValue(cfg),
+      text: (item) => formatTimezone(item),
     });
 
     this.setDropdownToggle(this.displayFormat(this.initialTimezone));

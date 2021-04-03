@@ -25,11 +25,17 @@ RSpec.describe StatusPage::PublishService do
 
     describe 'publish details' do
       context 'when upload succeeds' do
-        it 'uploads incident details and list' do
+        before do
           expect_to_publish_details(error?: false, success?: true)
           expect_to_publish_list(error?: false, success?: true)
+        end
 
+        it 'uploads incident details and list' do
           expect(result).to be_success
+        end
+
+        it_behaves_like 'an incident management tracked event', :incident_management_incident_published do
+          let(:current_user) { user }
         end
       end
 
@@ -37,7 +43,7 @@ RSpec.describe StatusPage::PublishService do
         it 'propagates the exception' do
           expect_to_upload_details(issue, status: 404)
 
-          expect { result }.to raise_error(StatusPage::Storage::Error)
+          expect { result }.to raise_error(Gitlab::StatusPage::Storage::Error)
         end
       end
     end
@@ -52,6 +58,8 @@ RSpec.describe StatusPage::PublishService do
 
           expect(result).to be_success
         end
+
+        it_behaves_like 'does not track incident management event', :incident_management_incident_published
       end
 
       context 'when unpublish service responses with error' do
@@ -117,11 +125,11 @@ RSpec.describe StatusPage::PublishService do
   end
 
   def expect_to_upload_details(issue, **kwargs)
-    stub_aws_request(:put, StatusPage::Storage.details_path(issue.iid), **kwargs)
+    stub_aws_request(:put, Gitlab::StatusPage::Storage.details_path(issue.iid), **kwargs)
   end
 
   def expect_to_upload_list(**kwargs)
-    stub_aws_request(:put, StatusPage::Storage.list_path, **kwargs)
+    stub_aws_request(:put, Gitlab::StatusPage::Storage.list_path, **kwargs)
   end
 
   def stub_aws_request(method, path, status: 200)

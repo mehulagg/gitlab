@@ -8,6 +8,7 @@ RSpec.shared_context 'exposing regular notes on a noteable in GraphQL' do
            noteable: noteable,
            project: (noteable.project if noteable.respond_to?(:project)))
   end
+
   let(:user) { note.author }
 
   context 'for regular notes' do
@@ -16,7 +17,7 @@ RSpec.shared_context 'exposing regular notes on a noteable in GraphQL' do
       notes {
         edges {
           node {
-            #{all_graphql_fields_for('Note')}
+            #{all_graphql_fields_for('Note', max_depth: 1)}
           }
         }
       }

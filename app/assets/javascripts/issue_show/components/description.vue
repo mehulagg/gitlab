@@ -1,13 +1,17 @@
 <script>
+import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import $ from 'jquery';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, sprintf } from '~/locale';
-import createFlash from '~/flash';
-import animateMixin from '../mixins/animate';
 import TaskList from '../../task_list';
-import recaptchaModalImplementor from '../../vue_shared/mixins/recaptcha_modal_implementor';
+import animateMixin from '../mixins/animate';
 
 export default {
-  mixins: [animateMixin, recaptchaModalImplementor],
+  directives: {
+    SafeHtml,
+  },
+
+  mixins: [animateMixin],
 
   props: {
     canUpdate: {
@@ -20,7 +24,8 @@ export default {
     },
     descriptionText: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     taskStatus: {
       type: String,
@@ -47,11 +52,16 @@ export default {
     return {
       preAnimation: false,
       pulseAnimation: false,
+      initialUpdate: true,
     };
   },
   watch: {
-    descriptionHtml() {
-      this.animateChange();
+    descriptionHtml(newDescription, oldDescription) {
+      if (!this.initialUpdate && newDescription !== oldDescription) {
+        this.animateChange();
+      } else {
+        this.initialUpdate = false;
+      }
 
       this.$nextTick(() => {
         this.renderGFM();
@@ -76,18 +86,8 @@ export default {
           fieldName: 'description',
           lockVersion: this.lockVersion,
           selector: '.detail-page-description',
-          onSuccess: this.taskListUpdateSuccess.bind(this),
           onError: this.taskListUpdateError.bind(this),
         });
-      }
-    },
-
-    taskListUpdateSuccess(data) {
-      try {
-        this.checkForSpam(data);
-        this.closeRecaptcha();
-      } catch (error) {
-        if (error && error.name === 'SpamError') this.openRecaptcha();
       }
     },
 
@@ -136,13 +136,14 @@ export default {
   >
     <div
       ref="gfm-content"
+      v-safe-html="descriptionHtml"
       :class="{
         'issue-realtime-pre-pulse': preAnimation,
         'issue-realtime-trigger-pulse': pulseAnimation,
       }"
       class="md"
-      v-html="descriptionHtml"
     ></div>
+    <!-- eslint-disable vue/no-mutating-props -->
     <textarea
       v-if="descriptionText"
       ref="textarea"
@@ -152,7 +153,6 @@ export default {
       dir="auto"
     >
     </textarea>
-
-    <recaptcha-modal v-show="showRecaptcha" :html="recaptchaHTML" @close="closeRecaptcha" />
+    <!-- eslint-enable vue/no-mutating-props -->
   </div>
 </template>

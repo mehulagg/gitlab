@@ -42,28 +42,30 @@ class UploadedFile
     @remote_id = remote_id
   end
 
-  def self.from_params(params, field, upload_paths, path_override = nil)
-    path = path_override || params["#{field}.path"]
-    remote_id = params["#{field}.remote_id"]
+  def self.from_params(params, upload_paths)
+    path = params['path']
+    remote_id = params['remote_id']
     return if path.blank? && remote_id.blank?
 
-    if remote_id.present? # don't use file_path if remote_id is set
+    # don't use file_path if remote_id is set
+    if remote_id.present?
       file_path = nil
     elsif path.present?
       file_path = File.realpath(path)
 
-      paths = Array(upload_paths) << Dir.tmpdir
-      unless self.allowed_path?(file_path, paths.compact)
+      unless self.allowed_path?(file_path, Array(upload_paths).compact)
         raise InvalidPathError, "insecure path used '#{file_path}'"
       end
     end
 
-    UploadedFile.new(file_path,
-      filename: params["#{field}.name"],
-      content_type: params["#{field}.type"] || 'application/octet-stream',
-      sha256: params["#{field}.sha256"],
+    UploadedFile.new(
+      file_path,
+      filename: params['name'],
+      content_type: params['type'] || 'application/octet-stream',
+      sha256: params['sha256'],
       remote_id: remote_id,
-      size: params["#{field}.size"])
+      size: params['size']
+    )
   end
 
   def self.allowed_path?(file_path, paths)

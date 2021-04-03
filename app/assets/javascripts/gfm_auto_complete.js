@@ -1,18 +1,26 @@
 import $ from 'jquery';
-import '@gitlab/at.js';
+import '~/lib/utils/jquery_at_who';
 import { escape, template } from 'lodash';
+import * as Emoji from '~/emoji';
+import axios from '~/lib/utils/axios_utils';
+import { s__, __, sprintf } from '~/locale';
+import { isUserBusy } from '~/set_status_modal/utils';
 import SidebarMediator from '~/sidebar/sidebar_mediator';
-import glRegexp from './lib/utils/regexp';
 import AjaxCache from './lib/utils/ajax_cache';
 import { spriteIcon } from './lib/utils/common_utils';
-import * as Emoji from '~/emoji';
+import { parsePikadayDate } from './lib/utils/datetime_utility';
+import glRegexp from './lib/utils/regexp';
 
 function sanitize(str) {
   return str.replace(/<(?:.|\n)*?>/gm, '');
 }
 
+function createMemberSearchString(member) {
+  return `${member.name.replace(/ /g, '')} ${member.username}`;
+}
+
 export function membersBeforeSave(members) {
-  return members.map(member => {
+  return members.map((member) => {
     const GROUP_TYPE = 'Group';
 
     let title = '';
@@ -37,8 +45,9 @@ export function membersBeforeSave(members) {
       username: member.username,
       avatarTag: autoCompleteAvatar.length === 1 ? txtAvatar : imgAvatar,
       title: sanitize(title),
-      search: sanitize(`${member.username} ${member.name}`),
+      search: sanitize(createMemberSearchString(member)),
       icon: avatarIcon,
+      availability: member?.availability,
     };
   });
 }
@@ -52,6 +61,7 @@ export const defaultAutocompleteConfig = {
   milestones: true,
   labels: true,
   snippets: true,
+  vulnerabilities: true,
 };
 
 class GfmAutoComplete {
@@ -59,6 +69,7 @@ class GfmAutoComplete {
     this.dataSources = dataSources;
     this.cachedData = {};
     this.isLoadingData = {};
+    this.previousQuery = '';
   }
 
   setup(input, enableMap = defaultAutocompleteConfig) {
@@ -71,12 +82,16 @@ class GfmAutoComplete {
   setupLifecycle() {
     this.input.each((i, input) => {
       const $input = $(input);
-      $input.off('focus.setupAtWho').on('focus.setupAtWho', this.setupAtWho.bind(this, $input));
-      $input.on('change.atwho', () => input.dispatchEvent(new Event('input')));
-      // This triggers at.js again
-      // Needed for quick actions with suffixes (ex: /label ~)
-      $input.on('inserted-commands.atwho', $input.trigger.bind($input, 'keyup'));
-      $input.on('clear-commands-cache.atwho', () => this.clearCache());
+      if (!$input.hasClass('js-gfm-input-initialized')) {
+        // eslint-disable-next-line @gitlab/no-global-event-off
+        $input.off('focus.setupAtWho').on('focus.setupAtWho', this.setupAtWho.bind(this, $input));
+        $input.on('change.atwho', () => input.dispatchEvent(new Event('input')));
+        // This triggers at.js again
+        // Needed for quick actions with suffixes (ex: /label ~)
+        $input.on('inserted-commands.atwho', $input.trigger.bind($input, 'keyup'));
+        $input.on('clear-commands-cache.atwho', () => this.clearCache());
+        $input.addClass('js-gfm-input-initialized');
+      }
     });
   }
 
@@ -93,6 +108,7 @@ class GfmAutoComplete {
       at: '/',
       alias: 'commands',
       searchKey: 'search',
+      limit: 100,
       skipSpecialCharacterTest: true,
       skipMarkdownCharacterTest: true,
       data: GfmAutoComplete.defaultLoadingData,
@@ -146,7 +162,7 @@ class GfmAutoComplete {
         ...this.getDefaultCallbacks(),
         beforeSave(commands) {
           if (GfmAutoComplete.isLoading(commands)) return commands;
-          return $.map(commands, c => {
+          return $.map(commands, (c) => {
             let search = c.name;
             if (c.aliases.length > 0) {
               search = `${search} ${c.aliases.join(' ')}`;
@@ -175,18 +191,13 @@ class GfmAutoComplete {
   }
 
   setupEmoji($input) {
+    const fetchData = this.fetchData.bind(this);
+
     // Emoji
     $input.atwho({
       at: ':',
-      displayTpl(value) {
-        let tmpl = GfmAutoComplete.Loading.template;
-        if (value && value.name) {
-          tmpl = GfmAutoComplete.Emoji.templateFunction(value.name);
-        }
-        return tmpl;
-      },
-      // eslint-disable-next-line no-template-curly-in-string
-      insertTpl: ':${name}:',
+      displayTpl: GfmAutoComplete.Emoji.templateFunction,
+      insertTpl: GfmAutoComplete.Emoji.insertTemplateFunction,
       skipSpecialCharacterTest: true,
       data: GfmAutoComplete.defaultLoadingData,
       callbacks: {
@@ -196,6 +207,27 @@ class GfmAutoComplete {
           const match = regexp.exec(subtext);
 
           return match && match.length ? match[1] : null;
+        },
+        filter(query, items) {
+          if (GfmAutoComplete.isLoading(items)) {
+            fetchData(this.$inputor, this.at);
+            return items;
+          }
+
+          return GfmAutoComplete.Emoji.filter(query);
+        },
+        sorter(query, items) {
+          this.setting.highlightFirst = this.setting.alwaysHighlightFirst || query.length > 0;
+          if (GfmAutoComplete.isLoading(items)) {
+            this.setting.highlightFirst = false;
+            return items;
+          }
+
+          if (query.length === 0) {
+            return items;
+          }
+
+          return GfmAutoComplete.Emoji.sorter(items);
         },
       },
     });
@@ -218,19 +250,24 @@ class GfmAutoComplete {
       alias: 'users',
       displayTpl(value) {
         let tmpl = GfmAutoComplete.Loading.template;
-        const { avatarTag, username, title, icon } = value;
+        const { avatarTag, username, title, icon, availability } = value;
         if (username != null) {
           tmpl = GfmAutoComplete.Members.templateFunction({
             avatarTag,
             username,
             title,
             icon,
+            availabilityStatus:
+              availability && isUserBusy(availability)
+                ? `<span class="gl-text-gray-500"> ${s__('UserAvailability|(Busy)')}</span>`
+                : '',
           });
         }
         return tmpl;
       },
       // eslint-disable-next-line no-template-curly-in-string
       insertTpl: '${atwho-at}${username}',
+      limit: 10,
       searchKey: 'search',
       alwaysHighlightFirst: true,
       skipSpecialCharacterTest: true,
@@ -239,13 +276,10 @@ class GfmAutoComplete {
         ...this.getDefaultCallbacks(),
         beforeSave: membersBeforeSave,
         matcher(flag, subtext) {
-          const subtextNodes = subtext
-            .split(/\n+/g)
-            .pop()
-            .split(GfmAutoComplete.regexSubtext);
+          const subtextNodes = subtext.split(/\n+/g).pop().split(GfmAutoComplete.regexSubtext);
 
           // Check if @ is followed by '/assign', '/reassign', '/unassign' or '/cc' commands.
-          command = subtextNodes.find(node => {
+          command = subtextNodes.find((node) => {
             if (Object.values(MEMBER_COMMAND).includes(node)) {
               return node;
             }
@@ -254,9 +288,7 @@ class GfmAutoComplete {
 
           // Cache assignees list for easier filtering later
           assignees =
-            SidebarMediator.singleton?.store?.assignees?.map(
-              assignee => `${assignee.username} ${assignee.name}`,
-            ) || [];
+            SidebarMediator.singleton?.store?.assignees?.map(createMemberSearchString) || [];
 
           const match = GfmAutoComplete.defaultMatcher(flag, subtext, this.app.controllers);
           return match && match.length ? match[1] : null;
@@ -273,13 +305,45 @@ class GfmAutoComplete {
 
           if (command === MEMBER_COMMAND.ASSIGN) {
             // Only include members which are not assigned to Issuable currently
-            return data.filter(member => !assignees.includes(member.search));
+            return data.filter((member) => !assignees.includes(member.search));
           } else if (command === MEMBER_COMMAND.UNASSIGN) {
             // Only include members which are assigned to Issuable currently
-            return data.filter(member => assignees.includes(member.search));
+            return data.filter((member) => assignees.includes(member.search));
           }
 
           return data;
+        },
+        sorter(query, items) {
+          // Disable auto-selecting the loading icon
+          this.setting.highlightFirst = this.setting.alwaysHighlightFirst;
+          if (GfmAutoComplete.isLoading(items)) {
+            this.setting.highlightFirst = false;
+            return items;
+          }
+
+          if (!query) {
+            return items;
+          }
+
+          const lowercaseQuery = query.toLowerCase();
+          const members = items.slice();
+          const { nameOrUsernameStartsWith, nameOrUsernameIncludes } = GfmAutoComplete.Members;
+
+          return members.sort((a, b) => {
+            if (nameOrUsernameStartsWith(a, lowercaseQuery)) {
+              return -1;
+            }
+            if (nameOrUsernameStartsWith(b, lowercaseQuery)) {
+              return 1;
+            }
+            if (nameOrUsernameIncludes(a, lowercaseQuery)) {
+              return -1;
+            }
+            if (nameOrUsernameIncludes(b, lowercaseQuery)) {
+              return 1;
+            }
+            return 0;
+          });
         },
       },
     });
@@ -303,7 +367,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(issues) {
-          return $.map(issues, i => {
+          return $.map(issues, (i) => {
             if (i.title == null) {
               return i;
             }
@@ -329,7 +393,7 @@ class GfmAutoComplete {
       displayTpl(value) {
         let tmpl = GfmAutoComplete.Loading.template;
         if (value.title != null) {
-          tmpl = GfmAutoComplete.Milestones.templateFunction(value.title);
+          tmpl = GfmAutoComplete.Milestones.templateFunction(value.title, value.expired);
         }
         return tmpl;
       },
@@ -337,16 +401,39 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(milestones) {
-          return $.map(milestones, m => {
+          const parsedMilestones = $.map(milestones, (m) => {
             if (m.title == null) {
               return m;
             }
+
+            const dueDate = m.due_date ? parsePikadayDate(m.due_date) : null;
+            const expired = dueDate ? Date.now() > dueDate.getTime() : false;
+
             return {
               id: m.iid,
               title: sanitize(m.title),
               search: m.title,
+              expired,
+              dueDate,
             };
           });
+
+          // Sort milestones by due date when present.
+          if (typeof parsedMilestones[0] === 'object') {
+            return parsedMilestones.sort((mA, mB) => {
+              // Move all expired milestones to the bottom.
+              if (mA.expired) return 1;
+              if (mB.expired) return -1;
+
+              // Move milestones without due dates just above expired milestones.
+              if (!mA.dueDate) return 1;
+              if (!mB.dueDate) return -1;
+
+              // Sort by due date in ascending order.
+              return mA.dueDate - mB.dueDate;
+            });
+          }
+          return parsedMilestones;
         },
       },
     });
@@ -370,7 +457,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(merges) {
-          return $.map(merges, m => {
+          return $.map(merges, (m) => {
             if (m.title == null) {
               return m;
             }
@@ -411,7 +498,7 @@ class GfmAutoComplete {
         ...this.getDefaultCallbacks(),
         beforeSave(merges) {
           if (GfmAutoComplete.isLoading(merges)) return merges;
-          return $.map(merges, m => ({
+          return $.map(merges, (m) => ({
             title: sanitize(m.title),
             color: m.color,
             search: m.title,
@@ -419,13 +506,10 @@ class GfmAutoComplete {
           }));
         },
         matcher(flag, subtext) {
-          const subtextNodes = subtext
-            .split(/\n+/g)
-            .pop()
-            .split(GfmAutoComplete.regexSubtext);
+          const subtextNodes = subtext.split(/\n+/g).pop().split(GfmAutoComplete.regexSubtext);
 
           // Check if ~ is followed by '/label', '/relabel' or '/unlabel' commands.
-          command = subtextNodes.find(node => {
+          command = subtextNodes.find((node) => {
             if (
               node === LABEL_COMMAND.LABEL ||
               node === LABEL_COMMAND.RELABEL ||
@@ -446,7 +530,7 @@ class GfmAutoComplete {
               return null;
             }
             const lastCandidate = subtext.split(flag).pop();
-            if (labels.find(label => label.title.startsWith(lastCandidate))) {
+            if (labels.find((label) => label.title.startsWith(lastCandidate))) {
               return lastCandidate;
             }
           } else {
@@ -473,10 +557,10 @@ class GfmAutoComplete {
           // because we want to return all the labels (unfiltered) for that command.
           if (command === LABEL_COMMAND.LABEL) {
             // Return labels with set: undefined.
-            return data.filter(label => !label.set);
+            return data.filter((label) => !label.set);
           } else if (command === LABEL_COMMAND.UNLABEL) {
             // Return labels with set: true.
-            return data.filter(label => label.set);
+            return data.filter((label) => label.set);
           }
 
           return data;
@@ -503,7 +587,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(snippets) {
-          return $.map(snippets, m => {
+          return $.map(snippets, (m) => {
             if (m.title == null) {
               return m;
             }
@@ -519,7 +603,7 @@ class GfmAutoComplete {
   }
 
   getDefaultCallbacks() {
-    const fetchData = this.fetchData.bind(this);
+    const self = this;
 
     return {
       sorter(query, items, searchKey) {
@@ -532,7 +616,14 @@ class GfmAutoComplete {
       },
       filter(query, data, searchKey) {
         if (GfmAutoComplete.isLoading(data)) {
-          fetchData(this.$inputor, this.at);
+          self.fetchData(this.$inputor, this.at);
+          return data;
+        } else if (
+          GfmAutoComplete.isTypeWithBackendFiltering(this.at) &&
+          self.previousQuery !== query
+        ) {
+          self.fetchData(this.$inputor, this.at, query);
+          self.previousQuery = query;
           return data;
         }
         return $.fn.atwho.default.callbacks.filter(query, data, searchKey);
@@ -580,24 +671,28 @@ class GfmAutoComplete {
     };
   }
 
-  fetchData($input, at) {
+  fetchData($input, at, search) {
     if (this.isLoadingData[at]) return;
 
     this.isLoadingData[at] = true;
     const dataSource = this.dataSources[GfmAutoComplete.atTypeMap[at]];
 
-    if (this.cachedData[at]) {
+    if (GfmAutoComplete.isTypeWithBackendFiltering(at)) {
+      axios
+        .get(dataSource, { params: { search } })
+        .then(({ data }) => {
+          this.loadData($input, at, data);
+        })
+        .catch(() => {
+          this.isLoadingData[at] = false;
+        });
+    } else if (this.cachedData[at]) {
       this.loadData($input, at, this.cachedData[at]);
     } else if (GfmAutoComplete.atTypeMap[at] === 'emojis') {
-      Emoji.initEmojiMap()
-        .then(() => {
-          this.loadData($input, at, Emoji.getValidEmojiNames());
-          GfmAutoComplete.glEmojiTag = Emoji.glEmojiTag;
-        })
-        .catch(() => {});
+      this.loadEmojiData($input, at).catch(() => {});
     } else if (dataSource) {
       AjaxCache.retrieve(dataSource, true)
-        .then(data => {
+        .then((data) => {
           this.loadData($input, at, data);
         })
         .catch(() => {
@@ -615,6 +710,14 @@ class GfmAutoComplete {
     // This trigger at.js again
     // otherwise we would be stuck with loading until the user types
     return $input.trigger('keyup');
+  }
+
+  async loadEmojiData($input, at) {
+    await Emoji.initEmojiMap();
+
+    this.loadData($input, at, ['loaded']);
+
+    GfmAutoComplete.glEmojiTag = Emoji.glEmojiTag;
   }
 
   clearCache() {
@@ -644,7 +747,9 @@ class GfmAutoComplete {
     // https://github.com/ichord/At.js
     const atSymbolsWithBar = Object.keys(controllers)
       .join('|')
-      .replace(/[$]/, '\\$&');
+      .replace(/[$]/, '\\$&')
+      .replace(/([[\]:])/g, '\\$1');
+
     const atSymbolsWithoutBar = Object.keys(controllers).join('');
     const targetSubtext = subtext.split(GfmAutoComplete.regexSubtext).pop();
     const resultantFlag = flag.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
@@ -675,24 +780,62 @@ GfmAutoComplete.atTypeMap = {
   '~': 'labels',
   '%': 'milestones',
   '/': 'commands',
+  '[vulnerability:': 'vulnerabilities',
   $: 'snippets',
 };
+
+GfmAutoComplete.typesWithBackendFiltering = ['vulnerabilities'];
+GfmAutoComplete.isTypeWithBackendFiltering = (type) =>
+  GfmAutoComplete.typesWithBackendFiltering.includes(GfmAutoComplete.atTypeMap[type]);
 
 // Emoji
 GfmAutoComplete.glEmojiTag = null;
 GfmAutoComplete.Emoji = {
-  templateFunction(name) {
-    // glEmojiTag helper is loaded on-demand in fetchData()
-    if (GfmAutoComplete.glEmojiTag) {
-      return `<li>${name} ${GfmAutoComplete.glEmojiTag(name)}</li>`;
+  insertTemplateFunction(value) {
+    return `:${value.emoji.name}:`;
+  },
+  templateFunction(item) {
+    if (GfmAutoComplete.isLoading(item)) {
+      return GfmAutoComplete.Loading.template;
     }
-    return `<li>${name}</li>`;
+
+    const escapedFieldValue = escape(item.fieldValue);
+    if (!GfmAutoComplete.glEmojiTag) {
+      return `<li>${escapedFieldValue}</li>`;
+    }
+
+    return `<li>${escapedFieldValue} ${GfmAutoComplete.glEmojiTag(item.emoji.name)}</li>`;
+  },
+  filter(query) {
+    if (query.length === 0) {
+      return Object.values(Emoji.getAllEmoji())
+        .map((emoji) => ({
+          emoji,
+          fieldValue: emoji.name,
+        }))
+        .slice(0, 20);
+    }
+
+    return Emoji.searchEmoji(query);
+  },
+  sorter(items) {
+    return Emoji.sortEmoji(items);
   },
 };
 // Team Members
 GfmAutoComplete.Members = {
-  templateFunction({ avatarTag, username, title, icon }) {
-    return `<li>${avatarTag} ${username} <small>${escape(title)}</small> ${icon}</li>`;
+  templateFunction({ avatarTag, username, title, icon, availabilityStatus }) {
+    return `<li>${avatarTag} ${username} <small>${escape(
+      title,
+    )}${availabilityStatus}</small> ${icon}</li>`;
+  },
+  nameOrUsernameStartsWith(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.split(' ').some((name) => name.toLowerCase().startsWith(query));
+  },
+  nameOrUsernameIncludes(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.toLowerCase().includes(query);
   },
 };
 GfmAutoComplete.Labels = {
@@ -714,7 +857,12 @@ GfmAutoComplete.Issues = {
 };
 // Milestones
 GfmAutoComplete.Milestones = {
-  templateFunction(title) {
+  templateFunction(title, expired) {
+    if (expired) {
+      return `<li>${sprintf(__('%{milestone} (expired)'), {
+        milestone: escape(title),
+      })}</li>`;
+    }
     return `<li>${escape(title)}</li>`;
   },
 };

@@ -9,6 +9,8 @@ class Projects::DiscussionsController < Projects::ApplicationController
   before_action :discussion, only: [:resolve, :unresolve]
   before_action :authorize_resolve_discussion!, only: [:resolve, :unresolve]
 
+  feature_category :issue_tracking
+
   def resolve
     Discussions::ResolveService.new(project, current_user, one_or_more_discussions: discussion).execute
 
@@ -16,7 +18,7 @@ class Projects::DiscussionsController < Projects::ApplicationController
   end
 
   def unresolve
-    discussion.unresolve!
+    Discussions::UnresolveService.new(discussion, current_user).execute
 
     render_discussion
   end

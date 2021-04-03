@@ -1,6 +1,6 @@
+import { LICENSE_LIST } from 'ee/license_compliance/store/constants';
 import createStore from 'ee/license_compliance/store/index';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
-import { LICENSE_LIST } from 'ee/license_compliance/store/constants';
 import * as licenseMangementMutationTypes from 'ee/vue_shared/license_compliance/store/mutation_types';
 
 describe('mediator', () => {

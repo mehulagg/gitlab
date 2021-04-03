@@ -12,19 +12,21 @@ RSpec.describe 'Project navbar' do
 
   before do
     insert_package_nav(_('Operations'))
+    insert_infrastructure_registry_nav
+    stub_config(registry: { enabled: false })
 
     project.add_maintainer(user)
     sign_in(user)
   end
 
-  context 'when issues analytics is available' do
+  context 'when issue analytics is available' do
     before do
       stub_licensed_features(issues_analytics: true)
 
       insert_after_sub_nav_item(
         _('Code Review'),
         within: _('Analytics'),
-        new_sub_nav_item_name: _('Issues')
+        new_sub_nav_item_name: _('Issue')
       )
 
       visit project_path(project)
@@ -34,20 +36,21 @@ RSpec.describe 'Project navbar' do
   end
 
   context 'when security dashboard is available' do
+    let(:security_and_compliance_nav_item) do
+      {
+        nav_item: _('Security & Compliance'),
+        nav_sub_items: [
+          _('Security Dashboard'),
+          _('Vulnerability Report'),
+          s_('OnDemandScans|On-demand Scans'),
+          _('Configuration'),
+          _('Audit Events')
+        ]
+      }
+    end
+
     before do
       stub_licensed_features(security_dashboard: true, security_on_demand_scans: true)
-
-      insert_after_nav_item(
-        _('CI / CD'),
-        new_nav_item: {
-          nav_item: _('Security & Compliance'),
-          nav_sub_items: [
-            _('Security Dashboard'),
-            s_('OnDemandScans|On-demand Scans'),
-            _('Configuration')
-          ]
-        }
-      )
 
       visit project_path(project)
     end
@@ -66,11 +69,7 @@ RSpec.describe 'Project navbar' do
       before do
         stub_config(registry: { enabled: true })
 
-        insert_after_sub_nav_item(
-          _('Package Registry'),
-          within: _('Packages & Registries'),
-          new_sub_nav_item_name: _('Container Registry')
-        )
+        insert_container_nav
 
         visit project_path(project)
       end
@@ -82,10 +81,9 @@ RSpec.describe 'Project navbar' do
   context 'when requirements is available' do
     before do
       stub_licensed_features(requirements: true)
-      stub_feature_flags(requirements_management: true)
 
       insert_after_nav_item(
-        _('Merge Requests'),
+        _('Merge requests'),
         new_nav_item: {
           nav_item: _('Requirements'),
           nav_sub_items: [_('List')]

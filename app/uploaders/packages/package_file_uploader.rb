@@ -20,11 +20,10 @@ class Packages::PackageFileUploader < GitlabUploader
   private
 
   def dynamic_segment
-    File.join(disk_hash[0..1], disk_hash[2..3], disk_hash,
-              'packages', model.package.id.to_s, 'files', model.id.to_s)
-  end
+    raise ObjectNotReadyError, "Package model not ready" unless model.id
 
-  def disk_hash
-    @disk_hash ||= Digest::SHA2.hexdigest(model.package.project_id.to_s)
+    package_segment = model.package.debian? ? 'debian' : model.package.id
+
+    Gitlab::HashedPath.new('packages', package_segment, 'files', model.id, root_hash: model.package.project_id)
   end
 end

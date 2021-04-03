@@ -10,7 +10,8 @@ RSpec.describe GitlabSchema.types['AlertManagementAlert'] do
   it 'exposes the expected fields' do
     expected_fields = %i[
       iid
-      issue_iid
+      issueIid
+      issue
       title
       description
       severity
@@ -28,6 +29,11 @@ RSpec.describe GitlabSchema.types['AlertManagementAlert'] do
       notes
       discussions
       metrics_dashboard_url
+      runbook
+      todos
+      details_url
+      prometheus_alert
+      environment
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)

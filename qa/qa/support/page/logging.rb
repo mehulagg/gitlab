@@ -10,7 +10,7 @@ module QA
           super
         end
 
-        def refresh
+        def refresh(skip_finished_loading_check: false)
           log("refreshing #{current_url}")
 
           super
@@ -64,6 +64,12 @@ module QA
           super
         end
 
+        def click_element_coordinates(name, **kwargs)
+          log(%Q(clicking the coordinates of :#{name}))
+
+          super
+        end
+
         def click_element(name, page = nil, **kwargs)
           msg = ["clicking :#{name}"]
           msg << ", expecting to be at #{page.class}" if page
@@ -75,7 +81,7 @@ module QA
         end
 
         def fill_element(name, content)
-          masked_content = name.to_s.include?('password') ? '*****' : content
+          masked_content = name.to_s.match?(/token|key|password/) ? '*****' : content
 
           log(%Q(filling :#{name} with "#{masked_content}"))
 
@@ -137,12 +143,12 @@ module QA
           super
         end
 
-        def within_element(name, text: nil)
-          log("within element :#{name}")
+        def within_element(name, **kwargs)
+          log("within element :#{name} with args #{kwargs}")
 
           element = super
 
-          log("end within element :#{name}")
+          log("end within element :#{name} with args #{kwargs}")
 
           element
         end

@@ -6,7 +6,7 @@ RSpec.describe Ci::CreatePipelineService do
   subject(:execute) { service.execute(:push) }
 
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:user) { create(:admin) }
+  let_it_be(:user) { project.owner }
 
   let(:service) do
     described_class.new(project, user, { ref: 'refs/heads/master' })
@@ -64,6 +64,10 @@ RSpec.describe Ci::CreatePipelineService do
   end
 
   shared_examples 'mixed artifacts definitions' do
+    before do
+      other_project.add_developer(user)
+    end
+
     let(:other_project) { create(:project, :repository) }
 
     let(:other_pipeline) do

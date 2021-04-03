@@ -2,17 +2,22 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import Iterations from './components/iterations.vue';
 import IterationForm from './components/iteration_form.vue';
 import IterationReport from './components/iteration_report.vue';
+import Iterations from './components/iterations.vue';
 
 Vue.use(VueApollo);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      batchMax: 1,
+    },
+  ),
 });
 
-export function initIterationsList() {
+export function initIterationsList(namespaceType) {
   const el = document.querySelector('.js-iterations-list');
 
   return new Vue({
@@ -21,8 +26,9 @@ export function initIterationsList() {
     render(createElement) {
       return createElement(Iterations, {
         props: {
-          groupPath: el.dataset.groupFullPath,
+          fullPath: el.dataset.fullPath,
           canAdmin: parseBoolean(el.dataset.canAdmin),
+          namespaceType,
           newIterationPath: el.dataset.newIterationPath,
         },
       });
@@ -48,10 +54,18 @@ export function initIterationForm() {
   });
 }
 
-export function initIterationReport() {
+export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   const el = document.querySelector('.js-iteration');
 
-  const { groupPath, iterationIid, editIterationPath } = el.dataset;
+  const {
+    fullPath,
+    hasScopedLabelsFeature,
+    iterationId,
+    labelsFetchPath,
+    editIterationPath,
+    previewMarkdownPath,
+    svgPath,
+  } = el.dataset;
   const canEdit = parseBoolean(el.dataset.canEdit);
 
   return new Vue({
@@ -60,14 +74,18 @@ export function initIterationReport() {
     render(createElement) {
       return createElement(IterationReport, {
         props: {
-          groupPath,
-          iterationIid,
+          fullPath,
+          hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
+          iterationId,
+          labelsFetchPath,
           canEdit,
           editIterationPath,
+          namespaceType,
+          previewMarkdownPath,
+          svgPath,
+          initiallyEditing,
         },
       });
     },
   });
 }
-
-export default {};

@@ -72,7 +72,7 @@ RSpec.describe Vulnerabilities::Export do
     subject(:vulnerability_export) { create(:vulnerability_export, :csv) }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     context 'when the export is new' do

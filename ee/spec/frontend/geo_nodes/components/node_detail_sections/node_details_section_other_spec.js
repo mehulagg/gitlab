@@ -2,8 +2,8 @@ import Vue from 'vue';
 
 import NodeDetailsSectionOtherComponent from 'ee/geo_nodes/components/node_detail_sections/node_details_section_other.vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
-import { mockNode, mockNodeDetails } from '../../mock_data';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
+import { mockNode, mockNodeDetails } from '../../mock_data';
 
 const createComponent = (
   node = { ...mockNode },
@@ -63,7 +63,7 @@ describe('NodeDetailsSectionOther', () => {
     });
 
     describe('storageShardsStatus', () => {
-      it('returns `Unknown` when `nodeDetails.storageShardsMatch` is null', done => {
+      it('returns `Unknown` when `nodeDetails.storageShardsMatch` is null', (done) => {
         vm.nodeDetails.storageShardsMatch = null;
         Vue.nextTick()
           .then(() => {
@@ -73,7 +73,7 @@ describe('NodeDetailsSectionOther', () => {
           .catch(done.fail);
       });
 
-      it('returns `OK` when `nodeDetails.storageShardsMatch` is true', done => {
+      it('returns `OK` when `nodeDetails.storageShardsMatch` is true', (done) => {
         vm.nodeDetails.storageShardsMatch = true;
         Vue.nextTick()
           .then(() => {
@@ -89,7 +89,7 @@ describe('NodeDetailsSectionOther', () => {
     });
 
     describe('storageShardsCssClass', () => {
-      it('returns CSS class `font-weight-bold` when `nodeDetails.storageShardsMatch` is true', done => {
+      it('returns CSS class `font-weight-bold` when `nodeDetails.storageShardsMatch` is true', (done) => {
         vm.nodeDetails.storageShardsMatch = true;
         Vue.nextTick()
           .then(() => {
@@ -117,7 +117,7 @@ describe('NodeDetailsSectionOther', () => {
       expect(vm.$el.querySelector('.btn-link > span').innerText.trim()).toBe('Other information');
     });
 
-    it('renders section items container element', done => {
+    it('renders section items container element', (done) => {
       vm.showSectionItems = true;
       Vue.nextTick(() => {
         expect(vm.$el.querySelector('.section-items-container')).not.toBeNull();

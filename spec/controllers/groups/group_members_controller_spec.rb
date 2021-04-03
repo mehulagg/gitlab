@@ -9,6 +9,10 @@ RSpec.describe Groups::GroupMembersController do
   let(:group) { create(:group, :public) }
   let(:membership) { create(:group_member, group: group) }
 
+  around do |example|
+    travel_to DateTime.new(2019, 4, 1) { example.run }
+  end
+
   describe 'GET index' do
     it 'renders index with 200 status code' do
       get :index, params: { group_id: group }
@@ -139,6 +143,45 @@ RSpec.describe Groups::GroupMembersController do
         expect(group.users).not_to include group_user
       end
     end
+
+    context 'access expiry date' do
+      before do
+        group.add_owner(user)
+      end
+
+      subject do
+        post :create, params: {
+                        group_id: group,
+                        user_ids: group_user.id,
+                        access_level: Gitlab::Access::GUEST,
+                        expires_at: expires_at
+                      }
+      end
+
+      context 'when set to a date in the past' do
+        let(:expires_at) { 2.days.ago }
+
+        it 'does not add user to members' do
+          subject
+
+          expect(flash[:alert]).to include('Expires at cannot be a date in the past')
+          expect(response).to redirect_to(group_group_members_path(group))
+          expect(group.users).not_to include group_user
+        end
+      end
+
+      context 'when set to a date in the future' do
+        let(:expires_at) { 5.days.from_now }
+
+        it 'adds user to members' do
+          subject
+
+          expect(response).to set_flash.to 'Users were successfully added.'
+          expect(response).to redirect_to(group_group_members_path(group))
+          expect(group.users).to include group_user
+        end
+      end
+    end
   end
 
   describe 'PUT update' do
@@ -149,21 +192,105 @@ RSpec.describe Groups::GroupMembersController do
       sign_in(user)
     end
 
-    Gitlab::Access.options.each do |label, value|
-      it "can change the access level to #{label}" do
-        put :update, params: {
-          group_member: { access_level: value },
-          group_id: group,
-          id: requester
-        }, xhr: true
+    context 'access level' do
+      Gitlab::Access.options.each do |label, value|
+        it "can change the access level to #{label}" do
+          put :update, params: {
+            group_member: { access_level: value },
+            group_id: group,
+            id: requester
+          }, xhr: true
 
-        expect(requester.reload.human_access).to eq(label)
+          expect(requester.reload.human_access).to eq(label)
+        end
+      end
+    end
+
+    context 'access expiry date' do
+      subject do
+        put :update, xhr: true, params: {
+                                          group_member: {
+                                            expires_at: expires_at
+                                          },
+                                          group_id: group,
+                                          id: requester
+                                        }
+      end
+
+      context 'when set to a date in the past' do
+        let(:expires_at) { 2.days.ago }
+
+        it 'does not update the member' do
+          subject
+
+          expect(requester.reload.expires_at).not_to eq(expires_at.to_date)
+        end
+
+        it 'returns error status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+        end
+
+        it 'returns error message' do
+          subject
+
+          expect(json_response).to eq({ 'message' => 'Expires at cannot be a date in the past' })
+        end
+      end
+
+      context 'when set to a date in the future' do
+        let(:expires_at) { 5.days.from_now }
+
+        it 'updates the member' do
+          subject
+
+          expect(requester.reload.expires_at).to eq(expires_at.to_date)
+        end
+      end
+    end
+
+    context 'expiration date' do
+      let(:expiry_date) { 1.month.from_now.to_date }
+
+      before do
+        travel_to Time.now.utc.beginning_of_day
+
+        put(
+          :update,
+          params: {
+            group_member: { expires_at: expiry_date },
+            group_id: group,
+            id: requester
+          },
+          format: :json
+        )
+      end
+
+      context 'when `expires_at` is set' do
+        it 'returns correct json response' do
+          expect(json_response).to eq({
+            "expires_in" => "about 1 month",
+            "expires_soon" => false,
+            "expires_at_formatted" => expiry_date.to_time.in_time_zone.to_s(:medium)
+          })
+        end
+      end
+
+      context 'when `expires_at` is not set' do
+        let(:expiry_date) { nil }
+
+        it 'returns empty json response' do
+          expect(json_response).to be_empty
+        end
       end
     end
   end
 
   describe 'DELETE destroy' do
-    let(:member) { create(:group_member, :developer, group: group) }
+    let(:sub_group) { create(:group, parent: group) }
+    let!(:member) { create(:group_member, :developer, group: group) }
+    let!(:sub_member) { create(:group_member, :developer, group: sub_group, user: member.user) }
 
     before do
       sign_in(user)
@@ -199,9 +326,19 @@ RSpec.describe Groups::GroupMembersController do
         it '[HTML] removes user from members' do
           delete :destroy, params: { group_id: group, id: member }
 
-          expect(response).to set_flash.to 'User was successfully removed from group and any subresources.'
+          expect(response).to set_flash.to 'User was successfully removed from group.'
           expect(response).to redirect_to(group_group_members_path(group))
           expect(group.members).not_to include member
+          expect(sub_group.members).to include sub_member
+        end
+
+        it '[HTML] removes user from members including subgroups and projects' do
+          delete :destroy, params: { group_id: group, id: member, remove_sub_memberships: true }
+
+          expect(response).to set_flash.to 'User was successfully removed from group and any subgroups and projects.'
+          expect(response).to redirect_to(group_group_members_path(group))
+          expect(group.members).not_to include member
+          expect(sub_group.members).not_to include sub_member
         end
 
         it '[JS] removes user from members' do
@@ -368,7 +505,7 @@ RSpec.describe Groups::GroupMembersController do
               group_id: group,
               id: membership
             },
-            format: :js
+            format: :json
 
         expect(response).to have_gitlab_http_status(:ok)
       end

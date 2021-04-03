@@ -1,0 +1,6 @@
+mutation dastSiteProfileUpdate($input: DastSiteProfileUpdateInput!) {
+  dastSiteProfileUpdate(input: $input) {
+    id
+    errors
+  }
+}

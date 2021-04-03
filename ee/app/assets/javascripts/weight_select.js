@@ -1,7 +1,7 @@
 /* eslint-disable no-shadow */
 
 import $ from 'jquery';
-import '~/gl_dropdown';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 function WeightSelect(els, options = {}) {
   const $els = $(els || '.js-weight-select');
@@ -11,8 +11,7 @@ function WeightSelect(els, options = {}) {
     const $selectbox = $dropdown.closest('.selectbox');
     const $block = $selectbox.closest('.block');
     const $value = $block.find('.value');
-    // eslint-disable-next-line no-jquery/no-fade
-    $block.find('.block-loading').fadeOut();
+    $block.find('.block-loading').addClass('gl-display-none');
     const fieldName = options.fieldName || $dropdown.data('fieldName');
     const inputField = $dropdown.closest('.selectbox').find(`input[name='${fieldName}']`);
 
@@ -20,7 +19,7 @@ function WeightSelect(els, options = {}) {
       inputField.val(options.selected);
     }
 
-    return $dropdown.glDropdown({
+    return initDeprecatedJQueryDropdown($dropdown, {
       selectable: true,
       fieldName,
       toggleLabel(selected, el) {
@@ -36,9 +35,9 @@ function WeightSelect(els, options = {}) {
         }
         return '';
       },
-      clicked(glDropdownEvt) {
-        const { e } = glDropdownEvt;
-        let selected = glDropdownEvt.selectedObj;
+      clicked(deprecatedJQueryDropdownEvt) {
+        const { e } = deprecatedJQueryDropdownEvt;
+        let selected = deprecatedJQueryDropdownEvt.selectedObj;
         const inputField = $dropdown.closest('.selectbox').find(`input[name='${fieldName}']`);
 
         if (options.handleClick) {

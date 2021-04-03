@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Review Apps
 
 Review Apps are automatically deployed by [the
@@ -96,17 +102,17 @@ subgraph "CNG-mirror pipeline"
 - The manual `review-stop` can be used to
   stop a Review App manually, and is also started by GitLab once a merge
   request's branch is deleted after being merged.
-- The Kubernetes cluster is connected to the `gitlab` projects using
-  [GitLab's Kubernetes integration](../../user/project/clusters/index.md). This basically
+- The Kubernetes cluster is connected to the `gitlab` projects using the
+  [GitLab Kubernetes integration](../../user/project/clusters/index.md). This basically
   allows to have a link to the Review App directly from the merge request widget.
 
 ### Auto-stopping of Review Apps
 
 Review Apps are automatically stopped 2 days after the last deployment thanks to
-the [Environment auto-stop](../../ci/environments/index.md#environments-auto-stop) feature.
+the [Environment auto-stop](../../ci/environments/index.md#stop-an-environment-after-a-certain-time-period) feature.
 
 If you need your Review App to stay up for a longer time, you can
-[pin its environment](../../ci/environments/index.md#auto-stop-example) or retry the
+[pin its environment](../../ci/environments/index.md#override-a-deployments-scheduled-stop-time) or retry the
 `review-deploy` job to update the "latest deployed at" time.
 
 The `review-cleanup` job that automatically runs in scheduled
@@ -142,6 +148,9 @@ the following node pools:
 
 - `e2-highcpu-16` (16 vCPU, 16 GB memory) pre-emptible nodes with autoscaling
 
+Node pool image type must be `Container-Optimized OS (cos)`, not `Container-Optimized OS with Containerd (cos_containerd)`,
+due to this [known issue on GitLab Runner Kubernetes executor](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4755)
+
 ### Helm
 
 The Helm version used is defined in the
@@ -153,18 +162,20 @@ used by the `review-deploy` and `review-stop` jobs.
 ### Get access to the GCP Review Apps cluster
 
 You need to [open an access request (internal link)](https://gitlab.com/gitlab-com/access-requests/-/issues/new)
-for the `gcp-review-apps-sg` GCP group. In order to join a group, you must specify the desired GCP role in your access request.
-The role is what will grant you specific permissions in order to engage with Review App containers.
+for the `gcp-review-apps-dev` GCP group and role.
 
-Here are some permissions you may want to have, and the roles that grant them:
+This grants you the following permissions for:
 
-- `container.pods.getLogs` - Required to [retrieve pod logs](#dig-into-a-pods-logs). Granted by [Viewer (`roles/viewer`)](https://cloud.google.com/iam/docs/understanding-roles#kubernetes-engine-roles).
-- `container.pods.exec` - Required to [run a Rails console](#run-a-rails-console). Granted by [Kubernetes Engine Developer (`roles/container.developer`)](https://cloud.google.com/iam/docs/understanding-roles#kubernetes-engine-roles).
+- [Retrieving pod logs](#dig-into-a-pods-logs). Granted by [Viewer (`roles/viewer`)](https://cloud.google.com/iam/docs/understanding-roles#kubernetes-engine-roles).
+- [Running a Rails console](#run-a-rails-console). Granted by [Kubernetes Engine Developer (`roles/container.pods.exec`)](https://cloud.google.com/iam/docs/understanding-roles#kubernetes-engine-roles).
 
 ### Log into my Review App
 
-The default username is `root` and its password can be found in the 1Password
-secure note named `gitlab-{ce,ee} Review App's root password`.
+For GitLab Team Members only. If you want to sign in to the review app, review
+the GitLab handbook information for the [shared 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
+
+- The default username is `root`.
+- The password can be found in the 1Password secure note named `gitlab-{ce,ee} Review App's root password`.
 
 ### Enable a feature flag for my Review App
 
@@ -175,9 +186,9 @@ secure note named `gitlab-{ce,ee} Review App's root password`.
 ### Find my Review App slug
 
 1. Open the `review-deploy` job.
-1. Look for `Checking for previous deployment of review-*`.
-1. For instance for `Checking for previous deployment of review-qa-raise-e-12chm0`,
-   your Review App slug would be `review-qa-raise-e-12chm0` in this case.
+1. Look for `** Deploying review-*`.
+1. For instance for `** Deploying review-1234-abc-defg... **`,
+   your Review App slug would be `review-1234-abc-defg` in this case.
 
 ### Run a Rails console
 
@@ -306,7 +317,7 @@ kubectl get cm --sort-by='{.metadata.creationTimestamp}' | grep 'review-' | grep
 
 ### Using K9s
 
-[K9s](https://github.com/derailed/k9s) is a powerful command line dashboard which allows you to filter by labels. This can help identify trends with apps exceeding the [review-app resource requests](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/review_apps/base-config.yaml). Kubernetes will schedule pods to nodes based on resource requests and allow for CPU usage up to the limits.
+[K9s](https://github.com/derailed/k9s) is a powerful command line dashboard which allows you to filter by labels. This can help identify trends with apps exceeding the [review-app resource requests](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/review_apps/base-config.yaml). Kubernetes schedules pods to nodes based on resource requests and allow for CPU usage up to the limits.
 
 - In K9s you can sort or add filters by typing the `/` character
   - `-lrelease=<review-app-slug>` - filters down to all pods for a release. This aids in determining what is having issues in a single deployment
@@ -346,7 +357,7 @@ using `v232`.
 
 For the record, the debugging steps to find out this issue were:
 
-1. Switch kubectl context to review-apps-ce (we recommend using [kubectx](https://github.com/ahmetb/kubectx/))
+1. Switch kubectl context to `review-apps-ce` (we recommend using [`kubectx`](https://github.com/ahmetb/kubectx/))
 1. `kubectl get pods | grep dns`
 1. `kubectl describe pod <pod name>` & confirm exact error message
 1. Web search for exact error message, following rabbit hole to [a relevant Kubernetes bug report](https://github.com/kubernetes/kubernetes/issues/57345)
@@ -384,8 +395,8 @@ helm ls -d | grep "Jun  4" | cut -f1 | xargs helm delete --purge
 
 #### Mitigation steps taken to avoid this problem in the future
 
-We've created a new node pool with smaller machines so that it's less likely
-that a machine will hit the "too many mount points" problem in the future.
+We've created a new node pool with smaller machines to reduce the risk
+that a machine reaches the "too many mount points" problem in the future.
 
 ## Frequently Asked Questions
 

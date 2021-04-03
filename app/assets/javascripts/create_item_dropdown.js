@@ -1,5 +1,5 @@
 import { escape } from 'lodash';
-import '~/gl_dropdown';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class CreateItemDropdown {
   /**
@@ -28,7 +28,7 @@ export default class CreateItemDropdown {
   }
 
   buildDropdown() {
-    this.$dropdown.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdown, {
       data: this.getData.bind(this),
       filterable: true,
       filterRemote: this.getDataRemote,
@@ -47,7 +47,7 @@ export default class CreateItemDropdown {
         return escape(item.id);
       },
       onFilter: this.toggleCreateNewButton.bind(this),
-      clicked: options => {
+      clicked: (options) => {
         options.e.preventDefault();
         this.onSelect();
       },
@@ -67,19 +67,19 @@ export default class CreateItemDropdown {
     e.preventDefault();
 
     this.refreshData();
-    this.$dropdown.data('glDropdown').selectRowAtIndex();
+    this.$dropdown.data('deprecatedJQueryDropdown').selectRowAtIndex();
   }
 
   refreshData() {
     // Refresh the dropdown's data, which ends up calling `getData`
-    this.$dropdown.data('glDropdown').remote.execute();
+    this.$dropdown.data('deprecatedJQueryDropdown').remote.execute();
   }
 
   getData(term, callback) {
     this.getDataOption(term, (data = []) => {
       // Ensure the selected item isn't already in the data to avoid duplicates
       const alreadyHasSelectedItem =
-        this.selectedItem && data.some(item => item.id === this.selectedItem.id);
+        this.selectedItem && data.some((item) => item.id === this.selectedItem.id);
 
       let uniqueData = data;
       if (!alreadyHasSelectedItem) {

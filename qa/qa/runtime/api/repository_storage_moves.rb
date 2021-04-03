@@ -9,17 +9,39 @@ module QA
 
         RepositoryStorageMovesError = Class.new(RuntimeError)
 
-        def has_status?(project, status, destination_storage = Env.additional_repository_storage)
-          all.any? do |move|
-            move[:project][:path_with_namespace] == project.path_with_namespace &&
+        def has_status?(resource, status, destination_storage = Env.additional_repository_storage)
+          find_any(resource) do |move|
+            next unless resource_equals?(resource, move)
+
+            QA::Runtime::Logger.debug("Move data: #{move}")
+
             move[:state] == status &&
             move[:destination_storage_name] == destination_storage
           end
         end
 
-        def all
+        def find_any(resource)
           Logger.debug('Getting repository storage moves')
-          parse_body(get(Request.new(api_client, '/project_repository_storage_moves').url))
+
+          Support::Waiter.wait_until do
+            with_paginated_response_body(Request.new(api_client, "/#{resource_name(resource)}_repository_storage_moves", per_page: '100').url) do |page|
+              break true if page.any? { |item| yield item }
+            end
+          end
+        end
+
+        def resource_equals?(resource, move)
+          if resource.class.name.include?('Snippet')
+            move[:snippet][:id] == resource.id
+          elsif resource.class.name.include?('Group')
+            move[:group][:id] == resource.id
+          else
+            move[:project][:path_with_namespace] == resource.path_with_namespace
+          end
+        end
+
+        def resource_name(resource)
+          resource.class.name.split('::').last.downcase
         end
 
         private

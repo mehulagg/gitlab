@@ -2,9 +2,34 @@
 
 module Types
   class BaseEnum < GraphQL::Schema::Enum
+    extend GitlabStyleDeprecations
+
     class << self
+      # Registers enum definition by the given DeclarativeEnum module
+      #
+      # @param enum_mod [Module] The enum module to be used
+      # @param use_name [Boolean] Does not override the name if set `false`
+      # @param use_description [Boolean] Does not override the description if set `false`
+      #
+      # Example:
+      #
+      #   class MyEnum < BaseEnum
+      #     declarative_enum MyDeclarativeEnum
+      #   end
+      #
+      def declarative_enum(enum_mod, use_name: true, use_description: true)
+        graphql_name(enum_mod.name) if use_name
+        description(enum_mod.description) if use_description
+
+        enum_mod.definition.each do |key, content|
+          desc = content.delete(:description)
+          value(key.to_s.upcase, description: desc, **content)
+        end
+      end
+
       def value(*args, **kwargs, &block)
         enum[args[0].downcase] = kwargs[:value] || args[0]
+        gitlab_deprecation(kwargs)
 
         super(*args, **kwargs, &block)
       end
@@ -13,6 +38,18 @@ module Types
       # and the value being the Ruby value (either the explicit `value` passed or the same as the value attr).
       def enum
         @enum_values ||= {}.with_indifferent_access
+      end
+
+      def authorization
+        @authorization ||= ::Gitlab::Graphql::Authorize::ObjectAuthorization.new(authorize)
+      end
+
+      def authorize(*abilities)
+        @abilities = abilities
+      end
+
+      def authorized?(object, context)
+        authorization.ok?(object, context[:current_user])
       end
     end
   end

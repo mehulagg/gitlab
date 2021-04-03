@@ -36,11 +36,11 @@ module LabelsHelper
   #   link_to_label(label) { "My Custom Label Text" }
   #
   # Returns a String
-  def link_to_label(label, type: :issue, tooltip: true, small: false, &block)
+  def link_to_label(label, type: :issue, tooltip: true, small: false, css_class: nil, &block)
     link = label.filter_path(type: type)
 
     if block_given?
-      link_to link, &block
+      link_to link, class: css_class, &block
     else
       render_label(label, link: link, tooltip: tooltip, small: small)
     end
@@ -61,7 +61,7 @@ module LabelsHelper
     render_label_text(
       label.name,
       suffix: suffix,
-      css_class: text_color_class_for_bg(label.color),
+      css_class: "gl-label-text #{text_color_class_for_bg(label.color)}",
       bg_color: label.color
     )
   end
@@ -80,27 +80,27 @@ module LabelsHelper
 
   def suggested_colors
     {
-      '#0033CC' => s_('SuggestedColors|UA blue'),
-      '#428BCA' => s_('SuggestedColors|Moderate blue'),
-      '#44AD8E' => s_('SuggestedColors|Lime green'),
-      '#A8D695' => s_('SuggestedColors|Feijoa'),
-      '#5CB85C' => s_('SuggestedColors|Slightly desaturated green'),
-      '#69D100' => s_('SuggestedColors|Bright green'),
-      '#004E00' => s_('SuggestedColors|Very dark lime green'),
-      '#34495E' => s_('SuggestedColors|Very dark desaturated blue'),
-      '#7F8C8D' => s_('SuggestedColors|Dark grayish cyan'),
-      '#A295D6' => s_('SuggestedColors|Slightly desaturated blue'),
-      '#5843AD' => s_('SuggestedColors|Dark moderate blue'),
-      '#8E44AD' => s_('SuggestedColors|Dark moderate violet'),
-      '#FFECDB' => s_('SuggestedColors|Very pale orange'),
-      '#AD4363' => s_('SuggestedColors|Dark moderate pink'),
-      '#D10069' => s_('SuggestedColors|Strong pink'),
-      '#CC0033' => s_('SuggestedColors|Strong red'),
-      '#FF0000' => s_('SuggestedColors|Pure red'),
-      '#D9534F' => s_('SuggestedColors|Soft red'),
-      '#D1D100' => s_('SuggestedColors|Strong yellow'),
-      '#F0AD4E' => s_('SuggestedColors|Soft orange'),
-      '#AD8D43' => s_('SuggestedColors|Dark moderate orange')
+      '#009966' => s_('SuggestedColors|Green-cyan'),
+      '#8fbc8f' => s_('SuggestedColors|Dark sea green'),
+      '#3cb371' => s_('SuggestedColors|Medium sea green'),
+      '#00b140' => s_('SuggestedColors|Green screen'),
+      '#013220' => s_('SuggestedColors|Dark green'),
+      '#6699cc' => s_('SuggestedColors|Blue-gray'),
+      '#0000ff' => s_('SuggestedColors|Blue'),
+      '#e6e6fa' => s_('SuggestedColors|Lavendar'),
+      '#9400d3' => s_('SuggestedColors|Dark violet'),
+      '#330066' => s_('SuggestedColors|Deep violet'),
+      '#808080' => s_('SuggestedColors|Gray'),
+      '#36454f' => s_('SuggestedColors|Charcoal grey'),
+      '#f7e7ce' => s_('SuggestedColors|Champagne'),
+      '#c21e56' => s_('SuggestedColors|Rose red'),
+      '#cc338b' => s_('SuggestedColors|Magenta-pink'),
+      '#dc143c' => s_('SuggestedColors|Crimson'),
+      '#ff0000' => s_('SuggestedColors|Red'),
+      '#cd5b45' => s_('SuggestedColors|Dark coral'),
+      '#eee600' => s_('SuggestedColors|Titanium yellow'),
+      '#ed9121' => s_('SuggestedColors|Carrot orange'),
+      '#c39953' => s_('SuggestedColors|Aztec Gold')
     }
   end
 
@@ -164,8 +164,8 @@ module LabelsHelper
   end
 
   def label_subscription_status(label, project)
-    return 'group-level' if label.subscribed?(current_user)
-    return 'project-level' if label.subscribed?(current_user, project)
+    return 'group-level' if label.lazy_subscribed?(current_user)
+    return 'project-level' if label.lazy_subscribed?(current_user, project)
 
     'unsubscribed'
   end
@@ -181,7 +181,7 @@ module LabelsHelper
   end
 
   def label_subscription_toggle_button_text(label, project = nil)
-    label.subscribed?(current_user, project) ? 'Unsubscribe' : 'Subscribe'
+    label.lazy_subscribed?(current_user, project) ? 'Unsubscribe' : 'Subscribe'
   end
 
   def create_label_title(subject)
@@ -241,27 +241,12 @@ module LabelsHelper
     }.merge(opts)
   end
 
-  def sidebar_label_dropdown_data(issuable_type, issuable_sidebar)
-    label_dropdown_data(nil, {
-     default_label: "Labels",
-     field_name: "#{issuable_type}[label_names][]",
-     ability_name: issuable_type,
-     namespace_path: issuable_sidebar[:namespace_path],
-     project_path: issuable_sidebar[:project_path],
-     issue_update: issuable_sidebar[:issuable_json_path],
-     labels: issuable_sidebar[:project_labels_path],
-     display: 'static'
-    })
-  end
-
-  def label_from_hash(hash)
-    klass = hash[:group_id] ? GroupLabel : ProjectLabel
-
-    klass.new(hash.slice(:color, :description, :title, :group_id, :project_id))
-  end
-
   def issuable_types
     ['issues', 'merge requests']
+  end
+
+  def show_labels_full_path?(project, group)
+    project || group&.subgroup?
   end
 
   private
@@ -281,7 +266,7 @@ module LabelsHelper
   def render_label_text(name, suffix: '', css_class: nil, bg_color: nil)
     <<~HTML.chomp.html_safe
       <span
-        class="gl-label-text #{css_class}"
+        class="#{css_class}"
         data-container="body"
         data-html="true"
         #{"style=\"background-color: #{bg_color}\"" if bg_color}

@@ -1,13 +1,15 @@
-import { GlSkeletonLoading, GlSprintf } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlSprintf, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { AVAILABILITY_STATUS } from '~/set_status_modal/utils';
+import UserNameWithStatus from '~/sidebar/components/assignees/user_name_with_status.vue';
 import UserPopover from '~/vue_shared/components/user_popover/user_popover.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 const DEFAULT_PROPS = {
   user: {
     username: 'root',
     name: 'Administrator',
     location: 'Vienna',
+    bot: false,
     bio: null,
     workInformation: null,
     status: null,
@@ -17,7 +19,6 @@ const DEFAULT_PROPS = {
 
 describe('User Popover Component', () => {
   const fixtureTemplate = 'merge_requests/diff_comment.html';
-  preloadFixtures(fixtureTemplate);
 
   let wrapper;
 
@@ -29,8 +30,11 @@ describe('User Popover Component', () => {
     wrapper.destroy();
   });
 
+  const findByTestId = (testid) => wrapper.find(`[data-testid="${testid}"]`);
   const findUserStatus = () => wrapper.find('.js-user-status');
   const findTarget = () => document.querySelector('.js-user-link');
+  const findUserName = () => wrapper.find(UserNameWithStatus);
+  const findSecurityBotDocsLink = () => findByTestId('user-popover-bot-docs-link');
 
   const createWrapper = (props = {}, options = {}) => {
     wrapper = shallowMount(UserPopover, {
@@ -40,7 +44,8 @@ describe('User Popover Component', () => {
         ...props,
       },
       stubs: {
-        'gl-sprintf': GlSprintf,
+        GlSprintf,
+        UserNameWithStatus,
       },
       ...options,
     });
@@ -74,9 +79,16 @@ describe('User Popover Component', () => {
     });
 
     it('shows icon for location', () => {
-      const iconEl = wrapper.find(Icon);
+      createWrapper();
+      const iconEl = wrapper.find(GlIcon);
 
       expect(iconEl.props('name')).toEqual('location');
+    });
+
+    it("should not show a link to bot's documentation", () => {
+      createWrapper();
+      const securityBotDocsLink = findSecurityBotDocsLink();
+      expect(securityBotDocsLink.exists()).toBe(false);
     });
   });
 
@@ -139,9 +151,9 @@ describe('User Popover Component', () => {
 
       createWrapper({ user });
 
-      expect(wrapper.findAll(Icon).filter(icon => icon.props('name') === 'profile').length).toEqual(
-        1,
-      );
+      expect(
+        wrapper.findAll(GlIcon).filter((icon) => icon.props('name') === 'profile').length,
+      ).toEqual(1);
     });
 
     it('shows icon for work information', () => {
@@ -152,7 +164,9 @@ describe('User Popover Component', () => {
 
       createWrapper({ user });
 
-      expect(wrapper.findAll(Icon).filter(icon => icon.props('name') === 'work').length).toEqual(1);
+      expect(
+        wrapper.findAll(GlIcon).filter((icon) => icon.props('name') === 'work').length,
+      ).toEqual(1);
     });
   });
 
@@ -193,6 +207,47 @@ describe('User Popover Component', () => {
       createWrapper({ user });
 
       expect(findUserStatus().exists()).toBe(false);
+    });
+
+    it('should show the busy status if user set to busy', () => {
+      const user = {
+        ...DEFAULT_PROPS.user,
+        status: { availability: AVAILABILITY_STATUS.BUSY },
+      };
+
+      createWrapper({ user });
+
+      expect(findUserName().exists()).toBe(true);
+      expect(wrapper.text()).toContain(user.name);
+      expect(wrapper.text()).toContain('(Busy)');
+    });
+
+    it('should hide the busy status for any other status', () => {
+      const user = {
+        ...DEFAULT_PROPS.user,
+        status: { availability: AVAILABILITY_STATUS.NOT_SET },
+      };
+
+      createWrapper({ user });
+
+      expect(wrapper.text()).not.toContain('(Busy)');
+    });
+  });
+
+  describe('bot user', () => {
+    const SECURITY_BOT_USER = {
+      ...DEFAULT_PROPS.user,
+      name: 'GitLab Security Bot',
+      username: 'GitLab-Security-Bot',
+      websiteUrl: '/security/bot/docs',
+      bot: true,
+    };
+
+    it("shows a link to the bot's documentation", () => {
+      createWrapper({ user: SECURITY_BOT_USER });
+      const securityBotDocsLink = findSecurityBotDocsLink();
+      expect(securityBotDocsLink.exists()).toBe(true);
+      expect(securityBotDocsLink.attributes('href')).toBe(SECURITY_BOT_USER.websiteUrl);
     });
   });
 });

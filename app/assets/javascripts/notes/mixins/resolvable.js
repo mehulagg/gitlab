@@ -1,18 +1,11 @@
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
 
 export default {
   computed: {
     discussionResolved() {
       if (this.discussion) {
-        const { notes, resolved } = this.discussion;
-
-        if (notes) {
-          // Decide resolved state using store. Only valid for discussions.
-          return notes.filter(note => !note.system).every(note => note.resolved);
-        }
-
-        return resolved;
+        return Boolean(this.discussion.resolved);
       }
 
       return this.note.resolved;
@@ -38,7 +31,12 @@ export default {
       this.isResolving = true;
       const isResolved = this.discussionResolved || resolvedState;
       const discussion = this.resolveAsThread;
-      const endpoint = discussion ? this.discussion.resolve_path : `${this.note.path}/resolve`;
+      let endpoint =
+        discussion && this.discussion ? this.discussion.resolve_path : `${this.note.path}/resolve`;
+
+      if (this.discussionResolvePath) {
+        endpoint = this.discussionResolvePath;
+      }
 
       return this.toggleResolveNote({ endpoint, isResolved, discussion })
         .then(() => {

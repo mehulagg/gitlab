@@ -1,11 +1,11 @@
 import $ from 'jquery';
-import '~/gl_dropdown';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 class RefSelectDropdown {
   constructor($dropdownButton, availableRefs) {
     const availableRefsValue =
       availableRefs || JSON.parse(document.getElementById('availableRefs').innerHTML);
-    $dropdownButton.glDropdown({
+    initDeprecatedJQueryDropdown($dropdownButton, {
       data: availableRefsValue,
       filterable: true,
       filterByText: true,
@@ -31,7 +31,7 @@ class RefSelectDropdown {
     const $fieldInput = $(`input[name="${$dropdownButton.data('fieldName')}"]`, $dropdownContainer);
     const $filterInput = $('input[type="search"]', $dropdownContainer);
 
-    $filterInput.on('keyup', e => {
+    $filterInput.on('keyup', (e) => {
       const keyCode = e.keyCode || e.which;
       if (keyCode !== 13) return;
 

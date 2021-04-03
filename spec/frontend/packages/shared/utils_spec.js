@@ -1,10 +1,10 @@
+import { PackageType, TrackingCategories } from '~/packages/shared/constants';
 import {
   packageTypeToTrackCategory,
   beautifyPath,
   getPackageTypeLabel,
   getCommitLink,
 } from '~/packages/shared/utils';
-import { PackageType, TrackingCategories } from '~/packages/shared/constants';
 import { packageList } from '../mock_data';
 
 describe('Packages shared utils', () => {
@@ -13,7 +13,7 @@ describe('Packages shared utils', () => {
       expect(packageTypeToTrackCategory()).toMatchInlineSnapshot(`"UI::undefined"`);
     });
 
-    it.each(Object.keys(PackageType))('returns a correct category string for %s', packageKey => {
+    it.each(Object.keys(PackageType))('returns a correct category string for %s', (packageKey) => {
       const packageName = PackageType[packageKey];
       expect(packageTypeToTrackCategory(packageName)).toBe(
         `UI::${TrackingCategories[packageName]}`,
@@ -32,13 +32,15 @@ describe('Packages shared utils', () => {
 
   describe('getPackageTypeLabel', () => {
     describe.each`
-      packageType | expectedResult
-      ${'conan'}  | ${'Conan'}
-      ${'maven'}  | ${'Maven'}
-      ${'npm'}    | ${'NPM'}
-      ${'nuget'}  | ${'NuGet'}
-      ${'pypi'}   | ${'PyPi'}
-      ${'foo'}    | ${null}
+      packageType   | expectedResult
+      ${'conan'}    | ${'Conan'}
+      ${'maven'}    | ${'Maven'}
+      ${'npm'}      | ${'npm'}
+      ${'nuget'}    | ${'NuGet'}
+      ${'pypi'}     | ${'PyPI'}
+      ${'rubygems'} | ${'RubyGems'}
+      ${'composer'} | ${'Composer'}
+      ${'foo'}      | ${null}
     `(`package type`, ({ packageType, expectedResult }) => {
       it(`${packageType} should show as ${expectedResult}`, () => {
         expect(getPackageTypeLabel(packageType)).toBe(expectedResult);

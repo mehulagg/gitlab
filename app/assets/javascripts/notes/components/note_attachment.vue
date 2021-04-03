@@ -1,6 +1,11 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
+
 export default {
   name: 'NoteAttachment',
+  components: {
+    GlIcon,
+  },
   props: {
     attachment: {
       type: Object,
@@ -19,7 +24,7 @@ export default {
       target="_blank"
       rel="noopener noreferrer"
     >
-      <img :src="attachment.url" class="note-image-attach" />
+      <img :src="attachment.url" class="note-image-attach col-lg-4" />
     </a>
     <div class="attachment">
       <a
@@ -29,7 +34,7 @@ export default {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <i class="fa fa-paperclip" aria-hidden="true"> </i> {{ attachment.filename }}
+        <gl-icon name="paperclip" /> {{ attachment.filename }}
       </a>
     </div>
   </div>

@@ -1,45 +1,58 @@
 <script>
-import { GlDropdown, GlDropdownDivider, GlDropdownHeader, GlDropdownItem } from '@gitlab/ui';
+import {
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownSectionHeader,
+  GlDropdownItem,
+  GlIcon,
+  GlModalDirective,
+} from '@gitlab/ui';
+import permissionsQuery from 'shared_queries/repository/permissions.query.graphql';
 import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import { __ } from '../../locale';
-import Icon from '../../vue_shared/components/icon.vue';
 import getRefMixin from '../mixins/get_ref';
-import getProjectShortPath from '../queries/getProjectShortPath.query.graphql';
-import getProjectPath from '../queries/getProjectPath.query.graphql';
-import getPermissions from '../queries/getPermissions.query.graphql';
+import projectPathQuery from '../queries/project_path.query.graphql';
+import projectShortPathQuery from '../queries/project_short_path.query.graphql';
+import UploadBlobModal from './upload_blob_modal.vue';
 
 const ROW_TYPES = {
   header: 'header',
   divider: 'divider',
 };
 
+const UPLOAD_BLOB_MODAL_ID = 'modal-upload-blob';
+
 export default {
   components: {
     GlDropdown,
     GlDropdownDivider,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
-    Icon,
+    GlIcon,
+    UploadBlobModal,
   },
   apollo: {
     projectShortPath: {
-      query: getProjectShortPath,
+      query: projectShortPathQuery,
     },
     projectPath: {
-      query: getProjectPath,
+      query: projectPathQuery,
     },
     userPermissions: {
-      query: getPermissions,
+      query: permissionsQuery,
       variables() {
         return {
           projectPath: this.projectPath,
         };
       },
-      update: data => data.project?.userPermissions,
+      update: (data) => data.project?.userPermissions,
       error(error) {
         throw error;
       },
     },
+  },
+  directives: {
+    GlModal: GlModalDirective,
   },
   mixins: [getRefMixin],
   props: {
@@ -57,6 +70,21 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    canPushCode: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    selectedBranch: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    originalBranch: {
+      type: String,
+      required: false,
+      default: '',
     },
     newBranchPath: {
       type: String,
@@ -88,7 +116,13 @@ export default {
       required: false,
       default: null,
     },
+    uploadPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
+  uploadBlobModalId: UPLOAD_BLOB_MODAL_ID,
   data() {
     return {
       projectShortPath: '',
@@ -100,7 +134,7 @@ export default {
     pathLinks() {
       return this.currentPath
         .split('/')
-        .filter(p => p !== '')
+        .filter((p) => p !== '')
         .reduce(
           (acc, name, i) => {
             const path = joinPaths(i > 0 ? acc[i].path : '', escapeFileUrl(name));
@@ -121,7 +155,10 @@ export default {
         );
     },
     canCreateMrFromFork() {
-      return this.userPermissions.forkProject && this.userPermissions.createMergeRequestIn;
+      return this.userPermissions?.forkProject && this.userPermissions?.createMergeRequestIn;
+    },
+    showUploadModal() {
+      return this.canEditTree && !this.$apollo.queries.userPermissions.loading;
     },
     dropdownItems() {
       const items = [];
@@ -144,10 +181,9 @@ export default {
           {
             attrs: {
               href: '#modal-upload-blob',
-              'data-target': '#modal-upload-blob',
-              'data-toggle': 'modal',
             },
             text: __('Upload file'),
+            modalId: UPLOAD_BLOB_MODAL_ID,
           },
           {
             attrs: {
@@ -223,7 +259,7 @@ export default {
         case ROW_TYPES.divider:
           return 'gl-dropdown-divider';
         case ROW_TYPES.header:
-          return 'gl-dropdown-header';
+          return 'gl-dropdown-section-header';
         default:
           return 'gl-dropdown-item';
       }
@@ -241,19 +277,33 @@ export default {
         </router-link>
       </li>
       <li v-if="renderAddToTreeDropdown" class="breadcrumb-item">
-        <gl-dropdown toggle-class="add-to-tree qa-add-to-tree ml-1">
+        <gl-dropdown toggle-class="add-to-tree qa-add-to-tree gl-ml-2">
           <template #button-content>
             <span class="sr-only">{{ __('Add to tree') }}</span>
-            <icon name="plus" :size="16" class="float-left" />
-            <icon name="chevron-down" :size="16" class="float-left" />
+            <gl-icon name="plus" :size="16" class="float-left" />
+            <gl-icon name="chevron-down" :size="16" class="float-left" />
           </template>
           <template v-for="(item, i) in dropdownItems">
-            <component :is="getComponent(item.type)" :key="i" v-bind="item.attrs">
+            <component
+              :is="getComponent(item.type)"
+              :key="i"
+              v-bind="item.attrs"
+              v-gl-modal="item.modalId || null"
+            >
               {{ item.text }}
             </component>
           </template>
         </gl-dropdown>
       </li>
     </ol>
+    <upload-blob-modal
+      v-if="showUploadModal"
+      :modal-id="$options.uploadBlobModalId"
+      :commit-message="__('Upload New File')"
+      :target-branch="selectedBranch"
+      :original-branch="originalBranch"
+      :can-push-code="canPushCode"
+      :path="uploadPath"
+    />
   </nav>
 </template>

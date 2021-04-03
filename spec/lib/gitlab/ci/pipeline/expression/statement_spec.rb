@@ -1,20 +1,18 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
-require 'rspec-parameterized'
+require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Pipeline::Expression::Statement do
-  subject do
-    described_class.new(text, variables)
+  let(:variables) do
+    Gitlab::Ci::Variables::Collection.new
+      .append(key: 'PRESENT_VARIABLE', value: 'my variable')
+      .append(key: 'PATH_VARIABLE', value: 'a/path/variable/value')
+      .append(key: 'FULL_PATH_VARIABLE', value: '/a/full/path/variable/value')
+      .append(key: 'EMPTY_VARIABLE', value: '')
   end
 
-  let(:variables) do
-    {
-      'PRESENT_VARIABLE'   => 'my variable',
-      'PATH_VARIABLE'      => 'a/path/variable/value',
-      'FULL_PATH_VARIABLE' => '/a/full/path/variable/value',
-      'EMPTY_VARIABLE'     =>  ''
-    }
+  subject do
+    described_class.new(text, variables)
   end
 
   describe '.new' do
@@ -109,6 +107,17 @@ RSpec.describe Gitlab::Ci::Pipeline::Expression::Statement do
       '$UNDEFINED_VARIABLE || $PRESENT_VARIABLE'                   | 'my variable'
       '$UNDEFINED_VARIABLE == null || $PRESENT_VARIABLE'           | true
       '$PRESENT_VARIABLE || $UNDEFINED_VARIABLE == null'           | 'my variable'
+
+      '($PRESENT_VARIABLE)'                                        | 'my variable'
+      '(($PRESENT_VARIABLE))'                                      | 'my variable'
+      '(($PRESENT_VARIABLE && null) || $EMPTY_VARIABLE == "")'     | true
+      '($PRESENT_VARIABLE) && (null || $EMPTY_VARIABLE == "")'     | true
+      '("string" || "test") == "string"'                           | true
+      '(null || ("test" == "string"))'                             | false
+      '("string" == ("test" && "string"))'                         | true
+      '("string" == ("test" || "string"))'                         | false
+      '("string" == "test" || "string")'                           | "string"
+      '("string" == ("string" || (("1" == "1") && ("2" == "3"))))' | true
     end
 
     with_them do

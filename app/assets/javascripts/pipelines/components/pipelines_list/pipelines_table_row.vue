@@ -1,34 +1,35 @@
 <script>
-import eventHub from '../../event_hub';
-import PipelinesActionsComponent from './pipelines_actions.vue';
-import PipelinesArtifactsComponent from './pipelines_artifacts.vue';
+import { GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
+import { __ } from '~/locale';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
-import PipelineStage from './stage.vue';
-import PipelineUrl from './pipeline_url.vue';
-import PipelineTriggerer from './pipeline_triggerer.vue';
-import PipelinesTimeago from './time_ago.vue';
 import CommitComponent from '~/vue_shared/components/commit.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
-import Icon from '~/vue_shared/components/icon.vue';
-import { PIPELINES_TABLE } from '../../constants';
+import eventHub from '../../event_hub';
+import PipelineMiniGraph from './pipeline_mini_graph.vue';
+import PipelineTriggerer from './pipeline_triggerer.vue';
+import PipelineUrl from './pipeline_url.vue';
+import PipelinesArtifactsComponent from './pipelines_artifacts.vue';
+import PipelinesManualActionsComponent from './pipelines_manual_actions.vue';
+import PipelinesTimeago from './time_ago.vue';
 
-/**
- * Pipeline table row.
- *
- * Given the received object renders a table row in the pipelines' table.
- */
 export default {
+  i18n: {
+    cancelTitle: __('Cancel'),
+    redeployTitle: __('Retry'),
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+    GlModalDirective,
+  },
   components: {
-    PipelinesActionsComponent,
+    PipelinesManualActionsComponent,
     PipelinesArtifactsComponent,
     CommitComponent,
-    PipelineStage,
+    PipelineMiniGraph,
     PipelineUrl,
     PipelineTriggerer,
     CiBadge,
     PipelinesTimeago,
-    LoadingButton,
-    Icon,
+    GlButton,
   },
   props: {
     pipeline: {
@@ -45,10 +46,6 @@ export default {
       required: false,
       default: false,
     },
-    autoDevopsHelpPath: {
-      type: String,
-      required: true,
-    },
     viewType: {
       type: String,
       required: true,
@@ -59,7 +56,6 @@ export default {
       default: null,
     },
   },
-  pipelinesTable: PIPELINES_TABLE,
   data() {
     return {
       isRetrying: false,
@@ -120,116 +116,27 @@ export default {
 
       return commitAuthorInformation;
     },
-
-    /**
-     * If provided, returns the commit tag.
-     * Needed to render the commit component column.
-     *
-     * @returns {String|Undefined}
-     */
     commitTag() {
-      if (this.pipeline.ref && this.pipeline.ref.tag) {
-        return this.pipeline.ref.tag;
-      }
-      return undefined;
+      return this.pipeline?.ref?.tag;
     },
-
-    /**
-     * If provided, returns the commit ref.
-     * Needed to render the commit component column.
-     *
-     * Matches `path` prop sent in the API to `ref_url` prop needed
-     * in the commit component.
-     *
-     * @returns {Object|Undefined}
-     */
     commitRef() {
-      if (this.pipeline.ref) {
-        return Object.keys(this.pipeline.ref).reduce((accumulator, prop) => {
-          if (prop === 'path') {
-            accumulator.ref_url = this.pipeline.ref[prop];
-          } else {
-            accumulator[prop] = this.pipeline.ref[prop];
-          }
-          return accumulator;
-        }, {});
-      }
-
-      return undefined;
+      return this.pipeline?.ref;
     },
-
-    /**
-     * If provided, returns the commit url.
-     * Needed to render the commit component column.
-     *
-     * @returns {String|Undefined}
-     */
     commitUrl() {
-      if (this.pipeline.commit && this.pipeline.commit.commit_path) {
-        return this.pipeline.commit.commit_path;
-      }
-      return undefined;
+      return this.pipeline?.commit?.commit_path;
     },
-
-    /**
-     * If provided, returns the commit short sha.
-     * Needed to render the commit component column.
-     *
-     * @returns {String|Undefined}
-     */
     commitShortSha() {
-      if (this.pipeline.commit && this.pipeline.commit.short_id) {
-        return this.pipeline.commit.short_id;
-      }
-      return undefined;
+      return this.pipeline?.commit?.short_id;
     },
-
-    /**
-     * If provided, returns the commit title.
-     * Needed to render the commit component column.
-     *
-     * @returns {String|Undefined}
-     */
     commitTitle() {
-      if (this.pipeline.commit && this.pipeline.commit.title) {
-        return this.pipeline.commit.title;
-      }
-      return undefined;
+      return this.pipeline?.commit?.title;
     },
-
-    /**
-     * Timeago components expects a number
-     *
-     * @return {type}  description
-     */
-    pipelineDuration() {
-      if (this.pipeline.details && this.pipeline.details.duration) {
-        return this.pipeline.details.duration;
-      }
-
-      return 0;
-    },
-
-    /**
-     * Timeago component expects a String.
-     *
-     * @return {String}
-     */
-    pipelineFinishedAt() {
-      if (this.pipeline.details && this.pipeline.details.finished_at) {
-        return this.pipeline.details.finished_at;
-      }
-
-      return '';
-    },
-
     pipelineStatus() {
-      if (this.pipeline.details && this.pipeline.details.status) {
-        return this.pipeline.details.status;
-      }
-      return {};
+      return this.pipeline?.details?.status ?? {};
     },
-
+    hasStages() {
+      return this.pipeline?.details?.stages?.length > 0;
+    },
     displayPipelineActions() {
       return (
         this.pipeline.flags.retryable ||
@@ -238,11 +145,9 @@ export default {
         this.pipeline.details.artifacts.length
       );
     },
-
     isChildView() {
       return this.viewType === 'child';
     },
-
     isCancelling() {
       return this.cancelingPipeline === this.pipeline.id;
     },
@@ -263,6 +168,10 @@ export default {
       this.isRetrying = true;
       eventHub.$emit('retryPipeline', this.pipeline.retry_path);
     },
+    handlePipelineActionRequestComplete() {
+      // warn the pipelines table to update
+      eventHub.$emit('refreshPipelinesTable');
+    },
   },
 };
 </script>
@@ -274,16 +183,13 @@ export default {
         <ci-badge
           :status="pipelineStatus"
           :show-text="!isChildView"
+          :icon-classes="'gl-vertical-align-middle!'"
           data-qa-selector="pipeline_commit_status"
         />
       </div>
     </div>
 
-    <pipeline-url
-      :pipeline="pipeline"
-      :pipeline-schedule-url="pipelineScheduleUrl"
-      :auto-devops-help-path="autoDevopsHelpPath"
-    />
+    <pipeline-url :pipeline="pipeline" :pipeline-schedule-url="pipelineScheduleUrl" />
     <pipeline-triggerer :pipeline="pipeline" />
 
     <div class="table-section section-wrap section-20">
@@ -305,60 +211,58 @@ export default {
     <div class="table-section section-wrap section-15 stage-cell">
       <div class="table-mobile-header" role="rowheader">{{ s__('Pipeline|Stages') }}</div>
       <div class="table-mobile-content">
-        <template v-if="pipeline.details.stages.length > 0">
-          <div
-            v-for="(stage, index) in pipeline.details.stages"
-            :key="index"
-            class="stage-container dropdown"
-            data-testid="widget-mini-pipeline-graph"
-          >
-            <pipeline-stage
-              :type="$options.pipelinesTable"
-              :stage="stage"
-              :update-dropdown="updateGraphDropdown"
-            />
-          </div>
-        </template>
+        <pipeline-mini-graph
+          v-if="hasStages"
+          :stages="pipeline.details.stages"
+          :update-dropdown="updateGraphDropdown"
+          @pipelineActionRequestComplete="handlePipelineActionRequestComplete"
+        />
       </div>
     </div>
 
-    <pipelines-timeago :duration="pipelineDuration" :finished-time="pipelineFinishedAt" />
+    <pipelines-timeago class="gl-text-right" :pipeline="pipeline" />
 
     <div
       v-if="displayPipelineActions"
       class="table-section section-20 table-button-footer pipeline-actions"
     >
       <div class="btn-group table-action-buttons">
-        <pipelines-actions-component v-if="actions.length > 0" :actions="actions" />
+        <pipelines-manual-actions-component v-if="actions.length > 0" :actions="actions" />
 
         <pipelines-artifacts-component
           v-if="pipeline.details.artifacts.length"
           :artifacts="pipeline.details.artifacts"
-          class="d-md-block"
         />
 
-        <loading-button
+        <gl-button
           v-if="pipeline.flags.retryable"
-          :loading="isRetrying"
+          v-gl-tooltip.hover
+          :aria-label="$options.i18n.redeployTitle"
+          :title="$options.i18n.redeployTitle"
           :disabled="isRetrying"
-          container-class="js-pipelines-retry-button btn btn-default btn-retry"
+          :loading="isRetrying"
+          class="js-pipelines-retry-button"
           data-qa-selector="pipeline_retry_button"
+          icon="repeat"
+          variant="default"
+          category="secondary"
           @click="handleRetryClick"
-        >
-          <icon name="repeat" />
-        </loading-button>
+        />
 
-        <loading-button
+        <gl-button
           v-if="pipeline.flags.cancelable"
+          v-gl-tooltip.hover
+          v-gl-modal-directive="'confirmation-modal'"
+          :aria-label="$options.i18n.cancelTitle"
+          :title="$options.i18n.cancelTitle"
           :loading="isCancelling"
           :disabled="isCancelling"
-          data-toggle="modal"
-          data-target="#confirmation-modal"
-          container-class="js-pipelines-cancel-button btn btn-remove"
+          icon="close"
+          variant="danger"
+          category="primary"
+          class="js-pipelines-cancel-button"
           @click="handleCancelClick"
-        >
-          <icon name="close" />
-        </loading-button>
+        />
       </div>
     </div>
   </div>

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe QA::Runtime::API::Client do
+RSpec.describe QA::Runtime::API::Client do
   include Helpers::StubENV
 
   describe 'initialization' do
@@ -60,7 +60,7 @@ describe QA::Runtime::API::Client do
       end
 
       it 'returns a created token' do
-        client = described_class.new(user: { username: 'foo' })
+        client = described_class.new(user: Struct.new(:username, :admin?).new('foo', false))
 
         expect(client).to receive(:create_personal_access_token).and_return('created_token')
 

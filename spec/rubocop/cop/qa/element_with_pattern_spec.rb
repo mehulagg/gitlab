@@ -2,14 +2,9 @@
 
 require 'fast_spec_helper'
 
-require 'rubocop'
-require 'rubocop/rspec/support'
-
 require_relative '../../../../rubocop/cop/qa/element_with_pattern'
 
-RSpec.describe RuboCop::Cop::QA::ElementWithPattern, type: :rubocop do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::QA::ElementWithPattern do
   let(:source_file) { 'qa/page.rb' }
 
   subject(:cop) { described_class.new }

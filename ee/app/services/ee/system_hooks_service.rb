@@ -6,13 +6,6 @@ module EE
 
     private
 
-    override :group_member_data
-    def group_member_data(model)
-      super.tap do |data|
-        data[:group_plan] = model.group.gitlab_subscription&.plan_name
-      end
-    end
-
     override :user_data
     def user_data(model)
       super.tap do |data|

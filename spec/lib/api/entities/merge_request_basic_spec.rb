@@ -7,7 +7,7 @@ RSpec.describe ::API::Entities::MergeRequestBasic do
   let_it_be(:project) { create(:project, :public) }
   let_it_be(:merge_request) { create(:merge_request) }
   let_it_be(:labels) { create_list(:label, 3) }
-  let_it_be(:merge_requests) { create_list(:labeled_merge_request, 10, :unique_branches, :with_diffs, labels: labels) }
+  let_it_be(:merge_requests) { create_list(:labeled_merge_request, 10, :unique_branches, labels: labels) }
 
   # This mimics the behavior of the `Grape::Entity` serializer
   def present(obj)
@@ -38,6 +38,18 @@ RSpec.describe ::API::Entities::MergeRequestBasic do
 
       # The current threshold is 3 query per entity maximum.
       expect(batch.count).to be_within(3 * query.count).of(control.count)
+    end
+  end
+
+  context 'reviewers' do
+    before do
+      merge_request.reviewers = [user]
+    end
+
+    it 'includes assigned reviewers' do
+      result = Gitlab::Json.parse(present(merge_request).to_json)
+
+      expect(result['reviewers'][0]['username']).to eq user.username
     end
   end
 end

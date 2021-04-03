@@ -1,13 +1,18 @@
 <script>
+import { GlSafeHtmlDirective as SafeHtml, GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
 import { escape } from 'lodash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { s__, sprintf } from '~/locale';
-import Flash from '~/flash';
 
 export default {
   components: {
-    GlModal: DeprecatedModal2,
+    GlModal,
+    GlButton,
+  },
+  directives: {
+    GlModalDirective,
+    SafeHtml,
   },
   props: {
     actionUrl: {
@@ -51,6 +56,21 @@ Please update your Git repository remotes as soon as possible.`),
         false,
       );
     },
+    primaryProps() {
+      return {
+        text: s__('Update username'),
+        attributes: [
+          { variant: 'warning' },
+          { category: 'primary' },
+          { disabled: this.isRequestPending },
+        ],
+      };
+    },
+    cancelProps() {
+      return {
+        text: s__('Cancel'),
+      };
+    },
   },
   methods: {
     onConfirm() {
@@ -64,13 +84,16 @@ Please update your Git repository remotes as soon as possible.`),
 
       return axios
         .put(this.actionUrl, putData)
-        .then(result => {
+        .then((result) => {
           Flash(result.data.message, 'notice');
           this.username = username;
           this.isRequestPending = false;
         })
-        .catch(error => {
-          Flash(error.response.data.message);
+        .catch((error) => {
+          Flash(
+            error?.response?.data?.message ||
+              s__('Profiles|An error occurred while updating your username, please try again.'),
+          );
           this.isRequestPending = false;
           throw error;
         });
@@ -99,23 +122,23 @@ Please update your Git repository remotes as soon as possible.`),
       </div>
       <p class="form-text text-muted">{{ path }}</p>
     </div>
-    <button
-      :data-target="`#${$options.modalId}`"
-      :disabled="isRequestPending || newUsername === username"
-      class="btn btn-warning"
-      type="button"
-      data-toggle="modal"
+    <gl-button
+      v-gl-modal-directive="$options.modalId"
+      :disabled="newUsername === username"
+      :loading="isRequestPending"
+      category="primary"
+      variant="warning"
+      data-testid="username-change-confirmation-modal"
+      >{{ $options.buttonText }}</gl-button
     >
-      {{ $options.buttonText }}
-    </button>
     <gl-modal
-      :id="$options.modalId"
-      :header-title-text="s__('Profiles|Change username') + '?'"
-      :footer-primary-button-text="$options.buttonText"
-      footer-primary-button-variant="warning"
-      @submit="onConfirm"
+      :modal-id="$options.modalId"
+      :title="s__('Profiles|Change username') + '?'"
+      :action-primary="primaryProps"
+      :action-cancel="cancelProps"
+      @primary="onConfirm"
     >
-      <span v-html="modalText"></span>
+      <span v-safe-html="modalText"></span>
     </gl-modal>
   </div>
 </template>

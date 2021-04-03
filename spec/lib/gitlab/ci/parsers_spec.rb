@@ -30,6 +30,14 @@ RSpec.describe Gitlab::Ci::Parsers do
       end
     end
 
+    context 'when file_type is codequality' do
+      let(:file_type) { 'codequality' }
+
+      it 'fabricates the class' do
+        is_expected.to be_a(described_class::Codequality::CodeClimate)
+      end
+    end
+
     context 'when file_type is terraform' do
       let(:file_type) { 'terraform' }
 
@@ -44,6 +52,14 @@ RSpec.describe Gitlab::Ci::Parsers do
       it 'raises an error' do
         expect { subject }.to raise_error(Gitlab::Ci::Parsers::ParserNotFoundError)
       end
+    end
+  end
+
+  describe '.instrument!' do
+    it 'prepends the Instrumentation module into each parser' do
+      expect(described_class.parsers.values).to all( receive(:prepend).with(Gitlab::Ci::Parsers::Instrumentation) )
+
+      described_class.instrument!
     end
   end
 end

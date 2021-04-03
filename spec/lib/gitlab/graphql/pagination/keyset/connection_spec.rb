@@ -10,15 +10,63 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
   let(:context) { GraphQL::Query::Context.new(query: OpenStruct.new(schema: schema), values: nil, object: nil) }
 
   subject(:connection) do
-    described_class.new(nodes, { context: context, max_page_size: 3 }.merge(arguments))
+    described_class.new(nodes, **{ context: context, max_page_size: 3 }.merge(arguments))
   end
 
   def encoded_cursor(node)
-    described_class.new(nodes, { context: context }).cursor_for(node)
+    described_class.new(nodes, context: context).cursor_for(node)
   end
 
   def decoded_cursor(cursor)
     Gitlab::Json.parse(Base64Bp.urlsafe_decode64(cursor))
+  end
+
+  # see: https://gitlab.com/gitlab-org/gitlab/-/issues/297358
+  context 'the relation has been preloaded' do
+    let(:projects) { Project.all.preload(:issues) }
+    let(:nodes) { projects.first.issues }
+
+    before do
+      project = create(:project)
+      create_list(:issue, 3, project: project)
+    end
+
+    it 'is loaded' do
+      expect(nodes).to be_loaded
+    end
+
+    it 'does not error when accessing pagination information' do
+      connection.first = 2
+
+      expect(connection).to have_attributes(
+        has_previous_page: false,
+        has_next_page: true
+      )
+    end
+
+    it 'can generate cursors' do
+      connection.send(:ordered_items) # necessary to generate the order-list
+
+      expect(connection.cursor_for(nodes.first)).to be_a(String)
+    end
+
+    it 'can read the next page' do
+      connection.send(:ordered_items) # necessary to generate the order-list
+      ordered = nodes.reorder(id: :desc)
+      next_page = described_class.new(nodes,
+                                      context: context,
+                                      max_page_size: 3,
+                                      after: connection.cursor_for(ordered.second))
+
+      expect(next_page.sliced_nodes).to contain_exactly(ordered.third)
+    end
+  end
+
+  it_behaves_like 'a connection with collection methods'
+
+  it_behaves_like 'a redactable connection' do
+    let_it_be(:projects) { create_list(:project, 2) }
+    let(:unwanted) { projects.second }
   end
 
   describe '#cursor_for' do
@@ -185,6 +233,7 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
         let(:nodes) do
           Project.order(Arel.sql('projects.last_repository_check_at IS NULL')).order(last_repository_check_at: :asc).order(id: :asc)
         end
+
         let(:ascending_nodes) { [project5, project1, project3, project2, project4] }
 
         it_behaves_like 'nodes are in ascending order'
@@ -210,6 +259,7 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
         let(:nodes) do
           Project.order(Arel.sql('projects.last_repository_check_at IS NULL')).order(last_repository_check_at: :desc).order(id: :asc)
         end
+
         let(:descending_nodes) { [project3, project1, project5, project2, project4] }
 
         it_behaves_like 'nodes are in descending order'
@@ -243,6 +293,7 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
         let(:nodes) do
           Project.order(Arel::Table.new(:projects)['name'].lower.asc).order(id: :asc)
         end
+
         let(:ascending_nodes) { [project1, project5, project3, project2, project4] }
 
         it_behaves_like 'nodes are in ascending order'
@@ -252,10 +303,27 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
         let(:nodes) do
           Project.order(Arel::Table.new(:projects)['name'].lower.desc).order(id: :desc)
         end
+
         let(:descending_nodes) { [project4, project2, project3, project5, project1] }
 
         it_behaves_like 'nodes are in descending order'
       end
+    end
+
+    context 'when ordering by similarity' do
+      let!(:project1) { create(:project, name: 'test') }
+      let!(:project2) { create(:project, name: 'testing') }
+      let!(:project3) { create(:project, name: 'tests') }
+      let!(:project4) { create(:project, name: 'testing stuff') }
+      let!(:project5) { create(:project, name: 'test') }
+
+      let(:nodes) do
+        Project.sorted_by_similarity_desc('test', include_in_select: true)
+      end
+
+      let(:descending_nodes) { nodes.to_a }
+
+      it_behaves_like 'nodes are in descending order'
     end
 
     context 'when an invalid cursor is provided' do
@@ -346,15 +414,6 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
       end
 
       context 'when before and last specified' do
-        let(:arguments) { { before: encoded_cursor(project_list.last), last: 2 } }
-
-        it 'has a previous and a next' do
-          expect(subject.has_previous_page).to be_truthy
-          expect(subject.has_next_page).to be_truthy
-        end
-      end
-
-      context 'when before and last does not request all remaining nodes' do
         let(:arguments) { { before: encoded_cursor(project_list.last), last: 2 } }
 
         it 'has a previous and a next' do

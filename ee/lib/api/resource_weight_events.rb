@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class ResourceWeightEvents < Grape::API::Instance
+  class ResourceWeightEvents < ::API::Base
     include PaginationParams
     helpers ::API::Helpers::NotesHelpers
 
     before { authenticate! }
+
+    feature_category :issue_tracking
 
     params do
       requires :id, type: String, desc: "The ID of a project"

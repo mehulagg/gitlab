@@ -2,38 +2,39 @@
 
 module Resolvers
   class TodoResolver < BaseResolver
-    type Types::TodoType, null: true
+    type Types::TodoType.connection_type, null: true
 
-    alias_method :user, :object
+    alias_method :target, :object
 
     argument :action, [Types::TodoActionEnum],
              required: false,
-             description: 'The action to be filtered'
+             description: 'The action to be filtered.'
 
     argument :author_id, [GraphQL::ID_TYPE],
              required: false,
-             description: 'The ID of an author'
+             description: 'The ID of an author.'
 
     argument :project_id, [GraphQL::ID_TYPE],
              required: false,
-             description: 'The ID of a project'
+             description: 'The ID of a project.'
 
     argument :group_id, [GraphQL::ID_TYPE],
              required: false,
-             description: 'The ID of a group'
+             description: 'The ID of a group.'
 
     argument :state, [Types::TodoStateEnum],
              required: false,
-             description: 'The state of the todo'
+             description: 'The state of the todo.'
 
     argument :type, [Types::TodoTargetEnum],
              required: false,
-             description: 'The type of the todo'
+             description: 'The type of the todo.'
 
     def resolve(**args)
-      return Todo.none if user != context[:current_user]
+      return Todo.none unless current_user.present? && target.present?
+      return Todo.none if target.is_a?(User) && target != current_user
 
-      TodosFinder.new(user, todo_finder_params(args)).execute
+      TodosFinder.new(current_user, todo_finder_params(args)).execute
     end
 
     private
@@ -46,6 +47,15 @@ module Resolvers
         author_id: args[:author_id],
         action_id: args[:action],
         project_id: args[:project_id]
+      }.merge(target_params)
+    end
+
+    def target_params
+      return {} unless TodosFinder::TODO_TYPES.include?(target.class.name)
+
+      {
+        type: target.class.name,
+        target_id: target.id
       }
     end
   end

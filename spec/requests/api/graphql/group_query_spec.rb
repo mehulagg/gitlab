@@ -4,7 +4,7 @@ require 'spec_helper'
 
 # Based on spec/requests/api/groups_spec.rb
 # Should follow closely in order to ensure all situations are covered
-RSpec.describe 'getting group information', :do_not_mock_admin_mode do
+RSpec.describe 'getting group information' do
   include GraphqlHelpers
   include UploadHelpers
 
@@ -17,7 +17,15 @@ RSpec.describe 'getting group information', :do_not_mock_admin_mode do
   # similar to the API "GET /groups/:id"
   describe "Query group(fullPath)" do
     def group_query(group)
-      graphql_query_for('group', 'fullPath' => group.full_path)
+      fields = all_graphql_fields_for('Group')
+      # TODO: Set required timelogs args elsewhere https://gitlab.com/gitlab-org/gitlab/-/issues/325499
+      fields.selection['timelogs(startDate: "2021-03-01" endDate: "2021-03-30")'] = fields.selection.delete('timelogs')
+
+      graphql_query_for(
+        'group',
+        { fullPath: group.full_path },
+        fields
+      )
     end
 
     it_behaves_like 'a working graphql query' do
@@ -89,18 +97,13 @@ RSpec.describe 'getting group information', :do_not_mock_admin_mode do
       end
 
       it 'avoids N+1 queries' do
-        control_count = ActiveRecord::QueryRecorder.new do
-          post_graphql(group_query(group1), current_user: admin)
-        end.count
+        pending('See: https://gitlab.com/gitlab-org/gitlab/-/issues/245272')
 
         queries = [{ query: group_query(group1) },
                    { query: group_query(group2) }]
 
-        expect do
-          post_multiplex(queries, current_user: admin)
-        end.not_to exceed_query_limit(control_count)
-
-        expect(graphql_errors).to contain_exactly(nil, nil)
+        expect { post_multiplex(queries, current_user: admin) }
+          .to issue_same_number_of_queries_as { post_graphql(group_query(group1), current_user: admin) }
       end
     end
 

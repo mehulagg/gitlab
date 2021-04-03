@@ -68,7 +68,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
           let(:config) { { rspec: nil } }
 
           it 'reports error' do
-            expect(entry.errors).to include "jobs config should contain valid jobs"
+            expect(entry.errors).to include 'jobs rspec config should implement a script: or a trigger: keyword'
           end
         end
 
@@ -100,6 +100,8 @@ RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
               stage: 'test',
               trigger: { project: 'my/project' },
               variables: {},
+              job_variables: {},
+              root_variables_inheritance: true,
               scheduling_type: :stage
             },
             regular_job: {
@@ -109,6 +111,8 @@ RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
               script: ['something'],
               stage: 'test',
               variables: {},
+              job_variables: {},
+              root_variables_inheritance: true,
               scheduling_type: :stage
             })
         end

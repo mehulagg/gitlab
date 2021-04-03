@@ -6,7 +6,11 @@ class TemplateFinder
   VENDORED_TEMPLATES = HashWithIndifferentAccess.new(
     dockerfiles: ::Gitlab::Template::DockerfileTemplate,
     gitignores: ::Gitlab::Template::GitignoreTemplate,
-    gitlab_ci_ymls: ::Gitlab::Template::GitlabCiYmlTemplate
+    gitlab_ci_ymls: ::Gitlab::Template::GitlabCiYmlTemplate,
+    gitlab_ci_syntax_ymls: ::Gitlab::Template::GitlabCiSyntaxYmlTemplate,
+    metrics_dashboard_ymls: ::Gitlab::Template::MetricsDashboardTemplate,
+    issues: ::Gitlab::Template::IssueTemplate,
+    merge_requests: ::Gitlab::Template::MergeRequestTemplate
   ).freeze
 
   class << self
@@ -16,6 +20,28 @@ class TemplateFinder
       else
         new(type, project, params)
       end
+    end
+
+    # This is temporary and will be removed once we introduce group level inherited templates and
+    # remove the inherited_issuable_templates FF
+    def all_template_names_hash_or_array(project, issuable_type)
+      if project.inherited_issuable_templates_enabled?
+        all_template_names(project, issuable_type.pluralize)
+      else
+        all_template_names_array(project, issuable_type.pluralize)
+      end
+    end
+
+    def all_template_names(project, type)
+      return {} if !VENDORED_TEMPLATES.key?(type.to_s) && type.to_s != 'licenses'
+
+      build(type, project).template_names
+    end
+
+    # This is for issues and merge requests description templates only.
+    # This will be removed once we introduce group level inherited templates and remove the inherited_issuable_templates FF
+    def all_template_names_array(project, type)
+      all_template_names(project, type).values.flatten.select { |tmpl| tmpl[:project_id] == project.id }.compact.uniq
     end
   end
 
@@ -34,10 +60,14 @@ class TemplateFinder
 
   def execute
     if params[:name]
-      vendored_templates.find(params[:name])
+      vendored_templates.find(params[:name], project)
     else
-      vendored_templates.all
+      vendored_templates.all(project)
     end
+  end
+
+  def template_names
+    vendored_templates.template_names(project)
   end
 end
 

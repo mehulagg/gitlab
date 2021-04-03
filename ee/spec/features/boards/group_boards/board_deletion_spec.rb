@@ -21,7 +21,7 @@ RSpec.describe 'Group Boards', :js do
     wait_for_requests
 
     find(:css, '.js-delete-board button').click
-    find(:css, '.board-config-modal .js-primary-button').click
+    find(:css, '.board-config-modal .js-modal-action-primary').click
 
     click_boards_dropdown
 

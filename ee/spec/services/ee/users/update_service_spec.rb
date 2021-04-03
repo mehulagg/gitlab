@@ -10,10 +10,19 @@ RSpec.describe Users::UpdateService do
 
       shared_examples_for 'a user can update the name' do
         it 'updates the name' do
-          result = described_class.new(current_user, { user: user, name: 'New Name' }).execute!
+          result = update_user_as(current_user, user, { user: user, name: 'New Name' })
 
           expect(result).to be_truthy
           expect(user.name).to eq('New Name')
+        end
+      end
+
+      shared_examples_for 'a user cannot update the name' do
+        it 'does not update the name' do
+          result = update_user_as(current_user, user, { name: 'New Name' })
+
+          expect(result).to be_truthy
+          expect(user.name).not_to eq('New Name')
         end
       end
 
@@ -31,8 +40,10 @@ RSpec.describe Users::UpdateService do
             let(:current_user) { user }
           end
 
-          it_behaves_like 'a user can update the name' do
-            let(:current_user) { admin }
+          context 'when admin mode is enabled', :enable_admin_mode do
+            it_behaves_like 'a user can update the name' do
+              let(:current_user) { admin }
+            end
           end
         end
 
@@ -42,16 +53,21 @@ RSpec.describe Users::UpdateService do
           end
 
           context 'as a regular user' do
-            it 'does not update the name' do
-              result = update_user(user, name: 'New Name')
-
-              expect(result).to be_truthy
-              expect(user.name).not_to eq('New Name')
+            it_behaves_like 'a user cannot update the name' do
+              let(:current_user) { user }
             end
           end
 
-          it_behaves_like 'a user can update the name' do
-            let(:current_user) { admin }
+          context 'when admin mode is enabled', :enable_admin_mode do
+            it_behaves_like 'a user can update the name' do
+              let(:current_user) { admin }
+            end
+          end
+
+          context 'when admin mode is disabled' do
+            it_behaves_like 'a user cannot update the name' do
+              let(:current_user) { admin }
+            end
           end
         end
       end
@@ -65,8 +81,16 @@ RSpec.describe Users::UpdateService do
           let(:current_user) { user }
         end
 
-        it_behaves_like 'a user can update the name' do
-          let(:current_user) { admin }
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it_behaves_like 'a user can update the name' do
+            let(:current_user) { admin }
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it_behaves_like 'a user cannot update the name' do
+            let(:current_user) { admin }
+          end
         end
       end
     end
@@ -84,7 +108,7 @@ RSpec.describe Users::UpdateService do
             expected_message = "Changed username from #{previous_username} to #{new_username}"
 
             expect do
-              update_user(user, username: new_username)
+              update_user_as_self(user, username: new_username)
             end.to change { AuditEvent.count }.by(1)
 
             expect(AuditEvent.last.present.action).to eq(expected_message)
@@ -97,7 +121,7 @@ RSpec.describe Users::UpdateService do
       allow(user).to receive(:group_managed_account?).and_return(true)
 
       expect do
-        update_user(user, { email: 'foreign@email' })
+        update_user_as_self(user, { email: 'foreign@email' })
       end.not_to change { user.reload.email }
     end
 
@@ -105,7 +129,7 @@ RSpec.describe Users::UpdateService do
       allow(user).to receive(:group_managed_account?).and_return(true)
 
       expect do
-        update_user(user, { commit_email: 'foreign@email' })
+        update_user_as_self(user, { commit_email: 'foreign@email' })
       end.not_to change { user.reload.commit_email }
     end
 
@@ -113,7 +137,7 @@ RSpec.describe Users::UpdateService do
       allow(user).to receive(:group_managed_account?).and_return(true)
 
       expect do
-        update_user(user, { public_email: 'foreign@email' })
+        update_user_as_self(user, { public_email: 'foreign@email' })
       end.not_to change { user.reload.public_email }
     end
 
@@ -121,7 +145,7 @@ RSpec.describe Users::UpdateService do
       allow(user).to receive(:group_managed_account?).and_return(true)
 
       expect do
-        update_user(user, { notification_email: 'foreign@email' })
+        update_user_as_self(user, { notification_email: 'foreign@email' })
       end.not_to change { user.reload.notification_email }
     end
 
@@ -142,7 +166,7 @@ RSpec.describe Users::UpdateService do
           end
 
           it 'adds identity to user' do
-            result = update_user(user, params)
+            result = update_user_as_self(user, params)
 
             expect(result).to be true
             expect(user.identities.last.saml_provider_id).to eq(provider.id)
@@ -152,8 +176,8 @@ RSpec.describe Users::UpdateService do
 
           it 'adds two different identities to user' do
             second_provider = create(:saml_provider)
-            result_one = update_user(user, { extern_uid: 'uid', provider: 'group_saml', saml_provider_id: provider.id })
-            result_two = update_user(user, { extern_uid: 'uid2', provider: 'group_saml', group_id_for_saml: second_provider.group.id } )
+            result_one = update_user_as_self(user, { extern_uid: 'uid', provider: 'group_saml', saml_provider_id: provider.id })
+            result_two = update_user_as_self(user, { extern_uid: 'uid2', provider: 'group_saml', group_id_for_saml: second_provider.group.id } )
 
             expect(result_one).to be true
             expect(result_two).to be true
@@ -165,8 +189,12 @@ RSpec.describe Users::UpdateService do
       end
     end
 
-    def update_user(user, opts)
-      described_class.new(user, opts.merge(user: user)).execute!
+    def update_user_as(current_user, user, opts)
+      described_class.new(current_user, opts.merge(user: user)).execute!
+    end
+
+    def update_user_as_self(user, opts)
+      update_user_as(user, user, opts)
     end
   end
 end

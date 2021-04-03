@@ -5,8 +5,13 @@ require 'spec_helper'
 RSpec.describe 'Project > Members > Invite group', :js do
   include Select2Helper
   include ActionView::Helpers::DateHelper
+  include Spec::Support::Helpers::Features::MembersHelpers
 
   let(:maintainer) { create(:user) }
+
+  before do
+    stub_feature_flags(invite_members_group_modal: false)
+  end
 
   describe 'Share with group lock' do
     shared_examples 'the project can be shared with groups' do
@@ -39,17 +44,17 @@ RSpec.describe 'Project > Members > Invite group', :js do
         it 'the project can be shared with another group' do
           visit project_project_members_path(project)
 
-          expect(page).not_to have_css('.project-members-groups')
+          expect(page).not_to have_link 'Groups'
 
           click_on 'invite-group-tab'
 
           select2 group_to_share_with.id, from: '#link_group_id'
           page.find('body').click
-          find('.btn-success').click
+          find('.btn-confirm').click
 
-          page.within('.project-members-groups') do
-            expect(page).to have_content(group_to_share_with.name)
-          end
+          click_link 'Groups'
+
+          expect(members_table).to have_content(group_to_share_with.name)
         end
       end
 
@@ -112,10 +117,10 @@ RSpec.describe 'Project > Members > Invite group', :js do
     let!(:group) { create(:group) }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
-    before do
+    def setup
       project.add_maintainer(maintainer)
       group.add_guest(maintainer)
       sign_in(maintainer)
@@ -126,19 +131,17 @@ RSpec.describe 'Project > Members > Invite group', :js do
 
       select2 group.id, from: '#link_group_id'
 
-      fill_in 'expires_at_groups', with: (Time.now + 4.5.days).strftime('%Y-%m-%d')
+      fill_in 'expires_at_groups', with: 5.days.from_now.strftime('%Y-%m-%d')
       click_on 'invite-group-tab'
-      find('.btn-success').click
+      find('.btn-confirm').click
     end
 
     it 'the group link shows the expiration time with a warning class' do
-      page.within('.project-members-groups') do
-        # Using distance_of_time_in_words_to_now because it is not the same as
-        # subtraction, and this way avoids time zone issues as well
-        expires_in_text = distance_of_time_in_words_to_now(project.project_group_links.first.expires_at)
-        expect(page).to have_content(expires_in_text)
-        expect(page).to have_selector('.text-warning')
-      end
+      setup
+      click_link 'Groups'
+
+      expect(find_group_row(group)).to have_content(/in \d days/)
+      expect(find_group_row(group)).to have_selector('.gl-text-orange-500')
     end
   end
 

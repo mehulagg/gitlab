@@ -3,6 +3,12 @@
 class AutocompleteController < ApplicationController
   skip_before_action :authenticate_user!, only: [:users, :award_emojis, :merge_request_target_branches]
 
+  feature_category :users, [:users, :user]
+  feature_category :projects, [:projects]
+  feature_category :issue_tracking, [:award_emojis]
+  feature_category :code_review, [:merge_request_target_branches]
+  feature_category :continuous_delivery, [:deploy_keys_with_owners]
+
   def users
     group = Autocomplete::GroupFinder
       .new(current_user, project, params)
@@ -12,7 +18,7 @@ class AutocompleteController < ApplicationController
       .new(params: params, current_user: current_user, project: project, group: group)
       .execute
 
-    render json: UserSerializer.new(params).represent(users, project: project)
+    render json: UserSerializer.new(params.merge({ current_user: current_user })).represent(users, project: project)
   end
 
   def user
@@ -47,7 +53,7 @@ class AutocompleteController < ApplicationController
   end
 
   def deploy_keys_with_owners
-    deploy_keys = DeployKeys::CollectKeysService.new(project, current_user).execute
+    deploy_keys = DeployKey.with_write_access_for_project(project)
 
     render json: DeployKeySerializer.new.represent(deploy_keys, { with_owner: true, user: current_user })
   end

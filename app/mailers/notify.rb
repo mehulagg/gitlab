@@ -4,6 +4,7 @@ class Notify < ApplicationMailer
   include ActionDispatch::Routing::PolymorphicRoutes
   include GitlabRoutingHelper
   include EmailsHelper
+  include ReminderEmailsHelper
   include IssuablesHelper
 
   include Emails::Issues
@@ -20,16 +21,19 @@ class Notify < ApplicationMailer
   include Emails::Groups
   include Emails::Reviews
   include Emails::ServiceDesk
+  include Emails::InProductMarketing
 
   helper TimeboxesHelper
   helper MergeRequestsHelper
   helper DiffHelper
   helper BlobHelper
   helper EmailsHelper
+  helper ReminderEmailsHelper
   helper MembersHelper
   helper AvatarsHelper
   helper GitlabRoutingHelper
   helper IssuablesHelper
+  helper InProductMarketingHelper
 
   def test_email(recipient_email, subject, body)
     mail(to: recipient_email,
@@ -66,7 +70,7 @@ class Notify < ApplicationMailer
     return unless sender = User.find(sender_id)
 
     address = default_sender_address
-    address.display_name = sender_name.presence || sender.name
+    address.display_name = sender_name.presence || "#{sender.name} (#{sender.to_reference})"
 
     if send_from_user_email && can_send_from_user_email?(sender)
       address.address = sender.email

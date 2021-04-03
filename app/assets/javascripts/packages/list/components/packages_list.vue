@@ -1,12 +1,12 @@
 <script>
-import { mapState, mapGetters } from 'vuex';
 import { GlPagination, GlModal, GlSprintf } from '@gitlab/ui';
-import Tracking from '~/tracking';
+import { mapState, mapGetters } from 'vuex';
 import { s__ } from '~/locale';
+import Tracking from '~/tracking';
+import PackagesListRow from '../../shared/components/package_list_row.vue';
+import PackagesListLoader from '../../shared/components/packages_list_loader.vue';
 import { TrackingActions } from '../../shared/constants';
 import { packageTypeToTrackCategory } from '../../shared/utils';
-import PackagesListLoader from '../../shared/components/packages_list_loader.vue';
-import PackagesListRow from '../../shared/components/package_list_row.vue';
 
 export default {
   components: {
@@ -24,10 +24,10 @@ export default {
   },
   computed: {
     ...mapState({
-      perPage: state => state.pagination.perPage,
-      totalItems: state => state.pagination.total,
-      page: state => state.pagination.page,
-      isGroupPage: state => state.config.isGroupPage,
+      perPage: (state) => state.pagination.perPage,
+      totalItems: (state) => state.pagination.total,
+      page: (state) => state.pagination.page,
+      isGroupPage: (state) => state.config.isGroupPage,
       isLoading: 'isLoading',
     }),
     ...mapGetters({ list: 'getList' }),
@@ -82,11 +82,11 @@ export default {
 </script>
 
 <template>
-  <div class="d-flex flex-column">
+  <div class="gl-display-flex gl-flex-direction-column">
     <slot v-if="isListEmpty && !isLoading" name="empty-state"></slot>
 
     <div v-else-if="isLoading">
-      <packages-list-loader :is-group="isGroupPage" />
+      <packages-list-loader />
     </div>
 
     <template v-else>
@@ -106,7 +106,7 @@ export default {
         :per-page="perPage"
         :total-items="totalItems"
         align="center"
-        class="w-100 mt-2"
+        class="gl-w-full gl-mt-3"
       />
 
       <gl-modal

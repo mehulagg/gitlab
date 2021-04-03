@@ -3,9 +3,13 @@
 RSpec.shared_examples 'multiple issue boards' do
   context 'authorized user' do
     before do
+      stub_feature_flags(board_new_list: false)
+
       parent.add_maintainer(user)
 
       login_as(user)
+
+      stub_feature_flags(board_new_list: false)
 
       visit boards_path
       wait_for_requests
@@ -48,7 +52,7 @@ RSpec.shared_examples 'multiple issue boards' do
       expect(page).to have_button('This is a new board')
     end
 
-    it 'deletes board' do
+    it 'deletes board', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/280554' do
       in_boards_switcher_dropdown do
         click_button 'Delete board'
       end

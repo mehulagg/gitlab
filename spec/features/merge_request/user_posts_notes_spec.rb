@@ -10,6 +10,7 @@ RSpec.describe 'Merge request > User posts notes', :js do
   let(:merge_request) do
     create(:merge_request, source_project: project, target_project: project)
   end
+
   let!(:note) do
     create(:note_on_merge_request, :with_attachment, noteable: merge_request,
                                                      project: project)
@@ -43,7 +44,10 @@ RSpec.describe 'Merge request > User posts notes', :js do
 
       it 'has enable submit button, preview button and saves content to local storage' do
         page.within('.js-main-target-form') do
-          expect(page).not_to have_css('.js-comment-button[disabled]')
+          page.within('[data-testid="comment-button"]') do
+            expect(page).to have_css('.split-content-button')
+            expect(page).not_to have_css('.split-content-button[disabled]')
+          end
           expect(page).to have_css('.js-md-preview-button', visible: true)
         end
 
@@ -81,7 +85,7 @@ RSpec.describe 'Merge request > User posts notes', :js do
       it 'shows a reply button' do
         reply_button = find('.js-reply-button', match: :first)
 
-        expect(reply_button).to have_selector('.ic-comment')
+        expect(reply_button).to have_selector('[data-testid="comment-icon"]')
       end
 
       it 'shows reply placeholder when clicking reply button' do
@@ -94,20 +98,31 @@ RSpec.describe 'Merge request > User posts notes', :js do
     end
   end
 
-  describe 'reply on a deleted conversation' do
-    before do
-      visit project_merge_request_path(project, merge_request)
-    end
-
-    it 'shows an error message' do
+  describe 'replying to a comment' do
+    it 'makes the discussion resolvable' do
       find('.js-reply-button').click
-      note.delete
 
       page.within('.discussion-reply-holder') do
         fill_in 'note[note]', with: 'A reply'
         click_button 'Add comment now'
-        wait_for_requests
-        expect(page).to have_content('Your comment could not be submitted because discussion to reply to cannot be found')
+
+        expect(page).to have_button('Resolve thread')
+      end
+    end
+
+    context 'when comment is deleted' do
+      it 'shows an error message' do
+        find('.js-reply-button').click
+
+        page.within('.discussion-reply-holder') do
+          fill_in 'note[note]', with: 'A reply'
+
+          note.delete
+
+          click_button 'Add comment now'
+
+          expect(page).to have_content('Your comment could not be submitted because discussion to reply to cannot be found')
+        end
       end
     end
   end
@@ -149,7 +164,7 @@ RSpec.describe 'Merge request > User posts notes', :js do
           fill_in 'note[note]', with: 'Some new content'
 
           accept_confirm do
-            find('.btn-cancel').click
+            find('[data-testid="cancel"]').click
           end
         end
         expect(find('.js-note-text').text).to eq ''
@@ -167,9 +182,9 @@ RSpec.describe 'Merge request > User posts notes', :js do
         find('.js-note-edit').click
 
         page.within('.current-note-edit-form') do
-          expect(find('#note_note').value).to include('This is the new content')
+          expect(find_field('note[note]').value).to include('This is the new content')
           first('.js-md').click
-          expect(find('#note_note').value).to include('This is the new content****')
+          expect(find_field('note[note]').value).to include('This is the new content****')
         end
       end
 

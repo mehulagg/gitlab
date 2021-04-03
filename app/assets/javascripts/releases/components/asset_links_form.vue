@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import {
   GlSprintf,
   GlLink,
@@ -10,9 +9,9 @@ import {
   GlFormInput,
   GlFormSelect,
 } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { DEFAULT_ASSET_LINK_TYPE, ASSET_LINK_TYPE } from '../constants';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import { s__ } from '~/locale';
+import { DEFAULT_ASSET_LINK_TYPE, ASSET_LINK_TYPE } from '../constants';
 
 export default {
   name: 'AssetLinksForm',
@@ -26,16 +25,15 @@ export default {
     GlFormSelect,
   },
   directives: { GlTooltip: GlTooltipDirective },
-  mixins: [glFeatureFlagsMixin()],
   computed: {
-    ...mapState('detail', ['release', 'releaseAssetsDocsPath']),
-    ...mapGetters('detail', ['validationErrors']),
+    ...mapState('editNew', ['release', 'releaseAssetsDocsPath']),
+    ...mapGetters('editNew', ['validationErrors']),
   },
   created() {
     this.ensureAtLeastOneLink();
   },
   methods: {
-    ...mapActions('detail', [
+    ...mapActions('editNew', [
       'addEmptyAssetLink',
       'updateAssetLinkUrl',
       'updateAssetLinkName',
@@ -48,6 +46,12 @@ export default {
     onRemoveClicked(linkId) {
       this.removeAssetLink(linkId);
       this.ensureAtLeastOneLink();
+    },
+    updateUrl(link, newUrl) {
+      this.updateAssetLinkUrl({ linkIdToUpdate: link.id, newUrl });
+    },
+    updateName(link, newName) {
+      this.updateAssetLinkName({ linkIdToUpdate: link.id, newName });
     },
     hasDuplicateUrl(link) {
       return Boolean(this.getLinkErrors(link).isDuplicate);
@@ -137,8 +141,11 @@ export default {
           :value="link.url"
           type="text"
           class="form-control"
+          name="asset-url"
           :state="isUrlValid(link)"
-          @change="updateAssetLinkUrl({ linkIdToUpdate: link.id, newUrl: $event })"
+          @change="updateUrl(link, $event)"
+          @keydown.ctrl.enter="updateUrl(link, $event.target.value)"
+          @keydown.meta.enter="updateUrl(link, $event.target.value)"
         />
         <template #invalid-feedback>
           <span v-if="hasEmptyUrl(link)" class="invalid-feedback d-inline">
@@ -174,8 +181,11 @@ export default {
           :value="link.name"
           type="text"
           class="form-control"
+          name="asset-link-name"
           :state="isNameValid(link)"
-          @change="updateAssetLinkName({ linkIdToUpdate: link.id, newName: $event })"
+          @change="updateName(link, $event)"
+          @keydown.ctrl.enter="updateName(link, $event.target.value)"
+          @keydown.meta.enter="updateName(link, $event.target.value)"
         />
         <template #invalid-feedback>
           <span v-if="hasEmptyName(link)" class="invalid-feedback d-inline">
@@ -185,7 +195,6 @@ export default {
       </gl-form-group>
 
       <gl-form-group
-        v-if="glFeatures.releaseAssetLinkType"
         class="link-type-field col-auto px-sm-2"
         :label="__('Type')"
         :label-for="`asset-type-${index}`"
@@ -195,6 +204,7 @@ export default {
           ref="typeSelect"
           :value="link.linkType || $options.defaultTypeOptionValue"
           class="form-control pr-4"
+          name="asset-type"
           :options="$options.typeOptions"
           @change="updateAssetLinkType({ linkIdToUpdate: link.id, newType: $event })"
         />

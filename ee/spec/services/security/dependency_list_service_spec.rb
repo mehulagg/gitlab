@@ -4,7 +4,11 @@ require 'spec_helper'
 
 RSpec.describe Security::DependencyListService do
   describe '#execute' do
-    let!(:pipeline) { create(:ee_ci_pipeline, :with_dependency_list_report) }
+    let_it_be(:pipeline) { create(:ee_ci_pipeline, :with_dependency_list_report) }
+    let_it_be(:nokogiri_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, :with_pipeline) }
+    let_it_be(:nokogiri_pipeline) { create(:vulnerabilities_finding_pipeline, finding: nokogiri_finding, pipeline: pipeline) }
+    let_it_be(:other_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, package: 'saml2-js', file: 'yarn/yarn.lock', version: '1.5.0', raw_severity: 'Unknown') }
+    let_it_be(:other_pipeline) { create(:vulnerabilities_finding_pipeline, finding: other_finding, pipeline: pipeline) }
 
     subject { described_class.new(pipeline: pipeline, params: params).execute }
 
@@ -40,7 +44,7 @@ RSpec.describe Security::DependencyListService do
         let(:params) { { filter: 'vulnerable' } }
 
         it 'returns filtered items' do
-          expect(subject.size).to eq(3)
+          expect(subject.size).to eq(2)
           expect(subject.last[:vulnerabilities]).not_to be_empty
         end
       end

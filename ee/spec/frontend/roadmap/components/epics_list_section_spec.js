@@ -1,14 +1,13 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import VirtualList from 'vue-virtual-scroll-list';
-import EpicsListSection from 'ee/roadmap/components/epics_list_section.vue';
 import EpicItem from 'ee/roadmap/components/epic_item.vue';
-import createStore from 'ee/roadmap/store';
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
+import EpicsListSection from 'ee/roadmap/components/epics_list_section.vue';
 import {
   PRESET_TYPES,
   EPIC_DETAILS_CELL_WIDTH,
   TIMELINE_CELL_MIN_WIDTH,
 } from 'ee/roadmap/constants';
+import createStore from 'ee/roadmap/store';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import {
   mockFormattedChildEpic1,
   mockFormattedChildEpic2,
@@ -18,7 +17,6 @@ import {
   mockEpicsWithParents,
   mockSortedBy,
   basePath,
-  epicsPath,
 } from 'ee_jest/roadmap/mock_data';
 
 const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);
@@ -29,7 +27,6 @@ store.dispatch('setInitialData', {
   presetType: PRESET_TYPES.MONTHS,
   timeframe: mockTimeframeMonths,
   filterQueryString: '',
-  initialEpicsPath: epicsPath,
   basePath,
 });
 
@@ -46,7 +43,6 @@ const createComponent = ({
   timeframe = mockTimeframeMonths,
   currentGroupId = mockGroupId,
   presetType = PRESET_TYPES.MONTHS,
-  roadmapBufferedRendering = true,
   hasFiltersApplied = false,
 } = {}) => {
   return shallowMount(EpicsListSection, {
@@ -62,9 +58,6 @@ const createComponent = ({
       timeframe,
       currentGroupId,
       hasFiltersApplied,
-    },
-    provide: {
-      glFeatures: { roadmapBufferedRendering },
     },
   });
 };
@@ -161,10 +154,6 @@ describe('EpicsListSectionComponent', () => {
         jest.spyOn(wrapper.vm, 'scrollToTodayIndicator').mockImplementation(() => {});
       });
 
-      it('sets value of `roadmapShellEl` with root component element', () => {
-        expect(wrapper.vm.roadmapShellEl instanceof HTMLElement).toBe(true);
-      });
-
       it('calls action `setBufferSize` with value based on window.innerHeight and component element position', () => {
         expect(wrapper.vm.bufferSize).toBe(16);
       });
@@ -240,34 +229,6 @@ describe('EpicsListSectionComponent', () => {
         expect(wrapper.vm.showBottomShadow).toBe(false);
       });
     });
-
-    describe('getEpicItemProps', () => {
-      it('returns an object containing props for EpicItem component', () => {
-        expect(wrapper.vm.getEpicItemProps(1)).toEqual(
-          expect.objectContaining({
-            key: 1,
-            props: {
-              epic: wrapper.vm.epics[1],
-              presetType: wrapper.vm.presetType,
-              timeframe: wrapper.vm.timeframe,
-              currentGroupId: wrapper.vm.currentGroupId,
-              clientWidth: wrapper.vm.clientWidth,
-              childLevel: 0,
-              childrenEpics: expect.objectContaining({
-                41: expect.arrayContaining([mockFormattedChildEpic1]),
-              }),
-              childrenFlags: expect.objectContaining({
-                1: {
-                  itemChildrenFetchInProgress: false,
-                  itemExpanded: false,
-                },
-              }),
-              hasFiltersApplied: false,
-            },
-          }),
-        );
-      });
-    });
   });
 
   describe('template', () => {
@@ -275,30 +236,7 @@ describe('EpicsListSectionComponent', () => {
       expect(wrapper.classes('epics-list-section')).toBe(true);
     });
 
-    it('renders virtual-list when roadmapBufferedRendering is `true` and `epics.length` is more than `bufferSize`', () => {
-      wrapper.vm.setBufferSize(5);
-
-      return wrapper.vm.$nextTick(() => {
-        expect(wrapper.find(VirtualList).exists()).toBe(true);
-      });
-    });
-
-    it('renders epic-item when roadmapBufferedRendering is `false`', () => {
-      // Destroy the wrapper created in the beforeEach above
-      wrapper.destroy();
-
-      const wrapperFlagOff = createComponent({
-        roadmapBufferedRendering: false,
-      });
-
-      expect(wrapperFlagOff.find(EpicItem).exists()).toBe(true);
-
-      wrapperFlagOff.destroy();
-    });
-
-    it('renders epic-item when roadmapBufferedRendering is `true` and `epics.length` is less than `bufferSize`', () => {
-      wrapper.vm.setBufferSize(50);
-
+    it('renders epic-item', () => {
       expect(wrapper.find(EpicItem).exists()).toBe(true);
     });
 

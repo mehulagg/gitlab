@@ -20,6 +20,8 @@ class DataList
   end
 
   def values
-    batch.map { |row| data_fields_hash.values << row['id'] }
+    batch.map do |record|
+      data_fields_hash.values << record['id']
+    end
   end
 end

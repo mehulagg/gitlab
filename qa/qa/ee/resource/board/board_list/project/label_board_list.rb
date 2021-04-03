@@ -10,7 +10,7 @@ module QA
               attribute :label do
                 QA::Resource::Label.fabricate_via_api! do |label|
                   label.project = board.project
-                  label.title = 'Doing'
+                  label.title = 'Testing'
                 end
               end
 

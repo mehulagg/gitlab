@@ -109,7 +109,7 @@ module Audit
     end
 
     def detail_value
-      @details.each_value.first
+      String(@details.each_value.first)
     end
 
     def oauth_label

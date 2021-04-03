@@ -2,8 +2,10 @@
 
 module API
   # External applications API
-  class Applications < Grape::API::Instance
+  class Applications < ::API::Base
     before { authenticated_as_admin! }
+
+    feature_category :authentication_and_authorization
 
     resource :applications do
       desc 'Create a new application' do
@@ -39,6 +41,8 @@ module API
       desc 'Delete an application'
       delete ':id' do
         application = ApplicationsFinder.new(params).execute
+        break not_found!('Application') unless application
+
         application.destroy
 
         no_content!

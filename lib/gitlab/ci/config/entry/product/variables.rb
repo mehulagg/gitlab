@@ -14,7 +14,7 @@ module Gitlab
             validations do
               validates :config, variables: { array_values: true }
               validates :config, length: {
-                minimum: 2,
+                minimum: 1,
                 too_short: 'requires at least %{count} items'
               }
             end

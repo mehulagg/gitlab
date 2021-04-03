@@ -1,3 +1,4 @@
+import { NpmManager } from '~/packages/details/constants';
 import {
   conanInstallationCommand,
   conanSetupCommand,
@@ -13,6 +14,11 @@ import {
   nugetSetupCommand,
   pypiPipCommand,
   pypiSetupCommand,
+  composerRegistryInclude,
+  composerPackageInclude,
+  groupExists,
+  gradleGroovyInstalCommand,
+  gradleGroovyAddSourceCommand,
 } from '~/packages/details/store/getters';
 import {
   conanPackage,
@@ -21,6 +27,7 @@ import {
   mockPipelineInfo,
   mavenPackage as packageWithoutBuildInfo,
   pypiPackage,
+  rubygemsPackage,
 } from '../../mock_data';
 import {
   generateMavenCommand,
@@ -29,8 +36,6 @@ import {
   registryUrl,
   pypiSetupCommandStr,
 } from '../mock_data';
-import { generateConanRecipe } from '~/packages/details/utils';
-import { NpmManager } from '~/packages/details/constants';
 
 describe('Getters PackageDetails Store', () => {
   let state;
@@ -51,8 +56,7 @@ describe('Getters PackageDetails Store', () => {
     };
   };
 
-  const recipe = generateConanRecipe(conanPackage);
-  const conanInstallationCommandStr = `conan install ${recipe} --remote=gitlab`;
+  const conanInstallationCommandStr = `conan install ${conanPackage.name} --remote=gitlab`;
   const conanSetupCommandStr = `conan remote add gitlab ${registryUrl}`;
 
   const mavenCommandStr = generateMavenCommand(packageWithoutBuildInfo.maven_metadatum);
@@ -60,14 +64,19 @@ describe('Getters PackageDetails Store', () => {
   const mavenSetupXmlBlock = generateMavenSetupXml();
 
   const npmInstallStr = `npm i ${npmPackage.name}`;
-  const npmSetupStr = `echo @Test:registry=${registryUrl} >> .npmrc`;
+  const npmSetupStr = `echo @Test:registry=${registryUrl}/ >> .npmrc`;
   const yarnInstallStr = `yarn add ${npmPackage.name}`;
-  const yarnSetupStr = `echo \\"@Test:registry\\" \\"${registryUrl}\\" >> .yarnrc`;
+  const yarnSetupStr = `echo \\"@Test:registry\\" \\"${registryUrl}/\\" >> .yarnrc`;
 
   const nugetInstallationCommandStr = `nuget install ${nugetPackage.name} -Source "GitLab"`;
   const nugetSetupCommandStr = `nuget source Add -Name "GitLab" -Source "${registryUrl}" -UserName <your_username> -Password <your_token>`;
 
-  const pypiPipCommandStr = `pip install ${pypiPackage.name} --index-url ${registryUrl}`;
+  const pypiPipCommandStr = `pip install ${pypiPackage.name} --extra-index-url ${registryUrl}`;
+  const composerRegistryIncludeStr =
+    'composer config repositories.gitlab.com/123 \'{"type": "composer", "url": "foo"}\'';
+  const composerPackageIncludeStr = `composer req ${[packageWithoutBuildInfo.name]}:${
+    packageWithoutBuildInfo.version
+  }`;
 
   describe('packagePipeline', () => {
     it('should return the pipeline info when pipeline exists', () => {
@@ -93,9 +102,10 @@ describe('Getters PackageDetails Store', () => {
       packageEntity              | expectedResult
       ${conanPackage}            | ${'Conan'}
       ${packageWithoutBuildInfo} | ${'Maven'}
-      ${npmPackage}              | ${'NPM'}
+      ${npmPackage}              | ${'npm'}
       ${nugetPackage}            | ${'NuGet'}
-      ${pypiPackage}             | ${'PyPi'}
+      ${pypiPackage}             | ${'PyPI'}
+      ${rubygemsPackage}         | ${'RubyGems'}
     `(`package type`, ({ packageEntity, expectedResult }) => {
       beforeEach(() => setupState({ packageEntity }));
 
@@ -162,13 +172,13 @@ describe('Getters PackageDetails Store', () => {
   });
 
   describe('npm string getters', () => {
-    it('gets the correct npmInstallationCommand for NPM', () => {
+    it('gets the correct npmInstallationCommand for npm', () => {
       setupState({ packageEntity: npmPackage });
 
       expect(npmInstallationCommand(state)(NpmManager.NPM)).toBe(npmInstallStr);
     });
 
-    it('gets the correct npmSetupCommand for NPM', () => {
+    it('gets the correct npmSetupCommand for npm', () => {
       setupState({ packageEntity: npmPackage });
 
       expect(npmSetupCommand(state)(NpmManager.NPM)).toBe(npmSetupStr);
@@ -212,6 +222,54 @@ describe('Getters PackageDetails Store', () => {
       setupState({ pypiSetupPath: 'foo' });
 
       expect(pypiSetupCommand(state)).toBe(pypiSetupCommandStr);
+    });
+  });
+
+  describe('composer string getters', () => {
+    it('gets the correct composerRegistryInclude command', () => {
+      setupState({ composerPath: 'foo', composerConfigRepositoryName: 'gitlab.com/123' });
+
+      expect(composerRegistryInclude(state)).toBe(composerRegistryIncludeStr);
+    });
+
+    it('gets the correct composerPackageInclude command', () => {
+      setupState();
+
+      expect(composerPackageInclude(state)).toBe(composerPackageIncludeStr);
+    });
+  });
+
+  describe('gradle groovy string getters', () => {
+    it('gets the correct gradleGroovyInstalCommand', () => {
+      setupState();
+
+      expect(gradleGroovyInstalCommand(state)).toMatchInlineSnapshot(
+        `"implementation 'com.test.app:test-app:1.0-SNAPSHOT'"`,
+      );
+    });
+
+    it('gets the correct gradleGroovyAddSourceCommand', () => {
+      setupState();
+
+      expect(gradleGroovyAddSourceCommand(state)).toMatchInlineSnapshot(`
+        "maven {
+          url 'foo/registry'
+        }"
+      `);
+    });
+  });
+
+  describe('check if group', () => {
+    it('is set', () => {
+      setupState({ groupListUrl: '/groups/composer/-/packages' });
+
+      expect(groupExists(state)).toBe(true);
+    });
+
+    it('is not set', () => {
+      setupState({ groupListUrl: '' });
+
+      expect(groupExists(state)).toBe(false);
     });
   });
 });

@@ -2,9 +2,10 @@
 
 class Admin::DashboardController < Admin::ApplicationController
   include CountHelper
-  helper_method :show_license_breakdown?
 
   COUNTED_ITEMS = [Project, User, Group].freeze
+
+  feature_category :not_owned
 
   # rubocop: disable CodeReuse/ActiveRecord
   def index
@@ -14,15 +15,12 @@ class Admin::DashboardController < Admin::ApplicationController
     @groups = Group.order_id_desc.with_route.limit(10)
     @notices = Gitlab::ConfigChecker::PumaRuggedChecker.check
     @notices += Gitlab::ConfigChecker::ExternalDatabaseChecker.check
+    @redis_versions = [Gitlab::Redis::Queues, Gitlab::Redis::SharedState, Gitlab::Redis::Cache].map(&:version).uniq
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
   def stats
     @users_statistics = UsersStatistics.latest
-  end
-
-  def show_license_breakdown?
-    false
   end
 end
 

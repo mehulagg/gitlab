@@ -1,7 +1,7 @@
 <!--
 # Read me first!
 
-Create this issue under https://gitlab.com/gitlab-org/security
+Create this issue under https://gitlab.com/gitlab-org/security/gitlab
 
 Set the title to: `Description of the original issue`
 -->
@@ -9,9 +9,11 @@ Set the title to: `Description of the original issue`
 ## Prior to starting the security release work
 
 - [ ] Read the [security process for developers] if you are not familiar with it.
+  - Verify if the issue you're working on `gitlab-org/gitlab` is confidential, if it's public fix should be placed on GitLab canonical and no backports are required.
 - [ ] Mark this [issue as related] to the Security Release Tracking Issue. You can find it on the topic of the `#releases` Slack channel.
 - Fill out the [Links section](#links):
   - [ ] Next to **Issue on GitLab**, add a link to the `gitlab-org/gitlab` issue that describes the security vulnerability.
+- [ ] Add one of the `~severity::x` labels to the issue and all associated merge requests. 
 
 ## Development
 
@@ -27,9 +29,9 @@ After your merge request has been approved according to our [approval guidelines
    * At this point, it might be easy to squash the commits from the MR into one
    * You can use the script `bin/secpick` instead of the following steps, to help you cherry-picking. See the [secpick documentation]
 - [ ] Create each MR targeting the stable branch `X-Y-stable`, using the [Security Release merge request template].
-   * Every merge request will have its own set of TODOs, so make sure to complete those.
-- [ ] On the "Related merge requests" section, ensure all MRs are linked to this issue.
-   * This section should only list the merge requests created for this issue: One targeting `master` and the 3 backports.
+   * Every merge request will have its own set of to-dos, so make sure to complete those.
+- [ ] On the "Related merge requests" section, ensure that `4` merge requests are associated: The one targeting `master` and the `3` backports.
+- [ ] If this issue requires less than `4` merge requests, post a message on the Security Release Tracking Issue and ping the Release Managers.
 
 ## Documentation and final details
 
@@ -53,7 +55,7 @@ After your merge request has been approved according to our [approval guidelines
 | Description | Details | Further details|
 | -------- | -------- | -------- |
 | Versions affected | X.Y  | |
-| GitLab EE only | Yes/No | | 
+| GitLab EE only | Yes/No | |
 | Upgrade notes | | |
 | GitLab Settings updated | Yes/No| |
 | Migration required | Yes/No | |
@@ -62,7 +64,6 @@ After your merge request has been approved according to our [approval guidelines
 [security process for developers]: https://gitlab.com/gitlab-org/release/docs/blob/master/general/security/developer.md
 [secpick documentation]: https://gitlab.com/gitlab-org/release/docs/-/blob/master/general/security/utilities/secpick_script.md
 [security Release merge request template]: https://gitlab.com/gitlab-org/security/gitlab/blob/master/.gitlab/merge_request_templates/Security%20Release.md
-[code review process]: https://docs.gitlab.com/ee/development/code_review.html
 [approval guidelines]: https://docs.gitlab.com/ee/development/code_review.html#approval-guidelines
 [issue as related]: https://docs.gitlab.com/ee/user/project/issues/related_issues.html#adding-a-related-issue
 

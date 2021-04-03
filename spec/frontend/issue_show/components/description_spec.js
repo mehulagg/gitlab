@@ -1,24 +1,17 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import '~/behaviors/markdown/render_gfm';
-import mountComponent from 'helpers/vue_mount_component_helper';
 import { TEST_HOST } from 'helpers/test_constants';
+import mountComponent from 'helpers/vue_mount_component_helper';
 import Description from '~/issue_show/components/description.vue';
 import TaskList from '~/task_list';
+import { descriptionProps as props } from '../mock_data';
 
 jest.mock('~/task_list');
 
 describe('Description component', () => {
   let vm;
   let DescriptionComponent;
-  const props = {
-    canUpdate: true,
-    descriptionHtml: 'test',
-    descriptionText: 'test',
-    updatedAt: new Date().toString(),
-    taskStatus: '',
-    updateUrl: TEST_HOST,
-  };
 
   beforeEach(() => {
     DescriptionComponent = Vue.extend(Description);
@@ -43,11 +36,26 @@ describe('Description component', () => {
     $('.issuable-meta .flash-container').remove();
   });
 
-  it('animates description changes', () => {
+  it('doesnt animate first description changes', () => {
     vm.descriptionHtml = 'changed';
 
+    return vm.$nextTick().then(() => {
+      expect(
+        vm.$el.querySelector('.md').classList.contains('issue-realtime-pre-pulse'),
+      ).toBeFalsy();
+      jest.runAllTimers();
+      return vm.$nextTick();
+    });
+  });
+
+  it('animates description changes on live update', () => {
+    vm.descriptionHtml = 'changed';
     return vm
       .$nextTick()
+      .then(() => {
+        vm.descriptionHtml = 'changed second time';
+        return vm.$nextTick();
+      })
       .then(() => {
         expect(
           vm.$el.querySelector('.md').classList.contains('issue-realtime-pre-pulse'),
@@ -59,36 +67,6 @@ describe('Description component', () => {
         expect(
           vm.$el.querySelector('.md').classList.contains('issue-realtime-trigger-pulse'),
         ).toBeTruthy();
-      });
-  });
-
-  it('opens reCAPTCHA dialog if update rejected as spam', () => {
-    let modal;
-    const recaptchaChild = vm.$children.find(
-      // eslint-disable-next-line no-underscore-dangle
-      child => child.$options._componentTag === 'recaptcha-modal',
-    );
-
-    recaptchaChild.scriptSrc = '//scriptsrc';
-
-    vm.taskListUpdateSuccess({
-      recaptcha_html: '<div class="g-recaptcha">recaptcha_html</div>',
-    });
-
-    return vm
-      .$nextTick()
-      .then(() => {
-        modal = vm.$el.querySelector('.js-recaptcha-modal');
-
-        expect(modal.style.display).not.toEqual('none');
-        expect(modal.querySelector('.g-recaptcha').textContent).toEqual('recaptcha_html');
-        expect(document.body.querySelector('.js-recaptcha-script').src).toMatch('//scriptsrc');
-      })
-      .then(() => modal.querySelector('.close').click())
-      .then(() => vm.$nextTick())
-      .then(() => {
-        expect(modal.style.display).toEqual('none');
-        expect(document.body.querySelector('.js-recaptcha-script')).toBeNull();
       });
   });
 
@@ -136,7 +114,6 @@ describe('Description component', () => {
         dataType: 'issuableType',
         fieldName: 'description',
         selector: '.detail-page-description',
-        onSuccess: expect.any(Function),
         onError: expect.any(Function),
         lockVersion: 0,
       });

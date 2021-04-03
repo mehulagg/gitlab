@@ -3,8 +3,12 @@
 module Projects
   module Security
     class ScannedResourcesController < ::Projects::ApplicationController
+      include SecurityAndCompliancePermissions
+
       before_action :authorize_read_vulnerability!
       before_action :scanned_resources
+
+      feature_category :dynamic_application_security_testing
 
       def index
         respond_to do |format|
@@ -20,7 +24,7 @@ module Projects
       private
 
       def scanned_resources
-        pipeline = project.ci_pipelines.find(pipeline_id)
+        pipeline = project.all_pipelines.find(pipeline_id)
         @scanned_resources = pipeline&.security_reports&.reports&.fetch('dast', nil)&.scanned_resources
 
         return if @scanned_resources
@@ -30,14 +34,14 @@ module Projects
 
       def render_csv
         CsvBuilders::SingleBatch.new(
-          ::Gitlab::Ci::Parsers::Security::ScannedResources.new.scanned_resources_for_csv(@scanned_resources),
+          @scanned_resources,
           {
             'Method': 'request_method',
-            'Scheme': 'scheme',
-            'Host': 'host',
-            'Port': 'port',
-            'Path': 'path',
-            'Query String': 'query_string'
+            'Scheme': 'url_scheme',
+            'Host': 'url_host',
+            'Port': 'url_port',
+            'Path': 'url_path',
+            'Query String': 'url_query'
           }
         ).render
       end

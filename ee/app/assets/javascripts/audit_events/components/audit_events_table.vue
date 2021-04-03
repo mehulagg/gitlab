@@ -1,11 +1,11 @@
 <script>
 import { GlPagination, GlTable } from '@gitlab/ui';
 
-import { s__ } from '~/locale';
 import { getParameterValues, setUrlParams } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 
-import UrlTableCell from './table_cells/url_table_cell.vue';
 import HtmlTableCell from './table_cells/html_table_cell.vue';
+import UrlTableCell from './table_cells/url_table_cell.vue';
 
 const TABLE_HEADER_CLASSES = 'bg-transparent border-bottom p-3';
 
@@ -26,11 +26,6 @@ export default {
       type: Boolean,
       required: false,
       default: false,
-    },
-    qaSelector: {
-      type: String,
-      required: false,
-      default: undefined,
     },
   },
   data() {
@@ -90,8 +85,8 @@ export default {
 </script>
 
 <template>
-  <div class="audit-log-table" data-testid="audit-events-table" :data-qa-selector="qaSelector">
-    <gl-table class="mt-3" :fields="$options.fields" :items="events" show-empty>
+  <div class="audit-log-table" data-qa-selector="audit_log_table">
+    <gl-table class="gl-mt-5" :fields="$options.fields" :items="events" show-empty stacked="md">
       <template #cell(author)="{ value: { url, name } }">
         <url-table-cell :url="url" :name="name" />
       </template>

@@ -9,6 +9,12 @@ const fileExtensionIcons = {
   'md.rendered': 'markdown',
   markdown: 'markdown',
   'markdown.rendered': 'markdown',
+  mdown: 'markdown',
+  'mdown.rendered': 'markdown',
+  mkd: 'markdown',
+  'mkd.rendered': 'markdown',
+  mkdn: 'markdown',
+  'mkdn.rendered': 'markdown',
   rst: 'markdown',
   blink: 'blink',
   css: 'css',
@@ -396,14 +402,15 @@ const fileNameIcons = {
   'gradle.properties': 'gradle',
   gradlew: 'gradle',
   'gradle-wrapper.properties': 'gradle',
-  license: 'certificate',
-  'license.md': 'certificate',
-  'license.md.rendered': 'certificate',
-  'license.txt': 'certificate',
-  licence: 'certificate',
-  'licence.md': 'certificate',
-  'licence.md.rendered': 'certificate',
-  'licence.txt': 'certificate',
+  COPYING: 'certificate',
+  'COPYING.LESSER': 'certificate',
+  LICENSE: 'certificate',
+  LICENCE: 'certificate',
+  'LICENSE.md': 'certificate',
+  'LICENCE.md': 'certificate',
+  'LICENSE.txt': 'certificate',
+  'LICENCE.txt': 'certificate',
+  '.gitlab-license': 'certificate',
   dockerfile: 'docker',
   'docker-compose.yml': 'docker',
   '.mailmap': 'email',
@@ -586,5 +593,7 @@ const fileNameIcons = {
 };
 
 export default function getIconForFile(name) {
-  return fileNameIcons[name] || fileExtensionIcons[name ? name.split('.').pop() : ''] || '';
+  return (
+    fileNameIcons[name] || fileExtensionIcons[name ? name.split('.').pop().toLowerCase() : ''] || ''
+  );
 }

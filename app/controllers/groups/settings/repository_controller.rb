@@ -3,12 +3,15 @@
 module Groups
   module Settings
     class RepositoryController < Groups::ApplicationController
+      layout 'group_settings'
       skip_cross_project_access_check :show
       before_action :authorize_create_deploy_token!
       before_action :define_deploy_token_variables
       before_action do
         push_frontend_feature_flag(:ajax_new_deploy_token, @group)
       end
+
+      feature_category :continuous_delivery
 
       def create_deploy_token
         result = Groups::DeployTokens::CreateService.new(@group, current_user, deploy_token_params).execute

@@ -204,6 +204,7 @@ RSpec.describe Audit::Details do
           ip_address: '127.0.0.1'
         }
       end
+
       let(:message) { 'Failed to login with GOOGLE authentication' }
 
       it 'shows the correct failed login meessage' do

@@ -2,13 +2,15 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Admin Mode Logout', :js, :clean_gitlab_redis_shared_state, :do_not_mock_admin_mode do
+RSpec.describe 'Admin Mode Logout', :js do
   include TermsHelper
   include UserLoginHelper
 
   let(:user) { create(:admin) }
 
   before do
+    stub_feature_flags(combined_menu: false)
+
     gitlab_sign_in(user)
     gitlab_enable_admin_mode_sign_in(user)
     visit admin_root_path

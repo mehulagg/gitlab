@@ -35,9 +35,7 @@ RSpec.describe 'Creating an Epic' do
       stub_licensed_features(epics: true)
     end
 
-    it_behaves_like 'a mutation that returns top-level errors',
-      errors: ['The resource that you are attempting to access does not exist '\
-               'or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
 
     it 'does not create epic' do
       expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Epic, :count)
@@ -96,19 +94,6 @@ RSpec.describe 'Creating an Epic' do
 
         it 'does not create the epic' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Epic, :count)
-        end
-      end
-
-      context 'when confidential_epics is disabled' do
-        before do
-          stub_feature_flags(confidential_epics: false)
-        end
-
-        it 'ignores confidential field' do
-          post_graphql_mutation(mutation, current_user: current_user)
-
-          epic_hash = mutation_response['epic']
-          expect(epic_hash['confidential']).to be_falsey
         end
       end
     end

@@ -7,8 +7,7 @@ RSpec.describe Banzai::Filter::WikiLinkFilter do
 
   let(:namespace) { build_stubbed(:namespace, name: "wiki_link_ns") }
   let(:project)   { build_stubbed(:project, :public, name: "wiki_link_project", namespace: namespace) }
-  let(:user) { double }
-  let(:wiki) { ProjectWiki.new(project, user) }
+  let(:wiki) { ProjectWiki.new(project, nil) }
   let(:repository_upload_folder) { Wikis::CreateAttachmentService::ATTACHMENT_PATH }
 
   it "doesn't rewrite absolute links" do
@@ -21,6 +20,15 @@ RSpec.describe Banzai::Filter::WikiLinkFilter do
     filtered_link = filter("<a href='/uploads/a.test'>Link</a>", wiki: wiki).children[0]
 
     expect(filtered_link.attribute('href').value).to eq('/uploads/a.test')
+  end
+
+  describe 'when links point to the relative wiki path' do
+    it 'does not rewrite links' do
+      path = "#{wiki.wiki_base_path}/#{repository_upload_folder}/a.jpg"
+      filtered_link = filter("<a href='#{path}'>Link</a>", wiki: wiki, page_slug: 'home').children[0]
+
+      expect(filtered_link.attribute('href').value).to eq(path)
+    end
   end
 
   describe "when links point to the #{Wikis::CreateAttachmentService::ATTACHMENT_PATH} folder" do

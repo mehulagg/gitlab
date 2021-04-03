@@ -37,7 +37,7 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def remove_wip_path
-    if work_in_progress? && can?(current_user, :update_merge_request, merge_request.project)
+    if can?(current_user, :update_merge_request, merge_request.project)
       remove_wip_project_merge_request_path(project, merge_request)
     end
   end
@@ -200,10 +200,6 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
     else
       false
     end
-  end
-
-  def web_url
-    Gitlab::UrlBuilder.build(merge_request)
   end
 
   def subscribed?

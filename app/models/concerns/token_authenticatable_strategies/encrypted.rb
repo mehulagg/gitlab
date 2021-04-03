@@ -85,7 +85,9 @@ module TokenAuthenticatableStrategies
     end
 
     def find_by_encrypted_token(token, unscoped)
-      encrypted_value = Gitlab::CryptoHelper.aes256_gcm_encrypt(token)
+      nonce = Gitlab::CryptoHelper::AES256_GCM_IV_STATIC
+      encrypted_value = Gitlab::CryptoHelper.aes256_gcm_encrypt(token, nonce: nonce)
+
       relation(unscoped).find_by(encrypted_field => encrypted_value)
     end
 

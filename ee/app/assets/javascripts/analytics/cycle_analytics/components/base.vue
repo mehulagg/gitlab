@@ -1,24 +1,20 @@
 <script>
-import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
+import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { featureAccessLevel } from '~/pages/projects/shared/permissions/constants';
-import { PROJECTS_PER_PAGE, STAGE_ACTIONS } from '../constants';
-import GroupsDropdownFilter from '../../shared/components/groups_dropdown_filter.vue';
-import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
-import { LAST_ACTIVITY_AT, DATE_RANGE_LIMIT } from '../../shared/constants';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
 import DateRange from '../../shared/components/daterange.vue';
-import StageTable from './stage_table.vue';
-import DurationChart from './duration_chart.vue';
-import TypeOfWorkCharts from './type_of_work_charts.vue';
-import UrlSyncMixin from '../../shared/mixins/url_sync_mixin';
+import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
+import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import RecentActivityCard from './recent_activity_card.vue';
-import TimeMetricsCard from './time_metrics_card.vue';
-import StageTableNav from './stage_table_nav.vue';
+import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
-import PathNavigation from './path_navigation.vue';
-import MetricCard from '../../shared/components/metric_card.vue';
+import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
+import Metrics from './metrics.vue';
+import PathNavigation from './path_navigation.vue';
+import StageTable from './stage_table.vue';
+import StageTableNav from './stage_table_nav.vue';
+import TypeOfWorkCharts from './type_of_work_charts.vue';
 import ValueStreamSelect from './value_stream_select.vue';
 
 export default {
@@ -26,22 +22,18 @@ export default {
   components: {
     DateRange,
     DurationChart,
-    GlLoadingIcon,
     GlEmptyState,
-    GroupsDropdownFilter,
     ProjectsDropdownFilter,
     StageTable,
     TypeOfWorkCharts,
-    RecentActivityCard,
-    TimeMetricsCard,
     CustomStageForm,
     StageTableNav,
     PathNavigation,
-    MetricCard,
     FilterBar,
     ValueStreamSelect,
+    UrlSync,
+    Metrics,
   },
-  mixins: [UrlSyncMixin],
   props: {
     emptyStateSvgPath: {
       type: String,
@@ -55,10 +47,6 @@ export default {
       type: String,
       required: true,
     },
-    hideGroupDropDown: {
-      type: Boolean,
-      required: true,
-    },
   },
   computed: {
     ...mapState([
@@ -66,13 +54,9 @@ export default {
       'isLoading',
       'isLoadingStage',
       'isEmptyStage',
-      'selectedGroup',
+      'currentGroup',
       'selectedProjects',
       'selectedStage',
-      'selectedMilestone',
-      'selectedAuthor',
-      'selectedLabels',
-      'selectedAssignees',
       'stages',
       'currentStageEvents',
       'errorCode',
@@ -80,6 +64,8 @@ export default {
       'endDate',
       'medians',
       'isLoadingValueStreams',
+      'selectedStageError',
+      'selectedValueStream',
     ]),
     // NOTE: formEvents are fetched in the same request as the list of stages (fetchGroupStagesAndEvents)
     // so i think its ok to bind formEvents here even though its only used as a prop to the custom-stage-form
@@ -95,53 +81,61 @@ export default {
     ]),
     ...mapGetters('customStages', ['customStageFormActive']),
     shouldRenderEmptyState() {
-      return !this.selectedGroup;
+      return !this.currentGroup && !this.isLoading;
     },
     shouldDisplayFilters() {
-      return this.selectedGroup && !this.errorCode;
+      return !this.errorCode;
+    },
+    isOverviewStageSelected() {
+      return this.selectedStage?.id === OVERVIEW_STAGE_ID;
     },
     shouldDisplayDurationChart() {
-      return this.featureFlags.hasDurationChart && !this.hasNoAccessError && !this.isLoading;
-    },
-    shouldDisplayTypeOfWorkCharts() {
-      return !this.hasNoAccessError && !this.isLoading;
-    },
-    shouldDsiplayPathNavigation() {
-      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError && this.selectedStage;
-    },
-    shouldDisplayFilterBar() {
-      // TODO: After we remove instance VSA currentGroupPath will be always set
-      // https://gitlab.com/gitlab-org/gitlab/-/issues/223735
-      return this.featureFlags.hasFilterBar && this.currentGroupPath;
-    },
-    shouldDisplayCreateMultipleValueStreams() {
-      return Boolean(
-        this.featureFlags.hasCreateMultipleValueStreams && !this.isLoadingValueStreams,
+      return (
+        !this.featureFlags.hasPathNavigation ||
+        (this.featureFlags.hasDurationChart &&
+          this.isOverviewStageSelected &&
+          !this.hasNoAccessError)
       );
     },
-    isLoadingTypeOfWork() {
-      return this.isLoadingTasksByTypeChartTopLabels || this.isLoadingTasksByTypeChart;
+    shouldDisplayTypeOfWorkCharts() {
+      return (
+        !this.featureFlags.hasPathNavigation ||
+        (this.isOverviewStageSelected && !this.hasNoAccessError)
+      );
+    },
+    selectedStageReady() {
+      return !this.hasNoAccessError && this.selectedStage;
+    },
+    shouldDisplayPathNavigation() {
+      return this.featureFlags.hasPathNavigation && this.selectedStageReady;
+    },
+    shouldDisplayVerticalNavigation() {
+      return !this.featureFlags.hasPathNavigation && this.selectedStageReady;
+    },
+    shouldDisplayCreateMultipleValueStreams() {
+      return Boolean(!this.shouldRenderEmptyState && !this.isLoadingValueStreams);
     },
     hasDateRangeSet() {
       return this.startDate && this.endDate;
     },
     query() {
+      const selectedProjectIds = this.selectedProjectIds?.length ? this.selectedProjectIds : null;
+
       return {
-        group_id: !this.hideGroupDropDown ? this.currentGroupPath : null,
-        'project_ids[]': this.selectedProjectIds,
+        value_stream_id: this.selectedValueStream?.id || null,
+        project_ids: selectedProjectIds,
         created_after: toYmd(this.startDate),
         created_before: toYmd(this.endDate),
-        milestone_title: this.selectedMilestone,
-        author_username: this.selectedAuthor,
-        'label_name[]': this.selectedLabels,
-        'assignee_username[]': this.selectedAssignees,
       };
     },
     stageCount() {
       return this.activeStages.length;
     },
-    hasProject() {
-      return this.selectedProjectIds.length > 0;
+    projectsQueryParams() {
+      return {
+        first: PROJECTS_PER_PAGE,
+        includeSubgroups: true,
+      };
     },
   },
 
@@ -149,34 +143,27 @@ export default {
     ...mapActions([
       'fetchCycleAnalyticsData',
       'fetchStageData',
-      'setSelectedGroup',
       'setSelectedProjects',
       'setSelectedStage',
+      'setDefaultSelectedStage',
       'setDateRange',
-      'updateStage',
       'removeStage',
       'updateStage',
       'reorderStage',
     ]),
-    ...mapActions('customStages', [
-      'hideForm',
-      'showCreateForm',
-      'showEditForm',
-      'createStage',
-      'clearFormErrors',
-    ]),
-    onGroupSelect(group) {
-      this.setSelectedGroup(group);
-      this.fetchCycleAnalyticsData();
-    },
+    ...mapActions('customStages', ['hideForm', 'showCreateForm', 'showEditForm', 'createStage']),
     onProjectsSelect(projects) {
       this.setSelectedProjects(projects);
       this.fetchCycleAnalyticsData();
     },
     onStageSelect(stage) {
       this.hideForm();
-      this.setSelectedStage(stage);
-      this.fetchStageData(this.selectedStage.slug);
+      if (stage.slug === OVERVIEW_STAGE_ID) {
+        this.setDefaultSelectedStage();
+      } else {
+        this.setSelectedStage(stage);
+        this.fetchStageData(stage.slug);
+      }
     },
     onShowAddStageForm() {
       this.showCreateForm();
@@ -200,17 +187,7 @@ export default {
   },
   multiProjectSelect: true,
   dateOptions: [7, 30, 90],
-  groupsQueryParams: {
-    min_access_level: featureAccessLevel.EVERYONE,
-  },
-  projectsQueryParams: {
-    per_page: PROJECTS_PER_PAGE,
-    with_shared: false,
-    order_by: LAST_ACTIVITY_AT,
-    include_subgroups: true,
-  },
   maxDateRange: DATE_RANGE_LIMIT,
-  STAGE_ACTIONS,
 };
 </script>
 <template>
@@ -222,71 +199,59 @@ export default {
       <value-stream-select
         v-if="shouldDisplayCreateMultipleValueStreams"
         class="gl-align-self-start gl-sm-align-self-start gl-mt-0 gl-sm-mt-5"
+        :has-extended-form-fields="featureFlags.hasExtendedFormFields"
       />
-    </div>
-    <div class="mw-100">
-      <div class="mt-3 py-2 px-3 bg-gray-light border-top border-bottom">
-        <div v-if="shouldDsiplayPathNavigation" class="w-100 pb-2">
-          <path-navigation
-            class="js-path-navigation"
-            :loading="isLoading"
-            :stages="pathNavigationData"
-            :selected-stage="selectedStage"
-            @selected="onStageSelect"
-          />
-        </div>
-        <div
-          class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between"
-        >
-          <div class="dropdown-container d-flex flex-column flex-lg-row">
-            <groups-dropdown-filter
-              v-if="!hideGroupDropDown"
-              class="js-groups-dropdown-filter"
-              :class="{ 'mr-lg-3': shouldDisplayFilters }"
-              :query-params="$options.groupsQueryParams"
-              :default-group="selectedGroup"
-              @selected="onGroupSelect"
-            />
-            <projects-dropdown-filter
-              v-if="shouldDisplayFilters"
-              :key="selectedGroup.id"
-              class="js-projects-dropdown-filter project-select"
-              :group-id="selectedGroup.id"
-              :query-params="$options.projectsQueryParams"
-              :multi-select="$options.multiProjectSelect"
-              :default-projects="selectedProjects"
-              @selected="onProjectsSelect"
-            />
-          </div>
-          <filter-bar
-            v-if="shouldDisplayFilterBar"
-            class="js-filter-bar filtered-search-box gl-display-flex gl-mt-3 mt-md-0 gl-mr-3 gl-border-none"
-            :disabled="!hasProject"
-          />
-          <div v-if="shouldDisplayFilters" class="gl-justify-content-end gl-white-space-nowrap">
-            <date-range
-              :start-date="startDate"
-              :end-date="endDate"
-              :max-date-range="$options.maxDateRange"
-              :include-selected-date="true"
-              class="js-daterange-picker"
-              @change="setDateRange"
-            />
-          </div>
-        </div>
-      </div>
     </div>
     <gl-empty-state
       v-if="shouldRenderEmptyState"
       :title="__('Value Stream Analytics can help you determine your team’s velocity')"
       :description="
-        __(
-          'Start by choosing a group to see how your team is spending time. You can then drill down to the project level.',
-        )
+        __('Filter parameters are not valid. Make sure that the end date is after the start date.')
       "
       :svg-path="emptyStateSvgPath"
     />
-    <div v-else class="cycle-analytics mt-0">
+    <div v-if="!shouldRenderEmptyState" class="gl-max-w-full">
+      <path-navigation
+        v-if="shouldDisplayPathNavigation"
+        :key="`path_navigation_key_${pathNavigationData.length}`"
+        class="js-path-navigation gl-w-full gl-pb-2"
+        :loading="isLoading"
+        :stages="pathNavigationData"
+        :selected-stage="selectedStage"
+        @selected="onStageSelect"
+      />
+      <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
+        <filter-bar
+          v-if="shouldDisplayFilters"
+          class="js-filter-bar filtered-search-box gl-display-flex gl-mb-2 gl-mr-3 gl-border-none"
+          :group-path="currentGroupPath"
+        />
+        <div
+          v-if="shouldDisplayFilters"
+          class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between"
+        >
+          <projects-dropdown-filter
+            :key="currentGroup.id"
+            class="js-projects-dropdown-filter project-select gl-mb-2 gl-lg-mb-0"
+            :group-id="currentGroup.id"
+            :group-namespace="currentGroupPath"
+            :query-params="projectsQueryParams"
+            :multi-select="$options.multiProjectSelect"
+            :default-projects="selectedProjects"
+            @selected="onProjectsSelect"
+          />
+          <date-range
+            :start-date="startDate"
+            :end-date="endDate"
+            :max-date-range="$options.maxDateRange"
+            :include-selected-date="true"
+            class="js-daterange-picker"
+            @change="setDateRange"
+          />
+        </div>
+      </div>
+    </div>
+    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-2">
       <gl-empty-state
         v-if="hasNoAccessError"
         class="js-empty-state"
@@ -294,71 +259,58 @@ export default {
         :svg-path="noAccessSvgPath"
         :description="
           __(
-            'Only \'Reporter\' roles and above on tiers Premium / Silver and above can see Value Stream Analytics.',
+            'Only \'Reporter\' roles and above on tiers Premium and above can see Value Stream Analytics.',
           )
         "
       />
-      <div v-else-if="!errorCode">
-        <div class="js-recent-activity gl-mt-3 gl-display-flex">
-          <div class="gl-flex-fill-1 gl-pr-2">
-            <time-metrics-card
-              #default="{ metrics, loading }"
-              :group-path="currentGroupPath"
-              :additional-params="cycleAnalyticsRequestParams"
-            >
-              <metric-card :title="__('Time')" :metrics="metrics" :is-loading="loading" />
-            </time-metrics-card>
-          </div>
-          <div class="gl-flex-fill-1 gl-pl-2">
-            <recent-activity-card
-              :group-path="currentGroupPath"
-              :additional-params="cycleAnalyticsRequestParams"
+      <div v-else>
+        <metrics
+          v-if="!featureFlags.hasPathNavigation || isOverviewStageSelected"
+          :group-path="currentGroupPath"
+          :request-params="cycleAnalyticsRequestParams"
+        />
+        <stage-table
+          v-if="!featureFlags.hasPathNavigation || !isOverviewStageSelected"
+          :key="stageCount"
+          class="js-stage-table"
+          :current-stage="selectedStage"
+          :is-loading="isLoading"
+          :is-loading-stage="isLoadingStage"
+          :is-empty-stage="isEmptyStage"
+          :custom-stage-form-active="customStageFormActive"
+          :current-stage-events="currentStageEvents"
+          :no-data-svg-path="noDataSvgPath"
+          :empty-state-message="selectedStageError"
+          :has-path-navigation="featureFlags.hasPathNavigation"
+        >
+          <template v-if="shouldDisplayVerticalNavigation" #nav>
+            <stage-table-nav
+              :current-stage="selectedStage"
+              :stages="activeStages"
+              :medians="medians"
+              :is-creating-custom-stage="isCreatingCustomStage"
+              :custom-ordering="enableCustomOrdering"
+              @reorderStage="onStageReorder"
+              @selectStage="onStageSelect"
+              @editStage="onShowEditStageForm"
+              @showAddStageForm="onShowAddStageForm"
+              @hideStage="onUpdateCustomStage"
+              @removeStage="onRemoveStage"
             />
-          </div>
-        </div>
-        <div v-if="isLoading">
-          <gl-loading-icon class="mt-4" size="md" />
-        </div>
-        <div v-else>
-          <stage-table
-            v-if="selectedStage"
-            :key="stageCount"
-            class="js-stage-table"
-            :current-stage="selectedStage"
-            :is-loading="isLoadingStage"
-            :is-empty-stage="isEmptyStage"
-            :custom-stage-form-active="customStageFormActive"
-            :current-stage-events="currentStageEvents"
-            :no-data-svg-path="noDataSvgPath"
-          >
-            <template #nav>
-              <stage-table-nav
-                :current-stage="selectedStage"
-                :stages="activeStages"
-                :medians="medians"
-                :is-creating-custom-stage="isCreatingCustomStage"
-                :custom-ordering="enableCustomOrdering"
-                @reorderStage="onStageReorder"
-                @selectStage="onStageSelect"
-                @editStage="onShowEditStageForm"
-                @showAddStageForm="onShowAddStageForm"
-                @hideStage="onUpdateCustomStage"
-                @removeStage="onRemoveStage"
-              />
-            </template>
-            <template v-if="customStageFormActive" #content>
-              <custom-stage-form
-                :events="formEvents"
-                @createStage="onCreateCustomStage"
-                @updateStage="onUpdateCustomStage"
-                @clearErrors="$emit('clearFormErrors')"
-              />
-            </template>
-          </stage-table>
-        </div>
+          </template>
+          <template v-if="customStageFormActive" #content>
+            <custom-stage-form
+              :events="formEvents"
+              @createStage="onCreateCustomStage"
+              @updateStage="onUpdateCustomStage"
+              @clearErrors="$emit('clear-form-errors')"
+            />
+          </template>
+        </stage-table>
+        <url-sync :query="query" />
       </div>
-      <duration-chart v-if="shouldDisplayDurationChart" class="mt-3" :stages="activeStages" />
-      <type-of-work-charts v-if="shouldDisplayTypeOfWorkCharts" :is-loading="isLoadingTypeOfWork" />
+      <duration-chart v-if="shouldDisplayDurationChart" class="gl-mt-3" :stages="activeStages" />
+      <type-of-work-charts v-if="shouldDisplayTypeOfWorkCharts" />
     </div>
   </div>
 </template>

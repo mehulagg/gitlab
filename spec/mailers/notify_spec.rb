@@ -16,12 +16,14 @@ RSpec.describe Notify do
   let_it_be(:user, reload: true) { create(:user) }
   let_it_be(:current_user, reload: true) { create(:user, email: "current@email.com", name: 'www.example.com') }
   let_it_be(:assignee, reload: true) { create(:user, email: 'assignee@example.com', name: 'John Doe') }
+  let_it_be(:reviewer, reload: true) { create(:user, email: 'reviewer@example.com', name: 'Jane Doe') }
 
   let_it_be(:merge_request) do
     create(:merge_request, source_project: project,
                            target_project: project,
                            author: current_user,
                            assignees: [assignee],
+                           reviewers: [reviewer],
                            description: 'Awesome description')
   end
 
@@ -45,6 +47,21 @@ RSpec.describe Notify do
     end
   end
 
+  shared_examples 'it requires a group' do
+    context 'when given an deleted group' do
+      before do
+        # destroy group and group member
+        group_member.destroy!
+        group.destroy!
+      end
+
+      it 'returns NullMail type message' do
+        expect(Gitlab::AppLogger).to receive(:info)
+        expect(subject.message).to be_a(ActionMailer::Base::NullMail)
+      end
+    end
+  end
+
   context 'for a project' do
     shared_examples 'an assignee email' do
       let(:recipient) { assignee }
@@ -52,11 +69,8 @@ RSpec.describe Notify do
       it_behaves_like 'an email sent to a user'
 
       it 'is sent to the assignee as the author' do
-        sender = subject.header[:from].addrs.first
-
         aggregate_failures do
-          expect(sender.display_name).to eq(current_user.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(current_user)
           expect(subject).to deliver_to(recipient.notification_email)
         end
       end
@@ -129,9 +143,7 @@ RSpec.describe Notify do
         it_behaves_like 'appearance header and footer not enabled'
 
         it 'is sent as the author' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(current_user)
         end
 
         it 'has the correct subject and body' do
@@ -170,9 +182,7 @@ RSpec.describe Notify do
         it_behaves_like 'appearance header and footer not enabled'
 
         it 'is sent as the author' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(current_user)
         end
 
         it 'has the correct subject and body' do
@@ -209,6 +219,10 @@ RSpec.describe Notify do
           let(:model) { issue }
         end
 
+        it 'contains a link to the issue' do
+          is_expected.to have_body_text(issue.to_reference(full: false))
+        end
+
         it_behaves_like 'it should show Gmail Actions View Issue link'
         it_behaves_like 'an unsubscribeable thread'
         it_behaves_like 'appearance header and footer enabled'
@@ -230,9 +244,7 @@ RSpec.describe Notify do
         it_behaves_like 'appearance header and footer not enabled'
 
         it 'is sent as the author' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(current_user)
         end
 
         it 'has the correct subject and body' do
@@ -323,6 +335,7 @@ RSpec.describe Notify do
             is_expected.to have_body_text(project_merge_request_path(project, merge_request))
             is_expected.to have_body_text(merge_request.source_branch)
             is_expected.to have_body_text(merge_request.target_branch)
+            is_expected.to have_body_text(reviewer.name)
           end
         end
 
@@ -343,7 +356,11 @@ RSpec.describe Notify do
 
         it 'contains a link to merge request author' do
           is_expected.to have_body_text merge_request.author_name
-          is_expected.to have_body_text 'created a merge request:'
+          is_expected.to have_body_text 'created a'
+        end
+
+        it 'contains a link to the merge request url' do
+          is_expected.to have_link('merge request', href: project_merge_request_url(merge_request.target_project, merge_request))
         end
       end
 
@@ -363,9 +380,7 @@ RSpec.describe Notify do
         it_behaves_like 'appearance header and footer not enabled'
 
         it 'is sent as the author' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(current_user)
         end
 
         it 'has the correct subject and body' do
@@ -430,115 +445,13 @@ RSpec.describe Notify do
         it_behaves_like 'appearance header and footer not enabled'
 
         it 'is sent as the author' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(current_user)
         end
 
         it 'has the correct subject and body' do
           is_expected.to have_referable_subject(merge_request, reply: true)
           is_expected.to have_body_text('foo, bar, and baz')
           is_expected.to have_body_text(project_merge_request_path(project, merge_request))
-        end
-      end
-
-      describe 'status changed' do
-        let(:status) { 'reopened' }
-
-        subject { described_class.merge_request_status_email(recipient.id, merge_request.id, status, current_user.id) }
-
-        it_behaves_like 'an answer to an existing thread with reply-by-email enabled' do
-          let(:model) { merge_request }
-        end
-
-        it_behaves_like 'it should show Gmail Actions View Merge request link'
-        it_behaves_like 'an unsubscribeable thread'
-        it_behaves_like 'appearance header and footer enabled'
-        it_behaves_like 'appearance header and footer not enabled'
-
-        it 'is sent as the author' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(current_user.name)
-          expect(sender.address).to eq(gitlab_sender)
-        end
-
-        it 'has the correct subject and body' do
-          aggregate_failures do
-            is_expected.to have_referable_subject(merge_request, reply: true)
-            is_expected.to have_body_text(status)
-            is_expected.to have_body_text(current_user_sanitized)
-            is_expected.to have_body_text(project_merge_request_path(project, merge_request))
-            is_expected.to have_link(merge_request.to_reference, href: project_merge_request_url(merge_request.target_project, merge_request))
-          end
-        end
-      end
-
-      describe 'that are merged' do
-        let(:merge_author) { create(:user) }
-
-        subject { described_class.merged_merge_request_email(recipient.id, merge_request.id, merge_author.id) }
-
-        it_behaves_like 'a multiple recipients email'
-        it_behaves_like 'an answer to an existing thread with reply-by-email enabled' do
-          let(:model) { merge_request }
-        end
-
-        it_behaves_like 'it should show Gmail Actions View Merge request link'
-        it_behaves_like 'an unsubscribeable thread'
-        it_behaves_like 'appearance header and footer enabled'
-        it_behaves_like 'appearance header and footer not enabled'
-
-        it 'is sent as the merge author' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(merge_author.name)
-          expect(sender.address).to eq(gitlab_sender)
-        end
-
-        it 'has the correct subject and body' do
-          aggregate_failures do
-            is_expected.to have_referable_subject(merge_request, reply: true)
-            is_expected.to have_body_text('merged')
-            is_expected.to have_body_text(project_merge_request_path(project, merge_request))
-            is_expected.to have_link(merge_request.to_reference, href: project_merge_request_url(merge_request.target_project, merge_request))
-          end
-        end
-      end
-
-      describe 'that are unmergeable' do
-        let_it_be(:merge_request) do
-          create(:merge_request, :conflict,
-                 source_project: project,
-                 target_project: project,
-                 author: current_user,
-                 assignees: [assignee],
-                 description: 'Awesome description')
-        end
-
-        subject { described_class.merge_request_unmergeable_email(recipient.id, merge_request.id) }
-
-        it_behaves_like 'a multiple recipients email'
-        it_behaves_like 'an answer to an existing thread with reply-by-email enabled' do
-          let(:model) { merge_request }
-        end
-
-        it_behaves_like 'it should show Gmail Actions View Merge request link'
-        it_behaves_like 'an unsubscribeable thread'
-        it_behaves_like 'appearance header and footer enabled'
-        it_behaves_like 'appearance header and footer not enabled'
-
-        it 'is sent as the merge request author' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(merge_request.author.name)
-          expect(sender.address).to eq(gitlab_sender)
-        end
-
-        it 'has the correct subject and body' do
-          aggregate_failures do
-            is_expected.to have_referable_subject(merge_request, reply: true)
-            is_expected.to have_body_text(project_merge_request_path(project, merge_request))
-            is_expected.to have_body_text('due to conflict.')
-            is_expected.to have_link(merge_request.to_reference, href: project_merge_request_url(merge_request.target_project, merge_request))
-          end
         end
       end
 
@@ -560,10 +473,7 @@ RSpec.describe Notify do
         it_behaves_like 'appearance header and footer not enabled'
 
         it 'is sent as the push user' do
-          sender = subject.header[:from].addrs[0]
-
-          expect(sender.display_name).to eq(push_user.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(push_user)
         end
 
         it 'has the correct subject and body' do
@@ -604,6 +514,7 @@ RSpec.describe Notify do
       let(:mailer) do
         mailer = described_class.new
         mailer.instance_variable_set(:@note, mail_thread_note)
+        mailer.instance_variable_set(:@target_url, "https://some.link")
         mailer
       end
 
@@ -853,21 +764,22 @@ RSpec.describe Notify do
       end
     end
 
-    def invite_to_project(project, inviter:)
+    def invite_to_project(project, inviter:, user: nil)
       create(
         :project_member,
         :developer,
         project: project,
         invite_token: '1234',
         invite_email: 'toto@example.com',
-        user: nil,
+        user: user,
         created_by: inviter
       )
     end
 
     describe 'project invitation' do
       let(:maintainer) { create(:user).tap { |u| project.add_maintainer(u) } }
-      let(:project_member) { invite_to_project(project, inviter: maintainer) }
+      let(:project_member) { invite_to_project(project, inviter: inviter) }
+      let(:inviter) { maintainer }
 
       subject { described_class.member_invited_email('project', project_member.id, project_member.invite_token) }
 
@@ -876,13 +788,48 @@ RSpec.describe Notify do
       it_behaves_like "a user cannot unsubscribe through footer link"
       it_behaves_like 'appearance header and footer enabled'
       it_behaves_like 'appearance header and footer not enabled'
+      it_behaves_like 'does not render a manage notifications link'
 
-      it 'contains all the useful information' do
-        is_expected.to have_subject "Invitation to join the #{project.full_name} project"
-        is_expected.to have_body_text project.full_name
-        is_expected.to have_body_text project.full_name
-        is_expected.to have_body_text project_member.human_access
-        is_expected.to have_body_text project_member.invite_token
+      context 'when there is an inviter' do
+        it 'contains all the useful information' do
+          is_expected.to have_subject "#{inviter.name} invited you to join GitLab"
+          is_expected.to have_body_text project.full_name
+          is_expected.to have_body_text project_member.human_access.downcase
+          is_expected.to have_body_text project_member.invite_token
+          is_expected.to have_link('Join now', href: invite_url(project_member.invite_token, invite_type: Members::InviteEmailExperiment::INVITE_TYPE))
+        end
+
+        it 'contains invite link for the avatar' do
+          stub_experiments('members/invite_email': :avatar)
+
+          is_expected.not_to have_content('You are invited!')
+          is_expected.not_to have_body_text 'What is a GitLab'
+        end
+
+        it 'contains invite link for the avatar' do
+          stub_experiments('members/invite_email': :permission_info)
+
+          is_expected.not_to have_content('You are invited!')
+          is_expected.to have_body_text 'What is a GitLab'
+          is_expected.to have_body_text 'What can I do with'
+        end
+
+        it 'has invite link for the control group' do
+          stub_experiments('members/invite_email': :control)
+
+          is_expected.to have_content('You are invited!')
+        end
+      end
+
+      context 'when there is no inviter' do
+        let(:inviter) { nil }
+
+        it 'contains all the useful information' do
+          is_expected.to have_subject "Invitation to join the #{project.full_name} project"
+          is_expected.to have_body_text project.full_name
+          is_expected.to have_body_text project_member.human_access.downcase
+          is_expected.to have_body_text project_member.invite_token
+        end
       end
     end
 
@@ -1039,11 +986,8 @@ RSpec.describe Notify do
         it_behaves_like 'it should have Gmail Actions links'
 
         it 'is sent to the given recipient as the author' do
-          sender = subject.header[:from].addrs[0]
-
           aggregate_failures do
-            expect(sender.display_name).to eq(note_author.name)
-            expect(sender.address).to eq(gitlab_sender)
+            expect_sender(note_author)
             expect(subject).to deliver_to(recipient.notification_email)
           end
         end
@@ -1199,11 +1143,8 @@ RSpec.describe Notify do
         it_behaves_like 'it should have Gmail Actions links'
 
         it 'is sent to the given recipient as the author' do
-          sender = subject.header[:from].addrs[0]
-
           aggregate_failures do
-            expect(sender.display_name).to eq(note_author.name)
-            expect(sender.address).to eq(gitlab_sender)
+            expect_sender(note_author)
             expect(subject).to deliver_to(recipient.notification_email)
           end
         end
@@ -1254,13 +1195,8 @@ RSpec.describe Notify do
 
     context 'for service desk issues' do
       before do
-        issue.update!(service_desk_reply_to: 'service.desk@example.com')
-      end
-
-      def expect_sender(username)
-        sender = subject.header[:from].addrs[0]
-        expect(sender.display_name).to eq(username)
-        expect(sender.address).to eq(gitlab_sender)
+        issue.update!(external_author: 'service.desk@example.com')
+        issue.issue_email_participants.create!(email: 'service.desk@example.com')
       end
 
       describe 'thank you email' do
@@ -1280,14 +1216,16 @@ RSpec.describe Notify do
         end
 
         it 'uses service bot name by default' do
-          expect_sender(User.support_bot.name)
+          expect_sender(User.support_bot)
         end
 
         context 'when custom outgoing name is set' do
           let_it_be(:settings) { create(:service_desk_setting, project: project, outgoing_name: 'some custom name') }
 
           it 'uses custom name in "from" header' do
-            expect_sender('some custom name')
+            sender = subject.header[:from].addrs[0]
+            expect(sender.display_name).to eq('some custom name')
+            expect(sender.address).to eq(gitlab_sender)
           end
         end
 
@@ -1295,7 +1233,7 @@ RSpec.describe Notify do
           let_it_be(:settings) { create(:service_desk_setting, project: project, outgoing_name: '') }
 
           it 'uses service bot name' do
-            expect_sender(User.support_bot.name)
+            expect_sender(User.support_bot)
           end
         end
       end
@@ -1303,7 +1241,7 @@ RSpec.describe Notify do
       describe 'new note email' do
         let_it_be(:first_note) { create(:discussion_note_on_issue, note: 'Hello world') }
 
-        subject { described_class.service_desk_new_note_email(issue.id, first_note.id) }
+        subject { described_class.service_desk_new_note_email(issue.id, first_note.id, 'service.desk@example.com') }
 
         it_behaves_like 'an unsubscribeable thread'
 
@@ -1312,7 +1250,7 @@ RSpec.describe Notify do
         end
 
         it 'uses author\'s name in "from" header' do
-          expect_sender(first_note.author.name)
+          expect_sender(first_note.author)
         end
 
         it 'has the correct subject and body' do
@@ -1358,6 +1296,7 @@ RSpec.describe Notify do
         group.request_access(user)
         group.requesters.find_by(user_id: user.id)
       end
+
       let(:recipient) { user }
 
       subject { described_class.member_access_denied_email('group', group.id, user.id) }
@@ -1388,6 +1327,7 @@ RSpec.describe Notify do
       it_behaves_like "a user cannot unsubscribe through footer link"
       it_behaves_like 'appearance header and footer enabled'
       it_behaves_like 'appearance header and footer not enabled'
+      it_behaves_like 'it requires a group'
 
       it 'contains all the useful information' do
         is_expected.to have_subject "Access to the #{group.name} group was granted"
@@ -1399,36 +1339,133 @@ RSpec.describe Notify do
       end
     end
 
-    def invite_to_group(group, inviter:)
+    def invite_to_group(group, inviter:, user: nil)
       create(
         :group_member,
         :developer,
         group: group,
         invite_token: '1234',
         invite_email: 'toto@example.com',
-        user: nil,
+        user: user,
         created_by: inviter
       )
     end
 
-    describe 'group invitation' do
+    describe 'invitations' do
       let(:owner) { create(:user).tap { |u| group.add_user(u, Gitlab::Access::OWNER) } }
-      let(:group_member) { invite_to_group(group, inviter: owner) }
+      let(:group_member) { invite_to_group(group, inviter: inviter) }
+      let(:inviter) { owner }
 
-      subject { described_class.member_invited_email('group', group_member.id, group_member.invite_token) }
+      subject { described_class.member_invited_email('Group', group_member.id, group_member.invite_token) }
 
       it_behaves_like 'an email sent from GitLab'
       it_behaves_like 'it should not have Gmail Actions links'
       it_behaves_like "a user cannot unsubscribe through footer link"
       it_behaves_like 'appearance header and footer enabled'
       it_behaves_like 'appearance header and footer not enabled'
+      it_behaves_like 'it requires a group'
+      it_behaves_like 'does not render a manage notifications link'
 
-      it 'contains all the useful information' do
-        is_expected.to have_subject "Invitation to join the #{group.name} group"
-        is_expected.to have_body_text group.name
-        is_expected.to have_body_text group.web_url
-        is_expected.to have_body_text group_member.human_access
-        is_expected.to have_body_text group_member.invite_token
+      context 'when there is an inviter' do
+        it 'contains all the useful information' do
+          is_expected.to have_subject "#{group_member.created_by.name} invited you to join GitLab"
+          is_expected.to have_body_text group.name
+          is_expected.to have_body_text group_member.human_access.downcase
+          is_expected.to have_body_text group_member.invite_token
+        end
+      end
+
+      context 'when there is no inviter' do
+        let(:inviter) { nil }
+
+        it 'contains all the useful information' do
+          is_expected.to have_subject "Invitation to join the #{group.name} group"
+          is_expected.to have_body_text group.name
+          is_expected.to have_body_text group_member.human_access.downcase
+          is_expected.to have_body_text group_member.invite_token
+        end
+      end
+    end
+
+    describe 'group invitation reminders' do
+      let_it_be(:inviter) { create(:user).tap { |u| group.add_user(u, Gitlab::Access::OWNER) } }
+
+      let(:group_member) { invite_to_group(group, inviter: inviter) }
+
+      subject { described_class.member_invited_reminder_email('Group', group_member.id, group_member.invite_token, reminder_index) }
+
+      describe 'not sending a reminder' do
+        let(:reminder_index) { 0 }
+
+        context 'member does not exist' do
+          let(:group_member) { double(id: nil, invite_token: nil) }
+
+          it_behaves_like 'no email is sent'
+        end
+
+        context 'member is not created by a user' do
+          before do
+            group_member.update(created_by: nil)
+          end
+
+          it_behaves_like 'no email is sent'
+        end
+
+        context 'member is a known user' do
+          before do
+            group_member.update(user: create(:user))
+          end
+
+          it_behaves_like 'no email is sent'
+        end
+      end
+
+      describe 'the first reminder' do
+        let(:reminder_index) { 0 }
+
+        it_behaves_like 'an email sent from GitLab'
+        it_behaves_like 'it should not have Gmail Actions links'
+        it_behaves_like 'a user cannot unsubscribe through footer link'
+
+        it 'contains all the useful information' do
+          is_expected.to have_subject "#{inviter.name}'s invitation to GitLab is pending"
+          is_expected.to have_body_text group.human_name
+          is_expected.to have_body_text group_member.human_access.downcase
+          is_expected.to have_body_text invite_url(group_member.invite_token)
+          is_expected.to have_body_text decline_invite_url(group_member.invite_token)
+        end
+      end
+
+      describe 'the second reminder' do
+        let(:reminder_index) { 1 }
+
+        it_behaves_like 'an email sent from GitLab'
+        it_behaves_like 'it should not have Gmail Actions links'
+        it_behaves_like 'a user cannot unsubscribe through footer link'
+
+        it 'contains all the useful information' do
+          is_expected.to have_subject "#{inviter.name} is waiting for you to join GitLab"
+          is_expected.to have_body_text group.human_name
+          is_expected.to have_body_text group_member.human_access.downcase
+          is_expected.to have_body_text invite_url(group_member.invite_token)
+          is_expected.to have_body_text decline_invite_url(group_member.invite_token)
+        end
+      end
+
+      describe 'the third reminder' do
+        let(:reminder_index) { 2 }
+
+        it_behaves_like 'an email sent from GitLab'
+        it_behaves_like 'it should not have Gmail Actions links'
+        it_behaves_like 'a user cannot unsubscribe through footer link'
+
+        it 'contains all the useful information' do
+          is_expected.to have_subject "#{inviter.name} is still waiting for you to join GitLab"
+          is_expected.to have_body_text group.human_name
+          is_expected.to have_body_text group_member.human_access.downcase
+          is_expected.to have_body_text invite_url(group_member.invite_token)
+          is_expected.to have_body_text decline_invite_url(group_member.invite_token)
+        end
       end
     end
 
@@ -1448,6 +1485,7 @@ RSpec.describe Notify do
       it_behaves_like "a user cannot unsubscribe through footer link"
       it_behaves_like 'appearance header and footer enabled'
       it_behaves_like 'appearance header and footer not enabled'
+      it_behaves_like 'it requires a group'
 
       it 'contains all the useful information' do
         is_expected.to have_subject 'Invitation accepted'
@@ -1479,6 +1517,88 @@ RSpec.describe Notify do
         is_expected.to have_body_text group.name
         is_expected.to have_body_text group.web_url
         is_expected.to have_body_text group_member.invite_email
+      end
+    end
+
+    describe 'group expiration date updated' do
+      let_it_be(:group_member) { create(:group_member, group: group, expires_at: 1.day.from_now) }
+
+      context 'when expiration date is changed' do
+        subject { described_class.member_expiration_date_updated_email('group', group_member.id) }
+
+        it_behaves_like 'an email sent from GitLab'
+        it_behaves_like 'it should not have Gmail Actions links'
+        it_behaves_like 'a user cannot unsubscribe through footer link'
+        it_behaves_like 'appearance header and footer enabled'
+        it_behaves_like 'appearance header and footer not enabled'
+
+        context 'when expiration date is one day away' do
+          it 'contains all the useful information' do
+            is_expected.to have_subject 'Group membership expiration date changed'
+            is_expected.to have_body_text group_member.user.name
+            is_expected.to have_body_text group.name
+            is_expected.to have_body_text group.web_url
+            is_expected.to have_body_text group_group_members_url(group, search: group_member.user.username)
+            is_expected.to have_body_text 'day.'
+            is_expected.not_to have_body_text 'days.'
+          end
+        end
+
+        context 'when expiration date is more than one day away' do
+          before do
+            group_member.update!(expires_at: 20.days.from_now)
+          end
+
+          it 'contains all the useful information' do
+            is_expected.to have_subject 'Group membership expiration date changed'
+            is_expected.to have_body_text group_member.user.name
+            is_expected.to have_body_text group.name
+            is_expected.to have_body_text group.web_url
+            is_expected.to have_body_text group_group_members_url(group, search: group_member.user.username)
+            is_expected.to have_body_text 'days.'
+            is_expected.not_to have_body_text 'day.'
+          end
+        end
+
+        context 'when a group member is newly given an expiration date' do
+          let_it_be(:group_member) { create(:group_member, group: group) }
+
+          before do
+            group_member.update!(expires_at: 5.days.from_now)
+          end
+
+          subject { described_class.member_expiration_date_updated_email('group', group_member.id) }
+
+          it 'contains all the useful information' do
+            is_expected.to have_subject 'Group membership expiration date changed'
+            is_expected.to have_body_text group_member.user.name
+            is_expected.to have_body_text group.name
+            is_expected.to have_body_text group.web_url
+            is_expected.to have_body_text group_group_members_url(group, search: group_member.user.username)
+            is_expected.to have_body_text 'days.'
+            is_expected.not_to have_body_text 'day.'
+          end
+        end
+      end
+
+      context 'when expiration date is removed' do
+        before do
+          group_member.update!(expires_at: nil)
+        end
+
+        subject { described_class.member_expiration_date_updated_email('group', group_member.id) }
+
+        it_behaves_like 'an email sent from GitLab'
+        it_behaves_like 'it should not have Gmail Actions links'
+        it_behaves_like 'a user cannot unsubscribe through footer link'
+        it_behaves_like 'appearance header and footer enabled'
+        it_behaves_like 'appearance header and footer not enabled'
+
+        it 'contains all the useful information' do
+          is_expected.to have_subject 'Group membership expiration date removed'
+          is_expected.to have_body_text group_member.user.name
+          is_expected.to have_body_text group.name
+        end
       end
     end
   end
@@ -1526,9 +1646,7 @@ RSpec.describe Notify do
     it_behaves_like 'appearance header and footer not enabled'
 
     it 'is sent as the author' do
-      sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
-      expect(sender.address).to eq(gitlab_sender)
+      expect_sender(user)
     end
 
     it 'has the correct subject and body' do
@@ -1553,9 +1671,7 @@ RSpec.describe Notify do
     it_behaves_like 'appearance header and footer not enabled'
 
     it 'is sent as the author' do
-      sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
-      expect(sender.address).to eq(gitlab_sender)
+      expect_sender(user)
     end
 
     it 'has the correct subject and body' do
@@ -1579,9 +1695,7 @@ RSpec.describe Notify do
     it_behaves_like 'appearance header and footer not enabled'
 
     it 'is sent as the author' do
-      sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
-      expect(sender.address).to eq(gitlab_sender)
+      expect_sender(user)
     end
 
     it 'has the correct subject' do
@@ -1602,9 +1716,7 @@ RSpec.describe Notify do
     it_behaves_like 'appearance header and footer not enabled'
 
     it 'is sent as the author' do
-      sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
-      expect(sender.address).to eq(gitlab_sender)
+      expect_sender(user)
     end
 
     it 'has the correct subject' do
@@ -1631,9 +1743,7 @@ RSpec.describe Notify do
     it_behaves_like 'appearance header and footer not enabled'
 
     it 'is sent as the author' do
-      sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
-      expect(sender.address).to eq(gitlab_sender)
+      expect_sender(user)
     end
 
     it 'has the correct subject and body' do
@@ -1724,9 +1834,7 @@ RSpec.describe Notify do
     it_behaves_like 'appearance header and footer not enabled'
 
     it 'is sent as the author' do
-      sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq(user.name)
-      expect(sender.address).to eq(gitlab_sender)
+      expect_sender(user)
     end
 
     it 'has the correct subject and body' do
@@ -1816,12 +1924,8 @@ RSpec.describe Notify do
     it_behaves_like 'an unsubscribeable thread'
 
     it 'is sent to the given recipient as the author' do
-      sender = subject.header[:from].addrs[0]
-
       aggregate_failures do
-        expect(sender.display_name).to eq(review.author_name)
-        expect(sender.address).to eq(gitlab_sender)
-        expect(subject).to deliver_to(recipient.notification_email)
+        expect_sender(review.author)
       end
     end
 
@@ -1855,5 +1959,11 @@ RSpec.describe Notify do
         is_expected.to have_body_text project_merge_request_path(project, merge_request)
       end
     end
+  end
+
+  def expect_sender(user)
+    sender = subject.header[:from].addrs[0]
+    expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
+    expect(sender.address).to eq(gitlab_sender)
   end
 end

@@ -22,15 +22,14 @@ RSpec.describe 'Environment > Metrics' do
   end
 
   around do |example|
-    Timecop.freeze(current_time) { example.run }
+    travel_to(current_time) { example.run }
   end
 
   shared_examples 'has environment selector' do
     it 'has a working environment selector', :js do
       click_link('See metrics')
-      # TODO: See metrics on the sidebar still points to the old metrics URL
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/229277
-      expect(page).to have_current_path(metrics_project_environment_path(project, id: environment.id))
+
+      expect(page).to have_current_path(project_metrics_dashboard_path(project, environment: environment.id))
       expect(page).to have_css('[data-qa-selector="environments_dropdown"]')
 
       within('[data-qa-selector="environments_dropdown"]') do

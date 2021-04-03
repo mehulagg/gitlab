@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 module API
-  class EpicIssues < Grape::API::Instance
+  class EpicIssues < ::API::Base
+    include PaginationParams
+
+    feature_category :epics
+
     before do
       authenticate!
       authorize_epics_feature!
@@ -13,6 +17,12 @@ module API
       def link
         @link ||= epic.epic_issues.find(params[:epic_issue_id])
       end
+
+      def related_issues(epic)
+        IssuesFinder.new(current_user, { epic_id: epic.id }).execute
+          .with_api_entity_associations
+          .sorted_by_epic_position
+      end
     end
 
     params do
@@ -23,10 +33,11 @@ module API
       desc 'Update epic issue association' do
       end
       params do
-        requires :epic_iid, type: Integer, desc: 'The iid of the epic'
-        requires :epic_issue_id, type: Integer, desc: 'The id of the epic issue association to update'
-        optional :move_before_id, type: Integer, desc: 'The id of the epic issue association that should be positioned before the actual issue'
-        optional :move_after_id, type: Integer, desc: 'The id of the epic issue association that should be positioned after the actual issue'
+        requires :epic_iid, type: Integer, desc: 'The IID of the epic'
+        requires :epic_issue_id, type: Integer, desc: 'The ID of the epic issue association to update'
+        optional :move_before_id, type: Integer, desc: 'The ID of the epic issue association that should be positioned before the actual issue'
+        optional :move_after_id, type: Integer, desc: 'The ID of the epic issue association that should be positioned after the actual issue'
+        use :pagination
       end
       put ':id/(-/)epics/:epic_iid/issues/:epic_issue_id' do
         authorize_can_admin_epic!
@@ -38,10 +49,8 @@ module API
 
         result = ::EpicIssues::UpdateService.new(link, current_user, update_params).execute
 
-        # For now we return empty body
-        # The issues list in the correct order in body will be returned as part of #4250
         if result
-          present epic.issues_readable_by(current_user),
+          present paginate(related_issues(epic)),
             with: EE::API::Entities::EpicIssue,
             current_user: current_user
         else
@@ -53,21 +62,24 @@ module API
         success EE::API::Entities::EpicIssue
       end
       params do
-        requires :epic_iid, type: Integer, desc: 'The iid of the epic'
+        requires :epic_iid, type: Integer, desc: 'The IID of the epic'
+        use :pagination
       end
-      get ':id/(-/)epics/:epic_iid/issues' do
-        authorize_can_read!
+      [':id/epics/:epic_iid/issues', ':id/-/epics/:epic_iid/issues'].each do |path|
+        get path do
+          authorize_can_read!
 
-        present epic.issues_readable_by(current_user),
-          with: EE::API::Entities::EpicIssue,
-          current_user: current_user
+          present paginate(related_issues(epic)),
+            with: EE::API::Entities::EpicIssue,
+            current_user: current_user
+        end
       end
 
       desc 'Assign an issue to the epic' do
         success EE::API::Entities::EpicIssueLink
       end
       params do
-        requires :epic_iid, type: Integer, desc: 'The iid of the epic'
+        requires :epic_iid, type: Integer, desc: 'The IID of the epic'
       end
       # rubocop: disable CodeReuse/ActiveRecord
       post ':id/(-/)epics/:epic_iid/issues/:issue_id' do
@@ -93,8 +105,8 @@ module API
         success EE::API::Entities::EpicIssueLink
       end
       params do
-        requires :epic_iid, type: Integer, desc: 'The iid of the epic'
-        requires :epic_issue_id, type: Integer, desc: 'The id of the association'
+        requires :epic_iid, type: Integer, desc: 'The IID of the epic'
+        requires :epic_issue_id, type: Integer, desc: 'The ID of the association'
       end
       delete ':id/(-/)epics/:epic_iid/issues/:epic_issue_id' do
         authorize_can_admin_epic!

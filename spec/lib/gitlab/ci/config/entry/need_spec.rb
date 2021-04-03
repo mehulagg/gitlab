@@ -23,7 +23,17 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: true)
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
+        end
+
+        context 'when the FF ci_needs_optional is disabled' do
+          before do
+            stub_feature_flags(ci_needs_optional: false)
+          end
+
+          it 'returns job needs configuration without `optional`' do
+            expect(need.value).to eq(name: 'job_name', artifacts: true)
+          end
         end
       end
 
@@ -58,7 +68,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: true)
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
         end
       end
 
@@ -74,7 +84,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: false)
+          expect(need.value).to eq(name: 'job_name', artifacts: false, optional: false)
         end
       end
 
@@ -90,7 +100,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: true)
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
         end
       end
 
@@ -106,11 +116,77 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
 
       describe '#value' do
         it 'returns job needs configuration' do
-          expect(need.value).to eq(name: 'job_name', artifacts: true)
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
         end
       end
 
       it_behaves_like 'job type'
+    end
+
+    context 'with job name and optional true' do
+      let(:config) { { job: 'job_name', optional: true } }
+
+      it { is_expected.to be_valid }
+
+      it_behaves_like 'job type'
+
+      describe '#value' do
+        it 'returns job needs configuration' do
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: true)
+        end
+
+        context 'when the FF ci_needs_optional is disabled' do
+          before do
+            stub_feature_flags(ci_needs_optional: false)
+          end
+
+          it 'returns job needs configuration without `optional`' do
+            expect(need.value).to eq(name: 'job_name', artifacts: true)
+          end
+        end
+      end
+    end
+
+    context 'with job name and optional false' do
+      let(:config) { { job: 'job_name', optional: false } }
+
+      it { is_expected.to be_valid }
+
+      it_behaves_like 'job type'
+
+      describe '#value' do
+        it 'returns job needs configuration' do
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
+        end
+      end
+    end
+
+    context 'with job name and optional nil' do
+      let(:config) { { job: 'job_name', optional: nil } }
+
+      it { is_expected.to be_valid }
+
+      it_behaves_like 'job type'
+
+      describe '#value' do
+        it 'returns job needs configuration' do
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
+        end
+      end
+    end
+
+    context 'without optional key' do
+      let(:config) { { job: 'job_name' } }
+
+      it { is_expected.to be_valid }
+
+      it_behaves_like 'job type'
+
+      describe '#value' do
+        it 'returns job needs configuration' do
+          expect(need.value).to eq(name: 'job_name', artifacts: true, optional: false)
+        end
+      end
     end
 
     context 'when job name is empty' do
@@ -162,6 +238,45 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
       end
 
       it_behaves_like 'job type'
+    end
+  end
+
+  context 'with cross pipeline artifacts needs' do
+    context 'when pipeline is provided' do
+      context 'when job is provided' do
+        let(:config) { { job: 'job_name', pipeline: '$THE_PIPELINE_ID' } }
+
+        it { is_expected.to be_valid }
+
+        it 'sets artifacts:true by default' do
+          expect(need.value).to eq(job: 'job_name', pipeline: '$THE_PIPELINE_ID', artifacts: true)
+        end
+
+        it 'sets the type as cross_dependency' do
+          expect(need.type).to eq(:cross_dependency)
+        end
+      end
+
+      context 'when artifacts is provided' do
+        let(:config) { { job: 'job_name', pipeline: '$THE_PIPELINE_ID', artifacts: false } }
+
+        it { is_expected.to be_valid }
+
+        it 'returns the correct value' do
+          expect(need.value).to eq(job: 'job_name', pipeline: '$THE_PIPELINE_ID', artifacts: false)
+        end
+      end
+    end
+
+    context 'when config contains not allowed keys' do
+      let(:config) { { job: 'job_name', pipeline: '$THE_PIPELINE_ID', something: 'else' } }
+
+      it { is_expected.not_to be_valid }
+
+      it 'returns an error' do
+        expect(need.errors)
+          .to contain_exactly('cross pipeline dependency config contains unknown keys: something')
+      end
     end
   end
 

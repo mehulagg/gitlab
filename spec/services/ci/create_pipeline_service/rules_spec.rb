@@ -2,10 +2,10 @@
 require 'spec_helper'
 
 RSpec.describe Ci::CreatePipelineService do
-  let(:user)        { create(:admin) }
+  let(:project)     { create(:project, :repository) }
+  let(:user)        { project.owner }
   let(:ref)         { 'refs/heads/master' }
   let(:source)      { :push }
-  let(:project)     { create(:project, :repository) }
   let(:service)     { described_class.new(project, user, { ref: ref }) }
   let(:pipeline)    { service.execute(source) }
   let(:build_names) { pipeline.builds.pluck(:name) }
@@ -93,6 +93,210 @@ RSpec.describe Ci::CreatePipelineService do
         end
       end
     end
+
+    context 'with allow_failure and exit_codes', :aggregate_failures do
+      def find_job(name)
+        pipeline.builds.find_by(name: name)
+      end
+
+      let(:config) do
+        <<-EOY
+          job-1:
+            script: exit 42
+            allow_failure:
+              exit_codes: 42
+            rules:
+              - if: $CI_COMMIT_REF_NAME == "master"
+                allow_failure: false
+
+          job-2:
+            script: exit 42
+            allow_failure:
+              exit_codes: 42
+            rules:
+              - if: $CI_COMMIT_REF_NAME == "master"
+                allow_failure: true
+
+          job-3:
+            script: exit 42
+            allow_failure:
+              exit_codes: 42
+            rules:
+              - if: $CI_COMMIT_REF_NAME == "master"
+                when: manual
+        EOY
+      end
+
+      it 'creates a pipeline' do
+        expect(pipeline).to be_persisted
+        expect(build_names).to contain_exactly(
+          'job-1', 'job-2', 'job-3'
+        )
+      end
+
+      it 'assigns job:allow_failure values to the builds' do
+        expect(find_job('job-1').allow_failure).to eq(false)
+        expect(find_job('job-2').allow_failure).to eq(true)
+        expect(find_job('job-3').allow_failure).to eq(false)
+      end
+
+      it 'removes exit_codes if allow_failure is specified' do
+        expect(find_job('job-1').options.dig(:allow_failure_criteria)).to be_nil
+        expect(find_job('job-2').options.dig(:allow_failure_criteria)).to be_nil
+        expect(find_job('job-3').options.dig(:allow_failure_criteria, :exit_codes)).to eq([42])
+      end
+    end
+
+    context 'if:' do
+      context 'variables:' do
+        let(:config) do
+          <<-EOY
+          variables:
+            VAR4: workflow var 4
+            VAR5: workflow var 5
+            VAR7: workflow var 7
+
+          workflow:
+            rules:
+              - if: $CI_COMMIT_REF_NAME =~ /master/
+                variables:
+                  VAR4: overridden workflow var 4
+              - if: $CI_COMMIT_REF_NAME =~ /feature/
+                variables:
+                  VAR5: overridden workflow var 5
+                  VAR6: new workflow var 6
+                  VAR7: overridden workflow var 7
+              - when: always
+
+          job1:
+            script: "echo job1"
+            variables:
+              VAR1: job var 1
+              VAR2: job var 2
+              VAR5: job var 5
+            rules:
+              - if: $CI_COMMIT_REF_NAME =~ /master/
+                variables:
+                  VAR1: overridden var 1
+              - if: $CI_COMMIT_REF_NAME =~ /feature/
+                variables:
+                  VAR2: overridden var 2
+                  VAR3: new var 3
+                  VAR7: overridden var 7
+              - when: on_success
+
+          job2:
+            script: "echo job2"
+            inherit:
+              variables: [VAR4, VAR6, VAR7]
+            variables:
+              VAR4: job var 4
+            rules:
+              - if: $CI_COMMIT_REF_NAME =~ /master/
+                variables:
+                  VAR7: overridden var 7
+              - when: on_success
+          EOY
+        end
+
+        let(:job1) { pipeline.builds.find_by(name: 'job1') }
+        let(:job2) { pipeline.builds.find_by(name: 'job2') }
+
+        let(:variable_keys) { %w(VAR1 VAR2 VAR3 VAR4 VAR5 VAR6 VAR7) }
+
+        context 'when no match' do
+          let(:ref) { 'refs/heads/wip' }
+
+          it 'does not affect vars' do
+            expect(job1.scoped_variables.to_hash.values_at(*variable_keys)).to eq(
+              ['job var 1', 'job var 2', nil, 'workflow var 4', 'job var 5', nil, 'workflow var 7']
+            )
+
+            expect(job2.scoped_variables.to_hash.values_at(*variable_keys)).to eq(
+              [nil, nil, nil, 'job var 4', nil, nil, 'workflow var 7']
+            )
+          end
+        end
+
+        context 'when matching to the first rule' do
+          let(:ref) { 'refs/heads/master' }
+
+          it 'overrides variables' do
+            expect(job1.scoped_variables.to_hash.values_at(*variable_keys)).to eq(
+              ['overridden var 1', 'job var 2', nil, 'overridden workflow var 4', 'job var 5', nil, 'workflow var 7']
+            )
+
+            expect(job2.scoped_variables.to_hash.values_at(*variable_keys)).to eq(
+              [nil, nil, nil, 'job var 4', nil, nil, 'overridden var 7']
+            )
+          end
+
+          context 'when FF ci_workflow_rules_variables is disabled' do
+            before do
+              stub_feature_flags(ci_workflow_rules_variables: false)
+            end
+
+            it 'does not affect workflow variables but job variables' do
+              expect(job1.scoped_variables.to_hash.values_at(*variable_keys)).to eq(
+                ['overridden var 1', 'job var 2', nil, 'workflow var 4', 'job var 5', nil, 'workflow var 7']
+              )
+
+              expect(job2.scoped_variables.to_hash.values_at(*variable_keys)).to eq(
+                [nil, nil, nil, 'job var 4', nil, nil, 'overridden var 7']
+              )
+            end
+          end
+        end
+
+        context 'when matching to the second rule' do
+          let(:ref) { 'refs/heads/feature' }
+
+          it 'overrides variables' do
+            expect(job1.scoped_variables.to_hash.values_at(*variable_keys)).to eq(
+              ['job var 1', 'overridden var 2', 'new var 3', 'workflow var 4', 'job var 5', 'new workflow var 6', 'overridden var 7']
+            )
+
+            expect(job2.scoped_variables.to_hash.values_at(*variable_keys)).to eq(
+              [nil, nil, nil, 'job var 4', nil, 'new workflow var 6', 'overridden workflow var 7']
+            )
+          end
+        end
+
+        context 'using calculated workflow var in job rules' do
+          let(:config) do
+            <<-EOY
+            variables:
+              VAR1: workflow var 4
+
+            workflow:
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  variables:
+                    VAR1: overridden workflow var 4
+                - when: always
+
+            job:
+              script: "echo job1"
+              rules:
+                - if: $VAR1 =~ "overridden workflow var 4"
+                  variables:
+                    VAR1: overridden var 1
+                - when: on_success
+            EOY
+          end
+
+          let(:job) { pipeline.builds.find_by(name: 'job') }
+
+          context 'when matching the first workflow condition' do
+            let(:ref) { 'refs/heads/master' }
+
+            it 'uses VAR1 of job rules result' do
+              expect(job.scoped_variables.to_hash['VAR1']).to eq('overridden var 1')
+            end
+          end
+        end
+      end
+    end
   end
 
   context 'when workflow:rules are used' do
@@ -116,8 +320,8 @@ RSpec.describe Ci::CreatePipelineService do
       end
 
       context 'matching the first rule in the list' do
-        it 'saves a pending pipeline' do
-          expect(pipeline).to be_pending
+        it 'saves a created pipeline' do
+          expect(pipeline).to be_created
           expect(pipeline).to be_persisted
         end
       end
@@ -125,8 +329,8 @@ RSpec.describe Ci::CreatePipelineService do
       context 'matching the last rule in the list' do
         let(:ref) { 'refs/heads/feature' }
 
-        it 'saves a pending pipeline' do
-          expect(pipeline).to be_pending
+        it 'saves a created pipeline' do
+          expect(pipeline).to be_created
           expect(pipeline).to be_persisted
         end
       end
@@ -166,8 +370,8 @@ RSpec.describe Ci::CreatePipelineService do
       end
 
       context 'matching the first rule in the list' do
-        it 'saves a pending pipeline' do
-          expect(pipeline).to be_pending
+        it 'saves a created pipeline' do
+          expect(pipeline).to be_created
           expect(pipeline).to be_persisted
         end
       end
@@ -191,8 +395,8 @@ RSpec.describe Ci::CreatePipelineService do
       context 'with partial match' do
         let(:ref) { 'refs/heads/feature' }
 
-        it 'saves a pending pipeline' do
-          expect(pipeline).to be_pending
+        it 'saves a created pipeline' do
+          expect(pipeline).to be_created
           expect(pipeline).to be_persisted
         end
       end
@@ -235,8 +439,8 @@ RSpec.describe Ci::CreatePipelineService do
       context 'where workflow passes and the job passes' do
         let(:ref) { 'refs/heads/feature' }
 
-        it 'saves a pending pipeline' do
-          expect(pipeline).to be_pending
+        it 'saves a created pipeline' do
+          expect(pipeline).to be_created
           expect(pipeline).to be_persisted
         end
       end

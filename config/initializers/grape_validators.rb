@@ -8,3 +8,5 @@ Grape::Validations.register_validator(:integer_none_any, ::API::Validations::Val
 Grape::Validations.register_validator(:array_none_any, ::API::Validations::Validators::ArrayNoneAny)
 Grape::Validations.register_validator(:check_assignees_count, ::API::Validations::Validators::CheckAssigneesCount)
 Grape::Validations.register_validator(:untrusted_regexp, ::API::Validations::Validators::UntrustedRegexp)
+Grape::Validations.register_validator(:email_or_email_list, ::API::Validations::Validators::EmailOrEmailList)
+Grape::Validations.register_validator(:iteration_id, ::API::Validations::Validators::IntegerOrCustomValue)

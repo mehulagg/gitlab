@@ -47,11 +47,11 @@ representation. It rarely happens that a serialization entity exists without
 a corresponding domain model class. As an example, we have an `Issue` class and
 a corresponding `IssueSerializer`.
 
-Serialization entites are designed to reuse other serialization entities, which
+Serialization entities are designed to reuse other serialization entities, which
 is a convenient way to create a multi-level JSON representation of a piece of
 a domain model you want to serialize.
 
-See [documentation for Grape Entites][grape-entity-readme] for more details.
+See [documentation for Grape Entities][grape-entity-readme] for more details.
 
 ## How to implement a serializer?
 
@@ -99,7 +99,7 @@ create a JSON response according to your needs.
 
 ```ruby
 class PipelineSerializer < BaseSerializer
-  entity PipelineEntity
+  entity Ci::PipelineEntity
 
   def represent_details(resource)
     represent(resource, only: [:details])
@@ -284,7 +284,7 @@ MyObjectSerializer.new.represent(object.present)
     entity requires `request.user` attribute, but the second one wants
     `request.current_user`. When it happens that these two entities are used in
     the same serialization request, you might need to pass both parameters to
-    the serializer, which is obviously not a perfect situation.
+    the serializer, which is not a perfect situation.
 
     When in doubt, pass only `current_user` and `project` if these are required.
 

@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
 
@@ -18,11 +21,11 @@ comments: false
   git clone <url>
   ```
 
-## Central Repos
+## Central Repositories
 
 - To instantiate a central repository a `--bare` flag is required.
 - Bare repositories don't allow file editing or committing changes.
-- Create a bare repo with:
+- Create a bare repository with:
 
   ```shell
   git init --bare project-name.git
@@ -31,7 +34,7 @@ comments: false
 ## Instantiate workflow with clone
 
 1. Create a project in your user namespace.
-   - Choose to import from 'Any Repo by URL' and use <https://gitlab.com/gitlab-org/training-examples.git>.
+   - Choose to import from **Any Repository by URL** and use <https://gitlab.com/gitlab-org/training-examples.git>.
 1. Create a '`Workspace`' directory in your home directory.
 1. Clone the '`training-examples`' project.
 

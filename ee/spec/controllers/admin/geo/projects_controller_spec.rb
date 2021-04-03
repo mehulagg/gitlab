@@ -6,6 +6,7 @@ RSpec.describe Admin::Geo::ProjectsController, :geo do
   include EE::GeoHelpers
 
   let_it_be(:admin) { create(:admin) }
+  let_it_be(:geo_primary) { create(:geo_node, :primary) }
   let(:synced_registry) { create(:geo_project_registry, :synced) }
 
   before do
@@ -35,6 +36,7 @@ RSpec.describe Admin::Geo::ProjectsController, :geo do
 
       it 'displays a different read-only message based on skip_readonly_message' do
         expect(subject.body).to match('You may be able to make a limited amount of changes or perform a limited amount of actions on this page')
+        expect(subject.body).to include(geo_primary.url)
       end
 
       context 'without sync_status specified' do

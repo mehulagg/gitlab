@@ -1,14 +1,8 @@
+# frozen_string_literal: true
+
 # All routing related to repository browsing
 
-resource :repository, only: [:create] do
-  member do
-    # deprecated since GitLab 9.5
-    get 'archive', constraints: { format: Gitlab::PathRegex.archive_formats_regex }, as: 'archive_alternative', defaults: { append_sha: true }
-
-    # deprecated since GitLab 10.7
-    get ':id/archive', constraints: { format: Gitlab::PathRegex.archive_formats_regex, id: /.+/ }, action: 'archive', as: 'archive_deprecated', defaults: { append_sha: true }
-  end
-end
+resource :repository, only: [:create]
 
 resources :commit, only: [:show], constraints: { id: /\h{7,40}/ } do
   member do
@@ -17,6 +11,7 @@ resources :commit, only: [:show], constraints: { id: /\h{7,40}/ } do
     post :revert
     post :cherry_pick
     get :diff_for_path
+    get :diff_files
     get :merge_requests
   end
 end

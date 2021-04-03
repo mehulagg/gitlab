@@ -21,11 +21,13 @@ module MultipleBoardsActions
   end
 
   def create
-    board = Boards::CreateService.new(parent, current_user, board_params).execute
+    response = Boards::CreateService.new(parent, current_user, board_params).execute
 
     respond_to do |format|
       format.json do
-        if board.persisted?
+        board = response.payload
+
+        if response.success?
           extra_json = { board_path: board_path(board) }
           render json: serialize_as_json(board).merge(extra_json)
         else
@@ -63,6 +65,7 @@ module MultipleBoardsActions
   private
 
   def redirect_to_recent_board
+    return unless board_type == Board.to_type
     return if request.format.json? || !parent.multiple_issue_boards_available? || !latest_visited_board
 
     redirect_to board_path(latest_visited_board.board)
@@ -77,7 +80,7 @@ module MultipleBoardsActions
   end
 
   def authorize_admin_board!
-    return render_404 unless can?(current_user, :admin_board, parent)
+    return render_404 unless can?(current_user, :admin_issue_board, parent)
   end
 
   def serializer

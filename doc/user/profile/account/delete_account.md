@@ -2,7 +2,7 @@
 type: howto
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Deleting a User account
@@ -12,30 +12,31 @@ Users can be deleted from a GitLab instance, either by:
 - The user themselves.
 - An administrator.
 
-NOTE: **Note:**
+NOTE:
 Deleting a user will delete all projects in that user namespace.
 
 ## As a user
 
-As a user, you can delete your own account by:
+As a user, to delete your own account:
 
-1. Clicking on your avatar.
-1. Navigating to **Settings > Account**.
-1. Selecting **Delete account**.
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Account**.
+1. Select **Delete account**.
 
 ## As an administrator
 
-As an administrator, you can delete a user account by:
+As an administrator, to delete a user account:
 
-1. Navigating to **Admin Area > Overview > Users**.
-1. Selecting a user.
-1. Under the **Account** tab, clicking:
-   - **Delete user** to delete only the user but maintaining their
+1. Go to **Admin Area > Overview > Users**.
+1. Select a user.
+1. Under the **Account** tab, select:
+   - **Delete user** to delete only the user but maintain their
      [associated records](#associated-records).
    - **Delete user and contributions** to delete the user and
      their associated records.
 
-DANGER: **Danger:**
+WARNING:
 Using the **Delete user and contributions** option may result
 in removing more data than intended. Please see [associated records](#associated-records)
 below for additional details.

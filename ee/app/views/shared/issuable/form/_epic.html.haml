@@ -1,7 +1,7 @@
 - project = local_assigns.fetch(:project)
 - issuable = local_assigns.fetch(:issuable)
 
-- return unless issuable.can_assign_epic?(current_user)
+- return unless issuable.can_assign_epic?(current_user) && issuable.supports_epic?
 - form = local_assigns.fetch(:form)
 
 .form-group.row.issue-epic
@@ -10,4 +10,4 @@
   .col-md-10.col-lg-8
     .issuable-form-select-holder
       %input{ id: 'issue_epic_id', type: 'hidden', name: 'issue[epic_id]' }
-      #js-epic-select-root{ data: { group_id: project.group.id } }
+      #js-epic-select-root{ data: { group_id: project.group.id, show_header: 'true' } }

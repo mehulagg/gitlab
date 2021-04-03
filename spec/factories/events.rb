@@ -18,6 +18,7 @@ FactoryBot.define do
     trait(:destroyed) { action { :destroyed } }
     trait(:expired)   { action { :expired } }
     trait(:archived)  { action { :archived } }
+    trait(:approved)  { action { :approved } }
 
     factory :closed_issue_event do
       action { :closed }
@@ -26,17 +27,20 @@ FactoryBot.define do
 
     factory :wiki_page_event do
       action { :created }
+      # rubocop: disable FactoryBot/InlineAssociation
+      # A persistent project is needed to have a wiki page being created properly.
       project { @overrides[:wiki_page]&.container || create(:project, :wiki_repo) }
-      target { create(:wiki_page_meta, :for_wiki_page, wiki_page: wiki_page) }
+      # rubocop: enable FactoryBot/InlineAssociation
+      target { association(:wiki_page_meta, :for_wiki_page, wiki_page: wiki_page) }
 
       transient do
-        wiki_page { create(:wiki_page, container: project) }
+        wiki_page { association(:wiki_page, container: project) }
       end
     end
 
     trait :has_design do
       transient do
-        design { create(:design, issue: create(:issue, project: project)) }
+        design { association(:design, issue: association(:issue, project: project)) }
       end
     end
 
@@ -44,7 +48,7 @@ FactoryBot.define do
       has_design
 
       transient do
-        note { create(:note, author: author, project: project, noteable: design) }
+        note { association(:note, author: author, project: project, noteable: design) }
       end
 
       action { :commented }
@@ -54,6 +58,16 @@ FactoryBot.define do
     factory :design_event, traits: [:has_design] do
       action { :created }
       target { design }
+    end
+
+    factory :project_created_event do
+      project factory: :project
+      action { :created }
+    end
+
+    factory :project_imported_event do
+      project factory: [:project, :with_import_url]
+      action { :created }
     end
   end
 

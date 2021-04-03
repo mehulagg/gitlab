@@ -7,6 +7,7 @@ module EE
   # and be prepended in the `PostReceive` worker
   module PostReceive
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     private
 
@@ -22,11 +23,25 @@ module EE
       end
     end
 
-    def process_wiki_changes(post_received, project)
+    def process_wiki_changes(post_received, wiki)
       super
 
+      return unless ::Gitlab::Geo.primary?
+
+      if wiki.is_a?(ProjectWiki)
+        ::Geo::RepositoryUpdatedService.new(wiki.repository).execute
+      else
+        group_wiki_repository = wiki.group.group_wiki_repository
+        group_wiki_repository.replicator.handle_after_update if group_wiki_repository
+      end
+    end
+
+    override :replicate_snippet_changes
+    def replicate_snippet_changes(snippet)
       if ::Gitlab::Geo.primary?
-        ::Geo::RepositoryUpdatedService.new(project.wiki.repository).execute
+        # We don't use Geo::RepositoryUpdatedService anymore as
+        # it's already deprecated. See https://gitlab.com/groups/gitlab-org/-/epics/2809
+        snippet.snippet_repository.replicator.handle_after_update if snippet.snippet_repository
       end
     end
 

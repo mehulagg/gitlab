@@ -1,0 +1,11 @@
+fragment EpicNode on Epic {
+  id
+  iid
+  title
+  state
+  reference
+  webPath
+  webUrl
+  createdAt
+  closedAt
+}

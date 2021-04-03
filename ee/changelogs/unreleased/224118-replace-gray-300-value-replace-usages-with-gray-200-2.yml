@@ -1,5 +1,0 @@
----
-title: Replace $gray-300 hex value, remap usages to $gray-200
-merge_request: 37586
-author:
-type: other

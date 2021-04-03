@@ -71,7 +71,7 @@ RSpec.describe Gitlab::Database::SimilarityScore do
       let(:search) { 'xyz' }
 
       it 'results have 0 similarity score' do
-        expect(query_result.map { |row| row['similarity'] }).to all(eq(0))
+        expect(query_result.map { |row| row['similarity'].to_f }).to all(eq(0))
       end
     end
   end
@@ -88,6 +88,17 @@ RSpec.describe Gitlab::Database::SimilarityScore do
 
     it 'ranks `path` matches higher' do
       expect(subject).to eq(%w[different same gitlab-danger])
+    end
+  end
+
+  describe 'annotation' do
+    it 'annotates the generated SQL expression' do
+      expression = Gitlab::Database::SimilarityScore.build_expression(search: 'test', rules: [
+        { column: Arel.sql('path'), multiplier: 1 },
+        { column: Arel.sql('name'), multiplier: 0.8 }
+      ])
+
+      expect(Gitlab::Database::SimilarityScore).to be_order_by_similarity(expression)
     end
   end
 end

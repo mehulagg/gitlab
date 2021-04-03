@@ -21,7 +21,7 @@ module StatusPage
     end
 
     def object_key
-      StatusPage::Storage.list_path
+      Gitlab::StatusPage::Storage.list_path
     end
   end
 end

@@ -9,11 +9,10 @@ RSpec.describe LicenseEntity do
     let(:license) { build(:license_scanning_license, :mit) }
     let(:license_policy) { ::SCA::LicensePolicy.new(license, software_policy) }
     let(:software_policy) { build(:software_license_policy) }
-    let(:path) { 'some_path' }
+    let(:path) { './Gemfile.lock' }
 
     before do
-      license.add_dependency('rails')
-      allow(license.dependencies.first).to receive(:path).and_return(path)
+      license.add_dependency(name: 'rails', package_manager: 'bundler', path: path, version: '6.0.3.4')
     end
 
     it "produces the correct representation" do
@@ -23,7 +22,7 @@ RSpec.describe LicenseEntity do
         url: license_policy.url,
         spdx_identifier: license_policy.spdx_identifier,
         classification: license_policy.classification,
-        components: [{ name: 'rails', blob_path: path }]
+        components: [{ name: 'rails', package_manager: 'bundler', version: '6.0.3.4', blob_path: path }]
       })
     end
 

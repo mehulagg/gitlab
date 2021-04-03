@@ -50,7 +50,7 @@ the browser to use. You will need to have Chrome (or Chromium) and
     - [Best practices](../doc/development/testing_guide/best_practices.md)
     - [Using page objects](../doc/development/testing_guide/end_to_end/page_objects.md)
     - [Guidelines](../doc/development/testing_guide/index.md)
-    - [Tests with special setup for local environemnts](../doc/development/testing_guide/end_to_end/running_tests_that_require_special_setup.md)
+    - [Tests with special setup for local environments](../doc/development/testing_guide/end_to_end/running_tests_that_require_special_setup.md)
 
 ### Run the end-to-end tests in a local development environment
 
@@ -103,6 +103,15 @@ bundle exec bin/qa Test::Instance::All http://localhost:3000 -- qa/specs/feature
 
 Note that the separator `--` is required; all subsequent options will be
 ignored by the QA framework and passed to `rspec`.
+
+#### Running tests for transient bugs
+
+A suite of tests have been written to test for [transient bugs](https://about.gitlab.com/handbook/engineering/quality/issue-triage/#transient-bugs).
+Those tests are tagged `:transient` and therefore can be run via:
+
+```shell
+bundle exec bin/qa Test::Instance::All http://localhost:3000 -- --tag transient
+```
 
 ### Overriding the authenticated user
 
@@ -207,7 +216,7 @@ run all the tests in the `Test::Instance::All` scenario, and then enable the
 feature flag again if it was enabled earlier.
 
 Note: the QA framework doesn't currently allow you to easily toggle a feature
-flag during a single test, [as you can in unit tests](https://docs.gitlab.com/ee/development/feature_flags.html#specs),
+flag during a single test, [as you can in unit tests](https://docs.gitlab.com/ee/development/feature_flags/index.html),
 but [that capability is planned](https://gitlab.com/gitlab-org/quality/team-tasks/issues/77).
 
 Note also that the `--` separator isn't used because `--enable-feature` and `--disable-feature`

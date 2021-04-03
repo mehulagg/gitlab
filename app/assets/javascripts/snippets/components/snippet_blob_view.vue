@@ -1,9 +1,8 @@
 <script>
-import BlobHeader from '~/blob/components/blob_header.vue';
-import BlobContent from '~/blob/components/blob_content.vue';
-import CloneDropdownButton from '~/vue_shared/components/clone_dropdown.vue';
+import GetBlobContent from 'shared_queries/snippet/snippet_blob_content.query.graphql';
 
-import GetBlobContent from '../queries/snippet.blob.content.query.graphql';
+import BlobContent from '~/blob/components/blob_content.vue';
+import BlobHeader from '~/blob/components/blob_header.vue';
 
 import {
   SIMPLE_BLOB_VIEWER,
@@ -16,23 +15,26 @@ export default {
   components: {
     BlobHeader,
     BlobContent,
-    CloneDropdownButton,
   },
   apollo: {
     blobContent: {
       query: GetBlobContent,
       variables() {
         return {
-          ids: this.snippet.id,
+          ids: [this.snippet.id],
           rich: this.activeViewerType === RICH_BLOB_VIEWER,
+          paths: [this.blob.path],
         };
       },
-      update: data =>
-        data.snippets.edges[0].node.blob.richData || data.snippets.edges[0].node.blob.plainData,
+      update(data) {
+        return this.onContentUpdate(data);
+      },
       result() {
         if (this.activeViewerType === RICH_BLOB_VIEWER) {
+          // eslint-disable-next-line vue/no-mutating-props
           this.blob.richViewer.renderError = null;
         } else {
+          // eslint-disable-next-line vue/no-mutating-props
           this.blob.simpleViewer.renderError = null;
         }
       },
@@ -40,6 +42,11 @@ export default {
         return this.viewer.renderError;
       },
     },
+  },
+  provide() {
+    return {
+      blobHash: Math.random().toString().split('.')[1],
+    };
   },
   props: {
     snippet: {
@@ -66,9 +73,6 @@ export default {
       const { richViewer, simpleViewer } = this.blob;
       return this.activeViewerType === RICH_BLOB_VIEWER ? richViewer : simpleViewer;
     },
-    canBeCloned() {
-      return this.snippet.sshUrlToRepo || this.snippet.httpUrlToRepo;
-    },
     hasRenderError() {
       return Boolean(this.viewer.renderError);
     },
@@ -80,6 +84,14 @@ export default {
     forceQuery() {
       this.$apollo.queries.blobContent.skip = false;
       this.$apollo.queries.blobContent.refetch();
+    },
+    onContentUpdate(data) {
+      const { path: blobPath } = this.blob;
+      const {
+        blobs: { nodes: dataBlobs },
+      } = data.snippets.nodes[0];
+      const updatedBlobData = dataBlobs.find((blob) => blob.path === blobPath);
+      return updatedBlobData.richData || updatedBlobData.plainData;
     },
   },
   BLOB_RENDER_EVENT_LOAD,
@@ -93,17 +105,7 @@ export default {
       :active-viewer-type="viewer.type"
       :has-render-error="hasRenderError"
       @viewer-changed="switchViewer"
-    >
-      <template #actions>
-        <clone-dropdown-button
-          v-if="canBeCloned"
-          class="gl-mr-3"
-          :ssh-link="snippet.sshUrlToRepo"
-          :http-link="snippet.httpUrlToRepo"
-          data-qa-selector="clone_button"
-        />
-      </template>
-    </blob-header>
+    />
     <blob-content
       :loading="isContentLoading"
       :content="blobContent"

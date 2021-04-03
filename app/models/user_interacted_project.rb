@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class UserInteractedProject < ApplicationRecord
+  extend SuppressCompositePrimaryKeyWarning
+
   belongs_to :user
   belongs_to :project
 
@@ -21,7 +23,7 @@ class UserInteractedProject < ApplicationRecord
         user_id: event.author_id
       }
 
-      cached_exists?(attributes) do
+      cached_exists?(**attributes) do
         transaction(requires_new: true) do
           where(attributes).select(1).first || create!(attributes)
           true # not caching the whole record here for now

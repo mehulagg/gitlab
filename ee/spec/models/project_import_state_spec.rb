@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ProjectImportState, type: :model do
+  include ::EE::GeoHelpers
+
   describe 'Project import job' do
     let(:project) { import_state.project }
 
@@ -33,6 +35,47 @@ RSpec.describe ProjectImportState, type: :model do
     let(:project) { import_state.project }
 
     context 'state transition: [:started] => [:finished]' do
+      context 'Geo repository update events' do
+        let(:repository_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+        let(:wiki_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+        let(:design_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+
+        before do
+          allow(::Geo::RepositoryUpdatedService)
+            .to receive(:new)
+            .with(project.repository)
+            .and_return(repository_updated_service)
+
+          allow(::Geo::RepositoryUpdatedService)
+            .to receive(:new)
+            .with(project.wiki.repository)
+            .and_return(wiki_updated_service)
+
+          allow(::Geo::RepositoryUpdatedService)
+            .to receive(:new)
+            .with(project.design_repository)
+            .and_return(design_updated_service)
+        end
+
+        it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node', :aggregate_failures do
+          stub_primary_node
+
+          expect(repository_updated_service).to receive(:execute).once
+          expect(wiki_updated_service).to receive(:execute).once
+          expect(design_updated_service).to receive(:execute).once
+
+          import_state.finish
+        end
+
+        it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node', :aggregate_failures do
+          expect(repository_updated_service).not_to receive(:execute)
+          expect(wiki_updated_service).not_to receive(:execute)
+          expect(design_updated_service).not_to receive(:execute)
+
+          import_state.finish
+        end
+      end
+
       context 'elasticsearch indexing disabled for this project' do
         before do
           expect(project).to receive(:use_elasticsearch?).and_return(false)
@@ -73,7 +116,7 @@ RSpec.describe ProjectImportState, type: :model do
 
   describe 'when create' do
     it 'sets next execution timestamp to now' do
-      Timecop.freeze(Time.current) do
+      travel_to(Time.current) do
         import_state = create(:import_state, :mirror)
 
         expect(import_state.next_execution_timestamp).to be_like_time(Time.current)
@@ -145,6 +188,26 @@ RSpec.describe ProjectImportState, type: :model do
       expect_any_instance_of(EE::NotificationService).to receive(:mirror_was_hard_failed).with(import_state.project)
 
       import_state.fail_op
+    end
+  end
+
+  describe 'mirror has an unrecoverable failure' do
+    let(:import_state) { create(:import_state, :mirror, :started, last_error: 'SSL certificate problem: certificate has expired') }
+
+    it 'sends a notification' do
+      expect_any_instance_of(EE::NotificationService).to receive(:mirror_was_hard_failed).with(import_state.project)
+
+      import_state.fail_op
+    end
+
+    it 'marks import state as hard_failed' do
+      import_state.fail_op
+
+      expect(import_state.hard_failed?).to be_truthy
+    end
+
+    it 'does not set next execution timestamp' do
+      expect { import_state.fail_op }.not_to change { import_state.next_execution_timestamp }
     end
   end
 
@@ -239,10 +302,26 @@ RSpec.describe ProjectImportState, type: :model do
       end
 
       before do
-        import_state.project.update!(archived: true)
+        import_state.project.update_column(:archived, true)
       end
 
       it 'returns false' do
+        expect(import_state.mirror_update_due?).to be false
+      end
+    end
+
+    context 'when the project pending_delete' do
+      let(:import_state) do
+        create(:import_state,
+               :finished,
+               :mirror,
+               :repository,
+               next_execution_timestamp: Time.current - 2.minutes)
+      end
+
+      it 'returns false' do
+        import_state.project.update_column(:pending_delete, true)
+
         expect(import_state.mirror_update_due?).to be false
       end
     end
@@ -445,7 +524,7 @@ RSpec.describe ProjectImportState, type: :model do
     end
 
     def expect_next_execution_timestamp(import_state, new_timestamp)
-      Timecop.freeze(timestamp) do
+      travel_to(timestamp) do
         expect do
           import_state.set_next_execution_timestamp
         end.to change { import_state.next_execution_timestamp }.to eq(new_timestamp)
@@ -475,7 +554,7 @@ RSpec.describe ProjectImportState, type: :model do
 
       expect(UpdateAllMirrorsWorker).to receive(:perform_async)
 
-      Timecop.freeze(timestamp) do
+      travel_to(timestamp) do
         expect { import_state.force_import_job! }.to change(import_state, :next_execution_timestamp).to(5.minutes.ago)
       end
     end
@@ -487,7 +566,7 @@ RSpec.describe ProjectImportState, type: :model do
 
         expect(UpdateAllMirrorsWorker).to receive(:perform_async)
 
-        Timecop.freeze(timestamp) do
+        travel_to(timestamp) do
           expect { import_state.force_import_job! }.to change(import_state, :retry_count).to(0)
           expect(import_state.next_execution_timestamp).to be_like_time(5.minutes.ago)
         end
@@ -508,6 +587,41 @@ RSpec.describe ProjectImportState, type: :model do
 
     it 'increments retry_count' do
       expect { import_state.increment_retry_count }.to change { import_state.retry_count }.from(0).to(1)
+    end
+  end
+
+  describe '#set_max_retry_count' do
+    let(:import_state) { create(:import_state, :mirror, :failed) }
+
+    it 'sets retry_count to max' do
+      expect { import_state.set_max_retry_count }.to change { import_state.retry_count }.from(0).to(Gitlab::Mirror::MAX_RETRY + 1)
+    end
+  end
+
+  describe '#unrecoverable_failure?' do
+    subject { import_state.unrecoverable_failure? }
+
+    let(:import_state) { create(:import_state, :mirror, :failed, last_error: last_error) }
+    let(:last_error) { 'fetch remote: "fatal: unable to access \'https://expired_cert.host\': SSL certificate problem: certificate has expired\n": exit status 128' }
+
+    it { is_expected.to be_truthy }
+
+    context 'when error is recoverable' do
+      let(:last_error) { 'fetch remote: "fatal: unable to access \'host\': Failed to connect to host port 80: Connection timed out\n": exit status 128' }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when error is missing' do
+      let(:last_error) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when import_state is not failed' do
+      let(:import_state) { create(:import_state, :mirror, :finished, last_error: last_error) }
+
+      it { is_expected.to be_falsey }
     end
   end
 end

@@ -112,7 +112,7 @@ RSpec.describe 'Commits' do
         describe 'Cancel build' do
           it 'cancels build', :js, :sidekiq_might_not_need_inline do
             visit pipeline_path(pipeline)
-            find('.js-btn-cancel-pipeline').click
+            find('[data-testid="cancelPipeline"]').click
             expect(page).to have_content 'canceled'
           end
         end
@@ -125,7 +125,7 @@ RSpec.describe 'Commits' do
           visit pipeline_path(pipeline)
         end
 
-        it 'Renders header', :js do
+        it 'renders header', :js do
           expect(page).to have_content pipeline.sha[0..7]
           expect(page).to have_content pipeline.git_commit_message.gsub!(/\s+/, ' ')
           expect(page).to have_content pipeline.user.name
@@ -138,9 +138,9 @@ RSpec.describe 'Commits' do
         end
       end
 
-      context 'when accessing internal project with disallowed access', :js do
+      context 'when accessing internal project with disallowed access', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/299575' do
         before do
-          project.update(
+          project.update!(
             visibility_level: Gitlab::VisibilityLevel::INTERNAL,
             public_builds: false)
           create(:ci_job_artifact, :archive, file: artifacts_file, job: build)

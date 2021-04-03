@@ -1,12 +1,22 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
 # Dockerfiles API
 
-In GitLab, there is an API endpoint available for Dockerfiles. For more
-information on Dockerfiles, see the
-[Docker documentation](https://docs.docker.com/engine/reference/builder/).
+GitLab provides an API endpoint for instance-level Dockerfile templates.
+Default templates are defined at
+[`vendor/Dockerfile`](https://gitlab.com/gitlab-org/gitlab-foss/-/tree/master/vendor/Dockerfile)
+in the GitLab repository.
+
+## Override Dockerfile API templates **(PREMIUM SELF)**
+
+In [GitLab Premium and higher](https://about.gitlab.com/pricing/) tiers, GitLab instance
+administrators can override templates in the
+[Admin Area](../../user/admin_area/settings/instance_template_repository.md).
 
 ## List Dockerfile templates
 
@@ -17,7 +27,7 @@ GET /templates/dockerfiles
 ```
 
 ```shell
-curl https://gitlab.example.com/api/v4/templates/dockerfiles
+curl "https://gitlab.example.com/api/v4/templates/dockerfiles"
 ```
 
 Example response:
@@ -116,7 +126,7 @@ GET /templates/dockerfiles/:key
 | `key`      | string | yes      | The key of the Dockerfile template |
 
 ```shell
-curl https://gitlab.example.com/api/v4/templates/dockerfiles/Binary
+curl "https://gitlab.example.com/api/v4/templates/dockerfiles/Binary"
 ```
 
 Example response:
@@ -124,7 +134,7 @@ Example response:
 ```json
 {
   "name": "Binary",
-  "content": "# This file is a template, and might need editing before it works on your project.\n# This Dockerfile installs a compiled binary into a bare system.\n# You must either commit your compiled binary into source control (not recommended)\n# or build the binary first as part of a CI/CD pipeline.\n\nFROM buildpack-deps:jessie\n\nWORKDIR /usr/local/bin\n\n# Change `app` to whatever your binary is called\nAdd app .\nCMD [\"./app\"]\n"
+  "content": "# This file is a template, and might need editing before it works on your project.\n# This Dockerfile installs a compiled binary into a bare system.\n# You must either commit your compiled binary into source control (not recommended)\n# or build the binary first as part of a CI/CD pipeline.\n\nFROM buildpack-deps:buster\n\nWORKDIR /usr/local/bin\n\n# Change `app` to whatever your binary is called\nAdd app .\nCMD [\"./app\"]\n"
 }
 ```
 

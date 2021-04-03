@@ -3,7 +3,7 @@ type: reference
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/time_tracking.html'
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Time Tracking
@@ -40,7 +40,8 @@ Below is an example of how you can use those new quick actions inside a comment.
 
 ![Time tracking example in a comment](img/time_tracking_example_v12_2.png)
 
-Adding time entries (time spent or estimates) is limited to project members.
+Adding time entries (time spent or estimates) is limited to project members
+with [Reporter and higher permission levels](../permissions.md).
 
 ### Estimates
 
@@ -49,7 +50,7 @@ you need to enter an estimate of 3 days, 5 hours and 10 minutes, you would write
 `/estimate 3d 5h 10m`. Time units that we support are listed at the bottom of
 this help page.
 
-Every time you enter a new time estimate, any previous time estimates will be
+Every time you enter a new time estimate, any previous time estimates are
 overridden by this new value. There should only be one valid estimate in an
 issue or a merge request.
 
@@ -59,12 +60,12 @@ To remove an estimation entirely, use `/remove_estimate`.
 
 To enter a time spent, use `/spend 3d 5h 10m`.
 
-Every new time spent entry will be added to the current total time spent for the
+Every new time spent entry is added to the current total time spent for the
 issue or the merge request.
 
-You can remove time by entering a negative amount: `/spend -3d` will remove 3
+You can remove time by entering a negative amount: for example, `/spend -3d` removes three
 days from the total time spent. You can't go below 0 minutes of time spent,
-so GitLab will automatically reset the time spent if you remove a larger amount
+so GitLab automatically resets the time spent if you remove a larger amount
 of time compared to the time that was entered already.
 
 To remove all the time spent at once, use `/remove_time_spent`.
@@ -81,7 +82,7 @@ The following time units are available:
 
 Default conversion rates are 1mo = 4w, 1w = 5d and 1d = 8h.
 
-### Limit displayed units to hours **(CORE ONLY)**
+### Limit displayed units to hours **(FREE SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29469/) in GitLab 12.1.
 

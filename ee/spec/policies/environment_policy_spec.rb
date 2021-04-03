@@ -31,6 +31,6 @@ RSpec.describe EnvironmentPolicy do
   describe '#create_environment_terminal' do
     subject { user.can?(:create_environment_terminal, environment) }
 
-    it_behaves_like 'protected environments access', false
+    it_behaves_like 'protected environments access', developer_access: false
   end
 end

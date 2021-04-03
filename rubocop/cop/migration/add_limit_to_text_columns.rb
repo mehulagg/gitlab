@@ -6,14 +6,22 @@ module RuboCop
   module Cop
     module Migration
       # Cop that enforces always adding a limit on text columns
+      #
+      # Text columns starting with `encrypted_` are very likely used
+      # by `attr_encrypted` which controls the text length. Those columns
+      # should not add a text limit.
       class AddLimitToTextColumns < RuboCop::Cop::Cop
         include MigrationHelpers
 
         MSG = 'Text columns should always have a limit set (255 is suggested). ' \
-          'You can add a limit to a `text` column by using `add_text_limit`'.freeze
+          'You can add a limit to a `text` column by using `add_text_limit`'
 
         def_node_matcher :reverting?, <<~PATTERN
           (def :down ...)
+        PATTERN
+
+        def_node_matcher :set_text_limit?, <<~PATTERN
+          (send _ :text_limit ...)
         PATTERN
 
         def_node_matcher :add_text_limit?, <<~PATTERN
@@ -102,21 +110,38 @@ module RuboCop
         # Check if there is an `add_text_limit` call for the provided
         # table and attribute name
         def text_limit_missing?(node, table_name, attribute_name)
+          return false if encrypted_attribute_name?(attribute_name)
+
           limit_found = false
 
           node.each_descendant(:send) do |send_node|
-            next unless add_text_limit?(send_node)
-
-            limit_table = send_node.children[2].value
-            limit_attribute = send_node.children[3].value
-
-            if limit_table == table_name && limit_attribute == attribute_name
-              limit_found = true
-              break
+            if set_text_limit?(send_node)
+              limit_found = matching_set_text_limit?(send_node, attribute_name)
+            elsif add_text_limit?(send_node)
+              limit_found = matching_add_text_limit?(send_node, table_name, attribute_name)
             end
+
+            break if limit_found
           end
 
           !limit_found
+        end
+
+        def matching_set_text_limit?(send_node, attribute_name)
+          limit_attribute = send_node.children[2].value
+
+          limit_attribute == attribute_name
+        end
+
+        def matching_add_text_limit?(send_node, table_name, attribute_name)
+          limit_table = send_node.children[2].value
+          limit_attribute = send_node.children[3].value
+
+          limit_table == table_name && limit_attribute == attribute_name
+        end
+
+        def encrypted_attribute_name?(attribute_name)
+          attribute_name.to_s.start_with?('encrypted_')
         end
       end
     end

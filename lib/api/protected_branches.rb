@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class ProtectedBranches < Grape::API::Instance
+  class ProtectedBranches < ::API::Base
     include PaginationParams
 
     BRANCH_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(name: API::NO_SLASH_URL_PART_REGEX)
 
     before { authorize_admin_project }
+
+    feature_category :source_code_management
 
     helpers Helpers::ProtectedBranchesHelpers
 
@@ -58,6 +60,9 @@ module API
         optional :merge_access_level, type: Integer,
                                       values: ProtectedBranch::MergeAccessLevel.allowed_access_levels,
                                       desc: 'Access levels allowed to merge (defaults: `40`, maintainer access level)'
+        optional :allow_force_push, type: Boolean,
+                                      default: false,
+                                      desc: 'Allow force push for all users with push access.'
 
         use :optional_params_ee
       end

@@ -156,7 +156,7 @@ RSpec.describe PersonalAccessTokensHelper do
   describe '#enforce_pat_expiration_feature_available?' do
     subject { helper.enforce_pat_expiration_feature_available? }
 
-    let(:feature) { :enforce_pat_expiration }
+    let(:feature) { :enforce_personal_access_token_expiration }
 
     it_behaves_like 'feature availability'
   end

@@ -14,13 +14,14 @@ module Geo
     # rubocop:disable CodeReuse/ActiveRecord
     def perform(geo_node_id)
       try_obtain_lease do
-        node = Geo::Fdw::GeoNode.find(geo_node_id)
+        node = GeoNode.find(geo_node_id)
         break unless node.selective_sync?
 
-        node.projects_outside_selective_sync.find_in_batches(batch_size: BATCH_SIZE) do |batch|
-          batch.each do |project|
-            clean_up_repositories(project)
-          end
+        Geo::ProjectRegistry.select(:id, :project_id).find_in_batches(batch_size: BATCH_SIZE) do |registries|
+          tracked_project_ids = registries.map(&:project_id)
+          replicable_project_ids = node.projects.id_in(tracked_project_ids).pluck_primary_key
+          unused_tracked_project_ids = tracked_project_ids - replicable_project_ids
+          clean_up_repositories(unused_tracked_project_ids)
         end
       end
     rescue ActiveRecord::RecordNotFound => error
@@ -30,7 +31,15 @@ module Geo
 
     private
 
-    def clean_up_repositories(project)
+    def clean_up_repositories(unused_tracked_project_ids)
+      unused_projects = Project.id_in(unused_tracked_project_ids)
+
+      unused_projects.each do |project|
+        clean_up_repository(project)
+      end
+    end
+
+    def clean_up_repository(project)
       job_id = ::Geo::RepositoryCleanupWorker.perform_async(project.id, project.name, project.disk_path, project.repository.storage)
 
       if job_id

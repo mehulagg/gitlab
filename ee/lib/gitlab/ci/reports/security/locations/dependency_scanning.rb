@@ -6,6 +6,8 @@ module Gitlab
       module Security
         module Locations
           class DependencyScanning < Base
+            include Security::Concerns::FingerprintPathFromFile
+
             attr_reader :file_path
             attr_reader :package_name
             attr_reader :package_version

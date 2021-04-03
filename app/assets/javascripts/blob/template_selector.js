@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 
 import $ from 'jquery';
-import '~/gl_dropdown';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class TemplateSelector {
   constructor({ dropdown, data, pattern, wrapper, editor, $input } = {}) {
@@ -10,7 +10,10 @@ export default class TemplateSelector {
     this.dropdown = dropdown;
     this.$dropdownContainer = wrapper;
     this.$filenameInput = $input || $('#file_name');
-    this.$dropdownIcon = $('.fa-chevron-down', dropdown);
+    this.$dropdownIcon = $('.dropdown-menu-toggle-icon', dropdown);
+    this.$loadingIcon = $(
+      '<div class="gl-spinner gl-spinner-orange gl-spinner-sm gl-absolute gl-top-3 gl-right-3 gl-display-none"></div>',
+    ).insertAfter(this.$dropdownIcon);
 
     this.initDropdown(dropdown, data);
     this.listenForFilenameInput();
@@ -19,16 +22,16 @@ export default class TemplateSelector {
   }
 
   initDropdown(dropdown, data) {
-    return $(dropdown).glDropdown({
+    return initDeprecatedJQueryDropdown($(dropdown), {
       data,
       filterable: true,
       selectable: true,
-      toggleLabel: item => item.name,
+      toggleLabel: (item) => item.name,
       search: {
         fields: ['name'],
       },
-      clicked: options => this.onDropdownClicked(options),
-      text: item => item.name,
+      clicked: (options) => this.onDropdownClicked(options),
+      text: (item) => item.name,
     });
   }
 
@@ -43,7 +46,7 @@ export default class TemplateSelector {
   }
 
   listenForFilenameInput() {
-    return this.$filenameInput.on('keyup blur', e => this.renderMatchedDropdown(e));
+    return this.$filenameInput.on('keyup blur', (e) => this.renderMatchedDropdown(e));
   }
 
   renderMatchedDropdown() {
@@ -92,10 +95,12 @@ export default class TemplateSelector {
   }
 
   startLoadingSpinner() {
-    this.$dropdownIcon.addClass('spinner').removeClass('fa-chevron-down');
+    this.$loadingIcon.removeClass('gl-display-none');
+    this.$dropdownIcon.addClass('gl-display-none');
   }
 
   stopLoadingSpinner() {
-    this.$dropdownIcon.addClass('fa-chevron-down').removeClass('spinner');
+    this.$loadingIcon.addClass('gl-display-none');
+    this.$dropdownIcon.removeClass('gl-display-none');
   }
 }

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Dynamic Element Validation
 
 We devised a solution to solve common test automation problems such as the dreaded `NoSuchElementException`.
@@ -17,7 +23,7 @@ We interpret user actions on the page to have some sort of effect. These actions
 
 ### Navigation
 
-When a page is navigated to, there are elements that will always appear on the page unconditionally.
+When a page is navigated to, there are elements that always appear on the page unconditionally.
 
 Dynamic element validation is instituted when using
 
@@ -33,7 +39,7 @@ appear on the webpage, or the test to navigate away from the page entirely.
 Dynamic element validation is instituted when using
 
 ```ruby
-click_element :my_element, Some::Page
+click_element(:my_element, Some::Page)
 ```
 
 ### Required Elements
@@ -73,7 +79,7 @@ class MyPage < Page::Base
   end
 
   def open_layer
-    click_element :my_element, Layer::MyLayer
+    click_element(:my_element, Layer::MyLayer)
   end
 end
 
@@ -94,7 +100,7 @@ Runtime::Browser.visit(:gitlab, Page::MyPage)
 execute_stuff
 ```
 
-will invoke GitLab QA to scan `MyPage` for `my_element` and `another_element` to be on the page before continuing to
+invokes GitLab QA to scan `MyPage` for `my_element` and `another_element` to be on the page before continuing to
 `execute_stuff`
 
 ### Clicking
@@ -103,11 +109,11 @@ Given the [source](#examples) ...
 
 ```ruby
 def open_layer
-  click_element :my_element, Layer::MyLayer
+  click_element(:my_element, Layer::MyLayer)
 end
 ```
 
-will invoke GitLab QA to ensure that `message_content` appears on
+invokes GitLab QA to ensure that `message_content` appears on
 the Layer upon clicking `my_element`.
 
-This will imply that the Layer is indeed rendered before we continue our test.
+This implies that the Layer is indeed rendered before we continue our test.

@@ -1,23 +1,26 @@
 <script>
-import { escape } from 'lodash';
-import { s__, __ } from '../../locale';
-import { APPLICATION_STATUS, INGRESS, LOGGING_MODE, BLOCKING_MODE } from '~/clusters/constants';
 import {
   GlAlert,
   GlSprintf,
   GlLink,
   GlToggle,
-  GlDeprecatedButton,
+  GlButton,
   GlDropdown,
   GlDropdownItem,
   GlIcon,
 } from '@gitlab/ui';
-import eventHub from '~/clusters/event_hub';
+import { escape } from 'lodash';
 import modSecurityLogo from 'images/cluster_app_logos/gitlab.png';
+import { APPLICATION_STATUS, INGRESS, LOGGING_MODE, BLOCKING_MODE } from '~/clusters/constants';
+import eventHub from '~/clusters/event_hub';
+import { s__, __ } from '../../locale';
 
 const { UPDATING, UNINSTALLING, INSTALLING, INSTALLED, UPDATED } = APPLICATION_STATUS;
 
 export default {
+  i18n: {
+    modSecurityEnabled: s__('ClusterIntegration|ModSecurity enabled'),
+  },
   title: __('Web Application Firewall'),
   modsecurityUrl: 'https://modsecurity.org/about.html',
   components: {
@@ -25,7 +28,7 @@ export default {
     GlSprintf,
     GlLink,
     GlToggle,
-    GlDeprecatedButton,
+    GlButton,
     GlDropdown,
     GlDropdownItem,
     GlIcon,
@@ -53,11 +56,13 @@ export default {
       }),
     },
   },
-  data: () => ({
-    modSecurityLogo,
-    initialValue: null,
-    initialMode: null,
-  }),
+  data() {
+    return {
+      modSecurityLogo,
+      initialValue: null,
+      initialMode: null,
+    };
+  },
   computed: {
     modSecurityEnabled: {
       get() {
@@ -130,9 +135,11 @@ export default {
     },
     resetStatus() {
       if (this.initialMode !== null) {
+        // eslint-disable-next-line vue/no-mutating-props
         this.ingress.modsecurity_mode = this.initialMode;
       }
       if (this.initialValue !== null) {
+        // eslint-disable-next-line vue/no-mutating-props
         this.ingress.modsecurity_enabled = this.initialValue;
       }
       this.initialValue = null;
@@ -198,7 +205,12 @@ export default {
             </strong>
           </p>
           <div class="form-check form-check-inline mt-3">
-            <gl-toggle v-model="modSecurityEnabled" :disabled="saveButtonDisabled" />
+            <gl-toggle
+              v-model="modSecurityEnabled"
+              :disabled="saveButtonDisabled"
+              :label="$options.i18n.modSecurityEnabled"
+              label-position="hidden"
+            />
           </div>
           <div
             v-if="ingress.modsecurity_enabled"
@@ -228,18 +240,24 @@ export default {
               </gl-dropdown>
             </div>
           </div>
-          <div v-if="showButtons" class="mt-3">
-            <gl-deprecated-button
-              class="btn-success inline mr-1"
+          <div v-if="showButtons" class="gl-mt-5 gl-display-flex">
+            <gl-button
+              variant="success"
+              category="primary"
+              data-qa-selector="save_ingress_modsecurity_settings"
               :loading="saving"
               :disabled="saveButtonDisabled"
               @click="updateApplication"
             >
               {{ saveButtonLabel }}
-            </gl-deprecated-button>
-            <gl-deprecated-button :disabled="saveButtonDisabled" @click="resetStatus">
+            </gl-button>
+            <gl-button
+              data-qa-selector="cancel_ingress_modsecurity_settings"
+              :disabled="saveButtonDisabled"
+              @click="resetStatus"
+            >
               {{ __('Cancel') }}
-            </gl-deprecated-button>
+            </gl-button>
           </div>
         </div>
       </div>

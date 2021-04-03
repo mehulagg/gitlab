@@ -1,8 +1,8 @@
 <script>
+import { GlButton } from '@gitlab/ui';
 import { mapActions } from 'vuex';
-import { GlDeprecatedButton } from '@gitlab/ui';
-import RuleInput from './mr_edit/rule_input.vue';
 import EmptyRuleName from './empty_rule_name.vue';
+import RuleInput from './mr_edit/rule_input.vue';
 import RuleBranches from './rule_branches.vue';
 
 export default {
@@ -10,7 +10,7 @@ export default {
     RuleInput,
     EmptyRuleName,
     RuleBranches,
-    GlDeprecatedButton,
+    GlButton,
   },
   props: {
     rule: {
@@ -59,14 +59,14 @@ export default {
       <rule-input :rule="rule" :is-mr-edit="isMrEdit" />
     </td>
     <td>
-      <gl-deprecated-button
+      <gl-button
         v-if="!allowMultiRule && canEdit"
         class="ml-auto btn-info btn-inverted"
         data-qa-selector="add_approvers_button"
         @click="openCreateModal(null)"
       >
         {{ __('Add approval rule') }}
-      </gl-deprecated-button>
+      </gl-button>
     </td>
   </tr>
 </template>

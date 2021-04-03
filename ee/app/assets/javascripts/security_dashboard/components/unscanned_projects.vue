@@ -1,13 +1,11 @@
 <script>
-import { GlDeprecatedBadge as GlBadge, GlTabs, GlTab, GlLink } from '@gitlab/ui';
+import { GlBadge, GlTabs, GlTab, GlLink, GlIcon } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-
-import Icon from '~/vue_shared/components/icon.vue';
 
 import UnscannedProjectsTabContent from './unscanned_projects_tab_content.vue';
 
 export default {
-  components: { GlBadge, GlTabs, GlTab, GlLink, Icon, UnscannedProjectsTabContent },
+  components: { GlBadge, GlTabs, GlTab, GlLink, GlIcon, UnscannedProjectsTabContent },
   props: {
     endpoint: {
       type: String,
@@ -52,7 +50,7 @@ export default {
           :href="helpPath"
           :title="__('Project scanning help page')"
           target="_blank"
-          ><icon name="question" :size="12" class="align-top"
+          ><gl-icon name="question" :size="12" class="align-top"
         /></gl-link>
       </h4>
       <p class="text-secondary mb-0">
@@ -64,9 +62,14 @@ export default {
         <gl-tab ref="outdatedProjectsTab" title-item-class="ml-3">
           <template #title>
             {{ s__('UnscannedProjects|Out of date') }}
-            <gl-badge v-if="!isLoading" ref="outdatedProjectsCount" pill>{{
-              outdatedProjectsCount
-            }}</gl-badge>
+            <gl-badge
+              v-if="!isLoading"
+              ref="outdatedProjectsCount"
+              size="sm"
+              class="gl-tab-counter-badge"
+              pill
+              >{{ outdatedProjectsCount }}
+            </gl-badge>
           </template>
           <unscanned-projects-tab-content :is-loading="isLoading" :is-empty="!hasOutdatedProjects">
             <div v-for="dateRange in outdatedProjects" :key="dateRange.fromDay" class="mb-3">
@@ -84,9 +87,14 @@ export default {
         <gl-tab ref="untestedProjectsTab" title-item-class="ml-3">
           <template #title>
             {{ s__('UnscannedProjects|Untested') }}
-            <gl-badge v-if="!isLoading" ref="untestedProjectsCount" pill>{{
-              untestedProjectsCount
-            }}</gl-badge>
+            <gl-badge
+              v-if="!isLoading"
+              ref="untestedProjectsCount"
+              size="sm"
+              class="gl-tab-counter-badge"
+              pill
+              >{{ untestedProjectsCount }}
+            </gl-badge>
           </template>
           <unscanned-projects-tab-content :is-loading="isLoading" :is-empty="!hasUntestedProjects">
             <ul class="list-unstyled m-0">

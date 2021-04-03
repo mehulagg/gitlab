@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :db do
     desc 'GitLab | DB | Manually insert schema migration version'
@@ -35,6 +37,11 @@ namespace :gitlab do
       # Truncate schema_migrations to ensure migrations re-run
       connection.execute('TRUNCATE schema_migrations') if connection.table_exists? 'schema_migrations'
 
+      # Drop any views
+      connection.views.each do |view|
+        connection.execute("DROP VIEW IF EXISTS #{connection.quote_table_name(view)} CASCADE")
+      end
+
       # Drop tables with cascade to avoid dependent table errors
       # PG: http://www.postgresql.org/docs/current/static/ddl-depend.html
       # Add `IF EXISTS` because cascade could have already deleted a table.
@@ -57,6 +64,19 @@ namespace :gitlab do
         Gitlab::Database.add_post_migrate_path_to_rails(force: true)
         Rake::Task['db:structure:load'].invoke
         Rake::Task['db:seed_fu'].invoke
+      end
+    end
+
+    desc 'GitLab | DB | Run database migrations and print `unattended_migrations_completed` if action taken'
+    task unattended: :environment do
+      no_database = !ActiveRecord::Base.connection.schema_migration.table_exists?
+      needs_migrations = ActiveRecord::Base.connection.migration_context.needs_migration?
+
+      if no_database || needs_migrations
+        Rake::Task['gitlab:db:configure'].invoke
+        puts "unattended_migrations_completed"
+      else
+        puts "unattended_migrations_static"
       end
     end
 
@@ -165,6 +185,83 @@ namespace :gitlab do
     # a rake task reloads the database schema.
     Rake::Task['db:test:load'].enhance do
       Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
+    end
+
+    desc 'reindex a regular (non-unique) index without downtime to eliminate bloat'
+    task :reindex, [:index_name] => :environment do |_, args|
+      unless Feature.enabled?(:database_reindexing, type: :ops)
+        puts "This feature (database_reindexing) is currently disabled.".color(:yellow)
+        exit
+      end
+
+      indexes = Gitlab::Database::Reindexing.candidate_indexes
+
+      if identifier = args[:index_name]
+        raise ArgumentError, "Index name is not fully qualified with a schema: #{identifier}" unless identifier =~ /^\w+\.\w+$/
+
+        indexes = indexes.where(identifier: identifier)
+
+        raise "Index not found or not supported: #{args[:index_name]}" if indexes.empty?
+      end
+
+      ActiveRecord::Base.logger = Logger.new(STDOUT) if Gitlab::Utils.to_boolean(ENV['LOG_QUERIES_TO_CONSOLE'], default: false)
+
+      Gitlab::Database::Reindexing.perform(indexes)
+    rescue => e
+      Gitlab::AppLogger.error(e)
+      raise
+    end
+
+    desc 'Check if there have been user additions to the database'
+    task active: :environment do
+      if ActiveRecord::Base.connection.migration_context.needs_migration?
+        puts "Migrations pending. Database not active"
+        exit 1
+      end
+
+      # A list of projects that GitLab creates automatically on install/upgrade
+      # gc = Gitlab::CurrentSettings.current_application_settings
+      seed_projects = [Gitlab::CurrentSettings.current_application_settings.self_monitoring_project]
+
+      if (Project.count - seed_projects.count {|x| !x.nil? }).eql?(0)
+        puts "No user created projects. Database not active"
+        exit 1
+      end
+
+      puts "Found user created projects. Database active"
+      exit 0
+    end
+
+    desc 'Run migrations with instrumentation'
+    task :migration_testing, [:result_file] => :environment do |_, args|
+      result_file = args[:result_file] || raise("Please specify result_file argument")
+      raise "File exists already, won't overwrite: #{result_file}" if File.exist?(result_file)
+
+      verbose_was, ActiveRecord::Migration.verbose = ActiveRecord::Migration.verbose, true
+
+      ctx = ActiveRecord::Base.connection.migration_context
+      existing_versions = ctx.get_all_versions.to_set
+
+      pending_migrations = ctx.migrations.reject do |migration|
+        existing_versions.include?(migration.version)
+      end
+
+      instrumentation = Gitlab::Database::Migrations::Instrumentation.new
+
+      pending_migrations.each do |migration|
+        instrumentation.observe(migration.version) do
+          ActiveRecord::Migrator.new(:up, ctx.migrations, ctx.schema_migration, migration.version).run
+        end
+      end
+    ensure
+      if instrumentation
+        File.open(result_file, 'wb+') do |io|
+          io << instrumentation.observations.to_json
+        end
+      end
+
+      ActiveRecord::Base.clear_cache!
+      ActiveRecord::Migration.verbose = verbose_was
     end
   end
 end

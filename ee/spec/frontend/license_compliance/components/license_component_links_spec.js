@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlLink, GlIntersperse } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import LicenseComponentLinks, {
   VISIBLE_COMPONENT_COUNT,
@@ -7,7 +7,12 @@ import LicenseComponentLinks, {
 
 describe('LicenseComponentLinks component', () => {
   // data helpers
-  const createComponents = n => [...Array(n).keys()].map(i => ({ name: `component ${i + 1}` }));
+  const createComponents = (n) =>
+    [...Array(n).keys()].map((i) => ({
+      name: `component ${i + 1}`,
+      version: (i + 1) % 2 === 0 ? null : `${i + 1}.0.0`,
+    }));
+
   const addUrls = (components, numComponentsWithUrls = Infinity) =>
     components.map((comp, i) => ({
       ...comp,
@@ -38,6 +43,15 @@ describe('LicenseComponentLinks component', () => {
     wrapper.destroy();
   });
 
+  it("renders components' name and version", () => {
+    factory({ numComponents: 2, numComponentsWithUrl: 1 });
+    const text = wrapper.text();
+
+    expect(text).toContain(`component 1 (1.0.0)`);
+    expect(text).toContain(`component 2`);
+    expect(text).not.toContain('component 2 (');
+  });
+
   it('intersperses the list of licenses correctly', () => {
     factory();
 
@@ -47,7 +61,7 @@ describe('LicenseComponentLinks component', () => {
     expect(intersperseInstance.attributes('lastseparator')).toBe(' and ');
   });
 
-  it.each([3, 5, 8, 13])('limits the number of visible licenses to 2', numComponents => {
+  it.each([3, 5, 8, 13])('limits the number of visible licenses to 2', (numComponents) => {
     factory({ numComponents });
 
     expect(findComponentListItems()).toHaveLength(VISIBLE_COMPONENT_COUNT);
@@ -82,7 +96,7 @@ describe('LicenseComponentLinks component', () => {
 
     const links = wrapper.findAll(GlLink);
 
-    links.wrappers.forEach(link => {
+    links.wrappers.forEach((link) => {
       expect(link.attributes('target')).toBe('_blank');
     });
   });

@@ -22,26 +22,35 @@ RSpec.describe Projects::BoardsController do
       expect(assigns(:boards_endpoint)).to eq project_boards_path(project)
     end
 
+    it 'pushes swimlanes_buffered_rendering feature flag' do
+      allow(controller).to receive(:push_frontend_feature_flag).and_call_original
+
+      expect(controller).to receive(:push_frontend_feature_flag)
+        .with(:swimlanes_buffered_rendering, project, default_enabled: :yaml)
+
+      list_boards
+    end
+
     context 'when format is HTML' do
       it 'renders template' do
         list_boards
 
         expect(response).to render_template :index
-        expect(response.content_type).to eq 'text/html'
+        expect(response.media_type).to eq 'text/html'
       end
 
       context 'with unauthorized user' do
         before do
           expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_board, project).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_issue_board, project).and_return(false)
         end
 
         it 'returns a not found 404 response' do
           list_boards
 
           expect(response).to have_gitlab_http_status(:not_found)
-          expect(response.content_type).to eq 'text/html'
+          expect(response.media_type).to eq 'text/html'
         end
       end
 
@@ -57,7 +66,7 @@ RSpec.describe Projects::BoardsController do
           list_boards
 
           expect(response).to render_template :index
-          expect(response.content_type).to eq 'text/html'
+          expect(response.media_type).to eq 'text/html'
         end
       end
     end
@@ -78,14 +87,14 @@ RSpec.describe Projects::BoardsController do
         before do
           expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_board, project).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_issue_board, project).and_return(false)
         end
 
         it 'returns a not found 404 response' do
           list_boards format: :json
 
           expect(response).to have_gitlab_http_status(:not_found)
-          expect(response.content_type).to eq 'application/json'
+          expect(response.media_type).to eq 'application/json'
         end
       end
     end
@@ -116,6 +125,15 @@ RSpec.describe Projects::BoardsController do
   describe 'GET show' do
     let!(:board) { create(:board, project: project) }
 
+    it 'pushes swimlanes_buffered_rendering feature flag' do
+      allow(controller).to receive(:push_frontend_feature_flag).and_call_original
+
+      expect(controller).to receive(:push_frontend_feature_flag)
+        .with(:swimlanes_buffered_rendering, project, default_enabled: :yaml)
+
+      read_board board: board
+    end
+
     it 'sets boards_endpoint instance variable to a boards path' do
       read_board board: board
 
@@ -127,21 +145,21 @@ RSpec.describe Projects::BoardsController do
         expect { read_board board: board }.to change(BoardProjectRecentVisit, :count).by(1)
 
         expect(response).to render_template :show
-        expect(response.content_type).to eq 'text/html'
+        expect(response.media_type).to eq 'text/html'
       end
 
       context 'with unauthorized user' do
         before do
           expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_board, project).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_issue_board, project).and_return(false)
         end
 
         it 'returns a not found 404 response' do
           read_board board: board
 
           expect(response).to have_gitlab_http_status(:not_found)
-          expect(response.content_type).to eq 'text/html'
+          expect(response.media_type).to eq 'text/html'
         end
       end
 
@@ -154,7 +172,7 @@ RSpec.describe Projects::BoardsController do
           expect { read_board board: board }.to change(BoardProjectRecentVisit, :count).by(0)
 
           expect(response).to render_template :show
-          expect(response.content_type).to eq 'text/html'
+          expect(response.media_type).to eq 'text/html'
         end
       end
     end
@@ -172,14 +190,14 @@ RSpec.describe Projects::BoardsController do
         before do
           expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_board, project).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_issue_board, project).and_return(false)
         end
 
         it 'returns a not found 404 response' do
           read_board board: board, format: :json
 
           expect(response).to have_gitlab_http_status(:not_found)
-          expect(response.content_type).to eq 'application/json'
+          expect(response.media_type).to eq 'application/json'
         end
       end
     end

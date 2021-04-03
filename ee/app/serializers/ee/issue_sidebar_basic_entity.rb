@@ -11,12 +11,19 @@ module EE
         expose :supports_health_status?, as: :health_status
 
         expose :issue_weights do |issuable|
-          issuable.project.feature_available?(:issue_weights)
+          issuable.weight_available?
         end
 
         expose :epics do |issuable|
           issuable.project&.group&.feature_available?(:epics)
         end
+      end
+
+      expose :request_cve_enabled_for_user, if: ->(issue) { ::Feature.enabled?(:cve_id_request_button, issue.project) } do |issue|
+        ::Gitlab.com? \
+          && can?(current_user, :admin_project, issue.project) \
+          && issue.project.public? \
+          && issue.project.project_setting.cve_id_request_enabled?
       end
     end
   end

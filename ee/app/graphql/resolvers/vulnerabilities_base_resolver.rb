@@ -5,6 +5,7 @@
 # to finding the object to get vulnerabilities from so that developers writing
 # new resolvers don't have to repeat it.
 
+# rubocop: disable Graphql/ResolverType
 module Resolvers
   class VulnerabilitiesBaseResolver < BaseResolver
     include Gitlab::Utils::StrongMemoize

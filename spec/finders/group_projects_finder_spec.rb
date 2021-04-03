@@ -51,7 +51,7 @@ RSpec.describe GroupProjectsFinder do
         let!(:shared_project_4) { create(:project, :internal, path: '8') }
 
         before do
-          shared_project_4.project_group_links.create(group_access: Gitlab::Access::REPORTER, group: group)
+          shared_project_4.project_group_links.create!(group_access: Gitlab::Access::REPORTER, group: group)
         end
 
         let(:params) { { min_access_level: Gitlab::Access::MAINTAINER } }
@@ -76,7 +76,7 @@ RSpec.describe GroupProjectsFinder do
 
       context "with external user" do
         before do
-          current_user.update(external: true)
+          current_user.update!(external: true)
         end
 
         it { is_expected.to match_array([shared_project_2, shared_project_1]) }
@@ -107,7 +107,7 @@ RSpec.describe GroupProjectsFinder do
 
       context "with external user" do
         before do
-          current_user.update(external: true)
+          current_user.update!(external: true)
         end
 
         context 'with subgroups projects' do
@@ -142,20 +142,40 @@ RSpec.describe GroupProjectsFinder do
   describe 'with an admin current user' do
     let(:current_user) { create(:admin) }
 
-    context "only shared" do
-      let(:options) { { only_shared: true } }
+    context 'when admin mode is enabled', :enable_admin_mode do
+      context "only shared" do
+        let(:options) { { only_shared: true } }
 
-      it            { is_expected.to eq([shared_project_3, shared_project_2, shared_project_1]) }
+        it            { is_expected.to contain_exactly(shared_project_3, shared_project_2, shared_project_1) }
+      end
+
+      context "only owned" do
+        let(:options) { { only_owned: true } }
+
+        it            { is_expected.to contain_exactly(private_project, public_project) }
+      end
+
+      context "all" do
+        it { is_expected.to contain_exactly(shared_project_3, shared_project_2, shared_project_1, private_project, public_project) }
+      end
     end
 
-    context "only owned" do
-      let(:options) { { only_owned: true } }
+    context 'when admin mode is disabled' do
+      context "only shared" do
+        let(:options) { { only_shared: true } }
 
-      it            { is_expected.to eq([private_project, public_project]) }
-    end
+        it            { is_expected.to contain_exactly(shared_project_3, shared_project_1) }
+      end
 
-    context "all" do
-      it { is_expected.to eq([shared_project_3, shared_project_2, shared_project_1, private_project, public_project]) }
+      context "only owned" do
+        let(:options) { { only_owned: true } }
+
+        it            { is_expected.to contain_exactly(public_project) }
+      end
+
+      context "all" do
+        it { is_expected.to contain_exactly(shared_project_3, shared_project_1, public_project) }
+      end
     end
   end
 

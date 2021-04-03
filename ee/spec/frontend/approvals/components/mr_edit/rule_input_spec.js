@@ -1,8 +1,8 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import RuleInput from 'ee/approvals/components/mr_edit/rule_input.vue';
-import MREditModule from 'ee/approvals/stores/modules/mr_edit';
 import { createStoreOptions } from 'ee/approvals/stores';
+import MREditModule from 'ee/approvals/stores/modules/mr_edit';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -83,11 +83,7 @@ describe('Rule Input', () => {
     jest.runAllTimers();
 
     return wrapper.vm.$nextTick().then(() => {
-      expect(action).toHaveBeenCalledWith(
-        expect.anything(),
-        { approvalsRequired: 10, id: 5 },
-        undefined,
-      );
+      expect(action).toHaveBeenCalledWith(expect.anything(), { approvalsRequired: 10, id: 5 });
     });
   });
 });

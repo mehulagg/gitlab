@@ -96,3 +96,38 @@ RSpec.shared_examples 'merge validation hooks' do |args|
     end
   end
 end
+
+RSpec.shared_examples 'service with multiple reviewers' do
+  context 'with multiple reviewer assignments' do
+    let(:opts) { super().merge(reviewer_ids_param) }
+    let(:reviewer_ids_param) { { reviewer_ids: [reviewer1.id, reviewer2.id] } }
+    let(:reviewer1) { create(:user) }
+    let(:reviewer2) { create(:user) }
+
+    before do
+      stub_feature_flags(merge_request_reviewer: true)
+      project.add_developer(reviewer1)
+      project.add_developer(reviewer2)
+    end
+
+    context 'with multiple_merge_request_reviewers feature on' do
+      before do
+        stub_licensed_features(multiple_merge_request_reviewers: true)
+      end
+
+      it 'allows multiple reviewers' do
+        expect(execute.reviewers).to contain_exactly(reviewer1, reviewer2)
+      end
+    end
+
+    context 'with multiple_merge_request_reviewers feature off' do
+      before do
+        stub_licensed_features(multiple_merge_request_reviewers: false)
+      end
+
+      it 'only allows one reviewer' do
+        expect(execute.reviewers).to contain_exactly(reviewer1)
+      end
+    end
+  end
+end

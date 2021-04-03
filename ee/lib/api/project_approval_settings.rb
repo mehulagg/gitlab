@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectApprovalSettings < ::Grape::API::Instance
+  class ProjectApprovalSettings < ::API::Base
     before { authenticate! }
 
     helpers ::API::Helpers::ProjectApprovalRulesHelpers
+
+    feature_category :source_code_management
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
@@ -19,7 +21,7 @@ module API
           optional :target_branch, type: String, desc: 'Branch that scoped approval rules apply to'
         end
         get do
-          authorize_create_merge_request_in_project
+          authorize_read_project_approval_rule!
 
           present(
             user_project,

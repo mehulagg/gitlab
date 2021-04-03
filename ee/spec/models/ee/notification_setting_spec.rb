@@ -24,10 +24,13 @@ RSpec.describe NotificationSetting do
             :reopen_merge_request,
             :close_merge_request,
             :reassign_merge_request,
+            :change_reviewer_merge_request,
             :merge_merge_request,
             :failed_pipeline,
             :fixed_pipeline,
             :success_pipeline,
+            :moved_project,
+            :merge_when_pipeline_succeeds,
             :new_epic
           ]
         )
@@ -52,10 +55,13 @@ RSpec.describe NotificationSetting do
             :reopen_merge_request,
             :close_merge_request,
             :reassign_merge_request,
+            :change_reviewer_merge_request,
             :merge_merge_request,
             :failed_pipeline,
             :fixed_pipeline,
-            :success_pipeline
+            :success_pipeline,
+            :moved_project,
+            :merge_when_pipeline_succeeds
           ]
         )
       end
@@ -79,10 +85,13 @@ RSpec.describe NotificationSetting do
             :reopen_merge_request,
             :close_merge_request,
             :reassign_merge_request,
+            :change_reviewer_merge_request,
             :merge_merge_request,
             :failed_pipeline,
             :fixed_pipeline,
             :success_pipeline,
+            :moved_project,
+            :merge_when_pipeline_succeeds,
             :new_epic
           ]
         )

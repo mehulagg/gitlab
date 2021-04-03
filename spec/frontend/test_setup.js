@@ -1,20 +1,28 @@
-import Vue from 'vue';
-import * as jqueryMatchers from 'custom-jquery-matchers';
 import { config as testUtilsConfig } from '@vue/test-utils';
+import * as jqueryMatchers from 'custom-jquery-matchers';
+import Vue from 'vue';
+import 'jquery';
+import { setGlobalDateToFakeDate } from 'helpers/fake_date';
 import Translate from '~/vue_shared/translate';
-import { initializeTestTimeout } from './helpers/timeout';
-import { getJSONFixture, loadHTMLFixture, setHTMLFixture } from './helpers/fixtures';
-import { setupManualMocks } from './mocks/mocks_helper';
+import { getJSONFixture, loadHTMLFixture, setHTMLFixture } from './__helpers__/fixtures';
+import { initializeTestTimeout } from './__helpers__/timeout';
 import customMatchers from './matchers';
+import { setupManualMocks } from './mocks/mocks_helper';
 
-import './helpers/dom_shims';
-import './helpers/jquery';
-import '~/commons/jquery';
+import './__helpers__/dom_shims';
+import './__helpers__/jquery';
 import '~/commons/bootstrap';
+
+// This module has some fairly decent visual test coverage in it's own repository.
+jest.mock('@gitlab/favicon-overlay');
 
 process.on('unhandledRejection', global.promiseRejectionHandler);
 
 setupManualMocks();
+
+// Fake the `Date` for the rest of the jest spec runtime environment.
+// https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39496#note_503084332
+setGlobalDateToFakeDate();
 
 afterEach(() =>
   // give Promises a bit more time so they fail the right test
@@ -36,11 +44,6 @@ Object.assign(global, {
   getJSONFixture,
   loadFixtures: loadHTMLFixture,
   setFixtures: setHTMLFixture,
-
-  // The following functions fill the fixtures cache in Karma.
-  // This is not necessary in Jest because we make no Ajax request.
-  loadJSONFixtures() {},
-  preloadFixtures() {},
 });
 
 // custom-jquery-matchers was written for an old Jest version, we need to make it compatible
@@ -57,8 +60,18 @@ Object.entries(jqueryMatchers).forEach(([matcherName, matcherFactory]) => {
 
 expect.extend(customMatchers);
 
-// Tech debt issue TBD
-testUtilsConfig.logModifiedComponents = false;
+testUtilsConfig.deprecationWarningHandler = (method, message) => {
+  const ALLOWED_DEPRECATED_METHODS = [
+    // https://gitlab.com/gitlab-org/gitlab/-/issues/295679
+    'finding components with `find` or `get`',
+
+    // https://gitlab.com/gitlab-org/gitlab/-/issues/295680
+    'finding components with `findAll`',
+  ];
+  if (!ALLOWED_DEPRECATED_METHODS.includes(method)) {
+    global.console.error(message);
+  }
+};
 
 Object.assign(global, {
   requestIdleCallback(cb) {

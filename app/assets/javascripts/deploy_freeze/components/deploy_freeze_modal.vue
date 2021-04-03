@@ -1,11 +1,10 @@
 <script>
 import { GlFormGroup, GlFormInput, GlModal, GlSprintf, GlLink } from '@gitlab/ui';
-import { mapActions, mapState } from 'vuex';
-import { mapComputed } from '~/vuex_shared/bindings';
-import { __ } from '~/locale';
-import { MODAL_ID } from '../constants';
-import TimezoneDropdown from '~/vue_shared/components/timezone_dropdown.vue';
 import { isValidCron } from 'cron-validator';
+import { mapActions, mapState } from 'vuex';
+import { __ } from '~/locale';
+import TimezoneDropdown from '~/vue_shared/components/timezone_dropdown.vue';
+import { mapComputed } from '~/vuex_shared/bindings';
 
 export default {
   components: {
@@ -18,8 +17,7 @@ export default {
   },
   modalOptions: {
     ref: 'modal',
-    modalId: MODAL_ID,
-    title: __('Add deploy freeze'),
+    modalId: 'deploy-freeze-modal',
     actionCancel: {
       text: __('Cancel'),
     },
@@ -31,10 +29,13 @@ export default {
     cronSyntaxInstructions: __(
       'Define a custom deploy freeze pattern with %{cronSyntaxStart}cron syntax%{cronSyntaxEnd}',
     ),
+    addTitle: __('Add deploy freeze'),
+    editTitle: __('Edit deploy freeze'),
   },
   computed: {
     ...mapState([
       'projectId',
+      'selectedId',
       'selectedTimezone',
       'timezoneData',
       'freezeStartCron',
@@ -46,9 +47,9 @@ export default {
     ]),
     addDeployFreezeButton() {
       return {
-        text: __('Add deploy freeze'),
+        text: this.isEditing ? __('Save deploy freeze') : __('Add deploy freeze'),
         attributes: [
-          { variant: 'success' },
+          { variant: 'confirm' },
           {
             disabled:
               !isValidCron(this.freezeStartCron) ||
@@ -78,9 +79,17 @@ export default {
         this.setSelectedTimezone(selectedTimezone);
       },
     },
+    isEditing() {
+      return Boolean(this.selectedId);
+    },
+    modalTitle() {
+      return this.isEditing
+        ? this.$options.translations.editTitle
+        : this.$options.translations.addTitle;
+    },
   },
   methods: {
-    ...mapActions(['addFreezePeriod', 'setSelectedTimezone', 'resetModal']),
+    ...mapActions(['addFreezePeriod', 'updateFreezePeriod', 'setSelectedTimezone', 'resetModal']),
     resetModalHandler() {
       this.resetModal();
     },
@@ -90,6 +99,13 @@ export default {
       }
       return '';
     },
+    submit() {
+      if (this.isEditing) {
+        this.updateFreezePeriod();
+      } else {
+        this.addFreezePeriod();
+      }
+    },
   },
 };
 </script>
@@ -97,8 +113,9 @@ export default {
 <template>
   <gl-modal
     v-bind="$options.modalOptions"
+    :title="modalTitle"
     :action-primary="addDeployFreezeButton"
-    @primary="addFreezePeriod"
+    @primary="submit"
     @canceled="resetModalHandler"
   >
     <p>

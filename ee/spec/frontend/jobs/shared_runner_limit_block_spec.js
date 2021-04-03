@@ -1,12 +1,11 @@
-import SharedRunnerLimitBlock from 'ee/jobs/components/shared_runner_limit_block.vue';
+import { GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import SharedRunnerLimitBlock from 'ee/jobs/components/shared_runner_limit_block.vue';
 import { trimText } from 'helpers/text_helper';
 
 describe('Shared Runner Limit Block', () => {
   let wrapper;
 
-  const runnersPath = 'root/project/runners';
   const projectPath = 'h5bp/html5-boilerplate';
   const subscriptionsMoreMinutesUrl = 'https://customers.gitlab.com/buy_pipeline_minutes';
 
@@ -27,7 +26,6 @@ describe('Shared Runner Limit Block', () => {
         propsData: {
           quotaUsed: 1000,
           quotaLimit: 4000,
-          runnersPath,
           projectPath,
           subscriptionsMoreMinutesUrl,
         },
@@ -40,12 +38,12 @@ describe('Shared Runner Limit Block', () => {
       );
     });
 
-    it('renders call to action gl-deprecated-button with the right href', () => {
-      const glDeprecatedButton = wrapper.find(GlDeprecatedButton);
+    it('renders call to action gl-button with the right href', () => {
+      const glButton = wrapper.find(GlButton);
 
-      expect(glDeprecatedButton.isVisible()).toBe(true);
-      expect(glDeprecatedButton.attributes('variant')).toBe('danger');
-      expect(glDeprecatedButton.attributes('href')).toBe(subscriptionsMoreMinutesUrl);
+      expect(glButton.isVisible()).toBe(true);
+      expect(glButton.attributes('variant')).toBe('danger');
+      expect(glButton.attributes('href')).toBe(subscriptionsMoreMinutesUrl);
     });
   });
 
@@ -56,29 +54,11 @@ describe('Shared Runner Limit Block', () => {
           quotaUsed: 1000,
           quotaLimit: 4000,
           projectPath,
-          runnersPath,
           subscriptionsMoreMinutesUrl,
         },
       });
 
       expect(trimText(wrapper.text())).toContain('For more information, go to the Runners page.');
-    });
-  });
-
-  describe('without runnersPath', () => {
-    it('does not render runner link', () => {
-      factory({
-        propsData: {
-          quotaUsed: 1000,
-          quotaLimit: 4000,
-          projectPath,
-          subscriptionsMoreMinutesUrl,
-        },
-      });
-
-      expect(trimText(wrapper.element.textContent)).not.toContain(
-        'For more information, go to the Runners page.',
-      );
     });
   });
 });

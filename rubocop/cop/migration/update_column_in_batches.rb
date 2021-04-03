@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../migration_helpers'
 
 module RuboCop
@@ -9,7 +11,7 @@ module RuboCop
         include MigrationHelpers
 
         MSG = 'Migration running `update_column_in_batches` must have a spec file at' \
-          ' `%s`.'.freeze
+          ' `%s`.'
 
         def on_send(node)
           return unless in_migration?(node)

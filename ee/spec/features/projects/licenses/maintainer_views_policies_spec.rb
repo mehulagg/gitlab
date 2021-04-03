@@ -21,7 +21,7 @@ RSpec.describe 'EE > Projects > Licenses > Maintainer views policies', :js do
   context 'when policies are not configured' do
     it 'displays a link to the documentation to configure license compliance' do
       expect(page).to have_content('License Compliance')
-      expect(page).to have_content('Learn more about license compliance')
+      expect(page).to have_content('More Information')
     end
   end
 
@@ -51,7 +51,7 @@ RSpec.describe 'EE > Projects > Licenses > Maintainer views policies', :js do
       end
 
       it 'displays the classification' do
-        selector = "div[data-qa-selector='admin_license_compliance_row']"
+        selector = "div[data-testid='admin-license-compliance-row']"
         expect(page).to have_selector(selector)
 
         row = page.find(selector)
@@ -60,10 +60,15 @@ RSpec.describe 'EE > Projects > Licenses > Maintainer views policies', :js do
       end
     end
 
+    def label_for(dependency)
+      name, version = dependency['name'], dependency['version']
+      version ? "#{name} (#{version})" : name
+    end
+
     def dependencies_for(spdx_id)
       report['dependencies']
         .find_all { |dependency| dependency['licenses'].include?(spdx_id) }
-        .map { |dependency| dependency['name'] }
+        .map { |dependency| label_for(dependency) }
     end
 
     def policy_for(license)

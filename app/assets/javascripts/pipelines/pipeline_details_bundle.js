@@ -1,25 +1,33 @@
 import Vue from 'vue';
-import Flash from '~/flash';
-import Translate from '~/vue_shared/translate';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
-import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
-import pipelineGraph from './components/graph/graph_component.vue';
-import Dag from './components/dag/dag.vue';
-import GraphBundleMixin from './mixins/graph_pipeline_bundle_mixin';
-import PipelinesMediator from './pipeline_details_mediator';
-import pipelineHeader from './components/header_component.vue';
-import eventHub from './event_hub';
+import Translate from '~/vue_shared/translate';
+import PipelineGraphLegacy from './components/graph/graph_component_legacy.vue';
 import TestReports from './components/test_reports/test_reports.vue';
+import GraphBundleMixin from './mixins/graph_pipeline_bundle_mixin';
+import createDagApp from './pipeline_details_dag';
+import { apolloProvider } from './pipeline_shared_client';
 import createTestReportsStore from './stores/test_reports';
+import { reportToSentry } from './utils';
 
 Vue.use(Translate);
 
-const createPipelinesDetailApp = mediator => {
+const SELECTORS = {
+  PIPELINE_DETAILS: '.js-pipeline-details-vue',
+  PIPELINE_GRAPH: '#js-pipeline-graph-vue',
+  PIPELINE_HEADER: '#js-pipeline-header-vue',
+  PIPELINE_TESTS: '#js-pipeline-tests-detail',
+};
+
+const createLegacyPipelinesDetailApp = (mediator) => {
+  if (!document.querySelector(SELECTORS.PIPELINE_GRAPH)) {
+    return;
+  }
   // eslint-disable-next-line no-new
   new Vue({
-    el: '#js-pipeline-graph-vue',
+    el: SELECTORS.PIPELINE_GRAPH,
     components: {
-      pipelineGraph,
+      PipelineGraphLegacy,
     },
     mixins: [GraphBundleMixin],
     data() {
@@ -27,8 +35,11 @@ const createPipelinesDetailApp = mediator => {
         mediator,
       };
     },
+    errorCaptured(err, _vm, info) {
+      reportToSentry('pipeline_details_bundle_legacy_details', `error: ${err}, info: ${info}`);
+    },
     render(createElement) {
-      return createElement('pipeline-graph', {
+      return createElement('pipeline-graph-legacy', {
         props: {
           isLoading: this.mediator.state.isLoading,
           pipeline: this.mediator.store.state.pipeline,
@@ -36,104 +47,24 @@ const createPipelinesDetailApp = mediator => {
         },
         on: {
           refreshPipelineGraph: this.requestRefreshPipelineGraph,
-          onResetTriggered: (parentPipeline, pipeline) =>
-            this.resetTriggeredPipelines(parentPipeline, pipeline),
-          onClickTriggeredBy: pipeline => this.clickTriggeredByPipeline(pipeline),
-          onClickTriggered: pipeline => this.clickTriggeredPipeline(pipeline),
+          onResetDownstream: (parentPipeline, pipeline) =>
+            this.resetDownstreamPipelines(parentPipeline, pipeline),
+          onClickUpstreamPipeline: (pipeline) => this.clickUpstreamPipeline(pipeline),
+          onClickDownstreamPipeline: (pipeline) => this.clickDownstreamPipeline(pipeline),
         },
       });
     },
   });
-};
-
-const createPipelineHeaderApp = mediator => {
-  // eslint-disable-next-line no-new
-  new Vue({
-    el: '#js-pipeline-header-vue',
-    components: {
-      pipelineHeader,
-    },
-    data() {
-      return {
-        mediator,
-      };
-    },
-    created() {
-      eventHub.$on('headerPostAction', this.postAction);
-      eventHub.$on('headerDeleteAction', this.deleteAction);
-    },
-    beforeDestroy() {
-      eventHub.$off('headerPostAction', this.postAction);
-      eventHub.$off('headerDeleteAction', this.deleteAction);
-    },
-    methods: {
-      postAction(path) {
-        this.mediator.service
-          .postAction(path)
-          .then(() => this.mediator.refreshPipeline())
-          .catch(() => Flash(__('An error occurred while making the request.')));
-      },
-      deleteAction(path) {
-        this.mediator.stopPipelinePoll();
-        this.mediator.service
-          .deleteAction(path)
-          .then(({ request }) => redirectTo(setUrlFragment(request.responseURL, 'delete_success')))
-          .catch(() => Flash(__('An error occurred while deleting the pipeline.')));
-      },
-    },
-    render(createElement) {
-      return createElement('pipeline-header', {
-        props: {
-          isLoading: this.mediator.state.isLoading,
-          pipeline: this.mediator.store.state.pipeline,
-        },
-      });
-    },
-  });
-};
-
-const createPipelinesTabs = testReportsStore => {
-  const tabsElement = document.querySelector('.pipelines-tabs');
-
-  if (tabsElement) {
-    const fetchReportsAction = 'fetchFullReport';
-    const isTestTabActive = Boolean(
-      document.querySelector('.pipelines-tabs > li > a.test-tab.active'),
-    );
-
-    if (isTestTabActive) {
-      testReportsStore.dispatch(fetchReportsAction);
-    } else {
-      const tabClickHandler = e => {
-        if (e.target.className === 'test-tab') {
-          testReportsStore.dispatch(fetchReportsAction);
-          tabsElement.removeEventListener('click', tabClickHandler);
-        }
-      };
-
-      tabsElement.addEventListener('click', tabClickHandler);
-    }
-  }
 };
 
 const createTestDetails = () => {
-  if (!window.gon?.features?.junitPipelineView) {
-    return;
-  }
-
-  const el = document.querySelector('#js-pipeline-tests-detail');
-  const { fullReportEndpoint, summaryEndpoint, suiteEndpoint, countEndpoint } = el?.dataset || {};
-
+  const el = document.querySelector(SELECTORS.PIPELINE_TESTS);
+  const { blobPath, summaryEndpoint, suiteEndpoint } = el?.dataset || {};
   const testReportsStore = createTestReportsStore({
-    fullReportEndpoint,
-    summaryEndpoint: summaryEndpoint || countEndpoint,
+    blobPath,
+    summaryEndpoint,
     suiteEndpoint,
-    useBuildSummaryReport: window.gon?.features?.buildReportSummary,
   });
-
-  if (!window.gon?.features?.buildReportSummary) {
-    createPipelinesTabs(testReportsStore);
-  }
 
   // eslint-disable-next-line no-new
   new Vue({
@@ -148,39 +79,41 @@ const createTestDetails = () => {
   });
 };
 
-const createDagApp = () => {
-  if (!window.gon?.features?.dagPipelineTab) {
-    return;
+export default async function initPipelineDetailsBundle() {
+  createTestDetails();
+  createDagApp(apolloProvider);
+
+  const canShowNewPipelineDetails =
+    gon.features.graphqlPipelineDetails || gon.features.graphqlPipelineDetailsUsers;
+
+  const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
+
+  if (canShowNewPipelineDetails) {
+    try {
+      const { createPipelinesDetailApp } = await import(
+        /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
+      );
+
+      createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH, apolloProvider, dataset);
+    } catch {
+      Flash(__('An error occurred while loading the pipeline.'));
+    }
+  } else {
+    const { default: PipelinesMediator } = await import(
+      /* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator'
+    );
+    const mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
+    mediator.fetchPipeline();
+
+    createLegacyPipelinesDetailApp(mediator);
   }
 
-  const el = document.querySelector('#js-pipeline-dag-vue');
-  const { pipelineDataPath, emptySvgPath, dagDocPath } = el?.dataset;
-
-  // eslint-disable-next-line no-new
-  new Vue({
-    el,
-    components: {
-      Dag,
-    },
-    render(createElement) {
-      return createElement('dag', {
-        props: {
-          graphUrl: pipelineDataPath,
-          emptySvgPath,
-          dagDocPath,
-        },
-      });
-    },
-  });
-};
-
-export default () => {
-  const { dataset } = document.querySelector('.js-pipeline-details-vue');
-  const mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
-  mediator.fetchPipeline();
-
-  createPipelinesDetailApp(mediator);
-  createPipelineHeaderApp(mediator);
-  createTestDetails();
-  createDagApp();
-};
+  try {
+    const { createPipelineHeaderApp } = await import(
+      /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
+    );
+    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER, apolloProvider, dataset.graphqlResourceEtag);
+  } catch {
+    Flash(__('An error occurred while loading a section of this page.'));
+  }
+}

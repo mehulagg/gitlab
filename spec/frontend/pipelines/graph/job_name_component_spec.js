@@ -1,7 +1,6 @@
 import { mount } from '@vue/test-utils';
+import jobNameComponent from '~/pipelines/components/jobs_shared/job_name_component.vue';
 import ciIcon from '~/vue_shared/components/ci_icon.vue';
-
-import jobNameComponent from '~/pipelines/components/graph/job_name_component.vue';
 
 describe('job name component', () => {
   let wrapper;
@@ -21,12 +20,7 @@ describe('job name component', () => {
   });
 
   it('should render the provided name', () => {
-    expect(
-      wrapper
-        .find('.ci-status-text')
-        .text()
-        .trim(),
-    ).toBe(propsData.name);
+    expect(wrapper.text()).toBe(propsData.name);
   });
 
   it('should render an icon with the provided status', () => {

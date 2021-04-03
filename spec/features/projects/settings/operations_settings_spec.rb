@@ -23,8 +23,8 @@ RSpec.describe 'Projects > Settings > For a forked project', :js do
 
   describe 'Settings > Operations' do
     describe 'Incidents' do
-      let(:create_issue) { 'Create an issue. Issues are created for each alert triggered.' }
-      let(:send_email) { 'Send a separate email notification to Developers.' }
+      let(:create_issue) { 'Create an incident. Incidents are created for each alert triggered.' }
+      let(:send_email) { 'Send a single email notification to Owners and Maintainers for new alerts.' }
 
       before do
         create(:project_incident_management_setting, send_email: true, project: project)
@@ -35,7 +35,7 @@ RSpec.describe 'Projects > Settings > For a forked project', :js do
       end
 
       it 'renders form for incident management' do
-        expect(page).to have_selector('h3', text: 'Incidents')
+        expect(page).to have_selector('h4', text: 'Incidents')
       end
 
       it 'sets correct default values' do
@@ -46,11 +46,14 @@ RSpec.describe 'Projects > Settings > For a forked project', :js do
       it 'updates form values' do
         check(create_issue)
         uncheck(send_email)
+        click_on('No template selected')
+        click_on('bug')
 
         save_form
         click_expand_incident_management_button
 
         expect(find_field(create_issue)).to be_checked
+        expect(page).to have_selector(:id, 'alert-integration-settings-issue-template', text: 'bug')
         expect(find_field(send_email)).not_to be_checked
       end
 
@@ -143,7 +146,7 @@ RSpec.describe 'Projects > Settings > For a forked project', :js do
 
           click_button('Connect')
 
-          assert_text('Connection has failed. Re-check Auth Token and try again.')
+          assert_text('Connection failed. Check Auth Token and try again.')
         end
       end
     end
@@ -159,13 +162,13 @@ RSpec.describe 'Projects > Settings > For a forked project', :js do
         end
 
         expect(page).to have_content('Grafana URL')
-        expect(page).to have_content('API Token')
-        expect(page).to have_button('Save Changes')
+        expect(page).to have_content('API token')
+        expect(page).to have_button('Save changes')
 
         fill_in('grafana-url', with: 'http://gitlab-test.grafana.net')
         fill_in('grafana-token', with: 'token')
 
-        click_button('Save Changes')
+        click_button('Save changes')
 
         wait_for_requests
 

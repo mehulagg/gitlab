@@ -1,12 +1,14 @@
+import { mount } from '@vue/test-utils';
 import Vue from 'vue';
-import { shallowMount } from '@vue/test-utils';
 import mountComponent, { mountComponentWithSlots } from 'helpers/vue_mount_component_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import reportSection from '~/reports/components/report_section.vue';
 
 describe('Report section', () => {
   let vm;
   let wrapper;
   const ReportSection = Vue.extend(reportSection);
+  const findCollapseButton = () => wrapper.findByTestId('report-section-expand-button');
 
   const resolvedIssues = [
     {
@@ -29,13 +31,15 @@ describe('Report section', () => {
     alwaysOpen: false,
   };
 
-  const createComponent = props => {
-    wrapper = shallowMount(reportSection, {
-      propsData: {
-        ...defaultProps,
-        ...props,
-      },
-    });
+  const createComponent = (props) => {
+    wrapper = extendedWrapper(
+      mount(reportSection, {
+        propsData: {
+          ...defaultProps,
+          ...props,
+        },
+      }),
+    );
     return wrapper;
   };
 
@@ -67,7 +71,7 @@ describe('Report section', () => {
         const issues = hasIssues ? 'has issues' : 'has no issues';
         const open = alwaysOpen ? 'is always open' : 'is not always open';
 
-        it(`is ${isCollapsible}, if the report ${issues} and ${open}`, done => {
+        it(`is ${isCollapsible}, if the report ${issues} and ${open}`, (done) => {
           vm.hasIssues = hasIssues;
           vm.alwaysOpen = alwaysOpen;
 
@@ -93,7 +97,7 @@ describe('Report section', () => {
         const issues = isCollapsed ? 'is collapsed' : 'is not collapsed';
         const open = alwaysOpen ? 'is always open' : 'is not always open';
 
-        it(`is ${isExpanded}, if the report ${issues} and ${open}`, done => {
+        it(`is ${isExpanded}, if the report ${issues} and ${open}`, (done) => {
           vm.isCollapsed = isCollapsed;
           vm.alwaysOpen = alwaysOpen;
 
@@ -144,7 +148,7 @@ describe('Report section', () => {
     describe('toggleCollapsed', () => {
       const hiddenCss = { display: 'none' };
 
-      it('toggles issues', done => {
+      it('toggles issues', (done) => {
         vm.$el.querySelector('button').click();
 
         Vue.nextTick()
@@ -163,7 +167,7 @@ describe('Report section', () => {
           .catch(done.fail);
       });
 
-      it('is always expanded, if always-open is set to true', done => {
+      it('is always expanded, if always-open is set to true', (done) => {
         vm.alwaysOpen = true;
         Vue.nextTick()
           .then(() => {
@@ -177,12 +181,12 @@ describe('Report section', () => {
   });
 
   describe('snowplow events', () => {
-    it('does emit an event on issue toggle if the shouldEmitToggleEvent prop does exist', done => {
+    it('does emit an event on issue toggle if the shouldEmitToggleEvent prop does exist', (done) => {
       createComponent({ hasIssues: true, shouldEmitToggleEvent: true });
 
       expect(wrapper.emitted().toggleEvent).toBeUndefined();
 
-      wrapper.vm.$el.querySelector('button').click();
+      findCollapseButton().trigger('click');
       return wrapper.vm
         .$nextTick()
         .then(() => {
@@ -192,12 +196,12 @@ describe('Report section', () => {
         .catch(done.fail);
     });
 
-    it('does not emit an event on issue toggle if the shouldEmitToggleEvent prop does not exist', done => {
+    it('does not emit an event on issue toggle if the shouldEmitToggleEvent prop does not exist', (done) => {
       createComponent({ hasIssues: true });
 
       expect(wrapper.emitted().toggleEvent).toBeUndefined();
 
-      wrapper.vm.$el.querySelector('button').click();
+      findCollapseButton().trigger('click');
       return wrapper.vm
         .$nextTick()
         .then(() => {
@@ -207,7 +211,7 @@ describe('Report section', () => {
         .catch(done.fail);
     });
 
-    it('does not emit an event if always-open is set to true', done => {
+    it('does not emit an event if always-open is set to true', (done) => {
       createComponent({ alwaysOpen: true, hasIssues: true, shouldEmitToggleEvent: true });
 
       wrapper.vm
@@ -244,7 +248,7 @@ describe('Report section', () => {
           hasIssues: true,
         },
         slots: {
-          actionButtons: ['Action!'],
+          'action-buttons': ['Action!'],
         },
       });
     });
@@ -259,7 +263,7 @@ describe('Report section', () => {
   });
 
   describe('Success and Error slots', () => {
-    const createComponentWithSlots = status => {
+    const createComponentWithSlots = (status) => {
       vm = mountComponentWithSlots(ReportSection, {
         props: {
           status,

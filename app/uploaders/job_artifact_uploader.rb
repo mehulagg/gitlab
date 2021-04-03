@@ -4,7 +4,6 @@ class JobArtifactUploader < GitlabUploader
   extend Workhorse::UploadPath
   include ObjectStorage::Concern
 
-  ObjectNotReadyError = Class.new(StandardError)
   UnknownFileLocationError = Class.new(StandardError)
 
   storage_options Gitlab.config.artifacts
@@ -24,7 +23,9 @@ class JobArtifactUploader < GitlabUploader
   private
 
   def dynamic_segment
-    raise ObjectNotReadyError, 'JobArtifact is not ready' unless model.id
+    # This now tests model.created_at because it can for some reason be nil in the test suite,
+    # and it's not clear if this is intentional or not
+    raise ObjectNotReadyError, 'JobArtifact is not ready' unless model.id && model.created_at
 
     if model.hashed_path?
       hashed_path
@@ -36,15 +37,10 @@ class JobArtifactUploader < GitlabUploader
   end
 
   def hashed_path
-    File.join(disk_hash[0..1], disk_hash[2..3], disk_hash,
-      model.created_at.utc.strftime('%Y_%m_%d'), model.job_id.to_s, model.id.to_s)
+    Gitlab::HashedPath.new(model.created_at.utc.strftime('%Y_%m_%d'), model.job_id, model.id, root_hash: model.project_id)
   end
 
   def legacy_path
     File.join(model.created_at.utc.strftime('%Y_%m'), model.project_id.to_s, model.job_id.to_s)
-  end
-
-  def disk_hash
-    @disk_hash ||= Digest::SHA2.hexdigest(model.project_id.to_s)
   end
 end

@@ -10,12 +10,19 @@ RSpec.describe Vulnerabilities::Statistics::AdjustmentWorker do
 
     before do
       allow(Vulnerabilities::Statistics::AdjustmentService).to receive(:execute)
+      allow(Vulnerabilities::HistoricalStatistics::AdjustmentService).to receive(:execute)
     end
 
     it 'calls `Vulnerabilities::Statistics::AdjustmentService` with given project_ids' do
       worker.perform(project_ids)
 
       expect(Vulnerabilities::Statistics::AdjustmentService).to have_received(:execute).with(project_ids)
+    end
+
+    it 'calls `Vulnerabilities::HistoricalStatistics::AdjustmentService` with given project_ids' do
+      worker.perform(project_ids)
+
+      expect(Vulnerabilities::HistoricalStatistics::AdjustmentService).to have_received(:execute).with(project_ids)
     end
   end
 end

@@ -3,7 +3,7 @@
 module Mutations
   module Iterations
     class Create < BaseMutation
-      include Mutations::ResolvesGroup
+      include Mutations::ResolvesResourceParent
 
       graphql_name 'CreateIteration'
 
@@ -12,39 +12,34 @@ module Mutations
       field :iteration,
             Types::IterationType,
             null: true,
-            description: 'The created iteration'
-
-      argument :group_path, GraphQL::ID_TYPE,
-               required: true,
-               description: "The target group for the iteration"
+            description: 'The created iteration.'
 
       argument :title,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The title of the iteration'
+               description: 'The title of the iteration.'
 
       argument :description,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The description of the iteration'
+               description: 'The description of the iteration.'
 
       argument :start_date,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The start date of the iteration'
+               description: 'The start date of the iteration.'
 
       argument :due_date,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'The end date of the iteration'
+               description: 'The end date of the iteration.'
 
       def resolve(args)
-        group_path = args.delete(:group_path)
-
         validate_arguments!(args)
 
-        group = authorized_find!(group_path: group_path)
-        response = ::Iterations::CreateService.new(group, current_user, args).execute
+        parent = authorized_resource_parent_find!(args)
+
+        response = ::Iterations::CreateService.new(parent, current_user, args).execute
 
         response_object = response.payload[:iteration] if response.success?
         response_errors = response.error? ? response.payload[:errors].full_messages : []
@@ -57,12 +52,8 @@ module Mutations
 
       private
 
-      def find_object(group_path:)
-        resolve_group(full_path: group_path)
-      end
-
       def validate_arguments!(args)
-        if args.empty?
+        if args.except(:group_path, :project_path).empty?
           raise Gitlab::Graphql::Errors::ArgumentError,
                 'The list of iteration attributes is empty'
         end

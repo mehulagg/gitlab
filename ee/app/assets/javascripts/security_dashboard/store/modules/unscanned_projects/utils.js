@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { getDayDifference, isValidDate } from '~/lib/utils/datetime_utility';
 
 /**
@@ -7,7 +6,7 @@ import { getDayDifference, isValidDate } from '~/lib/utils/datetime_utility';
  * @param daysInPast {number}
  * @returns {function({fromDay: Number, toDay: Number}): boolean}
  */
-const isWithinDateRange = daysInPast => ({ fromDay, toDay }) =>
+const isWithinDateRange = (daysInPast) => ({ fromDay, toDay }) =>
   daysInPast >= fromDay && daysInPast < toDay;
 
 /**
@@ -16,7 +15,7 @@ const isWithinDateRange = daysInPast => ({ fromDay, toDay }) =>
  * @param ranges {*}[]
  * @returns {{projects: []}}[]
  */
-const withEmptyProjectsArray = ranges => ranges.map(range => ({ ...range, projects: [] }));
+const withEmptyProjectsArray = (ranges) => ranges.map((range) => ({ ...range, projects: [] }));
 
 /**
  * Checks if a given group-object has any projects
@@ -24,7 +23,7 @@ const withEmptyProjectsArray = ranges => ranges.map(range => ({ ...range, projec
  * @param group {{ projects: [] }}
  * @returns {boolean}
  */
-const hasProjects = group => group.projects.length > 0;
+const hasProjects = (group) => group.projects.length > 0;
 
 /**
  * Takes an array of objects and groups them based on the given ranges

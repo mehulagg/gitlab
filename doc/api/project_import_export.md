@@ -1,11 +1,18 @@
-# Project import/export API
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference, api
+---
+
+# Project import/export API **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41899) in GitLab 10.6.
 
 See also:
 
 - [Project import/export documentation](../user/project/settings/import_export.md).
-- [Project import/export administration Rake tasks](../administration/raketasks/project_import_export.md). **(CORE ONLY)**
+- [Project import/export administration Rake tasks](../administration/raketasks/project_import_export.md). **(FREE SELF)**
 
 ## Schedule an export
 
@@ -42,8 +49,8 @@ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitla
 }
 ```
 
-NOTE: **Note:**
-The upload request will be sent with `Content-Type: application/gzip` header. Ensure that your pre-signed URL includes this as part of the signature.
+NOTE:
+The upload request is sent with `Content-Type: application/gzip` header. Ensure that your pre-signed URL includes this as part of the signature.
 
 ## Export status
 
@@ -79,7 +86,11 @@ an email notifying the user to download the file, uploading the exported file to
 
 `regeneration_in_progress` is when an export file is available to download, and a request to generate a new export is in process.
 
+`none` is when there are no exports _queued_, _started_, _finished_, or _being regenerated_
+
 `_links` are only present when export has finished.
+
+`created_at` is the project create timestamp, not the export start time.
 
 ```json
 {
@@ -127,14 +138,14 @@ POST /projects/import
 
 | Attribute | Type           | Required | Description                              |
 | --------- | -------------- | -------- | ---------------------------------------- |
-| `namespace` | integer/string | no | The ID or path of the namespace that the project will be imported to. Defaults to the current user's namespace |
+| `namespace` | integer/string | no | The ID or path of the namespace to import the project to. Defaults to the current user's namespace |
 | `name` | string | no | The name of the project to be imported. Defaults to the path of the project if not provided |
 | `file` | string | yes | The file to be uploaded |
 | `path` | string | yes | Name and path for new project |
-| `overwrite` | boolean | no | If there is a project with the same path the import will overwrite it. Default to false |
+| `overwrite` | boolean | no | If there is a project with the same path the import overwrites it. Default to false |
 | `override_params` | Hash | no | Supports all fields defined in the [Project API](projects.md) |
 
-The override parameters passed will take precedence over all values defined inside the export file.
+The override parameters passed take precedence over all values defined inside the export file.
 
 To upload a file from your file system, use the `--form` argument. This causes
 cURL to post data using the header `Content-Type: multipart/form-data`.
@@ -181,9 +192,9 @@ requests.post(url, headers=headers, data=data, files=files)
 }
 ```
 
-NOTE: **Note:**
-The maximum import file size can be set by the Administrator, default is 50MB.
-As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](settings.md#change-application-settings) or the [Admin UI](../user/admin_area/settings/account_and_limit_settings.md).
+NOTE:
+The maximum import file size can be set by the Administrator, default is `0` (unlimited)..
+As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](settings.md#change-application-settings) or the [Admin UI](../user/admin_area/settings/account_and_limit_settings.md). Default [modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to 0 in GitLab 13.8.
 
 ## Import status
 
@@ -209,15 +220,15 @@ Status can be one of:
 - `started`
 - `finished`
 
-If the status is `failed`, it will include the import error message under `import_error`.
+If the status is `failed`, it includes the import error message under `import_error`.
 If the status is `failed`, `started` or `finished`, the `failed_relations` array might
 be populated with any occurrences of relations that failed to import either due to
 unrecoverable errors or because retries were exhausted (a typical example are query timeouts.)
 
-NOTE: **Note:**
+NOTE:
 An element's `id` field in `failed_relations` references the failure record, not the relation.
 
-NOTE: **Note:**
+NOTE:
 The `failed_relations` array is currently capped to 100 items.
 
 ```json

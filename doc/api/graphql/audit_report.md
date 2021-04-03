@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Set up an Audit Report with GraphQL
 
 This page describes how you can use the GraphiQL explorer to set up an audit report
@@ -8,8 +14,8 @@ guidance on getting started from the [command line](getting_started.md#command-l
 
 The [example users query](#set-up-the-graphiql-explorer) looks for a subset of users in
 a GitLab instance either by username or
-[global ID](../../development/api_graphql_styleguide.md#exposing-global-ids). The query
-includes:
+[Global ID](../../development/api_graphql_styleguide.md#global-ids).
+The query includes:
 
 - [`pageInfo`](#pageinfo)
 - [`nodes`](#nodes)
@@ -99,7 +105,7 @@ explorer. GraphiQL explorer is available for:
 
 ![GraphiQL explorer search for boards](img/user_query_example_v13_2.png)
 
-NOTE: **Note:**
+NOTE:
 [The GraphQL API returns a GlobalID, rather than a standard ID.](getting_started.md#queries-and-mutations) It also expects a GlobalID as an input rather than
 a single integer.
 

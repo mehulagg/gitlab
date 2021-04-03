@@ -3,6 +3,7 @@
 class PagesDomain < ApplicationRecord
   include Presentable
   include FromUnion
+  include AfterCommitQueue
 
   VERIFICATION_KEY = 'gitlab-pages-verification-code'
   VERIFICATION_THRESHOLD = 3.days.freeze
@@ -33,10 +34,10 @@ class PagesDomain < ApplicationRecord
   validate :validate_matching_key, if: ->(domain) { domain.certificate.present? || domain.key.present? }
   validate :validate_intermediates, if: ->(domain) { domain.certificate.present? && domain.certificate_changed? }
 
-  default_value_for(:auto_ssl_enabled, allow_nil: false) { ::Gitlab::LetsEncrypt.enabled? }
-  default_value_for :scope, allow_nil: false, value: :project
-  default_value_for :wildcard, allow_nil: false, value: false
-  default_value_for :usage, allow_nil: false, value: :pages
+  default_value_for(:auto_ssl_enabled, allows_nil: false) { ::Gitlab::LetsEncrypt.enabled? }
+  default_value_for :scope, allows_nil: false, value: :project
+  default_value_for :wildcard, allows_nil: false, value: false
+  default_value_for :usage, allows_nil: false, value: :pages
 
   attr_encrypted :key,
     mode: :per_attribute_iv_and_salt,
@@ -187,7 +188,7 @@ class PagesDomain < ApplicationRecord
 
   def user_provided_key=(key)
     self.key = key
-    self.certificate_source = 'user_provided' if key_changed?
+    self.certificate_source = 'user_provided' if attribute_changed?(:key)
   end
 
   def user_provided_certificate
@@ -206,7 +207,7 @@ class PagesDomain < ApplicationRecord
 
   def gitlab_provided_key=(key)
     self.key = key
-    self.certificate_source = 'gitlab_provided' if key_changed?
+    self.certificate_source = 'gitlab_provided' if attribute_changed?(:key)
   end
 
   def pages_virtual_domain
@@ -222,6 +223,8 @@ class PagesDomain < ApplicationRecord
   private
 
   def pages_deployed?
+    return false unless project
+
     # TODO: remove once `pages_metadatum` is migrated
     # https://gitlab.com/gitlab-org/gitlab/issues/33106
     unless project.pages_metadatum
@@ -244,8 +247,9 @@ class PagesDomain < ApplicationRecord
   # rubocop: disable CodeReuse/ServiceClass
   def update_daemon
     return if usage_serverless?
+    return unless pages_deployed?
 
-    ::Projects::UpdatePagesConfigurationService.new(project).execute
+    run_after_commit { PagesUpdateConfigurationWorker.perform_async(project_id) }
   end
   # rubocop: enable CodeReuse/ServiceClass
 
@@ -282,7 +286,7 @@ class PagesDomain < ApplicationRecord
     return unless domain
 
     if domain.downcase.ends_with?(Settings.pages.host.downcase)
-      self.errors.add(:domain, "*.#{Settings.pages.host} is restricted")
+      self.errors.add(:domain, "*.#{Settings.pages.host} is restricted. Please compare our documentation at https://docs.gitlab.com/ee/administration/pages/#advanced-configuration against your configuration.")
     end
   end
 

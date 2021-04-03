@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-
 function trimFirstCharOfLineContent(text) {
   if (!text) {
     return text;
@@ -17,5 +15,5 @@ function cleanSuggestionLine(line = {}) {
 }
 
 export function selectDiffLines(lines) {
-  return lines.filter(line => line.type !== 'match').map(line => cleanSuggestionLine(line));
+  return lines.filter((line) => line.type !== 'match').map((line) => cleanSuggestionLine(line));
 }

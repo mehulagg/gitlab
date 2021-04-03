@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import initSAML from './shared/init_saml';
 import MembersApp from './saml_members/index.vue';
 import createStore from './saml_members/store';
+import initSAML from './shared/init_saml';
 
 function initMembers(el) {
   const { groupId } = el.dataset;
@@ -18,8 +18,6 @@ function initMembers(el) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const el = document.querySelector('.js-saml-members');
-  initMembers(el);
-  initSAML();
-});
+const el = document.querySelector('.js-saml-members');
+initMembers(el);
+initSAML();

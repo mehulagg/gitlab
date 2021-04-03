@@ -4,17 +4,17 @@ describe('BoardList Component', () => {
   let mock;
   let component;
 
-  beforeEach(done => {
+  beforeEach((done) => {
     const listIssueProps = {
       project: {
         path: '/test',
       },
       real_path: '',
+      webUrl: '',
     };
 
     const componentProps = {
       groupId: undefined,
-      issueLinkBase: '/test/:project_path/issues',
     };
 
     ({ mock, component } = createComponent({

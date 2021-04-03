@@ -9,7 +9,6 @@ RSpec.describe Groups::MilestonesController do
   let(:user)    { create(:user) }
   let(:title) { '肯定不是中文的问题' }
   let(:milestone) { create(:milestone, project: project) }
-  let(:milestone_path) { group_milestone_path(group, milestone.safe_title, title: milestone.title) }
 
   let(:milestone_params) do
     {
@@ -23,6 +22,12 @@ RSpec.describe Groups::MilestonesController do
     sign_in(user)
     group.add_owner(user)
     project.add_maintainer(user)
+  end
+
+  it_behaves_like 'milestone tabs' do
+    let(:milestone) { create(:milestone, group: group) }
+    let(:milestone_path) { group_milestone_path(group, milestone.iid) }
+    let(:request_params) { { group_id: group, id: milestone.iid } }
   end
 
   describe '#index' do
@@ -86,6 +91,7 @@ RSpec.describe Groups::MilestonesController do
         let!(:public_project_with_private_issues_and_mrs) do
           create(:project, :public, :issues_private, :merge_requests_private, group: public_group)
         end
+
         let!(:private_milestone) { create(:milestone, project: public_project_with_private_issues_and_mrs, title: 'project milestone') }
 
         context 'when anonymous user' do
@@ -171,7 +177,7 @@ RSpec.describe Groups::MilestonesController do
         expect(milestones.count).to eq(3)
         expect(milestones.collect { |m| m['title'] }).to match_array(['same name', 'same name', 'group milestone'])
         expect(response).to have_gitlab_http_status(:ok)
-        expect(response.content_type).to eq 'application/json'
+        expect(response.media_type).to eq 'application/json'
       end
 
       context 'with subgroup milestones' do

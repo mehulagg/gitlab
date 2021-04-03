@@ -1,3 +1,10 @@
-import initSecurityConfiguration from 'ee/security_configuration';
+import { initSecurityConfiguration } from 'ee/security_configuration';
+import { initStaticSecurityConfiguration } from '~/security_configuration';
 
-document.addEventListener('DOMContentLoaded', initSecurityConfiguration);
+const el = document.querySelector('#js-security-configuration');
+
+if (el) {
+  initSecurityConfiguration(el);
+} else {
+  initStaticSecurityConfiguration(document.querySelector('#js-security-configuration-static'));
+}

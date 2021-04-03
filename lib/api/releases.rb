@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 module API
-  class Releases < Grape::API::Instance
+  class Releases < ::API::Base
     include PaginationParams
 
     RELEASE_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS
       .merge(tag_name: API::NO_SLASH_URL_PART_REGEX)
 
     before { authorize_read_releases! }
+
+    feature_category :release_orchestration
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
@@ -19,9 +21,13 @@ module API
       end
       params do
         use :pagination
+        optional :order_by, type: String, values: %w[released_at created_at], default: 'released_at',
+                            desc: 'Return releases ordered by `released_at` or `created_at`.'
+        optional :sort, type: String, values: %w[asc desc], default: 'desc',
+                        desc: 'Return releases sorted in `asc` or `desc` order.'
       end
       get ':id/releases' do
-        releases = ::ReleasesFinder.new(user_project, current_user).execute
+        releases = ::ReleasesFinder.new(user_project, current_user, declared_params.slice(:order_by, :sort)).execute
 
         present paginate(releases), with: Entities::Release, current_user: current_user
       end
@@ -85,7 +91,7 @@ module API
         optional :name,        type: String, desc: 'The name of the release'
         optional :description, type: String, desc: 'Release notes with markdown support'
         optional :released_at, type: DateTime, desc: 'The date when the release will be/was ready.'
-        optional :milestones,  type: Array, desc: 'The titles of the related milestones'
+        optional :milestones,  type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'The titles of the related milestones'
       end
       put ':id/releases/:tag_name', requirements: RELEASE_ENDPOINT_REQUIREMENTS do
         authorize_update_release!
@@ -152,7 +158,7 @@ module API
       end
 
       def authorize_create_evidence!
-        # This is a separate method so that EE can extend its behaviour
+        # extended in EE
       end
 
       def release
@@ -160,15 +166,15 @@ module API
       end
 
       def log_release_created_audit_event(release)
-        # This is a separate method so that EE can extend its behaviour
+        # extended in EE
       end
 
       def log_release_updated_audit_event
-        # This is a separate method so that EE can extend its behaviour
+        # extended in EE
       end
 
       def log_release_milestones_updated_audit_event
-        # This is a separate method so that EE can extend its behaviour
+        # extended in EE
       end
     end
   end

@@ -1,11 +1,11 @@
 /* eslint-disable func-names */
 
-import $ from 'jquery';
 import Dropzone from 'dropzone';
-import { visitUrl } from '../lib/utils/url_utility';
+import $ from 'jquery';
+import { sprintf, __ } from '~/locale';
 import { HIDDEN_CLASS } from '../lib/utils/constants';
 import csrf from '../lib/utils/csrf';
-import { sprintf, __ } from '~/locale';
+import { visitUrl } from '../lib/utils/url_utility';
 
 Dropzone.autoDiscover = false;
 
@@ -43,16 +43,14 @@ export default class BlobFileDropzone {
       previewsContainer: '.dropzone-previews',
       headers: csrf.headers,
       init() {
-        this.on('processing', function() {
+        this.on('processing', function () {
           this.options.url = form.attr('action');
         });
 
         this.on('addedfile', () => {
           toggleLoading(submitButton, submitButtonLoadingIcon, false);
           dropzoneMessage.addClass(HIDDEN_CLASS);
-          $('.dropzone-alerts')
-            .html('')
-            .hide();
+          $('.dropzone-alerts').html('').hide();
         });
         this.on('removedfile', () => {
           toggleLoading(submitButton, submitButtonLoadingIcon, false);
@@ -62,7 +60,7 @@ export default class BlobFileDropzone {
           $('#modal-upload-blob').modal('hide');
           visitUrl(response.filePath);
         });
-        this.on('maxfilesexceeded', function(file) {
+        this.on('maxfilesexceeded', function (file) {
           dropzoneMessage.addClass(HIDDEN_CLASS);
           this.removeFile(file);
         });
@@ -74,9 +72,7 @@ export default class BlobFileDropzone {
       },
       // Override behavior of adding error underneath preview
       error(file, errorMessage) {
-        const stripped = $('<div/>')
-          .html(errorMessage)
-          .text();
+        const stripped = $('<div/>').html(errorMessage).text();
         $('.dropzone-alerts')
           .html(sprintf(__('Error uploading file: %{stripped}'), { stripped }))
           .show();
@@ -84,9 +80,10 @@ export default class BlobFileDropzone {
       },
     });
 
-    submitButton.on('click', e => {
+    submitButton.on('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
+
       if (dropzone[0].dropzone.getQueuedFiles().length === 0) {
         // eslint-disable-next-line no-alert
         alert(__('Please select a file'));

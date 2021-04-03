@@ -1,10 +1,4 @@
 .notification-list-item {
-  line-height: 34px;
-
-  .dropdown-menu {
-    @extend .dropdown-menu-right;
-  }
-
   @include media-breakpoint-down(sm) {
     .notification-dropdown {
       width: 100%;
@@ -37,8 +31,4 @@
 .notification {
   position: relative;
   top: 1px;
-
-  .fa {
-    font-size: 18px;
-  }
 }

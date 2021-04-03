@@ -16,6 +16,8 @@ module Gitlab
           :created_after,
           :author_username,
           :milestone_title,
+          :sort,
+          :direction,
           label_name: [].freeze,
           assignee_username: [].freeze,
           project_ids: [].freeze
@@ -34,6 +36,9 @@ module Gitlab
         attribute :created_before, :datetime
         attribute :group
         attribute :current_user
+        attribute :value_stream
+        attribute :sort
+        attribute :direction
 
         FINDER_PARAM_NAMES.each do |param_name|
           attribute param_name
@@ -48,7 +53,7 @@ module Gitlab
         def initialize(params = {})
           super(params)
 
-          self.created_before = (self.created_before || Time.now).at_end_of_day
+          self.created_before = (self.created_before || Time.current).at_end_of_day
           self.created_after  = (created_after || default_created_after).at_beginning_of_day
         end
 
@@ -61,13 +66,16 @@ module Gitlab
             current_user: current_user,
             from: created_after,
             to: created_before,
-            project_ids: project_ids
+            project_ids: project_ids,
+            sort: sort&.to_sym,
+            direction: direction&.to_sym
           }.merge(attributes.symbolize_keys.slice(*FINDER_PARAM_NAMES))
         end
 
         def to_data_attributes
           {}.tap do |attrs|
             attrs[:group] = group_data_attributes if group
+            attrs[:value_stream] = value_stream_data_attributes.to_json if value_stream
             attrs[:created_after] = created_after.to_date.iso8601
             attrs[:created_before] = created_before.to_date.iso8601
             attrs[:projects] = group_projects(project_ids) if group && project_ids.present?
@@ -75,6 +83,8 @@ module Gitlab
             attrs[:assignees] = assignee_username.to_json if assignee_username.present?
             attrs[:author] = author_username if author_username.present?
             attrs[:milestone] = milestone_title if milestone_title.present?
+            attrs[:sort] = sort if sort.present?
+            attrs[:direction] = direction if direction.present?
           end
         end
 
@@ -87,6 +97,14 @@ module Gitlab
             parent_id: group.parent_id,
             full_path: group.full_path,
             avatar_url: group.avatar_url
+          }
+        end
+
+        def value_stream_data_attributes
+          {
+            id: value_stream.id,
+            name: value_stream.name,
+            is_custom: value_stream.custom?
           }
         end
 
@@ -105,7 +123,7 @@ module Gitlab
 
         def project_data_attributes(project)
           {
-            id: project.id,
+            id: project.to_gid.to_s,
             name: project.name,
             path_with_namespace: project.path_with_namespace,
             avatar_url: project.avatar_url

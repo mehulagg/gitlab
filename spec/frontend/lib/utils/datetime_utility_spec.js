@@ -1,8 +1,8 @@
-import { __, s__ } from '~/locale';
 import $ from 'jquery';
 import timezoneMock from 'timezone-mock';
-import '~/commons/bootstrap';
 import * as datetimeUtility from '~/lib/utils/datetime_utility';
+import { __, s__ } from '~/locale';
+import '~/commons/bootstrap';
 
 describe('Date time utils', () => {
   describe('timeFor', () => {
@@ -66,6 +66,34 @@ describe('Date time utils', () => {
       const day = datetimeUtility.getDayName(new Date('07/23/2016'));
 
       expect(day).toBe(__('Saturday'));
+    });
+  });
+
+  describe('formatDateAsMonth', () => {
+    it('should format dash cased date properly', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth(new Date('2020-06-28'));
+
+      expect(formattedMonth).toBe('Jun');
+    });
+
+    it('should format return the non-abbreviated month', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth(new Date('2020-07-28'), {
+        abbreviated: false,
+      });
+
+      expect(formattedMonth).toBe('July');
+    });
+
+    it('should format date with slashes properly', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth(new Date('07/23/2016'));
+
+      expect(formattedMonth).toBe('Jul');
+    });
+
+    it('should format ISO date properly', () => {
+      const formattedMonth = datetimeUtility.formatDateAsMonth('2016-07-23T00:00:00.559Z');
+
+      expect(formattedMonth).toBe('Jul');
     });
   });
 
@@ -538,7 +566,7 @@ describe('getDatesInRange', () => {
   it('applies mapper function if provided fro each item in range', () => {
     const d1 = new Date('2019-01-01');
     const d2 = new Date('2019-01-31');
-    const formatter = date => date.getDate();
+    const formatter = (date) => date.getDate();
 
     const range = datetimeUtility.getDatesInRange(d1, d2, formatter);
 
@@ -556,27 +584,236 @@ describe('secondsToMilliseconds', () => {
   });
 });
 
-describe('dayAfter', () => {
-  const date = new Date('2019-07-16T00:00:00.000Z');
-
-  it('returns the following date', () => {
-    const nextDay = datetimeUtility.dayAfter(date);
-    const expectedNextDate = new Date('2019-07-17T00:00:00.000Z');
-
-    expect(nextDay).toStrictEqual(expectedNextDate);
-  });
-
-  it('does not modifiy the original date', () => {
-    datetimeUtility.dayAfter(date);
-    expect(date).toStrictEqual(new Date('2019-07-16T00:00:00.000Z'));
-  });
-});
-
 describe('secondsToDays', () => {
   it('converts seconds to days correctly', () => {
     expect(datetimeUtility.secondsToDays(0)).toBe(0);
     expect(datetimeUtility.secondsToDays(90000)).toBe(1);
     expect(datetimeUtility.secondsToDays(270000)).toBe(3);
+  });
+});
+
+describe('date addition/subtraction methods', () => {
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
+
+  describe('dayAfter', () => {
+    const input = '2019-03-10T00:00:00.000Z';
+    const expectedLocalResult = '2019-03-10T23:00:00.000Z';
+    const expectedUTCResult = '2019-03-11T00:00:00.000Z';
+
+    it.each`
+      inputAsString | options           | expectedAsString
+      ${input}      | ${undefined}      | ${expectedLocalResult}
+      ${input}      | ${{}}             | ${expectedLocalResult}
+      ${input}      | ${{ utc: false }} | ${expectedLocalResult}
+      ${input}      | ${{ utc: true }}  | ${expectedUTCResult}
+    `(
+      'when the provided date is $inputAsString and the options parameter is $options, returns $expectedAsString',
+      ({ inputAsString, options, expectedAsString }) => {
+        const inputDate = new Date(inputAsString);
+        const actual = datetimeUtility.dayAfter(inputDate, options);
+
+        expect(actual.toISOString()).toBe(expectedAsString);
+      },
+    );
+
+    it('does not modifiy the original date', () => {
+      const inputDate = new Date(input);
+      datetimeUtility.dayAfter(inputDate);
+      expect(inputDate.toISOString()).toBe(input);
+    });
+  });
+
+  describe('nDaysAfter', () => {
+    const input = '2019-07-16T00:00:00.000Z';
+
+    it.each`
+      inputAsString | numberOfDays | options           | expectedAsString
+      ${input}      | ${1}         | ${undefined}      | ${'2019-07-17T00:00:00.000Z'}
+      ${input}      | ${-1}        | ${undefined}      | ${'2019-07-15T00:00:00.000Z'}
+      ${input}      | ${0}         | ${undefined}      | ${'2019-07-16T00:00:00.000Z'}
+      ${input}      | ${0.9}       | ${undefined}      | ${'2019-07-16T00:00:00.000Z'}
+      ${input}      | ${120}       | ${undefined}      | ${'2019-11-13T01:00:00.000Z'}
+      ${input}      | ${120}       | ${{}}             | ${'2019-11-13T01:00:00.000Z'}
+      ${input}      | ${120}       | ${{ utc: false }} | ${'2019-11-13T01:00:00.000Z'}
+      ${input}      | ${120}       | ${{ utc: true }}  | ${'2019-11-13T00:00:00.000Z'}
+    `(
+      'when the provided date is $inputAsString, numberOfDays is $numberOfDays, and the options parameter is $options, returns $expectedAsString',
+      ({ inputAsString, numberOfDays, options, expectedAsString }) => {
+        const inputDate = new Date(inputAsString);
+        const actual = datetimeUtility.nDaysAfter(inputDate, numberOfDays, options);
+
+        expect(actual.toISOString()).toBe(expectedAsString);
+      },
+    );
+  });
+
+  describe('nDaysBefore', () => {
+    const input = '2019-07-16T00:00:00.000Z';
+
+    it.each`
+      inputAsString | numberOfDays | options           | expectedAsString
+      ${input}      | ${1}         | ${undefined}      | ${'2019-07-15T00:00:00.000Z'}
+      ${input}      | ${-1}        | ${undefined}      | ${'2019-07-17T00:00:00.000Z'}
+      ${input}      | ${0}         | ${undefined}      | ${'2019-07-16T00:00:00.000Z'}
+      ${input}      | ${0.9}       | ${undefined}      | ${'2019-07-15T00:00:00.000Z'}
+      ${input}      | ${180}       | ${undefined}      | ${'2019-01-17T01:00:00.000Z'}
+      ${input}      | ${180}       | ${{}}             | ${'2019-01-17T01:00:00.000Z'}
+      ${input}      | ${180}       | ${{ utc: false }} | ${'2019-01-17T01:00:00.000Z'}
+      ${input}      | ${180}       | ${{ utc: true }}  | ${'2019-01-17T00:00:00.000Z'}
+    `(
+      'when the provided date is $inputAsString, numberOfDays is $numberOfDays, and the options parameter is $options, returns $expectedAsString',
+      ({ inputAsString, numberOfDays, options, expectedAsString }) => {
+        const inputDate = new Date(inputAsString);
+        const actual = datetimeUtility.nDaysBefore(inputDate, numberOfDays, options);
+
+        expect(actual.toISOString()).toBe(expectedAsString);
+      },
+    );
+  });
+
+  describe('nWeeksAfter', () => {
+    const input = '2021-07-16T00:00:00.000Z';
+
+    it.each`
+      inputAsString | numberOfWeeks | options           | expectedAsString
+      ${input}      | ${1}          | ${undefined}      | ${'2021-07-23T00:00:00.000Z'}
+      ${input}      | ${3}          | ${undefined}      | ${'2021-08-06T00:00:00.000Z'}
+      ${input}      | ${-1}         | ${undefined}      | ${'2021-07-09T00:00:00.000Z'}
+      ${input}      | ${0}          | ${undefined}      | ${'2021-07-16T00:00:00.000Z'}
+      ${input}      | ${0.6}        | ${undefined}      | ${'2021-07-20T00:00:00.000Z'}
+      ${input}      | ${18}         | ${undefined}      | ${'2021-11-19T01:00:00.000Z'}
+      ${input}      | ${18}         | ${{}}             | ${'2021-11-19T01:00:00.000Z'}
+      ${input}      | ${18}         | ${{ utc: false }} | ${'2021-11-19T01:00:00.000Z'}
+      ${input}      | ${18}         | ${{ utc: true }}  | ${'2021-11-19T00:00:00.000Z'}
+    `(
+      'when the provided date is $inputAsString, numberOfWeeks is $numberOfWeeks, and the options parameter is $options, returns $expectedAsString',
+      ({ inputAsString, numberOfWeeks, options, expectedAsString }) => {
+        const inputDate = new Date(inputAsString);
+        const actual = datetimeUtility.nWeeksAfter(inputDate, numberOfWeeks, options);
+
+        expect(actual.toISOString()).toBe(expectedAsString);
+      },
+    );
+  });
+
+  describe('nWeeksBefore', () => {
+    const input = '2021-07-16T00:00:00.000Z';
+
+    it.each`
+      inputAsString | numberOfWeeks | options           | expectedAsString
+      ${input}      | ${1}          | ${undefined}      | ${'2021-07-09T00:00:00.000Z'}
+      ${input}      | ${3}          | ${undefined}      | ${'2021-06-25T00:00:00.000Z'}
+      ${input}      | ${-1}         | ${undefined}      | ${'2021-07-23T00:00:00.000Z'}
+      ${input}      | ${0}          | ${undefined}      | ${'2021-07-16T00:00:00.000Z'}
+      ${input}      | ${0.6}        | ${undefined}      | ${'2021-07-11T00:00:00.000Z'}
+      ${input}      | ${20}         | ${undefined}      | ${'2021-02-26T01:00:00.000Z'}
+      ${input}      | ${20}         | ${{}}             | ${'2021-02-26T01:00:00.000Z'}
+      ${input}      | ${20}         | ${{ utc: false }} | ${'2021-02-26T01:00:00.000Z'}
+      ${input}      | ${20}         | ${{ utc: true }}  | ${'2021-02-26T00:00:00.000Z'}
+    `(
+      'when the provided date is $inputAsString, numberOfWeeks is $numberOfWeeks, and the options parameter is $options, returns $expectedAsString',
+      ({ inputAsString, numberOfWeeks, options, expectedAsString }) => {
+        const inputDate = new Date(inputAsString);
+        const actual = datetimeUtility.nWeeksBefore(inputDate, numberOfWeeks, options);
+
+        expect(actual.toISOString()).toBe(expectedAsString);
+      },
+    );
+  });
+
+  describe('nMonthsAfter', () => {
+    // February has 28 days
+    const feb2019 = '2019-02-15T00:00:00.000Z';
+    // Except in 2020, it had 29 days
+    const feb2020 = '2020-02-15T00:00:00.000Z';
+    // April has 30 days
+    const apr2020 = '2020-04-15T00:00:00.000Z';
+    // May has 31 days
+    const may2020 = '2020-05-15T00:00:00.000Z';
+    // November 1, 2020 was the day Daylight Saving Time ended in 2020 (in the US)
+    const oct2020 = '2020-10-15T00:00:00.000Z';
+
+    it.each`
+      inputAsString | numberOfMonths | options           | expectedAsString
+      ${feb2019}    | ${1}           | ${undefined}      | ${'2019-03-14T23:00:00.000Z'}
+      ${feb2020}    | ${1}           | ${undefined}      | ${'2020-03-14T23:00:00.000Z'}
+      ${apr2020}    | ${1}           | ${undefined}      | ${'2020-05-15T00:00:00.000Z'}
+      ${may2020}    | ${1}           | ${undefined}      | ${'2020-06-15T00:00:00.000Z'}
+      ${may2020}    | ${12}          | ${undefined}      | ${'2021-05-15T00:00:00.000Z'}
+      ${may2020}    | ${-1}          | ${undefined}      | ${'2020-04-15T00:00:00.000Z'}
+      ${may2020}    | ${0}           | ${undefined}      | ${may2020}
+      ${may2020}    | ${0.9}         | ${undefined}      | ${may2020}
+      ${oct2020}    | ${1}           | ${undefined}      | ${'2020-11-15T01:00:00.000Z'}
+      ${oct2020}    | ${1}           | ${{}}             | ${'2020-11-15T01:00:00.000Z'}
+      ${oct2020}    | ${1}           | ${{ utc: false }} | ${'2020-11-15T01:00:00.000Z'}
+      ${oct2020}    | ${1}           | ${{ utc: true }}  | ${'2020-11-15T00:00:00.000Z'}
+    `(
+      'when the provided date is $inputAsString, numberOfMonths is $numberOfMonths, and the options parameter is $options, returns $expectedAsString',
+      ({ inputAsString, numberOfMonths, options, expectedAsString }) => {
+        const inputDate = new Date(inputAsString);
+        const actual = datetimeUtility.nMonthsAfter(inputDate, numberOfMonths, options);
+
+        expect(actual.toISOString()).toBe(expectedAsString);
+      },
+    );
+  });
+
+  describe('nYearsAfter', () => {
+    it.each`
+      date            | numberOfYears | expected
+      ${'2020-07-06'} | ${1}          | ${'2021-07-06'}
+      ${'2020-07-06'} | ${15}         | ${'2035-07-06'}
+    `(
+      'returns $expected for "$numberOfYears year(s) after $date"',
+      ({ date, numberOfYears, expected }) => {
+        expect(datetimeUtility.nYearsAfter(new Date(date), numberOfYears)).toEqual(
+          new Date(expected),
+        );
+      },
+    );
+  });
+
+  describe('nMonthsBefore', () => {
+    // The previous month (February) has 28 days
+    const march2019 = '2019-03-15T00:00:00.000Z';
+    // Except in 2020, it had 29 days
+    const march2020 = '2020-03-15T00:00:00.000Z';
+    // The previous month (April) has 30 days
+    const may2020 = '2020-05-15T00:00:00.000Z';
+    // The previous month (May) has 31 days
+    const june2020 = '2020-06-15T00:00:00.000Z';
+    // November 1, 2020 was the day Daylight Saving Time ended in 2020 (in the US)
+    const nov2020 = '2020-11-15T00:00:00.000Z';
+
+    it.each`
+      inputAsString | numberOfMonths | options           | expectedAsString
+      ${march2019}  | ${1}           | ${undefined}      | ${'2019-02-15T01:00:00.000Z'}
+      ${march2020}  | ${1}           | ${undefined}      | ${'2020-02-15T01:00:00.000Z'}
+      ${may2020}    | ${1}           | ${undefined}      | ${'2020-04-15T00:00:00.000Z'}
+      ${june2020}   | ${1}           | ${undefined}      | ${'2020-05-15T00:00:00.000Z'}
+      ${june2020}   | ${12}          | ${undefined}      | ${'2019-06-15T00:00:00.000Z'}
+      ${june2020}   | ${-1}          | ${undefined}      | ${'2020-07-15T00:00:00.000Z'}
+      ${june2020}   | ${0}           | ${undefined}      | ${june2020}
+      ${june2020}   | ${0.9}         | ${undefined}      | ${'2020-05-15T00:00:00.000Z'}
+      ${nov2020}    | ${1}           | ${undefined}      | ${'2020-10-14T23:00:00.000Z'}
+      ${nov2020}    | ${1}           | ${{}}             | ${'2020-10-14T23:00:00.000Z'}
+      ${nov2020}    | ${1}           | ${{ utc: false }} | ${'2020-10-14T23:00:00.000Z'}
+      ${nov2020}    | ${1}           | ${{ utc: true }}  | ${'2020-10-15T00:00:00.000Z'}
+    `(
+      'when the provided date is $inputAsString, numberOfMonths is $numberOfMonths, and the options parameter is $options, returns $expectedAsString',
+      ({ inputAsString, numberOfMonths, options, expectedAsString }) => {
+        const inputDate = new Date(inputAsString);
+        const actual = datetimeUtility.nMonthsBefore(inputDate, numberOfMonths, options);
+
+        expect(actual.toISOString()).toBe(expectedAsString);
+      },
+    );
   });
 });
 
@@ -615,16 +852,316 @@ describe('localTimeAgo', () => {
   });
 
   it.each`
-    timeagoArg | title          | dataOriginalTitle
-    ${false}   | ${'some time'} | ${null}
-    ${true}    | ${''}          | ${'Feb 18, 2020 10:22pm GMT+0000'}
-  `('converts $seconds seconds to $approximation', ({ timeagoArg, title, dataOriginalTitle }) => {
+    timeagoArg | title
+    ${false}   | ${'some time'}
+    ${true}    | ${'Feb 18, 2020 10:22pm GMT+0000'}
+  `('converts $seconds seconds to $approximation', ({ timeagoArg, title }) => {
     const element = document.querySelector('time');
     datetimeUtility.localTimeAgo($(element), timeagoArg);
 
     jest.runAllTimers();
 
-    expect(element.getAttribute('data-original-title')).toBe(dataOriginalTitle);
     expect(element.getAttribute('title')).toBe(title);
   });
+});
+
+describe('dateFromParams', () => {
+  it('returns the expected date object', () => {
+    const expectedDate = new Date('2019-07-17T00:00:00.000Z');
+    const date = datetimeUtility.dateFromParams(2019, 6, 17);
+
+    expect(date.getYear()).toBe(expectedDate.getYear());
+    expect(date.getMonth()).toBe(expectedDate.getMonth());
+    expect(date.getDate()).toBe(expectedDate.getDate());
+  });
+});
+
+describe('differenceInSeconds', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                 | expected
+    ${startDateTime}                        | ${new Date('2019-07-17T00:00:00.000Z')} | ${0}
+    ${startDateTime}                        | ${new Date('2019-07-17T12:00:00.000Z')} | ${43200}
+    ${startDateTime}                        | ${new Date('2019-07-18T00:00:00.000Z')} | ${86400}
+    ${new Date('2019-07-18T00:00:00.000Z')} | ${startDateTime}                        | ${-86400}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInSeconds(startDate, endDate)).toBe(expected);
+  });
+});
+
+describe('differenceInMonths', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                 | expected
+    ${startDateTime}                        | ${startDateTime}                        | ${0}
+    ${startDateTime}                        | ${new Date('2019-12-17T12:00:00.000Z')} | ${5}
+    ${startDateTime}                        | ${new Date('2021-02-18T00:00:00.000Z')} | ${19}
+    ${new Date('2021-02-18T00:00:00.000Z')} | ${startDateTime}                        | ${-19}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInMonths(startDate, endDate)).toBe(expected);
+  });
+});
+
+describe('differenceInMilliseconds', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                           | expected
+    ${startDateTime.getTime()}              | ${new Date('2019-07-17T00:00:00.000Z')}           | ${0}
+    ${startDateTime}                        | ${new Date('2019-07-17T12:00:00.000Z').getTime()} | ${43200000}
+    ${startDateTime}                        | ${new Date('2019-07-18T00:00:00.000Z').getTime()} | ${86400000}
+    ${new Date('2019-07-18T00:00:00.000Z')} | ${startDateTime.getTime()}                        | ${-86400000}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInMilliseconds(startDate, endDate)).toBe(expected);
+  });
+});
+
+describe('dateAtFirstDayOfMonth', () => {
+  const date = new Date('2019-07-16T12:00:00.000Z');
+
+  it('returns the date at the first day of the month', () => {
+    const startDate = datetimeUtility.dateAtFirstDayOfMonth(date);
+    const expectedStartDate = new Date('2019-07-01T12:00:00.000Z');
+
+    expect(startDate).toStrictEqual(expectedStartDate);
+  });
+});
+
+describe('datesMatch', () => {
+  const date = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    date1   | date2                                   | expected
+    ${date} | ${new Date('2019-07-17T00:00:00.000Z')} | ${true}
+    ${date} | ${new Date('2019-07-17T12:00:00.000Z')} | ${false}
+  `('returns $expected for $date1 matches $date2', ({ date1, date2, expected }) => {
+    expect(datetimeUtility.datesMatch(date1, date2)).toBe(expected);
+  });
+});
+
+describe('format24HourTimeStringFromInt', () => {
+  const expectedFormattedTimes = [
+    [0, '00:00'],
+    [2, '02:00'],
+    [6, '06:00'],
+    [9, '09:00'],
+    [10, '10:00'],
+    [16, '16:00'],
+    [22, '22:00'],
+    [32, ''],
+    [NaN, ''],
+    ['Invalid Int', ''],
+    [null, ''],
+    [undefined, ''],
+  ];
+
+  expectedFormattedTimes.forEach(([timeInt, expectedTimeStringIn24HourNotation]) => {
+    it(`formats ${timeInt} as ${expectedTimeStringIn24HourNotation}`, () => {
+      expect(datetimeUtility.format24HourTimeStringFromInt(timeInt)).toBe(
+        expectedTimeStringIn24HourNotation,
+      );
+    });
+  });
+});
+
+describe('getOverlapDateInPeriods', () => {
+  const start = new Date(2021, 0, 11);
+  const end = new Date(2021, 0, 13);
+
+  describe('when date periods overlap', () => {
+    const givenPeriodLeft = new Date(2021, 0, 11);
+    const givenPeriodRight = new Date(2021, 0, 14);
+
+    it('returns an overlap object that contains the amount of days overlapping, the amount of hours overlapping, start date of overlap and end date of overlap', () => {
+      expect(
+        datetimeUtility.getOverlapDateInPeriods(
+          { start, end },
+          { start: givenPeriodLeft, end: givenPeriodRight },
+        ),
+      ).toEqual({
+        daysOverlap: 2,
+        hoursOverlap: 48,
+        overlapStartDate: givenPeriodLeft.getTime(),
+        overlapEndDate: end.getTime(),
+      });
+    });
+  });
+
+  describe('when date periods do not overlap', () => {
+    const givenPeriodLeft = new Date(2021, 0, 9);
+    const givenPeriodRight = new Date(2021, 0, 10);
+
+    it('returns an overlap object that contains a 0 value for days overlapping', () => {
+      expect(
+        datetimeUtility.getOverlapDateInPeriods(
+          { start, end },
+          { start: givenPeriodLeft, end: givenPeriodRight },
+        ),
+      ).toEqual({ daysOverlap: 0 });
+    });
+  });
+
+  describe('when date periods contain an invalid Date', () => {
+    const startInvalid = new Date(NaN);
+    const endInvalid = new Date(NaN);
+    const error = __('Invalid period');
+
+    it('throws an exception when the left period contains an invalid date', () => {
+      expect(() =>
+        datetimeUtility.getOverlapDateInPeriods({ start, end }, { start: startInvalid, end }),
+      ).toThrow(error);
+    });
+
+    it('throws an exception when the right period contains an invalid date', () => {
+      expect(() =>
+        datetimeUtility.getOverlapDateInPeriods({ start, end }, { start, end: endInvalid }),
+      ).toThrow(error);
+    });
+  });
+});
+
+describe('isToday', () => {
+  const today = new Date();
+  it.each`
+    date                                    | expected | negation
+    ${today}                                | ${true}  | ${'is'}
+    ${new Date('2021-01-21T12:00:00.000Z')} | ${false} | ${'is NOT'}
+  `('returns $expected as $date $negation today', ({ date, expected }) => {
+    expect(datetimeUtility.isToday(date)).toBe(expected);
+  });
+});
+
+describe('isInPast', () => {
+  it.each`
+    date                                   | expected
+    ${new Date('2024-12-15')}              | ${false}
+    ${new Date('2020-07-06T00:00')}        | ${false}
+    ${new Date('2020-07-05T23:59:59.999')} | ${true}
+    ${new Date('2020-07-05')}              | ${true}
+    ${new Date('1999-03-21')}              | ${true}
+  `('returns $expected for $date', ({ date, expected }) => {
+    expect(datetimeUtility.isInPast(date)).toBe(expected);
+  });
+});
+
+describe('isInFuture', () => {
+  it.each`
+    date                                   | expected
+    ${new Date('2024-12-15')}              | ${true}
+    ${new Date('2020-07-07T00:00')}        | ${true}
+    ${new Date('2020-07-06T23:59:59.999')} | ${false}
+    ${new Date('2020-07-06')}              | ${false}
+    ${new Date('1999-03-21')}              | ${false}
+  `('returns $expected for $date', ({ date, expected }) => {
+    expect(datetimeUtility.isInFuture(date)).toBe(expected);
+  });
+});
+
+describe('fallsBefore', () => {
+  it.each`
+    dateA                                  | dateB                                  | expected
+    ${new Date('2020-07-06T23:59:59.999')} | ${new Date('2020-07-07T00:00')}        | ${true}
+    ${new Date('2020-07-07T00:00')}        | ${new Date('2020-07-06T23:59:59.999')} | ${false}
+    ${new Date('2020-04-04')}              | ${new Date('2021-10-10')}              | ${true}
+    ${new Date('2021-10-10')}              | ${new Date('2020-04-04')}              | ${false}
+  `('returns $expected for "$dateA falls before $dateB"', ({ dateA, dateB, expected }) => {
+    expect(datetimeUtility.fallsBefore(dateA, dateB)).toBe(expected);
+  });
+});
+
+describe('removeTime', () => {
+  it.each`
+    date                                   | expected
+    ${new Date('2020-07-07')}              | ${new Date('2020-07-07T00:00:00.000')}
+    ${new Date('2020-07-07T00:00:00.001')} | ${new Date('2020-07-07T00:00:00.000')}
+    ${new Date('2020-07-07T23:59:59.999')} | ${new Date('2020-07-07T00:00:00.000')}
+    ${new Date('2020-07-07T12:34:56.789')} | ${new Date('2020-07-07T00:00:00.000')}
+  `('returns $expected for $date', ({ date, expected }) => {
+    expect(datetimeUtility.removeTime(date)).toEqual(expected);
+  });
+});
+
+describe('getTimeRemainingInWords', () => {
+  it.each`
+    date                                   | expected
+    ${new Date('2020-07-06T12:34:56.789')} | ${'0 days remaining'}
+    ${new Date('2020-07-07T12:34:56.789')} | ${'1 day remaining'}
+    ${new Date('2020-07-08T12:34:56.789')} | ${'2 days remaining'}
+    ${new Date('2020-07-12T12:34:56.789')} | ${'6 days remaining'}
+    ${new Date('2020-07-13T12:34:56.789')} | ${'1 week remaining'}
+    ${new Date('2020-07-19T12:34:56.789')} | ${'1 week remaining'}
+    ${new Date('2020-07-20T12:34:56.789')} | ${'2 weeks remaining'}
+    ${new Date('2020-07-27T12:34:56.789')} | ${'3 weeks remaining'}
+    ${new Date('2020-08-03T12:34:56.789')} | ${'4 weeks remaining'}
+    ${new Date('2020-08-05T12:34:56.789')} | ${'4 weeks remaining'}
+    ${new Date('2020-08-06T12:34:56.789')} | ${'1 month remaining'}
+    ${new Date('2020-09-06T12:34:56.789')} | ${'2 months remaining'}
+    ${new Date('2021-06-06T12:34:56.789')} | ${'11 months remaining'}
+    ${new Date('2021-07-06T12:34:56.789')} | ${'1 year remaining'}
+    ${new Date('2022-07-06T12:34:56.789')} | ${'2 years remaining'}
+    ${new Date('2030-07-06T12:34:56.789')} | ${'10 years remaining'}
+    ${new Date('2119-07-06T12:34:56.789')} | ${'99 years remaining'}
+  `('returns $expected for $date', ({ date, expected }) => {
+    expect(datetimeUtility.getTimeRemainingInWords(date)).toEqual(expected);
+  });
+});
+
+describe('getStartOfDay', () => {
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
+
+  it.each`
+    inputAsString                      | options           | expectedAsString
+    ${'2021-01-29T18:08:23.014Z'}      | ${undefined}      | ${'2021-01-29T05:00:00.000Z'}
+    ${'2021-01-29T13:08:23.014-05:00'} | ${undefined}      | ${'2021-01-29T05:00:00.000Z'}
+    ${'2021-01-30T03:08:23.014+09:00'} | ${undefined}      | ${'2021-01-29T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${undefined}      | ${'2021-01-28T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${{}}             | ${'2021-01-28T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${{ utc: false }} | ${'2021-01-28T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${{ utc: true }}  | ${'2021-01-29T00:00:00.000Z'}
+  `(
+    'when the provided date is $inputAsString and the options parameter is $options, returns $expectedAsString',
+    ({ inputAsString, options, expectedAsString }) => {
+      const inputDate = new Date(inputAsString);
+      const actual = datetimeUtility.getStartOfDay(inputDate, options);
+
+      expect(actual.toISOString()).toEqual(expectedAsString);
+    },
+  );
+});
+
+describe('getStartOfWeek', () => {
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
+
+  it.each`
+    inputAsString                      | options           | expectedAsString
+    ${'2021-01-29T18:08:23.014Z'}      | ${undefined}      | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-29T13:08:23.014-05:00'} | ${undefined}      | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-30T03:08:23.014+09:00'} | ${undefined}      | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${undefined}      | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${{}}             | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${{ utc: false }} | ${'2021-01-25T05:00:00.000Z'}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${{ utc: true }}  | ${'2021-01-26T00:00:00.000Z'}
+  `(
+    'when the provided date is $inputAsString and the options parameter is $options, returns $expectedAsString',
+    ({ inputAsString, options, expectedAsString }) => {
+      const inputDate = new Date(inputAsString);
+      const actual = datetimeUtility.getStartOfWeek(inputDate, options);
+
+      expect(actual.toISOString()).toEqual(expectedAsString);
+    },
+  );
 });

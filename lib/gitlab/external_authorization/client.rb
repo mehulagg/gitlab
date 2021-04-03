@@ -17,23 +17,28 @@ module Gitlab
       end
 
       def request_access
-        response = Excon.post(
+        response = Gitlab::HTTP.post(
           service_url,
           post_params
         )
         ::Gitlab::ExternalAuthorization::Response.new(response)
-      rescue Excon::Error => e
+      rescue *Gitlab::HTTP::HTTP_ERRORS => e
         raise ::Gitlab::ExternalAuthorization::RequestFailed.new(e)
       end
 
       private
+
+      def allow_local_requests?
+        Gitlab::CurrentSettings.allow_local_requests_from_system_hooks?
+      end
 
       def post_params
         params = { headers: REQUEST_HEADERS,
                    body: body.to_json,
                    connect_timeout: timeout,
                    read_timeout: timeout,
-                   write_timeout: timeout }
+                   write_timeout: timeout,
+                   allow_local_requests: allow_local_requests? }
 
         if has_tls?
           params[:client_cert_data] = client_cert
@@ -46,18 +51,18 @@ module Gitlab
 
       def body
         @body ||= begin
-                    body = {
-                      user_identifier: @user.email,
-                      project_classification_label: @label,
-                      identities: @user.identities.map { |identity| { provider: identity.provider, extern_uid: identity.extern_uid } }
-                    }
+          body = {
+            user_identifier: @user.email,
+            project_classification_label: @label,
+            identities: @user.identities.map { |identity| { provider: identity.provider, extern_uid: identity.extern_uid } }
+          }
 
-                    if @user.ldap_identity
-                      body[:user_ldap_dn] = @user.ldap_identity.extern_uid
-                    end
+          if @user.ldap_identity
+            body[:user_ldap_dn] = @user.ldap_identity.extern_uid
+          end
 
-                    body
-                  end
+          body
+        end
       end
     end
   end

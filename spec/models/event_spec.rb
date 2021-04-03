@@ -81,6 +81,8 @@ RSpec.describe Event do
   describe 'validations' do
     describe 'action' do
       context 'for a design' do
+        let_it_be(:author) { create(:user) }
+
         where(:action, :valid) do
           valid = described_class::DESIGN_ACTIONS.map(&:to_s).to_set
 
@@ -90,7 +92,7 @@ RSpec.describe Event do
         end
 
         with_them do
-          let(:event) { build(:design_event, action: action) }
+          let(:event) { build(:design_event, author: author, action: action) }
 
           specify { expect(event.valid?).to eq(valid) }
         end
@@ -722,9 +724,17 @@ RSpec.describe Event do
         note_on_commit: true
       }
       valid_target_factories.map do |kind, needs_project|
-        extra_data = needs_project ? { project: project } : {}
+        extra_data = if kind == :merge_request
+                       { source_project: project }
+                     elsif needs_project
+                       { project: project }
+                     else
+                       {}
+                     end
+
         target = kind == :project ? nil : build(kind, **extra_data)
-        [kind, build(:event, :created, project: project, target: target)]
+
+        [kind, build(:event, :created, author: project.owner, project: project, target: target)]
       end.to_h
     end
 
@@ -734,13 +744,19 @@ RSpec.describe Event do
 
     describe '#wiki_page and #wiki_page?' do
       context 'for a wiki page event' do
-        let(:wiki_page) do
-          create(:wiki_page, project: project)
-        end
+        let(:wiki_page) { create(:wiki_page, project: project) }
 
         subject(:event) { create(:wiki_page_event, project: project, wiki_page: wiki_page) }
 
         it { is_expected.to have_attributes(wiki_page?: be_truthy, wiki_page: wiki_page) }
+
+        context 'title is empty' do
+          before do
+            expect(event.target).to receive(:canonical_slug).and_return('')
+          end
+
+          it { is_expected.to have_attributes(wiki_page?: be_truthy, wiki_page: nil) }
+        end
       end
 
       context 'for any other event' do
@@ -897,6 +913,58 @@ RSpec.describe Event do
     end
   end
 
+  context 'with snippet note' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:note_on_project_snippet) { create(:note_on_project_snippet, author: user) }
+    let_it_be(:note_on_personal_snippet) { create(:note_on_personal_snippet, author: user) }
+    let_it_be(:other_note) { create(:note_on_issue, author: user)}
+    let_it_be(:personal_snippet_event) { create(:event, :commented, project: nil, target: note_on_personal_snippet, author: user) }
+    let_it_be(:project_snippet_event) { create(:event, :commented, project: note_on_project_snippet.project, target: note_on_project_snippet, author: user) }
+    let_it_be(:other_event) { create(:event, :commented, project: other_note.project, target: other_note, author: user) }
+
+    describe '#snippet_note?' do
+      it 'returns true for a project snippet event' do
+        expect(project_snippet_event.snippet_note?).to be true
+      end
+
+      it 'returns true for a personal snippet event' do
+        expect(personal_snippet_event.snippet_note?).to be true
+      end
+
+      it 'returns false for a other kinds of event' do
+        expect(other_event.snippet_note?).to be false
+      end
+    end
+
+    describe '#personal_snippet_note?' do
+      it 'returns false for a project snippet event' do
+        expect(project_snippet_event.personal_snippet_note?).to be false
+      end
+
+      it 'returns true for a personal snippet event' do
+        expect(personal_snippet_event.personal_snippet_note?).to be true
+      end
+
+      it 'returns false for a other kinds of event' do
+        expect(other_event.personal_snippet_note?).to be false
+      end
+    end
+
+    describe '#project_snippet_note?' do
+      it 'returns true for a project snippet event' do
+        expect(project_snippet_event.project_snippet_note?).to be true
+      end
+
+      it 'returns false for a personal snippet event' do
+        expect(personal_snippet_event.project_snippet_note?).to be false
+      end
+
+      it 'returns false for a other kinds of event' do
+        expect(other_event.project_snippet_note?).to be false
+      end
+    end
+  end
+
   describe '#action_name' do
     it 'handles all valid design events' do
       created, updated, destroyed, archived = %i[created updated destroyed archived].map do |trait|
@@ -907,6 +975,56 @@ RSpec.describe Event do
       expect(updated).to eq('revised')
       expect(destroyed).to eq('deleted')
       expect(archived).to eq('archived')
+    end
+
+    it 'handles correct push_action' do
+      project = create(:project)
+      user = create(:user)
+      project.add_developer(user)
+      push_event = create_push_event(project, user)
+
+      expect(push_event.push_action?).to be true
+      expect(push_event.action_name).to eq('pushed to')
+    end
+
+    context 'handles correct base actions' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:trait, :action_name) do
+        :created   | 'created'
+        :updated   | 'opened'
+        :closed    | 'closed'
+        :reopened  | 'opened'
+        :commented | 'commented on'
+        :merged    | 'accepted'
+        :joined    | 'joined'
+        :left      | 'left'
+        :destroyed | 'destroyed'
+        :expired   | 'removed due to membership expiration from'
+        :approved  | 'approved'
+      end
+
+      with_them do
+        it 'with correct name and method' do
+          event = build(:event, trait)
+
+          expect(event.action_name).to eq(action_name)
+        end
+      end
+    end
+
+    context 'for created_project_action?' do
+      it 'returns created for created event' do
+        action = build(:project_created_event)
+
+        expect(action.action_name).to eq('created')
+      end
+
+      it 'returns imported for imported event' do
+        action = build(:project_imported_event)
+
+        expect(action.action_name).to eq('imported')
+      end
     end
   end
 

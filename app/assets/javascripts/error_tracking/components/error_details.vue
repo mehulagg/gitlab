@@ -1,6 +1,4 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
-import createFlash from '~/flash';
 import {
   GlButton,
   GlFormInput,
@@ -12,22 +10,24 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlDropdownDivider,
+  GlIcon,
 } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf, n__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
-import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
-import Stacktrace from './stacktrace.vue';
-import TrackEventDirective from '~/vue_shared/directives/track_event';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import { severityLevel, severityLevelVariant, errorStatus } from './constants';
 import Tracking from '~/tracking';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
+import TrackEventDirective from '~/vue_shared/directives/track_event';
+import query from '../queries/details.query.graphql';
 import {
   trackClickErrorLinkToSentryOptions,
   trackErrorDetailsViewsOptions,
   trackErrorStatusUpdateOptions,
 } from '../utils';
 
-import query from '../queries/details.query.graphql';
+import { severityLevel, severityLevelVariant, errorStatus } from './constants';
+import Stacktrace from './stacktrace.vue';
 
 const SENTRY_TIMEOUT = 10000;
 
@@ -38,7 +38,7 @@ export default {
     GlLink,
     GlLoadingIcon,
     TooltipOnTruncate,
-    Icon,
+    GlIcon,
     Stacktrace,
     GlBadge,
     GlAlert,
@@ -87,7 +87,7 @@ export default {
         };
       },
       pollInterval: 2000,
-      update: data => data.project.sentryErrors.detailedError,
+      update: (data) => data.project.sentryErrors.detailedError,
       error: () => createFlash(__('Failed to load error details from Sentry.')),
       result(res) {
         if (res.data.project?.sentryErrors?.detailedError) {
@@ -213,7 +213,7 @@ export default {
         this.errorStatus === errorStatus.RESOLVED ? errorStatus.UNRESOLVED : errorStatus.RESOLVED;
 
       // eslint-disable-next-line promise/catch-or-return
-      this.updateResolveStatus({ endpoint: this.issueUpdatePath, status }).then(res => {
+      this.updateResolveStatus({ endpoint: this.issueUpdatePath, status }).then((res) => {
         this.closedIssueId = res.closed_issue_iid;
         if (this.closedIssueId) {
           this.isAlertVisible = true;
@@ -397,7 +397,7 @@ export default {
               data-testid="external-url-link"
             >
               <span class="text-truncate">{{ error.externalUrl }}</span>
-              <icon name="external-link" class="ml-1 flex-shrink-0" />
+              <gl-icon name="external-link" class="ml-1 flex-shrink-0" />
             </gl-link>
           </li>
           <li v-if="error.firstReleaseVersion">

@@ -1,32 +1,29 @@
 <script>
-import { throttle } from 'lodash';
-import { mapActions, mapState, mapGetters } from 'vuex';
 import {
   GlSprintf,
-  GlIcon,
   GlAlert,
   GlDropdown,
-  GlDropdownHeader,
+  GlDropdownSectionHeader,
   GlDropdownItem,
   GlDropdownDivider,
   GlInfiniteScroll,
 } from '@gitlab/ui';
+import { throttle } from 'lodash';
+import { mapActions, mapState, mapGetters } from 'vuex';
 
-import LogSimpleFilters from './log_simple_filters.vue';
+import { timeRangeFromUrl } from '~/monitoring/utils';
+import { defaultTimeRange } from '~/vue_shared/constants';
+import { formatDate } from '../utils';
 import LogAdvancedFilters from './log_advanced_filters.vue';
 import LogControlButtons from './log_control_buttons.vue';
-
-import { defaultTimeRange } from '~/vue_shared/constants';
-import { timeRangeFromUrl } from '~/monitoring/utils';
-import { formatDate } from '../utils';
+import LogSimpleFilters from './log_simple_filters.vue';
 
 export default {
   components: {
     GlSprintf,
-    GlIcon,
     GlAlert,
     GlDropdown,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
     GlDropdownDivider,
     GlInfiniteScroll,
@@ -178,40 +175,32 @@ export default {
           id="environments-dropdown"
           :text="environments.current || managedApps.current"
           :disabled="environments.isLoading"
-          class="mb-2 gl-h-32 pr-2 d-flex d-md-block js-environments-dropdown"
+          class="gl-mr-3 gl-mb-3 gl-display-flex gl-md-display-block js-environments-dropdown"
         >
-          <gl-dropdown-header class="gl-text-center">
+          <gl-dropdown-section-header>
             {{ s__('Environments|Environments') }}
-          </gl-dropdown-header>
+          </gl-dropdown-section-header>
           <gl-dropdown-item
             v-for="env in environments.options"
             :key="env.id"
+            :is-check-item="true"
+            :is-checked="isCurrentEnvironment(env.name)"
             @click="showEnvironment(env.name)"
           >
-            <div class="d-flex">
-              <gl-icon
-                :class="{ invisible: !isCurrentEnvironment(env.name) }"
-                name="status_success_borderless"
-              />
-              <div class="gl-flex-grow-1">{{ env.name }}</div>
-            </div>
+            {{ env.name }}
           </gl-dropdown-item>
           <gl-dropdown-divider />
-          <gl-dropdown-header class="gl-text-center">
+          <gl-dropdown-section-header>
             {{ s__('Environments|Managed apps') }}
-          </gl-dropdown-header>
+          </gl-dropdown-section-header>
           <gl-dropdown-item
             v-for="app in managedApps.options"
             :key="app.id"
+            :is-check-item="true"
+            :is-checked="isCurrentManagedApp(app.name)"
             @click="showManagedApp(app.name)"
           >
-            <div class="gl-display-flex">
-              <gl-icon
-                :class="{ invisible: !isCurrentManagedApp(app.name) }"
-                name="status_success_borderless"
-              />
-              <div class="gl-flex-grow-1">{{ app.name }}</div>
-            </div>
+            {{ app.name }}
           </gl-dropdown-item>
         </gl-dropdown>
       </div>
@@ -256,9 +245,7 @@ export default {
         </div>{{trace}}
           </code></pre>
       </template>
-      <template #default
-        ><div></div
-      ></template>
+      <template #default><div></div></template>
     </gl-infinite-scroll>
 
     <div ref="logFooter" class="py-2 px-3 text-white bg-secondary-900">
@@ -272,9 +259,7 @@ export default {
       >
         <template #fetched>{{ logs.lines.length }}</template>
       </gl-sprintf>
-      <template v-else>
-        {{ s__('Environments|Currently showing all results.') }}</template
-      >
+      <template v-else> {{ s__('Environments|Currently showing all results.') }}</template>
     </div>
   </div>
 </template>

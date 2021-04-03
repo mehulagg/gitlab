@@ -1,6 +1,6 @@
-import AWS from 'aws-sdk/global';
 import EC2 from 'aws-sdk/clients/ec2';
 import IAM from 'aws-sdk/clients/iam';
+import AWS from 'aws-sdk/global';
 
 const lookupVpcName = ({ Tags: tags, VpcId: id }) => {
   const nameTag = tags.find(({ Key: key }) => key === 'Name');
@@ -8,13 +8,8 @@ const lookupVpcName = ({ Tags: tags, VpcId: id }) => {
   return nameTag ? nameTag.Value : id;
 };
 
-export const DEFAULT_REGION = 'us-east-2';
-
 export const setAWSConfig = ({ awsCredentials }) => {
-  AWS.config = {
-    ...awsCredentials,
-    region: DEFAULT_REGION,
-  };
+  AWS.config = awsCredentials;
 };
 
 export const fetchRoles = () => {
@@ -24,20 +19,6 @@ export const fetchRoles = () => {
     .listRoles()
     .promise()
     .then(({ Roles: roles }) => roles.map(({ RoleName: name, Arn: value }) => ({ name, value })));
-};
-
-export const fetchRegions = () => {
-  const ec2 = new EC2();
-
-  return ec2
-    .describeRegions()
-    .promise()
-    .then(({ Regions: regions }) =>
-      regions.map(({ RegionName: name }) => ({
-        name,
-        value: name,
-      })),
-    );
 };
 
 export const fetchKeyPairs = ({ region }) => {
@@ -56,7 +37,7 @@ export const fetchVpcs = ({ region }) => {
     .describeVpcs()
     .promise()
     .then(({ Vpcs: vpcs }) =>
-      vpcs.map(vpc => ({
+      vpcs.map((vpc) => ({
         value: vpc.VpcId,
         name: lookupVpcName(vpc),
       })),

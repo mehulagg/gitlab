@@ -6,19 +6,17 @@ module EE
     extend ::Gitlab::Utils::Override
 
     prepended do
-      FREE = 'free'.freeze
-      BRONZE = 'bronze'.freeze
-      SILVER = 'silver'.freeze
-      GOLD = 'gold'.freeze
-      EARLY_ADOPTER = 'early_adopter'.freeze
+      FREE = 'free'
+      BRONZE = 'bronze'
+      SILVER = 'silver'
+      PREMIUM = 'premium'
+      GOLD = 'gold'
+      ULTIMATE = 'ultimate'
 
       EE_DEFAULT_PLANS = (const_get(:DEFAULT_PLANS, false) + [FREE]).freeze
-      PAID_HOSTED_PLANS = [BRONZE, SILVER, GOLD].freeze
-      FREE_HOSTED_PLANS = [EARLY_ADOPTER].freeze
-      EE_ALL_PLANS = (EE_DEFAULT_PLANS + PAID_HOSTED_PLANS + FREE_HOSTED_PLANS).freeze
-
-      # This constant must keep ordered by tier.
-      ALL_HOSTED_PLANS = (PAID_HOSTED_PLANS + FREE_HOSTED_PLANS).freeze
+      PAID_HOSTED_PLANS = [BRONZE, SILVER, PREMIUM, GOLD, ULTIMATE].freeze
+      EE_ALL_PLANS = (EE_DEFAULT_PLANS + PAID_HOSTED_PLANS).freeze
+      PLANS_ELIGIBLE_FOR_TRIAL = EE_DEFAULT_PLANS
 
       has_many :hosted_subscriptions, class_name: 'GitlabSubscription', foreign_key: 'hosted_plan_id'
 
@@ -54,7 +52,7 @@ module EE
 
         ::Plan
           .joins(:hosted_subscriptions)
-          .where(name: ALL_HOSTED_PLANS)
+          .where(name: PAID_HOSTED_PLANS)
           .where(gitlab_subscriptions: { namespace_id: namespaces })
           .distinct
       end

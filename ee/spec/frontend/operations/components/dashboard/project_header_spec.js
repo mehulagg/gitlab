@@ -39,7 +39,7 @@ describe('project header component', () => {
 
   describe('remove button', () => {
     it('renders removal button icon', () => {
-      expect(wrapper.contains('.js-remove-button')).toBe(true);
+      expect(wrapper.find('.js-remove-button').exists()).toBe(true);
     });
 
     it('renders correct title for removal icon', () => {
@@ -52,12 +52,7 @@ describe('project header component', () => {
       wrapper.find('.js-remove-button').vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.emittedByOrder()).toContainEqual(
-          expect.objectContaining({
-            name: 'remove',
-            args: [mockOneProject.remove_path],
-          }),
-        );
+        expect(wrapper.emitted().remove).toStrictEqual([[mockOneProject.remove_path]]);
       });
     });
   });

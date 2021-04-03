@@ -1,11 +1,13 @@
 <script>
+import { GlLink, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
-import { GlLink } from '@gitlab/ui';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 
 export default {
   components: {
     CiIcon,
+    GlDropdown,
+    GlDropdownItem,
     GlLink,
   },
   props: {
@@ -41,25 +43,33 @@ export default {
 };
 </script>
 <template>
-  <div class="block-last dropdown">
-    <div class="js-pipeline-info">
+  <div class="dropdown">
+    <div class="js-pipeline-info" data-testid="pipeline-info">
       <ci-icon :status="pipeline.details.status" class="vertical-align-middle" />
 
       <span class="font-weight-bold">{{ s__('Job|Pipeline') }}</span>
-      <gl-link :href="pipeline.path" class="js-pipeline-path link-commit qa-pipeline-path"
+      <gl-link
+        :href="pipeline.path"
+        class="js-pipeline-path link-commit"
+        data-testid="pipeline-path"
+        data-qa-selector="pipeline_path"
         >#{{ pipeline.id }}</gl-link
       >
       <template v-if="hasRef">
         {{ s__('Job|for') }}
 
         <template v-if="isTriggeredByMergeRequest">
-          <gl-link :href="pipeline.merge_request.path" class="link-commit ref-name js-mr-link"
+          <gl-link
+            :href="pipeline.merge_request.path"
+            class="link-commit ref-name"
+            data-testid="mr-link"
             >!{{ pipeline.merge_request.iid }}</gl-link
           >
           {{ s__('Job|with') }}
           <gl-link
             :href="pipeline.merge_request.source_branch_path"
-            class="link-commit ref-name js-source-branch-link"
+            class="link-commit ref-name"
+            data-testid="source-branch-link"
             >{{ pipeline.merge_request.source_branch }}</gl-link
           >
 
@@ -67,7 +77,8 @@ export default {
             {{ s__('Job|into') }}
             <gl-link
               :href="pipeline.merge_request.target_branch_path"
-              class="link-commit ref-name js-target-branch-link"
+              class="link-commit ref-name"
+              data-testid="target-branch-link"
               >{{ pipeline.merge_request.target_branch }}</gl-link
             >
           </template>
@@ -78,20 +89,15 @@ export default {
       </template>
     </div>
 
-    <button
-      type="button"
-      data-toggle="dropdown"
-      class="js-selected-stage dropdown-menu-toggle gl-mt-3"
-    >
-      {{ selectedStage }} <i class="fa fa-chevron-down"></i>
-    </button>
-
-    <ul class="dropdown-menu">
-      <li v-for="stage in stages" :key="stage.name">
-        <button type="button" class="js-stage-item stage-item" @click="onStageClick(stage)">
-          {{ stage.name }}
-        </button>
-      </li>
-    </ul>
+    <gl-dropdown :text="selectedStage" class="js-selected-stage gl-w-full gl-mt-3">
+      <gl-dropdown-item
+        v-for="stage in stages"
+        :key="stage.name"
+        class="js-stage-item stage-item"
+        @click="onStageClick(stage)"
+      >
+        {{ stage.name }}
+      </gl-dropdown-item>
+    </gl-dropdown>
   </div>
 </template>

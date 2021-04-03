@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
 
@@ -9,7 +9,7 @@ type: concepts, howto
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29382) in GitLab 13.0.
 
-You can use the Freeze Periods API to manipulate GitLab's [Freeze Period](../user/project/releases/index.md#prevent-unintentional-releases-by-setting-a-deploy-freeze) entries.
+You can use the Freeze Periods API to manipulate GitLab [Freeze Period](../user/project/releases/index.md#prevent-unintentional-releases-by-setting-a-deploy-freeze) entries.
 
 ## Permissions and security
 
@@ -31,7 +31,7 @@ GET /projects/:id/freeze_periods
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: gVWYVHDRzXiRpN1rUC8T" "https://gitlab.example.com/api/v4/projects/19/freeze_periods"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/19/freeze_periods"
 ```
 
 Example response:
@@ -65,7 +65,7 @@ GET /projects/:id/freeze_periods/:freeze_period_id
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: gVWYVHDRzXiRpN1rUC8T" "https://gitlab.example.com/api/v4/projects/19/freeze_periods/1"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/19/freeze_periods/1"
 ```
 
 Example response:
@@ -99,9 +99,9 @@ POST /projects/:id/freeze_periods
 Example request:
 
 ```shell
-curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: gVWYVHDRzXiRpN1rUC8T" \
+curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: <your_access_token>" \
      --data '{ "freeze_start": "0 23 * * 5", "freeze_end": "0 7 * * 1", "cron_timezone": "UTC" }' \
-     --request POST https://gitlab.example.com/api/v4/projects/19/freeze_periods
+     --request POST "https://gitlab.example.com/api/v4/projects/19/freeze_periods"
 ```
 
 Example response:
@@ -136,9 +136,9 @@ PUT /projects/:id/freeze_periods/:tag_name
 Example request:
 
 ```shell
-curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: gVWYVHDRzXiRpN1rUC8T" \
+curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: <your_access_token>" \
      --data '{ "freeze_end": "0 8 * * 1" }' \
-     --request PUT https://gitlab.example.com/api/v4/projects/19/freeze_periods/1
+     --request PUT "https://gitlab.example.com/api/v4/projects/19/freeze_periods/1"
 ```
 
 Example response:
@@ -170,6 +170,6 @@ DELETE /projects/:id/freeze_periods/:freeze_period_id
 Example request:
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: gVWYVHDRzXiRpN1rUC8T" "https://gitlab.example.com/api/v4/projects/19/freeze_periods/1"
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/19/freeze_periods/1"
 
 ```

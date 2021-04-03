@@ -5,10 +5,10 @@ module EE
     module Checks
       module PushRules
         class FileSizeCheck < ::Gitlab::Checks::BaseChecker
-          LOG_MESSAGE = "Checking if any files are larger than the allowed size...".freeze
+          LOG_MESSAGE = "Checking if any files are larger than the allowed size..."
 
           def validate!
-            return if push_rule.nil? || push_rule.max_file_size.zero?
+            return if push_rule.nil? || push_rule.max_file_size == 0
 
             logger.log_timed(LOG_MESSAGE) do
               max_file_size = push_rule.max_file_size

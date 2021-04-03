@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddResyncWasScheduledAtToProjectRegistry < ActiveRecord::Migration[4.2]
   include Gitlab::Database::MigrationHelpers
 

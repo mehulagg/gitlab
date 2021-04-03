@@ -3,27 +3,24 @@
 class Profiles::PreferencesController < Profiles::ApplicationController
   before_action :user
 
+  feature_category :users
+
   def show
   end
 
   def update
-    begin
-      result = Users::UpdateService.new(current_user, preferences_params.merge(user: user)).execute
+    result = Users::UpdateService.new(current_user, preferences_params.merge(user: user)).execute
+    if result[:status] == :success
+      message = _('Preferences saved.')
 
-      if result[:status] == :success
-        flash[:notice] = _('Preferences saved.')
-      else
-        flash[:alert] = _('Failed to save preferences.')
-      end
-    rescue ArgumentError => e
-      # Raised when `dashboard` is given an invalid value.
-      flash[:alert] = _("Failed to save preferences (%{error_message}).") % { error_message: e.message }
+      render json: { type: :notice, message: message }
+    else
+      render status: :bad_request, json: { type: :alert, message: _('Failed to save preferences.') }
     end
-
-    respond_to do |format|
-      format.html { redirect_to profile_preferences_path }
-      format.js
-    end
+  rescue ArgumentError => e
+    # Raised when `dashboard` is given an invalid value.
+    message = _("Failed to save preferences (%{error_message}).") % { error_message: e.message }
+    render status: :bad_request, json: { type: :alert, message: message }
   end
 
   private
@@ -51,7 +48,9 @@ class Profiles::PreferencesController < Profiles::ApplicationController
       :view_diffs_file_by_file,
       :tab_width,
       :sourcegraph_enabled,
-      :render_whitespace_in_code
+      :gitpod_enabled,
+      :render_whitespace_in_code,
+      :markdown_surround_selection
     ]
   end
 end

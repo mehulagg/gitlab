@@ -40,9 +40,7 @@ export default {
         {{ value }}
         <span> {{ unit }} </span>
       </template>
-      <template v-else>
-        &ndash;
-      </template>
+      <template v-else> &ndash; </template>
     </span>
     <span v-if="label" class="d-flex d-md-none text-secondary metric-label">{{ label }}</span>
   </div>

@@ -1,4 +1,16 @@
 import { omitBy, isUndefined } from 'lodash';
+import { TRACKING_CONTEXT_SCHEMA } from '~/experimentation/constants';
+import { getExperimentData } from '~/experimentation/utils';
+
+const standardContext = { ...window.gl?.snowplowStandardContext };
+
+export const STANDARD_CONTEXT = {
+  schema: standardContext.schema,
+  data: {
+    ...(standardContext.data || {}),
+    source: 'gitlab-javascript',
+  },
+};
 
 const DEFAULT_SNOWPLOW_OPTIONS = {
   namespace: 'gl',
@@ -9,21 +21,28 @@ const DEFAULT_SNOWPLOW_OPTIONS = {
   respectDoNotTrack: true,
   forceSecureTracker: true,
   eventMethod: 'post',
-  contexts: { webPage: true },
+  contexts: { webPage: true, performanceTiming: true },
   formTracking: false,
   linkClickTracking: false,
+  pageUnloadTimer: 10,
 };
 
 const createEventPayload = (el, { suffix = '' } = {}) => {
-  const action = el.dataset.trackEvent + (suffix || '');
+  const action = (el.dataset.trackAction || el.dataset.trackEvent) + (suffix || '');
   let value = el.dataset.trackValue || el.value || undefined;
   if (el.type === 'checkbox' && !el.checked) value = false;
+
+  let context = el.dataset.trackContext;
+  if (el.dataset.trackExperiment) {
+    const data = getExperimentData(el.dataset.trackExperiment);
+    if (data) context = { schema: TRACKING_CONTEXT_SCHEMA, data };
+  }
 
   const data = {
     label: el.dataset.trackLabel,
     property: el.dataset.trackProperty,
     value,
-    context: el.dataset.trackContext,
+    context,
   };
 
   return {
@@ -33,7 +52,7 @@ const createEventPayload = (el, { suffix = '' } = {}) => {
 };
 
 const eventHandler = (e, func, opts = {}) => {
-  const el = e.target.closest('[data-track-event]');
+  const el = e.target.closest('[data-track-event], [data-track-action]');
 
   if (!el) return;
 
@@ -42,7 +61,7 @@ const eventHandler = (e, func, opts = {}) => {
 };
 
 const eventHandlers = (category, func) => {
-  const handler = opts => e => eventHandler(e, func, { ...{ category }, ...opts });
+  const handler = (opts) => (e) => eventHandler(e, func, { ...{ category }, ...opts });
   const handlers = [];
   handlers.push({ name: 'click', func: handler() });
   handlers.push({ name: 'show.bs.dropdown', func: handler({ suffix: '_show' }) });
@@ -50,25 +69,51 @@ const eventHandlers = (category, func) => {
   return handlers;
 };
 
+const dispatchEvent = (category = document.body.dataset.page, action = 'generic', data = {}) => {
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  if (!category) throw new Error('Tracking: no category provided for tracking.');
+
+  const { label, property, value } = data;
+  const contexts = [STANDARD_CONTEXT];
+
+  if (data.context) {
+    contexts.push(data.context);
+  }
+
+  return window.snowplow('trackStructEvent', category, action, label, property, value, contexts);
+};
+
 export default class Tracking {
+  static queuedEvents = [];
+  static initialized = false;
+
   static trackable() {
     return !['1', 'yes'].includes(
       window.doNotTrack || navigator.doNotTrack || navigator.msDoNotTrack,
     );
   }
 
+  static flushPendingEvents() {
+    this.initialized = true;
+
+    while (this.queuedEvents.length) {
+      dispatchEvent(...this.queuedEvents.shift());
+    }
+  }
+
   static enabled() {
     return typeof window.snowplow === 'function' && this.trackable();
   }
 
-  static event(category = document.body.dataset.page, action = 'generic', data = {}) {
+  static event(...eventData) {
     if (!this.enabled()) return false;
-    // eslint-disable-next-line @gitlab/require-i18n-strings
-    if (!category) throw new Error('Tracking: no category provided for tracking.');
 
-    const { label, property, value, context } = data;
-    const contexts = context ? [context] : undefined;
-    return window.snowplow('trackStructEvent', category, action, label, property, value, contexts);
+    if (!this.initialized) {
+      this.queuedEvents.push(eventData);
+      return false;
+    }
+
+    return dispatchEvent(...eventData);
   }
 
   static bindDocument(category = document.body.dataset.page, parent = document) {
@@ -78,16 +123,18 @@ export default class Tracking {
     parent.trackingBound = true;
 
     const handlers = eventHandlers(category, (...args) => this.event(...args));
-    handlers.forEach(event => parent.addEventListener(event.name, event.func));
+    handlers.forEach((event) => parent.addEventListener(event.name, event.func));
     return handlers;
   }
 
   static trackLoadEvents(category = document.body.dataset.page, parent = document) {
     if (!this.enabled()) return [];
 
-    const loadEvents = parent.querySelectorAll('[data-track-event="render"]');
+    const loadEvents = parent.querySelectorAll(
+      '[data-track-action="render"], [data-track-event="render"]',
+    );
 
-    loadEvents.forEach(element => {
+    loadEvents.forEach((element) => {
       const { action, data } = createEventPayload(element);
       this.event(category, action, data);
     });
@@ -126,14 +173,20 @@ export function initUserTracking() {
   const opts = { ...DEFAULT_SNOWPLOW_OPTIONS, ...window.snowplowOptions };
   window.snowplow('newTracker', opts.namespace, opts.hostname, opts);
 
-  window.snowplow('enableActivityTracking', 30, 30);
-  window.snowplow('trackPageView'); // must be after enableActivityTracking
+  document.dispatchEvent(new Event('SnowplowInitialized'));
+  Tracking.flushPendingEvents();
+}
 
-  if (opts.formTracking) window.snowplow('enableFormTracking');
-  if (opts.linkClickTracking) window.snowplow('enableLinkClickTracking');
+export function initDefaultTrackers() {
+  if (!Tracking.enabled()) return;
+
+  window.snowplow('enableActivityTracking', 30, 30);
+  // must be after enableActivityTracking
+  window.snowplow('trackPageView', null, [STANDARD_CONTEXT]);
+
+  if (window.snowplowOptions.formTracking) window.snowplow('enableFormTracking');
+  if (window.snowplowOptions.linkClickTracking) window.snowplow('enableLinkClickTracking');
 
   Tracking.bindDocument();
   Tracking.trackLoadEvents();
-
-  document.dispatchEvent(new Event('SnowplowInitialized'));
 }

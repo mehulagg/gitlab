@@ -3,7 +3,7 @@
 module Types
   class EpicStateEnum < BaseEnum
     graphql_name 'EpicState'
-    description 'State of an epic.'
+    description 'State of an epic'
 
     value 'all'
     value 'opened'

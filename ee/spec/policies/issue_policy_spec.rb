@@ -3,14 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe IssuePolicy do
-  let(:owner) { build_stubbed(:user) }
-  let(:namespace) { build_stubbed(:namespace, owner: owner) }
-  let(:project) { build_stubbed(:project, namespace: namespace) }
-  let(:issue) { build_stubbed(:issue, project: project) }
+  let_it_be(:owner) { create(:user) }
+  let_it_be(:namespace) { create(:group) }
+  let_it_be(:project) { create(:project, group: namespace) }
+  let_it_be(:issue) { create(:issue, project: project) }
 
   subject { described_class.new(owner, issue) }
 
   before do
+    namespace.add_owner(owner)
     allow(issue).to receive(:namespace).and_return namespace
     allow(project).to receive(:design_management_enabled?).and_return true
   end

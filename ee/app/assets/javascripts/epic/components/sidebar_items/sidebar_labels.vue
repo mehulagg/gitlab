@@ -1,10 +1,9 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { debounce } from 'lodash';
-
-import ListLabel from '../../models/label';
+import { mapState, mapActions } from 'vuex';
 
 import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
+import ListLabel from '../../models/label';
 
 export default {
   components: {
@@ -84,7 +83,7 @@ export default {
       if (label.isAny) {
         this.epicContext.labels = [];
       } else {
-        const labelIndex = this.epicContext.labels.findIndex(l => l.id === label.id);
+        const labelIndex = this.epicContext.labels.findIndex((l) => l.id === label.id);
 
         if (labelIndex === -1) {
           this.epicContext.labels.push(
@@ -100,14 +99,18 @@ export default {
         }
       }
     },
+    handleLabelRemove(labelId) {
+      const labelToRemove = [{ id: labelId, set: false }];
+      this.updateEpicLabels(labelToRemove);
+    },
     handleUpdateSelectedLabels(labels) {
       // Iterate over selection and check if labels which were
       // either selected or removed aren't leading to same selection
       // as current one, as then we don't want to make network call
       // since nothing has changed.
-      const anyLabelUpdated = labels.some(label => {
+      const anyLabelUpdated = labels.some((label) => {
         // Find this label in existing selection.
-        const existingLabel = this.epicContext.labels.find(l => l.id === label.id);
+        const existingLabel = this.epicContext.labels.find((l) => l.id === label.id);
 
         // Check either of the two following conditions;
         // 1. A label that's not currently applied is being applied.
@@ -124,6 +127,7 @@ export default {
 
 <template>
   <labels-select-vue
+    :allow-label-remove="canUpdate"
     :allow-label-edit="canUpdate"
     :allow-label-create="true"
     :allow-multiselect="true"
@@ -137,6 +141,7 @@ export default {
     class="block labels js-labels-block"
     @updateSelectedLabels="handleUpdateSelectedLabels"
     @onDropdownClose="handleDropdownClose"
+    @onLabelRemove="handleLabelRemove"
     @toggleCollapse="toggleSidebarRevealLabelsDropdown"
     >{{ __('None') }}</labels-select-vue
   >

@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import DiffFileRow from '~/diffs/components/diff_file_row.vue';
-import FileRow from '~/vue_shared/components/file_row.vue';
 import FileRowStats from '~/diffs/components/file_row_stats.vue';
 import ChangedFileIcon from '~/vue_shared/components/changed_file_icon.vue';
+import FileRow from '~/vue_shared/components/file_row.vue';
 
 describe('Diff File Row component', () => {
   let wrapper;
@@ -55,6 +55,28 @@ describe('Diff File Row component', () => {
       }),
     );
   });
+
+  it.each`
+    fileType  | isViewed | expected
+    ${'blob'} | ${false} | ${'gl-font-weight-bold'}
+    ${'blob'} | ${true}  | ${''}
+    ${'tree'} | ${false} | ${''}
+    ${'tree'} | ${true}  | ${''}
+  `(
+    'with (fileType="$fileType", isViewed=$isViewed), sets fileClasses="$expected"',
+    ({ fileType, isViewed, expected }) => {
+      createComponent({
+        file: {
+          type: fileType,
+          fileHash: '#123456789',
+        },
+        level: 0,
+        hideFileStats: false,
+        viewedFiles: isViewed ? { '#123456789': true } : {},
+      });
+      expect(wrapper.find(FileRow).props('fileClasses')).toBe(expected);
+    },
+  );
 
   describe('FileRowStats components', () => {
     it.each`

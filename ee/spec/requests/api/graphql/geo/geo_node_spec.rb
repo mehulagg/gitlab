@@ -30,6 +30,7 @@ RSpec.describe 'Getting the current Geo node' do
       }
     QUERY
   end
+
   let(:current_user) { create(:user, :admin) }
 
   before do

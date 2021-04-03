@@ -6,7 +6,7 @@ require Rails.root.join('db', 'post_migrate', '20200420094444_backfill_snippet_r
 RSpec.describe BackfillSnippetRepositories do
   let(:users) { table(:users) }
   let(:snippets) { table(:snippets) }
-  let(:user) { users.create(id: 1, email: 'user@example.com', projects_limit: 10, username: 'test', name: 'Test', state: 'active') }
+  let(:user) { users.create!(id: 1, email: 'user@example.com', projects_limit: 10, username: 'test', name: 'Test', state: 'active') }
 
   def create_snippet(id)
     params = {
@@ -28,7 +28,7 @@ RSpec.describe BackfillSnippetRepositories do
     stub_const("#{described_class.name}::BATCH_SIZE", 2)
 
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(described_class::MIGRATION)

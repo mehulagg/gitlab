@@ -16,7 +16,7 @@ RSpec.describe API::ProjectApprovalSettings do
 
     context 'when the request is correct' do
       let!(:rule) do
-        rule = create(:approval_project_rule, name: 'security', project: project, approvals_required: 7)
+        rule = create(:approval_project_rule, name: 'vulnerability', project: project, approvals_required: 7)
         rule.users << approver
         rule
       end
@@ -40,7 +40,7 @@ RSpec.describe API::ProjectApprovalSettings do
         rule = json['rules'].first
 
         expect(rule['approvals_required']).to eq(7)
-        expect(rule['name']).to eq('security')
+        expect(rule['name']).to eq('vulnerability')
       end
 
       context 'when target_branch is specified' do
@@ -103,7 +103,7 @@ RSpec.describe API::ProjectApprovalSettings do
 
       context 'report_approver rules' do
         let!(:report_approver_rule) do
-          create(:approval_project_rule, :security_report, project: project)
+          create(:approval_project_rule, :vulnerability_report, project: project)
         end
 
         it 'includes report_approver rules' do
@@ -113,6 +113,31 @@ RSpec.describe API::ProjectApprovalSettings do
 
           expect(json['rules'].size).to eq(2)
           expect(json['rules'].map { |rule| rule['name'] }).to contain_exactly(rule.name, report_approver_rule.name)
+        end
+      end
+    end
+
+    context 'when project is archived' do
+      let_it_be(:archived_project) { create(:project, :archived, creator: user) }
+      let(:url) { "/projects/#{archived_project.id}/approval_settings" }
+
+      context 'when user has normal permissions' do
+        it 'returns 403' do
+          archived_project.add_guest(user2)
+
+          get api(url, user2)
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'when user has project admin permissions' do
+        it 'allows access' do
+          archived_project.add_maintainer(user2)
+
+          get api(url, user2)
+
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end

@@ -57,7 +57,7 @@ export default {
         class="col-8 col-md-9 gl-pr-0"
         :disabled="!hasProjects"
         menu-class="w-100 mw-100"
-        toggle-class="dropdown-menu-toggle w-100 gl-field-error-outline"
+        toggle-class="dropdown-menu-toggle gl-field-error-outline"
         :text="dropdownLabel"
       >
         <gl-dropdown-item

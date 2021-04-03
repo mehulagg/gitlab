@@ -1,0 +1,11 @@
+mutation oncallScheduleCreate($oncallScheduleCreateInput: OncallScheduleCreateInput!) {
+  oncallScheduleCreate(input: $oncallScheduleCreateInput) {
+    errors
+    oncallSchedule {
+      iid
+      name
+      description
+      timezone
+    }
+  }
+}

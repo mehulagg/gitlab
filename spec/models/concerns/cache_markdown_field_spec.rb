@@ -20,6 +20,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
         @title, @description, @cached_markdown_version = args[:title], args[:description], args[:cached_markdown_version]
         @title_html, @description_html = args[:title_html], args[:description_html]
         @author, @project = args[:author], args[:project]
+        @parent_user = args[:parent_user]
       end
 
       attr_accessor :title, :description, :cached_markdown_version
@@ -41,8 +42,8 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
 
   let(:cache_version) { Gitlab::MarkdownCache::CACHE_COMMONMARK_VERSION << 16 }
 
-  def thing_subclass(klass, extra_attribute)
-    Class.new(klass) { attr_accessor(extra_attribute) }
+  def thing_subclass(klass, *extra_attributes)
+    Class.new(klass) { attr_accessor(*extra_attributes) }
   end
 
   shared_examples 'a class with cached markdown fields' do
@@ -192,11 +193,33 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
       end
 
       context 'with an author' do
-        let(:thing) { thing_subclass(klass, :author).new(title: markdown, title_html: html, author: :author_value) }
+        let(:user) { build(:user) }
+        let(:thing) { thing_subclass(klass, :author).new(title: markdown, title_html: html, author: user) }
 
         it 'sets the author in the context' do
           is_expected.to have_key(:author)
-          expect(context[:author]).to eq(:author_value)
+          expect(context[:author]).to eq(user)
+        end
+      end
+
+      context 'with a parent_user' do
+        let(:user) { build(:user) }
+        let(:thing) { thing_subclass(klass, :author, :parent_user).new(title: markdown, title_html: html, parent_user: user, author: user) }
+
+        it 'sets the user in the context' do
+          is_expected.to have_key(:user)
+          expect(context[:user]).to eq(user)
+        end
+
+        context 'when the personal_snippet_reference_filters flag is disabled' do
+          before do
+            stub_feature_flags(personal_snippet_reference_filters: false)
+          end
+
+          it 'does not set the user in the context' do
+            is_expected.not_to have_key(:user)
+            expect(context[:user]).to be_nil
+          end
         end
       end
     end
@@ -210,7 +233,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
         end
 
         it 'calls #refresh_markdown_cache!' do
-          expect(thing).to receive(:refresh_markdown_cache!)
+          expect(thing).to receive(:refresh_markdown_cache)
 
           expect(thing.updated_cached_html_for(:description)).to eq(html)
         end
@@ -256,13 +279,104 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
     end
   end
 
+  shared_examples 'a class with mentionable markdown fields' do
+    let(:mentionable) { klass.new(description: markdown, description_html: html, title: markdown, title_html: html, cached_markdown_version: cache_version) }
+
+    context 'when klass is a Mentionable', :aggregate_failures do
+      before do
+        klass.send(:include, Mentionable)
+        klass.send(:attr_mentionable, :description)
+      end
+
+      describe '#mentionable_attributes_changed?' do
+        message = Struct.new(:text)
+
+        let(:changes) do
+          msg = message.new('test')
+
+          changes = {}
+          changes[msg] = ['', 'some message']
+          changes[:random_sym_key] = ['', 'some message']
+          changes["description"] = ['', 'some message']
+          changes
+        end
+
+        it 'returns true with key string' do
+          changes["description_html"] = ['', 'some message']
+
+          allow(mentionable).to receive(:saved_changes).and_return(changes)
+
+          expect(mentionable.send(:mentionable_attributes_changed?)).to be true
+        end
+
+        it 'returns false with key symbol' do
+          changes[:description_html] = ['', 'some message']
+          allow(mentionable).to receive(:saved_changes).and_return(changes)
+
+          expect(mentionable.send(:mentionable_attributes_changed?)).to be false
+        end
+
+        it 'returns false when no attr_mentionable keys' do
+          allow(mentionable).to receive(:saved_changes).and_return(changes)
+
+          expect(mentionable.send(:mentionable_attributes_changed?)).to be false
+        end
+      end
+
+      describe '#save' do
+        context 'when cache is outdated' do
+          before do
+            thing.cached_markdown_version += 1
+          end
+
+          context 'when the markdown field also a mentionable attribute' do
+            let(:thing) { klass.new(description: markdown, description_html: html, cached_markdown_version: cache_version) }
+
+            it 'calls #store_mentions!' do
+              expect(thing).to receive(:mentionable_attributes_changed?).and_return(true)
+              expect(thing).to receive(:store_mentions!)
+
+              thing.try(:save)
+
+              expect(thing.description_html).to eq(html)
+            end
+          end
+
+          context 'when the markdown field is not mentionable attribute' do
+            let(:thing) { klass.new(title: markdown, title_html: html, cached_markdown_version: cache_version) }
+
+            it 'does not call #store_mentions!' do
+              expect(thing).not_to receive(:store_mentions!)
+              expect(thing).to receive(:refresh_markdown_cache)
+
+              thing.try(:save)
+
+              expect(thing.title_html).to eq(html)
+            end
+          end
+        end
+
+        context 'when the markdown field does not exist' do
+          let(:thing) { klass.new(cached_markdown_version: cache_version) }
+
+          it 'does not call #store_mentions!' do
+            expect(thing).not_to receive(:store_mentions!)
+
+            thing.try(:save)
+          end
+        end
+      end
+    end
+  end
+
   context 'for Active record classes' do
     let(:klass) { ar_class }
 
     it_behaves_like 'a class with cached markdown fields'
+    it_behaves_like 'a class with mentionable markdown fields'
 
     describe '#attribute_invalidated?' do
-      let(:thing) { klass.create(description: markdown, description_html: html, cached_markdown_version: cache_version) }
+      let(:thing) { klass.create!(description: markdown, description_html: html, cached_markdown_version: cache_version) }
 
       it 'returns true when cached_markdown_version is different' do
         thing.cached_markdown_version += 1
@@ -295,7 +409,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
       let(:thing) do
         # This forces the record to have outdated HTML. We can't use `create` because the `before_create` hook
         # would re-render the HTML to the latest version
-        klass.create.tap do |thing|
+        klass.create!.tap do |thing|
           thing.update_columns(description: markdown, description_html: old_html, cached_markdown_version: old_version)
         end
       end
@@ -303,7 +417,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
       it 'correctly updates cached HTML even if refresh_markdown_cache is called before updating the attribute' do
         thing.refresh_markdown_cache
 
-        thing.update(description: updated_markdown)
+        thing.update!(description: updated_markdown)
 
         expect(thing.description_html).to eq(updated_html)
       end

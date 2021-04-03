@@ -11,6 +11,7 @@ module QA
 
           view 'app/assets/javascripts/boards/components/board_form.vue' do
             element :board_name_field
+            element :save_changes_button
           end
 
           view 'app/assets/javascripts/boards/components/board_list.vue' do
@@ -21,10 +22,6 @@ module QA
             element :boards_dropdown
             element :boards_dropdown_content
             element :create_new_board_button
-          end
-
-          view 'app/assets/javascripts/vue_shared/components/deprecated_modal.vue' do
-            element :save_changes_button
           end
 
           view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select/base.vue' do
@@ -39,8 +36,12 @@ module QA
             element :boards_list
           end
 
-          view 'app/assets/javascripts/boards/toggle_focus.js' do
+          view 'app/assets/javascripts/boards/components/toggle_focus.vue' do
             element :focus_mode_button
+          end
+
+          view 'app/assets/javascripts/boards/components/config_toggle.vue' do
+            element :boards_config_button
           end
 
           # The `focused_board` method does not use `find_element` with an element defined
@@ -82,6 +83,10 @@ module QA
             end
           end
 
+          def click_boards_config_button
+            click_element(:boards_config_button)
+          end
+
           def click_boards_dropdown_button
             # The dropdown button comes from the `GlDropdown` component of `@gitlab/ui`,
             # so it wasn't possible to add a `data-qa-selector` to it.
@@ -96,6 +101,8 @@ module QA
             click_boards_config_button
             click_element(:labels_edit_button)
             find_element(:labels_dropdown_content).find('li', text: label).click
+            # Clicking the edit button again closes the dropdown and allows the save button to be clicked
+            click_element(:labels_edit_button)
             click_element(:save_changes_button)
             wait_boards_list_finish_loading
           end

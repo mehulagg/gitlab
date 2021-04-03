@@ -1,8 +1,8 @@
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
-import CreateMergeRequestDropdown from '~/create_merge_request_dropdown';
+import { TEST_HOST } from 'helpers/test_constants';
 import confidentialState from '~/confidential_merge_request/state';
-import { TEST_HOST } from './helpers/test_constants';
+import CreateMergeRequestDropdown from '~/create_merge_request_dropdown';
+import axios from '~/lib/utils/axios_utils';
 
 describe('CreateMergeRequestDropdown', () => {
   let axiosMock;
@@ -20,7 +20,9 @@ describe('CreateMergeRequestDropdown', () => {
         </div>
         <div class="js-ref"></div>
         <div class="js-create-mr"></div>
-        <div class="js-create-merge-request"></div>
+        <div class="js-create-merge-request">
+          <span class="js-spinner"></span>
+        </div>
         <div class="js-create-target"></div>
         <div class="js-dropdown-toggle"></div>
       </div>
@@ -36,7 +38,7 @@ describe('CreateMergeRequestDropdown', () => {
   });
 
   describe('getRef', () => {
-    it('escapes branch names correctly', done => {
+    it('escapes branch names correctly', (done) => {
       const endpoint = `${dropdown.refsPath}contains%23hash`;
       jest.spyOn(axios, 'get');
       axiosMock.onGet(endpoint).replyOnce({});
@@ -98,6 +100,20 @@ describe('CreateMergeRequestDropdown', () => {
       dropdown.enable();
 
       expect(dropdown.createMergeRequestButton.classList).toContain('disabled');
+    });
+  });
+
+  describe('setLoading', () => {
+    it.each`
+      loading  | hasClass
+      ${true}  | ${false}
+      ${false} | ${true}
+    `('it toggle loading spinner when loading is $loading', ({ loading, hasClass }) => {
+      dropdown.setLoading(loading);
+
+      expect(document.querySelector('.js-spinner').classList.contains('gl-display-none')).toEqual(
+        hasClass,
+      );
     });
   });
 });

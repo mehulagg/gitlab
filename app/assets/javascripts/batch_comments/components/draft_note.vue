@@ -1,26 +1,20 @@
 <script>
+/* eslint-disable vue/no-v-html */
+import { GlButton } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import NoteableNote from '~/notes/components/noteable_note.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import PublishButton from './publish_button.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
     NoteableNote,
     PublishButton,
-    LoadingButton,
+    GlButton,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     draft: {
       type: Object,
       required: true,
-    },
-    diffFile: {
-      type: Object,
-      required: false,
-      default: () => ({}),
     },
     line: {
       type: Object,
@@ -67,14 +61,14 @@ export default {
       this.isEditingDraft = false;
     },
     handleMouseEnter(draft) {
-      if (this.glFeatures.multilineComments && draft.position) {
+      if (draft.position) {
         this.setSelectedCommentPositionHover(draft.position.line_range);
       }
     },
     handleMouseLeave(draft) {
-      // Even though position isn't used here we still don't want to unecessarily call a mutation
+      // Even though position isn't used here we still don't want to unnecessarily call a mutation
       // The lack of position tells us that highlighting is irrelevant in this context
-      if (this.glFeatures.multilineComments && draft.position) {
+      if (draft.position) {
         this.setSelectedCommentPositionHover();
       }
     },
@@ -83,7 +77,6 @@ export default {
 </script>
 <template>
   <article
-    role="article"
     class="draft-note-component note-wrapper"
     @mouseenter="handleMouseEnter(draft)"
     @mouseleave="handleMouseLeave(draft)"
@@ -115,18 +108,15 @@ export default {
       ></div>
 
       <p class="draft-note-actions d-flex">
-        <publish-button
-          :show-count="true"
-          :should-publish="false"
-          class="btn btn-success btn-inverted gl-mr-3"
-        />
-        <loading-button
+        <publish-button :show-count="true" :should-publish="false" category="secondary" />
+        <gl-button
           ref="publishNowButton"
           :loading="isPublishingDraft(draft.id) || isPublishing"
-          :label="__('Add comment now')"
-          container-class="btn btn-inverted"
+          class="gl-ml-3"
           @click="publishNow"
-        />
+        >
+          {{ __('Add comment now') }}
+        </gl-button>
       </p>
     </template>
   </article>

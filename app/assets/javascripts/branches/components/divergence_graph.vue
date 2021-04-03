@@ -1,7 +1,7 @@
 <script>
 import { sprintf, __ } from '~/locale';
-import GraphBar from './graph_bar.vue';
 import { MAX_COMMIT_COUNT } from '../constants';
+import GraphBar from './graph_bar.vue';
 
 export default {
   components: {
@@ -65,7 +65,7 @@ export default {
     </template>
     <template v-else>
       <graph-bar :count="behindCount" :max-commits="maxCommits" position="left" />
-      <div class="graph-separator pull-left mt-1"></div>
+      <div class="graph-separator float-left mt-1"></div>
       <graph-bar :count="aheadCount" :max-commits="maxCommits" position="right" />
     </template>
   </div>

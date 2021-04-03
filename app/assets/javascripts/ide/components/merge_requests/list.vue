@@ -1,11 +1,10 @@
 <script>
-import { mapActions, mapState } from 'vuex';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
-import Item from './item.vue';
 import TokenedInput from '../shared/tokened_input.vue';
+import Item from './item.vue';
 
 const SEARCH_TYPES = [
   { type: 'created', label: __('Created by me') },
@@ -16,7 +15,7 @@ export default {
   components: {
     TokenedInput,
     Item,
-    Icon,
+    GlIcon,
     GlLoadingIcon,
   },
   data() {
@@ -76,7 +75,10 @@ export default {
 
 <template>
   <div>
-    <label class="dropdown-input pt-3 pb-3 mb-0 border-bottom block" @click.stop>
+    <label
+      class="dropdown-input gl-pt-3 gl-pb-5 gl-mb-0 gl-border-b-1 gl-border-b-solid gl-display-block"
+      @click.stop
+    >
       <tokened-input
         v-model="search"
         :tokens="searchTokens"
@@ -85,7 +87,7 @@ export default {
         @input="searchMergeRequests"
         @removeToken="setSearchType(null)"
       />
-      <icon :size="18" name="search" class="ml-3 input-icon" />
+      <gl-icon :size="18" name="search" class="ml-3 input-icon" use-deprecated-sizes />
     </label>
     <div class="dropdown-content ide-merge-requests-dropdown-content d-flex">
       <gl-loading-icon
@@ -103,7 +105,7 @@ export default {
                 @click.stop="setSearchType(searchType)"
               >
                 <span class="d-flex gl-mr-3 ide-search-list-current-icon">
-                  <icon :size="18" name="search" />
+                  <gl-icon :size="18" name="search" use-deprecated-sizes />
                 </span>
                 <span>{{ searchType.label }}</span>
               </button>

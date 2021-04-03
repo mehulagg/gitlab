@@ -1,7 +1,7 @@
+import { tableSortOrder } from 'ee/analytics/productivity_analytics/constants';
 import * as types from 'ee/analytics/productivity_analytics/store/modules/table/mutation_types';
 import mutations from 'ee/analytics/productivity_analytics/store/modules/table/mutations';
 import getInitialState from 'ee/analytics/productivity_analytics/store/modules/table/state';
-import { tableSortOrder } from 'ee/analytics/productivity_analytics/constants';
 import { mockMergeRequests } from '../../../mock_data';
 
 describe('Productivity analytics table mutations', () => {

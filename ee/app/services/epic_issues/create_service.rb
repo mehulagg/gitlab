@@ -19,6 +19,7 @@ module EpicIssues
 
       if link.save
         create_notes(referenced_issue, params)
+        usage_ping_record_epic_issue_added
       end
 
       link
@@ -50,7 +51,9 @@ module EpicIssues
         return [] unless can?(current_user, :admin_epic, issuable.group)
 
         issues.select do |issue|
-          issuable_group_descendants.include?(issue.project.group) && !previous_related_issuables.include?(issue)
+          issue.supports_epic? &&
+            issuable_group_descendants.include?(issue.project.group) &&
+            !previous_related_issuables.include?(issue)
         end
       end
     end
@@ -61,6 +64,10 @@ module EpicIssues
 
     def issuable_group_descendants
       @descendants ||= issuable.group.self_and_descendants
+    end
+
+    def usage_ping_record_epic_issue_added
+      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_issue_added(author: current_user)
     end
   end
 end

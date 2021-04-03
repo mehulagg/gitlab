@@ -9,6 +9,14 @@ RSpec.describe 'Filter issues weight', :js do
   let!(:user) { create(:user, name: 'administrator', username: 'root') }
   let(:js_dropdown_weight) { '#js-dropdown-weight' }
 
+  shared_examples 'filters by negated weight' do
+    it 'excludes issues with specified weight' do
+      input_filtered_search(search)
+
+      expect_issues_list_count(1)
+    end
+  end
+
   def expect_issues_list_count(open_count, closed_count = 0)
     all_count = open_count + closed_count
 
@@ -43,6 +51,20 @@ RSpec.describe 'Filter issues weight', :js do
       input_filtered_search('weight:=1')
 
       expect_issues_list_count(1)
+    end
+  end
+
+  describe 'negated weight only' do
+    let(:search) { 'weight:!=2' }
+
+    it_behaves_like 'filters by negated weight'
+
+    context 'when vue_issuables_list is disabled' do
+      before do
+        stub_feature_flags(vue_issuables_list: false)
+      end
+
+      it_behaves_like 'filters by negated weight'
     end
   end
 

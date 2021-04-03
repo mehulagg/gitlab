@@ -11,14 +11,14 @@ RSpec.describe 'User activates Pushover' do
 
   it 'activates service', :js do
     visit_project_integration('Pushover')
-    fill_in('Api key', with: 'verySecret')
+    fill_in('API key', with: 'verySecret')
     fill_in('User key', with: 'verySecret')
     fill_in('Device', with: 'myDevice')
     select('High Priority', from: 'Priority')
     select('Bike', from: 'Sound')
 
-    click_test_integration
+    click_test_then_save_integration(expect_test_to_fail: false)
 
-    expect(page).to have_content('Pushover activated.')
+    expect(page).to have_content('Pushover settings saved and active.')
   end
 end

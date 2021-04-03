@@ -47,31 +47,27 @@ FactoryBot.define do
       hosts { [FFaker::Internet.ip_v4_address] }
     end
 
-    trait :with_ended_at do
-      ended_at { Time.current }
-    end
-
     trait :without_ended_at do
       ended_at { nil }
     end
 
     trait :triggered do
-      status { AlertManagement::Alert::STATUSES[:triggered] }
+      status { AlertManagement::Alert.status_value(:triggered) }
       without_ended_at
     end
 
     trait :acknowledged do
-      status { AlertManagement::Alert::STATUSES[:acknowledged] }
+      status { AlertManagement::Alert.status_value(:acknowledged) }
       without_ended_at
     end
 
     trait :resolved do
-      status { AlertManagement::Alert::STATUSES[:resolved] }
-      with_ended_at
+      status { AlertManagement::Alert.status_value(:resolved) }
+      ended_at { Time.current }
     end
 
     trait :ignored do
-      status { AlertManagement::Alert::STATUSES[:ignored] }
+      status { AlertManagement::Alert.status_value(:ignored) }
       without_ended_at
     end
 
@@ -100,7 +96,17 @@ FactoryBot.define do
     end
 
     trait :prometheus do
-      monitoring_tool { Gitlab::AlertManagement::AlertParams::MONITORING_TOOLS[:prometheus] }
+      monitoring_tool { Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:prometheus] }
+      payload do
+        {
+          annotations: {
+            title: 'This is a prometheus error',
+            summary: 'Summary of the error',
+            description: 'Description of the error'
+          },
+          startsAt: started_at
+        }.with_indifferent_access
+      end
     end
 
     trait :all_fields do
@@ -112,6 +118,18 @@ FactoryBot.define do
       with_host
       with_description
       low
+    end
+
+    trait :from_payload do
+      after(:build) do |alert|
+        alert_params = ::Gitlab::AlertManagement::Payload.parse(
+          alert.project,
+          alert.payload,
+          monitoring_tool: alert.monitoring_tool
+        ).alert_params
+
+        alert.assign_attributes(alert_params)
+      end
     end
   end
 end

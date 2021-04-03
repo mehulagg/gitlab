@@ -45,7 +45,7 @@ RSpec.describe "User creates issue" do
         .and have_no_content("Milestone")
 
         expect(page.find('#issue_title')['placeholder']).to eq 'Title'
-        expect(page.find('#issue_description')['placeholder']).to eq 'Write a comment or drag your files here…'
+        expect(page.find('#issue_description')['placeholder']).to eq 'Write a description or drag your files here…'
       end
 
       issue_title = "500 error on profile"
@@ -54,12 +54,16 @@ RSpec.describe "User creates issue" do
       first('.js-md').click
       first('.rspec-issuable-form-description').native.send_keys('Description')
 
-      click_button("Submit issue")
+      click_button("Create issue")
 
       expect(page).to have_content(issue_title)
         .and have_content(user.name)
         .and have_content(project.name)
       expect(page).to have_selector('strong', text: 'Description')
+    end
+
+    it 'does not render the issue type dropdown' do
+      expect(page).not_to have_selector('.s-issuable-type-filter-dropdown-wrap')
     end
   end
 
@@ -108,7 +112,7 @@ RSpec.describe "User creates issue" do
         fill_in("Title", with: issue_title)
         click_button("Label")
         click_link(label_titles.first)
-        click_button("Submit issue")
+        click_button("Create issue")
 
         expect(page).to have_content(issue_title)
           .and have_content(user.name)
@@ -131,7 +135,7 @@ RSpec.describe "User creates issue" do
 
         expect(find('#issuable-due-date').value).to eq date.to_s
 
-        click_button 'Submit issue'
+        click_button 'Create issue'
 
         page.within '.issuable-sidebar' do
           expect(page).to have_content date.to_s(:medium)
@@ -188,6 +192,50 @@ RSpec.describe "User creates issue" do
       end
     end
 
+    context 'form create handles issue creation by default' do
+      let(:project) { create(:project) }
+
+      before do
+        visit new_project_issue_path(project)
+      end
+
+      it 'pre-fills the issue type dropdown with issue type' do
+        expect(find('.js-issuable-type-filter-dropdown-wrap .dropdown-toggle-text')).to have_content('Issue')
+      end
+
+      it 'does not hide the milestone select' do
+        expect(page).to have_selector('.qa-issuable-milestone-dropdown')
+      end
+    end
+
+    context 'form create handles incident creation' do
+      let(:project) { create(:project) }
+
+      before do
+        visit new_project_issue_path(project, { issuable_template: 'incident', issue: { issue_type: 'incident' } })
+      end
+
+      it 'pre-fills the issue type dropdown with incident type' do
+        expect(find('.js-issuable-type-filter-dropdown-wrap .dropdown-toggle-text')).to have_content('Incident')
+      end
+
+      it 'hides the epic select' do
+        expect(page).not_to have_selector('.epic-dropdown-container')
+      end
+
+      it 'shows the milestone select' do
+        expect(page).to have_selector('.qa-issuable-milestone-dropdown')
+      end
+
+      it 'hides the weight input' do
+        expect(page).not_to have_selector('.qa-issuable-weight-input')
+      end
+
+      it 'shows the incident help text' do
+        expect(page).to have_text('A modified issue to guide the resolution of incidents.')
+      end
+    end
+
     context 'suggestions', :js do
       it 'displays list of related issues' do
         issue = create(:issue, project: project)
@@ -211,7 +259,7 @@ RSpec.describe "User creates issue" do
         fill_in 'issue_title', with: 'bug 345'
         fill_in 'issue_description', with: 'bug description'
 
-        click_button 'Submit issue'
+        click_button 'Create issue'
       end
     end
   end

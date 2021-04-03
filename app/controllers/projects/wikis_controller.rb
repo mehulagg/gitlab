@@ -5,6 +5,5 @@ class Projects::WikisController < Projects::ApplicationController
 
   alias_method :container, :project
 
-  def git_access
-  end
+  feature_category :wiki
 end

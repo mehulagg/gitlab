@@ -13,9 +13,11 @@ RSpec.describe Members::UpdateService do
     { access_level: Gitlab::Access::MAINTAINER }
   end
 
+  subject { described_class.new(current_user, params).execute(member, permission: permission) }
+
   shared_examples 'a service raising Gitlab::Access::AccessDeniedError' do
     it 'raises Gitlab::Access::AccessDeniedError' do
-      expect { described_class.new(current_user, params).execute(member, permission: permission) }
+      expect { subject }
         .to raise_error(Gitlab::Access::AccessDeniedError)
     end
   end
@@ -24,24 +26,58 @@ RSpec.describe Members::UpdateService do
     it 'updates the member' do
       expect(TodosDestroyer::EntityLeaveWorker).not_to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, member.user_id, member.source_id, source.class.name)
 
-      updated_member = described_class.new(current_user, params).execute(member, permission: permission)
+      updated_member = subject.fetch(:member)
 
       expect(updated_member).to be_valid
       expect(updated_member.access_level).to eq(Gitlab::Access::MAINTAINER)
     end
 
+    it 'returns success status' do
+      result = subject.fetch(:status)
+
+      expect(result).to eq(:success)
+    end
+
     context 'when member is downgraded to guest' do
-      let(:params) do
-        { access_level: Gitlab::Access::GUEST }
+      shared_examples 'schedules to delete confidential todos' do
+        it do
+          expect(TodosDestroyer::EntityLeaveWorker).to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, member.user_id, member.source_id, source.class.name).once
+
+          updated_member = subject.fetch(:member)
+
+          expect(updated_member).to be_valid
+          expect(updated_member.access_level).to eq(Gitlab::Access::GUEST)
+        end
       end
 
-      it 'schedules to delete confidential todos' do
-        expect(TodosDestroyer::EntityLeaveWorker).to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, member.user_id, member.source_id, source.class.name).once
+      context 'with Gitlab::Access::GUEST level as a string' do
+        let(:params) { { access_level: Gitlab::Access::GUEST.to_s } }
 
-        updated_member = described_class.new(current_user, params).execute(member, permission: permission)
+        it_behaves_like 'schedules to delete confidential todos'
+      end
 
-        expect(updated_member).to be_valid
-        expect(updated_member.access_level).to eq(Gitlab::Access::GUEST)
+      context 'with Gitlab::Access::GUEST level as an integer' do
+        let(:params) { { access_level: Gitlab::Access::GUEST } }
+
+        it_behaves_like 'schedules to delete confidential todos'
+      end
+    end
+
+    context 'when access_level is invalid' do
+      let(:params) { { access_level: 'invalid' } }
+
+      it 'raises an error' do
+        expect { described_class.new(current_user, params) }.to raise_error(ArgumentError, 'invalid value for Integer(): "invalid"')
+      end
+    end
+
+    context 'when member is not valid' do
+      let(:params) { { expires_at: 2.days.ago } }
+
+      it 'returns error status' do
+        result = subject
+
+        expect(result[:status]).to eq(:error)
       end
     end
   end

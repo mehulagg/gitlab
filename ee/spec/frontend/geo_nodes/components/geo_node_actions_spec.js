@@ -1,8 +1,8 @@
+import { GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import GeoNodeActionsComponent from 'ee/geo_nodes/components/geo_node_actions.vue';
-import { GlButton } from '@gitlab/ui';
-import eventHub from 'ee/geo_nodes/event_hub';
 import { NODE_ACTIONS } from 'ee/geo_nodes/constants';
+import eventHub from 'ee/geo_nodes/event_hub';
 import { mockNodes } from '../mock_data';
 
 jest.mock('ee/geo_nodes/event_hub');
@@ -122,11 +122,7 @@ describe('GeoNodeActionsComponent', () => {
 
       describe(`when nodeRemovalAllowed is ${nodeRemovalAllowed}`, () => {
         it('has the correct button text', () => {
-          expect(
-            findRemoveButton()
-              .text()
-              .trim(),
-          ).toBe('Remove');
+          expect(findRemoveButton().text().trim()).toBe('Remove');
         });
 
         it(`the button's disabled attribute should be ${buttonDisabled}`, () => {

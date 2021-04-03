@@ -1,12 +1,13 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
-# Instance template repository **(PREMIUM ONLY)**
+# Instance template repository **(PREMIUM SELF)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5986) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
-
-## Overview
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5986) in GitLab Premium 11.3.
 
 In hosted systems, enterprises often have a need to share their own templates
 across teams. This feature allows an administrator to pick a project to be the
@@ -21,21 +22,21 @@ select the project to serve as the custom template repository.
 
 ![File templates in the Admin Area](img/file_template_admin_area.png)
 
-Once a project has been selected, you can add custom templates to the repository,
-and they will appear in the appropriate places in the
-[frontend](../../project/repository/web_editor.md#template-dropdowns) and
-[API](../../../api/settings.md).
+After that, you can add custom templates to the selected repository and use them for the entire instance.
+They are available in the [Web Editor's dropdown](../../project/repository/web_editor.md#template-dropdowns)
+and through the [API settings](../../../api/settings.md).
 
 Templates must be added to a specific subdirectory in the repository,
 corresponding to the kind of template. The following types of custom templates
 are supported:
 
-| Type              | Directory     | Extension     |
-| :---------------: | :-----------: | :-----------: |
-| `Dockerfile`      | `Dockerfile`  | `.dockerfile` |
-| `.gitignore`      | `gitignore`   | `.gitignore`  |
-| `.gitlab-ci.yml`  | `gitlab-ci`   | `.yml`        |
-| `LICENSE`         | `LICENSE`     | `.txt`        |
+| Type                    | Directory            | Extension     |
+| :---------------:       | :-----------:        | :-----------: |
+| `Dockerfile`            | `Dockerfile`         | `.dockerfile` |
+| `.gitignore`            | `gitignore`          | `.gitignore`  |
+| `.gitlab-ci.yml`        | `gitlab-ci`          | `.yml`        |
+| `LICENSE`               | `LICENSE`            | `.txt`        |
+| `metrics-dashboard.yml` | `metrics-dashboards` | `.yml`        |
 
 Each template must go in its respective subdirectory, have the correct
 extension and not be empty. So, the hierarchy should look like this:
@@ -54,16 +55,17 @@ extension and not be empty. So, the hierarchy should look like this:
 |-- LICENSE
     |-- custom_license.txt
     |-- another_license.txt
+|-- metrics-dashboards
+    |-- custom_metrics-dashboard.yml
+    |-- another_metrics-dashboard.yml
 ```
 
-Once this is established, the list of custom templates will be included when
-creating a new file and the template type is selected. These will appear at the
-top of the list.
+Your custom templates are displayed on the dropdown menu when a new file is added through the GitLab UI:
 
 ![Custom template dropdown menu](img/file_template_user_dropdown.png)
 
-If this feature is disabled or no templates are present, there will be
-no "Custom" section in the selection dropdown.
+If this feature is disabled or no templates are present,
+no **Custom** section displays in the selection dropdown.
 
 <!-- ## Troubleshooting
 

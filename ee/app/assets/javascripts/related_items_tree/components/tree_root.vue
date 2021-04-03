@@ -1,14 +1,13 @@
 <script>
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
-
-import TreeDragAndDropMixin from '../mixins/tree_dd_mixin';
 
 import { ChildType } from '../constants';
+import TreeDragAndDropMixin from '../mixins/tree_dd_mixin';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlLoadingIcon,
   },
   mixins: [TreeDragAndDropMixin],
@@ -72,12 +71,12 @@ export default {
   >
     <tree-item v-for="item in children" :key="item.id" :parent-item="parentItem" :item="item" />
     <li v-if="hasMoreChildren" class="tree-item list-item pt-0 pb-0 d-flex justify-content-center">
-      <gl-deprecated-button
+      <gl-button
         v-if="!fetchInProgress"
         class="d-inline-block mb-2"
         variant="link"
         @click="handleShowMoreClick($event)"
-        >{{ s__('Epics|Show more') }}</gl-deprecated-button
+        >{{ s__('Epics|Show more') }}</gl-button
       >
       <gl-loading-icon v-else size="sm" class="mt-1 mb-1" />
     </li>

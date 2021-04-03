@@ -24,6 +24,26 @@ RSpec.describe Gitlab::CurrentSettings do
     end
   end
 
+  describe '.signup_disabled?' do
+    subject { described_class.signup_disabled? }
+
+    context 'when signup is enabled' do
+      before do
+        create(:application_setting, signup_enabled: true)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when signup is disabled' do
+      before do
+        create(:application_setting, signup_enabled: false)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+  end
+
   describe '#current_application_settings', :use_clean_rails_memory_store_caching do
     it 'allows keys to be called directly' do
       db_settings = create(:application_setting,
@@ -115,6 +135,16 @@ RSpec.describe Gitlab::CurrentSettings do
           expect(settings).to have_attributes(settings_from_defaults)
         end
 
+        context 'when ApplicationSettings does not have a primary key' do
+          before do
+            allow(ActiveRecord::Base.connection).to receive(:primary_key).with('application_settings').and_return(nil)
+          end
+
+          it 'raises an exception if ApplicationSettings does not have a primary key' do
+            expect { described_class.current_application_settings }.to raise_error(/table is missing a primary key constraint/)
+          end
+        end
+
         context 'with pending migrations' do
           let(:current_settings) { described_class.current_application_settings }
 
@@ -181,6 +211,34 @@ RSpec.describe Gitlab::CurrentSettings do
             expect(described_class.current_application_settings).to eq(:current_settings)
           end
         end
+      end
+    end
+  end
+
+  describe '#current_application_settings?', :use_clean_rails_memory_store_caching do
+    before do
+      allow(Gitlab::CurrentSettings).to receive(:current_application_settings?).and_call_original
+    end
+
+    it 'returns true when settings exist' do
+      create(:application_setting,
+        home_page_url: 'http://mydomain.com',
+        signup_enabled: false)
+
+      expect(described_class.current_application_settings?).to eq(true)
+    end
+
+    it 'returns false when settings do not exist' do
+      expect(described_class.current_application_settings?).to eq(false)
+    end
+
+    context 'with cache', :request_store do
+      include_context 'with settings in cache'
+
+      it 'returns an in-memory ApplicationSetting object' do
+        expect(ApplicationSetting).not_to receive(:current)
+
+        expect(described_class.current_application_settings?).to eq(true)
       end
     end
   end

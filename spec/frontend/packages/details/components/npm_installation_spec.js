@@ -1,9 +1,12 @@
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { registryUrl as nugetPath } from 'jest/packages/details/mock_data';
+import { npmPackage as packageEntity } from 'jest/packages/mock_data';
+import InstallationTitle from '~/packages/details/components/installation_title.vue';
 import NpmInstallation from '~/packages/details/components/npm_installation.vue';
-import { npmPackage as packageEntity } from '../../mock_data';
-import { registryUrl as nugetPath } from '../mock_data';
-import { GlTabs } from '@gitlab/ui';
+import { TrackingActions } from '~/packages/details/constants';
+import { npmInstallationCommand, npmSetupCommand } from '~/packages/details/store/getters';
+import CodeInstructions from '~/vue_shared/components/registry/code_instruction.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -11,30 +14,22 @@ localVue.use(Vuex);
 describe('NpmInstallation', () => {
   let wrapper;
 
-  const npmCommandStr = 'npm install';
-  const npmSetupStr = 'npm setup';
-  const yarnCommandStr = 'npm install';
-  const yarnSetupStr = 'npm setup';
+  const findCodeInstructions = () => wrapper.findAll(CodeInstructions);
+  const findInstallationTitle = () => wrapper.findComponent(InstallationTitle);
 
-  const findTabs = () => wrapper.find(GlTabs);
-  const npmInstallationCommand = () => wrapper.find('.js-npm-install > input');
-  const npmSetupCommand = () => wrapper.find('.js-npm-setup > input');
-  const yarnInstallationCommand = () => wrapper.find('.js-yarn-install > input');
-  const yarnSetupCommand = () => wrapper.find('.js-yarn-setup > input');
-
-  function createComponent(yarn = false) {
+  function createComponent() {
     const store = new Vuex.Store({
       state: {
         packageEntity,
         nugetPath,
       },
       getters: {
-        npmInstallationCommand: () => () => (yarn ? yarnCommandStr : npmCommandStr),
-        npmSetupCommand: () => () => (yarn ? yarnSetupStr : npmSetupStr),
+        npmInstallationCommand,
+        npmSetupCommand,
       },
     });
 
-    wrapper = mount(NpmInstallation, {
+    wrapper = shallowMount(NpmInstallation, {
       localVue,
       store,
     });
@@ -45,36 +40,56 @@ describe('NpmInstallation', () => {
   });
 
   afterEach(() => {
-    if (wrapper) wrapper.destroy();
+    wrapper.destroy();
   });
 
-  describe('it renders', () => {
-    it('with GlTabs', () => {
-      expect(findTabs().exists()).toBe(true);
+  it('renders all the messages', () => {
+    expect(wrapper.element).toMatchSnapshot();
+  });
+
+  describe('install command switch', () => {
+    it('has the installation title component', () => {
+      expect(findInstallationTitle().exists()).toBe(true);
+      expect(findInstallationTitle().props()).toMatchObject({
+        packageType: 'npm',
+        options: [{ value: 'npm', label: 'Show NPM commands' }],
+      });
     });
   });
 
-  describe('npm commands', () => {
-    it('renders the correct install command', () => {
-      expect(npmInstallationCommand().element.value).toBe(npmCommandStr);
+  describe('installation commands', () => {
+    it('renders the correct npm command', () => {
+      expect(findCodeInstructions().at(0).props()).toMatchObject({
+        instruction: 'npm i @Test/package',
+        multiline: false,
+        trackingAction: TrackingActions.COPY_NPM_INSTALL_COMMAND,
+      });
     });
 
-    it('renders the correct setup command', () => {
-      expect(npmSetupCommand().element.value).toBe(npmSetupStr);
+    it('renders the correct yarn command', () => {
+      expect(findCodeInstructions().at(1).props()).toMatchObject({
+        instruction: 'yarn add @Test/package',
+        multiline: false,
+        trackingAction: TrackingActions.COPY_YARN_INSTALL_COMMAND,
+      });
     });
   });
 
-  describe('yarn commands', () => {
-    beforeEach(() => {
-      createComponent(true);
+  describe('setup commands', () => {
+    it('renders the correct npm command', () => {
+      expect(findCodeInstructions().at(2).props()).toMatchObject({
+        instruction: 'echo @Test:registry=undefined/ >> .npmrc',
+        multiline: false,
+        trackingAction: TrackingActions.COPY_NPM_SETUP_COMMAND,
+      });
     });
 
-    it('renders the correct install command', () => {
-      expect(yarnInstallationCommand().element.value).toBe(yarnCommandStr);
-    });
-
-    it('renders the correct setup command', () => {
-      expect(yarnSetupCommand().element.value).toBe(yarnSetupStr);
+    it('renders the correct yarn command', () => {
+      expect(findCodeInstructions().at(3).props()).toMatchObject({
+        instruction: 'echo \\"@Test:registry\\" \\"undefined/\\" >> .yarnrc',
+        multiline: false,
+        trackingAction: TrackingActions.COPY_YARN_SETUP_COMMAND,
+      });
     });
   });
 });

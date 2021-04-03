@@ -38,14 +38,33 @@ RSpec.describe ProjectPresenter do
       context 'when repository is empty' do
         let_it_be(:project) { create(:project_empty_repo, :public) }
 
-        it 'returns activity if user has repository access' do
+        it 'returns wiki if user has repository access and can read wiki, which exists' do
+          allow(project).to receive(:wiki_repository_exists?).and_return(true)
           allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(true)
+          allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(true)
+          allow(presenter).to receive(:can?).with(nil, :read_issue, project).and_return(false)
+
+          expect(presenter.default_view).to eq('wiki')
+        end
+
+        it 'returns activity if user has repository access and can read wiki, which does not exist' do
+          allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(true)
+          allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(true)
+          allow(presenter).to receive(:can?).with(nil, :read_issue, project).and_return(false)
 
           expect(presenter.default_view).to eq('activity')
         end
 
-        it 'returns activity if user does not have repository access' do
-          allow(project).to receive(:can?).with(nil, :download_code, project).and_return(false)
+        it 'returns issues if user does not have repository access, but can read issues' do
+          allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(false)
+          allow(presenter).to receive(:can?).with(nil, :read_issue, project).and_call_original
+
+          expect(presenter.default_view).to eq('projects/issues/issues')
+        end
+
+        it 'returns activity if user can read neither wiki nor issues' do
+          allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(false)
+          allow(presenter).to receive(:can?).with(nil, :read_issue, project).and_return(false)
 
           expect(presenter.default_view).to eq('activity')
         end
@@ -61,8 +80,18 @@ RSpec.describe ProjectPresenter do
           expect(presenter.default_view).to eq('files')
         end
 
-        it 'returns activity if user does not have repository access' do
+        it 'returns wiki if user does not have repository access and can read wiki, which exists' do
+          allow(project).to receive(:wiki_repository_exists?).and_return(true)
           allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(false)
+          allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(true)
+
+          expect(presenter.default_view).to eq('wiki')
+        end
+
+        it 'returns activity if user does not have repository or wiki access' do
+          allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(false)
+          allow(presenter).to receive(:can?).with(nil, :read_issue, project).and_return(false)
+          allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(false)
 
           expect(presenter.default_view).to eq('activity')
         end
@@ -96,22 +125,25 @@ RSpec.describe ProjectPresenter do
           allow(presenter).to receive(:can?).with(user, :download_code, project).and_return(false)
         end
 
-        it 'returns wiki if the user has the right policy' do
+        it 'returns wiki if the user has the right policy and the wiki exists' do
+          allow(project).to receive(:wiki_repository_exists?).and_return(true)
           allow(presenter).to receive(:can?).with(user, :read_wiki, project).and_return(true)
 
           expect(presenter.default_view).to eq('wiki')
         end
 
-        it 'returns customize_workflow if the user does not have the right policy' do
+        it 'returns activity if the user does not have the right policy' do
           allow(presenter).to receive(:can?).with(user, :read_wiki, project).and_return(false)
+          allow(presenter).to receive(:can?).with(user, :read_issue, project).and_return(false)
 
-          expect(presenter.default_view).to eq('customize_workflow')
+          expect(presenter.default_view).to eq('activity')
         end
       end
 
       context 'with issues as a feature available' do
         it 'return issues' do
           allow(presenter).to receive(:can?).with(user, :download_code, project).and_return(false)
+          allow(presenter).to receive(:can?).with(user, :read_issue, project).and_return(true)
           allow(presenter).to receive(:can?).with(user, :read_wiki, project).and_return(false)
 
           expect(presenter.default_view).to eq('projects/issues/issues')
@@ -119,12 +151,13 @@ RSpec.describe ProjectPresenter do
       end
 
       context 'with no activity, no wikies and no issues' do
-        it 'returns customize_workflow as default' do
+        it 'returns activity as default' do
           project.project_feature.update_attribute(:issues_access_level, 0)
           allow(presenter).to receive(:can?).with(user, :download_code, project).and_return(false)
           allow(presenter).to receive(:can?).with(user, :read_wiki, project).and_return(false)
+          allow(presenter).to receive(:can?).with(user, :read_issue, project).and_return(false)
 
-          expect(presenter.default_view).to eq('customize_workflow')
+          expect(presenter.default_view).to eq('activity')
         end
       end
     end
@@ -149,6 +182,14 @@ RSpec.describe ProjectPresenter do
 
     context 'not empty repo' do
       let(:project) { create(:project, :repository) }
+
+      context 'if no current user' do
+        let(:user) { nil }
+
+        it 'returns false' do
+          expect(presenter.can_current_user_push_code?).to be(false)
+        end
+      end
 
       it 'returns true if user can push to default branch' do
         project.add_developer(user)
@@ -317,7 +358,7 @@ RSpec.describe ProjectPresenter do
           is_link: false,
           label: a_string_including("New file"),
           link: presenter.project_new_blob_path(project, 'master'),
-          class_modifier: 'missing'
+          class_modifier: 'btn-dashed'
         )
       end
 
@@ -342,7 +383,7 @@ RSpec.describe ProjectPresenter do
         it 'returns anchor data' do
           project.add_developer(user)
 
-          allow(project.repository).to receive(:readme).and_return(nil)
+          allow(project.repository).to receive(:readme_path).and_return(nil)
 
           expect(presenter.readme_anchor_data).to have_attributes(
             is_link: false,
@@ -354,7 +395,7 @@ RSpec.describe ProjectPresenter do
 
       context 'when README exists' do
         it 'returns anchor data' do
-          allow(project.repository).to receive(:readme).and_return(double(name: 'readme'))
+          allow(project.repository).to receive(:readme_path).and_return('readme')
 
           expect(presenter.readme_anchor_data).to have_attributes(
             is_link: false,
@@ -522,13 +563,58 @@ RSpec.describe ProjectPresenter do
         end
       end
     end
+
+    describe '#upload_anchor_data' do
+      context 'with empty_repo_upload enabled' do
+        before do
+          stub_experiments(empty_repo_upload: :candidate)
+        end
+
+        context 'user can push to branch' do
+          before do
+            project.add_developer(user)
+          end
+
+          it 'returns upload_anchor_data' do
+            expect(presenter.upload_anchor_data).to have_attributes(
+              is_link: false,
+              label:  a_string_including('Upload file'),
+              data: {
+                "can_push_code" => "true",
+                "original_branch" => "master",
+                "path" => "/#{project.full_path}/-/create/master",
+                "project_path" => project.path,
+                "target_branch" => "master"
+              }
+            )
+          end
+        end
+
+        context 'user cannot push to branch' do
+          it 'returns nil' do
+            expect(presenter.upload_anchor_data).to be_nil
+          end
+        end
+      end
+
+      context 'with empty_repo_upload disabled' do
+        before do
+          stub_experiments(empty_repo_upload: :control)
+          project.add_developer(user)
+        end
+
+        it 'returns nil' do
+          expect(presenter.upload_anchor_data).to be_nil
+        end
+      end
+    end
   end
 
   describe '#statistics_buttons' do
     let(:project) { build_stubbed(:project) }
 
     it 'orders the items correctly' do
-      allow(project.repository).to receive(:readme).and_return(double(name: 'readme'))
+      allow(project.repository).to receive(:readme_path).and_return('readme')
       allow(project.repository).to receive(:license_blob).and_return(nil)
       allow(project.repository).to receive(:changelog).and_return(nil)
       allow(project.repository).to receive(:contribution_guide).and_return(double(name: 'foo'))
@@ -561,13 +647,47 @@ RSpec.describe ProjectPresenter do
         end
       end
 
+      describe 'experiment(:repo_integrations_link)' do
+        context 'when enabled' do
+          before do
+            stub_experiments(repo_integrations_link: :candidate)
+          end
+
+          it 'includes a button to configure integrations for maintainers' do
+            project.add_maintainer(user)
+
+            expect(empty_repo_statistics_buttons.map(&:label)).to include(
+              a_string_including('Configure Integration')
+            )
+          end
+
+          it 'does not include a button if not a maintainer' do
+            expect(empty_repo_statistics_buttons.map(&:label)).not_to include(
+              a_string_including('Configure Integration')
+            )
+          end
+        end
+
+        context 'when disabled' do
+          it 'does not include a button' do
+            project.add_maintainer(user)
+
+            expect(empty_repo_statistics_buttons.map(&:label)).not_to include(
+              a_string_including('Configure Integration')
+            )
+          end
+        end
+      end
+
       context 'for a developer' do
         before do
           project.add_developer(user)
+          stub_experiments(empty_repo_upload: :candidate)
         end
 
         it 'orders the items correctly' do
           expect(empty_repo_statistics_buttons.map(&:label)).to start_with(
+            a_string_including('Upload'),
             a_string_including('New'),
             a_string_including('README'),
             a_string_including('LICENSE'),
@@ -575,6 +695,16 @@ RSpec.describe ProjectPresenter do
             a_string_including('CONTRIBUTING'),
             a_string_including('CI/CD')
           )
+        end
+
+        context 'when not in the upload experiment' do
+          before do
+            stub_experiments(empty_repo_upload: :control)
+          end
+
+          it 'does not include upload button' do
+            expect(empty_repo_statistics_buttons.map(&:label)).not_to start_with(a_string_including('Upload'))
+          end
         end
       end
     end
@@ -659,6 +789,22 @@ RSpec.describe ProjectPresenter do
 
         it { is_expected.to be_falsey }
       end
+    end
+  end
+
+  describe 'empty_repo_upload_experiment?' do
+    subject { presenter.empty_repo_upload_experiment? }
+
+    it 'returns false when upload_anchor_data is nil' do
+      allow(presenter).to receive(:upload_anchor_data).and_return(nil)
+
+      expect(subject).to be false
+    end
+
+    it 'returns true when upload_anchor_data exists' do
+      allow(presenter).to receive(:upload_anchor_data).and_return(true)
+
+      expect(subject).to be true
     end
   end
 end

@@ -2,10 +2,12 @@
 
 module API
   # MergeRequestDiff API
-  class MergeRequestDiffs < Grape::API::Instance
+  class MergeRequestDiffs < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :code_review
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
@@ -21,6 +23,8 @@ module API
         use :pagination
       end
       get ":id/merge_requests/:merge_request_iid/versions" do
+        not_found!("Merge Request") unless can?(current_user, :read_merge_request, user_project)
+
         merge_request = find_merge_request_with_access(params[:merge_request_iid])
 
         present paginate(merge_request.merge_request_diffs.order_id_desc), with: Entities::MergeRequestDiff
@@ -37,9 +41,15 @@ module API
       end
 
       get ":id/merge_requests/:merge_request_iid/versions/:version_id" do
+        not_found!("Merge Request") unless can?(current_user, :read_merge_request, user_project)
+
         merge_request = find_merge_request_with_access(params[:merge_request_iid])
 
-        present merge_request.merge_request_diffs.find(params[:version_id]), with: Entities::MergeRequestDiffFull
+        if Feature.enabled?(:cached_api_merge_request_version, default_enabled: :yaml)
+          present_cached merge_request.merge_request_diffs.find(params[:version_id]), with: Entities::MergeRequestDiffFull, cache_context: nil
+        else
+          present merge_request.merge_request_diffs.find(params[:version_id]), with: Entities::MergeRequestDiffFull
+        end
       end
     end
   end

@@ -21,7 +21,7 @@ FactoryBot.define do
 
     starts_at { Date.new(1970, 1, 1) }
     expires_at { Date.current + 11.months }
-    block_changes_at { expires_at + 2.weeks }
+    block_changes_at { expires_at ? expires_at + 2.weeks : nil }
     notify_users_at  { expires_at }
     notify_admins_at { expires_at }
 
@@ -35,7 +35,8 @@ FactoryBot.define do
           'GitLab_FileLocks' => 1,
           'GitLab_Auditor_User' => 1
         },
-        plan: plan
+        plan: plan,
+        subscription_id: '0000'
       }
     end
   end
@@ -51,9 +52,8 @@ FactoryBot.define do
       attrs = [:gitlab_license]
       attrs << :trial if trial
       attrs << :expired if expired
-      attrs << { plan: plan }
 
-      build(*attrs).export
+      build(*attrs, plan: plan).export
     end
 
     # Disable validations when creating an expired license key

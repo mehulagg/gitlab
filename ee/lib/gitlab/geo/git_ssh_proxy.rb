@@ -5,11 +5,11 @@ module Gitlab
     class GitSSHProxy
       HTTP_READ_TIMEOUT = 60
 
-      UPLOAD_PACK_REQUEST_CONTENT_TYPE = 'application/x-git-upload-pack-request'.freeze
-      UPLOAD_PACK_RESULT_CONTENT_TYPE = 'application/x-git-upload-pack-result'.freeze
+      UPLOAD_PACK_REQUEST_CONTENT_TYPE = 'application/x-git-upload-pack-request'
+      UPLOAD_PACK_RESULT_CONTENT_TYPE = 'application/x-git-upload-pack-result'
 
-      RECEIVE_PACK_REQUEST_CONTENT_TYPE = 'application/x-git-receive-pack-request'.freeze
-      RECEIVE_PACK_RESULT_CONTENT_TYPE = 'application/x-git-receive-pack-result'.freeze
+      RECEIVE_PACK_REQUEST_CONTENT_TYPE = 'application/x-git-receive-pack-request'
+      RECEIVE_PACK_RESULT_CONTENT_TYPE = 'application/x-git-receive-pack-result'
 
       MustBeASecondaryNode = Class.new(StandardError)
 
@@ -134,8 +134,7 @@ module Gitlab
 
       def base_headers
         @base_headers ||= {
-          'Geo-GL-Id' => gl_id,
-          'Authorization' => Gitlab::Geo::BaseRequest.new(scope: auth_scope).authorization
+          'Authorization' => Gitlab::Geo::BaseRequest.new(scope: auth_scope, gl_id: gl_id).authorization
         }
       end
 

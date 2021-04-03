@@ -6,7 +6,7 @@ RSpec.describe 'Project' do
   describe 'Custom instance-level projects templates' do
     let(:user) { create(:user) }
     let(:group) { create(:group) }
-    let!(:projects) { create_list(:project, 3, :public, namespace: group) }
+    let!(:projects) { create_list(:project, 3, :public, :metrics_dashboard_enabled, namespace: group) }
 
     before do
       stub_ee_application_setting(custom_project_templates_group_id: group.id)
@@ -43,7 +43,7 @@ RSpec.describe 'Project' do
         new_path = 'example-custom-project-template'
         new_name = 'Example Custom Project Template'
 
-        find('#create-from-template-tab').click
+        find('[data-qa-selector="create_from_template_link"]').click
         find('.project-template .custom-instance-project-templates-tab').click
         find("label[for='#{projects.first.name}']").click
 
@@ -68,7 +68,7 @@ RSpec.describe 'Project' do
         new_path = 'example-custom-project-template'
         new_name = 'Example Custom Project Template'
 
-        find('#create-from-template-tab').click
+        find('[data-qa-selector="create_from_template_link"]').click
         find('.project-template .custom-instance-project-templates-tab').click
         find("label[for='#{projects.first.name}']").click
 
@@ -90,7 +90,7 @@ RSpec.describe 'Project' do
         new_path = 'example-custom-project-template'
         new_name = 'Example Custom Project Template'
 
-        find('#create-from-template-tab').click
+        find('[data-qa-selector="create_from_template_link"]').click
         find('.project-template .custom-instance-project-templates-tab').click
         find("label[for='#{projects.first.name}']").click
 
@@ -111,7 +111,7 @@ RSpec.describe 'Project' do
       it 'has a working pagination', :js do
         last_project = "label[for='#{projects.last.name}']"
 
-        find('#create-from-template-tab').click
+        find('[data-qa-selector="create_from_template_link"]').click
         find('.project-template .custom-instance-project-templates-tab').click
 
         expect(page).to have_css('.custom-project-templates .gl-pagination')

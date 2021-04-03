@@ -8,9 +8,13 @@ RSpec.describe 'Issue promotion', :js do
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
   let(:issue) { create(:issue, project: project) }
+  let(:parent_epic) { create(:epic, group: group) }
+  let!(:epic_issue) { create(:epic_issue, issue: issue, epic: parent_epic) }
   let(:user) { create(:user) }
 
   before do
+    stub_feature_flags(tribute_autocomplete: false)
+
     sign_in(user)
   end
 
@@ -21,7 +25,7 @@ RSpec.describe 'Issue promotion', :js do
       expect(page).not_to have_content 'Promoted issue to an epic.'
 
       expect(issue.reload).to be_open
-      expect(Epic.count).to be_zero
+      expect(Epic.count).to eq(1)
     end
   end
 
@@ -39,7 +43,7 @@ RSpec.describe 'Issue promotion', :js do
         expect(page).not_to have_content 'Promoted issue to an epic.'
 
         expect(issue.reload).to be_open
-        expect(Epic.count).to be_zero
+        expect(Epic.count).to eq(1)
       end
     end
 
@@ -49,19 +53,14 @@ RSpec.describe 'Issue promotion', :js do
         visit project_issue_path(project, issue)
       end
 
-      it 'displays warning' do
-        note = find('#note-body')
-        type(note, '/promote')
+      it 'displays description' do
+        fill_in 'Comment', with: '/promote'
 
-        wait_for_requests
-
-        expect(page).to have_content 'Promote issue to an epic'
+        expect(find_autocomplete_menu).to have_text 'Promote issue to an epic'
       end
 
       it 'promotes the issue' do
         add_note('/promote')
-
-        wait_for_requests
 
         epic = Epic.last
 
@@ -70,6 +69,7 @@ RSpec.describe 'Issue promotion', :js do
         expect(epic.title).to eq(issue.title)
         expect(epic.description).to eq(issue.description)
         expect(epic.author).to eq(user)
+        expect(epic.parent).to eq(parent_epic)
       end
 
       # Spec for https://gitlab.com/gitlab-org/gitlab/-/issues/215549
@@ -78,8 +78,6 @@ RSpec.describe 'Issue promotion', :js do
 
         it 'promotes the issue' do
           add_note('/promote')
-
-          wait_for_requests
 
           epic = Epic.last
 
@@ -101,18 +99,13 @@ RSpec.describe 'Issue promotion', :js do
       end
 
       it 'displays warning' do
-        note = find('#note-body')
-        type(note, '/promote')
+        fill_in 'Comment', with: '/promote'
 
-        wait_for_requests
-
-        expect(page).to have_content 'Promote confidential issue to a non-confidential epic'
+        expect(find_autocomplete_menu).to have_text 'Promote confidential issue to a non-confidential epic'
       end
 
       it 'promotes the issue' do
         add_note('/promote')
-
-        wait_for_requests
 
         epic = Epic.last
 
@@ -127,12 +120,7 @@ RSpec.describe 'Issue promotion', :js do
 
   private
 
-  # `note` is a textarea where the given text should be typed.
-  # We don't want to find it each time this function gets called.
-  def type(note, text)
-    page.within('.timeline-content-form') do
-      note.set('')
-      note.native.send_keys(text)
-    end
+  def find_autocomplete_menu
+    find('.atwho-view ul', visible: true)
   end
 end

@@ -20,7 +20,7 @@ RSpec.describe Analytics::CycleAnalytics::Stages::UpdateService do
     stub_licensed_features(cycle_analytics_for_groups: true)
   end
 
-  it_behaves_like 'permission check for cycle analytics stage services', :cycle_analytics_for_groups
+  it_behaves_like 'permission check for Value Stream Analytics Stage services', :cycle_analytics_for_groups
 
   context 'when updating a default stage' do
     let(:stage) { Analytics::CycleAnalytics::GroupStage.new(default_stages.first.merge(group: group)) }

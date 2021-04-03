@@ -17,6 +17,7 @@ RSpec.describe PushRulesHelper do
       requires_admin_contact: /Contact an admin to change this setting/
     }
   end
+
   let(:users) do
     {
       admin: admin,

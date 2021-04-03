@@ -13,7 +13,7 @@ module Gitlab
         MAPPINGS = {
           Issue => {
             serializer_class: AnalyticsIssueSerializer,
-            includes_for_query: { project: [:namespace], author: [] },
+            includes_for_query: { project: { namespace: [:route] }, author: [] },
             columns_for_select: %I[title iid id created_at author_id project_id]
           },
           MergeRequest => {
@@ -29,6 +29,8 @@ module Gitlab
           @stage = stage
           @query = query
           @params = params
+          @sort = params[:sort] || :end_event
+          @direction = params[:direction] || :desc
         end
 
         def serialized_records
@@ -41,7 +43,7 @@ module Gitlab
                 project = record.project
                 attributes = record.attributes.merge({
                   project_path: project.path,
-                  namespace_path: project.namespace.path,
+                  namespace_path: project.namespace.route.path,
                   author: record.author
                 })
                 serializer.represent(attributes)
@@ -52,7 +54,7 @@ module Gitlab
 
         private
 
-        attr_reader :stage, :query, :params
+        attr_reader :stage, :query, :params, :sort, :direction
 
         def columns
           MAPPINGS.fetch(subject_class).fetch(:columns_for_select).map do |column_name|
@@ -90,7 +92,7 @@ module Gitlab
         end
 
         def ordered_and_limited_query
-          order_by_end_event(query).limit(MAX_RECORDS)
+          order_by(query, sort, direction, columns).limit(MAX_RECORDS)
         end
 
         def records

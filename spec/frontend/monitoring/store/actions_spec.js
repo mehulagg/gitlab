@@ -1,16 +1,16 @@
 import MockAdapter from 'axios-mock-adapter';
+import { backoffMockImplementation } from 'helpers/backoff_helper';
 import testAction from 'helpers/vuex_action_helper';
-import Tracking from '~/tracking';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import statusCodes from '~/lib/utils/http_status';
 import * as commonUtils from '~/lib/utils/common_utils';
-import createFlash from '~/flash';
-import { defaultTimeRange } from '~/vue_shared/constants';
-import * as getters from '~/monitoring/stores/getters';
+import statusCodes from '~/lib/utils/http_status';
 import { ENVIRONMENT_AVAILABLE_STATE } from '~/monitoring/constants';
 
+import getAnnotations from '~/monitoring/queries/getAnnotations.query.graphql';
+import getDashboardValidationWarnings from '~/monitoring/queries/getDashboardValidationWarnings.query.graphql';
+import getEnvironments from '~/monitoring/queries/getEnvironments.query.graphql';
 import { createStore } from '~/monitoring/stores';
-import * as types from '~/monitoring/stores/mutation_types';
 import {
   setGettingStartedEmptyState,
   setInitialState,
@@ -30,16 +30,23 @@ import {
   duplicateSystemDashboard,
   updateVariablesAndFetchData,
   fetchVariableMetricLabelValues,
+  fetchPanelPreview,
 } from '~/monitoring/stores/actions';
+import * as getters from '~/monitoring/stores/getters';
+import * as types from '~/monitoring/stores/mutation_types';
+import storeState from '~/monitoring/stores/state';
 import {
   gqClient,
   parseEnvironmentsResponse,
   parseAnnotationsResponse,
 } from '~/monitoring/stores/utils';
-import getEnvironments from '~/monitoring/queries/getEnvironments.query.graphql';
-import getAnnotations from '~/monitoring/queries/getAnnotations.query.graphql';
-import getDashboardValidationWarnings from '~/monitoring/queries/getDashboardValidationWarnings.query.graphql';
-import storeState from '~/monitoring/stores/state';
+import Tracking from '~/tracking';
+import { defaultTimeRange } from '~/vue_shared/constants';
+import {
+  metricsDashboardResponse,
+  metricsDashboardViewModel,
+  metricsDashboardPanelCount,
+} from '../fixture_data';
 import {
   deploymentData,
   environmentData,
@@ -47,11 +54,6 @@ import {
   dashboardGitResponse,
   mockDashboardsErrorResponse,
 } from '../mock_data';
-import {
-  metricsDashboardResponse,
-  metricsDashboardViewModel,
-  metricsDashboardPanelCount,
-} from '../fixture_data';
 
 jest.mock('~/flash');
 
@@ -73,19 +75,7 @@ describe('Monitoring store actions', () => {
     commit = jest.fn();
     dispatch = jest.fn();
 
-    jest.spyOn(commonUtils, 'backOff').mockImplementation(callback => {
-      const q = new Promise((resolve, reject) => {
-        const stop = arg => (arg instanceof Error ? reject(arg) : resolve(arg));
-        const next = () => callback(next, stop);
-        // Define a timeout based on a mock timer
-        setTimeout(() => {
-          callback(next, stop);
-        });
-      });
-      // Run all resolved promises in chain
-      jest.runOnlyPendingTimers();
-      return q;
-    });
+    jest.spyOn(commonUtils, 'backOff').mockImplementation(backoffMockImplementation);
   });
 
   afterEach(() => {
@@ -98,7 +88,7 @@ describe('Monitoring store actions', () => {
   // Setup
 
   describe('setGettingStartedEmptyState', () => {
-    it('should commit SET_GETTING_STARTED_EMPTY_STATE mutation', done => {
+    it('should commit SET_GETTING_STARTED_EMPTY_STATE mutation', (done) => {
       testAction(
         setGettingStartedEmptyState,
         null,
@@ -115,7 +105,7 @@ describe('Monitoring store actions', () => {
   });
 
   describe('setInitialState', () => {
-    it('should commit SET_INITIAL_STATE mutation', done => {
+    it('should commit SET_INITIAL_STATE mutation', (done) => {
       testAction(
         setInitialState,
         {
@@ -243,7 +233,7 @@ describe('Monitoring store actions', () => {
         };
       });
 
-      it('dispatches a failure', done => {
+      it('dispatches a failure', (done) => {
         result()
           .then(() => {
             expect(commit).toHaveBeenCalledWith(
@@ -260,7 +250,7 @@ describe('Monitoring store actions', () => {
           .catch(done.fail);
       });
 
-      it('dispatches a failure action when a message is returned', done => {
+      it('dispatches a failure action when a message is returned', (done) => {
         result()
           .then(() => {
             expect(dispatch).toHaveBeenCalledWith(
@@ -275,7 +265,7 @@ describe('Monitoring store actions', () => {
           .catch(done.fail);
       });
 
-      it('does not show a flash error when showErrorBanner is disabled', done => {
+      it('does not show a flash error when showErrorBanner is disabled', (done) => {
         state.showErrorBanner = false;
 
         result()
@@ -332,7 +322,7 @@ describe('Monitoring store actions', () => {
       state.timeRange = defaultTimeRange;
     });
 
-    it('commits empty state when state.groups is empty', done => {
+    it('commits empty state when state.groups is empty', (done) => {
       const localGetters = {
         metricsWithData: () => [],
       };
@@ -363,7 +353,7 @@ describe('Monitoring store actions', () => {
         .catch(done.fail);
     });
 
-    it('dispatches fetchPrometheusMetric for each panel query', done => {
+    it('dispatches fetchPrometheusMetric for each panel query', (done) => {
       state.dashboard.panelGroups = convertObjectPropsToCamelCase(
         metricsDashboardResponse.dashboard.panel_groups,
       );
@@ -400,7 +390,7 @@ describe('Monitoring store actions', () => {
       done();
     });
 
-    it('dispatches fetchPrometheusMetric for each panel query, handles an error', done => {
+    it('dispatches fetchPrometheusMetric for each panel query, handles an error', (done) => {
       state.dashboard.panelGroups = metricsDashboardViewModel.panelGroups;
       const metric = state.dashboard.panelGroups[0].panels[0].metrics[0];
 
@@ -459,7 +449,7 @@ describe('Monitoring store actions', () => {
       };
     });
 
-    it('commits result', done => {
+    it('commits result', (done) => {
       mock.onGet(prometheusEndpointPath).reply(200, { data }); // One attempt
 
       testAction(
@@ -483,7 +473,6 @@ describe('Monitoring store actions', () => {
         ],
         [],
         () => {
-          expect(mock.history.get).toHaveLength(1);
           done();
         },
       ).catch(done.fail);
@@ -496,7 +485,7 @@ describe('Monitoring store actions', () => {
         step: 60,
       };
 
-      it('uses calculated step', done => {
+      it('uses calculated step', (done) => {
         mock.onGet(prometheusEndpointPath).reply(200, { data }); // One attempt
 
         testAction(
@@ -538,7 +527,7 @@ describe('Monitoring store actions', () => {
         step: 7,
       };
 
-      it('uses metric step', done => {
+      it('uses metric step', (done) => {
         mock.onGet(prometheusEndpointPath).reply(200, { data }); // One attempt
 
         testAction(
@@ -569,46 +558,8 @@ describe('Monitoring store actions', () => {
       });
     });
 
-    it('commits result, when waiting for results', done => {
-      // Mock multiple attempts while the cache is filling up
-      mock.onGet(prometheusEndpointPath).replyOnce(statusCodes.NO_CONTENT);
-      mock.onGet(prometheusEndpointPath).replyOnce(statusCodes.NO_CONTENT);
-      mock.onGet(prometheusEndpointPath).replyOnce(statusCodes.NO_CONTENT);
-      mock.onGet(prometheusEndpointPath).reply(200, { data }); // 4th attempt
-
-      testAction(
-        fetchPrometheusMetric,
-        { metric, defaultQueryParams },
-        state,
-        [
-          {
-            type: types.REQUEST_METRIC_RESULT,
-            payload: {
-              metricId: metric.metricId,
-            },
-          },
-          {
-            type: types.RECEIVE_METRIC_RESULT_SUCCESS,
-            payload: {
-              metricId: metric.metricId,
-              data,
-            },
-          },
-        ],
-        [],
-        () => {
-          expect(mock.history.get).toHaveLength(4);
-          done();
-        },
-      ).catch(done.fail);
-    });
-
-    it('commits failure, when waiting for results and getting a server error', done => {
-      // Mock multiple attempts while the cache is filling up and fails
-      mock.onGet(prometheusEndpointPath).replyOnce(statusCodes.NO_CONTENT);
-      mock.onGet(prometheusEndpointPath).replyOnce(statusCodes.NO_CONTENT);
-      mock.onGet(prometheusEndpointPath).replyOnce(statusCodes.NO_CONTENT);
-      mock.onGet(prometheusEndpointPath).reply(500); // 4th attempt
+    it('commits failure, when waiting for results and getting a server error', (done) => {
+      mock.onGet(prometheusEndpointPath).reply(500);
 
       const error = new Error('Request failed with status code 500');
 
@@ -632,8 +583,7 @@ describe('Monitoring store actions', () => {
           },
         ],
         [],
-      ).catch(e => {
-        expect(mock.history.get).toHaveLength(4);
+      ).catch((e) => {
         expect(e).toEqual(error);
         done();
       });
@@ -1041,7 +991,7 @@ describe('Monitoring store actions', () => {
       state.dashboardsEndpoint = '/dashboards.json';
     });
 
-    it('Succesful POST request resolves', done => {
+    it('Succesful POST request resolves', (done) => {
       mock.onPost(state.dashboardsEndpoint).reply(statusCodes.CREATED, {
         dashboard: dashboardGitResponse[1],
       });
@@ -1054,7 +1004,7 @@ describe('Monitoring store actions', () => {
         .catch(done.fail);
     });
 
-    it('Succesful POST request resolves to a dashboard', done => {
+    it('Succesful POST request resolves to a dashboard', (done) => {
       const mockCreatedDashboard = dashboardGitResponse[1];
 
       const params = {
@@ -1076,7 +1026,7 @@ describe('Monitoring store actions', () => {
       });
 
       testAction(duplicateSystemDashboard, params, state, [], [])
-        .then(result => {
+        .then((result) => {
           expect(mock.history.post).toHaveLength(1);
           expect(mock.history.post[0].data).toEqual(expectedPayload);
           expect(result).toEqual(mockCreatedDashboard);
@@ -1086,10 +1036,10 @@ describe('Monitoring store actions', () => {
         .catch(done.fail);
     });
 
-    it('Failed POST request throws an error', done => {
+    it('Failed POST request throws an error', (done) => {
       mock.onPost(state.dashboardsEndpoint).reply(statusCodes.BAD_REQUEST);
 
-      testAction(duplicateSystemDashboard, {}, state, [], []).catch(err => {
+      testAction(duplicateSystemDashboard, {}, state, [], []).catch((err) => {
         expect(mock.history.post).toHaveLength(1);
         expect(err).toEqual(expect.any(String));
 
@@ -1097,14 +1047,14 @@ describe('Monitoring store actions', () => {
       });
     });
 
-    it('Failed POST request throws an error with a description', done => {
+    it('Failed POST request throws an error with a description', (done) => {
       const backendErrorMsg = 'This file already exists!';
 
       mock.onPost(state.dashboardsEndpoint).reply(statusCodes.BAD_REQUEST, {
         error: backendErrorMsg,
       });
 
-      testAction(duplicateSystemDashboard, {}, state, [], []).catch(err => {
+      testAction(duplicateSystemDashboard, {}, state, [], []).catch((err) => {
         expect(mock.history.post).toHaveLength(1);
         expect(err).toEqual(expect.any(String));
         expect(err).toEqual(expect.stringContaining(backendErrorMsg));
@@ -1117,7 +1067,7 @@ describe('Monitoring store actions', () => {
   // Variables manipulation
 
   describe('updateVariablesAndFetchData', () => {
-    it('should commit UPDATE_VARIABLE_VALUE mutation and fetch data', done => {
+    it('should commit UPDATE_VARIABLE_VALUE mutation and fetch data', (done) => {
       testAction(
         updateVariablesAndFetchData,
         { pod: 'POD' },
@@ -1203,6 +1153,71 @@ describe('Monitoring store actions', () => {
           );
         },
       );
+    });
+  });
+
+  describe('fetchPanelPreview', () => {
+    const panelPreviewEndpoint = '/builder.json';
+    const mockYmlContent = 'mock yml content';
+
+    beforeEach(() => {
+      state.panelPreviewEndpoint = panelPreviewEndpoint;
+    });
+
+    it('should not commit or dispatch if payload is empty', () => {
+      testAction(fetchPanelPreview, '', state, [], []);
+    });
+
+    it('should store the panel and fetch metric results', () => {
+      const mockPanel = {
+        title: 'Go heap size',
+        type: 'area-chart',
+      };
+
+      mock
+        .onPost(panelPreviewEndpoint, { panel_yaml: mockYmlContent })
+        .reply(statusCodes.OK, mockPanel);
+
+      testAction(
+        fetchPanelPreview,
+        mockYmlContent,
+        state,
+        [
+          { type: types.SET_PANEL_PREVIEW_IS_SHOWN, payload: true },
+          { type: types.REQUEST_PANEL_PREVIEW, payload: mockYmlContent },
+          { type: types.RECEIVE_PANEL_PREVIEW_SUCCESS, payload: mockPanel },
+        ],
+        [{ type: 'fetchPanelPreviewMetrics' }],
+      );
+    });
+
+    it('should display a validation error when the backend cannot process the yml', () => {
+      const mockErrorMsg = 'Each "metric" must define one of :query or :query_range';
+
+      mock
+        .onPost(panelPreviewEndpoint, { panel_yaml: mockYmlContent })
+        .reply(statusCodes.UNPROCESSABLE_ENTITY, {
+          message: mockErrorMsg,
+        });
+
+      testAction(fetchPanelPreview, mockYmlContent, state, [
+        { type: types.SET_PANEL_PREVIEW_IS_SHOWN, payload: true },
+        { type: types.REQUEST_PANEL_PREVIEW, payload: mockYmlContent },
+        { type: types.RECEIVE_PANEL_PREVIEW_FAILURE, payload: mockErrorMsg },
+      ]);
+    });
+
+    it('should display a generic error when the backend fails', () => {
+      mock.onPost(panelPreviewEndpoint, { panel_yaml: mockYmlContent }).reply(500);
+
+      testAction(fetchPanelPreview, mockYmlContent, state, [
+        { type: types.SET_PANEL_PREVIEW_IS_SHOWN, payload: true },
+        { type: types.REQUEST_PANEL_PREVIEW, payload: mockYmlContent },
+        {
+          type: types.RECEIVE_PANEL_PREVIEW_FAILURE,
+          payload: 'Request failed with status code 500',
+        },
+      ]);
     });
   });
 });

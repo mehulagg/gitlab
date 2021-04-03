@@ -3,8 +3,8 @@
 module Gitlab
   module Mirror
     # Runs scheduler every minute
-    SCHEDULER_CRON = '* * * * *'.freeze
-    PULL_CAPACITY_KEY = 'MIRROR_PULL_CAPACITY'.freeze
+    SCHEDULER_CRON = '* * * * *'
+    PULL_CAPACITY_KEY = 'MIRROR_PULL_CAPACITY'
     JITTER = 1.minute
 
     # TODO: Dynamically determine mirror update interval based on total number
@@ -41,7 +41,7 @@ module Gitlab
 
         available = max_capacity - current_capacity
         if available < 0
-          Rails.logger.info("Mirror available capacity is below 0: #{available}") # rubocop:disable Gitlab/RailsLogger
+          Gitlab::AppLogger.info("Mirror available capacity is below 0: #{available}")
           available = 0
         end
 

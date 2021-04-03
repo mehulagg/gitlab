@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import Api from '~/api';
+import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 
 describe('Api', () => {
@@ -34,7 +34,7 @@ describe('Api', () => {
       expect(builtUrl).toEqual(expectedOutput);
     });
 
-    [null, '', '/'].forEach(root => {
+    [null, '', '/'].forEach((root) => {
       it(`works when relative_url_root is ${root}`, () => {
         window.gon.relative_url_root = root;
         const input = '/api/:version/foo/bar';
@@ -118,15 +118,33 @@ describe('Api', () => {
     });
   });
 
+  describe('container registry', () => {
+    describe('containerRegistryDetails', () => {
+      it('fetch container registry  details', async () => {
+        const expectedUrl = `foo`;
+        const apiResponse = {};
+
+        jest.spyOn(axios, 'get');
+        jest.spyOn(Api, 'buildUrl').mockReturnValueOnce(expectedUrl);
+        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, apiResponse);
+
+        const { data } = await Api.containerRegistryDetails(1);
+
+        expect(data).toEqual(apiResponse);
+        expect(axios.get).toHaveBeenCalledWith(expectedUrl, {});
+      });
+    });
+  });
+
   describe('group', () => {
-    it('fetches a group', done => {
+    it('fetches a group', (done) => {
       const groupId = '123456';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}`;
       mock.onGet(expectedUrl).reply(httpStatus.OK, {
         name: 'test',
       });
 
-      Api.group(groupId, response => {
+      Api.group(groupId, (response) => {
         expect(response.name).toBe('test');
         done();
       });
@@ -134,7 +152,7 @@ describe('Api', () => {
   });
 
   describe('groupMembers', () => {
-    it('fetches group members', done => {
+    it('fetches group members', (done) => {
       const groupId = '54321';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/members`;
       const expectedData = [{ id: 7 }];
@@ -149,8 +167,82 @@ describe('Api', () => {
     });
   });
 
+  describe('addGroupMembersByUserId', () => {
+    it('adds an existing User as a new Group Member by User ID', () => {
+      const groupId = 1;
+      const expectedUserId = 2;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/1/members`;
+      const params = {
+        user_id: expectedUserId,
+        access_level: 10,
+        expires_at: undefined,
+      };
+
+      mock.onPost(expectedUrl).reply(200, {
+        id: expectedUserId,
+        state: 'active',
+      });
+
+      return Api.addGroupMembersByUserId(groupId, params).then(({ data }) => {
+        expect(data.id).toBe(expectedUserId);
+        expect(data.state).toBe('active');
+      });
+    });
+  });
+
+  describe('inviteGroupMembersByEmail', () => {
+    it('invites a new email address to create a new User and become a Group Member', () => {
+      const groupId = 1;
+      const email = 'email@example.com';
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/1/invitations`;
+      const params = {
+        email,
+        access_level: 10,
+        expires_at: undefined,
+      };
+
+      mock.onPost(expectedUrl).reply(200, {
+        status: 'success',
+      });
+
+      return Api.inviteGroupMembersByEmail(groupId, params).then(({ data }) => {
+        expect(data.status).toBe('success');
+      });
+    });
+  });
+
+  describe('groupMilestones', () => {
+    it('fetches group milestones', (done) => {
+      const groupId = '16';
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/milestones`;
+      const expectedData = [
+        {
+          id: 12,
+          iid: 3,
+          group_id: 16,
+          title: '10.0',
+          description: 'Version',
+          due_date: '2013-11-29',
+          start_date: '2013-11-10',
+          state: 'active',
+          updated_at: '2013-10-02T09:24:18Z',
+          created_at: '2013-10-02T09:24:18Z',
+          web_url: 'https://gitlab.com/groups/gitlab-org/-/milestones/42',
+        },
+      ];
+      mock.onGet(expectedUrl).reply(httpStatus.OK, expectedData);
+
+      Api.groupMilestones(groupId)
+        .then(({ data }) => {
+          expect(data).toEqual(expectedData);
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
   describe('groups', () => {
-    it('fetches groups', done => {
+    it('fetches groups', (done) => {
       const query = 'dummy query';
       const options = { unused: 'option' };
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups.json`;
@@ -160,7 +252,7 @@ describe('Api', () => {
         },
       ]);
 
-      Api.groups(query, options, response => {
+      Api.groups(query, options, (response) => {
         expect(response.length).toBe(1);
         expect(response[0].name).toBe('test');
         done();
@@ -168,8 +260,30 @@ describe('Api', () => {
     });
   });
 
+  describe('groupLabels', () => {
+    it('fetches group labels', (done) => {
+      const options = { params: { search: 'foo' } };
+      const expectedGroup = 'gitlab-org';
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${expectedGroup}/labels`;
+      mock.onGet(expectedUrl).reply(httpStatus.OK, [
+        {
+          id: 1,
+          name: 'Foo Label',
+        },
+      ]);
+
+      Api.groupLabels(expectedGroup, options)
+        .then((res) => {
+          expect(res.length).toBe(1);
+          expect(res[0].name).toBe('Foo Label');
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
   describe('namespaces', () => {
-    it('fetches namespaces', done => {
+    it('fetches namespaces', (done) => {
       const query = 'dummy query';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/namespaces.json`;
       mock.onGet(expectedUrl).reply(httpStatus.OK, [
@@ -178,7 +292,7 @@ describe('Api', () => {
         },
       ]);
 
-      Api.namespaces(query, response => {
+      Api.namespaces(query, (response) => {
         expect(response.length).toBe(1);
         expect(response[0].name).toBe('test');
         done();
@@ -187,7 +301,7 @@ describe('Api', () => {
   });
 
   describe('projects', () => {
-    it('fetches projects with membership when logged in', done => {
+    it('fetches projects with membership when logged in', (done) => {
       const query = 'dummy query';
       const options = { unused: 'option' };
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects.json`;
@@ -198,14 +312,14 @@ describe('Api', () => {
         },
       ]);
 
-      Api.projects(query, options, response => {
+      Api.projects(query, options, (response) => {
         expect(response.length).toBe(1);
         expect(response[0].name).toBe('test');
         done();
       });
     });
 
-    it('fetches projects without membership when not logged in', done => {
+    it('fetches projects without membership when not logged in', (done) => {
       const query = 'dummy query';
       const options = { unused: 'option' };
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects.json`;
@@ -215,7 +329,7 @@ describe('Api', () => {
         },
       ]);
 
-      Api.projects(query, options, response => {
+      Api.projects(query, options, (response) => {
         expect(response.length).toBe(1);
         expect(response[0].name).toBe('test');
         done();
@@ -224,7 +338,7 @@ describe('Api', () => {
   });
 
   describe('updateProject', () => {
-    it('update a project with the given payload', done => {
+    it('update a project with the given payload', (done) => {
       const projectPath = 'foo';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}`;
       mock.onPut(expectedUrl).reply(httpStatus.OK, { foo: 'bar' });
@@ -239,7 +353,7 @@ describe('Api', () => {
   });
 
   describe('projectUsers', () => {
-    it('fetches all users of a particular project', done => {
+    it('fetches all users of a particular project', (done) => {
       const query = 'dummy query';
       const options = { unused: 'option' };
       const projectPath = 'gitlab-org%2Fgitlab-ce';
@@ -251,7 +365,7 @@ describe('Api', () => {
       ]);
 
       Api.projectUsers('gitlab-org/gitlab-ce', query, options)
-        .then(response => {
+        .then((response) => {
           expect(response.length).toBe(1);
           expect(response[0].name).toBe('test');
         })
@@ -264,7 +378,7 @@ describe('Api', () => {
     const projectPath = 'abc';
     const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests`;
 
-    it('fetches all merge requests for a project', done => {
+    it('fetches all merge requests for a project', (done) => {
       const mockData = [{ source_branch: 'foo' }, { source_branch: 'bar' }];
       mock.onGet(expectedUrl).reply(httpStatus.OK, mockData);
       Api.projectMergeRequests(projectPath)
@@ -277,7 +391,7 @@ describe('Api', () => {
         .catch(done.fail);
     });
 
-    it('fetches merge requests filtered with passed params', done => {
+    it('fetches merge requests filtered with passed params', (done) => {
       const params = {
         source_branch: 'bar',
       };
@@ -295,7 +409,7 @@ describe('Api', () => {
   });
 
   describe('projectMergeRequest', () => {
-    it('fetches a merge request', done => {
+    it('fetches a merge request', (done) => {
       const projectPath = 'abc';
       const mergeRequestId = '123456';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests/${mergeRequestId}`;
@@ -313,7 +427,7 @@ describe('Api', () => {
   });
 
   describe('projectMergeRequestChanges', () => {
-    it('fetches the changes of a merge request', done => {
+    it('fetches the changes of a merge request', (done) => {
       const projectPath = 'abc';
       const mergeRequestId = '123456';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests/${mergeRequestId}/changes`;
@@ -331,7 +445,7 @@ describe('Api', () => {
   });
 
   describe('projectMergeRequestVersions', () => {
-    it('fetches the versions of a merge request', done => {
+    it('fetches the versions of a merge request', (done) => {
       const projectPath = 'abc';
       const mergeRequestId = '123456';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests/${mergeRequestId}/versions`;
@@ -352,7 +466,7 @@ describe('Api', () => {
   });
 
   describe('projectRunners', () => {
-    it('fetches the runners of a project', done => {
+    it('fetches the runners of a project', (done) => {
       const projectPath = 7;
       const params = { scope: 'active' };
       const mockData = [{ id: 4 }];
@@ -368,8 +482,118 @@ describe('Api', () => {
     });
   });
 
+  describe('projectShareWithGroup', () => {
+    it('invites a group to share access with the authenticated project', () => {
+      const projectId = 1;
+      const sharedGroupId = 99;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/share`;
+      const options = {
+        group_id: sharedGroupId,
+        group_access: 10,
+        expires_at: undefined,
+      };
+
+      jest.spyOn(axios, 'post');
+
+      mock.onPost(expectedUrl).reply(200, {
+        status: 'success',
+      });
+
+      return Api.projectShareWithGroup(projectId, options).then(({ data }) => {
+        expect(data.status).toBe('success');
+        expect(axios.post).toHaveBeenCalledWith(expectedUrl, options);
+      });
+    });
+  });
+
+  describe('projectMilestones', () => {
+    it('fetches project milestones', (done) => {
+      const projectId = 1;
+      const options = { state: 'active' };
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/1/milestones`;
+      mock.onGet(expectedUrl).reply(200, [
+        {
+          id: 1,
+          title: 'milestone1',
+          state: 'active',
+        },
+      ]);
+
+      Api.projectMilestones(projectId, options)
+        .then(({ data }) => {
+          expect(data.length).toBe(1);
+          expect(data[0].title).toBe('milestone1');
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('addProjectIssueAsTodo', () => {
+    it('adds issue ID as a todo', () => {
+      const projectId = 1;
+      const issueIid = 11;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/1/issues/11/todo`;
+      mock.onPost(expectedUrl).reply(200, {
+        id: 112,
+        project: {
+          id: 1,
+        },
+      });
+
+      return Api.addProjectIssueAsTodo(projectId, issueIid).then(({ data }) => {
+        expect(data.id).toBe(112);
+        expect(data.project.id).toBe(projectId);
+      });
+    });
+  });
+
+  describe('addProjectMembersByUserId', () => {
+    it('adds an existing User as a new Project Member by User ID', () => {
+      const projectId = 1;
+      const expectedUserId = 2;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/1/members`;
+      const params = {
+        user_id: expectedUserId,
+        access_level: 10,
+        expires_at: undefined,
+      };
+
+      mock.onPost(expectedUrl).reply(200, {
+        id: expectedUserId,
+        state: 'active',
+      });
+
+      return Api.addProjectMembersByUserId(projectId, params).then(({ data }) => {
+        expect(data.id).toBe(expectedUserId);
+        expect(data.state).toBe('active');
+      });
+    });
+  });
+
+  describe('inviteProjectMembersByEmail', () => {
+    it('invites a new email address to create a new User and become a Project Member', () => {
+      const projectId = 1;
+      const expectedEmail = 'email@example.com';
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/1/invitations`;
+      const params = {
+        email: expectedEmail,
+        access_level: 10,
+        expires_at: undefined,
+      };
+
+      mock.onPost(expectedUrl).reply(200, {
+        status: 'success',
+      });
+
+      return Api.inviteProjectMembersByEmail(projectId, params).then(({ data }) => {
+        expect(data.status).toBe('success');
+      });
+    });
+  });
+
   describe('newLabel', () => {
-    it('creates a new label', done => {
+    it('creates a new project label', (done) => {
       const namespace = 'some namespace';
       const project = 'some project';
       const labelData = { some: 'data' };
@@ -377,7 +601,7 @@ describe('Api', () => {
       const expectedData = {
         label: labelData,
       };
-      mock.onPost(expectedUrl).reply(config => {
+      mock.onPost(expectedUrl).reply((config) => {
         expect(config.data).toBe(JSON.stringify(expectedData));
 
         return [
@@ -388,39 +612,36 @@ describe('Api', () => {
         ];
       });
 
-      Api.newLabel(namespace, project, labelData, response => {
+      Api.newLabel(namespace, project, labelData, (response) => {
         expect(response.name).toBe('test');
         done();
       });
     });
 
-    it('creates a group label', done => {
+    it('creates a new group label', (done) => {
       const namespace = 'group/subgroup';
-      const labelData = { some: 'data' };
+      const labelData = { name: 'Foo', color: '#000000' };
       const expectedUrl = Api.buildUrl(Api.groupLabelsPath).replace(':namespace_path', namespace);
-      const expectedData = {
-        label: labelData,
-      };
-      mock.onPost(expectedUrl).reply(config => {
-        expect(config.data).toBe(JSON.stringify(expectedData));
+      mock.onPost(expectedUrl).reply((config) => {
+        expect(config.data).toBe(JSON.stringify({ color: labelData.color }));
 
         return [
           httpStatus.OK,
           {
-            name: 'test',
+            ...labelData,
           },
         ];
       });
 
-      Api.newLabel(namespace, undefined, labelData, response => {
-        expect(response.name).toBe('test');
+      Api.newLabel(namespace, undefined, labelData, (response) => {
+        expect(response.name).toBe('Foo');
         done();
       });
     });
   });
 
   describe('groupProjects', () => {
-    it('fetches group projects', done => {
+    it('fetches group projects', (done) => {
       const groupId = '123456';
       const query = 'dummy query';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/projects.json`;
@@ -430,10 +651,34 @@ describe('Api', () => {
         },
       ]);
 
-      Api.groupProjects(groupId, query, {}, response => {
+      Api.groupProjects(groupId, query, {}, (response) => {
         expect(response.length).toBe(1);
         expect(response[0].name).toBe('test');
         done();
+      });
+    });
+  });
+
+  describe('groupShareWithGroup', () => {
+    it('invites a group to share access with the authenticated group', () => {
+      const groupId = 1;
+      const sharedGroupId = 99;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/share`;
+      const options = {
+        group_id: sharedGroupId,
+        group_access: 10,
+        expires_at: undefined,
+      };
+
+      jest.spyOn(axios, 'post');
+
+      mock.onPost(expectedUrl).reply(200, {
+        status: 'success',
+      });
+
+      return Api.groupShareWithGroup(groupId, options).then(({ data }) => {
+        expect(data.status).toBe('success');
+        expect(axios.post).toHaveBeenCalledWith(expectedUrl, options);
       });
     });
   });
@@ -463,14 +708,15 @@ describe('Api', () => {
   });
 
   describe('issueTemplate', () => {
-    it('fetches an issue template', done => {
-      const namespace = 'some namespace';
-      const project = 'some project';
-      const templateKey = ' template #%?.key ';
-      const templateType = 'template type';
-      const expectedUrl = `${dummyUrlRoot}/${namespace}/${project}/templates/${templateType}/${encodeURIComponent(
-        templateKey,
-      )}`;
+    const namespace = 'some namespace';
+    const project = 'some project';
+    const templateKey = ' template #%?.key ';
+    const templateType = 'template type';
+    const expectedUrl = `${dummyUrlRoot}/${namespace}/${project}/templates/${templateType}/${encodeURIComponent(
+      templateKey,
+    )}`;
+
+    it('fetches an issue template', (done) => {
       mock.onGet(expectedUrl).reply(httpStatus.OK, 'test');
 
       Api.issueTemplate(namespace, project, templateKey, templateType, (error, response) => {
@@ -478,15 +724,58 @@ describe('Api', () => {
         done();
       });
     });
+
+    describe('when an error occurs while fetching an issue template', () => {
+      it('rejects the Promise', () => {
+        mock.onGet(expectedUrl).replyOnce(httpStatus.INTERNAL_SERVER_ERROR);
+
+        Api.issueTemplate(namespace, project, templateKey, templateType, () => {
+          expect(mock.history.get).toHaveLength(1);
+        });
+      });
+    });
+  });
+
+  describe('issueTemplates', () => {
+    const namespace = 'some namespace';
+    const project = 'some project';
+    const templateType = 'template type';
+    const expectedUrl = `${dummyUrlRoot}/${namespace}/${project}/templates/${templateType}`;
+
+    it('fetches all templates by type', (done) => {
+      const expectedData = [
+        { key: 'Template1', name: 'Template 1', content: 'This is template 1!' },
+      ];
+      mock.onGet(expectedUrl).reply(httpStatus.OK, expectedData);
+
+      Api.issueTemplates(namespace, project, templateType, (error, response) => {
+        expect(response.length).toBe(1);
+        const { key, name, content } = response[0];
+        expect(key).toBe('Template1');
+        expect(name).toBe('Template 1');
+        expect(content).toBe('This is template 1!');
+        done();
+      });
+    });
+
+    describe('when an error occurs while fetching issue templates', () => {
+      it('rejects the Promise', () => {
+        mock.onGet(expectedUrl).replyOnce(httpStatus.INTERNAL_SERVER_ERROR);
+
+        Api.issueTemplates(namespace, project, templateType, () => {
+          expect(mock.history.get).toHaveLength(1);
+        });
+      });
+    });
   });
 
   describe('projectTemplates', () => {
-    it('fetches a list of templates', done => {
+    it('fetches a list of templates', (done) => {
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/gitlab-org%2Fgitlab-ce/templates/licenses`;
 
       mock.onGet(expectedUrl).reply(httpStatus.OK, 'test');
 
-      Api.projectTemplates('gitlab-org/gitlab-ce', 'licenses', {}, response => {
+      Api.projectTemplates('gitlab-org/gitlab-ce', 'licenses', {}, (response) => {
         expect(response).toBe('test');
         done();
       });
@@ -494,13 +783,13 @@ describe('Api', () => {
   });
 
   describe('projectTemplate', () => {
-    it('fetches a single template', done => {
+    it('fetches a single template', (done) => {
       const data = { unused: 'option' };
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/gitlab-org%2Fgitlab-ce/templates/licenses/test%20license`;
 
       mock.onGet(expectedUrl).reply(httpStatus.OK, 'test');
 
-      Api.projectTemplate('gitlab-org/gitlab-ce', 'licenses', 'test license', data, response => {
+      Api.projectTemplate('gitlab-org/gitlab-ce', 'licenses', 'test license', data, (response) => {
         expect(response).toBe('test');
         done();
       });
@@ -508,7 +797,7 @@ describe('Api', () => {
   });
 
   describe('users', () => {
-    it('fetches users', done => {
+    it('fetches users', (done) => {
       const query = 'dummy query';
       const options = { unused: 'option' };
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/users.json`;
@@ -529,7 +818,7 @@ describe('Api', () => {
   });
 
   describe('user', () => {
-    it('fetches single user', done => {
+    it('fetches single user', (done) => {
       const userId = '123456';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/users/${userId}`;
       mock.onGet(expectedUrl).reply(httpStatus.OK, {
@@ -546,7 +835,7 @@ describe('Api', () => {
   });
 
   describe('user counts', () => {
-    it('fetches single user counts', done => {
+    it('fetches single user counts', (done) => {
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/user_counts`;
       mock.onGet(expectedUrl).reply(httpStatus.OK, {
         merge_requests: 4,
@@ -562,7 +851,7 @@ describe('Api', () => {
   });
 
   describe('user status', () => {
-    it('fetches single user status', done => {
+    it('fetches single user status', (done) => {
       const userId = '123456';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/users/${userId}/status`;
       mock.onGet(expectedUrl).reply(httpStatus.OK, {
@@ -579,7 +868,7 @@ describe('Api', () => {
   });
 
   describe('user projects', () => {
-    it('fetches all projects that belong to a particular user', done => {
+    it('fetches all projects that belong to a particular user', (done) => {
       const query = 'dummy query';
       const options = { unused: 'option' };
       const userId = '123456';
@@ -590,7 +879,7 @@ describe('Api', () => {
         },
       ]);
 
-      Api.userProjects(userId, query, options, response => {
+      Api.userProjects(userId, query, options, (response) => {
         expect(response.length).toBe(1);
         expect(response[0].name).toBe('test');
         done();
@@ -599,7 +888,7 @@ describe('Api', () => {
   });
 
   describe('commitPipelines', () => {
-    it('fetches pipelines for a given commit', done => {
+    it('fetches pipelines for a given commit', (done) => {
       const projectId = 'example/foobar';
       const commitSha = 'abc123def';
       const expectedUrl = `${dummyUrlRoot}/${projectId}/commit/${commitSha}/pipelines`;
@@ -619,8 +908,28 @@ describe('Api', () => {
     });
   });
 
+  describe('pipelineJobs', () => {
+    it.each([undefined, {}, { foo: true }])(
+      'fetches the jobs for a given pipeline given %p params',
+      async (params) => {
+        const projectId = 123;
+        const pipelineId = 456;
+        const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/pipelines/${pipelineId}/jobs`;
+        const payload = [
+          {
+            name: 'test',
+          },
+        ];
+        mock.onGet(expectedUrl, { params }).reply(httpStatus.OK, payload);
+
+        const { data } = await Api.pipelineJobs(projectId, pipelineId, params);
+        expect(data).toEqual(payload);
+      },
+    );
+  });
+
   describe('createBranch', () => {
-    it('creates new branch', done => {
+    it('creates new branch', (done) => {
       const ref = 'master';
       const branch = 'new-branch-name';
       const dummyProjectPath = 'gitlab-org/gitlab-ce';
@@ -645,7 +954,7 @@ describe('Api', () => {
   });
 
   describe('projectForks', () => {
-    it('gets forked projects', done => {
+    it('gets forked projects', (done) => {
       const dummyProjectPath = 'gitlab-org/gitlab-ce';
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${encodeURIComponent(
         dummyProjectPath,
@@ -661,6 +970,79 @@ describe('Api', () => {
           expect(axios.get).toHaveBeenCalledWith(expectedUrl, {
             params: { visibility: 'private' },
           });
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('createContextCommits', () => {
+    it('creates a new context commit', (done) => {
+      const projectPath = 'abc';
+      const mergeRequestId = '123456';
+      const commitsData = ['abcdefg'];
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests/${mergeRequestId}/context_commits`;
+      const expectedData = {
+        commits: commitsData,
+      };
+
+      jest.spyOn(axios, 'post');
+
+      mock.onPost(expectedUrl).replyOnce(200, [
+        {
+          id: 'abcdefghijklmnop',
+          short_id: 'abcdefg',
+          title: 'Dummy commit',
+        },
+      ]);
+
+      Api.createContextCommits(projectPath, mergeRequestId, expectedData)
+        .then(({ data }) => {
+          expect(data[0].title).toBe('Dummy commit');
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('allContextCommits', () => {
+    it('gets all context commits', (done) => {
+      const projectPath = 'abc';
+      const mergeRequestId = '123456';
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests/${mergeRequestId}/context_commits`;
+
+      jest.spyOn(axios, 'get');
+
+      mock
+        .onGet(expectedUrl)
+        .replyOnce(200, [{ id: 'abcdef', short_id: 'abcdefghi', title: 'Dummy commit title' }]);
+
+      Api.allContextCommits(projectPath, mergeRequestId)
+        .then(({ data }) => {
+          expect(data[0].title).toBe('Dummy commit title');
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
+  describe('removeContextCommits', () => {
+    it('removes context commits', (done) => {
+      const projectPath = 'abc';
+      const mergeRequestId = '123456';
+      const commitsData = ['abcdefg'];
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectPath}/merge_requests/${mergeRequestId}/context_commits`;
+      const expectedData = {
+        commits: commitsData,
+      };
+
+      jest.spyOn(axios, 'delete');
+
+      mock.onDelete(expectedUrl).replyOnce(204);
+
+      Api.removeContextCommits(projectPath, mergeRequestId, expectedData)
+        .then(() => {
+          expect(axios.delete).toHaveBeenCalledWith(expectedUrl, { data: expectedData });
         })
         .then(done)
         .catch(done.fail);
@@ -893,7 +1275,7 @@ describe('Api', () => {
   });
 
   describe('updateIssue', () => {
-    it('update an issue with the given payload', done => {
+    it('update an issue with the given payload', (done) => {
       const projectId = 8;
       const issue = 1;
       const expectedArray = [1, 2, 3];
@@ -910,7 +1292,7 @@ describe('Api', () => {
   });
 
   describe('updateMergeRequest', () => {
-    it('update an issue with the given payload', done => {
+    it('update an issue with the given payload', (done) => {
       const projectId = 8;
       const mergeRequest = 1;
       const expectedArray = [1, 2, 3];
@@ -927,7 +1309,7 @@ describe('Api', () => {
   });
 
   describe('tags', () => {
-    it('fetches all tags of a particular project', done => {
+    it('fetches all tags of a particular project', (done) => {
       const query = 'dummy query';
       const options = { unused: 'option' };
       const projectId = 8;
@@ -997,6 +1379,38 @@ describe('Api', () => {
     });
   });
 
+  describe('updateFreezePeriod', () => {
+    const options = {
+      id: 10,
+      freeze_start: '* * * * *',
+      freeze_end: '* * * * *',
+      cron_timezone: 'America/Juneau',
+      created_at: '2020-07-11T07:04:50.153Z',
+      updated_at: '2020-07-11T07:04:50.153Z',
+    };
+    const projectId = 8;
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/freeze_periods/${options.id}`;
+
+    const expectedResult = {
+      id: 10,
+      freeze_start: '* * * * *',
+      freeze_end: '* * * * *',
+      cron_timezone: 'America/Juneau',
+      created_at: '2020-07-11T07:04:50.153Z',
+      updated_at: '2020-07-11T07:04:50.153Z',
+    };
+
+    describe('when the freeze period is successfully updated', () => {
+      it('resolves the Promise', () => {
+        mock.onPut(expectedUrl, options).replyOnce(httpStatus.OK, expectedResult);
+
+        return Api.updateFreezePeriod(projectId, options).then(({ data }) => {
+          expect(data).toStrictEqual(expectedResult);
+        });
+      });
+    });
+  });
+
   describe('createPipeline', () => {
     it('creates new pipeline', () => {
       const redirectUrl = 'ci-project/-/pipelines/95';
@@ -1022,6 +1436,173 @@ describe('Api', () => {
           headers: {
             'Content-Type': 'application/json',
           },
+        });
+      });
+    });
+  });
+
+  describe('trackRedisCounterEvent', () => {
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/usage_data/increment_counter`;
+
+    const event = 'dummy_event';
+    const postData = { event };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    describe('when usage data increment counter is called with feature flag disabled', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: false };
+      });
+
+      it('returns null', () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl).replyOnce(httpStatus.OK, true);
+
+        expect(axios.post).toHaveBeenCalledTimes(0);
+        expect(Api.trackRedisCounterEvent(event)).toEqual(null);
+      });
+    });
+
+    describe('when usage data increment counter is called', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: true };
+      });
+
+      it('resolves the Promise', () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl, { event }).replyOnce(httpStatus.OK, true);
+
+        return Api.trackRedisCounterEvent(event).then(({ data }) => {
+          expect(data).toEqual(true);
+          expect(axios.post).toHaveBeenCalledWith(expectedUrl, postData, { headers });
+        });
+      });
+    });
+  });
+
+  describe('trackRedisHllUserEvent', () => {
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/usage_data/increment_unique_users`;
+
+    const event = 'dummy_event';
+    const postData = { event };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    describe('when usage data increment unique users is called with feature flag disabled', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: false };
+      });
+
+      it('returns null', () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl).replyOnce(httpStatus.OK, true);
+
+        expect(axios.post).toHaveBeenCalledTimes(0);
+        expect(Api.trackRedisHllUserEvent(event)).toEqual(null);
+      });
+    });
+
+    describe('when usage data increment unique users is called', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: true };
+      });
+
+      it('resolves the Promise', () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl, { event }).replyOnce(httpStatus.OK, true);
+
+        return Api.trackRedisHllUserEvent(event).then(({ data }) => {
+          expect(data).toEqual(true);
+          expect(axios.post).toHaveBeenCalledWith(expectedUrl, postData, { headers });
+        });
+      });
+    });
+  });
+
+  describe('Feature Flag User List', () => {
+    let expectedUrl;
+    let projectId;
+    let mockUserList;
+
+    beforeEach(() => {
+      projectId = 1000;
+      expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/feature_flags_user_lists`;
+      mockUserList = {
+        name: 'mock_user_list',
+        user_xids: '1,2,3,4',
+        project_id: 1,
+        id: 1,
+        iid: 1,
+      };
+    });
+
+    describe('fetchFeatureFlagUserLists', () => {
+      it('GETs the right url', () => {
+        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
+
+        return Api.fetchFeatureFlagUserLists(projectId).then(({ data }) => {
+          expect(data).toEqual([]);
+        });
+      });
+    });
+
+    describe('searchFeatureFlagUserLists', () => {
+      it('GETs the right url', () => {
+        mock.onGet(expectedUrl, { params: { search: 'test' } }).replyOnce(httpStatus.OK, []);
+
+        return Api.searchFeatureFlagUserLists(projectId, 'test').then(({ data }) => {
+          expect(data).toEqual([]);
+        });
+      });
+    });
+
+    describe('createFeatureFlagUserList', () => {
+      it('POSTs data to the right url', () => {
+        const mockUserListData = {
+          name: 'mock_user_list',
+          user_xids: '1,2,3,4',
+        };
+        mock.onPost(expectedUrl, mockUserListData).replyOnce(httpStatus.OK, mockUserList);
+
+        return Api.createFeatureFlagUserList(projectId, mockUserListData).then(({ data }) => {
+          expect(data).toEqual(mockUserList);
+        });
+      });
+    });
+
+    describe('fetchFeatureFlagUserList', () => {
+      it('GETs the right url', () => {
+        mock.onGet(`${expectedUrl}/1`).replyOnce(httpStatus.OK, mockUserList);
+
+        return Api.fetchFeatureFlagUserList(projectId, 1).then(({ data }) => {
+          expect(data).toEqual(mockUserList);
+        });
+      });
+    });
+
+    describe('updateFeatureFlagUserList', () => {
+      it('PUTs the right url', () => {
+        mock
+          .onPut(`${expectedUrl}/1`)
+          .replyOnce(httpStatus.OK, { ...mockUserList, user_xids: '5' });
+
+        return Api.updateFeatureFlagUserList(projectId, {
+          ...mockUserList,
+          user_xids: '5',
+        }).then(({ data }) => {
+          expect(data).toEqual({ ...mockUserList, user_xids: '5' });
+        });
+      });
+    });
+
+    describe('deleteFeatureFlagUserList', () => {
+      it('DELETEs the right url', () => {
+        mock.onDelete(`${expectedUrl}/1`).replyOnce(httpStatus.OK, 'deleted');
+
+        return Api.deleteFeatureFlagUserList(projectId, 1).then(({ data }) => {
+          expect(data).toBe('deleted');
         });
       });
     });

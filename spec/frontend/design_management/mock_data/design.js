@@ -1,5 +1,5 @@
 export default {
-  id: 'design-id',
+  id: 'gid::/gitlab/Design/1',
   filename: 'test.jpg',
   fullPath: 'full-design-path',
   image: 'test.jpg',
@@ -8,18 +8,17 @@ export default {
     name: 'test',
   },
   issue: {
+    id: 'gid::/gitlab/Issue/1',
     title: 'My precious issue',
     webPath: 'full-issue-path',
     webUrl: 'full-issue-url',
     participants: {
-      edges: [
+      nodes: [
         {
-          node: {
-            name: 'Administrator',
-            username: 'root',
-            webUrl: 'link-to-author',
-            avatarUrl: 'link-to-avatar',
-          },
+          name: 'Administrator',
+          username: 'root',
+          webUrl: 'link-to-author',
+          avatarUrl: 'link-to-avatar',
         },
       ],
     },

@@ -2,28 +2,34 @@
 
 module Security
   class StoreScansService
-    def initialize(build)
-      @build = build
+    def self.execute(pipeline)
+      new(pipeline).execute
+    end
+
+    def initialize(pipeline)
+      @pipeline = pipeline
     end
 
     def execute
-      return if @build.canceled? || @build.skipped?
+      grouped_report_artifacts.each { |artifacts| StoreGroupedScansService.execute(artifacts) }
+    end
 
-      security_reports = @build.job_artifacts.security_reports
+    private
 
-      scan_params = security_reports.map do |job_artifact|
-        {
-          build: @build,
-          scan_type: job_artifact.file_type,
-          scanned_resources_count: Gitlab::Ci::Parsers::Security::ScannedResources.new.scanned_resources_count(job_artifact)
-        }
-      end
+    attr_reader :pipeline
 
-      ActiveRecord::Base.transaction do
-        scan_params.each do |param|
-          Security::Scan.safe_find_or_create_by!(param)
-        end
-      end
+    delegate :project, to: :pipeline, private: true
+
+    def grouped_report_artifacts
+      pipeline.job_artifacts
+              .security_reports
+              .group_by(&:file_type)
+              .select { |file_type, _| parse_report_file?(file_type) }
+              .values
+    end
+
+    def parse_report_file?(file_type)
+      project.feature_available?(Ci::Build::LICENSED_PARSER_FEATURES.fetch(file_type))
     end
   end
 end

@@ -1,8 +1,6 @@
 import { mount } from '@vue/test-utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
-import MRWidgetService from '~/vue_merge_request_widget/services/mr_widget_service';
-import DeploymentActions from '~/vue_merge_request_widget/components/deployment/deployment_actions.vue';
 import {
   CREATED,
   MANUAL_DEPLOY,
@@ -11,6 +9,8 @@ import {
   REDEPLOYING,
   STOPPING,
 } from '~/vue_merge_request_widget/components/deployment/constants';
+import DeploymentActions from '~/vue_merge_request_widget/components/deployment/deployment_actions.vue';
+import MRWidgetService from '~/vue_merge_request_widget/services/mr_widget_service';
 import {
   actionButtonMocks,
   deploymentMockData,
@@ -31,10 +31,7 @@ describe('DeploymentAction component', () => {
       wrapper.destroy();
     }
 
-    wrapper = mount(DeploymentActions, {
-      ...options,
-      provide: { glFeatures: { deployFromFooter: true } },
-    });
+    wrapper = mount(DeploymentActions, options);
   };
 
   const findStopButton = () => wrapper.find('.js-stop-env');

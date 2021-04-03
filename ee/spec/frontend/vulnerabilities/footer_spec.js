@@ -1,15 +1,17 @@
 import { shallowMount } from '@vue/test-utils';
-import Api from 'ee/api';
-import VulnerabilityFooter from 'ee/vulnerabilities/components/footer.vue';
-import HistoryEntry from 'ee/vulnerabilities/components/history_entry.vue';
-import VulnerabilitiesEventBus from 'ee/vulnerabilities/components/vulnerabilities_event_bus';
-import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
-import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
-import IssueNote from 'ee/vue_shared/security_reports/components/issue_note.vue';
-import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
+import Api from 'ee/api';
+import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
+import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
+import VulnerabilityFooter from 'ee/vulnerabilities/components/footer.vue';
+import GenericReportSection from 'ee/vulnerabilities/components/generic_report/report_section.vue';
+import HistoryEntry from 'ee/vulnerabilities/components/history_entry.vue';
+import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
+import RelatedJiraIssues from 'ee/vulnerabilities/components/related_jira_issues.vue';
+import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
+import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import initUserPopovers from '~/user_popovers';
 
 const mockAxios = new MockAdapter(axios);
@@ -19,41 +21,24 @@ jest.mock('~/user_popovers');
 describe('Vulnerability Footer', () => {
   let wrapper;
 
-  const minimumProps = {
-    discussionsUrl: `/discussions`,
-    solutionInfo: {
-      hasDownload: false,
-      hasMr: false,
-      hasRemediation: false,
-      isStandaloneVulnerability: true,
-      remediation: null,
-      solution: undefined,
-      vulnerabilityFeedbackHelpPath:
-        '/help/user/application_security/index#interacting-with-the-vulnerabilities',
-    },
-    finding: {},
+  const vulnerability = {
+    id: 1,
+    discussionsUrl: '/discussions',
     notesUrl: '/notes',
     project: {
-      url: '/root/security-reports',
-      value: 'Administrator / Security Reports',
+      fullPath: '/root/security-reports',
+      fullName: 'Administrator / Security Reports',
     },
-    vulnerabilityId: 1,
     canModifyRelatedIssues: true,
-  };
-
-  const solutionInfoProp = {
-    hasDownload: true,
+    relatedIssuesHelpPath: 'help/path',
     hasMr: false,
-    isStandaloneVulnerability: true,
-    remediation: {},
-    solution: 'Upgrade to fixed version.\n',
-    vulnerabilityFeedbackHelpPath:
-      '/help/user/application_security/index#interacting-with-the-vulnerabilities',
+    pipeline: {},
   };
 
-  const createWrapper = (props = minimumProps) => {
+  const createWrapper = (properties = {}, mountOptions = {}) => {
     wrapper = shallowMount(VulnerabilityFooter, {
-      propsData: props,
+      propsData: { vulnerability: { ...vulnerability, ...properties } },
+      ...mountOptions,
     });
   };
 
@@ -63,52 +48,58 @@ describe('Vulnerability Footer', () => {
     mockAxios.reset();
   });
 
-  describe('vulnerabilities event bus listener', () => {
-    it('calls the discussion url on vulnerabilities event bus emit of VULNERABILITY_STATE_CHANGE', () => {
+  describe('fetching discussions', () => {
+    it('calls the discussion url on if fetchDiscussions is called by the root', async () => {
       createWrapper();
       jest.spyOn(axios, 'get');
-      VulnerabilitiesEventBus.$emit('VULNERABILITY_STATE_CHANGE');
+      wrapper.vm.fetchDiscussions();
+
+      await axios.waitForAll();
+
       expect(axios.get).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('solution card', () => {
     it('does show solution card when there is one', () => {
-      createWrapper({ ...minimumProps, solutionInfo: solutionInfoProp });
-      expect(wrapper.contains(SolutionCard)).toBe(true);
-      expect(wrapper.find(SolutionCard).props()).toMatchObject(solutionInfoProp);
+      const properties = { remediations: [{ diff: [{}] }], solution: 'some solution' };
+      createWrapper(properties);
+
+      expect(wrapper.find(SolutionCard).exists()).toBe(true);
+      expect(wrapper.find(SolutionCard).props()).toEqual({
+        solution: properties.solution,
+        remediation: properties.remediations[0],
+        hasDownload: true,
+        hasMr: vulnerability.hasMr,
+      });
     });
 
     it('does not show solution card when there is not one', () => {
       createWrapper();
-      expect(wrapper.contains(SolutionCard)).toBe(false);
+      expect(wrapper.find(SolutionCard).exists()).toBe(false);
     });
   });
 
-  describe.each`
-    type               | prop                      | component
-    ${'issue'}         | ${'issueFeedback'}        | ${IssueNote}
-    ${'merge request'} | ${'mergeRequestFeedback'} | ${MergeRequestNote}
-  `('$type note', ({ prop, component }) => {
-    // The object itself does not matter, we just want to make sure it's passed to the issue note.
-    const feedback = {};
+  describe('merge request note', () => {
+    const mergeRequestNote = () => wrapper.find(MergeRequestNote);
 
-    it('shows issue note when an issue exists for the vulnerability', () => {
-      createWrapper({ ...minimumProps, [prop]: feedback });
-      expect(wrapper.contains(component)).toBe(true);
-      expect(wrapper.find(component).props()).toMatchObject({
-        feedback,
-      });
+    it('does not show merge request note when a merge request does not exist for the vulnerability', () => {
+      createWrapper();
+      expect(mergeRequestNote().exists()).toBe(false);
     });
 
-    it('does not show issue note when there is no issue for the vulnerability', () => {
-      createWrapper();
-      expect(wrapper.contains(component)).toBe(false);
+    it('shows merge request note when a merge request exists for the vulnerability', () => {
+      // The object itself does not matter, we just want to make sure it's passed to the issue note.
+      const mergeRequestFeedback = {};
+
+      createWrapper({ mergeRequestFeedback });
+      expect(mergeRequestNote().exists()).toBe(true);
+      expect(mergeRequestNote().props('feedback')).toBe(mergeRequestFeedback);
     });
   });
 
   describe('state history', () => {
-    const discussionUrl = '/discussions';
+    const discussionUrl = vulnerability.discussionsUrl;
 
     const historyList = () => wrapper.find({ ref: 'historyList' });
     const historyEntries = () => wrapper.findAll(HistoryEntry);
@@ -122,7 +113,10 @@ describe('Vulnerability Footer', () => {
     it('renders the history list if there are history items', () => {
       // The shape of this object doesn't matter for this test, we just need to verify that it's passed to the history
       // entry.
-      const historyItems = [{ id: 1, note: 'some note' }, { id: 2, note: 'another note' }];
+      const historyItems = [
+        { id: 1, note: 'some note' },
+        { id: 2, note: 'another note' },
+      ];
       mockAxios.onGet(discussionUrl).replyOnce(200, historyItems, { date: Date.now() });
       createWrapper();
 
@@ -158,11 +152,22 @@ describe('Vulnerability Footer', () => {
     });
 
     describe('new notes polling', () => {
+      jest.useFakeTimers();
+
       const getDiscussion = (entries, index) => entries.at(index).props('discussion');
       const createNotesRequest = (...notes) =>
         mockAxios
-          .onGet(minimumProps.notesUrl)
-          .replyOnce(200, { notes, last_fetched_at: Date.now() });
+          .onGet(vulnerability.notes_url)
+          .replyOnce(200, { notes, lastFetchedAt: Date.now() });
+
+      // Following #217184 the vulnerability polling uses an initial timeout
+      // which we need to run and then wait for the subsequent request.
+      const startTimeoutsAndAwaitRequests = async () => {
+        expect(setTimeout).toHaveBeenCalledTimes(1);
+        jest.runAllTimers();
+
+        return axios.waitForAll();
+      };
 
       beforeEach(() => {
         const historyItems = [
@@ -177,7 +182,9 @@ describe('Vulnerability Footer', () => {
         const note = { id: 100, note: 'updated note', discussion_id: 1 };
         createNotesRequest(note);
 
-        return axios.waitForAll().then(() => {
+        return axios.waitForAll().then(async () => {
+          await startTimeoutsAndAwaitRequests();
+
           const entries = historyEntries();
           expect(entries).toHaveLength(2);
           const discussion = getDiscussion(entries, 0);
@@ -190,7 +197,9 @@ describe('Vulnerability Footer', () => {
         const note = { id: 101, note: 'new note', discussion_id: 1 };
         createNotesRequest(note);
 
-        return axios.waitForAll().then(() => {
+        return axios.waitForAll().then(async () => {
+          await startTimeoutsAndAwaitRequests();
+
           const entries = historyEntries();
           expect(entries).toHaveLength(2);
           const discussion = getDiscussion(entries, 0);
@@ -203,7 +212,9 @@ describe('Vulnerability Footer', () => {
         const note = { id: 300, note: 'new note on a new discussion', discussion_id: 3 };
         createNotesRequest(note);
 
-        return axios.waitForAll().then(() => {
+        return axios.waitForAll().then(async () => {
+          await startTimeoutsAndAwaitRequests();
+
           const entries = historyEntries();
           expect(entries).toHaveLength(3);
           const discussion = getDiscussion(entries, 2);
@@ -223,23 +234,29 @@ describe('Vulnerability Footer', () => {
       });
 
       it('shows an error if the notes poll fails', () => {
-        mockAxios.onGet(minimumProps.notesUrl).replyOnce(500);
+        mockAxios.onGet(vulnerability.notes_url).replyOnce(500);
 
-        return axios.waitForAll().then(() => {
+        return axios.waitForAll().then(async () => {
+          await startTimeoutsAndAwaitRequests();
+
           expect(historyEntries()).toHaveLength(2);
           expect(mockAxios.history.get).toHaveLength(2);
           expect(createFlash).toHaveBeenCalled();
         });
       });
 
-      it('emits the VULNERABILITY_STATE_CHANGED event when the system note is new', async () => {
-        const spy = jest.spyOn(VulnerabilitiesEventBus, '$emit');
+      it('emits the vulnerability-state-change event when the system note is new', async () => {
+        const handler = jest.fn();
+        wrapper.vm.$on('vulnerability-state-change', handler);
+
         const note = { system: true, id: 1, discussion_id: 3 };
         createNotesRequest(note);
+
         await axios.waitForAll();
 
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith('VULNERABILITY_STATE_CHANGED');
+        await startTimeoutsAndAwaitRequests();
+
+        expect(handler).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -250,15 +267,99 @@ describe('Vulnerability Footer', () => {
     it('has the correct props', () => {
       const endpoint = Api.buildUrl(Api.vulnerabilityIssueLinksPath).replace(
         ':id',
-        minimumProps.vulnerabilityId,
+        vulnerability.id,
       );
       createWrapper();
 
       expect(relatedIssues().exists()).toBe(true);
       expect(relatedIssues().props()).toMatchObject({
         endpoint,
-        canModifyRelatedIssues: minimumProps.canModifyRelatedIssues,
-        projectPath: minimumProps.project.url,
+        canModifyRelatedIssues: vulnerability.canModifyRelatedIssues,
+        projectPath: vulnerability.project.fullPath,
+        helpPath: vulnerability.relatedIssuesHelpPath,
+      });
+    });
+  });
+
+  describe('related jira issues', () => {
+    const relatedJiraIssues = () => wrapper.find(RelatedJiraIssues);
+
+    describe('with `createJiraIssueUrl` not provided', () => {
+      beforeEach(() => {
+        createWrapper();
+      });
+
+      it('does not show related jira issues', () => {
+        expect(relatedJiraIssues().exists()).toBe(false);
+      });
+    });
+
+    describe('with `createJiraIssueUrl` provided', () => {
+      beforeEach(() => {
+        createWrapper(
+          {},
+          {
+            provide: {
+              createJiraIssueUrl: 'http://foo',
+              glFeatures: { jiraForVulnerabilities: true },
+            },
+          },
+        );
+      });
+
+      it('shows related jira issues', () => {
+        expect(relatedJiraIssues().exists()).toBe(true);
+      });
+    });
+  });
+
+  describe('detection note', () => {
+    const detectionNote = () => wrapper.find('[data-testid="detection-note"]');
+    const statusDescription = () => wrapper.find(StatusDescription);
+    const vulnerabilityStates = Object.keys(VULNERABILITY_STATES);
+
+    it.each(vulnerabilityStates)(
+      `shows detection note when vulnerability state is '%s'`,
+      (state) => {
+        createWrapper({ state });
+
+        expect(detectionNote().exists()).toBe(true);
+        expect(statusDescription().props('vulnerability')).toEqual({
+          state: 'detected',
+          pipeline: vulnerability.pipeline,
+        });
+      },
+    );
+  });
+
+  describe('generic report', () => {
+    const mockDetails = { foo: { type: 'bar' } };
+
+    const genericReportSection = () => wrapper.findComponent(GenericReportSection);
+
+    describe('when a vulnerability contains a details property', () => {
+      beforeEach(() => {
+        createWrapper({ details: mockDetails });
+      });
+
+      it('renders the report section', () => {
+        expect(genericReportSection().exists()).toBe(true);
+      });
+
+      it('passes the correct props to the report section', () => {
+        expect(genericReportSection().props()).toMatchObject({
+          details: mockDetails,
+        });
+      });
+    });
+
+    describe('when a vulnerability does not contain a details property', () => {
+      beforeEach(() => {
+        createWrapper();
+      });
+
+      it('does not render the report section', () => {
+        expect(genericReportSection().exists()).toBe(false);
       });
     });
   });

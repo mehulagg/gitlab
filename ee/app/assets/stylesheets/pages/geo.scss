@@ -19,3 +19,34 @@
     padding-left: 1.75rem;
   }
 }
+
+// Overrides max-width from `app/assets/stylesheets/framework/dropdowns.scss`
+.geo-node-form-container {
+  #node-synchronization-shards-field {
+    .dropdown-menu {
+      width: auto;
+    }
+  }
+}
+
+.geo-node-header-grid-columns {
+  grid-template-columns: 1fr auto;
+  grid-gap: $gl-spacing-scale-5;
+
+  @include media-breakpoint-up(md) {
+    grid-template-columns: 3fr 1fr;
+  }
+}
+
+.geo-node-details-grid-columns {
+  grid-gap: $gl-spacing-scale-5;
+
+  @include media-breakpoint-up(lg) {
+    grid-template-columns: 1fr 3fr;
+  }
+}
+
+.geo-node-core-details-grid-columns {
+  grid-template-columns: 1fr 1fr;
+  grid-gap: $gl-spacing-scale-5;
+}

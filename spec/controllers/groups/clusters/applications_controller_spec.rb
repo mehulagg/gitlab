@@ -10,7 +10,8 @@ RSpec.describe Groups::Clusters::ApplicationsController do
   end
 
   shared_examples 'a secure endpoint' do
-    it { expect { subject }.to be_allowed_for(:admin) }
+    it('is allowed for admin when admin mode is enabled', :enable_admin_mode) { expect { subject }.to be_allowed_for(:admin) }
+    it('is denied for admin when admin mode is disabled') { expect { subject }.to be_denied_for(:admin) }
     it { expect { subject }.to be_allowed_for(:owner).of(group) }
     it { expect { subject }.to be_allowed_for(:maintainer).of(group) }
     it { expect { subject }.to be_denied_for(:developer).of(group) }
@@ -28,7 +29,7 @@ RSpec.describe Groups::Clusters::ApplicationsController do
       post :create, params: params.merge(group_id: group)
     end
 
-    let(:application) { 'helm' }
+    let(:application) { 'ingress' }
     let(:params) { { application: application, id: cluster.id } }
 
     describe 'functionality' do
@@ -44,7 +45,7 @@ RSpec.describe Groups::Clusters::ApplicationsController do
 
         expect { subject }.to change { current_application.count }
         expect(response).to have_gitlab_http_status(:no_content)
-        expect(cluster.application_helm).to be_scheduled
+        expect(cluster.application_ingress).to be_scheduled
       end
 
       context 'when cluster do not exists' do
@@ -68,7 +69,7 @@ RSpec.describe Groups::Clusters::ApplicationsController do
 
       context 'when application is already installing' do
         before do
-          create(:clusters_applications_helm, :installing, cluster: cluster)
+          create(:clusters_applications_ingress, :installing, cluster: cluster)
         end
 
         it 'returns 400' do

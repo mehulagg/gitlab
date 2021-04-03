@@ -64,7 +64,7 @@ module Banzai
           next if has_ancestor?(node, IGNORED_ANCESTOR_TAGS)
           next unless node.content =~ TAGS_PATTERN
 
-          html = process_tag($1)
+          html = process_tag(Regexp.last_match(1))
 
           node.replace(html) if html && html != node.content
         end
@@ -82,7 +82,7 @@ module Banzai
       def process_tag(tag)
         parts = tag.split('|')
 
-        return if parts.size.zero?
+        return if parts.empty?
 
         process_image_tag(parts) || process_page_link_tag(parts)
       end
@@ -98,14 +98,15 @@ module Banzai
 
         return unless image?(content)
 
-        if url?(content)
-          path = content
-        elsif file = wiki.find_file(content)
-          path = ::File.join(wiki_base_path, file.path)
-        end
+        path =
+          if url?(content)
+            content
+          elsif file = wiki.find_file(content, load_content: false)
+            file.path
+          end
 
         if path
-          content_tag(:img, nil, data: { src: path }, class: 'gfm')
+          content_tag(:img, nil, src: path, class: 'gfm')
         end
       end
 

@@ -27,6 +27,18 @@ RSpec.describe Ci::Stage, :models do
     end
   end
 
+  describe '.by_name' do
+    it 'finds stages by name' do
+      a = create(:ci_stage_entity, name: 'a')
+      b = create(:ci_stage_entity, name: 'b')
+      c = create(:ci_stage_entity, name: 'c')
+
+      expect(described_class.by_name('a')).to contain_exactly(a)
+      expect(described_class.by_name('b')).to contain_exactly(b)
+      expect(described_class.by_name(%w[a c])).to contain_exactly(a, c)
+    end
+  end
+
   describe '#status' do
     context 'when stage is pending' do
       let(:stage) { create(:ci_stage_entity, status: 'pending') }
@@ -288,6 +300,7 @@ RSpec.describe Ci::Stage, :models do
   context 'when stage has warnings' do
     before do
       create(:ci_build, :failed, :allowed_to_fail, stage_id: stage.id)
+      create(:ci_bridge, :failed, :allowed_to_fail, stage_id: stage.id)
     end
 
     describe '#has_warnings?' do
@@ -310,7 +323,7 @@ RSpec.describe Ci::Stage, :models do
         expect(synced_queries.count).to eq 1
 
         expect(stage.number_of_warnings.inspect).to include 'BatchLoader'
-        expect(stage.number_of_warnings).to eq 1
+        expect(stage.number_of_warnings).to eq 2
       end
     end
   end

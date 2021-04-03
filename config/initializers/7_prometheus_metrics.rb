@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'prometheus/client'
 
 # Keep separate directories for separate processes
@@ -16,7 +18,7 @@ def prometheus_default_multiproc_dir
 end
 
 Prometheus::Client.configure do |config|
-  config.logger = Rails.logger # rubocop:disable Gitlab/RailsLogger
+  config.logger = Gitlab::AppLogger
 
   config.initial_mmap_file_size = 4 * 1024
 
@@ -39,22 +41,12 @@ Sidekiq.configure_server do |config|
 end
 
 if !Rails.env.test? && Gitlab::Metrics.prometheus_metrics_enabled?
-  Gitlab::Cluster::LifecycleEvents.on_worker_start do
-    defined?(::Prometheus::Client.reinitialize_on_pid_change) && Prometheus::Client.reinitialize_on_pid_change
-
-    Gitlab::Metrics::Samplers::RubySampler.initialize_instance.start
-    Gitlab::Metrics::Samplers::DatabaseSampler.initialize_instance.start
-    Gitlab::Metrics::Samplers::ThreadsSampler.initialize_instance.start
-
-    if Gitlab.ee? && Gitlab::Runtime.sidekiq?
-      Gitlab::Metrics::Samplers::GlobalSearchSampler.instance.start
-    end
-  rescue IOError => e
-    Gitlab::ErrorTracking.track_exception(e)
-    Gitlab::Metrics.error_detected!
-  end
-
+  # When running Puma in a Single mode, `on_master_start` and `on_worker_start` are the same.
+  # Thus, we order these events to run `reinitialize_on_pid_change` with `force: true` first.
   Gitlab::Cluster::LifecycleEvents.on_master_start do
+    # Ensure that stale Prometheus metrics don't accumulate over time
+    Prometheus::CleanupMultiprocDirService.new.execute
+
     ::Prometheus::Client.reinitialize_on_pid_change(force: true)
 
     if Gitlab::Runtime.unicorn?
@@ -65,7 +57,32 @@ if !Rails.env.test? && Gitlab::Metrics.prometheus_metrics_enabled?
 
     Gitlab::Metrics.gauge(:deployments, 'GitLab Version', {}, :max).set({ version: Gitlab::VERSION }, 1)
 
-    Gitlab::Metrics::RequestsRackMiddleware.initialize_http_request_duration_seconds
+    unless Gitlab::Runtime.sidekiq?
+      Gitlab::Metrics::RequestsRackMiddleware.initialize_metrics
+    end
+
+    Gitlab::Ci::Parsers.instrument!
+  rescue IOError => e
+    Gitlab::ErrorTracking.track_exception(e)
+    Gitlab::Metrics.error_detected!
+  end
+
+  Gitlab::Cluster::LifecycleEvents.on_worker_start do
+    defined?(::Prometheus::Client.reinitialize_on_pid_change) && Prometheus::Client.reinitialize_on_pid_change
+
+    Gitlab::Metrics::Samplers::RubySampler.initialize_instance.start
+    Gitlab::Metrics::Samplers::DatabaseSampler.initialize_instance.start
+    Gitlab::Metrics::Samplers::ThreadsSampler.initialize_instance.start
+
+    if Gitlab::Runtime.action_cable?
+      Gitlab::Metrics::Samplers::ActionCableSampler.instance.start
+    end
+
+    if Gitlab.ee? && Gitlab::Runtime.sidekiq?
+      Gitlab::Metrics::Samplers::GlobalSearchSampler.instance.start
+    end
+
+    Gitlab::Ci::Parsers.instrument!
   rescue IOError => e
     Gitlab::ErrorTracking.track_exception(e)
     Gitlab::Metrics.error_detected!

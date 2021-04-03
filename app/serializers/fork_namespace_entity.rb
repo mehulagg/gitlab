@@ -19,11 +19,11 @@ class ForkNamespaceEntity < Grape::Entity
   end
 
   expose :permission do |namespace, options|
-    membership(options[:current_user], namespace)&.human_access
+    membership(options[:current_user], namespace, options[:memberships])&.human_access
   end
 
   expose :relative_path do |namespace|
-    polymorphic_path(namespace)
+    group_path(namespace)
   end
 
   expose :markdown_description do |namespace|
@@ -37,10 +37,10 @@ class ForkNamespaceEntity < Grape::Entity
   private
 
   # rubocop: disable CodeReuse/ActiveRecord
-  def membership(user, object)
+  def membership(user, object, memberships)
     return unless user
 
-    @membership ||= user.members.find_by(source: object)
+    memberships[object.id]
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

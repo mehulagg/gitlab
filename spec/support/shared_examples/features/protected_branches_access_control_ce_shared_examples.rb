@@ -22,7 +22,7 @@ RSpec.shared_examples "protected branches > access control > CE" do
         end
       end
 
-      click_on "Protect"
+      click_on_protect
 
       expect(ProtectedBranch.count).to eq(1)
       expect(ProtectedBranch.last.push_access_levels.map(&:access_level)).to eq([access_type_id])
@@ -45,7 +45,7 @@ RSpec.shared_examples "protected branches > access control > CE" do
         find(:link, 'No one').click
       end
 
-      click_on "Protect"
+      click_on_protect
 
       expect(ProtectedBranch.count).to eq(1)
 
@@ -56,6 +56,8 @@ RSpec.shared_examples "protected branches > access control > CE" do
           expect(first("li")).to have_content("Roles")
           find(:link, access_type_name).click
         end
+
+        find(".js-allowed-to-push").click
       end
 
       wait_for_requests
@@ -85,7 +87,7 @@ RSpec.shared_examples "protected branches > access control > CE" do
         find(:link, 'No one').click
       end
 
-      click_on "Protect"
+      click_on_protect
 
       expect(ProtectedBranch.count).to eq(1)
       expect(ProtectedBranch.last.merge_access_levels.map(&:access_level)).to eq([access_type_id])
@@ -108,7 +110,7 @@ RSpec.shared_examples "protected branches > access control > CE" do
         find(:link, 'No one').click
       end
 
-      click_on "Protect"
+      click_on_protect
 
       expect(ProtectedBranch.count).to eq(1)
 

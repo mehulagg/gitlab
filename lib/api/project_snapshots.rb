@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectSnapshots < Grape::API::Instance
+  class ProjectSnapshots < ::API::Base
     helpers ::API::Helpers::ProjectSnapshotsHelpers
 
     before { authorize_read_git_snapshot! }
+
+    feature_category :source_code_management
 
     resource :projects do
       desc 'Download a (possibly inconsistent) snapshot of a repository' do

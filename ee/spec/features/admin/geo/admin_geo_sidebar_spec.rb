@@ -11,6 +11,7 @@ RSpec.describe 'admin Geo Sidebar', :js, :geo do
   before do
     stub_licensed_features(geo: true)
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   shared_examples 'active sidebar link' do |link_name|
@@ -65,7 +66,7 @@ RSpec.describe 'admin Geo Sidebar', :js, :geo do
     end
 
     describe 'visiting geo replicables' do
-      Gitlab::Geo.replicator_classes.each do |replicator_class|
+      Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
         it_behaves_like 'active sidebar link', 'Replication' do
           let(:path) { admin_geo_replicables_path(replicable_name_plural: replicator_class.replicable_name_plural) }
         end

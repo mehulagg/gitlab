@@ -8,4 +8,7 @@ export default () => ({
   username: 'root',
   web_url: `${TEST_HOST}/root`,
   can_merge: true,
+  can_update_merge_request: true,
+  reviewed: true,
+  approved: false,
 });

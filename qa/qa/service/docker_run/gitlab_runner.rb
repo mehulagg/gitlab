@@ -21,7 +21,7 @@ module QA
           @name = name || "qa-runner-#{SecureRandom.hex(4)}"
           @run_untagged = true
           @executor = :shell
-          @executor_image = 'registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-qa-alpine-ruby-2.6'
+          @executor_image = 'registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-qa-alpine-ruby-2.7'
 
           super()
         end
@@ -92,7 +92,7 @@ module QA
           CMD
         end
 
-        # Ping CloudFlare DNS, should fail
+        # Ping Cloudflare DNS, should fail
         # Ping Registry, should fail to resolve
         def prove_airgap
           gitlab_ip = Resolv.getaddress 'registry.gitlab.com'

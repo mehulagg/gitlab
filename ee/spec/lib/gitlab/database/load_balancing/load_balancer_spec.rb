@@ -2,16 +2,20 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
+RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
+  let(:pool_spec) { ActiveRecord::Base.connection_pool.spec }
+  let(:pool) { ActiveRecord::ConnectionAdapters::ConnectionPool.new(pool_spec) }
+  let(:conflict_error) { Class.new(RuntimeError) }
+
   let(:lb) { described_class.new(%w(localhost localhost)) }
 
   before do
     allow(Gitlab::Database).to receive(:create_connection_pool)
-      .and_return(ActiveRecord::Base.connection_pool)
-  end
-
-  after do
-    RequestStore.delete(described_class::CACHE_KEY)
+      .and_return(pool)
+    stub_const(
+      'Gitlab::Database::LoadBalancing::LoadBalancer::PG::TRSerializationFailure',
+      conflict_error
+    )
   end
 
   def raise_and_wrap(wrapper, original)
@@ -37,23 +41,29 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
   end
 
   describe '#read' do
-    let(:conflict_error) { Class.new(RuntimeError) }
-
-    before do
-      stub_const(
-        'Gitlab::Database::LoadBalancing::LoadBalancer::PG::TRSerializationFailure',
-        conflict_error
-      )
-    end
-
     it 'yields a connection for a read' do
       connection = double(:connection)
       host = double(:host)
 
       allow(lb).to receive(:host).and_return(host)
+      allow(host).to receive(:query_cache_enabled).and_return(true)
+
       expect(host).to receive(:connection).and_return(connection)
 
       expect { |b| lb.read(&b) }.to yield_with_args(connection)
+    end
+
+    it 'ensures that query cache is enabled' do
+      connection = double(:connection)
+      host = double(:host)
+
+      allow(lb).to receive(:host).and_return(host)
+      allow(host).to receive(:query_cache_enabled).and_return(false)
+      allow(host).to receive(:connection).and_return(connection)
+
+      expect(host).to receive(:enable_query_cache!).once
+
+      lb.read { 10 }
     end
 
     it 'marks hosts that are offline' do
@@ -125,6 +135,106 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
     end
   end
 
+  describe '#db_role_for_connection' do
+    context 'when the load balancer creates the connection with #read' do
+      it 'returns :replica' do
+        role = nil
+        lb.read do |connection|
+          role = lb.db_role_for_connection(connection)
+        end
+
+        expect(role).to be(:replica)
+      end
+    end
+
+    context 'when the load balancer uses nested #read' do
+      it 'returns :replica' do
+        roles = []
+        lb.read do |connection_1|
+          lb.read do |connection_2|
+            roles << lb.db_role_for_connection(connection_2)
+          end
+          roles << lb.db_role_for_connection(connection_1)
+        end
+
+        expect(roles).to eq([:replica, :replica])
+      end
+    end
+
+    context 'when the load balancer creates the connection with #read_write' do
+      it 'returns :primary' do
+        role = nil
+        lb.read_write do |connection|
+          role = lb.db_role_for_connection(connection)
+        end
+
+        expect(role).to be(:primary)
+      end
+    end
+
+    context 'when the load balancer uses nested #read_write' do
+      it 'returns :primary' do
+        roles = []
+        lb.read_write do |connection_1|
+          lb.read_write do |connection_2|
+            roles << lb.db_role_for_connection(connection_2)
+          end
+          roles << lb.db_role_for_connection(connection_1)
+        end
+
+        expect(roles).to eq([:primary, :primary])
+      end
+    end
+
+    context 'when the load balancer falls back the connection creation to primary' do
+      it 'returns :primary' do
+        allow(lb).to receive(:serialization_failure?).and_return(true)
+
+        role = nil
+        raised = 7 # 2 hosts = 6 retries
+
+        lb.read do |connection|
+          if raised > 0
+            raised -= 1
+            raise
+          end
+
+          role = lb.db_role_for_connection(connection)
+        end
+
+        expect(role).to be(:primary)
+      end
+    end
+
+    context 'when the load balancer uses replica after recovery from a failure' do
+      it 'returns :replica' do
+        allow(lb).to receive(:connection_error?).and_return(true)
+
+        role = nil
+        raised = false
+
+        lb.read do |connection|
+          unless raised
+            raised = true
+            raise
+          end
+
+          role = lb.db_role_for_connection(connection)
+        end
+
+        expect(role).to be(:replica)
+      end
+    end
+
+    context 'when the connection does not come from the load balancer' do
+      it 'returns nil' do
+        connection = double(:connection)
+
+        expect(lb.db_role_for_connection(connection)).to be(nil)
+      end
+    end
+  end
+
   describe '#host' do
     it 'returns the secondary host to use' do
       expect(lb.host).to be_an_instance_of(Gitlab::Database::LoadBalancing::Host)
@@ -142,7 +252,10 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
 
   describe '#release_host' do
     it 'releases the host and its connection' do
-      lb.host
+      host = lb.host
+
+      expect(host).to receive(:disable_query_cache!)
+
       lb.release_host
 
       expect(RequestStore[described_class::CACHE_KEY]).to be_nil
@@ -158,8 +271,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer do
   end
 
   describe '#primary_write_location' do
-    it 'returns a String' do
-      expect(lb.primary_write_location).to be_an_instance_of(String)
+    it 'returns a String in the right format' do
+      expect(lb.primary_write_location).to match(/[A-F0-9]{1,8}\/[A-F0-9]{1,8}/)
     end
 
     it 'raises an error if the write location could not be retrieved' do

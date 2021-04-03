@@ -60,19 +60,6 @@ RSpec.describe Epics::UpdateService do
       it 'updates the last_edited_at value' do
         expect { update_epic(opts) }.to change { epic.last_edited_at }
       end
-
-      context 'when confidential_epics is disabled' do
-        before do
-          stub_feature_flags(confidential_epics: false)
-        end
-
-        it 'ignores confidential attribute on update' do
-          update_epic(opts)
-
-          expect(epic).to be_valid
-          expect(epic.confidential).to be_falsey
-        end
-      end
     end
 
     context 'when title has changed' do
@@ -84,6 +71,12 @@ RSpec.describe Epics::UpdateService do
         expect(note.note).to start_with('changed title')
         expect(note.noteable).to eq(epic)
       end
+
+      it 'records epic title changed after saving' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_title_changed_action)
+
+        update_epic(title: 'New title')
+      end
     end
 
     context 'when description has changed' do
@@ -94,6 +87,52 @@ RSpec.describe Epics::UpdateService do
 
         expect(note.note).to start_with('changed the description')
         expect(note.noteable).to eq(epic)
+      end
+
+      it 'records epic description changed after saving' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_description_changed_action)
+
+        update_epic(description: 'New description')
+      end
+    end
+
+    context 'when repositioning an epic on a board' do
+      let(:epic1) { create(:epic, group: group) }
+      let(:epic2) { create(:epic, group: group) }
+
+      let!(:epic_position) { create(:epic_board_position, epic: epic, epic_board: board, relative_position: 10) }
+      let!(:epic1_position) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20) }
+      let!(:epic2_position) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 30) }
+
+      let(:board) { create(:epic_board, group: group) }
+
+      context 'when moving beetween 2 epics on the board' do
+        it 'moves the epic correctly' do
+          update_epic(move_between_ids: [epic1.id, epic2.id], board_id: board.id)
+
+          expect(epic_position.reload.relative_position)
+            .to be_between(epic1_position.relative_position, epic2_position.relative_position)
+        end
+      end
+
+      context 'when moving the epic to the end' do
+        it 'moves the epic correctly' do
+          update_epic(move_between_ids: [nil, epic2.id], board_id: board.id)
+
+          expect(epic_position.reload.relative_position).to be > epic2_position.relative_position
+        end
+      end
+
+      context 'when moving the epic to the beginning' do
+        before do
+          epic_position.update_column(:relative_position, 25)
+        end
+
+        it 'moves the epic correctly' do
+          update_epic(move_between_ids: [epic1.id, nil], board_id: board.id)
+
+          expect(epic_position.reload.relative_position).to be < epic1_position.relative_position
+        end
       end
     end
 
@@ -171,6 +210,7 @@ RSpec.describe Epics::UpdateService do
             author: user,
             user: user)
         end
+
         let!(:todo2) do
           create(:todo, :mentioned, :pending,
             target: epic,
@@ -227,6 +267,12 @@ RSpec.describe Epics::UpdateService do
             end.to not_change { Todo.count }
           end
         end
+      end
+
+      it 'schedules deletion of todos when epic becomes confidential' do
+        expect(TodosDestroyer::ConfidentialEpicWorker).to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, epic.id)
+
+        update_epic(confidential: true)
       end
     end
 
@@ -299,6 +345,36 @@ RSpec.describe Epics::UpdateService do
         end
       end
 
+      context 'epic start date fixed or inherited' do
+        it 'tracks the user action to set as fixed' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_fixed_action)
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_fixed_start_date_updated_action)
+
+          update_epic(start_date_is_fixed: true, start_date_fixed: Date.today)
+        end
+
+        it 'tracks the user action to set as inherited' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_inherited_action)
+
+          update_epic(start_date_is_fixed: false)
+        end
+      end
+
+      context 'epic due date fixed or inherited' do
+        it 'tracks the user action to set as fixed' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_due_date_set_as_fixed_action)
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_fixed_due_date_updated_action)
+
+          update_epic(due_date_is_fixed: true, due_date_fixed: Date.today)
+        end
+
+        it 'tracks the user action to set as inherited' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_due_date_set_as_inherited_action)
+
+          update_epic(due_date_is_fixed: false)
+        end
+      end
+
       context 'date fields are not updated' do
         it 'does not call UpdateDatesService' do
           expect(Epics::UpdateDatesService).not_to receive(:new)
@@ -314,12 +390,60 @@ RSpec.describe Epics::UpdateService do
     end
 
     context 'with quick actions in the description' do
-      let(:label) { create(:group_label, group: group) }
+      before do
+        stub_licensed_features(epics: true, subepics: true)
+        group.add_developer(user)
+      end
 
-      it 'adds labels to the epic' do
-        update_epic(description: "/label ~#{label.name}")
+      context 'for /label' do
+        let(:label) { create(:group_label, group: group) }
 
-        expect(epic.label_ids).to contain_exactly(label.id)
+        it 'adds labels to the epic' do
+          update_epic(description: "/label ~#{label.name}")
+
+          expect(epic.label_ids).to contain_exactly(label.id)
+        end
+      end
+
+      context 'for /parent_epic' do
+        it 'assigns parent epic' do
+          parent_epic = create(:epic, group: epic.group)
+
+          update_epic(description: "/parent_epic #{parent_epic.to_reference}")
+
+          expect(epic.parent).to eq(parent_epic)
+        end
+
+        context 'when parent epic cannot be assigned' do
+          it 'does not update parent epic' do
+            other_group = create(:group, :private)
+            parent_epic = create(:epic, group: other_group)
+
+            update_epic(description: "/parent_epic #{parent_epic.to_reference(group)}")
+
+            expect(epic.parent).to eq(nil)
+          end
+        end
+      end
+
+      context 'for /child_epic' do
+        it 'sets a child epic' do
+          child_epic = create(:epic, group: group)
+
+          update_epic(description: "/child_epic #{child_epic.to_reference}")
+
+          expect(epic.reload.children).to include(child_epic)
+        end
+
+        context 'when child epic cannot be assigned' do
+          it 'does not set child epic' do
+            other_group = create(:group, :private)
+            child_epic = create(:epic, group: other_group)
+
+            update_epic(description: "/child_epic #{child_epic.to_reference(group)}")
+            expect(epic.reload.children).to be_empty
+          end
+        end
       end
     end
   end

@@ -22,13 +22,13 @@ RSpec.describe 'Jobs/DAST-Default-Branch-Deploy.gitlab-ci.yml' do
   end
 
   describe 'the created pipeline' do
-    let(:user) { create(:admin) }
     let(:project) do
       create(:project, :repository, variables: [
         build(:ci_variable, key: 'CI_KUBERNETES_ACTIVE', value: 'true')
       ])
     end
 
+    let(:user) { project.owner }
     let(:default_branch) { 'master' }
     let(:pipeline_ref) { default_branch }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_ref) }
@@ -48,7 +48,7 @@ RSpec.describe 'Jobs/DAST-Default-Branch-Deploy.gitlab-ci.yml' do
 
     context 'when project has no license' do
       it 'includes no DAST jobs' do
-        expect(build_names).to eq %w(placeholder)
+        expect(build_names).to match_array(%w(placeholder))
       end
     end
 

@@ -15,6 +15,7 @@ RSpec.describe PreviewMarkdownService do
         group: epic.group
       }
     end
+
     let(:service) { described_class.new(nil, user, params) }
 
     before do

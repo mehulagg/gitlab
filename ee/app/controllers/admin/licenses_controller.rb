@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
 class Admin::LicensesController < Admin::ApplicationController
+  include Admin::LicenseRequest
+
   before_action :license, only: [:show, :download, :destroy]
   before_action :require_license, only: [:download, :destroy]
 
   respond_to :html
+
+  feature_category :license
 
   def show
     if @license.present? || License.future_dated_only?
@@ -35,8 +39,6 @@ class Admin::LicensesController < Admin::ApplicationController
 
     respond_with(@license, location: admin_license_path) do
       if @license.save
-        @license.update_trial_setting
-
         notice = if @license.started?
                    _('The license was successfully uploaded and is now active. You can see the details below.')
                  else
@@ -60,22 +62,19 @@ class Admin::LicensesController < Admin::ApplicationController
     redirect_to admin_license_path, status: :found
   end
 
-  private
+  def sync_seat_link
+    sync_result = Gitlab::SeatLinkData.new.sync
 
-  def license
-    @license ||= begin
-      License.reset_current
-      License.reset_future_dated
-      License.current
+    if sync_result
+      flash[:notice] = _('Your license was successfully synced.')
+    else
+      flash[:error] = _('There was an error when trying to sync your license. Please verify that your instance is using an active license key.')
     end
+
+    redirect_to admin_license_path
   end
 
-  def require_license
-    return if license
-
-    flash.keep
-    redirect_to new_admin_license_path
-  end
+  private
 
   def build_license
     @license ||= License.new(data: params[:trial_key])

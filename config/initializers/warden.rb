@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.configure do |config|
   Warden::Manager.after_set_user(scope: :user) do |user, auth, opts|
     Gitlab::Auth::UniqueIpsLimiter.limit_user!(user)
@@ -19,7 +21,7 @@ Rails.application.configure do |config|
 
   Warden::Manager.after_authentication(scope: :user) do |user, auth, opts|
     ActiveSession.cleanup(user)
-    Gitlab::AnonymousSession.new(auth.request.remote_ip, session_id: auth.request.session.id).cleanup_session_per_ip_entries
+    Gitlab::AnonymousSession.new(auth.request.remote_ip).cleanup_session_per_ip_count
   end
 
   Warden::Manager.after_set_user(scope: :user, only: :fetch) do |user, auth, opts|
@@ -40,7 +42,7 @@ Rails.application.configure do |config|
     activity = Gitlab::Auth::Activity.new(opts)
     tracker = Gitlab::Auth::BlockedUserTracker.new(user, auth)
 
-    ActiveSession.destroy(user, auth.request.session.id)
+    ActiveSession.destroy_session(user, auth.request.session.id.private_id) if auth.request.session.id
     activity.user_session_destroyed!
 
     ##

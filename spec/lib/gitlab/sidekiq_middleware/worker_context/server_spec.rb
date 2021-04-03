@@ -14,10 +14,11 @@ RSpec.describe Gitlab::SidekiqMiddleware::WorkerContext::Server do
 
       include ApplicationWorker
 
+      feature_category :foo
       worker_context user: nil
 
       def perform(identifier, *args)
-        self.class.contexts.merge!(identifier => Labkit::Context.current.to_h)
+        self.class.contexts.merge!(identifier => Gitlab::ApplicationContext.current)
       end
     end
   end
@@ -54,6 +55,12 @@ RSpec.describe Gitlab::SidekiqMiddleware::WorkerContext::Server do
       end
 
       expect(TestWorker.contexts['identifier'].keys).not_to include('meta.user')
+    end
+
+    it 'takes the feature category from the worker' do
+      TestWorker.perform_async('identifier', 1)
+
+      expect(TestWorker.contexts['identifier']).to include('meta.feature_category' => 'foo')
     end
 
     it "doesn't fail for unknown workers" do

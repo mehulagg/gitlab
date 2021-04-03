@@ -1,6 +1,13 @@
-# Project remote mirrors API
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference, api
+---
 
-[Push mirrors](../user/project/repository/repository_mirroring.md#pushing-to-a-remote-repository-core)
+# Project remote mirrors API **(FREE)**
+
+[Push mirrors](../user/project/repository/repository_mirroring.md#pushing-to-a-remote-repository)
 defined on a project's repository settings are called "remote mirrors", and the
 state of these mirrors can be queried and modified via the remote mirror API
 outlined below.
@@ -40,15 +47,15 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
-For security reasons, the `url` attribute will always be scrubbed of username
+NOTE:
+For security reasons, the `url` attribute is always scrubbed of username
 and password information.
 
 ## Create a remote mirror
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24189) in GitLab 12.9.
 
-Create a remote mirror for a project. The mirror will be disabled by default. You can enable it by including the optional parameter `enabled` when creating it:
+Create a remote mirror for a project. The mirror is disabled by default. You can enable it by including the optional parameter `enabled` when creating it:
 
 ```plaintext
 POST /projects/:id/remote_mirrors

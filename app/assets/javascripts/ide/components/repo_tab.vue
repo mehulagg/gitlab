@@ -1,18 +1,19 @@
 <script>
-import { mapActions } from 'vuex';
+import { GlIcon, GlTab } from '@gitlab/ui';
+import { mapActions, mapGetters } from 'vuex';
 import { __, sprintf } from '~/locale';
 
-import FileIcon from '~/vue_shared/components/file_icon.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import ChangedFileIcon from '~/vue_shared/components/changed_file_icon.vue';
+import FileIcon from '~/vue_shared/components/file_icon.vue';
 import FileStatusIcon from './repo_file_status_icon.vue';
 
 export default {
   components: {
     FileStatusIcon,
     FileIcon,
-    Icon,
+    GlIcon,
     ChangedFileIcon,
+    GlTab,
   },
   props: {
     tab: {
@@ -26,11 +27,12 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['getUrlForPath']),
     closeLabel() {
       if (this.fileHasChanged) {
-        return sprintf(__(`%{tabname} changed`), { tabname: this.tab.name });
+        return sprintf(__('%{tabname} changed'), { tabname: this.tab.name });
       }
-      return sprintf(__(`Close %{tabname}`, { tabname: this.tab.name }));
+      return sprintf(__('Close %{tabname}'), { tabname: this.tab.name });
     },
     showChangedIcon() {
       if (this.tab.pending) return true;
@@ -52,7 +54,7 @@ export default {
       if (tab.pending) {
         this.openPendingTab({ file: tab, keyPrefix: tab.staged ? 'staged' : 'unstaged' });
       } else {
-        this.$router.push(`/project${tab.url}`);
+        this.$router.push(this.getUrlForPath(tab.path));
       }
     },
     mouseOverTab() {
@@ -70,29 +72,30 @@ export default {
 </script>
 
 <template>
-  <li
-    :class="{
-      active: tab.active,
-      disabled: tab.pending,
-    }"
+  <gl-tab
+    :active="tab.active"
+    :disabled="tab.pending"
+    :title="tab.name"
     @click="clickFile(tab)"
     @mouseover="mouseOverTab"
     @mouseout="mouseOutTab"
   >
-    <div :title="tab.url" class="multi-file-tab">
-      <file-icon :file-name="tab.name" :size="16" />
-      {{ tab.name }}
-      <file-status-icon :file="tab" />
-    </div>
-    <button
-      :aria-label="closeLabel"
-      :disabled="tab.pending"
-      type="button"
-      class="multi-file-tab-close"
-      @click.stop.prevent="closeFile(tab)"
-    >
-      <icon v-if="!showChangedIcon" :size="12" name="close" />
-      <changed-file-icon v-else :file="tab" />
-    </button>
-  </li>
+    <template #title>
+      <div :title="getUrlForPath(tab.path)" class="multi-file-tab">
+        <file-icon :file-name="tab.name" :size="16" />
+        {{ tab.name }}
+        <file-status-icon :file="tab" />
+      </div>
+      <button
+        :aria-label="closeLabel"
+        :disabled="tab.pending"
+        type="button"
+        class="multi-file-tab-close"
+        @click.stop.prevent="closeFile(tab)"
+      >
+        <gl-icon v-if="!showChangedIcon" :size="12" name="close" />
+        <changed-file-icon v-else :file="tab" />
+      </button>
+    </template>
+  </gl-tab>
 </template>

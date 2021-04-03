@@ -1,0 +1,11 @@
+- add_to_breadcrumbs _('Test Cases'), project_quality_test_cases_path(@project)
+
+- breadcrumb_title _('New')
+- page_title _('New Test Case')
+
+#js-create-test-case{ data: { project_full_path: @project.full_path,
+  project_test_cases_path: project_quality_test_cases_path(@project),
+  description_preview_path: preview_markdown_path(@project),
+  description_help_path: help_page_path('user/markdown'),
+  labels_manage_path: project_labels_path(@project),
+  labels_fetch_path: project_labels_path(@project, format: :json) } }

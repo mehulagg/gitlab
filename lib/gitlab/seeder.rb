@@ -66,7 +66,7 @@ module Gitlab
       estimated_minutes = (size.to_f / ESTIMATED_INSERT_PER_MINUTE).round
       humanized_minutes = 'minute'.pluralize(estimated_minutes)
 
-      if estimated_minutes.zero?
+      if estimated_minutes == 0
         "Rough estimated time: less than a minute ⏰"
       else
         "Rough estimated time: #{estimated_minutes} #{humanized_minutes} ⏰"
@@ -87,7 +87,9 @@ module Gitlab
 
       SeedFu.quiet = true
 
-      yield
+      without_statement_timeout do
+        yield
+      end
 
       SeedFu.quiet = false
       ActiveRecord::Base.logger = old_logger
@@ -113,6 +115,13 @@ module Gitlab
 
     def self.mute_mailer
       ActionMailer::MessageDelivery.prepend(DeliverNever)
+    end
+
+    def self.without_statement_timeout
+      ActiveRecord::Base.connection.execute('SET statement_timeout=0')
+      yield
+    ensure
+      ActiveRecord::Base.connection.execute('RESET statement_timeout')
     end
   end
 end

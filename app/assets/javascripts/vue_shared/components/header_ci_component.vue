@@ -1,6 +1,8 @@
 <script>
-import { GlTooltipDirective, GlLink, GlDeprecatedButton } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+/* eslint-disable vue/no-v-html */
+import { GlTooltipDirective, GlLink, GlButton, GlTooltip } from '@gitlab/ui';
+import { glEmojiTag } from '../../emoji';
+import { __, sprintf } from '../../locale';
 import CiIconBadge from './ci_badge_link.vue';
 import TimeagoTooltip from './time_ago_tooltip.vue';
 import UserAvatarImage from './user_avatar/user_avatar_image.vue';
@@ -18,11 +20,13 @@ export default {
     TimeagoTooltip,
     UserAvatarImage,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
+    GlTooltip,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  EMOJI_REF: 'EMOJI_REF',
   props: {
     status: {
       type: Object,
@@ -61,6 +65,27 @@ export default {
     userAvatarAltText() {
       return sprintf(__(`%{username}'s avatar`), { username: this.user.name });
     },
+    userPath() {
+      // GraphQL returns `webPath` and Rest `path`
+      return this.user?.webPath || this.user?.path;
+    },
+    avatarUrl() {
+      // GraphQL returns `avatarUrl` and Rest `avatar_url`
+      return this.user?.avatarUrl || this.user?.avatar_url;
+    },
+    statusTooltipHTML() {
+      // Rest `status_tooltip_html` which is a ready to work
+      // html for the emoji and the status text inside a tooltip.
+      // GraphQL returns `status.emoji` and `status.message` which
+      // needs to be combined to make the html we want.
+      const { emoji } = this.user?.status || {};
+      const emojiHtml = emoji ? glEmojiTag(emoji) : '';
+
+      return emojiHtml || this.user?.status_tooltip_html;
+    },
+    message() {
+      return this.user?.status?.message;
+    },
   },
 
   methods: {
@@ -72,11 +97,15 @@ export default {
 </script>
 
 <template>
-  <header class="page-content-header ci-header-container">
-    <section class="header-main-content">
+  <header
+    class="page-content-header gl-display-flex gl-min-h-7"
+    data-qa-selector="pipeline_header"
+    data-testid="ci-header-content"
+  >
+    <section class="header-main-content gl-mr-3">
       <ci-icon-badge :status="status" />
 
-      <strong> {{ itemName }} #{{ itemId }} </strong>
+      <strong data-testid="ci-header-item-text"> {{ itemName }} #{{ itemId }} </strong>
 
       <template v-if="shouldRenderTriggeredLabel">{{ __('triggered') }}</template>
       <template v-else>{{ __('created') }}</template>
@@ -88,34 +117,38 @@ export default {
       <template v-if="user">
         <gl-link
           v-gl-tooltip
-          :href="user.path"
+          :href="userPath"
           :title="user.email"
           class="js-user-link commit-committer-link"
         >
-          <user-avatar-image
-            :img-src="user.avatar_url"
-            :img-alt="userAvatarAltText"
-            :tooltip-text="user.name"
-            :img-size="24"
-          />
-
+          <user-avatar-image :img-src="avatarUrl" :img-alt="userAvatarAltText" :size="24" />
           {{ user.name }}
         </gl-link>
-        <span v-if="user.status_tooltip_html" v-html="user.status_tooltip_html"></span>
+        <gl-tooltip v-if="message" :target="() => $refs[$options.EMOJI_REF]">
+          {{ message }}
+        </gl-tooltip>
+        <span
+          v-if="statusTooltipHTML"
+          :ref="$options.EMOJI_REF"
+          :data-testid="message"
+          v-html="statusTooltipHTML"
+        ></span>
       </template>
     </section>
 
-    <section v-if="$slots.default" class="header-action-buttons">
+    <section
+      v-if="$slots.default"
+      data-testid="ci-header-action-buttons"
+      class="gl-display-flex gl-mr-3"
+    >
       <slot></slot>
     </section>
-    <gl-deprecated-button
+    <gl-button
       v-if="hasSidebarButton"
-      id="toggleSidebar"
-      class="d-block d-sm-none
-sidebar-toggle-btn js-sidebar-build-toggle js-sidebar-build-toggle-header"
+      class="gl-md-display-none gl-ml-auto gl-align-self-start js-sidebar-build-toggle"
+      icon="chevron-double-lg-left"
+      :aria-label="__('Toggle sidebar')"
       @click="onClickSidebarButton"
-    >
-      <i class="fa fa-angle-double-left" aria-hidden="true" aria-labelledby="toggleSidebar"> </i>
-    </gl-deprecated-button>
+    />
   </header>
 </template>

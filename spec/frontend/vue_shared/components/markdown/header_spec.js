@@ -6,7 +6,7 @@ import ToolbarButton from '~/vue_shared/components/markdown/toolbar_button.vue';
 describe('Markdown field header component', () => {
   let wrapper;
 
-  const createWrapper = props => {
+  const createWrapper = (props) => {
     wrapper = shallowMount(HeaderComponent, {
       propsData: {
         previewMarkdown: false,
@@ -18,10 +18,16 @@ describe('Markdown field header component', () => {
   const findToolbarButtons = () => wrapper.findAll(ToolbarButton);
   const findToolbarButtonByProp = (prop, value) =>
     findToolbarButtons()
-      .filter(button => button.props(prop) === value)
+      .filter((button) => button.props(prop) === value)
       .at(0);
 
   beforeEach(() => {
+    window.gl = {
+      client: {
+        isMac: true,
+      },
+    };
+
     createWrapper();
   });
 
@@ -30,24 +36,40 @@ describe('Markdown field header component', () => {
     wrapper = null;
   });
 
-  it('renders markdown header buttons', () => {
-    const buttons = [
-      'Add bold text',
-      'Add italic text',
-      'Insert a quote',
-      'Insert suggestion',
-      'Insert code',
-      'Add a link',
-      'Add a bullet list',
-      'Add a numbered list',
-      'Add a task list',
-      'Add a table',
-      'Go full screen',
-    ];
-    const elements = findToolbarButtons();
+  describe('markdown header buttons', () => {
+    it('renders the buttons with the correct title', () => {
+      const buttons = [
+        'Add bold text (⌘B)',
+        'Add italic text (⌘I)',
+        'Insert a quote',
+        'Insert suggestion',
+        'Insert code',
+        'Add a link (⌘K)',
+        'Add a bullet list',
+        'Add a numbered list',
+        'Add a task list',
+        'Add a table',
+        'Go full screen',
+      ];
+      const elements = findToolbarButtons();
 
-    elements.wrappers.forEach((buttonEl, index) => {
-      expect(buttonEl.props('buttonTitle')).toBe(buttons[index]);
+      elements.wrappers.forEach((buttonEl, index) => {
+        expect(buttonEl.props('buttonTitle')).toBe(buttons[index]);
+      });
+    });
+
+    describe('when the user is on a non-Mac', () => {
+      beforeEach(() => {
+        delete window.gl.client.isMac;
+
+        createWrapper();
+      });
+
+      it('renders keyboard shortcuts with Ctrl+ instead of ⌘', () => {
+        const boldButton = findToolbarButtonByProp('icon', 'bold');
+
+        expect(boldButton.props('buttonTitle')).toBe('Add bold text (Ctrl+B)');
+      });
     });
   });
 

@@ -1,27 +1,29 @@
 /* eslint-disable no-new, class-methods-use-this */
-
-import $ from 'jquery';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
+import $ from 'jquery';
 import Cookies from 'js-cookie';
+import Vue from 'vue';
+import CommitPipelinesTable from '~/commit/pipelines/pipelines_table.vue';
 import createEventHub from '~/helpers/event_hub_factory';
-import axios from './lib/utils/axios_utils';
-import flash from './flash';
+import initAddContextCommitsTriggers from './add_context_commits_modal';
 import BlobForkSuggestion from './blob/blob_fork_suggestion';
+import Diff from './diff';
+import { deprecatedCreateFlash as flash } from './flash';
 import initChangesDropdown from './init_changes_dropdown';
+import axios from './lib/utils/axios_utils';
 import {
   parseUrlPathname,
   handleLocationHash,
   isMetaClick,
   parseBoolean,
+  scrollToElement,
 } from './lib/utils/common_utils';
+import { localTimeAgo } from './lib/utils/datetime_utility';
 import { isInVueNoteablePage } from './lib/utils/dom_utils';
 import { getLocationHash } from './lib/utils/url_utility';
-import Diff from './diff';
-import { localTimeAgo } from './lib/utils/datetime_utility';
-import syntaxHighlight from './syntax_highlight';
-import Notes from './notes';
-import { polyfillSticky } from './lib/utils/sticky';
 import { __ } from './locale';
+import Notes from './notes';
+import syntaxHighlight from './syntax_highlight';
 
 // MergeRequestTabs
 //
@@ -121,12 +123,11 @@ export default class MergeRequestTabs {
     ) {
       this.mergeRequestTabs.querySelector(`a[data-action='${action}']`).click();
     }
-    this.initAffix();
   }
 
   bindEvents() {
     $('.merge-request-tabs a[data-toggle="tabvue"]').on('click', this.clickTab);
-    window.addEventListener('popstate', event => {
+    window.addEventListener('popstate', (event) => {
       if (event.state && event.state.action) {
         this.tabShown(event.state.action, event.target.location);
         this.currentAction = event.state.action;
@@ -166,8 +167,6 @@ export default class MergeRequestTabs {
         if (this.setUrl) {
           this.setCurrentAction(action);
         }
-
-        this.eventHub.$emit('MergeRequestTabChange', this.getCurrentAction());
       }
     }
   }
@@ -177,14 +176,14 @@ export default class MergeRequestTabs {
       this.currentTab = action;
 
       if (this.mergeRequestTabPanesAll) {
-        this.mergeRequestTabPanesAll.forEach(el => {
+        this.mergeRequestTabPanesAll.forEach((el) => {
           const tabPane = el;
           tabPane.style.display = 'none';
         });
       }
 
       if (this.mergeRequestTabsAll) {
-        this.mergeRequestTabsAll.forEach(el => {
+        this.mergeRequestTabsAll.forEach((el) => {
           el.classList.remove('active');
         });
       }
@@ -251,14 +250,16 @@ export default class MergeRequestTabs {
         }
       }
     }
+
+    this.eventHub.$emit('MergeRequestTabChange', action);
   }
 
-  scrollToElement(container) {
+  scrollToContainerElement(container) {
     if (location.hash) {
-      const offset = 0 - ($('.navbar-gitlab').outerHeight() + $('.js-tabs-affix').outerHeight());
       const $el = $(`${container} ${location.hash}:not(.match)`);
+
       if ($el.length) {
-        $.scrollTo($el[0], { offset });
+        scrollToElement($el[0]);
       }
     }
   }
@@ -337,9 +338,10 @@ export default class MergeRequestTabs {
         document.querySelector('div#commits').innerHTML = data.html;
         localTimeAgo($('.js-timeago', 'div#commits'));
         this.commitsLoaded = true;
-        this.scrollToElement('#commits');
+        this.scrollToContainerElement('#commits');
 
         this.toggleLoading(false);
+        initAddContextCommitsTriggers();
       })
       .catch(() => {
         this.toggleLoading(false);
@@ -349,22 +351,27 @@ export default class MergeRequestTabs {
 
   mountPipelinesView() {
     const pipelineTableViewEl = document.querySelector('#commit-pipeline-table-view');
-    const { CommitPipelinesTable, mrWidgetData } = gl;
+    const { mrWidgetData } = gl;
 
-    this.commitPipelinesTable = new CommitPipelinesTable({
-      propsData: {
-        endpoint: pipelineTableViewEl.dataset.endpoint,
-        helpPagePath: pipelineTableViewEl.dataset.helpPagePath,
-        emptyStateSvgPath: pipelineTableViewEl.dataset.emptyStateSvgPath,
-        errorStateSvgPath: pipelineTableViewEl.dataset.errorStateSvgPath,
-        autoDevopsHelpPath: pipelineTableViewEl.dataset.helpAutoDevopsPath,
-        canCreatePipelineInTargetProject: Boolean(
-          mrWidgetData?.can_create_pipeline_in_target_project,
-        ),
-        sourceProjectFullPath: mrWidgetData?.source_project_full_path || '',
+    this.commitPipelinesTable = new Vue({
+      provide: {
         targetProjectFullPath: mrWidgetData?.target_project_full_path || '',
-        projectId: pipelineTableViewEl.dataset.projectId,
-        mergeRequestId: mrWidgetData ? mrWidgetData.iid : null,
+      },
+      render(createElement) {
+        return createElement(CommitPipelinesTable, {
+          props: {
+            endpoint: pipelineTableViewEl.dataset.endpoint,
+            emptyStateSvgPath: pipelineTableViewEl.dataset.emptyStateSvgPath,
+            errorStateSvgPath: pipelineTableViewEl.dataset.errorStateSvgPath,
+            canCreatePipelineInTargetProject: Boolean(
+              mrWidgetData?.can_create_pipeline_in_target_project,
+            ),
+            sourceProjectFullPath: mrWidgetData?.source_project_full_path || '',
+            targetProjectFullPath: mrWidgetData?.target_project_full_path || '',
+            projectId: pipelineTableViewEl.dataset.projectId,
+            mergeRequestId: mrWidgetData ? mrWidgetData.iid : null,
+          },
+        });
       },
     }).$mount();
 
@@ -393,10 +400,6 @@ export default class MergeRequestTabs {
 
         initChangesDropdown(this.stickyTop);
 
-        if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-          gl.diffNotesCompileComponents();
-        }
-
         localTimeAgo($('.js-timeago', 'div#diffs'));
         syntaxHighlight($('#diffs .js-syntax-highlight'));
 
@@ -406,7 +409,7 @@ export default class MergeRequestTabs {
         this.diffsLoaded = true;
 
         new Diff();
-        this.scrollToElement('#diffs');
+        this.scrollToContainerElement('#diffs');
 
         $('.diff-file').each((i, el) => {
           new BlobForkSuggestion({
@@ -479,13 +482,14 @@ export default class MergeRequestTabs {
   }
 
   shrinkView() {
-    const $gutterIcon = $('.js-sidebar-toggle i:visible');
+    const $gutterBtn = $('.js-sidebar-toggle:visible');
+    const $expandSvg = $gutterBtn.find('.js-sidebar-expand');
 
     // Wait until listeners are set
     setTimeout(() => {
       // Only when sidebar is expanded
-      if ($gutterIcon.is('.fa-angle-double-right')) {
-        $gutterIcon.closest('a').trigger('click', [true]);
+      if ($expandSvg.length && $expandSvg.hasClass('hidden')) {
+        $gutterBtn.trigger('click', [true]);
       }
     }, 0);
   }
@@ -495,31 +499,15 @@ export default class MergeRequestTabs {
     if (parseBoolean(Cookies.get('collapsed_gutter'))) {
       return;
     }
-    const $gutterIcon = $('.js-sidebar-toggle i:visible');
+    const $gutterBtn = $('.js-sidebar-toggle');
+    const $collapseSvg = $gutterBtn.find('.js-sidebar-collapse');
 
     // Wait until listeners are set
     setTimeout(() => {
       // Only when sidebar is collapsed
-      if ($gutterIcon.is('.fa-angle-double-left')) {
-        $gutterIcon.closest('a').trigger('click', [true]);
+      if ($collapseSvg.length && !$collapseSvg.hasClass('hidden')) {
+        $gutterBtn.trigger('click', [true]);
       }
     }, 0);
-  }
-
-  initAffix() {
-    const $tabs = $('.js-tabs-affix');
-
-    // Screen space on small screens is usually very sparse
-    // So we dont affix the tabs on these
-    if (bp.getBreakpointSize() === 'xs' || !$tabs.length) return;
-
-    /**
-      If the browser does not support position sticky, it returns the position as static.
-      If the browser does support sticky, then we allow the browser to handle it, if not
-      then we default back to Bootstraps affix
-    */
-    if ($tabs.css('position') !== 'static') return;
-
-    polyfillSticky($tabs);
   }
 }

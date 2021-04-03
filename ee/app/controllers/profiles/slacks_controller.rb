@@ -7,8 +7,10 @@ class Profiles::SlacksController < Profiles::ApplicationController
 
   layout 'application'
 
+  feature_category :users
+
   def edit
-    @projects = disabled_projects if current_user
+    @projects = disabled_projects.select([:id, :name]) if current_user
   end
 
   def slack_link

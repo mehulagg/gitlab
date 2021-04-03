@@ -1,67 +1,78 @@
 <script>
+import { GlEmptyState, GlLink, GlSprintf } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
-import { GlEmptyState, GlTab, GlTabs, GlLink, GlSprintf } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
-import PackageFilter from './packages_filter.vue';
+import createFlash from '~/flash';
+import { historyReplaceState } from '~/lib/utils/common_utils';
+import { s__ } from '~/locale';
+import { SHOW_DELETE_SUCCESS_ALERT } from '~/packages/shared/constants';
+import { FILTERED_SEARCH_TERM } from '~/packages_and_registries/shared/constants';
+import { getQueryParams, extractFilterAndSorting } from '~/packages_and_registries/shared/utils';
+import { DELETE_PACKAGE_SUCCESS_MESSAGE } from '../constants';
+import PackageSearch from './package_search.vue';
+import PackageTitle from './package_title.vue';
 import PackageList from './packages_list.vue';
-import PackageSort from './packages_sort.vue';
-import { PACKAGE_REGISTRY_TABS } from '../constants';
-import PackagesComingSoon from '../coming_soon/packages_coming_soon.vue';
 
 export default {
   components: {
     GlEmptyState,
-    GlTab,
-    GlTabs,
     GlLink,
     GlSprintf,
-    PackageFilter,
     PackageList,
-    PackageSort,
-    PackagesComingSoon,
+    PackageTitle,
+    PackageSearch,
   },
   computed: {
     ...mapState({
-      emptyListIllustration: state => state.config.emptyListIllustration,
-      emptyListHelpUrl: state => state.config.emptyListHelpUrl,
-      comingSoon: state => state.config.comingSoon,
-      filterQuery: state => state.filterQuery,
+      emptyListIllustration: (state) => state.config.emptyListIllustration,
+      emptyListHelpUrl: (state) => state.config.emptyListHelpUrl,
+      filter: (state) => state.filter,
+      selectedType: (state) => state.selectedType,
+      packageHelpUrl: (state) => state.config.packageHelpUrl,
+      packagesCount: (state) => state.pagination?.total,
     }),
-    tabsToRender() {
-      return PACKAGE_REGISTRY_TABS;
+    emptySearch() {
+      return (
+        this.filter.filter((f) => f.type !== FILTERED_SEARCH_TERM || f.value?.data).length === 0
+      );
+    },
+
+    emptyStateTitle() {
+      return this.emptySearch
+        ? s__('PackageRegistry|There are no packages yet')
+        : s__('PackageRegistry|Sorry, your filter produced no results');
     },
   },
   mounted() {
+    const queryParams = getQueryParams(window.document.location.search);
+    const { sorting, filters } = extractFilterAndSorting(queryParams);
+    this.setSorting(sorting);
+    this.setFilter(filters);
     this.requestPackagesList();
+    this.checkDeleteAlert();
   },
   methods: {
-    ...mapActions(['requestPackagesList', 'requestDeletePackage', 'setSelectedType']),
+    ...mapActions([
+      'requestPackagesList',
+      'requestDeletePackage',
+      'setSelectedType',
+      'setSorting',
+      'setFilter',
+    ]),
     onPageChanged(page) {
       return this.requestPackagesList({ page });
     },
     onPackageDeleteRequest(item) {
       return this.requestDeletePackage(item);
     },
-    tabChanged(e) {
-      const selectedType = PACKAGE_REGISTRY_TABS[e];
-
-      if (selectedType) {
-        this.setSelectedType(selectedType);
-        this.requestPackagesList();
+    checkDeleteAlert() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const showAlert = urlParams.get(SHOW_DELETE_SUCCESS_ALERT);
+      if (showAlert) {
+        // to be refactored to use gl-alert
+        createFlash({ message: DELETE_PACKAGE_SUCCESS_MESSAGE, type: 'notice' });
+        const cleanUrl = window.location.href.split('?')[0];
+        historyReplaceState(cleanUrl);
       }
-    },
-    emptyStateTitle({ title, type }) {
-      if (this.filterQuery) {
-        return s__('PackageRegistry|Sorry, your filter produced no results');
-      }
-
-      if (type) {
-        return sprintf(s__('PackageRegistry|There are no %{packageType} packages yet'), {
-          packageType: title,
-        });
-      }
-
-      return s__('PackageRegistry|There are no packages yet');
     },
   },
   i18n: {
@@ -74,37 +85,23 @@ export default {
 </script>
 
 <template>
-  <gl-tabs @input="tabChanged">
-    <template #tabs-end>
-      <div class="d-flex align-self-center ml-md-auto py-1 py-md-0">
-        <package-filter class="mr-1" @filter="requestPackagesList" />
-        <package-sort @sort:changed="requestPackagesList" />
-      </div>
-    </template>
+  <div>
+    <package-title :package-help-url="packageHelpUrl" :packages-count="packagesCount" />
+    <package-search @update="requestPackagesList" />
 
-    <gl-tab v-for="(tab, index) in tabsToRender" :key="index" :title="tab.title">
-      <package-list @page:changed="onPageChanged" @package:delete="onPackageDeleteRequest">
-        <template #empty-state>
-          <gl-empty-state :title="emptyStateTitle(tab)" :svg-path="emptyListIllustration">
-            <template #description>
-              <gl-sprintf v-if="filterQuery" :message="$options.i18n.widenFilters" />
-              <gl-sprintf v-else :message="$options.i18n.noResults">
-                <template #noPackagesLink="{content}">
-                  <gl-link :href="emptyListHelpUrl" target="_blank">{{ content }}</gl-link>
-                </template>
-              </gl-sprintf>
-            </template>
-          </gl-empty-state>
-        </template>
-      </package-list>
-    </gl-tab>
-
-    <gl-tab v-if="comingSoon" :title="__('Coming soon')" lazy>
-      <packages-coming-soon
-        :illustration="emptyListIllustration"
-        :project-path="comingSoon.projectPath"
-        :suggested-contributions-path="comingSoon.suggestedContributions"
-      />
-    </gl-tab>
-  </gl-tabs>
+    <package-list @page:changed="onPageChanged" @package:delete="onPackageDeleteRequest">
+      <template #empty-state>
+        <gl-empty-state :title="emptyStateTitle" :svg-path="emptyListIllustration">
+          <template #description>
+            <gl-sprintf v-if="!emptySearch" :message="$options.i18n.widenFilters" />
+            <gl-sprintf v-else :message="$options.i18n.noResults">
+              <template #noPackagesLink="{ content }">
+                <gl-link :href="emptyListHelpUrl" target="_blank">{{ content }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </template>
+        </gl-empty-state>
+      </template>
+    </package-list>
+  </div>
 </template>

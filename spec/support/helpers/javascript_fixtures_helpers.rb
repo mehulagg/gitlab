@@ -12,6 +12,7 @@ module JavaScriptFixturesHelpers
   included do |base|
     base.around do |example|
       # pick an arbitrary date from the past, so tests are not time dependent
+      # Also see spec/frontend/__helpers__/fake_date/jest.js
       Timecop.freeze(Time.utc(2015, 7, 3, 10)) { example.run }
 
       raise NoMethodError.new('You need to set `response` for the fixture generator! This will automatically happen with `type: :controller` or `type: :request`.', 'response') unless respond_to?(:response)
@@ -30,13 +31,24 @@ module JavaScriptFixturesHelpers
   #
   def clean_frontend_fixtures(directory_name)
     full_directory_name = File.expand_path(directory_name, fixture_root_path)
-    Dir[File.expand_path('*.html', full_directory_name)].each do |file_name|
+    Dir[File.expand_path('*.{html,json,md}', full_directory_name)].each do |file_name|
       FileUtils.rm(file_name)
     end
   end
 
   def remove_repository(project)
     Gitlab::Shell.new.remove_repository(project.repository_storage, project.disk_path)
+  end
+
+  # Public: Reads a GraphQL query from the filesystem as a string
+  #
+  # query_path - file path to the GraphQL query, relative to `app/assets/javascripts`
+  # fragment_paths - an optional array of file paths to any fragments the query uses,
+  #                  also relative to `app/assets/javascripts`
+  def get_graphql_query_as_string(query_path, fragment_paths = [])
+    [query_path, *fragment_paths].map do |path|
+      File.read(File.join(Rails.root, '/app/assets/javascripts', path))
+    end.join("\n")
   end
 
   private

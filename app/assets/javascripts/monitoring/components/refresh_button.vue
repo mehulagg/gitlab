@@ -1,16 +1,16 @@
 <script>
-import Visibility from 'visibilityjs';
-import { mapActions } from 'vuex';
-import { n__, __ } from '~/locale';
-
 import {
   GlButtonGroup,
   GlButton,
-  GlNewDropdown,
-  GlNewDropdownItem,
-  GlNewDropdownDivider,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownDivider,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import Visibility from 'visibilityjs';
+import { mapActions } from 'vuex';
+import { n__, __, s__ } from '~/locale';
+
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const makeInterval = (length = 0, unit = 's') => {
@@ -45,12 +45,15 @@ const makeInterval = (length = 0, unit = 's') => {
 };
 
 export default {
+  i18n: {
+    refreshDashboard: s__('Metrics|Refresh dashboard'),
+  },
   components: {
     GlButtonGroup,
     GlButton,
-    GlNewDropdown,
-    GlNewDropdownItem,
-    GlNewDropdownDivider,
+    GlDropdown,
+    GlDropdownItem,
+    GlDropdownDivider,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -148,31 +151,32 @@ export default {
       v-gl-tooltip
       class="gl-flex-grow-1"
       variant="default"
-      :title="s__('Metrics|Refresh dashboard')"
+      :title="$options.i18n.refreshDashboard"
+      :aria-label="$options.i18n.refreshDashboard"
       icon="retry"
       @click="refresh"
     />
-    <gl-new-dropdown
+    <gl-dropdown
       v-if="!disableMetricDashboardRefreshRate"
       v-gl-tooltip
       :title="s__('Metrics|Set refresh rate')"
       :text="dropdownText"
     >
-      <gl-new-dropdown-item
+      <gl-dropdown-item
         :is-check-item="true"
         :is-checked="refreshInterval === null"
         @click="removeRefreshInterval()"
-        >{{ __('Off') }}</gl-new-dropdown-item
+        >{{ __('Off') }}</gl-dropdown-item
       >
-      <gl-new-dropdown-divider />
-      <gl-new-dropdown-item
+      <gl-dropdown-divider />
+      <gl-dropdown-item
         v-for="(option, i) in $options.refreshIntervals"
         :key="i"
         :is-check-item="true"
         :is-checked="isChecked(option)"
         @click="setRefreshInterval(option)"
-        >{{ option.label }}</gl-new-dropdown-item
+        >{{ option.label }}</gl-dropdown-item
       >
-    </gl-new-dropdown>
+    </gl-dropdown>
   </gl-button-group>
 </template>

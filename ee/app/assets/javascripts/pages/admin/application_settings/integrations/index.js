@@ -1,5 +1,6 @@
-import 'select2/select2';
 import $ from 'jquery';
+import { loadCSSFile } from '~/lib/utils/css_utils';
+import { select2AxiosTransport } from '~/lib/utils/select2_utils';
 import { s__ } from '~/locale';
 import PersistentUserCallout from '~/persistent_user_callout';
 
@@ -27,47 +28,55 @@ const getDropdownConfig = (placeholder, url) => ({
     },
     results(data) {
       return {
-        results: data.map(entity => ({
+        results: data.results.map((entity) => ({
           id: entity.source_id,
           text: entity.path,
         })),
       };
     },
+    transport: select2AxiosTransport,
   },
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const callout = document.querySelector('.js-admin-integrations-moved');
-  PersistentUserCallout.factory(callout);
+const callout = document.querySelector('.js-admin-integrations-moved');
+PersistentUserCallout.factory(callout);
 
-  // ElasticSearch
-  const $container = $('#js-elasticsearch-settings');
+// ElasticSearch
+const $container = $('#js-elasticsearch-settings');
 
-  $container
-    .find('.js-limit-checkbox')
-    .on('change', e =>
-      onLimitCheckboxChange(
-        e.currentTarget.checked,
-        $container.find('.js-limit-namespaces'),
-        $container.find('.js-limit-projects'),
-      ),
-    );
+$container
+  .find('.js-limit-checkbox')
+  .on('change', (e) =>
+    onLimitCheckboxChange(
+      e.currentTarget.checked,
+      $container.find('.js-limit-namespaces'),
+      $container.find('.js-limit-projects'),
+    ),
+  );
 
-  $container
-    .find('.js-elasticsearch-namespaces')
-    .select2(
-      getDropdownConfig(
-        s__('Elastic|None. Select namespaces to index.'),
-        '/-/autocomplete/namespace_routes.json',
-      ),
-    );
+import(/* webpackChunkName: 'select2' */ 'select2/select2')
+  .then(() => {
+    // eslint-disable-next-line promise/no-nesting
+    loadCSSFile(gon.select2_css_path)
+      .then(() => {
+        $container
+          .find('.js-elasticsearch-namespaces')
+          .select2(
+            getDropdownConfig(
+              s__('Elastic|None. Select namespaces to index.'),
+              '/-/autocomplete/namespace_routes.json',
+            ),
+          );
 
-  $container
-    .find('.js-elasticsearch-projects')
-    .select2(
-      getDropdownConfig(
-        s__('Elastic|None. Select projects to index.'),
-        '/-/autocomplete/project_routes.json',
-      ),
-    );
-});
+        $container
+          .find('.js-elasticsearch-projects')
+          .select2(
+            getDropdownConfig(
+              s__('Elastic|None. Select projects to index.'),
+              '/-/autocomplete/project_routes.json',
+            ),
+          );
+      })
+      .catch(() => {});
+  })
+  .catch(() => {});

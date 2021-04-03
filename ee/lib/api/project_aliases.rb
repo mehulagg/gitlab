@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectAliases < Grape::API::Instance
+  class ProjectAliases < ::API::Base
     include PaginationParams
+
+    feature_category :source_code_management
 
     before { check_feature_availability }
     before { authenticated_as_admin! }

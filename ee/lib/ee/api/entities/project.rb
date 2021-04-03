@@ -11,7 +11,7 @@ module EE
 
           override :preload_relation
           def preload_relation(projects_relation, options = {})
-            super(projects_relation).with_compliance_framework_settings
+            super(projects_relation).with_compliance_framework_settings.with_group_saml_provider
           end
         end
 
@@ -28,9 +28,17 @@ module EE
           expose :marked_for_deletion_on, if: ->(project, _) { project.feature_available?(:adjourned_deletion_for_projects_and_groups) } do |project, _|
             project.marked_for_deletion_at
           end
-          expose :compliance_frameworks do |project, _|
-            [project.compliance_framework_setting&.framework].compact
+          expose :requirements_enabled do |project, options|
+            project.feature_available?(:requirements, options[:current_user])
           end
+          expose :security_and_compliance_enabled do |project, options|
+            project.feature_available?(:security_and_compliance, options[:current_user])
+          end
+          expose :compliance_frameworks do |project, _|
+            [project.compliance_framework_setting&.compliance_management_framework&.name].compact
+          end
+          expose :issues_template, if: ->(project, _) { project.feature_available?(:issuable_default_templates) }
+          expose :merge_requests_template, if: ->(project, _) { project.feature_available?(:issuable_default_templates) }
         end
       end
     end

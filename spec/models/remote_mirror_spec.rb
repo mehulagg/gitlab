@@ -142,6 +142,20 @@ RSpec.describe RemoteMirror, :mailer do
     end
   end
 
+  describe '#bare_url' do
+    it 'returns the URL without any credentials' do
+      remote_mirror = build(:remote_mirror, url: 'http://user:pass@example.com/foo')
+
+      expect(remote_mirror.bare_url).to eq('http://example.com/foo')
+    end
+
+    it 'returns an empty string when the URL is nil' do
+      remote_mirror = build(:remote_mirror, url: nil)
+
+      expect(remote_mirror.bare_url).to eq('')
+    end
+  end
+
   describe '#update_repository' do
     it 'performs update including options' do
       git_remote_mirror = stub_const('Gitlab::Git::RemoteMirror', spy)
@@ -249,6 +263,30 @@ RSpec.describe RemoteMirror, :mailer do
     end
   end
 
+  describe '#hard_retry!' do
+    let(:remote_mirror) { create(:remote_mirror).tap {|mirror| mirror.update_column(:url, 'invalid') } }
+
+    it 'transitions an invalid mirror to the to_retry state' do
+      remote_mirror.hard_retry!('Invalid')
+
+      expect(remote_mirror.update_status).to eq('to_retry')
+      expect(remote_mirror.last_error).to eq('Invalid')
+    end
+  end
+
+  describe '#hard_fail!' do
+    let(:remote_mirror) { create(:remote_mirror).tap {|mirror| mirror.update_column(:url, 'invalid') } }
+
+    it 'transitions an invalid mirror to the failed state' do
+      remote_mirror.hard_fail!('Invalid')
+
+      expect(remote_mirror.update_status).to eq('failed')
+      expect(remote_mirror.last_error).to eq('Invalid')
+      expect(remote_mirror.last_update_at).not_to be_nil
+      expect(RemoteMirrorNotificationWorker.jobs).not_to be_empty
+    end
+  end
+
   context 'when remote mirror gets destroyed' do
     it 'removes remote' do
       mirror = create_mirror(url: 'http://foo:bar@test.com')
@@ -283,7 +321,7 @@ RSpec.describe RemoteMirror, :mailer do
     let(:remote_mirror) { create(:project, :repository, :remote_mirror).remote_mirrors.first }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     context 'with remote mirroring disabled' do
@@ -397,7 +435,7 @@ RSpec.describe RemoteMirror, :mailer do
     let(:timestamp) { Time.current - 5.minutes }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     before do
@@ -442,16 +480,18 @@ RSpec.describe RemoteMirror, :mailer do
   end
 
   describe '#disabled?' do
+    let_it_be(:project) { create(:project, :repository) }
+
     subject { remote_mirror.disabled? }
 
     context 'when disabled' do
-      let(:remote_mirror) { build(:remote_mirror, enabled: false) }
+      let(:remote_mirror) { build(:remote_mirror, project: project, enabled: false) }
 
       it { is_expected.to be_truthy }
     end
 
     context 'when enabled' do
-      let(:remote_mirror) { build(:remote_mirror, enabled: true) }
+      let(:remote_mirror) { build(:remote_mirror, project: project, enabled: true) }
 
       it { is_expected.to be_falsy }
     end

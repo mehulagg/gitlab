@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Analytics::CycleAnalytics::ProjectStage do
-  include_examples 'cycle analytics label based stage' do
+  include_examples 'value stream analytics label based stage' do
     let_it_be(:group) { create(:group) }
     let_it_be(:parent) { create(:project, group: group) }
     let_it_be(:parent_in_subgroup) { create(:project, group: create(:group, parent: group)) }

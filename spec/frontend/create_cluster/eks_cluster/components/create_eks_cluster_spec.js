@@ -1,5 +1,5 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 
 import CreateEksCluster from '~/create_cluster/eks_cluster/components/create_eks_cluster.vue';
 import EksClusterConfigurationForm from '~/create_cluster/eks_cluster/components/eks_cluster_configuration_form.vue';
@@ -12,6 +12,7 @@ describe('CreateEksCluster', () => {
   let vm;
   let state;
   const gitlabManagedClusterHelpPath = 'gitlab-managed-cluster-help-path';
+  const namespacePerEnvironmentHelpPath = 'namespace-per-environment-help-path';
   const accountAndExternalIdsHelpPath = 'account-and-external-id-help-path';
   const createRoleArnHelpPath = 'role-arn-help-path';
   const kubernetesIntegrationHelpPath = 'kubernetes-integration';
@@ -26,6 +27,7 @@ describe('CreateEksCluster', () => {
     vm = shallowMount(CreateEksCluster, {
       propsData: {
         gitlabManagedClusterHelpPath,
+        namespacePerEnvironmentHelpPath,
         accountAndExternalIdsHelpPath,
         createRoleArnHelpPath,
         externalLinkIcon,
@@ -50,6 +52,12 @@ describe('CreateEksCluster', () => {
       it('help url for kubernetes integration documentation', () => {
         expect(vm.find(EksClusterConfigurationForm).props('gitlabManagedClusterHelpPath')).toBe(
           gitlabManagedClusterHelpPath,
+        );
+      });
+
+      it('help url for namespace per environment cluster documentation', () => {
+        expect(vm.find(EksClusterConfigurationForm).props('namespacePerEnvironmentHelpPath')).toBe(
+          namespacePerEnvironmentHelpPath,
         );
       });
 

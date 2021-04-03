@@ -1,0 +1,19 @@
+mutation dastSiteValidationCreate(
+  $fullPath: ID!
+  $dastSiteTokenId: DastSiteTokenID!
+  $validationPath: String!
+  $validationStrategy: DastSiteValidationStrategyEnum
+) {
+  dastSiteValidationCreate(
+    input: {
+      fullPath: $fullPath
+      dastSiteTokenId: $dastSiteTokenId
+      validationPath: $validationPath
+      strategy: $validationStrategy
+    }
+  ) {
+    id
+    status
+    errors
+  }
+}

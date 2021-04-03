@@ -18,7 +18,7 @@ RSpec.shared_examples 'a GraphQL type with labels' do
     subject { described_class.fields['labels'] }
 
     it { is_expected.to have_graphql_type(Types::LabelType.connection_type) }
-    it { is_expected.to have_graphql_arguments(:search_term) }
+    it { is_expected.to have_graphql_arguments(labels_resolver_arguments) }
   end
 end
 
@@ -105,14 +105,12 @@ RSpec.shared_examples 'querying a GraphQL type with labels' do
       run_query(query_for(label_a))
     end
 
-    it 'batches queries for labels by title' do
-      pending('See: https://gitlab.com/gitlab-org/gitlab/-/issues/217767')
-
+    it 'batches queries for labels by title', :request_store do
       multi_selection = query_for(label_b, label_c)
       single_selection = query_for(label_d)
 
       expect { run_query(multi_selection) }
-        .to issue_same_number_of_queries_as { run_query(single_selection) }
+        .to issue_same_number_of_queries_as { run_query(single_selection) }.ignoring_cached_queries
     end
   end
 

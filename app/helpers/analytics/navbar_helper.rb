@@ -28,7 +28,7 @@ module Analytics
     private
 
     def navbar_sub_item(args)
-      NavbarSubItem.new(args)
+      NavbarSubItem.new(**args)
     end
 
     def cycle_analytics_navbar_link(project, current_user)
@@ -58,7 +58,7 @@ module Analytics
       return unless project.feature_available?(:builds, current_user) || !project.empty_repo?
 
       navbar_sub_item(
-        title: _('CI / CD'),
+        title: _('CI/CD'),
         path: 'pipelines#charts',
         link: charts_project_pipelines_path(project)
       )

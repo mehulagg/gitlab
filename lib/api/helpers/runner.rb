@@ -51,9 +51,7 @@ module API
           job_forbidden!(job, 'Job is not running') unless job.running?
         end
 
-        if Gitlab::Ci::Features.job_heartbeats_runner?(job.project)
-          job.runner&.heartbeat(get_runner_ip)
-        end
+        job.runner&.heartbeat(get_runner_ip)
 
         job
       end
@@ -72,6 +70,15 @@ module API
       def job_forbidden!(job, reason)
         header 'Job-Status', job.status
         forbidden!(reason)
+      end
+
+      def set_application_context
+        return unless current_job
+
+        Gitlab::ApplicationContext.push(
+          user: -> { current_job.user },
+          project: -> { current_job.project }
+        )
       end
     end
   end

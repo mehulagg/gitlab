@@ -1,40 +1,24 @@
 # frozen_string_literal: true
 
 module Issues
-  class ExportCsvService
+  class ExportCsvService < Issuable::ExportCsv::BaseService
     include Gitlab::Routing.url_helpers
     include GitlabRoutingHelper
 
-    # Target attachment size before base64 encoding
-    TARGET_FILESIZE = 15000000
+    def initialize(issuables_relation, project)
+      super
 
-    attr_reader :project
-
-    def initialize(issues_relation, project)
-      @issues = issues_relation
-      @labels = @issues.labels_hash
-      @project = project
-    end
-
-    def csv_data
-      csv_builder.render(TARGET_FILESIZE)
+      @labels = @issuables.labels_hash.transform_values { |labels| labels.sort.join(',').presence }
     end
 
     def email(user)
       Notify.issues_csv_email(user, project, csv_data, csv_builder.status).deliver_now
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
-    def csv_builder
-      @csv_builder ||=
-        CsvBuilder.new(@issues.preload(associations_to_preload), header_to_value_hash)
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
-
     private
 
     def associations_to_preload
-      %i(author assignees timelogs)
+      %i(author assignees timelogs milestone project)
     end
 
     def header_to_value_hash
@@ -63,7 +47,7 @@ module Issues
     end
 
     def issue_labels(issue)
-      @labels[issue.id].sort.join(',').presence
+      @labels[issue.id]
     end
 
     # rubocop: disable CodeReuse/ActiveRecord

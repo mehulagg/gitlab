@@ -11,11 +11,12 @@ module Gitlab
       LOCK_SLEEP = 0.001.seconds
       WATCH_FLAG_TTL = 10.seconds
 
-      UPDATE_FREQUENCY_DEFAULT = 30.seconds
+      UPDATE_FREQUENCY_DEFAULT = 60.seconds
       UPDATE_FREQUENCY_WHEN_BEING_WATCHED = 3.seconds
 
       ArchiveError = Class.new(StandardError)
       AlreadyArchivedError = Class.new(StandardError)
+      LockedError = Class.new(StandardError)
 
       attr_reader :job
 
@@ -79,22 +80,11 @@ module Gitlab
         job.trace_chunks.any? || current_path.present? || old_trace.present?
       end
 
-      def read
-        stream = Gitlab::Ci::Trace::Stream.new do
-          if trace_artifact
-            trace_artifact.open
-          elsif job.trace_chunks.any?
-            Gitlab::Ci::Trace::ChunkedIO.new(job)
-          elsif current_path
-            File.open(current_path, "rb")
-          elsif old_trace
-            StringIO.new(old_trace)
-          end
-        end
-
-        yield stream
-      ensure
-        stream&.close
+      def read(&block)
+        read_stream(&block)
+      rescue Errno::ENOENT, ChunkedIO::FailedToGetChunkError
+        job.reset
+        read_stream(&block)
       end
 
       def write(mode, &blk)
@@ -124,7 +114,11 @@ module Gitlab
       end
 
       def update_interval
-        being_watched? ? UPDATE_FREQUENCY_WHEN_BEING_WATCHED : UPDATE_FREQUENCY_DEFAULT
+        if being_watched?
+          UPDATE_FREQUENCY_WHEN_BEING_WATCHED
+        else
+          UPDATE_FREQUENCY_DEFAULT
+        end
       end
 
       def being_watched!
@@ -139,7 +133,31 @@ module Gitlab
         end
       end
 
+      def lock(&block)
+        in_write_lock(&block)
+      rescue FailedToObtainLockError
+        raise LockedError, "build trace `#{job.id}` is locked"
+      end
+
       private
+
+      def read_stream
+        stream = Gitlab::Ci::Trace::Stream.new do
+          if trace_artifact
+            trace_artifact.open
+          elsif job.trace_chunks.any?
+            Gitlab::Ci::Trace::ChunkedIO.new(job)
+          elsif current_path
+            File.open(current_path, "rb")
+          elsif old_trace
+            StringIO.new(old_trace)
+          end
+        end
+
+        yield stream
+      ensure
+        stream&.close
+      end
 
       def unsafe_write!(mode, &blk)
         stream = Gitlab::Ci::Trace::Stream.new do
@@ -168,7 +186,7 @@ module Gitlab
         if job.trace_chunks.any?
           Gitlab::Ci::Trace::ChunkedIO.new(job) do |stream|
             archive_stream!(stream)
-            stream.destroy!
+            destroy_stream(job) { stream.destroy! }
           end
         elsif current_path
           File.open(current_path) do |stream|
@@ -254,7 +272,21 @@ module Gitlab
       end
 
       def trace_artifact
-        job.job_artifacts_trace
+        read_trace_artifact(job) { job.job_artifacts_trace }
+      end
+
+      ##
+      # Overridden in EE
+      #
+      def destroy_stream(job)
+        yield
+      end
+
+      ##
+      # Overriden in EE
+      #
+      def read_trace_artifact(job)
+        yield
       end
 
       def being_watched_cache_key
@@ -263,3 +295,5 @@ module Gitlab
     end
   end
 end
+
+::Gitlab::Ci::Trace.prepend_if_ee('EE::Gitlab::Ci::Trace')

@@ -1,11 +1,11 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
-# Location-aware Git remote URL with AWS Route53 **(PREMIUM ONLY)**
+# Location-aware Git remote URL with AWS Route53 **(PREMIUM SELF)**
 
 You can provide GitLab users with a single remote URL that automatically uses
 the Geo node closest to them. This means users don't need to update their Git
@@ -18,7 +18,7 @@ Though these instructions use [AWS Route53](https://aws.amazon.com/route53/),
 other services such as [Cloudflare](https://www.cloudflare.com/) could be used
 as well.
 
-NOTE: **Note:**
+NOTE:
 You can also use a load balancer to distribute web UI or API traffic to
 [multiple Geo **secondary** nodes](../../../user/admin_area/geo_nodes.md#multiple-secondary-nodes-behind-a-load-balancer).
 Importantly, the **primary** node cannot yet be included. See the feature request
@@ -43,16 +43,16 @@ In any case, you require:
 - A working GitLab **secondary** node.
 - A Route53 Hosted Zone managing your domain.
 
-If you have not yet setup a Geo **primary** node and **secondary** node, please consult
-[the Geo setup instructions](index.md#setup-instructions).
+If you haven't yet set up a Geo _primary_ node and _secondary_ node, see the
+[Geo setup instructions](../index.md#setup-instructions).
 
 ## Create a traffic policy
 
 In a Route53 Hosted Zone, traffic policies can be used to set up a variety of
 routing configurations.
 
-1. Navigate to the
-[Route53 dashboard](https://console.aws.amazon.com/route53/home) and click
+1. Go to the
+[Route53 dashboard](https://console.aws.amazon.com/route53/home) and select
 **Traffic policies**.
 
    ![Traffic policies](img/single_git_traffic_policies.png)

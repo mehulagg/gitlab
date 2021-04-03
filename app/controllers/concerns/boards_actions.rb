@@ -9,7 +9,7 @@ module BoardsActions
 
     before_action :boards, only: :index
     before_action :board, only: :show
-    before_action :push_wip_limits, only: [:index, :show]
+    before_action :push_licensed_features, only: [:index, :show]
     before_action do
       push_frontend_feature_flag(:not_issuable_queries, parent, default_enabled: true)
     end
@@ -29,19 +29,29 @@ module BoardsActions
   private
 
   # Noop on FOSS
-  def push_wip_limits
+  def push_licensed_features
   end
 
   def boards
     strong_memoize(:boards) do
-      Boards::ListService.new(parent, current_user).execute
+      existing_boards = boards_finder.execute
+      if existing_boards.any?
+        existing_boards
+      else
+        # if no board exists, create one
+        [board_create_service.execute.payload]
+      end
     end
   end
 
   def board
     strong_memoize(:board) do
-      boards.find(params[:id])
+      board_finder.execute.first
     end
+  end
+
+  def board_type
+    board_klass.to_type
   end
 
   def serializer

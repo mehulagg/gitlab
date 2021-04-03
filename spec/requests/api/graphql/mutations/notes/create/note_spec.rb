@@ -37,6 +37,8 @@ RSpec.describe 'Adding a Note' do
 
     it_behaves_like 'a Note mutation when the given resource id is not for a Noteable'
 
+    it_behaves_like 'a Note mutation when there are rate limit validation errors'
+
     it 'returns the note' do
       post_graphql_mutation(mutation, current_user: current_user)
 
@@ -59,6 +61,14 @@ RSpec.describe 'Adding a Note' do
           post_graphql_mutation(mutation, current_user: current_user)
 
           expect(mutation_response['note']['discussion']['id']).to eq(discussion.to_global_id.to_s)
+        end
+
+        context 'when the discussion_id is not for a Discussion' do
+          let(:discussion) { create(:issue) }
+
+          it_behaves_like 'a mutation that returns top-level errors' do
+            let(:match_errors) { include(/ does not represent an instance of Discussion/) }
+          end
         end
       end
     end

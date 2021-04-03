@@ -3,13 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe Groups::IssuesAnalyticsController do
-  it_behaves_like 'issues analytics controller' do
+  it_behaves_like 'issue analytics controller' do
     let_it_be(:user)  { create(:user) }
     let_it_be(:group) { create(:group) }
     let_it_be(:project1) { create(:project, :empty_repo, namespace: group) }
     let_it_be(:project2) { create(:project, :empty_repo, namespace: group) }
     let_it_be(:issue1) { create(:issue, project: project1, confidential: true) }
-    let_it_be(:issue2) { create(:issue, project: project2, state: :closed) }
+    let_it_be(:issue2) { create(:issue, :closed, project: project2) }
 
     before do
       group.add_owner(user)

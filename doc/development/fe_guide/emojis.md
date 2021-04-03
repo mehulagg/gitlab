@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Emojis
 
 GitLab supports native Unicode emojis and falls back to image-based emojis selectively
@@ -19,7 +25,7 @@ when your platform does not support it.
     - `app/assets/images/emoji.png`
     - `app/assets/images/emoji@2x.png`
  1. Ensure you see new individual images copied into `app/assets/images/emoji/`
- 1. Ensure you can see the new emojis and their aliases in the GFM Autocomplete
+ 1. Ensure you can see the new emojis and their aliases in the GitLab Flavored Markdown (GFM) Autocomplete
  1. Ensure you can see the new emojis and their aliases in the award emoji menu
  1. You might need to add new emoji Unicode support checks and rules for platforms
     that do not support a certain emoji and we need to fallback to an image.

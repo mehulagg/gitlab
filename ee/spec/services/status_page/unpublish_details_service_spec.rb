@@ -6,8 +6,8 @@ RSpec.describe StatusPage::UnpublishDetailsService do
   let_it_be(:project, refind: true) { create(:project) }
   let(:issue) { instance_double(Issue, iid: incident_id) }
   let(:incident_id) { 1 }
-  let(:key) { StatusPage::Storage.details_path(incident_id) }
-  let(:image_uploads_path) { StatusPage::Storage.uploads_path(issue.iid) }
+  let(:key) { Gitlab::StatusPage::Storage.details_path(incident_id) }
+  let(:image_uploads_path) { Gitlab::StatusPage::Storage.uploads_path(issue.iid) }
 
   let(:service) { described_class.new(project: project) }
 
@@ -15,7 +15,7 @@ RSpec.describe StatusPage::UnpublishDetailsService do
 
   describe '#execute' do
     let(:status_page_setting_enabled) { true }
-    let(:storage_client) { instance_double(StatusPage::Storage::S3Client) }
+    let(:storage_client) { instance_double(Gitlab::StatusPage::Storage::S3Client) }
 
     let(:status_page_setting) do
       instance_double(StatusPage::ProjectSetting, enabled?: status_page_setting_enabled,
@@ -53,7 +53,7 @@ RSpec.describe StatusPage::UnpublishDetailsService do
 
       it 'untracks the issue' do
         expect(StatusPage::PublishedIncident).to receive(:untrack).with(issue)
-        expect(StatusPage::UsageDataCounters::IncidentCounter).to receive(:count).with(:unpublishes).once
+        expect(Gitlab::StatusPage::UsageDataCounters::IncidentCounter).to receive(:count).with(:unpublishes).once
 
         result
       end
@@ -64,7 +64,7 @@ RSpec.describe StatusPage::UnpublishDetailsService do
       let(:error) { StandardError.new }
 
       let(:exception) do
-        StatusPage::Storage::Error.new(bucket: bucket, error: error)
+        Gitlab::StatusPage::Storage::Error.new(bucket: bucket, error: error)
       end
 
       context 'when json delete fails' do

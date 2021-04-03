@@ -50,7 +50,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
           wait_for_requests
 
-          expect(page.find('.js-run-mr-pipeline')).to have_text('Run Pipeline')
+          expect(page.find('[data-testid="run_pipeline_button"]')).to have_text('Run Pipeline')
         end
       end
 
@@ -66,7 +66,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
           wait_for_requests
 
-          expect(page.find('.js-run-mr-pipeline')).to have_text('Run Pipeline')
+          expect(page.find('[data-testid="run_pipeline_button"]')).to have_text('Run Pipeline')
         end
       end
     end
@@ -122,6 +122,10 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
     context 'when actor is a developer in parent project' do
       let(:actor) { developer_in_parent }
+
+      before do
+        stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
+      end
 
       it 'creates a pipeline in the parent project when user proceeds with the warning' do
         visit project_merge_request_path(parent_project, merge_request)
@@ -180,7 +184,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
         page.within(first('.commit')) do
           page.within('.pipeline-tags') do
-            expect(page.find('.js-pipeline-url-link')[:href]).to include(expected_project.full_path)
+            expect(page.find('[data-testid="pipeline-url-link"]')[:href]).to include(expected_project.full_path)
             expect(page).to have_content('detached')
           end
           page.within('.pipeline-triggerer') do
@@ -234,11 +238,15 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
         threads = []
 
         threads << Thread.new do
-          @merge_request = MergeRequests::CreateService.new(project, user, merge_request_params).execute
+          Sidekiq::Worker.skipping_transaction_check do
+            @merge_request = MergeRequests::CreateService.new(project, user, merge_request_params).execute
+          end
         end
 
         threads << Thread.new do
-          @pipeline = Ci::CreatePipelineService.new(project, user, build_push_data).execute(:push)
+          Sidekiq::Worker.skipping_transaction_check do
+            @pipeline = Ci::CreatePipelineService.new(project, user, build_push_data).execute(:push)
+          end
         end
 
         threads.each { |thr| thr.join }

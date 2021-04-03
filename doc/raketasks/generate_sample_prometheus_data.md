@@ -1,6 +1,12 @@
-# Generate sample Prometheus data **(CORE ONLY)**
+---
+stage: Monitor
+group: Monitor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
 
-This command will run Prometheus queries for each of the metrics of a specific environment
+# Generate sample Prometheus data **(FREE SELF)**
+
+This command runs Prometheus queries for each of the metrics of a specific environment
 for a series of time intervals to now:
 
 - 30 minutes

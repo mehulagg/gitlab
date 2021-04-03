@@ -1,29 +1,36 @@
 /* eslint-disable no-new */
 
 import IssuableFilteredSearchTokenKeys from 'ee_else_ce/filtered_search/issuable_filtered_search_token_keys';
-import IssuableIndex from '~/issuable_index';
 import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
-import UsersSelect from '~/users_select';
-import initFilteredSearch from '~/pages/search/init_filtered_search';
+import initCsvImportExportButtons from '~/issuable/init_csv_import_export_buttons';
+import initIssuableByEmail from '~/issuable/init_issuable_by_email';
+import IssuableIndex from '~/issuable_index';
+import initIssuablesList, { initIssuesListApp } from '~/issues_list';
+import initManualOrdering from '~/manual_ordering';
 import { FILTERED_SEARCH } from '~/pages/constants';
 import { ISSUABLE_INDEX } from '~/pages/projects/constants';
-import initIssuablesList from '~/issuables_list';
-import initManualOrdering from '~/manual_ordering';
-import { showLearnGitLabIssuesPopover } from '~/onboarding_issues';
+import initFilteredSearch from '~/pages/search/init_filtered_search';
+import UsersSelect from '~/users_select';
 
-document.addEventListener('DOMContentLoaded', () => {
-  IssuableFilteredSearchTokenKeys.addExtraTokensForIssues();
+IssuableFilteredSearchTokenKeys.addExtraTokensForIssues();
 
-  initFilteredSearch({
-    page: FILTERED_SEARCH.ISSUES,
-    filteredSearchTokenKeys: IssuableFilteredSearchTokenKeys,
-  });
-
-  new IssuableIndex(ISSUABLE_INDEX.ISSUE);
-  new ShortcutsNavigation();
-  new UsersSelect();
-
-  initManualOrdering();
-  initIssuablesList();
-  showLearnGitLabIssuesPopover();
+initFilteredSearch({
+  page: FILTERED_SEARCH.ISSUES,
+  filteredSearchTokenKeys: IssuableFilteredSearchTokenKeys,
+  useDefaultState: true,
 });
+
+if (gon.features?.vueIssuesList) {
+  new IssuableIndex();
+} else {
+  new IssuableIndex(ISSUABLE_INDEX.ISSUE);
+}
+
+new ShortcutsNavigation();
+new UsersSelect();
+
+initManualOrdering();
+initIssuablesList();
+initIssuableByEmail();
+initCsvImportExportButtons();
+initIssuesListApp();

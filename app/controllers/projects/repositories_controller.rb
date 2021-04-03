@@ -8,6 +8,8 @@ class Projects::RepositoriesController < Projects::ApplicationController
 
   prepend_before_action(only: [:archive]) { authenticate_sessionless_user!(:archive) }
 
+  skip_before_action :default_cache_headers, only: :archive
+
   # Authorize
   before_action :require_non_empty_project, except: :create
   before_action :archive_rate_limit!, only: :archive
@@ -17,6 +19,8 @@ class Projects::RepositoriesController < Projects::ApplicationController
   before_action :authorize_download_code!
   before_action :authorize_admin_project!, only: :create
   before_action :redirect_to_external_storage, only: :archive, if: :static_objects_external_storage_enabled?
+
+  feature_category :source_code_management
 
   def create
     @project.create_repository
@@ -49,7 +53,7 @@ class Projects::RepositoriesController < Projects::ApplicationController
   end
 
   def set_cache_headers
-    expires_in cache_max_age(archive_metadata['CommitId']), public: project.public?
+    expires_in cache_max_age(archive_metadata['CommitId']), public: Guest.can?(:download_code, project)
     fresh_when(etag: archive_metadata['ArchivePath'])
   end
 

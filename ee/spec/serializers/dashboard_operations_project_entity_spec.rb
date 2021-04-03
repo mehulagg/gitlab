@@ -95,15 +95,15 @@ RSpec.describe DashboardOperationsProjectEntity do
       expect(subject).not_to include(:alert_count, :upgrade_path)
     end
 
-    context 'the user has permission to upgrade plan' do
+    context 'the user has permission to upgrade plan', :enable_admin_mode do
       let(:user) { build(:user, :admin) }
 
       it 'shows the profile upgrade path' do
-        expect(subject[:upgrade_path]).to eq '/profile/billings'
+        expect(subject[:upgrade_path]).to eq '/-/profile/billings'
       end
     end
 
-    context 'the user has permission to upgrade group' do
+    context 'the user has permission to upgrade group', :enable_admin_mode do
       let(:project) { build(:project, namespace: create(:group)) }
       let(:user) { build(:user, :admin) }
 

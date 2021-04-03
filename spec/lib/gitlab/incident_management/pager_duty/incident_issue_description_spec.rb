@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'timecop'
 
 RSpec.describe Gitlab::IncidentManagement::PagerDuty::IncidentIssueDescription do
   describe '#to_s' do
@@ -10,9 +9,11 @@ RSpec.describe Gitlab::IncidentManagement::PagerDuty::IncidentIssueDescription d
     let(:assignees) do
       [{ 'summary' => 'Laura Haley', 'url' => 'https://webdemo.pagerduty.com/users/P553OPV' }]
     end
+
     let(:impacted_services) do
       [{ 'summary' => 'Production XDB Cluster', 'url' => 'https://webdemo.pagerduty.com/services/PN49J75' }]
     end
+
     let(:incident_payload) do
       {
         'url' => 'https://webdemo.pagerduty.com/incidents/PRORDTY',
@@ -48,7 +49,7 @@ RSpec.describe Gitlab::IncidentManagement::PagerDuty::IncidentIssueDescription d
       let(:created_at) { nil }
 
       it 'description contains current time in UTC' do
-        Timecop.freeze do
+        freeze_time do
           now = Time.current.utc.strftime('%d %B %Y, %-l:%M%p (%Z)')
 
           expect(to_s).to include(

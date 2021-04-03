@@ -6,18 +6,18 @@ RSpec.describe PipelineDetailsEntity do
   let_it_be(:user) { create(:user) }
   let(:request) { double('request') }
 
-  it 'inherrits from PipelineEntity' do
-    expect(described_class).to be < PipelineEntity
+  let(:entity) do
+    described_class.represent(pipeline, request: request)
+  end
+
+  it 'inherits from PipelineEntity' do
+    expect(described_class).to be < Ci::PipelineEntity
   end
 
   before do
     stub_not_protect_default_branch
 
     allow(request).to receive(:current_user).and_return(user)
-  end
-
-  let(:entity) do
-    described_class.represent(pipeline, request: request)
   end
 
   describe '#as_json' do
@@ -183,5 +183,7 @@ RSpec.describe PipelineDetailsEntity do
         expect(source_jobs[child_pipeline.id][:name]).to eq('child')
       end
     end
+
+    it_behaves_like 'public artifacts'
   end
 end

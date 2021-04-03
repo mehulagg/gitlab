@@ -1,10 +1,11 @@
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import LicenseManagement from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
-import ReportSection from '~/reports/components/report_section.vue';
-import ReportItem from '~/reports/components/report_item.vue';
-import { LOADING, ERROR, SUCCESS } from 'ee/vue_shared/security_reports/store/constants';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { stubComponent } from 'helpers/stub_component';
 import { TEST_HOST } from 'spec/test_constants';
+import ReportItem from '~/reports/components/report_item.vue';
+import ReportSection from '~/reports/components/report_section.vue';
+import { LOADING, ERROR, SUCCESS } from '~/reports/constants';
 import {
   approvedLicense,
   blacklistedLicense,
@@ -17,7 +18,7 @@ localVue.use(Vuex);
 
 describe('License Report MR Widget', () => {
   const apiUrl = `${TEST_HOST}/license_management`;
-  const securityApprovalsHelpPagePath = `${TEST_HOST}/path/to/security/approvals/help`;
+  const licenseComplianceDocsPath = `${TEST_HOST}/path/to/security/approvals/help`;
   let wrapper;
 
   const defaultState = {
@@ -53,7 +54,7 @@ describe('License Report MR Widget', () => {
     licenseManagementSettingsPath: `${TEST_HOST}/lm_settings`,
     fullReportPath: `${TEST_HOST}/path/to/the/full/report`,
     apiUrl,
-    securityApprovalsHelpPagePath,
+    licenseComplianceDocsPath,
   };
 
   const defaultActions = {
@@ -68,7 +69,7 @@ describe('License Report MR Widget', () => {
     getters = defaultGetters,
     state = defaultState,
     actions = defaultActions,
-    stubs = {},
+    stubs = { ReportSection },
   } = {}) => {
     const store = new Vuex.Store({
       modules: {
@@ -185,21 +186,6 @@ describe('License Report MR Widget', () => {
   });
 
   describe('report section', () => {
-    it('should render correctly', () => {
-      const mockReportGroups = [generateReportGroup()];
-
-      mountComponent({
-        getters: {
-          ...defaultGetters,
-          licenseReportGroups() {
-            return mockReportGroups;
-          },
-        },
-      });
-
-      expect(wrapper.find(ReportSection).element).toMatchSnapshot();
-    });
-
     describe('report body', () => {
       it('should render correctly', () => {
         const mockReportGroups = [generateReportGroup()];
@@ -211,7 +197,6 @@ describe('License Report MR Widget', () => {
               return mockReportGroups;
             },
           },
-          stubs: { ReportSection },
         });
 
         expect(wrapper.find({ ref: 'reportSectionBody' }).element).toMatchSnapshot();
@@ -225,7 +210,7 @@ describe('License Report MR Widget', () => {
       `(
         'given reports for: $givenStatuses it has $expectedNumberOfReportHeadings report headings',
         ({ givenStatuses, expectedNumberOfReportHeadings }) => {
-          const mockReportGroups = givenStatuses.map(status => generateReportGroup({ status }));
+          const mockReportGroups = givenStatuses.map((status) => generateReportGroup({ status }));
 
           mountComponent({
             getters: {
@@ -234,7 +219,6 @@ describe('License Report MR Widget', () => {
                 return mockReportGroups;
               },
             },
-            stubs: { ReportSection },
           });
 
           expect(wrapper.findAll({ ref: 'reportHeading' })).toHaveLength(
@@ -245,7 +229,7 @@ describe('License Report MR Widget', () => {
 
       it.each([0, 1, 2])(
         'should include %d report items when section has that many licenses',
-        numberOfLicenses => {
+        (numberOfLicenses) => {
           const mockReportGroups = [
             generateReportGroup({
               numberOfLicenses,
@@ -259,7 +243,6 @@ describe('License Report MR Widget', () => {
                 return mockReportGroups;
               },
             },
-            stubs: { ReportSection },
           });
 
           expect(findAllReportItems()).toHaveLength(numberOfLicenses);
@@ -280,7 +263,6 @@ describe('License Report MR Widget', () => {
               return mockReportGroups;
             },
           },
-          stubs: { ReportSection },
         });
 
         const allReportItems = findAllReportItems();
@@ -292,7 +274,7 @@ describe('License Report MR Widget', () => {
   });
 
   describe('`View full report` button', () => {
-    const selector = '.js-full-report';
+    const selector = '[data-testid="full-report-button"]';
 
     it('should be rendered when fullReportPath prop is provided', () => {
       mountComponent();
@@ -308,12 +290,12 @@ describe('License Report MR Widget', () => {
       const props = { ...defaultProps, fullReportPath: null };
       mountComponent({ props });
 
-      expect(wrapper.contains(selector)).toBe(false);
+      expect(wrapper.find(selector).exists()).toBe(false);
     });
   });
 
   describe('`Manage licenses` button', () => {
-    const selector = '.js-manage-licenses';
+    const selector = '[data-testid="manage-licenses-button"]';
 
     it('should be rendered when licenseManagementSettingsPath prop is provided', () => {
       mountComponent();
@@ -329,14 +311,38 @@ describe('License Report MR Widget', () => {
       const props = { ...defaultProps, licenseManagementSettingsPath: null };
       mountComponent({ props });
 
-      expect(wrapper.contains(selector)).toBe(false);
+      expect(wrapper.find(selector).exists()).toBe(false);
     });
-  });
 
-  it('should render set approval modal', () => {
-    mountComponent();
+    it('has gl-mr-3 class when isCollapsbile is true', () => {
+      mountComponent({
+        stubs: {
+          ReportSection: stubComponent(ReportSection, {
+            template: `
+              <div>
+                <slot name="action-buttons" :is-collapsible="true" />
+              </div>
+            `,
+          }),
+        },
+      });
+      expect(wrapper.find(selector).classes()).toContain('gl-mr-3');
+    });
 
-    expect(wrapper.find('#modal-set-license-approval')).not.toBeNull();
+    it('does not have gl-mr-3 class when isCollapsbile is false', () => {
+      mountComponent({
+        stubs: {
+          ReportSection: stubComponent(ReportSection, {
+            template: `
+              <div>
+                <slot name="action-buttons" :is-collapsible="false" />
+              </div>
+            `,
+          }),
+        },
+      });
+      expect(wrapper.find(selector).classes()).not.toContain('gl-mr-3');
+    });
   });
 
   it('should init store after mount', () => {
@@ -347,39 +353,29 @@ describe('License Report MR Widget', () => {
     };
     mountComponent({ actions });
 
-    expect(actions.setAPISettings).toHaveBeenCalledWith(
-      expect.any(Object),
-      {
-        apiUrlManageLicenses: apiUrl,
-        licensesApiPath: defaultProps.licensesApiPath,
-        approvalsApiPath: defaultProps.approvalsApiPath,
-        canManageLicenses: true,
-      },
-      undefined,
-    );
+    expect(actions.setAPISettings).toHaveBeenCalledWith(expect.any(Object), {
+      apiUrlManageLicenses: apiUrl,
+      licensesApiPath: defaultProps.licensesApiPath,
+      approvalsApiPath: defaultProps.approvalsApiPath,
+      canManageLicenses: true,
+    });
 
-    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(
-      expect.any(Object),
-      undefined,
-      undefined,
-    );
+    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(expect.any(Object), undefined);
 
     expect(actions.fetchLicenseCheckApprovalRule).toHaveBeenCalledWith(
       expect.any(Object),
-      undefined,
       undefined,
     );
   });
 
   describe('approval status', () => {
-    const findSecurityApprovalHelpLink = () => wrapper.find('.js-security-approval-help-link');
+    const findLicenseComplianceHelpLink = () =>
+      wrapper.find('[data-testid="security-approval-help-link"]');
 
     it('does not show a link to security approval help page if report does not contain blacklisted licenses', () => {
-      mountComponent({
-        stubs: { ReportSection },
-      });
+      mountComponent();
 
-      expect(findSecurityApprovalHelpLink().exists()).toBe(false);
+      expect(findLicenseComplianceHelpLink().exists()).toBe(false);
     });
 
     it('shows a link to security approval help page if report contains blacklisted licenses', () => {
@@ -391,13 +387,12 @@ describe('License Report MR Widget', () => {
       };
       mountComponent({
         getters,
-        stubs: { ReportSection },
       });
 
-      const securityApprovalHelpLink = findSecurityApprovalHelpLink();
+      const licenseComplianceHelpLink = findLicenseComplianceHelpLink();
 
-      expect(findSecurityApprovalHelpLink().exists()).toBe(true);
-      expect(securityApprovalHelpLink.attributes('href')).toBe(securityApprovalsHelpPagePath);
+      expect(findLicenseComplianceHelpLink().exists()).toBe(true);
+      expect(licenseComplianceHelpLink.attributes('href')).toBe(licenseComplianceDocsPath);
     });
   });
 });

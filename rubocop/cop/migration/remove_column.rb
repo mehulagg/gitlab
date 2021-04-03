@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../migration_helpers'
 
 module RuboCop
@@ -8,7 +10,7 @@ module RuboCop
       class RemoveColumn < RuboCop::Cop::Cop
         include MigrationHelpers
 
-        MSG = '`remove_column` must only be used in post-deployment migrations'.freeze
+        MSG = '`remove_column` must only be used in post-deployment migrations'
 
         def on_def(node)
           def_method = node.children[0]

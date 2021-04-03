@@ -1,9 +1,8 @@
-import { GlIcon, GlDropdownItem } from '@gitlab/ui';
+import { GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import LogSimpleFilters from '~/logs/components/log_simple_filters.vue';
 import { createStore } from '~/logs/stores';
 import { mockPods, mockPodName } from '../mock_data';
-
-import LogSimpleFilters from '~/logs/components/log_simple_filters.vue';
 
 const module = 'environmentLogs';
 
@@ -18,7 +17,7 @@ describe('LogSimpleFilters', () => {
   const findPodsDropdownItems = () =>
     findPodsDropdown()
       .findAll(GlDropdownItem)
-      .filter(item => !item.is('[disabled]'));
+      .filter((item) => !('disabled' in item.attributes()));
 
   const mockPodsLoading = () => {
     state.pods.options = [];
@@ -58,9 +57,6 @@ describe('LogSimpleFilters', () => {
 
   it('displays UI elements', () => {
     initWrapper();
-
-    expect(wrapper.isVueInstance()).toBe(true);
-    expect(wrapper.isEmpty()).toBe(false);
 
     expect(findPodsDropdown().exists()).toBe(true);
   });
@@ -117,9 +113,9 @@ describe('LogSimpleFilters', () => {
       mockPods.forEach((pod, i) => {
         const item = items.at(i);
         if (item.text() !== mockPodName) {
-          expect(item.find(GlIcon).classes('invisible')).toBe(true);
+          expect(item.find(GlDropdownItem).attributes('ischecked')).toBeFalsy();
         } else {
-          expect(item.find(GlIcon).classes('invisible')).toBe(false);
+          expect(item.find(GlDropdownItem).attributes('ischecked')).toBeTruthy();
         }
       });
     });

@@ -3,14 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe 'layouts/nav/sidebar/_project' do
-  let(:project) { create(:project, :repository) }
+  let_it_be_with_refind(:project) { create(:project, :repository) }
 
   before do
     assign(:project, project)
     assign(:repository, project.repository)
     allow(view).to receive(:current_ref).and_return('master')
-
-    stub_licensed_features(tracing: true)
   end
 
   describe 'issue boards' do
@@ -28,9 +26,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     let(:user) { create(:user) }
 
     before do
-      stub_licensed_features(feature_flags: true)
-
-      project.project_feature.update(builds_access_level: feature)
+      project.project_feature.update!(builds_access_level: feature)
 
       project.team.add_developer(user)
       sign_in(user)
@@ -57,43 +53,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'Operations > Tracing' do
-    it 'is not visible when no valid license' do
-      allow(view).to receive(:can?).and_return(true)
-      stub_licensed_features(tracing: false)
-
-      render
-
-      expect(rendered).not_to have_text 'Tracing'
-    end
-
-    it 'is not visible to unauthorized user' do
-      render
-
-      expect(rendered).not_to have_text 'Tracing'
-    end
-
-    it 'links to Tracing page' do
-      allow(view).to receive(:can?).and_return(true)
-
-      render
-
-      expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
-    end
-
-    context 'without project.tracing_external_url' do
-      before do
-        allow(view).to receive(:can?).and_return(true)
-      end
-
-      it 'links to Tracing page' do
-        render
-
-        expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
-      end
-    end
-  end
-
   describe 'Operations > Pod logs' do
     before do
       allow(view).to receive(:can?).with(nil, :read_environment, project).and_return(can_read_environment)
@@ -105,7 +64,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_environment) { true }
       let(:can_read_pod_logs) { true }
 
-      it 'link is visible ' do
+      it 'link is visible' do
         expect(rendered).to have_link('Logs', href: project_logs_path(project))
       end
     end
@@ -114,7 +73,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_environment) { false }
       let(:can_read_pod_logs) { false }
 
-      it 'link is not visible ' do
+      it 'link is not visible' do
         expect(rendered).not_to have_link 'Logs'
       end
     end
@@ -123,7 +82,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_environment) { true }
       let(:can_read_pod_logs) { false }
 
-      it 'link is not visible ' do
+      it 'link is not visible' do
         expect(rendered).not_to have_link 'Logs'
       end
     end
@@ -133,90 +92,180 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     before do
       allow(view).to receive(:can?).with(nil, :read_dependencies, project).and_return(can_read_dependencies)
       allow(view).to receive(:can?).with(nil, :read_project_security_dashboard, project).and_return(can_read_dashboard)
+      allow(view).to receive(:can?).with(nil, :read_project_audit_events, project).and_return(can_read_project_audit_events)
+      allow(view).to receive(:can?).with(nil, :read_security_configuration, project).and_return(can_read_security_configuration)
+      allow(view).to receive(:can?).with(nil, :access_security_and_compliance, project).and_return(can_access_security_and_compliance)
+
       render
     end
 
-    describe 'when the user has full permissions' do
-      let(:can_read_dashboard) { true }
-      let(:can_read_dependencies) { true }
+    describe 'when the "Security & Compliance" is not available' do
+      let(:can_access_security_and_compliance) { false }
 
-      it 'top level navigation link is visible' do
-        expect(rendered).to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
-      end
+      describe 'when the user has full permissions' do
+        let(:can_read_dashboard) { true }
+        let(:can_read_dependencies) { true }
+        let(:can_read_project_audit_events) { true }
+        let(:can_read_security_configuration) { true }
 
-      it 'security dashboard link is visible' do
-        expect(rendered).to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
-      end
+        it 'top level navigation link is not visible' do
+          expect(rendered).not_to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
+        end
 
-      it 'security configuration link is visible' do
-        expect(rendered).to have_link('Configuration', href: project_security_configuration_path(project))
-      end
+        it 'security dashboard link is not visible' do
+          expect(rendered).not_to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
+        end
 
-      it 'dependency list link is visible' do
-        expect(rendered).to have_link('Dependency List', href: project_dependencies_path(project))
-      end
-    end
+        it 'security configuration link is not visible' do
+          expect(rendered).not_to have_link('Configuration', href: project_security_configuration_path(project))
+        end
 
-    describe 'when the user can view only security dashboard' do
-      let(:can_read_dashboard) { true }
-      let(:can_read_dependencies) { false }
+        it 'dependency list link is not visible' do
+          expect(rendered).not_to have_link('Dependency List', href: project_dependencies_path(project))
+        end
 
-      it 'top level navigation link is visible' do
-        expect(rendered).to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
-      end
-
-      it 'security dashboard link is visible' do
-        expect(rendered).to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
-      end
-
-      it 'security configuration link is visible' do
-        expect(rendered).to have_link('Configuration', href: project_security_configuration_path(project))
-      end
-
-      it 'dependency list link is not visible' do
-        expect(rendered).not_to have_link('Dependency List', href: project_dependencies_path(project))
+        it 'audit events link is not visible' do
+          expect(rendered).not_to have_link('Audit Events', href: project_audit_events_path(project))
+        end
       end
     end
 
-    describe 'when the user can view only dependency list' do
-      let(:can_read_dashboard) { false }
-      let(:can_read_dependencies) { true }
+    describe 'when the "Security & Compliance" is available' do
+      let(:can_access_security_and_compliance) { true }
 
-      it 'top level navigation link is visible' do
-        expect(rendered).to have_link('Security & Compliance', href: project_dependencies_path(project))
+      describe 'when the user has full permissions' do
+        let(:can_read_dashboard) { true }
+        let(:can_read_dependencies) { true }
+        let(:can_read_project_audit_events) { true }
+        let(:can_read_security_configuration) { true }
+
+        it 'top level navigation link is visible' do
+          expect(rendered).to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
+        end
+
+        it 'security dashboard link is visible' do
+          expect(rendered).to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
+        end
+
+        it 'security configuration link is visible' do
+          expect(rendered).to have_link('Configuration', href: project_security_configuration_path(project))
+        end
+
+        it 'dependency list link is visible' do
+          expect(rendered).to have_link('Dependency List', href: project_dependencies_path(project))
+        end
+
+        it 'audit events link is visible' do
+          expect(rendered).to have_link('Audit Events', href: project_audit_events_path(project))
+        end
       end
 
-      it 'security dashboard link is not visible' do
-        expect(rendered).not_to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
+      describe 'when the user can view only security dashboard' do
+        let(:can_read_dashboard) { true }
+        let(:can_read_dependencies) { false }
+        let(:can_read_project_audit_events) { false }
+        let(:can_read_security_configuration) { true }
+
+        it 'top level navigation link is visible' do
+          expect(rendered).to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
+        end
+
+        it 'security dashboard link is visible' do
+          expect(rendered).to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
+        end
+
+        it 'security configuration link is visible' do
+          expect(rendered).to have_link('Configuration', href: project_security_configuration_path(project))
+        end
+
+        it 'dependency list link is not visible' do
+          expect(rendered).not_to have_link('Dependency List', href: project_dependencies_path(project))
+        end
+
+        it 'audit events link is not visible' do
+          expect(rendered).not_to have_link('Audit Events', href: project_audit_events_path(project))
+        end
       end
 
-      it 'security configuration link is not visible' do
-        expect(rendered).not_to have_link('Configuration', href: project_security_configuration_path(project))
+      describe 'when the user can view only dependency list' do
+        let(:can_read_dashboard) { false }
+        let(:can_read_dependencies) { true }
+        let(:can_read_project_audit_events) { false }
+        let(:can_read_security_configuration) { false }
+
+        it 'top level navigation link is visible' do
+          expect(rendered).to have_link('Security & Compliance', href: project_dependencies_path(project))
+        end
+
+        it 'security dashboard link is not visible' do
+          expect(rendered).not_to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
+        end
+
+        it 'security configuration link is not visible' do
+          expect(rendered).not_to have_link('Configuration', href: project_security_configuration_path(project))
+        end
+
+        it 'dependency list link is visible' do
+          expect(rendered).to have_link('Dependency List', href: project_dependencies_path(project))
+        end
+
+        it 'audit events link is not visible' do
+          expect(rendered).not_to have_link('Audit Events', href: project_audit_events_path(project))
+        end
       end
 
-      it 'dependency list link is visible' do
-        expect(rendered).to have_link('Dependency List', href: project_dependencies_path(project))
+      describe 'when the user can view only audit events' do
+        let(:can_read_dashboard) { false }
+        let(:can_read_dependencies) { false }
+        let(:can_read_project_audit_events) { true }
+        let(:can_read_security_configuration) { false }
+
+        it 'top level navigation link is visible' do
+          expect(rendered).to have_link('Security & Compliance', href: project_audit_events_path(project))
+        end
+
+        it 'security dashboard link is not visible' do
+          expect(rendered).not_to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
+        end
+
+        it 'security configuration link is not visible' do
+          expect(rendered).not_to have_link('Configuration', href: project_security_configuration_path(project))
+        end
+
+        it 'dependency list link is not visible' do
+          expect(rendered).not_to have_link('Dependency List', href: project_dependencies_path(project))
+        end
+
+        it 'audit events link is visible' do
+          expect(rendered).to have_link('Audit Events', href: project_audit_events_path(project))
+        end
       end
-    end
 
-    describe 'when the user has no permissions' do
-      let(:can_read_dependencies) { false }
-      let(:can_read_dashboard) { false }
+      describe 'when the user has no permissions' do
+        let(:can_read_dependencies) { false }
+        let(:can_read_dashboard) { false }
+        let(:can_read_project_audit_events) { false }
+        let(:can_read_security_configuration) { false }
 
-      it 'top level navigation link is visible' do
-        expect(rendered).not_to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
-      end
+        it 'top level navigation link is visible' do
+          expect(rendered).not_to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
+        end
 
-      it 'security dashboard link is not visible' do
-        expect(rendered).not_to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
-      end
+        it 'security dashboard link is not visible' do
+          expect(rendered).not_to have_link('Security Dashboard', href: project_security_dashboard_index_path(project))
+        end
 
-      it 'security configuration link is not visible' do
-        expect(rendered).not_to have_link('Configuration', href: project_security_configuration_path(project))
-      end
+        it 'security configuration link is not visible' do
+          expect(rendered).not_to have_link('Configuration', href: project_security_configuration_path(project))
+        end
 
-      it 'dependency list link is not visible' do
-        expect(rendered).not_to have_link('Dependency List', href: project_dependencies_path(project))
+        it 'dependency list link is not visible' do
+          expect(rendered).not_to have_link('Dependency List', href: project_dependencies_path(project))
+        end
+
+        it 'audit events link is not visible' do
+          expect(rendered).not_to have_link('Audit Events', href: project_audit_events_path(project))
+        end
       end
     end
   end
@@ -224,7 +273,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   describe 'Settings > Operations' do
     it 'is not visible when no valid license' do
       allow(view).to receive(:can?).and_return(true)
-      stub_licensed_features(tracing: false)
 
       render
 
@@ -243,6 +291,68 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       render
 
       expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+    end
+  end
+
+  describe 'iterations link' do
+    context 'with authorized user' do
+      let_it_be(:current_user) { create(:user) }
+
+      before do
+        project.add_guest(current_user)
+
+        allow(view).to receive(:current_user).and_return(current_user)
+      end
+
+      context 'with iterations licensed feature available' do
+        before do
+          stub_licensed_features(iterations: true)
+        end
+
+        it 'is visible' do
+          render
+
+          expect(rendered).to have_text 'Iterations'
+        end
+      end
+
+      context 'with iterations licensed feature disabled' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_text 'Iterations'
+        end
+      end
+    end
+
+    context 'with unauthorized user' do
+      context 'with iterations licensed feature available' do
+        before do
+          stub_licensed_features(iterations: true)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_text 'Iterations'
+        end
+      end
+
+      context 'with iterations licensed feature disabled' do
+        before do
+          stub_licensed_features(iterations: false)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_text 'Iterations'
+        end
+      end
     end
   end
 end

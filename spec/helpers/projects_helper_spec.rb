@@ -4,17 +4,17 @@ require 'spec_helper'
 
 RSpec.describe ProjectsHelper do
   include ProjectForksHelper
+  include AfterNextHelpers
 
-  let_it_be(:project) { create(:project) }
+  let_it_be_with_reload(:project) { create(:project) }
+  let_it_be_with_refind(:project_with_repo) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
 
+  before do
+    helper.instance_variable_set(:@project, project)
+  end
+
   describe '#project_incident_management_setting' do
-    let(:project) { create(:project) }
-
-    before do
-      helper.instance_variable_set(:@project, project)
-    end
-
     context 'when incident_management_setting exists' do
       let(:project_incident_management_setting) do
         create(:project_incident_management_setting, project: project)
@@ -40,20 +40,14 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#error_tracking_setting_project_json' do
-    let(:project) { create(:project) }
-
     context 'error tracking setting does not exist' do
-      before do
-        helper.instance_variable_set(:@project, project)
-      end
-
       it 'returns nil' do
         expect(helper.error_tracking_setting_project_json).to be_nil
       end
     end
 
     context 'error tracking setting exists' do
-      let!(:error_tracking_setting) { create(:project_error_tracking_setting, project: project) }
+      let_it_be(:error_tracking_setting) { create(:project_error_tracking_setting, project: project) }
 
       context 'api_url present' do
         let(:json) do
@@ -65,24 +59,16 @@ RSpec.describe ProjectsHelper do
           }.to_json
         end
 
-        before do
-          helper.instance_variable_set(:@project, project)
-        end
-
         it 'returns error tracking json' do
           expect(helper.error_tracking_setting_project_json).to eq(json)
         end
       end
 
       context 'api_url not present' do
-        before do
+        it 'returns nil' do
           project.error_tracking_setting.api_url = nil
           project.error_tracking_setting.enabled = false
 
-          helper.instance_variable_set(:@project, project)
-        end
-
-        it 'returns nil' do
           expect(helper.error_tracking_setting_project_json).to be_nil
         end
       end
@@ -98,8 +84,7 @@ RSpec.describe ProjectsHelper do
   end
 
   describe "can_change_visibility_level?" do
-    let(:project) { create(:project) }
-    let(:user) { create(:project_member, :reporter, user: create(:user), project: project).user }
+    let_it_be(:user) { create(:project_member, :reporter, user: create(:user), project: project).user }
     let(:forked_project) { fork_project(project, user) }
 
     it "returns false if there are no appropriate permissions" do
@@ -108,42 +93,15 @@ RSpec.describe ProjectsHelper do
       expect(helper.can_change_visibility_level?(project, user)).to be_falsey
     end
 
-    it "returns true if there are permissions and it is not fork" do
+    it "returns true if there are permissions" do
       allow(helper).to receive(:can?) { true }
 
       expect(helper.can_change_visibility_level?(project, user)).to be_truthy
     end
-
-    it 'allows visibility level to be changed if the project is forked' do
-      allow(helper).to receive(:can?).with(user, :change_visibility_level, project) { true }
-      project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-      fork_project(project)
-
-      expect(helper.can_change_visibility_level?(project, user)).to be_truthy
-    end
-
-    context "forks" do
-      it "returns false if there are permissions and origin project is PRIVATE" do
-        allow(helper).to receive(:can?) { true }
-
-        project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-
-        expect(helper.can_change_visibility_level?(forked_project, user)).to be_falsey
-      end
-
-      it "returns true if there are permissions and origin project is INTERNAL" do
-        allow(helper).to receive(:can?) { true }
-
-        project.update(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
-
-        expect(helper.can_change_visibility_level?(forked_project, user)).to be_truthy
-      end
-    end
   end
 
   describe '#can_disable_emails?' do
-    let(:project) { create(:project) }
-    let(:user) { create(:project_member, :maintainer, user: create(:user), project: project).user }
+    let_it_be(:user) { create(:project_member, :maintainer, user: create(:user), project: project).user }
 
     it 'returns true for the project owner' do
       allow(helper).to receive(:can?).with(project.owner, :set_emails_disabled, project) { true }
@@ -166,11 +124,7 @@ RSpec.describe ProjectsHelper do
   end
 
   describe "readme_cache_key" do
-    let(:project) { create(:project, :repository) }
-
-    before do
-      helper.instance_variable_set(:@project, project)
-    end
+    let(:project) { project_with_repo }
 
     it "returns a valid cach key" do
       expect(helper.send(:readme_cache_key)).to eq("#{project.full_path}-#{project.commit.id}-readme")
@@ -184,8 +138,7 @@ RSpec.describe ProjectsHelper do
   end
 
   describe "#project_list_cache_key", :clean_gitlab_redis_shared_state do
-    let(:project) { create(:project, :repository) }
-    let(:user) { create(:user) }
+    let(:project) { project_with_repo }
 
     before do
       allow(helper).to receive(:current_user).and_return(user)
@@ -249,8 +202,6 @@ RSpec.describe ProjectsHelper do
 
   describe '#load_pipeline_status' do
     it 'loads the pipeline status in batch' do
-      project = build(:project)
-
       helper.load_pipeline_status([project])
       # Skip lazy loading of the `pipeline_status` attribute
       pipeline_status = project.instance_variable_get('@pipeline_status')
@@ -260,8 +211,6 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#show_no_ssh_key_message?' do
-    let(:user) { create(:user) }
-
     before do
       allow(helper).to receive(:current_user).and_return(user)
     end
@@ -282,8 +231,6 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#show_no_password_message?' do
-    let(:user) { create(:user) }
-
     before do
       allow(helper).to receive(:current_user).and_return(user)
     end
@@ -424,7 +371,6 @@ RSpec.describe ProjectsHelper do
 
     before do
       allow(helper).to receive(:current_user).and_return(user)
-      helper.instance_variable_set(:@project, project)
     end
 
     context 'when there is no current_user' do
@@ -444,15 +390,32 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#get_project_nav_tabs' do
-    let_it_be(:user) { create(:user) }
-    let(:project) { create(:project) }
-
     before do
+      allow(helper).to receive(:current_user).and_return(user)
       allow(helper).to receive(:can?) { true }
     end
 
     subject do
       helper.send(:get_project_nav_tabs, project, user)
+    end
+
+    context 'Security & Compliance tabs' do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_security_configuration, project).and_return(can_read_security_configuration)
+      end
+
+      context 'when user cannot read security configuration' do
+        let(:can_read_security_configuration) { false }
+
+        it { is_expected.not_to include(:security_configuration) }
+      end
+
+      context 'when user can read security configuration' do
+        let(:can_read_security_configuration) { true }
+        let(:feature_flag_enabled) { true }
+
+        it { is_expected.to include(:security_configuration) }
+      end
     end
 
     context 'when builds feature is enabled' do
@@ -490,6 +453,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has external wiki' do
       it 'includes external wiki tab' do
         project.create_external_wiki_service(active: true, properties: { 'external_wiki_url' => 'https://gitlab.com' })
+        project.reload
 
         is_expected.to include(:external_wiki)
       end
@@ -515,28 +479,61 @@ RSpec.describe ProjectsHelper do
       it { is_expected.not_to include(:confluence) }
       it { is_expected.to include(:wiki) }
     end
+
+    context 'learn gitlab experiment' do
+      context 'when it is enabled' do
+        before do
+          expect(helper).to receive(:learn_gitlab_experiment_enabled?).with(project).and_return(true)
+        end
+
+        it { is_expected.to include(:learn_gitlab) }
+      end
+
+      context 'when it is not enabled' do
+        it { is_expected.not_to include(:learn_gitlab) }
+      end
+    end
   end
 
   describe '#can_view_operations_tab?' do
     before do
       allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(false)
     end
 
     subject { helper.send(:can_view_operations_tab?, user, project) }
 
-    [:read_environment, :read_cluster, :metrics_dashboard].each do |ability|
+    where(:ability) do
+      [
+        :metrics_dashboard,
+        :read_alert_management_alert,
+        :read_environment,
+        :read_issue,
+        :read_sentry_issue,
+        :read_cluster
+      ]
+    end
+
+    with_them do
       it 'includes operations tab' do
-        allow(helper).to receive(:can?).and_return(false)
         allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
 
         is_expected.to be(true)
+      end
+
+      context 'when operations feature is disabled' do
+        it 'does not include operations tab' do
+          allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
+          project.project_feature.update_attribute(:operations_access_level, ProjectFeature::DISABLED)
+
+          is_expected.to be(false)
+        end
       end
     end
   end
 
   describe '#show_projects' do
     let(:projects) do
-      create(:project)
       Project.all
     end
 
@@ -561,8 +558,8 @@ RSpec.describe ProjectsHelper do
     end
   end
 
-  describe('#push_to_create_project_command') do
-    let(:user) { create(:user, username: 'john') }
+  describe '#push_to_create_project_command' do
+    let(:user) { build_stubbed(:user, username: 'john') }
 
     it 'returns the command to push to create project over HTTP' do
       allow(Gitlab::CurrentSettings.current_application_settings).to receive(:enabled_git_access_protocol) { 'http' }
@@ -578,8 +575,6 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#any_projects?' do
-    let!(:project) { create(:project) }
-
     it 'returns true when projects will be returned' do
       expect(helper.any_projects?(Project.all)).to eq(true)
     end
@@ -609,7 +604,7 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#git_user_name' do
-    let(:user) { double(:user, name: 'John "A" Doe53') }
+    let(:user) { build_stubbed(:user, name: 'John "A" Doe53') }
 
     before do
       allow(helper).to receive(:current_user).and_return(user)
@@ -632,8 +627,6 @@ RSpec.describe ProjectsHelper do
     end
 
     context 'user logged in' do
-      let(:user) { create(:user) }
-
       before do
         allow(helper).to receive(:current_user).and_return(user)
       end
@@ -647,7 +640,7 @@ RSpec.describe ProjectsHelper do
       context 'user has a configured commit email' do
         before do
           confirmed_email = create(:email, :confirmed, user: user)
-          user.update(commit_email: confirmed_email)
+          user.update!(commit_email: confirmed_email)
         end
 
         it 'returns the commit email' do
@@ -658,7 +651,6 @@ RSpec.describe ProjectsHelper do
   end
 
   describe 'show_xcode_link' do
-    let!(:project) { create(:project) }
     let(:mac_ua) { 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36' }
     let(:ios_ua) { 'Mozilla/5.0 (iPad; CPU OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3' }
 
@@ -695,31 +687,6 @@ RSpec.describe ProjectsHelper do
         allow(helper).to receive(:browser).and_return(Browser.new(mac_ua))
 
         expect(helper.show_xcode_link?(project)).to eq(false)
-      end
-    end
-  end
-
-  describe 'link_to_filter_repo' do
-    subject { helper.link_to_filter_repo }
-
-    it 'generates a hardcoded link to git filter-repo' do
-      result = helper.link_to_filter_repo
-      doc = Nokogiri::HTML.fragment(result)
-
-      expect(doc.children.size).to eq(1)
-
-      link = doc.children.first
-
-      aggregate_failures do
-        expect(result).to be_html_safe
-
-        expect(link.name).to eq('a')
-        expect(link[:target]).to eq('_blank')
-        expect(link[:rel]).to eq('noopener noreferrer')
-        expect(link[:href]).to eq('https://github.com/newren/git-filter-repo')
-        expect(link.inner_html).to eq('git filter-repo')
-
-        expect(result).to be_html_safe
       end
     end
   end
@@ -799,7 +766,7 @@ RSpec.describe ProjectsHelper do
   describe '#show_auto_devops_implicitly_enabled_banner?' do
     using RSpec::Parameterized::TableSyntax
 
-    let(:user) { create(:user) }
+    let_it_be_with_reload(:project_with_auto_devops) { create(:project, :repository, :auto_devops) }
 
     let(:feature_visibilities) do
       {
@@ -866,16 +833,16 @@ RSpec.describe ProjectsHelper do
       when :developer, :maintainer
         project.add_user(user, access)
       when :owner
-        project.namespace.update(owner: user)
+        project.namespace.update!(owner: user)
       end
     end
 
     with_them do
       let(:project) do
         if project_setting.nil?
-          create(:project, :repository)
+          project_with_repo
         else
-          create(:project, :repository, :auto_devops)
+          project_with_auto_devops
         end
       end
 
@@ -896,32 +863,40 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#can_import_members?' do
-    let(:project) { create(:project) }
-    let(:user) { create(:user) }
-    let(:owner) { project.owner }
+    context 'when user is project owner' do
+      before do
+        allow(helper).to receive(:current_user) { project.owner }
+      end
 
-    before do
-      helper.instance_variable_set(:@project, project)
+      it 'returns true for owner of project' do
+        expect(helper.can_import_members?).to eq true
+      end
     end
 
-    it 'returns false if user cannot admin_project_member' do
-      allow(helper).to receive(:current_user) { user }
-      expect(helper.can_import_members?).to eq false
-    end
+    context 'when user is not a project owner' do
+      using RSpec::Parameterized::TableSyntax
 
-    it 'returns true if user can admin_project_member' do
-      allow(helper).to receive(:current_user) { owner }
-      expect(helper.can_import_members?).to eq true
+      where(:user_project_role, :can_import) do
+        :maintainer | true
+        :developer | false
+        :reporter | false
+        :guest | false
+      end
+
+      with_them do
+        before do
+          project.add_role(user, user_project_role)
+          allow(helper).to receive(:current_user) { user }
+        end
+
+        it 'resolves if the user can import members' do
+          expect(helper.can_import_members?).to eq can_import
+        end
+      end
     end
   end
 
   describe '#metrics_external_dashboard_url' do
-    let(:project) { create(:project) }
-
-    before do
-      helper.instance_variable_set(:@project, project)
-    end
-
     context 'metrics_setting exists' do
       it 'returns external_dashboard_url' do
         metrics_setting = create(:project_metrics_setting, project: project)
@@ -938,12 +913,6 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#grafana_integration_url' do
-    let(:project) { create(:project) }
-
-    before do
-      helper.instance_variable_set(:@project, project)
-    end
-
     subject { helper.grafana_integration_url }
 
     it { is_expected.to eq(nil) }
@@ -956,12 +925,6 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#grafana_integration_token' do
-    let(:project) { create(:project) }
-
-    before do
-      helper.instance_variable_set(:@project, project)
-    end
-
     subject { helper.grafana_integration_masked_token }
 
     it { is_expected.to eq(nil) }
@@ -974,12 +937,6 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#grafana_integration_enabled?' do
-    let(:project) { create(:project) }
-
-    before do
-      helper.instance_variable_set(:@project, project)
-    end
-
     subject { helper.grafana_integration_enabled? }
 
     it { is_expected.to eq(nil) }
@@ -992,7 +949,6 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#project_license_name(project)', :request_store do
-    let_it_be(:project) { create(:project) }
     let_it_be(:repository) { project.repository }
 
     subject { project_license_name(project) }
@@ -1058,6 +1014,47 @@ RSpec.describe ProjectsHelper do
         let(:exception) { GRPC::DeadlineExceeded }
 
         it_behaves_like 'returns nil and tracks exception'
+      end
+    end
+  end
+
+  describe '#project_title' do
+    subject { helper.project_title(project) }
+
+    it 'enqueues the elements in the breadcrumb schema list' do
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.namespace.name, user_path(project.owner))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.name, project_path(project))
+
+      subject
+    end
+  end
+
+  describe '#project_permissions_settings' do
+    context 'with no project_setting associated' do
+      it 'includes a value for edit commit messages' do
+        settings = project_permissions_settings(project)
+
+        expect(settings[:allowEditingCommitMessages]).to be_falsy
+      end
+    end
+
+    context 'when commits are allowed to be edited' do
+      it 'includes the edit commit message value' do
+        project.create_project_setting(allow_editing_commit_messages: true)
+
+        settings = project_permissions_settings(project)
+
+        expect(settings[:allowEditingCommitMessages]).to be_truthy
+      end
+    end
+
+    context 'when commits are not allowed to be edited' do
+      it 'returns false to the edit commit message value' do
+        project.create_project_setting(allow_editing_commit_messages: false)
+
+        settings = project_permissions_settings(project)
+
+        expect(settings[:allowEditingCommitMessages]).to be_falsy
       end
     end
   end

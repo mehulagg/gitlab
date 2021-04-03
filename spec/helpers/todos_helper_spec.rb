@@ -12,6 +12,7 @@ RSpec.describe TodosHelper do
            project: issue.project,
            note: 'I am note, hear me roar')
   end
+
   let_it_be(:design_todo) do
     create(:todo, :mentioned,
            user: user,
@@ -20,6 +21,7 @@ RSpec.describe TodosHelper do
            author: author,
            note: note)
   end
+
   let_it_be(:alert_todo) do
     alert = create(:alert_management_alert, iid: 1001)
     create(:todo, target: alert)
@@ -35,26 +37,6 @@ RSpec.describe TodosHelper do
       expect(helper.todos_count_format(99)).to eq '99'
       expect(helper.todos_count_format(50)).to eq '50'
       expect(helper.todos_count_format(1)).to eq '1'
-    end
-  end
-
-  describe '#todo_projects_options' do
-    let(:projects) { create_list(:project, 3) }
-    let(:user)     { create(:user) }
-
-    it 'returns users authorised projects in json format' do
-      projects.first.add_developer(user)
-      projects.second.add_developer(user)
-
-      allow(helper).to receive(:current_user).and_return(user)
-
-      expected_results = [
-        { 'id' => '', 'text' => 'Any Project' },
-        { 'id' => projects.second.id, 'text' => projects.second.full_name },
-        { 'id' => projects.first.id, 'text' => projects.first.full_name }
-      ]
-
-      expect(Gitlab::Json.parse(helper.todo_projects_options)).to match_array(expected_results)
     end
   end
 

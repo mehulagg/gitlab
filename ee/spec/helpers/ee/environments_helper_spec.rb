@@ -60,14 +60,14 @@ RSpec.describe EnvironmentsHelper do
 
     it 'returns environment parameters data' do
       expect(subject).to include(
-        "environment-name": environment.name,
-        "environments-path": project_environments_path(project, format: :json)
+        "environment_name": environment.name,
+        "environments_path": project_environments_path(project, format: :json)
       )
     end
 
     it 'returns parameters for forming the pod logs API URL' do
       expect(subject).to include(
-        "environment-id": environment.id
+        "environment_id": environment.id
       )
     end
   end

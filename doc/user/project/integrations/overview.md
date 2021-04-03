@@ -1,10 +1,10 @@
 ---
 stage: Create
 group: Ecosystem
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Integrations
+# Integrations **(FREE)**
 
 Integrations allow you to integrate GitLab with other applications. They
 are a bit like plugins in that they allow a lot of freedom in adding
@@ -13,20 +13,19 @@ functionality to GitLab.
 ## Accessing integrations
 
 You can find the available integrations under your project's
-**Settings ➔ Integrations** page.
+**Settings > Integrations** page.
 
 There are more than 20 integrations to integrate with. Click on the one that you
 want to configure.
 
-![Integrations list](img/project_services.png)
+![Integrations list](img/project_integrations_v13_3.png)
 
 ## Integrations listing
 
 Click on the service links to see further configuration instructions and details.
 
 | Service | Description | Service Hooks |
-| ------- | ----------- | ------------- |
-| Asana     | Asana - Teamwork without email | No |
+| Asana     | Add commit messages as comments to Asana tasks | No |
 | Assembla | Project Management Software (Source Commits Endpoint) | No |
 | [Atlassian Bamboo CI](bamboo.md) | A continuous integration and build server | Yes |
 | Buildkite | Continuous integration and deployments | Yes |
@@ -37,12 +36,11 @@ Click on the service links to see further configuration instructions and details
 | [Discord Notifications](discord_notifications.md) | Receive event notifications in Discord | No |
 | Drone CI | Continuous Integration platform built on Docker, written in Go | Yes |
 | [Emails on push](emails_on_push.md) | Email the commits and diff of each push to a list of recipients | No |
-| External Wiki | Replaces the link to the internal wiki with a link to an external wiki | No |
+| External wiki | Replaces the link to the internal wiki with a link to an external wiki | No |
 | Flowdock | Flowdock is a collaboration web app for technical teams | No |
-| [Generic alerts](generic_alerts.md) **(ULTIMATE)** | Receive alerts on GitLab from any source | No |
+| [Generic alerts](../../../operations/incident_management/integrations.md) **(ULTIMATE)** | Receive alerts on GitLab from any source | No |
 | [GitHub](github.md) **(PREMIUM)** | Sends pipeline notifications to GitHub | No |
 | [Hangouts Chat](hangouts_chat.md) | Receive events notifications in Google Hangouts Chat | No |
-| [HipChat](hipchat.md) | Private group chat and IM | No |
 | [Irker (IRC gateway)](irker.md) | Send IRC messages, on update, to a list of recipients through an Irker gateway | No |
 | [Jira](jira.md) | Jira issue tracker | No |
 | [Jenkins](../../../integration/jenkins.md) **(STARTER)** | An extendable open source continuous integration server | Yes |
@@ -50,15 +48,16 @@ Click on the service links to see further configuration instructions and details
 | [Mattermost slash commands](mattermost_slash_commands.md) | Mattermost chat and ChatOps slash commands | No |
 | [Mattermost Notifications](mattermost.md) | Receive event notifications in Mattermost | No |
 | [Microsoft teams](microsoft_teams.md) |  Receive notifications for actions that happen on GitLab into a room on Microsoft Teams using Office 365 Connectors | No |
-| Packagist | Update your project on Packagist, the main Composer repository | Yes |
+| Packagist | Update your projects on Packagist, the main Composer repository | Yes |
 | Pipelines emails | Email the pipeline status to a list of recipients | No |
 | [Slack Notifications](slack.md) | Send GitLab events (for example, an issue was created) to Slack as notifications | No |
-| [Slack slash commands](slack_slash_commands.md) **(CORE ONLY)** | Use slash commands in Slack to control GitLab | No |
-| [GitLab Slack application](gitlab_slack_application.md) **(FREE ONLY)** | Use Slack's official application | No |
+| [Slack slash commands](slack_slash_commands.md) **(FREE SELF)** | Use slash commands in Slack to control GitLab | No |
+| [GitLab Slack application](gitlab_slack_application.md) **(FREE SAAS)** | Use Slack's official application | No |
 | PivotalTracker | Project Management Software (Source Commits Endpoint) | No |
 | [Prometheus](prometheus.md) | Monitor the performance of your deployed apps | No |
 | Pushover | Pushover makes it easy to get real-time notifications on your Android device, iPhone, iPad, and Desktop | No |
 | [Redmine](redmine.md) | Redmine issue tracker | No |
+| [EWM](ewm.md) | EWM work item tracker | No |
 | [Unify Circuit](unify_circuit.md) | Receive events notifications in Unify Circuit | No |
 | [Webex Teams](webex_teams.md) | Receive events notifications in Webex Teams | No |
 | [YouTrack](youtrack.md) | YouTrack issue tracker | No |
@@ -68,17 +67,25 @@ Click on the service links to see further configuration instructions and details
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17874) in GitLab 12.4.
 
 If a single push includes changes to more than three branches or tags, services
-supported by `push_hooks` and `tag_push_hooks` events won't be executed.
+supported by `push_hooks` and `tag_push_hooks` events aren't executed.
 
 The number of branches or tags supported can be changed via
 [`push_event_hooks_limit` application setting](../../../api/settings.md#list-of-settings-that-can-be-accessed-via-api-calls).
 
 ## Service templates
 
-Service templates are a way to set predefined values for an integration across
+Service templates are a way to set predefined values for a project integration across
 all new projects on the instance.
 
-Read more about [Service templates in this document](services_templates.md).
+Read more about [Service templates](services_templates.md).
+
+## Project integration management
+
+Project integration management lets you control integration settings across all projects
+of an instance. On the project level, administrators you can choose whether to inherit the
+instance configuration or provide custom settings.
+
+Read more about [Project integration management](../../admin_area/settings/project_integration_management.md).
 
 ## Troubleshooting integrations
 

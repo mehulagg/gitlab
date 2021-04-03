@@ -1,6 +1,6 @@
+import * as types from 'ee/geo_node_form/store/mutation_types';
 import mutations from 'ee/geo_node_form/store/mutations';
 import createState from 'ee/geo_node_form/store/state';
-import * as types from 'ee/geo_node_form/store/mutation_types';
 import { MOCK_SYNC_NAMESPACES } from '../mock_data';
 
 describe('GeoNodeForm Store Mutations', () => {

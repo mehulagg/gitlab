@@ -1,43 +1,24 @@
-import Vuex from 'vuex';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver } from '@gitlab/ui';
+import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import FirstClassInstanceVulnerabilities from 'ee/security_dashboard/components/first_class_instance_security_dashboard_vulnerabilities.vue';
 import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
 import { generateVulnerabilities } from './mock_data';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
-
 describe('First Class Instance Dashboard Vulnerabilities Component', () => {
   let wrapper;
-  let store;
 
   const findIntersectionObserver = () => wrapper.find(GlIntersectionObserver);
   const findVulnerabilities = () => wrapper.find(VulnerabilityList);
   const findAlert = () => wrapper.find(GlAlert);
+  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
-  const createWrapper = ({ stubs, loading = false, isUpdatingProjects, data } = {}) => {
-    store = new Vuex.Store({
-      modules: {
-        projectSelector: {
-          namespaced: true,
-          actions: {
-            fetchProjects() {},
-            setProjectEndpoints() {},
-          },
-          getters: {
-            isUpdatingProjects: jest.fn().mockReturnValue(isUpdatingProjects),
-          },
-          state: {
-            projects: [],
-          },
-        },
-      },
-    });
+  const expectLoadingState = ({ initial = false, nextPage = false }) => {
+    expect(findVulnerabilities().props('isLoading')).toBe(initial);
+    expect(findLoadingIcon().exists()).toBe(nextPage);
+  };
 
+  const createWrapper = ({ stubs, loading = false, data } = {}) => {
     return shallowMount(FirstClassInstanceVulnerabilities, {
-      localVue,
-      store,
       stubs,
       mocks: {
         $apollo: {
@@ -46,6 +27,10 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
         fetchNextPage: () => {},
       },
       data,
+      provide: {
+        hasVulnerabilities: true,
+        hasJiraVulnerabilitiesIntegrationEnabled: false,
+      },
     });
   };
 
@@ -56,13 +41,11 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
 
   describe('when the query is loading', () => {
     beforeEach(() => {
-      wrapper = createWrapper({
-        loading: true,
-      });
+      wrapper = createWrapper({ loading: true });
     });
 
-    it('passes down isLoading correctly', () => {
-      expect(findVulnerabilities().props()).toMatchObject({ isLoading: true });
+    it('shows the initial loading state', () => {
+      expectLoadingState({ initial: true });
     });
   });
 
@@ -72,10 +55,7 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
         stubs: {
           GlAlert,
         },
-        data: () => ({
-          isFirstResultLoading: false,
-          errorLoadingVulnerabilities: true,
-        }),
+        data: () => ({ errorLoadingVulnerabilities: true }),
       });
     });
 
@@ -87,7 +67,7 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
 
     it('should have an alert that is dismissable', () => {
       const alert = findAlert();
-      alert.find('button').trigger('click');
+      alert.vm.$emit('dismiss');
       return wrapper.vm.$nextTick(() => {
         expect(alert.exists()).toBe(false);
       });
@@ -108,10 +88,7 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
           GlTable,
           GlEmptyState,
         },
-        data: () => ({
-          vulnerabilities,
-          isFirstResultLoading: false,
-        }),
+        data: () => ({ vulnerabilities }),
       });
     });
 
@@ -119,13 +96,32 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
       expect(findVulnerabilities().props()).toEqual({
         filters: {},
         isLoading: false,
-        shouldShowIdentifier: false,
         securityScanners: {},
-        shouldShowReportType: false,
         shouldShowSelection: true,
         shouldShowProjectNamespace: true,
         vulnerabilities,
       });
+    });
+
+    it('defaults to severity column for sorting', () => {
+      expect(wrapper.vm.sortBy).toBe('severity');
+    });
+
+    it('defaults to desc as sorting direction', () => {
+      expect(wrapper.vm.sortDirection).toBe('desc');
+    });
+
+    it('handles sorting', () => {
+      findVulnerabilities().vm.$listeners['sort-changed']({
+        sortBy: 'description',
+        sortDesc: false,
+      });
+      expect(wrapper.vm.sortBy).toBe('description');
+      expect(wrapper.vm.sortDirection).toBe('asc');
+    });
+
+    it('does not show loading any state', () => {
+      expectLoadingState({ initial: false, nextPage: false });
     });
   });
 
@@ -145,6 +141,57 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
 
     it('should render the observer component', () => {
       expect(findIntersectionObserver().exists()).toBe(true);
+    });
+
+    describe('when the filter is changed', () => {
+      it('it should not render the observer component', async () => {
+        await wrapper.setProps({ filters: {} });
+
+        expect(findIntersectionObserver().exists()).toBe(false);
+      });
+    });
+  });
+
+  describe('when the query is loading and there is another page', () => {
+    beforeEach(() => {
+      wrapper = createWrapper({
+        loading: true,
+        data: () => ({
+          vulnerabilities: generateVulnerabilities(),
+          pageInfo: {
+            hasNextPage: true,
+          },
+        }),
+      });
+    });
+
+    it('should render the observer component', () => {
+      expect(findIntersectionObserver().exists()).toBe(true);
+    });
+
+    it('should render the next page loading spinner', () => {
+      expectLoadingState({ nextPage: true });
+    });
+  });
+
+  describe('when filter or sort is changed', () => {
+    beforeEach(() => {
+      wrapper = createWrapper({ loading: true });
+    });
+
+    it('should show the initial loading state when the filter is changed', async () => {
+      await wrapper.setProps({ filter: {} });
+
+      expectLoadingState({ initial: true });
+    });
+
+    it('should show the initial loading state when the sort is changed', () => {
+      findVulnerabilities().vm.$emit('sort-changed', {
+        sortBy: 'description',
+        sortDesc: false,
+      });
+
+      expectLoadingState({ initial: true });
     });
   });
 });

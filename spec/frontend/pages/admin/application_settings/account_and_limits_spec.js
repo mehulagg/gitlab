@@ -8,7 +8,6 @@ describe('AccountAndLimits', () => {
   const FIXTURE = 'application_settings/accounts_and_limit.html';
   let $userDefaultExternal;
   let $userInternalRegex;
-  preloadFixtures(FIXTURE);
 
   beforeEach(() => {
     loadFixtures(FIXTURE);
@@ -24,7 +23,7 @@ describe('AccountAndLimits', () => {
       expect($userInternalRegex.readOnly).toBeTruthy();
     });
 
-    it('is checked', done => {
+    it('is checked', (done) => {
       if (!$userDefaultExternal.prop('checked')) $userDefaultExternal.click();
 
       expect($userDefaultExternal.prop('checked')).toBeTruthy();

@@ -3,7 +3,8 @@
 require "spec_helper"
 
 RSpec.describe EE::IssuesHelper do
-  let(:project) { create(:project) }
+  let(:group) { create :group }
+  let(:project) { create :project, group: group }
   let(:issue) { create :issue, project: project }
 
   describe '#issue_closed_link' do
@@ -13,7 +14,7 @@ RSpec.describe EE::IssuesHelper do
     context 'with linked issue' do
       context 'with promoted issue' do
         before do
-          issue.update(promoted_to_epic: new_epic)
+          issue.update!(promoted_to_epic: new_epic)
         end
 
         context 'when user has permission to see new epic' do
@@ -67,6 +68,79 @@ RSpec.describe EE::IssuesHelper do
       # When issue_in_subepic? is used, any epic with a different
       # id than the one on the params is considered a child
       expect(helper.issue_in_subepic?(issue, 'subepic_id')).to be_truthy
+    end
+  end
+
+  describe '#show_timeline_view_toggle?' do
+    subject { helper.show_timeline_view_toggle?(issue) }
+
+    it { is_expected.to be_falsy }
+
+    context 'issue is an incident' do
+      let(:issue) { build_stubbed(:incident) }
+
+      it { is_expected.to be_falsy }
+
+      context 'with license' do
+        before do
+          stub_licensed_features(incident_timeline_view: true)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+    end
+  end
+
+  describe '#scoped_labels_available?' do
+    shared_examples 'without license' do
+      before do
+        stub_licensed_features(scoped_labels: false)
+      end
+
+      it { is_expected.to be_falsy }
+    end
+
+    shared_examples 'with license' do
+      before do
+        stub_licensed_features(scoped_labels: true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'project' do
+      subject { helper.scoped_labels_available?(project) }
+
+      it_behaves_like 'without license'
+      it_behaves_like 'with license'
+    end
+
+    context 'group' do
+      subject { helper.scoped_labels_available?(group) }
+
+      it_behaves_like 'without license'
+      it_behaves_like 'with license'
+    end
+  end
+
+  describe '#issues_list_data' do
+    it 'returns expected result' do
+      current_user = double.as_null_object
+      finder = double.as_null_object
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:finder).and_return(finder)
+      allow(helper).to receive(:can?).and_return(true)
+      allow(helper).to receive(:url_for).and_return('#')
+      allow(helper).to receive(:import_csv_namespace_project_issues_path).and_return('#')
+      allow(project).to receive(:feature_available?).and_return(true)
+
+      expected = {
+        has_blocked_issues_feature: 'true',
+        has_issuable_health_status_feature: 'true',
+        has_issue_weights_feature: 'true'
+      }
+
+      expect(helper.issues_list_data(project, current_user, finder)).to include(expected)
     end
   end
 end

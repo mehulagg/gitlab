@@ -1,23 +1,21 @@
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { GlSprintf, GlIcon } from '@gitlab/ui';
+import { mapGetters } from 'vuex';
 import { IMAGE_DIFF_POSITION_TYPE } from '~/diffs/constants';
 import { sprintf, __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
-import resolvedStatusMixin from '../mixins/resolved_status';
-import { GlSprintf } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   getStartLineNumber,
   getEndLineNumber,
   getLineClasses,
 } from '~/notes/components/multiline_comment_utils';
+import resolvedStatusMixin from '../mixins/resolved_status';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlSprintf,
   },
-  mixins: [resolvedStatusMixin, glFeatureFlagsMixin()],
+  mixins: [resolvedStatusMixin],
   props: {
     draft: {
       type: Object,
@@ -48,7 +46,7 @@ export default {
       }
 
       return sprintf(__("%{authorsName}'s thread"), {
-        authorsName: this.discussion.notes.find(note => !note.system).author.name,
+        authorsName: this.discussion.notes.find((note) => !note.system).author.name,
       });
     },
     linePosition() {
@@ -72,6 +70,10 @@ export default {
       return this.draft.position || this.discussion.position;
     },
     startLineNumber() {
+      if (this.position?.position_type === IMAGE_DIFF_POSITION_TYPE) {
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        return `${this.position.x}x ${this.position.y}y`;
+      }
       return getStartLineNumber(this.position?.line_range);
     },
     endLineNumber() {
@@ -79,7 +81,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions('batchComments', ['scrollToDraft']),
     getLineClasses(lineNumber) {
       return getLineClasses(lineNumber);
     },
@@ -89,31 +90,15 @@ export default {
 </script>
 
 <template>
-  <button
-    type="button"
-    class="review-preview-item menu-item"
-    :class="[
-      componentClasses,
-      {
-        'is-last': isLast,
-      },
-    ]"
-    @click="scrollToDraft(draft)"
-  >
+  <span>
     <span class="review-preview-item-header">
-      <icon class="flex-shrink-0" :name="iconName" />
-      <span
-        class="bold text-nowrap"
-        :class="{ 'gl-align-items-center': glFeatures.multilineComments }"
-      >
+      <gl-icon class="flex-shrink-0" :name="iconName" />
+      <span class="bold text-nowrap gl-align-items-center">
         <span class="review-preview-item-header-text block-truncated">
           {{ titleText }}
         </span>
         <template v-if="showLinePosition">
-          <template v-if="!glFeatures.multilineComments"
-            >:{{ linePosition }}</template
-          >
-          <template v-else-if="startLineNumber === endLineNumber">
+          <template v-if="startLineNumber === endLineNumber">
             :<span :class="getLineClasses(startLineNumber)">{{ startLineNumber }}</span>
           </template>
           <gl-sprintf v-else :message="__(':%{startLine} to %{endLine}')">
@@ -138,7 +123,7 @@ export default {
       v-if="draft.discussion_id && resolvedStatusMessage"
       class="review-preview-item-footer draft-note-resolution p-0"
     >
-      <icon class="gl-mr-3" name="status_success" /> {{ resolvedStatusMessage }}
+      <gl-icon class="gl-mr-3" name="status_success" /> {{ resolvedStatusMessage }}
     </span>
-  </button>
+  </span>
 </template>

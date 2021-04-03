@@ -2,6 +2,8 @@
 
 module Notes
   class CreateService < ::Notes::BaseService
+    include IncidentManagement::UsageData
+
     def execute
       note = Notes::BuildService.new(project, current_user, params.except(:merge_request_diff_head_sha)).execute
 
@@ -25,7 +27,11 @@ module Notes
         end
 
         note_saved = note.with_transaction_returning_status do
-          !only_commands && note.save
+          break false if only_commands
+
+          note.save.tap do
+            update_discussions(note)
+          end
         end
 
         when_saved(note) if note_saved
@@ -52,27 +58,30 @@ module Notes
       @quick_actions_service ||= QuickActionsService.new(project, current_user)
     end
 
-    def when_saved(note)
+    def update_discussions(note)
+      # Ensure that individual notes that are promoted into discussions are
+      # updated in a transaction with the note creation to avoid inconsistencies:
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/301237
       if note.part_of_discussion? && note.discussion.can_convert_to_discussion?
-        note.discussion.convert_to_discussion!(save: true)
+        note.discussion.convert_to_discussion!.save
+        note.clear_memoization(:discussion)
       end
+    end
 
+    def when_saved(note)
       todo_service.new_note(note, current_user)
       clear_noteable_diffs_cache(note)
       Suggestions::CreateService.new(note).execute
       increment_usage_counter(note)
+      track_event(note, current_user)
 
-      if Feature.enabled?(:notes_create_service_tracking, project)
-        Gitlab::Tracking.event('Notes::CreateService', 'execute', tracking_data_for(note))
-      end
-
-      if Feature.enabled?(:merge_ref_head_comments, project, default_enabled: true) && note.for_merge_request? && note.diff_note? && note.start_of_discussion?
+      if note.for_merge_request? && note.diff_note? && note.start_of_discussion?
         Discussions::CaptureDiffNotePositionService.new(note.noteable, note.diff_file&.paths).execute(note.discussion)
       end
     end
 
     def do_commands(note, update_params, message, only_commands)
-      return if quick_actions_service.commands_executed_count.to_i.zero?
+      return if quick_actions_service.commands_executed_count.to_i == 0
 
       if update_params.present?
         quick_actions_service.apply_updates(update_params, note)
@@ -95,6 +104,16 @@ module Notes
       }
     end
 
+    def track_event(note, user)
+      track_note_creation_usage_for_issues(note) if note.for_issue?
+      track_note_creation_usage_for_merge_requests(note) if note.for_merge_request?
+      track_usage_event(:incident_management_incident_comment, user.id) if note.for_issue? && note.noteable.incident?
+
+      if Feature.enabled?(:notes_create_service_tracking, project)
+        Gitlab::Tracking.event('Notes::CreateService', 'execute', **tracking_data_for(note))
+      end
+    end
+
     def tracking_data_for(note)
       label = Gitlab.ee? && note.author == User.visual_review_bot ? 'anonymous_visual_review_note' : 'note'
 
@@ -103,5 +122,15 @@ module Notes
         value: note.id
       }
     end
+
+    def track_note_creation_usage_for_issues(note)
+      Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_comment_added_action(author: note.author)
+    end
+
+    def track_note_creation_usage_for_merge_requests(note)
+      Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter.track_create_comment_action(note: note)
+    end
   end
 end
+
+Notes::CreateService.prepend_if_ee('EE::Notes::CreateService')

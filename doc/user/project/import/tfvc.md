@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts
 ---
 
@@ -35,12 +38,20 @@ Advantages of migrating to Git/GitLab:
 - **No licensing costs:** Git is open source, while TFVC is proprietary.
 - **Shorter learning curve:** Git has a big community and a vast number of
   tutorials to get you started (see our [Git topic](../../../topics/git/index.md)).
-- **Integration with modern tools:** After migrating to Git and GitLab, you will have
+- **Integration with modern tools:** After migrating to Git and GitLab, you have
   an open source, end-to-end software development platform with built-in version
   control, issue tracking, code review, CI/CD, and more.
 
 ## How to migrate
 
-The best option to migrate from TFVC to Git is to use the [`git-tfs`](https://github.com/git-tfs/git-tfs)
-tool. Read the [Migrate TFS to Git](https://github.com/git-tfs/git-tfs/blob/master/doc/usecases/migrate_tfs_to_git.md)
-guide for more details.
+Migration options from TFVC to Git depend on your operating system.
+
+- If you're migrating on Microsoft Windows:
+
+  Use the [`git-tfs`](https://github.com/git-tfs/git-tfs)
+tool.
+  Read the [Migrate TFS to Git](https://github.com/git-tfs/git-tfs/blob/master/doc/usecases/migrate_tfs_to_git.md) guide for details.
+
+- If you're on a Unix-based system:
+
+  Follow the procedures described with this [TFVC to Git migration tool](https://github.com/turbo/gtfotfs).

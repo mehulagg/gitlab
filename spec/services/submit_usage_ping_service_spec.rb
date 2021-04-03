@@ -6,6 +6,7 @@ RSpec.describe SubmitUsagePingService do
   include StubRequests
   include UsageDataHelpers
 
+  let(:usage_data_id) { 31643 }
   let(:score_params) do
     {
       score: {
@@ -40,6 +41,8 @@ RSpec.describe SubmitUsagePingService do
         leader_service_desk_issues: 15.8,
         instance_service_desk_issues: 15.1,
 
+        usage_data_id: usage_data_id,
+
         non_existing_column: 'value'
       }
     }
@@ -47,32 +50,44 @@ RSpec.describe SubmitUsagePingService do
 
   let(:with_dev_ops_score_params) { { dev_ops_score: score_params[:score] } }
   let(:with_conv_index_params) { { conv_index: score_params[:score] } }
-  let(:without_dev_ops_score_params) { { dev_ops_score: {} } }
+
+  shared_examples 'does not run' do
+    it do
+      expect(Gitlab::HTTP).not_to receive(:post)
+      expect(Gitlab::UsageData).not_to receive(:data)
+
+      subject.execute
+    end
+  end
+
+  shared_examples 'does not send a blank usage ping payload' do
+    it do
+      expect(Gitlab::HTTP).not_to receive(:post)
+
+      expect { subject.execute }.to raise_error(described_class::SubmissionError) do |error|
+        expect(error.message).to include('Usage data is blank')
+      end
+    end
+  end
+
+  shared_examples 'saves DevOps report data from the response' do
+    it do
+      expect { subject.execute }
+        .to change { DevOpsReport::Metric.count }
+        .by(1)
+
+      expect(DevOpsReport::Metric.last.leader_issues).to eq 10.2
+      expect(DevOpsReport::Metric.last.instance_issues).to eq 3.2
+      expect(DevOpsReport::Metric.last.percentage_issues).to eq 31.37
+    end
+  end
 
   context 'when usage ping is disabled' do
     before do
       stub_application_setting(usage_ping_enabled: false)
     end
 
-    it 'does not run' do
-      expect(HTTParty).not_to receive(:post)
-
-      result = subject.execute
-
-      expect(result).to eq false
-    end
-  end
-
-  shared_examples 'saves DevOps score data from the response' do
-    it do
-      expect { subject.execute }
-        .to change { DevOpsScore::Metric.count }
-        .by(1)
-
-      expect(DevOpsScore::Metric.last.leader_issues).to eq 10.2
-      expect(DevOpsScore::Metric.last.instance_issues).to eq 3.2
-      expect(DevOpsScore::Metric.last.percentage_issues).to eq 31.37
-    end
+    it_behaves_like 'does not run'
   end
 
   context 'when usage ping is enabled' do
@@ -81,46 +96,132 @@ RSpec.describe SubmitUsagePingService do
       stub_application_setting(usage_ping_enabled: true)
     end
 
+    context 'and user requires usage stats consent' do
+      before do
+        allow(User).to receive(:single_user).and_return(double(:user, requires_usage_stats_consent?: true))
+      end
+
+      it_behaves_like 'does not run'
+    end
+
     it 'sends a POST request' do
-      response = stub_response(without_dev_ops_score_params)
+      response = stub_response(body: with_dev_ops_score_params)
 
       subject.execute
 
       expect(response).to have_been_requested
     end
 
-    it 'refreshes usage data statistics before submitting' do
-      stub_response(without_dev_ops_score_params)
+    it 'forces a refresh of usage data statistics before submitting' do
+      stub_response(body: with_dev_ops_score_params)
 
-      expect(Gitlab::UsageData).to receive(:to_json)
-        .with(force_refresh: true)
-        .and_call_original
+      expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_call_original
 
       subject.execute
     end
 
     context 'when conv_index data is passed' do
       before do
-        stub_response(with_conv_index_params)
+        stub_response(body: with_conv_index_params)
       end
 
-      it_behaves_like 'saves DevOps score data from the response'
+      it_behaves_like 'saves DevOps report data from the response'
+
+      it 'saves usage_data_id to version_usage_data_id_value' do
+        recorded_at = Time.current
+        usage_data = { uuid: 'uuid', recorded_at: recorded_at }
+
+        expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_return(usage_data)
+
+        subject.execute
+
+        raw_usage_data = RawUsageData.find_by(recorded_at: recorded_at)
+
+        expect(raw_usage_data.version_usage_data_id_value).to eq(31643)
+      end
     end
 
-    context 'when DevOps score data is passed' do
+    context 'when version app usage_data_id is invalid' do
+      let(:usage_data_id) { -1000 }
+
       before do
-        stub_response(with_dev_ops_score_params)
+        stub_response(body: with_conv_index_params)
       end
 
-      it_behaves_like 'saves DevOps score data from the response'
+      it 'raises an exception' do
+        expect { subject.execute }.to raise_error(described_class::SubmissionError) do |error|
+          expect(error.message).to include('Invalid usage_data_id in response: -1000')
+        end
+      end
+    end
+
+    context 'when DevOps report data is passed' do
+      before do
+        stub_response(body: with_dev_ops_score_params)
+      end
+
+      it_behaves_like 'saves DevOps report data from the response'
+    end
+
+    context 'with saving raw_usage_data' do
+      before do
+        stub_response(body: with_dev_ops_score_params)
+      end
+
+      it 'creates a raw_usage_data record' do
+        expect { subject.execute }.to change(RawUsageData, :count).by(1)
+      end
+
+      it 'saves the correct payload' do
+        recorded_at = Time.current
+        usage_data = { uuid: 'uuid', recorded_at: recorded_at }
+
+        expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_return(usage_data)
+
+        subject.execute
+
+        raw_usage_data = RawUsageData.find_by(recorded_at: recorded_at)
+
+        expect(raw_usage_data.recorded_at).to be_like_time(recorded_at)
+        expect(raw_usage_data.payload.to_json).to eq(usage_data.to_json)
+      end
+    end
+
+    context 'and usage ping response has unsuccessful status' do
+      before do
+        stub_response(body: nil, status: 504)
+      end
+
+      it 'raises an exception' do
+        expect { subject.execute }.to raise_error(described_class::SubmissionError) do |error|
+          expect(error.message).to include('Unsuccessful response code: 504')
+        end
+      end
+    end
+
+    context 'and usage data is empty string' do
+      before do
+        allow(Gitlab::UsageData).to receive(:data).and_return({})
+      end
+
+      it_behaves_like 'does not send a blank usage ping payload'
+    end
+
+    context 'and usage data is nil' do
+      before do
+        allow(Gitlab::UsageData).to receive(:data).and_return(nil)
+      end
+
+      it_behaves_like 'does not send a blank usage ping payload'
     end
   end
 
-  def stub_response(body)
-    stub_full_request('https://version.gitlab.com/usage_data', method: :post)
+  def stub_response(body:, status: 201)
+    stub_full_request(SubmitUsagePingService::STAGING_URL, method: :post)
       .to_return(
         headers: { 'Content-Type' => 'application/json' },
-        body: body.to_json
+        body: body.to_json,
+        status: status
       )
   end
 end

@@ -1,5 +1,5 @@
-import mutations from 'ee/analytics/cycle_analytics/store/modules/custom_stages/mutations';
 import * as types from 'ee/analytics/cycle_analytics/store/modules/custom_stages/mutation_types';
+import mutations from 'ee/analytics/cycle_analytics/store/modules/custom_stages/mutations';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { rawCustomStageEvents, camelCasedStageEvents, rawCustomStage } from '../../../mock_data';
 

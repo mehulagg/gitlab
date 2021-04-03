@@ -38,9 +38,11 @@ module Gitlab
         return update_index_status(Gitlab::Git::BLANK_SHA) unless commit
 
         repository.__elasticsearch__.elastic_writing_targets.each do |target|
-          Sidekiq.logger.debug(message: "Indexation running for #{project.id} #{from_sha}..#{commit.sha}",
+          logger.debug(message: "indexing_commit_range",
                                project_id: project.id,
-                               wiki: index_wiki?)
+                               from_sha: from_sha,
+                               to_sha: commit.sha,
+                               index_wiki: index_wiki?)
           run_indexer!(commit.sha, target)
         end
 
@@ -73,9 +75,9 @@ module Gitlab
 
         command =
           if index_wiki?
-            [path_to_indexer, "--blob-type=wiki_blob", "--skip-commits", project.id.to_s, repository_path]
+            [path_to_indexer, "--blob-type=wiki_blob", "--skip-commits", "--project-path=#{project.full_path}", project.id.to_s, repository_path]
           else
-            [path_to_indexer, project.id.to_s, repository_path]
+            [path_to_indexer, "--project-path=#{project.full_path}", project.id.to_s, repository_path]
           end
 
         output, status = Gitlab::Popen.popen(command, nil, vars)
@@ -101,7 +103,7 @@ module Gitlab
         vars = {
           'RAILS_ENV'               => Rails.env,
           'ELASTIC_CONNECTION_INFO' => elasticsearch_config(target),
-          'GITALY_CONNECTION_INFO'  => gitaly_connection_info,
+          'GITALY_CONNECTION_INFO'  => gitaly_config,
           'FROM_SHA'                => from_sha,
           'TO_SHA'                  => to_sha,
           'CORRELATION_ID'          => Labkit::Correlation::CorrelationId.current_id,
@@ -110,7 +112,9 @@ module Gitlab
         }
 
         # Set AWS environment variables for IAM role authentication if present
-        vars = build_aws_credentials_env(vars)
+        if Gitlab::CurrentSettings.elasticsearch_config[:aws]
+          vars = build_aws_credentials_env(vars)
+        end
 
         # Users can override default SSL certificate path via SSL_CERT_FILE SSL_CERT_DIR
         vars.merge(ENV.slice('SSL_CERT_FILE', 'SSL_CERT_DIR'))
@@ -166,14 +170,24 @@ module Gitlab
         ).to_json
       end
 
-      def gitaly_connection_info
+      def gitaly_config
         {
-          storage: project.repository_storage
+          storage: project.repository_storage,
+          limit_file_size: Gitlab::CurrentSettings.elasticsearch_indexed_file_size_limit_kb.kilobytes
         }.merge(Gitlab::GitalyClient.connection_data(project.repository_storage)).to_json
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
       def update_index_status(to_sha)
+        unless Project.exists?(id: project.id)
+          logger.debug(
+            message: 'Index status could not be updated as the project does not exist',
+            project_id: project.id,
+            index_wiki: index_wiki?
+          )
+          return false
+        end
+
         raise "Invalid sha #{to_sha}" unless to_sha.present?
 
         # An index_status should always be created,
@@ -192,6 +206,10 @@ module Gitlab
         project.reload_index_status
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def logger
+        @logger ||= ::Gitlab::Elasticsearch::Logger.build
+      end
     end
   end
 end

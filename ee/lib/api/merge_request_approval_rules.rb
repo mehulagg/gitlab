@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class MergeRequestApprovalRules < ::Grape::API
+  class MergeRequestApprovalRules < ::API::Base
     before { authenticate_non_get! }
+
+    feature_category :source_code_management
 
     helpers do
       def find_merge_request_approval_rule(merge_request, id)

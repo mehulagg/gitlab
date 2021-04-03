@@ -1,9 +1,13 @@
+import { GlAlert, GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
-import { GlAlert, GlLink } from '@gitlab/ui';
 import SecurityConfigurationApp from 'ee/security_configuration/components/app.vue';
-import CreateMergeRequestButton from 'ee/security_configuration/components/create_merge_request_button.vue';
+import ConfigurationTable from 'ee/security_configuration/components/configuration_table.vue';
+import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import stubChildren from 'helpers/stub_children';
+import { scanners } from '~/security_configuration/components/scanners_constants';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
+import { generateFeatures } from './helpers';
 
 const propsData = {
   features: [],
@@ -12,8 +16,9 @@ const propsData = {
   autoDevopsHelpPagePath: 'http://autoDevopsHelpPagePath',
   autoDevopsPath: 'http://autoDevopsPath',
   helpPagePath: 'http://helpPagePath',
+  gitlabCiPresent: false,
+  gitlabCiHistoryPath: '/ci/history',
   autoFixSettingsProps: {},
-  createSastMergeRequestPath: 'http://createSastMergeRequestPath',
 };
 
 describe('Security Configuration App', () => {
@@ -26,7 +31,6 @@ describe('Security Configuration App', () => {
         {
           stubs: {
             ...stubChildren(SecurityConfigurationApp),
-            GlTable: false,
             GlSprintf: false,
           },
           propsData,
@@ -36,31 +40,18 @@ describe('Security Configuration App', () => {
     );
   };
 
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
   });
 
-  const generateFeatures = (n, overrides = {}) => {
-    return [...Array(n).keys()].map(i => ({
-      type: `scan-type-${i}`,
-      name: `name-feature-${i}`,
-      description: `description-feature-${i}`,
-      link: `link-feature-${i}`,
-      configured: i % 2 === 0,
-      ...overrides,
-    }));
-  };
-
   const getPipelinesLink = () => wrapper.find({ ref: 'pipelinesLink' });
-  const getFeaturesTable = () => wrapper.find({ ref: 'securityControlTable' });
-  const getFeaturesRows = () => getFeaturesTable().findAll('tbody tr');
+  const getConfigurationTable = () => wrapper.find(ConfigurationTable);
   const getAlert = () => wrapper.find(GlAlert);
-  const getCreateMergeRequestButton = () => wrapper.find(CreateMergeRequestButton);
-  const getRowCells = row => {
-    const [feature, status, manage] = row.findAll('td').wrappers;
-    return { feature, status, manage };
-  };
 
   describe('header', () => {
     it.each`
@@ -80,20 +71,28 @@ describe('Security Configuration App', () => {
 
   describe('Auto DevOps alert', () => {
     describe.each`
-      gitlabCiPresent | autoDevopsEnabled | canEnableAutoDevops | shouldShowAlert
-      ${false}        | ${false}          | ${true}             | ${true}
-      ${true}         | ${false}          | ${true}             | ${false}
-      ${false}        | ${true}           | ${true}             | ${false}
-      ${false}        | ${false}          | ${false}            | ${false}
+      gitlabCiPresent | autoDevopsEnabled | canEnableAutoDevops | dismissed | shouldShowAlert
+      ${false}        | ${false}          | ${true}             | ${false}  | ${true}
+      ${false}        | ${false}          | ${true}             | ${true}   | ${false}
+      ${true}         | ${false}          | ${true}             | ${false}  | ${false}
+      ${false}        | ${true}           | ${true}             | ${false}  | ${false}
+      ${false}        | ${false}          | ${false}            | ${false}  | ${false}
     `(
-      'given gitlabCiPresent is $gitlabCiPresent, autoDevopsEnabled is $autoDevopsEnabled, canEnableAutoDevops is $canEnableAutoDevops',
-      ({ gitlabCiPresent, autoDevopsEnabled, canEnableAutoDevops, shouldShowAlert }) => {
+      'given gitlabCiPresent is $gitlabCiPresent, autoDevopsEnabled is $autoDevopsEnabled, dismissed is $dismissed, canEnableAutoDevops is $canEnableAutoDevops',
+      ({ gitlabCiPresent, autoDevopsEnabled, canEnableAutoDevops, dismissed, shouldShowAlert }) => {
         beforeEach(() => {
+          if (dismissed) {
+            localStorage.setItem(SecurityConfigurationApp.autoDevopsAlertStorageKey, 'true');
+          }
+
           createComponent({
             propsData: {
               gitlabCiPresent,
               autoDevopsEnabled,
               canEnableAutoDevops,
+            },
+            stubs: {
+              LocalStorageSync,
             },
           });
         });
@@ -119,83 +118,68 @@ describe('Security Configuration App', () => {
               title: 'Auto DevOps',
               primaryButtonText: 'Enable Auto DevOps',
               primaryButtonLink: propsData.autoDevopsPath,
-              dismissible: false,
             });
           });
         }
       },
     );
-  });
 
-  describe('features table', () => {
-    it('passes the expected data to the GlTable', () => {
-      const features = generateFeatures(5);
+    describe('dismissing the alert', () => {
+      useLocalStorageSpy();
 
-      createComponent({ propsData: { features } });
+      beforeEach(() => {
+        createComponent({
+          propsData: {
+            gitlabCiPresent: false,
+            autoDevopsEnabled: false,
+            canEnableAutoDevops: true,
+          },
+          stubs: {
+            LocalStorageSync,
+          },
+        });
 
-      expect(getFeaturesTable().classes('b-table-stacked-md')).toBeTruthy();
-      const rows = getFeaturesRows();
-      expect(rows).toHaveLength(5);
+        getAlert().vm.$emit('dismiss');
+      });
 
-      for (let i = 0; i < features.length; i += 1) {
-        const { feature, status, manage } = getRowCells(rows.at(i));
-        expect(feature.text()).toMatch(features[i].name);
-        expect(feature.text()).toMatch(features[i].description);
-        expect(status.text()).toMatch(features[i].configured ? 'Enabled' : 'Not enabled');
-        expect(manage.find(GlLink).attributes('href')).toBe(features[i].link);
-      }
-    });
+      it('hides the alert', () => {
+        expect(getAlert().exists()).toBe(false);
+      });
 
-    describe('given a feature enabled by Auto DevOps', () => {
-      it('displays the expected status text', () => {
-        const features = generateFeatures(1, { configured: true });
-
-        createComponent({ propsData: { features, autoDevopsEnabled: true } });
-
-        const { status } = getRowCells(getFeaturesRows().at(0));
-        expect(status.text()).toMatch('Enabled with Auto DevOps');
+      it('saves dismissal in localStorage', () => {
+        expect(localStorage.setItem.mock.calls).toEqual([
+          [SecurityConfigurationApp.autoDevopsAlertStorageKey, 'true'],
+        ]);
       });
     });
   });
 
-  describe('enabling SAST by merge request', () => {
-    describe.each`
-      gitlabCiPresent | autoDevopsEnabled | buttonExpected
-      ${false}        | ${false}          | ${true}
-      ${false}        | ${true}           | ${true}
-      ${true}         | ${false}          | ${false}
-    `(
-      'given gitlabCiPresent is $gitlabCiPresent, autoDevopsEnabled is $autoDevopsEnabled',
-      ({ gitlabCiPresent, autoDevopsEnabled, buttonExpected }) => {
-        beforeEach(() => {
-          const features = generateFeatures(1, { type: 'sast', configured: false });
+  describe('features table', () => {
+    it('passes the expected features to the configuration table', () => {
+      const features = generateFeatures(scanners.length);
 
-          createComponent({
-            propsData: { features, gitlabCiPresent, autoDevopsEnabled },
-          });
+      createComponent({ propsData: { features } });
+      const table = getConfigurationTable();
+      const receivedFeatures = table.props('features');
+
+      scanners.forEach((scanner, i) => {
+        expect(receivedFeatures[i]).toMatchObject({
+          ...features[i],
+          name: scanner.name,
+          description: scanner.description,
+          helpPath: scanner.helpPath,
         });
+      });
+    });
 
-        if (buttonExpected) {
-          it('renders the CreateMergeRequestButton component', () => {
-            const button = getCreateMergeRequestButton();
-            expect(button.exists()).toBe(true);
-            expect(button.props()).toMatchObject({
-              endpoint: propsData.createSastMergeRequestPath,
-              autoDevopsEnabled,
-            });
-          });
+    it('passes the expected props data to the configuration table', () => {
+      createComponent();
 
-          it('does not render the documentation link', () => {
-            const { manage } = getRowCells(getFeaturesRows().at(0));
-
-            expect(manage.contains(GlLink)).toBe(false);
-          });
-        } else {
-          it('does not render the CreateMergeRequestButton component', () => {
-            expect(getCreateMergeRequestButton().exists()).toBe(false);
-          });
-        }
-      },
-    );
+      expect(getConfigurationTable().props()).toMatchObject({
+        autoDevopsEnabled: propsData.autoDevopsEnabled,
+        gitlabCiPresent: propsData.gitlabCiPresent,
+        gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
+      });
+    });
   });
 });

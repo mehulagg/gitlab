@@ -8,6 +8,7 @@ class GroupsController < Groups::ApplicationController
   include RecordUserLastActivity
   include SendFileUpload
   include FiltersEvents
+  include Recaptcha::Verify
   extend ::Gitlab::Utils::Override
 
   respond_to :html
@@ -15,6 +16,7 @@ class GroupsController < Groups::ApplicationController
   prepend_before_action(only: [:show, :issues]) { authenticate_sessionless_user!(:rss) }
   prepend_before_action(only: [:issues_calendar]) { authenticate_sessionless_user!(:ics) }
   prepend_before_action :ensure_export_enabled, only: [:export, :download_export]
+  prepend_before_action :check_captcha, only: :create, if: -> { captcha_enabled? }
 
   before_action :authenticate_user!, only: [:new, :create]
   before_action :group, except: [:index, :new, :create]
@@ -22,6 +24,7 @@ class GroupsController < Groups::ApplicationController
   # Authorize
   before_action :authorize_admin_group!, only: [:edit, :update, :destroy, :projects, :transfer, :export, :download_export]
   before_action :authorize_create_group!, only: [:new]
+  before_action :load_recaptcha, only: [:new], if: -> { captcha_required? }
 
   before_action :group_projects, only: [:projects, :activity, :issues, :merge_requests]
   before_action :event_filter, only: [:activity]
@@ -38,6 +41,8 @@ class GroupsController < Groups::ApplicationController
 
   before_action :export_rate_limit, only: [:export, :download_export]
 
+  helper_method :captcha_required?
+
   skip_cross_project_access_check :index, :new, :create, :edit, :update,
                                   :destroy, :projects
   # When loading show as an atom feed, we render events that could leak cross
@@ -45,6 +50,17 @@ class GroupsController < Groups::ApplicationController
   skip_cross_project_access_check :show, if: -> { request.format.html? }
 
   layout :determine_layout
+
+  feature_category :subgroups, [
+                     :index, :new, :create, :show, :edit, :update,
+                     :destroy, :details, :transfer
+                   ]
+
+  feature_category :audit_events, [:activity]
+  feature_category :issue_tracking, [:issues, :issues_calendar, :preview_markdown]
+  feature_category :code_review, [:merge_requests, :unfoldered_environment_names]
+  feature_category :projects, [:projects]
+  feature_category :importers, [:export, :download_export]
 
   def index
     redirect_to(current_user ? dashboard_groups_path : explore_groups_path)
@@ -58,7 +74,7 @@ class GroupsController < Groups::ApplicationController
     @group = Groups::CreateService.new(current_user, group_params).execute
 
     if @group.persisted?
-      track_experiment_event(:onboarding_issues, 'created_namespace')
+      successful_creation_hooks
 
       notice = if @group.chat_team.present?
                  "Group '#{@group.name}' and its Mattermost team were successfully created."
@@ -121,10 +137,20 @@ class GroupsController < Groups::ApplicationController
 
   def update
     if Groups::UpdateService.new(@group, current_user, group_params).execute
-      redirect_to edit_group_path(@group, anchor: params[:update_section]), notice: "Group '#{@group.name}' was successfully updated."
+      notice = "Group '#{@group.name}' was successfully updated."
+
+      redirect_to edit_group_origin_location, notice: notice
     else
-      @group.path = @group.path_before_last_save || @group.path_was
+      @group.reset
       render action: "edit"
+    end
+  end
+
+  def edit_group_origin_location
+    if params.dig(:group, :redirect_target) == 'repository_settings'
+      group_settings_repository_path(@group, anchor: 'js-default-branch-name')
+    else
+      edit_group_path(@group, anchor: params[:update_section])
     end
   end
 
@@ -168,9 +194,19 @@ class GroupsController < Groups::ApplicationController
     end
   end
 
+  def unfoldered_environment_names
+    respond_to do |format|
+      format.json do
+        render json: EnvironmentNamesFinder.new(@group, current_user).execute
+      end
+    end
+  end
+
   protected
 
   def render_show_html
+    record_experiment_user(:invite_members_empty_group_version_a) if ::Gitlab.com?
+
     render 'groups/show', locals: { trial: params[:trial] }
   end
 
@@ -230,7 +266,10 @@ class GroupsController < Groups::ApplicationController
       :two_factor_grace_period,
       :project_creation_level,
       :subgroup_creation_level,
-      :default_branch_protection
+      :default_branch_protection,
+      :default_branch_name,
+      :allow_mfa_for_subgroups,
+      :resource_access_token_creation_allowed
     ]
   end
 
@@ -286,6 +325,25 @@ class GroupsController < Groups::ApplicationController
 
   private
 
+  def load_recaptcha
+    Gitlab::Recaptcha.load_configurations!
+  end
+
+  def check_captcha
+    return if group_params[:parent_id].present? # Only require for top-level groups
+
+    load_recaptcha
+
+    return if verify_recaptcha
+
+    flash[:alert] = _('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.')
+    flash.delete :recaptcha_error
+    @group = Group.new(group_params)
+    render action: 'new'
+  end
+
+  def successful_creation_hooks; end
+
   def groups
     if @group.supports_events?
       @group.self_and_descendants.public_or_visible_to_user(current_user)
@@ -295,6 +353,19 @@ class GroupsController < Groups::ApplicationController
   override :markdown_service_params
   def markdown_service_params
     params.merge(group: group)
+  end
+
+  override :has_project_list?
+  def has_project_list?
+    %w(details show index).include?(action_name)
+  end
+
+  def captcha_enabled?
+    Gitlab::Recaptcha.enabled? && Feature.enabled?(:recaptcha_on_top_level_group_creation, type: :ops)
+  end
+
+  def captcha_required?
+    captcha_enabled? && !params[:parent_id]
   end
 end
 

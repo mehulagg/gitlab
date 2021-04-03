@@ -3,13 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe RepositoryUpdateRemoteMirrorWorker, :clean_gitlab_redis_shared_state do
-  subject { described_class.new }
+  let_it_be(:remote_mirror) { create(:remote_mirror) }
 
-  let(:remote_mirror) { create(:remote_mirror) }
   let(:scheduled_time) { Time.current - 5.minutes }
 
   around do |example|
-    Timecop.freeze(Time.current) { example.run }
+    freeze_time { example.run }
   end
 
   def expect_mirror_service_to_return(mirror, result, tries = 0)
@@ -19,6 +18,8 @@ RSpec.describe RepositoryUpdateRemoteMirrorWorker, :clean_gitlab_redis_shared_st
   end
 
   describe '#perform' do
+    subject { described_class.new }
+
     it 'calls out to the service to perform the update' do
       expect_mirror_service_to_return(remote_mirror, status: :success)
 
@@ -26,7 +27,7 @@ RSpec.describe RepositoryUpdateRemoteMirrorWorker, :clean_gitlab_redis_shared_st
     end
 
     it 'does not do anything if the mirror was already updated' do
-      remote_mirror.update(last_update_started_at: Time.current, update_status: :finished)
+      remote_mirror.update!(last_update_started_at: Time.current, update_status: :finished)
 
       expect(Projects::UpdateRemoteMirrorService).not_to receive(:new)
 
@@ -67,5 +68,9 @@ RSpec.describe RepositoryUpdateRemoteMirrorWorker, :clean_gitlab_redis_shared_st
 
       subject.perform(remote_mirror.id, scheduled_time)
     end
+  end
+
+  include_examples 'an idempotent worker' do
+    let(:job_args) { [remote_mirror.id, scheduled_time] }
   end
 end

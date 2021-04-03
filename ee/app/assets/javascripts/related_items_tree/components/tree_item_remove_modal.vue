@@ -1,8 +1,8 @@
 <script>
-import { mapState, mapActions } from 'vuex';
-import { escape } from 'lodash';
-
+/* eslint-disable vue/no-v-html */
 import { GlModal } from '@gitlab/ui';
+import { escape } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 
 import { sprintf } from '~/locale';
 

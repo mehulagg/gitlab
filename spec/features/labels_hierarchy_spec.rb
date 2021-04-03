@@ -17,6 +17,8 @@ RSpec.describe 'Labels Hierarchy', :js do
   let!(:project_label_1) { create(:label, project: project_1, title: 'Label_4') }
 
   before do
+    stub_feature_flags(graphql_board_lists: false)
+    stub_feature_flags(board_new_list: false)
     grandparent.add_owner(user)
 
     sign_in(user)
@@ -42,12 +44,12 @@ RSpec.describe 'Labels Hierarchy', :js do
 
     it 'does not find child group labels on dropdown' do
       page.within('.block.labels') do
-        find('.edit-link').click
+        click_on 'Edit'
+
+        wait_for_requests
+
+        expect(page).not_to have_text(child_group_label.title)
       end
-
-      wait_for_requests
-
-      expect(page).not_to have_selector('.badge', text: child_group_label.title)
     end
   end
 
@@ -158,7 +160,7 @@ RSpec.describe 'Labels Hierarchy', :js do
       find('a.label-item', text: parent_group_label.title).click
       find('a.label-item', text: project_label_1.title).click
 
-      find('.btn-success').click
+      find('.btn-confirm').click
 
       expect(page.find('.issue-details h2.title')).to have_content('new created issue')
       expect(page).to have_selector('span.gl-label-text', text: grandparent_group_label.title)
@@ -269,6 +271,10 @@ RSpec.describe 'Labels Hierarchy', :js do
   end
 
   context 'creating boards lists' do
+    before do
+      stub_feature_flags(board_new_list: false)
+    end
+
     context 'on project boards' do
       let(:board) { create(:board, project: project_1) }
 
@@ -296,6 +302,7 @@ RSpec.describe 'Labels Hierarchy', :js do
       let(:board) { create(:board, group: parent) }
 
       before do
+        stub_feature_flags(graphql_board_lists: false)
         parent.add_developer(user)
         visit group_board_path(parent, board)
         find('.js-new-board-list').click

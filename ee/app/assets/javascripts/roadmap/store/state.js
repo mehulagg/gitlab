@@ -2,8 +2,6 @@ export default () => ({
   // API Calls
   basePath: '',
   epicsState: '',
-  filterQueryString: '',
-  initialEpicsPath: '',
   filterParams: null,
 
   // Data
@@ -26,6 +24,7 @@ export default () => ({
   // UI Flags
   defaultInnerHeight: 0,
   isChildEpics: false,
+  hasFiltersApplied: false,
   epicsFetchInProgress: false,
   epicsFetchForTimeframeInProgress: false,
   epicsFetchFailure: false,

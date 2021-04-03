@@ -1,16 +1,21 @@
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import createStore from 'ee/threat_monitoring/store';
 import EnvironmentPicker from 'ee/threat_monitoring/components/environment_picker.vue';
-import { INVALID_CURRENT_ENVIRONMENT_NAME } from 'ee/threat_monitoring/constants';
-import { mockEnvironmentsResponse } from '../mock_data';
+import {
+  INVALID_CURRENT_ENVIRONMENT_NAME,
+  ALL_ENVIRONMENT_NAME,
+} from 'ee/threat_monitoring/constants';
+import createStore from 'ee/threat_monitoring/store';
+import { mockEnvironmentsResponse } from '../mocks/mock_data';
 
 const mockEnvironments = mockEnvironmentsResponse.environments;
+const currentEnvironment = mockEnvironments[1];
 
 describe('EnvironmentPicker component', () => {
   let store;
   let wrapper;
 
-  const factory = state => {
+  const factory = (state) => {
     store = createStore();
     Object.assign(store.state.threatMonitoring, state);
 
@@ -21,8 +26,8 @@ describe('EnvironmentPicker component', () => {
     });
   };
 
-  const findEnvironmentsDropdown = () => wrapper.find({ ref: 'environmentsDropdown' });
-  const findEnvironmentsDropdownItems = () => wrapper.findAll({ ref: 'environmentsDropdownItem' });
+  const findEnvironmentsDropdown = () => wrapper.findComponent(GlDropdown);
+  const findEnvironmentsDropdownItems = () => wrapper.findAllComponents(GlDropdownItem);
 
   afterEach(() => {
     wrapper.destroy();
@@ -44,7 +49,6 @@ describe('EnvironmentPicker component', () => {
       });
     });
     describe('given there are environments', () => {
-      const currentEnvironment = mockEnvironments[1];
       beforeEach(() => {
         factory({
           environments: mockEnvironments,
@@ -71,6 +75,25 @@ describe('EnvironmentPicker component', () => {
             environment.id,
           );
         });
+      });
+    });
+    describe('with includeAll enabled', () => {
+      beforeEach(() => {
+        factory({
+          environments: mockEnvironments,
+          currentEnvironmentId: currentEnvironment.id,
+          allEnvironments: true,
+        });
+        wrapper = shallowMount(EnvironmentPicker, {
+          propsData: {
+            includeAll: true,
+          },
+          store,
+        });
+      });
+
+      it('has text set to the all environment option', () => {
+        expect(findEnvironmentsDropdown().attributes().text).toBe(ALL_ENVIRONMENT_NAME);
       });
     });
   });

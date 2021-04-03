@@ -15,7 +15,7 @@ RSpec.describe 'Set up Mattermost slash commands', :js do
       let(:mattermost_enabled) { true }
 
       it 'shows a help message' do
-        expect(page).to have_content("This service allows users to perform common")
+        expect(page).to have_content("Use this service to perform common")
       end
 
       it 'shows a token placeholder' do
@@ -28,21 +28,21 @@ RSpec.describe 'Set up Mattermost slash commands', :js do
         token = ('a'..'z').to_a.join
 
         fill_in 'service_token', with: token
-        click_active_toggle
-        click_on 'Save changes'
+        click_active_checkbox
+        click_save_integration
 
         expect(current_path).to eq(edit_project_service_path(project, :mattermost_slash_commands))
-        expect(page).to have_content('Mattermost slash commands settings saved, but not activated.')
+        expect(page).to have_content('Mattermost slash commands settings saved, but not active.')
       end
 
       it 'redirects to the integrations page after activating' do
         token = ('a'..'z').to_a.join
 
         fill_in 'service_token', with: token
-        click_on 'Save changes'
+        click_save_integration
 
         expect(current_path).to eq(edit_project_service_path(project, :mattermost_slash_commands))
-        expect(page).to have_content('Mattermost slash commands activated.')
+        expect(page).to have_content('Mattermost slash commands settings saved and active.')
       end
 
       it 'shows the add to mattermost button' do
@@ -113,7 +113,7 @@ RSpec.describe 'Set up Mattermost slash commands', :js do
 
         click_link 'Add to Mattermost'
 
-        expect(page).to have_selector('.alert')
+        expect(page).to have_selector('.gl-alert')
         expect(page).to have_content('test mattermost error message')
       end
 

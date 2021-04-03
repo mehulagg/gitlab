@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['Snippet'] do
+  include GraphqlHelpers
+
   let_it_be(:user) { create(:user) }
 
   it 'has the correct fields' do
@@ -14,6 +16,23 @@ RSpec.describe GitlabSchema.types['Snippet'] do
                        :description_html, :blob, :blobs]
 
     expect(described_class).to have_graphql_fields(*expected_fields)
+  end
+
+  describe 'blobs field' do
+    subject { described_class.fields['blobs'] }
+
+    it 'returns blobs' do
+      is_expected.to have_graphql_type(Types::Snippets::BlobType.connection_type)
+      is_expected.to have_graphql_resolver(Resolvers::Snippets::BlobsResolver)
+    end
+  end
+
+  describe '#user_permissions' do
+    let_it_be(:snippet) { create(:personal_snippet, :repository, :public, author: user) }
+
+    it 'can resolve the snippet permissions' do
+      expect(resolve_field(:user_permissions, snippet)).to eq(snippet)
+    end
   end
 
   context 'when restricted visibility level is set to public' do
@@ -33,6 +52,7 @@ RSpec.describe GitlabSchema.types['Snippet'] do
         }
       )
     end
+
     let(:response) { subject.dig('data', 'snippets', 'nodes')[0] }
 
     subject { GitlabSchema.execute(query, context: { current_user: current_user }).as_json }
@@ -97,6 +117,7 @@ RSpec.describe GitlabSchema.types['Snippet'] do
         }
       )
     end
+
     let(:response) { subject.dig('data', 'snippets', 'nodes')[0] }
 
     subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
@@ -113,7 +134,7 @@ RSpec.describe GitlabSchema.types['Snippet'] do
   end
 
   describe '#blob' do
-    let(:query_blob) { subject.dig('data', 'snippets', 'edges')[0]['node']['blob'] }
+    let(:query_blob) { subject.dig('data', 'snippets', 'nodes')[0]['blob'] }
 
     subject { GitlabSchema.execute(snippet_query_for(field: 'blob'), context: { current_user: user }).as_json }
 
@@ -140,9 +161,26 @@ RSpec.describe GitlabSchema.types['Snippet'] do
 
   describe '#blobs' do
     let_it_be(:snippet) { create(:personal_snippet, :public, author: user) }
-    let(:query_blobs) { subject.dig('data', 'snippets', 'edges')[0]['node']['blobs'] }
+    let(:query_blobs) { subject.dig('data', 'snippets', 'nodes')[0].dig('blobs', 'nodes') }
+    let(:paths) { [] }
+    let(:query) do
+      %(
+        {
+          snippets {
+            nodes {
+              blobs(paths: #{paths}) {
+                nodes {
+                  name
+                  path
+                }
+              }
+            }
+          }
+        }
+      )
+    end
 
-    subject { GitlabSchema.execute(snippet_query_for(field: 'blobs'), context: { current_user: user }).as_json }
+    subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
 
     shared_examples 'an array' do
       it 'returns an array of snippet blobs' do
@@ -172,6 +210,18 @@ RSpec.describe GitlabSchema.types['Snippet'] do
 
         expect(resulting_blobs_names).to match_array(blobs.map(&:name))
       end
+
+      context 'when specific path is set' do
+        let(:paths) { ['CHANGELOG'] }
+
+        it_behaves_like 'an array'
+
+        it 'returns specific files' do
+          resulting_blobs_names = query_blobs.map { |b| b['name'] }
+
+          expect(resulting_blobs_names).to match(paths)
+        end
+      end
     end
   end
 
@@ -179,12 +229,10 @@ RSpec.describe GitlabSchema.types['Snippet'] do
     %(
       {
         snippets {
-          edges {
-            node {
-              #{field} {
-                name
-                path
-              }
+          nodes {
+            #{field} {
+              name
+              path
             }
           }
         }

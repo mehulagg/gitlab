@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Understanding EXPLAIN plans
 
 PostgreSQL allows you to obtain query plans using the `EXPLAIN` command. This
@@ -274,7 +280,7 @@ FROM users
 WHERE twitter != '';
 ```
 
-This query simply counts the number of users that have a Twitter profile set.
+This query counts the number of users that have a Twitter profile set.
 Let's run this using `EXPLAIN (ANALYZE, BUFFERS)`:
 
 ```sql
@@ -382,7 +388,7 @@ we created the index:
 CREATE INDEX CONCURRENTLY twitter_test ON users (twitter);
 ```
 
-We simply told PostgreSQL to index all possible values of the `twitter` column,
+We told PostgreSQL to index all possible values of the `twitter` column,
 even empty strings. Our query in turn uses `WHERE twitter != ''`. This means
 that the index does improve things, as we don't need to do a sequential scan,
 but we may still encounter empty strings. This means PostgreSQL _has_ to apply a
@@ -427,6 +433,17 @@ result, first check if there are any existing indexes you may be able to reuse.
 If there aren't any, check if you can perhaps slightly change an existing one to
 fit both the existing and new queries. Only add a new index if none of the
 existing indexes can be used in any way.
+
+When comparing execution plans, don't take timing as the only important metric.
+Good timing is the main goal of any optimization, but it can be too volatile to
+be used for comparison (for example, it depends a lot on the state of cache).
+When optimizing a query, we usually need to reduce the amount of data we're
+dealing with. Indexes are the way to work with fewer pages (buffers) to get the
+result, so, during optimization, look at the number of buffers used (read and hit),
+and work on reducing these numbers. Reduced timing will be the consequence of reduced
+buffer numbers. [#database-lab](#database-lab) guarantees that the plan is structurally
+identical to production (and overall number of buffers is the same as on production),
+but difference in cache state and I/O speed may lead to different timings.
 
 ## Queries that can't be optimised
 

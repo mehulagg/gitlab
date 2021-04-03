@@ -1,6 +1,6 @@
-import Flash from '../flash';
-import BalsamiqViewer from './balsamiq/balsamiq_viewer';
 import { __ } from '~/locale';
+import { deprecatedCreateFlash as Flash } from '../flash';
+import BalsamiqViewer from './balsamiq/balsamiq_viewer';
 
 function onError() {
   const flash = new Flash(__('Balsamiq file could not be loaded.'));

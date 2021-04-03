@@ -1,9 +1,11 @@
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { registryUrl as nugetPath } from 'jest/packages/details/mock_data';
+import { nugetPackage as packageEntity } from 'jest/packages/mock_data';
+import InstallationTitle from '~/packages/details/components/installation_title.vue';
 import NugetInstallation from '~/packages/details/components/nuget_installation.vue';
-import { nugetPackage as packageEntity } from '../../mock_data';
-import { registryUrl as nugetPath } from '../mock_data';
-import { GlTabs } from '@gitlab/ui';
+import { TrackingActions } from '~/packages/details/constants';
+import CodeInstructions from '~/vue_shared/components/registry/code_instruction.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -25,12 +27,11 @@ describe('NugetInstallation', () => {
     },
   });
 
-  const findTabs = () => wrapper.find(GlTabs);
-  const nugetInstallationCommand = () => wrapper.find('.js-nuget-command > input');
-  const nugetSetupCommand = () => wrapper.find('.js-nuget-setup > input');
+  const findCodeInstructions = () => wrapper.findAll(CodeInstructions);
+  const findInstallationTitle = () => wrapper.findComponent(InstallationTitle);
 
   function createComponent() {
-    wrapper = mount(NugetInstallation, {
+    wrapper = shallowMount(NugetInstallation, {
       localVue,
       store,
     });
@@ -41,24 +42,38 @@ describe('NugetInstallation', () => {
   });
 
   afterEach(() => {
-    if (wrapper) wrapper.destroy();
+    wrapper.destroy();
   });
 
-  describe('it renders', () => {
-    it('with GlTabs', () => {
-      expect(findTabs().exists()).toBe(true);
+  it('renders all the messages', () => {
+    expect(wrapper.element).toMatchSnapshot();
+  });
+
+  describe('install command switch', () => {
+    it('has the installation title component', () => {
+      expect(findInstallationTitle().exists()).toBe(true);
+      expect(findInstallationTitle().props()).toMatchObject({
+        packageType: 'nuget',
+        options: [{ value: 'nuget', label: 'Show Nuget commands' }],
+      });
     });
   });
 
   describe('installation commands', () => {
     it('renders the correct command', () => {
-      expect(nugetInstallationCommand().element.value).toBe(nugetInstallationCommandStr);
+      expect(findCodeInstructions().at(0).props()).toMatchObject({
+        instruction: nugetInstallationCommandStr,
+        trackingAction: TrackingActions.COPY_NUGET_INSTALL_COMMAND,
+      });
     });
   });
 
   describe('setup commands', () => {
     it('renders the correct command', () => {
-      expect(nugetSetupCommand().element.value).toBe(nugetSetupCommandStr);
+      expect(findCodeInstructions().at(1).props()).toMatchObject({
+        instruction: nugetSetupCommandStr,
+        trackingAction: TrackingActions.COPY_NUGET_SETUP_COMMAND,
+      });
     });
   });
 });

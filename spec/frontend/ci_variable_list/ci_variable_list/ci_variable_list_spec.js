@@ -1,14 +1,9 @@
 import $ from 'jquery';
-import waitForPromises from 'helpers/wait_for_promises';
 import VariableList from '~/ci_variable_list/ci_variable_list';
 
 const HIDE_CLASS = 'hide';
 
 describe('VariableList', () => {
-  preloadFixtures('pipeline_schedules/edit.html');
-  preloadFixtures('pipeline_schedules/edit_with_variables.html');
-  preloadFixtures('projects/ci_cd_settings.html');
-
   let $wrapper;
   let variableList;
 
@@ -33,10 +28,7 @@ describe('VariableList', () => {
 
       it('should add another row when editing the last rows key input', () => {
         const $row = $wrapper.find('.js-row');
-        $row
-          .find('.js-ci-variable-input-key')
-          .val('foo')
-          .trigger('input');
+        $row.find('.js-ci-variable-input-key').val('foo').trigger('input');
 
         expect($wrapper.find('.js-row').length).toBe(2);
 
@@ -48,10 +40,7 @@ describe('VariableList', () => {
 
       it('should add another row when editing the last rows value textarea', () => {
         const $row = $wrapper.find('.js-row');
-        $row
-          .find('.js-ci-variable-input-value')
-          .val('foo')
-          .trigger('input');
+        $row.find('.js-ci-variable-input-value').val('foo').trigger('input');
 
         expect($wrapper.find('.js-row').length).toBe(2);
 
@@ -63,18 +52,11 @@ describe('VariableList', () => {
 
       it('should remove empty row after blurring', () => {
         const $row = $wrapper.find('.js-row');
-        $row
-          .find('.js-ci-variable-input-key')
-          .val('foo')
-          .trigger('input');
+        $row.find('.js-ci-variable-input-key').val('foo').trigger('input');
 
         expect($wrapper.find('.js-row').length).toBe(2);
 
-        $row
-          .find('.js-ci-variable-input-key')
-          .val('')
-          .trigger('input')
-          .trigger('blur');
+        $row.find('.js-ci-variable-input-key').val('').trigger('input').trigger('blur');
 
         expect($wrapper.find('.js-row').length).toBe(1);
       });
@@ -109,92 +91,6 @@ describe('VariableList', () => {
 
         expect($placeholder.hasClass(HIDE_CLASS)).toBe(true);
         expect($inputValue.hasClass(HIDE_CLASS)).toBe(false);
-      });
-    });
-  });
-
-  describe('with all inputs(key, value, protected)', () => {
-    beforeEach(() => {
-      loadFixtures('projects/ci_cd_settings.html');
-      $wrapper = $('.js-ci-variable-list-section');
-
-      $wrapper.find('.js-ci-variable-input-protected').attr('data-default', 'false');
-
-      variableList = new VariableList({
-        container: $wrapper,
-        formField: 'variables',
-      });
-      variableList.init();
-    });
-
-    it('should not add another row when editing the last rows protected checkbox', () => {
-      const $row = $wrapper.find('.js-row:last-child');
-      $row.find('.ci-variable-protected-item .js-project-feature-toggle').click();
-
-      return waitForPromises().then(() => {
-        expect($wrapper.find('.js-row').length).toBe(1);
-      });
-    });
-
-    it('should not add another row when editing the last rows masked checkbox', () => {
-      jest.spyOn(variableList, 'checkIfRowTouched');
-      const $row = $wrapper.find('.js-row:last-child');
-      $row.find('.ci-variable-masked-item .js-project-feature-toggle').click();
-
-      return waitForPromises().then(() => {
-        // This validates that we are checking after the event listener has run
-        expect(variableList.checkIfRowTouched).toHaveBeenCalled();
-        expect($wrapper.find('.js-row').length).toBe(1);
-      });
-    });
-
-    describe('validateMaskability', () => {
-      let $row;
-
-      const maskingErrorElement = '.js-row:last-child .masking-validation-error';
-      const clickToggle = () =>
-        $row.find('.ci-variable-masked-item .js-project-feature-toggle').click();
-
-      beforeEach(() => {
-        $row = $wrapper.find('.js-row:last-child');
-      });
-
-      it('has a regex provided via a data attribute', () => {
-        clickToggle();
-
-        expect($wrapper.attr('data-maskable-regex')).toBe('^[a-zA-Z0-9_+=/@:.-]{8,}$');
-      });
-
-      it('allows values that are 8 characters long', () => {
-        $row.find('.js-ci-variable-input-value').val('looooong');
-
-        clickToggle();
-
-        expect($wrapper.find(maskingErrorElement)).toHaveClass('hide');
-      });
-
-      it('rejects values that are shorter than 8 characters', () => {
-        $row.find('.js-ci-variable-input-value').val('short');
-
-        clickToggle();
-
-        expect($wrapper.find(maskingErrorElement)).toBeVisible();
-      });
-
-      it('allows values with base 64 characters', () => {
-        $row.find('.js-ci-variable-input-value').val('abcABC123_+=/-');
-
-        clickToggle();
-
-        expect($wrapper.find(maskingErrorElement)).toHaveClass('hide');
-      });
-
-      it('rejects values with other special characters', () => {
-        $row.find('.js-ci-variable-input-value').val('1234567$');
-
-        clickToggle();
-
-        expect($wrapper.find(maskingErrorElement)).toBeVisible();
       });
     });
   });
@@ -245,38 +141,6 @@ describe('VariableList', () => {
       variableList.toggleEnableRow(true);
 
       expect($wrapper.find('.js-ci-variable-input-key:not([disabled])').length).toBe(3);
-    });
-  });
-
-  describe('hideValues', () => {
-    beforeEach(() => {
-      loadFixtures('projects/ci_cd_settings.html');
-      $wrapper = $('.js-ci-variable-list-section');
-
-      variableList = new VariableList({
-        container: $wrapper,
-        formField: 'variables',
-      });
-      variableList.init();
-    });
-
-    it('should hide value input and show placeholder stars', () => {
-      const $row = $wrapper.find('.js-row');
-      const $inputValue = $row.find('.js-ci-variable-input-value');
-      const $placeholder = $row.find('.js-secret-value-placeholder');
-
-      $row
-        .find('.js-ci-variable-input-value')
-        .val('foo')
-        .trigger('input');
-
-      expect($placeholder.hasClass(HIDE_CLASS)).toBe(true);
-      expect($inputValue.hasClass(HIDE_CLASS)).toBe(false);
-
-      variableList.hideValues();
-
-      expect($placeholder.hasClass(HIDE_CLASS)).toBe(false);
-      expect($inputValue.hasClass(HIDE_CLASS)).toBe(true);
     });
   });
 });

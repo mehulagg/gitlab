@@ -13,11 +13,11 @@ module Gitlab
     TAG_REF_PREFIX = "refs/tags/"
     BRANCH_REF_PREFIX = "refs/heads/"
 
-    BaseError = Class.new(StandardError)
     CommandError = Class.new(BaseError)
     CommitError = Class.new(BaseError)
     OSError = Class.new(BaseError)
     UnknownRef = Class.new(BaseError)
+    CommandTimedOut = Class.new(CommandError)
 
     class << self
       include Gitlab::EncodingHelper

@@ -1,14 +1,11 @@
 <script>
-/* eslint-disable vue/require-default-prop */
-import IssueCardInner from './issue_card_inner.vue';
-import eventHub from '../eventhub';
-import sidebarEventHub from '~/sidebar/event_hub';
-import boardsStore from '../stores/boards_store';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import BoardCardInner from './board_card_inner.vue';
 
 export default {
-  name: 'BoardsIssueCard',
+  name: 'BoardCard',
   components: {
-    IssueCardInner,
+    BoardCardInner,
   },
   props: {
     list: {
@@ -16,14 +13,9 @@ export default {
       default: () => ({}),
       required: false,
     },
-    issue: {
+    item: {
       type: Object,
       default: () => ({}),
-      required: false,
-    },
-    issueLinkBase: {
-      type: String,
-      default: '',
       required: false,
     },
     disabled: {
@@ -36,65 +28,31 @@ export default {
       default: 0,
       required: false,
     },
-    rootPath: {
-      type: String,
-      default: '',
-      required: false,
-    },
-    groupId: {
-      type: Number,
-      required: false,
-    },
-  },
-  data() {
-    return {
-      showDetail: false,
-      detailIssue: boardsStore.detail,
-      multiSelect: boardsStore.multiSelect,
-    };
   },
   computed: {
-    issueDetailVisible() {
-      return this.detailIssue.issue && this.detailIssue.issue.id === this.issue.id;
+    ...mapState(['selectedBoardItems', 'activeId']),
+    ...mapGetters(['isSwimlanesOn']),
+    isActive() {
+      return this.item.id === this.activeId;
     },
     multiSelectVisible() {
-      return this.multiSelect.list.findIndex(issue => issue.id === this.issue.id) > -1;
-    },
-    canMultiSelect() {
-      return gon.features && gon.features.multiSelectBoard;
+      return (
+        !this.activeId &&
+        this.selectedBoardItems.findIndex((boardItem) => boardItem.id === this.item.id) > -1
+      );
     },
   },
   methods: {
-    mouseDown() {
-      this.showDetail = true;
-    },
-    mouseMove() {
-      this.showDetail = false;
-    },
-    showIssue(e) {
+    ...mapActions(['toggleBoardItemMultiSelection', 'toggleBoardItem']),
+    toggleIssue(e) {
+      // Don't do anything if this happened on a no trigger element
       if (e.target.classList.contains('js-no-trigger')) return;
 
-      // If no issues are opened, close all sidebars first
-      if (!boardsStore.detail?.issue?.id) {
-        sidebarEventHub.$emit('sidebar.closeAll');
-      }
-
-      // If CMD or CTRL is clicked
-      const isMultiSelect = this.canMultiSelect && (e.ctrlKey || e.metaKey);
-
-      if (this.showDetail || isMultiSelect) {
-        this.showDetail = false;
-
-        if (boardsStore.detail.issue && boardsStore.detail.issue.id === this.issue.id) {
-          eventHub.$emit('clearDetailIssue', isMultiSelect);
-
-          if (isMultiSelect) {
-            eventHub.$emit('newDetailIssue', this.issue, isMultiSelect);
-          }
-        } else {
-          eventHub.$emit('newDetailIssue', this.issue, isMultiSelect);
-          boardsStore.setListDetail(this.list);
-        }
+      const isMultiSelect = e.ctrlKey || e.metaKey;
+      if (isMultiSelect) {
+        this.toggleBoardItemMultiSelection(this.item);
+      } else {
+        this.toggleBoardItem({ boardItem: this.item });
       }
     },
   },
@@ -103,27 +61,21 @@ export default {
 
 <template>
   <li
+    data-qa-selector="board_card"
     :class="{
       'multi-select': multiSelectVisible,
-      'user-can-drag': !disabled && issue.id,
-      'is-disabled': disabled || !issue.id,
-      'is-active': issueDetailVisible,
+      'user-can-drag': !disabled && item.id,
+      'is-disabled': disabled || !item.id,
+      'is-active': isActive,
     }"
     :index="index"
-    :data-issue-id="issue.id"
-    data-qa-selector="board_card"
-    class="board-card p-3 rounded"
-    @mousedown="mouseDown"
-    @mousemove="mouseMove"
-    @mouseup="showIssue($event)"
+    :data-item-id="item.id"
+    :data-item-iid="item.iid"
+    :data-item-path="item.referencePath"
+    data-testid="board_card"
+    class="board-card gl-p-5 gl-rounded-base"
+    @mouseup="toggleIssue($event)"
   >
-    <issue-card-inner
-      :list="list"
-      :issue="issue"
-      :issue-link-base="issueLinkBase"
-      :group-id="groupId"
-      :root-path="rootPath"
-      :update-filters="true"
-    />
+    <board-card-inner :list="list" :item="item" :update-filters="true" />
   </li>
 </template>

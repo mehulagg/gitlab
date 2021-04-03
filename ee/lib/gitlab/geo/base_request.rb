@@ -3,7 +3,7 @@
 module Gitlab
   module Geo
     class BaseRequest
-      GITLAB_GEO_AUTH_TOKEN_TYPE = 'GL-Geo'.freeze
+      GITLAB_GEO_AUTH_TOKEN_TYPE = 'GL-Geo'
 
       attr_reader :request_data
 

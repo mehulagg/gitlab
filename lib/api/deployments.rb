@@ -2,10 +2,12 @@
 
 module API
   # Deployments RESTful API endpoints
-  class Deployments < Grape::API::Instance
+  class Deployments < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :continuous_delivery
 
     params do
       requires :id, type: String, desc: 'The project ID'
@@ -34,7 +36,9 @@ module API
       get ':id/deployments' do
         authorize! :read_deployment, user_project
 
-        deployments = DeploymentsFinder.new(user_project, params).execute
+        deployments =
+          DeploymentsFinder.new(params.merge(project: user_project))
+            .execute.with_api_entity_associations
 
         present paginate(deployments), with: Entities::Deployment
       end

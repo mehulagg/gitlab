@@ -1,7 +1,7 @@
+import { DEPENDENCY_LIST_TYPES } from 'ee/dependencies/store/constants';
 import * as types from 'ee/dependencies/store/mutation_types';
 import mutations from 'ee/dependencies/store/mutations';
 import getInitialState from 'ee/dependencies/store/state';
-import { DEPENDENCY_LIST_TYPES } from 'ee/dependencies/store/constants';
 
 describe('Dependencies mutations', () => {
   let state;

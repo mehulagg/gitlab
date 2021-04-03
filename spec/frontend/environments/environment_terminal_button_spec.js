@@ -5,7 +5,7 @@ describe('Stop Component', () => {
   let wrapper;
   const terminalPath = '/path';
 
-  const mountWithProps = props => {
+  const mountWithProps = (props) => {
     wrapper = shallowMount(TerminalComponent, {
       propsData: props,
     });
@@ -22,7 +22,7 @@ describe('Stop Component', () => {
   });
 
   it('should render a link to open a web terminal with the provided path', () => {
-    expect(wrapper.is('a')).toBe(true);
+    expect(wrapper.element.tagName).toBe('A');
     expect(wrapper.attributes('title')).toBe('Terminal');
     expect(wrapper.attributes('aria-label')).toBe('Terminal');
     expect(wrapper.attributes('href')).toBe(terminalPath);

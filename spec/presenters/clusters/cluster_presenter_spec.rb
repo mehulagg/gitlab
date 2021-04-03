@@ -264,8 +264,8 @@ RSpec.describe Clusters::ClusterPresenter do
       it do
         is_expected.to include('clusters-path': clusterable_presenter.index_path,
                              'dashboard-endpoint': clusterable_presenter.metrics_dashboard_path(cluster),
-                             'documentation-path': help_page_path('user/project/clusters/index', anchor: 'monitoring-your-kubernetes-cluster-ultimate'),
-                             'add-dashboard-documentation-path': help_page_path('user/project/integrations/prometheus.md', anchor: 'adding-a-new-dashboard-to-your-project'),
+                             'documentation-path': help_page_path('user/project/clusters/index', anchor: 'monitoring-your-kubernetes-cluster'),
+                             'add-dashboard-documentation-path': help_page_path('operations/metrics/dashboards/index.md', anchor: 'add-a-new-dashboard-to-your-project'),
                              'empty-getting-started-svg-path': match_asset_path('/assets/illustrations/monitoring/getting_started.svg'),
                              'empty-loading-svg-path': match_asset_path('/assets/illustrations/monitoring/loading.svg'),
                              'empty-no-data-svg-path': match_asset_path('/assets/illustrations/monitoring/no_data.svg'),
@@ -347,7 +347,7 @@ RSpec.describe Clusters::ClusterPresenter do
 
       before do
         project.add_maintainer(user)
-        stub_feature_flags(user_mode_in_session: false)
+        stub_application_setting(admin_mode: false)
       end
 
       context 'user can read logs' do
@@ -363,7 +363,7 @@ RSpec.describe Clusters::ClusterPresenter do
 
       before do
         project.add_developer(user)
-        stub_feature_flags(user_mode_in_session: false)
+        stub_application_setting(admin_mode: false)
       end
 
       it 'returns nil' do

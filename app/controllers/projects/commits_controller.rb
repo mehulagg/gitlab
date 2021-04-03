@@ -8,12 +8,13 @@ class Projects::CommitsController < Projects::ApplicationController
 
   prepend_before_action(only: [:show]) { authenticate_sessionless_user!(:rss) }
   around_action :allow_gitaly_ref_name_caching
-  before_action :whitelist_query_limiting, except: :commits_root
   before_action :require_non_empty_project
   before_action :assign_ref_vars, except: :commits_root
   before_action :authorize_download_code!
   before_action :validate_ref!, except: :commits_root
   before_action :set_commits, except: :commits_root
+
+  feature_category :source_code_management
 
   def commits_root
     redirect_to project_commits_path(@project, @project.default_branch)
@@ -79,9 +80,5 @@ class Projects::CommitsController < Projects::ApplicationController
 
     @commits = @commits.with_latest_pipeline(@ref)
     @commits = set_commits_for_rendering(@commits)
-  end
-
-  def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42330')
   end
 end

@@ -15,16 +15,12 @@ module Security
       def execute(enabled:)
         return unless valid?
 
-        project_settings.update(toggle_params(enabled))
+        project&.security_setting&.update(toggle_params(enabled))
       end
 
       private
 
       attr_reader :enabled, :feature, :project
-
-      def project_settings
-        @project_settings ||= ProjectSecuritySetting.safe_find_or_create_for(project)
-      end
 
       def toggle_params(enabled)
         if feature == 'all'

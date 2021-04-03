@@ -14,6 +14,7 @@ module StatusPage
   # * StatusPage::PublishListService
   class PublishService
     include Gitlab::Utils::StrongMemoize
+    include Gitlab::Utils::UsageData
 
     def initialize(user:, project:, issue_id:)
       @user = user
@@ -28,6 +29,8 @@ module StatusPage
       response = process_details
       return response if response.error?
 
+      track_event
+
       process_list
     end
 
@@ -36,11 +39,13 @@ module StatusPage
     attr_reader :user, :project, :issue_id
 
     def process_details
-      unpublish_details? ? unpublish_details : publish_details
+      should_unpublish? ? unpublish_details : publish_details
     end
 
-    def unpublish_details?
-      issue.confidential? || !issue.status_page_published_incident
+    def should_unpublish?
+      strong_memoize(:should_unpublish) do
+        issue.confidential? || !issue.status_page_published_incident
+      end
     end
 
     def process_list
@@ -89,6 +94,10 @@ module StatusPage
 
     def error(message)
       ServiceResponse.error(message: message)
+    end
+
+    def track_event
+      track_usage_event(:incident_management_incident_published, user.id) unless should_unpublish?
     end
   end
 end

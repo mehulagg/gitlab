@@ -1,16 +1,17 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
-import { scrollToElementWithContext } from '~/lib/utils/common_utils';
+import { scrollToElementWithContext, scrollToElement } from '~/lib/utils/common_utils';
 import eventHub from '../event_hub';
 
 /**
  * @param {string} selector
  * @returns {boolean}
  */
-function scrollTo(selector) {
+function scrollTo(selector, { withoutContext = false } = {}) {
   const el = document.querySelector(selector);
+  const scrollFunction = withoutContext ? scrollToElement : scrollToElementWithContext;
 
   if (el) {
-    scrollToElementWithContext(el);
+    scrollFunction(el);
     return true;
   }
 
@@ -35,7 +36,7 @@ function diffsJump({ expandDiscussion }, id) {
 function discussionJump({ expandDiscussion }, id) {
   const selector = `div.discussion[data-discussion-id="${id}"]`;
   expandDiscussion({ discussionId: id });
-  return scrollTo(selector);
+  return scrollTo(selector, { withoutContext: true });
 }
 
 /**
@@ -78,7 +79,7 @@ function handleDiscussionJump(self, fn, discussionId = self.currentDiscussionId)
   const isDiffView = window.mrTabs.currentAction === 'diffs';
   const targetId = fn(discussionId, isDiffView);
   const discussion = self.getDiscussion(targetId);
-  const discussionFilePath = discussion.diff_file?.file_path;
+  const discussionFilePath = discussion?.diff_file?.file_path;
 
   if (discussionFilePath) {
     self.scrollToFile(discussionFilePath);
@@ -98,7 +99,7 @@ export default {
       'getDiscussion',
     ]),
     ...mapState({
-      currentDiscussionId: state => state.notes.currentDiscussionId,
+      currentDiscussionId: (state) => state.notes.currentDiscussionId,
     }),
   },
   methods: {

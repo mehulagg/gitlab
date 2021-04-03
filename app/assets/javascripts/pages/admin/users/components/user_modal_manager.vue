@@ -1,15 +1,18 @@
 <script>
+import DeleteUserModal from './delete_user_modal.vue';
+
 export default {
+  components: { DeleteUserModal },
   props: {
     modalConfiguration: {
       required: true,
       type: Object,
     },
-    actionModals: {
-      required: true,
-      type: Object,
-    },
     csrfToken: {
+      required: true,
+      type: String,
+    },
+    selector: {
       required: true,
       type: String,
     },
@@ -21,10 +24,7 @@ export default {
   },
   computed: {
     activeModal() {
-      if (!this.currentModalData) return null;
-      const { glModalAction: action } = this.currentModalData;
-
-      return this.actionModals[action];
+      return Boolean(this.currentModalData);
     },
 
     modalProps() {
@@ -38,27 +38,27 @@ export default {
   },
 
   mounted() {
-    document.addEventListener('click', this.handleClick);
-  },
+    /*
+     * Here we're looking for every button that needs to launch a modal
+     * on click, and then attaching a click event handler to show the modal
+     * if it's correctly configured.
+     *
+     * TODO: Replace this with integrated modal components https://gitlab.com/gitlab-org/gitlab/-/issues/320922
+     */
+    document.querySelectorAll(this.selector).forEach((button) => {
+      button.addEventListener('click', (e) => {
+        if (!button.dataset.glModalAction) return;
 
-  beforeDestroy() {
-    document.removeEventListener('click', this.handleClick);
+        e.preventDefault();
+        this.show(button.dataset);
+      });
+    });
   },
 
   methods: {
-    handleClick(e) {
-      const { glModalAction: action } = e.target.dataset;
-      if (!action) return;
-
-      this.show(e.target.dataset);
-      e.preventDefault();
-    },
-
     show(modalData) {
       const { glModalAction: requestedAction } = modalData;
-      if (!this.actionModals[requestedAction]) {
-        throw new Error(`Requested non-existing modal action ${requestedAction}`);
-      }
+
       if (!this.modalConfiguration[requestedAction]) {
         throw new Error(`Modal action ${requestedAction} has no configuration in HTML`);
       }
@@ -73,5 +73,5 @@ export default {
 };
 </script>
 <template>
-  <div :is="activeModal" v-if="activeModal" ref="modal" v-bind="modalProps" />
+  <delete-user-modal v-if="activeModal" ref="modal" v-bind="modalProps" />
 </template>

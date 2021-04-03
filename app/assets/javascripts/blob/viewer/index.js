@@ -1,12 +1,13 @@
 import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
-import Flash from '../../flash';
-import { handleLocationHash } from '../../lib/utils/common_utils';
-import axios from '../../lib/utils/axios_utils';
-import eventHub from '../../notes/event_hub';
 import { __ } from '~/locale';
+import { fixTitle } from '~/tooltips';
+import { deprecatedCreateFlash as Flash } from '../../flash';
+import axios from '../../lib/utils/axios_utils';
+import { handleLocationHash } from '../../lib/utils/common_utils';
+import eventHub from '../../notes/event_hub';
 
-const loadRichBlobViewer = type => {
+const loadRichBlobViewer = (type) => {
   switch (type) {
     case 'balsamiq':
       return import(/* webpackChunkName: 'balsamiq_viewer' */ '../balsamiq_viewer');
@@ -29,8 +30,8 @@ export const handleBlobRichViewer = (viewer, type) => {
   if (!viewer || !type) return;
 
   loadRichBlobViewer(type)
-    .then(module => module?.default(viewer))
-    .catch(error => {
+    .then((module) => module?.default(viewer))
+    .catch((error) => {
       Flash(__('Error loading file viewer.'));
       throw error;
     });
@@ -61,6 +62,7 @@ export default class BlobViewer {
     this.switcher = document.querySelector('.js-blob-viewer-switcher');
     this.switcherBtns = document.querySelectorAll('.js-blob-viewer-switch-btn');
     this.copySourceBtn = document.querySelector('.js-copy-blob-source-btn');
+    this.copySourceBtnTooltip = document.querySelector('.js-copy-blob-source-btn-tooltip');
 
     this.simpleViewer = this.$fileHolder[0].querySelector('.blob-viewer[data-type="simple"]');
     this.richViewer = this.$fileHolder[0].querySelector('.blob-viewer[data-type="rich"]');
@@ -83,7 +85,7 @@ export default class BlobViewer {
 
   initBindings() {
     if (this.switcherBtns.length) {
-      Array.from(this.switcherBtns).forEach(el => {
+      Array.from(this.switcherBtns).forEach((el) => {
         el.addEventListener('click', this.switchViewHandler.bind(this));
       });
     }
@@ -108,39 +110,39 @@ export default class BlobViewer {
   toggleCopyButtonState() {
     if (!this.copySourceBtn) return;
     if (this.simpleViewer.getAttribute('data-loaded')) {
-      this.copySourceBtn.setAttribute('title', __('Copy file contents'));
+      this.copySourceBtnTooltip.setAttribute('title', __('Copy file contents'));
       this.copySourceBtn.classList.remove('disabled');
     } else if (this.activeViewer === this.simpleViewer) {
-      this.copySourceBtn.setAttribute(
+      this.copySourceBtnTooltip.setAttribute(
         'title',
         __('Wait for the file to load to copy its contents'),
       );
       this.copySourceBtn.classList.add('disabled');
     } else {
-      this.copySourceBtn.setAttribute(
+      this.copySourceBtnTooltip.setAttribute(
         'title',
         __('Switch to the source to copy the file contents'),
       );
       this.copySourceBtn.classList.add('disabled');
     }
 
-    $(this.copySourceBtn).tooltip('_fixTitle');
+    fixTitle($(this.copySourceBtnTooltip));
   }
 
   switchToViewer(name) {
     const newViewer = this.$fileHolder[0].querySelector(`.blob-viewer[data-type='${name}']`);
     if (this.activeViewer === newViewer) return;
 
-    const oldButton = document.querySelector('.js-blob-viewer-switch-btn.active');
+    const oldButton = document.querySelector('.js-blob-viewer-switch-btn.selected');
     const newButton = document.querySelector(`.js-blob-viewer-switch-btn[data-viewer='${name}']`);
     const oldViewer = this.$fileHolder[0].querySelector(`.blob-viewer:not([data-type='${name}'])`);
 
     if (oldButton) {
-      oldButton.classList.remove('active');
+      oldButton.classList.remove('selected');
     }
 
     if (newButton) {
-      newButton.classList.add('active');
+      newButton.classList.add('selected');
       newButton.blur();
     }
 
@@ -154,7 +156,7 @@ export default class BlobViewer {
 
     this.toggleCopyButtonState();
     BlobViewer.loadViewer(newViewer)
-      .then(viewer => {
+      .then((viewer) => {
         $(viewer).renderGFM();
 
         this.$fileHolder.trigger('highlight:line');
@@ -179,9 +181,7 @@ export default class BlobViewer {
       viewer.innerHTML = data.html;
       viewer.setAttribute('data-loaded', 'true');
 
-      if (window.gon?.features?.codeNavigation) {
-        eventHub.$emit('showBlobInteractionZones', viewer.dataset.path);
-      }
+      eventHub.$emit('showBlobInteractionZones', viewer.dataset.path);
 
       return viewer;
     });

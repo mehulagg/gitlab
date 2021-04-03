@@ -36,13 +36,13 @@ RSpec.describe 'Contributions Calendar', :js do
 
   def get_cell_date_selector(contributions, date)
     contribution_text =
-      if contributions.zero?
+      if contributions == 0
         'No contributions'
       else
         "#{contributions} #{'contribution'.pluralize(contributions)}"
       end
 
-    "#{get_cell_color_selector(contributions)}[data-original-title='#{contribution_text}<br />#{date}']"
+    "#{get_cell_color_selector(contributions)}[title='#{contribution_text}<br /><span class=\"gl-text-gray-300\">#{date}</span>']"
   end
 
   def push_code_contribution
@@ -64,7 +64,7 @@ RSpec.describe 'Contributions Calendar', :js do
       author_id: user.id
     }
 
-    Event.create(note_comment_params)
+    Event.create!(note_comment_params)
   end
 
   def selected_day_activities(visible: true)
@@ -113,8 +113,8 @@ RSpec.describe 'Contributions Calendar', :js do
       describe 'deselect calendar day' do
         before do
           cells[0].click
-          page.find('.js-overview-tab a').click
           wait_for_requests
+          cells[0].click
         end
 
         it 'hides calendar day activities' do
@@ -180,7 +180,7 @@ RSpec.describe 'Contributions Calendar', :js do
       before do
         push_code_contribution
 
-        Timecop.freeze(Date.yesterday) do
+        travel_to(Date.yesterday) do
           Issues::CreateService.new(contributed_project, user, issue_params).execute
         end
       end

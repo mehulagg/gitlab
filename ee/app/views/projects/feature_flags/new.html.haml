@@ -1,9 +1,0 @@
-- @breadcrumb_link = new_project_feature_flag_path(@project)
-- add_to_breadcrumbs s_('FeatureFlags|Feature Flags'), project_feature_flags_path(@project)
-- breadcrumb_title s_('FeatureFlags|New')
-- page_title s_('FeatureFlags|New Feature Flag')
-
-#js-new-feature-flag{ data: { endpoint: project_feature_flags_path(@project, format: :json),
-                     feature_flags_path: project_feature_flags_path(@project),
-                     environments_endpoint: search_project_environments_path(@project, format: :json),
-                     project_id: @project.id } }

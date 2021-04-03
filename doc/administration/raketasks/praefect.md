@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# Praefect Rake tasks **(CORE ONLY)**
+# Praefect Rake tasks **(FREE SELF)**
 
 > [Introduced]( https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28369) in GitLab 12.10.
 

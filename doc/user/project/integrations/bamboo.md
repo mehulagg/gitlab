@@ -1,14 +1,14 @@
 ---
 stage: Create
 group: Ecosystem
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Atlassian Bamboo CI Service
+# Atlassian Bamboo CI Service **(FREE)**
 
 GitLab provides integration with Atlassian Bamboo for continuous integration.
-When configured, pushes to a project will trigger a build in Bamboo automatically.
-Merge requests will also display CI status showing whether the build is pending,
+When configured, pushes to a project trigger a build in Bamboo automatically.
+Merge requests also display CI status showing whether the build is pending,
 failed, or completed successfully. It also provides a link to the Bamboo build
 page for more information.
 
@@ -50,18 +50,22 @@ service in GitLab.
 1. Enter the build key from your Bamboo build plan. Build keys are typically made
    up from the Project Key and Plan Key that are set on project/plan creation and
    separated with a dash (`-`), for example  **PROJ-PLAN**. This is a short, all
-   uppercase identifier that is unique. When viewing a plan within Bamboo, the
+   uppercase identifier that is unique. When viewing a plan in Bamboo, the
    build key is also shown in the browser URL, for example `https://bamboo.example.com/browse/PROJ-PLAN`.
 1. If necessary, enter username and password for a Bamboo user that has
    access to trigger the build plan. Leave these fields blank if you do not require
    authentication.
 1. Save or optionally click 'Test Settings'. Please note that 'Test Settings'
-   will actually trigger a build in Bamboo.
+   actually triggers a build in Bamboo.
 
 ## Troubleshooting
+
+### Builds not triggered
 
 If builds are not triggered, ensure you entered the right GitLab IP address in
 Bamboo under 'Trigger IP addresses'. Also check [service hook logs](overview.md#troubleshooting-integrations) for request failures.
 
-NOTE: **Note:**
-Starting with GitLab 8.14.0, builds are triggered on push events.
+### Advanced Atlassian Bamboo features not available in GitLab UI
+
+Advanced Atlassian Bamboo features are not compatible with GitLab. These features
+include, but are not limited to, the ability to watch the build logs from the GitLab UI.

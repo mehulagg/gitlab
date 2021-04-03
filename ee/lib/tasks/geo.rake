@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 task spec: ['geo:db:test:prepare']
 
 namespace :geo do
-  GEO_LICENSE_ERROR_TEXT = 'GitLab Geo is not supported with this license. Please contact the sales team: https://about.gitlab.com/sales.'.freeze
+  GEO_LICENSE_ERROR_TEXT = 'GitLab Geo is not supported with this license. Please contact the sales team: https://about.gitlab.com/sales.'
 
   namespace :db do |ns|
     desc 'GitLab | Geo | DB | Drops the Geo tracking database from config/database_geo.yml for the current RAILS_ENV.'
@@ -48,18 +50,6 @@ namespace :geo do
       ns['abort_if_pending_migrations'].invoke
 
       Gitlab::Geo::DatabaseTasks.load_seed
-    end
-
-    desc 'GitLab | Geo | DB | Refresh Foreign Tables definition in Geo Secondary node'
-    task refresh_foreign_tables: [:environment] do
-      if Gitlab::Geo::GeoTasks.foreign_server_configured?
-        print "\nRefreshing foreign tables for FDW: #{Gitlab::Geo::Fdw::FOREIGN_SCHEMA} ... "
-        Gitlab::Geo::GeoTasks.refresh_foreign_tables!
-        puts 'Done!'
-      else
-        puts "Error: Cannot refresh foreign tables, there is no foreign server configured."
-        exit 1
-      end
     end
 
     # IMPORTANT: This task won't dump the schema if ActiveRecord::Base.dump_schema_after_migration is set to false
@@ -147,16 +137,6 @@ namespace :geo do
       task purge: [:environment] do
         Gitlab::Geo::DatabaseTasks::Test.purge
       end
-
-      desc 'GitLab | Geo | DB | Test | Refresh Foreign Tables definition for test environment'
-      task refresh_foreign_tables: [:environment] do
-        old_env = ActiveRecord::Tasks::DatabaseTasks.env
-        ActiveRecord::Tasks::DatabaseTasks.env = 'test'
-
-        ns['geo:db:refresh_foreign_tables'].invoke
-
-        ActiveRecord::Tasks::DatabaseTasks.env = old_env
-      end
     end
   end
 
@@ -212,23 +192,7 @@ namespace :geo do
   task set_secondary_as_primary: :environment do
     abort GEO_LICENSE_ERROR_TEXT unless Gitlab::Geo.license_allows?
 
-    ActiveRecord::Base.transaction do
-      primary_node = GeoNode.primary_node
-
-      unless primary_node
-        abort 'The primary is not set'
-      end
-
-      primary_node.destroy
-
-      current_node = GeoNode.current_node
-
-      unless current_node.secondary?
-        abort 'This is not a secondary node'
-      end
-
-      current_node.update!(primary: true)
-    end
+    Gitlab::Geo::GeoTasks.set_secondary_as_primary
   end
 
   desc 'GitLab | Geo | Update Geo primary node URL'

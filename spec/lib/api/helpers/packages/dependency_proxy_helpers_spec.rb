@@ -12,6 +12,10 @@ RSpec.describe API::Helpers::Packages::DependencyProxyHelpers do
 
     subject { helper.redirect_registry_request(forward_to_registry, package_type, options) { helper.fallback } }
 
+    before do
+      allow(helper).to receive(:options).and_return(for: API::NpmInstancePackages)
+    end
+
     shared_examples 'executing fallback' do
       it 'redirects to package registry' do
         expect(helper).to receive(:registry_url).never
@@ -23,12 +27,14 @@ RSpec.describe API::Helpers::Packages::DependencyProxyHelpers do
     end
 
     shared_examples 'executing redirect' do
-      it 'redirects to package registry' do
+      it 'redirects to package registry', :snowplow do
         expect(helper).to receive(:registry_url).once
         expect(helper).to receive(:redirect).once
         expect(helper).to receive(:fallback).never
 
         subject
+
+        expect_snowplow_event(category: 'API::NpmInstancePackages', action: 'npm_request_forward')
       end
     end
 

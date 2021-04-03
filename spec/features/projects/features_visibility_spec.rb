@@ -14,7 +14,7 @@ RSpec.describe 'Edit Project Settings' do
       sign_in(member)
     end
 
-    tools = { builds: "pipelines", issues: "issues", wiki: "wiki", snippets: "snippets", merge_requests: "merge_requests" }
+    tools = { builds: "pipelines", issues: "issues", wiki: "wiki", snippets: "snippets", merge_requests: "merge_requests", analytics: "analytics" }
 
     tools.each do |tool_name, shortcut_name|
       describe "feature #{tool_name}" do
@@ -150,6 +150,7 @@ RSpec.describe 'Edit Project Settings' do
       before do
         non_member.update_attribute(:admin, true)
         sign_in(non_member)
+        gitlab_enable_admin_mode_sign_in(non_member)
       end
 
       it 'renders 404 if feature is disabled' do
@@ -186,7 +187,7 @@ RSpec.describe 'Edit Project Settings' do
         click_button "Save changes"
       end
 
-      expect(find(".sharing-permissions")).to have_selector(".project-feature-toggle.is-disabled", count: 4)
+      expect(find(".sharing-permissions")).to have_selector(".gl-toggle.is-disabled", minimum: 4)
     end
 
     it "shows empty features project homepage" do
@@ -201,7 +202,7 @@ RSpec.describe 'Edit Project Settings' do
 
       visit project_path(project)
 
-      expect(page).to have_content "Customize your workflow!"
+      expect(page).to have_content "joined project"
     end
 
     it "hides project activity tabs" do
@@ -281,10 +282,10 @@ RSpec.describe 'Edit Project Settings' do
   end
 
   def toggle_feature_off(feature_name)
-    find(".project-feature-controls[data-for=\"#{feature_name}\"] .project-feature-toggle.is-checked").click
+    find(".project-feature-controls[data-for=\"#{feature_name}\"] .gl-toggle.is-checked").click
   end
 
   def toggle_feature_on(feature_name)
-    find(".project-feature-controls[data-for=\"#{feature_name}\"] .project-feature-toggle:not(.is-checked)").click
+    find(".project-feature-controls[data-for=\"#{feature_name}\"] .gl-toggle:not(.is-checked)").click
   end
 end

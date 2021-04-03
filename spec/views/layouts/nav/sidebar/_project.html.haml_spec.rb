@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'layouts/nav/sidebar/_project' do
-  let(:project) { create(:project, :repository) }
+  let_it_be_with_reload(:project) { create(:project, :repository) }
 
   before do
     assign(:project, project)
@@ -48,7 +48,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   end
 
   describe 'Packages' do
-    let(:user) { create(:user) }
+    let_it_be(:user) { create(:user) }
 
     let_it_be(:package_menu_name) { 'Packages & Registries' }
     let_it_be(:package_entry_name) { 'Package Registry' }
@@ -146,7 +146,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'shows the external wiki tab with the external wiki service link' do
         render
 
-        expect(rendered).to have_link('External Wiki', href: properties['external_wiki_url'])
+        expect(rendered).to have_link('External wiki', href: properties['external_wiki_url'])
       end
     end
 
@@ -156,7 +156,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'does not show the external wiki tab' do
         render
 
-        expect(rendered).not_to have_link('External Wiki')
+        expect(rendered).not_to have_link('External wiki')
       end
     end
   end
@@ -204,7 +204,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'does not show the ci/cd settings tab' do
         render
 
-        expect(rendered).not_to have_link('CI / CD', href: project_settings_ci_cd_path(project))
+        expect(rendered).not_to have_link('CI/CD', href: project_settings_ci_cd_path(project))
       end
     end
 
@@ -214,8 +214,24 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'shows the ci/cd settings tab' do
         render
 
-        expect(rendered).to have_link('CI / CD', href: project_settings_ci_cd_path(project))
+        expect(rendered).to have_link('CI/CD', href: project_settings_ci_cd_path(project))
       end
+    end
+  end
+
+  describe 'pipeline editor link' do
+    it 'shows the pipeline editor link' do
+      render
+
+      expect(rendered).to have_link('Editor', href: project_ci_pipeline_editor_path(project))
+    end
+
+    it 'does not show the pipeline editor link' do
+      allow(view).to receive(:can_view_pipeline_editor?).and_return(false)
+
+      render
+
+      expect(rendered).not_to have_link('Editor', href: project_ci_pipeline_editor_path(project))
     end
   end
 
@@ -242,6 +258,30 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
           render
 
           expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+        end
+      end
+    end
+
+    describe 'Tracing' do
+      it 'is not visible to unauthorized user' do
+        allow(view).to receive(:can?).and_return(false)
+
+        render
+
+        expect(rendered).not_to have_text 'Tracing'
+      end
+
+      it 'links to Tracing page' do
+        render
+
+        expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
+      end
+
+      context 'without project.tracing_external_url' do
+        it 'links to Tracing page' do
+          render
+
+          expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
         end
       end
     end
@@ -299,11 +339,13 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         allow(Gitlab).to receive(:com?).and_return(true)
       end
 
-      it 'does not display "Access Tokens" nav item' do
+      it 'displays "Access Tokens" nav item' do
         render
 
-        expect(rendered).not_to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
+        expect(rendered).to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
       end
     end
   end
+
+  it_behaves_like 'sidebar includes snowplow attributes', 'render', 'projects_side_navigation', 'projects_side_navigation'
 end

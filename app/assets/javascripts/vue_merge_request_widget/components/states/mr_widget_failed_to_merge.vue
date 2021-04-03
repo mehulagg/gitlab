@@ -1,13 +1,15 @@
 <script>
-import { n__ } from '~/locale';
+import { GlButton } from '@gitlab/ui';
 import { stripHtml } from '~/lib/utils/text_utility';
-import statusIcon from '../mr_widget_status_icon.vue';
+import { sprintf, s__, n__ } from '~/locale';
 import eventHub from '../../event_hub';
+import statusIcon from '../mr_widget_status_icon.vue';
 
 export default {
   name: 'MRWidgetFailedToMerge',
 
   components: {
+    GlButton,
     statusIcon,
   },
 
@@ -29,7 +31,15 @@ export default {
 
   computed: {
     mergeError() {
-      return this.mr.mergeError ? stripHtml(this.mr.mergeError, ' ').trim() : '';
+      const mergeError = this.mr.mergeError ? stripHtml(this.mr.mergeError, ' ').trim() : '';
+
+      return sprintf(
+        s__('mrWidget|%{mergeError}.'),
+        {
+          mergeError,
+        },
+        false,
+      );
     },
     timerText() {
       return n__(
@@ -84,14 +94,14 @@ export default {
           <span v-else> {{ s__('mrWidget|Merge failed.') }} </span>
           <span :class="{ 'has-custom-error': mr.mergeError }"> {{ timerText }} </span>
         </span>
-        <button
-          class="btn btn-default btn-sm js-refresh-button"
+        <gl-button
+          size="small"
+          data-testid="merge-request-failed-refresh-button"
           data-qa-selector="merge_request_error_content"
-          type="button"
           @click="refresh"
         >
           {{ s__('mrWidget|Refresh now') }}
-        </button>
+        </gl-button>
       </div>
     </template>
   </div>

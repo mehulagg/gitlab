@@ -50,7 +50,7 @@
   .event-user-info {
     margin-bottom: $gl-padding-4;
 
-    .author_name {
+    .author-name {
       a {
         color: $gl-text-color;
         font-weight: $gl-font-weight-bold;
@@ -94,7 +94,7 @@
         border: 0;
         background: $gray-light;
         border-radius: 0;
-        color: $gl-gray-500;
+        color: $gray-500;
         overflow: hidden;
       }
 
@@ -111,25 +111,10 @@
     }
 
     .event-note-icon {
-      color: $gl-gray-500;
+      color: $gray-500;
       float: left;
       font-size: $gl-font-size;
       margin-right: 5px;
-    }
-  }
-
-  .event_icon {
-    position: relative;
-    float: right;
-    border: 1px solid $gray-darker;
-    padding: 5px;
-    border-radius: 5px;
-    background: $gray-light;
-    margin-left: 10px;
-    top: -6px;
-
-    img {
-      width: 20px;
     }
   }
 
@@ -137,7 +122,7 @@
     border: 0;
   }
 
-  .event_commits {
+  .event-commits {
     li {
       &.commit {
         background: transparent;

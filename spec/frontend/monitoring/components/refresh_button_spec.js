@@ -1,8 +1,8 @@
+import { GlDropdown, GlDropdownItem, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Visibility from 'visibilityjs';
-import { createStore } from '~/monitoring/stores';
-import { GlNewDropdown, GlNewDropdownItem, GlButton } from '@gitlab/ui';
 import RefreshButton from '~/monitoring/components/refresh_button.vue';
+import { createStore } from '~/monitoring/stores';
 
 describe('RefreshButton', () => {
   let wrapper;
@@ -15,11 +15,11 @@ describe('RefreshButton', () => {
   };
 
   const findRefreshBtn = () => wrapper.find(GlButton);
-  const findDropdown = () => wrapper.find(GlNewDropdown);
-  const findOptions = () => findDropdown().findAll(GlNewDropdownItem);
-  const findOptionAt = index => findOptions().at(index);
+  const findDropdown = () => wrapper.find(GlDropdown);
+  const findOptions = () => findDropdown().findAll(GlDropdownItem);
+  const findOptionAt = (index) => findOptions().at(index);
 
-  const expectFetchDataToHaveBeenCalledTimes = times => {
+  const expectFetchDataToHaveBeenCalledTimes = (times) => {
     const refreshCalls = dispatch.mock.calls.filter(([action, payload]) => {
       return action === 'monitoringDashboard/fetchDashboardData' && payload === undefined;
     });

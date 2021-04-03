@@ -30,6 +30,7 @@ RSpec.describe Groups::UpdateService, '#execute' do
         let(:operation) do
           update_group(group, user, visibility_level: Gitlab::VisibilityLevel::PRIVATE)
         end
+
         let(:fail_condition!) do
           allow(group).to receive(:save).and_return(false)
         end

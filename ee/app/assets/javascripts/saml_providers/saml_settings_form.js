@@ -1,8 +1,9 @@
 import $ from 'jquery';
-import { __ } from '~/locale';
-import DirtyFormChecker from './dirty_form_checker';
-import setupToggleButtons from '~/toggle_buttons';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
+import setupToggleButtons from '~/toggle_buttons';
+import { fixTitle } from '~/tooltips';
+import DirtyFormChecker from './dirty_form_checker';
 
 const CALLOUT_SELECTOR = '.js-callout';
 const HELPER_SELECTOR = '.js-helper-text';
@@ -39,13 +40,18 @@ export default class SamlSettingsForm {
         dependsOn: 'enforced-sso',
       },
       {
+        name: 'enforced-git-activity-check',
+        el: this.form.querySelector('.js-group-saml-enforced-git-check-toggle-area'),
+        dependsOn: 'enforced-sso',
+      },
+      {
         name: 'prohibited-outer-forks',
         el: this.form.querySelector('.js-group-saml-prohibited-outer-forks-toggle-area'),
         dependsOn: 'enforced-group-managed-accounts',
       },
     ]
-      .filter(s => s.el)
-      .map(setting => ({
+      .filter((s) => s.el)
+      .map((setting) => ({
         ...setting,
         toggle: getToggle(setting.el),
         helperText: getHelperText(setting.el),
@@ -59,7 +65,7 @@ export default class SamlSettingsForm {
   }
 
   findSetting(name) {
-    return this.settings.find(s => s.name === name);
+    return this.settings.find((s) => s.name === name);
   }
 
   getValueWithDeps(name) {
@@ -91,7 +97,7 @@ export default class SamlSettingsForm {
   }
 
   updateSAMLSettings() {
-    this.settings = this.settings.map(setting => ({
+    this.settings = this.settings.map((setting) => ({
       ...setting,
       value: parseBoolean(setting.el.querySelector('input').value),
     }));
@@ -111,8 +117,8 @@ export default class SamlSettingsForm {
 
   updateToggles() {
     this.settings
-      .filter(setting => setting.dependsOn)
-      .forEach(setting => {
+      .filter((setting) => setting.dependsOn)
+      .forEach((setting) => {
         const { helperText, callout, toggle } = setting;
         const isRelatedToggleOn = this.getValueWithDeps(setting.dependsOn);
         if (helperText) {
@@ -139,6 +145,7 @@ export default class SamlSettingsForm {
 
     // Update tooltip using wrapper so it works when input disabled
     this.testButtonTooltipWrapper.setAttribute('title', this.testButtonTooltip());
-    $(this.testButtonTooltipWrapper).tooltip('_fixTitle');
+
+    fixTitle($(this.testButtonTooltipWrapper));
   }
 }

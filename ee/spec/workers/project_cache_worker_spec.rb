@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe ProjectCacheWorker do
+  let_it_be(:project) { create(:project, :repository) }
+
   let(:worker) { described_class.new }
-  let(:project) { create(:project, :repository) }
 
   describe '#perform' do
     context 'with an existing project' do
@@ -22,6 +23,10 @@ RSpec.describe ProjectCacheWorker do
           expect_any_instance_of(Project).not_to receive(:update_commit_count)
 
           worker.perform(project.id, %w(readme))
+        end
+
+        it 'is idempotent' do
+          expect { perform_multiple([project.id, %w(readme)]) }.not_to raise_error
         end
       end
     end

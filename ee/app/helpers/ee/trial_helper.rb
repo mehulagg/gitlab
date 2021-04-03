@@ -13,25 +13,35 @@ module EE
       ], selected)
     end
 
+    def should_ask_company_question?
+      glm_params[:glm_source] != 'about.gitlab.com'
+    end
+
+    def glm_params
+      strong_memoize(:glm_params) do
+        params.slice(:glm_source, :glm_content).to_unsafe_h
+      end
+    end
+
+    def trial_selection_intro_text
+      if any_trial_group_namespaces?
+        s_('Trials|You can apply your trial to a new group or an existing group.')
+      else
+        s_('Trials|Create a new group to start your GitLab Ultimate trial.')
+      end
+    end
+
+    def show_trial_namespace_select?
+      any_trial_group_namespaces?
+    end
+
     def namespace_options_for_select(selected = nil)
       grouped_options = {
         'New' => [[_('Create group'), 0]],
-        'Groups' => trial_groups,
-        'Users' => trial_users
+        'Groups' => trial_group_namespaces.map { |n| [n.name, n.id] }
       }
 
       grouped_options_for_select(grouped_options, selected, prompt: _('Please select'))
-    end
-
-    def trial_users
-      user_namespace = current_user.namespace
-      return [] if user_namespace.gitlab_subscription&.trial?
-
-      [[user_namespace.name, user_namespace.id]]
-    end
-
-    def trial_groups
-      current_user.manageable_groups_eligible_for_trial.map { |g| [g.name, g.id] }
     end
 
     def show_trial_errors?(namespace, service_result)
@@ -40,6 +50,18 @@ module EE
 
     def trial_errors(namespace, service_result)
       namespace&.errors&.full_messages&.to_sentence&.presence || service_result&.dig(:errors)&.presence
+    end
+
+    private
+
+    def trial_group_namespaces
+      strong_memoize(:trial_group_namespaces) do
+        current_user.manageable_groups_eligible_for_trial
+      end
+    end
+
+    def any_trial_group_namespaces?
+      trial_group_namespaces.any?
     end
   end
 end

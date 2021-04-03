@@ -32,6 +32,8 @@ class CommitStatus < ApplicationRecord
     where(allow_failure: true, status: [:failed, :canceled])
   end
 
+  scope :order_id_desc, -> { order('ci_builds.id DESC') }
+
   scope :exclude_ignored, -> do
     # We want to ignore failed but allowed to fail jobs.
     #
@@ -46,12 +48,15 @@ class CommitStatus < ApplicationRecord
   scope :ordered_by_stage, -> { order(stage_idx: :asc) }
   scope :latest_ordered, -> { latest.ordered.includes(project: :namespace) }
   scope :retried_ordered, -> { retried.ordered.includes(project: :namespace) }
+  scope :ordered_by_pipeline, -> { order(pipeline_id: :asc) }
   scope :before_stage, -> (index) { where('stage_idx < ?', index) }
   scope :for_stage, -> (index) { where(stage_idx: index) }
   scope :after_stage, -> (index) { where('stage_idx > ?', index) }
-  scope :for_ids, -> (ids) { where(id: ids) }
   scope :for_ref, -> (ref) { where(ref: ref) }
   scope :by_name, -> (name) { where(name: name) }
+  scope :in_pipelines, ->(pipelines) { where(pipeline: pipelines) }
+  scope :eager_load_pipeline, -> { eager_load(:pipeline, project: { namespace: :route }) }
+  scope :with_pipeline, -> { joins(:pipeline) }
 
   scope :for_project_paths, -> (paths) do
     where(project: Project.where_full_path_in(Array(paths)))
@@ -77,9 +82,11 @@ class CommitStatus < ApplicationRecord
     merge(or_conditions)
   end
 
-  # We use `CommitStatusEnums.failure_reasons` here so that EE can more easily
+  # We use `Enums::Ci::CommitStatus.failure_reasons` here so that EE can more easily
   # extend this `Hash` with new values.
-  enum_with_nil failure_reason: ::CommitStatusEnums.failure_reasons
+  enum_with_nil failure_reason: Enums::Ci::CommitStatus.failure_reasons
+
+  default_value_for :retried, false
 
   ##
   # We still create some CommitStatuses outside of CreatePipelineService.
@@ -100,9 +107,7 @@ class CommitStatus < ApplicationRecord
     # will not be refreshed to pick the change
     self.processed_will_change!
 
-    if !::Gitlab::Ci::Features.atomic_processing?(project)
-      self.processed = nil
-    elsif latest?
+    if latest?
       self.processed = false # force refresh of all dependent ones
     elsif retried?
       self.processed = true # retried are considered to be already processed
@@ -158,19 +163,25 @@ class CommitStatus < ApplicationRecord
       commit_status.failure_reason = CommitStatus.failure_reasons[failure_reason]
     end
 
+    before_transition [:skipped, :manual] => :created do |commit_status, transition|
+      transition.args.first.try do |user|
+        commit_status.user = user
+      end
+    end
+
     after_transition do |commit_status, transition|
       next if transition.loopback?
       next if commit_status.processed?
       next unless commit_status.project
 
       commit_status.run_after_commit do
-        schedule_stage_and_pipeline_update
-
+        PipelineProcessWorker.perform_async(pipeline_id)
         ExpireJobCacheWorker.perform_async(id)
       end
     end
 
     after_transition any => :failed do |commit_status|
+      next if Feature.enabled?(:async_add_build_failure_todo, commit_status.project, default_enabled: :yaml)
       next unless commit_status.project
 
       # rubocop: disable CodeReuse/ServiceClass
@@ -184,14 +195,6 @@ class CommitStatus < ApplicationRecord
 
   def self.names
     select(:name)
-  end
-
-  def self.status_for_prior_stages(index, project:)
-    before_stage(index).latest.slow_composite_status(project: project) || 'success'
-  end
-
-  def self.status_for_names(names, project:)
-    where(name: names).latest.slow_composite_status(project: project) || 'success'
   end
 
   def self.update_as_processed!
@@ -210,7 +213,7 @@ class CommitStatus < ApplicationRecord
   end
 
   def group_name
-    name.to_s.gsub(%r{\d+[\s:/\\]+\d+\s*}, '').strip
+    name.to_s.sub(%r{([\b\s:]+((\[.*\])|(\d+[\s:\/\\]+\d+)))+\s*\z}, '').strip
   end
 
   def failed_but_allowed?
@@ -250,15 +253,7 @@ class CommitStatus < ApplicationRecord
   end
 
   def all_met_to_become_pending?
-    !any_unmet_prerequisites? && !requires_resource?
-  end
-
-  def any_unmet_prerequisites?
-    false
-  end
-
-  def requires_resource?
-    false
+    true
   end
 
   def auto_canceled?
@@ -281,25 +276,19 @@ class CommitStatus < ApplicationRecord
     failed? && !unrecoverable_failure?
   end
 
+  def update_older_statuses_retried!
+    pipeline
+      .statuses
+      .latest
+      .where(name: name)
+      .where.not(id: id)
+      .update_all(retried: true, processed: true)
+  end
+
   private
 
   def unrecoverable_failure?
     script_failure? || missing_dependency_failure? || archived_failure? || scheduler_failure? || data_integrity_failure?
-  end
-
-  def schedule_stage_and_pipeline_update
-    if ::Gitlab::Ci::Features.atomic_processing?(project)
-      # Atomic Processing requires only single Worker
-      PipelineProcessWorker.perform_async(pipeline_id, [id])
-    else
-      if complete? || manual?
-        PipelineProcessWorker.perform_async(pipeline_id, [id])
-      else
-        PipelineUpdateWorker.perform_async(pipeline_id)
-      end
-
-      StageUpdateWorker.perform_async(stage_id)
-    end
   end
 end
 

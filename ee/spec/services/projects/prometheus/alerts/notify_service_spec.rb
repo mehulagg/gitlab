@@ -7,7 +7,7 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
 
   let_it_be(:project, reload: true) { create(:project) }
 
-  let(:service) { described_class.new(project, nil, payload) }
+  let(:service) { described_class.new(project, payload) }
   let(:token_input) { 'token' }
 
   let!(:setting) do
@@ -15,43 +15,6 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
   end
 
   let(:subject) { service.execute(token_input) }
-
-  before do
-    # We use `let_it_be(:project)` so we make sure to clear caches
-    project.clear_memoization(:licensed_feature_available)
-  end
-
-  shared_examples 'sends notification email' do
-    let(:notification_service) { spy }
-
-    it 'sends a notification for firing alerts only' do
-      expect(NotificationService)
-        .to receive(:new)
-        .and_return(notification_service)
-
-      expect(notification_service)
-        .to receive_message_chain(:async, :prometheus_alerts_fired)
-
-      expect(subject).to be_success
-    end
-  end
-
-  shared_examples 'notifies alerts' do
-    it_behaves_like 'sends notification email'
-  end
-
-  shared_examples 'no notifications' do |http_status:|
-    let(:notification_service) { spy }
-    let(:create_events_service) { spy }
-
-    it 'does not notify' do
-      expect(notification_service).not_to receive(:async)
-      expect(create_events_service).not_to receive(:execute)
-
-      expect(subject).to be_error
-      expect(subject.http_status).to eq(http_status)
-    end
-  end
 
   context 'with valid payload' do
     let(:alert_firing) { create(:prometheus_alert, project: project) }
@@ -65,6 +28,7 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
       let(:prd_cluster) do
         create(:cluster, :provided_by_user, projects: [project], enabled: true, environment_scope: '*')
       end
+
       let(:stg_cluster) do
         create(:cluster, :provided_by_user, projects: [project], enabled: true, environment_scope: 'stg/*')
       end
@@ -87,11 +51,11 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
       context 'without token' do
         let(:token_input) { nil }
 
-        it_behaves_like 'notifies alerts'
+        it_behaves_like 'Alert Notification Service sends notification email'
       end
 
       context 'with token' do
-        it_behaves_like 'no notifications', http_status: :unauthorized
+        it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
       end
     end
   end

@@ -27,12 +27,16 @@ module Ci
     # rubocop:enable Cop/ActiveRecordSerialize
 
     state_machine :status do
-      after_transition created: :pending do |bridge|
+      after_transition [:created, :manual, :waiting_for_resource] => :pending do |bridge|
         next unless bridge.downstream_project
 
         bridge.run_after_commit do
           bridge.schedule_downstream_pipeline!
         end
+      end
+
+      event :pending do
+        transition all => :pending
       end
 
       event :manual do
@@ -42,10 +46,22 @@ module Ci
       event :scheduled do
         transition all => :scheduled
       end
+
+      event :actionize do
+        transition created: :manual
+      end
     end
 
     def self.retry(bridge, current_user)
       raise NotImplementedError
+    end
+
+    def self.with_preloads
+      preload(
+        :metadata,
+        downstream_pipeline: [project: [:route, { namespace: :route }]],
+        project: [:namespace]
+      )
     end
 
     def schedule_downstream_pipeline!
@@ -114,15 +130,33 @@ module Ci
       false
     end
 
-    def action?
-      false
+    def playable?
+      action? && !archived? && manual?
     end
+
+    def action?
+      %w[manual].include?(self.when)
+    end
+
+    # rubocop: disable CodeReuse/ServiceClass
+    # We don't need it but we are taking `job_variables_attributes` parameter
+    # to make it consistent with `Ci::Build#play` method.
+    def play(current_user, job_variables_attributes = nil)
+      Ci::PlayBridgeService
+        .new(project, current_user)
+        .execute(self)
+    end
+    # rubocop: enable CodeReuse/ServiceClass
 
     def artifacts?
       false
     end
 
     def runnable?
+      false
+    end
+
+    def any_unmet_prerequisites?
       false
     end
 
@@ -169,8 +203,8 @@ module Ci
       end
     end
 
-    def dependency_variables
-      []
+    def target_revision_ref
+      downstream_pipeline_params.dig(:target_revision, :ref)
     end
 
     private
@@ -180,7 +214,8 @@ module Ci
         project: downstream_project,
         source: :pipeline,
         target_revision: {
-          ref: target_ref || downstream_project.default_branch
+          ref: target_ref || downstream_project.default_branch,
+          variables_attributes: downstream_variables
         },
         execute_params: {
           ignore_skip_ci: true,
@@ -200,7 +235,8 @@ module Ci
           checkout_sha: parent_pipeline.sha,
           before: parent_pipeline.before_sha,
           source_sha: parent_pipeline.source_sha,
-          target_sha: parent_pipeline.target_sha
+          target_sha: parent_pipeline.target_sha,
+          variables_attributes: downstream_variables
         },
         execute_params: {
           ignore_skip_ci: true,

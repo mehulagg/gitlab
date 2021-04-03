@@ -2,14 +2,9 @@
 
 require 'fast_spec_helper'
 
-require 'rubocop'
-require 'rubocop/rspec/support'
-
 require_relative '../../../../rubocop/cop/qa/ambiguous_page_object_name'
 
-RSpec.describe RuboCop::Cop::QA::AmbiguousPageObjectName, type: :rubocop do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::QA::AmbiguousPageObjectName do
   let(:source_file) { 'qa/page.rb' }
 
   subject(:cop) { described_class.new }

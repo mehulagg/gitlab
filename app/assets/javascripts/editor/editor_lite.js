@@ -1,96 +1,263 @@
-import { editor as monacoEditor, languages as monacoLanguages, Position, Uri } from 'monaco-editor';
-import { DEFAULT_THEME, themes } from '~/ide/lib/themes';
-import languages from '~/ide/lib/languages';
+import { editor as monacoEditor, languages as monacoLanguages, Uri } from 'monaco-editor';
+import { uuids } from '~/diffs/utils/uuids';
 import { defaultEditorOptions } from '~/ide/lib/editor_options';
+import languages from '~/ide/lib/languages';
+import { DEFAULT_THEME, themes } from '~/ide/lib/themes';
 import { registerLanguages } from '~/ide/utils';
+import { joinPaths } from '~/lib/utils/url_utility';
+import {
+  EDITOR_LITE_INSTANCE_ERROR_NO_EL,
+  URI_PREFIX,
+  EDITOR_READY_EVENT,
+  EDITOR_TYPE_DIFF,
+} from './constants';
 import { clearDomElement } from './utils';
 
-export default class Editor {
+export default class EditorLite {
   constructor(options = {}) {
-    this.editorEl = null;
-    this.blobContent = '';
-    this.blobPath = '';
-    this.instance = null;
-    this.model = null;
+    this.instances = [];
     this.options = {
       extraEditorClassName: 'gl-editor-lite',
       ...defaultEditorOptions,
       ...options,
     };
 
-    Editor.setupMonacoTheme();
+    EditorLite.setupMonacoTheme();
 
     registerLanguages(...languages);
   }
 
   static setupMonacoTheme() {
     const themeName = window.gon?.user_color_scheme || DEFAULT_THEME;
-    const theme = themes.find(t => t.name === themeName);
+    const theme = themes.find((t) => t.name === themeName);
     if (theme) monacoEditor.defineTheme(themeName, theme.data);
     monacoEditor.setTheme(theme ? themeName : DEFAULT_THEME);
   }
 
-  createInstance({ el = undefined, blobPath = '', blobContent = '' } = {}) {
-    if (!el) return;
-    this.editorEl = el;
-    this.blobContent = blobContent;
-    this.blobPath = blobPath;
-
-    clearDomElement(this.editorEl);
-
-    this.model = monacoEditor.createModel(
-      this.blobContent,
-      undefined,
-      new Uri('gitlab', false, this.blobPath),
-    );
-
-    monacoEditor.onDidCreateEditor(this.renderEditor.bind(this));
-
-    this.instance = monacoEditor.create(this.editorEl, this.options);
-    this.instance.setModel(this.model);
-  }
-
-  dispose() {
-    return this.instance && this.instance.dispose();
-  }
-
-  renderEditor() {
-    delete this.editorEl.dataset.editorLoading;
-  }
-
-  updateModelLanguage(path) {
-    if (path === this.blobPath) return;
-    this.blobPath = path;
+  static getModelLanguage(path) {
     const ext = `.${path.split('.').pop()}`;
     const language = monacoLanguages
       .getLanguages()
-      .find(lang => lang.extensions.indexOf(ext) !== -1);
-    const id = language ? language.id : 'plaintext';
-    monacoEditor.setModelLanguage(this.model, id);
+      .find((lang) => lang.extensions.indexOf(ext) !== -1);
+    return language ? language.id : 'plaintext';
   }
 
-  getValue() {
-    return this.instance.getValue();
+  static pushToImportsArray(arr, toImport) {
+    arr.push(import(toImport));
   }
 
-  setValue(val) {
-    this.instance.setValue(val);
+  static loadExtensions(extensions) {
+    if (!extensions) {
+      return Promise.resolve();
+    }
+    const promises = [];
+    const extensionsArray = typeof extensions === 'string' ? extensions.split(',') : extensions;
+
+    extensionsArray.forEach((ext) => {
+      const prefix = ext.includes('/') ? '' : 'editor/';
+      const trimmedExt = ext.replace(/^\//, '').trim();
+      EditorLite.pushToImportsArray(promises, `~/${prefix}${trimmedExt}`);
+    });
+
+    return Promise.all(promises);
   }
 
-  focus() {
-    this.instance.focus();
+  static mixIntoInstance(source, inst) {
+    if (!inst) {
+      return;
+    }
+    const isClassInstance = source.constructor.prototype !== Object.prototype;
+    const sanitizedSource = isClassInstance ? source.constructor.prototype : source;
+    Object.getOwnPropertyNames(sanitizedSource).forEach((prop) => {
+      if (prop !== 'constructor') {
+        Object.assign(inst, { [prop]: source[prop] });
+      }
+    });
   }
 
-  navigateFileStart() {
-    this.instance.setPosition(new Position(1, 1));
+  static prepareInstance(el) {
+    if (!el) {
+      throw new Error(EDITOR_LITE_INSTANCE_ERROR_NO_EL);
+    }
+
+    clearDomElement(el);
+
+    monacoEditor.onDidCreateEditor(() => {
+      delete el.dataset.editorLoading;
+    });
   }
 
-  updateOptions(options = {}) {
-    this.instance.updateOptions(options);
+  static manageDefaultExtensions(instance, el, extensions) {
+    EditorLite.loadExtensions(extensions, instance)
+      .then((modules) => {
+        if (modules) {
+          modules.forEach((module) => {
+            instance.use(module.default);
+          });
+        }
+      })
+      .then(() => {
+        el.dispatchEvent(new Event(EDITOR_READY_EVENT));
+      })
+      .catch((e) => {
+        throw e;
+      });
   }
 
-  use(exts = []) {
-    const extensions = Array.isArray(exts) ? exts : [exts];
-    Object.assign(this, ...extensions);
+  static createEditorModel({
+    blobPath,
+    blobContent,
+    blobOriginalContent,
+    blobGlobalId,
+    instance,
+    isDiff,
+  } = {}) {
+    if (!instance) {
+      return null;
+    }
+    const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
+    const uri = Uri.file(uriFilePath);
+    const existingModel = monacoEditor.getModel(uri);
+    const model = existingModel || monacoEditor.createModel(blobContent, undefined, uri);
+    if (!isDiff) {
+      instance.setModel(model);
+      return model;
+    }
+    const diffModel = {
+      original: monacoEditor.createModel(
+        blobOriginalContent,
+        EditorLite.getModelLanguage(model.uri.path),
+      ),
+      modified: model,
+    };
+    instance.setModel(diffModel);
+    return diffModel;
+  }
+
+  static convertMonacoToELInstance = (inst) => {
+    const editorLiteInstanceAPI = {
+      updateModelLanguage: (path) => {
+        return EditorLite.instanceUpdateLanguage(inst, path);
+      },
+      use: (exts = []) => {
+        return EditorLite.instanceApplyExtension(inst, exts);
+      },
+    };
+    const handler = {
+      get(target, prop, receiver) {
+        if (Reflect.has(editorLiteInstanceAPI, prop)) {
+          return editorLiteInstanceAPI[prop];
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+    };
+    return new Proxy(inst, handler);
+  };
+
+  static instanceUpdateLanguage(inst, path) {
+    const lang = EditorLite.getModelLanguage(path);
+    const model = inst.getModel();
+    return monacoEditor.setModelLanguage(model, lang);
+  }
+
+  static instanceApplyExtension(inst, exts = []) {
+    const extensions = [].concat(exts);
+    extensions.forEach((extension) => {
+      EditorLite.mixIntoInstance(extension, inst);
+    });
+    return inst;
+  }
+
+  static instanceRemoveFromRegistry(editor, instance) {
+    const index = editor.instances.findIndex((inst) => inst === instance);
+    editor.instances.splice(index, 1);
+  }
+
+  static instanceDisposeModels(editor, instance, model) {
+    const instanceModel = instance.getModel() || model;
+    if (!instanceModel) {
+      return;
+    }
+    if (instance.getEditorType() === EDITOR_TYPE_DIFF) {
+      const { original, modified } = instanceModel;
+      if (original) {
+        original.dispose();
+      }
+      if (modified) {
+        modified.dispose();
+      }
+    } else {
+      instanceModel.dispose();
+    }
+  }
+
+  /**
+   * Creates a monaco instance with the given options.
+   *
+   * @param {Object} options Options used to initialize monaco.
+   * @param {Element} options.el The element which will be used to create the monacoEditor.
+   * @param {string} options.blobPath The path used as the URI of the model. Monaco uses the extension of this path to determine the language.
+   * @param {string} options.blobContent The content to initialize the monacoEditor.
+   * @param {string} options.blobGlobalId This is used to help globally identify monaco instances that are created with the same blobPath.
+   */
+  createInstance({
+    el = undefined,
+    blobPath = '',
+    blobContent = '',
+    blobOriginalContent = '',
+    blobGlobalId = uuids()[0],
+    extensions = [],
+    isDiff = false,
+    ...instanceOptions
+  } = {}) {
+    EditorLite.prepareInstance(el);
+
+    const createEditorFn = isDiff ? 'createDiffEditor' : 'create';
+    const instance = EditorLite.convertMonacoToELInstance(
+      monacoEditor[createEditorFn].call(this, el, {
+        ...this.options,
+        ...instanceOptions,
+      }),
+    );
+
+    let model;
+    if (instanceOptions.model !== null) {
+      model = EditorLite.createEditorModel({
+        blobGlobalId,
+        blobOriginalContent,
+        blobPath,
+        blobContent,
+        instance,
+        isDiff,
+      });
+    }
+
+    instance.onDidDispose(() => {
+      EditorLite.instanceRemoveFromRegistry(this, instance);
+      EditorLite.instanceDisposeModels(this, instance, model);
+    });
+
+    EditorLite.manageDefaultExtensions(instance, el, extensions);
+
+    this.instances.push(instance);
+    return instance;
+  }
+
+  createDiffInstance(args) {
+    return this.createInstance({
+      ...args,
+      isDiff: true,
+    });
+  }
+
+  dispose() {
+    this.instances.forEach((instance) => instance.dispose());
+  }
+
+  use(exts) {
+    this.instances.forEach((inst) => {
+      inst.use(exts);
+    });
+    return this;
   }
 }

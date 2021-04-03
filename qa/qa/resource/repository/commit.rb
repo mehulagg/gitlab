@@ -9,7 +9,8 @@ module QA
                       :branch,
                       :commit_message,
                       :file_path,
-                      :sha
+                      :sha,
+                      :start_branch
 
         attribute :short_id
 
@@ -59,14 +60,19 @@ module QA
           @update_files = files
         end
 
-        def resource_web_url(resource)
+        # If `actions` are specified, it performs the actions to create,
+        # update, or delete commits. If no actions are specified it
+        # gets existing commits.
+        def fabricate_via_api!
+          return api_get if actions.empty?
+
           super
-        rescue ResourceURLMissingError
-          # this particular resource does not expose a web_url property
+        rescue ResourceNotFoundError
+          super
         end
 
         def api_get_path
-          "#{api_post_path}/#{@sha}"
+          api_post_path
         end
 
         def api_post_path
@@ -75,12 +81,12 @@ module QA
 
         def api_post_body
           {
-            branch: @branch || "master",
+            branch: @branch || project.default_branch,
             author_email: @author_email || Runtime::User.default_email,
             author_name: @author_name || Runtime::User.username,
             commit_message: commit_message,
             actions: actions
-          }
+          }.merge(new_branch)
         end
 
         def actions
@@ -98,6 +104,14 @@ module QA
               files.any? { |file| !file.has_key?(:file_path) || !file.has_key?(:content) }
             raise ArgumentError, "Please provide an array of hashes e.g.: [{file_path: 'file1', content: 'foo'}]"
           end
+        end
+
+        def new_branch
+          return {} unless start_branch
+
+          {
+            start_branch: start_branch
+          }
         end
       end
     end

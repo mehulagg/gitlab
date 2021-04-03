@@ -1,7 +1,7 @@
 import Vue from 'vue';
+import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import IdeTreeList from '~/ide/components/ide_tree_list.vue';
 import { createStore } from '~/ide/stores';
-import { createComponentWithStore } from '../../helpers/vue_mount_component_helper';
 import { file } from '../helpers';
 import { projectData } from '../mock_data';
 
@@ -38,16 +38,10 @@ describe('IDE tree list', () => {
     beforeEach(() => {
       bootstrapWithTree();
 
-      jest.spyOn(vm, 'updateViewer');
-
       vm.$mount();
     });
 
-    it('updates viewer on mount', () => {
-      expect(vm.updateViewer).toHaveBeenCalledWith('edit');
-    });
-
-    it('renders loading indicator', done => {
+    it('renders loading indicator', (done) => {
       store.state.trees['abcproject/master'].loading = true;
 
       vm.$nextTick(() => {
@@ -66,8 +60,6 @@ describe('IDE tree list', () => {
   describe('empty-branch state', () => {
     beforeEach(() => {
       bootstrapWithTree(emptyBranchTree);
-
-      jest.spyOn(vm, 'updateViewer');
 
       vm.$mount();
     });

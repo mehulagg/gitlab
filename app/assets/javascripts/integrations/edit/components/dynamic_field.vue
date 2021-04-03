@@ -1,9 +1,9 @@
 <script>
+/* eslint-disable vue/no-v-html */
+import { GlFormGroup, GlFormCheckbox, GlFormInput, GlFormSelect, GlFormTextarea } from '@gitlab/ui';
+import { capitalize, lowerCase, isEmpty } from 'lodash';
 import { mapGetters } from 'vuex';
 import eventHub from '../event_hub';
-import { capitalize, lowerCase, isEmpty } from 'lodash';
-import { __, sprintf } from '~/locale';
-import { GlFormGroup, GlFormCheckbox, GlFormInput, GlFormSelect, GlFormTextarea } from '@gitlab/ui';
 
 export default {
   name: 'DynamicField',
@@ -76,14 +76,6 @@ export default {
     isNonEmptyPassword() {
       return this.isPassword && !isEmpty(this.value);
     },
-    label() {
-      if (this.isNonEmptyPassword) {
-        return sprintf(__('Enter new %{field_title}'), {
-          field_title: this.humanizedTitle,
-        });
-      }
-      return this.humanizedTitle;
-    },
     humanizedTitle() {
       return this.title || capitalize(lowerCase(this.name));
     },
@@ -91,7 +83,7 @@ export default {
       return isEmpty(this.value) && this.required;
     },
     options() {
-      return this.choices.map(choice => {
+      return this.choices.map((choice) => {
         return {
           value: choice[1],
           text: choice[0],
@@ -135,7 +127,7 @@ export default {
 
 <template>
   <gl-form-group
-    :label="label"
+    :label="humanizedTitle"
     :label-for="fieldId"
     :invalid-feedback="__('This field is required.')"
     :state="valid"

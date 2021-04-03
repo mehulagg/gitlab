@@ -67,6 +67,15 @@ RSpec.describe Issues::CloseService do
 
       service.execute(issue)
     end
+
+    context 'issue is incident type' do
+      let(:issue) { create(:incident, project: project) }
+      let(:current_user) { user }
+
+      subject { service.execute(issue) }
+
+      it_behaves_like 'an incident management tracked event', :incident_management_incident_closed
+    end
   end
 
   describe '#close_issue' do
@@ -75,6 +84,7 @@ RSpec.describe Issues::CloseService do
         let!(:external_issue_tracker) { create(:jira_service, project: project) }
 
         it 'closes the issue on the external issue tracker' do
+          project.reload
           expect(project.external_issue_tracker).to receive(:close_issue)
 
           described_class.new(project, user).close_issue(external_issue)
@@ -85,6 +95,7 @@ RSpec.describe Issues::CloseService do
         let!(:external_issue_tracker) { create(:jira_service, project: project, active: false) }
 
         it 'does not close the issue on the external issue tracker' do
+          project.reload
           expect(project.external_issue_tracker).not_to receive(:close_issue)
 
           described_class.new(project, user).close_issue(external_issue)
@@ -95,6 +106,7 @@ RSpec.describe Issues::CloseService do
         let!(:external_issue_tracker) { create(:bugzilla_service, project: project) }
 
         it 'does not close the issue on the external issue tracker' do
+          project.reload
           expect(project.external_issue_tracker).not_to receive(:close_issue)
 
           described_class.new(project, user).close_issue(external_issue)
@@ -103,10 +115,14 @@ RSpec.describe Issues::CloseService do
     end
 
     context "closed by a merge request", :sidekiq_might_not_need_inline do
-      it 'mentions closure via a merge request' do
+      subject(:close_issue) do
         perform_enqueued_jobs do
           described_class.new(project, user).close_issue(issue, closed_via: closing_merge_request)
         end
+      end
+
+      it 'mentions closure via a merge request' do
+        close_issue
 
         email = ActionMailer::Base.deliveries.last
 
@@ -115,12 +131,15 @@ RSpec.describe Issues::CloseService do
         expect(email.body.parts.map(&:body)).to all(include(closing_merge_request.to_reference))
       end
 
+      it_behaves_like 'records an onboarding progress action', :issue_auto_closed do
+        let(:namespace) { project.namespace }
+      end
+
       context 'when user cannot read merge request' do
         it 'does not mention merge request' do
           project.project_feature.update_attribute(:repository_access_level, ProjectFeature::DISABLED)
-          perform_enqueued_jobs do
-            described_class.new(project, user).close_issue(issue, closed_via: closing_merge_request)
-          end
+
+          close_issue
 
           email = ActionMailer::Base.deliveries.last
           body_text = email.body.parts.map(&:body).join(" ")
@@ -132,13 +151,11 @@ RSpec.describe Issues::CloseService do
       end
 
       context 'updating `metrics.first_mentioned_in_commit_at`' do
-        subject { described_class.new(project, user).close_issue(issue, closed_via: closing_merge_request) }
-
         context 'when `metrics.first_mentioned_in_commit_at` is not set' do
           it 'uses the first commit authored timestamp' do
             expected = closing_merge_request.commits.first.authored_date
 
-            subject
+            close_issue
 
             expect(issue.metrics.first_mentioned_in_commit_at).to eq(expected)
           end
@@ -150,7 +167,7 @@ RSpec.describe Issues::CloseService do
           end
 
           it 'does not update the metrics' do
-            expect { subject }.not_to change { issue.metrics.first_mentioned_in_commit_at }
+            expect { close_issue }.not_to change { issue.metrics.first_mentioned_in_commit_at }
           end
         end
 
@@ -158,7 +175,7 @@ RSpec.describe Issues::CloseService do
           let(:closing_merge_request) { create(:merge_request, :without_diffs, source_project: project) }
 
           it 'does not update the metrics' do
-            subject
+            close_issue
 
             expect(issue.metrics.first_mentioned_in_commit_at).to be_nil
           end
@@ -197,7 +214,7 @@ RSpec.describe Issues::CloseService do
     end
 
     context "valid params" do
-      def close_issue
+      subject(:close_issue) do
         perform_enqueued_jobs do
           described_class.new(project, user).close_issue(issue)
         end
@@ -224,26 +241,11 @@ RSpec.describe Issues::CloseService do
         expect(email.subject).to include(issue.title)
       end
 
-      context 'when resource state events are disabled' do
-        before do
-          stub_feature_flags(track_resource_state_change_events: false)
-        end
+      it 'creates resource state event about the issue being closed' do
+        close_issue
 
-        it 'creates system note about the issue being closed' do
-          close_issue
-
-          note = issue.notes.last
-          expect(note.note).to include "closed"
-        end
-      end
-
-      context 'when resource state events are enabled' do
-        it 'creates resource state event about the issue being closed' do
-          close_issue
-
-          event = issue.resource_state_events.last
-          expect(event.state).to eq('closed')
-        end
+        event = issue.resource_state_events.last
+        expect(event.state).to eq('closed')
       end
 
       it 'marks todos as done' do
@@ -288,7 +290,7 @@ RSpec.describe Issues::CloseService do
       end
 
       it 'deletes milestone issue counters cache' do
-        issue.update(milestone: create(:milestone, project: project))
+        issue.update!(milestone: create(:milestone, project: project))
 
         expect_next_instance_of(Milestones::ClosedIssuesCountService, issue.milestone) do |service|
           expect(service).to receive(:delete_cache).and_call_original
@@ -296,6 +298,8 @@ RSpec.describe Issues::CloseService do
 
         close_issue
       end
+
+      it_behaves_like 'does not record an onboarding progress action'
     end
 
     context 'when issue is not confidential' do

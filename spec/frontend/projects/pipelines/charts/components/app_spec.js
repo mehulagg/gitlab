@@ -1,29 +1,39 @@
+import { GlTabs, GlTab } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { merge } from 'lodash';
+import setWindowLocation from 'helpers/set_window_location_helper';
+import { TEST_HOST } from 'helpers/test_constants';
+import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import Component from '~/projects/pipelines/charts/components/app.vue';
-import StatisticsList from '~/projects/pipelines/charts/components/statistics_list.vue';
-import PipelinesAreaChart from '~/projects/pipelines/charts/components/pipelines_area_chart.vue';
-import {
-  counts,
-  timesChartData,
-  areaChartData as lastWeekChartData,
-  areaChartData as lastMonthChartData,
-  lastYearChartData,
-} from '../mock_data';
+import PipelineCharts from '~/projects/pipelines/charts/components/pipeline_charts.vue';
+
+jest.mock('~/lib/utils/url_utility');
+
+const DeploymentFrequencyChartsStub = { name: 'DeploymentFrequencyCharts', render: () => {} };
 
 describe('ProjectsPipelinesChartsApp', () => {
   let wrapper;
 
+  function createComponent(mountOptions = {}) {
+    wrapper = shallowMount(
+      Component,
+      merge(
+        {},
+        {
+          provide: {
+            shouldRenderDeploymentFrequencyCharts: false,
+          },
+          stubs: {
+            DeploymentFrequencyCharts: DeploymentFrequencyChartsStub,
+          },
+        },
+        mountOptions,
+      ),
+    );
+  }
+
   beforeEach(() => {
-    wrapper = shallowMount(Component, {
-      propsData: {
-        counts,
-        timesChartData,
-        lastWeekChartData,
-        lastMonthChartData,
-        lastYearChartData,
-      },
-    });
+    createComponent();
   });
 
   afterEach(() => {
@@ -31,42 +41,128 @@ describe('ProjectsPipelinesChartsApp', () => {
     wrapper = null;
   });
 
-  describe('overall statistics', () => {
-    it('displays the statistics list', () => {
-      const list = wrapper.find(StatisticsList);
+  const findGlTabs = () => wrapper.find(GlTabs);
+  const findAllGlTab = () => wrapper.findAll(GlTab);
+  const findGlTabAt = (i) => findAllGlTab().at(i);
+  const findDeploymentFrequencyCharts = () => wrapper.find(DeploymentFrequencyChartsStub);
+  const findPipelineCharts = () => wrapper.find(PipelineCharts);
 
-      expect(list.exists()).toBeTruthy();
-      expect(list.props('counts')).toBe(counts);
+  it('renders the pipeline charts', () => {
+    expect(findPipelineCharts().exists()).toBe(true);
+  });
+
+  describe('when shouldRenderDeploymentFrequencyCharts is true', () => {
+    beforeEach(() => {
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: true } });
     });
 
-    it('displays the commit duration chart', () => {
-      const chart = wrapper.find(GlColumnChart);
+    it('renders the deployment frequency charts in a tab', () => {
+      expect(findGlTabs().exists()).toBe(true);
+      expect(findGlTabAt(0).attributes('title')).toBe('Pipelines');
+      expect(findGlTabAt(1).attributes('title')).toBe('Deployments');
+      expect(findDeploymentFrequencyCharts().exists()).toBe(true);
+    });
 
-      expect(chart.exists()).toBeTruthy();
-      expect(chart.props('yAxisTitle')).toBe('Minutes');
-      expect(chart.props('xAxisTitle')).toBe('Commit');
-      expect(chart.props('data')).toBe(wrapper.vm.timesChartTransformedData);
-      expect(chart.props('option')).toBe(wrapper.vm.$options.timesChartOptions);
+    it('sets the tab and url when a tab is clicked', async () => {
+      let chartsPath;
+      setWindowLocation(`${TEST_HOST}/gitlab-org/gitlab-test/-/pipelines/charts`);
+
+      mergeUrlParams.mockImplementation(({ chart }, path) => {
+        expect(chart).toBe('deployments');
+        expect(path).toBe(window.location.pathname);
+        chartsPath = `${path}?chart=${chart}`;
+        return chartsPath;
+      });
+
+      updateHistory.mockImplementation(({ url }) => {
+        expect(url).toBe(chartsPath);
+      });
+      const tabs = findGlTabs();
+
+      expect(tabs.attributes('value')).toBe('0');
+
+      tabs.vm.$emit('input', 1);
+
+      await wrapper.vm.$nextTick();
+
+      expect(tabs.attributes('value')).toBe('1');
+    });
+
+    it('should not try to push history if the tab does not change', async () => {
+      setWindowLocation(`${TEST_HOST}/gitlab-org/gitlab-test/-/pipelines/charts`);
+
+      mergeUrlParams.mockImplementation(({ chart }, path) => `${path}?chart=${chart}`);
+
+      const tabs = findGlTabs();
+
+      expect(tabs.attributes('value')).toBe('0');
+
+      tabs.vm.$emit('input', 0);
+
+      await wrapper.vm.$nextTick();
+
+      expect(updateHistory).not.toHaveBeenCalled();
     });
   });
 
-  describe('pipelines charts', () => {
-    it('displays 3 area charts', () => {
-      expect(wrapper.findAll(PipelinesAreaChart).length).toBe(3);
+  describe('when provided with a query param', () => {
+    it.each`
+      chart            | tab
+      ${'deployments'} | ${'1'}
+      ${'pipelines'}   | ${'0'}
+      ${'fake'}        | ${'0'}
+      ${''}            | ${'0'}
+    `('shows the correct tab for URL parameter "$chart"', ({ chart, tab }) => {
+      setWindowLocation(`${TEST_HOST}/gitlab-org/gitlab-test/-/pipelines/charts?chart=${chart}`);
+      getParameterValues.mockImplementation((name) => {
+        expect(name).toBe('chart');
+        return chart ? [chart] : [];
+      });
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: true } });
+      expect(findGlTabs().attributes('value')).toBe(tab);
     });
 
-    describe('displays individual correctly', () => {
-      it('renders with the correct data', () => {
-        const charts = wrapper.findAll(PipelinesAreaChart);
+    it('should set the tab when the back button is clicked', async () => {
+      let popstateHandler;
 
-        for (let i = 0; i < charts.length; i += 1) {
-          const chart = charts.at(i);
+      window.addEventListener = jest.fn();
 
-          expect(chart.exists()).toBeTruthy();
-          expect(chart.props('chartData')).toBe(wrapper.vm.areaCharts[i].data);
-          expect(chart.text()).toBe(wrapper.vm.areaCharts[i].title);
+      window.addEventListener.mockImplementation((event, handler) => {
+        if (event === 'popstate') {
+          popstateHandler = handler;
         }
       });
+
+      getParameterValues.mockImplementation((name) => {
+        expect(name).toBe('chart');
+        return [];
+      });
+
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: true } });
+
+      expect(findGlTabs().attributes('value')).toBe('0');
+
+      getParameterValues.mockImplementationOnce((name) => {
+        expect(name).toBe('chart');
+        return ['deployments'];
+      });
+
+      popstateHandler();
+
+      await wrapper.vm.$nextTick();
+
+      expect(findGlTabs().attributes('value')).toBe('1');
+    });
+  });
+
+  describe('when shouldRenderDeploymentFrequencyCharts is false', () => {
+    beforeEach(() => {
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: false } });
+    });
+
+    it('does not render the deployment frequency charts in a tab', () => {
+      expect(findGlTabs().exists()).toBe(false);
+      expect(findDeploymentFrequencyCharts().exists()).toBe(false);
     });
   });
 });

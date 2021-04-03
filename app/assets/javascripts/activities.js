@@ -2,16 +2,16 @@
 
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import Pager from './pager';
 import { localTimeAgo } from './lib/utils/datetime_utility';
+import Pager from './pager';
 
 export default class Activities {
   constructor(container = '') {
     this.container = container;
 
-    Pager.init(20, true, false, data => data, this.updateTooltips, this.container);
+    Pager.init(20, true, false, (data) => data, this.updateTooltips, this.container);
 
-    $('.event-filter-link').on('click', e => {
+    $('.event-filter-link').on('click', (e) => {
       e.preventDefault();
       this.toggleFilter(e.currentTarget);
       this.reloadActivities();
@@ -24,7 +24,7 @@ export default class Activities {
 
   reloadActivities() {
     $('.content_list').html('');
-    Pager.init(20, true, false, data => data, this.updateTooltips, this.container);
+    Pager.init(20, true, false, (data) => data, this.updateTooltips, this.container);
   }
 
   toggleFilter(sender) {

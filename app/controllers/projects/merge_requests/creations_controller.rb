@@ -6,10 +6,13 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
   include RendersCommits
 
   skip_before_action :merge_request
-  before_action :whitelist_query_limiting, only: [:create]
   before_action :authorize_create_merge_request_from!
   before_action :apply_diff_view_cookie!, only: [:diffs, :diff_for_path]
   before_action :build_merge_request, except: [:create]
+
+  before_action do
+    push_frontend_feature_flag(:mr_collapsed_approval_rules, @project)
+  end
 
   def new
     define_new_vars
@@ -129,13 +132,11 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42384')
-  end
-
   def incr_count_webide_merge_request
     return if params[:nav_source] != 'webide'
 
     Gitlab::UsageDataCounters::WebIdeCounter.increment_merge_requests_count
   end
 end
+
+Projects::MergeRequests::CreationsController.prepend_ee_mod

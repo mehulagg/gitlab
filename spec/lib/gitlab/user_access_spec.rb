@@ -45,10 +45,20 @@ RSpec.describe Gitlab::UserAccess do
       let(:empty_project) { create(:project_empty_repo) }
       let(:project_access) { described_class.new(user, container: empty_project) }
 
-      it 'returns true for admins' do
-        user.update!(admin: true)
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'returns true for admins' do
+          user.update!(admin: true)
 
-        expect(access.can_push_to_branch?('master')).to be_truthy
+          expect(access.can_push_to_branch?('master')).to be_truthy
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'returns false for admins' do
+          user.update!(admin: true)
+
+          expect(access.can_push_to_branch?('master')).to be_falsey
+        end
       end
 
       it 'returns true if user is maintainer' do
@@ -85,10 +95,20 @@ RSpec.describe Gitlab::UserAccess do
       let(:branch) { create :protected_branch, project: project, name: "test" }
       let(:not_existing_branch) { create :protected_branch, :developers_can_merge, project: project }
 
-      it 'returns true for admins' do
-        user.update!(admin: true)
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'returns true for admins' do
+          user.update!(admin: true)
 
-        expect(access.can_push_to_branch?(branch.name)).to be_truthy
+          expect(access.can_push_to_branch?(branch.name)).to be_truthy
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'returns false for admins' do
+          user.update!(admin: true)
+
+          expect(access.can_push_to_branch?(branch.name)).to be_falsey
+        end
       end
 
       it 'returns true if user is a maintainer' do
@@ -194,6 +214,15 @@ RSpec.describe Gitlab::UserAccess do
         project.add_reporter(user)
 
         expect(access.can_merge_to_branch?(@branch.name)).to be_falsey
+      end
+    end
+
+    context 'when skip_collaboration_check is true' do
+      let(:access) { described_class.new(user, container: project, skip_collaboration_check: true) }
+
+      it 'does not call Project#branch_allows_collaboration?' do
+        expect(project).not_to receive(:branch_allows_collaboration?)
+        expect(access.can_push_to_branch?('master')).to be_falsey
       end
     end
   end
@@ -307,6 +336,26 @@ RSpec.describe Gitlab::UserAccess do
         project.add_user(user, :reporter)
 
         expect(access.can_delete_branch?(branch.name)).to be_falsey
+      end
+    end
+  end
+
+  describe '#can_push_for_ref?' do
+    let(:ref) { 'test_ref' }
+
+    context 'when user cannot push_code to a project repository (eg. as a guest)' do
+      it 'is false' do
+        project.add_user(user, :guest)
+
+        expect(access.can_push_for_ref?(ref)).to be_falsey
+      end
+    end
+
+    context 'when user can push_code to a project repository (eg. as a developer)' do
+      it 'is true' do
+        project.add_user(user, :developer)
+
+        expect(access.can_push_for_ref?(ref)).to be_truthy
       end
     end
   end

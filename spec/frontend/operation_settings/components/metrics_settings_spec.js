@@ -1,15 +1,15 @@
+import { GlButton, GlLink, GlFormGroup, GlFormInput, GlFormSelect } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton, GlLink, GlFormGroup, GlFormInput, GlFormSelect } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
-import MetricsSettings from '~/operation_settings/components/metrics_settings.vue';
-
-import ExternalDashboard from '~/operation_settings/components/form_group/external_dashboard.vue';
-import DashboardTimezone from '~/operation_settings/components/form_group/dashboard_timezone.vue';
-import { timezones } from '~/monitoring/format_date';
-import store from '~/operation_settings/store';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { refreshCurrentPage } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
+import { timezones } from '~/monitoring/format_date';
+import DashboardTimezone from '~/operation_settings/components/form_group/dashboard_timezone.vue';
+import ExternalDashboard from '~/operation_settings/components/form_group/external_dashboard.vue';
+import MetricsSettings from '~/operation_settings/components/metrics_settings.vue';
+
+import store from '~/operation_settings/store';
 
 jest.mock('~/lib/utils/url_utility');
 jest.mock('~/flash');
@@ -61,7 +61,8 @@ describe('operation settings external dashboard component', () => {
 
   describe('expand/collapse button', () => {
     it('renders as an expand button by default', () => {
-      const button = wrapper.find(GlDeprecatedButton);
+      mountComponent();
+      const button = wrapper.find(GlButton);
 
       expect(button.text()).toBe('Expand');
     });
@@ -160,8 +161,7 @@ describe('operation settings external dashboard component', () => {
     });
 
     describe('submit button', () => {
-      const findSubmitButton = () =>
-        wrapper.find('.settings-content form').find(GlDeprecatedButton);
+      const findSubmitButton = () => wrapper.find('.settings-content form').find(GlButton);
 
       const endpointRequest = [
         operationsSettingsEndpoint,

@@ -6,12 +6,15 @@ module Projects
       class NotesController < Projects::ApplicationController
         extend ::Gitlab::Utils::Override
 
+        include SecurityAndCompliancePermissions
         include SecurityDashboardsPermissions
         include NotesActions
         include NotesHelper
         include ToggleAwardEmoji
 
         before_action :authorize_create_note!, only: [:create]
+
+        feature_category :vulnerability_management
 
         private
 

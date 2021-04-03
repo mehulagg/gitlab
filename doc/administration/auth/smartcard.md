@@ -1,8 +1,11 @@
 ---
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# Smartcard authentication **(PREMIUM ONLY)**
+# Smartcard authentication **(PREMIUM SELF)**
 
 GitLab supports authentication using smartcards.
 
@@ -27,7 +30,7 @@ GitLab supports two authentication methods:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/726) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.6 as an experimental feature.
 
-CAUTION: **Caution:**
+WARNING:
 Smartcard authentication against local databases may change or be removed completely in future
 releases.
 
@@ -57,7 +60,7 @@ Certificate:
 Smartcards with X.509 certificates using SAN extensions can be used to authenticate
 with GitLab.
 
-NOTE: **Note:**
+NOTE:
 This is an experimental feature. Smartcard authentication against local databases may
 change or be removed completely in future releases.
 
@@ -114,8 +117,14 @@ attribute. As a prerequisite, you must use an LDAP server that:
    ```ruby
    gitlab_rails['smartcard_enabled'] = true
    gitlab_rails['smartcard_ca_file'] = "/etc/ssl/certs/CA.pem"
+   gitlab_rails['smartcard_client_certificate_required_host'] = "smartcard.example.com"
    gitlab_rails['smartcard_client_certificate_required_port'] = 3444
    ```
+
+   NOTE: **Note**
+   Assign a value to at least one of the following variables:
+   `gitlab_rails['smartcard_client_certificate_required_host']` or
+   `gitlab_rails['smartcard_client_certificate_required_port']`.
 
 1. Save the file and [reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure)
    GitLab for the changes to take effect.
@@ -208,7 +217,7 @@ attribute. As a prerequisite, you must use an LDAP server that:
      client_certificate_required_port: 3443
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Assign a value to at least one of the following variables:
    `client_certificate_required_host` or `client_certificate_required_port`.
 
@@ -309,6 +318,10 @@ attribute. As a prerequisite, you must use an LDAP server that:
 
 1. Save the file and [restart](../restart_gitlab.md#installations-from-source)
    GitLab for the changes to take effect.
+
+## Passwords for users created via smartcard authentication
+
+The [Generated passwords for users created through integrated authentication](../../security/passwords_for_integrated_authentication_methods.md) guide provides an overview of how GitLab generates and sets passwords for users created via smartcard authentication.
 
 <!-- ## Troubleshooting
 

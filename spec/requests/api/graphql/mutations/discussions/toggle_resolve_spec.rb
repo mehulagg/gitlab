@@ -10,16 +10,17 @@ RSpec.describe 'Toggling the resolve status of a discussion' do
   let(:discussion) do
     create(:diff_note_on_merge_request, noteable: noteable, project: project).to_discussion
   end
+
   let(:mutation) do
     graphql_mutation(:discussion_toggle_resolve, { id: discussion.to_global_id.to_s, resolve: true })
   end
+
   let(:mutation_response) { graphql_mutation_response(:discussion_toggle_resolve) }
 
   context 'when the user does not have permission' do
     let_it_be(:current_user) { create(:user) }
 
-    it_behaves_like 'a mutation that returns top-level errors',
-      errors: ["The resource that you are attempting to access does not exist or you don't have permission to perform this action"]
+    it_behaves_like 'a mutation that returns a top-level access error'
   end
 
   context 'when user has permission' do

@@ -4,10 +4,10 @@ class StuckMergeJobsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
-  feature_category :source_code_management
+  feature_category :code_review
 
   def self.logger
-    Rails.logger # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger
   end
 
   # rubocop: disable CodeReuse/ActiveRecord

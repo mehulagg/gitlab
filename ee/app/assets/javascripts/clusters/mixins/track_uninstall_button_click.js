@@ -2,7 +2,7 @@ import Tracking from '~/tracking';
 
 export default {
   methods: {
-    trackUninstallButtonClick: application => {
+    trackUninstallButtonClick: (application) => {
       Tracking.event('k8s_cluster', 'uninstall', {
         label: application,
       });

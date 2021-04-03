@@ -16,11 +16,12 @@ module EE
         dependency_scanning: :dependency_scanning,
         container_scanning: :container_scanning,
         dast: :dast,
-        coverage_fuzzing: :coverage_fuzzing
+        coverage_fuzzing: :coverage_fuzzing,
+        api_fuzzing: :api_fuzzing
       }.with_indifferent_access.freeze
 
       EE_RUNNER_FEATURES = {
-        secrets: -> (build) { build.ci_secrets_management_available? && build.secrets?}
+        vault_secrets: -> (build) { build.ci_secrets_management_available? && build.secrets? }
       }.freeze
 
       prepended do
@@ -30,6 +31,7 @@ module EE
         has_many :security_scans, class_name: 'Security::Scan'
 
         after_save :stick_build_if_status_changed
+        after_commit :track_ci_secrets_management_usage, on: :create
         delegate :service_specification, to: :runner_session, allow_nil: true
 
         scope :license_scan, -> { joins(:job_artifacts).merge(::Ci::JobArtifact.license_scanning_reports) }
@@ -39,9 +41,16 @@ module EE
             .for_ref(ref)
             .for_project_paths(project_path)
         end
+      end
 
-        scope :security_scans_scanned_resources_count, -> (report_types) do
-          joins(:security_scans).where(security_scans: { scan_type: report_types }).group(:scan_type).sum(:scanned_resources_count)
+      override :variables
+      def variables
+        strong_memoize(:variables) do
+          super.tap do |collection|
+            if pipeline.triggered_for_ondemand_dast_scan? && pipeline.dast_profile
+              collection.concat(pipeline.dast_profile.ci_variables)
+            end
+          end
         end
       end
 
@@ -80,11 +89,9 @@ module EE
       end
 
       def collect_license_scanning_reports!(license_scanning_report)
+        return license_scanning_report unless project.feature_available?(:license_scanning)
+
         each_report(::Ci::JobArtifact::LICENSE_SCANNING_REPORT_FILE_TYPES) do |file_type, blob|
-          next if ::Feature.disabled?(:parse_license_management_reports, default_enabled: true)
-
-          next unless project.feature_available?(:license_scanning)
-
           ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, license_scanning_report)
         end
 
@@ -93,7 +100,7 @@ module EE
 
       def collect_dependency_list_reports!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::DEPENDENCY_LIST_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse!(blob, dependency_list_report)
@@ -105,7 +112,7 @@ module EE
 
       def collect_licenses_for_dependency_list!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::LICENSE_SCANNING_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse_licenses!(blob, dependency_list_report)
@@ -135,12 +142,10 @@ module EE
         requirements_report
       end
 
-      def retryable?
-        !merge_train_pipeline? && super
-      end
-
       def ci_secrets_management_available?
-        project.beta_feature_available?(:ci_secrets_management)
+        return false unless project
+
+        project.feature_available?(:ci_secrets_management)
       end
 
       override :runner_required_feature_names
@@ -148,11 +153,25 @@ module EE
         super + ee_runner_required_feature_names
       end
 
+      def secrets_provider?
+        variable_value('VAULT_SERVER_URL').present?
+      end
+
+      def variable_value(key, default = nil)
+        variables_hash.fetch(key, default)
+      end
+
       private
+
+      def variables_hash
+        @variables_hash ||= variables.map do |variable|
+          [variable[:key], variable[:value]]
+        end.to_h
+      end
 
       def parse_security_artifact_blob(security_report, blob)
         report_clone = security_report.clone_as_blank
-        ::Gitlab::Ci::Parsers.fabricate!(security_report.type).parse!(blob, report_clone)
+        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, report_clone).parse!
         security_report.merge!(report_clone)
       end
 
@@ -162,6 +181,13 @@ module EE
             method.call(self)
           end.keys
         end
+      end
+
+      def track_ci_secrets_management_usage
+        return unless ::Feature.enabled?(:usage_data_i_ci_secrets_management_vault_build_created, default_enabled: true)
+        return unless ci_secrets_management_available? && secrets?
+
+        ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event('i_ci_secrets_management_vault_build_created', values: user_id)
       end
     end
   end

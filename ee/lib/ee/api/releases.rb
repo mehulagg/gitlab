@@ -18,7 +18,10 @@ module EE
             authorize_create_evidence!
 
             if release.present?
-              CreateEvidenceWorker.perform_async(release.id)
+              params = { tag: release.tag }
+              evidence_pipeline = ::Releases::EvidencePipelineFinder.new(release.project, params).execute
+              ::Releases::CreateEvidenceWorker.perform_async(release.id, evidence_pipeline)
+
               status :accepted
             else
               status :not_found

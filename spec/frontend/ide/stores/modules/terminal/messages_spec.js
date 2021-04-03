@@ -1,8 +1,8 @@
 import { escape } from 'lodash';
 import { TEST_HOST } from 'spec/test_constants';
 import * as messages from '~/ide/stores/modules/terminal/messages';
-import { sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
+import { sprintf } from '~/locale';
 
 const TEST_HELP_URL = `${TEST_HOST}/help`;
 
@@ -15,6 +15,8 @@ describe('IDE store terminal messages', () => {
         sprintf(
           messages.ERROR_CONFIG,
           {
+            codeStart: `<code>`,
+            codeEnd: `</code>`,
             helpStart: `<a href="${escape(TEST_HELP_URL)}" target="_blank">`,
             helpEnd: '</a>',
           },

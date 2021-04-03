@@ -1,6 +1,10 @@
-import { mount } from '@vue/test-utils';
+import { createLocalVue, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import BoardScope from 'ee/boards/components/board_scope.vue';
 import { TEST_HOST } from 'helpers/test_constants';
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 describe('BoardScope', () => {
   let wrapper;
@@ -14,12 +18,25 @@ describe('BoardScope', () => {
         labels: [],
         assignee: {},
       },
-      milestonePath: `${TEST_HOST}/milestones`,
       labelsPath: `${TEST_HOST}/labels`,
+      labelsWebUrl: `${TEST_HOST}/-/labels`,
     };
 
+    const createStore = () => {
+      return new Vuex.Store({
+        getters: {
+          isIssueBoard: () => true,
+          isEpicBoard: () => false,
+        },
+      });
+    };
+
+    const store = createStore();
+
     wrapper = mount(BoardScope, {
+      localVue,
       propsData,
+      store,
     });
 
     ({ vm } = wrapper);

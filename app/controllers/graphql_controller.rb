@@ -4,6 +4,9 @@ class GraphqlController < ApplicationController
   # Unauthenticated users have access to the API for public data
   skip_before_action :authenticate_user!
 
+  # Header can be passed by tests to disable SQL query limits.
+  DISABLE_SQL_QUERY_LIMIT_HEADER = 'HTTP_X_GITLAB_DISABLE_SQL_QUERY_LIMIT'
+
   # If a user is using their session to access GraphQL, we need to have session
   # storage, since the admin-mode check is session wide.
   # We can't enable this for anonymous users because that would cause users using
@@ -20,22 +23,29 @@ class GraphqlController < ApplicationController
   before_action :authorize_access_api!
   before_action(only: [:execute]) { authenticate_sessionless_user!(:api) }
   before_action :set_user_last_activity
+  before_action :track_vs_code_usage
+  before_action :disable_query_limiting
 
   # Since we deactivate authentication from the main ApplicationController and
   # defer it to :authorize_access_api!, we need to override the bypass session
   # callback execution order here
   around_action :sessionless_bypass_admin_mode!, if: :sessionless_user?
 
+  feature_category :not_owned
+
   def execute
     result = multiplex? ? execute_multiplex : execute_query
-
     render json: result
   end
 
   rescue_from StandardError do |exception|
     log_exception(exception)
 
-    render_error("Internal server error")
+    if Rails.env.test? || Rails.env.development?
+      render_error("Internal server error: #{exception.message}")
+    else
+      render_error("Internal server error")
+    end
   end
 
   rescue_from Gitlab::Graphql::Variables::Invalid do |exception|
@@ -46,12 +56,31 @@ class GraphqlController < ApplicationController
     render_error(exception.message, status: :unprocessable_entity)
   end
 
+  rescue_from ::GraphQL::CoercionError do |exception|
+    render_error(exception.message, status: :unprocessable_entity)
+  end
+
   private
+
+  # Tests may mark some GraphQL queries as exempt from SQL query limits
+  def disable_query_limiting
+    return unless Gitlab::QueryLimiting.enabled_for_env?
+
+    disable_issue = request.headers[DISABLE_SQL_QUERY_LIMIT_HEADER]
+    return unless disable_issue
+
+    Gitlab::QueryLimiting.disable!(disable_issue)
+  end
 
   def set_user_last_activity
     return unless current_user
 
     Users::ActivityService.new(current_user).execute
+  end
+
+  def track_vs_code_usage
+    Gitlab::UsageDataCounters::VSCodeExtensionActivityUniqueCounter
+      .track_api_request_when_trackable(user_agent: request.user_agent, user: current_user)
   end
 
   def execute_multiplex
@@ -81,7 +110,7 @@ class GraphqlController < ApplicationController
   end
 
   def context
-    @context ||= { current_user: current_user }
+    @context ||= { current_user: current_user, is_sessionless_user: !!sessionless_user?, request: request }
   end
 
   def build_variables(variable_info)
@@ -106,5 +135,18 @@ class GraphqlController < ApplicationController
     error = { errors: [message: message] }
 
     render json: error, status: status
+  end
+
+  def append_info_to_payload(payload)
+    super
+
+    # Merging to :metadata will ensure these are logged as top level keys
+    payload[:metadata] ||= {}
+    payload[:metadata].merge!(graphql: logs)
+  end
+
+  def logs
+    RequestStore.store[:graphql_logs].to_a
+                .map { |log| log.except(:duration_s, :query_string) }
   end
 end

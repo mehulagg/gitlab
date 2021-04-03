@@ -4,7 +4,7 @@ module Ci
   module BuildTraceChunks
     class Redis
       CHUNK_REDIS_TTL = 1.week
-      LUA_APPEND_CHUNK = <<~EOS.freeze
+      LUA_APPEND_CHUNK = <<~EOS
         local key, new_data, offset = KEYS[1], ARGV[1], ARGV[2]
         local length = new_data:len()
         local expire = #{CHUNK_REDIS_TTL.seconds}
@@ -41,9 +41,9 @@ module Ci
         end
       end
 
-      def set_data(model, data)
+      def set_data(model, new_data)
         Gitlab::Redis::SharedState.with do |redis|
-          redis.set(key(model), data, ex: CHUNK_REDIS_TTL)
+          redis.set(key(model), new_data, ex: CHUNK_REDIS_TTL)
         end
       end
 

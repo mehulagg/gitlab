@@ -21,6 +21,7 @@ RSpec.describe Gitlab::BackgroundMigration::MoveEpicIssuesAfterEpics, schema: 20
         author_id: user.id
       }
     end
+
     let(:issue_params) do
       {
         title: 'Issue',
@@ -30,21 +31,21 @@ RSpec.describe Gitlab::BackgroundMigration::MoveEpicIssuesAfterEpics, schema: 20
       }
     end
 
-    let(:user) { users.create(name: 'test', email: 'test@example.com', projects_limit: 5) }
-    let(:group) { namespaces.create(name: 'gitlab', path: 'gitlab-org') }
+    let(:user) { users.create!(name: 'test', email: 'test@example.com', projects_limit: 5) }
+    let(:group) { namespaces.create!(name: 'gitlab', path: 'gitlab-org') }
 
     context 'when there are epic_issues present' do
-      let(:project) { projects.create(namespace_id: group.id, name: 'foo') }
-      let(:base_epic) { epics.create(epic_params.merge(iid: 3, relative_position: 500)) }
-      let(:issue_1) { issues.create(issue_params.merge(iid: 1)) }
-      let(:issue_2) { issues.create(issue_params.merge(iid: 2)) }
-      let(:issue_3) { issues.create(issue_params.merge(iid: 3)) }
+      let(:project) { projects.create!(namespace_id: group.id, name: 'foo') }
+      let(:base_epic) { epics.create!(epic_params.merge(iid: 3, relative_position: 500)) }
+      let(:issue_1) { issues.create!(issue_params.merge(iid: 1)) }
+      let(:issue_2) { issues.create!(issue_params.merge(iid: 2)) }
+      let(:issue_3) { issues.create!(issue_params.merge(iid: 3)) }
 
-      let!(:epic_1) { epics.create(epic_params.merge(iid: 1, relative_position: 100)) }
-      let!(:epic_2) { epics.create(epic_params.merge(iid: 2, relative_position: 5000)) }
-      let!(:epic_issue_1) { epic_issues.create(issue_id: issue_1.id, epic_id: base_epic.id, relative_position: 400) }
-      let!(:epic_issue_2) { epic_issues.create(issue_id: issue_2.id, epic_id: base_epic.id, relative_position: 5010) }
-      let!(:epic_issue_3) { epic_issues.create(issue_id: issue_3.id, epic_id: base_epic.id, relative_position: Gitlab::Database::MAX_INT_VALUE - 10) }
+      let!(:epic_1) { epics.create!(epic_params.merge(iid: 1, relative_position: 100)) }
+      let!(:epic_2) { epics.create!(epic_params.merge(iid: 2, relative_position: 5000)) }
+      let!(:epic_issue_1) { epic_issues.create!(issue_id: issue_1.id, epic_id: base_epic.id, relative_position: 400) }
+      let!(:epic_issue_2) { epic_issues.create!(issue_id: issue_2.id, epic_id: base_epic.id, relative_position: 5010) }
+      let!(:epic_issue_3) { epic_issues.create!(issue_id: issue_3.id, epic_id: base_epic.id, relative_position: Gitlab::Database::MAX_INT_VALUE - 10) }
 
       before do
         subject.perform(epics.first.id, epics.last.id)
@@ -78,7 +79,7 @@ RSpec.describe Gitlab::BackgroundMigration::MoveEpicIssuesAfterEpics, schema: 20
 
     context 'when there are no epic_issues' do
       it 'runs correctly' do
-        epics.create(epic_params.merge(iid: 3, relative_position: 500))
+        epics.create!(epic_params.merge(iid: 3, relative_position: 500))
 
         expect(subject.perform(1, 10)).to be_zero
       end

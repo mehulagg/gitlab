@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlHeatmap } from '@gitlab/ui/dist/charts';
+import { shallowMount } from '@vue/test-utils';
 import timezoneMock from 'timezone-mock';
 import Heatmap from '~/monitoring/components/charts/heatmap.vue';
 import { heatmapGraphData } from '../../graph_data';
@@ -24,19 +24,12 @@ describe('Heatmap component', () => {
   };
 
   describe('wrapped chart', () => {
-    let glHeatmapChart;
-
     beforeEach(() => {
       createWrapper();
-      glHeatmapChart = findChart();
     });
 
     afterEach(() => {
       wrapper.destroy();
-    });
-
-    it('is a Vue instance', () => {
-      expect(glHeatmapChart.isVueInstance()).toBe(true);
     });
 
     it('should display a label on the x axis', () => {

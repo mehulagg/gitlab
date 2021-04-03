@@ -2,12 +2,8 @@
 
 module Types
   # rubocop: disable Graphql/AuthorizeTypes
-  class IssueConnectionType < GraphQL::Types::Relay::BaseConnection
-    field :count, Integer, null: false,
-          description: 'Total count of collection'
-
-    def count
-      object.items.size
-    end
+  class IssueConnectionType < CountableConnectionType
   end
 end
+
+Types::IssueConnectionType.prepend_if_ee('::EE::Types::IssueConnectionType')

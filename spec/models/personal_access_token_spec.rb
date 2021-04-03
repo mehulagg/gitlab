@@ -31,6 +31,18 @@ RSpec.describe PersonalAccessToken do
         expect(described_class.for_user(user_1)).to contain_exactly(token_of_user_1)
       end
     end
+
+    describe '.for_users' do
+      it 'returns personal access tokens for the specified users only' do
+        user_1 = create(:user)
+        user_2 = create(:user)
+        token_of_user_1 = create(:personal_access_token, user: user_1)
+        token_of_user_2 = create(:personal_access_token, user: user_2)
+        create_list(:personal_access_token, 3)
+
+        expect(described_class.for_users([user_1, user_2])).to contain_exactly(token_of_user_1, token_of_user_2)
+      end
+    end
   end
 
   describe ".active?" do
@@ -177,6 +189,18 @@ RSpec.describe PersonalAccessToken do
         it 'only includes a valid token' do
           expect(described_class.expiring_and_not_notified(3.days.from_now)).to contain_exactly(valid_token)
         end
+      end
+    end
+
+    describe '.expired_today_and_not_notified' do
+      let_it_be(:active) { create(:personal_access_token) }
+      let_it_be(:expired_yesterday) { create(:personal_access_token, expires_at: Date.yesterday) }
+      let_it_be(:revoked_token) { create(:personal_access_token, expires_at: Date.current, revoked: true) }
+      let_it_be(:expired_today) { create(:personal_access_token, expires_at: Date.current) }
+      let_it_be(:expired_today_and_notified) { create(:personal_access_token, expires_at: Date.current, after_expiry_notification_delivered: true) }
+
+      it 'returns tokens that have expired today' do
+        expect(described_class.expired_today_and_not_notified).to contain_exactly(expired_today)
       end
     end
 

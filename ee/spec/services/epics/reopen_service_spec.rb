@@ -2,9 +2,9 @@
 require 'spec_helper'
 
 RSpec.describe Epics::ReopenService do
-  let(:group) { create(:group, :internal) }
-  let(:user) { create(:user) }
-  let(:epic) { create(:epic, group: group, state: :closed, closed_at: Date.today, closed_by: user) }
+  let_it_be(:group) { create(:group, :internal) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:epic, reload: true) { create(:epic, group: group, state: :closed, closed_at: Date.today, closed_by: user) }
 
   describe '#execute' do
     subject { described_class.new(group, user) }
@@ -25,7 +25,7 @@ RSpec.describe Epics::ReopenService do
       end
 
       context 'when a user has permissions to update the epic' do
-        before do
+        before_all do
           group.add_maintainer(user)
         end
 
@@ -42,13 +42,12 @@ RSpec.describe Epics::ReopenService do
             expect { subject.execute(epic) }.to change { epic.closed_at }.to(nil)
           end
 
-          it 'creates a system note about epic reopen' do
-            expect { subject.execute(epic) }.to change { epic.notes.count }.by(1)
+          it 'creates a resource state event' do
+            expect { subject.execute(epic) }.to change { epic.resource_state_events.count }.by(1)
 
-            note = epic.notes.last
+            event = epic.resource_state_events.last
 
-            expect(note.note).to eq('opened')
-            expect(note.system_note_metadata.action).to eq('opened')
+            expect(event.state).to eq('opened')
           end
 
           it 'notifies the subscribers' do
@@ -60,8 +59,15 @@ RSpec.describe Epics::ReopenService do
             subject.execute(epic)
           end
 
-          it "creates new event" do
+          it 'creates new event' do
             expect { subject.execute(epic) }.to change { Event.count }
+          end
+
+          it 'tracks reopening the epic' do
+            expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter)
+              .to receive(:track_epic_reopened_action).with(author: user)
+
+            subject.execute(epic)
           end
         end
 
@@ -82,8 +88,8 @@ RSpec.describe Epics::ReopenService do
             expect { subject.execute(epic) }.not_to change { epic.closed_by }
           end
 
-          it 'does not create a system note' do
-            expect { subject.execute(epic) }.not_to change { epic.notes.count }
+          it 'does not create a resource state event' do
+            expect { subject.execute(epic) }.not_to change { epic.resource_state_events.count }
           end
 
           it 'does not send any emails' do
@@ -92,8 +98,14 @@ RSpec.describe Epics::ReopenService do
             subject.execute(epic)
           end
 
-          it "does not create an event" do
+          it 'does not create an event' do
             expect { subject.execute(epic) }.not_to change { Event.count }
+          end
+
+          it 'does not track reopening the epic' do
+            expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).not_to receive(:track_epic_reopened_action)
+
+            subject.execute(epic)
           end
         end
       end

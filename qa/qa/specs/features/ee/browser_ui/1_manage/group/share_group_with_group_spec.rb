@@ -2,7 +2,8 @@
 
 module QA
   RSpec.describe 'Manage' do
-    describe 'Group with members' do
+    # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+    describe 'Group with members', :requires_admin do
       let(:admin_api_client) { Runtime::API::Client.as_admin }
 
       let(:source_group_with_members) do
@@ -31,10 +32,12 @@ module QA
       end
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal)
+
         source_group_with_members.add_member(maintainer_user, Resource::Members::AccessLevel::MAINTAINER)
       end
 
-      it 'can be shared with another group with correct access level', :requires_admin do
+      it 'can be shared with another group with correct access level', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/945' do
         Flow::Login.sign_in
 
         target_group_with_project.visit!

@@ -3,12 +3,16 @@
 class Geo::ContainerRepositoryRegistry < Geo::BaseRegistry
   include ::Delay
 
+  MODEL_CLASS = ::ContainerRepository
+  MODEL_FOREIGN_KEY = :container_repository_id
+
   belongs_to :container_repository
 
-  scope :repository_id_not_in, -> (ids) { where.not(container_repository_id: ids) }
   scope :failed, -> { with_state(:failed) }
-  scope :synced, -> { with_state(:synced) }
+  scope :needs_sync_again, -> { failed.retry_due }
+  scope :never_attempted_sync, -> { with_state(:pending).where(last_synced_at: nil) }
   scope :retry_due, -> { where(arel_table[:retry_at].eq(nil).or(arel_table[:retry_at].lt(Time.current))) }
+  scope :synced, -> { with_state(:synced) }
 
   state_machine :state, initial: :pending do
     state :started
@@ -32,6 +36,16 @@ class Geo::ContainerRepositoryRegistry < Geo::BaseRegistry
     event :repository_updated! do
       transition [:synced, :failed, :started] => :pending
     end
+  end
+
+  def self.find_registries_needs_sync_again(batch_size:, except_ids: [])
+    super.order(Gitlab::Database.nulls_first_order(:last_synced_at))
+  end
+
+  def self.delete_for_model_ids(container_repository_ids)
+    where(container_repository_id: container_repository_ids).delete_all
+
+    container_repository_ids
   end
 
   def self.pluck_container_repository_key

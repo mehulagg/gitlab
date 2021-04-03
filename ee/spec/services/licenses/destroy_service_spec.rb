@@ -10,10 +10,18 @@ RSpec.describe Licenses::DestroyService do
     described_class.new(license, user).execute
   end
 
-  it 'destroys a license' do
-    destroy_with(user)
+  context 'when admin mode is enabled', :enable_admin_mode do
+    it 'destroys a license' do
+      destroy_with(user)
 
-    expect(License.where(id: license.id)).not_to exist
+      expect(License.where(id: license.id)).not_to exist
+    end
+  end
+
+  context 'when admin mode is disabled' do
+    it 'raises not allowed error' do
+      expect { destroy_with(user) }.to raise_error(::Gitlab::Access::AccessDeniedError)
+    end
   end
 
   it 'raises an error if license is nil' do

@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Foreign Keys & Associations
 
 When adding an association to a model you must also add a foreign key. For
@@ -69,7 +75,7 @@ your models _unless_ absolutely required and only when approved by database
 specialists. For example, if each row in a table has a corresponding file on a
 file system it may be tempting to add a `after_destroy` hook. This however
 introduces non database logic to a model, and means we can no longer rely on
-foreign keys to remove the data as this would result in the filesystem data
+foreign keys to remove the data as this would result in the file system data
 being left behind. In such a case you should use a service class instead that
 takes care of removing non database data.
 
@@ -99,6 +105,8 @@ create_table :user_configs, id: false do |t|
 end
 ```
 
+Setting `default: nil` will ensure a primary key sequence is not created, and since the primary key
+will automatically get an index, we set `index: false` to avoid creating a duplicate.
 You will also need to add the new primary key to the model:
 
 ```ruby

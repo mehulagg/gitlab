@@ -1,15 +1,18 @@
+import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
 import createStore from 'ee/security_dashboard/store';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlButton, GlNewDropdown, GlDropdownItem } from '@gitlab/ui';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('Filter component', () => {
   const projectId = 1;
-  const jobs = [{ ref: 'master', name: 'fuzz' }, { ref: 'master', name: 'fuzz 2' }];
+  const jobs = [
+    { ref: 'master', name: 'fuzz' },
+    { ref: 'master', name: 'fuzz 2' },
+  ];
 
   let wrapper;
   let store;
@@ -41,7 +44,7 @@ describe('Filter component', () => {
 
     it('should render a download button', () => {
       expect(wrapper.find(GlButton).exists()).toBe(true);
-      expect(wrapper.find(GlNewDropdown).exists()).toBe(false);
+      expect(wrapper.find(GlDropdown).exists()).toBe(false);
     });
 
     it('should render with href set to the correct filepath', () => {
@@ -59,7 +62,7 @@ describe('Filter component', () => {
 
     it('should render a dropdown button with several items', () => {
       expect(wrapper.find(GlButton).exists()).toBe(false);
-      expect(wrapper.find(GlNewDropdown).exists()).toBe(true);
+      expect(wrapper.find(GlDropdown).exists()).toBe(true);
       expect(wrapper.findAll(GlDropdownItem).length).toBe(2);
     });
 

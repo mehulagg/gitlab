@@ -21,9 +21,7 @@ RSpec.describe Mutations::Epics::AddIssue do
       )
     end
 
-    it 'raises an error if the resource is not accessible to the user' do
-      expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-    end
+    it_behaves_like 'permission level for epic mutation is correctly verified'
 
     context 'when the user can update the epic' do
       before do
@@ -47,7 +45,7 @@ RSpec.describe Mutations::Epics::AddIssue do
       it 'returns error if issue is not found' do
         issue.update!(project: create(:project))
 
-        expect(subject[:errors]).to eq('No Issue found for given params')
+        expect(subject[:errors]).to eq('No matching issue found. Make sure that you are adding a valid issue URL.')
       end
     end
   end

@@ -1,14 +1,14 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import { mapActions } from 'vuex';
-import icon from '~/vue_shared/components/icon.vue';
-import upload from './upload.vue';
-import ItemButton from './button.vue';
 import { modalTypes } from '../../constants';
+import ItemButton from './button.vue';
 import NewModal from './modal.vue';
+import upload from './upload.vue';
 
 export default {
   components: {
-    icon,
+    GlIcon,
     upload,
     ItemButton,
     NewModal,
@@ -67,7 +67,7 @@ export default {
         data-qa-selector="dropdown_button"
         @click.stop="openDropdown()"
       >
-        <icon name="ellipsis_v" /> <icon name="chevron-down" />
+        <gl-icon name="ellipsis_v" /> <gl-icon name="chevron-down" />
       </button>
       <ul ref="dropdownMenu" class="dropdown-menu dropdown-menu-right">
         <template v-if="type === 'tree'">
@@ -108,6 +108,7 @@ export default {
             class="d-flex"
             icon="remove"
             icon-classes="mr-2"
+            data-qa-selector="delete_button"
             @click="deleteEntry(path)"
           />
         </li>

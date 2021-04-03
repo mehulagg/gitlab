@@ -71,8 +71,12 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value('three').for(:push_event_activities_limit) }
     it { is_expected.not_to allow_value(nil).for(:push_event_activities_limit) }
 
+    it { is_expected.to validate_numericality_of(:container_registry_delete_tags_service_timeout).only_integer.is_greater_than_or_equal_to(0) }
+    it { is_expected.to validate_numericality_of(:container_registry_cleanup_tags_service_max_list_size).only_integer.is_greater_than_or_equal_to(0) }
+    it { is_expected.to validate_numericality_of(:container_registry_expiration_policies_worker_capacity).only_integer.is_greater_than_or_equal_to(0) }
+
     it { is_expected.to validate_numericality_of(:snippet_size_limit).only_integer.is_greater_than(0) }
-    it { is_expected.to validate_numericality_of(:wiki_page_max_content_bytes).only_integer.is_greater_than(0) }
+    it { is_expected.to validate_numericality_of(:wiki_page_max_content_bytes).only_integer.is_greater_than_or_equal_to(1024) }
     it { is_expected.to validate_presence_of(:max_artifacts_size) }
     it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
     it { is_expected.to validate_presence_of(:max_pages_size) }
@@ -86,11 +90,6 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(nil).for(:minimum_password_length) }
     it { is_expected.not_to allow_value('abc').for(:minimum_password_length) }
     it { is_expected.to allow_value(10).for(:minimum_password_length) }
-
-    it { is_expected.to allow_value(0).for(:namespace_storage_size_limit) }
-    it { is_expected.to allow_value(1).for(:namespace_storage_size_limit) }
-    it { is_expected.not_to allow_value(nil).for(:namespace_storage_size_limit) }
-    it { is_expected.not_to allow_value(-1).for(:namespace_storage_size_limit) }
 
     it { is_expected.to allow_value(300).for(:issues_create_limit) }
     it { is_expected.not_to allow_value('three').for(:issues_create_limit) }
@@ -106,14 +105,58 @@ RSpec.describe ApplicationSetting do
 
     it { is_expected.not_to allow_value(false).for(:hashed_storage_enabled) }
 
-    it { is_expected.not_to allow_value(101).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value('90').for(:repository_storages_weighted_default) }
-    it { is_expected.not_to allow_value(-1).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(100).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(0).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(50).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(nil).for(:repository_storages_weighted_default) }
-    it { is_expected.not_to allow_value({ default: 100, shouldntexist: 50 }).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => 0).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => 50).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => 100).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => '90').for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => nil).for(:repository_storages_weighted) }
+    it { is_expected.not_to allow_value('default' => -1).for(:repository_storages_weighted).with_message("value for 'default' must be between 0 and 100") }
+    it { is_expected.not_to allow_value('default' => 101).for(:repository_storages_weighted).with_message("value for 'default' must be between 0 and 100") }
+    it { is_expected.not_to allow_value('default' => 100, shouldntexist: 50).for(:repository_storages_weighted).with_message("can't include: shouldntexist") }
+
+    it { is_expected.to allow_value(400).for(:notes_create_limit) }
+    it { is_expected.not_to allow_value('two').for(:notes_create_limit) }
+    it { is_expected.not_to allow_value(nil).for(:notes_create_limit) }
+    it { is_expected.not_to allow_value(5.5).for(:notes_create_limit) }
+    it { is_expected.not_to allow_value(-2).for(:notes_create_limit) }
+
+    def many_usernames(num = 100)
+      Array.new(num) { |i| "username#{i}" }
+    end
+
+    it { is_expected.to allow_value(many_usernames(100)).for(:notes_create_limit_allowlist) }
+    it { is_expected.not_to allow_value(many_usernames(101)).for(:notes_create_limit_allowlist) }
+    it { is_expected.not_to allow_value(nil).for(:notes_create_limit_allowlist) }
+    it { is_expected.to allow_value([]).for(:notes_create_limit_allowlist) }
+
+    context 'help_page_documentation_base_url validations' do
+      it { is_expected.to allow_value(nil).for(:help_page_documentation_base_url) }
+      it { is_expected.to allow_value('https://docs.gitlab.com').for(:help_page_documentation_base_url) }
+      it { is_expected.to allow_value('http://127.0.0.1').for(:help_page_documentation_base_url) }
+      it { is_expected.not_to allow_value('docs.gitlab.com').for(:help_page_documentation_base_url) }
+
+      context 'when url length validation' do
+        let(:value) { 'http://'.ljust(length, 'A') }
+
+        context 'when value string length is 255 characters' do
+          let(:length) { 255 }
+
+          it 'allows the value' do
+            is_expected.to allow_value(value).for(:help_page_documentation_base_url)
+          end
+        end
+
+        context 'when value string length exceeds 255 characters' do
+          let(:length) { 256 }
+
+          it 'does not allow the value' do
+            is_expected.not_to allow_value(value)
+                                 .for(:help_page_documentation_base_url)
+                                 .with_message('is too long (maximum is 255 characters)')
+          end
+        end
+      end
+    end
 
     context 'grafana_url validations' do
       before do
@@ -194,14 +237,10 @@ RSpec.describe ApplicationSetting do
       it { is_expected.not_to allow_value(nil).for(:snowplow_collector_hostname) }
       it { is_expected.to allow_value("snowplow.gitlab.com").for(:snowplow_collector_hostname) }
       it { is_expected.not_to allow_value('/example').for(:snowplow_collector_hostname) }
-      it { is_expected.to allow_value('https://example.org').for(:snowplow_iglu_registry_url) }
-      it { is_expected.not_to allow_value('not-a-url').for(:snowplow_iglu_registry_url) }
-      it { is_expected.to allow_value(nil).for(:snowplow_iglu_registry_url) }
     end
 
     context 'when snowplow is not enabled' do
       it { is_expected.to allow_value(nil).for(:snowplow_collector_hostname) }
-      it { is_expected.to allow_value(nil).for(:snowplow_iglu_registry_url) }
     end
 
     context "when user accepted let's encrypt terms of service" do
@@ -236,7 +275,18 @@ RSpec.describe ApplicationSetting do
         it { is_expected.to allow_value('access-key-id-12').for(:eks_access_key_id) }
         it { is_expected.not_to allow_value('a' * 129).for(:eks_access_key_id) }
         it { is_expected.not_to allow_value('short-key').for(:eks_access_key_id) }
-        it { is_expected.not_to allow_value(nil).for(:eks_access_key_id) }
+        it { is_expected.to allow_value(nil).for(:eks_access_key_id) }
+
+        it { is_expected.to allow_value('secret-access-key').for(:eks_secret_access_key) }
+        it { is_expected.to allow_value(nil).for(:eks_secret_access_key) }
+      end
+
+      context 'access key is specified' do
+        let(:eks_enabled) { true }
+
+        before do
+          setting.eks_access_key_id = '123456789012'
+        end
 
         it { is_expected.to allow_value('secret-access-key').for(:eks_secret_access_key) }
         it { is_expected.not_to allow_value(nil).for(:eks_secret_access_key) }
@@ -279,7 +329,7 @@ RSpec.describe ApplicationSetting do
 
     it { is_expected.to validate_presence_of(:max_attachment_size) }
 
-    it do
+    specify do
       is_expected.to validate_numericality_of(:max_attachment_size)
         .only_integer
         .is_greater_than(0)
@@ -287,13 +337,13 @@ RSpec.describe ApplicationSetting do
 
     it { is_expected.to validate_presence_of(:max_import_size) }
 
-    it do
+    specify do
       is_expected.to validate_numericality_of(:max_import_size)
         .only_integer
         .is_greater_than_or_equal_to(0)
     end
 
-    it do
+    specify do
       is_expected.to validate_numericality_of(:local_markdown_version)
         .only_integer
         .is_greater_than_or_equal_to(0)
@@ -327,7 +377,7 @@ RSpec.describe ApplicationSetting do
       end
     end
 
-    it_behaves_like 'an object with email-formated attributes', :admin_notification_email do
+    it_behaves_like 'an object with email-formatted attributes', :abuse_notification_email do
       subject { setting }
     end
 
@@ -438,7 +488,7 @@ RSpec.describe ApplicationSetting do
       end
 
       [:gitaly_timeout_default, :gitaly_timeout_medium, :gitaly_timeout_fast].each do |timeout_name|
-        it do
+        specify do
           is_expected.to validate_presence_of(timeout_name)
           is_expected.to validate_numericality_of(timeout_name).only_integer
             .is_greater_than_or_equal_to(0)
@@ -625,6 +675,63 @@ RSpec.describe ApplicationSetting do
           end
         end
       end
+
+      describe '#asset_proxy_allowlist' do
+        context 'when given an Array' do
+          it 'sets the domains and adds current running host' do
+            setting.asset_proxy_allowlist = ['example.com', 'assets.example.com']
+            expect(setting.asset_proxy_allowlist).to eq(['example.com', 'assets.example.com', 'localhost'])
+          end
+        end
+
+        context 'when given a String' do
+          it 'sets multiple domains with spaces' do
+            setting.asset_proxy_allowlist = 'example.com *.example.com'
+            expect(setting.asset_proxy_allowlist).to eq(['example.com', '*.example.com', 'localhost'])
+          end
+
+          it 'sets multiple domains with newlines and a space' do
+            setting.asset_proxy_allowlist = "example.com\n *.example.com"
+            expect(setting.asset_proxy_allowlist).to eq(['example.com', '*.example.com', 'localhost'])
+          end
+
+          it 'sets multiple domains with commas' do
+            setting.asset_proxy_allowlist = "example.com, *.example.com"
+            expect(setting.asset_proxy_allowlist).to eq(['example.com', '*.example.com', 'localhost'])
+          end
+        end
+      end
+
+      describe '#ci_jwt_signing_key' do
+        it { is_expected.not_to allow_value('').for(:ci_jwt_signing_key) }
+        it { is_expected.not_to allow_value('invalid RSA key').for(:ci_jwt_signing_key) }
+        it { is_expected.to allow_value(nil).for(:ci_jwt_signing_key) }
+        it { is_expected.to allow_value(OpenSSL::PKey::RSA.new(1024).to_pem).for(:ci_jwt_signing_key) }
+
+        it 'is encrypted' do
+          subject.ci_jwt_signing_key = OpenSSL::PKey::RSA.new(1024).to_pem
+
+          aggregate_failures do
+            expect(subject.encrypted_ci_jwt_signing_key).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key_iv).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key).not_to eq(subject.ci_jwt_signing_key)
+          end
+        end
+      end
+
+      describe '#cloud_license_auth_token' do
+        it { is_expected.to allow_value(nil).for(:cloud_license_auth_token) }
+
+        it 'is encrypted' do
+          subject.cloud_license_auth_token = 'token-from-customers-dot'
+
+          aggregate_failures do
+            expect(subject.encrypted_cloud_license_auth_token).to be_present
+            expect(subject.encrypted_cloud_license_auth_token_iv).to be_present
+            expect(subject.encrypted_cloud_license_auth_token).not_to eq(subject.cloud_license_auth_token)
+          end
+        end
+      end
     end
 
     context 'static objects external storage' do
@@ -645,6 +752,50 @@ RSpec.describe ApplicationSetting do
         is_expected.to be_invalid
       end
     end
+
+    context 'gitpod settings' do
+      it 'is invalid if gitpod is enabled and no url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return(nil)
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an empty url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('')
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an invalid url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('javascript:alert("test")//')
+
+        is_expected.to be_invalid
+      end
+    end
+
+    context 'throttle_* settings' do
+      where(:throttle_setting) do
+        %i[
+          throttle_unauthenticated_requests_per_period
+          throttle_unauthenticated_period_in_seconds
+          throttle_authenticated_api_requests_per_period
+          throttle_authenticated_api_period_in_seconds
+          throttle_authenticated_web_requests_per_period
+          throttle_authenticated_web_period_in_seconds
+        ]
+      end
+
+      with_them do
+        it { is_expected.to allow_value(3).for(throttle_setting) }
+        it { is_expected.not_to allow_value(-3).for(throttle_setting) }
+        it { is_expected.not_to allow_value(0).for(throttle_setting) }
+        it { is_expected.not_to allow_value('three').for(throttle_setting) }
+        it { is_expected.not_to allow_value(nil).for(throttle_setting) }
+      end
+    end
   end
 
   context 'restrict creating duplicates' do
@@ -652,6 +803,16 @@ RSpec.describe ApplicationSetting do
 
     it 'returns the current settings' do
       expect(described_class.create_from_defaults).to eq(current_settings)
+    end
+  end
+
+  context 'when ApplicationSettings does not have a primary key' do
+    before do
+      allow(ActiveRecord::Base.connection).to receive(:primary_key).with(described_class.table_name).and_return(nil)
+    end
+
+    it 'raises an exception' do
+      expect { described_class.create_from_defaults }.to raise_error(/table is missing a primary key constraint/)
     end
   end
 
@@ -723,7 +884,7 @@ RSpec.describe ApplicationSetting do
       context 'validations' do
         it { is_expected.to validate_presence_of(:diff_max_patch_bytes) }
 
-        it do
+        specify do
           is_expected.to validate_numericality_of(:diff_max_patch_bytes)
           .only_integer
           .is_greater_than_or_equal_to(Gitlab::Git::Diff::DEFAULT_MAX_PATCH_BYTES)
@@ -749,6 +910,24 @@ RSpec.describe ApplicationSetting do
 
         expect(setting.sourcegraph_url_is_com?).to eq(is_com)
       end
+    end
+  end
+
+  describe '#instance_review_permitted?', :request_store, :use_clean_rails_memory_store_caching do
+    subject { setting.instance_review_permitted? }
+
+    before do
+      allow(License).to receive(:current).and_return(nil) if Gitlab.ee?
+      allow(Rails.cache).to receive(:fetch).and_call_original
+      expect(Rails.cache).to receive(:fetch).with('limited_users_count', anything).and_return(
+        ::ApplicationSetting::INSTANCE_REVIEW_MIN_USERS + users_over_minimum
+      )
+    end
+
+    where(users_over_minimum: [-1, 0, 1])
+
+    with_them do
+      it { is_expected.to be(users_over_minimum >= 0) }
     end
   end
 
@@ -805,16 +984,47 @@ RSpec.describe ApplicationSetting do
 
   it_behaves_like 'application settings examples'
 
-  describe 'repository_storages_weighted_attributes' do
-    it 'returns the keys for repository_storages_weighted' do
-      expect(subject.class.repository_storages_weighted_attributes).to eq([:repository_storages_weighted_default])
+  describe 'kroki_format_supported?' do
+    it 'returns true when Excalidraw is enabled' do
+      subject.kroki_formats_excalidraw = true
+      expect(subject.kroki_format_supported?('excalidraw')).to eq(true)
+    end
+
+    it 'returns true when BlockDiag is enabled' do
+      subject.kroki_formats_blockdiag = true
+      # format "blockdiag" aggregates multiple diagram types: actdiag, blockdiag, nwdiag...
+      expect(subject.kroki_format_supported?('actdiag')).to eq(true)
+      expect(subject.kroki_format_supported?('blockdiag')).to eq(true)
+    end
+
+    it 'returns false when BlockDiag is disabled' do
+      subject.kroki_formats_blockdiag = false
+      # format "blockdiag" aggregates multiple diagram types: actdiag, blockdiag, nwdiag...
+      expect(subject.kroki_format_supported?('actdiag')).to eq(false)
+      expect(subject.kroki_format_supported?('blockdiag')).to eq(false)
+    end
+
+    it 'returns false when the diagram type is optional and not enabled' do
+      expect(subject.kroki_format_supported?('bpmn')).to eq(false)
+    end
+
+    it 'returns true when the diagram type is enabled by default' do
+      expect(subject.kroki_format_supported?('vegalite')).to eq(true)
+      expect(subject.kroki_format_supported?('nomnoml')).to eq(true)
+      expect(subject.kroki_format_supported?('unknown-diagram-type')).to eq(false)
+    end
+
+    it 'returns false when the diagram type is unknown' do
+      expect(subject.kroki_format_supported?('unknown-diagram-type')).to eq(false)
     end
   end
 
-  it 'does not allow to set weight for non existing storage' do
-    setting.repository_storages_weighted = { invalid_storage: 100 }
-
-    expect(setting).not_to be_valid
-    expect(setting.errors.messages[:repository_storages_weighted]).to match_array(["can't include: invalid_storage"])
+  describe 'kroki_formats' do
+    it 'returns the value for kroki_formats' do
+      subject.kroki_formats = { blockdiag: true, bpmn: false, excalidraw: true }
+      expect(subject.kroki_formats_blockdiag).to eq(true)
+      expect(subject.kroki_formats_bpmn).to eq(false)
+      expect(subject.kroki_formats_excalidraw).to eq(true)
+    end
   end
 end

@@ -1,5 +1,0 @@
----
-title: Allow nested gitlab_subscription on namespace api
-merge_request: 37397
-author: jejacks0n
-type: changed

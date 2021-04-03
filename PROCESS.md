@@ -73,13 +73,13 @@ sensitive as to how you word things. Use Emoji to express your feelings (heart,
 star, smile, etc.). Some good tips about code reviews can be found in our
 [Code Review Guidelines].
 
-[Code Review Guidelines]: https://docs.gitlab.com/ce/development/code_review.html
+[Code Review Guidelines]: https://docs.gitlab.com/ee/development/code_review.html
 
 ## Feature flags
 
-Overview and details of feature flag processes in development of GitLab itself is described in [feature flags process documentation](https://docs.gitlab.com/ee/development/feature_flags/process.html).
+Overview and details of feature flag processes in development of GitLab itself is described in [feature flags process documentation](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/).
 
-Guides on how to include feature flags in your backend/frontend code while developing GitLab are described in [developing with feature flags documentation](https://docs.gitlab.com/ee/development/feature_flags/development.html).
+Guides on how to include feature flags in your backend/frontend code while developing GitLab are described in [developing with feature flags documentation](https://docs.gitlab.com/ee/development/feature_flags).
 
 Getting access and how to expose the feature to users is detailed in [controlling feature flags documentation](https://docs.gitlab.com/ee/development/feature_flags/controls.html).
 
@@ -217,5 +217,5 @@ rebase with master to see if that solves the issue.
 
 [team]: https://about.gitlab.com/team/
 [done]: https://docs.gitlab.com/ee/development/contributing/merge_request_workflow.html#definition-of-done
-[automatic_ce_ee_merge]: https://docs.gitlab.com/ce/development/automatic_ce_ee_merge.html
-[ee_features]: https://docs.gitlab.com/ce/development/ee_features.html
+[automatic_ce_ee_merge]: https://docs.gitlab.com/ee/development/automatic_ce_ee_merge.html
+[ee_features]: https://docs.gitlab.com/ee/development/ee_features.html

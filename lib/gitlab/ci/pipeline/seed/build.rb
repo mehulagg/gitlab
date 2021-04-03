@@ -11,16 +11,15 @@ module Gitlab
 
           delegate :dig, to: :@seed_attributes
 
-          # When the `ci_dag_limit_needs` is enabled it uses the lower limit
-          LOW_NEEDS_LIMIT = 10
-          HARD_NEEDS_LIMIT = 50
-
-          def initialize(pipeline, attributes, previous_stages)
-            @pipeline = pipeline
+          def initialize(context, attributes, previous_stages)
+            @context = context
+            @pipeline = context.pipeline
             @seed_attributes = attributes
             @previous_stages = previous_stages
             @needs_attributes = dig(:needs_attributes)
             @resource_group_key = attributes.delete(:resource_group_key)
+            @job_variables = @seed_attributes.delete(:job_variables)
+            @root_variables_inheritance = @seed_attributes.delete(:root_variables_inheritance) { true }
 
             @using_rules  = attributes.key?(:rules)
             @using_only   = attributes.key?(:only)
@@ -32,8 +31,10 @@ module Gitlab
               .fabricate(attributes.delete(:except))
             @rules = Gitlab::Ci::Build::Rules
               .new(attributes.delete(:rules), default_when: 'on_success')
-            @cache = Seed::Build::Cache
-              .new(pipeline, attributes.delete(:cache))
+            @cache = Gitlab::Ci::Build::Cache
+              .new(attributes.delete(:cache), @pipeline)
+
+            recalculate_yaml_variables!
           end
 
           def name
@@ -56,7 +57,7 @@ module Gitlab
             return unless included?
 
             strong_memoize(:errors) do
-              needs_errors
+              [needs_errors, variable_expansion_errors].compact.flatten
             end
           end
 
@@ -64,7 +65,8 @@ module Gitlab
             @seed_attributes
               .deep_merge(pipeline_attributes)
               .deep_merge(rules_attributes)
-              .deep_merge(cache_attributes)
+              .deep_merge(allow_failure_criteria_attributes)
+              .deep_merge(@cache.cache_attributes)
           end
 
           def bridge?
@@ -76,15 +78,26 @@ module Gitlab
 
           def to_resource
             strong_memoize(:resource) do
-              if bridge?
-                ::Ci::Bridge.new(attributes)
-              else
-                ::Ci::Build.new(attributes).tap do |build|
-                  build.assign_attributes(self.class.environment_attributes_for(build))
-                  build.resource_group = Seed::Build::ResourceGroup.new(build, @resource_group_key).to_resource
-                end
+              processable = initialize_processable
+              assign_resource_group(processable)
+              processable
+            end
+          end
+
+          def initialize_processable
+            if bridge?
+              ::Ci::Bridge.new(attributes)
+            else
+              ::Ci::Build.new(attributes).tap do |build|
+                build.assign_attributes(self.class.environment_attributes_for(build))
               end
             end
+          end
+
+          def assign_resource_group(processable)
+            processable.resource_group =
+              Seed::Processable::ResourceGroup.new(processable, @resource_group_key)
+                                              .to_resource
           end
 
           def self.environment_attributes_for(build)
@@ -133,20 +146,24 @@ module Gitlab
             end
 
             @needs_attributes.flat_map do |need|
+              next if ::Feature.enabled?(:ci_needs_optional, default_enabled: :yaml) && need[:optional]
+
               result = @previous_stages.any? do |stage|
                 stage.seeds_names.include?(need[:name])
               end
 
-              "#{name}: needs '#{need[:name]}'" unless result
+              "'#{name}' job needs '#{need[:name]}' job, but it was not added to the pipeline" unless result
             end.compact
           end
 
           def max_needs_allowed
-            if Feature.enabled?(:ci_dag_limit_needs, @project, default_enabled: true)
-              LOW_NEEDS_LIMIT
-            else
-              HARD_NEEDS_LIMIT
-            end
+            @pipeline.project.actual_limits.ci_needs_size_limit
+          end
+
+          def variable_expansion_errors
+            expanded_collection = evaluate_context.variables.sort_and_expand_all(@pipeline.project)
+            errors = expanded_collection.errors
+            ["#{name}: #{errors}"] if errors
           end
 
           def pipeline_attributes
@@ -162,9 +179,15 @@ module Gitlab
           end
 
           def rules_attributes
-            return {} unless @using_rules
+            strong_memoize(:rules_attributes) do
+              next {} unless @using_rules
 
-            rules_result.build_attributes
+              rules_variables_result = ::Gitlab::Ci::Variables::Helpers.merge_variables(
+                @seed_attributes[:yaml_variables], rules_result.variables
+              )
+
+              rules_result.build_attributes.merge(yaml_variables: rules_variables_result)
+            end
           end
 
           def rules_result
@@ -179,10 +202,22 @@ module Gitlab
             end
           end
 
-          def cache_attributes
-            strong_memoize(:cache_attributes) do
-              @cache.build_attributes
-            end
+          # If a job uses `allow_failure:exit_codes` and `rules:allow_failure`
+          # we need to prevent the exit codes from being persisted because they
+          # would break the behavior defined by `rules:allow_failure`.
+          def allow_failure_criteria_attributes
+            return {} if rules_attributes[:allow_failure].nil?
+            return {} unless @seed_attributes.dig(:options, :allow_failure_criteria)
+
+            { options: { allow_failure_criteria: nil } }
+          end
+
+          def recalculate_yaml_variables!
+            return unless ::Feature.enabled?(:ci_workflow_rules_variables, default_enabled: :yaml)
+
+            @seed_attributes[:yaml_variables] = Gitlab::Ci::Variables::Helpers.inherit_yaml_variables(
+              from: @context.root_variables, to: @job_variables, inheritance: @root_variables_inheritance
+            )
           end
         end
       end

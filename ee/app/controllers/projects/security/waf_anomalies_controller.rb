@@ -3,10 +3,14 @@
 module Projects
   module Security
     class WafAnomaliesController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
+
       POLLING_INTERVAL = 5_000
 
       before_action :authorize_read_waf_anomalies!
       before_action :set_polling_interval
+
+      feature_category :web_firewall
 
       def summary
         return not_found unless anomaly_summary_service.elasticsearch_client

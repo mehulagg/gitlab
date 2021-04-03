@@ -1,8 +1,7 @@
+import { DropdownVariant } from 'ee/vue_shared/components/sidebar/epics_select//constants';
+import * as types from 'ee/vue_shared/components/sidebar/epics_select/store/mutation_types';
 import mutations from 'ee/vue_shared/components/sidebar/epics_select/store/mutations';
 import createDefaultState from 'ee/vue_shared/components/sidebar/epics_select/store/state';
-
-import * as types from 'ee/vue_shared/components/sidebar/epics_select/store/mutation_types';
-import { DropdownVariant } from 'ee/vue_shared/components/sidebar/epics_select//constants';
 
 import { mockEpic1, mockIssue } from '../../mock_data';
 

@@ -28,19 +28,7 @@ module EventsHelper
   end
 
   def event_action_name(event)
-    target =  if event.target_type
-                if event.design? || event.design_note?
-                  'design'
-                elsif event.wiki_page?
-                  'wiki page'
-                elsif event.note?
-                  event.note_target_type
-                else
-                  event.target_type.titleize.downcase
-                end
-              else
-                'project'
-              end
+    target = event.note_target_type_name || event.target_type_name
 
     [event.action_name, target].join(" ")
   end
@@ -190,8 +178,8 @@ module EventsHelper
   def event_note_target_url(event)
     if event.commit_note?
       project_commit_url(event.project, event.note_target, anchor: dom_id(event.target))
-    elsif event.project_snippet_note?
-      project_snippet_url(event.project, event.note_target, anchor: dom_id(event.target))
+    elsif event.snippet_note?
+      gitlab_snippet_url(event.note_target, anchor: dom_id(event.target))
     elsif event.issue_note?
       project_issue_url(event.project, id: event.note_target, anchor: dom_id(event.target))
     elsif event.merge_request_note?
@@ -199,8 +187,7 @@ module EventsHelper
     elsif event.design_note?
       design_url(event.note_target, anchor: dom_id(event.note))
     else
-      polymorphic_url([event.project.namespace.becomes(Namespace),
-                       event.project, event.note_target],
+      polymorphic_url([event.project, event.note_target],
                         anchor: dom_id(event.target))
     end
   end
@@ -230,7 +217,7 @@ module EventsHelper
   def event_note_title_html(event)
     if event.note_target
       capture do
-        concat content_tag(:span, event.note_target_type, class: "event-target-type gl-mr-2")
+        concat content_tag(:span, event.note_target_type_name, class: "event-target-type gl-mr-2")
         concat link_to(event.note_target_reference, event_note_target_url(event), title: event.target_title, class: 'has-tooltip event-target-link gl-mr-2')
       end
     else
@@ -269,7 +256,7 @@ module EventsHelper
       end
     else
       content_tag :div, class: 'system-note-image user-avatar' do
-        author_avatar(event, size: 40)
+        author_avatar(event, size: 32)
       end
     end
   end
@@ -286,7 +273,7 @@ module EventsHelper
 
   def event_user_info(event)
     content_tag(:div, class: "event-user-info") do
-      concat content_tag(:span, link_to_author(event), class: "author_name")
+      concat content_tag(:span, link_to_author(event), class: "author-name")
       concat "&nbsp;".html_safe
       concat content_tag(:span, event.author.to_reference, class: "username")
     end

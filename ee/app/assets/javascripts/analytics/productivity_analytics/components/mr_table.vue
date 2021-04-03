@@ -1,14 +1,13 @@
 <script>
-import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
-import MergeRequestTableRow from './mr_table_row.vue';
+import { GlDropdown, GlDropdownItem, GlIcon } from '@gitlab/ui';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
+import MergeRequestTableRow from './mr_table_row.vue';
 
 export default {
   components: {
     GlDropdown,
     GlDropdownItem,
-    Icon,
+    GlIcon,
     MergeRequestTableRow,
     Pagination,
   },
@@ -36,7 +35,7 @@ export default {
   },
   computed: {
     metricDropdownLabel() {
-      return this.columnOptions.find(option => option.key === this.metricType).label;
+      return this.columnOptions.find((option) => option.key === this.metricType).label;
     },
     showPagination() {
       return this.pageInfo && this.pageInfo.total;
@@ -79,7 +78,7 @@ export default {
                   @click="$emit('columnMetricChange', option.key)"
                 >
                   <span class="d-flex">
-                    <icon
+                    <gl-icon
                       class="flex-shrink-0 gl-mr-2"
                       :class="{
                         invisible: !isSelectedMetric(option.key),

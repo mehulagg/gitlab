@@ -41,8 +41,16 @@ module SystemNoteService
     ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_assignees(old_assignees)
   end
 
-  def change_milestone(noteable, project, author, milestone)
-    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).change_milestone(milestone)
+  def change_issuable_reviewers(issuable, project, author, old_reviewers)
+    ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_reviewers(old_reviewers)
+  end
+
+  def relate_issue(noteable, noteable_ref, user)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: noteable.project, author: user).relate_issue(noteable_ref)
+  end
+
+  def unrelate_issue(noteable, noteable_ref, user)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: noteable.project, author: user).unrelate_issue(noteable_ref)
   end
 
   # Called when the due_date of a Noteable is changed
@@ -122,12 +130,12 @@ module SystemNoteService
     ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).abort_merge_when_pipeline_succeeds(reason)
   end
 
-  def handle_merge_request_wip(noteable, project, author)
-    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).handle_merge_request_wip
+  def handle_merge_request_draft(noteable, project, author)
+    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).handle_merge_request_draft
   end
 
-  def add_merge_request_wip_from_commit(noteable, project, author, commit)
-    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).add_merge_request_wip_from_commit(commit)
+  def add_merge_request_draft_from_commit(noteable, project, author, commit)
+    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).add_merge_request_draft_from_commit(commit)
   end
 
   def resolve_all_discussions(merge_request, project, author)
@@ -160,16 +168,19 @@ module SystemNoteService
   # project     - Project owning noteable
   # author      - User performing the change
   # branch_type - 'source' or 'target'
+  # event_type  - the source of event: 'update' or 'delete'
   # old_branch  - old branch name
   # new_branch  - new branch name
   #
-  # Example Note text:
+  # Example Note text is based on event_type:
   #
-  #   "changed target branch from `Old` to `New`"
+  #   update: "changed target branch from `Old` to `New`"
+  #   delete: "deleted the `Old` branch. This merge request now targets the `New` branch"
   #
   # Returns the created Note object
-  def change_branch(noteable, project, author, branch_type, old_branch, new_branch)
-    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author).change_branch(branch_type, old_branch, new_branch)
+  def change_branch(noteable, project, author, branch_type, event_type, old_branch, new_branch)
+    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author)
+      .change_branch(branch_type, event_type, old_branch, new_branch)
   end
 
   # Called when a branch in Noteable is added or deleted
@@ -218,12 +229,20 @@ module SystemNoteService
     ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).noteable_moved(noteable_ref, direction)
   end
 
+  def noteable_cloned(noteable, project, noteable_ref, author, direction:)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).noteable_cloned(noteable_ref, direction)
+  end
+
   def mark_duplicate_issue(noteable, project, author, canonical_issue)
     ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).mark_duplicate_issue(canonical_issue)
   end
 
   def mark_canonical_issue_of_duplicate(noteable, project, author, duplicate_issue)
     ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).mark_canonical_issue_of_duplicate(duplicate_issue)
+  end
+
+  def add_email_participants(noteable, project, author, body)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).add_email_participants(body)
   end
 
   def discussion_lock(issuable, author)
@@ -298,6 +317,18 @@ module SystemNoteService
 
   def new_alert_issue(alert, issue, author)
     ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project, author: author).new_alert_issue(issue)
+  end
+
+  def create_new_alert(alert, monitoring_tool)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project).create_new_alert(monitoring_tool)
+  end
+
+  def change_incident_severity(incident, author)
+    ::SystemNotes::IncidentService.new(noteable: incident, project: incident.project, author: author).change_incident_severity
+  end
+
+  def log_resolving_alert(alert, monitoring_tool)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project).log_resolving_alert(monitoring_tool)
   end
 
   private

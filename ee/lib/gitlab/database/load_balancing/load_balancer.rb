@@ -18,6 +18,8 @@ module Gitlab
         # hosts - The hostnames/addresses of the additional databases.
         def initialize(hosts = [])
           @host_list = HostList.new(hosts.map { |addr| Host.new(addr, self) })
+          @connection_db_roles = {}.compare_by_identity
+          @connection_db_roles_count = {}.compare_by_identity
         end
 
         # Yields a connection that can be used for reads.
@@ -25,12 +27,20 @@ module Gitlab
         # If no secondaries were available this method will use the primary
         # instead.
         def read(&block)
+          connection = nil
           conflict_retried = 0
 
           while host
+            ensure_caching!
+
             begin
-              return yield host.connection
+              connection = host.connection
+              track_connection_role(connection, ROLE_REPLICA)
+
+              return yield connection
             rescue => error
+              untrack_connection_role(connection)
+
               if serialization_failure?(error)
                 # This error can occur when a query conflicts. See
                 # https://www.postgresql.org/docs/current/static/hot-standby.html#HOT-STANDBY-CONFLICT
@@ -73,16 +83,31 @@ module Gitlab
           )
 
           read_write(&block)
+        ensure
+          untrack_connection_role(connection)
         end
 
         # Yields a connection that can be used for both reads and writes.
         def read_write
+          connection = nil
           # In the event of a failover the primary may be briefly unavailable.
           # Instead of immediately grinding to a halt we'll retry the operation
           # a few times.
           retry_with_backoff do
-            yield ActiveRecord::Base.retrieve_connection
+            connection = ActiveRecord::Base.retrieve_connection
+            track_connection_role(connection, ROLE_PRIMARY)
+
+            yield connection
           end
+        ensure
+          untrack_connection_role(connection)
+        end
+
+        # Recognize the role (primary/replica) of the database this connection
+        # is connecting to. If the connection is not issued by this load
+        # balancer, return nil
+        def db_role_for_connection(connection)
+          @connection_db_roles[connection]
         end
 
         # Returns a host to use for queries.
@@ -95,7 +120,11 @@ module Gitlab
 
         # Releases the host and connection for the current thread.
         def release_host
-          RequestStore[CACHE_KEY]&.release_connection
+          if host = RequestStore[CACHE_KEY]
+            host.disable_query_cache!
+            host.release_connection
+          end
+
           RequestStore.delete(CACHE_KEY)
         end
 
@@ -105,17 +134,13 @@ module Gitlab
 
         # Returns the transaction write location of the primary.
         def primary_write_location
-          read_write do |connection|
-            row = connection
-              .select_all("SELECT #{Gitlab::Database.pg_current_wal_insert_lsn}()::text AS location")
-              .first
-
-            if row
-              row['location']
-            else
-              raise 'Failed to determine the write location of the primary database'
-            end
+          location = read_write do |connection|
+            ::Gitlab::Database.get_write_location(connection)
           end
+
+          return location if location
+
+          raise 'Failed to determine the write location of the primary database'
         end
 
         # Returns true if all hosts have caught up to the given transaction
@@ -171,6 +196,28 @@ module Gitlab
             serialization_failure?(error.cause)
           else
             error.is_a?(PG::TRSerializationFailure)
+          end
+        end
+
+        private
+
+        def ensure_caching!
+          host.enable_query_cache! unless host.query_cache_enabled
+        end
+
+        def track_connection_role(connection, role)
+          @connection_db_roles[connection] = role
+          @connection_db_roles_count[connection] ||= 0
+          @connection_db_roles_count[connection] += 1
+        end
+
+        def untrack_connection_role(connection)
+          return if connection.blank? || @connection_db_roles_count[connection].blank?
+
+          @connection_db_roles_count[connection] -= 1
+          if @connection_db_roles_count[connection] <= 0
+            @connection_db_roles.delete(connection)
+            @connection_db_roles_count.delete(connection)
           end
         end
       end

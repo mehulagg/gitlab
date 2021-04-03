@@ -1,12 +1,12 @@
 import savedContentMetaQuery from '~/static_site_editor/graphql/queries/saved_content_meta.query.graphql';
-import submitContentChanges from '~/static_site_editor/services/submit_content_changes';
 import submitContentChangesResolver from '~/static_site_editor/graphql/resolvers/submit_content_changes';
+import submitContentChanges from '~/static_site_editor/services/submit_content_changes';
 
 import {
   projectId as project,
   sourcePath,
   username,
-  sourceContent as content,
+  sourceContentYAML as content,
   savedContentMeta,
 } from '../../mock_data';
 

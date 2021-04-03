@@ -33,10 +33,10 @@ module QA
                   fill_element :approvals_required_field, rule[:approvals_required]
 
                   rule.key?(:users) && rule[:users].each do |user|
-                    select_user_member user.username
+                    select_user_member(user.username)
                   end
                   rule.key?(:groups) && rule[:groups].each do |group|
-                    select_group_member group.name
+                    select_group_member(group.name)
                   end
 
                   click_approvers_modal_ok_button
@@ -65,8 +65,10 @@ module QA
               private
 
               def enter_member(name)
-                within_element(:member_select_field) do
-                  search_item(name)
+                retry_until do
+                  within_element(:member_select_field) do
+                    search_item(name)
+                  end
                 end
               end
             end

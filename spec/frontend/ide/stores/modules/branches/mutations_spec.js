@@ -1,6 +1,6 @@
-import state from '~/ide/stores/modules/branches/state';
-import mutations from '~/ide/stores/modules/branches/mutations';
 import * as types from '~/ide/stores/modules/branches/mutation_types';
+import mutations from '~/ide/stores/modules/branches/mutations';
+import state from '~/ide/stores/modules/branches/state';
 import { branches } from '../../../mock_data';
 
 describe('IDE branches mutations', () => {
@@ -28,7 +28,7 @@ describe('IDE branches mutations', () => {
 
   describe('RECEIVE_BRANCHES_SUCCESS', () => {
     it('sets branches', () => {
-      const expectedBranches = branches.map(branch => ({
+      const expectedBranches = branches.map((branch) => ({
         name: branch.name,
         committedDate: branch.commit.committed_date,
       }));

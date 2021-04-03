@@ -1,33 +1,29 @@
 <script>
+import { GlLoadingIcon, GlIcon, GlSafeHtmlDirective as SafeHtml, GlAlert } from '@gitlab/ui';
+import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { throttle, isEmpty } from 'lodash';
 import { mapGetters, mapState, mapActions } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
-import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { isScrolledToBottom } from '~/lib/utils/scroll_utils';
-import { polyfillSticky } from '~/lib/utils/sticky';
+import { sprintf } from '~/locale';
 import CiHeader from '~/vue_shared/components/header_ci_component.vue';
-import Callout from '~/vue_shared/components/callout.vue';
-import Icon from '~/vue_shared/components/icon.vue';
+import delayedJobMixin from '../mixins/delayed_job_mixin';
 import EmptyState from './empty_state.vue';
 import EnvironmentsBlock from './environments_block.vue';
 import ErasedBlock from './erased_block.vue';
 import LogTopBar from './job_log_controllers.vue';
+import Log from './log/log.vue';
+import Sidebar from './sidebar.vue';
 import StuckBlock from './stuck_block.vue';
 import UnmetPrerequisitesBlock from './unmet_prerequisites_block.vue';
-import Sidebar from './sidebar.vue';
-import { sprintf } from '~/locale';
-import delayedJobMixin from '../mixins/delayed_job_mixin';
-import Log from './log/log.vue';
 
 export default {
   name: 'JobPageApp',
   components: {
     CiHeader,
-    Callout,
     EmptyState,
     EnvironmentsBlock,
     ErasedBlock,
-    Icon,
+    GlIcon,
     Log,
     LogTopBar,
     StuckBlock,
@@ -35,20 +31,24 @@ export default {
     Sidebar,
     GlLoadingIcon,
     SharedRunner: () => import('ee_component/jobs/components/shared_runner_limit_block.vue'),
+    GlAlert,
+  },
+  directives: {
+    SafeHtml,
   },
   mixins: [delayedJobMixin],
   props: {
+    artifactHelpUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
     runnerSettingsUrl: {
       type: String,
       required: false,
       default: null,
     },
     variablesSettingsUrl: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    runnerHelpUrl: {
       type: String,
       required: false,
       default: null,
@@ -128,19 +128,11 @@ export default {
       if (isEmpty(oldVal) && !isEmpty(newVal.pipeline)) {
         const stages = this.job.pipeline.details.stages || [];
 
-        const defaultStage = stages.find(stage => stage && stage.name === this.selectedStage);
+        const defaultStage = stages.find((stage) => stage && stage.name === this.selectedStage);
 
         if (defaultStage) {
           this.fetchJobsForStage(defaultStage);
         }
-      }
-
-      if (newVal.archived) {
-        this.$nextTick(() => {
-          if (this.$refs.sticky) {
-            polyfillSticky(this.$refs.sticky);
-          }
-        });
       }
     },
   },
@@ -216,10 +208,14 @@ export default {
               @clickedSidebarButton="toggleSidebar"
             />
           </div>
-
-          <callout v-if="shouldRenderHeaderCallout">
-            <div v-html="job.callout_message"></div>
-          </callout>
+          <gl-alert
+            v-if="shouldRenderHeaderCallout"
+            variant="danger"
+            class="gl-mt-3"
+            :dismissible="false"
+          >
+            <div v-safe-html="job.callout_message"></div>
+          </gl-alert>
         </header>
         <!-- EO Header Section -->
 
@@ -240,7 +236,6 @@ export default {
           v-if="shouldRenderSharedRunnerLimitWarning"
           :quota-used="job.runners.quota.used"
           :quota-limit="job.runners.quota.limit"
-          :runners-path="runnerHelpUrl"
           :project-path="projectPath"
           :subscriptions-more-minutes-url="subscriptionsMoreMinutesUrl"
         />
@@ -261,12 +256,11 @@ export default {
 
         <div
           v-if="job.archived"
-          ref="sticky"
           class="gl-mt-3 archived-job"
           :class="{ 'sticky-top border-bottom-0': hasTrace }"
           data-testid="archived-job"
         >
-          <icon name="lock" class="align-text-bottom" />
+          <gl-icon name="lock" class="align-text-bottom" />
           {{ __('This job is archived. Only the complete pipeline can be retried.') }}
         </div>
         <!-- job log -->
@@ -319,7 +313,7 @@ export default {
         'right-sidebar-expanded': isSidebarOpen,
         'right-sidebar-collapsed': !isSidebarOpen,
       }"
-      :runner-help-url="runnerHelpUrl"
+      :artifact-help-url="artifactHelpUrl"
       data-testid="job-sidebar"
     />
   </div>

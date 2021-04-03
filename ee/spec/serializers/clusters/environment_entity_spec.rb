@@ -62,6 +62,16 @@ RSpec.describe Clusters::EnvironmentEntity do
         group.add_developer(user)
       end
 
+      it 'exposes logs_path' do
+        expect(subject).to include(:logs_path)
+      end
+    end
+
+    context 'with reporter access' do
+      before do
+        group.add_reporter(user)
+      end
+
       it 'does not expose logs_path' do
         expect(subject).not_to include(:logs_path)
       end

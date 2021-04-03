@@ -1,100 +1,51 @@
 # frozen_string_literal: true
 
 module AlertManagement
-  class ProcessPrometheusAlertService < BaseService
-    include Gitlab::Utils::StrongMemoize
+  class ProcessPrometheusAlertService
+    extend ::Gitlab::Utils::Override
+    include ::AlertManagement::AlertProcessing
+
+    def initialize(project, payload)
+      @project = project
+      @payload = payload
+    end
 
     def execute
-      return bad_request unless parsed_alert.valid?
+      return bad_request unless incoming_payload.has_required_attributes?
 
-      process_alert_management_alert
+      process_alert
+      return bad_request unless alert.persisted?
+
+      complete_post_processing_tasks
 
       ServiceResponse.success
     end
 
     private
 
-    delegate :firing?, :resolved?, :gitlab_fingerprint, :ends_at, to: :parsed_alert
+    attr_reader :project, :payload
 
-    def parsed_alert
-      strong_memoize(:parsed_alert) do
-        Gitlab::Alerting::Alert.new(project: project, payload: params)
+    override :process_new_alert
+    def process_new_alert
+      return if resolving_alert?
+
+      super
+    end
+
+    override :incoming_payload
+    def incoming_payload
+      strong_memoize(:incoming_payload) do
+        Gitlab::AlertManagement::Payload.parse(
+          project,
+          payload,
+          monitoring_tool: Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:prometheus]
+        )
       end
     end
 
-    def process_alert_management_alert
-      process_firing_alert_management_alert if firing?
-      process_resolved_alert_management_alert if resolved?
-    end
-
-    def process_firing_alert_management_alert
-      if am_alert.present?
-        am_alert.register_new_event!
-        reset_alert_management_alert_status
-      else
-        create_alert_management_alert
-      end
-    end
-
-    def reset_alert_management_alert_status
-      return if am_alert.trigger
-
-      logger.warn(
-        message: 'Unable to update AlertManagement::Alert status to triggered',
-        project_id: project.id,
-        alert_id: am_alert.id
-      )
-    end
-
-    def create_alert_management_alert
-      am_alert = AlertManagement::Alert.new(am_alert_params.merge(ended_at: nil))
-      if am_alert.save
-        am_alert.execute_services
-        return
-      end
-
-      logger.warn(
-        message: 'Unable to create AlertManagement::Alert',
-        project_id: project.id,
-        alert_errors: am_alert.errors.messages
-      )
-    end
-
-    def am_alert_params
-      Gitlab::AlertManagement::AlertParams.from_prometheus_alert(project: project, parsed_alert: parsed_alert)
-    end
-
-    def process_resolved_alert_management_alert
-      return if am_alert.blank?
-
-      if am_alert.resolve(ends_at)
-        close_issue(am_alert.issue)
-        return
-      end
-
-      logger.warn(
-        message: 'Unable to update AlertManagement::Alert status to resolved',
-        project_id: project.id,
-        alert_id: am_alert.id
-      )
-    end
-
-    def close_issue(issue)
-      return if issue.blank? || issue.closed?
-
-      Issues::CloseService
-        .new(project, User.alert_bot)
-        .execute(issue, system_note: false)
-
-      SystemNoteService.auto_resolve_prometheus_alert(issue, project, User.alert_bot) if issue.reset.closed?
-    end
-
-    def logger
-      @logger ||= Gitlab::AppLogger
-    end
-
-    def am_alert
-      @am_alert ||= AlertManagement::Alert.not_resolved.for_fingerprint(project, gitlab_fingerprint).first
+    override :resolving_alert?
+    def resolving_alert?
+      incoming_payload.resolved?
     end
 
     def bad_request

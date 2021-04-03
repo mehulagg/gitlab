@@ -1,0 +1,5 @@
+---
+title: 'Geo: Fail syncs which exceed a timeout'
+merge_request: 56538
+author:
+type: fixed

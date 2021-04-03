@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Contribute to GitLab
 
 Thank you for your interest in contributing to GitLab. This guide details how
@@ -30,7 +37,7 @@ Report suspected security vulnerabilities in private to
 `support@gitlab.com`, also see the
 [disclosure section on the GitLab.com website](https://about.gitlab.com/security/disclosure/).
 
-DANGER: **Danger:**
+WARNING:
 Do **NOT** create publicly viewable issues for suspected security vulnerabilities.
 
 ## Code of conduct
@@ -67,6 +74,11 @@ we credit the original author by adding a changelog entry crediting the author
 and optionally include the original author on at least one of the commits
 within the MR.
 
+## Closing policy for inactive bugs
+
+GitLab values the time spent by contributors on reporting bugs. However, if a bug remains inactive for a very long period,
+it will qualify for auto-closure. Please refer to the [auto-close inactive bugs](https://about.gitlab.com/handbook/engineering/quality/triage-operations/#auto-close-inactive-bugs) section in our handbook to understand the complete workflow.
+
 ## Helping others
 
 Help other GitLab users when you can.
@@ -81,6 +93,11 @@ If you would like to contribute to GitLab:
 - Issues with the
   [`~Accepting merge requests` label](issue_workflow.md#label-for-community-contributors)
   are a great place to start.
+- Optimizing our tests is another great opportunity to contribute. You can use
+  [RSpec profiling statistics](https://gitlab-org.gitlab.io/rspec_profiling_stats/) to identify
+  slowest tests. These tests are good candidates for improving and checking if any of
+  [best practices](../testing_guide/best_practices.md)
+  could speed them up.
 - Consult the [Contribution Flow](#contribution-flow) section to learn the process.
 
 If you have any questions or need help visit [Getting Help](https://about.gitlab.com/get-help/) to
@@ -127,12 +144,12 @@ Keep the following in mind when submitting merge requests:
 
 - When reviewers are reading through a merge request they may request guidance from other
   reviewers.
-- If the code quality is found to not meet GitLab’s standards, the merge request reviewer will
+- If the code quality is found to not meet GitLab standards, the merge request reviewer will
   provide guidance and refer the author to our:
-  - [Documentation](../documentation/styleguide.md) style guide.
-  - Code style guides.
+  - [Documentation](../documentation/styleguide/index.md) style guide.
+  - [Code style guides](style_guides.md).
 - Sometimes style guides will be followed but the code will lack structural integrity, or the
-  reviewer will have reservations about the code’s overall quality. When there is a reservation,
+  reviewer will have reservations about the code's overall quality. When there is a reservation,
   the reviewer will inform the author and provide some guidance.
 - Though GitLab generally allows anyone to indicate
   [approval](../../user/project/merge_requests/merge_request_approvals.md) of merge requests, the
@@ -164,10 +181,20 @@ reasons for including it.
 `@mention` a maintainer in merge requests that contain:
 
 - More than 500 changes.
-- Any major breaking changes.
+- Any major [breaking changes](#breaking-changes).
 - External libraries.
 
 If you are not sure who to mention, the reviewer will do this for you early in the merge request process.
+
+#### Breaking changes
+
+A "breaking change" is any change that requires users to make a corresponding change to their code, settings, or workflow. "Users" might be humans, API clients, or even code classes that "use" another class. Examples of breaking changes include:
+
+- Removing a user-facing feature without a replacement/workaround.
+- Changing the definition of an existing API (by re-naming query parameters, changing routes, etc.).
+- Removing a public method from a code class.
+
+A breaking change can be considered "major" if it affects many users, or represents a significant change in behavior.
 
 #### Issues workflow
 

@@ -1,7 +1,7 @@
-import $ from 'jquery';
+import { GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import $ from 'jquery';
 import StopComponent from '~/environments/components/environment_stop.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import eventHub from '~/environments/event_hub';
 
 $.fn.tooltip = () => {};
@@ -17,7 +17,7 @@ describe('Stop Component', () => {
     });
   };
 
-  const findButton = () => wrapper.find(LoadingButton);
+  const findButton = () => wrapper.find(GlButton);
 
   beforeEach(() => {
     jest.spyOn(window, 'confirm');

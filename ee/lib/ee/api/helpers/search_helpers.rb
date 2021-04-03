@@ -11,12 +11,12 @@ module EE
 
           override :global_search_scopes
           def global_search_scopes
-            ['wiki_blobs', 'blobs', 'commits', *super]
+            ['wiki_blobs', 'blobs', 'commits', 'notes', *super]
           end
 
           override :group_search_scopes
           def group_search_scopes
-            ['wiki_blobs', 'blobs', 'commits', *super]
+            ['wiki_blobs', 'blobs', 'commits', 'notes', *super]
           end
         end
       end

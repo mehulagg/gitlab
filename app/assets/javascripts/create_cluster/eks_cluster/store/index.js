@@ -1,19 +1,16 @@
 import Vuex from 'vuex';
-import * as actions from './actions';
-import * as getters from './getters';
-import mutations from './mutations';
-import state from './state';
-
 import clusterDropdownStore from '~/create_cluster/store/cluster_dropdown';
-
 import {
   fetchRoles,
-  fetchRegions,
   fetchKeyPairs,
   fetchVpcs,
   fetchSubnets,
   fetchSecurityGroups,
 } from '../services/aws_services_facade';
+import * as actions from './actions';
+import * as getters from './getters';
+import mutations from './mutations';
+import state from './state';
 
 const createStore = ({ initialState }) =>
   new Vuex.Store({
@@ -25,10 +22,6 @@ const createStore = ({ initialState }) =>
       roles: {
         namespaced: true,
         ...clusterDropdownStore({ fetchFn: fetchRoles }),
-      },
-      regions: {
-        namespaced: true,
-        ...clusterDropdownStore({ fetchFn: fetchRegions }),
       },
       keyPairs: {
         namespaced: true,

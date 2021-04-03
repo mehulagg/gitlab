@@ -24,8 +24,6 @@ module Security
     end
 
     def execute
-      requested_reports = pipeline_reports.select { |report_type| requested_type?(report_type) }
-
       findings = requested_reports.each_with_object([]) do |(type, report), findings|
         raise ParseError, 'JSON parsing failed' if report.error.is_a?(Gitlab::Ci::Parsers::Security::Common::SecurityReportParserError)
 
@@ -54,18 +52,18 @@ module Security
       Gitlab::Utils.stable_sort_by(findings) { |x| [-x.severity_value, -x.confidence_value] }
     end
 
-    def pipeline_reports
-      pipeline&.security_reports&.reports || {}
+    def requested_reports
+      @requested_reports ||= pipeline&.security_reports(report_types: report_types)&.reports || {}
     end
 
     def vulnerabilities_by_finding_fingerprint(report_type, report)
       Vulnerabilities::Finding
-        .with_vulnerabilities_for_state(
-          project: pipeline.project,
-          report_type: report_type,
-          project_fingerprints: report.findings.map(&:project_fingerprint))
+        .by_project_fingerprints(report.findings.map(&:project_fingerprint))
+        .by_projects(pipeline.project)
+        .by_report_types(report_type)
+        .select(:vulnerability_id, :project_fingerprint)
        .each_with_object({}) do |finding, hash|
-        hash[finding.project_fingerprint] = finding.vulnerability
+        hash[finding.project_fingerprint] = finding.vulnerability_id
       end
     end
 
@@ -77,15 +75,18 @@ module Security
     def normalize_report_findings(report_findings, vulnerabilities)
       report_findings.map do |report_finding|
         finding_hash = report_finding.to_hash
-          .except(:compare_key, :identifiers, :location, :scanner)
+          .except(:compare_key, :identifiers, :location, :scanner, :links)
 
         finding = Vulnerabilities::Finding.new(finding_hash)
         # assigning Vulnerabilities to Findings to enable the computed state
         finding.location_fingerprint = report_finding.location.fingerprint
-        finding.vulnerability = vulnerabilities[finding.project_fingerprint]
+        finding.vulnerability_id = vulnerabilities[finding.project_fingerprint]
         finding.project = pipeline.project
         finding.sha = pipeline.sha
         finding.build_scanner(report_finding.scanner&.to_hash)
+        finding.finding_links = report_finding.links.map do |link|
+          Vulnerabilities::FindingLink.new(link.to_hash)
+        end
         finding.identifiers = report_finding.identifiers.map do |identifier|
           Vulnerabilities::Identifier.new(identifier.to_hash)
         end
@@ -105,10 +106,6 @@ module Security
       end
     end
 
-    def requested_type?(type)
-      report_types.include?(type)
-    end
-
     def include_dismissed?
       params[:scope] == 'all'
     end
@@ -119,10 +116,10 @@ module Security
 
     def dismissal_feedback_by_fingerprint
       strong_memoize(:dismissal_feedback_by_fingerprint) do
-        pipeline.project.vulnerability_feedback
-          .with_associations
-          .where(feedback_type: 'dismissal') # rubocop:disable CodeReuse/ActiveRecord
-          .group_by(&:project_fingerprint)
+        pipeline.project
+                .vulnerability_feedback
+                .for_dismissal
+                .group_by(&:project_fingerprint)
       end
     end
 

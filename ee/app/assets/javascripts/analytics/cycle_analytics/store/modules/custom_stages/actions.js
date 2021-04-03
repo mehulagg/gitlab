@@ -1,9 +1,9 @@
 import Api from 'ee/api';
 import createFlash from '~/flash';
-import { __, sprintf } from '~/locale';
 import httpStatusCodes from '~/lib/utils/http_status';
-import * as types from './mutation_types';
+import { __, sprintf } from '~/locale';
 import { removeFlash, isStageNameExistsError } from '../../../utils';
+import * as types from './mutation_types';
 
 export const setStageEvents = ({ commit }, data) => commit(types.SET_STAGE_EVENTS, data);
 export const setStageFormErrors = ({ commit }, errors) =>
@@ -40,13 +40,18 @@ export const clearSavingCustomStage = ({ commit }) => commit(types.CLEAR_SAVING_
 
 export const receiveCreateStageSuccess = ({ commit, dispatch }, { data: { title } }) => {
   commit(types.RECEIVE_CREATE_STAGE_SUCCESS);
-  createFlash(sprintf(__(`Your custom stage '%{title}' was created`), { title }), 'notice');
+  createFlash({
+    message: sprintf(__(`Your custom stage '%{title}' was created`), { title }),
+    type: 'notice',
+  });
 
   return Promise.resolve()
     .then(() => dispatch('fetchGroupStagesAndEvents', null, { root: true }))
     .then(() => dispatch('clearSavingCustomStage'))
     .catch(() => {
-      createFlash(__('There was a problem refreshing the data, please try again'));
+      createFlash({
+        message: __('There was a problem refreshing the data, please try again'),
+      });
     });
 };
 
@@ -61,20 +66,24 @@ export const receiveCreateStageError = (
       ? sprintf(__(`'%{name}' stage already exists`), { name })
       : __('There was a problem saving your custom stage, please try again');
 
-  createFlash(flashMessage);
+  createFlash({
+    message: flashMessage,
+  });
   return dispatch('setStageFormErrors', errors);
 };
 
-export const createStage = ({ dispatch, rootState }, data) => {
-  const {
-    selectedGroup: { fullPath },
-  } = rootState;
+export const createStage = ({ dispatch, rootGetters }, data) => {
+  const { currentGroupPath, currentValueStreamId } = rootGetters;
 
   dispatch('clearFormErrors');
   dispatch('setSavingCustomStage');
 
-  return Api.cycleAnalyticsCreateStage(fullPath, data)
-    .then(response => {
+  return Api.cycleAnalyticsCreateStage({
+    groupId: currentGroupPath,
+    valueStreamId: currentValueStreamId,
+    data,
+  })
+    .then((response) => {
       const { status, data: responseData } = response;
       return dispatch('receiveCreateStageSuccess', { status, data: responseData });
     })

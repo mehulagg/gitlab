@@ -1,12 +1,11 @@
 <script>
+import { GlTooltip, GlIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 
-import { GlTooltip, GlIcon } from '@gitlab/ui';
+import { issuableTypesMap } from '~/related_issues/constants';
 
-import { issuableTypesMap } from 'ee/related_issues/constants';
-
-import EpicActionsSplitButton from './epic_issue_actions_split_button.vue';
 import EpicHealthStatus from './epic_health_status.vue';
+import EpicActionsSplitButton from './epic_issue_actions_split_button.vue';
 
 export default {
   components: {
@@ -48,7 +47,9 @@ export default {
       });
     },
     showCreateIssueForm() {
-      this.toggleCreateIssueForm({ toggleState: true });
+      this.toggleCreateIssueForm({
+        toggleState: true,
+      });
     },
     showAddEpicForm() {
       this.toggleAddItemForm({
@@ -57,7 +58,9 @@ export default {
       });
     },
     showCreateEpicForm() {
-      this.toggleCreateEpicForm({ toggleState: true });
+      this.toggleCreateEpicForm({
+        toggleState: true,
+      });
     },
   },
 };

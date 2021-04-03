@@ -52,7 +52,7 @@ export default {
     resolveButtonTitle() {
       if (this.isDraft || this.discussionId) return this.resolvedStatusMessage;
 
-      let title = __('Mark as resolved');
+      let title = __('Resolve thread');
 
       if (this.resolvedBy) {
         title = sprintf(__('Resolved by %{name}'), { name: this.resolvedBy.name });

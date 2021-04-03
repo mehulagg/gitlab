@@ -1,9 +1,9 @@
-import MockAdapter from 'axios-mock-adapter';
-import { mount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
-import Project from 'ee/operations/components/dashboard/project.vue';
+import { mount, createLocalVue } from '@vue/test-utils';
+import MockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 import Dashboard from 'ee/operations/components/dashboard/dashboard.vue';
+import Project from 'ee/operations/components/dashboard/project.vue';
 import createStore from 'ee/vue_shared/dashboards/store';
 import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';

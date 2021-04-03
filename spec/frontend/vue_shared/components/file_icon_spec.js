@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { FILE_SYMLINK_MODE } from '~/vue_shared/constants';
 
@@ -36,6 +36,9 @@ describe('File Icon component', () => {
     fileName        | iconName
     ${'test.js'}    | ${'javascript'}
     ${'test.png'}   | ${'image'}
+    ${'test.PNG'}   | ${'image'}
+    ${'.npmrc'}     | ${'npm'}
+    ${'.Npmrc'}     | ${'file'}
     ${'webpack.js'} | ${'webpack'}
   `('should render a $iconName icon based on file ending', ({ fileName, iconName }) => {
     createComponent({ fileName });

@@ -1,16 +1,18 @@
 <script>
+/* eslint-disable vue/no-v-html */
+import { GlFormGroup, GlButton, GlModal, GlToast, GlToggle } from '@gitlab/ui';
 import Vue from 'vue';
-import { GlFormGroup, GlDeprecatedButton, GlModal, GlToast, GlToggle } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { __, s__, sprintf } from '~/locale';
+import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import { visitUrl, getBaseURL } from '~/lib/utils/url_utility';
+import { __, s__, sprintf } from '~/locale';
 
 Vue.use(GlToast);
 
 export default {
   components: {
     GlFormGroup,
-    GlDeprecatedButton,
+    GlButton,
     GlModal,
     GlToggle,
   },
@@ -97,11 +99,11 @@ export default {
       'resetAlert',
     ]),
     hideSelfMonitorModal() {
-      this.$root.$emit('bv::hide::modal', this.modalId);
+      this.$root.$emit(BV_HIDE_MODAL, this.modalId);
       this.setSelfMonitor(true);
     },
     showSelfMonitorModal() {
-      this.$root.$emit('bv::show::modal', this.modalId);
+      this.$root.$emit(BV_SHOW_MODAL, this.modalId);
     },
     saveChangesSelfMonitorProject() {
       if (this.projectCreated && !this.projectEnabled) {
@@ -122,7 +124,7 @@ export default {
       <h4 class="js-section-header">
         {{ s__('SelfMonitoring|Self monitoring') }}
       </h4>
-      <gl-deprecated-button class="js-settings-toggle">{{ __('Expand') }}</gl-deprecated-button>
+      <gl-button class="js-settings-toggle">{{ __('Expand') }}</gl-button>
       <p class="js-section-sub-header">
         {{ s__('SelfMonitoring|Enable or disable instance self monitoring') }}
       </p>
@@ -130,11 +132,11 @@ export default {
     <div class="settings-content">
       <form name="self-monitoring-form">
         <p ref="selfMonitoringFormText" v-html="selfMonitoringFormText"></p>
-        <gl-form-group :label="$options.formLabels.createProject" label-for="self-monitor-toggle">
+        <gl-form-group>
           <gl-toggle
             v-model="selfMonitorEnabled"
             :is-loading="loading"
-            name="self-monitor-toggle"
+            :label="$options.formLabels.createProject"
           />
         </gl-form-group>
       </form>
@@ -145,6 +147,7 @@ export default {
       :ok-title="__('Delete project')"
       :cancel-title="__('Cancel')"
       ok-variant="danger"
+      category="primary"
       @ok="deleteProject"
       @cancel="hideSelfMonitorModal"
     >

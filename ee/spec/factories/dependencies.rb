@@ -8,10 +8,10 @@ FactoryBot.define do
     version { '1.8.0' }
     licenses { [] }
     vulnerabilities { [] }
-    sequence(:location) do |n|
+    location do
       {
-        blob_path: "/some_project/path/File_#{n}.lock",
-        path:      "File_#{n}.lock"
+        blob_path: '/some_project/path/package_file.lock',
+        path: 'package_file.lock'
       }
     end
 
@@ -22,12 +22,16 @@ FactoryBot.define do
     trait :with_vulnerabilities do
       vulnerabilities do
         [{
-           name:     'DDoS',
-           severity: 'high'
+           name: 'DDoS',
+           severity: 'high',
+           id: 42,
+           url: 'http://gitlab.org/some-group/some-project/-/security/vulnerabilities/42'
          },
          {
            name:     'XSS vulnerability',
-           severity: 'low'
+           severity: 'low',
+           id: 1729,
+           url: 'http://gitlab.org/some-group/some-project/-/security/vulnerabilities/1729'
          }]
       end
     end
@@ -38,6 +42,38 @@ FactoryBot.define do
            name: 'MIT',
            url: 'http://opensource.org/licenses/mit-license'
          }]
+      end
+    end
+
+    trait :indirect do
+      iid { 42 }
+      location do
+        {
+          blob_path: '/some_project/path/package_file.lock',
+          path: 'package_file.lock',
+          ancestors:
+            [{
+               name: 'dep1',
+               version: '1.2'
+             },
+             {
+               name: 'dep2',
+               version: '10.11'
+             }],
+          top_level: false
+        }
+      end
+    end
+
+    trait :direct do
+      iid { 24 }
+      location do
+        {
+          blob_path: '/some_project/path/package_file.lock',
+          path: 'package_file.lock',
+          ancestors: nil,
+          top_level: true
+        }
       end
     end
 

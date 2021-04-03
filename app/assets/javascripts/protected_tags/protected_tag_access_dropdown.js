@@ -1,3 +1,4 @@
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 import { __ } from '~/locale';
 
 export default class ProtectedTagAccessDropdown {
@@ -8,7 +9,7 @@ export default class ProtectedTagAccessDropdown {
 
   initDropdown() {
     const { onSelect } = this.options;
-    this.options.$dropdown.glDropdown({
+    initDeprecatedJQueryDropdown(this.options.$dropdown, {
       data: this.options.data,
       selectable: true,
       inputId: this.options.$dropdown.data('inputId'),

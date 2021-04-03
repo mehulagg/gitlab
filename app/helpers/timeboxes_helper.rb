@@ -40,7 +40,7 @@ module TimeboxesHelper
     opts = { milestone_title: milestone.title, state: state }
 
     if @project
-      polymorphic_path([@project.namespace.becomes(Namespace), @project, type], opts)
+      polymorphic_path([@project, type], opts)
     elsif @group
       polymorphic_url([type, @group], opts)
     else
@@ -115,17 +115,6 @@ module TimeboxesHelper
     end
   end
 
-  def milestones_filter_dropdown_path
-    project = @target_project || @project
-    if project
-      project_milestones_path(project, :json)
-    elsif @group
-      group_milestones_path(@group, :json)
-    else
-      dashboard_milestones_path(:json)
-    end
-  end
-
   def milestone_time_for(date, date_type)
     title = date_type == :start ? "Start date" : "End date"
 
@@ -155,7 +144,7 @@ module TimeboxesHelper
     opened = milestone.opened_issues_count
     closed = milestone.closed_issues_count
 
-    return _("Issues") if total.zero?
+    return _("Issues") if total == 0
 
     content = []
 
@@ -187,7 +176,7 @@ module TimeboxesHelper
   def milestone_releases_tooltip_text(milestone)
     count = milestone.releases.count
 
-    return _("Releases") if count.zero?
+    return _("Releases") if count == 0
 
     n_("%{releases} release", "%{releases} releases", count) % { releases: count }
   end
@@ -228,8 +217,8 @@ module TimeboxesHelper
   end
   alias_method :milestone_date_range, :timebox_date_range
 
-  def milestone_tab_path(milestone, tab)
-    url_for(action: tab, format: :json)
+  def milestone_tab_path(milestone, tab, params = {})
+    url_for(params.merge(action: tab, format: :json))
   end
 
   def update_milestone_path(milestone, params = {})

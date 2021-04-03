@@ -1,5 +1,5 @@
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import { GlLoadingIcon } from '@gitlab/ui';
 import MrCollapsibleSection from '~/vue_merge_request_widget/components/mr_collapsible_extension.vue';
 
 describe('Merge Request Collapsible Extension', () => {
@@ -8,19 +8,21 @@ describe('Merge Request Collapsible Extension', () => {
     title: 'View artifacts',
   };
 
-  const mountComponent = props => {
+  const mountComponent = (props) => {
     wrapper = mount(MrCollapsibleSection, {
       propsData: {
         ...props,
       },
       slots: {
         default: '<div class="js-slot">Foo</div>',
+        header: '<span data-testid="collapsed-header">hello there</span>',
       },
     });
   };
 
-  const findTitle = () => wrapper.find('.js-title');
+  const findTitle = () => wrapper.find('[data-testid="mr-collapsible-title"]');
   const findErrorMessage = () => wrapper.find('.js-error-state');
+  const findIcon = () => wrapper.find(GlIcon);
 
   afterEach(() => {
     wrapper.destroy();
@@ -35,8 +37,12 @@ describe('Merge Request Collapsible Extension', () => {
       expect(findTitle().text()).toBe(data.title);
     });
 
+    it('renders the header slot', () => {
+      expect(wrapper.find('[data-testid="collapsed-header"]').text()).toBe('hello there');
+    });
+
     it('renders angle-right icon', () => {
-      expect(wrapper.vm.arrowIconName).toBe('angle-right');
+      expect(findIcon().props('name')).toBe('angle-right');
     });
 
     describe('onClick', () => {
@@ -54,7 +60,7 @@ describe('Merge Request Collapsible Extension', () => {
       });
 
       it('renders angle-down icon', () => {
-        expect(wrapper.vm.arrowIconName).toBe('angle-down');
+        expect(findIcon().props('name')).toBe('angle-down');
       });
     });
   });
@@ -65,18 +71,8 @@ describe('Merge Request Collapsible Extension', () => {
     });
 
     it('renders the buttons disabled', () => {
-      expect(
-        wrapper
-          .findAll('button')
-          .at(0)
-          .attributes('disabled'),
-      ).toEqual('disabled');
-      expect(
-        wrapper
-          .findAll('button')
-          .at(1)
-          .attributes('disabled'),
-      ).toEqual('disabled');
+      expect(wrapper.findAll('button').at(0).attributes('disabled')).toEqual('disabled');
+      expect(wrapper.findAll('button').at(1).attributes('disabled')).toEqual('disabled');
     });
 
     it('renders loading spinner', () => {

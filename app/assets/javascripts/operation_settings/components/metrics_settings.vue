@@ -1,12 +1,12 @@
 <script>
+import { GlButton, GlLink } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { GlDeprecatedButton, GlLink } from '@gitlab/ui';
-import ExternalDashboard from './form_group/external_dashboard.vue';
 import DashboardTimezone from './form_group/dashboard_timezone.vue';
+import ExternalDashboard from './form_group/external_dashboard.vue';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlLink,
     ExternalDashboard,
     DashboardTimezone,
@@ -31,10 +31,12 @@ export default {
 <template>
   <section class="settings no-animate">
     <div class="settings-header">
-      <h3 class="js-section-header h4">
+      <h4
+        class="js-section-header settings-title js-settings-toggle js-settings-toggle-trigger-only"
+      >
         {{ s__('MetricsSettings|Metrics dashboard') }}
-      </h3>
-      <gl-deprecated-button class="js-settings-toggle">{{ __('Expand') }}</gl-deprecated-button>
+      </h4>
+      <gl-button class="js-settings-toggle">{{ __('Expand') }}</gl-button>
       <p class="js-section-sub-header">
         {{ s__('MetricsSettings|Manage Metrics Dashboard settings.') }}
         <gl-link :href="helpPage">{{ __('Learn more') }}</gl-link>
@@ -44,9 +46,9 @@ export default {
       <form>
         <dashboard-timezone />
         <external-dashboard />
-        <gl-deprecated-button variant="success" @click="saveChanges">
+        <gl-button variant="success" category="primary" @click="saveChanges">
           {{ __('Save Changes') }}
-        </gl-deprecated-button>
+        </gl-button>
       </form>
     </div>
   </section>

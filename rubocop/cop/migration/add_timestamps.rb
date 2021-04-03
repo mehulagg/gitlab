@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../migration_helpers'
 
 module RuboCop
@@ -7,7 +9,7 @@ module RuboCop
       class AddTimestamps < RuboCop::Cop::Cop
         include MigrationHelpers
 
-        MSG = 'Do not use `add_timestamps`, use `add_timestamps_with_timezone` instead'.freeze
+        MSG = 'Do not use `add_timestamps`, use `add_timestamps_with_timezone` instead'
 
         # Check methods.
         def on_send(node)

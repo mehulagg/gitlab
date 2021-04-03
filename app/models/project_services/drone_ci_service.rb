@@ -42,7 +42,7 @@ class DroneCiService < CiService
   def commit_status_path(sha, ref)
     Gitlab::Utils.append_path(
       drone_url,
-      "gitlab/#{project.full_path}/commits/#{sha}?branch=#{URI.encode(ref.to_s)}&access_token=#{token}")
+      "gitlab/#{project.full_path}/commits/#{sha}?branch=#{Addressable::URI.encode_component(ref.to_s)}&access_token=#{token}")
   end
 
   def commit_status(sha, ref)
@@ -75,7 +75,7 @@ class DroneCiService < CiService
   def build_page(sha, ref)
     Gitlab::Utils.append_path(
       drone_url,
-      "gitlab/#{project.full_path}/redirect/commits/#{sha}?branch=#{URI.encode(ref.to_s)}")
+      "gitlab/#{project.full_path}/redirect/commits/#{sha}?branch=#{Addressable::URI.encode_component(ref.to_s)}")
   end
 
   def title
@@ -93,7 +93,7 @@ class DroneCiService < CiService
   def fields
     [
       { type: 'text', name: 'token', placeholder: 'Drone CI project specific token', required: true },
-      { type: 'text', name: 'drone_url', placeholder: 'http://drone.example.com', required: true },
+      { type: 'text', name: 'drone_url', title: s_('ProjectService|Drone URL'), placeholder: 'http://drone.example.com', required: true },
       { type: 'checkbox', name: 'enable_ssl_verification', title: "Enable SSL verification" }
     ]
   end

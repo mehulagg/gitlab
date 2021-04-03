@@ -85,8 +85,24 @@ RSpec.describe InstanceSecurityDashboard do
 
   describe '#projects' do
     context 'when the user cannot read all resources' do
-      it 'returns only projects on their dashboard that they can read' do
-        expect(subject.projects).to contain_exactly(project1)
+      context 'when the `security_and_compliance` is enabled for the project' do
+        before do
+          ProjectFeature.update_all(security_and_compliance_access_level: Featurable::ENABLED)
+        end
+
+        it 'returns only projects on their dashboard that they can read' do
+          expect(subject.projects).to contain_exactly(project1)
+        end
+      end
+
+      context 'when the `security_and_compliance` is disabled for the project' do
+        before do
+          project1.project_feature.update_column(:security_and_compliance_access_level, Featurable::DISABLED)
+        end
+
+        it 'returns only projects on their dashboard that they can read' do
+          expect(subject.projects).to be_empty
+        end
       end
     end
 
@@ -94,8 +110,24 @@ RSpec.describe InstanceSecurityDashboard do
       let(:project_ids) { [project1.id, project2.id] }
       let(:user) { create(:auditor) }
 
-      it "returns all projects on the user's dashboard" do
-        expect(subject.projects).to contain_exactly(project1, project2, project3)
+      context 'when the `security_and_compliance` is enabled for the project' do
+        before do
+          ProjectFeature.update_all(security_and_compliance_access_level: Featurable::ENABLED)
+        end
+
+        it "returns all projects on the user's dashboard" do
+          expect(subject.projects).to contain_exactly(project1, project2, project3)
+        end
+      end
+
+      context 'when the `security_and_compliance` is disabled for the project' do
+        before do
+          project1.project_feature.update_column(:security_and_compliance_access_level, Featurable::DISABLED)
+        end
+
+        it "returns only the feature enabled projects on the user's dashboard" do
+          expect(subject.projects).to contain_exactly(project2, project3)
+        end
       end
     end
   end
@@ -134,6 +166,25 @@ RSpec.describe InstanceSecurityDashboard do
 
       it "returns vulnerability scanners from all projects on the user's dashboard" do
         expect(subject.vulnerability_scanners).to contain_exactly(vulnerability_scanner1, vulnerability_scanner2)
+      end
+    end
+  end
+
+  describe '#vulnerability_historical_statistics' do
+    let_it_be(:vulnerability_historical_statistic_1) { create(:vulnerability_historical_statistic, project: project1) }
+    let_it_be(:vulnerability_historical_statistic_2) { create(:vulnerability_historical_statistic, project: project2) }
+
+    context 'when the user cannot read all resources' do
+      it 'returns only vulnerability scanners from projects on their dashboard that they can read' do
+        expect(subject.vulnerability_historical_statistics).to contain_exactly(vulnerability_historical_statistic_1)
+      end
+    end
+
+    context 'when the user can read all resources' do
+      let(:user) { create(:auditor) }
+
+      it "returns vulnerability scanners from all projects on the user's dashboard" do
+        expect(subject.vulnerability_historical_statistics).to contain_exactly(vulnerability_historical_statistic_1, vulnerability_historical_statistic_2)
       end
     end
   end

@@ -1,26 +1,27 @@
-import $ from 'jquery';
 import Clipboard from 'clipboard';
+import $ from 'jquery';
 import { sprintf, __ } from '~/locale';
+import { fixTitle, add, show, once } from '~/tooltips';
 
 function showTooltip(target, title) {
-  const $target = $(target);
-  const originalTitle = $target.data('originalTitle');
+  const { title: originalTitle } = target.dataset;
 
-  if (!$target.data('hideTooltip')) {
-    $target
-      .attr('title', title)
-      .tooltip('_fixTitle')
-      .tooltip('show')
-      .attr('title', originalTitle)
-      .tooltip('_fixTitle');
-  }
+  once('hidden', (tooltip) => {
+    if (tooltip.target === target) {
+      target.setAttribute('title', originalTitle);
+      fixTitle(target);
+    }
+  });
+
+  target.setAttribute('title', title);
+  fixTitle(target);
+  show(target);
+  setTimeout(() => target.blur(), 1000);
 }
 
 function genericSuccess(e) {
   // Clear the selection and blur the trigger so it loses its border
   e.clearSelection();
-  $(e.trigger).blur();
-
   showTooltip(e.trigger, __('Copied'));
 }
 
@@ -53,7 +54,7 @@ export default function initCopyToClipboard() {
    * the last minute to deconstruct this JSON hash and set the `text/plain` and `text/x-gfm` copy
    * data types to the intended values.
    */
-  $(document).on('copy', 'body > textarea[readonly]', e => {
+  $(document).on('copy', 'body > textarea[readonly]', (e) => {
     const { clipboardData } = e.originalEvent;
     if (!clipboardData) return;
 
@@ -73,4 +74,18 @@ export default function initCopyToClipboard() {
     clipboardData.setData('text/plain', json.text);
     clipboardData.setData('text/x-gfm', json.gfm);
   });
+}
+
+/**
+ * Programmatically triggers a click event on a
+ * "copy to clipboard" button, causing its
+ * contents to be copied. Handles some of the messiniess
+ * around managing the button's tooltip.
+ * @param {HTMLElement} btnElement
+ */
+export function clickCopyToClipboardButton(btnElement) {
+  // Ensure the button has already been tooltip'd.
+  add([btnElement], { show: true });
+
+  btnElement.click();
 }

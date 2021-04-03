@@ -4,21 +4,99 @@ RSpec.shared_examples 'wiki model' do
   let_it_be(:user) { create(:user, :commit_email) }
   let(:wiki_container) { raise NotImplementedError }
   let(:wiki_container_without_repo) { raise NotImplementedError }
+  let(:wiki_lfs_enabled) { false }
   let(:wiki) { described_class.new(wiki_container, user) }
   let(:commit) { subject.repository.head_commit }
 
   subject { wiki }
+
+  it 'container class includes HasWiki' do
+    # NOTE: This is not enforced at runtime, since we also need to support Geo::DeletedProject
+    expect(wiki_container).to be_kind_of(HasWiki)
+    expect(wiki_container_without_repo).to be_kind_of(HasWiki)
+  end
 
   it_behaves_like 'model with repository' do
     let(:container) { wiki }
     let(:stubbed_container) { described_class.new(wiki_container_without_repo, user) }
     let(:expected_full_path) { "#{container.container.full_path}.wiki" }
     let(:expected_web_url_path) { "#{container.container.web_url(only_path: true).sub(%r{^/}, '')}/-/wikis/home" }
+    let(:expected_lfs_enabled) { wiki_lfs_enabled }
+  end
+
+  describe '.container_class' do
+    it 'is set to the container class' do
+      expect(described_class.container_class).to eq(wiki_container.class)
+    end
+  end
+
+  describe '.find_by_id' do
+    it 'returns a wiki instance if the container is found' do
+      wiki = described_class.find_by_id(wiki_container.id)
+
+      expect(wiki).to be_a(described_class)
+      expect(wiki.container).to eq(wiki_container)
+    end
+
+    it 'returns nil if the container is not found' do
+      expect(described_class.find_by_id(-1)).to be_nil
+    end
+  end
+
+  describe '#initialize' do
+    it 'accepts a valid user' do
+      expect do
+        described_class.new(wiki_container, user)
+      end.not_to raise_error
+    end
+
+    it 'accepts a blank user' do
+      expect do
+        described_class.new(wiki_container, nil)
+      end.not_to raise_error
+    end
+
+    it 'raises an error for invalid users' do
+      expect do
+        described_class.new(wiki_container, Object.new)
+      end.to raise_error(ArgumentError, 'user must be a User, got Object')
+    end
+  end
+
+  describe '#run_after_commit' do
+    it 'delegates to the container' do
+      expect(wiki_container).to receive(:run_after_commit)
+
+      wiki.run_after_commit
+    end
+  end
+
+  describe '#==' do
+    it 'returns true for wikis from the same container' do
+      expect(wiki).to eq(described_class.new(wiki_container))
+    end
+
+    it 'returns false for wikis from different containers' do
+      expect(wiki).not_to eq(described_class.new(wiki_container_without_repo))
+    end
+  end
+
+  describe '#id' do
+    it 'returns the ID of the container' do
+      expect(wiki.id).to eq(wiki_container.id)
+    end
+  end
+
+  describe '#to_global_id' do
+    it 'returns a global ID' do
+      expect(wiki.to_global_id.to_s).to eq("gid://gitlab/#{wiki.class.name}/#{wiki.id}")
+    end
   end
 
   describe '#repository' do
     it 'returns a wiki repository' do
       expect(subject.repository.repo_type).to be_wiki
+      expect(subject.repository.container).to be(subject)
     end
   end
 
@@ -75,6 +153,15 @@ RSpec.shared_examples 'wiki model' do
     context 'when the wiki repository is empty' do
       it 'returns true' do
         expect(subject.empty?).to be(true)
+      end
+
+      context 'when the repository does not exist' do
+        let(:wiki_container) { wiki_container_without_repo }
+
+        it 'returns true and does not create the repo' do
+          expect(subject.empty?).to be(true)
+          expect(wiki.repository_exists?).to be false
+        end
       end
     end
 
@@ -164,7 +251,7 @@ RSpec.shared_examples 'wiki model' do
 
     def total_pages(entries)
       entries.sum do |entry|
-        entry.is_a?(WikiDirectory) ? entry.pages.size : 1
+        entry.is_a?(WikiDirectory) ? total_pages(entry.entries) : 1
       end
     end
 
@@ -204,8 +291,9 @@ RSpec.shared_examples 'wiki model' do
       expect(page.title).to eq('index page')
     end
 
-    it 'returns nil if the page does not exist' do
-      expect(subject.find_page('non-existent')).to eq(nil)
+    it 'returns nil if the page or version does not exist' do
+      expect(subject.find_page('non-existent')).to be_nil
+      expect(subject.find_page('index page', 'non-existent')).to be_nil
     end
 
     it 'can find a page by slug' do
@@ -266,27 +354,47 @@ RSpec.shared_examples 'wiki model' do
       subject.repository.create_file(user, 'image.png', image, branch_name: subject.default_branch, message: 'add image')
     end
 
-    it 'returns the latest version of the file if it exists' do
-      file = subject.find_file('image.png')
+    shared_examples 'find_file results' do
+      it 'returns the latest version of the file if it exists' do
+        file = subject.find_file('image.png')
 
-      expect(file.mime_type).to eq('image/png')
+        expect(file.mime_type).to eq('image/png')
+      end
+
+      it 'returns nil if the page does not exist' do
+        expect(subject.find_file('non-existent')).to eq(nil)
+      end
+
+      it 'returns a Gitlab::Git::WikiFile instance' do
+        file = subject.find_file('image.png')
+
+        expect(file).to be_a Gitlab::Git::WikiFile
+      end
+
+      it 'returns the whole file' do
+        file = subject.find_file('image.png')
+        image.rewind
+
+        expect(file.raw_data.b).to eq(image.read.b)
+      end
     end
 
-    it 'returns nil if the page does not exist' do
-      expect(subject.find_file('non-existent')).to eq(nil)
+    it_behaves_like 'find_file results'
+
+    context 'when load_content is disabled' do
+      it 'includes the file data in the Gitlab::Git::WikiFile' do
+        file = subject.find_file('image.png', load_content: false)
+
+        expect(file.raw_data).to be_empty
+      end
     end
 
-    it 'returns a Gitlab::Git::WikiFile instance' do
-      file = subject.find_file('image.png')
+    context 'when feature flag :gitaly_find_file is disabled' do
+      before do
+        stub_feature_flags(gitaly_find_file: false)
+      end
 
-      expect(file).to be_a Gitlab::Git::WikiFile
-    end
-
-    it 'returns the whole file' do
-      file = subject.find_file('image.png')
-      image.rewind
-
-      expect(file.raw_data.b).to eq(image.read.b)
+      it_behaves_like 'find_file results'
     end
   end
 
@@ -322,8 +430,8 @@ RSpec.shared_examples 'wiki model' do
       expect(commit.committer_email).to eq(user.commit_email)
     end
 
-    it 'updates container activity' do
-      expect(subject).to receive(:update_container_activity)
+    it 'runs after_wiki_activity callbacks' do
+      expect(subject).to receive(:after_wiki_activity)
 
       subject.create_page('Test Page', 'This is content')
     end
@@ -363,38 +471,63 @@ RSpec.shared_examples 'wiki model' do
       expect(commit.committer_email).to eq(user.commit_email)
     end
 
-    it 'updates container activity' do
+    it 'runs after_wiki_activity callbacks' do
       page
 
-      expect(subject).to receive(:update_container_activity)
+      expect(subject).to receive(:after_wiki_activity)
 
       update_page
     end
   end
 
   describe '#delete_page' do
-    let(:page) { create(:wiki_page, wiki: wiki) }
+    shared_examples 'delete_page operations' do
+      let(:page) { create(:wiki_page, wiki: wiki) }
 
-    it 'deletes the page' do
-      subject.delete_page(page)
+      it 'deletes the page' do
+        subject.delete_page(page)
 
-      expect(subject.list_pages.count).to eq(0)
+        expect(subject.list_pages.count).to eq(0)
+      end
+
+      it 'sets the correct commit email' do
+        subject.delete_page(page)
+
+        expect(user.commit_email).not_to eq(user.email)
+        expect(commit.author_email).to eq(user.commit_email)
+        expect(commit.committer_email).to eq(user.commit_email)
+      end
+
+      it 'runs after_wiki_activity callbacks' do
+        page
+
+        expect(subject).to receive(:after_wiki_activity)
+
+        subject.delete_page(page)
+      end
     end
 
-    it 'sets the correct commit email' do
-      subject.delete_page(page)
+    it_behaves_like 'delete_page operations'
 
-      expect(user.commit_email).not_to eq(user.email)
-      expect(commit.author_email).to eq(user.commit_email)
-      expect(commit.committer_email).to eq(user.commit_email)
+    context 'when an error is raised' do
+      it 'logs the error and returns false' do
+        page = build(:wiki_page, wiki: wiki)
+        exception = Gitlab::Git::Index::IndexError.new('foo')
+
+        allow(subject.repository).to receive(:delete_file).and_raise(exception)
+
+        expect(Gitlab::ErrorTracking).to receive(:log_exception).with(exception, action: :deleted, wiki_id: wiki.id)
+
+        expect(subject.delete_page(page)).to be_falsey
+      end
     end
 
-    it 'updates container activity' do
-      page
+    context 'when feature flag :gitaly_replace_wiki_delete_page is disabled' do
+      before do
+        stub_feature_flags(gitaly_replace_wiki_delete_page: false)
+      end
 
-      expect(subject).to receive(:update_container_activity)
-
-      subject.delete_page(page)
+      it_behaves_like 'delete_page operations'
     end
   end
 

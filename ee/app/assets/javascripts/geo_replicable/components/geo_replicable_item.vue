@@ -1,6 +1,6 @@
 <script>
-import { mapActions } from 'vuex';
 import { GlLink, GlButton } from '@gitlab/ui';
+import { mapActions } from 'vuex';
 import { __ } from '~/locale';
 import { ACTION_TYPES } from '../constants';
 import GeoReplicableStatus from './geo_replicable_status.vue';

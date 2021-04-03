@@ -19,7 +19,7 @@ describe('AssigneesListItem', () => {
   });
 
   it('renders component container element with class `filter-dropdown-item`', () => {
-    expect(wrapper.contains('.filter-dropdown-item')).toBe(true);
+    expect(wrapper.find('.filter-dropdown-item').exists()).toBe(true);
   });
 
   it('emits `onItemSelect` event on component click and sends `assignee` as event param', () => {

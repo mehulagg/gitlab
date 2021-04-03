@@ -1,12 +1,12 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'helpers/test_constants';
-import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { refreshCurrentPage } from '~/lib/utils/url_utility';
+import testAction from 'helpers/vuex_action_helper';
 import * as actions from '~/error_tracking_settings/store/actions';
 import * as types from '~/error_tracking_settings/store/mutation_types';
 import defaultState from '~/error_tracking_settings/store/state';
+import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { refreshCurrentPage } from '~/lib/utils/url_utility';
 import { projectList } from '../mock';
 
 jest.mock('~/lib/utils/url_utility');
@@ -27,7 +27,7 @@ describe('error tracking settings actions', () => {
       refreshCurrentPage.mockClear();
     });
 
-    it('should request and transform the project list', done => {
+    it('should request and transform the project list', (done) => {
       mock.onGet(TEST_HOST).reply(() => [200, { projects: projectList }]);
       testAction(
         actions.fetchProjects,
@@ -48,7 +48,7 @@ describe('error tracking settings actions', () => {
       );
     });
 
-    it('should handle a server error', done => {
+    it('should handle a server error', (done) => {
       mock.onGet(`${TEST_HOST}.json`).reply(() => [400]);
       testAction(
         actions.fetchProjects,
@@ -68,7 +68,7 @@ describe('error tracking settings actions', () => {
       );
     });
 
-    it('should request projects correctly', done => {
+    it('should request projects correctly', (done) => {
       testAction(
         actions.requestProjects,
         null,
@@ -79,7 +79,7 @@ describe('error tracking settings actions', () => {
       );
     });
 
-    it('should receive projects correctly', done => {
+    it('should receive projects correctly', (done) => {
       const testPayload = [];
       testAction(
         actions.receiveProjectsSuccess,
@@ -95,7 +95,7 @@ describe('error tracking settings actions', () => {
       );
     });
 
-    it('should handle errors when receiving projects', done => {
+    it('should handle errors when receiving projects', (done) => {
       const testPayload = [];
       testAction(
         actions.receiveProjectsError,
@@ -126,7 +126,7 @@ describe('error tracking settings actions', () => {
       mock.restore();
     });
 
-    it('should save the page', done => {
+    it('should save the page', (done) => {
       mock.onPatch(TEST_HOST).reply(200);
       testAction(actions.updateSettings, null, state, [], [{ type: 'requestSettings' }], () => {
         expect(mock.history.patch.length).toBe(1);
@@ -135,7 +135,7 @@ describe('error tracking settings actions', () => {
       });
     });
 
-    it('should handle a server error', done => {
+    it('should handle a server error', (done) => {
       mock.onPatch(TEST_HOST).reply(400);
       testAction(
         actions.updateSettings,
@@ -156,7 +156,7 @@ describe('error tracking settings actions', () => {
       );
     });
 
-    it('should request to save the page', done => {
+    it('should request to save the page', (done) => {
       testAction(
         actions.requestSettings,
         null,
@@ -167,7 +167,7 @@ describe('error tracking settings actions', () => {
       );
     });
 
-    it('should handle errors when requesting to save the page', done => {
+    it('should handle errors when requesting to save the page', (done) => {
       testAction(
         actions.receiveSettingsError,
         {},
@@ -181,7 +181,7 @@ describe('error tracking settings actions', () => {
 
   describe('generic actions to update the store', () => {
     const testData = 'test';
-    it('should reset the `connect success` flag when updating the api host', done => {
+    it('should reset the `connect success` flag when updating the api host', (done) => {
       testAction(
         actions.updateApiHost,
         testData,
@@ -192,7 +192,7 @@ describe('error tracking settings actions', () => {
       );
     });
 
-    it('should reset the `connect success` flag when updating the token', done => {
+    it('should reset the `connect success` flag when updating the token', (done) => {
       testAction(
         actions.updateToken,
         testData,

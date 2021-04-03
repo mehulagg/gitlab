@@ -1,7 +1,7 @@
 <script>
-import ViewerSwitcher from './blob_header_viewer_switcher.vue';
 import DefaultActions from './blob_header_default_actions.vue';
 import BlobFilepath from './blob_header_filepath.vue';
+import ViewerSwitcher from './blob_header_viewer_switcher.vue';
 import { SIMPLE_BLOB_VIEWER } from './constants';
 
 export default {
@@ -66,12 +66,12 @@ export default {
 <template>
   <div class="js-file-title file-title-flex-parent">
     <blob-filepath :blob="blob">
-      <template #filepathPrepend>
+      <template #filepath-prepend>
         <slot name="prepend"></slot>
       </template>
     </blob-filepath>
 
-    <div class="gl-display-none gl-display-sm-flex">
+    <div class="gl-display-none gl-sm-display-flex">
       <viewer-switcher v-if="showViewerSwitcher" v-model="viewer" />
 
       <slot name="actions"></slot>

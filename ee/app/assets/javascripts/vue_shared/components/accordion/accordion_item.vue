@@ -1,17 +1,15 @@
 <script>
+import { GlSkeletonLoader, GlIcon } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
-import { GlSkeletonLoader } from '@gitlab/ui';
-
-import Icon from '~/vue_shared/components/icon.vue';
 
 import accordionEventBus from './accordion_event_bus';
 
-const accordionItemUniqueId = name => uniqueId(`gl-accordion-item-${name}-`);
+const accordionItemUniqueId = (name) => uniqueId(`gl-accordion-item-${name}-`);
 
 export default {
   components: {
     GlSkeletonLoader,
-    Icon,
+    GlIcon,
   },
   props: {
     accordionId: {
@@ -62,6 +60,7 @@ export default {
     accordionEventBus.$on(this.closeOtherItemsEvent, this.onCloseOtherAccordionItems);
   },
   destroyed() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     accordionEventBus.$off(this.closeOtherItemsEvent);
   },
   methods: {
@@ -99,15 +98,12 @@ export default {
           :disabled="isDisabled"
           :aria-expanded="isExpanded"
           :aria-controls="contentContainerId"
-          class="btn-transparent border-0 rounded-0 w-100 p-0 text-left"
-          :class="{ 'cursor-default': isDisabled }"
+          class="gl-bg-transparent border-0 rounded-0 w-100 p-0 text-left"
+          :class="{ 'cursor-default': isDisabled, 'list-group-item-action': !isDisabled }"
           @click="handleClick"
         >
-          <div
-            class="d-flex align-items-center p-2"
-            :class="{ 'list-group-item-action': !isDisabled }"
-          >
-            <icon
+          <div class="d-flex align-items-center p-2">
+            <gl-icon
               :size="16"
               class="mr-2 gl-text-gray-900"
               :name="isExpanded ? 'angle-down' : 'angle-right'"
@@ -118,16 +114,15 @@ export default {
           </div>
         </button>
       </div>
-      <div
+      <section
         v-show="isExpanded"
         :id="contentContainerId"
         ref="contentContainer"
         :aria-labelledby="buttonId"
-        role="region"
       >
-        <slot name="subTitle"></slot>
+        <slot name="sub-title"></slot>
         <div ref="content" :style="contentStyles"><slot name="default"></slot></div>
-      </div>
+      </section>
     </template>
     <div v-else ref="loadingIndicator" class="d-flex p-2">
       <div class="h-32-px">

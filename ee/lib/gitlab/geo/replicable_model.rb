@@ -5,17 +5,23 @@ module Gitlab
     module ReplicableModel
       extend ActiveSupport::Concern
       include Checksummable
-      include ::ShaAttribute
 
       included do
         # If this hook turns out not to apply to all Models, perhaps we should extract a `ReplicableBlobModel`
         after_create_commit -> { replicator.handle_after_create_commit if replicator.respond_to?(:handle_after_create_commit) }
         after_destroy -> { replicator.handle_after_destroy if replicator.respond_to?(:handle_after_destroy) }
 
-        scope :checksummed, -> { where('verification_checksum IS NOT NULL') }
-        scope :checksum_failed, -> { where('verification_failure IS NOT NULL') }
+        # Temporarily defining `verification_succeeded` and
+        # `verification_failed` for unverified models while verification is
+        # under development to avoid breaking GeoNodeStatusCheck code.
+        # TODO: Remove these after including `Gitlab::Geo::VerificationState` on
+        # all models. https://gitlab.com/gitlab-org/gitlab/-/issues/280768
+        scope :verification_succeeded, -> { none }
+        scope :verification_failed, -> { none }
 
-        sha_attribute :verification_checksum
+        # These scopes are intended to be overridden as needed
+        scope :available_replicables, -> { all }
+        scope :available_verifiables, -> { self.respond_to?(:with_files_stored_locally) ? available_replicables.with_files_stored_locally : available_replicables }
       end
 
       class_methods do
@@ -45,42 +51,8 @@ module Gitlab
         raise NotImplementedError, 'There is no Replicator defined for this model'
       end
 
-      # Clear model verification checksum and force recalculation
-      def calculate_checksum!
-        self.verification_checksum = nil
-
-        return unless needs_checksum?
-
-        self.verification_checksum = self.class.hexdigest(file.path)
-      end
-
-      # Checks whether model needs checksum to be performed
-      #
-      # Conditions:
-      # - No checksum is present
-      # - It's capable of generating a checksum of itself
-      #
-      # @return [Boolean]
-      def needs_checksum?
-        verification_checksum.nil? && checksummable?
-      end
-
-      # Return whether its capable of generating a checksum of itself
-      #
-      # @return [Boolean] whether it can generate a checksum
-      def checksummable?
-        local? && file_exist?
-      end
-
-      # This checks for existence of the file on storage
-      #
-      # @return [Boolean] whether the file exists on storage
-      def file_exist?
-        if local?
-          File.exist?(replicator.carrierwave_uploader.path)
-        else
-          replicator.carrierwave_uploader.exists?
-        end
+      def in_replicables_for_current_secondary?
+        self.class.replicables_for_current_secondary(self).exists?
       end
     end
   end

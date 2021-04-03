@@ -3,22 +3,65 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Metrics::BackgroundTransaction do
-  let(:test_worker_class) { double(:class, name: 'TestWorker') }
+  let(:transaction) { described_class.new }
+  let(:prometheus_metric) { instance_double(Prometheus::Client::Metric, base_labels: {}) }
 
-  subject { described_class.new(test_worker_class) }
+  before do
+    allow(described_class).to receive(:prometheus_metric).and_return(prometheus_metric)
+  end
 
-  describe '#label' do
-    it 'returns labels based on class name' do
-      expect(subject.labels).to eq(controller: 'TestWorker', action: 'perform', feature_category: '')
+  describe '#run' do
+    it 'yields the supplied block' do
+      expect { |b| transaction.run(&b) }.to yield_control
     end
 
-    it 'contains only the labels defined for metrics' do
-      expect(subject.labels.keys).to contain_exactly(*described_class.superclass::BASE_LABELS.keys)
+    it 'stores the transaction in the current thread' do
+      transaction.run do
+        expect(Thread.current[described_class::BACKGROUND_THREAD_KEY]).to eq(transaction)
+      end
     end
 
-    it 'includes the feature category if there is one' do
-      expect(test_worker_class).to receive(:get_feature_category).and_return('source_code_management')
-      expect(subject.labels).to include(feature_category: 'source_code_management')
+    it 'removes the transaction from the current thread upon completion' do
+      transaction.run { }
+
+      expect(Thread.current[described_class::BACKGROUND_THREAD_KEY]).to be_nil
     end
+  end
+
+  describe '#labels' do
+    it 'provides labels with endpoint_id and feature_category' do
+      Gitlab::ApplicationContext.with_raw_context(feature_category: 'projects', caller_id: 'TestWorker') do
+        expect(transaction.labels).to eq({ endpoint_id: 'TestWorker', feature_category: 'projects' })
+      end
+    end
+  end
+
+  RSpec.shared_examples 'metric with labels' do |metric_method|
+    it 'measures with correct labels and value' do
+      value = 1
+      expect(prometheus_metric).to receive(metric_method).with({ endpoint_id: 'TestWorker', feature_category: 'projects' }, value)
+
+      Gitlab::ApplicationContext.with_raw_context(feature_category: 'projects', caller_id: 'TestWorker') do
+        transaction.send(metric_method, :test_metric, value)
+      end
+    end
+  end
+
+  describe '#increment' do
+    let(:prometheus_metric) { instance_double(Prometheus::Client::Counter, :increment, base_labels: {}) }
+
+    it_behaves_like 'metric with labels', :increment
+  end
+
+  describe '#set' do
+    let(:prometheus_metric) { instance_double(Prometheus::Client::Gauge, :set, base_labels: {}) }
+
+    it_behaves_like 'metric with labels', :set
+  end
+
+  describe '#observe' do
+    let(:prometheus_metric) { instance_double(Prometheus::Client::Histogram, :observe, base_labels: {}) }
+
+    it_behaves_like 'metric with labels', :observe
   end
 end

@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class DeployKeys < Grape::API::Instance
+  class DeployKeys < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :continuous_delivery
 
     helpers do
       def add_deploy_keys_project(project, attrs = {})
@@ -42,7 +44,7 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       get ":id/deploy_keys" do
-        keys = user_project.deploy_keys_projects.preload(:deploy_key)
+        keys = user_project.deploy_keys_projects.preload(deploy_key: :user)
 
         present paginate(keys), with: Entities::DeployKeysProject
       end

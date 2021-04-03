@@ -20,6 +20,8 @@ RSpec.describe SamlProvider do
     it { is_expected.to validate_presence_of(:group) }
     it { is_expected.to validate_presence_of(:sso_url) }
     it { is_expected.to validate_presence_of(:certificate_fingerprint) }
+    it { is_expected.to validate_presence_of(:default_membership_role) }
+    it { is_expected.to validate_inclusion_of(:default_membership_role).in_array([10, 20, 30, 40]) }
 
     it 'expects sso_url to be an https URL' do
       expect(subject).to allow_value('https://example.com').for(:sso_url)
@@ -59,6 +61,63 @@ RSpec.describe SamlProvider do
 
       expect(subject).to allow_value(group).for(:group)
       expect(subject).not_to allow_value(nested_group).for(:group)
+    end
+
+    describe 'access level inclusion' do
+      let(:group) { create(:group) }
+
+      context 'when minimal access user feature is switched on' do
+        before do
+          stub_licensed_features(minimal_access_role: true)
+        end
+
+        it 'default membership role can have access levels from minimal access to owner' do
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::NO_ACCESS)).to be_invalid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::MINIMAL_ACCESS)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::GUEST)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::REPORTER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::DEVELOPER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::MAINTAINER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::OWNER)).to be_valid
+        end
+      end
+
+      context 'when minimal access user feature switched off' do
+        before do
+          stub_licensed_features(minimal_access_role: false)
+        end
+
+        it 'default membership role can have access levels from guest to owner' do
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::NO_ACCESS)).to be_invalid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::MINIMAL_ACCESS)).to be_invalid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::GUEST)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::REPORTER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::DEVELOPER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::MAINTAINER)).to be_valid
+          expect(build(:saml_provider, group: group, default_membership_role: ::Gitlab::Access::OWNER)).to be_valid
+        end
+      end
+    end
+
+    describe 'git_check_enforced' do
+      let_it_be(:group) { create(:group) }
+
+      context 'sso is enforced' do
+        it 'git_check_enforced is valid' do
+          expect(build(:saml_provider, group: group, enabled: true, enforced_sso: true, git_check_enforced: true)).to be_valid
+          expect(build(:saml_provider, group: group, enabled: true, enforced_sso: true, git_check_enforced: false)).to be_valid
+        end
+      end
+
+      context 'sso is not enforced' do
+        it 'git_check_enforced is invalid when set to true' do
+          expect(build(:saml_provider, group: group, enabled: true, enforced_sso: false, git_check_enforced: true)).to be_invalid
+        end
+
+        it 'git_check_enforced is valid when set to false' do
+          expect(build(:saml_provider, group: group, enabled: true, enforced_sso: false, git_check_enforced: false)).to be_valid
+        end
+      end
     end
   end
 
@@ -174,6 +233,34 @@ RSpec.describe SamlProvider do
         expect(subject).not_to be_enforced_group_managed_accounts
         subject.enforced_group_managed_accounts = false
         expect(subject).not_to be_enforced_group_managed_accounts
+      end
+    end
+  end
+
+  describe '#git_check_enforced?' do
+    context 'without enforced sso' do
+      before do
+        allow(subject).to receive(:enforced_sso?).and_return(false)
+      end
+
+      it 'does not enforce git activity check' do
+        subject.git_check_enforced = true
+        expect(subject).not_to be_git_check_enforced
+        subject.git_check_enforced = false
+        expect(subject).not_to be_git_check_enforced
+      end
+    end
+
+    context 'with enforced sso' do
+      before do
+        allow(subject).to receive(:enforced_sso?).and_return(true)
+      end
+
+      it 'enforces git activity check when attribute is set to true' do
+        subject.git_check_enforced = true
+        expect(subject).to be_git_check_enforced
+        subject.git_check_enforced = false
+        expect(subject).not_to be_git_check_enforced
       end
     end
   end

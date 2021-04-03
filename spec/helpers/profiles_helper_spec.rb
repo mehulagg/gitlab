@@ -31,7 +31,7 @@ RSpec.describe ProfilesHelper do
     end
 
     it 'returns DB stored commit_email' do
-      user.update(commit_email: Gitlab::PrivateCommitEmail::TOKEN)
+      user.update!(commit_email: Gitlab::PrivateCommitEmail::TOKEN)
 
       expect(helper.selected_commit_email(user)).to eq(Gitlab::PrivateCommitEmail::TOKEN)
     end
@@ -77,6 +77,38 @@ RSpec.describe ProfilesHelper do
       allow(helper).to receive(:current_user).and_return(ldap_user)
 
       expect(helper.attribute_provider_label(:email)).to eq('LDAP')
+    end
+  end
+
+  describe "#user_status_set_to_busy?" do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:availability, :result) do
+      "busy"    | true
+      "not_set" | false
+      ""        | false
+      nil       | false
+    end
+
+    with_them do
+      it { expect(helper.user_status_set_to_busy?(OpenStruct.new(availability: availability))).to eq(result) }
+    end
+  end
+
+  describe "#show_status_emoji?" do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:message, :emoji, :result) do
+      "Some message" | UserStatus::DEFAULT_EMOJI | true
+      "Some message" | ""                        | true
+      ""             | "basketball"              | true
+      ""             | "basketball"              | true
+      ""             | UserStatus::DEFAULT_EMOJI | false
+      ""             | UserStatus::DEFAULT_EMOJI | false
+    end
+
+    with_them do
+      it { expect(helper.show_status_emoji?(OpenStruct.new(message: message, emoji: emoji))).to eq(result) }
     end
   end
 

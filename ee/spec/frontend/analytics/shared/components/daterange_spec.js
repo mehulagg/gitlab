@@ -1,6 +1,7 @@
+import { GlDaterangePicker } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Daterange from 'ee/analytics/shared/components/daterange.vue';
-import { GlDaterangePicker } from '@gitlab/ui';
+import { useFakeDate } from 'helpers/fake_date';
 
 const defaultProps = {
   startDate: new Date(2019, 8, 1),
@@ -8,6 +9,8 @@ const defaultProps = {
 };
 
 describe('Daterange component', () => {
+  useFakeDate(2019, 8, 25);
+
   let wrapper;
 
   const factory = (props = defaultProps) => {
@@ -18,10 +21,6 @@ describe('Daterange component', () => {
       },
     });
   };
-
-  beforeEach(() => {
-    jest.spyOn(global.Date, 'now').mockImplementation(() => new Date('2019-09-25T00:00:00Z'));
-  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -60,12 +59,7 @@ describe('Daterange component', () => {
         input.trigger('change');
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.emittedByOrder()).toEqual([
-            {
-              name: 'change',
-              args: [{ startDate: minDate, endDate }],
-            },
-          ]);
+          expect(wrapper.emitted().change).toEqual([[{ startDate: minDate, endDate }]]);
         });
       });
     });
@@ -80,11 +74,7 @@ describe('Daterange component', () => {
       });
 
       it('displays the correct number of selected days in the indicator', () => {
-        expect(
-          findDateRangeIndicator()
-            .find('span')
-            .text(),
-        ).toBe('10 days');
+        expect(findDateRangeIndicator().find('span').text()).toBe('10 days');
       });
     });
   });
@@ -101,12 +91,7 @@ describe('Daterange component', () => {
           const endDate = new Date('2019-10-05');
           wrapper.vm.dateRange = { startDate, endDate };
 
-          expect(wrapper.emittedByOrder()).toEqual([
-            {
-              name: 'change',
-              args: [{ startDate, endDate }],
-            },
-          ]);
+          expect(wrapper.emitted().change).toEqual([[{ startDate, endDate }]]);
         });
       });
 

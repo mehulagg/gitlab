@@ -8,7 +8,7 @@
 #   current_user - which user use
 #   params:
 #     scope: 'created_by_me' or 'assigned_to_me' or 'all'
-#     state: 'open' or 'closed' or 'all'
+#     state: 'opened' or 'closed' or 'all'
 #     group_id: integer
 #     project_id: integer
 #     milestone_title: string
@@ -25,6 +25,7 @@
 #     updated_after: datetime
 #     updated_before: datetime
 #     confidential: boolean
+#     issue_type: array of strings (one of Issue.issue_types)
 #
 class IssuesFinder < IssuableFinder
   CONFIDENTIAL_ACCESS_LEVEL = Gitlab::Access::REPORTER
@@ -40,12 +41,21 @@ class IssuesFinder < IssuableFinder
   # rubocop: enable CodeReuse/ActiveRecord
 
   def params_class
-    IssuesFinder::Params
+    self.class.const_get(:Params, false)
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def with_confidentiality_access_check
     return Issue.all if params.user_can_see_all_confidential_issues?
+
+    if Feature.enabled?(:optimize_issue_filter_assigned_to_self, default_enabled: :yaml)
+      # If already filtering by assignee we can skip confidentiality since a user
+      # can always see confidential issues assigned to them. This is just an
+      # optimization since a very common usecase of this Finder is to load the
+      # count of issues assigned to the user for the header bar.
+      return Issue.all if current_user && params.assignees.include?(current_user)
+    end
+
     return Issue.where('issues.confidential IS NOT TRUE') if params.user_cannot_see_confidential_issues?
 
     Issue.where('
@@ -73,6 +83,7 @@ class IssuesFinder < IssuableFinder
     issues = super
     issues = by_due_date(issues)
     issues = by_confidential(issues)
+    issues = by_issue_types(issues)
     issues
   end
 
@@ -95,7 +106,17 @@ class IssuesFinder < IssuableFinder
       items.due_between(Date.today.beginning_of_month, Date.today.end_of_month)
     elsif params.filter_by_due_next_month_and_previous_two_weeks?
       items.due_between(Date.today - 2.weeks, (Date.today + 1.month).end_of_month)
+    else
+      items.none
     end
+  end
+
+  def by_issue_types(items)
+    issue_type_params = Array(params[:issue_types]).map(&:to_s)
+    return items if issue_type_params.blank?
+    return Issue.none unless (Issue.issue_types.keys & issue_type_params).sort == issue_type_params.sort
+
+    items.with_issue_type(params[:issue_types])
   end
 end
 

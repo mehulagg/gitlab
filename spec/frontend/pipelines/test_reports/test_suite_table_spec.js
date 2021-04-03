@@ -1,9 +1,11 @@
-import Vuex from 'vuex';
+import { GlButton, GlFriendlyWrap, GlLink, GlPagination } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import { getJSONFixture } from 'helpers/fixtures';
 import SuiteTable from '~/pipelines/components/test_reports/test_suite_table.vue';
-import * as getters from '~/pipelines/stores/test_reports/getters';
 import { TestStatus } from '~/pipelines/constants';
+import * as getters from '~/pipelines/stores/test_reports/getters';
+import { formatFilePath } from '~/pipelines/stores/test_reports/utils';
 import skippedTestCases from './mock_data';
 
 const localVue = createLocalVue();
@@ -19,19 +21,26 @@ describe('Test reports suite table', () => {
 
   testSuite.test_cases = [...testSuite.test_cases, ...skippedTestCases];
   const testCases = testSuite.test_cases;
+  const blobPath = '/test/blob/path';
 
   const noCasesMessage = () => wrapper.find('.js-no-test-cases');
   const allCaseRows = () => wrapper.findAll('.js-case-row');
-  const findCaseRowAtIndex = index => wrapper.findAll('.js-case-row').at(index);
+  const findCaseRowAtIndex = (index) => wrapper.findAll('.js-case-row').at(index);
+  const findLinkForRow = (row) => row.find(GlLink);
   const findIconForRow = (row, status) => row.find(`.ci-status-icon-${status}`);
 
-  const createComponent = (suite = testSuite) => {
+  const createComponent = (suite = testSuite, perPage = 20) => {
     store = new Vuex.Store({
       state: {
+        blobPath,
         testReports: {
           test_suites: [suite],
         },
         selectedSuiteIndex: 0,
+        pageInfo: {
+          page: 1,
+          perPage,
+        },
       },
       getters,
     });
@@ -39,6 +48,7 @@ describe('Test reports suite table', () => {
     wrapper = shallowMount(SuiteTable, {
       store,
       localVue,
+      stubs: { GlFriendlyWrap },
     });
   };
 
@@ -58,35 +68,78 @@ describe('Test reports suite table', () => {
     beforeEach(() => createComponent());
 
     it('renders the correct number of rows', () => {
-      expect(allCaseRows().length).toBe(testCases.length);
+      expect(allCaseRows()).toHaveLength(testCases.length);
     });
 
-    it('renders the failed tests first', () => {
-      const failedCaseNames = testCases
-        .filter(x => x.status === TestStatus.FAILED)
-        .map(x => x.name);
+    it.each([
+      TestStatus.ERROR,
+      TestStatus.FAILED,
+      TestStatus.SKIPPED,
+      TestStatus.SUCCESS,
+      'unknown',
+    ])('renders the correct icon for test case with %s status', (status) => {
+      const test = testCases.findIndex((x) => x.status === status);
+      const row = findCaseRowAtIndex(test);
 
-      const skippedCaseNames = testCases
-        .filter(x => x.status === TestStatus.SKIPPED)
-        .map(x => x.name);
-
-      expect(findCaseRowAtIndex(0).text()).toContain(failedCaseNames[0]);
-      expect(findCaseRowAtIndex(1).text()).toContain(failedCaseNames[1]);
-      expect(findCaseRowAtIndex(2).text()).toContain(skippedCaseNames[0]);
+      expect(findIconForRow(row, status).exists()).toBe(true);
     });
 
-    it('renders the correct icon for each status', () => {
-      const failedTest = testCases.findIndex(x => x.status === TestStatus.FAILED);
-      const skippedTest = testCases.findIndex(x => x.status === TestStatus.SKIPPED);
-      const successTest = testCases.findIndex(x => x.status === TestStatus.SUCCESS);
+    it('renders the file name for the test with a copy button', () => {
+      const { file } = testCases[0];
+      const relativeFile = formatFilePath(file);
+      const filePath = `${blobPath}/${relativeFile}`;
+      const row = findCaseRowAtIndex(0);
+      const fileLink = findLinkForRow(row);
+      const button = row.find(GlButton);
 
-      const failedRow = findCaseRowAtIndex(failedTest);
-      const skippedRow = findCaseRowAtIndex(skippedTest);
-      const successRow = findCaseRowAtIndex(successTest);
+      expect(fileLink.attributes('href')).toBe(filePath);
+      expect(row.text()).toContain(file);
+      expect(button.exists()).toBe(true);
+      expect(button.attributes('data-clipboard-text')).toBe(file);
+    });
+  });
 
-      expect(findIconForRow(failedRow, TestStatus.FAILED).exists()).toBe(true);
-      expect(findIconForRow(skippedRow, TestStatus.SKIPPED).exists()).toBe(true);
-      expect(findIconForRow(successRow, TestStatus.SUCCESS).exists()).toBe(true);
+  describe('when a test suite has more test cases than the pagination size', () => {
+    const perPage = 2;
+
+    beforeEach(() => {
+      createComponent(testSuite, perPage);
+    });
+
+    it('renders one page of test cases', () => {
+      expect(allCaseRows().length).toBe(perPage);
+    });
+
+    it('renders a pagination component', () => {
+      expect(wrapper.find(GlPagination).exists()).toBe(true);
+    });
+  });
+
+  describe('when a test case classname property is null', () => {
+    it('still renders all test cases', () => {
+      createComponent({
+        ...testSuite,
+        test_cases: testSuite.test_cases.map((testCase) => ({
+          ...testCase,
+          classname: null,
+        })),
+      });
+
+      expect(allCaseRows()).toHaveLength(testCases.length);
+    });
+  });
+
+  describe('when a test case name property is null', () => {
+    it('still renders all test cases', () => {
+      createComponent({
+        ...testSuite,
+        test_cases: testSuite.test_cases.map((testCase) => ({
+          ...testCase,
+          name: null,
+        })),
+      });
+
+      expect(allCaseRows()).toHaveLength(testCases.length);
     });
   });
 });

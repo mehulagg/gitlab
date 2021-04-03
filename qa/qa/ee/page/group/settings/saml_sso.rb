@@ -9,6 +9,7 @@ module QA
             view 'ee/app/views/groups/saml_providers/_form.html.haml' do
               element :identity_provider_sso_field
               element :certificate_fingerprint_field
+              element :default_membership_role_dropdown
               element :enforced_sso_toggle_button
               element :group_managed_accounts_toggle_button
               element :save_changes_button
@@ -28,6 +29,10 @@ module QA
 
             def set_cert_fingerprint(fingerprint)
               fill_element :certificate_fingerprint_field, fingerprint
+            end
+
+            def set_default_membership_role(role)
+              select_element(:default_membership_role_dropdown, role)
             end
 
             def has_enforced_sso_button?

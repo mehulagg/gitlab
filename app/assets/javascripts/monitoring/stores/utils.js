@@ -1,12 +1,12 @@
-import { slugify } from '~/lib/utils/text_utility';
-import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import { SUPPORTED_FORMATS } from '~/lib/utils/unit_format';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { mergeURLVariables, parseTemplatingVariables } from './variable_mapping';
+import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { DATETIME_RANGE_TYPES } from '~/lib/utils/constants';
 import { timeRangeToParams, getRangeType } from '~/lib/utils/datetime_range';
+import { slugify } from '~/lib/utils/text_utility';
+import { SUPPORTED_FORMATS } from '~/lib/utils/unit_format';
 import { isSafeURL, mergeUrlParams } from '~/lib/utils/url_utility';
 import { NOT_IN_DB_PREFIX, linkTypes, OUT_OF_THE_BOX_DASHBOARDS_PATH_PREFIX } from '../constants';
+import { mergeURLVariables, parseTemplatingVariables } from './variable_mapping';
 
 export const gqClient = createGqClient(
   {},
@@ -40,7 +40,7 @@ export const uniqMetricsId = ({ metric_id, id }) => `${metric_id || NOT_IN_DB_PR
  * @param {String} str String with leading slash
  * @returns {String}
  */
-export const removeLeadingSlash = str => (str || '').replace(/^\/+/, '');
+export const removeLeadingSlash = (str) => (str || '').replace(/^\/+/, '');
 
 /**
  * GraphQL environments API returns only id and name.
@@ -52,7 +52,7 @@ export const removeLeadingSlash = str => (str || '').replace(/^\/+/, '');
  * @returns {Array}
  */
 export const parseEnvironmentsResponse = (response = [], projectPath) =>
-  (response || []).map(env => {
+  (response || []).map((env) => {
     const id = getIdFromGraphQLId(env.id);
     return {
       ...env,
@@ -75,11 +75,11 @@ export const parseEnvironmentsResponse = (response = [], projectPath) =>
  * @param {Array} response annotations response
  * @returns {Array} parsed responses
  */
-export const parseAnnotationsResponse = response => {
+export const parseAnnotationsResponse = (response) => {
   if (!response) {
     return [];
   }
-  return response.map(annotation => ({
+  return response.map((annotation) => ({
     ...annotation,
     startingAt: new Date(annotation.startingAt),
     endingAt: annotation.endingAt ? new Date(annotation.endingAt) : null,
@@ -99,7 +99,7 @@ export const parseAnnotationsResponse = response => {
  * @param {Array} metrics - Array of prometheus metrics
  * @returns {Object}
  */
-const mapToMetricsViewModel = metrics =>
+const mapToMetricsViewModel = (metrics) =>
   metrics.map(({ label, id, metric_id, query_range, prometheus_endpoint_path, ...metric }) => ({
     label,
     queryRange: query_range,
@@ -176,7 +176,11 @@ export const mapPanelToViewModel = ({
   field,
   metrics = [],
   links = [],
+  min_value,
   max_value,
+  split,
+  thresholds,
+  format,
 }) => {
   // Both `x_axis.name` and `x_label` are supported for now
   // https://gitlab.com/gitlab-org/gitlab/issues/210521
@@ -195,7 +199,11 @@ export const mapPanelToViewModel = ({
     yAxis,
     xAxis,
     field,
+    minValue: min_value,
     maxValue: max_value,
+    split,
+    thresholds,
+    format,
     links: links.map(mapLinksToViewModel),
     metrics: mapToMetricsViewModel(metrics),
   };
@@ -222,7 +230,7 @@ const mapToPanelGroupViewModel = ({ group = '', panels = [] }, i) => {
  * @param {Object} timeRange
  * @returns {Object}
  */
-export const convertToGrafanaTimeRange = timeRange => {
+export const convertToGrafanaTimeRange = (timeRange) => {
   const timeRangeType = getRangeType(timeRange);
   if (timeRangeType === DATETIME_RANGE_TYPES.fixed) {
     return {
@@ -264,7 +272,7 @@ export const convertTimeRanges = (timeRange, type) => {
  * @param {Object} metadata
  * @returns {Function}
  */
-export const addDashboardMetaDataToLink = metadata => link => {
+export const addDashboardMetaDataToLink = (metadata) => (link) => {
   let modifiedLink = { ...link };
   if (metadata.timeRange) {
     modifiedLink = {
@@ -299,7 +307,7 @@ export const mapToDashboardViewModel = ({
 
 // Prometheus Results Parsing
 
-const dateTimeFromUnixTime = unixTime => new Date(unixTime * 1000).toISOString();
+const dateTimeFromUnixTime = (unixTime) => new Date(unixTime * 1000).toISOString();
 
 const mapScalarValue = ([unixTime, value]) => [dateTimeFromUnixTime(unixTime), Number(value)];
 
@@ -316,7 +324,7 @@ const mapStringValue = ([unixTime, value]) => [dateTimeFromUnixTime(unixTime), v
  * @param {array} result
  * @returns {array}
  */
-const normalizeScalarResult = result => [
+const normalizeScalarResult = (result) => [
   {
     metric: {},
     value: mapScalarValue(result),
@@ -336,7 +344,7 @@ const normalizeScalarResult = result => [
  * @param {array} result
  * @returns {array}
  */
-const normalizeStringResult = result => [
+const normalizeStringResult = (result) => [
   {
     metric: {},
     value: mapStringValue(result),
@@ -371,7 +379,7 @@ const normalizeStringResult = result => [
  * @param {array} result
  * @returns {array}
  */
-const normalizeVectorResult = result =>
+const normalizeVectorResult = (result) =>
   result.map(({ metric, value }) => {
     const scalar = mapScalarValue(value);
     // Add a single element to `values`, to support matrix
@@ -399,7 +407,7 @@ const normalizeVectorResult = result =>
  * @param {array} result
  * @returns {object} Normalized result.
  */
-const normalizeResultMatrix = result =>
+const normalizeResultMatrix = (result) =>
   result.map(({ metric, values }) => {
     const mappedValues = values.map(mapScalarValue);
     return {
@@ -432,7 +440,7 @@ const normalizeResultMatrix = result =>
  * ]
  *
  */
-export const normalizeQueryResponseData = data => {
+export const normalizeQueryResponseData = (data) => {
   const { resultType, result } = data;
   if (resultType === 'vector') {
     return normalizeVectorResult(result);
@@ -458,16 +466,16 @@ export const normalizeQueryResponseData = data => {
  * @param {String} name Variable key that needs to be prefixed
  * @returns {String}
  */
-export const addPrefixToCustomVariableParams = name => `variables[${name}]`;
+export const addPrefixToCustomVariableParams = (name) => `variables[${name}]`;
 
 /**
  * Normalize custom dashboard paths. This method helps support
  * metrics dashboard to work with custom dashboard file names instead
  * of the entire path.
  *
- * If dashboard is empty, it is the default dashboard.
+ * If dashboard is empty, it is the overview dashboard.
  * If dashboard is set, it usually is a custom dashboard unless
- * explicitly it is set to default dashboard path.
+ * explicitly it is set to overview dashboard path.
  *
  * @param {String} dashboard dashboard path
  * @param {String} dashboardPrefix custom dashboard directory prefix

@@ -2,27 +2,24 @@
 
 exports[`GroupActivity component matches the snapshot 1`] = `
 <div
-  class="card"
+  class="gl-card gl-mb-5"
 >
-  <!---->
   <div
-    class="card-header"
+    class="gl-card-header"
   >
     <strong>
       Recent activity (last 90 days)
     </strong>
   </div>
+   
   <div
-    class="card-body"
+    class="gl-card-body"
   >
-    <!---->
-    <!---->
-     
     <div
-      class="d-flex"
+      class="gl-display-flex"
     >
       <div
-        class="js-metric-card-item flex-grow text-center"
+        class="js-metric-card-item gl-flex-grow-1 gl-text-center"
       >
         <h3
           class="gl-my-2"
@@ -31,13 +28,16 @@ exports[`GroupActivity component matches the snapshot 1`] = `
         </h3>
          
         <p
-          class="text-secondary gl-font-sm mb-2"
+          class="text-secondary gl-font-sm gl-mb-2"
         >
+          
           Merge Requests opened
+          
+          <!---->
         </p>
       </div>
       <div
-        class="js-metric-card-item flex-grow text-center"
+        class="js-metric-card-item gl-flex-grow-1 gl-text-center"
       >
         <h3
           class="gl-my-2"
@@ -46,13 +46,16 @@ exports[`GroupActivity component matches the snapshot 1`] = `
         </h3>
          
         <p
-          class="text-secondary gl-font-sm mb-2"
+          class="text-secondary gl-font-sm gl-mb-2"
         >
+          
           Issues opened
+          
+          <!---->
         </p>
       </div>
       <div
-        class="js-metric-card-item flex-grow text-center"
+        class="js-metric-card-item gl-flex-grow-1 gl-text-center"
       >
         <h3
           class="gl-my-2"
@@ -61,15 +64,17 @@ exports[`GroupActivity component matches the snapshot 1`] = `
         </h3>
          
         <p
-          class="text-secondary gl-font-sm mb-2"
+          class="text-secondary gl-font-sm gl-mb-2"
         >
+          
           Members added
+          
+          <!---->
         </p>
       </div>
     </div>
-     
   </div>
-  <!---->
+   
   <!---->
 </div>
 `;

@@ -1,10 +1,18 @@
-# Search API
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference, api
+---
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41763) in GitLab 10.5.
+# Search API **(FREE)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41763) in GitLab 10.5.
+> - [Feature flag `search_filter_by_confidential` removed](https://gitlab.com/gitlab-org/gitlab/-/issues/244923) in GitLab 13.6.
 
 Every API call to search must be authenticated.
 
-## Global Search API
+## Advanced Search API
 
 Search globally across the GitLab instance.
 
@@ -16,10 +24,14 @@ GET /search
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
 | `scope`       | string   | yes        | The scope to search in                |
 | `search`      | string   | yes        | The search query  |
+| `state`       | string   | no        | Filter by state. Issues and merge requests are supported; it is ignored for other scopes. |
+| `confidential` | boolean   | no         | Filter by confidentiality. Issues scope is supported; it is ignored for other scopes. |
+| `order_by`    | string   | no         | Allowed values are `created_at` only. If this is not set, the results are either sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
+| `sort`    | string   | no         | Allowed values are `asc` or `desc` only. If this is not set, the results are either sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
 
 Search the expression within the specified scope. Currently these scopes are supported: projects, issues, merge_requests, milestones, snippet_titles, users.
 
-If Elasticsearch is enabled additional scopes available are blobs, wiki_blobs and commits. Find more about [the feature](../integration/elasticsearch.md). **(STARTER)**
+If Elasticsearch is enabled additional scopes available are blobs, wiki_blobs, notes, and commits. Find more about [the feature](../integration/elasticsearch.md). **(PREMIUM)**
 
 The response depends on the requested scope.
 
@@ -117,7 +129,8 @@ Example response:
 ]
 ```
 
-**Note**: `assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
+NOTE:
+`assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 ### Scope: merge_requests
 
@@ -253,7 +266,9 @@ Example response:
 ]
 ```
 
-### Scope: wiki_blobs **(STARTER)**
+### Scope: wiki_blobs **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
@@ -279,10 +294,12 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
-`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+NOTE:
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` is intended to be only the filename and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
-### Scope: commits **(STARTER)**
+### Scope: commits **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
@@ -315,7 +332,9 @@ Example response:
 ]
 ```
 
-### Scope: blobs **(STARTER)**
+### Scope: blobs **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
@@ -351,8 +370,44 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
-`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+NOTE:
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` is intended to be only the filename and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+
+### Scope: notes **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
+
+This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=notes&search=maxime"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": 191,
+    "body": "Harum maxime consequuntur et et deleniti assumenda facilis.",
+    "attachment": null,
+    "author": {
+      "id": 23,
+      "name": "User 1",
+      "username": "user1",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/111d68d06e2d317b5a59c2c6c5bad808?s=80&d=identicon",
+      "web_url": "http://localhost:3000/user1"
+    },
+    "created_at": "2017-09-05T08:01:32.068Z",
+    "updated_at": "2017-09-05T08:01:32.068Z",
+    "system": false,
+    "noteable_id": 22,
+    "noteable_type": "Issue",
+    "noteable_iid": 2
+  }
+]
+```
 
 ### Scope: users
 
@@ -379,7 +434,7 @@ Example response:
 
 Search within the specified group.
 
-If a user is not a member of a group and the group is private, a `GET` request on that group will result to a `404` status code.
+If a user is not a member of a group and the group is private, a `GET` request on that group results in a `404` status code.
 
 ```plaintext
 GET /groups/:id/search
@@ -390,10 +445,14 @@ GET /groups/:id/search
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user                |
 | `scope`       | string   | yes        | The scope to search in                |
 | `search`      | string   | yes        | The search query  |
+| `state`       | string   | no        | Filter by state. Issues and merge requests are supported; it is ignored for other scopes. |
+| `confidential` | boolean   | no         | Filter by confidentiality. Issues scope is supported; it is ignored for other scopes. |
+| `order_by`    | string   | no         | Allowed values are `created_at` only. If this is not set, the results are either sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
+| `sort`    | string   | no         | Allowed values are `asc` or `desc` only. If this is not set, the results are either sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
 
 Search the expression within the specified scope. Currently these scopes are supported: projects, issues, merge_requests, milestones, users.
 
-If Elasticsearch is enabled additional scopes available are blobs, wiki_blobs and commits. Find more about [the feature](../integration/elasticsearch.md). **(STARTER)**
+If Elasticsearch is enabled additional scopes available are blobs, wiki_blobs, notes, and commits. Find more about [the feature](../integration/elasticsearch.md). **(PREMIUM)**
 
 The response depends on the requested scope.
 
@@ -491,7 +550,8 @@ Example response:
 ]
 ```
 
-**Note**: `assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
+NOTE:
+`assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 ### Scope: merge_requests
 
@@ -596,7 +656,9 @@ Example response:
 ]
 ```
 
-### Scope: wiki_blobs **(STARTER)**
+### Scope: wiki_blobs **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
@@ -622,10 +684,12 @@ Example response:
 ]
 ```
 
-NOTE **Note:**
-`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+NOTE:
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` is intended to be only the filename and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
-### Scope: commits **(STARTER)**
+### Scope: commits **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
@@ -658,7 +722,9 @@ Example response:
 ]
 ```
 
-### Scope: blobs **(STARTER)**
+### Scope: blobs **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
@@ -694,8 +760,44 @@ Example response:
 ]
 ```
 
-NOTE **Note:**
-`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+NOTE:
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` is intended to be only the filename and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+
+### Scope: notes **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
+
+This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=notes&search=maxime"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": 191,
+    "body": "Harum maxime consequuntur et et deleniti assumenda facilis.",
+    "attachment": null,
+    "author": {
+      "id": 23,
+      "name": "User 1",
+      "username": "user1",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/111d68d06e2d317b5a59c2c6c5bad808?s=80&d=identicon",
+      "web_url": "http://localhost:3000/user1"
+    },
+    "created_at": "2017-09-05T08:01:32.068Z",
+    "updated_at": "2017-09-05T08:01:32.068Z",
+    "system": false,
+    "noteable_id": 22,
+    "noteable_type": "Issue",
+    "noteable_iid": 2
+  }
+]
+```
 
 ### Scope: users
 
@@ -722,7 +824,7 @@ Example response:
 
 Search within the specified project.
 
-If a user is not a member of a project and the project is private, a `GET` request on that project will result to a `404` status code.
+If a user is not a member of a project and the project is private, a `GET` request on that project results in a `404` status code.
 
 ```plaintext
 GET /projects/:id/search
@@ -734,6 +836,10 @@ GET /projects/:id/search
 | `scope`       | string   | yes        | The scope to search in                |
 | `search`      | string   | yes        | The search query  |
 | `ref`         | string   | no         | The name of a repository branch or tag to search on. The project's default branch is used by default. This is only applicable for scopes: commits, blobs, and wiki_blobs.  |
+| `state`       | string   | no        | Filter by state. Issues and merge requests are supported; it is ignored for other scopes. |
+| `confidential` | boolean   | no         | Filter by confidentiality. Issues scope is supported; it is ignored for other scopes. |
+| `order_by`    | string   | no         | Allowed values are `created_at` only. If this is not set, the results are either sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
+| `sort`    | string   | no         | Allowed values are `asc` or `desc` only. If this is not set, the results are either sorted by `created_at` in descending order for basic search, or by the most relevant documents when using advanced search.|
 
 Search the expression within the specified scope. Currently these scopes are supported: issues, merge_requests, milestones, notes, wiki_blobs, commits, blobs, users.
 
@@ -802,7 +908,8 @@ Example response:
 ]
 ```
 
-**Note**: `assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
+NOTE:
+`assignee` column is deprecated, now we show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 ### Scope: merge_requests
 
@@ -907,7 +1014,11 @@ Example response:
 ]
 ```
 
-### Scope: notes
+### Scope: notes **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
+
+This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=notes&search=maxime"
@@ -939,7 +1050,11 @@ Example response:
 ]
 ```
 
-### Scope: wiki_blobs
+### Scope: wiki_blobs **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
+
+This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
 Filters are available for this scope:
 
@@ -980,10 +1095,14 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
-`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+NOTE:
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` are intended to be only the filename and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
-### Scope: commits
+### Scope: commits **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
+
+This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=commits&search=bye"
@@ -1014,7 +1133,11 @@ Example response:
 ]
 ```
 
-### Scope: blobs
+### Scope: blobs **(PREMIUM)**
+
+> Moved to GitLab Premium in 13.9.
+
+This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
 Filters are available for this scope:
 
@@ -1054,8 +1177,8 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
-`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+NOTE:
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` is intended to be only the filename and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: users
 

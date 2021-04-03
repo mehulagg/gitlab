@@ -1,27 +1,38 @@
+import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver } from '@gitlab/ui';
 import FirstClassGroupVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
 import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
 import { generateVulnerabilities } from './mock_data';
 
 describe('First Class Group Dashboard Vulnerabilities Component', () => {
   let wrapper;
+  const apolloMock = {
+    queries: { vulnerabilities: { loading: true } },
+  };
 
   const groupFullPath = 'group-full-path';
 
   const findIntersectionObserver = () => wrapper.find(GlIntersectionObserver);
   const findVulnerabilities = () => wrapper.find(VulnerabilityList);
   const findAlert = () => wrapper.find(GlAlert);
+  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
-  const createWrapper = ({ $apollo, stubs }) => {
+  const expectLoadingState = ({ initial = false, nextPage = false }) => {
+    expect(findVulnerabilities().props('isLoading')).toBe(initial);
+    expect(findLoadingIcon().exists()).toBe(nextPage);
+  };
+
+  const createWrapper = ({ $apollo = apolloMock, stubs } = {}) => {
     return shallowMount(FirstClassGroupVulnerabilities, {
-      propsData: {
-        groupFullPath,
-      },
       stubs,
       mocks: {
         $apollo,
         fetchNextPage: () => {},
+      },
+      provide: {
+        groupFullPath,
+        hasVulnerabilities: true,
+        hasJiraVulnerabilitiesIntegrationEnabled: false,
       },
     });
   };
@@ -39,8 +50,8 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
       });
     });
 
-    it('passes down isLoading correctly', () => {
-      expect(findVulnerabilities().props()).toMatchObject({ isLoading: true });
+    it('shows the initial loading state', () => {
+      expectLoadingState({ initial: true });
     });
   });
 
@@ -68,7 +79,7 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
 
     it('should have an alert that is dismissable', () => {
       const alert = findAlert();
-      alert.find('button').trigger('click');
+      alert.vm.$emit('dismiss');
       return wrapper.vm.$nextTick(() => {
         expect(alert.exists()).toBe(false);
       });
@@ -103,13 +114,32 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
       expect(findVulnerabilities().props()).toEqual({
         filters: {},
         isLoading: false,
-        shouldShowIdentifier: false,
         securityScanners: {},
-        shouldShowReportType: false,
         shouldShowSelection: true,
         shouldShowProjectNamespace: true,
         vulnerabilities,
       });
+    });
+
+    it('defaults to severity column for sorting', () => {
+      expect(wrapper.vm.sortBy).toBe('severity');
+    });
+
+    it('defaults to desc as sorting direction', () => {
+      expect(wrapper.vm.sortDirection).toBe('desc');
+    });
+
+    it('handles sorting', () => {
+      findVulnerabilities().vm.$listeners['sort-changed']({
+        sortBy: 'description',
+        sortDesc: false,
+      });
+      expect(wrapper.vm.sortBy).toBe('description');
+      expect(wrapper.vm.sortDirection).toBe('asc');
+    });
+
+    it('does not show loading any state', () => {
+      expectLoadingState({ initial: false, nextPage: false });
     });
   });
 
@@ -133,6 +163,48 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
 
     it('should render the observer component', () => {
       expect(findIntersectionObserver().exists()).toBe(true);
+    });
+  });
+
+  describe('when the query is loading the next page', () => {
+    beforeEach(() => {
+      wrapper = createWrapper({
+        $apollo: {
+          queries: { vulnerabilities: { loading: true } },
+        },
+      });
+
+      wrapper.setData({
+        vulnerabilities: generateVulnerabilities(),
+        pageInfo: {
+          hasNextPage: true,
+        },
+      });
+    });
+
+    it('should render the loading spinner', () => {
+      expectLoadingState({ nextPage: true });
+    });
+  });
+
+  describe('when filter or sort is changed', () => {
+    beforeEach(() => {
+      wrapper = createWrapper();
+    });
+
+    it('should show the initial loading state when the filter is changed', () => {
+      wrapper.setProps({ filter: {} });
+
+      expectLoadingState({ initial: true });
+    });
+
+    it('should show the initial loading state when the sort is changed', () => {
+      findVulnerabilities().vm.$emit('sort-changed', {
+        sortBy: 'description',
+        sortDesc: false,
+      });
+
+      expectLoadingState({ initial: true });
     });
   });
 });

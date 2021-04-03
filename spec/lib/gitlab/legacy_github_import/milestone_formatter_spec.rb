@@ -17,6 +17,7 @@ RSpec.describe Gitlab::LegacyGithubImport::MilestoneFormatter do
       closed_at: nil
     }
   end
+
   let(:iid_attr) { :number }
 
   subject(:formatter) { described_class.new(project, raw_data) }
@@ -91,7 +92,7 @@ RSpec.describe Gitlab::LegacyGithubImport::MilestoneFormatter do
     let(:iid_attr) { :id }
 
     before do
-      project.update(import_type: 'gitea')
+      project.update!(import_type: 'gitea')
     end
 
     it_behaves_like 'Gitlab::LegacyGithubImport::MilestoneFormatter#attributes'

@@ -1,10 +1,11 @@
 import { TEST_HOST } from 'spec/test_constants';
+import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
 
 const AVATAR_URL = `${TEST_HOST}/dummy.jpg`;
 
 export const mockText = {
   ADD_PROJECTS_ERROR: 'Something went wrong, unable to add projects to dashboard',
-  REMOVE_PROJECT_ERROR: 'Something went wrong, unable to remove project',
+  REMOVE_PROJECT_ERROR: 'Something went wrong, unable to delete project',
   NO_SEARCH_RESULTS: 'Sorry, no projects matched your search',
   RECEIVE_PROJECTS_ERROR: 'Something went wrong, unable to get projects',
 };
@@ -21,7 +22,7 @@ export const mockHeaders = {
 export function mockPipelineData(
   status = 'success',
   id = 1,
-  finishedTimeStamp = new Date(Date.now() - 86400000).toISOString(),
+  finishedTimeStamp = new Date(differenceInMilliseconds(86400000)).toISOString(),
   isTag = false,
 ) {
   return {
@@ -37,7 +38,7 @@ export function mockPipelineData(
       path: '/test',
     },
     active: false,
-    path: '/test/test-project/pipelines/1',
+    path: '/test/test-project/-/pipelines/1',
     details: {
       status: {
         icon: `status_${status}`,
@@ -46,7 +47,7 @@ export function mockPipelineData(
         group: status,
         tooltip: status,
         has_details: true,
-        details_path: '/test/test-project/pipelines/1',
+        details_path: '/test/test-project/-/pipelines/1',
         illustration: null,
       },
       finished_at: finishedTimeStamp,

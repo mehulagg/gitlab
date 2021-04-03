@@ -1,10 +1,21 @@
 <script>
 import Api from 'ee/api';
-import { __ } from '~/locale';
+import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import createFlash from '~/flash';
-import { slugify } from '~/lib/utils/text_utility';
-import MetricCard from '../../shared/components/metric_card.vue';
-import { removeFlash } from '../utils';
+import { sprintf, __, s__ } from '~/locale';
+import { OVERVIEW_METRICS } from '../constants';
+import { removeFlash, prepareTimeMetricsData } from '../utils';
+
+const I18N_TEXT = {
+  'lead-time': s__('ValueStreamAnalytics|Median time from issue created to issue closed.'),
+  'cycle-time': s__('ValueStreamAnalytics|Median time from first commit to issue closed.'),
+};
+
+const requestData = ({ requestType, groupPath, additionalParams }) => {
+  return requestType === OVERVIEW_METRICS.TIME_SUMMARY
+    ? Api.cycleAnalyticsTimeSummaryData(groupPath, additionalParams)
+    : Api.cycleAnalyticsSummaryData(groupPath, additionalParams);
+};
 
 export default {
   name: 'TimeMetricsCard',
@@ -20,6 +31,11 @@ export default {
       type: Object,
       required: false,
       default: () => ({}),
+    },
+    requestType: {
+      type: String,
+      required: true,
+      validator: (t) => OVERVIEW_METRICS[t],
     },
   },
   data() {
@@ -40,18 +56,23 @@ export default {
     fetchData() {
       removeFlash();
       this.loading = true;
-      return Api.cycleAnalyticsTimeSummaryData(this.groupPath, this.additionalParams)
+      return requestData(this)
         .then(({ data }) => {
-          this.data = data.map(({ title: label, ...rest }) => ({
-            ...rest,
-            label,
-            key: slugify(label),
-          }));
+          this.data = prepareTimeMetricsData(data, I18N_TEXT);
         })
         .catch(() => {
-          createFlash(
-            __('There was an error while fetching value stream analytics time summary data.'),
-          );
+          const requestTypeName =
+            this.requestType === OVERVIEW_METRICS.TIME_SUMMARY
+              ? __('time summary')
+              : __('recent activity');
+          createFlash({
+            message: sprintf(
+              s__(
+                'There was an error while fetching value stream analytics %{requestTypeName} data.',
+              ),
+              { requestTypeName },
+            ),
+          });
         })
         .finally(() => {
           this.loading = false;

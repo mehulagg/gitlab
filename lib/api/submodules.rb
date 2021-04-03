@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Submodules < Grape::API::Instance
+  class Submodules < ::API::Base
     before { authenticate! }
+
+    feature_category :source_code_management
 
     helpers do
       def commit_params(attrs)

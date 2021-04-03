@@ -1,0 +1,5 @@
+---
+title: Batch-load environments in EE pipelines
+merge_request: 57706
+author:
+type: performance

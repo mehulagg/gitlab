@@ -34,19 +34,26 @@ module QA
         @retry_later_backoff = QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME
       end
 
+      def inspect
+        # For prettier failure messages
+        # Eg.: "expected QA::Page::File::Show not to have file "QA Test - File name"
+        # Instead of "expected #<QA::Page::File::Show:0x000055c6511e07b8 @retry_later_backoff=60> not to have file "QA Test - File name"
+        self.class.to_s
+      end
+
       def assert_no_element(name)
         assert_no_selector(element_selector_css(name))
       end
 
-      def refresh
+      def refresh(skip_finished_loading_check: false)
         page.refresh
 
-        wait_for_requests
+        wait_for_requests(skip_finished_loading_check: skip_finished_loading_check)
       end
 
-      def wait_until(max_duration: 60, sleep_interval: 0.1, reload: true, raise_on_failure: true)
+      def wait_until(max_duration: 60, sleep_interval: 0.1, reload: true, raise_on_failure: true, skip_finished_loading_check_on_refresh: false)
         Support::Waiter.wait_until(max_duration: max_duration, sleep_interval: sleep_interval, raise_on_failure: raise_on_failure) do
-          yield || (reload && refresh && false)
+          yield || (reload && refresh(skip_finished_loading_check: skip_finished_loading_check_on_refresh) && false)
         end
       end
 
@@ -126,19 +133,66 @@ module QA
       end
 
       def check_element(name)
-        retry_until(sleep_interval: 1) do
-          find_element(name).set(true)
+        if find_element(name, visible: false).checked?
+          QA::Runtime::Logger.debug("#{name} is already checked")
 
-          find_element(name).checked?
+          return
+        end
+
+        retry_until(sleep_interval: 1) do
+          find_element(name, visible: false).click
+          checked = find_element(name, visible: false).checked?
+
+          QA::Runtime::Logger.debug(checked ? "#{name} was checked" : "#{name} was not checked")
+
+          checked
         end
       end
 
       def uncheck_element(name)
-        retry_until(sleep_interval: 1) do
-          find_element(name).set(false)
+        unless find_element(name, visible: false).checked?
+          QA::Runtime::Logger.debug("#{name} is already unchecked")
 
-          !find_element(name).checked?
+          return
         end
+
+        retry_until(sleep_interval: 1) do
+          find_element(name, visible: false).click
+          unchecked = !find_element(name, visible: false).checked?
+
+          QA::Runtime::Logger.debug(unchecked ? "#{name} was unchecked" : "#{name} was not unchecked")
+
+          unchecked
+        end
+      end
+
+      # Method for selecting radios
+      def choose_element(name, click_by_js = false)
+        if find_element(name, visible: false).checked?
+          QA::Runtime::Logger.debug("#{name} is already selected")
+
+          return
+        end
+
+        retry_until(sleep_interval: 1) do
+          radio = find_element(name, visible: false)
+          # Some radio buttons are hidden by their labels and cannot be clicked directly
+          click_by_js ? page.execute_script("arguments[0].click();", radio) : radio.click
+          selected = find_element(name, visible: false).checked?
+
+          QA::Runtime::Logger.debug(selected ? "#{name} was selected" : "#{name} was not selected")
+
+          selected
+        end
+      end
+
+      # Use this to simulate moving the pointer to an element's coordinate
+      # and sending a click event.
+      # This is a helpful workaround when there is a transparent element overlapping
+      # the target element and so, normal `click_element` on target would raise
+      # Selenium::WebDriver::Error::ElementClickInterceptedError
+      def click_element_coordinates(name, **kwargs)
+        page.driver.browser.action.move_to(find_element(name, **kwargs).native).click.perform
       end
 
       # replace with (..., page = self.class)
@@ -169,19 +223,31 @@ module QA
       end
 
       def has_element?(name, **kwargs)
+        disabled = kwargs.delete(:disabled)
+        original_kwargs = kwargs.dup
+        wait = kwargs.delete(:wait) || Capybara.default_max_wait_time
+        text = kwargs.delete(:text)
+        klass = kwargs.delete(:class)
+
+        try_find_element = ->(wait) do
+          if disabled.nil?
+            has_css?(element_selector_css(name, kwargs), text: text, wait: wait, class: klass)
+          else
+            find_element(name, original_kwargs).disabled? == disabled
+          end
+        end
+
+        # Check for the element before waiting for requests, just in case unrelated requests are in progress.
+        # This is to avoid waiting unnecessarily after the element we're interested in has already appeared.
+        return true if try_find_element.call(wait)
+
+        # If the element didn't appear, wait for requests and then check again
         wait_for_requests(skip_finished_loading_check: !!kwargs.delete(:skip_finished_loading_check))
 
-        disabled = kwargs.delete(:disabled)
-
-        if disabled.nil?
-          wait = kwargs.delete(:wait) || Capybara.default_max_wait_time
-          text = kwargs.delete(:text)
-          klass = kwargs.delete(:class)
-
-          has_css?(element_selector_css(name, kwargs), text: text, wait: wait, class: klass)
-        else
-          find_element(name, kwargs).disabled? == disabled
-        end
+        # We only wait one second now because we previously waited the full expected duration,
+        # plus however long it took for requests to complete. One second should be enough
+        # for the UI to update after requests complete.
+        try_find_element.call(1)
       end
 
       def has_no_element?(name, **kwargs)
@@ -212,7 +278,7 @@ module QA
       def finished_loading_block?
         wait_for_requests
 
-        has_no_css?('.fa-spinner.block-loading', wait: Capybara.default_max_wait_time)
+        has_no_css?('.gl-spinner', wait: Capybara.default_max_wait_time)
       end
 
       def has_loaded_all_images?
@@ -258,8 +324,11 @@ module QA
         sleep 1
       end
 
-      def within_element(name, text: nil)
-        page.within(element_selector_css(name), text: text) do
+      def within_element(name, **kwargs)
+        wait_for_requests
+        text = kwargs.delete(:text)
+
+        page.within(element_selector_css(name, kwargs), text: text) do
           yield
         end
       end

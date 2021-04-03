@@ -18,6 +18,7 @@ module QA
               expand_content(:custom_project_template_content)
 
               within_element(:custom_project_template_select) do
+                wait_for_requests
                 current_selection
               end
             end

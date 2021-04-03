@@ -18,13 +18,13 @@ RSpec.describe EachBatch do
 
     shared_examples 'each_batch handling' do |kwargs|
       it 'yields an ActiveRecord::Relation when a block is given' do
-        model.each_batch(kwargs) do |relation|
+        model.each_batch(**kwargs) do |relation|
           expect(relation).to be_a_kind_of(ActiveRecord::Relation)
         end
       end
 
       it 'yields a batch index as the second argument' do
-        model.each_batch(kwargs) do |_, index|
+        model.each_batch(**kwargs) do |_, index|
           expect(index).to eq(1)
         end
       end
@@ -32,7 +32,7 @@ RSpec.describe EachBatch do
       it 'accepts a custom batch size' do
         amount = 0
 
-        model.each_batch(kwargs.merge({ of: 1 })) { amount += 1 }
+        model.each_batch(**kwargs.merge({ of: 1 })) { amount += 1 }
 
         expect(amount).to eq(5)
       end
@@ -56,5 +56,21 @@ RSpec.describe EachBatch do
 
     it_behaves_like 'each_batch handling', {}
     it_behaves_like 'each_batch handling', { order_hint: :updated_at }
+
+    it 'orders ascending by default' do
+      ids = []
+
+      model.each_batch(of: 1) { |rel| ids.concat(rel.ids) }
+
+      expect(ids).to eq(ids.sort)
+    end
+
+    it 'accepts descending order' do
+      ids = []
+
+      model.each_batch(of: 1, order: :desc) { |rel| ids.concat(rel.ids) }
+
+      expect(ids).to eq(ids.sort.reverse)
+    end
   end
 end

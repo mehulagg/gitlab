@@ -21,8 +21,11 @@ module GroupsHelper
       integrations#edit
       ldap_group_links#index
       hooks#index
-      audit_events#index
       pipeline_quota#index
+      applications#index
+      applications#show
+      applications#edit
+      packages_and_registries#index
     ]
   end
 
@@ -62,6 +65,14 @@ module GroupsHelper
     can?(current_user, :set_emails_disabled, group) && !group.parent&.emails_disabled?
   end
 
+  def group_open_issues_count(group)
+    if Feature.enabled?(:cached_sidebar_open_issues_count, group, default_enabled: :yaml)
+      cached_issuables_count(group, type: :issues)
+    else
+      number_with_delimiter(group_issues_count(state: 'opened'))
+    end
+  end
+
   def group_issues_count(state:)
     IssuesFinder
       .new(current_user, group_id: @group.id, state: state, non_archived: true, include_subgroups: true)
@@ -69,11 +80,33 @@ module GroupsHelper
       .count
   end
 
+  def group_open_merge_requests_count(group)
+    if Feature.enabled?(:cached_sidebar_merge_requests_count, group, default_enabled: :yaml)
+      cached_issuables_count(@group, type: :merge_requests)
+    else
+      number_with_delimiter(group_merge_requests_count(state: 'opened'))
+    end
+  end
+
   def group_merge_requests_count(state:)
     MergeRequestsFinder
       .new(current_user, group_id: @group.id, state: state, non_archived: true, include_subgroups: true)
       .execute
       .count
+  end
+
+  def cached_issuables_count(group, type: nil)
+    count_service = issuables_count_service_class(type)
+    return unless count_service.present?
+
+    issuables_count = count_service.new(group, current_user).count
+    format_issuables_count(count_service, issuables_count)
+  end
+
+  def group_dependency_proxy_url(group)
+    # The namespace path can include uppercase letters, which
+    # Docker doesn't allow. The proxy expects it to be downcased.
+    "#{group_url(group).downcase}#{DependencyProxy::URL_SUFFIX}"
   end
 
   def group_icon_url(group, options = {})
@@ -88,18 +121,27 @@ module GroupsHelper
     @has_group_title = true
     full_title = []
 
-    group.ancestors.reverse.each_with_index do |parent, index|
+    ancestors = group.ancestors.with_route
+
+    ancestors.reverse_each.with_index do |parent, index|
       if index > 0
         add_to_breadcrumb_dropdown(group_title_link(parent, hidable: false, show_avatar: true, for_dropdown: true), location: :before)
       else
         full_title << breadcrumb_list_item(group_title_link(parent, hidable: false))
       end
+
+      push_to_schema_breadcrumb(simple_sanitize(parent.name), group_path(parent))
     end
 
     full_title << render("layouts/nav/breadcrumbs/collapsed_dropdown", location: :before, title: _("Show parent subgroups"))
 
     full_title << breadcrumb_list_item(group_title_link(group))
-    full_title << ' &middot; '.html_safe + link_to(simple_sanitize(name), url, class: 'group-path breadcrumb-item-text js-breadcrumb-item-text') if name
+    push_to_schema_breadcrumb(simple_sanitize(group.name), group_path(group))
+
+    if name
+      full_title << ' &middot; '.html_safe + link_to(simple_sanitize(name), url, class: 'group-path breadcrumb-item-text js-breadcrumb-item-text')
+      push_to_schema_breadcrumb(simple_sanitize(name), url)
+    end
 
     full_title.join.html_safe
   end
@@ -130,7 +172,7 @@ module GroupsHelper
   end
 
   def remove_group_message(group)
-    _("You are going to remove %{group_name}, this will also remove all of its subgroups and projects. Removed groups CANNOT be restored! Are you ABSOLUTELY sure?") %
+    _("You are going to remove %{group_name}, this will also delete all of its subgroups and projects. Removed groups CANNOT be restored! Are you ABSOLUTELY sure?") %
       { group_name: group.name }
   end
 
@@ -163,11 +205,38 @@ module GroupsHelper
       group_container_registry_nav?
   end
 
+  def group_dependency_proxy_nav?
+    @group.dependency_proxy_feature_available?
+  end
+
   def group_packages_list_nav?
     @group.packages_feature_enabled?
   end
 
+  def show_invite_banner?(group)
+    Feature.enabled?(:invite_your_teammates_banner_a, group) &&
+      can?(current_user, :admin_group, group) &&
+      !just_created? &&
+      !multiple_members?(group)
+  end
+
+  def show_thanks_for_purchase_banner?
+    params.key?(:purchased_quantity) && params[:purchased_quantity].to_i > 0
+  end
+
+  def project_list_sort_by
+    @group_projects_sort || @sort || params[:sort] || sort_value_recently_created
+  end
+
   private
+
+  def just_created?
+    flash[:notice] =~ /successfully created/
+  end
+
+  def multiple_members?(group)
+    group.member_count > 1
+  end
 
   def get_group_sidebar_links
     links = [:overview, :group_members]
@@ -239,6 +308,26 @@ module GroupsHelper
 
   def ancestor_locked_and_has_been_overridden(group)
     s_("GroupSettings|This setting is applied on %{ancestor_group} and has been overridden on this subgroup.").html_safe % { ancestor_group: ancestor_group(group) }
+  end
+
+  def issuables_count_service_class(type)
+    if type == :issues
+      Groups::OpenIssuesCountService
+    elsif type == :merge_requests
+      Groups::MergeRequestsCountService
+    end
+  end
+
+  def format_issuables_count(count_service, count)
+    if count > count_service::CACHED_COUNT_THRESHOLD
+      ActiveSupport::NumberHelper
+        .number_to_human(
+          count,
+          units: { thousand: 'k', million: 'm' }, precision: 1, significant: false, format: '%n%u'
+        )
+    else
+      number_with_delimiter(count)
+    end
   end
 end
 

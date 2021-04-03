@@ -20,11 +20,11 @@ RSpec.describe 'Import multiple repositories by uploading a manifest file', :js 
     attach_file('manifest', Rails.root.join('spec/fixtures/aosp_manifest.xml'))
     click_on 'List available repositories'
 
-    expect(page).to have_button('Import all repositories')
+    expect(page).to have_button('Import 660 repositories')
     expect(page).to have_content('https://android-review.googlesource.com/platform/build/blueprint')
   end
 
-  it 'imports successfully imports a project', :sidekiq_inline do
+  it 'imports a project successfully', :sidekiq_inline, :js do
     visit new_import_manifest_path
 
     attach_file('manifest', Rails.root.join('spec/fixtures/aosp_manifest.xml'))
@@ -32,10 +32,23 @@ RSpec.describe 'Import multiple repositories by uploading a manifest file', :js 
 
     page.within(second_row) do
       click_on 'Import'
+    end
 
-      expect(page).to have_content 'Done'
+    wait_for_requests
+
+    page.within(second_row) do
+      expect(page).to have_content 'Complete'
       expect(page).to have_content("#{group.full_path}/build/blueprint")
     end
+  end
+
+  it 'renders an error if the remote url scheme starts with javascript' do
+    visit new_import_manifest_path
+
+    attach_file('manifest', Rails.root.join('spec/fixtures/unsafe_javascript.xml'))
+    click_on 'List available repositories'
+
+    expect(page).to have_content 'Make sure the url does not start with javascript'
   end
 
   it 'renders an error if invalid file was provided' do
@@ -48,6 +61,6 @@ RSpec.describe 'Import multiple repositories by uploading a manifest file', :js 
   end
 
   def second_row
-    page.all('table.import-jobs tbody tr')[1]
+    page.all('table tbody tr')[1]
   end
 end

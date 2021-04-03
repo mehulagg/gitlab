@@ -1,12 +1,12 @@
-import Api from '~/api';
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
-import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
-import getInitialState from '~/deploy_freeze/store/state';
+import Api from '~/api';
 import * as actions from '~/deploy_freeze/store/actions';
 import * as types from '~/deploy_freeze/store/mutation_types';
-import { mockTimezoneData, mockFreezePeriods } from '../mock_data';
+import getInitialState from '~/deploy_freeze/store/state';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { freezePeriodsFixture, timezoneDataFixture } from '../helpers';
 
 jest.mock('~/api.js');
 jest.mock('~/flash.js');
@@ -19,14 +19,48 @@ describe('deploy freeze store actions', () => {
     mock = new MockAdapter(axios);
     state = getInitialState({
       projectId: '8',
-      timezoneData: mockTimezoneData,
+      timezoneData: timezoneDataFixture,
     });
-    Api.freezePeriods.mockResolvedValue({ data: mockFreezePeriods });
+    Api.freezePeriods.mockResolvedValue({ data: freezePeriodsFixture });
     Api.createFreezePeriod.mockResolvedValue();
+    Api.updateFreezePeriod.mockResolvedValue();
   });
 
   afterEach(() => {
     mock.restore();
+  });
+
+  describe('setSelectedFreezePeriod', () => {
+    it('commits SET_SELECTED_TIMEZONE mutation', () => {
+      testAction(
+        actions.setFreezePeriod,
+        {
+          id: 3,
+          cronTimezone: 'UTC',
+          freezeStart: 'start',
+          freezeEnd: 'end',
+        },
+        {},
+        [
+          {
+            payload: 3,
+            type: types.SET_SELECTED_ID,
+          },
+          {
+            payload: 'UTC',
+            type: types.SET_SELECTED_TIMEZONE,
+          },
+          {
+            payload: 'start',
+            type: types.SET_FREEZE_START_CRON,
+          },
+          {
+            payload: 'end',
+            type: types.SET_FREEZE_END_CRON,
+          },
+        ],
+      );
+    });
   });
 
   describe('setSelectedTimezone', () => {
@@ -68,10 +102,16 @@ describe('deploy freeze store actions', () => {
         state,
         [{ type: 'RESET_MODAL' }],
         [
-          { type: 'requestAddFreezePeriod' },
-          { type: 'receiveAddFreezePeriodSuccess' },
+          { type: 'requestFreezePeriod' },
+          { type: 'receiveFreezePeriodSuccess' },
           { type: 'fetchFreezePeriods' },
         ],
+        () =>
+          expect(Api.createFreezePeriod).toHaveBeenCalledWith(state.projectId, {
+            freeze_start: state.freezeStartCron,
+            freeze_end: state.freezeEndCron,
+            cron_timezone: state.selectedTimezoneIdentifier,
+          }),
       );
     });
 
@@ -83,7 +123,43 @@ describe('deploy freeze store actions', () => {
         {},
         state,
         [],
-        [{ type: 'requestAddFreezePeriod' }, { type: 'receiveAddFreezePeriodError' }],
+        [{ type: 'requestFreezePeriod' }, { type: 'receiveFreezePeriodError' }],
+        () => expect(createFlash).toHaveBeenCalled(),
+      );
+    });
+  });
+
+  describe('updateFreezePeriod', () => {
+    it('dispatch correct actions on updating a freeze period', () => {
+      testAction(
+        actions.updateFreezePeriod,
+        {},
+        state,
+        [{ type: 'RESET_MODAL' }],
+        [
+          { type: 'requestFreezePeriod' },
+          { type: 'receiveFreezePeriodSuccess' },
+          { type: 'fetchFreezePeriods' },
+        ],
+        () =>
+          expect(Api.updateFreezePeriod).toHaveBeenCalledWith(state.projectId, {
+            id: state.selectedId,
+            freeze_start: state.freezeStartCron,
+            freeze_end: state.freezeEndCron,
+            cron_timezone: state.selectedTimezoneIdentifier,
+          }),
+      );
+    });
+
+    it('should show flash error and set error in state on add failure', () => {
+      Api.updateFreezePeriod.mockRejectedValue();
+
+      testAction(
+        actions.updateFreezePeriod,
+        {},
+        state,
+        [],
+        [{ type: 'requestFreezePeriod' }, { type: 'receiveFreezePeriodError' }],
         () => expect(createFlash).toHaveBeenCalled(),
       );
     });
@@ -95,11 +171,11 @@ describe('deploy freeze store actions', () => {
         actions.fetchFreezePeriods,
         {},
         state,
-        [],
         [
-          { type: 'requestFreezePeriods' },
-          { type: 'receiveFreezePeriodsSuccess', payload: mockFreezePeriods },
+          { type: types.REQUEST_FREEZE_PERIODS },
+          { type: types.RECEIVE_FREEZE_PERIODS_SUCCESS, payload: freezePeriodsFixture },
         ],
+        [],
       );
     });
 
@@ -110,8 +186,8 @@ describe('deploy freeze store actions', () => {
         actions.fetchFreezePeriods,
         {},
         state,
+        [{ type: types.REQUEST_FREEZE_PERIODS }],
         [],
-        [{ type: 'requestFreezePeriods' }],
         () =>
           expect(createFlash).toHaveBeenCalledWith(
             'There was an error fetching the deploy freezes.',

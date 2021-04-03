@@ -49,7 +49,7 @@ RSpec.describe DescriptionVersion do
     def deleted_count
       DescriptionVersion
         .where('issue_id = ? or epic_id = ? or merge_request_id = ?', issue.id, epic.id, merge_request.id)
-        .where('deleted_at IS NOT NULL')
+        .where.not(deleted_at: nil)
         .count
     end
 
@@ -62,7 +62,7 @@ RSpec.describe DescriptionVersion do
     end
 
     context 'when start_id is not present' do
-      it 'only soft deletes description_version' do
+      it 'only delayed deletes description_version' do
         version = epic.description_versions.last
 
         version.delete!
@@ -73,7 +73,7 @@ RSpec.describe DescriptionVersion do
     end
 
     context 'when start_id is present' do
-      it 'soft deletes description versions of same issuable up to start_id' do
+      it 'delayed deletes description versions of same issuable up to start_id' do
         description_version = epic.description_versions.last.previous_version
         starting_version = epic.description_versions.second
 

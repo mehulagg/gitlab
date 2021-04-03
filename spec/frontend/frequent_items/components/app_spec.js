@@ -1,15 +1,16 @@
 import MockAdapter from 'axios-mock-adapter';
 import Vue from 'vue';
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
-import axios from '~/lib/utils/axios_utils';
-import appComponent from '~/frequent_items/components/app.vue';
-import eventHub from '~/frequent_items/event_hub';
-import store from '~/frequent_items/store';
-import { FREQUENT_ITEMS, HOUR_IN_MS } from '~/frequent_items/constants';
-import { getTopFrequentItems } from '~/frequent_items/utils';
-import { currentSession, mockFrequentProjects, mockSearchedProjects } from '../mock_data';
+import { useRealDate } from 'helpers/fake_date';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import appComponent from '~/frequent_items/components/app.vue';
+import { FREQUENT_ITEMS, HOUR_IN_MS } from '~/frequent_items/constants';
+import eventHub from '~/frequent_items/event_hub';
+import { createStore } from '~/frequent_items/store';
+import { getTopFrequentItems } from '~/frequent_items/utils';
+import axios from '~/lib/utils/axios_utils';
+import { currentSession, mockFrequentProjects, mockSearchedProjects } from '../mock_data';
 
 useLocalStorageSpy();
 
@@ -18,6 +19,7 @@ const createComponentWithStore = (namespace = 'projects') => {
   session = currentSession[namespace];
   gon.api_version = session.apiVersion;
   const Component = Vue.extend(appComponent);
+  const store = createStore();
 
   return mountComponentWithStore(Component, {
     store,
@@ -64,7 +66,7 @@ describe('Frequent Items App Component', () => {
           storage[storageKey] = value;
         });
 
-        localStorage.getItem.mockImplementation(storageKey => {
+        localStorage.getItem.mockImplementation((storageKey) => {
           if (storage[storageKey]) {
             return storage[storageKey];
           }
@@ -92,23 +94,27 @@ describe('Frequent Items App Component', () => {
         expect(projects.length).toBe(1);
       });
 
-      it('should increase frequency of report if it was logged multiple times over the course of an hour', () => {
-        let projects;
-        const newTimestamp = Date.now() + HOUR_IN_MS + 1;
+      describe('with real date', () => {
+        useRealDate();
 
-        vm.logItemAccess(session.storageKey, session.project);
-        projects = JSON.parse(storage[session.storageKey]);
+        it('should increase frequency of report if it was logged multiple times over the course of an hour', () => {
+          let projects;
+          const newTimestamp = Date.now() + HOUR_IN_MS + 1;
 
-        expect(projects[0].frequency).toBe(1);
+          vm.logItemAccess(session.storageKey, session.project);
+          projects = JSON.parse(storage[session.storageKey]);
 
-        vm.logItemAccess(session.storageKey, {
-          ...session.project,
-          lastAccessedOn: newTimestamp,
+          expect(projects[0].frequency).toBe(1);
+
+          vm.logItemAccess(session.storageKey, {
+            ...session.project,
+            lastAccessedOn: newTimestamp,
+          });
+          projects = JSON.parse(storage[session.storageKey]);
+
+          expect(projects[0].frequency).toBe(2);
+          expect(projects[0].lastAccessedOn).not.toBe(session.project.lastAccessedOn);
         });
-        projects = JSON.parse(storage[session.storageKey]);
-
-        expect(projects[0].frequency).toBe(2);
-        expect(projects[0].lastAccessedOn).not.toBe(session.project.lastAccessedOn);
       });
 
       it('should always update project metadata', () => {
@@ -159,7 +165,7 @@ describe('Frequent Items App Component', () => {
   });
 
   describe('created', () => {
-    it('should bind event listeners on eventHub', done => {
+    it('should bind event listeners on eventHub', (done) => {
       jest.spyOn(eventHub, '$on').mockImplementation(() => {});
 
       createComponentWithStore().$mount();
@@ -172,7 +178,7 @@ describe('Frequent Items App Component', () => {
   });
 
   describe('beforeDestroy', () => {
-    it('should unbind event listeners on eventHub', done => {
+    it('should unbind event listeners on eventHub', (done) => {
       jest.spyOn(eventHub, '$off').mockImplementation(() => {});
 
       vm.$mount();
@@ -190,7 +196,7 @@ describe('Frequent Items App Component', () => {
       expect(vm.$el.querySelector('.search-input-container')).toBeDefined();
     });
 
-    it('should render loading animation', done => {
+    it('should render loading animation', (done) => {
       vm.$store.dispatch('fetchSearchedItems');
 
       Vue.nextTick(() => {
@@ -203,7 +209,7 @@ describe('Frequent Items App Component', () => {
       });
     });
 
-    it('should render frequent projects list header', done => {
+    it('should render frequent projects list header', (done) => {
       Vue.nextTick(() => {
         const sectionHeaderEl = vm.$el.querySelector('.section-header');
 
@@ -213,7 +219,7 @@ describe('Frequent Items App Component', () => {
       });
     });
 
-    it('should render frequent projects list', done => {
+    it('should render frequent projects list', (done) => {
       const expectedResult = getTopFrequentItems(mockFrequentProjects);
       localStorage.getItem.mockImplementation(() => JSON.stringify(mockFrequentProjects));
 
@@ -228,7 +234,7 @@ describe('Frequent Items App Component', () => {
       });
     });
 
-    it('should render searched projects list', done => {
+    it('should render searched projects list', (done) => {
       mock.onGet(/\/api\/v4\/projects.json(.*)$/).replyOnce(200, mockSearchedProjects);
 
       expect(vm.$el.querySelectorAll('.frequent-items-list-container li').length).toBe(1);

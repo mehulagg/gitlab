@@ -1,5 +1,5 @@
 # Template project: https://gitlab.com/pages/jekyll
-# Docs: https://docs.gitlab.com/ce/pages/
+# Docs: https://docs.gitlab.com/ee/pages/
 image: ruby:2.6
 
 variables:
@@ -18,7 +18,8 @@ test:
     paths:
       - test
   except:
-    - master
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 pages:
   stage: deploy
@@ -28,4 +29,5 @@ pages:
     paths:
       - public
   only:
-    - master
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

@@ -1,7 +1,7 @@
 <script>
 import { GlFormInput } from '@gitlab/ui';
-import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 import setupCollapsibleInputs from '~/snippet/collapsible_input';
+import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 
 export default {
   components: {
@@ -49,6 +49,7 @@ export default {
         :add-spacing-classes="false"
         :markdown-preview-path="markdownPreviewPath"
         :markdown-docs-path="markdownDocsPath"
+        :textarea-value="value"
       >
         <template #textarea>
           <textarea

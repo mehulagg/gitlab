@@ -11,7 +11,7 @@
       = _('Lock memberships to LDAP synchronization')
   %span.form-text.text-muted
     = _('If checked, new group memberships and permissions can only be added via LDAP synchronization')
-    = link_to icon('question-circle'), help_page_path('administration/auth/ldap/index.md', anchor: 'global-group-memberships-lock-starter-only')
+    = link_to sprite_icon('question-o'), help_page_path('administration/auth/ldap/index.md', anchor: 'global-group-memberships-lock')
 
   .form-check
     = form.check_box :allow_group_owners_to_manage_ldap, class: 'form-check-input'
@@ -19,4 +19,4 @@
       = _('Allow group owners to manage LDAP-related settings')
   %span.form-text.text-muted
     = _('If checked, group owners can manage LDAP group links and LDAP member overrides')
-    = link_to icon('question-circle'), help_page_path('administration/auth/ldap-ee')
+    = link_to sprite_icon('question-o'), help_page_path('administration/auth/ldap/index.md')

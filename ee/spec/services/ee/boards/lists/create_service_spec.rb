@@ -4,47 +4,101 @@ require 'spec_helper'
 
 RSpec.describe Boards::Lists::CreateService do
   describe '#execute' do
-    let(:project) { create(:project) }
-    let(:board) { create(:board, project: project) }
-    let(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+    let_it_be_with_refind(:project) { create(:project, group: group) }
+    let_it_be(:board, refind: true) { create(:board, project: project) }
+    let_it_be(:user) { create(:user) }
 
     context 'when assignee_id param is sent' do
-      let(:other_user) { create(:user) }
+      let_it_be(:other_user) { create(:user) }
+
+      before_all do
+        project.add_developer(user)
+        project.add_developer(other_user)
+      end
 
       subject(:service) { described_class.new(project, user, 'assignee_id' => other_user.id) }
 
       before do
-        project.add_developer(user)
-        project.add_developer(other_user)
-
         stub_licensed_features(board_assignee_lists: true)
       end
 
       it 'creates a new assignee list' do
-        list = service.execute(board)
+        response = service.execute(board)
 
-        expect(list.list_type).to eq('assignee')
-        expect(list).to be_valid
+        expect(response.success?).to eq(true)
+        expect(response.payload[:list].list_type).to eq('assignee')
       end
     end
 
     context 'when milestone_id param is sent' do
-      let(:user) { create(:user) }
-      let(:milestone) { create(:milestone, project: project) }
+      let_it_be(:milestone) { create(:milestone, project: project) }
+
+      before_all do
+        project.add_developer(user)
+      end
 
       subject(:service) { described_class.new(project, user, 'milestone_id' => milestone.id) }
 
       before do
-        project.add_developer(user)
-
         stub_licensed_features(board_milestone_lists: true)
       end
 
       it 'creates a milestone list when param is valid' do
-        list = service.execute(board)
+        response = service.execute(board)
 
-        expect(list.list_type).to eq('milestone')
-        expect(list).to be_valid
+        expect(response.success?).to eq(true)
+        expect(response.payload[:list].list_type).to eq('milestone')
+      end
+    end
+
+    context 'when iteration_id param is sent' do
+      let_it_be(:iteration) { create(:iteration, group: group) }
+
+      before_all do
+        group.add_developer(user)
+      end
+
+      subject(:service) { described_class.new(project, user, 'iteration_id' => iteration.id) }
+
+      before do
+        stub_licensed_features(board_iteration_lists: true)
+      end
+
+      it 'creates an iteration list when param is valid' do
+        response = service.execute(board)
+
+        expect(response.success?).to eq(true)
+        expect(response.payload[:list].list_type).to eq('iteration')
+      end
+
+      context 'when iteration is from another group' do
+        let_it_be(:iteration) { create(:iteration) }
+
+        it 'returns an error' do
+          response = service.execute(board)
+
+          expect(response.success?).to eq(false)
+          expect(response.errors).to include('Iteration not found')
+        end
+      end
+
+      it 'returns an error when feature flag is disabled' do
+        stub_feature_flags(iteration_board_lists: false)
+
+        response = service.execute(board)
+
+        expect(response.success?).to eq(false)
+        expect(response.errors).to include('iteration_board_lists feature flag is disabled')
+      end
+
+      it 'returns an error when license is unavailable' do
+        stub_licensed_features(board_iteration_lists: false)
+
+        response = service.execute(board)
+
+        expect(response.success?).to eq(false)
+        expect(response.errors).to include('Iteration lists not available with your current license')
       end
     end
 
@@ -52,7 +106,7 @@ RSpec.describe Boards::Lists::CreateService do
       describe '#create_list_attributes' do
         shared_examples 'attribute provider for list creation' do
           before do
-            stub_feature_flags(wip_limits: wip_limits_enabled)
+            stub_licensed_features(wip_limits: wip_limits_enabled)
           end
 
           where(:params, :expected_max_issue_count, :expected_max_issue_weight, :expected_limit_metric) do
@@ -86,7 +140,7 @@ RSpec.describe Boards::Lists::CreateService do
             it 'contains the expected max limits' do
               service = described_class.new(project, user, params)
 
-              attrs = service.create_list_attributes(nil, nil, nil)
+              attrs = service.send(:create_list_attributes, nil, nil, nil)
 
               if wip_limits_enabled
                 expect(attrs).to include(max_issue_count: expected_max_issue_count,

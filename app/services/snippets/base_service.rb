@@ -2,7 +2,8 @@
 
 module Snippets
   class BaseService < ::BaseService
-    include SpamCheckMethods
+    UPDATE_COMMIT_MSG = 'Update snippet'
+    INITIAL_COMMIT_MSG = 'Initial commit'
 
     CreateRepositoryError = Class.new(StandardError)
 
@@ -15,8 +16,6 @@ module Snippets
 
       input_actions = Array(@params.delete(:snippet_actions).presence)
       @snippet_actions = SnippetInputActionCollection.new(input_actions, allowed_actions: restricted_files_actions)
-
-      filter_spam_check_params
     end
 
     private
@@ -46,7 +45,7 @@ module Snippets
         snippet.errors.add(:snippet_actions, 'have invalid data')
       end
 
-      snippet_error_response(snippet, 403)
+      snippet_error_response(snippet, 422)
     end
 
     def snippet_error_response(snippet, http_status)
@@ -84,6 +83,21 @@ module Snippets
 
     def restricted_files_actions
       nil
+    end
+
+    def commit_attrs(snippet, msg)
+      {
+        branch_name: snippet.default_branch,
+        message: msg
+      }
+    end
+
+    def delete_repository(snippet)
+      snippet.repository.remove
+      snippet.snippet_repository&.delete
+
+      # Purge any existing value for repository_exists?
+      snippet.repository.expire_exists_cache
     end
   end
 end

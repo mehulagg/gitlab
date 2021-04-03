@@ -9,6 +9,7 @@ RSpec.describe Projects::MirrorsController do
            mirror_user: user,
            import_url: 'http://user:pass@test.url')
   end
+
   let(:user) { create(:user) }
 
   describe 'updates the mirror URL' do

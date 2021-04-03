@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :admin do
   resources :users, constraints: { id: %r{[a-zA-Z./0-9_\-]+} } do
     resources :keys, only: [:show, :destroy]
@@ -17,6 +19,8 @@ namespace :admin do
       put :activate
       put :unlock
       put :confirm
+      put :approve
+      delete :reject
       post :impersonate
       patch :disable_two_factor
       delete 'remove/:email_id', action: 'remove_email', as: 'remove_email'
@@ -81,6 +85,8 @@ namespace :admin do
     post :preview, on: :collection
   end
 
+  get :instance_review, to: 'instance_review#index'
+
   resource :health_check, controller: 'health_check', only: [:show]
   resource :background_jobs, controller: 'background_jobs', only: [:show]
 
@@ -88,6 +94,11 @@ namespace :admin do
   resources :requests_profiles, only: [:index, :show], param: :name, constraints: { name: /.+\.(html|txt)/ }
 
   resources :projects, only: [:index]
+
+  get '/instance_statistics', to: redirect('admin/usage_trends')
+  resources :usage_trends, only: :index
+  resource :dev_ops_report, controller: 'dev_ops_report', only: :show
+  resources :cohorts, only: :index
 
   scope(path: 'projects/*namespace_id',
         as: :namespace,
@@ -119,6 +130,7 @@ namespace :admin do
     resources :integrations, only: [:edit, :update] do
       member do
         put :test
+        post :reset
       end
     end
 
@@ -135,16 +147,19 @@ namespace :admin do
     get :status_delete_self_monitoring_project
   end
 
+  resources :plan_limits, only: :create
+
   resources :labels
 
   resources :runners, only: [:index, :show, :update, :destroy] do
     member do
-      get :resume
-      get :pause
+      post :resume
+      post :pause
     end
 
     collection do
       get :tag_list, format: :json
+      get :runner_setup_scripts, format: :json
     end
   end
 

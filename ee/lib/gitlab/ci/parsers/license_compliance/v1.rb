@@ -15,7 +15,7 @@ module Gitlab
             json.fetch(:dependencies, []).each do |dependency|
               each_license_for(dependency) do |license_hash|
                 license = report.add_license(id: nil, name: license_hash[:name], url: license_hash[:url])
-                license.add_dependency(dependency[:dependency][:name])
+                license.add_dependency(name: dependency[:dependency][:name])
               end
             end
           end

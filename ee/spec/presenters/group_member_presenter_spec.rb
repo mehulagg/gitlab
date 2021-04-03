@@ -12,6 +12,14 @@ RSpec.describe GroupMemberPresenter do
     let(:saml_provider) { double(:saml_provider) }
     let(:group) { double(:group) }
 
+    context 'when member does not have a user (invited member)' do
+      let(:group_member) { build(:group_member, :invited) }
+
+      it 'returns `false`' do
+        expect(presenter.group_sso?).to eq false
+      end
+    end
+
     it 'calls through to User#group_sso?' do
       expect(user).to receive(:group_sso?).with(group).and_return(true)
 
@@ -20,6 +28,14 @@ RSpec.describe GroupMemberPresenter do
   end
 
   describe '#group_managed_account?' do
+    context 'when member does not have a user (invited member)' do
+      let(:group_member) { build(:group_member, :invited) }
+
+      it 'returns `false`' do
+        expect(presenter.group_managed_account?).to eq false
+      end
+    end
+
     context 'when user is part of the group managed account' do
       before do
         expect(user).to receive(:group_managed_account?).and_return(true)
@@ -58,6 +74,28 @@ RSpec.describe GroupMemberPresenter do
       end
 
       it { expect(presenter.can_update?).to eq(false) }
+    end
+  end
+
+  describe '#valid_level_roles?' do
+    context 'with minimal access role feature switched on' do
+      before do
+        allow(group_member).to receive(:highest_group_member)
+        allow(group_member).to receive_message_chain(:class, :access_level_roles).and_return(::Gitlab::Access.options_with_owner)
+        expect(group).to receive(:access_level_roles).and_return(::Gitlab::Access.options_with_minimal_access)
+      end
+
+      it { expect(presenter.valid_level_roles).to eq(::Gitlab::Access.options_with_minimal_access) }
+    end
+
+    context 'with minimal access role feature switched off' do
+      it_behaves_like '#valid_level_roles', :group do
+        let(:expected_roles) { { 'Developer' => 30, 'Maintainer' => 40, 'Owner' => 50, 'Reporter' => 20 } }
+
+        before do
+          entity.parent = group
+        end
+      end
     end
   end
 end

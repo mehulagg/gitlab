@@ -2,7 +2,9 @@
 
 module API
   module Metrics
-    class UserStarredDashboards < Grape::API::Instance
+    class UserStarredDashboards < ::API::Base
+      feature_category :metrics
+
       resource :projects do
         desc 'Marks selected metrics dashboard as starred' do
           success Entities::Metrics::UserStarredDashboard

@@ -1,9 +1,9 @@
 import Api from '~/api';
 import httpStatus from '~/lib/utils/http_status';
-import * as types from '../mutation_types';
-import * as messages from '../messages';
-import { CHECK_CONFIG, CHECK_RUNNERS, RETRY_RUNNERS_INTERVAL } from '../constants';
 import * as terminalService from '../../../../services/terminals';
+import { CHECK_CONFIG, CHECK_RUNNERS, RETRY_RUNNERS_INTERVAL } from '../constants';
+import * as messages from '../messages';
+import * as types from '../mutation_types';
 
 export const requestConfigCheck = ({ commit }) => {
   commit(types.REQUEST_CHECK, CHECK_CONFIG);
@@ -36,7 +36,7 @@ export const fetchConfigCheck = ({ dispatch, rootState, rootGetters }) => {
     .then(() => {
       dispatch('receiveConfigCheckSuccess');
     })
-    .catch(e => {
+    .catch((e) => {
       dispatch('receiveConfigCheckError', e);
     });
 };
@@ -92,7 +92,7 @@ export const fetchRunnersCheck = ({ dispatch, rootGetters }, options = {}) => {
     .then(({ data }) => {
       dispatch('receiveRunnersCheckSuccess', data);
     })
-    .catch(e => {
+    .catch((e) => {
       dispatch('receiveRunnersCheckError', e);
     });
 };

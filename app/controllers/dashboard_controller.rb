@@ -15,6 +15,10 @@ class DashboardController < Dashboard::ApplicationController
 
   respond_to :html
 
+  feature_category :audit_events, [:activity]
+  feature_category :issue_tracking, [:issues, :issues_calendar]
+  feature_category :code_review, [:merge_requests]
+
   def activity
     respond_to do |format|
       format.html
@@ -29,6 +33,21 @@ class DashboardController < Dashboard::ApplicationController
   protected
 
   def load_events
+    @events =
+      if params[:filter] == "followed"
+        load_user_events
+      else
+        load_project_events
+      end
+
+    Events::RenderService.new(current_user).execute(@events)
+  end
+
+  def load_user_events
+    UserRecentEventsFinder.new(current_user, current_user.followees, event_filter, params).execute
+  end
+
+  def load_project_events
     projects =
       if params[:filter] == "starred"
         ProjectsFinder.new(current_user: current_user, params: { starred: true }).execute
@@ -36,12 +55,10 @@ class DashboardController < Dashboard::ApplicationController
         current_user.authorized_projects
       end
 
-    @events = EventCollection
+    EventCollection
       .new(projects, offset: params[:offset].to_i, filter: event_filter)
       .to_a
       .map(&:present)
-
-    Events::RenderService.new(current_user).execute(@events)
   end
 
   def set_show_full_reference

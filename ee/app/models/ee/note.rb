@@ -13,6 +13,18 @@ module EE
       scope :searchable, -> { where(system: false).includes(:noteable) }
       scope :by_humans, -> { user.joins(:author).merge(::User.humans) }
       scope :with_suggestions, -> { joins(:suggestions) }
+      scope :count_for_vulnerability_id, ->(vulnerability_id) do
+        where(noteable_type: ::Vulnerability.name, noteable_id: vulnerability_id)
+          .group(:noteable_id)
+          .count
+      end
+    end
+
+    class_methods do
+      # override
+      def use_separate_indices?
+        Elastic::DataMigrationService.migration_has_finished?(:migrate_notes_to_separate_index)
+      end
     end
 
     # Original method in Elastic::ApplicationSearch
@@ -64,6 +76,15 @@ module EE
       return true unless system_note_for_epic? && created_before_noteable?
 
       group_reporter?(user, noteable.group)
+    end
+
+    override :skip_notification?
+    def skip_notification?
+      for_vulnerability? || super
+    end
+
+    def usage_ping_track_updated_epic_note(user)
+      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_note_updated_action(author: user) if for_epic?
     end
 
     private

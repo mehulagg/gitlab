@@ -21,6 +21,7 @@
         "name": { "type": "string" },
         "username": { "type": "string" },
         "status_tooltip_html": { "$ref": "../../../../../../spec/fixtures/api/schemas/types/nullable_string.json" },
+        "show_status": { "type": "boolean" },
         "is_gitlab_employee": { "type": "boolean" }
       },
       "additionalProperties": false

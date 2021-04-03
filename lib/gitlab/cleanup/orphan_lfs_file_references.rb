@@ -5,19 +5,23 @@ module Gitlab
     class OrphanLfsFileReferences
       include Gitlab::Utils::StrongMemoize
 
-      attr_reader :project, :dry_run, :logger, :limit
+      attr_reader :project, :dry_run, :logger
 
       DEFAULT_REMOVAL_LIMIT = 1000
 
-      def initialize(project, dry_run: true, logger: nil, limit: nil)
+      def initialize(project, dry_run: true, logger: nil)
         @project = project
         @dry_run = dry_run
-        @logger = logger || Rails.logger # rubocop:disable Gitlab/RailsLogger
-        @limit = limit
+        @logger = logger || Gitlab::AppLogger
       end
 
       def run!
         log_info("Looking for orphan LFS files for project #{project.name_with_namespace}")
+
+        if project.lfs_objects.empty?
+          log_info("Project #{project.name_with_namespace} is linked to 0 LFS objects. Nothing to do")
+          return
+        end
 
         remove_orphan_references
       end
@@ -25,7 +29,7 @@ module Gitlab
       private
 
       def remove_orphan_references
-        invalid_references = project.lfs_objects_projects.where(lfs_object: orphan_objects) # rubocop:disable CodeReuse/ActiveRecord
+        invalid_references = project.lfs_objects_projects.lfs_object_in(orphan_objects)
 
         if dry_run
           log_info("Found invalid references: #{invalid_references.count}")
@@ -41,30 +45,30 @@ module Gitlab
         end
       end
 
-      def lfs_oids_from_repository
-        project.repository.gitaly_blob_client.get_all_lfs_pointers.map(&:lfs_oid)
-      end
+      def orphan_objects
+        # Get these first so racing with a git push can't remove any LFS objects
+        oids = project.lfs_objects_oids
 
-      def orphan_oids
-        lfs_oids_from_database - lfs_oids_from_repository
-      end
+        repos = [
+          project.repository,
+          project.design_repository,
+          project.wiki.repository
+        ].select(&:exists?)
 
-      def lfs_oids_from_database
-        oids = []
-
-        project.lfs_objects.each_batch do |relation|
-          oids += relation.pluck(:oid) # rubocop:disable CodeReuse/ActiveRecord
+        repos.flat_map do |repo|
+          oids -= repo.gitaly_blob_client.get_all_lfs_pointers.map(&:lfs_oid)
         end
 
-        oids
-      end
-
-      def orphan_objects
-        LfsObject.where(oid: orphan_oids) # rubocop:disable CodeReuse/ActiveRecord
+        # The remaining OIDs are not used by any repository, so are orphans
+        LfsObject.for_oids(oids)
       end
 
       def log_info(msg)
         logger.info("#{'[DRY RUN] ' if dry_run}#{msg}")
+      end
+
+      def limit
+        ENV['LIMIT']&.to_i
       end
     end
   end

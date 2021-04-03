@@ -1,8 +1,25 @@
-import * as getters from '~/ide/stores/getters';
+import { TEST_HOST } from 'helpers/test_constants';
+import {
+  DEFAULT_PERMISSIONS,
+  PERMISSION_PUSH_CODE,
+  PUSH_RULE_REJECT_UNSIGNED_COMMITS,
+} from '~/ide/constants';
+import {
+  MSG_CANNOT_PUSH_CODE,
+  MSG_CANNOT_PUSH_CODE_GO_TO_FORK,
+  MSG_CANNOT_PUSH_CODE_SHOULD_FORK,
+  MSG_CANNOT_PUSH_UNSIGNED,
+  MSG_CANNOT_PUSH_UNSIGNED_SHORT,
+  MSG_FORK,
+  MSG_GO_TO_FORK,
+} from '~/ide/messages';
 import { createStore } from '~/ide/stores';
+import * as getters from '~/ide/stores/getters';
 import { file } from '../helpers';
 
 const TEST_PROJECT_ID = 'test_project';
+const TEST_IDE_PATH = '/test/ide/path';
+const TEST_FORK_PATH = '/test/fork/path';
 
 describe('IDE store getters', () => {
   let localState;
@@ -383,20 +400,23 @@ describe('IDE store getters', () => {
     );
   });
 
-  describe('findProjectPermissions', () => {
-    it('returns false if project not found', () => {
-      expect(localStore.getters.findProjectPermissions(TEST_PROJECT_ID)).toEqual({});
+  describe.each`
+    getterName                  | projectField         | defaultValue
+    ${'findProjectPermissions'} | ${'userPermissions'} | ${DEFAULT_PERMISSIONS}
+    ${'findPushRules'}          | ${'pushRules'}       | ${{}}
+  `('$getterName', ({ getterName, projectField, defaultValue }) => {
+    const callGetter = (...args) => localStore.getters[getterName](...args);
+
+    it('returns default if project not found', () => {
+      expect(callGetter(TEST_PROJECT_ID)).toEqual(defaultValue);
     });
 
-    it('finds permission in given project', () => {
-      const userPermissions = {
-        readMergeRequest: true,
-        createMergeRequestsIn: false,
-      };
+    it('finds field in given project', () => {
+      const obj = { test: 'foo' };
 
-      localState.projects[TEST_PROJECT_ID] = { userPermissions };
+      localState.projects[TEST_PROJECT_ID] = { [projectField]: obj };
 
-      expect(localStore.getters.findProjectPermissions(TEST_PROJECT_ID)).toBe(userPermissions);
+      expect(callGetter(TEST_PROJECT_ID)).toBe(obj);
     });
   });
 
@@ -404,9 +424,8 @@ describe('IDE store getters', () => {
     getterName                  | permissionKey
     ${'canReadMergeRequests'}   | ${'readMergeRequest'}
     ${'canCreateMergeRequests'} | ${'createMergeRequestIn'}
-    ${'canPushCode'}            | ${'pushCode'}
   `('$getterName', ({ getterName, permissionKey }) => {
-    it.each([true, false])('finds permission for current project (%s)', val => {
+    it.each([true, false])('finds permission for current project (%s)', (val) => {
       localState.projects[TEST_PROJECT_ID] = {
         userPermissions: {
           [permissionKey]: val,
@@ -415,6 +434,95 @@ describe('IDE store getters', () => {
       localState.currentProjectId = TEST_PROJECT_ID;
 
       expect(localStore.getters[getterName]).toBe(val);
+    });
+  });
+
+  describe('canPushCodeStatus', () => {
+    it.each([
+      [
+        'when can push code, and can push unsigned commits',
+        {
+          input: { pushCode: true, rejectUnsignedCommits: false },
+          output: { isAllowed: true, message: '', messageShort: '' },
+        },
+      ],
+      [
+        'when cannot push code, and can push unsigned commits',
+        {
+          input: { pushCode: false, rejectUnsignedCommits: false },
+          output: {
+            isAllowed: false,
+            message: MSG_CANNOT_PUSH_CODE,
+            messageShort: MSG_CANNOT_PUSH_CODE,
+          },
+        },
+      ],
+      [
+        'when cannot push code, and has ide_path in forkInfo',
+        {
+          input: {
+            pushCode: false,
+            rejectUnsignedCommits: false,
+            forkInfo: { ide_path: TEST_IDE_PATH },
+          },
+          output: {
+            isAllowed: false,
+            message: MSG_CANNOT_PUSH_CODE_GO_TO_FORK,
+            messageShort: MSG_CANNOT_PUSH_CODE,
+            action: { href: TEST_IDE_PATH, text: MSG_GO_TO_FORK },
+          },
+        },
+      ],
+      [
+        'when cannot push code, and has fork_path in forkInfo',
+        {
+          input: {
+            pushCode: false,
+            rejectUnsignedCommits: false,
+            forkInfo: { fork_path: TEST_FORK_PATH },
+          },
+          output: {
+            isAllowed: false,
+            message: MSG_CANNOT_PUSH_CODE_SHOULD_FORK,
+            messageShort: MSG_CANNOT_PUSH_CODE,
+            action: { href: TEST_FORK_PATH, text: MSG_FORK, isForm: true },
+          },
+        },
+      ],
+      [
+        'when can push code, but cannot push unsigned commits',
+        {
+          input: { pushCode: true, rejectUnsignedCommits: true },
+          output: {
+            isAllowed: false,
+            message: MSG_CANNOT_PUSH_UNSIGNED,
+            messageShort: MSG_CANNOT_PUSH_UNSIGNED_SHORT,
+          },
+        },
+      ],
+    ])('%s', (testName, { input, output }) => {
+      const { forkInfo, rejectUnsignedCommits, pushCode } = input;
+
+      localState.links = { forkInfo };
+      localState.projects[TEST_PROJECT_ID] = {
+        pushRules: {
+          [PUSH_RULE_REJECT_UNSIGNED_COMMITS]: rejectUnsignedCommits,
+        },
+        userPermissions: {
+          [PERMISSION_PUSH_CODE]: pushCode,
+        },
+      };
+      localState.currentProjectId = TEST_PROJECT_ID;
+
+      expect(localStore.getters.canPushCodeStatus).toEqual(output);
+    });
+  });
+
+  describe('canPushCode', () => {
+    it.each([true, false])('with canPushCodeStatus.isAllowed = $s', (isAllowed) => {
+      const canPushCodeStatus = { isAllowed };
+
+      expect(getters.canPushCode({}, { canPushCodeStatus })).toBe(isAllowed);
     });
   });
 
@@ -448,16 +556,16 @@ describe('IDE store getters', () => {
   describe('getAvailableFileName', () => {
     it.each`
       path                                          | newPath
-      ${'foo'}                                      | ${'foo_1'}
+      ${'foo'}                                      | ${'foo-1'}
       ${'foo__93.png'}                              | ${'foo__94.png'}
-      ${'foo/bar.png'}                              | ${'foo/bar_1.png'}
+      ${'foo/bar.png'}                              | ${'foo/bar-1.png'}
       ${'foo/bar--34.png'}                          | ${'foo/bar--35.png'}
       ${'foo/bar 2.png'}                            | ${'foo/bar 3.png'}
       ${'foo/bar-621.png'}                          | ${'foo/bar-622.png'}
-      ${'jquery.min.js'}                            | ${'jquery_1.min.js'}
+      ${'jquery.min.js'}                            | ${'jquery-1.min.js'}
       ${'my_spec_22.js.snap'}                       | ${'my_spec_23.js.snap'}
-      ${'subtitles5.mp4.srt'}                       | ${'subtitles_6.mp4.srt'}
-      ${'sample_file.mp3'}                          | ${'sample_file_1.mp3'}
+      ${'subtitles5.mp4.srt'}                       | ${'subtitles-6.mp4.srt'}
+      ${'sample-file.mp3'}                          | ${'sample-file-1.mp3'}
       ${'Screenshot 2020-05-26 at 10.53.08 PM.png'} | ${'Screenshot 2020-05-26 at 11.53.08 PM.png'}
     `('suffixes the path with a number if the path already exists', ({ path, newPath }) => {
       localState.entries[path] = file();
@@ -480,6 +588,50 @@ describe('IDE store getters', () => {
 
     it('returns the entry path as is if the path does not exist', () => {
       expect(localStore.getters.getAvailableFileName('foo-bar1.jpg')).toBe('foo-bar1.jpg');
+    });
+  });
+
+  describe('getUrlForPath', () => {
+    it('returns a route url for the given path', () => {
+      localState.currentProjectId = 'test/test';
+      localState.currentBranchId = 'master';
+
+      expect(localStore.getters.getUrlForPath('path/to/foo/bar-1.jpg')).toBe(
+        `/project/test/test/tree/master/-/path/to/foo/bar-1.jpg/`,
+      );
+    });
+  });
+
+  describe('getJsonSchemaForPath', () => {
+    beforeEach(() => {
+      localState.currentProjectId = 'path/to/some/project';
+      localState.currentBranchId = 'master';
+    });
+
+    it('returns a json schema uri and match config for a json/yaml file that can be loaded by monaco', () => {
+      expect(localStore.getters.getJsonSchemaForPath('.gitlab-ci.yml')).toEqual({
+        fileMatch: ['*.gitlab-ci.yml'],
+        uri: `${TEST_HOST}/path/to/some/project/-/schema/master/.gitlab-ci.yml`,
+      });
+    });
+
+    it('returns a path containing sha if branch details are present in state', () => {
+      localState.projects['path/to/some/project'] = {
+        name: 'project',
+        branches: {
+          master: {
+            name: 'master',
+            commit: {
+              id: 'abcdef123456',
+            },
+          },
+        },
+      };
+
+      expect(localStore.getters.getJsonSchemaForPath('.gitlab-ci.yml')).toEqual({
+        fileMatch: ['*.gitlab-ci.yml'],
+        uri: `${TEST_HOST}/path/to/some/project/-/schema/abcdef123456/.gitlab-ci.yml`,
+      });
     });
   });
 });

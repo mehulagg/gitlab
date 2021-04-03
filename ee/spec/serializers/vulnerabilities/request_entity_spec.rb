@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Vulnerabilities::RequestEntity do
-  let(:request) { create(:vulnerabilities_occurrence).evidence[:request] }
+  let(:request) { create(:vulnerabilities_finding).evidence[:request] }
 
   let(:entity) do
     described_class.represent(request)

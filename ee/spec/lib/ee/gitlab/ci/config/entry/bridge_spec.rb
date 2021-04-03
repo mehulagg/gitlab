@@ -48,6 +48,8 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
                                       stage: 'test',
                                       only: { refs: %w[branches tags] },
                                       variables: {},
+                                      job_variables: {},
+                                      root_variables_inheritance: true,
                                       scheduling_type: :stage)
         end
       end
@@ -64,11 +66,13 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
         it 'is returns a bridge job configuration' do
           expect(subject.value).to eq(name: :my_bridge,
                                       trigger: { project: 'some/project' },
-                                      needs: { job: [{ name: 'some_job', artifacts: true }] },
+                                      needs: { job: [{ name: 'some_job', artifacts: true, optional: false }] },
                                       ignore: false,
                                       stage: 'test',
                                       only: { refs: %w[branches tags] },
                                       variables: {},
+                                      job_variables: {},
+                                      root_variables_inheritance: true,
                                       scheduling_type: :dag)
         end
       end

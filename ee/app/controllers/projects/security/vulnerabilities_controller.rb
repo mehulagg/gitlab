@@ -3,13 +3,20 @@
 module Projects
   module Security
     class VulnerabilitiesController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
       include SecurityDashboardsPermissions
       include IssuableActions
       include RendersNotes
 
+      before_action do
+        push_frontend_feature_flag(:jira_for_vulnerabilities, @project, default_enabled: :yaml)
+      end
+
       before_action :vulnerability, except: :index
 
       alias_method :vulnerable, :project
+
+      feature_category :vulnerability_management
 
       def show
         pipeline = vulnerability.finding.pipelines.first
@@ -25,6 +32,10 @@ module Projects
 
       alias_method :issuable, :vulnerability
       alias_method :noteable, :vulnerability
+
+      def issue_serializer
+        IssueSerializer.new(current_user: current_user)
+      end
     end
   end
 end

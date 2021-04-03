@@ -21,17 +21,22 @@ module Projects
     def execute
       return false unless can?(current_user, :remove_project, project)
 
+      project.update_attribute(:pending_delete, true)
       # Flush the cache for both repositories. This has to be done _before_
       # removing the physical repositories as some expiration code depends on
       # Git data (e.g. a list of branch names).
       flush_caches(project)
 
+      if Feature.enabled?(:abort_deleted_project_pipelines, default_enabled: :yaml)
+        ::Ci::AbortPipelinesService.new.execute(project.all_pipelines)
+      end
+
       Projects::UnlinkForkService.new(project, current_user).execute
 
-      attempt_destroy_transaction(project)
+      attempt_destroy(project)
 
       system_hook_service.execute_hooks_for(project, :destroy)
-      log_info("Project \"#{project.full_path}\" was removed")
+      log_info("Project \"#{project.full_path}\" was deleted")
 
       current_user.invalidate_personal_projects_count
 
@@ -98,27 +103,28 @@ module Projects
       log_error("Deletion failed on #{project.full_path} with the following message: #{message}")
     end
 
-    def attempt_destroy_transaction(project)
+    def attempt_destroy(project)
       unless remove_registry_tags
         raise_error(s_('DeleteProject|Failed to remove some tags in project container registry. Please try again or contact administrator.'))
       end
 
       project.leave_pool_repository
+      destroy_project_related_records(project)
+    end
 
-      Project.transaction do
-        log_destroy_event
-        trash_relation_repositories!
-        trash_project_repositories!
+    def destroy_project_related_records(project)
+      log_destroy_event
+      trash_relation_repositories!
+      trash_project_repositories!
 
-        # Rails attempts to load all related records into memory before
-        # destroying: https://github.com/rails/rails/issues/22510
-        # This ensures we delete records in batches.
-        #
-        # Exclude container repositories because its before_destroy would be
-        # called multiple times, and it doesn't destroy any database records.
-        project.destroy_dependent_associations_in_batches(exclude: [:container_repositories, :snippets])
-        project.destroy!
-      end
+      # Rails attempts to load all related records into memory before
+      # destroying: https://github.com/rails/rails/issues/22510
+      # This ensures we delete records in batches.
+      #
+      # Exclude container repositories because its before_destroy would be
+      # called multiple times, and it doesn't destroy any database records.
+      project.destroy_dependent_associations_in_batches(exclude: [:container_repositories, :snippets])
+      project.destroy!
     end
 
     def log_destroy_event

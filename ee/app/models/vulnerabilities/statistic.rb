@@ -18,6 +18,8 @@ module Vulnerabilities
 
     before_save :assign_letter_grade
 
+    scope :for_project, ->(project) { where(project_id: project) }
+
     class << self
       # Takes an object which responds to `#[]` method call
       # like an instance of ActiveRecord::Base or a Hash and

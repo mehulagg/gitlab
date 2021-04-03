@@ -8,6 +8,7 @@ RSpec.describe List do
   describe 'relationships' do
     it { is_expected.to belong_to(:user) }
     it { is_expected.to belong_to(:milestone) }
+    it { is_expected.to belong_to(:iteration) }
   end
 
   describe 'validations' do
@@ -62,6 +63,33 @@ RSpec.describe List do
     end
   end
 
+  context 'when it is an iteration type' do
+    let(:iteration) { build(:iteration, title: 'awesome-iteration') }
+
+    subject { described_class.new(list_type: :iteration, iteration: iteration, board: board) }
+
+    it { is_expected.to be_destroyable }
+    it { is_expected.to be_movable }
+
+    describe 'validations' do
+      it { is_expected.to validate_presence_of(:iteration) }
+
+      it 'is invalid when feature is not available' do
+        stub_licensed_features(board_iteration_lists: false)
+
+        expect(subject).to be_invalid
+        expect(subject.errors[:list_type])
+          .to contain_exactly('Iteration lists not available with your current license')
+      end
+    end
+
+    describe '#title' do
+      it 'returns the iteration title' do
+        expect(subject.title).to eq('awesome-iteration')
+      end
+    end
+  end
+
   describe '#wip_limits_available?' do
     let!(:project) { create(:project) }
     let!(:group) { create(:group) }
@@ -73,6 +101,10 @@ RSpec.describe List do
     let!(:list2) { create(:list, board: board2) }
 
     context 'with enabled wip_limits' do
+      before do
+        stub_licensed_features(wip_limits: true)
+      end
+
       it 'returns the expected values' do
         expect(list1.wip_limits_available?).to be_truthy
         expect(list2.wip_limits_available?).to be_truthy
@@ -81,7 +113,7 @@ RSpec.describe List do
 
     context 'with disabled wip_limits' do
       before do
-        stub_feature_flags(wip_limits: false)
+        stub_licensed_features(wip_limits: false)
       end
 
       it 'returns the expected values' do

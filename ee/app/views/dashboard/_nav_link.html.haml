@@ -1,7 +1,7 @@
 - if any_dashboard_nav_link?([:environments, :operations, :security])
   %button#js-dashboards-menu.btn-link{ type: 'button', data: { toggle: 'dropdown' }, 'aria-label': _('Dashboards'), 'aria-haspopup': true, 'aria-expanded': false }
     = sprite_icon('dashboard', size: 18)
-    = sprite_icon('angle-down', css_class: 'caret-down')
+    = sprite_icon('chevron-down', css_class: 'caret-down')
   .dropdown-menu{ 'aria-labelledby': "js-dashboards-menu" }
     .dropdown-bold-header
       = _('Dashboards')

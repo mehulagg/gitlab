@@ -23,7 +23,7 @@ RSpec.describe Geo::EventService do
     it 'executes the consume part of the replication' do
       subject.execute
 
-      expect(model_record.file_exist?).to be_truthy
+      expect(model_record.file.exists?).to be_truthy
     end
   end
 end

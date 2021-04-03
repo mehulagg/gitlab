@@ -124,24 +124,25 @@ RSpec.describe Ci::ProcessBuildService, '#execute' do
   end
 
   context 'when build is scheduled with DAG' do
+    using RSpec::Parameterized::TableSyntax
+
     let(:pipeline) { create(:ci_pipeline, ref: 'master', project: project) }
-    let!(:build) { create(:ci_build, :created, when: :on_success, pipeline: pipeline, scheduling_type: :dag) }
+    let!(:build) { create(:ci_build, :created, when: build_when, pipeline: pipeline, scheduling_type: :dag) }
     let!(:other_build) { create(:ci_build, :created, when: :on_success, pipeline: pipeline) }
     let!(:build_on_other_build) { create(:ci_build_need, build: build, name: other_build.name) }
 
-    context 'when current status is success' do
-      let(:current_status) { 'success' }
-
-      it 'enqueues the build' do
-        expect { subject }.to change { build.status }.to('pending')
-      end
+    where(:build_when, :current_status, :after_status) do
+      :on_success | 'success' | 'pending'
+      :on_success | 'skipped' | 'skipped'
+      :manual     | 'success' | 'manual'
+      :manual     | 'skipped' | 'skipped'
+      :delayed    | 'success' | 'manual'
+      :delayed    | 'skipped' | 'skipped'
     end
 
-    context 'when current status is skipped' do
-      let(:current_status) { 'skipped' }
-
-      it 'skips the build' do
-        expect { subject }.to change { build.status }.to('skipped')
+    with_them do
+      it 'proceeds the build' do
+        expect { subject }.to change { build.status }.to(after_status)
       end
     end
   end

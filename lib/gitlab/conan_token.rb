@@ -7,7 +7,7 @@
 
 module Gitlab
   class ConanToken
-    HMAC_KEY = 'gitlab-conan-packages'.freeze
+    HMAC_KEY = 'gitlab-conan-packages'
 
     attr_reader :access_token_id, :user_id
 
@@ -35,7 +35,7 @@ module Gitlab
 
       def secret
         OpenSSL::HMAC.hexdigest(
-          OpenSSL::Digest::SHA256.new,
+          OpenSSL::Digest.new('SHA256'),
           ::Settings.attr_encrypted_db_key_base,
           HMAC_KEY
         )

@@ -1,0 +1,11 @@
+fragment IterationReport on Iteration {
+  description
+  descriptionHtml
+  dueDate
+  id
+  iid
+  startDate
+  state
+  title
+  webPath
+}

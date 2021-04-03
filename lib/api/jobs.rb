@@ -1,15 +1,18 @@
 # frozen_string_literal: true
 
 module API
-  class Jobs < Grape::API::Instance
+  class Jobs < ::API::Base
     include PaginationParams
 
     before { authenticate! }
 
-    params do
-      requires :id, type: String, desc: 'The ID of a project'
-    end
+    feature_category :continuous_integration
+
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+      params do
+        requires :id, type: String, desc: 'The ID of a project'
+      end
+
       helpers do
         params :optional_scope do
           optional :scope, types: [String, Array[String]], desc: 'The scope of builds to show',
@@ -30,7 +33,7 @@ module API
       end
 
       desc 'Get a projects jobs' do
-        success Entities::Job
+        success Entities::Ci::Job
       end
       params do
         use :optional_scope
@@ -43,61 +46,13 @@ module API
         builds = user_project.builds.order('id DESC')
         builds = filter_builds(builds, params[:scope])
 
-        builds = builds.preload(:user, :job_artifacts_archive, :job_artifacts, :runner, pipeline: :project)
-        present paginate(builds), with: Entities::Job
-      end
-      # rubocop: enable CodeReuse/ActiveRecord
-
-      desc 'Get pipeline jobs' do
-        success Entities::Job
-      end
-      params do
-        requires :pipeline_id, type: Integer, desc: 'The pipeline ID'
-        use :optional_scope
-        use :pagination
-      end
-      # rubocop: disable CodeReuse/ActiveRecord
-      get ':id/pipelines/:pipeline_id/jobs' do
-        authorize!(:read_pipeline, user_project)
-        pipeline = user_project.all_pipelines.find(params[:pipeline_id])
-        authorize!(:read_build, pipeline)
-
-        builds = pipeline.builds
-        builds = filter_builds(builds, params[:scope])
-        builds = builds.preload(:job_artifacts_archive, :job_artifacts, project: [:namespace])
-
-        present paginate(builds), with: Entities::Job
-      end
-      # rubocop: enable CodeReuse/ActiveRecord
-
-      desc 'Get pipeline bridge jobs' do
-        success Entities::Bridge
-      end
-      params do
-        requires :pipeline_id, type: Integer, desc: 'The pipeline ID'
-        use :optional_scope
-        use :pagination
-      end
-      # rubocop: disable CodeReuse/ActiveRecord
-      get ':id/pipelines/:pipeline_id/bridges' do
-        authorize!(:read_build, user_project)
-        pipeline = user_project.ci_pipelines.find(params[:pipeline_id])
-        authorize!(:read_pipeline, pipeline)
-
-        bridges = pipeline.bridges
-        bridges = filter_builds(bridges, params[:scope])
-        bridges = bridges.preload(
-          :metadata,
-          downstream_pipeline: [project: [:route, { namespace: :route }]],
-          project: [:namespace]
-        )
-
-        present paginate(bridges), with: Entities::Bridge
+        builds = builds.preload(:user, :job_artifacts_archive, :job_artifacts, :runner, :tags, pipeline: :project)
+        present paginate(builds), with: Entities::Ci::Job
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Get a specific job of a project' do
-        success Entities::Job
+        success Entities::Ci::Job
       end
       params do
         requires :job_id, type: Integer, desc: 'The ID of a job'
@@ -107,7 +62,7 @@ module API
 
         build = find_build!(params[:job_id])
 
-        present build, with: Entities::Job
+        present build, with: Entities::Ci::Job
       end
 
       # TODO: We should use `present_disk_file!` and leave this implementation for backward compatibility (when build trace
@@ -122,16 +77,19 @@ module API
 
         build = find_build!(params[:job_id])
 
+        authorize_read_build_trace!(build) if build
+
         header 'Content-Disposition', "infile; filename=\"#{build.id}.log\""
         content_type 'text/plain'
         env['api.format'] = :binary
 
-        trace = build.trace.raw
+        # The trace can be nil bu body method expects a string as an argument.
+        trace = build.trace.raw || ''
         body trace
       end
 
       desc 'Cancel a specific job of a project' do
-        success Entities::Job
+        success Entities::Ci::Job
       end
       params do
         requires :job_id, type: Integer, desc: 'The ID of a job'
@@ -144,11 +102,11 @@ module API
 
         build.cancel
 
-        present build, with: Entities::Job
+        present build, with: Entities::Ci::Job
       end
 
       desc 'Retry a specific build of a project' do
-        success Entities::Job
+        success Entities::Ci::Job
       end
       params do
         requires :job_id, type: Integer, desc: 'The ID of a build'
@@ -162,11 +120,11 @@ module API
 
         build = ::Ci::Build.retry(build, current_user)
 
-        present build, with: Entities::Job
+        present build, with: Entities::Ci::Job
       end
 
       desc 'Erase job (remove artifacts and the trace)' do
-        success Entities::Job
+        success Entities::Ci::Job
       end
       params do
         requires :job_id, type: Integer, desc: 'The ID of a build'
@@ -179,28 +137,49 @@ module API
         break forbidden!('Job is not erasable!') unless build.erasable?
 
         build.erase(erased_by: current_user)
-        present build, with: Entities::Job
+        present build, with: Entities::Ci::Job
       end
 
-      desc 'Trigger a actionable job (manual, delayed, etc)' do
-        success Entities::Job
+      desc 'Trigger an actionable job (manual, delayed, etc)' do
+        success Entities::Ci::JobBasic
         detail 'This feature was added in GitLab 8.11'
       end
       params do
         requires :job_id, type: Integer, desc: 'The ID of a Job'
       end
+
       post ":id/jobs/:job_id/play" do
         authorize_read_builds!
 
-        build = find_build!(params[:job_id])
+        job = find_job!(params[:job_id])
 
-        authorize!(:update_build, build)
-        bad_request!("Unplayable Job") unless build.playable?
+        authorize!(:play_job, job)
 
-        build.play(current_user)
+        bad_request!("Unplayable Job") unless job.playable?
+
+        job.play(current_user)
 
         status 200
-        present build, with: Entities::Job
+
+        if job.is_a?(::Ci::Build)
+          present job, with: Entities::Ci::Job
+        else
+          present job, with: Entities::Ci::Bridge
+        end
+      end
+    end
+
+    resource :job do
+      desc 'Get current project using job token' do
+        success Entities::Ci::Job
+      end
+      route_setting :authentication, job_token_allowed: true
+      get do
+        # current_authenticated_job will be nil if user is using
+        # a valid authentication that is not CI_JOB_TOKEN
+        not_found!('Job') unless current_authenticated_job
+
+        present current_authenticated_job, with: Entities::Ci::Job
       end
     end
 

@@ -1,15 +1,16 @@
 <script>
+import { GlPopover, GlButton, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import $ from 'jquery';
-import { GlPopover, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { keysFor, BOLD_TEXT, ITALIC_TEXT, LINK_TEXT } from '~/behaviors/shortcuts/keybindings';
 import { getSelectedFragment } from '~/lib/utils/common_utils';
+import { s__ } from '~/locale';
 import { CopyAsGFM } from '../../../behaviors/markdown/copy_as_gfm';
 import ToolbarButton from './toolbar_button.vue';
-import Icon from '../icon.vue';
 
 export default {
   components: {
     ToolbarButton,
-    Icon,
+    GlIcon,
     GlPopover,
     GlButton,
   },
@@ -36,6 +37,11 @@ export default {
       required: false,
       default: false,
     },
+    suggestionStartIndex: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -53,7 +59,18 @@ export default {
       ].join('\n');
     },
     mdSuggestion() {
-      return ['```suggestion:-0+0', `{text}`, '```'].join('\n');
+      return [['```', `suggestion:-${this.suggestionStartIndex}+0`].join(''), `{text}`, '```'].join(
+        '\n',
+      );
+    },
+    isMac() {
+      // Accessing properties using ?. to allow tests to use
+      // this component without setting up window.gl.client.
+      // In production, window.gl.client should always be present.
+      return Boolean(window.gl?.client?.isMac);
+    },
+    modifierKey() {
+      return this.isMac ? '⌘' : s__('KeyboardKey|Ctrl+');
     },
   },
   mounted() {
@@ -101,11 +118,16 @@ export default {
       const area = this.$el.parentNode.querySelector('textarea');
 
       CopyAsGFM.nodeToGFM(transformed)
-        .then(gfm => {
+        .then((gfm) => {
           CopyAsGFM.insertPastedText(area, documentFragment.textContent, CopyAsGFM.quoted(gfm));
         })
         .catch(() => {});
     },
+  },
+  shortcuts: {
+    bold: keysFor(BOLD_TEXT),
+    italic: keysFor(ITALIC_TEXT),
+    link: keysFor(LINK_TEXT),
   },
 };
 </script>
@@ -129,8 +151,22 @@ export default {
       </li>
       <li :class="{ active: !previewMarkdown }" class="md-header-toolbar">
         <div class="d-inline-block">
-          <toolbar-button tag="**" :button-title="__('Add bold text')" icon="bold" />
-          <toolbar-button tag="*" :button-title="__('Add italic text')" icon="italic" />
+          <toolbar-button
+            tag="**"
+            :button-title="
+              sprintf(s__('MarkdownEditor|Add bold text (%{modifierKey}B)'), { modifierKey })
+            "
+            :shortcuts="$options.shortcuts.bold"
+            icon="bold"
+          />
+          <toolbar-button
+            tag="_"
+            :button-title="
+              sprintf(s__('MarkdownEditor|Add italic text (%{modifierKey}I)'), { modifierKey })
+            "
+            :shortcuts="$options.shortcuts.italic"
+            icon="italic"
+          />
           <toolbar-button
             :prepend="true"
             :tag="tag"
@@ -149,6 +185,7 @@ export default {
               :cursor-offset="4"
               :tag-content="lineContent"
               icon="doc-code"
+              data-qa-selector="suggestion_button"
               class="js-suggestion-btn"
               @click="handleSuggestDismissed"
             />
@@ -181,7 +218,10 @@ export default {
           <toolbar-button
             tag="[{text}](url)"
             tag-select="url"
-            :button-title="__('Add a link')"
+            :button-title="
+              sprintf(s__('MarkdownEditor|Add a link (%{modifierKey}K)'), { modifierKey })
+            "
+            :shortcuts="$options.shortcuts.link"
             icon="link"
           />
         </div>
@@ -221,7 +261,7 @@ export default {
             :title="__('Go full screen')"
             type="button"
           >
-            <icon name="screen-full" />
+            <gl-icon name="maximize" />
           </button>
         </div>
       </li>

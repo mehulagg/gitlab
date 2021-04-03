@@ -2,8 +2,10 @@
 
 module API
   module Analytics
-    class CodeReviewAnalytics < Grape::API::Instance
+    class CodeReviewAnalytics < ::API::Base
       include PaginationParams
+
+      feature_category :planning_analytics
 
       helpers do
         def project

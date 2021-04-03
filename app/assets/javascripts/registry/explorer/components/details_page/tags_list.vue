@@ -1,9 +1,10 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import TagsListRow from './tags_list_row.vue';
 import { REMOVE_TAGS_BUTTON_TITLE, TAGS_LIST_TITLE } from '../../constants/index';
+import TagsListRow from './tags_list_row.vue';
 
 export default {
+  name: 'TagsList',
   components: {
     GlButton,
     TagsListRow,
@@ -14,7 +15,12 @@ export default {
       required: false,
       default: () => [],
     },
-    isDesktop: {
+    isMobile: {
+      type: Boolean,
+      default: true,
+      required: false,
+    },
+    disabled: {
       type: Boolean,
       default: false,
       required: false,
@@ -31,10 +37,13 @@ export default {
   },
   computed: {
     hasSelectedItems() {
-      return this.tags.some(tag => this.selectedItems[tag.name]);
+      return this.tags.some((tag) => this.selectedItems[tag.name]);
     },
     showMultiDeleteButton() {
-      return this.tags.some(tag => tag.destroy_path) && this.isDesktop;
+      return this.tags.some((tag) => tag.canDelete) && !this.isMobile;
+    },
+    multiDeleteButtonIsDisabled() {
+      return !this.hasSelectedItems || this.disabled;
     },
   },
   methods: {
@@ -54,7 +63,7 @@ export default {
 
       <gl-button
         v-if="showMultiDeleteButton"
-        :disabled="!hasSelectedItems"
+        :disabled="multiDeleteButtonIsDisabled"
         category="secondary"
         variant="danger"
         @click="$emit('delete', selectedItems)"
@@ -67,9 +76,9 @@ export default {
       :key="tag.path"
       :tag="tag"
       :first="index === 0"
-      :last="index === tags.length - 1"
       :selected="selectedItems[tag.name]"
-      :is-desktop="isDesktop"
+      :is-mobile="isMobile"
+      :disabled="disabled"
       @select="updateSelectedItems(tag.name)"
       @delete="$emit('delete', { [tag.name]: true })"
     />

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
-import { createStore } from '~/ide/stores';
 import commitSidebarList from '~/ide/components/commit_sidebar/list.vue';
+import { createStore } from '~/ide/stores';
 import { file } from '../../helpers';
 
 describe('Multi-file editor commit sidebar list', () => {
@@ -16,7 +16,6 @@ describe('Multi-file editor commit sidebar list', () => {
     vm = createComponentWithStore(Component, store, {
       title: 'Staged',
       fileList: [],
-      iconName: 'staged',
       action: 'stageAllChanges',
       actionBtnText: 'stage all',
       actionBtnIcon: 'history',
@@ -32,7 +31,7 @@ describe('Multi-file editor commit sidebar list', () => {
   });
 
   describe('with a list of files', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       const f = file('file name');
       f.changed = true;
       vm.fileList.push(f);

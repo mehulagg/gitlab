@@ -1,0 +1,19 @@
+query getProjectsTestCoverage($groupFullPath: ID!, $projectIds: [ID!]) {
+  group(fullPath: $groupFullPath) {
+    projects(hasCodeCoverage: true, ids: $projectIds) {
+      nodes {
+        fullPath
+        id
+        name
+        repository {
+          rootRef
+        }
+        codeCoverageSummary {
+          averageCoverage
+          coverageCount
+          lastUpdatedOn
+        }
+      }
+    }
+  }
+}

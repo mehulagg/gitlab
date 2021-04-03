@@ -6,8 +6,6 @@ RSpec.shared_examples 'a geo RequestService' do
 
   let_it_be(:primary) { create(:geo_node, :primary) } unless method_defined?(:primary)
 
-  let(:args) { raise 'args must be supplied in a let variable in order to execute the request' } unless method_defined?(:args)
-
   describe '#execute' do
     it 'parses a 401 response' do
       response = double(success?: false,
@@ -17,14 +15,14 @@ RSpec.shared_examples 'a geo RequestService' do
       allow(Gitlab::HTTP).to receive(:perform_request).and_return(response)
       expect(subject).to receive(:log_error).with("Could not connect to Geo primary node - HTTP Status Code: 401 Unauthorized\nTest")
 
-      expect(subject.execute(args)).to be_falsey
+      expect(subject.execute).to be_falsey
     end
 
     it 'alerts on bad SSL certficate' do
       allow(Gitlab::HTTP).to receive(:perform_request).and_raise(OpenSSL::SSL::SSLError.new('bad certificate'))
       expect(subject).to receive(:log_error).with(/Failed to Net::HTTP::(Put|Post) to primary url: /, kind_of(OpenSSL::SSL::SSLError))
 
-      expect(subject.execute(args)).to be_falsey
+      expect(subject.execute).to be_falsey
     end
 
     it 'handles connection refused' do
@@ -32,7 +30,7 @@ RSpec.shared_examples 'a geo RequestService' do
 
       expect(subject).to receive(:log_error).with(/Failed to Net::HTTP::(Put|Post) to primary url: /, kind_of(Errno::ECONNREFUSED))
 
-      expect(subject.execute(args)).to be_falsey
+      expect(subject.execute).to be_falsey
     end
 
     it 'returns meaningful error message when primary uses incorrect db key' do
@@ -43,13 +41,13 @@ RSpec.shared_examples 'a geo RequestService' do
         kind_of(OpenSSL::Cipher::CipherError)
       )
 
-      expect(subject.execute(args)).to be_falsey
+      expect(subject.execute).to be_falsey
     end
 
     it 'gracefully handles case when primary is deleted' do
       primary.destroy!
 
-      expect(subject.execute(args)).to be_falsey
+      expect(subject.execute).to be_falsey
     end
   end
 end

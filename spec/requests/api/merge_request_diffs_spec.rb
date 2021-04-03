@@ -8,8 +8,8 @@ RSpec.describe API::MergeRequestDiffs, 'MergeRequestDiffs' do
   let!(:project)       { merge_request.target_project }
 
   before do
-    merge_request.merge_request_diffs.create(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9')
-    merge_request.merge_request_diffs.create(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e')
+    merge_request.merge_request_diffs.create!(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9')
+    merge_request.merge_request_diffs.create!(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e')
     project.add_maintainer(user)
   end
 
@@ -34,6 +34,12 @@ RSpec.describe API::MergeRequestDiffs, 'MergeRequestDiffs' do
     it 'returns a 404 when merge_request_iid not found' do
       get api("/projects/#{project.id}/merge_requests/0/versions", user)
       expect(response).to have_gitlab_http_status(:not_found)
+    end
+
+    context 'when merge request author has only guest access' do
+      it_behaves_like 'rejects user from accessing merge request info' do
+        let(:url) { "/projects/#{project.id}/merge_requests/#{merge_request.iid}/versions" }
+      end
     end
   end
 
@@ -62,6 +68,32 @@ RSpec.describe API::MergeRequestDiffs, 'MergeRequestDiffs' do
     it 'returns a 404 when merge_request_iid is not found' do
       get api("/projects/#{project.id}/merge_requests/#{non_existing_record_iid}/versions/#{merge_request_diff.id}", user)
       expect(response).to have_gitlab_http_status(:not_found)
+    end
+
+    context 'when merge request author has only guest access' do
+      it_behaves_like 'rejects user from accessing merge request info' do
+        let(:url) { "/projects/#{project.id}/merge_requests/#{merge_request.iid}/versions/#{merge_request_diff.id}" }
+      end
+    end
+
+    context 'caching merge request diffs', :use_clean_rails_redis_caching do
+      it 'is performed' do
+        get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/versions/#{merge_request_diff.id}", user)
+
+        expect(Rails.cache.fetch(merge_request_diff.cache_key)).to be_present
+      end
+
+      context 'when cached_api_merge_request_version is disabled' do
+        before do
+          stub_feature_flags(cached_api_merge_request_version: false)
+        end
+
+        it 'is not performed' do
+          get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/versions/#{merge_request_diff.id}", user)
+
+          expect(Rails.cache.fetch(merge_request_diff.cache_key)).to be_nil
+        end
+      end
     end
   end
 end

@@ -74,7 +74,10 @@ RSpec.describe 'Merge request > User posts diff notes', :js do
 
     context 'with an unfolded line' do
       before do
-        find('.js-unfold', match: :first).click
+        page.within('.file-holder[id="a5cc2925ca8258af241be7e5b0381edf30266302"]') do
+          find('.js-unfold', match: :first).click
+        end
+
         wait_for_requests
       end
 
@@ -137,7 +140,10 @@ RSpec.describe 'Merge request > User posts diff notes', :js do
 
     context 'with an unfolded line' do
       before do
-        find('.js-unfold', match: :first).click
+        page.within('.file-holder[id="a5cc2925ca8258af241be7e5b0381edf30266302"]') do
+          find('.js-unfold', match: :first).click
+        end
+
         wait_for_requests
       end
 
@@ -186,14 +192,14 @@ RSpec.describe 'Merge request > User posts diff notes', :js do
       it 'adds as discussion' do
         should_allow_commenting(find('[id="6eb14e00385d2fb284765eb1cd8d420d33d63fc9_22_22"]'), asset_form_reset: false)
         expect(page).to have_css('.notes_holder .note.note-discussion', count: 1)
-        expect(page).to have_button('Reply...')
+        expect(page).to have_field('Reply…')
       end
     end
   end
 
   context 'when the MR only supports legacy diff notes' do
     before do
-      merge_request.merge_request_diff.update(start_commit_sha: nil)
+      merge_request.merge_request_diff.update!(start_commit_sha: nil)
       visit diffs_project_merge_request_path(project, merge_request, view: 'inline')
     end
 

@@ -87,9 +87,14 @@ $monokai-il: #ae81ff;
 $monokai-gu: #75715e;
 $monokai-gd: #f92672;
 $monokai-gi: #a6e22e;
+$monokai-gh: #75715e;
 
 .code.monokai {
   // Line numbers
+  .file-line-num {
+    @include line-number-link($monokai-line-num-color);
+  }
+
   .line-numbers,
   .diff-line-num {
     background-color: $monokai-bg;
@@ -125,6 +130,9 @@ $monokai-gi: #a6e22e;
       @include dark-diff-match-line;
     }
 
+    .diff-td.diff-line-num.hll:not(.empty-cell),
+    .diff-td.line-coverage.hll:not(.empty-cell),
+    .diff-td.line_content.hll:not(.empty-cell),
     td.diff-line-num.hll:not(.empty-cell),
     td.line-coverage.hll:not(.empty-cell),
     td.line_content.hll:not(.empty-cell) {
@@ -158,15 +166,17 @@ $monokai-gi: #a6e22e;
       }
     }
 
+    .diff-grid-left:hover,
+    .diff-grid-right:hover {
+      .diff-line-num:not(.empty-cell) {
+        @include line-number-hover($monokai-over-bg);
+      }
+    }
+
     .diff-line-num {
       &.is-over,
       &.hll:not(.empty-cell).is-over {
-        background-color: $monokai-over-bg;
-        border-color: darken($monokai-over-bg, 5%);
-
-        a {
-          color: darken($monokai-over-bg, 15%);
-        }
+        @include line-number-hover($monokai-over-bg);
       }
     }
 
@@ -192,6 +202,8 @@ $monokai-gi: #a6e22e;
       }
     }
   }
+
+  @include conflict-colors('monokai');
 
   // highlight line via anchor
   pre .hll {
@@ -274,4 +286,5 @@ $monokai-gi: #a6e22e;
   .gu { color: $monokai-gu; } /* Generic.Subheading & Diff Unified/Comment? */
   .gd { color: $monokai-gd; } /* Generic.Deleted & Diff Deleted */
   .gi { color: $monokai-gi; } /* Generic.Inserted & Diff Inserted */
+  .gh { color: $monokai-gh; } /* Generic.Heading */
 }

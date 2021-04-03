@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Refactoring guide
 
 This document is a collection of techniques and best practices to consider while performing a refactor.
@@ -74,4 +80,4 @@ expect(cleanForSnapshot(wrapper.element)).toMatchSnapshot();
 - [Pinning test in refactoring dropdown](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28173)
 - [Pinning test in refactoring vulnerability_details.vue](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25830/commits)
 - [Pinning test in refactoring notes_award_list.vue](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29528#pinning-test)
-- [Video of pair programming session on pinning tests](https://youtu.be/LrakPcspBK4)
+- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Video of pair programming session on pinning tests](https://youtu.be/LrakPcspBK4)

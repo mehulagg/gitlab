@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Group navbar' do
   include NavbarStructureHelper
   include WaitForRequests
+  include WikiHelpers
 
   include_context 'group navbar structure'
 
@@ -13,9 +14,8 @@ RSpec.describe 'Group navbar' do
 
   before do
     group.add_maintainer(user)
-    stub_feature_flags(group_push_rules: false)
     stub_feature_flags(group_iterations: false)
-    stub_feature_flags(group_wiki: false)
+    stub_group_wikis(false)
     sign_in(user)
 
     insert_package_nav(_('Kubernetes'))
@@ -26,7 +26,7 @@ RSpec.describe 'Group navbar' do
       stub_licensed_features(productivity_analytics: true)
 
       insert_after_sub_nav_item(
-        _('Contribution'),
+        _('DevOps Adoption'),
         within: _('Analytics'),
         new_sub_nav_item_name: _('Productivity')
       )
@@ -42,7 +42,7 @@ RSpec.describe 'Group navbar' do
       stub_licensed_features(cycle_analytics_for_groups: true)
 
       insert_after_sub_nav_item(
-        _('Contribution'),
+        _('DevOps Adoption'),
         within: _('Analytics'),
         new_sub_nav_item_name: _('Value Stream')
       )
@@ -66,6 +66,7 @@ RSpec.describe 'Group navbar' do
   context 'when epics are available' do
     before do
       stub_licensed_features(epics: true)
+      stub_feature_flags(epic_boards: false)
 
       insert_after_nav_item(
         _('Group overview'),
@@ -73,6 +74,28 @@ RSpec.describe 'Group navbar' do
           nav_item: _('Epics'),
           nav_sub_items: [
             _('List'),
+            _('Roadmap')
+          ]
+        }
+      )
+
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when epics and epic boards are available' do
+    before do
+      stub_licensed_features(epics: true)
+
+      insert_after_nav_item(
+        _('Group overview'),
+        new_nav_item: {
+          nav_item: _('Epics'),
+          nav_sub_items: [
+            _('List'),
+            _('Boards'),
             _('Roadmap')
           ]
         }
@@ -122,21 +145,22 @@ RSpec.describe 'Group navbar' do
   end
 
   context 'when security dashboard is available' do
+    let(:security_and_compliance_nav_item) do
+      {
+        nav_item: _('Security & Compliance'),
+        nav_sub_items: [
+          _('Security Dashboard'),
+          _('Vulnerability Report'),
+          _('Compliance'),
+          _('Audit Events')
+        ]
+      }
+    end
+
     before do
       group.add_owner(user)
 
       stub_licensed_features(security_dashboard: true, group_level_compliance_dashboard: true)
-
-      insert_after_nav_item(
-        _('Merge Requests'),
-        new_nav_item: {
-          nav_item: _('Security & Compliance'),
-          nav_sub_items: [
-            _('Security'),
-            _('Compliance')
-          ]
-        }
-      )
 
       insert_after_nav_item(_('Members'), new_nav_item: settings_nav_item)
       insert_after_nav_item(_('Settings'), new_nav_item: administration_nav_item)
@@ -171,29 +195,6 @@ RSpec.describe 'Group navbar' do
     end
   end
 
-  context 'when push_rules for groups are available' do
-    before do
-      group.add_owner(user)
-
-      stub_feature_flags(group_push_rules: true)
-
-      insert_after_nav_item(
-        _('Merge Requests'),
-        new_nav_item: {
-          nav_item: _('Push Rules'),
-          nav_sub_items: []
-        }
-      )
-
-      insert_after_nav_item(_('Members'), new_nav_item: settings_nav_item)
-      insert_after_nav_item(_('Settings'), new_nav_item: administration_nav_item)
-
-      visit group_path(group)
-    end
-
-    it_behaves_like 'verified navigation bar'
-  end
-
   context 'when iterations are available' do
     before do
       stub_licensed_features(iterations: true)
@@ -213,7 +214,7 @@ RSpec.describe 'Group navbar' do
 
   context 'when group wiki is available' do
     before do
-      stub_feature_flags(group_wiki: true)
+      stub_group_wikis(true)
 
       insert_after_nav_item(
         _('Analytics'),

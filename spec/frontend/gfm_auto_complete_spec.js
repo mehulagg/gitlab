@@ -1,23 +1,229 @@
 /* eslint no-param-reassign: "off" */
-
+import MockAdapter from 'axios-mock-adapter';
 import $ from 'jquery';
 import GfmAutoComplete, { membersBeforeSave } from 'ee_else_ce/gfm_auto_complete';
-
-import 'jquery.caret';
-import '@gitlab/at.js';
-
-import { TEST_HOST } from 'helpers/test_constants';
+import { initEmojiMock } from 'helpers/emoji';
+import '~/lib/utils/jquery_at_who';
 import { getJSONFixture } from 'helpers/fixtures';
+import { TEST_HOST } from 'helpers/test_constants';
+import waitForPromises from 'helpers/wait_for_promises';
+import AjaxCache from '~/lib/utils/ajax_cache';
+import axios from '~/lib/utils/axios_utils';
 
 const labelsFixture = getJSONFixture('autocomplete_sources/labels.json');
 
 describe('GfmAutoComplete', () => {
-  const gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call({
-    fetchData: () => {},
-  });
+  const fetchDataMock = { fetchData: jest.fn() };
+  let gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call(fetchDataMock);
 
   let atwhoInstance;
   let sorterValue;
+  let filterValue;
+
+  describe('DefaultOptions.filter', () => {
+    let items;
+
+    beforeEach(() => {
+      jest.spyOn(fetchDataMock, 'fetchData');
+      jest.spyOn($.fn.atwho.default.callbacks, 'filter').mockImplementation(() => {});
+    });
+
+    describe('assets loading', () => {
+      beforeEach(() => {
+        atwhoInstance = { setting: {}, $inputor: 'inputor', at: '[vulnerability:' };
+        items = ['loading'];
+
+        filterValue = gfmAutoCompleteCallbacks.filter.call(atwhoInstance, '', items);
+      });
+
+      it('should call the fetchData function without query', () => {
+        expect(fetchDataMock.fetchData).toHaveBeenCalledWith('inputor', '[vulnerability:');
+      });
+
+      it('should not call the default atwho filter', () => {
+        expect($.fn.atwho.default.callbacks.filter).not.toHaveBeenCalled();
+      });
+
+      it('should return the passed unfiltered items', () => {
+        expect(filterValue).toEqual(items);
+      });
+    });
+
+    describe('backend filtering', () => {
+      beforeEach(() => {
+        atwhoInstance = { setting: {}, $inputor: 'inputor', at: '[vulnerability:' };
+        items = [];
+      });
+
+      describe('when previous query is different from current one', () => {
+        beforeEach(() => {
+          gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call({
+            previousQuery: 'oldquery',
+            ...fetchDataMock,
+          });
+          filterValue = gfmAutoCompleteCallbacks.filter.call(atwhoInstance, 'newquery', items);
+        });
+
+        it('should call the fetchData function with query', () => {
+          expect(fetchDataMock.fetchData).toHaveBeenCalledWith(
+            'inputor',
+            '[vulnerability:',
+            'newquery',
+          );
+        });
+
+        it('should not call the default atwho filter', () => {
+          expect($.fn.atwho.default.callbacks.filter).not.toHaveBeenCalled();
+        });
+
+        it('should return the passed unfiltered items', () => {
+          expect(filterValue).toEqual(items);
+        });
+      });
+
+      describe('when previous query is not different from current one', () => {
+        beforeEach(() => {
+          gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call({
+            previousQuery: 'oldquery',
+            ...fetchDataMock,
+          });
+          filterValue = gfmAutoCompleteCallbacks.filter.call(
+            atwhoInstance,
+            'oldquery',
+            items,
+            'searchKey',
+          );
+        });
+
+        it('should not call the fetchData function', () => {
+          expect(fetchDataMock.fetchData).not.toHaveBeenCalled();
+        });
+
+        it('should call the default atwho filter', () => {
+          expect($.fn.atwho.default.callbacks.filter).toHaveBeenCalledWith(
+            'oldquery',
+            items,
+            'searchKey',
+          );
+        });
+      });
+    });
+  });
+
+  describe('fetchData', () => {
+    const { fetchData } = GfmAutoComplete.prototype;
+    let mock;
+
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+      jest.spyOn(axios, 'get');
+      jest.spyOn(AjaxCache, 'retrieve');
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
+    describe('already loading data', () => {
+      beforeEach(() => {
+        const context = {
+          isLoadingData: { '[vulnerability:': true },
+          dataSources: {},
+          cachedData: {},
+        };
+        fetchData.call(context, {}, '[vulnerability:', '');
+      });
+
+      it('should not call either axios nor AjaxCache', () => {
+        expect(axios.get).not.toHaveBeenCalled();
+        expect(AjaxCache.retrieve).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('backend filtering', () => {
+      describe('data is not in cache', () => {
+        let context;
+
+        beforeEach(() => {
+          context = {
+            isLoadingData: { '[vulnerability:': false },
+            dataSources: { vulnerabilities: 'vulnerabilities_autocomplete_url' },
+            cachedData: {},
+          };
+        });
+
+        it('should call axios with query', () => {
+          fetchData.call(context, {}, '[vulnerability:', 'query');
+
+          expect(axios.get).toHaveBeenCalledWith('vulnerabilities_autocomplete_url', {
+            params: { search: 'query' },
+          });
+        });
+
+        it.each([200, 500])('should set the loading state', async (responseStatus) => {
+          mock.onGet('vulnerabilities_autocomplete_url').replyOnce(responseStatus);
+
+          fetchData.call(context, {}, '[vulnerability:', 'query');
+
+          expect(context.isLoadingData['[vulnerability:']).toBe(true);
+
+          await waitForPromises();
+
+          expect(context.isLoadingData['[vulnerability:']).toBe(false);
+        });
+      });
+
+      describe('data is in cache', () => {
+        beforeEach(() => {
+          const context = {
+            isLoadingData: { '[vulnerability:': false },
+            dataSources: { vulnerabilities: 'vulnerabilities_autocomplete_url' },
+            cachedData: { '[vulnerability:': [{}] },
+          };
+          fetchData.call(context, {}, '[vulnerability:', 'query');
+        });
+
+        it('should anyway call axios with query ignoring cache', () => {
+          expect(axios.get).toHaveBeenCalledWith('vulnerabilities_autocomplete_url', {
+            params: { search: 'query' },
+          });
+        });
+      });
+    });
+
+    describe('frontend filtering', () => {
+      describe('data is not in cache', () => {
+        beforeEach(() => {
+          const context = {
+            isLoadingData: { '#': false },
+            dataSources: { issues: 'issues_autocomplete_url' },
+            cachedData: {},
+          };
+          fetchData.call(context, {}, '#', 'query');
+        });
+
+        it('should call AjaxCache', () => {
+          expect(AjaxCache.retrieve).toHaveBeenCalledWith('issues_autocomplete_url', true);
+        });
+      });
+
+      describe('data is in cache', () => {
+        beforeEach(() => {
+          const context = {
+            isLoadingData: { '#': false },
+            dataSources: { issues: 'issues_autocomplete_url' },
+            cachedData: { '#': [{}] },
+            loadData: () => {},
+          };
+          fetchData.call(context, {}, '#', 'query');
+        });
+
+        it('should not call AjaxCache', () => {
+          expect(AjaxCache.retrieve).not.toHaveBeenCalled();
+        });
+      });
+    });
+  });
 
   describe('DefaultOptions.sorter', () => {
     describe('assets loading', () => {
@@ -155,16 +361,15 @@ describe('GfmAutoComplete', () => {
       'я',
       '.',
       "'",
-      '+',
       '-',
       '_',
     ];
     const jointAllowedSymbols = allowedSymbols.join('');
 
     describe('should match regular symbols', () => {
-      flagsUseDefaultMatcher.forEach(flag => {
-        allowedSymbols.forEach(symbol => {
-          argumentSize.forEach(size => {
+      flagsUseDefaultMatcher.forEach((flag) => {
+        allowedSymbols.forEach((symbol) => {
+          argumentSize.forEach((size) => {
             const query = new Array(size + 1).join(symbol);
             const subtext = flag + query;
 
@@ -186,8 +391,8 @@ describe('GfmAutoComplete', () => {
       const shouldNotBeFollowedBy = flags.concat(['\x00', '\x10', '\x3f', '\n', ' ']);
       const shouldNotBePrependedBy = ['`'];
 
-      flagsUseDefaultMatcher.forEach(atSign => {
-        shouldNotBeFollowedBy.forEach(followedSymbol => {
+      flagsUseDefaultMatcher.forEach((atSign) => {
+        shouldNotBeFollowedBy.forEach((followedSymbol) => {
           const seq = atSign + followedSymbol;
 
           it(`should not match ${JSON.stringify(seq)}`, () => {
@@ -195,7 +400,7 @@ describe('GfmAutoComplete', () => {
           });
         });
 
-        shouldNotBePrependedBy.forEach(prependedSymbol => {
+        shouldNotBePrependedBy.forEach((prependedSymbol) => {
           const seq = prependedSymbol + atSign;
 
           it(`should not match "${seq}"`, () => {
@@ -284,7 +489,7 @@ describe('GfmAutoComplete', () => {
           username: 'my-group',
           avatarTag: '<div class="avatar rect-avatar center avatar-inline s26">M</div>',
           title: 'My Group (2)',
-          search: 'my-group My Group',
+          search: 'MyGroup my-group',
           icon: '',
         },
       ]);
@@ -297,7 +502,7 @@ describe('GfmAutoComplete', () => {
           avatarTag:
             '<img src="./group.jpg" alt="my-group" class="avatar rect-avatar avatar-inline center s26"/>',
           title: 'My Group (2)',
-          search: 'my-group My Group',
+          search: 'MyGroup my-group',
           icon: '',
         },
       ]);
@@ -310,7 +515,7 @@ describe('GfmAutoComplete', () => {
           avatarTag:
             '<img src="./group.jpg" alt="my-group" class="avatar rect-avatar avatar-inline center s26"/>',
           title: 'My Group',
-          search: 'my-group My Group',
+          search: 'MyGroup my-group',
           icon:
             '<svg class="s16 vertical-align-middle gl-ml-2"><use xlink:href="undefined#notifications-off" /></svg>',
         },
@@ -328,7 +533,7 @@ describe('GfmAutoComplete', () => {
           avatarTag:
             '<img src="./users.jpg" alt="my-user" class="avatar  avatar-inline center s26"/>',
           title: 'My User',
-          search: 'my-user My User',
+          search: 'MyUser my-user',
           icon: '',
         },
       ]);
@@ -371,38 +576,95 @@ describe('GfmAutoComplete', () => {
     });
   });
 
-  describe('Members.templateFunction', () => {
-    it('should return html with avatarTag and username', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: '',
-          icon: '',
-        }),
-      ).toBe('<li>IMG my-group <small></small> </li>');
-    });
+  describe('GfmAutoComplete.Members', () => {
+    const member = {
+      name: 'Marge Simpson',
+      username: 'msimpson',
+      search: 'MargeSimpson msimpson',
+    };
 
-    it('should add icon if icon is set', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: '',
-          icon: '<i class="icon"/>',
-        }),
-      ).toBe('<li>IMG my-group <small></small> <i class="icon"/></li>');
-    });
+    describe('templateFunction', () => {
+      it('should return html with avatarTag and username', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: '',
+            icon: '',
+            availabilityStatus: '',
+          }),
+        ).toBe('<li>IMG my-group <small></small> </li>');
+      });
 
-    it('should add escaped title if title is set', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: 'MyGroup+',
-          icon: '<i class="icon"/>',
-        }),
-      ).toBe('<li>IMG my-group <small>MyGroup+</small> <i class="icon"/></li>');
+      it('should add icon if icon is set', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: '',
+            icon: '<i class="icon"/>',
+            availabilityStatus: '',
+          }),
+        ).toBe('<li>IMG my-group <small></small> <i class="icon"/></li>');
+      });
+
+      it('should add escaped title if title is set', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: 'MyGroup+',
+            icon: '<i class="icon"/>',
+            availabilityStatus: '',
+          }),
+        ).toBe('<li>IMG my-group <small>MyGroup+</small> <i class="icon"/></li>');
+      });
+
+      it('should add user availability status if availabilityStatus is set', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: '',
+            icon: '<i class="icon"/>',
+            availabilityStatus: '<span class="gl-text-gray-500"> (Busy)</span>',
+          }),
+        ).toBe(
+          '<li>IMG my-group <small><span class="gl-text-gray-500"> (Busy)</span></small> <i class="icon"/></li>',
+        );
+      });
+
+      describe('nameOrUsernameStartsWith', () => {
+        it.each`
+          query             | result
+          ${'mar'}          | ${true}
+          ${'msi'}          | ${true}
+          ${'margesimpson'} | ${true}
+          ${'msimpson'}     | ${true}
+          ${'arge'}         | ${false}
+          ${'rgesimp'}      | ${false}
+          ${'maria'}        | ${false}
+          ${'homer'}        | ${false}
+        `('returns $result for $query', ({ query, result }) => {
+          expect(GfmAutoComplete.Members.nameOrUsernameStartsWith(member, query)).toBe(result);
+        });
+      });
+
+      describe('nameOrUsernameIncludes', () => {
+        it.each`
+          query             | result
+          ${'mar'}          | ${true}
+          ${'msi'}          | ${true}
+          ${'margesimpson'} | ${true}
+          ${'msimpson'}     | ${true}
+          ${'arge'}         | ${true}
+          ${'rgesimp'}      | ${true}
+          ${'maria'}        | ${false}
+          ${'homer'}        | ${false}
+        `('returns $result for $query', ({ query, result }) => {
+          expect(GfmAutoComplete.Members.nameOrUsernameIncludes(member, query)).toBe(result);
+        });
+      });
     });
   });
 
@@ -412,15 +674,16 @@ describe('GfmAutoComplete', () => {
     };
 
     const allLabels = labelsFixture;
-    const assignedLabels = allLabels.filter(label => label.set);
-    const unassignedLabels = allLabels.filter(label => !label.set);
+    const assignedLabels = allLabels.filter((label) => label.set);
+    const unassignedLabels = allLabels.filter((label) => !label.set);
 
     let autocomplete;
     let $textarea;
 
     beforeEach(() => {
+      setFixtures('<textarea></textarea>');
       autocomplete = new GfmAutoComplete(dataSources);
-      $textarea = $('<textarea></textarea>');
+      $textarea = $('textarea');
       autocomplete.setup($textarea, { labels: true });
     });
 
@@ -428,11 +691,8 @@ describe('GfmAutoComplete', () => {
       autocomplete.destroy();
     });
 
-    const triggerDropdown = text => {
-      $textarea
-        .trigger('focus')
-        .val(text)
-        .caret('pos', -1);
+    const triggerDropdown = (text) => {
+      $textarea.trigger('focus').val(text).caret('pos', -1);
       $textarea.trigger('keyup');
 
       return new Promise(window.requestAnimationFrame);
@@ -441,12 +701,12 @@ describe('GfmAutoComplete', () => {
     const getDropdownItems = () => {
       const dropdown = document.getElementById('at-view-labels');
       const items = dropdown.getElementsByTagName('li');
-      return [].map.call(items, item => item.textContent.trim());
+      return [].map.call(items, (item) => item.textContent.trim());
     };
 
     const expectLabels = ({ input, output }) =>
       triggerDropdown(input).then(() => {
-        expect(getDropdownItems()).toEqual(output.map(label => label.title));
+        expect(getDropdownItems()).toEqual(output.map((label) => label.title));
       });
 
     describe('with no labels assigned', () => {
@@ -489,6 +749,52 @@ describe('GfmAutoComplete', () => {
         ${'/relabel ~'} | ${assignedLabels}
         ${'/unlabel ~'} | ${assignedLabels}
       `('$input shows $output.length labels', expectLabels);
+    });
+  });
+
+  describe('emoji', () => {
+    let mock;
+
+    const mockItem = {
+      'atwho-at': ':',
+      emoji: {
+        c: 'symbols',
+        d: 'negative squared ab',
+        e: '🆎',
+        name: 'ab',
+        u: '6.0',
+      },
+      fieldValue: 'ab',
+    };
+
+    beforeEach(async () => {
+      mock = await initEmojiMock();
+
+      await new GfmAutoComplete({}).loadEmojiData({ atwho() {}, trigger() {} }, ':');
+      if (!GfmAutoComplete.glEmojiTag) throw new Error('emoji not loaded');
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
+    describe('Emoji.templateFunction', () => {
+      it('should return a correct template', () => {
+        const actual = GfmAutoComplete.Emoji.templateFunction(mockItem);
+        const glEmojiTag = `<gl-emoji data-name="${mockItem.emoji.name}"></gl-emoji>`;
+        const expected = `<li>${mockItem.fieldValue} ${glEmojiTag}</li>`;
+
+        expect(actual).toBe(expected);
+      });
+    });
+
+    describe('Emoji.insertTemplateFunction', () => {
+      it('should return a correct template', () => {
+        const actual = GfmAutoComplete.Emoji.insertTemplateFunction(mockItem);
+        const expected = `:${mockItem.emoji.name}:`;
+
+        expect(actual).toBe(expected);
+      });
     });
   });
 });

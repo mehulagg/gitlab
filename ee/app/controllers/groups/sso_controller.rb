@@ -15,12 +15,17 @@ class Groups::SsoController < Groups::ApplicationController
 
   layout 'devise'
 
+  feature_category :authentication_and_authorization
+
   def saml
     @redirect_path = safe_redirect_path(params[:redirect]) || group_path(unauthenticated_group)
     @group_path = unauthenticated_group.path
     @group_name = unauthenticated_group.full_name
     @group_saml_identity = linked_identity
     @idp_url = unauthenticated_group.saml_provider.sso_url
+    @auto_redirect_to_provider = current_user&.group_sso?(unauthenticated_group)
+
+    render layout: 'devise_empty' if @auto_redirect_to_provider
   end
 
   def unlink

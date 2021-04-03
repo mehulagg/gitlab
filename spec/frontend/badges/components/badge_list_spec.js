@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
+import BadgeList from '~/badges/components/badge_list.vue';
 import { GROUP_BADGE, PROJECT_BADGE } from '~/badges/constants';
 import store from '~/badges/store';
-import BadgeList from '~/badges/components/badge_list.vue';
 import { createDummyBadge } from '../dummy_badge';
 
 describe('BadgeList component', () => {
@@ -48,7 +48,7 @@ describe('BadgeList component', () => {
     expect(rows).toHaveLength(numberOfDummyBadges);
   });
 
-  it('renders a message if no badges exist', done => {
+  it('renders a message if no badges exist', (done) => {
     store.state.badges = [];
 
     Vue.nextTick()
@@ -59,7 +59,7 @@ describe('BadgeList component', () => {
       .catch(done.fail);
   });
 
-  it('shows a loading icon when loading', done => {
+  it('shows a loading icon when loading', (done) => {
     store.state.isLoading = true;
 
     Vue.nextTick()
@@ -73,15 +73,13 @@ describe('BadgeList component', () => {
   });
 
   describe('for group badges', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       store.state.kind = GROUP_BADGE;
 
-      Vue.nextTick()
-        .then(done)
-        .catch(done.fail);
+      Vue.nextTick().then(done).catch(done.fail);
     });
 
-    it('renders a message if no badges exist', done => {
+    it('renders a message if no badges exist', (done) => {
       store.state.badges = [];
 
       Vue.nextTick()

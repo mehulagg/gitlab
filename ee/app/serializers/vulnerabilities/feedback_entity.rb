@@ -12,6 +12,7 @@ class Vulnerabilities::FeedbackEntity < Grape::Entity
     expose :comment_timestamp
     expose :comment_author, using: UserEntity
   end
+  expose :finding_uuid
 
   expose :pipeline, if: -> (feedback, _) { feedback.pipeline.present? } do
     expose :id do |feedback|
@@ -47,6 +48,11 @@ class Vulnerabilities::FeedbackEntity < Grape::Entity
     feedback&.pipeline&.ref
   end
   expose :project_fingerprint
+
+  expose :dismissal_reason
+  expose :dismissal_descriptions do |feedback|
+    Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] }
+  end
 
   alias_method :feedback, :object
 

@@ -11,15 +11,18 @@ module Gitlab
         class Bridge < ::Gitlab::Config::Entry::Node
           include ::Gitlab::Ci::Config::Entry::Processable
 
-          ALLOWED_KEYS = %i[trigger].freeze
+          ALLOWED_WHEN = %w[on_success on_failure always manual].freeze
+          ALLOWED_KEYS = %i[trigger parallel].freeze
 
           validations do
             validates :config, allowed_keys: ALLOWED_KEYS + PROCESSABLE_ALLOWED_KEYS
 
             with_options allow_nil: true do
-              validates :when,
-                inclusion: { in: %w[on_success on_failure always],
-                              message: 'should be on_success, on_failure or always' }
+              validates :when, inclusion: {
+                in: ALLOWED_WHEN,
+                message: "should be one of: #{ALLOWED_WHEN.join(', ')}"
+              }
+              validates :allow_failure, boolean: true
             end
 
             validate on: :composed do
@@ -45,7 +48,12 @@ module Gitlab
             inherit: false,
             metadata: { allowed_needs: %i[job bridge] }
 
-          attributes :when, :allow_failure
+          entry :parallel, Entry::Product::Parallel,
+            description: 'Parallel configuration for this job.',
+            inherit: false,
+            metadata: { allowed_strategies: %i(matrix) }
+
+          attributes :when, :allow_failure, :parallel
 
           def self.matching?(name, config)
             !name.to_s.start_with?('.') &&
@@ -61,14 +69,19 @@ module Gitlab
             super.merge(
               trigger: (trigger_value if trigger_defined?),
               needs: (needs_value if needs_defined?),
-              ignore: !!allow_failure,
+              ignore: ignored?,
               when: self.when,
-              scheduling_type: needs_defined? && !bridge_needs ? :dag : :stage
+              scheduling_type: needs_defined? && !bridge_needs ? :dag : :stage,
+              parallel: has_parallel? ? parallel_value : nil
             ).compact
           end
 
           def bridge_needs
             needs_value[:bridge] if needs_value
+          end
+
+          def ignored?
+            allow_failure.nil? ? manual_action? : allow_failure
           end
         end
       end

@@ -42,7 +42,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
       end
 
       it 'is valid' do
-        Timecop.travel '2019-03-01' do
+        travel_to '2019-03-01' do
           expect(subject).to be_valid
         end
       end
@@ -82,7 +82,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
   describe 'optional `project_ids`' do
     context 'when `project_ids` is not empty' do
       def json_project(project)
-        { id: project.id,
+        { id: project.to_gid.to_s,
           name: project.name,
           path_with_namespace: project.path_with_namespace,
           avatar_url: project.avatar_url }.to_json
@@ -168,6 +168,26 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
     end
   end
 
+  describe 'optional `value_stream`' do
+    context 'when `value_stream` is not empty' do
+      let(:value_stream) { instance_double('Analytics::CycleAnalytics::GroupValueStream') }
+
+      before do
+        params[:value_stream] = value_stream
+      end
+
+      it { expect(subject.value_stream).to eq(value_stream) }
+    end
+
+    context 'when `value_stream` is nil' do
+      before do
+        params[:value_stream] = nil
+      end
+
+      it { expect(subject.value_stream).to eq(nil) }
+    end
+  end
+
   describe 'issuable filter params' do
     before do
       params.merge!(
@@ -184,5 +204,25 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
     it { expect(subject[:assignees]).to eq('["username1"]') }
     it { expect(subject[:labels]).to eq('["label1","label2"]') }
     it { expect(subject[:author]).to eq('author') }
+  end
+
+  describe 'sorting params' do
+    before do
+      params.merge!(sort: 'duration', direction: 'asc')
+    end
+
+    it 'converts sorting params to symbol when passing it to data collector' do
+      data_collector_params = subject.to_data_collector_params
+
+      expect(data_collector_params[:sort]).to eq(:duration)
+      expect(data_collector_params[:direction]).to eq(:asc)
+    end
+
+    it 'adds corting params to data attributes' do
+      data_attributes = subject.to_data_attributes
+
+      expect(data_attributes[:sort]).to eq('duration')
+      expect(data_attributes[:direction]).to eq('asc')
+    end
   end
 end

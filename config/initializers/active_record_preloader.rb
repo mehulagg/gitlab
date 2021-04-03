@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveRecord
   module Associations
     class Preloader
@@ -7,6 +9,7 @@ module ActiveRecord
         end
 
         def self.run
+          self
         end
 
         def self.preloaded_records

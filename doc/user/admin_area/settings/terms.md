@@ -1,10 +1,11 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# Enforce accepting Terms of Service **(CORE ONLY)**
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18570) in [GitLab Core](https://about.gitlab.com/pricing/) 10.8.
+# Enforce accepting Terms of Service **(FREE SELF)**
 
 An admin can enforce acceptance of a terms of service and privacy policy. When this option is enabled, new and existing users must accept the terms.
 
@@ -26,7 +27,7 @@ To enforce acceptance of a Terms of Service and Privacy Policy:
 ![Enable enforcing Terms of Service](img/enforce_terms.png)
 
 For each update to the terms, a new version is stored. When a user accepts or declines the terms,
-GitLab will record which version they accepted or declined.
+GitLab records which version they accepted or declined.
 
 ## New users
 
@@ -34,28 +35,28 @@ When this feature is enabled, a checkbox is added to the sign-up form.
 
 ![Sign up form](img/sign_up_terms.png)
 
-This checkbox will be required during sign up.
+This checkbox is required during sign up.
 
 Users can review the terms entered in the admin panel before
-accepting. The page will be opened in a new window so they can
+accepting. The page is opened in a new window so they can
 continue their registration afterwards.
 
 ## Accepting terms
 
 When this feature is enabled, the users that have not accepted the
-terms of service will be presented with a screen where they can either
+terms of service are presented with a screen where they can either
 accept or decline the terms.
 
 ![Respond to terms](img/respond_to_terms.png)
 
-If the user accepts the terms, they will be directed to where they
-were going. After a sign-in or sign-up this will most likely be the
+If the user accepts the terms, they are directed to where they
+were going. After a sign-in or sign-up this is most likely the
 dashboard.
 
 If the user was already logged in when the feature was turned on,
-they will be asked to accept the terms on their next interaction.
+they are asked to accept the terms on their next interaction.
 
-If a user declines the terms, they will be signed out.
+If a user declines the terms, they are signed out.
 
 <!-- ## Troubleshooting
 

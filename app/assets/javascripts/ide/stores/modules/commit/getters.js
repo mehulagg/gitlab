@@ -1,5 +1,5 @@
 import { sprintf, n__, __ } from '../../../../locale';
-import consts from './constants';
+import { COMMIT_TO_NEW_BRANCH } from './constants';
 
 const BRANCH_SUFFIX_COUNT = 5;
 const createTranslatedTextForFiles = (files, text) => {
@@ -11,9 +11,11 @@ const createTranslatedTextForFiles = (files, text) => {
   });
 };
 
-export const discardDraftButtonDisabled = state =>
+export const discardDraftButtonDisabled = (state) =>
   state.commitMessage === '' || state.submitCommitLoading;
 
+// Note: If changing the structure of the placeholder branch name, please also
+// update #patch_branch_name in app/helpers/tree_helper.rb
 export const placeholderBranchName = (state, _, rootState) =>
   `${gon.current_username}-${rootState.currentBranchId}-patch-${`${new Date().getTime()}`.substr(
     -BRANCH_SUFFIX_COUNT,
@@ -35,18 +37,18 @@ export const preBuiltCommitMessage = (state, _, rootState) => {
   if (state.commitMessage) return state.commitMessage;
 
   const files = rootState.stagedFiles.length ? rootState.stagedFiles : rootState.changedFiles;
-  const modifiedFiles = files.filter(f => !f.deleted);
-  const deletedFiles = files.filter(f => f.deleted);
+  const modifiedFiles = files.filter((f) => !f.deleted);
+  const deletedFiles = files.filter((f) => f.deleted);
 
   return [
     createTranslatedTextForFiles(modifiedFiles, __('Update')),
     createTranslatedTextForFiles(deletedFiles, __('Deleted')),
   ]
-    .filter(t => t)
+    .filter((t) => t)
     .join('\n');
 };
 
-export const isCreatingNewBranch = state => state.commitAction === consts.COMMIT_TO_NEW_BRANCH;
+export const isCreatingNewBranch = (state) => state.commitAction === COMMIT_TO_NEW_BRANCH;
 
 export const shouldHideNewMrOption = (_state, getters, _rootState, rootGetters) =>
   !getters.isCreatingNewBranch &&

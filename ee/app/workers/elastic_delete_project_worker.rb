@@ -16,25 +16,43 @@ class ElasticDeleteProjectWorker
 
   private
 
+  def indices
+    helper = Gitlab::Elastic::Helper.default
+
+    index_names = [helper.target_name]
+
+    if Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
+      index_names << helper.standalone_indices_proxies(target_classes: [Issue]).map(&:index_name)
+    end
+
+    if Elastic::DataMigrationService.migration_has_finished?(:migrate_notes_to_separate_index)
+      index_names << helper.standalone_indices_proxies(target_classes: [Note]).map(&:index_name)
+    end
+
+    index_names
+  end
+
   def remove_project_and_children_documents(project_id, es_id)
     client.delete_by_query({
-      index: Project.__elasticsearch__.index_name,
+      index: indices,
       routing: es_id,
       body: {
         query: {
           bool: {
             should: [
               {
-                has_parent: {
-                  parent_type: 'project',
-                  query: {
-                    term: { id: project_id }
-                  }
+                term: {
+                  _id: es_id
                 }
               },
               {
                 term: {
-                  _id: es_id
+                  project_id: project_id
+                }
+              },
+              {
+                term: {
+                  target_project_id: project_id # handle merge_request which aliases project_id to target_project_id
                 }
               }
             ]

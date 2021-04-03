@@ -86,7 +86,6 @@
   height: $input-height;
   padding: 0;
   background: transparent;
-  border: 0;
   color: $gl-text-color-secondary;
 
   &:hover,
@@ -97,15 +96,5 @@
 
   &[disabled] {
     color: $gl-text-color-disabled;
-  }
-}
-
-.group-variable-list {
-  color: $gray-700;
-
-  .table-section:not(:first-child) {
-    @include media-breakpoint-down(sm) {
-      border-top: hidden;
-    }
   }
 }

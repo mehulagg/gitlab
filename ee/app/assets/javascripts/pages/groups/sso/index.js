@@ -1,7 +1,7 @@
-import UsernameValidator from '~/pages/sessions/new/username_validator';
+import { redirectUserWithSSOIdentity } from 'ee/saml_sso';
 import initConfirmDangerModal from '~/confirm_danger_modal';
+import UsernameValidator from '~/pages/sessions/new/username_validator';
 
-document.addEventListener('DOMContentLoaded', () => {
-  new UsernameValidator(); // eslint-disable-line no-new
-  initConfirmDangerModal();
-});
+new UsernameValidator(); // eslint-disable-line no-new
+initConfirmDangerModal();
+redirectUserWithSSOIdentity();

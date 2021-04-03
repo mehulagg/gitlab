@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Database::MigrationHelpers do
+  include Database::TableSchemaHelpers
+
   let(:model) do
     ActiveRecord::Migration.new.extend(described_class)
   end
@@ -92,6 +94,157 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         expect do
           model.add_timestamps_with_timezone(:foo)
         end.not_to raise_error
+      end
+    end
+  end
+
+  describe '#create_table_with_constraints' do
+    let(:table_name) { :test_table }
+    let(:column_attributes) do
+      [
+        { name: 'id',         sql_type: 'bigint',                   null: false, default: nil    },
+        { name: 'created_at', sql_type: 'timestamp with time zone', null: false, default: nil    },
+        { name: 'updated_at', sql_type: 'timestamp with time zone', null: false, default: nil    },
+        { name: 'some_id',    sql_type: 'integer',                  null: false, default: nil    },
+        { name: 'active',     sql_type: 'boolean',                  null: false, default: 'true' },
+        { name: 'name',       sql_type: 'text',                     null: true,  default: nil    }
+      ]
+    end
+
+    before do
+      allow(model).to receive(:transaction_open?).and_return(true)
+    end
+
+    context 'when no check constraints are defined' do
+      it 'creates the table as expected' do
+        model.create_table_with_constraints table_name do |t|
+          t.timestamps_with_timezone
+          t.integer :some_id, null: false
+          t.boolean :active, null: false, default: true
+          t.text :name
+        end
+
+        expect_table_columns_to_match(column_attributes, table_name)
+      end
+    end
+
+    context 'when check constraints are defined' do
+      context 'when the text_limit is explicity named' do
+        it 'creates the table as expected' do
+          model.create_table_with_constraints table_name do |t|
+            t.timestamps_with_timezone
+            t.integer :some_id, null: false
+            t.boolean :active, null: false, default: true
+            t.text :name
+
+            t.text_limit :name, 255, name: 'check_name_length'
+            t.check_constraint :some_id_is_positive, 'some_id > 0'
+          end
+
+          expect_table_columns_to_match(column_attributes, table_name)
+
+          expect_check_constraint(table_name, 'check_name_length', 'char_length(name) <= 255')
+          expect_check_constraint(table_name, 'some_id_is_positive', 'some_id > 0')
+        end
+      end
+
+      context 'when the text_limit is not named' do
+        it 'creates the table as expected, naming the text limit' do
+          model.create_table_with_constraints table_name do |t|
+            t.timestamps_with_timezone
+            t.integer :some_id, null: false
+            t.boolean :active, null: false, default: true
+            t.text :name
+
+            t.text_limit :name, 255
+            t.check_constraint :some_id_is_positive, 'some_id > 0'
+          end
+
+          expect_table_columns_to_match(column_attributes, table_name)
+
+          expect_check_constraint(table_name, 'check_cda6f69506', 'char_length(name) <= 255')
+          expect_check_constraint(table_name, 'some_id_is_positive', 'some_id > 0')
+        end
+      end
+
+      it 'runs the change within a with_lock_retries' do
+        expect(model).to receive(:with_lock_retries).ordered.and_yield
+        expect(model).to receive(:create_table).ordered.and_call_original
+        expect(model).to receive(:execute).with(<<~SQL).ordered
+          ALTER TABLE "#{table_name}"\nADD CONSTRAINT "check_cda6f69506" CHECK (char_length("name") <= 255)
+        SQL
+
+        model.create_table_with_constraints table_name do |t|
+          t.text :name
+          t.text_limit :name, 255
+        end
+      end
+
+      context 'when with_lock_retries re-runs the block' do
+        it 'only creates constraint for unique definitions' do
+          expected_sql = <<~SQL
+            ALTER TABLE "#{table_name}"\nADD CONSTRAINT "check_cda6f69506" CHECK (char_length("name") <= 255)
+          SQL
+
+          expect(model).to receive(:create_table).twice.and_call_original
+
+          expect(model).to receive(:execute).with(expected_sql).and_raise(ActiveRecord::LockWaitTimeout)
+          expect(model).to receive(:execute).with(expected_sql).and_call_original
+
+          model.create_table_with_constraints table_name do |t|
+            t.timestamps_with_timezone
+            t.integer :some_id, null: false
+            t.boolean :active, null: false, default: true
+            t.text :name
+
+            t.text_limit :name, 255
+          end
+
+          expect_table_columns_to_match(column_attributes, table_name)
+
+          expect_check_constraint(table_name, 'check_cda6f69506', 'char_length(name) <= 255')
+        end
+      end
+
+      context 'when constraints are given invalid names' do
+        let(:expected_max_length) { described_class::MAX_IDENTIFIER_NAME_LENGTH }
+        let(:expected_error_message) { "The maximum allowed constraint name is #{expected_max_length} characters" }
+
+        context 'when the explicit text limit name is not valid' do
+          it 'raises an error' do
+            too_long_length = expected_max_length + 1
+
+            expect do
+              model.create_table_with_constraints table_name do |t|
+                t.timestamps_with_timezone
+                t.integer :some_id, null: false
+                t.boolean :active, null: false, default: true
+                t.text :name
+
+                t.text_limit :name, 255, name: ('a' * too_long_length)
+                t.check_constraint :some_id_is_positive, 'some_id > 0'
+              end
+            end.to raise_error(expected_error_message)
+          end
+        end
+
+        context 'when a check constraint name is not valid' do
+          it 'raises an error' do
+            too_long_length = expected_max_length + 1
+
+            expect do
+              model.create_table_with_constraints table_name do |t|
+                t.timestamps_with_timezone
+                t.integer :some_id, null: false
+                t.boolean :active, null: false, default: true
+                t.text :name
+
+                t.text_limit :name, 255
+                t.check_constraint ('a' * too_long_length), 'some_id > 0'
+              end
+            end.to raise_error(expected_error_message)
+          end
+        end
       end
     end
   end
@@ -699,6 +852,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
           expect(model).to receive(:copy_indexes).with(:users, :old, :new)
           expect(model).to receive(:copy_foreign_keys).with(:users, :old, :new)
+          expect(model).to receive(:copy_check_constraints).with(:users, :old, :new)
 
           model.rename_column_concurrently(:users, :old, :new)
         end
@@ -760,6 +914,9 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           it 'copies the default to the new column' do
             expect(model).to receive(:change_column_default)
               .with(:users, :new, old_column.default)
+
+            expect(model).to receive(:copy_check_constraints)
+              .with(:users, :old, :new)
 
             model.rename_column_concurrently(:users, :old, :new)
           end
@@ -856,6 +1013,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
         expect(model).to receive(:copy_indexes).with(:users, :new, :old)
         expect(model).to receive(:copy_foreign_keys).with(:users, :new, :old)
+        expect(model).to receive(:copy_check_constraints).with(:users, :new, :old)
 
         model.undo_cleanup_concurrent_column_rename(:users, :old, :new)
       end
@@ -894,6 +1052,9 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           expect(model).to receive(:change_column_default)
             .with(:users, :old, new_column.default)
 
+          expect(model).to receive(:copy_check_constraints)
+            .with(:users, :new, :old)
+
           model.undo_cleanup_concurrent_column_rename(:users, :old, :new)
         end
       end
@@ -903,18 +1064,38 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
   describe '#change_column_type_concurrently' do
     it 'changes the column type' do
       expect(model).to receive(:rename_column_concurrently)
-        .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: nil)
+        .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: nil, batch_column_name: :id)
 
       model.change_column_type_concurrently('users', 'username', :text)
+    end
+
+    it 'passed the batch column name' do
+      expect(model).to receive(:rename_column_concurrently)
+        .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: nil, batch_column_name: :user_id)
+
+      model.change_column_type_concurrently('users', 'username', :text, batch_column_name: :user_id)
     end
 
     context 'with type cast' do
       it 'changes the column type with casting the value to the new type' do
         expect(model).to receive(:rename_column_concurrently)
-          .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: 'JSON')
+          .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: 'JSON', batch_column_name: :id)
 
         model.change_column_type_concurrently('users', 'username', :text, type_cast_function: 'JSON')
       end
+    end
+  end
+
+  describe '#undo_change_column_type_concurrently' do
+    it 'reverses the operations of change_column_type_concurrently' do
+      expect(model).to receive(:check_trigger_permissions!).with(:users)
+
+      expect(model).to receive(:remove_rename_triggers_for_postgresql)
+        .with(:users, /trigger_.{12}/)
+
+      expect(model).to receive(:remove_column).with(:users, "old_for_type_change")
+
+      model.undo_change_column_type_concurrently(:users, :old)
     end
   end
 
@@ -927,6 +1108,97 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         .with('users', 'username_for_type_change', 'username')
 
       model.cleanup_concurrent_column_type_change('users', 'username')
+    end
+  end
+
+  describe '#undo_cleanup_concurrent_column_type_change' do
+    context 'in a transaction' do
+      it 'raises RuntimeError' do
+        allow(model).to receive(:transaction_open?).and_return(true)
+
+        expect { model.undo_cleanup_concurrent_column_type_change(:users, :old, :new) }
+          .to raise_error(RuntimeError)
+      end
+    end
+
+    context 'outside a transaction' do
+      let(:temp_column) { "old_for_type_change" }
+
+      let(:temp_undo_cleanup_column) do
+        identifier = "users_old_for_type_change"
+        hashed_identifier = Digest::SHA256.hexdigest(identifier).first(10)
+        "tmp_undo_cleanup_column_#{hashed_identifier}"
+      end
+
+      let(:trigger_name) { model.rename_trigger_name(:users, :old, :old_for_type_change) }
+
+      before do
+        allow(model).to receive(:transaction_open?).and_return(false)
+      end
+
+      it 'reverses the operations of cleanup_concurrent_column_type_change' do
+        expect(model).to receive(:check_trigger_permissions!).with(:users)
+
+        expect(model).to receive(:create_column_from).with(
+          :users,
+          :old,
+          temp_undo_cleanup_column,
+          type: :string,
+          batch_column_name: :id,
+          type_cast_function: nil,
+          limit: nil
+        ).and_return(true)
+
+        expect(model).to receive(:rename_column)
+          .with(:users, :old, temp_column)
+
+        expect(model).to receive(:rename_column)
+          .with(:users, temp_undo_cleanup_column, :old)
+
+        expect(model).to receive(:install_rename_triggers_for_postgresql)
+          .with(trigger_name, '"users"', '"old"', '"old_for_type_change"')
+
+        model.undo_cleanup_concurrent_column_type_change(:users, :old, :string)
+      end
+
+      it 'passes the type_cast_function, batch_column_name and limit' do
+        expect(model).to receive(:column_exists?).with(:users, :other_batch_column).and_return(true)
+        expect(model).to receive(:check_trigger_permissions!).with(:users)
+
+        expect(model).to receive(:create_column_from).with(
+          :users,
+          :old,
+          temp_undo_cleanup_column,
+          type: :string,
+          batch_column_name: :other_batch_column,
+          type_cast_function: :custom_type_cast_function,
+          limit: 8
+        ).and_return(true)
+
+        expect(model).to receive(:rename_column)
+          .with(:users, :old, temp_column)
+
+        expect(model).to receive(:rename_column)
+          .with(:users, temp_undo_cleanup_column, :old)
+
+        expect(model).to receive(:install_rename_triggers_for_postgresql)
+          .with(trigger_name, '"users"', '"old"', '"old_for_type_change"')
+
+        model.undo_cleanup_concurrent_column_type_change(
+          :users,
+          :old,
+          :string,
+          type_cast_function: :custom_type_cast_function,
+          batch_column_name: :other_batch_column,
+          limit: 8
+        )
+      end
+
+      it 'raises an error with invalid batch_column_name' do
+        expect do
+          model.undo_cleanup_concurrent_column_type_change(:users, :old, :new, batch_column_name: :invalid)
+        end.to raise_error(RuntimeError, /Column invalid does not exist on users/)
+      end
     end
   end
 
@@ -1121,7 +1393,65 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
                name: 'index_on_issues_gl_project_id',
                length: [],
                order: [],
-               opclasses: { 'gl_project_id' => 'bar' })
+               opclass: { 'gl_project_id' => 'bar' })
+
+        model.copy_indexes(:issues, :project_id, :gl_project_id)
+      end
+    end
+
+    context 'using an index with multiple columns and custom operator classes' do
+      it 'copies the index' do
+        index = double(:index,
+                       columns: %w(project_id foobar),
+                       name: 'index_on_issues_project_id_foobar',
+                       using: :gin,
+                       where: nil,
+                       opclasses: { 'project_id' => 'bar', 'foobar' => :gin_trgm_ops },
+                       unique: false,
+                       lengths: [],
+                       orders: [])
+
+        allow(model).to receive(:indexes_for).with(:issues, 'project_id')
+          .and_return([index])
+
+        expect(model).to receive(:add_concurrent_index)
+          .with(:issues,
+               %w(gl_project_id foobar),
+               unique: false,
+               name: 'index_on_issues_gl_project_id_foobar',
+               length: [],
+               order: [],
+               opclass: { 'gl_project_id' => 'bar', 'foobar' => :gin_trgm_ops },
+               using: :gin)
+
+        model.copy_indexes(:issues, :project_id, :gl_project_id)
+      end
+    end
+
+    context 'using an index with multiple columns and a custom operator class on the non affected column' do
+      it 'copies the index' do
+        index = double(:index,
+                       columns: %w(project_id foobar),
+                       name: 'index_on_issues_project_id_foobar',
+                       using: :gin,
+                       where: nil,
+                       opclasses: { 'foobar' => :gin_trgm_ops },
+                       unique: false,
+                       lengths: [],
+                       orders: [])
+
+        allow(model).to receive(:indexes_for).with(:issues, 'project_id')
+          .and_return([index])
+
+        expect(model).to receive(:add_concurrent_index)
+          .with(:issues,
+               %w(gl_project_id foobar),
+               unique: false,
+               name: 'index_on_issues_gl_project_id_foobar',
+               length: [],
+               order: [],
+               opclass: { 'foobar' => :gin_trgm_ops },
+               using: :gin)
 
         model.copy_indexes(:issues, :project_id, :gl_project_id)
       end
@@ -1371,6 +1701,175 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     end
   end
 
+  describe '#initialize_conversion_of_integer_to_bigint' do
+    let(:table) { :test_table }
+    let(:column) { :id }
+    let(:tmp_column) { "#{column}_convert_to_bigint" }
+
+    before do
+      model.create_table table, id: false do |t|
+        t.integer :id, primary_key: true
+        t.integer :non_nullable_column, null: false
+        t.integer :nullable_column
+        t.timestamps
+      end
+    end
+
+    context 'when the target table does not exist' do
+      it 'raises an error' do
+        expect { model.initialize_conversion_of_integer_to_bigint(:this_table_is_not_real, column) }
+          .to raise_error('Table this_table_is_not_real does not exist')
+      end
+    end
+
+    context 'when the primary key does not exist' do
+      it 'raises an error' do
+        expect { model.initialize_conversion_of_integer_to_bigint(table, column, primary_key: :foobar) }
+          .to raise_error("Column foobar does not exist on #{table}")
+      end
+    end
+
+    context 'when the column to convert does not exist' do
+      let(:column) { :foobar }
+
+      it 'raises an error' do
+        expect { model.initialize_conversion_of_integer_to_bigint(table, column) }
+          .to raise_error("Column #{column} does not exist on #{table}")
+      end
+    end
+
+    context 'when the column to convert is the primary key' do
+      it 'creates a not-null bigint column and installs triggers' do
+        expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: 0, null: false)
+
+        expect(model).to receive(:install_rename_triggers).with(table, column, tmp_column)
+
+        model.initialize_conversion_of_integer_to_bigint(table, column)
+      end
+    end
+
+    context 'when the column to convert is not the primary key, but non-nullable' do
+      let(:column) { :non_nullable_column }
+
+      it 'creates a not-null bigint column and installs triggers' do
+        expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: 0, null: false)
+
+        expect(model).to receive(:install_rename_triggers).with(table, column, tmp_column)
+
+        model.initialize_conversion_of_integer_to_bigint(table, column)
+      end
+    end
+
+    context 'when the column to convert is not the primary key, but nullable' do
+      let(:column)  { :nullable_column }
+
+      it 'creates a nullable bigint column and installs triggers' do
+        expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: nil)
+
+        expect(model).to receive(:install_rename_triggers).with(table, column, tmp_column)
+
+        model.initialize_conversion_of_integer_to_bigint(table, column)
+      end
+    end
+  end
+
+  describe '#backfill_conversion_of_integer_to_bigint' do
+    let(:table) { :_test_backfill_table }
+    let(:column) { :id }
+    let(:tmp_column) { "#{column}_convert_to_bigint" }
+
+    before do
+      model.create_table table, id: false do |t|
+        t.integer :id, primary_key: true
+        t.text :message, null: false
+        t.timestamps
+      end
+
+      allow(model).to receive(:perform_background_migration_inline?).and_return(false)
+    end
+
+    context 'when the target table does not exist' do
+      it 'raises an error' do
+        expect { model.backfill_conversion_of_integer_to_bigint(:this_table_is_not_real, column) }
+          .to raise_error('Table this_table_is_not_real does not exist')
+      end
+    end
+
+    context 'when the primary key does not exist' do
+      it 'raises an error' do
+        expect { model.backfill_conversion_of_integer_to_bigint(table, column, primary_key: :foobar) }
+          .to raise_error("Column foobar does not exist on #{table}")
+      end
+    end
+
+    context 'when the column to convert does not exist' do
+      let(:column) { :foobar }
+
+      it 'raises an error' do
+        expect { model.backfill_conversion_of_integer_to_bigint(table, column) }
+          .to raise_error("Column #{column} does not exist on #{table}")
+      end
+    end
+
+    context 'when the temporary column does not exist' do
+      it 'raises an error' do
+        expect { model.backfill_conversion_of_integer_to_bigint(table, column) }
+          .to raise_error('The temporary column does not exist, initialize it with `initialize_conversion_of_integer_to_bigint`')
+      end
+    end
+
+    context 'when the conversion is properly initialized' do
+      let(:model_class) do
+        Class.new(ActiveRecord::Base) do
+          self.table_name = :_test_backfill_table
+        end
+      end
+
+      let(:migration_relation) { Gitlab::Database::BackgroundMigration::BatchedMigration.active }
+
+      before do
+        model.initialize_conversion_of_integer_to_bigint(table, column)
+
+        model_class.create!(message: 'hello')
+        model_class.create!(message: 'so long')
+      end
+
+      it 'creates the batched migration tracking record' do
+        last_record = model_class.create!(message: 'goodbye')
+
+        expect do
+          model.backfill_conversion_of_integer_to_bigint(table, column, batch_size: 2, sub_batch_size: 1)
+        end.to change { migration_relation.count }.by(1)
+
+        expect(migration_relation.last).to have_attributes(
+          job_class_name: 'CopyColumnUsingBackgroundMigrationJob',
+          table_name: table.to_s,
+          column_name: column.to_s,
+          min_value: 1,
+          max_value: last_record.id,
+          interval: 120,
+          batch_size: 2,
+          sub_batch_size: 1,
+          job_arguments: [column.to_s, "#{column}_convert_to_bigint"]
+        )
+      end
+
+      context 'when the migration should be performed inline' do
+        it 'calls the runner to run the entire migration' do
+          expect(model).to receive(:perform_background_migration_inline?).and_return(true)
+
+          expect_next_instance_of(Gitlab::Database::BackgroundMigration::BatchedMigrationRunner) do |scheduler|
+            expect(scheduler).to receive(:run_entire_migration) do |batched_migration|
+              expect(batched_migration).to eq(migration_relation.last)
+            end
+          end
+
+          model.backfill_conversion_of_integer_to_bigint(table, column, batch_size: 2, sub_batch_size: 1)
+        end
+      end
+    end
+  end
+
   describe '#index_exists_by_name?' do
     it 'returns true if an index exists' do
       ActiveRecord::Base.connection.execute(
@@ -1393,13 +1892,30 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         )
       end
 
-      after do
-        'DROP INDEX IF EXISTS test_index;'
-      end
-
       it 'returns true if an index exists' do
         expect(model.index_exists_by_name?(:projects, 'test_index'))
           .to be_truthy
+      end
+    end
+
+    context 'when an index exists for a table with the same name in another schema' do
+      before do
+        ActiveRecord::Base.connection.execute(
+          'CREATE SCHEMA new_test_schema'
+        )
+
+        ActiveRecord::Base.connection.execute(
+          'CREATE TABLE new_test_schema.projects (id integer, name character varying)'
+        )
+
+        ActiveRecord::Base.connection.execute(
+          'CREATE INDEX test_index_on_name ON new_test_schema.projects (LOWER(name));'
+        )
+      end
+
+      it 'returns false if the index does not exist in the current schema' do
+        expect(model.index_exists_by_name?(:projects, 'test_index_on_name'))
+          .to be_falsy
       end
     end
   end
@@ -1489,8 +2005,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
         has_internal_id :iid,
           scope: :project,
-          init: ->(s) { s&.project&.issues&.maximum(:iid) },
-          backfill: true,
+          init: ->(s, _scope) { s&.project&.issues&.maximum(:iid) },
           presence: false
       end
     end
@@ -1542,258 +2057,6 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
       expect(issue_a.iid).to eq(2)
       expect(issue_b.iid).to eq(3)
-    end
-
-    context 'when the new code creates a row post deploy but before the migration runs' do
-      it 'does not change the row iid' do
-        project = setup
-        issue = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue.reload.iid).to eq(1)
-      end
-
-      it 'backfills iids for rows already in the database' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-      end
-
-      it 'backfills iids across multiple projects' do
-        project_a = setup
-        project_b = setup
-        issue_a = issues.create!(project_id: project_a.id)
-        issue_b = issues.create!(project_id: project_b.id)
-        issue_c = Issue.create!(project_id: project_a.id)
-        issue_d = Issue.create!(project_id: project_b.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(1)
-        expect(issue_c.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(2)
-      end
-
-      it 'generates iids properly for models created after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_d = Issue.create!(project_id: project.id)
-        issue_e = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-        expect(issue_d.iid).to eq(4)
-        expect(issue_e.iid).to eq(5)
-      end
-
-      it 'backfills iids and properly generates iids for new models across multiple projects' do
-        project_a = setup
-        project_b = setup
-        issue_a = issues.create!(project_id: project_a.id)
-        issue_b = issues.create!(project_id: project_b.id)
-        issue_c = Issue.create!(project_id: project_a.id)
-        issue_d = Issue.create!(project_id: project_b.id)
-
-        model.backfill_iids('issues')
-
-        issue_e = Issue.create!(project_id: project_a.id)
-        issue_f = Issue.create!(project_id: project_b.id)
-        issue_g = Issue.create!(project_id: project_a.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(1)
-        expect(issue_c.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(2)
-        expect(issue_e.iid).to eq(3)
-        expect(issue_f.iid).to eq(3)
-        expect(issue_g.iid).to eq(4)
-      end
-    end
-
-    context 'when the new code creates a model and then old code creates a model post deploy but before the migration runs' do
-      it 'backfills iids' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = Issue.create!(project_id: project.id)
-        issue_c = issues.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-      end
-
-      it 'generates an iid for a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_d = issues.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_e = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-        expect(issue_d.reload.iid).to eq(4)
-        expect(issue_e.iid).to eq(5)
-      end
-    end
-
-    context 'when the new code and old code alternate creating models post deploy but before the migration runs' do
-      it 'backfills iids' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = Issue.create!(project_id: project.id)
-        issue_c = issues.create!(project_id: project.id)
-        issue_d = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-        expect(issue_d.reload.iid).to eq(4)
-      end
-
-      it 'generates an iid for a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_d = issues.create!(project_id: project.id)
-        issue_e = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_f = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_c.reload.iid).to eq(3)
-        expect(issue_d.reload.iid).to eq(4)
-        expect(issue_e.reload.iid).to eq(5)
-        expect(issue_f.iid).to eq(6)
-      end
-    end
-
-    context 'when the new code creates and deletes a model post deploy but before the migration runs' do
-      it 'backfills iids for rows already in the database' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-      end
-
-      it 'successfully creates a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-
-        model.backfill_iids('issues')
-
-        issue_d = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.iid).to eq(3)
-      end
-    end
-
-    context 'when the new code creates and deletes a model and old code creates a model post deploy but before the migration runs' do
-      it 'backfills iids' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-        issue_d = issues.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(3)
-      end
-
-      it 'successfully creates a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-        issue_d = issues.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_e = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(3)
-        expect(issue_e.iid).to eq(4)
-      end
-    end
-
-    context 'when the new code creates and deletes a model and then creates another model post deploy but before the migration runs' do
-      it 'successfully generates an iid for a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-        issue_d = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(3)
-      end
-
-      it 'successfully generates an iid for a new model after the migration' do
-        project = setup
-        issue_a = issues.create!(project_id: project.id)
-        issue_b = issues.create!(project_id: project.id)
-        issue_c = Issue.create!(project_id: project.id)
-        issue_c.delete
-        issue_d = Issue.create!(project_id: project.id)
-
-        model.backfill_iids('issues')
-
-        issue_e = Issue.create!(project_id: project.id)
-
-        expect(issue_a.reload.iid).to eq(1)
-        expect(issue_b.reload.iid).to eq(2)
-        expect(issue_d.reload.iid).to eq(3)
-        expect(issue_e.iid).to eq(4)
-      end
     end
 
     context 'when the first model is created for a project after the migration' do
@@ -1856,11 +2119,17 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       ActiveRecord::Base.connection.execute(
         'ALTER TABLE projects ADD CONSTRAINT check_1 CHECK (char_length(path) <= 5) NOT VALID'
       )
-    end
 
-    after do
       ActiveRecord::Base.connection.execute(
-        'ALTER TABLE projects DROP CONSTRAINT IF EXISTS check_1'
+        'CREATE SCHEMA new_test_schema'
+      )
+
+      ActiveRecord::Base.connection.execute(
+        'CREATE TABLE new_test_schema.projects (id integer, name character varying)'
+      )
+
+      ActiveRecord::Base.connection.execute(
+        'ALTER TABLE new_test_schema.projects ADD CONSTRAINT check_2 CHECK (char_length(name) <= 5)'
       )
     end
 
@@ -1876,6 +2145,11 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
     it 'returns false if a constraint with the same name exists in another table' do
       expect(model.check_constraint_exists?(:users, 'check_1'))
+        .to be_falsy
+    end
+
+    it 'returns false if a constraint with the same name exists for the same table in another schema' do
+      expect(model.check_constraint_exists?(:projects, 'check_2'))
         .to be_falsy
     end
   end
@@ -2076,6 +2350,138 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       expect(model).to receive(:execute).with(drop_sql)
 
       model.remove_check_constraint(:test_table, 'check_name')
+    end
+  end
+
+  describe '#copy_check_constraints' do
+    context 'inside a transaction' do
+      it 'raises an error' do
+        expect(model).to receive(:transaction_open?).and_return(true)
+
+        expect do
+          model.copy_check_constraints(:test_table, :old_column, :new_column)
+        end.to raise_error(RuntimeError)
+      end
+    end
+
+    context 'outside a transaction' do
+      before do
+        allow(model).to receive(:transaction_open?).and_return(false)
+        allow(model).to receive(:column_exists?).and_return(true)
+      end
+
+      let(:old_column_constraints) do
+        [
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'check_d7d49d475d',
+            'constraint_def' => 'CHECK ((old_column IS NOT NULL))'
+          },
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'check_48560e521e',
+            'constraint_def' => 'CHECK ((char_length(old_column) <= 255))'
+          },
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'custom_check_constraint',
+            'constraint_def' => 'CHECK (((old_column IS NOT NULL) AND (another_column IS NULL)))'
+          },
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'not_valid_check_constraint',
+            'constraint_def' => 'CHECK ((old_column IS NOT NULL)) NOT VALID'
+          }
+        ]
+      end
+
+      it 'copies check constraints from one column to another' do
+        allow(model).to receive(:check_constraints_for)
+        .with(:test_table, :old_column, schema: nil)
+          .and_return(old_column_constraints)
+
+        allow(model).to receive(:not_null_constraint_name).with(:test_table, :new_column)
+          .and_return('check_1')
+
+        allow(model).to receive(:text_limit_name).with(:test_table, :new_column)
+          .and_return('check_2')
+
+        allow(model).to receive(:check_constraint_name)
+          .with(:test_table, :new_column, 'copy_check_constraint')
+          .and_return('check_3')
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '(new_column IS NOT NULL)',
+            'check_1',
+            validate: true
+          ).once
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '(char_length(new_column) <= 255)',
+            'check_2',
+            validate: true
+          ).once
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '((new_column IS NOT NULL) AND (another_column IS NULL))',
+            'check_3',
+            validate: true
+          ).once
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '(new_column IS NOT NULL)',
+            'check_1',
+            validate: false
+          ).once
+
+        model.copy_check_constraints(:test_table, :old_column, :new_column)
+      end
+
+      it 'does nothing if there are no constraints defined for the old column' do
+        allow(model).to receive(:check_constraints_for)
+        .with(:test_table, :old_column, schema: nil)
+          .and_return([])
+
+        expect(model).not_to receive(:add_check_constraint)
+
+        model.copy_check_constraints(:test_table, :old_column, :new_column)
+      end
+
+      it 'raises an error when the orginating column does not exist' do
+        allow(model).to receive(:column_exists?).with(:test_table, :old_column).and_return(false)
+
+        error_message = /Column old_column does not exist on test_table/
+
+        expect do
+          model.copy_check_constraints(:test_table, :old_column, :new_column)
+        end.to raise_error(RuntimeError, error_message)
+      end
+
+      it 'raises an error when the target column does not exist' do
+        allow(model).to receive(:column_exists?).with(:test_table, :new_column).and_return(false)
+
+        error_message = /Column new_column does not exist on test_table/
+
+        expect do
+          model.copy_check_constraints(:test_table, :old_column, :new_column)
+        end.to raise_error(RuntimeError, error_message)
+      end
     end
   end
 
@@ -2326,6 +2732,58 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
                      .with(:test_table, constraint_name)
 
         model.check_not_null_constraint_exists?(:test_table, :name, constraint_name: constraint_name)
+      end
+    end
+  end
+
+  describe '#create_extension' do
+    subject { model.create_extension(extension) }
+
+    let(:extension) { :btree_gist }
+
+    it 'executes CREATE EXTENSION statement' do
+      expect(model).to receive(:execute).with(/CREATE EXTENSION IF NOT EXISTS #{extension}/)
+
+      subject
+    end
+
+    context 'without proper permissions' do
+      before do
+        allow(model).to receive(:execute).with(/CREATE EXTENSION IF NOT EXISTS #{extension}/).and_raise(ActiveRecord::StatementInvalid, 'InsufficientPrivilege: permission denied')
+      end
+
+      it 'raises the exception' do
+        expect { subject }.to raise_error(ActiveRecord::StatementInvalid, /InsufficientPrivilege/)
+      end
+
+      it 'prints an error message' do
+        expect { subject }.to output(/user is not allowed/).to_stderr.and raise_error
+      end
+    end
+  end
+
+  describe '#drop_extension' do
+    subject { model.drop_extension(extension) }
+
+    let(:extension) { 'btree_gist' }
+
+    it 'executes CREATE EXTENSION statement' do
+      expect(model).to receive(:execute).with(/DROP EXTENSION IF EXISTS #{extension}/)
+
+      subject
+    end
+
+    context 'without proper permissions' do
+      before do
+        allow(model).to receive(:execute).with(/DROP EXTENSION IF EXISTS #{extension}/).and_raise(ActiveRecord::StatementInvalid, 'InsufficientPrivilege: permission denied')
+      end
+
+      it 'raises the exception' do
+        expect { subject }.to raise_error(ActiveRecord::StatementInvalid, /InsufficientPrivilege/)
+      end
+
+      it 'prints an error message' do
+        expect { subject }.to output(/user is not allowed/).to_stderr.and raise_error
       end
     end
   end

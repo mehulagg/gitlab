@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAlert } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import DependencyListIncompleteAlert from 'ee/dependencies/components/dependency_list_incomplete_alert.vue';
 
 describe('DependencyListIncompleteAlert component', () => {

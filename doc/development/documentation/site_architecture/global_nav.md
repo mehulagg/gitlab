@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: "Learn how GitLab docs' global navigation works and how to add new items."
 ---
 
@@ -67,7 +70,6 @@ With these groups in mind, the following are general rules for where new items s
 - Other documentation belongs at the top-level, but care must be taken to not create an enormously
   long top-level navigation, which defeats the purpose of it.
 
-NOTE: **Note:**
 Making all documentation and navigation items adhere to these principles is being progressively
 rolled out.
 
@@ -91,19 +93,21 @@ mechanics of what is required is [documented below](#data-file) but, in principl
 
 ## How it works
 
-The global nav has 3 components:
+The global nav has five levels:
 
 - **Section**
   - Category
     - Doc
+      - Doc
+        - Doc
 
 The available sections are described on the table below:
 
-| Section       | Description                                |
-| ------------- | ------------------------------------------ |
-| User          | Documentation for the GitLab's user UI.    |
-| Administrator | Documentation for the GitLab's Admin Area. |
-| Contributor   | Documentation for developing GitLab.       |
+| Section       | Description                          |
+| ------------- | ------------------------------------ |
+| User          | Documentation for the GitLab UI.     |
+| Administrator | Documentation for the Admin Area.    |
+| Contributor   | Documentation for developing GitLab. |
 
 The majority of the links available on the nav were added according to the UI.
 The match is not perfect, as for some UI nav items the documentation doesn't
@@ -114,7 +118,6 @@ for clarity.
 To see the improvements planned, check the
 [global nav epic](https://gitlab.com/groups/gitlab-com/-/epics/21).
 
-NOTE: **Note:**
 **Do not** [add items](#adding-new-items) to the global nav without
 the consent of one of the technical writers.
 
@@ -202,10 +205,10 @@ add the attribute `external_url: true` below the category title. Example:
 
 #### Docs
 
-Each doc represents the third level of nav links. They must be always
+Each doc represents the third, fourth, and fifth level of nav links. They must be always
 added within a category.
 
-Example with one doc link:
+Example with three doc links, one at each level:
 
 ```yaml
 - category_title: Category title
@@ -213,10 +216,16 @@ Example with one doc link:
   docs:
     - doc_title: Document title
       doc_url: 'doc-link'
+      docs:
+      - doc_title: Document title
+        doc_url: 'doc-link'
+        docs:
+        - doc_title: Document title
+          doc_url: 'doc-link'
 ```
 
 A category supports as many docs as necessary, but, for clarity, try to not
-overpopulate a category.
+overpopulate a category. Also, do not use more than three levels of docs.
 
 Example with multiple docs:
 
@@ -249,7 +258,7 @@ below the doc link:
 ```
 
 All nav links are clickable. If the higher-level link does not have a link
-of its own, it must link to its first sub-item link, mimicking GitLab's navigation.
+of its own, it must link to its first sub-item link, mimicking the navigation in GitLab.
 This must be avoided so that we don't have duplicated links nor two `.active` links
 at the same time.
 
@@ -282,8 +291,8 @@ and the following syntax rules.
 - As convention, always wrap URLs in single quotes `'url'`.
 - Always use relative paths against the home of CE and EE. Examples:
   - For `https://docs.gitlab.com/ee/README.html`, the relative URL is `README.html`.
-  - For `https://docs.gitlab.com/ee/user/project/cycle_analytics.html`, the relative
-    URL is `user/project/cycle_analytics.html`.
+  - For `https://docs.gitlab.com/ee/user/analytics/value_stream_analytics.md`, the relative
+    URL is `user/analytics/value_stream_analytics.html`.
 - For `README.html` files, add the complete path `path/to/README.html`.
 - For `index.html` files, use the clean (canonical) URL: `path/to/`.
 - For EE-only docs, use the same relative path, but add the attribute `ee_only: true` below
@@ -291,7 +300,7 @@ and the following syntax rules.
   an "information" icon on the nav to make the user aware that the feature is
   EE-only.
 
-CAUTION: **Caution:**
+WARNING:
 All links present on the data file must end in `.html`, not `.md`. Do not
 start any relative link with a forward slash `/`.
 
@@ -324,11 +333,10 @@ There are three main considerations on the logic built for the nav:
   - `https://docs.gitlab.com/ee/`
   - `https://docs.gitlab.com/omnibus/`
   - `https://docs.gitlab.com/runner/`
-  - `https://docs.gitlab.com/debug/`
   - `https://docs.gitlab.com/*`
 - [EE-only](#ee-only-docs): documentation only available in `/ee/`, not on `/ce/`, e.g.:
   - `https://docs.gitlab.com/ee/user/group/epics/`
-  - `https://docs.gitlab.com/ee/user/project/security_dashboard.html`
+  - `https://docs.gitlab.com/ee/user/application_security/security_dashboard/index.html`
 - [Default URL](#default-url): between CE and EE docs, the default is `ee`, therefore, all docs
   should link to `/ee/` unless if on `/ce/` linking internally to `ce`.
 
@@ -342,8 +350,8 @@ all the nav links to other pages:
 <% dir = @item.identifier.to_s[%r{(?<=/)[^/]+}] %>
 ```
 
-For instance, for `https://docs.gitlab.com/ce/user/index.html`,
-`dir` == `ce`, and for `https://docs.gitlab.com/omnibus/README.html`,
+For instance, for `https://docs.gitlab.com/ee/user/index.html`,
+`dir` == `ee`, and for `https://docs.gitlab.com/omnibus/README.html`,
 `dir` == `omnibus`.
 
 #### Default URL

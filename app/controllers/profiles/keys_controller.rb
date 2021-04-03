@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Profiles::KeysController < Profiles::ApplicationController
+  feature_category :users
+
   def index
     @keys = current_user.keys.order_id_desc
     @key = Key.new

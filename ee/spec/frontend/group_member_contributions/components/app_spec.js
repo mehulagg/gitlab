@@ -1,9 +1,8 @@
 import Vue from 'vue';
 
-import mountComponent from 'helpers/vue_mount_component_helper';
-
 import AppComponent from 'ee/group_member_contributions/components/app.vue';
 import GroupMemberStore from 'ee/group_member_contributions/store/group_member_store';
+import mountComponent from 'helpers/vue_mount_component_helper';
 import { contributionsPath } from '../mock_data';
 
 const createComponent = () => {

@@ -2,7 +2,7 @@
 
 RSpec.shared_examples 'error tracking index page' do
   it 'renders the error index page', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/217810' } do
-    within('div.js-title-container') do
+    within('[data-testid="breadcrumb-links"]') do
       expect(page).to have_content(project.namespace.name)
       expect(page).to have_content(project.name)
     end
@@ -36,10 +36,10 @@ end
 RSpec.shared_examples 'expanded stack trace context' do |selected_line: nil, expected_line: 1|
   it 'expands the stack trace context', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/217810' } do
     within('div.stacktrace') do
-      find("div.file-holder:nth-child(#{selected_line}) svg.ic-chevron-right").click if selected_line
+      find("div.file-holder:nth-child(#{selected_line}) svg[data-testid='chevron-right-icon']").click if selected_line
 
       expanded_line = find("div.file-holder:nth-child(#{expected_line})")
-      expect(expanded_line).to have_css('svg.ic-chevron-down')
+      expect(expanded_line).to have_css('svg[data-testid="chevron-down-icon"]')
 
       event_response['entries'][0]['data']['values'][0]['stacktrace']['frames'][-expected_line]['context'].each do |context|
         expect(page).to have_content(context[0])

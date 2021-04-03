@@ -23,6 +23,7 @@ RSpec.describe Gitlab::Insights::Reducers::CountPerLabelReducer do
       period_limit: 5
     }
   end
+
   let(:issuable_relation) { find_issuables(project, query) }
 
   subject { reduce(issuable_relation, query[:collection_labels]) }

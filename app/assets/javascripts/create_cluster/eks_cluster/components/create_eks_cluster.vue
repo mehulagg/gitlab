@@ -1,7 +1,7 @@
 <script>
 import { mapState } from 'vuex';
-import ServiceCredentialsForm from './service_credentials_form.vue';
 import EksClusterConfigurationForm from './eks_cluster_configuration_form.vue';
+import ServiceCredentialsForm from './service_credentials_form.vue';
 
 export default {
   components: {
@@ -10,6 +10,10 @@ export default {
   },
   props: {
     gitlabManagedClusterHelpPath: {
+      type: String,
+      required: true,
+    },
+    namespacePerEnvironmentHelpPath: {
       type: String,
       required: true,
     },
@@ -40,6 +44,7 @@ export default {
     <eks-cluster-configuration-form
       v-if="hasCredentials"
       :gitlab-managed-cluster-help-path="gitlabManagedClusterHelpPath"
+      :namespace-per-environment-help-path="namespacePerEnvironmentHelpPath"
       :kubernetes-integration-help-path="kubernetesIntegrationHelpPath"
       :external-link-icon="externalLinkIcon"
     />

@@ -1,21 +1,22 @@
 import { mount } from '@vue/test-utils';
-import SnippetBlobView from '~/snippets/components/snippet_blob_view.vue';
-import BlobHeader from '~/blob/components/blob_header.vue';
-import BlobEmbeddable from '~/blob/components/blob_embeddable.vue';
+import { nextTick } from 'vue';
+import {
+  Blob as BlobMock,
+  SimpleViewerMock,
+  RichViewerMock,
+  RichBlobContentMock,
+  SimpleBlobContentMock,
+} from 'jest/blob/components/mock_data';
 import BlobContent from '~/blob/components/blob_content.vue';
+import BlobHeader from '~/blob/components/blob_header.vue';
 import {
   BLOB_RENDER_EVENT_LOAD,
   BLOB_RENDER_EVENT_SHOW_SOURCE,
   BLOB_RENDER_ERRORS,
 } from '~/blob/components/constants';
+import SnippetBlobView from '~/snippets/components/snippet_blob_view.vue';
+import { SNIPPET_VISIBILITY_PUBLIC } from '~/snippets/constants';
 import { RichViewer, SimpleViewer } from '~/vue_shared/components/blob_viewers';
-import {
-  SNIPPET_VISIBILITY_PRIVATE,
-  SNIPPET_VISIBILITY_INTERNAL,
-  SNIPPET_VISIBILITY_PUBLIC,
-} from '~/snippets/constants';
-
-import { Blob as BlobMock, SimpleViewerMock, RichViewerMock } from 'jest/blob/components/mock_data';
 
 describe('Blob Embeddable', () => {
   let wrapper;
@@ -72,18 +73,6 @@ describe('Blob Embeddable', () => {
       expect(wrapper.find(BlobContent).exists()).toBe(true);
     });
 
-    it.each([SNIPPET_VISIBILITY_INTERNAL, SNIPPET_VISIBILITY_PRIVATE, 'foo'])(
-      'does not render blob-embeddable by default',
-      visibilityLevel => {
-        createComponent({
-          snippetProps: {
-            visibilityLevel,
-          },
-        });
-        expect(wrapper.find(BlobEmbeddable).exists()).toBe(false);
-      },
-    );
-
     it('sets simple viewer correctly', () => {
       createComponent();
       expect(wrapper.find(SimpleViewer).exists()).toBe(true);
@@ -126,6 +115,59 @@ describe('Blob Embeddable', () => {
       });
 
       expect(wrapper.find(BlobHeader).props('hasRenderError')).toBe(true);
+    });
+
+    describe('bob content in multi-file scenario', () => {
+      const SimpleBlobContentMock2 = {
+        ...SimpleBlobContentMock,
+        plainData: 'Another Plain Foo',
+      };
+      const RichBlobContentMock2 = {
+        ...SimpleBlobContentMock,
+        richData: 'Another Rich Foo',
+      };
+
+      it.each`
+        snippetBlobs                                       | description                                  | currentBlob              | expectedContent
+        ${[SimpleBlobContentMock]}                         | ${'one existing textual blob'}               | ${SimpleBlobContentMock} | ${SimpleBlobContentMock.plainData}
+        ${[RichBlobContentMock]}                           | ${'one existing rich blob'}                  | ${RichBlobContentMock}   | ${RichBlobContentMock.richData}
+        ${[SimpleBlobContentMock, RichBlobContentMock]}    | ${'mixed blobs with current textual blob'}   | ${SimpleBlobContentMock} | ${SimpleBlobContentMock.plainData}
+        ${[SimpleBlobContentMock, RichBlobContentMock]}    | ${'mixed blobs with current rich blob'}      | ${RichBlobContentMock}   | ${RichBlobContentMock.richData}
+        ${[SimpleBlobContentMock, SimpleBlobContentMock2]} | ${'textual blobs with current textual blob'} | ${SimpleBlobContentMock} | ${SimpleBlobContentMock.plainData}
+        ${[RichBlobContentMock, RichBlobContentMock2]}     | ${'rich blobs with current rich blob'}       | ${RichBlobContentMock}   | ${RichBlobContentMock.richData}
+      `(
+        'renders correct content for $description',
+        async ({ snippetBlobs, currentBlob, expectedContent }) => {
+          const apolloData = {
+            snippets: {
+              nodes: [
+                {
+                  blobs: {
+                    nodes: snippetBlobs,
+                  },
+                },
+              ],
+            },
+          };
+          createComponent({
+            blob: {
+              ...BlobMock,
+              path: currentBlob.path,
+            },
+          });
+
+          // mimic apollo's update
+          wrapper.setData({
+            blobContent: wrapper.vm.onContentUpdate(apolloData),
+          });
+
+          await nextTick();
+
+          const findContent = () => wrapper.find(BlobContent);
+
+          expect(findContent().props('content')).toBe(expectedContent);
+        },
+      );
     });
 
     describe('URLS with hash', () => {

@@ -47,5 +47,8 @@ export default () => ({
   /**
    * The search query that is used to filter packages by name
    */
-  filterQuery: '',
+  filter: [],
+  /**
+   * The selected TAB of the package types tabs
+   */
 });

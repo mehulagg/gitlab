@@ -1,32 +1,34 @@
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
+// This is a false violation of @gitlab/no-runtime-template-compiler, since it
+// extends a valid Vue single file component.
+/* eslint-disable @gitlab/no-runtime-template-compiler */
 import BoardListHeaderFoss from '~/boards/components/board_list_header.vue';
-import { __, sprintf, s__ } from '~/locale';
-import boardsStore from '~/boards/stores/boards_store';
-import { inactiveListId } from '~/boards/constants';
-import eventHub from '~/sidebar/event_hub';
+import { n__, __, sprintf, s__ } from '~/locale';
 
 export default {
   extends: BoardListHeaderFoss,
-  data() {
-    return {
-      weightFeatureAvailable: boardsStore.weightFeatureAvailable,
-    };
-  },
+  inject: ['weightFeatureAvailable'],
   computed: {
-    ...mapState(['activeListId']),
-    issuesTooltip() {
-      const { issuesSize, maxIssueCount } = this.list;
-
+    ...mapGetters(['isEpicBoard']),
+    countIcon() {
+      return this.isEpicBoard ? 'epic' : 'issues';
+    },
+    itemsCount() {
+      return this.isEpicBoard ? this.list.epicsCount : this.list.issuesCount;
+    },
+    itemsTooltipLabel() {
+      const { maxIssueCount } = this.list;
       if (maxIssueCount > 0) {
-        return sprintf(__('%{issuesSize} issues with a limit of %{maxIssueCount}'), {
-          issuesSize,
+        return sprintf(__('%{itemsCount} issues with a limit of %{maxIssueCount}'), {
+          itemsCount: this.itemsCount,
           maxIssueCount,
         });
       }
 
-      // TODO: Remove this pattern.
-      return BoardListHeaderFoss.computed.issuesTooltip.call(this);
+      return this.isEpicBoard
+        ? n__(`%d epic`, `%d epics`, this.itemsCount)
+        : n__(`%d issue`, `%d issues`, this.itemsCount);
     },
     weightCountToolTip() {
       const { totalWeight } = this.list;
@@ -36,16 +38,6 @@ export default {
       }
 
       return null;
-    },
-  },
-  methods: {
-    ...mapActions(['setActiveListId']),
-    openSidebarSettings() {
-      if (this.activeListId === inactiveListId) {
-        eventHub.$emit('sidebar.closeAll');
-      }
-
-      this.setActiveListId(this.list.id);
     },
   },
 };

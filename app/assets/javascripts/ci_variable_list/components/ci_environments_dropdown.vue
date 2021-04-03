@@ -1,13 +1,7 @@
 <script>
-import {
-  GlDropdown,
-  GlDropdownItem,
-  GlDropdownDivider,
-  GlSearchBoxByType,
-  GlIcon,
-} from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlDropdown, GlDropdownItem, GlDropdownDivider, GlSearchBoxByType } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
+import { __, sprintf } from '~/locale';
 
 export default {
   name: 'CiEnvironmentsDropdown',
@@ -16,7 +10,6 @@ export default {
     GlDropdownItem,
     GlDropdownDivider,
     GlSearchBoxByType,
-    GlIcon,
   },
   props: {
     value: {
@@ -27,7 +20,7 @@ export default {
   },
   data() {
     return {
-      searchTerm: this.value || '',
+      searchTerm: '',
     };
   },
   computed: {
@@ -40,14 +33,9 @@ export default {
     },
     filteredResults() {
       const lowerCasedSearchTerm = this.searchTerm.toLowerCase();
-      return this.joinedEnvironments.filter(resultString =>
+      return this.joinedEnvironments.filter((resultString) =>
         resultString.toLowerCase().includes(lowerCasedSearchTerm),
       );
-    },
-  },
-  watch: {
-    value(newVal) {
-      this.searchTerm = newVal;
     },
   },
   methods: {
@@ -62,22 +50,22 @@ export default {
     isSelected(env) {
       return this.value === env;
     },
+    clearSearch() {
+      this.searchTerm = '';
+    },
   },
 };
 </script>
 <template>
-  <gl-dropdown :text="value">
-    <gl-search-box-by-type v-model.trim="searchTerm" class="m-2" />
+  <gl-dropdown :text="value" @show="clearSearch">
+    <gl-search-box-by-type v-model.trim="searchTerm" data-testid="ci-environment-search" />
     <gl-dropdown-item
       v-for="environment in filteredResults"
       :key="environment"
+      :is-checked="isSelected(environment)"
+      is-check-item
       @click="selectEnvironment(environment)"
     >
-      <gl-icon
-        :class="{ invisible: !isSelected(environment) }"
-        name="mobile-issue-close"
-        class="vertical-align-middle"
-      />
       {{ environment }}
     </gl-dropdown-item>
     <gl-dropdown-item v-if="!filteredResults.length" ref="noMatchingResults">{{
@@ -85,7 +73,7 @@ export default {
     }}</gl-dropdown-item>
     <template v-if="shouldRenderCreateButton">
       <gl-dropdown-divider />
-      <gl-dropdown-item @click="createClicked">
+      <gl-dropdown-item data-testid="create-wildcard-button" @click="createClicked">
         {{ composedCreateButtonLabel }}
       </gl-dropdown-item>
     </template>

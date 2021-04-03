@@ -37,19 +37,30 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
             </span>
              
             <gl-dropdown-stub
+              category="primary"
               class="w-100 metric-col"
+              headertext=""
+              hideheaderborder="true"
               menu-class="w-100 mw-100"
+              size="medium"
               text="Time from first comment to last commit"
-              toggle-class="dropdown-menu-toggle w-100"
+              toggleclass="dropdown-menu-toggle w-100"
+              variant="default"
             >
               <gl-dropdown-item-stub
                 active-class="is-active"
+                avatarurl=""
                 class="w-100"
+                iconcolor=""
+                iconname=""
+                iconrightarialabel=""
+                iconrightname=""
+                secondarytext=""
               >
                 <span
                   class="d-flex"
                 >
-                  <icon-stub
+                  <gl-icon-stub
                     class="flex-shrink-0 gl-mr-2 invisible"
                     name="mobile-issue-close"
                     size="16"
@@ -61,12 +72,18 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
               </gl-dropdown-item-stub>
               <gl-dropdown-item-stub
                 active-class="is-active"
+                avatarurl=""
                 class="w-100"
+                iconcolor=""
+                iconname=""
+                iconrightarialabel=""
+                iconrightname=""
+                secondarytext=""
               >
                 <span
                   class="d-flex"
                 >
-                  <icon-stub
+                  <gl-icon-stub
                     class="flex-shrink-0 gl-mr-2"
                     name="mobile-issue-close"
                     size="16"
@@ -78,12 +95,18 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
               </gl-dropdown-item-stub>
               <gl-dropdown-item-stub
                 active-class="is-active"
+                avatarurl=""
                 class="w-100"
+                iconcolor=""
+                iconname=""
+                iconrightarialabel=""
+                iconrightname=""
+                secondarytext=""
               >
                 <span
                   class="d-flex"
                 >
-                  <icon-stub
+                  <gl-icon-stub
                     class="flex-shrink-0 gl-mr-2 invisible"
                     name="mobile-issue-close"
                     size="16"

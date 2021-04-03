@@ -1,14 +1,14 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
-import Icon from '~/vue_shared/components/icon.vue';
-import FileIcon from '../file_icon.vue';
 import ChangedFileIcon from '../changed_file_icon.vue';
+import FileIcon from '../file_icon.vue';
 
 const MAX_PATH_LENGTH = 60;
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     ChangedFileIcon,
     FileIcon,
   },
@@ -103,10 +103,10 @@ export default {
     <span v-if="file.changed || file.tempFile" v-once class="diff-changed-stats">
       <span v-if="showDiffStats">
         <span class="cgreen bold">
-          <icon name="file-addition" class="align-text-top" /> {{ file.addedLines }}
+          <gl-icon name="file-addition" class="align-text-top" /> {{ file.addedLines }}
         </span>
         <span class="cred bold ml-1">
-          <icon name="file-deletion" class="align-text-top" /> {{ file.removedLines }}
+          <gl-icon name="file-deletion" class="align-text-top" /> {{ file.removedLines }}
         </span>
       </span>
       <changed-file-icon v-else :file="file" />

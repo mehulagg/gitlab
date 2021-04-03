@@ -1,9 +1,7 @@
 <script>
+import { GlIcon, GlToggle, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import Tracking from '~/tracking';
-import icon from '~/vue_shared/components/icon.vue';
-import toggleButton from '~/vue_shared/components/toggle_button.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
 import eventHub from '../../event_hub';
 
 const ICON_ON = 'notifications';
@@ -13,11 +11,11 @@ const LABEL_OFF = __('Notifications off');
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
-    icon,
-    toggleButton,
+    GlIcon,
+    GlToggle,
   },
   mixins: [Tracking.mixin({ label: 'right_sidebar' })],
   props: {
@@ -107,31 +105,25 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="gl-display-flex gl-justify-content-space-between">
     <span
       ref="tooltip"
-      v-tooltip
-      class="sidebar-collapsed-icon"
+      v-gl-tooltip.viewport.left
       :title="notificationTooltip"
-      data-container="body"
-      data-placement="left"
-      data-boundary="viewport"
+      class="sidebar-collapsed-icon"
       @click="onClickCollapsedIcon"
     >
-      <icon
-        :name="notificationIcon"
-        :size="16"
-        aria-hidden="true"
-        class="sidebar-item-icon is-active"
-      />
+      <gl-icon :name="notificationIcon" :size="16" class="sidebar-item-icon is-active" />
     </span>
-    <span class="issuable-header-text hide-collapsed float-left"> {{ notificationText }} </span>
-    <toggle-button
+    <span class="hide-collapsed" data-testid="subscription-title"> {{ notificationText }} </span>
+    <gl-toggle
       v-if="!projectEmailsDisabled"
-      ref="toggleButton"
       :is-loading="showLoadingState"
       :value="subscribed"
-      class="float-right hide-collapsed js-issuable-subscribe-button"
+      class="hide-collapsed"
+      data-testid="subscription-toggle"
+      :label="__('Notifications')"
+      label-position="hidden"
       @change="toggleSubscription"
     />
   </div>

@@ -18,7 +18,7 @@ RSpec.describe 'Merge requests > User merges immediately', :js do
 
   before_all do
     project.add_maintainer(user)
-    project.update!(merge_pipelines_enabled: true)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
     merge_request.all_pipelines.first.succeed!
     merge_request.update_head_pipeline
   end
@@ -41,7 +41,7 @@ RSpec.describe 'Merge requests > User merges immediately', :js do
     def open_warning_dialog
       find('.mr-widget-body .dropdown-toggle').click
 
-      click_link 'Merge immediately'
+      click_button 'Merge immediately'
 
       expect(page).to have_selector('#merge-immediately-confirmation-dialog')
     end

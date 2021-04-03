@@ -5,15 +5,18 @@ class Projects::ReleasesController < Projects::ApplicationController
   before_action :require_non_empty_project, except: [:index]
   before_action :release, only: %i[edit show update downloads]
   before_action :authorize_read_release!
+  # We have to check `download_code` permission because detail URL path
+  # contains git-tag name.
+  before_action :authorize_download_code!, except: [:index]
   before_action do
-    push_frontend_feature_flag(:release_issue_summary, project, default_enabled: true)
-    push_frontend_feature_flag(:release_evidence_collection, project, default_enabled: true)
-    push_frontend_feature_flag(:release_show_page, project, default_enabled: true)
-    push_frontend_feature_flag(:release_asset_link_editing, project, default_enabled: true)
-    push_frontend_feature_flag(:release_asset_link_type, project, default_enabled: true)
+    push_frontend_feature_flag(:graphql_release_data, project, default_enabled: true)
+    push_frontend_feature_flag(:graphql_milestone_stats, project, default_enabled: true)
+    push_frontend_feature_flag(:graphql_releases_page, project, default_enabled: true)
   end
   before_action :authorize_update_release!, only: %i[edit update]
   before_action :authorize_create_release!, only: :new
+
+  feature_category :release_orchestration
 
   def index
     respond_to do |format|
@@ -24,12 +27,8 @@ class Projects::ReleasesController < Projects::ApplicationController
     end
   end
 
-  def show
-    return render_404 unless Feature.enabled?(:release_show_page, project, default_enabled: true)
-  end
-
   def new
-    unless Feature.enabled?(:new_release_page, project)
+    unless Feature.enabled?(:new_release_page, project, default_enabled: true)
       redirect_to(new_project_tag_path(@project))
     end
   end
@@ -57,7 +56,7 @@ class Projects::ReleasesController < Projects::ApplicationController
   end
 
   def sanitized_filepath
-    CGI.unescape(params[:filepath])
+    "/#{CGI.unescape(params[:filepath])}"
   end
 
   def sanitized_tag_name

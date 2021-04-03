@@ -1,5 +1,4 @@
-- return unless Feature.enabled?(:requirements_management, project, default_enabled: true)
-- return unless can?(current_user, :read_requirement, project)
+- return unless project_nav_tab? :requirements
 
 = nav_link(path: 'requirements#index') do
   = link_to project_requirements_management_requirements_path(project), class: 'qa-project-requirements-link' do

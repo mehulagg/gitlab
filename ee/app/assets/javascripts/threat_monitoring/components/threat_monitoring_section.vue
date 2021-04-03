@@ -1,10 +1,10 @@
 <script>
-import { mapState } from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { setUrlFragment } from '~/lib/utils/url_utility';
 import LoadingSkeleton from './loading_skeleton.vue';
-import StatisticsSummary from './statistics_summary.vue';
 import StatisticsHistory from './statistics_history.vue';
+import StatisticsSummary from './statistics_summary.vue';
 
 export default {
   components: {
@@ -60,6 +60,7 @@ export default {
     },
   },
   computed: {
+    ...mapState('threatMonitoring', ['currentEnvironmentId', 'currentTimeWindow']),
     ...mapState({
       isLoading(state) {
         return state[this.storeNamespace].isLoadingStatistics;
@@ -95,6 +96,24 @@ export default {
     documentationFullPath() {
       return setUrlFragment(this.documentationPath, this.documentationAnchor);
     },
+  },
+  watch: {
+    currentEnvironmentId() {
+      this.fetchStatistics();
+    },
+    currentTimeWindow() {
+      this.fetchStatistics();
+    },
+  },
+  created() {
+    this.fetchStatistics();
+  },
+  methods: {
+    ...mapActions({
+      fetchStatistics(dispatch) {
+        return dispatch(`${this.storeNamespace}/fetchStatistics`);
+      },
+    }),
   },
 };
 </script>

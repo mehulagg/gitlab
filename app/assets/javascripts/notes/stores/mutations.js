@@ -1,34 +1,56 @@
-import * as utils from './utils';
-import * as types from './mutation_types';
-import * as constants from '../constants';
+import { isEqual } from 'lodash';
 import { isInMRPage } from '../../lib/utils/common_utils';
+import * as constants from '../constants';
+import * as types from './mutation_types';
+import * as utils from './utils';
 
 export default {
   [types.ADD_NEW_NOTE](state, data) {
     const note = data.discussion ? data.discussion.notes[0] : data;
     const { discussion_id, type } = note;
-    const [exists] = state.discussions.filter(n => n.id === note.discussion_id);
+    const [exists] = state.discussions.filter((n) => n.id === note.discussion_id);
     const isDiscussion = type === constants.DISCUSSION_NOTE || type === constants.DIFF_NOTE;
 
     if (!exists) {
-      const noteData = {
-        expanded: true,
-        id: discussion_id,
-        individual_note: !isDiscussion,
-        notes: [note],
-        reply_id: discussion_id,
-      };
+      let discussion = data.discussion || note.base_discussion;
 
-      if (isDiscussion && isInMRPage()) {
-        noteData.resolvable = note.resolvable;
-        noteData.resolved = false;
-        noteData.active = true;
-        noteData.resolve_path = note.resolve_path;
-        noteData.resolve_with_issue_path = note.resolve_with_issue_path;
-        noteData.diff_discussion = false;
+      if (!discussion) {
+        discussion = {
+          expanded: true,
+          id: discussion_id,
+          individual_note: !isDiscussion,
+          reply_id: discussion_id,
+        };
+
+        if (isDiscussion && isInMRPage()) {
+          discussion.resolvable = note.resolvable;
+          discussion.resolved = false;
+          discussion.active = true;
+          discussion.resolve_path = note.resolve_path;
+          discussion.resolve_with_issue_path = note.resolve_with_issue_path;
+          discussion.diff_discussion = false;
+        }
       }
 
-      state.discussions.push(noteData);
+      if (window.gon?.features?.paginatedNotes && note.base_discussion) {
+        if (discussion.diff_file) {
+          discussion.file_hash = discussion.diff_file.file_hash;
+
+          discussion.truncated_diff_lines = utils.prepareDiffLines(
+            discussion.truncated_diff_lines || [],
+          );
+        }
+
+        discussion.resolvable = note.resolvable;
+        discussion.expanded = note.base_discussion.expanded;
+        discussion.resolved = note.resolved;
+      }
+
+      // note.base_discussion = undefined; // No point keeping a reference to this
+      delete note.base_discussion;
+      discussion.notes = [note];
+
+      state.discussions.push(discussion);
     }
   },
 
@@ -99,6 +121,10 @@ export default {
     state.noteableData.confidential = data;
   },
 
+  [types.SET_ISSUABLE_LOCK](state, locked) {
+    state.noteableData.discussion_locked = locked;
+  },
+
   [types.SET_USER_DATA](state, data) {
     Object.assign(state, { userData: data });
   },
@@ -118,7 +144,7 @@ export default {
 
       // To support legacy notes, should be very rare case.
       if (discussion.individual_note && discussion.notes.length > 1) {
-        discussion.notes.forEach(n => {
+        discussion.notes.forEach((n) => {
           acc.push({
             ...discussion,
             ...diffData,
@@ -173,7 +199,7 @@ export default {
     const { id, name, username } = state.userData;
 
     const hasEmojiAwardedByCurrentUser = note.award_emoji.filter(
-      emoji => `${emoji.name}` === `${data.awardName}` && emoji.user.id === id,
+      (emoji) => `${emoji.name}` === `${data.awardName}` && emoji.user.id === id,
     );
 
     if (hasEmojiAwardedByCurrentUser.length) {
@@ -196,15 +222,24 @@ export default {
 
   [types.SET_EXPAND_DISCUSSIONS](state, { discussionIds, expanded }) {
     if (discussionIds?.length) {
-      discussionIds.forEach(discussionId => {
+      discussionIds.forEach((discussionId) => {
         const discussion = utils.findNoteObjectById(state.discussions, discussionId);
         Object.assign(discussion, { expanded });
       });
     }
   },
 
+  [types.SET_RESOLVING_DISCUSSION](state, isResolving) {
+    state.isResolvingDiscussion = isResolving;
+  },
+
   [types.UPDATE_NOTE](state, note) {
     const noteObj = utils.findNoteObjectById(state.discussions, note.discussion_id);
+
+    // Disable eslint here so we can delete the property that we no longer need
+    // in the note object
+    // eslint-disable-next-line no-param-reassign
+    delete note.base_discussion;
 
     if (noteObj.individual_note) {
       if (note.type === constants.DISCUSSION_NOTE) {
@@ -214,7 +249,10 @@ export default {
       noteObj.notes.splice(0, 1, note);
     } else {
       const comment = utils.findNoteObjectById(noteObj.notes, note.id);
-      noteObj.notes.splice(noteObj.notes.indexOf(comment), 1, note);
+
+      if (!isEqual(comment, note)) {
+        noteObj.notes.splice(noteObj.notes.indexOf(comment), 1, note);
+      }
     }
   },
 
@@ -222,7 +260,7 @@ export default {
     const noteObj = utils.findNoteObjectById(state.discussions, discussionId);
     const comment = utils.findNoteObjectById(noteObj.notes, noteId);
 
-    comment.suggestions = comment.suggestions.map(suggestion => ({
+    comment.suggestions = comment.suggestions.map((suggestion) => ({
       ...suggestion,
       applied: suggestion.applied || suggestion.id === suggestionId,
       appliable: false,
@@ -230,13 +268,13 @@ export default {
   },
 
   [types.SET_APPLYING_BATCH_STATE](state, isApplyingBatch) {
-    state.batchSuggestionsInfo.forEach(suggestionInfo => {
+    state.batchSuggestionsInfo.forEach((suggestionInfo) => {
       const { discussionId, noteId, suggestionId } = suggestionInfo;
 
       const noteObj = utils.findNoteObjectById(state.discussions, discussionId);
       const comment = utils.findNoteObjectById(noteObj.notes, noteId);
 
-      comment.suggestions = comment.suggestions.map(suggestion => ({
+      comment.suggestions = comment.suggestions.map((suggestion) => ({
         ...suggestion,
         is_applying_batch: suggestion.id === suggestionId && isApplyingBatch,
       }));
@@ -264,7 +302,7 @@ export default {
 
   [types.UPDATE_DISCUSSION](state, noteData) {
     const note = noteData;
-    const selectedDiscussion = state.discussions.find(disc => disc.id === note.id);
+    const selectedDiscussion = state.discussions.find((disc) => disc.id === note.id);
     note.expanded = true; // override expand flag to prevent collapse
     if (note.diff_file) {
       Object.assign(note, {
@@ -272,6 +310,11 @@ export default {
       });
     }
     Object.assign(selectedDiscussion, { ...note });
+  },
+
+  [types.UPDATE_DISCUSSION_POSITION](state, { discussionId, position }) {
+    const selectedDiscussion = state.discussions.find((disc) => disc.id === discussionId);
+    if (selectedDiscussion) Object.assign(selectedDiscussion.position, { ...position });
   },
 
   [types.CLOSE_ISSUE](state) {
@@ -286,10 +329,6 @@ export default {
     Object.assign(state, { isToggleStateButtonLoading: value });
   },
 
-  [types.TOGGLE_BLOCKED_ISSUE_WARNING](state, value) {
-    Object.assign(state, { isToggleBlockedIssueWarning: value });
-  },
-
   [types.SET_NOTES_FETCHED_STATE](state, value) {
     Object.assign(state, { isNotesFetched: value });
   },
@@ -298,14 +337,23 @@ export default {
     state.isLoading = value;
   },
 
+  [types.SET_NOTES_FETCHING_STATE](state, value) {
+    state.isFetching = value;
+  },
+
   [types.SET_DISCUSSION_DIFF_LINES](state, { discussionId, diffLines }) {
     const discussion = utils.findNoteObjectById(state.discussions, discussionId);
 
     discussion.truncated_diff_lines = utils.prepareDiffLines(diffLines);
   },
 
-  [types.SET_DISCUSSIONS_SORT](state, sort) {
-    state.discussionSortOrder = sort;
+  [types.SET_DISCUSSIONS_SORT](state, { direction, persist }) {
+    state.discussionSortOrder = direction;
+    state.persistSortOrder = persist;
+  },
+
+  [types.SET_TIMELINE_VIEW](state, value) {
+    state.isTimelineEnabled = value;
   },
 
   [types.SET_SELECTED_COMMENT_POSITION](state, position) {
@@ -321,13 +369,13 @@ export default {
   },
   [types.UPDATE_RESOLVABLE_DISCUSSIONS_COUNTS](state) {
     state.resolvableDiscussionsCount = state.discussions.filter(
-      discussion => !discussion.individual_note && discussion.resolvable,
+      (discussion) => !discussion.individual_note && discussion.resolvable,
     ).length;
     state.unresolvedDiscussionsCount = state.discussions.filter(
-      discussion =>
+      (discussion) =>
         !discussion.individual_note &&
         discussion.resolvable &&
-        discussion.notes.some(note => note.resolvable && !note.resolved),
+        discussion.notes.some((note) => note.resolvable && !note.resolved),
     ).length;
   },
 
@@ -369,5 +417,8 @@ export default {
   },
   [types.UPDATE_ASSIGNEES](state, assignees) {
     state.noteableData.assignees = assignees;
+  },
+  [types.SET_FETCHING_DISCUSSIONS](state, value) {
+    state.currentlyFetchingDiscussions = value;
   },
 };

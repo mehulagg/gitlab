@@ -22,14 +22,14 @@ class BlockingMergeRequestEntity < Grape::Entity
 
   expose :head_pipeline,
          if: -> (_, _) { can_read_head_pipeline? },
-         using: ::API::Entities::Pipeline
+         using: ::API::Entities::Ci::Pipeline
 
   expose :assignees, using: ::API::Entities::UserBasic
   expose :milestone, using: ::API::Entities::Milestone
   expose :created_at
   expose :merged_at
   expose :closed_at do |blocking_mr|
-    blocking_mr.metrics.latest_closed_at
+    blocking_mr.metrics&.latest_closed_at
   end
 
   private

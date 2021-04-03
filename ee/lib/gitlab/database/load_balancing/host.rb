@@ -7,7 +7,7 @@ module Gitlab
       class Host
         attr_reader :pool, :last_checked_at, :intervals, :load_balancer, :host, :port
 
-        delegate :connection, :release_connection, to: :pool
+        delegate :connection, :release_connection, :enable_query_cache!, :disable_query_cache!, :query_cache_enabled, to: :pool
 
         CONNECTION_ERRORS =
           if defined?(PG)
@@ -148,7 +148,7 @@ module Gitlab
         def replication_lag_size
           location = connection.quote(primary_write_location)
           row = query_and_release(<<-SQL.squish)
-            SELECT #{Gitlab::Database.pg_wal_lsn_diff}(#{location}, #{Gitlab::Database.pg_last_wal_replay_lsn}())::float
+            SELECT pg_wal_lsn_diff(#{location}, pg_last_wal_replay_lsn())::float
               AS diff
           SQL
 
@@ -175,7 +175,7 @@ module Gitlab
           # such a case.
           query = <<-SQL.squish
             SELECT NOT pg_is_in_recovery()
-              OR #{Gitlab::Database.pg_wal_lsn_diff}(#{Gitlab::Database.pg_last_wal_replay_lsn}(), #{string}) >= 0
+              OR pg_wal_lsn_diff(pg_last_wal_replay_lsn(), #{string}) >= 0
               AS result
           SQL
 

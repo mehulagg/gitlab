@@ -17,9 +17,11 @@ class Todo < ApplicationRecord
   UNMERGEABLE         = 6
   DIRECTLY_ADDRESSED  = 7
   MERGE_TRAIN_REMOVED = 8 # This is an EE-only feature
+  REVIEW_REQUESTED    = 9
 
   ACTION_NAMES = {
     ASSIGNED => :assigned,
+    REVIEW_REQUESTED => :review_requested,
     MENTIONED => :mentioned,
     BUILD_FAILED => :build_failed,
     MARKED => :marked,
@@ -53,7 +55,6 @@ class Todo < ApplicationRecord
   validates :project, presence: true, unless: :group_id
   validates :group, presence: true, unless: :project_id
 
-  scope :for_ids, -> (ids) { where(id: ids) }
   scope :pending, -> { with_state(:pending) }
   scope :done, -> { with_state(:done) }
   scope :for_action, -> (action) { where(action: action) }
@@ -137,17 +138,19 @@ class Todo < ApplicationRecord
     # Todos with highest priority first then oldest todos
     # Need to order by created_at last because of differences on Mysql and Postgres when joining by type "Merge_request/Issue"
     def order_by_labels_priority
-      params = {
+      highest_priority = highest_label_priority(
         target_type_column: "todos.target_type",
         target_column: "todos.target_id",
         project_column: "todos.project_id"
-      }
-
-      highest_priority = highest_label_priority(params).to_sql
+      ).to_sql
 
       select("#{table_name}.*, (#{highest_priority}) AS highest_priority")
         .order(Gitlab::Database.nulls_last_order('highest_priority', 'ASC'))
         .order('todos.created_at')
+    end
+
+    def pluck_user_id
+      pluck(:user_id)
     end
   end
 
@@ -165,6 +168,10 @@ class Todo < ApplicationRecord
 
   def assigned?
     action == ASSIGNED
+  end
+
+  def review_requested?
+    action == REVIEW_REQUESTED
   end
 
   def merge_train_removed?
@@ -221,7 +228,7 @@ class Todo < ApplicationRecord
   end
 
   def self_assigned?
-    assigned? && self_added?
+    self_added? && (assigned? || review_requested?)
   end
 
   private

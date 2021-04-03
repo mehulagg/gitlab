@@ -10,6 +10,8 @@ module Gitlab
           SyntaxError = Class.new(Expression::ExpressionError)
 
           LEXEMES = [
+            Expression::Lexeme::ParenthesisOpen,
+            Expression::Lexeme::ParenthesisClose,
             Expression::Lexeme::Variable,
             Expression::Lexeme::String,
             Expression::Lexeme::Pattern,
@@ -21,6 +23,10 @@ module Gitlab
             Expression::Lexeme::And,
             Expression::Lexeme::Or
           ].freeze
+
+          def self.lexemes
+            LEXEMES
+          end
 
           MAX_TOKENS = 100
 
@@ -47,7 +53,7 @@ module Gitlab
 
               return tokens if @scanner.eos?
 
-              lexeme = LEXEMES.find do |type|
+              lexeme = self.class.lexemes.find do |type|
                 type.scan(@scanner).tap do |token|
                   tokens.push(token) if token.present?
                 end

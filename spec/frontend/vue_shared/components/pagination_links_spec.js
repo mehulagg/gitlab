@@ -1,6 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlPagination } from '@gitlab/ui';
-import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
+import { mount } from '@vue/test-utils';
 import {
   PREV,
   NEXT,
@@ -9,6 +8,7 @@ import {
   LABEL_NEXT_PAGE,
   LABEL_LAST_PAGE,
 } from '~/vue_shared/components/pagination/constants';
+import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
 
 describe('Pagination links component', () => {
   const pageInfo = {
@@ -49,7 +49,7 @@ describe('Pagination links component', () => {
   });
 
   it('should provide translated text to GitLab UI pagination', () => {
-    Object.entries(translations).forEach(entry => {
+    Object.entries(translations).forEach((entry) => {
       expect(glPagination.vm[entry[0]]).toBe(entry[1]);
     });
   });

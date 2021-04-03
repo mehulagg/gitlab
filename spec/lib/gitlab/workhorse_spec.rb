@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Workhorse do
   let_it_be(:project) { create(:project, :repository) }
+
   let(:repository) { project.repository }
 
   def decode_workhorse_header(array)
@@ -15,9 +16,7 @@ RSpec.describe Gitlab::Workhorse do
   end
 
   before do
-    allow(Feature::Gitaly).to receive(:server_feature_flags).and_return({
-      'gitaly-feature-foobar' => 'true'
-    })
+    stub_feature_flags(gitaly_enforce_requests_limits: true)
   end
 
   describe ".send_git_archive" do
@@ -43,7 +42,7 @@ RSpec.describe Gitlab::Workhorse do
       expect(command).to eq('git-archive')
       expect(params).to eq({
         'GitalyServer' => {
-          features: { 'gitaly-feature-foobar' => 'true' },
+          features: { 'gitaly-feature-enforce-requests-limits' => 'true' },
           address: Gitlab::GitalyClient.address(project.repository_storage),
           token: Gitlab::GitalyClient.token(project.repository_storage)
         },
@@ -54,10 +53,42 @@ RSpec.describe Gitlab::Workhorse do
             commit_id: metadata['CommitId'],
             prefix: metadata['ArchivePrefix'],
             format: Gitaly::GetArchiveRequest::Format::ZIP,
-            path: path
+            path: path,
+            include_lfs_blobs: true
           ).to_proto
         )
       }.deep_stringify_keys)
+    end
+
+    context 'when include_lfs_blobs_in_archive is disabled' do
+      before do
+        stub_feature_flags(include_lfs_blobs_in_archive: false)
+      end
+
+      it 'sets include_lfs_blobs to false' do
+        key, command, params = decode_workhorse_header(subject)
+
+        expect(key).to eq('Gitlab-Workhorse-Send-Data')
+        expect(command).to eq('git-archive')
+        expect(params).to eq({
+          'GitalyServer' => {
+            features: { 'gitaly-feature-enforce-requests-limits' => 'true' },
+            address: Gitlab::GitalyClient.address(project.repository_storage),
+            token: Gitlab::GitalyClient.token(project.repository_storage)
+          },
+          'ArchivePath' => metadata['ArchivePath'],
+          'GetArchiveRequest' => Base64.encode64(
+            Gitaly::GetArchiveRequest.new(
+              repository: repository.gitaly_repository,
+              commit_id: metadata['CommitId'],
+              prefix: metadata['ArchivePrefix'],
+              format: Gitaly::GetArchiveRequest::Format::ZIP,
+              path: path,
+              include_lfs_blobs: false
+            ).to_proto
+          )
+        }.deep_stringify_keys)
+      end
     end
 
     context 'when archive caching is disabled' do
@@ -71,7 +102,7 @@ RSpec.describe Gitlab::Workhorse do
 
     context "when the repository doesn't have an archive file path" do
       before do
-        allow(project.repository).to receive(:archive_metadata).and_return(Hash.new)
+        allow(project.repository).to receive(:archive_metadata).and_return({})
       end
 
       it "raises an error" do
@@ -92,7 +123,7 @@ RSpec.describe Gitlab::Workhorse do
       expect(command).to eq("git-format-patch")
       expect(params).to eq({
         'GitalyServer' => {
-          features: { 'gitaly-feature-foobar' => 'true' },
+          features: { 'gitaly-feature-enforce-requests-limits' => 'true' },
           address: Gitlab::GitalyClient.address(project.repository_storage),
           token: Gitlab::GitalyClient.token(project.repository_storage)
         },
@@ -155,7 +186,7 @@ RSpec.describe Gitlab::Workhorse do
       expect(command).to eq("git-diff")
       expect(params).to eq({
         'GitalyServer' => {
-          features: { 'gitaly-feature-foobar' => 'true' },
+          features: { 'gitaly-feature-enforce-requests-limits' => 'true' },
           address: Gitlab::GitalyClient.address(project.repository_storage),
           token: Gitlab::GitalyClient.token(project.repository_storage)
         },
@@ -242,7 +273,7 @@ RSpec.describe Gitlab::Workhorse do
       let(:gitaly_params) do
         {
           GitalyServer: {
-            features: { 'gitaly-feature-foobar' => 'true' },
+            features: { 'gitaly-feature-enforce-requests-limits' => 'true' },
             address: Gitlab::GitalyClient.address('default'),
             token: Gitlab::GitalyClient.token('default')
           }
@@ -277,6 +308,35 @@ RSpec.describe Gitlab::Workhorse do
           subject { described_class.git_http_ok(repository, Gitlab::GlRepository::PROJECT, user, action, show_all_refs: true) }
 
           it { is_expected.to include(ShowAllRefs: true) }
+        end
+
+        context 'when a feature flag is set for a single project' do
+          before do
+            stub_feature_flags(gitaly_mep_mep: project)
+          end
+
+          it 'sets the flag to true for that project' do
+            response = described_class.git_http_ok(repository, Gitlab::GlRepository::PROJECT, user, action)
+
+            expect(response.dig(:GitalyServer, :features)).to eq('gitaly-feature-enforce-requests-limits' => 'true',
+                                                                 'gitaly-feature-mep-mep' => 'true')
+          end
+
+          it 'sets the flag to false for other projects' do
+            other_project = create(:project, :public, :repository)
+            response = described_class.git_http_ok(other_project.repository, Gitlab::GlRepository::PROJECT, user, action)
+
+            expect(response.dig(:GitalyServer, :features)).to eq('gitaly-feature-enforce-requests-limits' => 'true',
+                                                                 'gitaly-feature-mep-mep' => 'false')
+          end
+
+          it 'sets the flag to false when there is no project' do
+            snippet = create(:personal_snippet, :repository)
+            response = described_class.git_http_ok(snippet.repository, Gitlab::GlRepository::SNIPPET, user, action)
+
+            expect(response.dig(:GitalyServer, :features)).to eq('gitaly-feature-enforce-requests-limits' => 'true',
+                                                                 'gitaly-feature-mep-mep' => 'false')
+          end
         end
       end
 
@@ -391,7 +451,7 @@ RSpec.describe Gitlab::Workhorse do
       expect(command).to eq('git-blob')
       expect(params).to eq({
         'GitalyServer' => {
-          features: { 'gitaly-feature-foobar' => 'true' },
+          features: { 'gitaly-feature-enforce-requests-limits' => 'true' },
           address: Gitlab::GitalyClient.address(project.repository_storage),
           token: Gitlab::GitalyClient.token(project.repository_storage)
         },
@@ -421,6 +481,26 @@ RSpec.describe Gitlab::Workhorse do
     end
   end
 
+  describe '.send_scaled_image' do
+    let(:location) { 'http://example.com/avatar.png' }
+    let(:width) { '150' }
+    let(:content_type) { 'image/png' }
+
+    subject { described_class.send_scaled_image(location, width, content_type) }
+
+    it 'sets the header correctly' do
+      key, command, params = decode_workhorse_header(subject)
+
+      expect(key).to eq("Gitlab-Workhorse-Send-Data")
+      expect(command).to eq("send-scaled-img")
+      expect(params).to eq({
+        'Location' => location,
+        'Width' => width,
+        'ContentType' => content_type
+      }.deep_stringify_keys)
+    end
+  end
+
   describe '.send_git_snapshot' do
     let(:url) { 'http://example.com' }
 
@@ -433,7 +513,7 @@ RSpec.describe Gitlab::Workhorse do
       expect(command).to eq('git-snapshot')
       expect(params).to eq(
         'GitalyServer' => {
-          'features' => { 'gitaly-feature-foobar' => 'true' },
+          'features' => { 'gitaly-feature-enforce-requests-limits' => 'true' },
           'address' => Gitlab::GitalyClient.address(project.repository_storage),
           'token' => Gitlab::GitalyClient.token(project.repository_storage)
         },

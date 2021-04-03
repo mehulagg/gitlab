@@ -1,23 +1,33 @@
-import GetSnippetQuery from '../queries/snippet.query.graphql';
+import GetSnippetQuery from 'shared_queries/snippet/snippet.query.graphql';
 
 const blobsDefault = [];
 
-// eslint-disable-next-line import/prefer-default-export
 export const getSnippetMixin = {
   apollo: {
     snippet: {
       query: GetSnippetQuery,
       variables() {
         return {
-          ids: this.snippetGid,
+          ids: [this.snippetGid],
         };
       },
-      update: data => data.snippets.edges[0]?.node,
-      result(res) {
-        this.blobs = res.data.snippets.edges[0]?.node?.blobs || blobsDefault;
-        if (this.onSnippetFetch) {
-          this.onSnippetFetch(res);
+      update(data) {
+        const res = data.snippets.nodes[0];
+
+        // Set `snippet.blobs` since some child components are coupled to this.
+        if (res) {
+          // It's possible for us to not get any blobs in a response.
+          // In this case, we should default to current blobs.
+          res.blobs = res.blobs ? res.blobs.nodes : this.blobs;
         }
+
+        return res;
+      },
+      result(res) {
+        this.blobs = res.data.snippets.nodes[0]?.blobs || blobsDefault;
+      },
+      skip() {
+        return this.newSnippet;
       },
     },
   },
@@ -30,7 +40,7 @@ export const getSnippetMixin = {
   data() {
     return {
       snippet: {},
-      newSnippet: false,
+      newSnippet: !this.snippetGid,
       blobs: blobsDefault,
     };
   },

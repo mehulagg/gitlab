@@ -1,24 +1,25 @@
 <script>
-import $ from 'jquery';
 import { GlButton } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { getMilestone } from 'ee_else_ce/boards/boards_util';
-import ListIssue from 'ee_else_ce/boards/models/issue';
+import BoardNewIssueMixin from 'ee_else_ce/boards/mixins/board_new_issue';
+import { __ } from '~/locale';
 import eventHub from '../eventhub';
 import ProjectSelect from './project_select.vue';
-import boardsStore from '../stores/boards_store';
 
 export default {
   name: 'BoardNewIssue',
+  i18n: {
+    submit: __('Create issue'),
+    cancel: __('Cancel'),
+  },
   components: {
     ProjectSelect,
     GlButton,
   },
+  mixins: [BoardNewIssueMixin],
+  inject: ['groupId'],
   props: {
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     list: {
       type: Object,
       required: true,
@@ -27,16 +28,20 @@ export default {
   data() {
     return {
       title: '',
-      error: false,
-      selectedProject: {},
     };
   },
   computed: {
+    ...mapState(['selectedProject']),
+    ...mapGetters(['isGroupBoard']),
     disabled() {
-      if (this.groupId) {
+      if (this.isGroupBoard) {
         return this.title === '' || !this.selectedProject.name;
       }
       return this.title === '';
+    },
+    inputFieldId() {
+      // eslint-disable-next-line @gitlab/require-i18n-strings
+      return `${this.list.id}-title`;
     },
   },
   mounted() {
@@ -44,58 +49,34 @@ export default {
     eventHub.$on('setSelectedProject', this.setSelectedProject);
   },
   methods: {
+    ...mapActions(['addListNewIssue']),
     submit(e) {
       e.preventDefault();
-      if (this.title.trim() === '') return Promise.resolve();
 
-      this.error = false;
-
+      const { title } = this;
       const labels = this.list.label ? [this.list.label] : [];
       const assignees = this.list.assignee ? [this.list.assignee] : [];
       const milestone = getMilestone(this.list);
 
-      const { weightFeatureAvailable } = boardsStore;
-      const { weight } = weightFeatureAvailable ? boardsStore.state.currentBoard : {};
-
-      const issue = new ListIssue({
-        title: this.title,
-        labels,
-        subscribed: true,
-        assignees,
-        milestone,
-        project_id: this.selectedProject.id,
-        weight,
-      });
-
       eventHub.$emit(`scroll-board-list-${this.list.id}`);
-      this.cancel();
 
-      return this.list
-        .newIssue(issue)
-        .then(() => {
-          // Need this because our jQuery very kindly disables buttons on ALL form submissions
-          $(this.$refs.submitButton).enable();
-
-          boardsStore.setIssueDetail(issue);
-          boardsStore.setListDetail(this.list);
-        })
-        .catch(() => {
-          // Need this because our jQuery very kindly disables buttons on ALL form submissions
-          $(this.$refs.submitButton).enable();
-
-          // Remove the issue
-          this.list.removeIssue(issue);
-
-          // Show error message
-          this.error = true;
-        });
+      return this.addListNewIssue({
+        issueInput: {
+          title,
+          labelIds: labels?.map((l) => l.id),
+          assigneeIds: assignees?.map((a) => a?.id),
+          milestoneId: milestone?.id,
+          projectPath: this.selectedProject.fullPath,
+          ...this.extraIssueInput(),
+        },
+        list: this.list,
+      }).then(() => {
+        this.reset();
+      });
     },
-    cancel() {
+    reset() {
       this.title = '';
       eventHub.$emit(`toggle-issue-form-${this.list.id}`);
-    },
-    setSelectedProject(selectedProject) {
-      this.selectedProject = selectedProject;
     },
   },
 };
@@ -104,13 +85,10 @@ export default {
 <template>
   <div class="board-new-issue-form">
     <div class="board-card position-relative p-3 rounded">
-      <form @submit="submit($event)">
-        <div v-if="error" class="flash-container">
-          <div class="flash-alert">{{ __('An error occurred. Please try again.') }}</div>
-        </div>
-        <label :for="list.id + '-title'" class="label-bold">{{ __('Title') }}</label>
+      <form ref="submitForm" @submit="submit">
+        <label :for="inputFieldId" class="label-bold">{{ __('Title') }}</label>
         <input
-          :id="list.id + '-title'"
+          :id="inputFieldId"
           ref="input"
           v-model="title"
           class="form-control"
@@ -118,20 +96,27 @@ export default {
           name="issue_title"
           autocomplete="off"
         />
-        <project-select v-if="groupId" :group-id="groupId" :list="list" />
-        <div class="clearfix prepend-top-10">
+        <project-select v-if="isGroupBoard" :group-id="groupId" :list="list" />
+        <div class="clearfix gl-mt-3">
           <gl-button
-            ref="submit-button"
+            ref="submitButton"
             :disabled="disabled"
-            class="float-left"
+            class="float-left js-no-auto-disable"
             variant="success"
             category="primary"
             type="submit"
-            >{{ __('Submit issue') }}</gl-button
           >
-          <gl-button class="float-right" type="button" variant="default" @click="cancel">{{
-            __('Cancel')
-          }}</gl-button>
+            {{ $options.i18n.submit }}
+          </gl-button>
+          <gl-button
+            ref="cancelButton"
+            class="float-right"
+            type="button"
+            variant="default"
+            @click="reset"
+          >
+            {{ $options.i18n.cancel }}
+          </gl-button>
         </div>
       </form>
     </div>

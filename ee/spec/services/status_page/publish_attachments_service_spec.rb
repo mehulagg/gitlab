@@ -9,7 +9,7 @@ RSpec.describe StatusPage::PublishAttachmentsService do
     let(:image_file_name_2) { 'tanuki_2.png' }
     let(:upload_path_2) { "/uploads/#{upload_secret_2}/#{image_file_name_2}" }
     let(:markdown_field) { "![tanuki](#{upload_path}) and ![tanuki_2](#{upload_path_2})" }
-    let(:status_page_upload_path_2) { StatusPage::Storage.upload_path(issue.iid, upload_secret_2, image_file_name_2) }
+    let(:status_page_upload_path_2) { Gitlab::StatusPage::Storage.upload_path(issue.iid, upload_secret_2, image_file_name_2) }
   end
 
   describe '#execute' do
@@ -18,9 +18,9 @@ RSpec.describe StatusPage::PublishAttachmentsService do
     let(:user_notes) { [] }
     let(:incident_id) { 1 }
     let(:issue) { instance_double(Issue, notes: user_notes, description: markdown_field, iid: incident_id) }
-    let(:key) { StatusPage::Storage.details_path(incident_id) }
+    let(:key) { Gitlab::StatusPage::Storage.details_path(incident_id) }
     let(:content) { { id: incident_id } }
-    let(:storage_client) { instance_double(StatusPage::Storage::S3Client) }
+    let(:storage_client) { instance_double(Gitlab::StatusPage::Storage::S3Client) }
 
     let(:service) { described_class.new(project: project, issue: issue, user_notes: user_notes, storage_client: storage_client) }
 
@@ -47,7 +47,7 @@ RSpec.describe StatusPage::PublishAttachmentsService do
         let(:image_file_name) { 'tanuki.png'}
         let(:upload_path) { "/uploads/#{upload_secret}/#{image_file_name}" }
         let(:markdown_field) { "![tanuki](#{upload_path})" }
-        let(:status_page_upload_path) { StatusPage::Storage.upload_path(issue.iid, upload_secret, image_file_name) }
+        let(:status_page_upload_path) { Gitlab::StatusPage::Storage.upload_path(issue.iid, upload_secret, image_file_name) }
         let(:user_notes) { [] }
 
         let(:open_file) { instance_double(File, read: 'stubbed read') }
@@ -73,7 +73,7 @@ RSpec.describe StatusPage::PublishAttachmentsService do
 
         context 'when upload to storage throws an error' do
           it 'returns an error response' do
-            storage_error = StatusPage::Storage::Error.new(bucket: '', error: StandardError.new)
+            storage_error = Gitlab::StatusPage::Storage::Error.new(bucket: '', error: StandardError.new)
             # no raise to mimic prod behavior
             allow(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
             allow(storage_client).to receive(:multipart_upload).and_raise(storage_error)
@@ -99,7 +99,7 @@ RSpec.describe StatusPage::PublishAttachmentsService do
           include_context 'second file'
 
           before do
-            stub_const("StatusPage::Storage::MAX_UPLOADS", 2)
+            stub_const("Gitlab::StatusPage::Storage::MAX_UPLOADS", 2)
             allow(storage_client).to receive(:list_object_keys).and_return(Set['existing_key'])
           end
 

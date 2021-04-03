@@ -41,7 +41,7 @@ module Packages
           }
         end
 
-        ::Gitlab::Database.bulk_insert(::Packages::Nuget::DependencyLinkMetadatum.table_name, rows.compact)
+        ::Gitlab::Database.bulk_insert(::Packages::Nuget::DependencyLinkMetadatum.table_name, rows.compact) # rubocop:disable Gitlab/BulkInsert
       end
 
       def raw_dependency_for(dependency)
@@ -54,9 +54,9 @@ module Packages
       end
 
       def dependencies_for_create_dependency_service
-        names_and_versions = @dependencies.map do |dependency|
+        names_and_versions = @dependencies.to_h do |dependency|
           [dependency[:name], version_or_empty_string(dependency[:version])]
-        end.to_h
+        end
 
         { 'dependencies' => names_and_versions }
       end

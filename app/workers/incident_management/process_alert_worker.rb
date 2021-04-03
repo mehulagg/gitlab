@@ -17,10 +17,9 @@ module IncidentManagement
       return unless alert
 
       result = create_issue_for(alert)
-      return unless result.success?
+      return if result.success?
 
-      new_issue = result.payload[:issue]
-      link_issue_with_alert(alert, new_issue.id)
+      log_warning(alert, result)
     end
 
     private
@@ -29,24 +28,20 @@ module IncidentManagement
       AlertManagement::Alert.find_by_id(alert_id)
     end
 
-    def parsed_payload(alert)
-      Gitlab::Alerting::NotificationPayloadParser.call(alert.payload.to_h, alert.project)
-    end
-
     def create_issue_for(alert)
-      IncidentManagement::CreateIssueService
-        .new(alert.project, parsed_payload(alert))
+      AlertManagement::CreateAlertIssueService
+        .new(alert, User.alert_bot)
         .execute
     end
 
-    def link_issue_with_alert(alert, issue_id)
-      return if alert.update(issue_id: issue_id)
+    def log_warning(alert, result)
+      issue_id = result.payload[:issue]&.id
 
       Gitlab::AppLogger.warn(
-        message: 'Cannot link an Issue with Alert',
+        message: 'Cannot process an Incident',
         issue_id: issue_id,
         alert_id: alert.id,
-        alert_errors: alert.errors.messages
+        errors: result.message
       )
     end
   end

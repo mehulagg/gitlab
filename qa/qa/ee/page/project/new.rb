@@ -27,6 +27,10 @@ module QA
                 element :use_template_button
                 element :template_option_row
               end
+
+              view 'app/assets/javascripts/projects/experiment_new_project_creation/components/welcome.vue' do
+                element :cicd_for_external_repo_link, ':data-qa-selector="`${panel.name}_link`"' # rubocop:disable QA/ElementWithPattern
+              end
             end
           end
 
@@ -44,6 +48,10 @@ module QA
 
           def instance_template_tab_badge_text
             find_element(:instance_template_tab_badge).text
+          end
+
+          def click_cicd_for_external_repo
+            click_element :cicd_for_external_repo_link
           end
         end
       end

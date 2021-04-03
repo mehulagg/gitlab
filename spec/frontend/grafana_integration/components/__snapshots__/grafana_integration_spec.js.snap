@@ -8,28 +8,34 @@ exports[`grafana integration component default state to match the default snapsh
   <div
     class="settings-header"
   >
-    <h3
-      class="js-section-header h4"
+    <h4
+      class="js-section-header settings-title js-settings-toggle js-settings-toggle-trigger-only"
     >
       
       Grafana authentication
     
-    </h3>
+    </h4>
      
-    <gl-deprecated-button-stub
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
       class="js-settings-toggle"
-      size="md"
-      variant="secondary"
+      icon=""
+      size="medium"
+      variant="default"
     >
       Expand
-    </gl-deprecated-button-stub>
+    </gl-button-stub>
      
     <p
       class="js-section-sub-header"
     >
       
-      Embed Grafana charts in GitLab issues.
-    
+      Set up Grafana authentication to embed Grafana panels in GitLab Flavored Markdown.
+      
+      <gl-link-stub>
+        Learn more.
+      </gl-link-stub>
     </p>
   </div>
    
@@ -53,13 +59,13 @@ exports[`grafana integration component default state to match the default snapsh
       >
         <gl-form-input-stub
           id="grafana-url"
-          placeholder="https://my-url.grafana.net/"
+          placeholder="https://my-grafana.example.com/"
           value="http://test.host"
         />
       </gl-form-group-stub>
        
       <gl-form-group-stub
-        label="API Token"
+        label="API token"
         label-for="grafana-token"
       >
         <gl-form-input-stub
@@ -71,7 +77,7 @@ exports[`grafana integration component default state to match the default snapsh
           class="form-text text-muted"
         >
           
-          Enter the Grafana API Token.
+          Enter the Grafana API token.
           
           <a
             href="https://grafana.com/docs/http_api/auth/#create-api-token"
@@ -79,9 +85,9 @@ exports[`grafana integration component default state to match the default snapsh
             target="_blank"
           >
             
-            More information
+            More information.
             
-            <icon-stub
+            <gl-icon-stub
               class="vertical-align-middle"
               name="external-link"
               size="16"
@@ -90,14 +96,17 @@ exports[`grafana integration component default state to match the default snapsh
         </p>
       </gl-form-group-stub>
        
-      <gl-deprecated-button-stub
-        size="md"
+      <gl-button-stub
+        buttontextclasses=""
+        category="primary"
+        icon=""
+        size="medium"
         variant="success"
       >
         
-        Save Changes
+        Save changes
       
-      </gl-deprecated-button-stub>
+      </gl-button-stub>
     </form>
   </div>
 </section>

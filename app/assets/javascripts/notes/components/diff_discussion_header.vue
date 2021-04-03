@@ -1,9 +1,10 @@
 <script>
-import { mapActions } from 'vuex';
+import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { escape } from 'lodash';
+import { mapActions } from 'vuex';
 
-import { s__, __, sprintf } from '~/locale';
 import { truncateSha } from '~/lib/utils/text_utility';
+import { s__, __, sprintf } from '~/locale';
 
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import noteEditedText from './note_edited_text.vue';
@@ -15,6 +16,9 @@ export default {
     userAvatarLink,
     noteEditedText,
     noteHeader,
+  },
+  directives: {
+    SafeHtml,
   },
   props: {
     discussion: {
@@ -112,7 +116,7 @@ export default {
         :expanded="discussion.expanded"
         @toggleHandler="toggleDiscussionHandler"
       >
-        <span v-html="headerText"></span>
+        <span v-safe-html="headerText"></span>
       </note-header>
       <note-edited-text
         v-if="discussion.resolved"

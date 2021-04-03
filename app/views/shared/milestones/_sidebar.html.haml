@@ -1,7 +1,7 @@
 - affix_offset = local_assigns.fetch(:affix_offset, "50")
 - project = local_assigns[:project]
 
-%aside.right-sidebar.js-right-sidebar{ data: { "offset-top" => affix_offset, "spy" => "affix", "always-show-toggle" => true }, class: sidebar_gutter_collapsed_class, 'aria-live' => 'polite' }
+%aside.right-sidebar.js-right-sidebar{ data: { "offset-top" => affix_offset, "spy" => "affix", "always-show-toggle" => true }, class: sidebar_gutter_collapsed_class, 'aria-live' => 'polite', 'aria-label': _('Milestone') }
   .issuable-sidebar.milestone-sidebar
     .block.milestone-progress.issuable-sidebar-header
       %a.gutter-toggle.float-right.js-sidebar-toggle.has-tooltip{ role: "button", href: "#", "aria-label" => s_('MilestoneSidebar|Toggle sidebar'), title: sidebar_gutter_tooltip_text, data: { container: 'body', placement: 'left', boundary: 'viewport' } }
@@ -32,7 +32,8 @@
 
     .block.due_date
       .sidebar-collapsed-icon
-        = icon('calendar', 'aria-hidden': 'true')
+        %span{ 'aria-hidden': 'true' }
+          = sprite_icon('calendar')
         %span.collapsed-milestone-date
           - if milestone.start_date && milestone.due_date
             - if milestone.start_date.year == milestone.due_date.year
@@ -140,11 +141,11 @@
       .block.releases
         .sidebar-collapsed-icon.has-tooltip{ title: milestone_releases_tooltip_text(milestone), data: { container: 'body', placement: 'left', boundary: 'viewport' } }
           %strong
-            = sprite_icon("rocket", size: 16)
+            = sprite_icon("rocket")
           %span= total_count
         .title.hide-collapsed= n_('Release', 'Releases', total_count)
         .hide-collapsed
-          - if total_count.zero?
+          - if total_count == 0
             .no-value= s_('MilestoneSidebar|None')
           - else
             .font-weight-bold
@@ -164,6 +165,6 @@
         .cross-project-reference.hide-collapsed
           %span
             = s_('MilestoneSidebar|Reference:')
-            %cite{ title: milestone_ref }
+            %span{ title: milestone_ref }
               = milestone_ref
           = clipboard_button(text: milestone_ref, title: s_('MilestoneSidebar|Copy reference'), placement: "left", boundary: 'viewport')

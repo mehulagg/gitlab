@@ -2,8 +2,8 @@
 
 import $ from 'jquery';
 import Sortable from 'sortablejs';
-
-import flash from './flash';
+import { dispose } from '~/tooltips';
+import { deprecatedCreateFlash as flash } from './flash';
 import axios from './lib/utils/axios_utils';
 import { __ } from './locale';
 
@@ -29,7 +29,6 @@ export default class LabelManager {
   }
 
   bindEvents() {
-    this.prioritizedLabels.find('.btn-action').on('mousedown', this, this.onButtonActionClick);
     return this.togglePriorityButton.on('click', this, this.onTogglePriorityClick);
   }
 
@@ -40,14 +39,9 @@ export default class LabelManager {
     const $label = $(`#${$btn.data('domId')}`);
     const action = $btn.parents('.js-prioritized-labels').length ? 'remove' : 'add';
     const $tooltip = $(`#${$btn.find('.has-tooltip:visible').attr('aria-describedby')}`);
-    $tooltip.tooltip('dispose');
+    dispose($tooltip);
     _this.toggleLabelPriority($label, action);
     _this.toggleEmptyState($label, $btn, action);
-  }
-
-  onButtonActionClick(e) {
-    e.stopPropagation();
-    $(e.currentTarget).tooltip('hide');
   }
 
   toggleEmptyState() {
@@ -134,7 +128,7 @@ export default class LabelManager {
 
   getSortedLabelsIds() {
     const sortedIds = [];
-    this.prioritizedLabels.find('> li').each(function() {
+    this.prioritizedLabels.find('> li').each(function () {
       const id = $(this).data('id');
 
       if (id) {

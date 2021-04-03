@@ -1,7 +1,7 @@
-import Vuex from 'vuex';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 
-import { GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
 import DropdownTitle from '~/vue_shared/components/sidebar/labels_select_vue/dropdown_title.vue';
 
 import labelsSelectModule from '~/vue_shared/components/sidebar/labels_select_vue/store';
@@ -42,7 +42,7 @@ describe('DropdownTitle', () => {
     });
 
     it('renders edit link', () => {
-      const editBtnEl = wrapper.find(GlDeprecatedButton);
+      const editBtnEl = wrapper.find(GlButton);
 
       expect(editBtnEl.exists()).toBe(true);
       expect(editBtnEl.text()).toBe('Edit');

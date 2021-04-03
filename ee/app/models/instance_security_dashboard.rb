@@ -24,6 +24,7 @@ class InstanceSecurityDashboard
 
   def projects
     Project.where(id: visible_users_security_dashboard_projects)
+           .with_feature_available_for_user(:security_and_compliance, user)
   end
 
   def vulnerabilities
@@ -36,6 +37,12 @@ class InstanceSecurityDashboard
     return Vulnerabilities::Scanner.none if projects.empty?
 
     Vulnerabilities::Scanner.for_projects(projects)
+  end
+
+  def vulnerability_historical_statistics
+    return Vulnerabilities::Scanner.none if projects.empty?
+
+    Vulnerabilities::HistoricalStatistic.for_project(projects)
   end
 
   private

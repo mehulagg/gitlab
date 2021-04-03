@@ -9,12 +9,13 @@ module EE
       ERROR_MESSAGES = {
         write_to_group_wiki: "You are not allowed to write to this group's wiki.",
         group_not_found: 'The group you were looking for could not be found.',
-        no_group_repo: 'A repository for this group wiki does not exist yet.'
+        no_group_repo: 'A repository for this group wiki does not exist yet.',
+        repo_read_only: 'The repository is temporarily read-only. Please try again later.'
       }.freeze
 
-      override :project?
-      def project?
-        !group?
+      override :group
+      def group
+        container.group if container.is_a?(GroupWiki)
       end
 
       override :check_container!
@@ -26,9 +27,13 @@ module EE
 
       override :check_push_access!
       def check_push_access!
-        return check_change_access! if group?
+        return super unless group?
 
-        super
+        if group.repository_read_only?
+          raise ::Gitlab::GitAccess::ForbiddenError, ERROR_MESSAGES[:repo_read_only]
+        end
+
+        check_change_access!
       end
 
       override :write_to_wiki_message
@@ -52,15 +57,13 @@ module EE
       end
 
       def can_read_group?
-        if user
-          user.can?(:read_group, container)
-        else
-          Guest.can?(:read_group, container)
-        end
-      end
+        return true if geo?
 
-      def project_or_wiki
-        container.wiki
+        if user
+          user.can?(:read_group, group)
+        else
+          Guest.can?(:read_group, group)
+        end
       end
     end
   end

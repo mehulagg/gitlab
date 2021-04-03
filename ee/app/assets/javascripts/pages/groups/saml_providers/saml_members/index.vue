@@ -1,8 +1,8 @@
 <script>
-import { GlSkeletonLoading, GlTable, GlAvatar } from '@gitlab/ui';
-import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlTable, GlAvatar } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { __, s__ } from '~/locale';
+import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 
 export default {
   components: {

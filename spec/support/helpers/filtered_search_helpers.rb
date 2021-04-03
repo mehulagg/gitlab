@@ -13,7 +13,7 @@ module FilteredSearchHelpers
       search = "#{search_term} "
     end
 
-    filtered_search.set(search)
+    filtered_search.set(search, rapid: false)
 
     if submit
       # Wait for the lazy author/assignee tokens that
@@ -111,6 +111,10 @@ module FilteredSearchHelpers
 
   def assignee_token(assignee_name = nil)
     create_token('Assignee', assignee_name)
+  end
+
+  def reviewer_token(reviewer_name = nil)
+    create_token('Reviewer', reviewer_name)
   end
 
   def milestone_token(milestone_name = nil, has_symbol = true, operator = '=')

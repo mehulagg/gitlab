@@ -43,9 +43,12 @@ $subscriptions-full-width-lg: 541px;
       width: 400px;
     }
 
+    list-style-position: inside;
+    list-style-type: decimal;
+
     .phase {
       border-bottom: 5px solid $gray-100;
-      color: $gray-700;
+      color: $gray-500;
       flex-basis: 100%;
       font-size: $gl-font-size-12;
       line-height: $gl-line-height;
@@ -75,6 +78,14 @@ $subscriptions-full-width-lg: 541px;
 
     @media(min-width: map-get($grid-breakpoints, lg)) {
       width: $subscriptions-full-width-lg;
+    }
+
+    &.payment-method {
+      // Use literals here to avoid dark theme from changing the color
+      // stylelint-disable-next-line
+      background-color: #fff;
+      // stylelint-disable-next-line
+      color: #303030;
     }
   }
 
@@ -141,7 +152,9 @@ $subscriptions-full-width-lg: 541px;
     }
 
     iframe {
-      background-color: $white;
+      // Use literals here to avoid dark theme from changing the color
+      // stylelint-disable-next-line
+      background-color: #fff;
       margin: -4px;
       width: 100% !important;
     }
@@ -155,20 +168,26 @@ $subscriptions-full-width-lg: 541px;
     }
   }
 
-  .edit-group,
-  .edit-profile,
-  .new-project {
-    max-width: 400px;
+  @mixin default-widths {
+    max-width: 460px;
 
     .bar {
       width: 100%;
     }
+  }
+
+  .edit-group,
+  .edit-profile,
+  .new-project {
+    @include default-widths;
 
     .normal {
       font-weight: $gl-font-weight-normal;
     }
 
+    // stylelint-disable-next-line
     .field_with_errors {
+      @include gl-flex-grow-1;
       display: inline;
     }
 
@@ -185,5 +204,9 @@ $subscriptions-full-width-lg: 541px;
         }
       }
     }
+  }
+
+  .group-invites {
+    @include default-widths;
   }
 }

@@ -9,9 +9,12 @@
       = render 'admin/users/user_listing_note', user: user
 
       - user_badges_in_admin_section(user).each do |badge|
-        - css_badge = "badge badge-#{badge[:variant]}" if badge[:variant].present?
-        %span{ class: css_badge }
-          = badge[:text]
+        - css_badge = "badge gl-badge sm badge-pill badge-#{badge[:variant]}" if badge[:variant].present?
+        %span.px-1.py-1
+          %span{ class: css_badge }
+            = badge[:text]
 
       .row-second-line.str-truncated-100
         = mail_to user.email, user.email, class: 'text-secondary'
+        - unless Feature.disabled?(:security_auto_fix) || !user.internal? || user.website_url.blank?
+          = link_to "(#{_('more information')})", user.website_url

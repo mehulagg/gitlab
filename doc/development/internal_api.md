@@ -1,4 +1,11 @@
-# Internal API
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference, api
+---
+
+# Internal API **(FREE)**
 
 The internal API is used by different GitLab components, it can not be
 used by other consumers. This documentation is intended for people
@@ -18,21 +25,22 @@ To authenticate using that token, clients read the contents of that
 file, and include the token Base64 encoded in a `secret_token` parameter
 or in the `Gitlab-Shared-Secret` header.
 
-NOTE: **Note:**
-The internal API used by GitLab Pages uses a different kind of
-authentication.
+NOTE:
+The internal API used by GitLab Pages, and GitLab Kubernetes Agent Server (`kas`) uses JSON Web Token (JWT)
+authentication, which is different from GitLab Shell.
 
 ## Git Authentication
 
-This is called by Gitaly and GitLab-shell to check access to a
+This is called by [Gitaly](https://gitlab.com/gitlab-org/gitaly) and
+[GitLab Shell](https://gitlab.com/gitlab-org/gitlab-shell) to check access to a
 repository.
 
-When called from GitLab-shell no changes are passed and the internal
-API replies with the information needed to pass the request on to
-Gitaly.
+- **When called from GitLab Shell**: No changes are passed, and the internal
+  API replies with the information needed to pass the request on to Gitaly.
+- **When called from Gitaly in a `pre-receive` hook**: The changes are passed
+  and validated to determine if the push is allowed.
 
-When called from Gitaly in a `pre-receive` hook the changes are passed
-and those are validated to determine if the push is allowed.
+Calls are limited to 50 seconds each.
 
 ```plaintext
 POST /internal/allowed
@@ -40,19 +48,19 @@ POST /internal/allowed
 
 | Attribute | Type   | Required | Description |
 |:----------|:-------|:---------|:------------|
-| `key_id`  | string | no       | ID of the SSH-key used to connect to GitLab-shell |
-| `username` | string | no      | Username from the certificate used to connect to GitLab-Shell |
+| `key_id`  | string | no       | ID of the SSH-key used to connect to GitLab Shell |
+| `username` | string | no      | Username from the certificate used to connect to GitLab Shell |
 | `project`  | string | no (if `gl_repository` is passed) | Path to the project |
-| `gl_repository`  | string | no (if `project` is passed) | Repository identifier (e.g. `project-7`) |
-| `protocol` | string | yes     | SSH when called from GitLab-shell, HTTP or SSH when called from Gitaly |
+| `gl_repository`  | string | no (if `project` is passed) | Repository identifier, such as `project-7` |
+| `protocol` | string | yes     | SSH when called from GitLab Shell, HTTP or SSH when called from Gitaly |
 | `action`   | string | yes     | Git command being run (`git-upload-pack`, `git-receive-pack`, `git-upload-archive`) |
-| `changes`  | string | yes     | `<oldrev> <newrev> <refname>` when called from Gitaly, The magic string `_any` when called from GitLab Shell |
+| `changes`  | string | yes     | `<oldrev> <newrev> <refname>` when called from Gitaly, the magic string `_any` when called from GitLab Shell |
 | `check_ip` | string | no     | IP address from which call to GitLab Shell was made |
 
 Example request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded token>" --data "key_id=11&project=gnuwget/wget2&action=git-upload-pack&protocol=ssh" http://localhost:3001/api/v4/internal/allowed
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded token>" --data "key_id=11&project=gnuwget/wget2&action=git-upload-pack&protocol=ssh" "http://localhost:3001/api/v4/internal/allowed"
 ```
 
 Example response:
@@ -84,23 +92,23 @@ Example response:
 ### Known consumers
 
 - Gitaly
-- GitLab-shell
+- GitLab Shell
 
 ## LFS Authentication
 
-This is the endpoint that gets called from GitLab-shell to provide
+This is the endpoint that gets called from GitLab Shell to provide
 information for LFS clients when the repository is accessed over SSH.
 
 | Attribute | Type   | Required | Description |
 |:----------|:-------|:---------|:------------|
-| `key_id`  | string | no       | ID of the SSH-key used to connect to GitLab-shell |
-| `username`| string | no       | Username from the certificate used to connect to GitLab-Shell |
+| `key_id`  | string | no       | ID of the SSH-key used to connect to GitLab Shell |
+| `username`| string | no       | Username from the certificate used to connect to GitLab Shell |
 | `project` | string | no       | Path to the project |
 
 Example request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded token>" --data "key_id=11&project=gnuwget/wget2" http://localhost:3001/api/v4/internal/lfs_authenticate
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded token>" --data "key_id=11&project=gnuwget/wget2" "http://localhost:3001/api/v4/internal/lfs_authenticate"
 ```
 
 ```json
@@ -114,17 +122,17 @@ curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded token>" --da
 
 ### Known consumers
 
-- GitLab-shell
+- GitLab Shell
 
 ## Authorized Keys Check
 
-This endpoint is called by the GitLab-shell authorized keys
+This endpoint is called by the GitLab Shell authorized keys
 check. Which is called by OpenSSH for [fast SSH key
 lookup](../administration/operations/fast_ssh_key_lookup.md).
 
 | Attribute | Type   | Required | Description |
 |:----------|:-------|:---------|:------------|
-| `key`     | string | yes      | SSH key as passed by OpenSSH to GitLab-shell |
+| `key`     | string | yes      | SSH key as passed by OpenSSH to GitLab Shell |
 
 ```plaintext
 GET /internal/authorized_keys
@@ -133,7 +141,7 @@ GET /internal/authorized_keys
 Example request:
 
 ```shell
-curl --request GET --header "Gitlab-Shared-Secret: <Base64 encoded secret>""http://localhost:3001/api/v4/internal/authorized_keys?key=<key as passed by OpenSSH>"
+curl --request GET --header "Gitlab-Shared-Secret: <Base64 encoded secret>" "http://localhost:3001/api/v4/internal/authorized_keys?key=<key as passed by OpenSSH>"
 ```
 
 Example response:
@@ -149,7 +157,7 @@ Example response:
 
 ### Known consumers
 
-- GitLab-shell
+- GitLab Shell
 
 ## Get user for user ID or key
 
@@ -159,7 +167,7 @@ discovers the user associated with an SSH key.
 | Attribute | Type   | Required | Description |
 |:----------|:-------|:---------|:------------|
 | `key_id` | integer | no | The ID of the SSH key used as found in the authorized-keys file or through the `/authorized_keys` check |
-| `username` | string | no | Username of the user being looked up, used by GitLab-shell when authenticating using a certificate |
+| `username` | string | no | Username of the user being looked up, used by GitLab Shell when authenticating using a certificate |
 
 ```plaintext
 GET /internal/discover
@@ -183,12 +191,12 @@ Example response:
 
 ### Known consumers
 
-- GitLab-shell
+- GitLab Shell
 
 ## Instance information
 
 This gets some generic information about the instance. This is used
-by Geo nodes to get information about each other
+by Geo nodes to get information about each other.
 
 ```plaintext
 GET /internal/check
@@ -214,12 +222,13 @@ Example response:
 ### Known consumers
 
 - GitLab Geo
-- GitLab-shell's `bin/check`
+- GitLab Shell's `bin/check`
+- Gitaly
 
 ## Get new 2FA recovery codes using an SSH key
 
-This is called from GitLab-shell and allows users to get new 2FA
-recovery codes based on their SSH key
+This is called from GitLab Shell and allows users to get new 2FA
+recovery codes based on their SSH key.
 
 | Attribute | Type   | Required | Description |
 |:----------|:-------|:---------|:------------|
@@ -233,7 +242,7 @@ GET /internal/two_factor_recovery_codes
 Example request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "key_id=7" http://localhost:3001/api/v4/internal/two_factor_recovery_codes
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "key_id=7" "http://localhost:3001/api/v4/internal/two_factor_recovery_codes"
 ```
 
 Example response:
@@ -258,7 +267,45 @@ Example response:
 
 ### Known consumers
 
-- GitLab-shell
+- GitLab Shell
+
+## Get new personal access-token
+
+This is called from GitLab Shell and allows users to generate a new
+personal access token.
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `name` | string | yes | The name of the new token |
+| `scopes` | string array | yes | The authorization scopes for the new token, these must be valid token scopes |
+| `expires_at` | string | no | The expiry date for the new token |
+| `key_id`  | integer | no | The ID of the SSH key used as found in the authorized-keys file or through the `/authorized_keys` check |
+| `user_id` | integer | no | User\_id for which to generate the new token |
+
+```plaintext
+POST /internal/personal_access_token
+```
+
+Example request:
+
+```shell
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "user_id=29&name=mytokenname&scopes[]=read_user&scopes[]=read_repository&expires_at=2020-07-24" "http://localhost:3001/api/v4/internal/personal_access_token"
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "token": "Hf_79B288hRv_3-TSD1R",
+  "scopes": ["read_user","read_repository"],
+  "expires_at": "2020-07-24"
+}
+```
+
+### Known consumers
+
+- GitLab Shell
 
 ## Incrementing counter on pre-receive
 
@@ -276,7 +323,7 @@ POST /internal/pre_receive
 Example request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "gl_repository=project-7" http://localhost:3001/api/v4/internal/pre_receive
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "gl_repository=project-7" "http://localhost:3001/api/v4/internal/pre_receive"
 ```
 
 Example response:
@@ -308,7 +355,7 @@ POST /internal/post_receive
 Example Request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "gl_repository=project-7" --data "identifier=user-1" --data "changes=0000000000000000000000000000000000000000 fd9e76b9136bdd9fe217061b497745792fe5a5ee gh-pages\n"  http://localhost:3001/api/v4/internal/post_receive
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "gl_repository=project-7" --data "identifier=user-1" --data "changes=0000000000000000000000000000000000000000 fd9e76b9136bdd9fe217061b497745792fe5a5ee gh-pages\n" "http://localhost:3001/api/v4/internal/post_receive"
 ```
 
 Example response:
@@ -324,3 +371,249 @@ Example response:
   "reference_counter_decreased": true
 }
 ```
+
+## Kubernetes agent endpoints
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41045) in GitLab 13.4.
+> - This feature is not deployed on GitLab.com
+> - It's not recommended for production use.
+
+The following endpoints are used by the GitLab Kubernetes Agent Server (`kas`)
+for various purposes.
+
+These endpoints are all authenticated using JWT. The JWT secret is stored in a file
+specified in `config/gitlab.yml`. By default, the location is in the root of the
+GitLab Rails app in a file called `.gitlab_kas_secret`.
+
+WARNING:
+The Kubernetes agent is under development and is not recommended for production use.
+
+### Kubernetes agent information
+
+Called from GitLab Kubernetes Agent Server (`kas`) to retrieve agent
+information for the given agent token. This returns the Gitaly connection
+information for the agent's project in order for `kas` to fetch and update
+the agent's configuration.
+
+```plaintext
+GET /internal/kubernetes/agent_info
+```
+
+Example Request:
+
+```shell
+curl --request GET --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" "http://localhost:3000/api/v4/internal/kubernetes/agent_info"
+```
+
+### Kubernetes agent project information
+
+Called from GitLab Kubernetes Agent Server (`kas`) to retrieve project
+information for the given agent token. This returns the Gitaly
+connection for the requested project. GitLab `kas` uses this to configure
+the agent to fetch Kubernetes resources from the project repository to
+sync.
+
+Only public projects are supported. For private projects, the ability for the
+agent to be authorized is [not yet implemented](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](../api/README.md#namespaced-path-encoding) |
+
+```plaintext
+GET /internal/kubernetes/project_info
+```
+
+Example Request:
+
+```shell
+curl --request GET --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" "http://localhost:3000/api/v4/internal/kubernetes/project_info?id=7"
+```
+
+### Kubernetes agent usage metrics
+
+Called from GitLab Kubernetes Agent Server (`kas`) to increase the usage
+metric counters.
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `gitops_sync_count` | integer| yes | The number to increase the `gitops_sync_count` counter by |
+
+```plaintext
+POST /internal/kubernetes/usage_metrics
+```
+
+Example Request:
+
+```shell
+curl --request POST --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Content-Type: application/json" --data '{"gitops_sync_count":1}' "http://localhost:3000/api/v4/internal/kubernetes/usage_metrics"
+```
+
+### Kubernetes agent alert metrics
+
+Called from GitLab Kubernetes Agent Server (KAS) to save alerts derived from Cilium on Kubernetes
+Cluster.
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `alert` | Hash | yes | Alerts detail. Same format as [3rd party alert](../operations/incident_management/integrations.md#customize-the-alert-payload-outside-of-gitlab). |
+
+```plaintext
+POST internal/kubernetes/modules/cilium_alert
+```
+
+Example Request:
+
+```shell
+curl --request POST   --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" --header "Content-Type: application/json" --data '"{\"alert\":{\"title\":\"minimal\",\"message\":\"network problem\",\"evalMatches\":[{\"value\":1,\"metric\":\"Count\",\"tags\":{}}]}}"' "http://localhost:3000/api/v4/internal/kubernetes/modules/cilium_alert"
+```
+
+## Subscriptions
+
+The subscriptions endpoint is used by [CustomersDot](https://gitlab.com/gitlab-org/customers-gitlab-com) (`customers.gitlab.com`)
+in order to apply subscriptions including trials, and add-on purchases, for personal namespaces or top-level groups within GitLab.com.
+
+### Creating a subscription
+
+Use a POST to create a subscription.
+
+```plaintext
+POST /namespaces/:id/gitlab_subscription
+```
+
+| Attribute   | Type    | Required | Description |
+|:------------|:--------|:---------|:------------|
+| `start_date` | date   | yes      | Start date of subscription |
+| `end_date`  | date    | no       | End date of subscription |
+| `plan_code` | string  | no       | Subscription tier code |
+| `seats`     | integer | no       | Number of seats in subscription |
+| `max_seats_used` | integer | no  | Highest number of active users in the last month |
+| `auto_renew` | boolean | no      | Whether subscription auto-renews on end date |
+| `trial`     | boolean | no       | Whether subscription is a trial |
+| `trial_starts_on` | date | no    | Start date of trial |
+| `trial_ends_on` | date | no      | End date of trial |
+
+Example request:
+
+```shell
+curl --request POST --header "TOKEN: <admin_access_token>" "https://gitlab.com/api/v4/namespaces/1234/gitlab_subscription?start_date="2020-07-15"&plan="silver"&seats=10"
+```
+
+Example response:
+
+```json
+{
+  "plan": {
+    "code":"silver",
+    "name":"Silver",
+    "trial":false,
+    "auto_renew":null,
+    "upgradable":false
+  },
+  "usage": {
+    "seats_in_subscription":10,
+    "seats_in_use":1,
+    "max_seats_used":0,
+    "seats_owed":0
+  },
+  "billing": {
+    "subscription_start_date":"2020-07-15",
+    "subscription_end_date":null,
+    "trial_ends_on":null
+  }
+}
+```
+
+### Updating a subscription
+
+Use a PUT command to update an existing subscription.
+
+```plaintext
+PUT /namespaces/:id/gitlab_subscription
+```
+
+| Attribute   | Type    | Required | Description |
+|:------------|:--------|:---------|:------------|
+| `start_date` | date   | no       | Start date of subscription |
+| `end_date`  | date    | no       | End date of subscription |
+| `plan_code` | string  | no       | Subscription tier code |
+| `seats`     | integer | no       | Number of seats in subscription |
+| `max_seats_used` | integer | no  | Highest number of active users in the last month |
+| `auto_renew` | boolean | no      | Whether subscription auto-renews on end date |
+| `trial`     | boolean | no       | Whether subscription is a trial |
+| `trial_starts_on` | date | no    | Start date of trial. Required if trial is true. |
+| `trial_ends_on` | date | no      | End date of trial |
+
+Example request:
+
+```shell
+curl --request PUT --header "TOKEN: <admin_access_token>" "https://gitlab.com/api/v4/namespaces/1234/gitlab_subscription?max_seats_used=0"
+```
+
+Example response:
+
+```json
+{
+  "plan": {
+    "code":"silver",
+    "name":"Silver",
+    "trial":false,
+    "auto_renew":null,
+    "upgradable":false
+  },
+  "usage": {
+    "seats_in_subscription":80,
+    "seats_in_use":82,
+    "max_seats_used":0,
+    "seats_owed":2
+  },
+  "billing": {
+    "subscription_start_date":"2020-07-15",
+    "subscription_end_date":"2021-07-15",
+    "trial_ends_on":null
+  }
+}
+```
+
+### Retrieving a subscription
+
+Use a GET command to view an existing subscription.
+
+```plaintext
+GET /namespaces/:id/gitlab_subscription
+```
+
+Example request:
+
+```shell
+curl --header "TOKEN: <admin_access_token>" "https://gitlab.com/api/v4/namespaces/1234/gitlab_subscription"
+```
+
+Example response:
+
+```json
+{
+  "plan": {
+    "code":"silver",
+    "name":"Silver",
+    "trial":false,
+    "auto_renew":null,
+    "upgradable":false
+  },
+  "usage": {
+    "seats_in_subscription":80,
+    "seats_in_use":82,
+    "max_seats_used":82,
+    "seats_owed":2
+  },
+  "billing": {
+    "subscription_start_date":"2020-07-15",
+    "subscription_end_date":"2021-07-15",
+    "trial_ends_on":null
+  }
+}
+```
+
+### Known consumers
+
+- CustomersDot

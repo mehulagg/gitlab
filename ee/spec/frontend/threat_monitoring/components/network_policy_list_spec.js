@@ -1,13 +1,13 @@
+import { GlTable, GlToggle } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import createStore from 'ee/threat_monitoring/store';
 import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
-import { GlTable } from '@gitlab/ui';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-
-import { mockPoliciesResponse } from '../mock_data';
+import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
 import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
+import createStore from 'ee/threat_monitoring/store';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { mockPoliciesResponse } from '../mocks/mock_data';
 
-const mockData = mockPoliciesResponse.map(policy => convertObjectPropsToCamelCase(policy));
+const mockData = mockPoliciesResponse.map((policy) => convertObjectPropsToCamelCase(policy));
 
 describe('NetworkPolicyList component', () => {
   let store;
@@ -26,12 +26,13 @@ describe('NetworkPolicyList component', () => {
     wrapper = mount(NetworkPolicyList, {
       propsData: {
         documentationPath: 'documentation_path',
-        newPolicyPath: 'new_policy_path',
+        newPolicyPath: '/policies/new',
         ...propsData,
       },
       data,
       store,
       provide,
+      stubs: { NetworkPolicyEditor: true },
     });
   };
 
@@ -40,7 +41,7 @@ describe('NetworkPolicyList component', () => {
   const findTableEmptyState = () => wrapper.find({ ref: 'tableEmptyState' });
   const findEditorDrawer = () => wrapper.find({ ref: 'editorDrawer' });
   const findPolicyEditor = () => wrapper.find({ ref: 'policyEditor' });
-  const findPolicyToggle = () => wrapper.find('[data-testid="policyToggle"]');
+  const findPolicyToggle = () => wrapper.find(GlToggle);
   const findApplyButton = () => wrapper.find({ ref: 'applyButton' });
   const findCancelButton = () => wrapper.find({ ref: 'cancelButton' });
   const findAutodevopsAlert = () => wrapper.find('[data-testid="autodevopsAlert"]');
@@ -58,30 +59,77 @@ describe('NetworkPolicyList component', () => {
     expect(findEnvironmentsPicker().exists()).toBe(true);
   });
 
-  it('does not render the new policy button', () => {
+  it('renders the new policy button', () => {
     const button = wrapper.find('[data-testid="new-policy"]');
-    expect(button.exists()).toBe(false);
+    expect(button.exists()).toBe(true);
   });
 
-  describe('given the networkPolicyEditor feature flag is enabled', () => {
+  it('does not render the new policy drawer', () => {
+    expect(wrapper.find(PolicyDrawer).exists()).toBe(false);
+  });
+
+  it('fetches policies', () => {
+    expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', -1);
+  });
+
+  it('fetches policies on environment change', async () => {
+    store.dispatch.mockReset();
+    await store.commit('threatMonitoring/SET_CURRENT_ENVIRONMENT_ID', 2);
+
+    expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', 2);
+  });
+
+  it('does not render edit button', () => {
+    expect(wrapper.find('[data-testid="edit-button"]').exists()).toBe(false);
+  });
+
+  describe('given selected policy is a cilium policy', () => {
+    const manifest = `apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: policy
+spec:
+  endpointSelector: {}`;
+
     beforeEach(() => {
       factory({
-        provide: {
-          glFeatures: {
-            networkPolicyEditor: true,
-          },
+        data: () => ({ selectedPolicyName: 'policy' }),
+        state: {
+          policies: [
+            {
+              name: 'policy',
+              creationTimestamp: new Date(),
+              manifest,
+            },
+          ],
         },
       });
     });
 
-    it('renders the new policy button', () => {
-      const button = wrapper.find('[data-testid="new-policy"]');
+    it('renders the new policy drawer', () => {
+      expect(wrapper.find(PolicyDrawer).exists()).toBe(true);
+    });
+
+    it('renders edit button', () => {
+      const button = wrapper.find('[data-testid="edit-button"]');
       expect(button.exists()).toBe(true);
+      expect(button.attributes().href).toBe('/policies/policy/edit?environment_id=-1');
     });
   });
 
   it('renders policies table', () => {
     expect(findPoliciesTable().element).toMatchSnapshot();
+  });
+
+  describe('with allEnvironments enabled', () => {
+    beforeEach(() => {
+      wrapper.vm.$store.state.threatMonitoring.allEnvironments = true;
+    });
+
+    it('renders policies table', () => {
+      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(1);
+      expect(namespaceHeader.text()).toBe('Namespace');
+    });
   });
 
   it('renders closed editor drawer', () => {
@@ -91,9 +139,7 @@ describe('NetworkPolicyList component', () => {
   });
 
   it('renders opened editor drawer on row selection', () => {
-    findPoliciesTable()
-      .find('td')
-      .trigger('click');
+    findPoliciesTable().find('td').trigger('click');
 
     return wrapper.vm.$nextTick().then(() => {
       const editorDrawer = findEditorDrawer();
@@ -126,13 +172,16 @@ describe('NetworkPolicyList component', () => {
     it('renders network policy editor with manifest', () => {
       const policyEditor = findPolicyEditor();
       expect(policyEditor.exists()).toBe(true);
-      expect(policyEditor.props('value')).toBe(mockData[0].manifest);
+      expect(policyEditor.attributes('value')).toBe(mockData[0].manifest);
     });
 
     it('renders network policy toggle', () => {
       const policyToggle = findPolicyToggle();
       expect(policyToggle.exists()).toBe(true);
-      expect(policyToggle.props('value')).toBe(mockData[0].isEnabled);
+      expect(policyToggle.props()).toMatchObject({
+        label: NetworkPolicyList.i18n.enforcementStatus,
+        value: mockData[0].isEnabled,
+      });
     });
 
     it('renders disabled apply button', () => {

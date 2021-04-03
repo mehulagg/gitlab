@@ -1,17 +1,41 @@
 <script>
+import { GlButton } from '@gitlab/ui';
 import axios from 'axios';
-import RelatedIssuesStore from 'ee/related_issues/stores/related_issues_store';
-import RelatedIssuesBlock from 'ee/related_issues/components/related_issues_block.vue';
-import { issuableTypesMap, PathIdSeparator } from 'ee/related_issues/constants';
-import { sprintf, __ } from '~/locale';
-import { joinPaths } from '~/lib/utils/url_utility';
-import { RELATED_ISSUES_ERRORS } from '../constants';
 import createFlash from '~/flash';
+import { joinPaths, redirectTo } from '~/lib/utils/url_utility';
+import { sprintf, __, s__ } from '~/locale';
+import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
+import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
+import RelatedIssuesStore from '~/related_issues/stores/related_issues_store';
+import { RELATED_ISSUES_ERRORS } from '../constants';
 import { getFormattedIssue, getAddRelatedIssueRequestParams } from '../helpers';
 
 export default {
   name: 'VulnerabilityRelatedIssues',
-  components: { RelatedIssuesBlock },
+  components: {
+    RelatedIssuesBlock,
+    GlButton,
+  },
+  inject: {
+    vulnerabilityId: {
+      default: 0,
+    },
+    projectFingerprint: {
+      default: '',
+    },
+    newIssueUrl: {
+      default: '',
+    },
+    reportType: {
+      default: '',
+    },
+    issueTrackingHelpPath: {
+      default: '',
+    },
+    permissionsHelpPath: {
+      default: '',
+    },
+  },
   props: {
     endpoint: {
       type: String,
@@ -34,11 +58,14 @@ export default {
   },
   data() {
     this.store = new RelatedIssuesStore();
+
     return {
+      isProcessingAction: false,
       state: this.store.state,
       isFetching: false,
       isSubmitting: false,
       isFormVisible: false,
+      errorCreatingIssue: false,
       inputValue: '',
     };
   },
@@ -46,11 +73,21 @@ export default {
     vulnerabilityProjectId() {
       return this.projectPath.replace(/^\//, ''); // Remove the leading slash, i.e. '/root/test' -> 'root/test'.
     },
+    isIssueAlreadyCreated() {
+      return Boolean(this.state.relatedIssues.find((i) => i.lockIssueRemoval));
+    },
+    canCreateIssue() {
+      return !this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.newIssueUrl);
+    },
   },
   created() {
     this.fetchRelatedIssues();
   },
   methods: {
+    createIssue() {
+      this.isProcessingAction = true;
+      redirectTo(this.newIssueUrl, { params: { vulnerability_id: this.vulnerabilityId } });
+    },
     toggleFormVisibility() {
       this.isFormVisible = !this.isFormVisible;
     },
@@ -65,7 +102,9 @@ export default {
       const errors = [];
 
       // The endpoint can only accept one issue, so we need to do a separate call for each pending reference.
-      const requests = this.state.pendingReferences.map(reference => {
+      const requests = this.state.pendingReferences.map((reference) => {
+        // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+        // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
         return axios
           .post(
             this.endpoint,
@@ -95,34 +134,56 @@ export default {
         this.isFormVisible = hasErrors;
 
         if (hasErrors) {
-          const messages = errors.map(error => sprintf(RELATED_ISSUES_ERRORS.LINK_ERROR, error));
-          createFlash(messages.join(' '));
+          const messages = errors.map((error) => sprintf(RELATED_ISSUES_ERRORS.LINK_ERROR, error));
+          createFlash({
+            message: messages.join(' '),
+          });
         }
       });
     },
     removeRelatedIssue(idToRemove) {
       const issue = this.state.relatedIssues.find(({ id }) => id === idToRemove);
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .delete(joinPaths(this.endpoint, issue.vulnerabilityLinkId.toString()))
         .then(() => {
           this.store.removeRelatedIssue(issue);
         })
         .catch(() => {
-          createFlash(RELATED_ISSUES_ERRORS.UNLINK_ERROR);
+          createFlash({
+            message: RELATED_ISSUES_ERRORS.UNLINK_ERROR,
+          });
         });
     },
     fetchRelatedIssues() {
       this.isFetching = true;
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .get(this.endpoint)
         .then(({ data }) => {
           const issues = data.map(getFormattedIssue);
-          this.store.setRelatedIssues(issues);
+          this.store.setRelatedIssues(
+            issues.map((i) => {
+              const lockIssueRemoval = i.vulnerability_link_type === 'created';
+
+              return {
+                ...i,
+                lockIssueRemoval,
+                lockedMessage: lockIssueRemoval
+                  ? s__('SecurityReports|Issues created from a vulnerability cannot be removed.')
+                  : undefined,
+              };
+            }),
+          );
         })
         .catch(() => {
-          createFlash(__('An error occurred while fetching issues.'));
+          createFlash({
+            message: __('An error occurred while fetching issues.'),
+          });
         })
         .finally(() => {
           this.isFetching = false;
@@ -136,38 +197,62 @@ export default {
       this.store.removePendingRelatedIssue(indexToRemove);
     },
     processAllReferences(value = '') {
-      const rawReferences = value.split(/\s+/).filter(reference => reference.trim().length > 0);
+      const rawReferences = value.split(/\s+/).filter((reference) => reference.trim().length > 0);
       this.addPendingReferences({ untouchedRawReferences: rawReferences });
     },
   },
   autoCompleteSources: gl?.GfmAutoComplete?.dataSources,
   issuableType: issuableTypesMap.ISSUE,
   pathIdSeparator: PathIdSeparator.Issue,
+  i18n: {
+    relatedIssues: __('Related issues'),
+    createIssue: __('Create issue'),
+    createIssueErrorTitle: __('Could not create issue'),
+    createIssueErrorBody: s__(
+      'SecurityReports|Ensure that %{trackingStart}issue tracking%{trackingEnd} is enabled for this project and you have %{permissionsStart}permission to create new issues%{permissionsEnd}.',
+    ),
+  },
 };
 </script>
 
 <template>
-  <related-issues-block
-    :help-path="helpPath"
-    :is-fetching="isFetching"
-    :is-submitting="isSubmitting"
-    :related-issues="state.relatedIssues"
-    :can-admin="canModifyRelatedIssues"
-    :pending-references="state.pendingReferences"
-    :is-form-visible="isFormVisible"
-    :input-value="inputValue"
-    :auto-complete-sources="$options.autoCompleteSources"
-    :issuable-type="$options.issuableType"
-    :path-id-separator="$options.pathIdSeparator"
-    :show-categorized-issues="false"
-    @toggleAddRelatedIssuesForm="toggleFormVisibility"
-    @addIssuableFormInput="addPendingReferences"
-    @addIssuableFormBlur="processAllReferences"
-    @addIssuableFormSubmit="addRelatedIssue"
-    @addIssuableFormCancel="resetForm"
-    @pendingIssuableRemoveRequest="removePendingReference"
-    @relatedIssueRemoveRequest="removeRelatedIssue"
-  >
-    <template #headerText>{{ __('Related issues') }}</template>
-  </related-issues-block>
+  <div>
+    <related-issues-block
+      :help-path="helpPath"
+      :is-fetching="isFetching"
+      :is-submitting="isSubmitting"
+      :related-issues="state.relatedIssues"
+      :can-admin="canModifyRelatedIssues"
+      :pending-references="state.pendingReferences"
+      :is-form-visible="isFormVisible"
+      :input-value="inputValue"
+      :auto-complete-sources="$options.autoCompleteSources"
+      :issuable-type="$options.issuableType"
+      :path-id-separator="$options.pathIdSeparator"
+      :show-categorized-issues="false"
+      @toggleAddRelatedIssuesForm="toggleFormVisibility"
+      @addIssuableFormInput="addPendingReferences"
+      @addIssuableFormBlur="processAllReferences"
+      @addIssuableFormSubmit="addRelatedIssue"
+      @addIssuableFormCancel="resetForm"
+      @pendingIssuableRemoveRequest="removePendingReference"
+      @relatedIssueRemoveRequest="removeRelatedIssue"
+    >
+      <template #headerText>
+        {{ $options.i18n.relatedIssues }}
+      </template>
+      <template v-if="canCreateIssue" #header-actions>
+        <gl-button
+          ref="createIssue"
+          variant="success"
+          category="secondary"
+          data-qa-selector="create_issue_button"
+          :loading="isProcessingAction"
+          @click="createIssue"
+        >
+          {{ $options.i18n.createIssue }}
+        </gl-button>
+      </template>
+    </related-issues-block>
+  </div>
 </template>

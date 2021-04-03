@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import PageComponent from '~/pdf/page/index.vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
+import PageComponent from '~/pdf/page/index.vue';
 
 jest.mock('pdfjs-dist/webpack', () => {
   return { default: jest.requireActual('pdfjs-dist/build/pdf') };
@@ -14,7 +14,7 @@ describe('Page component', () => {
     vm.$destroy();
   });
 
-  it('renders the page when mounting', done => {
+  it('renders the page when mounting', (done) => {
     const promise = Promise.resolve();
     const testPage = {
       render: jest.fn().mockReturnValue({ promise: Promise.resolve() }),

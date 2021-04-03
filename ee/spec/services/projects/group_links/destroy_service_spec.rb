@@ -17,6 +17,7 @@ RSpec.describe Projects::GroupLinks::DestroyService do
         expect_any_instance_of(ProjectGroupLink)
           .to receive(:destroy).and_return(group_link)
       end
+
       let(:attributes) do
         {
            author_id: user.id,

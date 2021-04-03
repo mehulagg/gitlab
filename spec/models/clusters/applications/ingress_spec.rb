@@ -131,12 +131,12 @@ RSpec.describe Clusters::Applications::Ingress do
   describe '#install_command' do
     subject { ingress.install_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::InstallCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InstallCommand) }
 
     it 'is initialized with ingress arguments' do
       expect(subject.name).to eq('ingress')
-      expect(subject.chart).to eq('stable/nginx-ingress')
-      expect(subject.version).to eq('1.29.7')
+      expect(subject.chart).to eq('ingress/nginx-ingress')
+      expect(subject.version).to eq('1.40.2')
       expect(subject).to be_rbac
       expect(subject.files).to eq(ingress.files)
     end
@@ -153,7 +153,7 @@ RSpec.describe Clusters::Applications::Ingress do
       let(:ingress) { create(:clusters_applications_ingress, :errored, version: 'nginx') }
 
       it 'is initialized with the locked version' do
-        expect(subject.version).to eq('1.29.7')
+        expect(subject.version).to eq('1.40.2')
       end
     end
   end

@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-require 'rubocop'
-require 'rubocop/rspec/support'
+require 'fast_spec_helper'
 require_relative '../../../rubocop/cop/avoid_break_from_strong_memoize'
 
 RSpec.describe RuboCop::Cop::AvoidBreakFromStrongMemoize do
-  include CopHelper
-
   subject(:cop) { described_class.new }
 
   it 'flags violation for break inside strong_memoize' do
@@ -57,16 +53,16 @@ RSpec.describe RuboCop::Cop::AvoidBreakFromStrongMemoize do
       call do
         strong_memoize(:result) do
           break if something
-
+          ^^^^^ Do not use break inside strong_memoize, use next instead.
           do_an_heavy_calculation
         end
       end
     RUBY
-    expect_next_instance_of(described_class) do |instance|
+    expect_any_instance_of(described_class) do |instance|
       expect(instance).to receive(:add_offense).once
     end
 
-    inspect_source(source)
+    expect_offense(source)
   end
 
   it "doesn't check when block is empty" do

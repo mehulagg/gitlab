@@ -91,14 +91,7 @@
 
 body.modal-open {
   overflow: hidden;
-}
-
-.modal-no-backdrop {
-  @extend .modal-dialog;
-
-  .modal-content {
-    box-shadow: none;
-  }
+  padding-right: 0 !important;
 }
 
 .modal {
@@ -117,12 +110,6 @@ body.modal-open {
       border-bottom-right-radius: $modal-border-radius;
     }
   }
-
-  @include media-breakpoint-up(sm) {
-    .modal-dialog {
-      margin: 64px auto;
-    }
-  }
 }
 
 .recaptcha-modal .recaptcha-form {
@@ -134,23 +121,7 @@ body.modal-open {
 }
 
 .issues-import-modal,
-.issues-export-modal {
-  .modal-header {
-    justify-content: flex-start;
-
-    .import-export-svg-container {
-      flex-grow: 1;
-      height: 56px;
-      padding: $gl-btn-padding $gl-btn-padding 0;
-      text-align: right;
-
-      .illustration {
-        height: inherit;
-        width: initial;
-      }
-    }
-  }
-
+.issuable-export-modal {
   .modal-body {
     padding: 0;
 
@@ -165,9 +136,5 @@ body.modal-open {
       padding: $gl-padding-24 $gl-padding;
       min-height: $modal-body-height;
     }
-  }
-
-  .checkmark {
-    color: $green-400;
   }
 }

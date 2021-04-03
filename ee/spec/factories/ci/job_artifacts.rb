@@ -8,7 +8,17 @@ FactoryBot.define do
 
       after(:build) do |artifact, _|
         artifact.file = fixture_file_upload(
-          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-sast-report.json'), 'application/json')
+          Rails.root.join('spec/fixtures/security_reports/master/gl-sast-report.json'), 'application/json')
+      end
+    end
+
+    trait :with_exceeding_identifiers do
+      file_type { :sast }
+      file_format { :raw }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-sast-report-with-exceeding-identifiers.json'), 'application/json')
       end
     end
 
@@ -18,7 +28,7 @@ FactoryBot.define do
 
       after(:build) do |artifact, _|
         artifact.file = fixture_file_upload(
-          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-secret-detection-report.json'), 'application/json')
+          Rails.root.join('spec/fixtures/security_reports/master/gl-secret-detection-report.json'), 'application/json')
       end
     end
 
@@ -301,6 +311,26 @@ FactoryBot.define do
       end
     end
 
+    trait :common_security_report do
+      file_format { :raw }
+      file_type { :dependency_scanning }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-common-scanning-report.json'), 'application/json')
+      end
+    end
+
+    trait :common_security_report_with_blank_names do
+      file_format { :raw }
+      file_type { :dependency_scanning }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-common-scanning-report-names.json'), 'application/json')
+      end
+    end
+
     trait :container_scanning_feature_branch do
       file_format { :raw }
       file_type { :container_scanning }
@@ -400,6 +430,17 @@ FactoryBot.define do
       after(:build) do |artifact, _|
         artifact.file = fixture_file_upload(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-coverage-fuzzing-report.json'),
+          'application/json')
+      end
+    end
+
+    trait :api_fuzzing do
+      file_format { :raw }
+      file_type { :api_fuzzing }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-api-fuzzing-report.json'),
           'application/json')
       end
     end

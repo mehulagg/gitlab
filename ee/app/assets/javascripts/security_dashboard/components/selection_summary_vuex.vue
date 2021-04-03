@@ -1,7 +1,7 @@
 <script>
-import { __, n__ } from '~/locale';
+import { GlButton, GlFormSelect } from '@gitlab/ui';
 import { mapActions, mapGetters } from 'vuex';
-import { GlDeprecatedButton, GlFormSelect } from '@gitlab/ui';
+import { __, n__ } from '~/locale';
 
 const REASON_NONE = __('[No reason]');
 const REASON_WONT_FIX = __("Won't fix / Accept risk");
@@ -10,12 +10,14 @@ const REASON_FALSE_POSITIVE = __('False positive');
 export default {
   name: 'SelectionSummary',
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlFormSelect,
   },
-  data: () => ({
-    dismissalReason: null,
-  }),
+  data() {
+    return {
+      dismissalReason: null,
+    };
+  },
   computed: {
     ...mapGetters('vulnerabilities', ['selectedVulnerabilitiesCount']),
     canDismissVulnerability() {
@@ -55,15 +57,20 @@ export default {
 <template>
   <div class="card">
     <form class="card-body d-flex align-items-center" @submit.prevent="handleDismiss">
-      <span>{{ message }}</span>
+      <span data-testid="dismiss-message">{{ message }}</span>
       <gl-form-select
         v-model="dismissalReason"
         class="mx-3 w-auto"
         :options="$options.dismissalReasons"
       />
-      <gl-deprecated-button type="submit" variant="close" :disabled="!canDismissVulnerability">{{
-        __('Dismiss Selected')
-      }}</gl-deprecated-button>
+      <gl-button
+        type="submit"
+        category="secondary"
+        variant="warning"
+        :disabled="!canDismissVulnerability"
+      >
+        {{ __('Dismiss selected') }}
+      </gl-button>
     </form>
   </div>
 </template>

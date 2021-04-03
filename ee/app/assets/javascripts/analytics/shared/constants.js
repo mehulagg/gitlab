@@ -1,6 +1,10 @@
+import { masks } from 'dateformat';
+
+const { isoDate, mediumDate } = masks;
+
 export const dateFormats = {
-  isoDate: 'yyyy-mm-dd',
-  defaultDate: 'mmm d, yyyy',
+  isoDate,
+  defaultDate: mediumDate,
   defaultDateTime: 'mmm d, yyyy h:MMtt',
 };
 
@@ -13,8 +17,6 @@ export const scatterChartLineProps = {
     zlevel: 3,
   },
 };
-
-export const LAST_ACTIVITY_AT = 'last_activity_at';
 
 export const DATE_RANGE_LIMIT = 180;
 

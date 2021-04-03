@@ -1,10 +1,36 @@
-query getIncidents($projectPath: ID!, $labelNames: [String], $state: IssuableState) {
+#import "ee_else_ce/incidents/graphql/fragments/incident_fields.fragment.graphql"
+
+query getIncidents(
+  $projectPath: ID!
+  $issueTypes: [IssueType!]
+  $sort: IssueSort
+  $status: IssuableState
+  $firstPageSize: Int
+  $lastPageSize: Int
+  $prevPageCursor: String = ""
+  $nextPageCursor: String = ""
+  $searchTerm: String = ""
+  $authorUsername: String = ""
+  $assigneeUsername: String = ""
+) {
   project(fullPath: $projectPath) {
-    issues(state: $state, labelName: $labelNames) {
+    issues(
+      search: $searchTerm
+      types: $issueTypes
+      sort: $sort
+      state: $status
+      authorUsername: $authorUsername
+      assigneeUsername: $assigneeUsername
+      first: $firstPageSize
+      last: $lastPageSize
+      after: $nextPageCursor
+      before: $prevPageCursor
+    ) {
       nodes {
         iid
         title
         createdAt
+        state
         labels {
           nodes {
             title
@@ -19,6 +45,13 @@ query getIncidents($projectPath: ID!, $labelNames: [String], $state: IssuableSta
             webUrl
           }
         }
+        ...IncidentFields
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+        hasPreviousPage
+        startCursor
       }
     }
   }

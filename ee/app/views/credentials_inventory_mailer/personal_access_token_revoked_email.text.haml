@@ -1,0 +1,12 @@
+= _("The following Personal Access Token was revoked by an administrator, %{username}.") % { username: @revoked_by.username }
+
+= @token.name
+
+= _("Created on %{created_at}") % { created_at: @token.created_at.to_date.to_s(:medium) }
+
+- if @token.last_used_at
+  = _("Last used %{last_used_at} ago") % { last_used_at: time_ago_in_words(@token.last_used_at) }
+
+= _("Scopes: %{scope_list}") % { scope_list: @token.scopes.join(', ') }
+
+= html_escape(_("You can create a new Personal Access Token by visiting %{link}")) % { link: profile_personal_access_tokens_url.html_safe }

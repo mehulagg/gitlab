@@ -1,0 +1,17 @@
+mutation projectIssueIterationMutation($fullPath: ID!, $iid: String!, $iterationId: ID) {
+  issuableSetIteration: issueSetIteration(
+    input: { projectPath: $fullPath, iid: $iid, iterationId: $iterationId }
+  ) {
+    __typename
+    errors
+    issuable: issue {
+      __typename
+      id
+      iteration {
+        title
+        id
+        state
+      }
+    }
+  }
+}

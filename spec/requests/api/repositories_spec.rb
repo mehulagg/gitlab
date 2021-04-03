@@ -402,7 +402,9 @@ RSpec.describe API::Repositories do
       end
 
       it "returns an empty string when the diff overflows" do
-        stub_const('Gitlab::Git::DiffCollection::DEFAULT_LIMITS', { max_files: 2, max_lines: 2 })
+        allow(Gitlab::Git::DiffCollection)
+          .to receive(:default_limits)
+          .and_return({ max_files: 2, max_lines: 2 })
 
         get api(route, current_user), params: { from: 'master', to: 'feature' }
 
@@ -606,6 +608,121 @@ RSpec.describe API::Repositories do
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['message']).to eq('Provide at least 2 refs')
       end
+    end
+  end
+
+  describe 'POST /projects/:id/repository/changelog' do
+    it 'generates the changelog for a version' do
+      spy = instance_spy(Repositories::ChangelogService)
+
+      allow(Repositories::ChangelogService)
+        .to receive(:new)
+        .with(
+          project,
+          user,
+          version: '1.0.0',
+          from: 'foo',
+          to: 'bar',
+          date: DateTime.new(2020, 1, 1),
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        )
+        .and_return(spy)
+
+      allow(spy).to receive(:execute)
+
+      post(
+        api("/projects/#{project.id}/repository/changelog", user),
+        params: {
+          version: '1.0.0',
+          from: 'foo',
+          to: 'bar',
+          date: '2020-01-01',
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+    end
+
+    it 'supports leaving out the from and to attribute' do
+      spy = instance_spy(Repositories::ChangelogService)
+
+      allow(Repositories::ChangelogService)
+        .to receive(:new)
+        .with(
+          project,
+          user,
+          version: '1.0.0',
+          date: DateTime.new(2020, 1, 1),
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        )
+        .and_return(spy)
+
+      expect(spy).to receive(:execute)
+
+      post(
+        api("/projects/#{project.id}/repository/changelog", user),
+        params: {
+          version: '1.0.0',
+          date: '2020-01-01',
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+    end
+
+    it 'produces an error when generating the changelog fails' do
+      spy = instance_spy(Repositories::ChangelogService)
+
+      allow(Repositories::ChangelogService)
+        .to receive(:new)
+        .with(
+          project,
+          user,
+          version: '1.0.0',
+          from: 'foo',
+          to: 'bar',
+          date: DateTime.new(2020, 1, 1),
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        )
+        .and_return(spy)
+
+      allow(spy)
+        .to receive(:execute)
+        .and_raise(Gitlab::Changelog::Error.new('oops'))
+
+      post(
+        api("/projects/#{project.id}/repository/changelog", user),
+        params: {
+          version: '1.0.0',
+          from: 'foo',
+          to: 'bar',
+          date: '2020-01-01',
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        }
+      )
+
+      expect(response).to have_gitlab_http_status(:unprocessable_entity)
+      expect(json_response['message']).to eq('Failed to generate the changelog: oops')
     end
   end
 end

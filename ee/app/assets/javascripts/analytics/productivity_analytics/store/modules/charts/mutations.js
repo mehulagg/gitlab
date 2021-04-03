@@ -1,5 +1,5 @@
-import * as types from './mutation_types';
 import { chartKeys } from '../../../constants';
+import * as types from './mutation_types';
 
 export default {
   [types.RESET_CHART_DATA](state, chartKey) {

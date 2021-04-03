@@ -23,4 +23,26 @@ RSpec.describe Analytics::CycleAnalytics::GroupValueStream, type: :model do
       expect(value_stream.errors.messages).to eq(name: [I18n.t('errors.messages.taken')])
     end
   end
+
+  describe 'ordering of stages' do
+    let(:group) { create(:group) }
+    let(:value_stream) do
+      create(:cycle_analytics_group_value_stream, group: group, stages: [
+        create(:cycle_analytics_group_stage, group: group, name: "stage 1", relative_position: 5),
+        create(:cycle_analytics_group_stage, group: group, name: "stage 2", relative_position: nil),
+        create(:cycle_analytics_group_stage, group: group, name: "stage 3", relative_position: 1)
+      ])
+    end
+
+    before do
+      value_stream.reload
+    end
+
+    describe 'stages attribute' do
+      it 'sorts stages by relative position' do
+        names = value_stream.stages.map(&:name)
+        expect(names).to eq(['stage 3', 'stage 1', 'stage 2'])
+      end
+    end
+  end
 end

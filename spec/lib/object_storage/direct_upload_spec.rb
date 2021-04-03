@@ -18,13 +18,25 @@ RSpec.describe ObjectStorage::DirectUpload do
     }
   end
 
+  let(:storage_options) { {} }
+  let(:raw_config) do
+    {
+      enabled: true,
+      connection: credentials,
+      remote_directory: bucket_name,
+      storage_options: storage_options,
+      consolidated_settings: consolidated_settings
+    }
+  end
+
+  let(:config) { ObjectStorage::Config.new(raw_config) }
   let(:storage_url) { 'https://uploads.s3.amazonaws.com/' }
 
   let(:bucket_name) { 'uploads' }
   let(:object_name) { 'tmp/uploads/my-file' }
   let(:maximum_size) { 1.gigabyte }
 
-  let(:direct_upload) { described_class.new(credentials, bucket_name, object_name, has_length: has_length, maximum_size: maximum_size, consolidated_settings: consolidated_settings) }
+  let(:direct_upload) { described_class.new(config, object_name, has_length: has_length, maximum_size: maximum_size) }
 
   before do
     Fog.unmock!
@@ -62,7 +74,7 @@ RSpec.describe ObjectStorage::DirectUpload do
   end
 
   describe '#get_url' do
-    subject { described_class.new(credentials, bucket_name, object_name, has_length: true) }
+    subject { described_class.new(config, object_name, has_length: true) }
 
     context 'when AWS is used' do
       it 'calls the proper method' do
@@ -93,7 +105,7 @@ RSpec.describe ObjectStorage::DirectUpload do
     end
   end
 
-  describe '#to_hash' do
+  describe '#to_hash', :aggregate_failures do
     subject { direct_upload.to_hash }
 
     shared_examples 'a valid S3 upload' do
@@ -111,6 +123,7 @@ RSpec.describe ObjectStorage::DirectUpload do
         expect(s3_config[:Region]).to eq(region)
         expect(s3_config[:PathStyle]).to eq(path_style)
         expect(s3_config[:UseIamProfile]).to eq(use_iam_profile)
+        expect(s3_config.keys).not_to include(%i(ServerSideEncryption SSEKMSKeyID))
       end
 
       context 'when feature flag is disabled' do
@@ -150,6 +163,33 @@ RSpec.describe ObjectStorage::DirectUpload do
           expect(subject[:UseWorkhorseClient]).to be true
         end
       end
+
+      context 'when only server side encryption is used' do
+        let(:storage_options) { { server_side_encryption: 'AES256' } }
+
+        it 'sends server side encryption settings' do
+          s3_config = subject[:ObjectStorage][:S3Config]
+
+          expect(s3_config[:ServerSideEncryption]).to eq('AES256')
+          expect(s3_config.keys).not_to include(:SSEKMSKeyID)
+        end
+      end
+
+      context 'when SSE-KMS is used' do
+        let(:storage_options) do
+          {
+            server_side_encryption: 'AES256',
+            server_side_encryption_kms_key_id: 'arn:aws:12345'
+          }
+        end
+
+        it 'sends server side encryption settings' do
+          s3_config = subject[:ObjectStorage][:S3Config]
+
+          expect(s3_config[:ServerSideEncryption]).to eq('AES256')
+          expect(s3_config[:SSEKMSKeyID]).to eq('arn:aws:12345')
+        end
+      end
     end
 
     shared_examples 'a valid Google upload' do
@@ -157,6 +197,21 @@ RSpec.describe ObjectStorage::DirectUpload do
 
       it 'does not set Workhorse client data' do
         expect(subject.keys).not_to include(:UseWorkhorseClient, :RemoteTempObjectID, :ObjectStorage)
+      end
+    end
+
+    shared_examples 'a valid AzureRM upload' do
+      before do
+        require 'fog/azurerm'
+      end
+
+      it_behaves_like 'a valid upload'
+
+      it 'enables the Workhorse client' do
+        expect(subject[:UseWorkhorseClient]).to be true
+        expect(subject[:RemoteTempObjectID]).to eq(object_name)
+        expect(subject[:ObjectStorage][:Provider]).to eq('AzureRM')
+        expect(subject[:ObjectStorage][:GoCloudConfig]).to eq({ URL: gocloud_url })
       end
     end
 
@@ -168,6 +223,17 @@ RSpec.describe ObjectStorage::DirectUpload do
         expect(subject[:DeleteURL]).to start_with(storage_url)
         expect(subject[:CustomPutHeaders]).to be_truthy
         expect(subject[:PutHeaders]).to eq({})
+      end
+
+      context 'with an object with UTF-8 characters' do
+        let(:object_name) { 'tmp/uploads/テスト' }
+
+        it 'returns an escaped path' do
+          expect(subject[:GetURL]).to start_with(storage_url)
+
+          uri = Addressable::URI.parse(subject[:GetURL])
+          expect(uri.path).to include("tmp/uploads/#{CGI.escape("テスト")}")
+        end
       end
     end
 
@@ -237,6 +303,7 @@ RSpec.describe ObjectStorage::DirectUpload do
 
         context 'when IAM profile is true' do
           let(:use_iam_profile) { true }
+          let(:iam_credentials_v2_url) { "http://169.254.169.254/latest/api/token" }
           let(:iam_credentials_url) { "http://169.254.169.254/latest/meta-data/iam/security-credentials/" }
           let(:iam_credentials) do
             {
@@ -248,6 +315,9 @@ RSpec.describe ObjectStorage::DirectUpload do
           end
 
           before do
+            # If IMDSv2 is disabled, we should still fall back to IMDSv1
+            stub_request(:put, iam_credentials_v2_url)
+              .to_return(status: 404)
             stub_request(:get, iam_credentials_url)
               .to_return(status: 200, body: "somerole", headers: {})
             stub_request(:get, "#{iam_credentials_url}somerole")
@@ -255,6 +325,21 @@ RSpec.describe ObjectStorage::DirectUpload do
           end
 
           it_behaves_like 'a valid S3 upload without multipart data'
+
+          context 'when IMSDv2 is available' do
+            let(:iam_token) { 'mytoken' }
+
+            before do
+              stub_request(:put, iam_credentials_v2_url)
+                .to_return(status: 200, body: iam_token)
+              stub_request(:get, iam_credentials_url).with(headers: { "X-aws-ec2-metadata-token" => iam_token })
+                .to_return(status: 200, body: "somerole", headers: {})
+              stub_request(:get, "#{iam_credentials_url}somerole").with(headers: { "X-aws-ec2-metadata-token" => iam_token })
+                .to_return(status: 200, body: iam_credentials.to_json, headers: {})
+            end
+
+            it_behaves_like 'a valid S3 upload without multipart data'
+          end
         end
       end
 
@@ -264,6 +349,30 @@ RSpec.describe ObjectStorage::DirectUpload do
         it_behaves_like 'a valid S3 upload with multipart data' do
           before do
             stub_object_storage_multipart_init(storage_url, "myUpload")
+          end
+
+          context 'when maximum upload size is 0' do
+            let(:maximum_size) { 0 }
+
+            it 'returns maximum number of parts' do
+              expect(subject[:MultipartUpload][:PartURLs].length).to eq(100)
+            end
+
+            it 'part size is minimum, 5MB' do
+              expect(subject[:MultipartUpload][:PartSize]).to eq(5.megabyte)
+            end
+          end
+
+          context 'when maximum upload size is < 5 MB' do
+            let(:maximum_size) { 1024 }
+
+            it 'returns only 1 part' do
+              expect(subject[:MultipartUpload][:PartURLs].length).to eq(1)
+            end
+
+            it 'part size is minimum, 5MB' do
+              expect(subject[:MultipartUpload][:PartSize]).to eq(5.megabyte)
+            end
           end
 
           context 'when maximum upload size is 10MB' do
@@ -328,6 +437,36 @@ RSpec.describe ObjectStorage::DirectUpload do
 
         it_behaves_like 'a valid Google upload'
         it_behaves_like 'a valid upload without multipart data'
+      end
+    end
+
+    context 'when AzureRM is used' do
+      let(:credentials) do
+        {
+          provider: 'AzureRM',
+          azure_storage_account_name: 'azuretest',
+          azure_storage_access_key: 'ABCD1234'
+        }
+      end
+
+      let(:has_length) { false }
+      let(:storage_domain) { nil }
+      let(:storage_url) { 'https://azuretest.blob.core.windows.net' }
+      let(:gocloud_url) { "azblob://#{bucket_name}" }
+
+      it_behaves_like 'a valid AzureRM upload'
+      it_behaves_like 'a valid upload without multipart data'
+
+      context 'when a custom storage domain is used' do
+        let(:storage_domain) { 'blob.core.chinacloudapi.cn' }
+        let(:storage_url) { "https://azuretest.#{storage_domain}" }
+        let(:gocloud_url) { "azblob://#{bucket_name}?domain=#{storage_domain}" }
+
+        before do
+          credentials[:azure_storage_domain] = storage_domain
+        end
+
+        it_behaves_like 'a valid AzureRM upload'
       end
     end
   end

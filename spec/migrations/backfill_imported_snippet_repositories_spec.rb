@@ -6,7 +6,7 @@ require Rails.root.join('db', 'post_migrate', '20200608072931_backfill_imported_
 RSpec.describe BackfillImportedSnippetRepositories do
   let(:users) { table(:users) }
   let(:snippets) { table(:snippets) }
-  let(:user) { users.create(id: 1, email: 'user@example.com', projects_limit: 10, username: 'test', name: 'Test', state: 'active') }
+  let(:user) { users.create!(id: 1, email: 'user@example.com', projects_limit: 10, username: 'test', name: 'Test', state: 'active') }
 
   def create_snippet(id)
     params = {
@@ -30,7 +30,7 @@ RSpec.describe BackfillImportedSnippetRepositories do
     create_snippet(10)
 
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(described_class::MIGRATION)

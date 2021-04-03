@@ -38,7 +38,7 @@ export default {
 
 <template>
   <div class="mt-2 detail-section-item">
-    <div class="gl-text-gray-700 node-detail-title">{{ s__('GeoNodes|Replication status') }}</div>
+    <div class="gl-text-gray-500 node-detail-title">{{ s__('GeoNodes|Replication status') }}</div>
     <div class="gl-display-flex gl-align-items-center">
       <div
         :class="replicationStatusCssClass"
@@ -53,11 +53,7 @@ export default {
         name="question"
         class="gl-text-blue-600 gl-ml-2 gl-cursor-pointer"
       />
-      <gl-popover
-        :target="() => $refs.replicationStatusHelp.$el"
-        placement="top"
-        triggers="hover focus"
-      >
+      <gl-popover :target="() => $refs.replicationStatusHelp.$el" placement="top">
         <p>{{ __('Geo nodes are paused using a command run on the node') }}</p>
         <gl-link
           class="gl-mt-5 gl-font-sm"

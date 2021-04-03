@@ -21,7 +21,7 @@ class Gitlab::Seeder::Packages
           .gsub('1.0.1', version))
         .with_indifferent_access
 
-      ::Packages::Npm::CreatePackageService.new(project, project.owner, params).execute
+      ::Packages::Npm::CreatePackageService.new(project, project.creator, params).execute
 
       print '.'
     end
@@ -38,7 +38,7 @@ class Gitlab::Seeder::Packages
         path: "#{name}/#{version}"
       }
 
-      pkg = ::Packages::Maven::CreatePackageService.new(project, project.owner, params).execute
+      pkg = ::Packages::Maven::CreatePackageService.new(project, project.creator, params).execute
 
       %w(maven-metadata.xml my-app-1.0-20180724.124855-1.pom my-app-1.0-20180724.124855-1.jar).each do |filename|
         with_cloned_fixture_file('maven', filename) do |filepath|
@@ -68,7 +68,7 @@ class Gitlab::Seeder::Packages
         package_channel: 'stable'
       }
 
-      pkg = ::Packages::Conan::CreatePackageService.new(project, project.owner, params).execute
+      pkg = ::Packages::Conan::CreatePackageService.new(project, project.creator, params).execute
 
       fixtures = {
         'recipe_files' => %w(conanfile.py conanmanifest.txt),
@@ -103,8 +103,10 @@ class Gitlab::Seeder::Packages
       name = "MyNugetApp.Package#{i}"
       version = "4.2.#{i}"
 
-      pkg = ::Packages::Nuget::CreatePackageService.new(project, project.owner, {}).execute
-      # when using ::Packages::Nuget::CreatePackageService, packages have a fixed name and a fixed version.
+      pkg = ::Packages::CreateTemporaryPackageService.new(
+        project, project.creator, {}
+      ).execute(:nuget, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME)
+      # when using ::Packages::CreateTemporaryPackageService, packages have a fixed name and a fixed version.
       pkg.update!(name: name, version: version)
 
       filename = 'package.nupkg'

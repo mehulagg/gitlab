@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlTooltipDirective, GlButton, GlFormInput, GlLink, GlLoadingIcon } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -25,7 +25,7 @@ export default {
     },
     suggestedColors() {
       const colorsMap = gon.suggested_label_colors;
-      return Object.keys(colorsMap).map(color => ({ [color]: colorsMap[color] }));
+      return Object.keys(colorsMap).map((color) => ({ [color]: colorsMap[color] }));
     },
   },
   methods: {
@@ -105,13 +105,13 @@ export default {
         :disabled="disableCreate"
         category="primary"
         variant="success"
-        class="pull-left d-flex align-items-center"
+        class="float-left d-flex align-items-center"
         @click="handleCreateClick"
       >
         <gl-loading-icon v-show="labelCreateInProgress" :inline="true" class="mr-1" />
         {{ __('Create') }}
       </gl-button>
-      <gl-button class="pull-right js-btn-cancel-create" @click="toggleDropdownContentsCreateView">
+      <gl-button class="float-right js-btn-cancel-create" @click="toggleDropdownContentsCreateView">
         {{ __('Cancel') }}
       </gl-button>
     </div>

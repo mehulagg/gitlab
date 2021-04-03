@@ -1,0 +1,9 @@
+mutation moveTestCase($moveTestCaseInput: IssueMoveInput!) {
+  issueMove(input: $moveTestCaseInput) {
+    errors
+    clientMutationId
+    issue {
+      webUrl
+    }
+  }
+}

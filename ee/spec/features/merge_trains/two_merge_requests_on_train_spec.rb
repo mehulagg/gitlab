@@ -32,7 +32,7 @@ RSpec.describe 'Two merge requests on a merge train' do
     project.add_maintainer(maintainer_1)
     project.add_maintainer(maintainer_2)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
     stub_ci_pipeline_yaml_file(YAML.dump(ci_yaml))
 
     head_pipeline = double('Ci::Pipeline')
@@ -50,7 +50,7 @@ RSpec.describe 'Two merge requests on a merge train' do
   end
 
   it 'creates a pipeline for merge request 1', :sidekiq_might_not_need_inline do
-    expect(merge_request_1.merge_train.pipeline).to be_merge_request_pipeline
+    expect(merge_request_1.merge_train.pipeline).to be_merged_result_pipeline
     expect(merge_request_1.merge_train.pipeline.user).to eq(maintainer_1)
     expect(merge_request_1.merge_train.pipeline.ref).to eq(merge_request_1.train_ref_path)
     expect(merge_request_1.merge_train.pipeline.target_sha)
@@ -58,7 +58,7 @@ RSpec.describe 'Two merge requests on a merge train' do
   end
 
   it 'creates a pipeline for merge request 2', :sidekiq_might_not_need_inline do
-    expect(merge_request_2.merge_train.pipeline).to be_merge_request_pipeline
+    expect(merge_request_2.merge_train.pipeline).to be_merged_result_pipeline
     expect(merge_request_2.merge_train.pipeline.user).to eq(maintainer_2)
     expect(merge_request_2.merge_train.pipeline.ref).to eq(merge_request_2.train_ref_path)
     expect(merge_request_2.merge_train.pipeline.target_sha)

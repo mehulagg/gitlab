@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::ReferenceExtractor do
-  let(:group)   { create(:group) }
-  let(:project) { create(:project, group: group) }
+  let_it_be(:group)   { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
 
   before do
     group.add_developer(project.creator)
@@ -24,5 +24,23 @@ RSpec.describe Gitlab::ReferenceExtractor do
     subject.analyze(text, { group: group })
 
     expect(subject.epics).to match_array([@e0, @e1])
+  end
+
+  context 'for vulnerabilities' do
+    let_it_be(:vulnerability_0) { create(:vulnerability, project: project) }
+    let_it_be(:vulnerability_1) { create(:vulnerability, project: project) }
+    let_it_be(:vulnerability_2) { create(:vulnerability, project: create(:project, :private)) }
+
+    let(:text) { "#{vulnerability_0.to_reference(project, full: true)}, [vulnerability:#{non_existing_record_id}], #{vulnerability_1.to_reference(project, full: true)}, #{vulnerability_2.to_reference(project, full: true)}" }
+
+    before do
+      stub_licensed_features(security_dashboard: true)
+    end
+
+    it 'accesses valid vulnerabilities' do
+      subject.analyze(text, { project: project })
+
+      expect(subject.vulnerabilities).to match_array([vulnerability_0, vulnerability_1])
+    end
   end
 end

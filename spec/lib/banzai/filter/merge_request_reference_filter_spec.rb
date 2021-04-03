@@ -216,10 +216,11 @@ RSpec.describe Banzai::Filter::MergeRequestReferenceFilter do
   end
 
   context 'URL reference for a commit' do
-    let(:mr) { create(:merge_request, :with_diffs) }
+    let(:mr) { create(:merge_request) }
     let(:reference) do
       urls.project_merge_request_url(mr.project, mr) + "/diffs?commit_id=#{mr.diff_head_sha}"
     end
+
     let(:commit) { mr.commits.find { |commit| commit.sha == mr.diff_head_sha } }
 
     it 'links to a valid reference' do

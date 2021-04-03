@@ -198,7 +198,7 @@ RSpec.describe StatusPage::ProjectSetting do
     context 'when status page settings is enabled' do
       let(:status_page_setting_enabled) { true }
 
-      it { is_expected.to be_instance_of(StatusPage::Storage::S3Client) }
+      it { is_expected.to be_instance_of(Gitlab::StatusPage::Storage::S3Client) }
     end
 
     context 'when not enabled' do

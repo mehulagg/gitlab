@@ -1,36 +1,40 @@
 <script>
-import { mapState } from 'vuex';
-import { pickBy } from 'lodash';
-import invalidUrl from '~/lib/utils/invalid_url';
-import { relativePathToAbsolute, getBaseURL, visitUrl, isSafeURL } from '~/lib/utils/url_utility';
 import {
   GlResizeObserverDirective,
   GlIcon,
+  GlLink,
   GlLoadingIcon,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
-  GlNewDropdownDivider as GlDropdownDivider,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownDivider,
   GlModal,
   GlModalDirective,
+  GlSprintf,
   GlTooltip,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { mapValues, pickBy } from 'lodash';
+import { mapState } from 'vuex';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
+import { convertToFixedRange } from '~/lib/utils/datetime_range';
+import invalidUrl from '~/lib/utils/invalid_url';
+import { relativePathToAbsolute, getBaseURL, visitUrl, isSafeURL } from '~/lib/utils/url_utility';
 import { __, n__ } from '~/locale';
+import TrackEventDirective from '~/vue_shared/directives/track_event';
 import { panelTypes } from '../constants';
 
-import MonitorEmptyChart from './charts/empty_chart.vue';
-import MonitorTimeSeriesChart from './charts/time_series.vue';
-import MonitorAnomalyChart from './charts/anomaly.vue';
-import MonitorSingleStatChart from './charts/single_stat.vue';
-import MonitorHeatmapChart from './charts/heatmap.vue';
-import MonitorColumnChart from './charts/column.vue';
-import MonitorBarChart from './charts/bar.vue';
-import MonitorStackedColumnChart from './charts/stacked_column.vue';
-
-import TrackEventDirective from '~/vue_shared/directives/track_event';
-import AlertWidget from './alert_widget.vue';
-import { timeRangeToUrl, downloadCSVOptions, generateLinkToChartOptions } from '../utils';
 import { graphDataToCsv } from '../csv_export';
+import { timeRangeToUrl, downloadCSVOptions, generateLinkToChartOptions } from '../utils';
+import AlertWidget from './alert_widget.vue';
+import MonitorAnomalyChart from './charts/anomaly.vue';
+import MonitorBarChart from './charts/bar.vue';
+import MonitorColumnChart from './charts/column.vue';
+import MonitorEmptyChart from './charts/empty_chart.vue';
+import MonitorGaugeChart from './charts/gauge.vue';
+import MonitorHeatmapChart from './charts/heatmap.vue';
+import MonitorSingleStatChart from './charts/single_stat.vue';
+import MonitorStackedColumnChart from './charts/stacked_column.vue';
+import MonitorTimeSeriesChart from './charts/time_series.vue';
 
 const events = {
   timeRangeZoom: 'timerangezoom',
@@ -42,12 +46,14 @@ export default {
     MonitorEmptyChart,
     AlertWidget,
     GlIcon,
+    GlLink,
     GlLoadingIcon,
     GlTooltip,
     GlDropdown,
     GlDropdownItem,
     GlDropdownDivider,
     GlModal,
+    GlSprintf,
   },
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
@@ -129,6 +135,15 @@ export default {
         return getters[`${this.namespace}/selectedDashboard`];
       },
     }),
+    fixedCurrentTimeRange() {
+      // convertToFixedRange throws an error if the time range
+      // is not properly set.
+      try {
+        return convertToFixedRange(this.timeRange);
+      } catch {
+        return {};
+      }
+    },
     title() {
       return this.graphData?.title || '';
     },
@@ -169,6 +184,9 @@ export default {
     basicChartComponent() {
       if (this.isPanelType(panelTypes.SINGLE_STAT)) {
         return MonitorSingleStatChart;
+      }
+      if (this.isPanelType(panelTypes.GAUGE_CHART)) {
+        return MonitorGaugeChart;
       }
       if (this.isPanelType(panelTypes.HEATMAP)) {
         return MonitorHeatmapChart;
@@ -215,7 +233,8 @@ export default {
       return (
         this.isPanelType(panelTypes.AREA_CHART) ||
         this.isPanelType(panelTypes.LINE_CHART) ||
-        this.isPanelType(panelTypes.SINGLE_STAT)
+        this.isPanelType(panelTypes.SINGLE_STAT) ||
+        this.isPanelType(panelTypes.GAUGE_CHART)
       );
     },
     editCustomMetricLink() {
@@ -252,8 +271,8 @@ export default {
   methods: {
     getGraphAlerts(queries) {
       if (!this.allAlerts) return {};
-      const metricIdsForChart = queries.map(q => q.metricId);
-      return pickBy(this.allAlerts, alert => metricIdsForChart.includes(alert.metricId));
+      const metricIdsForChart = queries.map((q) => q.metricId);
+      return pickBy(this.allAlerts, (alert) => metricIdsForChart.includes(alert.metricId));
     },
     getGraphAlertValues(queries) {
       return Object.values(this.getGraphAlerts(queries));
@@ -299,7 +318,7 @@ export default {
       return isSafeURL(url) ? url : '#';
     },
     showAlertModal() {
-      this.$root.$emit('bv::show::modal', this.alertModalId);
+      this.$root.$emit(BV_SHOW_MODAL, this.alertModalId);
     },
     showAlertModalFromKeyboardShortcut() {
       if (this.isContextualMenuShown) {
@@ -326,6 +345,19 @@ export default {
         this.$refs.copyChartLink.$el.firstChild.click();
       }
     },
+    getAlertRunbooks(queries) {
+      const hasRunbook = (alert) => Boolean(alert.runbookUrl);
+      const graphAlertsWithRunbooks = pickBy(this.getGraphAlerts(queries), hasRunbook);
+      const alertToRunbookTransform = (alert) => {
+        const alertQuery = queries.find((query) => query.metricId === alert.metricId);
+        return {
+          key: alert.metricId,
+          href: alert.runbookUrl,
+          label: alertQuery.label,
+        };
+      };
+      return mapValues(graphAlertsWithRunbooks, alertToRunbookTransform);
+    },
   },
   panelTypes,
 };
@@ -333,7 +365,7 @@ export default {
 <template>
   <div v-gl-resize-observer="onResize" class="prometheus-graph">
     <div class="d-flex align-items-center">
-      <slot name="topLeft"></slot>
+      <slot name="top-left"></slot>
       <h5
         ref="graphTitle"
         class="prometheus-graph-title gl-font-lg font-weight-bold text-truncate gl-mr-3"
@@ -362,15 +394,21 @@ export default {
         data-qa-selector="prometheus_graph_widgets"
       >
         <div data-testid="dropdown-wrapper" class="d-flex align-items-center">
+          <!--
+            This component should be replaced with a variant developed
+            as part of https://gitlab.com/gitlab-org/gitlab-ui/-/issues/936
+            The variant will create a dropdown with an icon, no text and no caret
+           -->
           <gl-dropdown
             v-gl-tooltip
-            toggle-class="shadow-none border-0"
+            toggle-class="gl-px-3!"
+            no-caret
             data-qa-selector="prometheus_widgets_dropdown"
             right
             :title="__('More actions')"
           >
-            <template slot="button-content">
-              <gl-icon name="ellipsis_v" class="dropdown-icon text-secondary" />
+            <template #button-content>
+              <gl-icon class="gl-mr-0!" name="ellipsis_v" />
             </template>
             <gl-dropdown-item
               v-if="expandBtnAvailable"
@@ -421,6 +459,25 @@ export default {
             >
               {{ __('Alerts') }}
             </gl-dropdown-item>
+            <gl-dropdown-item
+              v-for="runbook in getAlertRunbooks(graphData.metrics)"
+              :key="runbook.key"
+              :href="safeUrl(runbook.href)"
+              data-testid="runbookLink"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
+                <span>
+                  <gl-sprintf :message="s__('Metrics|View runbook - %{label}')">
+                    <template #label>
+                      {{ runbook.label }}
+                    </template>
+                  </gl-sprintf>
+                </span>
+                <gl-icon name="external-link" />
+              </span>
+            </gl-dropdown-item>
 
             <template v-if="graphData.links && graphData.links.length">
               <gl-dropdown-divider />
@@ -463,6 +520,7 @@ export default {
       :thresholds="getGraphAlertValues(graphData.metrics)"
       :group-id="groupId"
       :timezone="dashboardTimezone"
+      :time-range="fixedCurrentTimeRange"
       v-bind="$attrs"
       v-on="$listeners"
       @datazoom="onDatazoom"

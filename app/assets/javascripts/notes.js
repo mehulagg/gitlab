@@ -10,25 +10,22 @@ class-methods-use-this */
 old_notes_spec.js is the spec for the legacy, jQuery notes application. It has nothing to do with the new, fancy Vue notes app.
  */
 
-import $ from 'jquery';
-import { escape, uniqueId } from 'lodash';
-import Cookies from 'js-cookie';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import Autosize from 'autosize';
-import 'jquery.caret'; // required by at.js
-import '@gitlab/at.js';
+import $ from 'jquery';
+import Cookies from 'js-cookie';
+import { escape, uniqueId } from 'lodash';
 import Vue from 'vue';
-import { GlSkeletonLoading } from '@gitlab/ui';
+import '~/lib/utils/jquery_at_who';
 import AjaxCache from '~/lib/utils/ajax_cache';
 import syntaxHighlight from '~/syntax_highlight';
-import axios from './lib/utils/axios_utils';
-import { getLocationHash } from './lib/utils/url_utility';
-import Flash from './flash';
-import { defaultAutocompleteConfig } from './gfm_auto_complete';
-import CommentTypeToggle from './comment_type_toggle';
-import GLForm from './gl_form';
-import loadAwardsHandler from './awards_handler';
 import Autosave from './autosave';
-import TaskList from './task_list';
+import loadAwardsHandler from './awards_handler';
+import CommentTypeToggle from './comment_type_toggle';
+import createFlash from './flash';
+import { defaultAutocompleteConfig } from './gfm_auto_complete';
+import GLForm from './gl_form';
+import axios from './lib/utils/axios_utils';
 import {
   isInViewport,
   getPagePath,
@@ -37,7 +34,9 @@ import {
   isInMRPage,
 } from './lib/utils/common_utils';
 import { localTimeAgo } from './lib/utils/datetime_utility';
+import { getLocationHash } from './lib/utils/url_utility';
 import { sprintf, s__, __ } from './locale';
+import TaskList from './task_list';
 
 window.autosize = Autosize;
 
@@ -109,10 +108,7 @@ export default class Notes {
 
     // We are in the Merge Requests page so we need another edit form for Changes tab
     if (getPagePath(1) === 'merge_requests') {
-      $('.note-edit-form')
-        .clone()
-        .addClass('mr-note-edit-form')
-        .insertAfter('.note-edit-form');
+      $('.note-edit-form').clone().addClass('mr-note-edit-form').insertAfter('.note-edit-form');
     }
 
     const hash = getLocationHash();
@@ -188,6 +184,7 @@ export default class Notes {
     this.$wrapperEl.off('click', '.js-discussion-reply-button');
     this.$wrapperEl.off('click', '.js-add-diff-note-button');
     this.$wrapperEl.off('click', '.js-add-image-diff-note-button');
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.$wrapperEl.off('visibilitychange');
     this.$wrapperEl.off('keyup input', '.js-note-text');
     this.$wrapperEl.off('click', '.js-note-target-reopen');
@@ -348,7 +345,7 @@ export default class Notes {
         votesBlock = $('.js-awards-block').eq(0);
 
         loadAwardsHandler()
-          .then(awardsHandler => {
+          .then((awardsHandler) => {
             awardsHandler.addAwardToEmojiBar(votesBlock, noteEntity.commands_changes.emoji_award);
             awardsHandler.scrollToAwards();
           })
@@ -402,7 +399,11 @@ export default class Notes {
         if (noteEntity.commands_changes && Object.keys(noteEntity.commands_changes).length > 0) {
           $notesList.find('.system-note.being-posted').remove();
         }
-        this.addFlash(noteEntity.errors.commands_only, 'notice', this.parentTimeline.get(0));
+        this.addFlash({
+          message: noteEntity.errors.commands_only,
+          type: 'notice',
+          parent: this.parentTimeline.get(0),
+        });
         this.refresh();
       }
       return;
@@ -427,12 +428,7 @@ export default class Notes {
     } else if (Notes.isUpdatedNote(noteEntity, $note)) {
       // The server can send the same update multiple times so we need to make sure to only update once per actual update.
       const isEditing = $note.hasClass('is-editing');
-      const initialContent = normalizeNewlines(
-        $note
-          .find('.original-note-content')
-          .text()
-          .trim(),
-      );
+      const initialContent = normalizeNewlines($note.find('.original-note-content').text().trim());
       const $textarea = $note.find('.js-note-text');
       const currentContent = $textarea.val();
       // There can be CRLF vs LF mismatches if we don't sanitize and compare the same way
@@ -480,11 +476,6 @@ export default class Notes {
       row = form;
     }
 
-    const lineType = this.isParallelView() ? form.find('#line_type').val() : 'old';
-    const diffAvatarContainer = row
-      .prevAll('.line_holder')
-      .first()
-      .find(`.js-avatar-container.${lineType}_line`);
     // is this the first note of discussion?
     discussionContainer = $(`.notes[data-discussion-id="${noteEntity.discussion_id}"]`);
     if (!discussionContainer.length) {
@@ -520,12 +511,6 @@ export default class Notes {
       Notes.animateAppendNote(noteEntity.html, discussionContainer);
     }
 
-    if (typeof gl.diffNotesCompileComponents !== 'undefined' && noteEntity.discussion_resolvable) {
-      gl.diffNotesCompileComponents();
-
-      this.renderDiscussionAvatar(diffAvatarContainer, noteEntity);
-    }
-
     localTimeAgo($('.js-timeago'), false);
     Notes.checkMergeRequestStatus();
     return this.updateNotesCount(1);
@@ -537,19 +522,6 @@ export default class Notes {
       .prevAll('.line_holder')
       .first()
       .get(0);
-  }
-
-  renderDiscussionAvatar(diffAvatarContainer, noteEntity) {
-    let avatarHolder = diffAvatarContainer.find('.diff-comment-avatar-holders');
-
-    if (!avatarHolder.length) {
-      avatarHolder = document.createElement('diff-note-avatars');
-      avatarHolder.setAttribute('discussion-id', noteEntity.discussion_id);
-
-      diffAvatarContainer.append(avatarHolder);
-
-      gl.diffNotesCompileComponents();
-    }
   }
 
   /**
@@ -565,14 +537,8 @@ export default class Notes {
     form.find('.js-errors').remove();
     // reset text and preview
     form.find('.js-md-write-button').click();
-    form
-      .find('.js-note-text')
-      .val('')
-      .trigger('input');
-    form
-      .find('.js-note-text')
-      .data('autosave')
-      .reset();
+    form.find('.js-note-text').val('').trigger('input');
+    form.find('.js-note-text').data('autosave').reset();
 
     const event = document.createEvent('Event');
     event.initEvent('autosize:update', true, false);
@@ -606,10 +572,6 @@ export default class Notes {
     form.find('#note_type').val('');
     form.find('#note_project_id').remove();
     form.find('#in_reply_to_discussion_id').remove();
-    form
-      .find('.js-comment-resolve-button')
-      .closest('comment-and-resolve-btn')
-      .remove();
     this.parentTimeline = form.parents('.timeline');
 
     if (form.length) {
@@ -662,20 +624,21 @@ export default class Notes {
     } else if ($form.hasClass('js-discussion-note-form')) {
       formParentTimeline = $form.closest('.discussion-notes').find('.notes');
     }
-    return this.addFlash(
-      __(
+    return this.addFlash({
+      message: __(
         'Your comment could not be submitted! Please check your network connection and try again.',
       ),
-      'alert',
-      formParentTimeline.get(0),
-    );
+      type: 'alert',
+      parent: formParentTimeline.get(0),
+    });
   }
 
   updateNoteError() {
-    // eslint-disable-next-line no-new
-    new Flash(
-      __('Your comment could not be updated! Please check your network connection and try again.'),
-    );
+    createFlash({
+      message: __(
+        'Your comment could not be updated! Please check your network connection and try again.',
+      ),
+    });
   }
 
   /**
@@ -715,17 +678,10 @@ export default class Notes {
 
     $note_li.replaceWith($noteEntityEl);
     this.setupNewNote($noteEntityEl);
-
-    if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-      gl.diffNotesCompileComponents();
-    }
   }
 
   checkContentToAllowEditing($el) {
-    const initialContent = $el
-      .find('.original-note-content')
-      .text()
-      .trim();
+    const initialContent = $el.find('.original-note-content').text().trim();
     const currentContent = $el.find('.js-note-text').val();
     let isAllowed = true;
 
@@ -845,12 +801,6 @@ export default class Notes {
       const $notes = $note.closest('.discussion-notes');
       const discussionId = $('.notes', $notes).data('discussionId');
 
-      if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-        if (gl.diffNoteApps[noteElId]) {
-          gl.diffNoteApps[noteElId].$destroy();
-        }
-      }
-
       $note.remove();
 
       // check if this is the last note for this line
@@ -915,10 +865,7 @@ export default class Notes {
     const form = this.cleanForm(this.formClone.clone());
     const replyLink = $(target).closest('.js-discussion-reply-button');
     // insert the form after the button
-    replyLink
-      .closest('.discussion-reply-holder')
-      .hide()
-      .after(form);
+    replyLink.closest('.discussion-reply-holder').hide().after(form);
     // show the form
     return this.setupDiscussionNoteForm(replyLink, form);
   }
@@ -962,30 +909,12 @@ export default class Notes {
     // DiffNote
     form.find('#note_position').val(dataHolder.attr('data-position'));
 
-    form
-      .prepend(
-        `<a href="${escape(
-          gon.current_username,
-        )}" class="user-avatar-link d-none d-sm-block"><img class="avatar s40" src="${encodeURI(
-          gon.current_user_avatar_url || gon.default_avatar_url,
-        )}" alt="${escape(gon.current_user_fullname)}" /></a>`,
-      )
-      .append('</div>')
-      .find('.js-close-discussion-note-form')
-      .show()
-      .removeClass('hide');
+    form.append('</div>').find('.js-close-discussion-note-form').show().removeClass('hide');
     form.find('.js-note-target-close').remove();
     form.find('.js-note-new-discussion').remove();
     this.setupNoteForm(form);
 
     form.removeClass('js-main-target-form').addClass('discussion-form js-discussion-note-form');
-
-    if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-      const $commentBtn = form.find('comment-and-resolve-btn');
-      $commentBtn.attr(':discussion-id', `'${discussionID}'`);
-
-      gl.diffNotesCompileComponents();
-    }
 
     form.find('.js-note-text').focus();
     form.find('.js-comment-resolve-button').attr('data-discussion-id', discussionID);
@@ -1114,10 +1043,7 @@ export default class Notes {
     const row = form.closest('tr');
     const glForm = form.data('glForm');
     glForm.destroy();
-    form
-      .find('.js-note-text')
-      .data('autosave')
-      .reset();
+    form.find('.js-note-text').data('autosave').reset();
     // show the reply button (will only work for replies)
     form.prev('.discussion-reply-holder').show();
     if (row.is('.js-temp-notes-holder')) {
@@ -1226,16 +1152,10 @@ export default class Notes {
 
     this.glForm = new GLForm($editForm.find('form'), this.enableGFM);
 
-    $editForm
-      .find('form')
-      .attr('action', `${postUrl}?html=true`)
-      .attr('data-remote', 'true');
+    $editForm.find('form').attr('action', `${postUrl}?html=true`).attr('data-remote', 'true');
     $editForm.find('.js-form-target-id').val(targetId);
     $editForm.find('.js-form-target-type').val(targetType);
-    $editForm
-      .find('.js-note-text')
-      .focus()
-      .val(originalContent);
+    $editForm.find('.js-note-text').focus().val(originalContent);
     $editForm.find('.js-md-write-button').trigger('click');
     $editForm.find('.referenced-users').hide();
   }
@@ -1351,9 +1271,7 @@ export default class Notes {
    * intrusive.
    */
   collapseLongCommitList() {
-    const systemNotes = $('#notes-list')
-      .find('li.system-note')
-      .has('ul');
+    const systemNotes = $('#notes-list').find('li.system-note').has('ul');
 
     $.each(systemNotes, (index, systemNote) => {
       const $systemNote = $(systemNote);
@@ -1376,7 +1294,7 @@ export default class Notes {
   }
 
   addFlash(...flashParams) {
-    this.flashContainer = new Flash(...flashParams);
+    this.flashContainer = createFlash(...flashParams);
   }
 
   clearFlash() {
@@ -1410,11 +1328,7 @@ export default class Notes {
     // There can be CRLF vs LF mismatches if we don't sanitize and compare the same way
     const sanitizedNoteEntityText = normalizeNewlines(noteEntity.note.trim());
     const currentNoteText = normalizeNewlines(
-      $note
-        .find('.original-note-content')
-        .first()
-        .text()
-        .trim(),
+      $note.find('.original-note-content').first().text().trim(),
     );
     return sanitizedNoteEntityText !== currentNoteText;
   }
@@ -1476,7 +1390,7 @@ export default class Notes {
     let tempFormContent;
 
     // Identify executed quick actions from `formContent`
-    const executedCommands = availableQuickActions.filter(command => {
+    const executedCommands = availableQuickActions.filter((command) => {
       const commandRegex = new RegExp(`/${command.name}`);
       return commandRegex.test(formContent);
     });
@@ -1590,10 +1504,7 @@ export default class Notes {
     let $form = $submitBtn.parents('form');
     const $closeBtn = $form.find('.js-note-target-close');
     const isDiscussionNote =
-      $submitBtn
-        .parent()
-        .find('li.droplab-item-selected')
-        .attr('id') === 'discussion';
+      $submitBtn.parent().find('li.droplab-item-selected').attr('id') === 'discussion';
     const isMainForm = $form.hasClass('js-main-target-form');
     const isDiscussionForm = $form.hasClass('js-discussion-note-form');
     const isDiscussionResolve = $submitBtn.hasClass('js-comment-resolve-button');
@@ -1666,7 +1577,7 @@ export default class Notes {
     // Make request to submit comment on server
     return axios
       .post(`${formAction}?html=true`, formData)
-      .then(res => {
+      .then((res) => {
         const note = res.data;
 
         $submitBtn.prop('disabled', false);

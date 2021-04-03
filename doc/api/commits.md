@@ -1,4 +1,13 @@
-# Commits API
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference, api
+---
+
+# Commits API **(FREE)**
+
+This API operates on [repository commits](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository). Read more about [GitLab-specific information](../user/project/repository/index.md#commits) for commits.
 
 ## List repository commits
 
@@ -12,11 +21,11 @@ GET /projects/:id/repository/commits
 | --------- | ---- | -------- | ----------- |
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
 | `ref_name` | string | no | The name of a repository branch, tag or revision range, or if not given the default branch |
-| `since` | string | no | Only commits after or on this date will be returned in ISO 8601 format YYYY-MM-DDTHH:MM:SSZ |
-| `until` | string | no | Only commits before or on this date will be returned in ISO 8601 format YYYY-MM-DDTHH:MM:SSZ |
+| `since` | string | no | Only commits after or on this date are returned in ISO 8601 format `YYYY-MM-DDTHH:MM:SSZ` |
+| `until` | string | no | Only commits before or on this date are returned in ISO 8601 format `YYYY-MM-DDTHH:MM:SSZ` |
 | `path` | string | no | The file path |
 | `all` | boolean | no | Retrieve every commit from the repository |
-| `with_stats` | boolean | no | Stats about each commit will be added to the response |
+| `with_stats` | boolean | no | Stats about each commit are added to the response |
 | `first_parent` | boolean | no | Follow only the first parent commit upon seeing a merge commit |
 | `order` | string | no | List commits in order. Possible values: `default`, [`topo`](https://git-scm.com/docs/git-log#Documentation/git-log.txt---topo-order). Defaults to `default`, the commits are shown in reverse chronological order. |
 
@@ -92,9 +101,9 @@ POST /projects/:id/repository/commits
 | `action` | string | yes | The action to perform, `create`, `delete`, `move`, `update`, `chmod`|
 | `file_path` | string | yes | Full path to the file. Ex. `lib/class.rb` |
 | `previous_path` | string | no | Original full path to the file being moved. Ex. `lib/class1.rb`. Only considered for `move` action. |
-| `content` | string | no | File content, required for all except `delete`, `chmod`, and `move`. Move actions that do not specify `content` will preserve the existing file content, and any other value of `content` will overwrite the file content. |
+| `content` | string | no | File content, required for all except `delete`, `chmod`, and `move`. Move actions that do not specify `content` preserve the existing file content, and any other value of `content` overwrites the file content. |
 | `encoding` | string | no | `text` or `base64`. `text` is default. |
-| `last_commit_id` | string | no | Last known file commit ID. Will be only considered in update, move, and delete actions. |
+| `last_commit_id` | string | no | Last known file commit ID. Only considered in update, move, and delete actions. |
 | `execute_filemode` | boolean | no | When `true/false` enables/disables the execute flag on the file. Only considered for `chmod` action. |
 
 ```shell
@@ -292,9 +301,10 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `sha` | string | yes | The commit hash  |
 | `branch` | string | yes | The name of the branch  |
+| `dry_run` | boolean | no | Does not commit any changes. Default is false. [Introduced in GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/231032) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/master/cherry_pick"
@@ -323,7 +333,7 @@ Example response:
 }
 ```
 
-In the event of a failed cherry-pick, the response will provide context about
+In the event of a failed cherry-pick, the response provides context about
 why:
 
 ```json
@@ -337,6 +347,19 @@ In this case, the cherry-pick failed because the changeset was empty and likely
 indicates that the commit already exists in the target branch. The other
 possible error code is `conflict`, which indicates that there was a merge
 conflict.
+
+When `dry_run` is enabled, the server attempts to apply the cherry-pick _but
+not actually commit any resulting changes_. If the cherry-pick applies cleanly,
+the API responds with `200 OK`:
+
+```json
+{
+  "dry_run": "success"
+}
+```
+
+In the event of a failure, an error displays that is identical to a failure without
+dry run.
 
 ## Revert a commit
 
@@ -355,6 +378,7 @@ Parameters:
 | `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `sha`     | string         | yes      | Commit SHA to revert                                                            |
 | `branch`  | string         | yes      | Target branch name                                                              |
+| `dry_run` | boolean        | no       | Does not commit any changes. Default is false. [Introduced in GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/231032) |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/a738f717824ff53aebad8b090c1b79a14f2bd9e8/revert"
@@ -380,7 +404,7 @@ Example response:
 }
 ```
 
-In the event of a failed revert, the response will provide context about why:
+In the event of a failed revert, the response provides context about why:
 
 ```json
 {
@@ -392,6 +416,19 @@ In the event of a failed revert, the response will provide context about why:
 In this case, the revert failed because the attempted revert generated a merge
 conflict. The other possible error code is `empty`, which indicates that the
 changeset was empty, likely due to the change having already been reverted.
+
+When `dry_run` is enabled, the server attempts to apply the revert _but not
+actually commit any resulting changes_. If the revert applies cleanly, the API
+responds with `200 OK`:
+
+```json
+{
+  "dry_run": "success"
+}
+```
+
+In the event of a failure, an error displays that is identical to a failure without
+dry run.
 
 ## Get the diff of a commit
 
@@ -474,7 +511,7 @@ In order to post a comment in a particular line of a particular file, you must
 specify the full commit SHA, the `path`, the `line` and `line_type` should be
 `new`.
 
-The comment will be added at the end of the last commit if at least one of the
+The comment is added at the end of the last commit if at least one of the
 cases below is valid:
 
 - the `sha` is instead a branch or a tag and the `line` or `path` are invalid
@@ -579,7 +616,7 @@ Example response:
 
 ## Commit status
 
-Since GitLab 8.1, this is the new commit status API.
+In GitLab 8.1 and later, this is the new commit status API.
 
 ### List the statuses of a commit
 
@@ -596,11 +633,11 @@ GET /projects/:id/repository/commits/:sha/statuses
 | `sha`     | string  | yes | The commit SHA
 | `ref`     | string  | no  | The name of a repository branch or tag or, if not given, the default branch
 | `stage`   | string  | no  | Filter by [build stage](../ci/yaml/README.md#stages), e.g., `test`
-| `name`    | string  | no  | Filter by [job name](../ci/yaml/README.md#introduction), e.g., `bundler:audit`
+| `name`    | string  | no  | Filter by [job name](../ci/yaml/README.md#job-keywords), e.g., `bundler:audit`
 | `all`     | boolean | no  | Return all statuses, not only the latest ones
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/17/repository/commits/18f3e63d05582537db6d183d9d557be09e1f90c8/statuses
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/17/repository/commits/18f3e63d05582537db6d183d9d557be09e1f90c8/statuses"
 ```
 
 Example response:
@@ -807,7 +844,8 @@ Example response if commit is GPG signed:
   "gpg_key_primary_keyid": "8254AAB3FBD54AC9",
   "gpg_key_user_name": "John Doe",
   "gpg_key_user_email": "johndoe@example.com",
-  "gpg_key_subkey_id": null
+  "gpg_key_subkey_id": null,
+  "commit_source": "gitaly"
 }
 ```
 
@@ -830,7 +868,8 @@ Example response if commit is X.509 signed:
       "subject_key_identifier": "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB",
       "crl_url": "http://example.com/pki.crl"
     }
-  }
+  },
+  "commit_source": "gitaly"
 }
 ```
 

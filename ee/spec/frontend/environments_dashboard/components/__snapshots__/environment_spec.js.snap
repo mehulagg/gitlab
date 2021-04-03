@@ -36,7 +36,7 @@ exports[`Environment matchs the snapshot 1`] = `
         <div
           class="branch-commit"
         >
-          <icon-stub
+          <gl-icon-stub
             name="work"
             size="16"
           />

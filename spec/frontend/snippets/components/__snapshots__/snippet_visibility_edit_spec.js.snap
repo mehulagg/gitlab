@@ -20,6 +20,7 @@ exports[`Snippet Visibility Edit component rendering matches the snapshot 1`] = 
   </label>
    
   <gl-form-group-stub
+    class="gl-mb-0"
     id="visibility-level-setting"
   >
     <gl-form-radio-group-stub
@@ -45,6 +46,8 @@ exports[`Snippet Visibility Edit component rendering matches the snapshot 1`] = 
            
           <span
             class="font-weight-bold ml-1 js-visibility-option"
+            data-qa-selector="visibility_content"
+            data-qa-visibility="Private"
           >
             Private
           </span>
@@ -64,6 +67,8 @@ exports[`Snippet Visibility Edit component rendering matches the snapshot 1`] = 
            
           <span
             class="font-weight-bold ml-1 js-visibility-option"
+            data-qa-selector="visibility_content"
+            data-qa-visibility="Internal"
           >
             Internal
           </span>
@@ -83,6 +88,8 @@ exports[`Snippet Visibility Edit component rendering matches the snapshot 1`] = 
            
           <span
             class="font-weight-bold ml-1 js-visibility-option"
+            data-qa-selector="visibility_content"
+            data-qa-visibility="Public"
           >
             Public
           </span>
@@ -90,5 +97,12 @@ exports[`Snippet Visibility Edit component rendering matches the snapshot 1`] = 
       </gl-form-radio-stub>
     </gl-form-radio-group-stub>
   </gl-form-group-stub>
+   
+  <div
+    class="text-muted"
+    data-testid="restricted-levels-info"
+  >
+    <!---->
+  </div>
 </div>
 `;

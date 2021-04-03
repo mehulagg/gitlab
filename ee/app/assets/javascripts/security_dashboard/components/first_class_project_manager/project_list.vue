@@ -1,19 +1,12 @@
 <script>
-import {
-  GlDeprecatedBadge as GlBadge,
-  GlDeprecatedButton,
-  GlLoadingIcon,
-  GlTooltipDirective,
-} from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlBadge, GlButton, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 export default {
   components: {
     GlBadge,
-    GlDeprecatedButton,
+    GlButton,
     GlLoadingIcon,
-    Icon,
     ProjectAvatar,
   },
   directives: {
@@ -42,7 +35,7 @@ export default {
     <div>
       <h4 class="h5 font-weight-bold text-secondary border-bottom mb-3 pb-2">
         {{ s__('SecurityReports|Projects added') }}
-        <gl-badge pill class="font-weight-bold">{{ projects.length }}</gl-badge>
+        <gl-badge class="gl-font-weight-bold">{{ projects.length }}</gl-badge>
         <gl-loading-icon v-if="showLoadingIndicator" size="sm" class="float-right" />
       </h4>
       <ul v-if="projects.length" class="list-unstyled">
@@ -55,14 +48,13 @@ export default {
           <span>
             {{ project.name_with_namespace || project.nameWithNamespace }}
           </span>
-          <gl-deprecated-button
+          <gl-button
             v-gl-tooltip
-            class="ml-auto bg-transparent border-0 p-0 text-secondary js-projects-list-project-remove"
+            icon="remove"
+            class="gl-ml-auto js-projects-list-project-remove"
             :title="s__('SecurityReports|Remove project from dashboard')"
             @click="projectRemoved(project)"
-          >
-            <icon name="remove" />
-          </gl-deprecated-button>
+          />
         </li>
       </ul>
       <p v-else class="text-secondary js-projects-list-empty-message">

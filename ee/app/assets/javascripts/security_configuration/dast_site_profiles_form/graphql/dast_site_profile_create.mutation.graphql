@@ -1,0 +1,6 @@
+mutation dastSiteProfileCreate($input: DastSiteProfileCreateInput!) {
+  dastSiteProfileCreate(input: $input) {
+    id
+    errors
+  }
+}

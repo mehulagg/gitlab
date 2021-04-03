@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Manage', :group_saml, :orchestrated do
+  # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+  RSpec.describe 'Manage', :group_saml, :orchestrated, :requires_admin do
     describe 'Group SAML SSO - Enforced SSO' do
       include Support::Api
 
@@ -12,6 +13,8 @@ module QA
           @group = Resource::Sandbox.fabricate_via_api! do |sandbox_group|
             sandbox_group.path = "saml_sso_group_#{SecureRandom.hex(8)}"
           end
+
+          Runtime::Feature.enable(:invite_members_group_modal, group: @group)
 
           @developer_user = Resource::User.fabricate_via_api!
 
@@ -28,7 +31,7 @@ module QA
         end
       end
 
-      it 'user clones and pushes to project within a group using Git HTTP' do
+      it 'user clones and pushes to project within a group using Git HTTP', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/675' do
         Flow::Login.sign_in
 
         @project = Resource::Project.fabricate! do |project|
@@ -51,9 +54,7 @@ module QA
 
       after do
         page.visit Runtime::Scenario.gitlab_address
-        %w[group_administration_nav_item].each do |flag|
-          Runtime::Feature.remove(flag)
-        end
+        Runtime::Feature.remove(:group_administration_nav_item)
 
         @group.remove_via_api!
 
@@ -64,9 +65,7 @@ module QA
     end
 
     def setup_and_enable_enforce_sso
-      %w[group_administration_nav_item].each do |flag|
-        Runtime::Feature.enable_and_verify(flag)
-      end
+      Runtime::Feature.enable(:group_administration_nav_item)
 
       page.visit Runtime::Scenario.gitlab_address
       Page::Main::Login.perform(&:sign_in_using_credentials) unless Page::Main::Menu.perform(&:signed_in?)
