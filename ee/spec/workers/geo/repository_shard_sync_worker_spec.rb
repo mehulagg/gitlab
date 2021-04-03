@@ -25,6 +25,7 @@ RSpec.describe Geo::RepositoryShardSyncWorker, :geo, :clean_gitlab_redis_cache, 
       Gitlab::ShardHealthCache.update([])
 
       expect(Geo::ProjectSyncWorker).not_to receive(:perform_async)
+      expect(subject).to receive(:log_error).with("Skipped scheduling project syncs due to unhealthy shard", { shard_name: shard_name })
 
       subject.perform(shard_name)
     end
