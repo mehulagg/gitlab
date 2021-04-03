@@ -3,7 +3,6 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import GroupSecurityVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
-import { vulnerabilitiesSeverityCountScopes } from '../constants';
 import vulnerableProjectsQuery from '../graphql/queries/vulnerable_projects.query.graphql';
 import CsvExportButton from './csv_export_button.vue';
 import DashboardNotConfigured from './empty_states/group_dashboard_not_configured.vue';
@@ -54,7 +53,6 @@ export default {
       this.filters = filters;
     },
   },
-  vulnerabilitiesSeverityCountScopes,
 };
 </script>
 
@@ -70,11 +68,7 @@ export default {
           </h2>
           <csv-export-button />
         </header>
-        <vulnerabilities-count-list
-          :scope="$options.vulnerabilitiesSeverityCountScopes.group"
-          :full-path="groupFullPath"
-          :filters="filters"
-        />
+        <vulnerabilities-count-list :full-path="groupFullPath" :filters="filters" />
       </template>
       <template #sticky>
         <filters :projects="projects" @filterChange="handleFilterChange" />

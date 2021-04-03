@@ -3,7 +3,6 @@ import Filters from 'ee/security_dashboard/components/first_class_vulnerability_
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
 import createFlash from '~/flash';
-import { vulnerabilitiesSeverityCountScopes } from '../constants';
 import { createProjectLoadingError } from '../helpers';
 import CsvExportButton from './csv_export_button.vue';
 import DashboardNotConfigured from './empty_states/instance_dashboard_not_configured.vue';
@@ -55,7 +54,6 @@ export default {
       this.filters = filters;
     },
   },
-  vulnerabilitiesSeverityCountScopes,
 };
 </script>
 
@@ -71,10 +69,7 @@ export default {
           </h2>
           <csv-export-button />
         </header>
-        <vulnerabilities-count-list
-          :scope="$options.vulnerabilitiesSeverityCountScopes.instance"
-          :filters="filters"
-        />
+        <vulnerabilities-count-list :filters="filters" />
       </div>
     </template>
     <template #sticky>
