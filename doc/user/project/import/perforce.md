@@ -30,7 +30,7 @@ Git:
    and experiment in isolation, then clean up your mess before sharing your new
    cool stuff with everyone.
 1. Git also made code review simple because you could share your changes without
-   merging them to master, whereas Perforce had to implement a Shelving feature on
+   merging them to the default branch, whereas Perforce had to implement a Shelving feature on
    the server so others could review changes before merging.
 
 ## Why migrate
