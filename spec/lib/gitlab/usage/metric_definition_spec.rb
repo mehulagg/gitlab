@@ -91,7 +91,8 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
       'deprecated'     | false
       'removed'        | false
       'data_available' | false
-      'random'         | true
+      'implemented'    | false
+      'not_used'       | false
     end
 
     with_them do
@@ -99,12 +100,8 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
         described_class.new(path, attributes.merge( { status: status } )).validate!
       end
 
-      it "checks for valid/invalid statuses" do
-        if raise_exception
-          expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).at_least(:once).with(instance_of(Gitlab::Usage::Metric::InvalidMetricError))
-        else
-          expect(Gitlab::ErrorTracking).not_to receive(:track_and_raise_for_dev_exception)
-        end
+      it 'does not raise exceptions for valid statuses' do
+        expect(Gitlab::ErrorTracking).not_to receive(:track_and_raise_for_dev_exception)
 
         validation
       end
