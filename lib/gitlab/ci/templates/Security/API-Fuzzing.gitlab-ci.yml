@@ -11,21 +11,8 @@ stages:
     - fuzz
 
 variables:
-    FUZZAPI_PROFILE: Quick
+    SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
     FUZZAPI_VERSION: latest
-    FUZZAPI_CONFIG: .gitlab-api-fuzzing.yml
-    FUZZAPI_TIMEOUT: 30
-    FUZZAPI_REPORT: gl-api-fuzzing-report.json
-    FUZZAPI_REPORT_ASSET_PATH: assets
-    #
-    FUZZAPI_D_NETWORK: testing-net
-    #
-    # Wait up to 5 minutes for API Fuzzer and target url to become
-    # available (non 500 response to HTTP(s))
-    FUZZAPI_SERVICE_START_TIMEOUT: "300"
-    #
-    FUZZAPI_IMAGE: registry.gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing:${FUZZAPI_VERSION}-engine
-    #
 
 apifuzzer_fuzz_unlicensed:
     stage: fuzz
@@ -40,15 +27,7 @@ apifuzzer_fuzz_unlicensed:
 
 apifuzzer_fuzz:
     stage: fuzz
-    image:
-        name: $FUZZAPI_IMAGE
-        entrypoint: ["/bin/bash", "-l", "-c"]
-    variables:
-        FUZZAPI_PROJECT: $CI_PROJECT_PATH
-        FUZZAPI_API: http://localhost:80
-        FUZZAPI_NEW_REPORT: 1
-        FUZZAPI_LOG_SCANNER: gl-apifuzzing-api-scanner.log
-        TZ: America/Los_Angeles
+    image: ${SECURE_ANALYZERS_PREFIX}/api-fuzzing:${FUZZAPI_VERSION}-engine
     allow_failure: true
     rules:
         - if: $FUZZAPI_D_TARGET_IMAGE
@@ -62,43 +41,15 @@ apifuzzer_fuzz:
           when: never
         - if: $CI_COMMIT_BRANCH && $GITLAB_FEATURES =~ /\bapi_fuzzing\b/
     script:
-        #
-        # Validate options
-        - |
-            if [ "$FUZZAPI_HAR$FUZZAPI_OPENAPI$FUZZAPI_POSTMAN_COLLECTION" == "" ]; then \
-                echo "Error: One of FUZZAPI_HAR, FUZZAPI_OPENAPI, or FUZZAPI_POSTMAN_COLLECTION must be provided."; \
-                echo "See https://docs.gitlab.com/ee/user/application_security/api_fuzzing/ for information on how to configure API Fuzzing."; \
-                exit 1; \
-            fi
-        #
-        # Run user provided pre-script
-        - sh -c "$FUZZAPI_PRE_SCRIPT"
-        #
-        # Make sure asset path exists
-        - mkdir -p $FUZZAPI_REPORT_ASSET_PATH
-        #
-        # Start API Security background process
-        - dotnet /peach/Peach.Web.dll &> $FUZZAPI_LOG_SCANNER &
-        - APISEC_PID=$!
-        #
-        # Start scanning
-        - worker-entry
-        #
-        # Run user provided post-script
-        - sh -c "$FUZZAPI_POST_SCRIPT"
-        #
-        # Shutdown API Security
-        - kill $APISEC_PID
-        - wait $APISEC_PID
-        #
+        - /peach/analyzer-fuzz-api
     artifacts:
         when: always
         paths:
-            - $FUZZAPI_REPORT_ASSET_PATH
-            - $FUZZAPI_REPORT
-            - $FUZZAPI_LOG_SCANNER
+            - gl-assets
+            - gl-api-fuzzing-report.json
+            - gl-*.log
         reports:
-            api_fuzzing: $FUZZAPI_REPORT
+            api_fuzzing: gl-api-fuzzing-report.json
 
 apifuzzer_fuzz_dnd:
     stage: fuzz
@@ -106,8 +57,6 @@ apifuzzer_fuzz_dnd:
     variables:
         DOCKER_DRIVER: overlay2
         DOCKER_TLS_CERTDIR: ""
-        FUZZAPI_PROJECT: $CI_PROJECT_PATH
-        FUZZAPI_API: http://apifuzzer:80
     allow_failure: true
     rules:
         - if: $FUZZAPI_D_TARGET_IMAGE == null && $FUZZAPI_D_WORKER_IMAGE == null
