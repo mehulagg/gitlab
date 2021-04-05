@@ -4630,6 +4630,7 @@ Information about pagination in a connection.
 | `stages` | [`CiStageConnection`](#cistageconnection) | Stages of the pipeline. |
 | `startedAt` | [`Time`](#time) | Timestamp when the pipeline was started. |
 | `status` | [`PipelineStatusEnum!`](#pipelinestatusenum) | Status of the pipeline (CREATED, WAITING_FOR_RESOURCE, PREPARING, PENDING, RUNNING, FAILED, SUCCESS, CANCELED, SKIPPED, MANUAL, SCHEDULED). |
+| `testReportSummary` | [`PipelineTestSummaryReport`](#pipelinetestsummaryreport) | The summary of the test report the pipeline generated. |
 | `updatedAt` | [`Time!`](#time) | Timestamp of the pipeline's last activity. |
 | `upstream` | [`Pipeline`](#pipeline) | Pipeline that triggered the pipeline. |
 | `user` | [`User`](#user) | Pipeline user. |
@@ -4780,6 +4781,59 @@ An edge in a connection.
 | ----- | ---- | ----------- |
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`PipelineSecurityReportFinding`](#pipelinesecurityreportfinding) | The item at the end of the edge. |
+
+### `PipelineTestReportTotal`
+
+The total test report statistics.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `count` | [`Int`](#int) | The total number of the test cases. |
+| `error` | [`Int`](#int) | The total number of test cases that had an error. |
+| `failed` | [`Int`](#int) | The total number of test cases that failed. |
+| `skipped` | [`Int`](#int) | The total number of test cases that were skipped. |
+| `success` | [`Int`](#int) | The total number of test cases that succeeded. |
+| `suiteError` | [`String`](#string) | The test suite error message. |
+| `time` | [`Float`](#float) | The total duration of the tests. |
+
+### `PipelineTestSuiteSummary`
+
+Represents a test suite summary in a pipeline test report.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `buildIds` | [`[ID!]`](#id) | The IDs of the builds used to run the test suite. |
+| `name` | [`String`](#string) | Name of the test suite. |
+| `total` | [`PipelineTestReportTotal`](#pipelinetestreporttotal) | The total statistics for the test suite. |
+
+### `PipelineTestSuiteSummaryConnection`
+
+The connection type for PipelineTestSuiteSummary.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `count` | [`Int!`](#int) | Total count of collection. |
+| `edges` | [`[PipelineTestSuiteSummaryEdge]`](#pipelinetestsuitesummaryedge) | A list of edges. |
+| `nodes` | [`[PipelineTestSuiteSummary]`](#pipelinetestsuitesummary) | A list of nodes. |
+| `pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+### `PipelineTestSuiteSummaryEdge`
+
+An edge in a connection.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| `node` | [`PipelineTestSuiteSummary`](#pipelinetestsuitesummary) | The item at the end of the edge. |
+
+### `PipelineTestSummaryReport`
+
+Represents the test report for a pipeline.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `testSuites` | [`PipelineTestSuiteSummaryConnection`](#pipelinetestsuitesummaryconnection) | Test suites belonging to a pipeline test report. |
+| `total` | [`PipelineTestReportTotal`](#pipelinetestreporttotal) | The total report statistics for a pipeline test report. |
 
 ### `Project`
 

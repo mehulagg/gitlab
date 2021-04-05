@@ -122,6 +122,29 @@ module Types
             method: :uses_needs?,
             description: 'Indicates if the pipeline has jobs with `needs` dependencies.'
 
+      field :test_report_summary, Types::Ci::PipelineTestReportSummaryType, null: true,
+            description: 'The summary of the test report the pipeline generated'
+
+      def test_report_summary
+        report = object.test_report_summary
+        {
+          total: report.total,
+          test_suites: report.test_suites.values.map{ | suite | { 
+            total: {
+              time: suite.total_time,
+              count: suite.total_count,
+              success: suite.success_count,
+              failed: suite.failed_count,
+              skipped: suite.skipped_count,
+              error: suite.error_count,
+              suite_error: suite.suite_error
+            },
+            build_ids: suite.build_ids,
+            name: suite.name
+          } }
+        }
+      end
+
       def detailed_status
         object.detailed_status(current_user)
       end
