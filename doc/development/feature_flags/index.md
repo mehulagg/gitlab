@@ -292,7 +292,7 @@ end
 
 ### Frontend
 
-Use the `push_frontend_feature_flag` method for frontend code, which is
+Use the `push_frontend_feature_flag` method -  or `push_licensed_feature` if it is an EE feature - for frontend code, which is
 available to all controllers that inherit from `ApplicationController`. You can use
 this method to expose the state of a feature flag, for example:
 
@@ -300,6 +300,8 @@ this method to expose the state of a feature flag, for example:
 before_action do
   # Prefer to scope it per project or user e.g.
   push_frontend_feature_flag(:vim_bindings, project)
+  # Or if the feature is a licensed feature
+  push_licensed_feature(:vim_bindings, project)
 end
 
 def index
