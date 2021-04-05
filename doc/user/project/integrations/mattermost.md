@@ -4,16 +4,16 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Mattermost Notifications Service **(FREE)**
+# Mattermost notifications service **(FREE)**
 
-The Mattermost Notifications Service allows your GitLab project to send events
-(for example, `issue created`) to your existing Mattermost team as notifications.
-This requires configurations in both Mattermost and GitLab.
+Use the Mattermost notifications service to send notifications for GitLab events
+(for example, `issue created`) to Mattermost. You must configure both [Mattermost](#configure-mattermost-to-receive-gitlab-notifications)
+and [GitLab](#configure-gitlab-to-send-notifications-to-mattermost).
 
 You can also use [Mattermost slash commands](mattermost_slash_commands.md) to control
 GitLab inside Mattermost.
 
-## On Mattermost
+## Configure Mattermost to receive GitLab notifications
 
 To use the Mattermost integration you must create an incoming webhook integration
 in Mattermost:
@@ -34,34 +34,24 @@ to enable it on:
 
 Display name override is not enabled by default, you need to ask your administrator to enable it on that same section.
 
-## On GitLab
+## Configure GitLab to send notifications to Mattermost
 
-After you set up Mattermost, it's time to set up GitLab.
+After the Mattermost instance has an incoming webhook set up, you can set up GitLab
+to send the notifications.
 
 Navigate to the [Integrations page](overview.md#accessing-integrations)
-and select the **Mattermost notifications** service to configure it.
-There, you see a checkbox with the following events that can be triggered:
+and select the **Mattermost notifications** service. Select the GitLab events
+that you want to generate notifications.
 
-- Push
-- Issue
-- Confidential issue
-- Merge request
-- Note
-- Confidential note
-- Tag push
-- Pipeline
-- Wiki page
-- Deployment
+For each event you select, input the Mattermost channel you want to receive the
+notification. You do not need to add the hash sign `#`.
 
-Below each of these event checkboxes, you have an input field to enter
-which Mattermost channel you want to send that event message. Enter your preferred channel handle (the hash sign `#` is optional).
-
-At the end, fill in your Mattermost details:
+Then fill in the integration configuration:
 
 | Field | Description |
 | ----- | ----------- |
-| **Webhook**  | The incoming webhook URL which you have to set up on Mattermost, similar to: `http://mattermost.example/hooks/5xo…` |
-| **Username** | (Optional) Username to show on messages sent to Mattermost. Fill this in if you want to change the username of the bot. |
-| **Notify only broken pipelines** | If you choose to enable the **Pipeline** event and you want to be only notified about failed pipelines. |
-| **Branches to be notified** | Select which types of branches to send notifications for. |
-| **Labels to be notified** | (Optional) Labels that the issue or merge request must have in order to trigger a notification. Leave blank to get notifications for all issues and merge requests. |
+| **Webhook**  | The incoming webhook URL on Mattermost, similar to: `http://mattermost.example/hooks/5xo…`. |
+| **Username** | (Optional) The username to show on messages sent to Mattermost. Fill this in to change the username of the bot. |
+| **Notify only broken pipelines** | If you enable the **Pipeline** event and you want to be notified about failed pipelines only. |
+| **Branches to be notified** | Select which branches to send notifications for. |
+| **Labels to be notified** | (Optional) Labels that the issue or merge request must have to trigger a notification. Leave blank to get notifications for all issues and merge requests. |
