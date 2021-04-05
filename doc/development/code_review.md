@@ -101,8 +101,8 @@ with [domain expertise](#domain-experts).
 1. If your merge request includes frontend changes (*1*), it must be
    **approved by a [frontend maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_frontend)**.
 1. If your merge request includes user-facing changes (*3*), it must be
-   **approved by a [Product Designer](https://about.gitlab.com/company/team/)**,
-   based on the appropriate [product category](https://about.gitlab.com/handbook/product/categories/).
+   **approved by a [Product Designer](https://about.gitlab.com/handbook/engineering/ux/product-design/)**,
+   based on assignments in the appropriate [DevOps stage group](https://about.gitlab.com/handbook/product/categories/#devops-stages).
 1. If your merge request includes adding a new JavaScript library (*1*)...
    - If the library significantly increases the
      [bundle size](https://gitlab.com/gitlab-org/frontend/playground/webpack-memory-metrics/-/blob/master/doc/report.md), it must
