@@ -11541,7 +11541,7 @@ msgstr ""
 msgid "EmailsOnPushService|Send from committer"
 msgstr ""
 
-msgid "EmailsOnPushService|Send notifications from the committer's email address if the domain is part of the domain GitLab is running on (e.g. %{domains})."
+msgid "EmailsOnPushService|Send notifications from the committer's email address if the domain matches the domain used by your GitLab instance (such as %{domains})."
 msgstr ""
 
 msgid "Embed"
@@ -24131,6 +24131,12 @@ msgstr ""
 msgid "ProjectService|Enter new password"
 msgstr ""
 
+msgid "ProjectService|Event triggered for every new new tag pushed to the repository."
+msgstr ""
+
+msgid "ProjectService|Event triggered for every push to the repository."
+msgstr ""
+
 msgid "ProjectService|Event triggered when a commit is created or updated."
 msgstr ""
 
@@ -24141,9 +24147,6 @@ msgid "ProjectService|Event triggered when a deployment starts or finishes."
 msgstr ""
 
 msgid "ProjectService|Event triggered when a merge request is created, updated, or merged."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a new tag is pushed to the repository."
 msgstr ""
 
 msgid "ProjectService|Event triggered when a new, unique alert is recorded."
@@ -24162,9 +24165,6 @@ msgid "ProjectService|Event triggered when someone adds a comment on a confident
 msgstr ""
 
 msgid "ProjectService|Event triggered when someone adds a comment."
-msgstr ""
-
-msgid "ProjectService|Event triggered when someone pushes to the repository."
 msgstr ""
 
 msgid "ProjectService|Issue URL"
