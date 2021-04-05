@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.shared_examples_for 'graphql mutations security ci configuration' do
-  subject(:mutation) { described_class.new(object: nil, context: context, field: nil) }
-
   let_it_be(:project) { create(:project, :public, :repository) }
   let_it_be(:user) { create(:user) }
 
@@ -35,8 +33,6 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
   specify { expect(described_class).to require_graphql_authorizations(:push_code) }
 
   describe '#resolve' do
-    subject { mutation.resolve(project_path: project.full_path, configuration: {}) }
-
     let(:result) { subject }
 
     it 'raises an error if the resource is not accessible to the user' do
