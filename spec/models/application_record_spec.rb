@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ApplicationRecord do
-  describe '#id_in' do
+  describe '.id_in' do
     let(:records) { create_list(:user, 3) }
 
     it 'returns records of the ids' do
@@ -126,6 +126,39 @@ RSpec.describe ApplicationRecord do
             described_class.connection.exec_query('SELECT pg_sleep(0.1)')
           end
         end.to raise_error(ActiveRecord::QueryCanceled)
+      end
+    end
+  end
+
+  describe '#serializable_hash' do
+    subject { model.new }
+
+    context 'when model is not taggable' do
+      let(:model) do
+        Class.new(ApplicationRecord) do
+          self.table_name = 'users'
+        end
+      end
+
+      specify { expect(subject.attributes).not_to include('tag_list') }
+
+      it 'serializes successfully' do
+        expect(subject.serializable_hash).to be_kind_of(Hash)
+      end
+    end
+
+    context 'when model is taggable' do
+      let(:model) do
+        Class.new(ApplicationRecord) do
+          self.table_name = 'users'
+          acts_as_taggable
+        end
+      end
+
+      specify { expect(subject.attributes).to include('tag_list') }
+
+      it 'excludes `tag_list`' do
+        expect(subject.serializable_hash).not_to have_key('tag_list')
       end
     end
   end

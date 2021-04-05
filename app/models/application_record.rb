@@ -78,6 +78,18 @@ class ApplicationRecord < ActiveRecord::Base
     values = enum_mod.definition.transform_values { |v| v[:value] }
     enum(enum_mod.key => values)
   end
+
+  def serializable_hash(options = nil)
+    return super(options) unless self.class.taggable?
+
+    raise "Here!"
+
+    options ||= {}
+    options[:except] = Array.wrap(options[:except])
+    options[:except] << :tag_list
+
+    super(options)
+  end
 end
 
 ApplicationRecord.prepend_if_ee('EE::ApplicationRecordHelpers')
