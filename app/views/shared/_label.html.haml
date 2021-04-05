@@ -39,7 +39,7 @@
               - if can?(current_user, :admin_label, label)
                 %li
                   %span{ data: { toggle: 'modal', target: "#modal-delete-label-#{label.id}" } }
-                    %button.text-danger.remove-row{ type: 'button' }= _('Delete')
+                    %button.text-danger.js-delete-label{ type: 'button' }= _('Delete')
     - if current_user
       %li.inline.label-subscription
         - if label.can_subscribe_to_label_in_different_levels?
