@@ -1,9 +1,0 @@
-- form = local_assigns.fetch(:form)
-
-= form.fields_for :project_setting do |settings|
-  .form-group
-    %b= s_('ProjectSettings|Default target project')
-    %p.text-secondary
-      = s_('ProjectSettings|Decide which project to be a default target for a new merge request. This setting is only available for a forked project.')
-
-    = settings.select :mr_default_target_project_origin, [['The upstream project', false], ['This project', true]], { include_blank: false }, class: "select2"
