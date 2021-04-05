@@ -51,7 +51,7 @@ Once [Group Single Sign-On](index.md) has been configured, we can:
 The SAML application that was created during [Single sign-on](index.md) setup for [Azure](https://docs.microsoft.com/en-us/azure/active-directory/manage-apps/view-applications-portal) now needs to be set up for SCIM.
 
 1. Set up automatic provisioning and administrative credentials by following the
-   [Azure documentation on provisioning users and groups to applications that support SCIM](https://docs.microsoft.com/en-us/azure/active-directory/app-provisioning/use-scim-to-provision-users-and-groups#provisioning-users-and-groups-to-applications-that-support-scim) section in Azure's SCIM setup documentation.
+   [Azure's SCIM setup documentation](https://docs.microsoft.com/en-us/azure/active-directory/app-provisioning/use-scim-to-provision-users-and-groups#provisioning-users-and-groups-to-applications-that-support-scim).
 
 During this configuration, note the following:
 
@@ -66,7 +66,10 @@ You can then test the connection by clicking on **Test Connection**. If the conn
 
 Follow [Azure documentation to configure the attribute mapping](https://docs.microsoft.com/en-us/azure/active-directory/app-provisioning/customize-application-attributes).
 
-The table below provides the suggested attribute mapping, which is known to work with GitLab. If your SAML configuration differs from [the recommended SAML settings](index.md#azure-setup-notes), your SCIM configuration needs to be different from the table below and match your settings. Mappings not listed in the table can be left to the default values.
+The following table below provides an attribute mapping known to work with GitLab. If
+your SAML configuration differs from [the recommended SAML settings](index.md#azure-setup-notes),
+modify the corresponding `customappsso` settings accordingly. If a mapping is not listed in the
+table, use the Azure defaults.
 
 | Azure Active Directory Attribute | customappsso Attribute | Matching precedence |
 | -------------------------------- | ---------------------- | -------------------- |
@@ -74,7 +77,7 @@ The table below provides the suggested attribute mapping, which is known to work
 | `userPrincipalName`              | `emails[type eq "work"].value` |  |
 | `mailNickname`                   | `userName`             |  |
 
-For reference, you can view [an example configuration in the troubleshooting reference](../../../administration/troubleshooting/group_saml_scim.md#azure-active-directory).
+For guidance, you can view [an example configuration in the troubleshooting reference](../../../administration/troubleshooting/group_saml_scim.md#azure-active-directory).
 
 1. Below the mapping list click on **Show advanced options > Edit attribute list for AppName**.
 1. Ensure the `id` is the primary and required field, and `externalId` is also required.
@@ -83,7 +86,7 @@ For reference, you can view [an example configuration in the troubleshooting ref
    `username` should neither be primary nor required as we don't support
    that field on GitLab SCIM yet.
 
-1. Ensure to save all changed.
+1. Save all changes.
 1. In the **Provisioning** step, set the `Provisioning Status` to `On`.
 
    NOTE:
