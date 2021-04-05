@@ -84,11 +84,11 @@ class ApplicationRecord < ActiveRecord::Base
 
     raise "Here!"
 
-    options ||= {}
-    options[:except] = Array.wrap(options[:except])
-    options[:except] << :tag_list
+    # options ||= {}
+    # options[:except] = Array.wrap(options[:except])
+    # options[:except] << :tag_list
 
-    super(options)
+    # super(options)
   end
 end
 
