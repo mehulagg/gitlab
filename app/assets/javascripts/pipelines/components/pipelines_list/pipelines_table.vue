@@ -9,7 +9,6 @@ import PipelineTriggerer from './pipeline_triggerer.vue';
 import PipelineUrl from './pipeline_url.vue';
 import PipelinesCommit from './pipelines_commit.vue';
 import PipelinesStatusBadge from './pipelines_status_badge.vue';
-import PipelinesTableRowComponent from './pipelines_table_row.vue';
 import PipelinesTimeago from './time_ago.vue';
 
 const DEFAULT_TD_CLASS = 'gl-p-5!';
@@ -82,7 +81,6 @@ export default {
     PipelineOperations,
     PipelinesStatusBadge,
     PipelineStopModal,
-    PipelinesTableRowComponent,
     PipelinesTimeago,
     PipelineTriggerer,
     PipelineUrl,
