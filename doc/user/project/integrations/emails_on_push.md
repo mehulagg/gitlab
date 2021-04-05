@@ -18,7 +18,7 @@ The following options are available:
 
 - **Push events** - Email is triggered when a push event is received.
 - **Tag push events** - Email is triggered when a tag is created and pushed.
-- **Send from committer** - Send notifications from the committer's email address if the domain is part of the domain GitLab is running on (e.g. `user@gitlab.com`).
+- **Send from committer** - Send notifications from the committer's email address if the domain matches the domain used by your GitLab instance (such as `user@gitlab.com`).
 - **Disable code diffs** - Don't include possibly sensitive code diffs in notification body.
 
 | Settings | Notification |

@@ -17,7 +17,7 @@ RSpec.describe ServiceEventEntity do
       let(:event) { 'push' }
 
       it 'exposes correct attributes' do
-        expect(subject[:description]).to eq('Event triggered when someone pushes to the repository.')
+        expect(subject[:description]).to eq('Event triggered for every push to the repository.')
         expect(subject[:name]).to eq('push_events')
         expect(subject[:title]).to eq('push')
         expect(subject[:value]).to be(true)
