@@ -24116,9 +24116,6 @@ msgstr ""
 msgid "ProjectSettings|Customize this project's badges."
 msgstr ""
 
-msgid "ProjectSettings|Decide which project to be a default target for a new merge request. This setting is only available for a forked project."
-msgstr ""
-
 msgid "ProjectSettings|Determine what happens to the commit history when you merge a merge request."
 msgstr ""
 
@@ -24314,7 +24311,13 @@ msgstr ""
 msgid "ProjectSettings|The commit message used when applying merge request suggestions. %{link_start}Learn more about suggestions.%{link_end}"
 msgstr ""
 
+msgid "ProjectSettings|The default target project for merge requests that are created in this fork project."
+msgstr ""
+
 msgid "ProjectSettings|These checks must pass before merge requests can be merged."
+msgstr ""
+
+msgid "ProjectSettings|This project"
 msgstr ""
 
 msgid "ProjectSettings|This setting is applied on the server level and can be overridden by an admin."
@@ -24332,10 +24335,7 @@ msgstr ""
 msgid "ProjectSettings|Transfer project"
 msgstr ""
 
-msgid "ProjectSettings|Use the upstream project to be a default target for a new merge request."
-msgstr ""
-
-msgid "ProjectSettings|Use this project to be a default target for a new merge request."
+msgid "ProjectSettings|Upstream project"
 msgstr ""
 
 msgid "ProjectSettings|Used for every new merge request."
