@@ -62,6 +62,7 @@ export default (
   let state = stateArg;
   let expectedMutations = expectedMutationsArg;
   let expectedActions = expectedActionsArg;
+  let actionHandlers = {};
   let done = doneArg;
 
   if (typeof actionArg !== 'function') {
@@ -71,6 +72,7 @@ export default (
       state,
       expectedMutations = [],
       expectedActions = [],
+      actionHandlers = {},
       done = noop,
     } = actionArg);
   }
@@ -98,6 +100,8 @@ export default (
     }
 
     actions.push(dispatchedAction);
+
+    return actionHandlers[type] ? actionHandlers[type]() : Promise.resolve();
   };
 
   const validateResults = () => {
