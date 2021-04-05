@@ -247,6 +247,39 @@ can enable or disable the project wiki by following the instructions in
 Administrators for self-managed GitLab installs can
 [configure additional wiki settings](../../../administration/wikis/index.md).
 
+## Link an external wiki
+
+To add a link to an external wiki from the project's left sidebar:
+
+1. Go to your project's **Settings > Integrations**.
+1. Click **External wiki**.
+1. Add the URL to your external wiki.
+1. (Optional) Click **Test settings** to verify the connection.
+1. Click **Save changes**.
+
+If you want to revert this change:
+
+1. Go to your project's **Settings > Integrations**.
+1. Click **External wiki**.
+1. Unselect **Enable integration**.
+1. Click **Save changes**.
+1. Find the new nav item **External wiki** from the project's left sidebar.
+
+When you enable this integration, the link to the external wiki does
+not replace the link to the internal wiki.
+To hide the internal wiki from the sidebar, [disable the project's wiki](#disable-the-projects-wiki).
+
+## Disable the project's wiki
+
+To disable the project's wiki:
+
+1. Go to your project's **Settings > General**.
+1. Expand **Visibility, project features, permissions**.
+1. Scroll down to find **Wiki** and toggle it off (in gray).
+1. Click **Save changes**.
+
+Once done, the link to the internal wiki is not displayed.
+
 ## Resources
 
 - [Wiki settings for administrators](../../../administration/wikis/index.md)
