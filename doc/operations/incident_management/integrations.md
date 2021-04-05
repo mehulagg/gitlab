@@ -193,12 +193,11 @@ If the existing alert is already `resolved`, GitLab creates a new alert instead.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13402) in GitLab 13.4.
 
-The alert in GitLab will be automatically resolved when an HTTP Endpoint
-receives a payload with the end time of the alert set. For HTTP Endpoints
-without [custom mappings](#map-fields-in-custom-alerts), the expected
-field is `end_time`. With custom mappings, you can select the expected field.
-
-You can also configure the associated [incident to be closed automatically](../incident_management/incidents.md#automatically-close-incidents-via-recovery-alerts) when the alert resolves.
+GitLab automatically resolves an alert when an HTTP endpoint receives a payload that sets the
+alert's end time. For HTTP endpoints without [custom mappings](#map-fields-in-custom-alerts),
+the expected field is `end_time`. With custom mappings, you can select the expected field. You can
+also configure the associated [incident to close automatically](../incident_management/incidents.md#close-incidents-automatically-with-recovery-alerts)
+when the alert resolves.
 
 ## Link to your Opsgenie Alerts
 

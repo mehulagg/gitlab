@@ -312,13 +312,17 @@ to remove a fork relationship.
 
 ### Alerts
 
-Configure [alert integrations](../../../operations/incident_management/integrations.md#configuration) to triage and manage critical problems in your application as [alerts](../../../operations/incident_management/alerts.md).
+Configure [alert integrations](../../../operations/incident_management/integrations.md#configuration)
+to triage and manage critical problems in your application as [alerts](../../../operations/incident_management/alerts.md).
 
 ### Incidents
 
 #### Alert integration
 
-Automatically [create](../../../operations/incident_management/incidents.md#create-incidents-automatically), [notify on](../../../operations/incident_management/paging.md#email-notifications), and [resolve](../../../operations/incident_management/incidents.md#automatically-close-incidents-via-recovery-alerts) incidents based on GitLab alerts.
+Automatically [create](../../../operations/incident_management/incidents.md#create-incidents-automatically),
+[notify on](../../../operations/incident_management/paging.md#email-notifications),
+and [resolve](../../../operations/incident_management/incidents.md#close-incidents-automatically-with-recovery-alerts)
+incidents based on GitLab alerts.
 
 #### PagerDuty integration
 
@@ -326,7 +330,8 @@ Automatically [create](../../../operations/incident_management/incidents.md#crea
 
 #### Incident settings
 
-[Manage Service Level Agreements for incidents](../../../operations/incident_management/incidents.md#service-level-agreement-countdown-timer) with an SLA countdown timer.
+[Manage Service Level Agreements (SLA) for incidents](../../../operations/incident_management/incidents.md#service-level-agreement-countdown-timer)
+with an SLA countdown timer.
 
 ### Error Tracking
 

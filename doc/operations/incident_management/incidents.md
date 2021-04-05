@@ -268,18 +268,19 @@ You can embed both [GitLab-hosted metrics](../metrics/embed.md) and
 [Grafana metrics](../metrics/embed_grafana.md) in incidents and issue
 templates.
 
-### Automatically close incidents via recovery alerts
+### Close incidents automatically with recovery alerts
 
 > - [Introduced for Prometheus Integrations](https://gitlab.com/gitlab-org/gitlab/-/issues/13401) in GitLab 12.5.
 > - [Introduced for HTTP Integrations](https://gitlab.com/gitlab-org/gitlab/-/issues/13402) in GitLab 13.4.
 
-With Maintainer or higher [permissions](../../user/permissions.md), you can enable
- GitLab to close an incident automatically when a **Recovery Alert** is received:
+When GitLab receives a recovery alert, it closes the associated incident. GitLab records this action
+as a system message on the incident, indicating that the GitLab Alert bot automatically closed the
+incident.
 
-1. Navigate to **Settings > Operations > Incidents** and expand **Incidents**.
-1. Check the **Automatically close associated Incident** checkbox.
-1. Click **Save changes**.
+With Maintainer or higher [permissions](../../user/permissions.md),
+you can set GitLab to automatically close an incident when a recovery alert is received:
 
-When GitLab receives a **Recovery Alert**, it closes the associated incident.
-This action is recorded as a system message on the incident indicating that it
-was closed automatically by the GitLab Alert bot.
+1. Go to **Settings > Operations** and expand **Incidents**.
+1. On the **Alert integration** tab, select the checkbox
+   **Automatically close associated incident when a recovery alert notification resolves an alert**.
+1. Select **Save changes**.

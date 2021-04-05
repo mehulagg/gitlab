@@ -133,9 +133,9 @@ of the project.
 
 ### Recovery alerts
 
-> - [From GitLab Ultimate 12.5](https://gitlab.com/gitlab-org/gitlab/-/issues/13401), when GitLab receives a recovery alert, it automatically closes the associated issue.
+> [Beginning in GitLab Ultimate 12.5](https://gitlab.com/gitlab-org/gitlab/-/issues/13401),
+  GitLab automatically closes the associated issue when it receives a recovery alert.
 
-The alert in GitLab will be automatically resolved when Prometheus
-sends a payload with the field `status` set to `resolved`.
-
-You can also configure the associated [incident to be closed automatically](../incident_management/incidents.md#automatically-close-incidents-via-recovery-alerts) when the alert resolves.
+GitLab automatically resolves an alert when Prometheus sends a payload that sets the `status` field
+to `resolved`. You can also configure the associated [incident to close automatically](../incident_management/incidents.md#close-incidents-automatically-with-recovery-alerts)
+when the alert resolves.
