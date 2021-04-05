@@ -94,13 +94,13 @@ RSpec.describe 'Pipelines', :js do
           wait_for_requests
         end
 
-        it 'renders run pipeline link' do
-          expect(page).to have_link('Run pipeline')
-        end
-
         it 'renders ci lint link' do
           expect(page).to have_link('CI Lint')
         end
+
+        it 'renders run pipeline link' do
+          expect(page).to have_link('Run pipeline')
+        end        
       end
 
       context 'when pipeline is cancelable' do
@@ -721,37 +721,6 @@ RSpec.describe 'Pipelines', :js do
       end
     end
 
-    describe 'Run Pipelines' do
-      let(:project) { create(:project, :repository) }
-
-      before do
-        stub_feature_flags(new_pipeline_form: false)
-        visit new_project_pipeline_path(project)
-      end
-
-      describe 'new pipeline page' do
-        it 'has field to add a new pipeline' do
-          expect(page).to have_selector('.js-branch-select')
-          expect(find('.js-branch-select')).to have_content project.default_branch
-          expect(page).to have_content('Run for')
-        end
-      end
-
-      describe 'find pipelines' do
-        it 'shows filtered pipelines', :js do
-          click_button project.default_branch
-
-          page.within '.dropdown-menu' do
-            find('.dropdown-input-field').native.send_keys('fix')
-
-            page.within '.dropdown-content' do
-              expect(page).to have_content('fix')
-            end
-          end
-        end
-      end
-    end
-
     describe 'Reset runner caches' do
       let(:project) { create(:project, :repository) }
 
@@ -783,6 +752,37 @@ RSpec.describe 'Pipelines', :js do
             click_button 'Clear runner caches'
             wait_for_requests
             expect(page.find('.flash-notice')).to have_content 'Project cache successfully reset.'
+          end
+        end
+      end
+    end
+
+    describe 'Run Pipelines' do
+      let(:project) { create(:project, :repository) }
+
+      before do
+        stub_feature_flags(new_pipeline_form: false)
+        visit new_project_pipeline_path(project)
+      end
+
+      describe 'new pipeline page' do
+        it 'has field to add a new pipeline' do
+          expect(page).to have_selector('.js-branch-select')
+          expect(find('.js-branch-select')).to have_content project.default_branch
+          expect(page).to have_content('Run for')
+        end
+      end
+
+      describe 'find pipelines' do
+        it 'shows filtered pipelines', :js do
+          click_button project.default_branch
+
+          page.within '.dropdown-menu' do
+            find('.dropdown-input-field').native.send_keys('fix')
+
+            page.within '.dropdown-content' do
+              expect(page).to have_content('fix')
+            end
           end
         end
       end
