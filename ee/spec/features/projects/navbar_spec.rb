@@ -12,6 +12,8 @@ RSpec.describe 'Project navbar' do
 
   before do
     insert_package_nav(_('Operations'))
+    insert_infrastructure_registry_nav
+    stub_config(registry: { enabled: false })
 
     project.add_maintainer(user)
     sign_in(user)
@@ -67,11 +69,7 @@ RSpec.describe 'Project navbar' do
       before do
         stub_config(registry: { enabled: true })
 
-        insert_after_sub_nav_item(
-          _('Package Registry'),
-          within: _('Packages & Registries'),
-          new_sub_nav_item_name: _('Container Registry')
-        )
+        insert_container_nav
 
         visit project_path(project)
       end
@@ -85,7 +83,7 @@ RSpec.describe 'Project navbar' do
       stub_licensed_features(requirements: true)
 
       insert_after_nav_item(
-        _('Merge Requests'),
+        _('Merge requests'),
         new_nav_item: {
           nav_item: _('Requirements'),
           nav_sub_items: [_('List')]

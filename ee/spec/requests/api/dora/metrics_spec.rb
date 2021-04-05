@@ -15,7 +15,7 @@ RSpec.describe API::Dora::Metrics do
     let(:user) { maintainer }
 
     around do |example|
-      freeze_time do
+      travel_to '2021-01-03'.to_time do
         example.run
       end
     end

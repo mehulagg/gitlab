@@ -519,7 +519,7 @@ class Project < ApplicationRecord
   scope :with_packages, -> { joins(:packages) }
   scope :in_namespace, ->(namespace_ids) { where(namespace_id: namespace_ids) }
   scope :personal, ->(user) { where(namespace_id: user.namespace_id) }
-  scope :joined, ->(user) { where('namespace_id != ?', user.namespace_id) }
+  scope :joined, ->(user) { where.not(namespace_id: user.namespace_id) }
   scope :starred_by, ->(user) { joins(:users_star_projects).where('users_star_projects.user_id': user.id) }
   scope :visible_to_user, ->(user) { where(id: user.authorized_projects.select(:id).reorder(nil)) }
   scope :visible_to_user_and_access_level, ->(user, access_level) { where(id: user.authorized_projects.where('project_authorizations.access_level >= ?', access_level).select(:id).reorder(nil)) }
@@ -1370,9 +1370,9 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return %w(datadog) unless Feature.enabled?(:datadog_ci_integration, self)
+    return %w[datadog hipchat] unless Feature.enabled?(:datadog_ci_integration, self)
 
-    []
+    %w[hipchat]
   end
 
   def find_or_initialize_service(name)
@@ -2711,7 +2711,7 @@ class Project < ApplicationRecord
       # Issue for N+1: https://gitlab.com/gitlab-org/gitlab-foss/issues/49322
       Gitlab::GitalyClient.allow_n_plus_1_calls do
         merge_requests_allowing_collaboration(branch_name).any? do |merge_request|
-          merge_request.can_be_merged_by?(user)
+          merge_request.can_be_merged_by?(user, skip_collaboration_check: true)
         end
       end
     end

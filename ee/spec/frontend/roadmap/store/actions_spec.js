@@ -8,7 +8,7 @@ import * as epicUtils from 'ee/roadmap/utils/epic_utils';
 import * as roadmapItemUtils from 'ee/roadmap/utils/roadmap_item_utils';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import {
   mockGroupId,
@@ -147,7 +147,9 @@ describe('Roadmap Vuex Actions', () => {
     it('should show flash error', () => {
       actions.receiveEpicsFailure({ commit: () => {} });
 
-      expect(createFlash).toHaveBeenCalledWith('Something went wrong while fetching epics');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong while fetching epics',
+      });
     });
   });
 
@@ -670,7 +672,9 @@ describe('Roadmap Vuex Actions', () => {
     it('should show flash error', () => {
       actions.receiveMilestonesFailure({ commit: () => {} });
 
-      expect(createFlash).toHaveBeenCalledWith('Something went wrong while fetching milestones');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong while fetching milestones',
+      });
     });
   });
 

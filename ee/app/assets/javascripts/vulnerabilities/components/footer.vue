@@ -5,7 +5,7 @@ import Api from 'ee/api';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
@@ -138,11 +138,11 @@ export default {
           });
         })
         .catch(() => {
-          createFlash(
-            s__(
+          createFlash({
+            message: s__(
               'VulnerabilityManagement|Something went wrong while trying to retrieve the vulnerability history. Please try again later.',
             ),
-          );
+          });
         });
     },
     createNotesPoll() {
@@ -161,7 +161,9 @@ export default {
           this.lastFetchedAt = lastFetchedAt;
         },
         errorCallback: () =>
-          createFlash(__('Something went wrong while fetching latest comments.')),
+          createFlash({
+            message: __('Something went wrong while fetching latest comments.'),
+          }),
       });
     },
     updateNotes(notes) {

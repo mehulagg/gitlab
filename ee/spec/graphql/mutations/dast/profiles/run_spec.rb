@@ -48,21 +48,23 @@ RSpec.describe Mutations::Dast::Profiles::Run do
           project.add_developer(user)
         end
 
-        it_behaves_like 'it delegates scan creation to another service' do
-          let(:delegated_params) do
-            { branch: dast_profile.branch_name, dast_site_profile: dast_profile.dast_site_profile, dast_scanner_profile: dast_profile.dast_scanner_profile }
+        it_behaves_like 'it creates a DAST on-demand scan pipeline' do
+          context 'when there is a dast_site_profile_secret_variable associated with the dast_profile' do
+            let_it_be(:dast_site_profile_secret_variable) { create(:dast_site_profile_secret_variable, dast_site_profile: dast_profile.dast_site_profile, raw_value: 'hello, world') }
+
+            it 'makes the variable available to the dast build' do
+              subject
+
+              dast_build = pipeline.builds.find_by!(name: 'dast')
+              variable = dast_build.variables.find { |var| var[:key] == dast_site_profile_secret_variable.key }
+
+              expect(Base64.strict_decode64(variable.value)).to include('hello, world')
+            end
           end
         end
 
-        it 'returns a pipeline_url containing the correct path' do
-          actual_url = subject[:pipeline_url]
-          pipeline = Ci::Pipeline.last
-          expected_url = Gitlab::Routing.url_helpers.project_pipeline_url(
-            project,
-            pipeline
-          )
-
-          expect(actual_url).to eq(expected_url)
+        it_behaves_like 'it delegates scan creation to another service' do
+          let(:delegated_params) { hash_including(dast_profile: dast_profile) }
         end
 
         context 'when the dast_profile does not exist' do

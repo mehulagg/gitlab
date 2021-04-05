@@ -76,7 +76,7 @@ RSpec.describe 'Project fork' do
       let(:forking_access_level) { ProjectFeature::PRIVATE }
 
       before do
-        project.update(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
+        project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
       end
 
       context 'user is not a team member' do
@@ -208,7 +208,7 @@ RSpec.describe 'Project fork' do
       expect(page).to have_content(/new merge request/i)
 
       page.within '.nav-sidebar' do
-        first(:link, 'Merge Requests').click
+        first(:link, 'Merge requests').click
       end
 
       expect(page).to have_content(/new merge request/i)

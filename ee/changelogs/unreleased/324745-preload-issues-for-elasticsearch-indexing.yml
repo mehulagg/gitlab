@@ -1,0 +1,5 @@
+---
+title: Remove N+1 DB queries from indexing issues in Elasticsearch
+merge_request: 57788
+author:
+type: performance

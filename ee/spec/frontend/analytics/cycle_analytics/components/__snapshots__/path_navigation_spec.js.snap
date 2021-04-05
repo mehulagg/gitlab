@@ -34,6 +34,28 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
       id="path-6-item-0"
     >
       <button
+        class="gl-path-button"
+      >
+        <svg
+          aria-hidden="true"
+          class="gl-mr-2 gl-icon s16"
+          data-testid="gl-path-item-icon"
+        >
+          <use
+            href="#home"
+          />
+        </svg>
+        
+        Overview
+        <!---->
+      </button>
+       
+    </li>
+    <li
+      class="gl-path-nav-list-item"
+      id="path-6-item-1"
+    >
+      <button
         class="gl-path-button gl-path-active-item-indigo"
       >
         <!---->
@@ -99,7 +121,7 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
     </li>
     <li
       class="gl-path-nav-list-item"
-      id="path-6-item-1"
+      id="path-6-item-2"
     >
       <button
         class="gl-path-button"
@@ -167,7 +189,7 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
     </li>
     <li
       class="gl-path-nav-list-item"
-      id="path-6-item-2"
+      id="path-6-item-3"
     >
       <button
         class="gl-path-button"

@@ -44,7 +44,7 @@ RSpec.describe Projects::IssuesController do
         let_it_be(:issue) { create(:issue, project: new_project) }
 
         before do
-          project.route.destroy
+          project.route.destroy!
           new_project.redirect_routes.create!(path: project.full_path)
           new_project.add_developer(user)
         end
@@ -74,8 +74,9 @@ RSpec.describe Projects::IssuesController do
         end
 
         it 'assigns the candidate experience and tracks the event' do
-          expect(experiment(:null_hypothesis)).to track('index').on_any_instance.for(:candidate)
+          expect(experiment(:null_hypothesis)).to track('index').for(:candidate)
             .with_context(project: project)
+            .on_next_instance
 
           get :index, params: { namespace_id: project.namespace, project_id: project }
         end
@@ -218,10 +219,10 @@ RSpec.describe Projects::IssuesController do
         end
 
         it 'assigns the candidate experience and tracks the event' do
-          expect(experiment(:invite_member_link)).to track(:view, property: project.root_ancestor.id.to_s)
-                                                       .on_any_instance
-                                                       .for(:invite_member_link)
-                                                       .with_context(namespace: project.root_ancestor)
+          expect(experiment(:invite_members_in_comment)).to track(:view, property: project.root_ancestor.id.to_s)
+            .for(:invite_member_link)
+            .with_context(namespace: project.root_ancestor)
+            .on_next_instance
 
           get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }
         end
@@ -229,7 +230,7 @@ RSpec.describe Projects::IssuesController do
 
       context 'when user can not invite' do
         it 'does not track the event' do
-          expect(experiment(:invite_member_link)).not_to track(:view)
+          expect(experiment(:invite_members_in_comment)).not_to track(:view)
 
           get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }
         end
@@ -711,7 +712,7 @@ RSpec.describe Projects::IssuesController do
 
         issue.update!(last_edited_by: deleted_user, last_edited_at: Time.current)
 
-        deleted_user.destroy
+        deleted_user.destroy!
         sign_in(user)
       end
 
@@ -1064,10 +1065,10 @@ RSpec.describe Projects::IssuesController do
         labels = create_list(:label, 10, project: project).map(&:to_reference)
         issue = create(:issue, project: project, description: 'Test issue')
 
-        control_count = ActiveRecord::QueryRecorder.new { issue.update(description: [issue.description, label].join(' ')) }.count
+        control_count = ActiveRecord::QueryRecorder.new { issue.update!(description: [issue.description, label].join(' ')) }.count
 
         # Follow-up to get rid of this `2 * label.count` requirement: https://gitlab.com/gitlab-org/gitlab-foss/issues/52230
-        expect { issue.update(description: [issue.description, labels].join(' ')) }
+        expect { issue.update!(description: [issue.description, labels].join(' ')) }
           .not_to exceed_query_limit(control_count + 2 * labels.count)
       end
 
@@ -1923,7 +1924,7 @@ RSpec.describe Projects::IssuesController do
       before do
         sign_in(user)
 
-        project.route.destroy
+        project.route.destroy!
         new_project.redirect_routes.create!(path: project.full_path)
         new_project.add_developer(user)
       end

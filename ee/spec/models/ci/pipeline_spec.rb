@@ -12,11 +12,15 @@ RSpec.describe Ci::Pipeline do
     create(:ci_empty_pipeline, status: :created, project: project)
   end
 
-  it { is_expected.to have_many(:security_scans).through(:builds).class_name('Security::Scan') }
-  it { is_expected.to have_many(:security_findings).through(:security_scans).class_name('Security::Finding').source(:findings) }
-  it { is_expected.to have_many(:downstream_bridges) }
-  it { is_expected.to have_many(:vulnerability_findings).through(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::Finding') }
-  it { is_expected.to have_many(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::FindingPipeline') }
+  describe 'associations' do
+    it { is_expected.to have_many(:security_scans).through(:builds).class_name('Security::Scan') }
+    it { is_expected.to have_many(:security_findings).through(:security_scans).class_name('Security::Finding').source(:findings) }
+    it { is_expected.to have_many(:downstream_bridges) }
+    it { is_expected.to have_many(:vulnerability_findings).through(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::Finding') }
+    it { is_expected.to have_many(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::FindingPipeline') }
+    it { is_expected.to have_one(:dast_profiles_pipeline).class_name('Dast::ProfilesPipeline').with_foreign_key(:ci_pipeline_id).inverse_of(:ci_pipeline) }
+    it { is_expected.to have_one(:dast_profile).class_name('Dast::Profile').through(:dast_profiles_pipeline) }
+  end
 
   describe '.failure_reasons' do
     it 'contains failure reasons about exceeded limits' do
@@ -266,8 +270,8 @@ RSpec.describe Ci::Pipeline do
 
       context 'when builds are retried' do
         before do
-          build_1.update(retried: true)
-          build_2.update(retried: true)
+          build_1.update!(retried: true)
+          build_2.update!(retried: true)
         end
 
         it 'does not take retried builds into account' do
@@ -305,8 +309,8 @@ RSpec.describe Ci::Pipeline do
 
       context 'when builds are retried' do
         before do
-          build.update(retried: true)
-          build1.update(retried: true)
+          build.update!(retried: true)
+          build1.update!(retried: true)
         end
 
         it 'does not take retried builds into account' do
@@ -388,7 +392,7 @@ RSpec.describe Ci::Pipeline do
 
       context 'when pipeline runs on a tag' do
         before do
-          pipeline.update(tag: true)
+          pipeline.update!(tag: true)
         end
 
         context 'when feature is not available' do
@@ -612,6 +616,37 @@ RSpec.describe Ci::Pipeline do
     end
 
     context 'when the pipeline does not have security_findings' do
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#triggered_for_ondemand_dast_scan?' do
+    let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+    let(:pipeline) { build(:ci_pipeline, pipeline_params) }
+
+    subject { pipeline.triggered_for_ondemand_dast_scan? }
+
+    context 'when the feature flag is enabled' do
+      it { is_expected.to be_truthy }
+
+      context 'when the pipeline only has the correct source' do
+        let(:pipeline_params) { { source: :ondemand_dast_scan } }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the pipeline only has the correct config_source' do
+        let(:pipeline_params) { { config_source: :parameter_source } }
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when the feature flag is disabled' do
+      before do
+        stub_feature_flags(security_dast_site_profiles_additional_fields: false)
+      end
+
       it { is_expected.to be_falsey }
     end
   end

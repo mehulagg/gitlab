@@ -167,7 +167,7 @@ export default {
     <template v-if="canAdmin" #tabs-end>
       <li class="gl-ml-auto gl-display-flex gl-align-items-center">
         <gl-button
-          variant="success"
+          variant="confirm"
           data-qa-selector="new_iteration_button"
           :href="newIterationPath"
         >

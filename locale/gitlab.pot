@@ -1074,6 +1074,9 @@ msgstr[1] ""
 msgid "+%{approvers} more approvers"
 msgstr ""
 
+msgid "+%{extra} more"
+msgstr ""
+
 msgid "+%{more_assignees_count}"
 msgstr ""
 
@@ -1467,13 +1470,19 @@ msgstr ""
 msgid "API version"
 msgstr ""
 
+msgid "APIFuzzing|$VariableWithPassword"
+msgstr ""
+
+msgid "APIFuzzing|$VariableWithUsername"
+msgstr ""
+
+msgid "APIFuzzing|/folder/example_file.json"
+msgstr ""
+
 msgid "APIFuzzing|API Fuzzing Configuration"
 msgstr ""
 
-msgid "APIFuzzing|Authentication is handled by providing HTTP basic authentication token as a header or cookie. %{linkStart}More information%{linkEnd}."
-msgstr ""
-
-msgid "APIFuzzing|Base URL of API fuzzing target."
+msgid "APIFuzzing|Base URL of API testing target. For example, http://www.example.com."
 msgstr ""
 
 msgid "APIFuzzing|Choose a method"
@@ -1483,6 +1492,9 @@ msgid "APIFuzzing|Choose a profile"
 msgstr ""
 
 msgid "APIFuzzing|Code snippet for the API Fuzzing configuration"
+msgstr ""
+
+msgid "APIFuzzing|Configure HTTP basic authentication values. Other authentication methods are supported. %{linkStart}Learn more%{linkEnd}."
 msgstr ""
 
 msgid "APIFuzzing|Copy code and open .gitlab-ci.yml file"
@@ -1497,10 +1509,10 @@ msgstr ""
 msgid "APIFuzzing|Enable authentication"
 msgstr ""
 
-msgid "APIFuzzing|Ex: $TestPassword"
+msgid "APIFuzzing|Enter the name of the variable containing the password. For example, $VariableWithPassword."
 msgstr ""
 
-msgid "APIFuzzing|Ex: $TestUsername"
+msgid "APIFuzzing|Enter the name of the variable containing the username. For example, $VariableWithUsername."
 msgstr ""
 
 msgid "APIFuzzing|Ex: Project_Test/File/example_fuzz"
@@ -1509,19 +1521,13 @@ msgstr ""
 msgid "APIFuzzing|Ex: Project_Test/File/example_fuzz.har"
 msgstr ""
 
-msgid "APIFuzzing|Ex: Project_Test/File/example_fuzz.json"
+msgid "APIFuzzing|File path containing APIs to be tested. For example, /folder/example_file.json."
 msgstr ""
 
 msgid "APIFuzzing|Generate code snippet"
 msgstr ""
 
 msgid "APIFuzzing|HAR files may contain sensitive information such as authentication tokens, API keys, and session cookies. We recommend that you review the HAR files' contents before adding them to a repository."
-msgstr ""
-
-msgid "APIFuzzing|Instead of entering the password directly, enter the key of the CI variable set to the password."
-msgstr ""
-
-msgid "APIFuzzing|Instead of entering the username directly, enter the key of the CI variable set to the username."
 msgstr ""
 
 msgid "APIFuzzing|Make sure your credentials are secured"
@@ -1531,6 +1537,9 @@ msgid "APIFuzzing|Password for basic authentication"
 msgstr ""
 
 msgid "APIFuzzing|Postman collections are a group of saved requests you can organize into folders."
+msgstr ""
+
+msgid "APIFuzzing|Predefined profiles"
 msgstr ""
 
 msgid "APIFuzzing|Scan mode"
@@ -1561,9 +1570,6 @@ msgid "APIFuzzing|Use this tool to generate API fuzzing configuration YAML to co
 msgstr ""
 
 msgid "APIFuzzing|Username for basic authentication"
-msgstr ""
-
-msgid "APIFuzzing|We recommend that you review the JSON specifications file before adding it to a repository."
 msgstr ""
 
 msgid "APIFuzzing|You may need a maintainer's help to secure your credentials."
@@ -1743,6 +1749,9 @@ msgstr ""
 msgid "Account: %{account}"
 msgstr ""
 
+msgid "Action"
+msgstr ""
+
 msgid "Action to take when receiving an alert. %{docsLink}"
 msgstr ""
 
@@ -1894,6 +1903,9 @@ msgid "Add comment now"
 msgstr ""
 
 msgid "Add comment to design"
+msgstr ""
+
+msgid "Add commit messages as comments to Asana tasks. %{docs_link}"
 msgstr ""
 
 msgid "Add deploy freeze"
@@ -2065,6 +2077,9 @@ msgid "Additional minutes"
 msgstr ""
 
 msgid "Additional text"
+msgstr ""
+
+msgid "Address"
 msgstr ""
 
 msgid "Adds"
@@ -2999,9 +3014,6 @@ msgstr ""
 msgid "AlertSettings|URL cannot be blank and must start with http or https"
 msgstr ""
 
-msgid "AlertSettings|URL is invalid."
-msgstr ""
-
 msgid "AlertSettings|Utilize the URL and authorization key below to authorize Prometheus to send alerts to GitLab. Review the Prometheus documentation to learn where to add these details, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
 msgstr ""
 
@@ -3149,9 +3161,6 @@ msgstr ""
 msgid "Allow only the selected protocols to be used for Git access."
 msgstr ""
 
-msgid "Allow overrides to approval lists per merge request (MR)"
-msgstr ""
-
 msgid "Allow owners to manage default branch protection per group"
 msgstr ""
 
@@ -3213,6 +3222,9 @@ msgid "Allowed domains for sign-ups"
 msgstr ""
 
 msgid "Allowed email domain restriction only permitted for top-level groups"
+msgstr ""
+
+msgid "Allowed group"
 msgstr ""
 
 msgid "Allowed to create:"
@@ -3441,9 +3453,6 @@ msgid "An error occurred while fetching terraform reports."
 msgstr ""
 
 msgid "An error occurred while fetching the board lists. Please try again."
-msgstr ""
-
-msgid "An error occurred while fetching the builds."
 msgstr ""
 
 msgid "An error occurred while fetching the job log."
@@ -4176,13 +4185,13 @@ msgstr ""
 msgid "AsanaService|%{user} pushed to branch %{branch} of %{project_name} ( %{commit_url} ):"
 msgstr ""
 
-msgid "AsanaService|Asana - Teamwork without email"
+msgid "AsanaService|Add commit messages as comments to Asana tasks"
 msgstr ""
 
-msgid "AsanaService|Comma-separated list of branches which will be automatically inspected. Leave blank to include all branches."
+msgid "AsanaService|Comma-separated list of branches to be automatically inspected. Leave blank to include all branches."
 msgstr ""
 
-msgid "AsanaService|User Personal Access Token. User must have access to task, all comments will be attributed to this user."
+msgid "AsanaService|User Personal Access Token. User must have access to the task. All comments are attributed to this user."
 msgstr ""
 
 msgid "Ascending"
@@ -4705,25 +4714,25 @@ msgstr ""
 msgid "Balsamiq file could not be loaded."
 msgstr ""
 
-msgid "BambooService|A continuous integration and build server"
-msgstr ""
-
-msgid "BambooService|A user with API access, if applicable"
-msgstr ""
-
-msgid "BambooService|Atlassian Bamboo CI"
+msgid "BambooService|Atlassian Bamboo"
 msgstr ""
 
 msgid "BambooService|Bamboo URL"
 msgstr ""
 
-msgid "BambooService|Bamboo build plan key like KEY"
+msgid "BambooService|Bamboo build plan key."
 msgstr ""
 
-msgid "BambooService|Bamboo root URL like https://bamboo.example.com"
+msgid "BambooService|Bamboo service root URL."
 msgstr ""
 
-msgid "BambooService|You must set up automatic revision labeling and a repository trigger in Bamboo."
+msgid "BambooService|The user with API access to the Bamboo server."
+msgstr ""
+
+msgid "BambooService|Use Atlassian Bamboo to run CI/CD pipelines. You must set up automatic revision labeling and a repository trigger in Bamboo. %{docs_link}"
+msgstr ""
+
+msgid "BambooService|Use the Atlassian Bamboo CI/CD server with GitLab."
 msgstr ""
 
 msgid "Based on"
@@ -4762,7 +4771,7 @@ msgstr ""
 msgid "BillingPlans|%{group_name} is currently using the %{plan_name}."
 msgstr ""
 
-msgid "BillingPlans|@%{user_name} you are currently using the %{plan_name} plan."
+msgid "BillingPlans|@%{user_name} you are currently using the %{plan_name}."
 msgstr ""
 
 msgid "BillingPlans|Congratulations, your free trial is activated."
@@ -4941,9 +4950,6 @@ msgid "Boards|An error occurred while creating the list. Please try again."
 msgstr ""
 
 msgid "Boards|An error occurred while fetching group projects. Please try again."
-msgstr ""
-
-msgid "Boards|An error occurred while fetching issues. Please reload the page."
 msgstr ""
 
 msgid "Boards|An error occurred while fetching labels. Please reload the page."
@@ -5694,6 +5700,9 @@ msgstr ""
 msgid "Change this value to influence how frequently the GitLab UI polls for updates."
 msgstr ""
 
+msgid "Change this value to influence how frequently the GitLab UI polls for updates. If you set the value to 2 all polling intervals are multiplied by 2, which means that polling happens half as frequently. The multiplier can also have a decimal value. The default value (1) is a reasonable choice for the majority of GitLab installations. Set to 0 to completely disable polling."
+msgstr ""
+
 msgid "Change title"
 msgstr ""
 
@@ -6429,10 +6438,37 @@ msgstr ""
 msgid "CloudLicense|Activate"
 msgstr ""
 
+msgid "CloudLicense|ID"
+msgstr ""
+
+msgid "CloudLicense|Last Sync"
+msgstr ""
+
+msgid "CloudLicense|Licensed to"
+msgstr ""
+
+msgid "CloudLicense|Manage"
+msgstr ""
+
 msgid "CloudLicense|Paste your activation code"
 msgstr ""
 
 msgid "CloudLicense|Paste your activation code below"
+msgstr ""
+
+msgid "CloudLicense|Plan"
+msgstr ""
+
+msgid "CloudLicense|Renews"
+msgstr ""
+
+msgid "CloudLicense|Started"
+msgstr ""
+
+msgid "CloudLicense|Subscription details"
+msgstr ""
+
+msgid "CloudLicense|Sync Subscription details"
 msgstr ""
 
 msgid "CloudLicense|This instance is currently using the %{planName} plan."
@@ -7763,6 +7799,9 @@ msgstr ""
 msgid "Community forum"
 msgstr ""
 
+msgid "Company"
+msgstr ""
+
 msgid "Company name"
 msgstr ""
 
@@ -7824,6 +7863,9 @@ msgid "CompareRevisions|Tags"
 msgstr ""
 
 msgid "CompareRevisions|There was an error while loading the branch/tag list. Please try again."
+msgstr ""
+
+msgid "CompareRevisions|There was an error while searching the branch/tag list. Please try again."
 msgstr ""
 
 msgid "CompareRevisions|There was an error while updating the branch/tag list. Please try again."
@@ -8642,10 +8684,19 @@ msgstr ""
 msgid "Copy value"
 msgstr ""
 
+msgid "Corpus Management|Are you sure you want to delete the corpus?"
+msgstr ""
+
 msgid "CorpusManagement|Fuzz testing corpus management"
 msgstr ""
 
+msgid "CorpusManagement|Latest Job:"
+msgstr ""
+
 msgid "CorpusManagement|New corpus"
+msgstr ""
+
+msgid "CorpusManagement|Not Set"
 msgstr ""
 
 msgid "CorpusManagement|Total Size: %{totalSize}"
@@ -8720,6 +8771,12 @@ msgstr ""
 msgid "Could not load usage counts. Please refresh the page to try again."
 msgstr ""
 
+msgid "Could not remove %{user} from %{group}. Cannot remove last group owner."
+msgstr ""
+
+msgid "Could not remove %{user} from %{group}. User is not a group member."
+msgstr ""
+
 msgid "Could not remove the trigger."
 msgstr ""
 
@@ -8769,6 +8826,9 @@ msgid "Create"
 msgstr ""
 
 msgid "Create %{environment}"
+msgstr ""
+
+msgid "Create %{humanized_resource_name}"
 msgstr ""
 
 msgid "Create %{type}"
@@ -9156,6 +9216,9 @@ msgid "Creating epic"
 msgstr ""
 
 msgid "Creating graphs uses the data from the Prometheus server. If this takes a long time, ensure that data is available."
+msgstr ""
+
+msgid "Creating pack file bitmaps makes housekeeping take a little longer but bitmaps should accelerate 'git clone' performance."
 msgstr ""
 
 msgid "Creation date"
@@ -9941,6 +10004,9 @@ msgstr ""
 msgid "Decompressed archive size validation failed."
 msgstr ""
 
+msgid "Decrease"
+msgstr ""
+
 msgid "Default CI configuration path"
 msgstr ""
 
@@ -10436,9 +10502,6 @@ msgstr ""
 msgid "DeployTokens|Revoke"
 msgstr ""
 
-msgid "DeployTokens|Revoke %{b_start}%{name}%{b_end}?"
-msgstr ""
-
 msgid "DeployTokens|Revoke %{name}"
 msgstr ""
 
@@ -10464,9 +10527,6 @@ msgid "DeployTokens|Use this token as a password. Save it. This password can %{i
 msgstr ""
 
 msgid "DeployTokens|Username"
-msgstr ""
-
-msgid "DeployTokens|You are about to revoke %{b_start}%{name}%{b_end}."
 msgstr ""
 
 msgid "DeployTokens|Your new Deploy Token username"
@@ -11499,6 +11559,9 @@ msgstr ""
 msgid "Enable Auto DevOps"
 msgstr ""
 
+msgid "Enable Git pack file bitmap creation"
+msgstr ""
+
 msgid "Enable Gitpod"
 msgstr ""
 
@@ -11523,6 +11586,9 @@ msgstr ""
 msgid "Enable Pseudonymizer data collection"
 msgstr ""
 
+msgid "Enable Repository Checks"
+msgstr ""
+
 msgid "Enable SSL verification"
 msgstr ""
 
@@ -11535,6 +11601,9 @@ msgstr ""
 msgid "Enable access to Grafana"
 msgstr ""
 
+msgid "Enable access to the Performance Bar"
+msgstr ""
+
 msgid "Enable access to the Performance Bar for a given group."
 msgstr ""
 
@@ -11545,6 +11614,9 @@ msgid "Enable and configure Prometheus metrics."
 msgstr ""
 
 msgid "Enable and disable Service Desk. Some additional configuration might be required. %{link_start}Learn more%{link_end}."
+msgstr ""
+
+msgid "Enable automatic repository housekeeping (git repack, git gc)"
 msgstr ""
 
 msgid "Enable classification control using an external service"
@@ -12489,9 +12561,6 @@ msgstr ""
 msgid "Evidence collection"
 msgstr ""
 
-msgid "Ex: Example.com"
-msgstr ""
-
 msgid "Exactly one of %{attributes} is required"
 msgstr ""
 
@@ -12559,6 +12628,9 @@ msgid "Expand milestones"
 msgstr ""
 
 msgid "Expand panel"
+msgstr ""
+
+msgid "Expand pipeline"
 msgstr ""
 
 msgid "Expand sidebar"
@@ -13514,7 +13586,13 @@ msgstr ""
 msgid "For each job, re-use the project workspace. If the workspace doesn't exist, use %{code_open}git clone%{code_close}."
 msgstr ""
 
+msgid "For general work"
+msgstr ""
+
 msgid "For individual use, create a separate account under your personal email address, not tied to the Enterprise email domain or group."
+msgstr ""
+
+msgid "For investigating IT service disruptions or outages"
 msgstr ""
 
 msgid "For more info, read the documentation."
@@ -13907,7 +13985,13 @@ msgstr ""
 msgid "Geo|Could not remove tracking entry for an existing upload."
 msgstr ""
 
+msgid "Geo|Data replication lag"
+msgstr ""
+
 msgid "Geo|Discover GitLab Geo"
+msgstr ""
+
+msgid "Geo|Does not match the primary storage configuration"
 msgstr ""
 
 msgid "Geo|Failed"
@@ -13935,6 +14019,12 @@ msgid "Geo|In sync"
 msgstr ""
 
 msgid "Geo|Internal URL"
+msgstr ""
+
+msgid "Geo|Last event ID from primary"
+msgstr ""
+
+msgid "Geo|Last event ID processed by cursor"
 msgstr ""
 
 msgid "Geo|Last repository check run"
@@ -14021,10 +14111,25 @@ msgstr ""
 msgid "Geo|Replicated data is verified with the secondary node(s) using checksums."
 msgstr ""
 
+msgid "Geo|Replication Details"
+msgstr ""
+
+msgid "Geo|Replication counts"
+msgstr ""
+
+msgid "Geo|Replication details"
+msgstr ""
+
 msgid "Geo|Replication slot WAL"
 msgstr ""
 
 msgid "Geo|Replication slots"
+msgstr ""
+
+msgid "Geo|Replication status"
+msgstr ""
+
+msgid "Geo|Replication summary"
 msgstr ""
 
 msgid "Geo|Resync"
@@ -14045,9 +14150,6 @@ msgstr ""
 msgid "Geo|Review replication status, and resynchronize and reverify items with the primary node."
 msgstr ""
 
-msgid "Geo|Secondary Details"
-msgstr ""
-
 msgid "Geo|Secondary node"
 msgstr ""
 
@@ -14055,6 +14157,9 @@ msgid "Geo|Secondary site"
 msgstr ""
 
 msgid "Geo|Status"
+msgstr ""
+
+msgid "Geo|Storage config"
 msgstr ""
 
 msgid "Geo|Synced"
@@ -14067,6 +14172,9 @@ msgid "Geo|Synchronization failed - %{error}"
 msgstr ""
 
 msgid "Geo|Synchronization of %{itemTitle} is disabled."
+msgstr ""
+
+msgid "Geo|Synchronization settings"
 msgstr ""
 
 msgid "Geo|The database is currently %{db_lag} behind the primary node."
@@ -14148,6 +14256,9 @@ msgid "Getting started with releases"
 msgstr ""
 
 msgid "Git"
+msgstr ""
+
+msgid "Git GC period"
 msgstr ""
 
 msgid "Git LFS is not enabled on this GitLab server, contact your admin."
@@ -14282,6 +14393,9 @@ msgstr ""
 msgid "GitLab version"
 msgstr ""
 
+msgid "GitLab will periodically run %{link_to_git_fsck} in all project and wiki repositories to look for silent disk corruption issues."
+msgstr ""
+
 msgid "GitLab will run a background job that will produce pseudonymized CSVs of the GitLab database that will be uploaded to your configured object storage directory."
 msgstr ""
 
@@ -14403,6 +14517,24 @@ msgid "Gitea Host URL"
 msgstr ""
 
 msgid "Gitea Import"
+msgstr ""
+
+msgid "GithubIntegration|Create a %{token_link_start}personal access token%{token_link_end} with %{status_html} access granted and paste it here."
+msgstr ""
+
+msgid "GithubIntegration|Obtain statuses for commits and pull requests."
+msgstr ""
+
+msgid "GithubIntegration|Repository URL"
+msgstr ""
+
+msgid "GithubIntegration|Select this if you want GitHub to mark status checks as \"Required\". %{learn_more_link_start}Learn more%{learn_more_link_end}."
+msgstr ""
+
+msgid "GithubIntegration|Static status check names (optional)"
+msgstr ""
+
+msgid "GithubIntegration|This requires mirroring your GitHub repository to this project. %{docs_link}"
 msgstr ""
 
 msgid "Gitlab Pages"
@@ -14843,7 +14975,13 @@ msgstr ""
 msgid "GroupSAML|Are you sure you want to remove the SAML group link?"
 msgstr ""
 
+msgid "GroupSAML|Before enforcing SSO, enable SAML authentication."
+msgstr ""
+
 msgid "GroupSAML|Certificate fingerprint"
+msgstr ""
+
+msgid "GroupSAML|Check SSO on git activity"
 msgstr ""
 
 msgid "GroupSAML|Configuration"
@@ -14861,7 +14999,10 @@ msgstr ""
 msgid "GroupSAML|Enable SAML authentication for this group."
 msgstr ""
 
-msgid "GroupSAML|Enforce SSO-only authentication for this group."
+msgid "GroupSAML|Enforce SSO-access for Git in this group."
+msgstr ""
+
+msgid "GroupSAML|Enforce SSO-only authentication for web activity for this group."
 msgstr ""
 
 msgid "GroupSAML|Enforce users to have dedicated group managed accounts for this group."
@@ -14955,9 +15096,6 @@ msgid "GroupSAML|The case-sensitive group name that will be sent by the SAML ide
 msgstr ""
 
 msgid "GroupSAML|This will be set as the access level of users added to the group."
-msgstr ""
-
-msgid "GroupSAML|To be able to enable enforced SSO, you first need to enable SAML authentication."
 msgstr ""
 
 msgid "GroupSAML|To be able to enable group managed accounts, you first need to enable enforced SSO."
@@ -15468,6 +15606,9 @@ msgstr ""
 msgid "How do I configure runners?"
 msgstr ""
 
+msgid "How do I configure this integration?"
+msgstr ""
+
 msgid "How do I generate it?"
 msgstr ""
 
@@ -15634,6 +15775,12 @@ msgid "If you did not recently sign in, you should immediately %{password_link_s
 msgstr ""
 
 msgid "If you did not recently sign in, you should immediately change your password: %{password_link}."
+msgstr ""
+
+msgid "If you got a lot of false alarms from repository checks you can choose to clear all repository check information from the database."
+msgstr ""
+
+msgid "If you keep automatic housekeeping disabled for a long time Git repository access on your GitLab server will become slower and your repositories will use more disk space. We recommend to always leave this enabled."
 msgstr ""
 
 msgid "If you lose your recovery codes you can generate new ones, invalidating all previous codes."
@@ -16428,6 +16575,9 @@ msgstr ""
 msgid "Incomplete"
 msgstr ""
 
+msgid "Increase"
+msgstr ""
+
 msgid "Indent"
 msgstr ""
 
@@ -16444,6 +16594,9 @@ msgid "Inform users without uploaded SSH keys that they can't push over SSH unti
 msgstr ""
 
 msgid "Information about additional Pages templates and how to install them can be found in our %{pages_getting_started_guide}."
+msgstr ""
+
+msgid "Infrastructure Registry"
 msgstr ""
 
 msgid "Inherited"
@@ -16662,9 +16815,6 @@ msgid "Integrations|Standard"
 msgstr ""
 
 msgid "Integrations|This integration, and inheriting projects were reset."
-msgstr ""
-
-msgid "Integrations|This requires mirroring your GitHub repository to this project. %{docs_link}"
 msgstr ""
 
 msgid "Integrations|To keep this project going, create a new issue."
@@ -17141,6 +17291,9 @@ msgstr ""
 msgid "Issue title"
 msgstr ""
 
+msgid "Issue types"
+msgstr ""
+
 msgid "Issue update failed"
 msgstr ""
 
@@ -17396,6 +17549,9 @@ msgstr ""
 msgid "JiraService|An error occurred while fetching issue list"
 msgstr ""
 
+msgid "JiraService|Automatically transitions Jira issues to the \"Done\" category. %{linkStart}Learn more%{linkEnd}"
+msgstr ""
+
 msgid "JiraService|Define the type of Jira issue to create from a vulnerability."
 msgstr ""
 
@@ -17406,6 +17562,9 @@ msgid "JiraService|Enable Jira issues"
 msgstr ""
 
 msgid "JiraService|Enable Jira issues creation from vulnerabilities"
+msgstr ""
+
+msgid "JiraService|Enable Jira transitions"
 msgstr ""
 
 msgid "JiraService|Enter new password or API token"
@@ -17456,10 +17615,10 @@ msgstr ""
 msgid "JiraService|Jira project key"
 msgstr ""
 
-msgid "JiraService|Jira workflow transition IDs"
+msgid "JiraService|Leave blank to use your current password or API token"
 msgstr ""
 
-msgid "JiraService|Leave blank to use your current password or API token"
+msgid "JiraService|Move to Done"
 msgstr ""
 
 msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}."
@@ -17480,7 +17639,7 @@ msgstr ""
 msgid "JiraService|Select issue type"
 msgstr ""
 
-msgid "JiraService|Set transition IDs for Jira workflow transitions. %{link_start}Learn more%{link_end}"
+msgid "JiraService|Set a custom final state by using transition IDs. %{linkStart}Learn about transition IDs%{linkEnd}"
 msgstr ""
 
 msgid "JiraService|Sign in to GitLab.com to get started."
@@ -17492,10 +17651,16 @@ msgstr ""
 msgid "JiraService|This issue is synchronized with Jira"
 msgstr ""
 
+msgid "JiraService|Transition Jira issues to their final state:"
+msgstr ""
+
 msgid "JiraService|Use a password for server version and an API token for cloud version"
 msgstr ""
 
 msgid "JiraService|Use a username for server version and an email for cloud version"
+msgstr ""
+
+msgid "JiraService|Use custom transitions"
 msgstr ""
 
 msgid "JiraService|Username or Email"
@@ -17682,6 +17847,9 @@ msgid "Just me"
 msgstr ""
 
 msgid "K8s pod health"
+msgstr ""
+
+msgid "KEY"
 msgstr ""
 
 msgid "Keep artifacts from most recent successful jobs"
@@ -18729,9 +18897,6 @@ msgstr ""
 msgid "Mark as ready"
 msgstr ""
 
-msgid "Mark as resolved"
-msgstr ""
-
 msgid "Mark this issue as a duplicate of another issue"
 msgstr ""
 
@@ -18807,6 +18972,9 @@ msgstr ""
 msgid "MattermostService|Add to Mattermost"
 msgstr ""
 
+msgid "MattermostService|After you configure the integration, view your new Mattermost commands by entering"
+msgstr ""
+
 msgid "MattermostService|Command trigger word"
 msgstr ""
 
@@ -18825,13 +18993,10 @@ msgstr ""
 msgid "MattermostService|Response username"
 msgstr ""
 
-msgid "MattermostService|See list of available commands in Mattermost after setting up this service, by entering"
-msgstr ""
-
 msgid "MattermostService|Suggestions:"
 msgstr ""
 
-msgid "MattermostService|This service allows users to perform common operations on this project by entering slash commands in Mattermost."
+msgid "MattermostService|Use this service to perform common tasks in your project by entering slash commands in Mattermost."
 msgstr ""
 
 msgid "Max 100,000 events"
@@ -20498,6 +20663,9 @@ msgstr ""
 msgid "NetworkPolicy|Search by policy name"
 msgstr ""
 
+msgid "NetworkPolicy|Status"
+msgstr ""
+
 msgid "Never"
 msgstr ""
 
@@ -20543,9 +20711,6 @@ msgid "New Jira import"
 msgstr ""
 
 msgid "New Label"
-msgstr ""
-
-msgid "New Merge Request"
 msgstr ""
 
 msgid "New Milestone"
@@ -21279,6 +21444,15 @@ msgstr ""
 msgid "Number of Elasticsearch shards"
 msgstr ""
 
+msgid "Number of Git pushes after which 'git gc' is run."
+msgstr ""
+
+msgid "Number of Git pushes after which a full 'git repack' is run."
+msgstr ""
+
+msgid "Number of Git pushes after which an incremental 'git repack' is run."
+msgstr ""
+
 msgid "Number of LOCs per commit"
 msgstr ""
 
@@ -21644,12 +21818,6 @@ msgstr ""
 msgid "Open"
 msgstr ""
 
-msgid "Open API"
-msgstr ""
-
-msgid "Open API specification file path"
-msgstr ""
-
 msgid "Open Selection"
 msgstr ""
 
@@ -21678,6 +21846,12 @@ msgid "Open sidebar"
 msgstr ""
 
 msgid "Open: %{open}"
+msgstr ""
+
+msgid "OpenAPI"
+msgstr ""
+
+msgid "OpenAPI specification file path"
 msgstr ""
 
 msgid "Opened"
@@ -22125,30 +22299,6 @@ msgid "PackageRegistry|published by %{author}"
 msgstr ""
 
 msgid "PackageRegistry|yarn command"
-msgstr ""
-
-msgid "PackageType|Composer"
-msgstr ""
-
-msgid "PackageType|Conan"
-msgstr ""
-
-msgid "PackageType|Generic"
-msgstr ""
-
-msgid "PackageType|Maven"
-msgstr ""
-
-msgid "PackageType|NuGet"
-msgstr ""
-
-msgid "PackageType|PyPI"
-msgstr ""
-
-msgid "PackageType|RubyGems"
-msgstr ""
-
-msgid "PackageType|npm"
 msgstr ""
 
 msgid "Packages"
@@ -23099,6 +23249,9 @@ msgstr ""
 msgid "Policy project doesn't exist"
 msgstr ""
 
+msgid "Polling interval multiplier"
+msgstr ""
+
 msgid "Popularity"
 msgstr ""
 
@@ -23241,6 +23394,12 @@ msgid "Prevent project forking outside current group"
 msgstr ""
 
 msgid "Prevent users from changing their profile name"
+msgstr ""
+
+msgid "Prevent users from modifying MR approval rules in merge requests."
+msgstr ""
+
+msgid "Prevent users from modifying MR approval rules in projects and merge requests."
 msgstr ""
 
 msgid "Prevent users from modifying MR approval rules."
@@ -23972,40 +24131,40 @@ msgstr ""
 msgid "ProjectService|Enter new password"
 msgstr ""
 
-msgid "ProjectService|Event will be triggered by a push to the repository"
+msgid "ProjectService|Event triggered when a commit is created or updated."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when a commit is created/updated"
+msgid "ProjectService|Event triggered when a confidential issue is created, updated, or closed."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when a confidential issue is created/updated/closed"
+msgid "ProjectService|Event triggered when a deployment starts or finishes."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when a deployment starts or finishes"
+msgid "ProjectService|Event triggered when a merge request is created, updated, or merged."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when a merge request is created/updated/merged"
+msgid "ProjectService|Event triggered when a new tag is pushed to the repository."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when a new tag is pushed to the repository"
+msgid "ProjectService|Event triggered when a new, unique alert is recorded."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when a new, unique alert is recorded"
+msgid "ProjectService|Event triggered when a pipeline status changes."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when a pipeline status changes"
+msgid "ProjectService|Event triggered when a wiki page is created or updated."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when a wiki page is created/updated"
+msgid "ProjectService|Event triggered when an issue is created, updated, or closed."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when an issue is created/updated/closed"
+msgid "ProjectService|Event triggered when someone adds a comment on a confidential issue."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when someone adds a comment"
+msgid "ProjectService|Event triggered when someone adds a comment."
 msgstr ""
 
-msgid "ProjectService|Event will be triggered when someone adds a comment on a confidential issue"
+msgid "ProjectService|Event triggered when someone pushes to the repository."
 msgstr ""
 
 msgid "ProjectService|Issue URL"
@@ -24032,7 +24191,7 @@ msgstr ""
 msgid "ProjectService|TeamCity URL"
 msgstr ""
 
-msgid "ProjectService|To set up this service:"
+msgid "ProjectService|To configure this integration, you should:"
 msgstr ""
 
 msgid "ProjectSettings|%{link_start}What are description templates?%{link_end}"
@@ -24104,7 +24263,7 @@ msgstr ""
 msgid "ProjectSettings|Enable \"Delete source branch\" option by default"
 msgstr ""
 
-msgid "ProjectSettings|Enable merge trains."
+msgid "ProjectSettings|Enable merge trains"
 msgstr ""
 
 msgid "ProjectSettings|Enable merged results pipelines"
@@ -25449,7 +25608,7 @@ msgstr ""
 msgid "Releases are based on Git tags and mark specific points in a project's development history. They can contain information about the type of changes and can also deliver binaries, like compiled versions of your software."
 msgstr ""
 
-msgid "Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0%{codeEnd}, %{codeStart}v2.0-pre%{codeEnd}."
+msgid "Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0.0%{codeEnd}, %{codeStart}v2.1.0-pre%{codeEnd}."
 msgstr ""
 
 msgid "Releases documentation"
@@ -25483,6 +25642,9 @@ msgid "Remove %{displayReference}"
 msgstr ""
 
 msgid "Remove Zoom meeting"
+msgstr ""
+
+msgid "Remove all approvals in a merge request when new commits are pushed to its source branch."
 msgstr ""
 
 msgid "Remove all or specific assignee(s)"
@@ -25779,6 +25941,9 @@ msgstr ""
 msgid "Reported %{timeAgo} by %{reportedBy}"
 msgstr ""
 
+msgid "Reported by"
+msgstr ""
+
 msgid "Reported by %{reporter}"
 msgstr ""
 
@@ -25825,9 +25990,6 @@ msgstr ""
 msgid "Reports|Base report parsing error:"
 msgstr ""
 
-msgid "Reports|Class"
-msgstr ""
-
 msgid "Reports|Classname"
 msgstr ""
 
@@ -25845,6 +26007,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Reports|Failure"
+msgstr ""
+
+msgid "Reports|Filename"
 msgstr ""
 
 msgid "Reports|Head report parsing error:"
@@ -25974,6 +26139,9 @@ msgid "Repository check"
 msgstr ""
 
 msgid "Repository check was triggered."
+msgstr ""
+
+msgid "Repository checks"
 msgstr ""
 
 msgid "Repository cleanup"
@@ -26530,6 +26698,9 @@ msgstr ""
 msgid "Runners|Revision"
 msgstr ""
 
+msgid "Runners|Runner #%{runner_id}"
+msgstr ""
+
 msgid "Runners|Shared"
 msgstr ""
 
@@ -27030,6 +27201,9 @@ msgid "SecurityApprovals|Requires approval for Denied licenses. %{linkStart}More
 msgstr ""
 
 msgid "SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}Learn more.%{linkEnd}"
+msgstr ""
+
+msgid "SecurityConfiguration|%{featureName} merge request creation mutation failed"
 msgstr ""
 
 msgid "SecurityConfiguration|An error occurred while creating the merge request."
@@ -29118,13 +29292,13 @@ msgstr ""
 msgid "Status: %{title}"
 msgstr ""
 
+msgid "StatusPage|AWS %{docsLink}"
+msgstr ""
+
 msgid "StatusPage|AWS Secret access key"
 msgstr ""
 
 msgid "StatusPage|AWS access key ID"
-msgstr ""
-
-msgid "StatusPage|AWS documentation"
 msgstr ""
 
 msgid "StatusPage|AWS region"
@@ -29139,9 +29313,6 @@ msgstr ""
 msgid "StatusPage|Configure file storage settings to link issues in this project to an external status page."
 msgstr ""
 
-msgid "StatusPage|For help with configuration, visit %{docsLink}"
-msgstr ""
-
 msgid "StatusPage|S3 Bucket name"
 msgstr ""
 
@@ -29154,7 +29325,7 @@ msgstr ""
 msgid "StatusPage|Status page frontend documentation"
 msgstr ""
 
-msgid "StatusPage|To publish incidents to an external status page, GitLab will store a JSON file in your Amazon S3 account in a location accessible to your external status page service. Make sure to also set up %{docsLink}"
+msgid "StatusPage|To publish incidents to an external status page, GitLab stores a JSON file in your Amazon S3 account at a location that your external status page service can access. Make sure to also set up %{docsLink}"
 msgstr ""
 
 msgid "StatusPage|configuration documentation"
@@ -29244,9 +29415,6 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
-msgid "Submit %{humanized_resource_name}"
-msgstr ""
-
 msgid "Submit a review"
 msgstr ""
 
@@ -29260,9 +29428,6 @@ msgid "Submit changes..."
 msgstr ""
 
 msgid "Submit feedback"
-msgstr ""
-
-msgid "Submit issue"
 msgstr ""
 
 msgid "Submit review"
@@ -30354,6 +30519,9 @@ msgstr ""
 msgid "The merge request can now be merged."
 msgstr ""
 
+msgid "The merge request has been updated, and the number of code quality violations in this file has changed."
+msgstr ""
+
 msgid "The metric must be one of %{metrics}."
 msgstr ""
 
@@ -30427,6 +30595,9 @@ msgid "The pseudonymizer data collection is disabled. When enabled, GitLab will 
 msgstr ""
 
 msgid "The regular expression used to find test coverage output in the job log. For example, use %{regex} for Simplecov (Ruby). Leave blank to disable."
+msgstr ""
+
+msgid "The remote mirror URL is invalid."
 msgstr ""
 
 msgid "The remote mirror took to long to complete."
@@ -30562,6 +30733,9 @@ msgid "There are no SSH keys associated with this account."
 msgstr ""
 
 msgid "There are no SSH keys with access to your account."
+msgstr ""
+
+msgid "There are no abuse reports!"
 msgstr ""
 
 msgid "There are no archived projects yet"
@@ -30838,6 +31012,9 @@ msgid "There was an error when reseting email token."
 msgstr ""
 
 msgid "There was an error when subscribing to this label."
+msgstr ""
+
+msgid "There was an error when trying to sync your license. Please verify that your instance is using an active license key."
 msgstr ""
 
 msgid "There was an error when unsubscribing from this label."
@@ -31792,6 +31969,15 @@ msgstr ""
 msgid "To GitLab"
 msgstr ""
 
+msgid "To accept this invitation, create an account or sign in."
+msgstr ""
+
+msgid "To accept this invitation, sign in or create an account."
+msgstr ""
+
+msgid "To accept this invitation, sign in."
+msgstr ""
+
 msgid "To access this domain create a new DNS record"
 msgstr ""
 
@@ -32166,7 +32352,7 @@ msgstr ""
 msgid "Trials|You can apply your trial to a new group or an existing group."
 msgstr ""
 
-msgid "Trials|You won't get a free trial right now but you can always resume this process by clicking on your avatar and choosing 'Start a free trial'"
+msgid "Trials|You won't get a free trial right now but you can always resume this process by selecting your avatar and choosing 'Start an Ultimate trial'"
 msgstr ""
 
 msgid "Trials|Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the features of GitLab %{planName}. To keep those features after your trial ends, you’ll need to buy a subscription. (You can also choose GitLab Premium if it meets your needs.)"
@@ -32356,6 +32542,12 @@ msgid "U2F only works with HTTPS-enabled websites. Contact your administrator fo
 msgstr ""
 
 msgid "URL"
+msgstr ""
+
+msgid "URL cannot be blank"
+msgstr ""
+
+msgid "URL is invalid"
 msgstr ""
 
 msgid "URL is required"
@@ -33120,6 +33312,9 @@ msgstr ""
 msgid "User %{username} was successfully removed."
 msgstr ""
 
+msgid "User %{user} was removed from %{group}."
+msgstr ""
+
 msgid "User ID"
 msgstr ""
 
@@ -33462,7 +33657,22 @@ msgstr ""
 msgid "ValueStreamAnalyticsStage|We don't have enough data to show this stage."
 msgstr ""
 
-msgid "ValueStreamAnalytics|%{days}d"
+msgid "ValueStreamAnalytics|%{value}M"
+msgstr ""
+
+msgid "ValueStreamAnalytics|%{value}d"
+msgstr ""
+
+msgid "ValueStreamAnalytics|%{value}h"
+msgstr ""
+
+msgid "ValueStreamAnalytics|%{value}m"
+msgstr ""
+
+msgid "ValueStreamAnalytics|%{value}w"
+msgstr ""
+
+msgid "ValueStreamAnalytics|&lt;1m"
 msgstr ""
 
 msgid "ValueStreamAnalytics|Median time from first commit to issue closed."
@@ -33632,6 +33842,9 @@ msgid "View logs"
 msgstr ""
 
 msgid "View merge request"
+msgstr ""
+
+msgid "View on %{url}"
 msgstr ""
 
 msgid "View open merge request"
@@ -34279,6 +34492,9 @@ msgstr ""
 msgid "What does this command do?"
 msgstr ""
 
+msgid "What is repository mirroring?"
+msgstr ""
+
 msgid "What is squashing?"
 msgstr ""
 
@@ -34575,6 +34791,9 @@ msgstr ""
 msgid "Write a comment…"
 msgstr ""
 
+msgid "Write a description or drag your files here…"
+msgstr ""
+
 msgid "Write milestone description..."
 msgstr ""
 
@@ -34729,6 +34948,12 @@ msgid "You can create a new SSH key by visiting %{link}"
 msgstr ""
 
 msgid "You can create a new one or check them in your %{pat_link_start}personal access tokens%{pat_link_end} settings"
+msgstr ""
+
+msgid "You can create a new one or check them in your %{ssh_key_link_start}SSH keys%{ssh_key_link_end} settings."
+msgstr ""
+
+msgid "You can create a new one or check them in your SSH keys settings %{ssh_key_link}."
 msgstr ""
 
 msgid "You can create a new one or check them in your personal access tokens settings %{pat_link}"
@@ -35226,10 +35451,16 @@ msgstr ""
 msgid "Your Public Email will be displayed on your public profile."
 msgstr ""
 
+msgid "Your SSH key has expired"
+msgstr ""
+
 msgid "Your SSH key was deleted"
 msgstr ""
 
 msgid "Your SSH keys (%{count})"
+msgstr ""
+
+msgid "Your SSH keys with the following fingerprints has expired:"
 msgstr ""
 
 msgid "Your To-Do List"
@@ -35350,6 +35581,9 @@ msgid "Your license does not support on-call schedules"
 msgstr ""
 
 msgid "Your license is valid from"
+msgstr ""
+
+msgid "Your license was successfully synced."
 msgstr ""
 
 msgid "Your license will be included in your GitLab backup and will survive upgrades, so in normal usage you should never need to re-upload your %{code_open}.gitlab-license%{code_close} file."
@@ -36048,6 +36282,12 @@ msgid "help"
 msgstr ""
 
 msgid "http:"
+msgstr ""
+
+msgid "http://www.example.com"
+msgstr ""
+
+msgid "https://bamboo.example.com"
 msgstr ""
 
 msgid "https://your-bitbucket-server"

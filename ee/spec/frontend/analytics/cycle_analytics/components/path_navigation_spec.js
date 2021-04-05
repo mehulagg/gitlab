@@ -63,9 +63,9 @@ describe('PathNavigation', () => {
 
         describe('popovers', () => {
           const modifiedStages = [
-            ...transformedStagePathData.slice(0, 2),
+            ...transformedStagePathData.slice(0, 3),
             {
-              ...transformedStagePathData[2],
+              ...transformedStagePathData[3],
               startEventHtmlDescription: null,
               endEventHtmlDescription: null,
             },
@@ -80,16 +80,16 @@ describe('PathNavigation', () => {
           });
 
           it('shows the sanitized start event description for the first stage item', () => {
-            const firsPpopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
+            const firstPopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
             const expectedStartEventDescription = 'Issue created';
-            expect(firsPpopover.text()).toContain(expectedStartEventDescription);
+            expect(firstPopover.text()).toContain(expectedStartEventDescription);
           });
 
           it('shows the sanitized end event description for the first stage item', () => {
-            const firsPpopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
+            const firstPopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
             const expectedStartEventDescription =
               'Issue first associated with a milestone or issue first added to a board';
-            expect(firsPpopover.text()).toContain(expectedStartEventDescription);
+            expect(firstPopover.text()).toContain(expectedStartEventDescription);
           });
         });
       });

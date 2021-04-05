@@ -244,4 +244,100 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
       end
     end
   end
+
+  describe '#filter_purchase_eligible_namespaces' do
+    subject do
+      client.filter_purchase_eligible_namespaces(user, [user_namespace, group_namespace, subgroup])
+    end
+
+    let_it_be(:user) { create(:user) }
+    let_it_be(:user_namespace) { user.namespace }
+    let_it_be(:group_namespace) { create(:group) }
+    let_it_be(:subgroup) { create(:group, parent: group_namespace) }
+
+    let(:headers) do
+      {
+        "Accept" => "application/json",
+        "Content-Type" => "application/json",
+        "X-Admin-Email" => "gl_com_api@gitlab.com",
+        "X-Admin-Token" => "customer_admin_token"
+      }
+    end
+
+    let(:variables) do
+      {
+        customerUid: user.id,
+        namespaces: [
+          { id: user_namespace.id, parentId: nil, plan: "default", trial: false },
+          { id: group_namespace.id, parentId: nil, plan: "default", trial: false },
+          { id: subgroup.id, parentId: group_namespace.id, plan: "default", trial: false }
+        ]
+      }
+    end
+
+    let(:params) do
+      {
+        variables: variables,
+        query: <<~GQL
+          query FilterEligibleNamespaces($customerUid: Int!, $namespaces: [GitlabNamespaceInput!]!) {
+            namespaceEligibility(customerUid: $customerUid, namespaces: $namespaces, eligibleForPurchase: true) {
+              id
+            }
+          }
+        GQL
+      }
+    end
+
+    context 'when the response is successful' do
+      it 'returns the namespace data', :aggregate_failures do
+        response = {
+          data: {
+            'data' => {
+              'namespaceEligibility' => [{ 'id' => 1 }, { 'id' => 3 }]
+            }
+          }
+        }
+
+        expect(client).to receive(:http_post).with('graphql', headers, params).and_return(response)
+
+        expect(subject).to eq(success: true, data: [{ 'id' => 1 }, { 'id' => 3 }])
+      end
+    end
+
+    context 'when the response is unsuccessful' do
+      it 'returns the error message', :aggregate_failures do
+        response = {
+          data: {
+            "data" => {
+              "namespaceEligibility" => nil
+            },
+            "errors" => [
+              {
+                "message" => "You must be logged in to access this resource",
+                "locations" => [{ "line" => 2, "column" => 3 }],
+                "path" => ["namespaceEligibility"]
+              }
+            ]
+          }
+        }
+
+        expect(Gitlab::ErrorTracking)
+          .to receive(:track_and_raise_for_dev_exception)
+          .with(
+            a_kind_of(Gitlab::SubscriptionPortal::Client::ResponseError),
+            query: params[:query], response: response[:data])
+
+        expect(client).to receive(:http_post).with('graphql', headers, params).and_return(response)
+
+        expect(subject).to eq(
+          success: false,
+          errors: [{
+            "locations" => [{ "column" => 3, "line" => 2 }],
+            "message" => "You must be logged in to access this resource",
+            "path" => ["namespaceEligibility"]
+          }]
+        )
+      end
+    end
+  end
 end

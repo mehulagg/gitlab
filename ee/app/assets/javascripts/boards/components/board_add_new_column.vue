@@ -72,6 +72,7 @@ export default {
   data() {
     return {
       selectedId: null,
+      selectedItem: null,
       columnType: ListType.label,
     };
   },
@@ -111,10 +112,6 @@ export default {
     },
     iterationTypeSelected() {
       return this.columnType === ListType.iteration;
-    },
-
-    selectedItem() {
-      return this.items.find(({ id }) => id === this.selectedId);
     },
 
     hasLabelSelection() {
@@ -262,11 +259,17 @@ export default {
     setColumnType(type) {
       this.columnType = type;
       this.selectedId = null;
+      this.setSelectedItem(null);
       this.filterItems();
     },
 
-    hideDropdown() {
-      this.$root.$emit('bv::dropdown::hide');
+    setSelectedItem(selectedId) {
+      const item = this.items.find(({ id }) => id === selectedId);
+      if (!selectedId || !item) {
+        this.selectedItem = null;
+      } else {
+        this.selectedItem = { ...item };
+      }
     },
   },
 };
@@ -337,7 +340,8 @@ export default {
       <gl-form-radio-group
         v-model="selectedId"
         class="gl-overflow-y-auto gl-px-5"
-        @change="hideDropdown"
+        data-testid="selectItem"
+        @change="setSelectedItem"
       >
         <label
           v-for="item in items"

@@ -91,7 +91,7 @@ module Projects
         {
           sast: project_security_configuration_sast_path(project),
           dast_profiles: project_security_configuration_dast_scans_path(project),
-          api_fuzzing: ::Feature.enabled?(:api_fuzzing_configuration_ui, project, default_enabled: :yaml) ? project_security_configuration_api_fuzzing_path(project) : nil
+          api_fuzzing: project_security_configuration_api_fuzzing_path(project)
         }[type]
       end
     end

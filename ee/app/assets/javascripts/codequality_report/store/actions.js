@@ -1,5 +1,5 @@
 import Api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
 
@@ -33,6 +33,8 @@ export const fetchReport = ({ state, dispatch }) => {
     })
     .catch((error) => {
       dispatch('receiveReportError', error);
-      createFlash(s__('ciReport|There was an error fetching the codequality report.'));
+      createFlash({
+        message: s__('ciReport|There was an error fetching the codequality report.'),
+      });
     });
 };

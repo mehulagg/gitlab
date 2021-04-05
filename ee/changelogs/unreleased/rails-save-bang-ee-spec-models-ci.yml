@@ -1,0 +1,5 @@
+---
+title: Fix Rails/SaveBang rubocop offenses in ee/spec/models/ci
+merge_request: 58109
+author: Abdul Wadood @abdulwd
+type: fixed

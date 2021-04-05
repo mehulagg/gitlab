@@ -20,11 +20,15 @@ describe('Group settings store mutations', () => {
     it('updates settings', () => {
       mutations.RECEIVE_SETTINGS_SUCCESS(state, {
         allow_author_approval: true,
+        allow_overrides_to_approver_list_per_merge_request: true,
         require_password_to_approve: true,
+        retain_approvals_on_push: true,
       });
 
       expect(state.settings.preventAuthorApproval).toBe(false);
+      expect(state.settings.preventMrApprovalRuleEdit).toBe(false);
       expect(state.settings.requireUserPassword).toBe(true);
+      expect(state.settings.removeApprovalsOnPush).toBe(false);
       expect(state.isLoading).toBe(false);
     });
   });
@@ -49,11 +53,15 @@ describe('Group settings store mutations', () => {
     it('updates settings', () => {
       mutations.UPDATE_SETTINGS_SUCCESS(state, {
         allow_author_approval: true,
+        allow_overrides_to_approver_list_per_merge_request: true,
         require_password_to_approve: true,
+        retain_approvals_on_push: true,
       });
 
       expect(state.settings.preventAuthorApproval).toBe(false);
+      expect(state.settings.preventMrApprovalRuleEdit).toBe(false);
       expect(state.settings.requireUserPassword).toBe(true);
+      expect(state.settings.removeApprovalsOnPush).toBe(false);
       expect(state.isLoading).toBe(false);
     });
   });

@@ -16,7 +16,8 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
       time_frame: 'none',
       data_source: 'database',
       distribution: %w(ee ce),
-      tier: %w(free starter premium ultimate bronze silver gold)
+      tier: %w(free starter premium ultimate bronze silver gold),
+      name: 'count_boards'
     }
   end
 
@@ -53,6 +54,7 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
       :distribution       | nil
       :distribution       | 'test'
       :tier               | %w(test ee)
+      :name               | 'count_<adjective_describing>_boards'
     end
 
     with_them do
@@ -78,6 +80,33 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
 
           described_class.new(path, attributes.merge( { skip_validation: true } )).validate!
         end
+      end
+    end
+  end
+
+  describe 'statuses' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:status, :raise_exception) do
+      'deprecated'     | false
+      'removed'        | false
+      'data_available' | false
+      'random'         | true
+    end
+
+    with_them do
+      subject(:validation) do
+        described_class.new(path, attributes.merge( { status: status } )).validate!
+      end
+
+      it "checks for valid/invalid statuses" do
+        if raise_exception
+          expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).at_least(:once).with(instance_of(Gitlab::Usage::Metric::InvalidMetricError))
+        else
+          expect(Gitlab::ErrorTracking).not_to receive(:track_and_raise_for_dev_exception)
+        end
+
+        validation
       end
     end
   end

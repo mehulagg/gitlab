@@ -39,7 +39,7 @@ exports[`Status Page settings form default state should match the default snapsh
   >
     <p>
       <gl-sprintf-stub
-        message="To publish incidents to an external status page, GitLab will store a JSON file in your Amazon S3 account in a location accessible to your external status page service. Make sure to also set up %{docsLink}"
+        message="To publish incidents to an external status page, GitLab stores a JSON file in your Amazon S3 account at a location that your external status page service can access. Make sure to also set up %{docsLink}"
       />
     </p>
      
@@ -117,7 +117,7 @@ exports[`Status Page settings form default state should match the default snapsh
           class="form-text text-muted"
         >
           <gl-sprintf-stub
-            message="For help with configuration, visit %{docsLink}"
+            message="AWS %{docsLink}"
           />
         </p>
       </gl-form-group-stub>

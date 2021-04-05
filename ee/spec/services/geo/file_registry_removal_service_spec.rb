@@ -324,6 +324,7 @@ RSpec.describe Geo::FileRegistryRemovalService, :geo do
 
     context 'with namespace_file' do
       let_it_be(:group) { create(:group) }
+
       let(:file) { fixture_file_upload('spec/fixtures/dk.png', 'image/png') }
       let!(:upload) do
         NamespaceFileUploader.new(group).store!(file)

@@ -13,6 +13,7 @@ import { calculateSwimlanesBufferSize } from '../boards_util';
 import { DRAGGABLE_TAG, EPIC_LANE_BASE_HEIGHT } from '../constants';
 import EpicLane from './epic_lane.vue';
 import IssuesLaneList from './issues_lane_list.vue';
+import SwimlanesLoadingSkeleton from './swimlanes_loading_skeleton.vue';
 
 export default {
   EpicLane,
@@ -24,6 +25,7 @@ export default {
     IssuesLaneList,
     GlButton,
     GlIcon,
+    SwimlanesLoadingSkeleton,
     VirtualList,
   },
   directives: {
@@ -51,7 +53,14 @@ export default {
     };
   },
   computed: {
-    ...mapState(['epics', 'pageInfoByListId', 'listsFlags', 'addColumnForm']),
+    ...mapState([
+      'epics',
+      'pageInfoByListId',
+      'listsFlags',
+      'addColumnForm',
+      'filterParams',
+      'epicsSwimlanesFetchInProgress',
+    ]),
     ...mapGetters(['getUnassignedIssues']),
     addColumnFormVisible() {
       return this.addColumnForm?.visible;
@@ -89,12 +98,34 @@ export default {
         this.lists.some((list) => this.pageInfoByListId[list.id]?.hasNextPage)
       );
     },
+    isLoading() {
+      const {
+        epicLanesFetchInProgress,
+        listItemsFetchInProgress,
+      } = this.epicsSwimlanesFetchInProgress;
+      return epicLanesFetchInProgress && listItemsFetchInProgress;
+    },
+  },
+  watch: {
+    filterParams: {
+      handler() {
+        Promise.all(
+          this.lists.map((list) => {
+            return this.fetchItemsForList({ listId: list.id });
+          }),
+        )
+          .then(() => this.doneLoadingSwimlanesItems())
+          .catch(() => {});
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   mounted() {
     this.bufferSize = calculateSwimlanesBufferSize(this.$el.offsetTop);
   },
   methods: {
-    ...mapActions(['moveList', 'fetchItemsForList']),
+    ...mapActions(['moveList', 'fetchItemsForList', 'doneLoadingSwimlanesItems']),
     handleDragOnEnd(params) {
       const { newIndex, oldIndex, item, to } = params;
       const { listId } = item.dataset;
@@ -146,7 +177,8 @@ export default {
     data-testid="board-swimlanes"
     data_qa_selector="board_epics_swimlanes"
   >
-    <div>
+    <swimlanes-loading-skeleton v-if="isLoading" />
+    <div v-else>
       <component
         :is="treeRootWrapper"
         v-bind="treeRootOptions"

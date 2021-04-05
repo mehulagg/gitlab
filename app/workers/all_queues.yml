@@ -187,6 +187,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: cronjob:database_batched_background_migration
+  :feature_category: :database
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: cronjob:environments_auto_stop_cron
   :feature_category: :continuous_delivery
   :has_external_dependencies:
@@ -434,6 +442,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: cronjob:ssh_keys_expired_notification
+  :feature_category: :compliance_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: cronjob:stuck_ci_jobs
   :feature_category: :continuous_integration
@@ -1219,6 +1235,14 @@
   :weight: 3
   :idempotent:
   :tags: []
+- :name: pipeline_default:ci_merge_requests_add_todo_when_build_fails
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 3
+  :idempotent: true
+  :tags: []
 - :name: pipeline_default:ci_pipeline_bridge_status
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1298,6 +1322,14 @@
   :resource_boundary: :cpu
   :weight: 5
   :idempotent:
+  :tags: []
+- :name: pipeline_processing:ci_initial_pipeline_process
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :unknown
+  :weight: 5
+  :idempotent: true
   :tags: []
 - :name: pipeline_processing:ci_resource_groups_assign_resource_from_resource_group
   :feature_category: :continuous_delivery

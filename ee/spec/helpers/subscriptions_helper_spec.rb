@@ -46,7 +46,7 @@ RSpec.describe SubscriptionsHelper do
       group.add_owner(user)
     end
 
-    subject { helper.subscription_data }
+    subject { helper.subscription_data([group]) }
 
     it { is_expected.to include(setup_for_company: 'false') }
     it { is_expected.to include(full_name: 'First Last') }

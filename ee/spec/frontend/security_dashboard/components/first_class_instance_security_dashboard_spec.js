@@ -14,8 +14,6 @@ describe('First Class Instance Dashboard Component', () => {
     $apollo: { queries: { projects: { loading } } },
   });
 
-  const vulnerabilitiesExportEndpoint = '/vulnerabilities/exports';
-
   const findInstanceVulnerabilities = () => wrapper.find(FirstClassInstanceVulnerabilities);
   const findCsvExportButton = () => wrapper.find(CsvExportButton);
   const findEmptyState = () => wrapper.find(DashboardNotConfigured);
@@ -29,9 +27,6 @@ describe('First Class Instance Dashboard Component', () => {
         return { ...data };
       },
       mocks,
-      propsData: {
-        vulnerabilitiesExportEndpoint,
-      },
       stubs: {
         ...stubs,
         SecurityDashboardLayout,
@@ -77,9 +72,7 @@ describe('First Class Instance Dashboard Component', () => {
     });
 
     it('displays the csv export button', () => {
-      expect(findCsvExportButton().props('vulnerabilitiesExportEndpoint')).toBe(
-        vulnerabilitiesExportEndpoint,
-      );
+      expect(findCsvExportButton().exists()).toBe(true);
     });
 
     it('displays the vulnerability count list with the correct data', () => {

@@ -39,12 +39,13 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
 
         it 'returns prepared scanner params in the payload' do
           expect(subject.payload).to eq(
-            branch: project.default_branch,
-            target_url: dast_site_profile.dast_site.url,
-            excluded_urls: dast_site_profile.excluded_urls.join(','),
-            auth_username_field: dast_site_profile.auth_username_field,
             auth_password_field: dast_site_profile.auth_password_field,
-            auth_username: dast_site_profile.auth_username
+            auth_username: dast_site_profile.auth_username,
+            auth_username_field: dast_site_profile.auth_username_field,
+            branch: project.default_branch,
+            dast_profile: nil,
+            excluded_urls: dast_site_profile.excluded_urls.join(','),
+            target_url: dast_site_profile.dast_site.url
           )
         end
       end
@@ -54,16 +55,17 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
 
         it 'returns prepared scanner params in the payload' do
           expect(subject.payload).to eq(
-            branch: project.default_branch,
-            target_url: dast_site_profile.dast_site.url,
-            excluded_urls: dast_site_profile.excluded_urls.join(','),
-            auth_username_field: dast_site_profile.auth_username_field,
             auth_password_field: dast_site_profile.auth_password_field,
             auth_username: dast_site_profile.auth_username,
+            auth_username_field: dast_site_profile.auth_username_field,
+            branch: project.default_branch,
+            dast_profile: nil,
+            excluded_urls: dast_site_profile.excluded_urls.join(','),
             full_scan_enabled: false,
             show_debug_messages: false,
             spider_timeout: nil,
             target_timeout: nil,
+            target_url: dast_site_profile.dast_site.url,
             use_ajax_spider: false
           )
         end
@@ -78,6 +80,29 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
             expect(subject.message).to eq('Cannot run active scan against unvalidated target')
           end
         end
+      end
+    end
+
+    context 'when the dast_profile is provided' do
+      let_it_be(:dast_profile) { create(:dast_profile, project: project, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile) }
+
+      let(:params) { { dast_profile: dast_profile } }
+
+      it 'returns prepared scanner params in the payload' do
+        expect(subject.payload).to eq(
+          auth_password_field: dast_site_profile.auth_password_field,
+          auth_username: dast_site_profile.auth_username,
+          auth_username_field: dast_site_profile.auth_username_field,
+          branch: project.default_branch,
+          dast_profile: dast_profile,
+          excluded_urls: dast_site_profile.excluded_urls.join(','),
+          full_scan_enabled: false,
+          show_debug_messages: false,
+          spider_timeout: nil,
+          target_timeout: nil,
+          target_url: dast_site_profile.dast_site.url,
+          use_ajax_spider: false
+        )
       end
     end
   end

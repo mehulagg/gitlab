@@ -32,6 +32,8 @@ RSpec.describe 'epics swimlanes', :js do
     it 'displays epics swimlanes when link to boards with group_by epic in URL' do
       expect(page).to have_selector('[data-testid="board-swimlanes"]')
 
+      wait_for_all_requests
+
       epic_lanes = page.all(:css, '.board-epic-lane')
       expect(epic_lanes.length).to eq(2)
     end
@@ -137,7 +139,7 @@ RSpec.describe 'epics swimlanes', :js do
 
       page.within(first('.board-new-issue-form')) do
         find('.form-control').set('bug')
-        click_button 'Submit issue'
+        click_button 'Create issue'
       end
 
       wait_for_all_requests

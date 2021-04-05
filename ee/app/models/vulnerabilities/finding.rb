@@ -36,6 +36,8 @@ module Vulnerabilities
 
     has_many :fingerprints, class_name: 'Vulnerabilities::FindingFingerprint', inverse_of: :finding
 
+    has_many :finding_evidences, class_name: 'Vulnerabilities::FindingEvidence', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+
     serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
 
     attr_writer :sha

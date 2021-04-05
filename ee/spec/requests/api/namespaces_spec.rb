@@ -534,6 +534,12 @@ RSpec.describe API::Namespaces do
             max_seats_used: 42
           )
         end
+
+        it 'updates the timestamp when the attributes are the same' do
+          expect do
+            do_put(namespace.id, admin, gitlab_subscription.attributes)
+          end.to change { gitlab_subscription.reload.updated_at }
+        end
       end
     end
 

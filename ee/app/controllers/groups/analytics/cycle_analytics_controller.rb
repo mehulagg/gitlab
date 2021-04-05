@@ -33,6 +33,12 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
   def load_value_stream
     return unless @group && params[:value_stream_id]
 
-    @value_stream = @group.value_streams.find(params[:value_stream_id])
+    default_name = Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME
+
+    @value_stream = if params[:value_stream_id] == default_name
+                      @group.value_streams.new(name: default_name)
+                    else
+                      @group.value_streams.find(params[:value_stream_id])
+                    end
   end
 end

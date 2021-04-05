@@ -31,21 +31,27 @@ module DastOnDemandScans
       end
     end
 
-    def dast_site
-      strong_memoize(:dast_site) do
-        dast_site_profile&.dast_site
+    def dast_profile
+      strong_memoize(:dast_profile) do
+        params[:dast_profile]
       end
     end
 
     def dast_site_profile
       strong_memoize(:dast_site_profile) do
-        params[:dast_site_profile]
+        dast_profile&.dast_site_profile || params[:dast_site_profile]
       end
     end
 
     def dast_scanner_profile
       strong_memoize(:dast_scanner_profile) do
-        params[:dast_scanner_profile]
+        dast_profile&.dast_scanner_profile || params[:dast_scanner_profile]
+      end
+    end
+
+    def dast_site
+      strong_memoize(:dast_site) do
+        dast_site_profile&.dast_site
       end
     end
 
@@ -57,6 +63,7 @@ module DastOnDemandScans
 
     def default_config
       {
+        dast_profile: dast_profile,
         branch: branch,
         target_url: dast_site&.url
       }

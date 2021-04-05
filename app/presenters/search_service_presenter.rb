@@ -10,7 +10,10 @@ class SearchServicePresenter < Gitlab::View::Presenter::Delegated
     issues: :with_web_entity_associations,
     merge_requests: :with_web_entity_associations,
     epics: :with_web_entity_associations,
-    notes: :with_web_entity_associations
+    notes: :with_web_entity_associations,
+    milestones: :with_web_entity_associations,
+    commits: :with_web_entity_associations,
+    blobs: :with_web_entity_associations
   }.freeze
 
   SORT_ENABLED_SCOPES = %w(issues merge_requests).freeze

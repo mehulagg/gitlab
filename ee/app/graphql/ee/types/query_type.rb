@@ -32,15 +32,20 @@ module EE
         field :vulnerabilities_count_by_day,
               ::Types::VulnerabilitiesCountByDayType.connection_type,
               null: true,
-              description: "Number of vulnerabilities per day for the projects on the current user's instance security dashboard.",
-              resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver
+              resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver,
+              description: <<~DESC
+                Number of vulnerabilities per day for the projects on the current user's instance security dashboard.
+              DESC
 
         field :vulnerabilities_count_by_day_and_severity,
               ::Types::VulnerabilitiesCountByDayAndSeverityType.connection_type,
               null: true,
-              description: "Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard.",
               resolver: ::Resolvers::VulnerabilitiesHistoryResolver,
-              deprecated: { reason: :discouraged, replacement: 'Query.vulnerabilitiesCountByDay', milestone: '13.3' }
+              deprecated: { reason: :discouraged, replacement: 'Query.vulnerabilitiesCountByDay', milestone: '13.3' },
+              description: <<~DESC
+                Number of vulnerabilities per severity level, per day, for the projects on the
+                current user's instance security dashboard.
+              DESC
 
         field :geo_node, ::Types::Geo::GeoNodeType,
               null: true,

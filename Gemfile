@@ -274,7 +274,7 @@ gem 'licensee', '~> 9.14.1'
 gem 'charlock_holmes', '~> 0.7.7'
 
 # Detect mime content type from content
-gem 'ruby-magic-static', '~> 0.3.4'
+gem 'ruby-magic', '~> 0.3.2'
 
 # Fake version of the gem to trick bundler
 gem 'mimemagic', '0.3.7', path: 'vendor/shims/mimemagic', require: false
@@ -488,7 +488,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.1'
+gem 'gitlab-experiment', '~> 0.5.2'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

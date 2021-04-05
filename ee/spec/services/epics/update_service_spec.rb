@@ -348,6 +348,7 @@ RSpec.describe Epics::UpdateService do
       context 'epic start date fixed or inherited' do
         it 'tracks the user action to set as fixed' do
           expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_fixed_action)
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_fixed_start_date_updated_action)
 
           update_epic(start_date_is_fixed: true, start_date_fixed: Date.today)
         end
@@ -362,6 +363,7 @@ RSpec.describe Epics::UpdateService do
       context 'epic due date fixed or inherited' do
         it 'tracks the user action to set as fixed' do
           expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_due_date_set_as_fixed_action)
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_fixed_due_date_updated_action)
 
           update_epic(due_date_is_fixed: true, due_date_fixed: Date.today)
         end

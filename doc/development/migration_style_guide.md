@@ -254,7 +254,7 @@ end
 
 **Creating a new table with a foreign key:**
 
-We can simply wrap the `create_table` method with `with_lock_retries`:
+We can wrap the `create_table` method with `with_lock_retries`:
 
 ```ruby
 def up
@@ -302,7 +302,7 @@ end
 
 Adding foreign key to `projects`:
 
-We can use the `add_concurrenct_foreign_key` method in this case, as this helper method
+We can use the `add_concurrent_foreign_key` method in this case, as this helper method
 has the lock retries built into it.
 
 ```ruby
@@ -715,7 +715,7 @@ the `DROP TABLE` statement is likely to stall concurrent traffic until it fails 
 Table **has no records** (feature was never in use) and **no foreign
 keys**:
 
-- Simply use the `drop_table` method in your migration.
+- Use the `drop_table` method in your migration.
 
 ```ruby
 def change

@@ -124,6 +124,7 @@ module EE
 
             subscription_params = declared_params(include_missing: false)
             subscription_params[:trial_starts_on] ||= subscription_params[:start_date] if subscription_params[:trial]
+            subscription_params[:updated_at] = Time.current
 
             if subscription.update(subscription_params)
               present subscription, with: ::EE::API::Entities::GitlabSubscription

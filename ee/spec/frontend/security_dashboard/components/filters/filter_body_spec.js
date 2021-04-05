@@ -1,4 +1,4 @@
-import { GlDropdown, GlSearchBoxByType } from '@gitlab/ui';
+import { GlDropdown, GlSearchBoxByType, GlLoadingIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import FilterBody from 'ee/security_dashboard/components/filters/filter_body.vue';
 
@@ -80,10 +80,11 @@ describe('Filter Body component', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
-    it('emits input event on component when search box input is changed', () => {
+    it('emits input event on component when search box input is changed', async () => {
       const text = 'abc';
       createComponent({ showSearchBox: true });
       searchBox().vm.$emit('input', text);
+      await wrapper.vm.$nextTick();
 
       expect(wrapper.emitted('input')[0][0]).toBe(text);
     });
@@ -101,6 +102,18 @@ describe('Filter Body component', () => {
       createComponent();
 
       expect(wrapper.text()).toContain('No matching results');
+    });
+  });
+
+  describe('loading icon', () => {
+    it.each`
+      phrase     | loading
+      ${'shows'} | ${true}
+      ${'hides'} | ${false}
+    `('$phrase the loading icon when the loading prop is $loading', ({ loading }) => {
+      createComponent({ loading });
+
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(loading);
     });
   });
 });

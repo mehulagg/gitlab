@@ -346,22 +346,6 @@ export default {
       .catch(() => commit(types.RECEIVE_ITEMS_FOR_LIST_FAILURE, listId));
   },
 
-  fetchIssuesForEpic: ({ state, commit }, epicId) => {
-    commit(types.REQUEST_ISSUES_FOR_EPIC, epicId);
-
-    const { filterParams } = state;
-
-    const variables = {
-      filters: { ...filterParams, epicId },
-    };
-
-    return fetchAndFormatListIssues(state, variables)
-      .then(({ listItems }) => {
-        commit(types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, { ...listItems, epicId });
-      })
-      .catch(() => commit(types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, epicId));
-  },
-
   toggleEpicSwimlanes: ({ state, commit, dispatch }) => {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
@@ -384,6 +368,10 @@ export default {
 
   setEpicSwimlanes: ({ commit }) => {
     commit(types.SET_EPICS_SWIMLANES);
+  },
+
+  doneLoadingSwimlanesItems: ({ commit }) => {
+    commit(types.DONE_LOADING_SWIMLANES_ITEMS);
   },
 
   resetEpics: ({ commit }) => {

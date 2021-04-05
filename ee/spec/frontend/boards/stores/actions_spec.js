@@ -9,7 +9,7 @@ import * as types from 'ee/boards/stores/mutation_types';
 import mutations from 'ee/boards/stores/mutations';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
-import { formatListIssues, formatBoardLists } from '~/boards/boards_util';
+import { formatBoardLists } from '~/boards/boards_util';
 import { issuableTypes } from '~/boards/constants';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
@@ -480,71 +480,6 @@ describe('updateIssueWeight', () => {
   expectNotImplemented(actions.updateIssueWeight);
 });
 
-describe('fetchIssuesForEpic', () => {
-  const listId = mockLists[0].id;
-  const epicId = mockEpic.id;
-
-  const state = {
-    fullPath: 'gitlab-org',
-    boardId: 1,
-    filterParams: {},
-    boardType: 'group',
-  };
-
-  const queryResponse = {
-    data: {
-      group: {
-        board: {
-          lists: {
-            nodes: [
-              {
-                id: listId,
-                issues: {
-                  edges: [{ node: [mockIssue] }],
-                },
-              },
-            ],
-          },
-        },
-      },
-    },
-  };
-
-  const formattedIssues = formatListIssues(queryResponse.data.group.board.lists);
-
-  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ITEMS_FOR_LIST_SUCCESS on success', (done) => {
-    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
-
-    testAction(
-      actions.fetchIssuesForEpic,
-      epicId,
-      state,
-      [
-        { type: types.REQUEST_ISSUES_FOR_EPIC, payload: epicId },
-        { type: types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, payload: { ...formattedIssues, epicId } },
-      ],
-      [],
-      done,
-    );
-  });
-
-  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ITEMS_FOR_LIST_FAILURE on failure', (done) => {
-    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
-
-    testAction(
-      actions.fetchIssuesForEpic,
-      epicId,
-      state,
-      [
-        { type: types.REQUEST_ISSUES_FOR_EPIC, payload: epicId },
-        { type: types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, payload: epicId },
-      ],
-      [],
-      done,
-    );
-  });
-});
-
 describe('toggleEpicSwimlanes', () => {
   it('should commit mutation TOGGLE_EPICS_SWIMLANES', () => {
     const startURl = `${TEST_HOST}/groups/gitlab-org/-/boards/1?group_by=epic`;
@@ -608,13 +543,23 @@ describe('toggleEpicSwimlanes', () => {
 
 describe('setEpicSwimlanes', () => {
   it('should commit mutation SET_EPICS_SWIMLANES', () => {
-    jest.spyOn(gqlClient, 'query').mockResolvedValue({});
-
     return testAction(
       actions.setEpicSwimlanes,
       null,
       {},
       [{ type: types.SET_EPICS_SWIMLANES }],
+      [],
+    );
+  });
+});
+
+describe('doneLoadingSwimlanesItems', () => {
+  it('should commit mutation DONE_LOADING_SWIMLANES_ITEMS', () => {
+    return testAction(
+      actions.doneLoadingSwimlanesItems,
+      null,
+      {},
+      [{ type: types.DONE_LOADING_SWIMLANES_ITEMS }],
       [],
     );
   });

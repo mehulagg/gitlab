@@ -2,6 +2,8 @@
 
 module Types
   class DastSiteProfileType < BaseObject
+    REDACTED_REQUEST_HEADERS = '[Redacted]'
+
     graphql_name 'DastSiteProfile'
     description 'Represents a DAST Site Profile'
 
@@ -68,7 +70,10 @@ module Types
     end
 
     def request_headers
-      nil
+      return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, object.project, default_enabled: :yaml)
+      return unless object.secret_variables.any? { |variable| variable.key == ::Dast::SiteProfileSecretVariable::REQUEST_HEADERS }
+
+      REDACTED_REQUEST_HEADERS
     end
 
     def normalized_target_url

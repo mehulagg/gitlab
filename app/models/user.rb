@@ -103,6 +103,7 @@ class User < ApplicationRecord
 
   # Profile
   has_many :keys, -> { regular_keys }, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+  has_many :expired_today_and_unnotified_keys, -> { expired_today_and_not_notified }, class_name: 'Key'
   has_many :deploy_keys, -> { where(type: 'DeployKey') }, dependent: :nullify # rubocop:disable Cop/ActiveRecordDependent
   has_many :group_deploy_keys
   has_many :gpg_keys
@@ -352,12 +353,7 @@ class User < ApplicationRecord
     # this state transition object in order to do a rollback.
     # For this reason the tradeoff is to disable this cop.
     after_transition any => :blocked do |user|
-      if Feature.enabled?(:abort_user_pipelines_on_block, user)
-        Ci::AbortPipelinesService.new.execute(user.pipelines)
-      else
-        Ci::CancelUserPipelinesService.new.execute(user)
-      end
-
+      Ci::AbortPipelinesService.new.execute(user.pipelines)
       Ci::DisableUserPipelineSchedulesService.new.execute(user)
     end
     # rubocop: enable CodeReuse/ServiceClass
@@ -397,6 +393,14 @@ class User < ApplicationRecord
             .where('personal_access_tokens.user_id = users.id')
             .without_impersonation
             .expired_today_and_not_notified)
+  end
+  scope :with_ssh_key_expired_today, -> do
+    includes(:expired_today_and_unnotified_keys)
+      .where('EXISTS (?)',
+        ::Key
+        .select(1)
+        .where('keys.user_id = users.id')
+        .expired_today_and_not_notified)
   end
   scope :order_recent_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('current_sign_in_at', 'DESC')) }
   scope :order_oldest_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('current_sign_in_at', 'ASC')) }
@@ -1032,7 +1036,7 @@ class User < ApplicationRecord
       [
         Project.where(namespace: namespace),
         Project.joins(:project_authorizations)
-          .where("projects.namespace_id <> ?", namespace.id)
+          .where.not('projects.namespace_id' => namespace.id)
           .where(project_authorizations: { user_id: id, access_level: Gitlab::Access::OWNER })
       ],
       remove_duplicates: false
@@ -1851,10 +1855,12 @@ class User < ApplicationRecord
   end
 
   def dismissed_callout?(feature_name:, ignore_dismissal_earlier_than: nil)
-    callouts = self.callouts.with_feature_name(feature_name)
-    callouts = callouts.with_dismissed_after(ignore_dismissal_earlier_than) if ignore_dismissal_earlier_than
+    callout = callouts_by_feature_name[feature_name]
 
-    callouts.any?
+    return false unless callout
+    return callout.dismissed_after?(ignore_dismissal_earlier_than) if ignore_dismissal_earlier_than
+
+    true
   end
 
   # Load the current highest access by looking directly at the user's memberships
@@ -1916,6 +1922,10 @@ class User < ApplicationRecord
   end
 
   private
+
+  def callouts_by_feature_name
+    @callouts_by_feature_name ||= callouts.index_by(&:feature_name)
+  end
 
   def authorized_groups_without_shared_membership
     Group.from_union([

@@ -5,11 +5,12 @@ require 'spec_helper'
 RSpec.describe Mutations::Dast::Profiles::Update do
   include GraphqlHelpers
 
-  let_it_be(:project) { create(:project) }
+  let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
   let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project, branch_name: 'audio') }
 
   let(:dast_profile_gid) { dast_profile.to_global_id }
+  let(:run_after_update) { false }
 
   let(:params) do
     {
@@ -18,7 +19,8 @@ RSpec.describe Mutations::Dast::Profiles::Update do
       description: SecureRandom.hex,
       branch_name: 'orphaned-branch',
       dast_site_profile_id: global_id_of(create(:dast_site_profile, project: project)),
-      dast_scanner_profile_id: global_id_of(create(:dast_scanner_profile, project: project))
+      dast_scanner_profile_id: global_id_of(create(:dast_scanner_profile, project: project)),
+      run_after_update: run_after_update
     }
   end
 
@@ -74,6 +76,16 @@ RSpec.describe Mutations::Dast::Profiles::Update do
             expect(updated_dast_profile.name).to eq(params[:name])
             expect(updated_dast_profile.description).to eq(params[:description])
             expect(updated_dast_profile.branch_name).to eq(params[:branch_name])
+          end
+        end
+
+        context 'when run_after_update=true' do
+          let(:run_after_update) { true }
+
+          it_behaves_like 'it creates a DAST on-demand scan pipeline'
+
+          it_behaves_like 'it delegates scan creation to another service' do
+            let(:delegated_params) { hash_including(dast_profile: dast_profile) }
           end
         end
 

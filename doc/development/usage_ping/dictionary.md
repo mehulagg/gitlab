@@ -7364,6 +7364,30 @@ Status: `data_available`
 
 Tiers:
 
+### `redis_hll_counters.analytics.i_analytics_dev_ops_adoption_monthly`
+
+Counts visits to DevOps Adoption page per month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210401092244_i_analytics_dev_ops_adoption_monthly.yml)
+
+Group: `group::optimize`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.analytics.i_analytics_dev_ops_adoption_weekly`
+
+Counts visits to DevOps Adoption page per week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210401092244_i_analytics_dev_ops_adoption_weekly.yml)
+
+Group: `group::optimize`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `redis_hll_counters.analytics.i_analytics_dev_ops_score_monthly`
 
 Missing description
@@ -9908,6 +9932,30 @@ Status: `implemented`
 
 Tiers: `premium`, `ultimate`
 
+### `redis_hll_counters.epics_usage.g_project_management_issue_promoted_to_epic_monthly`
+
+Count of MAU promoting issues to epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210331193236_g_project_management_issue_promoted_to_epic_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_issue_promoted_to_epic_weekly`
+
+Counts of WAU promoting issues to epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210331192332_g_project_management_issue_promoted_to_epic_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `redis_hll_counters.epics_usage.g_project_management_users_creating_epic_notes_monthly`
 
 Counts of MAU adding epic notes
@@ -10117,6 +10165,54 @@ Tiers: `premium`, `ultimate`
 Counts of WAU changing epic titles
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210312101826_g_project_management_users_updating_epic_titles_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_due_date_monthly`
+
+Counts of MAU manually updating fixed due date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210329043548_g_project_management_users_updating_fixed_epic_due_date_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_due_date_weekly`
+
+Counts of WAU manually updating fixed due date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210329042536_g_project_management_users_updating_fixed_epic_due_date_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_start_date_monthly`
+
+Counts of MAU manually updating fixed start date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210329043509_g_project_management_users_updating_fixed_epic_start_date_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_start_date_weekly`
+
+Counts of WAU manually updating fixed start date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210329043402_g_project_management_users_updating_fixed_epic_start_date_weekly.yml)
 
 Group: `group::product planning`
 

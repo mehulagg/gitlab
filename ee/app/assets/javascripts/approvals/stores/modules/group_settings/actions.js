@@ -26,7 +26,9 @@ export const fetchSettings = ({ commit }, endpoint) => {
 export const updateSettings = ({ commit, state }, endpoint) => {
   const payload = {
     allow_author_approval: !state.settings.preventAuthorApproval,
+    allow_overrides_to_approver_list_per_merge_request: !state.settings.preventMrApprovalRuleEdit,
     require_password_to_approve: state.settings.requireUserPassword,
+    retain_approvals_on_push: !state.settings.removeApprovalsOnPush,
   };
 
   commit(types.REQUEST_UPDATE_SETTINGS);

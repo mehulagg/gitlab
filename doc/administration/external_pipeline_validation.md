@@ -7,7 +7,7 @@ type: reference, howto
 
 # External Pipeline Validation
 
-You can use an external service for validating a pipeline before it's created.
+You can use an external service to validate a pipeline before it's created.
 
 WARNING:
 This is an experimental feature and subject to change without notice.
@@ -19,15 +19,21 @@ data as payload. GitLab then invalidates the pipeline based on the response
 code. If there's an error or the request times out, the pipeline is not
 invalidated.
 
-Response Code Legend:
+Response codes:
 
-- `200` - Accepted
-- `406` - Not Accepted
-- Other Codes - Accepted and Logged
+- `200`: Accepted
+- `4XX`: Not accepted
+- All other codes: accepted and logged
 
 ## Configuration
 
-Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL and enable `ci_external_validation_service` feature flag.
+To configure external pipeline validation, add the
+[`EXTERNAL_VALIDATION_SERVICE_URL` environment variable](environment_variables.md)
+and set it to the external service URL.
+
+By default, requests to the external service time out after five seconds. To override
+the default, set the `EXTERNAL_VALIDATION_SERVICE_TIMEOUT` environment variable to the
+required number of seconds.
 
 ## Payload Schema
 
@@ -123,3 +129,6 @@ Set the `EXTERNAL_VALIDATION_SERVICE_URL` to the external service URL and enable
   }
 }
 ```
+
+The `namespace` field is only available in [GitLab Premium](https://about.gitlab.com/pricing/)
+and higher.

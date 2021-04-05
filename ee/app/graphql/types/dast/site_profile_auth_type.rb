@@ -3,6 +3,8 @@
 module Types
   module Dast
     class SiteProfileAuthType < BaseObject
+      REDACTED_PASSWORD = '••••••••'
+
       graphql_name 'DastSiteProfileAuth'
       description 'Input type for DastSiteProfile authentication'
 
@@ -39,7 +41,9 @@ module Types
             description: 'Redacted password to authenticate with on the target website.'
 
       def password
-        nil
+        return unless object.secret_variables.any? { |variable| variable.key == ::Dast::SiteProfileSecretVariable::PASSWORD }
+
+        REDACTED_PASSWORD
       end
     end
   end

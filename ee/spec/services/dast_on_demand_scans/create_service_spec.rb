@@ -18,6 +18,18 @@ RSpec.describe DastOnDemandScans::CreateService do
     ).execute
   end
 
+  shared_examples 'a service that calls Ci::RunDastScanService' do
+    it 'delegates pipeline creation to Ci::RunDastScanService', :aggregate_failures do
+      service = double(Ci::RunDastScanService)
+      response = ServiceResponse.error(message: 'Stubbed response')
+
+      expect(Ci::RunDastScanService).to receive(:new).and_return(service)
+      expect(service).to receive(:execute).with(expected_params).and_return(response)
+
+      subject
+    end
+  end
+
   describe 'execute' do
     context 'when on demand scan licensed feature is not available' do
       context 'when the user cannot run an on demand scan' do
@@ -49,28 +61,23 @@ RSpec.describe DastOnDemandScans::CreateService do
           expect(subject.payload[:pipeline_url]).to be_a(String)
         end
 
-        it 'delegates pipeline creation to Ci::RunDastScanService', :aggregate_failures do
-          expected_params = {
-            auth_password_field: dast_site_profile.auth_password_field,
-            auth_username: dast_site_profile.auth_username,
-            auth_username_field: dast_site_profile.auth_username_field,
-            branch: project.default_branch_or_master,
-            excluded_urls: dast_site_profile.excluded_urls.join(','),
-            full_scan_enabled: false,
-            show_debug_messages: false,
-            spider_timeout: nil,
-            target_timeout: nil,
-            target_url: dast_site_profile.dast_site.url,
-            use_ajax_spider: false
-          }
-
-          service = double(Ci::RunDastScanService)
-          response = ServiceResponse.error(message: 'Stubbed response')
-
-          expect(Ci::RunDastScanService).to receive(:new).and_return(service)
-          expect(service).to receive(:execute).with(expected_params).and_return(response)
-
-          subject
+        it_behaves_like 'a service that calls Ci::RunDastScanService' do
+          let(:expected_params) do
+            {
+              auth_password_field: dast_site_profile.auth_password_field,
+              auth_username: dast_site_profile.auth_username,
+              auth_username_field: dast_site_profile.auth_username_field,
+              branch: project.default_branch_or_master,
+              dast_profile: nil,
+              excluded_urls: dast_site_profile.excluded_urls.join(','),
+              full_scan_enabled: false,
+              show_debug_messages: false,
+              spider_timeout: nil,
+              target_timeout: nil,
+              target_url: dast_site_profile.dast_site.url,
+              use_ajax_spider: false
+            }
+          end
         end
 
         context 'when a branch is specified' do
@@ -97,6 +104,20 @@ RSpec.describe DastOnDemandScans::CreateService do
 
           it 'communicates success' do
             expect(subject.status).to eq(:success)
+          end
+        end
+
+        context 'when dast_profile is specified' do
+          let_it_be(:dast_profile) { create(:dast_profile, project: project) }
+
+          let(:params) { { dast_profile: dast_profile } }
+
+          it 'communicates success' do
+            expect(subject.status).to eq(:success)
+          end
+
+          it_behaves_like 'a service that calls Ci::RunDastScanService' do
+            let(:expected_params) { hash_including(dast_profile: dast_profile) }
           end
         end
 

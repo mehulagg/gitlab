@@ -104,7 +104,7 @@ RSpec.describe 'Billing plan pages', :feature, :js do
 
     it 'displays header' do
       page.within('.billing-plan-header') do
-        expect(page).to have_content("#{user.username} you are currently using the #{plan.name.titleize} plan.")
+        expect(page).to have_content("#{user.username} you are currently using the #{plan.name.titleize} Plan.")
 
         expect(page).to have_css('.billing-plan-logo img')
       end

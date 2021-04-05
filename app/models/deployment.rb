@@ -94,11 +94,6 @@ class Deployment < ApplicationRecord
     after_transition any => :success do |deployment|
       deployment.run_after_commit do
         Deployments::UpdateEnvironmentWorker.perform_async(id)
-      end
-    end
-
-    after_transition any => FINISHED_STATUSES do |deployment|
-      deployment.run_after_commit do
         Deployments::LinkMergeRequestWorker.perform_async(id)
       end
     end
@@ -226,7 +221,7 @@ class Deployment < ApplicationRecord
   end
 
   def update_merge_request_metrics!
-    return unless environment.update_merge_request_metrics? && success?
+    return unless environment.production? && success?
 
     merge_requests = project.merge_requests
                      .joins(:metrics)
