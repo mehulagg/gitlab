@@ -5802,9 +5802,6 @@ msgstr ""
 msgid "Changing group URL can have unintended side effects."
 msgstr ""
 
-msgid "Channel handle (e.g. town-square)"
-msgstr ""
-
 msgid "Charts can't be displayed as the request for data has timed out. %{documentationLink}"
 msgstr ""
 
@@ -24119,49 +24116,10 @@ msgstr ""
 msgid "ProjectService|%{service_title}: status on"
 msgstr ""
 
-msgid "ProjectService|Drone URL"
-msgstr ""
-
 msgid "ProjectService|Enter new API key"
 msgstr ""
 
 msgid "ProjectService|Enter new password"
-msgstr ""
-
-msgid "ProjectService|Event triggered when a commit is created or updated."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a confidential issue is created, updated, or closed."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a deployment starts or finishes."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a merge request is created, updated, or merged."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a new tag is pushed to the repository."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a new, unique alert is recorded."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a pipeline status changes."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a wiki page is created or updated."
-msgstr ""
-
-msgid "ProjectService|Event triggered when an issue is created, updated, or closed."
-msgstr ""
-
-msgid "ProjectService|Event triggered when someone adds a comment on a confidential issue."
-msgstr ""
-
-msgid "ProjectService|Event triggered when someone adds a comment."
-msgstr ""
-
-msgid "ProjectService|Event triggered when someone pushes to the repository."
 msgstr ""
 
 msgid "ProjectService|Issue URL"
@@ -24189,6 +24147,45 @@ msgid "ProjectService|TeamCity URL"
 msgstr ""
 
 msgid "ProjectService|To configure this integration, you should:"
+msgstr ""
+
+msgid "ProjectService|Trigger event for new comments on confidential issues."
+msgstr ""
+
+msgid "ProjectService|Trigger event for new comments."
+msgstr ""
+
+msgid "ProjectService|Trigger event for new tags pushed to the repository."
+msgstr ""
+
+msgid "ProjectService|Trigger event for pushes to the repository."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a commit is created or updated."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a confidential issue is created, updated, or closed."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a deployment starts or finishes."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a merge request is created, updated, or merged."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a new, unique alert is recorded."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a pipeline status changes."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a wiki page is created or updated."
+msgstr ""
+
+msgid "ProjectService|Trigger event when an issue is created, updated, or closed."
+msgstr ""
+
+msgid "ProjectService|URL of Drone service"
 msgstr ""
 
 msgid "ProjectSettings|%{link_start}What are description templates?%{link_end}"
@@ -36796,6 +36793,9 @@ msgid "must contain only valid frameworks"
 msgstr ""
 
 msgid "my-awesome-group"
+msgstr ""
+
+msgid "my-channel"
 msgstr ""
 
 msgid "n/a"
