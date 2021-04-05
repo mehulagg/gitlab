@@ -10,15 +10,16 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
 
   let!(:job_record) { create(:batched_background_migration_job, batched_migration: active_migration) }
   let(:job_instance) { double('job instance', batch_metrics: {}) }
+  let(:pause_seconds) { 0.1 }
 
   before do
     allow(job_class).to receive(:new).and_return(job_instance)
   end
 
   it 'runs the migration job' do
-    expect(job_instance).to receive(:perform).with(1, 10, 'events', 'id', 1, 'id', 'other_id')
+    expect(job_instance).to receive(:perform).with(1, 10, 'events', 'id', 1, pause_seconds, 'id', 'other_id')
 
-    migration_wrapper.perform(job_record)
+    migration_wrapper.perform(job_record, pause_seconds)
   end
 
   it 'updates the tracking record in the database' do
@@ -30,7 +31,7 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
     expect(job_record).to receive(:update!).with(hash_including(attempts: 1, status: :running)).and_call_original
 
     freeze_time do
-      migration_wrapper.perform(job_record)
+      migration_wrapper.perform(job_record, pause_seconds)
 
       reloaded_job_record = job_record.reload
 
@@ -43,10 +44,10 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
 
   context 'when the migration job does not raise an error' do
     it 'marks the tracking record as succeeded' do
-      expect(job_instance).to receive(:perform).with(1, 10, 'events', 'id', 1, 'id', 'other_id')
+      expect(job_instance).to receive(:perform).with(1, 10, 'events', 'id', 1, pause_seconds, 'id', 'other_id')
 
       freeze_time do
-        migration_wrapper.perform(job_record)
+        migration_wrapper.perform(job_record, pause_seconds)
 
         reloaded_job_record = job_record.reload
 
@@ -59,11 +60,13 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
   context 'when the migration job raises an error' do
     it 'marks the tracking record as failed before raising the error' do
       expect(job_instance).to receive(:perform)
-        .with(1, 10, 'events', 'id', 1, 'id', 'other_id')
+        .with(1, 10, 'events', 'id', 1, pause_seconds, 'id', 'other_id')
         .and_raise(RuntimeError, 'Something broke!')
 
       freeze_time do
-        expect { migration_wrapper.perform(job_record) }.to raise_error(RuntimeError, 'Something broke!')
+        expect do
+          migration_wrapper.perform(job_record, pause_seconds)
+        end.to raise_error(RuntimeError, 'Something broke!')
 
         reloaded_job_record = job_record.reload
 

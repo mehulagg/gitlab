@@ -6,6 +6,7 @@ RSpec.describe Gitlab::BackgroundMigration::CopyColumnUsingBackgroundMigrationJo
   let(:table_name) { :copy_primary_key_test }
   let(:test_table) { table(table_name) }
   let(:sub_batch_size) { 1000 }
+  let(:pause_seconds) { 0.0 }
 
   before do
     ActiveRecord::Base.connection.execute(<<~SQL)
@@ -40,7 +41,7 @@ RSpec.describe Gitlab::BackgroundMigration::CopyColumnUsingBackgroundMigrationJo
     let(:migration_class) { described_class.name }
 
     it 'copies all primary keys in range' do
-      subject.perform(12, 15, table_name, 'id', sub_batch_size, 'id', 'id_convert_to_bigint')
+      subject.perform(12, 15, table_name, 'id', sub_batch_size, pause_seconds, 'id', 'id_convert_to_bigint')
 
       expect(test_table.where('id = id_convert_to_bigint').pluck(:id)).to contain_exactly(12, 15)
       expect(test_table.where(id_convert_to_bigint: 0).pluck(:id)).to contain_exactly(11, 19)
@@ -48,7 +49,7 @@ RSpec.describe Gitlab::BackgroundMigration::CopyColumnUsingBackgroundMigrationJo
     end
 
     it 'copies all foreign keys in range' do
-      subject.perform(10, 14, table_name, 'id', sub_batch_size, 'fk', 'fk_convert_to_bigint')
+      subject.perform(10, 14, table_name, 'id', sub_batch_size, pause_seconds, 'fk', 'fk_convert_to_bigint')
 
       expect(test_table.where('fk = fk_convert_to_bigint').pluck(:id)).to contain_exactly(11, 12)
       expect(test_table.where(fk_convert_to_bigint: 0).pluck(:id)).to contain_exactly(15, 19)
@@ -58,7 +59,7 @@ RSpec.describe Gitlab::BackgroundMigration::CopyColumnUsingBackgroundMigrationJo
     it 'copies columns with NULLs' do
       expect(test_table.where("name_convert_to_text = 'no name'").count).to eq(4)
 
-      subject.perform(10, 20, table_name, 'id', sub_batch_size, 'name', 'name_convert_to_text')
+      subject.perform(10, 20, table_name, 'id', sub_batch_size, pause_seconds, 'name', 'name_convert_to_text')
 
       expect(test_table.where('name = name_convert_to_text').pluck(:id)).to contain_exactly(11, 12, 19)
       expect(test_table.where('name is NULL and name_convert_to_text is NULL').pluck(:id)).to contain_exactly(15)
@@ -68,7 +69,7 @@ RSpec.describe Gitlab::BackgroundMigration::CopyColumnUsingBackgroundMigrationJo
     it 'tracks timings of queries' do
       expect(subject.batch_metrics.timings).to be_empty
 
-      subject.perform(10, 20, table_name, 'id', sub_batch_size, 'name', 'name_convert_to_text')
+      subject.perform(10, 20, table_name, 'id', sub_batch_size, pause_seconds, 'name', 'name_convert_to_text')
 
       expect(subject.batch_metrics.timings[:update_all]).not_to be_empty
     end

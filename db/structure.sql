@@ -9900,6 +9900,7 @@ CREATE TABLE batched_background_migrations (
     table_name text NOT NULL,
     column_name text NOT NULL,
     job_arguments jsonb DEFAULT '"[]"'::jsonb NOT NULL,
+    pause_seconds double precision DEFAULT 0.1 NOT NULL,
     CONSTRAINT check_5bb0382d6f CHECK ((char_length(column_name) <= 63)),
     CONSTRAINT check_6b6a06254a CHECK ((char_length(table_name) <= 63)),
     CONSTRAINT check_batch_size_in_range CHECK ((batch_size >= sub_batch_size)),

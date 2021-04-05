@@ -1,0 +1,5 @@
+---
+title: Add pause_seconds column to batched_background_migrations
+merge_request: 58583
+author:
+type: changed

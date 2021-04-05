@@ -20,7 +20,7 @@ module Gitlab
         # Note that this method is primarily intended to called by a scheduled worker.
         def run_migration_job(active_migration)
           if next_batched_job = create_next_batched_job!(active_migration)
-            migration_wrapper.perform(next_batched_job)
+            migration_wrapper.perform(next_batched_job, active_migration.pause_seconds)
           else
             finish_active_migration(active_migration)
           end

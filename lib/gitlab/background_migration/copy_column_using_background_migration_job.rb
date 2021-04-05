@@ -16,8 +16,6 @@ module Gitlab
     class CopyColumnUsingBackgroundMigrationJob
       include Gitlab::Database::DynamicModelHelpers
 
-      PAUSE_SECONDS = 0.1
-
       # start_id - The start ID of the range of rows to update.
       # end_id - The end ID of the range of rows to update.
       # batch_table - The name of the table that contains the columns.
@@ -25,9 +23,10 @@ module Gitlab
       # sub_batch_size - We don't want updates to take more than ~100ms
       #                  This allows us to run multiple smaller batches during
       #                  the minimum 2.minute interval that we can schedule jobs
+      # pause_seconds - The number of seconds to sleep between each subbatch execution.
       # copy_from - The column containing the data to copy.
       # copy_to - The column to copy the data to.
-      def perform(start_id, end_id, batch_table, batch_column, sub_batch_size, copy_from, copy_to)
+      def perform(start_id, end_id, batch_table, batch_column, sub_batch_size, pause_seconds, copy_from, copy_to)
         quoted_copy_from = connection.quote_column_name(copy_from)
         quoted_copy_to = connection.quote_column_name(copy_to)
 
@@ -38,7 +37,7 @@ module Gitlab
             sub_batch.update_all("#{quoted_copy_to}=#{quoted_copy_from}")
           end
 
-          sleep(PAUSE_SECONDS)
+          sleep(pause_seconds)
         end
       end
 

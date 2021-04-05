@@ -11,10 +11,10 @@ module Gitlab
         # the migration provides, if any are given.
         #
         # The job's batch_metrics are serialized to JSON for storage.
-        def perform(batch_tracking_record)
+        def perform(batch_tracking_record, pause_seconds)
           start_tracking_execution(batch_tracking_record)
 
-          execute_batch(batch_tracking_record)
+          execute_batch(batch_tracking_record, pause_seconds)
 
           batch_tracking_record.status = :succeeded
         rescue => e
@@ -31,7 +31,7 @@ module Gitlab
           tracking_record.update!(attempts: tracking_record.attempts + 1, status: :running, started_at: Time.current)
         end
 
-        def execute_batch(tracking_record)
+        def execute_batch(tracking_record, pause_seconds)
           job_instance = tracking_record.migration_job_class.new
 
           job_instance.perform(
@@ -40,6 +40,7 @@ module Gitlab
             tracking_record.migration_table_name,
             tracking_record.migration_column_name,
             tracking_record.sub_batch_size,
+            pause_seconds,
             *tracking_record.migration_job_arguments)
 
           if job_instance.respond_to?(:batch_metrics)

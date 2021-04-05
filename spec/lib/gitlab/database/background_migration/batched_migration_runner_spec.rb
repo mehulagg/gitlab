@@ -38,8 +38,9 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationRunner do
         it 'runs the job for the first batch' do
           migration.update!(min_value: event1.id, max_value: event2.id)
 
-          expect(migration_wrapper).to receive(:perform) do |job_record|
+          expect(migration_wrapper).to receive(:perform) do |job_record, pause_seconds|
             expect(job_record).to eq(job_relation.first)
+            expect(pause_seconds).to eq(migration.pause_seconds)
           end
 
           expect { runner.run_migration_job(migration) }.to change { job_relation.count }.by(1)
@@ -101,8 +102,9 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationRunner do
 
       context 'when the migration has batches to process' do
         it 'runs the migration job for the next batch' do
-          expect(migration_wrapper).to receive(:perform) do |job_record|
+          expect(migration_wrapper).to receive(:perform) do |job_record, pause_seconds|
             expect(job_record).to eq(job_relation.last)
+            expect(pause_seconds).to eq(migration.pause_seconds)
           end
 
           expect { runner.run_migration_job(migration) }.to change { job_relation.count }.by(1)

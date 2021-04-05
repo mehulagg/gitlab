@@ -9,5 +9,6 @@ FactoryBot.define do
     job_class_name { 'CopyColumnUsingBackgroundMigrationJob' }
     table_name { :events }
     column_name { :id }
+    pause_seconds { 0.1 }
   end
 end
