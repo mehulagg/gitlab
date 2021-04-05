@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::Security::CiConfiguration::ConfigureSast do
-  subject(:mutation) { described_class.new(object: nil, context: context, field: nil) }
+  let(:mutation) { described_class.new(object: nil, context: context, field: nil) }
 
-  subject(:service) { ::Security::CiConfiguration::SastCreateService }
+  let(:service) { ::Security::CiConfiguration::SastCreateService }
 
   subject { mutation.resolve(project_path: project.full_path, configuration: {}) }
 
