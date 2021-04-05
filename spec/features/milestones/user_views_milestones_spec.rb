@@ -80,7 +80,6 @@ RSpec.describe "User views milestones with no MR" do
     expect(page).to have_content(milestone.title)
       .and have_content(milestone.expires_at)
       .and have_content("Issues")
-      .and have_no_content("Merge requests")
   end
 
   it "opens milestone" do
