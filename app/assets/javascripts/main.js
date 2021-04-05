@@ -109,12 +109,6 @@ function deferredInitialisation() {
 
   addSelectOnFocusBehaviour('.js-select-on-focus');
 
-  $('.remove-row').on('ajax:success', function removeRowAjaxSuccessCallback() {
-    tooltips.dispose(this);
-
-    $(this).closest('li').addClass('gl-display-none!');
-  });
-
   const glTooltipDelay = localStorage.getItem('gl-tooltip-delay');
   const delay = glTooltipDelay ? JSON.parse(glTooltipDelay) : 0;
 
