@@ -32,7 +32,7 @@ module Gitlab
 
           if job['database_replica_location'] || replica_caught_up?(job['database_write_location'])
             job[:database_chosen] = 'replica'
-            true
+            false
           elsif worker_class.get_data_consistency == :delayed && job['retry_count'].to_i == 0
             job[:database_chosen] = 'retry'
             raise JobReplicaNotUpToDate, "Sidekiq job #{worker_class} JID-#{job['jid']} couldn't use the replica."\
@@ -41,8 +41,6 @@ module Gitlab
             job[:database_chosen] = 'primary'
             true
           end
-
-          job[:use_primary]
         end
 
         def load_balancer
