@@ -170,15 +170,15 @@ You purchase a subscription for 10 users.
 
 | Event                                              | Billable members | Maximum users |
 |:---------------------------------------------------|:-----------------|:--------------|
-| Ten people (users) occupy all 10 seats.            | 10               | 10            |
-| Two new people join.                               | 12               | 12            |
-| Three people leave and their accounts are removed. | 9                | 12            |
+| Ten users occupy all 10 seats.                     | 10               | 10            |
+| Two new users join.                                | 12               | 12            |
+| Three users leave and their accounts are removed.  | 9                | 12            |
 
 Seats owed = 12 - 10 (Maximum users - users in subscription)
 
 ### Renew or change a GitLab SaaS subscription
 
-Starting 30 days before a subscription expires, GitLab notifies administrators
+Starting 30 days before a subscription expires, GitLab notifies group owners
 of the date of expiry with a banner in the GitLab user interface.
 
 We recommend following these steps during renewal:
@@ -186,11 +186,10 @@ We recommend following these steps during renewal:
 1. Prune any [inactive or unwanted users](#remove-billable-user).
 1. Determine if you have a need for user growth in the upcoming subscription.
 1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in) and beneath your existing subscription, select the **Renew** button.
-1. In the first box, enter the total number of users you'll need for the upcoming year. Be sure this number is at least **equal to, or greater than** the number of billable users in the system at the time of performing the renewal.
-1. Enter the number of [seats owed](#seats-owed) in the second box.
 1. Review your renewal details and complete the payment process.
-1. A license for the renewal term is available for download on the [Manage Purchases](https://customers.gitlab.com/subscriptions) page on the relevant subscription card. Select **Copy license to clipboard** or **Download license** to get a copy.
-1. [Upload](../../user/admin_area/license.md#uploading-your-license) your new license to your instance.
+1. Select **Confirm purchase**.
+
+Your updated subscription is applied to your namespace on the renewal period start date.
 
 An invoice is generated for the renewal and available for viewing or download on the [View invoices](https://customers.gitlab.com/receipts) page. If you have difficulty during the renewal process, contact our [support team](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293) for assistance.
 
