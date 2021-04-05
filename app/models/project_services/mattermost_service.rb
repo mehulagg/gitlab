@@ -16,21 +16,14 @@ class MattermostService < ChatNotificationService
   end
 
   def help
-    'This service sends notifications about projects events to Mattermost channels.<br />
-    To set up this service:
-    <ol>
-      <li><a href="https://docs.mattermost.com/developer/webhooks-incoming.html#enabling-incoming-webhooks">Enable incoming webhooks</a> in your Mattermost installation.</li>
-      <li><a href="https://docs.mattermost.com/developer/webhooks-incoming.html#creating-integrations-using-incoming-webhooks">Add an incoming webhook</a> in your Mattermost team. The default channel can be overridden for each event.</li>
-      <li>Paste the webhook <strong>URL</strong> into the field below.</li>
-      <li>Select events below to enable notifications. The <strong>Channel handle</strong> and <strong>Username</strong> fields are optional.</li>
-    </ol>'
+    'This service sends notifications about project events to Mattermost channels. <a href="https://docs.gitlab.com/ee/user/project/integrations/mattermost.html">How do I use this integration?</a>'
   end
 
   def default_channel_placeholder
-    "Channel handle (e.g. town-square)"
+    "my-channel"
   end
 
   def webhook_placeholder
-    'http://mattermost.example.com/hooks/…'
+    'http://mattermost.example.com/hooks/'
   end
 end

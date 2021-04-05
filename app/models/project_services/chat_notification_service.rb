@@ -61,11 +61,11 @@ class ChatNotificationService < Service
 
   def default_fields
     [
-      { type: 'text', name: 'webhook', placeholder: "e.g. #{webhook_placeholder}", required: true }.freeze,
-      { type: 'text', name: 'username', placeholder: 'e.g. GitLab' }.freeze,
+      { type: 'text', name: 'webhook', placeholder: "#{webhook_placeholder}", required: true }.freeze,
+      { type: 'text', name: 'username', placeholder: 'username' }.freeze,
       { type: 'checkbox', name: 'notify_only_broken_pipelines' }.freeze,
       { type: 'select', name: 'branches_to_be_notified', choices: branch_choices }.freeze,
-      { type: 'text', name: 'labels_to_be_notified', placeholder: 'e.g. ~backend', help: 'Only supported for issue, merge request and note events.' }.freeze
+      { type: 'text', name: 'labels_to_be_notified', placeholder: '~backend,~frontend', help: 'For issue, merge request, and note events only.' }.freeze
     ].freeze
   end
 
