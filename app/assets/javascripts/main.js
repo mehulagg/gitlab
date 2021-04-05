@@ -40,10 +40,6 @@ import 'ee_else_ce/main_ee';
 
 applyGitLabUIConfig();
 
-// expose jQuery as global (TODO: remove these)
-window.jQuery = jQuery;
-window.$ = jQuery;
-
 // inject test utilities if necessary
 if (process.env.NODE_ENV !== 'production' && gon?.test_env) {
   import(/* webpackMode: "eager" */ './test_utils/');
