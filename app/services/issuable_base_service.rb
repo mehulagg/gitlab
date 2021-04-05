@@ -483,7 +483,7 @@ class IssuableBaseService < BaseService
   # we need to check this because milestone from milestone_id param is displayed on "new" page
   # where private project milestone could leak without this check
   def ensure_milestone_available(issuable)
-    issuable.milestone_id = nil unless issuable.milestone_available?
+    issuable.milestone_id = nil if issuable.milestone_id.present? && !issuable.milestone_available?
   end
 
   def update_timestamp?(issuable)
