@@ -51,6 +51,23 @@
     ],
     "analyzers": [
         {
+            "name": "bandit",
+            "label": "Bandit",
+            "enabled" : true,
+            "description": "Python",
+            "variables": [
+                {
+                    "field" : "SAST_BANDIT_EXCLUDED_PATHS",
+                    "label" : "Paths to exclude from scan",
+                    "type": "string",
+                    "default_value": "",
+                    "value": "",
+                    "size": "SMALL",
+                    "description": "Comma-separated list of paths to exclude from scan. Uses Python’s 'fnmatch' syntax; For example: '*/tests/*, */venv/*'"
+                }
+            ]
+        },
+        {
             "name": "brakeman",
             "label": "Brakeman",
             "enabled" : true,
@@ -67,23 +84,6 @@
                 }
             ]
         },
-        {
-            "name": "bandit",
-            "label": "Bandit",
-            "enabled" : true,
-            "description": "Python",
-            "variables": [
-                {
-                    "field" : "SAST_BANDIT_EXCLUDED_PATHS",
-                    "label" : "Paths to exclude from scan",
-                    "type": "string",
-                    "default_value": "",
-                    "value": "",
-                    "size": "SMALL",
-                    "description": "Comma-separated list of paths to exclude from scan. Uses Python’s 'fnmatch' syntax; For example: '*/tests/*, */venv/*'"
-                }
-            ]
-        },         
         {
             "name": "eslint",
             "label": "ESLint",
