@@ -4,8 +4,6 @@ module Gitlab
   module Database
     module LoadBalancing
       class SidekiqServerMiddleware
-        include ::Gitlab::SidekiqMiddleware::MetricsHelper
-
         JobReplicaNotUpToDate = Class.new(StandardError)
 
         def call(worker, job, _queue)
