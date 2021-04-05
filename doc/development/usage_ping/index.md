@@ -214,7 +214,7 @@ For GitLab.com, there are extremely large tables with 15 second query timeouts, 
 | `merge_request_diff_files`   | 1082                   |
 | `events`                     | 514                    |
 
-We have several operations methods available:
+The following operation methods are available for your use:
 
 - [Ordinary Batch Counters](#ordinary-batch-counters)
 - [Distinct Batch Counters](#distinct-batch-counters)
@@ -320,13 +320,13 @@ sum(Issue.group(:state_id), :weight))
 
 ### Add Operation
 
-Handles `StandardError`
+Handles `StandardError`.
 
-Returns `-1` if any of arguments is `-1`
+Returns `-1` if any of the arguments are `-1`.
 
-Sum the values given as parameters
+Sum the values given as parameters.
 
-Method `add(*args)`
+Method: `add(*args)`
 
 Examples
 
