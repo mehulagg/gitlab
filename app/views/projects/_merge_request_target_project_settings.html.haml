@@ -4,16 +4,16 @@
   .form-group
     %b= s_('ProjectSettings|Target project')
     %p.text-secondary
-      = s_('ProjectSettings|Decide which project to be a default target for a new merge request. This setting is only available for a forked project.')
+      = s_('ProjectSettings|The default target project for merge requests that are created in this fork project.')
 
     .form-check.gl-mb-2
       = settings.radio_button :mr_default_target_project_origin, true, class: "form-check-input"
       = label_tag :project_project_setting_mr_default_target_project_origin, class: 'form-check-label' do
         .gl-font-weight-bold
-          = s_('ProjectSettings|Use this project to be a default target for a new merge request.')
+          = s_('ProjectSettings|This project')
 
     .form-check.gl-mb-2
       = settings.radio_button :mr_default_target_project_origin, false, class: "form-check-input"
       = label_tag :project_project_setting_mr_default_target_project_origin, class: 'form-check-label' do
         .gl-font-weight-bold
-          = s_('ProjectSettings|Use the upstream project to be a default target for a new merge request.')
+          = s_('ProjectSettings|Upstream project')
