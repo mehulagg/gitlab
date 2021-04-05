@@ -6,13 +6,11 @@ query EpicLabels($fullPath: ID!, $search: String) {
       first: 20
       searchTerm: $search
     ) {
-      edges {
-        node {
-          id
-          color
-          title
-          textColor
-        }
+      nodes {
+        id
+        color
+        title
+        textColor
       }
     }
   }
