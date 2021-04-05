@@ -131,8 +131,8 @@ describe('detailedMetric', () => {
                 details: requestDetails,
                 warnings: ['gitaly calls: 456 over 30'],
                 summaryOptions: {
-                  hideTotal: true
-                }
+                  hideTotal: true,
+                },
               },
             },
           },
@@ -155,8 +155,8 @@ describe('detailedMetric', () => {
                 details: requestDetails,
                 warnings: ['gitaly calls: 456 over 30'],
                 summaryOptions: {
-                  hideDuration: true
-                }
+                  hideDuration: true,
+                },
               },
             },
           },
@@ -184,8 +184,8 @@ describe('detailedMetric', () => {
                 },
                 summaryOptions: {
                   hideDuration: true,
-                  hideTotal: true
-                }
+                  hideTotal: true,
+                },
               },
             },
           },
@@ -193,10 +193,7 @@ describe('detailedMetric', () => {
       });
 
       it('displays a summary section', () => {
-        expect(findAllSummaryItems()).toEqual([
-          'In controllers 100',
-          'In middlewares 20',
-        ]);
+        expect(findAllSummaryItems()).toEqual(['In controllers 100', 'In middlewares 20']);
       });
     });
 

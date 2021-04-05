@@ -54,17 +54,17 @@ export default {
       return this.currentRequest.details[this.metric];
     },
     metricDetailsSummary() {
-      const summary = {}
+      const summary = {};
 
       if (!this.metricDetails.summaryOptions || !this.metricDetails.summaryOptions.hideTotal) {
-        summary[s__('Total')] = this.metricDetails.calls
+        summary[s__('Total')] = this.metricDetails.calls;
       }
 
       if (!this.metricDetails.summaryOptions || !this.metricDetails.summaryOptions.hideDuration) {
-        summary[s__('PerformanceBar|Total duration')] = this.metricDetails.duration
+        summary[s__('PerformanceBar|Total duration')] = this.metricDetails.duration;
       }
 
-      return {...summary, ...(this.metricDetails.summary || {})}
+      return { ...summary, ...(this.metricDetails.summary || {}) };
     },
     metricDetailsLabel() {
       if (this.metricDetails.duration && this.metricDetails.calls) {

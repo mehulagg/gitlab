@@ -1,6 +1,7 @@
 /* eslint-disable @gitlab/require-i18n-strings */
 import Vue from 'vue';
 import axios from '~/lib/utils/axios_utils';
+import { s__ } from '~/locale';
 import Translate from '~/vue_shared/translate';
 
 import initPerformanceBarLog from './performance_bar_log';
@@ -82,9 +83,9 @@ const initPerformanceBar = (el) => {
             const domContentLoaded = Math.round(navigationEntries[0].domContentLoadedEventEnd);
 
             summary = {
-              Backend: backend,
-              'First contentful paint': firstContentfulPaint,
-              'Dom content loaded': domContentLoaded,
+              [s__('PerformanceBar|Backend')]: backend,
+              [s__('PerformanceBar|First contentful paint')]: firstContentfulPaint,
+              [s__('PerformanceBar|Dom content loaded')]: domContentLoaded,
             };
 
             durationString = `${backend} | ${firstContentfulPaint} | ${domContentLoaded}`;
@@ -122,7 +123,7 @@ const initPerformanceBar = (el) => {
           start: entry.startTime,
           name: entry.name.replace(document.location.origin, ''),
           duration: Math.round(entry.duration),
-          size: entry.transferSize ? `${nf.format(entry.transferSize)} bytes` : 'cached',
+          size: entry.transferSize ? `${nf.format(entry.transferSize)} ${s__('bytes')}` : 'cached',
         };
       },
     },
