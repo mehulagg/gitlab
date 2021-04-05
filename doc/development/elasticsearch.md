@@ -202,7 +202,6 @@ class MigrationName < Elastic::Migration
   # configuration files:
   #   - `Elastic::Latest::Config`, for the main index.
   #   - `Elastic::Latest::<Type>Config`, for standalone indices.
-  # for standalone indices
 
   def migrate
   end
