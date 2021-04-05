@@ -100,7 +100,7 @@ RSpec.describe 'Pipelines', :js do
 
         it 'renders run pipeline link' do
           expect(page).to have_link('Run pipeline')
-        end        
+        end
       end
 
       context 'when pipeline is cancelable' do
