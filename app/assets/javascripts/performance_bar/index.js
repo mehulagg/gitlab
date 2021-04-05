@@ -1,6 +1,7 @@
 /* eslint-disable @gitlab/require-i18n-strings */
 import Vue from 'vue';
 import axios from '~/lib/utils/axios_utils';
+import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { s__ } from '~/locale';
 import Translate from '~/vue_shared/translate';
 
@@ -118,12 +119,11 @@ const initPerformanceBar = (el) => {
         });
       },
       transformResourceEntry(entry) {
-        const nf = new Intl.NumberFormat();
         return {
           start: entry.startTime,
           name: entry.name.replace(document.location.origin, ''),
           duration: Math.round(entry.duration),
-          size: entry.transferSize ? `${nf.format(entry.transferSize)} ${s__('bytes')}` : 'cached',
+          size: entry.transferSize ? numberToHumanSize(entry.transferSize) : 'cached',
         };
       },
     },
