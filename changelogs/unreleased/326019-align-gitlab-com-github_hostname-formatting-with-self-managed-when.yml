@@ -1,0 +1,6 @@
+---
+title: Resolve Align gitlab.com github_hostname formatting with self-managed when
+  Importing repos from GHE
+merge_request: 58516
+author:
+type: fixed
