@@ -1115,7 +1115,6 @@ Profiles:
 
 This error is specific to OpenAPI files. It happens during the validation of the input document. OpenAPI provides rules about what is a valid content. 
 
-
 **Error message**
 
 - `Error, OpenAPI file contains schema errors` [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/298849) in GitLab 13.11. 
@@ -1125,7 +1124,7 @@ This error is specific to OpenAPI files. It happens during the validation of the
 **Solution** 
 
 1. The most simple solution is to use a visual tool to edit and validate the OpenAPI document. As for example [Swagger Editor](https://editor.swagger.io/), where it is possible to upload the OpenAPI document, and it will automatically point out schema errors and possible solutions. 
-1. Alternatively, you could check the log output and look for schema validation warnings. They are prefixed with a messages such as `OpenAPI 2.0 schema validation error` or `OpenAPI 3.0.x schema validation error`. Each failed validation provides extra information about `location` and `description`. Please notice that JSON Schema validation message might not be easy to understand. This is why we recommend the use of editors to validate document.
+1. Alternatively, you could check the log output and look for schema validation warnings. They are prefixed with a messages such as `OpenAPI 2.0 schema validation error` or `OpenAPI 3.0.x schema validation error`. Each failed validation provides extra information about `location` and `description`. Correct each of the validation failures and then resubmit the OpenAPI doc. Please notice that JSON Schema validation message might not be easy to understand. This is why we recommend the use of editors to validate document.
 
 <!--
 ### Target Container
