@@ -396,6 +396,8 @@ group :development, :test do
   gem 'parallel', '~> 1.19', require: false
 
   gem 'rblineprof', '~> 0.3.6', platform: :mri, require: false
+
+  gem 'test_file_finder', git: 'https://gitlab.com/gitlab-org/ci-cd/test_file_finder', ref: '0ddf87af87f8e7e28072e58d5fbd52d560361a3b'
 end
 
 group :development, :test, :danger do
