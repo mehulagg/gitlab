@@ -249,13 +249,14 @@ Administrators for self-managed GitLab installs can
 
 ## Link an external wiki
 
-To add a link to an external wiki from the project's left sidebar:
+To link to an external wiki from the project's left sidebar:
 
 1. Go to your project's **Settings > Integrations**.
 1. Click **External wiki**.
 1. Add the URL to your external wiki.
 1. (Optional) Click **Test settings** to verify the connection.
 1. Click **Save changes**.
+1. Find the new nav item **External wiki** from the project's left sidebar.
 
 If you want to revert this change:
 
@@ -263,7 +264,6 @@ If you want to revert this change:
 1. Click **External wiki**.
 1. Unselect **Enable integration**.
 1. Click **Save changes**.
-1. Find the new nav item **External wiki** from the project's left sidebar.
 
 When you enable this integration, the link to the external wiki does
 not replace the link to the internal wiki.
@@ -278,7 +278,7 @@ To disable the project's wiki:
 1. Scroll down to find **Wiki** and toggle it off (in gray).
 1. Click **Save changes**.
 
-Once done, the link to the internal wiki is not displayed.
+Once done, the link to the internal wiki is not displayed on the left sidebar.
 
 ## Resources
 
