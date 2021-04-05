@@ -65,5 +65,3 @@ At the end, fill in your Mattermost details:
 | **Notify only broken pipelines** | If you choose to enable the **Pipeline** event and you want to be only notified about failed pipelines. |
 | **Branches to be notified** | Select which types of branches to send notifications for. |
 | **Labels to be notified** | (Optional) Labels that the issue or merge request must have in order to trigger a notification. Leave blank to get notifications for all issues and merge requests. |
-
-![Mattermost configuration](img/mattermost_configuration_v2.png)
