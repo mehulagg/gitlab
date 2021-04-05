@@ -10,7 +10,7 @@ class ExternalWikiService < Service
   end
 
   def description
-    s_('ExternalWikiService|Replaces the link to the internal wiki with a link to an external wiki.')
+    s_('ExternalWikiService|Links to an external wiki from the sidebar')
   end
 
   def self.to_param
@@ -23,7 +23,7 @@ class ExternalWikiService < Service
         type: 'text',
         name: 'external_wiki_url',
         title: s_('ExternalWikiService|External wiki URL'),
-        placeholder: s_('ExternalWikiService|The URL of the external wiki'),
+        placeholder: s_('ExternalWikiService|Enter the URL of the external wiki'),
         required: true
       }
     ]
