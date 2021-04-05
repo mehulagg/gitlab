@@ -115,6 +115,10 @@ class Note < ApplicationRecord
              { system_note_metadata: :description_version }, :note_diff_file, :diff_note_positions, :suggestions)
   end
 
+  scope :cherry_picked_merge_requests, ->(shas) do
+    where(noteable_type: 'MergeRequest', commit_id: shas).select(:noteable_id)
+  end
+
   scope :with_notes_filter, -> (notes_filter) do
     case notes_filter
     when UserPreference::NOTES_FILTERS[:only_comments]
