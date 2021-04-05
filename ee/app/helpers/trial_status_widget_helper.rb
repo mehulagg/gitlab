@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# NOTE: The patterns first introduced in this helper for doing trial-related
+# callouts are mimicked by the PaidFeatureCalloutHelper. A third reuse of these
+# patterns (especially as these experiments finish & become permanent parts of
+# the codebase) could trigger the need to extract these patterns into a single,
+# reusable, sharable helper.
 module TrialStatusWidgetHelper
   def trial_status_popover_data_attrs(group)
     base_attrs = trial_status_common_data_attrs(group)
@@ -20,7 +25,7 @@ module TrialStatusWidgetHelper
   end
 
   def show_trial_status_widget?(group)
-    billing_plans_and_trials_available? && eligible_for_trial_status_widget?(group)
+    billing_plans_and_trials_available? && eligible_for_trial_upgrade_callout?(group)
   end
 
   private
@@ -29,7 +34,7 @@ module TrialStatusWidgetHelper
     ::Gitlab::CurrentSettings.should_check_namespace_plan?
   end
 
-  def eligible_for_trial_status_widget?(group)
+  def eligible_for_trial_upgrade_callout?(group)
     group.trial_active? && can?(current_user, :admin_namespace, group)
   end
 

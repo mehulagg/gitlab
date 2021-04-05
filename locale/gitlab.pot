@@ -13310,6 +13310,9 @@ msgstr ""
 msgid "FeatureFlag|User List"
 msgstr ""
 
+msgid "FeatureHighlight|This feature is part of your GitLab Ultimate trial."
+msgstr ""
+
 msgid "Feb"
 msgstr ""
 
