@@ -38,12 +38,13 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
     context 'when active migrations exist' do
       let(:lease_key) { 'batched_background_migration_worker' }
       let(:migration) { build(:batched_background_migration, :active, interval: 2.minutes) }
+      let(:interval_variance) { described_class::INTERVAL_VARIANCE }
 
       before do
         allow(Gitlab::Database::BackgroundMigration::BatchedMigration).to receive(:active_migration)
           .and_return(migration)
 
-        allow(migration).to receive(:interval_elapsed?).and_return(true)
+        allow(migration).to receive(:interval_elapsed?).with(variance: interval_variance).and_return(true)
         allow(migration).to receive(:reload)
       end
 
@@ -64,7 +65,7 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
         it 'does not run the migration' do
           expect_to_obtain_exclusive_lease(lease_key, timeout: 4.minutes)
 
-          expect(migration).to receive(:interval_elapsed?).and_return(false)
+          expect(migration).to receive(:interval_elapsed?).with(variance: interval_variance).and_return(false)
 
           expect(worker).not_to receive(:run_active_migration)
 
