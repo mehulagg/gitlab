@@ -2174,14 +2174,11 @@ class Project < ApplicationRecord
   end
 
   def mr_can_target_upstream?
-    # We can target forked_from_project only when it has more permissive visibility.
-    #
-    # Examples are:
-    # - self is public and forked_from_project is public too
-    # - self is private but forked_from_project is public
+    # When our current visibility is more restrictive than the upstream project,
+    # (e.g., the fork is `private` but the parent is `public`), don't allow target upstream
     forked_from_project &&
       forked_from_project.merge_requests_enabled? &&
-      forked_from_project.visibility_level_value >= visibility_level_value
+      forked_from_project.visibility_level_value <= visibility_level_value
   end
 
   def multiple_issue_boards_available?
