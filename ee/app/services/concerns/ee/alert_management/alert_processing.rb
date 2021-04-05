@@ -3,6 +3,7 @@
 module EE
   module AlertManagement
     module AlertProcessing
+      include ::Gitlab::Utils::UsageData
       extend ::Gitlab::Utils::Override
 
       private
@@ -18,6 +19,8 @@ module EE
         notification_service
           .async
           .notify_oncall_users_of_alert(oncall_notification_recipients.to_a, alert)
+
+        track_usage_event(:incident_management_oncall_notification_sent, oncall_notification_recipients.to_a)
       end
 
       def oncall_notification_recipients
