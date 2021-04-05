@@ -12,6 +12,7 @@ import {
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { convertObjectPropsToCamelCase, urlParamsToObject } from '~/lib/utils/common_utils';
+import { s__ } from '~/locale';
 import {
   formatBoardLists,
   formatListIssues,
@@ -428,23 +429,35 @@ export default {
       .catch(() => commit(types.CREATE_ISSUE_FAILURE));
   },
 
-  addListIssue: ({ commit }, { list, issue, position }) => {
-    commit(types.ADD_ISSUE_TO_LIST, { list, issue, position });
+  addListItem: ({ commit }, { list, item, position }) => {
+    commit(types.ADD_BOARD_ITEM_TO_LIST, { listId: list.id, itemId: item.id, atIndex: position });
+    commit(types.UPDATE_BOARD_ITEM, item);
+  },
+
+  removeListItem: ({ commit }, { listId, itemId }) => {
+    commit(types.REMOVE_BOARD_ITEM_FROM_LIST, { listId, itemId });
+    commit(types.REMOVE_BOARD_ITEM, itemId);
   },
 
   addListNewIssue: ({ commit, dispatch }, { issueInput, list }) => {
-    const issue = formatIssue({ ...issueInput, id: 'tmp' });
-    commit(types.ADD_ISSUE_TO_LIST, { list, issue, position: 0 });
+    const placeholderIssue = formatIssue({ ...issueInput, id: 'tmp' });
+    dispatch('addListItem', { list, item: placeholderIssue, position: 0 });
 
     dispatch('createNewIssue', issueInput)
       .then((res) => {
-        commit(types.ADD_ISSUE_TO_LIST, {
+        dispatch('removeListItem', { listId: list.id, itemId: placeholderIssue.id });
+        dispatch('addListItem', {
+          item: formatIssue({ ...res, id: getIdFromGraphQLId(res.id) }),
           list,
-          issue: formatIssue({ ...res, id: getIdFromGraphQLId(res.id) }),
         });
-        commit(types.REMOVE_ISSUE_FROM_LIST, { list, issue });
       })
-      .catch(() => commit(types.ADD_ISSUE_TO_LIST_FAILURE, { list, issueId: issueInput.id }));
+      .catch(() => {
+        dispatch('removeListItem', { listId: list.id, itemId: placeholderIssue.id });
+        commit(
+          types.SET_ERROR,
+          s__('Boards|An error occurred while creating the issue. Please try again.'),
+        );
+      });
   },
 
   setActiveIssueLabels: async ({ commit, getters }, input) => {

@@ -5,6 +5,7 @@ import {
   formatListIssues,
   formatBoardLists,
   formatIssueInput,
+  formatIssue,
 } from '~/boards/boards_util';
 import { inactiveId, ISSUABLE } from '~/boards/constants';
 import destroyBoardListMutation from '~/boards/graphql/board_list_destroy.mutation.graphql';
@@ -12,6 +13,7 @@ import issueCreateMutation from '~/boards/graphql/issue_create.mutation.graphql'
 import issueMoveListMutation from '~/boards/graphql/issue_move_list.mutation.graphql';
 import actions, { gqlClient } from '~/boards/stores/actions';
 import * as types from '~/boards/stores/mutation_types';
+import { getIdFromGraphQLId } from '../../../../app/assets/javascripts/graphql_shared/utils';
 import {
   mockLists,
   mockListsById,
@@ -928,22 +930,107 @@ describe('createNewIssue', () => {
   });
 });
 
-describe('addListIssue', () => {
-  it('should commit ADD_ISSUE_TO_LIST mutation', (done) => {
+describe('addListItem', () => {
+  it('should commit ADD_BOARD_ITEM_TO_LIST and UPDATE_BOARD_ITEM mutations', () => {
     const payload = {
       list: mockLists[0],
-      issue: mockIssue,
+      item: mockIssue,
       position: 0,
     };
 
-    testAction(
-      actions.addListIssue,
-      payload,
-      {},
-      [{ type: types.ADD_ISSUE_TO_LIST, payload }],
-      [],
-      done,
-    );
+    testAction(actions.addListItem, payload, {}, [
+      {
+        type: types.ADD_BOARD_ITEM_TO_LIST,
+        payload: {
+          listId: mockLists[0].id,
+          itemId: mockIssue.id,
+          atIndex: 0,
+        },
+      },
+      { type: types.UPDATE_BOARD_ITEM, payload: mockIssue },
+    ]);
+  });
+});
+
+describe('removeListItem', () => {
+  it('should commit REMOVE_BOARD_ITEM_FROM_LIST and REMOVE_BOARD_ITEM mutations', () => {
+    const payload = {
+      listId: mockLists[0].id,
+      itemId: mockIssue.id,
+    };
+
+    testAction(actions.removeListItem, payload, {}, [
+      { type: types.REMOVE_BOARD_ITEM_FROM_LIST, payload },
+      { type: types.REMOVE_BOARD_ITEM, payload: mockIssue.id },
+    ]);
+  });
+});
+
+describe('addListNewIssue', () => {
+  describe("when 'createNewIssue' action succeeds", () => {
+    it('dispatches a correct set of actions', (done) => {
+      const fakeList = { id: 'gid://gitlab/List/123' };
+      const fakeResponse = {
+        id: 'gid://gitlab/Issue/456',
+        foo: 'bar',
+      };
+
+      testAction({
+        action: actions.addListNewIssue,
+        payload: {
+          issueInput: {},
+          list: fakeList,
+        },
+        state: {},
+        expectedActions: [
+          {
+            type: 'addListItem',
+            payload: { list: fakeList, item: formatIssue({ id: 'tmp' }), position: 0 },
+          },
+          { type: 'createNewIssue', payload: {} },
+          { type: 'removeListItem', payload: { listId: fakeList.id, itemId: 'tmp' } },
+          {
+            type: 'addListItem',
+            payload: {
+              list: fakeList,
+              item: formatIssue({ ...fakeResponse, id: getIdFromGraphQLId(fakeResponse.id) }),
+            },
+          },
+        ],
+        expectedMutations: [],
+        actionHandlers: { createNewIssue: jest.fn().mockResolvedValue(fakeResponse) },
+        done,
+      });
+    });
+  });
+
+  describe("when 'createNewIssue' action fails", () => {
+    it('dispatches a correct set of actions and commits types.ERROR mutation', (done) => {
+      testAction({
+        action: actions.addListNewIssue,
+        payload: {
+          issueInput: {},
+          list: { id: 'listId' },
+        },
+        state: {},
+        expectedActions: [
+          {
+            type: 'addListItem',
+            payload: { list: { id: 'listId' }, item: formatIssue({ id: 'tmp' }), position: 0 },
+          },
+          { type: 'createNewIssue', payload: {} },
+          { type: 'removeListItem', payload: { listId: 'listId', itemId: 'tmp' } },
+        ],
+        expectedMutations: [
+          {
+            type: types.SET_ERROR,
+            payload: 'An error occurred while creating the issue. Please try again.',
+          },
+        ],
+        actionHandlers: { createNewIssue: jest.fn().mockRejectedValue() },
+        done,
+      });
+    });
   });
 });
 
