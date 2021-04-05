@@ -122,7 +122,7 @@ For example:
 
 ## Subscription expiry
 
-When your subscription expires, you can continue to use GitLab for 14 days.
+When your subscription expires, you can continue to use paid features of GitLab for 14 days.
 On the 15th day, paid features are no longer available. You can
 continue to use free features.
 
