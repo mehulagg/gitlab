@@ -22508,7 +22508,13 @@ msgstr ""
 msgid "Performance optimization"
 msgstr ""
 
+msgid "PerformanceBar|Backend"
+msgstr ""
+
 msgid "PerformanceBar|Bullet notifications"
+msgstr ""
+
+msgid "PerformanceBar|Dom content loaded"
 msgstr ""
 
 msgid "PerformanceBar|Download"
@@ -22518,6 +22524,9 @@ msgid "PerformanceBar|Elasticsearch calls"
 msgstr ""
 
 msgid "PerformanceBar|External Http calls"
+msgstr ""
+
+msgid "PerformanceBar|First contentful paint"
 msgstr ""
 
 msgid "PerformanceBar|Frontend resources"
