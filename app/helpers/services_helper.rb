@@ -6,7 +6,7 @@ module ServicesHelper
     when "push", "push_events"
       s_("ProjectService|Event triggered for every push to the repository.")
     when "tag_push", "tag_push_events"
-      s_("ProjectService|Event triggered for every new new tag pushed to the repository.")
+      s_("ProjectService|Event triggered for every new tag pushed to the repository.")
     when "note", "note_events"
       s_("ProjectService|Event triggered when someone adds a comment.")
     when "confidential_note", "confidential_note_events"

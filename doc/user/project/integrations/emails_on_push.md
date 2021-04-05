@@ -23,4 +23,4 @@ The following options are available:
 
 | Settings | Notification |
 | --- | --- |
-| ![Email on push service settings](img/emails_on_push_service.png) | ![Email on push notification](img/emails_on_push_email.png) |
+| ![Email on push service settings](img/emails_on_push_service_v13_11.png) | ![Email on push notification](img/emails_on_push_email.png) |

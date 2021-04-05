@@ -24131,7 +24131,7 @@ msgstr ""
 msgid "ProjectService|Enter new password"
 msgstr ""
 
-msgid "ProjectService|Event triggered for every new new tag pushed to the repository."
+msgid "ProjectService|Event triggered for every new tag pushed to the repository."
 msgstr ""
 
 msgid "ProjectService|Event triggered for every push to the repository."
