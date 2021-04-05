@@ -168,19 +168,20 @@ RSpec.describe 'epic boards', :js do
       visit_epic_boards_page
     end
 
-    it 'can select an Author and Label' do
-      page.find('[data-qa-selector="epic-filtered-search"]').click
+    it 'can select an Author and Label', :js do
+      page.find('[data-testid="epic-filtered-search"]').click
 
-      page.within('[data-qa-selector="epic-filtered-search"]') do
-        find('li', text: 'Author').click
-        find('li', text: user.name).click
+      page.within('[data-testid="epic-filtered-search"]') do
+        click_link 'Author'
+        wait_for_requests
+        click_link user.name
 
-        expect(find('[data-qa-selector="selected-author"]')).to have_content(user.name)
+        click_link 'Label'
+        wait_for_requests
+        click_link label.title
 
-        find('li', text: 'Label').click
-        find('li', text: label.title).click
+        expect(page).to have_text("Author = #{user.name} Label = ~#{label.title}")
 
-        expect(find('[data-qa-selector="selected-label"]')).to have_content(label.title)
       end
     end
   end

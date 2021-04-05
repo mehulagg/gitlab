@@ -6,8 +6,8 @@ import { __ } from '~/locale';
 import FilteredSearch from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
-import GroupLabelsQuery from '../graphql/group_labels.query.graphql';
-import GroupUsersQuery from '../graphql/group_members.query.graphql';
+import groupLabelsQuery from '../graphql/group_labels.query.graphql';
+import groupUsersQuery from '../graphql/group_members.query.graphql';
 
 export default {
   i18n: {
@@ -16,7 +16,7 @@ export default {
   components: { FilteredSearch },
   inject: ['search'],
   computed: {
-    ...mapState({ fullPath: (state) => state.fullPath }),
+    ...mapState(['fullPath']),
     initialSearch() {
       return [{ type: 'filtered-search-term', value: { data: this.search } }];
     },
@@ -26,7 +26,7 @@ export default {
     fetchAuthors(authorsSearchTerm) {
       return this.$apollo
         .query({
-          query: GroupUsersQuery,
+          query: groupUsersQuery,
           variables: {
             fullPath: this.fullPath,
             search: authorsSearchTerm,
@@ -37,13 +37,13 @@ export default {
     fetchLabels(labelSearchTerm) {
       return this.$apollo
         .query({
-          query: GroupLabelsQuery,
+          query: groupLabelsQuery,
           variables: {
             fullPath: this.fullPath,
             search: labelSearchTerm,
           },
         })
-        .then(({ data }) => data.group?.labels?.edges.map((item) => item.node || []));
+        .then(({ data }) => data.group?.labels.nodes || []);
     },
     handleSearch(filters = []) {
       const [item] = filters;
@@ -83,7 +83,7 @@ export default {
 
 <template>
   <filtered-search
-    data-qa-selector="epic-filtered-search"
+    data-testid="epic-filtered-search"
     class="gl-w-full"
     namespace=""
     :tokens="tokens()"

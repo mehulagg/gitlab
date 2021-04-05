@@ -102,9 +102,7 @@ export default {
         shape="circle"
         class="gl-mr-2"
       />
-      <span data-qa-selector="selected-author">{{
-        activeAuthor ? activeAuthor.name : inputValue
-      }}</span>
+      <span>{{ activeAuthor ? activeAuthor.name : inputValue }}</span>
     </template>
     <template #suggestions>
       <gl-filtered-search-suggestion
