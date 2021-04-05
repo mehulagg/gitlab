@@ -7,13 +7,13 @@
       = s_('ProjectSettings|The default target project for merge requests that are created in this fork project.')
 
     .form-check.gl-mb-2
-      = settings.radio_button :mr_default_target_project_origin, false, class: "form-check-input"
-      = label_tag :project_project_setting_mr_default_target_project_origin, class: 'form-check-label' do
+      = settings.radio_button :mr_default_target_self, false, class: "form-check-input"
+      = label_tag :project_project_setting_mr_default_target_self, class: 'form-check-label' do
         .gl-font-weight-bold
           = s_('ProjectSettings|Upstream project')
 
     .form-check.gl-mb-2
-      = settings.radio_button :mr_default_target_project_origin, true, class: "form-check-input"
-      = label_tag :project_project_setting_mr_default_target_project_origin, class: 'form-check-label' do
+      = settings.radio_button :mr_default_target_self, true, class: "form-check-input"
+      = label_tag :project_project_setting_mr_default_target_self, class: 'form-check-label' do
         .gl-font-weight-bold
           = s_('ProjectSettings|This project')

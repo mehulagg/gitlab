@@ -29,6 +29,6 @@ class AddDefaultTargetProject < ActiveRecord::Migration[6.0]
   # disable_ddl_transaction!
 
   def change
-    add_column :project_settings, :mr_default_target_project_origin, :boolean
+    add_column :project_settings, :mr_default_target_self, :boolean
   end
 end
