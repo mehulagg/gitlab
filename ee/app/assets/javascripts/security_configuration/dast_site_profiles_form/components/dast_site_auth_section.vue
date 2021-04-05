@@ -18,7 +18,7 @@ export default {
       required: false,
       default: false,
     },
-    value: {
+    fields: {
       type: Object,
       required: false,
       default: () => ({}),
@@ -38,9 +38,9 @@ export default {
       // default to commonly used names for `username` and `password` fields in authentcation forms
       usernameField = 'username',
       passwordField = 'password',
-    } = this.value.fields;
+    } = this.fields;
 
-    const isEditMode = Object.keys(this.value.fields).length > 0;
+    const isEditMode = Object.keys(this.fields).length > 0;
 
     return {
       form: {
@@ -73,6 +73,7 @@ export default {
   },
   methods: {
     emitUpdate() {
+      debugger;
       this.$emit('input', this.form);
     },
   },

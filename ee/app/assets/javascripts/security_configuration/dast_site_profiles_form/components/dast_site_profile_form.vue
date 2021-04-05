@@ -109,6 +109,11 @@ export default {
     isEdit() {
       return Boolean(this.siteProfile?.id);
     },
+    // authSection() {
+    //   return {
+    //     fields: this.siteProfile?.auth || {},
+    //   };
+    // },
     hasRequestHeaders() {
       return Boolean(this.siteProfile?.requestHeaders);
     },
@@ -408,7 +413,6 @@ export default {
       v-if="glFeatures.securityDastSiteProfilesAdditionalFields && !isTargetAPI"
       v-model="authSection"
       :disabled="isPolicyProfile"
-      :show-validation="form.showValidation"
     />
 
     <hr class="gl-border-gray-100" />
