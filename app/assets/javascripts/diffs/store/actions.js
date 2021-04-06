@@ -176,11 +176,17 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
 
         return null;
       })
-      .catch(() => commit(types.SET_RETRIEVING_BATCHES, false));
+      .catch((e) => {
+        commit(types.SET_RETRIEVING_BATCHES, false);
+
+        throw e;
+      });
 
   return getBatch()
     .then(handleLocationHash)
-    .catch(() => null);
+    .catch((e) => {
+      throw e;
+    });
 };
 
 export const fetchDiffFilesMeta = ({ commit, state }) => {
@@ -213,7 +219,10 @@ export const fetchDiffFilesMeta = ({ commit, state }) => {
 
       return data;
     })
-    .catch(() => worker.terminate());
+    .catch((e) => {
+      worker.terminate();
+      throw e;
+    });
 };
 
 export const fetchCoverageFiles = ({ commit, state }) => {

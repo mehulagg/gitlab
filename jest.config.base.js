@@ -93,6 +93,7 @@ module.exports = (path, options = {}) => {
     restoreMocks: true,
     transform: {
       '^.+\\.(gql|graphql)$': 'jest-transform-graphql',
+      '^.+\\_worker.js$': './spec/frontend/__helpers__/web_worker_transformer.js',
       '^.+\\.js$': 'babel-jest',
       '^.+\\.vue$': 'vue-jest',
       '^.+\\.(md|zip|png)$': 'jest-raw-loader',

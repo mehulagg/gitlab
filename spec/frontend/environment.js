@@ -22,6 +22,8 @@ class CustomEnvironment extends JSDOMEnvironment {
 
     Object.assign(context.console, {
       error(...args) {
+        console.error(...args);
+
         throw new ErrorWithStack(
           `Unexpected call of console.error() with:\n\n${args.join(', ')}`,
           this.error,
@@ -29,6 +31,8 @@ class CustomEnvironment extends JSDOMEnvironment {
       },
 
       warn(...args) {
+        console.warn(...args);
+
         throw new ErrorWithStack(
           `Unexpected call of console.warn() with:\n\n${args.join(', ')}`,
           this.warn,

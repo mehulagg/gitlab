@@ -374,7 +374,9 @@ export default {
           this.diffFilesLength = parseInt(real_size, 10);
           if (toggleTree) this.setTreeDisplay();
         })
-        .catch(() => {
+        .catch((e) => {
+          console.error(e);
+
           createFlash(__('Something went wrong on our end. Please try again!'));
         });
 
@@ -387,7 +389,9 @@ export default {
           // change when loading the other half of the diff files.
           this.setDiscussions();
         })
-        .catch(() => {
+        .catch((e) => {
+          console.error(e);
+
           createFlash(__('Something went wrong on our end. Please try again!'));
         });
 
