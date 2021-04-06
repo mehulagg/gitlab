@@ -15,35 +15,34 @@ module SchemaPath
 end
 
 RSpec::Matchers.define :match_response_schema do |schema, dir: nil, **options|
-  match do |response|
-    @errors = JSON::Validator.fully_validate(
-      SchemaPath.expand(schema, dir), response.body, options)
+  file_ref_resolver = proc do |uri|
+    file = Rails.root.join(uri.path)
+    raise StandardError, "Ref file #{uri.path} must be json" unless uri.path.ends_with?('.json')
+    raise StandardError, "File #{file.to_path} doesn't exists" unless file.exist?
 
-    @errors.empty?
+    Gitlab::Json.parse(File.read(file))
   end
 
-  failure_message do |response|
-    "didn't match the schema defined by #{SchemaPath.expand(schema, dir)}" \
-    " The validation errors were:\n#{@errors.join("\n")}"
+  match do |response|
+    schema_path = Pathname.new(SchemaPath.expand(schema, dir))
+
+    validator = JSONSchemer.schema(schema_path, ref_resolver: file_ref_resolver)
+    validator.valid?(Gitlab::Json.parse(response.body))
   end
 end
 
 RSpec::Matchers.define :match_schema do |schema, dir: nil, **options|
+  file_ref_resolver = proc do |uri|
+    file = Rails.root.join(uri.path)
+    raise StandardError, "Ref file #{uri.path} must be json" unless uri.path.ends_with?('.json')
+    raise StandardError, "File #{file.to_path} doesn't exists" unless file.exist?
+
+    Gitlab::Json.parse(File.read(file))
+  end
+
   match do |data|
-    @errors = JSON::Validator.fully_validate(
-      SchemaPath.expand(schema, dir), data, options)
-
-    @errors.empty?
-  end
-
-  failure_message do |response|
-    "didn't match the schema defined by #{schema_name(schema, dir)}" \
-    " The validation errors were:\n#{@errors.join("\n")}"
-  end
-
-  def schema_name(schema, dir)
-    return 'provided schema' unless schema.is_a?(String)
-
-    SchemaPath.expand(schema, dir)
+    schema_path = Pathname.new(SchemaPath.expand(schema, dir))
+    validator = JSONSchemer.schema(schema_path, ref_resolver: file_ref_resolver)
+    validator.valid?(Gitlab::Json.parse(response.body))
   end
 end
