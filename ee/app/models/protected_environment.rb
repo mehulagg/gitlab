@@ -24,6 +24,18 @@ class ProtectedEnvironment < ApplicationRecord
       .joins(:protected_environment).where(group: group)
   end
 
+  class << self
+    def for_environment(environment)
+      raise ArgumentError unless environment.is_a?(::Environment)
+
+      key = "protected_environment:for_environment:#{environment.project_id}:#{environment.name}"
+
+      ::Gitlab::SafeRequestStore.fetch(key) do
+        where(project: environment.project_id, name: environment.name)
+      end
+    end
+  end
+
   def accessible_to?(user)
     deploy_access_levels
       .any? { |deploy_access_level| deploy_access_level.check_access(user) }
