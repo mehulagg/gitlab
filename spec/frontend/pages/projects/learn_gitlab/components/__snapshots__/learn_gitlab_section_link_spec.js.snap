@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Learn GitLab Section Link renders correctly 1`] = `
+<div
+  class="gl-mb-4"
+>
+  <span>
+    <gl-link-stub
+      href="https://example.com"
+    >
+      Create or import a repository
+    </gl-link-stub>
+  </span>
+</div>
+`;
