@@ -11,6 +11,7 @@ import {
 } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
+import SidebarDueDateWidget from '~/sidebar/components/due_date/sidebar_due_date_widget.vue';
 import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
 import { apolloProvider } from '~/sidebar/graphql';
 import Translate from '../vue_shared/translate';
@@ -163,6 +164,38 @@ function mountConfidentialComponent() {
             isInIssuePage() || isInIncidentPage() || isInDesignPage()
               ? IssuableType.Issue
               : IssuableType.MergeRequest,
+        },
+      }),
+  });
+}
+
+function mountDueDateComponent() {
+  const el = document.getElementById('js-due-date-entry-point');
+  if (!el) {
+    return;
+  }
+
+  const { fullPath, iid } = getSidebarOptions();
+  const dataNode = document.getElementById('js-due-date-issue-data');
+  const initialData = JSON.parse(dataNode.innerHTML);
+
+  // eslint-disable-next-line no-new
+  new Vue({
+    el,
+    apolloProvider,
+    components: {
+      SidebarDueDateWidget,
+    },
+    provide: {
+      iid: String(iid),
+      fullPath,
+      canUpdate: initialData.is_editable,
+    },
+
+    render: (createElement) =>
+      createElement('sidebar-due-date-widget', {
+        props: {
+          issuableType: IssuableType.Issue,
         },
       }),
   });
@@ -345,6 +378,7 @@ export function mountSidebar(mediator) {
   mountAssigneesComponent(mediator);
   mountReviewersComponent(mediator);
   mountConfidentialComponent(mediator);
+  mountDueDateComponent(mediator);
   mountReferenceComponent(mediator);
   mountLockComponent();
   mountParticipantsComponent(mediator);

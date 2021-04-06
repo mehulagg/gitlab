@@ -1,0 +1,9 @@
+mutation updateIssueDueDate($input: IssueSetDueDateInput!) {
+  issuableSetConfidential: issueSetConfidential(input: $input) {
+    issuable: issue {
+      id
+      dueDate
+    }
+    errors
+  }
+}
