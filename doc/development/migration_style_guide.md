@@ -962,6 +962,10 @@ If using a model in the migrations, you should first
 [clear the column cache](https://api.rubyonrails.org/classes/ActiveRecord/ModelSchema/ClassMethods.html#method-i-reset_column_information)
 using `reset_column_information`.
 
+Another strategy is to use disable single table inheritance (STI) using `self.inheritance_column = :_type_disabled`.
+This will ensure the migration always references itself instead of referencing the version from `app/models`. If a
+migration is not referencing individual columns, then it should be able to do this instead of `reset_column_information`.
+
 This avoids problems where a column that you are using was altered and cached
 in a previous migration.
 
