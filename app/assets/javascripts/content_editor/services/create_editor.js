@@ -1,9 +1,35 @@
 import { Editor } from 'tiptap';
-import { Bold, Code } from 'tiptap-extensions';
+import {
+  Bold,
+  Italic,
+  Code,
+  Link,
+  Image,
+  Heading,
+  Blockquote,
+  HorizontalRule,
+  BulletList,
+  OrderedList,
+  ListItem,
+  CodeBlock,
+} from 'tiptap-extensions';
 
 const createEditor = async ({ content, serializer } = {}) => {
   const editor = new Editor({
-    extensions: [new Bold(), new Code()],
+    extensions: [
+      new Bold(),
+      new Italic(),
+      new Code(),
+      new Link(),
+      new Image(),
+      new Heading({ levels: [1, 2, 3, 4, 5, 6] }),
+      new Blockquote(),
+      new HorizontalRule(),
+      new BulletList(),
+      new ListItem(),
+      new OrderedList(),
+      new CodeBlock(),
+    ],
   });
 
   editor.setSerializedContent = async (serializedContent) => {
