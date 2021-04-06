@@ -72,11 +72,15 @@ module DastOnDemandScans
     def site_profile_config
       return {} unless dast_site_profile
 
+      excluded_urls = dast_site_profile.excluded_urls.presence&.join(',')
+      return { excluded_urls: excluded_urls } unless dast_site_profile.auth_enabled
+
       {
-        excluded_urls: dast_site_profile.excluded_urls.presence&.join(','),
+        excluded_urls: excluded_urls,
         auth_username_field: dast_site_profile.auth_username_field,
         auth_password_field: dast_site_profile.auth_password_field,
-        auth_username: dast_site_profile.auth_username
+        auth_username: dast_site_profile.auth_username,
+        auth_url: dast_site_profile.auth_url
       }
     end
 

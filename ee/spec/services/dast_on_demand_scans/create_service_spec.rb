@@ -65,6 +65,7 @@ RSpec.describe DastOnDemandScans::CreateService do
           let(:expected_params) do
             {
               auth_password_field: dast_site_profile.auth_password_field,
+              auth_url: dast_site_profile.auth_url,
               auth_username: dast_site_profile.auth_username,
               auth_username_field: dast_site_profile.auth_username_field,
               branch: project.default_branch_or_master,
