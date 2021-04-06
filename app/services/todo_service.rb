@@ -43,11 +43,11 @@ class TodoService
   # updates the todo counts for those users.
   #
   def destroy_target(target)
-    todo_users = UsersWithPendingTodosFinder.new(target).execute
+    todo_users = UsersWithPendingTodosFinder.new(target).execute.to_a
 
     yield target
 
-    Users::UpdateTodoCountCacheService.new(todo_users).execute
+    Users::UpdateTodoCountCacheService.new(todo_users).execute if todo_users.present?
   end
 
   # When we reassign an assignable object (issuable, alert) we should:
