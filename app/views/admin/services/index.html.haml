@@ -19,7 +19,7 @@
         %th Service
         %th Description
         %th Last edit
-    - @services.each do |service|
+    - @activated_services.each do |service|
       - if service.type.in?(@existing_instance_types)
         %tr
           %td
