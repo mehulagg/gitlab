@@ -7,15 +7,17 @@ module MergeRequests
     # This saves a lot of queries for irrelevant things that cannot possibly
     # change in the execution of this service.
     def execute(merge_request)
-      return unless current_user&.can?(:update_merge_request, merge_request)
+      return merge_request unless current_user&.can?(:update_merge_request, merge_request)
 
       old_ids = merge_request.assignees.map(&:id)
-      return if old_ids.to_set == update_attrs[:assignee_ids].to_set # no-change
+      return merge_request if old_ids.to_set == update_attrs[:assignee_ids].to_set # no-change
 
       merge_request.update!(**update_attrs)
 
       # Defer the more expensive operations (handle_assignee_changes) to the background
       MergeRequests::AssigneesChangeWorker.perform_async(merge_request.id, current_user.id, old_ids)
+
+      merge_request
     end
 
     def handle_assignee_changes(merge_request, old_assignees)
