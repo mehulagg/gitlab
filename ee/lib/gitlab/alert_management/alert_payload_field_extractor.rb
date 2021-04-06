@@ -34,40 +34,28 @@ module Gitlab
       #
       # Determines the keys and indicies needed to identify a value.
       # in a hash with nested values.
-      #
       # Example)
       # {
-      #   apple: [:a, :b, :c],
+      #   apple: [:a, :b],
       #   pickle: {
-      #     dill: 1,
-      #     kosher: 2,
-      #     sweet: 3,
-      #     garlic: 4
+      #     dill: true
       #   },
-      #   pear: [{ bosc: 5, bartlett: 6 }],
-      #   peach: [{ some: { none: 14, maybe: { not: 4 } } }, 'PLEASE', { plum: 4, apricot: ['red', 'purple'] }]
+      #   pear: [{ bosc: 5, bartlett: [1, [2]] }]
       # }
       #
       # Becomes:
-      # [[[:apple], [:a, :b, :c]],
-      # [[:apple, 0], :a],
-      # [[:apple, 1], :b],
-      # [[:apple, 2], :c],
-      # [[:pickle, :garlic], 4],
-      # [[:pickle, :sweet], 3],
-      # [[:pickle, :kosher], 2],
-      # [[:pickle, :dill], 1],
-      # [[:pear], [{:bosc=>5, :bartlett=>6}]],
-      # [[:pear, 0, :bartlett], 6],
-      # [[:pear, 0, :bosc], 5],
-      # [[:peach], [{:some=>{:none=>14, :maybe=>{:not=>4}}}, "PLEASE", {:plum=>4, :apricot=>["red", "purple"]}]],
-      # [[:peach, 1], "PLEASE"],
-      # [[:peach, 2, :apricot], ["red", "purple"]],
-      # [[:peach, 2, :apricot, 0], "red"],
-      # [[:peach, 2, :apricot, 1], "purple"],
-      # [[:peach, 2, :plum], 4],
-      # [[:peach, 0, :some, :maybe, :not], 4],
-      # [[:peach, 0, :some, :none], 14]]
+      # [
+      #   [[:apple], [:a, :b]],
+      #   [[:apple, 0], :a],
+      #   [[:apple, 1], :b],
+      #   [[:pickle, :dill], true],
+      #   [[:pear, 0, :bosc], 5]
+      #   [[:pear], [{:bosc=>5, :bartlett=>[1, [2]]}]],
+      #   [[:pear, 0, :bartlett], [1, [2]]],
+      #   [[:pear, 0, :bartlett, 0], 1],
+      #   [[:pear, 0, :bartlett, 1], [2]],
+      #   [[:pear, 0, :bartlett, 1, 0], 2],
+      # ]
       #
       # @return Enumerator
       def deep_traverse(hash)
@@ -83,12 +71,8 @@ module Gitlab
           elsif value.is_a?(Array)
             yield key, value
 
-            value.each.with_index do |sub_value, index|
-              if sub_value.is_a?(Hash)
-                sub_value.each { |k, v| pairs.unshift [key + [index, k], v] }
-              else
-                yield (key + [index]), sub_value
-              end
+            value.each.with_index do |element, index|
+              pairs.unshift [key + [index], element]
             end
           else
             yield key, value
@@ -107,11 +91,17 @@ module Gitlab
         end
       end
 
+      # EX) ['first', 'second'] => 'Second'
+      # EX) ['first', 'second', 0, 1] => 'Second[0][1]'
       def label_for(path)
         # Integers represent array indicies
         return path.last.humanize unless path.last.is_a?(Integer)
 
-       "#{path.second_to_last.humanize}[#{path.last}]"
+        path.reverse.reduce('') do |label, element|
+          break "#{element.humanize}#{label}" unless element.is_a?(Integer)
+
+          "[#{element}]#{label}"
+        end
       end
     end
   end

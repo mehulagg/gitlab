@@ -30,7 +30,11 @@ RSpec.describe Gitlab::AlertManagement::AlertPayloadFieldExtractor do
         discarded_null: nil,
         discarded_bool_true: true,
         discarded_bool_false: false,
-        arr: %w[one two three]
+        arr: [
+          { key_a: 'string', key_b: ['nested_arr_value'] },
+          'non_hash_value',
+          [['array_a'], 'array_b']
+        ]
       )
     end
 
@@ -44,7 +48,15 @@ RSpec.describe Gitlab::AlertManagement::AlertPayloadFieldExtractor do
         a_field(['time_iso_8601'], 'Time iso 8601', 'datetime'),
         a_field(['time_iso_8601_short'], 'Time iso 8601 short', 'datetime'),
         a_field(['time_rfc_3339'], 'Time rfc 3339', 'datetime'),
-        a_field(['arr'], 'Arr', 'array')
+        a_field(['arr'], 'Arr', 'array'),
+        a_field(['arr', 0, 'key_a'], 'Key a', 'string'),
+        a_field(['arr', 0, 'key_b'], 'Key b', 'array'),
+        a_field(['arr', 0, 'key_b', 0], 'Key b[0]', 'string'),
+        a_field(['arr', 1], 'Arr[1]', 'string'),
+        a_field(['arr', 2], 'Arr[2]', 'array'),
+        a_field(['arr', 2, 0], 'Arr[2][0]', 'array'),
+        a_field(['arr', 2, 1], 'Arr[2][1]', 'string'),
+        a_field(['arr', 2, 0, 0], 'Arr[2][0][0]', 'string')
       )
     end
   end

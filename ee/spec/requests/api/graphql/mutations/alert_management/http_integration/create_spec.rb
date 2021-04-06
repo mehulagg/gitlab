@@ -11,14 +11,17 @@ RSpec.describe 'Creating a new HTTP Integration' do
   let(:payload_example) do
     {
       'alert' => { 'name' => 'Test alert' },
-      'started_at' => Time.current.strftime('%d %B %Y, %-l:%M%p (%Z)')
+      'started_at' => Time.current.strftime('%d %B %Y, %-l:%M%p (%Z)'),
+      'tool' => %w[DataDog V1]
     }.to_json
   end
 
   let(:payload_attribute_mappings) do
     [
       { fieldName: 'TITLE', path: %w[alert name], type: 'STRING' },
-      { fieldName: 'START_TIME', path: %w[started_at], type: 'DATETIME', label: 'Start time' }
+      { fieldName: 'START_TIME', path: %w[started_at], type: 'DATETIME', label: 'Start time' },
+      { fieldName: 'MONITORING_TOOL', path: ['tool', 0], type: 'STRING', label: 'Tool[0]' },
+      { fieldName: 'HOSTS', path: %w[tool], type: 'ARRAY', label: 'Tool' }
     ]
   end
 
@@ -84,7 +87,9 @@ RSpec.describe 'Creating a new HTTP Integration' do
     expect(new_integration.payload_attribute_mapping).to eq(
       {
         'title' => { 'path' => %w[alert name], 'type' => 'string', 'label' => nil },
-        'start_time' => { 'path' => %w[started_at], 'type' => 'datetime', 'label' => 'Start time' }
+        'start_time' => { 'path' => %w[started_at], 'type' => 'datetime', 'label' => 'Start time' },
+        'monitoring_tool' => { 'path' => ['tool', 0], 'type' => 'string', 'label' => 'Tool[0]' },
+        'hosts' => { 'path' => %w[tool], 'type' => 'array', 'label' => 'Tool' }
       }
     )
   end

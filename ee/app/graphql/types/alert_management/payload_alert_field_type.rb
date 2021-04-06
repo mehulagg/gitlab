@@ -9,7 +9,7 @@ module Types
       authorize :read_alert_management_alert
 
       field :path,
-            [Types::StringOrIntType],
+            [Types::AlertManagement::PayloadAlertFieldPathSegementType],
             null: true,
             description: 'Path to value inside payload JSON.'
 

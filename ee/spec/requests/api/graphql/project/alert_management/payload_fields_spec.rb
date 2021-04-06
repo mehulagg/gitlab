@@ -58,7 +58,9 @@ RSpec.describe 'parse alert payload fields' do
       { 'path' => %w[title], 'label' => 'Title', 'type' => 'STRING' },
       { 'path' => %w[started_at], 'label' => 'Started at', 'type' => 'DATETIME' },
       { 'path' => %w[nested key], 'label' => 'Key', 'type' => 'STRING' },
-      { 'path' => %w[arr], 'label' => 'Arr', 'type' => 'ARRAY' }
+      { 'path' => %w[arr], 'label' => 'Arr', 'type' => 'ARRAY' },
+      { 'path' => ['arr', 1], 'label' => 'Arr[1]', 'type' => 'STRING' },
+      { 'path' => ['arr', 0], 'label' => 'Arr[0]', 'type' => 'STRING' }
     ])
   end
 
