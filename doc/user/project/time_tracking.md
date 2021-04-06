@@ -68,8 +68,9 @@ days from the total time spent. You can't go below 0 minutes of time spent,
 so GitLab automatically resets the time spent if you remove a larger amount
 of time compared to the time that was entered already.
 
-You can log time in the past by providing a date after the time: for example, `/spend 1h 2021-01-31`.
-If you supply a date in the future the command will fail, and no time will be logged.
+You can log time in the past by providing a date after the time. For example, `/spend 1h 2021-01-31`.
+If you supply a date in the future, the command fails and
+no time is logged.
 
 To remove all the time spent at once, use `/remove_time_spent`.
 
