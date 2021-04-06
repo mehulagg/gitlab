@@ -27,10 +27,10 @@ Scanning a web application with both Browserker and GitLab DAST should provide g
 
 Browserker is an extension to the GitLab DAST product. DAST should be included in the CI configuration and Browserker enabled using environment variables:
 
-- Install the DAST [prerequisites](index.md#prerequisite)
-- Include the [DAST CI template](index.md#include-the-dast-template)
-- Set the target website using the `DAST_WEBSITE` environment variable
-- Set the environment variable `DAST_BROWSERKER_SCAN` to `true`
+1. Install the DAST [prerequisites](index.md#prerequisite)
+1. Include the [DAST CI template](index.md#include-the-dast-template)
+1. Set the target website using the `DAST_WEBSITE` environment variable
+1. Set the environment variable `DAST_BROWSERKER_SCAN` to `true`
  
 An example configuration might look like the following:
 
