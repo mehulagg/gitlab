@@ -6,17 +6,19 @@ import SubscriptionDetailsUserInfo, {
 } from 'ee/pages/admin/cloud_licenses/components/subscription_details_user_info.vue';
 import {
   billableUsersText,
+  billableUsersTitle,
   maximumUsersText,
-  usersInLicenseText,
+  maximumUsersTitle,
+  usersInSubscriptionText,
+  usersInSubscriptionTitle,
   usersOverSubscriptionText,
+  usersOverSubscriptionTitle,
 } from 'ee/pages/admin/cloud_licenses/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { license } from '../mock_data';
 
 describe('Subscription Details Card', () => {
   let wrapper;
-
-  const getDataTestId = (data) => data.replace(/([A-Z])/g, (letter) => `-${letter.toLowerCase()}`);
 
   const createComponent = (props = {}, stubGlSprintf = false) => {
     wrapper = extendedWrapper(
@@ -38,17 +40,16 @@ describe('Subscription Details Card', () => {
   });
 
   describe.each`
-    card                       | info    | title                        | text                         | link
-    ${'usersInLicense'}        | ${'10'} | ${'Users in subscription'}   | ${usersInLicenseText}        | ${false}
-    ${'billableUsers'}         | ${'8'}  | ${'Billable users'}          | ${billableUsersText}         | ${billableUsersURL}
-    ${'maximumUsers'}          | ${'8'}  | ${'Maximum users'}           | ${maximumUsersText}          | ${false}
-    ${'usersOverSubscription'} | ${'0'}  | ${'Users over subscription'} | ${usersOverSubscriptionText} | ${trueUpURL}
-  `('with data for $card', ({ card, info, title, text, link }) => {
+    testId                       | info    | title                         | text                         | link
+    ${'users-in-license'}        | ${'10'} | ${usersInSubscriptionTitle}   | ${usersInSubscriptionText}   | ${false}
+    ${'billable-users'}          | ${'8'}  | ${billableUsersTitle}         | ${billableUsersText}         | ${billableUsersURL}
+    ${'maximum-users'}           | ${'8'}  | ${maximumUsersTitle}          | ${maximumUsersText}          | ${false}
+    ${'users-over-subscription'} | ${'0'}  | ${usersOverSubscriptionTitle} | ${usersOverSubscriptionText} | ${trueUpURL}
+  `('with data for $card', ({ testId, info, title, text, link }) => {
     beforeEach(() => {
       createComponent();
     });
 
-    const testId = getDataTestId(card);
     const findUseCard = () => wrapper.findByTestId(testId);
     const linkDescriptionPart = link ? ' ' : ' not ';
 

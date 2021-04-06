@@ -19,7 +19,7 @@ export const detailsLabels = {
 
 export const billableUsersTitle = __('Billable users');
 export const maximumUsersTitle = __('Maximum users');
-export const usersInLicenseTitle = __('Users in subscription');
+export const usersInSubscriptionTitle = __('Users in subscription');
 export const usersOverSubscriptionTitle = __('Users over subscription');
 export const billableUsersText = __(
   'This is the number of %{billableUsersLinkStart}billable users%{billableUsersLinkEnd} on your installation, and this is the minimum number you need to purchase when you renew your license.',
@@ -27,7 +27,7 @@ export const billableUsersText = __(
 export const maximumUsersText = __(
   'This is the highest peak of users on your installation since the license started.',
 );
-export const usersInLicenseText = __(
+export const usersInSubscriptionText = __(
   `Users with a Guest role or those who don't belong to a Project or Group will not use a seat from your license.`,
 );
 export const usersOverSubscriptionText = __(

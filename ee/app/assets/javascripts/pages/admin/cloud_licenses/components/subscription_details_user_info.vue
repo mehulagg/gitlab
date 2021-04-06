@@ -6,8 +6,8 @@ import {
   billableUsersTitle,
   maximumUsersText,
   maximumUsersTitle,
-  usersInLicenseText,
-  usersInLicenseTitle,
+  usersInSubscriptionText,
+  usersInSubscriptionTitle,
   usersOverSubscriptionText,
   usersOverSubscriptionTitle,
 } from '../constants';
@@ -19,11 +19,11 @@ export default {
   i18n: {
     billableUsersTitle,
     maximumUsersTitle,
-    usersInLicenseTitle,
+    usersInSubscriptionTitle,
     usersOverSubscriptionTitle,
     billableUsersText,
     maximumUsersText,
-    usersInLicenseText,
+    usersInSubscriptionText,
     usersOverSubscriptionText,
   },
   links: {
@@ -66,11 +66,11 @@ export default {
         <header>
           <h2>{{ usersInSubscription }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">
-            {{ $options.i18n.usersInLicenseTitle }}
+            {{ $options.i18n.usersInSubscriptionTitle }}
           </h5>
         </header>
         <p>
-          {{ $options.i18n.usersInLicenseText }}
+          {{ $options.i18n.usersInSubscriptionText }}
         </p>
       </gl-card>
     </div>
