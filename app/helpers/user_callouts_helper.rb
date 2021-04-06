@@ -42,6 +42,8 @@ module UserCalloutsHelper
   end
 
   def show_service_templates_deprecated?
+    !Gitlab.com? &&
+    current_user&.admin? &&
     !user_dismissed?(SERVICE_TEMPLATES_DEPRECATED)
   end
 
@@ -67,6 +69,7 @@ module UserCalloutsHelper
     signup_enabled? &&
     !user_dismissed?(REGISTRATION_ENABLED_CALLOUT)
   end
+
 
   private
 
