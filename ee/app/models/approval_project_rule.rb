@@ -25,9 +25,11 @@ class ApprovalProjectRule < ApplicationRecord
   def applies_to_branch?(branch)
     return true if protected_branches.blank?
 
+    # rubocop:disable Gitlab/PredicateMemoization
     @applies_to_branch ||= Hash.new do |h, key|
       h[key] = protected_branches.matching(key).present?
     end
+    # rubocop:enable Gitlab/PredicateMemoization
 
     @applies_to_branch[branch]
   end

@@ -30,9 +30,11 @@ module EE
             next true unless rule.approval_project_rule.present?
             next true if rule.overridden?
 
-            applies_to_branch ||= Hash.new do |h, key| #rubocop:disable Gitlab/PredicateMemoization
+            # rubocop:disable Gitlab/PredicateMemoization
+            applies_to_branch ||= Hash.new do |h, key|
               h[key] = rule.approval_project_rule.applies_to_branch?(key)
             end
+            # rubocop:enable Gitlab/PredicateMemoization
 
             applies_to_branch[branch]
           end
