@@ -130,7 +130,7 @@ module MergeRequests
     end
 
     def merge_request_metrics_service(merge_request)
-      MergeRequestMetricsService.new(merge_request.metrics)
+      MergeRequestMetricsService.new(merge_request.includes(:metrics).metrics)
     end
 
     def create_assignee_note(merge_request, old_assignees)

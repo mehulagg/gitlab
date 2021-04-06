@@ -26,7 +26,7 @@ class ApprovalState
     if users.is_a?(ActiveRecord::Relation) && !users.loaded?
       users.where.not(id: merge_request.author_id)
     else
-      users - [merge_request.author]
+      users.includes(:author) - [merge_request.author]
     end
   end
 
