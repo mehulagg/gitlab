@@ -5,6 +5,20 @@ module Gitlab
     class PgClass < ActiveRecord::Base
       self.primary_key = nil
       self.table_name = 'pg_class'
+
+      scope :for_table, ->(relname) do
+        joins("LEFT JOIN pg_stat_user_tables ON pg_stat_user_tables.relid = pg_class.oid")
+          .where('schemaname = current_schema()')
+          .find_by(relname: relname)
+      end
+
+      def cardinality_estimate
+        tuples = reltuples.to_i
+
+        return if tuples < 1
+
+        tuples
+      end
     end
   end
 end
