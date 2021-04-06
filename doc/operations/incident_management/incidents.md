@@ -277,10 +277,9 @@ When GitLab receives a recovery alert, it closes the associated incident. GitLab
 as a system message on the incident, indicating that the GitLab Alert bot automatically closed the
 incident.
 
-With Maintainer or higher [permissions](../../user/permissions.md),
-you can set GitLab to automatically close an incident when a recovery alert is received:
+With Maintainer or higher [permissions](../../user/permissions.md), you can disable this setting:
 
 1. Go to **Settings > Operations** and expand **Incidents**.
-1. On the **Alert integration** tab, select the checkbox
+1. On the **Alert integration** tab, deselect the checkbox
    **Automatically close associated incident when a recovery alert notification resolves an alert**.
 1. Select **Save changes**.
