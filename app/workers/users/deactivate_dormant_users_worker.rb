@@ -13,9 +13,10 @@ module Users
       return if Gitlab.com?
       return unless ::Gitlab::CurrentSettings.current_application_settings.deactivate_dormant_users
 
+      # rubocop: disable CodeReuse/ActiveRecord
       User.dormant.find_each(batch_size: BATCH_SIZE) { |user| deactivate(user) }
-
       User.with_no_activity.find_each(batch_size: BATCH_SIZE) { |user| deactivate(user) }
+      # rubocop: enable CodeReuse/ActiveRecord
     end
 
     private

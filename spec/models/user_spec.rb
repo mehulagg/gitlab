@@ -5636,7 +5636,8 @@ RSpec.describe User do
         create(:user, state: :active, user_type: user_type, last_activity_on: nil)
       end
 
-      create(:user, last_activity_on: 1.day.ago)
+      create(:user, last_activity_on: not_that_long_ago)
+      create(:user, last_activity_on: too_long_ago)
 
       user_with_no_activity = create(:user, last_activity_on: nil)
 
