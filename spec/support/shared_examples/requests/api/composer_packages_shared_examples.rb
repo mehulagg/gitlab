@@ -97,7 +97,6 @@ RSpec.shared_examples 'process Composer api request' do |user_type, status, add_
     end
 
     it_behaves_like 'returning response status', status
-    it_behaves_like 'a package tracking event', described_class.name, 'pull_package'
   end
 end
 
