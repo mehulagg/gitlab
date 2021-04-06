@@ -979,7 +979,7 @@ Feature.disable(:gitaly_reference_transactions_primary_wins)
 ```
 
 NOTE:
-If _unset_ in Rails, flags will read false from the console and Praefect will use their default value, which depends on the GitLab version in use.
+If not set in GitLab, flags are read as false from the console and Praefect uses their default value, which depends on the GitLab version.
 
 To monitor strong consistency, you can use the following Prometheus metrics:
 
