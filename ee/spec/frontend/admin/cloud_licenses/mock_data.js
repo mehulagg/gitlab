@@ -1,3 +1,5 @@
+import { licenseType } from '../../../../app/assets/javascripts/pages/admin/cloud_licenses/constants';
+
 export const license = {
   ULTIMATE: {
     billableUsers: '8',
@@ -14,6 +16,35 @@ export const license = {
     usersOverSubscription: '0',
   },
 };
+
+export const subscriptionHistory = [
+  {
+    company: 'ACME Corp',
+    email: 'user@acmecorp.com',
+    expiresAt: '',
+    // TODO: not present in graphQL response (?)
+    id: '1309188',
+    name: 'Jane Doe',
+    plan: 'Ultimate',
+    startsAt: '',
+    type: licenseType.CLOUD,
+    validFrom: '',
+    usersInLicense: '10',
+  },
+  {
+    company: 'ACME Corp',
+    email: 'user@acmecorp.com',
+    expiresAt: '',
+    // TODO: not present in graphQL response (?)
+    id: '1309188',
+    name: 'Jane Doe',
+    plan: 'Ultimate',
+    startsAt: '',
+    type: licenseType.LEGACY,
+    validFrom: '',
+    usersInLicense: '5',
+  },
+];
 
 export const activateLicenseMutationResponse = {
   FAILURE: [

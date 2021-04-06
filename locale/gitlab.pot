@@ -6441,37 +6441,10 @@ msgstr ""
 msgid "CloudLicense|Activate"
 msgstr ""
 
-msgid "CloudLicense|ID"
-msgstr ""
-
-msgid "CloudLicense|Last Sync"
-msgstr ""
-
-msgid "CloudLicense|Licensed to"
-msgstr ""
-
-msgid "CloudLicense|Manage"
-msgstr ""
-
 msgid "CloudLicense|Paste your activation code"
 msgstr ""
 
 msgid "CloudLicense|Paste your activation code below"
-msgstr ""
-
-msgid "CloudLicense|Plan"
-msgstr ""
-
-msgid "CloudLicense|Renews"
-msgstr ""
-
-msgid "CloudLicense|Started"
-msgstr ""
-
-msgid "CloudLicense|Subscription details"
-msgstr ""
-
-msgid "CloudLicense|Sync Subscription details"
 msgstr ""
 
 msgid "CloudLicense|This instance is currently using the %{planName} plan."
@@ -29749,6 +29722,48 @@ msgid "Summary"
 msgstr ""
 
 msgid "Sunday"
+msgstr ""
+
+msgid "SuperSonics|Activated on"
+msgstr ""
+
+msgid "SuperSonics|Expires on"
+msgstr ""
+
+msgid "SuperSonics|ID"
+msgstr ""
+
+msgid "SuperSonics|Last Sync"
+msgstr ""
+
+msgid "SuperSonics|Licensed to"
+msgstr ""
+
+msgid "SuperSonics|Manage"
+msgstr ""
+
+msgid "SuperSonics|Plan"
+msgstr ""
+
+msgid "SuperSonics|Renews"
+msgstr ""
+
+msgid "SuperSonics|Seats"
+msgstr ""
+
+msgid "SuperSonics|Started"
+msgstr ""
+
+msgid "SuperSonics|Subscription details"
+msgstr ""
+
+msgid "SuperSonics|Sync Subscription details"
+msgstr ""
+
+msgid "SuperSonics|Type"
+msgstr ""
+
+msgid "SuperSonics|Valid From"
 msgstr ""
 
 msgid "Support"
