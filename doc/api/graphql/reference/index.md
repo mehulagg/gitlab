@@ -870,6 +870,26 @@ Input type: `ConfigureSastInput`
 | <a id="mutationconfiguresaststatus"></a>`status` | [`String!`](#string) | Status of creating the commit for the supplied SAST CI configuration. |
 | <a id="mutationconfiguresastsuccesspath"></a>`successPath` | [`String`](#string) | Redirect path to use when the response is successful. |
 
+### `Mutation.configureSecretDetection`
+
+Input type: `ConfigureSecretDetectionInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationconfiguresecretdetectionclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationconfiguresecretdetectionprojectpath"></a>`projectPath` | [`ID!`](#id) | Full path of the project. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationconfiguresecretdetectionclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationconfiguresecretdetectionerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationconfiguresecretdetectionstatus"></a>`status` | [`String!`](#string) | Status of creating the commit for the supplied Secret Detection CI configuration. |
+| <a id="mutationconfiguresecretdetectionsuccesspath"></a>`successPath` | [`String`](#string) | Redirect path to use when the response is successful. |
+
 ### `Mutation.createAlertIssue`
 
 Input type: `CreateAlertIssueInput`
