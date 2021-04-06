@@ -108,10 +108,10 @@ module Gitlab
       end
 
       def label_for(path)
+        # Integers represent array indicies
         return path.last.humanize unless path.last.is_a?(Integer)
 
-        # Integers represent array indicies
-       "#{path.second_to_last}[#{path.last}]"
+       "#{path.second_to_last.humanize}[#{path.last}]"
       end
     end
   end
