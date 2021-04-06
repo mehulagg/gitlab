@@ -35,7 +35,8 @@ full list of reference architectures, see
 | Object storage                             | n/a         | n/a                     | n/a              | n/a          | n/a       |
 | NFS server                                 | 1           | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`   | `c5.xlarge`  | `F4s v2`  |
 
-NOTE: Components marked with * can be optionally run on reputable
+NOTE:
+Components marked with * can be optionally run on reputable
 third party external PaaS solutions such as Google Cloud SQL or Memorystore.
 
 ```plantuml
@@ -2405,7 +2406,8 @@ services where applicable):
 | Praefect PostgreSQL*                       | 1+    | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | Object storage                             | n/a   | n/a                     | n/a              |
 
-NOTE: Components marked with * can be optionally run on reputable
+NOTE:
+Components marked with * can be optionally run on reputable
 third party external PaaS solutions such as Google Cloud SQL or Memorystore.
 
 ```plantuml
