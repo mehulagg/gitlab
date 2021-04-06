@@ -18822,6 +18822,9 @@ msgstr ""
 msgid "Manage project labels"
 msgstr ""
 
+msgid "Manage projects."
+msgstr ""
+
 msgid "Manage storage usage"
 msgstr ""
 
