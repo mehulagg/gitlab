@@ -20,12 +20,22 @@ class MemberPresenter < Gitlab::View::Presenter::Delegated
       can?(current_user, admin_member_permission, source)
   end
 
-  def can_update?
-    can?(current_user, update_member_permission, member)
+  def can_update?(user_ids)
+    # this is :update_group_member
+    # which is just can?(:admin_group_member) + the last_owner
+    # can?(current_user, update_member_permission, member)
+
+    return false if member.user_id.in?(user_ids)
+
+    can?(current_user, :admin_group_member, source)
   end
 
-  def can_remove?
-    can?(current_user, destroy_member_permission, member)
+  def can_remove?(user_ids)
+    # can?(current_user, destroy_member_permission, member)
+
+    return false if member.user_id.in?(user_ids)
+
+    can?(current_user, :admin_group_member, source)
   end
 
   def can_approve?

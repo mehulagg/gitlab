@@ -327,6 +327,10 @@ class Group < Namespace
     members_with_parents.owners.exists?(user_id: user)
   end
 
+  def owner_user_ids(members)
+    members_with_parents.owners.where(user_id: members.pluck(:user_id)).ids
+  end
+
   def has_maintainer?(user)
     return false unless user
 
@@ -339,7 +343,11 @@ class Group < Namespace
 
   # Check if user is a last owner of the group.
   def last_owner?(user)
-    has_owner?(user) && members_with_parents.owners.size == 1
+    has_owner?(user) && last_existing_owner?
+  end
+
+  def last_existing_owner?
+    members_with_parents.owners.size == 1
   end
 
   def last_blocked_owner?(user)

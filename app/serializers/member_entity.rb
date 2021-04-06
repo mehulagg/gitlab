@@ -15,12 +15,12 @@ class MemberEntity < Grape::Entity
     UserEntity.represent(member.created_by, only: [:name, :web_url])
   end
 
-  expose :can_update do |member|
-    member.can_update?
+  expose :can_update do |member, options|
+    member.can_update?(options[:can_update_ids])
   end
 
-  expose :can_remove do |member|
-    member.can_remove?
+  expose :can_remove do |member, options|
+    member.can_remove?(options[:can_update_ids])
   end
 
   expose :is_direct_member do |member, options|

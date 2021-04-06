@@ -4,7 +4,7 @@ module EE
   module MemberPresenter
     extend ::Gitlab::Utils::Override
 
-    def can_update?
+    def can_update?(_user_ids)
       super || can_override?
     end
 

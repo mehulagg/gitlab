@@ -18,7 +18,15 @@ module Groups::GroupMembersHelper
   end
 
   def members_data_json(group, members)
-    MemberSerializer.new.represent(members, { current_user: current_user, group: group, source: group }).to_json
+    owner_ids = if group.last_existing_owner?
+                  group.owner_user_ids(members)
+                else
+                  []
+                end
+
+    MemberSerializer.new
+                    .represent(members, { current_user: current_user, group: group, source: group, can_update_ids: owner_ids })
+                    .to_json
   end
 
   # Overridden in `ee/app/helpers/ee/groups/group_members_helper.rb`
