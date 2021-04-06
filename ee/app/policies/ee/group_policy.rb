@@ -38,8 +38,11 @@ module EE
       end
 
       condition(:group_devops_adoption_available) do
-        ::Feature.enabled?(:group_devops_adoption, @subject, default_enabled: :yaml) &&
           @subject.feature_available?(:group_level_devops_adoption)
+      end
+
+      condition(:group_devops_adoption_enabled) do
+        ::Feature.enabled?(:group_devops_adoption, @subject, default_enabled: :yaml)
       end
 
       condition(:dora4_analytics_available) do
@@ -191,9 +194,13 @@ module EE
         enable :view_group_ci_cd_analytics
       end
 
-      rule { reporter & group_devops_adoption_available }.policy do
+      rule { reporter & group_devops_adoption_enabled & group_devops_adoption_available }.policy do
         enable :manage_devops_adoption_segments
         enable :view_group_devops_adoption
+      end
+
+      rule { admin & group_devops_adoption_enabled }.policy do
+        enable :manage_devops_adoption_segments
       end
 
       rule { owner & ~has_parent & prevent_group_forking_available }.policy do

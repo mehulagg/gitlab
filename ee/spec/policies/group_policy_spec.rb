@@ -1613,7 +1613,7 @@ RSpec.describe GroupPolicy do
       it { is_expected.to be_disallowed(policy) }
     end
 
-    context 'when feature is enabled and license include the feature' do
+    context 'when feature is enabled and license includes the feature' do
       using RSpec::Parameterized::TableSyntax
 
       where(:role, :admin_mode, :allowed) do
@@ -1637,6 +1637,86 @@ RSpec.describe GroupPolicy do
         let(:current_user) { public_send(role) }
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+      end
+    end
+  end
+
+  describe 'manage_devops_adoption_segments' do
+    let(:current_user) { owner }
+    let(:policy) { :manage_devops_adoption_segments }
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(group_devops_adoption: false)
+      end
+
+      it { is_expected.to be_disallowed(policy) }
+    end
+
+    context 'when license does not include the feature' do
+      before do
+        stub_feature_flags(group_devops_adoption: true)
+        stub_licensed_features(group_level_devops_adoption: false)
+      end
+
+      it { is_expected.to be_disallowed(policy) }
+    end
+
+    context 'when feature is enabled' do
+      before do
+        stub_feature_flags(group_devops_adoption: true)
+      end
+
+      context 'when license includes the feature' do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:role, :admin_mode, :allowed) do
+          :admin            | true  | true
+          :admin            | false | false
+          :owner            | nil   | true
+          :maintainer       | nil   | true
+          :developer        | nil   | true
+          :reporter         | nil   | true
+          :guest            | nil   | false
+          :non_group_member | nil   | false
+        end
+
+        before do
+          stub_licensed_features(group_level_devops_adoption: true)
+          enable_admin_mode!(current_user) if admin_mode
+        end
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+        end
+      end
+
+      context 'when license does not include the feature' do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:role, :admin_mode, :allowed) do
+          :admin            | true  | true
+          :admin            | false | false
+          :owner            | nil   | false
+          :maintainer       | nil   | false
+          :developer        | nil   | false
+          :reporter         | nil   | false
+          :guest            | nil   | false
+          :non_group_member | nil   | false
+        end
+
+        before do
+          stub_licensed_features(group_level_devops_adoption: false)
+          enable_admin_mode!(current_user) if admin_mode
+        end
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+        end
       end
     end
   end
