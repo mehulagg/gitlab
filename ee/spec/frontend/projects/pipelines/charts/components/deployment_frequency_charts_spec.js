@@ -11,13 +11,13 @@ import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_an
 jest.mock('~/flash');
 
 const lastWeekData = getJSONFixture(
-  'api/dora/metrics/daily_deployment_frequencies_for_last_week.json',
+  'api/dora/metrics/daily_deployment_frequency_for_last_week.json',
 );
 const lastMonthData = getJSONFixture(
-  'api/dora/metrics/daily_deployment_frequencies_for_last_month.json',
+  'api/dora/metrics/daily_deployment_frequency_for_last_month.json',
 );
 const last90DaysData = getJSONFixture(
-  'api/dora/metrics/daily_deployment_frequencies_for_last_90_days.json',
+  'api/dora/metrics/daily_deployment_frequency_for_last_90_days.json',
 );
 
 describe('ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue', () => {
