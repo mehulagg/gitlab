@@ -6,12 +6,13 @@ module Security
   class StoreReportService < ::BaseService
     include Gitlab::Utils::StrongMemoize
 
-    attr_reader :pipeline, :report, :project
+    attr_reader :pipeline, :report, :project, :vulnerability_finding_id_to_finding_map
 
     def initialize(pipeline, report)
       @pipeline = pipeline
       @report = report
       @project = @pipeline.project
+      @vulnerability_finding_id_to_finding_map = Hash.new
     end
 
     def execute
@@ -62,6 +63,8 @@ module Security
       # Vulnerabilities::Finding (`vulnerability_occurrences`)
       vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
         create_new_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
+
+      vulnerability_finding_id_to_finding_map[vulnerability_finding.id] = finding
 
       update_vulnerability_scanner(finding)
 
@@ -130,6 +133,20 @@ module Security
       vulnerability_finding.finding_identifiers.find_or_create_by!(identifier: identifier_object)
       identifier_object.update!(identifier.to_hash)
     rescue ActiveRecord::RecordNotUnique
+    end
+
+    def update_vulnerability_links_info
+      records = []
+      vulnerability_finding_id_to_finding_map.each do |vulnerability_id, finding|
+        finding.links.each do |link|
+          records << {vulnerability_occurrence_id: vulnerability_id, url: link.to_hash}
+        end
+      end
+
+      records.uniq!
+      records.each { |record| record.merge!({ created_at: Time.current, updated_at: Time.current }) }
+
+      Vulnerabilities::FindingLink.insert_all!(records) if records.present?
     end
 
     def create_or_update_vulnerability_links(finding, vulnerability_finding)
