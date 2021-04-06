@@ -77,7 +77,7 @@ The following is hidden from your user profile page (`https://gitlab.example.com
 - Tabs for activity, groups, contributed projects, personal projects, starred projects, snippets
 
 NOTE:
-Making your user profile page private does not hide your public resources from APIs as REST or GraphQL.
+Making your user profile page private does not hide your public resources from the REST or GraphQL APIs.
 
 ## Add external accounts to your user profile page
 
