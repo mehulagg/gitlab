@@ -202,7 +202,7 @@ export default {
         :loading="state.isRunningMergeRequestPipeline"
         @click="tryRunPipeline"
       >
-        {{ s__('Pipelines|Run Pipeline') }}
+        {{ s__('Pipelines|Run pipeline') }}
       </gl-button>
 
       <pipelines-table-component
