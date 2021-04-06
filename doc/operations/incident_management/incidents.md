@@ -280,6 +280,6 @@ incident.
 With Maintainer or higher [permissions](../../user/permissions.md), you can disable this setting:
 
 1. Go to **Settings > Operations** and expand **Incidents**.
-1. On the **Alert integration** tab, deselect the checkbox
+1. On the **Alert integration** tab, clear the checkbox
    **Automatically close associated incident when a recovery alert notification resolves an alert**.
 1. Select **Save changes**.
