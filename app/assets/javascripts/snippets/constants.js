@@ -13,7 +13,7 @@ export const SNIPPET_VISIBILITY = {
   },
   [SNIPPET_VISIBILITY_INTERNAL]: {
     label: __('Internal'),
-    icon: 'shield',
+    icon: 'eye-slash',
     description: __('The snippet is visible to any logged in user except external users.'),
   },
   [SNIPPET_VISIBILITY_PUBLIC]: {

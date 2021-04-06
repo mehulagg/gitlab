@@ -48,6 +48,6 @@ export const PROJECT_VISIBILITY_TYPE = {
 
 export const VISIBILITY_TYPE_ICON = {
   public: 'earth',
-  internal: 'shield',
+  internal: 'eye-slash',
   private: 'lock',
 };

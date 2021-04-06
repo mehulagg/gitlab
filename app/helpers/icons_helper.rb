@@ -91,7 +91,7 @@ module IconsHelper
       when Gitlab::VisibilityLevel::PRIVATE
         'lock'
       when Gitlab::VisibilityLevel::INTERNAL
-        'shield'
+        'eye-slash'
       else # Gitlab::VisibilityLevel::PUBLIC
         'earth'
       end
