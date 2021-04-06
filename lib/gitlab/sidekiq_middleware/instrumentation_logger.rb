@@ -16,7 +16,7 @@ module Gitlab
           :worker_data_consistency,
           *::Gitlab::Memory::Instrumentation::KEY_MAPPING.values,
           *::Gitlab::Instrumentation::Redis.known_payload_keys,
-          *::Gitlab::Metrics::Subscribers::ActiveRecord.known_payload_keys,
+          *::Gitlab::Metrics::Subscribers::ActiveRecord::DB_COUNTERS,
           *::Gitlab::Metrics::Subscribers::ExternalHttp::KNOWN_PAYLOAD_KEYS,
           *::Gitlab::Metrics::Subscribers::RackAttack::PAYLOAD_KEYS
         ]
@@ -44,3 +44,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::SidekiqMiddleware::InstrumentationLogger.singleton_class.prepend_if_ee('EE::Gitlab::SidekiqMiddleware::InstrumentationLogger')

@@ -21,7 +21,8 @@ RSpec.describe Gitlab::InstrumentationHelper do
         expect(payload).to include(db_replica_count: 0,
                                    db_replica_cached_count: 0,
                                    db_primary_count: 0,
-                                   db_primary_cached_count: 0)
+                                   db_primary_cached_count: 0,
+                                   primary_write_location: 0)
       end
     end
 
@@ -36,7 +37,8 @@ RSpec.describe Gitlab::InstrumentationHelper do
         expect(payload).not_to include(db_replica_count: 0,
                                    db_replica_cached_count: 0,
                                    db_primary_count: 0,
-                                   db_primary_cached_count: 0)
+                                   db_primary_cached_count: 0,
+                                   primary_write_location: 0)
       end
     end
 

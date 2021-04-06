@@ -149,3 +149,5 @@ module Gitlab
     private_class_method :convert_to_time
   end
 end
+
+Gitlab::InstrumentationHelper.singleton_class.prepend_if_ee('EE::Gitlab::InstrumentationHelper')

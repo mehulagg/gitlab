@@ -76,7 +76,8 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
             'db_replica_count' => 0,
             'db_replica_cached_count' => 0,
             'db_primary_count' => a_value >= 1,
-            'db_primary_cached_count' => 0
+            'db_primary_cached_count' => 0,
+            'primary_write_location' => 0
           )
         end
 
@@ -94,7 +95,8 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
             'db_replica_count' => 0,
             'db_replica_cached_count' => 0,
             'db_primary_count' => 0,
-            'db_primary_cached_count' => 0
+            'db_primary_cached_count' => 0,
+            'primary_write_location' => 0
           )
         end
 
