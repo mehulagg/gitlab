@@ -610,7 +610,7 @@ Parsed field from an alert used for custom mappings.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `label` | [`String`](#string) | Human-readable label of the payload path. |
-| `path` | [`[String!]`](#string) | Path to value inside payload JSON. |
+| `path` | [`[PayloadAlertFieldPathSegement!]`](#payloadalertfieldpathsegement) | Path to value inside payload JSON. |
 | `type` | [`AlertManagementPayloadAlertFieldType`](#alertmanagementpayloadalertfieldtype) | Type of the parsed value. |
 
 ### `AlertManagementPayloadAlertMappingField`
@@ -8627,6 +8627,10 @@ An example `NoteableID` is: `"gid://gitlab/Noteable/1"`.
 A `PackagesPackageID` is a global ID. It is encoded as a string.
 
 An example `PackagesPackageID` is: `"gid://gitlab/Packages::Package/1"`.
+
+### `PayloadAlertFieldPathSegement`
+
+String or integer.
 
 ### `ProjectID`
 
