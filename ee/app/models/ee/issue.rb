@@ -30,6 +30,7 @@ module EE
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
       scope :not_in_epics, ->(epics) { left_outer_joins(:epic_issue).where('epic_issues.epic_id NOT IN (?) OR epic_issues.epic_id IS NULL', epics) }
+      scope :sorted_by_epic_position, -> { joins(:epic_issue).select('issues.*, epic_issues.id as epic_issue_id, epic_issues.relative_position, epic_issues.epic_id as epic_id').order('epic_issues.relative_position, epic_issues.id') }
       scope :no_iteration, -> { where(sprint_id: nil) }
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }

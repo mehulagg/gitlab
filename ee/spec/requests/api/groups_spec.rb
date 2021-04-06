@@ -892,6 +892,28 @@ RSpec.describe API::Groups do
             expect(json_response['message']).to eq('error')
           end
         end
+
+        it 'does not mark the group for deletion when the group has a paid gitlab.com subscription' do
+          create(:gitlab_subscription, :ultimate, namespace: group)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq("This group can't be removed because it is linked to a subscription.")
+          expect(group.marked_for_deletion_on).to be_nil
+          expect(group.deleting_user).to be_nil
+        end
+
+        it 'marks for deletion a subgroup of a group with a paid gitlab.com subscription' do
+          create(:gitlab_subscription, :ultimate, namespace: group)
+          subgroup = create(:group, parent: group)
+
+          delete api("/groups/#{subgroup.id}", user)
+
+          expect(response).to have_gitlab_http_status(:accepted)
+          expect(subgroup.marked_for_deletion_on).to eq(Date.today)
+          expect(subgroup.deleting_user).to eq(user)
+        end
       end
 
       context 'period of delayed deletion is set to 0' do
@@ -909,6 +931,22 @@ RSpec.describe API::Groups do
       end
 
       it_behaves_like 'immediately enqueues the job to delete the group'
+
+      it 'does not delete the group when the group has a paid gitlab.com subscription' do
+        create(:gitlab_subscription, :ultimate, namespace: group)
+
+        expect { subject }.not_to change(GroupDestroyWorker.jobs, :size)
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['message']).to eq("This group can't be removed because it is linked to a subscription.")
+      end
+
+      it 'deletes a subgroup of a group with a paid gitlab.com subscription' do
+        create(:gitlab_subscription, :ultimate, namespace: group)
+        subgroup = create(:group, parent: group)
+
+        expect { delete api("/groups/#{subgroup.id}", user) }.to change(GroupDestroyWorker.jobs, :size).by(1)
+        expect(response).to have_gitlab_http_status(:accepted)
+      end
     end
   end
 

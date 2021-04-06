@@ -3,6 +3,7 @@ import { GlCard, GlButtonGroup, GlButton, GlModalDirective, GlTooltipDirective }
 import * as Sentry from '@sentry/browser';
 import { capitalize } from 'lodash';
 import {
+  getStartOfWeek,
   formatDate,
   nWeeksBefore,
   nWeeksAfter,
@@ -87,20 +88,17 @@ export default {
   data() {
     return {
       presetType: this.$options.PRESET_TYPES.WEEKS,
-      timeframeStartDate: new Date(),
+      timeframeStartDate: getStartOfWeek(new Date()),
       rotations: this.schedule.rotations.nodes,
       rotationToUpdate: {},
     };
   },
   computed: {
-    selectedTimezone() {
-      return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
+    loading() {
+      return this.$apollo.queries.rotations.loading;
     },
     offset() {
       return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
-    },
-    timeframe() {
-      return getTimeframeForWeeksView(this.timeframeStartDate);
     },
     scheduleRange() {
       switch (this.presetType) {
@@ -120,14 +118,24 @@ export default {
           return '';
       }
     },
-    loading() {
-      return this.$apollo.queries.rotations.loading;
+    scheduleInfo() {
+      if (this.schedule.description) {
+        return `${this.schedule.description} | ${this.offset} ${this.schedule.timezone}`;
+      }
+      return `${this.schedule.timezone} | ${this.offset}`;
+    },
+    selectedTimezone() {
+      return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
+    },
+    timeframe() {
+      return getTimeframeForWeeksView(this.timeframeStartDate);
     },
   },
   methods: {
     switchPresetType(type) {
       this.presetType = type;
-      this.timeframeStartDate = new Date();
+      this.timeframeStartDate =
+        type === PRESET_TYPES.WEEKS ? getStartOfWeek(new Date()) : new Date();
     },
     formatPresetType(type) {
       return capitalize(type);
@@ -194,7 +202,7 @@ export default {
         </div>
       </template>
       <p class="gl-text-gray-500 gl-mb-5" data-testid="scheduleBody">
-        {{ schedule.timezone }} | {{ offset }}
+        {{ scheduleInfo }}
       </p>
       <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">
         <div class="gl-display-flex gl-align-items-center">

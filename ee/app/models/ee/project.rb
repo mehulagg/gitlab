@@ -439,6 +439,12 @@ module EE
       group_hooks.hooks_for(hooks_scope).any?
     end
 
+    def execute_external_compliance_hooks(data)
+      external_approval_rules.each do |approval_rule|
+        approval_rule.async_execute(data)
+      end
+    end
+
     def execute_hooks(data, hooks_scope = :push_hooks)
       super
 
@@ -798,6 +804,16 @@ module EE
       jira_issue_association_required_to_merge_enabled? && prevent_merge_without_jira_issue
     end
 
+    def licensed_feature_available?(feature, user = nil)
+      available_features = strong_memoize(:licensed_feature_available) do
+        Hash.new do |h, f|
+          h[f] = load_licensed_feature_available(f)
+        end
+      end
+
+      available_features[feature]
+    end
+
     private
 
     def group_hooks
@@ -811,16 +827,6 @@ module EE
 
     def set_next_execution_timestamp_to_now
       import_state.set_next_execution_to_now
-    end
-
-    def licensed_feature_available?(feature, user = nil)
-      available_features = strong_memoize(:licensed_feature_available) do
-        Hash.new do |h, f|
-          h[f] = load_licensed_feature_available(f)
-        end
-      end
-
-      available_features[feature]
     end
 
     def load_licensed_feature_available(feature)
@@ -851,7 +857,7 @@ module EE
 
     # Return the group's setting for delayed deletion, false for user namespace projects
     def group_deletion_mode_configured?
-      group && group.delayed_project_removal?
+      group && group.namespace_settings.delayed_project_removal?
     end
   end
 end

@@ -23,11 +23,13 @@ export default () => ({
   addedLines: null,
   removedLines: null,
   endpoint: '',
+  endpointUpdateUser: '',
   basePath: '',
   commit: null,
   startVersion: null, // Null unless a target diff is selected for comparison that is not the "base" diff
   diffFiles: [],
   coverageFiles: {},
+  codequalityDiff: {},
   mergeRequestDiffs: [],
   mergeRequestDiff: null,
   diffViewType: viewTypeFromQueryString || viewTypeFromCookie || defaultViewType,

@@ -6,7 +6,7 @@ import {
   GlAvatar,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { isNumeric } from '~/lib/utils/number_utils';
 import { sprintf, s__, __ } from '~/locale';
@@ -102,7 +102,9 @@ export default {
       } else {
         message = s__('AuditLogs|Failed to find %{type}. Please try again.');
       }
-      createFlash(sprintf(message, { type }));
+      createFlash({
+        message: sprintf(message, { type }),
+      });
     },
     selectActiveItem(id) {
       this.activeItem = this.suggestions.find((u) => u.id === id);

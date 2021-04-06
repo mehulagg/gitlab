@@ -647,6 +647,9 @@ The default is 100MB.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16610) in GitLab 12.7.
 
+NOTE:
+Only GitLab admin users will be able to view and override the **Maximum size of Pages** setting.
+
 To override the global maximum pages size for a specific project:
 
 1. Go to your project's **Settings > Pages** page.
@@ -1112,6 +1115,8 @@ If the wildcard DNS [prerequisite](#prerequisites) can't be met, you can still u
 1. [Move](../../user/project/settings/index.md#transferring-an-existing-project-into-another-namespace)
    all projects you need to use Pages with into a single group namespace, for example `pages`.
 1. Configure a [DNS entry](#dns-configuration) without the `*.`-wildcard, for example `pages.example.io`.
+1. Configure `pages_external_url http://example.io/` in your `gitlab.rb` file.
+   Omit the group namespace here, because it will automatically be prepended by GitLab.
 
 ### Pages daemon fails with permission denied errors
 

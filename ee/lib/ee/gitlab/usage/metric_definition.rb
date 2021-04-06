@@ -11,7 +11,7 @@ module EE
 
           override :paths
           def paths
-            @ee_paths ||= [Rails.root.join('ee', 'config', 'metrics', '**', '*.yml')] + super
+            @ee_paths ||= [Rails.root.join('ee', 'config', 'metrics', '[^agg]*', '*.yml')] + super
           end
         end
       end

@@ -88,8 +88,7 @@ module Gitlab
             response = execute_graphql_query({ query: query, variables: { tags: plan_tags } })[:data]
 
             if response['errors'].present?
-              exception = SubscriptionPortal::Client::ResponseError.new("Received an error from CustomerDot")
-              Gitlab::ErrorTracking.track_and_raise_for_dev_exception(exception, query: query, response: response)
+              track_error(query, response)
 
               return error
             end
@@ -121,6 +120,39 @@ module Gitlab
             end
           end
 
+          def filter_purchase_eligible_namespaces(user, namespaces)
+            query = <<~GQL
+            query FilterEligibleNamespaces($customerUid: Int!, $namespaces: [GitlabNamespaceInput!]!) {
+              namespaceEligibility(customerUid: $customerUid, namespaces: $namespaces, eligibleForPurchase: true) {
+                id
+              }
+            }
+            GQL
+
+            namespace_data = namespaces.map do |namespace|
+              {
+                id: namespace.id,
+                parentId: namespace.parent_id,
+                plan: namespace.actual_plan_name,
+                trial: !!namespace.trial?
+              }
+            end
+
+            response = http_post(
+              "graphql",
+              admin_headers,
+              { query: query, variables: { customerUid: user.id, namespaces: namespace_data } }
+            )[:data]
+
+            if response['errors'].blank?
+              { success: true, data: response.dig('data', 'namespaceEligibility') }
+            else
+              track_error(query, response)
+
+              error(response['errors'])
+            end
+          end
+
           private
 
           def execute_graphql_query(params)
@@ -135,6 +167,14 @@ module Gitlab
 
           def graphql_endpoint
             EE::SUBSCRIPTIONS_GRAPHQL_URL
+          end
+
+          def track_error(query, response)
+            Gitlab::ErrorTracking.track_and_raise_for_dev_exception(
+              SubscriptionPortal::Client::ResponseError.new("Received an error from CustomerDot"),
+              query: query,
+              response: response
+            )
           end
 
           def error(errors = nil)

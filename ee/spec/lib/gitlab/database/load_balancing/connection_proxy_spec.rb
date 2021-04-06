@@ -87,7 +87,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
       end
     end
 
-    it 'inserts data in bulk', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/325786' do
+    it 'inserts data in bulk' do
       expect(model_class).to receive(:connection)
         .at_least(:once)
         .and_return(proxy)

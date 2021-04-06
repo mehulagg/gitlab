@@ -57,6 +57,13 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
           end
         end
 
+        it 'counts a usage ping event' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_issue_promoted_to_epic)
+            .with(author: user)
+
+          subject.execute(issue)
+        end
+
         context 'when promoting issue', :snowplow do
           let!(:issue_mentionable_note) { create(:note, noteable: issue, author: user, project: project, note: "note with mention #{user.to_reference}") }
           let!(:issue_note) { create(:note, noteable: issue, author: user, project: project, note: "note without mention") }

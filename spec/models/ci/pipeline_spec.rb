@@ -2635,6 +2635,37 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         expect(latest_status).to eq %w(canceled canceled)
       end
     end
+
+    context 'preloading relations' do
+      let(:pipeline1) { create(:ci_empty_pipeline, :created) }
+      let(:pipeline2) { create(:ci_empty_pipeline, :created) }
+
+      before do
+        create(:ci_build, :pending, pipeline: pipeline1)
+        create(:generic_commit_status, :pending, pipeline: pipeline1)
+
+        create(:ci_build, :pending, pipeline: pipeline2)
+        create(:ci_build, :pending, pipeline: pipeline2)
+        create(:generic_commit_status, :pending, pipeline: pipeline2)
+        create(:generic_commit_status, :pending, pipeline: pipeline2)
+        create(:generic_commit_status, :pending, pipeline: pipeline2)
+      end
+
+      it 'preloads relations for each build to avoid N+1 queries' do
+        control1 = ActiveRecord::QueryRecorder.new do
+          pipeline1.cancel_running
+        end
+
+        control2 = ActiveRecord::QueryRecorder.new do
+          pipeline2.cancel_running
+        end
+
+        extra_update_queries = 3 # transition ... => :canceled
+        extra_generic_commit_status_validation_queries = 2 # name_uniqueness_across_types
+
+        expect(control2.count).to eq(control1.count + extra_update_queries + extra_generic_commit_status_validation_queries)
+      end
+    end
   end
 
   describe '#retry_failed' do
@@ -3778,6 +3809,26 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     context 'when pipeline does not have any builds with codequality reports' do
       it 'returns codequality reports without degradations' do
         expect(codequality_reports.degradations).to be_empty
+      end
+    end
+  end
+
+  describe '#uses_needs?' do
+    let_it_be(:pipeline) { create(:ci_pipeline) }
+
+    context 'when the scheduling type is `dag`' do
+      it 'returns true' do
+        create(:ci_build, pipeline: pipeline, scheduling_type: :dag)
+
+        expect(pipeline.uses_needs?).to eq(true)
+      end
+    end
+
+    context 'when the scheduling type is nil or stage' do
+      it 'returns false' do
+        create(:ci_build, pipeline: pipeline, scheduling_type: :stage)
+
+        expect(pipeline.uses_needs?).to eq(false)
       end
     end
   end

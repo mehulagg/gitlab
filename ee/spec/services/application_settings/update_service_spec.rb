@@ -44,19 +44,12 @@ RSpec.describe ApplicationSettings::UpdateService do
       context 'index creation' do
         let(:opts) { { elasticsearch_indexing: true } }
 
-        context 'when index exists' do
-          it 'skips creating a new index' do
-            expect(helper).to(receive(:index_exists?)).and_return(true)
-            expect(helper).not_to(receive(:create_empty_index))
-
-            service.execute
-          end
-        end
-
         context 'when index does not exist' do
           it 'creates a new index' do
-            expect(helper).to(receive(:index_exists?)).and_return(false)
-            expect(helper).to(receive(:create_empty_index))
+            expect(helper).to receive(:create_empty_index).with(options: { skip_if_exists: true })
+            expect(helper).to receive(:create_standalone_indices).with(options: { skip_if_exists: true })
+            expect(helper).to receive(:migrations_index_exists?).and_return(false)
+            expect(helper).to receive(:create_migrations_index)
 
             service.execute
           end
@@ -65,7 +58,7 @@ RSpec.describe ApplicationSettings::UpdateService do
         context 'when ES service is not reachable' do
           it 'does not throw exception' do
             expect(helper).to receive(:index_exists?).and_raise(Faraday::ConnectionFailed, nil)
-            expect(helper).not_to receive(:create_empty_index)
+            expect(helper).not_to receive(:create_standalone_indices)
 
             expect { service.execute }.not_to raise_error
           end

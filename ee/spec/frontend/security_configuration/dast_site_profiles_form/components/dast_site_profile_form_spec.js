@@ -13,7 +13,6 @@ import * as responses from 'ee_jest/security_configuration/dast_site_profiles_fo
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import * as urlUtility from '~/lib/utils/url_utility';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
@@ -134,7 +133,18 @@ describe('DastSiteProfileForm', () => {
 
   it('renders properly', () => {
     createComponent();
-    expect(wrapper.html()).not.toBe('');
+    expect(findForm().exists()).toBe(true);
+    expect(findForm().text()).toContain('New site profile');
+  });
+
+  it('when showHeader prop is disabled', () => {
+    createComponent({
+      propsData: {
+        ...defaultProps,
+        showHeader: false,
+      },
+    });
+    expect(findForm().text()).not.toContain('New site profile');
   });
 
   describe('target URL input', () => {
@@ -215,8 +225,6 @@ describe('DastSiteProfileForm', () => {
           siteProfile,
         },
       });
-
-      jest.spyOn(urlUtility, 'redirectTo').mockImplementation();
     });
 
     it('sets the correct title', () => {
@@ -260,8 +268,10 @@ describe('DastSiteProfileForm', () => {
           });
         });
 
-        it('redirects to the profiles library', () => {
-          expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+        it('emits success event with correct params', () => {
+          expect(wrapper.emitted('success')).toBeTruthy();
+          expect(wrapper.emitted('success')).toHaveLength(1);
+          expect(wrapper.emitted('success')[0]).toStrictEqual([{ id: '3083' }]);
         });
 
         it('does not show an alert', () => {
@@ -319,9 +329,9 @@ describe('DastSiteProfileForm', () => {
 
     describe('cancellation', () => {
       describe('form unchanged', () => {
-        it('redirects to the profiles library', () => {
+        it('emits cancel event', () => {
           findCancelButton().vm.$emit('click');
-          expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+          expect(wrapper.emitted('cancel')).toBeTruthy();
         });
       });
 
@@ -337,9 +347,9 @@ describe('DastSiteProfileForm', () => {
           expect(findCancelModal().vm.show).toHaveBeenCalled();
         });
 
-        it('redirects to the profiles library if confirmed', () => {
+        it('emits cancel event', () => {
           findCancelModal().vm.$emit('ok');
-          expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+          expect(wrapper.emitted('cancel')).toBeTruthy();
         });
       });
     });

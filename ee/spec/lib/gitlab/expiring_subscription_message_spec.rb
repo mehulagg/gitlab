@@ -115,7 +115,7 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                     let_it_be(:namespace) { create(:group, name: 'No Limit Records') }
 
                     before do
-                      allow_next_instance_of(GitlabSubscriptions::CheckFutureRenewalService, namespace_id: namespace.id) do |service|
+                      allow_next_instance_of(GitlabSubscriptions::CheckFutureRenewalService, namespace: namespace) do |service|
                         allow(service).to receive(:execute).and_return(has_future_renewal)
                       end
                     end
@@ -203,7 +203,7 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                 let_it_be(:namespace) { create(:group, name: 'No Limit Records') }
 
                 before do
-                  allow_next_instance_of(GitlabSubscriptions::CheckFutureRenewalService, namespace_id: namespace.id) do |service|
+                  allow_next_instance_of(GitlabSubscriptions::CheckFutureRenewalService, namespace: namespace) do |service|
                     allow(service).to receive(:execute).and_return(has_future_renewal)
                   end
                 end

@@ -34,6 +34,7 @@ export default (el, dashboardType) => {
     emptyStateSvgPath: el.dataset.emptyStateSvgPath,
     groupFullPath: el.dataset.groupFullPath,
     securityConfigurationPath: el.dataset.securityConfigurationPath,
+    surveyRequestSvgPath: el.dataset.surveyRequestSvgPath,
   };
 
   let component;

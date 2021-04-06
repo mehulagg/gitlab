@@ -1,0 +1,5 @@
+---
+title: Make sure all ES indexes are created when setting server URL
+merge_request: 57253
+author:
+type: fixed

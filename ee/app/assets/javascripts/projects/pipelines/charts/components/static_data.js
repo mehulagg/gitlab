@@ -19,8 +19,8 @@ const last90Days = nDaysBefore(startOfTomorrow, 90, { utc: true });
 const apiDateFormatString = 'isoDateTime';
 const titleDateFormatString = 'mmm d';
 const sharedRequestParams = {
-  environment: 'production',
   interval: 'daily',
+  end_date: dateFormat(startOfTomorrow, apiDateFormatString, true),
 
   // We will never have more than 91 records (1 record per day), so we
   // don't have to worry about making multiple requests to get all the results
@@ -39,8 +39,7 @@ export const allChartDefinitions = [
     endDate: startOfTomorrow,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(lastWeek, apiDateFormatString, true),
-      to: dateFormat(startOfTomorrow, apiDateFormatString, true),
+      start_date: dateFormat(lastWeek, apiDateFormatString, true),
     },
   },
   {
@@ -54,8 +53,7 @@ export const allChartDefinitions = [
     endDate: startOfTomorrow,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(lastMonth, apiDateFormatString, true),
-      to: dateFormat(startOfTomorrow, apiDateFormatString, true),
+      start_date: dateFormat(lastMonth, apiDateFormatString, true),
     },
   },
   {
@@ -69,8 +67,7 @@ export const allChartDefinitions = [
     endDate: startOfTomorrow,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(last90Days, apiDateFormatString, true),
-      to: dateFormat(startOfTomorrow, apiDateFormatString, true),
+      start_date: dateFormat(last90Days, apiDateFormatString, true),
     },
   },
 ];

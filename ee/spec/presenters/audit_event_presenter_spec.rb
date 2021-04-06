@@ -40,7 +40,7 @@ RSpec.describe AuditEventPresenter do
       let(:audit_event) { create(:audit_event, user: user, details: details) }
 
       before do
-        user.destroy
+        user.destroy!
         audit_event.reload
       end
 

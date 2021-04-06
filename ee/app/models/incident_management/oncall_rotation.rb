@@ -11,10 +11,12 @@ module IncidentManagement
         end_time > start_time if present?
       end
 
-      def for_date(date)
+      def for_date(start_date)
+        end_date = end_after_start? ? start_date : start_date.next_day
+
         [
-          date.change(hour: start_time.hour, min: start_time.min),
-          date.change(hour: end_time.hour, min: end_time.min)
+          start_date.change(hour: start_time.hour, min: start_time.min),
+          end_date.change(hour: end_time.hour, min: end_time.min)
         ]
       end
     end
@@ -44,7 +46,6 @@ module IncidentManagement
 
     validates :active_period_start, presence: true, if: :active_period_end
     validates :active_period_end, presence: true, if: :active_period_start
-    validate :active_period_end_after_start, if: :active_period_start
     validate :no_active_period_for_hourly_shifts, if: :hours?
 
     scope :in_progress, -> { where('starts_at < :time AND (ends_at > :time OR ends_at IS NULL)', time: Time.current) }
@@ -96,13 +97,6 @@ module IncidentManagement
 
     def valid_ends_at
       errors.add(:ends_at, s_('must be after start')) if ends_at <= starts_at
-    end
-
-    def active_period_end_after_start
-      return unless active_period.present?
-      return if active_period.end_after_start?
-
-      errors.add(:active_period_end, _('must be later than active period start'))
     end
 
     def no_active_period_for_hourly_shifts

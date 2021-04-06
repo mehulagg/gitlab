@@ -1,9 +1,10 @@
 <script>
-import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { toNumber } from 'lodash';
 import createFlash from '~/flash';
+import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
-import { IssuableStatus } from '~/issue_show/constants';
+import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
 import {
   CREATED_DESC,
   PAGE_SIZE,
@@ -14,17 +15,23 @@ import {
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase, getParameterByName } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
+import eventHub from '../eventhub';
 import IssueCardTimeInfo from './issue_card_time_info.vue';
 
 export default {
   CREATED_DESC,
+  IssuableListTabs,
   PAGE_SIZE,
   sortOptions,
   sortParams,
   i18n: {
+    calendarLabel: __('Subscribe to calendar'),
     reorderError: __('An error occurred while reordering issues.'),
+    rssLabel: __('Subscribe to RSS feed'),
   },
   components: {
+    CsvImportExportButtons,
+    GlButton,
     GlIcon,
     IssuableList,
     IssueCardTimeInfo,
@@ -34,7 +41,16 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   inject: {
+    calendarPath: {
+      default: '',
+    },
+    canBulkUpdate: {
+      default: false,
+    },
     endpoint: {
+      default: '',
+    },
+    exportCsvPath: {
       default: '',
     },
     fullPath: {
@@ -42,6 +58,15 @@ export default {
     },
     issuesPath: {
       default: '',
+    },
+    newIssuePath: {
+      default: '',
+    },
+    rssPath: {
+      default: '',
+    },
+    showNewIssueLink: {
+      default: false,
     },
   },
   data() {
@@ -52,19 +77,31 @@ export default {
     );
 
     return {
-      currentPage: toNumber(getParameterByName('page')) || 1,
+      exportCsvPathWithQuery: this.getExportCsvPathWithQuery(),
       filters: sortParams[sortKey] || {},
       isLoading: false,
       issues: [],
+      page: toNumber(getParameterByName('page')) || 1,
+      showBulkEditSidebar: false,
       sortKey: sortKey || CREATED_DESC,
+      state: getParameterByName('state') || IssuableStates.Opened,
       totalIssues: 0,
     };
   },
   computed: {
+    tabCounts() {
+      return Object.values(IssuableStates).reduce(
+        (acc, state) => ({
+          ...acc,
+          [state]: this.state === state ? this.totalIssues : undefined,
+        }),
+        {},
+      );
+    },
     urlParams() {
       return {
-        page: this.currentPage,
-        state: IssuableStatus.Open,
+        page: this.page,
+        state: this.state,
         ...this.filters,
       };
     },
@@ -73,26 +110,34 @@ export default {
     },
   },
   mounted() {
+    eventHub.$on('issuables:toggleBulkEdit', (showBulkEditSidebar) => {
+      this.showBulkEditSidebar = showBulkEditSidebar;
+    });
     this.fetchIssues();
   },
+  beforeDestroy() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
+    eventHub.$off('issuables:toggleBulkEdit');
+  },
   methods: {
-    fetchIssues(pageToFetch) {
+    fetchIssues() {
       this.isLoading = true;
 
       return axios
         .get(this.endpoint, {
           params: {
-            page: pageToFetch || this.currentPage,
+            page: this.page,
             per_page: this.$options.PAGE_SIZE,
-            state: IssuableStatus.Open,
+            state: this.state,
             with_labels_details: true,
             ...this.filters,
           },
         })
         .then(({ data, headers }) => {
-          this.currentPage = Number(headers['x-page']);
+          this.page = Number(headers['x-page']);
           this.totalIssues = Number(headers['x-total']);
           this.issues = data.map((issue) => convertObjectPropsToCamelCase(issue, { deep: true }));
+          this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
         })
         .catch(() => {
           createFlash({ message: __('An error occurred while loading issues') });
@@ -101,8 +146,29 @@ export default {
           this.isLoading = false;
         });
     },
+    getExportCsvPathWithQuery() {
+      return `${this.exportCsvPath}${window.location.search}`;
+    },
+    handleUpdateLegacyBulkEdit() {
+      // If "select all" checkbox was checked, wait for all checkboxes
+      // to be checked before updating IssuableBulkUpdateSidebar class
+      this.$nextTick(() => {
+        eventHub.$emit('issuables:updateBulkEdit');
+      });
+    },
+    handleBulkUpdateClick() {
+      eventHub.$emit('issuables:enableBulkEdit');
+    },
+    handleClickTab(state) {
+      if (this.state !== state) {
+        this.page = 1;
+      }
+      this.state = state;
+      this.fetchIssues();
+    },
     handlePageChange(page) {
-      this.fetchIssues(page);
+      this.page = page;
+      this.fetchIssues();
     },
     handleReorder({ newIndex, oldIndex }) {
       const issueToMove = this.issues[oldIndex];
@@ -155,23 +221,60 @@ export default {
     :sort-options="$options.sortOptions"
     :initial-sort-by="sortKey"
     :issuables="issues"
-    :tabs="[]"
-    current-tab=""
+    :tabs="$options.IssuableListTabs"
+    :current-tab="state"
+    :tab-counts="tabCounts"
     :issuables-loading="isLoading"
     :is-manual-ordering="isManualOrdering"
+    :show-bulk-edit-sidebar="showBulkEditSidebar"
     :show-pagination-controls="true"
     :total-items="totalIssues"
-    :current-page="currentPage"
-    :previous-page="currentPage - 1"
-    :next-page="currentPage + 1"
+    :current-page="page"
+    :previous-page="page - 1"
+    :next-page="page + 1"
     :url-params="urlParams"
+    @click-tab="handleClickTab"
     @page-change="handlePageChange"
     @reorder="handleReorder"
     @sort="handleSort"
+    @update-legacy-bulk-edit="handleUpdateLegacyBulkEdit"
   >
+    <template #nav-actions>
+      <gl-button
+        v-gl-tooltip
+        :href="rssPath"
+        icon="rss"
+        :title="$options.i18n.rssLabel"
+        :aria-label="$options.i18n.rssLabel"
+      />
+      <gl-button
+        v-gl-tooltip
+        :href="calendarPath"
+        icon="calendar"
+        :title="$options.i18n.calendarLabel"
+        :aria-label="$options.i18n.calendarLabel"
+      />
+      <csv-import-export-buttons
+        class="gl-mr-3"
+        :export-csv-path="exportCsvPathWithQuery"
+        :issuable-count="totalIssues"
+      />
+      <gl-button
+        v-if="canBulkUpdate"
+        :disabled="showBulkEditSidebar"
+        @click="handleBulkUpdateClick"
+      >
+        {{ __('Edit issues') }}
+      </gl-button>
+      <gl-button v-if="showNewIssueLink" :href="newIssuePath" variant="confirm">
+        {{ __('New issue') }}
+      </gl-button>
+    </template>
+
     <template #timeframe="{ issuable = {} }">
       <issue-card-time-info :issue="issuable" />
     </template>
+
     <template #statistics="{ issuable = {} }">
       <li
         v-if="issuable.mergeRequestsCount"

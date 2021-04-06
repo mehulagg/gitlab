@@ -254,7 +254,7 @@ end
 
 **Creating a new table with a foreign key:**
 
-We can simply wrap the `create_table` method with `with_lock_retries`:
+We can wrap the `create_table` method with `with_lock_retries`:
 
 ```ruby
 def up
@@ -302,7 +302,7 @@ end
 
 Adding foreign key to `projects`:
 
-We can use the `add_concurrenct_foreign_key` method in this case, as this helper method
+We can use the `add_concurrent_foreign_key` method in this case, as this helper method
 has the lock retries built into it.
 
 ```ruby
@@ -715,7 +715,7 @@ the `DROP TABLE` statement is likely to stall concurrent traffic until it fails 
 Table **has no records** (feature was never in use) and **no foreign
 keys**:
 
-- Simply use the `drop_table` method in your migration.
+- Use the `drop_table` method in your migration.
 
 ```ruby
 def change
@@ -1038,7 +1038,7 @@ To identify a high-traffic table for GitLab.com the following measures are consi
 Note that the metrics linked here are GitLab-internal only:
 
 - [Read operations](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_stat_user_tables_seq_tup_read%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_scan%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_tup_fetch%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1)
-- [Number of records](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_stat_user_tables_n_live_tup%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1)
-- [Size](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_total_relation_size_bytes%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1) is greater than 10 GB
+- [Number of records](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20max%20by%20(relname)%20(pg_stat_user_tables_n_live_tup%7Benvironment%3D%22gprd%22%7D))&g0.tab=1)
+- [Size](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20max%20by%20(relname)%20(pg_total_relation_size_bytes%7Benvironment%3D%22gprd%22%7D))&g0.tab=1) is greater than 10 GB
 
 Any table which has some high read operation compared to current [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L4) might be a good candidate.

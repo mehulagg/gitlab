@@ -74,7 +74,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         <span
           class="current-day-indicator"
           data-testid="current-day-indicator"
-          style="left: 7.142857142857143%;"
+          style="left: 29%;"
         />
          
         <div>

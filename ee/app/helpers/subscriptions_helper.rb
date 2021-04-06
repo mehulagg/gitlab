@@ -3,7 +3,7 @@
 module SubscriptionsHelper
   include ::Gitlab::Utils::StrongMemoize
 
-  def subscription_data
+  def subscription_data(eligible_groups)
     {
       setup_for_company: (current_user.setup_for_company == true).to_s,
       full_name: current_user.name,
@@ -12,7 +12,7 @@ module SubscriptionsHelper
       plan_id: params[:plan_id],
       namespace_id: params[:namespace_id],
       new_user: new_user?.to_s,
-      group_data: group_data.to_json
+      group_data: present_groups(eligible_groups).to_json
     }
   end
 
@@ -64,8 +64,8 @@ module SubscriptionsHelper
     end
   end
 
-  def group_data
-    current_user.manageable_groups_eligible_for_subscription.with_counts(archived: false).map do |namespace|
+  def present_groups(groups)
+    groups.map do |namespace|
       {
         id: namespace.id,
         name: namespace.name,

@@ -725,6 +725,7 @@ export default {
       @drawer-close="handleNewRequirementCancel"
     />
     <requirement-edit-form
+      data-testid="edit-form"
       :drawer-open="showRequirementViewDrawer"
       :requirement="editedRequirement"
       :enable-requirement-edit="enableRequirementEdit"

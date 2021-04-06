@@ -45,3 +45,5 @@ export const APPROVAL_RULE_CONFIGS = {
     documentationText: __('Learn more about License-Check'),
   },
 };
+
+export const APPROVALS_HELP_PATH = 'user/project/merge_requests/merge_request_approvals';

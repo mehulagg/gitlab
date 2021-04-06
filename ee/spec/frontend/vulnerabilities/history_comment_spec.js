@@ -3,7 +3,7 @@ import MockAdapter from 'axios-mock-adapter';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
 import HistoryComment from 'ee/vulnerabilities/components/history_comment.vue';
 import HistoryCommentEditor from 'ee/vulnerabilities/components/history_comment_editor.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 const mockAxios = new MockAdapter(axios);

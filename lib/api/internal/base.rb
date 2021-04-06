@@ -109,9 +109,7 @@ module API
           end
         end
 
-        def validate_actor_key(actor, key_id)
-          return 'Could not find a user without a key' unless key_id
-
+        def validate_actor(actor)
           return 'Could not find the given key' unless actor.key
 
           'Could not find a user for the given key' unless actor.user
@@ -127,6 +125,11 @@ module API
           Gitlab::Auth::CurrentUserMode.bypass_session!(actor_id) do
             yield
           end
+        end
+
+        # Overridden in EE
+        def geo_proxy
+          {}
         end
       end
 
@@ -201,7 +204,7 @@ module API
           actor.update_last_used_at!
           user = actor.user
 
-          error_message = validate_actor_key(actor, params[:key_id])
+          error_message = validate_actor(actor)
 
           if params[:user_id] && user.nil?
             break { success: false, message: 'Could not find the given user' }
@@ -230,7 +233,7 @@ module API
           actor.update_last_used_at!
           user = actor.user
 
-          error_message = validate_actor_key(actor, params[:key_id])
+          error_message = validate_actor(actor)
 
           break { success: false, message: 'Deploy keys cannot be used to create personal access tokens' } if actor.key.is_a?(DeployKey)
 
@@ -303,7 +306,7 @@ module API
           actor.update_last_used_at!
           user = actor.user
 
-          error_message = validate_actor_key(actor, params[:key_id])
+          error_message = validate_actor(actor)
 
           if error_message
             { success: false, message: error_message }
@@ -321,6 +324,12 @@ module API
           status 200
 
           two_factor_otp_check
+        end
+
+        # Workhorse calls this to determine if it is a Geo secondary site
+        # that should proxy requests. FOSS can quickly return empty data.
+        get '/geo_proxy', feature_category: :geo_replication do
+          geo_proxy
         end
       end
     end

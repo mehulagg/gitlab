@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import DismissButton from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 import { s__ } from '~/locale';
@@ -9,7 +9,6 @@ export default {
     DismissButton,
     GlButton,
     SplitButton,
-    GlIcon,
   },
   props: {
     modal: {
@@ -75,15 +74,16 @@ export default {
       const issueButton = {
         name: this.createIssueButtonText,
         tagline: s__('ciReport|Investigate this vulnerability by creating an issue'),
-        isLoading: this.isCreatingIssue,
+        icon: this.vulnerability.create_jira_issue_url ? 'external-link' : undefined,
+        loading: this.isCreatingIssue,
+        target: this.vulnerability.create_jira_issue_url ? '_blank' : undefined,
         action: this.vulnerability.create_jira_issue_url ? undefined : 'createNewIssue',
         href: this.vulnerability.create_jira_issue_url,
-        icon: this.vulnerability.create_jira_issue_url ? 'external-link' : undefined,
       };
       const MRButton = {
         name: s__('ciReport|Resolve with merge request'),
         tagline: s__('ciReport|Automatically apply the patch in a new branch'),
-        isLoading: this.isCreatingMergeRequest,
+        loading: this.isCreatingMergeRequest,
         action: 'createMergeRequest',
       };
       const DownloadButton = {
@@ -139,21 +139,14 @@ export default {
 
     <gl-button
       v-else-if="actionButtons.length > 0"
-      :loading="actionButtons[0].isLoading"
+      v-bind="actionButtons[0]"
       :disabled="disabled"
-      variant="success"
+      variant="confirm"
       category="secondary"
       data-testid="create-issue-button"
       data-qa-selector="create_issue_button"
-      :target="actionButtons[0].href ? '_blank' : undefined"
-      :href="actionButtons[0].href"
       @click="$emit(actionButtons[0].action)"
     >
-      <gl-icon
-        v-if="actionButtons[0].icon"
-        :name="actionButtons[0].icon"
-        class="gl-vertical-align-middle"
-      />
       {{ __(actionButtons[0].name) }}
     </gl-button>
   </div>

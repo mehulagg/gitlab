@@ -36,6 +36,8 @@ module Vulnerabilities
 
     has_many :fingerprints, class_name: 'Vulnerabilities::FindingFingerprint', inverse_of: :finding
 
+    has_many :finding_evidences, class_name: 'Vulnerabilities::FindingEvidence', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+
     serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
 
     attr_writer :sha
@@ -76,6 +78,7 @@ module Vulnerabilities
 
     scope :by_report_types, -> (values) { where(report_type: values) }
     scope :by_projects, -> (values) { where(project_id: values) }
+    scope :by_scanners, -> (values) { where(scanner_id: values) }
     scope :by_severities, -> (values) { where(severity: values) }
     scope :by_confidences, -> (values) { where(confidence: values) }
     scope :by_project_fingerprints, -> (values) { where(project_fingerprint: values) }

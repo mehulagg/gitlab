@@ -11,8 +11,6 @@ class Environment < ApplicationRecord
   self.reactive_cache_hard_limit = 10.megabytes
   self.reactive_cache_work_type = :external_dependency
 
-  PRODUCTION_ENVIRONMENT_IDENTIFIERS = %w[prod production].freeze
-
   belongs_to :project, required: true
 
   use_fast_destroy :all_deployments
@@ -88,7 +86,7 @@ class Environment < ApplicationRecord
   end
 
   scope :for_project, -> (project) { where(project_id: project) }
-  scope :for_tier, -> (tier) { where(tier: tier).where('tier IS NOT NULL') }
+  scope :for_tier, -> (tier) { where(tier: tier).where.not(tier: nil) }
   scope :with_deployment, -> (sha) { where('EXISTS (?)', Deployment.select(1).where('deployments.environment_id = environments.id').where(sha: sha)) }
   scope :unfoldered, -> { where(environment_type: nil) }
   scope :with_rank, -> do
@@ -249,10 +247,6 @@ class Environment < ApplicationRecord
 
   def last_deployed_at
     last_deployment.try(:created_at)
-  end
-
-  def update_merge_request_metrics?
-    PRODUCTION_ENVIRONMENT_IDENTIFIERS.include?(folder_name.downcase)
   end
 
   def ref_path

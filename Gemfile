@@ -274,7 +274,10 @@ gem 'licensee', '~> 9.14.1'
 gem 'charlock_holmes', '~> 0.7.7'
 
 # Detect mime content type from content
-gem 'ruby-magic', '~> 0.3'
+gem 'ruby-magic', '~> 0.3.2'
+
+# Fake version of the gem to trick bundler
+gem 'mimemagic', '0.3.7', path: 'vendor/shims/mimemagic', require: false
 
 # Faster blank
 gem 'fast_blank'
@@ -396,8 +399,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'danger-gitlab', '~> 8.0', require: false
-  gem 'gitlab-dangerfiles', '~> 0.8.0', require: false
+  gem 'gitlab-dangerfiles', '~> 1.1.0', require: false
 end
 
 group :development, :test, :coverage do
@@ -477,7 +479,7 @@ gem 'gitaly', '~> 13.9.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
-gem 'google-protobuf', '~> 3.12'
+gem 'google-protobuf', '~> 3.14.0'
 
 gem 'toml-rb', '~> 1.0.0'
 
@@ -486,7 +488,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.1'
+gem 'gitlab-experiment', '~> 0.5.2'
 
 # Structured logging
 gem 'lograge', '~> 0.5'
@@ -511,7 +513,7 @@ gem 'erubi', '~> 1.9.0'
 gem 'mail', '= 2.7.1'
 
 # File encryption
-gem 'lockbox', '~> 0.3.3'
+gem 'lockbox', '~> 0.6.2'
 
 # Email validation
 gem 'valid_email', '~> 0.1'

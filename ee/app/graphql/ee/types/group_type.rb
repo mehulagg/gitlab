@@ -89,6 +89,10 @@ module EE
               null: true,
               description: 'Group statistics.',
               method: :itself
+
+        field :billable_members_count, ::GraphQL::INT_TYPE,
+              null: true,
+              description: 'The number of billable users in the group.'
       end
     end
   end

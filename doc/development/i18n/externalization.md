@@ -256,6 +256,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
 - In Vue:
 
   Use the [`GlSprintf`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/docs/utilities-sprintf--sentence-with-link) component if:
+
   - you need to include child components in the translation string.
   - you need to include HTML in your translation string.
   - you are using `sprintf` and need to pass `false` as the third argument to
@@ -624,7 +625,7 @@ This also applies when using links in between translated sentences, otherwise th
   ```haml
   - zones_link_url = 'https://cloud.google.com/compute/docs/regions-zones/regions-zones'
   - zones_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: zones_link_url }
-  = s_('ClusterIntegration|Learn more about %{zones_link_start}zones%{zones_link_end}').html_safe % { zones_link_start: zones_link_start, zones_link_end: '</a>'.html_safe }
+  = html_escape(s_('ClusterIntegration|Learn more about %{zones_link_start}zones%{zones_link_end}')) % { zones_link_start: zones_link_start, zones_link_end: '</a>'.html_safe }
   ```
 
 - In Vue, instead of:
@@ -698,7 +699,7 @@ bin/rake gettext:regenerate
 
 This command updates `locale/gitlab.pot` file with the newly externalized
 strings and remove any strings that aren't used anymore. You should check this
-file in. Once the changes are on master, they are picked up by
+file in. Once the changes are on the default branch, they are picked up by
 [CrowdIn](https://translate.gitlab.com) and be presented for
 translation.
 

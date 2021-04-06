@@ -47,7 +47,7 @@ RSpec.describe Admin::CloudLicensesController, :cloud_licenses do
           send_request
 
           expect(response).to render_template(:show)
-          expect(response.body).to include('js-show-cloud-license-pag')
+          expect(response.body).to include('js-show-cloud-license-page')
         end
       end
     end

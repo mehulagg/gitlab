@@ -33,7 +33,7 @@ Each metric is defined in a separate YAML file consisting of a number of fields:
 | `product_group`     | yes      | The [group](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml) that owns the metric. |
 | `product_category`  | no       | The [product category](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/categories.yml) for the metric. |
 | `value_type`        | yes      | `string`; one of [`string`, `number`, `boolean`, `object`](https://json-schema.org/understanding-json-schema/reference/type.html).                                                     |
-| `status`            | yes      | `string`; [status](#metric-statuses) of the metric, may be set to `data_available`, `implemented`, `not_used`, `deprecated`. |
+| `status`            | yes      | `string`; [status](#metric-statuses) of the metric, may be set to `data_available`, `implemented`, `not_used`, `deprecated`, `removed`. |
 | `time_frame`        | yes      | `string`; may be set to a value like `7d`, `28d`, `all`, `none`. |
 | `data_source`       | yes      | `string`; may be set to a value like `database`, `redis`, `redis_hll`, `prometheus`, `ruby`. |
 | `distribution`      | yes      | `array`; may be set to one of `ce, ee` or `ee`. The [distribution](https://about.gitlab.com/handbook/marketing/strategic-marketing/tiers/#definitions) where the tracked feature is available.  |
@@ -52,6 +52,7 @@ Metric definitions can have one of the following statuses:
   status for newly added metrics awaiting inclusion in a new release.
 - `not_used`: Metric is not used in any dashboard.
 - `deprecated`: Metric is deprecated and possibly planned to be removed.
+- `removed`: Metric was removed, but it may appear in Usage Ping payloads sent from instances running on older versions of GitLab.
 
 ### Example YAML metric definition
 
@@ -109,4 +110,12 @@ create  ee/config/metrics/counts_7d/issues.yml
 
 The [Redis HLL metrics](index.md#known-events-are-added-automatically-in-usage-data-payload) are added automatically to Usage Ping payload.
 
-A YAML metric definition is required for each metric.
+A YAML metric definition is required for each metric. A dedicated generator is provided to create metric definitions for Redis HLL events.
+
+The generator takes `category` and `event` arguments, as the root key will be `redis_hll_counters`, and creates two metric definitions for weekly and monthly timeframes:
+
+```shell
+bundle exec rails generate gitlab:usage_metric_definition:redis_hll issues i_closed
+create  config/metrics/counts_7d/i_closed_weekly.yml
+create  config/metrics/counts_28d/i_closed_monthly.yml
+```

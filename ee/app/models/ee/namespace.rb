@@ -47,10 +47,6 @@ module EE
           .where(plans: { name: [nil, *::Plan.default_plans] })
       end
 
-      scope :eligible_for_subscription, -> do
-        top_most.in_active_trial.or(top_most.in_default_plan)
-      end
-
       scope :eligible_for_trial, -> do
         left_joins(gitlab_subscription: :hosted_plan)
           .where(
@@ -94,7 +90,7 @@ module EE
                                 less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
 
       delegate :trial?, :trial_ends_on, :trial_starts_on, :trial_days_remaining,
-        :trial_percentage_complete, :upgradable?,
+        :trial_percentage_complete, :upgradable?, :trial_extended_or_reactivated?,
         to: :gitlab_subscription, allow_nil: true
 
       before_create :sync_membership_lock_with_parent
@@ -146,8 +142,8 @@ module EE
     # Checks features (i.e. https://about.gitlab.com/pricing/) availabily
     # for a given Namespace plan. This method should consider ancestor groups
     # being licensed.
-    override :feature_available?
-    def feature_available?(feature)
+    override :licensed_feature_available?
+    def licensed_feature_available?(feature)
       available_features = strong_memoize(:feature_available) do
         Hash.new do |h, f|
           h[f] = load_feature_available(f)
@@ -293,6 +289,14 @@ module EE
 
     def trial_active?
       trial? && trial_ends_on.present? && trial_ends_on >= Date.today
+    end
+
+    def can_extend?
+      trial_active? && !trial_extended_or_reactivated?
+    end
+
+    def can_reactivate?
+      !trial_active? && !never_had_trial? && !trial_extended_or_reactivated? && free_plan?
     end
 
     def never_had_trial?

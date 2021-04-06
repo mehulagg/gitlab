@@ -30,14 +30,12 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   before_action :check_user_can_push_to_source_branch!, only: [:rebase]
   before_action only: [:show] do
     push_frontend_feature_flag(:file_identifier_hash)
-    push_frontend_feature_flag(:batch_suggestions, @project, default_enabled: true)
     push_frontend_feature_flag(:approvals_commented_by, @project, default_enabled: true)
     push_frontend_feature_flag(:merge_request_widget_graphql, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:drag_comment_selection, @project, default_enabled: true)
     push_frontend_feature_flag(:unified_diff_components, @project, default_enabled: true)
     push_frontend_feature_flag(:default_merge_ref_for_diffs, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:core_security_mr_widget_counts, @project)
-    push_frontend_feature_flag(:remove_resolve_note, @project, default_enabled: true)
     push_frontend_feature_flag(:diffs_gradual_load, @project, default_enabled: true)
     push_frontend_feature_flag(:codequality_backend_comparison, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:local_file_reviews, default_enabled: :yaml)
@@ -112,6 +110,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
         @show_whitespace_default = current_user.nil? || current_user.show_whitespace_in_diffs
         @file_by_file_default = current_user&.view_diffs_file_by_file
         @coverage_path = coverage_reports_project_merge_request_path(@project, @merge_request, format: :json) if @merge_request.has_coverage_reports?
+        @update_current_user_path = expose_path(api_v4_user_preferences_path)
         @endpoint_metadata_url = endpoint_metadata_url(@project, @merge_request)
 
         set_pipeline_variables

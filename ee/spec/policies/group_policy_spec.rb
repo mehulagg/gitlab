@@ -846,7 +846,9 @@ RSpec.describe GroupPolicy do
   end
 
   describe 'read_group_security_dashboard & create_vulnerability_export' do
-    let(:abilities) { %i(read_group_security_dashboard create_vulnerability_export) }
+    let(:abilities) do
+      %i[read_group_security_dashboard create_vulnerability_export read_vulnerability]
+    end
 
     before do
       stub_licensed_features(security_dashboard: true)
@@ -1383,7 +1385,38 @@ RSpec.describe GroupPolicy do
           group.add_owner(owner)
         end
 
-        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+        context 'create resource access tokens' do
+          it { is_expected.to be_allowed(:create_resource_access_tokens) }
+
+          context 'when resource access token creation is not allowed' do
+            before do
+              group.namespace_settings.update_column(:resource_access_token_creation_allowed, false)
+            end
+
+            it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+          end
+
+          context 'when parent group has resource access token creation disabled' do
+            let(:parent) { create(:group_with_plan, plan: :bronze_plan) }
+            let(:group) { create(:group, parent: parent) }
+
+            before do
+              parent.namespace_settings.update_column(:resource_access_token_creation_allowed, false)
+            end
+
+            context 'cannot create resource access tokens' do
+              it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+            end
+          end
+        end
+
+        context 'read resource access tokens' do
+          it { is_expected.to be_allowed(:read_resource_access_tokens) }
+        end
+
+        context 'destroy resource access tokens' do
+          it { is_expected.to be_allowed(:destroy_resource_access_tokens) }
+        end
       end
 
       context 'with developer' do
@@ -1393,7 +1426,17 @@ RSpec.describe GroupPolicy do
           group.add_developer(developer)
         end
 
-        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+        context 'create resource access tokens' do
+          it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+        end
+
+        context 'read resource access tokens' do
+          it { is_expected.not_to be_allowed(:read_resource_access_tokens) }
+        end
+
+        context 'destroy resource access tokens' do
+          it { is_expected.not_to be_allowed(:destroy_resource_access_tokens) }
+        end
       end
     end
   end

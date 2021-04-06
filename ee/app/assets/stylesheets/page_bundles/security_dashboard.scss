@@ -119,3 +119,12 @@ $selection-summary-with-error-height: 118px;
     @include sticky-top-positioning($security-filter-height + $selection-summary-with-error-height);
   }
 }
+
+.generic-report-row {
+  grid-template-columns: minmax(150px, 1fr) 3fr;
+  grid-column-gap: $gl-spacing-scale-5;
+
+  &:last-child {
+    @include gl-border-b-0;
+  }
+}

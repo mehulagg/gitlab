@@ -2,7 +2,7 @@
 
 %h2.gl-mb-8
   = s_("SecurityOrchestration|Create a policy")
-= form_with url:assign_project_security_policy_url(@project), as: :policy_project, html: { class: 'gl-w-half' } do |field|
+= form_with url: assign_project_security_policy_url(@project), as: :policy_project, html: { class: 'gl-w-half' } do |field|
   %h4
     = s_('SecurityOrchestration|Security policy project')
   %p

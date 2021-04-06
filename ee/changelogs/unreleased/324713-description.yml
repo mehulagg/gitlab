@@ -1,0 +1,5 @@
+---
+title: Allow oncall schedule to display description
+merge_request: 56796
+author:
+type: fixed

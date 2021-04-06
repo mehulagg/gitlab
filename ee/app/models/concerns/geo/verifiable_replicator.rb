@@ -189,7 +189,7 @@ module Geo
 
     # Schedules a verification job after a model record is created/updated
     def after_verifiable_update
-      verify_async if should_primary_verify?
+      verify_async if should_primary_verify_after_save?
     end
 
     def verify_async
@@ -242,10 +242,22 @@ module Geo
 
     private
 
-    def should_primary_verify?
-      self.class.verification_enabled? &&
-       primary_checksum.nil? && # Some models may populate this as part of creating the record
-       checksummable?
+    def should_primary_verify_after_save?
+      return false unless self.class.verification_enabled?
+
+      # Optimization: If the data is immutable, then there is no need to
+      # recalculate checksum when a record is created (some models calculate
+      # checksum as part of creation) or updated. Note that reverification
+      # should still run as usual.
+      return false if immutable? && primary_checksum.present?
+
+      checksummable?
+    end
+
+    # @abstract
+    # @return [Boolean] whether the replicable is supposed to be immutable
+    def immutable?
+      raise NotImplementedError, "#{self.class} does not implement #{__method__}"
     end
 
     # @abstract

@@ -24,9 +24,9 @@
 
   .gl-form-checkbox-group
     .gl-form-checkbox.custom-control.custom-checkbox
-      = form.check_box(:disable_overriding_approvers_per_merge_request, { class: 'custom-control-input', disabled: !can_modify_approvers }, false, true)
+      = form.check_box(:disable_overriding_approvers_per_merge_request, { class: 'custom-control-input', disabled: !can_modify_approvers })
       = form.label :disable_overriding_approvers_per_merge_request, class: 'custom-control-label' do
-        %span= _('Allow overrides to approval lists per merge request (MR)')
+        %span= _('Prevent users from modifying MR approval rules in merge requests.')
         = link_to sprite_icon('question-o'), help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'prevent-overriding-default-approvals'), target: '_blank'
 
     .gl-form-checkbox.custom-control.custom-checkbox

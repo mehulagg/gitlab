@@ -44,7 +44,10 @@ RSpec.describe Gitlab::Usage::Metrics::NamesSuggestions::Generator do
           #   ::Deployment.arel_table[:environment_id]
           # )
           let(:key_path) { 'counts.ingress_modsecurity_logging' }
-          let(:name_suggestion) { /count_distinct_environment_id_from_<adjective describing\: '\(clusters_applications_ingress\.modsecurity_enabled = TRUE AND clusters_applications_ingress\.modsecurity_mode = \d+ AND clusters.enabled = TRUE AND deployments.status = \d+\)'>_deployments_<with>_clusters_<having>_clusters_applications_ingress/ }
+          let(:name_suggestion) do
+            constrains = /'\(clusters_applications_ingress\.modsecurity_enabled = TRUE AND clusters_applications_ingress\.modsecurity_mode = \d+ AND clusters.enabled = TRUE AND deployments.status = \d+\)'/
+            /count_distinct_environment_id_from_<adjective describing\: #{constrains}>_deployments_<with>_<adjective describing\: #{constrains}>_clusters_<having>_<adjective describing\: #{constrains}>_clusters_applications_ingress/
+          end
         end
       end
 
@@ -54,6 +57,15 @@ RSpec.describe Gitlab::Usage::Metrics::NamesSuggestions::Generator do
           let(:key_path) { 'counts.issues_created_manually_from_alerts' }
           let(:name_suggestion) { /count_<adjective describing\: '\(issues\.author_id != \d+\)'>_issues_<with>_alert_management_alerts/ }
         end
+      end
+    end
+
+    context 'strips off time period constraint' do
+      it_behaves_like 'name suggestion' do
+        # corresponding metric is collected with distinct_count(::Clusters::Cluster.aws_installed.enabled.where(time_period), :user_id)
+        let(:key_path) { 'usage_activity_by_stage_monthly.configure.clusters_platforms_eks' }
+        let(:constraints) { /<adjective describing\: '\(clusters.provider_type = \d+ AND \(cluster_providers_aws\.status IN \(\d+\)\) AND clusters\.enabled = TRUE\)'>/ }
+        let(:name_suggestion) { /count_distinct_user_id_from_#{constraints}_clusters_<with>_#{constraints}_cluster_providers_aws/ }
       end
     end
 
@@ -77,7 +89,7 @@ RSpec.describe Gitlab::Usage::Metrics::NamesSuggestions::Generator do
       it_behaves_like 'name suggestion' do
         # corresponding metric is collected with redis_usage_data { unique_visit_service.unique_visits_for(targets: :analytics) }
         let(:key_path) { 'analytics_unique_visits.analytics_unique_visits_for_any_target' }
-        let(:name_suggestion) { /<please fill metric name>/ }
+        let(:name_suggestion) { /<please fill metric name, suggested format is: {subject}_{verb}{ing|ed}_{object} eg: users_creating_epics or merge_requests_viewed_in_single_file_mode>/ }
       end
     end
 

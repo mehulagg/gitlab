@@ -2056,7 +2056,7 @@ Whether or not ModSecurity is set to blocking mode
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2068,7 +2068,7 @@ Whether or not ModSecurity is disabled within Ingress
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2080,7 +2080,7 @@ Whether or not ModSecurity is set to logging mode
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2092,7 +2092,7 @@ Whether or not ModSecurity has not been installed into the cluster
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2104,7 +2104,7 @@ Cumulative count of packets identified as anomalous by ModSecurity since Usage P
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2116,7 +2116,7 @@ Cumulative count of packets processed by ModSecurity since Usage Ping was last r
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2128,7 +2128,7 @@ Whether or not ModSecurity statistics are unavailable
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `ultimate`
 
@@ -6154,27 +6154,27 @@ Tiers: `free`
 
 ### `counts_monthly.aggregated_metrics.product_analytics_test_metrics_intersection`
 
-Missing description
+This was test metric used for purpose of assuring correct implementation of aggregated metrics feature
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183205_product_analytics_test_metrics_intersection.yml)
 
-Group: ``
+Group: `group::product intelligence`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.aggregated_metrics.product_analytics_test_metrics_union`
 
-Missing description
+This was test metric used for purpose of assuring correct implementation of aggregated metrics feature
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183203_product_analytics_test_metrics_union.yml)
 
-Group: ``
+Group: `group::product intelligence`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.deployments`
 
@@ -6322,27 +6322,27 @@ Tiers:
 
 ### `counts_weekly.aggregated_metrics.product_analytics_test_metrics_intersection`
 
-Missing description
+This was test metric used for purpose of assuring correct implementation of aggregated metrics feature
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183215_product_analytics_test_metrics_intersection.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216183215_product_analytics_test_metrics_intersection.yml)
 
-Group: ``
+Group: `group::product intelligence`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.product_analytics_test_metrics_union`
 
-Missing description
+This was test metric used for purpose of assuring correct implementation of aggregated metrics feature
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183213_product_analytics_test_metrics_union.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216183213_product_analytics_test_metrics_union.yml)
 
-Group: ``
+Group: `group::product intelligence`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `database.adapter`
 
@@ -6592,7 +6592,7 @@ Whether or not ModSecurity is enabled within Ingress
 
 Group: `group::container security`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -7363,6 +7363,30 @@ Group: `group::analytics`
 Status: `data_available`
 
 Tiers:
+
+### `redis_hll_counters.analytics.i_analytics_dev_ops_adoption_monthly`
+
+Counts visits to DevOps Adoption page per month
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210401092244_i_analytics_dev_ops_adoption_monthly.yml)
+
+Group: `group::optimize`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.analytics.i_analytics_dev_ops_adoption_weekly`
+
+Counts visits to DevOps Adoption page per week
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210401092244_i_analytics_dev_ops_adoption_weekly.yml)
+
+Group: `group::optimize`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.analytics.i_analytics_dev_ops_score_monthly`
 
@@ -9908,13 +9932,37 @@ Status: `implemented`
 
 Tiers: `premium`, `ultimate`
 
+### `redis_hll_counters.epics_usage.g_project_management_issue_promoted_to_epic_monthly`
+
+Count of MAU promoting issues to epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210331193236_g_project_management_issue_promoted_to_epic_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_issue_promoted_to_epic_weekly`
+
+Counts of WAU promoting issues to epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210331192332_g_project_management_issue_promoted_to_epic_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `redis_hll_counters.epics_usage.g_project_management_users_creating_epic_notes_monthly`
 
 Counts of MAU adding epic notes
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210314215451_g_project_management_users_creating_epic_notes_monthly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -9926,7 +9974,7 @@ Counts of WAU adding epic notes
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210314231518_g_project_management_users_creating_epic_notes_weekly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -9938,7 +9986,7 @@ Counts of MAU destroying epic notes
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315034808_g_project_management_users_destroying_epic_notes_monthly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -9950,7 +9998,55 @@ Counts of WAU destroying epic notes
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315034846_g_project_management_users_destroying_epic_notes_weekly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_due_date_as_fixed_monthly`
+
+Counts of MAU setting epic due date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210325060507_g_project_management_users_setting_epic_due_date_as_fixed_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_due_date_as_fixed_weekly`
+
+Counts of WAU setting epic due date as fixed
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210325060623_g_project_management_users_setting_epic_due_date_as_fixed_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_due_date_as_inherited_monthly`
+
+Counts of MAU setting epic due date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210325060315_g_project_management_users_setting_epic_due_date_as_inherited_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_setting_epic_due_date_as_inherited_weekly`
+
+Counts of WAU setting epic due date as inherited
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210325060903_g_project_management_users_setting_epic_due_date_as_inherited_weekly.yml)
+
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -9962,7 +10058,7 @@ Counts of MAU setting epic start date as fixed
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315055624_g_project_management_users_setting_epic_start_date_as_fixed_monthly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -9974,7 +10070,7 @@ Counts of WAU setting epic start date as fixed
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315054905_g_project_management_users_setting_epic_start_date_as_fixed_weekly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -9986,7 +10082,7 @@ Counts of MAU setting epic start date as inherited
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315055439_g_project_management_users_setting_epic_start_date_as_inherited_monthly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -9998,7 +10094,7 @@ Counts of WAU setting epic start date as inherited
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210315055342_g_project_management_users_setting_epic_start_date_as_inherited_weekly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -10010,7 +10106,7 @@ Counts of MAU changing epic descriptions
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312102051_g_project_management_users_updating_epic_descriptions_monthly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -10022,7 +10118,7 @@ Counts of WAU changing epic descriptions
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210312101753_g_project_management_users_updating_epic_descriptions_weekly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -10034,7 +10130,7 @@ Counts of MAU updating epic notes
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210314234202_g_project_management_users_updating_epic_notes_monthly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -10046,7 +10142,7 @@ Counts of WAU updating epic notes
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210314234041_g_project_management_users_updating_epic_notes_weekly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -10058,7 +10154,7 @@ Counts of MAU changing epic titles
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312101935_g_project_management_users_updating_epic_titles_monthly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -10070,7 +10166,55 @@ Counts of WAU changing epic titles
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210312101826_g_project_management_users_updating_epic_titles_weekly.yml)
 
-Group: `group:product planning`
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_due_date_monthly`
+
+Counts of MAU manually updating fixed due date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210329043548_g_project_management_users_updating_fixed_epic_due_date_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_due_date_weekly`
+
+Counts of WAU manually updating fixed due date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210329042536_g_project_management_users_updating_fixed_epic_due_date_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_start_date_monthly`
+
+Counts of MAU manually updating fixed start date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210329043509_g_project_management_users_updating_fixed_epic_start_date_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_updating_fixed_epic_start_date_weekly`
+
+Counts of WAU manually updating fixed start date
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210329043402_g_project_management_users_updating_fixed_epic_start_date_weekly.yml)
+
+Group: `group::product planning`
 
 Status: `implemented`
 
@@ -14000,23 +14144,13 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
-### `topology.duration_s`
+### `topology`
 
-Time it took to collect topology data
+Topology data
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180922_duration_s.yml)
+[Object JSON schema](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/objects_schemas/topology_schema.json)
 
-Group: `group::memory`
-
-Status: `data_available`
-
-Tiers: `free`, `premium`, `ultimate`
-
-### `topology.failures`
-
-Contains information about failed queries
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180924_failures.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210323120839_topology.yml)
 
 Group: `group::memory`
 

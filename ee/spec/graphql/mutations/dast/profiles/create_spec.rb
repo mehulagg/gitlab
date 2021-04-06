@@ -44,19 +44,10 @@ RSpec.describe Mutations::Dast::Profiles::Create do
         context 'when run_after_create=true' do
           let(:run_after_create) { true }
 
-          it 'returns the pipeline_url' do
-            actual_url = subject[:pipeline_url]
-            pipeline = Ci::Pipeline.find_by(
-              project: project,
-              sha: project.repository.commits('orphaned-branch', limit: 1)[0].id,
-              source: :ondemand_dast_scan,
-              config_source: :parameter_source
-            )
-            expected_url = Rails.application.routes.url_helpers.project_pipeline_url(
-              project,
-              pipeline
-            )
-            expect(actual_url).to eq(expected_url)
+          it_behaves_like 'it creates a DAST on-demand scan pipeline'
+
+          it_behaves_like 'it delegates scan creation to another service' do
+            let(:delegated_params) { hash_including(dast_profile: instance_of(Dast::Profile)) }
           end
         end
 

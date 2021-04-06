@@ -129,8 +129,8 @@ module IncidentManagement
           #     expected_shift_count = 14          -> pretend it's a 2-week rotation
           #     shift_count = 2                    -> we're calculating the shift for the 3rd day
           # starts_at = Monday 00:00:00 + 8.hours + 2.days => Thursday 08:00:00
-
-          starts_at, ends_at = rotation.active_period.for_date(shift_cycle_starts_at + shift_count.days)
+          start_date = shift_cycle_starts_at + shift_count.days
+          starts_at, ends_at = rotation.active_period.for_date(start_date)
 
           shift_for(participant, [rotation.starts_at, starts_at].max, limit_end_time(ends_at))
         end

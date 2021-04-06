@@ -53,7 +53,7 @@ describe('DAST Profiles redirector', () => {
       });
 
       it('redirects to previous page with id', () => {
-        factory(2);
+        factory({ id: 2 });
         expect(urlUtility.redirectTo).toHaveBeenCalledWith(
           `${onDemandScansPath}?site_profile_id=2`,
         );

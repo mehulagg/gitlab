@@ -15,4 +15,10 @@ RSpec.describe ApprovalRules::ExternalApprovalRule, type: :model do
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
     it { is_expected.to validate_uniqueness_of(:external_url).scoped_to(:project_id) }
   end
+
+  describe 'to_h' do
+    it 'returns the correct information' do
+      expect(subject.to_h).to eq({ id: subject.id, name: subject.name, external_url: subject.external_url })
+    end
+  end
 end

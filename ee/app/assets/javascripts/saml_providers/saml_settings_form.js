@@ -40,6 +40,11 @@ export default class SamlSettingsForm {
         dependsOn: 'enforced-sso',
       },
       {
+        name: 'enforced-git-activity-check',
+        el: this.form.querySelector('.js-group-saml-enforced-git-check-toggle-area'),
+        dependsOn: 'enforced-sso',
+      },
+      {
         name: 'prohibited-outer-forks',
         el: this.form.querySelector('.js-group-saml-prohibited-outer-forks-toggle-area'),
         dependsOn: 'enforced-group-managed-accounts',

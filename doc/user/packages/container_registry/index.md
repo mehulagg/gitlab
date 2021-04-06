@@ -499,11 +499,11 @@ The cleanup policy:
 1. Collects all tags for a given repository in a list.
 1. Excludes the tag named `latest` from the list.
 1. Evaluates the `name_regex` (tags to expire), excluding non-matching names from the list.
+1. Excludes from the list any tags matching the `name_regex_keep` value (tags to preserve).
 1. Excludes any tags that do not have a manifest (not part of the options in the UI).
 1. Orders the remaining tags by `created_date`.
 1. Excludes from the list the N tags based on the `keep_n` value (Number of tags to retain).
 1. Excludes from the list the tags more recent than the `older_than` value (Expiration interval).
-1. Excludes from the list any tags matching the `name_regex_keep` value (tags to preserve).
 1. Finally, the remaining tags in the list are deleted from the Container Registry.
 
 WARNING:
@@ -670,8 +670,8 @@ and stored by Docker, it is not possible for GitLab to parse this data and meet 
 ## Limitations
 
 - Moving or renaming existing Container Registry repositories is not supported
-once you have pushed images, because the images are signed, and the
-signature includes the repository name. To move or rename a repository with a
+once you have pushed images, because the images are stored in a path that matches
+the repository path. To move or rename a repository with a
 Container Registry, you must delete all existing images.
 - Prior to GitLab 12.10, any tags that use the same image ID as the `latest` tag
 are not deleted by the cleanup policy.

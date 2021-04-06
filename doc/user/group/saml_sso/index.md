@@ -10,6 +10,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > Introduced in GitLab 11.0.
 
 This page describes SAML for Groups. For instance-wide SAML on self-managed GitLab instances, see [SAML OmniAuth Provider](../../../integration/saml.md).
+[View the differences between SaaS and Self-Managed Authentication and Authorization Options](../../../administration/auth/README.md#saas-vs-self-managed-comparison).
 
 SAML on GitLab.com allows users to sign in through their SAML identity provider. If the user is not already a member, the sign-in process automatically adds the user to the appropriate group.
 
@@ -95,16 +96,25 @@ Please note that the certificate [fingerprint algorithm](../../../integration/sa
 - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/9255) in GitLab 11.11 with ongoing enforcement in the GitLab UI.
 - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/292811) in GitLab 13.8, with an updated timeout experience.
 - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/211962) in GitLab 13.8 with allowing group owners to not go through SSO.
+- [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/9152) in GitLab 13.11 with enforcing open SSO session to use Git if this setting is switched on.
 
-With this option enabled, users must go through your group's GitLab single sign-on URL. They may also be added via SCIM, if configured. Users can't be added manually, and may only access project/group resources via the UI by signing in through the SSO URL.
+With this option enabled, users must go through your group's GitLab single sign-on URL if they wish to access group resources through the UI. Users can't be manually added as members.
+
+SSO enforcement does not affect sign in or access to any resources outside of the group. Users can view which groups and projects they are a member of without SSO sign in.
 
 However, users are not prompted to sign in through SSO on each visit. GitLab checks whether a user
 has authenticated through SSO. If it's been more than 1 day since the last sign-in, GitLab
 prompts the user to sign in again through SSO.
 
-We intend to add a similar SSO requirement for [Git and API activity](https://gitlab.com/gitlab-org/gitlab/-/issues/9152).
+We intend to add a similar SSO requirement for [API activity](https://gitlab.com/gitlab-org/gitlab/-/issues/9152).
 
-When SSO enforcement is enabled for a group, users can't share a project in the group outside the top-level group, even if the project is forked.
+SSO has the following effects when enabled:
+
+- For groups, users can't share a project in the group outside the top-level group,
+  even if the project is forked.
+- For a Git activity, users must be signed-in through SSO before they can push to or
+  pull from a GitLab repository.
+<!-- Add bullet for API activity when https://gitlab.com/gitlab-org/gitlab/-/issues/9152 is complete -->
 
 ## Providers
 
@@ -424,7 +434,9 @@ Alternatively, when users need to [link SAML to their existing GitLab.com accoun
 
 ### I need to change my SAML app
 
-Users will need to [unlink the current SAML identity](#unlinking-accounts) and [link their identity](#user-access-and-management) to the new SAML app.
+If the NameID is identical in both SAML apps, then no change is required.
+
+Otherwise, to change the SAML app used for sign in, users need to [unlink the current SAML identity](#unlinking-accounts) and then [link their identity](#user-access-and-management) to the new SAML app.
 
 ### I need additional information to configure my identity provider
 

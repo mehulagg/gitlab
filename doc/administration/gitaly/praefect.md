@@ -5,201 +5,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Gitaly Cluster **(FREE SELF)**
+# Configure Gitaly Cluster **(FREE SELF)**
 
-[Gitaly](index.md), the service that provides storage for Git repositories, can
-be run in a clustered configuration to scale the Gitaly service and increase
-fault tolerance. In this configuration, every Git repository is stored on every
-Gitaly node in the cluster.
-
-Using a Gitaly Cluster increases fault tolerance by:
-
-- Replicating write operations to warm standby Gitaly nodes.
-- Detecting Gitaly node failures.
-- Automatically routing Git requests to an available Gitaly node.
-
-NOTE:
-Technical support for Gitaly clusters is limited to GitLab Premium and Ultimate
-customers.
-
-The availability objectives for Gitaly clusters are:
-
-- **Recovery Point Objective (RPO):** Less than 1 minute.
-
-  Writes are replicated asynchronously. Any writes that have not been replicated
-  to the newly promoted primary are lost.
-
-  [Strong consistency](#strong-consistency) can be used to avoid loss in some
-  circumstances.
-
-- **Recovery Time Objective (RTO):** Less than 10 seconds.
-
-  Outages are detected by a health checks run by each Praefect node every
-  second. Failover requires ten consecutive failed health checks on each
-  Praefect node.
-
-  [Faster outage detection](https://gitlab.com/gitlab-org/gitaly/-/issues/2608)
-  is planned to improve this to less than 1 second.
-
-Gitaly Cluster supports:
-
-- [Strong consistency](#strong-consistency) of the secondary replicas.
-- [Automatic failover](#automatic-failover-and-leader-election) from the primary to the secondary.
-- Reporting of possible data loss if replication queue is non-empty.
-- Marking repositories as [read only](#read-only-mode) if data loss is detected to prevent data inconsistencies.
-
-Follow the [Gitaly Cluster epic](https://gitlab.com/groups/gitlab-org/-/epics/1489)
-for improvements including
-[horizontally distributing reads](https://gitlab.com/groups/gitlab-org/-/epics/2013).
-
-## Overview
-
-Git storage is provided through the Gitaly service in GitLab, and is essential
-to correct proper operation of the GitLab application. When the number of
-users, repositories, and activity grows, it is important to scale Gitaly
-appropriately by:
-
-- Increasing the available CPU and memory resources available to Git before
-  resource exhaustion degrades Git, Gitaly, and GitLab application performance.
-- Increase available storage before storage limits are reached causing write
-  operations to fail.
-- Improve fault tolerance by removing single points of failure. Git should be
-  considered mission critical if a service degradation would prevent you from
-  deploying changes to production.
-
-### Moving beyond NFS
-
-WARNING:
-From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,
-support for NFS for Git repositories is scheduled to be removed. Upgrade to
-Gitaly Cluster as soon as possible.
-
-[Network File System (NFS)](https://en.wikipedia.org/wiki/Network_File_System)
-is not well suited to Git workloads which are CPU and IOPS sensitive.
-Specifically:
-
-- Git is sensitive to file system latency. Even simple operations require many
-  read operations. Operations that are fast on block storage can become an order of
-  magnitude slower. This significantly impacts GitLab application performance.
-- NFS performance optimizations that prevent the performance gap between
-  block storage and NFS being even wider are vulnerable to race conditions. We have observed
-  [data inconsistencies](https://gitlab.com/gitlab-org/gitaly/-/issues/2589)
-  in production environments caused by simultaneous writes to different NFS
-  clients. Data corruption is not an acceptable risk.
-
-Gitaly Cluster is purpose built to provide reliable, high performance, fault
-tolerant Git storage.
-
-Further reading:
-
-- Blog post: [The road to Gitaly v1.0 (aka, why GitLab doesn't require NFS for storing Git data anymore)](https://about.gitlab.com/blog/2018/09/12/the-road-to-gitaly-1-0/)
-- Blog post: [How we spent two weeks hunting an NFS bug in the Linux kernel](https://about.gitlab.com/blog/2018/11/14/how-we-spent-two-weeks-hunting-an-nfs-bug/)
-
-## Where Gitaly Cluster fits
-
-GitLab accesses [repositories](../../user/project/repository/index.md) through the configured
-[repository storages](../repository_storage_paths.md). Each new repository is stored on one of the
-repository storages based on their configured weights. Each repository storage is either:
-
-- A Gitaly storage served directly by Gitaly. These map to a directory on the file system of a
-  Gitaly node.
-- A [virtual storage](#virtual-storage-or-direct-gitaly-storage) served by Praefect. A virtual
-  storage is a cluster of Gitaly storages that appear as a single repository storage.
-
-Virtual storages are a feature of Gitaly Cluster. They support replicating the repositories to
-multiple storages for fault tolerance. Virtual storages can improve performance by distributing
-requests across Gitaly nodes. Their distributed nature makes it viable to have a single repository
-storage in GitLab to simplify repository management.
-
-## Components of Gitaly Cluster
-
-Gitaly Cluster consists of multiple components:
-
-- [Load balancer](#load-balancer) for distributing requests and providing fault-tolerant access to
-  Praefect nodes.
-- [Praefect](#praefect) nodes for managing the cluster and routing requests to Gitaly nodes.
-- [PostgreSQL database](#postgresql) for persisting cluster metadata and [PgBouncer](#pgbouncer),
-  recommended for pooling Praefect's database connections.
-- [Gitaly](index.md) nodes to provide repository storage and Git access.
-
-![Cluster example](img/cluster_example_v13_3.png)
-
-In this example:
-
-- Repositories are stored on a virtual storage called `storage-1`.
-- Three Gitaly nodes provide `storage-1` access: `gitaly-1`, `gitaly-2`, and `gitaly-3`.
-- The three Gitaly nodes store data on their file systems.
-
-### Virtual storage or direct Gitaly storage
-
-Gitaly supports multiple models of scaling:
-
-- Clustering using Gitaly Cluster, where each repository is stored on multiple Gitaly nodes in the
-  cluster. Read requests are distributed between repository replicas and write requests are
-  broadcast to repository replicas. GitLab accesses virtual storage.
-- Direct access to Gitaly storage using [repository storage paths](../repository_storage_paths.md),
-  where each repository is stored on the assigned Gitaly node. All requests are routed to this node.
-
-The following is Gitaly set up to use direct access to Gitaly instead of Gitaly Cluster:
-
-![Shard example](img/shard_example_v13_3.png)
-
-In this example:
-
-- Each repository is stored on one of three Gitaly storages: `storage-1`, `storage-2`,
-  or `storage-3`.
-- Each storage is serviced by a Gitaly node.
-- The three Gitaly nodes store data in three separate hashed storage locations.
-
-Generally, virtual storage with Gitaly Cluster can replace direct Gitaly storage configurations, at
-the expense of additional storage needed to store each repository on multiple Gitaly nodes. The
-benefit of using Gitaly Cluster over direct Gitaly storage is:
-
-- Improved fault tolerance, because each Gitaly node has a copy of every repository.
-- Improved resource utilization, reducing the need for over-provisioning for shard-specific peak
-  loads, because read loads are distributed across replicas.
-- Manual rebalancing for performance is not required, because read loads are distributed across
-  replicas.
-- Simpler management, because all Gitaly nodes are identical.
-
-Under some workloads, CPU and memory requirements may require a large fleet of Gitaly nodes. It
-can be uneconomical to have one to one replication factor.
-
-A hybrid approach can be used in these instances, where each shard is configured as a smaller
-cluster. [Variable replication factor](https://gitlab.com/groups/gitlab-org/-/epics/3372) is planned
-to provide greater flexibility for extremely large GitLab instances.
-
-### Gitaly Cluster compared to Geo
-
-Gitaly Cluster and [Geo](../geo/index.md) both provide redundancy. However the redundancy of:
-
-- Gitaly Cluster provides fault tolerance for data storage and is invisible to the user. Users are
-  not aware when Gitaly Cluster is used.
-- Geo provides [replication](../geo/index.md) and [disaster recovery](../geo/disaster_recovery/index.md) for
-  an entire instance of GitLab. Users know when they are using Geo for
-  [replication](../geo/index.md). Geo [replicates multiple datatypes](../geo/replication/datatypes.md#limitations-on-replicationverification),
-  including Git data.
-
-The following table outlines the major differences between Gitaly Cluster and Geo:
-
-| Tool           | Nodes    | Locations | Latency tolerance  | Failover                                             | Consistency                   | Provides redundancy for |
-|:---------------|:---------|:----------|:-------------------|:-----------------------------------------------------|:------------------------------|:------------------------|
-| Gitaly Cluster | Multiple | Single    | Approximately 1 ms | [Automatic](#automatic-failover-and-leader-election) | [Strong](#strong-consistency) | Data storage in Git     |
-| Geo            | Multiple | Multiple  | Up to one minute   | [Manual](../geo/disaster_recovery/index.md)          | Eventual                      | Entire GitLab instance  |
-
-For more information, see:
-
-- [Gitaly](index.md).
-- Geo [use cases](../geo/index.md#use-cases) and [architecture](../geo/index.md#architecture).
-
-## Architecture
-
-Praefect is a router and transaction manager for Gitaly, and a required
-component for running a Gitaly Cluster.
-
-![Architecture diagram](img/praefect_architecture_v12_10.png)
-
-For more information, see [Gitaly HA Design](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/design_ha.md)
+In addition to Gitaly Cluster configuration instructions available as part of
+[reference architectures](../reference_architectures/index.md) for installations for more than
+2000 users, advanced configuration instructions are available below.
 
 ## Requirements for configuring a Gitaly Cluster
 
@@ -1486,21 +1296,35 @@ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.t
 
 ## Migrate existing repositories to Gitaly Cluster
 
-If your GitLab instance already has repositories on single Gitaly nodes, these aren't migrated to
-Gitaly Cluster automatically.
+To migrate to Gitaly Cluster, existing repositories stored outside Gitaly Cluster must be
+moved. There is no automatic migration but the moves can be scheduled with the GitLab API.
 
-Project repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md). Note that this API cannot move all repository types. For moving other repositories types, see:
+GitLab repositories can be associated with projects, groups, and snippets. Each of these types
+have a separate API to schedule the respective repositories to move. To move all repositories
+on a GitLab instance, each of these types must be scheduled to move for each storage.
 
-- [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md).
-- [Group repository storage moves API](../../api/group_repository_storage_moves.md).
+Each repository is made read only when the move is scheduled. The repository is not writable
+until the move has completed.
 
-To move repositories to Gitaly Cluster:
+After creating and configuring Gitaly Cluster:
+
+1. Ensure all storages are accessible to the GitLab instance. In this example, these
+are `<original_storage_name>` and `<cluster_storage_name>`.
+1. [Configure repository storage weights](../repository_storage_paths.md#configure-where-new-repositories-are-stored)
+   so that the Gitaly Cluster receives all new projects. This stops new projects being created
+   on existing Gitaly nodes while the migration is in progress.
+1. Schedule repository moves for:
+   - [Projects](#bulk-schedule-projects).
+   - [Snippets](#bulk-schedule-snippets).
+   - [Groups](#bulk-schedule-groups). **(PREMIUM SELF)**
+
+### Bulk schedule projects
 
 1. [Schedule repository storage moves for all projects on a storage shard](../../api/project_repository_storage_moves.md#schedule-repository-storage-moves-for-all-projects-on-a-storage-shard) using the API. For example:
 
    ```shell
    curl --request POST --header "Private-Token: <your_access_token>" --header "Content-Type: application/json" \
-   --data '{"source_storage_name":"gitaly","destination_storage_name":"praefect"}' "https://gitlab.example.com/api/v4/project_repository_storage_moves"
+   --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/project_repository_storage_moves"
    ```
 
 1. [Query the most recent repository moves](../../api/project_repository_storage_moves.md#retrieve-all-project-repository-storage-moves)
@@ -1513,9 +1337,69 @@ To move repositories to Gitaly Cluster:
    using the API to confirm that all projects have moved. No projects should be returned
    with `repository_storage` field set to the old storage.
 
-In a similar way, you can move other repository types by using the
-[Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md) **(FREE SELF)**
-or the [Groups repository storage moves API](../../api/group_repository_storage_moves.md) **(PREMIUM SELF)**.
+   ```shell
+   curl --header "Private-Token: <your_access_token>" --header "Content-Type: application/json" \
+   "https://gitlab.example.com/api/v4/projects?repository_storage=<original_storage_name>"
+   ```
+
+   Alternatively use [the rails console](../operations/rails_console.md) to
+   confirm that all projects have moved. Run the following in the rails console:
+
+   ```ruby
+   ProjectRepository.for_repository_storage('<original_storage_name>')
+   ```
+
+1. Repeat for each storage as required.
+
+### Bulk schedule snippets
+
+1. [Schedule repository storage moves for all snippets on a storage shard](../../api/snippet_repository_storage_moves.md#schedule-repository-storage-moves-for-all-snippets-on-a-storage-shard) using the API. For example:
+
+   ```shell
+   curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+   --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/snippet_repository_storage_moves"
+   ```
+
+1. [Query the most recent repository moves](../../api/snippet_repository_storage_moves.md#retrieve-all-snippet-repository-storage-moves)
+   using the API. The query indicates either:
+   - The moves have completed successfully. The `state` field is `finished`.
+   - The moves are in progress. Re-query the repository move until it completes successfully.
+   - The moves have failed. Most failures are temporary and are solved by rescheduling the move.
+
+1. After the moves are complete, use [the rails console](../operations/rails_console.md) to
+   confirm that all snippets have moved. No snippets should be returned for the original
+   storage. Run the following in the rails console:
+
+   ```ruby
+   SnippetRepository.for_repository_storage('<original_storage_name>')
+   ```
+
+1. Repeat for each storage as required.
+
+### Bulk schedule groups **(PREMIUM SELF)**
+
+1. [Schedule repository storage moves for all groups on a storage shard](../../api/group_repository_storage_moves.md#schedule-repository-storage-moves-for-all-groups-on-a-storage-shard) using the API.
+
+    ```shell
+    curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+    --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/group_repository_storage_moves"
+    ```
+
+1. [Query the most recent repository moves](../../api/group_repository_storage_moves.md#retrieve-all-group-repository-storage-moves)
+   using the API. The query indicates either:
+   - The moves have completed successfully. The `state` field is `finished`.
+   - The moves are in progress. Re-query the repository move until it completes successfully.
+   - The moves have failed. Most failures are temporary and are solved by rescheduling the move.
+
+1. After the moves are complete, use [the rails console](../operations/rails_console.md) to
+   confirm that all groups have moved. No groups should be returned for the original
+   storage. Run the following in the rails console:
+
+   ```ruby
+   GroupWikiRepository.for_repository_storage('<original_storage_name>')
+   ```
+
+1. Repeat for each storage as required.
 
 ## Debugging Praefect
 

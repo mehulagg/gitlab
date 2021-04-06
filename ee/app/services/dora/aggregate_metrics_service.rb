@@ -2,7 +2,7 @@
 
 module Dora
   class AggregateMetricsService < ::BaseContainerService
-    MAX_RANGE = 3.months / 1.day
+    MAX_RANGE = 92 # the maximum number of days in 3 months
     DEFAULT_ENVIRONMENT_TIER = 'production'
     DEFAULT_INTERVAL = Dora::DailyMetrics::INTERVAL_DAILY
 

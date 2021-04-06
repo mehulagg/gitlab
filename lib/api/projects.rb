@@ -67,6 +67,16 @@ module API
 
         PROJECT_ATTACHMENT_SIZE_EXEMPT
       end
+
+      # This is to help determine which projects to use in https://gitlab.com/gitlab-org/gitlab/-/issues/325788
+      def log_if_upload_exceed_max_size(user_project, file)
+        return if file.size <= user_project.max_attachment_size
+        return if exempt_from_global_attachment_size?(user_project)
+
+        if file.size > user_project.max_attachment_size
+          Gitlab::AppLogger.info({ message: "File exceeds maximum size", file_bytes: file.size, project_id: user_project.id, project_path: user_project.full_path })
+        end
+      end
     end
 
     helpers do
@@ -475,7 +485,7 @@ module API
       get ':id/languages', feature_category: :source_code_management do
         ::Projects::RepositoryLanguagesService
           .new(user_project, current_user)
-          .execute.map { |lang| [lang.name, lang.share] }.to_h
+          .execute.to_h { |lang| [lang.name, lang.share] }
       end
 
       desc 'Delete a project'
@@ -576,6 +586,8 @@ module API
         requires :file, types: [Rack::Multipart::UploadedFile, ::API::Validations::Types::WorkhorseFile], desc: 'The attachment file to be uploaded'
       end
       post ":id/uploads", feature_category: :not_owned do
+        log_if_upload_exceed_max_size(user_project, params[:file])
+
         service = UploadService.new(user_project, params[:file])
         service.override_max_attachment_size = project_attachment_size(user_project)
         upload = service.execute

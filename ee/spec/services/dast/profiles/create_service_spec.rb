@@ -52,9 +52,7 @@ RSpec.describe Dast::Profiles::CreateService do
         let(:params) { default_params.merge(run_after_create: true) }
 
         it_behaves_like 'it delegates scan creation to another service' do
-          let(:delegated_params) do
-            { branch: default_params[:branch_name], dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile }
-          end
+          let(:delegated_params) { hash_including(dast_profile: instance_of(Dast::Profile)) }
         end
 
         it 'creates a ci_pipeline' do

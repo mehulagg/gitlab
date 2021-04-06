@@ -2,6 +2,10 @@
 
 module Admin
   module NavbarHelper
+    def navbar_controller_path
+      cloud_license_enabled? ? 'admin/cloud_licenses' : 'admin/licenses'
+    end
+
     def navbar_item_name
       cloud_license_enabled? ? _('Cloud License') : _('License')
     end

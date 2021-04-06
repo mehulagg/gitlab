@@ -85,12 +85,6 @@ RSpec.describe 'User adds a merge request to a merge train', :js do
     context "when user clicks 'Remove from merge train' button" do
       before do
         click_link 'Remove from merge train'
-        # Currently, this page shows "Add to merge train" button instead of "Start merge train",
-        # even though the merge train is empty.
-        # This likely is caused by the stale cache in client side. Frontend
-        # would need to refresh the mergiability data, specifically `stateData.mergeTrainsCount` periodically e.g. polling.
-        # As a workaround, we're doing a hard reload by executing `visit` here.
-        visit project_merge_request_path(project, merge_request)
       end
 
       it 'cancels automatic merge' do

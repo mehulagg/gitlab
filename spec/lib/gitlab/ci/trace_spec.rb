@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state, factory_default: :keep do
   let_it_be(:project) { create_default(:project).freeze }
-  let_it_be_with_reload(:build) { create(:ci_build) }
+  let_it_be_with_reload(:build) { create(:ci_build, :success) }
   let(:trace) { described_class.new(build) }
 
   describe "associations" do
@@ -64,14 +64,6 @@ RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state, factory_defa
   describe '#update_interval' do
     context 'it is not being watched' do
       it { expect(trace.update_interval).to eq(60.seconds) }
-
-      context 'when feature flag ci_lower_frequency_trace_update is disabled' do
-        before do
-          stub_feature_flags(ci_lower_frequency_trace_update: false)
-        end
-
-        it { expect(trace.update_interval).to eq(30.seconds) }
-      end
     end
 
     context 'it is being watched' do

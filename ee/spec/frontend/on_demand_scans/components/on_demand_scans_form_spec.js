@@ -630,6 +630,26 @@ describe('OnDemandScansForm', () => {
     });
   });
 
+  describe('when no repository exists', () => {
+    beforeEach(() => {
+      mountShallowSubject({
+        propsData: {
+          /**
+           * The assumption here is that, if a default branch is not defined, then the project
+           * does not have a repository.
+           */
+          defaultBranch: '',
+        },
+      });
+    });
+
+    it('shows an error message', () => {
+      expect(subject.text()).toContain(
+        'You must create a repository within your project to run an on-demand scan.',
+      );
+    });
+  });
+
   describe('dastBranchSelection feature flag disabled', () => {
     describe.each`
       action      | actionFunction | runAfter

@@ -21,6 +21,8 @@
   aggregation: daily
   feature_flag: track_epics_activity
 
+# epic notes
+
 - name: g_project_management_users_creating_epic_notes
   category: epics_usage
   redis_slot: project_management
@@ -39,13 +41,41 @@
   aggregation: daily
   feature_flag: track_epics_activity
 
+# start date events
+
 - name: g_project_management_users_setting_epic_start_date_as_fixed
   category: epics_usage
   redis_slot: project_management
   aggregation: daily
   feature_flag: track_epics_activity
 
+- name: g_project_management_users_updating_fixed_epic_start_date
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity
+
 - name: g_project_management_users_setting_epic_start_date_as_inherited
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity
+
+# due date events
+
+- name: g_project_management_users_setting_epic_due_date_as_fixed
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity
+
+- name: g_project_management_users_updating_fixed_epic_due_date
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity
+
+- name: g_project_management_users_setting_epic_due_date_as_inherited
   category: epics_usage
   redis_slot: project_management
   aggregation: daily
@@ -64,6 +94,12 @@
   feature_flag: track_epics_activity
 
 - name: g_project_management_epic_reopened
+  category: epics_usage
+  redis_slot: project_management
+  aggregation: daily
+  feature_flag: track_epics_activity
+
+- name: 'g_project_management_issue_promoted_to_epic'
   category: epics_usage
   redis_slot: project_management
   aggregation: daily

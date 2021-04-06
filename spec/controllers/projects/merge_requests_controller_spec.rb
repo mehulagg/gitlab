@@ -8,6 +8,7 @@ RSpec.describe Projects::MergeRequestsController do
 
   let_it_be_with_refind(:project) { create(:project, :repository) }
   let_it_be_with_reload(:project_public_with_private_builds) { create(:project, :repository, :public, :builds_private) }
+
   let(:user) { project.owner }
   let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
 
@@ -48,10 +49,10 @@ RSpec.describe Projects::MergeRequestsController do
         end
 
         it 'assigns the candidate experience and tracks the event' do
-          expect(experiment(:invite_member_link)).to track(:view, property: project.root_ancestor.id.to_s)
-                                                       .on_any_instance
-                                                       .for(:invite_member_link)
-                                                       .with_context(namespace: project.root_ancestor)
+          expect(experiment(:invite_members_in_comment)).to track(:view, property: project.root_ancestor.id.to_s)
+            .for(:invite_member_link)
+            .with_context(namespace: project.root_ancestor)
+            .on_next_instance
 
           go
         end
@@ -59,7 +60,7 @@ RSpec.describe Projects::MergeRequestsController do
 
       context 'when user can not invite' do
         it 'does not track the event' do
-          expect(experiment(:invite_member_link)).not_to track(:view)
+          expect(experiment(:invite_members_in_comment)).not_to track(:view)
 
           go
         end

@@ -9,6 +9,7 @@ query groupEpics(
   $labelName: [String!]
   $milestoneTitle: String = ""
   $confidential: Boolean
+  $search: String = ""
   $sortBy: EpicSort
   $firstPageSize: Int
   $lastPageSize: Int
@@ -22,6 +23,7 @@ query groupEpics(
       labelName: $labelName
       milestoneTitle: $milestoneTitle
       confidential: $confidential
+      search: $search
       sort: $sortBy
       first: $firstPageSize
       last: $lastPageSize

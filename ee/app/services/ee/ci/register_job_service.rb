@@ -74,8 +74,14 @@ module EE
 
       # rubocop: disable CodeReuse/ActiveRecord
       def all_namespaces
-        namespaces = ::Namespace.reorder(nil).where('namespaces.id = projects.namespace_id')
-        ::Gitlab::ObjectHierarchy.new(namespaces, options: { skip_ordering: true }).roots
+        if traversal_ids_enabled?
+          ::Namespace
+            .where('namespaces.id = project_namespaces.traversal_ids[1]')
+            .joins('INNER JOIN namespaces as project_namespaces ON project_namespaces.id = projects.namespace_id')
+        else
+          namespaces = ::Namespace.reorder(nil).where('namespaces.id = projects.namespace_id')
+          ::Gitlab::ObjectHierarchy.new(namespaces, options: { skip_ordering: true }).roots
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -85,6 +91,11 @@ module EE
 
       def shared_runner_build_limits_feature_enabled?
         ENV['DISABLE_SHARED_RUNNER_BUILD_MINUTES_LIMIT'].to_s != 'true'
+      end
+
+      def traversal_ids_enabled?
+        ::Feature.enabled?(:sync_traversal_ids, default_enabled: :yaml) &&
+          ::Feature.enabled?(:traversal_ids_for_quota_calculation, type: :development, default_enabled: :yaml)
       end
 
       override :pre_assign_runner_checks

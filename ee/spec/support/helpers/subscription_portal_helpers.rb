@@ -3,7 +3,7 @@
 module SubscriptionPortalHelpers
   include StubRequests
 
-  def stub_eoa_eligibility_request(namespace_id)
+  def stub_eoa_eligibility_request(namespace_id, eligible = false, free_upgrade_plan_id = nil, assisted_upgrade_plan_id = nil)
     stub_full_request("#{EE::SUBSCRIPTIONS_URL}/graphql", method: :post)
       .with(
         body: "{\"query\":\"{\\n  subscription(namespaceId: \\\"#{namespace_id}\\\") {\\n    eoaStarterBronzeEligible\\n    assistedUpgradePlanId\\n    freeUpgradePlanId\\n  }\\n}\\n\"}",
@@ -17,7 +17,7 @@ module SubscriptionPortalHelpers
       .to_return(
         status: 200,
         headers: { 'Content-Type' => 'application/json' },
-        body: stubbed_eoa_eligibility_response_body
+        body: stubbed_eoa_eligibility_response_body(eligible, free_upgrade_plan_id, assisted_upgrade_plan_id)
       )
   end
 
@@ -41,13 +41,13 @@ module SubscriptionPortalHelpers
 
   private
 
-  def stubbed_eoa_eligibility_response_body
+  def stubbed_eoa_eligibility_response_body(eligible, free_upgrade_plan_id, assisted_upgrade_plan_id)
     {
       "data": {
         "subscription": {
-          "eoaStarterBronzeEligible": false,
-          "assistedUpgradePlanId": nil,
-          "freeUpgradePlanId": nil
+          "eoaStarterBronzeEligible": eligible,
+          "assistedUpgradePlanId": free_upgrade_plan_id,
+          "freeUpgradePlanId": assisted_upgrade_plan_id
         }
       }
     }.to_json
