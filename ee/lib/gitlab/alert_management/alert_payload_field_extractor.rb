@@ -91,16 +91,16 @@ module Gitlab
         end
       end
 
-      # EX) ['first', 'second'] => 'Second'
-      # EX) ['first', 'second', 0, 1] => 'Second[0][1]'
+      # EX) ['first', 'second'] => 'first.second'
+      # EX) ['first', 'second', 0, 1, 'third'] => 'first.second[0][1].third'
+      #
+      # Assumes first element in path is a string (as we only
+      # expect a Hash as payload input)
       def label_for(path)
-        # Integers represent array indicies
-        return path.last.humanize unless path.last.is_a?(Integer)
+        path.reduce do |label, element|
+          next "#{label}[#{element}]" if element.is_a?(Integer)
 
-        path.reverse.reduce('') do |label, element|
-          break "#{element.humanize}#{label}" unless element.is_a?(Integer)
-
-          "[#{element}]#{label}"
+          "#{label}/#{element}"
         end
       end
     end

@@ -621,7 +621,7 @@ Parsed field (with its name) from an alert used for custom mappings.
 | ----- | ---- | ----------- |
 | `fieldName` | [`AlertManagementPayloadAlertFieldName`](#alertmanagementpayloadalertfieldname) | A GitLab alert field name. |
 | `label` | [`String`](#string) | Human-readable label of the payload path. |
-| `path` | [`[String!]`](#string) | Path to value inside payload JSON. |
+| `path` | [`[PayloadAlertFieldPathSegement!]`](#payloadalertfieldpathsegement) | Path to value inside payload JSON. |
 | `type` | [`AlertManagementPayloadAlertFieldType`](#alertmanagementpayloadalertfieldtype) | Type of the parsed value. |
 
 ### `AlertManagementPrometheusIntegration`

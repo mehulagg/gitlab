@@ -43,6 +43,9 @@ RSpec.describe 'Updating an existing HTTP Integration' do
           payloadExample
           payloadAttributeMappings {
             fieldName
+            path
+            label
+            type
           }
         }
       QL
@@ -55,9 +58,12 @@ RSpec.describe 'Updating an existing HTTP Integration' do
     it 'updates integration without the custom mapping params', :aggregate_failures do
       post_graphql_mutation(mutation, current_user: current_user)
 
+      integration.reload
       integration_response = mutation_response['integration']
 
       expect(response).to have_gitlab_http_status(:success)
+      expect(integration.payload_example).to eq({})
+      expect(integration.payload_attribute_mapping).to eq({})
       expect(integration_response['payloadExample']).to eq('{}')
       expect(integration_response['payloadAttributeMappings']).to be_empty
     end
@@ -76,8 +82,10 @@ RSpec.describe 'Updating an existing HTTP Integration' do
   it 'updates the custom mapping params', :aggregate_failures do
     post_graphql_mutation(mutation, current_user: current_user)
 
-    expect(response).to have_gitlab_http_status(:success)
     integration.reload
+    integration_response = mutation_response['integration']
+
+    expect(response).to have_gitlab_http_status(:success)
     expect(integration.payload_example).to eq(Gitlab::Json.parse(payload_example))
     expect(integration.payload_attribute_mapping).to eq(
       'start_time' => {
@@ -90,6 +98,13 @@ RSpec.describe 'Updating an existing HTTP Integration' do
         'path' => %w[alert name],
         'type' => 'string'
       }
+    )
+    expect(integration_response['payloadExample']).to eq(payload_example)
+    expect(integration_response['payloadAttributeMappings']).to eq(
+      [
+        { 'fieldName' => 'TITLE', 'path' => %w[alert name], 'type' => 'STRING', 'label' => nil },
+        { 'fieldName' => 'START_TIME', 'path' => %w[started_at], 'type' => 'DATETIME', 'label' => 'Start time' }
+      ]
     )
   end
 
