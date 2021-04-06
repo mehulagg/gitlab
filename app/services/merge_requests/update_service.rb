@@ -147,7 +147,7 @@ module MergeRequests
     def resolve_todos(merge_request, old_labels, old_assignees, old_reviewers)
       return unless has_changes?(merge_request, old_labels: old_labels, old_assignees: old_assignees, old_reviewers: old_reviewers)
 
-      todo_service.resolve_todos_for_target(merge_request, current_user)
+      ::MergeRequests::ResolveTodosService.new(merge_request, current_user).async_execute
     end
 
     def handle_target_branch_change(merge_request)
@@ -210,7 +210,7 @@ module MergeRequests
     def handle_assignees_change(merge_request, old_assignees)
       create_assignee_note(merge_request, old_assignees)
       notification_service.async.reassigned_merge_request(merge_request, current_user, old_assignees)
-      todo_service.reassigned_assignable(merge_request, current_user, old_assignees)
+      MergeRequests::CreateAssigneesTodosService.new(merge_request, current_user, old_assignees).async_execute
 
       new_assignees = merge_request.assignees - old_assignees
       merge_request_activity_counter.track_users_assigned_to_mr(users: new_assignees)
@@ -221,7 +221,7 @@ module MergeRequests
       affected_reviewers = (old_reviewers + merge_request.reviewers) - (old_reviewers & merge_request.reviewers)
       create_reviewer_note(merge_request, old_reviewers)
       notification_service.async.changed_reviewer_of_merge_request(merge_request, current_user, old_reviewers)
-      todo_service.reassigned_reviewable(merge_request, current_user, old_reviewers)
+      MergeRequests::CreateReviewersTodosService.new(merge_request, current_user, old_reviewers).async_execute
       invalidate_cache_counts(merge_request, users: affected_reviewers.compact)
 
       new_reviewers = merge_request.reviewers - old_reviewers
