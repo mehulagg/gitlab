@@ -34,7 +34,7 @@ Time Tracking uses two [quick actions](quick_actions.md): `/spend` and `/estimat
 
 Quick actions can be used in the body and comments of an issue or merge request.
 
-If either quick action is repeated in a single commnet, only the last occurence will be applied.
+If you use either quick action more than once in a single comment, only the last occurrence is applied.
 
 Below is an example of how you can use those new quick actions inside a comment.
 
