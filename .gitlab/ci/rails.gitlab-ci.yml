@@ -33,6 +33,8 @@
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
   script:
     - !reference [.base-script, script]
+    - ulimit -c unlimited && sysctl -w kernel.core_pattern=./crash
+    - file ./crash
     - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag ~level:migration"
   artifacts:
     expire_in: 31d
@@ -48,8 +50,12 @@
       - tmp/memory_test/
       - tmp/feature_flags/
       - log/*.log
+      - crash/
     reports:
       junit: junit_rspec.xml
+  tags:
+    # See https://gitlab.com/gitlab-com/www-gitlab-com/-/issues/7019 for tag descriptions
+    - gitlab-org-docker
 
 .rspec-base-migration:
   extends: .rails:rules:ee-and-foss-migration
