@@ -100,7 +100,7 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
         described_class.new(path, attributes.merge( { status: status } )).send(:skip_validation?)
       end
 
-      it 'does not raise exceptions for valid statuses' do
+      it 'returns true/false for skip_validation' do
         expect(validation).to eq(skip_validation?)
       end
     end
