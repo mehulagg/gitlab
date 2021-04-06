@@ -26,7 +26,8 @@ class Namespace < ApplicationRecord
 
   cache_markdown_field :description, pipeline: :description
 
-  has_many :projects, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+  has_many :projects, -> { where(shadow: false) }, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+  has_one :shadow_project, -> { where(shadow: true) }, dependent: :destroy, class_name: 'Project'
   has_many :project_statistics
   has_one :namespace_settings, inverse_of: :namespace, class_name: 'NamespaceSetting', autosave: true
 
@@ -45,6 +46,9 @@ class Namespace < ApplicationRecord
   has_one :root_storage_statistics, class_name: 'Namespace::RootStorageStatistics'
   has_one :aggregation_schedule, class_name: 'Namespace::AggregationSchedule'
   has_one :package_setting_relation, inverse_of: :namespace, class_name: 'PackageSetting'
+
+  # namespace's shadow project
+  belongs_to :project
 
   has_one :admin_note, inverse_of: :namespace
   accepts_nested_attributes_for :admin_note, update_only: true
@@ -82,6 +86,7 @@ class Namespace < ApplicationRecord
   before_create :sync_share_with_group_lock_with_parent
   before_update :sync_share_with_group_lock_with_parent, if: :parent_changed?
   after_update :force_share_with_group_lock_on_descendants, if: -> { saved_change_to_share_with_group_lock? && share_with_group_lock? }
+  before_update :update_shadow_project
 
   # Legacy Storage specific hooks
 
@@ -418,6 +423,12 @@ class Namespace < ApplicationRecord
     created_at >= 90.days.ago
   end
 
+  def shadow_project
+    strong_memoize(:shadow_project) do
+      Project.find_by_namespace_id_and_shadow(self.id, true)
+    end
+  end
+
   private
 
   def all_projects_with_pages
@@ -485,6 +496,13 @@ class Namespace < ApplicationRecord
       project.write_repository_config
       project.track_project_repository
     end
+  end
+
+  def update_shadow_project
+    shadow_project = Project.safe_find_or_create_by(namespace_id: self.id, path: "#{self.path}-shadow", name: "#{self.name}-shadow", creator: User.admins.first)
+    shadow_project.parent_id = parent&.shadow_project&.id if parent_changed?
+    shadow_project.save!
+    # TODO - consider updating name/path (or resync can be done in the end when we replace group with shadow project)
   end
 end
 

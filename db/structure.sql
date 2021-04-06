@@ -16642,7 +16642,7 @@ CREATE TABLE projects (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     creator_id integer,
-    namespace_id integer NOT NULL,
+    namespace_id integer,
     last_activity_at timestamp without time zone,
     import_url character varying,
     visibility_level integer DEFAULT 0 NOT NULL,
@@ -16716,7 +16716,9 @@ CREATE TABLE projects (
     marked_for_deletion_at date,
     marked_for_deletion_by_user_id integer,
     autoclose_referenced_issues boolean,
-    suggestion_commit_message character varying(255)
+    suggestion_commit_message character varying(255),
+    parent_id bigint,
+    shadow boolean DEFAULT false
 );
 
 CREATE SEQUENCE projects_id_seq
@@ -23693,6 +23695,8 @@ CREATE INDEX index_projects_on_name_trigram ON projects USING gin (name gin_trgm
 
 CREATE INDEX index_projects_on_namespace_id_and_id ON projects USING btree (namespace_id, id);
 
+CREATE INDEX index_projects_on_namespace_id_and_shadow ON projects USING btree (namespace_id, shadow);
+
 CREATE INDEX index_projects_on_path_and_id ON projects USING btree (path, id);
 
 CREATE INDEX index_projects_on_path_trigram ON projects USING gin (path gin_trgm_ops);
@@ -26305,6 +26309,9 @@ ALTER TABLE ONLY ci_pipelines_config
 
 ALTER TABLE ONLY approval_project_rules_groups
     ADD CONSTRAINT fk_rails_9071e863d1 FOREIGN KEY (approval_project_rule_id) REFERENCES approval_project_rules(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY projects
+    ADD CONSTRAINT fk_rails_90a9194c0b FOREIGN KEY (parent_id) REFERENCES projects(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY vulnerability_occurrences
     ADD CONSTRAINT fk_rails_90fed4faba FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
