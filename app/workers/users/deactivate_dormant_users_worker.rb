@@ -7,13 +7,15 @@ module Users
 
     feature_category :utilization
 
+    BATCH_SIZE = 100
+
     def perform
       return if Gitlab.com?
       return unless ::Gitlab::CurrentSettings.current_application_settings.deactivate_dormant_users
 
-      User.dormant_that_can_be_deactivated.find_each { |user| deactivate(user) }
+      User.dormant.find_each(batch_size: BATCH_SIZE) { |user| deactivate(user) }
 
-      User.with_no_activity_that_can_be_deactivated.find_each { |user| deactivate(user) }
+      User.with_no_activity.find_each(batch_size: BATCH_SIZE) { |user| deactivate(user) }
     end
 
     private

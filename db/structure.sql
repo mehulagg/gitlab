@@ -24182,6 +24182,8 @@ CREATE INDEX index_users_on_feed_token ON users USING btree (feed_token);
 
 CREATE INDEX index_users_on_group_view ON users USING btree (group_view);
 
+CREATE INDEX index_users_on_id_and_last_activity_on_for_non_internal_active ON users USING btree (id, last_activity_on) WHERE (((state)::text = 'active'::text) AND ((user_type IS NULL) OR (user_type = ANY (ARRAY[NULL::integer, 6, 4]))));
+
 CREATE INDEX index_users_on_incoming_email_token ON users USING btree (incoming_email_token);
 
 CREATE INDEX index_users_on_managing_group_id ON users USING btree (managing_group_id);

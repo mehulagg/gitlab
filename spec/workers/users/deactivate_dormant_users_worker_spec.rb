@@ -27,12 +27,12 @@ RSpec.describe Users::DeactivateDormantUsersWorker do
         dormant_users = double
         users_with_no_activity = double
 
-        expect(User).to receive(:dormant_that_can_be_deactivated).and_return(dormant_users)
+        expect(User).to receive(:dormant).and_return(dormant_users)
         expect(dormant_users).to receive(:find_each)
           .and_yield(user_that_can_be_deactivated_1)
           .and_yield(user_that_can_not_be_deactivated_1)
 
-        expect(User).to receive(:with_no_activity_that_can_be_deactivated).and_return(users_with_no_activity)
+        expect(User).to receive(:with_no_activity).and_return(users_with_no_activity)
         expect(users_with_no_activity).to receive(:find_each)
           .and_yield(user_that_can_be_deactivated_2)
           .and_yield(user_that_can_not_be_deactivated_2)
@@ -52,8 +52,8 @@ RSpec.describe Users::DeactivateDormantUsersWorker do
       end
 
       it 'does nothing' do
-        expect(User).not_to receive(:dormant_that_can_be_deactivated)
-        expect(User).not_to receive(:with_no_activity_that_can_be_deactivated)
+        expect(User).not_to receive(:dormant)
+        expect(User).not_to receive(:with_no_activity)
 
         worker.perform
       end
