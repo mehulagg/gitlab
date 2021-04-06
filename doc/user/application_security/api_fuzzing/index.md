@@ -1111,7 +1111,7 @@ Profiles:
 
 ## Troubleshooting
 
-### Error, OpenAPI file contains schema errors
+### Error, the OpenAPI document is not valid. Errors were found during validation of the document using the published OpenAPI schema
 
 At the start of an API Fuzzing job the OpenAPI specification is validated against the [published schema](https://github.com/OAI/OpenAPI-Specification/tree/master/schemas). This error is shown when the provided OpenAPI specification has validation errors. Errors can be introduced when creating an OpenAPI specification manually, and also when the schema is generated.
 
@@ -1119,7 +1119,7 @@ For OpenAPI specifications that are generated automatically validation errors ar
 
 **Error message**
 
-- In [GitLab 13.11 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/323939), `Error, OpenAPI file contains schema errors`
+- In [GitLab 13.11 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/323939), `Error, the OpenAPI document is not valid. Errors were found during validation of the document using the published OpenAPI schema`
   - `OpenAPI 2.0 schema validation error ...`  
   - `OpenAPI 3.0.x schema validation error ...` 
 
