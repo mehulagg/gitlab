@@ -326,21 +326,36 @@ class GfmAutoComplete {
           }
 
           const lowercaseQuery = query.toLowerCase();
-          const members = items.slice();
+          const members = items.map((item, index) => ({ ...item, index }));
           const { nameOrUsernameStartsWith, nameOrUsernameIncludes } = GfmAutoComplete.Members;
 
           return members.sort((a, b) => {
-            if (nameOrUsernameStartsWith(a, lowercaseQuery)) {
-              return -1;
-            }
-            if (nameOrUsernameStartsWith(b, lowercaseQuery)) {
-              return 1;
-            }
-            if (nameOrUsernameIncludes(a, lowercaseQuery)) {
-              return -1;
-            }
-            if (nameOrUsernameIncludes(b, lowercaseQuery)) {
-              return 1;
+            if (a.index < b.index) {
+              if (nameOrUsernameStartsWith(a, lowercaseQuery)) {
+                return -1;
+              }
+              if (nameOrUsernameStartsWith(b, lowercaseQuery)) {
+                return 1;
+              }
+              if (nameOrUsernameIncludes(a, lowercaseQuery)) {
+                return -1;
+              }
+              if (nameOrUsernameIncludes(b, lowercaseQuery)) {
+                return 1;
+              }
+            } else {
+              if (nameOrUsernameStartsWith(b, lowercaseQuery)) {
+                return 1;
+              }
+              if (nameOrUsernameStartsWith(a, lowercaseQuery)) {
+                return -1;
+              }
+              if (nameOrUsernameIncludes(b, lowercaseQuery)) {
+                return 1;
+              }
+              if (nameOrUsernameIncludes(a, lowercaseQuery)) {
+                return -1;
+              }
             }
             return 0;
           });
