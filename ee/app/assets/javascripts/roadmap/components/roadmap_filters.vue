@@ -85,6 +85,7 @@ export default {
       this.fetchEpics();
     },
     handleFilterEpics(filters) {
+      console.log(filters)
       this.setFilterParams(this.getFilterParams(filters));
       this.fetchEpics();
     },

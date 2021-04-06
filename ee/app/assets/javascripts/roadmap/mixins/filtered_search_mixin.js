@@ -7,14 +7,15 @@ import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
+import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
 
 import { FilterTokenOperators } from '../constants';
 
 export default {
-  inject: ['groupFullPath', 'groupMilestonesPath'],
+  inject: ['groupFullPath', 'groupMilestonesPath', 'listEpicsPath'],
   computed: {
     urlParams() {
-      const { search, authorUsername, labelName, milestoneTitle, confidential } =
+      const { search, authorUsername, labelName, milestoneTitle, confidential, epicId } =
         this.filterParams || {};
 
       return {
@@ -27,6 +28,7 @@ export default {
         'label_name[]': labelName,
         milestone_title: milestoneTitle,
         confidential,
+        epic_id: epicId,
         search,
       };
     },
@@ -102,10 +104,24 @@ export default {
             { icon: 'eye', value: false, title: __('No') },
           ],
         },
+        {
+          type: 'epic_id',
+          icon: 'epic',
+          title: __('Epic'),
+          unique: true,
+          symbol: '&',
+          token: EpicToken,
+          operators: FilterTokenOperators,
+          fetchEpics: (search = '') => {
+            return axios.get(this.listEpicsPath).then(({ data }) => {
+              return { data };
+            });
+          },
+        },
       ];
     },
     getFilteredSearchValue() {
-      const { authorUsername, labelName, milestoneTitle, confidential, search } =
+      const { authorUsername, labelName, milestoneTitle, confidential, search, epicId } =
         this.filterParams || {};
       const filteredSearchValue = [];
 
@@ -139,6 +155,13 @@ export default {
         });
       }
 
+      if (epicId) {
+        filteredSearchValue.push({
+          type: 'epic_id',
+          value: { data: epicId },
+        });
+      }
+
       if (search) {
         filteredSearchValue.push(search);
       }
@@ -163,6 +186,9 @@ export default {
             break;
           case 'confidential':
             filterParams.confidential = filter.value.data;
+            break;
+          case 'epic_id':
+            filterParams.epicId = filter.value.data;
             break;
           case 'filtered-search-term':
             if (filter.value.data) plainText.push(filter.value.data);

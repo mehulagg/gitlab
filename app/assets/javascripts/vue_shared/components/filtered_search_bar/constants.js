@@ -21,4 +21,6 @@ export const DEFAULT_MILESTONES = [
   { value: 'Started', text: __('Started') },
 ];
 
+export const DEFAULT_EPICS = [DEFAULT_LABEL_NONE, DEFAULT_LABEL_ANY];
+
 /* eslint-enable @gitlab/require-i18n-strings */

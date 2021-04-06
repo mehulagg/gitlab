@@ -10,7 +10,7 @@ import { debounce } from 'lodash';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 
-import { DEFAULT_MILESTONES, DEBOUNCE_DELAY } from '../constants';
+import { DEFAULT_EPICS, DEBOUNCE_DELAY } from '../constants';
 import { stripQuotes } from '../filtered_search_utils';
 
 export default {
@@ -32,8 +32,8 @@ export default {
   },
   data() {
     return {
-      milestones: this.config.initialMilestones || [],
-      defaultMilestones: this.config.defaultMilestones || DEFAULT_MILESTONES,
+      epics: this.config.initialEpics || [],
+      defaultEpics: this.config.defaultEpics || DEFAULT_EPICS,
       loading: true,
     };
   },
@@ -41,37 +41,35 @@ export default {
     currentValue() {
       return this.value.data.toLowerCase();
     },
-    activeMilestone() {
-      return this.milestones.find(
-        (milestone) => milestone.title.toLowerCase() === stripQuotes(this.currentValue),
-      );
+    activeEpic() {
+      return this.epics.find((epic) => epic.title.toLowerCase() === this.currentValue);
     },
   },
   watch: {
     active: {
       immediate: true,
       handler(newValue) {
-        if (!newValue && !this.milestones.length) {
-          this.fetchMilestoneBySearchTerm(this.value.data);
+        if (!newValue && !this.epics.length) {
+          this.fetchEpicsBySearchTerm(this.value.data);
         }
       },
     },
   },
   methods: {
-    fetchMilestoneBySearchTerm(searchTerm = '') {
+    fetchEpicsBySearchTerm(searchTerm = '') {
       this.loading = true;
       this.config
-        .fetchMilestones(searchTerm)
+        .fetchEpics(searchTerm)
         .then(({ data }) => {
-          this.milestones = data;
+          this.epics = data;
         })
-        .catch(() => createFlash({ message: __('There was a problem fetching milestones.') }))
+        .catch(() => createFlash({ message: __('There was a problem fetching epics.') }))
         .finally(() => {
           this.loading = false;
         });
     },
-    searchMilestones: debounce(function debouncedSearch({ data }) {
-      this.fetchMilestoneBySearchTerm(data);
+    searchEpics: debounce(function debouncedSearch({ data }) {
+      this.fetchEpicsBySearchTerm(data);
     }, DEBOUNCE_DELAY),
   },
 };
@@ -82,28 +80,24 @@ export default {
     :config="config"
     v-bind="{ ...$props, ...$attrs }"
     v-on="$listeners"
-    @input="searchMilestones"
+    @input="searchEpics"
   >
     <template #view="{ inputValue }">
-      <span>&{{ activeMilestone ? activeMilestone.title : inputValue }}</span>
+      <span>&{{ activeEpic ? activeEpic.title : inputValue }}</span>
     </template>
     <template #suggestions>
       <gl-filtered-search-suggestion
-        v-for="milestone in defaultMilestones"
-        :key="milestone.value"
-        :value="milestone.value"
+        v-for="epic in defaultEpics"
+        :key="epic.value"
+        :value="epic.value"
       >
-        {{ milestone.text }}
+        {{ epic.text }}
       </gl-filtered-search-suggestion>
-      <gl-dropdown-divider v-if="defaultMilestones.length" />
+      <gl-dropdown-divider v-if="defaultEpics.length" />
       <gl-loading-icon v-if="loading" />
       <template v-else>
-        <gl-filtered-search-suggestion
-          v-for="milestone in milestones"
-          :key="milestone.id"
-          :value="milestone.title"
-        >
-          <div>{{ milestone.title }}</div>
+        <gl-filtered-search-suggestion v-for="epic in epics" :key="epic.id" :value="epic.title">
+          <div>{{ epic.title }}</div>
         </gl-filtered-search-suggestion>
       </template>
     </template>

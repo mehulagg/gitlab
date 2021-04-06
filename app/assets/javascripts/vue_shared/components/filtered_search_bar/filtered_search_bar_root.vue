@@ -283,6 +283,7 @@ export default {
       this.recentSearches = [];
     },
     handleFilterSubmit() {
+      debugger
       const filterTokens = uniqueTokens(this.filterValue);
       this.filterValue = filterTokens;
 
