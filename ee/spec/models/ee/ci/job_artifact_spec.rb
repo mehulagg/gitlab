@@ -227,7 +227,7 @@ RSpec.describe Ci::JobArtifact do
 
     subject(:findings_count) { security_report.findings.length }
 
-    it { is_expected.to be(33) }
+    it { is_expected.to be(5) }
 
     context 'for different types' do
       where(:file_type, :security_report?) do

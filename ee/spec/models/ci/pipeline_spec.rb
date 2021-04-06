@@ -137,7 +137,7 @@ RSpec.describe Ci::Pipeline do
         expect(subject.reports.keys).to contain_exactly('sast', 'dependency_scanning', 'container_scanning')
 
         # for each of report categories, we have merged 2 reports with the same data (fixture)
-        expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(33)
+        expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(5)
         expect(subject.get_report('dependency_scanning', ds1_artifact).findings.size).to eq(4)
         expect(subject.get_report('container_scanning', cs1_artifact).findings.size).to eq(8)
       end
@@ -146,7 +146,7 @@ RSpec.describe Ci::Pipeline do
         let(:build_sast_1) { create(:ci_build, :retried, name: 'sast_1', pipeline: pipeline, project: project) }
 
         it 'does not take retried builds into account' do
-          expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(33)
+          expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(5)
           expect(subject.get_report('dependency_scanning', ds1_artifact).findings.size).to eq(4)
           expect(subject.get_report('container_scanning', cs1_artifact).findings.size).to eq(8)
         end

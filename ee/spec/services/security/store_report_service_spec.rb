@@ -31,7 +31,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
     using RSpec::Parameterized::TableSyntax
 
     where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :fingerprints) do
-      'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0 | 2
+      'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2
       'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0
       'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0
       'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0
@@ -113,9 +113,13 @@ RSpec.describe Security::StoreReportService, '#execute' do
   end
 
   context 'with existing data from previous pipeline' do
-    let(:scanner) { build(:vulnerabilities_scanner, project: project, external_id: 'bandit', name: 'Bandit') }
-    let(:identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'e6dd15eda2137be0034977a85b300a94a4f243a3') }
-    let(:different_identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'fa47ee81f079e5c38ea6edb700b44eaeb62f67ee') }
+    let(:finding_identifier_fingerprint) do
+      build(:ci_reports_security_identifier, external_id: "CIPHER_INTEGRITY").fingerprint
+    end
+
+    let(:scanner) { build(:vulnerabilities_scanner, project: project, external_id: 'find_sec_bugs', name: 'Find Security Bugs') }
+    let(:identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: finding_identifier_fingerprint) }
+    let(:different_identifier) { build(:vulnerabilities_identifier, project: project) }
     let!(:new_artifact) { create(:ee_ci_job_artifact, :sast, job: new_build) }
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
     let(:new_pipeline) { create(:ci_pipeline, project: project) }
@@ -129,6 +133,15 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     let(:trait) { :sast }
 
+    let(:finding_location_fingerprint) do
+      build(
+        :ci_reports_security_locations_sast,
+        file_path: "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
+        start_line: "29",
+        end_line: "29"
+      ).fingerprint
+    end
+
     let!(:finding) do
       create(:vulnerabilities_finding,
         pipelines: [pipeline],
@@ -136,8 +149,8 @@ RSpec.describe Security::StoreReportService, '#execute' do
         primary_identifier: identifier,
         scanner: scanner,
         project: project,
-        uuid: "80571acf-8660-4bc8-811a-1d8dec9ab6f4",
-        location_fingerprint: 'd869ba3f0b3347eb2749135a437dc07c8ae0f420')
+        uuid: "e5388f40-18f5-566d-95c6-d64c6f46a00a",
+        location_fingerprint: finding_location_fingerprint)
     end
 
     let!(:vulnerability) { create(:vulnerability, findings: [finding], project: project) }
@@ -180,30 +193,30 @@ RSpec.describe Security::StoreReportService, '#execute' do
       expect(finding.reload.uuid).to eq(desired_uuid)
     end
 
-    it 'inserts only new scanners and reuse existing ones' do
-      expect { subject }.to change { Vulnerabilities::Scanner.count }.by(2)
+    it 'reuses existing scanner' do
+      expect { subject }.not_to change { Vulnerabilities::Scanner.count }
     end
 
     it 'inserts only new identifiers and reuse existing ones' do
-      expect { subject }.to change { Vulnerabilities::Identifier.count }.by(16)
+      expect { subject }.to change { Vulnerabilities::Identifier.count }.by(5)
     end
 
     it 'inserts only new findings and reuse existing ones' do
-      expect { subject }.to change { Vulnerabilities::Finding.count }.by(32)
+      expect { subject }.to change { Vulnerabilities::Finding.count }.by(4)
     end
 
     it 'inserts all finding pipelines (join model) for this new pipeline' do
-      expect { subject }.to change { Vulnerabilities::FindingPipeline.where(pipeline: new_pipeline).count }.by(33)
+      expect { subject }.to change { Vulnerabilities::FindingPipeline.where(pipeline: new_pipeline).count }.by(5)
     end
 
     it 'inserts new vulnerabilities with data from findings from this new pipeline' do
-      expect { subject }.to change { Vulnerability.count }.by(32)
+      expect { subject }.to change { Vulnerability.count }.by(4)
     end
 
     it 'updates existing findings with new data' do
       subject
 
-      expect(finding.reload).to have_attributes(severity: 'medium', name: 'Probable insecure usage of temp file/directory.')
+      expect(finding.reload).to have_attributes(severity: 'medium', name: 'Cipher with no integrity')
     end
 
     it 'updates fingerprints to match new values' do
@@ -234,7 +247,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
     it 'updates existing vulnerability with new data' do
       subject
 
-      expect(vulnerability.reload).to have_attributes(severity: 'medium', title: 'Probable insecure usage of temp file/directory.', title_html: 'Probable insecure usage of temp file/directory.')
+      expect(vulnerability.reload).to have_attributes(severity: 'medium', title: 'Cipher with no integrity', title_html: 'Cipher with no integrity')
     end
 
     context 'when the existing vulnerability is resolved with the latest report' do

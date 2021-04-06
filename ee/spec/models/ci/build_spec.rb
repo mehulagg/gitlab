@@ -226,7 +226,7 @@ RSpec.describe Ci::Build do
         it 'parses blobs and add the results to the report' do
           subject
 
-          expect(security_reports.get_report('sast', artifact).findings.size).to eq(33)
+          expect(security_reports.get_report('sast', artifact).findings.size).to eq(5)
         end
 
         it 'adds the created date to the report' do
@@ -245,7 +245,7 @@ RSpec.describe Ci::Build do
         it 'parses blobs and adds the results to the reports' do
           subject
 
-          expect(security_reports.get_report('sast', sast_artifact).findings.size).to eq(33)
+          expect(security_reports.get_report('sast', sast_artifact).findings.size).to eq(5)
           expect(security_reports.get_report('dependency_scanning', ds_artifact).findings.size).to eq(4)
           expect(security_reports.get_report('container_scanning', cs_artifact).findings.size).to eq(8)
           expect(security_reports.get_report('dast', dast_artifact).findings.size).to eq(20)
