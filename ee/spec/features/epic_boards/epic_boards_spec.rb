@@ -168,7 +168,7 @@ RSpec.describe 'epic boards', :js do
       visit_epic_boards_page
     end
 
-    it 'can select an Author and Label', :js do
+    it 'can select an Author and Label' do
       page.find('[data-testid="epic-filtered-search"]').click
 
       page.within('[data-testid="epic-filtered-search"]') do
