@@ -216,7 +216,7 @@ module QA
               # animation is still in process even when the buttons have the
               # expected visibility.
               commit_success = retry_until(sleep_interval: 5) do
-                click_element(:commit_to_current_branch_radio) if has_element?(:commit_to_current_branch_radio)
+                choose_element(:commit_to_current_branch_radio) if has_element?(:commit_to_current_branch_radio)
                 click_element(:commit_button) if has_element?(:commit_button)
 
                 # If this is the first commit, the commit SHA only appears after reloading
