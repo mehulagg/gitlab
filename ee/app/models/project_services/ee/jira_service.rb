@@ -89,13 +89,29 @@ module EE
     #
     # @return [Array] the array of IDs
     def project_issuetype_scheme_ids
-      query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', 'project')
-      query_url.query_values = { 'projectId' => jira_project_id }
+      case data_fields.deployment_type
+      when "server"
+        schemes_query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/')
+        scheme_ids = client.get(schemes_query_url.to_s).fetch('schemes', []).map { |scheme| scheme['id'] }
+        scheme_ids.map(&method(:fetch_associated_projects)).reduce({}, :merge).dig(project_key)
+      when "cloud"
+        query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', 'project')
+        query_url.query_values = { 'projectId' => jira_project_id }
 
+        client
+          .get(query_url.to_s)
+          .fetch('values', [])
+          .map { |schemes| schemes.dig('issueTypeScheme', 'id') }
+      else
+      end
+    end
+
+    def fetch_associated_projects(scheme_id)
+      associations_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', "#{scheme_id}/", 'associations/')
       client
-        .get(query_url.to_s)
-        .fetch('values', [])
-        .map { |schemes| schemes.dig('issueTypeScheme', 'id') }
+        .get(associations_url.to_s)
+        .map { |assocation| { assocation.dig('key') => scheme_id } }
+        .reduce({}, :merge)
     end
 
     # Returns list of Issue Type IDs available in active Issue Type Scheme in selected JIRA Project
@@ -103,13 +119,24 @@ module EE
     # @return [Array] the array of IDs
     def project_issuetype_ids
       strong_memoize(:project_issuetype_ids) do
-        query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', 'mapping')
-        query_url.query_values = { 'issueTypeSchemeId' => project_issuetype_scheme_ids }
+        case data_fields.deployment_type
+        when "server"
+          query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'project/', project_key)
 
-        client
-          .get(query_url.to_s)
-          .fetch('values', [])
-          .map { |schemes| schemes['issueTypeId'] }
+          client
+            .get(query_url.to_s)
+            .fetch('issueTypes', [])
+            .map { |issue_type| issue_type['id'] }
+        when "cloud"
+          query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', 'mapping')
+          query_url.query_values = { 'issueTypeSchemeId' => project_issuetype_scheme_ids }
+
+          client
+            .get(query_url.to_s)
+            .fetch('values', [])
+            .map { |schemes| schemes['issueTypeId'] }
+        else
+        end
       end
     end
 
