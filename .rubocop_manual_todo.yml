@@ -58,7 +58,6 @@ Rails/SaveBang:
     - 'ee/spec/models/ee/protected_ref_access_spec.rb'
     - 'ee/spec/models/ee/protected_ref_spec.rb'
     - 'ee/spec/models/elasticsearch_indexed_namespace_spec.rb'
-    - 'ee/spec/models/environment_spec.rb'
     - 'ee/spec/models/epic_spec.rb'
     - 'ee/spec/models/gitlab_subscription_spec.rb'
     - 'ee/spec/models/issue_spec.rb'
