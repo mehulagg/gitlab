@@ -21,7 +21,7 @@ module Ci
     end
 
     # overridden in EE
-    condition(:protected_environment_access) do
+    condition(:protected_environment) do
       false
     end
 
@@ -65,10 +65,14 @@ module Ci
       can?(:developer_access, @subject.project)
     end
 
+    condition(:has_environment) do
+      @subject.has_environment?
+    end
+
     rule { project_read_build }.enable :read_build_trace
     rule { debug_mode & ~project_update_build }.prevent :read_build_trace
 
-    rule { ~protected_environment_access & (protected_ref | archived) }.policy do
+    rule { protected_ref | archived | (has_environment && protected_environment) }.policy do
       prevent :update_build
       prevent :update_commit_status
       prevent :erase_build
