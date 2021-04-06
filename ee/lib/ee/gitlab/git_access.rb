@@ -122,7 +122,8 @@ module EE
 
         return unless ::Gitlab::Auth::GroupSaml::SessionEnforcer.new(user, containing_group).access_restricted?
 
-        group_saml_url = Rails.application.routes.url_helpers.sso_group_saml_providers_url(containing_group, token: containing_group.saml_discovery_token)
+        root_group = containing_group.root_ancestor
+        group_saml_url = Rails.application.routes.url_helpers.sso_group_saml_providers_url(root_group, token: root_group.saml_discovery_token)
         raise ::Gitlab::GitAccess::ForbiddenError, "Cannot find valid SSO session. Please login via your group's SSO at #{group_saml_url}"
       end
 
