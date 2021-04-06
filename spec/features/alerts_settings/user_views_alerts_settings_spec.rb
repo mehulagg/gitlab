@@ -19,19 +19,18 @@ RSpec.describe 'Alert integrations settings form', :js do
   describe 'when viewing alert integrations as a maintainer' do
     context 'with the default page permissions' do
       before do
-        stub_feature_flags(multiple_http_integrations_custom_mapping: false)
         visit project_settings_operations_path(project, anchor: 'js-alert-management-settings')
         wait_for_requests
       end
 
       it 'shows the alerts setting form title' do
         page.within('#js-alert-management-settings') do
-          expect(find('h4')).to have_content('Alerts')
+          expect(find('h4')).to have_content('Alert integrations')
         end
       end
 
-      it 'shows the new alerts setting form' do
-        expect(page).to have_content('1. Select integration type')
+      it 'shows the integrations list title' do
+        expect(page).to have_content('Current integrations')
       end
     end
   end
@@ -44,7 +43,7 @@ RSpec.describe 'Alert integrations settings form', :js do
       wait_for_requests
     end
 
-    it 'shows the old alerts setting form' do
+    it 'does not have rights to access the setting form' do
       expect(page).not_to have_selector('.incident-management-list')
       expect(page).not_to have_selector('#js-alert-management-settings')
     end

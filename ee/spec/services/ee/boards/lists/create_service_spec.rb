@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Boards::Lists::CreateService do
   describe '#execute' do
     let_it_be(:group) { create(:group) }
-    let_it_be(:project) { create(:project, group: group) }
+    let_it_be_with_refind(:project) { create(:project, group: group) }
     let_it_be(:board, refind: true) { create(:board, project: project) }
     let_it_be(:user) { create(:user) }
 
@@ -106,7 +106,7 @@ RSpec.describe Boards::Lists::CreateService do
       describe '#create_list_attributes' do
         shared_examples 'attribute provider for list creation' do
           before do
-            stub_feature_flags(wip_limits: wip_limits_enabled)
+            stub_licensed_features(wip_limits: wip_limits_enabled)
           end
 
           where(:params, :expected_max_issue_count, :expected_max_issue_weight, :expected_limit_metric) do

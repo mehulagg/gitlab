@@ -114,10 +114,10 @@ See the documentation on [File Locking](../../../user/project/file_lock.md).
 ## LFS objects in project archives
 
 > - Support for including Git LFS blobs inside [project source downloads](../../../user/project/repository/index.md) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
-> - It was [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/268409) on GitLab 13.6.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
+> - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/268409) in GitLab 13.6.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-lfs-objects-in-project-archives).
 
 WARNING:
@@ -269,3 +269,46 @@ You might choose to do this if you are using an appliance like a <!-- vale gitla
 GitLab can't verify LFS objects. Pushes then fail if you have GitLab LFS support enabled.
 
 To stop push failure, LFS support can be disabled in the [Project settings](../../../user/project/settings/index.md), which also disables GitLab LFS value-adds (Verifying LFS objects, UI integration for LFS).
+
+### Missing LFS objects
+
+An error about a missing LFS object may occur in either of these situations:
+
+- When migrating LFS objects from disk to object storage, with error messages like:
+
+   ```plaintext
+   ERROR -- : Failed to transfer LFS object
+   006622269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7
+   with error: No such file or directory @ rb_sysopen -
+   /var/opt/gitlab/gitlab-rails/shared/lfs-objects/00/66/22269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7
+   ```
+
+   (Line breaks have been added for legibility.)
+
+- When running the
+  [integrity check for LFS objects](../../../administration/raketasks/check.md#uploaded-files-integrity)
+  with the `VERBOSE=1` parameter.
+
+The database can have records for LFS objects which are not on disk. The database entry may
+[prevent a new copy of the object being pushed](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/49241).
+To delete these references:
+
+1. [Start a rails console](../../../administration/operations/rails_console.md).
+1. Query the object that's reported as missing in the rails console, to return a file path:
+
+   ```ruby
+   lfs_object = LfsObject.find_by(oid: '006622269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7')
+   lfs_object.file.path
+   ```
+
+1. Check on disk if it exists:
+
+   ```shell
+   ls -al /var/opt/gitlab/gitlab-rails/shared/lfs-objects/00/66/22269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7
+   ```
+
+1. If the file is not present, remove the database record via the rails console:
+
+   ```ruby
+   lfs_object.destroy
+   ```

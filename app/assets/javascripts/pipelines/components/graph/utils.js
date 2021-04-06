@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/browser';
 import Visibility from 'visibilityjs';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { unwrapStagesWithNeeds } from '../unwrapping_utils';
@@ -8,6 +7,66 @@ const addMulti = (mainPipelineProjectPath, linkedPipeline) => {
     ...linkedPipeline,
     multiproject: mainPipelineProjectPath !== linkedPipeline.project.fullPath,
   };
+};
+
+/* eslint-disable @gitlab/require-i18n-strings */
+const getQueryHeaders = (etagResource) => {
+  return {
+    fetchOptions: {
+      method: 'GET',
+    },
+    headers: {
+      'X-GITLAB-GRAPHQL-FEATURE-CORRELATION': 'verify/ci/pipeline-graph',
+      'X-GITLAB-GRAPHQL-RESOURCE-ETAG': etagResource,
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  };
+};
+
+const serializeGqlErr = (gqlError) => {
+  const { locations = [], message = '', path = [] } = gqlError;
+
+  return `
+    ${message}.
+    Locations: ${locations
+      .flatMap((loc) => Object.entries(loc))
+      .flat(2)
+      .join(' ')}.
+    Path: ${path.join(', ')}.
+  `;
+};
+
+const serializeLoadErrors = (errors) => {
+  const { gqlError, graphQLErrors, networkError, message } = errors;
+
+  if (graphQLErrors) {
+    return graphQLErrors.map((err) => serializeGqlErr(err)).join('; ');
+  }
+
+  if (gqlError) {
+    return serializeGqlErr(gqlError);
+  }
+
+  if (networkError) {
+    return `Network error: ${networkError.message}`;
+  }
+
+  return message;
+};
+
+/* eslint-enable @gitlab/require-i18n-strings */
+
+const toggleQueryPollingByVisibility = (queryRef, interval = 10000) => {
+  const stopStartQuery = (query) => {
+    if (!Visibility.hidden()) {
+      query.startPolling(interval);
+    } else {
+      query.stopPolling();
+    }
+  };
+
+  stopStartQuery(queryRef);
+  Visibility.change(stopStartQuery.bind(null, queryRef));
 };
 
 const transformId = (linkedPipeline) => {
@@ -42,24 +101,13 @@ const unwrapPipelineData = (mainPipelineProjectPath, data) => {
   };
 };
 
-const toggleQueryPollingByVisibility = (queryRef, interval = 10000) => {
-  const stopStartQuery = (query) => {
-    if (!Visibility.hidden()) {
-      query.startPolling(interval);
-    } else {
-      query.stopPolling();
-    }
-  };
+const validateConfigPaths = (value) => value.graphqlResourceEtag?.length > 0;
 
-  stopStartQuery(queryRef);
-  Visibility.change(stopStartQuery.bind(null, queryRef));
-};
-
-export { unwrapPipelineData, toggleQueryPollingByVisibility };
-
-export const reportToSentry = (component, failureType) => {
-  Sentry.withScope((scope) => {
-    scope.setTag('component', component);
-    Sentry.captureException(failureType);
-  });
+export {
+  getQueryHeaders,
+  serializeGqlErr,
+  serializeLoadErrors,
+  toggleQueryPollingByVisibility,
+  unwrapPipelineData,
+  validateConfigPaths,
 };

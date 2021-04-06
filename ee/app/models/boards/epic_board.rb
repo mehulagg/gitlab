@@ -6,6 +6,7 @@ module Boards
     has_many :epic_board_labels, foreign_key: :epic_board_id, inverse_of: :epic_board
     has_many :epic_board_positions, foreign_key: :epic_board_id, inverse_of: :epic_board
     has_many :epic_lists, -> { ordered }, foreign_key: :epic_board_id, inverse_of: :epic_board
+    has_many :labels, through: :epic_board_labels
 
     validates :name, length: { maximum: 255 }, presence: true
 
@@ -32,7 +33,7 @@ module Boards
     end
 
     def scoped?
-      false
+      labels.any?
     end
 
     def milestone_id
@@ -57,14 +58,6 @@ module Boards
 
     def assignee
       nil
-    end
-
-    def label_ids
-      []
-    end
-
-    def labels
-      []
     end
 
     def weight

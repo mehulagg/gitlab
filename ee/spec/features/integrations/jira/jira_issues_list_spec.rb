@@ -9,9 +9,9 @@ RSpec.describe 'Jira issues list' do
 
   before do
     stub_licensed_features(jira_issues_integration: true)
-    stub_feature_flags(jira_issues_list: false)
     project.add_user(user, :developer)
     sign_in(user)
+    stub_request(:get, /.*jira.example.com.*/)
   end
 
   context 'when jira_issues_integration licensed feature is not available' do
@@ -27,7 +27,7 @@ RSpec.describe 'Jira issues list' do
     end
   end
 
-  it 'renders "Create new issue" button' do
+  it 'renders "Create new issue" button', :js do
     visit project_integrations_jira_issues_path(project)
 
     expect(page).to have_link('Create new issue in Jira')

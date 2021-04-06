@@ -76,6 +76,28 @@ Rake task.
 
 Requests time out at 30 seconds.
 
+## Breaking changes
+
+The GitLab GraphQL API is [versionless](https://graphql.org/learn/best-practices/#versioning) which means
+developers must familiarize themselves with our [deprecation cycle of breaking changes](#breaking-changes).
+
+Breaking changes are:
+
+- Removing or renaming a field, argument, enum value or mutation.
+- Changing the type of a field, argument or enum value.
+- Raising the [complexity](#max-complexity) of a field or complexity multipliers in a resolver.
+- Changing a field from being _not_ nullable (`null: false`) to nullable (`null: true`), as
+discussed in [Nullable fields](#nullable-fields).
+- Changing an argument from being optional (`required: false`) to being required (`required: true`).
+- Changing the [max page size](#page-size-limit) of a connection.
+- Lowering the global limits for query complexity and depth.
+- Anything else that can result in queries hitting a limit that previously was allowed.
+
+Fields that use the [`feature_flag` property](#feature_flag-property) and the flag is disabled by default are exempt
+from the deprecation process, and can be removed at any time without notice.
+
+See the [deprecating fields and enum values](#deprecating-fields-arguments-and-enum-values) section for how to deprecate items.
+
 ## Global IDs
 
 The GitLab GraphQL API uses Global IDs (i.e: `"gid://gitlab/MyObject/123"`)
@@ -370,6 +392,28 @@ field :blob, type: Types::Snippets::BlobType,
 
 This will increment the [`complexity` score](#field-complexity) of the field by `1`.
 
+If a resolver calls Gitaly, it can be annotated with
+`BaseResolver.calls_gitaly!`. This passes `calls_gitaly: true` to any
+field that uses this resolver.
+
+For example:
+
+```ruby
+class BranchResolver < BaseResolver
+  type ::Types::BranchType, null: true
+  calls_gitaly!
+
+  argument name: ::GraphQL::STRING_TYPE, required: true
+
+  def resolve(name:)
+    object.branch(name)
+  end
+end
+```
+
+Then when we use it, any field that uses `BranchResolver` has the correct
+value for `calls_gitaly:`.
+
 ### Exposing permissions for a type
 
 To expose permissions the current user has on a resource, you can call
@@ -448,7 +492,7 @@ fails. Consider this when toggling the visibility of the feature on or off on
 production.
 
 The `feature_flag` property does not allow the use of
-[feature gates based on actors](../development/feature_flags/development.md).
+[feature gates based on actors](../development/feature_flags/index.md).
 This means that the feature flag cannot be toggled only for particular
 projects, groups, or users, but instead can only be toggled globally for
 everyone.
@@ -499,7 +543,7 @@ Rather than removing fields, arguments, or [enum values](#enums), they
 must be _deprecated_ instead.
 
 The deprecated parts of the schema can then be removed in a future release
-in accordance with the [GitLab deprecation process](../api/graphql/index.md#deprecation-process).
+in accordance with the [GitLab deprecation process](../api/graphql/index.md#deprecation-and-removal-process).
 
 Fields, arguments, and enum values are deprecated using the `deprecated` property.
 The value of the property is a `Hash` of:
@@ -1115,9 +1159,10 @@ When using resolvers, they can and should serve as the SSoT for field metadata.
 All field options (apart from the field name) can be declared on the resolver.
 These include:
 
-- `type` (this is particularly important, and is planned to be mandatory)
+- `type` (required - all resolvers must include a type annotation)
 - `extras`
 - `description`
+- Gitaly annotations (with `calls_gitaly!`)
 
 Example:
 
@@ -1127,6 +1172,7 @@ module Resolvers
     type Types::MyType, null: true
     extras [:lookahead]
     description 'Retrieve a single MyType'
+    calls_gitaly!
   end
 end
 ```

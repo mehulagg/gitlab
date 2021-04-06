@@ -26,7 +26,7 @@ RSpec.describe Groups::BillingsController do
     context 'authorized' do
       before do
         add_group_owner
-        allow_next_instance_of(FetchSubscriptionPlansService) do |instance|
+        allow_next_instance_of(GitlabSubscriptions::FetchSubscriptionPlansService) do |instance|
           allow(instance).to receive(:execute)
         end
         allow(controller).to receive(:track_experiment_event)
@@ -41,7 +41,7 @@ RSpec.describe Groups::BillingsController do
 
       it 'fetches subscription plans data from customers.gitlab.com' do
         data = double
-        expect_next_instance_of(FetchSubscriptionPlansService) do |instance|
+        expect_next_instance_of(GitlabSubscriptions::FetchSubscriptionPlansService) do |instance|
           expect(instance).to receive(:execute).and_return(data)
         end
 

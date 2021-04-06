@@ -365,7 +365,8 @@ export default {
             v-if="isLatestVersion"
             variant="link"
             size="small"
-            class="gl-mr-4 js-select-all"
+            class="gl-mr-3"
+            data-testid="select-all-designs-button"
             @click="toggleDesignsSelection"
             >{{ selectAllButtonText }}
           </gl-button>
@@ -378,14 +379,13 @@ export default {
             <delete-button
               v-if="isLatestVersion"
               :is-deleting="loading"
-              button-variant="warning"
-              button-category="secondary"
+              button-variant="default"
               button-class="gl-mr-3"
               button-size="small"
               data-qa-selector="archive_button"
               :loading="loading"
               :has-selected-designs="hasSelectedDesigns"
-              @deleteSelectedDesigns="mutate()"
+              @delete-selected-designs="mutate()"
             >
               {{ s__('DesignManagement|Archive selected') }}
             </delete-button>
@@ -484,9 +484,7 @@ export default {
               <template #upload-text="{ openFileUpload }">
                 <gl-sprintf :message="$options.i18n.dropzoneDescriptionText">
                   <template #link="{ content }">
-                    <gl-link @click.stop="openFileUpload">
-                      {{ content }}
-                    </gl-link>
+                    <gl-link @click.stop="openFileUpload">{{ content }}</gl-link>
                   </template>
                 </gl-sprintf>
               </template>

@@ -5,7 +5,7 @@ RSpec.shared_context 'project navbar structure' do
     {
       nav_item: _('Analytics'),
       nav_sub_items: [
-        _('CI / CD'),
+        _('CI/CD'),
         (_('Code Review') if Gitlab.ee?),
         (_('Merge Request') if Gitlab.ee?),
         _('Repository'),
@@ -59,11 +59,11 @@ RSpec.shared_context 'project navbar structure' do
         ]
       },
       {
-        nav_item: _('Merge Requests'),
+        nav_item: _('Merge requests'),
         nav_sub_items: []
       },
       {
-        nav_item: _('CI / CD'),
+        nav_item: _('CI/CD'),
         nav_sub_items: [
           _('Pipelines'),
           s_('Pipelines|Editor'),
@@ -111,7 +111,7 @@ RSpec.shared_context 'project navbar structure' do
           _('Webhooks'),
           _('Access Tokens'),
           _('Repository'),
-          _('CI / CD'),
+          _('CI/CD'),
           _('Operations')
         ].compact
       }
@@ -124,7 +124,8 @@ RSpec.shared_context 'group navbar structure' do
     {
       nav_item: _('Analytics'),
       nav_sub_items: [
-        _('Contribution')
+        _('Contribution'),
+        _('DevOps Adoption')
       ]
     }
   end
@@ -137,7 +138,8 @@ RSpec.shared_context 'group navbar structure' do
         _('Integrations'),
         _('Projects'),
         _('Repository'),
-        _('CI / CD'),
+        _('CI/CD'),
+        _('Applications'),
         _('Packages & Registries'),
         _('Webhooks')
       ]
@@ -188,7 +190,7 @@ RSpec.shared_context 'group navbar structure' do
         ]
       },
       {
-        nav_item: _('Merge Requests'),
+        nav_item: _('Merge requests'),
         nav_sub_items: []
       },
       security_and_compliance_nav_item,

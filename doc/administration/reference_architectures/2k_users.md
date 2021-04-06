@@ -956,20 +956,10 @@ possible. However, if you intend to use GitLab Pages,
 See how to [configure NFS](../nfs.md).
 
 WARNING:
-From GitLab 13.0, using NFS for Git repositories is deprecated.
-From GitLab 14.0, technical support for NFS for Git repositories
-will no longer be provided. Upgrade to [Gitaly Cluster](../gitaly/praefect.md)
-as soon as possible.
-
-<div align="right">
-  <a type="button" class="btn btn-default" href="#setup-components">
-    Back to setup components <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-  </a>
-</div>
-
-## Troubleshooting
-
-See the [troubleshooting documentation](troubleshooting.md).
+From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories will no longer be
+considered and customer technical support will be considered out of scope.
+[Read more about Gitaly and NFS](../gitaly/index.md#nfs-deprecation-notice) and
+[the correct mount options to use](../nfs.md#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

@@ -142,9 +142,52 @@ RSpec.describe Ci::Build do
 
       context 'when there is a plan for the group' do
         it 'GITLAB_FEATURES should include the features for that plan' do
-          is_expected.to include({ key: 'GITLAB_FEATURES', value: anything, public: true, masked: false })
+          expect(subject.to_runner_variables).to include({ key: 'GITLAB_FEATURES', value: anything, public: true, masked: false })
           features_variable = subject.find { |v| v[:key] == 'GITLAB_FEATURES' }
           expect(features_variable[:value]).to include('multiple_ldap_servers')
+        end
+      end
+
+      context 'when there is a dast_profile associated with the pipeline' do
+        let_it_be(:project) { create(:project, :repository) }
+        let_it_be(:dast_profile) { create(:dast_profile, project: project) }
+        let_it_be(:dast_site_profile_secret_variable) { create(:dast_site_profile_secret_variable, key: 'DAST_PASSWORD_BASE64', dast_site_profile: dast_profile.dast_site_profile) }
+
+        let(:pipeline) { create(:ci_pipeline, pipeline_params.merge!(project: project, dast_profile: dast_profile) ) }
+
+        let(:key) { dast_site_profile_secret_variable.key }
+        let(:value) { dast_site_profile_secret_variable.value }
+
+        shared_examples 'a pipeline with no dast on-demand variables' do
+          it 'does not include variables associated with the profile' do
+            keys = subject.to_runner_variables.map { |var| var[:key] }
+
+            expect(keys).not_to include(key)
+          end
+        end
+
+        it_behaves_like 'a pipeline with no dast on-demand variables' do
+          let(:pipeline_params) { { config_source: :parameter_source } }
+        end
+
+        it_behaves_like 'a pipeline with no dast on-demand variables' do
+          let(:pipeline_params) { { source: :ondemand_dast_scan } }
+        end
+
+        context 'when the dast on-demand pipeline is correctly configured' do
+          let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+
+          it 'includes variables associated with the profile' do
+            expect(subject.to_runner_variables).to include(key: key, value: value, public: false, masked: true)
+          end
+        end
+
+        it_behaves_like 'a pipeline with no dast on-demand variables' do
+          let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+
+          before do
+            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
+          end
         end
       end
     end
@@ -330,6 +373,7 @@ RSpec.describe Ci::Build do
 
       before do
         stub_licensed_features(dependency_scanning: true)
+        stub_feature_flags(standalone_vuln_dependency_list: false)
       end
 
       subject { job.collect_dependency_list_reports!(dependency_list_report) }

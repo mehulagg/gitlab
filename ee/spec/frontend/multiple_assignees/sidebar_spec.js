@@ -1,6 +1,4 @@
 describe('Sidebar', () => {
-  preloadFixtures('issues/open-issue.html');
-
   beforeEach(() => loadFixtures('issues/open-issue.html'));
 
   it('does not have a max select', () => {

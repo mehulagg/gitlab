@@ -3,7 +3,7 @@
 module Clusters
   module AgentTokens
     class CreateService < ::BaseContainerService
-      ALLOWED_PARAMS = %i[agent_id description].freeze
+      ALLOWED_PARAMS = %i[agent_id description name].freeze
 
       def execute
         return error_feature_not_available unless container.feature_available?(:cluster_agents)

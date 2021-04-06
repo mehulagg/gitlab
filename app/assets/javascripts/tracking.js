@@ -1,4 +1,6 @@
-import { omitBy, isUndefined, get } from 'lodash';
+import { omitBy, isUndefined } from 'lodash';
+import { TRACKING_CONTEXT_SCHEMA } from '~/experimentation/constants';
+import { getExperimentData } from '~/experimentation/utils';
 
 const standardContext = { ...window.gl?.snowplowStandardContext };
 
@@ -26,14 +28,14 @@ const DEFAULT_SNOWPLOW_OPTIONS = {
 };
 
 const createEventPayload = (el, { suffix = '' } = {}) => {
-  const action = el.dataset.trackEvent + (suffix || '');
+  const action = (el.dataset.trackAction || el.dataset.trackEvent) + (suffix || '');
   let value = el.dataset.trackValue || el.value || undefined;
   if (el.type === 'checkbox' && !el.checked) value = false;
 
   let context = el.dataset.trackContext;
   if (el.dataset.trackExperiment) {
-    const data = get(window, ['gon', 'global', 'experiment', el.dataset.trackExperiment]);
-    if (data) context = { schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/1-0-0', data };
+    const data = getExperimentData(el.dataset.trackExperiment);
+    if (data) context = { schema: TRACKING_CONTEXT_SCHEMA, data };
   }
 
   const data = {
@@ -50,7 +52,7 @@ const createEventPayload = (el, { suffix = '' } = {}) => {
 };
 
 const eventHandler = (e, func, opts = {}) => {
-  const el = e.target.closest('[data-track-event]');
+  const el = e.target.closest('[data-track-event], [data-track-action]');
 
   if (!el) return;
 
@@ -128,7 +130,9 @@ export default class Tracking {
   static trackLoadEvents(category = document.body.dataset.page, parent = document) {
     if (!this.enabled()) return [];
 
-    const loadEvents = parent.querySelectorAll('[data-track-event="render"]');
+    const loadEvents = parent.querySelectorAll(
+      '[data-track-action="render"], [data-track-event="render"]',
+    );
 
     loadEvents.forEach((element) => {
       const { action, data } = createEventPayload(element);

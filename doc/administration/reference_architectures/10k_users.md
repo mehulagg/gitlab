@@ -26,7 +26,7 @@ full list of reference architectures, see
 | Redis - Queues / Shared State              | 3           | 4 vCPU, 15 GB memory    | n1-standard-4   | `m5.xlarge`   | D4s v3   |
 | Redis Sentinel - Cache                     | 3           | 1 vCPU, 1.7 GB memory   | g1-small        | `t3.small`    | B1MS     |
 | Redis Sentinel - Queues / Shared State     | 3           | 1 vCPU, 1.7 GB memory   | g1-small        | `t3.small`    | B1MS     |
-| Gitaly Cluster                             | 3           | 16 vCPU, 60 GB memory   | n1-standard-16  | `m5.4xlarge`  | D16s v3  |
+| Gitaly                                     | 3           | 16 vCPU, 60 GB memory   | n1-standard-16  | `m5.4xlarge`  | D16s v3  |
 | Praefect                                   | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | `c5.large`    | F2s v2   |
 | Praefect PostgreSQL                        | 1+*         | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | `c5.large`    | F2s v2   |
 | Sidekiq                                    | 4           | 4 vCPU, 15 GB memory    | n1-standard-4   | `m5.xlarge`   | D4s v3   |
@@ -206,7 +206,7 @@ The following list includes descriptions of each server and its assigned IP:
 - `10.6.0.111`: GitLab application 1
 - `10.6.0.112`: GitLab application 2
 - `10.6.0.113`: GitLab application 3
-- `10.6.0.121`: Prometheus
+- `10.6.0.151`: Prometheus
 
 ## Configure the external load balancer
 
@@ -1927,7 +1927,7 @@ To configure the Sidekiq nodes, on each one:
    node_exporter['listen_address'] = '0.0.0.0:9100'
 
    # Rails Status for prometheus
-   gitlab_rails['monitoring_whitelist'] = ['10.6.0.121/32', '127.0.0.0/8']
+   gitlab_rails['monitoring_whitelist'] = ['10.6.0.151/32', '127.0.0.0/8']
 
    #############################
    ###     Object storage    ###
@@ -2055,8 +2055,8 @@ On each node perform the following:
 
    # Add the monitoring node's IP address to the monitoring whitelist and allow it to
    # scrape the NGINX metrics
-   gitlab_rails['monitoring_whitelist'] = ['10.6.0.121/32', '127.0.0.0/8']
-   nginx['status']['options']['allow'] = ['10.6.0.121/32', '127.0.0.0/8']
+   gitlab_rails['monitoring_whitelist'] = ['10.6.0.151/32', '127.0.0.0/8']
+   nginx['status']['options']['allow'] = ['10.6.0.151/32', '127.0.0.0/8']
 
    #############################
    ###     Object storage    ###
@@ -2192,7 +2192,7 @@ running [Prometheus](../monitoring/prometheus/index.md) and
 
 The following IP will be used as an example:
 
-- `10.6.0.121`: Prometheus
+- `10.6.0.151`: Prometheus
 
 To configure the Monitoring node:
 
@@ -2313,7 +2313,7 @@ in the future.
   </a>
 </div>
 
-## Configure Advanced Search **(PREMIUM SELF)**
+## Configure Advanced Search
 
 You can leverage Elasticsearch and [enable Advanced Search](../../integration/elasticsearch.md)
 for faster, more advanced code search across your entire GitLab instance.
@@ -2338,20 +2338,10 @@ to use GitLab Pages, this currently [requires NFS](troubleshooting.md#gitlab-pag
 See how to [configure NFS](../nfs.md).
 
 WARNING:
-From GitLab 13.0, using NFS for Git repositories is deprecated.
-From GitLab 14.0, technical support for NFS for Git repositories
-will no longer be provided. Upgrade to [Gitaly Cluster](../gitaly/praefect.md)
-as soon as possible.
-
-<div align="right">
-  <a type="button" class="btn btn-default" href="#setup-components">
-    Back to setup components <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-  </a>
-</div>
-
-## Troubleshooting
-
-See the [troubleshooting documentation](troubleshooting.md).
+From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories will no longer be
+considered and customer technical support will be considered out of scope.
+[Read more about Gitaly and NFS](../gitaly/index.md#nfs-deprecation-notice) and
+[the correct mount options to use](../nfs.md#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
@@ -2411,3 +2401,9 @@ Webservice pods. Expand available resources using the ratio of 1 vCPU to 1.25 GB
 _per each worker process_ for each additional Webservice pod.
 
 For further information on resource usage, see the [Webservice resources](https://docs.gitlab.com/charts/charts/gitlab/webservice/#resources).
+
+<div align="right">
+  <a type="button" class="btn btn-default" href="#setup-components">
+    Back to setup components <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+  </a>
+</div>

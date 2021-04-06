@@ -53,6 +53,21 @@ RSpec.describe Analytics::CycleAnalytics::ValueStreams::UpdateService do
         expect(last_stage.reload.name).to eq('updated')
       end
 
+      context 'relative positioning' do
+        before do
+          params[:stages].reverse!
+        end
+
+        it 'calculates and sets relative_position for the stages based on the incoming stages array' do
+          incoming_stage_names = params[:stages].map { |stage| stage[:name] }
+
+          value_stream = subject.payload[:value_stream]
+          persisted_stages_sorted_by_relative_position = value_stream.stages.sort_by(&:relative_position).map(&:name)
+
+          expect(persisted_stages_sorted_by_relative_position).to eq(incoming_stage_names)
+        end
+      end
+
       context 'when the params are invalid' do
         before do
           params[:stages].last[:name] = ''

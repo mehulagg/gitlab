@@ -15,6 +15,11 @@ export default {
       required: false,
       default: false,
     },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -109,6 +114,7 @@ export default {
     :name="filter.name"
     :selected-options="selectedOptionsOrAll"
     :show-search-box="showSearchBox"
+    :loading="loading"
   >
     <filter-item
       v-if="filter.allOption && !searchTerm.length"

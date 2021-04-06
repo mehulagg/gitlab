@@ -29,18 +29,6 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(subject.mirror_max_capacity + 1).for(:mirror_capacity_threshold) }
     it { is_expected.to allow_value(nil).for(:custom_project_templates_group_id) }
 
-    it { is_expected.to allow_value(10).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(nil).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(0).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(-1).for(:elasticsearch_shards) }
-
-    it { is_expected.to allow_value(10).for(:elasticsearch_replicas) }
-    it { is_expected.to allow_value(0).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(nil).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(-1).for(:elasticsearch_replicas) }
-
     it { is_expected.to allow_value(10).for(:elasticsearch_indexed_file_size_limit_kb) }
     it { is_expected.not_to allow_value(0).for(:elasticsearch_indexed_file_size_limit_kb) }
     it { is_expected.not_to allow_value(nil).for(:elasticsearch_indexed_file_size_limit_kb) }
@@ -368,24 +356,31 @@ RSpec.describe ApplicationSetting do
       end
 
       context 'namespaces' do
-        let(:namespaces) { create_list(:namespace, 2) }
-        let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: namespaces.last }
+        context 'with personal namespaces' do
+          let(:namespaces) { create_list(:namespace, 2) }
+          let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: namespaces.last }
 
-        it 'tells you if a namespace is allowed to be indexed' do
-          expect(setting.elasticsearch_indexes_namespace?(namespaces.last)).to be_truthy
-          expect(setting.elasticsearch_indexes_namespace?(namespaces.first)).to be_falsey
+          it 'tells you if a namespace is allowed to be indexed' do
+            expect(setting.elasticsearch_indexes_namespace?(namespaces.last)).to be_truthy
+            expect(setting.elasticsearch_indexes_namespace?(namespaces.first)).to be_falsey
+          end
         end
 
-        it 'returns namespaces that are allowed to be indexed' do
-          child_namespace = create(:namespace, parent: namespaces.first)
-          create :elasticsearch_indexed_namespace, namespace: child_namespace
+        context 'with groups' do
+          let(:groups) { create_list(:group, 2) }
+          let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: groups.last }
 
-          child_namespace_indexed_through_parent = create(:namespace, parent: namespaces.last)
+          it 'returns groups that are allowed to be indexed' do
+            child_group = create(:group, parent: groups.first)
+            create :elasticsearch_indexed_namespace, namespace: child_group
 
-          expect(setting.elasticsearch_limited_namespaces).to match_array(
-            [namespaces.last, child_namespace, child_namespace_indexed_through_parent])
-          expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
-            [namespaces.last, child_namespace])
+            child_group_indexed_through_parent = create(:group, parent: groups.last)
+
+            expect(setting.elasticsearch_limited_namespaces).to match_array(
+              [groups.last, child_group, child_group_indexed_through_parent])
+            expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
+              [groups.last, child_group])
+          end
         end
 
         describe '#elasticsearch_indexes_project?' do

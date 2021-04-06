@@ -314,7 +314,7 @@ Some features are not implemented yet. For example, support for environments.
 You can trigger a pipeline in your project whenever a pipeline finishes for a new
 tag in a different project:
 
-1. Go to the project's **Settings > CI / CD** page, and expand the **Pipeline subscriptions** section.
+1. Go to the project's **Settings > CI/CD** page, and expand the **Pipeline subscriptions** section.
 1. Enter the project you want to subscribe to, in the format `<namespace>/<project>`.
    For example, if the project is `https://gitlab.com/gitlab-org/gitlab`, use `gitlab-org/gitlab`.
 1. Click subscribe.
@@ -324,8 +324,9 @@ now trigger a pipeline on the current project's default branch. The maximum
 number of upstream pipeline subscriptions is 2 by default, for both the upstream and
 downstream projects. This [application limit](../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) can be changed on self-managed instances by a GitLab administrator.
 
-The upstream project needs to be [public](../public_access/public_access.md) for
-pipeline subscription to work.
+The upstream project needs to be [public](../public_access/public_access.md)
+and the user must have [developer permissions](../user/permissions.md#project-members-permissions)
+for the upstream project.
 
 ## Downstream private projects confidentiality concern
 

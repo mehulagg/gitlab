@@ -37,7 +37,7 @@ describe('metrics reports mutations', () => {
       };
       mutations[types.RECEIVE_METRICS_SUCCESS](mockState, data);
 
-      expect(mockState.existingMetrics).toEqual(data.existing_metrics);
+      expect(mockState.unchangedMetrics).toEqual(data.existing_metrics);
       expect(mockState.numberOfChanges).toEqual(0);
       expect(mockState.isLoading).toEqual(false);
     });
@@ -70,37 +70,9 @@ describe('metrics reports mutations', () => {
       };
       mutations[types.RECEIVE_METRICS_SUCCESS](mockState, data);
 
-      expect(mockState.existingMetrics).toEqual(data.existing_metrics);
+      expect(mockState.changedMetrics).toEqual(data.existing_metrics);
       expect(mockState.numberOfChanges).toEqual(1);
       expect(mockState.isLoading).toEqual(false);
-    });
-
-    it('should put changed metrics before unchanged metrics', () => {
-      const unchangedMetrics = [
-        {
-          name: 'an unchanged metric',
-          value: 'one',
-        },
-        {
-          name: 'another unchanged metric metric',
-          value: 'four',
-        },
-      ];
-      const changedMetric = {
-        name: 'changed metric',
-        value: 'two',
-        previous_value: 'three',
-      };
-      const data = {
-        existing_metrics: [unchangedMetrics[0], changedMetric, unchangedMetrics[1]],
-      };
-      mutations[types.RECEIVE_METRICS_SUCCESS](mockState, data);
-
-      expect(mockState.existingMetrics).toEqual([
-        changedMetric,
-        unchangedMetrics[0],
-        unchangedMetrics[1],
-      ]);
     });
   });
 

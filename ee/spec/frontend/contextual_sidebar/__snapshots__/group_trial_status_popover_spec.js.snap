@@ -7,11 +7,10 @@ exports[`TrialStatusPopover component matches the snapshot 1`] = `
   delay="[object Object]"
   placement="rightbottom"
   target="target-element-identifier"
-  triggers="hover focus"
 >
    
   <gl-sprintf-stub
-    message="Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you are enjoying GitLab %{planName}. To continue using GitLab %{planName} after your trial ends, you will need to buy a subscription. You can also choose GitLab Premium if its features are sufficient for your needs."
+    message="Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the features of GitLab %{planName}. To keep those features after your trial ends, you’ll need to buy a subscription. (You can also choose GitLab Premium if it meets your needs.)"
   />
    
   <div
@@ -22,6 +21,10 @@ exports[`TrialStatusPopover component matches the snapshot 1`] = `
       buttontextclasses=""
       category="primary"
       class="gl-mb-0"
+      data-testid="upgradeBtn"
+      data-track-event="click_button"
+      data-track-label="upgrade_to_ultimate"
+      data-track-property="experiment:show_trial_status_in_sidebar"
       href="transactions/new"
       icon=""
       size="small"
@@ -41,6 +44,10 @@ exports[`TrialStatusPopover component matches the snapshot 1`] = `
       buttontextclasses=""
       category="secondary"
       class="gl-mb-0"
+      data-testid="compareBtn"
+      data-track-event="click_button"
+      data-track-label="compare_all_plans"
+      data-track-property="experiment:show_trial_status_in_sidebar"
       href="billing/path-for/group"
       icon=""
       size="small"

@@ -1,6 +1,5 @@
 <script>
 import { GlIcon, GlButton } from '@gitlab/ui';
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 import Popover from '~/vue_shared/components/help_popover.vue';
 
@@ -11,7 +10,11 @@ export default {
     GlIcon,
     Popover,
   },
-  inject: ['billableSeatsHref', 'isGroup'],
+  inject: {
+    billableSeatsHref: {
+      default: '',
+    },
+  },
   props: {
     header: {
       type: Object,
@@ -26,21 +29,18 @@ export default {
       required: false,
       default: false,
     },
+    isFreePlan: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
-    ...mapState(['hasBillableGroupMembers']),
-    ...mapGetters(['isFreePlan']),
     rowClasses() {
       return !this.last ? 'gl-border-b-gray-100 gl-border-b-1 gl-border-b-solid' : null;
     },
   },
-  created() {
-    if (this.isGroup) {
-      this.fetchHasBillableGroupMembers();
-    }
-  },
   methods: {
-    ...mapActions(['fetchHasBillableGroupMembers']),
     getPopoverOptions(col) {
       const defaults = {
         placement: 'bottom',
@@ -63,7 +63,7 @@ export default {
       return typeof col.value !== 'undefined' && col.value !== null ? col.value : ' - ';
     },
     isSeatsUsageButtonShown(col) {
-      return this.hasBillableGroupMembers && this.billableSeatsHref && col.id === 'seatsInUse';
+      return this.billableSeatsHref && col.id === 'seatsInUse';
     },
   },
 };

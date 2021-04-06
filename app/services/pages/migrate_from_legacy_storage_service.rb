@@ -2,11 +2,12 @@
 
 module Pages
   class MigrateFromLegacyStorageService
-    def initialize(logger, migration_threads:, batch_size:, ignore_invalid_entries:)
+    def initialize(logger, migration_threads:, batch_size:, ignore_invalid_entries:, mark_projects_as_not_deployed:)
       @logger = logger
       @migration_threads = migration_threads
       @batch_size = batch_size
       @ignore_invalid_entries = ignore_invalid_entries
+      @mark_projects_as_not_deployed = mark_projects_as_not_deployed
 
       @migrated = 0
       @errored = 0
@@ -60,11 +61,13 @@ module Pages
     def migrate_project(project)
       result = nil
       time = Benchmark.realtime do
-        result = ::Pages::MigrateLegacyStorageToDeploymentService.new(project, ignore_invalid_entries: @ignore_invalid_entries).execute
+        result = ::Pages::MigrateLegacyStorageToDeploymentService.new(project,
+                                                                      ignore_invalid_entries: @ignore_invalid_entries,
+                                                                      mark_projects_as_not_deployed: @mark_projects_as_not_deployed).execute
       end
 
       if result[:status] == :success
-        @logger.info("project_id: #{project.id} #{project.pages_path} has been migrated in #{time.round(2)} seconds")
+        @logger.info("project_id: #{project.id} #{project.pages_path} has been migrated in #{time.round(2)} seconds: #{result[:message]}")
         @counters_lock.synchronize { @migrated += 1 }
       else
         @logger.error("project_id: #{project.id} #{project.pages_path} failed to be migrated in #{time.round(2)} seconds: #{result[:message]}")

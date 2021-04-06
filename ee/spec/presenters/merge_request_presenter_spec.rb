@@ -156,4 +156,28 @@ RSpec.describe MergeRequestPresenter do
       end
     end
   end
+
+  describe '#issue_keys' do
+    let(:presenter) { described_class.new(merge_request, current_user: user) }
+
+    subject { presenter.issue_keys }
+
+    context 'when Jira issue is provided in MR title / description' do
+      let(:issue_key) { 'SIGNUP-1234' }
+
+      before do
+        merge_request.update!(title: "Fixes sign up issue #{issue_key}", description: "Related to #{issue_key}")
+      end
+
+      it { is_expected.to contain_exactly(issue_key) }
+    end
+
+    context 'when Jira issue is NOT provided in MR title / description' do
+      before do
+        merge_request.update!(title: "Fixes sign up issue", description: "Prevent spam sign ups by adding a rate limiter")
+      end
+
+      it { is_expected.to be_empty }
+    end
+  end
 end

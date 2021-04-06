@@ -19,7 +19,7 @@ export default {
       type: String,
       required: true,
     },
-    isCiConfigDataLoading: {
+    isNewCiConfigFile: {
       type: Boolean,
       required: true,
     },
@@ -46,12 +46,11 @@ export default {
   <div>
     <pipeline-editor-header
       :ci-config-data="ciConfigData"
-      :is-ci-config-data-loading="isCiConfigDataLoading"
+      :is-new-ci-config-file="isNewCiConfigFile"
     />
     <pipeline-editor-tabs
       :ci-config-data="ciConfigData"
       :ci-file-content="ciFileContent"
-      :is-ci-config-data-loading="isCiConfigDataLoading"
       v-on="$listeners"
       @set-current-tab="setCurrentTab"
     />

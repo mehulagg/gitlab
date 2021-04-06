@@ -7,6 +7,8 @@ module EE
     include ::Gitlab::Utils::StrongMemoize
 
     prepended do
+      has_many :dora_daily_metrics, class_name: 'Dora::DailyMetrics'
+
       # Returns environments where its latest deployment is to a cluster
       scope :deployed_to_cluster, -> (cluster) do
         environments = model.arel_table

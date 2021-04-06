@@ -73,7 +73,7 @@ describe('Grouped metrics reports app', () => {
     describe('when user expands to view metrics', () => {
       beforeEach(() => {
         mockStore.state.numberOfChanges = 0;
-        mockStore.state.existingMetrics = [
+        mockStore.state.unchangedMetrics = [
           {
             name: 'name',
             value: 'value',
@@ -110,7 +110,7 @@ describe('Grouped metrics reports app', () => {
     describe('with no changes', () => {
       beforeEach(() => {
         mockStore.state.numberOfChanges = 0;
-        mockStore.state.existingMetrics = [
+        mockStore.state.unchangedMetrics = [
           {
             name: 'name',
             value: 'value',
@@ -129,7 +129,7 @@ describe('Grouped metrics reports app', () => {
     describe('with one change', () => {
       beforeEach(() => {
         mockStore.state.numberOfChanges = 1;
-        mockStore.state.existingMetrics = [
+        mockStore.state.changedMetrics = [
           {
             name: 'name',
             value: 'value',
@@ -149,7 +149,7 @@ describe('Grouped metrics reports app', () => {
     describe('with multiple changes', () => {
       beforeEach(() => {
         mockStore.state.numberOfChanges = 2;
-        mockStore.state.existingMetrics = [
+        mockStore.state.changedMetrics = [
           {
             name: 'name',
             value: 'value',
@@ -212,7 +212,7 @@ describe('Grouped metrics reports app', () => {
     describe('when has metrics', () => {
       beforeEach(() => {
         mockStore.state.numberOfChanges = 1;
-        mockStore.state.existingMetrics = [
+        mockStore.state.changedMetrics = [
           {
             name: 'name',
             value: 'value',

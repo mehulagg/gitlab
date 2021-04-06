@@ -2,7 +2,7 @@
 import { GlFormCheckbox, GlModal } from '@gitlab/ui';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import csrf from '~/lib/utils/csrf';
-import { __ } from '~/locale';
+import { s__, __ } from '~/locale';
 
 export default {
   actionCancel: {
@@ -22,8 +22,20 @@ export default {
     isAccessRequest() {
       return parseBoolean(this.modalData.isAccessRequest);
     },
+    isInvite() {
+      return parseBoolean(this.modalData.isInvite);
+    },
+    isGroupMember() {
+      return this.modalData.memberType === 'GroupMember';
+    },
     actionText() {
-      return this.isAccessRequest ? __('Deny access request') : __('Remove member');
+      if (this.isAccessRequest) {
+        return __('Deny access request');
+      } else if (this.isInvite) {
+        return s__('Member|Revoke invite');
+      }
+
+      return __('Remove member');
     },
     actionPrimary() {
       return {
@@ -32,6 +44,9 @@ export default {
           variant: 'danger',
         },
       };
+    },
+    showUnassignIssuablesCheckbox() {
+      return !this.isAccessRequest && !this.isInvite;
     },
   },
   mounted() {
@@ -70,7 +85,10 @@ export default {
 
       <input ref="method" type="hidden" name="_method" value="delete" />
       <input :value="$options.csrf.token" type="hidden" name="authenticity_token" />
-      <gl-form-checkbox v-if="!isAccessRequest" name="unassign_issuables">
+      <gl-form-checkbox v-if="isGroupMember" name="remove_sub_memberships">
+        {{ __('Also remove direct user membership from subgroups and projects') }}
+      </gl-form-checkbox>
+      <gl-form-checkbox v-if="showUnassignIssuablesCheckbox" name="unassign_issuables">
         {{ __('Also unassign this user from related issues and merge requests') }}
       </gl-form-checkbox>
     </form>

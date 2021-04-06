@@ -7,6 +7,7 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll, :clean_
   let_it_be(:end_date) { Date.current }
   let_it_be(:recorded_at) { Time.current }
   let_it_be(:time_period) { { created_at: (start_date..end_date) } }
+
   let(:metric_1) { 'metric_1' }
   let(:metric_2) { 'metric_2' }
   let(:metric_names) { [metric_1, metric_2] }
@@ -69,7 +70,7 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll, :clean_
 
       it 'persists serialized data in Redis' do
         Gitlab::Redis::SharedState.with do |redis|
-          expect(redis).to receive(:set).with("#{metric_1}_weekly-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
+          expect(redis).to receive(:set).with("#{metric_1}_7d-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
         end
 
         save_aggregated_metrics
@@ -81,7 +82,7 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll, :clean_
 
         it 'persists serialized data in Redis' do
           Gitlab::Redis::SharedState.with do |redis|
-            expect(redis).to receive(:set).with("#{metric_1}_monthly-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
+            expect(redis).to receive(:set).with("#{metric_1}_28d-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
           end
 
           save_aggregated_metrics
@@ -93,7 +94,7 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll, :clean_
 
         it 'persists serialized data in Redis' do
           Gitlab::Redis::SharedState.with do |redis|
-            expect(redis).to receive(:set).with("#{metric_1}_all_time-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
+            expect(redis).to receive(:set).with("#{metric_1}_all-#{recorded_at.to_i}", '{"141":1,"56":1}', ex: 120.hours)
           end
 
           save_aggregated_metrics

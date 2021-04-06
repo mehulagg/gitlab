@@ -35,7 +35,7 @@ describe('Value Stream Analytics mutations', () => {
     ${types.REQUEST_STAGE_DATA}                  | ${'isLoadingStage'}          | ${true}
     ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isEmptyStage'}            | ${true}
     ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isLoadingStage'}          | ${false}
-    ${types.REQUEST_CYCLE_ANALYTICS_DATA}        | ${'isLoading'}               | ${true}
+    ${types.REQUEST_VALUE_STREAM_DATA}           | ${'isLoading'}               | ${true}
     ${types.RECEIVE_GROUP_STAGES_ERROR}          | ${'stages'}                  | ${[]}
     ${types.REQUEST_GROUP_STAGES}                | ${'stages'}                  | ${[]}
     ${types.REQUEST_UPDATE_STAGE}                | ${'isLoading'}               | ${true}
@@ -58,7 +58,7 @@ describe('Value Stream Analytics mutations', () => {
     ${types.REQUEST_DELETE_VALUE_STREAM}         | ${'deleteValueStreamError'}  | ${null}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'deleteValueStreamError'}  | ${null}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'selectedValueStream'}     | ${null}
-    ${types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS}  | ${'isLoading'}               | ${false}
+    ${types.INITIALIZE_VALUE_STREAM_SUCCESS}     | ${'isLoading'}               | ${false}
   `('$mutation will set $stateKey=$value', ({ mutation, stateKey, value }) => {
     mutations[mutation](state);
 
@@ -131,9 +131,9 @@ describe('Value Stream Analytics mutations', () => {
     );
   });
 
-  describe(`${types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS}`, () => {
+  describe(`${types.RECEIVE_VALUE_STREAM_DATA_SUCCESS}`, () => {
     it('will set isLoading=false and errorCode=null', () => {
-      mutations[types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state, {
+      mutations[types.RECEIVE_VALUE_STREAM_DATA_SUCCESS](state, {
         stats: [],
         stages: [],
       });
@@ -157,11 +157,11 @@ describe('Value Stream Analytics mutations', () => {
     });
   });
 
-  describe(`${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR}`, () => {
+  describe(`${types.RECEIVE_VALUE_STREAM_DATA_ERROR}`, () => {
     it('sets errorCode correctly', () => {
       const errorCode = 403;
 
-      mutations[types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR](state, errorCode);
+      mutations[types.RECEIVE_VALUE_STREAM_DATA_ERROR](state, errorCode);
 
       expect(state.isLoading).toBe(false);
       expect(state.errorCode).toBe(errorCode);
@@ -184,9 +184,31 @@ describe('Value Stream Analytics mutations', () => {
         2: { value: 10, error: null },
       });
     });
+
+    describe('with hasPathNavigation set to true', () => {
+      beforeEach(() => {
+        state = {
+          featureFlags: { hasPathNavigation: true },
+          medians: {},
+        };
+
+        mutations[types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, [
+          { id: 1, value: 7580 },
+          { id: 2, value: 434340 },
+        ]);
+      });
+
+      it('formats each stage median for display in the path navigation', () => {
+        expect(state.medians).toMatchObject({ 1: '2h', 2: '5d' });
+      });
+
+      it('calculates the overview median', () => {
+        expect(state.medians).toMatchObject({ overview: '5d' });
+      });
+    });
   });
 
-  describe(`${types.INITIALIZE_CYCLE_ANALYTICS}`, () => {
+  describe(`${types.INITIALIZE_VSA}`, () => {
     const initialData = {
       group: { fullPath: 'cool-group' },
       selectedProjects,
@@ -202,7 +224,7 @@ describe('Value Stream Analytics mutations', () => {
       ${'endDate'}          | ${initialData.createdBefore}
     `('$stateKey will be set to $expectedState', ({ stateKey, expectedState }) => {
       state = {};
-      mutations[types.INITIALIZE_CYCLE_ANALYTICS](state, initialData);
+      mutations[types.INITIALIZE_VSA](state, initialData);
 
       expect(state[stateKey]).toEqual(expectedState);
     });

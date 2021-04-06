@@ -8,6 +8,7 @@ module Security
 
     validates :build_id, presence: true
     validates :scan_type, presence: true
+    validates :info, json_schema: { filename: 'security_scan_info', draft: 7 }
 
     belongs_to :build, class_name: 'Ci::Build'
 
@@ -38,6 +39,6 @@ module Security
 
     scope :latest_successful_by_build, -> { joins(:build).where(ci_builds: { status: 'success', retried: [nil, false] }) }
 
-    delegate :project, to: :build
+    delegate :project, :name, to: :build
   end
 end

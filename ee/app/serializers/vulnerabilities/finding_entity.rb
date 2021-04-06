@@ -41,6 +41,7 @@ class Vulnerabilities::FindingEntity < Grape::Entity
     expose(:assets) { |model, _| model.assets }
   end
 
+  expose :details
   expose :state
   expose :scan
 

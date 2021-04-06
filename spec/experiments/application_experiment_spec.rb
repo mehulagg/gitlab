@@ -58,27 +58,31 @@ RSpec.describe ApplicationExperiment, :experiment do
   end
 
   describe "publishing results" do
+    it "doesn't track or push data to the client if we shouldn't track", :snowplow do
+      allow(subject).to receive(:should_track?).and_return(false)
+      expect(Gon).not_to receive(:push)
+
+      subject.publish(:action)
+
+      expect_no_snowplow_event
+    end
+
     it "tracks the assignment" do
       expect(subject).to receive(:track).with(:assignment)
 
-      subject.publish(nil)
+      subject.publish
     end
 
-    it "pushes the experiment knowledge into the client using Gon.global" do
-      expect(Gon.global).to receive(:push).with(
-        {
-          experiment: {
-            'namespaced/stub' => { # string key because it can be namespaced
-              experiment: 'namespaced/stub',
-              key: '86208ac54ca798e11f127e8b23ec396a',
-              variant: 'control'
-            }
-          }
-        },
-        true
-      )
+    it "pushes the experiment knowledge into the client using Gon" do
+      expect(Gon).to receive(:push).with({ experiment: { 'namespaced/stub' => subject.signature } }, true)
 
-      subject.publish(nil)
+      subject.publish
+    end
+
+    it "handles when Gon raises exceptions (like when it can't be pushed into)" do
+      expect(Gon).to receive(:push).and_raise(NoMethodError)
+
+      expect { subject.publish }.not_to raise_error
     end
   end
 
@@ -110,7 +114,7 @@ RSpec.describe ApplicationExperiment, :experiment do
             data: { data: '_data_' }
           },
           {
-            schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/0-3-0',
+            schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/1-0-0',
             data: { experiment: 'namespaced/stub', key: '86208ac54ca798e11f127e8b23ec396a', variant: 'control' }
           }
         ]
@@ -119,77 +123,22 @@ RSpec.describe ApplicationExperiment, :experiment do
   end
 
   describe "variant resolution" do
-    context "when using the default feature flag percentage rollout" do
-      it "uses the default value as specified in the yaml" do
-        expect(Feature).to receive(:enabled?).with('namespaced_stub', subject, type: :experiment, default_enabled: :yaml)
+    it "uses the default value as specified in the yaml" do
+      expect(Feature).to receive(:enabled?).with('namespaced_stub', subject, type: :experiment, default_enabled: :yaml)
 
-        expect(subject.variant.name).to eq('control')
-      end
-
-      it "returns nil when not rolled out" do
-        stub_feature_flags(namespaced_stub: false)
-
-        expect(subject.variant.name).to eq('control')
-      end
-
-      context "when rolled out to 100%" do
-        it "returns the first variant name" do
-          subject.try(:variant1) {}
-          subject.try(:variant2) {}
-
-          expect(subject.variant.name).to eq('variant1')
-        end
-      end
+      expect(subject.variant.name).to eq('control')
     end
 
-    context "when using the round_robin strategy", :clean_gitlab_redis_shared_state do
-      context "when variants aren't supplied" do
-        subject :inheriting_class do
-          Class.new(described_class) do
-            def rollout_strategy
-              :round_robin
-            end
-          end.new('namespaced/stub')
-        end
-
-        it "raises an error" do
-          expect { inheriting_class.variants }.to raise_error(NotImplementedError)
-        end
+    context "when rolled out to 100%" do
+      before do
+        stub_feature_flags(namespaced_stub: true)
       end
 
-      context "when variants are supplied" do
-        let(:inheriting_class) do
-          Class.new(described_class) do
-            def rollout_strategy
-              :round_robin
-            end
+      it "returns the first variant name" do
+        subject.try(:variant1) {}
+        subject.try(:variant2) {}
 
-            def variants
-              %i[variant1 variant2 control]
-            end
-          end
-        end
-
-        it "proves out round robin in variant selection", :aggregate_failures do
-          instance_1 = inheriting_class.new('namespaced/stub')
-          allow(instance_1).to receive(:enabled?).and_return(true)
-          instance_2 = inheriting_class.new('namespaced/stub')
-          allow(instance_2).to receive(:enabled?).and_return(true)
-          instance_3 = inheriting_class.new('namespaced/stub')
-          allow(instance_3).to receive(:enabled?).and_return(true)
-
-          instance_1.try {}
-
-          expect(instance_1.variant.name).to eq('variant2')
-
-          instance_2.try {}
-
-          expect(instance_2.variant.name).to eq('control')
-
-          instance_3.try {}
-
-          expect(instance_3.variant.name).to eq('variant1')
-        end
+        expect(subject.variant.name).to eq('variant1')
       end
     end
   end

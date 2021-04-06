@@ -204,7 +204,7 @@ into your project and edit it as needed.
 
 For clusters not managed by GitLab, you can customize the namespace in
 `.gitlab-ci.yml` by specifying
-[`environment:kubernetes:namespace`](../../ci/environments/index.md#configuring-kubernetes-deployments).
+[`environment:kubernetes:namespace`](../../ci/environments/index.md#configure-kubernetes-deployments).
 For example, the following configuration overrides the namespace used for
 `production` deployments:
 
@@ -651,7 +651,7 @@ permissions on new projects when Auto DevOps is not enabled:
 The banner can be disabled for:
 
 - A user, when they dismiss it themselves.
-- A project, by explicitly [disabling Auto DevOps](index.md#enablingdisabling-auto-devops).
+- A project, by explicitly [disabling Auto DevOps](index.md#enable-or-disable-auto-devops).
 - An entire GitLab instance:
   - By an administrator running the following in a Rails console:
 

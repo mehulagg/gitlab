@@ -27,7 +27,9 @@ module Projects
       # Git data (e.g. a list of branch names).
       flush_caches(project)
 
-      ::Ci::AbortProjectPipelinesService.new.execute(project)
+      if Feature.enabled?(:abort_deleted_project_pipelines, default_enabled: :yaml)
+        ::Ci::AbortPipelinesService.new.execute(project.all_pipelines)
+      end
 
       Projects::UnlinkForkService.new(project, current_user).execute
 
@@ -107,12 +109,7 @@ module Projects
       end
 
       project.leave_pool_repository
-
-      if Gitlab::Ci::Features.project_transactionless_destroy?(project)
-        destroy_project_related_records(project)
-      else
-        Project.transaction { destroy_project_related_records(project) }
-      end
+      destroy_project_related_records(project)
     end
 
     def destroy_project_related_records(project)

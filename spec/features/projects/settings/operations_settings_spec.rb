@@ -24,7 +24,7 @@ RSpec.describe 'Projects > Settings > For a forked project', :js do
   describe 'Settings > Operations' do
     describe 'Incidents' do
       let(:create_issue) { 'Create an incident. Incidents are created for each alert triggered.' }
-      let(:send_email) { 'Send a separate email notification to Developers.' }
+      let(:send_email) { 'Send a single email notification to Owners and Maintainers for new alerts.' }
 
       before do
         create(:project_incident_management_setting, send_email: true, project: project)
@@ -146,7 +146,7 @@ RSpec.describe 'Projects > Settings > For a forked project', :js do
 
           click_button('Connect')
 
-          assert_text('Connection has failed. Re-check Auth Token and try again.')
+          assert_text('Connection failed. Check Auth Token and try again.')
         end
       end
     end
@@ -162,13 +162,13 @@ RSpec.describe 'Projects > Settings > For a forked project', :js do
         end
 
         expect(page).to have_content('Grafana URL')
-        expect(page).to have_content('API Token')
-        expect(page).to have_button('Save Changes')
+        expect(page).to have_content('API token')
+        expect(page).to have_button('Save changes')
 
         fill_in('grafana-url', with: 'http://gitlab-test.grafana.net')
         fill_in('grafana-token', with: 'token')
 
-        click_button('Save Changes')
+        click_button('Save changes')
 
         wait_for_requests
 

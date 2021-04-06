@@ -4,6 +4,12 @@ export const TYPE_USER = 'user';
 export const TYPE_GROUP = 'group';
 export const TYPE_HIDDEN_GROUPS = 'hidden_groups';
 
+export const BRANCH_FETCH_DELAY = 250;
+export const ANY_BRANCH = {
+  id: null,
+  name: __('Any branch'),
+};
+
 export const RULE_TYPE_FALLBACK = 'fallback';
 export const RULE_TYPE_REGULAR = 'regular';
 export const RULE_TYPE_REPORT_APPROVER = 'report_approver';
@@ -39,3 +45,5 @@ export const APPROVAL_RULE_CONFIGS = {
     documentationText: __('Learn more about License-Check'),
   },
 };
+
+export const APPROVALS_HELP_PATH = 'user/project/merge_requests/merge_request_approvals';

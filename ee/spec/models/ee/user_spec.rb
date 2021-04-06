@@ -265,6 +265,14 @@ RSpec.describe User do
     end
   end
 
+  describe '#can_admin_all_resources?' do
+    it 'returns false for auditor user' do
+      user = build(:user, :auditor)
+
+      expect(user.can_admin_all_resources?).to be_falsy
+    end
+  end
+
   describe '#forget_me!' do
     subject { create(:user, remember_created_at: Time.current) }
 
@@ -1001,94 +1009,12 @@ RSpec.describe User do
     end
   end
 
-  describe '#manageable_groups_eligible_for_subscription' do
-    let_it_be(:user) { create(:user) }
-    let_it_be(:licensed_group) { create(:group, gitlab_subscription: create(:gitlab_subscription, :bronze)) }
-    let_it_be(:free_group_z) { create(:group, name: 'AZ', gitlab_subscription: create(:gitlab_subscription, :free)) }
-    let_it_be(:free_group_a) { create(:group, name: 'AA', gitlab_subscription: create(:gitlab_subscription, :free)) }
-    let_it_be(:sub_group) { create(:group, name: 'SubGroup', parent: free_group_a) }
-    let_it_be(:trial_group) { create(:group, name: 'AB', gitlab_subscription: create(:gitlab_subscription, :active_trial, :ultimate)) }
-
-    subject { user.manageable_groups_eligible_for_subscription }
-
-    context 'user with no groups' do
-      it { is_expected.to eq [] }
-    end
-
-    context 'owner of a licensed group' do
-      before do
-        licensed_group.add_owner(user)
-      end
-
-      it { is_expected.not_to include licensed_group }
-    end
-
-    context 'guest of a free group' do
-      before do
-        free_group_a.add_guest(user)
-      end
-
-      it { is_expected.not_to include free_group_a }
-    end
-
-    context 'developer of a free group' do
-      before do
-        free_group_a.add_developer(user)
-      end
-
-      it { is_expected.not_to include free_group_a }
-    end
-
-    context 'maintainer of a free group' do
-      before do
-        free_group_a.add_maintainer(user)
-      end
-
-      it { is_expected.to include free_group_a }
-    end
-
-    context 'owner of 2 free groups' do
-      before do
-        free_group_a.add_owner(user)
-        free_group_z.add_owner(user)
-      end
-
-      it { is_expected.to eq [free_group_a, free_group_z] }
-
-      it { is_expected.not_to include(sub_group) }
-    end
-
-    context 'developer of a trial group' do
-      before do
-        trial_group.add_developer(user)
-      end
-
-      it { is_expected.not_to include(trial_group) }
-    end
-
-    context 'owner of a trial group' do
-      before do
-        trial_group.add_owner(user)
-      end
-
-      it { is_expected.to include(trial_group) }
-    end
-
-    context 'maintainer of a trial group' do
-      before do
-        trial_group.add_maintainer(user)
-      end
-
-      it { is_expected.to include(trial_group) }
-    end
-  end
-
   describe '#manageable_groups_eligible_for_trial' do
     let_it_be(:user) { create :user }
-    let_it_be(:non_trialed_group_z) { create :group, name: 'Zeta', gitlab_subscription: create(:gitlab_subscription, :free) }
-    let_it_be(:non_trialed_group_a) { create :group, name: 'Alpha', gitlab_subscription: create(:gitlab_subscription, :free) }
-    let_it_be(:trialed_group) { create :group, name: 'Omitted', gitlab_subscription: create(:gitlab_subscription, :free, trial: true) }
-    let_it_be(:non_trialed_subgroup) { create :group, name: 'Sub-group', gitlab_subscription: create(:gitlab_subscription, :free), parent: non_trialed_group_a }
+    let_it_be(:non_trialed_group_z) { create :group_with_plan, name: 'Zeta', plan: :free_plan }
+    let_it_be(:non_trialed_group_a) { create :group_with_plan, name: 'Alpha', plan: :free_plan }
+    let_it_be(:trialed_group) { create :group_with_plan, name: 'Omitted', plan: :free_plan, trial_ends_on: Date.today + 1.day }
+    let_it_be(:non_trialed_subgroup) { create :group_with_plan, name: 'Sub-group', plan: :free_plan, parent: non_trialed_group_a }
 
     subject { user.manageable_groups_eligible_for_trial }
 

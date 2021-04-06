@@ -25,6 +25,7 @@ export default {
       :size="18"
       :aria-label="title"
       name="check-circle"
+      use-deprecated-sizes
     />
     <h5 class="gl-mt-0 gl-mb-3">{{ title }}</h5>
   </div>

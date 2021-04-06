@@ -12,6 +12,8 @@ module Boards
 
     enum list_type: { backlog: 0, label: 1, closed: 2 }
 
+    scope :preload_associated_models, -> { preload(:epic_board, label: :priorities) }
+
     alias_method :preferences, :epic_list_user_preferences
 
     def preferences_for(user)

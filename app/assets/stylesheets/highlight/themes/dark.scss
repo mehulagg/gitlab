@@ -38,7 +38,7 @@ $dark-cp: #969896;
 $dark-c1: #969896;
 $dark-cs: #969896;
 $dark-gd: #c66;
-$dark-gh: #c5c8c6;
+$dark-gh: #8abeb7;
 $dark-gi: #b5bd68;
 $dark-gp: #969896;
 $dark-gu: #8abeb7;
@@ -90,6 +90,10 @@ $dark-il: #de935f;
 
 .code.dark {
   // Line numbers
+  .file-line-num {
+    @include line-number-link($dark-line-num-color);
+  }
+  
   .line-numbers,
   .diff-line-num {
     background-color: $dark-main-bg;

@@ -8,7 +8,6 @@
           = cf.label :framework, class: 'gl-font-weight-bold' do
             = _('Compliance framework  (optional)')
           - if frameworks.any?
-            %p.text-secondary= _('Select required regulatory standard.')
             - selected_default_framework = @project.compliance_framework_setting&.compliance_management_framework&.id
             = cf.select :framework, options_for_select(frameworks.map { |fw| [fw.name.truncate(88), fw.id] }, selected_default_framework), { selected: '', prompt: _('Choose your framework'), include_blank: _('None') }, { class: 'form-control', disabled: false }
           - else
@@ -30,7 +29,7 @@
     - else
       = f.fields_for :compliance_framework_setting, ComplianceManagement::ComplianceFramework::ProjectSettings.new do |cf|
         = cf.label :framework, _('Compliance framework (optional)'), class: 'gl-font-weight-bold'
-        %p.text-secondary= _('Select required regulatory standard.')
         - selected_default_framework = @project.compliance_framework_setting&.compliance_management_framework&.default_framework_definition&.identifier
         = cf.select :framework, options_for_select(compliance_framework_options, selected_default_framework), { selected: '', disabled: '', prompt: _('Choose your framework'), include_blank: _('None') }, class: 'form-control'
+        = link_to _("Learn more."), help_page_path('user/project/settings/index', anchor: 'compliance-framework')
 

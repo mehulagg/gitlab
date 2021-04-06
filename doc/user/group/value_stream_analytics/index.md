@@ -59,7 +59,7 @@ To filter results:
 1. Select a parameter to filter by.
 1. Select a value from the autocompleted results, or type to refine the results.
 
-![Value stream analytics filter bar](img/vsa_filter_bar_v13.3.png "Active filter bar for value stream analytics")
+![Value stream analytics filter bar](img/vsa_filter_bar_v13_3.png "Active filter bar for value stream analytics")
 
 ### Date ranges
 
@@ -76,9 +76,7 @@ GitLab provides the ability to filter analytics based on a date range. To filter
 The "Time" metrics near the top of the page are measured as follows:
 
 - **Lead time**: median time from issue created to issue closed.
-- **Cycle time**: median time from first commit to issue closed.
-
-A commit is associated with an issue by [crosslinking](../../project/issues/crosslinking_issues.md) in the commit message or by manually linking the merge request containing the commit.
+- **Cycle time**: median time from first commit to issue closed. (You can associate a commit with an issue by [crosslinking in the commit message](../../project/issues/crosslinking_issues.md#from-commit-messages).)
 
 ![Value stream analytics time metrics](img/vsa_time_metrics_v13_0.png "Time metrics for value stream analytics")
 
@@ -193,17 +191,37 @@ GitLab allows users to create multiple value streams, hide default stages and cr
 
 ### Stage path
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
+> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md). **(FREE SELF)**
 
-Stages are visually depicted as a horizontal process flow. Selecting a stage will update the
-the content below the value stream.
+![Value stream path navigation](img/vsa_path_nav_v13_11.png "Value stream path navigation")
 
-This is disabled by default. If you have a self-managed instance, an
+Stages are visually depicted as a horizontal process flow. Selecting a stage updates the content
+below the value stream.
+
+The stage time is displayed next to the name of each stage, in the following format:
+
+| Symbol | Description |
+|--------|-------------|
+| `m`    | Minutes     |
+| `h`    | Hours       |
+| `d`    | Days        |
+| `w`    | Weeks       |
+| `M`    | Months      |
+
+Hovering over a stage item displays a popover with the following information:
+
+- Start event description for the given stage
+- End event description
+
+Horizontal path navigation is enabled by default. If you have a self-managed instance, an
 administrator can [open a Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md)
-and enable it with the following command:
+and disable it with the following command:
 
 ```ruby
-Feature.enable(:value_stream_analytics_path_navigation)
+Feature.disable(:value_stream_analytics_path_navigation)
 ```
 
 ### Adding a stage
@@ -299,9 +317,58 @@ To create a value stream:
 1. Navigate to your group's **Analytics > Value Stream**.
 1. Click the Value stream dropdown and select **Create new Value Stream**
 1. Fill in a name for the new Value Stream
+   - You can [customize the stages](#creating-a-value-stream-with-stages) as the `value_stream_analytics_extended_form` feature flag is enabled.
 1. Click the **Create Value Stream** button.
 
 ![New value stream](img/new_value_stream_v13_3.png "Creating a new value stream")
+
+#### Creating a value stream with stages
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55572) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md). **(FREE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can create value streams with stages, starting with a default or a blank template. You can
+add stages as desired.
+
+To create a value stream with stages:
+
+1. Navigate to your group's **Analytics > Value Stream**.
+1. Find and select the Value Stream dropdown. Select **Create new Value Stream**.
+1. Select either **Create from default template** or **Create from no template**.
+   - Default stages in the value stream can be hidden or re-ordered
+     ![Default stage actions](img/vsa_default_stage_v13_10.png "Default stage actions")
+   - New stages can be added by clicking the 'Add another stage' button
+   - The name, start and end events for the stage can be selected
+     ![Custom stage actions](img/vsa_custom_stage_v13_10.png "Custom stage actions")
+1. Select the **Create Value Stream** button to save the value stream.
+
+![Extended create value stream form](img/extended_value_stream_form_v13_10.png "Extended create value stream form")
+
+#### Enable or disable value stream with stages
+
+Value streams with stages is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+# For the instance
+Feature.enable(:value_stream_analytics_extended_form)
+```
+
+To disable it:
+
+```ruby
+# For the instance
+Feature.disable(:value_stream_analytics_extended_form)
+```
 
 ### Deleting a value stream
 
@@ -314,7 +381,7 @@ To delete a custom value stream:
 1. Click the **Delete (name of value stream)**.
 1. Click the **Delete** button to confirm.
 
-![Delete value stream](img/delete_value_stream_v13.4.png "Deleting a custom value stream")
+![Delete value stream](img/delete_value_stream_v13_4.png "Deleting a custom value stream")
 
 ## Days to completion chart
 

@@ -16,6 +16,10 @@ FactoryBot.define do
       status { :processing }
     end
 
+    trait :error do
+      status { :error }
+    end
+
     factory :maven_package do
       maven_metadatum
 
@@ -36,8 +40,8 @@ FactoryBot.define do
       package_type { :rubygems }
 
       after :create do |package|
-        create :package_file, :gem, package: package
-        create :package_file, :gemspec, package: package
+        create :package_file, package.processing? ? :unprocessed_gem : :gem, package: package
+        create :package_file, :gemspec, package: package unless package.processing?
       end
 
       trait(:with_metadatum) do
@@ -277,6 +281,10 @@ FactoryBot.define do
   factory :packages_dependency, class: 'Packages::Dependency' do
     sequence(:name) { |n| "@test/package-#{n}"}
     sequence(:version_pattern) { |n| "~6.2.#{n}" }
+
+    trait(:rubygems) do
+      sequence(:name) { |n| "gem-dependency-#{n}"}
+    end
   end
 
   factory :packages_dependency_link, class: 'Packages::DependencyLink' do
@@ -288,6 +296,11 @@ FactoryBot.define do
       after :build do |link|
         link.nuget_metadatum = build(:nuget_dependency_link_metadatum)
       end
+    end
+
+    trait(:rubygems) do
+      package { association(:rubygems_package) }
+      dependency { association(:packages_dependency, :rubygems) }
     end
   end
 

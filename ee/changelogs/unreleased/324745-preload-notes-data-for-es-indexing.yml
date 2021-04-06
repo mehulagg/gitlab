@@ -1,0 +1,5 @@
+---
+title: Improve performance of indexing notes in Elasticsearch
+merge_request: 56808
+author:
+type: performance

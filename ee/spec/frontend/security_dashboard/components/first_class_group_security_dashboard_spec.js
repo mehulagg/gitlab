@@ -14,7 +14,6 @@ describe('First Class Group Dashboard Component', () => {
   const dashboardDocumentation = 'dashboard-documentation';
   const emptyStateSvgPath = 'empty-state-path';
   const groupFullPath = 'group-full-path';
-  const vulnerabilitiesExportEndpoint = '/vulnerabilities/exports';
 
   const findDashboardLayout = () => wrapper.find(SecurityDashboardLayout);
   const findGroupVulnerabilities = () => wrapper.find(FirstClassGroupVulnerabilities);
@@ -29,9 +28,8 @@ describe('First Class Group Dashboard Component', () => {
       propsData: {
         dashboardDocumentation,
         emptyStateSvgPath,
-        groupFullPath,
-        vulnerabilitiesExportEndpoint,
       },
+      provide: { groupFullPath },
       data,
       stubs: {
         SecurityDashboardLayout,
@@ -52,10 +50,6 @@ describe('First Class Group Dashboard Component', () => {
       expect(findLoadingIcon().exists()).toBe(true);
     });
 
-    it('dashboard should have display none because it needs to fetch the projects', () => {
-      expect(findDashboardLayout().attributes('class')).toEqual('gl-display-none');
-    });
-
     it('should not display the dashboard not configured component', () => {
       expect(findEmptyState().exists()).toBe(false);
     });
@@ -70,7 +64,6 @@ describe('First Class Group Dashboard Component', () => {
 
     it('should render correctly', () => {
       expect(findGroupVulnerabilities().props()).toEqual({
-        groupFullPath,
         filters: {},
       });
     });
@@ -94,17 +87,11 @@ describe('First Class Group Dashboard Component', () => {
     });
 
     it('displays the csv export button', () => {
-      expect(findCsvExportButton().props('vulnerabilitiesExportEndpoint')).toBe(
-        vulnerabilitiesExportEndpoint,
-      );
+      expect(findCsvExportButton().exists()).toBe(true);
     });
 
     it('loading button should not be rendered', () => {
       expect(findLoadingIcon().exists()).toBe(false);
-    });
-
-    it('dashboard should no more have display none', () => {
-      expect(findDashboardLayout().attributes('class')).toEqual('');
     });
 
     it('should not display the dashboard not configured component', () => {

@@ -18,12 +18,7 @@ export default {
     VulnerabilitySeverities,
     VulnerabilityChart,
   },
-  props: {
-    groupFullPath: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: ['groupFullPath'],
   apollo: {
     projects: {
       query: vulnerableProjectsQuery,
@@ -65,11 +60,8 @@ export default {
       <dashboard-not-configured />
     </template>
     <template v-else-if="shouldShowCharts" #default>
-      <vulnerability-chart :query="vulnerabilityHistoryQuery" :group-full-path="groupFullPath" />
-      <vulnerability-severities
-        :query="vulnerabilityGradesQuery"
-        :group-full-path="groupFullPath"
-      />
+      <vulnerability-chart :query="vulnerabilityHistoryQuery" />
+      <vulnerability-severities :query="vulnerabilityGradesQuery" />
     </template>
     <template v-else #loading>
       <gl-loading-icon size="lg" class="gl-mt-6" />

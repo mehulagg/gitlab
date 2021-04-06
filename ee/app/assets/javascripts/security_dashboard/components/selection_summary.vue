@@ -3,6 +3,7 @@ import { GlButton, GlAlert } from '@gitlab/ui';
 import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
 import { __, s__, n__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
+import eventHub from '../utils/event_hub';
 import StatusDropdown from './status_dropdown.vue';
 
 export default {
@@ -72,6 +73,7 @@ export default {
       return Promise.all(promises).then(() => {
         if (fulfilledCount > 0) {
           toast(this.$options.i18n.vulnerabilitiesUpdated(fulfilledCount));
+          eventHub.$emit('vulnerabilities-updated', this);
         }
 
         if (rejected.length > 0) {
@@ -95,31 +97,30 @@ export default {
 </script>
 
 <template>
-  <div>
-    <gl-alert v-if="updateErrorText" variant="danger" :dismissible="false" class="gl-mb-3">
+  <div class="card gl-z-index-2!" :class="{ 'with-error': Boolean(updateErrorText) }">
+    <gl-alert v-if="updateErrorText" variant="danger" :dismissible="false">
       {{ updateErrorText }}
     </gl-alert>
-    <div class="card gl-z-index-3!">
-      <form class="card-body gl-display-flex gl-align-items-center" @submit.prevent="handleSubmit">
-        <div
-          class="gl-line-height-0 gl-border-r-solid gl-border-gray-100 gl-pr-6 gl-border-1 gl-h-7 gl-display-flex gl-align-items-center"
+
+    <form class="card-body gl-display-flex gl-align-items-center" @submit.prevent="handleSubmit">
+      <div
+        class="gl-line-height-0 gl-border-r-solid gl-border-gray-100 gl-pr-6 gl-border-1 gl-h-7 gl-display-flex gl-align-items-center"
+      >
+        <span
+          ><b>{{ selectedVulnerabilitiesCount }}</b> {{ $options.i18n.selected }}</span
         >
-          <span
-            ><b>{{ selectedVulnerabilitiesCount }}</b> {{ $options.i18n.selected }}</span
-          >
-        </div>
-        <div class="gl-flex-fill-1 gl-ml-6 gl-mr-4">
-          <status-dropdown @change="handleStatusDropdownChange" />
-        </div>
-        <template v-if="shouldShowActionButtons">
-          <gl-button type="button" class="gl-mr-4" @click="resetSelected">
-            {{ $options.i18n.cancel }}
-          </gl-button>
-          <gl-button type="submit" category="primary" variant="confirm">
-            {{ $options.i18n.changeStatus }}
-          </gl-button>
-        </template>
-      </form>
-    </div>
+      </div>
+      <div class="gl-flex-fill-1 gl-ml-6 gl-mr-4">
+        <status-dropdown @change="handleStatusDropdownChange" />
+      </div>
+      <template v-if="shouldShowActionButtons">
+        <gl-button type="button" class="gl-mr-4" @click="resetSelected">
+          {{ $options.i18n.cancel }}
+        </gl-button>
+        <gl-button type="submit" category="primary" variant="confirm">
+          {{ $options.i18n.changeStatus }}
+        </gl-button>
+      </template>
+    </form>
   </div>
 </template>

@@ -3,8 +3,8 @@
 module Gitlab
   module Mirror
     # Runs scheduler every minute
-    SCHEDULER_CRON = '* * * * *'.freeze
-    PULL_CAPACITY_KEY = 'MIRROR_PULL_CAPACITY'.freeze
+    SCHEDULER_CRON = '* * * * *'
+    PULL_CAPACITY_KEY = 'MIRROR_PULL_CAPACITY'
     JITTER = 1.minute
 
     # TODO: Dynamically determine mirror update interval based on total number

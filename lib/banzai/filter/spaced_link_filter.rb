@@ -42,7 +42,7 @@ module Banzai
       TEXT_QUERY = %Q(descendant-or-self::text()[
         not(#{IGNORE_PARENTS.map { |p| "ancestor::#{p}" }.join(' or ')})
         and contains(., ']\(')
-      ]).freeze
+      ])
 
       def call
         doc.xpath(TEXT_QUERY).each do |node|
@@ -76,7 +76,7 @@ module Banzai
       end
 
       def spaced_link_filter(text)
-        Gitlab::StringRegexMarker.new(CGI.unescapeHTML(text), text.html_safe).mark(LINK_OR_IMAGE_PATTERN) do |link, left:, right:|
+        Gitlab::StringRegexMarker.new(CGI.unescapeHTML(text), text.html_safe).mark(LINK_OR_IMAGE_PATTERN) do |link, left:, right:, mode:|
           spaced_link_match(link).html_safe
         end
       end

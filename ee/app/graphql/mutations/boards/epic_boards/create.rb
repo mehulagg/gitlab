@@ -6,6 +6,7 @@ module Mutations
       class Create < ::Mutations::BaseMutation
         include Mutations::ResolvesGroup
         include Mutations::Boards::CommonMutationArguments
+        prepend Mutations::Boards::ScopedBoardMutation
 
         graphql_name 'EpicBoardCreate'
 
@@ -27,7 +28,7 @@ module Mutations
           service_response = ::Boards::EpicBoards::CreateService.new(group, current_user, args).execute
 
           {
-            epic_board: service_response.payload,
+            epic_board: service_response.success? ? service_response.payload : nil,
             errors: service_response.errors
           }
         end

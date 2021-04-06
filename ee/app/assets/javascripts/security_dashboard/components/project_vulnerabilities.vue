@@ -112,7 +112,6 @@ export default {
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             return produce(fetchMoreResult, (draftData) => {
-              // eslint-disable-next-line no-param-reassign
               draftData.project.vulnerabilities.nodes = [
                 ...previousResult.project.vulnerabilities.nodes,
                 ...draftData.project.vulnerabilities.nodes,

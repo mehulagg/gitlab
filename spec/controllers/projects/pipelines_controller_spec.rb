@@ -7,13 +7,14 @@ RSpec.describe Projects::PipelinesController do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public, :repository) }
+
   let(:feature) { ProjectFeature::ENABLED }
 
   before do
     allow(Sidekiq.logger).to receive(:info)
     stub_not_protect_default_branch
     project.add_developer(user)
-    project.project_feature.update(builds_access_level: feature)
+    project.project_feature.update!(builds_access_level: feature)
 
     sign_in(user)
   end
@@ -628,44 +629,6 @@ RSpec.describe Projects::PipelinesController do
     end
   end
 
-  describe 'GET stages_ajax.json' do
-    let(:pipeline) { create(:ci_pipeline, project: project) }
-
-    context 'when accessing existing stage' do
-      before do
-        create(:ci_build, pipeline: pipeline, stage: 'build')
-
-        get_stage_ajax('build')
-      end
-
-      it 'returns html source for stage dropdown' do
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to render_template('projects/pipelines/_stage')
-        expect(json_response).to include('html')
-      end
-    end
-
-    context 'when accessing unknown stage' do
-      before do
-        get_stage_ajax('test')
-      end
-
-      it 'responds with not found' do
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    def get_stage_ajax(name)
-      get :stage_ajax, params: {
-                         namespace_id: project.namespace,
-                         project_id: project,
-                         id: pipeline.id,
-                         stage: name
-                       },
-                       format: :json
-    end
-  end
-
   describe 'GET status.json' do
     let(:pipeline) { create(:ci_pipeline, project: project) }
     let(:status) { pipeline.detailed_status(double('user')) }
@@ -702,7 +665,7 @@ RSpec.describe Projects::PipelinesController do
 
     before do
       project.add_developer(user)
-      project.project_feature.update(builds_access_level: feature)
+      project.project_feature.update!(builds_access_level: feature)
     end
 
     context 'with a valid .gitlab-ci.yml file' do
@@ -721,7 +684,7 @@ RSpec.describe Projects::PipelinesController do
 
           pipeline = project.ci_pipelines.last
           expected_redirect_path = Gitlab::Routing.url_helpers.project_pipeline_path(project, pipeline)
-          expect(pipeline).to be_pending
+          expect(pipeline).to be_created
           expect(response).to redirect_to(expected_redirect_path)
         end
       end
@@ -777,7 +740,7 @@ RSpec.describe Projects::PipelinesController do
 
     before do
       project.add_developer(user)
-      project.project_feature.update(builds_access_level: feature)
+      project.project_feature.update!(builds_access_level: feature)
     end
 
     context 'with a valid .gitlab-ci.yml file' do

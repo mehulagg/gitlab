@@ -76,19 +76,47 @@ RSpec.describe Repositories::ChangelogService do
       recorder = ActiveRecord::QueryRecorder.new { service.execute }
       changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
 
-      expect(recorder.count).to eq(10)
+      expect(recorder.count).to eq(11)
       expect(changelog).to include('Title 1', 'Title 2')
     end
 
-    it 'uses the target branch when "to" is unspecified' do
-      allow(MergeRequestDiffCommit)
-        .to receive(:oldest_merge_request_id_per_commit)
-        .with(project.id, [commit3.id, commit2.id, commit1.id])
-        .and_return([
-          { sha: sha2, merge_request_id: mr1.id },
-          { sha: sha3, merge_request_id: mr2.id }
-        ])
+    it "ignores a commit when it's both added and reverted in the same range" do
+      create_commit(
+        project,
+        author2,
+        commit_message: "Title 4\n\nThis reverts commit #{sha4}",
+        actions: [{ action: 'create', content: 'bar', file_path: 'd.txt' }]
+      )
 
+      described_class
+        .new(project, creator, version: '1.0.0', from: sha1)
+        .execute
+
+      changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
+
+      expect(changelog).to include('Title 1', 'Title 2')
+      expect(changelog).not_to include('Title 3', 'Title 4')
+    end
+
+    it 'includes a revert commit when it has a trailer' do
+      create_commit(
+        project,
+        author2,
+        commit_message: "Title 4\n\nThis reverts commit #{sha4}\n\nChangelog: added",
+        actions: [{ action: 'create', content: 'bar', file_path: 'd.txt' }]
+      )
+
+      described_class
+        .new(project, creator, version: '1.0.0', from: sha1)
+        .execute
+
+      changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
+
+      expect(changelog).to include('Title 1', 'Title 2', 'Title 4')
+      expect(changelog).not_to include('Title 3')
+    end
+
+    it 'uses the target branch when "to" is unspecified' do
       described_class
         .new(project, creator, version: '1.0.0', from: sha1)
         .execute
@@ -102,13 +130,14 @@ RSpec.describe Repositories::ChangelogService do
   describe '#start_of_commit_range' do
     let(:project) { build_stubbed(:project) }
     let(:user) { build_stubbed(:user) }
+    let(:config) { Gitlab::Changelog::Config.new(project) }
 
     context 'when the "from" argument is specified' do
       it 'returns the value of the argument' do
         service = described_class
           .new(project, user, version: '1.0.0', from: 'foo', to: 'bar')
 
-        expect(service.start_of_commit_range).to eq('foo')
+        expect(service.start_of_commit_range(config)).to eq('foo')
       end
     end
 
@@ -117,12 +146,12 @@ RSpec.describe Repositories::ChangelogService do
         service = described_class
           .new(project, user, version: '1.0.0', to: 'bar')
 
-        finder_spy = instance_spy(Repositories::PreviousTagFinder)
+        finder_spy = instance_spy(Repositories::ChangelogTagFinder)
         tag = double(:tag, target_commit: double(:commit, id: '123'))
 
-        allow(Repositories::PreviousTagFinder)
+        allow(Repositories::ChangelogTagFinder)
           .to receive(:new)
-          .with(project)
+          .with(project, regex: an_instance_of(String))
           .and_return(finder_spy)
 
         allow(finder_spy)
@@ -130,18 +159,18 @@ RSpec.describe Repositories::ChangelogService do
           .with('1.0.0')
           .and_return(tag)
 
-        expect(service.start_of_commit_range).to eq('123')
+        expect(service.start_of_commit_range(config)).to eq('123')
       end
 
       it 'raises an error when no tag is found' do
         service = described_class
           .new(project, user, version: '1.0.0', to: 'bar')
 
-        finder_spy = instance_spy(Repositories::PreviousTagFinder)
+        finder_spy = instance_spy(Repositories::ChangelogTagFinder)
 
-        allow(Repositories::PreviousTagFinder)
+        allow(Repositories::ChangelogTagFinder)
           .to receive(:new)
-          .with(project)
+          .with(project, regex: an_instance_of(String))
           .and_return(finder_spy)
 
         allow(finder_spy)
@@ -149,7 +178,7 @@ RSpec.describe Repositories::ChangelogService do
           .with('1.0.0')
           .and_return(nil)
 
-        expect { service.start_of_commit_range }
+        expect { service.start_of_commit_range(config) }
           .to raise_error(Gitlab::Changelog::Error)
       end
     end

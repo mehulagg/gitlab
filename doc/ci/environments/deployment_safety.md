@@ -74,15 +74,15 @@ runs by enabling the [Skip outdated deployment jobs](../pipelines/settings.md#sk
 
 Example of a problematic pipeline flow **before** enabling Skip outdated deployment jobs:
 
-1. Pipeline-A is created on the `master` branch.
-1. Later, Pipeline-B is created on the `master` branch (with a newer commit SHA).
+1. Pipeline-A is created on the default branch.
+1. Later, Pipeline-B is created on the default branch (with a newer commit SHA).
 1. The `deploy` job in Pipeline-B finishes first, and deploys the newer code.
 1. The `deploy` job in Pipeline-A finished later, and deploys the older code, **overwriting** the newer (latest) deployment.
 
 The improved pipeline flow **after** enabling Skip outdated deployment jobs:
 
-1. Pipeline-A is created on the `master` branch.
-1. Later, Pipeline-B is created on the `master` branch (with a newer SHA).
+1. Pipeline-A is created on the default branch.
+1. Later, Pipeline-B is created on the default branch (with a newer SHA).
 1. The `deploy` job in Pipeline-B finishes first, and deploys the newer code.
 1. The `deploy` job in Pipeline-A is automatically cancelled, so that it doesn't overwrite the deployment from the newer pipeline.
 
@@ -110,7 +110,7 @@ for an explanation of these roles and the permissions of each.
 
 Production secrets are needed to deploy successfully. For example, when deploying to the cloud,
 cloud providers require these secrets to connect to their services. In the project settings, you can
-define and protect CI/CD variables for these secrets. [Protected variables](../variables/README.md#protect-a-custom-variable)
+define and protect CI/CD variables for these secrets. [Protected variables](../variables/README.md#protect-a-cicd-variable)
 are only passed to pipelines running on [protected branches](../../user/project/protected_branches.md)
 or [protected tags](../../user/project/protected_tags.md).
 The other pipelines don't get the protected variable. You can also

@@ -30,11 +30,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations) do
-      'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0
-      'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0
-      'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1
-      'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0
+    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :fingerprints) do
+      'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0 | 2
+      'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0
+      'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0
+      'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0
     end
 
     with_them do
@@ -64,6 +64,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
       it 'inserts all vulnerabilities' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
+      end
+
+      it 'inserts all fingerprints' do
+        expect { subject }.to change { Vulnerabilities::FindingFingerprint.count }.by(fingerprints)
       end
     end
 
@@ -116,6 +120,13 @@ RSpec.describe Security::StoreReportService, '#execute' do
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
     let(:new_pipeline) { create(:ci_pipeline, project: project) }
     let(:new_report) { new_pipeline.security_reports.get_report(report_type.to_s, artifact) }
+    let(:existing_fingerprint) { create(:vulnerabilities_finding_fingerprint, finding: finding) }
+    let(:unsupported_fingerprint) do
+      create(:vulnerabilities_finding_fingerprint,
+        finding: finding,
+        algorithm_type: ::Vulnerabilities::FindingFingerprint.algorithm_types[:location])
+    end
+
     let(:trait) { :sast }
 
     let!(:finding) do
@@ -195,6 +206,31 @@ RSpec.describe Security::StoreReportService, '#execute' do
       expect(finding.reload).to have_attributes(severity: 'medium', name: 'Probable insecure usage of temp file/directory.')
     end
 
+    it 'updates fingerprints to match new values' do
+      existing_fingerprint
+      unsupported_fingerprint
+
+      expect(finding.fingerprints.count).to eq(2)
+      fingerprint_algs = finding.fingerprints.map(&:algorithm_type).sort
+      expect(fingerprint_algs).to eq(%w[hash location])
+
+      subject
+
+      finding.reload
+      existing_fingerprint.reload
+
+      # check that unsupported algorithm is not deleted
+      expect(finding.fingerprints.count).to eq(3)
+      fingerprint_algs = finding.fingerprints.sort.map(&:algorithm_type)
+      expect(fingerprint_algs).to eq(%w[hash location scope_offset])
+
+      # check that the existing hash fingerprint was updated/reused
+      expect(existing_fingerprint.id).to eq(finding.fingerprints.min.id)
+
+      # check that the unsupported fingerprint was not deleted
+      expect(::Vulnerabilities::FindingFingerprint.exists?(unsupported_fingerprint.id)).to eq(true)
+    end
+
     it 'updates existing vulnerability with new data' do
       subject
 
@@ -239,6 +275,46 @@ RSpec.describe Security::StoreReportService, '#execute' do
         subject
 
         expect(Gitlab::AppLogger).to have_received(:warn).exactly(new_report.findings.length).times
+      end
+    end
+
+    context 'vulnerability issue link' do
+      context 'when there is no associated issue feedback with finding' do
+        it 'does not insert issue links from the new pipeline' do
+          expect { subject }.to change { Vulnerabilities::IssueLink.count }.by(0)
+        end
+      end
+
+      context 'when there is an associated issue feedback with finding' do
+        let(:issue) { create(:issue, project: project) }
+        let!(:issue_feedback) do
+          create(
+            :vulnerability_feedback,
+            :sast,
+            :issue,
+            issue: issue,
+            project: project,
+            project_fingerprint: new_report.findings.first.project_fingerprint
+          )
+        end
+
+        it 'inserts issue links from the new pipeline' do
+          expect { subject }.to change { Vulnerabilities::IssueLink.count }.by(1)
+        end
+
+        it 'the issue link is valid' do
+          subject
+
+          finding = Vulnerabilities::Finding.find_by(uuid: new_report.findings.first.uuid)
+          vulnerability_id = finding.vulnerability_id
+          issue_id = issue.id
+          issue_link = Vulnerabilities::IssueLink.find_by(
+            vulnerability_id: vulnerability_id,
+            issue_id: issue_id
+          )
+
+          expect(issue_link).not_to be_nil
+        end
       end
     end
   end

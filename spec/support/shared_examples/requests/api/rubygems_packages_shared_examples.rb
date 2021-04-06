@@ -43,6 +43,8 @@ end
 RSpec.shared_examples 'process rubygems upload' do |user_type, status, add_member = true|
   RSpec.shared_examples 'creates rubygems package files' do
     it 'creates package files', :aggregate_failures do
+      expect(::Packages::Rubygems::ExtractionWorker).to receive(:perform_async).once
+
       expect { subject }
           .to change { project.packages.count }.by(1)
           .and change { Packages::PackageFile.count }.by(1)
@@ -50,6 +52,17 @@ RSpec.shared_examples 'process rubygems upload' do |user_type, status, add_membe
 
       package_file = project.packages.last.package_files.reload.last
       expect(package_file.file_name).to eq('package.gem')
+    end
+
+    it 'returns bad request if package creation fails' do
+      file_service = double('file_service', execute: nil)
+
+      expect(::Packages::CreatePackageFileService).to receive(:new).and_return(file_service)
+      expect(::Packages::Rubygems::ExtractionWorker).not_to receive(:perform_async)
+
+      subject
+
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
   end
 
@@ -126,5 +139,69 @@ RSpec.shared_examples 'process rubygems upload' do |user_type, status, add_membe
         end
       end
     end
+  end
+end
+
+RSpec.shared_examples 'dependency endpoint success' do |user_type, status, add_member = true|
+  context "for user type #{user_type}" do
+    before do
+      project.send("add_#{user_type}", user) if add_member && user_type != :anonymous
+    end
+
+    raise 'Status is not :success' if status != :success
+
+    context 'with no params', :aggregate_failures do
+      it 'returns empty' do
+        subject
+
+        expect(response.body).to eq('200')
+        expect(response).to have_gitlab_http_status(status)
+      end
+    end
+
+    context 'with gems params' do
+      let(:params) { { gems: 'foo,bar' } }
+      let(:expected_response) { Marshal.dump(%w(result result)) }
+
+      it 'returns successfully', :aggregate_failures do
+        service_result = double('DependencyResolverService', execute: ServiceResponse.success(payload: 'result'))
+
+        expect(Packages::Rubygems::DependencyResolverService).to receive(:new).with(project, anything, gem_name: 'foo').and_return(service_result)
+        expect(Packages::Rubygems::DependencyResolverService).to receive(:new).with(project, anything, gem_name: 'bar').and_return(service_result)
+
+        subject
+
+        expect(response.body).to eq(expected_response) # rubocop:disable Security/MarshalLoad
+        expect(response).to have_gitlab_http_status(status)
+      end
+
+      it 'rejects if the service fails', :aggregate_failures do
+        service_result = double('DependencyResolverService', execute: ServiceResponse.error(message: 'rejected', http_status: :bad_request))
+
+        expect(Packages::Rubygems::DependencyResolverService).to receive(:new).with(project, anything, gem_name: 'foo').and_return(service_result)
+
+        subject
+
+        expect(response.body).to match(/rejected/)
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+    end
+  end
+end
+
+RSpec.shared_examples 'Rubygems gem download' do |user_type, status, add_member = true|
+  context "for user type #{user_type}" do
+    before do
+      project.send("add_#{user_type}", user) if add_member && user_type != :anonymous
+    end
+
+    it 'returns the gem', :aggregate_failures do
+      subject
+
+      expect(response.media_type).to eq('application/octet-stream')
+      expect(response).to have_gitlab_http_status(status)
+    end
+
+    it_behaves_like 'a package tracking event', described_class.name, 'pull_package'
   end
 end

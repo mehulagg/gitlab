@@ -3,54 +3,39 @@
 require 'spec_helper'
 
 RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
-  include AdminModeHelper
-
-  let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:group) { create(:group) }
+  let_it_be(:reporter) { create(:user).tap { |u| group.add_reporter(u) } }
+  let(:current_user) { reporter }
 
   let(:params) { { namespace: group } }
   let(:segment) { subject.payload[:segment] }
 
-  subject { described_class.new(params: params, current_user: admin).execute }
-
-  before do
-    enable_admin_mode!(admin)
-  end
+  subject(:response) { described_class.new(params: params, current_user: current_user).execute }
 
   it 'persists the segment' do
-    expect(subject).to be_success
+    expect(response).to be_success
     expect(segment.namespace).to eq(group)
   end
 
   it 'schedules for snapshot creation' do
     allow(Analytics::DevopsAdoption::CreateSnapshotWorker).to receive(:perform_async).and_call_original
 
-    subject
+    response
 
     expect(Analytics::DevopsAdoption::CreateSnapshotWorker).to have_received(:perform_async).with(Analytics::DevopsAdoption::Segment.last.id)
   end
 
-  context 'when user is not an admin' do
-    let(:user) { build(:user) }
+  it 'authorizes for manage_devops_adoption' do
+    expect(::Ability).to receive(:allowed?).with(current_user, :manage_devops_adoption_segments, group).and_return true
 
-    subject { described_class.new(params: params, current_user: user).execute }
-
-    it 'does not persist the segment' do
-      expect(subject).to be_error
-      expect(subject.message).to eq('Forbidden')
-      expect(segment).not_to be_persisted
-    end
+    response
   end
 
-  context 'when namespace is not given' do
-    before do
-      params.delete(:namespace)
-    end
+  context 'for guests' do
+    let(:current_user) { create(:user) }
 
-    it "doesn't save the segment" do
-      expect(subject).to be_error
-      expect(subject.message).to eq('Validation error')
-      expect(segment.namespace).to be_nil
+    it 'returns forbidden error' do
+      expect { response }.to raise_error(Analytics::DevopsAdoption::Segments::AuthorizationError)
     end
   end
 end

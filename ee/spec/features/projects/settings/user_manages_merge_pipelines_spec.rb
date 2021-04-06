@@ -23,7 +23,7 @@ RSpec.describe 'User manages merge pipelines option', :js do
     before do
       visit edit_project_path(project)
 
-      check('Enable merged results pipelines.')
+      check('Enable merged results pipelines')
     end
 
     it 'sees enabled merge pipeline checkbox' do

@@ -476,8 +476,8 @@ be mandatory and clients cannot be authenticated with the TLS protocol.
 
 ## Multiple LDAP servers **(PREMIUM SELF)**
 
-With GitLab Enterprise Edition Starter, you can configure multiple LDAP servers
-that your GitLab instance connects to.
+With GitLab, you can configure multiple LDAP servers that your GitLab instance
+connects to.
 
 To add another LDAP server:
 
@@ -705,8 +705,8 @@ When enabled, the following applies:
 To enable it you need to:
 
 1. [Enable LDAP](#configuration)
-1. Navigate to **Admin Area > Settings -> Visibility and access controls**.
-1. Make sure the "Lock memberships to LDAP synchronization" checkbox is enabled.
+1. Go to **Admin Area > Settings > Visibility and access controls**.
+1. Make sure the **Lock memberships to LDAP synchronization** checkbox is selected.
 
 ### Adjusting LDAP group sync schedule **(PREMIUM SELF)**
 

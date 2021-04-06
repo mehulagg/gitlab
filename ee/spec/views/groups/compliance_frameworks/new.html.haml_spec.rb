@@ -10,6 +10,7 @@ RSpec.describe 'groups/compliance_frameworks/new.html.haml' do
     assign(:group, group)
 
     allow(view).to receive(:current_user).and_return(user)
+    allow(user).to receive(:can_admin_all_resources?).and_return(false)
     allow(user).to receive(:can?).with(:admin_compliance_pipeline_configuration, group).and_return(true)
   end
 

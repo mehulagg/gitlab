@@ -1,4 +1,5 @@
 import { newDate } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
 import { PRESET_DEFAULTS, DAYS_IN_WEEK } from '../../constants';
 
 /**
@@ -32,3 +33,18 @@ export const getTimeframeForWeeksView = (initialDate = new Date()) => {
 
   return timeframe;
 };
+
+/**
+ * This method returns the formatted offset for a
+ * given timezone against UTC
+ *
+ *
+ * @param {String} offset - the selected timezone offset.
+ * @returns {String}
+ *
+ * @example
+ * selectedTimezoneFormattedOffset(offset:"-10:00")
+ * => (UTC -10:00)
+ *
+ */
+export const selectedTimezoneFormattedOffset = (offset) => __(`(UTC ${offset})`);

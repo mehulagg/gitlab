@@ -1297,6 +1297,7 @@ X-Gitlab-Event: Job Hook
   "build_name": "test",
   "build_stage": "test",
   "build_status": "created",
+  "build_created_at": "2021-02-23T02:41:37.886Z",
   "build_started_at": null,
   "build_finished_at": null,
   "build_duration": null,
@@ -1566,7 +1567,7 @@ X-Gitlab-Event: Subgroup Hook
 ```
 
 NOTE:
-Webhooks for when a [subgroup is removed from a group](#subgroup-removed-from-a-group) are not triggered when a [subgroup is transferred to a new parent group](../../group/index.md#transferring-groups)
+Webhooks for when a [subgroup is removed from a group](#subgroup-removed-from-a-group) are not triggered when a [subgroup is transferred to a new parent group](../../group/index.md#transfer-a-group)
 
 ### Feature Flag events
 

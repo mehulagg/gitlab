@@ -1,4 +1,4 @@
-mutation($id: AnalyticsDevopsAdoptionSegmentID!) {
+mutation($id: [AnalyticsDevopsAdoptionSegmentID!]!) {
   deleteDevopsAdoptionSegment(input: { id: $id }) {
     errors
   }

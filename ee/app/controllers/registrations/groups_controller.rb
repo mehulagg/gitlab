@@ -9,7 +9,7 @@ module Registrations
     before_action :check_signup_onboarding_enabled
     before_action :authorize_create_group!, only: :new
 
-    feature_category :navigation
+    feature_category :onboarding
 
     def new
       record_experiment_user(:trial_during_signup)
@@ -57,13 +57,15 @@ module Registrations
     def apply_trial_for_trial_onboarding_flow
       if apply_trial
         record_experiment_user(:remove_known_trial_form_fields, namespace_id: @group.id)
-        record_experiment_user(:trial_registration_with_social_signin, namespace_id: @group.id)
         record_experiment_user(:trial_onboarding_issues, namespace_id: @group.id)
         record_experiment_conversion_event(:remove_known_trial_form_fields)
-        record_experiment_conversion_event(:trial_registration_with_social_signin)
         record_experiment_conversion_event(:trial_onboarding_issues)
 
-        redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?, trial_onboarding_flow: true)
+        experiment(:registrations_group_invite, actor: current_user) do |experiment_instance|
+          experiment_instance.use { redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?, trial_onboarding_flow: true) } # control
+          experiment_instance.try(:invite_page) { redirect_to new_users_sign_up_group_invite_path(group_id: @group.id, trial: helpers.in_trial_during_signup_flow?, trial_onboarding_flow: true) } # with separate page
+          experiment_instance.track(:created, property: @group.id.to_s)
+        end
       else
         render action: :new
       end
@@ -75,7 +77,11 @@ module Registrations
       if experiment_enabled?(:trial_during_signup)
         trial_during_signup_flow
       else
-        invite_on_create
+        experiment(:registrations_group_invite, actor: current_user) do |experiment_instance|
+          experiment_instance.use { invite_on_create } # control
+          experiment_instance.try(:invite_page) { redirect_to new_users_sign_up_group_invite_path(group_id: @group.id, trial: helpers.in_trial_during_signup_flow?) } # with separate page
+          experiment_instance.track(:created, property: @group.id.to_s)
+        end
       end
     end
 
@@ -89,7 +95,11 @@ module Registrations
       if helpers.in_trial_during_signup_flow?
         create_lead_and_apply_trial_flow
       else
-        redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?)
+        experiment(:registrations_group_invite, actor: current_user) do |experiment_instance|
+          experiment_instance.use { redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?) } # control
+          experiment_instance.try(:invite_page) { redirect_to new_users_sign_up_group_invite_path(group_id: @group.id, trial: helpers.in_trial_during_signup_flow?) } # with separate page
+          experiment_instance.track(:created, property: @group.id.to_s)
+        end
       end
     end
 
@@ -97,7 +107,11 @@ module Registrations
       if create_lead && apply_trial
         record_experiment_conversion_event(:trial_during_signup)
 
-        redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?)
+        experiment(:registrations_group_invite, actor: current_user) do |experiment_instance|
+          experiment_instance.use { redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?) } # control
+          experiment_instance.try(:invite_page) { redirect_to new_users_sign_up_group_invite_path(group_id: @group.id, trial: helpers.in_trial_during_signup_flow?) } # with separate page
+          experiment_instance.track(:created, property: @group.id.to_s)
+        end
       else
         render action: :new
       end

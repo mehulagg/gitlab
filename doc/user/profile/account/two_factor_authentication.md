@@ -5,7 +5,7 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Two-factor authentication
+# Two-factor authentication **(FREE)**
 
 Two-factor authentication (2FA) provides an additional level of security to your
 GitLab account. After being enabled, in addition to supplying your username and
@@ -44,7 +44,7 @@ To enable 2FA:
 
 1. **In GitLab:**
    1. Sign in to your GitLab account.
-   1. Go to your [**User settings**](../index.md#user-settings).
+   1. Go to your [**User settings**](../index.md#access-your-user-settings).
    1. Go to **Account**.
    1. Select **Enable Two-factor Authentication**.
 1. **On your device (usually your phone):**
@@ -161,7 +161,7 @@ have FortiToken configured in FortiToken Cloud.
 
 You'll also need a `client_id` and `client_secret` to configure FortiToken Cloud.
 To get these, see the `REST API Guide` at
-[`Fortinet Document Library`](https://docs.fortinet.com/document/fortitoken-cloud/20.4.d/rest-api).
+[`Fortinet Document Library`](https://docs.fortinet.com/document/fortitoken-cloud/latest/rest-api).
 
 First configure FortiToken Cloud in GitLab. On your GitLab server:
 
@@ -248,7 +248,7 @@ Search for `security.webauth.u2f` and double click on it to toggle to `true`.
 To set up 2FA with a U2F device:
 
 1. Sign in to your GitLab account.
-1. Go to your [**User settings**](../index.md#user-settings).
+1. Go to your [**User settings**](../index.md#access-your-user-settings).
 1. Go to **Account**.
 1. Click **Enable Two-Factor Authentication**.
 1. Connect your U2F device.
@@ -284,7 +284,7 @@ and the following mobile browsers:
 To set up 2FA with a WebAuthn compatible device:
 
 1. Sign in to your GitLab account.
-1. Go to your [**User settings**](../index.md#user-settings).
+1. Go to your [**User settings**](../index.md#access-your-user-settings).
 1. Go to **Account**.
 1. Select **Enable Two-Factor Authentication**.
 1. Plug in your WebAuthn device.
@@ -351,7 +351,7 @@ request and you're automatically signed in.
 If you ever need to disable 2FA:
 
 1. Sign in to your GitLab account.
-1. Go to your [**User settings**](../index.md#user-settings).
+1. Go to your [**User settings**](../index.md#access-your-user-settings).
 1. Go to **Account**.
 1. Click **Disable**, under **Two-Factor Authentication**.
 
@@ -445,7 +445,7 @@ To regenerate 2FA recovery codes, you need access to a desktop browser:
 
 1. Navigate to GitLab.
 1. Sign in to your GitLab account.
-1. Go to your [**User settings**](../index.md#user-settings).
+1. Go to your [**User settings**](../index.md#access-your-user-settings).
 1. Select **Account > Two-Factor Authentication (2FA)**.
 1. If you've already configured 2FA, click **Manage two-factor authentication**.
 1. In the **Register Two-Factor Authenticator** pane, click **Regenerate recovery codes**.

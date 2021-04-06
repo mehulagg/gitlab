@@ -19,8 +19,9 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
 
   describe '#resolve' do
     let(:description) { 'new token!' }
+    let(:name) { 'new name' }
 
-    subject { mutation.resolve(cluster_agent_id: cluster_agent.to_global_id, description: description) }
+    subject { mutation.resolve(cluster_agent_id: cluster_agent.to_global_id, description: description, name: name) }
 
     context 'without token permissions' do
       it 'raises an error if the resource is not accessible to the user' do
@@ -50,8 +51,12 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
       end
 
       it 'returns token information', :aggregate_failures do
+        token = subject[:token]
+
         expect(subject[:secret]).not_to be_nil
-        expect(subject[:token].description).to eq(description)
+        expect(token.created_by_user).to eq(user)
+        expect(token.description).to eq(description)
+        expect(token.name).to eq(name)
       end
 
       context 'invalid params' do

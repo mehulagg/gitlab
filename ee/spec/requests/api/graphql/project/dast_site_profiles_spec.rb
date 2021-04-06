@@ -17,14 +17,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
             pageInfo {
               hasNextPage
             }
-            nodes {
-              id
-              profileName
-              targetUrl
-              editPath
-              validationStatus
-              normalizedTargetUrl
-            }
+            nodes { #{all_graphql_fields_for('DastSiteProfile')} }
           }
         }
       }
@@ -77,7 +70,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
       expect(first_dast_site_profile_response['id']).to eq(dast_site_profile.to_global_id.to_s)
     end
 
-    it 'eager loads the dast site and dast site validation' do
+    it 'avoids N+1 queries' do
       control = ActiveRecord::QueryRecorder.new do
         post_graphql(
           query,

@@ -141,8 +141,8 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
         it 'returns key value' do
           expect(needs.value).to eq(
             job: [
-              { name: 'first_job_name',  artifacts: true },
-              { name: 'second_job_name', artifacts: false }
+              { name: 'first_job_name',  artifacts: true, optional: false },
+              { name: 'second_job_name', artifacts: false, optional: false }
             ],
             bridge: [{ pipeline: 'some/project' }],
             cross_dependency: [

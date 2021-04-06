@@ -18,6 +18,8 @@ module Gitlab
         # hosts - The hostnames/addresses of the additional databases.
         def initialize(hosts = [])
           @host_list = HostList.new(hosts.map { |addr| Host.new(addr, self) })
+          @connection_db_roles = {}.compare_by_identity
+          @connection_db_roles_count = {}.compare_by_identity
         end
 
         # Yields a connection that can be used for reads.
@@ -25,14 +27,20 @@ module Gitlab
         # If no secondaries were available this method will use the primary
         # instead.
         def read(&block)
+          connection = nil
           conflict_retried = 0
 
           while host
             ensure_caching!
 
             begin
-              return yield host.connection
+              connection = host.connection
+              track_connection_role(connection, ROLE_REPLICA)
+
+              return yield connection
             rescue => error
+              untrack_connection_role(connection)
+
               if serialization_failure?(error)
                 # This error can occur when a query conflicts. See
                 # https://www.postgresql.org/docs/current/static/hot-standby.html#HOT-STANDBY-CONFLICT
@@ -75,16 +83,31 @@ module Gitlab
           )
 
           read_write(&block)
+        ensure
+          untrack_connection_role(connection)
         end
 
         # Yields a connection that can be used for both reads and writes.
         def read_write
+          connection = nil
           # In the event of a failover the primary may be briefly unavailable.
           # Instead of immediately grinding to a halt we'll retry the operation
           # a few times.
           retry_with_backoff do
-            yield ActiveRecord::Base.retrieve_connection
+            connection = ActiveRecord::Base.retrieve_connection
+            track_connection_role(connection, ROLE_PRIMARY)
+
+            yield connection
           end
+        ensure
+          untrack_connection_role(connection)
+        end
+
+        # Recognize the role (primary/replica) of the database this connection
+        # is connecting to. If the connection is not issued by this load
+        # balancer, return nil
+        def db_role_for_connection(connection)
+          @connection_db_roles[connection]
         end
 
         # Returns a host to use for queries.
@@ -180,6 +203,22 @@ module Gitlab
 
         def ensure_caching!
           host.enable_query_cache! unless host.query_cache_enabled
+        end
+
+        def track_connection_role(connection, role)
+          @connection_db_roles[connection] = role
+          @connection_db_roles_count[connection] ||= 0
+          @connection_db_roles_count[connection] += 1
+        end
+
+        def untrack_connection_role(connection)
+          return if connection.blank? || @connection_db_roles_count[connection].blank?
+
+          @connection_db_roles_count[connection] -= 1
+          if @connection_db_roles_count[connection] <= 0
+            @connection_db_roles.delete(connection)
+            @connection_db_roles_count.delete(connection)
+          end
         end
       end
     end

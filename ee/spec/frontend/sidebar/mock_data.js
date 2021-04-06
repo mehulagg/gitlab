@@ -7,13 +7,6 @@ export const mockIssue = {
   groupPath: mockGroupPath,
 };
 
-// This mock issue has a different format b/c
-// it is used in board_sidebar_iteration_select_spec.js (swimlane sidebar)
-export const mockIssue2 = {
-  referencePath: `${mockProjectPath}#1`,
-  iid: '1',
-};
-
 export const mockIssueId = 'gid://gitlab/Issue/1';
 
 export const mockIteration1 = {
@@ -32,9 +25,9 @@ export const mockIteration2 = {
   state: 'opened',
 };
 
-export const mockIterationsResponse = {
+export const mockGroupIterationsResponse = {
   data: {
-    group: {
+    workspace: {
       iterations: {
         nodes: [mockIteration1, mockIteration2],
       },
@@ -44,9 +37,9 @@ export const mockIterationsResponse = {
   },
 };
 
-export const emptyIterationsResponse = {
+export const emptyGroupIterationsResponse = {
   data: {
-    group: {
+    workspace: {
       iterations: {
         nodes: [],
       },
@@ -58,8 +51,8 @@ export const emptyIterationsResponse = {
 
 export const noCurrentIterationResponse = {
   data: {
-    project: {
-      issue: { id: mockIssueId, iteration: null, __typename: 'Issue' },
+    workspace: {
+      issuable: { id: mockIssueId, iteration: null, __typename: 'Issue' },
       __typename: 'Project',
     },
   },
@@ -67,9 +60,9 @@ export const noCurrentIterationResponse = {
 
 export const mockMutationResponse = {
   data: {
-    issueSetIteration: {
+    issuableSetIteration: {
       errors: [],
-      issue: {
+      issuable: {
         id: mockIssueId,
         iteration: {
           id: 'gid://gitlab/Iteration/2',
@@ -86,7 +79,8 @@ export const mockMutationResponse = {
 
 export const issuableQueryResponse = {
   data: {
-    project: {
+    workspace: {
+      __typename: 'Project',
       issuable: {
         __typename: 'Issue',
         id: 'gid://gitlab/Issue/1',
@@ -109,6 +103,13 @@ export const issuableQueryResponse = {
               username: 'francina.skiles',
               webUrl: '/franc',
             },
+            {
+              id: 'gid://gitlab/User/3',
+              avatarUrl: '/avatar',
+              name: 'John Doe',
+              username: 'johndoe',
+              webUrl: '/john',
+            },
           ],
         },
         assignees: {
@@ -130,31 +131,38 @@ export const issuableQueryResponse = {
 
 export const searchQueryResponse = {
   data: {
-    users: {
-      nodes: [
-        {
-          id: '1',
-          avatarUrl: '/avatar',
-          name: 'root',
-          username: 'root',
-          webUrl: 'root',
-        },
-        {
-          id: '3',
-          avatarUrl: '/avatar',
-          name: 'rookie',
-          username: 'rookie',
-          webUrl: 'rookie',
-        },
-      ],
+    workspace: {
+      __typename: 'Project',
+      users: {
+        nodes: [
+          {
+            user: {
+              id: '1',
+              avatarUrl: '/avatar',
+              name: 'root',
+              username: 'root',
+              webUrl: 'root',
+            },
+          },
+          {
+            user: {
+              id: '2',
+              avatarUrl: '/avatar2',
+              name: 'rookie',
+              username: 'rookie',
+              webUrl: 'rookie',
+            },
+          },
+        ],
+      },
     },
   },
 };
 
 export const updateIssueAssigneesMutationResponse = {
   data: {
-    issueSetAssignees: {
-      issue: {
+    issuableSetAssignees: {
+      issuable: {
         id: 'gid://gitlab/Issue/1',
         iid: '1',
         assignees: {
@@ -196,7 +204,6 @@ export const updateIssueAssigneesMutationResponse = {
         },
         __typename: 'Issue',
       },
-      __typename: 'IssueSetAssigneesPayload',
     },
   },
 };

@@ -193,16 +193,24 @@ RSpec.describe GroupPolicy do
     let(:current_user) { admin }
 
     specify do
-      expect_allowed(*read_group_permissions)
-      expect_allowed(*guest_permissions)
-      expect_allowed(*reporter_permissions)
-      expect_allowed(*developer_permissions)
-      expect_allowed(*maintainer_permissions)
-      expect_allowed(*owner_permissions)
+      expect_disallowed(*read_group_permissions)
+      expect_disallowed(*guest_permissions)
+      expect_disallowed(*reporter_permissions)
+      expect_disallowed(*developer_permissions)
+      expect_disallowed(*maintainer_permissions)
+      expect_disallowed(*owner_permissions)
     end
 
     context 'with admin mode', :enable_admin_mode do
-      specify { expect_allowed(*admin_permissions) }
+      specify do
+        expect_allowed(*read_group_permissions)
+        expect_allowed(*guest_permissions)
+        expect_allowed(*reporter_permissions)
+        expect_allowed(*developer_permissions)
+        expect_allowed(*maintainer_permissions)
+        expect_allowed(*owner_permissions)
+        expect_allowed(*admin_permissions)
+      end
     end
 
     it_behaves_like 'deploy token does not get confused with user' do
@@ -773,7 +781,13 @@ RSpec.describe GroupPolicy do
     context 'admin' do
       let(:current_user) { admin }
 
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+      end
+
+      context 'when admin mode is disabled' do
+        it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+      end
     end
 
     context 'with owner' do
@@ -817,7 +831,13 @@ RSpec.describe GroupPolicy do
     context 'admin' do
       let(:current_user) { admin }
 
-      it { is_expected.to be_allowed(:read_package) }
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it { is_expected.to be_allowed(:read_package) }
+      end
+
+      context 'when admin mode is disabled' do
+        it { is_expected.to be_disallowed(:read_package) }
+      end
     end
 
     context 'with owner' do
@@ -900,6 +920,56 @@ RSpec.describe GroupPolicy do
 
       it { expect_allowed(:read_label) }
       it { expect(described_class.new(current_user, subgroup)).to be_allowed(:read_label) }
+    end
+  end
+
+  context 'timelogs' do
+    context 'with admin' do
+      let(:current_user) { admin }
+
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it { is_expected.to be_allowed(:read_group_timelogs) }
+      end
+
+      context 'when admin mode is disabled' do
+        it { is_expected.to be_disallowed(:read_group_timelogs) }
+      end
+    end
+
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:read_group_timelogs) }
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:read_group_timelogs) }
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_allowed(:read_group_timelogs) }
+    end
+
+    context 'with guest' do
+      let(:current_user) { guest }
+
+      it { is_expected.to be_disallowed(:read_group_timelogs) }
+    end
+
+    context 'with non member' do
+      let(:current_user) { create(:user) }
+
+      it { is_expected.to be_disallowed(:read_group_timelogs) }
+    end
+
+    context 'with anonymous' do
+      let(:current_user) { nil }
+
+      it { is_expected.to be_disallowed(:read_group_timelogs) }
     end
   end
 end

@@ -14,11 +14,20 @@ module Ci
 
     has_many :statuses, class_name: 'CommitStatus', foreign_key: :stage_id
     has_many :latest_statuses, -> { ordered.latest }, class_name: 'CommitStatus', foreign_key: :stage_id
+    has_many :retried_statuses, -> { ordered.retried }, class_name: 'CommitStatus', foreign_key: :stage_id
     has_many :processables, class_name: 'Ci::Processable', foreign_key: :stage_id
     has_many :builds, foreign_key: :stage_id
     has_many :bridges, foreign_key: :stage_id
 
     scope :ordered, -> { order(position: :asc) }
+    scope :in_pipelines, ->(pipelines) { where(pipeline: pipelines) }
+    scope :by_name, ->(names) { where(name: names) }
+    scope :with_latest_and_retried_statuses, -> do
+      includes(
+        latest_statuses: [:pipeline, project: :namespace],
+        retried_statuses: [:pipeline, project: :namespace]
+      )
+    end
 
     with_options unless: :importing? do
       validates :project, presence: true
@@ -35,7 +44,7 @@ module Ci
       next if position.present?
 
       self.position = statuses.select(:stage_idx)
-        .where('stage_idx IS NOT NULL')
+        .where.not(stage_idx: nil)
         .group(:stage_idx)
         .order('COUNT(*) DESC')
         .first&.stage_idx.to_i
@@ -84,7 +93,7 @@ module Ci
     end
 
     def set_status(new_status)
-      retry_optimistic_lock(self) do
+      retry_optimistic_lock(self, name: 'ci_stage_set_status') do
         case new_status
         when 'created' then nil
         when 'waiting_for_resource' then request_resource
@@ -138,7 +147,7 @@ module Ci
     end
 
     def latest_stage_status
-      statuses.latest.composite_status || 'skipped'
+      statuses.latest.composite_status(project: project) || 'skipped'
     end
   end
 end

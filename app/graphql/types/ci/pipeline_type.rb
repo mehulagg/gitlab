@@ -81,6 +81,20 @@ module Types
             description: 'Jobs belonging to the pipeline.',
             resolver: ::Resolvers::Ci::JobsResolver
 
+      field :job,
+            type: ::Types::Ci::JobType,
+            null: true,
+            description: 'A specific job in this pipeline, either by name or ID.' do
+        argument :id,
+                 type: ::Types::GlobalIDType[::CommitStatus],
+                 required: false,
+                 description: 'ID of the job.'
+        argument :name,
+                 type: ::GraphQL::STRING_TYPE,
+                 required: false,
+                 description: 'Name of the job.'
+      end
+
       field :source_job, Types::Ci::JobType, null: true,
             description: 'Job where pipeline was triggered from.'
 
@@ -95,23 +109,47 @@ module Types
       field :path, GraphQL::STRING_TYPE, null: true,
             description: "Relative path to the pipeline's page."
 
+      field :commit_path, GraphQL::STRING_TYPE, null: true,
+            description: 'Path to the commit that triggered the pipeline.'
+
       field :project, Types::ProjectType, null: true,
             description: 'Project the pipeline belongs to.'
 
       field :active, GraphQL::BOOLEAN_TYPE, null: false, method: :active?,
             description: 'Indicates if the pipeline is active.'
 
+      field :uses_needs, GraphQL::BOOLEAN_TYPE, null: true,
+            method: :uses_needs?,
+            description: 'Indicates if the pipeline has jobs with `needs` dependencies.'
+
       def detailed_status
-        object.detailed_status(context[:current_user])
+        object.detailed_status(current_user)
       end
 
       def user
         Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.user_id).find
       end
 
+      def commit_path
+        ::Gitlab::Routing.url_helpers.project_commit_path(object.project, object.sha)
+      end
+
       def path
         ::Gitlab::Routing.url_helpers.project_pipeline_path(object.project, object)
       end
+
+      def job(id: nil, name: nil)
+        raise ::Gitlab::Graphql::Errors::ArgumentError, 'One of id or name is required' unless id || name
+
+        if id
+          id = ::Types::GlobalIDType[::CommitStatus].coerce_isolated_input(id) if id
+          pipeline.statuses.id_in(id.model_id)
+        else
+          pipeline.statuses.by_name(name)
+        end.take # rubocop: disable CodeReuse/ActiveRecord
+      end
+
+      alias_method :pipeline, :object
     end
   end
 end

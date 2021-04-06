@@ -54,6 +54,7 @@ RSpec.describe 'Value stream analytics charts', :js do
     end
 
     before do
+      stub_feature_flags(value_stream_analytics_path_navigation: false)
       select_group(group)
     end
 
@@ -82,6 +83,8 @@ RSpec.describe 'Value stream analytics charts', :js do
   end
 
   describe 'Tasks by type chart', :js do
+    filters_selector = '.js-tasks-by-type-chart-filters'
+
     before do
       stub_licensed_features(cycle_analytics_for_groups: true, type_of_work_analytics: true)
 
@@ -94,6 +97,9 @@ RSpec.describe 'Value stream analytics charts', :js do
     context 'enabled' do
       context 'with data available' do
         before do
+          mr_issue = create(:labeled_issue, created_at: 5.days.ago, project: create(:project, group: group), labels: [group_label2])
+          create(:merge_request, iid: mr_issue.id, created_at: 3.days.ago, source_project: project, labels: [group_label1, group_label2])
+
           3.times do |i|
             create(:labeled_issue, created_at: i.days.ago, project: create(:project, group: group), labels: [group_label1])
             create(:labeled_issue, created_at: i.days.ago, project: create(:project, group: group), labels: [group_label2])
@@ -113,7 +119,24 @@ RSpec.describe 'Value stream analytics charts', :js do
         end
 
         it 'has chart filters' do
-          expect(page).to have_css('.js-tasks-by-type-chart-filters')
+          expect(page).to have_css(filters_selector)
+        end
+
+        it 'can update the filters' do
+          page.within filters_selector do
+            find('.dropdown-toggle').click
+            first_selected_label = all('[data-testid="type-of-work-filters-label"] .dropdown-item.active').first
+            first_selected_label.click
+          end
+
+          expect(page).to have_text('Showing Issues and 1 label')
+
+          page.within filters_selector do
+            find('.dropdown-toggle').click
+            find('[data-testid="type-of-work-filters-subject"] label', text: 'Merge Requests').click
+          end
+
+          expect(page).to have_text('Showing Merge Requests and 1 label')
         end
       end
 

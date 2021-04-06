@@ -43,6 +43,17 @@ module EE
         end
       end
 
+      override :variables
+      def variables
+        strong_memoize(:variables) do
+          super.tap do |collection|
+            if pipeline.triggered_for_ondemand_dast_scan? && pipeline.dast_profile
+              collection.concat(pipeline.dast_profile.ci_variables)
+            end
+          end
+        end
+      end
+
       def shared_runners_minutes_limit_enabled?
         project.shared_runners_minutes_limit_enabled? && runner&.minutes_cost_factor(project.visibility_level)&.positive?
       end
@@ -89,7 +100,7 @@ module EE
 
       def collect_dependency_list_reports!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::DEPENDENCY_LIST_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse!(blob, dependency_list_report)
@@ -101,7 +112,7 @@ module EE
 
       def collect_licenses_for_dependency_list!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::LICENSE_SCANNING_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse_licenses!(blob, dependency_list_report)
@@ -173,7 +184,6 @@ module EE
       end
 
       def track_ci_secrets_management_usage
-        return unless ::Feature.enabled?(:usage_data_i_ci_secrets_management_vault_build_created, default_enabled: true)
         return unless ci_secrets_management_available? && secrets?
 
         ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event('i_ci_secrets_management_vault_build_created', values: user_id)

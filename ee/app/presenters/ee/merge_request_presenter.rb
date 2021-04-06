@@ -56,6 +56,10 @@ module EE
       project_security_discover_path(project) if show_discover_project_security?(project)
     end
 
+    def issue_keys
+      Atlassian::JiraIssueKeyExtractor.new(merge_request.title, merge_request.description).issue_keys
+    end
+
     private
 
     def expose_mr_approval_path?

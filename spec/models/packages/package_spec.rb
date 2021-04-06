@@ -22,6 +22,14 @@ RSpec.describe Packages::Package, type: :model do
     it { is_expected.to have_one(:rubygems_metadatum).inverse_of(:package) }
   end
 
+  describe '.with_debian_codename' do
+    let_it_be(:publication) { create(:debian_publication) }
+
+    subject { described_class.with_debian_codename(publication.distribution.codename).to_a }
+
+    it { is_expected.to contain_exactly(publication.package) }
+  end
+
   describe '.with_composer_target' do
     let!(:package1) { create(:composer_package, :with_metadatum, sha: '123') }
     let!(:package2) { create(:composer_package, :with_metadatum, sha: '123') }
@@ -88,6 +96,34 @@ RSpec.describe Packages::Package, type: :model do
       let!(:package4) { create(:npm_package, project: another_project, version: '3.1.0', name: "@#{project.root_namespace.path}/bar") }
 
       let(:packages) { [package1, package2, package3, package4] }
+    end
+  end
+
+  describe '.for_projects' do
+    let_it_be(:package1) { create(:maven_package) }
+    let_it_be(:package2) { create(:maven_package) }
+    let_it_be(:package3) { create(:maven_package) }
+
+    let(:projects) { ::Project.id_in([package1.project_id, package2.project_id]) }
+
+    subject { described_class.for_projects(projects.select(:id)) }
+
+    it 'returns package1 and package2' do
+      expect(projects).not_to receive(:any?)
+
+      expect(subject).to match_array([package1, package2])
+    end
+
+    context 'with maven_packages_group_level_improvements disabled' do
+      before do
+        stub_feature_flags(maven_packages_group_level_improvements: false)
+      end
+
+      it 'returns package1 and package2' do
+        expect(projects).to receive(:any?).and_call_original
+
+        expect(subject).to match_array([package1, package2])
+      end
     end
   end
 
@@ -331,7 +367,14 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.to validate_presence_of(:version) }
         it { is_expected.to allow_value('1.2.3').for(:version) }
         it { is_expected.to allow_value('1.3.350').for(:version) }
-        it { is_expected.not_to allow_value('1.3.350-20201230123456').for(:version) }
+        it { is_expected.to allow_value('1.3.350-20201230123456').for(:version) }
+        it { is_expected.to allow_value('1.2.3-rc1').for(:version) }
+        it { is_expected.to allow_value('1.2.3g').for(:version) }
+        it { is_expected.to allow_value('1.2').for(:version) }
+        it { is_expected.to allow_value('1.2.bananas').for(:version) }
+        it { is_expected.to allow_value('v1.2.4-build').for(:version) }
+        it { is_expected.to allow_value('d50d836eb3de6177ce6c7a5482f27f9c2c84b672').for(:version) }
+        it { is_expected.to allow_value('this_is_a_string_only').for(:version) }
         it { is_expected.not_to allow_value('..1.2.3').for(:version) }
         it { is_expected.not_to allow_value('  1.2.3').for(:version) }
         it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
@@ -613,10 +656,12 @@ RSpec.describe Packages::Package, type: :model do
     describe '.displayable' do
       let_it_be(:hidden_package) { create(:maven_package, :hidden) }
       let_it_be(:processing_package) { create(:maven_package, :processing) }
+      let_it_be(:error_package) { create(:maven_package, :error) }
 
       subject { described_class.displayable }
 
-      it 'does not include hidden packages', :aggregate_failures do
+      it 'does not include non-displayable packages', :aggregate_failures do
+        is_expected.to include(error_package)
         is_expected.not_to include(hidden_package)
         is_expected.not_to include(processing_package)
       end
@@ -803,6 +848,65 @@ RSpec.describe Packages::Package, type: :model do
 
     it 'returns the namespace package_settings' do
       expect(package.package_settings).to eq(group.package_settings)
+    end
+  end
+
+  describe '#sync_maven_metadata' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:package) { create(:maven_package) }
+
+    subject { package.sync_maven_metadata(user) }
+
+    shared_examples 'not enqueuing a sync worker job' do
+      it 'does not enqueue a sync worker job' do
+        expect(::Packages::Maven::Metadata::SyncWorker)
+          .not_to receive(:perform_async)
+
+        subject
+      end
+    end
+
+    it 'enqueues a sync worker job' do
+      expect(::Packages::Maven::Metadata::SyncWorker)
+        .to receive(:perform_async).with(user.id, package.project.id, package.name)
+
+      subject
+    end
+
+    context 'with no user' do
+      let(:user) { nil }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+
+    context 'with a versionless maven package' do
+      let_it_be(:package) { create(:maven_package, version: nil) }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+
+    context 'with a non maven package' do
+      let_it_be(:package) { create(:npm_package) }
+
+      it_behaves_like 'not enqueuing a sync worker job'
+    end
+  end
+
+  context 'destroying a composer package' do
+    let_it_be(:package_name) { 'composer-package-name' }
+    let_it_be(:json) { { 'name' => package_name } }
+    let_it_be(:project) { create(:project, :custom_repo, files: { 'composer.json' => json.to_json } ) }
+    let!(:package) { create(:composer_package, :with_metadatum, project: project, name: package_name, version: '1.0.0', json: json) }
+
+    before do
+      Gitlab::Composer::Cache.new(project: project, name: package_name).execute
+      package.composer_metadatum.reload
+    end
+
+    it 'schedule the update job' do
+      expect(::Packages::Composer::CacheUpdateWorker).to receive(:perform_async).with(project.id, package_name, package.composer_metadatum.version_cache_sha)
+
+      package.destroy!
     end
   end
 end

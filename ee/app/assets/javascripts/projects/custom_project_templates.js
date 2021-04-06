@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { Rails } from '~/lib/utils/rails_ujs';
 import projectNew from '~/projects/project_new';
 
 const bindEvents = () => {
@@ -125,13 +126,11 @@ export default () => {
   $groupTabContent.on('ajax:success', bindEvents);
 
   $navElement.one('click', () => {
-    // eslint-disable-next-line no-jquery/no-ajax
-    $.get($tabContent.data('initialTemplates'));
+    Rails.ajax({ url: $tabContent.data('initialTemplates'), type: 'GET' });
   });
 
   $groupNavElement.one('click', () => {
-    // eslint-disable-next-line no-jquery/no-ajax
-    $.get($groupTabContent.data('initialTemplates'));
+    Rails.ajax({ url: $groupTabContent.data('initialTemplates'), type: 'GET' });
   });
 
   bindEvents();

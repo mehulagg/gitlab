@@ -81,6 +81,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       it 'renders bad request for IntegrationError' do
         expect_any_instance_of(Projects::Integrations::Jira::IssuesFinder).to receive(:execute)
           .and_raise(Projects::Integrations::Jira::IssuesFinder::IntegrationError, 'Integration error')
+        expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
         get :index, params: { namespace_id: project.namespace, project_id: project }, format: :json
 
@@ -91,6 +92,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       it 'renders bad request for RequestError' do
         expect_any_instance_of(Projects::Integrations::Jira::IssuesFinder).to receive(:execute)
           .and_raise(Projects::Integrations::Jira::IssuesFinder::RequestError, 'Request error')
+        expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
         get :index, params: { namespace_id: project.namespace, project_id: project }, format: :json
 
@@ -182,9 +184,9 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
   end
 
   describe 'GET #show' do
-    context 'when `jira_issues_show_integration` feature is disabled' do
+    context 'when jira_issues_integration licensed feature is not available' do
       before do
-        stub_feature_flags(jira_issues_show_integration: false)
+        stub_licensed_features(jira_issues_integration: false)
       end
 
       it 'returns 404 status' do
@@ -194,12 +196,12 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       end
     end
 
-    context 'when `jira_issues_show_integration` feature is enabled' do
+    context 'when jira_issues_integration licensed feature is available' do
       let(:jira_issue) { { 'from' => 'jira' } }
       let(:issue_json) { { 'from' => 'backend' } }
 
       before do
-        stub_feature_flags(jira_issues_show_integration: true)
+        stub_licensed_features(jira_issues_integration: true)
 
         expect_next_found_instance_of(JiraService) do |service|
           expect(service).to receive(:find_issue).with('1', rendered_fields: true).and_return(jira_issue)

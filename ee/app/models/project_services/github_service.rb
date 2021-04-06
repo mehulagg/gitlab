@@ -23,14 +23,14 @@ class GithubService < Service
   end
 
   def description
-    "See pipeline statuses on GitHub for your commits and pull requests"
+    s_("GithubIntegration|Obtain statuses for commits and pull requests.")
   end
 
   def help
     return unless project
 
-    docs_link = link_to _('Learn more'), help_page_url('user/project/repository/repository_mirroring')
-    s_("Integrations|This requires mirroring your GitHub repository to this project. %{docs_link}" % { docs_link: docs_link }).html_safe
+    docs_link = link_to _('What is repository mirroring?'), help_page_url('user/project/repository/repository_mirroring')
+    s_("GithubIntegration|This requires mirroring your GitHub repository to this project. %{docs_link}" % { docs_link: docs_link }).html_safe
   end
 
   def self.to_param
@@ -38,21 +38,28 @@ class GithubService < Service
   end
 
   def fields
+    learn_more_link_url = help_page_path('user/project/integrations/github', anchor: 'static--dynamic-status-check-name')
+    learn_more_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: learn_more_link_url }
+    static_context_field_help = s_('GithubIntegration|Select this if you want GitHub to mark status checks as "Required". %{learn_more_link_start}Learn more%{learn_more_link_end}.').html_safe % { learn_more_link_start: learn_more_link_start, learn_more_link_end: '</a>'.html_safe }
+
+    token_url = 'https://github.com/settings/tokens'
+    token_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: token_url }
+    token_field_help = s_('GithubIntegration|Create a %{token_link_start}personal access token%{token_link_end} with %{status_html} access granted and paste it here.').html_safe % { token_link_start: token_link_start, token_link_end: '</a>'.html_safe, status_html: '<code>repo:status</code>'.html_safe }
     [
       { type: 'password',
         name: "token",
         required: true,
-        placeholder: "e.g. 8d3f016698e...",
-        help: 'Create a <a href="https://github.com/settings/tokens">personal access token</a> with  <code>repo:status</code> access granted and paste it here.'.html_safe },
+        placeholder: "8d3f016698e...",
+        help: token_field_help },
       { type: 'text',
         name: "repository_url",
-        title: 'Repository URL',
+        title: s_('GithubIntegration|Repository URL'),
         required: true,
-        placeholder: 'e.g. https://github.com/owner/repository' },
+        placeholder: 'https://github.com/owner/repository' },
       { type: 'checkbox',
         name: "static_context",
-        title: 'Static status check names',
-        help: 'GitHub status checks need static name in order to be marked as "required".' }
+        title: s_('GithubIntegration|Static status check names (optional)'),
+        help: static_context_field_help }
     ]
   end
 

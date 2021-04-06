@@ -1,6 +1,0 @@
----
-title: Fix updating of board's hide_backlog_list and hide_closed_list settings when
-  on an unlicensed EE instance
-merge_request: 51561
-author:
-type: fixed

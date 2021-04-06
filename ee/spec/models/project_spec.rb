@@ -21,6 +21,8 @@ RSpec.describe Project do
 
     it { is_expected.to delegate_method(:pipeline_configuration_full_path).to(:compliance_management_framework) }
 
+    it { is_expected.to delegate_method(:prevent_merge_without_jira_issue).to(:project_setting) }
+
     it { is_expected.to belong_to(:deleting_user) }
 
     it { is_expected.to have_one(:import_state).class_name('ProjectImportState') }
@@ -119,6 +121,46 @@ RSpec.describe Project do
       with_them do
         it 'returns the correct value' do
           expect(project.jira_issue_association_required_to_merge_enabled?).to eq(result)
+        end
+      end
+    end
+
+    context 'import_state dependant predicate method' do
+      shared_examples 'returns expected values' do
+        context 'when project lacks a import_state relation' do
+          it 'returns false' do
+            expect(project.send("mirror_#{method}")).to be_falsey
+          end
+        end
+
+        context 'when project has a import_state relation' do
+          before do
+            create(:import_state, project: project)
+          end
+
+          it 'accesses the value from the import_state' do
+            expect(project.import_state).to receive(method)
+
+            project.send("mirror_#{method}")
+          end
+        end
+      end
+
+      describe '#mirror_last_update_succeeded?' do
+        it_behaves_like 'returns expected values' do
+          let(:method) { "last_update_succeeded?" }
+        end
+      end
+
+      describe '#mirror_last_update_failed?' do
+        it_behaves_like 'returns expected values' do
+          let(:method) { "last_update_failed?" }
+        end
+      end
+
+      describe '#mirror_ever_updated_successfully?' do
+        it_behaves_like 'returns expected values' do
+          let(:method) { "ever_updated_successfully?" }
         end
       end
     end
@@ -362,6 +404,19 @@ RSpec.describe Project do
       subject { described_class.order_by_total_repository_size_excess_desc(limit) }
 
       it { is_expected.to eq([project_2, project_3, project_1]) }
+    end
+
+    describe '.with_code_coverage' do
+      let_it_be(:project_1) { create(:project) }
+      let_it_be(:project_2) { create(:project) }
+      let_it_be(:project_3) { create(:project) }
+
+      let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1) }
+      let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project_2) }
+
+      subject { described_class.with_code_coverage }
+
+      it { is_expected.to contain_exactly(project_1, project_2) }
     end
   end
 
@@ -662,10 +717,46 @@ RSpec.describe Project do
       end
     end
 
+    shared_examples 'a predicate wrapper method' do
+      where(:wrapped_method_return, :subject_return) do
+        true  | true
+        false | false
+        nil   | false
+      end
+
+      with_them do
+        it 'returns the expected boolean value' do
+          expect(project)
+            .to receive(wrapped_method)
+            .and_return(wrapped_method_return)
+
+          expect(project.send("#{wrapped_method}?")).to be(subject_return)
+        end
+      end
+    end
+
+    describe '#disable_overriding_approvers_per_merge_request?' do
+      it_behaves_like 'a predicate wrapper method' do
+        let(:wrapped_method) { :disable_overriding_approvers_per_merge_request }
+      end
+    end
+
     describe '#merge_requests_disable_committers_approval' do
       it_behaves_like 'setting modified by application setting' do
         let(:setting) { :merge_requests_disable_committers_approval }
         let(:application_setting) { :prevent_merge_requests_committers_approval }
+      end
+    end
+
+    describe '#merge_requests_disable_committers_approval?' do
+      it_behaves_like 'a predicate wrapper method' do
+        let(:wrapped_method) { :merge_requests_disable_committers_approval }
+      end
+    end
+
+    describe '#require_password_to_approve?' do
+      it_behaves_like 'a predicate wrapper method' do
+        let(:wrapped_method) { :require_password_to_approve }
       end
     end
 
@@ -698,6 +789,12 @@ RSpec.describe Project do
           expect(project.send(setting)).to eq(final_setting)
           expect(project.send("#{setting}?")).to eq(final_setting)
         end
+      end
+    end
+
+    describe '#merge_requests_author_approval?' do
+      it_behaves_like 'a predicate wrapper method' do
+        let(:wrapped_method) { :merge_requests_author_approval }
       end
     end
   end
@@ -777,6 +874,16 @@ RSpec.describe Project do
     end
   end
 
+  describe '#execute_external_compliance_hooks' do
+    let_it_be(:rule) { create(:external_approval_rule) }
+
+    it 'enqueues the correct number of workers' do
+      allow(rule).to receive(:async_execute).once
+
+      rule.project.execute_external_compliance_hooks({})
+    end
+  end
+
   describe "#execute_hooks" do
     context "group hooks" do
       let(:group) { create(:group) }
@@ -792,7 +899,7 @@ RSpec.describe Project do
         project.execute_hooks(some: 'info')
       end
 
-      context 'when group_webhooks frature is enabled' do
+      context 'when group_webhooks feature is enabled' do
         before do
           stub_licensed_features(group_webhooks: true)
         end
@@ -869,14 +976,6 @@ RSpec.describe Project do
 
                 it 'returns true' do
                   is_expected.to eq(true)
-                end
-
-                context 'when feature is disabled by a feature flag' do
-                  it 'returns false' do
-                    stub_feature_flags(feature => false)
-
-                    is_expected.to eq(false)
-                  end
                 end
               end
 
@@ -998,11 +1097,11 @@ RSpec.describe Project do
       end
 
       it 'has a shared runner' do
-        expect(project.any_runners?).to be_truthy
+        expect(project.any_active_runners?).to be_truthy
       end
 
       it 'checks the presence of shared runner' do
-        expect(project.any_runners? { |runner| runner == shared_runner }).to be_truthy
+        expect(project.any_active_runners? { |runner| runner == shared_runner }).to be_truthy
       end
 
       context 'with used pipeline minutes' do
@@ -1014,7 +1113,7 @@ RSpec.describe Project do
         end
 
         it 'does not have a shared runner' do
-          expect(project.any_runners?).to be_falsey
+          expect(project.any_active_runners?).to be_falsey
         end
       end
     end
@@ -1701,6 +1800,35 @@ RSpec.describe Project do
       it 'returns nothing' do
         is_expected.to be_nil
       end
+    end
+  end
+
+  describe '#security_reports_up_to_date_for_ref?' do
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:merge_request) do
+      create(:ee_merge_request,
+             source_project: project,
+             source_branch: 'feature1',
+             target_branch: project.default_branch)
+    end
+
+    let_it_be(:pipeline) do
+      create(:ee_ci_pipeline,
+             :with_sast_report,
+             project: project,
+             ref: merge_request.target_branch)
+    end
+
+    subject { project.security_reports_up_to_date_for_ref?(merge_request.target_branch) }
+
+    context 'when the target branch security reports are up to date' do
+      it { is_expected.to be true }
+    end
+
+    context 'when the target branch security reports are out of date' do
+      let_it_be(:bad_pipeline) { create(:ee_ci_pipeline, :failed, project: project, ref: merge_request.target_branch) }
+
+      it { is_expected.to be false }
     end
   end
 
@@ -2581,7 +2709,7 @@ RSpec.describe Project do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: licensed?)
         stub_application_setting(deletion_adjourned_period: adjourned_period)
-        allow(group).to receive(:delayed_project_removal?).and_return(feature_enabled_on_group?)
+        allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(feature_enabled_on_group?)
       end
 
       it { is_expected.to be result }
@@ -2694,6 +2822,28 @@ RSpec.describe Project do
       expect(ProjectTemplateExportWorker).to receive(:perform_async).with(user.id, project.id, nil, {})
 
       project.add_template_export_job(current_user: user)
+    end
+  end
+
+  describe '#prevent_merge_without_jira_issue?' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { project.prevent_merge_without_jira_issue? }
+
+    where(:feature_available, :prevent_merge, :result) do
+      true  | true  | true
+      true  | false | false
+      false | true  | false
+      false | false | false
+    end
+
+    with_them do
+      before do
+        allow(project).to receive(:jira_issue_association_required_to_merge_enabled?).and_return(feature_available)
+        project.create_project_setting(prevent_merge_without_jira_issue: prevent_merge)
+      end
+
+      it { is_expected.to be result }
     end
   end
 

@@ -7,12 +7,11 @@ RSpec.describe ComplianceManagement::ComplianceFramework::GroupSettingsHelper do
   let_it_be(:current_user) { build(:admin) }
 
   before do
-    assign(:group, group)
     allow(helper).to receive(:current_user) { current_user }
   end
 
   describe '#show_compliance_frameworks?' do
-    subject { helper.show_compliance_frameworks? }
+    subject { helper.show_compliance_frameworks?(group) }
 
     context 'the user has permission' do
       before do
@@ -33,30 +32,48 @@ RSpec.describe ComplianceManagement::ComplianceFramework::GroupSettingsHelper do
 
   describe '#compliance_frameworks_list_data' do
     it 'returns the correct data' do
-      expect(helper.compliance_frameworks_list_data).to contain_exactly(
+      expect(helper.compliance_frameworks_list_data(group)).to contain_exactly(
         [:empty_state_svg_path, ActionController::Base.helpers.image_path('illustrations/welcome/ee_trial.svg')],
         [:group_path, group.full_path],
-        [:add_framework_path, new_group_compliance_framework_path(group)]
+        [:add_framework_path, new_group_compliance_framework_path(group)],
+        [:edit_framework_path, edit_group_compliance_framework_path(group, :id)]
       )
     end
   end
 
-  describe '#compliance_frameworks_new_form_data' do
-    subject { helper.compliance_frameworks_new_form_data }
+  describe '#compliance_frameworks_form_data' do
+    let(:framework_id) { nil }
+
+    subject { helper.compliance_frameworks_form_data(group, framework_id) }
 
     shared_examples 'returns the correct data' do |pipeline_configuration_enabled|
       before do
         allow(helper).to receive(:can?).with(current_user, :admin_compliance_pipeline_configuration, group).and_return(pipeline_configuration_enabled)
       end
 
-      it {
+      it 'does not contain a framework ID' do
         is_expected.to contain_exactly(
+          [:framework_id, nil],
           [:group_path, group.full_path],
           [:group_edit_path, edit_group_path(group, anchor: 'js-compliance-frameworks-settings')],
           [:graphql_field_name, ComplianceManagement::Framework.name],
           [:pipeline_configuration_full_path_enabled, pipeline_configuration_enabled.to_s]
         )
-      }
+      end
+
+      context 'with a framework ID' do
+        let(:framework_id) { 12345 }
+
+        it {
+          is_expected.to contain_exactly(
+            [:framework_id, framework_id],
+            [:group_path, group.full_path],
+            [:group_edit_path, edit_group_path(group, anchor: 'js-compliance-frameworks-settings')],
+            [:graphql_field_name, ComplianceManagement::Framework.name],
+            [:pipeline_configuration_full_path_enabled, pipeline_configuration_enabled.to_s]
+          )
+        }
+      end
     end
 
     context 'the user has pipeline configuration permission' do

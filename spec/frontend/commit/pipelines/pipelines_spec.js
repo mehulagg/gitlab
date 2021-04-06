@@ -17,8 +17,6 @@ describe('Pipelines table in Commits and Merge requests', () => {
     errorStateSvgPath: 'foo',
   };
 
-  preloadFixtures(jsonFixtureName);
-
   const findRunPipelineBtn = () => vm.$el.querySelector('[data-testid="run_pipeline_button"]');
   const findRunPipelineBtnMobile = () =>
     vm.$el.querySelector('[data-testid="run_pipeline_button_mobile"]');
@@ -273,7 +271,6 @@ describe('Pipelines table in Commits and Merge requests', () => {
       setImmediate(() => {
         expect(vm.$el.querySelector('.js-pipelines-error-state')).toBeDefined();
         expect(vm.$el.querySelector('.realtime-loading')).toBe(null);
-        expect(vm.$el.querySelector('.js-empty-state')).toBe(null);
         expect(vm.$el.querySelector('.ci-table')).toBe(null);
         done();
       });

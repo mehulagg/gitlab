@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Activate GitLab EE with a license **(STARTER ONLY)**
+# Activate GitLab EE with a license **(PREMIUM SELF)**
 
 To activate all GitLab Enterprise Edition (EE) functionality, you need to upload
 a license. It's only possible to activate GitLab Enterprise Edition, so first verify which edition
@@ -89,10 +89,7 @@ is active until the end of the license period. When that period ends, the
 instance will [fall back](#what-happens-when-your-license-expires) to Free-only
 functionality.
 
-You can review the license details at any time in the **License** section of the
-**Admin Area**.
-
-![License details](img/license_details_v13_8.png)
+You can review the license details at any time by going to **Admin Area > License**.
 
 ## Notification before the license expires
 
@@ -102,12 +99,15 @@ license, otherwise you miss all the paid features if your license expires.
 
 ## What happens when your license expires
 
-In case your license expires, GitLab locks down some features like Git pushes,
-and issue creation, and displays a message to all administrators to inform of the expired license.
+When your license expires, GitLab locks down features, like Git pushes
+and issue creation. Then, your instance becomes read-only and
+an expiration message is displayed to all administrators.
 
-To get back all the previous functionality, you must upload a new license.
-To fall back to having only the Free features active, you must delete the
-expired license(s).
+For GitLab self-managed instances, you have a 14-day grace period
+before this occurs.
+
+- To resume functionality, upload a new license.
+- To fall back to Free features, delete the expired license.
 
 ### Remove a license
 

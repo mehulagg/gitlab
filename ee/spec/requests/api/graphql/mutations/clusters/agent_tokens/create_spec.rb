@@ -9,10 +9,11 @@ RSpec.describe 'Create a new cluster agent token' do
   let_it_be(:current_user) { create(:user) }
 
   let(:description) { 'create token' }
+  let(:name) { 'token name' }
   let(:mutation) do
     graphql_mutation(
       :cluster_agent_token_create,
-      { cluster_agent_id: cluster_agent.to_global_id.to_s, description: description }
+      { cluster_agent_id: cluster_agent.to_global_id.to_s, description: description, name: name }
     )
   end
 
@@ -58,6 +59,7 @@ RSpec.describe 'Create a new cluster agent token' do
 
       expect(mutation_response['secret']).not_to be_nil
       expect(mutation_response.dig('token', 'description')).to eq(description)
+      expect(mutation_response.dig('token', 'name')).to eq(name)
     end
   end
 end

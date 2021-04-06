@@ -1,6 +1,5 @@
-= form_for [@project], remote: true, html: { multipart: true, class: "edit-project js-general-settings-form" }, authenticity_token: true do |f|
+= form_for [@project], html: { multipart: true, class: "edit-project js-general-settings-form" }, authenticity_token: true do |f|
   %input{ name: 'update_section', type: 'hidden', value: 'js-general-settings' }
-  = form_errors(@project)
 
   %fieldset
     .row
@@ -40,4 +39,4 @@
       %hr
       = link_to _('Remove avatar'), project_avatar_path(@project), data: { confirm: _('Avatar will be removed. Are you sure?')}, method: :delete, class: 'btn btn-link'
 
-  = f.submit _('Save changes'), class: "gl-button btn btn-success gl-mt-6", data: { qa_selector: 'save_naming_topics_avatar_button' }
+  = f.submit _('Save changes'), class: "gl-button btn btn-confirm gl-mt-6", data: { qa_selector: 'save_naming_topics_avatar_button' }

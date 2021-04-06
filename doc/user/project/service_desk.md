@@ -73,7 +73,7 @@ To enable Service Desk in your project:
 1. Enable the **Activate Service Desk** toggle. This reveals a unique email address to email issues
    to the project.
 
-Service Desk is now enabled for this project! To access it in a project, in the left sidebar, select 
+Service Desk is now enabled for this project! To access it in a project, in the left sidebar, select
 **Issues > Service Desk**.
 
 WARNING:
@@ -160,7 +160,7 @@ To edit the custom email display name:
 1. Enter a new name in **Email display name**.
 1. Select **Save Changes**.
 
-### Using custom email address
+### Using custom email address **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.

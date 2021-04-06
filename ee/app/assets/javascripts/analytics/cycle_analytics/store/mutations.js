@@ -1,5 +1,5 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { transformRawStages, prepareStageErrors } from '../utils';
+import { transformRawStages, prepareStageErrors, formatMedianValuesWithOverview } from '../utils';
 import * as types from './mutation_types';
 
 export default {
@@ -16,14 +16,14 @@ export default {
     state.startDate = startDate;
     state.endDate = endDate;
   },
-  [types.REQUEST_CYCLE_ANALYTICS_DATA](state) {
+  [types.REQUEST_VALUE_STREAM_DATA](state) {
     state.isLoading = true;
   },
-  [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state) {
+  [types.RECEIVE_VALUE_STREAM_DATA_SUCCESS](state) {
     state.errorCode = null;
     state.isLoading = false;
   },
-  [types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR](state, errCode) {
+  [types.RECEIVE_VALUE_STREAM_DATA_ERROR](state, errCode) {
     state.errorCode = errCode;
     state.isLoading = false;
   },
@@ -49,13 +49,17 @@ export default {
     state.medians = {};
   },
   [types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, medians = []) {
-    state.medians = medians.reduce(
-      (acc, { id, value, error = null }) => ({
-        ...acc,
-        [id]: { value, error },
-      }),
-      {},
-    );
+    if (state?.featureFlags?.hasPathNavigation) {
+      state.medians = formatMedianValuesWithOverview(medians);
+    } else {
+      state.medians = medians.reduce(
+        (acc, { id, value, error = null }) => ({
+          ...acc,
+          [id]: { value, error },
+        }),
+        {},
+      );
+    }
   },
   [types.RECEIVE_STAGE_MEDIANS_ERROR](state) {
     state.medians = {};
@@ -67,8 +71,7 @@ export default {
     state.stages = [];
   },
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
-    const transformedStages = transformRawStages(stages);
-    state.stages = transformedStages.sort((a, b) => a?.id > b?.id);
+    state.stages = transformRawStages(stages);
   },
   [types.REQUEST_UPDATE_STAGE](state) {
     state.isLoading = true;
@@ -85,7 +88,7 @@ export default {
   [types.RECEIVE_REMOVE_STAGE_RESPONSE](state) {
     state.isLoading = false;
   },
-  [types.INITIALIZE_CYCLE_ANALYTICS](
+  [types.INITIALIZE_VSA](
     state,
     {
       group = null,
@@ -104,7 +107,7 @@ export default {
     state.endDate = endDate;
     state.defaultStageConfig = defaultStageConfig;
   },
-  [types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS](state) {
+  [types.INITIALIZE_VALUE_STREAM_SUCCESS](state) {
     state.isLoading = false;
   },
   [types.REQUEST_REORDER_STAGE](state) {

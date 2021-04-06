@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'issue boards', :js do
+RSpec.describe 'Project issue boards', :js do
   include DragTo
 
   let(:user) { create(:user) }
@@ -132,7 +132,8 @@ RSpec.describe 'issue boards', :js do
 
     it 'shows total weight for backlog' do
       backlog = board.lists.first
-      expect(badge(backlog)).to have_content('5')
+
+      expect(list_weight_badge(backlog)).to have_content('5')
     end
 
     it 'updates weight when moving to list' do
@@ -146,8 +147,8 @@ RSpec.describe 'issue boards', :js do
               to_index: 0,
               list_to_index: 1)
 
-      expect(badge(from)).to have_content('3')
-      expect(badge(to)).to have_content('2')
+      expect(card_weight_badge(from)).to have_content('3')
+      expect(card_weight_badge(to)).to have_content('2')
     end
 
     context 'unlicensed' do
@@ -160,26 +161,10 @@ RSpec.describe 'issue boards', :js do
         expect(page).not_to have_text('2 issues')
 
         backlog = board.lists.first
-        badge(backlog).hover
+        list_weight_badge(backlog).hover
 
         expect(page).to have_text('2 issues')
       end
-    end
-  end
-
-  context 'locked milestone' do
-    before do
-      visit project_board_path(project, board_with_milestone)
-      wait_for_requests
-    end
-
-    it 'does not have remove button' do
-      expect(page).to have_selector('.js-visual-token .remove-token', count: 0)
-    end
-
-    it 'is not able to be backspaced' do
-      find('.input-token .filtered-search').native.send_key(:backspace)
-      expect(page).to have_selector('.js-visual-token', count: 1)
     end
   end
 
@@ -201,7 +186,7 @@ RSpec.describe 'issue boards', :js do
 
         it 'displays issue and max issue size' do
           page.within(find(".board:nth-child(2)")) do
-            expect(page.find('.js-issue-size')).to have_text(total_development_issues)
+            expect(page.find('[data-testid="board-items-count"]')).to have_text(total_development_issues)
             expect(page.find('.js-max-issue-size')).to have_text(max_issue_count)
           end
         end
@@ -215,7 +200,7 @@ RSpec.describe 'issue boards', :js do
       login_as(user)
     end
 
-    context 'When license is available' do
+    context 'when license is available' do
       let!(:label) { create(:label, project: project, name: 'Brount') }
       let!(:list) { create(:list, board: board, label: label, position: 1) }
 
@@ -346,7 +331,7 @@ RSpec.describe 'issue boards', :js do
       end
     end
 
-    context 'When license is not available' do
+    context 'when license is not available' do
       before do
         stub_licensed_features(wip_limits: false)
         visit project_boards_path(project)
@@ -359,8 +344,12 @@ RSpec.describe 'issue boards', :js do
     end
   end
 
-  def badge(list)
-    find(".board[data-id='#{list.id}'] .issue-count-badge")
+  def list_weight_badge(list)
+    find(".board[data-id='gid://gitlab/List/#{list.id}'] [data-testid='issue-count-badge']")
+  end
+
+  def card_weight_badge(list)
+    find(".board[data-id='gid://gitlab/List/#{list.id}'] [data-testid='board-card-weight']")
   end
 
   def visit_board_page

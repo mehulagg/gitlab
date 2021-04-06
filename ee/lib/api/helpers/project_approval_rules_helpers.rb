@@ -28,7 +28,9 @@ module API
         requires :approval_rule_id, type: Integer, desc: 'The ID of an approval_rule'
       end
 
-      def authorize_create_merge_request_in_project
+      def authorize_read_project_approval_rule!
+        return if can?(current_user, :admin_project, user_project)
+
         authorize! :create_merge_request_in, user_project
       end
 

@@ -8,9 +8,18 @@ module BulkImports
       end
 
       def execute
-        context = BulkImports::Pipeline::Context.new(entity)
+        pipelines.each.with_index do |pipeline, stage|
+          pipeline_tracker = entity.trackers.create!(
+            pipeline_name: pipeline,
+            stage: stage
+          )
 
-        pipelines.each { |pipeline| pipeline.new(context).run }
+          context = BulkImports::Pipeline::Context.new(pipeline_tracker)
+
+          pipeline.new(context).run
+
+          pipeline_tracker.finish!
+        end
 
         entity.finish!
       end
@@ -24,7 +33,9 @@ module BulkImports
           BulkImports::Groups::Pipelines::GroupPipeline,
           BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
           BulkImports::Groups::Pipelines::MembersPipeline,
-          BulkImports::Groups::Pipelines::LabelsPipeline
+          BulkImports::Groups::Pipelines::LabelsPipeline,
+          BulkImports::Groups::Pipelines::MilestonesPipeline,
+          BulkImports::Groups::Pipelines::BadgesPipeline
         ]
       end
     end

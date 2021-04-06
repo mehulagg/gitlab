@@ -164,7 +164,7 @@ module MergeRequests
 
     def pipeline_merge_requests(pipeline)
       pipeline.all_merge_requests.opened.each do |merge_request|
-        next unless pipeline == merge_request.head_pipeline
+        next unless pipeline.id == merge_request.head_pipeline_id
 
         yield merge_request
       end
@@ -181,7 +181,7 @@ module MergeRequests
       }
 
       if exception
-        Gitlab::ErrorTracking.with_context(current_user) do
+        Gitlab::ApplicationContext.with_context(user: current_user) do
           Gitlab::ErrorTracking.track_exception(exception, data)
         end
 

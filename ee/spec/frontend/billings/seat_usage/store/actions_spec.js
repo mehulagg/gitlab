@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
 import Api from 'ee/api';
+import * as GroupsApi from 'ee/api/groups_api';
 import * as actions from 'ee/billings/seat_usage/store/actions';
 import * as types from 'ee/billings/seat_usage/store/mutation_types';
 import State from 'ee/billings/seat_usage/store/state';
 import { mockDataSeats } from 'ee_jest/billings/mock_data';
 import testAction from 'helpers/vuex_action_helper';
-import * as GroupsApi from '~/api/groups_api';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -121,35 +121,35 @@ describe('seats actions', () => {
     });
   });
 
-  describe('resetMembers', () => {
+  describe('resetBillableMembers', () => {
     it('should commit mutation', () => {
       testAction({
-        action: actions.resetMembers,
+        action: actions.resetBillableMembers,
         state,
-        expectedMutations: [{ type: types.RESET_MEMBERS }],
+        expectedMutations: [{ type: types.RESET_BILLABLE_MEMBERS }],
       });
     });
   });
 
-  describe('setMemberToRemove', () => {
+  describe('setBillableMemberToRemove', () => {
     it('should commit the set member mutation', async () => {
       await testAction({
-        action: actions.setMemberToRemove,
+        action: actions.setBillableMemberToRemove,
         state,
-        expectedMutations: [{ type: types.SET_MEMBER_TO_REMOVE }],
+        expectedMutations: [{ type: types.SET_BILLABLE_MEMBER_TO_REMOVE }],
       });
     });
   });
 
-  describe('removeMember', () => {
+  describe('removeBillableMember', () => {
     let groupsApiSpy;
 
     beforeEach(() => {
-      groupsApiSpy = jest.spyOn(GroupsApi, 'removeMemberFromGroup');
+      groupsApiSpy = jest.spyOn(GroupsApi, 'removeBillableMemberFromGroup');
 
       state = {
         namespaceId: 1,
-        memberToRemove: {
+        billableMemberToRemove: {
           id: 2,
         },
       };
@@ -157,14 +157,14 @@ describe('seats actions', () => {
 
     describe('on success', () => {
       beforeEach(() => {
-        mock.onDelete('/api/v4/groups/1/members/2').reply(httpStatusCodes.OK);
+        mock.onDelete('/api/v4/groups/1/billable_members/2').reply(httpStatusCodes.OK);
       });
 
-      it('dispatches the removeMemberSuccess action', async () => {
+      it('dispatches the removeBillableMemberSuccess action', async () => {
         await testAction({
-          action: actions.removeMember,
+          action: actions.removeBillableMember,
           state,
-          expectedActions: [{ type: 'removeMemberSuccess' }],
+          expectedActions: [{ type: 'removeBillableMemberSuccess' }],
         });
 
         expect(groupsApiSpy).toHaveBeenCalled();
@@ -173,14 +173,16 @@ describe('seats actions', () => {
 
     describe('on error', () => {
       beforeEach(() => {
-        mock.onDelete('/api/v4/groups/1/members/2').reply(httpStatusCodes.UNPROCESSABLE_ENTITY);
+        mock
+          .onDelete('/api/v4/groups/1/billable_members/2')
+          .reply(httpStatusCodes.UNPROCESSABLE_ENTITY);
       });
 
-      it('dispatches the removeMemberError action', async () => {
+      it('dispatches the removeBillableMemberError action', async () => {
         await testAction({
-          action: actions.removeMember,
+          action: actions.removeBillableMember,
           state,
-          expectedActions: [{ type: 'removeMemberError' }],
+          expectedActions: [{ type: 'removeBillableMemberError' }],
         });
 
         expect(groupsApiSpy).toHaveBeenCalled();
@@ -188,13 +190,13 @@ describe('seats actions', () => {
     });
   });
 
-  describe('removeMemberSuccess', () => {
+  describe('removeBillableMemberSuccess', () => {
     it('dispatches fetchBillableMembersList', async () => {
       await testAction({
-        action: actions.removeMemberSuccess,
+        action: actions.removeBillableMemberSuccess,
         state,
         expectedActions: [{ type: 'fetchBillableMembersList' }],
-        expectedMutations: [{ type: types.REMOVE_MEMBER_SUCCESS }],
+        expectedMutations: [{ type: types.REMOVE_BILLABLE_MEMBER_SUCCESS }],
       });
 
       expect(createFlash).toHaveBeenCalledWith({
@@ -204,12 +206,12 @@ describe('seats actions', () => {
     });
   });
 
-  describe('removeMemberError', () => {
+  describe('removeBillableMemberError', () => {
     it('commits remove member error', async () => {
       await testAction({
-        action: actions.removeMemberError,
+        action: actions.removeBillableMemberError,
         state,
-        expectedMutations: [{ type: types.REMOVE_MEMBER_ERROR }],
+        expectedMutations: [{ type: types.REMOVE_BILLABLE_MEMBER_ERROR }],
       });
 
       expect(createFlash).toHaveBeenCalledWith({

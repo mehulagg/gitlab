@@ -19,7 +19,7 @@ module IncidentManagement
       ends_at = limit_end_time(apply_timezone(ends_at))
 
       return [] unless starts_at < ends_at
-      return [] unless rotation.participants.any?
+      return [] unless participants.any?
 
       # The first shift within the timeframe may begin before
       # the timeframe. We want to begin generating shifts
@@ -50,7 +50,7 @@ module IncidentManagement
 
       return if timestamp < rotation_starts_at
       return if rotation_ends_at && rotation_ends_at <= timestamp
-      return unless rotation.participants.any?
+      return unless participants.any?
 
       elapsed_shift_cycle_count = elapsed_whole_shift_cycles(timestamp)
       shift_cycle_starts_at = shift_cycle_start_time(elapsed_shift_cycle_count)
@@ -129,8 +129,8 @@ module IncidentManagement
           #     expected_shift_count = 14          -> pretend it's a 2-week rotation
           #     shift_count = 2                    -> we're calculating the shift for the 3rd day
           # starts_at = Monday 00:00:00 + 8.hours + 2.days => Thursday 08:00:00
-
-          starts_at, ends_at = rotation.active_period.for_date(shift_cycle_starts_at + shift_count.days)
+          start_date = shift_cycle_starts_at + shift_count.days
+          starts_at, ends_at = rotation.active_period.for_date(start_date)
 
           shift_for(participant, [rotation.starts_at, starts_at].max, limit_end_time(ends_at))
         end
@@ -175,7 +175,7 @@ module IncidentManagement
 
     def participants
       strong_memoize(:participants) do
-        rotation.participants
+        rotation.active_participants
       end
     end
 

@@ -1,5 +1,6 @@
 <script>
 import {
+  GlAlert,
   GlButton,
   GlIcon,
   GlFormCheckbox,
@@ -14,38 +15,39 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import Autosave from '~/autosave';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import httpStatusCodes from '~/lib/utils/http_status';
 import {
   capitalizeFirstCharacter,
   convertToCamelCase,
   splitCamelCase,
   slugifyWithUnderscore,
 } from '~/lib/utils/text_utility';
-import { __, sprintf } from '~/locale';
+import { sprintf } from '~/locale';
 import markdownField from '~/vue_shared/components/markdown/field.vue';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+
 import * as constants from '../constants';
 import eventHub from '../event_hub';
+import { COMMENT_FORM } from '../i18n';
+
 import issuableStateMixin from '../mixins/issuable_state';
 import CommentFieldLayout from './comment_field_layout.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
 import noteSignedOutWidget from './note_signed_out_widget.vue';
 
+const { UNPROCESSABLE_ENTITY } = httpStatusCodes;
+
 export default {
   name: 'CommentForm',
-  i18n: {
-    submitButton: {
-      startThread: __('Start thread'),
-      comment: __('Comment'),
-      commentHelp: __('Add a general comment to this %{noteableDisplayName}.'),
-    },
-  },
+  i18n: COMMENT_FORM,
   noteTypeComment: constants.COMMENT,
   noteTypeDiscussion: constants.DISCUSSION,
   components: {
     noteSignedOutWidget,
     discussionLockedWidget,
     markdownField,
+    GlAlert,
     GlButton,
     TimelineEntryItem,
     GlIcon,
@@ -69,6 +71,7 @@ export default {
     return {
       note: '',
       noteType: constants.COMMENT,
+      errors: [],
       noteIsConfidential: false,
       isSubmitting: false,
     };
@@ -96,12 +99,14 @@ export default {
       return this.getUserData.id;
     },
     commentButtonTitle() {
-      return this.noteType === constants.COMMENT ? __('Comment') : __('Start thread');
+      return this.noteType === constants.COMMENT
+        ? this.$options.i18n.comment
+        : this.$options.i18n.startThread;
     },
     startDiscussionDescription() {
       return this.getNoteableData.noteableType === constants.MERGE_REQUEST_NOTEABLE_TYPE
-        ? __('Discuss a specific suggestion or question that needs to be resolved.')
-        : __('Discuss a specific suggestion or question.');
+        ? this.$options.i18n.discussionThatNeedsResolution
+        : this.$options.i18n.discussion;
     },
     commentDescription() {
       return sprintf(this.$options.i18n.submitButton.commentHelp, {
@@ -121,20 +126,17 @@ export default {
       const openOrClose = this.isOpen ? 'close' : 'reopen';
 
       if (this.note.length) {
-        return sprintf(__('%{actionText} & %{openOrClose} %{noteable}'), {
+        return sprintf(this.$options.i18n.actionButtonWithNote, {
           actionText: this.commentButtonTitle,
           openOrClose,
           noteable: this.noteableDisplayName,
         });
       }
 
-      return sprintf(__('%{openOrClose} %{noteable}'), {
+      return sprintf(this.$options.i18n.actionButton, {
         openOrClose: capitalizeFirstCharacter(openOrClose),
         noteable: this.noteableDisplayName,
       });
-    },
-    buttonVariant() {
-      return this.isOpen ? 'warning' : 'default';
     },
     actionButtonClassNames() {
       return {
@@ -171,8 +173,8 @@ export default {
     },
     issuableTypeTitle() {
       return this.noteableType === constants.MERGE_REQUEST_NOTEABLE_TYPE
-        ? __('merge request')
-        : __('issue');
+        ? this.$options.i18n.mergeRequest
+        : this.$options.i18n.issue;
     },
     isIssue() {
       return this.noteableDisplayName === constants.ISSUE_NOTEABLE_TYPE;
@@ -205,11 +207,19 @@ export default {
       'reopenIssuable',
       'toggleIssueLocalState',
     ]),
+    handleSaveError({ data, status }) {
+      if (status === UNPROCESSABLE_ENTITY && data.errors?.commands_only?.length) {
+        this.errors = data.errors.commands_only;
+      } else {
+        this.errors = [this.$options.i18n.GENERIC_UNSUBMITTABLE_NETWORK];
+      }
+    },
     handleSave(withIssueAction) {
+      this.errors = [];
+
       if (this.note.length) {
         const noteData = {
           endpoint: this.endpoint,
-          flashContainer: this.$el,
           data: {
             note: {
               noteable_type: this.noteableType,
@@ -240,12 +250,10 @@ export default {
               this.toggleIssueState();
             }
           })
-          .catch(() => {
+          .catch(({ response }) => {
+            this.handleSaveError(response);
+
             this.discard(false);
-            const msg = __(
-              'Your comment could not be submitted! Please check your network connection and try again.',
-            );
-            Flash(msg, 'alert', this.$el);
             this.note = noteData.data.note.note; // Restore textarea content.
             this.removePlaceholderNotes();
           })
@@ -310,7 +318,7 @@ export default {
         const noteableType = capitalizeFirstCharacter(convertToCamelCase(this.noteableType));
 
         this.autosave = new Autosave($(this.$refs.textarea), [
-          __('Note'),
+          this.$options.i18n.note,
           noteableType,
           this.getNoteableData.id,
         ]);
@@ -324,6 +332,9 @@ export default {
     hasEmailParticipants() {
       return this.getNoteableData.issue_email_participants?.length;
     },
+    dismissError(index) {
+      this.errors.splice(index, 1);
+    },
   },
 };
 </script>
@@ -334,7 +345,15 @@ export default {
     <discussion-locked-widget v-else-if="!canCreateNote" :issuable-type="issuableTypeTitle" />
     <ul v-else-if="canCreateNote" class="notes notes-form timeline">
       <timeline-entry-item class="note-form">
-        <div class="flash-container error-alert timeline-content"></div>
+        <gl-alert
+          v-for="(error, index) in errors"
+          :key="index"
+          variant="danger"
+          class="gl-mb-2"
+          @dismiss="() => dismissError(index)"
+        >
+          {{ error }}
+        </gl-alert>
         <div class="timeline-content timeline-content-form">
           <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
             <comment-field-layout
@@ -363,8 +382,8 @@ export default {
                     data-qa-selector="comment_field"
                     data-testid="comment-field"
                     :data-supports-quick-actions="!glFeatures.tributeAutocomplete"
-                    :aria-label="__('Comment')"
-                    :placeholder="__('Write a comment or drag your files here…')"
+                    :aria-label="$options.i18n.comment"
+                    :placeholder="$options.i18n.bodyPlaceholder"
                     @keydown.up="editCurrentUserLastNote()"
                     @keydown.meta.enter="handleSave()"
                     @keydown.ctrl.enter="handleSave()"
@@ -379,12 +398,12 @@ export default {
                 class="gl-mb-6"
                 data-testid="confidential-note-checkbox"
               >
-                {{ s__('Notes|Make this comment confidential') }}
+                {{ $options.i18n.confidential }}
                 <gl-icon
                   v-gl-tooltip:tooltipcontainer.bottom
                   name="question"
                   :size="16"
-                  :title="s__('Notes|Confidential comments are only visible to project members')"
+                  :title="$options.i18n.confidentialVisibility"
                   class="gl-text-gray-500"
                 />
               </gl-form-checkbox>
@@ -393,7 +412,7 @@ export default {
                 :text="commentButtonTitle"
                 class="gl-mr-3 js-comment-button js-comment-submit-button comment-type-dropdown"
                 category="primary"
-                variant="success"
+                variant="confirm"
                 :disabled="disableSubmitButton"
                 data-testid="comment-button"
                 data-qa-selector="comment_button"
@@ -425,8 +444,6 @@ export default {
               <gl-button
                 v-if="canToggleIssueState"
                 :loading="isToggleStateButtonLoading"
-                category="secondary"
-                :variant="buttonVariant"
                 :class="[actionButtonClassNames, 'btn-comment btn-comment-and-close']"
                 :disabled="isSubmitting"
                 data-testid="close-reopen-button"

@@ -2,32 +2,53 @@ import { GlLabel } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
 import ListItem from 'ee/groups/settings/compliance_frameworks/components/list_item.vue';
+import {
+  DELETE_BUTTON_LABEL,
+  EDIT_BUTTON_LABEL,
+} from 'ee/groups/settings/compliance_frameworks/constants';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('ListItem', () => {
   let wrapper;
 
-  const framework = { name: 'framework', description: 'a framework', color: '#112233' };
-  const findLabel = () => wrapper.find(GlLabel);
-  const findDescription = () => wrapper.find('[data-testid="compliance-framework-description"]');
-  const findDeleteButton = () => wrapper.find('[data-testid="compliance-framework-delete-button"]');
+  const framework = {
+    parsedId: 1,
+    name: 'framework',
+    description: 'a framework',
+    color: '#112233',
+    editPath: 'group/framework/1/edit',
+  };
+  const findLabel = () => wrapper.findComponent(GlLabel);
+  const findDescription = () => wrapper.findByTestId('compliance-framework-description');
+  const findEditButton = () => wrapper.findByTestId('compliance-framework-edit-button');
+  const findDeleteButton = () => wrapper.findByTestId('compliance-framework-delete-button');
 
   const createComponent = (props = {}) => {
-    wrapper = shallowMount(ListItem, {
-      propsData: {
-        framework,
-        loading: false,
-        ...props,
-      },
-      directives: {
-        GlTooltip: createMockDirective(),
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(ListItem, {
+        propsData: {
+          framework,
+          loading: false,
+          ...props,
+        },
+        directives: {
+          GlTooltip: createMockDirective(),
+        },
+      }),
+    );
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
+
+  const displaysTheButton = (button, icon, ariaLabel) => {
+    expect(button.props('icon')).toBe(icon);
+    expect(button.props('disabled')).toBe(false);
+    expect(button.props('loading')).toBe(false);
+    expect(button.attributes('aria-label')).toBe(ariaLabel);
+  };
 
   it('displays the description defined by the framework', () => {
     createComponent();
@@ -39,6 +60,7 @@ describe('ListItem', () => {
     createComponent();
 
     expect(findLabel().props('title')).toBe('framework');
+    expect(findLabel().props('target')).toBe(framework.editPath);
     expect(findLabel().props('scoped')).toBe(false);
   });
 
@@ -46,8 +68,18 @@ describe('ListItem', () => {
     createComponent({ framework: { ...framework, name: 'scoped::framework' } });
 
     expect(findLabel().props('title')).toBe('scoped::framework');
+    expect(findLabel().props('target')).toBe(framework.editPath);
     expect(findLabel().props('scoped')).toBe(true);
     expect(findLabel().props('disabled')).toBe(false);
+  });
+
+  it('displays the edit button', () => {
+    createComponent();
+
+    const button = findEditButton();
+
+    displaysTheButton(button, 'pencil', EDIT_BUTTON_LABEL);
+    expect(button.attributes('href')).toBe('group/framework/1/edit');
   });
 
   it('displays a delete button', () => {
@@ -56,10 +88,7 @@ describe('ListItem', () => {
     const button = findDeleteButton();
     const tooltip = getBinding(button.element, 'gl-tooltip');
 
-    expect(button.props('icon')).toBe('remove');
-    expect(button.props('disabled')).toBe(false);
-    expect(button.props('loading')).toBe(false);
-    expect(button.attributes('aria-label')).toBe('Delete framework');
+    displaysTheButton(button, 'remove', DELETE_BUTTON_LABEL);
     expect(tooltip.value).toBe('Delete framework');
   });
 
@@ -81,8 +110,17 @@ describe('ListItem', () => {
     });
 
     it('disables the delete button and shows loading', () => {
-      expect(findDeleteButton().props('disabled')).toBe(true);
-      expect(findDeleteButton().props('loading')).toBe(true);
+      const button = findDeleteButton();
+
+      expect(button.props('disabled')).toBe(true);
+      expect(button.props('loading')).toBe(true);
+    });
+
+    it('disables the edit button and does not show loading', () => {
+      const button = findEditButton();
+
+      expect(button.props('disabled')).toBe(true);
+      expect(button.props('loading')).toBe(false);
     });
   });
 });

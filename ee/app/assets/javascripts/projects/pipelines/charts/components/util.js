@@ -24,7 +24,7 @@ export const apiDataToChartSeries = (apiData, startDate, endDate) => {
   // The timestamps are explicitly set to the _beginning_ of the day (in UTC)
   // so that we can confidently compare dates by value below.
   const timestampToApiValue = apiData.reduce((acc, curr) => {
-    const apiTimestamp = getStartOfDay(new Date(curr.from), { utc: true }).getTime();
+    const apiTimestamp = getStartOfDay(new Date(curr.date), { utc: true }).getTime();
     acc[apiTimestamp] = curr.value;
     return acc;
   }, {});

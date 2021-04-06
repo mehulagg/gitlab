@@ -75,6 +75,9 @@ A modal appears to confirm your action.
 
 Deleting an epic releases all existing issues from their associated epic in the system.
 
+WARNING:
+If you delete an epic, all its child epics and their descendants are deleted as well. If needed, you can [remove child epics](#remove-a-child-epic-from-a-parent-epic) from the parent epic before you delete it.
+
 ## Close an epic
 
 Whenever you decide that there is no longer need for that epic,
@@ -107,15 +110,17 @@ link in the issue sidebar.
 
 > - Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.5.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/37081) to the [Premium](https://about.gitlab.com/pricing/) tier in GitLab 12.8.
+> - Searching by the user's reaction emoji [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/325630) in GitLab 13.11.
 
 You can search for an epic from the list of epics using filtered search bar (similar to
-that of Issues and Merge Requests) based on following parameters:
+that of issues and merge requests) based on following parameters:
 
 - Title or description
 - Author name / username
 - Labels
+- Reaction emoji
 
-![epics search](img/epics_search.png)
+![epics search](img/epics_search_v13_11.png)
 
 To search, go to the list of epics and select the field **Search or filter results**.
 It displays a dropdown menu, from which you can add an author. You can also enter plain
@@ -243,7 +248,7 @@ To move an issue to another epic:
 
 If you have the necessary [permissions](../../permissions.md) to close an issue and create an
 epic in the immediate parent group, you can promote an issue to an epic with the `/promote`
-[quick action](../../project/quick_actions.md#quick-actions-for-issues-merge-requests-and-epics).
+[quick action](../../project/quick_actions.md#issues-merge-requests-and-epics).
 Only issues from projects that are in groups can be promoted. When you attempt to promote a confidential
 issue, a warning is displayed. Promoting a confidential issue to an epic makes all information
 related to the issue public as epics are public to group members.

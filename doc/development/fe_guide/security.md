@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## Resources
 
-[Mozilla’s HTTP Observatory CLI](https://github.com/mozilla/http-observatory-cli) and 
+[Mozilla's HTTP Observatory CLI](https://github.com/mozilla/http-observatory-cli) and
 [Qualys SSL Labs Server Test](https://www.ssllabs.com/ssltest/analyze.html) are good resources for finding
 potential problems and ensuring compliance with security best practices.
 
@@ -41,7 +41,7 @@ Security Policy headers in the GitLab Rails app.
 Some resources on implementing Content Security Policy:
 
 - [MDN Article on CSP](https://developer.mozilla.org/en-US/docs/Web/Security/CSP)
-- [GitHub’s CSP Journey on the GitHub Engineering Blog](http://githubengineering.com/githubs-csp-journey/)
+- [GitHub's CSP Journey on the GitHub Engineering Blog](http://githubengineering.com/githubs-csp-journey/)
 - The Dropbox Engineering Blog's series on CSP: [1](https://blogs.dropbox.com/tech/2015/09/on-csp-reporting-and-filtering/), [2](https://blogs.dropbox.com/tech/2015/09/unsafe-inline-and-nonce-deployment/), [3](https://blogs.dropbox.com/tech/2015/09/csp-the-unexpected-eval/), [4](https://blogs.dropbox.com/tech/2015/09/csp-third-party-integrations-and-privilege-separation/)
 
 ### Subresource Integrity (SRI)
@@ -105,3 +105,9 @@ element.appendChild(sanitize(unsafeHtml));
 
 This `sanitize` function takes the same configuration as the
 original.
+
+### Fixing Security Issues
+
+When refactoring old code, it's important that we don't accidentally remove specs written to catch security issues which might still be relevant.
+
+We should mark specs with `#security` in either the `describe` or `it` blocks to communicate to the engineer reading the code that by removing these specs could have severe consequences down the road, and you are removing code that could catch a reintroduction of a security issue.

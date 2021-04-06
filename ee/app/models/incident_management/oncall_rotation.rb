@@ -11,10 +11,12 @@ module IncidentManagement
         end_time > start_time if present?
       end
 
-      def for_date(date)
+      def for_date(start_date)
+        end_date = end_after_start? ? start_date : start_date.next_day
+
         [
-          date.change(hour: start_time.hour, min: start_time.min),
-          date.change(hour: end_time.hour, min: end_time.min)
+          start_date.change(hour: start_time.hour, min: start_time.min),
+          end_date.change(hour: end_time.hour, min: end_time.min)
         ]
       end
     end
@@ -30,8 +32,9 @@ module IncidentManagement
     NAME_LENGTH = 200
 
     belongs_to :schedule, class_name: 'OncallSchedule', inverse_of: 'rotations', foreign_key: 'oncall_schedule_id'
-    # Note! If changing the order of participants, also change the :with_shift_generation_associations scope.
     has_many :participants, -> { order(id: :asc) }, class_name: 'OncallParticipant', inverse_of: :rotation
+    # Note! If changing the order of participants, also change the :with_shift_generation_associations scope.
+    has_many :active_participants, -> { not_removed.order(id: :asc) }, class_name: 'OncallParticipant', inverse_of: :rotation
     has_many :users, through: :participants
     has_many :shifts, class_name: 'OncallShift', inverse_of: :rotation, foreign_key: :rotation_id
 
@@ -43,15 +46,14 @@ module IncidentManagement
 
     validates :active_period_start, presence: true, if: :active_period_end
     validates :active_period_end, presence: true, if: :active_period_start
-    validate :active_period_end_after_start, if: :active_period_start
     validate :no_active_period_for_hourly_shifts, if: :hours?
 
     scope :in_progress, -> { where('starts_at < :time AND (ends_at > :time OR ends_at IS NULL)', time: Time.current) }
     scope :except_ids, -> (ids) { where.not(id: ids) }
     scope :with_shift_generation_associations, -> do
-      joins(:participants, :schedule)
+      joins(:active_participants, :schedule)
         .distinct
-        .includes(:participants, :schedule)
+        .includes(:active_participants, :schedule)
         .order(:id, 'incident_management_oncall_participants.id ASC')
     end
 
@@ -84,17 +86,17 @@ module IncidentManagement
       !hours? && active_period.present?
     end
 
+    def upsert_participants!(new_participants)
+      ::IncidentManagement::OncallParticipant.upsert_all(
+        new_participants,
+        unique_by: :index_inc_mgmnt_oncall_participants_on_user_id_and_rotation_id
+      )
+    end
+
     private
 
     def valid_ends_at
       errors.add(:ends_at, s_('must be after start')) if ends_at <= starts_at
-    end
-
-    def active_period_end_after_start
-      return unless active_period.present?
-      return if active_period.end_after_start?
-
-      errors.add(:active_period_end, _('must be later than active period start'))
     end
 
     def no_active_period_for_hourly_shifts

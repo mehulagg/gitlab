@@ -14,7 +14,7 @@ RSpec.describe 'getting a requirement list for a project' do
     <<~QUERY
     edges {
       node {
-        #{all_graphql_fields_for('requirements'.classify)}
+        #{all_graphql_fields_for('requirements'.classify, max_depth: 1)}
       }
     }
     QUERY

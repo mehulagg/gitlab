@@ -40,6 +40,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
   it { is_expected.to respond_to :git_author_name }
   it { is_expected.to respond_to :git_author_email }
+  it { is_expected.to respond_to :git_author_full_text }
   it { is_expected.to respond_to :short_sha }
   it { is_expected.to delegate_method(:full_path).to(:project).with_prefix }
 
@@ -807,7 +808,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       expect(keys).to eq %w[
         CI_PIPELINE_IID
         CI_PIPELINE_SOURCE
-        CI_CONFIG_PATH
+        CI_PIPELINE_CREATED_AT
         CI_COMMIT_SHA
         CI_COMMIT_SHORT_SHA
         CI_COMMIT_BEFORE_SHA
@@ -819,6 +820,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         CI_COMMIT_DESCRIPTION
         CI_COMMIT_REF_PROTECTED
         CI_COMMIT_TIMESTAMP
+        CI_COMMIT_AUTHOR
         CI_BUILD_REF
         CI_BUILD_BEFORE_SHA
         CI_BUILD_REF_NAME
@@ -1132,22 +1134,28 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
           end
 
           context 'when commit status is retried' do
-            before do
+            let!(:old_commit_status) do
               create(:commit_status, pipeline: pipeline,
-                                    stage: 'build',
-                                    name: 'mac',
-                                    stage_idx: 0,
-                                    status: 'success')
-
-              Ci::ProcessPipelineService
-                .new(pipeline)
-                .execute
+                                     stage: 'build',
+                                     name: 'mac',
+                                     stage_idx: 0,
+                                     status: 'success')
             end
 
-            it 'ignores the previous state' do
-              expect(statuses).to eq([%w(build success),
-                                      %w(test success),
-                                      %w(deploy running)])
+            context 'when FF ci_remove_update_retried_from_process_pipeline is disabled' do
+              before do
+                stub_feature_flags(ci_remove_update_retried_from_process_pipeline: false)
+
+                Ci::ProcessPipelineService
+                  .new(pipeline)
+                  .execute
+              end
+
+              it 'ignores the previous state' do
+                expect(statuses).to eq([%w(build success),
+                                        %w(test success),
+                                        %w(deploy running)])
+              end
             end
           end
         end
@@ -2627,6 +2635,37 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         expect(latest_status).to eq %w(canceled canceled)
       end
     end
+
+    context 'preloading relations' do
+      let(:pipeline1) { create(:ci_empty_pipeline, :created) }
+      let(:pipeline2) { create(:ci_empty_pipeline, :created) }
+
+      before do
+        create(:ci_build, :pending, pipeline: pipeline1)
+        create(:generic_commit_status, :pending, pipeline: pipeline1)
+
+        create(:ci_build, :pending, pipeline: pipeline2)
+        create(:ci_build, :pending, pipeline: pipeline2)
+        create(:generic_commit_status, :pending, pipeline: pipeline2)
+        create(:generic_commit_status, :pending, pipeline: pipeline2)
+        create(:generic_commit_status, :pending, pipeline: pipeline2)
+      end
+
+      it 'preloads relations for each build to avoid N+1 queries' do
+        control1 = ActiveRecord::QueryRecorder.new do
+          pipeline1.cancel_running
+        end
+
+        control2 = ActiveRecord::QueryRecorder.new do
+          pipeline2.cancel_running
+        end
+
+        extra_update_queries = 3 # transition ... => :canceled
+        extra_generic_commit_status_validation_queries = 2 # name_uniqueness_across_types
+
+        expect(control2.count).to eq(control1.count + extra_update_queries + extra_generic_commit_status_validation_queries)
+      end
+    end
   end
 
   describe '#retry_failed' do
@@ -3774,6 +3813,26 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
   end
 
+  describe '#uses_needs?' do
+    let_it_be(:pipeline) { create(:ci_pipeline) }
+
+    context 'when the scheduling type is `dag`' do
+      it 'returns true' do
+        create(:ci_build, pipeline: pipeline, scheduling_type: :dag)
+
+        expect(pipeline.uses_needs?).to eq(true)
+      end
+    end
+
+    context 'when the scheduling type is nil or stage' do
+      it 'returns false' do
+        create(:ci_build, pipeline: pipeline, scheduling_type: :stage)
+
+        expect(pipeline.uses_needs?).to eq(false)
+      end
+    end
+  end
+
   describe '#total_size' do
     let(:pipeline) { create(:ci_pipeline) }
     let!(:build_job1) { create(:ci_build, pipeline: pipeline, stage_idx: 0) }
@@ -3806,6 +3865,16 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
           expect(AutoDevops::DisableWorker).not_to receive(:perform_async)
 
           pipeline.drop
+        end
+      end
+
+      context 'with failure_reason' do
+        let(:pipeline) { create(:ci_pipeline, :running) }
+        let(:failure_reason) { 'config_error' }
+        let(:counter) { Gitlab::Metrics.counter(:gitlab_ci_pipeline_failure_reasons, 'desc') }
+
+        it 'increments the counter with the failure_reason' do
+          expect { pipeline.drop!(failure_reason) }.to change { counter.get(reason: failure_reason) }.by(1)
         end
       end
     end

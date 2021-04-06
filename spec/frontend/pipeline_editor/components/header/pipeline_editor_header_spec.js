@@ -3,7 +3,7 @@ import PipelineEditorHeader from '~/pipeline_editor/components/header/pipeline_e
 import PipelineStatus from '~/pipeline_editor/components/header/pipeline_status.vue';
 import ValidationSegment from '~/pipeline_editor/components/header/validation_segment.vue';
 
-import { mockLintResponse } from '../../mock_data';
+import { mockCiYml, mockLintResponse } from '../../mock_data';
 
 describe('Pipeline editor header', () => {
   let wrapper;
@@ -13,15 +13,18 @@ describe('Pipeline editor header', () => {
     },
   };
 
-  const createComponent = ({ provide = {} } = {}) => {
+  const createComponent = ({ provide = {}, props = {} } = {}) => {
     wrapper = shallowMount(PipelineEditorHeader, {
       provide: {
         ...mockProvide,
         ...provide,
       },
-      props: {
+      propsData: {
         ciConfigData: mockLintResponse,
+        ciFileContent: mockCiYml,
         isCiConfigDataLoading: false,
+        isNewCiConfigFile: false,
+        ...props,
       },
     });
   };
@@ -35,15 +38,21 @@ describe('Pipeline editor header', () => {
   });
 
   describe('template', () => {
-    beforeEach(() => {
-      createComponent();
+    it('hides the pipeline status for new projects without a CI file', () => {
+      createComponent({ props: { isNewCiConfigFile: true } });
+
+      expect(findPipelineStatus().exists()).toBe(false);
     });
 
-    it('renders the pipeline status', () => {
+    it('renders the pipeline status when CI file exists', () => {
+      createComponent({ props: { isNewCiConfigFile: false } });
+
       expect(findPipelineStatus().exists()).toBe(true);
     });
 
     it('renders the validation segment', () => {
+      createComponent();
+
       expect(findValidationSegment().exists()).toBe(true);
     });
   });

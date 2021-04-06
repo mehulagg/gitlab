@@ -1,3 +1,4 @@
+- add_page_specific_style 'page_bundles/members'
 - page_title _('Group members')
 - can_manage_members = can?(current_user, :admin_group_member, @group)
 - show_invited_members = can_manage_members && @invited_members.exists?
@@ -18,7 +19,7 @@
           .gl-w-half.gl-xs-w-full
             .gl-display-flex.gl-flex-wrap.gl-justify-content-end.gl-mb-3
               .js-invite-group-trigger{ data: { classes: 'gl-mt-3 gl-sm-w-auto gl-w-full', display_text: _('Invite a group') } }
-              .js-invite-members-trigger{ data: { classes: 'btn btn-success gl-button gl-mt-3 gl-sm-w-auto gl-w-full gl-sm-ml-3', display_text: _('Invite members') } }
+              .js-invite-members-trigger{ data: { variant: 'success', classes: 'gl-mt-3 gl-sm-w-auto gl-w-full gl-sm-ml-3', display_text: _('Invite members') } }
           = render 'groups/invite_members_modal', group: @group
     - if can_manage_members && !can_invite_members_for_group?(@group)
       %hr.gl-mt-4
@@ -40,25 +41,25 @@
         = link_to '#tab-members', class: ['nav-link', ('active' unless invited_active)], data: { toggle: 'tab' } do
           %span
             = _('Members')
-          %span.badge.badge-pill= @members.total_count
+          %span.badge.gl-tab-counter-badge.badge-muted.badge-pill.gl-badge.sm= @members.total_count
       - if @group.shared_with_group_links.any?
         %li.nav-item
           = link_to '#tab-groups', class: ['nav-link'] , data: { toggle: 'tab', qa_selector: 'groups_list_tab' } do
             %span
               = _('Groups')
-            %span.badge.badge-pill= @group.shared_with_group_links.count
+            %span.badge.gl-tab-counter-badge.badge-muted.badge-pill.gl-badge.sm= @group.shared_with_group_links.count
       - if show_invited_members
         %li.nav-item
           = link_to '#tab-invited-members', class: ['nav-link', ('active' if invited_active)], data: { toggle: 'tab' } do
             %span
               = _('Invited')
-            %span.badge.badge-pill= @invited_members.total_count
+            %span.badge.gl-tab-counter-badge.badge-muted.badge-pill.gl-badge.sm= @invited_members.total_count
       - if show_access_requests
         %li.nav-item
           = link_to '#tab-access-requests', class: 'nav-link', data: { toggle: 'tab' } do
             %span
               = _('Access requests')
-            %span.badge.badge-pill= @requesters.count
+            %span.badge.gl-tab-counter-badge.badge-muted.badge-pill.gl-badge.sm= @requesters.count
     .tab-content
       #tab-members.tab-pane{ class: ('active' unless invited_active) }
         .js-group-members-list{ data: group_members_list_data_attributes(@group, @members) }

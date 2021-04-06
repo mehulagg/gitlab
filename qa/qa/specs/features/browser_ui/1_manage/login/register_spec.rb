@@ -23,6 +23,7 @@ module QA
 
         @personal_access_token = Runtime::Env.personal_access_token
         Runtime::Env.personal_access_token = nil
+
         ldap_username = Runtime::Env.ldap_username
         Runtime::Env.ldap_username = nil
 
@@ -70,7 +71,7 @@ module QA
 
             Flow::Login.sign_in(as: user, skip_page_validation: true)
 
-            expect(page).to have_text("Invalid Login or password")
+            expect(page).to have_text("Invalid login or password")
 
             @recreated_user = Resource::User.fabricate_via_browser_ui! do |resource|
               resource.name = user.name

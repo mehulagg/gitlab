@@ -16,6 +16,16 @@ query DastSiteProfiles($fullPath: ID!, $after: String, $before: String, $first: 
           targetUrl
           editPath
           validationStatus
+          referencedInSecurityPolicies
+          auth @client {
+            enabled
+            url
+            usernameField
+            passwordField
+            username
+          }
+          excludedUrls @client
+          requestHeaders @client
         }
       }
     }

@@ -25,7 +25,7 @@
       - if @can_bulk_update
         = render_if_exists 'shared/issuable/bulk_update_button', type: :epics
       - if can?(current_user, :create_epic, @group)
-        = link_to _('New epic'), new_group_epic_path(@group), class: 'btn btn-success gl-button', data: { qa_selector: 'new_epic_button' }
+        = link_to _('New epic'), new_group_epic_path(@group), class: 'btn btn-confirm gl-button', data: { qa_selector: 'new_epic_button' }
 
   = render 'shared/epic/search_bar', type: :epics
 

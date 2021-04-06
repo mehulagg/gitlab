@@ -105,7 +105,7 @@ describe('TypeOfWorkCharts', () => {
 
     beforeEach(() => {
       wrapper = createComponent();
-      findSubjectFilters(wrapper).vm.$emit('updateFilter', payload);
+      findSubjectFilters(wrapper).vm.$emit('update-filter', payload);
       return wrapper.vm.$nextTick();
     });
 

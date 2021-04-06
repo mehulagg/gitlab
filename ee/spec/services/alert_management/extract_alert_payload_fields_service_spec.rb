@@ -22,76 +22,59 @@ RSpec.describe AlertManagement::ExtractAlertPayloadFieldsService do
       stub_licensed_features(multiple_alert_http_integrations: true)
     end
 
-    context 'with feature flag enabled' do
+    context 'with permissions' do
       before do
-        stub_feature_flags(multiple_http_integrations_custom_mapping: project)
+        project.add_maintainer(user_with_permissions)
       end
 
-      context 'with permissions' do
-        before do
-          project.add_maintainer(user_with_permissions)
-        end
-
-        context 'when payload is valid JSON' do
-          context 'when payload has an acceptable size' do
-            it 'responds with success' do
-              is_expected.to be_success
-            end
-
-            it 'returns parsed fields' do
-              fields = response.payload[:payload_alert_fields]
-              field = fields.first
-
-              expect(fields.count).to eq(1)
-              expect(field.label).to eq('Foo')
-              expect(field.type).to eq('string')
-              expect(field.path).to eq(%w[foo])
-            end
+      context 'when payload is valid JSON' do
+        context 'when payload has an acceptable size' do
+          it 'responds with success' do
+            is_expected.to be_success
           end
 
-          context 'when limits are exceeded' do
-            before do
-              allow(Gitlab::Utils::DeepSize)
+          it 'returns parsed fields' do
+            fields = response.payload[:payload_alert_fields]
+            field = fields.first
+
+            expect(fields.count).to eq(1)
+            expect(field.label).to eq('Foo')
+            expect(field.type).to eq('string')
+            expect(field.path).to eq(%w[foo])
+          end
+        end
+
+        context 'when limits are exceeded' do
+          before do
+            allow(Gitlab::Utils::DeepSize)
                 .to receive(:new)
-                .with(Gitlab::Json.parse(payload_json))
-                .and_return(double(valid?: false))
-            end
-
-            it 'returns payload size exceeded error' do
-              is_expected.to be_error
-              expect(response.message).to eq('Payload size exceeded')
-            end
+                        .with(Gitlab::Json.parse(payload_json))
+                        .and_return(double(valid?: false))
           end
-        end
 
-        context 'when payload is not a valid JSON' do
-          let(:payload) { 'not a JSON' }
-
-          it 'returns payload parse failure error' do
+          it 'returns payload size exceeded error' do
             is_expected.to be_error
-            expect(response.message).to eq('Failed to parse payload')
+            expect(response.message).to eq('Payload size exceeded')
           end
         end
       end
 
-      context 'without permissions' do
-        let_it_be(:user) { user_without_permissions }
+      context 'when payload is not a valid JSON' do
+        let(:payload) { 'not a JSON' }
 
-        it 'returns insufficient permissions error' do
+        it 'returns payload parse failure error' do
           is_expected.to be_error
-          expect(response.message).to eq('Insufficient permissions')
+          expect(response.message).to eq('Failed to parse payload')
         end
       end
     end
 
-    context 'with feature flag disabled' do
-      before do
-        stub_feature_flags(multiple_http_integrations_custom_mapping: false)
-      end
+    context 'without permissions' do
+      let_it_be(:user) { user_without_permissions }
 
-      it 'returns feature not available error' do
+      it 'returns insufficient permissions error' do
         is_expected.to be_error
-        expect(response.message).to eq('Feature not available')
+        expect(response.message).to eq('Insufficient permissions')
       end
     end
   end

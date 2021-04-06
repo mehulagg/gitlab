@@ -6,10 +6,12 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:head_sha) { project.repository.head_commit.id }
   let(:pipeline) { build(:ci_empty_pipeline, project: project, sha: head_sha) }
+  let(:root_variables) { [] }
+  let(:seed_context) { double(pipeline: pipeline, root_variables: root_variables) }
   let(:attributes) { { name: 'rspec', ref: 'master', scheduling_type: :stage } }
   let(:previous_stages) { [] }
 
-  let(:seed_build) { described_class.new(pipeline, attributes, previous_stages) }
+  let(:seed_build) { described_class.new(seed_context, attributes, previous_stages) }
 
   describe '#attributes' do
     subject { seed_build.attributes }
@@ -75,8 +77,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
       let(:attributes) do
         { name: 'rspec',
           ref: 'master',
-          yaml_variables: [{ key: 'VAR1', value: 'var 1', public: true },
-                           { key: 'VAR2', value: 'var 2', public: true }],
+          job_variables: [{ key: 'VAR1', value: 'var 1', public: true },
+                          { key: 'VAR2', value: 'var 2', public: true }],
           rules: [{ if: '$VAR == null', variables: { VAR1: 'new var 1', VAR3: 'var 3' } }] }
       end
 
@@ -87,86 +89,167 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
       end
     end
 
+    context 'with multiple_cache_per_job FF disabled' do
+      before do
+        stub_feature_flags(multiple_cache_per_job: false)
+      end
+
+      context 'with cache:key' do
+        let(:attributes) do
+          {
+            name: 'rspec',
+            ref: 'master',
+            cache: {
+              key: 'a-value'
+            }
+          }
+        end
+
+        it { is_expected.to include(options: { cache: { key: 'a-value' } }) }
+      end
+
+      context 'with cache:key:files' do
+        let(:attributes) do
+          {
+            name: 'rspec',
+            ref: 'master',
+            cache: {
+              key: {
+                files: ['VERSION']
+              }
+            }
+          }
+        end
+
+        it 'includes cache options' do
+          cache_options = {
+            options: {
+              cache: { key: 'f155568ad0933d8358f66b846133614f76dd0ca4' }
+            }
+          }
+
+          is_expected.to include(cache_options)
+        end
+      end
+
+      context 'with cache:key:prefix' do
+        let(:attributes) do
+          {
+            name: 'rspec',
+            ref: 'master',
+            cache: {
+              key: {
+                prefix: 'something'
+              }
+            }
+          }
+        end
+
+        it { is_expected.to include(options: { cache: { key: 'something-default' } }) }
+      end
+
+      context 'with cache:key:files and prefix' do
+        let(:attributes) do
+          {
+            name: 'rspec',
+            ref: 'master',
+            cache: {
+              key: {
+                files: ['VERSION'],
+                prefix: 'something'
+              }
+            }
+          }
+        end
+
+        it 'includes cache options' do
+          cache_options = {
+            options: {
+              cache: { key: 'something-f155568ad0933d8358f66b846133614f76dd0ca4' }
+            }
+          }
+
+          is_expected.to include(cache_options)
+        end
+      end
+    end
+
     context 'with cache:key' do
       let(:attributes) do
         {
           name: 'rspec',
           ref: 'master',
-          cache: {
+          cache: [{
             key: 'a-value'
-          }
+          }]
         }
       end
 
-      it { is_expected.to include(options: { cache: { key: 'a-value' } }) }
-    end
+      it { is_expected.to include(options: { cache: [a_hash_including(key: 'a-value')] }) }
 
-    context 'with cache:key:files' do
-      let(:attributes) do
-        {
-          name: 'rspec',
-          ref: 'master',
-          cache: {
-            key: {
-              files: ['VERSION']
+      context 'with cache:key:files' do
+        let(:attributes) do
+          {
+            name: 'rspec',
+            ref: 'master',
+            cache: [{
+              key: {
+                files: ['VERSION']
+              }
+            }]
+          }
+        end
+
+        it 'includes cache options' do
+          cache_options = {
+            options: {
+              cache: [a_hash_including(key: 'f155568ad0933d8358f66b846133614f76dd0ca4')]
             }
           }
-        }
+
+          is_expected.to include(cache_options)
+        end
       end
 
-      it 'includes cache options' do
-        cache_options = {
-          options: {
-            cache: {
-              key: 'f155568ad0933d8358f66b846133614f76dd0ca4'
-            }
+      context 'with cache:key:prefix' do
+        let(:attributes) do
+          {
+            name: 'rspec',
+            ref: 'master',
+            cache: [{
+              key: {
+                prefix: 'something'
+              }
+            }]
           }
-        }
+        end
 
-        is_expected.to include(cache_options)
-      end
-    end
-
-    context 'with cache:key:prefix' do
-      let(:attributes) do
-        {
-          name: 'rspec',
-          ref: 'master',
-          cache: {
-            key: {
-              prefix: 'something'
-            }
-          }
-        }
+        it { is_expected.to include(options: { cache: [a_hash_including( key: 'something-default' )] }) }
       end
 
-      it { is_expected.to include(options: { cache: { key: 'something-default' } }) }
-    end
+      context 'with cache:key:files and prefix' do
+        let(:attributes) do
+          {
+            name: 'rspec',
+            ref: 'master',
+            cache: [{
+              key: {
+                files: ['VERSION'],
+                prefix: 'something'
+              }
+            }]
+          }
+        end
 
-    context 'with cache:key:files and prefix' do
-      let(:attributes) do
-        {
-          name: 'rspec',
-          ref: 'master',
-          cache: {
-            key: {
-              files: ['VERSION'],
-              prefix: 'something'
+        it 'includes cache options' do
+          cache_options = {
+            options: {
+              cache: [a_hash_including(key: 'something-f155568ad0933d8358f66b846133614f76dd0ca4')]
             }
           }
-        }
-      end
 
-      it 'includes cache options' do
-        cache_options = {
-          options: {
-            cache: {
-              key: 'something-f155568ad0933d8358f66b846133614f76dd0ca4'
-            }
-          }
-        }
-
-        is_expected.to include(cache_options)
+          is_expected.to include(cache_options)
+        end
       end
     end
 
@@ -179,7 +262,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         }
       end
 
-      it { is_expected.to include(options: {}) }
+      it { is_expected.to include({}) }
     end
 
     context 'with allow_failure' do
@@ -218,6 +301,133 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         end
 
         it { is_expected.to match a_hash_including(options: { allow_failure_criteria: nil }) }
+      end
+    end
+
+    context 'with workflow:rules:[variables:]' do
+      let(:attributes) do
+        { name: 'rspec',
+          ref: 'master',
+          yaml_variables: [{ key: 'VAR2', value: 'var 2', public: true },
+                           { key: 'VAR3', value: 'var 3', public: true }],
+          job_variables: [{ key: 'VAR2', value: 'var 2', public: true },
+                          { key: 'VAR3', value: 'var 3', public: true }],
+          root_variables_inheritance: root_variables_inheritance }
+      end
+
+      context 'when the pipeline has variables' do
+        let(:root_variables) do
+          [{ key: 'VAR1', value: 'var overridden pipeline 1', public: true },
+           { key: 'VAR2', value: 'var pipeline 2', public: true },
+           { key: 'VAR3', value: 'var pipeline 3', public: true },
+           { key: 'VAR4', value: 'new var pipeline 4', public: true }]
+        end
+
+        context 'when root_variables_inheritance is true' do
+          let(:root_variables_inheritance) { true }
+
+          it 'returns calculated yaml variables' do
+            expect(subject[:yaml_variables]).to match_array(
+              [{ key: 'VAR1', value: 'var overridden pipeline 1', public: true },
+               { key: 'VAR2', value: 'var 2', public: true },
+               { key: 'VAR3', value: 'var 3', public: true },
+               { key: 'VAR4', value: 'new var pipeline 4', public: true }]
+            )
+          end
+
+          context 'when FF ci_workflow_rules_variables is disabled' do
+            before do
+              stub_feature_flags(ci_workflow_rules_variables: false)
+            end
+
+            it 'returns existing yaml variables' do
+              expect(subject[:yaml_variables]).to match_array(
+                [{ key: 'VAR2', value: 'var 2', public: true },
+                 { key: 'VAR3', value: 'var 3', public: true }]
+              )
+            end
+          end
+        end
+
+        context 'when root_variables_inheritance is false' do
+          let(:root_variables_inheritance) { false }
+
+          it 'returns job variables' do
+            expect(subject[:yaml_variables]).to match_array(
+              [{ key: 'VAR2', value: 'var 2', public: true },
+               { key: 'VAR3', value: 'var 3', public: true }]
+            )
+          end
+        end
+
+        context 'when root_variables_inheritance is an array' do
+          let(:root_variables_inheritance) { %w(VAR1 VAR2 VAR3) }
+
+          it 'returns calculated yaml variables' do
+            expect(subject[:yaml_variables]).to match_array(
+              [{ key: 'VAR1', value: 'var overridden pipeline 1', public: true },
+               { key: 'VAR2', value: 'var 2', public: true },
+               { key: 'VAR3', value: 'var 3', public: true }]
+            )
+          end
+        end
+      end
+
+      context 'when the pipeline has not a variable' do
+        let(:root_variables_inheritance) { true }
+
+        it 'returns seed yaml variables' do
+          expect(subject[:yaml_variables]).to match_array(
+            [{ key: 'VAR2', value: 'var 2', public: true },
+             { key: 'VAR3', value: 'var 3', public: true }])
+        end
+      end
+    end
+
+    context 'when the job rule depends on variables' do
+      let(:attributes) do
+        { name: 'rspec',
+          ref: 'master',
+          yaml_variables: [{ key: 'VAR1', value: 'var 1', public: true }],
+          job_variables: [{ key: 'VAR1', value: 'var 1', public: true }],
+          root_variables_inheritance: root_variables_inheritance,
+          rules: rules }
+      end
+
+      let(:root_variables_inheritance) { true }
+
+      context 'when the rules use job variables' do
+        let(:rules) do
+          [{ if: '$VAR1 == "var 1"', variables: { VAR1: 'overridden var 1', VAR2: 'new var 2' } }]
+        end
+
+        it 'recalculates the variables' do
+          expect(subject[:yaml_variables]).to contain_exactly({ key: 'VAR1', value: 'overridden var 1', public: true },
+                                                              { key: 'VAR2', value: 'new var 2', public: true })
+        end
+      end
+
+      context 'when the rules use root variables' do
+        let(:root_variables) do
+          [{ key: 'VAR2', value: 'var pipeline 2', public: true }]
+        end
+
+        let(:rules) do
+          [{ if: '$VAR2 == "var pipeline 2"', variables: { VAR1: 'overridden var 1', VAR2: 'overridden var 2' } }]
+        end
+
+        it 'recalculates the variables' do
+          expect(subject[:yaml_variables]).to contain_exactly({ key: 'VAR1', value: 'overridden var 1', public: true },
+                                                              { key: 'VAR2', value: 'overridden var 2', public: true })
+        end
+
+        context 'when the root_variables_inheritance is false' do
+          let(:root_variables_inheritance) { false }
+
+          it 'does not recalculate the variables' do
+            expect(subject[:yaml_variables]).to contain_exactly({ key: 'VAR1', value: 'var 1', public: true })
+          end
+        end
       end
     end
   end
@@ -296,7 +506,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         it 'does not have environment' do
           expect(subject).not_to be_has_environment
           expect(subject.environment).to be_nil
-          expect(subject.metadata.expanded_environment_name).to be_nil
+          expect(subject.metadata&.expanded_environment_name).to be_nil
           expect(Environment.exists?(name: expected_environment_name)).to eq(false)
         end
       end
@@ -968,6 +1178,25 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         expect(subject.errors).to contain_exactly(
           "'rspec' job needs 'build' job, but it was not added to the pipeline")
       end
+
+      context 'when the needed job is optional' do
+        let(:needs_attributes) { [{ name: 'build', optional: true }] }
+
+        it "does not return an error" do
+          expect(subject.errors).to be_empty
+        end
+
+        context 'when the FF ci_needs_optional is disabled' do
+          before do
+            stub_feature_flags(ci_needs_optional: false)
+          end
+
+          it "returns an error" do
+            expect(subject.errors).to contain_exactly(
+              "'rspec' job needs 'build' job, but it was not added to the pipeline")
+          end
+        end
+      end
     end
 
     context 'when build job is part of prior stages' do
@@ -980,7 +1209,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
       end
 
       let(:stage_seed) do
-        Gitlab::Ci::Pipeline::Seed::Stage.new(pipeline, stage_attributes, [])
+        Gitlab::Ci::Pipeline::Seed::Stage.new(seed_context, stage_attributes, [])
       end
 
       let(:previous_stages) { [stage_seed] }
@@ -1021,6 +1250,77 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         it "returns an error" do
           expect(subject.errors).to contain_exactly(
             "rspec: one job can only need 0 others, but you have listed 101. See needs keyword documentation for more details")
+        end
+      end
+    end
+  end
+
+  describe 'applying pipeline variables' do
+    subject { seed_build }
+
+    let(:pipeline_variables) { [] }
+    let(:pipeline) do
+      build(:ci_empty_pipeline, project: project, sha: head_sha, variables: pipeline_variables)
+    end
+
+    context 'containing variable references' do
+      let(:pipeline_variables) do
+        [
+          build(:ci_pipeline_variable, key: 'A', value: '$B'),
+          build(:ci_pipeline_variable, key: 'B', value: '$C')
+        ]
+      end
+
+      context 'when FF :variable_inside_variable is enabled' do
+        before do
+          stub_feature_flags(variable_inside_variable: [project])
+        end
+
+        it "does not have errors" do
+          expect(subject.errors).to be_empty
+        end
+      end
+    end
+
+    context 'containing cyclic reference' do
+      let(:pipeline_variables) do
+        [
+          build(:ci_pipeline_variable, key: 'A', value: '$B'),
+          build(:ci_pipeline_variable, key: 'B', value: '$C'),
+          build(:ci_pipeline_variable, key: 'C', value: '$A')
+        ]
+      end
+
+      context 'when FF :variable_inside_variable is disabled' do
+        before do
+          stub_feature_flags(variable_inside_variable: false)
+        end
+
+        it "does not have errors" do
+          expect(subject.errors).to be_empty
+        end
+      end
+
+      context 'when FF :variable_inside_variable is enabled' do
+        before do
+          stub_feature_flags(variable_inside_variable: [project])
+        end
+
+        it "returns an error" do
+          expect(subject.errors).to contain_exactly(
+            'rspec: circular variable reference detected: ["A", "B", "C"]')
+        end
+
+        context 'with job:rules:[if:]' do
+          let(:attributes) { { name: 'rspec', ref: 'master', rules: [{ if: '$C != null', when: 'always' }] } }
+
+          it "included? does not raise" do
+            expect { subject.included? }.not_to raise_error
+          end
+
+          it "included? returns true" do
+            expect(subject.included?).to eq(true)
+          end
         end
       end
     end

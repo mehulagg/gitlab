@@ -166,20 +166,6 @@ RSpec.describe MergeRequests::MergeService do
           service.execute(merge_request)
         end
 
-        context 'when jira_issue_transition_id is not present' do
-          before do
-            allow_any_instance_of(JIRA::Resource::Issue).to receive(:resolution).and_return(nil)
-          end
-
-          it 'does not close issue' do
-            jira_tracker.update!(jira_issue_transition_id: nil)
-
-            expect_any_instance_of(JiraService).not_to receive(:transition_issue)
-
-            service.execute(merge_request)
-          end
-        end
-
         context 'wrong issue markdown' do
           it 'does not close issues on Jira issue tracker' do
             jira_issue = ExternalIssue.new('#JIRA-123', project)
@@ -258,9 +244,8 @@ RSpec.describe MergeRequests::MergeService do
           end
 
           it 'removes the source branch using the author user' do
-            expect(::Branches::DeleteService).to receive(:new)
-              .with(merge_request.source_project, merge_request.author)
-              .and_call_original
+            expect(::MergeRequests::DeleteSourceBranchWorker).to receive(:perform_async).with(merge_request.id, merge_request.source_branch_sha, merge_request.author.id)
+
             service.execute(merge_request)
           end
 
@@ -268,7 +253,8 @@ RSpec.describe MergeRequests::MergeService do
             let(:service) { described_class.new(project, user, merge_params.merge('should_remove_source_branch' => false)) }
 
             it 'does not delete the source branch' do
-              expect(::Branches::DeleteService).not_to receive(:new)
+              expect(::MergeRequests::DeleteSourceBranchWorker).not_to receive(:perform_async)
+
               service.execute(merge_request)
             end
           end
@@ -280,9 +266,8 @@ RSpec.describe MergeRequests::MergeService do
           end
 
           it 'removes the source branch using the current user' do
-            expect(::Branches::DeleteService).to receive(:new)
-              .with(merge_request.source_project, user)
-              .and_call_original
+            expect(::MergeRequests::DeleteSourceBranchWorker).to receive(:perform_async).with(merge_request.id, merge_request.source_branch_sha, user.id)
+
             service.execute(merge_request)
           end
         end

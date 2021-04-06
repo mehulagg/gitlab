@@ -3,14 +3,18 @@ import { shallowMount } from '@vue/test-utils';
 import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
 import Api from '~/api';
+import ExperimentTracking from '~/experimentation/experiment_tracking';
 import InviteMembersModal from '~/invite_members/components/invite_members_modal.vue';
+import { INVITE_MEMBERS_IN_COMMENT } from '~/invite_members/constants';
+
+jest.mock('~/experimentation/experiment_tracking');
 
 const id = '1';
 const name = 'test name';
 const isProject = false;
 const inviteeType = 'members';
 const accessLevels = { Guest: 10, Reporter: 20, Developer: 30, Maintainer: 40, Owner: 50 };
-const defaultAccessLevel = '10';
+const defaultAccessLevel = 10;
 const helpLink = 'https://example.com';
 
 const user1 = { id: 1, name: 'Name One', username: 'one_1', avatar_url: '' };
@@ -89,7 +93,7 @@ describe('InviteMembersModal', () => {
     });
 
     it('renders the modal with the correct title', () => {
-      expect(wrapper.findComponent(GlModal).props('title')).toBe('Invite team members');
+      expect(wrapper.findComponent(GlModal).props('title')).toBe('Invite members');
     });
 
     it('renders the Cancel button text correctly', () => {
@@ -129,7 +133,7 @@ describe('InviteMembersModal', () => {
         it('includes the correct invitee, type, and formatted name', () => {
           wrapper = createInviteMembersToProjectWrapper();
 
-          expect(findIntroText()).toBe("You're inviting members to the TEST NAME project");
+          expect(findIntroText()).toBe("You're inviting members to the test name project.");
         });
       });
 
@@ -137,7 +141,7 @@ describe('InviteMembersModal', () => {
         it('includes the correct invitee, type, and formatted name', () => {
           wrapper = createInviteGroupToProjectWrapper();
 
-          expect(findIntroText()).toBe("You're inviting a group to the TEST NAME project");
+          expect(findIntroText()).toBe("You're inviting a group to the test name project.");
         });
       });
     });
@@ -147,7 +151,7 @@ describe('InviteMembersModal', () => {
         it('includes the correct invitee, type, and formatted name', () => {
           wrapper = createInviteMembersToGroupWrapper();
 
-          expect(wrapper.html()).toContain("You're inviting members to the TEST NAME group");
+          expect(findIntroText()).toBe("You're inviting members to the test name group.");
         });
       });
 
@@ -155,7 +159,7 @@ describe('InviteMembersModal', () => {
         it('includes the correct invitee, type, and formatted name', () => {
           wrapper = createInviteGroupToGroupWrapper();
 
-          expect(wrapper.html()).toContain("You're inviting a group to the TEST NAME group");
+          expect(findIntroText()).toBe("You're inviting a group to the test name group.");
         });
       });
     });
@@ -167,7 +171,7 @@ describe('InviteMembersModal', () => {
     describe('when inviting an existing user to group by user ID', () => {
       const postData = {
         user_id: '1',
-        access_level: '10',
+        access_level: defaultAccessLevel,
         expires_at: undefined,
         format: 'json',
       };
@@ -238,7 +242,7 @@ describe('InviteMembersModal', () => {
 
     describe('when inviting a new user by email address', () => {
       const postData = {
-        access_level: '10',
+        access_level: defaultAccessLevel,
         expires_at: undefined,
         email: 'email@example.com',
         format: 'json',
@@ -287,7 +291,7 @@ describe('InviteMembersModal', () => {
 
     describe('when inviting members and non-members in same click', () => {
       const postData = {
-        access_level: '10',
+        access_level: defaultAccessLevel,
         expires_at: undefined,
         format: 'json',
       };
@@ -303,6 +307,7 @@ describe('InviteMembersModal', () => {
           jest.spyOn(Api, 'inviteGroupMembersByEmail').mockResolvedValue({ data: postData });
           jest.spyOn(Api, 'addGroupMembersByUserId').mockResolvedValue({ data: postData });
           jest.spyOn(wrapper.vm, 'showToastMessageSuccess');
+          jest.spyOn(wrapper.vm, 'trackInvite');
 
           clickInviteButton();
         });
@@ -348,7 +353,7 @@ describe('InviteMembersModal', () => {
       describe('when sharing the group is successful', () => {
         const groupPostData = {
           group_id: sharedGroup.id,
-          group_access: '10',
+          group_access: defaultAccessLevel,
           expires_at: undefined,
           format: 'json',
         };
@@ -394,6 +399,47 @@ describe('InviteMembersModal', () => {
 
           expect(wrapper.vm.showToastMessageError).toHaveBeenCalled();
         });
+      });
+    });
+
+    describe('tracking', () => {
+      const postData = {
+        user_id: '1',
+        access_level: defaultAccessLevel,
+        expires_at: undefined,
+        format: 'json',
+      };
+
+      beforeEach(() => {
+        wrapper = createComponent({ newUsersToInvite: [user3] });
+
+        wrapper.vm.$toast = { show: jest.fn() };
+        jest.spyOn(Api, 'inviteGroupMembersByEmail').mockResolvedValue({ data: postData });
+      });
+
+      it('tracks the invite', () => {
+        wrapper.vm.openModal({ inviteeType: 'members', source: INVITE_MEMBERS_IN_COMMENT });
+
+        clickInviteButton();
+
+        expect(ExperimentTracking).toHaveBeenCalledWith(INVITE_MEMBERS_IN_COMMENT);
+        expect(ExperimentTracking.prototype.event).toHaveBeenCalledWith('comment_invite_success');
+      });
+
+      it('does not track invite for unknown source', () => {
+        wrapper.vm.openModal({ inviteeType: 'members', source: 'unknown' });
+
+        clickInviteButton();
+
+        expect(ExperimentTracking).not.toHaveBeenCalled();
+      });
+
+      it('does not track invite undefined source', () => {
+        wrapper.vm.openModal({ inviteeType: 'members' });
+
+        clickInviteButton();
+
+        expect(ExperimentTracking).not.toHaveBeenCalled();
       });
     });
   });

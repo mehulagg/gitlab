@@ -112,7 +112,6 @@ module API
       end
 
       def delete_group(group)
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/46285')
         destroy_conditionally!(group) do |group|
           ::Groups::DestroyService.new(group, current_user).async_execute
         end
@@ -137,6 +136,14 @@ module API
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def authorize_group_creation!
+        authorize! :create_group
+      end
+
+      def check_subscription!(group)
+        render_api_error!("This group can't be removed because it is linked to a subscription.", :bad_request) if group.paid?
+      end
     end
 
     resource :groups do
@@ -169,7 +176,7 @@ module API
         if parent_group
           authorize! :create_subgroup, parent_group
         else
-          authorize! :create_group
+          authorize_group_creation!
         end
 
         group = create_group
@@ -235,6 +242,7 @@ module API
       delete ":id" do
         group = find_group!(params[:id])
         authorize! :admin_group, group
+        check_subscription! group
 
         delete_group(group)
       end

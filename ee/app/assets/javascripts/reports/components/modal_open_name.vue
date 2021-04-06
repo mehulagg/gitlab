@@ -20,9 +20,11 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    tooltipTitle: '',
-  }),
+  data() {
+    return {
+      tooltipTitle: '',
+    };
+  },
   mounted() {
     this.updateTooltipTitle();
   },

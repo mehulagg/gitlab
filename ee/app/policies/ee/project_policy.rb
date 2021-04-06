@@ -164,10 +164,6 @@ module EE
         @subject.feature_available?(:status_page, @user)
       end
 
-      condition(:group_timelogs_available) do
-        @subject.feature_available?(:group_timelogs)
-      end
-
       condition(:over_storage_limit, scope: :subject) do
         @subject.root_namespace.over_storage_limit?
       end
@@ -204,20 +200,17 @@ module EE
         prevent :admin_feature_flags_issue_links
       end
 
-      rule { ~group_timelogs_available }.prevent :read_group_timelogs
-
       rule { can?(:guest_access) & iterations_available }.enable :read_iteration
 
       rule { can?(:reporter_access) }.policy do
-        enable :admin_board
+        enable :admin_issue_board
         enable :admin_epic_issue
-        enable :read_group_timelogs
       end
 
       rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
 
       rule { can?(:developer_access) }.policy do
-        enable :admin_board
+        enable :admin_issue_board
         enable :read_vulnerability_feedback
         enable :create_vulnerability_feedback
         enable :destroy_vulnerability_feedback
@@ -366,7 +359,7 @@ module EE
         prevent :owner_access
       end
 
-      rule { ip_enforcement_prevents_access & ~admin }.policy do
+      rule { ip_enforcement_prevents_access & ~admin & ~auditor }.policy do
         prevent :read_project
       end
 
@@ -430,14 +423,13 @@ module EE
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
-    override :resource_access_token_available?
-    def resource_access_token_available?
-      return true unless ::Gitlab.com?
+    override :resource_access_token_feature_available?
+    def resource_access_token_feature_available?
+      return super unless ::Gitlab.com?
 
-      group = project.namespace
+      namespace = project.namespace
 
-      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
-        group.feature_available_non_trial?(:resource_access_token)
+      namespace.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

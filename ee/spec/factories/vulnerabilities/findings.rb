@@ -59,6 +59,17 @@ FactoryBot.define do
     confidence { :medium }
     scanner factory: :vulnerabilities_scanner
     metadata_version { 'sast:1.0' }
+
+    details do
+      {
+        url: {
+          name: 'URL',
+          type: 'url',
+          href: 'http://site.com'
+        }
+      }
+    end
+
     raw_metadata do
       {
         description: 'The cipher does not provide data integrity update 1',
@@ -447,6 +458,64 @@ FactoryBot.define do
             value: 'More info about this vulnerability'
           }
         }
+      end
+    end
+
+    trait :with_dependency_scanning_metadata do
+      transient do
+        raw_severity { "High" }
+        id { "Gemnasium-06565b64-486d-4326-b906-890d9915804d" }
+        file { "rails/Gemfile.lock" }
+        package { "nokogiri" }
+        version { "1.8.0" }
+      end
+
+      after(:build) do |finding, evaluator|
+        finding.report_type = "dependency_scanning"
+        finding.name = "Vulnerabilities in libxml2"
+        finding.message = "Vulnerabilities in libxml2 in nokogiri"
+        finding.metadata_version = "2.1"
+        finding.raw_metadata = {
+          "category": "dependency_scanning",
+          "name": "Vulnerabilities in libxml2",
+          "message": "Vulnerabilities in libxml2 in nokogiri",
+          "description": "  The version of libxml2 packaged with Nokogiri contains several vulnerabilities.",
+          "cve": "rails/Gemfile.lock:nokogiri:gemnasium:06565b64-486d-4326-b906-890d9915804d",
+          "severity": evaluator.raw_severity,
+          "solution": "Upgrade to latest version.",
+          "scanner": {
+            "id": "gemnasium",
+            "name": "Gemnasium"
+          },
+          "location": {
+            "file": evaluator.file,
+            "dependency": {
+              "package": {
+                "name": evaluator.package
+              },
+              "version": evaluator.version
+            }
+          },
+          "identifiers": [
+            {
+              "type": "gemnasium",
+              "name": evaluator.id,
+              "value": "06565b64-486d-4326-b906-890d9915804d",
+              "url": "https://deps.sec.gitlab.com/packages/gem/nokogiri/versions/1.8.0/advisories"
+            },
+            {
+              "type": "usn",
+              "name": "USN-3424-1",
+              "value": "USN-3424-1",
+              "url": "https://usn.ubuntu.com/3424-1/"
+            }
+          ],
+          "links": [
+            {
+              "url": "https://github.com/sparklemotion/nokogiri/issues/1673"
+            }
+          ]
+        }.to_json
       end
     end
 

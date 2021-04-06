@@ -1,5 +1,5 @@
 import Api from 'ee/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import * as types from './mutation_types';
 
@@ -13,7 +13,9 @@ export const fetchGeoSettings = ({ commit }) => {
       });
     })
     .catch(() => {
-      createFlash(__('There was an error fetching the Geo Settings'));
+      createFlash({
+        message: __('There was an error fetching the Geo Settings'),
+      });
       commit(types.RECEIVE_GEO_SETTINGS_ERROR);
     });
 };
@@ -31,7 +33,9 @@ export const updateGeoSettings = ({ commit, state }) => {
       });
     })
     .catch(() => {
-      createFlash(__('There was an error updating the Geo Settings'));
+      createFlash({
+        message: __('There was an error updating the Geo Settings'),
+      });
       commit(types.RECEIVE_UPDATE_GEO_SETTINGS_ERROR);
     });
 };

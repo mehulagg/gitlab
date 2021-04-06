@@ -2,7 +2,6 @@
 
 class Groups::EmailCampaignsController < Groups::ApplicationController
   include InProductMarketingHelper
-  include Gitlab::Tracking::ControllerConcern
 
   EMAIL_CAMPAIGNS_SCHEMA_URL = 'iglu:com.gitlab/email_campaigns/jsonschema/1-0-0'
 
@@ -20,12 +19,14 @@ class Groups::EmailCampaignsController < Groups::ApplicationController
   def track_click
     data = {
       namespace_id: group.id,
-      track: @track,
+      track: @track.to_s,
       series: @series,
       subject_line: subject_line(@track, @series)
     }
 
-    track_self_describing_event(EMAIL_CAMPAIGNS_SCHEMA_URL, data: data)
+    context = SnowplowTracker::SelfDescribingJson.new(EMAIL_CAMPAIGNS_SCHEMA_URL, data)
+
+    ::Gitlab::Tracking.event(self.class.name, 'click', context: [context])
   end
 
   def redirect_link

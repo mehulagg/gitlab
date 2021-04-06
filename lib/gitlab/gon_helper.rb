@@ -7,13 +7,14 @@ module Gitlab
     include WebpackHelper
 
     def add_gon_variables
-      gon.api_version            = 'v4'
-      gon.default_avatar_url     = default_avatar_url
-      gon.max_file_size          = Gitlab::CurrentSettings.max_attachment_size
-      gon.asset_host             = ActionController::Base.asset_host
-      gon.webpack_public_path    = webpack_public_path
-      gon.relative_url_root      = Gitlab.config.gitlab.relative_url_root
-      gon.user_color_scheme      = Gitlab::ColorSchemes.for_user(current_user).css_class
+      gon.api_version             = 'v4'
+      gon.default_avatar_url      = default_avatar_url
+      gon.max_file_size           = Gitlab::CurrentSettings.max_attachment_size
+      gon.asset_host              = ActionController::Base.asset_host
+      gon.webpack_public_path     = webpack_public_path
+      gon.relative_url_root       = Gitlab.config.gitlab.relative_url_root
+      gon.user_color_scheme       = Gitlab::ColorSchemes.for_user(current_user).css_class
+      gon.markdown_surround_selection = current_user&.markdown_surround_selection
 
       if Gitlab.config.sentry.enabled
         gon.sentry_dsn           = Gitlab.config.sentry.clientside_dsn
@@ -44,7 +45,7 @@ module Gitlab
       # Initialize gon.features with any flags that should be
       # made globally available to the frontend
       push_frontend_feature_flag(:snippets_binary_blob, default_enabled: false)
-      push_frontend_feature_flag(:usage_data_api, default_enabled: true)
+      push_frontend_feature_flag(:usage_data_api, type: :ops, default_enabled: :yaml)
       push_frontend_feature_flag(:security_auto_fix, default_enabled: false)
     end
 

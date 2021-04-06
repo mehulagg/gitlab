@@ -1,5 +1,7 @@
 import { s__, __, sprintf } from '~/locale';
 
+export const DEFAULT_POLLING_INTERVAL = 30000;
+
 export const MAX_SEGMENTS = 30;
 
 export const MAX_REQUEST_COUNT = 10;
@@ -27,7 +29,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
       text: s__(
         'DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}.',
       ),
-      button: s__('DevopsAdoption|Add Group'),
+      button: s__('DevopsAdoption|Add / remove groups'),
       buttonTooltip: sprintf(s__('DevopsAdoption|Maximum %{maxSegments} groups allowed'), {
         maxSegments: MAX_SEGMENTS,
       }),
@@ -41,15 +43,12 @@ export const DEVOPS_ADOPTION_STRINGS = {
     button: s__('DevopsAdoption|Add Group'),
   },
   modal: {
-    addingTitle: s__('DevopsAdoption|Add Group'),
-    addingButton: s__('DevopsAdoption|Add Group'),
-    editingButton: s__('DevopsAdoption|Save changes'),
+    addingTitle: s__('DevopsAdoption|Add / remove groups'),
+    addingButton: s__('DevopsAdoption|Save changes'),
     cancel: __('Cancel'),
     namePlaceholder: s__('DevopsAdoption|My group'),
     filterPlaceholder: s__('DevopsAdoption|Filter by name'),
-    selectedGroupsTextSingular: s__('DevopsAdoption|%{selectedCount} group selected'),
-    selectedGroupsTextPlural: s__('DevopsAdoption|%{selectedCount} groups selected'),
-    error: s__('DevopsAdoption|An error occurred while saving the group. Please try again.'),
+    error: s__('DevopsAdoption|An error occurred while saving changes. Please try again.'),
     noResults: s__('DevopsAdoption|No filter results.'),
   },
   table: {

@@ -25,8 +25,6 @@ RSpec.describe 'registrations/welcome/show' do
     '/-/subscriptions/new'    | true  | true  | :subscription | true
     '/-/trials/new'           | false | false | :trial        | true
     '/-/trials/new'           | true  | false | :trial        | true
-    '/-/invites/abc123'       | false | false | nil           | false
-    '/-/invites/abc123'       | true  | false | nil           | false
     '/oauth/authorize/abc123' | false | false | nil           | false
     '/oauth/authorize/abc123' | true  | false | nil           | false
     nil                       | false | false | nil           | false
@@ -46,11 +44,7 @@ RSpec.describe 'registrations/welcome/show' do
       is_expected.to have_button(expected_text)
     end
 
-    if params[:show_progress_bar]
-      it { is_expected.to have_selector('#progress-bar') }
-    else
-      it { is_expected.not_to have_selector('#progress-bar') }
-    end
+    it { is_expected_to_have_progress_bar(status: show_progress_bar) }
 
     context 'feature flag other_role_details is enabled' do
       let_it_be(:user_other_role_details_enabled) { true }
@@ -59,6 +53,16 @@ RSpec.describe 'registrations/welcome/show' do
         is_expected.not_to have_selector('input[type="hidden"][name="user[other_role]"]', visible: false)
         is_expected.to have_selector('input[type="text"][name="user[other_role]"]')
       end
+    end
+  end
+
+  def is_expected_to_have_progress_bar(status: true)
+    allow(view).to receive(:show_signup_flow_progress_bar?).and_return(status)
+
+    if status
+      is_expected.to have_selector('#progress-bar')
+    else
+      is_expected.not_to have_selector('#progress-bar')
     end
   end
 end

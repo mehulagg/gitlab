@@ -100,7 +100,7 @@ describe('Value Stream Analytics LabelsSelector', () => {
         return waitForPromises();
       });
 
-      it('will emit the "selectLabel" event', () => {
+      it('will emit the "select-label" event', () => {
         expect(wrapper.emitted('select-label')).toBeUndefined();
 
         const elem = wrapper.findAll('.dropdown-item').at(1);

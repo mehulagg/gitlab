@@ -1,6 +1,4 @@
-import { GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import MockAdapter from 'axios-mock-adapter';
 import ThreatMonitoringAlerts from 'ee/threat_monitoring/components/alerts/alerts.vue';
 import ThreatMonitoringApp from 'ee/threat_monitoring/components/app.vue';
 import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
@@ -9,7 +7,6 @@ import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_moni
 import createStore from 'ee/threat_monitoring/store';
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import axios from '~/lib/utils/axios_utils';
 
 const defaultEnvironmentId = 3;
 const documentationPath = '/docs';
@@ -20,8 +17,6 @@ const networkPolicyNoDataSvgPath = '/network-policy-no-data-svg';
 const environmentsEndpoint = `${TEST_HOST}/environments`;
 const wafStatisticsEndpoint = `${TEST_HOST}/waf`;
 const networkPolicyStatisticsEndpoint = `${TEST_HOST}/network_policy`;
-const userCalloutId = 'threat_monitoring_info';
-const userCalloutsPath = `${TEST_HOST}/user_callouts`;
 
 describe('ThreatMonitoringApp component', () => {
   let store;
@@ -46,9 +41,6 @@ describe('ThreatMonitoringApp component', () => {
           wafNoDataSvgPath,
           networkPolicyNoDataSvgPath,
           newPolicyPath,
-          showUserCallout: true,
-          userCalloutId,
-          userCalloutsPath,
           ...propsData,
         },
         provide: {
@@ -62,7 +54,6 @@ describe('ThreatMonitoringApp component', () => {
     );
   };
 
-  const findAlert = () => wrapper.find(GlAlert);
   const findAlertsView = () => wrapper.find(ThreatMonitoringAlerts);
   const findNetworkPolicyList = () => wrapper.find(NetworkPolicyList);
   const findFilters = () => wrapper.find(ThreatMonitoringFilters);
@@ -125,10 +116,6 @@ describe('ThreatMonitoringApp component', () => {
       ]);
     });
 
-    it('shows the alert', () => {
-      expect(findAlert().element).toMatchSnapshot();
-    });
-
     it('shows the filter bar', () => {
       expect(findFilters().exists()).toBe(true);
     });
@@ -147,44 +134,6 @@ describe('ThreatMonitoringApp component', () => {
 
     it('does not show the alert tab', () => {
       expect(findAlertTab().exists()).toBe(false);
-    });
-
-    describe('dismissing the alert', () => {
-      let mockAxios;
-
-      beforeEach(() => {
-        mockAxios = new MockAdapter(axios);
-        mockAxios.onPost(userCalloutsPath, { feature_name: userCalloutId }).reply(200);
-
-        findAlert().vm.$emit('dismiss');
-        return wrapper.vm.$nextTick();
-      });
-
-      afterEach(() => {
-        mockAxios.restore();
-      });
-
-      it('hides the alert', () => {
-        expect(findAlert().exists()).toBe(false);
-      });
-
-      it('posts the dismissal to the user callouts endpoint', () => {
-        expect(mockAxios.history.post).toHaveLength(1);
-      });
-    });
-  });
-
-  describe('given showUserCallout is false', () => {
-    beforeEach(() => {
-      factory({
-        propsData: {
-          showUserCallout: false,
-        },
-      });
-    });
-
-    it('does not render the alert', () => {
-      expect(findAlert().exists()).toBe(false);
     });
   });
 

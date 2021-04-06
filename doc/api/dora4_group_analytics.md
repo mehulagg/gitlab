@@ -5,13 +5,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, api
 ---
 
-# DORA4 Analytics Group API **(ULTIMATE ONLY)**
+# DORA4 Analytics Group API **(ULTIMATE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/291747) in GitLab 13.9.
-> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-dora4-analytics-group-api). **(ULTIMATE ONLY)**
+> - [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-dora4-analytics-group-api).
+
+WARNING:
+These endpoints are deprecated and will be removed in GitLab 14.0. Use the [DORA metrics API](dora/metrics.md) instead.
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -64,7 +67,7 @@ Example response:
 ]
 ```
 
-## Enable or disable DORA4 Analytics Group API **(ULTIMATE ONLY)**
+## Enable or disable DORA4 Analytics Group API **(ULTIMATE SELF)**
 
 DORA4 Analytics Group API is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.

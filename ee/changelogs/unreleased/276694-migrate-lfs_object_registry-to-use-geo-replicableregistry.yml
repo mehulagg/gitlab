@@ -1,5 +1,0 @@
----
-title: Migrate lfs_object_registry to be compatible with Geo::ReplicableRegistry
-merge_request: 52636
-author:
-type: changed

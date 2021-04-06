@@ -13,31 +13,37 @@ import {
   genericErrorMessage,
   dataErrorMessage,
   groupNodeLabelValues,
+  devopsAdoptionSegmentsData,
 } from '../mock_data';
 
 const mockEvent = { preventDefault: jest.fn() };
 const mutate = jest.fn().mockResolvedValue({
   data: {
-    createDevopsAdoptionSegment: {
+    bulkFindOrCreateDevopsAdoptionSegments: {
+      errors: [],
+    },
+    deleteDevopsAdoptionSegment: {
       errors: [],
     },
   },
 });
-const mutateWithDataErrors = () =>
-  jest.fn().mockResolvedValue({
-    data: {
-      createDevopsAdoptionSegment: {
-        errors: [dataErrorMessage],
-      },
+const mutateWithDataErrors = jest.fn().mockResolvedValue({
+  data: {
+    bulkFindOrCreateDevopsAdoptionSegments: {
+      errors: [dataErrorMessage],
     },
-  });
+    deleteDevopsAdoptionSegment: {
+      errors: [],
+    },
+  },
+});
 const mutateLoading = jest.fn().mockResolvedValue(new Promise(() => {}));
 const mutateWithErrors = jest.fn().mockRejectedValue(genericErrorMessage);
 
 describe('DevopsAdoptionSegmentModal', () => {
   let wrapper;
 
-  const createComponent = ({ mutationMock = mutate } = {}) => {
+  const createComponent = ({ mutationMock = mutate, props = {} } = {}) => {
     const $apollo = {
       mutate: mutationMock,
     };
@@ -45,6 +51,7 @@ describe('DevopsAdoptionSegmentModal', () => {
     wrapper = shallowMount(DevopsAdoptionSegmentModal, {
       propsData: {
         groups: groupNodes,
+        ...props,
       },
       stubs: {
         GlSprintf,
@@ -65,7 +72,6 @@ describe('DevopsAdoptionSegmentModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('contains the corrrect id', () => {
@@ -77,15 +83,32 @@ describe('DevopsAdoptionSegmentModal', () => {
     expect(modal.props('modalId')).toBe(DEVOPS_ADOPTION_SEGMENT_MODAL_ID);
   });
 
+  it.each`
+    enabledGroups | checkboxValues | disabled | condition       | state
+    ${[]}         | ${[]}          | ${true}  | ${'no changes'} | ${'disables'}
+    ${[]}         | ${[1]}         | ${false} | ${'changes'}    | ${'enables'}
+  `(
+    '$state the primary action if there are $condition',
+    async ({ enabledGroups, disabled, checkboxValues }) => {
+      createComponent({ props: { enabledGroups } });
+
+      wrapper.setData({ checkboxValues });
+
+      await nextTick();
+
+      expect(actionButtonDisabledState()).toBe(disabled);
+    },
+  );
+
   describe('displays the correct content', () => {
     beforeEach(() => createComponent());
 
     const isCorrectShape = (option) => {
       const keys = Object.keys(option);
-      return keys.includes('text') && keys.includes('value');
+      return keys.includes('label') && keys.includes('value');
     };
 
-    it('contains the radio group component', () => {
+    it('contains the checkbox tree component', () => {
       const checkboxes = findByTestId('groups');
 
       expect(checkboxes.exists()).toBe(true);
@@ -159,29 +182,36 @@ describe('DevopsAdoptionSegmentModal', () => {
     });
   });
 
-  it.each`
-    selectedGroupId | disabled | values        | state
-    ${null}         | ${true}  | ${'checkbox'} | ${'disables'}
-    ${1}            | ${false} | ${'nothing'}  | ${'enables'}
-  `('$state the primary action if $values is missing', async ({ selectedGroupId, disabled }) => {
-    createComponent();
+  describe.each`
+    state        | action      | expected
+    ${'opening'} | ${'show'}   | ${true}
+    ${'closing'} | ${'hidden'} | ${false}
+  `('$state the modal', ({ action, expected }) => {
+    beforeEach(() => {
+      createComponent();
+      findModal().vm.$emit(action);
+    });
 
-    wrapper.setData({ selectedGroupId });
-
-    await nextTick();
-
-    expect(actionButtonDisabledState()).toBe(disabled);
+    it(`emits trackModalOpenState as ${expected}`, () => {
+      expect(wrapper.emitted('trackModalOpenState')).toStrictEqual([[expected]]);
+    });
   });
 
-  describe('handles the form submission correctly when creating a new segment', () => {
-    const additionalData = { selectedGroupId: groupIds[0] };
+  describe('handles the form submission correctly when saving changes', () => {
+    const enableFirstGroup = { checkboxValues: [groupIds[0]] };
+    const enableSecondGroup = { checkboxValues: [groupIds[1]] };
+    const noEnabledGroups = { checkboxValues: [] };
+    const firstGroupEnabledData = [devopsAdoptionSegmentsData.nodes[0]];
+    const firstGroupId = [groupIds[0]];
+    const firstGroupGid = [groupGids[0]];
+    const secondGroupGid = [groupGids[1]];
 
     describe('submitting the form', () => {
       describe('while waiting for the mutation', () => {
         beforeEach(() => {
           createComponent({ mutationMock: mutateLoading });
 
-          wrapper.setData(additionalData);
+          wrapper.setData(enableFirstGroup);
         });
 
         it('disables the form inputs', async () => {
@@ -217,46 +247,72 @@ describe('DevopsAdoptionSegmentModal', () => {
         });
       });
 
-      describe('successful submission', () => {
-        beforeEach(() => {
-          createComponent();
+      describe.each`
+        action                   | enabledGroups            | newGroups            | expectedAddGroupGids | expectedDeleteIds
+        ${'adding'}              | ${[]}                    | ${enableFirstGroup}  | ${firstGroupGid}     | ${[]}
+        ${'removing'}            | ${firstGroupEnabledData} | ${noEnabledGroups}   | ${[]}                | ${firstGroupId}
+        ${'adding and removing'} | ${firstGroupEnabledData} | ${enableSecondGroup} | ${secondGroupGid}    | ${firstGroupId}
+      `(
+        '$action groups',
+        ({ enabledGroups, newGroups, expectedAddGroupGids, expectedDeleteIds }) => {
+          describe('successful submission', () => {
+            beforeEach(async () => {
+              createComponent({ props: { enabledGroups } });
 
-          wrapper.setData(additionalData);
+              wrapper.setData(newGroups);
 
-          wrapper.vm.$refs.modal.hide = jest.fn();
+              wrapper.vm.$refs.modal.hide = jest.fn();
 
-          findModal().vm.$emit('primary', mockEvent);
-        });
+              findModal().vm.$emit('primary', mockEvent);
 
-        it('submits the correct request variables', async () => {
-          expect(mutate).toHaveBeenCalledWith(
-            expect.objectContaining({
-              variables: { namespaceId: groupGids[0] },
-            }),
-          );
-        });
+              await waitForPromises();
+            });
 
-        it('closes the modal after a successful mutation', async () => {
-          expect(wrapper.vm.$refs.modal.hide).toHaveBeenCalled();
-        });
+            if (expectedAddGroupGids.length) {
+              it('submits the correct add request variables', () => {
+                expect(mutate).toHaveBeenCalledWith(
+                  expect.objectContaining({
+                    variables: { namespaceIds: expectedAddGroupGids },
+                  }),
+                );
+              });
+            }
 
-        it('resets the form fields', async () => {
-          expect(wrapper.vm.selectedGroupId).toEqual(null);
-          expect(wrapper.vm.filter).toBe('');
-        });
-      });
+            if (expectedDeleteIds.length) {
+              it('submits the correct delete request variables', () => {
+                expect(mutate).toHaveBeenCalledWith(
+                  expect.objectContaining({
+                    variables: { id: expectedDeleteIds },
+                  }),
+                );
+              });
+            }
+
+            it('closes the modal after a successful mutation', () => {
+              expect(wrapper.vm.$refs.modal.hide).toHaveBeenCalled();
+            });
+
+            it('resets the form fields', () => {
+              findModal().vm.$emit('hidden');
+
+              expect(wrapper.vm.checkboxValues).toEqual([]);
+              expect(wrapper.vm.filter).toBe('');
+            });
+          });
+        },
+      );
 
       describe('error handling', () => {
         it.each`
-          errorType     | errorLocation  | mutationSpy               | message
-          ${'generic'}  | ${'top level'} | ${mutateWithErrors}       | ${genericErrorMessage}
-          ${'specific'} | ${'data'}      | ${mutateWithDataErrors()} | ${dataErrorMessage}
+          errorType     | errorLocation  | mutationSpy             | message
+          ${'generic'}  | ${'top level'} | ${mutateWithErrors}     | ${genericErrorMessage}
+          ${'specific'} | ${'data'}      | ${mutateWithDataErrors} | ${dataErrorMessage}
         `(
           'displays a $errorType error if the mutation has a $errorLocation error',
           async ({ mutationSpy, message }) => {
             createComponent({ mutationMock: mutationSpy });
 
-            wrapper.setData(additionalData);
+            wrapper.setData(enableFirstGroup);
 
             findModal().vm.$emit('primary', mockEvent);
 
@@ -275,7 +331,7 @@ describe('DevopsAdoptionSegmentModal', () => {
 
           createComponent({ mutationMock: mutateWithErrors });
 
-          wrapper.setData(additionalData);
+          wrapper.setData(enableFirstGroup);
 
           findModal().vm.$emit('primary', mockEvent);
 

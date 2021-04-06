@@ -58,10 +58,7 @@ GitLab provides the ability to filter analytics based on a date range. To filter
 The "Time" metrics near the top of the page are measured as follows:
 
 - **Lead time**: median time from issue created to issue closed.
-- **Cycle time**: median time from first commit to issue closed.
-
-NOTE:
-A commit is associated with an issue by [crosslinking](../project/issues/crosslinking_issues.md) in the commit message or by manually linking the merge request containing the commit.
+- **Cycle time**: median time from first commit to issue closed. (You can associate a commit with an issue by [crosslinking in the commit message](../project/issues/crosslinking_issues.md#from-commit-messages).)
 
 ## How the stages are measured
 
@@ -103,14 +100,8 @@ In short, the Value Stream Analytics dashboard tracks data related to [GitLab fl
 
 ## How the production environment is identified
 
-Value Stream Analytics identifies production environments by looking for project [environments](../../ci/yaml/README.md#environment) with a name matching any of these patterns:
-
-- `prod` or `prod/*`
-- `production` or `production/*`
-
-These patterns are not case-sensitive.
-
-You can change the name of a project environment in your GitLab CI/CD configuration.
+Value Stream Analytics identifies production environments based on
+[the deployment tier of environments](../../ci/environments/index.md#deployment-tier-of-environments).
 
 ## Example workflow
 

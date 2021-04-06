@@ -28,7 +28,7 @@
                 .gl-alert-body
                   %h4.gl-alert-title= _('There is a halted Elasticsearch migration')
                   = html_escape_once(_('Check the elasticsearch.log file to debug why the migration was halted and make any changes before retrying the migration. When you fix the cause of the failure, click "Retry migration", and the migration will be scheduled to be retried in the background.')).html_safe
-                  = link_to _('Learn more.'), help_page_path('integration/elasticsearch', anchor: 'background-migrations')
+                  = link_to _('Learn more.'), help_page_path('integration/elasticsearch', anchor: 'advanced-search-migrations')
                 .gl-alert-actions
                   - migration = Elastic::DataMigrationService.halted_migration
                   = link_to _('Retry migration'), admin_elasticsearch_retry_migration_path(version: migration.version), class: 'btn gl-alert-action btn-warning gl-button', disabled: @elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to retry this migration?') }, method: :post
@@ -74,14 +74,14 @@
 
             .form-group
               = f.label :elasticsearch_shards, _('Number of Elasticsearch shards'), class: 'label-bold'
-              = f.number_field :elasticsearch_shards, value: @application_setting.elasticsearch_shards, class: 'form-control gl-form-input'
+              = f.number_field :elasticsearch_shards, value: Elastic::IndexSetting.number_of_shards, class: 'form-control gl-form-input'
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('How many shards to split the Elasticsearch index over.')
                 = recreate_index_text
 
             .form-group
               = f.label :elasticsearch_replicas, _('Number of Elasticsearch replicas'), class: 'label-bold'
-              = f.number_field :elasticsearch_replicas, value: @application_setting.elasticsearch_replicas, class: 'form-control gl-form-input'
+              = f.number_field :elasticsearch_replicas, value: Elastic::IndexSetting.number_of_replicas, class: 'form-control gl-form-input'
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('How many replicas each Elasticsearch shard has.')
                 = recreate_index_text

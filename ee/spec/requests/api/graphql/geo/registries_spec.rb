@@ -30,4 +30,18 @@ RSpec.describe 'Gets registries' do
     registry_factory: :geo_terraform_state_version_registry,
     registry_foreign_key_field_name: 'terraformStateVersionId'
   }
+
+  it_behaves_like 'gets registries for', {
+    field_name: 'groupWikiRepositoryRegistries',
+    registry_class_name: 'GroupWikiRepositoryRegistry',
+    registry_factory: :geo_group_wiki_repository_registry,
+    registry_foreign_key_field_name: 'groupWikiRepositoryId'
+  }
+
+  it_behaves_like 'gets registries for', {
+    field_name: 'pipelineArtifactRegistries',
+    registry_class_name: 'PipelineArtifactRegistry',
+    registry_factory: :geo_pipeline_artifact_registry,
+    registry_foreign_key_field_name: 'pipelineArtifactId'
+  }
 end

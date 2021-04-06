@@ -6,7 +6,7 @@ class BasePolicy < DeclarativePolicy::Base
   desc "User is an instance admin"
   with_options scope: :user, score: 0
   condition(:admin) do
-    if Feature.enabled?(:user_mode_in_session)
+    if Gitlab::CurrentSettings.admin_mode
       Gitlab::Auth::CurrentUserMode.new(@user).admin_mode?
     else
       @user&.admin?
@@ -55,14 +55,17 @@ class BasePolicy < DeclarativePolicy::Base
     prevent :read_cross_project
   end
 
-  # Policy extended in EE to also enable auditors
-  rule { admin }.enable :read_all_resources
+  rule { admin }.policy do
+    # Only for actual administrator accounts, behaviour affected by admin mode application setting
+    enable :admin_all_resources
+    # Policy extended in EE to also enable auditors
+    enable :read_all_resources
+    enable :change_repository_storage
+  end
 
   rule { default }.enable :read_cross_project
 
   condition(:is_gitlab_com) { ::Gitlab.dev_env_or_com? }
-
-  rule { admin }.enable :change_repository_storage
 end
 
 BasePolicy.prepend_if_ee('EE::BasePolicy')

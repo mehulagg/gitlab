@@ -1,4 +1,5 @@
-import { GlAlert, GlButton } from '@gitlab/ui';
+import { GlAlert } from '@gitlab/ui';
+import { fireEvent, within } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
 import LinksInner from '~/pipelines/components/graph_shared/links_inner.vue';
 import LinksLayer from '~/pipelines/components/graph_shared/links_layer.vue';
@@ -7,8 +8,10 @@ import { generateResponse, mockPipelineResponse } from '../graph/mock_data';
 describe('links layer component', () => {
   let wrapper;
 
+  const withinComponent = () => within(wrapper.element);
   const findAlert = () => wrapper.find(GlAlert);
-  const findShowAnyways = () => findAlert().find(GlButton);
+  const findShowAnyways = () =>
+    withinComponent().getByText(wrapper.vm.$options.i18n.showLinksAnyways);
   const findLinksInner = () => wrapper.find(LinksInner);
 
   const pipeline = generateResponse(mockPipelineResponse, 'root/fungi-xoxo');
@@ -79,19 +82,37 @@ describe('links layer component', () => {
       });
     });
 
+    describe('with width or height measurement at 0', () => {
+      beforeEach(() => {
+        createComponent({ props: { containerMeasurements: { width: 0, height: 100 } } });
+      });
+
+      it('renders the default slot', () => {
+        expect(wrapper.html()).toContain(slotContent);
+      });
+
+      it('does not render the alert component', () => {
+        expect(findAlert().exists()).toBe(false);
+      });
+
+      it('does not render the inner links component', () => {
+        expect(findLinksInner().exists()).toBe(false);
+      });
+    });
+
     describe('interactions', () => {
       beforeEach(() => {
         createComponent({ mountFn: mount, props: { pipelineData: tooManyStages } });
       });
 
       it('renders the disable button', () => {
-        expect(findShowAnyways().exists()).toBe(true);
-        expect(findShowAnyways().text()).toBe(wrapper.vm.$options.i18n.showLinksAnyways);
+        expect(findShowAnyways()).not.toBe(null);
       });
 
       it('shows links when override is clicked', async () => {
         expect(findLinksInner().exists()).toBe(false);
-        await findShowAnyways().trigger('click');
+        fireEvent(findShowAnyways(), new MouseEvent('click', { bubbles: true }));
+        await wrapper.vm.$nextTick();
         expect(findLinksInner().exists()).toBe(true);
       });
     });

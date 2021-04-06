@@ -19,6 +19,7 @@ module EE
     override :sidebar_operations_paths
     def sidebar_operations_paths
       super + %w[
+        cluster_agents
         oncall_schedules
       ]
     end
@@ -56,21 +57,29 @@ module EE
 
     override :project_permissions_settings
     def project_permissions_settings(project)
-      super.merge(
+      settings = super.merge(
         requirementsAccessLevel: project.requirements_access_level
       )
+
+      if ::Feature.enabled?(:cve_id_request_button, project)
+        settings[:cveIdRequestEnabled] = project.public? && project.project_setting.cve_id_request_enabled?
+      end
+
+      settings
     end
 
     override :project_permissions_panel_data
     def project_permissions_panel_data(project)
-      super.merge(
+      panel_data = super.merge(
         requirementsAvailable: project.feature_available?(:requirements)
       )
-    end
 
-    override :show_security_and_compliance_toggle?
-    def show_security_and_compliance_toggle?
-      super || show_audit_events?(@project)
+      if ::Feature.enabled?(:cve_id_request_button, project)
+        panel_data[:requestCveAvailable] = ::Gitlab.com?
+        panel_data[:cveIdRequestHelpPath] = help_page_path('user/application_security/cve_id_request')
+      end
+
+      panel_data
     end
 
     override :default_url_to_repo
@@ -183,6 +192,7 @@ module EE
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
         projects/threat_monitoring#alert_details
+        projects/security/policies#show
         projects/audit_events#index
       ]
     end
@@ -215,9 +225,9 @@ module EE
     end
 
     def size_limit_message(project)
-      show_lfs = project.lfs_enabled? ? 'including files in LFS' : ''
+      show_lfs = project.lfs_enabled? ? 'including LFS files' : ''
 
-      "The total size of this project's repository #{show_lfs} will be limited to this size. 0 for unlimited. Leave empty to inherit the group/global value."
+      "Max size of this project's repository, #{show_lfs}. For no limit, enter 0. To inherit the group/global value, leave blank."
     end
 
     override :membership_locked?
@@ -241,9 +251,11 @@ module EE
           has_vulnerabilities: 'false',
           has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
+          survey_request_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
-          project_full_path: project.full_path
+          project_full_path: project.full_path,
+          security_configuration_path: project_security_configuration_path(@project)
         }.merge!(security_dashboard_pipeline_data(project))
       else
         {
@@ -253,6 +265,7 @@ module EE
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: api_v4_security_projects_vulnerability_exports_path(id: project.id),
           empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
+          survey_request_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
           dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
@@ -358,6 +371,10 @@ module EE
 
       if can?(current_user, :read_threat_monitoring, project)
         nav_tabs << :threat_monitoring
+      end
+
+      if can?(current_user, :security_orchestration_policies, project)
+        nav_tabs << :security_orchestration_policies
       end
 
       if show_audit_events?(project)

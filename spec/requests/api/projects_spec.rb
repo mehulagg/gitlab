@@ -810,6 +810,31 @@ RSpec.describe API::Projects do
         end
       end
     end
+
+    context 'with forked projects', :use_clean_rails_memory_store_caching do
+      include ProjectForksHelper
+
+      let_it_be(:admin) { create(:admin) }
+
+      it 'avoids N+1 queries' do
+        get api('/projects', admin)
+
+        base_project = create(:project, :public, namespace: admin.namespace)
+
+        fork_project1 = fork_project(base_project, admin, namespace: create(:user).namespace)
+        fork_project2 = fork_project(fork_project1, admin, namespace: create(:user).namespace)
+
+        control = ActiveRecord::QueryRecorder.new do
+          get api('/projects', admin)
+        end
+
+        fork_project(fork_project2, admin, namespace: create(:user).namespace)
+
+        expect do
+          get api('/projects', admin)
+        end.not_to exceed_query_limit(control.count)
+      end
+    end
   end
 
   describe 'POST /projects' do
@@ -1461,13 +1486,76 @@ RSpec.describe API::Projects do
     end
   end
 
+  describe "POST /projects/:id/uploads/authorize" do
+    include WorkhorseHelpers
+
+    let(:headers) { workhorse_internal_api_request_header.merge({ 'HTTP_GITLAB_WORKHORSE' => 1 }) }
+
+    context 'with authorized user' do
+      it "returns 200" do
+        post api("/projects/#{project.id}/uploads/authorize", user), headers: headers
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['MaximumSize']).to eq(project.max_attachment_size)
+      end
+    end
+
+    context 'with unauthorized user' do
+      it "returns 404" do
+        post api("/projects/#{project.id}/uploads/authorize", user2), headers: headers
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'with exempted project' do
+      before do
+        stub_env('GITLAB_UPLOAD_API_ALLOWLIST', project.id)
+      end
+
+      it "returns 200" do
+        post api("/projects/#{project.id}/uploads/authorize", user), headers: headers
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['MaximumSize']).to eq(1.gigabyte)
+      end
+    end
+
+    context 'with upload size enforcement disabled' do
+      before do
+        stub_feature_flags(enforce_max_attachment_size_upload_api: false)
+      end
+
+      it "returns 200" do
+        post api("/projects/#{project.id}/uploads/authorize", user), headers: headers
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['MaximumSize']).to eq(1.gigabyte)
+      end
+    end
+
+    context 'with no Workhorse headers' do
+      it "returns 403" do
+        post api("/projects/#{project.id}/uploads/authorize", user)
+
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+  end
+
   describe "POST /projects/:id/uploads" do
+    let(:file) { fixture_file_upload("spec/fixtures/dk.png", "image/png") }
+
     before do
       project
     end
 
     it "uploads the file and returns its info" do
-      post api("/projects/#{project.id}/uploads", user), params: { file: fixture_file_upload("spec/fixtures/dk.png", "image/png") }
+      expect_next_instance_of(UploadService) do |instance|
+        expect(instance).to receive(:override_max_attachment_size=).with(project.max_attachment_size).and_call_original
+      end
+
+      post api("/projects/#{project.id}/uploads", user), params: { file: file }
 
       expect(response).to have_gitlab_http_status(:created)
       expect(json_response['alt']).to eq("dk")
@@ -1475,6 +1563,156 @@ RSpec.describe API::Projects do
       expect(json_response['url']).to end_with("/dk.png")
 
       expect(json_response['full_path']).to start_with("/#{project.namespace.path}/#{project.path}/uploads")
+    end
+
+    it "logs a warning if file exceeds attachment size" do
+      allow(Gitlab::CurrentSettings).to receive(:max_attachment_size).and_return(0)
+
+      expect(Gitlab::AppLogger).to receive(:info).with(hash_including(message: 'File exceeds maximum size')).and_call_original
+
+      post api("/projects/#{project.id}/uploads", user), params: { file: file }
+    end
+
+    shared_examples 'capped upload attachments' do
+      it "limits the upload to 1 GB" do
+        expect_next_instance_of(UploadService) do |instance|
+          expect(instance).to receive(:override_max_attachment_size=).with(1.gigabyte).and_call_original
+        end
+
+        post api("/projects/#{project.id}/uploads", user), params: { file: file }
+
+        expect(response).to have_gitlab_http_status(:created)
+      end
+    end
+
+    context 'with exempted project' do
+      before do
+        stub_env('GITLAB_UPLOAD_API_ALLOWLIST', project.id)
+      end
+
+      it_behaves_like 'capped upload attachments'
+    end
+
+    context 'with upload size enforcement disabled' do
+      before do
+        stub_feature_flags(enforce_max_attachment_size_upload_api: false)
+      end
+
+      it_behaves_like 'capped upload attachments'
+    end
+  end
+
+  describe "GET /projects/:id/groups" do
+    let_it_be(:root_group) { create(:group, :public, name: 'root group') }
+    let_it_be(:project_group) { create(:group, :public, parent: root_group, name: 'project group') }
+    let_it_be(:shared_group_with_dev_access) { create(:group, :private, parent: root_group, name: 'shared group') }
+    let_it_be(:shared_group_with_reporter_access) { create(:group, :private) }
+    let_it_be(:private_project) { create(:project, :private, group: project_group) }
+    let_it_be(:public_project) { create(:project, :public, group: project_group) }
+
+    before_all do
+      create(:project_group_link, :developer, group: shared_group_with_dev_access, project: private_project)
+      create(:project_group_link, :reporter, group: shared_group_with_reporter_access, project: private_project)
+    end
+
+    shared_examples_for 'successful groups response' do
+      it 'returns an array of groups' do
+        request
+
+        aggregate_failures do
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response.map { |g| g['name'] }).to match_array(expected_groups.map(&:name))
+        end
+      end
+    end
+
+    context 'when unauthenticated' do
+      it 'does not return groups for private projects' do
+        get api("/projects/#{private_project.id}/groups")
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      context 'for public projects' do
+        let(:request) { get api("/projects/#{public_project.id}/groups") }
+
+        it_behaves_like 'successful groups response' do
+          let(:expected_groups) { [root_group, project_group] }
+        end
+      end
+    end
+
+    context 'when authenticated as user' do
+      context 'when user does not have access to the project' do
+        it 'does not return groups' do
+          get api("/projects/#{private_project.id}/groups", user)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      context 'when user has access to the project' do
+        let(:request) { get api("/projects/#{private_project.id}/groups", user), params: params }
+        let(:params) { {} }
+
+        before do
+          private_project.add_developer(user)
+        end
+
+        it_behaves_like 'successful groups response' do
+          let(:expected_groups) { [root_group, project_group] }
+        end
+
+        context 'when search by root group name' do
+          let(:params) { { search: 'root' } }
+
+          it_behaves_like 'successful groups response' do
+            let(:expected_groups) { [root_group] }
+          end
+        end
+
+        context 'with_shared option is on' do
+          let(:params) { { with_shared: true } }
+
+          it_behaves_like 'successful groups response' do
+            let(:expected_groups) { [root_group, project_group, shared_group_with_dev_access, shared_group_with_reporter_access] }
+          end
+
+          context 'when shared_min_access_level is set' do
+            let(:params) { super().merge(shared_min_access_level: Gitlab::Access::DEVELOPER) }
+
+            it_behaves_like 'successful groups response' do
+              let(:expected_groups) { [root_group, project_group, shared_group_with_dev_access] }
+            end
+          end
+
+          context 'when search by shared group name' do
+            let(:params) { super().merge(search: 'shared') }
+
+            it_behaves_like 'successful groups response' do
+              let(:expected_groups) { [shared_group_with_dev_access] }
+            end
+          end
+
+          context 'when skip_groups is set' do
+            let(:params) { super().merge(skip_groups: [shared_group_with_dev_access.id, root_group.id]) }
+
+            it_behaves_like 'successful groups response' do
+              let(:expected_groups) { [shared_group_with_reporter_access, project_group] }
+            end
+          end
+        end
+      end
+    end
+
+    context 'when authenticated as admin' do
+      let(:request) { get api("/projects/#{private_project.id}/groups", admin) }
+
+      it_behaves_like 'successful groups response' do
+        let(:expected_groups) { [root_group, project_group] }
+      end
     end
   end
 
@@ -1540,6 +1778,10 @@ RSpec.describe API::Projects do
     end
 
     context 'when authenticated as an admin' do
+      before do
+        stub_container_registry_config(enabled: true, host_port: 'registry.example.org:5000')
+      end
+
       let(:project_attributes_file) { 'spec/requests/api/project_attributes.yml' }
       let(:project_attributes) { YAML.load_file(project_attributes_file) }
 
@@ -1563,13 +1805,15 @@ RSpec.describe API::Projects do
             mirror
             requirements_enabled
             security_and_compliance_enabled
+            issues_template
+            merge_requests_template
           ]
         end
 
         keys
       end
 
-      it 'returns a project by id' do
+      it 'returns a project by id', :aggregate_failures do
         project
         project_member
         group = create(:group)
@@ -1587,6 +1831,7 @@ RSpec.describe API::Projects do
         expect(json_response['ssh_url_to_repo']).to be_present
         expect(json_response['http_url_to_repo']).to be_present
         expect(json_response['web_url']).to be_present
+        expect(json_response['container_registry_image_prefix']).to eq("registry.example.org:5000/#{project.full_path}")
         expect(json_response['owner']).to be_a Hash
         expect(json_response['name']).to eq(project.name)
         expect(json_response['path']).to be_present
@@ -1644,9 +1889,10 @@ RSpec.describe API::Projects do
       before do
         project
         project_member
+        stub_container_registry_config(enabled: true, host_port: 'registry.example.org:5000')
       end
 
-      it 'returns a project by id' do
+      it 'returns a project by id', :aggregate_failures do
         group = create(:group)
         link = create(:project_group_link, project: project, group: group)
 
@@ -1662,6 +1908,7 @@ RSpec.describe API::Projects do
         expect(json_response['ssh_url_to_repo']).to be_present
         expect(json_response['http_url_to_repo']).to be_present
         expect(json_response['web_url']).to be_present
+        expect(json_response['container_registry_image_prefix']).to eq("registry.example.org:5000/#{project.full_path}")
         expect(json_response['owner']).to be_a Hash
         expect(json_response['name']).to eq(project.name)
         expect(json_response['path']).to be_present

@@ -17,6 +17,8 @@ import {
   composerRegistryInclude,
   composerPackageInclude,
   groupExists,
+  gradleGroovyInstalCommand,
+  gradleGroovyAddSourceCommand,
 } from '~/packages/details/store/getters';
 import {
   conanPackage,
@@ -25,6 +27,7 @@ import {
   mockPipelineInfo,
   mavenPackage as packageWithoutBuildInfo,
   pypiPackage,
+  rubygemsPackage,
 } from '../../mock_data';
 import {
   generateMavenCommand,
@@ -102,6 +105,7 @@ describe('Getters PackageDetails Store', () => {
       ${npmPackage}              | ${'npm'}
       ${nugetPackage}            | ${'NuGet'}
       ${pypiPackage}             | ${'PyPI'}
+      ${rubygemsPackage}         | ${'RubyGems'}
     `(`package type`, ({ packageEntity, expectedResult }) => {
       beforeEach(() => setupState({ packageEntity }));
 
@@ -232,6 +236,26 @@ describe('Getters PackageDetails Store', () => {
       setupState();
 
       expect(composerPackageInclude(state)).toBe(composerPackageIncludeStr);
+    });
+  });
+
+  describe('gradle groovy string getters', () => {
+    it('gets the correct gradleGroovyInstalCommand', () => {
+      setupState();
+
+      expect(gradleGroovyInstalCommand(state)).toMatchInlineSnapshot(
+        `"implementation 'com.test.app:test-app:1.0-SNAPSHOT'"`,
+      );
+    });
+
+    it('gets the correct gradleGroovyAddSourceCommand', () => {
+      setupState();
+
+      expect(gradleGroovyAddSourceCommand(state)).toMatchInlineSnapshot(`
+        "maven {
+          url 'foo/registry'
+        }"
+      `);
     });
   });
 

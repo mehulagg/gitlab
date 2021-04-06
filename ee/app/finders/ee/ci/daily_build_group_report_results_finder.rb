@@ -9,6 +9,8 @@ module EE
     # Added arguments:
     #   params:
     #     group: integer
+    #     group_activity: boolean
+    #
     module DailyBuildGroupReportResultsFinder
       extend ::Gitlab::Utils::Override
 
@@ -23,6 +25,17 @@ module EE
       end
 
       private
+
+      override :filter_report_results
+      def filter_report_results(collection)
+        collection = super(collection)
+        collection = by_activity_per_group(collection)
+        collection
+      end
+
+      def by_activity_per_group(items)
+        params[:group_activity].present? ? items.activity_per_group : items
+      end
 
       override :query_allowed?
       def query_allowed?

@@ -133,9 +133,15 @@ module QA
       end
 
       def check_element(name)
+        if find_element(name, visible: false).checked?
+          QA::Runtime::Logger.debug("#{name} is already checked")
+
+          return
+        end
+
         retry_until(sleep_interval: 1) do
-          find_element(name).set(true)
-          checked = find_element(name).checked?
+          find_element(name, visible: false).click
+          checked = find_element(name, visible: false).checked?
 
           QA::Runtime::Logger.debug(checked ? "#{name} was checked" : "#{name} was not checked")
 
@@ -144,10 +150,39 @@ module QA
       end
 
       def uncheck_element(name)
-        retry_until(sleep_interval: 1) do
-          find_element(name).set(false)
+        unless find_element(name, visible: false).checked?
+          QA::Runtime::Logger.debug("#{name} is already unchecked")
 
-          !find_element(name).checked?
+          return
+        end
+
+        retry_until(sleep_interval: 1) do
+          find_element(name, visible: false).click
+          unchecked = !find_element(name, visible: false).checked?
+
+          QA::Runtime::Logger.debug(unchecked ? "#{name} was unchecked" : "#{name} was not unchecked")
+
+          unchecked
+        end
+      end
+
+      # Method for selecting radios
+      def choose_element(name, click_by_js = false)
+        if find_element(name, visible: false).checked?
+          QA::Runtime::Logger.debug("#{name} is already selected")
+
+          return
+        end
+
+        retry_until(sleep_interval: 1) do
+          radio = find_element(name, visible: false)
+          # Some radio buttons are hidden by their labels and cannot be clicked directly
+          click_by_js ? page.execute_script("arguments[0].click();", radio) : radio.click
+          selected = find_element(name, visible: false).checked?
+
+          QA::Runtime::Logger.debug(selected ? "#{name} was selected" : "#{name} was not selected")
+
+          selected
         end
       end
 
@@ -156,8 +191,8 @@ module QA
       # This is a helpful workaround when there is a transparent element overlapping
       # the target element and so, normal `click_element` on target would raise
       # Selenium::WebDriver::Error::ElementClickInterceptedError
-      def click_element_coordinates(name)
-        page.driver.browser.action.move_to(find_element(name).native).click.perform
+      def click_element_coordinates(name, **kwargs)
+        page.driver.browser.action.move_to(find_element(name, **kwargs).native).click.perform
       end
 
       # replace with (..., page = self.class)

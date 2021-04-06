@@ -63,6 +63,7 @@ Examples of both configurations can be found here:
 - [Example OpenAPI v2 specification project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing-example/-/tree/openapi)
 - [Example HTTP Archive (HAR) project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing-example/-/tree/har)
 - [Example Postman Collection project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/postman-api-fuzzing-example)
+- [Example GraphQL project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/graphql-api-fuzzing-example)
 
 WARNING:
 GitLab 14.0 will require that you place API fuzzing configuration files (for example,
@@ -70,7 +71,38 @@ GitLab 14.0 will require that you place API fuzzing configuration files (for exa
 repository's root. You can continue using your existing configuration files as they are, but
 starting in GitLab 14.0, GitLab will not check your repository's root for configuration files.
 
+### Configuration form
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299234) in GitLab 13.10.
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+The API fuzzing configuration form helps you create or modify your project's API fuzzing
+configuration. The form lets you choose values for the most common API fuzzing options and builds
+a YAML snippet that you can paste in your GitLab CI/CD configuration.
+
+To generate an API Fuzzing configuration snippet:
+
+1. From your project's home page, go to **Security & Compliance > Configuration** in the left
+   sidebar.
+1. Select **Configure** in the **API Fuzzing** row.
+1. Complete the form as needed. Read below for more information on available configuration options.
+1. Select **Generate code snippet**.
+
+A modal opens with the YAML snippet corresponding to the options you've selected in the form.
+
+![API Fuzzing configuration snippet](img/api_fuzzing_configuration_snippet_v13.10.png)
+
+Select **Copy code and open `.gitlab-ci.yml` file** to copy the snippet to your clipboard and be redirected
+to your project's `.gitlab-ci.yml` file where you can paste the YAML configuration.
+
+Select **Copy code only** to copy the snippet to your clipboard and close the modal.
+
 ### OpenAPI Specification
+
+> Support for OpenAPI Specification v3 was
+> [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/228652) in GitLab 13.9.
 
 The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an
 API description format for REST APIs. This section shows you how to configure API fuzzing by using
@@ -206,7 +238,8 @@ target API to test:
      FUZZAPI_PROFILE: Quick-10
    ```
 
-1. Add the `FUZZAPI_HAR` variable and set it to the HAR file's location:
+1. Provide the location of the HAR specification. You can provide the specification as a file
+   or URL. [URL support was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285020) in GitLab 13.10 and later. Specify the location by adding the `FUZZAPI_HAR` variable:
 
    ```yaml
    include:
@@ -297,7 +330,8 @@ information about the target API to test:
      FUZZAPI_PROFILE: Quick-10
    ```
 
-1. Add the `FUZZAPI_POSTMAN_COLLECTION` variable and set it to the Postman Collection's location:
+1. Provide the location of the Postman Collection specification. You can provide the specification as a file
+   or URL. [URL support was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285020) in GitLab 13.10 and later. Specify the location by adding the `FUZZAPI_POSTMAN_COLLECTION` variable:
 
    ```yaml
    include:
@@ -409,7 +443,7 @@ To use HTTP basic authentication, two CI/CD variables are added to your `.gitlab
 - `FUZZAPI_HTTP_USERNAME`: The username for authentication.
 - `FUZZAPI_HTTP_PASSWORD`: The password for authentication.
 
-For the password, we recommended that you [create a CI/CD variable](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui)
+For the password, we recommended that you [create a CI/CD variable](../../../ci/variables/README.md#custom-cicd-variables)
 (for example, `TEST_API_PASSWORD`) set to the password. You can create CI/CD variables from the
 GitLab projects page at **Settings > CI/CD**, in the **Variables** section. Use that variable
 as the value for `FUZZAPI_HTTP_PASSWORD`:
@@ -444,7 +478,7 @@ outgoing HTTP requests.
 
 Follow these steps to provide the bearer token with `FUZZAPI_OVERRIDES_ENV`:
 
-1. [Create a CI/CD variable](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui),
+1. [Create a CI/CD variable](../../../ci/variables/README.md#custom-cicd-variables),
    for example `TEST_API_BEARERAUTH`, with the value
    `{"headers":{"Authorization":"Bearer dXNlcm5hbWU6cGFzc3dvcmQ="}}` (substitute your token). You
    can create CI/CD variables from the GitLab projects page at **Settings > CI/CD**, in the
@@ -783,7 +817,7 @@ variables:
 ```
 
 In this example `.gitlab-ci.yml`, the `SECRET_OVERRIDES` variable provides the JSON. This is a
-[group or instance level CI/CD variable defined in the UI](../../../ci/variables/README.md#instance-level-cicd-variables):
+[group or instance level CI/CD variable defined in the UI](../../../ci/variables/README.md#instance-cicd-variables):
 
 ```yaml
 include:
@@ -941,7 +975,7 @@ pipelines. For more information, see the [Security Dashboard documentation](../s
 
 Fuzzing faults show up as vulnerabilities with a severity of Unknown.
 Once a fault is found, you can interact with it. Read more on how to
-[interact with the vulnerabilities](../index.md#interacting-with-the-vulnerabilities).
+[address the vulnerabilities](../index.md#addressing-vulnerabilities).
 
 ## Handling False Positives
 
@@ -960,7 +994,7 @@ False positives can be handled in two ways:
 Checks perform testing of a specific type and can be turned on and off for specific configuration
 profiles. The provided [configuration files](#configuration-files) define several profiles that you
 can use. The profile definition in the configuration file lists all the checks that are active
-during a scan. To turn off a specific check, simply remove it from the profile definition in the
+during a scan. To turn off a specific check, remove it from the profile definition in the
 configuration file. The profiles are defined in the `Profiles` section of the configuration file.
 
 Example profile definition:

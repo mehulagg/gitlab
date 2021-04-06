@@ -622,6 +622,35 @@ RSpec.describe ProjectsController do
         end
       end
     end
+
+    context 'cve_id_request_button feature flag' do
+      where(feature_flag_enabled: [true, false])
+      with_them do
+        before do
+          stub_feature_flags(cve_id_request_button: feature_flag_enabled)
+        end
+
+        it 'handles setting cve_id_request_enabled' do
+          project.project_setting.cve_id_request_enabled = false
+          project.project_setting.save!
+
+          params = {
+            project_setting_attributes: {
+              cve_id_request_enabled: true
+            }
+          }
+          put :update,
+              params: {
+                namespace_id: project.namespace,
+                id: project,
+                project: params
+              }
+          project.reload
+
+          expect(project.project_setting.cve_id_request_enabled).to eq(feature_flag_enabled)
+        end
+      end
+    end
   end
 
   describe '#download_export' do
@@ -735,7 +764,7 @@ RSpec.describe ProjectsController do
 
       context 'when feature is enabled for group' do
         before do
-          allow(group).to receive(:delayed_project_removal?).and_return(true)
+          allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(true)
         end
 
         it_behaves_like 'marks project for deletion'
@@ -767,7 +796,7 @@ RSpec.describe ProjectsController do
 
       context 'when feature is disabled for group' do
         before do
-          allow(group).to receive(:delayed_project_removal).and_return(false)
+          allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(false)
         end
 
         it_behaves_like 'deletes project right away'

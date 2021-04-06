@@ -241,7 +241,7 @@ container_scanning:
         -----END CERTIFICATE-----
 ```
 
-The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
+The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/README.md#custom-cicd-variables), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
 
 ### Vulnerability allowlisting
 
@@ -455,7 +455,7 @@ For more information about the vulnerabilities database update, check the
 
 ## Interacting with the vulnerabilities
 
-After a vulnerability is found, you can [interact with it](../index.md#interacting-with-the-vulnerabilities).
+After a vulnerability is found, you can [address it](../index.md#addressing-vulnerabilities).
 
 ## Solutions for vulnerabilities (auto-remediation)
 
@@ -469,7 +469,7 @@ file, it's necessary to set [`GIT_STRATEGY: fetch`](../../../ci/runners/README.m
 your `.gitlab-ci.yml` file by following the instructions described in this document's
 [overriding the container scanning template](#overriding-the-container-scanning-template) section.
 
-Read more about the [solutions for vulnerabilities](../index.md#automatic-remediation-for-vulnerabilities).
+Read more about the [solutions for vulnerabilities](../index.md#apply-an-automatic-remediation-for-a-vulnerability).
 
 ## Troubleshooting
 

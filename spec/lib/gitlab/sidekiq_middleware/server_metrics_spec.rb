@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 
+# rubocop: disable RSpec/MultipleMemoizedHelpers
 RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
   context "with worker attribution" do
     subject { described_class.new }
@@ -83,18 +84,22 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
           let(:elasticsearch_calls) { 8 }
           let(:elasticsearch_duration) { 0.54 }
 
+          let(:instrumentation) do
+            {
+              gitaly_duration_s: gitaly_duration,
+              redis_calls: redis_calls,
+              redis_duration_s: redis_duration,
+              elasticsearch_calls: elasticsearch_calls,
+              elasticsearch_duration_s: elasticsearch_duration
+            }
+          end
+
           before do
             allow(subject).to receive(:get_thread_cputime).and_return(thread_cputime_before, thread_cputime_after)
             allow(Gitlab::Metrics::System).to receive(:monotonic_time).and_return(monotonic_time_before, monotonic_time_after)
             allow(Gitlab::InstrumentationHelper).to receive(:queue_duration_for_job).with(job).and_return(queue_duration_for_job)
             allow(ActiveRecord::LogSubscriber).to receive(:runtime).and_return(db_duration * 1000)
-
-            job[:gitaly_duration_s] = gitaly_duration
-            job[:redis_calls] = redis_calls
-            job[:redis_duration_s] = redis_duration
-
-            job[:elasticsearch_calls] = elasticsearch_calls
-            job[:elasticsearch_duration_s] = elasticsearch_duration
+            job[:instrumentation] = instrumentation
 
             allow(running_jobs_metric).to receive(:increment)
             allow(redis_requests_total).to receive(:increment)
@@ -110,6 +115,14 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
 
           it 'yields block' do
             expect { |b| subject.call(worker, job, :test, &b) }.to yield_control.once
+          end
+
+          it 'calls BackgroundTransaction' do
+            expect_next_instance_of(Gitlab::Metrics::BackgroundTransaction) do |instance|
+              expect(instance).to receive(:run)
+            end
+
+            subject.call(worker, job, :test) {}
           end
 
           it 'sets queue specific metrics' do
@@ -220,6 +233,15 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
       it_behaves_like "a metrics middleware"
     end
 
+    context 'for ActionMailer::MailDeliveryJob' do
+      let(:job) { { 'class' => ActionMailer::MailDeliveryJob } }
+      let(:worker) { ActionMailer::MailDeliveryJob.new }
+      let(:worker_class) { ActionMailer::MailDeliveryJob }
+      let(:labels) { default_labels.merge(feature_category: 'issue_tracking') }
+
+      it_behaves_like 'a metrics middleware'
+    end
+
     context "when workers are attributed" do
       def create_attributed_worker_class(urgency, external_dependencies, resource_boundary, category)
         Class.new do
@@ -287,3 +309,4 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
     end
   end
 end
+# rubocop: enable RSpec/MultipleMemoizedHelpers

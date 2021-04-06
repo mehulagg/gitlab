@@ -79,7 +79,7 @@ RSpec.describe 'Project active tab' do
       visit project_merge_requests_path(project)
     end
 
-    it_behaves_like 'page has active tab', 'Merge Requests'
+    it_behaves_like 'page has active tab', 'Merge requests'
   end
 
   context 'on project Wiki' do
@@ -132,13 +132,13 @@ RSpec.describe 'Project active tab' do
       it_behaves_like 'page has active sub tab', _('Value Stream')
     end
 
-    context 'on project Analytics/"CI / CD"' do
+    context 'on project Analytics/"CI/CD"' do
       before do
-        click_tab(_('CI / CD'))
+        click_tab(_('CI/CD'))
       end
 
       it_behaves_like 'page has active tab', _('Analytics')
-      it_behaves_like 'page has active sub tab', _('CI / CD')
+      it_behaves_like 'page has active sub tab', _('CI/CD')
     end
   end
 end

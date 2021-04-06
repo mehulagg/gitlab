@@ -12,11 +12,6 @@ import UserAvatarImage from '../user_avatar/user_avatar_image.vue';
 
 const MAX_SKELETON_LINES = 4;
 
-const SECURITY_BOT_USER_DATA = {
-  username: 'GitLab-Security-Bot',
-  name: 'GitLab Security Bot',
-};
-
 export default {
   name: 'UserPopover',
   maxSkeletonLines: MAX_SKELETON_LINES,
@@ -56,15 +51,6 @@ export default {
     userIsLoading() {
       return !this.user?.loaded;
     },
-    isSecurityBot() {
-      const { username, name, websiteUrl = '' } = this.user;
-      return (
-        gon.features?.securityAutoFix &&
-        username === SECURITY_BOT_USER_DATA.username &&
-        name === SECURITY_BOT_USER_DATA.name &&
-        websiteUrl.length
-      );
-    },
     availabilityStatus() {
       return this.user?.status?.availability || '';
     },
@@ -74,7 +60,7 @@ export default {
 
 <template>
   <!-- 200ms delay so not every mouseover triggers Popover -->
-  <gl-popover :target="target" :delay="200" boundary="viewport" triggers="hover" placement="top">
+  <gl-popover :target="target" :delay="200" boundary="viewport" placement="top">
     <div class="gl-p-3 gl-line-height-normal gl-display-flex" data-testid="user-popover">
       <div class="gl-p-2 flex-shrink-1">
         <user-avatar-image :img-src="user.avatarUrl" :size="60" css-classes="gl-mr-3!" />
@@ -114,7 +100,7 @@ export default {
           <div v-if="statusHtml" class="js-user-status gl-mt-3">
             <span v-html="statusHtml"></span>
           </div>
-          <div v-if="isSecurityBot" class="gl-text-blue-500">
+          <div v-if="user.bot" class="gl-text-blue-500">
             <gl-icon name="question" />
             <gl-link data-testid="user-popover-bot-docs-link" :href="user.websiteUrl">
               {{ sprintf(__('Learn more about %{username}'), { username: user.name }) }}

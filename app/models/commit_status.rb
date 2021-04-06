@@ -55,6 +55,8 @@ class CommitStatus < ApplicationRecord
   scope :for_ref, -> (ref) { where(ref: ref) }
   scope :by_name, -> (name) { where(name: name) }
   scope :in_pipelines, ->(pipelines) { where(pipeline: pipelines) }
+  scope :eager_load_pipeline, -> { eager_load(:pipeline, project: { namespace: :route }) }
+  scope :with_pipeline, -> { joins(:pipeline) }
 
   scope :for_project_paths, -> (paths) do
     where(project: Project.where_full_path_in(Array(paths)))
@@ -83,6 +85,8 @@ class CommitStatus < ApplicationRecord
   # We use `Enums::Ci::CommitStatus.failure_reasons` here so that EE can more easily
   # extend this `Hash` with new values.
   enum_with_nil failure_reason: Enums::Ci::CommitStatus.failure_reasons
+
+  default_value_for :retried, false
 
   ##
   # We still create some CommitStatuses outside of CreatePipelineService.
@@ -177,14 +181,16 @@ class CommitStatus < ApplicationRecord
     end
 
     after_transition any => :failed do |commit_status|
-      next unless commit_status.project
-
-      # rubocop: disable CodeReuse/ServiceClass
       commit_status.run_after_commit do
-        MergeRequests::AddTodoWhenBuildFailsService
-          .new(project, nil).execute(self)
+        ::Gitlab::Ci::Pipeline::Metrics.job_failure_reason_counter.increment(reason: commit_status.failure_reason)
+
+        # rubocop: disable CodeReuse/ServiceClass
+        next if Feature.enabled?(:async_add_build_failure_todo, commit_status.project, default_enabled: :yaml)
+        next unless commit_status.project
+
+        MergeRequests::AddTodoWhenBuildFailsService.new(project, nil).execute(self)
+        # rubocop: enable CodeReuse/ServiceClass
       end
-      # rubocop: enable CodeReuse/ServiceClass
     end
   end
 
@@ -208,26 +214,7 @@ class CommitStatus < ApplicationRecord
   end
 
   def group_name
-    simplified_commit_status_group_name_feature_flag = Gitlab::SafeRequestStore.fetch("project:#{project_id}:simplified_commit_status_group_name") do
-      Feature.enabled?(:simplified_commit_status_group_name, project, default_enabled: false)
-    end
-
-    if simplified_commit_status_group_name_feature_flag
-      # Only remove one or more [...] "X/Y" "X Y" from the end of build names.
-      # More about the regular expression logic: https://docs.gitlab.com/ee/ci/jobs/#group-jobs-in-a-pipeline
-
-      name.to_s.sub(%r{([\b\s:]+((\[.*\])|(\d+[\s:\/\\]+\d+)))+\s*\z}, '').strip
-    else
-      # Prior implementation, remove [...] "X/Y" "X Y" from the beginning and middle of build names
-      # 'rspec:linux: 1/10' => 'rspec:linux'
-      common_name = name.to_s.gsub(%r{\b\d+[\s:\/\\]+\d+\s*}, '')
-
-      # 'rspec:linux: [aws, max memory]' => 'rspec:linux', 'rspec:linux: [aws]' => 'rspec:linux'
-      common_name.gsub!(%r{: \[.*\]\s*\z}, '')
-
-      common_name.strip!
-      common_name
-    end
+    name.to_s.sub(%r{([\b\s:]+((\[.*\])|(\d+[\s:\/\\]+\d+)))+\s*\z}, '').strip
   end
 
   def failed_but_allowed?
@@ -288,6 +275,15 @@ class CommitStatus < ApplicationRecord
 
   def recoverable?
     failed? && !unrecoverable_failure?
+  end
+
+  def update_older_statuses_retried!
+    pipeline
+      .statuses
+      .latest
+      .where(name: name)
+      .where.not(id: id)
+      .update_all(retried: true, processed: true)
   end
 
   private

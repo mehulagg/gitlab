@@ -203,11 +203,19 @@ module EE
       self.iterations_cadence = default_cadence
     end
 
+    # TODO: this method should be removed as part of https://gitlab.com/gitlab-org/gitlab/-/issues/296099
     def find_or_create_default_cadence
       cadence_title = "#{group.name} Iterations"
       start_date = self.start_date || Date.today
 
-      ::Iterations::Cadence.create_with(title: cadence_title, start_date: start_date).safe_find_or_create_by!(group: group)
+      ::Iterations::Cadence.create_with(
+        title: cadence_title,
+        start_date: start_date,
+        automatic: false,
+        # set to 0, i.e. unspecified when creating default iterations as we do validate for presence.
+        iterations_in_advance: 0,
+        duration_in_weeks: 0
+      ).safe_find_or_create_by!(group: group)
     end
 
     # TODO: remove this as part of https://gitlab.com/gitlab-org/gitlab/-/issues/296100

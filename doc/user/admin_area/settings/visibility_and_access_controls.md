@@ -55,7 +55,7 @@ To change the default project creation protection:
 1. Select the desired option.
 1. Click **Save changes**.
 
-For more details, see [Default project-creation level](../../group/index.md#default-project-creation-level).
+For more details, see [Specify who can add projects to a group](../../group/index.md#specify-who-can-add-projects-to-a-group).
 
 ## Default project deletion protection **(PREMIUM SELF)**
 
@@ -79,7 +79,7 @@ The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org
 [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
 Projects in a group (but not a personal namespace) can be deleted after a delayed period, by
-[configuring in Group Settings](../../group/index.md#enabling-delayed-project-removal).
+[configuring in Group Settings](../../group/index.md#enable-delayed-project-removal).
 The default period is seven days, and can be changed. Setting this period to `0` enables immediate removal
 of projects or groups.
 

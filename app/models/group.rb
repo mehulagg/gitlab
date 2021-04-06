@@ -16,6 +16,7 @@ class Group < Namespace
   include Gitlab::Utils::StrongMemoize
   include GroupAPICompatibility
   include EachBatch
+  include HasTimelogsReport
 
   ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
@@ -70,6 +71,7 @@ class Group < Namespace
   has_many :group_deploy_keys, through: :group_deploy_keys_groups
   has_many :group_deploy_tokens
   has_many :deploy_tokens, through: :group_deploy_tokens
+  has_many :oauth_applications, class_name: 'Doorkeeper::Application', as: :owner, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
   has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
@@ -340,6 +342,13 @@ class Group < Namespace
     has_owner?(user) && members_with_parents.owners.size == 1
   end
 
+  def last_blocked_owner?(user)
+    return false if members_with_parents.owners.any?
+
+    blocked_owners = members.blocked.where(access_level: Gitlab::Access::OWNER)
+    blocked_owners.size == 1 && blocked_owners.exists?(user_id: user)
+  end
+
   def ldap_synced?
     false
   end
@@ -505,7 +514,7 @@ class Group < Namespace
   # @param only_concrete_membership [Bool] whether require admin concrete membership status
   def max_member_access_for_user(user, only_concrete_membership: false)
     return GroupMember::NO_ACCESS unless user
-    return GroupMember::OWNER if user.admin? && !only_concrete_membership
+    return GroupMember::OWNER if user.can_admin_all_resources? && !only_concrete_membership
 
     max_member_access = members_with_parents.where(user_id: user)
                                             .reorder(access_level: :desc)
@@ -525,15 +534,11 @@ class Group < Namespace
     }
   end
 
-  def ci_variables_for(ref, project)
-    cache_key = "ci_variables_for:group:#{self&.id}:project:#{project&.id}:ref:#{ref}"
+  def ci_variables_for(ref, project, environment: nil)
+    cache_key = "ci_variables_for:group:#{self&.id}:project:#{project&.id}:ref:#{ref}:environment:#{environment}"
 
     ::Gitlab::SafeRequestStore.fetch(cache_key) do
-      list_of_ids = [self] + ancestors
-      variables = Ci::GroupVariable.where(group: list_of_ids)
-      variables = variables.unprotected unless project.protected_for?(ref)
-      variables = variables.group_by(&:group_id)
-      list_of_ids.reverse.flat_map { |group| variables[group.id] }.compact
+      uncached_ci_variables_for(ref, project, environment: environment)
     end
   end
 
@@ -774,6 +779,23 @@ class Group < Namespace
 
   def enable_shared_runners!
     update!(shared_runners_enabled: true)
+  end
+
+  def uncached_ci_variables_for(ref, project, environment: nil)
+    list_of_ids = [self] + ancestors
+    variables = Ci::GroupVariable.where(group: list_of_ids)
+    variables = variables.unprotected unless project.protected_for?(ref)
+
+    if Feature.enabled?(:scoped_group_variables, self, default_enabled: :yaml)
+      variables = if environment
+                    variables.on_environment(environment)
+                  else
+                    variables.where(environment_scope: '*')
+                  end
+    end
+
+    variables = variables.group_by(&:group_id)
+    list_of_ids.reverse.flat_map { |group| variables[group.id] }.compact
   end
 end
 

@@ -21,11 +21,8 @@ RSpec.describe 'Issue Boards', :js do
   let(:card1) { find('.board:nth-child(2)').find('.board-card:nth-child(2)') }
   let(:card2) { find('.board:nth-child(2)').find('.board-card:nth-child(1)') }
 
-  around do |example|
-    freeze_time { example.run }
-  end
-
   before do
+    stub_feature_flags(graphql_board_lists: false)
     stub_licensed_features(multiple_issue_assignees: true)
 
     project.add_maintainer(user)

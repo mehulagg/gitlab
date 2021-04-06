@@ -36,6 +36,8 @@
   - 1
 - - analytics_usage_trends_counter_job
   - 1
+- - approval_rules_external_approval_rule_payload
+  - 1
 - - approve_blocked_pending_approval_users
   - 1
 - - authorized_keys
@@ -99,6 +101,8 @@
 - - disallow_two_factor_for_group
   - 1
 - - disallow_two_factor_for_subgroups
+  - 1
+- - dora_metrics
   - 1
 - - elastic_association_indexer
   - 1
@@ -166,6 +170,8 @@
   - 1
 - - groups_update_repository_storage
   - 1
+- - groups_update_statistics
+  - 1
 - - hashed_storage
   - 1
 - - import_issues_csv
@@ -204,6 +210,8 @@
   - 1
 - - merge_request_reset_approvals
   - 1
+- - merge_requests_delete_source_branch
+  - 1
 - - metrics_dashboard_prune_old_annotations
   - 1
 - - metrics_dashboard_sync_dashboards
@@ -233,6 +241,8 @@
 - - object_storage
   - 1
 - - package_repositories
+  - 1
+- - packages_composer_cache_update
   - 1
 - - pages
   - 1

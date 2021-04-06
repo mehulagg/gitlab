@@ -41,8 +41,6 @@ class PipelineSerializer < BaseSerializer
   def preloaded_relations
     [
       :cancelable_statuses,
-      :latest_statuses_ordered_by_stage,
-      :latest_builds_report_results,
       :retryable_builds,
       :stages,
       :latest_statuses,

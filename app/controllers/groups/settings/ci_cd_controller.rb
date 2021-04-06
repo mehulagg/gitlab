@@ -5,6 +5,7 @@ module Groups
     class CiCdController < Groups::ApplicationController
       include RunnerSetupScripts
 
+      layout 'group_settings'
       skip_cross_project_access_check :show
       before_action :authorize_admin_group!
       before_action :authorize_update_max_artifacts_size!, only: [:update]
@@ -51,7 +52,7 @@ module Groups
       end
 
       def runner_setup_scripts
-        private_runner_setup_scripts(group: group)
+        private_runner_setup_scripts
       end
 
       private

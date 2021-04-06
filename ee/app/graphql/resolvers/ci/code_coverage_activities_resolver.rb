@@ -12,16 +12,24 @@ module Resolvers
       alias_method :group, :object
 
       def resolve(**args)
-        project_ids = group.projects.select(:id)
-        start_date = args[:start_date].to_s
+        code_coverage_params = params(args)
 
-        ::Ci::DailyBuildGroupReportResult
-          .with_included_projects
-          .by_projects(project_ids)
-          .with_coverage
-          .with_default_branch
-          .by_date(start_date)
-          .activity_per_group
+        ::Ci::DailyBuildGroupReportResultsFinder.new(
+          params: code_coverage_params,
+          current_user: current_user
+        ).execute
+      end
+
+      private
+
+      def params(args)
+        {
+          group: group,
+          coverage: true,
+          start_date: args.dig(:start_date).to_s,
+          end_date: Date.current.to_s,
+          group_activity: true
+        }
       end
     end
   end

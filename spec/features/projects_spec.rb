@@ -49,7 +49,7 @@ RSpec.describe 'Project' do
     it 'shows the command in a popover', :js do
       click_link 'Show command'
 
-      expect(page).to have_css('.popover .push-to-create-popover #push_to_create_tip')
+      expect(page).to have_css('.popover #push-to-create-tip')
       expect(page).to have_content 'Private projects can be created in your personal namespace with:'
     end
   end
@@ -290,6 +290,7 @@ RSpec.describe 'Project' do
     let(:project) { create(:forked_project_with_submodules) }
 
     before do
+      stub_feature_flags(refactor_blob_viewer: false)
       project.add_maintainer(user)
       sign_in user
       visit project_path(project)

@@ -11,7 +11,6 @@ const resolvers = {
     updateShiftTimeUnitWidth: (_, { shiftTimeUnitWidth = 0 }, { cache }) => {
       const sourceData = cache.readQuery({ query: getShiftTimeUnitWidthQuery });
       const data = produce(sourceData, (draftData) => {
-        // eslint-disable-next-line no-param-reassign
         draftData.shiftTimeUnitWidth = shiftTimeUnitWidth;
       });
       cache.writeQuery({ query: getShiftTimeUnitWidthQuery, data });

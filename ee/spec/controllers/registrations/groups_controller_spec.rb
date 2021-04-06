@@ -142,14 +142,26 @@ RSpec.describe Registrations::GroupsController do
                 expect(service).to receive(:execute).with(apply_trial_params).and_return({ success: true })
               end
               expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, namespace_id: group.id)
-              expect(controller).to receive(:record_experiment_user).with(:trial_registration_with_social_signin, namespace_id: group.id)
               expect(controller).to receive(:record_experiment_user).with(:trial_onboarding_issues, namespace_id: group.id)
               expect(controller).to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
-              expect(controller).to receive(:record_experiment_conversion_event).with(:trial_registration_with_social_signin)
               expect(controller).to receive(:record_experiment_conversion_event).with(:trial_onboarding_issues)
             end
 
-            it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: group.id, trial: false, trial_onboarding_flow: true)) }
+            context 'when registration_group_invite experiment is enabled' do
+              before do
+                stub_experiments(registrations_group_invite: :invite_page)
+              end
+
+              it { is_expected.to redirect_to(new_users_sign_up_group_invite_path(group_id: group.id, trial: false, trial_onboarding_flow: true)) }
+            end
+
+            context 'when registration_group_invite experiment is disabled' do
+              before do
+                stub_experiments(registrations_group_invite: :control)
+              end
+
+              it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: group.id, trial: false, trial_onboarding_flow: true)) }
+            end
           end
 
           context 'when failing to apply trial' do
@@ -240,7 +252,32 @@ RSpec.describe Registrations::GroupsController do
                   end
                 end
 
-                it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: group.id, trial: true)) }
+                context 'with registrations_group_invite experiment' do
+                  it 'tracks experiment as expected', :experiment do
+                    expect(experiment(:registrations_group_invite))
+                      .to track(:created, { property: group.id.to_s })
+                            .on_next_instance
+                            .with_context(actor: user)
+
+                    subject
+                  end
+
+                  context 'when registrations_group_invite invite_page path is taken' do
+                    before do
+                      stub_experiments(registrations_group_invite: :invite_page)
+                    end
+
+                    it { is_expected.to redirect_to(new_users_sign_up_group_invite_path(group_id: group.id, trial: true)) }
+                  end
+
+                  context 'when registrations_group_invite experiment control path is taken' do
+                    before do
+                      stub_experiments(registrations_group_invite: :control)
+                    end
+
+                    it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: group.id, trial: true)) }
+                  end
+                end
               end
 
               context 'when failing to create a lead and apply trial' do
@@ -277,7 +314,36 @@ RSpec.describe Registrations::GroupsController do
                 subject
               end
 
-              it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: user.groups.last.id, trial: false)) }
+              context 'with registrations_group_invite experiment' do
+                it 'tracks experiment as expected', :experiment do
+                  expect_next_instance_of(Groups::CreateService) do |service|
+                    expect(service).to receive(:execute).and_return(group)
+                  end
+
+                  expect(experiment(:registrations_group_invite))
+                    .to track(:created, { property: group.id.to_s })
+                          .on_next_instance
+                          .with_context(actor: user)
+
+                  subject
+                end
+
+                context 'when registrations_group_invite invite_page path is taken' do
+                  before do
+                    stub_experiments(registrations_group_invite: :invite_page)
+                  end
+
+                  it { is_expected.to redirect_to(new_users_sign_up_group_invite_path(group_id: user.groups.last.id, trial: false)) }
+                end
+
+                context 'when registrations_group_invite experiment control path is taken' do
+                  before do
+                    stub_experiments(registrations_group_invite: :control)
+                  end
+
+                  it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: user.groups.last.id, trial: false)) }
+                end
+              end
             end
           end
 
@@ -290,11 +356,27 @@ RSpec.describe Registrations::GroupsController do
               expect_next_instance_of(Groups::CreateService) do |service|
                 expect(service).to receive(:execute).and_return(group)
               end
+              expect(experiment(:registrations_group_invite))
+                .to track(:created, { property: group.id.to_s })
+                      .on_next_instance
+                      .with_context(actor: user)
 
               subject
             end
 
-            context 'with invite on group creation' do
+            context 'when registrations_group_invite invite_page path is taken' do
+              before do
+                stub_experiments(registrations_group_invite: :invite_page)
+              end
+
+              it { is_expected.to redirect_to(new_users_sign_up_group_invite_path(group_id: user.groups.last.id, trial: false)) }
+            end
+
+            context 'when registrations_group_invite experiment control path is taken' do
+              before do
+                stub_experiments(registrations_group_invite: :control)
+              end
+
               it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: user.groups.last.id, trial: false)) }
 
               it_behaves_like GroupInviteMembers

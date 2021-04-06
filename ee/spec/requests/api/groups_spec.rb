@@ -414,6 +414,100 @@ RSpec.describe API::Groups do
         end
       end
     end
+
+    context 'when creating group on .com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'when top_level_group_creation_enabled feature flag is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it 'does not create a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.not_to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+
+        it 'creates a subgroup' do
+          parent = create(:group)
+          parent.add_owner(admin)
+
+          expect do
+            post api("/groups", admin), params: { parent_id: parent.id, name: 'foo', path: 'foo' }
+          end.to change { Group.count }.by(1)
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+
+      context 'when top_level_group_creation_enabled feature flag is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it 'creates a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+    end
+
+    context 'when creating group on self-managed' do
+      context 'when top_level_group_creation_enabled feature flag is disabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: false)
+        end
+
+        it 'creates a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+
+        it 'creates a subgroup' do
+          parent = create(:group)
+          parent.add_owner(admin)
+
+          expect do
+            post api("/groups", admin), params: { parent_id: parent.id, name: 'foo', path: 'foo' }
+          end.to change { Group.count }.by(1)
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+
+      context 'when top_level_group_creation_enabled feature flag is enabled' do
+        before do
+          stub_feature_flags(top_level_group_creation_enabled: true)
+        end
+
+        it 'creates a top-level group' do
+          group = attributes_for_group_api
+
+          expect do
+            post api("/groups", admin), params: group
+          end.to change { Group.count }
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+    end
   end
 
   describe 'POST /groups/:id/ldap_sync' do
@@ -798,6 +892,28 @@ RSpec.describe API::Groups do
             expect(json_response['message']).to eq('error')
           end
         end
+
+        it 'does not mark the group for deletion when the group has a paid gitlab.com subscription' do
+          create(:gitlab_subscription, :ultimate, namespace: group)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq("This group can't be removed because it is linked to a subscription.")
+          expect(group.marked_for_deletion_on).to be_nil
+          expect(group.deleting_user).to be_nil
+        end
+
+        it 'marks for deletion a subgroup of a group with a paid gitlab.com subscription' do
+          create(:gitlab_subscription, :ultimate, namespace: group)
+          subgroup = create(:group, parent: group)
+
+          delete api("/groups/#{subgroup.id}", user)
+
+          expect(response).to have_gitlab_http_status(:accepted)
+          expect(subgroup.marked_for_deletion_on).to eq(Date.today)
+          expect(subgroup.deleting_user).to eq(user)
+        end
       end
 
       context 'period of delayed deletion is set to 0' do
@@ -815,6 +931,22 @@ RSpec.describe API::Groups do
       end
 
       it_behaves_like 'immediately enqueues the job to delete the group'
+
+      it 'does not delete the group when the group has a paid gitlab.com subscription' do
+        create(:gitlab_subscription, :ultimate, namespace: group)
+
+        expect { subject }.not_to change(GroupDestroyWorker.jobs, :size)
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['message']).to eq("This group can't be removed because it is linked to a subscription.")
+      end
+
+      it 'deletes a subgroup of a group with a paid gitlab.com subscription' do
+        create(:gitlab_subscription, :ultimate, namespace: group)
+        subgroup = create(:group, parent: group)
+
+        expect { delete api("/groups/#{subgroup.id}", user) }.to change(GroupDestroyWorker.jobs, :size).by(1)
+        expect(response).to have_gitlab_http_status(:accepted)
+      end
     end
   end
 

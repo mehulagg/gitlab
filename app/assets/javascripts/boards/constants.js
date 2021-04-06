@@ -1,4 +1,10 @@
 import { __ } from '~/locale';
+import boardBlockingIssuesQuery from './graphql/board_blocking_issues.query.graphql';
+
+export const issuableTypes = {
+  issue: 'issue',
+  epic: 'epic',
+};
 
 export const BoardType = {
   project: 'project',
@@ -39,4 +45,10 @@ export const flashAnimationDuration = 2000;
 export default {
   BoardType,
   ListType,
+};
+
+export const blockingIssuablesQueries = {
+  [issuableTypes.issue]: {
+    query: boardBlockingIssuesQuery,
+  },
 };

@@ -108,7 +108,8 @@ class ProjectPolicy < BasePolicy
   condition(:service_desk_enabled) { @subject.service_desk_enabled? }
 
   with_scope :subject
-  condition(:resource_access_token_available) { resource_access_token_available? }
+  condition(:resource_access_token_feature_available) { resource_access_token_feature_available? }
+  condition(:resource_access_token_creation_allowed) { resource_access_token_creation_allowed? }
 
   # We aren't checking `:read_issue` or `:read_merge_request` in this case
   # because it could be possible for a user to see an issuable-iid
@@ -204,8 +205,8 @@ class ProjectPolicy < BasePolicy
   rule { can?(:guest_access) }.policy do
     enable :read_project
     enable :create_merge_request_in
-    enable :read_board
-    enable :read_list
+    enable :read_issue_board
+    enable :read_issue_board_list
     enable :read_wiki
     enable :read_issue
     enable :read_label
@@ -231,7 +232,7 @@ class ProjectPolicy < BasePolicy
   rule { guest & can?(:read_container_image) }.enable :build_read_container_image
 
   rule { can?(:reporter_access) }.policy do
-    enable :admin_board
+    enable :admin_issue_board
     enable :download_code
     enable :read_statistics
     enable :download_wiki_code
@@ -240,7 +241,7 @@ class ProjectPolicy < BasePolicy
     enable :reopen_issue
     enable :admin_issue
     enable :admin_label
-    enable :admin_list
+    enable :admin_issue_board_list
     enable :admin_issue_link
     enable :read_commit_status
     enable :read_build
@@ -259,6 +260,7 @@ class ProjectPolicy < BasePolicy
     enable :read_confidential_issues
     enable :read_package
     enable :read_product_analytics
+    enable :read_group_timelogs
   end
 
   # We define `:public_user_access` separately because there are cases in gitlab-ee
@@ -319,7 +321,7 @@ class ProjectPolicy < BasePolicy
 
   rule { can?(:developer_access) }.policy do
     enable :create_package
-    enable :admin_board
+    enable :admin_issue_board
     enable :admin_merge_request
     enable :admin_milestone
     enable :update_merge_request
@@ -369,7 +371,7 @@ class ProjectPolicy < BasePolicy
 
   rule { can?(:maintainer_access) }.policy do
     enable :destroy_package
-    enable :admin_board
+    enable :admin_issue_board
     enable :push_to_delete_protected_branch
     enable :update_snippet
     enable :admin_snippet
@@ -429,8 +431,8 @@ class ProjectPolicy < BasePolicy
 
   rule { issues_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:issue))
-    prevent(*create_read_update_admin_destroy(:board))
-    prevent(*create_read_update_admin_destroy(:list))
+    prevent(*create_read_update_admin_destroy(:issue_board))
+    prevent(*create_read_update_admin_destroy(:issue_board_list))
   end
 
   rule { merge_requests_disabled | repository_disabled }.policy do
@@ -507,8 +509,8 @@ class ProjectPolicy < BasePolicy
   rule { can?(:public_access) }.policy do
     enable :read_package
     enable :read_project
-    enable :read_board
-    enable :read_list
+    enable :read_issue_board
+    enable :read_issue_board_list
     enable :read_wiki
     enable :read_label
     enable :read_milestone
@@ -631,11 +633,18 @@ class ProjectPolicy < BasePolicy
 
   rule { project_bot }.enable :project_bot_access
 
-  rule { resource_access_token_available & can?(:admin_project) }.policy do
-    enable :admin_resource_access_tokens
+  rule { can?(:admin_project) & resource_access_token_feature_available }.policy do
+    enable :read_resource_access_tokens
+    enable :destroy_resource_access_tokens
   end
 
-  rule { can?(:project_bot_access) }.prevent :admin_resource_access_tokens
+  rule { can?(:read_resource_access_tokens) & resource_access_token_creation_allowed }.policy do
+    enable :create_resource_access_tokens
+  end
+
+  rule { can?(:project_bot_access) }.policy do
+    prevent :create_resource_access_tokens
+  end
 
   rule { user_defined_variables_allowed | can?(:maintainer_access) }.policy do
     enable :set_pipeline_variables
@@ -719,8 +728,16 @@ class ProjectPolicy < BasePolicy
     end
   end
 
-  def resource_access_token_available?
+  def resource_access_token_feature_available?
     true
+  end
+
+  def resource_access_token_creation_allowed?
+    group = project.group
+
+    return true unless group # always enable for projects in personal namespaces
+
+    resource_access_token_feature_available? && group.root_ancestor.namespace_settings.resource_access_token_creation_allowed?
   end
 
   def project

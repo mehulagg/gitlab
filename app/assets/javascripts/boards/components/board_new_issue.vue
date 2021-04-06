@@ -1,24 +1,24 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { getMilestone } from 'ee_else_ce/boards/boards_util';
+import BoardNewIssueMixin from 'ee_else_ce/boards/mixins/board_new_issue';
 import { __ } from '~/locale';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../eventhub';
 import ProjectSelect from './project_select.vue';
 
 export default {
   name: 'BoardNewIssue',
   i18n: {
-    submit: __('Submit issue'),
+    submit: __('Create issue'),
     cancel: __('Cancel'),
   },
   components: {
     ProjectSelect,
     GlButton,
   },
-  mixins: [glFeatureFlagMixin()],
-  inject: ['groupId', 'weightFeatureAvailable', 'boardWeight'],
+  mixins: [BoardNewIssueMixin],
+  inject: ['groupId'],
   props: {
     list: {
       type: Object,
@@ -32,8 +32,9 @@ export default {
   },
   computed: {
     ...mapState(['selectedProject']),
+    ...mapGetters(['isGroupBoard']),
     disabled() {
-      if (this.groupId) {
+      if (this.isGroupBoard) {
         return this.title === '' || !this.selectedProject.name;
       }
       return this.title === '';
@@ -52,13 +53,10 @@ export default {
     submit(e) {
       e.preventDefault();
 
+      const { title } = this;
       const labels = this.list.label ? [this.list.label] : [];
       const assignees = this.list.assignee ? [this.list.assignee] : [];
       const milestone = getMilestone(this.list);
-
-      const weight = this.weightFeatureAvailable ? this.boardWeight : undefined;
-
-      const { title } = this;
 
       eventHub.$emit(`scroll-board-list-${this.list.id}`);
 
@@ -69,7 +67,7 @@ export default {
           assigneeIds: assignees?.map((a) => a?.id),
           milestoneId: milestone?.id,
           projectPath: this.selectedProject.fullPath,
-          weight: weight >= 0 ? weight : null,
+          ...this.extraIssueInput(),
         },
         list: this.list,
       }).then(() => {
@@ -98,7 +96,7 @@ export default {
           name="issue_title"
           autocomplete="off"
         />
-        <project-select v-if="groupId" :group-id="groupId" :list="list" />
+        <project-select v-if="isGroupBoard" :group-id="groupId" :list="list" />
         <div class="clearfix gl-mt-3">
           <gl-button
             ref="submitButton"

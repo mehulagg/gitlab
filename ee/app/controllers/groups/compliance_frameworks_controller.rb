@@ -11,6 +11,9 @@ class Groups::ComplianceFrameworksController < Groups::ApplicationController
   def new
   end
 
+  def edit
+  end
+
   protected
 
   def check_group_compliance_frameworks_available!

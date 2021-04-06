@@ -1,0 +1,12 @@
+mutation EpicMoveList(
+  $epicId: EpicID!
+  $boardId: BoardsEpicBoardID!
+  $fromListId: BoardsEpicListID!
+  $toListId: BoardsEpicListID!
+) {
+  epicMoveList(
+    input: { epicId: $epicId, boardId: $boardId, fromListId: $fromListId, toListId: $toListId }
+  ) {
+    errors
+  }
+}

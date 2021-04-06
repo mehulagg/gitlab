@@ -499,11 +499,11 @@ The cleanup policy:
 1. Collects all tags for a given repository in a list.
 1. Excludes the tag named `latest` from the list.
 1. Evaluates the `name_regex` (tags to expire), excluding non-matching names from the list.
+1. Excludes from the list any tags matching the `name_regex_keep` value (tags to preserve).
 1. Excludes any tags that do not have a manifest (not part of the options in the UI).
 1. Orders the remaining tags by `created_date`.
 1. Excludes from the list the N tags based on the `keep_n` value (Number of tags to retain).
 1. Excludes from the list the tags more recent than the `older_than` value (Expiration interval).
-1. Excludes from the list any tags matching the `name_regex_keep` value (tags to preserve).
 1. Finally, the remaining tags in the list are deleted from the Container Registry.
 
 WARNING:
@@ -577,7 +577,7 @@ Here are examples of regex patterns you may want to use:
   (?:v.+|master|release.*)
   ```
 
-### Set cleanup limits to conserve resources 
+### Set cleanup limits to conserve resources
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/288812) in GitLab 13.9.
 > - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
@@ -595,7 +595,7 @@ To prevent server resource starvation, the following application settings are av
 - `container_registry_delete_tags_service_timeout`. The maximum time, in seconds, that the cleanup process can take to delete a batch of tags.
 - `container_registry_cleanup_tags_service_max_list_size`. The maximum number of tags that can be deleted in a single execution. Additional tags must be deleted in another execution.
    We recommend starting with a low number, like `100`, and increasing it after monitoring that container images are properly deleted.
-   
+
 For self-managed instances, those settings can be updated in the [Rails console](../../../administration/operations/rails_console.md#starting-a-rails-console-session):
 
   ```ruby
@@ -670,8 +670,8 @@ and stored by Docker, it is not possible for GitLab to parse this data and meet 
 ## Limitations
 
 - Moving or renaming existing Container Registry repositories is not supported
-once you have pushed images, because the images are signed, and the
-signature includes the repository name. To move or rename a repository with a
+once you have pushed images, because the images are stored in a path that matches
+the repository path. To move or rename a repository with a
 Container Registry, you must delete all existing images.
 - Prior to GitLab 12.10, any tags that use the same image ID as the `latest` tag
 are not deleted by the cleanup policy.
@@ -699,7 +699,7 @@ project or branch name. Special characters can include:
 - Leading underscore
 - Trailing hyphen/dash
 
-To get around this, you can [change the group path](../../group/index.md#changing-a-groups-path),
+To get around this, you can [change the group path](../../group/index.md#change-a-groups-path),
 [change the project path](../../project/settings/index.md#renaming-a-repository) or change the branch
 name.
 
@@ -712,7 +712,7 @@ For information on how to update your images, see the [Docker help](https://docs
 
 ### `Blob unknown to registry` error when pushing a manifest list
 
-When [pushing a Docker manifest list](https://docs.docker.com/engine/reference/commandline/manifest/#create-and-push-a-manifest-list) to the GitLab Container Registry, you may receive the error `manifest blob unknown: blob unknown to registry`. This issue occurs when the individual child manifests referenced in the manifest list were not pushed to the same repository.
+When [pushing a Docker manifest list](https://docs.docker.com/engine/reference/commandline/manifest/#create-and-push-a-manifest-list) to the GitLab Container Registry, you may receive the error `manifest blob unknown: blob unknown to registry`. [This issue](https://gitlab.com/gitlab-org/gitlab/-/issues/209008) occurs when the individual child manifests referenced in the manifest list were not pushed to the same repository.
 
 For example, you may have two individual images, one for `amd64` and another for `arm64v8`, and you want to build a multi-arch image with them. The `amd64` and `arm64v8` images must be pushed to the same repository where you want to push the multi-arch image.
 

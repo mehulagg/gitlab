@@ -1,6 +1,6 @@
 ---
 stage: Enablement
-group: Distribution
+group: Geo
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -629,7 +629,7 @@ directory that you want to copy the tarballs to is the root of your mounted
 directory, use `.` instead.
 
 Because file system performance may affect overall GitLab performance,
-[GitLab doesn't recommend using EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
+[GitLab doesn't recommend using cloud-based file systems for storage](../administration/nfs.md#avoid-using-cloud-based-file-systems).
 
 For Omnibus GitLab packages:
 
@@ -941,7 +941,7 @@ Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:back
 WARNING:
 `gitlab-rake gitlab:backup:restore` doesn't set the correct file system
 permissions on your Registry directory. This is a [known issue](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/62759).
-On GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
+In GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
 issue.
 
 If there's a GitLab version mismatch between your backup tar file and the
@@ -963,7 +963,7 @@ sudo gitlab-ctl restart
 sudo gitlab-rake gitlab:check SANITIZE=true
 ```
 
-On GitLab 13.1 and later, check [database values can be decrypted](../administration/raketasks/doctor.md)
+In GitLab 13.1 and later, check [database values can be decrypted](../administration/raketasks/doctor.md)
 especially if `/etc/gitlab/gitlab-secrets.json` was restored, or if a different server is
 the target for the restore.
 
@@ -1011,13 +1011,13 @@ Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:back
 WARNING:
 `gitlab-rake gitlab:backup:restore` doesn't set the correct file system
 permissions on your Registry directory. This is a [known issue](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/62759).
-On GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
+In GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
 issue.
 
 The GitLab Helm chart uses a different process, documented in
 [restoring a GitLab Helm chart installation](https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/backup-restore/restore.md).
 
-### Restoring only one or a few project(s) or group(s) from a backup
+### Restoring only one or a few projects or groups from a backup
 
 Although the Rake task used to restore a GitLab instance doesn't support
 restoring a single project or group, you can use a workaround by restoring

@@ -4,7 +4,7 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
   include ApplicationWorker
   include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
-  feature_category :license_compliance
+  feature_category :license
   worker_resource_boundary :cpu
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -16,11 +16,6 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
       tuples = []
 
       subscriptions.each do |subscription|
-        unless subscription.namespace
-          track_error(subscription)
-          next
-        end
-
         subscription.refresh_seat_attributes!
 
         tuples << [subscription.id, subscription.max_seats_used, subscription.seats_in_use, subscription.seats_owed]

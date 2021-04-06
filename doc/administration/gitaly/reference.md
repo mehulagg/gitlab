@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Gitaly reference
+# Gitaly reference **(FREE SELF)**
 
 Gitaly is configured via a [TOML](https://github.com/toml-lang/toml)
 configuration file. Unlike installations from source, in Omnibus GitLab, you
@@ -91,7 +91,7 @@ certificate_path = '/home/git/cert.cert'
 key_path = '/home/git/key.pem'
 ```
 
-[Read more](index.md#enable-tls-support) about TLS in Gitaly.
+[Read more](configure_gitaly.md#enable-tls-support) about TLS in Gitaly.
 
 ### Storage
 

@@ -7,6 +7,7 @@ import {
   mockIssuesByListId,
   mockEpics,
   issues,
+  mockLists,
 } from '../mock_data';
 
 describe('EE Boards Store Getters', () => {
@@ -18,12 +19,12 @@ describe('EE Boards Store Getters', () => {
 
   describe('isSwimlanesOn', () => {
     afterEach(() => {
-      window.gon = { features: {} };
+      window.gon = { licensed_features: {} };
     });
 
     describe('when swimlanes feature is true', () => {
       beforeEach(() => {
-        window.gon = { features: { swimlanes: true } };
+        window.gon = { licensed_features: { swimlanes: true } };
       });
 
       describe('when isShowingEpicsSwimlanes is true', () => {
@@ -89,5 +90,53 @@ describe('EE Boards Store Getters', () => {
         getters.getUnassignedIssues(boardsState, { getBoardItemsByList })('gid://gitlab/List/1'),
       ).toEqual([mockIssue3, mockIssue4]);
     });
+  });
+
+  describe('getListByTypeId', () => {
+    const [, labelList, assigneeList, milestoneList] = mockLists;
+
+    it('returns label list by labelId', () => {
+      const labelId = labelList.label.id;
+      expect(getters.getListByTypeId({ boardLists: mockLists })({ labelId })).toEqual(labelList);
+    });
+
+    it('returns assignee list by assigneeId', () => {
+      const assigneeId = assigneeList.assignee.id;
+
+      expect(getters.getListByTypeId({ boardLists: mockLists })({ assigneeId })).toEqual(
+        assigneeList,
+      );
+    });
+
+    it('returns milestone list by milestoneId', () => {
+      const milestoneId = milestoneList.milestone.id;
+
+      expect(getters.getListByTypeId({ boardLists: mockLists })({ milestoneId })).toEqual(
+        milestoneList,
+      );
+    });
+
+    it('returns nothing if not results', () => {
+      expect(
+        getters.getListByTypeId({ boardLists: mockLists })({ labelId: 'not found' }),
+      ).toBeUndefined();
+    });
+  });
+
+  describe('isEpicBoard', () => {
+    it.each`
+      issuableType | expected
+      ${'epic'}    | ${true}
+      ${'issue'}   | ${false}
+    `(
+      'returns $expected when issuableType on state is $issuableType',
+      ({ issuableType, expected }) => {
+        const state = {
+          issuableType,
+        };
+
+        expect(getters.isEpicBoard(state)).toBe(expected);
+      },
+    );
   });
 });

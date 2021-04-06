@@ -3,6 +3,8 @@
 module Types
   module IncidentManagement
     class OncallRotationType < BaseObject
+      MAX_SHIFTS_FOR_TIMEFRAME = 350
+
       graphql_name 'IncidentManagementOncallRotation'
       description 'Describes an incident management on-call rotation'
 
@@ -52,7 +54,12 @@ module Types
             ::Types::IncidentManagement::OncallShiftType.connection_type,
             null: true,
             description: 'Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.',
+            max_page_size: MAX_SHIFTS_FOR_TIMEFRAME,
             resolver: ::Resolvers::IncidentManagement::OncallShiftsResolver
+
+      def participants
+        object.participants.not_removed
+      end
     end
   end
 end

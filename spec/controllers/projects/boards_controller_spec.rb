@@ -22,6 +22,15 @@ RSpec.describe Projects::BoardsController do
       expect(assigns(:boards_endpoint)).to eq project_boards_path(project)
     end
 
+    it 'pushes swimlanes_buffered_rendering feature flag' do
+      allow(controller).to receive(:push_frontend_feature_flag).and_call_original
+
+      expect(controller).to receive(:push_frontend_feature_flag)
+        .with(:swimlanes_buffered_rendering, project, default_enabled: :yaml)
+
+      list_boards
+    end
+
     context 'when format is HTML' do
       it 'renders template' do
         list_boards
@@ -34,7 +43,7 @@ RSpec.describe Projects::BoardsController do
         before do
           expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_board, project).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_issue_board, project).and_return(false)
         end
 
         it 'returns a not found 404 response' do
@@ -78,7 +87,7 @@ RSpec.describe Projects::BoardsController do
         before do
           expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_board, project).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_issue_board, project).and_return(false)
         end
 
         it 'returns a not found 404 response' do
@@ -116,6 +125,15 @@ RSpec.describe Projects::BoardsController do
   describe 'GET show' do
     let!(:board) { create(:board, project: project) }
 
+    it 'pushes swimlanes_buffered_rendering feature flag' do
+      allow(controller).to receive(:push_frontend_feature_flag).and_call_original
+
+      expect(controller).to receive(:push_frontend_feature_flag)
+        .with(:swimlanes_buffered_rendering, project, default_enabled: :yaml)
+
+      read_board board: board
+    end
+
     it 'sets boards_endpoint instance variable to a boards path' do
       read_board board: board
 
@@ -134,7 +152,7 @@ RSpec.describe Projects::BoardsController do
         before do
           expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_board, project).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_issue_board, project).and_return(false)
         end
 
         it 'returns a not found 404 response' do
@@ -172,7 +190,7 @@ RSpec.describe Projects::BoardsController do
         before do
           expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_board, project).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_issue_board, project).and_return(false)
         end
 
         it 'returns a not found 404 response' do

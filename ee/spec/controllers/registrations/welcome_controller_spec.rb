@@ -179,7 +179,7 @@ RSpec.describe Registrations::WelcomeController do
 
           context 'when in invitation flow' do
             before do
-              allow(controller.helpers).to receive(:in_invitation_flow?).and_return(true)
+              allow(controller.helpers).to receive(:user_has_memberships?).and_return(true)
             end
 
             it { is_expected.not_to redirect_to new_users_sign_up_group_path }

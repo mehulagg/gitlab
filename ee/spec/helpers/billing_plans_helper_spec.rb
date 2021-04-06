@@ -21,7 +21,6 @@ RSpec.describe BillingPlansHelper do
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
-                 is_group: "true",
                  add_seats_href: add_seats_href,
                  plan_upgrade_href: upgrade_href,
                  plan_renew_href: renew_href,
@@ -51,7 +50,6 @@ RSpec.describe BillingPlansHelper do
           .to eq(add_seats_href:  add_seats_href,
                  billable_seats_href: billable_seats_href,
                  customer_portal_url: customer_portal_url,
-                 is_group: "true",
                  namespace_id: nil,
                  namespace_name: group.name,
                  plan_renew_href: renew_href,
@@ -71,7 +69,6 @@ RSpec.describe BillingPlansHelper do
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
-                 is_group: "true",
                  customer_portal_url: customer_portal_url,
                  billable_seats_href: billable_seats_href,
                  add_seats_href: add_seats_href,
@@ -81,13 +78,23 @@ RSpec.describe BillingPlansHelper do
       end
     end
 
-    context 'when namespace is passed in' do
-      it 'returns false for is_group' do
-        namespace = build(:namespace)
+    context 'with different namespaces' do
+      subject { helper.subscription_plan_data_attributes(namespace, plan) }
 
-        result = helper.subscription_plan_data_attributes(namespace, plan)
+      context 'with namespace' do
+        let(:namespace) { build(:namespace) }
 
-        expect(result).to include(is_group: "false")
+        it 'does not return billable_seats_href' do
+          expect(subject).not_to include(billable_seats_href: helper.group_seat_usage_path(namespace))
+        end
+      end
+
+      context 'with group' do
+        let(:namespace) { build(:group) }
+
+        it 'returns billable_seats_href for group' do
+          expect(subject).to include(billable_seats_href: helper.group_seat_usage_path(namespace))
+        end
       end
     end
   end
@@ -99,10 +106,7 @@ RSpec.describe BillingPlansHelper do
 
     with_them do
       let_it_be(:user) { create(:user) }
-      let(:namespace) do
-        create :namespace, type: type,
-          gitlab_subscription: create(:gitlab_subscription, hosted_plan: create("#{plan}_plan".to_sym))
-      end
+      let(:namespace) { create(:namespace_with_plan, plan: "#{plan}_plan".to_sym, type: type) }
 
       before do
         allow(helper).to receive(:current_user).and_return(user)
@@ -119,13 +123,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when the group is on a plan eligible for the new purchase flow' do
-      let(:namespace) do
-        create(
-          :namespace,
-          type: Group,
-          gitlab_subscription: create(:gitlab_subscription, hosted_plan: create(:free_plan))
-        )
-      end
+      let(:namespace) { create(:namespace_with_plan, plan: :free_plan, type: Group) }
 
       before do
         allow(helper).to receive(:current_user).and_return(user)

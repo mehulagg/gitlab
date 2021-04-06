@@ -1,3 +1,4 @@
+import { GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import BoardSidebarEpicSelect from 'ee/boards/components/sidebar/board_sidebar_epic_select.vue';
@@ -69,6 +70,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   const findEpicSelect = () => wrapper.find({ ref: 'epicSelect' });
   const findItemWrapper = () => wrapper.find({ ref: 'sidebarItem' });
   const findCollapsed = () => wrapper.find('[data-testid="collapsed-content"]');
+  const findEpicLink = () => wrapper.find(GlLink);
   const findBoardEditableItem = () => wrapper.find(BoardEditableItem);
 
   describe('when not editing', () => {
@@ -173,7 +175,9 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(findCollapsed().text()).toBe(mockAssignedEpic.title);
+      expect(findEpicLink().isVisible()).toBe(true);
+      expect(findEpicLink().text()).toBe(mockAssignedEpic.title);
+      expect(findEpicLink().attributes('href')).toBe(mockAssignedEpic.webPath);
     });
   });
 
@@ -212,8 +216,9 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
     });
 
     it('collapses sidebar and renders epic title', () => {
-      expect(findCollapsed().isVisible()).toBe(true);
-      expect(findCollapsed().text()).toBe(mockAssignedEpic.title);
+      expect(findEpicLink().isVisible()).toBe(true);
+      expect(findEpicLink().text()).toBe(mockAssignedEpic.title);
+      expect(findEpicLink().attributes('href')).toBe(mockAssignedEpic.webPath);
     });
 
     describe('when the selected epic did not change', () => {

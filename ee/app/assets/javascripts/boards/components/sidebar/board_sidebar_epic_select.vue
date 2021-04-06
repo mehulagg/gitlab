@@ -1,4 +1,5 @@
 <script>
+import { GlLink } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
@@ -11,6 +12,7 @@ export default {
   components: {
     BoardEditableItem,
     EpicsSelect,
+    GlLink,
   },
   i18n: {
     epic: __('Epic'),
@@ -24,9 +26,9 @@ export default {
   inject: ['groupId'],
   computed: {
     ...mapState(['epics', 'epicsCacheById', 'epicFetchInProgress']),
-    ...mapGetters(['activeIssue', 'projectPathForActiveIssue']),
+    ...mapGetters(['activeBoardItem', 'projectPathForActiveIssue']),
     epic() {
-      return this.activeIssue.epic;
+      return this.activeBoardItem.epic;
     },
     epicData() {
       const hasEpic = this.epic !== null;
@@ -99,13 +101,14 @@ export default {
     ref="sidebarItem"
     :title="$options.i18n.epic"
     :loading="epicFetchInProgress"
+    data-testid="sidebar-epic"
     @open="handleOpen"
     @close="handleClose"
   >
     <template v-if="epicData.title" #collapsed>
-      <a class="gl-text-gray-900! gl-font-weight-bold" href="#">
+      <gl-link class="gl-text-gray-900! gl-font-weight-bold" :href="epicData.webPath">
         {{ epicData.title }}
-      </a>
+      </gl-link>
     </template>
     <epics-select
       v-if="!epicFetchInProgress"

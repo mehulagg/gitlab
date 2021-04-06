@@ -11,10 +11,12 @@ import {
 } from '@gitlab/ui';
 import { partition, isString } from 'lodash';
 import Api from '~/api';
+import ExperimentTracking from '~/experimentation/experiment_tracking';
 import GroupSelect from '~/invite_members/components/group_select.vue';
 import MembersTokenSelect from '~/invite_members/components/members_token_select.vue';
 import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import { s__, sprintf } from '~/locale';
+import { INVITE_MEMBERS_IN_COMMENT } from '../constants';
 import eventHub from '../event_hub';
 
 export default {
@@ -49,7 +51,7 @@ export default {
       required: true,
     },
     defaultAccessLevel: {
-      type: String,
+      type: Number,
       required: true,
     },
     helpLink: {
@@ -76,7 +78,7 @@ export default {
       const inviteTo = this.isProject ? 'toProject' : 'toGroup';
 
       return sprintf(this.$options.labels[this.inviteeType][inviteTo].introText, {
-        name: this.name.toUpperCase(),
+        name: this.name,
       });
     },
     toastOptions() {
@@ -122,8 +124,9 @@ export default {
         usersToAddById.map((user) => user.id).join(','),
       ];
     },
-    openModal({ inviteeType }) {
+    openModal({ inviteeType, source }) {
       this.inviteeType = inviteeType;
+      this.source = source;
 
       this.$root.$emit(BV_SHOW_MODAL, this.modalId);
     },
@@ -137,6 +140,12 @@ export default {
         this.submitInviteMembers();
       }
       this.closeModal();
+    },
+    trackInvite() {
+      if (this.source === INVITE_MEMBERS_IN_COMMENT) {
+        const tracking = new ExperimentTracking(INVITE_MEMBERS_IN_COMMENT);
+        tracking.event('comment_invite_success');
+      }
     },
     cancelInvite() {
       this.selectedAccessLevel = this.defaultAccessLevel;
@@ -177,6 +186,8 @@ export default {
         promises.push(apiAddByUserId(this.id, this.addByUserIdPostData(usersToAddById)));
       }
 
+      this.trackInvite();
+
       Promise.all(promises).then(this.showToastMessageSuccess).catch(this.showToastMessageError);
     },
     inviteByEmailPostData(usersToInviteByEmail) {
@@ -211,14 +222,18 @@ export default {
   },
   labels: {
     members: {
-      modalTitle: s__('InviteMembersModal|Invite team members'),
-      searchField: s__('InviteMembersModal|GitLab member or Email address'),
-      placeHolder: s__('InviteMembersModal|Search for members to invite'),
+      modalTitle: s__('InviteMembersModal|Invite members'),
+      searchField: s__('InviteMembersModal|GitLab member or email address'),
+      placeHolder: s__('InviteMembersModal|Select members or type email addresses'),
       toGroup: {
-        introText: s__("InviteMembersModal|You're inviting members to the %{name} group"),
+        introText: s__(
+          "InviteMembersModal|You're inviting members to the %{strongStart}%{name}%{strongEnd} group.",
+        ),
       },
       toProject: {
-        introText: s__("InviteMembersModal|You're inviting members to the %{name} project"),
+        introText: s__(
+          "InviteMembersModal|You're inviting members to the %{strongStart}%{name}%{strongEnd} project.",
+        ),
       },
     },
     group: {
@@ -226,10 +241,14 @@ export default {
       searchField: s__('InviteMembersModal|Select a group to invite'),
       placeHolder: s__('InviteMembersModal|Search for a group to invite'),
       toGroup: {
-        introText: s__("InviteMembersModal|You're inviting a group to the %{name} group"),
+        introText: s__(
+          "InviteMembersModal|You're inviting a group to the %{strongStart}%{name}%{strongEnd} group.",
+        ),
       },
       toProject: {
-        introText: s__("InviteMembersModal|You're inviting a group to the %{name} project"),
+        introText: s__(
+          "InviteMembersModal|You're inviting a group to the %{strongStart}%{name}%{strongEnd} project.",
+        ),
       },
     },
     accessLevel: s__('InviteMembersModal|Choose a role permission'),
@@ -253,7 +272,13 @@ export default {
     :header-close-label="$options.labels.headerCloseLabel"
   >
     <div>
-      <p ref="introText">{{ introText }}</p>
+      <p ref="introText">
+        <gl-sprintf :message="introText">
+          <template #strong="{ content }">
+            <strong>{{ content }}</strong>
+          </template>
+        </gl-sprintf>
+      </p>
 
       <label :id="$options.membersTokenSelectLabelId" class="gl-font-weight-bold gl-mt-5">{{
         $options.labels[inviteeType].searchField
@@ -280,6 +305,7 @@ export default {
             <gl-dropdown-item
               :key="key"
               active-class="is-active"
+              is-check-item
               :is-checked="key === selectedAccessLevel"
               @click="changeSelectedItem(key)"
             >

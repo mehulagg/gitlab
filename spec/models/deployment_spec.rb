@@ -161,9 +161,9 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+      it 'does not execute Deployments::LinkMergeRequestWorker' do
         expect(Deployments::LinkMergeRequestWorker)
-          .to receive(:perform_async).with(deployment.id)
+          .not_to receive(:perform_async).with(deployment.id)
 
         deployment.drop!
       end
@@ -188,9 +188,9 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+      it 'does not execute Deployments::LinkMergeRequestWorker' do
         expect(Deployments::LinkMergeRequestWorker)
-          .to receive(:perform_async).with(deployment.id)
+          .not_to receive(:perform_async).with(deployment.id)
 
         deployment.cancel!
       end
@@ -497,7 +497,7 @@ RSpec.describe Deployment do
 
     context 'when the SHA for the deployment does not exist in the repo' do
       it 'returns false' do
-        deployment.update(sha: Gitlab::Git::BLANK_SHA)
+        deployment.update!(sha: Gitlab::Git::BLANK_SHA)
         commit = project.commit
 
         expect(deployment.includes_commit?(commit)).to be false
@@ -574,7 +574,7 @@ RSpec.describe Deployment do
 
   describe '#previous_deployment' do
     it 'returns the previous deployment' do
-      deploy1 = create(:deployment)
+      deploy1 = create(:deployment, :success)
       deploy2 = create(
         :deployment,
         project: deploy1.project,
@@ -582,6 +582,18 @@ RSpec.describe Deployment do
       )
 
       expect(deploy2.previous_deployment).to eq(deploy1)
+    end
+
+    it 'returns nothing if the refs do not match' do
+      deploy1 = create(:deployment, :success)
+      deploy2 = create(
+        :deployment,
+        :review_app,
+        project: deploy1.project,
+        environment: deploy1.environment
+      )
+
+      expect(deploy2.previous_deployment).to be_nil
     end
   end
 
@@ -793,6 +805,32 @@ RSpec.describe Deployment do
 
       other_deployments.each do |deployment|
         expect(project.commit(deployment.ref_path)).not_to be_nil
+      end
+    end
+  end
+
+  describe '#update_merge_request_metrics!' do
+    let_it_be(:project) { create(:project, :repository) }
+    let(:environment) { build(:environment, environment_tier, project: project) }
+    let!(:deployment) { create(:deployment, :success, project: project, environment: environment) }
+    let!(:merge_request) { create(:merge_request, :simple, :merged_last_month, project: project) }
+
+    context 'with production environment' do
+      let(:environment_tier) { :production }
+
+      it 'updates merge request metrics for production-grade environment' do
+        expect { deployment.update_merge_request_metrics! }
+          .to change { merge_request.reload.metrics.first_deployed_to_production_at }
+          .from(nil).to(deployment.reload.finished_at)
+      end
+    end
+
+    context 'with staging environment' do
+      let(:environment_tier) { :staging }
+
+      it 'updates merge request metrics for production-grade environment' do
+        expect { deployment.update_merge_request_metrics! }
+          .not_to change { merge_request.reload.metrics.first_deployed_to_production_at }
       end
     end
   end

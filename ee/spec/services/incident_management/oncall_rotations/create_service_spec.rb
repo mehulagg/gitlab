@@ -8,7 +8,9 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
   let_it_be(:user_with_permissions) { create(:user) }
   let_it_be(:user_without_permissions) { create(:user) }
   let_it_be(:current_user) { user_with_permissions }
-  let_it_be(:starts_at) { Time.current.change(usec: 0) }
+
+  let(:execution_time) { DateTime.new(2021, 3, 1, 4, 5, 6) }
+  let(:starts_at) { DateTime.new(2021, 3, 1) }
 
   let(:participants) do
     [
@@ -33,13 +35,16 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
 
   describe '#execute' do
     shared_examples 'error response' do |message|
-      it 'has an informative message' do
+      it 'does not save the rotation and has an informative message' do
+        expect { execute }.not_to change(IncidentManagement::OncallRotation, :count)
         expect(execute).to be_error
         expect(execute.message).to eq(message)
       end
     end
 
-    subject(:execute) { service.execute }
+    subject(:execute) do
+      travel_to(execution_time) { service.execute }
+    end
 
     context 'when the current_user is anonymous' do
       let(:current_user) { nil }
@@ -61,14 +66,6 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
       it_behaves_like 'error response', 'Your license does not support on-call rotations'
     end
 
-    context 'when feature flag is disabled' do
-      before do
-        stub_feature_flags(oncall_schedules_mvc: false)
-      end
-
-      it_behaves_like 'error response', 'Your license does not support on-call rotations'
-    end
-
     context 'when an on-call rotation already exists' do
       let!(:oncall_rotation) { create(:incident_management_oncall_rotation, schedule: schedule, name: 'On-call rotation') }
 
@@ -82,7 +79,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
 
       it 'has an informative error message' do
         expect(execute).to be_error
-        expect(execute.message).to eq("A maximum of #{IncidentManagement::OncallRotations::CreateService::MAXIMUM_PARTICIPANTS} participants can be added")
+        expect(execute.message).to eq("A maximum of #{IncidentManagement::OncallRotations::SharedRotationLogic::MAXIMUM_PARTICIPANTS} participants can be added")
       end
     end
 
@@ -134,7 +131,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
           expect(oncall_rotation.length).to eq(1)
           expect(oncall_rotation.length_unit).to eq('days')
 
-          expect(oncall_rotation.participants.length).to eq(1)
+          expect(oncall_rotation.participants.reload.length).to eq(1)
           expect(oncall_rotation.participants.first).to have_attributes(
             **participants.first,
             rotation: oncall_rotation,
@@ -166,6 +163,14 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
         it_behaves_like 'successfully creates rotation'
         it_behaves_like 'saved the active period times'
 
+        context 'when end active time is before start active time' do
+          let(:active_period_start) { '17:00' }
+          let(:active_period_end) { '08:00' }
+
+          it_behaves_like 'successfully creates rotation'
+          it_behaves_like 'saved the active period times'
+        end
+
         context 'when only active period end time is set' do
           let(:active_period_start) { nil }
 
@@ -177,12 +182,17 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
 
           it_behaves_like 'error response', "Active period end can't be blank"
         end
+      end
 
-        context 'when end active time is before start active time' do
-          let(:active_period_start) { '17:00' }
-          let(:active_period_end) { '08:00' }
+      context 'for an in-progress rotation' do
+        it 'trims & saves the current shift' do
+          oncall_rotation = execute.payload[:oncall_rotation]
 
-          it_behaves_like 'error response', "Active period end must be later than active period start"
+          expect(oncall_rotation.shifts.length).to eq(1)
+          expect(oncall_rotation.shifts.first).to have_attributes(
+            starts_at: oncall_rotation.reload.created_at,
+            ends_at: oncall_rotation.starts_at.next_day
+          )
         end
       end
     end

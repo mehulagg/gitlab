@@ -1,6 +1,6 @@
 <script>
-import { GlDropdownDivider, GlSegmentedControl, GlIcon } from '@gitlab/ui';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { GlDropdownDivider, GlSegmentedControl, GlIcon, GlSprintf } from '@gitlab/ui';
+import createFlash from '~/flash';
 import { s__, sprintf } from '~/locale';
 import {
   TASKS_BY_TYPE_FILTERS,
@@ -18,6 +18,7 @@ export default {
     GlDropdownDivider,
     GlIcon,
     LabelsSelector,
+    GlSprintf,
   },
   props: {
     selectedLabelIds: {
@@ -45,25 +46,14 @@ export default {
         value,
       }));
     },
-    selectedFiltersText() {
-      const { subjectFilter, selectedLabelIds } = this;
-      const subjectFilterText = TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[subjectFilter]
+    selectedSubjectFilter() {
+      const { subjectFilter } = this;
+      return TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[subjectFilter]
         ? TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[subjectFilter]
         : TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS[TASKS_BY_TYPE_SUBJECT_ISSUE];
-      return sprintf(
-        s__('CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} labels'),
-        {
-          subjectFilterText,
-          selectedLabelsCount: selectedLabelIds.length,
-        },
-      );
     },
-    selectedLabelLimitText() {
-      const { selectedLabelIds, maxLabels } = this;
-      return sprintf(s__('CycleAnalytics|%{selectedLabelsCount} selected (%{maxLabels} max)'), {
-        selectedLabelsCount: selectedLabelIds.length,
-        maxLabels,
-      });
+    selectedLabelsCount() {
+      return this.selectedLabelIds.length;
     },
     maxLabelsSelected() {
       return this.selectedLabelIds.length >= this.maxLabels;
@@ -77,14 +67,17 @@ export default {
     handleLabelSelected(value) {
       removeFlash('notice');
       if (this.canUpdateLabelFilters(value)) {
-        this.$emit('updateFilter', { filter: TASKS_BY_TYPE_FILTERS.LABEL, value });
+        this.$emit('update-filter', { filter: TASKS_BY_TYPE_FILTERS.LABEL, value });
       } else {
         const { maxLabels } = this;
         const message = sprintf(
           s__('CycleAnalytics|Only %{maxLabels} labels can be selected at this time'),
           { maxLabels },
         );
-        createFlash(message, 'notice');
+        createFlash({
+          message,
+          type: 'notice',
+        });
       }
     },
   },
@@ -97,10 +90,24 @@ export default {
   >
     <div class="flex-column">
       <h4>{{ s__('CycleAnalytics|Tasks by type') }}</h4>
-      <p v-if="hasData">{{ selectedFiltersText }}</p>
+      <p v-if="hasData">
+        <gl-sprintf
+          :message="
+            n__(
+              'CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} label',
+              'CycleAnalytics|Showing %{subjectFilterText} and %{selectedLabelsCount} labels',
+              selectedLabelsCount,
+            )
+          "
+        >
+          <template #selectedLabelsCount>{{ selectedLabelsCount }}</template>
+          <template #subjectFilterText>{{ selectedSubjectFilter }}</template>
+        </gl-sprintf>
+      </p>
     </div>
     <div class="flex-column">
       <labels-selector
+        data-testid="type-of-work-filters-label"
         :default-selected-labels-ids="selectedLabelIds"
         :max-labels="maxLabels"
         :aria-label="__('CycleAnalytics|Display chart filters')"
@@ -108,7 +115,7 @@ export default {
         aria-expanded="false"
         multiselect
         right
-        @selectLabel="handleLabelSelected"
+        @select-label="handleLabelSelected"
       >
         <template #label-dropdown-button>
           <gl-icon class="vertical-align-top" name="settings" />
@@ -118,11 +125,12 @@ export default {
           <div class="mb-3 px-3">
             <p class="font-weight-bold text-left mb-2">{{ s__('CycleAnalytics|Show') }}</p>
             <gl-segmented-control
+              data-testid="type-of-work-filters-subject"
               :checked="subjectFilter"
               :options="subjectFilterOptions"
               @input="
                 (value) =>
-                  $emit('updateFilter', { filter: $options.TASKS_BY_TYPE_FILTERS.SUBJECT, value })
+                  $emit('update-filter', { filter: $options.TASKS_BY_TYPE_FILTERS.SUBJECT, value })
               "
             />
           </div>
@@ -130,7 +138,16 @@ export default {
           <div class="mb-3 px-3">
             <p class="font-weight-bold text-left my-2">
               {{ s__('CycleAnalytics|Select labels') }}
-              <br /><small>{{ selectedLabelLimitText }}</small>
+              <br /><small>
+                <gl-sprintf
+                  :message="
+                    s__('CycleAnalytics|%{selectedLabelsCount} selected (%{maxLabels} max)')
+                  "
+                >
+                  <template #selectedLabelsCount>{{ selectedLabelsCount }}</template>
+                  <template #maxLabels>{{ maxLabels }}</template>
+                </gl-sprintf>
+              </small>
             </p>
           </div>
         </template>

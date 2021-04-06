@@ -13,6 +13,7 @@ describe('formatListEpics', () => {
       nodes: [
         {
           id: 'gid://gitlab/Boards::EpicList/3',
+          epicsCount: 1,
           epics: {
             edges: [
               {

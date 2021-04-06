@@ -22,4 +22,9 @@ RSpec.describe GitlabSchema.types['IncidentManagementOncallRotation'] do
 
     expect(described_class).to have_graphql_fields(*expected_fields)
   end
+
+  it 'returns enough records to cover 2 weeks of hour-long shifts' do
+    expect(described_class::MAX_SHIFTS_FOR_TIMEFRAME).to be > 14 * 24 # 14 days * 24 hours
+    expect(described_class).to have_graphql_field(:shifts, max_page_size: described_class::MAX_SHIFTS_FOR_TIMEFRAME)
+  end
 end

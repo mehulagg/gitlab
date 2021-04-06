@@ -1,24 +1,31 @@
 <script>
-import { GlEmptyState } from '@gitlab/ui';
+import { GlEmptyState, GlButton } from '@gitlab/ui';
+import { s__, __ } from '~/locale';
 
 export default {
   components: {
     GlEmptyState,
+    GlButton,
   },
   inject: ['dashboardDocumentation', 'emptyStateSvgPath'],
+  i18n: {
+    title: s__('SecurityReports|Monitor vulnerabilities in your group'),
+    description: s__(
+      'SecurityReports|Manage and track vulnerabilities identified in projects within your group. Vulnerabilities in projects are shown here when security testing is configured.',
+    ),
+    secondaryButtonText: __('Learn more'),
+  },
 };
 </script>
 
 <template>
   <gl-empty-state
-    :title="s__('SecurityReports|Add projects to your group')"
-    :description="
-      s__(
-        'SecurityReports|The security dashboard displays the latest security findings for projects you wish to monitor. Add projects to your group to view their vulnerabilities here.',
-      )
-    "
-    :primary-button-link="dashboardDocumentation"
-    :primary-button-text="s__('SecurityReports|Learn more about setting up your dashboard')"
+    :title="$options.i18n.title"
     :svg-path="emptyStateSvgPath"
-  />
+    :description="$options.i18n.description"
+  >
+    <template #actions>
+      <gl-button :href="dashboardDocumentation">{{ $options.i18n.secondaryButtonText }}</gl-button>
+    </template>
+  </gl-empty-state>
 </template>

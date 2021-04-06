@@ -1,5 +1,6 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import ApplySuggestion from '~/vue_shared/components/markdown/apply_suggestion.vue';
 import SuggestionDiffHeader from '~/vue_shared/components/markdown/suggestion_diff_header.vue';
 
 const DEFAULT_PROPS = {
@@ -15,17 +16,11 @@ const DEFAULT_PROPS = {
 describe('Suggestion Diff component', () => {
   let wrapper;
 
-  const createComponent = (props, glFeatures = {}) => {
+  const createComponent = (props) => {
     wrapper = shallowMount(SuggestionDiffHeader, {
       propsData: {
         ...DEFAULT_PROPS,
         ...props,
-      },
-      provide: {
-        glFeatures: {
-          batchSuggestions: true,
-          ...glFeatures,
-        },
       },
     });
   };
@@ -38,7 +33,7 @@ describe('Suggestion Diff component', () => {
     wrapper.destroy();
   });
 
-  const findApplyButton = () => wrapper.find('.js-apply-btn');
+  const findApplyButton = () => wrapper.find(ApplySuggestion);
   const findApplyBatchButton = () => wrapper.find('.js-apply-batch-btn');
   const findAddToBatchButton = () => wrapper.find('.js-add-to-batch-btn');
   const findRemoveFromBatchButton = () => wrapper.find('.js-remove-from-batch-btn');
@@ -88,7 +83,7 @@ describe('Suggestion Diff component', () => {
     beforeEach(() => {
       createComponent();
 
-      findApplyButton().vm.$emit('click');
+      findApplyButton().vm.$emit('apply');
     });
 
     it('emits apply', () => {
@@ -207,18 +202,6 @@ describe('Suggestion Diff component', () => {
         expect(findRemoveFromBatchButton().exists()).toBe(false);
         expect(findApplyBatchButton().exists()).toBe(false);
       });
-    });
-  });
-
-  describe('batchSuggestions feature flag is set to false', () => {
-    beforeEach(() => {
-      createComponent({}, { batchSuggestions: false });
-    });
-
-    it('disables add to batch buttons but keeps apply suggestion enabled', () => {
-      expect(findApplyButton().exists()).toBe(true);
-      expect(findAddToBatchButton().exists()).toBe(false);
-      expect(findApplyButton().attributes('disabled')).not.toBe('true');
     });
   });
 

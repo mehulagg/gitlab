@@ -67,7 +67,7 @@ class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analyt
   end
 
   def value_streams
-    @group.value_streams.presence || [in_memory_default_value_stream]
+    @group.value_streams.preload_associated_models.presence || [in_memory_default_value_stream]
   end
 
   def in_memory_default_value_stream

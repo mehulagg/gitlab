@@ -91,7 +91,7 @@ projects:
 - Avoid global variables, even in packages. By doing so you introduce side
   effects if the package is included multiple times.
 - Use `goimports` before committing.
-  [`goimports`](https://godoc.org/golang.org/x/tools/cmd/goimports)
+  [`goimports`](https://pkg.go.dev/golang.org/x/tools/cmd/goimports)
   is a tool that automatically formats Go source code using
   [`Gofmt`](https://golang.org/cmd/gofmt/), in addition to formatting import lines,
   adding missing ones and removing unreferenced ones.
@@ -322,7 +322,7 @@ A few things to keep in mind when adding context:
 - [Go 1.13 errors](https://blog.golang.org/go1.13-errors).
 - [Programing with
   errors](https://peter.bourgon.org/blog/2019/09/11/programming-with-errors.html).
-- [Don’t just check errors, handle them
+- [Don't just check errors, handle them
   gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully).
 
 ## CLIs

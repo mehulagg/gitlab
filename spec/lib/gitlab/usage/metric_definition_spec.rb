@@ -16,7 +16,8 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
       time_frame: 'none',
       data_source: 'database',
       distribution: %w(ee ce),
-      tier: %w(free starter premium ultimate bronze silver gold)
+      tier: %w(free starter premium ultimate bronze silver gold),
+      name: 'count_boards'
     }
   end
 
@@ -53,6 +54,7 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
       :distribution       | nil
       :distribution       | 'test'
       :tier               | %w(test ee)
+      :name               | 'count_<adjective_describing>_boards'
     end
 
     with_them do
@@ -78,6 +80,28 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
 
           described_class.new(path, attributes.merge( { skip_validation: true } )).validate!
         end
+      end
+    end
+  end
+
+  describe 'statuses' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:status, :skip_validation?) do
+      'deprecated'     | true
+      'removed'        | true
+      'data_available' | false
+      'implemented'    | false
+      'not_used'       | false
+    end
+
+    with_them do
+      subject(:validation) do
+        described_class.new(path, attributes.merge( { status: status } )).send(:skip_validation?)
+      end
+
+      it 'returns true/false for skip_validation' do
+        expect(validation).to eq(skip_validation?)
       end
     end
   end

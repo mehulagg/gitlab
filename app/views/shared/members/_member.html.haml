@@ -107,7 +107,7 @@
         - if member.can_approve?
           = link_to polymorphic_path([:approve_access_request, member]),
                     method: :post,
-                    class: "btn btn-success btn-icon gl-button align-self-center m-0 mb-2 #{'mb-sm-0 ml-sm-2' unless force_mobile_view}",
+                    class: "btn btn-confirm btn-icon gl-button align-self-center m-0 mb-2 #{'mb-sm-0 ml-sm-2' unless force_mobile_view}",
                     title: _('Grant access') do
             %span{ class: ('d-block d-sm-none' unless force_mobile_view) }
               = _('Grant access')
@@ -120,7 +120,7 @@
               = sprite_icon('leave', css_class: 'gl-icon')
               = _('Leave')
           - else
-            %button{ data: { member_path: member_path(member.member), message: remove_member_message(member), is_access_request: member.request?.to_s, qa_selector: 'delete_member_button' },
+            %button{ data: { member_path: member_path(member.member), member_type: member.type, message: remove_member_message(member), is_access_request: member.request?.to_s, qa_selector: 'delete_member_button' },
               class: "js-remove-member-button btn gl-button btn-danger align-self-center m-0 #{'ml-sm-2 btn-icon' unless force_mobile_view}",
               title: remove_member_title(member) }
               %span{ class: ('d-block d-sm-none' unless force_mobile_view) }

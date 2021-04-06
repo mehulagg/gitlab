@@ -22,6 +22,13 @@ module Ci
       @jobs = jobs
     end
 
+    def ==(other)
+      other.present? && other.is_a?(self.class) &&
+        project == other.project &&
+        stage == other.stage &&
+        name == other.name
+    end
+
     def status
       strong_memoize(:status) do
         status_struct.status
@@ -39,7 +46,7 @@ module Ci
     def status_struct
       strong_memoize(:status_struct) do
         Gitlab::Ci::Status::Composite
-          .new(@jobs)
+          .new(@jobs, project: project)
       end
     end
 

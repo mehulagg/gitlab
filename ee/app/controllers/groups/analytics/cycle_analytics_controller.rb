@@ -14,8 +14,8 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
 
   before_action do
     push_frontend_feature_flag(:cycle_analytics_scatterplot_enabled, default_enabled: true)
-    push_frontend_feature_flag(:value_stream_analytics_path_navigation, @group)
-    push_frontend_feature_flag(:value_stream_analytics_extended_form, @group)
+    push_frontend_feature_flag(:value_stream_analytics_path_navigation, @group, default_enabled: :yaml)
+    push_frontend_feature_flag(:value_stream_analytics_extended_form, @group, default_enabled: :yaml)
     render_403 unless can?(current_user, :read_group_cycle_analytics, @group)
   end
 
@@ -33,6 +33,12 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
   def load_value_stream
     return unless @group && params[:value_stream_id]
 
-    @value_stream = @group.value_streams.find(params[:value_stream_id])
+    default_name = Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME
+
+    @value_stream = if params[:value_stream_id] == default_name
+                      @group.value_streams.new(name: default_name)
+                    else
+                      @group.value_streams.find(params[:value_stream_id])
+                    end
   end
 end

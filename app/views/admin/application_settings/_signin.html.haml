@@ -20,18 +20,26 @@
               or LDAP password
             must be used to authenticate.
     - if omniauth_enabled? && button_based_providers.any?
-      .form-group
-        = f.label :enabled_oauth_sign_in_sources, 'Enabled OAuth sign-in sources', class: 'label-bold'
+      %fieldset.form-group
+        %legend.gl-font-base.gl-mb-3.gl-border-none.gl-font-weight-bold= _('Enabled OAuth sign-in sources')
         = hidden_field_tag 'application_setting[enabled_oauth_sign_in_sources][]'
-        .btn-group{ data: { toggle: 'buttons' } }
-          - oauth_providers_checkboxes.each do |source|
-            = source
+        - oauth_providers_checkboxes.each do |source|
+          = source
     .form-group
       = f.label :two_factor_authentication, 'Two-factor authentication', class: 'label-bold'
       .form-check
         = f.check_box :require_two_factor_authentication, class: 'form-check-input'
         = f.label :require_two_factor_authentication, class: 'form-check-label' do
           Require all users to set up Two-factor authentication
+    .form-group
+      = f.label :admin_mode, _('Admin Mode'), class: 'label-bold'
+      = sprite_icon('lock', css_class: 'gl-icon')
+      .form-check
+        = f.check_box :admin_mode, class: 'form-check-input'
+        = f.label :admin_mode, class: 'form-check-label' do
+          = _('Require additional authentication for administrative tasks')
+        .form-text.text-muted
+          = link_to _('Learn more.'), help_page_path('user/admin_area/settings/sign_in_restrictions', anchor: 'admin-mode')
     .form-group
       = f.label :unknown_sign_in, _('Email notification for unknown sign-ins'), class: 'label-bold'
       .form-check
@@ -57,4 +65,4 @@
       = f.label :sign_in_text, _('Sign-in text'), class: 'label-bold'
       = f.text_area :sign_in_text, class: 'form-control gl-form-input', rows: 4
       .form-text.text-muted Markdown enabled
-  = f.submit 'Save changes', class: "gl-button btn btn-success"
+  = f.submit 'Save changes', class: "gl-button btn btn-confirm"

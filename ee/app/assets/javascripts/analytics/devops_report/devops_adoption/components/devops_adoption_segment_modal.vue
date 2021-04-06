@@ -1,10 +1,12 @@
 <script>
-import { GlFormGroup, GlFormInput, GlFormRadioGroup, GlModal, GlAlert, GlIcon } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput, GlFormCheckboxTree, GlModal, GlAlert, GlIcon } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { convertToGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
+import _ from 'lodash';
+import { convertToGraphQLId, getIdFromGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
 import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from '../constants';
-import createDevopsAdoptionSegmentMutation from '../graphql/mutations/create_devops_adoption_segment.mutation.graphql';
-import { addSegmentToCache } from '../utils/cache_updates';
+import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
+import deleteDevopsAdoptionSegmentMutation from '../graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
+import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
 
 export default {
   name: 'DevopsAdoptionSegmentModal',
@@ -12,7 +14,7 @@ export default {
     GlModal,
     GlFormGroup,
     GlFormInput,
-    GlFormRadioGroup,
+    GlFormCheckboxTree,
     GlAlert,
     GlIcon,
   },
@@ -21,19 +23,33 @@ export default {
       type: Array,
       required: true,
     },
+    enabledGroups: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   i18n: DEVOPS_ADOPTION_STRINGS.modal,
   data() {
+    const checkboxValuesFromEnabledGroups = this.enabledGroups.map((group) =>
+      getIdFromGraphQLId(group.namespace.id),
+    );
+
     return {
-      selectedGroupId: null,
+      checkboxValuesFromEnabledGroups,
+      checkboxValues: checkboxValuesFromEnabledGroups,
       filter: '',
-      loading: false,
+      loadingAdd: false,
+      loadingDelete: false,
       errors: [],
     };
   },
   computed: {
+    loading() {
+      return this.loadingAdd || this.loadingDelete;
+    },
     checkboxOptions() {
-      return this.groups.map(({ id, full_name }) => ({ text: full_name, value: id }));
+      return this.groups.map(({ id, full_name }) => ({ label: full_name, value: id }));
     },
     cancelOptions() {
       return {
@@ -41,7 +57,6 @@ export default {
           text: this.$options.i18n.cancel,
           attributes: [{ disabled: this.loading }],
         },
-        callback: this.resetForm,
       };
     },
     primaryOptions() {
@@ -56,11 +71,11 @@ export default {
             },
           ],
         },
-        callback: this.createSegment,
+        callback: this.saveChanges,
       };
     },
     canSubmit() {
-      return Boolean(this.selectedGroupId);
+      return !this.anyChangesMade;
     },
     displayError() {
       return this.errors[0];
@@ -71,44 +86,101 @@ export default {
     filteredOptions() {
       return this.filter
         ? this.checkboxOptions.filter((option) =>
-            option.text.toLowerCase().includes(this.filter.toLowerCase()),
+            option.label.toLowerCase().includes(this.filter.toLowerCase()),
           )
         : this.checkboxOptions;
     },
+    anyChangesMade() {
+      return _.isEqual(
+        _.sortBy(this.checkboxValues),
+        _.sortBy(this.checkboxValuesFromEnabledGroups),
+      );
+    },
   },
   methods: {
-    async createSegment() {
+    async saveChanges() {
+      await this.deleteMissingGroups();
+      await this.addNewGroups();
+
+      if (!this.errors.length) this.closeModal();
+    },
+    async addNewGroups() {
       try {
-        this.loading = true;
-        const {
-          data: {
-            createDevopsAdoptionSegment: { errors },
-          },
-        } = await this.$apollo.mutate({
-          mutation: createDevopsAdoptionSegmentMutation,
-          variables: {
-            namespaceId: convertToGraphQLId(TYPE_GROUP, this.selectedGroupId),
-          },
-          update: (store, { data }) => {
-            const {
-              createDevopsAdoptionSegment: { segment, errors: requestErrors },
-            } = data;
+        const originalEnabledIds = this.enabledGroups.map((group) =>
+          getIdFromGraphQLId(group.namespace.id),
+        );
 
-            if (!requestErrors.length) addSegmentToCache(store, segment);
-          },
-        });
+        const namespaceIds = this.checkboxValues
+          .filter((id) => !originalEnabledIds.includes(id))
+          .map((id) => convertToGraphQLId(TYPE_GROUP, id));
 
-        if (errors.length) {
-          this.errors = errors;
-        } else {
-          this.resetForm();
-          this.closeModal();
+        if (namespaceIds.length) {
+          this.loadingAdd = true;
+          const {
+            data: {
+              bulkFindOrCreateDevopsAdoptionSegments: { errors },
+            },
+          } = await this.$apollo.mutate({
+            mutation: bulkFindOrCreateDevopsAdoptionSegmentsMutation,
+            variables: {
+              namespaceIds,
+            },
+            update: (store, { data }) => {
+              const {
+                bulkFindOrCreateDevopsAdoptionSegments: { segments, errors: requestErrors },
+              } = data;
+
+              if (!requestErrors.length) addSegmentsToCache(store, segments);
+            },
+          });
+
+          if (errors.length) {
+            this.errors = errors;
+          }
         }
       } catch (error) {
         this.errors.push(this.$options.i18n.error);
         Sentry.captureException(error);
       } finally {
-        this.loading = false;
+        this.loadingAdd = false;
+      }
+    },
+    async deleteMissingGroups() {
+      try {
+        const removedGroupGids = this.enabledGroups
+          .filter((group) => !this.checkboxValues.includes(getIdFromGraphQLId(group.namespace.id)))
+          .map((group) => group.id);
+
+        if (removedGroupGids.length) {
+          this.loadingDelete = true;
+
+          const {
+            data: {
+              deleteDevopsAdoptionSegment: { errors },
+            },
+          } = await this.$apollo.mutate({
+            mutation: deleteDevopsAdoptionSegmentMutation,
+            variables: {
+              id: removedGroupGids,
+            },
+            update: (store, { data }) => {
+              const {
+                deleteDevopsAdoptionSegment: { errors: requestErrors },
+              } = data;
+
+              if (!requestErrors.length) deleteSegmentsFromCache(store, removedGroupGids);
+            },
+          });
+
+          if (errors.length) {
+            this.errors = errors;
+          }
+        }
+      } catch (error) {
+        this.errors.push(this.$options.i18n.error);
+        Sentry.captureException(error);
+      } finally {
+        this.loadingDelete = false;
       }
     },
     clearErrors() {
@@ -118,8 +190,9 @@ export default {
       this.$refs.modal.hide();
     },
     resetForm() {
-      this.selectedGroupId = null;
+      this.checkboxValues = [];
       this.filter = '';
+      this.$emit('trackModalOpenState', false);
     },
   },
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
@@ -135,14 +208,19 @@ export default {
     :action-primary="primaryOptions.button"
     :action-cancel="cancelOptions.button"
     @primary.prevent="primaryOptions.callback"
-    @canceled="cancelOptions.callback"
-    @hide="resetForm"
+    @hidden="resetForm"
+    @show="$emit('trackModalOpenState', true)"
   >
     <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
       {{ displayError }}
     </gl-alert>
     <gl-form-group class="gl-mb-3" data-testid="filter">
-      <gl-icon name="search" :size="18" class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3" />
+      <gl-icon
+        name="search"
+        :size="18"
+        use-deprecated-sizes
+        class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3"
+      />
       <gl-form-input
         v-model="filter"
         class="gl-pl-7!"
@@ -152,10 +230,10 @@ export default {
       />
     </gl-form-group>
     <gl-form-group class="gl-mb-0">
-      <gl-form-radio-group
+      <gl-form-checkbox-tree
         v-if="filteredOptions.length"
         :key="filteredOptions.length"
-        v-model="selectedGroupId"
+        v-model="checkboxValues"
         data-testid="groups"
         :options="filteredOptions"
         :hide-toggle-all="true"

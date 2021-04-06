@@ -4,7 +4,7 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 import AncestorsTree from 'ee/sidebar/components/ancestors_tree/ancestors_tree.vue';
 
 import notesEventHub from '~/notes/event_hub';
-import ConfidentialIssueSidebar from '~/sidebar/components/confidential/confidential_issue_sidebar.vue';
+import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarParticipants from '~/sidebar/components/participants/participants.vue';
 import sidebarEventHub from '~/sidebar/event_hub';
 import SidebarDatePickerCollapsed from '~/vue_shared/components/sidebar/collapsed_grouped_date_picker.vue';
@@ -28,7 +28,12 @@ export default {
     AncestorsTree,
     SidebarParticipants,
     SidebarSubscription,
-    ConfidentialIssueSidebar,
+    SidebarConfidentialityWidget,
+  },
+  data() {
+    return {
+      sidebarExpandedOnClick: false,
+    };
   },
   computed: {
     ...mapState([
@@ -80,6 +85,7 @@ export default {
       'toggleStartDateType',
       'toggleDueDateType',
       'saveDate',
+      'updateConfidentialityOnIssuable',
     ]),
     getDateFromMilestonesTooltip(dateType) {
       return epicUtils.getDateFromMilestonesTooltip({
@@ -128,6 +134,15 @@ export default {
     },
     updateEpicConfidentiality(confidential) {
       notesEventHub.$emit('notesApp.updateIssuableConfidentiality', confidential);
+    },
+    handleSidebarToggle() {
+      if (this.sidebarCollapsed) {
+        this.sidebarExpandedOnClick = true;
+        this.toggleSidebar({ sidebarCollapsed: true });
+      } else if (this.sidebarExpandedOnClick) {
+        this.sidebarExpandedOnClick = false;
+        this.toggleSidebar({ sidebarCollapsed: false });
+      }
     },
   },
 };
@@ -209,13 +224,12 @@ export default {
       <div v-if="allowSubEpics" class="block ancestors">
         <ancestors-tree :ancestors="ancestors" :is-fetching="false" data-testid="ancestors" />
       </div>
-
-      <confidential-issue-sidebar
-        :is-editable="canUpdate"
-        :full-path="fullPath"
+      <sidebar-confidentiality-widget
         issuable-type="epic"
+        @closeForm="handleSidebarToggle"
+        @expandSidebar="handleSidebarToggle"
+        @confidentialityUpdated="updateConfidentialityOnIssuable($event)"
       />
-
       <div class="block participants">
         <sidebar-participants
           :participants="participants"

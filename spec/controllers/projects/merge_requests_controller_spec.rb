@@ -8,6 +8,7 @@ RSpec.describe Projects::MergeRequestsController do
 
   let_it_be_with_refind(:project) { create(:project, :repository) }
   let_it_be_with_reload(:project_public_with_private_builds) { create(:project, :repository, :public, :builds_private) }
+
   let(:user) { project.owner }
   let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
 
@@ -38,6 +39,32 @@ RSpec.describe Projects::MergeRequestsController do
       }
 
       get :show, params: params.merge(extra_params)
+    end
+
+    context 'with the invite_members_in_comment experiment', :experiment do
+      context 'when user can invite' do
+        before do
+          stub_experiments(invite_members_in_comment: :invite_member_link)
+          project.add_maintainer(user)
+        end
+
+        it 'assigns the candidate experience and tracks the event' do
+          expect(experiment(:invite_members_in_comment)).to track(:view, property: project.root_ancestor.id.to_s)
+            .for(:invite_member_link)
+            .with_context(namespace: project.root_ancestor)
+            .on_next_instance
+
+          go
+        end
+      end
+
+      context 'when user can not invite' do
+        it 'does not track the event' do
+          expect(experiment(:invite_members_in_comment)).not_to track(:view)
+
+          go
+        end
+      end
     end
 
     context 'with view param' do
@@ -2041,21 +2068,6 @@ RSpec.describe Projects::MergeRequestsController do
     context 'successfully' do
       it 'enqeues a RebaseWorker' do
         expect_rebase_worker_for(viewer)
-
-        post_rebase
-
-        expect(response).to have_gitlab_http_status(:ok)
-      end
-    end
-
-    context 'with SELECT FOR UPDATE lock' do
-      before do
-        stub_feature_flags(merge_request_rebase_nowait_lock: false)
-      end
-
-      it 'executes rebase' do
-        allow_any_instance_of(MergeRequest).to receive(:with_lock).with(true).and_call_original
-        expect(RebaseWorker).to receive(:perform_async)
 
         post_rebase
 

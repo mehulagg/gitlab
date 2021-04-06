@@ -15,7 +15,7 @@
           = epic.to_reference(@group)
         %span.issuable-authored.d-none.d-sm-inline-block
           &middot;
-          opened #{time_ago_with_tooltip(epic.created_at, placement: 'bottom')}
+          created #{time_ago_with_tooltip(epic.created_at, placement: 'bottom')}
           by #{link_to_member(@group, epic.author, avatar: false)}
           = gitlab_team_member_badge(epic.author)
         - if epic.start_date? || epic.end_date?
@@ -26,7 +26,7 @@
         - if epic.labels.any?
           &nbsp;
           - epic.labels.each do |label|
-            = render_label(label.present(issuable_subject: @group), tooltip: true, link: group_epics_path(@group, label_name:[label.name]), small: true)
+            = render_label(label.present(issuable_subject: @group), tooltip: true, link: group_epics_path(@group, label_name: [label.name]), small: true)
 
     .issuable-meta
       %ul.controls

@@ -67,6 +67,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    codequalityDiff: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -148,8 +153,16 @@ export default {
 
       return loggedIn && featureOn;
     },
+    hasCodequalityChanges() {
+      return this.codequalityDiff.length > 0;
+    },
   },
   watch: {
+    'file.id': {
+      handler: function fileIdHandler() {
+        this.manageViewedEffects();
+      },
+    },
     'file.file_hash': {
       handler: function hashChangeWatch(newHash, oldHash) {
         this.isCollapsed = isCollapsed(this.file);
@@ -186,9 +199,7 @@ export default {
       this.postRender();
     }
 
-    if (this.reviewed && !this.isCollapsed && this.showLocalFileReviews) {
-      this.handleToggle();
-    }
+    this.manageViewedEffects();
   },
   beforeDestroy() {
     eventHub.$off(EVT_EXPAND_ALL_FILES, this.expandAllListener);
@@ -200,6 +211,11 @@ export default {
       'setRenderIt',
       'setFileCollapsedByUser',
     ]),
+    manageViewedEffects() {
+      if (this.reviewed && !this.isCollapsed && this.showLocalFileReviews) {
+        this.handleToggle();
+      }
+    },
     expandAllListener() {
       if (this.isCollapsed) {
         this.handleToggle();
@@ -286,6 +302,7 @@ export default {
       :add-merge-request-buttons="true"
       :view-diffs-file-by-file="viewDiffsFileByFile"
       :show-local-file-reviews="showLocalFileReviews"
+      :has-codequality-changes="hasCodequalityChanges"
       class="js-file-title file-title gl-border-1 gl-border-solid gl-border-gray-100"
       :class="hasBodyClasses.header"
       @toggleFile="handleToggle"

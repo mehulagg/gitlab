@@ -108,6 +108,14 @@ RSpec.describe Gitlab::GitAccessWiki do
         end
       end
 
+      context 'when actor is geo' do
+        let(:user) { :geo }
+
+        it 'gives access to download wiki code' do
+          expect { subject }.not_to raise_error
+        end
+      end
+
       context 'the group is public' do
         let(:group) { create(:group, :public, :wiki_repo) }
 

@@ -41,6 +41,9 @@ RSpec.describe User do
     it { is_expected.to delegate_method(:show_whitespace_in_diffs).to(:user_preference) }
     it { is_expected.to delegate_method(:show_whitespace_in_diffs=).to(:user_preference).with_arguments(:args) }
 
+    it { is_expected.to delegate_method(:view_diffs_file_by_file).to(:user_preference) }
+    it { is_expected.to delegate_method(:view_diffs_file_by_file=).to(:user_preference).with_arguments(:args) }
+
     it { is_expected.to delegate_method(:tab_width).to(:user_preference) }
     it { is_expected.to delegate_method(:tab_width=).to(:user_preference).with_arguments(:args) }
 
@@ -58,6 +61,9 @@ RSpec.describe User do
 
     it { is_expected.to delegate_method(:experience_level).to(:user_preference) }
     it { is_expected.to delegate_method(:experience_level=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:markdown_surround_selection).to(:user_preference) }
+    it { is_expected.to delegate_method(:markdown_surround_selection=).to(:user_preference).with_arguments(:args) }
 
     it { is_expected.to delegate_method(:job_title).to(:user_detail).allow_nil }
     it { is_expected.to delegate_method(:job_title=).to(:user_detail).with_arguments(:args).allow_nil }
@@ -79,6 +85,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:group_members) }
     it { is_expected.to have_many(:groups) }
     it { is_expected.to have_many(:keys).dependent(:destroy) }
+    it { is_expected.to have_many(:expired_today_and_unnotified_keys) }
     it { is_expected.to have_many(:deploy_keys).dependent(:nullify) }
     it { is_expected.to have_many(:group_deploy_keys) }
     it { is_expected.to have_many(:events).dependent(:delete_all) }
@@ -102,6 +109,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:merge_request_assignees).inverse_of(:assignee) }
     it { is_expected.to have_many(:merge_request_reviewers).inverse_of(:reviewer) }
     it { is_expected.to have_many(:created_custom_emoji).inverse_of(:creator) }
+    it { is_expected.to have_many(:in_product_marketing_emails) }
 
     describe "#user_detail" do
       it 'does not persist `user_detail` by default' do
@@ -993,6 +1001,18 @@ RSpec.describe User do
       end
     end
 
+    describe '.with_ssh_key_expired_today' do
+      let_it_be(:user1) { create(:user) }
+      let_it_be(:expired_today_not_notified) { create(:key, expires_at: Time.current, user: user1) }
+
+      let_it_be(:user2) { create(:user) }
+      let_it_be(:expired_today_already_notified) { create(:key, expires_at: Time.current, user: user2, expiry_notification_delivered_at: Time.current) }
+
+      it 'returns users whose token has expired today' do
+        expect(described_class.with_ssh_key_expired_today).to contain_exactly(user1)
+      end
+    end
+
     describe '.active_without_ghosts' do
       let_it_be(:user1) { create(:user, :external) }
       let_it_be(:user2) { create(:user, state: 'blocked') }
@@ -1760,7 +1780,7 @@ RSpec.describe User do
   end
 
   describe 'blocking user' do
-    let(:user) { create(:user, name: 'John Smith') }
+    let_it_be_with_refind(:user) { create(:user, name: 'John Smith') }
 
     it 'blocks user' do
       user.block
@@ -1770,17 +1790,22 @@ RSpec.describe User do
 
     context 'when user has running CI pipelines' do
       let(:service) { double }
+      let(:pipelines) { build_list(:ci_pipeline, 3, :running) }
 
-      before do
-        pipeline = create(:ci_pipeline, :running, user: user)
-        create(:ci_build, :running, pipeline: pipeline)
-      end
-
-      it 'cancels all running pipelines and related jobs' do
-        expect(Ci::CancelUserPipelinesService).to receive(:new).and_return(service)
-        expect(service).to receive(:execute).with(user)
+      it 'aborts all running pipelines and related jobs' do
+        expect(user).to receive(:pipelines).and_return(pipelines)
+        expect(Ci::AbortPipelinesService).to receive(:new).and_return(service)
+        expect(service).to receive(:execute).with(pipelines)
 
         user.block
+      end
+    end
+
+    context 'when user has active CI pipeline schedules' do
+      let_it_be(:schedule) { create(:ci_pipeline_schedule, active: true, owner: user) }
+
+      it 'disables any pipeline schedules' do
+        expect { user.block }.to change { schedule.reload.active? }.to(false)
       end
     end
   end
@@ -1828,7 +1853,7 @@ RSpec.describe User do
   end
 
   describe '.instance_access_request_approvers_to_be_notified' do
-    let_it_be(:admin_list) { create_list(:user, 12, :admin, :with_sign_ins) }
+    let_it_be(:admin_issue_board_list) { create_list(:user, 12, :admin, :with_sign_ins) }
 
     it 'returns up to the ten most recently active instance admins' do
       active_admins_in_recent_sign_in_desc_order = User.admins.active.order_recent_sign_in.limit(10)
@@ -2489,6 +2514,38 @@ RSpec.describe User do
       it 'shows correct avatar url' do
         expect(user.avatar_url).to eq(user.avatar.url)
         expect(user.avatar_url(only_path: false)).to eq([Gitlab.config.gitlab.url, user.avatar.url].join)
+      end
+    end
+  end
+
+  describe "#clear_avatar_caches" do
+    let(:user) { create(:user) }
+
+    context "when :avatar_cache_for_email flag is enabled" do
+      before do
+        stub_feature_flags(avatar_cache_for_email: true)
+      end
+
+      it "clears the avatar cache when saving" do
+        allow(user).to receive(:avatar_changed?).and_return(true)
+
+        expect(Gitlab::AvatarCache).to receive(:delete_by_email).with(*user.verified_emails)
+
+        user.update(avatar: fixture_file_upload('spec/fixtures/dk.png'))
+      end
+    end
+
+    context "when :avatar_cache_for_email flag is disabled" do
+      before do
+        stub_feature_flags(avatar_cache_for_email: false)
+      end
+
+      it "doesn't attempt to clear the avatar cache" do
+        allow(user).to receive(:avatar_changed?).and_return(true)
+
+        expect(Gitlab::AvatarCache).not_to receive(:delete_by_email)
+
+        user.update(avatar: fixture_file_upload('spec/fixtures/dk.png'))
       end
     end
   end
@@ -3228,23 +3285,8 @@ RSpec.describe User do
         create(:group_group_link, shared_group: private_group, shared_with_group: other_group)
       end
 
-      context 'when shared_group_membership_auth is enabled' do
-        before do
-          stub_feature_flags(shared_group_membership_auth: user)
-        end
-
-        it { is_expected.to include shared_group }
-        it { is_expected.not_to include other_group }
-      end
-
-      context 'when shared_group_membership_auth is disabled' do
-        before do
-          stub_feature_flags(shared_group_membership_auth: false)
-        end
-
-        it { is_expected.not_to include shared_group }
-        it { is_expected.not_to include other_group }
-      end
+      it { is_expected.to include shared_group }
+      it { is_expected.not_to include other_group }
     end
   end
 
@@ -3933,6 +3975,37 @@ RSpec.describe User do
 
         it 'returns true' do
           expect(user.can_read_all_resources?).to be_truthy
+        end
+      end
+    end
+  end
+
+  describe '#can_admin_all_resources?', :request_store do
+    it 'returns false for regular user' do
+      user = build_stubbed(:user)
+
+      expect(user.can_admin_all_resources?).to be_falsy
+    end
+
+    context 'for admin user' do
+      include_context 'custom session'
+
+      let(:user) { build_stubbed(:user, :admin) }
+
+      context 'when admin mode is disabled' do
+        it 'returns false' do
+          expect(user.can_admin_all_resources?).to be_falsy
+        end
+      end
+
+      context 'when admin mode is enabled' do
+        before do
+          Gitlab::Auth::CurrentUserMode.new(user).request_admin_mode!
+          Gitlab::Auth::CurrentUserMode.new(user).enable_admin_mode!(password: user.password)
+        end
+
+        it 'returns true' do
+          expect(user.can_admin_all_resources?).to be_truthy
         end
       end
     end
@@ -5371,6 +5444,40 @@ RSpec.describe User do
     end
   end
 
+  describe 'can_trigger_notifications?' do
+    context 'when user is not confirmed' do
+      let_it_be(:user) { create(:user, :unconfirmed) }
+
+      it 'returns false' do
+        expect(user.can_trigger_notifications?).to be(false)
+      end
+    end
+
+    context 'when user is blocked' do
+      let_it_be(:user) { create(:user, :blocked) }
+
+      it 'returns false' do
+        expect(user.can_trigger_notifications?).to be(false)
+      end
+    end
+
+    context 'when user is a ghost' do
+      let_it_be(:user) { create(:user, :ghost) }
+
+      it 'returns false' do
+        expect(user.can_trigger_notifications?).to be(false)
+      end
+    end
+
+    context 'when user is confirmed and neither blocked or a ghost' do
+      let_it_be(:user) { create(:user) }
+
+      it 'returns true' do
+        expect(user.can_trigger_notifications?).to be(true)
+      end
+    end
+  end
+
   context 'bot users' do
     shared_examples 'bot users' do |bot_type|
       it 'creates the user if it does not exist' do
@@ -5455,6 +5562,45 @@ RSpec.describe User do
           it 'is truthy' do
             expect(subject).to be_truthy
           end
+        end
+      end
+    end
+  end
+
+  describe '#find_or_initialize_callout' do
+    subject(:find_or_initialize_callout) { user.find_or_initialize_callout(feature_name) }
+
+    let(:user) { create(:user) }
+    let(:feature_name) { UserCallout.feature_names.each_key.first }
+
+    context 'when callout exists' do
+      let!(:callout) { create(:user_callout, user: user, feature_name: feature_name) }
+
+      it 'returns existing callout' do
+        expect(find_or_initialize_callout).to eq(callout)
+      end
+    end
+
+    context 'when callout does not exist' do
+      context 'when feature name is valid' do
+        it 'initializes a new callout' do
+          expect(find_or_initialize_callout).to be_a_new(UserCallout)
+        end
+
+        it 'is valid' do
+          expect(find_or_initialize_callout).to be_valid
+        end
+      end
+
+      context 'when feature name is not valid' do
+        let(:feature_name) { 'notvalid' }
+
+        it 'initializes a new callout' do
+          expect(find_or_initialize_callout).to be_a_new(UserCallout)
+        end
+
+        it 'is not valid' do
+          expect(find_or_initialize_callout).not_to be_valid
         end
       end
     end

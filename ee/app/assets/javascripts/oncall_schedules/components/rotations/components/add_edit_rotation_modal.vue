@@ -1,12 +1,17 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
 import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import { updateStoreAfterRotationEdit } from 'ee/oncall_schedules/utils/cache_updates';
-import { isNameFieldValid, getParticipantsForSave } from 'ee/oncall_schedules/utils/common_utils';
+import {
+  isNameFieldValid,
+  getParticipantsForSave,
+  parseHour,
+  parseRotationDate,
+} from 'ee/oncall_schedules/utils/common_utils';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import searchProjectMembersQuery from '~/graphql_shared/queries/project_user_members_search.query.graphql';
 import { format24HourTimeStringFromInt, formatDate } from '~/lib/utils/datetime_utility';
@@ -21,9 +26,38 @@ export const i18n = {
   cancel: __('Cancel'),
 };
 
+export const formEmptyState = {
+  name: '',
+  participants: [],
+  rotationLength: {
+    length: 1,
+    unit: LENGTH_ENUM.days,
+  },
+  startsAt: {
+    date: null,
+    time: 0,
+  },
+  isEndDateEnabled: false,
+  endsAt: {
+    date: null,
+    time: 0,
+  },
+  isRestrictedToTime: false,
+  restrictedTo: {
+    startTime: 0,
+    endTime: 0,
+  },
+};
+
+const validiationInitialState = {
+  name: true,
+  participants: true,
+  startsAt: true,
+  endsAt: true,
+};
+
 export default {
   i18n,
-  LENGTH_ENUM,
   components: {
     GlModal,
     GlAlert,
@@ -39,6 +73,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    rotation: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
     schedule: {
       type: Object,
@@ -67,32 +106,9 @@ export default {
       participants: [],
       loading: false,
       ptSearchTerm: '',
-      form: {
-        name: '',
-        participants: [],
-        rotationLength: {
-          length: 1,
-          unit: this.$options.LENGTH_ENUM.days,
-        },
-        startsAt: {
-          date: null,
-          time: 0,
-        },
-        endsOn: {
-          date: null,
-          time: 0,
-        },
-        restrictedTo: {
-          from: 0,
-          to: 0,
-        },
-      },
+      form: cloneDeep(formEmptyState),
       error: '',
-      validationState: {
-        name: true,
-        participants: true,
-        startsAt: true,
-      },
+      validationState: cloneDeep(validiationInitialState),
     };
   },
   computed: {
@@ -129,36 +145,69 @@ export default {
         name,
         rotationLength,
         participants,
-        startsAt: { date, time },
+        startsAt: { date: startDate, time: startTime },
+        endsAt: { date: endDate, time: endTime },
+        isEndDateEnabled,
+        isRestrictedToTime,
+        restrictedTo: { startTime: activeStartTime, endTime: activeEndTime },
       } = this.form;
 
-      return {
-        projectPath: this.projectPath,
-        scheduleIid: this.schedule.iid,
+      const variables = {
         name,
-        startsAt: {
-          date: formatDate(date, 'yyyy-mm-dd'),
-          time: format24HourTimeStringFromInt(time),
-        },
+        participants: getParticipantsForSave(participants),
         rotationLength: {
           ...rotationLength,
           length: parseInt(rotationLength.length, 10),
         },
-        participants: getParticipantsForSave(participants),
+        startsAt: {
+          date: formatDate(startDate, 'yyyy-mm-dd'),
+          time: format24HourTimeStringFromInt(startTime),
+        },
+        endsAt: isEndDateEnabled
+          ? {
+              date: formatDate(endDate, 'yyyy-mm-dd'),
+              time: format24HourTimeStringFromInt(endTime),
+            }
+          : null,
+        activePeriod: isRestrictedToTime
+          ? {
+              startTime: format24HourTimeStringFromInt(activeStartTime),
+              endTime: format24HourTimeStringFromInt(activeEndTime),
+            }
+          : null,
       };
+      return variables;
     },
     title() {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;
+    },
+    isEndDateValid() {
+      const startsAt = new Date(this.form.startsAt.date).getTime();
+      const endsAt = new Date(this.form.endsAt.date).getTime();
+
+      if (!startsAt || !endsAt) {
+        // If start or end is not present, we consider the end date valid
+        return true;
+      } else if (startsAt < endsAt) {
+        return true;
+      } else if (startsAt === endsAt) {
+        return this.form.startsAt.time < this.form.endsAt.time;
+      }
+      return false;
     },
   },
   methods: {
     createRotation() {
       this.loading = true;
-
+      const input = {
+        ...this.rotationVariables,
+        projectPath: this.projectPath,
+        scheduleIid: this.schedule.iid,
+      };
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
-          variables: { input: this.rotationVariables },
+          variables: { input },
         })
         .then(
           ({
@@ -173,7 +222,7 @@ export default {
             }
 
             this.$refs.addEditScheduleRotationModal.hide();
-            this.$emit('fetchRotationShifts');
+            this.$emit('fetch-rotation-shifts');
             return createFlash({
               message: this.$options.i18n.rotationCreated,
               type: FLASH_TYPES.SUCCESS,
@@ -190,11 +239,14 @@ export default {
     editRotation() {
       this.loading = true;
       const { projectPath, schedule } = this;
-
+      const input = {
+        ...this.rotationVariables,
+        id: this.rotation.id,
+      };
       this.$apollo
         .mutate({
           mutation: updateOncallScheduleRotationMutation,
-          variables: { input: this.rotationVariables },
+          variables: { input },
           update(store, { data }) {
             updateStoreAfterRotationEdit(
               store,
@@ -219,6 +271,7 @@ export default {
             }
 
             this.$refs.addEditScheduleRotationModal.hide();
+            this.$emit('fetch-rotation-shifts');
             return createFlash({
               message: this.$options.i18n.editedRotation,
               type: FLASH_TYPES.SUCCESS,
@@ -244,8 +297,55 @@ export default {
         this.validationState.name = isNameFieldValid(this.form.name);
       } else if (key === 'participants') {
         this.validationState.participants = this.form.participants.length > 0;
-      } else if (key === 'startsAt.date') {
+      } else if (key === 'startsAt.date' || key === 'startsAt.time') {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
+        this.validationState.endsAt = this.isEndDateValid;
+      } else if (key === 'endsAt.date' || key === 'endsAt.time') {
+        this.validationState.endsAt = this.isEndDateValid;
+      }
+    },
+    beforeShowModal() {
+      if (this.isEditMode) {
+        return this.parseRotation();
+      }
+
+      return this.resetModal();
+    },
+    resetModal() {
+      if (!this.isLoading) {
+        this.form = cloneDeep(formEmptyState);
+        this.validationState = cloneDeep(validiationInitialState);
+        this.error = '';
+      }
+    },
+    parseRotation() {
+      const scheduleTimezone = this.schedule.timezone;
+
+      this.form.name = this.rotation.name;
+
+      const participants =
+        this.rotation?.participants?.nodes?.map(({ user }) => ({ ...user })) ?? [];
+      this.form.participants = participants;
+
+      this.form.rotationLength = {
+        length: this.rotation.length,
+        unit: this.rotation.lengthUnit,
+      };
+
+      if (this.rotation.startsAt) {
+        this.form.startsAt = parseRotationDate(this.rotation.startsAt, scheduleTimezone);
+      }
+
+      if (this.rotation.endsAt) {
+        this.form.isEndDateEnabled = true;
+        this.form.endsAt = parseRotationDate(this.rotation.endsAt, scheduleTimezone);
+      }
+
+      if (this.rotation?.activePeriod?.startTime) {
+        const { activePeriod } = this.rotation;
+        this.form.isRestrictedToTime = true;
+        this.form.restrictedTo.startTime = parseHour(activePeriod.startTime);
+        this.form.restrictedTo.endTime = parseHour(activePeriod.endTime);
       }
     },
   },
@@ -261,6 +361,8 @@ export default {
     :action-cancel="actionsProps.cancel"
     modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
+    @show="beforeShowModal"
+    @hide="resetModal"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error || $options.i18n.errorMsg }}

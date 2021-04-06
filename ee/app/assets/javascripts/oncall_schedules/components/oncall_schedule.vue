@@ -1,22 +1,16 @@
 <script>
-import {
-  GlSprintf,
-  GlCard,
-  GlButtonGroup,
-  GlButton,
-  GlModalDirective,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlCard, GlButtonGroup, GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { capitalize } from 'lodash';
 import {
+  getStartOfWeek,
   formatDate,
   nWeeksBefore,
   nWeeksAfter,
   nDaysBefore,
   nDaysAfter,
 } from '~/lib/utils/datetime_utility';
-import { s__, __ } from '~/locale';
+import { s__ } from '~/locale';
 import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
@@ -24,10 +18,9 @@ import DeleteScheduleModal from './delete_schedule_modal.vue';
 import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
-import { getTimeframeForWeeksView } from './schedule/utils';
+import { getTimeframeForWeeksView, selectedTimezoneFormattedOffset } from './schedule/utils';
 
 export const i18n = {
-  scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),
   editScheduleLabel: s__('OnCallSchedules|Edit schedule'),
   deleteScheduleLabel: s__('OnCallSchedules|Delete schedule'),
   rotationTitle: s__('OnCallSchedules|Rotations'),
@@ -51,7 +44,6 @@ export default {
     GlButton,
     GlButtonGroup,
     GlCard,
-    GlSprintf,
     AddEditRotationModal,
     DeleteScheduleModal,
     EditScheduleModal,
@@ -96,17 +88,17 @@ export default {
   data() {
     return {
       presetType: this.$options.PRESET_TYPES.WEEKS,
-      timeframeStartDate: new Date(),
+      timeframeStartDate: getStartOfWeek(new Date()),
       rotations: this.schedule.rotations.nodes,
+      rotationToUpdate: {},
     };
   },
   computed: {
-    offset() {
-      const selectedTz = this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
-      return __(`(UTC ${selectedTz.formatted_offset})`);
+    loading() {
+      return this.$apollo.queries.rotations.loading;
     },
-    timeframe() {
-      return getTimeframeForWeeksView(this.timeframeStartDate);
+    offset() {
+      return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
     },
     scheduleRange() {
       switch (this.presetType) {
@@ -126,14 +118,24 @@ export default {
           return '';
       }
     },
-    loading() {
-      return this.$apollo.queries.rotations.loading;
+    scheduleInfo() {
+      if (this.schedule.description) {
+        return `${this.schedule.description} | ${this.offset} ${this.schedule.timezone}`;
+      }
+      return `${this.schedule.timezone} | ${this.offset}`;
+    },
+    selectedTimezone() {
+      return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
+    },
+    timeframe() {
+      return getTimeframeForWeeksView(this.timeframeStartDate);
     },
   },
   methods: {
     switchPresetType(type) {
       this.presetType = type;
-      this.timeframeStartDate = new Date();
+      this.timeframeStartDate =
+        type === PRESET_TYPES.WEEKS ? getStartOfWeek(new Date()) : new Date();
     },
     formatPresetType(type) {
       return capitalize(type);
@@ -164,6 +166,9 @@ export default {
     },
     fetchRotationShifts() {
       this.$apollo.queries.rotations.refetch();
+    },
+    setRotationToUpdate(rotation) {
+      this.rotationToUpdate = rotation;
     },
   },
 };
@@ -196,11 +201,8 @@ export default {
           </gl-button-group>
         </div>
       </template>
-      <p class="gl-text-gray-500 gl-mb-3" data-testid="scheduleBody">
-        <gl-sprintf :message="$options.i18n.scheduleForTz">
-          <template #timezone>{{ schedule.timezone }}</template>
-        </gl-sprintf>
-        | {{ offset }}
+      <p class="gl-text-gray-500 gl-mb-5" data-testid="scheduleBody">
+        {{ scheduleInfo }}
       </p>
       <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">
         <div class="gl-display-flex gl-align-items-center">
@@ -254,6 +256,7 @@ export default {
             :timeframe="timeframe"
             :schedule-iid="schedule.iid"
             :loading="loading"
+            @set-rotation-to-update="setRotationToUpdate"
           />
         </div>
       </gl-card>
@@ -267,12 +270,14 @@ export default {
     <add-edit-rotation-modal
       :schedule="schedule"
       :modal-id="$options.addRotationModalId"
-      @fetchRotationShifts="fetchRotationShifts"
+      @fetch-rotation-shifts="fetchRotationShifts"
     />
     <add-edit-rotation-modal
       :schedule="schedule"
       :modal-id="$options.editRotationModalId"
+      :rotation="rotationToUpdate"
       is-edit-mode
+      @fetch-rotation-shifts="fetchRotationShifts"
     />
   </div>
 </template>

@@ -146,7 +146,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'shows the external wiki tab with the external wiki service link' do
         render
 
-        expect(rendered).to have_link('External Wiki', href: properties['external_wiki_url'])
+        expect(rendered).to have_link('External wiki', href: properties['external_wiki_url'])
       end
     end
 
@@ -156,7 +156,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'does not show the external wiki tab' do
         render
 
-        expect(rendered).not_to have_link('External Wiki')
+        expect(rendered).not_to have_link('External wiki')
       end
     end
   end
@@ -204,7 +204,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'does not show the ci/cd settings tab' do
         render
 
-        expect(rendered).not_to have_link('CI / CD', href: project_settings_ci_cd_path(project))
+        expect(rendered).not_to have_link('CI/CD', href: project_settings_ci_cd_path(project))
       end
     end
 
@@ -214,7 +214,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'shows the ci/cd settings tab' do
         render
 
-        expect(rendered).to have_link('CI / CD', href: project_settings_ci_cd_path(project))
+        expect(rendered).to have_link('CI/CD', href: project_settings_ci_cd_path(project))
       end
     end
   end
@@ -346,4 +346,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       end
     end
   end
+
+  it_behaves_like 'sidebar includes snowplow attributes', 'render', 'projects_side_navigation', 'projects_side_navigation'
 end

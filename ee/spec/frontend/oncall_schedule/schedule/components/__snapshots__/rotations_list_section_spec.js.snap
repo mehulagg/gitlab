@@ -12,7 +12,9 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
         <span
-          class="gl-text-truncated"
+          aria-label="Rotation 242"
+          class="gl-text-truncate"
+          data-testid="rotation-name-gid://gitlab/IncidentManagement::OncallRotation/2"
         >
           Rotation 242
         </span>
@@ -23,7 +25,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         >
           <button
             aria-label="Edit rotation"
-            class="btn gl-display-none btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
             title="Edit rotation"
             type="button"
           >
@@ -72,7 +74,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         <span
           class="current-day-indicator"
           data-testid="current-day-indicator"
-          style="left: 7.142857142857143%;"
+          style="left: 29%;"
         />
          
         <div>
@@ -80,45 +82,39 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
             class="gl-absolute gl-h-7 gl-mt-3"
             style="left: 0px; width: -2px;"
           >
-            <span
-              class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-blue-500"
-              id="1-12"
+            <div
+              class="gl-h-6 gl-bg-data-viz-blue-500 gl-display-flex gl-justify-content-center gl-align-items-center"
+              data-testid="rotation-assignee"
+              id="rotation-assignee-2"
             >
-              <span
-                class="gl-token-content"
+              <div
+                class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
               >
-                <div
-                  class="gl-display-flex gl-text-white gl-font-weight-normal"
-                >
-                  <img
-                    alt="avatar"
-                    class="gl-avatar gl-avatar-circle gl-avatar-s16"
-                    src="/url"
-                  />
-                   
-                  <!---->
-                </div>
+                <!---->
                  
                 <!---->
-              </span>
-            </span>
+              </div>
+            </div>
              
             <div
               class="gl-popover"
-              title="nora.schaden"
             >
               <p
                 class="gl-m-0"
                 data-testid="rotation-assignee-starts-at"
               >
-                Starts: January 12, 2021, 10:04am GMT+0000
+                
+      Starts: January 12, 2021, 10:04 (UTC: +0000)
+    
               </p>
                
               <p
                 class="gl-m-0"
                 data-testid="rotation-assignee-ends-at"
               >
-                Ends: January 15, 2021, 10:04am GMT+0000
+                
+      Ends: January 15, 2021, 10:04 (UTC: +0000)
+    
               </p>
             </div>
           </div>
@@ -126,45 +122,39 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
             class="gl-absolute gl-h-7 gl-mt-3"
             style="left: 0px; width: -2px;"
           >
-            <span
-              class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-orange-500"
-              id="2-17"
+            <div
+              class="gl-h-6 gl-bg-data-viz-orange-500 gl-display-flex gl-justify-content-center gl-align-items-center"
+              data-testid="rotation-assignee"
+              id="rotation-assignee-3"
             >
-              <span
-                class="gl-token-content"
+              <div
+                class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
               >
-                <div
-                  class="gl-display-flex gl-text-white gl-font-weight-normal"
-                >
-                  <img
-                    alt="avatar"
-                    class="gl-avatar gl-avatar-circle gl-avatar-s16"
-                    src="/url"
-                  />
-                   
-                  <!---->
-                </div>
+                <!---->
                  
                 <!---->
-              </span>
-            </span>
+              </div>
+            </div>
              
             <div
               class="gl-popover"
-              title="racheal.loving"
             >
               <p
                 class="gl-m-0"
                 data-testid="rotation-assignee-starts-at"
               >
-                Starts: January 16, 2021, 10:04am GMT+0000
+                
+      Starts: January 16, 2021, 10:04 (UTC: +0000)
+    
               </p>
                
               <p
                 class="gl-m-0"
                 data-testid="rotation-assignee-ends-at"
               >
-                Ends: January 18, 2021, 10:04am GMT+0000
+                
+      Ends: January 18, 2021, 10:04 (UTC: +0000)
+    
               </p>
             </div>
           </div>

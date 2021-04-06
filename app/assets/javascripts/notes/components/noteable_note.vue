@@ -1,7 +1,7 @@
 <script>
 import { GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import $ from 'jquery';
-import { escape } from 'lodash';
+import { escape, isEmpty } from 'lodash';
 import { mapGetters, mapActions } from 'vuex';
 import { INLINE_DIFF_LINES_KEY } from '~/diffs/constants';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -86,7 +86,7 @@ export default {
       isRequesting: false,
       isResolving: false,
       commentLineStart: {},
-      resolveAsThread: this.glFeatures.removeResolveNote,
+      resolveAsThread: true,
     };
   },
   computed: {
@@ -139,14 +139,9 @@ export default {
       return this.note.isDraft;
     },
     canResolve() {
-      if (this.glFeatures.removeResolveNote && !this.discussionRoot) return false;
+      if (!this.discussionRoot) return false;
 
-      if (this.glFeatures.removeResolveNote) return this.note.current_user.can_resolve_discussion;
-
-      return (
-        this.note.current_user.can_resolve ||
-        (this.note.isDraft && this.note.discussion_id !== null)
-      );
+      return this.note.current_user.can_resolve_discussion;
     },
     lineRange() {
       return this.note.position?.line_range;
@@ -282,9 +277,13 @@ export default {
         note: {
           target_type: this.getNoteableData.targetType,
           target_id: this.note.noteable_id,
-          note: { note: noteText, position: JSON.stringify(position) },
+          note: { note: noteText },
         },
       };
+
+      // Stringifying an empty object yields `{}` which breaks graphql queries
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/298827
+      if (!isEmpty(position)) data.note.note.position = JSON.stringify(position);
       this.isRequesting = true;
       this.oldContent = this.note.note_html;
       // eslint-disable-next-line vue/no-mutating-props
@@ -416,6 +415,7 @@ export default {
           :is-draft="note.isDraft"
           :resolve-discussion="note.isDraft && note.resolve_discussion"
           :discussion-id="discussionId"
+          :award-path="note.toggle_award_path"
           @handleEdit="editHandler"
           @handleDelete="deleteHandler"
           @handleResolve="resolveHandler"

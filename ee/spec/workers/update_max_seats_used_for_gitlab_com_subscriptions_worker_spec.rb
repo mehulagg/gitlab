@@ -96,28 +96,6 @@ RSpec.describe UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker do
           .and change(gitlab_subscription_2, :seats_in_use).from(0).to(13)
           .and change(gitlab_subscription_2, :seats_owed).from(0).to(12)
       end
-
-      context 'when namespace is absent' do
-        before do
-          gitlab_subscription.update!(namespace_id: nil)
-        end
-
-        it 'skips the subscription' do
-          expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
-            an_instance_of(StandardError),
-            { gitlab_subscription_id: gitlab_subscription.id, namespace_id: nil }
-          )
-
-          expect do
-            perform_and_reload
-          end.to not_change(gitlab_subscription, :max_seats_used).from(0)
-            .and not_change(gitlab_subscription, :seats_in_use).from(0)
-            .and not_change(gitlab_subscription, :seats_owed).from(0)
-            .and change(gitlab_subscription_2, :max_seats_used).from(0).to(14)
-            .and change(gitlab_subscription_2, :seats_in_use).from(0).to(13)
-            .and change(gitlab_subscription_2, :seats_owed).from(0).to(12)
-        end
-      end
     end
   end
 

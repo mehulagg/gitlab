@@ -10,6 +10,7 @@ export const participants = [
     name: 'test',
     avatar: '',
     avatarUrl: '',
+    webUrl: '',
   },
   {
     id: '2',
@@ -17,6 +18,7 @@ export const participants = [
     name: 'hello',
     avatar: '',
     avatarUrl: '',
+    webUrl: '',
   },
 ];
 
@@ -32,9 +34,7 @@ export const getOncallSchedulesQueryResponse = {
             iid: '37',
             name: 'Test schedule from query',
             description: 'Description 1 lives here',
-            timezone: {
-              identifier: 'Pacific/Honolulu',
-            },
+            timezone: 'Pacific/Honolulu',
             rotations: { nodes: [mockRotations] },
           },
         ],
@@ -138,9 +138,14 @@ export const createRotationResponse = {
       oncallRotation: {
         id: '44',
         name: 'Test',
-        startsAt: '2020-12-17T12:00:00Z',
+        startsAt: '2020-12-20T12:00:00Z',
+        endsAt: '2021-03-17T12:00:00Z',
         length: 5,
         lengthUnit: 'WEEKS',
+        activePeriod: {
+          startTime: '02:00',
+          endTime: '10:00',
+        },
         participants: {
           nodes: [
             {
@@ -149,6 +154,7 @@ export const createRotationResponse = {
                 username: 'project_1_bot3',
                 avatarUrl: invalidUrl,
                 avatar__typename: 'User',
+                name: 'Bot 3',
               },
               colorWeight: '500',
               colorPalette: 'blue',
@@ -171,9 +177,14 @@ export const createRotationResponseWithErrors = {
       oncallRotation: {
         id: '44',
         name: 'Test',
-        startsAt: '2020-12-17T12:00:00Z',
+        startsAt: '2020-12-20T12:00:00Z',
+        endsAt: '2021-03-17T12:00:00Z',
         length: 5,
         lengthUnit: 'WEEKS',
+        activePeriod: {
+          startTime: '02:00',
+          endTime: '10:00',
+        },
         participants: {
           nodes: [
             {
@@ -182,6 +193,7 @@ export const createRotationResponseWithErrors = {
                 username: 'project_1_bot3',
                 avatarUrl: invalidUrl,
                 __typename: 'User',
+                name: 'Bot 3',
               },
               colorWeight: '500',
               colorPalette: 'blue',

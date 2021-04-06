@@ -106,7 +106,7 @@ RSpec.describe Projects::BoardsController do
         before do
           expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :admin_board, project).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :admin_issue_board, project).and_return(false)
         end
 
         it 'returns a not found 404 response' do
@@ -185,7 +185,7 @@ RSpec.describe Projects::BoardsController do
       before do
         expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
         allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-        allow(Ability).to receive(:allowed?).with(user, :admin_board, project).and_return(false)
+        allow(Ability).to receive(:allowed?).with(user, :admin_issue_board, project).and_return(false)
       end
 
       it 'returns a not found 404 response' do
@@ -235,7 +235,7 @@ RSpec.describe Projects::BoardsController do
       before do
         expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
         allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
-        allow(Ability).to receive(:allowed?).with(user, :admin_board, project).and_return(false)
+        allow(Ability).to receive(:allowed?).with(user, :admin_issue_board, project).and_return(false)
       end
 
       it 'returns a not found 404 response' do

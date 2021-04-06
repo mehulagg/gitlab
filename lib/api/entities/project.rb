@@ -5,6 +5,8 @@ module API
     class Project < BasicProjectDetails
       include ::API::Helpers::RelatedResourcesHelpers
 
+      expose :container_registry_url, as: :container_registry_image_prefix, if: -> (_, _) { Gitlab.config.registry.enabled }
+
       expose :_links do
         expose :self do |project|
           expose_url(api_v4_projects_path(id: project.id))
@@ -125,7 +127,7 @@ module API
         # as `:tags` are defined as: `has_many :tags, through: :taggings`
         # N+1 is solved then by using `subject.tags.map(&:name)`
         # MR describing the solution: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/20555
-        super(projects_relation).preload(:group)
+        super(projects_relation).preload(group: :namespace_settings)
                                 .preload(:ci_cd_settings)
                                 .preload(:project_setting)
                                 .preload(:container_expiration_policy)
@@ -133,7 +135,7 @@ module API
                                 .preload(project_group_links: { group: :route },
                                          fork_network: :root_project,
                                          fork_network_member: :forked_from_project,
-                                         forked_from_project: [:route, :forks, :tags, namespace: :route])
+                                         forked_from_project: [:route, :forks, :tags, :group, :project_feature, namespace: [:route, :owner]])
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

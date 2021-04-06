@@ -112,19 +112,8 @@ describe('RequirementStatusBadge', () => {
 
     describe(`when the last test report's been manually created`, () => {
       it('renders GlBadge component when status is "PASSED"', () => {
-        wrapper = createComponent({ lastTestReportManuallyCreated: true });
-
         expect(findGlBadge(wrapper).exists()).toBe(true);
         expect(findGlBadge(wrapper).text()).toBe('satisfied');
-      });
-
-      it('does not render GlBadge component when status is "FAILED"', () => {
-        wrapper = createComponent({
-          testReport: mockTestReportFailed,
-          lastTestReportManuallyCreated: true,
-        });
-
-        expect(findGlBadge(wrapper).exists()).toBe(false);
       });
     });
   });

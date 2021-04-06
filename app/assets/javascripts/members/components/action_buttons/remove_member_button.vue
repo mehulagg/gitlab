@@ -13,6 +13,11 @@ export default {
       type: Number,
       required: true,
     },
+    memberType: {
+      type: String,
+      required: false,
+      default: null,
+    },
     message: {
       type: String,
       required: true,
@@ -27,6 +32,11 @@ export default {
       default: 'remove',
     },
     isAccessRequest: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    isInvite: {
       type: Boolean,
       required: false,
       default: false,
@@ -50,7 +60,9 @@ export default {
     :aria-label="title"
     :icon="icon"
     :data-member-path="computedMemberPath"
+    :data-member-type="memberType"
     :data-is-access-request="isAccessRequest"
+    :data-is-invite="isInvite"
     :data-message="message"
     data-qa-selector="delete_member_button"
   />

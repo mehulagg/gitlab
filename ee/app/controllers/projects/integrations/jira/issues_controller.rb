@@ -13,12 +13,6 @@ module Projects
           name: 'i_ecosystem_jira_service_list_issues'
 
         before_action :check_feature_enabled!
-        before_action :check_issues_show_enabled!, only: :show
-
-        before_action do
-          push_frontend_feature_flag(:jira_issues_integration, project, type: :licensed, default_enabled: true)
-          push_frontend_feature_flag(:jira_issues_list, project, type: :development)
-        end
 
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::IntegrationError, with: :render_integration_error
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::RequestError, with: :render_request_error
@@ -101,18 +95,16 @@ module Projects
           return render_404 unless project.jira_issues_integration_available? && project.jira_service.issues_enabled
         end
 
-        def check_issues_show_enabled!
-          render_404 unless ::Feature.enabled?(:jira_issues_show_integration, @project, default_enabled: :yaml)
-        end
-
         # Return the informational message to the user
         def render_integration_error(exception)
+          log_exception(exception)
+
           render json: { errors: [exception.message] }, status: :bad_request
         end
 
         # Log the specific request error details and return generic message
         def render_request_error(exception)
-          Gitlab::AppLogger.error(exception)
+          log_exception(exception)
 
           render json: { errors: [_('An error occurred while requesting data from the Jira service')] }, status: :bad_request
         end

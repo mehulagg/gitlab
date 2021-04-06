@@ -2533,11 +2533,11 @@ RSpec.describe API::MergeRequests do
       it "results in a default squash commit message when not set" do
         put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/merge", user), params: { squash: true }
 
-        expect(squash_commit.message).to eq(merge_request.default_squash_commit_message)
+        expect(squash_commit.message.chomp).to eq(merge_request.default_squash_commit_message.chomp)
       end
     end
 
-    describe "the should_remove_source_branch param" do
+    describe "the should_remove_source_branch param", :sidekiq_inline do
       let(:source_repository) { merge_request.source_project.repository }
       let(:source_branch) { merge_request.source_branch }
 
@@ -2552,7 +2552,7 @@ RSpec.describe API::MergeRequests do
       end
     end
 
-    context "with a merge request that has force_remove_source_branch enabled" do
+    context "with a merge request that has force_remove_source_branch enabled", :sidekiq_inline do
       let(:source_repository) { merge_request.source_project.repository }
       let(:source_branch) { merge_request.source_branch }
 

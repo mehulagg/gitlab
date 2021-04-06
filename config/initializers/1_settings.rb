@@ -184,8 +184,8 @@ Settings.gitlab['user'] ||= 'git'
 Settings.gitlab['ssh_user'] ||= Settings.gitlab.user
 Settings.gitlab['user_home'] ||= begin
   Etc.getpwnam(Settings.gitlab['user']).dir
-                                 rescue ArgumentError # no user configured
-                                   '/home/' + Settings.gitlab['user']
+rescue ArgumentError # no user configured
+  '/home/' + Settings.gitlab['user']
 end
 Settings.gitlab['time_zone'] ||= nil
 Settings.gitlab['signup_enabled'] ||= true if Settings.gitlab['signup_enabled'].nil?
@@ -210,6 +210,7 @@ Settings.gitlab['domain_allowlist'] ||= []
 Settings.gitlab['import_sources'] ||= Gitlab::ImportSources.values
 Settings.gitlab['trusted_proxies'] ||= []
 Settings.gitlab['content_security_policy'] ||= Gitlab::ContentSecurityPolicy::ConfigLoader.default_settings_hash
+Settings.gitlab['allowed_hosts'] ||= []
 Settings.gitlab['no_todos_messages'] ||= YAML.load_file(Rails.root.join('config', 'no_todos_messages.yml'))
 Settings.gitlab['impersonation_enabled'] ||= true if Settings.gitlab['impersonation_enabled'].nil?
 Settings.gitlab['usage_ping_enabled'] = true if Settings.gitlab['usage_ping_enabled'].nil?
@@ -309,6 +310,9 @@ Settings.pages['secret_file'] ||= Rails.root.join('.gitlab_pages_secret')
 # this will allow us to easier migrate existing instances with NFS
 Settings.pages['storage_path']      = Settings.pages['path']
 Settings.pages['object_store']      = ObjectStoreSettings.legacy_parse(Settings.pages['object_store'])
+Settings.pages['local_store'] ||= Settingslogic.new({})
+Settings.pages['local_store']['path'] = Settings.absolute(Settings.pages['local_store']['path'] || File.join(Settings.shared['path'], "pages"))
+Settings.pages['local_store']['enabled'] = true if Settings.pages['local_store']['enabled'].nil?
 
 #
 # GitLab documentation
@@ -559,16 +563,22 @@ Settings.cron_jobs['manage_evidence_worker']['job_class'] = 'Releases::ManageEvi
 Settings.cron_jobs['user_status_cleanup_batch_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['user_status_cleanup_batch_worker']['cron'] ||= '* * * * *'
 Settings.cron_jobs['user_status_cleanup_batch_worker']['job_class'] = 'UserStatusCleanup::BatchWorker'
+Settings.cron_jobs['ssh_keys_expired_notification_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['ssh_keys_expired_notification_worker']['cron'] ||= '0 2 * * *'
+Settings.cron_jobs['ssh_keys_expired_notification_worker']['job_class'] = 'SshKeys::ExpiredNotificationWorker'
 
 Gitlab.com do
   Settings.cron_jobs['namespaces_in_product_marketing_emails_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['namespaces_in_product_marketing_emails_worker']['cron'] ||= '0 9 * * *'
   Settings.cron_jobs['namespaces_in_product_marketing_emails_worker']['job_class'] = 'Namespaces::InProductMarketingEmailsWorker'
+  Settings.cron_jobs['batched_background_migrations_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['batched_background_migrations_worker']['cron'] ||= '* * * * *'
+  Settings.cron_jobs['batched_background_migrations_worker']['job_class'] = 'Database::BatchedBackgroundMigrationWorker'
 end
 
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= Settingslogic.new({})
-  Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['cron'] ||= '0 4 * * *'
+  Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['cron'] ||= '0 4 * * 0'
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['job_class'] = 'Analytics::DevopsAdoption::CreateAllSnapshotsWorker'
   Settings.cron_jobs['active_user_count_threshold_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['active_user_count_threshold_worker']['cron'] ||= '0 12 * * *'
@@ -585,6 +595,12 @@ Gitlab.ee do
   Settings.cron_jobs['geo_verification_cron_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['geo_verification_cron_worker']['cron'] ||= '* * * * *'
   Settings.cron_jobs['geo_verification_cron_worker']['job_class'] ||= 'Geo::VerificationCronWorker'
+  Settings.cron_jobs['geo_sync_timeout_cron_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['geo_sync_timeout_cron_worker']['cron'] ||= '*/10 * * * *'
+  Settings.cron_jobs['geo_sync_timeout_cron_worker']['job_class'] ||= 'Geo::SyncTimeoutCronWorker'
+  Settings.cron_jobs['geo_secondary_usage_data_cron_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['geo_secondary_usage_data_cron_worker']['cron'] ||= '0 0 * * 0'
+  Settings.cron_jobs['geo_secondary_usage_data_cron_worker']['job_class'] ||= 'Geo::SecondaryUsageDataCronWorker'
   Settings.cron_jobs['geo_file_download_dispatch_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['geo_file_download_dispatch_worker']['cron'] ||= '*/1 * * * *'
   Settings.cron_jobs['geo_file_download_dispatch_worker']['job_class'] ||= 'Geo::FileDownloadDispatchWorker'

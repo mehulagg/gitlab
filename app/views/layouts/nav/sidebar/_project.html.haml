@@ -1,4 +1,4 @@
-%aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **tracking_attrs('projects_side_navigation', 'render', 'projects_side_navigation'), 'aria-label': _('Project navigation') }
+%aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **sidebar_tracking_attributes_by_object(@project), 'aria-label': _('Project navigation') }
   .nav-sidebar-inner-scroll
     .context-header
       = link_to project_path(@project), title: @project.name do
@@ -160,14 +160,14 @@
             .nav-icon-container
               = sprite_icon('git-merge')
             %span.nav-item-name#js-onboarding-mr-link
-              = _('Merge Requests')
+              = _('Merge requests')
             %span.badge.badge-pill.count.merge_counter.js-merge-counter
               = number_with_delimiter(@project.open_merge_requests_count)
           %ul.sidebar-sub-level-items.is-fly-out-only
             = nav_link(controller: :merge_requests, html_options: { class: "fly-out-top-item" } ) do
               = link_to project_merge_requests_path(@project) do
                 %strong.fly-out-top-item-name
-                  = _('Merge Requests')
+                  = _('Merge requests')
                 %span.badge.badge-pill.count.merge_counter.js-merge-counter.fly-out-badge
                   = number_with_delimiter(@project.open_merge_requests_count)
 
@@ -179,13 +179,13 @@
             .nav-icon-container
               = sprite_icon('rocket')
             %span.nav-item-name#js-onboarding-pipelines-link
-              = _('CI / CD')
+              = _('CI/CD')
 
           %ul.sidebar-sub-level-items
             = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts, :test_cases, :pipeline_editor], html_options: { class: "fly-out-top-item" }) do
               = link_to project_pipelines_path(@project) do
                 %strong.fly-out-top-item-name
-                  =  _('CI / CD')
+                  =  _('CI/CD')
             %li.divider.fly-out-top-item
             - if project_nav_tab? :pipelines
               = nav_link(path: ['pipelines#index', 'pipelines#show']) do
@@ -286,7 +286,7 @@
 
             - if project_nav_tab? :clusters
               - show_cluster_hint = show_gke_cluster_integration_callout?(@project)
-              = nav_link(controller: [:clusters, :user, :gcp]) do
+              = nav_link(controller: [:cluster_agents, :clusters]) do
                 = link_to project_clusters_path(@project), title: _('Kubernetes'), class: 'shortcuts-kubernetes' do
                   %span
                     = _('Kubernetes')
@@ -346,12 +346,12 @@
             .nav-icon-container
               = sprite_icon('external-link')
             %span.nav-item-name
-              = _('External Wiki')
+              = s_('ExternalWikiService|External wiki')
           %ul.sidebar-sub-level-items.is-fly-out-only
             = nav_link(html_options: { class: "fly-out-top-item" } ) do
               = link_to external_wiki_url do
                 %strong.fly-out-top-item-name
-                  = _('External Wiki')
+                  = s_('ExternalWikiService|External wiki')
 
       - if project_nav_tab? :snippets
         = nav_link(controller: :snippets) do
@@ -377,8 +377,6 @@
             = link_to project_project_members_path(@project) do
               %strong.fly-out-top-item-name
                 = _('Members')
-
-      = content_for :invite_members_sidebar
 
       - if project_nav_tab? :settings
         = nav_link(path: sidebar_settings_paths) do
@@ -409,7 +407,7 @@
                 = link_to project_hooks_path(@project), title: _('Webhooks'), data: { qa_selector: 'webhooks_settings_link' } do
                   %span
                     = _('Webhooks')
-              - if project_access_token_available?(@project)
+              - if can?(current_user, :read_resource_access_tokens, @project)
                 = nav_link(controller: [:access_tokens]) do
                   = link_to project_settings_access_tokens_path(@project), title: _('Access Tokens'), data: { qa_selector: 'access_tokens_settings_link' } do
                     %span
@@ -420,9 +418,9 @@
                     = _('Repository')
               - if !@project.archived? && @project.feature_available?(:builds, current_user)
                 = nav_link(controller: :ci_cd) do
-                  = link_to project_settings_ci_cd_path(@project), title: _('CI / CD') do
+                  = link_to project_settings_ci_cd_path(@project), title: _('CI/CD') do
                     %span
-                      = _('CI / CD')
+                      = _('CI/CD')
               - if settings_operations_available?
                 = nav_link(controller: [:operations]) do
                   = link_to project_settings_operations_path(@project), title: _('Operations'), data: { qa_selector: 'operations_settings_link' } do

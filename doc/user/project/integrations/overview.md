@@ -25,8 +25,7 @@ want to configure.
 Click on the service links to see further configuration instructions and details.
 
 | Service | Description | Service Hooks |
-| ------- | ----------- | ------------- |
-| Asana     | Asana - Teamwork without email | No |
+| Asana     | Add commit messages as comments to Asana tasks | No |
 | Assembla | Project Management Software (Source Commits Endpoint) | No |
 | [Atlassian Bamboo CI](bamboo.md) | A continuous integration and build server | Yes |
 | Buildkite | Continuous integration and deployments | Yes |
@@ -37,12 +36,11 @@ Click on the service links to see further configuration instructions and details
 | [Discord Notifications](discord_notifications.md) | Receive event notifications in Discord | No |
 | Drone CI | Continuous Integration platform built on Docker, written in Go | Yes |
 | [Emails on push](emails_on_push.md) | Email the commits and diff of each push to a list of recipients | No |
-| External Wiki | Replaces the link to the internal wiki with a link to an external wiki | No |
+| External wiki | Replaces the link to the internal wiki with a link to an external wiki | No |
 | Flowdock | Flowdock is a collaboration web app for technical teams | No |
 | [Generic alerts](../../../operations/incident_management/integrations.md) **(ULTIMATE)** | Receive alerts on GitLab from any source | No |
 | [GitHub](github.md) **(PREMIUM)** | Sends pipeline notifications to GitHub | No |
 | [Hangouts Chat](hangouts_chat.md) | Receive events notifications in Google Hangouts Chat | No |
-| [HipChat](hipchat.md) | Private group chat and IM | No |
 | [Irker (IRC gateway)](irker.md) | Send IRC messages, on update, to a list of recipients through an Irker gateway | No |
 | [Jira](jira.md) | Jira issue tracker | No |
 | [Jenkins](../../../integration/jenkins.md) **(STARTER)** | An extendable open source continuous integration server | Yes |

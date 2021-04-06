@@ -177,7 +177,7 @@ describe('Project Licenses', () => {
     it('renders a "Detected in project" tab and a "Policies" tab', () => {
       expect(wrapper.find(GlTabs).exists()).toBe(true);
       expect(wrapper.find(GlTab).exists()).toBe(true);
-      expect(wrapper.findAll(GlTab)).toHaveLength(2);
+      expect(wrapper.findAllComponents(GlTab)).toHaveLength(2);
     });
 
     it('it renders the "Detected in project" table', () => {
@@ -279,11 +279,21 @@ describe('Project Licenses', () => {
       );
 
       it('it renders the correct count in "Detected in project" tab', () => {
-        expect(wrapper.findAll(GlBadge).at(0).text()).toBe(pageInfo.total.toString());
+        expect(wrapper.findAllComponents(GlBadge).at(0).text()).toBe(pageInfo.total.toString());
       });
 
       it('it renders the correct count in "Policies" tab', () => {
-        expect(wrapper.findAll(GlBadge).at(1).text()).toBe(managedLicenses.length.toString());
+        expect(wrapper.findAllComponents(GlBadge).at(1).text()).toBe(
+          managedLicenses.length.toString(),
+        );
+      });
+
+      it('it renders the correct type of badge styling', () => {
+        const badges = [
+          wrapper.findAllComponents(GlBadge).at(0),
+          wrapper.findAllComponents(GlBadge).at(1),
+        ];
+        badges.forEach((badge) => expect(badge.classes()).toContain('gl-tab-counter-badge'));
       });
     });
 

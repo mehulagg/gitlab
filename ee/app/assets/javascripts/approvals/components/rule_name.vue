@@ -48,6 +48,11 @@ export default {
       return this.rulesWithTooltips[this.name]?.linkPath;
     },
   },
+  methods: {
+    popoverTarget() {
+      return this.$refs.helpIcon?.$el;
+    },
+  },
 };
 </script>
 
@@ -62,7 +67,7 @@ export default {
         :size="14"
         class="author-link suggestion-help-hover"
       />
-      <gl-popover :target="() => $refs.helpIcon.$el" placement="top" triggers="hover focus">
+      <gl-popover :target="popoverTarget" placement="top">
         <template #title>{{ __('Who can approve?') }}</template>
         <p>{{ description }}</p>
         <gl-link v-if="linkPath" :href="linkPath" class="gl-font-sm" target="_blank">{{

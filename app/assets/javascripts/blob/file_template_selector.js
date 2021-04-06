@@ -19,6 +19,17 @@ export default class FileTemplateSelector {
     this.$dropdownToggleText = this.$wrapper.find('.dropdown-toggle-text');
 
     this.initDropdown();
+    this.selectInitialTemplate();
+  }
+
+  selectInitialTemplate() {
+    const template = this.$dropdown.data('selected');
+
+    if (!template) {
+      return;
+    }
+
+    this.mediator.selectTemplateFile(this, template);
   }
 
   show() {
@@ -36,7 +47,7 @@ export default class FileTemplateSelector {
   }
 
   isHidden() {
-    return this.$wrapper.hasClass('hidden');
+    return !this.$wrapper || this.$wrapper.hasClass('hidden');
   }
 
   getToggleText() {

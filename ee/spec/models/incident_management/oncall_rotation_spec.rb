@@ -8,8 +8,19 @@ RSpec.describe IncidentManagement::OncallRotation do
   describe '.associations' do
     it { is_expected.to belong_to(:schedule).class_name('OncallSchedule').inverse_of(:rotations) }
     it { is_expected.to have_many(:participants).order(id: :asc).class_name('OncallParticipant').inverse_of(:rotation) }
+    it { is_expected.to have_many(:active_participants).order(id: :asc).class_name('OncallParticipant').inverse_of(:rotation) }
     it { is_expected.to have_many(:users).through(:participants) }
     it { is_expected.to have_many(:shifts).class_name('OncallShift').inverse_of(:rotation) }
+
+    describe '.active_participants' do
+      let(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
+      let(:participant) { create(:incident_management_oncall_participant, rotation: rotation) }
+      let(:removed_participant) { create(:incident_management_oncall_participant, :removed, rotation: rotation) }
+
+      subject { rotation.active_participants }
+
+      it { is_expected.to contain_exactly(participant) }
+    end
   end
 
   describe '.validations' do
@@ -80,16 +91,6 @@ RSpec.describe IncidentManagement::OncallRotation do
 
           expect(subject.valid?).to eq(false)
           expect(subject.errors.full_messages).to include(/Restricted shift times are not available for hourly shifts/)
-        end
-      end
-
-      context 'end time before start time' do
-        it 'raises a validation error if an active period is set' do
-          subject.active_period_start = '17:00'
-          subject.active_period_end = '08:00'
-
-          expect(subject.valid?).to eq(false)
-          expect(subject.errors.full_messages).to include('Active period end must be later than active period start')
         end
       end
     end

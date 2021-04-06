@@ -138,14 +138,16 @@ pending_job_classes = scheduled_queue.select { |job| job["class"] == "Background
 pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_class) }
 ```
 
-## Checking for pending Elasticsearch migrations
+## Checking for pending Advanced Search migrations
 
 This section is only applicable if you have enabled the [Elasticsearch
 integration](../integration/elasticsearch.md).
 
-Certain major releases might require [Elasticsearch
-migrations](../integration/elasticsearch.md#background-migrations) to be
-finished. You can find pending migrations by running the following command:
+Major releases require all [Advanced Search
+migrations](../integration/elasticsearch.md#advanced-search-migrations) to
+be finished from the most recent minor release in your current version
+before the major version upgrade. You can find pending migrations by
+running the following command:
 
 **For Omnibus installations**
 
@@ -160,28 +162,29 @@ cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:elastic:list_pending_migrations
 ```
 
-### What do I do if my Elasticsearch migrations are stuck?
+### What do I do if my Advanced Search migrations are stuck?
 
 See [how to retry a halted
 migration](../integration/elasticsearch.md#retry-a-halted-migration).
 
 ## Upgrade paths
 
-Although you can generally upgrade through multiple GitLab versions in one go,
+You can generally upgrade through multiple GitLab versions in one go,
+although this is discouraged for [zero downtime upgrades](#upgrading-without-downtime) and
 sometimes this can cause issues.
 
 Find where your version sits in the upgrade path below, and upgrade GitLab
 accordingly, while also consulting the
 [version-specific upgrade instructions](#version-specific-upgrading-instructions):
 
-`8.11.Z` -> `8.12.0` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.1.11` - > [latest `13.Y.Z`](https://about.gitlab.com/releases/categories/releases/)
+`8.11.Z` -> `8.12.0` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.1.11`  -> `13.5.4` - > [latest `13.Y.Z`](https://about.gitlab.com/releases/categories/releases/)
 
 The following table, while not exhaustive, shows some examples of the supported
 upgrade paths.
 
 | Target version | Your version | Supported upgrade path | Note |
 | --------------------- | ------------ | ------------------------ | ---- |
-| `13.4.3`                | `12.9.2`      | `12.9.2` -> `12.10.14` -> `13.0.14` -> `13.4.3` | Two intermediate versions are required: the final `12.10` release, plus `13.0`. |
+| `13.5.4`                | `12.9.2`      | `12.9.2` -> `12.10.14` -> `13.0.14`  -> `13.1.11` -> `13.5.4` | Three intermediate versions are required: the final `12.10` release, plus `13.0` and `13.1`. |
 | `13.2.10`                | `11.5.0`      | `11.5.0` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.2.10` | Five intermediate versions are required: the final `11.11`, `12.0`, `12.1` and `12.10` releases, plus `13.0`. |
 | `12.10.14`             | `11.3.4`       | `11.3.4` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14`             |  Three intermediate versions are required: the final `11.11` and `12.0` releases, plus `12.1` |
 | `12.9.5`             | `10.4.5`       | `10.4.5` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.9.5`   | Four intermediate versions are required: `10.8`, `11.11`, `12.0` and `12.1`, then `12.9.5` |
@@ -208,6 +211,13 @@ It's also important to ensure that any background migrations have been fully com
 before upgrading to a new major version. To see the current size of the `background_migration` queue,
 [Check for background migrations before upgrading](#checking-for-background-migrations-before-upgrading).
 
+If you have enabled the [Elasticsearch
+integration](../integration/elasticsearch.md), then you will also need to ensure
+all Advanced Search migrations are completed in the last minor version within
+your current version. Be sure to [check for pending Advanced Search
+migrations](#checking-for-pending-advanced-search-migrations) before proceeding
+with the major version upgrade.
+
 If your GitLab instance has any runners associated with it, it is very
 important to upgrade GitLab Runner to match the GitLab minor version that was
 upgraded to. This is to ensure [compatibility with GitLab versions](https://docs.gitlab.com/runner/#compatibility-with-gitlab-versions).
@@ -219,7 +229,8 @@ patch version of GitLab without having to take your GitLab instance offline.
 However, for this to work there are the following requirements:
 
 - You can only upgrade 1 minor release at a time. So from 9.1 to 9.2, not to
-   9.3.
+   9.3. If you skip releases, database modifications may be run in the wrong
+   sequence [and leave the database schema in a broken state](https://gitlab.com/gitlab-org/gitlab/-/issues/321542).
 - You have to use [post-deployment
    migrations](../development/post_deployment_migrations.md) (included in
    [zero downtime update steps below](#steps)).
@@ -347,6 +358,10 @@ Ruby 2.7.2 is required. GitLab will not start with Ruby 2.6.6 or older versions.
 
 The required Git version is Git v2.29 or higher.
 
+### 13.4.0
+
+GitLab 13.4.0 includes a background migration to [move all remaining repositories in legacy storage to hashed storage](../administration/raketasks/storage.md#migrate-to-hashed-storage). There are [known issues with this migration](https://gitlab.com/gitlab-org/gitlab/-/issues/259605) which are fixed in GitLab 13.5.4 and later. If possible, skip 13.4.0 and upgrade to 13.5.4 or higher instead. Note that the migration can take quite a while to run, depending on how many repositories must be moved. Be sure to check that all background migrations have completed before upgrading further.
+
 ### 13.3.0
 
 The recommended Git version is Git v2.28. The minimum required version of Git
@@ -390,7 +405,7 @@ fail for [multi-node GitLab installations](https://docs.gitlab.com/omnibus/updat
 So, if you are using multiple Rails servers and specifically upgrading from 13.0,
 all servers must first be upgraded to 13.1.Z before upgrading to 13.2.0 or later:
 
-1. Ensure all GitLab web nodes are on GitLab 13.1.Z.
+1. Ensure all GitLab web nodes are running GitLab 13.1.Z.
 1. Optionally, enable the `global_csrf_token` feature flag to enable new
    method of CSRF token generation:
 

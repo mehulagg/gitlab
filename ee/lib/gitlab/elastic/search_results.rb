@@ -38,7 +38,7 @@ module Gitlab
         when 'notes'
           eager_load(notes, page, per_page, preload_method, project: [:route, :namespace])
         when 'blobs'
-          blobs(page: page, per_page: per_page)
+          blobs(page: page, per_page: per_page, preload_method: preload_method)
         when 'wiki_blobs'
           wiki_blobs(page: page, per_page: per_page)
         when 'commits'
@@ -289,7 +289,7 @@ module Gitlab
         scope_results :notes, Note, count_only: count_only
       end
 
-      def blobs(page: 1, per_page: DEFAULT_PER_PAGE, count_only: false)
+      def blobs(page: 1, per_page: DEFAULT_PER_PAGE, count_only: false, preload_method: nil)
         return Kaminari.paginate_array([]) if query.blank?
 
         strong_memoize(memoize_key(:blobs, count_only: count_only)) do
@@ -297,7 +297,8 @@ module Gitlab
             query,
             page: (page || 1).to_i,
             per: per_page,
-            options: base_options.merge(count_only: count_only)
+            options: base_options.merge(count_only: count_only),
+            preload_method: preload_method
           )
         end
       end

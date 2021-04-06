@@ -4,7 +4,7 @@ class Projects::PipelinesController < Projects::ApplicationController
   include ::Gitlab::Utils::StrongMemoize
   include Analytics::UniqueVisitsHelper
 
-  before_action :whitelist_query_limiting, only: [:create, :retry]
+  before_action :disable_query_limiting, only: [:create, :retry]
   before_action :pipeline, except: [:index, :new, :create, :charts, :config_variables]
   before_action :set_pipeline_path, only: [:show]
   before_action :authorize_read_pipeline!
@@ -13,11 +13,13 @@ class Projects::PipelinesController < Projects::ApplicationController
   before_action :authorize_create_pipeline!, only: [:new, :create, :config_variables]
   before_action :authorize_update_pipeline!, only: [:retry, :cancel]
   before_action do
-    push_frontend_feature_flag(:pipelines_security_report_summary, project, default_enabled: :yaml)
     push_frontend_feature_flag(:new_pipeline_form, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:pipeline_graph_layers_view, project, type: :development, default_enabled: :yaml)
+    push_frontend_feature_flag(:pipeline_filter_jobs, project, default_enabled: :yaml)
     push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: :yaml)
     push_frontend_feature_flag(:graphql_pipeline_details_users, current_user, type: :development, default_enabled: :yaml)
     push_frontend_feature_flag(:jira_for_vulnerabilities, project, type: :development, default_enabled: :yaml)
+    push_frontend_feature_flag(:new_pipelines_table, project, default_enabled: :yaml)
   end
   before_action :ensure_pipeline, only: [:show]
 
@@ -92,10 +94,10 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def show
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/26657')
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/26657')
 
     respond_to do |format|
-      format.html
+      format.html { render_show }
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
 
@@ -150,15 +152,6 @@ class Projects::PipelinesController < Projects::ApplicationController
       .represent(@stage, details: true, retried: params[:retried])
   end
 
-  # TODO: This endpoint is used by mini-pipeline-graph
-  # TODO: This endpoint should be migrated to `stage.json`
-  def stage_ajax
-    @stage = pipeline.legacy_stage(params[:stage])
-    return not_found unless @stage
-
-    render json: { html: view_to_html_string('projects/pipelines/_stage') }
-  end
-
   def retry
     pipeline.retry_failed(current_user)
 
@@ -185,10 +178,7 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   def test_report
     respond_to do |format|
-      format.html do
-        render 'show'
-      end
-
+      format.html { render_show }
       format.json do
         render json: TestReportSerializer
           .new(current_user: @current_user)
@@ -217,6 +207,8 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def render_show
+    @stages = @pipeline.stages.with_latest_and_retried_statuses
+
     respond_to do |format|
       format.html do
         render 'show'
@@ -269,9 +261,9 @@ class Projects::PipelinesController < Projects::ApplicationController
             &.present(current_user: current_user)
   end
 
-  def whitelist_query_limiting
-    # Also see https://gitlab.com/gitlab-org/gitlab-foss/issues/42343
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42339')
+  def disable_query_limiting
+    # Also see https://gitlab.com/gitlab-org/gitlab/-/issues/20785
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20784')
   end
 
   def authorize_update_pipeline!

@@ -36,6 +36,8 @@ class Project < ApplicationRecord
   include Integration
   include Repositories::CanHousekeepRepository
   include EachBatch
+  include GitlabRoutingHelper
+
   extend Gitlab::Cache::RequestCache
   extend Gitlab::Utils::Override
 
@@ -94,6 +96,9 @@ class Project < ApplicationRecord
   before_validation :mark_remote_mirrors_for_removal, if: -> { RemoteMirror.table_exists? }
 
   before_save :ensure_runners_token
+
+  # https://api.rubyonrails.org/v6.0.3.4/classes/ActiveRecord/AttributeMethods/Dirty.html#method-i-will_save_change_to_attribute-3F
+  before_update :set_container_registry_access_level, if: :will_save_change_to_container_registry_enabled?
 
   after_save :update_project_statistics, if: :saved_change_to_namespace_id?
 
@@ -393,6 +398,7 @@ class Project < ApplicationRecord
     :wiki_access_level, :snippets_access_level, :builds_access_level,
     :repository_access_level, :pages_access_level, :metrics_dashboard_access_level, :analytics_access_level,
     :operations_enabled?, :operations_access_level, :security_and_compliance_access_level,
+    :container_registry_access_level,
     to: :project_feature, allow_nil: true
   delegate :show_default_award_emojis, :show_default_award_emojis=,
     :show_default_award_emojis?,
@@ -492,16 +498,28 @@ class Project < ApplicationRecord
       { column: arel_table["description"], multiplier: 0.2 }
     ])
 
-    query = reorder(order_expression.desc, arel_table['id'].desc)
+    order = Gitlab::Pagination::Keyset::Order.build([
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'similarity',
+        column_expression: order_expression,
+        order_expression: order_expression.desc,
+        order_direction: :desc,
+        distinct: false,
+        add_to_projections: true
+      ),
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'id',
+        order_expression: Project.arel_table[:id].desc
+      )
+    ])
 
-    query = query.select(*query.arel.projections, order_expression.as('similarity')) if include_in_select
-    query
+    order.apply_cursor_conditions(reorder(order))
   end
 
   scope :with_packages, -> { joins(:packages) }
   scope :in_namespace, ->(namespace_ids) { where(namespace_id: namespace_ids) }
   scope :personal, ->(user) { where(namespace_id: user.namespace_id) }
-  scope :joined, ->(user) { where('namespace_id != ?', user.namespace_id) }
+  scope :joined, ->(user) { where.not(namespace_id: user.namespace_id) }
   scope :starred_by, ->(user) { joins(:users_star_projects).where('users_star_projects.user_id': user.id) }
   scope :visible_to_user, ->(user) { where(id: user.authorized_projects.select(:id).reorder(nil)) }
   scope :visible_to_user_and_access_level, ->(user, access_level) { where(id: user.authorized_projects.where('project_authorizations.access_level >= ?', access_level).select(:id).reorder(nil)) }
@@ -561,7 +579,7 @@ class Project < ApplicationRecord
     with_issues_available_for_user(user).or(with_merge_requests_available_for_user(user))
   end
   scope :with_merge_requests_enabled, -> { with_feature_enabled(:merge_requests) }
-  scope :with_remote_mirrors, -> { joins(:remote_mirrors).where(remote_mirrors: { enabled: true }).distinct }
+  scope :with_remote_mirrors, -> { joins(:remote_mirrors).where(remote_mirrors: { enabled: true }) }
   scope :with_limit, -> (maximum) { limit(maximum) }
 
   scope :with_group_runners_enabled, -> do
@@ -605,7 +623,7 @@ class Project < ApplicationRecord
   end
 
   def self.with_web_entity_associations
-    preload(:project_feature, :route, :creator, :group, namespace: [:route, :owner])
+    preload(:project_feature, :route, :creator, group: :parent, namespace: [:route, :owner])
   end
 
   def self.eager_load_namespace_and_owner
@@ -1352,9 +1370,9 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return %w(datadog) unless Feature.enabled?(:datadog_ci_integration, self)
+    return %w[datadog hipchat] unless Feature.enabled?(:datadog_ci_integration, self)
 
-    []
+    %w[hipchat]
   end
 
   def find_or_initialize_service(name)
@@ -1697,8 +1715,8 @@ class Project < ApplicationRecord
     end
   end
 
-  def any_runners?(&block)
-    active_runners.any?(&block)
+  def any_active_runners?(&block)
+    active_runners_with_tags.any?(&block)
   end
 
   def valid_runners_token?(token)
@@ -1796,7 +1814,7 @@ class Project < ApplicationRecord
   # TODO: remove this method https://gitlab.com/gitlab-org/gitlab/-/issues/320775
   # rubocop: disable CodeReuse/ServiceClass
   def legacy_remove_pages
-    return unless Feature.enabled?(:pages_update_legacy_storage, default_enabled: true)
+    return unless ::Settings.pages.local_store.enabled
 
     # Projects with a missing namespace cannot have their pages removed
     return unless namespace
@@ -1832,7 +1850,7 @@ class Project < ApplicationRecord
     # where().update_all to perform update in the single transaction with check for null
     ProjectPagesMetadatum
       .where(project_id: id, pages_deployment_id: nil)
-      .update_all(pages_deployment_id: deployment.id)
+      .update_all(deployed: deployment.present?, pages_deployment_id: deployment&.id)
   end
 
   def write_repository_config(gl_full_path: full_path)
@@ -1987,6 +2005,7 @@ class Project < ApplicationRecord
       .append(key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: repository_languages.map(&:name).join(',').downcase)
       .append(key: 'CI_DEFAULT_BRANCH', value: default_branch)
       .append(key: 'CI_PROJECT_CONFIG_PATH', value: ci_config_path_or_default)
+      .append(key: 'CI_CONFIG_PATH', value: ci_config_path_or_default)
   end
 
   def predefined_ci_server_variables
@@ -2024,10 +2043,12 @@ class Project < ApplicationRecord
     Gitlab::Ci::Variables::Collection.new.tap do |variables|
       break variables unless Gitlab.config.dependency_proxy.enabled
 
-      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}")
+      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: Gitlab.host_with_port)
       variables.append(
         key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
-        value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}"
+        # The namespace path can include uppercase letters, which
+        # Docker doesn't allow. The proxy expects it to be downcased.
+        value: "#{Gitlab.host_with_port}/#{namespace.root_ancestor.path.downcase}#{DependencyProxy::URL_SUFFIX}"
       )
     end
   end
@@ -2126,8 +2147,8 @@ class Project < ApplicationRecord
         data = repository.route_map_for(sha)
 
         Gitlab::RouteMap.new(data) if data
-               rescue Gitlab::RouteMap::FormatError
-                 nil
+      rescue Gitlab::RouteMap::FormatError
+        nil
       end
     end
 
@@ -2301,6 +2322,11 @@ class Project < ApplicationRecord
   def external_authorization_classification_label
     super || ::Gitlab::CurrentSettings.current_application_settings
                .external_authorization_service_default_label
+  end
+
+  # Overridden in EE::Project
+  def licensed_feature_available?(_feature)
+    false
   end
 
   def licensed_features
@@ -2539,6 +2565,20 @@ class Project < ApplicationRecord
 
   private
 
+  def set_container_registry_access_level
+    # changes_to_save = { 'container_registry_enabled' => [value_before_update, value_after_update] }
+    value = changes_to_save['container_registry_enabled'][1]
+
+    access_level =
+      if value
+        ProjectFeature::ENABLED
+      else
+        ProjectFeature::DISABLED
+      end
+
+    project_feature.update!(container_registry_access_level: access_level)
+  end
+
   def find_service(services, name)
     services.find { |service| service.to_param == name }
   end
@@ -2671,7 +2711,7 @@ class Project < ApplicationRecord
       # Issue for N+1: https://gitlab.com/gitlab-org/gitlab-foss/issues/49322
       Gitlab::GitalyClient.allow_n_plus_1_calls do
         merge_requests_allowing_collaboration(branch_name).any? do |merge_request|
-          merge_request.can_be_merged_by?(user)
+          merge_request.can_be_merged_by?(user, skip_collaboration_check: true)
         end
       end
     end
@@ -2698,6 +2738,12 @@ class Project < ApplicationRecord
 
   def cache_has_external_issue_tracker
     update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
+  end
+
+  def active_runners_with_tags
+    strong_memoize(:active_runners_with_tags) do
+      active_runners.with_tags
+    end
   end
 end
 

@@ -73,6 +73,8 @@ production: &base
         worker_src: "'self' blob:"
         report_uri:
 
+    allowed_hosts: []
+
     # Trusted Proxies
     # Customize if you have GitLab behind a reverse proxy which is running on a different machine.
     # Add the IP address for your reverse proxy to the list, otherwise users will appear signed in from that address.
@@ -406,6 +408,10 @@ production: &base
         aws_access_key_id: AWS_ACCESS_KEY_ID
         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
         region: us-east-1
+    local_store:
+      enabled: true
+      # The location where pages are stored (default: shared/pages).
+      # path: shared/pages
 
   ## Mattermost
   ## For enabling Add to Mattermost button
@@ -483,7 +489,7 @@ production: &base
   ee_cron_jobs:
     # Schedule snapshots for all devops adoption segments
     analytics_devops_adoption_create_all_snapshots_worker:
-      cron: 0 4 * * *
+      cron: 0 4 * * 0
 
     # Snapshot active users statistics
     historical_data_worker:
@@ -1393,6 +1399,9 @@ test:
         aws_access_key_id: AWS_ACCESS_KEY_ID
         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
         region: us-east-1
+    local_store:
+      enabled: true
+      path: tmp/tests/pages
   repositories:
     storages:
       default:

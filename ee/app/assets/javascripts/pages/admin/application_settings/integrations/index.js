@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import { loadCSSFile } from '~/lib/utils/css_utils';
+import { select2AxiosTransport } from '~/lib/utils/select2_utils';
 import { s__ } from '~/locale';
 import PersistentUserCallout from '~/persistent_user_callout';
 
@@ -27,12 +28,13 @@ const getDropdownConfig = (placeholder, url) => ({
     },
     results(data) {
       return {
-        results: data.map((entity) => ({
+        results: data.results.map((entity) => ({
           id: entity.source_id,
           text: entity.path,
         })),
       };
     },
+    transport: select2AxiosTransport,
   },
 });
 

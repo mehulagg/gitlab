@@ -66,8 +66,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::ServiceDiscovery do
         .to receive(:refresh_if_necessary)
         .and_raise(error)
 
-      expect(Raven)
-        .to receive(:capture_exception)
+      expect(Gitlab::ErrorTracking)
+        .to receive(:track_exception)
         .with(error)
 
       expect(service)

@@ -58,6 +58,7 @@ Rails.application.routes.draw do
 
     Gitlab.ee do
       resources :groups, only: [:new, :create]
+      resources :group_invites, only: [:new, :create]
       resources :projects, only: [:new, :create]
     end
   end
@@ -131,8 +132,24 @@ Rails.application.routes.draw do
     # UserCallouts
     resources :user_callouts, only: [:create]
 
-    get 'ide' => 'ide#index'
-    get 'ide/*vueroute' => 'ide#index', format: false
+    scope :ide, as: :ide, format: false do
+      get '/', to: 'ide#index'
+      get '/project', to: 'ide#index'
+
+      scope path: 'project/:project_id', as: :project, constraints: { project_id: Gitlab::PathRegex.full_namespace_route_regex } do
+        %w[edit tree blob].each do |action|
+          get "/#{action}", to: 'ide#index'
+          get "/#{action}/*branch/-/*path", to: 'ide#index'
+          get "/#{action}/*branch/-", to: 'ide#index'
+          get "/#{action}/*branch", to: 'ide#index'
+        end
+
+        get '/merge_requests/:merge_request_id', to: 'ide#index', constraints: { merge_request_id: /\d+/ }
+        get '/', to: 'ide#index'
+      end
+    end
+
+    resource :projects
 
     draw :operations
     draw :jira_connect
@@ -267,6 +284,7 @@ Rails.application.routes.draw do
 
   draw :git_http
   draw :api
+  draw :customers_dot
   draw :sidekiq
   draw :help
   draw :google_api

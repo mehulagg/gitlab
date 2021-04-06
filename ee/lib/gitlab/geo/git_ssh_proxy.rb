@@ -5,11 +5,11 @@ module Gitlab
     class GitSSHProxy
       HTTP_READ_TIMEOUT = 60
 
-      UPLOAD_PACK_REQUEST_CONTENT_TYPE = 'application/x-git-upload-pack-request'.freeze
-      UPLOAD_PACK_RESULT_CONTENT_TYPE = 'application/x-git-upload-pack-result'.freeze
+      UPLOAD_PACK_REQUEST_CONTENT_TYPE = 'application/x-git-upload-pack-request'
+      UPLOAD_PACK_RESULT_CONTENT_TYPE = 'application/x-git-upload-pack-result'
 
-      RECEIVE_PACK_REQUEST_CONTENT_TYPE = 'application/x-git-receive-pack-request'.freeze
-      RECEIVE_PACK_RESULT_CONTENT_TYPE = 'application/x-git-receive-pack-result'.freeze
+      RECEIVE_PACK_REQUEST_CONTENT_TYPE = 'application/x-git-receive-pack-request'
+      RECEIVE_PACK_RESULT_CONTENT_TYPE = 'application/x-git-receive-pack-result'
 
       MustBeASecondaryNode = Class.new(StandardError)
 

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'group compliance frameworks' do
   let_it_be(:group) { create(:group) }
   let_it_be(:user) { create(:user) }
+  let_it_be(:framework) { create(:compliance_framework, namespace: group, name: 'Framework') }
 
   before do
     login_as(user)
@@ -19,6 +20,14 @@ RSpec.describe 'group compliance frameworks' do
     describe 'GET /groups/:group/-/compliance_frameworks/new' do
       it 'returns 404 not found' do
         get new_group_compliance_framework_path(group)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    describe 'GET /groups/:group/-/compliance_frameworks/:id/edit' do
+      it 'returns 404 not found' do
+        get edit_group_compliance_framework_path(group, framework)
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -42,6 +51,23 @@ RSpec.describe 'group compliance frameworks' do
       context 'with unauthorized user' do
         it 'returns 404 not found' do
           get new_group_compliance_framework_path(group)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    describe 'GET /groups/:group/-/compliance_frameworks/:id/edit' do
+      it 'renders template' do
+        group.add_owner(user)
+        get edit_group_compliance_framework_path(group, framework)
+
+        expect(response).to render_template 'groups/compliance_frameworks/edit'
+      end
+
+      context 'with unauthorized user' do
+        it 'returns 404 not found' do
+          get edit_group_compliance_framework_path(group, framework)
 
           expect(response).to have_gitlab_http_status(:not_found)
         end

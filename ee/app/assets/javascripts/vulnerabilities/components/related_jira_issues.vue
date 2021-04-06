@@ -129,7 +129,7 @@ export default {
           target="_blank"
           class="gl-display-flex gl-align-items-center gl-ml-2 gl-text-gray-500"
         >
-          <gl-icon name="question" :size="12" role="text" />
+          <gl-icon name="question" :size="12" />
         </gl-link>
         <span
           class="gl-display-inline-flex gl-align-items-center gl-ml-4"

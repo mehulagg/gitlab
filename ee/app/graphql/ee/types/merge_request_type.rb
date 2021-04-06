@@ -19,6 +19,10 @@ module EE
               null: false, calls_gitaly: true,
               method: :has_security_reports?,
               description: 'Indicates if the source branch has any security reports.'
+        field :security_reports_up_to_date_on_target_branch, GraphQL::BOOLEAN_TYPE,
+              null: false, calls_gitaly: true,
+              method: :security_reports_up_to_date?,
+              description: 'Indicates if the target branch security reports are out of date.'
       end
 
       def merge_trains_count

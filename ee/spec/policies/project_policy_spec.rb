@@ -34,7 +34,7 @@ RSpec.describe ProjectPolicy do
 
     let(:auditor_permissions) do
       %i[
-        download_code download_wiki_code read_project read_board read_list
+        download_code download_wiki_code read_project read_issue_board read_issue_board_list
         read_project_for_iids read_issue_iid read_merge_request_iid read_wiki
         read_issue read_label read_issue_link read_milestone read_iteration
         read_snippet read_project_member read_note read_cycle_analytics
@@ -190,7 +190,7 @@ RSpec.describe ProjectPolicy do
       end
 
       it 'disables boards permissions' do
-        expect_disallowed :admin_board
+        expect_disallowed :admin_issue_board
       end
     end
   end
@@ -438,6 +438,12 @@ RSpec.describe ProjectPolicy do
 
           context 'with admin disabled' do
             it { is_expected.to be_disallowed(:read_project) }
+          end
+
+          context 'with auditor' do
+            let(:current_user) { create(:user, :auditor) }
+
+            it { is_expected.to be_allowed(:read_project) }
           end
         end
       end
@@ -1078,7 +1084,6 @@ RSpec.describe ProjectPolicy do
         let(:current_user) { public_send(role) if role }
 
         before do
-          stub_feature_flags(feature => true)
           stub_licensed_features(feature => true)
           enable_admin_mode!(current_user) if admin_mode
         end
@@ -1088,14 +1093,6 @@ RSpec.describe ProjectPolicy do
         context 'when feature is not available' do
           before do
             stub_licensed_features(feature => false)
-          end
-
-          it { is_expected.to be_disallowed(policy) }
-        end
-
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(feature => false)
           end
 
           it { is_expected.to be_disallowed(policy) }
@@ -1252,70 +1249,6 @@ RSpec.describe ProjectPolicy do
         it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
       end
     end
-  end
-
-  context 'when timelogs report feature is enabled' do
-    before do
-      stub_licensed_features(group_timelogs: true)
-    end
-
-    context 'admin' do
-      let(:current_user) { admin }
-
-      context 'when admin mode enabled', :enable_admin_mode do
-        it { is_expected.to be_allowed(:read_group_timelogs) }
-      end
-
-      context 'when admin mode disabled' do
-        it { is_expected.to be_disallowed(:read_group_timelogs) }
-      end
-    end
-
-    context 'with owner' do
-      let(:current_user) { owner }
-
-      it { is_expected.to be_allowed(:read_group_timelogs) }
-    end
-
-    context 'with maintainer' do
-      let(:current_user) { maintainer }
-
-      it { is_expected.to be_allowed(:read_group_timelogs) }
-    end
-
-    context 'with reporter' do
-      let(:current_user) { reporter }
-
-      it { is_expected.to be_allowed(:read_group_timelogs) }
-    end
-
-    context 'with guest' do
-      let(:current_user) { guest }
-
-      it { is_expected.to be_disallowed(:read_group_timelogs) }
-    end
-
-    context 'with non member' do
-      let(:current_user) { non_member }
-
-      it { is_expected.to be_disallowed(:read_group_timelogs) }
-    end
-
-    context 'with anonymous' do
-      let(:current_user) { anonymous }
-
-      it { is_expected.to be_disallowed(:read_group_timelogs) }
-    end
-  end
-
-  context 'when timelogs report feature is disabled' do
-    let(:current_user) { admin }
-
-    before do
-      stub_licensed_features(group_timelogs: false)
-    end
-
-    it { is_expected.to be_disallowed(:read_group_timelogs) }
   end
 
   context 'when dora4 analytics is available' do
@@ -1550,14 +1483,6 @@ RSpec.describe ProjectPolicy do
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
 
-        context 'with disabled feature flag' do
-          before do
-            stub_feature_flags(oncall_schedules_mvc: false)
-          end
-
-          it { is_expected.to(be_disallowed(policy)) }
-        end
-
         context 'with unavailable license' do
           before do
             stub_licensed_features(oncall_schedules: false)
@@ -1590,14 +1515,6 @@ RSpec.describe ProjectPolicy do
         let(:current_user) { public_send(role) }
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
-
-        context 'with disabled feature flag' do
-          before do
-            stub_feature_flags(oncall_schedules_mvc: false)
-          end
-
-          it { is_expected.to(be_disallowed(policy)) }
-        end
 
         context 'with unavailable license' do
           before do
@@ -1635,7 +1552,8 @@ RSpec.describe ProjectPolicy do
       # These are abilities that are not explicitly allowed by policies because most of them are not
       # real abilities.  They are prevented due to the use of create_update_admin helper method.
       let(:abilities_not_currently_enabled) do
-        %i[create_merge_request create_list update_list create_label update_label create_milestone
+        %i[create_merge_request create_issue_board_list create_issue_board update_issue_board
+           update_issue_board_list create_label update_label create_milestone
            update_milestone update_wiki update_design admin_design update_note
            update_pipeline_schedule admin_pipeline_schedule create_trigger update_trigger
            admin_trigger create_pages admin_release request_access create_board update_board
@@ -1659,24 +1577,73 @@ RSpec.describe ProjectPolicy do
         allow(::Gitlab).to receive(:com?).and_return(true)
       end
 
-      context 'with maintainer' do
+      context 'with maintainer access' do
         let(:current_user) { maintainer }
 
         before do
           project.add_maintainer(maintainer)
         end
 
-        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+        context 'create resource access tokens' do
+          it { is_expected.to be_allowed(:create_resource_access_tokens) }
+
+          context 'with a personal namespace project' do
+            let(:namespace) { create(:namespace_with_plan, plan: :bronze_plan) }
+            let(:project) { create(:project, namespace: namespace) }
+
+            it { is_expected.to be_allowed(:create_resource_access_tokens) }
+          end
+
+          context 'when resource access token creation is not allowed' do
+            before do
+              group.namespace_settings.update_column(:resource_access_token_creation_allowed, false)
+            end
+
+            it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+          end
+
+          context 'when parent group has resource access token creation disabled' do
+            let(:parent) { create(:group_with_plan, plan: :bronze_plan) }
+            let(:group) { create(:group, parent: parent) }
+            let(:project) { create(:project, group: group) }
+
+            before do
+              parent.namespace_settings.update_column(:resource_access_token_creation_allowed, false)
+            end
+
+            context 'cannot create resource access tokens' do
+              it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+            end
+          end
+        end
+
+        context 'read resource access tokens' do
+          it { is_expected.to be_allowed(:read_resource_access_tokens) }
+        end
+
+        context 'destroy resource access tokens' do
+          it { is_expected.to be_allowed(:destroy_resource_access_tokens) }
+        end
       end
 
-      context 'with developer' do
+      context 'with developer access' do
         let(:current_user) { developer }
 
         before do
           project.add_developer(developer)
         end
 
-        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+        context 'create resource access tokens' do
+          it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+        end
+
+        context 'read resource access tokens' do
+          it { is_expected.not_to be_allowed(:read_resource_access_tokens) }
+        end
+
+        context 'destroy resource access tokens' do
+          it { is_expected.not_to be_allowed(:destroy_resource_access_tokens) }
+        end
       end
     end
   end

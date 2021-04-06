@@ -167,7 +167,10 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         create(:key, user: user)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: true)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: false)
-        create(:remote_mirror, project: project)
+        create(:remote_mirror, project: project, enabled: true)
+        another_user = create(:user)
+        another_project = create(:project, :repository, creator: another_user)
+        create(:remote_mirror, project: another_project, enabled: false)
         create(:snippet, author: user)
       end
 
@@ -176,7 +179,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         keys: 2,
         merge_requests: 2,
         projects_with_disable_overriding_approvers_per_merge_request: 2,
-        projects_without_disable_overriding_approvers_per_merge_request: 4,
+        projects_without_disable_overriding_approvers_per_merge_request: 6,
         remote_mirrors: 2,
         snippets: 2
       )
@@ -185,7 +188,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         keys: 1,
         merge_requests: 1,
         projects_with_disable_overriding_approvers_per_merge_request: 1,
-        projects_without_disable_overriding_approvers_per_merge_request: 2,
+        projects_without_disable_overriding_approvers_per_merge_request: 3,
         remote_mirrors: 1,
         snippets: 1
       )
@@ -382,14 +385,15 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
   describe 'usage_activity_by_stage_monitor' do
     it 'includes accurate usage_activity_by_stage data' do
       for_defined_days_back do
-        user    = create(:user, dashboard: 'operations')
+        user = create(:user, dashboard: 'operations')
         cluster = create(:cluster, user: user)
-        create(:project, creator: user)
+        project = create(:project, creator: user)
         create(:clusters_applications_prometheus, :installed, cluster: cluster)
         create(:project_tracing_setting)
         create(:project_error_tracking_setting)
         create(:incident)
         create(:incident, alert_management_alert: create(:alert_management_alert))
+        create(:alert_management_http_integration, :active, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
@@ -399,10 +403,12 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_with_tracing_enabled: 2,
         projects_with_error_tracking_enabled: 2,
         projects_with_incidents: 4,
-        projects_with_alert_incidents: 2
+        projects_with_alert_incidents: 2,
+        projects_with_enabled_alert_integrations_histogram: { '1' => 2 }
       )
 
-      expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
+      data_28_days = described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)
+      expect(data_28_days).to include(
         clusters: 1,
         clusters_applications_prometheus: 1,
         operations_dashboard_default_dashboard: 1,
@@ -411,6 +417,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_with_incidents: 2,
         projects_with_alert_incidents: 1
       )
+
+      expect(data_28_days).not_to include(:projects_with_enabled_alert_integrations_histogram)
     end
   end
 
@@ -528,14 +536,14 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(subject.keys).to include(*UsageDataHelpers::USAGE_DATA_KEYS)
     end
 
-    it 'gathers usage counts' do
+    it 'gathers usage counts', :aggregate_failures do
       count_data = subject[:counts]
 
       expect(count_data[:boards]).to eq(1)
       expect(count_data[:projects]).to eq(4)
-      expect(count_data.values_at(*UsageDataHelpers::SMAU_KEYS)).to all(be_an(Integer))
       expect(count_data.keys).to include(*UsageDataHelpers::COUNTS_KEYS)
       expect(UsageDataHelpers::COUNTS_KEYS - count_data.keys).to be_empty
+      expect(count_data.values).to all(be_a_kind_of(Integer))
     end
 
     it 'gathers usage counts correctly' do
@@ -1129,11 +1137,39 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       end
     end
 
+    describe ".operating_system" do
+      let(:ohai_data) { { "platform" => "ubuntu", "platform_version" => "20.04" } }
+
+      before do
+        allow_next_instance_of(Ohai::System) do |ohai|
+          allow(ohai).to receive(:data).and_return(ohai_data)
+        end
+      end
+
+      subject { described_class.operating_system }
+
+      it { is_expected.to eq("ubuntu-20.04") }
+
+      context 'when on Debian with armv architecture' do
+        let(:ohai_data) { { "platform" => "debian", "platform_version" => "10", 'kernel' => { 'machine' => 'armv' } } }
+
+        it { is_expected.to eq("raspbian-10") }
+      end
+    end
+
     describe ".system_usage_data_settings" do
+      before do
+        allow(described_class).to receive(:operating_system).and_return('ubuntu-20.04')
+      end
+
       subject { described_class.system_usage_data_settings }
 
       it 'gathers settings usage data', :aggregate_failures do
         expect(subject[:settings][:ldap_encrypted_secrets_enabled]).to eq(Gitlab::Auth::Ldap::Config.encrypted_secrets.active?)
+      end
+
+      it 'populates operating system information' do
+        expect(subject[:settings][:operating_system]).to eq('ubuntu-20.04')
       end
     end
   end
@@ -1255,6 +1291,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           'p_analytics_repo' => 123,
           'i_analytics_cohorts' => 123,
           'i_analytics_dev_ops_score' => 123,
+          'i_analytics_dev_ops_adoption' => 123,
           'i_analytics_instance_statistics' => 123,
           'p_analytics_merge_request' => 123,
           'g_analytics_merge_request' => 123,
@@ -1325,47 +1362,54 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
     let(:categories) { ::Gitlab::UsageDataCounters::HLLRedisCounter.categories }
     let(:ineligible_total_categories) do
-      %w[source_code ci_secrets_management incident_management_alerts snippets terraform pipeline_authoring]
+      %w[source_code ci_secrets_management incident_management_alerts snippets terraform]
     end
 
-    it 'has all known_events' do
-      expect(subject).to have_key(:redis_hll_counters)
+    context 'with redis_hll_tracking feature enabled' do
+      it 'has all known_events' do
+        stub_feature_flags(redis_hll_tracking: true)
 
-      expect(subject[:redis_hll_counters].keys).to match_array(categories)
+        expect(subject).to have_key(:redis_hll_counters)
 
-      categories.each do |category|
-        keys = ::Gitlab::UsageDataCounters::HLLRedisCounter.events_for_category(category)
+        expect(subject[:redis_hll_counters].keys).to match_array(categories)
 
-        metrics = keys.map { |key| "#{key}_weekly" } + keys.map { |key| "#{key}_monthly" }
+        categories.each do |category|
+          keys = ::Gitlab::UsageDataCounters::HLLRedisCounter.events_for_category(category)
 
-        if ineligible_total_categories.exclude?(category)
-          metrics.append("#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly")
+          metrics = keys.map { |key| "#{key}_weekly" } + keys.map { |key| "#{key}_monthly" }
+
+          if ineligible_total_categories.exclude?(category)
+            metrics.append("#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly")
+          end
+
+          expect(subject[:redis_hll_counters][category].keys).to match_array(metrics)
         end
+      end
+    end
 
-        expect(subject[:redis_hll_counters][category].keys).to match_array(metrics)
+    context 'with redis_hll_tracking disabled' do
+      it 'does not have redis_hll_tracking key' do
+        stub_feature_flags(redis_hll_tracking: false)
+
+        expect(subject).not_to have_key(:redis_hll_counters)
       end
     end
   end
 
-  describe '.aggregated_metrics_weekly' do
-    subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_weekly }
+  describe '.aggregated_metrics_data' do
+    it 'uses ::Gitlab::Usage::Metrics::Aggregates::Aggregate methods', :aggregate_failures do
+      expected_payload = {
+        counts_weekly: { aggregated_metrics: { global_search_gmau: 123 } },
+        counts_monthly: { aggregated_metrics: { global_search_gmau: 456 } },
+        counts: { aggregate_global_search_gmau: 789 }
+      }
 
-    it 'uses ::Gitlab::Usage::Metrics::Aggregates::Aggregate#weekly_data', :aggregate_failures do
       expect_next_instance_of(::Gitlab::Usage::Metrics::Aggregates::Aggregate) do |instance|
         expect(instance).to receive(:weekly_data).and_return(global_search_gmau: 123)
+        expect(instance).to receive(:monthly_data).and_return(global_search_gmau: 456)
+        expect(instance).to receive(:all_time_data).and_return(global_search_gmau: 789)
       end
-      expect(aggregated_metrics_payload).to eq(aggregated_metrics: { global_search_gmau: 123 })
-    end
-  end
-
-  describe '.aggregated_metrics_monthly' do
-    subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_monthly }
-
-    it 'uses ::Gitlab::Usage::Metrics::Aggregates::Aggregate#monthly_data', :aggregate_failures do
-      expect_next_instance_of(::Gitlab::Usage::Metrics::Aggregates::Aggregate) do |instance|
-        expect(instance).to receive(:monthly_data).and_return(global_search_gmau: 123)
-      end
-      expect(aggregated_metrics_payload).to eq(aggregated_metrics: { global_search_gmau: 123 })
+      expect(described_class.aggregated_metrics_data).to eq(expected_payload)
     end
   end
 

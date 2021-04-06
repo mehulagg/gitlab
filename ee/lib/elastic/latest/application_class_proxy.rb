@@ -37,6 +37,12 @@ module Elastic
         self.import(options)
       end
 
+      # Should be overriden in *ClassProxy for specific model if data needs to
+      # be preloaded by #as_indexed_json method
+      def preload_indexing_data(relation)
+        relation
+      end
+
       private
 
       def default_operator

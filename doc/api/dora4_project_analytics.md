@@ -5,9 +5,12 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, api
 ---
 
-# DORA4 Analytics Project API **(ULTIMATE ONLY)**
+# DORA4 Analytics Project API **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/279039) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.7.
+
+WARNING:
+These endpoints are deprecated and will be removed in GitLab 14.0. Use the [DORA metrics API](dora/metrics.md) instead.
 
 All methods require reporter authorization.
 

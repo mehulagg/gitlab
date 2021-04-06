@@ -14,8 +14,6 @@ module Ci
 
     BuildArchivedError = Class.new(StandardError)
 
-    ignore_columns :artifacts_file, :artifacts_file_store, :artifacts_metadata, :artifacts_metadata_store, :artifacts_size, :commands, remove_after: '2019-12-15', remove_with: '12.7'
-
     belongs_to :project, inverse_of: :builds
     belongs_to :runner
     belongs_to :trigger_request
@@ -75,7 +73,14 @@ module Ci
       return unless has_environment?
 
       strong_memoize(:persisted_environment) do
-        Environment.find_by(name: expanded_environment_name, project: project)
+        # This code path has caused N+1s in the past, since environments are only indirectly
+        # associated to builds and pipelines; see https://gitlab.com/gitlab-org/gitlab/-/issues/326445
+        # We therefore batch-load them to prevent dormant N+1s until we found a proper solution.
+        BatchLoader.for(expanded_environment_name).batch(key: project_id) do |names, loader, args|
+          Environment.where(name: names, project: args[:key]).find_each do |environment|
+            loader.call(environment.name, environment)
+          end
+        end
       end
     end
 
@@ -88,8 +93,7 @@ module Ci
     validates :ref, presence: true
 
     scope :not_interruptible, -> do
-      joins(:metadata).where('ci_builds_metadata.id NOT IN (?)',
-        Ci::BuildMetadata.scoped_build.with_interruptible.select(:id))
+      joins(:metadata).where.not('ci_builds_metadata.id' => Ci::BuildMetadata.scoped_build.with_interruptible.select(:id))
     end
 
     scope :unstarted, -> { where(runner_id: nil) }
@@ -486,6 +490,10 @@ module Ci
       self.options.fetch(:environment, {}).fetch(:action, 'start') if self.options
     end
 
+    def environment_deployment_tier
+      self.options.dig(:environment, :deployment_tier) if self.options
+    end
+
     def outdated_deployment?
       success? && !deployment.try(:last?)
     end
@@ -510,7 +518,6 @@ module Ci
           .concat(scoped_variables)
           .concat(job_variables)
           .concat(persisted_environment_variables)
-          .to_runner_variables
       end
     end
 
@@ -523,6 +530,7 @@ module Ci
           .append(key: 'CI_JOB_ID', value: id.to_s)
           .append(key: 'CI_JOB_URL', value: Gitlab::Routing.url_helpers.project_job_url(project, self))
           .append(key: 'CI_JOB_TOKEN', value: token.to_s, public: false, masked: true)
+          .append(key: 'CI_JOB_STARTED_AT', value: started_at&.iso8601)
           .append(key: 'CI_BUILD_ID', value: id.to_s)
           .append(key: 'CI_BUILD_TOKEN', value: token.to_s, public: false, masked: true)
           .append(key: 'CI_REGISTRY_USER', value: ::Gitlab::Auth::CI_JOB_USER)
@@ -694,7 +702,7 @@ module Ci
     end
 
     def any_runners_online?
-      project.any_runners? { |runner| runner.active? && runner.online? && runner.can_pick?(self) }
+      project.any_active_runners? { |runner| runner.match_build_if_online?(self) }
     end
 
     def stuck?
@@ -813,14 +821,15 @@ module Ci
     end
 
     def cache
-      cache = options[:cache]
+      cache = Array.wrap(options[:cache])
 
-      if cache && project.jobs_cache_index
-        cache = cache.merge(
-          key: "#{cache[:key]}-#{project.jobs_cache_index}")
+      if project.jobs_cache_index
+        cache = cache.map do |single_cache|
+          single_cache.merge(key: "#{single_cache[:key]}-#{project.jobs_cache_index}")
+        end
       end
 
-      [cache]
+      cache
     end
 
     def credentials
@@ -986,7 +995,7 @@ module Ci
       # TODO: Have `debug_mode?` check against data on sent back from runner
       # to capture all the ways that variables can be set.
       # See (https://gitlab.com/gitlab-org/gitlab/-/issues/290955)
-      variables.any? { |variable| variable[:key] == 'CI_DEBUG_TRACE' && variable[:value].casecmp('true') == 0 }
+      variables['CI_DEBUG_TRACE']&.value&.casecmp('true') == 0
     end
 
     def drop_with_exit_code!(failure_reason, exit_code)

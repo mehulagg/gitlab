@@ -5,7 +5,7 @@ module Types
     graphql_name 'Board'
     description 'Represents a project or group issue board'
     accepts ::Board
-    authorize :read_board
+    authorize :read_issue_board
 
     present_using BoardPresenter
 
@@ -19,6 +19,12 @@ module Types
 
     field :hide_closed_list, type: GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Whether or not closed list is hidden.'
+
+    field :created_at, Types::TimeType, null: false,
+          description: 'Timestamp of when the board was created.'
+
+    field :updated_at, Types::TimeType, null: false,
+          description: 'Timestamp of when the board was last updated.'
 
     field :lists,
           Types::BoardListType.connection_type,

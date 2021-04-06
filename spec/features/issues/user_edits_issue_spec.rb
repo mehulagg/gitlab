@@ -78,7 +78,7 @@ RSpec.describe "Issues > User edits issue", :js do
         end
 
         it 'warns about version conflict' do
-          issue.update(title: "New title")
+          issue.update!(title: "New title")
 
           fill_in 'issue_title', with: 'bug 345'
           fill_in 'issue_description', with: 'bug description'
@@ -142,10 +142,8 @@ RSpec.describe "Issues > User edits issue", :js do
 
         it 'can remove label without removing label added via quick action', :aggregate_failures do
           # Add `syzygy` label with a quick action
-          note = find('#note-body')
-          page.within '.timeline-content-form' do
-            note.native.send_keys('/label ~syzygy')
-          end
+          fill_in 'Comment', with: '/label ~syzygy'
+
           click_button 'Comment'
 
           wait_for_requests
@@ -309,7 +307,7 @@ RSpec.describe "Issues > User edits issue", :js do
           before do
             project.add_guest(guest)
             issue.milestone = milestone
-            issue.save
+            issue.save!
           end
 
           it 'shows milestone text' do

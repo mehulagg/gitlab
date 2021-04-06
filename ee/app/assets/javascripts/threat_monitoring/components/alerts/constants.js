@@ -1,4 +1,4 @@
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
 
 export const MESSAGES = {
   CONFIGURE: s__(
@@ -56,3 +56,7 @@ export const PAGE_SIZE = 20;
 export const DEFAULT_FILTERS = { statuses: ['TRIGGERED', 'ACKNOWLEDGED'] };
 
 export const DOMAIN = 'threat_monitoring';
+
+export const DEBOUNCE = 250;
+
+export const ALL = { key: 'ALL', value: __('All') };

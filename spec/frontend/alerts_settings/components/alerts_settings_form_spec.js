@@ -1,12 +1,7 @@
-import {
-  GlForm,
-  GlFormSelect,
-  GlCollapse,
-  GlFormInput,
-  GlToggle,
-  GlFormTextarea,
-} from '@gitlab/ui';
+import { GlForm, GlFormSelect, GlFormInput, GlToggle, GlFormTextarea, GlTab } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import MappingBuilder from '~/alerts_settings/components/alert_mapping_builder.vue';
 import AlertsSettingsForm from '~/alerts_settings/components/alerts_settings_form.vue';
@@ -15,55 +10,53 @@ import alertFields from '../mocks/alert_fields.json';
 import parsedMapping from '../mocks/parsed_mapping.json';
 import { defaultAlertSettingsConfig } from './util';
 
+const scrollIntoViewMock = jest.fn();
+HTMLElement.prototype.scrollIntoView = scrollIntoViewMock;
+
 describe('AlertsSettingsForm', () => {
   let wrapper;
   const mockToastShow = jest.fn();
 
-  const createComponent = ({
-    data = {},
-    props = {},
-    multipleHttpIntegrationsCustomMapping = false,
-    multiIntegrations = true,
-  } = {}) => {
-    wrapper = mount(AlertsSettingsForm, {
-      data() {
-        return { ...data };
-      },
-      propsData: {
-        loading: false,
-        canAddIntegration: true,
-        ...props,
-      },
-      provide: {
-        ...defaultAlertSettingsConfig,
-        glFeatures: { multipleHttpIntegrationsCustomMapping },
-        multiIntegrations,
-      },
-      mocks: {
-        $apollo: {
-          query: jest.fn(),
+  const createComponent = ({ data = {}, props = {}, multiIntegrations = true } = {}) => {
+    wrapper = extendedWrapper(
+      mount(AlertsSettingsForm, {
+        data() {
+          return { ...data };
         },
-        $toast: {
-          show: mockToastShow,
+        propsData: {
+          loading: false,
+          canAddIntegration: true,
+          ...props,
         },
-      },
-    });
+        provide: {
+          ...defaultAlertSettingsConfig,
+          multiIntegrations,
+        },
+        mocks: {
+          $apollo: {
+            query: jest.fn(),
+          },
+          $toast: {
+            show: mockToastShow,
+          },
+        },
+      }),
+    );
   };
 
-  const findForm = () => wrapper.find(GlForm);
-  const findSelect = () => wrapper.find(GlFormSelect);
-  const findFormSteps = () => wrapper.find(GlCollapse);
-  const findFormFields = () => wrapper.findAll(GlFormInput);
-  const findFormToggle = () => wrapper.find(GlToggle);
-  const findTestPayloadSection = () => wrapper.find(`[id = "test-integration"]`);
-  const findMappingBuilderSection = () => wrapper.find(`[id = "mapping-builder"]`);
+  const findForm = () => wrapper.findComponent(GlForm);
+  const findSelect = () => wrapper.findComponent(GlFormSelect);
+  const findFormFields = () => wrapper.findAllComponents(GlFormInput);
+  const findFormToggle = () => wrapper.findComponent(GlToggle);
+  const findSamplePayloadSection = () => wrapper.findByTestId('sample-payload-section');
   const findMappingBuilder = () => wrapper.findComponent(MappingBuilder);
-  const findSubmitButton = () => wrapper.find(`[type = "submit"]`);
-  const findMultiSupportText = () =>
-    wrapper.find(`[data-testid="multi-integrations-not-supported"]`);
-  const findJsonTestSubmit = () => wrapper.find(`[data-testid="integration-test-and-submit"]`);
+
+  const findSubmitButton = () => wrapper.findByTestId('integration-form-submit');
+  const findMultiSupportText = () => wrapper.findByTestId('multi-integrations-not-supported');
+  const findJsonTestSubmit = () => wrapper.findByTestId('send-test-alert');
   const findJsonTextArea = () => wrapper.find(`[id = "test-payload"]`);
-  const findActionBtn = () => wrapper.find(`[data-testid="payload-action-btn"]`);
+  const findActionBtn = () => wrapper.findByTestId('payload-action-btn');
+  const findTabs = () => wrapper.findAllComponents(GlTab);
 
   afterEach(() => {
     if (wrapper) {
@@ -87,15 +80,11 @@ describe('AlertsSettingsForm', () => {
       createComponent();
     });
 
-    it('renders the initial template', () => {
-      expect(wrapper.element).toMatchSnapshot();
-    });
-
     it('render the initial form with only an integration type dropdown', () => {
       expect(findForm().exists()).toBe(true);
       expect(findSelect().exists()).toBe(true);
       expect(findMultiSupportText().exists()).toBe(false);
-      expect(findFormSteps().attributes('visible')).toBeUndefined();
+      expect(findFormFields()).toHaveLength(0);
     });
 
     it('shows the rest of the form when the dropdown is used', async () => {
@@ -110,37 +99,47 @@ describe('AlertsSettingsForm', () => {
       expect(findMultiSupportText().exists()).toBe(true);
     });
 
-    it('disabled the name input when the selected value is prometheus', async () => {
+    it('hides the name input when the selected value is prometheus', async () => {
       createComponent();
       await selectOptionAtIndex(2);
+      expect(findFormFields().at(0).attributes('id')).not.toBe('name-integration');
+    });
 
-      expect(findFormFields().at(0).attributes('disabled')).toBe('disabled');
+    describe('form tabs', () => {
+      it('renders 3 tabs', () => {
+        expect(findTabs()).toHaveLength(3);
+      });
+
+      it('only first tab is enabled on integration create', () => {
+        createComponent({
+          data: {
+            currentIntegration: null,
+          },
+        });
+        const tabs = findTabs();
+        expect(tabs.at(0).find('[role="tabpanel"]').classes('disabled')).toBe(false);
+        expect(tabs.at(1).find('[role="tabpanel"]').classes('disabled')).toBe(true);
+        expect(tabs.at(2).find('[role="tabpanel"]').classes('disabled')).toBe(true);
+      });
+
+      it('all tabs are enabled on integration edit', () => {
+        createComponent({
+          data: {
+            currentIntegration: { id: 1 },
+          },
+        });
+        const tabs = findTabs();
+        expect(tabs.at(0).find('[role="tabpanel"]').classes('disabled')).toBe(false);
+        expect(tabs.at(1).find('[role="tabpanel"]').classes('disabled')).toBe(false);
+        expect(tabs.at(2).find('[role="tabpanel"]').classes('disabled')).toBe(false);
+      });
     });
   });
 
   describe('submitting integration form', () => {
     describe('HTTP', () => {
-      it('create', async () => {
-        createComponent();
-
-        const integrationName = 'Test integration';
-        await selectOptionAtIndex(1);
-        enableIntegration(0, integrationName);
-
-        const submitBtn = findSubmitButton();
-        expect(submitBtn.exists()).toBe(true);
-        expect(submitBtn.text()).toBe('Save integration');
-
-        findForm().trigger('submit');
-
-        expect(wrapper.emitted('create-new-integration')[0]).toEqual([
-          { type: typeSet.http, variables: { name: integrationName, active: true } },
-        ]);
-      });
-
       it('create with custom mapping', async () => {
         createComponent({
-          multipleHttpIntegrationsCustomMapping: true,
           multiIntegrations: true,
           props: { alertFields },
         });
@@ -154,29 +153,28 @@ describe('AlertsSettingsForm', () => {
         findMappingBuilder().vm.$emit('onMappingUpdate', sampleMapping);
         findForm().trigger('submit');
 
-        expect(wrapper.emitted('create-new-integration')[0]).toEqual([
-          {
-            type: typeSet.http,
-            variables: {
-              name: integrationName,
-              active: true,
-              payloadAttributeMappings: sampleMapping,
-              payloadExample: '{}',
-            },
+        expect(wrapper.emitted('create-new-integration')[0][0]).toMatchObject({
+          type: typeSet.http,
+          variables: {
+            name: integrationName,
+            active: true,
+            payloadAttributeMappings: sampleMapping,
+            payloadExample: '{}',
           },
-        ]);
+        });
       });
 
       it('update', () => {
         createComponent({
           data: {
-            selectedIntegration: typeSet.http,
-            currentIntegration: { id: '1', name: 'Test integration pre' },
+            integrationForm: { id: '1', name: 'Test integration pre', type: typeSet.http },
+            currentIntegration: { id: '1' },
           },
           props: {
             loading: false,
           },
         });
+
         const updatedIntegrationName = 'Test integration post';
         enableIntegration(0, updatedIntegrationName);
 
@@ -184,41 +182,42 @@ describe('AlertsSettingsForm', () => {
         expect(submitBtn.exists()).toBe(true);
         expect(submitBtn.text()).toBe('Save integration');
 
-        findForm().trigger('submit');
-
-        expect(wrapper.emitted('update-integration')[0]).toEqual([
-          { type: typeSet.http, variables: { name: updatedIntegrationName, active: true } },
-        ]);
+        submitBtn.trigger('click');
+        expect(wrapper.emitted('update-integration')[0][0]).toMatchObject({
+          type: typeSet.http,
+          variables: {
+            name: updatedIntegrationName,
+            active: true,
+            payloadAttributeMappings: [],
+            payloadExample: '{}',
+          },
+        });
       });
     });
 
     describe('PROMETHEUS', () => {
       it('create', async () => {
         createComponent();
-
         await selectOptionAtIndex(2);
-
         const apiUrl = 'https://test.com';
-        enableIntegration(1, apiUrl);
-
-        findFormToggle().trigger('click');
-
+        enableIntegration(0, apiUrl);
         const submitBtn = findSubmitButton();
         expect(submitBtn.exists()).toBe(true);
         expect(submitBtn.text()).toBe('Save integration');
 
         findForm().trigger('submit');
 
-        expect(wrapper.emitted('create-new-integration')[0]).toEqual([
-          { type: typeSet.prometheus, variables: { apiUrl, active: true } },
-        ]);
+        expect(wrapper.emitted('create-new-integration')[0][0]).toMatchObject({
+          type: typeSet.prometheus,
+          variables: { apiUrl, active: true },
+        });
       });
 
       it('update', () => {
         createComponent({
           data: {
-            selectedIntegration: typeSet.prometheus,
-            currentIntegration: { id: '1', apiUrl: 'https://test-pre.com' },
+            integrationForm: { id: '1', apiUrl: 'https://test-pre.com', type: typeSet.prometheus },
+            currentIntegration: { id: '1' },
           },
           props: {
             loading: false,
@@ -226,7 +225,7 @@ describe('AlertsSettingsForm', () => {
         });
 
         const apiUrl = 'https://test-post.com';
-        enableIntegration(1, apiUrl);
+        enableIntegration(0, apiUrl);
 
         const submitBtn = findSubmitButton();
         expect(submitBtn.exists()).toBe(true);
@@ -234,9 +233,10 @@ describe('AlertsSettingsForm', () => {
 
         findForm().trigger('submit');
 
-        expect(wrapper.emitted('update-integration')[0]).toEqual([
-          { type: typeSet.prometheus, variables: { apiUrl, active: true } },
-        ]);
+        expect(wrapper.emitted('update-integration')[0][0]).toMatchObject({
+          type: typeSet.prometheus,
+          variables: { apiUrl, active: true },
+        });
       });
     });
   });
@@ -245,7 +245,6 @@ describe('AlertsSettingsForm', () => {
     beforeEach(() => {
       createComponent({
         data: {
-          selectedIntegration: typeSet.http,
           currentIntegration: { id: '1', name: 'Test' },
           active: true,
         },
@@ -260,11 +259,11 @@ describe('AlertsSettingsForm', () => {
       await findJsonTextArea().setValue('Invalid JSON');
 
       jest.runAllTimers();
-      await wrapper.vm.$nextTick();
+      await nextTick();
 
       const jsonTestSubmit = findJsonTestSubmit();
       expect(jsonTestSubmit.exists()).toBe(true);
-      expect(jsonTestSubmit.text()).toBe('Save and test payload');
+      expect(jsonTestSubmit.text()).toBe('Send');
       expect(jsonTestSubmit.props('disabled')).toBe(true);
     });
 
@@ -273,7 +272,7 @@ describe('AlertsSettingsForm', () => {
       await findJsonTextArea().setValue('{ "value": "value" }');
 
       jest.runAllTimers();
-      await wrapper.vm.$nextTick();
+      await nextTick();
       expect(findJsonTestSubmit().props('disabled')).toBe(false);
     });
   });
@@ -281,15 +280,13 @@ describe('AlertsSettingsForm', () => {
   describe('Test payload section for HTTP integration', () => {
     const validSamplePayload = JSON.stringify(alertFields);
     const emptySamplePayload = '{}';
-
     beforeEach(() => {
       createComponent({
-        multipleHttpIntegrationsCustomMapping: true,
+        multiIntegrations: true,
         data: {
+          integrationForm: { type: typeSet.http },
           currentIntegration: {
-            type: typeSet.http,
-            payloadExample: validSamplePayload,
-            payloadAttributeMappings: [],
+            payloadExample: emptySamplePayload,
           },
           active: false,
           resetPayloadAndMappingConfirmed: false,
@@ -299,30 +296,28 @@ describe('AlertsSettingsForm', () => {
     });
 
     describe.each`
-      active   | resetPayloadAndMappingConfirmed | disabled
-      ${true}  | ${true}                         | ${undefined}
-      ${false} | ${true}                         | ${'disabled'}
-      ${true}  | ${false}                        | ${'disabled'}
-      ${false} | ${false}                        | ${'disabled'}
-    `('', ({ active, resetPayloadAndMappingConfirmed, disabled }) => {
+      payload               | resetPayloadAndMappingConfirmed | disabled
+      ${validSamplePayload} | ${true}                         | ${undefined}
+      ${emptySamplePayload} | ${true}                         | ${undefined}
+      ${validSamplePayload} | ${false}                        | ${'disabled'}
+      ${emptySamplePayload} | ${false}                        | ${undefined}
+    `('', ({ payload, resetPayloadAndMappingConfirmed, disabled }) => {
       const payloadResetMsg = resetPayloadAndMappingConfirmed
         ? 'was confirmed'
         : 'was not confirmed';
       const enabledState = disabled === 'disabled' ? 'disabled' : 'enabled';
-      const activeState = active ? 'active' : 'not active';
+      const validPayloadMsg = payload === emptySamplePayload ? 'not valid' : 'valid';
 
-      it(`textarea should be ${enabledState} when payload reset ${payloadResetMsg} and current integration is ${activeState}`, async () => {
+      it(`textarea should be ${enabledState} when payload reset ${payloadResetMsg} and payload is ${validPayloadMsg}`, async () => {
         wrapper.setData({
-          currentIntegration: {
-            type: typeSet.http,
-            payloadExample: validSamplePayload,
-            payloadAttributeMappings: [],
-          },
-          active,
+          currentIntegration: { payloadExample: payload },
           resetPayloadAndMappingConfirmed,
         });
-        await wrapper.vm.$nextTick();
-        expect(findTestPayloadSection().find(GlFormTextarea).attributes('disabled')).toBe(disabled);
+
+        await nextTick();
+        expect(findSamplePayloadSection().find(GlFormTextarea).attributes('disabled')).toBe(
+          disabled,
+        );
       });
     });
 
@@ -330,9 +325,9 @@ describe('AlertsSettingsForm', () => {
       describe.each`
         resetPayloadAndMappingConfirmed | payloadExample        | caption
         ${false}                        | ${validSamplePayload} | ${'Edit payload'}
-        ${true}                         | ${emptySamplePayload} | ${'Submit payload'}
-        ${true}                         | ${validSamplePayload} | ${'Submit payload'}
-        ${false}                        | ${emptySamplePayload} | ${'Submit payload'}
+        ${true}                         | ${emptySamplePayload} | ${'Parse payload fields'}
+        ${true}                         | ${validSamplePayload} | ${'Parse payload fields'}
+        ${false}                        | ${emptySamplePayload} | ${'Parse payload fields'}
       `('', ({ resetPayloadAndMappingConfirmed, payloadExample, caption }) => {
         const samplePayloadMsg = payloadExample ? 'was provided' : 'was not provided';
         const payloadResetMsg = resetPayloadAndMappingConfirmed
@@ -341,16 +336,12 @@ describe('AlertsSettingsForm', () => {
 
         it(`shows ${caption} button when sample payload ${samplePayloadMsg} and payload reset ${payloadResetMsg}`, async () => {
           wrapper.setData({
-            selectedIntegration: typeSet.http,
             currentIntegration: {
               payloadExample,
-              type: typeSet.http,
-              active: true,
-              payloadAttributeMappings: [],
             },
             resetPayloadAndMappingConfirmed,
           });
-          await wrapper.vm.$nextTick();
+          await nextTick();
           expect(findActionBtn().text()).toBe(caption);
         });
       });
@@ -359,7 +350,6 @@ describe('AlertsSettingsForm', () => {
     describe('Parsing payload', () => {
       beforeEach(() => {
         wrapper.setData({
-          selectedIntegration: typeSet.http,
           resetPayloadAndMappingConfirmed: true,
         });
       });
@@ -386,29 +376,26 @@ describe('AlertsSettingsForm', () => {
 
         await waitForPromises();
 
-        expect(findTestPayloadSection().find('.invalid-feedback').text()).toBe(errorMessage);
+        expect(findSamplePayloadSection().find('.invalid-feedback').text()).toBe(errorMessage);
       });
     });
   });
 
   describe('Mapping builder section', () => {
     describe.each`
-      alertFieldsProvided | multiIntegrations | featureFlag | integrationOption | visible
-      ${true}             | ${true}           | ${true}     | ${1}              | ${true}
-      ${true}             | ${true}           | ${true}     | ${2}              | ${false}
-      ${true}             | ${true}           | ${false}    | ${1}              | ${false}
-      ${true}             | ${true}           | ${false}    | ${2}              | ${false}
-      ${true}             | ${false}          | ${true}     | ${1}              | ${false}
-      ${false}            | ${true}           | ${true}     | ${1}              | ${false}
-    `('', ({ alertFieldsProvided, multiIntegrations, featureFlag, integrationOption, visible }) => {
-      const visibleMsg = visible ? 'is rendered' : 'is not rendered';
-      const featureFlagMsg = featureFlag ? 'is enabled' : 'is disabled';
-      const alertFieldsMsg = alertFieldsProvided ? 'are provided' : 'are not provided';
+      alertFieldsProvided | multiIntegrations | integrationOption | visible
+      ${true}             | ${true}           | ${1}              | ${true}
+      ${true}             | ${true}           | ${2}              | ${false}
+      ${true}             | ${false}          | ${1}              | ${false}
+      ${false}            | ${true}           | ${1}              | ${false}
+    `('', ({ alertFieldsProvided, multiIntegrations, integrationOption, visible }) => {
+      const visibleMsg = visible ? 'rendered' : 'not rendered';
+      const alertFieldsMsg = alertFieldsProvided ? 'provided' : 'not provided';
       const integrationType = integrationOption === 1 ? typeSet.http : typeSet.prometheus;
+      const multiIntegrationsEnabled = multiIntegrations ? 'enabled' : 'not enabled';
 
-      it(`${visibleMsg} when multipleHttpIntegrationsCustomMapping feature flag ${featureFlagMsg} and integration type is ${integrationType} and alert fields ${alertFieldsMsg}`, async () => {
+      it(`is ${visibleMsg} when multiIntegrations are ${multiIntegrationsEnabled}, integration type is ${integrationType} and alert fields are ${alertFieldsMsg}`, async () => {
         createComponent({
-          multipleHttpIntegrationsCustomMapping: featureFlag,
           multiIntegrations,
           props: {
             alertFields: alertFieldsProvided ? alertFields : [],
@@ -416,8 +403,80 @@ describe('AlertsSettingsForm', () => {
         });
         await selectOptionAtIndex(integrationOption);
 
-        expect(findMappingBuilderSection().exists()).toBe(visible);
+        expect(findMappingBuilder().exists()).toBe(visible);
       });
+    });
+  });
+
+  describe('Form validation', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it('should not be able to submit when no integration type is selected', async () => {
+      await selectOptionAtIndex(0);
+
+      expect(findSubmitButton().attributes('disabled')).toBe('disabled');
+    });
+
+    it('should not be able to submit when HTTP integration form is invalid', async () => {
+      await selectOptionAtIndex(1);
+      await findFormFields().at(0).vm.$emit('input', '');
+      expect(findSubmitButton().attributes('disabled')).toBe('disabled');
+    });
+
+    it('should be able to submit when HTTP integration  form is valid', async () => {
+      await selectOptionAtIndex(1);
+      await findFormFields().at(0).vm.$emit('input', 'Name');
+      expect(findSubmitButton().attributes('disabled')).toBe(undefined);
+    });
+
+    it('should not be able to submit when Prometheus integration form is invalid', async () => {
+      await selectOptionAtIndex(2);
+      await findFormFields().at(0).vm.$emit('input', '');
+
+      expect(findSubmitButton().attributes('disabled')).toBe('disabled');
+    });
+
+    it('should be able to submit when Prometheus integration  form is valid', async () => {
+      await selectOptionAtIndex(2);
+      await findFormFields().at(0).vm.$emit('input', 'http://valid.url');
+
+      expect(findSubmitButton().attributes('disabled')).toBe(undefined);
+    });
+
+    it('should be able to submit when form is dirty', async () => {
+      wrapper.setData({
+        currentIntegration: { type: typeSet.http, name: 'Existing integration' },
+      });
+      await nextTick();
+      await findFormFields().at(0).vm.$emit('input', 'Updated name');
+
+      expect(findSubmitButton().attributes('disabled')).toBe(undefined);
+    });
+
+    it('should not be able to submit when form is pristine', async () => {
+      wrapper.setData({
+        currentIntegration: { type: typeSet.http, name: 'Existing integration' },
+      });
+      await nextTick();
+
+      expect(findSubmitButton().attributes('disabled')).toBe('disabled');
+    });
+
+    it('should disable submit button after click on validation failure', async () => {
+      await selectOptionAtIndex(1);
+      findSubmitButton().trigger('click');
+      await nextTick();
+
+      expect(findSubmitButton().attributes('disabled')).toBe('disabled');
+    });
+
+    it('should scroll to invalid field on validation failure', async () => {
+      await selectOptionAtIndex(1);
+      findSubmitButton().trigger('click');
+
+      expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
     });
   });
 });

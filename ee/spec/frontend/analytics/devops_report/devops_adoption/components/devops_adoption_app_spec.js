@@ -12,6 +12,7 @@ import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   MAX_SEGMENTS,
+  DEFAULT_POLLING_INTERVAL,
 } from 'ee/analytics/devops_report/devops_adoption/constants';
 import devopsAdoptionSegments from 'ee/analytics/devops_report/devops_adoption/graphql/queries/devops_adoption_segments.query.graphql';
 import getGroupsQuery from 'ee/analytics/devops_report/devops_adoption/graphql/queries/get_groups.query.graphql';
@@ -444,6 +445,37 @@ describe('DevopsAdoptionApp', () => {
 
       it('calls Sentry', () => {
         expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(segmentsErrorMessage);
+      });
+    });
+
+    describe('data polling', () => {
+      const mockIntervalId = 1234;
+
+      beforeEach(async () => {
+        jest.spyOn(window, 'setInterval').mockReturnValue(mockIntervalId);
+        jest.spyOn(window, 'clearInterval').mockImplementation();
+
+        wrapper = createComponent({
+          mockApollo: createMockApolloProvider({
+            groupsSpy: jest.fn().mockResolvedValueOnce({ ...initialResponse, pageInfo: null }),
+          }),
+        });
+
+        await waitForPromises();
+      });
+
+      it('sets pollTableData interval', () => {
+        expect(window.setInterval).toHaveBeenCalledWith(
+          wrapper.vm.pollTableData,
+          DEFAULT_POLLING_INTERVAL,
+        );
+        expect(wrapper.vm.pollingTableData).toBe(mockIntervalId);
+      });
+
+      it('clears pollTableData interval when destroying ', () => {
+        wrapper.vm.$destroy();
+
+        expect(window.clearInterval).toHaveBeenCalledWith(mockIntervalId);
       });
     });
   });

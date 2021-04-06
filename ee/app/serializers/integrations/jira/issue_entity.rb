@@ -41,13 +41,13 @@ module Integrations
       end
 
       expose :author do |jira_issue|
-        jira_user(jira_issue, :reporter)
+        jira_user(jira_issue.fields['reporter'])
       end
 
       expose :assignees do |jira_issue|
-        if jira_issue.assignee.present?
+        if jira_issue.fields['assignee']
           [
-            jira_user(jira_issue, :assignee)
+            jira_user(jira_issue.fields['assignee'])
           ]
         else
           []
@@ -59,11 +59,7 @@ module Integrations
       end
 
       expose :gitlab_web_url do |jira_issue|
-        if ::Feature.enabled?(:jira_issues_show_integration, project, default_enabled: :yaml)
-          project_integrations_jira_issue_path(project, jira_issue.key)
-        else
-          nil
-        end
+        project_integrations_jira_issue_path(project, jira_issue.key)
       end
 
       expose :references do |jira_issue|
@@ -78,26 +74,24 @@ module Integrations
 
       private
 
-      # rubocop:disable GitlabSecurity/PublicSend
-      def jira_user(jira_issue, user_type)
+      def jira_user(user)
         {
-          name: jira_issue.public_send(user_type).displayName,
-          web_url: jira_web_url(jira_issue, user_type),
-          avatar_url: jira_issue.public_send(user_type).avatarUrls['48x48']
+          name: user['displayName'],
+          web_url: jira_web_url(user),
+          avatar_url: user['avatarUrls']['48x48']
         }
       end
 
-      def jira_web_url(jira_issue, user_type)
+      def jira_web_url(user)
         # There are differences between Jira Cloud and Jira Server URLs and responses.
         # accountId is only available on Jira Cloud.
         # https://community.atlassian.com/t5/Jira-Questions/How-to-find-account-id-on-jira-on-premise/qaq-p/1168652
-        if jira_issue.public_send(user_type).try(:accountId)
-          "#{base_web_url}/people/#{jira_issue.public_send(user_type).accountId}"
+        if user['accountId'].present?
+          "#{base_web_url}/people/#{user['accountId']}"
         else
-          "#{base_web_url}/secure/ViewProfile.jspa?name=#{jira_issue.public_send(user_type).name}"
+          "#{base_web_url}/secure/ViewProfile.jspa?name=#{user['name']}"
         end
       end
-      # rubocop:enable GitlabSecurity/PublicSend
 
       def base_web_url
         @base_web_url ||= project.jira_service.url

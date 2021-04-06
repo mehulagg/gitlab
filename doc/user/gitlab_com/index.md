@@ -4,7 +4,7 @@ group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab.com settings
+# GitLab.com settings **(FREE SAAS)**
 
 This page contains information about the settings that are used on
 [GitLab.com](https://about.gitlab.com/pricing/).
@@ -50,7 +50,7 @@ Projects can be backed up in their entirety by exporting them either [through th
 
 With exports, be sure to take note of [what is and is not](../project/settings/import_export.md#exported-contents), included in a project export.
 
-Since GitLab is built on Git, you can back up **just** the repository of a project by [cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine. Similarly, if you need to back up just the wiki of a repository it can also be cloned and all files uploaded to that wiki are included [if they were uploaded after 2020-08-22](../project/wiki/index.md#creating-a-new-wiki-page).
+Since GitLab is built on Git, you can back up **just** the repository of a project by [cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine. Similarly, if you need to back up just the wiki of a repository it can also be cloned and all files uploaded to that wiki are included [if they were uploaded after 2020-08-22](../project/wiki/index.md#create-a-new-wiki-page).
 
 ## Alternative SSH port
 
@@ -121,7 +121,7 @@ NOTE:
 
 ## IP range
 
-GitLab.com is using the IP range `34.74.90.64/28` for traffic from its Web/API
+GitLab.com uses the IP ranges `34.74.90.64/28` and `34.74.226.0/24` for traffic from its Web/API
 fleet. This whole range is solely allocated to GitLab. You can expect connections from webhooks or repository mirroring to come
 from those IPs and allow them.
 
@@ -205,7 +205,7 @@ can be used for:
 - Downloading assets from a CDN
 - Any other commands that must run before the `git init`
 
-To use this feature, define a [CI/CD variable](../../ci/variables/README.md#create-a-custom-variable-in-the-ui) called
+To use this feature, define a [CI/CD variable](../../ci/variables/README.md#custom-cicd-variables) called
 `CI_PRE_CLONE_SCRIPT` that contains a bash script.
 
 [This example](../../development/pipelines.md#pre-clone-step)

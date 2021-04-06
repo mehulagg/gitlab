@@ -186,39 +186,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let(:multiline_commits) { subject.commits.select(&is_multiline) }
     let(:singleline_commits) { subject.commits.reject(&is_multiline) }
 
-    context 'when the total number of commits is safe' do
-      it 'returns the oldest multiline commit message' do
-        expect(subject.default_squash_commit_message).to eq(multiline_commits.last.message)
-      end
-    end
-
-    context 'when the total number of commits is big' do
-      let(:safe_number) { 20 }
-
-      before do
-        stub_const('MergeRequestDiff::COMMITS_SAFE_SIZE', safe_number)
-      end
-
-      it 'returns the oldest multiline commit message from safe number of commits' do
-        expect(subject.default_squash_commit_message).to eq(
-          "remove emtpy file.(beacase git ignore empty file)\nadd whitespace test file.\n"
-        )
-      end
-    end
-
-    it 'returns the merge request title if there are no multiline commits' do
-      expect(subject).to receive(:commits).and_return(
-        CommitCollection.new(project, singleline_commits)
-      )
-
-      expect(subject.default_squash_commit_message).to eq(subject.title)
-    end
-
-    it 'does not return commit messages from multiline merge commits' do
-      collection = CommitCollection.new(project, multiline_commits).enrich!
-
-      expect(collection.commits).to all( receive(:merge_commit?).and_return(true) )
-      expect(subject).to receive(:commits).and_return(collection)
+    it 'returns the merge request title' do
       expect(subject.default_squash_commit_message).to eq(subject.title)
     end
   end
@@ -417,6 +385,19 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     it 'returns merge requests that match the given squash commit' do
       is_expected.to eq([merge_request])
+    end
+  end
+
+  describe '.by_merge_or_squash_commit_sha' do
+    subject { described_class.by_merge_or_squash_commit_sha([sha1, sha2]) }
+
+    let(:sha1) { '123abc' }
+    let(:sha2) { '456abc' }
+    let(:mr1) { create(:merge_request, :merged, squash_commit_sha: sha1) }
+    let(:mr2) { create(:merge_request, :merged, merge_commit_sha: sha2) }
+
+    it 'returns merge requests that match the given squash and merge commits' do
+      is_expected.to include(mr1, mr2)
     end
   end
 
@@ -1353,6 +1334,24 @@ RSpec.describe MergeRequest, factory_default: :keep do
       expect(subject.work_in_progress?).to eq false
     end
 
+    it 'does not detect Draft: in the middle of the title' do
+      subject.title = 'Something with Draft: in the middle'
+
+      expect(subject.work_in_progress?).to eq false
+    end
+
+    it 'does not detect WIP at the end of the title' do
+      subject.title = 'Something ends with WIP'
+
+      expect(subject.work_in_progress?).to eq false
+    end
+
+    it 'does not detect Draft at the end of the title' do
+      subject.title = 'Something ends with Draft'
+
+      expect(subject.work_in_progress?).to eq false
+    end
+
     it "doesn't detect WIP for words starting with WIP" do
       subject.title = "Wipwap #{subject.title}"
       expect(subject.work_in_progress?).to eq false
@@ -1360,6 +1359,11 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     it "doesn't detect WIP for words containing with WIP" do
       subject.title = "WupWipwap #{subject.title}"
+      expect(subject.work_in_progress?).to eq false
+    end
+
+    it "doesn't detect draft for words containing with draft" do
+      subject.title = "Drafting #{subject.title}"
       expect(subject.work_in_progress?).to eq false
     end
 
@@ -1392,6 +1396,42 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
         expect(subject.work_in_progress?).to eq false
       end
+    end
+
+    it 'removes only WIP prefix from the MR title' do
+      subject.title = 'WIP: Implement feature called WIP'
+
+      expect(subject.wipless_title).to eq 'Implement feature called WIP'
+    end
+
+    it 'removes only draft prefix from the MR title' do
+      subject.title = 'Draft: Implement feature called draft'
+
+      expect(subject.wipless_title).to eq 'Implement feature called draft'
+    end
+
+    it 'does not remove WIP in the middle of the title' do
+      subject.title = 'Something with WIP in the middle'
+
+      expect(subject.wipless_title).to eq subject.title
+    end
+
+    it 'does not remove Draft in the middle of the title' do
+      subject.title = 'Something with Draft in the middle'
+
+      expect(subject.wipless_title).to eq subject.title
+    end
+
+    it 'does not remove WIP at the end of the title' do
+      subject.title = 'Something ends with WIP'
+
+      expect(subject.wipless_title).to eq subject.title
+    end
+
+    it 'does not remove Draft at the end of the title' do
+      subject.title = 'Something ends with Draft'
+
+      expect(subject.wipless_title).to eq subject.title
     end
   end
 
@@ -2899,6 +2939,14 @@ RSpec.describe MergeRequest, factory_default: :keep do
       expect(subject.mergeable?).to be_truthy
     end
 
+    it 'return true if #mergeable_state? is true and the MR #can_be_merged? is false' do
+      allow(subject).to receive(:mergeable_state?) { true }
+      expect(subject).to receive(:check_mergeability)
+      expect(subject).to receive(:can_be_merged?) { false }
+
+      expect(subject.mergeable?).to be_falsey
+    end
+
     context 'with skip_ci_check option' do
       before do
         allow(subject).to receive_messages(check_mergeability: nil,
@@ -3076,6 +3124,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     where(:status, :public_status) do
       'cannot_be_merged_rechecking' | 'checking'
+      'preparing'                   | 'checking'
       'checking'                    | 'checking'
       'cannot_be_merged'            | 'cannot_be_merged'
     end
@@ -4099,6 +4148,65 @@ RSpec.describe MergeRequest, factory_default: :keep do
       end
     end
 
+    describe '#mark_as_unchecked' do
+      subject { create(:merge_request, source_project: project, merge_status: merge_status) }
+
+      shared_examples 'for an invalid state transition' do
+        it 'is not a valid state transition' do
+          expect { subject.mark_as_unchecked! }.to raise_error(StateMachines::InvalidTransition)
+        end
+      end
+
+      shared_examples 'for an valid state transition' do
+        it 'is a valid state transition' do
+          expect { subject.mark_as_unchecked! }
+            .to change { subject.merge_status }
+            .from(merge_status.to_s)
+            .to(expected_merge_status)
+        end
+      end
+
+      context 'when the status is unchecked' do
+        let(:merge_status) { :unchecked }
+
+        include_examples 'for an invalid state transition'
+      end
+
+      context 'when the status is checking' do
+        let(:merge_status) { :checking }
+        let(:expected_merge_status) { 'unchecked' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is can_be_merged' do
+        let(:merge_status) { :can_be_merged }
+        let(:expected_merge_status) { 'unchecked' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is cannot_be_merged_recheck' do
+        let(:merge_status) { :cannot_be_merged_recheck }
+
+        include_examples 'for an invalid state transition'
+      end
+
+      context 'when the status is cannot_be_merged' do
+        let(:merge_status) { :cannot_be_merged }
+        let(:expected_merge_status) { 'cannot_be_merged_recheck' }
+
+        include_examples 'for an valid state transition'
+      end
+
+      context 'when the status is cannot_be_merged' do
+        let(:merge_status) { :cannot_be_merged }
+        let(:expected_merge_status) { 'cannot_be_merged_recheck' }
+
+        include_examples 'for an valid state transition'
+      end
+    end
+
     describe 'transition to cannot_be_merged' do
       let(:notification_service) { double(:notification_service) }
       let(:todo_service) { double(:todo_service) }
@@ -4795,6 +4903,35 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
         it { is_expected.to be_falsy }
       end
+    end
+  end
+
+  describe '#includes_ci_config?' do
+    let(:merge_request) { build(:merge_request) }
+    let(:project) { merge_request.project }
+
+    subject(:result) { merge_request.includes_ci_config? }
+
+    before do
+      allow(merge_request).to receive(:diff_stats).and_return(diff_stats)
+    end
+
+    context 'when diff_stats is nil' do
+      let(:diff_stats) {}
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when diff_stats does not include the ci config path of the project' do
+      let(:diff_stats) { [double(path: 'abc.txt')] }
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when diff_stats includes the ci config path of the project' do
+      let(:diff_stats) { [double(path: '.gitlab-ci.yml')] }
+
+      it { is_expected.to eq(true) }
     end
   end
 end

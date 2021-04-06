@@ -228,7 +228,7 @@
     padding: 0 2px;
 
     svg {
-      margin-bottom: 1px;
+      margin-bottom: 3px;
       height: $default-icon-size;
       width: $default-icon-size;
       border-radius: 50%;
@@ -261,7 +261,6 @@
 // migrated to Vue.
 
 .gl-button .award-emoji-block gl-emoji {
-  top: -1px;
   margin-top: -1px;
   margin-bottom: -1px;
 }
@@ -274,7 +273,9 @@
   // `position:absolute`
   &::after {
     content: '\a0';
+    display: block !important;
     width: 1em;
+    color: transparent;
   }
 
   .reaction-control-icon {

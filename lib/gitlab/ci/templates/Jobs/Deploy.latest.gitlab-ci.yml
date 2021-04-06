@@ -1,5 +1,5 @@
 .auto-deploy:
-  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v2.0.0"
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v2.6.0"
   dependencies: []
 
 review:
@@ -152,7 +152,7 @@ production_manual:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CANARY_ENABLED'
       when: manual
 
-# This job implements incremental rollout on for every push to `master`.
+# This job implements incremental rollout on for every push to the default branch.
 
 .rollout: &rollout_template
   extends: .auto-deploy

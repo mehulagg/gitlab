@@ -14,7 +14,7 @@ class ProjectsController < Projects::ApplicationController
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show]
 
-  before_action :whitelist_query_limiting, only: [:show, :create]
+  before_action :disable_query_limiting, only: [:show, :create]
   before_action :authenticate_user!, except: [:index, :show, :activity, :refs, :resolve, :unfoldered_environment_names]
   before_action :redirect_git_extension, only: [:show]
   before_action :project, except: [:index, :new, :create, :resolve]
@@ -33,6 +33,10 @@ class ProjectsController < Projects::ApplicationController
 
   before_action only: [:edit] do
     push_frontend_feature_flag(:allow_editing_commit_messages, @project)
+  end
+
+  before_action do
+    push_frontend_feature_flag(:refactor_blob_viewer, @project, default_enabled: :yaml)
   end
 
   layout :determine_layout
@@ -90,21 +94,13 @@ class ProjectsController < Projects::ApplicationController
     # Refresh the repo in case anything changed
     @repository = @project.repository
 
-    respond_to do |format|
-      if result[:status] == :success
-        flash[:notice] = _("Project '%{project_name}' was successfully updated.") % { project_name: @project.name }
-
-        format.html do
-          redirect_to(edit_project_path(@project, anchor: 'js-general-project-settings'))
-        end
-      else
-        flash[:alert] = result[:message]
-        @project.reset
-
-        format.html { render_edit }
-      end
-
-      format.js
+    if result[:status] == :success
+      flash[:notice] = _("Project '%{project_name}' was successfully updated.") % { project_name: @project.name }
+      redirect_to(edit_project_path(@project, anchor: 'js-general-project-settings'))
+    else
+      flash[:alert] = result[:message]
+      @project.reset
+      render 'edit'
     end
   end
 
@@ -329,7 +325,10 @@ class ProjectsController < Projects::ApplicationController
     if can?(current_user, :download_code, @project)
       return render 'projects/no_repo' unless @project.repository_exists?
 
-      experiment(:empty_repo_upload, project: @project).track(:view_project_show) if @project.can_current_user_push_to_default_branch?
+      if @project.can_current_user_push_to_default_branch?
+        property = @project.empty_repo? ? 'empty' : 'nonempty'
+        experiment(:empty_repo_upload, project: @project).track(:view_project_show, property: property)
+      end
 
       if @project.empty_repo?
         record_experiment_user(:invite_members_empty_project_version_a)
@@ -515,8 +514,8 @@ class ProjectsController < Projects::ApplicationController
     redirect_to(request.original_url.sub(%r{\.git/?\Z}, ''))
   end
 
-  def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/20826')
+  def disable_query_limiting
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20826')
   end
 
   def present_project
@@ -526,7 +525,7 @@ class ProjectsController < Projects::ApplicationController
   def export_rate_limit
     prefixed_action = "project_#{params[:action]}".to_sym
 
-    project_scope = params[:action] == :download_export ? @project : nil
+    project_scope = params[:action] == 'download_export' ? @project : nil
 
     if rate_limiter.throttled?(prefixed_action, scope: [current_user, project_scope].compact)
       rate_limiter.log_request(request, "#{prefixed_action}_request_limit".to_sym, current_user)

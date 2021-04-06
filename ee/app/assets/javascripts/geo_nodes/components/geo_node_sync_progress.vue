@@ -54,12 +54,7 @@ export default {
       :failure-count="failureCount"
       :total-count="totalCount"
     />
-    <gl-popover
-      :target="`syncProgress-${itemTitle}`"
-      placement="right"
-      triggers="hover focus"
-      :css-classes="['w-100']"
-    >
+    <gl-popover :target="`syncProgress-${itemTitle}`" placement="right" :css-classes="['w-100']">
       <template #title>
         <gl-sprintf :message="__('Number of %{itemTitle}')">
           <template #itemTitle>

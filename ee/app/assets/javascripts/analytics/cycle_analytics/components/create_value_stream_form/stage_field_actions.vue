@@ -44,7 +44,7 @@ export default {
       return this.canRemove ? __('Remove') : __('Hide');
     },
     hideActionIcon() {
-      return this.canRemove ? 'remove' : 'archive';
+      return this.canRemove ? 'remove' : 'eye-slash';
     },
     hideActionTestId() {
       return `stage-action-${this.canRemove ? 'remove' : 'hide'}-${this.index}`;

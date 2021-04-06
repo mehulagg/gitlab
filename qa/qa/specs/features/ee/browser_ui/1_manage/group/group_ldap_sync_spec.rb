@@ -34,7 +34,7 @@ module QA
         Runtime::Browser.visit(:gitlab, Page::Main::Login)
         Page::Main::Login.perform(&:sign_in_using_admin_credentials)
 
-        Runtime::Env.personal_access_token = Resource::PersonalAccessToken.fabricate!.access_token
+        Runtime::Env.personal_access_token = Resource::PersonalAccessToken.fabricate!.token
         Page::Main::Menu.perform(&:sign_out)
       end
 

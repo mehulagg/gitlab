@@ -209,9 +209,11 @@ describe('~ee/oncall_schedules/components/schedule/components/shifts/components/
 
   describe('weekDisplayShiftWidth', () => {
     const shiftTimeUnitWidth = 50;
+    const mockTimeframeInitialDate = new Date('2018-01-01T00:00:00');
 
     it.each`
-      shiftUnitIsHour | shiftRangeOverlap                       | shiftStartDateOutOfRange | value
+      shiftUnitIsHour | shiftRangeOverlapObject                 | shiftStartDateOutOfRange | value
+      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 1 }}  | ${false}                 | ${1}
       ${true}         | ${{ daysOverlap: 1, hoursOverlap: 4 }}  | ${false}                 | ${6}
       ${true}         | ${{ daysOverlap: 1, hoursOverlap: 8 }}  | ${false}                 | ${14}
       ${true}         | ${{ daysOverlap: 1, hoursOverlap: 24 }} | ${false}                 | ${48}
@@ -219,19 +221,41 @@ describe('~ee/oncall_schedules/components/schedule/components/shifts/components/
       ${false}        | ${{ daysOverlap: 1, hoursOverlap: 24 }} | ${false}                 | ${48}
       ${false}        | ${{ daysOverlap: 2, hoursOverlap: 48 }} | ${false}                 | ${98}
       ${false}        | ${{ daysOverlap: 3, hoursOverlap: 72 }} | ${false}                 | ${148}
-      ${false}        | ${{ daysOverlap: 3, hoursOverlap: 72 }} | ${true}                  | ${98}
+      ${false}        | ${{ daysOverlap: 3, hoursOverlap: 72 }} | ${true}                  | ${148}
     `(
       `returns $value px as the rotation width when shiftUnitIsHour is $shiftUnitIsHour, shiftStartDateOutOfRange is $shiftStartDateOutOfRange and shiftTimeUnitWidth is ${shiftTimeUnitWidth}`,
-      ({ shiftUnitIsHour, shiftRangeOverlap, shiftStartDateOutOfRange, value }) => {
+      ({
+        shiftUnitIsHour,
+        shiftRangeOverlapObject: { daysOverlap, hoursOverlap },
+        shiftStartDateOutOfRange,
+        value,
+      }) => {
         expect(
           weekDisplayShiftWidth(
             shiftUnitIsHour,
-            shiftRangeOverlap,
+            {
+              overlapEndDate: mockTimeStamp(mockTimeframeInitialDate, daysOverlap),
+              daysOverlap,
+              hoursOverlap,
+            },
             shiftStartDateOutOfRange,
             shiftTimeUnitWidth,
           ),
         ).toBe(value);
       },
     );
+  });
+
+  it('returns with an offset of 1 day width less only when the shift start date is before the timeframe start and the shift does not end at midnight', () => {
+    const mockOverlapEndDateNotAtMidnight = new Date('2018-01-01T03:02:01');
+
+    expect(
+      weekDisplayShiftWidth(
+        false,
+        { overlapEndDate: mockOverlapEndDateNotAtMidnight, daysOverlap: 3, hoursOverlap: 72 },
+        true,
+        50,
+      ),
+    ).toBe(98);
   });
 });

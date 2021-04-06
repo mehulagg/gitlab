@@ -11,7 +11,6 @@ export const initSecurityConfiguration = (el) => {
     autoDevopsHelpPagePath,
     autoDevopsPath,
     features,
-    helpPagePath,
     latestPipelinePath,
     autoFixEnabled,
     autoFixHelpPath,
@@ -19,7 +18,6 @@ export const initSecurityConfiguration = (el) => {
     containerScanningHelpPath,
     dependencyScanningHelpPath,
     toggleAutofixSettingEndpoint,
-    createSastMergeRequestPath,
     gitlabCiHistoryPath,
   } = el.dataset;
 
@@ -34,9 +32,7 @@ export const initSecurityConfiguration = (el) => {
           autoDevopsHelpPagePath,
           autoDevopsPath,
           features: JSON.parse(features),
-          helpPagePath,
           latestPipelinePath,
-          createSastMergeRequestPath,
           ...parseBooleanDataAttributes(el, [
             'autoDevopsEnabled',
             'canEnableAutoDevops',

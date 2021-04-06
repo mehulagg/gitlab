@@ -1,8 +1,8 @@
 import Api from 'ee/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import httpStatus from '~/lib/utils/http_status';
 import { __, sprintf } from '~/locale';
-import { FETCH_VALUE_STREAM_DATA } from '../constants';
+import { FETCH_VALUE_STREAM_DATA, OVERVIEW_STAGE_CONFIG } from '../constants';
 import {
   removeFlash,
   throwIfUserForbidden,
@@ -72,7 +72,9 @@ export const requestStageMedianValues = ({ commit }) => commit(types.REQUEST_STA
 
 export const receiveStageMedianValuesError = ({ commit }, error) => {
   commit(types.RECEIVE_STAGE_MEDIANS_ERROR, error);
-  createFlash(__('There was an error fetching median data for stages'));
+  createFlash({
+    message: __('There was an error fetching median data for stages'),
+  });
 };
 
 const fetchStageMedian = ({ groupId, valueStreamId, stageId, params }) =>
@@ -112,19 +114,21 @@ export const fetchStageMedianValues = ({ dispatch, commit, getters }) => {
     .catch((error) => dispatch('receiveStageMedianValuesError', error));
 };
 
-export const requestCycleAnalyticsData = ({ commit }) => commit(types.REQUEST_CYCLE_ANALYTICS_DATA);
+export const requestCycleAnalyticsData = ({ commit }) => commit(types.REQUEST_VALUE_STREAM_DATA);
 
 export const receiveCycleAnalyticsDataSuccess = ({ commit, dispatch }) => {
-  commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS);
+  commit(types.RECEIVE_VALUE_STREAM_DATA_SUCCESS);
   dispatch('typeOfWork/fetchTopRankedGroupLabels');
 };
 
 export const receiveCycleAnalyticsDataError = ({ commit }, { response = {} }) => {
   const { status = httpStatus.INTERNAL_SERVER_ERROR } = response;
 
-  commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR, status);
+  commit(types.RECEIVE_VALUE_STREAM_DATA_ERROR, status);
   if (status !== httpStatus.FORBIDDEN) {
-    createFlash(__('There was an error while fetching value stream analytics data.'));
+    createFlash({
+      message: __('There was an error while fetching value stream analytics data.'),
+    });
   }
 };
 
@@ -148,10 +152,16 @@ export const requestGroupStages = ({ commit }) => commit(types.REQUEST_GROUP_STA
 
 export const receiveGroupStagesError = ({ commit }, error) => {
   commit(types.RECEIVE_GROUP_STAGES_ERROR, error);
-  createFlash(__('There was an error fetching value stream analytics stages.'));
+  createFlash({
+    message: __('There was an error fetching value stream analytics stages.'),
+  });
 };
 
-export const setDefaultSelectedStage = ({ dispatch, getters }) => {
+export const setDefaultSelectedStage = ({ dispatch, getters, state: { featureFlags } = {} }) => {
+  if (featureFlags?.hasPathNavigation) {
+    return dispatch('setSelectedStage', OVERVIEW_STAGE_CONFIG);
+  }
+
   const { activeStages = [] } = getters;
 
   if (activeStages?.length) {
@@ -162,7 +172,9 @@ export const setDefaultSelectedStage = ({ dispatch, getters }) => {
     ]);
   }
 
-  createFlash(__('There was an error while fetching value stream analytics data.'));
+  createFlash({
+    message: __('There was an error while fetching value stream analytics data.'),
+  });
   return Promise.resolve();
 };
 
@@ -203,12 +215,17 @@ export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
 export const requestUpdateStage = ({ commit }) => commit(types.REQUEST_UPDATE_STAGE);
 export const receiveUpdateStageSuccess = ({ commit, dispatch }, updatedData) => {
   commit(types.RECEIVE_UPDATE_STAGE_SUCCESS);
-  createFlash(__('Stage data updated'), 'notice');
+  createFlash({
+    message: __('Stage data updated'),
+    type: 'notice',
+  });
   return Promise.resolve()
     .then(() => dispatch('fetchGroupStagesAndEvents'))
     .then(() => dispatch('customStages/showEditForm', updatedData))
     .catch(() => {
-      createFlash(__('There was a problem refreshing the data, please try again'));
+      createFlash({
+        message: __('There was a problem refreshing the data, please try again'),
+      });
     });
 };
 
@@ -224,7 +241,9 @@ export const receiveUpdateStageError = (
       ? sprintf(__(`'%{name}' stage already exists`), { name })
       : __('There was a problem saving your custom stage, please try again');
 
-  createFlash(__(message));
+  createFlash({
+    message: __(message),
+  });
   return dispatch('customStages/setStageFormErrors', errors);
 };
 
@@ -249,13 +268,18 @@ export const updateStage = ({ dispatch, getters }, { id, ...params }) => {
 export const requestRemoveStage = ({ commit }) => commit(types.REQUEST_REMOVE_STAGE);
 export const receiveRemoveStageSuccess = ({ commit, dispatch }) => {
   commit(types.RECEIVE_REMOVE_STAGE_RESPONSE);
-  createFlash(__('Stage removed'), 'notice');
+  createFlash({
+    message: __('Stage removed'),
+    type: 'notice',
+  });
   return dispatch('fetchCycleAnalyticsData');
 };
 
 export const receiveRemoveStageError = ({ commit }) => {
   commit(types.RECEIVE_REMOVE_STAGE_RESPONSE);
-  createFlash(__('There was an error removing your custom stage, please try again'));
+  createFlash({
+    message: __('There was an error removing your custom stage, please try again'),
+  });
 };
 
 export const removeStage = ({ dispatch, getters }, stageId) => {
@@ -272,10 +296,10 @@ export const removeStage = ({ dispatch, getters }, stageId) => {
 };
 
 export const initializeCycleAnalyticsSuccess = ({ commit }) =>
-  commit(types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS);
+  commit(types.INITIALIZE_VALUE_STREAM_SUCCESS);
 
 export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {}) => {
-  commit(types.INITIALIZE_CYCLE_ANALYTICS, initialData);
+  commit(types.INITIALIZE_VSA, initialData);
 
   const {
     featureFlags = {},
@@ -315,7 +339,9 @@ export const receiveReorderStageSuccess = ({ commit }) =>
 
 export const receiveReorderStageError = ({ commit }) => {
   commit(types.RECEIVE_REORDER_STAGE_ERROR);
-  createFlash(__('There was an error updating the stage order. Please try reloading the page.'));
+  createFlash({
+    message: __('There was an error updating the stage order. Please try reloading the page.'),
+  });
 };
 
 export const reorderStage = ({ dispatch, getters }, initialData) => {

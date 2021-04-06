@@ -60,6 +60,11 @@ export default {
       required: false,
       default: null,
     },
+    lines: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
     note: {
       type: Object,
       required: false,
@@ -201,7 +206,7 @@ export default {
     changedCommentText() {
       return sprintf(
         __(
-          'This comment has changed since you started editing, please review the %{startTag}updated comment%{endTag} to ensure information is not lost.',
+          'This comment changed after you started editing it. Review the %{startTag}updated comment%{endTag} to ensure information is not lost.',
         ),
         {
           startTag: `<a href="${this.noteHash}" target="_blank" rel="noopener noreferrer">`,
@@ -333,6 +338,7 @@ export default {
           :help-page-path="helpPagePath"
           :show-suggest-popover="showSuggestPopover"
           :textarea-value="updatedNoteBody"
+          :lines="lines"
           @handleSuggestDismissed="() => $emit('handleSuggestDismissed')"
         >
           <template #textarea>

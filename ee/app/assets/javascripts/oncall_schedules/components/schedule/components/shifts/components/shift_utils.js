@@ -2,6 +2,7 @@ import {
   PRESET_TYPES,
   DAYS_IN_WEEK,
   ASSIGNEE_SPACER,
+  ASSIGNEE_SPACER_SMALL,
   HOURS_IN_DAY,
 } from 'ee/oncall_schedules/constants';
 import {
@@ -50,8 +51,8 @@ export const currentTimeframeEndsAt = (timeframeStart, presetType) => {
  * => true
  *
  */
-export const shiftShouldRender = (shiftRangeOverlap = {}) => {
-  return Boolean(shiftRangeOverlap?.hoursOverlap);
+export const shiftShouldRender = (shiftRangeOverlap) => {
+  return Boolean(shiftRangeOverlap.hoursOverlap);
 };
 
 /**
@@ -175,7 +176,7 @@ export const daysUntilEndOfTimeFrame = (shiftRangeOverlap, timeframeItem, preset
  * @param {String} shiftTimeUnitWidth - the current grid type i.e. Week, Day, Hour.
  * @param {Date} shiftStartsAt - current shift start Date.
  * @param {Date} timeframeItem - the current timeframe start Date.
- * * @param {String} presetType - the current grid type i.e. Week, Day, Hour.
+ * @param {String} presetType - the current grid type i.e. Week, Day, Hour.
  * @returns {Number}
  *
  * @example
@@ -225,7 +226,7 @@ export const weekDisplayShiftLeft = (
  * @returns {Number}
  *
  * @example
- * weekDisplayShiftWidth(false, { daysOverlap: 3 }, false , 50)
+ * weekDisplayShiftWidth(false, { daysOverlap: 3, hoursOverlap: 72, overlapEndDate: 1610496000000 }, false , 50)
  * => 148
  *
  */
@@ -236,13 +237,13 @@ export const weekDisplayShiftWidth = (
   shiftTimeUnitWidth,
 ) => {
   if (shiftUnitIsHour) {
+    const SPACER = shiftRangeOverlap.hoursOverlap === 1 ? ASSIGNEE_SPACER_SMALL : ASSIGNEE_SPACER;
     return (
-      Math.floor((shiftTimeUnitWidth / HOURS_IN_DAY) * shiftRangeOverlap.hoursOverlap) -
-      ASSIGNEE_SPACER
+      Math.floor((shiftTimeUnitWidth / HOURS_IN_DAY) * shiftRangeOverlap.hoursOverlap) - SPACER
     );
   }
 
-  const widthOffset = shiftStartDateOutOfRange ? 1 : 0;
-
+  const shiftEndsAtMidnight = new Date(shiftRangeOverlap.overlapEndDate).getHours() === 0;
+  const widthOffset = shiftStartDateOutOfRange && !shiftEndsAtMidnight ? 1 : 0;
   return shiftTimeUnitWidth * (shiftRangeOverlap.daysOverlap - widthOffset) - ASSIGNEE_SPACER;
 };

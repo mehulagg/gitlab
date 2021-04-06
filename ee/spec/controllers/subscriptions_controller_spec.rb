@@ -5,21 +5,24 @@ require 'spec_helper'
 RSpec.describe SubscriptionsController do
   let_it_be(:user) { create(:user) }
 
-  describe 'GET #new' do
-    subject { get :new, params: { plan_id: 'bronze_id' } }
+  shared_examples 'unauthenticated subscription request' do |redirect_from|
+    it { is_expected.to have_gitlab_http_status(:redirect) }
+    it { is_expected.to redirect_to new_user_registration_path(redirect_from: redirect_from) }
 
-    context 'with unauthenticated user' do
-      it { is_expected.to have_gitlab_http_status(:redirect) }
-      it { is_expected.to redirect_to new_user_registration_path(redirect_from: 'checkout') }
+    it 'stores subscription URL for later' do
+      subject
 
-      it 'stores subscription URL for later' do
-        subject
+      expected_subscription_path = new_subscriptions_path(plan_id: 'bronze_id') if redirect_from == 'checkout'
+      expected_subscription_path = buy_minutes_subscriptions_path(plan_id: 'bronze_id') if redirect_from == 'buy_minutes'
 
-        expected_subscription_path = new_subscriptions_path(plan_id: 'bronze_id')
-
-        expect(controller.stored_location_for(:user)).to eq(expected_subscription_path)
-      end
+      expect(controller.stored_location_for(:user)).to eq(expected_subscription_path)
     end
+  end
+
+  describe 'GET #new' do
+    subject(:get_new) { get :new, params: { plan_id: 'bronze_id' } }
+
+    it_behaves_like 'unauthenticated subscription request', 'checkout'
 
     context 'with authenticated user' do
       before do
@@ -28,6 +31,90 @@ RSpec.describe SubscriptionsController do
 
       it { is_expected.to render_template 'layouts/checkout' }
       it { is_expected.to render_template :new }
+
+      context 'when there are groups eligible for the subscription' do
+        let_it_be(:group) { create(:group) }
+
+        before do
+          group.add_owner(user)
+
+          allow_next_instance_of(GitlabSubscriptions::FilterPurchaseEligibleNamespacesService, user: user, namespaces: [group]) do |instance|
+            allow(instance).to receive(:execute).and_return(instance_double(ServiceResponse, success?: true, payload: [group]))
+          end
+        end
+
+        it 'assigns the eligible groups for the subscription' do
+          get_new
+
+          expect(assigns(:eligible_groups)).to eq [group]
+        end
+      end
+
+      context 'when there are no eligible groups for the subscription' do
+        it 'assigns eligible groups as an empty array' do
+          allow_next_instance_of(GitlabSubscriptions::FilterPurchaseEligibleNamespacesService, user: user, namespaces: []) do |instance|
+            allow(instance).to receive(:execute).and_return(instance_double(ServiceResponse, success?: true, payload: []))
+          end
+
+          get_new
+
+          expect(assigns(:eligible_groups)).to eq []
+        end
+      end
+    end
+  end
+
+  describe 'GET #buy_minutes' do
+    subject(:buy_minutes) { get :buy_minutes, params: { plan_id: 'bronze_id' } }
+
+    it_behaves_like 'unauthenticated subscription request', 'buy_minutes'
+
+    context 'with authenticated user' do
+      before do
+        sign_in(user)
+      end
+
+      it { is_expected.to render_template 'layouts/checkout' }
+      it { is_expected.to render_template :buy_minutes }
+
+      context 'when there are groups eligible for the subscription' do
+        let_it_be(:group) { create(:group) }
+
+        before do
+          group.add_owner(user)
+
+          allow_next_instance_of(GitlabSubscriptions::FilterPurchaseEligibleNamespacesService, user: user, namespaces: [group]) do |instance|
+            allow(instance).to receive(:execute).and_return(instance_double(ServiceResponse, success?: true, payload: [group]))
+          end
+        end
+
+        it 'assigns the eligible groups for the subscription' do
+          buy_minutes
+
+          expect(assigns(:eligible_groups)).to eq [group]
+        end
+      end
+
+      context 'when there are no eligible groups for the subscription' do
+        it 'assigns eligible groups as an empty array' do
+          allow_next_instance_of(GitlabSubscriptions::FilterPurchaseEligibleNamespacesService, user: user, namespaces: []) do |instance|
+            allow(instance).to receive(:execute).and_return(instance_double(ServiceResponse, success?: true, payload: []))
+          end
+
+          buy_minutes
+
+          expect(assigns(:eligible_groups)).to eq []
+        end
+      end
+    end
+
+    context 'with :new_route_ci_minutes_purchase disabled' do
+      before do
+        sign_in(user)
+        stub_feature_flags(new_route_ci_minutes_purchase: false)
+      end
+
+      it { is_expected.to have_gitlab_http_status(:not_found) }
     end
   end
 
@@ -191,7 +278,6 @@ RSpec.describe SubscriptionsController do
       end
 
       context 'when selecting an existing group' do
-        let_it_be(:selected_group) { create(:group) }
         let(:params) do
           {
             selected_group: selected_group.id,
@@ -200,21 +286,63 @@ RSpec.describe SubscriptionsController do
           }
         end
 
-        before do
-          selected_group.add_owner(user)
+        context 'when the selected group is eligible for a new subscription' do
+          let_it_be(:selected_group) { create(:group) }
+
+          before do
+            selected_group.add_owner(user)
+
+            allow_next_instance_of(
+              GitlabSubscriptions::FilterPurchaseEligibleNamespacesService,
+              user: user,
+              namespaces: [selected_group]
+            ) do |instance|
+              allow(instance)
+                .to receive(:execute)
+                .and_return(instance_double(ServiceResponse, success?: true, payload: [selected_group]))
+            end
+          end
+
+          it 'does not create a group' do
+            expect { subject }.to not_change { Group.count }
+          end
+
+          it 'returns the selected group location in JSON format' do
+            subject
+
+            plan_id = params[:subscription][:plan_id]
+            quantity = params[:subscription][:quantity]
+
+            expect(response.body).to eq({ location: "/#{selected_group.path}?plan_id=#{plan_id}&purchased_quantity=#{quantity}" }.to_json)
+          end
         end
 
-        it 'does not create a group' do
-          expect { subject }.to not_change { Group.count }
-        end
+        context 'when the selected group is ineligible for a new subscription' do
+          let_it_be(:selected_group) { create(:group) }
 
-        it 'returns the selected group location in JSON format' do
-          subject
+          before do
+            selected_group.add_owner(user)
 
-          plan_id = params[:subscription][:plan_id]
-          quantity = params[:subscription][:quantity]
+            allow_next_instance_of(
+              GitlabSubscriptions::FilterPurchaseEligibleNamespacesService,
+              user: user,
+              namespaces: [selected_group]
+            ) do |instance|
+              allow(instance)
+                .to receive(:execute)
+                .and_return(instance_double(ServiceResponse, success?: true, payload: []))
+            end
+          end
 
-          expect(response.body).to eq({ location: "/#{selected_group.path}?plan_id=#{plan_id}&purchased_quantity=#{quantity}" }.to_json)
+          it 'does not create a group' do
+            expect { subject }.to not_change { Group.count }
+          end
+
+          it 'returns a 404 not found' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
         end
 
         context 'when selected group is a sub group' do

@@ -1,54 +1,46 @@
-import MockAdapter from 'axios-mock-adapter';
-import Vue from 'vue';
-
+import { shallowMount } from '@vue/test-utils';
 import EpicBody from 'ee/epic/components/epic_body.vue';
 import createStore from 'ee/epic/store';
-
-import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
-import { initialRequest } from 'jest/issue_show/mock_data';
-import { TEST_HOST } from 'spec/test_constants';
-import axios from '~/lib/utils/axios_utils';
+import IssuableBody from '~/issue_show/components/app.vue';
 import { mockEpicMeta, mockEpicData } from '../mock_data';
 
 describe('EpicBodyComponent', () => {
-  useMockIntersectionObserver();
+  let wrapper;
 
-  let vm;
-  let mock;
+  const findIssuableBody = () => wrapper.findComponent(IssuableBody);
 
-  beforeEach(() => {
-    mock = new MockAdapter(axios);
-    mock.onGet(`${TEST_HOST}/realtime_changes`).reply(200, initialRequest);
+  const store = createStore();
+  store.dispatch('setEpicMeta', mockEpicMeta);
+  store.dispatch('setEpicData', mockEpicData);
 
-    const Component = Vue.extend(EpicBody);
-    const store = createStore();
-    store.dispatch('setEpicMeta', mockEpicMeta);
-    store.dispatch('setEpicData', mockEpicData);
-
-    vm = mountComponentWithStore(Component, {
+  const createComponent = () => {
+    wrapper = shallowMount(EpicBody, {
       store,
     });
-
-    jest.advanceTimersByTime(5);
-  });
+  };
 
   afterEach(() => {
-    mock.restore();
-    vm.$destroy();
+    wrapper.destroy();
   });
 
-  describe('template', () => {
-    it('renders epic body container element with class `detail-page-description` & `issuable-details` & `content-block`', () => {
-      const el = vm.$el.querySelector('.detail-page-description');
-      expect(el).not.toBeNull();
-      expect(el.classList.contains('issuable-details')).toBe(true);
-      expect(el.classList.contains('content-block')).toBe(true);
-    });
+  it('renders an issuable body component', () => {
+    createComponent();
 
-    it('renders epic body elements', () => {
-      expect(vm.$el.querySelector('.title-container')).not.toBeNull();
-      expect(vm.$el.querySelector('.description')).not.toBeNull();
+    expect(findIssuableBody().exists()).toBe(true);
+    expect(findIssuableBody().props()).toMatchObject({
+      endpoint: 'http://test.host',
+      updateEndpoint: '/groups/frontend-fixtures-group/-/epics/1.json',
+      canUpdate: true,
+      canDestroy: true,
+      showInlineEditButton: true,
+      showDeleteButton: true,
+      enableAutocomplete: true,
+      zoomMeetingUrl: '',
+      publishedIncidentUrl: '',
+      issuableRef: '',
+      issuableStatus: '',
+      initialTitleHtml: 'This is a sample epic',
+      initialTitleText: 'This is a sample epic',
     });
   });
 });

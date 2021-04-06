@@ -3,7 +3,7 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import IterationDropdown from 'ee/sidebar/components/iteration_dropdown.vue';
 import { iterationSelectTextMap } from 'ee/sidebar/constants';
-import groupIterationsQuery from 'ee/sidebar/queries/group_iterations.query.graphql';
+import groupIterationsQuery from 'ee/sidebar/queries/iterations.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 
 const localVue = createLocalVue();

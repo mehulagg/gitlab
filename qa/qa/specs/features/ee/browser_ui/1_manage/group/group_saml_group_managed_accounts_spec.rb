@@ -19,7 +19,7 @@ module QA
 
         @saml_idp_service = Flow::Saml.run_saml_idp_service(@group.path)
 
-        @api_client = Runtime::API::Client.new(:gitlab, personal_access_token: Runtime::Env.admin_personal_access_token)
+        @api_client = Runtime::API::Client.as_admin
 
         @developer_user = Resource::User.fabricate_via_api!
 

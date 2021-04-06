@@ -82,7 +82,7 @@ module EE
     class_methods do
       # This is an ActiveRecord scope in CE
       def with_api_entity_associations
-        super.preload(:blocking_merge_requests)
+        super.preload(:blocking_merge_requests, target_project: [group: :saml_provider])
       end
 
       def sort_by_attribute(method, *args, **kwargs)
@@ -268,6 +268,10 @@ module EE
       wrapped_approval_rules.select do |rule|
         rule.approvers.pluck(:id).include?(user_id)
       end
+    end
+
+    def security_reports_up_to_date?
+      project.security_reports_up_to_date_for_ref?(target_branch)
     end
 
     private

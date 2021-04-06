@@ -16,9 +16,11 @@ import {
   MAX_SEGMENTS,
   DATE_TIME_FORMAT,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
+  DEFAULT_POLLING_INTERVAL,
 } from '../constants';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
+import { shouldPollTableData } from '../utils/helpers';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
 import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
 import DevopsAdoptionTable from './devops_adoption_table.vue';
@@ -48,6 +50,7 @@ export default {
       isLoadingGroups: false,
       requestCount: 0,
       selectedSegment: null,
+      openModal: false,
       errors: {
         [DEVOPS_ADOPTION_ERROR_KEYS.groups]: false,
         [DEVOPS_ADOPTION_ERROR_KEYS.segments]: false,
@@ -56,6 +59,7 @@ export default {
         nodes: [],
         pageInfo: null,
       },
+      pollingTableData: null,
     };
   },
   apollo: {
@@ -98,7 +102,27 @@ export default {
   created() {
     this.fetchGroups();
   },
+  beforeDestroy() {
+    clearInterval(this.pollingTableData);
+  },
   methods: {
+    pollTableData() {
+      const shouldPoll = shouldPollTableData({
+        segments: this.devopsAdoptionSegments.nodes,
+        timestamp: this.devopsAdoptionSegments?.nodes[0]?.latestSnapshot?.recordedAt,
+        openModal: this.openModal,
+      });
+
+      if (shouldPoll) {
+        this.$apollo.queries.devopsAdoptionSegments.refetch();
+      }
+    },
+    trackModalOpenState(state) {
+      this.openModal = state;
+    },
+    startPollingTableData() {
+      this.pollingTableData = setInterval(this.pollTableData, DEFAULT_POLLING_INTERVAL);
+    },
     handleError(key, error) {
       this.errors[key] = true;
       Sentry.captureException(error);
@@ -126,6 +150,7 @@ export default {
             this.fetchGroups(pageInfo.nextPage);
           } else {
             this.isLoadingGroups = false;
+            this.startPollingTableData();
           }
         })
         .catch((error) => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
@@ -153,7 +178,8 @@ export default {
       v-if="hasGroupData"
       :key="modalKey"
       :groups="groups.nodes"
-      :segment="selectedSegment"
+      :enabled-groups="devopsAdoptionSegments.nodes"
+      @trackModalOpenState="trackModalOpenState"
     />
     <div v-if="hasSegmentsData" class="gl-mt-3">
       <div
@@ -178,6 +204,7 @@ export default {
         :segments="devopsAdoptionSegments.nodes"
         :selected-segment="selectedSegment"
         @set-selected-segment="setSelectedSegment"
+        @trackModalOpenState="trackModalOpenState"
       />
     </div>
     <devops-adoption-empty-state

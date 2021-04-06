@@ -23,12 +23,12 @@ module Ci
       end
 
       pipeline.builds.latest.skipped.find_each do |skipped|
-        retry_optimistic_lock(skipped) { |build| build.process(current_user) }
+        retry_optimistic_lock(skipped, name: 'ci_retry_pipeline') { |build| build.process(current_user) }
       end
 
       pipeline.reset_ancestor_bridges!
 
-      MergeRequests::AddTodoWhenBuildFailsService
+      ::MergeRequests::AddTodoWhenBuildFailsService
         .new(project, current_user)
         .close_all(pipeline)
 

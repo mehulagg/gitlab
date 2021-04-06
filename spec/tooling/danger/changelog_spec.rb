@@ -1,25 +1,22 @@
 # frozen_string_literal: true
 
-require_relative 'danger_spec_helper'
+require 'gitlab-dangerfiles'
+require 'gitlab/dangerfiles/spec_helper'
 
-require_relative '../../../tooling/danger/helper'
 require_relative '../../../tooling/danger/changelog'
+require_relative '../../../tooling/danger/project_helper'
 
 RSpec.describe Tooling::Danger::Changelog do
-  include DangerSpecHelper
+  include_context "with dangerfile"
 
-  let(:change_class) { Tooling::Danger::Helper::Change }
-  let(:changes_class) { Tooling::Danger::Helper::Changes }
-  let(:changes) { changes_class.new([]) }
-
-  let(:mr_labels) { [] }
-  let(:sanitize_mr_title) { 'Fake Title' }
-
-  let(:fake_helper) { double('fake-helper', changes: changes, mr_iid: 1234, mr_title: sanitize_mr_title, mr_labels: mr_labels) }
-
-  let(:fake_danger) { new_fake_danger.include(described_class) }
+  let(:fake_danger) { DangerSpecHelper.fake_danger.include(described_class) }
+  let(:fake_project_helper) { double('fake-project-helper', helper: fake_helper).tap { |h| h.class.include(Tooling::Danger::ProjectHelper) } }
 
   subject(:changelog) { fake_danger.new(helper: fake_helper) }
+
+  before do
+    allow(changelog).to receive(:project_helper).and_return(fake_project_helper)
+  end
 
   describe '#required_reasons' do
     subject { changelog.required_reasons }
@@ -164,82 +161,161 @@ RSpec.describe Tooling::Danger::Changelog do
   describe '#modified_text' do
     subject { changelog.modified_text }
 
-    context "when title is not changed from sanitization", :aggregate_failures do
-      let(:sanitize_mr_title) { 'Fake Title' }
+    context 'when in CI context' do
+      shared_examples 'changelog modified text' do |key|
+        specify do
+          expect(subject).to include('CHANGELOG.md was edited')
+          expect(subject).to include('bin/changelog -m 1234 "Fake Title"')
+          expect(subject).to include('bin/changelog --ee -m 1234 "Fake Title"')
+        end
+      end
 
-      specify do
-        expect(subject).to include('CHANGELOG.md was edited')
-        expect(subject).to include('bin/changelog -m 1234 "Fake Title"')
-        expect(subject).to include('bin/changelog --ee -m 1234 "Fake Title"')
+      before do
+        allow(fake_helper).to receive(:ci?).and_return(true)
+      end
+
+      context "when title is not changed from sanitization", :aggregate_failures do
+        let(:mr_title) { 'Fake Title' }
+
+        it_behaves_like 'changelog modified text'
+      end
+
+      context "when title needs sanitization", :aggregate_failures do
+        let(:mr_title) { 'DRAFT: Fake Title' }
+
+        it_behaves_like 'changelog modified text'
       end
     end
 
-    context "when title needs sanitization", :aggregate_failures do
-      let(:sanitize_mr_title) { 'DRAFT: Fake Title' }
+    context 'when in local context' do
+      let(:mr_title) { 'Fake Title' }
+
+      before do
+        allow(fake_helper).to receive(:ci?).and_return(false)
+      end
 
       specify do
         expect(subject).to include('CHANGELOG.md was edited')
-        expect(subject).to include('bin/changelog -m 1234 "Fake Title"')
-        expect(subject).to include('bin/changelog --ee -m 1234 "Fake Title"')
+        expect(subject).not_to include('bin/changelog')
       end
     end
   end
 
   describe '#required_texts' do
-    let(:sanitize_mr_title) { 'Fake Title' }
+    let(:mr_title) { 'Fake Title' }
 
     subject { changelog.required_texts }
 
-    shared_examples 'changelog required text' do |key|
-      specify do
-        expect(subject).to have_key(key)
-        expect(subject[key]).to include('CHANGELOG missing')
-        expect(subject[key]).to include('bin/changelog -m 1234 "Fake Title"')
-        expect(subject[key]).not_to include('--ee')
+    context 'when in CI context' do
+      before do
+        allow(fake_helper).to receive(:ci?).and_return(true)
+      end
+
+      shared_examples 'changelog required text' do |key|
+        specify do
+          expect(subject).to have_key(key)
+          expect(subject[key]).to include('CHANGELOG missing')
+          expect(subject[key]).to include('bin/changelog -m 1234 "Fake Title"')
+          expect(subject[key]).not_to include('--ee')
+        end
+      end
+
+      context 'with a new migration file' do
+        let(:changes) { changes_class.new([change_class.new('foo', :added, :migration)]) }
+
+        context "when title is not changed from sanitization", :aggregate_failures do
+          it_behaves_like 'changelog required text', :db_changes
+        end
+
+        context "when title needs sanitization", :aggregate_failures do
+          let(:mr_title) { 'DRAFT: Fake Title' }
+
+          it_behaves_like 'changelog required text', :db_changes
+        end
+      end
+
+      context 'with a removed feature flag file' do
+        let(:changes) { changes_class.new([change_class.new('foo', :deleted, :feature_flag)]) }
+
+        it_behaves_like 'changelog required text', :feature_flag_removed
       end
     end
 
-    context 'with a new migration file' do
-      let(:changes) { changes_class.new([change_class.new('foo', :added, :migration)]) }
-
-      context "when title is not changed from sanitization", :aggregate_failures do
-        it_behaves_like 'changelog required text', :db_changes
+    context 'when in local context' do
+      before do
+        allow(fake_helper).to receive(:ci?).and_return(false)
       end
 
-      context "when title needs sanitization", :aggregate_failures do
-        let(:sanitize_mr_title) { 'DRAFT: Fake Title' }
-
-        it_behaves_like 'changelog required text', :db_changes
+      shared_examples 'changelog required text' do |key|
+        specify do
+          expect(subject).to have_key(key)
+          expect(subject[key]).to include('CHANGELOG missing')
+          expect(subject[key]).not_to include('bin/changelog')
+          expect(subject[key]).not_to include('--ee')
+        end
       end
-    end
 
-    context 'with a removed feature flag file' do
-      let(:changes) { changes_class.new([change_class.new('foo', :deleted, :feature_flag)]) }
+      context 'with a new migration file' do
+        let(:changes) { changes_class.new([change_class.new('foo', :added, :migration)]) }
 
-      it_behaves_like 'changelog required text', :feature_flag_removed
+        context "when title is not changed from sanitization", :aggregate_failures do
+          it_behaves_like 'changelog required text', :db_changes
+        end
+
+        context "when title needs sanitization", :aggregate_failures do
+          let(:mr_title) { 'DRAFT: Fake Title' }
+
+          it_behaves_like 'changelog required text', :db_changes
+        end
+      end
+
+      context 'with a removed feature flag file' do
+        let(:changes) { changes_class.new([change_class.new('foo', :deleted, :feature_flag)]) }
+
+        it_behaves_like 'changelog required text', :feature_flag_removed
+      end
     end
   end
 
   describe '#optional_text' do
     subject { changelog.optional_text }
 
-    context "when title is not changed from sanitization", :aggregate_failures do
-      let(:sanitize_mr_title) { 'Fake Title' }
+    context 'when in CI context' do
+      shared_examples 'changelog optional text' do |key|
+        specify do
+          expect(subject).to include('CHANGELOG missing')
+          expect(subject).to include('bin/changelog -m 1234 "Fake Title"')
+          expect(subject).to include('bin/changelog --ee -m 1234 "Fake Title"')
+        end
+      end
 
-      specify do
-        expect(subject).to include('CHANGELOG missing')
-        expect(subject).to include('bin/changelog -m 1234 "Fake Title"')
-        expect(subject).to include('bin/changelog --ee -m 1234 "Fake Title"')
+      before do
+        allow(fake_helper).to receive(:ci?).and_return(true)
+      end
+
+      context "when title is not changed from sanitization", :aggregate_failures do
+        let(:mr_title) { 'Fake Title' }
+
+        it_behaves_like 'changelog optional text'
+      end
+
+      context "when title needs sanitization", :aggregate_failures do
+        let(:mr_title) { 'DRAFT: Fake Title' }
+
+        it_behaves_like 'changelog optional text'
       end
     end
 
-    context "when title needs sanitization", :aggregate_failures do
-      let(:sanitize_mr_title) { 'DRAFT: Fake Title' }
+    context 'when in local context' do
+      let(:mr_title) { 'Fake Title' }
+
+      before do
+        allow(fake_helper).to receive(:ci?).and_return(false)
+      end
 
       specify do
         expect(subject).to include('CHANGELOG missing')
-        expect(subject).to include('bin/changelog -m 1234 "Fake Title"')
-        expect(subject).to include('bin/changelog --ee -m 1234 "Fake Title"')
+        expect(subject).not_to include('bin/changelog')
       end
     end
   end

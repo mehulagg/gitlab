@@ -91,20 +91,72 @@ RSpec.describe GroupsHelper do
         stub_feature_flags(group_ci_cd_analytics_page: false)
       end
 
-      it 'hides CI / CD Analytics' do
+      it 'hides CI/CD Analytics' do
         expect(helper.group_sidebar_links).not_to include(:group_ci_cd_analytics)
       end
     end
 
-    context 'when the user does not have permissions to view the CI / CD Analytics page' do
+    context 'when the user does not have permissions to view the CI/CD Analytics page' do
       let(:current_user) { create(:user) }
 
       before do
         group.add_guest(current_user)
       end
 
-      it 'hides CI / CD Analytics' do
+      it 'hides CI/CD Analytics' do
         expect(helper.group_sidebar_links).not_to include(:group_ci_cd_analytics)
+      end
+    end
+  end
+
+  describe '#render_setting_to_allow_project_access_token_creation?' do
+    context 'with self-managed' do
+      let_it_be(:parent) { create(:group) }
+      let_it_be(:group) { create(:group, parent: parent) }
+
+      before do
+        parent.add_owner(owner)
+        group.add_owner(owner)
+      end
+
+      it 'returns true if group is root' do
+        expect(helper.render_setting_to_allow_project_access_token_creation?(parent)).to be_truthy
+      end
+
+      it 'returns false if group is subgroup' do
+        expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsey
+      end
+    end
+
+    context 'on .com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+        stub_ee_application_setting(should_check_namespace_plan: true)
+      end
+
+      context 'with a free plan' do
+        let_it_be(:group) { create(:group) }
+
+        it 'returns false' do
+          expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsey
+        end
+      end
+
+      context 'with a paid plan' do
+        let_it_be(:parent) { create(:group_with_plan, plan: :bronze_plan) }
+        let_it_be(:group) { create(:group, parent: parent) }
+
+        before do
+          parent.add_owner(owner)
+        end
+
+        it 'returns true if group is root' do
+          expect(helper.render_setting_to_allow_project_access_token_creation?(parent)).to be_truthy
+        end
+
+        it 'returns false if group is subgroup' do
+          expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsey
+        end
       end
     end
   end

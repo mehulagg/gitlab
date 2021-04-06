@@ -6,7 +6,7 @@ import deleteProjectFromSecurityDashboard from 'ee/security_dashboard/graphql/mu
 import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
 import getProjects from 'ee/security_dashboard/graphql/queries/get_projects.query.graphql';
 import { createInvalidProjectMessage } from 'ee/security_dashboard/utils/first_class_project_manager_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
 import ProjectList from './project_list.vue';
@@ -82,7 +82,6 @@ export default {
               const newProject = results.addProjectToSecurityDashboard.project;
 
               const data = produce(sourceData, (draftData) => {
-                // eslint-disable-next-line no-param-reassign
                 draftData.instanceSecurityDashboard.projects.nodes = [
                   ...draftData.instanceSecurityDashboard.projects.nodes,
                   {
@@ -137,7 +136,9 @@ export default {
               },
             );
 
-            createFlash(errorMessages.join('<br/>'));
+            createFlash({
+              message: errorMessages.join('<br/>'),
+            });
           }
         })
         .finally(() => {
@@ -157,7 +158,6 @@ export default {
             const sourceData = store.readQuery({ query: projectsQuery });
 
             const data = produce(sourceData, (draftData) => {
-              // eslint-disable-next-line no-param-reassign
               draftData.instanceSecurityDashboard.projects.nodes = draftData.instanceSecurityDashboard.projects.nodes.filter(
                 (curr) => curr.id !== id,
               );
@@ -169,7 +169,11 @@ export default {
         .then(() => {
           this.$emit('handleProjectManipulation', false);
         })
-        .catch(() => createFlash(__('Something went wrong, unable to delete project')));
+        .catch(() =>
+          createFlash({
+            message: __('Something went wrong, unable to delete project'),
+          }),
+        );
     },
     searched(query) {
       this.searchQuery = query;

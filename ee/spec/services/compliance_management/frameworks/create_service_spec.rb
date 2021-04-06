@@ -34,17 +34,22 @@ RSpec.describe ComplianceManagement::Frameworks::CreateService do
     end
 
     context 'namespace has a parent' do
-      let_it_be_with_reload(:namespace) { create(:namespace, :with_hierarchy) }
-      let(:descendant) { namespace.descendants.first }
+      let_it_be(:user) { create(:user) }
+      let_it_be_with_reload(:group) { create(:group, :with_hierarchy) }
+      let(:descendant) { group.descendants.first }
 
-      subject { described_class.new(namespace: descendant, params: params, current_user: namespace.owner) }
+      before do
+        group.add_owner(user)
+      end
+
+      subject { described_class.new(namespace: descendant, params: params, current_user: user) }
 
       it 'responds with a successful service response' do
         expect(subject.execute.success?).to be true
       end
 
       it 'creates the new framework in the root namespace' do
-        expect(subject.execute.payload[:framework].namespace).to eq(namespace)
+        expect(subject.execute.payload[:framework].namespace).to eq(group)
       end
     end
 

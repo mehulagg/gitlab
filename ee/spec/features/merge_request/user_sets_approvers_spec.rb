@@ -109,7 +109,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
           click_button 'Add approval rule'
         end
 
-        click_on("Submit merge request")
+        click_on("Create merge request")
         wait_for_all_requests
 
         expect(page).to have_content("Requires approval.")
@@ -134,7 +134,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         end
 
         click_button 'Update approval rule'
-        click_on("Submit merge request")
+        click_on("Create merge request")
         wait_for_all_requests
         click_on("View eligible approvers") if page.has_button?("View eligible approvers")
         wait_for_requests
@@ -228,9 +228,9 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         find('.merge-request').click_on 'Edit'
         open_modal
 
-        expect(page).to have_field 'Approvals required', exact: 2
+        expect(page).to have_field 'approvals_required', exact: 2
 
-        fill_in 'Approvals required', with: '3'
+        fill_in 'approvals_required', with: '3'
 
         click_button 'Update approval rule'
         click_on('Save changes')
@@ -245,7 +245,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
 
         open_modal
 
-        expect(page).to have_field 'Approvals required', exact: 3
+        expect(page).to have_field 'approvals_required', exact: 3
       end
     end
   end

@@ -9,16 +9,11 @@ import * as actions from 'ee/analytics/cycle_analytics/store/modules/type_of_wor
 import * as getters from 'ee/analytics/cycle_analytics/store/modules/type_of_work/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/modules/type_of_work/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash } from '~/flash';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { groupLabels, endpoints, startDate, endDate, rawTasksByTypeData } from '../../../mock_data';
 
 jest.mock('~/flash');
-
-const shouldFlashAMessage = (msg, type = null) => {
-  const args = type ? [msg, type] : [msg];
-  expect(deprecatedCreateFlash).toHaveBeenCalledWith(...args);
-};
 
 const error = new Error(`Request failed with status code ${httpStatusCodes.NOT_FOUND}`);
 
@@ -147,7 +142,9 @@ describe('Type of work actions', () => {
           commit: () => {},
         });
 
-        shouldFlashAMessage('There was an error fetching the top labels for the selected group');
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'There was an error fetching the top labels for the selected group',
+        });
       });
     });
   });
@@ -217,7 +214,9 @@ describe('Type of work actions', () => {
           commit: () => {},
         });
 
-        shouldFlashAMessage('There was an error fetching data for the tasks by type chart');
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'There was an error fetching data for the tasks by type chart',
+        });
       });
     });
   });

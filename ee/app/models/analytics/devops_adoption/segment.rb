@@ -12,4 +12,6 @@ class Analytics::DevopsAdoption::Segment < ApplicationRecord
   validates :namespace, uniqueness: true, presence: true
 
   scope :ordered_by_name, -> { includes(:namespace).order('"namespaces"."name" ASC') }
+  scope :for_namespaces, -> (namespaces) { where(namespace_id: namespaces) }
+  scope :for_parent, -> (namespace) { for_namespaces(namespace.self_and_descendants) }
 end

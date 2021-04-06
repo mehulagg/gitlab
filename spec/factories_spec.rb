@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe 'factories' do
   include Database::DatabaseHelpers
 
+  # https://gitlab.com/groups/gitlab-org/-/epics/5464 tracks the remaining
+  # skipped traits.
+  #
+  # Consider adding a code comment if a trait cannot produce a valid object.
   def skipped_traits
     [
       [:audit_event, :unauthenticated],
@@ -14,9 +18,6 @@ RSpec.describe 'factories' do
       [:ci_job_artifact, :gzip],
       [:ci_job_artifact, :correct_checksum],
       [:environment, :non_playable],
-      [:go_module_commit, :files],
-      [:go_module_commit, :package],
-      [:go_module_version, :pseudo],
       [:composer_cache_file, :object_storage],
       [:debian_project_component_file, :object_storage],
       [:debian_project_distribution, :object_storage],
@@ -31,7 +32,8 @@ RSpec.describe 'factories' do
       [:project_member, :blocked],
       [:project, :remote_mirror],
       [:remote_mirror, :ssh],
-      [:user_preference, :only_comments]
+      [:user_preference, :only_comments],
+      [:ci_pipeline_artifact, :remote_store]
     ]
   end
 
@@ -64,14 +66,23 @@ RSpec.describe 'factories' do
   # associations must be unique and cannot be reused, or the factory default
   # is being mutated.
   skip_factory_defaults = %i[
+    evidence
+    exported_protected_branch
     fork_network_member
     group_member
     import_state
+    milestone_release
     namespace
     project_broken_repo
     prometheus_alert
     prometheus_alert_event
     prometheus_metric
+    protected_branch
+    protected_branch_merge_access_level
+    protected_branch_push_access_level
+    protected_tag
+    release
+    release_link
     self_managed_prometheus_alert_event
     users_star_project
     wiki_page

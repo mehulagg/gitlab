@@ -7,8 +7,16 @@ module BulkImports
     include Gitlab::ClassAttributes
     include Runner
 
+    NotAllowedError = Class.new(StandardError)
+
+    CACHE_KEY_EXPIRATION = 2.hours
+
     def initialize(context)
       @context = context
+    end
+
+    def tracker
+      @tracker ||= context.tracker
     end
 
     included do

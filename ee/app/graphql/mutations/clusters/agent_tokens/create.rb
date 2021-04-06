@@ -20,6 +20,11 @@ module Mutations
                  required: false,
                  description: 'Description of the token.'
 
+        argument :name,
+                 GraphQL::STRING_TYPE,
+                 required: true,
+                 description: 'Name of the token.'
+
         field :secret,
               GraphQL::STRING_TYPE,
               null: true,

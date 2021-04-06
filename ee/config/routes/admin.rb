@@ -28,9 +28,12 @@ namespace :admin do
 
   resource :license, only: [:show, :new, :create, :destroy] do
     get :download, on: :member
+    post :sync_seat_link, on: :collection
 
     resource :usage_export, controller: 'licenses/usage_exports', only: [:show]
   end
+
+  resource :cloud_license, only: [:show]
 
   # using `only: []` to keep duplicate routes from being created
   resource :application_settings, only: [] do

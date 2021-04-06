@@ -3,14 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe BulkImports::Importers::GroupImporter do
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
-  let(:bulk_import) { create(:bulk_import, user: user) }
-  let(:bulk_import_entity) { create(:bulk_import_entity, :started, bulk_import: bulk_import, group: group) }
-  let(:bulk_import_configuration) { create(:bulk_import_configuration, bulk_import: bulk_import) }
-  let(:context) { BulkImports::Pipeline::Context.new(bulk_import_entity) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:bulk_import) { create(:bulk_import, user: user) }
+  let_it_be(:entity) { create(:bulk_import_entity, :started, bulk_import: bulk_import, group: group) }
+  let_it_be(:tracker) { create(:bulk_import_tracker, entity: entity) }
+  let_it_be(:context) { BulkImports::Pipeline::Context.new(tracker) }
 
-  subject { described_class.new(bulk_import_entity) }
+  subject { described_class.new(entity) }
 
   before do
     allow(BulkImports::Pipeline::Context).to receive(:new).and_return(context)
@@ -22,12 +22,15 @@ RSpec.describe BulkImports::Importers::GroupImporter do
       expect_to_run_pipeline BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline, context: context
       expect_to_run_pipeline BulkImports::Groups::Pipelines::MembersPipeline, context: context
       expect_to_run_pipeline BulkImports::Groups::Pipelines::LabelsPipeline, context: context
+      expect_to_run_pipeline BulkImports::Groups::Pipelines::MilestonesPipeline, context: context
       expect_to_run_pipeline EE::BulkImports::Groups::Pipelines::EpicsPipeline, context: context
       expect_to_run_pipeline EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline, context: context
+      expect_to_run_pipeline EE::BulkImports::Groups::Pipelines::EpicEventsPipeline, context: context
+      expect_to_run_pipeline EE::BulkImports::Groups::Pipelines::IterationsPipeline, context: context
 
       subject.execute
 
-      expect(bulk_import_entity.reload).to be_finished
+      expect(entity.reload).to be_finished
     end
   end
 

@@ -2,7 +2,6 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import BoardNewIssue from '~/boards/components/board_new_issue.vue';
 
-import '~/boards/models/list';
 import { mockList, mockGroupProjects } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -31,7 +30,7 @@ describe('Issue boards new issue form', () => {
     const store = new Vuex.Store({
       state: { selectedProject: mockGroupProjects[0] },
       actions: { addListNewIssue: addListNewIssuesSpy },
-      getters: {},
+      getters: { isGroupBoard: () => false, isProjectBoard: () => true },
     });
 
     wrapper = shallowMount(BoardNewIssue, {
@@ -87,7 +86,7 @@ describe('Issue boards new issue form', () => {
 
   describe('submit success', () => {
     it('creates new issue', async () => {
-      wrapper.setData({ title: 'submit issue' });
+      wrapper.setData({ title: 'create issue' });
 
       await vm.$nextTick();
       await submitIssue();
@@ -96,7 +95,7 @@ describe('Issue boards new issue form', () => {
 
     it('enables button after submit', async () => {
       jest.spyOn(wrapper.vm, 'submit').mockImplementation();
-      wrapper.setData({ title: 'submit issue' });
+      wrapper.setData({ title: 'create issue' });
 
       await vm.$nextTick();
       await submitIssue();
@@ -104,7 +103,7 @@ describe('Issue boards new issue form', () => {
     });
 
     it('clears title after submit', async () => {
-      wrapper.setData({ title: 'submit issue' });
+      wrapper.setData({ title: 'create issue' });
 
       await vm.$nextTick();
       await submitIssue();

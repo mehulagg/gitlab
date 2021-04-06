@@ -1,7 +1,6 @@
 ---
 key_path: usage_activity_by_stage.secure.user_container_scanning_jobs
-description: no idea, Count of Container Scanning jobs run, it implies user but AFAIK
-  we don't track per user
+description: Distinct count per user of Container Scanning jobs run
 product_section: sec
 product_stage: protect
 product_group: group::container security
@@ -9,9 +8,8 @@ product_category: container_scanning
 value_type: number
 status: data_available
 time_frame: all
-data_source:
+data_source: database
 distribution:
 - ee
 tier:
 - ultimate
-skip_validation: true

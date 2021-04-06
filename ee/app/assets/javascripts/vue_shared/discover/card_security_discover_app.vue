@@ -52,14 +52,16 @@ export default {
       default: '',
     },
   },
-  data: () => ({
-    slide: 0,
-    carouselImages: [
-      securityDependencyImageUrl,
-      securityScanningImageUrl,
-      securityDashboardImageUrl,
-    ],
-  }),
+  data() {
+    return {
+      slide: 0,
+      carouselImages: [
+        securityDependencyImageUrl,
+        securityScanningImageUrl,
+        securityDashboardImageUrl,
+      ],
+    };
+  },
   computed: {
     discoverButtonProps() {
       return {

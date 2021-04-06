@@ -47,7 +47,7 @@ export default {
           </template>
           <gl-link :href="url" class="pipeline-id">#{{ id }}</gl-link>
           <gl-icon :size="16" name="fork" />
-          <gl-link :href="branch.url" class="ref-name">{{ branch.name }}</gl-link>
+          <gl-link v-if="branch" :href="branch.url" class="ref-name">{{ branch.name }}</gl-link>
           <span class="icon-branch gl-text-gray-400">
             <gl-icon name="commit" :size="14" />
           </span>

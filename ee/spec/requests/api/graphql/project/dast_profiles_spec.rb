@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Query.project(fullPath).dastProfiles' do
   include GraphqlHelpers
 
-  let_it_be(:project) { create(:project) }
+  let_it_be(:project) { create(:project, :repository) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:dast_profile1) { create(:dast_profile, project: project) }
   let_it_be(:dast_profile2) { create(:dast_profile, project: project) }
@@ -72,14 +72,10 @@ RSpec.describe 'Query.project(fullPath).dastProfiles' do
       end
     end
 
-    context 'when the feature is disabled' do
-      it 'returns no nodes' do
-        stub_feature_flags(dast_saved_scans: false)
+    it 'includes branch information' do
+      subject
 
-        subject
-
-        expect(graphql_data_at(:project, :dast_profiles, :nodes)).to be_empty
-      end
+      expect(graphql_data_at(:project, :dast_profiles, :nodes, 0, 'branch')).to eq('name' => 'master', 'exists' => true)
     end
   end
 

@@ -57,15 +57,19 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
           end
         end
 
+        it 'counts a usage ping event' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_issue_promoted_to_epic)
+            .with(author: user)
+
+          subject.execute(issue)
+        end
+
         context 'when promoting issue', :snowplow do
           let!(:issue_mentionable_note) { create(:note, noteable: issue, author: user, project: project, note: "note with mention #{user.to_reference}") }
           let!(:issue_note) { create(:note, noteable: issue, author: user, project: project, note: "note without mention") }
 
           before do
             subject.execute(issue)
-
-            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  project: project, user: user, namespace: group)
           end
 
           it 'creates a new epic with correct attributes' do
@@ -95,6 +99,11 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
           it 'marks the old issue as promoted' do
             expect(issue).to be_promoted
             expect(issue.promoted_to_epic).to eq(epic)
+          end
+
+          it 'emits a snowplow event' do
+            expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
+                                  project: project, user: user, namespace: group)
           end
 
           context 'when issue description has mentions and has notes with mentions' do

@@ -68,11 +68,15 @@ RSpec.describe Gitlab::QueryLimiting::Transaction do
     it 'increments the number of executed queries' do
       transaction = described_class.new
 
-      expect(transaction.count).to be_zero
+      expect { transaction.increment }.to change { transaction.count }.by(1)
+    end
 
-      transaction.increment
+    it 'does not increment the number of executed queries when query limiting is disabled' do
+      transaction = described_class.new
 
-      expect(transaction.count).to eq(1)
+      allow(transaction).to receive(:enabled?).and_return(false)
+
+      expect { transaction.increment }.not_to change { transaction.count }
     end
   end
 
@@ -116,6 +120,30 @@ RSpec.describe Gitlab::QueryLimiting::Transaction do
         "Too many SQL queries were executed: a maximum of #{max} " \
         "is allowed but #{max} SQL queries were executed"
       )
+    end
+
+    it 'includes a list of executed queries' do
+      transaction = described_class.new
+      transaction.count = max = described_class::THRESHOLD
+      %w[foo bar baz].each { |sql| transaction.executed_sql(sql) }
+
+      message = transaction.error_message
+
+      expect(message).to start_with(
+        "Too many SQL queries were executed: a maximum of #{max} " \
+        "is allowed but #{max} SQL queries were executed"
+      )
+
+      expect(message).to include("0: foo", "1: bar", "2: baz")
+    end
+
+    it 'indicates if the log is truncated' do
+      transaction = described_class.new
+      transaction.count = described_class::THRESHOLD * 2
+
+      message = transaction.error_message
+
+      expect(message).to end_with('...')
     end
 
     it 'includes the action name in the error message when present' do

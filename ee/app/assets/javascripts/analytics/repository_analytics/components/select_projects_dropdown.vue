@@ -112,7 +112,6 @@ export default {
           },
           updateQuery(previousResult, { fetchMoreResult }) {
             const results = produce(fetchMoreResult, (draftData) => {
-              // eslint-disable-next-line no-param-reassign
               draftData.group.projects.nodes = [
                 ...previousResult.group.projects.nodes,
                 ...draftData.group.projects.nodes,

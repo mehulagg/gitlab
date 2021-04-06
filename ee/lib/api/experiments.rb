@@ -11,9 +11,7 @@ module API
         success EE::API::Entities::Experiment
       end
       get do
-        experiments = Gitlab::Experimentation::EXPERIMENTS.keys.map do |experiment_key|
-          { key: experiment_key, enabled: Gitlab::Experimentation.active?(experiment_key) }
-        end
+        experiments = Feature::Definition.definitions.values.select { |d| d.attributes[:type] == 'experiment' }
 
         present experiments, with: EE::API::Entities::Experiment, current_user: current_user
       end

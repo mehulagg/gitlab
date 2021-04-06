@@ -1,7 +1,6 @@
 <script>
-import { GlAlert, GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
+import { GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
 import { mapActions } from 'vuex';
-import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Alerts from './alerts/alerts.vue';
@@ -13,7 +12,6 @@ import ThreatMonitoringSection from './threat_monitoring_section.vue';
 export default {
   name: 'ThreatMonitoring',
   components: {
-    GlAlert,
     GlIcon,
     GlLink,
     GlPopover,
@@ -40,18 +38,6 @@ export default {
       type: String,
       required: true,
     },
-    showUserCallout: {
-      type: Boolean,
-      required: true,
-    },
-    userCalloutId: {
-      type: String,
-      required: true,
-    },
-    userCalloutsPath: {
-      type: String,
-      required: true,
-    },
     newPolicyPath: {
       type: String,
       required: true,
@@ -59,8 +45,6 @@ export default {
   },
   data() {
     return {
-      showAlert: this.showUserCallout,
-
       // We require the project to have at least one available environment.
       // An invalid default environment id means there there are no available
       // environments, therefore infrastructure cannot be set up. A valid default
@@ -84,13 +68,6 @@ export default {
     isValidEnvironmentId(id) {
       return Number.isInteger(id) && id >= 0;
     },
-    dismissAlert() {
-      this.showAlert = false;
-
-      axios.post(this.userCalloutsPath, {
-        feature_name: this.userCalloutId,
-      });
-    },
   },
   chartEmptyStateDescription: s__(
     `ThreatMonitoring|While it's rare to have no traffic coming to your
@@ -105,29 +82,12 @@ export default {
     `ThreatMonitoring|Container Network Policies are not installed or have been disabled. To view
      this data, ensure your Network Policies are installed and enabled for your cluster.`,
   ),
-  alertText: s__(
-    `ThreatMonitoring|The graph below is an overview of traffic coming to your
-    application as tracked by the Web Application Firewall (WAF). View the docs
-    for instructions on how to access the WAF logs to see what type of
-    malicious traffic is trying to access your app. The docs link is also
-    accessible by clicking the "?" icon next to the title below.`,
-  ),
   helpPopoverText: s__('ThreatMonitoring|View documentation'),
 };
 </script>
 
 <template>
   <section>
-    <gl-alert
-      v-if="showAlert"
-      class="my-3"
-      variant="info"
-      :secondary-button-link="documentationPath"
-      :secondary-button-text="__('View documentation')"
-      @dismiss="dismissAlert"
-    >
-      {{ $options.alertText }}
-    </gl-alert>
     <header class="my-3">
       <h2 class="h3 mb-1">
         {{ s__('ThreatMonitoring|Threat Monitoring') }}
@@ -139,13 +99,13 @@ export default {
         >
           <gl-icon name="question" />
         </gl-link>
-        <gl-popover :target="() => $refs.helpLink" triggers="hover focus">
+        <gl-popover :target="() => $refs.helpLink">
           {{ $options.helpPopoverText }}
         </gl-popover>
       </h2>
     </header>
 
-    <gl-tabs>
+    <gl-tabs content-class="gl-pt-0">
       <gl-tab
         v-if="showAlertsTab"
         :title="s__('ThreatMonitoring|Alerts')"

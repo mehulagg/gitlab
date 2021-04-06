@@ -3,6 +3,7 @@
 module API
   module Helpers
     include Gitlab::Utils
+    include Helpers::Caching
     include Helpers::Pagination
     include Helpers::PaginationStrategies
 
@@ -48,7 +49,11 @@ module API
     # Returns the job associated with the token provided for
     # authentication, if any
     def current_authenticated_job
-      @current_authenticated_job
+      if try(:namespace_inheritable, :authentication)
+        ci_build_from_namespace_inheritable
+      else
+        @current_authenticated_job # rubocop:disable Gitlab/ModuleWithInstanceVariables
+      end
     end
 
     # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -467,7 +472,7 @@ module API
     def handle_api_exception(exception)
       if report_exception?(exception)
         define_params_for_grape_middleware
-        Gitlab::ErrorTracking.with_context(current_user) do
+        Gitlab::ApplicationContext.with_context(user: current_user) do
           Gitlab::ErrorTracking.track_exception(exception)
         end
       end
@@ -537,17 +542,6 @@ module API
         status :ok
         body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       end
-    end
-
-    def track_event(action = action_name, **args)
-      category = args.delete(:category) || self.options[:for].name
-      raise "invalid category" unless category
-
-      ::Gitlab::Tracking.event(category, action.to_s, **args)
-    rescue => error
-      Gitlab::AppLogger.warn(
-        "Tracking event failed for action: #{action}, category: #{category}, message: #{error.message}"
-      )
     end
 
     def increment_counter(event_name)

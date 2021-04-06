@@ -1,5 +1,5 @@
 import Api from 'ee/api';
-import * as GroupsApi from '~/api/groups_api';
+import * as GroupsApi from 'ee/api/groups_api';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import { s__ } from '~/locale';
 import * as types from './mutation_types';
@@ -24,21 +24,21 @@ export const receiveBillableMembersListError = ({ commit }) => {
   commit(types.RECEIVE_BILLABLE_MEMBERS_ERROR);
 };
 
-export const resetMembers = ({ commit }) => {
-  commit(types.RESET_MEMBERS);
+export const resetBillableMembers = ({ commit }) => {
+  commit(types.RESET_BILLABLE_MEMBERS);
 };
 
-export const setMemberToRemove = ({ commit }, member) => {
-  commit(types.SET_MEMBER_TO_REMOVE, member);
+export const setBillableMemberToRemove = ({ commit }, member) => {
+  commit(types.SET_BILLABLE_MEMBER_TO_REMOVE, member);
 };
 
-export const removeMember = ({ dispatch, state }) => {
-  return GroupsApi.removeMemberFromGroup(state.namespaceId, state.memberToRemove.id)
-    .then(() => dispatch('removeMemberSuccess'))
-    .catch(() => dispatch('removeMemberError'));
+export const removeBillableMember = ({ dispatch, state }) => {
+  return GroupsApi.removeBillableMemberFromGroup(state.namespaceId, state.billableMemberToRemove.id)
+    .then(() => dispatch('removeBillableMemberSuccess'))
+    .catch(() => dispatch('removeBillableMemberError'));
 };
 
-export const removeMemberSuccess = ({ dispatch, commit }) => {
+export const removeBillableMemberSuccess = ({ dispatch, commit }) => {
   dispatch('fetchBillableMembersList');
 
   createFlash({
@@ -46,12 +46,12 @@ export const removeMemberSuccess = ({ dispatch, commit }) => {
     type: FLASH_TYPES.SUCCESS,
   });
 
-  commit(types.REMOVE_MEMBER_SUCCESS);
+  commit(types.REMOVE_BILLABLE_MEMBER_SUCCESS);
 };
 
-export const removeMemberError = ({ commit }) => {
+export const removeBillableMemberError = ({ commit }) => {
   createFlash({
     message: s__('Billing|An error occurred while removing a billable member'),
   });
-  commit(types.REMOVE_MEMBER_ERROR);
+  commit(types.REMOVE_BILLABLE_MEMBER_ERROR);
 };

@@ -68,10 +68,11 @@ request is as follows:
    1. Use the syntax `Solves #XXX`, `Closes #XXX`, or `Refs #XXX` to mention the issue(s) your merge
       request addresses. Referenced issues do not [close automatically](../../user/project/issues/managing_issues.md#closing-issues-automatically).
       You must close them manually once the merge request is merged.
+   1. The MR must include *Before* and *After* screenshots if UI changes are made.
+   1. Include any steps or setup required to ensure reviewers can view the changes you've made (e.g. include any information about feature flags).
 1. If you're allowed to, set a relevant milestone and [labels](issue_workflow.md).
 1. UI changes should use available components from the GitLab Design System,
-   [Pajamas](https://design.gitlab.com/). The MR must include *Before* and
-   *After* screenshots.
+   [Pajamas](https://design.gitlab.com/).
 1. If the MR changes CSS classes, please include the list of affected pages, which
    can be found by running `grep css-class ./app -R`.
 1. If your MR touches code that executes shell commands, reads or opens files, or
@@ -130,9 +131,9 @@ Commit messages should follow the guidelines below, for reasons explained by Chr
 - The commit subject must not be longer than 72 characters.
 - The commit subject must not end with a period.
 - The commit body must not contain more than 72 characters per line.
-- Commits that change 30 or more lines across at least 3 files must
-  describe these changes in the commit body.
 - The commit subject or body must not contain Emojis.
+- Commits that change 30 or more lines across at least 3 files should
+  describe these changes in the commit body.
 - Use issues and merge requests' full URLs instead of short references,
   as they are displayed as plain text outside of GitLab.
 - The merge request should not contain more than 10 commit messages.
@@ -177,7 +178,7 @@ Example commit message template that can be used on your machine that embodies t
 #    Do not end the subject line with a period
 #    Subject must contain at least 3 words
 #    Separate subject from body with a blank line
-#    Commits that change 30 or more lines across at least 3 files must
+#    Commits that change 30 or more lines across at least 3 files should
 #    describe these changes in the commit body
 #    Do not use Emojis
 #    Use the body to explain what and why vs. how
@@ -248,6 +249,7 @@ requirements.
 1. [Black-box tests/end-to-end tests](../testing_guide/testing_levels.md#black-box-tests-at-the-system-level-aka-end-to-end-tests)
    added if required. Please contact [the quality team](https://about.gitlab.com/handbook/engineering/quality/#teams)
    with any questions.
+1. The User Experience (UX) for people not using the features isn't negatively affected.
 
 ## Dependencies
 

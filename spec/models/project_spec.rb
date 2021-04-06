@@ -145,7 +145,7 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it_behaves_like 'model with wiki' do
-      let_it_be(:container) { create(:project, :wiki_repo) }
+      let_it_be(:container) { create(:project, :wiki_repo, namespace: create(:group)) }
       let(:container_without_wiki) { create(:project) }
     end
 
@@ -1351,6 +1351,34 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '.with_remote_mirrors' do
+    let_it_be(:project) { create(:project, :repository) }
+
+    subject { described_class.with_remote_mirrors }
+
+    context 'when some remote mirrors are enabled for the project' do
+      let!(:remote_mirror) { create(:remote_mirror, project: project, enabled: true) }
+
+      it "returns a project" do
+        is_expected.to eq([project])
+      end
+    end
+
+    context 'when some remote mirrors exists but disabled for the project' do
+      let!(:remote_mirror) { create(:remote_mirror, project: project, enabled: false) }
+
+      it "returns a project" do
+        is_expected.to be_empty
+      end
+    end
+
+    context 'when no remote mirrors exist for the project' do
+      it "returns an empty list" do
+        is_expected.to be_empty
+      end
+    end
+  end
+
   describe '.with_active_jira_services' do
     it 'returns the correct project' do
       active_jira_service = create(:jira_service)
@@ -1599,7 +1627,7 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#any_runners?' do
+  describe '#any_active_runners?' do
     context 'shared runners' do
       let(:project) { create(:project, shared_runners_enabled: shared_runners_enabled) }
       let(:specific_runner) { create(:ci_runner, :project, projects: [project]) }
@@ -1609,31 +1637,31 @@ RSpec.describe Project, factory_default: :keep do
         let(:shared_runners_enabled) { false }
 
         it 'has no runners available' do
-          expect(project.any_runners?).to be_falsey
+          expect(project.any_active_runners?).to be_falsey
         end
 
         it 'has a specific runner' do
           specific_runner
 
-          expect(project.any_runners?).to be_truthy
+          expect(project.any_active_runners?).to be_truthy
         end
 
         it 'has a shared runner, but they are prohibited to use' do
           shared_runner
 
-          expect(project.any_runners?).to be_falsey
+          expect(project.any_active_runners?).to be_falsey
         end
 
         it 'checks the presence of specific runner' do
           specific_runner
 
-          expect(project.any_runners? { |runner| runner == specific_runner }).to be_truthy
+          expect(project.any_active_runners? { |runner| runner == specific_runner }).to be_truthy
         end
 
         it 'returns false if match cannot be found' do
           specific_runner
 
-          expect(project.any_runners? { false }).to be_falsey
+          expect(project.any_active_runners? { false }).to be_falsey
         end
       end
 
@@ -1643,19 +1671,19 @@ RSpec.describe Project, factory_default: :keep do
         it 'has a shared runner' do
           shared_runner
 
-          expect(project.any_runners?).to be_truthy
+          expect(project.any_active_runners?).to be_truthy
         end
 
         it 'checks the presence of shared runner' do
           shared_runner
 
-          expect(project.any_runners? { |runner| runner == shared_runner }).to be_truthy
+          expect(project.any_active_runners? { |runner| runner == shared_runner }).to be_truthy
         end
 
         it 'returns false if match cannot be found' do
           shared_runner
 
-          expect(project.any_runners? { false }).to be_falsey
+          expect(project.any_active_runners? { false }).to be_falsey
         end
       end
     end
@@ -1669,13 +1697,13 @@ RSpec.describe Project, factory_default: :keep do
         let(:group_runners_enabled) { false }
 
         it 'has no runners available' do
-          expect(project.any_runners?).to be_falsey
+          expect(project.any_active_runners?).to be_falsey
         end
 
         it 'has a group runner, but they are prohibited to use' do
           group_runner
 
-          expect(project.any_runners?).to be_falsey
+          expect(project.any_active_runners?).to be_falsey
         end
       end
 
@@ -1685,19 +1713,19 @@ RSpec.describe Project, factory_default: :keep do
         it 'has a group runner' do
           group_runner
 
-          expect(project.any_runners?).to be_truthy
+          expect(project.any_active_runners?).to be_truthy
         end
 
         it 'checks the presence of group runner' do
           group_runner
 
-          expect(project.any_runners? { |runner| runner == group_runner }).to be_truthy
+          expect(project.any_active_runners? { |runner| runner == group_runner }).to be_truthy
         end
 
         it 'returns false if match cannot be found' do
           group_runner
 
-          expect(project.any_runners? { false }).to be_falsey
+          expect(project.any_active_runners? { false }).to be_falsey
         end
       end
     end
@@ -2199,6 +2227,44 @@ RSpec.describe Project, factory_default: :keep do
       end
 
       it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#set_container_registry_access_level' do
+    let_it_be_with_reload(:project) { create(:project) }
+
+    it 'updates project_feature', :aggregate_failures do
+      # Simulate an existing project that has container_registry enabled
+      project.update_column(:container_registry_enabled, true)
+      project.project_feature.update_column(:container_registry_access_level, ProjectFeature::DISABLED)
+
+      expect(project.container_registry_enabled).to eq(true)
+      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+
+      project.update!(container_registry_enabled: false)
+
+      expect(project.container_registry_enabled).to eq(false)
+      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+
+      project.update!(container_registry_enabled: true)
+
+      expect(project.container_registry_enabled).to eq(true)
+      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::ENABLED)
+    end
+
+    it 'rollsback both projects and project_features row in case of error', :aggregate_failures do
+      project.update_column(:container_registry_enabled, true)
+      project.project_feature.update_column(:container_registry_access_level, ProjectFeature::DISABLED)
+
+      expect(project.container_registry_enabled).to eq(true)
+      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+
+      allow(project).to receive(:valid?).and_return(false)
+
+      expect { project.update!(container_registry_enabled: false) }.to raise_error(ActiveRecord::RecordInvalid)
+
+      expect(project.reload.container_registry_enabled).to eq(true)
+      expect(project.project_feature.reload.container_registry_access_level).to eq(ProjectFeature::DISABLED)
     end
   end
 
@@ -4071,7 +4137,7 @@ RSpec.describe Project, factory_default: :keep do
     subject { described_class.wrap_with_cte(projects) }
 
     it 'wrapped query matches original' do
-      expect(subject.to_sql).to match(/^WITH "projects_cte" AS/)
+      expect(subject.to_sql).to match(/^WITH "projects_cte" AS #{Gitlab::Database::AsWithMaterialized.materialized_if_supported}/)
       expect(subject).to match_array(projects)
     end
   end
@@ -4162,7 +4228,7 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it 'does nothing if updates on legacy storage are disabled' do
-      stub_feature_flags(pages_update_legacy_storage: false)
+      allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
 
       expect(Gitlab::PagesTransfer).not_to receive(:new)
       expect(PagesWorker).not_to receive(:perform_in)
@@ -4466,7 +4532,11 @@ RSpec.describe Project, factory_default: :keep do
     subject { project.predefined_project_variables.to_runner_variables }
 
     specify do
-      expect(subject).to include({ key: 'CI_PROJECT_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false })
+      expect(subject).to include
+      [
+        { key: 'CI_PROJECT_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false },
+        { key: 'CI_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false }
+      ]
     end
 
     context 'when ci config path is overridden' do
@@ -4474,7 +4544,41 @@ RSpec.describe Project, factory_default: :keep do
         project.update!(ci_config_path: 'random.yml')
       end
 
-      it { expect(subject).to include({ key: 'CI_PROJECT_CONFIG_PATH', value: 'random.yml', public: true, masked: false }) }
+      it do
+        expect(subject).to include
+        [
+          { key: 'CI_PROJECT_CONFIG_PATH', value: 'random.yml', public: true, masked: false },
+          { key: 'CI_CONFIG_PATH', value: 'random.yml', public: true, masked: false }
+        ]
+      end
+    end
+  end
+
+  describe '#dependency_proxy_variables' do
+    let_it_be(:namespace) { create(:namespace, path: 'NameWithUPPERcaseLetters') }
+    let_it_be(:project) { create(:project, :repository, namespace: namespace) }
+
+    subject { project.dependency_proxy_variables.to_runner_variables }
+
+    context 'when dependency_proxy is enabled' do
+      before do
+        stub_config(dependency_proxy: { enabled: true })
+      end
+
+      it 'contains the downcased name' do
+        expect(subject).to include({ key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
+                                     value: "#{Gitlab.host_with_port}/namewithuppercaseletters#{DependencyProxy::URL_SUFFIX}",
+                                     public: true,
+                                     masked: false })
+      end
+    end
+
+    context 'when dependency_proxy is disabled' do
+      before do
+        stub_config(dependency_proxy: { enabled: false })
+      end
+
+      it { expect(subject).to be_empty }
     end
   end
 
@@ -5215,6 +5319,64 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#branch_allows_collaboration?' do
+    context 'when there are open merge requests that have their source/target branches point to each other' do
+      let_it_be(:project) { create(:project, :repository) }
+      let_it_be(:developer) { create(:user) }
+      let_it_be(:reporter) { create(:user) }
+      let_it_be(:guest) { create(:user) }
+
+      before_all do
+        create(
+          :merge_request,
+          target_project: project,
+          target_branch: 'master',
+          source_project: project,
+          source_branch: 'merge-test',
+          allow_collaboration: true
+        )
+
+        create(
+          :merge_request,
+          target_project: project,
+          target_branch: 'merge-test',
+          source_project: project,
+          source_branch: 'master',
+          allow_collaboration: true
+        )
+
+        project.add_developer(developer)
+        project.add_reporter(reporter)
+        project.add_guest(guest)
+      end
+
+      shared_examples_for 'successful check' do
+        it 'does not go into an infinite loop' do
+          expect { project.branch_allows_collaboration?(user, 'master') }
+            .not_to raise_error
+        end
+      end
+
+      context 'when user is a developer' do
+        let(:user) { developer }
+
+        it_behaves_like 'successful check'
+      end
+
+      context 'when user is a reporter' do
+        let(:user) { reporter }
+
+        it_behaves_like 'successful check'
+      end
+
+      context 'when user is a guest' do
+        let(:user) { guest }
+
+        it_behaves_like 'successful check'
+      end
+    end
+  end
+
   context 'with cross project merge requests' do
     let(:user) { create(:user) }
     let(:target_project) { create(:project, :repository) }
@@ -5940,12 +6102,15 @@ RSpec.describe Project, factory_default: :keep do
       project.set_first_pages_deployment!(deployment)
 
       expect(project.pages_metadatum.reload.pages_deployment).to eq(deployment)
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
     end
 
     it "updates the existing metadara record with deployment" do
       expect do
         project.set_first_pages_deployment!(deployment)
       end.to change { project.pages_metadatum.reload.pages_deployment }.from(nil).to(deployment)
+
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
     end
 
     it 'only updates metadata for this project' do
@@ -5954,6 +6119,8 @@ RSpec.describe Project, factory_default: :keep do
       expect do
         project.set_first_pages_deployment!(deployment)
       end.not_to change { other_project.pages_metadatum.reload.pages_deployment }.from(nil)
+
+      expect(other_project.pages_metadatum.reload.deployed).to eq(false)
     end
 
     it 'does nothing if metadata already references some deployment' do
@@ -5963,6 +6130,14 @@ RSpec.describe Project, factory_default: :keep do
       expect do
         project.set_first_pages_deployment!(deployment)
       end.not_to change { project.pages_metadatum.reload.pages_deployment }.from(existing_deployment)
+    end
+
+    it 'marks project as not deployed if deployment is nil' do
+      project.mark_pages_as_deployed
+
+      expect do
+        project.set_first_pages_deployment!(nil)
+      end.to change { project.pages_metadatum.reload.deployed }.from(true).to(false)
     end
   end
 

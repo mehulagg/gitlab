@@ -6,12 +6,17 @@
     - .default-before_script
     - .rails-cache
 
-.base-script: &base-script
-  # Only install knapsack after bundle install! Otherwise oddly some native
-  # gems could not be found under some circumstance. No idea why, hours wasted.
-  - run_timed_command "gem install knapsack --no-document"
-  - run_timed_command "scripts/gitaly-test-spawn"
-  - source ./scripts/rspec_helpers.sh
+.minimal-bundle-install:
+  script:
+    - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
+
+.base-script:
+  script:
+    # Only install knapsack after bundle install! Otherwise oddly some native
+    # gems could not be found under some circumstance. No idea why, hours wasted.
+    - run_timed_command "gem install knapsack --no-document"
+    - run_timed_command "scripts/gitaly-test-spawn"
+    - source ./scripts/rspec_helpers.sh
 
 .minimal-rspec-tests:
   variables:
@@ -27,7 +32,7 @@
     RECORD_DEPRECATIONS: "true"
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
   script:
-    - *base-script
+    - !reference [.base-script, script]
     - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag ~level:migration"
   artifacts:
     expire_in: 31d
@@ -49,7 +54,7 @@
 .rspec-base-migration:
   extends: .rails:rules:ee-and-foss-migration
   script:
-    - *base-script
+    - !reference [.base-script, script]
     - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag level:migration"
 
 .rspec-base-pg11:
@@ -82,7 +87,7 @@
 .rspec-ee-base-geo:
   extends: .rspec-base
   script:
-    - *base-script
+    - !reference [.base-script, script]
     - rspec_paralellized_job "--tag ~quarantine --tag geo"
 
 .rspec-ee-base-geo-pg11:
@@ -137,12 +142,12 @@
 ############################
 
 #######################################################
-# EE/FOSS: default refs (MRs, master, schedules) jobs #
+# EE/FOSS: default refs (MRs, default branch, schedules) jobs #
 setup-test-env:
   extends:
     - .rails-job-base
     - .setup-test-env-cache
-    - .rails:rules:default-refs-code-backstage-qa
+    - .rails:rules:code-backstage-qa
     - .use-pg11
   stage: prepare
   variables:
@@ -162,6 +167,7 @@ setup-test-env:
       - tmp/tests/gitaly/gitaly-lfs-smudge
       - tmp/tests/gitaly/gitaly-ssh
       - tmp/tests/gitaly/internal/
+      - tmp/tests/gitaly/internal_gitaly2/
       - tmp/tests/gitaly/internal_sockets/
       - tmp/tests/gitaly/Makefile
       - tmp/tests/gitaly/praefect
@@ -177,6 +183,7 @@ setup-test-env:
       - tmp/tests/gitlab-workhorse/gitlab-workhorse
       - tmp/tests/gitlab-workhorse/gitlab-resize-image
       - tmp/tests/gitlab-workhorse/config.toml
+      - tmp/tests/gitlab-workhorse/WORKHORSE_TREE
       - tmp/tests/repositories/
       - tmp/tests/second_storage/
     when: always
@@ -212,7 +219,7 @@ update-coverage-cache:
     - .shared:rules:update-cache
   stage: prepare
   script:
-    - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
+    - !reference [.minimal-bundle-install, script]
   cache:
     policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
 
@@ -243,7 +250,7 @@ update-static-analysis-cache:
 static-analysis:
   extends:
     - .static-analysis-base
-    - .rails:rules:default-refs-code-backstage-qa
+    - .rails:rules:code-backstage-qa
   stage: test
   parallel: 4
   script:
@@ -316,7 +323,7 @@ rspec db-library-code pg12:
     - .rspec-base-pg12
     - .rails:rules:ee-and-foss-db-library-code
   script:
-    - *base-script
+    - !reference [.base-script, script]
     - rspec_db_library_code
 
 rspec fast_spec_helper:
@@ -340,7 +347,7 @@ db:migrate:reset:
 db:check-schema:
   extends:
     - .db-job-base
-    - .rails:rules:ee-mr-and-master-only
+    - .rails:rules:ee-mr-and-default-branch-only
   script:
     - source scripts/schema_changed.sh
 
@@ -352,32 +359,34 @@ db:check-migrations:
     - scripts/validate_migration_schema
   allow_failure: true
 
-db:migrate-from-v12.10.0:
-  extends: .db-job-base
-  variables:
-    SETUP_DB: "false"
-  script:
-    - export PROJECT_TO_CHECKOUT="gitlab"
-    - export TAG_TO_CHECKOUT="v12.10.0-ee"
-    - '[[ -d "ee/" ]] || export PROJECT_TO_CHECKOUT="gitlab-foss"'
-    - '[[ -d "ee/" ]] || export TAG_TO_CHECKOUT="v12.10.0"'
-    - retry 'git fetch https://gitlab.com/gitlab-org/$PROJECT_TO_CHECKOUT.git $TAG_TO_CHECKOUT'
-    - git checkout -f FETCH_HEAD
-    - sed -i -e "s/gem 'grpc', '~> 1.24.0'/gem 'grpc', '~> 1.30.2'/" Gemfile  # Update gRPC for Ruby 2.7
-    - sed -i -e "s/gem 'google-protobuf', '~> 3.8.0'/gem 'google-protobuf', '~> 3.12.0'/" Gemfile
-    - gem install bundler:1.17.3
-    - bundle update google-protobuf grpc bootsnap
-    - bundle install $BUNDLE_INSTALL_FLAGS
-    - date
-    - cp config/gitlab.yml.example config/gitlab.yml
-    - bundle exec rake db:drop db:create db:structure:load db:seed_fu
-    - date
-    - git checkout -f $CI_COMMIT_SHA
-    - bundle install $BUNDLE_INSTALL_FLAGS
-    - date
-    - . scripts/prepare_build.sh
-    - date
-    - bundle exec rake db:migrate
+# Temporarily disabled due to failures in https://gitlab.com/gitlab-org/gitlab/-/issues/325838
+
+# db:migrate-from-v12.10.0:
+#   extends: .db-job-base
+#   variables:
+#     SETUP_DB: "false"
+#   script:
+#     - export PROJECT_TO_CHECKOUT="gitlab"
+#     - export TAG_TO_CHECKOUT="v12.10.0-ee"
+#     - '[[ -d "ee/" ]] || export PROJECT_TO_CHECKOUT="gitlab-foss"'
+#     - '[[ -d "ee/" ]] || export TAG_TO_CHECKOUT="v12.10.0"'
+#     - retry 'git fetch https://gitlab.com/gitlab-org/$PROJECT_TO_CHECKOUT.git $TAG_TO_CHECKOUT'
+#     - git checkout -f FETCH_HEAD
+#     - sed -i -e "s/gem 'grpc', '~> 1.24.0'/gem 'grpc', '~> 1.30.2'/" Gemfile  # Update gRPC for Ruby 2.7
+#     - sed -i -e "s/gem 'google-protobuf', '~> 3.8.0'/gem 'google-protobuf', '~> 3.12.0'/" Gemfile
+#     - gem install bundler:1.17.3
+#     - bundle update google-protobuf grpc bootsnap
+#     - bundle install $BUNDLE_INSTALL_FLAGS
+#     - date
+#     - cp config/gitlab.yml.example config/gitlab.yml
+#     - bundle exec rake db:drop db:create db:structure:load db:seed_fu
+#     - date
+#     - git checkout -f $CI_COMMIT_SHA
+#     - bundle install $BUNDLE_INSTALL_FLAGS
+#     - date
+#     - . scripts/prepare_build.sh
+#     - date
+#     - bundle exec rake db:migrate
 
 db:rollback:
   extends: .db-job-base
@@ -405,7 +414,7 @@ gitlab:setup:
     # db/fixtures/development/04_project.rb thanks to SIZE=1 below
     - git clone https://gitlab.com/gitlab-org/gitlab-test.git
        /home/git/repositories/gitlab-org/gitlab-test.git
-    - *base-script
+    - !reference [.base-script, script]
     - force=yes SIZE=1 FIXTURE_PATH="db/fixtures/development" bundle exec rake gitlab:setup
   artifacts:
     when: on_failure
@@ -485,7 +494,7 @@ rspec:coverage:
     - memory-static
     - memory-on-boot
   script:
-    - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
+    - !reference [.minimal-bundle-install, script]
     - run_timed_command "bundle exec scripts/merge-simplecov"
     - run_timed_command "bundle exec scripts/gather-test-memory-data"
   coverage: '/LOC \((\d+\.\d+%)\) covered.$/'
@@ -522,18 +531,18 @@ rspec:feature-flags:
     - memory-static
     - memory-on-boot
   script:
-    - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --without default development test production puma unicorn kerberos metrics omnibus ed25519"
+    - !reference [.minimal-bundle-install, script]
     - if [ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]; then
         run_timed_command "bundle exec scripts/used-feature-flags" || (scripts/slack master-broken "☠️ \`${CI_JOB_NAME}\` failed! ☠️ See ${CI_JOB_URL}" ci_failing "GitLab Bot" && exit 1);
       else
         run_timed_command "bundle exec scripts/used-feature-flags";
       fi
 
-# EE/FOSS: default refs (MRs, master, schedules) jobs #
+# EE/FOSS: default refs (MRs, default branch, schedules) jobs #
 #######################################################
 
 ##################################################
-# EE: default refs (MRs, master, schedules) jobs #
+# EE: default refs (MRs, default branch, schedules) jobs #
 rspec migration pg11-as-if-foss:
   extends:
     - .rspec-base-pg11-as-if-foss
@@ -676,81 +685,81 @@ db:rollback geo:
   script:
     - bundle exec rake geo:db:migrate VERSION=20170627195211
     - bundle exec rake geo:db:migrate
-# EE: default refs (MRs, master, schedules) jobs #
+# EE: default refs (MRs, default branch, schedules) jobs #
 ##################################################
 
 ##########################################
-# EE/FOSS: master nightly scheduled jobs #
+# EE/FOSS: default branch nightly scheduled jobs #
 rspec migration pg12:
   extends:
     - .rspec-base-pg12
     - .rspec-base-migration
-    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rails:rules:default-branch-schedule-nightly--code-backstage
     - .rspec-migration-parallel
 
 rspec unit pg12:
   extends:
     - .rspec-base-pg12
-    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rails:rules:default-branch-schedule-nightly--code-backstage
     - .rspec-unit-parallel
 
 rspec integration pg12:
   extends:
     - .rspec-base-pg12
-    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rails:rules:default-branch-schedule-nightly--code-backstage
     - .rspec-integration-parallel
 
 rspec system pg12:
   extends:
     - .rspec-base-pg12
-    - .rails:rules:master-schedule-nightly--code-backstage
+    - .rails:rules:default-branch-schedule-nightly--code-backstage
     - .rspec-system-parallel
-# EE/FOSS: master nightly scheduled jobs #
+# EE/FOSS: default branch nightly scheduled jobs #
 ##########################################
 
 #####################################
-# EE: master nightly scheduled jobs #
+# EE: default branch nightly scheduled jobs #
 rspec-ee migration pg12:
   extends:
     - .rspec-ee-base-pg12
     - .rspec-base-migration
-    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-migration-parallel
 
 rspec-ee unit pg12:
   extends:
     - .rspec-ee-base-pg12
-    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-unit-parallel
 
 rspec-ee integration pg12:
   extends:
     - .rspec-ee-base-pg12
-    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-integration-parallel
 
 rspec-ee system pg12:
   extends:
     - .rspec-ee-base-pg12
-    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-system-parallel
 
 rspec-ee unit pg12 geo:
   extends:
     - .rspec-ee-base-geo-pg12
-    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-unit-geo-parallel
 
 rspec-ee integration pg12 geo:
   extends:
     - .rspec-ee-base-geo-pg12
-    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
 
 rspec-ee system pg12 geo:
   extends:
     - .rspec-ee-base-geo-pg12
-    - .rails:rules:master-schedule-nightly--code-backstage-ee-only
-# EE: master nightly scheduled jobs #
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+# EE: default branch nightly scheduled jobs #
 #####################################
 
 ##################################################
@@ -762,7 +771,7 @@ rspec fail-fast:
   stage: test
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
   script:
-    - *base-script
+    - !reference [.base-script, script]
     - rspec_fail_fast tmp/matching_tests.txt "--tag ~quarantine"
   artifacts:
     expire_in: 7d
@@ -775,7 +784,7 @@ rspec foss-impact:
     - .rails:rules:rspec-foss-impact
   needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets as-if-foss", "detect-tests as-if-foss"]
   script:
-    - *base-script
+    - !reference [.base-script, script]
     - rspec_matched_foss_tests tmp/matching_foss_tests.txt "--tag ~quarantine"
   artifacts:
     expire_in: 7d

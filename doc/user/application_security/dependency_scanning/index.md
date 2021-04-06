@@ -62,16 +62,16 @@ The following languages and dependency managers are supported:
 
 | Package Managers | Languages  | Supported files | Scan tools |
 | ------------------- | --------- | --------------- | ------------ |
-| [Bundler](https://bundler.io/) | Ruby | `Gemfile.lock`, `gems.locked` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium), [bundler-audit](https://github.com/rubysec/bundler-audit) |
-| [Composer](https://getcomposer.org/) | PHP | `composer.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
-| [Conan](https://conan.io/) | C, C++ | [`conan.lock`](https://docs.conan.io/en/latest/versioning/lockfiles.html) | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
-| [Golang](https://golang.org/) | Go | `go.sum` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
-| [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) | Java | `build.gradle`, `build.gradle.kts`, `pom.xml` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
-| [npm](https://www.npmjs.com/), [yarn](https://classic.yarnpkg.com/en/) 1.x | JavaScript | `package-lock.json`, `npm-shrinkwrap.json`, `yarn.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
+| [Bundler](https://bundler.io/) | Ruby | `Gemfile.lock`, `gems.locked` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium), [bundler-audit](https://github.com/rubysec/bundler-audit) |
+| [Composer](https://getcomposer.org/) | PHP | `composer.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [Conan](https://conan.io/) | C, C++ | [`conan.lock`](https://docs.conan.io/en/latest/versioning/lockfiles.html) | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [Golang](https://golang.org/) | Go | `go.sum` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) | Java | `build.gradle`, `build.gradle.kts`, `pom.xml` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [npm](https://www.npmjs.com/), [yarn](https://classic.yarnpkg.com/en/) 1.x | JavaScript | `package-lock.json`, `npm-shrinkwrap.json`, `yarn.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
 | [npm](https://www.npmjs.com/) (7 and earlier), [yarn](https://classic.yarnpkg.com/en/) 1.x | JavaScript | `package.json` | [Retire.js](https://retirejs.github.io/retire.js/) |
-| [NuGet](https://www.nuget.org/) 4.9+ | .NET, C# | [`packages.lock.json`](https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#enabling-lock-file) | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
-| [`setuptools`](https://setuptools.readthedocs.io/en/latest/), [pip](https://pip.pypa.io/en/stable/), [Pipenv](https://pipenv.pypa.io/en/latest/) (*1*) | Python | `setup.py`, `requirements.txt`, `requirements.pip`, `requires.txt`, `Pipfile`, `Pipfile.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
-| [sbt](https://www.scala-sbt.org/) (*2*) | Scala | `build.sbt` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
+| [NuGet](https://www.nuget.org/) 4.9+ | .NET, C# | [`packages.lock.json`](https://docs.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#enabling-lock-file) | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [`setuptools`](https://setuptools.readthedocs.io/en/latest/), [pip](https://pip.pypa.io/en/stable/), [Pipenv](https://pipenv.pypa.io/en/latest/) (*1*) | Python | `setup.py`, `requirements.txt`, `requirements.pip`, `requires.txt`, `Pipfile`, `Pipfile.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
+| [sbt](https://www.scala-sbt.org/) (*2*) | Scala | `build.sbt` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) |
 
 1. [Pipenv](https://pipenv.pypa.io/en/latest/) projects are scanned when a `Pipfile` is present.
 1. Support for [sbt](https://www.scala-sbt.org/) 1.3 and above was added in GitLab 13.9.
@@ -80,7 +80,7 @@ Plans are underway for supporting the following languages, dependency managers, 
 
 | Package Managers    | Languages | Supported files | Scan tools | Issue |
 | ------------------- | --------- | --------------- | ---------- | ----- |
-| [Poetry](https://python-poetry.org/) | Python | `poetry.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) | [GitLab#7006](https://gitlab.com/gitlab-org/gitlab/-/issues/7006) |
+| [Poetry](https://python-poetry.org/) | Python | `poetry.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium) | [GitLab#7006](https://gitlab.com/gitlab-org/gitlab/-/issues/7006) |
 
 ## Contribute your scanner
 
@@ -183,10 +183,11 @@ The following variables are used for configuring specific analyzers (used for a 
 | `BUNDLER_AUDIT_ADVISORY_DB_URL`      | `bundler-audit`    | `https://github.com/rubysec/ruby-advisory-db` | URL of the advisory database used by bundler-audit. |
 | `BUNDLER_AUDIT_ADVISORY_DB_REF_NAME` | `bundler-audit`    | `master`                     | Git ref for the advisory database specified by `BUNDLER_AUDIT_ADVISORY_DB_URL`. |
 | `GEMNASIUM_DB_LOCAL_PATH`            | `gemnasium`        | `/gemnasium-db`              | Path to local Gemnasium database. |
+| `GEMNASIUM_DB_UPDATE_DISABLED`       | `gemnasium`        | `"false"`                    | Disable automatic updates for the `gemnasium-db` advisory database (For usage see: [examples](#hosting-a-copy-of-the-gemnasium_db-advisory-database))|
 | `GEMNASIUM_DB_REMOTE_URL`            | `gemnasium`        | `https://gitlab.com/gitlab-org/security-products/gemnasium-db.git` | Repository URL for fetching the Gemnasium database. |
 | `GEMNASIUM_DB_REF_NAME`              | `gemnasium`        | `master`                     | Branch name for remote repository database. `GEMNASIUM_DB_REMOTE_URL` is required. |
 | `DS_REMEDIATE`                       | `gemnasium`        | `"true"`                     | Enable automatic remediation of vulnerable dependencies. |
-| `DS_JAVA_VERSION`                    | `gemnasium-maven`  | `11`                         | Version of Java. Available versions: `8`, `11`, `13`, `14`. Maven and Gradle use the Java version specified by this value. |
+| `DS_JAVA_VERSION`                    | `gemnasium-maven`  | `11`                         | Version of Java. Available versions: `8`, `11`, `13`, `14`, `15`. Maven and Gradle use the Java version specified by this value. |
 | `MAVEN_CLI_OPTS`                     | `gemnasium-maven`  | `"-DskipTests --batch-mode"` | List of command line arguments that are passed to `maven` by the analyzer. See an example for [using private repositories](../index.md#using-private-maven-repositories). |
 | `GRADLE_CLI_OPTS`                    | `gemnasium-maven`  |                              | List of command line arguments that are passed to `gradle` by the analyzer. |
 | `SBT_CLI_OPTS`                       | `gemnasium-maven`  |                              | List of command-line arguments that the analyzer passes to `sbt`. |
@@ -214,7 +215,7 @@ variables:
       -----END CERTIFICATE-----
 ```
 
-The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
+The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/README.md#custom-cicd-variables), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
 
 ### Using private Maven repositories
 
@@ -226,13 +227,13 @@ Read more on [how to use private Maven repositories](../index.md#using-private-m
 ## Interacting with the vulnerabilities
 
 Once a vulnerability is found, you can interact with it. Read more on how to
-[interact with the vulnerabilities](../index.md#interacting-with-the-vulnerabilities).
+[address the vulnerabilities](../index.md#addressing-vulnerabilities).
 
 ## Solutions for vulnerabilities (auto-remediation)
 
 Some vulnerabilities can be fixed by applying the solution that GitLab
 automatically generates. Read more about the
-[solutions for vulnerabilities](../index.md#automatic-remediation-for-vulnerabilities).
+[solutions for vulnerabilities](../index.md#apply-an-automatic-remediation-for-a-vulnerability).
 
 ## Security Dashboard
 
@@ -505,12 +506,56 @@ ensure that it can reach your private repository. Here is an example configurati
    setuptools.ssl_support.cert_paths = ['internal.crt']
    ```
 
+## Hosting a copy of the gemnasium_db advisory database
+
+The [gemnasium_db](https://gitlab.com/gitlab-org/security-products/gemnasium-db) Git repository is
+used by `gemnasium`, `gemnasium-maven`, and `gemnasium-python` as the source of vulnerability data.
+This repository updates at scan time to fetch the latest advisories. However, due to a restricted
+networking environment, running this update is sometimes not possible. In this case, a user can do
+one of the following:
+
+- [Host a copy of the advisory database](#host-a-copy-of-the-advisory-database)
+- [Use a local clone](#use-a-local-clone)
+
+### Host a copy of the advisory database
+
+If [gemnasium-db](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is not reachable
+from within the environment, the user can host their own Git copy. Then the analyzer can be
+instructed to update the database from the user's copy by using `GEMNASIUM_DB_REMOTE_URL`:
+
+```yaml
+variables:
+  GEMNASIUM_DB_REMOTE_URL: https://users-own-copy.example.com/gemnasium-db/.git
+
+...
+```
+
+### Use a local clone
+
+If a hosted copy is not possible, then the user can clone [gemnasium-db](https://gitlab.com/gitlab-org/security-products/gemnasium-db)
+or create an archive before the scan and point the analyzer to the directory (using:
+`GEMNASIUM_DB_LOCAL_PATH`). Turn off the analyzer's self-update mechanism (using:
+`GEMNASIUM_DB_UPDATE_DISABLED`). In this example, the database directory is created in the
+`before_script`, before the `gemnasium` analyzer's scan job:
+
+```yaml
+...
+
+gemnasium-dependency_scanning:
+  variables:
+    GEMNASIUM_DB_LOCAL_PATH: ./gemnasium-db-local
+    GEMNASIUM_DB_UPDATE_DISABLED: "true"
+  before_script:
+    - mkdir $GEMNASIUM_DB_LOCAL_PATH
+    - tar -xzf gemnasium_db.tar.gz -C $GEMNASIUM_DB_LOCAL_PATH
+```
+
 ## Limitations
 
 ### Referencing local dependencies using a path in JavaScript projects
 
 The [Retire.js](https://gitlab.com/gitlab-org/security-products/analyzers/retire.js) analyzer
-doesn't support dependency references made with [local paths](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#local-paths)
+doesn't support dependency references made with [local paths](https://docs.npmjs.com/cli/v6/configuring-npm/package-json/#local-paths)
 in the `package.json` of JavaScript projects. The dependency scan outputs the following error for
 such references:
 

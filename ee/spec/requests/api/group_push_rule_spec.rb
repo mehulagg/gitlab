@@ -303,7 +303,7 @@ RSpec.describe API::GroupPushRule, 'GroupPushRule', api: true do
             put api("/groups/#{group_without_push_rule.id}/push_rule", admin), params: attributes_for_update
 
             expect(response).to have_gitlab_http_status(:not_found)
-            expect(json_response['message']).to include('Not Found')
+            expect(json_response['message']).to include('Push Rule Not Found')
           end
         end
 

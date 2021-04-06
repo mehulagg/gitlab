@@ -9,12 +9,12 @@ module EE
 
           def to_s
             <<-'GRAPHQL'
-            query($full_path: ID!, $epic_iid: ID!, $cursor: String) {
+            query($full_path: ID!, $epic_iid: ID!, $cursor: String, $per_page: Int) {
               group(fullPath: $full_path) {
                 epic(iid: $epic_iid) {
-                  events(first: 100, after: $cursor) {
+                  events(first: $per_page, after: $cursor) {
                     page_info: pageInfo {
-                      end_cursor: endCursor
+                      next_page: endCursor
                       has_next_page: hasNextPage
                     }
                     nodes {
@@ -34,12 +34,12 @@ module EE
 
           def variables(context)
             iid = context.extra[:epic_iid]
-            tracker = "epic_#{iid}_events"
 
             {
               full_path: context.entity.source_full_path,
-              cursor: context.entity.next_page_for(tracker),
-              epic_iid: iid
+              cursor: context.tracker.next_page,
+              epic_iid: iid,
+              per_page: ::BulkImports::Tracker::DEFAULT_PAGE_SIZE
             }
           end
 

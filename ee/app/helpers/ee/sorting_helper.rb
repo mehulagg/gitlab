@@ -72,7 +72,7 @@ module EE
 
       link_to sprite_icon(sort_icon),
               page_filter_path(sort: opposite_sorting_param),
-              class: "btn btn-default has-tooltip qa-reverse-sort btn-sort-direction",
+              class: "btn gl-button btn-default btn-icon has-tooltip qa-reverse-sort btn-sort-direction",
               title: _("Sort direction")
     end
   end

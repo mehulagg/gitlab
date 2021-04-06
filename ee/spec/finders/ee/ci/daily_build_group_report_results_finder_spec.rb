@@ -17,7 +17,8 @@ RSpec.describe Ci::DailyBuildGroupReportResultsFinder do
     let(:start_date) { '2020-03-09' }
     let(:end_date) { '2020-03-10' }
     let(:limit) { nil }
-    let(:sort) { true }
+    let(:sort) { false }
+    let(:group_activity) { nil }
 
     let(:params) do
       {
@@ -27,7 +28,8 @@ RSpec.describe Ci::DailyBuildGroupReportResultsFinder do
         start_date: start_date,
         end_date: end_date,
         sort: sort,
-        limit: limit
+        limit: limit,
+        group_activity: group_activity
       }
     end
 
@@ -40,8 +42,12 @@ RSpec.describe Ci::DailyBuildGroupReportResultsFinder do
         group.add_reporter(current_user)
       end
 
-      it 'returns coverages belonging to the group' do
-        expect(coverages).to contain_exactly(rspec_coverage, karma_coverage)
+      context 'when sort is true' do
+        let(:sort) { true }
+
+        it 'returns coverages belonging to the group' do
+          expect(coverages).to contain_exactly(rspec_coverage, karma_coverage)
+        end
       end
 
       context 'with a limit below 1000' do
@@ -63,6 +69,31 @@ RSpec.describe Ci::DailyBuildGroupReportResultsFinder do
       context 'without a limit' do
         it 'returns MAX_ITEMS as a limit' do
           expect(coverages.limit_value).to eq(Ci::DailyBuildGroupReportResultsFinder::MAX_ITEMS)
+        end
+      end
+
+      context 'with group_activity' do
+        let(:group_activity) { true }
+
+        let_it_be(:karma_coverage_2) { create_daily_coverage('karma', 89.0, '2020-03-10', karma_project, group) }
+
+        it 'returns the group activity aggregated data' do
+          expected_results = [
+            {
+              average_coverage: 89.0,
+              coverage_count: 1,
+              project_count: 1,
+              date: '2020-03-09'.to_date
+            },
+            {
+              average_coverage: 92.0,
+              coverage_count: 2,
+              project_count: 2,
+              date: '2020-03-10'.to_date
+            }
+          ]
+
+          expect(coverages).to eq(expected_results)
         end
       end
     end

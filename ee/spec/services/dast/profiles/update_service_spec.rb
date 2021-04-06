@@ -5,17 +5,18 @@ require 'spec_helper'
 RSpec.describe Dast::Profiles::UpdateService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project) }
+  let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project, branch_name: 'orphaned-branch') }
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
   let(:default_params) do
     {
+      name: SecureRandom.hex,
+      description: SecureRandom.hex,
+      branch_name: 'orphaned-branch',
       dast_profile: dast_profile,
       dast_site_profile_id: dast_site_profile.id,
-      dast_scanner_profile_id: dast_scanner_profile.id,
-      name: SecureRandom.hex,
-      description: SecureRandom.hex
+      dast_scanner_profile_id: dast_scanner_profile.id
     }
   end
 
@@ -30,22 +31,9 @@ RSpec.describe Dast::Profiles::UpdateService do
   end
 
   describe 'execute', :clean_gitlab_redis_shared_state do
-    context 'when on demand scan feature is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: false)
-
-        aggregate_failures do
-          expect(subject.status).to eq(:error)
-          expect(subject.message).to eq('You are not authorized to update this profile')
-        end
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(dast_saved_scans: true)
 
         aggregate_failures do
           expect(subject.status).to eq(:error)
@@ -57,7 +45,6 @@ RSpec.describe Dast::Profiles::UpdateService do
     context 'when the feature is enabled' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(dast_saved_scans: true)
       end
 
       context 'when the user cannot run a DAST scan' do
@@ -92,12 +79,8 @@ RSpec.describe Dast::Profiles::UpdateService do
         context 'when param run_after_update: true' do
           let(:params) { default_params.merge(run_after_update: true) }
 
-          it 'calls DastOnDemandScans::CreateService' do
-            params = { dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile }
-
-            expect(DastOnDemandScans::CreateService).to receive(:new).with(hash_including(params: params)).and_call_original
-
-            subject
+          it_behaves_like 'it delegates scan creation to another service' do
+            let(:delegated_params) { hash_including(dast_profile: dast_profile) }
           end
 
           it 'creates a ci_pipeline' do

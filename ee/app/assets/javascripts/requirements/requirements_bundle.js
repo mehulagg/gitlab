@@ -50,6 +50,7 @@ export default () => {
         prev,
         textSearch,
         authorUsernames,
+        status,
         sortBy,
         projectPath,
         emptyStatePath,
@@ -71,6 +72,7 @@ export default () => {
         initialFilterBy: stateFilterBy,
         initialTextSearch: textSearch,
         initialAuthorUsernames: authorUsernames ? JSON.parse(authorUsernames) : [],
+        initialStatus: status,
         initialSortBy: sortBy,
         initialRequirementsCount: {
           OPENED,
@@ -95,6 +97,7 @@ export default () => {
           initialFilterBy: this.initialFilterBy,
           initialTextSearch: this.initialTextSearch,
           initialAuthorUsernames: this.initialAuthorUsernames,
+          initialStatus: this.initialStatus,
           initialSortBy: this.initialSortBy,
           initialRequirementsCount: this.initialRequirementsCount,
           page: parseInt(this.page, 10) || 1,

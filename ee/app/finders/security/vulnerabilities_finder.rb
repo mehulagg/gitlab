@@ -30,7 +30,8 @@ module Security
       filter_by_report_types
       filter_by_severities
       filter_by_states
-      filter_by_scanners
+      filter_by_scanner_external_id
+      filter_by_scanner_ids
       filter_by_resolution
       filter_by_issues
 
@@ -65,9 +66,15 @@ module Security
       end
     end
 
-    def filter_by_scanners
+    def filter_by_scanner_ids
+      if params[:scanner_id].present?
+        @vulnerabilities = vulnerabilities.by_scanner_ids(params[:scanner_id])
+      end
+    end
+
+    def filter_by_scanner_external_id
       if params[:scanner].present?
-        @vulnerabilities = vulnerabilities.with_scanners(params[:scanner])
+        @vulnerabilities = vulnerabilities.with_scanner_external_ids(params[:scanner])
       end
     end
 

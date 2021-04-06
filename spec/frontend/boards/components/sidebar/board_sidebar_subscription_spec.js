@@ -20,10 +20,10 @@ describe('~/boards/components/sidebar/board_sidebar_subscription_spec.vue', () =
   const findToggle = () => wrapper.find(GlToggle);
   const findGlLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
-  const createComponent = (activeIssue = { ...mockActiveIssue }) => {
+  const createComponent = (activeBoardItem = { ...mockActiveIssue }) => {
     store = createStore();
-    store.state.boardItems = { [activeIssue.id]: activeIssue };
-    store.state.activeId = activeIssue.id;
+    store.state.boardItems = { [activeBoardItem.id]: activeBoardItem };
+    store.state.activeId = activeBoardItem.id;
 
     wrapper = mount(BoardSidebarSubscription, {
       localVue,
@@ -43,6 +43,12 @@ describe('~/boards/components/sidebar/board_sidebar_subscription_spec.vue', () =
       createComponent();
 
       expect(findNotificationHeader().text()).toBe('Notifications');
+    });
+
+    it('renders toggle with label', () => {
+      createComponent();
+
+      expect(findToggle().props('label')).toBe(BoardSidebarSubscription.i18n.header.title);
     });
 
     it('renders toggle as "off" when currently not subscribed', () => {
@@ -85,8 +91,8 @@ describe('~/boards/components/sidebar/board_sidebar_subscription_spec.vue', () =
   describe('Board sidebar subscription component `behavior`', () => {
     const mockSetActiveIssueSubscribed = (subscribedState) => {
       jest.spyOn(wrapper.vm, 'setActiveIssueSubscribed').mockImplementation(async () => {
-        store.commit(types.UPDATE_ISSUE_BY_ID, {
-          issueId: mockActiveIssue.id,
+        store.commit(types.UPDATE_BOARD_ITEM_BY_ID, {
+          itemId: mockActiveIssue.id,
           prop: 'subscribed',
           value: subscribedState,
         });

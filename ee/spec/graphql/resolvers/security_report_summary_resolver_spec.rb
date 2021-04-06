@@ -15,7 +15,7 @@ RSpec.describe Resolvers::SecurityReportSummaryResolver do
 
       let(:expected_selection_info) do
         {
-          dast: [:scanned_resources_count, :vulnerabilities_count],
+          dast: [:scanned_resources_count, :vulnerabilities_count, :scans],
           sast: [:scanned_resources_count, :vulnerabilities_count],
           container_scanning: [:scanned_resources_count, :vulnerabilities_count],
           dependency_scanning: [:scanned_resources_count, :vulnerabilities_count],

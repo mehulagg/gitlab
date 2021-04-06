@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :external_approval_rule, class: 'ApprovalRules::ExternalApprovalRule' do
     project
-    external_url { "https://testurl.example.test" }
+    external_url { FFaker::Internet.http_url }
 
     sequence :name do |i|
       "rule #{i}"

@@ -5,7 +5,7 @@ group: Static Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Secret Detection
+# Secret Detection **(FREE)**
 
 > - [Introduced](https://about.gitlab.com/releases/2019/03/22/gitlab-11-9-released/#detect-secrets-and-credentials-in-the-repository) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.9.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/222788) in 13.3.
@@ -102,8 +102,7 @@ as shown in the following table:
 Secret Detection is performed by a [specific analyzer](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Secret-Detection.gitlab-ci.yml)
 during the `secret-detection` job. It runs regardless of your app's programming language.
 
-The Secret Detection analyzer includes [Gitleaks](https://github.com/zricethezav/gitleaks) and
-[TruffleHog](https://github.com/dxa4481/truffleHog) checks.
+The Secret Detection analyzer includes [Gitleaks](https://github.com/zricethezav/gitleaks) checks.
 
 Note that the Secret Detection analyzer ignores Password-in-URL vulnerabilities if the password
 begins with a dollar sign (`$`), as this likely indicates the password is an environment variable.
@@ -133,18 +132,6 @@ The results are saved as a
 [Secret Detection report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportssecret_detection)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest Secret Detection artifact available.
-
-### Post-processing
-
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4639) in GitLab 13.6.
-
-Upon detection of a secret, GitLab supports post processing hooks. These can be used to take actions like notifying the cloud service who issued the secret. The cloud provider can confirm the credentials and take remediation actions like revoking or reissuing a new secret and notifying the creator of the secret. Post-processing workflows vary by supported cloud providers.
-
-GitLab currently supports post-processing for following service providers:
-
-- Amazon Web Services (AWS)
-
-Third party cloud and SaaS providers can [express integration interest by filling out this form](https://forms.gle/wWpvrtLRK21Q2WJL9). Learn more about the [technical details of post-processing secrets](https://gitlab.com/groups/gitlab-org/-/epics/4639).
 
 ### Customizing settings
 
@@ -200,7 +187,7 @@ Secret Detection can be customized by defining available CI/CD variables:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211387) in GitLab 13.5.
 
 You can customize the default secret detection rules provided with GitLab.
-Customization allows you to exclude rules and add new rules.
+Customization allows replace the default secret detection rules with rules that you define.
 
 To create a custom ruleset:
 
@@ -250,6 +237,34 @@ From highest to lowest severity, the logging levels are:
 - `info` (default)
 - `debug`
 
+## Post-processing and revocation
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4639) in GitLab 13.6.
+
+Upon detection of a secret, GitLab supports post-processing hooks. These can be used to take actions like notifying the cloud service who issued the secret. The cloud provider can confirm the credentials and take remediation actions like revoking or reissuing a new secret and notifying the creator of the secret. Post-processing workflows vary by supported cloud providers.
+
+GitLab currently supports post-processing for following service providers:
+
+- Amazon Web Services (AWS)
+
+Third party cloud and SaaS providers can [express integration interest by filling out this form](https://forms.gle/wWpvrtLRK21Q2WJL9). Learn more about the [technical details of post-processing secrets](https://gitlab.com/groups/gitlab-org/-/epics/4639).
+
+NOTE:
+Post-processing is currently limited to a project's default branch, see the above epic for future efforts to support additional branches.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    Rails->>+Sidekiq: gl-secret-detection-report.json
+    Sidekiq-->+Sidekiq: BuildFinishedWorker
+    Sidekiq-->+RevocationAPI: GET revocable keys types
+    RevocationAPI-->>-Sidekiq: OK
+    Sidekiq->>+RevocationAPI: POST revoke revocable keys
+    RevocationAPI-->>-Sidekiq: ACCEPTED
+    RevocationAPI-->>+Cloud Vendor: revoke revocable keys
+    Cloud Vendor-->>+RevocationAPI: ACCEPTED
+```
+
 ## Full History Secret Scan
 
 GitLab 12.11 introduced support for scanning the full history of a repository. This new functionality
@@ -258,7 +273,7 @@ want to perform a full secret scan. Running a secret scan on the full history ca
 especially for larger repositories with lengthy Git histories. We recommend not setting this CI/CD variable
 as part of your normal job definition.
 
-A new configuration variable ([`SECRET_DETECTION_HISTORIC_SCAN`](../sast/#vulnerability-filters))
+A new configuration variable ([`SECRET_DETECTION_HISTORIC_SCAN`](#available-variables))
 can be set to change the behavior of the GitLab Secret Detection scan to run on the entire Git history of a repository.
 
 We have created a [short video walkthrough](https://youtu.be/wDtc_K00Y0A) showcasing how you can perform a full history secret scan.

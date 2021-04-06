@@ -80,6 +80,7 @@ module QA
     autoload :CiVariable, 'qa/resource/ci_variable'
     autoload :Runner, 'qa/resource/runner'
     autoload :PersonalAccessToken, 'qa/resource/personal_access_token'
+    autoload :ProjectAccessToken, 'qa/resource/project_access_token'
     autoload :User, 'qa/resource/user'
     autoload :ProjectMilestone, 'qa/resource/project_milestone'
     autoload :GroupMilestone, 'qa/resource/group_milestone'
@@ -95,6 +96,9 @@ module QA
     autoload :Visibility, 'qa/resource/visibility'
     autoload :ProjectSnippet, 'qa/resource/project_snippet'
     autoload :Design, 'qa/resource/design'
+    autoload :RegistryRepository, 'qa/resource/registry_repository'
+    autoload :Package, 'qa/resource/package'
+    autoload :PipelineSchedules, 'qa/resource/pipeline_schedules'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
@@ -120,6 +124,7 @@ module QA
 
     module Wiki
       autoload :ProjectPage, 'qa/resource/wiki/project_page'
+      autoload :GroupPage, 'qa/resource/wiki/group_page'
     end
   end
 
@@ -231,6 +236,7 @@ module QA
 
       module Settings
         autoload :General, 'qa/page/group/settings/general'
+        autoload :PackageRegistries, 'qa/page/group/settings/package_registries'
       end
     end
 
@@ -314,6 +320,7 @@ module QA
         autoload :MirroringRepositories, 'qa/page/project/settings/mirroring_repositories'
         autoload :ProtectedTags, 'qa/page/project/settings/protected_tags'
         autoload :VisibilityFeaturesPermissions, 'qa/page/project/settings/visibility_features_permissions'
+        autoload :AccessTokens, 'qa/page/project/settings/access_tokens'
 
         module Services
           autoload :Jira, 'qa/page/project/settings/services/jira'
@@ -378,7 +385,6 @@ module QA
         autoload :Edit, 'qa/page/project/wiki/edit'
         autoload :Show, 'qa/page/project/wiki/show'
         autoload :GitAccess, 'qa/page/project/wiki/git_access'
-        autoload :Sidebar, 'qa/page/project/wiki/sidebar'
         autoload :List, 'qa/page/project/wiki/list'
       end
 
@@ -494,6 +500,11 @@ module QA
       autoload :Snippet, 'qa/page/component/snippet'
       autoload :NewSnippet, 'qa/page/component/new_snippet'
       autoload :InviteMembersModal, 'qa/page/component/invite_members_modal'
+      autoload :Wiki, 'qa/page/component/wiki'
+      autoload :WikiSidebar, 'qa/page/component/wiki_sidebar'
+      autoload :WikiPageForm, 'qa/page/component/wiki_page_form'
+      autoload :AccessTokens, 'qa/page/component/access_tokens'
+      autoload :CommitModal, 'qa/page/component/commit_modal'
 
       module Issuable
         autoload :Common, 'qa/page/component/issuable/common'
@@ -571,7 +582,9 @@ module QA
     autoload :LoopRunner, 'qa/specs/loop_runner'
 
     module Helpers
+      autoload :ContextSelector, 'qa/specs/helpers/context_selector'
       autoload :Quarantine, 'qa/specs/helpers/quarantine'
+      autoload :RSpec, 'qa/specs/helpers/rspec'
     end
   end
 

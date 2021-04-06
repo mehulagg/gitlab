@@ -127,11 +127,15 @@ module Gitlab
           return unless Gitlab::CurrentSettings.usage_ping_enabled?
 
           event = event_for(event_name)
-          raise UnknownEvent, "Unknown event #{event_name}" unless event.present?
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(UnknownEvent.new("Unknown event #{event_name}")) unless event.present?
 
           return unless feature_enabled?(event)
 
           Gitlab::Redis::HLL.add(key: redis_key(event, time, context), value: values, expiry: expiry(event))
+        rescue => e
+          # Ignore any exceptions unless is dev or test env
+          # The application flow should not be blocked by erros in tracking
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
         end
 
         # The array of valid context on which we allow tracking
@@ -147,13 +151,16 @@ module Gitlab
           aggregation = events.first[:aggregation]
 
           keys = keys_for_aggregation(aggregation, events: events, start_date: start_date, end_date: end_date, context: context)
+
+          return FALLBACK unless keys.any?
+
           redis_usage_data { Gitlab::Redis::HLL.count(keys: keys) }
         end
 
         def feature_enabled?(event)
           return true if event[:feature_flag].blank?
 
-          Feature.enabled?(event[:feature_flag], default_enabled: :yaml)
+          Feature.enabled?(event[:feature_flag], default_enabled: :yaml) && Feature.enabled?(:redis_hll_tracking, type: :ops, default_enabled: :yaml)
         end
 
         # Allow to add totals for events that are in the same redis slot, category and have the same aggregation level

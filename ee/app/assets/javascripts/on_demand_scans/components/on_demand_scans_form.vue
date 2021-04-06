@@ -17,16 +17,18 @@ import {
   SCAN_TYPE_LABEL,
   SCAN_TYPE,
 } from 'ee/security_configuration/dast_scanner_profiles/constants';
+import { EXCLUDED_URLS_SEPARATOR } from 'ee/security_configuration/dast_site_profiles_form/constants';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { initFormField } from 'ee/security_configuration/utils';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { serializeFormObject } from '~/lib/utils/forms';
 import { redirectTo, queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
+import RefSelector from '~/ref/components/ref_selector.vue';
+import { REF_TYPE_BRANCHES } from '~/ref/constants';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
 import dastProfileCreateMutation from '../graphql/dast_profile_create.mutation.graphql';
 import dastProfileUpdateMutation from '../graphql/dast_profile_update.mutation.graphql';
 import {
@@ -36,7 +38,6 @@ import {
   ERROR_MESSAGES,
   SCANNER_PROFILES_QUERY,
   SITE_PROFILES_QUERY,
-  SITE_PROFILES_EXTENDED_QUERY,
   TYPE_SITE_PROFILE,
   TYPE_SCANNER_PROFILE,
 } from '../settings';
@@ -68,9 +69,11 @@ const createProfilesApolloOptions = (name, field, { fetchQuery, fetchError }) =>
 
 export default {
   SCAN_TYPE_LABEL,
+  enabledRefTypes: [REF_TYPE_BRANCHES],
   saveAndRunScanBtnId: 'scan-submit-button',
   saveScanBtnId: 'scan-save-button',
   components: {
+    RefSelector,
     ProfileSelectorSummaryCell,
     ScannerProfileSelector,
     SiteProfileSelector,
@@ -97,15 +100,11 @@ export default {
       'selectedScannerProfileId',
       SCANNER_PROFILES_QUERY,
     ),
-    siteProfiles() {
-      return createProfilesApolloOptions(
-        'siteProfiles',
-        'selectedSiteProfileId',
-        this.glFeatures.securityDastSiteProfilesAdditionalFields
-          ? SITE_PROFILES_EXTENDED_QUERY
-          : SITE_PROFILES_QUERY,
-      );
-    },
+    siteProfiles: createProfilesApolloOptions(
+      'siteProfiles',
+      'selectedSiteProfileId',
+      SITE_PROFILES_QUERY,
+    ),
   },
   inject: {
     dastSiteValidationDocsPath: {
@@ -136,26 +135,22 @@ export default {
     },
   },
   data() {
-    const savedScansFields = this.glFeatures.dastSavedScans
-      ? {
-          form: {
-            showValidation: false,
-            state: false,
-            fields: {
-              name: initFormField({ value: this.dastScan?.name ?? '' }),
-              description: initFormField({
-                value: this.dastScan?.description ?? '',
-                required: false,
-                skipValidation: true,
-              }),
-            },
-          },
-        }
-      : {};
     return {
-      ...savedScansFields,
+      form: {
+        showValidation: false,
+        state: false,
+        fields: {
+          name: initFormField({ value: this.dastScan?.name ?? '' }),
+          description: initFormField({
+            value: this.dastScan?.description ?? '',
+            required: false,
+            skipValidation: true,
+          }),
+        },
+      },
       scannerProfiles: [],
       siteProfiles: [],
+      selectedBranch: this.dastScan?.branch?.name ?? this.defaultBranch,
       selectedScannerProfileId: this.dastScan?.scannerProfileId || null,
       selectedSiteProfileId: this.dastScan?.siteProfileId || null,
       loading: false,
@@ -173,11 +168,6 @@ export default {
       return this.isEdit
         ? s__('OnDemandScans|Edit on-demand DAST scan')
         : s__('OnDemandScans|New on-demand DAST scan');
-    },
-    manageProfilesLabel() {
-      return this.glFeatures.dastSavedScans
-        ? s__('OnDemandScans|Manage DAST scans')
-        : s__('OnDemandScans|Manage profiles');
     },
     selectedScannerProfile() {
       return this.selectedScannerProfileId
@@ -231,12 +221,19 @@ export default {
       return isFormInvalid || (loading && loading !== saveScanBtnId);
     },
     formFieldValues() {
-      const { selectedScannerProfileId, selectedSiteProfileId } = this;
+      const { selectedScannerProfileId, selectedSiteProfileId, selectedBranch } = this;
       return {
         ...serializeFormObject(this.form.fields),
         selectedScannerProfileId,
         selectedSiteProfileId,
+        selectedBranch,
       };
+    },
+    hasExcludedUrls() {
+      return this.selectedSiteProfile.excludedUrls?.length > 0;
+    },
+    storageKey() {
+      return `${this.projectPath}/${ON_DEMAND_SCANS_STORAGE_KEY}`;
     },
   },
   created() {
@@ -251,31 +248,25 @@ export default {
   },
   methods: {
     onSubmit({ runAfter = true, button = this.$options.saveAndRunScanBtnId } = {}) {
-      if (this.glFeatures.dastSavedScans) {
-        this.form.showValidation = true;
-        if (!this.form.state) {
-          return;
-        }
+      this.form.showValidation = true;
+      if (!this.form.state) {
+        return;
       }
 
       this.loading = button;
       this.hideErrors();
-      let mutation = dastOnDemandScanCreateMutation;
-      let responseType = 'dastOnDemandScanCreate';
-      let input = {
+      const mutation = this.isEdit ? dastProfileUpdateMutation : dastProfileCreateMutation;
+      const responseType = this.isEdit ? 'dastProfileUpdate' : 'dastProfileCreate';
+      const input = {
         fullPath: this.projectPath,
         dastScannerProfileId: this.selectedScannerProfile.id,
         dastSiteProfileId: this.selectedSiteProfile.id,
+        ...(this.isEdit ? { id: this.dastScan.id } : {}),
+        ...serializeFormObject(this.form.fields),
+        [this.isEdit ? 'runAfterUpdate' : 'runAfterCreate']: runAfter,
       };
-      if (this.glFeatures.dastSavedScans) {
-        mutation = this.isEdit ? dastProfileUpdateMutation : dastProfileCreateMutation;
-        responseType = this.isEdit ? 'dastProfileUpdate' : 'dastProfileCreate';
-        input = {
-          ...input,
-          ...(this.isEdit ? { id: this.dastScan.id } : {}),
-          ...serializeFormObject(this.form.fields),
-          [this.isEdit ? 'runAfterUpdate' : 'runAfterCreate']: runAfter,
-        };
+      if (this.glFeatures.dastBranchSelection) {
+        input.branchName = this.selectedBranch;
       }
 
       this.$apollo
@@ -291,7 +282,7 @@ export default {
           if (errors?.length) {
             this.showErrors(ERROR_RUN_SCAN, errors);
             this.loading = false;
-          } else if (this.glFeatures.dastSavedScans && !runAfter) {
+          } else if (!runAfter) {
             redirectTo(response.dastProfile.editPath);
             this.clearStorage = true;
           } else {
@@ -320,26 +311,32 @@ export default {
       this.showAlert = false;
     },
     updateFromStorage(val) {
-      const { selectedSiteProfileId, selectedScannerProfileId, name, description } = val;
+      const {
+        selectedSiteProfileId,
+        selectedScannerProfileId,
+        name,
+        description,
+        selectedBranch,
+      } = val;
 
       this.form.fields.name.value = name ?? this.form.fields.name.value;
       this.form.fields.description.value = description ?? this.form.fields.description.value;
-
+      this.selectedBranch = selectedBranch;
       // precedence is given to profile IDs passed from the query params
       this.selectedSiteProfileId = this.selectedSiteProfileId ?? selectedSiteProfileId;
       this.selectedScannerProfileId = this.selectedScannerProfileId ?? selectedScannerProfileId;
     },
   },
-  ON_DEMAND_SCANS_STORAGE_KEY,
+  EXCLUDED_URLS_SEPARATOR,
 };
 </script>
 
 <template>
   <gl-form novalidate @submit.prevent="onSubmit()">
     <local-storage-sync
-      v-if="glFeatures.dastSavedScans && !isEdit"
+      v-if="!isEdit"
       as-json
-      :storage-key="$options.ON_DEMAND_SCANS_STORAGE_KEY"
+      :storage-key="storageKey"
       :clear="clearStorage"
       :value="formFieldValues"
       @input="updateFromStorage"
@@ -348,7 +345,7 @@ export default {
       <div class="gl-mt-6 gl-display-flex">
         <h2 class="gl-flex-grow-1 gl-my-0">{{ title }}</h2>
         <gl-button :href="profilesLibraryPath" data-testid="manage-profiles-link">
-          {{ manageProfilesLabel }}
+          {{ s__('OnDemandScans|Manage DAST scans') }}
         </gl-button>
       </div>
       <p>
@@ -383,7 +380,7 @@ export default {
     </gl-alert>
 
     <template v-if="isLoadingProfiles">
-      <gl-skeleton-loader v-if="glFeatures.dastSavedScans" :width="1248" :height="180">
+      <gl-skeleton-loader :width="1248" :height="180">
         <rect x="0" y="0" width="100" height="15" rx="4" />
         <rect x="0" y="24" width="460" height="32" rx="4" />
         <rect x="0" y="71" width="100" height="15" rx="4" />
@@ -404,33 +401,55 @@ export default {
       </gl-card>
     </template>
     <template v-else-if="!failedToLoadProfiles">
-      <template v-if="glFeatures.dastSavedScans">
-        <gl-form-group
-          :label="s__('OnDemandScans|Scan name')"
-          :invalid-feedback="form.fields.name.feedback"
-        >
-          <gl-form-input
-            v-model="form.fields.name.value"
-            v-validation:[form.showValidation]
-            class="mw-460"
-            data-testid="dast-scan-name-input"
-            type="text"
-            :placeholder="s__('OnDemandScans|My daily scan')"
-            :state="form.fields.name.state"
-            name="name"
-            required
-          />
-        </gl-form-group>
-        <gl-form-group :label="s__('OnDemandScans|Description (optional)')">
-          <gl-form-textarea
-            v-model="form.fields.description.value"
-            class="mw-460"
-            data-testid="dast-scan-description-input"
-            :placeholder="s__(`OnDemandScans|For example: Tests the login page for SQL injections`)"
-            :state="form.fields.description.state"
-          />
-        </gl-form-group>
-      </template>
+      <gl-form-group
+        :label="s__('OnDemandScans|Scan name')"
+        :invalid-feedback="form.fields.name.feedback"
+      >
+        <gl-form-input
+          v-model="form.fields.name.value"
+          v-validation:[form.showValidation]
+          class="mw-460"
+          data-testid="dast-scan-name-input"
+          type="text"
+          :placeholder="s__('OnDemandScans|My daily scan')"
+          :state="form.fields.name.state"
+          name="name"
+          required
+        />
+      </gl-form-group>
+      <gl-form-group :label="s__('OnDemandScans|Description (optional)')">
+        <gl-form-textarea
+          v-model="form.fields.description.value"
+          class="mw-460"
+          data-testid="dast-scan-description-input"
+          :placeholder="s__(`OnDemandScans|For example: Tests the login page for SQL injections`)"
+          :state="form.fields.description.state"
+        />
+      </gl-form-group>
+
+      <gl-form-group v-if="glFeatures.dastBranchSelection" :label="__('Branch')">
+        <ref-selector
+          v-model="selectedBranch"
+          data-testid="dast-scan-branch-input"
+          no-flip
+          :enabled-ref-types="$options.enabledRefTypes"
+          :project-id="projectPath"
+          :translations="{
+            dropdownHeader: __('Select a branch'),
+            searchPlaceholder: __('Search'),
+            noRefSelected: __('No available branches'),
+            noResults: __('No available branches'),
+          }"
+        />
+        <div v-if="!defaultBranch" class="gl-text-red-500 gl-mt-3">
+          {{
+            s__(
+              'OnDemandScans|You must create a repository within your project to run an on-demand scan.',
+            )
+          }}
+        </div>
+      </gl-form-group>
+
       <scanner-profile-selector
         v-model="selectedScannerProfileId"
         class="gl-mb-5"
@@ -496,6 +515,10 @@ export default {
                   :label="s__('DastProfiles|Username')"
                   :value="selectedSiteProfile.auth.username"
                 />
+                <profile-selector-summary-cell
+                  :label="s__('DastProfiles|Password')"
+                  value="••••••••"
+                />
               </div>
               <div class="row">
                 <profile-selector-summary-cell
@@ -510,12 +533,14 @@ export default {
             </template>
             <div class="row">
               <profile-selector-summary-cell
+                v-if="hasExcludedUrls"
                 :label="s__('DastProfiles|Excluded URLs')"
-                :value="selectedSiteProfile.excludedUrls"
+                :value="selectedSiteProfile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR)"
               />
               <profile-selector-summary-cell
+                v-if="selectedSiteProfile.requestHeaders"
                 :label="s__('DastProfiles|Request headers')"
-                :value="selectedSiteProfile.requestHeaders"
+                :value="__('[Redacted]')"
               />
             </div>
           </template>
@@ -551,14 +576,9 @@ export default {
           :disabled="isSubmitButtonDisabled"
           :loading="loading === $options.saveAndRunScanBtnId"
         >
-          {{
-            glFeatures.dastSavedScans
-              ? s__('OnDemandScans|Save and run scan')
-              : s__('OnDemandScans|Run scan')
-          }}
+          {{ s__('OnDemandScans|Save and run scan') }}
         </gl-button>
         <gl-button
-          v-if="glFeatures.dastSavedScans"
           variant="success"
           category="secondary"
           data-testid="on-demand-scan-save-button"

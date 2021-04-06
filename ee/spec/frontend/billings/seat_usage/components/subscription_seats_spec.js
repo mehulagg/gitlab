@@ -17,7 +17,7 @@ localVue.use(Vuex);
 
 const actionSpies = {
   fetchBillableMembersList: jest.fn(),
-  resetMembers: jest.fn(),
+  resetBillableMembers: jest.fn(),
 };
 
 const providedFields = {
@@ -228,17 +228,17 @@ describe('Subscription Seats', () => {
       expect(findTableEmptyText()).toBe(EMPTY_TEXT_NO_USERS);
     });
 
-    it('dispatches the resetMembers action when 1 or 2 characters have been typed', async () => {
-      expect(actionSpies.resetMembers).not.toHaveBeenCalled();
+    it('dispatches the.resetBillableMembers action when 1 or 2 characters have been typed', async () => {
+      expect(actionSpies.resetBillableMembers).not.toHaveBeenCalled();
 
       await findSearchBox().vm.$emit('input', 'a');
-      expect(actionSpies.resetMembers).toHaveBeenCalledTimes(1);
+      expect(actionSpies.resetBillableMembers).toHaveBeenCalledTimes(1);
 
       await findSearchBox().vm.$emit('input', 'aa');
-      expect(actionSpies.resetMembers).toHaveBeenCalledTimes(2);
+      expect(actionSpies.resetBillableMembers).toHaveBeenCalledTimes(2);
 
       await findSearchBox().vm.$emit('input', 'aaa');
-      expect(actionSpies.resetMembers).toHaveBeenCalledTimes(2);
+      expect(actionSpies.resetBillableMembers).toHaveBeenCalledTimes(2);
     });
 
     it('dispatches fetchBillableMembersList action when search box is emptied out', async () => {

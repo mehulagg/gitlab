@@ -1,18 +1,12 @@
+-# Only top-level groups can have trials & plans
 - root_group = group.root_ancestor
 - return unless show_trial_status_widget?(root_group)
 
-= nav_link do
-  #js-trial-status-widget{ data: { container_id: 'trial-status-sidebar-widget',
-    days_remaining: root_group.trial_days_remaining,
-    nav_icon_image_path: image_path('illustrations/golden_tanuki.svg'),
-    percentage_complete: root_group.trial_percentage_complete,
-    plan_name: plan_title_for_group(root_group),
-    plans_href: group_billings_path(root_group) } }
+-# For the current Growth::Conversion experiment
+- experiment_key = :show_trial_status_in_sidebar
+- record_experiment_group(experiment_key, root_group)
+- return unless experiment_enabled?(experiment_key, subject: root_group)
 
-  #js-trial-status-popover{ data: { container_id: 'trial-status-sidebar-widget',
-    group_name: root_group.name,
-    plan_name: plan_title_for_group(root_group),
-    plans_href: group_billings_path(root_group),
-    purchase_href: new_subscriptions_path(namespace_id: group.id, plan_id: '2c92a0fc5a83f01d015aa6db83c45aac'),
-    target_id: 'trial-status-sidebar-widget',
-    trial_end_date: root_group.trial_ends_on } }
+= nav_link do
+  #js-trial-status-widget{ data: trial_status_widget_data_attrs(root_group) }
+  #js-trial-status-popover{ data: trial_status_popover_data_attrs(root_group) }

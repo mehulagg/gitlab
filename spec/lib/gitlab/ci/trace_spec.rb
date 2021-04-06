@@ -63,9 +63,7 @@ RSpec.describe Gitlab::Ci::Trace, :clean_gitlab_redis_shared_state, factory_defa
 
   describe '#update_interval' do
     context 'it is not being watched' do
-      it 'returns 30 seconds' do
-        expect(trace.update_interval).to eq(30.seconds)
-      end
+      it { expect(trace.update_interval).to eq(60.seconds) }
     end
 
     context 'it is being watched' do

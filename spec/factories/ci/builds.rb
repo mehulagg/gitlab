@@ -30,6 +30,21 @@ FactoryBot.define do
       yaml_variables { nil }
     end
 
+    trait :unique_name do
+      name { generate(:job_name) }
+    end
+
+    trait :dependent do
+      transient do
+        sequence(:needed_name) { |n| "dependency #{n}" }
+        needed { association(:ci_build, name: needed_name, pipeline: pipeline) }
+      end
+
+      after(:create) do |build, evaluator|
+        build.needs << create(:ci_build_need, build: build, name: evaluator.needed.name)
+      end
+    end
+
     trait :started do
       started_at { 'Di 29. Okt 09:51:28 CET 2013' }
     end
@@ -475,7 +490,7 @@ FactoryBot.define do
     trait :license_scanning do
       options do
         {
-          artifacts: { reports: { license_management: 'gl-license-scanning-report.json' } }
+          artifacts: { reports: { license_scanning: 'gl-license-scanning-report.json' } }
         }
       end
     end

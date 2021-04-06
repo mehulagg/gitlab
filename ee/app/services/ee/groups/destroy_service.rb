@@ -10,7 +10,13 @@ module EE
         super.tap do |group|
           delete_dependency_proxy_blobs(group)
 
-          log_audit_event unless group&.persisted?
+          unless group&.persisted?
+            log_audit_event
+
+            if ::Gitlab::Geo.primary? && group.group_wiki_repository
+              group.group_wiki_repository.replicator.handle_after_destroy
+            end
+          end
         end
       end
 

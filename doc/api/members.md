@@ -90,8 +90,10 @@ Example response:
 
 Gets a list of group or project members viewable by the authenticated user, including inherited members and permissions through ancestor groups.
 
-WARNING:
-Due to [an issue](https://gitlab.com/gitlab-org/gitlab/-/issues/249523), the users effective `access_level` may actually be higher than returned value when listing group members.
+If a user is a member of this group or project and also of one or more ancestor groups,
+only its membership with the highest `access_level` is returned.
+([Improved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56677)] in GitLab 13.11.)
+This represents the effective permission of the user.
 
 This function takes pagination parameters `page` and `per_page` to restrict the list of users.
 
@@ -237,6 +239,8 @@ Example response:
 
 Gets a list of group members that count as billable. The list includes members in the subgroup or subproject.
 
+This API endpoint works on top-level groups only. It does not work on subgroups.
+
 NOTE:
 Unlike other API endpoints, billable members is updated once per day at 12:00 UTC.
 
@@ -306,6 +310,27 @@ Example response:
     "last_activity_on": "2021-01-20"
   }
 ]
+```
+
+## Remove a billable member from a group
+
+Removes a billable member from a group and its subgroups and projects.
+
+The user does not need to be a group member to qualify for removal.
+For example, if the user was added directly to a project within the group, you can
+still use this API to remove them.
+
+```plaintext
+DELETE /groups/:id/billable_members/:user_id
+```
+
+| Attribute | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `user_id` | integer | yes   | The user ID of the member |
+
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/billable_members/:user_id"
 ```
 
 ## Add a member to a group or project
@@ -471,7 +496,10 @@ DELETE /projects/:id/members/:user_id
 | --------- | ---- | -------- | ----------- |
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `user_id` | integer | yes   | The user ID of the member |
-| `unassign_issuables` | boolean | false   | Flag indicating if the removed member should be unassigned from any issues or merge requests inside a given group or project |
+| `skip_subresources` | boolean | false   | Whether the deletion of direct memberships of the removed member in subgroups and projects should be skipped. Default is `false`. |
+| `unassign_issuables` | boolean | false   | Whether the removed member should be unassigned from any issues or merge requests inside a given group or project. Default is `false`. |
+
+Example request:
 
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/members/:user_id"

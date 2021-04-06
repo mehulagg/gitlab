@@ -14,16 +14,18 @@ Pages](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/196).
 For data objects such as LFS, Uploads, Artifacts, etc., an [Object Storage service](object_storage.md)
 is recommended over NFS where possible, due to better performance.
 
-WARNING:
-From GitLab 13.0, using NFS for Git repositories is deprecated.
-From GitLab 14.0, technical support for NFS for Git repositories
-will no longer be provided. Upgrade to [Gitaly Cluster](gitaly/praefect.md)
-as soon as possible.
-
 File system performance can impact overall GitLab performance, especially for
 actions that read or write to Git repositories. For steps you can use to test
 file system performance, see
 [File system Performance Benchmarking](operations/filesystem_benchmarking.md).
+
+## Gitaly and NFS deprecation
+
+WARNING:
+From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories will no longer be
+considered and customer technical support will be considered out of scope.
+[Read more about Gitaly and NFS](gitaly/index.md#nfs-deprecation-notice) and
+[the correct mount options to use](#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
 
 ## Known kernel version incompatibilities
 
@@ -187,6 +189,7 @@ Note there are several options that you should consider using:
 | `nofail` | Don't halt boot process waiting for this mount to become available
 | `lookupcache=positive` | Tells the NFS client to honor `positive` cache results but invalidates any `negative` cache results. Negative cache results cause problems with Git. Specifically, a `git push` can fail to register uniformly across all NFS clients. The negative cache causes the clients to 'remember' that the files did not exist previously.
 | `hard` | Instead of `soft`. [Further details](#soft-mount-option).
+| `cto` | `cto` is the default option, which you should use. Do not use `nocto`. [Further details](#nocto-mount-option).
 
 #### `soft` mount option
 
@@ -222,6 +225,25 @@ NFS server goes down, `hard` will cause processes to hang when interacting with
 the mount point. Use `SIGKILL` (`kill -9`) to deal with hung processes.
 The `intr` option
 [stopped working in the 2.6 kernel](https://access.redhat.com/solutions/157873).
+
+#### `nocto` mount option
+
+Do not use `nocto`. Instead, use `cto`, which is the default.
+
+When using `nocto`, the dentry cache is always used, up to `acdirmax` seconds (attribute cache time) from the time it's created.
+
+This results in stale dentry cache issues with multiple clients, where each client can see a different (cached)
+version of a directory.
+
+From the [Linux man page](https://linux.die.net/man/5/nfs), the important parts:
+
+> If the nocto option is specified, the client uses a non-standard heuristic to determine when files on the server have changed.
+>
+> Using the nocto option may improve performance for read-only mounts, but should be used only if the data on the server changes only occasionally.
+
+We have noticed this behavior in an issue about [refs not found after a push](https://gitlab.com/gitlab-org/gitlab/-/issues/326066),
+where newly added loose refs can be seen as missing on a different client with a local dentry cache, as
+[described in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/326066#note_539436931).
 
 ### A single NFS mount
 
@@ -346,12 +368,18 @@ sudo ufw allow from <client_ip_address> to any port nfs
 ### Upgrade to Gitaly Cluster or disable caching if experiencing data loss
 
 WARNING:
-From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,
-support for NFS for Git repositories is scheduled to be removed. Upgrade to
-[Gitaly Cluster](gitaly/praefect.md) as soon as possible.
+From GitLab 13.0, using NFS for Git repositories is deprecated.
+As of GitLab 14.0, NFS-related issues with Gitaly will no longer be addressed. Read
+more about [Gitaly and NFS deprecation](gitaly/index.md#nfs-deprecation-notice).
 
 Customers and users have reported data loss on high-traffic repositories when using NFS for Git repositories.
-For example, we have seen [inconsistent updates after a push](https://gitlab.com/gitlab-org/gitaly/-/issues/2589). The problem may be partially mitigated by adjusting caching using the following NFS client mount options:
+For example, we have seen:
+
+- [Inconsistent updates after a push](https://gitlab.com/gitlab-org/gitaly/-/issues/2589).
+- `git ls-remote` [returning the wrong (or no branches)](https://gitlab.com/gitlab-org/gitaly/-/issues/3083)
+causing Jenkins to intermittently re-run all pipelines for a repository.
+
+The problem may be partially mitigated by adjusting caching using the following NFS client mount options:
 
 | Setting | Description |
 | ------- | ----------- |
@@ -362,24 +390,29 @@ For example, we have seen [inconsistent updates after a push](https://gitlab.com
 WARNING:
 The `actimeo=0` and `noac` options both result in a significant reduction in performance, possibly leading to timeouts.
 You may be able to avoid timeouts and data loss using `actimeo=0` and `lookupcache=positive` _without_ `noac`, however
-we expect the performance reduction will still be significant. As noted above, we strongly recommend upgrading to
+we expect the performance reduction will still be significant. Upgrade to
 [Gitaly Cluster](gitaly/praefect.md) as soon as possible.
 
-### Avoid using AWS's Elastic File System (EFS)
+### Avoid using cloud-based file systems
 
-GitLab strongly recommends against using AWS Elastic File System (EFS).
-Our support team will not be able to assist on performance issues related to
-file system access.
+GitLab strongly recommends against using cloud-based file systems such as:
 
-Customers and users have reported that AWS EFS does not perform well for the GitLab
-use-case. Workloads where many small files are written in a serialized manner, like `git`,
-are not well-suited for EFS. EBS with an NFS server on top will perform much better.
+- AWS Elastic File System (EFS).
+- Google Cloud Filestore.
+- Azure Files.
 
-If you do choose to use EFS, avoid storing GitLab log files (e.g. those in `/var/log/gitlab`)
+Our support team cannot assist with performance issues related to cloud-based file system access.
+
+Customers and users have reported that these file systems don't perform well for
+the file system access GitLab requires. Workloads where many small files are written in
+a serialized manner, like `git`, are not well suited to cloud-based file systems.
+
+If you do choose to use these, avoid storing GitLab log files (for example, those in `/var/log/gitlab`)
 there because this will also affect performance. We recommend that the log files be
 stored on a local volume.
 
-For more details on another person's experience with EFS, see this [Commit Brooklyn 2019 video](https://youtu.be/K6OS8WodRBQ?t=313).
+For more details on the experience of using a cloud-based file systems with GitLab,
+see this [Commit Brooklyn 2019 video](https://youtu.be/K6OS8WodRBQ?t=313).
 
 ### Avoid using CephFS and GlusterFS
 

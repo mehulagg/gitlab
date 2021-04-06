@@ -27,7 +27,7 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
   context 'seat usage table' do
     it 'displays correct number of users' do
       within '[data-testid="table"]' do
-        expect(all('tr').count).to eq(3)
+        expect(all('tbody tr').count).to eq(3)
       end
     end
   end
@@ -48,13 +48,13 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
       end
 
       it 'has disabled the remove button' do
-        within '[data-qa-selector="remove_member_modal"]' do
+        within '[data-qa-selector="remove_billable_member_modal"]' do
           expect(page).to have_button('Remove user', disabled: true)
         end
       end
 
       it 'enables the remove button when user enters valid username' do
-        within '[data-qa-selector="remove_member_modal"]' do
+        within '[data-qa-selector="remove_billable_member_modal"]' do
           find('input').fill_in(with: maintainer.username)
           find('input').send_keys(:tab)
 
@@ -63,7 +63,7 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
       end
 
       it 'does not enable button when user enters invalid username' do
-        within '[data-qa-selector="remove_member_modal"]' do
+        within '[data-qa-selector="remove_billable_member_modal"]' do
           find('input').fill_in(with: 'invalid username')
           find('input').send_keys(:tab)
 
@@ -81,7 +81,7 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
       end
 
       it 'shows a flash message' do
-        within '[data-qa-selector="remove_member_modal"]' do
+        within '[data-qa-selector="remove_billable_member_modal"]' do
           find('input').fill_in(with: maintainer.username)
           find('input').send_keys(:tab)
 
@@ -91,7 +91,7 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
         wait_for_all_requests
 
         within '[data-testid="table"]' do
-          expect(all('tr').count).to eq(2)
+          expect(all('tbody tr').count).to eq(2)
         end
 
         expect(page.find('.flash-container')).to have_content('User was successfully removed')
@@ -100,7 +100,7 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
       context 'removing the user from a sub-group' do
         it 'updates the seat table of the parent group' do
           within '[data-testid="table"]' do
-            expect(all('tr').count).to eq(3)
+            expect(all('tbody tr').count).to eq(3)
           end
 
           visit group_group_members_path(sub_group)
@@ -118,7 +118,7 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
           wait_for_all_requests
 
           within '[data-testid="table"]' do
-            expect(all('tr').count).to eq(2)
+            expect(all('tbody tr').count).to eq(2)
           end
         end
       end

@@ -9,6 +9,7 @@ query projectRequirementsEE(
   $prevPageCursor: String = ""
   $nextPageCursor: String = ""
   $authorUsernames: [String!] = []
+  $status: RequirementStatusFilter
   $search: String = ""
   $sortBy: Sort = CREATED_DESC
 ) {
@@ -20,6 +21,7 @@ query projectRequirementsEE(
       before: $prevPageCursor
       state: $state
       authorUsername: $authorUsernames
+      lastTestReportState: $status
       search: $search
       sort: $sortBy
     ) {

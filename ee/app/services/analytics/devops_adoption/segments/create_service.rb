@@ -4,7 +4,7 @@ module Analytics
   module DevopsAdoption
     module Segments
       class CreateService
-        include Gitlab::Allowable
+        include CommonMethods
 
         def initialize(segment: Analytics::DevopsAdoption::Segment.new, params: {}, current_user:)
           @segment = segment
@@ -13,11 +13,9 @@ module Analytics
         end
 
         def execute
-          unless can?(current_user, :manage_devops_adoption_segments, :global)
-            return ServiceResponse.error(message: 'Forbidden', payload: response_payload)
-          end
+          authorize!
 
-          segment.assign_attributes(attributes)
+          segment.assign_attributes(namespace: namespace)
 
           if segment.save
             Analytics::DevopsAdoption::CreateSnapshotWorker.perform_async(segment.id)
@@ -36,8 +34,8 @@ module Analytics
           { segment: segment }
         end
 
-        def attributes
-          params.slice(:namespace, :namespace_id)
+        def namespace
+          params[:namespace]
         end
       end
     end

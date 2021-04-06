@@ -1,4 +1,3 @@
-import { within } from '@testing-library/dom';
 import { shallowMount } from '@vue/test-utils';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
@@ -15,13 +14,12 @@ describe('First Class Instance Dashboard Component', () => {
     $apollo: { queries: { projects: { loading } } },
   });
 
-  const vulnerabilitiesExportEndpoint = '/vulnerabilities/exports';
-
   const findInstanceVulnerabilities = () => wrapper.find(FirstClassInstanceVulnerabilities);
   const findCsvExportButton = () => wrapper.find(CsvExportButton);
   const findEmptyState = () => wrapper.find(DashboardNotConfigured);
   const findFilters = () => wrapper.find(Filters);
   const findVulnerabilitiesCountList = () => wrapper.find(VulnerabilitiesCountList);
+  const findHeader = () => wrapper.find('[data-testid="header"]');
 
   const createWrapper = ({ data = {}, stubs, mocks = defaultMocks() }) => {
     return shallowMount(FirstClassInstanceDashboard, {
@@ -29,9 +27,6 @@ describe('First Class Instance Dashboard Component', () => {
         return { ...data };
       },
       mocks,
-      propsData: {
-        vulnerabilitiesExportEndpoint,
-      },
       stubs: {
         ...stubs,
         SecurityDashboardLayout,
@@ -51,6 +46,10 @@ describe('First Class Instance Dashboard Component', () => {
           projects: [{ id: 1 }, { id: 2 }],
         },
       });
+    });
+
+    it('should show the header', () => {
+      expect(findHeader().exists()).toBe(true);
     });
 
     it('should render the vulnerabilities', () => {
@@ -73,9 +72,7 @@ describe('First Class Instance Dashboard Component', () => {
     });
 
     it('displays the csv export button', () => {
-      expect(findCsvExportButton().props('vulnerabilitiesExportEndpoint')).toBe(
-        vulnerabilitiesExportEndpoint,
-      );
+      expect(findCsvExportButton().exists()).toBe(true);
     });
 
     it('displays the vulnerability count list with the correct data', () => {
@@ -96,12 +93,10 @@ describe('First Class Instance Dashboard Component', () => {
       });
     });
 
-    it('does not render the export button', () => {
+    it('does not render the export button, vulnerabilities count list, or header', () => {
       expect(findCsvExportButton().exists()).toBe(false);
-    });
-
-    it('does not render the vulnerabilities count list', () => {
       expect(findVulnerabilitiesCountList().exists()).toBe(false);
+      expect(findHeader().exists()).toBe(false);
     });
   });
 
@@ -114,36 +109,13 @@ describe('First Class Instance Dashboard Component', () => {
       });
     });
 
-    it('renders the empty state', () => {
-      expect(findEmptyState().props()).toEqual({});
-    });
-
-    it('does not render the export button', () => {
+    it('only renders the empty state', () => {
+      expect(findEmptyState().exists()).toBe(true);
       expect(findCsvExportButton().exists()).toBe(false);
-    });
-
-    it('does not render the vulnerability list', () => {
       expect(findInstanceVulnerabilities().exists()).toBe(false);
-    });
-
-    it('has no filters', () => {
       expect(findFilters().exists()).toBe(false);
-    });
-
-    it('does not render the vulnerabilities count list', () => {
       expect(findVulnerabilitiesCountList().exists()).toBe(false);
-    });
-  });
-
-  describe('always', () => {
-    beforeEach(() => {
-      wrapper = createWrapper({});
-    });
-
-    it('has the security dashboard title', () => {
-      expect(
-        within(wrapper.element).getByRole('heading', { name: 'Vulnerability Report' }),
-      ).not.toBe(null);
+      expect(findHeader().exists()).toBe(false);
     });
   });
 });

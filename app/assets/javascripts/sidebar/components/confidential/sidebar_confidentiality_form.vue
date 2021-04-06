@@ -1,6 +1,7 @@
 <script>
 import { GlSprintf, GlButton } from '@gitlab/ui';
 import createFlash from '~/flash';
+import { IssuableType } from '~/issue_show/constants';
 import { __, sprintf } from '~/locale';
 import { confidentialityQueries } from '~/sidebar/constants';
 
@@ -45,6 +46,15 @@ export default {
         ? this.$options.i18n.confidentialityOffWarning
         : this.$options.i18n.confidentialityOnWarning;
     },
+    workspacePath() {
+      return this.issuableType === IssuableType.Issue
+        ? {
+            projectPath: this.fullPath,
+          }
+        : {
+            groupPath: this.fullPath,
+          };
+    },
   },
   methods: {
     submitForm() {
@@ -54,7 +64,7 @@ export default {
           mutation: confidentialityQueries[this.issuableType].mutation,
           variables: {
             input: {
-              projectPath: this.fullPath,
+              ...this.workspacePath,
               iid: this.iid,
               confidential: !this.confidential,
             },
@@ -111,7 +121,7 @@ export default {
           </gl-button>
           <gl-button
             category="secondary"
-            variant="warning"
+            variant="confirm"
             :disabled="loading"
             :loading="loading"
             data-testid="confidential-toggle"

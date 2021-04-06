@@ -6,7 +6,7 @@ import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE } from '../constants';
+import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
 import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
@@ -86,14 +86,31 @@ export default {
     shouldDisplayFilters() {
       return !this.errorCode;
     },
+    isOverviewStageSelected() {
+      return this.selectedStage?.id === OVERVIEW_STAGE_ID;
+    },
     shouldDisplayDurationChart() {
-      return this.featureFlags.hasDurationChart && !this.hasNoAccessError;
+      return (
+        !this.featureFlags.hasPathNavigation ||
+        (this.featureFlags.hasDurationChart &&
+          this.isOverviewStageSelected &&
+          !this.hasNoAccessError)
+      );
     },
     shouldDisplayTypeOfWorkCharts() {
-      return !this.hasNoAccessError;
+      return (
+        !this.featureFlags.hasPathNavigation ||
+        (this.isOverviewStageSelected && !this.hasNoAccessError)
+      );
+    },
+    selectedStageReady() {
+      return !this.hasNoAccessError && this.selectedStage;
     },
     shouldDisplayPathNavigation() {
-      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError && this.selectedStage;
+      return this.featureFlags.hasPathNavigation && this.selectedStageReady;
+    },
+    shouldDisplayVerticalNavigation() {
+      return !this.featureFlags.hasPathNavigation && this.selectedStageReady;
     },
     shouldDisplayCreateMultipleValueStreams() {
       return Boolean(!this.shouldRenderEmptyState && !this.isLoadingValueStreams);
@@ -128,6 +145,7 @@ export default {
       'fetchStageData',
       'setSelectedProjects',
       'setSelectedStage',
+      'setDefaultSelectedStage',
       'setDateRange',
       'removeStage',
       'updateStage',
@@ -140,8 +158,12 @@ export default {
     },
     onStageSelect(stage) {
       this.hideForm();
-      this.setSelectedStage(stage);
-      this.fetchStageData(this.selectedStage.slug);
+      if (stage.slug === OVERVIEW_STAGE_ID) {
+        this.setDefaultSelectedStage();
+      } else {
+        this.setSelectedStage(stage);
+        this.fetchStageData(stage.slug);
+      }
     },
     onShowAddStageForm() {
       this.showCreateForm();
@@ -189,17 +211,21 @@ export default {
       :svg-path="emptyStateSvgPath"
     />
     <div v-if="!shouldRenderEmptyState" class="gl-max-w-full">
+      <path-navigation
+        v-if="shouldDisplayPathNavigation"
+        :key="`path_navigation_key_${pathNavigationData.length}`"
+        class="js-path-navigation gl-w-full gl-pb-2"
+        :loading="isLoading"
+        :stages="pathNavigationData"
+        :selected-stage="selectedStage"
+        @selected="onStageSelect"
+      />
       <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
-        <div v-if="shouldDisplayPathNavigation" class="gl-w-full gl-pb-2">
-          <path-navigation
-            :key="`path_navigation_key_${pathNavigationData.length}`"
-            class="js-path-navigation"
-            :loading="isLoading"
-            :stages="pathNavigationData"
-            :selected-stage="selectedStage"
-            @selected="onStageSelect"
-          />
-        </div>
+        <filter-bar
+          v-if="shouldDisplayFilters"
+          class="js-filter-bar filtered-search-box gl-display-flex gl-mb-2 gl-mr-3 gl-border-none"
+          :group-path="currentGroupPath"
+        />
         <div
           v-if="shouldDisplayFilters"
           class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between"
@@ -223,14 +249,9 @@ export default {
             @change="setDateRange"
           />
         </div>
-        <filter-bar
-          v-if="shouldDisplayFilters"
-          class="js-filter-bar filtered-search-box gl-display-flex gl-mt-3 gl-mr-3 gl-border-none"
-          :group-path="currentGroupPath"
-        />
       </div>
     </div>
-    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-0">
+    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-2">
       <gl-empty-state
         v-if="hasNoAccessError"
         class="js-empty-state"
@@ -243,8 +264,13 @@ export default {
         "
       />
       <div v-else>
-        <metrics :group-path="currentGroupPath" :request-params="cycleAnalyticsRequestParams" />
+        <metrics
+          v-if="!featureFlags.hasPathNavigation || isOverviewStageSelected"
+          :group-path="currentGroupPath"
+          :request-params="cycleAnalyticsRequestParams"
+        />
         <stage-table
+          v-if="!featureFlags.hasPathNavigation || !isOverviewStageSelected"
           :key="stageCount"
           class="js-stage-table"
           :current-stage="selectedStage"
@@ -255,8 +281,9 @@ export default {
           :current-stage-events="currentStageEvents"
           :no-data-svg-path="noDataSvgPath"
           :empty-state-message="selectedStageError"
+          :has-path-navigation="featureFlags.hasPathNavigation"
         >
-          <template #nav>
+          <template v-if="shouldDisplayVerticalNavigation" #nav>
             <stage-table-nav
               :current-stage="selectedStage"
               :stages="activeStages"

@@ -1,4 +1,4 @@
-import { GlCard, GlSprintf, GlButton } from '@gitlab/ui';
+import { GlCard, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import OnCallSchedule, { i18n } from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import RotationsListSection from 'ee/oncall_schedules/components/schedule/components/rotations_list_section.vue';
@@ -8,7 +8,7 @@ import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import * as dateTimeUtility from '~/lib/utils/datetime_utility';
-import mockTimezones from './mocks/mockTimezones.json';
+import mockTimezones from './mocks/mock_timezones.json';
 
 describe('On-call schedule', () => {
   let wrapper;
@@ -56,7 +56,6 @@ describe('On-call schedule', () => {
         },
         stubs: {
           GlCard,
-          GlSprintf,
         },
         mocks: { $apollo },
       }),
@@ -71,12 +70,12 @@ describe('On-call schedule', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findScheduleHeader = () => wrapper.findByTestId('scheduleHeader');
   const findRotationsHeader = () => wrapper.findByTestId('rotationsHeader');
   const findSchedule = () => wrapper.findByTestId('scheduleBody');
+  const findScheduleDescription = () => findSchedule().text();
   const findRotations = () => wrapper.findByTestId('rotationsBody');
   const findRotationsShiftPreset = () => wrapper.findByTestId('shift-preset-change');
   const findAddRotationsBtn = () => findRotationsHeader().find(GlButton);
@@ -89,12 +88,23 @@ describe('On-call schedule', () => {
     expect(findScheduleHeader().text()).toBe(mockSchedule.name);
   });
 
-  it('shows timezone info', () => {
-    const timezone = i18n.scheduleForTz.replace('%{timezone}', lastTz.identifier);
+  describe('Timeframe schedule card header information', () => {
+    const timezone = lastTz.identifier;
     const offset = `(UTC ${lastTz.formatted_offset})`;
-    const description = findSchedule().text();
-    expect(description).toContain(timezone);
-    expect(description).toContain(offset);
+
+    it('shows timezone info', () => {
+      expect(findScheduleDescription()).toContain(timezone);
+      expect(findScheduleDescription()).toContain(offset);
+    });
+
+    it('shows schedule description if present', () => {
+      expect(findScheduleDescription()).toContain(mockSchedule.description);
+    });
+
+    it('does not show schedule description if none present', () => {
+      createComponent({ schedule: { ...mockSchedule, description: null }, loading: false });
+      expect(findScheduleDescription()).not.toContain(mockSchedule.description);
+    });
   });
 
   it('renders rotations header', () => {

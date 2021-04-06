@@ -57,6 +57,8 @@ module EE
       end
 
       def can_read_group?
+        return true if geo?
+
         if user
           user.can?(:read_group, group)
         else

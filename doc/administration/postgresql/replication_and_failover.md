@@ -6,8 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # PostgreSQL replication and failover with Omnibus GitLab **(PREMIUM SELF)**
 
-This document focuses on configuration supported with [GitLab Premium](https://about.gitlab.com/pricing/), using the Omnibus GitLab package.
-If you're a Community Edition or Starter user, consider using a cloud hosted solution.
+If you're a Free user of GitLab self-managed, consider using a cloud-hosted solution.
 This document doesn't cover installations from source.
 
 If a setup with replication and failover isn't what you were looking for, see
@@ -900,7 +899,12 @@ You can switch an exiting database cluster to use Patroni instead of repmgr with
    ```
 
 1. Repeat the last two steps for all replica nodes. `gitlab.rb` should look the same on all nodes.
-1. Optional: You can remove `gitlab_repmgr` database and role on the primary.
+1. If present, remove the `gitlab_repmgr` database and role on the primary. If you don't delete the `gitlab_repmgr`
+   database, upgrading PostgreSQL 11 to 12 will fail with:
+
+   ```plaintext
+   could not load library "$libdir/repmgr_funcs": ERROR:  could not access file "$libdir/repmgr_funcs": No such file or directory
+   ```
 
 ### Upgrading PostgreSQL major version in a Patroni cluster
 

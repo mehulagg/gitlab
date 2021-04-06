@@ -4,17 +4,17 @@ require 'spec_helper'
 
 RSpec.describe DastScannerProfiles::UpdateService do
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_scanner_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
-  let_it_be(:dast_scanner_profile_2, reload: true) { create(:dast_scanner_profile) }
-  let(:project) { dast_scanner_profile.project }
-  let(:project_2) { dast_scanner_profile_2.project }
+  let_it_be(:dast_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
+  let_it_be(:dast_profile_2, reload: true) { create(:dast_scanner_profile) }
+  let(:project) { dast_profile.project }
+  let(:project_2) { dast_profile_2.project }
 
   let_it_be(:new_profile_name) { SecureRandom.hex }
-  let_it_be(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
-  let_it_be(:new_spider_timeout) { dast_scanner_profile.spider_timeout + 1 }
+  let_it_be(:new_target_timeout) { dast_profile.target_timeout + 1 }
+  let_it_be(:new_spider_timeout) { dast_profile.spider_timeout + 1 }
   let_it_be(:new_scan_type) { (DastScannerProfile.scan_types.keys - [DastScannerProfile.last.scan_type]).first }
-  let(:new_use_ajax_spider) { !dast_scanner_profile.use_ajax_spider }
-  let(:new_show_debug_messages) { !dast_scanner_profile.show_debug_messages }
+  let(:new_use_ajax_spider) { !dast_profile.use_ajax_spider }
+  let(:new_show_debug_messages) { !dast_profile.show_debug_messages }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -33,7 +33,7 @@ RSpec.describe DastScannerProfiles::UpdateService do
       )
     end
 
-    let(:dast_scanner_profile_id) { dast_scanner_profile.id }
+    let(:dast_scanner_profile_id) { dast_profile.id }
     let(:status) { subject.status }
     let(:message) { subject.message }
     let(:payload) { subject.payload }
@@ -56,7 +56,7 @@ RSpec.describe DastScannerProfiles::UpdateService do
 
       subject do
         described_class.new(project_2, user).execute(
-          id: dast_scanner_profile.id,
+          id: dast_profile.id,
           profile_name: new_profile_name,
           target_timeout: new_target_timeout,
           spider_timeout: new_spider_timeout,
@@ -94,9 +94,9 @@ RSpec.describe DastScannerProfiles::UpdateService do
           updated_dast_scanner_profile = payload.reload
 
           aggregate_failures do
-            expect(updated_dast_scanner_profile.scan_type).to eq(dast_scanner_profile.scan_type)
-            expect(updated_dast_scanner_profile.use_ajax_spider).to eq(dast_scanner_profile.use_ajax_spider)
-            expect(updated_dast_scanner_profile.show_debug_messages).to eq(dast_scanner_profile.show_debug_messages)
+            expect(updated_dast_scanner_profile.scan_type).to eq(dast_profile.scan_type)
+            expect(updated_dast_scanner_profile.use_ajax_spider).to eq(dast_profile.use_ajax_spider)
+            expect(updated_dast_scanner_profile.show_debug_messages).to eq(dast_profile.show_debug_messages)
           end
         end
       end
@@ -164,6 +164,8 @@ RSpec.describe DastScannerProfiles::UpdateService do
           expect(message).to eq('You are not authorized to update this scanner profile')
         end
       end
+
+      include_examples 'restricts modification if referenced by policy', :modify
     end
   end
 end

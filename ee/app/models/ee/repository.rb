@@ -9,7 +9,7 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
-    MIRROR_REMOTE = "upstream".freeze
+    MIRROR_REMOTE = "upstream"
 
     prepended do
       include Elastic::RepositoriesSearch

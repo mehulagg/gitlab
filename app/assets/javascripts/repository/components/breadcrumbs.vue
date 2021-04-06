@@ -81,7 +81,7 @@ export default {
       required: false,
       default: '',
     },
-    origionalBranch: {
+    originalBranch: {
       type: String,
       required: false,
       default: '',
@@ -301,7 +301,7 @@ export default {
       :modal-id="$options.uploadBlobModalId"
       :commit-message="__('Upload New File')"
       :target-branch="selectedBranch"
-      :origional-branch="origionalBranch"
+      :original-branch="originalBranch"
       :can-push-code="canPushCode"
       :path="uploadPath"
     />

@@ -28,6 +28,7 @@ query DastScannerProfiles(
           useAjaxSpider
           showDebugMessages
           editPath
+          referencedInSecurityPolicies
         }
       }
     }

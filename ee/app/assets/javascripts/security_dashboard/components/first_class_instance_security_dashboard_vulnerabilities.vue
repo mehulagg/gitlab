@@ -65,6 +65,7 @@ export default {
     filters() {
       // Clear out the existing vulnerabilities so that the skeleton loader is shown.
       this.vulnerabilities = [];
+      this.pageInfo = {};
     },
     sort() {
       // Clear out the existing vulnerabilities so that the skeleton loader is shown.
@@ -81,7 +82,6 @@ export default {
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             return produce(fetchMoreResult, (draftData) => {
-              // eslint-disable-next-line no-param-reassign
               draftData.vulnerabilities.nodes = [
                 ...previousResult.vulnerabilities.nodes,
                 ...draftData.vulnerabilities.nodes,

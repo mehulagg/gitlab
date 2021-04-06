@@ -27,6 +27,7 @@ In the `.gitlab-ci.yml` file, you can define:
 
 The scripts are grouped into **jobs**, and jobs run as part of a larger
 **pipeline**. You can group multiple independent jobs into **stages** that run in a defined order.
+The CI/CD configuration needs at least one job that is [not hidden](README.md#hide-jobs).
 
 You should organize your jobs in a sequence that suits your application and is in accordance with
 the tests you wish to perform. To [visualize](../pipeline_editor/index.md#visualize-ci-configuration) the process, imagine
@@ -75,7 +76,7 @@ branch in the project.
 GitLab CI/CD not only executes the jobs but also shows you what's happening during execution,
 just as you would see in your terminal:
 
-![job running](img/job_running.png)
+![job running](img/job_running_v13_10.png)
 
 You create the strategy for your app and GitLab runs the pipeline
 according to what you've defined. Your pipeline status is also

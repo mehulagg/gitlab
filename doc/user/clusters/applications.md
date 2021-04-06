@@ -86,13 +86,12 @@ is saved as a [CI job artifact](../../ci/pipelines/job_artifacts.md).
 
 #### Usage in GitLab versions earlier than 13.5
 
-For GitLab versions 13.5 and below, the Ingress, Fluentd, Prometheus,
-and Sentry apps are fetched from the central Helm
-[stable repository](https://kubernetes-charts.storage.googleapis.com/). This repository
-[was deleted](https://github.com/helm/charts#deprecation-timeline)
+For GitLab versions 13.5 and earlier, the Ingress, Fluentd, Prometheus, and Sentry
+apps were fetched from the central Helm stable repository (`https://kubernetes-charts.storage.googleapis.com/`).
+This repository [was deleted](https://github.com/helm/charts#deprecation-timeline)
 on November 13, 2020. This causes the installation CI/CD pipeline to
 fail. Upgrade to GitLab 13.6, or alternatively, you can
-use the following `.gitlab-ci.yml`, which has been tested on GitLab 13.5:
+use the following `.gitlab-ci.yml`, which has been tested in GitLab 13.5:
 
 ```yaml
 include:
@@ -1063,7 +1062,7 @@ supported by GitLab before installing any of the applications.
 used to install the GitLab-managed apps. GitLab runs each `helm` command
 in a pod in the `gitlab-managed-apps` namespace inside the cluster.
 
-- For clusters created on GitLab 13.6 and newer, GitLab uses Helm 3 to manage
+- For clusters created in GitLab 13.6 and newer, GitLab uses Helm 3 to manage
   applications.
 - For clusters created on versions of GitLab prior to 13.6, GitLab uses Helm 2
   with a local [Tiller](https://v2.helm.sh/docs/glossary/#tiller) server. Prior
@@ -1240,7 +1239,7 @@ of a WAF are:
 
 By default, GitLab provides you with a WAF known as [`ModSecurity`](https://www.modsecurity.org/),
 which is a toolkit for real-time web application monitoring, logging, and access
-control. GitLab applies the [OWASP's Core Rule Set](https://www.modsecurity.org/CRS/Documentation/),
+control. GitLab applies the [OWASP's Core Rule Set](https://coreruleset.org/),
 which provides generic attack detection capabilities.
 
 This feature:
@@ -1315,7 +1314,7 @@ tracked over time:
 
 - The total amount of traffic to your application.
 - The proportion of traffic that's considered anomalous by the Web Application
-  Firewall's default [OWASP ruleset](https://www.modsecurity.org/CRS/Documentation/).
+  Firewall's default [OWASP ruleset](https://coreruleset.org/).
 
 If a significant percentage of traffic is anomalous, investigate it for potential threats
 by [examining the Web Application Firewall logs](#web-application-firewall-modsecurity).
@@ -1469,7 +1468,7 @@ Kubernetes API, giving you access to more advanced querying capabilities. Log
 data is deleted after 30 days, using [Curator](https://www.elastic.co/guide/en/elasticsearch/client/curator/5.5/about.html).
 
 The Elastic Stack cluster application is intended as a log aggregation solution
-and is not related to our [Advanced Search](../search/advanced_global_search.md)
+and is not related to our [Advanced Search](../search/advanced_search.md)
 functionality, which uses a separate Elasticsearch cluster.
 
 To enable log shipping:

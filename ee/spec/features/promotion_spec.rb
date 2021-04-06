@@ -24,7 +24,7 @@ RSpec.describe 'Promotions', :js do
     it 'appears in project edit page' do
       visit edit_project_path(project)
 
-      expect(find('#promote_mr_features')).to have_content 'Improve Merge Requests'
+      expect(find('#promote_mr_features')).to have_content 'Improve merge requests'
     end
 
     it 'does not show when cookie is set' do
@@ -82,7 +82,7 @@ RSpec.describe 'Promotions', :js do
     it 'appears in milestone page' do
       visit project_milestone_path(project, milestone)
 
-      expect(find('#promote_burndown_charts')).to have_content "Upgrade your plan to improve milestones with Burndown Charts."
+      expect(find('#promote_burndown_charts')).to have_content 'Upgrade your plan to improve milestones with Burndown Charts.'
     end
 
     it 'does not show when cookie is set' do
@@ -180,7 +180,7 @@ RSpec.describe 'Promotions', :js do
       visit project_issue_path(project, issue)
       wait_for_requests
 
-      find('.btn-link.js-toggle-button.js-weight-sidebar-callout-btn').click
+      click_link 'Learn more'
 
       expect(find('.promotion-issue-weight-sidebar-message')).to have_content 'Improve issues management with Issue weight and GitLab Enterprise Edition'
     end
@@ -189,8 +189,8 @@ RSpec.describe 'Promotions', :js do
       visit project_issue_path(project, issue)
       wait_for_requests
 
-      find('.btn-link.js-toggle-button.js-weight-sidebar-callout-btn').click
-      click_link "Not now, thanks"
+      click_link 'Learn more'
+      click_link 'Not now, thanks'
 
       expect(page).not_to have_content('.js-weight-sidebar-callout')
     end
@@ -199,8 +199,8 @@ RSpec.describe 'Promotions', :js do
       visit project_issue_path(project, issue)
       wait_for_requests
 
-      find('.btn-link.js-toggle-button.js-weight-sidebar-callout-btn').click
-      find('.js-weight-sidebar-callout .js-close-callout').click
+      click_link 'Learn more'
+      click_link 'Not now, thanks'
       visit project_issue_path(project, issue)
 
       expect(page).not_to have_selector('.js-weight-sidebar-callout')
@@ -210,8 +210,8 @@ RSpec.describe 'Promotions', :js do
       visit project_issue_path(project, issue)
       wait_for_requests
 
-      find('.btn-link.js-toggle-button.js-weight-sidebar-callout-btn').click
-      find('.btn-link.js-toggle-button.js-weight-sidebar-callout-btn').click
+      click_link 'Learn more'
+      click_link 'Learn more'
 
       expect(page).to have_selector('.js-weight-sidebar-callout')
       expect(page).to have_selector('.promotion-issue-sidebar-message', visible: false)
@@ -228,7 +228,7 @@ RSpec.describe 'Promotions', :js do
         visit project_issue_path(project, issue)
         wait_for_requests
 
-        find('.btn-link.js-toggle-button.js-weight-sidebar-callout-btn').click
+        click_link 'Learn more'
 
         expect(page).to have_link 'Try it for free', href: new_trial_registration_path(glm_source: 'gitlab.com', glm_content: 'discover-issue-weights'), class: 'issue-weights-trial-cta'
         expect(find('.js-close-callout.js-close-session.tr-issue-weights-not-now-cta')).to have_content 'Not now, thanks!'

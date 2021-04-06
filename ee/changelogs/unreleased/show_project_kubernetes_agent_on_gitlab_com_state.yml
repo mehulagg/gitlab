@@ -1,0 +1,5 @@
+---
+title: Hide cluster agent UI if not enabled on GitLab.com
+merge_request: 57668
+author:
+type: changed

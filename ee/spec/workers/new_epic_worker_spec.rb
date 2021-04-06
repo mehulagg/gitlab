@@ -34,44 +34,75 @@ RSpec.describe NewEpicWorker do
       end
     end
 
-    context 'when everything is ok' do
-      let(:user) { create(:user) }
+    context 'with a user' do
       let(:epic) { create(:epic) }
 
       before do
         stub_licensed_features(epics: true)
       end
 
-      it 'creates an event' do
-        expect { worker.perform(epic.id, user.id) }.to change { Event.count }.from(0).to(1)
-      end
+      shared_examples 'a new epic where the current user cannot trigger notifications' do
+        it 'does not create a notification for the mentioned user' do
+          expect(Notify).not_to receive(:new_epic_email).with(user.id, epic.id, nil)
 
-      context 'user watches group' do
-        before do
-          create(
-            :notification_setting,
-            user: user,
-            source: epic.group,
-            level: NotificationSetting.levels[:watch]
-          )
-        end
-
-        it 'creates a notification for watcher' do
-          expect(Notify).to receive(:new_epic_email).with(user.id, epic.id, nil)
-            .and_return(double(deliver_later: true))
+          expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: user.id, klass: epic.class.to_s, object_id: epic.id)
 
           worker.perform(epic.id, user.id)
         end
       end
 
-      context 'mention' do
-        let(:epic) { create(:epic, description: "epic for #{user.to_reference}") }
+      context 'when the new epic author is not confirmed' do
+        let_it_be(:user) { create(:user, :unconfirmed) }
 
-        it 'creates a notification for the mentioned user' do
-          expect(Notify).to receive(:new_epic_email).with(user.id, epic.id, NotificationReason::MENTIONED)
-            .and_return(double(deliver_later: true))
+        it_behaves_like 'a new epic where the current user cannot trigger notifications'
+      end
 
-          worker.perform(epic.id, user.id)
+      context 'when the new epic author is blocked' do
+        let_it_be(:user) { create(:user, :blocked) }
+
+        it_behaves_like 'a new epic where the current user cannot trigger notifications'
+      end
+
+      context 'when the new epic author is a ghost' do
+        let_it_be(:user) { create(:user, :ghost) }
+
+        it_behaves_like 'a new epic where the current user cannot trigger notifications'
+      end
+
+      context 'when everything is ok' do
+        let(:user) { create(:user) }
+
+        it 'creates an event' do
+          expect { worker.perform(epic.id, user.id) }.to change { Event.count }.from(0).to(1)
+        end
+
+        context 'user watches group' do
+          before do
+            create(
+              :notification_setting,
+              user: user,
+              source: epic.group,
+              level: NotificationSetting.levels[:watch]
+            )
+          end
+
+          it 'creates a notification for watcher' do
+            expect(Notify).to receive(:new_epic_email).with(user.id, epic.id, nil)
+              .and_return(double(deliver_later: true))
+
+            worker.perform(epic.id, user.id)
+          end
+        end
+
+        context 'mention' do
+          let(:epic) { create(:epic, description: "epic for #{user.to_reference}") }
+
+          it 'creates a notification for the mentioned user' do
+            expect(Notify).to receive(:new_epic_email).with(user.id, epic.id, NotificationReason::MENTIONED)
+              .and_return(double(deliver_later: true))
+
+            worker.perform(epic.id, user.id)
+          end
         end
       end
     end

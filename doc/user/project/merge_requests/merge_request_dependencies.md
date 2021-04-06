@@ -17,9 +17,9 @@ then it cannot be merged until its dependency is itself merged.
 
 NOTE:
 Merge requests dependencies are a **PREMIUM** feature, but this restriction is
-only enforced for the dependent merge request. A merge request in a **FREE** or
-**STARTER** project can be a dependency of a **PREMIUM** merge request, but not
-vice-versa.
+only enforced for the dependent merge request. A merge request in a **FREE**
+project can be a dependency of a **PREMIUM** merge request, but not
+the other way around.
 
 ## Use cases
 
@@ -84,7 +84,7 @@ merge request widget:
 ![Dependencies in merge request widget](img/dependencies_view_v12_2.png)
 
 Until all dependencies have, themselves, been merged, the **Merge**
-button will be disabled for the dependent merge request. In
+button is disabled for the dependent merge request. In
 particular, note that **closed merge requests** still prevent their
 dependents from being merged - it is impossible to automatically
 determine whether the dependency expressed by a closed merge request

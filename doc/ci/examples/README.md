@@ -34,8 +34,6 @@ The following table lists examples with step-by-step tutorials that are containe
 | PHP with Laravel, Envoy       | [Test and deploy Laravel applications with GitLab CI/CD and Envoy](laravel_with_gitlab_and_envoy/index.md). |
 | PHP with npm, SCP             | [Running Composer and npm scripts with deployment via SCP in GitLab CI/CD](deployment/composer-npm-deploy.md). |
 | PHP with PHPunit, `atoum`       | [Testing PHP projects](php.md). |
-| Python on Heroku              | [Test and deploy a Python application with GitLab CI/CD](test-and-deploy-python-application-to-heroku.md). |
-| Ruby on Heroku                | [Test and deploy a Ruby application with GitLab CI/CD](test-and-deploy-ruby-application-to-heroku.md). |
 | Secrets management with Vault | [Authenticating and Reading Secrets With HashiCorp Vault](authenticating-with-hashicorp-vault/index.md). |
 
 ### Contributed examples
@@ -51,6 +49,8 @@ separate example projects:
 | Java with Maven               | [How to deploy Maven projects to Artifactory with GitLab CI/CD](https://gitlab.com/gitlab-examples/maven/simple-maven-example). |
 | Java with Spring Boot         | [Deploy a Spring Boot application to Cloud Foundry with GitLab CI/CD](https://gitlab.com/gitlab-examples/spring-gitlab-cf-deploy-demo). |
 | Parallel testing Ruby & JS    | [GitLab CI/CD parallel jobs testing for Ruby & JavaScript projects](https://docs.knapsackpro.com/2019/how-to-run-parallel-jobs-for-rspec-tests-on-gitlab-ci-pipeline-and-speed-up-ruby-javascript-testing). |
+| Python on Heroku              | [Test and deploy a Python application with GitLab CI/CD](https://gitlab.com/gitlab-examples/python-getting-started). |
+| Ruby on Heroku                | [Test and deploy a Ruby application with GitLab CI/CD](https://gitlab.com/gitlab-examples/ruby-getting-started). |
 | Scala on Heroku               | [Test and deploy a Scala application to Heroku](https://gitlab.com/gitlab-examples/scala-sbt). |
 
 ## CI/CD templates
@@ -166,7 +166,7 @@ For examples of others who have implemented GitLab CI/CD, see:
 
 To see how you can integrate GitLab CI/CD with third-party systems, see:
 
-- [Streamline and shorten error remediation with Sentry’s new GitLab integration](https://about.gitlab.com/blog/2019/01/25/sentry-integration-blog-post/)
+- [Streamline and shorten error remediation with Sentry's new GitLab integration](https://about.gitlab.com/blog/2019/01/25/sentry-integration-blog-post/)
 - [How to simplify your smart home configuration with GitLab CI/CD](https://about.gitlab.com/blog/2018/08/02/using-the-gitlab-ci-slash-cd-for-smart-home-configuration-management/)
 - [Demo: GitLab + Jira + Jenkins](https://about.gitlab.com/blog/2018/07/30/gitlab-workflow-with-jira-jenkins/)
 - [Introducing Auto Breakfast from GitLab (sort of)](https://about.gitlab.com/blog/2018/06/29/introducing-auto-breakfast-from-gitlab/)

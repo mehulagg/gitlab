@@ -43,6 +43,39 @@ RSpec.describe MergeRequests::MergeService do
         expect(rule.approved_approvers).to contain_exactly(approver)
       end
     end
+
+    context 'with jira issue enforcement' do
+      using RSpec::Parameterized::TableSyntax
+
+      subject do
+        perform_enqueued_jobs do
+          service.execute(merge_request)
+        end
+      end
+
+      where(:prevent_merge, :issue_specified, :merged) do
+        true  | true  | true
+        true  | false | false
+        false | true  | true
+        false | false | true
+      end
+
+      with_them do
+        before do
+          allow(project).to receive(:prevent_merge_without_jira_issue?).and_return(prevent_merge)
+          allow(Atlassian::JiraIssueKeyExtractor).to receive(:has_keys?)
+                                                       .with(merge_request.title, merge_request.description)
+                                                       .and_return(issue_specified)
+        end
+
+        it 'sets the correct merged state and raises an error when applicable', :aggregate_failures do
+          subject
+
+          expect(merge_request.reload.merged?).to eq(merged)
+          expect(merge_request.merge_error).to include('Before this can be merged, a Jira issue must be linked in the title or description') unless merged
+        end
+      end
+    end
   end
 
   it_behaves_like 'merge validation hooks', persisted: true

@@ -422,25 +422,6 @@ RSpec.describe 'Scoped issue boards', :js do
         end
       end
     end
-
-    context 'remove issue' do
-      let!(:issue) { create(:labeled_issue, project: project, labels: [project_label], milestone: milestone, assignees: [user]) }
-      let!(:list) { create(:list, board: board, label: project_label, position: 0) }
-
-      it 'removes issues milestone when removing from the board' do
-        board.update!(milestone: milestone, assignee: user)
-        visit project_boards_path(project)
-        wait_for_requests
-
-        find(".board-card[data-issue-id='#{issue.id}']").click
-
-        click_button 'Remove from board'
-        wait_for_requests
-
-        expect(issue.reload.milestone).to be_nil
-        expect(issue.reload.assignees).to be_empty
-      end
-    end
   end
 
   context 'user without edit permissions' do

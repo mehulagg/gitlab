@@ -2,8 +2,6 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import SubscriptionApp from 'ee/billings/subscriptions/components/app.vue';
 import initialStore from 'ee/billings/subscriptions/store';
-import * as types from 'ee/billings/subscriptions/store/mutation_types';
-import { mockDataSeats } from 'ee_jest/billings/mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -35,13 +33,11 @@ describe('SubscriptionApp component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('on creation', () => {
     beforeEach(() => {
       factory();
-      store.commit(`${types.RECEIVE_HAS_BILLABLE_MEMBERS_SUCCESS}`, mockDataSeats);
     });
 
     it('dispatches expected actions on created', () => {

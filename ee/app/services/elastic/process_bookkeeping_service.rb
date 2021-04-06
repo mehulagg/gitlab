@@ -2,11 +2,23 @@
 
 module Elastic
   class ProcessBookkeepingService
-    REDIS_SET_KEY = 'elastic:incremental:updates:0:zset'
-    REDIS_SCORE_KEY = 'elastic:incremental:updates:0:score'
-    LIMIT = 10_000
+    SHARD_LIMIT = 1_000
+    SHARDS_NUMBER = 16
+    SHARDS = 0.upto(SHARDS_NUMBER - 1).to_a
 
     class << self
+      def shard_number(data)
+        Elastic::BookkeepingShardService.shard_number(number_of_shards: SHARDS_NUMBER, data: data)
+      end
+
+      def redis_set_key(shard_number)
+        "elastic:incremental:updates:#{shard_number}:zset"
+      end
+
+      def redis_score_key(shard_number)
+        "elastic:incremental:updates:#{shard_number}:score"
+      end
+
       # Add some records to the processing queue. Items must be serializable to
       # a Gitlab::Elastic::DocumentReference
       def track!(*items)
@@ -14,19 +26,25 @@ module Elastic
 
         items.map! { |item| ::Gitlab::Elastic::DocumentReference.serialize(item) }
 
+        items_by_shard = items.group_by { |item| shard_number(item) }
+
         with_redis do |redis|
-          # Efficiently generate a guaranteed-unique score for each item
-          max = redis.incrby(self::REDIS_SCORE_KEY, items.size)
-          min = (max - items.size) + 1
+          items_by_shard.each do |shard_number, shard_items|
+            set_key = redis_set_key(shard_number)
 
-          (min..max).zip(items).each_slice(1000) do |group|
-            logger.debug(class: self.name,
-                         redis_set: self::REDIS_SET_KEY,
-                         message: 'track_items',
-                         count: group.count,
-                         tracked_items_encoded: group.to_json)
+            # Efficiently generate a guaranteed-unique score for each item
+            max = redis.incrby(redis_score_key(shard_number), shard_items.size)
+            min = (max - shard_items.size) + 1
 
-            redis.zadd(self::REDIS_SET_KEY, group)
+            (min..max).zip(shard_items).each_slice(1000) do |group|
+              logger.debug(class: self.name,
+                          redis_set: set_key,
+                          message: 'track_items',
+                          count: group.count,
+                          tracked_items_encoded: group.to_json)
+
+              redis.zadd(set_key, group)
+            end
           end
         end
 
@@ -34,14 +52,39 @@ module Elastic
       end
 
       def queue_size
-        with_redis { |redis| redis.zcard(self::REDIS_SET_KEY) }
+        with_redis do |redis|
+          SHARDS.sum do |shard_number|
+            redis.zcard(redis_set_key(shard_number))
+          end
+        end
+      end
+
+      def queued_items
+        {}.tap do |hash|
+          with_redis do |redis|
+            each_queued_items_by_shard(redis) do |shard_number, specs|
+              hash[shard_number] = specs if specs.present?
+            end
+          end
+        end
       end
 
       def clear_tracking!
         with_redis do |redis|
           Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
-            redis.unlink(self::REDIS_SET_KEY, self::REDIS_SCORE_KEY)
+            keys = SHARDS.map { |m| [redis_set_key(m), redis_score_key(m)] }.flatten
+
+            redis.unlink(*keys)
           end
+        end
+      end
+
+      def each_queued_items_by_shard(redis)
+        SHARDS.each do |shard_number|
+          set_key = redis_set_key(shard_number)
+          specs = redis.zrangebyscore(set_key, '-inf', '+inf', limit: [0, SHARD_LIMIT], with_scores: true)
+
+          yield shard_number, specs
         end
       end
 
@@ -88,41 +131,55 @@ module Elastic
     def execute_with_redis(redis)
       start_time = Time.current
 
-      specs = redis.zrangebyscore(self.class::REDIS_SET_KEY, '-inf', '+inf', limit: [0, LIMIT], with_scores: true)
-      return 0 if specs.empty?
+      specs_buffer = []
+      scores = {}
 
-      first_score = specs.first.last
-      last_score = specs.last.last
+      self.class.each_queued_items_by_shard(redis) do |shard_number, specs|
+        next if specs.empty?
 
-      logger.info(
-        message: 'bulk_indexing_start',
-        records_count: specs.count,
-        first_score: first_score,
-        last_score: last_score
-      )
+        set_key = self.class.redis_set_key(shard_number)
+        first_score = specs.first.last
+        last_score = specs.last.last
 
-      refs = deserialize_all(specs)
+        logger.info(
+          message: 'bulk_indexing_start',
+          redis_set: set_key,
+          records_count: specs.count,
+          first_score: first_score,
+          last_score: last_score
+        )
+
+        specs_buffer += specs
+
+        scores[set_key] = [first_score, last_score, specs.count]
+      end
+
+      return 0 if specs_buffer.blank?
+
+      refs = deserialize_all(specs_buffer)
       refs.preload_database_records.each { |ref| submit_document(ref) }
+
       failures = bulk_indexer.flush
 
       # Re-enqueue any failures so they are retried
       self.class.track!(*failures) if failures.present?
 
       # Remove all the successes
-      redis.zremrangebyscore(self.class::REDIS_SET_KEY, first_score, last_score)
+      scores.each do |set_key, (first_score, last_score, count)|
+        redis.zremrangebyscore(set_key, first_score, last_score)
 
-      records_count = specs.count
+        logger.info(
+          message: 'bulk_indexing_end',
+          redis_set: set_key,
+          records_count: count,
+          first_score: first_score,
+          last_score: last_score,
+          failures_count: failures.count,
+          bulk_execution_duration_s: Time.current - start_time
+        )
+      end
 
-      logger.info(
-        message: 'bulk_indexing_end',
-        records_count: records_count,
-        failures_count: failures.count,
-        first_score: first_score,
-        last_score: last_score,
-        bulk_execution_duration_s: Time.current - start_time
-      )
-
-      records_count
+      specs_buffer.count
     end
 
     def deserialize_all(specs)

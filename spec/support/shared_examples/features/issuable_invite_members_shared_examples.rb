@@ -1,12 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'issuable invite members experiments' do
-  context 'when invite_members_version_a experiment is enabled' do
-    before do
-      stub_experiment_for_subject(invite_members_version_a: true)
-    end
-
-    it 'shows a link for inviting members and follows through to the members page' do
+  context 'when a privileged user can invite' do
+    it 'shows a link for inviting members and launches invite modal' do
       project.add_maintainer(user)
       visit issuable_path
 
@@ -15,14 +11,14 @@ RSpec.shared_examples 'issuable invite members experiments' do
       wait_for_requests
 
       page.within '.dropdown-menu-user' do
-        expect(page).to have_link('Invite Members', href: project_project_members_path(project))
+        expect(page).to have_link('Invite Members')
         expect(page).to have_selector('[data-track-event="click_invite_members"]')
         expect(page).to have_selector('[data-track-label="edit_assignee"]')
       end
 
       click_link 'Invite Members'
 
-      expect(current_path).to eq project_project_members_path(project)
+      expect(page).to have_content("You're inviting members to the")
     end
   end
 
@@ -51,9 +47,9 @@ RSpec.shared_examples 'issuable invite members experiments' do
     end
   end
 
-  context 'when no invite members experiments are enabled' do
+  context 'when invite_members_version_b experiment is disabled' do
     it 'shows author in assignee dropdown and no invite link' do
-      project.add_maintainer(user)
+      project.add_developer(user)
       visit issuable_path
 
       find('.block.assignee .edit-link').click

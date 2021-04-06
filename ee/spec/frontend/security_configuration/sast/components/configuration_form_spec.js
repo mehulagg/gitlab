@@ -1,4 +1,4 @@
-import { GlAlert, GlLink } from '@gitlab/ui';
+import { GlLink } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
@@ -29,7 +29,10 @@ describe('ConfigurationForm component', () => {
   };
 
   const createComponent = ({ mutationResult, ...options } = {}) => {
-    sastCiConfiguration = makeSastCiConfiguration();
+    sastCiConfiguration =
+      options?.analyzerEnabled === false
+        ? makeSastCiConfiguration(options?.analyzerEnabled)
+        : makeSastCiConfiguration();
 
     wrapper = shallowMount(
       ConfigurationForm,
@@ -65,11 +68,12 @@ describe('ConfigurationForm component', () => {
 
   const findForm = () => wrapper.find('form');
   const findSubmitButton = () => wrapper.find({ ref: 'submitButton' });
-  const findErrorAlert = () => wrapper.find(GlAlert);
+  const findErrorAlert = () => wrapper.find('[data-testid="analyzers-error-alert"]');
   const findCancelButton = () => wrapper.find({ ref: 'cancelButton' });
   const findDynamicFieldsComponents = () => wrapper.findAll(DynamicFields);
   const findAnalyzerConfigurations = () => wrapper.findAll(AnalyzerConfiguration);
   const findAnalyzersSection = () => wrapper.find('[data-testid="analyzers-section"]');
+  const findAnalyzersSectionTip = () => wrapper.find('[data-testid="analyzers-section-tip"]');
 
   const expectPayloadForEntities = () => {
     const expectedPayload = {
@@ -188,6 +192,11 @@ describe('ConfigurationForm component', () => {
       });
     });
 
+    it('does not render alert-tip', () => {
+      const analyzersSectionTip = findAnalyzersSectionTip();
+      expect(analyzersSectionTip.exists()).toBe(false);
+    });
+
     describe('when an AnalyzerConfiguration emits an input event', () => {
       let analyzer;
       let updatedEntity;
@@ -204,6 +213,52 @@ describe('ConfigurationForm component', () => {
       it('updates the entity binding', () => {
         expect(analyzer.props('entity')).toBe(updatedEntity);
       });
+    });
+
+    describe('when at least 1 analyzer gets disabled', () => {
+      let analyzer;
+      let updatedEntity;
+
+      beforeEach(() => {
+        analyzer = findAnalyzerConfigurations().at(0);
+        // eslint-disable-next-line prefer-destructuring
+        updatedEntity = sastCiConfiguration.analyzers.nodes[0];
+        updatedEntity.enabled = false;
+        analyzer.vm.$emit('input', updatedEntity);
+      });
+
+      it('renders alert-tip', () => {
+        const analyzersSectionTip = findAnalyzersSectionTip();
+        expect(analyzersSectionTip.exists()).toBe(true);
+        expect(analyzersSectionTip.html()).toContain(ConfigurationForm.i18n.analyzersTipHeading);
+        expect(analyzersSectionTip.html()).toContain(ConfigurationForm.i18n.analyzersTipBody);
+      });
+
+      describe('when alert-tip is dismissed', () => {
+        beforeEach(() => {
+          findAnalyzersSectionTip().vm.$emit('dismiss');
+          return wrapper.vm.$nextTick();
+        });
+
+        it('should not be displayed', () => {
+          expect(findAnalyzersSectionTip().exists()).toBe(false);
+        });
+      });
+    });
+  });
+
+  describe('on Load with disabled analyzers', () => {
+    beforeEach(() => {
+      createComponent({
+        analyzerEnabled: false,
+      });
+    });
+
+    it('renders alert-tip', () => {
+      const analyzersSectionTip = findAnalyzersSectionTip();
+      expect(analyzersSectionTip.exists()).toBe(true);
+      expect(analyzersSectionTip.html()).toContain(ConfigurationForm.i18n.analyzersTipHeading);
+      expect(analyzersSectionTip.html()).toContain(ConfigurationForm.i18n.analyzersTipBody);
     });
   });
 

@@ -8,6 +8,7 @@ import { formType } from '~/boards/constants';
 import createBoardMutation from '~/boards/graphql/board_create.mutation.graphql';
 import destroyBoardMutation from '~/boards/graphql/board_destroy.mutation.graphql';
 import updateBoardMutation from '~/boards/graphql/board_update.mutation.graphql';
+import { createStore } from '~/boards/stores';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 
@@ -48,6 +49,13 @@ describe('BoardForm', () => {
   const findDeleteConfirmation = () => wrapper.find('[data-testid="delete-confirmation-message"]');
   const findInput = () => wrapper.find('#board-new-name');
 
+  const store = createStore({
+    getters: {
+      isGroupBoard: () => true,
+      isProjectBoard: () => false,
+    },
+  });
+
   const createComponent = (props, data) => {
     wrapper = shallowMount(BoardForm, {
       propsData: { ...defaultProps, ...props },
@@ -64,6 +72,7 @@ describe('BoardForm', () => {
           mutate,
         },
       },
+      store,
       attachTo: document.body,
     });
   };
@@ -217,7 +226,7 @@ describe('BoardForm', () => {
 
       it('passes correct primary action text and variant', () => {
         expect(findModalActionPrimary().text).toBe('Save changes');
-        expect(findModalActionPrimary().attributes[0].variant).toBe('info');
+        expect(findModalActionPrimary().attributes[0].variant).toBe('confirm');
       });
 
       it('does not render delete confirmation message', () => {

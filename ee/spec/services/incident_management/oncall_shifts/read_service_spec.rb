@@ -7,7 +7,7 @@ RSpec.describe ::IncidentManagement::OncallShifts::ReadService do
   let_it_be(:user_without_permissions) { create(:user) }
   let_it_be(:current_user) { user_with_permissions }
 
-  let_it_be_with_refind(:rotation) { create(:incident_management_oncall_rotation, length: 1, length_unit: :days) }
+  let_it_be_with_refind(:rotation) { create(:incident_management_oncall_rotation, :utc, length: 1, length_unit: :days) }
   let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
   let_it_be(:project) { rotation.project }
 
@@ -67,14 +67,6 @@ RSpec.describe ::IncidentManagement::OncallShifts::ReadService do
     context 'when feature is not available' do
       before do
         stub_licensed_features(oncall_schedules: false)
-      end
-
-      it_behaves_like 'error response', 'Your license does not support on-call rotations'
-    end
-
-    context 'when feature flag is disabled' do
-      before do
-        stub_feature_flags(oncall_schedules_mvc: false)
       end
 
       it_behaves_like 'error response', 'Your license does not support on-call rotations'

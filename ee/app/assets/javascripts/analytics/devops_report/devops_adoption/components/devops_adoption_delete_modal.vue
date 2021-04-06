@@ -3,7 +3,7 @@ import { GlModal, GlSprintf, GlAlert } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID } from '../constants';
 import deleteDevopsAdoptionSegmentMutation from '../graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
-import { deleteSegmentFromCache } from '../utils/cache_updates';
+import { deleteSegmentsFromCache } from '../utils/cache_updates';
 
 export default {
   name: 'DevopsAdoptionDeleteModal',
@@ -63,10 +63,10 @@ export default {
         } = await this.$apollo.mutate({
           mutation: deleteDevopsAdoptionSegmentMutation,
           variables: {
-            id,
+            id: [id],
           },
           update(store) {
-            deleteSegmentFromCache(store, id);
+            deleteSegmentsFromCache(store, [id]);
           },
         });
 
@@ -96,6 +96,8 @@ export default {
     :action-primary="primaryOptions"
     :action-cancel="cancelOptions"
     @primary.prevent="deleteSegment"
+    @hide="$emit('trackModalOpenState', false)"
+    @show="$emit('trackModalOpenState', true)"
   >
     <template #modal-title>{{ $options.i18n.title }}</template>
     <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">

@@ -51,7 +51,7 @@ See the epic for:
 - A list of known issues.
 - Our planned direction and next steps.
 
-If you find an issue that isn’t listed, please leave a comment on the epic or create a
+If you find an issue that isn't listed, please leave a comment on the epic or create a
 new issue.
 
 Dark mode is available as a navigation theme, for MVC and compatibility reasons. In
@@ -108,12 +108,13 @@ select few, the amount of activity on the default Dashboard page can be
 overwhelming. Changing this setting allows you to redefine your default
 dashboard.
 
-You have 8 options here that you can use for your default dashboard view:
+You can include the following options for your default dashboard view:
 
 - Your projects (default)
 - Starred projects
 - Your projects' activity
 - Starred projects' activity
+- Followed Users' Activity
 - Your groups
 - Your [To-Do List](../todos.md)
 - Assigned Issues
@@ -123,7 +124,7 @@ You have 8 options here that you can use for your default dashboard view:
 ### Group overview content
 
 The **Group overview content** dropdown allows you to choose what information is
-displayed on a group’s home page.
+displayed on a group's home page.
 
 You can choose between 2 options:
 
@@ -133,7 +134,7 @@ You can choose between 2 options:
 ### Project overview content
 
 The **Project overview content** setting allows you to choose what content you want to
-see on a project’s home page.
+see on a project's home page.
 
 ### Tab width
 

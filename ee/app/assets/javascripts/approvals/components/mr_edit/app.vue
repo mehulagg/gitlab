@@ -112,7 +112,7 @@ export default {
       data-testid="collapsedSummaryText"
     ></p>
 
-    <gl-accordion>
+    <gl-accordion :header-level="3">
       <gl-accordion-item :title="accordionTitle">
         <app>
           <mr-rules slot="rules" />

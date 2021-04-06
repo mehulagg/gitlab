@@ -8,7 +8,7 @@ RSpec.describe Clusters::AgentTokens::CreateService do
   let_it_be(:user) { create(:user) }
   let(:cluster_agent) { create(:cluster_agent) }
   let(:project) { cluster_agent.project }
-  let(:params) { { agent_id: cluster_agent.id } }
+  let(:params) { { agent_id: cluster_agent.id, description: 'token description', name: 'token name' } }
 
   before do
     stub_licensed_features(cluster_agents: false)
@@ -28,9 +28,6 @@ RSpec.describe Clusters::AgentTokens::CreateService do
       end
 
       context 'with premium plan' do
-        let(:description) { 'New token description' }
-        let(:params) { { agent_id: cluster_agent.id, description: description } }
-
         before do
           stub_licensed_features(cluster_agents: true)
         end
@@ -64,7 +61,8 @@ RSpec.describe Clusters::AgentTokens::CreateService do
             expect(subject.payload[:secret]).not_to be_nil
 
             expect(token.created_by_user).to eq(user)
-            expect(token.description).to eq(description)
+            expect(token.description).to eq(params[:description])
+            expect(token.name).to eq(params[:name])
           end
 
           context 'when params are invalid' do
@@ -76,7 +74,7 @@ RSpec.describe Clusters::AgentTokens::CreateService do
 
             it 'returns validation errors', :aggregate_failures do
               expect(subject.status).to eq(:error)
-              expect(subject.message).to eq(['Agent must exist'])
+              expect(subject.message).to eq(["Agent must exist", "Name can't be blank"])
             end
           end
         end

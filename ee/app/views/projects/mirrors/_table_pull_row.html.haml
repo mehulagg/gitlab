@@ -25,6 +25,6 @@
       - elsif @project.archived?
         %button.btn.btn-icon.gl-button.disabled{ type: 'button', data: { container: 'body', toggle: 'tooltip', qa_selector: 'update_now_button' }, title: _('This Project is currently archived and read-only. Please unarchive the project first if you want to resume Pull mirroring') }= sprite_icon("retry")
       - else
-        = link_to update_now_project_mirror_path(@project), method: :post, class: 'btn gl-button btn-icon js-force-update-mirror', data: { container: 'body', toggle: 'tooltip', qa_selector: 'update_now_button' }, title: _('Update now') do
+        = link_to update_now_project_mirror_path(@project), method: :post, class: 'btn gl-button btn-icon btn-default js-force-update-mirror', data: { container: 'body', toggle: 'tooltip', qa_selector: 'update_now_button' }, title: _('Update now') do
           = sprite_icon("retry")
       %button.js-delete-mirror.js-delete-pull-mirror.btn.btn-icon.gl-button.btn-danger{ type: 'button', data: { toggle: 'tooltip', container: 'body' }, title: _('Remove') }= sprite_icon('remove')

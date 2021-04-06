@@ -51,14 +51,16 @@ module EE
       ::Gitlab::ExpiringSubscriptionMessage.new(
         subscribable: decorated_subscription,
         signed_in: signed_in?,
-        is_admin: can?(current_user, :owner_access, entity),
+        is_admin: can?(current_user, :owner_access, entity.root_ancestor),
         namespace: current_namespace
       ).message
     end
 
     def decorated_subscription
       entity = @project || @group
-      subscription = entity&.closest_gitlab_subscription
+      return unless entity && entity.persisted?
+
+      subscription = entity.closest_gitlab_subscription
 
       return unless subscription
 

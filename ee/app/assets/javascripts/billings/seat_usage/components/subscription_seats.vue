@@ -17,10 +17,10 @@ import {
   FIELDS,
   AVATAR_SIZE,
   SEARCH_DEBOUNCE_MS,
-  REMOVE_MEMBER_MODAL_ID,
+  REMOVE_BILLABLE_MEMBER_MODAL_ID,
 } from 'ee/billings/seat_usage/constants';
 import { s__ } from '~/locale';
-import RemoveMemberModal from './remove_member_modal.vue';
+import RemoveBillableMemberModal from './remove_billable_member_modal.vue';
 
 export default {
   directives: {
@@ -36,7 +36,7 @@ export default {
     GlPagination,
     GlSearchBoxByType,
     GlTable,
-    RemoveMemberModal,
+    RemoveBillableMemberModal,
   },
   data() {
     return {
@@ -51,7 +51,7 @@ export default {
       'total',
       'namespaceName',
       'namespaceId',
-      'memberToRemove',
+      'billableMemberToRemove',
     ]),
     ...mapGetters(['tableItems']),
     currentPage: {
@@ -93,7 +93,11 @@ export default {
     this.fetchBillableMembersList();
   },
   methods: {
-    ...mapActions(['fetchBillableMembersList', 'resetMembers', 'setMemberToRemove']),
+    ...mapActions([
+      'fetchBillableMembersList',
+      'resetBillableMembers',
+      'setBillableMemberToRemove',
+    ]),
     onSearchEnter() {
       this.debouncedSearch.cancel();
       this.executeQuery();
@@ -105,7 +109,7 @@ export default {
       if (queryLength === 0 || queryLength >= MIN_SEARCH_LENGTH) {
         this.debouncedSearch();
       } else if (queryLength < MIN_SEARCH_LENGTH) {
-        this.resetMembers();
+        this.resetBillableMembers();
       }
     },
   },
@@ -116,7 +120,7 @@ export default {
   },
   avatarSize: AVATAR_SIZE,
   fields: FIELDS,
-  removeMemberModalId: REMOVE_MEMBER_MODAL_ID,
+  removeBillableMemberModalId: REMOVE_BILLABLE_MEMBER_MODAL_ID,
 };
 </script>
 
@@ -151,7 +155,6 @@ export default {
       :show-empty="true"
       data-testid="table"
       :empty-text="emptyText"
-      thead-class="gl-display-none"
     >
       <template #cell(user)="data">
         <div class="gl-display-flex">
@@ -180,11 +183,17 @@ export default {
         </div>
       </template>
 
+      <template #cell(lastActivityTime)="data">
+        <span>
+          {{ data.item.user.last_activity_on ? data.item.user.last_activity_on : __('Never') }}
+        </span>
+      </template>
+
       <template #cell(actions)="data">
         <gl-dropdown icon="ellipsis_h" right data-testid="user-actions">
           <gl-dropdown-item
-            v-gl-modal="$options.removeMemberModalId"
-            @click="setMemberToRemove(data.item.user)"
+            v-gl-modal="$options.removeBillableMemberModalId"
+            @click="setBillableMemberToRemove(data.item.user)"
           >
             {{ __('Remove user') }}
           </gl-dropdown-item>
@@ -201,6 +210,9 @@ export default {
       class="gl-mt-5"
     />
 
-    <remove-member-modal v-if="memberToRemove" :modal-id="$options.removeMemberModalId" />
+    <remove-billable-member-modal
+      v-if="billableMemberToRemove"
+      :modal-id="$options.removeBillableMemberModalId"
+    />
   </section>
 </template>

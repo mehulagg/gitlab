@@ -4,10 +4,10 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Kubernetes Agent **(PREMIUM SELF)**
+# GitLab Kubernetes Agent **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223061) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
-> - It's disabled on GitLab.com. Rolling this feature out to GitLab.com is [planned](https://gitlab.com/groups/gitlab-org/-/epics/3834).
+> - [In GitLab 13.10](https://gitlab.com/gitlab-org/gitlab/-/issues/300960), KAS became available on GitLab.com under `wss://kas.gitlab.com` through an Early Adopter Program.
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -55,13 +55,12 @@ There are several components that work in concert for the Agent to accomplish Gi
   Agent which repositories to synchronize with the cluster.
 - A manifest repository that contains manifest files. Any changes to manifest files are applied to the cluster.
 
-These repositories might be the same GitLab project or separate projects.
+You can use the same GitLab project or separate projects for configuration and manifest files, as follows:
 
-NOTE:
-GitLab recommends you use the same GitLab project for the agent configuration
-and manifest repositories. Our backlog contains issues for adding support for
+- Single GitLab project (recommended): when you use a single repository to hold both the manifest and the configuration files, these projects can be either private or public, as you prefer.
+- Two GitLab projects: when you opt to use two different GitLab projects, one for manifest files, and another for configuration files, the manifests project must be private, while the configuration project can be either private or public. Our backlog contains issues for adding support for
 [private manifest repositories outside of the configuration project](https://gitlab.com/gitlab-org/gitlab/-/issues/220912) and
-[group level agents](https://gitlab.com/gitlab-org/gitlab/-/issues/283885).
+[group level agents](https://gitlab.com/gitlab-org/gitlab/-/issues/283885) in the future.
 
 For more details, please refer to our [full architecture documentation](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/architecture.md#high-level-architecture) in the Agent project.
 
@@ -69,7 +68,7 @@ For more details, please refer to our [full architecture documentation](https://
 
 The setup process involves a few steps to enable GitOps deployments:
 
-1. [Install the Agent server](#install-the-kubernetes-agent-server).
+1. [Set up the Kubernetes Agent Server](#set-up-the-kubernetes-agent-server) for your GitLab instance.
 1. [Define a configuration repository](#define-a-configuration-repository).
 1. [Create an Agent record in GitLab](#create-an-agent-record-in-gitlab).
 1. [Generate and copy a Secret token used to connect to the Agent](#create-the-kubernetes-secret).
@@ -84,69 +83,22 @@ neither stable nor versioned yet. For this reason, GitLab only guarantees compat
 between corresponding major.minor (X.Y) versions of GitLab and its cluster side
 component, `agentk`.
 
-Upgrade your agent installations together with GitLab upgrades. To decide which version of `agentk`to install follow:
+Upgrade your agent installations together with GitLab upgrades. To decide which version of `agentk` to install follow:
 
-1. Open the [GITLAB_KAS_VERSION](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_KAS_VERSION) file from the GitLab Repository, which contains the latest `agentk` version associated with the `master` branch.
+1. Open the [`GITLAB_KAS_VERSION`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_KAS_VERSION) file from the GitLab Repository, which contains the latest `agentk` version associated with the `master` branch.
 1. Change the `master` branch and select the Git tag associated with your version. For instance, you could change it to GitLab [v13.5.3-ee release](https://gitlab.com/gitlab-org/gitlab/-/blob/v13.5.3-ee/GITLAB_KAS_VERSION)
 
 The available `agentk` and `kas` versions can be found in
 [the container registry](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/container_registry/).
 
-### Install the Kubernetes Agent Server
+### Set up the Kubernetes Agent Server
 
-The GitLab Kubernetes Agent Server (KAS) can be deployed using [Omnibus
-GitLab](https://docs.gitlab.com/omnibus/) or the [GitLab
-chart](https://gitlab.com/gitlab-org/charts/gitlab). If you don't already have
-GitLab installed, please refer to our [installation
-documentation](https://docs.gitlab.com/ee/install/README.html).
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3834) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.10, the GitLab Kubernetes Agent Server (KAS) became available on GitLab.com under `wss://kas.gitlab.com`.
 
-NOTE:
-GitLab plans to include the KAS on [GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/3834).
+To use the KAS:
 
-#### Install with Omnibus
-
-When using the [Omnibus GitLab](https://docs.gitlab.com/omnibus/) package:
-
-1. Edit `/etc/gitlab/gitlab.rb`:
-
-   ```plaintext
-   gitlab_kas['enable'] = true
-   ```
-
-1. [Reconfigure GitLab](../../../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
-
-To configure any additional options related to GitLab Kubernetes Agent Server,
-refer to the **Enable GitLab KAS** section of the
-[`gitlab.rb.template`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/files/gitlab-config-template/gitlab.rb.template).
-
-#### Install with the Helm chart
-
-When installing or upgrading the GitLab Helm chart, consider the following Helm v3 example.
-If you're using Helm v2, you must modify this example. See our [notes regarding deploy with Helm](https://docs.gitlab.com/charts/installation/deployment.html#deploy-using-helm).
-
-You must set `global.kas.enabled=true` for the KAS to be properly installed and configured:
-
-```shell
-helm repo add gitlab https://charts.gitlab.io/
-helm repo update
-helm upgrade --install gitlab gitlab/gitlab \
-  --timeout 600s \
-  --set global.hosts.domain=<YOUR_DOMAIN> \
-  --set global.hosts.externalIP=<YOUR_IP> \
-  --set certmanager-issuer.email=<YOUR_EMAIL> \
-  --set global.kas.enabled=true
-```
-
-To specify other options related to the KAS sub-chart, create a `gitlab.kas` sub-section
-of your `values.yaml` file:
-
-```shell
-gitlab:
-  kas:
-    # put your KAS custom options here
-```
-
-For details, read [Using the GitLab-KAS chart](https://docs.gitlab.com/charts/charts/gitlab/kas/).
+- If you are a self-managed user, follow the instructions to [install the Kubernetes Agent Server](../../../administration/clusters/kas.md).
+- If you are a GitLab.com user, when you [set up the configuration repository](#define-a-configuration-repository) for your agent, use `wss://kas.gitlab.com` as the `--kas-address`.
 
 ### Define a configuration repository
 
@@ -174,23 +126,9 @@ documentation on the [Kubernetes Agent configuration repository](repository.md).
 
 ### Create an Agent record in GitLab
 
-Next, create an GitLab Rails Agent record so the Agent can associate itself with
+Next, create a GitLab Rails Agent record to associate it with
 the configuration repository project. Creating this record also creates a Secret needed to configure
-the Agent in subsequent steps. You can create an Agent record either:
-
-- Through the Rails console:
-
-  ```ruby
-  project = ::Project.find_by_full_path("path-to/your-configuration-project")
-  # agent-name should be the same as specified above in the config.yaml
-  agent = ::Clusters::Agent.create(name: "<agent-name>", project: project)
-  token = ::Clusters::AgentToken.create(agent: agent)
-  token.token # this will print out the token you need to use on the next step
-  ```
-
-   For full details, read [Starting a Rails console session](../../../administration/operations/rails_console.md#starting-a-rails-console-session).
-
-- Through GraphQL: **(PREMIUM SELF)**
+the Agent in subsequent steps. You can create an Agent record with GraphQL:
 
   ```graphql
   mutation createAgent {
@@ -205,7 +143,13 @@ the Agent in subsequent steps. You can create an Agent record either:
   }
 
   mutation createToken {
-    clusterAgentTokenCreate(input: { clusterAgentId: <cluster-agent-id-taken-from-the-previous-mutation> }) {
+    clusterAgentTokenCreate(
+      input: {
+        clusterAgentId: "<cluster-agent-id-taken-from-the-previous-mutation>"
+        description: "<optional-description-of-token>"
+        name: "<required-name-given-to-token>"
+      }
+    ) {
       secret # This is the value you need to use on the next step
       token {
         createdAt
@@ -223,7 +167,38 @@ the Agent in subsequent steps. You can create an Agent record either:
   [Getting started with the GraphQL API page](../../../api/graphql/getting_started.md),
   or the [GraphQL Explorer](https://gitlab.com/-/graphql-explorer).
 
-### Create the Kubernetes secret
+### Install the Agent into the cluster
+
+Next, install the in-cluster component of the Agent.
+
+NOTE:
+For GitLab.com users, the KAS is available at `wss://kas.gitlab.com`.
+
+#### One-liner installation
+
+Replace the value of `agent-token` below with the token received from the previous step. Also, replace `kas-address` with the configured access of the Kubernetes Agent Server:
+
+```shell
+docker run --rm registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:latest generate --agent-token=your-agent-token --kas-address=wss://kas.gitlab.example.com --agent-version latest | kubectl apply -f -
+```
+
+Set `agent-version` to the latest released patch version matching your
+GitLab installation's major and minor versions. For example, if you have
+GitLab v13.9.0, set `--agent-version=v13.9.1`.
+
+To find out the various options the above Docker container supports, run:
+
+```shell
+docker run --rm -it registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:latest generate --help
+```
+
+#### Advanced installation
+
+For more advanced configurations, we recommend to use [the `kpt` based installation method](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/tree/master/build/deployment/gitlab-agent).
+
+Otherwise, you can follow below for fully manual, detailed installation steps.
+
+##### Create the Kubernetes secret
 
 After generating the token, you must apply it to the Kubernetes cluster.
 
@@ -239,9 +214,7 @@ After generating the token, you must apply it to the Kubernetes cluster.
    kubectl create secret generic -n <YOUR-DESIRED-NAMESPACE> gitlab-agent-token --from-literal=token='YOUR_AGENT_TOKEN'
    ```
 
-### Install the Agent into the cluster
-
-Next, install the in-cluster component of the Agent. This example file contains the
+The following example file contains the
 Kubernetes resources required for the Agent to be installed. You can modify this
 example [`resources.yml` file](#example-resourcesyml-file) in the following ways:
 
@@ -253,11 +226,11 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
     after you install the `gitlab-kas` sub-chart, or enable `gitlab-kas` for Omnibus GitLab.
     When using the sub-chart, you must set `wss://kas.host.tld:443` as
     `kas-address`, where `host.tld` is the domain you've setup for your GitLab installation.
-    When using Omnibus GitLab, you must set `wss://GitLab.host.tld:443/-/kubernetes-agent` as
+    When using Omnibus GitLab, you must set `wss://GitLab.host.tld:443/-/kubernetes-agent/` as
     `kas-address`, where `GitLab.host.tld` is your GitLab hostname.
   - When using the sub-chart, specify the `ws` scheme (such as `ws://kas.host.tld:80`)
     to use an unencrypted WebSockets connection.
-    When using the Omnibus GitLab, specify the `ws` scheme (such as `ws://GitLab.host.tld:80/-/kubernetes-agent`).
+    When using the Omnibus GitLab, specify the `ws` scheme (such as `ws://GitLab.host.tld:80/-/kubernetes-agent/`).
   - Specify the `grpc` scheme if both Agent and Server are installed in one cluster.
     In this case, you may specify `kas-address` value as
     `grpc://gitlab-kas.<your-namespace>:5005`) to use gRPC directly, where `gitlab-kas`
@@ -269,7 +242,7 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
   - When deploying KAS through the [GitLab chart](https://docs.gitlab.com/charts/), it's possible to customize the `kas-address` for `wss` and `ws` schemes to whatever you need.
     Check the [chart's KAS Ingress documentation](https://docs.gitlab.com/charts/charts/gitlab/kas/#ingress)
     to learn more about it.
-  - In the near future, Omnibus GitLab intends to provision `gitlab-kas` under a sub-domain by default, instead of the `/-/kubernetes-agent` path. Please follow [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784) for details.
+  - In the near future, Omnibus GitLab intends to provision `gitlab-kas` under a sub-domain by default, instead of the `/-/kubernetes-agent/` path. Please follow [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784) for details.
 - If you defined your own secret name, replace `gitlab-agent-token` with your
   secret name in the `secretName:` section.
 
@@ -288,7 +261,7 @@ NAMESPACE     NAME                               READY   STATUS    RESTARTS   AG
 gitlab-agent  gitlab-agent-77689f7dcb-5skqk      1/1     Running   0          51s
 ```
 
-#### Example `resources.yml` file
+##### Example `resources.yml` file
 
 ```yaml
 apiVersion: v1
@@ -318,7 +291,7 @@ spec:
         - --token-file=/config/token
         - --kas-address
         - wss://kas.host.tld:443 # change this line for the one below if using Omnibus GitLab
-        # - wss://gitlab.host.tld:443/-/kubernetes-agent
+        # - wss://gitlab.host.tld:443/-/kubernetes-agent/
         volumeMounts:
         - name: token-volume
           mountPath: /config
@@ -442,7 +415,7 @@ The following example projects can help you get started with the Kubernetes Agen
 ### Deploying GitLab Runner with the Agent
 
 You can use the Kubernetes Agent to
-[deploy GitLab Runner in a Kubernetes cluster](http://docs.gitlab.com/runner/install/kubernetes-agent.html).
+[deploy GitLab Runner in a Kubernetes cluster](https://docs.gitlab.com/runner/install/kubernetes-agent.html).
 
 ## Kubernetes Network Security Alerts
 
@@ -459,7 +432,7 @@ There are several components that work in concert for the Agent to generate the 
 - One or more network policies through any of these options:
   - Use the [Container Network Policy editor](../../application_security/threat_monitoring/index.md#container-network-policy-editor) to create and manage policies.
   - Use an [AutoDevOps](../../application_security/threat_monitoring/index.md#container-network-policy-management) configuration.
-  - Add the required labels and annotations to existing network policies. 
+  - Add the required labels and annotations to existing network policies.
 - Use a configuration repository to inform the Agent through a `config.yaml` file, which
   repositories can synchronize with. This repository might be the same, or a separate GitLab
   project.
@@ -492,7 +465,7 @@ cilium:
 ## Management interfaces
 
 Users with at least the [Developer](../../permissions.md) can access the user interface
-for the GitLab Kubernetes agent at **Operations > Kubernetes** and selecting the
+for the GitLab Kubernetes agent at **Operations > Kubernetes** under the
 **GitLab Agent managed clusters** tab. This page lists all registered agents for
 the current project, and the configuration directory for each agent:
 
@@ -504,36 +477,17 @@ Additional management interfaces are planned for the GitLab Kubernetes Agent.
 ## Troubleshooting
 
 If you face any issues while using GitLab Kubernetes Agent, you can read the
-service logs with the following commands:
+service logs with the following command
 
-- KAS pod logs - Tail these logs with the
-  `kubectl logs -f -l=app=kas -n <YOUR-GITLAB-NAMESPACE>`
-  command. In Omnibus GitLab, the logs reside in `/var/log/gitlab/gitlab-kas/`.
-- Agent pod logs - Tail these logs with the
-  `kubectl logs -f -l=app=gitlab-agent -n <YOUR-DESIRED-NAMESPACE>` command.
-
-### KAS logs - GitOps: failed to get project info
-
-```plaintext
-{"level":"warn","time":"2020-10-30T08:37:26.123Z","msg":"GitOps: failed to get project info","agent_id":4,"project_id":"root/kas-manifest001","error":"error kind: 0; status: 404"}
+```shell
+kubectl logs -f -l=app=gitlab-agent -n <YOUR-DESIRED-NAMESPACE>
 ```
 
-This error is shown if the specified manifest project `root/kas-manifest001`
-doesn't exist, or if a project is private. To fix it, make sure the project exists
-and its visibility is [set to public](../../../public_access/public_access.md).
-
-### KAS logs - Configuration file not found
-
-```plaintext
-time="2020-10-29T04:44:14Z" level=warning msg="Config: failed to fetch" agent_id=2 error="configuration file not found: \".gitlab/agents/test-agent/config.yaml\
-```
-
-This error is shown if the path to the configuration project was specified incorrectly,
-or if the path to `config.yaml` inside the project is not valid.
+GitLab administrators can additionally view the [Kubernetes Agent Server logs](../../../administration/clusters/kas.md#troubleshooting).
 
 ### Agent logs - Transport: Error while dialing failed to WebSocket dial
 
-```plaintext
+```json
 {"level":"warn","time":"2020-11-04T10:14:39.368Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://gitlab-kas:443/-/kubernetes-agent\\\": dial tcp: lookup gitlab-kas on 10.60.0.10:53: no such host\""}
 ```
 
@@ -541,7 +495,7 @@ This error is shown if there are some connectivity issues between the address
 specified as `kas-address`, and your Agent pod. To fix it, make sure that you
 specified the `kas-address` correctly.
 
-### Agent logs - ValidationError(Deployment.metadata
+### Agent logs - ValidationError(Deployment.metadata)
 
 ```plaintext
 {"level":"info","time":"2020-10-30T08:56:54.329Z","msg":"Synced","project_id":"root/kas-manifest001","resource_key":"apps/Deployment/kas-test001/nginx-deployment","sync_result":"error validating data: [ValidationError(Deployment.metadata): unknown field \"replicas\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"selector\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Deployment.metadata): unknown field \"template\" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta]"}
@@ -553,7 +507,7 @@ may try using them to create objects in Kubernetes directly for more troubleshoo
 
 ### Agent logs - Error while dialing failed to WebSocket dial: failed to send handshake request
 
-```plaintext
+```json
 {"level":"warn","time":"2020-10-30T09:50:51.173Z","msg":"GetConfiguration failed","error":"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://GitLabhost.tld:443/-/kubernetes-agent\\\": net/http: HTTP/1.x transport connection broken: malformed HTTP response \\\"\\\\x00\\\\x00\\\\x06\\\\x04\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x00\\\\x05\\\\x00\\\\x00@\\\\x00\\\"\""}
 ```
 
@@ -569,9 +523,78 @@ issue is in progress, directly edit the deployment with the
 
 ### Agent logs - Decompressor is not installed for grpc-encoding
 
-```plaintext
+```json
 {"level":"warn","time":"2020-11-05T05:25:46.916Z","msg":"GetConfiguration.Recv failed","error":"rpc error: code = Unimplemented desc = grpc: Decompressor is not installed for grpc-encoding \"gzip\""}
 ```
 
 This error is shown if the version of the agent is newer that the version of KAS.
 To fix it, make sure that both `agentk` and KAS use the same versions.
+
+### Agent logs - Certificate signed by unknown authority
+
+```json
+{"level":"error","time":"2021-02-25T07:22:37.158Z","msg":"Reverse tunnel","mod_name":"reverse_tunnel","error":"Connect(): rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing failed to WebSocket dial: failed to send handshake request: Get \\\"https://GitLabhost.tld:443/-/kubernetes-agent/\\\": x509: certificate signed by unknown authority\""}
+```
+
+This error is shown if your GitLab instance is using a certificate signed by an internal CA that
+is unknown to the agent. One approach to fixing it is to present the CA certificate file to the agent
+via a Kubernetes `configmap` and mount the file in the agent `/etc/ssl/certs` directory from where it
+will be picked up automatically.
+
+For example, if your internal CA certifciate is `myCA.pem`:
+
+```plaintext
+kubectl -n gitlab-agent create configmap ca-pemstore --from-file=myCA.pem
+```
+
+Then in `resources.yml`:
+
+```yaml
+    spec:
+      serviceAccountName: gitlab-agent
+      containers:
+      - name: agent
+        image: "registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/agentk:latest"
+        args:
+        - --token-file=/config/token
+        - --kas-address
+        - wss://kas.host.tld:443 # change this line for the one below if using Omnibus GitLab
+        # - wss://gitlab.host.tld:443/-/kubernetes-agent/
+        volumeMounts:
+        - name: token-volume
+          mountPath: /config
+        - name: ca-pemstore-volume
+          mountPath: /etc/ssl/certs/myCA.pem
+          subPath: myCA.pem
+      volumes:
+      - name: token-volume
+        secret:
+          secretName: gitlab-agent-token
+      - name: ca-pemstore-volume
+        configMap:
+          name: ca-pemstore
+          items:
+          - key: myCA.pem
+            path: myCA.pem
+```
+
+Alternatively, you can mount the certificate file at a different location and include it using the
+`--ca-cert-file` agent parameter:
+
+```yaml
+      containers:
+      - name: agent
+        image: "registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/agentk:latest"
+        args:
+        - --ca-cert-file=/tmp/myCA.pem
+        - --token-file=/config/token
+        - --kas-address
+        - wss://kas.host.tld:443 # change this line for the one below if using Omnibus GitLab
+        # - wss://gitlab.host.tld:443/-/kubernetes-agent/
+        volumeMounts:
+        - name: token-volume
+          mountPath: /config
+        - name: ca-pemstore-volume
+          mountPath: /tmp/myCA.pem
+          subPath: myCA.pem
+```

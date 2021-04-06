@@ -105,13 +105,14 @@ RSpec.describe API::API do
 
     it 'logs all application context fields' do
       allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
-        Labkit::Context.current.to_h.tap do |log_context|
+        Gitlab::ApplicationContext.current.tap do |log_context|
           expect(log_context).to match('correlation_id' => an_instance_of(String),
-                                       'meta.caller_id' => '/api/:version/projects/:id/issues',
+                                       'meta.caller_id' => 'GET /api/:version/projects/:id/issues',
                                        'meta.remote_ip' => an_instance_of(String),
                                        'meta.project' => project.full_path,
                                        'meta.root_namespace' => project.namespace.full_path,
                                        'meta.user' => user.username,
+                                       'meta.client_id' => an_instance_of(String),
                                        'meta.feature_category' => 'issue_tracking')
         end
       end
@@ -121,15 +122,38 @@ RSpec.describe API::API do
 
     it 'skips fields that do not apply' do
       allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
-        Labkit::Context.current.to_h.tap do |log_context|
+        Gitlab::ApplicationContext.current.tap do |log_context|
           expect(log_context).to match('correlation_id' => an_instance_of(String),
-                                       'meta.caller_id' => '/api/:version/users',
+                                       'meta.caller_id' => 'GET /api/:version/users',
                                        'meta.remote_ip' => an_instance_of(String),
+                                       'meta.client_id' => an_instance_of(String),
                                        'meta.feature_category' => 'users')
         end
       end
 
       get(api('/users'))
+    end
+  end
+
+  describe 'Marginalia comments' do
+    context 'GET /user/:id' do
+      let_it_be(:user) { create(:user) }
+      let(:component_map) do
+        {
+          "application" => "test",
+          "endpoint_id" => "GET /api/:version/users/:id"
+        }
+      end
+
+      subject { ActiveRecord::QueryRecorder.new { get api("/users/#{user.id}", user) } }
+
+      it 'generates a query that includes the expected annotations' do
+        expect(subject.log.last).to match(/correlation_id:.*/)
+
+        component_map.each do |component, value|
+          expect(subject.log.last).to include("#{component}:#{value}")
+        end
+      end
     end
   end
 

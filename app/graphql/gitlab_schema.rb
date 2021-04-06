@@ -12,9 +12,6 @@ class GitlabSchema < GraphQL::Schema
 
   use GraphQL::Pagination::Connections
   use BatchLoader::GraphQL
-  use Gitlab::Graphql::Authorize
-  use Gitlab::Graphql::Present
-  use Gitlab::Graphql::CallsGitaly
   use Gitlab::Graphql::Pagination::Connections
   use Gitlab::Graphql::GenericTracing
   use Gitlab::Graphql::Timeout, max_seconds: Gitlab.config.gitlab.graphql_timeout
@@ -127,7 +124,7 @@ class GitlabSchema < GraphQL::Schema
 
       raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab ID." unless gid
 
-      if expected_type && !gid.model_class.ancestors.include?(expected_type)
+      if expected_type && gid.model_class.ancestors.exclude?(expected_type)
         vars = { global_id: global_id, expected_type: expected_type }
         msg = _('%{global_id} is not a valid ID for %{expected_type}.') % vars
         raise Gitlab::Graphql::Errors::ArgumentError, msg
