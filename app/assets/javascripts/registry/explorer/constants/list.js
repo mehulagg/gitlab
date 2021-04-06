@@ -44,7 +44,7 @@ export const EMPTY_RESULT_MESSAGE = s__(
 
 export const IMAGE_DELETE_SCHEDULED_STATUS = 'DELETE_SCHEDULED';
 export const IMAGE_FAILED_DELETED_STATUS = 'DELETE_FAILED';
-export const GRAPHQL_PAGE_SIZE = 10;
+export const GRAPHQL_PAGE_SIZE = 20;
 
 export const SORT_FIELDS = [
   { orderBy: 'UPDATED', label: __('Updated') },
