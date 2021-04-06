@@ -23,6 +23,14 @@ RSpec.describe Users::UpdateTodoCountCacheService do
         .and change(user1, :todos_pending_count).from(0).to(1)
         .and change(user2, :todos_done_count).from(0).to(1)
         .and change(user2, :todos_pending_count).from(0).to(1)
+
+      Todo.delete_all
+
+      expect { described_class.new([user1, user2]).execute }
+        .to change(user1, :todos_done_count).from(1).to(0)
+        .and change(user1, :todos_pending_count).from(1).to(0)
+        .and change(user2, :todos_done_count).from(1).to(0)
+        .and change(user2, :todos_pending_count).from(1).to(0)
     end
 
     it 'avoids N+1 queries' do

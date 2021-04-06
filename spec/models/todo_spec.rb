@@ -376,20 +376,6 @@ RSpec.describe Todo do
     end
   end
 
-  describe '.by_states_and_users' do
-    let_it_be(:user1) { create(:user) }
-    let_it_be(:user2) { create(:user) }
-    let_it_be(:todo_user1_pending) { create(:todo, user: user1, state: :pending) }
-    let_it_be(:todo_user1_done) { create(:todo, user: user1, state: :done) }
-    let_it_be(:todo_user2_pending) { create(:todo, user: user2, state: :pending) }
-
-    specify do
-      expect(Todo.by_states_and_users([:pending], [user1])).to contain_exactly(todo_user1_pending)
-      expect(Todo.by_states_and_users([:pending], [user1, user2])).to contain_exactly(todo_user1_pending, todo_user2_pending)
-      expect(Todo.by_states_and_users([:done], [user1, user2])).to contain_exactly(todo_user1_done)
-    end
-  end
-
   describe '.group_by_user_id_and_state' do
     let_it_be(:user1) { create(:user) }
     let_it_be(:user2) { create(:user) }
