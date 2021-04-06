@@ -95,7 +95,7 @@ RSpec.describe 'Pipelines', :js do
         end
 
         it 'renders ci lint link' do
-          expect(page).to have_link('CI Lint')
+          expect(page).to have_link('CI lint')
         end
 
         it 'renders run pipeline link' do

@@ -51,7 +51,7 @@ export default {
     </gl-button>
 
     <gl-button v-if="ciLintPath" :href="ciLintPath" class="js-ci-lint" data-testid="ci-lint-button">
-      {{ s__('Pipelines|CI Lint') }}
+      {{ s__('Pipelines|CI lint') }}
     </gl-button>
 
     <gl-button

@@ -22619,7 +22619,7 @@ msgstr ""
 msgid "Pipelines|By revoking a trigger you will break any processes making use of it. Are you sure?"
 msgstr ""
 
-msgid "Pipelines|CI Lint"
+msgid "Pipelines|CI lint"
 msgstr ""
 
 msgid "Pipelines|Child pipeline"

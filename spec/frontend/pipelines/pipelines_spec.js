@@ -195,7 +195,7 @@ describe('Pipelines', () => {
         expect(findRunPipelineButton().attributes('href')).toBe(paths.newPipelinePath);
       });
 
-      it('renders CI Lint link', () => {
+      it('renders CI lint link', () => {
         expect(findCiLintButton().attributes('href')).toBe(paths.ciLintPath);
       });
 
@@ -503,7 +503,7 @@ describe('Pipelines', () => {
         expect(findRunPipelineButton().attributes('href')).toBe(paths.newPipelinePath);
       });
 
-      it('renders CI Lint link', () => {
+      it('renders CI lint link', () => {
         expect(findCiLintButton().attributes('href')).toBe(paths.ciLintPath);
       });
 

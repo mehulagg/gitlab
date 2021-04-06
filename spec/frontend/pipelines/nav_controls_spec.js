@@ -55,7 +55,7 @@ describe('Pipelines Nav Controls', () => {
 
     createComponent(mockData);
 
-    expect(wrapper.find('.js-ci-lint').text().trim()).toContain('CI Lint');
+    expect(wrapper.find('.js-ci-lint').text().trim()).toContain('CI lint');
     expect(wrapper.find('.js-ci-lint').attributes('href')).toBe(mockData.ciLintPath);
   });
 
