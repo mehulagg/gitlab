@@ -61,33 +61,16 @@ module Ci
     delegate :gitlab_deploy_token, to: :project
     delegate :trigger_short_token, to: :trigger_request, allow_nil: true
 
-    ##
-    # Since Gitlab 11.5, deployments records started being created right after
-    # `ci_builds` creation. We can look up a relevant `environment` through
-    # `deployment` relation today.
-    # (See more https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/22380)
-    #
-    # Since Gitlab 12.9, we started persisting the expanded environment name to
-    # avoid repeated variables expansion in `action: stop` builds as well.
-    def persisted_environment
-      return unless has_environment?
-
-      strong_memoize(:persisted_environment) do
-        # This code path has caused N+1s in the past, since environments are only indirectly
-        # associated to builds and pipelines; see https://gitlab.com/gitlab-org/gitlab/-/issues/326445
-        # We therefore batch-load them to prevent dormant N+1s until we found a proper solution.
-        BatchLoader.for(expanded_environment_name).batch(key: project_id) do |names, loader, args|
-          Environment.where(name: names, project: args[:key]).find_each do |environment|
-            loader.call(environment.name, environment)
-          end
-        end
-      end
-    end
-
     serialize :options # rubocop:disable Cop/ActiveRecordSerialize
     serialize :yaml_variables, Gitlab::Serializer::Ci::Variables # rubocop:disable Cop/ActiveRecordSerialize
 
     delegate :name, to: :project, prefix: true
+
+    delegate :persisted_environment, :environment_url, :environment_status,
+             :expanded_environment_name, :has_environment?, :starts_environment?,
+             :stops_environment?, :environment_action, :environment_deployment_tier,
+             :on_stop, :persisted_environment_variables, :deployment_status,
+             :expanded_kubernetes_namespace, to: :build_environment
 
     validates :coverage, numericality: true, allow_blank: true
     validates :ref, presence: true
@@ -448,62 +431,12 @@ module Ci
       Gitlab::Ci::Build::Prerequisite::Factory.new(self).unmet
     end
 
-    def expanded_environment_name
-      return unless has_environment?
-
-      strong_memoize(:expanded_environment_name) do
-        # We're using a persisted expanded environment name in order to avoid
-        # variable expansion per request.
-        if metadata&.expanded_environment_name.present?
-          metadata.expanded_environment_name
-        else
-          ExpandVariables.expand(environment, -> { simple_variables })
-        end
-      end
-    end
-
-    def expanded_kubernetes_namespace
-      return unless has_environment?
-
-      namespace = options.dig(:environment, :kubernetes, :namespace)
-
-      if namespace.present?
-        strong_memoize(:expanded_kubernetes_namespace) do
-          ExpandVariables.expand(namespace, -> { simple_variables })
-        end
-      end
-    end
-
-    def has_environment?
-      environment.present?
-    end
-
-    def starts_environment?
-      has_environment? && self.environment_action == 'start'
-    end
-
-    def stops_environment?
-      has_environment? && self.environment_action == 'stop'
-    end
-
-    def environment_action
-      self.options.fetch(:environment, {}).fetch(:action, 'start') if self.options
-    end
-
-    def environment_deployment_tier
-      self.options.dig(:environment, :deployment_tier) if self.options
-    end
-
     def outdated_deployment?
       success? && !deployment.try(:last?)
     end
 
     def triggered_by?(current_user)
       user == current_user
-    end
-
-    def on_stop
-      options&.dig(:environment, :on_stop)
     end
 
     ##
@@ -537,19 +470,6 @@ module Ci
           .append(key: 'CI_REGISTRY_PASSWORD', value: token.to_s, public: false, masked: true)
           .append(key: 'CI_REPOSITORY_URL', value: repo_url.to_s, public: false)
           .concat(deploy_token_variables)
-      end
-    end
-
-    def persisted_environment_variables
-      Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        break variables unless persisted? && persisted_environment.present?
-
-        variables.concat(persisted_environment.predefined_variables)
-
-        # Here we're passing unexpanded environment_url for runner to expand,
-        # and we need to make sure that CI_ENVIRONMENT_NAME and
-        # CI_ENVIRONMENT_SLUG so on are available for the URL be expanded.
-        variables.append(key: 'CI_ENVIRONMENT_URL', value: environment_url) if environment_url
       end
     end
 
@@ -952,19 +872,6 @@ module Ci
       job_artifacts.with_reports
     end
 
-    # Virtual deployment status depending on the environment status.
-    def deployment_status
-      return unless starts_environment?
-
-      if success?
-        return successful_deployment_status
-      elsif failed?
-        return :failed
-      end
-
-      :creating
-    end
-
     # Consider this object to have a structural integrity problems
     def doom!
       update_columns(
@@ -1019,6 +926,10 @@ module Ci
 
     private
 
+    def build_environment
+      @build_environment ||= Ci::Build::Environment.new(build: build)
+    end
+
     def status_commit_hooks
       @status_commit_hooks ||= []
     end
@@ -1031,14 +942,6 @@ module Ci
 
     def build_data
       @build_data ||= Gitlab::DataBuilder::Build.build(self)
-    end
-
-    def successful_deployment_status
-      if deployment&.last?
-        :last
-      else
-        :out_of_date
-      end
     end
 
     def each_report(report_types)
@@ -1064,18 +967,6 @@ module Ci
 
     def unscoped_project
       @unscoped_project ||= Project.unscoped.find_by(id: project_id)
-    end
-
-    def environment_url
-      options&.dig(:environment, :url) || persisted_environment&.external_url
-    end
-
-    def environment_status
-      strong_memoize(:environment_status) do
-        if has_environment? && merge_request
-          EnvironmentStatus.new(project, persisted_environment, merge_request, pipeline.sha)
-        end
-      end
     end
 
     def has_expiring_artifacts?
