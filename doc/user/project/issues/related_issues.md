@@ -52,6 +52,9 @@ them categorized so their relationships can be better understood visually.
 
 ![Related issue block](img/related_issue_block_v12_8.png)
 
+You can also add a linked issue from a commit message or the description in another issue or MR.
+[Learn more about crosslinking issues.](crosslinking_issues.md)
+
 ## Remove a linked issue
 
 In the **Linked issues** section of an issue, click the remove button (**{close}**) on the
