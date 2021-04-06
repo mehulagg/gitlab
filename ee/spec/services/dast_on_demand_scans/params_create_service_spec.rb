@@ -70,6 +70,14 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
           )
         end
 
+        context 'when dast_site_profile.excluded_urls is empty' do
+          let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project, excluded_urls: []) }
+
+          it 'returns nil' do
+            expect(subject.payload[:excluded_urls]).to be_nil
+          end
+        end
+
         context 'when the target is not validated and an active scan is requested' do
           let_it_be(:active_dast_scanner_profile) { create(:dast_scanner_profile, project: project, scan_type: 'active') }
 
