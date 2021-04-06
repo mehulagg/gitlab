@@ -275,14 +275,16 @@ describe('~ee/oncall_schedules/components/schedule/components/shifts/components/
     const ONE_HOUR = 60 * 60 * 1000;
     const EIGHT_HOURS = 8 * ONE_HOUR;
     const TWELVE_HOURS = 12 * ONE_HOUR;
+    const ONE_DAY = 2 * TWELVE_HOURS;
+    const TWO_WEEKS = 14 * ONE_DAY;
 
     describe('getTotalTime', () => {
       it('returns the correct length for the days view', () => {
-        expect(getTotalTime(PRESET_TYPES.DAYS)).toBe(86400000);
+        expect(getTotalTime(PRESET_TYPES.DAYS)).toBe(ONE_DAY);
       });
 
       it('returns the correct length for the 2 week view', () => {
-        expect(getTotalTime(PRESET_TYPES.WEEKS)).toBe(1209600000);
+        expect(getTotalTime(PRESET_TYPES.WEEKS)).toBe(TWO_WEEKS);
       });
     });
 
