@@ -9,7 +9,7 @@ class AssemblaService < Service
   end
 
   def description
-    'Manage projects.'
+    _('Manage projects.')
   end
 
   def self.to_param
