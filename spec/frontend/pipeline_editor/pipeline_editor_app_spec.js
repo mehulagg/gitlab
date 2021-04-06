@@ -2,8 +2,10 @@ import { GlAlert, GlButton, GlLoadingIcon, GlTabs } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import httpStatusCodes from '~/lib/utils/http_status';
+import CodeSnippetAlert from '~/pipeline_editor/components/code_snippet_alert/code_snippet_alert.vue';
 import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
 import TextEditor from '~/pipeline_editor/components/editor/text_editor.vue';
 
@@ -105,6 +107,7 @@ describe('Pipeline editor app component', () => {
   const findEmptyState = () => wrapper.findComponent(PipelineEditorEmptyState);
   const findEmptyStateButton = () =>
     wrapper.findComponent(PipelineEditorEmptyState).findComponent(GlButton);
+  const findCodeSnippetAlert = () => wrapper.find(CodeSnippetAlert);
 
   beforeEach(() => {
     mockBlobContentData = jest.fn();
@@ -124,6 +127,48 @@ describe('Pipeline editor app component', () => {
 
       expect(findLoadingIcon().exists()).toBe(true);
       expect(findTextEditor().exists()).toBe(false);
+    });
+  });
+
+  describe('code snippet alert', () => {
+    const setCodeSnippetUrlParam = (value) => {
+      global.jsdom.reconfigure({
+        url: `${TEST_HOST}/?code_snippet_copied_from=${value}`,
+      });
+    };
+
+    it('does not show by default', () => {
+      createComponent();
+
+      expect(findCodeSnippetAlert().exists()).toBe(false);
+    });
+
+    it('shows if URL param is set and supported, and cleans up URL', () => {
+      jest.spyOn(window.history, 'replaceState');
+      setCodeSnippetUrlParam('api_fuzzing');
+      createComponent();
+
+      expect(findCodeSnippetAlert().exists()).toBe(true);
+      expect(window.history.replaceState).toHaveBeenCalledWith({}, document.title, `${TEST_HOST}/`);
+    });
+
+    it('does not show if URL param is invalid', () => {
+      setCodeSnippetUrlParam('foo_bar');
+      createComponent();
+
+      expect(findCodeSnippetAlert().exists()).toBe(false);
+    });
+
+    it('disappears on dismiss', async () => {
+      setCodeSnippetUrlParam('api_fuzzing');
+      createComponent();
+      const alert = findCodeSnippetAlert();
+
+      expect(alert.exists()).toBe(true);
+
+      await alert.vm.$emit('dismiss');
+
+      expect(alert.exists()).toBe(false);
     });
   });
 

@@ -1,7 +1,8 @@
 <script>
 import { GlModal } from '@gitlab/ui';
 import Clipboard from 'clipboard';
-import { redirectTo } from '~/lib/utils/url_utility';
+import { getBaseURL, setUrlParams, redirectTo } from '~/lib/utils/url_utility';
+import { CODE_SNIPPET_SOURCE_URL_PARAM } from '~/pipeline_editor/components/code_snippet_alert/constants';
 import { CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
 
 export default {
@@ -15,6 +16,10 @@ export default {
       required: true,
     },
     yaml: {
+      type: String,
+      required: true,
+    },
+    redirectParam: {
       type: String,
       required: true,
     },
@@ -33,7 +38,15 @@ export default {
       });
       clipboard.on('success', () => {
         if (andRedirect) {
-          redirectTo(this.ciYamlEditUrl);
+          const url = new URL(this.ciYamlEditUrl, getBaseURL());
+          redirectTo(
+            setUrlParams(
+              {
+                [CODE_SNIPPET_SOURCE_URL_PARAM]: this.redirectParam,
+              },
+              url,
+            ),
+          );
         }
       });
     },

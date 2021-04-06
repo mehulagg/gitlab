@@ -35,6 +35,7 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
     projectPath,
     projectNamespace,
     ymlHelpPagePath,
+    apiFuzzingConfigurationPath,
   } = el?.dataset;
 
   Vue.use(VueApollo);
@@ -71,6 +72,7 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
       projectPath,
       projectNamespace,
       ymlHelpPagePath,
+      apiFuzzingConfigurationPath,
     },
     render(h) {
       return h(PipelineEditorApp);

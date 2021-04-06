@@ -1,9 +1,15 @@
 <script>
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import httpStatusCodes from '~/lib/utils/http_status';
+import { getParameterValues, removeParams } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 
 import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
+import CodeSnippetAlert from './components/code_snippet_alert/code_snippet_alert.vue';
+import {
+  CODE_SNIPPET_SOURCE_URL_PARAM,
+  CODE_SNIPPET_SOURCES,
+} from './components/code_snippet_alert/constants';
 import ConfirmUnsavedChangesDialog from './components/ui/confirm_unsaved_changes_dialog.vue';
 import PipelineEditorEmptyState from './components/ui/pipeline_editor_empty_state.vue';
 import {
@@ -29,6 +35,7 @@ export default {
     GlLoadingIcon,
     PipelineEditorEmptyState,
     PipelineEditorHome,
+    CodeSnippetAlert,
   },
   inject: {
     ciConfigPath: {
@@ -51,8 +58,11 @@ export default {
       showFailureAlert: false,
       showSuccessAlert: false,
       successType: null,
+      codeSnippetCopiedFrom: '',
+      codeSnippetAlertDismissed: false,
     };
   },
+
   apollo: {
     initialCiFileContent: {
       query: getBlobContent,
@@ -166,6 +176,9 @@ export default {
           return null;
       }
     },
+    showCodeSnippetAlert() {
+      return this.codeSnippetCopiedFrom && !this.codeSnippetAlertDismissed;
+    },
   },
   i18n: {
     tabEdit: s__('Pipelines|Write pipeline configuration'),
@@ -186,6 +199,17 @@ export default {
         this.setAppStatus(EDITOR_APP_STATUS_EMPTY);
       }
     },
+  },
+  created() {
+    const [codeSnippetCopiedFrom] = getParameterValues(CODE_SNIPPET_SOURCE_URL_PARAM);
+    if (codeSnippetCopiedFrom && CODE_SNIPPET_SOURCES.includes(codeSnippetCopiedFrom)) {
+      this.codeSnippetCopiedFrom = codeSnippetCopiedFrom;
+      window.history.replaceState(
+        {},
+        document.title,
+        removeParams([CODE_SNIPPET_SOURCE_URL_PARAM]),
+      );
+    }
   },
   methods: {
     handleBlobContentError(error = {}) {
@@ -266,6 +290,12 @@ export default {
       @createEmptyConfigFile="setNewEmptyCiConfigFile"
     />
     <div v-else>
+      <code-snippet-alert
+        v-if="showCodeSnippetAlert"
+        :source="codeSnippetCopiedFrom"
+        class="gl-mb-5"
+        @dismiss="codeSnippetAlertDismissed = true"
+      />
       <gl-alert
         v-if="showSuccessAlert"
         :variant="success.variant"

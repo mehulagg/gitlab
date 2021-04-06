@@ -13,6 +13,7 @@ import {
 import * as Sentry from '@sentry/browser';
 import { isEmptyValue } from '~/lib/utils/forms';
 import { __, s__ } from '~/locale';
+import { CODE_SNIPPET_SOURCE_API_FUZZING } from '~/pipeline_editor/components/code_snippet_alert/constants';
 import DropdownInput from '../../components/dropdown_input.vue';
 import DynamicFields from '../../components/dynamic_fields.vue';
 import FormInput from '../../components/form_input.vue';
@@ -22,6 +23,7 @@ import ConfigurationSnippetModal from './configuration_snippet_modal.vue';
 
 export default {
   CONFIGURATION_SNIPPET_MODAL_ID,
+  CODE_SNIPPET_SOURCE_API_FUZZING,
   components: {
     GlAccordion,
     GlAccordionItem,
@@ -304,6 +306,7 @@ export default {
       :ref="$options.CONFIGURATION_SNIPPET_MODAL_ID"
       :ci-yaml-edit-url="ciYamlEditPath"
       :yaml="configurationYaml"
+      :redirect-param="$options.CODE_SNIPPET_SOURCE_API_FUZZING"
     />
   </form>
 </template>
