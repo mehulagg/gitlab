@@ -1,11 +1,13 @@
 <script>
 import NamedList from './types/named_list.vue';
+import Text from './types/text.vue';
 import Url from './types/url.vue';
 
 export default {
   components: {
     Url,
     NamedList,
+    Text,
   },
   props: {
     item: {
