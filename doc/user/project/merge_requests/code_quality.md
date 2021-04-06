@@ -33,7 +33,7 @@ Code Quality:
 Going a step further, GitLab can show the Code Quality report right
 in the merge request widget area if a report from the target branch is available to compare to:
 
-![Code Quality Widget](img/code_quality.png)
+![Code Quality Widget](img/code_quality_widget_13_11.png)
 
 Watch a quick walkthrough of Code Quality in action:
 
