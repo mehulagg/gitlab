@@ -661,22 +661,6 @@ module EE
     end
     request_cache(:any_path_locks?) { self.id }
 
-    def protected_environment_accessible_to?(environment_name, user)
-      protected_environment = protected_environment_by_name(environment_name)
-
-      !protected_environment || protected_environment.accessible_to?(user)
-    end
-
-    def protected_environment_by_name(environment_name)
-      return unless protected_environments_feature_available?
-
-      key = "protected_environment_by_name:#{id}:#{environment_name}"
-
-      ::Gitlab::SafeRequestStore.fetch(key) do
-        protected_environments.find { |pe| pe.name == environment_name }
-      end
-    end
-
     override :after_import
     def after_import
       super
@@ -700,10 +684,6 @@ module EE
     def gitlab_custom_project_template_import?
       import_type == 'gitlab_custom_project_template' &&
         ::Gitlab::CurrentSettings.custom_project_templates_enabled?
-    end
-
-    def protected_environments_feature_available?
-      feature_available?(:protected_environments)
     end
 
     # Update the default branch querying the remote to determine its HEAD

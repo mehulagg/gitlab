@@ -163,6 +163,10 @@ module Ci
     def expanded_environment_name
     end
 
+    def has_environment?
+      false
+    end
+
     def execute_hooks
       raise NotImplementedError
     end

@@ -1,0 +1,5 @@
+---
+title: Refactor project-level protected environments for performance optimization
+merge_request: 58633
+author:
+type: performance

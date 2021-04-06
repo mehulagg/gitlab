@@ -6,7 +6,7 @@ module EE
 
       override :enqueue
       def enqueue(build)
-        unless allowed_to_deploy?(build)
+        if protected_environment?(build)
           return build.drop!(:protected_environment_failure)
         end
 
@@ -15,12 +15,13 @@ module EE
 
       private
 
-      def allowed_to_deploy?(build)
-        # We need to check if Protected Environments feature is available,
-        # as evaluating `build.expanded_environment_name` is expensive.
-        return true unless project.protected_environments_feature_available?
+      def protected_environment?(build)
+        return false unless build.has_environment?
 
-        project.protected_environment_accessible_to?(build.expanded_environment_name, build.user)
+        # Initializing an object than fetching a persisted row in order to avoid N+1.
+        # See https://gitlab.com/gitlab-org/gitlab/-/issues/326445
+        ::Environment.new(project: build.project, name: build.expanded_environment_name)
+                     .protected_from?(build.user)
       end
     end
   end
