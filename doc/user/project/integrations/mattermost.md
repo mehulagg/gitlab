@@ -41,10 +41,10 @@ to send the notifications.
 
 Navigate to the [Integrations page](overview.md#accessing-integrations)
 and select the **Mattermost notifications** service. Select the GitLab events
-that you want to generate notifications.
+you want to generate notifications for.
 
 For each event you select, input the Mattermost channel you want to receive the
-notification. You do not need to add the hash sign `#`.
+notification. You do not need to add the hash sign (`#`).
 
 Then fill in the integration configuration:
 

@@ -65,7 +65,7 @@ class ChatNotificationService < Service
       { type: 'text', name: 'username', placeholder: 'GitLab-integration' }.freeze,
       { type: 'checkbox', name: 'notify_only_broken_pipelines', help: 'Do not send notifications for successful pipelines.' }.freeze,
       { type: 'select', name: 'branches_to_be_notified', choices: branch_choices }.freeze,
-      { type: 'text', name: 'labels_to_be_notified', placeholder: '~backend,~frontend', help: 'Send notifications only for issue, merge request, and comment events with the listed labels. Leave blank to receive notifications for all issue, merge request and comment events.' }.freeze
+      { type: 'text', name: 'labels_to_be_notified', placeholder: '~backend,~frontend', help: 'Send notifications for issue, merge request, and comment events with the listed labels only. Leave blank to receive notifications for all events.' }.freeze
     ].freeze
   end
 
