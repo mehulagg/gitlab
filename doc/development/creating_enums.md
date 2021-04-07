@@ -137,4 +137,16 @@ end
 ```
 
 When adding a new value we should fill the gap first.
-In the example above we would add `14` instead of `1_003`.
+In the example above we would add `14` instead of `1_003`:
+
+```ruby
+{
+  # ...
+  data_integrity_failure: 12,
+  forward_deployment_failure: 13,
+  a_new_value: 14,
+  insufficient_bridge_permissions: 1_001,
+  downstream_bridge_project_not_found: 1_002,
+  # ...
+}
+```
