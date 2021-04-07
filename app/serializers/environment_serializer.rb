@@ -17,7 +17,38 @@ class EnvironmentSerializer < BaseSerializer
 
   def represent(resource, opts = {})
     if itemized?
-      itemize(resource).map do |item|
+      items = itemize(resource)
+
+      preload_for_deployment = [
+        :user,
+        :cluster,
+        {
+          deployable: [
+            :user,
+            pipeline: [
+              :manual_actions,
+              :scheduled_actions
+            ]
+            project: [
+              :project_feature,
+              :route,
+              {
+                namespace: :route
+              }
+            ]
+          ]
+        }
+      ]
+
+      ActiveRecord::Associations::Preloader.new.preload(items.map(&:latest),
+        {
+          last_deployment: preload_for_deployment,
+          upcoming_deployment: preload_for_deployment,
+          project: [:project_feature, :route, { namespace: :route }]
+        }
+      )
+
+      items.map do |item|
         { name: item.name,
           size: item.size,
           latest: super(item.latest, opts) }
