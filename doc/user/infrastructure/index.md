@@ -74,6 +74,12 @@ Neither Terraform nor GitLab encrypts the plan file by default. If your Terrafor
 includes sensitive data such as passwords, access tokens, or certificates, GitLab strongly
 recommends encrypting plan output or modifying the project visibility settings.
 
+## GitLab Terraform Module Registry
+
+GitLab can be used as a [Terraform Module Registry](../packages/terraform_module_registry/index.md).
+This allows you to create and publish private Terraform Modules that can be
+referenced under your top-level namespace or group.
+
 ## Terraform integration in Merge Requests
 
 Collaborating around Infrastructure as Code (IaC) changes requires both code changes
