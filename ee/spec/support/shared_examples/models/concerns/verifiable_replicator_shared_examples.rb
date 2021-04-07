@@ -12,9 +12,9 @@
 RSpec.shared_examples 'a verifiable replicator' do
   include EE::GeoHelpers
 
-  before do
-    stub_current_geo_node(primary)
-  end
+  # before do
+  #   stub_current_geo_node(primary)
+  # end
 
   describe 'events' do
     it 'has checksum_succeeded event' do
@@ -286,7 +286,7 @@ RSpec.shared_examples 'a verifiable replicator' do
 
   describe '.verification_pending_batch' do
     context 'when current node is a primary' do
-      it 'delegates to the model class of the replicator'do
+      it 'delegates to the model class of the replicator' do
         expect(described_class.model).to receive(:verification_pending_batch).with(any_args)
 
         described_class.verification_pending_batch(batch_size: 1)
