@@ -9,7 +9,7 @@ module Gitlab
         BASE_QUERY = ::Gitlab::BackgroundMigration::BackfillTraversalIds::Models::Namespace
           .where('parent_id IS NOT NULL')
           .where("traversal_ids = '{}'")
-        PAUSE_SECONDS = 2
+        PAUSE_SECONDS = 0.1
 
         def perform(start_id, end_id, sub_batch_size)
           ranged_query = BASE_QUERY.where(id: start_id..end_id)
