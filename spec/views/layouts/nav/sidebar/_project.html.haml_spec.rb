@@ -56,9 +56,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   describe 'Learn GitLab' do
     it 'has a link to the learn GitLab experiment' do
       allow(view).to receive(:learn_gitlab_experiment_enabled?).and_return(true)
-      allow_next_instance_of(LearnGitlab::Onboarding) do |onboarding|
-        expect(onboarding).to receive(:completed_percentage).and_return(20)
-      end
 
       render
 
@@ -589,7 +586,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       stub_config(packages: { enabled: packages_enabled })
     end
 
-    it 'top level navigation link is visible and points to package registry page' do
+    it 'top level navigation link is visible points to package registry page' do
       render
 
       expect(rendered).to have_link('Packages & Registries', href: project_packages_path(project))
@@ -722,11 +719,11 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     context 'when the Confluence integration is active' do
       let(:active) { true }
 
-      it 'shows the Confluence link' do
+      it 'shows the Confluence tab' do
         expect(rendered).to have_link('Confluence', href: project_wikis_confluence_path(project))
       end
 
-      it 'does not show the GitLab wiki link' do
+      it 'does not show the GitLab wiki tab' do
         expect(rendered).not_to have_link('Wiki')
       end
     end
@@ -734,11 +731,11 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     context 'when it is disabled' do
       let(:active) { false }
 
-      it 'does not show the Confluence link' do
+      it 'does not show the Confluence tab' do
         expect(rendered).not_to have_link('Confluence')
       end
 
-      it 'shows the GitLab wiki link' do
+      it 'shows the GitLab wiki tab' do
         expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
       end
     end
@@ -756,7 +753,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     describe 'when wiki is disabled' do
       let(:user) { nil }
 
-      it 'does not show the wiki link' do
+      it 'does not show the wiki tab' do
         render
 
         expect(rendered).not_to have_link('Wiki')
@@ -784,7 +781,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     context 'when it is disabled' do
       let(:service_status) { false }
 
-      it 'does not show the external wiki link' do
+      it 'does not show the external wiki tab' do
         render
 
         expect(rendered).not_to have_link('External wiki')
@@ -995,6 +992,44 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
           expect(rendered).not_to have_link('Packages & Registries', href: project_settings_packages_and_registries_path(project))
         end
       end
+    end
+  end
+
+  describe 'Hidden menus' do
+    it 'has a link to the Activity page' do
+      render
+
+      expect(rendered).to have_link('Activity', href: activity_project_path(project), class: 'shortcuts-project-activity', visible: false)
+    end
+
+    it 'has a link to the Graph page' do
+      render
+
+      expect(rendered).to have_link('Graph', href: project_network_path(project, current_ref), class: 'shortcuts-network', visible: false)
+    end
+
+    it 'has a link to the New Issue page' do
+      render
+
+      expect(rendered).to have_link('Create a new issue', href: new_project_issue_path(project), class: 'shortcuts-new-issue', visible: false)
+    end
+
+    it 'has a link to the Jobs page' do
+      render
+
+      expect(rendered).to have_link('Jobs', href: project_jobs_path(project), class: 'shortcuts-builds', visible: false)
+    end
+
+    it 'has a link to the Commits page' do
+      render
+
+      expect(rendered).to have_link('Commits', href: project_commits_path(project), class: 'shortcuts-commits', visible: false)
+    end
+
+    it 'has a link to the Issue Boardss page' do
+      render
+
+      expect(rendered).to have_link('Issue Boards', href: project_boards_path(project), class: 'shortcuts-issue-boards', visible: false)
     end
   end
 
