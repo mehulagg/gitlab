@@ -26713,9 +26713,6 @@ msgstr ""
 msgid "Runner API"
 msgstr ""
 
-msgid "Runner is %{status}, last contact was %{runner_contact} ago"
-msgstr ""
-
 msgid "Runner token"
 msgstr ""
 
@@ -26807,6 +26804,15 @@ msgid "Runners|Revision"
 msgstr ""
 
 msgid "Runners|Runner #%{runner_id}"
+msgstr ""
+
+msgid "Runners|Runner is offline, last contact was %{runner_contact} ago"
+msgstr ""
+
+msgid "Runners|Runner is online, last contact was %{runner_contact} ago"
+msgstr ""
+
+msgid "Runners|Runner is paused, last contact was %{runner_contact} ago"
 msgstr ""
 
 msgid "Runners|Shared"

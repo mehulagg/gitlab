@@ -4,18 +4,33 @@ module Ci
   module RunnersHelper
     include IconsHelper
 
-    def runner_status_icon(runner)
-      status = runner.status
-      case status
-      when :not_connected
-        content_tag(:span, title: _("New runner. Has not connected yet")) do
-          sprite_icon("warning-solid", size: 24, css_class: "gl-vertical-align-bottom!")
-        end
+    def runner_status_icon(runner, size: 16, icon_class: '')
+      title = ''
+      icon = ''
+      span_classes = ['has-tooltip']
 
-      when :online, :offline, :paused
-        content_tag :span, nil,
-                    class: "gl-display-inline-block gl-avatar gl-avatar-s16 gl-avatar-circle runner-status runner-status-#{status}",
-                    title: _("Runner is %{status}, last contact was %{runner_contact} ago") % { status: status, runner_contact: time_ago_in_words(runner.contacted_at) }
+      runner.contacted_at = 0
+
+      case runner.status
+      when :not_connected
+        title = _("New runner. Has not connected yet")
+        icon = 'warning-solid'
+      when :online
+        title = s_("Runners|Runner is online, last contact was %{runner_contact} ago") % { runner_contact: time_ago_in_words(runner.contacted_at) }
+        icon = 'status-active'
+        span_classes << 'gl-text-green-500'
+      when :offline
+        title = s_("Runners|Runner is offline, last contact was %{runner_contact} ago") % { runner_contact: time_ago_in_words(runner.contacted_at) }
+        icon = 'status-failed'
+        span_classes << 'gl-text-red-500'
+      when :paused
+        title = s_("Runners|Runner is paused, last contact was %{runner_contact} ago") % { runner_contact: time_ago_in_words(runner.contacted_at) }
+        icon = 'status-paused'
+        span_classes << 'gl-text-gray-600'
+      end
+
+      content_tag(:span, title: title, class: span_classes.join(' ')) do
+        sprite_icon(icon, size: size, css_class: icon_class)
       end
     end
 
