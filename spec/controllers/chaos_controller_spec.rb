@@ -126,6 +126,10 @@ RSpec.describe ChaosController do
   end
 
   describe '#quit' do
+    it 'calls QUIT' do
+      get :quit
+    end
+
     it 'calls synchronously' do
       expect(Gitlab::Chaos).to receive(:kill).with('QUIT')
 
