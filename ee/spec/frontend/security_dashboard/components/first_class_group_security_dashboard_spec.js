@@ -14,7 +14,6 @@ describe('First Class Group Dashboard Component', () => {
   const dashboardDocumentation = 'dashboard-documentation';
   const emptyStateSvgPath = 'empty-state-path';
   const groupFullPath = 'group-full-path';
-  const vulnerabilitiesExportEndpoint = '/vulnerabilities/exports';
 
   const findDashboardLayout = () => wrapper.find(SecurityDashboardLayout);
   const findGroupVulnerabilities = () => wrapper.find(FirstClassGroupVulnerabilities);
@@ -29,9 +28,8 @@ describe('First Class Group Dashboard Component', () => {
       propsData: {
         dashboardDocumentation,
         emptyStateSvgPath,
-        groupFullPath,
-        vulnerabilitiesExportEndpoint,
       },
+      provide: { groupFullPath },
       data,
       stubs: {
         SecurityDashboardLayout,
@@ -66,7 +64,6 @@ describe('First Class Group Dashboard Component', () => {
 
     it('should render correctly', () => {
       expect(findGroupVulnerabilities().props()).toEqual({
-        groupFullPath,
         filters: {},
       });
     });
@@ -90,9 +87,7 @@ describe('First Class Group Dashboard Component', () => {
     });
 
     it('displays the csv export button', () => {
-      expect(findCsvExportButton().props('vulnerabilitiesExportEndpoint')).toBe(
-        vulnerabilitiesExportEndpoint,
-      );
+      expect(findCsvExportButton().exists()).toBe(true);
     });
 
     it('loading button should not be rendered', () => {

@@ -125,6 +125,46 @@ RSpec.describe Project do
       end
     end
 
+    context 'import_state dependant predicate method' do
+      shared_examples 'returns expected values' do
+        context 'when project lacks a import_state relation' do
+          it 'returns false' do
+            expect(project.send("mirror_#{method}")).to be_falsey
+          end
+        end
+
+        context 'when project has a import_state relation' do
+          before do
+            create(:import_state, project: project)
+          end
+
+          it 'accesses the value from the import_state' do
+            expect(project.import_state).to receive(method)
+
+            project.send("mirror_#{method}")
+          end
+        end
+      end
+
+      describe '#mirror_last_update_succeeded?' do
+        it_behaves_like 'returns expected values' do
+          let(:method) { "last_update_succeeded?" }
+        end
+      end
+
+      describe '#mirror_last_update_failed?' do
+        it_behaves_like 'returns expected values' do
+          let(:method) { "last_update_failed?" }
+        end
+      end
+
+      describe '#mirror_ever_updated_successfully?' do
+        it_behaves_like 'returns expected values' do
+          let(:method) { "ever_updated_successfully?" }
+        end
+      end
+    end
+
     describe 'approval_rules association' do
       let_it_be(:rule, reload: true) { create(:approval_project_rule) }
       let(:project) { rule.project }
@@ -834,6 +874,16 @@ RSpec.describe Project do
     end
   end
 
+  describe '#execute_external_compliance_hooks' do
+    let_it_be(:rule) { create(:external_approval_rule) }
+
+    it 'enqueues the correct number of workers' do
+      allow(rule).to receive(:async_execute).once
+
+      rule.project.execute_external_compliance_hooks({})
+    end
+  end
+
   describe "#execute_hooks" do
     context "group hooks" do
       let(:group) { create(:group) }
@@ -849,7 +899,7 @@ RSpec.describe Project do
         project.execute_hooks(some: 'info')
       end
 
-      context 'when group_webhooks frature is enabled' do
+      context 'when group_webhooks feature is enabled' do
         before do
           stub_licensed_features(group_webhooks: true)
         end
@@ -2659,7 +2709,7 @@ RSpec.describe Project do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: licensed?)
         stub_application_setting(deletion_adjourned_period: adjourned_period)
-        allow(group).to receive(:delayed_project_removal?).and_return(feature_enabled_on_group?)
+        allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(feature_enabled_on_group?)
       end
 
       it { is_expected.to be result }

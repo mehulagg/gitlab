@@ -4,9 +4,9 @@ require 'spec_helper'
 
 RSpec.describe VulnerabilitiesHelper do
   let_it_be(:user) { create(:user) }
-  let(:project) { create(:project, :repository, :public) }
-  let(:pipeline) { create(:ci_pipeline, :success, project: project) }
-  let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline], project: project, severity: :high) }
+  let_it_be(:project) { create(:project, :repository, :public) }
+  let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
+  let_it_be(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline], project: project, severity: :high) }
   let(:vulnerability) { create(:vulnerability, title: "My vulnerability", project: project, findings: [finding]) }
 
   before do
@@ -43,7 +43,7 @@ RSpec.describe VulnerabilitiesHelper do
                     :details)
     end
 
-    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid details] }
+    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid details dismissal_feedback] }
 
     before do
       vulnerability_serializer_stub = instance_double("VulnerabilitySerializer")
@@ -162,6 +162,22 @@ RSpec.describe VulnerabilitiesHelper do
         it { is_expected.to be_falsey }
       end
     end
+
+    context 'dismissal descriptions' do
+      let(:expected_descriptions) do
+        {
+          acceptable_risk: "The vulnerability is known, and has not been remediated or mitigated, but is considered to be an acceptable business risk.",
+          false_positive: "An error in reporting in which a test result incorrectly indicates the presence of a vulnerability in a system when the vulnerability is not present.",
+          mitigating_control: "A management, operational, or technical control (that is, safeguard or countermeasure) employed by an organization that provides equivalent or comparable protection for an information system.",
+          used_in_tests: "The finding is not a vulnerability because it is part of a test or is test data.",
+          not_applicable: "The vulnerability is known, and has not been remediated or mitigated, but is considered to be in a part of the application that will not be updated."
+        }
+      end
+
+      it 'incldues dismissal descriptions' do
+        expect(subject[:dismissal_descriptions]).to eq(expected_descriptions)
+      end
+    end
   end
 
   describe '#create_jira_issue_url_for' do
@@ -270,7 +286,8 @@ RSpec.describe VulnerabilitiesHelper do
         assets: kind_of(Array),
         supporting_messages: kind_of(Array),
         uuid: kind_of(String),
-        details: kind_of(Hash)
+        details: kind_of(Hash),
+        dismissal_feedback: anything
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))
@@ -284,6 +301,16 @@ RSpec.describe VulnerabilitiesHelper do
 
       it 'does not have a blob_path if there is no file' do
         expect(subject[:location]).not_to have_key('blob_path')
+      end
+    end
+
+    context 'with existing dismissal feedback' do
+      let_it_be(:feedback) { create(:vulnerability_feedback, :comment, :dismissal, project: project, pipeline: pipeline, project_fingerprint: finding.project_fingerprint) }
+
+      it 'returns dismissal feedback information', :aggregate_failures do
+        dismissal_feedback = subject[:dismissal_feedback]
+        expect(dismissal_feedback[:dismissal_reason]).to eq(feedback.dismissal_reason)
+        expect(dismissal_feedback[:comment_details][:comment]).to eq(feedback.comment)
       end
     end
   end

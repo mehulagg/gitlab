@@ -18,7 +18,7 @@ To measure the impact of a merge request you can use
 the following guides:
 
 - [Performance Guidelines](performance.md)
-- [What requires downtime?](what_requires_downtime.md)
+- [Avoiding downtime in migrations](avoiding_downtime_in_migrations.md)
 
 ## Definition
 
@@ -459,7 +459,7 @@ Performance deficiencies should be addressed right away after we merge initial
 changes.
 
 Read more about when and how feature flags should be used in
-[Feature flags in GitLab development](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle#feature-flags-in-gitlab-development).
+[Feature flags in GitLab development](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/#feature-flags-in-gitlab-development).
 
 ## Storage
 

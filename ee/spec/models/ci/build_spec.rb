@@ -147,6 +147,49 @@ RSpec.describe Ci::Build do
           expect(features_variable[:value]).to include('multiple_ldap_servers')
         end
       end
+
+      context 'when there is a dast_profile associated with the pipeline' do
+        let_it_be(:project) { create(:project, :repository) }
+        let_it_be(:dast_profile) { create(:dast_profile, project: project) }
+        let_it_be(:dast_site_profile_secret_variable) { create(:dast_site_profile_secret_variable, key: 'DAST_PASSWORD_BASE64', dast_site_profile: dast_profile.dast_site_profile) }
+
+        let(:pipeline) { create(:ci_pipeline, pipeline_params.merge!(project: project, dast_profile: dast_profile) ) }
+
+        let(:key) { dast_site_profile_secret_variable.key }
+        let(:value) { dast_site_profile_secret_variable.value }
+
+        shared_examples 'a pipeline with no dast on-demand variables' do
+          it 'does not include variables associated with the profile' do
+            keys = subject.to_runner_variables.map { |var| var[:key] }
+
+            expect(keys).not_to include(key)
+          end
+        end
+
+        it_behaves_like 'a pipeline with no dast on-demand variables' do
+          let(:pipeline_params) { { config_source: :parameter_source } }
+        end
+
+        it_behaves_like 'a pipeline with no dast on-demand variables' do
+          let(:pipeline_params) { { source: :ondemand_dast_scan } }
+        end
+
+        context 'when the dast on-demand pipeline is correctly configured' do
+          let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+
+          it 'includes variables associated with the profile' do
+            expect(subject.to_runner_variables).to include(key: key, value: value, public: false, masked: true)
+          end
+        end
+
+        it_behaves_like 'a pipeline with no dast on-demand variables' do
+          let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+
+          before do
+            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
+          end
+        end
+      end
     end
 
     describe 'variable CI_HAS_OPEN_REQUIREMENTS' do
@@ -183,7 +226,7 @@ RSpec.describe Ci::Build do
         it 'parses blobs and add the results to the report' do
           subject
 
-          expect(security_reports.get_report('sast', artifact).findings.size).to eq(33)
+          expect(security_reports.get_report('sast', artifact).findings.size).to eq(5)
         end
 
         it 'adds the created date to the report' do
@@ -202,7 +245,7 @@ RSpec.describe Ci::Build do
         it 'parses blobs and adds the results to the reports' do
           subject
 
-          expect(security_reports.get_report('sast', sast_artifact).findings.size).to eq(33)
+          expect(security_reports.get_report('sast', sast_artifact).findings.size).to eq(5)
           expect(security_reports.get_report('dependency_scanning', ds_artifact).findings.size).to eq(4)
           expect(security_reports.get_report('container_scanning', cs_artifact).findings.size).to eq(8)
           expect(security_reports.get_report('dast', dast_artifact).findings.size).to eq(20)

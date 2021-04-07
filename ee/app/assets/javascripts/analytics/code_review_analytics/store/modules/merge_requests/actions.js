@@ -1,5 +1,5 @@
 import API from 'ee/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
@@ -40,7 +40,9 @@ export const fetchMergeRequests = ({ commit, state, rootState }) => {
     .catch(({ response }) => {
       const { status } = response;
       commit(types.RECEIVE_MERGE_REQUESTS_ERROR, status);
-      createFlash(__('An error occurred while loading merge requests.'));
+      createFlash({
+        message: __('An error occurred while loading merge requests.'),
+      });
     });
 };
 

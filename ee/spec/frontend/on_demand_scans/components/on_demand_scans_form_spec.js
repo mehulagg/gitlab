@@ -12,6 +12,7 @@ import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graph
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import createApolloProvider from 'helpers/mock_apollo_helper';
 import { stubComponent } from 'helpers/stub_component';
+import waitForPromises from 'helpers/wait_for_promises';
 import { redirectTo, setUrlParams } from '~/lib/utils/url_utility';
 import RefSelector from '~/ref/components/ref_selector.vue';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
@@ -22,11 +23,11 @@ const URL_HOST = 'https://localhost/';
 const helpPagePath = '/application_security/dast/index#on-demand-scans';
 const projectPath = 'group/project';
 const defaultBranch = 'master';
-const profilesLibraryPath = '/security/configuration/dast_profiles';
-const scannerProfilesLibraryPath = '/security/configuration/dast_profiles#scanner-profiles';
-const siteProfilesLibraryPath = '/security/configuration/dast_profiles#site-profiles';
-const newScannerProfilePath = '/security/configuration/dast_profiles/dast_scanner_profile/new';
-const newSiteProfilePath = `/${projectPath}/-/security/configuration/dast_profiles`;
+const profilesLibraryPath = '/security/configuration/dast_scans';
+const scannerProfilesLibraryPath = '/security/configuration/dast_scans#scanner-profiles';
+const siteProfilesLibraryPath = '/security/configuration/dast_scans#site-profiles';
+const newScannerProfilePath = '/security/configuration/dast_scans/dast_scanner_profile/new';
+const newSiteProfilePath = `/${projectPath}/-/security/configuration/dast_scans`;
 
 const defaultProps = {
   helpPagePath,
@@ -55,7 +56,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
 }));
 
-const LOCAL_STORAGE_KEY = 'on-demand-scans-new-form';
+const LOCAL_STORAGE_KEY = 'group/project/on-demand-scans-new-form';
 
 describe('OnDemandScansForm', () => {
   let localVue;
@@ -81,6 +82,7 @@ describe('OnDemandScansForm', () => {
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
   const findSaveButton = () => findByTestId('on-demand-scan-save-button');
   const findCancelButton = () => findByTestId('on-demand-scan-cancel-button');
+  const findProfileSummary = () => findByTestId('selected-profile-summary');
 
   const setValidFormData = () => {
     findNameInput().vm.$emit('input', 'My daily scan');
@@ -101,6 +103,12 @@ describe('OnDemandScansForm', () => {
     });
     return setValidFormData();
   };
+  const selectProfile = (component) => async (profile) => {
+    subject.find(component).vm.$emit('input', profile.id);
+    await subject.vm.$nextTick();
+  };
+  const selectScannerProfile = selectProfile(ScannerProfileSelector);
+  const selectSiteProfile = selectProfile(SiteProfileSelector);
 
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
   const saveScan = () => findSaveButton().vm.$emit('click');
@@ -113,7 +121,6 @@ describe('OnDemandScansForm', () => {
       dastSiteProfiles: jest.fn().mockResolvedValue(responses.dastSiteProfiles()),
       ...handlers,
     };
-
     return createApolloProvider([
       [dastScannerProfilesQuery, requestHandlers.dastScannerProfiles],
       [dastSiteProfilesQuery, requestHandlers.dastSiteProfiles],
@@ -261,6 +268,7 @@ describe('OnDemandScansForm', () => {
             name: 'My daily scan',
             selectedScannerProfileId: 'gid://gitlab/DastScannerProfile/1',
             selectedSiteProfileId: 'gid://gitlab/DastSiteProfile/1',
+            selectedBranch: 'some-other-branch',
           }),
         ],
       ]);
@@ -499,13 +507,15 @@ describe('OnDemandScansForm', () => {
   `('when there is a single $profileType profile', ({ query, selector, profiles }) => {
     const [profile] = profiles;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mountShallowSubject(
         {},
         {
           [query]: jest.fn().mockResolvedValue(responses[query]([profile])),
         },
       );
+
+      await waitForPromises();
     });
 
     it('automatically selects the only available profile', () => {
@@ -513,13 +523,26 @@ describe('OnDemandScansForm', () => {
     });
   });
 
+  describe('scanner profile summary', () => {
+    beforeEach(() => {
+      mountSubject({
+        provide: {
+          glFeatures: {
+            securityDastSiteProfilesAdditionalFields: true,
+          },
+        },
+      });
+    });
+
+    it('does not render the summary provided an invalid profile ID', async () => {
+      await selectScannerProfile({ id: 'gid://gitlab/DastScannerProfile/123' });
+
+      expect(findProfileSummary().exists()).toBe(false);
+    });
+  });
+
   describe('site profile summary', () => {
     const [authEnabledProfile] = siteProfiles;
-
-    const selectSiteProfile = async (profile) => {
-      subject.find(SiteProfileSelector).vm.$emit('input', profile.id);
-      await subject.vm.$nextTick();
-    };
 
     beforeEach(() => {
       mountSubject({
@@ -534,14 +557,23 @@ describe('OnDemandScansForm', () => {
     it('renders all fields correctly', async () => {
       await selectSiteProfile(authEnabledProfile);
       const summary = subject.find(SiteProfileSelector).text();
+      const defaultPassword = '••••••••';
+      const defaultRequestHeaders = '[Redacted]';
 
       expect(summary).toMatch(authEnabledProfile.targetUrl);
       expect(summary).toMatch(authEnabledProfile.excludedUrls.join(','));
-      expect(summary).toMatch(authEnabledProfile.requestHeaders);
       expect(summary).toMatch(authEnabledProfile.auth.url);
       expect(summary).toMatch(authEnabledProfile.auth.username);
       expect(summary).toMatch(authEnabledProfile.auth.usernameField);
       expect(summary).toMatch(authEnabledProfile.auth.passwordField);
+      expect(summary).toMatch(defaultPassword);
+      expect(summary).toMatch(defaultRequestHeaders);
+    });
+
+    it('does not render the summary provided an invalid profile ID', async () => {
+      await selectSiteProfile({ id: 'gid://gitlab/DastSiteProfile/123' });
+
+      expect(findProfileSummary().exists()).toBe(false);
     });
   });
 
@@ -595,6 +627,26 @@ describe('OnDemandScansForm', () => {
 
       expect(findScannerProfilesSelector().attributes('value')).toBe(scannerProfile.id);
       expect(findSiteProfilesSelector().attributes('value')).toBe(siteProfile.id);
+    });
+  });
+
+  describe('when no repository exists', () => {
+    beforeEach(() => {
+      mountShallowSubject({
+        propsData: {
+          /**
+           * The assumption here is that, if a default branch is not defined, then the project
+           * does not have a repository.
+           */
+          defaultBranch: '',
+        },
+      });
+    });
+
+    it('shows an error message', () => {
+      expect(subject.text()).toContain(
+        'You must create a repository within your project to run an on-demand scan.',
+      );
     });
   });
 

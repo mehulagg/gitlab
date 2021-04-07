@@ -821,45 +821,6 @@ RSpec.describe Ci::Build do
       { cache: [{ key: "key", paths: ["public"], policy: "pull-push" }] }
     end
 
-    context 'with multiple_cache_per_job FF disabled' do
-      before do
-        stub_feature_flags(multiple_cache_per_job: false)
-      end
-      let(:options) { { cache: { key: "key", paths: ["public"], policy: "pull-push" } } }
-
-      subject { build.cache }
-
-      context 'when build has cache' do
-        before do
-          allow(build).to receive(:options).and_return(options)
-        end
-
-        context 'when project has jobs_cache_index' do
-          before do
-            allow_any_instance_of(Project).to receive(:jobs_cache_index).and_return(1)
-          end
-
-          it { is_expected.to be_an(Array).and all(include(key: "key-1")) }
-        end
-
-        context 'when project does not have jobs_cache_index' do
-          before do
-            allow_any_instance_of(Project).to receive(:jobs_cache_index).and_return(nil)
-          end
-
-          it { is_expected.to eq([options[:cache]]) }
-        end
-      end
-
-      context 'when build does not have cache' do
-        before do
-          allow(build).to receive(:options).and_return({})
-        end
-
-        it { is_expected.to eq([]) }
-      end
-    end
-
     subject { build.cache }
 
     context 'when build has cache' do
@@ -2500,6 +2461,7 @@ RSpec.describe Ci::Build do
           { key: 'CI_COMMIT_DESCRIPTION', value: pipeline.git_commit_description, public: true, masked: false },
           { key: 'CI_COMMIT_REF_PROTECTED', value: (!!pipeline.protected_ref?).to_s, public: true, masked: false },
           { key: 'CI_COMMIT_TIMESTAMP', value: pipeline.git_commit_timestamp, public: true, masked: false },
+          { key: 'CI_COMMIT_AUTHOR', value: pipeline.git_author_full_text, public: true, masked: false },
           { key: 'CI_BUILD_REF', value: build.sha, public: true, masked: false },
           { key: 'CI_BUILD_BEFORE_SHA', value: build.before_sha, public: true, masked: false },
           { key: 'CI_BUILD_REF_NAME', value: build.ref, public: true, masked: false },
@@ -3620,10 +3582,10 @@ RSpec.describe Ci::Build do
   end
 
   describe 'state transition when build fails' do
-    let(:service) { MergeRequests::AddTodoWhenBuildFailsService.new(project, user) }
+    let(:service) { ::MergeRequests::AddTodoWhenBuildFailsService.new(project, user) }
 
     before do
-      allow(MergeRequests::AddTodoWhenBuildFailsService).to receive(:new).and_return(service)
+      allow(::MergeRequests::AddTodoWhenBuildFailsService).to receive(:new).and_return(service)
       allow(service).to receive(:close)
     end
 
@@ -3708,15 +3670,42 @@ RSpec.describe Ci::Build do
         subject.drop!
       end
 
-      it 'creates a todo' do
-        project.add_developer(user)
+      context 'when async_add_build_failure_todo flag enabled' do
+        it 'creates a todo async', :sidekiq_inline do
+          project.add_developer(user)
 
-        expect_next_instance_of(TodoService) do |todo_service|
-          expect(todo_service)
-            .to receive(:merge_request_build_failed).with(merge_request)
+          expect_next_instance_of(TodoService) do |todo_service|
+            expect(todo_service)
+              .to receive(:merge_request_build_failed).with(merge_request)
+          end
+
+          subject.drop!
         end
 
-        subject.drop!
+        it 'does not create a sync todo' do
+          project.add_developer(user)
+
+          expect(TodoService).not_to receive(:new)
+
+          subject.drop!
+        end
+      end
+
+      context 'when async_add_build_failure_todo flag disabled' do
+        before do
+          stub_feature_flags(async_add_build_failure_todo: false)
+        end
+
+        it 'creates a todo sync' do
+          project.add_developer(user)
+
+          expect_next_instance_of(TodoService) do |todo_service|
+            expect(todo_service)
+              .to receive(:merge_request_build_failed).with(merge_request)
+          end
+
+          subject.drop!
+        end
       end
     end
 
@@ -3741,6 +3730,7 @@ RSpec.describe Ci::Build do
 
   describe '.matches_tag_ids' do
     let_it_be(:build, reload: true) { create(:ci_build, project: project, user: user) }
+
     let(:tag_ids) { ::ActsAsTaggableOn::Tag.named_any(tag_list).ids }
 
     subject { described_class.where(id: build).matches_tag_ids(tag_ids) }
@@ -4192,6 +4182,7 @@ RSpec.describe Ci::Build do
 
   describe '#artifacts_metadata_entry' do
     let_it_be(:build) { create(:ci_build, project: project) }
+
     let(:path) { 'other_artifacts_0.1.2/another-subdirectory/banana_sample.gif' }
 
     around do |example|

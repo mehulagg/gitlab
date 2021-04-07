@@ -108,26 +108,78 @@ RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
   # We have an extra test for #transaction here to make sure that nested queries
   # are also sent to a primary.
   describe '#transaction' do
-    after do
-      Gitlab::Database::LoadBalancing::Session.clear_session
+    let(:session) { double(:session) }
+
+    before do
+      allow(Gitlab::Database::LoadBalancing::Session).to receive(:current)
+        .and_return(session)
     end
 
-    it 'runs the transaction and any nested queries on the primary' do
-      primary = double(:connection)
+    context 'session prefers to use a replica' do
+      let(:replica) { double(:connection) }
 
-      allow(primary).to receive(:transaction).and_yield
-      allow(primary).to receive(:select)
+      before do
+        allow(session).to receive(:use_replica?).and_return(true)
+        allow(session).to receive(:use_primary?).and_return(false)
+        allow(replica).to receive(:transaction).and_yield
+        allow(replica).to receive(:select)
+      end
 
-      expect(proxy.load_balancer).to receive(:read_write)
-        .twice.and_yield(primary)
+      context 'with a read query' do
+        it 'runs the transaction and any nested queries on the replica' do
+          expect(proxy.load_balancer).to receive(:read)
+            .twice.and_yield(replica)
+          expect(proxy.load_balancer).not_to receive(:read_write)
+          expect(session).not_to receive(:write!)
 
-      # This expectation is put in place to ensure no read is performed.
-      expect(proxy.load_balancer).not_to receive(:read)
+          proxy.transaction { proxy.select('true') }
+        end
+      end
 
-      proxy.transaction { proxy.select('true') }
+      context 'with a write query' do
+        it 'raises an exception' do
+          allow(proxy.load_balancer).to receive(:read).and_yield(replica)
+          allow(proxy.load_balancer).to receive(:read_write).and_yield(replica)
 
-      expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?)
-        .to eq(true)
+          expect do
+            proxy.transaction { proxy.insert('something') }
+          end.to raise_error(Gitlab::Database::LoadBalancing::ConnectionProxy::WriteInsideReadOnlyTransactionError)
+        end
+      end
+    end
+
+    context 'session does not prefer to use a replica' do
+      let(:primary) { double(:connection) }
+
+      before do
+        allow(session).to receive(:use_replica?).and_return(false)
+        allow(session).to receive(:use_primary?).and_return(true)
+        allow(primary).to receive(:transaction).and_yield
+        allow(primary).to receive(:select)
+        allow(primary).to receive(:insert)
+      end
+
+      context 'with a read query' do
+        it 'runs the transaction and any nested queries on the primary and stick to it' do
+          expect(proxy.load_balancer).to receive(:read_write)
+            .twice.and_yield(primary)
+          expect(proxy.load_balancer).not_to receive(:read)
+          expect(session).to receive(:write!)
+
+          proxy.transaction { proxy.select('true') }
+        end
+      end
+
+      context 'with a write query' do
+        it 'runs the transaction and any nested queries on the primary and stick to it' do
+          expect(proxy.load_balancer).to receive(:read_write)
+            .twice.and_yield(primary)
+          expect(proxy.load_balancer).not_to receive(:read)
+          expect(session).to receive(:write!).twice
+
+          proxy.transaction { proxy.insert('something') }
+        end
+      end
     end
   end
 
@@ -146,6 +198,32 @@ RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
 
       expect { proxy.case_sensitive_comparison(:table, :attribute, :column, { value: :value, format: :format }) }
         .not_to raise_error
+    end
+
+    context 'current session prefers to use a replica' do
+      let(:session) { double(:session) }
+
+      before do
+        allow(Gitlab::Database::LoadBalancing::Session).to receive(:current)
+          .and_return(session)
+        allow(session).to receive(:use_replica?).and_return(true)
+        allow(session).to receive(:use_primary?).and_return(false)
+      end
+
+      it 'runs the query on the replica' do
+        expect(proxy).to receive(:read_using_load_balancer).with(:foo, ['foo'])
+
+        proxy.foo('foo')
+      end
+
+      it 'properly forwards trailing hash arguments' do
+        allow(proxy.load_balancer).to receive(:read)
+
+        expect(proxy).to receive(:read_using_load_balancer).and_call_original
+
+        expect { proxy.case_sensitive_comparison(:table, :attribute, :column, { value: :value, format: :format }) }
+          .not_to raise_error
+      end
     end
   end
 

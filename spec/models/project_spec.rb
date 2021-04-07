@@ -1351,6 +1351,34 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '.with_remote_mirrors' do
+    let_it_be(:project) { create(:project, :repository) }
+
+    subject { described_class.with_remote_mirrors }
+
+    context 'when some remote mirrors are enabled for the project' do
+      let!(:remote_mirror) { create(:remote_mirror, project: project, enabled: true) }
+
+      it "returns a project" do
+        is_expected.to eq([project])
+      end
+    end
+
+    context 'when some remote mirrors exists but disabled for the project' do
+      let!(:remote_mirror) { create(:remote_mirror, project: project, enabled: false) }
+
+      it "returns a project" do
+        is_expected.to be_empty
+      end
+    end
+
+    context 'when no remote mirrors exist for the project' do
+      it "returns an empty list" do
+        is_expected.to be_empty
+      end
+    end
+  end
+
   describe '.with_active_jira_services' do
     it 'returns the correct project' do
       active_jira_service = create(:jira_service)
@@ -4109,7 +4137,7 @@ RSpec.describe Project, factory_default: :keep do
     subject { described_class.wrap_with_cte(projects) }
 
     it 'wrapped query matches original' do
-      expect(subject.to_sql).to match(/^WITH "projects_cte" AS/)
+      expect(subject.to_sql).to match(/^WITH "projects_cte" AS #{Gitlab::Database::AsWithMaterialized.materialized_if_supported}/)
       expect(subject).to match_array(projects)
     end
   end
@@ -4200,7 +4228,7 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it 'does nothing if updates on legacy storage are disabled' do
-      stub_feature_flags(pages_update_legacy_storage: false)
+      allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
 
       expect(Gitlab::PagesTransfer).not_to receive(:new)
       expect(PagesWorker).not_to receive(:perform_in)
@@ -5291,6 +5319,64 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#branch_allows_collaboration?' do
+    context 'when there are open merge requests that have their source/target branches point to each other' do
+      let_it_be(:project) { create(:project, :repository) }
+      let_it_be(:developer) { create(:user) }
+      let_it_be(:reporter) { create(:user) }
+      let_it_be(:guest) { create(:user) }
+
+      before_all do
+        create(
+          :merge_request,
+          target_project: project,
+          target_branch: 'master',
+          source_project: project,
+          source_branch: 'merge-test',
+          allow_collaboration: true
+        )
+
+        create(
+          :merge_request,
+          target_project: project,
+          target_branch: 'merge-test',
+          source_project: project,
+          source_branch: 'master',
+          allow_collaboration: true
+        )
+
+        project.add_developer(developer)
+        project.add_reporter(reporter)
+        project.add_guest(guest)
+      end
+
+      shared_examples_for 'successful check' do
+        it 'does not go into an infinite loop' do
+          expect { project.branch_allows_collaboration?(user, 'master') }
+            .not_to raise_error
+        end
+      end
+
+      context 'when user is a developer' do
+        let(:user) { developer }
+
+        it_behaves_like 'successful check'
+      end
+
+      context 'when user is a reporter' do
+        let(:user) { reporter }
+
+        it_behaves_like 'successful check'
+      end
+
+      context 'when user is a guest' do
+        let(:user) { guest }
+
+        it_behaves_like 'successful check'
+      end
+    end
+  end
+
   context 'with cross project merge requests' do
     let(:user) { create(:user) }
     let(:target_project) { create(:project, :repository) }
@@ -6016,12 +6102,15 @@ RSpec.describe Project, factory_default: :keep do
       project.set_first_pages_deployment!(deployment)
 
       expect(project.pages_metadatum.reload.pages_deployment).to eq(deployment)
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
     end
 
     it "updates the existing metadara record with deployment" do
       expect do
         project.set_first_pages_deployment!(deployment)
       end.to change { project.pages_metadatum.reload.pages_deployment }.from(nil).to(deployment)
+
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
     end
 
     it 'only updates metadata for this project' do
@@ -6030,6 +6119,8 @@ RSpec.describe Project, factory_default: :keep do
       expect do
         project.set_first_pages_deployment!(deployment)
       end.not_to change { other_project.pages_metadatum.reload.pages_deployment }.from(nil)
+
+      expect(other_project.pages_metadatum.reload.deployed).to eq(false)
     end
 
     it 'does nothing if metadata already references some deployment' do
@@ -6039,6 +6130,14 @@ RSpec.describe Project, factory_default: :keep do
       expect do
         project.set_first_pages_deployment!(deployment)
       end.not_to change { project.pages_metadatum.reload.pages_deployment }.from(existing_deployment)
+    end
+
+    it 'marks project as not deployed if deployment is nil' do
+      project.mark_pages_as_deployed
+
+      expect do
+        project.set_first_pages_deployment!(nil)
+      end.to change { project.pages_metadatum.reload.deployed }.from(true).to(false)
     end
   end
 

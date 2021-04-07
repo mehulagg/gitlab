@@ -1,5 +1,0 @@
----
-title: Do not mark bot users as pending approval when User Cap is enabled
-merge_request: 56287
-author:
-type: fixed

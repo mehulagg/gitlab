@@ -32,6 +32,7 @@ describe('NetworkPolicyList component', () => {
       data,
       store,
       provide,
+      stubs: { NetworkPolicyEditor: true },
     });
   };
 
@@ -171,7 +172,7 @@ spec:
     it('renders network policy editor with manifest', () => {
       const policyEditor = findPolicyEditor();
       expect(policyEditor.exists()).toBe(true);
-      expect(policyEditor.props('value')).toBe(mockData[0].manifest);
+      expect(policyEditor.attributes('value')).toBe(mockData[0].manifest);
     });
 
     it('renders network policy toggle', () => {

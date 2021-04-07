@@ -22,7 +22,7 @@ RSpec.describe "projects/security/dast_site_profiles/edit", type: :view do
   end
 
   it 'passes DAST profiles library URL' do
-    expect(rendered).to include '/security/configuration/dast_profiles#site-profiles'
+    expect(rendered).to include '/security/configuration/dast_scans#site-profiles'
   end
 
   it 'passes DAST site profile\'s data' do

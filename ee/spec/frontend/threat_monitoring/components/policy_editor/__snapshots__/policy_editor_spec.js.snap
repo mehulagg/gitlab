@@ -22,8 +22,8 @@ exports[`PolicyEditorApp component given .yaml editor mode is enabled renders ya
       <div
         class="gl-p-4"
       >
-        <network-policy-editor-stub
-          height="400"
+        <networkpolicyeditor-stub
+          data-testid="network-policy-editor"
           value=""
         />
       </div>

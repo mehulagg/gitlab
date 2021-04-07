@@ -46,7 +46,12 @@ export default {
 
 <template>
   <gl-form-group>
-    <gl-form-checkbox :id="entity.name" :checked="entity.enabled" @input="onToggle">
+    <gl-form-checkbox
+      :id="entity.name"
+      :checked="entity.enabled"
+      :data-qa-selector="`${entity.name}_checkbox`"
+      @input="onToggle"
+    >
       <span class="gl-font-weight-bold">{{ entity.label }}</span>
       <span v-if="entity.description" class="gl-text-gray-500">({{ entity.description }})</span>
     </gl-form-checkbox>
@@ -54,7 +59,7 @@ export default {
     <dynamic-fields
       v-if="hasVariables"
       :disabled="!entity.enabled"
-      class="gl-ml-6 gl-mb-0"
+      class="gl-mt-3 gl-ml-6 gl-mb-0"
       :entities="variables"
       @input="onVariablesUpdate"
     />

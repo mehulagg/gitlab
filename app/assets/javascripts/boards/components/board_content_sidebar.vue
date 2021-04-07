@@ -1,9 +1,6 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
-import BoardSidebarEpicSelect from 'ee_component/boards/components/sidebar/board_sidebar_epic_select.vue';
-import BoardSidebarWeightInput from 'ee_component/boards/components/sidebar/board_sidebar_weight_input.vue';
-import SidebarIterationWidget from 'ee_component/sidebar/components/sidebar_iteration_widget.vue';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
@@ -26,15 +23,18 @@ export default {
     BoardSidebarDueDate,
     BoardSidebarSubscription,
     BoardSidebarMilestoneSelect,
-    BoardSidebarEpicSelect,
-    SidebarIterationWidget,
-    BoardSidebarWeightInput,
+    BoardSidebarEpicSelect: () =>
+      import('ee_component/boards/components/sidebar/board_sidebar_epic_select.vue'),
+    BoardSidebarWeightInput: () =>
+      import('ee_component/boards/components/sidebar/board_sidebar_weight_input.vue'),
+    SidebarIterationWidget: () =>
+      import('ee_component/sidebar/components/sidebar_iteration_widget.vue'),
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
     ...mapGetters([
       'isSidebarOpen',
-      'activeIssue',
+      'activeBoardItem',
       'groupPathForActiveIssue',
       'projectPathForActiveIssue',
     ]),
@@ -46,17 +46,13 @@ export default {
       return this.isIssuableSidebar && this.isSidebarOpen;
     },
     fullPath() {
-      return this.activeIssue?.referencePath?.split('#')[0] || '';
+      return this.activeBoardItem?.referencePath?.split('#')[0] || '';
     },
   },
   methods: {
     ...mapActions(['toggleBoardItem', 'setAssignees']),
-    updateAssignees(data) {
-      const assignees = data.issueSetAssignees?.issue?.assignees?.nodes || [];
-      this.setAssignees(assignees);
-    },
     handleClose() {
-      this.toggleBoardItem({ boardItem: this.activeIssue, sidebarType: this.sidebarType });
+      this.toggleBoardItem({ boardItem: this.activeBoardItem, sidebarType: this.sidebarType });
     },
   },
 };
@@ -65,7 +61,6 @@ export default {
 <template>
   <gl-drawer
     v-if="showSidebar"
-    data-testid="sidebar-drawer"
     :open="isSidebarOpen"
     :header-height="$options.headerHeight"
     @close="handleClose"
@@ -74,17 +69,17 @@ export default {
     <template #default>
       <board-sidebar-issue-title />
       <sidebar-assignees-widget
-        :iid="activeIssue.iid"
+        :iid="activeBoardItem.iid"
         :full-path="fullPath"
-        :initial-assignees="activeIssue.assignees"
+        :initial-assignees="activeBoardItem.assignees"
         class="assignee"
-        @assignees-updated="updateAssignees"
+        @assignees-updated="setAssignees"
       />
       <board-sidebar-epic-select class="epic" />
       <div>
         <board-sidebar-milestone-select />
         <sidebar-iteration-widget
-          :iid="activeIssue.iid"
+          :iid="activeBoardItem.iid"
           :workspace-path="projectPathForActiveIssue"
           :iterations-workspace-path="groupPathForActiveIssue"
           :issuable-type="issuableType"

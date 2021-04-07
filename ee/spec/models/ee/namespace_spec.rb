@@ -26,6 +26,7 @@ RSpec.describe Namespace do
   it { is_expected.to delegate_method(:trial_days_remaining).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:trial_percentage_complete).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:upgradable?).to(:gitlab_subscription) }
+  it { is_expected.to delegate_method(:trial_extended_or_reactivated?).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:email).to(:owner).with_prefix.allow_nil }
   it { is_expected.to delegate_method(:additional_purchased_storage_size).to(:namespace_limit) }
   it { is_expected.to delegate_method(:additional_purchased_storage_size=).to(:namespace_limit).with_arguments(:args) }
@@ -217,92 +218,6 @@ RSpec.describe Namespace do
         namespace = create(:namespace)
 
         is_expected.to eq([namespace.id])
-      end
-    end
-
-    describe '.eligible_for_subscription' do
-      let_it_be(:namespace) { create :namespace }
-      let_it_be(:group) { create :group }
-      let_it_be(:subgroup) { create(:group, parent: group) }
-
-      subject { described_class.eligible_for_subscription.ids }
-
-      context 'when there is no subscription' do
-        it { is_expected.to contain_exactly(group.id, namespace.id) }
-      end
-
-      context 'when there is a subscription' do
-        context 'with a plan that is eligible for a trial' do
-          where(plan: ::Plan::PLANS_ELIGIBLE_FOR_TRIAL)
-
-          with_them do
-            context 'and has not yet been trialed' do
-              before do
-                create :gitlab_subscription, plan, namespace: namespace
-                create :gitlab_subscription, plan, namespace: group
-                create :gitlab_subscription, plan, namespace: subgroup
-              end
-
-              it { is_expected.to contain_exactly(group.id, namespace.id) }
-            end
-
-            context 'but has already had a trial' do
-              before do
-                create :gitlab_subscription, plan, namespace: namespace
-                create :gitlab_subscription, plan, :expired_trial, namespace: group
-                create :gitlab_subscription, plan, :expired_trial, namespace: subgroup
-              end
-
-              it { is_expected.to contain_exactly(group.id, namespace.id) }
-            end
-
-            context 'but is currently being trialed' do
-              before do
-                create :gitlab_subscription, plan, namespace: namespace
-                create :gitlab_subscription, plan, :active_trial, namespace: group
-                create :gitlab_subscription, plan, :active_trial, namespace: subgroup
-              end
-
-              it { is_expected.to contain_exactly(group.id, namespace.id) }
-            end
-          end
-        end
-
-        context 'in active trial ultimate plan' do
-          using RSpec::Parameterized::TableSyntax
-
-          where(:plan_name) do
-            [
-              [::Plan::GOLD],
-              [::Plan::ULTIMATE]
-            ]
-          end
-
-          with_them do
-            before do
-              create :gitlab_subscription, plan_name, :active_trial, namespace: namespace
-              create :gitlab_subscription, plan_name, :active_trial, namespace: group
-              create :gitlab_subscription, plan_name, :active_trial, namespace: subgroup
-            end
-
-            it { is_expected.to contain_exactly(group.id, namespace.id) }
-          end
-        end
-
-        context 'with a paid plan and not in trial' do
-          where(plan: ::Plan::PAID_HOSTED_PLANS)
-
-          with_them do
-            context 'and has not yet been trialed' do
-              before do
-                create :gitlab_subscription, plan, namespace: namespace
-                create :gitlab_subscription, plan, namespace: group
-              end
-
-              it { is_expected.to be_empty }
-            end
-          end
-        end
       end
     end
 
@@ -768,6 +683,22 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#paid?' do
+    it 'returns true for a root namespace with a paid plan' do
+      create(:gitlab_subscription, :ultimate, namespace: namespace)
+
+      expect(namespace.paid?).to eq(true)
+    end
+
+    it 'returns false for a subgroup of a group with a paid plan' do
+      group = create(:group)
+      subgroup = create(:group, parent: group)
+      create(:gitlab_subscription, :ultimate, namespace: group)
+
+      expect(subgroup.paid?).to eq(false)
+    end
+  end
+
   describe '#actual_plan_name' do
     context 'when namespace does not have a subscription associated' do
       it 'returns default plan' do
@@ -1227,6 +1158,60 @@ RSpec.describe Namespace do
           end
         end
       end
+    end
+  end
+
+  describe '#can_extend?' do
+    subject { namespace.can_extend? }
+
+    where(:trial_active, :trial_extended_or_reactivated, :can_extend) do
+      false | false | false
+      false | true  | false
+      true  | false | true
+      true  | true  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:trial_active?).and_return(trial_active)
+        allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(trial_extended_or_reactivated)
+      end
+
+      it { is_expected.to be can_extend }
+    end
+  end
+
+  describe '#can_reactivate?' do
+    subject { namespace.can_reactivate? }
+
+    where(:trial_active, :never_had_trial, :trial_extended_or_reactivated, :free_plan, :can_reactivate) do
+      false | false | false | false | false
+      false | false | false | true  | true
+      false | false | true  | false | false
+      false | false | true  | true  | false
+      false | true  | false | false | false
+      false | true  | false | true  | false
+      false | true  | true  | false | false
+      false | true  | true  | true  | false
+      true  | false | false | false | false
+      true  | false | false | true  | false
+      true  | false | true  | false | false
+      true  | false | true  | true  | false
+      true  | true  | false | false | false
+      true  | true  | false | true  | false
+      true  | true  | true  | false | false
+      true  | true  | true  | true  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:trial_active?).and_return(trial_active)
+        allow(namespace).to receive(:never_had_trial?).and_return(never_had_trial)
+        allow(namespace).to receive(:trial_extended_or_reactivated?).and_return(trial_extended_or_reactivated)
+        allow(namespace).to receive(:free_plan?).and_return(free_plan)
+      end
+
+      it { is_expected.to be can_reactivate }
     end
   end
 

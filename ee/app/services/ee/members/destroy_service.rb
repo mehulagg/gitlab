@@ -13,7 +13,7 @@ module EE
         end
 
         cleanup_group_identity(member)
-        cleanup_group_deletion_schedule(member) if member.source&.is_a?(Group)
+        cleanup_group_deletion_schedule(member) if member.source.is_a?(Group)
       end
 
       private

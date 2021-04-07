@@ -7,11 +7,10 @@ exports[`TrialStatusPopover component matches the snapshot 1`] = `
   delay="[object Object]"
   placement="rightbottom"
   target="target-element-identifier"
-  triggers="hover focus"
 >
    
   <gl-sprintf-stub
-    message="Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you are enjoying GitLab %{planName}. To continue using GitLab %{planName} after your trial ends, you will need to buy a subscription. You can also choose GitLab Premium if its features are sufficient for your needs."
+    message="Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the features of GitLab %{planName}. To keep those features after your trial ends, you’ll need to buy a subscription. (You can also choose GitLab Premium if it meets your needs.)"
   />
    
   <div

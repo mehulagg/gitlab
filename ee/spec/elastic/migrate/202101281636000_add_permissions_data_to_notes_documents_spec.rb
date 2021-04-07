@@ -9,6 +9,7 @@ RSpec.describe AddPermissionsDataToNotesDocuments, :elastic, :sidekiq_inline do
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
+    set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
   end
 
   describe 'migration_options' do
@@ -32,7 +33,7 @@ RSpec.describe AddPermissionsDataToNotesDocuments, :elastic, :sidekiq_inline do
     context 'when migration is completed' do
       it 'does not queue documents for indexing' do
         expect(migration.completed?).to be_truthy
-        expect(::Elastic::ProcessBookkeepingService).not_to receive(:track!)
+        expect(::Elastic::ProcessInitialBookkeepingService).not_to receive(:track!)
 
         migration.migrate
       end
@@ -44,7 +45,7 @@ RSpec.describe AddPermissionsDataToNotesDocuments, :elastic, :sidekiq_inline do
       end
 
       it 'queues documents for indexing' do
-        expect(::Elastic::ProcessBookkeepingService).to receive(:track!).once do |*tracked_refs|
+        expect(::Elastic::ProcessInitialBookkeepingService).to receive(:track!).once do |*tracked_refs|
           expect(tracked_refs.count).to eq(4)
         end
 
@@ -55,7 +56,7 @@ RSpec.describe AddPermissionsDataToNotesDocuments, :elastic, :sidekiq_inline do
         add_permission_data_for_notes([note_on_issue, note_on_snippet, note_on_merge_request])
 
         expected = [Gitlab::Elastic::DocumentReference.new(Note, note_on_commit.id, note_on_commit.es_id, note_on_commit.es_parent)]
-        expect(::Elastic::ProcessBookkeepingService).to receive(:track!).with(*expected).once
+        expect(::Elastic::ProcessInitialBookkeepingService).to receive(:track!).with(*expected).once
 
         migration.migrate
       end
@@ -64,22 +65,22 @@ RSpec.describe AddPermissionsDataToNotesDocuments, :elastic, :sidekiq_inline do
         stub_const("#{described_class}::QUERY_BATCH_SIZE", 2)
         stub_const("#{described_class}::UPDATE_BATCH_SIZE", 1)
 
-        allow(::Elastic::ProcessBookkeepingService).to receive(:track!).and_call_original
+        allow(::Elastic::ProcessInitialBookkeepingService).to receive(:track!).and_call_original
 
         migration.migrate
 
-        expect(::Elastic::ProcessBookkeepingService).to have_received(:track!).exactly(2).times
+        expect(::Elastic::ProcessInitialBookkeepingService).to have_received(:track!).exactly(2).times
 
         ensure_elasticsearch_index!
         migration.migrate
 
-        expect(::Elastic::ProcessBookkeepingService).to have_received(:track!).exactly(4).times
+        expect(::Elastic::ProcessInitialBookkeepingService).to have_received(:track!).exactly(4).times
 
         ensure_elasticsearch_index!
         migration.migrate
 
         # The migration should have already finished so there are no more items to process
-        expect(::Elastic::ProcessBookkeepingService).to have_received(:track!).exactly(4).times
+        expect(::Elastic::ProcessInitialBookkeepingService).to have_received(:track!).exactly(4).times
         expect(migration).to be_completed
       end
     end

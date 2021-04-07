@@ -220,6 +220,12 @@ Rails.application.routes.draw do
         post :authorize_aws_role
       end
 
+      resource :integration, controller: 'clusters/integrations', only: [] do
+        collection do
+          post :create_or_update
+        end
+      end
+
       member do
         Gitlab.ee do
           get :metrics, format: :json
@@ -284,6 +290,7 @@ Rails.application.routes.draw do
 
   draw :git_http
   draw :api
+  draw :customers_dot
   draw :sidekiq
   draw :help
   draw :google_api

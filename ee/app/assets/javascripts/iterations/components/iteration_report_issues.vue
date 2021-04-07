@@ -303,7 +303,7 @@ export default {
             :key="assignee.username"
             v-gl-tooltip="tooltipText(assignee)"
           >
-            <gl-avatar :src="assignee.avatarUrl" :size="16" />
+            <gl-avatar :src="assignee.avatarUrl" :size="24" />
           </span>
         </span>
       </template>

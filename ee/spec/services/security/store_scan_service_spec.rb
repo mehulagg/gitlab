@@ -26,14 +26,27 @@ RSpec.describe Security::StoreScanService do
 
   describe '#execute' do
     let_it_be(:unique_finding_uuid) { artifact.security_report.findings[0].uuid }
-    let_it_be(:duplicate_finding_uuid) { artifact.security_report.findings[5].uuid }
+    let_it_be(:duplicate_finding_uuid) { artifact.security_report.findings[4].uuid }
+
+    let(:finding_location_fingerprint) do
+      build(
+        :ci_reports_security_locations_sast,
+        file_path: "groovy/src/main/java/com/gitlab/security_products/tests/App.groovy",
+        start_line: "41",
+        end_line: "41"
+      ).fingerprint
+    end
+
+    let(:finding_identifier_fingerprint) do
+      build(:ci_reports_security_identifier, external_id: "PREDICTABLE_RANDOM").fingerprint
+    end
 
     let(:deduplicate) { false }
     let(:service_object) { described_class.new(artifact, known_keys, deduplicate) }
     let(:finding_key) do
       build(:ci_reports_security_finding_key,
-            location_fingerprint: 'd869ba3f0b3347eb2749135a437dc07c8ae0f420',
-            identifier_fingerprint: 'e6dd15eda2137be0034977a85b300a94a4f243a3')
+            location_fingerprint: finding_location_fingerprint,
+            identifier_fingerprint: finding_identifier_fingerprint)
     end
 
     subject(:store_scan) { service_object.execute }

@@ -19,6 +19,7 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to have_many(:finding_links).class_name('Vulnerabilities::FindingLink').with_foreign_key('vulnerability_occurrence_id') }
     it { is_expected.to have_many(:finding_remediations).class_name('Vulnerabilities::FindingRemediation').with_foreign_key('vulnerability_occurrence_id') }
     it { is_expected.to have_many(:remediations).through(:finding_remediations) }
+    it { is_expected.to have_many(:finding_evidences).class_name('Vulnerabilities::FindingEvidence').with_foreign_key('vulnerability_occurrence_id') }
   end
 
   describe 'validations' do
@@ -192,6 +193,20 @@ RSpec.describe Vulnerabilities::Finding do
 
       it 'returns found record' do
         is_expected.to contain_exactly(vulnerability1)
+      end
+    end
+  end
+
+  describe '.by_scanners' do
+    context 'with found record' do
+      it 'returns found record' do
+        vulnerability1 = create(:vulnerabilities_finding)
+        create(:vulnerabilities_finding)
+        param = vulnerability1.scanner_id
+
+        result = described_class.by_scanners(param)
+
+        expect(result).to contain_exactly(vulnerability1)
       end
     end
   end

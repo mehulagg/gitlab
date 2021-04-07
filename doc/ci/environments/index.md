@@ -6,9 +6,7 @@ type: reference
 disqus_identifier: 'https://docs.gitlab.com/ee/ci/environments.html'
 ---
 
-# Environments and deployments
-
-> Introduced in GitLab 8.9.
+# Environments and deployments **(FREE)**
 
 Environments describe where code is deployed.
 
@@ -123,7 +121,7 @@ Some variables cannot be used as environment names or URLs.
 For more information about the `environment` keywords, see
 [the `.gitlab-ci.yml` keyword reference](../yaml/README.md#environment).
 
-## Deployment tier of environments (**FREE**)
+## Deployment tier of environments
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/300741) in GitLab 13.10.
 
@@ -377,13 +375,7 @@ deleted.
 You can configure environments to stop when a branch is deleted.
 
 The following example shows a `deploy_review` job that calls a `stop_review` job
-to clean up and stop the environment. The `stop_review` job must be in the same
-`stage` as the `deploy_review` job.
-
-Both jobs must have the same [`rules`](../yaml/README.md#onlyexcept-basic)
-or [`only/except`](../yaml/README.md#onlyexcept-basic) configuration. Otherwise,
-the `stop_review` job might not be included in all pipelines that include the
-`deploy_review` job, and you cannot trigger `action: stop` to stop the environment automatically.
+to clean up and stop the environment.
 
 ```yaml
 deploy_review:
@@ -408,6 +400,14 @@ stop_review:
     - if: $CI_MERGE_REQUEST_ID
       when: manual
 ```
+
+Both jobs must have the same [`rules`](../yaml/README.md#onlyexcept-basic)
+or [`only/except`](../yaml/README.md#onlyexcept-basic) configuration. Otherwise,
+the `stop_review` job might not be included in all pipelines that include the
+`deploy_review` job, and you cannot trigger `action: stop` to stop the environment automatically.
+
+The job with [`action: stop` might not run](#the-job-with-action-stop-doesnt-run)
+if it's in a later stage than the job that started the environment.
 
 If you can't use [pipelines for merge requests](../merge_request_pipelines/index.md),
 set the [`GIT_STRATEGY`](../runners/README.md#git-strategy) to `none` in the
@@ -497,19 +497,17 @@ To delete a stopped environment in the GitLab UI:
 1. Next to the environment you want to delete, select **Delete environment**.
 1. On the confirmation dialog box, select **Delete environment**.
 
-### Prepare an environment
+### Prepare an environment without creating a deployment
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208655) in GitLab 13.2.
 
-By default, GitLab creates a deployment every time a
-build with the specified environment runs. Newer deployments can also
-[cancel older ones](deployment_safety.md#skip-outdated-deployment-jobs).
+By default, whenever GitLab CI/CD runs a job for a specific environment, it
+triggers a deployment and [(optionally) cancels outdated
+deployments](deployment_safety.md#ensure-only-one-deployment-job-runs-at-a-time).
 
-You may want to specify an environment keyword to
-[protect builds from unauthorized access](protected_environments.md), or to get
-access to [environment-scoped variables](#scoping-environments-with-specs). In these cases,
-you can use the `action: prepare` keyword to ensure deployments aren't created,
-and no builds are canceled:
+To use an environment without creating a new deployment, and without
+cancelling outdated deployments, append the keyword `action: prepare` to your
+job:
 
 ```yaml
 build:
@@ -521,6 +519,9 @@ build:
     action: prepare
     url: https://staging.example.com
 ```
+
+This gives you access to [environment-scoped variables](#scoping-environments-with-specs),
+and can be used to [protect builds from unauthorized access](protected_environments.md).
 
 ### Group similar environments
 
@@ -739,14 +740,68 @@ the `review/feature-1` spec takes precedence over `review/*` and `*` specs.
   environment's operational health. **(PREMIUM)**
 - [Deployment safety](deployment_safety.md#restrict-write-access-to-a-critical-environment): Secure your deployments.
 
-<!-- ## Troubleshooting
+## Troubleshooting
 
-Include any troubleshooting steps that you can foresee. If you know beforehand what issues
-one might have when setting this up, or when something is changed, or on upgrading, it's
-important to describe those, too. Think of things that may go wrong and include them here.
-This is important to minimize requests for support, and to avoid doc comments with
-questions that you know someone might ask.
+### The job with `action: stop` doesn't run
 
-Each scenario can be a third-level heading, e.g. `### Getting error message X`.
-If you have none to add when creating a doc, leave this section in place
-but commented out to help encourage others to add to it in the future. -->
+In some cases, environments do not [stop when a branch is deleted](#stop-an-environment-when-a-branch-is-deleted).
+
+For example, the environment might start in a stage that also has a job that failed.
+Then the jobs in later stages job don't start. If the job with the `action: stop`
+for the environment is also in a later stage, it can't start and the environment isn't deleted.
+
+To ensure the `action: stop` can always run when needed, you can:
+
+- Put both jobs in the same stage:
+
+  ```yaml
+  stages:
+    - build
+    - test
+    - deploy
+
+  ...
+
+  deploy_review:
+    stage: deploy
+    environment:
+      name: review/$CI_COMMIT_REF_NAME
+      url: https://$CI_ENVIRONMENT_SLUG.example.com
+      on_stop: stop_review
+
+  stop_review:
+    stage: deploy
+    environment:
+      name: review/$CI_COMMIT_REF_NAME
+      action: stop
+    when: manual
+  ```
+
+- Add a [`needs`](../yaml/README.md#needs) entry to the `action: stop` job so the
+  job can start out of stage order:
+
+  ```yaml
+  stages:
+    - build
+    - test
+    - deploy
+    - cleanup
+
+  ...
+
+  deploy_review:
+    stage: deploy
+    environment:
+      name: review/$CI_COMMIT_REF_NAME
+      url: https://$CI_ENVIRONMENT_SLUG.example.com
+      on_stop: stop_review
+
+  stop_review:
+    stage: cleanup
+    needs:
+      - deploy_review
+    environment:
+      name: review/$CI_COMMIT_REF_NAME
+      action: stop
+    when: manual
+  ```

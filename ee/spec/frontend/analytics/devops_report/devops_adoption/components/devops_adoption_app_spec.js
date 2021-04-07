@@ -14,8 +14,10 @@ import {
   MAX_SEGMENTS,
   DEFAULT_POLLING_INTERVAL,
 } from 'ee/analytics/devops_report/devops_adoption/constants';
+import bulkFindOrCreateDevopsAdoptionSegmentsMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import devopsAdoptionSegments from 'ee/analytics/devops_report/devops_adoption/graphql/queries/devops_adoption_segments.query.graphql';
 import getGroupsQuery from 'ee/analytics/devops_report/devops_adoption/graphql/queries/get_groups.query.graphql';
+import { addSegmentsToCache } from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -26,6 +28,10 @@ import {
   devopsAdoptionSegmentsData,
   devopsAdoptionSegmentsDataEmpty,
 } from '../mock_data';
+
+jest.mock('ee/analytics/devops_report/devops_adoption/utils/cache_updates', () => ({
+  addSegmentsToCache: jest.fn(),
+}));
 
 const localVue = createLocalVue();
 Vue.use(VueApollo);
@@ -43,15 +49,33 @@ describe('DevopsAdoptionApp', () => {
   const segmentsEmpty = jest
     .fn()
     .mockResolvedValue({ data: { devopsAdoptionSegments: devopsAdoptionSegmentsDataEmpty } });
+  const addSegmentMutationSpy = jest.fn().mockResolvedValue({
+    data: {
+      bulkFindOrCreateDevopsAdoptionSegments: {
+        segments: [devopsAdoptionSegmentsData.nodes[0]],
+        errors: [],
+      },
+    },
+  });
 
   function createMockApolloProvider(options = {}) {
-    const { groupsSpy = groupsEmpty, segmentsSpy = segmentsEmpty } = options;
+    const {
+      groupsSpy = groupsEmpty,
+      segmentsSpy = segmentsEmpty,
+      addSegmentsSpy = addSegmentMutationSpy,
+    } = options;
 
-    const mockApollo = createMockApollo([[devopsAdoptionSegments, segmentsSpy]], {
-      Query: {
-        groups: groupsSpy,
+    const mockApollo = createMockApollo(
+      [
+        [bulkFindOrCreateDevopsAdoptionSegmentsMutation, addSegmentsSpy],
+        [devopsAdoptionSegments, segmentsSpy],
+      ],
+      {
+        Query: {
+          groups: groupsSpy,
+        },
       },
-    });
+    );
 
     // Necessary for local resolvers to be activated
     mockApollo.defaultClient.cache.writeQuery({
@@ -63,11 +87,12 @@ describe('DevopsAdoptionApp', () => {
   }
 
   function createComponent(options = {}) {
-    const { mockApollo, data = {} } = options;
+    const { mockApollo, data = {}, provide = {} } = options;
 
     return shallowMount(DevopsAdoptionApp, {
       localVue,
       apolloProvider: mockApollo,
+      provide,
       stubs: {
         GlSprintf,
       },
@@ -319,12 +344,13 @@ describe('DevopsAdoptionApp', () => {
       });
     });
 
-    describe('when there is segment data', () => {
+    describe('when there is segment data and group data', () => {
       beforeEach(async () => {
         const segmentsWithData = jest
           .fn()
           .mockResolvedValue({ data: { devopsAdoptionSegments: devopsAdoptionSegmentsData } });
-        const mockApollo = createMockApolloProvider({ segmentsSpy: segmentsWithData });
+        const groupsSpy = jest.fn().mockResolvedValueOnce({ ...initialResponse, pageInfo: null });
+        const mockApollo = createMockApolloProvider({ segmentsSpy: segmentsWithData, groupsSpy });
         wrapper = createComponent({ mockApollo });
         await waitForPromises();
       });
@@ -373,6 +399,7 @@ describe('DevopsAdoptionApp', () => {
 
           it('displays the add segment button', () => {
             expect(segmentButton.exists()).toBe(true);
+            expect(segmentButton.text()).toBe('Add/remove groups');
           });
 
           it('calls the gl-modal show', async () => {
@@ -410,6 +437,153 @@ describe('DevopsAdoptionApp', () => {
               expect(tooltip.value).toBe('Maximum 30 groups allowed');
             });
           });
+        });
+      });
+    });
+
+    describe('when there is segment data but no group data', () => {
+      beforeEach(async () => {
+        const segmentsWithData = jest.fn().mockResolvedValue({
+          data: { devopsAdoptionSegments: devopsAdoptionSegmentsData },
+        });
+        const mockApollo = createMockApolloProvider({ segmentsSpy: segmentsWithData });
+        wrapper = createComponent({ mockApollo });
+        await waitForPromises();
+      });
+
+      it('does not display the modal button', () => {
+        const segmentButtonWrapper = wrapper.find("[data-testid='segmentButtonWrapper']");
+
+        expect(segmentButtonWrapper.exists()).toBe(false);
+      });
+    });
+
+    describe('when there is no active group', () => {
+      beforeEach(async () => {
+        const mockApollo = createMockApolloProvider();
+        wrapper = createComponent({ mockApollo });
+        await waitForPromises();
+      });
+
+      it('does not attempt to enable a group', () => {
+        expect(addSegmentMutationSpy).toHaveBeenCalledTimes(0);
+      });
+    });
+
+    describe('when there is an active group', () => {
+      const groupGid = devopsAdoptionSegmentsData.nodes[0].namespace.id;
+
+      describe('which is enabled', () => {
+        beforeEach(async () => {
+          const segmentsWithData = jest.fn().mockResolvedValue({
+            data: { devopsAdoptionSegments: devopsAdoptionSegmentsData },
+          });
+          const mockApollo = createMockApolloProvider({
+            segmentsSpy: segmentsWithData,
+          });
+          const provide = {
+            isGroup: true,
+            groupGid,
+          };
+          wrapper = createComponent({ mockApollo, provide });
+          await waitForPromises();
+          await wrapper.vm.$nextTick();
+        });
+
+        it('does not attempt to enable a group', () => {
+          expect(addSegmentMutationSpy).toHaveBeenCalledTimes(0);
+        });
+      });
+
+      describe('which is not enabled', () => {
+        beforeEach(async () => {
+          const mockApollo = createMockApolloProvider();
+          const provide = {
+            isGroup: true,
+            groupGid,
+          };
+          wrapper = createComponent({ mockApollo, provide });
+          await waitForPromises();
+          await wrapper.vm.$nextTick();
+        });
+
+        describe('enables the group', () => {
+          it('makes a request with the correct variables', () => {
+            expect(addSegmentMutationSpy).toHaveBeenCalledTimes(1);
+            expect(addSegmentMutationSpy).toHaveBeenCalledWith(
+              expect.objectContaining({
+                namespaceIds: [groupGid],
+              }),
+            );
+            expect(addSegmentsToCache).toHaveBeenCalledTimes(1);
+          });
+
+          describe('error handling', () => {
+            const addSegmentsSpyErrorMessage = 'Error: bar!';
+
+            beforeEach(async () => {
+              jest.spyOn(Sentry, 'captureException');
+              const addSegmentsSpyError = jest.fn().mockRejectedValue(addSegmentsSpyErrorMessage);
+              const provide = {
+                isGroup: true,
+                groupGid,
+              };
+              const mockApollo = createMockApolloProvider({ addSegmentsSpy: addSegmentsSpyError });
+              wrapper = createComponent({ mockApollo, provide });
+              await waitForPromises();
+              await wrapper.vm.$nextTick();
+            });
+
+            it('does not display the loader', () => {
+              expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+            });
+
+            it('does not render the segment modal', () => {
+              expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
+            });
+
+            it('does not render the table', () => {
+              expect(wrapper.find(DevopsAdoptionTable).exists()).toBe(false);
+            });
+
+            it('displays the error message ', () => {
+              const alert = wrapper.find(GlAlert);
+              expect(alert.exists()).toBe(true);
+              expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.addSegmentsError);
+            });
+
+            it('calls Sentry', () => {
+              expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(
+                addSegmentsSpyErrorMessage,
+              );
+            });
+          });
+        });
+      });
+
+      describe('segment modal button', () => {
+        beforeEach(async () => {
+          const segmentsWithData = jest.fn().mockResolvedValue({
+            data: { devopsAdoptionSegments: devopsAdoptionSegmentsData },
+          });
+          const groupsSpy = jest.fn().mockResolvedValueOnce({ ...initialResponse, pageInfo: null });
+          const mockApollo = createMockApolloProvider({
+            segmentsSpy: segmentsWithData,
+            groupsSpy,
+          });
+          const provide = {
+            isGroup: true,
+            groupGid,
+          };
+          wrapper = createComponent({ mockApollo, provide });
+          await waitForPromises();
+          await wrapper.vm.$nextTick();
+        });
+
+        it('displays group level text', () => {
+          const segmentButton = wrapper.find("[data-testid='segmentButtonWrapper']").find(GlButton);
+
+          expect(segmentButton.text()).toBe('Add/remove sub-groups');
         });
       });
     });

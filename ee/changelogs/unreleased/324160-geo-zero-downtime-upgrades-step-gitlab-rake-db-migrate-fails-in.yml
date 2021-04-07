@@ -1,5 +1,0 @@
----
-title: Fix zero-downtime upgrade from 13.8.x to 13.9.3
-merge_request: 56352
-author:
-type: fixed

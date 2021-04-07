@@ -18,9 +18,9 @@
     "formatted_offset": "-11:00"
   },
   {
-    "identifier": "Pacific/Honolulu",
-    "name": "Hawaii",
-    "abbr": "HST",
-    "formatted_offset": "-10:00"
+    "identifier": "Pacific/US/Canada",
+    "name": "Pacific Time (US & Canada)",
+    "abbr": "PT",
+    "formatted_offset": "-7:00"
   }
 ]

@@ -1,4 +1,4 @@
-import { GlAvatarLabeled, GlSearchBoxByType, GlFormRadio, GlFormSelect } from '@gitlab/ui';
+import { GlAvatarLabeled, GlDropdown, GlFormRadio, GlFormRadioGroup } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
@@ -16,6 +16,10 @@ Vue.use(Vuex);
 describe('BoardAddNewColumn', () => {
   let wrapper;
   let shouldUseGraphQL;
+
+  const selectItem = (id) => {
+    wrapper.findByTestId('selectItem').vm.$emit('change', id);
+  };
 
   const createStore = ({ actions = {}, getters = {}, state = {} } = {}) => {
     return new Vuex.Store({
@@ -40,6 +44,8 @@ describe('BoardAddNewColumn', () => {
       shallowMount(BoardAddNewColumn, {
         stubs: {
           BoardAddNewColumnForm,
+          GlFormRadio,
+          GlFormRadioGroup,
         },
         data() {
           return {
@@ -74,29 +80,31 @@ describe('BoardAddNewColumn', () => {
         },
       }),
     );
+
+    // trigger change event
+    if (selectedId) {
+      selectItem(selectedId);
+    }
   };
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findForm = () => wrapper.findComponent(BoardAddNewColumnForm);
-  const formTitle = () => wrapper.findByTestId('board-add-column-form-title').text();
-  const findSearchInput = () => wrapper.find(GlSearchBoxByType);
   const cancelButton = () => wrapper.findByTestId('cancelAddNewColumn');
   const submitButton = () => wrapper.findByTestId('addNewColumnButton');
-  const listTypeSelect = () => wrapper.findComponent(GlFormSelect);
+  const listTypeSelect = (type) => {
+    const radio = wrapper
+      .findAllComponents(GlFormRadio)
+      .filter((r) => r.attributes('value') === type)
+      .at(0);
+    radio.element.value = type;
+    radio.vm.$emit('change', type);
+  };
 
   beforeEach(() => {
     shouldUseGraphQL = true;
-  });
-
-  it('shows form title & search input', () => {
-    mountComponent();
-
-    expect(formTitle()).toEqual(BoardAddNewColumnForm.i18n.newList);
-    expect(findSearchInput().exists()).toBe(true);
   });
 
   it('clicking cancel hides the form', () => {
@@ -174,15 +182,15 @@ describe('BoardAddNewColumn', () => {
         },
       });
 
-      listTypeSelect().vm.$emit('change', ListType.assignee);
+      listTypeSelect(ListType.assignee);
 
       await nextTick();
     });
 
     it('sets assignee placeholder text in form', async () => {
       expect(findForm().props()).toMatchObject({
-        formDescription: listTypeInfo.assignee.formDescription,
-        searchLabel: listTypeInfo.assignee.searchLabel,
+        noneSelected: listTypeInfo.assignee.noneSelected,
+        searchLabel: BoardAddNewColumn.i18n.value,
         searchPlaceholder: listTypeInfo.assignee.searchPlaceholder,
       });
     });
@@ -195,7 +203,7 @@ describe('BoardAddNewColumn', () => {
       expect(userList).toHaveLength(mockAssignees.length);
       expect(userList.at(0).props()).toMatchObject({
         label: firstUser.name,
-        subLabel: firstUser.username,
+        subLabel: `@${firstUser.username}`,
       });
     });
   });
@@ -209,21 +217,20 @@ describe('BoardAddNewColumn', () => {
         },
       });
 
-      listTypeSelect().vm.$emit('change', ListType.iteration);
+      listTypeSelect(ListType.iteration);
 
       await nextTick();
     });
 
-    it('sets iteration placeholder text in form', async () => {
+    it('sets iteration placeholder text in form', () => {
       expect(findForm().props()).toMatchObject({
-        formDescription: listTypeInfo.iteration.formDescription,
-        searchLabel: listTypeInfo.iteration.searchLabel,
+        searchLabel: BoardAddNewColumn.i18n.value,
         searchPlaceholder: listTypeInfo.iteration.searchPlaceholder,
       });
     });
 
     it('shows list of iterations', () => {
-      const itemList = wrapper.findAllComponents(GlFormRadio);
+      const itemList = wrapper.findComponent(GlDropdown).findAllComponents(GlFormRadio);
 
       expect(itemList).toHaveLength(mockIterations.length);
       expect(itemList.at(0).attributes('value')).toBe(mockIterations[0].id);

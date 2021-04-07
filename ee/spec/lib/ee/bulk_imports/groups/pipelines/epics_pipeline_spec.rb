@@ -3,11 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_redis_cache do
-  let_it_be(:cursor) { 'cursor' }
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let(:bulk_import) { create(:bulk_import, user: user) }
-  let(:entity) do
+  let_it_be(:bulk_import) { create(:bulk_import, user: user) }
+
+  let_it_be(:entity) do
     create(
       :bulk_import_entity,
       group: group,
@@ -18,7 +18,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_
     )
   end
 
-  let(:context) { BulkImports::Pipeline::Context.new(entity) }
+  let_it_be(:tracker) { create(:bulk_import_tracker, entity: entity) }
+  let_it_be(:context) { BulkImports::Pipeline::Context.new(tracker) }
 
   before do
     stub_licensed_features(epics: true)
@@ -29,8 +30,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_
 
   describe '#run' do
     it 'imports group epics into destination group' do
-      first_page = extractor_data(has_next_page: true, cursor: cursor)
-      last_page = extractor_data(has_next_page: false, page: 2)
+      first_page = extracted_data(has_next_page: true)
+      last_page = extracted_data
 
       allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
         allow(extractor)
@@ -86,9 +87,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_
       end
 
       it 'raises NotAllowedError' do
-        data = extractor_data(has_next_page: false)
-
-        expect { subject.load(context, data) }.to raise_error(::BulkImports::Pipeline::NotAllowedError)
+        expect { subject.load(context, extracted_data) }
+          .to raise_error(::BulkImports::Pipeline::NotAllowedError)
       end
     end
   end
@@ -104,38 +104,6 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_
       end
 
       subject.transform(context, data)
-    end
-  end
-
-  describe '#after_run' do
-    context 'when extracted data has next page' do
-      it 'updates tracker information and runs pipeline again' do
-        data = extractor_data(has_next_page: true, cursor: cursor)
-
-        expect(subject).to receive(:run)
-
-        subject.after_run(data)
-
-        tracker = entity.trackers.find_by(relation: :epics)
-
-        expect(tracker.has_next_page).to eq(true)
-        expect(tracker.next_page).to eq(cursor)
-      end
-    end
-
-    context 'when extracted data has no next page' do
-      it 'updates tracker information and does not run pipeline' do
-        data = extractor_data(has_next_page: false)
-
-        expect(subject).not_to receive(:run)
-
-        subject.after_run(data)
-
-        tracker = entity.trackers.find_by(relation: :epics)
-
-        expect(tracker.has_next_page).to eq(false)
-        expect(tracker.next_page).to be_nil
-      end
     end
   end
 
@@ -157,16 +125,17 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_
       expect(described_class.transformers)
         .to contain_exactly(
           { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil },
+          { klass: BulkImports::Common::Transformers::UserReferenceTransformer, options: { reference: :author } },
           { klass: EE::BulkImports::Groups::Transformers::EpicAttributesTransformer, options: nil }
         )
     end
   end
 
-  def extractor_data(has_next_page:, cursor: nil, page: 1)
+  def extracted_data(has_next_page: false)
     data = [
       {
-        'id' => "gid://gitlab/Epic/#{page}",
-        'iid' => page,
+        'id' => "gid://gitlab/Epic/99",
+        'iid' => has_next_page ? 2 : 1,
         'title' => 'epic1',
         'state' => 'closed',
         'confidential' => true,
@@ -177,8 +146,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_
     ]
 
     page_info = {
-      'end_cursor' => cursor,
-      'has_next_page' => has_next_page
+      'has_next_page' => has_next_page,
+      'next_page' => has_next_page ? 'cursor' : nil
     }
 
     BulkImports::Pipeline::ExtractedData.new(data: data, page_info: page_info)

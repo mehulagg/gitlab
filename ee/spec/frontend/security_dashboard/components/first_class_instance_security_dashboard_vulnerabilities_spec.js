@@ -67,7 +67,7 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
 
     it('should have an alert that is dismissable', () => {
       const alert = findAlert();
-      alert.find('button').trigger('click');
+      alert.vm.$emit('dismiss');
       return wrapper.vm.$nextTick(() => {
         expect(alert.exists()).toBe(false);
       });

@@ -8,11 +8,12 @@ import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
-
 import { getStoreConfig } from 'ee/security_dashboard/store';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
+import { BV_HIDE_MODAL } from '~/lib/utils/constants';
 
 const pipelineId = 123;
 const vulnerabilitiesEndpoint = `${TEST_HOST}/vulnerabilities`;
@@ -21,6 +22,8 @@ jest.mock('~/lib/utils/url_utility', () => ({
   getParameterValues: jest.fn().mockReturnValue([]),
 }));
 
+jest.mock('~/flash');
+
 describe('Security Dashboard component', () => {
   let wrapper;
   let mock;
@@ -28,7 +31,7 @@ describe('Security Dashboard component', () => {
   let fetchPipelineJobsSpy;
   let store;
 
-  const createComponent = (props) => {
+  const createComponent = ({ props } = {}) => {
     setPipelineIdSpy = jest.fn();
     fetchPipelineJobsSpy = jest.fn();
 
@@ -119,6 +122,12 @@ describe('Security Dashboard component', () => {
         );
       },
     );
+
+    it('emits a hide modal event when modal does not have an error and hideModal is called', async () => {
+      const rootEmit = jest.spyOn(wrapper.vm.$root, '$emit');
+      wrapper.vm.hideModal();
+      expect(rootEmit).toHaveBeenCalledWith(BV_HIDE_MODAL, VULNERABILITY_MODAL_ID);
+    });
   });
 
   describe('issue modal', () => {
@@ -146,6 +155,15 @@ describe('Security Dashboard component', () => {
   describe('on error', () => {
     beforeEach(() => {
       createComponent();
+      store.dispatch('vulnerabilities/receiveDismissVulnerabilityError', {
+        flashError: 'Something went wrong',
+      });
+    });
+
+    it('does not emit a hide modal event when modal has error', () => {
+      const rootEmit = jest.spyOn(wrapper.vm.$root, '$emit');
+      wrapper.vm.hideModal();
+      expect(rootEmit).not.toHaveBeenCalled();
     });
 
     it.each([401, 403])('displays an error on error %s', async (errorCode) => {

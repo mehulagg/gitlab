@@ -42,7 +42,7 @@ RSpec.describe 'Create a Compliance Framework' do
     end
   end
 
-  context 'feature is unlicensed' do
+  context 'framework feature is unlicensed' do
     before do
       stub_licensed_features(custom_compliance_frameworks: false)
       post_graphql_mutation(mutation, current_user: current_user)
@@ -51,17 +51,34 @@ RSpec.describe 'Create a Compliance Framework' do
     it_behaves_like 'a mutation that returns errors in the response', errors: ['Not permitted to create framework']
   end
 
+  context 'pipeline configuration feature is unlicensed' do
+    before do
+      stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: false)
+      post_graphql_mutation(mutation, current_user: current_user)
+    end
+
+    it_behaves_like 'a mutation that returns errors in the response', errors: ['Pipeline configuration full path feature is not available']
+  end
+
   context 'feature is licensed' do
     before do
       stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: true)
     end
 
-    context 'feature is disabled' do
+    context 'framework feature is disabled' do
       before do
         stub_feature_flags(ff_custom_compliance_frameworks: false)
       end
 
       it_behaves_like 'a mutation that returns errors in the response', errors: ['Not permitted to create framework']
+    end
+
+    context 'pipeline configuration feature is disabled' do
+      before do
+        stub_feature_flags(ff_evaluate_group_level_compliance_pipeline: false)
+      end
+
+      it_behaves_like 'a mutation that returns errors in the response', errors: ['Pipeline configuration full path feature is not available']
     end
 
     context 'current_user is namespace owner' do

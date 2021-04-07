@@ -46,6 +46,7 @@ import projectBoardAssigneesQuery from '../graphql/project_board_assignees.query
 import projectBoardIterationsQuery from '../graphql/project_board_iterations.query.graphql';
 import projectBoardMilestonesQuery from '../graphql/project_board_milestones.query.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/update_board_epic_user_preferences.mutation.graphql';
+import updateEpicLabelsMutation from '../graphql/update_epic_labels.mutation.graphql';
 
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
@@ -115,7 +116,7 @@ const fetchAndFormatListEpics = (state, extraVariables) => {
 export default {
   ...actionsCE,
 
-  setFilters: ({ commit, dispatch }, filters) => {
+  setFilters: ({ commit, dispatch, getters }, filters) => {
     const filterParams = pick(filters, [
       'assigneeUsername',
       'authorUsername',
@@ -126,9 +127,13 @@ export default {
       'releaseTag',
       'search',
       'weight',
+      'myReactionEmoji',
     ]);
 
-    filterParams.not = transformNotFilters(filters);
+    // Temporarily disabled until negated filters are supported for epic boards
+    if (!getters.isEpicBoard) {
+      filterParams.not = transformNotFilters(filters);
+    }
 
     if (filters.groupBy === GroupByParamType.epic) {
       dispatch('setEpicSwimlanes');
@@ -140,7 +145,7 @@ export default {
     } else if (filterParams.epicId) {
       filterParams.epicId = fullEpicId(filterParams.epicId);
     }
-    if (filterParams.not.epicId) {
+    if (!getters.isEpicBoard && filterParams.not.epicId) {
       filterParams.not.epicId = fullEpicId(filterParams.not.epicId);
     }
 
@@ -164,21 +169,21 @@ export default {
     if (getters.isSwimlanesOn) {
       dispatch('resetEpics');
       dispatch('resetIssues');
-      dispatch('fetchEpicsSwimlanes', {});
+      dispatch('fetchEpicsSwimlanes');
+      dispatch('fetchIssueLists');
     } else if (gon.features.graphqlBoardLists || getters.isEpicBoard) {
       dispatch('fetchLists');
       dispatch('resetIssues');
     }
   },
 
-  fetchEpicsSwimlanes({ state, commit, dispatch }, { withLists = true, endCursor = null }) {
+  fetchEpicsSwimlanes({ state, commit, dispatch }, { endCursor = null } = {}) {
     const { fullPath, boardId, boardType, filterParams } = state;
 
     const variables = {
       fullPath,
       boardId: `gid://gitlab/Board/${boardId}`,
       issueFilters: filterParams,
-      withLists,
       isGroup: boardType === BoardType.group,
       isProject: boardType === BoardType.project,
       after: endCursor,
@@ -190,31 +195,21 @@ export default {
         variables,
       })
       .then(({ data }) => {
-        const { epics, lists } = data[boardType]?.board;
+        const { epics } = data[boardType]?.board;
         const epicsFormatted = epics.edges.map((e) => ({
           ...e.node,
         }));
 
-        if (!withLists) {
-          commit(types.RECEIVE_EPICS_SUCCESS, epicsFormatted);
+        if (epicsFormatted) {
+          commit(types.RECEIVE_EPICS_SUCCESS, {
+            epics: epicsFormatted,
+            canAdminEpic: epics.edges[0]?.node?.userPermissions?.adminEpic,
+          });
           commit(types.UPDATE_CACHED_EPICS, epicsFormatted);
-        } else {
-          if (lists) {
-            commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
-          }
-
-          if (epicsFormatted) {
-            commit(types.RECEIVE_FIRST_EPICS_SUCCESS, {
-              epics: epicsFormatted,
-              canAdminEpic: epics.edges[0]?.node?.userPermissions?.adminEpic,
-            });
-            commit(types.UPDATE_CACHED_EPICS, epicsFormatted);
-          }
         }
 
         if (epics.pageInfo?.hasNextPage) {
           dispatch('fetchEpicsSwimlanes', {
-            withLists: false,
             endCursor: epics.pageInfo.endCursor,
           });
         }
@@ -352,22 +347,6 @@ export default {
       .catch(() => commit(types.RECEIVE_ITEMS_FOR_LIST_FAILURE, listId));
   },
 
-  fetchIssuesForEpic: ({ state, commit }, epicId) => {
-    commit(types.REQUEST_ISSUES_FOR_EPIC, epicId);
-
-    const { filterParams } = state;
-
-    const variables = {
-      filters: { ...filterParams, epicId },
-    };
-
-    return fetchAndFormatListIssues(state, variables)
-      .then(({ listItems }) => {
-        commit(types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, { ...listItems, epicId });
-      })
-      .catch(() => commit(types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, epicId));
-  },
-
   toggleEpicSwimlanes: ({ state, commit, dispatch }) => {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
@@ -377,7 +356,8 @@ export default {
           spreadArrays: true,
         }),
       );
-      dispatch('fetchEpicsSwimlanes', {});
+      dispatch('fetchEpicsSwimlanes');
+      dispatch('fetchIssueLists');
     } else if (!gon.features.graphqlBoardLists) {
       historyPushState(removeParams(['group_by']), window.location.href, true);
       boardsStore.create();
@@ -387,10 +367,12 @@ export default {
     }
   },
 
-  setEpicSwimlanes: ({ commit, dispatch }) => {
+  setEpicSwimlanes: ({ commit }) => {
     commit(types.SET_EPICS_SWIMLANES);
+  },
 
-    dispatch('fetchEpicsSwimlanes', {});
+  doneLoadingSwimlanesItems: ({ commit }) => {
+    commit(types.DONE_LOADING_SWIMLANES_ITEMS);
   },
 
   resetEpics: ({ commit }) => {
@@ -398,13 +380,13 @@ export default {
   },
 
   fetchEpicForActiveIssue: async ({ state, commit, getters }) => {
-    if (!getters.activeIssue.epic) {
+    if (!getters.activeBoardItem.epic) {
       return false;
     }
 
     const {
       epic: { id, iid },
-    } = getters.activeIssue;
+    } = getters.activeBoardItem;
 
     if (state.epicsCacheById[id]) {
       return false;
@@ -440,7 +422,7 @@ export default {
       mutation: issueSetEpicMutation,
       variables: {
         input: {
-          iid: String(getters.activeIssue.iid),
+          iid: String(getters.activeBoardItem.iid),
           epicId,
           projectPath: getters.projectPathForActiveIssue,
         },
@@ -454,12 +436,12 @@ export default {
     const { epic } = data.issueSetEpic.issue;
 
     if (epic !== null) {
-      commit(types.RECEIVE_FIRST_EPICS_SUCCESS, { epics: [epic, ...state.epics] });
+      commit(types.RECEIVE_EPICS_SUCCESS, { epics: [epic, ...state.epics] });
       commit(types.UPDATE_CACHED_EPICS, [epic]);
     }
 
-    commit(typesCE.UPDATE_ISSUE_BY_ID, {
-      issueId: getters.activeIssue.id,
+    commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
+      itemId: getters.activeBoardItem.id,
       prop: 'epic',
       value: epic ? { id: epic.id, iid: epic.iid } : null,
     });
@@ -471,7 +453,7 @@ export default {
       mutation: issueSetWeightMutation,
       variables: {
         input: {
-          iid: String(getters.activeIssue.iid),
+          iid: String(getters.activeBoardItem.iid),
           weight: input.weight,
           projectPath: input.projectPath,
         },
@@ -482,8 +464,8 @@ export default {
       throw new Error(data.issueSetWeight?.errors);
     }
 
-    commit(typesCE.UPDATE_ISSUE_BY_ID, {
-      issueId: getters.activeIssue.id,
+    commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
+      itemId: getters.activeBoardItem.id,
       prop: 'weight',
       value: data.issueSetWeight.issue.weight,
     });
@@ -783,5 +765,38 @@ export default {
         commit(types.CREATE_LIST_FAILURE);
         throw e;
       });
+  },
+
+  setActiveBoardItemLabels: ({ getters, dispatch }, params) => {
+    if (!getters.isEpicBoard) {
+      dispatch('setActiveIssueLabels', params);
+    } else {
+      dispatch('setActiveEpicLabels', params);
+    }
+  },
+
+  setActiveEpicLabels: async ({ commit, getters, state }, input) => {
+    const { activeBoardItem } = getters;
+    const { data } = await gqlClient.mutate({
+      mutation: updateEpicLabelsMutation,
+      variables: {
+        input: {
+          iid: String(activeBoardItem.iid),
+          addLabelIds: input.addLabelIds ?? [],
+          removeLabelIds: input.removeLabelIds ?? [],
+          groupPath: state.fullPath,
+        },
+      },
+    });
+
+    if (data.updateEpic?.errors?.length > 0) {
+      throw new Error(data.updateEpic.errors);
+    }
+
+    commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
+      itemId: activeBoardItem.id,
+      prop: 'labels',
+      value: data.updateEpic.epic.labels.nodes,
+    });
   },
 };

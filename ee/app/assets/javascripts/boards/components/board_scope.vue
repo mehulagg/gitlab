@@ -1,4 +1,5 @@
 <script>
+import { mapGetters } from 'vuex';
 import ListLabel from '~/boards/models/label';
 import { __ } from '~/locale';
 import BoardLabelsSelect from '~/vue_shared/components/sidebar/labels_select/base.vue';
@@ -66,6 +67,7 @@ export default {
   },
 
   computed: {
+    ...mapGetters(['isIssueBoard']),
     expandButtonText() {
       return this.expanded ? __('Collapse') : __('Expand');
     },
@@ -110,6 +112,7 @@ export default {
     </p>
     <div v-if="!collapseScope || expanded">
       <board-milestone-select
+        v-if="isIssueBoard"
         :board="board"
         :group-id="groupId"
         :project-id="projectId"
@@ -117,6 +120,7 @@ export default {
       />
 
       <board-scope-current-iteration
+        v-if="isIssueBoard"
         :can-admin-board="canAdminBoard"
         :iteration-id="board.iteration_id"
         @set-iteration="$emit('set-iteration', $event)"
@@ -136,6 +140,7 @@ export default {
       >
 
       <assignee-select
+        v-if="isIssueBoard"
         :board="board"
         :selected="board.assignee"
         :can-edit="canAdminBoard"
@@ -150,6 +155,7 @@ export default {
 
       <!-- eslint-disable vue/no-mutating-props -->
       <board-weight-select
+        v-if="isIssueBoard"
         v-model="board.weight"
         :board="board"
         :weights="weights"

@@ -2,7 +2,7 @@
 
 module Geo
   class MetricsUpdateService
-    METRIC_PREFIX = 'geo_'.freeze
+    METRIC_PREFIX = 'geo_'
 
     def execute
       return unless Gitlab::Geo.enabled?

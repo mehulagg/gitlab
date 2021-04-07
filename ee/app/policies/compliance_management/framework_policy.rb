@@ -6,12 +6,12 @@ module ComplianceManagement
 
     condition(:custom_compliance_frameworks_enabled) do
       @subject.namespace.feature_available?(:custom_compliance_frameworks) &&
-        Feature.enabled?(:ff_custom_compliance_frameworks, @subject.namespace)
+        Feature.enabled?(:ff_custom_compliance_frameworks, @subject.namespace, default_enabled: :yaml)
     end
 
     condition(:group_level_compliance_pipeline_enabled) do
       @subject.namespace.feature_available?(:evaluate_group_level_compliance_pipeline) &&
-        Feature.enabled?(:ff_custom_compliance_frameworks, @subject.namespace)
+        Feature.enabled?(:ff_evaluate_group_level_compliance_pipeline, @subject.namespace)
     end
 
     rule { can?(:owner_access) & custom_compliance_frameworks_enabled }.policy do

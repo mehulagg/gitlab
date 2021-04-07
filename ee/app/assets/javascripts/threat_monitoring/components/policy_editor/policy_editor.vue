@@ -16,7 +16,6 @@ import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, sprintf } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import EnvironmentPicker from '../environment_picker.vue';
-import NetworkPolicyEditor from '../network_policy_editor.vue';
 import {
   EditorModeRule,
   EditorModeYAML,
@@ -49,7 +48,8 @@ export default {
     GlAlert,
     GlModal,
     EnvironmentPicker,
-    NetworkPolicyEditor,
+    NetworkPolicyEditor: () =>
+      import(/* webpackChunkName: 'network_policy_editor' */ '../network_policy_editor.vue'),
     PolicyRuleBuilder,
     PolicyPreview,
     PolicyActionPicker,
@@ -367,8 +367,8 @@ export default {
           </h5>
           <div class="gl-p-4">
             <network-policy-editor
+              data-testid="network-policy-editor"
               :value="yamlEditorValue"
-              :height="400"
               :read-only="false"
               @input="loadYaml"
             />

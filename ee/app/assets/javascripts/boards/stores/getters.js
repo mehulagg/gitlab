@@ -9,7 +9,7 @@ export default {
     return Boolean(gon?.licensed_features?.swimlanes && state.isShowingEpicsSwimlanes);
   },
 
-  getListByTypeId: (state) => ({ assigneeId, labelId, milestoneId }) => {
+  getListByTypeId: (state) => ({ assigneeId, labelId, milestoneId, iterationId }) => {
     if (assigneeId) {
       return find(
         state.boardLists,
@@ -28,6 +28,13 @@ export default {
       return find(
         state.boardLists,
         (l) => l.listType === ListType.milestone && l.milestone?.id === milestoneId,
+      );
+    }
+
+    if (iterationId) {
+      return find(
+        state.boardLists,
+        (l) => l.listType === ListType.iteration && l.iteration?.id === iterationId,
       );
     }
 

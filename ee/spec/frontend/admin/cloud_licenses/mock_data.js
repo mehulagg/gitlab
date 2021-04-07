@@ -1,3 +1,16 @@
+export const license = {
+  ULTIMATE: {
+    id: '1309188',
+    plan: 'Ultimate',
+    lastSync: 'just now - actual date',
+    startsAt: '22 February',
+    renews: 'in 11 months',
+    name: 'Jane Doe',
+    email: 'user@acmecorp.com',
+    company: 'ACME Corp',
+  },
+};
+
 export const activateLicenseMutationResponse = {
   FAILURE: [
     {

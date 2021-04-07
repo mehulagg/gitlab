@@ -13,6 +13,8 @@ RSpec.describe 'Issue promotion', :js do
   let(:user) { create(:user) }
 
   before do
+    stub_feature_flags(tribute_autocomplete: false)
+
     sign_in(user)
   end
 
@@ -51,13 +53,10 @@ RSpec.describe 'Issue promotion', :js do
         visit project_issue_path(project, issue)
       end
 
-      it 'displays warning' do
-        note = find('#note-body')
-        type(note, '/promote')
+      it 'displays description' do
+        fill_in 'Comment', with: '/promote'
 
-        wait_for_requests
-
-        expect(page).to have_content 'Promote issue to an epic'
+        expect(find_autocomplete_menu).to have_text 'Promote issue to an epic'
       end
 
       it 'promotes the issue' do
@@ -100,12 +99,9 @@ RSpec.describe 'Issue promotion', :js do
       end
 
       it 'displays warning' do
-        note = find('#note-body')
-        type(note, '/promote')
+        fill_in 'Comment', with: '/promote'
 
-        wait_for_requests
-
-        expect(page).to have_content 'Promote confidential issue to a non-confidential epic'
+        expect(find_autocomplete_menu).to have_text 'Promote confidential issue to a non-confidential epic'
       end
 
       it 'promotes the issue' do
@@ -124,12 +120,7 @@ RSpec.describe 'Issue promotion', :js do
 
   private
 
-  # `note` is a textarea where the given text should be typed.
-  # We don't want to find it each time this function gets called.
-  def type(note, text)
-    page.within('.timeline-content-form') do
-      note.set('')
-      note.native.send_keys(text)
-    end
+  def find_autocomplete_menu
+    find('.atwho-view ul', visible: true)
   end
 end

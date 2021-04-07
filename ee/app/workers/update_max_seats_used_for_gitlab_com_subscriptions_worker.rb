@@ -16,14 +16,6 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
       tuples = []
 
       subscriptions.each do |subscription|
-        # This should be removed after https://gitlab.com/gitlab-org/gitlab/-/issues/243496
-        # Because there should not be any NULL namespace_id gitlab_subscription after the merge
-        # request https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40537
-        unless subscription.namespace
-          track_error(subscription)
-          next
-        end
-
         subscription.refresh_seat_attributes!
 
         tuples << [subscription.id, subscription.max_seats_used, subscription.seats_in_use, subscription.seats_owed]

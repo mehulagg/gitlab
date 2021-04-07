@@ -124,14 +124,4 @@ RSpec.describe Integrations::Jira::IssueEntity do
       expect(subject).to include(labels: [])
     end
   end
-
-  context 'when feature flag "jira_issues_show_integration" is disabled' do
-    before do
-      stub_feature_flags(jira_issues_show_integration: false)
-    end
-
-    it 'sets `gitlab_web_url` to nil' do
-      expect(subject[:gitlab_web_url]).to eq(nil)
-    end
-  end
 end

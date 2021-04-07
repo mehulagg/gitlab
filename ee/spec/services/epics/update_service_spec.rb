@@ -71,6 +71,12 @@ RSpec.describe Epics::UpdateService do
         expect(note.note).to start_with('changed title')
         expect(note.noteable).to eq(epic)
       end
+
+      it 'records epic title changed after saving' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_title_changed_action)
+
+        update_epic(title: 'New title')
+      end
     end
 
     context 'when description has changed' do
@@ -81,6 +87,52 @@ RSpec.describe Epics::UpdateService do
 
         expect(note.note).to start_with('changed the description')
         expect(note.noteable).to eq(epic)
+      end
+
+      it 'records epic description changed after saving' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_description_changed_action)
+
+        update_epic(description: 'New description')
+      end
+    end
+
+    context 'when repositioning an epic on a board' do
+      let(:epic1) { create(:epic, group: group) }
+      let(:epic2) { create(:epic, group: group) }
+
+      let!(:epic_position) { create(:epic_board_position, epic: epic, epic_board: board, relative_position: 10) }
+      let!(:epic1_position) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20) }
+      let!(:epic2_position) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 30) }
+
+      let(:board) { create(:epic_board, group: group) }
+
+      context 'when moving beetween 2 epics on the board' do
+        it 'moves the epic correctly' do
+          update_epic(move_between_ids: [epic1.id, epic2.id], board_id: board.id)
+
+          expect(epic_position.reload.relative_position)
+            .to be_between(epic1_position.relative_position, epic2_position.relative_position)
+        end
+      end
+
+      context 'when moving the epic to the end' do
+        it 'moves the epic correctly' do
+          update_epic(move_between_ids: [nil, epic2.id], board_id: board.id)
+
+          expect(epic_position.reload.relative_position).to be > epic2_position.relative_position
+        end
+      end
+
+      context 'when moving the epic to the beginning' do
+        before do
+          epic_position.update_column(:relative_position, 25)
+        end
+
+        it 'moves the epic correctly' do
+          update_epic(move_between_ids: [epic1.id, nil], board_id: board.id)
+
+          expect(epic_position.reload.relative_position).to be < epic1_position.relative_position
+        end
       end
     end
 
@@ -217,10 +269,38 @@ RSpec.describe Epics::UpdateService do
         end
       end
 
-      it 'schedules deletion of todos when epic becomes confidential' do
-        expect(TodosDestroyer::ConfidentialEpicWorker).to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, epic.id)
+      context 'when the epic becomes confidential' do
+        it 'schedules deletion of todos' do
+          expect(TodosDestroyer::ConfidentialEpicWorker).to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, epic.id)
 
-        update_epic(confidential: true)
+          update_epic(confidential: true)
+        end
+
+        it 'tracks the epic becoming confidential' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter)
+            .to receive(:track_epic_confidential_action).with(author: user)
+
+          update_epic(confidential: true)
+        end
+      end
+
+      context 'when the epic becomes visible' do
+        before do
+          epic.update_column(:confidential, true)
+        end
+
+        it 'does not schedule deletion of todos' do
+          expect(TodosDestroyer::ConfidentialEpicWorker).not_to receive(:perform_in)
+
+          update_epic(confidential: false)
+        end
+
+        it 'tracks the epic becoming visible' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter)
+            .to receive(:track_epic_visible_action).with(author: user)
+
+          update_epic(confidential: false)
+        end
       end
     end
 
@@ -290,6 +370,36 @@ RSpec.describe Epics::UpdateService do
           update_epic(start_date_is_fixed: true, start_date_fixed: Date.today)
           epic.reload
           expect(epic.start_date).to eq(epic.start_date_fixed)
+        end
+      end
+
+      context 'epic start date fixed or inherited' do
+        it 'tracks the user action to set as fixed' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_fixed_action)
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_fixed_start_date_updated_action)
+
+          update_epic(start_date_is_fixed: true, start_date_fixed: Date.today)
+        end
+
+        it 'tracks the user action to set as inherited' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_start_date_set_as_inherited_action)
+
+          update_epic(start_date_is_fixed: false)
+        end
+      end
+
+      context 'epic due date fixed or inherited' do
+        it 'tracks the user action to set as fixed' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_due_date_set_as_fixed_action)
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_fixed_due_date_updated_action)
+
+          update_epic(due_date_is_fixed: true, due_date_fixed: Date.today)
+        end
+
+        it 'tracks the user action to set as inherited' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_due_date_set_as_inherited_action)
+
+          update_epic(due_date_is_fixed: false)
         end
       end
 

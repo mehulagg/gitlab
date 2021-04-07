@@ -9,8 +9,12 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
+import { s__ } from '~/locale';
 
 export default {
+  i18n: {
+    editProfileLabel: s__('DastProfiles|Edit profile'),
+  },
   name: 'OnDemandScansProfileSelector',
   components: {
     GlButton,
@@ -116,7 +120,7 @@ export default {
       </gl-dropdown>
 
       <div
-        v-if="value && $scopedSlots.summary"
+        v-if="selectedProfile && $scopedSlots.summary"
         data-testid="selected-profile-summary"
         class="gl-mt-6 gl-pt-6 gl-border-t-solid gl-border-gray-100 gl-border-t-1"
       >
@@ -125,7 +129,8 @@ export default {
           v-gl-tooltip
           category="primary"
           icon="pencil"
-          :title="s__('DastProfiles|Edit profile')"
+          :title="$options.i18n.editProfileLabel"
+          :aria-label="$options.i18n.editProfileLabel"
           :href="selectedProfile.editPath"
           class="gl-absolute gl-right-7"
         />

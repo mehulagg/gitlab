@@ -3,9 +3,11 @@ import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import { shallowMount } from '@vue/test-utils';
 
 import TrialStatusPopover from 'ee/contextual_sidebar/components/trial_status_popover.vue';
+import { mockTracking } from 'helpers/tracking_helper';
 
 describe('TrialStatusPopover component', () => {
   let wrapper;
+  let trackingSpy;
 
   const getGlButton = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
@@ -24,12 +26,15 @@ describe('TrialStatusPopover component', () => {
 
   beforeEach(() => {
     wrapper = createComponent();
+    trackingSpy = mockTracking('_category_', wrapper.element, jest.spyOn);
   });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
   });
+
+  const getGlPopover = () => wrapper.findComponent(GlPopover);
 
   it('matches the snapshot', () => {
     expect(wrapper.element).toMatchSnapshot();
@@ -51,8 +56,6 @@ describe('TrialStatusPopover component', () => {
 
   describe('methods', () => {
     describe('onResize', () => {
-      const getGlPopover = () => wrapper.findComponent(GlPopover);
-
       it.each`
         bp      | isDisabled
         ${'xs'} | ${'true'}
@@ -71,6 +74,19 @@ describe('TrialStatusPopover component', () => {
           expect(getGlPopover().attributes('disabled')).toBe(isDisabled);
         },
       );
+    });
+
+    describe('onShown', () => {
+      beforeEach(() => {
+        getGlPopover().vm.$emit('shown');
+      });
+
+      it('dispatches tracking event', () => {
+        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'popover_shown', {
+          label: 'trial_status_popover',
+          property: 'experiment:show_trial_status_in_sidebar',
+        });
+      });
     });
   });
 });

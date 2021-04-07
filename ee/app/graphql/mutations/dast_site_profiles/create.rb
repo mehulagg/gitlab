@@ -23,19 +23,54 @@ module Mutations
                required: false,
                description: 'The URL of the target to be scanned.'
 
+      argument :excluded_urls, [GraphQL::STRING_TYPE],
+               required: false,
+               default_value: [],
+               description: 'The URLs to skip during an authenticated scan. Defaults to `[]`. Will be ignored ' \
+                            'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
+
+      argument :request_headers, GraphQL::STRING_TYPE,
+               required: false,
+               description: 'Comma-separated list of request header names and values to be ' \
+                            'added to every request made by DAST. Will be ignored ' \
+                            'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
+
+      argument :auth, ::Types::Dast::SiteProfileAuthInputType,
+               required: false,
+               description: 'Parameters for authentication. Will be ignored ' \
+                            'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
+
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, profile_name:, target_url: nil)
+      def resolve(full_path:, profile_name:, target_url: nil, **params)
         project = authorized_find!(full_path)
 
-        service = ::DastSiteProfiles::CreateService.new(project, current_user)
-        result = service.execute(name: profile_name, target_url: target_url)
+        auth_params = feature_flagged(project, params[:auth], default: {})
 
-        if result.success?
-          { id: result.payload.to_global_id, errors: [] }
-        else
-          { errors: result.errors }
-        end
+        dast_site_profile_params = {
+          name: profile_name,
+          target_url: target_url,
+          excluded_urls: feature_flagged(project, params[:excluded_urls]),
+          request_headers: feature_flagged(project, params[:request_headers]),
+          auth_enabled: auth_params[:enabled],
+          auth_url: auth_params[:url],
+          auth_username_field: auth_params[:username_field],
+          auth_password_field: auth_params[:password_field],
+          auth_username: auth_params[:username],
+          auth_password: auth_params[:password]
+        }.compact
+
+        result = ::DastSiteProfiles::CreateService.new(project, current_user).execute(**dast_site_profile_params)
+
+        { id: result.payload.try(:to_global_id), errors: result.errors }
+      end
+
+      private
+
+      def feature_flagged(project, value, opts = {})
+        return opts[:default] unless Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
+
+        value || opts[:default]
       end
     end
   end

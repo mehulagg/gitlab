@@ -53,7 +53,7 @@ RSpec.describe Namespaces::ProjectsFinder do
 
       context 'when sort does not equal :storage' do
         it 'returns all projects' do
-          expect(projects).to eq [project_1, project_2]
+          expect(projects).to match_array [project_1, project_2]
         end
       end
     end

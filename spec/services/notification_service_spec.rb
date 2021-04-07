@@ -288,6 +288,27 @@ RSpec.describe NotificationService, :mailer do
         end
       end
     end
+
+    describe '#ssh_key_expired' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:fingerprints) { ["aa:bb:cc:dd:ee:zz"] }
+
+      subject { notification.ssh_key_expired(user, fingerprints) }
+
+      it 'sends email to the token owner' do
+        expect { subject }.to have_enqueued_email(user, fingerprints, mail: "ssh_key_expired_email")
+      end
+
+      context 'when user is not allowed to receive notifications' do
+        before do
+          user.block!
+        end
+
+        it 'does not send email to the token owner' do
+          expect { subject }.not_to have_enqueued_email(user, fingerprints, mail: "ssh_key_expired_email")
+        end
+      end
+    end
   end
 
   describe '#unknown_sign_in' do
@@ -1662,7 +1683,7 @@ RSpec.describe NotificationService, :mailer do
         notification.issue_due(issue)
         email = find_email_for(@subscriber)
 
-        expect(email.header[:from].display_names).to eq([issue.author.name])
+        expect(email.header[:from].display_names).to eq(["#{issue.author.name} (@#{issue.author.username})"])
       end
 
       it_behaves_like 'participating notifications' do

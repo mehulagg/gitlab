@@ -20,6 +20,9 @@ RSpec.describe 'epic boards', :js do
   let_it_be(:epic2) { create(:epic, group: group, title: 'Epic2') }
   let_it_be(:epic3) { create(:epic, group: group, labels: [label2], title: 'Epic3') }
 
+  let(:edit_board) { find('.btn', text: 'Edit board') }
+  let(:view_scope) { find('.btn', text: 'View scope') }
+
   context 'display epics in board' do
     before do
       stub_licensed_features(epics: true)
@@ -70,10 +73,13 @@ RSpec.describe 'epic boards', :js do
       click_button 'Create list'
       wait_for_all_requests
 
-      page.within("[data-testid='board-add-new-column']") do
+      click_button 'Select a label'
+
+      page.within(".dropdown-menu") do
         find('label', text: label2.title).click
-        click_button 'Add'
       end
+
+      click_button 'Add to board'
 
       wait_for_all_requests
 
@@ -103,6 +109,25 @@ RSpec.describe 'epic boards', :js do
     it "shows 'Create list' button" do
       expect(page).to have_selector('[data-testid="boards-create-list"]')
     end
+
+    it 'creates board filtering by one label' do
+      create_board_label(label.title)
+
+      expect(page).to have_selector('.board-card', count: 1)
+    end
+
+    it 'adds label to board scope and filters epics' do
+      label_title = label.title
+
+      update_board_label(label_title)
+
+      aggregate_failures do
+        expect(page).to have_selector('.board-card', count: 1)
+        expect(page).to have_content('Epic1')
+        expect(page).not_to have_content('Epic2')
+        expect(page).not_to have_content('Epic3')
+      end
+    end
   end
 
   context 'when user cannot admin epic boards' do
@@ -115,6 +140,21 @@ RSpec.describe 'epic boards', :js do
 
     it "does not show 'Create list'" do
       expect(page).not_to have_selector('[data-testid="boards-create-list"]')
+    end
+
+    it 'can view board scope' do
+      view_scope.click
+
+      page.within('.modal') do
+        aggregate_failures do
+          expect(find('.modal-header')).to have_content('Board scope')
+          expect(page).not_to have_content('Board name')
+          expect(page).not_to have_link('Edit')
+          expect(page).not_to have_button('Edit')
+          expect(page).not_to have_button('Save')
+          expect(page).not_to have_button('Cancel')
+        end
+      end
     end
   end
 
@@ -138,5 +178,71 @@ RSpec.describe 'epic boards', :js do
             to_index: to_index,
             list_to_index: list_to_index,
             perform_drop: perform_drop)
+  end
+
+  def click_value(filter, value)
+    page.within(".#{filter}") do
+      click_button 'Edit'
+
+      if value.is_a?(Array)
+        value.each { |value| click_link value }
+      else
+        click_link value
+      end
+    end
+  end
+
+  def click_on_create_new_board
+    page.within '.js-boards-selector' do
+      find('.dropdown-menu-toggle').click
+      wait_for_requests
+
+      click_button 'Create new board'
+    end
+  end
+
+  def create_board_label(label_title)
+    create_board_scope('labels', label_title)
+  end
+
+  def create_board_scope(filter, value)
+    click_on_create_new_board
+    find('#board-new-name').set 'test'
+
+    click_button 'Expand'
+
+    click_value(filter, value)
+
+    click_on_board_modal
+
+    click_button 'Create board'
+
+    wait_for_requests
+
+    expect(page).not_to have_selector('.board-list-loading')
+  end
+
+  def update_board_scope(filter, value)
+    edit_board.click
+
+    click_value(filter, value)
+
+    click_on_board_modal
+
+    click_button 'Save changes'
+
+    wait_for_requests
+
+    expect(page).not_to have_selector('.board-list-loading')
+  end
+
+  def update_board_label(label_title)
+    update_board_scope('labels', label_title)
+  end
+
+  # Click on modal to make sure the dropdown is closed (e.g. label scenario)
+  #
+  def click_on_board_modal
+    find('.board-config-modal .modal-content').click
   end
 end

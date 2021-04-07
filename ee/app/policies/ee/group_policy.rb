@@ -94,10 +94,6 @@ module EE
         @subject.saml_group_sync_available?
       end
 
-      condition(:group_timelogs_available) do
-        @subject.feature_available?(:group_timelogs)
-      end
-
       with_scope :global
       condition(:commit_committer_check_disabled_globally) do
         !PushRule.global&.commit_committer_check
@@ -130,12 +126,12 @@ module EE
 
       condition(:compliance_framework_available) do
         @subject.feature_available?(:custom_compliance_frameworks) &&
-          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject)
+          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject, default_enabled: :yaml)
       end
 
       condition(:group_level_compliance_pipeline_available) do
         @subject.feature_available?(:evaluate_group_level_compliance_pipeline) &&
-          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject, default_enabled: :yaml)
+          ::Feature.enabled?(:ff_evaluate_group_level_compliance_pipeline, @subject, default_enabled: :yaml)
       end
 
       rule { public_group | logged_in_viewable }.policy do
@@ -152,7 +148,6 @@ module EE
         enable :admin_issue_board_list
         enable :view_productivity_analytics
         enable :view_type_of_work_charts
-        enable :read_group_timelogs
         enable :download_wiki_code
       end
 
@@ -287,7 +282,10 @@ module EE
 
       rule { security_dashboard_enabled & developer }.enable :read_group_security_dashboard
 
-      rule { can?(:read_group_security_dashboard) }.enable :create_vulnerability_export
+      rule { can?(:read_group_security_dashboard) }.policy do
+        enable :create_vulnerability_export
+        enable :read_vulnerability
+      end
 
       rule { admin | owner }.policy do
         enable :read_group_compliance_dashboard
@@ -310,8 +308,6 @@ module EE
       rule { owner & group_saml_enabled }.policy do
         enable :read_group_saml_identity
       end
-
-      rule { ~group_timelogs_available }.prevent :read_group_timelogs
 
       rule { ~(admin | allow_to_manage_default_branch_protection) }.policy do
         prevent :update_default_branch_protection
@@ -395,12 +391,11 @@ module EE
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
-    override :resource_access_token_available?
-    def resource_access_token_available?
-      return true unless ::Gitlab.com?
+    override :resource_access_token_feature_available?
+    def resource_access_token_feature_available?
+      return super unless ::Gitlab.com?
 
-      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
-        group.feature_available_non_trial?(:resource_access_token)
+      group.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

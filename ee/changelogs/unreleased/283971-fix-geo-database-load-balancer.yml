@@ -1,5 +1,0 @@
----
-title: 'Geo: adds database load balancing support to work on standby clusters'
-merge_request: 53147
-author:
-type: added

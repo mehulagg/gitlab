@@ -150,7 +150,7 @@ gem 'deckar01-task_list', '2.3.1'
 gem 'gitlab-markup', '~> 1.7.1'
 gem 'github-markup', '~> 1.7.0', require: 'github/markup'
 gem 'commonmarker', '~> 0.21'
-gem 'kramdown', '~> 2.3.0'
+gem 'kramdown', '~> 2.3.1'
 gem 'RedCloth', '~> 4.3.2'
 gem 'rdoc', '~> 6.1.2'
 gem 'org-ruby', '~> 0.9.12'
@@ -198,7 +198,7 @@ gem 'acts-as-taggable-on', '~> 7.0'
 gem 'sidekiq', '~> 5.2.7'
 gem 'sidekiq-cron', '~> 1.0'
 gem 'redis-namespace', '~> 1.7.0'
-gem 'gitlab-sidekiq-fetcher', '0.5.5', require: 'sidekiq-reliable-fetch'
+gem 'gitlab-sidekiq-fetcher', '0.5.6', require: 'sidekiq-reliable-fetch'
 
 # Cron Parser
 gem 'fugit', '~> 1.2.1'
@@ -238,9 +238,6 @@ gem 'redis-rails', '~> 5.0.2'
 # Discord integration
 gem 'discordrb-webhooks', '~> 3.4', require: false
 
-# HipChat integration
-gem 'hipchat', '~> 1.5.0'
-
 # Jira integration
 gem 'jira-ruby', '~> 2.1.4'
 gem 'atlassian-jwt', '~> 0.2.0'
@@ -277,7 +274,10 @@ gem 'licensee', '~> 9.14.1'
 gem 'charlock_holmes', '~> 0.7.7'
 
 # Detect mime content type from content
-gem 'mimemagic', '~> 0.3.2'
+gem 'ruby-magic', '~> 0.3.2'
+
+# Fake version of the gem to trick bundler
+gem 'mimemagic', '0.3.7', path: 'vendor/shims/mimemagic', require: false
 
 # Faster blank
 gem 'fast_blank'
@@ -312,7 +312,7 @@ gem 'pg_query', '~> 1.3.0'
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '~> 0.16.1'
+gem 'gitlab-labkit', '~> 0.16.2'
 # Thrift is a dependency of gitlab-labkit, we want a version higher than 0.14.0
 # because of https://gitlab.com/gitlab-org/gitlab/-/issues/321900
 gem 'thrift', '>= 0.14.0'
@@ -377,7 +377,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 6.1.0', require: false
+  gem 'gitlab-styles', '~> 6.2.0', require: false
 
   gem 'haml_lint', '~> 0.36.0', require: false
   gem 'bundler-audit', '~> 0.7.0.1', require: false
@@ -399,8 +399,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'danger-gitlab', '~> 8.0', require: false
-  gem 'gitlab-dangerfiles', '~> 0.8.0', require: false
+  gem 'gitlab-dangerfiles', '~> 1.1.1', require: false
 end
 
 group :development, :test, :coverage do
@@ -414,6 +413,7 @@ group :development, :test, :omnibus do
 end
 
 group :test do
+  gem 'json-schema', '~> 2.8.0'
   gem 'fuubar', '~> 2.2.0'
   gem 'rspec-retry', '~> 0.6.1'
   gem 'rspec_profiling', '~> 0.0.6'
@@ -479,7 +479,7 @@ gem 'gitaly', '~> 13.9.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
-gem 'google-protobuf', '~> 3.12'
+gem 'google-protobuf', '~> 3.14.0'
 
 gem 'toml-rb', '~> 1.0.0'
 
@@ -488,7 +488,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.0'
+gem 'gitlab-experiment', '~> 0.5.2'
 
 # Structured logging
 gem 'lograge', '~> 0.5'
@@ -513,14 +513,13 @@ gem 'erubi', '~> 1.9.0'
 gem 'mail', '= 2.7.1'
 
 # File encryption
-gem 'lockbox', '~> 0.3.3'
+gem 'lockbox', '~> 0.6.2'
 
 # Email validation
 gem 'valid_email', '~> 0.1'
 
 # JSON
 gem 'json', '~> 2.3.0'
-gem 'json-schema', '~> 2.8.0'
 gem 'json_schemer', '~> 0.2.12'
 gem 'oj', '~> 3.10.6'
 gem 'multi_json', '~> 1.14.1'

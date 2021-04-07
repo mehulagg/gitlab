@@ -204,10 +204,6 @@
     margin-bottom: 10px;
   }
 
-  &:hover {
-    @extend .form-control:hover;
-  }
-
   &.focus,
   &.focus:hover {
     border-color: $blue-300;
@@ -402,7 +398,6 @@
 
     > svg {
       position: absolute;
-      top: 11px;
       right: 6px;
     }
   }

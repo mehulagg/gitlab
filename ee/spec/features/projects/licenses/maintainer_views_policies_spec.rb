@@ -51,7 +51,7 @@ RSpec.describe 'EE > Projects > Licenses > Maintainer views policies', :js do
       end
 
       it 'displays the classification' do
-        selector = "div[data-qa-selector='admin_license_compliance_row']"
+        selector = "div[data-testid='admin-license-compliance-row']"
         expect(page).to have_selector(selector)
 
         row = page.find(selector)

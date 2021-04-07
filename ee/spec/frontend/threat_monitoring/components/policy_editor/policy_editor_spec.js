@@ -1,6 +1,5 @@
 import { GlModal, GlToggle } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import NetworkPolicyEditor from 'ee/threat_monitoring/components/network_policy_editor.vue';
 import {
   RuleDirectionInbound,
   PortMatchModeAny,
@@ -66,6 +65,7 @@ spec:
       },
       store,
       data,
+      stubs: { NetworkPolicyEditor: true },
     });
   };
 
@@ -74,7 +74,7 @@ spec:
   const findPreview = () => wrapper.find(PolicyPreview);
   const findAddRuleButton = () => wrapper.find('[data-testid="add-rule"]');
   const findYAMLParsingAlert = () => wrapper.find('[data-testid="parsing-alert"]');
-  const findNetworkPolicyEditor = () => wrapper.find(NetworkPolicyEditor);
+  const findNetworkPolicyEditor = () => wrapper.find('[data-testid="network-policy-editor"]');
   const findPolicyAlertPicker = () => wrapper.find(PolicyAlertPicker);
   const findPolicyName = () => wrapper.find("[id='policyName']");
   const findSavePolicy = () => wrapper.find("[data-testid='save-policy']");
@@ -259,7 +259,7 @@ spec:
 
     const editor = findNetworkPolicyEditor();
     expect(editor.exists()).toBe(true);
-    expect(fromYaml(editor.props('value'))).toMatchObject({
+    expect(fromYaml(editor.attributes('value'))).toMatchObject({
       name: 'test-policy',
     });
   });
@@ -296,7 +296,7 @@ spec:
 
       const editor = findNetworkPolicyEditor();
       expect(editor.exists()).toBe(true);
-      expect(editor.props('value')).toEqual('');
+      expect(editor.attributes('value')).toEqual('');
     });
   });
 

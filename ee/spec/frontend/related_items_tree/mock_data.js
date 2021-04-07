@@ -357,3 +357,45 @@ export const mockEpicTreeReorderInput = {
     moveAfterId: 'gid://gitlab/Epic/3',
   },
 };
+
+export const mockFrequentlyUsedProjects = [
+  {
+    id: 1,
+    name: 'Project 1',
+    namespace: 'Gitlab / Project 1',
+    webUrl: '/gitlab-org/project1',
+    avatarUrl: null,
+    lastAccessedOn: 123,
+    frequency: 1,
+  },
+  {
+    id: 2,
+    name: 'Project 2',
+    namespace: 'Gitlab / Project 2',
+    webUrl: '/gitlab-org/project2',
+    avatarUrl: null,
+    lastAccessedOn: 124,
+    frequency: 1,
+  },
+];
+
+export const mockMixedFrequentlyUsedProjects = [
+  {
+    id: 1,
+    name: 'Project 1',
+    namespace: 'Gitlab / Project 1',
+    webUrl: '/gitlab-org/project1',
+    avatarUrl: null,
+    lastAccessedOn: 123,
+    frequency: 1,
+  },
+  {
+    id: 2,
+    name: 'Project 2',
+    namespace: 'Gitlab.com / Project 2',
+    webUrl: '/gitlab-com/project2',
+    avatarUrl: null,
+    lastAccessedOn: 124,
+    frequency: 1,
+  },
+];

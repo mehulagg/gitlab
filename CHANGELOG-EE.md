@@ -1,5 +1,194 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.10.2 (2021-04-01)
+
+- No changes.
+
+## 13.10.1 (2021-03-31)
+
+### Security (1 change)
+
+- Escape HTML on scoped labels tooltip.
+
+
+## 13.10.0 (2021-03-22)
+
+### Removed (1 change)
+
+- Remove the dast_saved_scans feature flag. !56540
+
+### Fixed (39 changes)
+
+- Fix updating of board's hide_backlog_list and hide_closed_list settings when on an unlicensed EE instance. !51561
+- Return only supported issue types for selected Jira Project. !53705
+- Fix incorrect IP address when creating ProtectedBranch audit event. !54292
+- Add support for negated weight issue filtering. !54393
+- Update details JSON Schema and GraphQL Schema for Vulnerability Finding. !54423
+- Jira Issues List page shows Web URL links instead of API URL. !54434
+- Add spacing to related Jira issues section. !54514
+- Geo: Prioritize resyncing new failures over persistent failures. !54585
+- Move action buttons to dropdown footer. !54767
+- Geo: Add unique constraints to container repository and terraform state registries. !54841
+- Exclude guests for trial ultimate licenses too. !54952
+- Only set note visibility_level if associated to a project. !55111
+- Fix scrolling issues with sticky status box. !55188
+- Prevent rendering test cases as issues. !55410
+- Fix wrong message for group vulnerability report when no vulnerabilities in projects. !55464
+- Hide package list if license compliance has an entry with 0 packages. !55466
+- Prevents HttpIntegration.payload_attribute_mapping from being reset when it was not a part of a GraphQL mutation input. !55511
+- Counter badges are misaligned in License Compliance tabs. !55517
+- Fix 500 error on group milestones page when milestones are associated to more than 3 releases. !55540
+- Fix Jira icon in sidebar too huge during page load. !55598
+- Fix alignment issues in vulnerability modals. !55716
+- Do not display empty description template lists in the dropdown. !55762
+- Geo: Fix syncing direct download remote stored Blob types. !55775
+- Update alerts list to fail gracefully on GraphQL failure. !55817
+- Allow project admin to read approval rules from archived projects. !55929
+- Fix epics dropdown to work in project epic swimlanes. !55954
+- Ensure task by type filters refresh the chart data. !55958
+- Fix console-error on vulnerabilities report. !56076
+- Refetch count list when vulnerabilities are updated. !56116
+- Fix group code coverage table to show all projects correctly. !56124
+- Fix dropdown z-index issue. !56125
+- Fix DAST site profile form submission. !56135
+- Correct billable users calculation on users statistics page. !56152
+- Do not mark bot users as pending approval when User Cap is enabled. !56287
+- Fix zero-downtime upgrade from 13.8.x to 13.9.3. !56352
+- Use created in epics and MRs. !56391
+- Fix subscription banner on New Project page. !56443
+- Fetch only detected and confirmed vulnerabilities for project security status. !56533
+- Replace stubbed dastProfiles.branch GraphQL field. !56604
+
+### Changed (44 changes, 3 of them are from the community)
+
+- Migrate lfs_object_registry to be compatible with Geo::ReplicableRegistry. !52636
+- Send email when user cap is reached. !53489
+- Add securityReportsUpToDateOnTargetBranch field to MergeRequestType to indicate if the security reports are up to date on the target branch. !53907
+- GitLab EE Project Settings CI/CD headers expand/collapse on click / tap. !54115 (Daniel Schömer)
+- Add ability to bulk update vulnerabilities. !54206
+- Add external link to create jira issue button. !54310
+- Update License Compliance and Dependency List Empty State Pages. !54314
+- Lower SAML SSO session expiry to one day. !54374
+- Add page specific styles to project discover security page. !54460
+- Migrate Epic Events when using Group Migration. !54475
+- Update AutoDevOps wording on secure config page. !54586
+- Geo Status - Rename Attachments to Uploads. !54720
+- Sort changed metrics first in metrics reports MR widget. !54729
+- Remove services section from API Fuzzing CI template. !54746
+- Add negated weight issue filtering on API. !54867
+- Differentiate metrics and logs from replica/primary databases. !54885
+- Show subscription expiration banner only for top-level group owners. !54908
+- Trim-down "Skip Trial" link on the trial flow page. !54911
+- Remove saml_group_links feature flag. !54986
+- Exempt auditor from ip restriction. !55073
+- Introduce disabled analyzer warning to SAST Config Page. !55172
+- Restructure layout of Add/Update approval rule form. !55181
+- Sort metrics report MR widget - changed, new, removed, unchanged. !55217
+- Project Settings Repository Push Rules header expands/collapses on click / tap. !55235 (Daniel Schömer)
+- Epic confidentiality widget. !55350
+- Make vulnerability file path linkable in the vulnerability list. !55356
+- Update css to make the vulnerability more prominent. !55389
+- Add warning message to pipeline stage dropdowns in merge trains. !55437
+- Remove scanner parameter from vulnerability_findings REST endpoint. !55453 (Thiago Figueiro @thiagocsf)
+- Add docs link for license compliance mr widget. !55474
+- Improve security dashboard/vulnerability report empty state messages. !55489
+- Add name to agent token table. !55503
+- Link cluster index page to cluster show page. !55536
+- Default enable the extended VSA form. !55572
+- Select security findings by their UUIDs instead of their positions in the report artifacts. !55643
+- Restyle license compliance button on merge request widget. !55667
+- Remove sast_configuration_ui feature flag. !55680
+- Track group coverage usage ping event in Vue template. !55687
+- Disable policy DAST scan profile modification. !55704
+- Add pagination to agent token table. !55788
+- Show CSV has been exported banner on export. !55965
+- DevOps Adoption - Allow users to select multiple groups. !56073
+- Advanced Search Migration to add permission data to notes documents. !56177
+- Update the approvers rule removal modal button to use new danger variant. !56230
+
+### Performance (4 changes)
+
+- Use shards for Advanced Search indexing. !55047
+- Pipline vulnerabilities loading performance improvements. !55692
+- Spread shared runner minute reset to 8h. !55802
+- Make StoreSecurityReportsWorker cpu-bound. !56149
+
+### Added (49 changes)
+
+- Restrict on-call to certain times during rotations via GraphQL. !52998
+- Support /child quick action when creating epics. !53073
+- Geo: adds database load balancing support to work on standby clusters. !53147
+- Support OpenAPI v3 and Postman variables in API Fuzzing. !53646
+- Add Geo node status metrics to usage ping. !53665
+- Add iteration to the sidebar in epics swimlanes. !53695
+- Add table to store secondary usage data. !53758
+- User permission export (feature flag removed). !53789
+- Add status filtering token support for Requirements. !54056
+- Extend GraphQL Ci::PipelineType to include Security Report Findings. !54104
+- Added cluster agent details page. !54106
+- Expose details of blocking issues via GraphQL. !54152
+- Geo: Release package file verification. !54361
+- Advanced Search: Estimate Elasticsearch cluster size. !54430
+- Add remove button to billable members. !54458
+- Add event count column to threat alerts. !54616
+- Add rake task to check pending Elasticsearch migrations. !54656
+- Add pipeline security report summary. !54673
+- Add label `x` to remove labels in iteration report. !54708
+- Allow to filter requirements by missing status. !54711
+- Cleanup ci_notification_dot experiment. !54721
+- Include namespace storage stats in root statistics. !54788
+- Include group wikis in Geo replication. !54914
+- Allow only group trials. !54920
+- Disable repository mirroring for hard failures. !54964
+- Include wiki_size and storage_size in NamespaceStatistics. !54967
+- Update NamespaceStatistics after wiki update. !54969
+- Query group projects by code coverage with GraphQL. !55182
+- Add purchase more storage button to storage usage quotas page. !55246
+- Add last activity time column to seat usage table. !55321
+- Add mutation to move epics between lists. !55467
+- Introduce group-level API for DevOps adoption. !55479
+- Update existing namespace statistics with wiki_size. !55487
+- Social sign in options to trial registration. !55533
+- Add remove Billable Member API endpoint. !55645
+- Add support for updating default description templates for issues and merge requests via API. !55718
+- Include detected vulnerability in finding state check. !55806
+- Show 'Add Seats' Button on Billing Page. !55964
+- Migrate group iterations when using Bulk Import. !56018
+- Custom mapping for HTTP endpoints. !56021
+- Create vulnerability issue link after merging the MR. !56038
+- Add support for task lists within Test Case description. !56196
+- Implement Group Wiki Geo replication. !56247
+- Skip user limit validation when saving cloud licenses. !56260
+- Add reviewers detail to approved and unapproved merge request emails. !56290
+- Add toolbox for the trends chart in project security dashboard. !56316
+- Add feature flag to block gitlab.com top-level group creation via api. !56360
+- Release DAST Profile branch selection. !56442
+- Add `scan` field into `SecurityReportSummarySectionType` GraphQL type. !56547
+
+### Other (9 changes, 1 of them is from the community)
+
+- Rename "CYCLE_ANALYTICS_*" variables in spec with "VSA_*". !52609 (Takuya Noguchi)
+- Track epic creation action on usage ping. !53651
+- Apply GitLab UI styles to registrations/ci_cd buttons. !54501
+- Fix License Compliance widget button spacing. !54701
+- Remove feature flag for Pipelines Security Summary. !54808
+- Add new bulk create API endpoint for Devops adoption. !54813
+- Add a separator between milestone and iteration dropdown in sidebars. !54895
+- Update usage ping dictionary. !55024
+- Delete redirect files. !56169
+
+
+## 13.9.5 (2021-03-31)
+
+### Security (1 change)
+
+- Escape HTML on scoped labels tooltip.
+
+
+## 13.9.4 (2021-03-17)
+
+- No changes.
+
 ## 13.9.3 (2021-03-08)
 
 - No changes.
@@ -166,6 +355,17 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Review UI text - repo push rules settings. !52797
 
 
+## 13.8.7 (2021-03-31)
+
+### Security (1 change)
+
+- Escape HTML on scoped labels tooltip.
+
+
+## 13.8.6 (2021-03-17)
+
+- No changes.
+
 ## 13.8.5 (2021-03-04)
 
 - No changes.
@@ -311,6 +511,10 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Update what's new UI text. !51422
 - Enable DevOps Adoption Report feature flag if any Segments already exist. !51602
 
+
+## 13.7.9 (2021-03-17)
+
+- No changes.
 
 ## 13.7.8 (2021-03-04)
 

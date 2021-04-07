@@ -80,15 +80,15 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
       it 'reports that all scanners are configured for which latest pipeline has builds' do
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
-          security_scan(:dast, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:dast_profiles, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:sast, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:container_scanning, configured: false, auto_dev_ops_enabled: true),
-          security_scan(:dependency_scanning, configured: false, auto_dev_ops_enabled: true),
-          security_scan(:license_scanning, configured: false, auto_dev_ops_enabled: true),
-          security_scan(:secret_detection, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:coverage_fuzzing, configured: false, auto_dev_ops_enabled: true),
-          security_scan(:api_fuzzing, configured: false, auto_dev_ops_enabled: true)
+          security_scan(:dast, configured: true),
+          security_scan(:sast, configured: true),
+          security_scan(:container_scanning, configured: false),
+          security_scan(:dependency_scanning, configured: false),
+          security_scan(:license_scanning, configured: false),
+          security_scan(:secret_detection, configured: true),
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false),
+          security_scan(:dast_profiles, configured: true)
         )
       end
     end
@@ -105,14 +105,14 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       it 'reports all security jobs as unconfigured' do
         expect(Gitlab::Json.parse(subject[:features])).to contain_exactly(
           security_scan(:dast, configured: false),
-          security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: false),
           security_scan(:container_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
           security_scan(:coverage_fuzzing, configured: false),
-          security_scan(:api_fuzzing, configured: false)
+          security_scan(:api_fuzzing, configured: false),
+          security_scan(:dast_profiles, configured: true)
         )
       end
     end
@@ -254,36 +254,21 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
     end
   end
 
-  def security_scan(type, configured:, auto_dev_ops_enabled: false)
+  def security_scan(type, configured:)
     configuration_path = configuration_path(type)
-
-    status_str = scan_status(type, configured, auto_dev_ops_enabled)
 
     {
       "type" => type.to_s,
       "configured" => configured,
-      "status" => status_str,
       "configuration_path" => configuration_path
     }
   end
 
   def configuration_path(type)
     {
-      dast_profiles: project_security_configuration_dast_profiles_path(project),
+      dast_profiles: project_security_configuration_dast_scans_path(project),
       sast: project_security_configuration_sast_path(project),
       api_fuzzing: project_security_configuration_api_fuzzing_path(project)
     }[type]
-  end
-
-  def scan_status(type, configured, auto_dev_ops_enabled)
-    if type == :dast_profiles
-      "Available for on-demand DAST"
-    elsif configured && auto_dev_ops_enabled
-      "Enabled with Auto DevOps"
-    elsif configured
-      "Enabled"
-    else
-      "Not enabled"
-    end
   end
 end

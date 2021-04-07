@@ -309,6 +309,7 @@ module Ci
     scope :created_after, -> (time) { where('ci_pipelines.created_at > ?', time) }
     scope :created_before_id, -> (id) { where('ci_pipelines.id < ?', id) }
     scope :before_pipeline, -> (pipeline) { created_before_id(pipeline.id).outside_pipeline_family(pipeline) }
+    scope :eager_load_project, -> { eager_load(project: [:route, { namespace: :route }]) }
 
     scope :outside_pipeline_family, ->(pipeline) do
       where.not(id: pipeline.same_family_pipeline_ids)
@@ -445,6 +446,10 @@ module Ci
       @auto_devops_pipelines_completed_total ||= Gitlab::Metrics.counter(:auto_devops_pipelines_completed_total, 'Number of completed auto devops pipelines')
     end
 
+    def uses_needs?
+      builds.where(scheduling_type: :dag).any?
+    end
+
     def stages_count
       statuses.select(:stage).distinct.count
     end
@@ -507,6 +512,12 @@ module Ci
     def git_author_email
       strong_memoize(:git_author_email) do
         commit.try(:author_email)
+      end
+    end
+
+    def git_author_full_text
+      strong_memoize(:git_author_full_text) do
+        commit.try(:author_full_text)
       end
     end
 
@@ -573,10 +584,18 @@ module Ci
     end
 
     def cancel_running(retries: nil)
-      retry_optimistic_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelable|
-        cancelable.find_each do |job|
-          yield(job) if block_given?
-          job.cancel
+      commit_status_relations = [:project, :pipeline]
+      ci_build_relations = [:deployment, :taggings]
+
+      retry_optimistic_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelables|
+        cancelables.find_in_batches do |batch|
+          ActiveRecord::Associations::Preloader.new.preload(batch, commit_status_relations)
+          ActiveRecord::Associations::Preloader.new.preload(batch.select { |job| job.is_a?(Ci::Build) }, ci_build_relations)
+
+          batch.each do |job|
+            yield(job) if block_given?
+            job.cancel
+          end
         end
       end
     end
@@ -822,6 +841,7 @@ module Ci
         variables.append(key: 'CI_COMMIT_DESCRIPTION', value: git_commit_description.to_s)
         variables.append(key: 'CI_COMMIT_REF_PROTECTED', value: (!!protected_ref?).to_s)
         variables.append(key: 'CI_COMMIT_TIMESTAMP', value: git_commit_timestamp.to_s)
+        variables.append(key: 'CI_COMMIT_AUTHOR', value: git_author_full_text.to_s)
 
         # legacy variables
         variables.append(key: 'CI_BUILD_REF', value: sha)

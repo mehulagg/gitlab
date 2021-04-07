@@ -23,6 +23,7 @@ RSpec.describe CredentialsInventoryMailer do
 
   describe '#ssh_key_deleted_email' do
     let_it_be(:ssh_key) { create(:personal_key, last_used_at: 3.weeks.ago) }
+
     let(:params) do
       {
           notification_email: ssh_key.user.notification_email,

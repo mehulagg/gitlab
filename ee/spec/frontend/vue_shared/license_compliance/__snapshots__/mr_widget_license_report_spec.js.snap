@@ -3,7 +3,7 @@
 exports[`License Report MR Widget report section report body should render correctly 1`] = `
 <smart-virtual-list-stub
   class="report-block-container"
-  length="1"
+  length="2"
   remain="20"
   rtag="div"
   size="26"

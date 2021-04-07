@@ -29,12 +29,7 @@ export default {
         :size="14"
         class="author-link suggestion-help-hover"
       />
-      <gl-popover
-        target="pop-approver"
-        container="popovercontainer"
-        placement="top"
-        triggers="hover focus"
-      >
+      <gl-popover target="pop-approver" container="popovercontainer" placement="top">
         <template #title>{{ __('Who can approve?') }}</template>
         <ul class="pl-3">
           <li>

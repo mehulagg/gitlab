@@ -20,18 +20,6 @@ module EE
             context.group.iterations.create!(data)
           end
 
-          def after_run(extracted_data)
-            context.entity.update_tracker_for(
-              relation: :iterations,
-              has_next_page: extracted_data.has_next_page?,
-              next_page: extracted_data.next_page
-            )
-
-            if extracted_data.has_next_page?
-              run
-            end
-          end
-
           private
 
           def authorized?

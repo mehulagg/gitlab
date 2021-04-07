@@ -21,6 +21,8 @@ import {
 import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
 
 export const i18n = {
+  deleteIntegration: s__('AlertSettings|Delete integration'),
+  editIntegration: s__('AlertSettings|Edit integration'),
   title: s__('AlertsIntegrations|Current integrations'),
   emptyState: s__('AlertsIntegrations|No integrations have been added yet'),
   status: {
@@ -139,7 +141,7 @@ export default {
 
 <template>
   <div class="incident-management-list">
-    <h5 class="gl-font-lg">{{ $options.i18n.title }}</h5>
+    <h5 class="gl-font-lg gl-mt-5">{{ $options.i18n.title }}</h5>
     <gl-table
       class="integration-list"
       :items="integrations"
@@ -174,11 +176,16 @@ export default {
 
       <template #cell(actions)="{ item }">
         <gl-button-group class="gl-ml-3">
-          <gl-button icon="settings" @click="editIntegration(item)" />
+          <gl-button
+            icon="settings"
+            :aria-label="$options.i18n.editIntegration"
+            @click="editIntegration(item)"
+          />
           <gl-button
             v-gl-modal.deleteIntegration
             :disabled="item.type === $options.typeSet.prometheus"
             icon="remove"
+            :aria-label="$options.i18n.deleteIntegration"
             @click="setIntegrationToDelete(item)"
           />
         </gl-button-group>
@@ -198,8 +205,8 @@ export default {
     </gl-table>
     <gl-modal
       modal-id="deleteIntegration"
-      :title="s__('AlertSettings|Delete integration')"
-      :ok-title="s__('AlertSettings|Delete integration')"
+      :title="$options.i18n.deleteIntegration"
+      :ok-title="$options.i18n.deleteIntegration"
       ok-variant="danger"
       @ok="deleteIntegration"
     >

@@ -3,7 +3,11 @@ import { GlFormGroup, GlFormInput, GlFormCheckboxTree, GlModal, GlAlert, GlIcon 
 import * as Sentry from '@sentry/browser';
 import _ from 'lodash';
 import { convertToGraphQLId, getIdFromGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
-import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from '../constants';
+import {
+  DEVOPS_ADOPTION_STRINGS,
+  DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
+  DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
+} from '../constants';
 import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import deleteDevopsAdoptionSegmentMutation from '../graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
 import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
@@ -17,6 +21,11 @@ export default {
     GlFormCheckboxTree,
     GlAlert,
     GlIcon,
+  },
+  inject: {
+    isGroup: {
+      default: false,
+    },
   },
   props: {
     groups: {
@@ -81,7 +90,7 @@ export default {
       return this.errors[0];
     },
     modalTitle() {
-      return this.$options.i18n.addingTitle;
+      return this.isGroup ? DEVOPS_ADOPTION_GROUP_LEVEL_LABEL : this.$options.i18n.addingTitle;
     },
     filteredOptions() {
       return this.filter

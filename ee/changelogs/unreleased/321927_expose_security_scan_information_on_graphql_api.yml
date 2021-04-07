@@ -1,5 +1,0 @@
----
-title: Add `scan` field into `SecurityReportSummarySectionType` GraphQL type
-merge_request: 56547
-author:
-type: added

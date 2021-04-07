@@ -4,7 +4,6 @@ import { uniqueId } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
-import { selectedTimezoneFormattedOffset } from '../../schedule/utils';
 
 export const SHIFT_WIDTHS = {
   md: 100,
@@ -13,7 +12,7 @@ export const SHIFT_WIDTHS = {
 };
 
 const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
-export const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM';
+export const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM ("UTC:" o)';
 
 export default {
   ROTATION_CENTER_CLASS,
@@ -21,7 +20,6 @@ export default {
     GlAvatar,
     GlPopover,
   },
-  inject: ['selectedTimezone'],
   props: {
     assignee: {
       type: Object,
@@ -57,9 +55,7 @@ export default {
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)} ${
-          this.timezoneOffset
-        }`,
+        endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)}`,
       });
     },
     rotationAssigneeUniqueID() {
@@ -73,13 +69,8 @@ export default {
     },
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)} ${
-          this.timezoneOffset
-        }`,
+        startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)}`,
       });
-    },
-    timezoneOffset() {
-      return selectedTimezoneFormattedOffset(this.selectedTimezone.formatted_offset);
     },
   },
 };
@@ -103,12 +94,7 @@ export default {
         >
       </div>
     </div>
-    <gl-popover
-      :target="rotationAssigneeUniqueID"
-      :title="assignee.user.username"
-      triggers="hover"
-      placement="top"
-    >
+    <gl-popover :target="rotationAssigneeUniqueID" :title="assignee.user.username" placement="top">
       <p class="gl-m-0" data-testid="rotation-assignee-starts-at">
         {{ startsAt }}
       </p>

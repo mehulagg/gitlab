@@ -10,10 +10,6 @@ module Gitlab
         ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
       end
 
-      def self.instance_variables_ui_enabled?
-        ::Feature.enabled?(:ci_instance_variables_ui, default_enabled: true)
-      end
-
       def self.pipeline_latest?
         ::Feature.enabled?(:ci_pipeline_latest, default_enabled: true)
       end
@@ -68,8 +64,8 @@ module Gitlab
         ::Feature.enabled?(:multiple_cache_per_job, default_enabled: :yaml)
       end
 
-      def self.ci_commit_pipeline_mini_graph_vue_enabled?(project)
-        ::Feature.enabled?(:ci_commit_pipeline_mini_graph_vue, project, default_enabled: :yaml)
+      def self.remove_duplicate_artifact_exposure_paths?(project)
+        ::Feature.enabled?(:remove_duplicate_artifact_exposure_paths, project, default_enabled: :yaml)
       end
     end
   end

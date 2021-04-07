@@ -7,6 +7,8 @@ RSpec.describe 'Operations dropdown navbar EE' do
   let(:project) { create(:project) }
 
   before do
+    stub_feature_flags(combined_menu: false)
+
     project.add_maintainer(user)
     sign_in(user)
 

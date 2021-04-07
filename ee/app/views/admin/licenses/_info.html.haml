@@ -17,7 +17,7 @@
         %ul.content-list
           %li
             %span.light= _('Plan:')
-            %strong= @license.plan.capitalize
+            %strong{ data: { "qa-selector": "plan_name" } }= @license.plan.capitalize
             - unless @license.ultimate?
               = ' - '
               = link_to _('Contact Sales to upgrade'),

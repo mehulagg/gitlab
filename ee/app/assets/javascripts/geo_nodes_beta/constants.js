@@ -12,6 +12,11 @@ export const GEO_TROUBLESHOOTING_URL = helpPagePath(
   'administration/geo/replication/troubleshooting.html',
 );
 
+export const HELP_INFO_URL = helpPagePath(
+  'administration/geo/disaster_recovery/background_verification.html',
+  { anchor: 'repository-verification' },
+);
+
 export const HEALTH_STATUS_UI = {
   healthy: {
     icon: 'status_success',

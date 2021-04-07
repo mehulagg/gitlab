@@ -1,11 +1,8 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { shallowMount } from '@vue/test-utils';
+import GeoNodeDetails from 'ee/geo_nodes_beta/components/details/geo_node_details.vue';
 import GeoNodes from 'ee/geo_nodes_beta/components/geo_nodes.vue';
 import GeoNodeHeader from 'ee/geo_nodes_beta/components/header/geo_node_header.vue';
-import { MOCK_PRIMARY_VERSION, MOCK_REPLICABLE_TYPES, MOCK_NODES } from '../mock_data';
-
-const localVue = createLocalVue();
-localVue.use(Vuex);
+import { MOCK_NODES } from '../mock_data';
 
 describe('GeoNodes', () => {
   let wrapper;
@@ -14,19 +11,8 @@ describe('GeoNodes', () => {
     node: MOCK_NODES[0],
   };
 
-  const createComponent = (initialState, props) => {
-    const store = new Vuex.Store({
-      state: {
-        primaryVersion: MOCK_PRIMARY_VERSION.version,
-        primaryRevision: MOCK_PRIMARY_VERSION.revision,
-        replicableTypes: MOCK_REPLICABLE_TYPES,
-        ...initialState,
-      },
-    });
-
+  const createComponent = (props) => {
     wrapper = shallowMount(GeoNodes, {
-      localVue,
-      store,
       propsData: {
         ...defaultProps,
         ...props,
@@ -41,8 +27,8 @@ describe('GeoNodes', () => {
 
   const findGeoNodesContainer = () => wrapper.find('div');
   const findGeoSiteTitle = () => wrapper.find('h4');
-  const findGeoNodeHeader = () => wrapper.find(GeoNodeHeader);
-  const findGeoNodeDetails = () => wrapper.find('p');
+  const findGeoNodeHeader = () => wrapper.findComponent(GeoNodeHeader);
+  const findGeoNodeDetails = () => wrapper.findComponent(GeoNodeDetails);
 
   describe('template', () => {
     beforeEach(() => {
@@ -78,7 +64,7 @@ describe('GeoNodes', () => {
     ${MOCK_NODES[1]} | ${'Secondary site'}
   `(`Site Title`, ({ node, siteTitle }) => {
     beforeEach(() => {
-      createComponent(null, { node });
+      createComponent({ node });
     });
 
     it(`is ${siteTitle} when primary is ${node.primary}`, () => {

@@ -13,7 +13,7 @@ class IssuablesAnalytics
 
   attr_reader :issuables, :start_date, :end_date, :months_back
 
-  DATE_FORMAT = "%Y-%m".freeze
+  DATE_FORMAT = "%Y-%m"
 
   def initialize(issuables:, months_back: nil)
     @issuables = issuables

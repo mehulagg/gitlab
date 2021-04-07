@@ -181,14 +181,22 @@ RSpec.describe GroupMember do
   end
 
   describe 'scopes' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:member1) { create(:group_member, group: group) }
+    let_it_be(:member2) { create(:group_member, group: group) }
+    let_it_be(:member3) { create(:group_member) }
+    let_it_be(:guest1) { create(:group_member, :guest) }
+    let_it_be(:guest2) { create(:group_member, :guest, group: group) }
+
     describe '.by_group_ids' do
       it 'returns only members from selected groups' do
-        group = create(:group)
-        member1 = create(:group_member, group: group)
-        member2 = create(:group_member, group: group)
-        create(:group_member)
+        expect(described_class.by_group_ids([group.id])).to contain_exactly(member1, member2, guest2)
+      end
+    end
 
-        expect(described_class.by_group_ids([group.id])).to match_array([member1, member2])
+    describe '.guests' do
+      it 'returns only guests members' do
+        expect(described_class.guests).to contain_exactly(guest1, guest2)
       end
     end
 

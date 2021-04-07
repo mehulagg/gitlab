@@ -15,6 +15,9 @@ describe('CloudLicenseApp', () => {
         propsData: {
           ...props,
         },
+        provide: {
+          planName: 'Core',
+        },
       }),
     );
   };
@@ -28,6 +31,10 @@ describe('CloudLicenseApp', () => {
 
     it('presents a form', () => {
       expect(findActivateSubscriptionForm().exists()).toBe(true);
+    });
+
+    it('presents a main title with the plan name', () => {
+      expect(wrapper.text()).toContain('Core plan');
     });
   });
 });

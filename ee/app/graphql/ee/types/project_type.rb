@@ -133,8 +133,7 @@ module EE
         field :api_fuzzing_ci_configuration,
               ::Types::AppSec::Fuzzing::Api::CiConfigurationType,
               null: true,
-              description: 'API fuzzing configuration for the project.',
-              feature_flag: :api_fuzzing_configuration_ui
+              description: 'API fuzzing configuration for the project. '
 
         field :push_rules,
               ::Types::PushRulesType,

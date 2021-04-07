@@ -110,7 +110,15 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                   end
 
                   context 'with namespace' do
-                    let(:namespace) { double(:namespace, name: 'No Limit Records') }
+                    let(:has_future_renewal) { false }
+
+                    let_it_be(:namespace) { create(:group, name: 'No Limit Records') }
+
+                    before do
+                      allow_next_instance_of(GitlabSubscriptions::CheckFutureRenewalService, namespace: namespace) do |service|
+                        allow(service).to receive(:execute).and_return(has_future_renewal)
+                      end
+                    end
 
                     it 'has an expiration blocking message' do
                       expect(subject).to include("You didn't renew your subscription for No Limit Records so it was downgraded to the free plan")
@@ -126,6 +134,12 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                       it 'has an expiration blocking message' do
                         expect(subject).to include("We tried to automatically renew your subscription for No Limit Records on 2020-03-01 but something went wrong so your subscription was downgraded to the free plan. Don't worry, your data is safe. We suggest you check your payment method and get in touch with our support team (support@gitlab.com). They'll gladly help with your subscription renewal.")
                       end
+                    end
+
+                    context 'when there is a future renewal' do
+                      let(:has_future_renewal) { true }
+
+                      it { is_expected.to be_nil }
                     end
                   end
                 end
@@ -184,7 +198,15 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
               context 'with namespace' do
                 using RSpec::Parameterized::TableSyntax
 
-                let(:namespace) { double(:namespace, name: 'No Limit Records') }
+                let(:has_future_renewal) { false }
+
+                let_it_be(:namespace) { create(:group, name: 'No Limit Records') }
+
+                before do
+                  allow_next_instance_of(GitlabSubscriptions::CheckFutureRenewalService, namespace: namespace) do |service|
+                    allow(service).to receive(:execute).and_return(has_future_renewal)
+                  end
+                end
 
                 where plan: %w(gold ultimate)
 
@@ -226,6 +248,12 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                   it 'returns nil' do
                     expect(subject).to be nil
                   end
+                end
+
+                context 'when there is a future renewal' do
+                  let(:has_future_renewal) { true }
+
+                  it { is_expected.to be_nil }
                 end
               end
             end

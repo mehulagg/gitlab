@@ -14,7 +14,8 @@ module API
               package,
               current_user,
               project,
-              conan_package_reference: params[:conan_package_reference]
+              conan_package_reference: params[:conan_package_reference],
+              id: params[:id]
             )
 
             render_api_error!("No recipe manifest found", 404) if yield(presenter).empty?
@@ -31,19 +32,15 @@ module API
           end
 
           def recipe_upload_urls
-            { upload_urls: Hash[
-              file_names.select(&method(:recipe_file?)).map do |file_name|
-                [file_name, build_recipe_file_upload_url(file_name)]
-              end
-            ] }
+            { upload_urls: file_names.select(&method(:recipe_file?)).to_h do |file_name|
+                             [file_name, build_recipe_file_upload_url(file_name)]
+                           end }
           end
 
           def package_upload_urls
-            { upload_urls: Hash[
-              file_names.select(&method(:package_file?)).map do |file_name|
-                [file_name, build_package_file_upload_url(file_name)]
-              end
-            ] }
+            { upload_urls: file_names.select(&method(:package_file?)).to_h do |file_name|
+                             [file_name, build_package_file_upload_url(file_name)]
+                           end }
           end
 
           def recipe_file?(file_name)

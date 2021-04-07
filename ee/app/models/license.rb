@@ -8,7 +8,7 @@ class License < ApplicationRecord
   PREMIUM_PLAN = 'premium'
   ULTIMATE_PLAN = 'ultimate'
   CLOUD_LICENSE_TYPE = 'cloud'
-  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0).freeze
+  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
@@ -98,6 +98,7 @@ class License < ApplicationRecord
     group_repository_analytics
     group_saml
     group_saml_group_sync
+    group_scoped_ci_variables
     group_wikis
     incident_sla
     incident_metric_upload
@@ -126,7 +127,6 @@ class License < ApplicationRecord
     scoped_labels
     smartcard_auth
     swimlanes
-    group_timelogs
     type_of_work_analytics
     minimal_access_role
     unprotection_restrictions
@@ -157,6 +157,7 @@ class License < ApplicationRecord
     group_ci_cd_analytics
     group_level_compliance_dashboard
     incident_management
+    inline_codequality
     insights
     issuable_health_status
     jira_vulnerabilities_integration
@@ -179,7 +180,6 @@ class License < ApplicationRecord
     subepics
     threat_monitoring
     vulnerability_auto_fix
-    evaluate_group_level_compliance_pipeline
   ]
   EEU_FEATURES.freeze
 

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Groups::PushRulesController < Groups::ApplicationController
   include Gitlab::Utils::StrongMemoize
   include PushRulesHelper
@@ -16,10 +17,14 @@ class Groups::PushRulesController < Groups::ApplicationController
   end
 
   def update
-    if @push_rule.update(push_rule_params)
+    service_response = PushRules::CreateOrUpdateService
+      .new(container: group, current_user: current_user, params: push_rule_params)
+      .execute
+
+    if service_response.success?
       flash[:notice] = _('Push Rule updated successfully.')
     else
-      flash[:alert] = @push_rule.errors.full_messages.join(', ').html_safe
+      flash[:alert] = service_response.message
     end
 
     redirect_to edit_group_push_rules_path(group)
@@ -45,8 +50,7 @@ class Groups::PushRulesController < Groups::ApplicationController
 
   def push_rule
     strong_memoize(:push_rule) do
-      group.update(push_rule: PushRule.create!) unless group.push_rule
-      group.push_rule
+      group.push_rule || group.build_push_rule
     end
   end
 

@@ -13,14 +13,13 @@ import * as responses from 'ee_jest/security_configuration/dast_site_profiles_fo
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import * as urlUtility from '~/lib/utils/url_utility';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
 const [siteProfileOne] = siteProfiles;
 const fullPath = 'group/project';
-const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
+const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_scans`;
 const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';
@@ -134,7 +133,18 @@ describe('DastSiteProfileForm', () => {
 
   it('renders properly', () => {
     createComponent();
-    expect(wrapper.html()).not.toBe('');
+    expect(findForm().exists()).toBe(true);
+    expect(findForm().text()).toContain('New site profile');
+  });
+
+  it('when showHeader prop is disabled', () => {
+    createComponent({
+      propsData: {
+        ...defaultProps,
+        showHeader: false,
+      },
+    });
+    expect(findForm().text()).not.toContain('New site profile');
   });
 
   describe('target URL input', () => {
@@ -175,6 +185,33 @@ describe('DastSiteProfileForm', () => {
       expect(findExcludedUrlsInput().attributes('maxlength')).toBe('2048');
       expect(findRequestHeadersInput().attributes('maxlength')).toBe('2048');
     });
+
+    describe('should have correct placeholders', () => {
+      const defaultPlaceholder = 'Cache-control: no-cache, User-Agent: DAST/1.0';
+
+      it('when creating a new profile', async () => {
+        expect(findRequestHeadersInput().attributes('placeholder')).toBe(defaultPlaceholder);
+      });
+
+      it('when updating an existing profile with no request headers set', () => {
+        createFullComponent({
+          propsData: {
+            siteProfile: { ...siteProfileOne, requestHeaders: '' },
+          },
+        });
+        expect(findRequestHeadersInput().attributes('placeholder')).toBe(defaultPlaceholder);
+      });
+
+      it('when updating an existing profile', () => {
+        createFullComponent({
+          propsData: {
+            siteProfile: siteProfileOne,
+          },
+        });
+        expect(findRequestHeadersInput().attributes('placeholder')).toBe('[Redacted]');
+        expect(findByNameAttribute('password').attributes('placeholder')).toBe('••••••••');
+      });
+    });
   });
 
   describe.each`
@@ -188,8 +225,6 @@ describe('DastSiteProfileForm', () => {
           siteProfile,
         },
       });
-
-      jest.spyOn(urlUtility, 'redirectTo').mockImplementation();
     });
 
     it('sets the correct title', () => {
@@ -233,8 +268,10 @@ describe('DastSiteProfileForm', () => {
           });
         });
 
-        it('redirects to the profiles library', () => {
-          expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+        it('emits success event with correct params', () => {
+          expect(wrapper.emitted('success')).toBeTruthy();
+          expect(wrapper.emitted('success')).toHaveLength(1);
+          expect(wrapper.emitted('success')[0]).toStrictEqual([{ id: '3083' }]);
         });
 
         it('does not show an alert', () => {
@@ -292,9 +329,9 @@ describe('DastSiteProfileForm', () => {
 
     describe('cancellation', () => {
       describe('form unchanged', () => {
-        it('redirects to the profiles library', () => {
+        it('emits cancel event', () => {
           findCancelButton().vm.$emit('click');
-          expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+          expect(wrapper.emitted('cancel')).toBeTruthy();
         });
       });
 
@@ -310,9 +347,9 @@ describe('DastSiteProfileForm', () => {
           expect(findCancelModal().vm.show).toHaveBeenCalled();
         });
 
-        it('redirects to the profiles library if confirmed', () => {
+        it('emits cancel event', () => {
           findCancelModal().vm.$emit('ok');
-          expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+          expect(wrapper.emitted('cancel')).toBeTruthy();
         });
       });
     });

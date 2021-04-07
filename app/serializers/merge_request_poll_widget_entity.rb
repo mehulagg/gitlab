@@ -19,19 +19,22 @@ class MergeRequestPollWidgetEntity < Grape::Entity
   # User entities
   expose :merge_user, using: UserEntity
 
-  expose :actual_head_pipeline, as: :pipeline, if: -> (mr, _) {
-    Feature.disabled?(:merge_request_cached_pipeline_serializer, mr.project) && presenter(mr).can_read_pipeline?
+  expose :merge_pipeline, if: ->(mr, _) {
+    Feature.disabled?(:merge_request_cached_merge_pipeline_serializer, mr.project, default_enabled: :yaml) &&
+      mr.merged? &&
+      can?(request.current_user, :read_pipeline, mr.target_project)
   } do |merge_request, options|
-    MergeRequests::PipelineEntity.represent(merge_request.actual_head_pipeline, options)
-  end
-
-  expose :merge_pipeline, if: ->(mr, _) { mr.merged? && can?(request.current_user, :read_pipeline, mr.target_project)} do |merge_request, options|
     MergeRequests::PipelineEntity.represent(merge_request.merge_pipeline, options)
   end
 
   expose :default_merge_commit_message
 
-  expose :mergeable?, as: :mergeable
+  expose :mergeable do |merge_request, options|
+    next merge_request.mergeable? if Feature.disabled?(:check_mergeability_async_in_widget, merge_request.project, default_enabled: :yaml)
+    next false if options[:async_mergeability_check].present? && merge_request.checking?
+
+    merge_request.mergeable?
+  end
 
   expose :default_merge_commit_message_with_description do |merge_request|
     merge_request.default_merge_commit_message(include_description: true)

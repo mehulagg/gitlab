@@ -80,7 +80,7 @@ module Gitlab
             links = create_links(data['links'])
             location = create_location(data['location'] || {})
             remediations = create_remediations(data['remediations'])
-            fingerprints = create_fingerprints(tracking_data(data))
+            signatures = create_signatures(tracking_data(data))
 
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
@@ -99,30 +99,30 @@ module Gitlab
                 raw_metadata: data.to_json,
                 metadata_version: report_version,
                 details: data['details'] || {},
-                fingerprints: fingerprints))
+                signatures: signatures))
           end
 
-          def create_fingerprints(tracking)
-            return [] if tracking.nil? || tracking['items'].nil?
+          def create_signatures(data)
+            return [] if data.nil? || data['items'].nil?
 
-            fingerprint_algorithms = Hash.new { |hash, key| hash[key] = [] }
-            tracking['items'].each do |item|
-              next unless item.key?('fingerprints')
+            signature_algorithms = Hash.new { |hash, key| hash[key] = [] }
+            data['items'].each do |item|
+              next unless item.key?('signatures')
 
-              item['fingerprints'].each do |fingerprint|
-                alg = fingerprint['algorithm']
-                fingerprint_algorithms[alg] << fingerprint['value']
+              item['signatures'].each do |signature|
+                alg = signature['algorithm']
+                signature_algorithms[alg] << signature['value']
               end
             end
 
-            fingerprint_algorithms.map do |algorithm, values|
+            signature_algorithms.map do |algorithm, values|
               value = values.join('|')
               begin
-                fingerprint = ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
+                signature = ::Gitlab::Ci::Reports::Security::FindingSignature.new(
                   algorithm_type: algorithm,
-                  fingerprint_value: value
+                  signature_value: value
                 )
-                fingerprint.valid? ? fingerprint : nil
+                signature.valid? ? signature : nil
               rescue ArgumentError => e
                 Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
                 nil

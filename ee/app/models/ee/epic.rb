@@ -88,19 +88,27 @@ module EE
       end
 
       scope :order_start_date_asc, -> do
-        reorder(::Gitlab::Database.nulls_last_order('start_date'), 'id DESC')
-      end
+        keyset_order = keyset_pagination_for(column_name: :start_date)
 
-      scope :order_end_date_asc, -> do
-        reorder(::Gitlab::Database.nulls_last_order('end_date'), 'id DESC')
-      end
-
-      scope :order_end_date_desc, -> do
-        reorder(::Gitlab::Database.nulls_last_order('end_date', 'DESC'), 'id DESC')
+        reorder(keyset_order)
       end
 
       scope :order_start_date_desc, -> do
-        reorder(::Gitlab::Database.nulls_last_order('start_date', 'DESC'), 'id DESC')
+        keyset_order = keyset_pagination_for(column_name: :start_date, direction: 'DESC')
+
+        reorder(keyset_order)
+      end
+
+      scope :order_end_date_asc, -> do
+        keyset_order = keyset_pagination_for(column_name: :end_date)
+
+        reorder(keyset_order)
+      end
+
+      scope :order_end_date_desc, -> do
+        keyset_order = keyset_pagination_for(column_name: :end_date, direction: 'DESC')
+
+        reorder(keyset_order)
       end
 
       scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
@@ -147,6 +155,20 @@ module EE
         SELECT_LIST
 
         select(selection).in_parents(node.parent_ids)
+      end
+
+      # This is being overriden from Issuable to be able to use
+      # keyset pagination, allowing queries with these
+      # ordering statements to be reversible on GraphQL.
+      def self.sort_by_attribute(method, excluded_labels: [])
+        case method.to_s
+        when 'start_date_asc' then order_start_date_asc
+        when 'start_date_desc' then order_start_date_desc
+        when 'end_date_asc' then order_end_date_asc
+        when 'end_date_desc' then order_end_date_desc
+        else
+          super
+        end
       end
 
       private
@@ -230,10 +252,10 @@ module EE
       def simple_sorts
         super.merge(
           {
-            'start_date_asc' => -> { order_start_date_asc.with_order_id_desc },
-            'start_date_desc' => -> { order_start_date_desc.with_order_id_desc },
-            'end_date_asc' => -> { order_end_date_asc.with_order_id_desc },
-            'end_date_desc' => -> { order_end_date_desc.with_order_id_desc }
+            'start_date_asc' => -> { order_start_date_asc },
+            'start_date_desc' => -> { order_start_date_desc },
+            'end_date_asc' => -> { order_end_date_asc },
+            'end_date_desc' => -> { order_end_date_desc }
           }
         )
       end
@@ -263,10 +285,7 @@ module EE
       end
 
       def related_issues(ids: nil, preload: nil)
-        items = ::Issue.select('issues.*, epic_issues.id as epic_issue_id, epic_issues.relative_position, epic_issues.epic_id as epic_id')
-          .joins(:epic_issue)
-          .preload(preload)
-          .order('epic_issues.relative_position, epic_issues.id')
+        items = ::Issue.preload(preload).sorted_by_epic_position
 
         return items unless ids
 
@@ -289,6 +308,26 @@ module EE
           .limit(limit)
 
         records.map { |record| record.attributes.with_indifferent_access }
+      end
+
+      def keyset_pagination_for(column_name:, direction: 'ASC')
+        reverse_direction = direction == 'ASC' ? 'DESC' : 'ASC'
+
+        ::Gitlab::Pagination::Keyset::Order.build([
+          ::Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+            attribute_name: column_name.to_s,
+            column_expression: ::Epic.arel_table[column_name],
+            order_expression: ::Gitlab::Database.nulls_last_order(column_name, direction),
+            reversed_order_expression: ::Gitlab::Database.nulls_last_order(column_name, reverse_direction),
+            order_direction: direction,
+            distinct: false,
+            nullable: :nulls_last
+          ),
+          ::Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+            attribute_name: 'id',
+            order_expression: ::Epic.arel_table[:id].desc
+          )
+        ])
       end
     end
 

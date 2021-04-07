@@ -1,11 +1,19 @@
 <script>
-import { GlDropdown, GlSearchBoxByType, GlIcon, GlTruncate, GlDropdownText } from '@gitlab/ui';
+import {
+  GlDropdown,
+  GlSearchBoxByType,
+  GlIcon,
+  GlLoadingIcon,
+  GlTruncate,
+  GlDropdownText,
+} from '@gitlab/ui';
 
 export default {
   components: {
     GlDropdown,
     GlSearchBoxByType,
     GlIcon,
+    GlLoadingIcon,
     GlTruncate,
     GlDropdownText,
   },
@@ -28,7 +36,15 @@ export default {
       required: false,
       default: false,
     },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
+  data: () => ({
+    searchBoxText: '',
+  }),
   computed: {
     firstSelectedOption() {
       return this.selectedOptions[0]?.name || '-';
@@ -61,11 +77,13 @@ export default {
       class="gl-mt-2 gl-w-full"
       menu-class="dropdown-extended-height"
       :header-text="name"
+      :loading="loading"
       toggle-class="gl-w-full"
       @show="emitDropdownShow"
       @hide="$emit('dropdown-hide')"
     >
       <template #button-content>
+        <gl-loading-icon v-if="loading" class="gl-mr-2" />
         <gl-truncate
           :text="firstSelectedOption"
           class="gl-min-w-0 gl-mr-2"
@@ -80,6 +98,7 @@ export default {
       <template v-if="showSearchBox" #header>
         <gl-search-box-by-type
           ref="searchBox"
+          v-model="searchBoxText"
           :placeholder="__('Search')"
           autocomplete="off"
           @input="emitInput"

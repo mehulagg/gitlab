@@ -9,13 +9,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208747) in GitLab Premium 12.10.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
-Publish PyPI packages in your project’s Package Registry. Then install the
+Publish PyPI packages in your project's Package Registry. Then install the
 packages whenever you need to use them as a dependency.
 
 The Package Registry works with:
 
 - [pip](https://pypi.org/project/pip/)
 - [twine](https://pypi.org/project/twine/)
+
+For documentation of the specific API endpoints that the `pip` and `twine`
+clients use, see the [PyPI API documentation](../../../api/packages/pypi.md).
 
 ## Build a PyPI package
 

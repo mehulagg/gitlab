@@ -19,6 +19,7 @@ export default {
     GlPopover,
     GlSprintf,
   },
+  mixins: [Tracking.mixin()],
   props: {
     containerId: {
       type: [String, null],
@@ -59,15 +60,15 @@ export default {
     compareAllButtonTitle: s__('Trials|Compare all plans'),
     popoverTitle: s__('Trials|Hey there'),
     popoverContent: s__(`Trials|Your trial ends on
-      %{boldStart}%{trialEndDate}%{boldEnd}. We hope you are enjoying GitLab
-      %{planName}. To continue using GitLab %{planName} after your trial ends,
-      you will need to buy a subscription. You can also choose GitLab Premium
-      if its features are sufficient for your needs.`),
+      %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the
+      features of GitLab %{planName}. To keep those features after your trial
+      ends, you’ll need to buy a subscription. (You can also choose GitLab
+      Premium if it meets your needs.)`),
     upgradeButtonTitle: s__('Trials|Upgrade %{groupName} to %{planName}'),
   },
   computed: {
     formattedTrialEndDate() {
-      return formatDate(this.trialEndDate, 'yyyy-mm-dd');
+      return formatDate(this.trialEndDate, 'mmmm d');
     },
   },
   created() {
@@ -85,7 +86,7 @@ export default {
       this.updateDisabledState();
     },
     onShown() {
-      Tracking.event(undefined, 'popover_shown', {
+      this.track('popover_shown', {
         label: 'trial_status_popover',
         property: 'experiment:show_trial_status_in_sidebar',
       });
@@ -102,7 +103,6 @@ export default {
     :container="containerId"
     :target="targetId"
     :disabled="disabled"
-    triggers="hover focus"
     placement="rightbottom"
     boundary="viewport"
     :delay="{ hide: 400 }"

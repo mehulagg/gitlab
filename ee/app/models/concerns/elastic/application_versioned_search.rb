@@ -47,6 +47,8 @@ module Elastic
         after_commit :maintain_elasticsearch_create, on: :create, if: :maintaining_elasticsearch?
         after_commit :maintain_elasticsearch_update, on: :update, if: :maintaining_elasticsearch?
         after_commit :maintain_elasticsearch_destroy, on: :destroy, if: :maintaining_elasticsearch?
+
+        scope :preload_indexing_data, -> { __elasticsearch__.preload_indexing_data(self) }
       end
     end
 
@@ -91,7 +93,7 @@ module Elastic
       end
 
       def use_separate_indices?
-        Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.include?(self) && Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
+        false
       end
 
       # Mark a dependant association as needing to be updated when a specific

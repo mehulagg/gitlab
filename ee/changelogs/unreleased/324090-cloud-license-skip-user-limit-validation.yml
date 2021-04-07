@@ -1,5 +1,0 @@
----
-title: Skip user limit validation when saving cloud licenses
-merge_request: 56260
-author:
-type: added

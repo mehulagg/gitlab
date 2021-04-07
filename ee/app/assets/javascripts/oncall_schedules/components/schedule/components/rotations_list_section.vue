@@ -108,7 +108,7 @@ export default {
       <span
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
-        <span class="gl-text-truncated">{{ $options.i18n.addRotationLabel }}</span>
+        <span class="gl-text-truncate">{{ $options.i18n.addRotationLabel }}</span>
       </span>
       <span
         v-for="(timeframeItem, index) in timeframeToDraw"
@@ -125,7 +125,13 @@ export default {
         <span
           class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
         >
-          <span class="gl-text-truncated">{{ rotation.name }}</span>
+          <span
+            v-gl-tooltip="{ boundary: 'viewport', title: rotation.name }"
+            class="gl-text-truncate"
+            :aria-label="rotation.name"
+            :data-testid="`rotation-name-${rotation.id}`"
+            >{{ rotation.name }}</span
+          >
           <gl-button-group class="gl-px-2">
             <gl-button
               v-gl-modal="$options.editRotationModalId"

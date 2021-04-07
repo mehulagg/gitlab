@@ -19,16 +19,7 @@ export default {
     GlLoadingIcon,
     VulnerabilitiesCountList,
   },
-  props: {
-    groupFullPath: {
-      type: String,
-      required: true,
-    },
-    vulnerabilitiesExportEndpoint: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: ['groupFullPath'],
   apollo: {
     projects: {
       query: vulnerableProjectsQuery,
@@ -77,7 +68,7 @@ export default {
           <h2 class="gl-flex-grow-1 gl-my-0">
             {{ s__('SecurityReports|Vulnerability Report') }}
           </h2>
-          <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
+          <csv-export-button />
         </header>
         <vulnerabilities-count-list
           :scope="$options.vulnerabilitiesSeverityCountScopes.group"
@@ -88,7 +79,7 @@ export default {
       <template #sticky>
         <filters :projects="projects" @filterChange="handleFilterChange" />
       </template>
-      <group-security-vulnerabilities :group-full-path="groupFullPath" :filters="filters" />
+      <group-security-vulnerabilities :filters="filters" />
     </security-dashboard-layout>
   </div>
 </template>

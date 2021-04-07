@@ -1,11 +1,11 @@
 <script>
 import {
+  GlAvatar,
   GlAvatarLabeled,
+  GlIcon,
   GlFormGroup,
   GlFormRadio,
   GlFormRadioGroup,
-  GlFormSelect,
-  GlLabel,
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
@@ -21,48 +21,44 @@ export const listTypeInfo = {
     listPropertyName: 'labels',
     loadingPropertyName: 'labelsLoading',
     fetchMethodName: 'fetchLabels',
-    formDescription: __('A label list displays issues with the selected label.'),
-    searchLabel: __('Select label'),
+    noneSelected: __('Select a label'),
     searchPlaceholder: __('Search labels'),
   },
   [ListType.assignee]: {
     listPropertyName: 'assignees',
     loadingPropertyName: 'assigneesLoading',
     fetchMethodName: 'fetchAssignees',
-    formDescription: __('An assignee list displays issues assigned to the selected user'),
-    searchLabel: __('Select assignee'),
+    noneSelected: __('Select an assignee'),
     searchPlaceholder: __('Search assignees'),
   },
   [ListType.milestone]: {
     listPropertyName: 'milestones',
     loadingPropertyName: 'milestonesLoading',
     fetchMethodName: 'fetchMilestones',
-    formDescription: __('A milestone list displays issues in the selected milestone.'),
-    searchLabel: __('Select milestone'),
+    noneSelected: __('Select a milestone'),
     searchPlaceholder: __('Search milestones'),
   },
   [ListType.iteration]: {
     listPropertyName: 'iterations',
     loadingPropertyName: 'iterationsLoading',
     fetchMethodName: 'fetchIterations',
-    formDescription: __('An iteration list displays issues in the selected iteration.'),
-    searchLabel: __('Select iteration'),
+    noneSelected: __('Select an iteration'),
     searchPlaceholder: __('Search iterations'),
   },
 };
 
 export default {
   i18n: {
-    listType: __('List type'),
+    value: __('Value'),
   },
   components: {
     BoardAddNewColumnForm,
+    GlAvatar,
     GlAvatarLabeled,
+    GlIcon,
     GlFormGroup,
     GlFormRadio,
     GlFormRadioGroup,
-    GlFormSelect,
-    GlLabel,
   },
   directives: {
     GlTooltip,
@@ -76,6 +72,7 @@ export default {
   data() {
     return {
       selectedId: null,
+      selectedItem: null,
       columnType: ListType.label,
     };
   },
@@ -100,6 +97,10 @@ export default {
       return this[this.info.listPropertyName] || [];
     },
 
+    hasItems() {
+      return this.items.length > 0;
+    },
+
     labelTypeSelected() {
       return this.columnType === ListType.label;
     },
@@ -111,10 +112,6 @@ export default {
     },
     iterationTypeSelected() {
       return this.columnType === ListType.iteration;
-    },
-
-    selectedItem() {
-      return this.items.find(({ id }) => id === this.selectedId);
     },
 
     hasLabelSelection() {
@@ -131,14 +128,20 @@ export default {
     },
 
     columnForSelected() {
-      if (!this.columnType) {
+      if (!this.columnType || !this.selectedId) {
         return false;
       }
 
-      const key = `${this.columnType}Id`;
-      return this.getListByTypeId({
-        [key]: this.selectedId,
-      });
+      if (this.shouldUseGraphQL || this.isEpicBoard) {
+        const key = `${this.columnType}Id`;
+        return this.getListByTypeId({
+          [key]: this.selectedId,
+        });
+      }
+
+      return boardsStore.state.lists.find(
+        (list) => list[this.columnType]?.id === getIdFromGraphQLId(this.selectedId),
+      );
     },
 
     loading() {
@@ -161,6 +164,10 @@ export default {
       }
 
       return types;
+    },
+
+    searchLabel() {
+      return this.showListTypeSelector ? this.$options.i18n.value : null;
     },
 
     showListTypeSelector() {
@@ -252,7 +259,17 @@ export default {
     setColumnType(type) {
       this.columnType = type;
       this.selectedId = null;
+      this.setSelectedItem(null);
       this.filterItems();
+    },
+
+    setSelectedItem(selectedId) {
+      const item = this.items.find(({ id }) => id === selectedId);
+      if (!selectedId || !item) {
+        this.selectedItem = null;
+      } else {
+        this.selectedItem = { ...item };
+      }
     },
   },
 };
@@ -261,68 +278,83 @@ export default {
 <template>
   <board-add-new-column-form
     :loading="loading"
-    :form-description="info.formDescription"
-    :search-label="info.searchLabel"
+    :none-selected="info.noneSelected"
+    :search-label="searchLabel"
     :search-placeholder="info.searchPlaceholder"
     :selected-id="selectedId"
     @filter-items="filterItems"
     @add-list="addList"
   >
-    <template slot="select-list-type">
+    <template #select-list-type>
       <gl-form-group
         v-if="showListTypeSelector"
-        :label="$options.i18n.listType"
-        class="gl-px-5 gl-py-0 gl-mt-5"
+        :description="$options.i18n.scopeDescription"
+        class="gl-px-5 gl-py-0 gl-mb-3"
         label-for="list-type"
       >
-        <gl-form-select
-          id="list-type"
-          v-model="columnType"
-          :options="columnTypes"
-          @change="setColumnType"
-        />
+        <gl-form-radio-group v-model="columnType">
+          <gl-form-radio
+            v-for="{ text, value } in columnTypes"
+            :key="value"
+            :value="value"
+            class="gl-mb-0 gl-align-self-center"
+            @change="setColumnType"
+          >
+            {{ text }}
+          </gl-form-radio>
+        </gl-form-radio-group>
       </gl-form-group>
     </template>
 
-    <template slot="selected">
-      <div v-if="hasLabelSelection">
-        <gl-label
-          v-gl-tooltip
-          :title="selectedItem.title"
-          :description="selectedItem.description"
-          :background-color="selectedItem.color"
-          :scoped="showScopedLabels(selectedItem)"
-        />
-      </div>
+    <template #selected>
+      <template v-if="hasLabelSelection">
+        <span
+          class="dropdown-label-box gl-top-0 gl-flex-shrink-0"
+          :style="{
+            backgroundColor: selectedItem.color,
+          }"
+        ></span>
+        <div class="gl-text-truncate">{{ selectedItem.title }}</div>
+      </template>
 
-      <div v-else-if="hasAssigneeSelection">
-        <gl-avatar-labeled
-          :size="32"
-          :label="selectedItem.name"
-          :sub-label="selectedItem.username"
-          :src="selectedItem.avatarUrl"
-        />
-      </div>
-      <div v-else-if="hasMilestoneSelection || hasIterationSelection" class="gl-text-truncate">
-        {{ selectedItem.title }}
-      </div>
+      <template v-else-if="hasMilestoneSelection">
+        <gl-icon class="gl-flex-shrink-0" name="clock" />
+        <span class="gl-text-truncate">{{ selectedItem.title }}</span>
+      </template>
+
+      <template v-else-if="hasIterationSelection">
+        <gl-icon class="gl-flex-shrink-0" name="iteration" />
+        <span class="gl-text-truncate">{{ selectedItem.title }}</span>
+      </template>
+
+      <template v-else-if="hasAssigneeSelection">
+        <gl-avatar class="gl-mr-2 gl-flex-shrink-0" :size="16" :src="selectedItem.avatarUrl" />
+        <div class="gl-text-truncate">
+          <b class="gl-mr-2">{{ selectedItem.name }}</b>
+          <span class="gl-text-gray-700">@{{ selectedItem.username }}</span>
+        </div>
+      </template>
     </template>
 
-    <template slot="items">
+    <template v-if="hasItems" #items>
       <gl-form-radio-group
-        v-if="items.length > 0"
         v-model="selectedId"
-        class="gl-overflow-y-auto gl-px-5 gl-pt-3"
+        class="gl-overflow-y-auto gl-px-5"
+        data-testid="selectItem"
+        @change="setSelectedItem"
       >
         <label
           v-for="item in items"
           :key="item.id"
-          class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
+          class="gl-display-flex gl-font-weight-normal gl-overflow-break-word gl-py-3 gl-mb-0"
         >
-          <gl-form-radio :value="item.id" class="gl-mb-0 gl-align-self-center" />
+          <gl-form-radio
+            :value="item.id"
+            :class="assigneeTypeSelected ? 'gl-align-self-center' : ''"
+          />
           <span
             v-if="labelTypeSelected"
-            class="dropdown-label-box gl-top-0"
+            class="dropdown-label-box gl-top-0 gl-flex-shrink-0"
             :style="{
               backgroundColor: item.color,
             }"
@@ -330,14 +362,17 @@ export default {
 
           <gl-avatar-labeled
             v-if="assigneeTypeSelected"
+            class="gl-display-flex gl-align-items-center"
             :size="32"
             :label="item.name"
-            :sub-label="item.username"
+            :sub-label="`@${item.username}`"
             :src="item.avatarUrl"
           />
           <span v-else>{{ item.title }}</span>
         </label>
       </gl-form-radio-group>
+
+      <div class="dropdown-content-faded-mask gl-fixed gl-bottom-0 gl-w-full"></div>
     </template>
   </board-add-new-column-form>
 </template>

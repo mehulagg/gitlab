@@ -5,7 +5,7 @@
 class Analytics::IssuesAnalytics
   attr_reader :issues, :start_date, :months_back
 
-  DATE_FORMAT = "%Y-%m".freeze
+  DATE_FORMAT = "%Y-%m"
 
   def initialize(issues:, months_back: nil)
     @issues = issues

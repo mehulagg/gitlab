@@ -306,13 +306,17 @@ export default {
     },
     beforeShowModal() {
       if (this.isEditMode) {
-        this.parseRotation();
+        return this.parseRotation();
       }
+
+      return this.resetModal();
     },
     resetModal() {
-      this.form = cloneDeep(formEmptyState);
-      this.validationState = cloneDeep(validiationInitialState);
-      this.error = '';
+      if (!this.isLoading) {
+        this.form = cloneDeep(formEmptyState);
+        this.validationState = cloneDeep(validiationInitialState);
+        this.error = '';
+      }
     },
     parseRotation() {
       const scheduleTimezone = this.schedule.timezone;

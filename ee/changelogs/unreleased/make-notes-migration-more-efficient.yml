@@ -1,0 +1,5 @@
+---
+title: Improve performance of Elasticsearch notes permissions migration
+merge_request: 56823
+author:
+type: performance

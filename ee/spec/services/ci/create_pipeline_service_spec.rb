@@ -31,8 +31,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
       it 'enqueues a new pipeline' do
         pipeline = create_pipeline!
 
-        expect(pipeline).to be_persisted
-        expect(pipeline).to be_pending
+        expect(pipeline).to be_created_successfully
       end
     end
 

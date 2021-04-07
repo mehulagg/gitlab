@@ -45,9 +45,10 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
       hideheaderborder="true"
       id="schedule-timezone"
       size="medium"
-      text="(UTC -12:00) -12 International Date Line West"
+      text=""
       variant="default"
     >
+       
       <gl-search-box-by-type-stub
         clearbuttontitle="Clear"
         value=""
@@ -66,7 +67,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
         <span
           class="gl-white-space-nowrap"
         >
-           (UTC -12:00) -12 International Date Line West
+          (UTC -12:00) -12 International Date Line West
         </span>
       </gl-dropdown-item-stub>
       <gl-dropdown-item-stub
@@ -81,7 +82,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
         <span
           class="gl-white-space-nowrap"
         >
-           (UTC -11:00) SST American Samoa
+          (UTC -11:00) SST American Samoa
         </span>
       </gl-dropdown-item-stub>
       <gl-dropdown-item-stub
@@ -96,7 +97,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
         <span
           class="gl-white-space-nowrap"
         >
-           (UTC -11:00) SST Midway Island
+          (UTC -11:00) SST Midway Island
         </span>
       </gl-dropdown-item-stub>
       <gl-dropdown-item-stub
@@ -111,7 +112,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
         <span
           class="gl-white-space-nowrap"
         >
-           (UTC -10:00) HST Hawaii
+          (UTC -7:00) PT Pacific Time (US & Canada)
         </span>
       </gl-dropdown-item-stub>
        

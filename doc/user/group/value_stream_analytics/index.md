@@ -76,9 +76,7 @@ GitLab provides the ability to filter analytics based on a date range. To filter
 The "Time" metrics near the top of the page are measured as follows:
 
 - **Lead time**: median time from issue created to issue closed.
-- **Cycle time**: median time from first commit to issue closed.
-
-A commit is associated with an issue by [crosslinking](../../project/issues/crosslinking_issues.md) in the commit message or by manually linking the merge request containing the commit.
+- **Cycle time**: median time from first commit to issue closed. (You can associate a commit with an issue by [crosslinking in the commit message](../../project/issues/crosslinking_issues.md#from-commit-messages).)
 
 ![Value stream analytics time metrics](img/vsa_time_metrics_v13_0.png "Time metrics for value stream analytics")
 
@@ -193,17 +191,37 @@ GitLab allows users to create multiple value streams, hide default stages and cr
 
 ### Stage path
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
+> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md). **(FREE SELF)**
 
-Stages are visually depicted as a horizontal process flow. Selecting a stage will update the
-the content below the value stream.
+![Value stream path navigation](img/vsa_path_nav_v13_11.png "Value stream path navigation")
 
-This is disabled by default. If you have a self-managed instance, an
+Stages are visually depicted as a horizontal process flow. Selecting a stage updates the content
+below the value stream.
+
+The stage time is displayed next to the name of each stage, in the following format:
+
+| Symbol | Description |
+|--------|-------------|
+| `m`    | Minutes     |
+| `h`    | Hours       |
+| `d`    | Days        |
+| `w`    | Weeks       |
+| `M`    | Months      |
+
+Hovering over a stage item displays a popover with the following information:
+
+- Start event description for the given stage
+- End event description
+
+Horizontal path navigation is enabled by default. If you have a self-managed instance, an
 administrator can [open a Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md)
-and enable it with the following command:
+and disable it with the following command:
 
 ```ruby
-Feature.enable(:value_stream_analytics_path_navigation)
+Feature.disable(:value_stream_analytics_path_navigation)
 ```
 
 ### Adding a stage

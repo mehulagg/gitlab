@@ -57,13 +57,13 @@ We use Snowplow for the majority of our tracking strategy and it is enabled on G
 - **Admin Area > Settings > General** in the UI.
 - `admin/application_settings/integrations` in your browser.
 
-The following configuration is required:
+Example configuration:
 
-| Name          | Value                     |
-|---------------|---------------------------|
-| Collector     | `snowplow.trx.gitlab.net` |
-| Site ID       | `gitlab`                  |
-| Cookie domain | `.gitlab.com`             |
+| Name          | Value                         |
+|---------------|-------------------------------|
+| Collector     | `your-snowplow-collector.net` |
+| Site ID       | `gitlab`                      |
+| Cookie domain | `.your-gitlab-instance.com`   |
 
 ## Snowplow request flow
 
@@ -126,17 +126,17 @@ GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tra
 
 ### Tracking in HAML (or Vue Templates)
 
-When working within HAML (or Vue templates) we can add `data-track-*` attributes to elements of interest. All elements that have a `data-track-event` attribute automatically have event tracking bound on clicks.
+When working within HAML (or Vue templates) we can add `data-track-*` attributes to elements of interest. All elements that have a `data-track-action` attribute automatically have event tracking bound on clicks.
 
 Below is an example of `data-track-*` attributes assigned to a button:
 
 ```haml
-%button.btn{ data: { track: { event: "click_button", label: "template_preview", property: "my-template" } } }
+%button.btn{ data: { track: { action: "click_button", label: "template_preview", property: "my-template" } } }
 ```
 
 ```html
 <button class="btn"
-  data-track-event="click_button"
+  data-track-action="click_button"
   data-track-label="template_preview"
   data-track-property="my-template"
 />
@@ -148,7 +148,7 @@ Below is a list of supported `data-track-*` attributes:
 
 | attribute             | required | description |
 |:----------------------|:---------|:------------|
-| `data-track-event`    | true     | Action the user is taking. Clicks must be prepended with `click` and activations must be prepended with `activate`. For example, focusing a form field would be `activate_form_input` and clicking a button would be `click_button`. |
+| `data-track-action`    | true     | Action the user is taking. Clicks must be prepended with `click` and activations must be prepended with `activate`. For example, focusing a form field would be `activate_form_input` and clicking a button would be `click_button`. Replaces `data-track-event`, which was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/290962) in GitLab 13.11. |
 | `data-track-label`    | false    | The `label` as described in our [Structured event taxonomy](#structured-event-taxonomy). |
 | `data-track-property` | false    | The `property` as described in our [Structured event taxonomy](#structured-event-taxonomy). |
 | `data-track-value`    | false    | The `value` as described in our [Structured event taxonomy](#structured-event-taxonomy). If omitted, this is the element's `value` property or an empty string. For checkboxes, the default value is the element's checked attribute or `false` when unchecked. |
@@ -159,11 +159,11 @@ Below is a list of supported `data-track-*` attributes:
 When using the GitLab helper method [`nav_link`](https://gitlab.com/gitlab-org/gitlab/-/blob/898b286de322e5df6a38d257b10c94974d580df8/app/helpers/tab_helper.rb#L69) be sure to wrap `html_options` under the `html_options` keyword argument.
 Be careful, as this behavior can be confused with the `ActionView` helper method [`link_to`](https://api.rubyonrails.org/v5.2.3/classes/ActionView/Helpers/UrlHelper.html#method-i-link_to) that does not require additional wrapping of `html_options`
 
-`nav_link(controller: ['dashboard/groups', 'explore/groups'], html_options: { data: { track_label: "groups_dropdown", track_event: "click_dropdown" } })`
+`nav_link(controller: ['dashboard/groups', 'explore/groups'], html_options: { data: { track_label: "groups_dropdown", track_action: "click_dropdown" } })`
 
 vs
 
-`link_to assigned_issues_dashboard_path, title: _('Issues'), data: { track_label: 'main_navigation', track_event: 'click_issues_link' }`
+`link_to assigned_issues_dashboard_path, title: _('Issues'), data: { track_label: 'main_navigation', track_action: 'click_issues_link' }`
 
 ### Tracking within Vue components
 
@@ -314,6 +314,7 @@ Custom event tracking and instrumentation can be added by directly calling the `
 | `project`  | Project                   | nil           | The project associated with the event. |
 | `user`     | User                      | nil           | The user associated with the event. |
 | `namespace` | Namespace                | nil           | The namespace associated with the event. |
+| `extra`   | Hash                | `{}`         | Additional keyword arguments are collected into a hash and sent with the event. |
 
 Tracking can be viewed as either tracking user behavior, or can be used for instrumentation to monitor and visualize performance over time in an area or aspect of code.
 
@@ -468,7 +469,7 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
 1. Send a test Snowplow event from the Rails console:
 
    ```ruby
-   Gitlab::Tracking.self_describing_event('iglu:com.gitlab/pageview_context/jsonschema/1-0-0', data: { page_type: 'MY_TYPE' }, context: nil)
+   Gitlab::Tracking.event('category', 'action')
    ```
 
 1. Navigate to `localhost:9090/micro/good` to see the event.
@@ -495,6 +496,7 @@ The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/g
 | `namespace_id` | **{dotted-circle}** | integer               |                                                               |
 | `environment`  | **{check-circle}**  | string (max 32 chars) | Name of the source environment, such as `production` or `staging`             |
 | `source`       | **{check-circle}**  | string (max 32 chars) | Name of the source application, such as  `gitlab-rails` or `gitlab-javascript` |
+| `extra`        | **{dotted-circle}**  | JSON                  | Any additional data associated with the event, in the form of key-value pairs |
 
 ### Default Schema
 
@@ -525,7 +527,7 @@ The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/g
 | `contexts`                 | **{dotted-circle}** |           |                                                                                                                                  |
 | `derived_contexts`         | **{dotted-circle}** |           | Contexts derived in the Enrich process                                                                                           |
 | `derived_tstamp`           | **{dotted-circle}** | timestamp | Timestamp making allowance for inaccurate device clock                                                                          |
-| `doc_charset`              | **{dotted-circle}** | string    | Web page’s character encoding                                                                                                    |
+| `doc_charset`              | **{dotted-circle}** | string    | Web page's character encoding                                                                                                    |
 | `doc_height`               | **{dotted-circle}** | string    | Web page height                                                                                                                  |
 | `doc_width`                | **{dotted-circle}** | string    | Web page width                                                                                                                   |
 | `domain_sessionid`         | **{dotted-circle}** | string    | Unique identifier (UUID) for this visit of this user_id to this domain                                                           |
@@ -554,10 +556,10 @@ The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/g
 | `geo_region_name`          | **{dotted-circle}** | string    | Region of IP origin                                                                                                              |
 | `geo_timezone`             | **{dotted-circle}** | string    | Timezone of IP origin                                                                                                            |
 | `geo_zipcode`              | **{dotted-circle}** | string    | Zip (postal) code of IP origin                                                                                                   |
-| `ip_domain`                | **{dotted-circle}** | string    | Second level domain name associated with the visitor’s IP address                                                                |
-| `ip_isp`                   | **{dotted-circle}** | string    | Visitor’s ISP                                                                                                                    |
-| `ip_netspeed`              | **{dotted-circle}** | string    | Visitor’s connection type                                                                                                        |
-| `ip_organization`          | **{dotted-circle}** | string    | Organization associated with the visitor’s IP address – defaults to ISP name if none is found                                    |
+| `ip_domain`                | **{dotted-circle}** | string    | Second level domain name associated with the visitor's IP address                                                                |
+| `ip_isp`                   | **{dotted-circle}** | string    | Visitor's ISP                                                                                                                    |
+| `ip_netspeed`              | **{dotted-circle}** | string    | Visitor's connection type                                                                                                        |
+| `ip_organization`          | **{dotted-circle}** | string    | Organization associated with the visitor's IP address – defaults to ISP name if none is found                                    |
 | `mkt_campaign`             | **{dotted-circle}** | string    | The campaign ID                                                                                                                  |
 | `mkt_clickid`              | **{dotted-circle}** | string    | The click ID                                                                                                                     |
 | `mkt_content`              | **{dotted-circle}** | string    | The content or ID of the ad.                                                                   |
@@ -566,7 +568,7 @@ The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/g
 | `mkt_source`               | **{dotted-circle}** | string    | The company / website where the traffic came from                                                                                |
 | `mkt_term`                 | **{dotted-circle}** | string    | Keywords associated with the referrer                                                                                        |
 | `name_tracker`             | **{dotted-circle}** | string    | The tracker namespace                                                                                                            |
-| `network_userid`           | **{dotted-circle}** | string    | Unique identifier for a user, based on a cookie from the collector (so set at a network level and shouldn’t be set by a tracker) |
+| `network_userid`           | **{dotted-circle}** | string    | Unique identifier for a user, based on a cookie from the collector (so set at a network level and shouldn't be set by a tracker) |
 | `os_family`                | **{dotted-circle}** | string    | Operating system family                                                                                                          |
 | `os_manufacturer`          | **{dotted-circle}** | string    | Manufacturers of operating system                                                                                                |
 | `os_name`                  | **{dotted-circle}** | string    | Name of operating system                                                                                                         |
@@ -598,7 +600,7 @@ The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/g
 | `refr_urlscheme`           | **{dotted-circle}** | string    | Referer scheme                                                                                                                   |
 | `se_action`                | **{dotted-circle}** | string    | The action / event itself                                                                                                        |
 | `se_category`              | **{dotted-circle}** | string    | The category of event                                                                                                            |
-| `se_label`                 | **{dotted-circle}** | string    | A label often used to refer to the ‘object’ the action is performed on                                                           |
+| `se_label`                 | **{dotted-circle}** | string    | A label often used to refer to the 'object' the action is performed on                                                           |
 | `se_property`              | **{dotted-circle}** | string    | A property associated with either the action or the object                                                                       |
 | `se_value`                 | **{dotted-circle}** | decimal   | A value associated with the user action                                                                                          |
 | `ti_category`              | **{dotted-circle}** | string    | Item category                                                                                                                    |

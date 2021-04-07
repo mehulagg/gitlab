@@ -147,6 +147,20 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       end
     end
 
+    context 'when the load balancer uses nested #read' do
+      it 'returns :replica' do
+        roles = []
+        lb.read do |connection_1|
+          lb.read do |connection_2|
+            roles << lb.db_role_for_connection(connection_2)
+          end
+          roles << lb.db_role_for_connection(connection_1)
+        end
+
+        expect(roles).to eq([:replica, :replica])
+      end
+    end
+
     context 'when the load balancer creates the connection with #read_write' do
       it 'returns :primary' do
         role = nil
@@ -155,6 +169,20 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
         end
 
         expect(role).to be(:primary)
+      end
+    end
+
+    context 'when the load balancer uses nested #read_write' do
+      it 'returns :primary' do
+        roles = []
+        lb.read_write do |connection_1|
+          lb.read_write do |connection_2|
+            roles << lb.db_role_for_connection(connection_2)
+          end
+          roles << lb.db_role_for_connection(connection_1)
+        end
+
+        expect(roles).to eq([:primary, :primary])
       end
     end
 

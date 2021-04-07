@@ -11,8 +11,8 @@ module EE
 
     include AuditorUserHelper
 
-    DEFAULT_ROADMAP_LAYOUT = 'months'.freeze
-    DEFAULT_GROUP_VIEW = 'details'.freeze
+    DEFAULT_ROADMAP_LAYOUT = 'months'
+    DEFAULT_GROUP_VIEW = 'details'
     MAX_USERNAME_SUGGESTION_ATTEMPTS = 15
 
     prepended do
@@ -253,10 +253,6 @@ module EE
         .include_gitlab_subscription
         .where(gitlab_subscriptions: { hosted_plan: ::Plan.where(name: plans) })
         .any?
-    end
-
-    def manageable_groups_eligible_for_subscription
-      manageable_groups.eligible_for_subscription.order(:name)
     end
 
     def manageable_groups_eligible_for_trial

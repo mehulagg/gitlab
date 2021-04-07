@@ -473,6 +473,7 @@ FactoryBot.define do
       after(:build) do |finding, evaluator|
         finding.report_type = "dependency_scanning"
         finding.name = "Vulnerabilities in libxml2"
+        finding.message = "Vulnerabilities in libxml2 in nokogiri"
         finding.metadata_version = "2.1"
         finding.raw_metadata = {
           "category": "dependency_scanning",

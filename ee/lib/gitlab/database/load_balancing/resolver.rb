@@ -43,6 +43,8 @@ module Gitlab
           return if answer.empty?
 
           answer.first.address
+        rescue Net::DNS::Resolver::NoResponseError
+          raise UnresolvableNameserverError, "no response from DNS server(s)"
         end
       end
     end

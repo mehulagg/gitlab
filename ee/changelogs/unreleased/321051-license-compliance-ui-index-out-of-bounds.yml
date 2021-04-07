@@ -1,5 +1,0 @@
----
-title: Hide package list if license compliance has an entry with 0 packages
-merge_request: 55466
-author:
-type: fixed

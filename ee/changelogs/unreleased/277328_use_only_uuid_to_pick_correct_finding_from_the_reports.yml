@@ -1,6 +1,0 @@
----
-title: Select security findings by their UUIDs instead of their positions in the report
-  artifacts
-merge_request: 55643
-author:
-type: changed

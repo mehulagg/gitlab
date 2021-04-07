@@ -15,8 +15,6 @@ module API
         end
 
         def fetch!(container)
-          not_found! unless ::Feature.enabled?(:dora_daily_metrics, container, default_enabled: :yaml)
-
           result = ::Dora::AggregateMetricsService
             .new(container: container, current_user: current_user, params: declared_params(include_missing: false))
             .execute

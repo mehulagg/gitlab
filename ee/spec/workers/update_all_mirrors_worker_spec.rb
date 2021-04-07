@@ -27,15 +27,15 @@ RSpec.describe UpdateAllMirrorsWorker do
       worker.perform
     end
 
-    it 'removes metadata except correlation_id from the application context before scheduling mirrors' do
+    it 'removes metadata except correlation_id from the application context before scheduling mirrors', :context_aware do
       inner_context = nil
       outer_context = nil
 
       Gitlab::ApplicationContext.with_context(project: build(:project)) do
-        outer_context = Labkit::Context.current.to_h
+        outer_context = Gitlab::ApplicationContext.current
 
         expect(worker).to receive(:schedule_mirrors!) do
-          inner_context = Labkit::Context.current.to_h
+          inner_context = Gitlab::ApplicationContext.current
 
           # `schedule_mirrors!` needs to return an integer.
           0

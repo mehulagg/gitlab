@@ -12,6 +12,7 @@ module EE
     NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
     PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
     EOA_BRONZE_PLAN_BANNER         = 'eoa_bronze_plan_banner'
+    EOA_BRONZE_PLAN_END_DATE       = '2022-01-26'
 
     def render_enable_hashed_storage_warning
       return unless show_enable_hashed_storage_warning?
@@ -91,7 +92,7 @@ module EE
     private
 
     def eoa_bronze_plan_end_date
-      Date.parse('2022-01-26')
+      Date.parse(EOA_BRONZE_PLAN_END_DATE)
     end
 
     def hashed_storage_enabled?

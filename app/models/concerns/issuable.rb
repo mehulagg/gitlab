@@ -324,7 +324,7 @@ module Issuable
       # This prevents errors when ignored columns are present in the database.
       issuable_columns = with_cte ? issue_grouping_columns(use_cte: with_cte) : "#{table_name}.*"
 
-      extra_select_columns = extra_select_columns.unshift("(#{highest_priority}) AS highest_priority")
+      extra_select_columns.unshift("(#{highest_priority}) AS highest_priority")
 
       select(issuable_columns)
         .select(extra_select_columns)
@@ -437,7 +437,7 @@ module Issuable
   end
 
   def subscribed_without_subscriptions?(user, project)
-    participants(user).include?(user)
+    participant?(user)
   end
 
   def can_assign_epic?(user)

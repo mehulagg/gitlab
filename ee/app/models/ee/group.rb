@@ -12,7 +12,6 @@ module EE
     prepended do
       include TokenAuthenticatable
       include InsightsFeature
-      include HasTimelogsReport
       include HasWiki
       include CanMoveRepositoryStorage
 
@@ -58,7 +57,7 @@ module EE
 
       belongs_to :file_template_project, class_name: "Project"
 
-      belongs_to :push_rule
+      belongs_to :push_rule, inverse_of: :group
 
       # Use +checked_file_template_project+ instead, which implements important
       # visibility checks
@@ -73,7 +72,7 @@ module EE
 
       validate :custom_project_templates_group_allowed, if: :custom_project_templates_group_id_changed?
 
-      scope :aimed_for_deletion, -> (date) { joins(:deletion_schedule).where('group_deletion_schedules.marked_for_deletion_on <= ?', date) }
+      scope :aimed_for_deletion, ->(date) { joins(:deletion_schedule).where('group_deletion_schedules.marked_for_deletion_on <= ?', date) }
       scope :with_deletion_schedule, -> { preload(deletion_schedule: :deleting_user) }
       scope :with_deletion_schedule_only, -> { preload(:deletion_schedule) }
 
@@ -81,14 +80,14 @@ module EE
         joins(:ldap_group_links).where(ldap_group_links: { provider: provider })
       end
 
-      scope :with_managed_accounts_enabled, -> {
+      scope :with_managed_accounts_enabled, -> do
         joins(:saml_provider).where(saml_providers:
           {
             enabled: true,
             enforced_sso: true,
             enforced_group_managed_accounts: true
           })
-      }
+      end
 
       scope :with_no_pat_expiry_policy, -> { where(max_personal_access_token_lifetime: nil) }
 
@@ -242,6 +241,11 @@ module EE
 
     def group_project_template_available?
       feature_available?(:group_project_templates)
+    end
+
+    def scoped_variables_available?
+      ::Feature.enabled?(:scoped_group_variables, self, default_enabled: :yaml) &&
+        feature_available?(:group_scoped_ci_variables)
     end
 
     def actual_size_limit
@@ -427,7 +431,7 @@ module EE
 
     override :users_count
     def users_count
-      return all_group_members.count unless minimal_access_role_allowed?
+      return all_group_members.count if minimal_access_role_allowed?
 
       members.count
     end
@@ -455,7 +459,7 @@ module EE
 
       return unless feature_available?(:group_webhooks)
 
-      self_and_ancestor_hooks = GroupHook.where(group_id: self.self_and_ancestors)
+      self_and_ancestor_hooks = GroupHook.where(group_id: self_and_ancestors)
       self_and_ancestor_hooks.hooks_for(hooks_scope).each do |hook|
         hook.async_execute(data, hooks_scope.to_s)
       end

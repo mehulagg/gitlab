@@ -6,7 +6,7 @@ module Gitlab
       class << self
         include Gitlab::Routing
 
-        GITLAB_ORG_NAMESPACE = 'gitlab-org'.freeze
+        GITLAB_ORG_NAMESPACE = 'gitlab-org'
 
         def execute
           unless Gitlab.com?

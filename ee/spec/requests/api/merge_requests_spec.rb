@@ -145,7 +145,7 @@ RSpec.describe API::MergeRequests do
       context 'the approvals_before_merge param' do
         context 'when the target project has disable_overriding_approvers_per_merge_request set to true' do
           before do
-            project.update(disable_overriding_approvers_per_merge_request: true)
+            project.update!(disable_overriding_approvers_per_merge_request: true)
             create_merge_request(approvals_before_merge: 1)
           end
 
@@ -156,7 +156,7 @@ RSpec.describe API::MergeRequests do
 
         context 'when the target project has disable_overriding_approvers_per_merge_request set to false' do
           before do
-            project.update(approvals_before_merge: 0)
+            project.update!(approvals_before_merge: 0)
             create_merge_request(approvals_before_merge: 1)
           end
 
@@ -173,7 +173,7 @@ RSpec.describe API::MergeRequests do
   describe "PUT /projects/:id/merge_requests/:merge_request_iid/merge" do
     it 'returns 405 if merge request was not approved' do
       project.add_developer(create(:user))
-      project.update(approvals_before_merge: 1)
+      project.update!(approvals_before_merge: 1)
 
       put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/merge", user)
 
@@ -184,8 +184,8 @@ RSpec.describe API::MergeRequests do
     it 'returns 200 if merge request was approved' do
       approver = create(:user)
       project.add_developer(approver)
-      project.update(approvals_before_merge: 1)
-      merge_request.approvals.create(user: approver)
+      project.update!(approvals_before_merge: 1)
+      merge_request.approvals.create!(user: approver)
 
       put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/merge", user)
 

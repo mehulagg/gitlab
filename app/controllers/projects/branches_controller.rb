@@ -12,6 +12,9 @@ class Projects::BranchesController < Projects::ApplicationController
   # Support legacy URLs
   before_action :redirect_for_legacy_index_sort_or_search, only: [:index]
   before_action :limit_diverging_commit_counts!, only: [:diverging_commit_counts]
+  before_action do
+    push_frontend_feature_flag(:gldropdown_branches)
+  end
 
   feature_category :source_code_management
 
@@ -49,7 +52,7 @@ class Projects::BranchesController < Projects::ApplicationController
         branches = BranchesFinder.new(repository, params.permit(names: [])).execute
 
         Gitlab::GitalyClient.allow_n_plus_1_calls do
-          render json: branches.map { |branch| [branch.name, service.call(branch)] }.to_h
+          render json: branches.to_h { |branch| [branch.name, service.call(branch)] }
         end
       end
     end

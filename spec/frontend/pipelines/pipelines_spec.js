@@ -1,4 +1,4 @@
-import { GlButton, GlFilteredSearch, GlLoadingIcon, GlPagination } from '@gitlab/ui';
+import { GlButton, GlEmptyState, GlFilteredSearch, GlLoadingIcon, GlPagination } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { chunk } from 'lodash';
@@ -8,8 +8,6 @@ import waitForPromises from 'helpers/wait_for_promises';
 import Api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import BlankState from '~/pipelines/components/pipelines_list/blank_state.vue';
-import EmptyState from '~/pipelines/components/pipelines_list/empty_state.vue';
 import NavigationControls from '~/pipelines/components/pipelines_list/nav_controls.vue';
 import PipelinesComponent from '~/pipelines/components/pipelines_list/pipelines.vue';
 import PipelinesTableComponent from '~/pipelines/components/pipelines_list/pipelines_table.vue';
@@ -58,11 +56,10 @@ describe('Pipelines', () => {
   };
 
   const findFilteredSearch = () => wrapper.findComponent(GlFilteredSearch);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
   const findNavigationTabs = () => wrapper.findComponent(NavigationTabs);
   const findNavigationControls = () => wrapper.findComponent(NavigationControls);
   const findPipelinesTable = () => wrapper.findComponent(PipelinesTableComponent);
-  const findEmptyState = () => wrapper.findComponent(EmptyState);
-  const findBlankState = () => wrapper.findComponent(BlankState);
   const findTablePagination = () => wrapper.findComponent(TablePagination);
 
   const findTab = (tab) => wrapper.findByTestId(`pipelines-tab-${tab}`);
@@ -268,7 +265,7 @@ describe('Pipelines', () => {
           });
 
           it('should filter pipelines', async () => {
-            expect(findBlankState().text()).toBe('There are currently no pipelines.');
+            expect(findEmptyState().text()).toBe('There are currently no pipelines.');
           });
 
           it('should update browser bar', () => {
@@ -515,7 +512,11 @@ describe('Pipelines', () => {
       });
 
       it('renders empty state', () => {
-        expect(findBlankState().text()).toBe('There are currently no pipelines.');
+        expect(findEmptyState().text()).toBe('There are currently no pipelines.');
+      });
+
+      it('renders filtered search', () => {
+        expect(findFilteredSearch().exists()).toBe(true);
       });
 
       it('renders tab empty state finished scope', async () => {
@@ -528,7 +529,7 @@ describe('Pipelines', () => {
 
         await waitForPromises();
 
-        expect(findBlankState().text()).toBe('There are currently no finished pipelines.');
+        expect(findEmptyState().text()).toBe('There are currently no finished pipelines.');
       });
     });
 
@@ -548,6 +549,10 @@ describe('Pipelines', () => {
         expect(findEmptyState().find(GlButton).attributes('href')).toBe(
           '/help/ci/quick_start/index.md',
         );
+      });
+
+      it('does not render filtered search', () => {
+        expect(findFilteredSearch().exists()).toBe(false);
       });
 
       it('does not render tabs nor buttons', () => {
@@ -599,7 +604,7 @@ describe('Pipelines', () => {
       });
 
       it('renders empty state', () => {
-        expect(findBlankState().text()).toBe('There are currently no pipelines.');
+        expect(findEmptyState().text()).toBe('There are currently no pipelines.');
       });
     });
   });
@@ -688,7 +693,7 @@ describe('Pipelines', () => {
       });
 
       it('shows error state', () => {
-        expect(findBlankState().text()).toBe(
+        expect(findEmptyState().text()).toBe(
           'There was an error fetching the pipelines. Try again in a few moments or contact your support team.',
         );
       });
@@ -713,7 +718,7 @@ describe('Pipelines', () => {
       });
 
       it('shows error state', () => {
-        expect(findBlankState().text()).toBe(
+        expect(findEmptyState().text()).toBe(
           'There was an error fetching the pipelines. Try again in a few moments or contact your support team.',
         );
       });

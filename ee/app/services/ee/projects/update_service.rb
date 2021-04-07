@@ -4,7 +4,6 @@ module EE
   module Projects
     module UpdateService
       extend ::Gitlab::Utils::Override
-      include CleanupApprovers
 
       PULL_MIRROR_ATTRIBUTES = %i[
         mirror
@@ -19,7 +18,6 @@ module EE
 
       override :execute
       def execute
-        should_remove_old_approvers = params.delete(:remove_old_approvers)
         limit = params.delete(:repository_size_limit)
         wiki_was_enabled = project.wiki_enabled?
 
@@ -33,7 +31,6 @@ module EE
         end
 
         if result[:status] == :success
-          cleanup_approvers(project) if should_remove_old_approvers
           refresh_merge_trains(project)
 
           log_audit_events
@@ -81,7 +78,7 @@ module EE
           framework_identifier = settings.delete(:framework)
           if framework_identifier.blank?
             settings.merge!(_destroy: true)
-          elsif ::Feature.enabled?(:ff_custom_compliance_frameworks, project.namespace)
+          elsif ::Feature.enabled?(:ff_custom_compliance_frameworks, project.namespace, default_enabled: :yaml)
             settings[:compliance_management_framework] = project.namespace.root_ancestor.compliance_management_frameworks.find(framework_identifier)
           else
             settings[:compliance_management_framework] = ComplianceManagement::Framework.find_or_create_legacy_default_framework(project, framework_identifier)

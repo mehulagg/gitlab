@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import Visibility from 'visibilityjs';
 import Vue from 'vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { diffViewerModes } from '~/ide/constants';
@@ -49,9 +50,10 @@ import {
   convertExpandLines,
   idleCallback,
   allDiscussionWrappersExpanded,
-  prepareDiffData,
   prepareLineForRenamedFile,
 } from './utils';
+
+let eTagPoll;
 
 export const setBaseConfig = ({ commit }, options) => {
   const {
@@ -59,6 +61,8 @@ export const setBaseConfig = ({ commit }, options) => {
     endpointMetadata,
     endpointBatch,
     endpointCoverage,
+    endpointCodequality,
+    endpointUpdateUser,
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
@@ -71,6 +75,8 @@ export const setBaseConfig = ({ commit }, options) => {
     endpointMetadata,
     endpointBatch,
     endpointCoverage,
+    endpointCodequality,
+    endpointUpdateUser,
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
@@ -163,7 +169,15 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
 
         return pagination.next_page;
       })
-      .then((nextPage) => nextPage && getBatch(nextPage))
+      .then((nextPage) => {
+        dispatch('startRenderDiffsQueue');
+
+        if (nextPage) {
+          return getBatch(nextPage);
+        }
+
+        return null;
+      })
       .catch(() => commit(types.SET_RETRIEVING_BATCHES, false));
 
   return getBatch()
@@ -197,13 +211,7 @@ export const fetchDiffFilesMeta = ({ commit, state }) => {
       commit(types.SET_MERGE_REQUEST_DIFFS, data.merge_request_diffs || []);
       commit(types.SET_DIFF_METADATA, strippedData);
 
-      worker.postMessage(
-        prepareDiffData({
-          diff: data,
-          priorFiles: state.diffFiles,
-          meta: true,
-        }),
-      );
+      worker.postMessage(data.diff_files);
 
       return data;
     })
@@ -228,6 +236,48 @@ export const fetchCoverageFiles = ({ commit, state }) => {
   });
 
   coveragePoll.makeRequest();
+};
+
+export const clearEtagPoll = () => {
+  eTagPoll = null;
+};
+
+export const stopCodequalityPolling = () => {
+  if (eTagPoll) eTagPoll.stop();
+};
+
+export const restartCodequalityPolling = () => {
+  if (eTagPoll) eTagPoll.restart();
+};
+
+export const fetchCodequality = ({ commit, state, dispatch }) => {
+  eTagPoll = new Poll({
+    resource: {
+      getCodequalityDiffReports: (endpoint) => axios.get(endpoint),
+    },
+    data: state.endpointCodequality,
+    method: 'getCodequalityDiffReports',
+    successCallback: ({ status, data }) => {
+      if (status === httpStatusCodes.OK) {
+        commit(types.SET_CODEQUALITY_DATA, data);
+
+        eTagPoll.stop();
+      }
+    },
+    errorCallback: () => createFlash(__('Something went wrong on our end. Please try again!')),
+  });
+
+  if (!Visibility.hidden()) {
+    eTagPoll.makeRequest();
+  }
+
+  Visibility.change(() => {
+    if (!Visibility.hidden()) {
+      dispatch('restartCodequalityPolling');
+    } else {
+      dispatch('stopCodequalityPolling');
+    }
+  });
 };
 
 export const setHighlightedRow = ({ commit }, lineCode) => {
@@ -304,33 +354,38 @@ export const renderFileForDiscussionId = ({ commit, rootState, state }, discussi
 };
 
 export const startRenderDiffsQueue = ({ state, commit }) => {
-  const checkItem = () =>
-    new Promise((resolve) => {
-      const nextFile = state.diffFiles.find(
-        (file) =>
-          !file.renderIt &&
-          file.viewer &&
-          (!isCollapsed(file) || file.viewer.name !== diffViewerModes.text),
-      );
+  const diffFilesToRender = state.diffFiles.filter(
+    (file) =>
+      !file.renderIt &&
+      file.viewer &&
+      (!isCollapsed(file) || file.viewer.name !== diffViewerModes.text),
+  );
+  let currentDiffFileIndex = 0;
 
-      if (nextFile) {
-        requestAnimationFrame(() => {
-          commit(types.RENDER_FILE, nextFile);
+  const checkItem = () => {
+    const nextFile = diffFilesToRender[currentDiffFileIndex];
+
+    if (nextFile) {
+      currentDiffFileIndex += 1;
+      commit(types.RENDER_FILE, nextFile);
+
+      const requestIdle = () =>
+        requestIdleCallback((idleDeadline) => {
+          // Wait for at least 5ms before trying to render
+          if (idleDeadline.timeRemaining() >= 6) {
+            checkItem();
+          } else {
+            requestIdle();
+          }
         });
-        requestIdleCallback(
-          () => {
-            checkItem()
-              .then(resolve)
-              .catch(() => {});
-          },
-          { timeout: 1000 },
-        );
-      } else {
-        resolve();
-      }
-    });
 
-  return checkItem();
+      requestIdle();
+    }
+  };
+
+  if (diffFilesToRender.length) {
+    checkItem();
+  }
 };
 
 export const setRenderIt = ({ commit }, file) => commit(types.RENDER_FILE, file);

@@ -21,7 +21,6 @@ const props = {
     path: '/mixed-vulnerabilities/dependency-list-test-01/-/pipelines/214',
   },
   securityDashboardHelpPath: '/security/dashboard/help-path',
-  vulnerabilitiesExportEndpoint: '/vulnerabilities/exports',
 };
 
 const provide = {

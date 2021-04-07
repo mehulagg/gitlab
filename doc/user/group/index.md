@@ -16,10 +16,11 @@ Then you can:
 
 - Grant members access to multiple projects at once.
 - Add to-do items for all of the group members at once.
-- View the [issues](../project/issues/index.md#issues-list) and
+- View the [issues](../project/issues/index.md) and
   [merge requests](../project/merge_requests/reviewing_and_managing_merge_requests.md#view-merge-requests-for-all-projects-in-a-group)
   for all projects in the group, together in a single list view.
 - [Bulk edit](../group/bulk_editing/index.md) issues, epics, and merge requests.
+- [Create a wiki](../project/wiki/index.md) for the group.
 
 You can also create [subgroups](subgroups/index.md).
 
@@ -140,7 +141,7 @@ To remove a member from a group:
 1. From the left menu, select **Members**.
 1. Next to the member you want to remove, select **Delete**.
 1. Optional. On the **Remove member** confirmation box, select the
-  **Also unassign this user from related issues and merge requests** checkbox.
+  **Also unassign this user from linked issues and merge requests** checkbox.
 1. Select **Remove member**.
 
 ## Filter and sort members in a group
@@ -322,25 +323,6 @@ LDAP user permissions can be manually overridden by an administrator. To overrid
 
 Now you can edit the user's permissions from the **Members** page.
 
-## Group wikis **(PREMIUM)**
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13195) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
-
-Group wikis work the same way as [project wikis](../project/wiki/index.md).
-
-Group wikis can be edited by members with [Developer permissions](../../user/permissions.md#group-members-permissions)
-and above.
-
-You can move group wiki repositories by using the [Group repository storage moves API](../../api/group_repository_storage_moves.md).
-
-There are a few limitations compared to project wikis:
-
-- Git LFS is not supported.
-- Group wikis are not included in global search.
-- Changes to group wikis don't show up in the group's activity feed.
-
-For updates, follow [the epic that tracks feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
-
 ## Transfer a group
 
 You can transfer groups in the following ways:
@@ -387,16 +369,10 @@ because the project cannot be moved.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43290) in GitLab 13.6.
 
-By default, when you create a new project in GitLab, the initial branch is called `master`.
-For groups, a group owner can customize the initial branch name to something
-else. This way, every new project created under that group from then on starts from the custom branch name rather than `master`.
-
-To use a custom name for the initial branch:
-
-1. Go to the group's **Settings > Repository** page.
-1. Expand the **Default initial branch name** section.
-1. Change the default initial branch to a custom name of your choice.
-1. Select **Save changes**.
+When you create a new project in GitLab, a default branch is created with the
+first push. The group owner can
+[customize the initial branch](../project/repository/branches/default.md#group-level-custom-initial-branch-name)
+for the group's projects to meet your group's needs.
 
 ## Remove a group
 
@@ -434,7 +410,7 @@ To prevent a project from being shared with other groups:
 
 1. Go to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section.
-1. Select **Prevent sharing a project within <group_name> with other groups**.
+1. Select **Prevent sharing a project within `<group_name>` with other groups**.
 1. Select **Save changes**.
 
 ## Prevent members from being added to a group **(PREMIUM)**
@@ -460,33 +436,30 @@ API requests to add a new user to a project are not possible.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1985) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.0.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/215410) to [GitLab Premium](https://about.gitlab.com/pricing/) in 13.1.
 
-NOTE:
-IP access restrictions are not functioning as expected on GitLab.com. If enabled,
-users cannot perform Git operations through SSH, or access projects in the UI.
-For more information, [see this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/271673).
-
 To ensure only people from your organization can access particular
-resources, you can restrict access to groups by IP address. This setting applies to all subgroups,
-projects, issues, and so on. 
+resources, you can restrict access to groups by IP address. This group-level setting
+applies to:
 
-IP access restrictions can be configured at the group level only.
-
-This restriction applies to:
-
-- The GitLab UI.
+- The GitLab UI, including subgroups, projects, and issues.
 - [In GitLab 12.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/12874), the API.
-- [In GitLab 12.4 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/32113), Git actions via SSH.
 
-Administrators and group owners are able to access the group regardless of the IP restriction.
+You should consider these security implications before configuring IP address restrictions:
+
+- **SSH requests**: While you can restrict HTTP traffic on GitLab.com with IP address restrictions,
+  they cause SSH requests, including Git operations over SSH, to fail. For more information,
+  read [issue 271673](https://gitlab.com/gitlab-org/gitlab/-/issues/271673).
+- **Administrators and group owners**: Users with these permission levels can always
+  access the group settings, regardless of IP restriction, but they cannot access projects
+  belonging to the group when accessing from a disallowed IP address.
 
 To restrict group access by IP address:
 
-1. Go to the group’s **Settings > General** page.
+1. Go to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section.
 1. In the **Allow access to the following IP addresses** field, enter IP address ranges in CIDR notation.
 1. Select **Save changes**.
 
-![Domain restriction by IP address](img/restrict-by-ip.gif)
+   ![Domain restriction by IP address](img/restrict-by-ip.gif)
 
 ## Restrict group access by domain **(PREMIUM)**
 
@@ -638,6 +611,7 @@ The group's new subgroups have push rules set for them based on either:
 
 ## Related topics
 
+- [Group wikis](../project/wiki/index.md)
 - [Maximum artifacts size](../admin_area/settings/continuous_integration.md#maximum-artifacts-size). **(FREE SELF)**
 - [Repositories analytics](repositories_analytics/index.md): View overall activity of all projects with code coverage. **(PREMIUM)**
 - [Contribution analytics](contribution_analytics/index.md): View the contributions (pushes, merge requests,
@@ -662,3 +636,15 @@ The group's new subgroups have push rules set for them based on either:
 - [Lock the sharing with group feature](#prevent-a-project-from-being-shared-with-groups).
 - [Enforce two-factor authentication (2FA)](../../security/two_factor_authentication.md#enforcing-2fa-for-all-users-in-a-group): Enforce 2FA
   for all group members.
+
+## Troubleshooting
+
+### Verify if access is blocked by IP restriction
+
+If a user sees a 404 when they would normally expect access, and the problem is limited to a specific group, search the `auth.log` rails log for one or more of the following:
+
+- `json.message`: `'Attempting to access IP restricted group'`
+- `json.allowed`: `false`
+
+In viewing the log entries, compare the `remote.ip` with the list of
+[allowed IPs](#restrict-group-access-by-ip-address) for the group.

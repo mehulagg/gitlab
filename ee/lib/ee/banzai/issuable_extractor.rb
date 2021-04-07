@@ -3,8 +3,8 @@
 module EE
   module Banzai
     module IssuableExtractor
-      EPIC_REFERENCE_TYPE = '@data-reference-type="epic"'.freeze
-      VULNERABILITY_REFERENCE_TYPE = '@data-reference-type="vulnerability"'.freeze
+      EPIC_REFERENCE_TYPE = '@data-reference-type="epic"'
+      VULNERABILITY_REFERENCE_TYPE = '@data-reference-type="vulnerability"'
 
       private
 

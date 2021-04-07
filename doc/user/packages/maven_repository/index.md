@@ -9,8 +9,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5811) in GitLab Premium 11.3.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
-Publish [Maven](https://maven.apache.org) artifacts in your project’s Package Registry.
+Publish [Maven](https://maven.apache.org) artifacts in your project's Package Registry.
 Then, install the packages whenever you need to use them as a dependency.
+
+For documentation of the specific API endpoints that the Maven package manager
+client uses, see the [Maven API documentation](../../../api/packages/maven.md).
 
 ## Build a Maven package
 
