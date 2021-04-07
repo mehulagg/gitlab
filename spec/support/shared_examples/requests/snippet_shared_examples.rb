@@ -176,31 +176,6 @@ RSpec.shared_examples 'snippet creation without files parameter' do
   end
 end
 
-#RSpec.shared_examples 'snippets controller actions' do
-#  describe 'GET #index' do
-#    subject(:request) { get :index }
-#
-#    context 'when views are rendered' do
-#      render_views
-#
-#      it 'avoids N+1 database queries' do
-#        # Warming call to load everything non snippet related
-#        get(:index)
-#
-#        project = create(:project, namespace: user.namespace)
-#        create(:project_snippet, project: project, author: user)
-#
-#        control_count = ActiveRecord::QueryRecorder.new { get(:index) }.count
-#
-#        project = create(:project, namespace: user.namespace)
-#        create(:project_snippet, project: project, author: user)
-#
-#        expect { get(:index) }.not_to exceed_query_limit(control_count)
-#      end
-#    end
-#  end
-#end
-
 RSpec.shared_examples 'snippets views' do
   let(:params) { {} }
 
