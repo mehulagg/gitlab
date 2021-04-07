@@ -47,8 +47,8 @@ with [Reporter and higher permission levels](../permissions.md).
 
 To enter an estimate, write `/estimate`, followed by the time. For example, if
 you need to enter an estimate of 1 month, 2 weeks, 3 days, 4 hours and 5 minutes,
-you would write `/estimate 1mo 2w 3d 4h 5m`. Time units that we support are listed
-at the bottom of this help page.
+write `/estimate 1mo 2w 3d 4h 5m`.
+Check the [time units you can use](#configuration).
 
 Every time you enter a new time estimate, any previous time estimates are
 overridden by this new value. There should only be one valid estimate in an

@@ -95,7 +95,7 @@ threads. Some quick actions might not be available to all subscription tiers.
 | `/remove_zoom`                        | **{check-circle}** Yes | **{dotted-circle}** No | **{dotted-circle}** No | Remove Zoom meeting from this issue ([introduced in GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16609)). |
 | `/reopen`                             | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | Reopen. |
 | `/shrug <comment>`                    | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | Append the comment with `¯\＿(ツ)＿/¯`. |
-| `/spend <time> [<date>]` | **{check-circle}** Yes | **{check-circle}** Yes | **{dotted-circle}** No | Add or subtract spent time. Optionally, specify the date that time was spent on. For example, `/spend -1mo 2w 3d 4h 5m 2018-08-26`. Learn more about [time tracking](time_tracking.md). |
+| `/spend <time> [<date>]` | **{check-circle}** Yes | **{check-circle}** Yes | **{dotted-circle}** No | Add or subtract spent time. Optionally, specify the date that time was spent on. For example, `/spend 1mo 2w 3d 4h 5m 2018-08-26` or `/spend -1h 30m`. Learn more about [time tracking](time_tracking.md). |
 | `/submit_review`                      | **{dotted-circle}** No | **{check-circle}** Yes | **{dotted-circle}** No | Submit a pending review ([introduced in GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/issues/8041)). |
 | `/subscribe`                          | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | Subscribe to notifications. |
 | `/tableflip <comment>`                | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | Append the comment with `(╯°□°)╯︵ ┻━┻`. |
