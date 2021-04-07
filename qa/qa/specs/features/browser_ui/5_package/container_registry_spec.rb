@@ -34,24 +34,20 @@ module QA
                                 file_path: '.gitlab-ci.yml',
                                 content:
                                     <<~YAML
-                                    build:
                                       image: docker:19.03.12
-                                      stage: build
+                                      variables:
+                                        DOCKER_TLS_CERTDIR: "/certs"
                                       services:
                                         - docker:19.03.12-dind
-                                      variables:
-                                        IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-                                        DOCKER_TLS_CERTDIR: "/certs"
-                                      before_script:
-                                        - mkdir -p $HOME/.docker/
-                                        - 'echo "{ \\"proxies\\": { \\"default\\": { \\"httpProxy\\": \\"http://$CI_SERVER_HOST\\", \\"httpsProxy\\": \\"http://$CI_SERVER_HOST\\", \\"noProxy\\": \\"docker:2375,docker:2376\\" } } }" > $HOME/.docker/config.json'
-                                        - cat $HOME/.docker/config.json
-                                      script:
-                                        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-                                        - docker build -t $IMAGE_TAG .
-                                        - docker push $IMAGE_TAG
-                                      tags:
-                                        - "runner-for-#{project.name}"
+
+                                      build:
+                                        stage: build
+                                        script:
+                                          - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+                                          - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+                                          - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+                                        tags:
+                                          - "runner-for-#{project.name}"
                                     YAML
                             }])
         end
