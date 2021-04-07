@@ -246,7 +246,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'threat monitoring link is visible' do
         expect(rendered).to have_link('Threat Monitoring', href: project_threat_monitoring_path(project))
       end
-
       it 'scan policies link is visible' do
         expect(rendered).to have_link('Scan Policies', href: project_security_policy_path(project))
       end
@@ -399,27 +398,27 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'Settings > Operations' do
-    it 'is not visible when no valid license' do
-      allow(view).to receive(:can?).and_return(true)
-
-      render
-
-      expect(rendered).not_to have_link project_settings_operations_path(project)
+  describe 'Settings' do
+    before do
+      allow(view).to receive(:current_user).and_return(user)
     end
 
-    it 'is not visible to unauthorized user' do
-      render
+    describe 'Operations' do
+      it 'links to settings page' do
+        render
 
-      expect(rendered).not_to have_link project_settings_operations_path(project)
-    end
+        expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+      end
 
-    it 'links to settings page' do
-      allow(view).to receive(:can?).and_return(true)
+      context 'when user is not authorized' do
+        let(:user) { nil }
 
-      render
+        it 'does not display the link' do
+          render
 
-      expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+          expect(rendered).not_to have_link project_settings_operations_path(project)
+        end
+      end
     end
   end
 end
