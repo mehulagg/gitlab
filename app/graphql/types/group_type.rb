@@ -161,6 +161,12 @@ module Types
       group.container_repositories.size
     end
 
+    field :exportable_entities,
+          ::Types::ExportableEntitiesType.connection_type,
+          null: true,
+          description: 'Exportable Types',
+          resolver: Resolvers::ExportableTypeResolver
+
     private
 
     def group
