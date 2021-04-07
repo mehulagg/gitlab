@@ -50,7 +50,7 @@ RSpec.describe "Admin::AbuseReports", :js do
       end
 
       describe 'in the abuse report view' do
-        it 'presents information about abuse report', :experiment do
+        it 'presents information about abuse report' do
           visit admin_abuse_reports_path
 
           expect(page).to have_content('Abuse Reports')
