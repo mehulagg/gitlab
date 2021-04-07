@@ -261,10 +261,10 @@ export const fetchCodequality = ({ commit, state, dispatch }) => {
       if (status === httpStatusCodes.OK) {
         commit(types.SET_CODEQUALITY_DATA, data);
 
-        eTagPoll.stop();
+        dispatch('stopCodequalityPolling');
       }
     },
-    errorCallback: () => createFlash(__('Something went wrong on our end. Please try again!')),
+    errorCallback: () => createFlash(__('Something went wrong on our end. Please try again.')),
   });
 
   if (!Visibility.hidden()) {

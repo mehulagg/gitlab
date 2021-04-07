@@ -1,4 +1,4 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 
 import CodeQualityBadge from 'ee/diffs/components/code_quality_badge.vue';
@@ -23,7 +23,7 @@ function createComponent({ first = false, last = false, options = {}, props = {}
 
   store.state.diffs.diffFiles = [file];
 
-  const wrapper = shallowMount(DiffFileComponent, {
+  const wrapper = mount(DiffFileComponent, {
     store,
     localVue,
     propsData: {
@@ -52,27 +52,35 @@ describe('EE DiffFile', () => {
   });
 
   describe('code quality badge', () => {
-    it('is shown when there is diff data for the file', () => {
-      ({ wrapper } = createComponent({
-        props: {
-          codequalityDiff: [
-            { line: 1, description: 'Unexpected alert.', severity: 'minor' },
-            {
-              line: 3,
-              description: 'Arrow function has too many statements (52). Maximum allowed is 30.',
-              severity: 'minor',
-            },
-          ],
-        },
-      }));
+    describe('when there is diff data for the file', () => {
+      beforeEach(() => {
+        ({ wrapper } = createComponent({
+          props: {
+            codequalityDiff: [
+              { line: 1, description: 'Unexpected alert.', severity: 'minor' },
+              {
+                line: 3,
+                description: 'Arrow function has too many statements (52). Maximum allowed is 30.',
+                severity: 'minor',
+              },
+            ],
+          },
+        }));
+      });
 
-      expect(wrapper.find(CodeQualityBadge)).toExist();
+      it('shows the code quality badge', () => {
+        expect(wrapper.find(CodeQualityBadge).exists()).toBe(true);
+      });
     });
 
-    it('is not shown when there is no diff data for the file', () => {
-      ({ wrapper } = createComponent({}));
+    describe('when there is no diff data for the file', () => {
+      beforeEach(() => {
+        ({ wrapper } = createComponent({}));
+      });
 
-      expect(wrapper.find(CodeQualityBadge)).toExist();
+      it('does not show the code quality badge', () => {
+        expect(wrapper.find(CodeQualityBadge).exists()).toBe(false);
+      });
     });
   });
 });
