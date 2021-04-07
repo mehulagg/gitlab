@@ -32,7 +32,7 @@ can be hosted by you or in [Atlassian cloud](https://www.atlassian.com/cloud):
 
 ### Jira development panel integration
 
-The [Jira development panel integration](../../../integration/jira_development_panel.md)
+The [Jira development panel integration](development_panel.md)
 connects all GitLab projects under a group or personal namespace. When configured,
 relevant GitLab information, including related branches, commits, and merge requests,
 displays in the [development panel](https://support.atlassian.com/jira-software-cloud/docs/view-development-information-for-an-issue/).

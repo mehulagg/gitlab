@@ -14,7 +14,7 @@ in the issue.
 
 It complements the [GitLab Jira integration](../../user/project/integrations/jira.md). You may choose
 to configure both integrations to take advantage of both sets of features. See a
-[feature comparison](../../user/project/integrations/jira_integrations.md).
+[feature comparison](index.md#direct-feature-comparison).
 
 ## Features
 
@@ -82,7 +82,7 @@ To enable the Jira service in GitLab, you must:
 
 To enable the Jira integration in a project:
 
-1. Go to the project's [Integrations page](overview.md#accessing-integrations) and select the
+1. Go to the project's [Integrations page](../../user/project/integrations/overview.md#accessing-integrations) and select the
    **Jira** service.
 
 1. Select **Enable integration**.
@@ -95,7 +95,7 @@ To enable the Jira integration in a project:
 1. To include a comment on the Jira issue when the above reference is made in GitLab, select
    **Enable comments**.
 
-1. To transition Jira issues when a [closing reference](../issues/managing_issues.md#closing-issues-automatically) is made in GitLab,
+1. To transition Jira issues when a [closing reference](../../user/project/issues/managing_issues.md#closing-issues-automatically) is made in GitLab,
    select **Enable Jira transitions**.
 
 1. Enter the further details on the page as described in the following table.
