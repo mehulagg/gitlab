@@ -412,7 +412,7 @@ in the regression issue as fixes are addressed.
 
 In order to track things that can be improved in the GitLab codebase,
 we use the ~"technical debt" label in the [GitLab issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues).
-We use the ~"UX debt" label when an intentional decision is made to deviate from the MVC, which sacrifies the user experience.
+We use the ~"UX debt" label when an intentional decision is made to deviate from the MVC, which sacrifices the user experience.
 
 These labels should be added to issues that describe things that can be improved,
 shortcuts that have been taken, features that need additional attention, and all
