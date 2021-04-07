@@ -22694,9 +22694,6 @@ msgstr ""
 msgid "Pipelines|Revoke"
 msgstr ""
 
-msgid "Pipelines|Run pipeline"
-msgstr ""
-
 msgid "Pipelines|Something went wrong while cleaning runners cache."
 msgstr ""
 

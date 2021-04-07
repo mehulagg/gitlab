@@ -63,7 +63,7 @@ export default {
       data-testid="run-pipeline-button"
       data-qa-selector="run_pipeline_button"
     >
-      {{ s__('Pipelines|Run pipeline') }}
+      {{ s__('Pipeline|Run pipeline') }}
     </gl-button>
   </div>
 </template>
