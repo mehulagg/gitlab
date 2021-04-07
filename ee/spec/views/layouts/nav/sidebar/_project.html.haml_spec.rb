@@ -246,7 +246,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'threat monitoring link is visible' do
         expect(rendered).to have_link('Threat Monitoring', href: project_threat_monitoring_path(project))
       end
-
       it 'scan policies link is visible' do
         expect(rendered).to have_link('Scan Policies', href: project_security_policy_path(project))
       end
@@ -268,16 +267,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         stub_licensed_features(oncall_schedules: true)
       end
 
-      it 'has a link to the on-call schedules page' do
-        render
-
-        expect(rendered).to have_link('On-call Schedules', href: project_incident_management_oncall_schedules_path(project))
-      end
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
-        it 'does not have a link to the on-call schedules page' do
           render
 
           expect(rendered).not_to have_link('On-call Schedules')
