@@ -166,7 +166,7 @@ On Jira Server you can get the transition IDs in either of the following ways:
 Note that the transition ID may vary between workflows (for example, bug vs. story),
 even if the status you are changing to is the same.
 
-#### Disabling comments on Jira issues
+## Disabling comments on Jira issues
 
 You can continue to have GitLab cross-link a source commit/MR with a Jira issue while disabling the comment added to the issue.
 
