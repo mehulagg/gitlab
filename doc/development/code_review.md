@@ -406,7 +406,7 @@ When ready to merge:
   circling back with the author about that. Otherwise, if the MR only has a few commits, we'll
   be respecting the author's setting by not squashing them.
 
-- **Start a new merge request pipeline with the `Run Pipeline` button in the merge
+- **Start a new merge request pipeline with the `Run pipeline` button in the merge
   request's "Pipelines" tab, and enable "Merge When Pipeline Succeeds" (MWPS).** Note that:
   - If **[master is broken](https://about.gitlab.com/handbook/engineering/workflow/#broken-master),
     For other cases, follow these [handbook instructions](https://about.gitlab.com/handbook/engineering/workflow/#merging-during-broken-master).
