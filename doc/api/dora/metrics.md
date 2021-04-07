@@ -98,4 +98,4 @@ parameter:
 | `metric` query parameter | Description of `value` in response                                                                                                |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
 | `deployment_frequency`   | The number of successful deployments during the time period.                                                                      |
-| `lead_time_for_changes`  | The median number of seconds between MR merge and the deployment of the MR's commits for all MRs deployed during the time period. |
+| `lead_time_for_changes`  | The median number of seconds between the merge of the merge request (MR) and the deployment of the MR's commits for all MRs deployed during the time period. |
