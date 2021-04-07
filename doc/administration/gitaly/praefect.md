@@ -1249,7 +1249,7 @@ affected repositories. Praefect provides tools for:
 - [Manual](#manual-reconciliation) reconciliation, for:
   - GitLab 13.3 and earlier.
   - Repositories upgraded to GitLab 13.4 and later without entries in the `repositories` table.
-    A migration tool [is planned](https://gitlab.com/gitlab-org/gitaly/-/issues/3033).
+    If necessary, a migration is run when Praefect starts.
 
 These tools reconcile the outdated repositories to bring them fully up to date again.
 
