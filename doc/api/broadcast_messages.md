@@ -1,6 +1,6 @@
 ---
-stage: Plan
-group: Project Management
+stage: Growth
+group: Activation
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
