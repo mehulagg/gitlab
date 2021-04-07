@@ -140,7 +140,7 @@ export const fileLineCoverage = (state) => (file, line) => {
  * @param {string} filePath
  * @returns {Array}
  */
-export const fileCodequalityDiff = (state) => (filePath) => {
+export const getDiffFileCodequality = (state) => (filePath) => {
   if (!state.codequalityDiff.files || !state.codequalityDiff.files[filePath]) return [];
   return state.codequalityDiff.files[filePath];
 };

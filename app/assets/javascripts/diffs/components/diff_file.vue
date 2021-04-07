@@ -67,11 +67,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    codequalityDiff: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
   },
   data() {
     return {
@@ -87,7 +82,7 @@ export default {
   computed: {
     ...mapState('diffs', ['currentDiffFileId']),
     ...mapGetters(['isNotesFetched']),
-    ...mapGetters('diffs', ['getDiffFileDiscussions']),
+    ...mapGetters('diffs', ['getDiffFileDiscussions', 'getDiffFileCodequality']),
     viewBlobHref() {
       return escape(this.file.view_path);
     },
@@ -154,7 +149,7 @@ export default {
       return loggedIn && featureOn;
     },
     hasCodequalityChanges() {
-      return this.codequalityDiff.length > 0;
+      return this.getDiffFileCodequality(this.file.file_path)?.length > 0;
     },
   },
   watch: {

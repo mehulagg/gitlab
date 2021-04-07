@@ -9,7 +9,7 @@ import createDiffsStore from '~/diffs/store/modules';
 
 const getReadableFile = () => JSON.parse(JSON.stringify(diffFileMockDataReadable));
 
-function createComponent({ first = false, last = false, options = {}, props = {} }) {
+function createComponent({ withCodequality = true }) {
   const file = getReadableFile();
   const localVue = createLocalVue();
 
@@ -23,6 +23,21 @@ function createComponent({ first = false, last = false, options = {}, props = {}
 
   store.state.diffs.diffFiles = [file];
 
+  if (withCodequality) {
+    store.state.diffs.codequalityDiff = {
+      files: {
+        [file.file_path]: [
+          { line: 1, description: 'Unexpected alert.', severity: 'minor' },
+          {
+            line: 3,
+            description: 'Arrow function has too many statements (52). Maximum allowed is 30.',
+            severity: 'minor',
+          },
+        ],
+      },
+    };
+  }
+
   const wrapper = mount(DiffFileComponent, {
     store,
     localVue,
@@ -30,11 +45,9 @@ function createComponent({ first = false, last = false, options = {}, props = {}
       file,
       canCurrentUserFork: false,
       viewDiffsFileByFile: false,
-      isFirstFile: first,
-      isLastFile: last,
-      ...props,
+      isFirstFile: false,
+      isLastFile: false,
     },
-    ...options,
   });
 
   return {
@@ -54,18 +67,7 @@ describe('EE DiffFile', () => {
   describe('code quality badge', () => {
     describe('when there is diff data for the file', () => {
       beforeEach(() => {
-        ({ wrapper } = createComponent({
-          props: {
-            codequalityDiff: [
-              { line: 1, description: 'Unexpected alert.', severity: 'minor' },
-              {
-                line: 3,
-                description: 'Arrow function has too many statements (52). Maximum allowed is 30.',
-                severity: 'minor',
-              },
-            ],
-          },
-        }));
+        ({ wrapper } = createComponent({ withCodequality: true }));
       });
 
       it('shows the code quality badge', () => {
@@ -75,7 +77,7 @@ describe('EE DiffFile', () => {
 
     describe('when there is no diff data for the file', () => {
       beforeEach(() => {
-        ({ wrapper } = createComponent({}));
+        ({ wrapper } = createComponent({ withCodequality: false }));
       });
 
       it('does not show the code quality badge', () => {
