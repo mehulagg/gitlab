@@ -25,12 +25,6 @@ module DastOnDemandScans
       ).execute.present?
     end
 
-    def branch
-      strong_memoize(:branch) do
-        params[:branch] || container.default_branch
-      end
-    end
-
     def dast_profile
       strong_memoize(:dast_profile) do
         params[:dast_profile]
@@ -52,6 +46,12 @@ module DastOnDemandScans
     def dast_site
       strong_memoize(:dast_site) do
         dast_site_profile&.dast_site
+      end
+    end
+
+    def branch
+      strong_memoize(:branch) do
+        dast_profile&.branch_name || params[:branch] || container.default_branch
       end
     end
 
