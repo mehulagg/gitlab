@@ -96,6 +96,13 @@ export default {
     shouldShowAvatarsOnGutter() {
       return this.line.hasDiscussions;
     },
+    interopType() {
+      // type can be a number of things including 'null'. Let's force to be "old" | "new"
+      return this.line.type === 'old' ? 'old' : 'new';
+    },
+    interopLine() {
+      return this.interopType === 'old' ? this.line.old_line : this.line.new_line;
+    },
   },
   mounted() {
     this.scrollToLineIfNeededInline(this.line);
@@ -124,6 +131,10 @@ export default {
     :id="inlineRowId"
     :class="classNameMap"
     class="line_holder"
+    :data-interop-type="interopType"
+    :data-interop-line="interopLine"
+    :data-interop-old-line="line.old_line"
+    :data-interop-new-line="line.new_line"
     @mouseover="handleMouseMove"
     @mouseout="handleMouseMove"
   >

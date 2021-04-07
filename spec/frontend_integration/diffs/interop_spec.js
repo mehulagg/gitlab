@@ -2,7 +2,11 @@ import { waitFor } from '@testing-library/dom';
 import { TEST_HOST } from 'helpers/test_constants';
 import initDiffsApp from '~/diffs';
 import { createStore } from '~/mr_notes/stores';
-import { getDiffCodePart, getLineNumberFromCodeElement } from './interop_api';
+import {
+  getDiffCodePart,
+  getLineNumberFromCodeElement,
+  getCodeElementFromLineNumber,
+} from './interop_api';
 
 jest.mock('~/vue_shared/mixins/gl_feature_flags_mixin', () => () => ({
   inject: {
@@ -20,7 +24,7 @@ const EXPECT_INLINE = [
   ['head', 1],
   ['head', 2],
   ['head', 3],
-  ['base', 5],
+  ['base', 4],
   ['head', 4],
   null,
   ['base', 6],
@@ -109,13 +113,6 @@ describe('diffs third party interoperability', () => {
         ],
     );
 
-  // ${'inline view'}              | ${false}              | ${'inline'}   | ${'tr.line_holder'}       | ${'td.line_content'}                  | ${EXPECT_INLINE}
-  // ${'parallel view left side'}  | ${false}              | ${'parallel'} | ${'tr.line_holder'}       | ${'td.line_content.left-side'}        | ${EXPECT_PARALLEL_LEFT_SIDE}
-  // ${'parallel view right side'} | ${false}              | ${'parallel'} | ${'tr.line_holder'}       | ${'td.line_content.right-side'}       | ${EXPECT_PARALLEL_RIGHT_SIDE}
-  // ${'inline view'}              | ${true}               | ${'inline'}   | ${'.diff-tr.line_holder'} | ${'.diff-td.line_content'}            | ${EXPECT_INLINE}
-  // ${'parallel view left side'}  | ${true}               | ${'parallel'} | ${'.diff-tr.line_holder'} | ${'.diff-td.line_content.left-side'}  | ${EXPECT_PARALLEL_LEFT_SIDE.slice(0, EXPECT_PARALLEL_LEFT_SIDE.length - 1)}
-  // ${'parallel view right side'} | ${true}               | ${'parallel'} | ${'.diff-tr.line_holder'} | ${'.diff-td.line_content.right-side'} | ${EXPECT_PARALLEL_RIGHT_SIDE.slice(0, EXPECT_PARALLEL_RIGHT_SIDE.length - 1)}
-
   describe.each`
     desc                          | unifiedDiffComponents | view          | rowSelector               | codeSelector                          | expectation
     ${'inline view'}              | ${false}              | ${'inline'}   | ${'tr.line_holder'}       | ${'td.line_content'}                  | ${EXPECT_INLINE}
@@ -144,6 +141,21 @@ describe('diffs third party interoperability', () => {
 
         expect(getCodeElementsInteropModel(codes)).toEqual(expectation);
       });
+
+      it.each`
+        lineNumber | part      | expectedText
+        ${4}       | ${'base'} | ${'new CommitFile(this)'}
+        ${4}       | ${'head'} | ${'new CommitFile(@)'}
+        ${2}       | ${'base'} | ${'constructor: ->'}
+        ${2}       | ${'head'} | ${'constructor: ->'}
+      `(
+        'should find code element lineNumber=$lineNumber part=$part',
+        ({ lineNumber, part, expectedText }) => {
+          const codeElement = getCodeElementFromLineNumber(findDiffFile(), lineNumber, part);
+
+          expect(codeElement.textContent.trim()).toBe(expectedText);
+        },
+      );
     },
   );
 });

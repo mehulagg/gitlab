@@ -116,6 +116,25 @@ export default {
     isLeftConflictMarker() {
       return [CONFLICT_MARKER_OUR, CONFLICT_MARKER_THEIR].includes(this.line.left?.type);
     },
+    interopLeftType() {
+      return this.interopNewLine ? 'new' : 'old';
+    },
+    interopLeftLine() {
+      return this.interopNewLine || this.interopOldLine;
+    },
+    interopOldLine() {
+      return this.line.left?.old_line;
+    },
+    interopNewLine() {
+      if (!this.inline) {
+        return null;
+      }
+
+      return this.line.left?.new_line;
+    },
+    interopRightLine() {
+      return this.line.right?.new_line;
+    },
   },
   mounted() {
     this.scrollToLineIfNeededParallel(this.line);
@@ -181,6 +200,10 @@ export default {
     <div
       data-testid="left-side"
       class="diff-grid-left left-side"
+      :data-interop-type="interopLeftType"
+      :data-interop-line="interopLeftLine"
+      :data-interop-old-line="interopOldLine"
+      :data-interop-new-line="interopNewLine"
       @dragover.prevent
       @dragenter="onDragEnter(line.left, index)"
       @dragend="onDragEnd"
@@ -286,6 +309,8 @@ export default {
       v-if="!inline"
       data-testid="right-side"
       class="diff-grid-right right-side"
+      data-interop-type="new"
+      :data-interop-line="interopRightLine"
       @dragover.prevent
       @dragenter="onDragEnter(line.right, index)"
       @dragend="onDragEnd"

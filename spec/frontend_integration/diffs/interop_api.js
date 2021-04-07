@@ -1,63 +1,27 @@
 /**
- * This helper module helps freeze the API expectation of the diff output.
+ * This helper module contains the API expectation of the diff output HTML.
  *
- * This helps simulate what third-parties, such as Sourcegraph, which scrape
- * the HTML shold be looking fo.
- *
- * TEMPORARY! These functions are copied from Sourcegraph
+ * This helps simulate what third-party HTML scrapers, such as Sourcegraph,
+ * should be looking for.
  */
 export const getDiffCodePart = (codeElement) => {
-  let selector = 'old';
+  const el = codeElement.closest('[data-interop-type]');
 
-  const row = codeElement.closest('.diff-td,td');
-
-  // Split diff
-  if (row.classList.contains('parallel')) {
-    selector = 'left-side';
-  }
-
-  return row.classList.contains(selector) ? 'base' : 'head';
+  return el.dataset.interopType === 'old' ? 'base' : 'head';
 };
 
 export const getCodeElementFromLineNumber = (codeView, line, part) => {
-  const lineNumberElement = codeView.querySelector(
-    `.${part === 'base' ? 'old_line' : 'new_line'} [data-linenumber="${line}"]`,
+  const type = part === 'base' ? 'old' : 'new';
+
+  const el = codeView.querySelector(
+    `[data-interop-type="${type}"][data-interop-line="${line}"],[data-interop-${type}-line="${line}"]`,
   );
-  if (!lineNumberElement) {
-    return null;
-  }
 
-  const row = lineNumberElement.closest('.diff-tr,tr');
-  if (!row) {
-    return null;
-  }
-
-  let selector = 'span.line';
-
-  // Split diff
-  if (row.classList.contains('parallel')) {
-    selector = `.${part === 'base' ? 'left-side' : 'right-side'} ${selector}`;
-  }
-
-  return row.querySelector(selector);
+  return el ? el.querySelector('span.line') : null;
 };
 
-export const getLineNumberFromCodeElement = (el) => {
-  const part = getDiffCodePart(el);
+export const getLineNumberFromCodeElement = (codeElement) => {
+  const el = codeElement.closest('[data-interop-line]');
 
-  let cell = el.closest('.diff-td,td');
-  while (
-    cell &&
-    !cell.matches(`.diff-line-num.${part === 'base' ? 'old_line' : 'new_line'}`) &&
-    cell.previousElementSibling
-  ) {
-    cell = cell.previousElementSibling;
-  }
-
-  if (cell) {
-    const a = cell.querySelector('a');
-    return parseInt(a.dataset.linenumber || '', 10);
-  }
-
-  throw new Error('Unable to determine line number for diff code element');
+  return parseInt(el.dataset.interopLine || '', 10);
 };

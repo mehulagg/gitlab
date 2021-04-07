@@ -217,6 +217,8 @@ export default {
         :key="line.left.line_code"
         v-safe-html="line.left.rich_text"
         :class="parallelViewLeftLineType"
+        data-interop-type="old"
+        :data-interop-line="line.left.old_line"
         class="line_content with-coverage parallel left-side"
         @mousedown="handleParallelLineMouseDown"
       ></td>
@@ -283,6 +285,8 @@ export default {
             hll: isHighlighted,
           },
         ]"
+        data-interop-type="new"
+        :data-interop-line="line.right.new_line"
         class="line_content with-coverage parallel right-side"
         @mousedown="handleParallelLineMouseDown"
       ></td>
