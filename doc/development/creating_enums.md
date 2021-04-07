@@ -114,3 +114,27 @@ class Pipeline < ApplicationRecord
   }
 end
 ```
+
+After merging some of the EE and FOSS enums we could end up having a gap between the two group of values:
+
+```ruby
+module Enums
+  module Ci
+    module CommitStatus
+      def self.failure_reasons
+        {
+          # ...
+          data_integrity_failure: 12,
+          forward_deployment_failure: 13,
+          insufficient_bridge_permissions: 1_001,
+          downstream_bridge_project_not_found: 1_002,
+          # ...
+        }
+      end
+    end
+  end
+end
+```
+
+When adding a new value we should fill the gap first.
+In the example above we would add `14` instead of `1_003`.
