@@ -27,7 +27,7 @@ class Namespace < ApplicationRecord
   cache_markdown_field :description, pipeline: :description
 
   has_many :projects, -> { where(shadow: false) }, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
-  has_one :shadow_project, -> { where(shadow: true) }, dependent: :destroy, class_name: 'Project'
+  has_one :shadow_project, -> { where(shadow: true) }, dependent: :destroy, class_name: 'Project' # rubocop:disable Cop/ActiveRecordDependent
   has_many :project_statistics
   has_one :namespace_settings, inverse_of: :namespace, class_name: 'NamespaceSetting', autosave: true
 
@@ -421,12 +421,6 @@ class Namespace < ApplicationRecord
 
   def recent?
     created_at >= 90.days.ago
-  end
-
-  def shadow_project
-    strong_memoize(:shadow_project) do
-      Project.find_by_namespace_id_and_shadow(self.id, true)
-    end
   end
 
   private

@@ -43,6 +43,7 @@ module EE
 
       belongs_to :assignee, class_name: "User"
       belongs_to :group
+      belongs_to :project
       belongs_to :start_date_sourcing_milestone, class_name: 'Milestone'
       belongs_to :due_date_sourcing_milestone, class_name: 'Milestone'
       belongs_to :start_date_sourcing_epic, class_name: 'Epic'
@@ -64,12 +65,20 @@ module EE
       validate :validate_confidential_issues_and_subepics
       validate :validate_confidential_parent
 
+      before_save :set_shadow_project
+
       alias_attribute :parent_ids, :parent_id
       alias_method :issuing_parent, :group
 
       scope :in_parents, -> (parent_ids) { where(parent_id: parent_ids) }
       scope :inc_group, -> { includes(:group) }
-      scope :in_selected_groups, -> (groups) { where(group_id: groups) }
+
+      scope :in_selected_groups, -> (groups) do
+        shadow_projects = ::Project.where(shadow: true).where(namespace_id: groups)
+        # TODO - when BG migration is finished, we can search by project_id only
+        where(group_id: groups).or(where(project_id: shadow_projects))
+      end
+
       scope :in_milestone, -> (milestone_id) { joins(:issues).where(issues: { milestone_id: milestone_id }).distinct }
       scope :in_issues, -> (issues) { joins(:epic_issues).where(epic_issues: { issue_id: issues }).distinct }
       scope :has_parent, -> { where.not(parent_id: nil) }
@@ -132,7 +141,7 @@ module EE
       scope :public_only, -> { where(confidential: false) }
       scope :confidential, -> { where(confidential: true) }
       scope :not_confidential_or_in_groups, -> (groups) do
-        public_only.or(where(confidential: true, group_id: groups))
+        public_only.or(where(confidential: true).in_selected_groups(groups))
       end
 
       MAX_HIERARCHY_DEPTH = 7
@@ -515,6 +524,10 @@ module EE
       if !confidential? && parent.confidential?
         errors.add :confidential, _('A non-confidential epic cannot be assigned to a confidential parent epic')
       end
+    end
+
+    def set_shadow_project
+      self.project = group&.project
     end
   end
 end

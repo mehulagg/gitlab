@@ -8,13 +8,13 @@ class ShadowProjectColumns < ActiveRecord::Migration[6.0]
 
   def up
     # TODO - break into separate migrations
-    add_column :projects, :parent_id, :bigint
-    add_foreign_key :projects, :projects, column: :parent_id, on_delete: :nullify
+    add_column :projects, :parent_id, :bigint # rubocop:disable Migration/AddColumnsToWideTables
+    add_concurrent_foreign_key :projects, :projects, column: :parent_id, on_delete: :nullify
 
     # TODO: we would have to make sure we don't expose shadowed projects anywhere
     # another approach would be allow NULL group_id for shadowed projects and reference
     # them from group table (but this introduces an inconsistency and makes preloading harder)
-    add_column :projects, :shadow, :boolean, default: false
+    add_column :projects, :shadow, :boolean, default: false # rubocop: disable Migration/AddColumnsToWideTables
     add_concurrent_index :projects, [:namespace_id, :shadow]
   end
 
