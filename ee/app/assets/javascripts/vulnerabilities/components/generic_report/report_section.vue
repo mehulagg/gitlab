@@ -50,11 +50,17 @@ export default {
       </h3>
     </header>
     <gl-collapse :visible="showSection">
-      <div data-testid="reports">
+      <div class="generic-report-container" data-testid="reports">
         <template v-for="[label, item] in detailsEntries">
-          <report-row :key="label" :label="item.name" :data-testid="`report-row-${label}`">
+          <!-- <report-row :key="label" :label="item.name" :data-testid="`report-row-${label}`">
             <report-item :item="item" />
-          </report-row>
+          </report-row> -->
+          <div :key="label" class="generic-report-row" :data-testid="`report-row-${label}`">
+            <strong class="generic-report-column">{{ item.name }}</strong>
+            <div class="generic-report-column" data-testid="reportContent">
+              <report-item :item="item" />
+            </div>
+          </div>
         </template>
       </div>
     </gl-collapse>
