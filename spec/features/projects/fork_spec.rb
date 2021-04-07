@@ -193,6 +193,8 @@ RSpec.describe 'Project fork' do
     it_behaves_like 'create fork page', ' Select a namespace to fork the project '
 
     it 'forks the project', :sidekiq_might_not_need_inline do
+      stub_feature_flags(project_source_code_refactor: false)
+
       visit project_path(project)
 
       click_link 'Fork'

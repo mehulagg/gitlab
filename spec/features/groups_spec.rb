@@ -6,6 +6,8 @@ RSpec.describe 'Group' do
   let_it_be(:user) { create(:user) }
 
   before do
+    stub_feature_flags(project_source_code_refactor: false)
+
     sign_in(user)
   end
 

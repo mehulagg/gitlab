@@ -10,6 +10,10 @@ require 'spec_helper'
 RSpec.describe 'Issues > User uses quick actions', :js do
   include Spec::Support::Helpers::Features::NotesHelpers
 
+  before do
+    stub_feature_flags(project_source_code_refactor: false)
+  end
+
   context "issuable common quick actions" do
     let(:new_url_opts) { {} }
     let(:maintainer) { create(:user) }
