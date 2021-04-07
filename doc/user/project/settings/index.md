@@ -45,7 +45,7 @@ You can select a framework label to identify that your project has certain compl
 NOTE:
 Compliance framework labels do not affect your project settings.
 
-#### Custom compliance frameworks
+#### Custom compliance frameworks **(ULTIMATE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276221) in GitLab 13.9.
 > - [Deployed behind a feature flag](../../feature_flags.md).
