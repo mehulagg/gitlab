@@ -9,6 +9,8 @@ RSpec.describe 'User browses commits' do
   let(:project) { create(:project, :public, :repository, namespace: user.namespace) }
 
   before do
+    stub_feature_flags(project_source_code_refactor: false)
+
     sign_in(user)
   end
 
