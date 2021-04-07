@@ -81,6 +81,47 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
+  describe 'Requirements' do
+    let(:user) { project.owner }
+
+    before do
+      stub_licensed_features(requirements: true)
+      allow(view).to receive(:current_user).and_return(user)
+    end
+
+    shared_examples 'has a link to the requirements page' do
+      specify do
+        render
+
+        expect(rendered).to have_link('Requirements', href: project_requirements_management_requirements_path(project))
+      end
+    end
+
+    context 'when feature flag :sidebar_refactor is enabled' do
+      it_behaves_like 'has a link to the requirements page'
+
+      it 'does not have a link to the requirement List' do
+        stub_feature_flags(sidebar_refactor: true)
+
+        render
+
+        expect(rendered).not_to have_link('List', href: project_requirements_management_requirements_path(project))
+      end
+    end
+
+    context 'when feature flag :sidebar_refactor is disabled' do
+      it_behaves_like 'has a link to the requirements page'
+
+      it 'has a link to the requirement List' do
+        stub_feature_flags(sidebar_refactor: false)
+
+        render
+
+        expect(rendered).to have_link('List', href: project_requirements_management_requirements_path(project))
+      end
+    end
+  end
+
   describe 'Operations main link' do
     let(:user) { create(:user) }
 
