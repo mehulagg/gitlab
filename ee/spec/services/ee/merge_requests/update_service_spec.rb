@@ -331,16 +331,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       update_merge_request(title: 'Title')
     end
 
-    context 'updating assignee_ids' do
-      it 'updates the tracking when user ids are valid' do
-        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
-          .to receive(:track_users_assigned_to_mr)
-          .with(users: [user, user2])
-
-        update_merge_request(assignee_ids: [user.id, user2.id])
-      end
-    end
-
     context 'updating reviewers_ids' do
       it 'updates the tracking when user ids are valid' do
         expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
