@@ -47,8 +47,6 @@ After a namespace is added:
 
 Support for syncing past branch and commit data [is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/263240).
 
-For more information, see [Usage](index.md#usage).
-
 ## Install the GitLab Jira Cloud application for self-managed instances **(FREE SELF)**
 
 If your GitLab instance is self-managed, you must follow some
