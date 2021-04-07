@@ -64,7 +64,7 @@ project can interact with _all_ Jira projects in that instance, once configured.
   project.
 
 If you have a single Jira instance, you can pre-fill the settings. For more information, read the
-documentation for [central administration of project integrations](../../admin_area/settings/project_integration_management.md).
+documentation for [central administration of project integrations](../../user/admin_area/settings/project_integration_management.md).
 
 To enable the Jira service in GitLab, you must:
 

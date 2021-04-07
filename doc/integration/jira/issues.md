@@ -95,7 +95,7 @@ if your GitLab administrator [has configured it](#configure-gitlab):
 1. In the left navigation bar, go to **Jira > Issues list**.
 1. The issue list sorts by **Created date** by default, with the newest issues listed at the top:
 
-   ![Jira issues integration enabled](img/jira/open_jira_issues_list_v13.2.png)
+   ![Jira issues integration enabled](img/open_jira_issues_list_v13.2.png)
 
 1. To display the most recently updated issues first, click **Last updated**.
 1. In GitLab versions 13.10 and later, you can view [individual Jira issues](#view-a-jira-issue).
@@ -114,7 +114,7 @@ Issues are grouped into tabs based on their [Jira status](https://confluence.atl
 When viewing the [Jira issues list](#view-jira-issues), select an issue from the
 list to open it in GitLab:
 
-![Jira issue detail view](img/jira/jira_issue_detail_view_v13.10.png)
+![Jira issue detail view](img/jira_issue_detail_view_v13.10.png)
 
 ## Search and filter the issues list
 
