@@ -94,6 +94,50 @@ RSpec.describe AuthorizedProjectUpdate::FindRecordsDueForRefreshService do
     end
   end
 
+  describe '#needs_refresh?' do
+    context 'when there are records due for either removal or addition' do
+      context 'when there are both removals and additions to be made' do
+        before do
+          user.project_authorizations.delete_all
+        end
+
+        it 'returns true' do
+          project2 = create(:project)
+          user.project_authorizations
+            .create!(project: project2, access_level: Gitlab::Access::MAINTAINER)
+
+          expect(service.needs_refresh?).to eq(true)
+        end
+      end
+
+      context 'when there are no removals, but there are additions to be made' do
+        before do
+          user.project_authorizations.delete_all
+        end
+
+        it 'returns true' do
+          expect(service.needs_refresh?).to eq(true)
+        end
+      end
+
+      context 'when there are no additions, but there are removals to be made' do
+        it 'returns true' do
+          project2 = create(:project)
+          user.project_authorizations
+            .create!(project: project2, access_level: Gitlab::Access::MAINTAINER)
+
+          expect(service.needs_refresh?).to eq(true)
+        end
+      end
+    end
+
+    context 'when there are no additions or removals to be made' do
+      it 'returns false' do
+        expect(service.needs_refresh?).to eq(false)
+      end
+    end
+  end
+
   describe '#fresh_access_levels_per_project' do
     let(:hash) { service.fresh_access_levels_per_project }
 
