@@ -1,20 +1,21 @@
 import { __, s__ } from '~/locale';
 
-export const subscriptionDetailsHeaderText = s__('CloudLicense|Subscription details');
-export const licensedToHeaderText = s__('CloudLicense|Licensed to');
-export const manageSubscriptionButtonText = s__('CloudLicense|Manage');
-export const syncSubscriptionButtonText = s__('CloudLicense|Sync Subscription details');
+export const subscriptionDetailsHeaderText = s__('SuperSonics|Subscription details');
+export const licensedToHeaderText = s__('SuperSonics|Licensed to');
+export const manageSubscriptionButtonText = s__('SuperSonics|Manage');
+export const syncSubscriptionButtonText = s__('SuperSonics|Sync Subscription details');
 export const copySubscriptionIdButtonText = __('Copy');
+export const subscriptionTypeText = __('%{type} License');
 export const detailsLabels = {
   address: __('Address'),
-  id: s__('CloudLicense|ID'),
+  id: s__('SuperSonics|ID'),
   company: __('Company'),
   email: __('Email'),
-  lastSync: s__('CloudLicense|Last Sync'),
+  lastSync: s__('SuperSonics|Last Sync'),
   name: __('Name'),
-  plan: s__('CloudLicense|Plan'),
-  startsAt: s__('CloudLicense|Started'),
-  renews: s__('CloudLicense|Renews'),
+  plan: s__('SuperSonics|Plan'),
+  renews: s__('SuperSonics|Renews'),
+  startsAt: s__('SuperSonics|Started'),
 };
 
 export const billableUsersTitle = __('Billable users');
@@ -33,3 +34,15 @@ export const usersInSubscriptionText = __(
 export const usersOverSubscriptionText = __(
   `You'll be charged for %{trueUpLinkStart}users over license%{trueUpLinkEnd} on a quarterly or annual basis, depending on the terms of your agreement.`,
 );
+export const subscriptionTable = {
+  activatedOn: s__('SuperSonics|Activated on'),
+  expiresOn: s__('SuperSonics|Expires on'),
+  seats: s__('SuperSonics|Seats'),
+  title: __('Subscription History'),
+  type: s__('SuperSonics|Type'),
+  validFrom: s__('SuperSonics|Valid From'),
+};
+export const subscriptionType = {
+  CLOUD: 'cloud',
+  LEGACY: 'legacy',
+};
