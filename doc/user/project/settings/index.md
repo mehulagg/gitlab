@@ -89,7 +89,7 @@ The custom pipeline configuration can then execute the individual project's conf
 
 Example `.compliance-gitlab-ci.yml`
 
-```yml
+```yaml
 stages: # Allows compliance team to control the ordering and interweaving of stages/jobs
 - pre-compliance
 - build
