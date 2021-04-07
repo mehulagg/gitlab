@@ -39,8 +39,8 @@ include:
   - template: DAST.gitlab-ci.yml
 
 variables:
-  DAST_WEBSITE: https://example.com
-  DAST_BROWSERKER_SCAN: true
+  DAST_WEBSITE: "https://example.com"
+  DAST_BROWSERKER_SCAN: "true"
 ```
 
 ### Available variables
@@ -49,6 +49,7 @@ Browserker can be configured using CI/CD variables.
 
 | CI/CD variable                       | Type            | Example                           | Description | 
 |--------------------------------------| ----------------| --------------------------------- | ------------|
+| `DAST_WEBSITE`                       | URL             | `http://www.site.com`             | The URL of the website to scan. |
 | `DAST_BROWSERKER_SCAN`               | boolean         | `true`                            | Configures DAST to use the Browserker crawler engine. |
 | `DAST_BROWSERKER_ALLOWED_HOSTS`      | List of strings | `site.com,another.com`            | Hostnames included in this variable are considered in scope when crawled. By default the `DAST_WEBSITE` hostname is included in the allowed hosts list. |
 | `DAST_BROWSERKER_EXCLUDED_HOSTS`     | List of strings | `site.com,another.com`            | Hostnames included in this variable are considered excluded and connections are forcibly dropped. |
@@ -65,8 +66,8 @@ Browserker can be configured using CI/CD variables.
 | `DAST_SUBMIT_FIELD`                  | selector        | `xpath://input[@value='Login']`   | A selector describing the element that when clicked submits the login form or the password form of a multi-page login process. |
 | `DAST_FIRST_SUBMIT_FIELD`            | selector        | `.submit`                         | A selector describing the element that when clicked submits the username form of a multi-page login process. |
 
-The [DAST variables](index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `DAST_WEBSITE`, `DAST_FULL_SCAN_ENABLED`, `DAST_AUTO_UPDATE_ADDONS`, `DAST_EXCLUDE_RULES`, `DAST_REQUEST_HEADERS`, `DAST_HTML_REPORT`, `DAST_MARKDOWN_REPORT`, `DAST_XML_REPORT`,
-`DAST_INCLUDE_ALPHA_VULNERABILITIES`, `DAST_ZAP_CLI_OPTIONS`, and `DAST_ZAP_LOG_CONFIGURATION` are also compatible with Browserker scans.   
+The [DAST variables](index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `DAST_FULL_SCAN_ENABLED`, `DAST_AUTO_UPDATE_ADDONS`, `DAST_EXCLUDE_RULES`, `DAST_REQUEST_HEADERS`, `DAST_HTML_REPORT`, `DAST_MARKDOWN_REPORT`, `DAST_XML_REPORT`,
+`DAST_INCLUDE_ALPHA_VULNERABILITIES`, `DAST_PATHS_FILE`, `DAST_PATHS`, `DAST_ZAP_CLI_OPTIONS`, and `DAST_ZAP_LOG_CONFIGURATION` are also compatible with Browserker scans.   
 
 #### Selectors
 
