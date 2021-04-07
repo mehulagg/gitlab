@@ -169,7 +169,7 @@ apifuzzer_fuzz_dnd:
                 docker run \
                     --name worker \
                     --network $FUZZAPI_D_NETWORK \
-                    -e FUZZAPI_API=http://apifuzzer:80 \
+                    -e FUZZAPI_API=http://apifuzzer:5000 \
                     -e FUZZAPI_PROJECT \
                     -e FUZZAPI_PROFILE \
                     -e FUZZAPI_CONFIG \
@@ -212,7 +212,7 @@ apifuzzer_fuzz_dnd:
                     --name worker \
                     --network $FUZZAPI_D_NETWORK \
                     -e TZ=America/Los_Angeles \
-                    -e FUZZAPI_API=http://apifuzzer:80 \
+                    -e FUZZAPI_API=http://apifuzzer:5000 \
                     -e FUZZAPI_PROJECT \
                     -e FUZZAPI_PROFILE \
                     -e FUZZAPI_CONFIG \
