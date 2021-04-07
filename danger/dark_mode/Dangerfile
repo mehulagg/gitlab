@@ -1,0 +1,27 @@
+# frozen_string_literal: true
+
+def get_forbidden_css_class_files(files)
+  files.select do |file|
+    file.end_with?('.js', '.vue', '.haml') &&
+      File.read(file).include?('text-secondary')
+  end
+end
+
+dark_mode_violations = get_forbidden_css_class_files(helper.all_changed_files)
+
+return if dark_mode_violations.empty?
+
+warn 'This merge request added deprecated CSS classes. Please fix them.'
+
+if helper.ci?
+  markdown(<<~MARKDOWN)
+    ## Deprecated CSS classes
+
+    The following files include deprecated CSS classes:
+
+    * #{dark_mode_violations.map { |path| "`#{path}`" }.join("\n* ")}
+
+    These conflict with Sourcegraph styles and break dark mode. Instead of text-secondary,
+    use gl-text-gray-500
+  MARKDOWN
+end
