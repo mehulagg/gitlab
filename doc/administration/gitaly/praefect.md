@@ -25,7 +25,7 @@ document](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/design_ha.md)
 for implementation details.
 
 NOTE:
-If not set in GitLab, feature flags are read as false from the console and Praefect uses their
+If not set in GitLab, feature flags are read as false from the console and Praefect uses its
 default value, which depends on the GitLab version.
 
 ## Setup Instructions
