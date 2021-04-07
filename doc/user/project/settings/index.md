@@ -65,6 +65,65 @@ can now create their own.
 
 New compliance framework labels can be created and updated using GraphQL.
 
+#### Compliance pipeline configuration
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3156) in GitLab 13.11.
+> - [Deployed behind a feature flag](../../feature_flags.md).
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/287779) in GitLab 13.11.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+Compliance pipeline configuration can be used by group owners to define compliance requirements
+(scans, tests, or other jobs that are required to occur) and enforce them in individual projects.
+
+The [custom compliance framework](#custom-compliance-frameworks) label feature allows group owners to specify the location
+of a compliance configuration stored and managed in a dedicated project away from a developer's project.
+The format for the field is `file@group/project`, such as `.compliance-gitlab-ci.yml@compliance-group/compliance-project`.
+This field will be inherited by projects where the label is applied, forcing the project to run the compliance configurations.
+
+When a project with a custom label executes a pipeline, it begins by evaluating the compliance pipeline configuration.
+The custom pipeline configuration can then execute the individual project's configuration, if specified.
+
+Example `.compliance-gitlab-ci.yml`
+
+```yml
+stages: # Allows compliance team to control the ordering and interweaving of stages/jobs
+- pre-compliance
+- build
+- test
+- pre-deploy-compliance
+- deploy
+- post-compliance
+
+variables: # can be overriden by a developer's local .gitlab-ci.yml
+  FOO: sast
+
+sast: # none of these attributes can be overriden by a developer's local .gitlab-ci.yml
+  variables:
+    FOO: sast
+  stage: pre-compliance
+  script:
+  - echo "running $FOO"
+
+sanity check:
+  stage: pre-deploy-compliance
+  script:
+  - echo "running $FOO"
+
+
+audit trail:
+  stage: post-compliance
+  script:
+  - echo "running $FOO"
+
+include: # Execute individual project's configuration
+  project: '$CI_PROJECT_PATH'
+  file: '$CI_PROJECT_CONFIG_PATH'
+```
+
 ### Sharing and permissions
 
 For your repository, you can set up features such as public access, repository features,
