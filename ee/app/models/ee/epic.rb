@@ -41,9 +41,13 @@ module EE
         update(state: :closed, closed_at: Time.zone.now)
       end
 
+      ignore_column :group_id, remove_with: '14.1', remove_after: '2021-05-22'
+
       belongs_to :assignee, class_name: "User"
-      belongs_to :group
+
       belongs_to :project
+      has_one :group, through: :project, source: :namespace
+
       belongs_to :start_date_sourcing_milestone, class_name: 'Milestone'
       belongs_to :due_date_sourcing_milestone, class_name: 'Milestone'
       belongs_to :start_date_sourcing_epic, class_name: 'Epic'
@@ -52,7 +56,7 @@ module EE
       has_many :children, class_name: "Epic", foreign_key: :parent_id
       has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
-      has_internal_id :iid, scope: :group
+      has_internal_id :iid, scope: :project
 
       has_many :epic_issues
       has_many :issues, through: :epic_issues
@@ -60,7 +64,7 @@ module EE
       has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :epic
       has_many :epic_board_positions, class_name: 'Boards::EpicBoardPosition', inverse_of: :epic_board
 
-      validates :group, presence: true
+      validates :project, presence: true
       validate :validate_parent, on: :create
       validate :validate_confidential_issues_and_subepics
       validate :validate_confidential_parent
@@ -68,23 +72,24 @@ module EE
       before_save :set_shadow_project
 
       alias_attribute :parent_ids, :parent_id
-      alias_method :issuing_parent, :group
+      alias_method :issuing_parent, :project
 
       scope :in_parents, -> (parent_ids) { where(parent_id: parent_ids) }
-      scope :inc_group, -> { includes(:group) }
+      scope :inc_group, -> { includes(project: :group) }
 
       scope :in_selected_groups, -> (groups) do
         shadow_projects = ::Project.where(shadow: true).where(namespace_id: groups)
-        # TODO - when BG migration is finished, we can search by project_id only
-        where(group_id: groups).or(where(project_id: shadow_projects))
+        where(project_id: shadow_projects)
       end
+
+      scope :in_selected_projects, -> (projects) { where(project_id: projects) }
 
       scope :in_milestone, -> (milestone_id) { joins(:issues).where(issues: { milestone_id: milestone_id }).distinct }
       scope :in_issues, -> (issues) { joins(:epic_issues).where(epic_issues: { issue_id: issues }).distinct }
       scope :has_parent, -> { where.not(parent_id: nil) }
       scope :iid_starts_with, -> (query) { where("CAST(iid AS VARCHAR) LIKE ?", "#{sanitize_sql_like(query)}%") }
 
-      scope :with_web_entity_associations, -> { preload(:author, group: [:ip_restrictions, :route]) }
+      scope :with_web_entity_associations, -> { preload(:author, project: { group: [:ip_restrictions, :route] }) }
 
       scope :within_timeframe, -> (start_date, end_date) do
         where('start_date is not NULL or end_date is not NULL')

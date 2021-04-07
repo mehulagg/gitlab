@@ -178,6 +178,10 @@ class Namespace < ApplicationRecord
     def top_most
       where(parent_id: nil)
     end
+
+    def shadow_project(namespace_id)
+      Project.find_by_namespace_id_and_shadow(namespace_id, true)
+    end
   end
 
   def package_settings

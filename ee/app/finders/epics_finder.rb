@@ -74,37 +74,25 @@ class EpicsFinder < IssuableFinder
   end
 
   def init_collection
-    groups = if params[:iids].present?
-               # If we are querying for specific iids, then we should only be looking at
-               # those in the group, not any sub-groups (which can have identical iids).
-               # The `group` method takes care of checking permissions
-               [group]
-             else
-               permissioned_related_groups
-             end
+    projects = if params[:iids].present?
+                 # If we are querying for specific iids, then we should only be looking at
+                 # those in the group, not any sub-groups (which can have identical iids).
+                 # The `group` method takes care of checking permissions
+                 [group.shadow_project]
+               else
+                 permissioned_related_projects
+               end
 
-    epics = Epic.in_selected_groups(groups)
-    with_confidentiality_access_check(epics, groups)
+    epics = Epic.in_selected_projects(projects)
+    with_confidentiality_access_check(epics, projects)
   end
 
   private
 
-  def permissioned_related_groups
-    strong_memoize(:permissioned_related_groups) do
-      groups = related_groups
-
-      # if user is member of top-level related group, he can automatically read
-      # all epics in all subgroups
-      next groups if can_read_all_epics_in_related_groups?(groups)
-
-      groups_user_can_read_epics(groups)
+  def permissioned_related_projects
+    strong_memoize(:permissioned_related_projects) do
+      related_projects
     end
-  end
-
-  def groups_user_can_read_epics(groups)
-    # `same_root` should be set only if we are sure that all groups
-    # in related_groups have the same ancestor root group
-    ::Group.groups_user_can_read_epics(groups, current_user, same_root: true)
   end
 
   def filter_items(items)
@@ -132,6 +120,10 @@ class EpicsFinder < IssuableFinder
     by_negated_label(items)
   end
 
+  def project
+    group.shadow_project
+  end
+
   def group
     strong_memoize(:group) do
       next unless params[:group_id]
@@ -153,18 +145,18 @@ class EpicsFinder < IssuableFinder
     items.iid_starts_with(query)
   end
 
-  def related_groups
+  def related_projects
     include_ancestors = params.fetch(:include_ancestor_groups, false)
     include_descendants = params.fetch(:include_descendant_groups, true)
 
     if include_ancestors && include_descendants
-      group.self_and_hierarchy
+      project.self_and_hierarchy
     elsif include_ancestors
-      group.self_and_ancestors
+      project.self_and_ancestors
     elsif include_descendants
-      group.self_and_descendants
+      project.self_and_descendants
     else
-      Group.id_in(group.id)
+      Project.id_in(project.id)
     end
   end
 

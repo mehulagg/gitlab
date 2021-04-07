@@ -38,6 +38,9 @@ class Project < ApplicationRecord
   include EachBatch
   include GitlabRoutingHelper
 
+  # TODO: implement proper parent-child module for projects (same as for groups)
+  include Namespaces::Traversal::Recursive
+
   extend Gitlab::Cache::RequestCache
   extend Gitlab::Utils::Override
 
