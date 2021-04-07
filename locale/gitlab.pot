@@ -3353,10 +3353,10 @@ msgstr ""
 msgid "An error occurred when updating the issue due date"
 msgstr ""
 
-msgid "An error occurred when updating the issue title"
+msgid "An error occurred when updating the issue weight"
 msgstr ""
 
-msgid "An error occurred when updating the issue weight"
+msgid "An error occurred when updating the title"
 msgstr ""
 
 msgid "An error occurred while acknowledging the notification. Refresh the page and try again."
@@ -3684,9 +3684,6 @@ msgid "An instance-level serverless domain already exists."
 msgstr ""
 
 msgid "An issue already exists"
-msgstr ""
-
-msgid "An issue title is required"
 msgstr ""
 
 msgid "An unauthenticated user"
@@ -17340,9 +17337,6 @@ msgid "Issue or merge request ID is required"
 msgstr ""
 
 msgid "Issue published on status page."
-msgstr ""
-
-msgid "Issue title"
 msgstr ""
 
 msgid "Issue types"

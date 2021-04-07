@@ -1223,7 +1223,7 @@ describe('setActiveIssueMilestone', () => {
   });
 });
 
-describe('setActiveIssueTitle', () => {
+describe('setActiveItemTitle', () => {
   const state = { boardItems: { [mockIssue.id]: mockIssue } };
   const getters = { activeBoardItem: mockIssue };
   const testTitle = 'Test Title';
@@ -1251,7 +1251,7 @@ describe('setActiveIssueTitle', () => {
     };
 
     testAction(
-      actions.setActiveIssueTitle,
+      actions.setActiveItemTitle,
       input,
       { ...state, ...getters },
       [
@@ -1270,7 +1270,7 @@ describe('setActiveIssueTitle', () => {
       .spyOn(gqlClient, 'mutate')
       .mockResolvedValue({ data: { updateIssue: { errors: ['failed mutation'] } } });
 
-    await expect(actions.setActiveIssueTitle({ getters }, input)).rejects.toThrow(Error);
+    await expect(actions.setActiveItemTitle({ getters }, input)).rejects.toThrow(Error);
   });
 });
 
