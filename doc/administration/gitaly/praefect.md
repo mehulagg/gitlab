@@ -24,6 +24,10 @@ See the [design
 document](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/design_ha.md)
 for implementation details.
 
+NOTE:
+If not set in GitLab, feature flags are read as false from the console and Praefect uses their
+default value, which depends on the GitLab version.
+
 ## Setup Instructions
 
 If you [installed](https://about.gitlab.com/install/) GitLab using the Omnibus
@@ -977,9 +981,6 @@ In the Rails console, enable or disable the flags as required. For example:
 Feature.enable(:gitaly_reference_transactions)
 Feature.disable(:gitaly_reference_transactions_primary_wins)
 ```
-
-NOTE:
-If not set in GitLab, flags are read as false from the console and Praefect uses their default value, which depends on the GitLab version.
 
 To monitor strong consistency, you can use the following Prometheus metrics:
 
