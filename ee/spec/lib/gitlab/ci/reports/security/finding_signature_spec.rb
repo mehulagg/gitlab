@@ -52,7 +52,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingSignature do
     it 'returns a hash representation of the signature' do
       expect(subject.to_hash).to eq(
         algorithm_type: params[:algorithm_type],
-        signature_sha: Digest::SHA1.digest(params[:fingerprint_value])
+        signature_sha: Digest::SHA1.digest(params[:signature_value])
       )
     end
   end

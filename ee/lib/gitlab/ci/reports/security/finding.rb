@@ -94,7 +94,7 @@ module Gitlab
             return false unless report_type == other.report_type && primary_identifier_fingerprint == other.primary_identifier_fingerprint
 
             if @vulnerability_finding_signatures_enabled
-              matches_fingerprints(other.fingerprints, other.uuid)
+              matches_signatures(other.signatures, other.uuid)
             else
               location.fingerprint == other.location.fingerprint
             end
