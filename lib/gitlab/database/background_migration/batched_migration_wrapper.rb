@@ -62,7 +62,10 @@ module Gitlab
           metric_for(:gauge_batch_size).set(base_labels, tracking_record.batch_size)
           metric_for(:gauge_sub_batch_size).set(base_labels, tracking_record.sub_batch_size)
           metric_for(:counter_updated_tuples).increment(base_labels, tracking_record.batch_size)
-          metric_for(:counter_job_duration).increment(base_labels, (tracking_record.finished_at - tracking_record.started_at).to_i)
+
+          # Time efficiency: Ratio of duration to interval (ideal: less than, but close to 1)
+          efficiency = (tracking_record.finished_at - tracking_record.started_at).to_i / migration.interval.to_f
+          metric_for(:histogram_time_efficiency).observe(base_labels, efficiency)
 
           if metrics = tracking_record.metrics
             metrics['timings']&.each do |key, timings|
@@ -97,13 +100,15 @@ module Gitlab
               ),
               histogram_timings: Gitlab::Metrics.histogram(
                 :batched_migration_job_timings,
-                'Summary of timings for a migration job',
+                'Timings for a migration job',
                 {},
-                [0, 0.1, 0.25, 0.5, 1, 5].freeze
+                [0.1, 0.25, 0.5, 1, 5].freeze
               ),
-              counter_job_duration: Gitlab::Metrics.counter(
-                :batched_migration_job_duration,
-                'Job duration in seconds'
+              histogram_time_efficiency: Gitlab::Metrics.histogram(
+                :batched_migration_job_time_efficiency,
+                'Ratio of job duration to interval',
+                {},
+                [0.5, 0.9, 1, 1.5, 2].freeze
               )
             }
           end

@@ -84,11 +84,14 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
       migration_wrapper.perform(job_record)
     end
 
-    it 'reports overall job duration' do
+    it 'reports time efficiency' do
       freeze_time do
         expect(Time).to receive(:current).and_return(Time.zone.now - 5.seconds).ordered
         expect(Time).to receive(:current).and_return(Time.zone.now).ordered
-        expect(described_class.metrics[:counter_job_duration]).to receive(:increment).with(labels, 5)
+
+        ratio = 5 / job_record.batched_migration.interval.to_f
+
+        expect(described_class.metrics[:histogram_time_efficiency]).to receive(:observe).with(labels, ratio)
 
         migration_wrapper.perform(job_record)
       end
