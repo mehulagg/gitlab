@@ -78,6 +78,7 @@ module Clusters
         )
       end
 
+      # Deprecated, to be removed in %14.0 as part of https://gitlab.com/groups/gitlab-org/-/epics/4280
       def patch_command(values)
         helm_command_module::PatchCommand.new(
           name: name,

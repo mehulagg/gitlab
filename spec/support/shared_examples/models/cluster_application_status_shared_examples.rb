@@ -330,4 +330,36 @@ RSpec.shared_examples 'cluster application status specs' do |application_name|
       end
     end
   end
+
+  describe '#integration?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let_it_be(:cluster) { create(:cluster, :provided_by_gcp) }
+
+    where(:trait, :integration) do
+      :not_installable   | false
+      :installable       | false
+      :scheduled         | false
+      :installing        | false
+      :installed         | false
+      :updating          | false
+      :updated           | false
+      :errored           | false
+      :update_errored    | false
+      :uninstalling      | false
+      :uninstall_errored | false
+      :uninstalled       | true
+      :externally_installed | true
+    end
+
+    with_them do
+      subject { build(application_name, trait, cluster: cluster) }
+
+      if params[:integration]
+        it { is_expected.to be_integration }
+      else
+        it { is_expected.not_to be_integration }
+      end
+    end
+  end
 end

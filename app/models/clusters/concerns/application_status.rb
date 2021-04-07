@@ -122,6 +122,10 @@ module Clusters
       def update_in_progress?
         updating?
       end
+
+      def integration?
+        externally_installed? || uninstalled?
+      end
     end
   end
 end

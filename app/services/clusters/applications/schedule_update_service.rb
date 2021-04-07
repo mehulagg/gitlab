@@ -14,6 +14,7 @@ module Clusters
 
       def execute
         return unless application
+        return if application.integration?
 
         if recently_scheduled?
           worker_class.perform_in(BACKOFF_DELAY, application.name, application.id, project.id, Time.current)

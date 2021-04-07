@@ -19,6 +19,14 @@ RSpec.describe Clusters::Applications::PrometheusUpdateService do
       allow(service).to receive(:helm_api).and_return(helm_client)
     end
 
+    context 'when prometheus is externally installed' do
+      let(:application) { create(:clusters_applications_prometheus, :externally_installed, cluster: cluster) }
+
+      it 'raises NotImplementedError' do
+        expect { service.execute }.to raise_error(NotImplementedError)
+      end
+    end
+
     context 'when there are no errors' do
       before do
         expect(helm_client).to receive(:update).with(patch_command)

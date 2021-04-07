@@ -35,6 +35,7 @@ class ClusterUpdateAppWorker # rubocop:disable Scalability/IdempotentWorker
   # rubocop: enable CodeReuse/ActiveRecord
 
   def update_prometheus(app, scheduled_time, project)
+    return if app.integration?
     return if app.updated_since?(scheduled_time)
     return if app.update_in_progress?
 
