@@ -24028,6 +24028,8 @@ CREATE INDEX index_todos_on_user_id_and_id_done ON todos USING btree (user_id, i
 
 CREATE INDEX index_todos_on_user_id_and_id_pending ON todos USING btree (user_id, id) WHERE ((state)::text = 'pending'::text);
 
+CREATE INDEX index_todos_on_user_id_and_state ON todos USING btree (user_id, state);
+
 CREATE UNIQUE INDEX index_token_with_ivs_on_hashed_plaintext_token ON token_with_ivs USING btree (hashed_plaintext_token);
 
 CREATE UNIQUE INDEX index_token_with_ivs_on_hashed_token ON token_with_ivs USING btree (hashed_token);
@@ -24341,8 +24343,6 @@ CREATE INDEX tmp_idx_on_namespaces_delayed_project_removal ON namespaces USING b
 CREATE INDEX tmp_index_on_security_findings_scan_id ON security_findings USING btree (scan_id) WHERE (uuid IS NULL);
 
 CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
-
-CREATE INDEX todos_on_user_id_where_status_pending_or_done ON todos USING btree (user_id) WHERE ((state)::text = ANY ('{done,pending}'::text[]));
 
 CREATE UNIQUE INDEX uniq_pkgs_deb_grp_architectures_on_distribution_id_and_name ON packages_debian_group_architectures USING btree (distribution_id, name);
 
