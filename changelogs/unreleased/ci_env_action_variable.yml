@@ -1,0 +1,5 @@
+---
+title: Add CI_ENVIRONMENT_ACTION as a pre-defined environment variable
+merge_request: 58786
+author: Jamie Reid
+type: added
