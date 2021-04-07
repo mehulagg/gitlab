@@ -422,12 +422,6 @@ class Namespace < ApplicationRecord
     created_at >= 90.days.ago
   end
 
-  def shadow_project
-    strong_memoize(:shadow_project) do
-      Project.find_by_namespace_id_and_shadow(self.id, true)
-    end
-  end
-
   private
 
   def all_projects_with_pages

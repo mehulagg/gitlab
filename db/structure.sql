@@ -12486,7 +12486,7 @@ ALTER SEQUENCE epic_user_mentions_id_seq OWNED BY epic_user_mentions.id;
 
 CREATE TABLE epics (
     id integer NOT NULL,
-    group_id integer NOT NULL,
+    group_id integer,
     author_id integer NOT NULL,
     assignee_id integer,
     iid integer NOT NULL,
@@ -12518,6 +12518,7 @@ CREATE TABLE epics (
     due_date_sourcing_epic_id integer,
     confidential boolean DEFAULT false NOT NULL,
     external_key character varying(255),
+    project_id bigint,
     CONSTRAINT check_fcfb4a93ff CHECK ((lock_version IS NOT NULL))
 );
 
@@ -25991,6 +25992,9 @@ ALTER TABLE ONLY merge_request_assignees
 
 ALTER TABLE ONLY packages_debian_project_architectures
     ADD CONSTRAINT fk_rails_5808663adf FOREIGN KEY (distribution_id) REFERENCES packages_debian_project_distributions(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY epics
+    ADD CONSTRAINT fk_rails_59316ce116 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY clusters_applications_cilium
     ADD CONSTRAINT fk_rails_59dc12eea6 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
