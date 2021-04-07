@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StageTable will render an event with an id 1`] = `
+"<div data-testid=\\"vsa-stage-event\\">
+  <div data-testid=\\"vsa-stage-content\\">
+    <p class=\\"gl-m-0\\">
+      <!----> <a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal pipeline-id\\">#222</a> <svg data-testid=\\"fork-icon\\" aria-hidden=\\"true\\" class=\\"gl-icon s16\\">
+        <use href=\\"#fork\\"></use>
+      </svg>
+      <!----> <span class=\\"icon-branch gl-text-gray-400\\"><svg data-testid=\\"commit-icon\\" aria-hidden=\\"true\\" class=\\"gl-icon s14\\"><use href=\\"#commit\\"></use></svg></span> <a href=\\"#\\" class=\\"gl-link commit-sha\\"></a></p>
+    <p class=\\"gl-m-0\\"><span><a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal build-date\\"></a>
+              by
+              <a href=\\"http://localhost/user1\\" class=\\"gl-link gl-text-black-normal issue-author-link\\">John Doe2</a></span></p>
+  </div>
+</div>"
+`;
+
+exports[`StageTable will render an event with an iid 1`] = `
+"<div data-testid=\\"vsa-stage-event\\">
+  <div data-testid=\\"vsa-stage-content\\">
+    <h5 data-testid=\\"vsa-stage-event-title\\" class=\\"gl-font-weight-bold gl-my-1\\"><a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal\\">My title 10</a></h5>
+    <p class=\\"gl-m-0\\"><a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal\\">#3</a> <span class=\\"gl-font-lg\\">·</span> <span>
+              Opened
+              <a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal\\">4 days ago</a></span> <span>
+              by
+              <a href=\\"http://localhost/user1\\" class=\\"gl-link gl-text-black-normal\\">John Doe2</a></span></p>
+  </div>
+</div>"
+`;
+
+exports[`StageTable will render build status for the default \`test\` stage 1`] = `
+"<div data-testid=\\"vsa-stage-event\\">
+  <div data-testid=\\"vsa-stage-content\\">
+    <p class=\\"gl-m-0\\"><span data-testid=\\"vsa-stage-event-build-status\\" class=\\"icon-build-status gl-vertical-align-middle gl-text-green-500\\"><svg data-testid=\\"status_success-icon\\" aria-hidden=\\"true\\" class=\\"gl-icon s14\\"><use href=\\"#status_success\\"></use></svg></span> <a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal item-build-name\\"></a>
+      ·
+      <a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal pipeline-id\\">#222</a> <svg data-testid=\\"fork-icon\\" aria-hidden=\\"true\\" class=\\"gl-icon s16\\">
+        <use href=\\"#fork\\"></use>
+      </svg>
+      <!----> <span class=\\"icon-branch gl-text-gray-400\\"><svg data-testid=\\"commit-icon\\" aria-hidden=\\"true\\" class=\\"gl-icon s14\\"><use href=\\"#commit\\"></use></svg></span> <a href=\\"#\\" class=\\"gl-link commit-sha\\"></a></p>
+    <p class=\\"gl-m-0\\"><span><a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal issue-date\\"></a></span></p>
+  </div>
+</div>"
+`;
