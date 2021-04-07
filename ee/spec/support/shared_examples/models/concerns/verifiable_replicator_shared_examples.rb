@@ -550,7 +550,6 @@ RSpec.shared_examples 'a verifiable replicator' do
 
       describe 'background backfill' do
         it 'verifies model records' do
-          puts "current node: #{Gitlab::Geo.current_node}"
           expect do
             Geo::VerificationBatchWorker.new.perform(replicator.replicable_name)
           end.to change { model_record.reload.verification_succeeded? }.from(false).to(true)
