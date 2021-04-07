@@ -44,7 +44,6 @@ module GitalyTest
 
   def env
     env_hash = {
-      'HOME' => File.expand_path('tmp/tests'),
       'GEM_PATH' => Gem.path.join(':'),
       'BUNDLE_APP_CONFIG' => File.join(gemfile_dir, '.bundle'),
       'BUNDLE_INSTALL_FLAGS' => nil,
