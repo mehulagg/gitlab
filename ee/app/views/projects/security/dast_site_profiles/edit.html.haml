@@ -7,5 +7,5 @@
 profiles_library_path: project_security_configuration_dast_scans_path(@project, anchor: 'site-profiles'),
 site_profile: { id: @site_profile.to_global_id.to_s, name: @site_profile.name, target_url: @site_profile.dast_site.url,
 excluded_urls: @site_profile.excluded_urls, request_headers: @site_profile.request_headers,
-auth: { enabled: @site_profile.auth_enabled, url: @site_profile.auth_url, username: @site_profile.auth_username, usernameField: @site_profile.auth_username_field, passwordField: @site_profile.auth_password_field }, referenced_in_security_policies: @site_profile.referenced_in_security_policies}.to_json,
+auth: { enabled: @site_profile.auth_enabled, url: @site_profile.auth_url, username: @site_profile.auth_username, username_field: @site_profile.auth_username_field, password: @site_profile.password, password_field: @site_profile.auth_password_field }, referenced_in_security_policies: @site_profile.referenced_in_security_policies}.to_json,
 on_demand_scans_path: new_project_on_demand_scan_path(@project) } }

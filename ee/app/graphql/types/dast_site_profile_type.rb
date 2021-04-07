@@ -7,6 +7,8 @@ module Types
     graphql_name 'DastSiteProfile'
     description 'Represents a DAST Site Profile'
 
+    present_using ::Dast::SiteProfilePresenter
+
     authorize :read_on_demand_scans
 
     expose_permissions Types::PermissionTypes::DastSiteProfile
@@ -67,13 +69,6 @@ module Types
       return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, object.project, default_enabled: :yaml)
 
       object.excluded_urls
-    end
-
-    def request_headers
-      return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, object.project, default_enabled: :yaml)
-      return unless object.secret_variables.any? { |variable| variable.key == ::Dast::SiteProfileSecretVariable::REQUEST_HEADERS }
-
-      REDACTED_REQUEST_HEADERS
     end
 
     def normalized_target_url
