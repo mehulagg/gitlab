@@ -43,7 +43,7 @@ include:
   - template: API-Fuzzing.gitlab-ci.yml
 ```
 
-In GitLab 13.12 and earlier, when using the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). The template already defines `build`,`test`, `deploy`, and `fuzz` stages, and  the `fuzz` stage runs last by default.
+In GitLab 13.12 and earlier, when using the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). The template already defines `build`,`test`, `deploy`, and `fuzz` stages, and the `fuzz` stage runs last by default.
 
 Always, to ensure API fuzzing scans the latest code, your CI pipeline should deploy changes to a test environment in one of the jobs preceding the `fuzz` job.
 
@@ -127,6 +127,7 @@ Follow these steps to configure API fuzzing in GitLab with an OpenAPI specificat
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
    ```
@@ -139,9 +140,11 @@ Follow these steps to configure API fuzzing in GitLab with an OpenAPI specificat
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
    ```
+
 1. Add the configuration file [`gitlab-api-fuzzing-config.yml`](https://gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing/-/blob/master/gitlab-api-fuzzing-config.yml) to your repository's root as `.gitlab-api-fuzzing.yml`.
 
 1. The [configuration file](#configuration-files) has several testing profiles defined with varying
@@ -154,6 +157,7 @@ Follow these steps to configure API fuzzing in GitLab with an OpenAPI specificat
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
 
@@ -167,6 +171,7 @@ Follow these steps to configure API fuzzing in GitLab with an OpenAPI specificat
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
 
@@ -189,6 +194,7 @@ Follow these steps to configure API fuzzing in GitLab with an OpenAPI specificat
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
 
@@ -236,6 +242,7 @@ target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
    ```
@@ -248,6 +255,7 @@ target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
    ```
@@ -264,6 +272,7 @@ target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
 
@@ -277,6 +286,7 @@ target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
 
@@ -299,6 +309,7 @@ target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
 
@@ -344,6 +355,7 @@ information about the target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
    ```
@@ -356,6 +368,7 @@ information about the target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
    ```
@@ -373,6 +386,7 @@ information about the target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
 
@@ -386,6 +400,7 @@ information about the target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
 
@@ -408,6 +423,7 @@ information about the target API to test:
    ```yaml
    stages:
      - fuzz
+
    include:
      - template: API-Fuzzing.gitlab-ci.yml
 
@@ -463,6 +479,7 @@ Here is an example of using `FUZZAPI_POSTMAN_COLLECTION_VARIABLES`:
 ```yaml
 stages:
      - fuzz
+
 include:
   - template: API-Fuzzing.gitlab-ci.yml
 
