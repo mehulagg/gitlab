@@ -28,46 +28,84 @@ RSpec.describe Security::StoreReportService, '#execute' do
       allow(pipeline).to receive(:user).and_return(user)
     end
 
-    using RSpec::Parameterized::TableSyntax
+    context 'for different security reports' do
+      using RSpec::Parameterized::TableSyntax
 
-    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures) do
-      'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2
-      'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0
-      'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0
-      'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0
+      where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures, :optimize_sql_query_for_security_report_ff) do
+        'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2 | false
+        'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0 | false
+        'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0 | false
+        'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0 | false
+        'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2 | true
+        'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0 | true
+        'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0 | true
+        'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0 | true
+      end
+
+      with_them do
+        before do
+          stub_feature_flags(optimize_sql_query_for_security_report: optimize_sql_query_for_security_report_ff)
+        end
+
+        it 'inserts all scanners' do
+          expect { subject }.to change { Vulnerabilities::Scanner.count }.by(scanners)
+        end
+
+        it 'inserts all identifiers' do
+          expect { subject }.to change { Vulnerabilities::Identifier.count }.by(identifiers)
+        end
+
+        it 'inserts all findings' do
+          expect { subject }.to change { Vulnerabilities::Finding.count }.by(findings)
+        end
+
+        it 'inserts all finding identifiers (join model)' do
+          expect { subject }.to change { Vulnerabilities::FindingIdentifier.count }.by(finding_identifiers)
+        end
+
+        it 'inserts all finding pipelines (join model)' do
+          expect { subject }.to change { Vulnerabilities::FindingPipeline.count }.by(finding_pipelines)
+        end
+
+        it 'inserts all remediations' do
+          expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
+        end
+
+        it 'inserts all vulnerabilities' do
+          expect { subject }.to change { Vulnerability.count }.by(findings)
+        end
+
+        it 'inserts all signatures' do
+          expect { subject }.to change { Vulnerabilities::FindingSignature.count }.by(signatures)
+        end
+      end
     end
 
-    with_them do
-      it 'inserts all scanners' do
-        expect { subject }.to change { Vulnerabilities::Scanner.count }.by(scanners)
-      end
+    context 'when there is an exception' do
+      let(:trait) { :sast }
 
-      it 'inserts all identifiers' do
-        expect { subject }.to change { Vulnerabilities::Identifier.count }.by(identifiers)
-      end
+      subject { described_class.new(pipeline, report) }
 
-      it 'inserts all findings' do
-        expect { subject }.to change { Vulnerabilities::Finding.count }.by(findings)
+      it 'does not insert any scanner' do
+        allow(Vulnerabilities::Scanner).to receive(:insert_all).with(anything).and_raise(StandardError)
+        expect { subject.send(:update_vulnerability_scanners!, report.findings) }.to change { Vulnerabilities::Scanner.count }.by(0)
       end
+    end
 
-      it 'inserts all finding identifiers (join model)' do
-        expect { subject }.to change { Vulnerabilities::FindingIdentifier.count }.by(finding_identifiers)
-      end
+    context 'when N+1 database queries have been removed' do
+      let(:trait) { :sast }
+      let(:bandit_scanner) { build(:ci_reports_security_scanner, external_id: 'bandit', name: 'Bandit') }
 
-      it 'inserts all finding pipelines (join model)' do
-        expect { subject }.to change { Vulnerabilities::FindingPipeline.count }.by(finding_pipelines)
-      end
+      subject { described_class.new(pipeline, report) }
 
-      it 'inserts all remediations' do
-        expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
-      end
+      it "avoids N+1 database queries for updating vulnerability scanners", :use_sql_query_cache do
+        report.add_scanner(bandit_scanner)
 
-      it 'inserts all vulnerabilities' do
-        expect { subject }.to change { Vulnerability.count }.by(findings)
-      end
+        control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerability_scanners!, report.findings) }.count
 
-      it 'inserts all signatures' do
-        expect { subject }.to change { Vulnerabilities::FindingSignature.count }.by(signatures)
+        5.times { report.add_finding(build(:ci_reports_security_finding, scanner: bandit_scanner)) }
+
+        expect {  described_class.new(pipeline, report).send(:update_vulnerability_scanners!, report.findings) }.not_to exceed_query_limit(control_count)
       end
     end
 
