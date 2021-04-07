@@ -44,20 +44,54 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
   context 'reporting prometheus metrics' do
     let(:labels) { job_record.batched_migration.prometheus_labels }
 
-    it 'reports batch_size' do
+    before do
       allow(job_instance).to receive(:perform)
+      job_record.started_at = Time.current - 5.seconds
+      job_record.finished_at = Time.current
 
-      expect(described_class.gauge_batch_size).to receive(:set).with(labels, job_record.batch_size)
+    end
+
+    it 'reports batch_size' do
+      expect(described_class.metrics[:gauge_batch_size]).to receive(:set).with(labels, job_record.batch_size)
 
       migration_wrapper.perform(job_record)
     end
 
     it 'reports sub_batch_size' do
-      allow(job_instance).to receive(:perform)
-
-      expect(described_class.gauge_sub_batch_size).to receive(:set).with(labels, job_record.sub_batch_size)
+      expect(described_class.metrics[:gauge_sub_batch_size]).to receive(:set).with(labels, job_record.sub_batch_size)
 
       migration_wrapper.perform(job_record)
+    end
+
+    it 'reports updated tuples (currently based on batch_size)' do
+      expect(described_class.metrics[:counter_updated_tuples]).to receive(:increment).with(labels, job_record.batch_size)
+
+      migration_wrapper.perform(job_record)
+    end
+
+    it 'reports summary of query timings' do
+      metrics = { 'timings' => { 'update_all' => [1, 2, 3, 4, 5] } }
+
+      expect(job_instance).to receive(:batch_metrics).and_return(metrics)
+
+      metrics['timings'].each do |key, timings|
+        summary_labels = labels.merge(operation: key)
+        timings.each do |timing|
+          expect(described_class.metrics[:histogram_timings]).to receive(:observe).with(summary_labels, timing)
+        end
+      end
+
+      migration_wrapper.perform(job_record)
+    end
+
+    it 'reports overall job duration' do
+      freeze_time do
+        expect(Time).to receive(:current).and_return(Time.zone.now - 5.seconds).ordered
+        expect(Time).to receive(:current).and_return(Time.zone.now).ordered
+        expect(described_class.metrics[:counter_job_duration]).to receive(:increment).with(labels, 5)
+
+        migration_wrapper.perform(job_record)
+      end
     end
   end
 

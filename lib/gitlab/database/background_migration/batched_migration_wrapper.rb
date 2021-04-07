@@ -15,7 +15,6 @@ module Gitlab
         # The job's batch_metrics are serialized to JSON for storage.
         def perform(batch_tracking_record)
           start_tracking_execution(batch_tracking_record)
-          track_prometheus_metrics(batch_tracking_record)
 
           execute_batch(batch_tracking_record)
 
@@ -26,6 +25,7 @@ module Gitlab
           raise e
         ensure
           finish_tracking_execution(batch_tracking_record)
+          track_prometheus_metrics(batch_tracking_record)
         end
 
         private
@@ -57,26 +57,55 @@ module Gitlab
 
         def track_prometheus_metrics(tracking_record)
           migration = tracking_record.batched_migration
+          base_labels = migration.prometheus_labels
 
-          self.class.gauge_batch_size.set(migration.prometheus_labels, tracking_record.batch_size)
-          self.class.gauge_sub_batch_size.set(migration.prometheus_labels, tracking_record.sub_batch_size)
-        end
+          metric_for(:gauge_batch_size).set(base_labels, tracking_record.batch_size)
+          metric_for(:gauge_sub_batch_size).set(base_labels, tracking_record.sub_batch_size)
+          metric_for(:counter_updated_tuples).increment(base_labels, tracking_record.batch_size)
+          metric_for(:counter_job_duration).increment(base_labels, (tracking_record.finished_at - tracking_record.started_at).to_i)
 
-        def self.gauge_batch_size
-          strong_memoize(:gauge_batch_size) do
-            Gitlab::Metrics.gauge(
-              :batched_migration_job_batch_size,
-              'Batch size for a batched migration job'
-            )
+          if metrics = tracking_record.metrics
+            metrics['timings']&.each do |key, timings|
+              summary = metric_for(:histogram_timings)
+              labels = base_labels.merge(operation: key)
+
+              timings.each do |timing|
+                summary.observe(labels, timing)
+              end
+            end
           end
         end
 
-        def self.gauge_sub_batch_size
-          strong_memoize(:gauge_sub_batch_size) do
-            Gitlab::Metrics.gauge(
-              :batched_migration_job_sub_batch_size,
-              'Sub-batch size for a batched migration job'
-            )
+        def metric_for(name)
+          self.class.metrics[name]
+        end
+
+        def self.metrics
+          strong_memoize(:metrics) do
+            {
+              gauge_batch_size: Gitlab::Metrics.gauge(
+                :batched_migration_job_batch_size,
+                'Batch size for a batched migration job'
+              ),
+              gauge_sub_batch_size: Gitlab::Metrics.gauge(
+                :batched_migration_job_sub_batch_size,
+                'Sub-batch size for a batched migration job'
+              ),
+              counter_updated_tuples: Gitlab::Metrics.counter(
+                :batched_migration_job_updated_tuples,
+                'Number of tuples updated by job'
+              ),
+              histogram_timings: Gitlab::Metrics.histogram(
+                :batched_migration_job_timings,
+                'Summary of timings for a migration job',
+                {},
+                [0, 0.1, 0.25, 0.5, 1, 5].freeze
+              ),
+              counter_job_duration: Gitlab::Metrics.counter(
+                :batched_migration_job_duration,
+                'Job duration in seconds'
+              )
+            }
           end
         end
       end
