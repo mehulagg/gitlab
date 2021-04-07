@@ -1,6 +1,6 @@
 <script>
-import { GlFilteredSearchToken } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { GlFilteredSearchToken } from '@gitlab/ui';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import { setUrlParams, queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
@@ -37,14 +37,18 @@ export default {
       ],
     },
   ],
-  inject: ['sourceId', 'canManageMembers'],
+  inject: ['namespace', 'sourceId', 'canManageMembers'],
   data() {
     return {
       initialFilterValue: [],
     };
   },
   computed: {
-    ...mapState(['filteredSearchBar']),
+    ...mapState({
+      filteredSearchBar(state) {
+        return state[this.namespace].filteredSearchBar;
+      },
+    }),
     tokens() {
       return this.$options.availableTokens.filter((token) => {
         if (

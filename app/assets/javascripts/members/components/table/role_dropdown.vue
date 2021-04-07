@@ -1,7 +1,7 @@
 <script>
+import { mapActions } from 'vuex';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
-import { mapActions } from 'vuex';
 import { s__ } from '~/locale';
 
 export default {
@@ -11,6 +11,7 @@ export default {
     GlDropdownItem,
     LdapDropdownItem: () => import('ee_component/members/components/ldap/ldap_dropdown_item.vue'),
   },
+  inject: ['namespace'],
   props: {
     member: {
       type: Object,
@@ -44,7 +45,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['updateMemberRole']),
+    ...mapActions({
+      updateMemberRole(dispatch, payload) {
+        return dispatch(`${this.namespace}/updateMemberRole`, payload);
+      },
+    }),
     handleSelect(value, name) {
       if (value === this.member.accessLevel.integerValue) {
         return;

@@ -1,6 +1,6 @@
 <script>
-import { GlTable, GlBadge } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { GlTable, GlBadge } from '@gitlab/ui';
 import MembersTableCell from 'ee_else_ce/members/components/table/members_table_cell.vue';
 import { canOverride, canRemove, canResend, canUpdate } from 'ee_else_ce/members/utils';
 import initUserPopovers from '~/user_popovers';
@@ -31,9 +31,22 @@ export default {
     LdapOverrideConfirmationModal: () =>
       import('ee_component/members/components/ldap/ldap_override_confirmation_modal.vue'),
   },
-  inject: ['currentUserId'],
+  inject: ['namespace', 'currentUserId'],
   computed: {
-    ...mapState(['members', 'tableFields', 'tableAttrs']),
+    ...mapState({
+      members(state) {
+        return state[this.namespace].members;
+      },
+      tableFields(state) {
+        return state[this.namespace].tableFields;
+      },
+      tableAttrs(state) {
+        return state[this.namespace].tableAttrs;
+      },
+      currentUserId(state) {
+        return state[this.namespace].currentUserId;
+      },
+    }),
     filteredFields() {
       return FIELDS.filter(
         (field) => this.tableFields.includes(field.key) && this.showField(field),

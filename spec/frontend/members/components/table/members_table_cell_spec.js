@@ -42,7 +42,9 @@ describe('MembersTableCell', () => {
 
   const createStore = (state = {}) => {
     return new Vuex.Store({
-      state,
+      modules: {
+        [MEMBER_TYPES.user]: { namespaced: true, state },
+      },
     });
   };
 
@@ -56,6 +58,7 @@ describe('MembersTableCell', () => {
       provide: {
         sourceId: 1,
         currentUserId: 1,
+        namespace: MEMBER_TYPES.user,
       },
       scopedSlots: {
         default: `

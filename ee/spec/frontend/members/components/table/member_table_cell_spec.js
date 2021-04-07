@@ -2,6 +2,7 @@ import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import MembersTableCell from 'ee/members/components/table/members_table_cell.vue';
 import { member as memberMock, directMember } from 'jest/members/mock_data';
+import { MEMBER_TYPES } from '~/members/constants';
 
 describe('MemberTableCell', () => {
   const WrappedComponent = {
@@ -34,7 +35,12 @@ describe('MemberTableCell', () => {
 
   const createStore = (state = {}) => {
     return new Vuex.Store({
-      state,
+      modules: {
+        [MEMBER_TYPES.user]: {
+          namespaced: true,
+          state,
+        },
+      },
     });
   };
 
@@ -48,6 +54,7 @@ describe('MemberTableCell', () => {
       provide: {
         sourceId: 1,
         currentUserId: 1,
+        namespace: MEMBER_TYPES.user,
       },
       scopedSlots: {
         default: `

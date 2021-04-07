@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions } from 'vuex';
+import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 
 export default {
@@ -12,6 +12,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  inject: ['namespace'],
   props: {
     member: {
       type: Object,
@@ -19,7 +20,11 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['showLdapOverrideConfirmationModal']),
+    ...mapActions({
+      showLdapOverrideConfirmationModal(dispatch, payload) {
+        return dispatch(`${this.namespace}/showLdapOverrideConfirmationModal`, payload);
+      },
+    }),
   },
 };
 </script>

@@ -1,12 +1,13 @@
 <script>
-import { GlDatepicker } from '@gitlab/ui';
 import { mapActions } from 'vuex';
+import { GlDatepicker } from '@gitlab/ui';
 import { getDateInFuture } from '~/lib/utils/datetime_utility';
 import { s__ } from '~/locale';
 
 export default {
   name: 'ExpirationDatepicker',
   components: { GlDatepicker },
+  inject: ['namespace'],
   props: {
     member: {
       type: Object,
@@ -46,7 +47,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['updateMemberExpiration']),
+    ...mapActions({
+      updateMemberExpiration(dispatch, payload) {
+        return dispatch(`${this.namespace}/updateMemberExpiration`, payload);
+      },
+    }),
     handleInput(date) {
       this.busy = true;
       this.updateMemberExpiration({

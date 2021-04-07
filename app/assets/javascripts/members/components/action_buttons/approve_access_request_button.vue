@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlForm, GlTooltipDirective } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { GlButton, GlForm, GlTooltipDirective } from '@gitlab/ui';
 import csrf from '~/lib/utils/csrf';
 import { __ } from '~/locale';
 
@@ -12,6 +12,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  inject: ['namespace'],
   props: {
     memberId: {
       type: Number,
@@ -19,7 +20,11 @@ export default {
     },
   },
   computed: {
-    ...mapState(['memberPath']),
+    ...mapState({
+      memberPath(state) {
+        return state[this.namespace].memberPath;
+      },
+    }),
     approvePath() {
       return this.memberPath.replace(/:id$/, `${this.memberId}/approve_access_request`);
     },

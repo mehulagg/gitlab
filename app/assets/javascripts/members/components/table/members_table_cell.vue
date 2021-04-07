@@ -11,7 +11,7 @@ import {
 
 export default {
   name: 'MembersTableCell',
-  inject: ['currentUserId'],
+  inject: ['namespace', 'currentUserId'],
   props: {
     member: {
       type: Object,

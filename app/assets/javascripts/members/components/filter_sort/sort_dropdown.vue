@@ -1,6 +1,6 @@
 <script>
-import { GlSorting, GlSortingItem } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { GlSorting, GlSortingItem } from '@gitlab/ui';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { FIELDS } from '~/members/constants';
 import { parseSortParam, buildSortHref } from '~/members/utils';
@@ -8,8 +8,16 @@ import { parseSortParam, buildSortHref } from '~/members/utils';
 export default {
   name: 'SortDropdown',
   components: { GlSorting, GlSortingItem },
+  inject: ['namespace'],
   computed: {
-    ...mapState(['tableSortableFields', 'filteredSearchBar']),
+    ...mapState({
+      tableSortableFields(state) {
+        return state[this.namespace].tableSortableFields;
+      },
+      filteredSearchBar(state) {
+        return state[this.namespace].filteredSearchBar;
+      },
+    }),
     sort() {
       return parseSortParam(this.tableSortableFields);
     },
