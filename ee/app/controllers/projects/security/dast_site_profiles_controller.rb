@@ -16,7 +16,9 @@ module Projects
       end
 
       def edit
-        @site_profile = DastSiteProfilesFinder.new(project_id: @project.id, id: params[:id]).execute.first! # rubocop: disable CodeReuse/ActiveRecord
+        @site_profile = Dast::SiteProfilePresenter.new(
+          DastSiteProfilesFinder.new(project_id: @project.id, id: params[:id]).execute.first! # rubocop: disable CodeReuse/ActiveRecord
+        )
       end
     end
   end
