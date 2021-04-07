@@ -4,6 +4,8 @@ module Gitlab
   module Database
     module BackgroundMigration
       class BatchedMigration < ActiveRecord::Base # rubocop:disable Rails/ApplicationRecord
+        include Gitlab::Utils::StrongMemoize
+
         JOB_CLASS_MODULE = 'Gitlab::BackgroundMigration'
         BATCH_CLASS_MODULE = "#{JOB_CLASS_MODULE}::BatchingStrategies"
 
@@ -56,6 +58,15 @@ module Gitlab
 
         def batch_class_name=(class_name)
           write_attribute(:batch_class_name, class_name.demodulize)
+        end
+
+        def prometheus_labels
+          strong_memoize(:prometheus_labels) do
+            {
+              migration_id: id,
+              migration_identifier: "%s/%s.%s" % [job_class_name, table_name, column_name]
+            }
+          end
         end
       end
     end

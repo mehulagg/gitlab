@@ -4,6 +4,8 @@ module Gitlab
   module Database
     module BackgroundMigration
       class BatchedMigrationWrapper
+        extend Gitlab::Utils::StrongMemoize
+
         # Wraps the execution of a batched_background_migration.
         #
         # Updates the job's tracking records with the status of the migration
@@ -13,6 +15,7 @@ module Gitlab
         # The job's batch_metrics are serialized to JSON for storage.
         def perform(batch_tracking_record)
           start_tracking_execution(batch_tracking_record)
+          track_prometheus_metrics(batch_tracking_record)
 
           execute_batch(batch_tracking_record)
 
@@ -50,6 +53,31 @@ module Gitlab
         def finish_tracking_execution(tracking_record)
           tracking_record.finished_at = Time.current
           tracking_record.save!
+        end
+
+        def track_prometheus_metrics(tracking_record)
+          migration = tracking_record.batched_migration
+
+          self.class.gauge_batch_size.set(migration.prometheus_labels, tracking_record.batch_size)
+          self.class.gauge_sub_batch_size.set(migration.prometheus_labels, tracking_record.sub_batch_size)
+        end
+
+        def self.gauge_batch_size
+          strong_memoize(:gauge_batch_size) do
+            Gitlab::Metrics.gauge(
+              :batched_migration_job_batch_size,
+              'Batch size for a batched migration job'
+            )
+          end
+        end
+
+        def self.gauge_sub_batch_size
+          strong_memoize(:gauge_sub_batch_size) do
+            Gitlab::Metrics.gauge(
+              :batched_migration_job_sub_batch_size,
+              'Sub-batch size for a batched migration job'
+            )
+          end
         end
       end
     end

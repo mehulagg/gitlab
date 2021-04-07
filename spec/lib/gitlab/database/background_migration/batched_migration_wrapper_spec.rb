@@ -41,6 +41,26 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
     end
   end
 
+  context 'reporting prometheus metrics' do
+    let(:labels) { job_record.batched_migration.prometheus_labels }
+
+    it 'reports batch_size' do
+      allow(job_instance).to receive(:perform)
+
+      expect(described_class.gauge_batch_size).to receive(:set).with(labels, job_record.batch_size)
+
+      migration_wrapper.perform(job_record)
+    end
+
+    it 'reports sub_batch_size' do
+      allow(job_instance).to receive(:perform)
+
+      expect(described_class.gauge_sub_batch_size).to receive(:set).with(labels, job_record.sub_batch_size)
+
+      migration_wrapper.perform(job_record)
+    end
+  end
+
   context 'when the migration job does not raise an error' do
     it 'marks the tracking record as succeeded' do
       expect(job_instance).to receive(:perform).with(1, 10, 'events', 'id', 1, 'id', 'other_id')
