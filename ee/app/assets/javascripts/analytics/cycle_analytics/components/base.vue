@@ -199,7 +199,6 @@ export default {
       <value-stream-select
         v-if="shouldDisplayCreateMultipleValueStreams"
         class="gl-align-self-start gl-sm-align-self-start gl-mt-0 gl-sm-mt-5"
-        :has-extended-form-fields="featureFlags.hasExtendedFormFields"
       />
     </div>
     <gl-empty-state

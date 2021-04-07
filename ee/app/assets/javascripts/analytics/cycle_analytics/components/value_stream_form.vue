@@ -57,11 +57,6 @@ export default {
       required: false,
       default: () => ({}),
     },
-    hasExtendedFormFields: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     defaultStageConfig: {
       type: Array,
       required: true,
@@ -75,22 +70,18 @@ export default {
   data() {
     const {
       defaultStageConfig = [],
-      hasExtendedFormFields,
       initialData: { name: initialName, stages: initialStages },
       initialFormErrors,
       initialPreset,
     } = this;
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
-    const additionalFields = hasExtendedFormFields
-      ? {
-          stages: this.isEditing
-            ? cloneDeep(initialStages)
-            : initializeStages(defaultStageConfig, initialPreset),
-          stageErrors:
-            cloneDeep(stageErrors) || initializeStageErrors(defaultStageConfig, initialPreset),
-        }
-      : { stages: [], nameError };
-
+    const additionalFields = {
+      stages: this.isEditing
+        ? cloneDeep(initialStages)
+        : initializeStages(defaultStageConfig, initialPreset),
+      stageErrors:
+        cloneDeep(stageErrors) || initializeStageErrors(defaultStageConfig, initialPreset),
+    };
     return {
       hiddenStages: [],
       selectedPreset: initialPreset,
@@ -129,11 +120,7 @@ export default {
     secondaryProps() {
       return {
         text: this.$options.i18n.BTN_ADD_ANOTHER_STAGE,
-        attributes: [
-          { category: 'secondary' },
-          { variant: 'info' },
-          { class: this.hasExtendedFormFields ? '' : 'gl-display-none' },
-        ],
+        attributes: [{ category: 'secondary' }, { variant: 'info' }, { class: '' }],
       };
     },
     hasFormErrors() {
@@ -346,7 +333,7 @@ export default {
         </div>
       </gl-form-group>
       <gl-form-radio-group
-        v-if="hasExtendedFormFields && !isEditing"
+        v-if="!isEditing"
         v-model="selectedPreset"
         class="gl-mb-4"
         data-testid="vsa-preset-selector"
@@ -354,7 +341,7 @@ export default {
         name="preset"
         @input="onSelectPreset"
       />
-      <div v-if="hasExtendedFormFields" data-testid="extended-form-fields">
+      <div data-testid="extended-form-fields">
         <div
           v-for="(stage, activeStageIndex) in stages"
           ref="formStages"
