@@ -1,0 +1,5 @@
+%aside.nav-sidebar{ class: ('sidebar-collapsed-desktop' if collapsed_sidebar?), **sidebar_tracking_attributes_by_object(sidebar.container), 'aria-label': sidebar.aria_label }
+  .nav-sidebar-inner-scroll
+    = render partial: 'shared/nav/scope_menu', object: sidebar.scope_menu
+
+    = render 'shared/sidebar_toggle_button'

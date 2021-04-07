@@ -51,5 +51,9 @@ module Sidebars
     def renderable_menus
       @renderable_menus ||= @menus.select(&:render?)
     end
+
+    def container
+      context.container
+    end
   end
 end
