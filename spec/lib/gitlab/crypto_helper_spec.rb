@@ -68,8 +68,6 @@ RSpec.describe Gitlab::CryptoHelper do
   end
 
   def create_nonce
-    cipher = OpenSSL::Cipher.new('aes-256-gcm')
-    cipher.encrypt # Required before '#random_iv' can be called
-    cipher.random_iv # Ensures that the IV is the correct length respective to the algorithm used.
+    ::Digest::SHA256.hexdigest('my-value').bytes.take(TokenAuthenticatableStrategies::EncryptionHelper::NONCE_SIZE).pack('c*')
   end
 end
