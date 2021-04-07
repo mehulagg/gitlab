@@ -977,7 +977,7 @@
       when: manual
       allow_failure: true
 
-.reports:schedule-dast:
+.reports:rules:schedule-dast:
   rules:
     - if: '$DAST_DISABLED || $GITLAB_FEATURES !~ /\bdast\b/'
       when: never
