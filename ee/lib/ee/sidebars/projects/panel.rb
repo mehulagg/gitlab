@@ -11,6 +11,7 @@ module EE
           super
 
           insert_menu_after(::Sidebars::Projects::Menus::ExternalIssueTrackerMenu, ::Sidebars::Projects::Menus::JiraMenu.new(context))
+          insert_menu_after(::Sidebars::Projects::Menus::MergeRequestsMenu, ::Sidebars::Projects::Menus::RequirementsMenu.new(context))
         end
       end
     end
