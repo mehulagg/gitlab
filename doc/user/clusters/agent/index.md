@@ -244,7 +244,7 @@ If you haven't previously defined or created a namespace, run the following comm
 kubectl create namespace gitlab-kubernetes-agent
 ```
 
-#### One-liner installation
+#### Quick setup
 
 To perform a one-liner installation, run the command below. Make sure to replace:
 
