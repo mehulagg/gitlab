@@ -33,6 +33,15 @@ module Terraform
 
     default_value_for(:uuid, allows_nil: false) { SecureRandom.hex(UUID_LENGTH / 2) }
 
+    delegate :verification_retry_at, :verification_retry_at=,
+       :verified_at, :verified_at=,
+       :verification_checksum, :verification_checksum=,
+       :verification_failure, :verification_failure=,
+       :verification_retry_count, :verification_retry_count=,
+       :verification_state, :verification_state=,
+       :verification_started_at, :verification_started_at=,
+    to: :latest_version, allow_nil: true
+
     def latest_file
       latest_version&.file
     end
