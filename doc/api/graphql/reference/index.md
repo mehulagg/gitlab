@@ -3328,6 +3328,7 @@ Describes an incident management on-call schedule.
 | `description` | [`String`](#string) | Description of the on-call schedule. |
 | `iid` | [`ID!`](#id) | Internal ID of the on-call schedule. |
 | `name` | [`String!`](#string) | Name of the on-call schedule. |
+| `rotation` | [`IncidentManagementOncallRotation!`](#incidentmanagementoncallrotation) | On-call rotations for the on-call schedule. |
 | `rotations` | [`IncidentManagementOncallRotationConnection!`](#incidentmanagementoncallrotationconnection) | On-call rotations for the on-call schedule. |
 | `timezone` | [`String!`](#string) | Time zone of the on-call schedule. |
 
