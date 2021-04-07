@@ -550,6 +550,7 @@ module Ci
         # and we need to make sure that CI_ENVIRONMENT_NAME and
         # CI_ENVIRONMENT_SLUG so on are available for the URL be expanded.
         variables.append(key: 'CI_ENVIRONMENT_URL', value: environment_url) if environment_url
+        variables.append(key: 'CI_ENVIRONMENT_ACTION', value: environment_action) if environment_action
       end
     end
 
