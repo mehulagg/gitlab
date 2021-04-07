@@ -85,7 +85,7 @@ module ServicesHelper
     end
   end
 
-  def integration_form_data(integration, group: nil)
+  def integration_form_data(integration, group: nil, editable: true)
     form_data = {
       id: integration.id,
       show_active: integration.show_active_box?.to_s,
@@ -100,7 +100,7 @@ module ServicesHelper
       fields: fields_for_service(integration),
       inherit_from_id: integration.inherit_from_id,
       integration_level: integration_level(integration),
-      editable: integration.editable?.to_s,
+      editable: integration.editable?.to_s && editable,
       cancel_path: scoped_integrations_path,
       can_test: integration.can_test?.to_s,
       test_path: scoped_test_integration_path(integration),
