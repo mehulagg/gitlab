@@ -34,6 +34,16 @@ export const getPipelineConfigurationPathParts = (path) => {
   return { file, group, project };
 };
 
+export const getProjectDefaultBranch = async (group, project) => {
+  try {
+    const { data } = await Api.project(`${group}/${project}`);
+
+    return { data };
+  } catch (e) {
+    return false;
+  }
+}
+
 export const validatePipelineConfirmationFormat = (path) =>
   PIPELINE_CONFIGURATION_PATH_FORMAT.test(path);
 
@@ -44,8 +54,10 @@ export const fetchPipelineConfigurationFileExists = async (path) => {
     return false;
   }
 
+  const { projectData } = await getProjectDefaultBranch(group, project);
+
   try {
-    const { status } = await Api.getRawFile(`${group}/${project}`, file);
+    const { status } = await Api.getRawFile(`${group}/${project}`, file, { ref: `${projectData.default_branch}` });
 
     return status === httpStatus.OK;
   } catch (e) {
