@@ -202,7 +202,7 @@ export default {
         :loading="state.isRunningMergeRequestPipeline"
         @click="tryRunPipeline"
       >
-        {{ s__('Pipelines|Run pipeline') }}
+        {{ s__('Pipeline|Run pipeline') }}
       </gl-button>
 
       <pipelines-table-component
@@ -218,7 +218,7 @@ export default {
               :loading="state.isRunningMergeRequestPipeline"
               @click="tryRunPipeline"
             >
-              {{ s__('Pipelines|Run pipeline') }}
+              {{ s__('Pipeline|Run pipeline') }}
             </gl-button>
           </div>
         </template>
@@ -231,7 +231,7 @@ export default {
       ref="modal"
       :modal-id="modalId"
       :title="s__('Pipelines|Are you sure you want to run this pipeline?')"
-      :ok-title="s__('Pipelines|Run pipeline')"
+      :ok-title="s__('Pipeline|Run pipeline')"
       ok-variant="danger"
       @ok="onClickRunPipeline"
     >
