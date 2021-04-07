@@ -2,7 +2,6 @@
 import { GlCollapse, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ReportItem from './report_item.vue';
-import ReportRow from './report_row.vue';
 import { isValidReportType } from './types/utils';
 
 export default {
@@ -13,7 +12,6 @@ export default {
     GlCollapse,
     GlIcon,
     ReportItem,
-    ReportRow,
   },
   props: {
     details: {
@@ -52,13 +50,10 @@ export default {
     <gl-collapse :visible="showSection">
       <div class="generic-report-container" data-testid="reports">
         <template v-for="[label, item] in detailsEntries">
-          <!-- <report-row :key="label" :label="item.name" :data-testid="`report-row-${label}`">
-            <report-item :item="item" />
-          </report-row> -->
           <div :key="label" class="generic-report-row" :data-testid="`report-row-${label}`">
             <strong class="generic-report-column">{{ item.name }}</strong>
             <div class="generic-report-column" data-testid="reportContent">
-              <report-item :item="item" />
+              <report-item :item="item" :data-testid="`report-item-${label}`" />
             </div>
           </div>
         </template>
