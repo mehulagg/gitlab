@@ -22670,6 +22670,9 @@ msgstr ""
 msgid "Pipelines|Loading Pipelines"
 msgstr ""
 
+msgid "Pipelines|Loading pipelines"
+msgstr ""
+
 msgid "Pipelines|Merged YAML is view only"
 msgstr ""
 
@@ -22689,9 +22692,6 @@ msgid "Pipelines|Project cache successfully reset."
 msgstr ""
 
 msgid "Pipelines|Revoke"
-msgstr ""
-
-msgid "Pipelines|Run Pipeline"
 msgstr ""
 
 msgid "Pipelines|Run pipeline"
