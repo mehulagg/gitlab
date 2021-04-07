@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlCard, GlEmoji, GlSprintf } from '@gitlab/ui';
+import ExperimentTracking from '~/experimentation/experiment_tracking';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import { s__, sprintf } from '~/locale';
 import { SUGGESTED_CI_TEMPLATES, HELLO_WORLD_TEMPLATE_KEY } from '../../constants';
@@ -11,6 +12,7 @@ export default {
     GlEmoji,
     GlSprintf,
   },
+  HELLO_WORLD_TEMPLATE_KEY,
   i18n: {
     errorMessage: s__('Pipelines|An error occurred. Please try again.'),
     testTemplates: {
@@ -54,6 +56,14 @@ export default {
       ),
     };
   },
+  methods: {
+    trackEvent(template) {
+      const tracking = new ExperimentTracking('pipeline_empty_state_templates', {
+        label: template,
+      });
+      tracking.event('template_clicked');
+    },
+  },
 };
 </script>
 <template>
@@ -85,6 +95,7 @@ export default {
             variant="confirm"
             :href="helloWorldTemplateUrl"
             data-testid="test-template-link"
+            @click="trackEvent($options.HELLO_WORLD_TEMPLATE_KEY)"
             >{{ $options.i18n.testTemplates.cta }}</gl-button
           >
         </gl-card>
@@ -123,6 +134,7 @@ export default {
             variant="confirm"
             :href="template.link"
             data-testid="template-link"
+            @click="trackEvent(template.name)"
             >{{ $options.i18n.templates.cta }}</gl-button
           >
         </div>
