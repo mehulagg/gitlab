@@ -2,7 +2,7 @@
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { DAYS_IN_WEEK, HOURS_IN_DAY } from 'ee/oncall_schedules/constants';
 import { getOverlapDateInPeriods, nDaysAfter } from '~/lib/utils/datetime_utility';
-import { weekDisplayShiftLeft, weekDisplayShiftWidth } from './shift_utils';
+import { weekDisplayShiftLeft, getPixelWidth } from './shift_utils';
 
 export default {
   components: {
@@ -37,6 +37,10 @@ export default {
       type: Object,
       required: true,
     },
+    timelineWidth: {
+      type: Number,
+      required: true,
+    },
   },
   computed: {
     currentTimeFrameEnd() {
@@ -51,6 +55,8 @@ export default {
         shiftStartsAt,
         timeframeItem,
         presetType,
+        timelineWidth,
+        shift,
       } = this;
 
       return {
@@ -63,11 +69,15 @@ export default {
           timeframeItem,
           presetType,
         ),
-        width: weekDisplayShiftWidth(
-          shiftUnitIsHour,
-          totalShiftRangeOverlap,
-          shiftStartDateOutOfRange,
-          shiftTimeUnitWidth,
+        width: Math.round(
+          getPixelWidth({
+            shift,
+            timelineWidth,
+            presetType,
+            shiftDLSOffset:
+              new Date(shift.startsAt).getTimezoneOffset() -
+              new Date(shift.endsAt).getTimezoneOffset(),
+          }),
         ),
       };
     },

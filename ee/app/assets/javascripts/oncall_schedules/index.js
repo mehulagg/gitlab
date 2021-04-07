@@ -3,6 +3,7 @@ import VueApollo from 'vue-apollo';
 import OnCallSchedulesWrapper from './components/oncall_schedules_wrapper.vue';
 import apolloProvider from './graphql';
 import getShiftTimeUnitWidthQuery from './graphql/queries/get_shift_time_unit_width.query.graphql';
+import getTimelineWidthQuery from './graphql/queries/get_timeline_width.query.graphql';
 
 Vue.use(VueApollo);
 
@@ -17,6 +18,13 @@ export default () => {
     query: getShiftTimeUnitWidthQuery,
     data: {
       shiftTimeUnitWidth: 0,
+    },
+  });
+
+  apolloProvider.clients.defaultClient.cache.writeQuery({
+    query: getTimelineWidthQuery,
+    data: {
+      timelineWidth: 0,
     },
   });
 
