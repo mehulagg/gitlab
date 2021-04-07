@@ -1,11 +1,13 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlTabs, GlTab } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon, GlTabs } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   CREATE_TAB,
+  EDITOR_APP_STATUS_EMPTY,
   EDITOR_APP_STATUS_ERROR,
+  EDITOR_APP_STATUS_INVALID,
   EDITOR_APP_STATUS_LOADING,
   EDITOR_APP_STATUS_VALID,
   LINT_TAB,
@@ -40,7 +42,6 @@ export default {
     EditorTab,
     GlAlert,
     GlLoadingIcon,
-    GlTab,
     GlTabs,
     PipelineGraph,
     TextEditor,
@@ -65,6 +66,12 @@ export default {
     hasAppError() {
       // Not an invalid config and with `mergedYaml` data missing
       return this.appStatus === EDITOR_APP_STATUS_ERROR;
+    },
+    isEmpty() {
+      return this.appStatus === EDITOR_APP_STATUS_EMPTY;
+    },
+    isInvalid() {
+      return this.appStatus === EDITOR_APP_STATUS_INVALID;
     },
     isValid() {
       return this.appStatus === EDITOR_APP_STATUS_VALID;
@@ -91,9 +98,11 @@ export default {
     >
       <text-editor :value="ciFileContent" v-on="$listeners" />
     </editor-tab>
-    <gl-tab
+    <editor-tab
       v-if="glFeatures.ciConfigVisualizationTab"
       class="gl-mb-3"
+      :is-empty="isEmpty"
+      :is-invalid="isInvalid"
       :title="$options.i18n.tabGraph"
       lazy
       data-testid="visualization-tab"
@@ -101,9 +110,10 @@ export default {
     >
       <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
       <pipeline-graph v-else :pipeline-data="ciConfigData" />
-    </gl-tab>
+    </editor-tab>
     <editor-tab
       class="gl-mb-3"
+      :is-empty="isEmpty"
       :title="$options.i18n.tabLint"
       data-testid="lint-tab"
       @click="setCurrentTab($options.tabConstants.LINT_TAB)"
@@ -111,9 +121,11 @@ export default {
       <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
       <ci-lint v-else :is-valid="isValid" :ci-config="ciConfigData" />
     </editor-tab>
-    <gl-tab
+    <editor-tab
       v-if="glFeatures.ciConfigMergedTab"
       class="gl-mb-3"
+      :is-empty="isEmpty"
+      :is-invalid="isInvalid"
       :title="$options.i18n.tabMergedYaml"
       lazy
       data-testid="merged-tab"
@@ -123,12 +135,7 @@ export default {
       <gl-alert v-else-if="hasAppError" variant="danger" :dismissible="false">
         {{ $options.errorTexts.loadMergedYaml }}
       </gl-alert>
-      <ci-config-merged-preview
-        v-else
-        :is-valid="isValid"
-        :ci-config-data="ciConfigData"
-        v-on="$listeners"
-      />
-    </gl-tab>
+      <ci-config-merged-preview v-else :ci-config-data="ciConfigData" v-on="$listeners" />
+    </editor-tab>
   </gl-tabs>
 </template>

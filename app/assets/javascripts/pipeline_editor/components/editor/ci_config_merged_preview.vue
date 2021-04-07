@@ -2,7 +2,7 @@
 import { GlAlert, GlIcon } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import { __, s__ } from '~/locale';
-import { DEFAULT, INVALID_CI_CONFIG } from '~/pipelines/constants';
+import { DEFAULT } from '~/pipelines/constants';
 import EditorLite from '~/vue_shared/components/editor_lite.vue';
 
 export default {
@@ -10,7 +10,6 @@ export default {
     viewOnlyMessage: s__('Pipelines|Merged YAML is view only'),
   },
   errorTexts: {
-    [INVALID_CI_CONFIG]: __('Your CI configuration file is invalid.'),
     [DEFAULT]: __('An unknown error occurred.'),
   },
   components: {
@@ -20,10 +19,6 @@ export default {
   },
   inject: ['ciConfigPath'],
   props: {
-    isValid: {
-      type: Boolean,
-      required: true,
-    },
     ciConfigData: {
       type: Object,
       required: true,
@@ -37,8 +32,6 @@ export default {
   computed: {
     failure() {
       switch (this.failureType) {
-        case INVALID_CI_CONFIG:
-          return this.$options.errorTexts[INVALID_CI_CONFIG];
         default:
           return this.$options.errorTexts[DEFAULT];
       }
@@ -57,9 +50,7 @@ export default {
     ciConfigData: {
       immediate: true,
       handler() {
-        if (!this.isValid) {
-          this.reportFailure(INVALID_CI_CONFIG);
-        } else if (this.hasError) {
+        if (this.hasError) {
           this.resetFailure();
         }
       },

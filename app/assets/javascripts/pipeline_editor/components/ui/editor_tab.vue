@@ -1,6 +1,6 @@
 <script>
-import { GlTab } from '@gitlab/ui';
-
+import { GlAlert, GlTab } from '@gitlab/ui';
+import { __ } from '~/locale';
 /**
  * Wrapper of <gl-tab> to optionally lazily render this tab's content
  * when its shown **without dismounting after its hidden**.
@@ -10,10 +10,10 @@ import { GlTab } from '@gitlab/ui';
  * API is the same as <gl-tab>, for example:
  *
  * <gl-tabs>
- *   <editor-tab title="Tab 1" :lazy="true">
+ *   <editor-tab title="Tab 1" lazy>
  *     lazily mounted content (gets mounted if this is first tab)
  *   </editor-tab>
- *   <editor-tab title="Tab 2" :lazy="true">
+ *   <editor-tab title="Tab 2" lazy>
  *     lazily mounted content
  *   </editor-tab>
  *   <editor-tab title="Tab 3">
@@ -25,10 +25,29 @@ import { GlTab } from '@gitlab/ui';
  * so it's contents are not dismounted.
  *
  * lazy is "false" by default, as in <gl-tab>.
+ *
+ * It is also possible to pass the `isEmpty` and or `isInvalid` to let
+ * the tab component handle that state on its own. For example:
+ *
+ *  * <gl-tabs>
+ *   <editor-tab-with-status title="Tab 1" :is-empty="isEmpty" :is-invalid="isInvalid">
+ *    ...
+ *   </editor-tab-with-status>
+ *   Will be the same as normal, except it will only render the slot component
+ *   if the status is not empty and not invalid. In any of these 2 cases, it will render
+ *   a generic component and avoid mounting whatever it received in the slot.
+ * </gl-tabs>
  */
 
 export default {
+  i18n: {
+    empty: __(
+      'This tab will be usable when the CI/CD configuration file is populated with valid syntax.',
+    ),
+    invalid: __('Your CI configuration file is invalid.'),
+  },
   components: {
+    GlAlert,
     GlTab,
     // Use a small renderless component to know when the tab content mounts because:
     // - gl-tab always gets mounted, even if lazy is `true`. See:
@@ -40,6 +59,16 @@ export default {
   },
   inheritAttrs: false,
   props: {
+    isEmpty: {
+      type: Boolean,
+      required: false,
+      default: null,
+    },
+    isInvalid: {
+      type: Boolean,
+      required: false,
+      default: null,
+    },
     lazy: {
       type: Boolean,
       required: false,
@@ -62,7 +91,11 @@ export default {
 </script>
 <template>
   <gl-tab :lazy="isLazy" v-bind="$attrs" v-on="$listeners">
-    <slot v-for="slot in Object.keys($slots)" :name="slot"></slot>
-    <mount-spy @hook:mounted="onContentMounted" />
+    <gl-alert v-if="isEmpty" variant="tip">{{ $options.i18n.empty }}</gl-alert>
+    <gl-alert v-else-if="isInvalid" variant="danger">{{ $options.i18n.invalid }}</gl-alert>
+    <template v-else>
+      <slot v-for="slot in Object.keys($slots)" :name="slot"></slot>
+      <mount-spy @hook:mounted="onContentMounted" />
+    </template>
   </gl-tab>
 </template>
