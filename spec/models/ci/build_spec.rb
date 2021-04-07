@@ -2603,7 +2603,8 @@ RSpec.describe Ci::Build do
       let(:environment_variables) do
         [
           { key: 'CI_ENVIRONMENT_NAME', value: 'production', public: true, masked: false },
-          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false }
+          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false },
+          { key: 'CI_ENVIRONMENT_ACTION', value: 'start',  public: true, masked: false }
         ]
       end
 
@@ -2612,7 +2613,8 @@ RSpec.describe Ci::Build do
                project: build.project,
                name: 'production',
                slug: 'prod-slug',
-               external_url: '')
+               external_url: '',
+               action: 'start')
       end
 
       before do
@@ -2666,6 +2668,23 @@ RSpec.describe Ci::Build do
 
           it_behaves_like 'containing environment variables'
         end
+      end
+
+      context 'when an environment action was specified' do
+        let(:action) { 'prepare' }
+
+        before do
+          environment_variables <<
+            { key: 'CI_ENVIRONMENT_ACTION', value: 'prepare',  public: true, masked: false }
+        end
+
+        it_behaves_like 'containing environment variables'
+      end
+
+      context 'when no environment action was specified' do
+        let(:action) { 'start'}
+
+        it_behaves_like 'containing environment variables'
       end
 
       context 'when project has an environment specific variable' do
