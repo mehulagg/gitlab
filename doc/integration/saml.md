@@ -798,7 +798,7 @@ Make sure the ACS URL points to `https://gitlab.example.com/users/auth/saml/call
 `gitlab.example.com` is the URL of your GitLab instance.
 
 If the ACS URL is correct, and you still have errors, review the other
-[Troubleshooiting](#troubleshooting) sections.
+[Troubleshooting](#troubleshooting) sections.
 
 If you are sure that the ACS URL is correct, proceed to the [Redirect back to the login screen with no evident error](#redirect-back-to-the-login-screen-with-no-evident-error)
 section for further troubleshooting steps.
