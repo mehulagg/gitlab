@@ -64,7 +64,7 @@ describe('Pipelines CI Templates', () => {
 
     it('has the description of the template', () => {
       expect(findTemplateDescriptions().at(0).text()).toEqual(
-        'Continuous deployment template to test and deploy your Android project.',
+        'CI/CD template to test and deploy your Android project.',
       );
     });
 

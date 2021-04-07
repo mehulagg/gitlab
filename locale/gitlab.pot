@@ -22805,13 +22805,13 @@ msgstr ""
 msgid "Pipelines|CI Lint"
 msgstr ""
 
+msgid "Pipelines|CI/CD template to test and deploy your %{name} project."
+msgstr ""
+
 msgid "Pipelines|Child pipeline"
 msgstr ""
 
 msgid "Pipelines|Clear Runner Caches"
-msgstr ""
-
-msgid "Pipelines|Continuous deployment template to test and deploy your %{name} project."
 msgstr ""
 
 msgid "Pipelines|Copy trigger token"
@@ -22827,6 +22827,9 @@ msgid "Pipelines|Edit"
 msgstr ""
 
 msgid "Pipelines|Editor"
+msgstr ""
+
+msgid "Pipelines|Get familiar with GitLab CI/CD syntax by starting with a simple pipeline that runs a “Hello world” script."
 msgstr ""
 
 msgid "Pipelines|Get started with CI/CD"
@@ -22869,6 +22872,9 @@ msgid "Pipelines|Owner"
 msgstr ""
 
 msgid "Pipelines|Pipeline Editor"
+msgstr ""
+
+msgid "Pipelines|Pipelines|Use a basic %{codeStart}.gitlab-ci.yml%{codeEnd} template file to explore how CI/CD works."
 msgstr ""
 
 msgid "Pipelines|Project cache successfully reset."
@@ -22925,10 +22931,16 @@ msgstr ""
 msgid "Pipelines|Trigger user has insufficient permissions to project"
 msgstr ""
 
-msgid "Pipelines|Try a sample CI/CD file"
+msgid "Pipelines|Try a CI/CD template"
 msgstr ""
 
-msgid "Pipelines|Use a sample file to implement GitLab CI/CD based on your project’s language/framework."
+msgid "Pipelines|Try a simple CI/CD template"
+msgstr ""
+
+msgid "Pipelines|Use Hello World template"
+msgstr ""
+
+msgid "Pipelines|Use a template based on your project’s language/framework to get started with GitLab CI/CD."
 msgstr ""
 
 msgid "Pipelines|Use template"
@@ -22950,6 +22962,9 @@ msgid "Pipelines|invalid"
 msgstr ""
 
 msgid "Pipelines|parent"
+msgstr ""
+
+msgid "Pipelines|“Hello world” with GitLab CI/CD"
 msgstr ""
 
 msgid "Pipeline|Actions"
