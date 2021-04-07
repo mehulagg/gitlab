@@ -12,9 +12,9 @@
 RSpec.shared_examples 'a verifiable replicator' do
   include EE::GeoHelpers
 
-  # before do
-  #   stub_current_geo_node(primary)
-  # end
+  before do
+    stub_current_geo_node(primary)
+  end
 
   describe 'events' do
     it 'has checksum_succeeded event' do
