@@ -142,6 +142,7 @@ apifuzzer_fuzz_dnd:
             -e TZ=America/Los_Angeles \
             -e GITLAB_FEATURES \
             -p 80:80 \
+            -p 5000:5000 \
             -p 8000:8000 \
             -p 514:514 \
             --restart=no \
@@ -237,6 +238,7 @@ apifuzzer_fuzz_dnd:
                     -v $CI_PROJECT_DIR:/app \
                     -v `pwd`/$FUZZAPI_REPORT_ASSET_PATH:/app/$FUZZAPI_REPORT_ASSET_PATH:rw \
                     -p 81:80 \
+                    -p 5001:5000 \
                     -p 8001:8000 \
                     -p 515:514 \
                     --restart=no \
