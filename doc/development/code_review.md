@@ -301,6 +301,7 @@ first time.
   you forget to remove any debugging code?
 - Consider providing instructions on how to test the merge request. This can be
   helpful for reviewers not familiar with the product feature or area of the codebase.
+- If UI changes are made, include _Before_ and _After_ screenshots in the description.
 - If you know your change depends on another being merged first, note it in the
   description and set an [merge request dependency](../user/project/merge_requests/merge_request_dependencies.md).
 - Be grateful for the reviewer's suggestions. (`Good call. I'll make that change.`)
