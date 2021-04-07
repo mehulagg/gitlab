@@ -21,6 +21,10 @@ module Types
     field :target_url, GraphQL::STRING_TYPE, null: true,
           description: 'The URL of the target to be scanned.'
 
+    field :target_type, Types::DastTargetTypeEnum, null: true,
+          description: 'The type of target to be scanned. Will always return `null` ' \
+                       'if `security_dast_site_profiles_api_option` feature flag is disabled.'
+
     field :edit_path, GraphQL::STRING_TYPE, null: true,
           description: 'Relative web path to the edit page of a site profile.'
 
@@ -51,6 +55,12 @@ module Types
 
     def target_url
       object.dast_site.url
+    end
+
+    def target_type
+      return unless Feature.enabled?(:security_dast_site_profiles_api_option, object.project, default_enabled: :yaml)
+
+      object.target_type
     end
 
     def edit_path

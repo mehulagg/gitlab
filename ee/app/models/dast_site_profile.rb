@@ -21,6 +21,8 @@ class DastSiteProfile < ApplicationRecord
 
   after_destroy :cleanup_dast_site
 
+  enum target_type: { website: 0, api: 1 }
+
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
 
   def status

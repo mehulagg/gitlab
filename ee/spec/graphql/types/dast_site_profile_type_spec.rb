@@ -8,7 +8,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user, developer_projects: [project]) }
   let_it_be(:object, reload: true) { create(:dast_site_profile, project: project) }
-  let_it_be(:fields) { %i[id profileName targetUrl editPath excludedUrls requestHeaders validationStatus userPermissions normalizedTargetUrl auth referencedInSecurityPolicies] }
+  let_it_be(:fields) { %i[id profileName targetUrl targetType editPath excludedUrls requestHeaders validationStatus userPermissions normalizedTargetUrl auth referencedInSecurityPolicies] }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -36,6 +36,22 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   describe 'targetUrl field' do
     it 'is the url of the associated dast_site' do
       expect(resolve_field(:target_url, object, current_user: user)).to eq(object.dast_site.url)
+    end
+  end
+
+  describe 'targetType field' do
+    context 'when the feature flag is disabled' do
+      it 'is nil' do
+        stub_feature_flags(security_dast_site_profiles_api_option: false)
+
+        expect(resolve_field(:target_type, object, current_user: user)).to be_nil
+      end
+    end
+
+    context 'when the feature flag is enabled' do
+      it 'is the target type' do
+        expect(resolve_field(:target_type, object, current_user: user)).to eq('website')
+      end
     end
   end
 
