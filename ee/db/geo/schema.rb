@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_30_170348) do
+ActiveRecord::Schema.define(version: 2021_04_07_140527) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -280,6 +280,15 @@ ActiveRecord::Schema.define(version: 2021_03_30_170348) do
     t.datetime_with_timezone "last_synced_at"
     t.datetime_with_timezone "created_at", null: false
     t.text "last_sync_failure"
+    t.datetime_with_timezone "verification_started_at"
+    t.datetime_with_timezone "verified_at"
+    t.datetime_with_timezone "verification_retry_at"
+    t.integer "verification_retry_count"
+    t.integer "verification_state", limit: 2, default: 0, null: false
+    t.boolean "checksum_mismatch"
+    t.binary "verification_checksum"
+    t.binary "verification_checksum_mismatched"
+    t.string "verification_failure", limit: 255
     t.index ["retry_at"], name: "index_terraform_state_version_registry_on_retry_at"
     t.index ["state"], name: "index_terraform_state_version_registry_on_state"
     t.index ["terraform_state_version_id"], name: "index_tf_state_versions_registry_tf_state_versions_id_unique", unique: true

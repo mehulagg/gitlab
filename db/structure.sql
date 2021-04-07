@@ -17945,6 +17945,8 @@ CREATE TABLE terraform_state_versions (
     verification_checksum bytea,
     verification_failure text,
     ci_build_id bigint,
+    verification_state smallint DEFAULT 0 NOT NULL,
+    verification_started_at timestamp with time zone,
     CONSTRAINT check_0824bb7bbd CHECK ((char_length(file) <= 255)),
     CONSTRAINT tf_state_versions_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
 );
