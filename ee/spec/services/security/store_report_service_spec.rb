@@ -14,10 +14,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
   subject { described_class.new(pipeline, report).execute }
 
-  where(vulnerability_finding_fingerprints_enabled: [true, false])
+  where(vulnerability_finding_signatures_enabled: [true, false])
   with_them do
     before do
-      stub_feature_flags(vulnerability_finding_fingerprints: vulnerability_finding_fingerprints_enabled)
+      stub_feature_flags(vulnerability_finding_signatures: vulnerability_finding_signatures_enabled)
       stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, security_dashboard: true)
       allow(Security::AutoFixWorker).to receive(:perform_async)
     end
@@ -229,7 +229,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'updates signatures to match new values' do
-        next unless vulnerability_finding_fingerprints_enabled
+        next unless vulnerability_finding_signatures_enabled
 
         expect(finding.signatures.count).to eq(1)
         expect(finding.signatures.first.algorithm_type).to eq('location')

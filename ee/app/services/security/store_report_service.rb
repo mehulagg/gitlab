@@ -57,7 +57,7 @@ module Security
         return
       end
 
-      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links, :fingerprints)
+      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links, :signatures)
       entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
       # Vulnerabilities::Finding (`vulnerability_occurrences`)
       vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
@@ -68,7 +68,7 @@ module Security
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
 
-      if ::Feature.enabled?(:vulnerability_finding_fingerprints, project)
+      if ::Feature.enabled?(:vulnerability_finding_signatures, project)
         update_feedbacks(vulnerability_finding, vulnerability_params[:uuid])
       end
 
@@ -88,8 +88,8 @@ module Security
     end
 
     def find_or_create_vulnerability_finding(finding, create_params)
-      if ::Feature.enabled?(:vulnerability_finding_fingerprints, project)
-        find_or_create_vulnerability_finding_with_fingerprints(finding, create_params)
+      if ::Feature.enabled?(:vulnerability_finding_signatures, project)
+        find_or_create_vulnerability_finding_with_signatures(finding, create_params)
       else
         find_or_create_vulnerability_finding_with_location(finding, create_params)
       end
@@ -129,26 +129,26 @@ module Security
       end
     end
 
-    def get_matched_findings(finding, normalized_fingerprints, find_params)
+    def get_matched_findings(finding, normalized_signatures, find_params)
       project.vulnerability_findings.where(**find_params).filter do |vf|
-        vf.matches_fingerprints(normalized_fingerprints, finding.uuid)
+        vf.matches_signatures(normalized_signatures, finding.uuid)
       end
     end
 
-    def find_or_create_vulnerability_finding_with_fingerprints(finding, create_params)
+    def find_or_create_vulnerability_finding_with_signatures(finding, create_params)
       find_params = {
         # this isn't taking prioritization into account (happens in the filter
         # block below), but it *does* limit the number of findings we have to sift through
-        location_fingerprint: [finding.location.fingerprint, *finding.fingerprints.map(&:fingerprint_hex)],
+        location_fingerprint: [finding.location.fingerprint, *finding.signatures.map(&:signature_hex)],
         scanner: scanners_objects[finding.scanner.key],
         primary_identifier: identifiers_objects[finding.primary_identifier.key]
       }
 
-      normalized_fingerprints = finding.fingerprints.map do |fingerprint|
-        ::Vulnerabilities::FindingFingerprint.new(fingerprint.to_hash)
+      normalized_signatures = finding.signatures.map do |signature|
+        ::Vulnerabilities::FindingSignature.new(signature.to_hash)
       end
 
-      matched_findings = get_matched_findings(finding, normalized_fingerprints, find_params)
+      matched_findings = get_matched_findings(finding, normalized_signatures, find_params)
 
       begin
         vulnerability_finding = matched_findings.first
@@ -161,17 +161,17 @@ module Security
         end
 
         vulnerability_finding.uuid = finding.uuid
-        if finding.fingerprints.length == 0
+        if finding.signatures.length == 0
           vulnerability_finding.location_fingerprint = finding.location.fingerprint
         else
-          vulnerability_finding.location_fingerprint = finding.fingerprints.max_by(&:priority).fingerprint_hex
+          vulnerability_finding.location_fingerprint = finding.signatures.max_by(&:priority).signature_hex
         end
         vulnerability_finding.location = create_params.dig(:location)
         vulnerability_finding.save!
 
         vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
-        get_matched_findings(finding, normalized_fingerprints, find_params).first
+        get_matched_findings(finding, normalized_signatures, find_params).first
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
@@ -261,12 +261,12 @@ module Security
         next if poro_signature.nil?
 
         poro_signatures.delete(signature.algorithm_type)
-        to_update[signature.id] = poro_fingerprint.to_hash
+        to_update[signature.id] = poro_signature.to_hash
       end
 
       # any remaining poro signatures left are new
       poro_signatures.values.each do |poro_signature|
-        attributes = poro_signature.to_h.merge(finding_id: vulnerability_finding.id)
+        attributes = poro_signature.to_hash.merge(finding_id: vulnerability_finding.id)
         to_create << ::Vulnerabilities::FindingSignature.new(attributes: attributes, created_at: Time.zone.now, updated_at: Time.zone.now)
       end
 

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Parsers::Security::Common do
   describe '#parse!' do
-    where(vulnerability_finding_fingerprints_enabled: [true, false])
+    where(vulnerability_finding_signatures_enabled: [true, false])
     with_them do
       let_it_be(:pipeline) { create(:ci_pipeline) }
 
@@ -19,7 +19,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
           allow(parser).to receive(:tracking_data).and_return(tracking_data)
         end
 
-        artifact.each_blob { |blob| described_class.parse!(blob, report, vulnerability_finding_fingerprints_enabled) }
+        artifact.each_blob { |blob| described_class.parse!(blob, report, vulnerability_finding_signatures_enabled) }
       end
 
       describe 'parsing finding.name' do
@@ -230,30 +230,30 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
           it 'ignores invalid algorithm types' do
             finding = report.findings.first
-            expect(finding.fingerprints.size).to eq(2)
-            expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location'])
+            expect(finding.signatures.size).to eq(2)
+            expect(finding.signatures.map(&:algorithm_type).to_set).to eq(Set['hash', 'location'])
           end
         end
 
         context 'with valid tracking information' do
-          it 'creates fingerprints for each fingerprint algorithm' do
+          it 'creates signatures for each signature algorithm' do
             finding = report.findings.first
-            expect(finding.fingerprints.size).to eq(3)
-            expect(finding.fingerprints.map(&:algorithm_type)).to eq(%w[hash location scope_offset])
+            expect(finding.signatures.size).to eq(3)
+            expect(finding.signatures.map(&:algorithm_type)).to eq(%w[hash location scope_offset])
 
-            fingerprints = finding.fingerprints.index_by(&:algorithm_type)
-            expected_values = tracking_data['items'][0]['fingerprints'].index_by { |x| x['algorithm'] }
-            expect(fingerprints['hash'].fingerprint_value).to eq(expected_values['hash']['value'])
-            expect(fingerprints['location'].fingerprint_value).to eq(expected_values['location']['value'])
-            expect(fingerprints['scope_offset'].fingerprint_value).to eq(expected_values['scope_offset']['value'])
+            signatures = finding.signatures.index_by(&:algorithm_type)
+            expected_values = tracking_data['items'][0]['signatures'].index_by { |x| x['algorithm'] }
+            expect(signatures['hash'].signature_value).to eq(expected_values['hash']['value'])
+            expect(signatures['location'].signature_value).to eq(expected_values['location']['value'])
+            expect(signatures['scope_offset'].signature_value).to eq(expected_values['scope_offset']['value'])
           end
 
-          it 'sets the uuid according to the higest priority fingerprint' do
+          it 'sets the uuid according to the higest priority signature' do
             finding = report.findings.first
-            highest_fingerprint = finding.fingerprints.max_by(&:priority)
+            highest_signature = finding.signatures.max_by(&:priority)
 
-            identifiers = if vulnerability_finding_fingerprints_enabled
-                            "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{highest_fingerprint.fingerprint_hex}-#{report.project_id}"
+            identifiers = if vulnerability_finding_signatures_enabled
+                            "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{highest_signature.signature_hex}-#{report.project_id}"
                           else
                             location_fingerprint = "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5"
                             "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{location_fingerprint}-#{report.project_id}"

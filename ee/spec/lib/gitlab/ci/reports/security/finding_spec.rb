@@ -138,7 +138,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         severity: occurrence.severity,
         uuid: occurrence.uuid,
         details: occurrence.details,
-        fingerprints: []
+        signatures: []
       })
     end
   end
@@ -198,11 +198,11 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
   end
 
   describe '#eql?' do
-    where(vulnerability_finding_fingerprints_enabled: [true, false])
+    where(vulnerability_finding_signatures_enabled: [true, false])
     with_them do
       let(:identifier) { build(:ci_reports_security_identifier) }
       let(:location) { build(:ci_reports_security_locations_sast) }
-      let(:finding) { build(:ci_reports_security_finding, severity: 'low', report_type: :sast, identifiers: [identifier], location: location, vulnerability_finding_fingerprints_enabled: vulnerability_finding_fingerprints_enabled) }
+      let(:finding) { build(:ci_reports_security_finding, severity: 'low', report_type: :sast, identifiers: [identifier], location: location, vulnerability_finding_signatures_enabled: vulnerability_finding_signatures_enabled) }
 
       let(:report_type) { :secret_detection }
       let(:identifier_external_id) { 'foo' }
@@ -215,10 +215,10 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
               report_type: report_type,
               identifiers: [other_identifier],
               location: other_location,
-              vulnerability_finding_fingerprints_enabled: vulnerability_finding_fingerprints_enabled)
+              vulnerability_finding_signatures_enabled: vulnerability_finding_signatures_enabled)
       end
 
-      let(:fingerprint) { ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(algorithm_type: 'location', fingerprint_value: 'value1') }
+      let(:signature) { ::Gitlab::Ci::Reports::Security::FindingSignature.new(algorithm_type: 'location', signature_value: 'value1') }
 
       subject { finding.eql?(other_finding) }
 
@@ -236,10 +236,10 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         context 'when the other finding has same primary identifier fingerprint' do
           let(:identifier_external_id) { identifier.external_id }
 
-          context 'when the other finding has same location fingerprint' do
+          context 'when the other finding has same location signature' do
             before do
-              finding.fingerprints << fingerprint
-              other_finding.fingerprints << fingerprint
+              finding.signatures << signature
+              other_finding.signatures << signature
             end
 
             let(:location_start_line) { location.start_line }
@@ -247,19 +247,19 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
             it { is_expected.to be(true) }
           end
 
-          context 'when the other finding does not have same location fingerprint' do
+          context 'when the other finding does not have same location signature' do
             it { is_expected.to be(false) }
           end
         end
 
         context 'when the other finding does not have same primary identifier fingerprint' do
-          context 'when the other finding has same location fingerprint' do
+          context 'when the other finding has same location signature' do
             let(:location_start_line) { location.start_line }
 
             it { is_expected.to be(false) }
           end
 
-          context 'when the other finding does not have same location fingerprint' do
+          context 'when the other finding does not have same location signature' do
             it { is_expected.to be(false) }
           end
         end
@@ -269,25 +269,25 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         context 'when the other finding has same primary identifier fingerprint' do
           let(:identifier_external_id) { identifier.external_id }
 
-          context 'when the other finding has same location fingerprint' do
+          context 'when the other finding has same location signature' do
             let(:location_start_line) { location.start_line }
 
             it { is_expected.to be(false) }
           end
 
-          context 'when the other finding does not have same location fingerprint' do
+          context 'when the other finding does not have same location signature' do
             it { is_expected.to be(false) }
           end
         end
 
         context 'when the other finding does not have same primary identifier fingerprint' do
-          context 'when the other finding has same location fingerprint' do
+          context 'when the other finding has same location signature' do
             let(:location_start_line) { location.start_line }
 
             it { is_expected.to be(false) }
           end
 
-          context 'when the other finding does not have same location fingerprint' do
+          context 'when the other finding does not have same location signature' do
             it { is_expected.to be(false) }
           end
         end
@@ -364,7 +364,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
     let(:location) { build(:ci_reports_security_locations_sast) }
     let(:uuid) { SecureRandom.uuid }
 
-    context 'with vulnerability_finding_fingerprints enabled' do
+    context 'with vulnerability_finding_signatures enabled' do
       let(:finding) do
         build(:ci_reports_security_finding,
               scanner: scanner,
@@ -372,27 +372,27 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
               location: location,
               uuid: uuid,
               compare_key: '',
-              vulnerability_finding_fingerprints_enabled: true)
+              vulnerability_finding_signatures_enabled: true)
       end
 
-      let(:low_priority_fingerprint) { ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(algorithm_type: 'location', fingerprint_value: 'value1') }
-      let(:high_priority_fingerprint) { ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(algorithm_type: 'scope_offset', fingerprint_value: 'value2') }
+      let(:low_priority_signature) { ::Gitlab::Ci::Reports::Security::FindingSignature.new(algorithm_type: 'location', signature_value: 'value1') }
+      let(:high_priority_signature) { ::Gitlab::Ci::Reports::Security::FindingSignature.new(algorithm_type: 'scope_offset', signature_value: 'value2') }
 
-      it 'returns the expected hash with no fingerprints' do
-        expect(finding.fingerprints.length).to eq(0)
-        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_identifier_fingerprint.hash)
+      it 'returns the expected hash with no signatures' do
+        expect(finding.signatures.length).to eq(0)
+        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.signature.hash ^ finding.primary_identifier_fingerprint.hash)
       end
 
-      it 'returns the expected hash with fingerprints' do
-        finding.fingerprints << low_priority_fingerprint
-        finding.fingerprints << high_priority_fingerprint
+      it 'returns the expected hash with signatures' do
+        finding.signatures << low_priority_signature
+        finding.signatures << high_priority_signature
 
-        expect(finding.fingerprints.length).to eq(2)
-        expect(finding.hash).to eq(finding.report_type.hash ^ high_priority_fingerprint.fingerprint_hex.hash ^ finding.primary_identifier_fingerprint.hash)
+        expect(finding.signatures.length).to eq(2)
+        expect(finding.hash).to eq(finding.report_type.hash ^ high_priority_signature.signature_hex.hash ^ finding.primary_identifier_fingerprint.hash)
       end
     end
 
-    context 'without vulnerability_finding_fingerprints enabled' do
+    context 'without vulnerability_finding_signatures enabled' do
       let(:finding) do
         build(:ci_reports_security_finding,
               scanner: scanner,
@@ -400,11 +400,11 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
               location: location,
               uuid: uuid,
               compare_key: '',
-              vulnerability_finding_fingerprints_enabled: false)
+              vulnerability_finding_signatures_enabled: false)
       end
 
       it 'returns the expected hash' do
-        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.fingerprint.hash ^ finding.primary_identifier_fingerprint.hash)
+        expect(finding.hash).to eq(finding.report_type.hash ^ finding.location.signature.hash ^ finding.primary_identifier_fingerprint.hash)
       end
     end
   end

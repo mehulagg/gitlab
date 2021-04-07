@@ -31,7 +31,7 @@ module Gitlab
 
           delegate :file_path, :start_line, :end_line, to: :location
 
-          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil, details: {}, signatures: [], project_id: nil, vulnerability_finding_fingerprints_enabled: false) # rubocop:disable Metrics/ParameterLists
+          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil, details: {}, signatures: [], project_id: nil, vulnerability_finding_signatures_enabled: false) # rubocop:disable Metrics/ParameterLists
             @compare_key = compare_key
             @confidence = confidence
             @identifiers = identifiers
@@ -49,7 +49,7 @@ module Gitlab
             @details = details
             @signatures = signatures
             @project_id = project_id
-            @vulnerability_finding_fingerprints_enabled = vulnerability_finding_fingerprints_enabled
+            @vulnerability_finding_signatures_enabled = vulnerability_finding_signatures_enabled
 
             @project_fingerprint = generate_project_fingerprint
           end
@@ -71,7 +71,7 @@ module Gitlab
               severity
               uuid
               details
-              fingerprints
+              signatures
             ].each_with_object({}) do |key, hash|
               hash[key] = public_send(key) # rubocop:disable GitlabSecurity/PublicSend
             end
@@ -93,7 +93,7 @@ module Gitlab
           def eql?(other)
             return false unless report_type == other.report_type && primary_identifier_fingerprint == other.primary_identifier_fingerprint
 
-            if @vulnerability_finding_fingerprints_enabled
+            if @vulnerability_finding_signatures_enabled
               matches_fingerprints(other.fingerprints, other.uuid)
             else
               location.fingerprint == other.location.fingerprint
@@ -101,9 +101,9 @@ module Gitlab
           end
 
           def hash
-            if @vulnerability_finding_fingerprints_enabled && !fingerprints.empty?
-              highest_fingerprint = fingerprints.max_by(&:priority)
-              report_type.hash ^ highest_fingerprint.fingerprint_hex.hash ^ primary_identifier_fingerprint.hash
+            if @vulnerability_finding_signatures_enabled && !signatures.empty?
+              highest_signature = signatures.max_by(&:priority)
+              report_type.hash ^ highest_signature.signature_hex.hash ^ primary_identifier_fingerprint.hash
             else
               report_type.hash ^ location.fingerprint.hash ^ primary_identifier_fingerprint.hash
             end

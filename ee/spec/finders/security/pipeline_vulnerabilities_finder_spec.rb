@@ -173,7 +173,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
       let(:ds_finding) { pipeline.security_reports.reports["dependency_scanning"].findings.first }
       let(:sast_finding) { pipeline.security_reports.reports["sast"].findings.first }
 
-      context 'when vulnerabilty_finding_fingerprints feature flag is disabled' do
+      context 'when vulnerability_finding_signatures feature flag is disabled' do
         let!(:feedback) do
           [
             create(
@@ -200,7 +200,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         end
 
         before do
-          stub_feature_flags(vulnerability_finding_fingerprints: false)
+          stub_feature_flags(vulnerability_finding_signatures: false)
         end
 
         context 'when unscoped' do
@@ -230,7 +230,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         end
       end
 
-      context 'when vulnerabilty_finding_fingerprints feature flag is enabled' do
+      context 'when vulnerability_finding_signatures feature flag is enabled' do
         let!(:feedback) do
           [
             create(
@@ -247,7 +247,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         end
 
         before do
-          stub_feature_flags(vulnerability_finding_fingerprints: true)
+          stub_feature_flags(vulnerability_finding_signatures: true)
         end
 
         context 'when unscoped' do

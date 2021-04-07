@@ -5,7 +5,7 @@ module Gitlab
     module Reports
       module Security
         class FindingSignature
-          include VulnerabilityFindingFingerprintHelpers
+          include VulnerabilityFindingSignatureHelpers
 
           attr_accessor :algorithm_type, :signature_value
 
@@ -15,15 +15,15 @@ module Gitlab
           end
 
           def priority
-            ::Vulnerabilities::FindingFingerprint.priority(algorithm_type)
+            ::Vulnerabilities::FindingSignature.priority(algorithm_type)
           end
 
           def signature_sha
             Digest::SHA1.digest(signature_value)
           end
 
-          def fingerprint_hex
-            fingerprint_sha256.unpack1("H*")
+          def signature_hex
+            signature_sha.unpack1("H*")
           end
 
           def to_hash
@@ -39,7 +39,7 @@ module Gitlab
 
           def eql?(other)
             other.algorithm_type == algorithm_type &&
-              other.fingerprint_sha256 == fingerprint_sha256
+              other.signature_sha == signature_sha
           end
 
           alias_method :==, :eql?

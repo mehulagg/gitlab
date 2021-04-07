@@ -75,7 +75,7 @@ module Security
     def normalize_report_findings(report_findings, vulnerabilities)
       report_findings.map do |report_finding|
         finding_hash = report_finding.to_hash
-          .except(:compare_key, :identifiers, :location, :scanner, :links, :fingerprints)
+          .except(:compare_key, :identifiers, :location, :scanner, :links, :signatures)
 
         finding = Vulnerabilities::Finding.new(finding_hash)
         # assigning Vulnerabilities to Findings to enable the computed state
@@ -90,8 +90,8 @@ module Security
         finding.identifiers = report_finding.identifiers.map do |identifier|
           Vulnerabilities::Identifier.new(identifier.to_hash)
         end
-        finding.fingerprints = report_finding.fingerprints.map do |fingerprint|
-          Vulnerabilities::FindingFingerprint.new(fingerprint.to_hash)
+        finding.signatures = report_finding.signatures.map do |signature|
+          Vulnerabilities::FindingSignature.new(signature.to_hash)
         end
 
         finding
@@ -114,21 +114,21 @@ module Security
     end
 
     def dismissal_feedback?(finding)
-      if ::Feature.enabled?(:vulnerability_finding_fingerprints, pipeline.project) && !finding.fingerprints.empty?
-        dismissal_feedback_by_finding_fingerprints(finding)
+      if ::Feature.enabled?(:vulnerability_finding_signatures, pipeline.project) && !finding.signatures.empty?
+        dismissal_feedback_by_finding_signatures(finding)
       else
         dismissal_feedback_by_project_fingerprint(finding)
       end
     end
 
-    def dismissal_feedback_by_finding_fingerprints(finding)
+    def dismissal_feedback_by_finding_signatures(finding)
       all_dismissals = strong_memoize(:all_dismissal_feedbacks) do
         pipeline.project
                 .vulnerability_feedback
                 .for_dismissal
       end
 
-      potential_uuids = Set.new([*finding.fingerprint_uuids, finding.uuid].compact)
+      potential_uuids = Set.new([*finding.signature_uuids, finding.uuid].compact)
       all_dismissals.any? { |dismissal| potential_uuids.include?(dismissal.finding_uuid) }
     end
 
