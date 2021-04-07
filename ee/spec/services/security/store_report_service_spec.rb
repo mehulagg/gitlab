@@ -37,9 +37,9 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
       where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures) do
         'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2
-        'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 1
-        'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 2
-        'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 8
+        'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0
+        'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0
+        'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0
       end
 
       with_them do
@@ -130,11 +130,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
       let(:new_pipeline) { create(:ci_pipeline, project: project) }
       let(:new_report) { new_pipeline.security_reports.get_report(report_type.to_s, artifact) }
       let(:existing_signature) { create(:vulnerabilities_finding_signature, finding: finding) }
-      let(:unsupported_signature) do
-        create(:vulnerabilities_finding_signature,
-               finding: finding,
-               algorithm_type: ::Vulnerabilities::FindingSignature.algorithm_types[:location])
-      end
 
       let(:trait) { :sast }
 
@@ -245,7 +240,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
         next unless vulnerability_finding_signatures_enabled
 
         expect(finding.signatures.count).to eq(1)
-        expect(finding.signatures.first.algorithm_type).to eq('location')
+        expect(finding.signatures.first.algorithm_type).to eq('hash')
 
         existing_signature = finding.signatures.first
 
@@ -256,10 +251,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
         expect(finding.signatures.count).to eq(2)
         signature_algs = finding.signatures.map(&:algorithm_type)
-        expect(signature_algs).to eq(%w[location scope_offset])
+        expect(signature_algs).to eq(%w[scope_offset hash])
 
         # check that the existing hash signature was updated/reused
-        expect(existing_signature.id).to eq(finding.signatures.first.id)
+        expect(existing_signature.id).to eq(finding.signatures.last.id)
       end
 
       it 'updates existing vulnerability with new data' do
