@@ -4,7 +4,7 @@ description: The value of the SMTP server that is used
 product_section: growth
 product_stage: growth
 product_group: group::acquisition
-product_category: experimentation
+product_category: onboarding
 value_type: number
 status: data_available
 time_frame: all
