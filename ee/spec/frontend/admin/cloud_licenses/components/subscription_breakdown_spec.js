@@ -92,13 +92,13 @@ describe('Subscription Breakdown', () => {
   });
 
   describe('with empty data', () => {
-    it('dos not show user info', () => {
+    it('does not show user info', () => {
       createComponent({ props: { subscription: {} } });
 
       expect(findDetailsUserInfo().exists()).toBe(false);
     });
 
-    it('dos not show subscription history', () => {
+    it('does not show subscription history', () => {
       createComponent({ props: { subscriptionList: [] } });
 
       expect(findDetailsHistory().exists()).toBe(false);
