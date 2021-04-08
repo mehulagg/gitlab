@@ -184,6 +184,19 @@ RSpec.describe EpicsFinder do
                 it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic, epic1, epic2, epic3) }
               end
             end
+
+            context 'when user is not member of top level group' do
+              it 'does not have N+1 queries for subgroups when searched by guests' do
+                GroupMember.where(user_id: search_user.id).delete_all
+                group.add_guest(search_user)
+
+                control = ActiveRecord::QueryRecorder.new(skip_cached: false) { epics.to_a }
+
+                create_list(:group, 5, :private, parent: group)
+
+                expect { epics.to_a }.not_to exceed_all_query_limit(control)
+              end
+            end
           end
 
           it 'does not execute more than 5 SQL queries' do
