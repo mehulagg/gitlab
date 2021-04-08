@@ -1227,7 +1227,7 @@ Use `rules:if` clauses to specify when to add a job to a pipeline:
 `rules:if` differs slightly from `only:variables` by accepting only a single
 expression string per rule, rather than an array of them. Any set of expressions to be
 evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
-by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-cicd-variable-expressions).
+by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../jobs/job_control.md#syntax-of-cicd-variable-expressions).
 
 Unlike variables in [`script`](../variables/README.md#use-cicd-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
@@ -1513,7 +1513,7 @@ WARNING:
 [Before GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/230938),
 rules that use both `||` and `&&` may evaluate with an unexpected order of operations.
 
-### `only`/`except` (basic)
+### `only`/`except`
 
 NOTE:
 `only` and `except` are not being actively developed. To define when
@@ -1622,47 +1622,7 @@ job2:
   only: ['branches', 'tags']
 ```
 
-#### Regular expressions
-
-The `@` symbol denotes the beginning of a ref's repository path.
-To match a ref name that contains the `@` character in a regular expression,
-you must use the hex character code match `\x40`.
-
-Only the tag or branch name can be matched by a regular expression.
-The repository path, if given, is always matched literally.
-
-To match the tag or branch name,
-the entire ref name part of the pattern must be a regular expression surrounded by `/`.
-For example, you can't use `issue-/.*/` to match all tag names or branch names
-that begin with `issue-`, but you can use `/issue-.*/`.
-
-Regular expression flags must be appended after the closing `/`.
-
-NOTE:
-Use anchors `^` and `$` to avoid the regular expression
-matching only a substring of the tag name or branch name.
-For example, `/^issue-.*$/` is equivalent to `/^issue-/`,
-while just `/issue/` would also match a branch called `severe-issues`.
-
-#### Supported `only`/`except` regexp syntax
-
-In GitLab 11.9.4, GitLab began internally converting the regexp used
-in `only` and `except` keywords to [RE2](https://github.com/google/re2/wiki/Syntax).
-
-[RE2](https://github.com/google/re2/wiki/Syntax) limits the set of available features
-due to computational complexity, and some features, like negative lookaheads, became unavailable.
-Only a subset of features provided by [Ruby Regexp](https://ruby-doc.org/core/Regexp.html)
-are now supported.
-
-From GitLab 11.9.7 to GitLab 12.0, GitLab provided a feature flag to
-let you use unsafe regexp syntax. After migrating to safe syntax, you should disable
-this feature flag again:
-
-```ruby
-Feature.enable(:allow_unsafe_ruby_regexp)
-```
-
-### `only`/`except` (advanced)
+### `only`/`except` with multiple strategies
 
 GitLab supports multiple strategies, and it's possible to use an
 array or a hash configuration scheme.
@@ -1757,8 +1717,6 @@ deploy:
 ```
 
 #### `only:variables`/`except:variables`
-
-> `variables` policy introduced in GitLab 10.7.
 
 The `variables` keyword defines variable expressions.
 
