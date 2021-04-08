@@ -251,7 +251,7 @@ To allowlist specific vulnerabilities, follow these steps:
    [overriding the container scanning template](#overriding-the-container-scanning-template).
 1. Define the allowlisted vulnerabilities in a YAML file named `vulnerability-allowlist.yml`. This must use
    the format described [below](#vulnerability-allowlistyml-data-format).
-2. Add the `vulnerability-allowlist.yml` file to your project's Git repository.
+1. Add the `vulnerability-allowlist.yml` file to the root folder of your project's Git repository.
 
 #### vulnerability-allowlist.yml data format
 
