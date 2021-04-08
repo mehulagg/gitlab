@@ -52,6 +52,16 @@ RSpec.describe SearchController, type: :request do
       it_behaves_like 'an efficient database result'
     end
 
+    context 'for commits scope' do
+      let(:creation_traits) { [] }
+      let(:object) { :commit }
+      let(:creation_args) { { project: project, title: 'bar' } }
+      let(:params) { { search: 'bar', scope: 'commits' } }
+      let(:threshold) { 0 }
+
+      it_behaves_like 'an efficient database result'
+    end
+
     context 'for project scope' do
       let(:creation_traits) { [:public] }
       let(:object) { :project }
