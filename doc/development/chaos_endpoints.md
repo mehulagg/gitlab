@@ -171,9 +171,6 @@ This endpoint simulates the unexpected death of a worker process using the `QUIT
 Unlike `KILL`, the `QUIT` signal will also attempt to write a core dump.
 See [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) for more information.
 
-Because this endpoint uses the `QUIT` signal, the worker isn't given an
-opportunity to clean up or shut down.
-
 ```plaintext
 GET /-/chaos/quit
 GET /-/chaos/quit?async=true
