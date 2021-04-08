@@ -11,6 +11,10 @@ module MergeRequests
     end
 
     def execute(merge_request)
+      updated_merge_request = update_merge_request_with_specialized_service(merge_request)
+
+      return updated_merge_request unless updated_merge_request.nil?
+
       # We don't allow change of source/target projects and source branch
       # after merge request was created
       params.delete(:source_project_id)
@@ -266,6 +270,32 @@ module MergeRequests
     override :quick_action_options
     def quick_action_options
       { merge_request_diff_head_sha: params.delete(:merge_request_diff_head_sha) }
+    end
+
+    def update_merge_request_with_specialized_service(merge_request)
+      return unless params.delete(:use_specialized_service)
+
+      # If we're attempting to modify only a single attribute, look up whether
+      #   we have a specialized, targeted service we should use instead. We may
+      #   in the future extend this to include specialized services that operate
+      #   on multiple attributes, but for now limit to only single attribute
+      #   updates.
+      #
+      return unless params.keys.length == 1
+
+      updated_merge_request = nil
+
+      case params.keys[0]
+      when "assignee_ids"
+        updated_merge_request = assignees_service.execute(merge_request)
+      end
+
+      updated_merge_request
+    end
+
+    def assignees_service
+      @assignees_service ||= ::MergeRequests::UpdateAssigneesService
+        .new(project, current_user, params)
     end
   end
 end

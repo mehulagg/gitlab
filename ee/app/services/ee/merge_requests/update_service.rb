@@ -7,6 +7,10 @@ module EE
 
       override :execute
       def execute(merge_request)
+        updated_merge_request = update_merge_request_with_specialized_service(merge_request)
+
+        return updated_merge_request unless updated_merge_request.nil?
+
         unless update_task_event?
           old_approvers = merge_request.overall_approvers(exclude_code_owners: true)
         end

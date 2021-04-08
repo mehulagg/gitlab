@@ -16,6 +16,8 @@ module MergeRequests
 
       # Defer the more expensive operations (handle_assignee_changes) to the background
       MergeRequests::AssigneesChangeWorker.perform_async(merge_request.id, current_user.id, old_ids)
+
+      merge_request
     end
 
     def handle_assignee_changes(merge_request, old_assignees)
