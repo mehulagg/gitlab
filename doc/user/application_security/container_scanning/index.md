@@ -250,8 +250,46 @@ To allowlist specific vulnerabilities, follow these steps:
 1. Set `GIT_STRATEGY: fetch` in your `.gitlab-ci.yml` file by following the instructions in
    [overriding the container scanning template](#overriding-the-container-scanning-template).
 1. Define the allowlisted vulnerabilities in a YAML file named `vulnerability-allowlist.yml`. This must use
-   the format described in the [allowlist example file](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/raw/master/testdata/vulnerability-allowlist.yml).
-1. Add the `vulnerability-allowlist.yml` file to your project's Git repository.
+   the format described [below](#vulnerability-allowlistyml-data-format).
+2. Add the `vulnerability-allowlist.yml` file to your project's Git repository.
+
+#### vulnerability-allowlist.yml data format
+
+`vulnerability-allowlist.yml` is a YAML file that specifies a **list of CVE IDs** of vulnerabilities that are **allowed** to exist, because they're *false positives*, or *they're not applicable*.
+
+If a matching entry is found in the `vulnerability-allowlist.yml` file, the following will happen:
+
+* The vulnerability **will not be included** when the analyzer generates the `gl-container-scanning-report.json` file.
+* The Security tab of the pipeline **will not show** the vulnerability, since it hasn't been included in the gl-container-scanning-report.json file, and this is the source of truth where the vulnerability list is retrieved from.
+
+Here's an example `vulnerability-allowlist.yml` file:
+
+```yaml
+generalallowlist:
+  CVE-2019-8696: cups
+  CVE-2014-8166: cups
+  CVE-2017-18248: cups
+images:
+  registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e:
+    CVE-2018-4180: cups
+  your.private.registry:5000/centos:
+    CVE-2015-1419: libxml2
+    CVE-2015-1447: grep
+```
+
+In the example above, when we will exclude from `gl-container-scanning-report.json` all vulnerabilities with CVE IDs: _CVE-2019-8696_, _CVE-2014-8166_, _CVE-2017-18248_ and all vulnerabilities found in `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e` container image with CVE ID _CVE-2018-4180_ and all vulnerabilities found in `your.private.registry:5000/centos` container with CVE IDs _CVE-2015-1419_, _CVE-2015-1447_.
+
+##### File format
+
+* `generalallowlist` collection allows you to specify CVE IDs globally. All vulnerabilities with matching CVE IDs will be excluded from the scan report.
+
+* `images` collection allows you to specify CVE IDs for each container image independently. All vulnerabilities from given image with matching CVE IDs will be excluded from the scan report. You can specify container image in multiple ways:
+  * as image name only (ie. `centos`)
+  * as full image name with registry hostname (ie. `your.private.registry:5000/centos`)
+  * as full image name with registry hostname and sha256 image digest (ie. `your.private.registry:5000/centos@@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e`)
+
+NOTE:
+The string after CVE ID has **no impact** whatsoever, it is simply included to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
 
 ### Running container scanning in an offline environment
 
