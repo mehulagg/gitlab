@@ -11,8 +11,7 @@ module EE
             query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
 
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
-          transformer ::BulkImports::Common::Transformers::UserReferenceTransformer,
-            reference: :author
+          transformer ::BulkImports::Common::Transformers::UserReferenceTransformer, reference: 'author'
           transformer EE::BulkImports::Groups::Transformers::EpicAttributesTransformer
 
           def transform(_, data)
