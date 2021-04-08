@@ -69,7 +69,7 @@ There are two types of variables: [`File` or `Variable`](#cicd-variable-types).
 Variable names are limited by the [shell the runner uses](https://docs.gitlab.com/runner/shells/index.html)
 to execute scripts. Each shell has its own set of reserved variable names.
 
-Make sure variables are defined for the [scope you want to use it in](where_variables_can_be_used.md).
+Make sure each variable is defined for the [scope you want to use it in](where_variables_can_be_used.md).
 
 ### Create a custom CI/CD variable in the `.gitlab-ci.yml` file
 
@@ -572,7 +572,7 @@ You can override the value of a variable when you:
 1. Trigger a pipeline by using [the API](../triggers/README.md#making-use-of-trigger-variables).
 1. Pass variables to a [downstream pipeline](../multi_project_pipelines.md#passing-cicd-variables-to-a-downstream-pipeline).
 
-These pipeline variables declared in these events take [priority over other variables](#priority-of-cicd-variables).
+The pipeline variables declared in these events take [priority over other variables](#priority-of-cicd-variables).
 
 ### Override a variable when running a pipeline manually
 
@@ -587,18 +587,17 @@ You can override the value of a CI/CD variable when you
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/295234) in GitLab 13.8.
 
-You can allow only users with [maintainer permissions](../../user/permissions.md#project-features)
-to override variables. When a user with lower permissions tries to run a pipeline
+You can grant permission to override variables to [maintainers](../../user/permissions.md#project-features) only. When other users try to run a pipeline
 with overridden variables, they receive the `Insufficient permissions to set pipeline variables`
 error message.
 
 If you [store your CI/CD configurations in a different repository](../../ci/pipelines/settings.md#custom-cicd-configuration-path),
-use this setting for strict control over the environment the pipeline runs in.
+use this setting for control over the environment the pipeline runs in.
 
 You can enable this feature by using [the projects API](../../api/projects.md#edit-project)
 to enable the `restrict_user_defined_variables` setting. The setting is `disabled` by default.
 
-## Limit the environment scopes of CI/CD variables
+## Limit the environment scope of a CI/CD variable
 
 You can limit the environment scope of a variable by
 [defining which environments](../environments/index.md) it can be available for.
@@ -614,7 +613,7 @@ for [deployment jobs](../environments/index.md).
 For example, the [Kubernetes integration](../../user/project/clusters/index.md#deployment-variables)
 defines deployment variables that you can use with the integration.
 
-The [documentation for each integrations](../../user/project/integrations/overview.md)
+The [documentation for each integration](../../user/project/integrations/overview.md)
 explains if the integration has any deployment variables available.
 
 ## Auto DevOps environment variables
@@ -624,7 +623,7 @@ explains if the integration has any deployment variables available.
 You can configure [Auto DevOps](../../topics/autodevops/index.md) to pass CI/CD variables
 to a running application.
 
-To make CI/CD variables available as environment variables in the running application's container,
+To make a CI/CD variable available as an environment variable in the running application's container,
 [prefix the variable key](../../topics/autodevops/customize.md#application-secret-variables)
 with `K8S_SECRET_`.
 
@@ -828,13 +827,13 @@ all variables and other secrets available to the job. The output is uploaded to 
 GitLab server and visible in job logs.
 
 You can use debug logging to help troubleshoot problems with pipeline configuration
-or job scripts. Debug logging exposes job execution details that are normally hidden
+or job scripts. Debug logging exposes job execution details that are usually hidden
 by the runner and makes job logs more verbose. It also exposes all variables and secrets
 available to the job.
 
 Before you enable debug logging, make sure only [team members](../../user/permissions.md#project-features)
 can view job logs. You should also [delete job logs](../jobs/index.md#view-jobs-in-a-pipeline)
-with debug output before you make logs public again..
+with debug output before you make logs public again.
 
 ### Enable Debug logging
 
