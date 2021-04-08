@@ -140,4 +140,3 @@ RSpec.describe 'API-Fuzzing.latest.gitlab-ci.yml' do
     end
   end
 end
-
