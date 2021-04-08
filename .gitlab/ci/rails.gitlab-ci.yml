@@ -257,6 +257,15 @@ static-analysis:
     - run_timed_command "retry yarn install --frozen-lockfile"
     - scripts/static-analysis
 
+rubocop:
+  extends:
+    - .static-analysis-base
+    - .rails:rules:code-backstage-qa
+  stage: test
+  script:
+    - run_timed_command "retry yarn install --frozen-lockfile"
+    - run_timed_command "bundle exec rubocop --parallel"
+
 rspec migration pg11:
   extends:
     - .rspec-base-pg11
