@@ -11077,7 +11077,7 @@ msgstr ""
 msgid "DiscordService|Discord Notifications"
 msgstr ""
 
-msgid "DiscordService|Receive event notifications in Discord"
+msgid "DiscordService|Send notifications about project events to a Discord channel."
 msgstr ""
 
 msgid "Discover GitLab Geo"
@@ -15706,6 +15706,9 @@ msgid "How do I generate it?"
 msgstr ""
 
 msgid "How do I mirror repositories?"
+msgstr ""
+
+msgid "How do I set up this service?"
 msgstr ""
 
 msgid "How does cleanup work?"
@@ -27945,6 +27948,9 @@ msgid "Send notifications about project events to Mattermost channels."
 msgstr ""
 
 msgid "Send notifications about project events to Mattermost channels. %{docs_link}"
+msgstr ""
+
+msgid "Send notifications about project events to a Discord channel. %{docs_link}"
 msgstr ""
 
 msgid "Send report"
