@@ -1,19 +1,11 @@
 # frozen_string_literal: true
 
 module Resolvers
-  class ProjectPackagesResolver < BaseResolver
-    type Types::Packages::PackageType.connection_type, null: true
-
-    def resolve(**args)
+  class ProjectPackagesResolver < PackageBaseResolver
+    def resolve(sort:)
       return unless packages_available?
 
-      ::Packages::PackagesFinder.new(object).execute
-    end
-
-    private
-
-    def packages_available?
-      ::Gitlab.config.packages.enabled
+      ::Packages::PackagesFinder.new(object, SORT_TO_PARAMS_MAP[sort]).execute
     end
   end
 end
