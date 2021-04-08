@@ -43,7 +43,7 @@ export default {
     },
     emptyStateTitle() {
       const { emptyStateMessage } = this;
-      return emptyStateMessage.length ? emptyStateMessage : NOT_ENOUGH_DATA_ERROR;
+      return emptyStateMessage || NOT_ENOUGH_DATA_ERROR;
     },
     withBuildStatus() {
       const { currentStage } = this;
@@ -68,7 +68,7 @@ export default {
   <div data-testid="vsa-stage-table">
     <gl-loading-icon v-if="isLoading" class="gl-mt-4" size="md" />
     <gl-empty-state
-      v-else-if="!stageEvents.length"
+      v-else-if="isEmptyStage"
       :title="emptyStateTitle"
       :svg-path="noDataSvgPath"
     />
@@ -93,9 +93,9 @@ export default {
                 >
                   <gl-icon name="status_success" :size="14" />
                 </span>
-                <gl-link class="gl-text-black-normal item-build-name" :href="item.url">{{
-                  item.name
-                }}</gl-link>
+                <gl-link class="gl-text-black-normal item-build-name" :href="item.url">
+                  {{ item.name }}
+                </gl-link>
                 &middot;
               </template>
               <gl-link class="gl-text-black-normal pipeline-id" :href="item.url"

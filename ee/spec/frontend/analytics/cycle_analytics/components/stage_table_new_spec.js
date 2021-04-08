@@ -25,8 +25,8 @@ function createComponent(props = {}, shallow = false) {
         ...props,
       },
       stubs: {
-        'gl-loading-icon': true,
-        'gl-empty-state': true,
+        GlLoadingIcon,
+        GlEmptyState,
       },
     }),
   );

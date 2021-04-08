@@ -31,7 +31,9 @@ exports[`StageTable will render an event with an iid 1`] = `
 exports[`StageTable will render build status for the default \`test\` stage 1`] = `
 "<div data-testid=\\"vsa-stage-event\\">
   <div data-testid=\\"vsa-stage-content\\">
-    <p class=\\"gl-m-0\\"><span data-testid=\\"vsa-stage-event-build-status\\" class=\\"icon-build-status gl-vertical-align-middle gl-text-green-500\\"><svg data-testid=\\"status_success-icon\\" aria-hidden=\\"true\\" class=\\"gl-icon s14\\"><use href=\\"#status_success\\"></use></svg></span> <a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal item-build-name\\"></a>
+    <p class=\\"gl-m-0\\"><span data-testid=\\"vsa-stage-event-build-status\\" class=\\"icon-build-status gl-vertical-align-middle gl-text-green-500\\"><svg data-testid=\\"status_success-icon\\" aria-hidden=\\"true\\" class=\\"gl-icon s14\\"><use href=\\"#status_success\\"></use></svg></span> <a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal item-build-name\\">
+
+      </a>
       ·
       <a href=\\"http://localhost/group1/project1/-/issues/3\\" class=\\"gl-link gl-text-black-normal pipeline-id\\">#222</a> <svg data-testid=\\"fork-icon\\" aria-hidden=\\"true\\" class=\\"gl-icon s16\\">
         <use href=\\"#fork\\"></use>
