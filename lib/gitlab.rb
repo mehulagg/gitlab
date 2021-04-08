@@ -111,7 +111,7 @@ module Gitlab
   def self.jh?
     @is_jh ||=
       ee? &&
-        root.join('jh/app/helpers/jh/appearances_helper.rb').exist? &&
+        root.join('jh').exist? &&
         !%w[true 1].include?(ENV['EE_ONLY'].to_s)
   end
 
