@@ -644,3 +644,16 @@ Cop/UserAdmin:
 Performance/OpenStruct:
   Exclude:
     - 'ee/spec/**/*.rb'
+
+# TODO Create and link follow-up issue to remove this temporary cop
+# Extended by Style/RegexpLiteralMixedPreserve
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/RegexpLiteralMixedPreserve:
+  SupportedStyles:
+    - slashes
+    - percent_r
+    - mixed
+    - mixed_preserve
+  EnforcedStyle: mixed_preserve
