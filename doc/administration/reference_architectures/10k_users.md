@@ -1548,7 +1548,6 @@ To configure the Praefect nodes, on each one:
 
    # Prevent database connections during 'gitlab-ctl reconfigure'
    gitlab_rails['rake_cache_clear'] = false
-
    # Prevent database migrations from running on upgrade automatically
    praefect['auto_migrate'] = false
    gitlab_rails['auto_migrate'] = false
