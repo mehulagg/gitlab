@@ -9,7 +9,7 @@ module QA
         end
       end
 
-      let(:gitlab_ci_yaml) {  
+      let(:gitlab_ci_yaml) do
         <<~YAML
           image: alpine:latest
   
@@ -37,7 +37,7 @@ module QA
             script: exit 0
             stage: deploy
         YAML
-      }
+      end
 
       before do
         Flow::Login.sign_in
@@ -49,7 +49,7 @@ module QA
         project.remove_via_api!
       end
 
-      it 'Validates a valid CI yaml', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/tbd' do
+      it 'validates a valid CI yaml', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/tbd' do
         Page::Project::Menu.perform(&:click_pipelines_editor)
         Page::Project::PipelineEditor::Show.perform do |show|
           show.click_element(:create_new_pipeline_button)

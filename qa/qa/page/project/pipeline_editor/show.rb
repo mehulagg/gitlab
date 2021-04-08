@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 module QA
   module Page
     module Project
       module PipelineEditor
         class Show < QA::Page::Base
-
           view 'app/assets/javascripts/pipeline_editor/components/pipeline_editor_tabs.vue' do
             element :editor_tab
             element :visualization_tab
