@@ -393,17 +393,21 @@ module GraphqlHelpers
     post api('/', current_user, version: 'graphql'), params: { _json: queries }, headers: headers
   end
 
-  def post_graphql(query, current_user: nil, variables: nil, headers: {})
+  def post_graphql(query, current_user: nil, variables: nil, headers: {}, token: nil)
     params = { query: query, variables: serialize_variables(variables) }
-    post api('/', current_user, version: 'graphql'), params: params, headers: headers
+    post api('/', current_user, version: 'graphql', personal_access_token: token), params: params, headers: headers
 
-    if graphql_errors # Errors are acceptable, but not this one:
-      expect(graphql_errors).not_to include(a_hash_including('message' => 'Internal server error'))
-    end
+    return unless graphql_errors
+
+    # Errors are acceptable, but not this one:
+    expect(graphql_errors).not_to include(a_hash_including('message' => 'Internal server error'))
   end
 
-  def post_graphql_mutation(mutation, current_user: nil)
-    post_graphql(mutation.query, current_user: current_user, variables: mutation.variables)
+  def post_graphql_mutation(mutation, current_user: nil, token: nil)
+    post_graphql(mutation.query,
+                 current_user: current_user,
+                 variables: mutation.variables,
+                 token: token)
   end
 
   def post_graphql_mutation_with_uploads(mutation, current_user: nil)

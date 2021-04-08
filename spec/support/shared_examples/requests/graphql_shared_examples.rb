@@ -10,6 +10,24 @@ RSpec.shared_examples 'a working graphql query' do
   end
 end
 
+RSpec.shared_examples 'a working GraphQL mutation' do
+  include GraphqlHelpers
+
+  it_behaves_like 'a working graphql query' do
+    before do
+      post_graphql_mutation(mutation, current_user: current_user)
+    end
+  end
+
+  it 'requires the api scope' do
+    pat = create(:personal_access_token, user: current_user, scopes: ['read_api'])
+
+    post_graphql_mutation(mutation, current_user: current_user, token: pat)
+
+    expect(graphql_data.compact).to be_empty
+  end
+end
+
 RSpec.shared_examples 'a mutation on an unauthorized resource' do
   it_behaves_like 'a mutation that returns top-level errors',
                       errors: [::Gitlab::Graphql::Authorize::AuthorizeResource::RESOURCE_ACCESS_ERROR]
