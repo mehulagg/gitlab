@@ -19,6 +19,8 @@ jest.mock('~/lib/utils/url_utility');
 
 Vue.use(VueApollo);
 
+const projectPath = 'namespace/project';
+
 describe('ManageViaMr component', () => {
   let wrapper;
 
@@ -53,6 +55,9 @@ describe('ManageViaMr component', () => {
       wrapper = extendedWrapper(
         mount(ManageViaMr, {
           apolloProvider: mockApollo,
+          provide: {
+            projectPath,
+          },
           propsData: {
             feature: {
               name: featureName,
@@ -87,6 +92,20 @@ describe('ManageViaMr component', () => {
 
       it('it does render a button', () => {
         expect(findButton().exists()).toBe(true);
+      });
+
+      it('clicking on the button triggers the configure mutation', () => {
+        jest.spyOn(wrapper.vm.$apollo, 'mutate');
+        findButton().trigger('click');
+
+        expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+          mutation,
+          variables: {
+            input: {
+              projectPath,
+            },
+          },
+        });
       });
     });
 

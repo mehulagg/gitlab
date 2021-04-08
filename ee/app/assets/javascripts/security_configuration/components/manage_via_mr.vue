@@ -10,12 +10,7 @@ export default {
   components: {
     GlButton,
   },
-  inject: {
-    projectPath: {
-      from: 'projectPath',
-      default: '',
-    },
-  },
+  inject: ['projectPath'],
   props: {
     feature: {
       type: Object,
