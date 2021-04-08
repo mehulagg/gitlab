@@ -12,7 +12,7 @@ module Types
                 method: :license_id
 
           field :type, GraphQL::STRING_TYPE, null: false,
-                description: 'Type of the subscription.'
+                description: 'Type of the license.'
 
           field :plan, GraphQL::STRING_TYPE, null: false,
                 description: 'Name of the subscription plan.'

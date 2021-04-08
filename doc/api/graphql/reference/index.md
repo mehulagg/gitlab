@@ -1910,7 +1910,7 @@ Represents the current license.
 | `name` | [`String`](#string) | Name of the licensee. |
 | `plan` | [`String!`](#string) | Name of the subscription plan. |
 | `startsAt` | [`Date`](#date) | Date when the license started. |
-| `type` | [`String!`](#string) | Type of the subscription. |
+| `type` | [`String!`](#string) | Type of the license. |
 | `usersInLicense` | [`Int`](#int) | Number of paid users in the license. |
 | `usersOverSubscription` | [`Int`](#int) | Number of users over the paid users in the license. |
 
@@ -3930,7 +3930,7 @@ Represents an entry from the Cloud License history.
 | `name` | [`String`](#string) | Name of the licensee. |
 | `plan` | [`String!`](#string) | Name of the subscription plan. |
 | `startsAt` | [`Date`](#date) | Date when the license started. |
-| `type` | [`String!`](#string) | Type of the subscription. |
+| `type` | [`String!`](#string) | Type of the license. |
 | `usersInLicense` | [`Int`](#int) | Number of paid users in the license. |
 
 ### `LicenseHistoryEntryConnection`
