@@ -6,6 +6,7 @@ import ManageViaMr from 'ee/security_configuration/components/manage_via_mr.vue'
 import {
   REPORT_TYPE_DAST_PROFILES,
   REPORT_TYPE_DEPENDENCY_SCANNING,
+  REPORT_TYPE_SECRET_DETECTION,
 } from '~/vue_shared/security_reports/constants';
 import { generateFeatures } from './helpers';
 
@@ -21,6 +22,7 @@ describe('ManageFeature component', () => {
       provide: {
         glFeatures: {
           secDependencyScanningUiEnable: true,
+          secSecretDetectionUiEnable: true,
         },
       },
       ...options,
@@ -53,6 +55,7 @@ describe('ManageFeature component', () => {
     type                               | expectedComponent
     ${REPORT_TYPE_DAST_PROFILES}       | ${ManageDastProfiles}
     ${REPORT_TYPE_DEPENDENCY_SCANNING} | ${ManageViaMr}
+    ${REPORT_TYPE_SECRET_DETECTION}    | ${ManageViaMr}
     ${'foo'}                           | ${ManageGeneric}
   `('given a $type feature', ({ type, expectedComponent }) => {
     let feature;
@@ -77,6 +80,7 @@ describe('ManageFeature component', () => {
   it.each`
     type                               | featureFlag
     ${REPORT_TYPE_DEPENDENCY_SCANNING} | ${'secDependencyScanningUiEnable'}
+    ${REPORT_TYPE_SECRET_DETECTION}    | ${'secSecretDetectionUiEnable'}
   `('renders generic component for $type if $featureFlag is disabled', ({ type, featureFlag }) => {
     const [feature] = generateFeatures(1, { type });
     createComponent({

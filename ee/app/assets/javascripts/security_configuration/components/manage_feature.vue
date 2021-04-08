@@ -4,6 +4,7 @@ import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   REPORT_TYPE_DAST_PROFILES,
   REPORT_TYPE_DEPENDENCY_SCANNING,
+  REPORT_TYPE_SECRET_DETECTION,
 } from '~/vue_shared/security_reports/constants';
 import ManageDastProfiles from './manage_dast_profiles.vue';
 import ManageGeneric from './manage_generic.vue';
@@ -12,6 +13,7 @@ import ManageViaMr from './manage_via_mr.vue';
 const scannerComponentMap = {
   [REPORT_TYPE_DAST_PROFILES]: ManageDastProfiles,
   [REPORT_TYPE_DEPENDENCY_SCANNING]: ManageViaMr,
+  [REPORT_TYPE_SECRET_DETECTION]: ManageViaMr,
 };
 
 export default {
@@ -22,6 +24,9 @@ export default {
       const scannerComponentMapCopy = { ...scannerComponentMap };
       if (!this.glFeatures.secDependencyScanningUiEnable) {
         delete scannerComponentMapCopy[REPORT_TYPE_DEPENDENCY_SCANNING];
+      }
+      if (!this.glFeatures.secSecretDetectionUiEnable) {
+        delete scannerComponentMapCopy[REPORT_TYPE_SECRET_DETECTION];
       }
       return scannerComponentMapCopy;
     },

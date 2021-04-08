@@ -214,11 +214,12 @@ For GitLab.com, there are extremely large tables with 15 second query timeouts, 
 | `merge_request_diff_files`   | 1082                   |
 | `events`                     | 514                    |
 
-We have several batch counting methods available:
+The following operation methods are available for your use:
 
 - [Ordinary Batch Counters](#ordinary-batch-counters)
 - [Distinct Batch Counters](#distinct-batch-counters)
-- [Sum Batch Counters](#sum-batch-counters)
+- [Sum Batch Operation](#sum-batch-operation)
+- [Add Operation](#add-operation)
 - [Estimated Batch Counters](#estimated-batch-counters)
 
 Batch counting requires indexes on columns to calculate max, min, and range queries. In some cases,
@@ -276,7 +277,7 @@ distinct_count(::Note.with_suggestions.where(time_period), :author_id, start: ::
 distinct_count(::Clusters::Applications::CertManager.where(time_period).available.joins(:cluster), 'clusters.user_id')
 ```
 
-### Sum Batch Counters
+### Sum Batch Operation
 
 Handles `ActiveRecord::StatementInvalid` error
 
@@ -315,6 +316,25 @@ distinct_count(Project.group(:visibility_level), :creator_id)
 
 sum(Issue.group(:state_id), :weight))
 # returns => {1=>3542, 2=>6820}
+```
+
+### Add Operation
+
+Handles `StandardError`.
+
+Returns `-1` if any of the arguments are `-1`.
+
+Sum the values given as parameters.
+
+Method: `add(*args)`
+
+Examples
+
+```ruby
+project_imports = distinct_count(::Project.where.not(import_type: nil), :creator_id)
+bulk_imports = distinct_count(::BulkImport, :user_id)
+
+ add(project_imports, bulk_imports)
 ```
 
 ### Estimated Batch Counters
@@ -477,6 +497,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      redis_slot: compliance
      expiry: 42  # 6 weeks
      aggregation: weekly
+     feature_flag: usage_data_i_compliance_credential_inventory
    ```
 
    Keys:
@@ -508,7 +529,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      aggregation.
    - `aggregation`: may be set to a `:daily` or `:weekly` key. Defines how counting data is stored in Redis.
      Aggregation on a `daily` basis does not pull more fine grained data.
-   - `feature_flag`: optional `default_enabled: :yaml`. If no feature flag is set then the tracking is enabled. For details, see our [GitLab internal Feature flags](../feature_flags/index.md) documentation. The feature flags are owned by the group adding the event tracking.
+   - `feature_flag`: optional `default_enabled: :yaml`. If no feature flag is set then the tracking is enabled. One feature flag can be used for multiple events. For details, see our [GitLab internal Feature flags](../feature_flags/index.md) documentation. The feature flags are owned by the group adding the event tracking.
 
 Use one of the following methods to track events:
 
@@ -546,8 +567,6 @@ Use one of the following methods to track events:
    ```
 
 1. Track event in API using `increment_unique_values(event_name, values)` helper method.
-
-   To be able to track the event, Usage Ping must be enabled and the event feature `usage_data_<event_name>` must be enabled.
 
    Arguments:
 
@@ -592,10 +611,6 @@ Use one of the following methods to track events:
 
    API requests are protected by checking for a valid CSRF token.
 
-   To increment the values, the related feature `usage_data_<event_name>` should be
-   set to `default_enabled: true`. For more information, see
-   [Feature flags in development of GitLab](../feature_flags/index.md).
-
    ```plaintext
    POST /usage_data/increment_unique_users
    ```
@@ -619,8 +634,6 @@ Use one of the following methods to track events:
 
    Usage Data API is behind  `usage_data_api` feature flag which, as of GitLab 13.7, is
    now set to `default_enabled: true`.
-
-   Each event tracked using Usage Data API is behind a feature flag `usage_data_#{event_name}` which should be `default_enabled: true`
 
    ```javascript
    import api from '~/api';
@@ -896,18 +909,56 @@ On GitLab.com, we have DangerBot setup to monitor Product Intelligence related f
 
 On GitLab.com, the Product Intelligence team regularly monitors Usage Ping. They may alert you that your metrics need further optimization to run quicker and with greater success. You may also use the [Usage Ping QA dashboard](https://app.periscopedata.com/app/gitlab/632033/Usage-Ping-QA) to check how well your metric performs. The dashboard allows filtering by GitLab version, by "Self-managed" & "SaaS" and shows you how many failures have occurred for each metric. Whenever you notice a high failure rate, you may re-optimize your metric.
 
-### Optional: Test Prometheus based Usage Ping
+### Usage Ping local setup
 
-If the data submitted includes metrics [queried from Prometheus](#prometheus-queries) that you would like to inspect and verify,
-then you need to ensure that a Prometheus server is running locally, and that furthermore the respective GitLab components
-are exporting metrics to it. If you do not need to test data coming from Prometheus, no further action
+To set up Usage Ping locally, you must:
+
+1. [Set up local repositories]#(set-up-local-repositories)
+1. [Test local setup](#test-local-setup)
+1. (Optional) [Test Prometheus-based usage ping](#test-prometheus-based-usage-ping)
+
+#### Set up local repositories
+
+1. Clone and start [GitLab](https://gitlab.com/gitlab-org/gitlab-development-kit).
+1. Clone and start [Versions Application](https://gitlab.com/gitlab-services/version-gitlab-com).
+   Make sure to run `docker-compose up` to start a PostgreSQL and Redis instance.
+1. Point GitLab to the Versions Application endpoint instead of the default endpoint:
+   1. Open [submit_usage_ping_service.rb](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/submit_usage_ping_service.rb#L4) in your local and modified `PRODUCTION_URL`.
+   1. Set it to the local Versions Application URL `http://localhost:3000/usage_data`.
+
+#### Test local setup
+
+1. Using the `gitlab` Rails console, manually trigger a usage ping:
+
+   ```ruby
+   SubmitUsagePingService.new.execute
+   ```
+
+1. Use the `versions` Rails console to check the usage ping was successfully received,
+   parsed, and stored in the Versions database:
+
+   ```ruby
+   UsageData.last
+   ```
+
+### Test Prometheus-based usage ping
+
+If the data submitted includes metrics [queried from Prometheus](#prometheus-queries)
+you want to inspect and verify, you must:
+
+- Ensure that a Prometheus server is running locally.
+- Ensure the respective GitLab components are exporting metrics to the Prometheus server.
+
+If you do not need to test data coming from Prometheus, no further action
 is necessary. Usage Ping should degrade gracefully in the absence of a running Prometheus server.
 
-There are three kinds of components that may export data to Prometheus, and which are included in Usage Ping:
+Three kinds of components may export data to Prometheus, and are included in Usage Ping:
 
-- [`node_exporter`](https://github.com/prometheus/node_exporter) - Exports node metrics from the host machine
-- [`gitlab-exporter`](https://gitlab.com/gitlab-org/gitlab-exporter) - Exports process metrics from various GitLab components
-- various GitLab services such as Sidekiq and the Rails server that export their own metrics
+- [`node_exporter`](https://github.com/prometheus/node_exporter): Exports node metrics
+  from the host machine.
+- [`gitlab-exporter`](https://gitlab.com/gitlab-org/gitlab-exporter): Exports process metrics
+  from various GitLab components.
+- Other various GitLab services, such as Sidekiq and the Rails server, which export their own metrics.
 
 #### Test with an Omnibus container
 

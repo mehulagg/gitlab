@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Issues::UpdateService do
   let_it_be(:group) { create(:group) }
+
   let(:project) { create(:project, group: group) }
   let(:issue) { create(:issue, project: project) }
   let(:user) { issue.author }
@@ -19,6 +20,7 @@ RSpec.describe Issues::UpdateService do
 
     context 'refresh epic dates' do
       let_it_be(:epic) { create(:epic) }
+
       let(:issue) { create(:issue, epic: epic, project: project) }
 
       context 'updating milestone' do

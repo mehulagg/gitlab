@@ -57,13 +57,13 @@ We use Snowplow for the majority of our tracking strategy and it is enabled on G
 - **Admin Area > Settings > General** in the UI.
 - `admin/application_settings/integrations` in your browser.
 
-The following configuration is required:
+Example configuration:
 
-| Name          | Value                     |
-|---------------|---------------------------|
-| Collector     | `snowplow.trx.gitlab.net` |
-| Site ID       | `gitlab`                  |
-| Cookie domain | `.gitlab.com`             |
+| Name          | Value                         |
+|---------------|-------------------------------|
+| Collector     | `your-snowplow-collector.net` |
+| Site ID       | `gitlab`                      |
+| Cookie domain | `.your-gitlab-instance.com`   |
 
 ## Snowplow request flow
 
@@ -314,6 +314,7 @@ Custom event tracking and instrumentation can be added by directly calling the `
 | `project`  | Project                   | nil           | The project associated with the event. |
 | `user`     | User                      | nil           | The user associated with the event. |
 | `namespace` | Namespace                | nil           | The namespace associated with the event. |
+| `extra`   | Hash                | `{}`         | Additional keyword arguments are collected into a hash and sent with the event. |
 
 Tracking can be viewed as either tracking user behavior, or can be used for instrumentation to monitor and visualize performance over time in an area or aspect of code.
 
@@ -468,7 +469,7 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
 1. Send a test Snowplow event from the Rails console:
 
    ```ruby
-   Gitlab::Tracking.self_describing_event('iglu:com.gitlab/pageview_context/jsonschema/1-0-0', data: { page_type: 'MY_TYPE' }, context: nil)
+   Gitlab::Tracking.event('category', 'action')
    ```
 
 1. Navigate to `localhost:9090/micro/good` to see the event.
@@ -495,6 +496,7 @@ The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/g
 | `namespace_id` | **{dotted-circle}** | integer               |                                                               |
 | `environment`  | **{check-circle}**  | string (max 32 chars) | Name of the source environment, such as `production` or `staging`             |
 | `source`       | **{check-circle}**  | string (max 32 chars) | Name of the source application, such as  `gitlab-rails` or `gitlab-javascript` |
+| `extra`        | **{dotted-circle}**  | JSON                  | Any additional data associated with the event, in the form of key-value pairs |
 
 ### Default Schema
 

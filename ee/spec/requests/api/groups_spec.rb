@@ -14,7 +14,7 @@ RSpec.describe API::Groups do
 
   before do
     group.add_owner(user)
-    group.ldap_group_links.create cn: 'ldap-group', group_access: Gitlab::Access::MAINTAINER, provider: 'ldap'
+    group.ldap_group_links.create! cn: 'ldap-group', group_access: Gitlab::Access::MAINTAINER, provider: 'ldap'
   end
 
   shared_examples 'inaccessable by reporter role and lower' do
@@ -211,7 +211,7 @@ RSpec.describe API::Groups do
 
       context 'when authenticated as the group owner' do
         it 'returns 200 if shared_runners_minutes_limit is not changing' do
-          group.update(shared_runners_minutes_limit: 133)
+          group.update!(shared_runners_minutes_limit: 133)
 
           expect do
             put api("/groups/#{group.id}", user), params: { shared_runners_minutes_limit: 133 }

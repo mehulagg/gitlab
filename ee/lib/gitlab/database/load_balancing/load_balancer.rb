@@ -107,7 +107,9 @@ module Gitlab
         # is connecting to. If the connection is not issued by this load
         # balancer, return nil
         def db_role_for_connection(connection)
-          @connection_db_roles[connection]
+          return @connection_db_roles[connection] if @connection_db_roles[connection]
+          return ROLE_REPLICA if @host_list.manage_pool?(connection.pool)
+          return ROLE_PRIMARY if connection.pool == ActiveRecord::Base.connection_pool
         end
 
         # Returns a host to use for queries.

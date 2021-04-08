@@ -141,7 +141,7 @@ export default {
       v-else-if="actionButtons.length > 0"
       v-bind="actionButtons[0]"
       :disabled="disabled"
-      variant="success"
+      variant="confirm"
       category="secondary"
       data-testid="create-issue-button"
       data-qa-selector="create_issue_button"

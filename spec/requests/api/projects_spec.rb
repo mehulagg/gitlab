@@ -810,6 +810,54 @@ RSpec.describe API::Projects do
         end
       end
     end
+
+    context 'with forked projects', :use_clean_rails_memory_store_caching do
+      include ProjectForksHelper
+
+      let_it_be(:admin) { create(:admin) }
+
+      it 'avoids N+1 queries' do
+        get api('/projects', admin)
+
+        base_project = create(:project, :public, namespace: admin.namespace)
+
+        fork_project1 = fork_project(base_project, admin, namespace: create(:user).namespace)
+        fork_project2 = fork_project(fork_project1, admin, namespace: create(:user).namespace)
+
+        control = ActiveRecord::QueryRecorder.new do
+          get api('/projects', admin)
+        end
+
+        fork_project(fork_project2, admin, namespace: create(:user).namespace)
+
+        expect do
+          get api('/projects', admin)
+        end.not_to exceed_query_limit(control.count)
+      end
+    end
+
+    context 'when service desk is enabled', :use_clean_rails_memory_store_caching do
+      let_it_be(:admin) { create(:admin) }
+
+      it 'avoids N+1 queries' do
+        allow(Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(true)
+        allow(Gitlab::IncomingEmail).to receive(:enabled?).and_return(true)
+
+        get api('/projects', admin)
+
+        create(:project, :public, :service_desk_enabled, namespace: admin.namespace)
+
+        control = ActiveRecord::QueryRecorder.new do
+          get api('/projects', admin)
+        end
+
+        create_list(:project, 2, :public, :service_desk_enabled, namespace: admin.namespace)
+
+        expect do
+          get api('/projects', admin)
+        end.not_to exceed_query_limit(control.count)
+      end
+    end
   end
 
   describe 'POST /projects' do

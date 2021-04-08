@@ -8,6 +8,7 @@ RSpec.describe BackfillVersionAuthorAndCreatedAt do
   let_it_be(:issues) { table(:issues) }
   let_it_be(:versions) { table(:design_management_versions) }
   let_it_be(:users) { table(:users) }
+
   let(:project) { projects.create!(name: 'gitlab', path: 'gitlab-org/gitlab-ce', namespace_id: 1) }
   let(:issue_1) { create_issue }
   let(:issue_2) { create_issue }

@@ -288,6 +288,10 @@ class Repository
     false
   end
 
+  def search_branch_names(pattern)
+    redis_set_cache.search('branch_names', pattern) { branch_names }
+  end
+
   def languages
     return [] if empty?
 
@@ -827,12 +831,6 @@ class Repository
         nil # Return value does not matter.
       end
     end
-  end
-
-  def merge_to_ref(user, source_sha, merge_request, target_ref, message, first_parent_ref, allow_conflicts = false)
-    branch = merge_request.target_branch
-
-    raw.merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
   end
 
   def delete_refs(*ref_names)

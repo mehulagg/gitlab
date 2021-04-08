@@ -444,7 +444,7 @@ variables:
       -----END CERTIFICATE-----
 ```
 
-The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
+The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/README.md#custom-cicd-variables), either as a `file`, which requires the path to the certificate, or as a variable, which requires the text representation of the certificate.
 
 #### Docker images
 
@@ -708,6 +708,15 @@ self-signed certificate or disable certificate verification. Refer to the packag
 documentation for instructions.
 
 ## Troubleshooting
+
+### SAST debug logging
+
+Increase the [Secure scanner log verbosity](#logging-level) to `debug` in a global CI variable to help troubleshoot SAST jobs.
+
+```yaml
+variables:
+  SECURE_LOG_LEVEL: "debug"
+```
 
 ### `Error response from daemon: error processing tar file: docker-tar: relocation error`
 

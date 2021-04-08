@@ -29,8 +29,8 @@ RSpec.describe API::ProtectedBranches do
 
         before do
           project.add_developer(push_user)
-          project.project_group_links.create(group: merge_group)
-          project.project_group_links.create(group: unprotect_group)
+          project.project_group_links.create!(group: merge_group)
+          project.project_group_links.create!(group: unprotect_group)
           protected_branch.push_access_levels.create!(user: push_user)
           protected_branch.merge_access_levels.create!(group: merge_group)
           protected_branch.unprotect_access_levels.create!(group: unprotect_group)

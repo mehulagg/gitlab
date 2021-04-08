@@ -312,15 +312,15 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
     end
 
     stages_with_data = [
-      { title: 'Issue', description: 'Time before an issue gets scheduled', events_count: 1, median: '5 days' },
-      { title: 'Code', description: 'Time until first merge request', events_count: 1, median: 'about 5 hours' },
-      { title: 'Review', description: 'Time between merge request creation and merge/close', events_count: 1, median: 'about 1 hour' },
-      { title: 'Staging', description: 'From merge request merge until deploy to production', events_count: 1, median: 'about 1 hour' }
+      { title: 'Issue', description: 'Time before an issue gets scheduled', events_count: 1, time: '5d' },
+      { title: 'Code', description: 'Time until first merge request', events_count: 1, time: '5h' },
+      { title: 'Review', description: 'Time between merge request creation and merge/close', events_count: 1, time: '1h' },
+      { title: 'Staging', description: 'From merge request merge until deploy to production', events_count: 1, time: '1h' }
     ]
 
     stages_without_data = [
-      { title: 'Plan', description: 'Time before an issue starts implementation', events_count: 0, median: 'Not enough data' },
-      { title: 'Test', description: 'Total test time for all commits/merges', events_count: 0, median: 'Not enough data' }
+      { title: 'Plan', description: 'Time before an issue starts implementation', events_count: 0, time: "-" },
+      { title: 'Test', description: 'Total test time for all commits/merges', events_count: 0, time: "-" }
     ]
 
     it 'each stage will display the events description when selected', :sidekiq_might_not_need_inline do
@@ -352,7 +352,9 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       [].concat(stages_without_data, stages_with_data).each do |stage|
         select_stage(stage[:title])
 
-        expect(page.find('.js-path-navigation .gl-path-active-item-indigo').text).to eq(stage[:title])
+        stage_name = page.find('.js-path-navigation .gl-path-active-item-indigo').text
+        expect(stage_name).to include(stage[:title])
+        expect(stage_name).to include(stage[:time])
       end
     end
 

@@ -1291,6 +1291,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           'p_analytics_repo' => 123,
           'i_analytics_cohorts' => 123,
           'i_analytics_dev_ops_score' => 123,
+          'i_analytics_dev_ops_adoption' => 123,
           'i_analytics_instance_statistics' => 123,
           'p_analytics_merge_request' => 123,
           'g_analytics_merge_request' => 123,
@@ -1361,7 +1362,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
     let(:categories) { ::Gitlab::UsageDataCounters::HLLRedisCounter.categories }
     let(:ineligible_total_categories) do
-      %w[source_code ci_secrets_management incident_management_alerts snippets terraform]
+      %w[source_code ci_secrets_management incident_management_alerts snippets terraform incident_management_oncall]
     end
 
     context 'with redis_hll_tracking feature enabled' do

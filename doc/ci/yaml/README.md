@@ -172,6 +172,7 @@ a preconfigured `workflow: rules` entry.
 - [`when`](#when): Specify what to do when the `if` rule evaluates to true.
   - To run a pipeline, set to `always`.
   - To prevent pipelines from running, set to `never`.
+- [`variables`](#workflowrulesvariables): If not defined, uses the [variables defined elsewhere](#variables).
 
 When no rules evaluate to true, the pipeline does not run.
 
@@ -221,6 +222,54 @@ request pipelines.
 
 If your rules match both branch pipelines and merge request pipelines,
 [duplicate pipelines](#avoid-duplicate-pipelines) can occur.
+
+#### `workflow:rules:variables`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/294232) in GitLab 13.11.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-workflowrulesvariables). **(CORE ONLY)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can use [`variables`](#variables) in `workflow:rules:` to define variables for specific pipeline conditions.
+
+For example:
+
+```yaml
+variables:
+  DEPLOY_VARIABLE: "default-deploy"
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /master/
+      variables:
+        DEPLOY_VARIABLE: "deploy-production"  # Override globally-defined DEPLOY_VARIABLE
+    - if: $CI_COMMIT_REF_NAME =~ /feature/
+      variables:
+        IS_A_FEATURE: "true"                  # Define a new variable.
+```
+
+##### Enable or disable workflow:rules:variables **(CORE ONLY)**
+
+rules:variables is under development and not ready for production use.
+It is deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_workflow_rules_variables)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_workflow_rules_variables)
+```
 
 #### `workflow:rules` templates
 
@@ -1180,7 +1229,7 @@ expression string per rule, rather than an array of them. Any set of expressions
 evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
 by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-cicd-variable-expressions).
 
-Unlike variables in [`script`](../variables/README.md#syntax-of-cicd-variables-in-job-scripts)
+Unlike variables in [`script`](../variables/README.md#use-cicd-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
 
 `if:` clauses are evaluated based on the values of [predefined CI/CD variables](../variables/predefined_variables.md)
@@ -4587,7 +4636,7 @@ meaning it applies to all jobs. If you define a variable in a job, it's availabl
 to that job only.
 
 If a variable of the same name is defined globally and for a specific job, the
-[job-specific variable overrides the global variable](../variables/README.md#priority-of-cicd-variables).
+[job-specific variable overrides the global variable](../variables/README.md#cicd-variable-precedence).
 
 All YAML-defined variables are also set to any linked
 [Docker service containers](../services/index.md).

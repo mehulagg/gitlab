@@ -268,4 +268,83 @@ RSpec.describe MergeRequestPollCachedWidgetEntity do
       end
     end
   end
+
+  describe 'merge_pipeline' do
+    it 'returns nil' do
+      expect(subject[:merge_pipeline]).to be_nil
+    end
+
+    context 'when is merged' do
+      let(:resource) { create(:merged_merge_request, source_project: project, merge_commit_sha: project.commit.id) }
+      let(:pipeline) { create(:ci_empty_pipeline, project: project, ref: resource.target_branch, sha: resource.merge_commit_sha) }
+
+      before do
+        project.add_maintainer(user)
+      end
+
+      it 'returns merge_pipeline' do
+        pipeline.reload
+        pipeline_payload =
+          MergeRequests::PipelineEntity
+            .represent(pipeline, request: request)
+            .as_json
+
+        expect(subject[:merge_pipeline]).to eq(pipeline_payload)
+      end
+
+      context 'when user cannot read pipelines on target project' do
+        before do
+          project.add_guest(user)
+        end
+
+        it 'returns nil' do
+          expect(subject[:merge_pipeline]).to be_nil
+        end
+      end
+
+      context 'when merge_request_cached_merge_pipeline_serializer is disabled' do
+        before do
+          stub_feature_flags(merge_request_cached_merge_pipeline_serializer: false)
+        end
+
+        it 'returns nil' do
+          expect(subject[:merge_pipeline]).to be_nil
+        end
+      end
+    end
+  end
+
+  describe 'ci related paths' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:path_field, :method_for_existence_check) do
+      :terraform_reports_path | :has_terraform_reports?
+      :accessibility_report_path | :has_accessibility_reports?
+      :exposed_artifacts_path | :has_exposed_artifacts?
+      :test_reports_path | :has_test_reports?
+      :codequality_reports_path | :has_codequality_reports?
+    end
+
+    with_them do
+      context 'when merge request has reports' do
+        before do
+          allow(resource).to receive(method_for_existence_check).and_return(true)
+        end
+
+        it 'set the path to poll data' do
+          expect(subject[path_field]).to be_present
+        end
+      end
+
+      context 'when merge request has no reports' do
+        before do
+          allow(resource).to receive(method_for_existence_check).and_return(false)
+        end
+
+        it 'does not set reports path' do
+          expect(subject[path_field]).to be_nil
+        end
+      end
+    end
+  end
 end

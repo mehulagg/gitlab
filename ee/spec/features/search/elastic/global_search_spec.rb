@@ -82,6 +82,28 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
 
       it_behaves_like 'an efficient database result'
     end
+
+    context 'searching code' do
+      let(:path) { search_path(search: '*', scope: 'blobs') }
+
+      it 'avoids N+1 database queries' do
+        project.repository.index_commits_and_blobs
+
+        ensure_elasticsearch_index!
+
+        control = ActiveRecord::QueryRecorder.new { visit path }
+        expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
+
+        projects.each do |project|
+          project.repository.index_commits_and_blobs
+        end
+
+        ensure_elasticsearch_index!
+
+        expect { visit path }.not_to exceed_query_limit(control.count)
+        expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
+      end
+    end
   end
 
   describe 'I search through the issues and I see pagination' do

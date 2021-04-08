@@ -4228,7 +4228,7 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it 'does nothing if updates on legacy storage are disabled' do
-      stub_feature_flags(pages_update_legacy_storage: false)
+      allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
 
       expect(Gitlab::PagesTransfer).not_to receive(:new)
       expect(PagesWorker).not_to receive(:perform_in)
@@ -5316,6 +5316,64 @@ RSpec.describe Project, factory_default: :keep do
 
       expect(user).to receive(:can?).at_most(5).times
       project.branch_allows_collaboration?(user, "merge-test")
+    end
+  end
+
+  describe '#branch_allows_collaboration?' do
+    context 'when there are open merge requests that have their source/target branches point to each other' do
+      let_it_be(:project) { create(:project, :repository) }
+      let_it_be(:developer) { create(:user) }
+      let_it_be(:reporter) { create(:user) }
+      let_it_be(:guest) { create(:user) }
+
+      before_all do
+        create(
+          :merge_request,
+          target_project: project,
+          target_branch: 'master',
+          source_project: project,
+          source_branch: 'merge-test',
+          allow_collaboration: true
+        )
+
+        create(
+          :merge_request,
+          target_project: project,
+          target_branch: 'merge-test',
+          source_project: project,
+          source_branch: 'master',
+          allow_collaboration: true
+        )
+
+        project.add_developer(developer)
+        project.add_reporter(reporter)
+        project.add_guest(guest)
+      end
+
+      shared_examples_for 'successful check' do
+        it 'does not go into an infinite loop' do
+          expect { project.branch_allows_collaboration?(user, 'master') }
+            .not_to raise_error
+        end
+      end
+
+      context 'when user is a developer' do
+        let(:user) { developer }
+
+        it_behaves_like 'successful check'
+      end
+
+      context 'when user is a reporter' do
+        let(:user) { reporter }
+
+        it_behaves_like 'successful check'
+      end
+
+      context 'when user is a guest' do
+        let(:user) { guest }
+
+        it_behaves_like 'successful check'
+      end
     end
   end
 

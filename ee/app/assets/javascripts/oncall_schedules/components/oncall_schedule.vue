@@ -25,6 +25,8 @@ export const i18n = {
   deleteScheduleLabel: s__('OnCallSchedules|Delete schedule'),
   rotationTitle: s__('OnCallSchedules|Rotations'),
   addARotation: s__('OnCallSchedules|Add a rotation'),
+  viewPreviousTimeframe: s__('OnCallSchedules|View previous timeframe'),
+  viewNextTimeframe: s__('OnCallSchedules|View next timeframe'),
   presetTypeLabels: {
     DAYS: s__('OnCallSchedules|1 day'),
     WEEKS: s__('OnCallSchedules|2 weeks'),
@@ -211,12 +213,14 @@ export default {
               data-testid="previous-timeframe-btn"
               icon="chevron-left"
               :disabled="loading"
+              :aria-label="$options.i18n.viewPreviousTimeframe"
               @click="updateToViewPreviousTimeframe"
             />
             <gl-button
               data-testid="next-timeframe-btn"
               icon="chevron-right"
               :disabled="loading"
+              :aria-label="$options.i18n.viewNextTimeframe"
               @click="updateToViewNextTimeframe"
             />
           </gl-button-group>

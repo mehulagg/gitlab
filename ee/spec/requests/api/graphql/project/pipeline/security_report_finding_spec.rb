@@ -64,7 +64,7 @@ RSpec.describe 'Query.project(fullPath).pipeline(iid).securityReportFindings' do
       end
 
       it 'returns all the vulnerability findings' do
-        expect(security_report_findings.length).to eq(53)
+        expect(security_report_findings.length).to eq(25)
       end
 
       it 'returns all the queried fields', :aggregate_failures do

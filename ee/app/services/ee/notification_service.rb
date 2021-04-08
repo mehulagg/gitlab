@@ -2,6 +2,8 @@
 
 module EE
   module NotificationService
+    include ::Gitlab::Utils::UsageData
+
     # When we add approvers to a merge request we should send an email to:
     #
     #  * the new approvers
@@ -67,6 +69,8 @@ module EE
     end
 
     def notify_oncall_users_of_alert(users, alert)
+      track_usage_event(:i_incident_management_oncall_notification_sent, users.map(&:id))
+
       users.each do |user|
         mailer.prometheus_alert_fired_email(alert.project, user, alert).deliver_later
       end

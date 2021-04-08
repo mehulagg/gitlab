@@ -11,6 +11,7 @@ RSpec.describe 'gitlab:license namespace rake tasks' do
 
   describe 'load' do
     let_it_be(:license_path) { 'arbitrary_file_name' }
+
     let(:mode) { 'default' }
 
     subject { run_rake_task 'gitlab:license:load', [mode] }

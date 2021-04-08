@@ -601,6 +601,7 @@ RSpec.describe GitlabSubscription do
 
   describe '#legacy?' do
     let_it_be(:eoa_rollout_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date }
+
     let!(:gitlab_subscription) { create(:gitlab_subscription, start_date: start_date) }
 
     subject { gitlab_subscription.legacy? }

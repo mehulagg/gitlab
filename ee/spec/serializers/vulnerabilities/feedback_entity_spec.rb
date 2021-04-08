@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Vulnerabilities::FeedbackEntity do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
+
   let(:request) { double('request') }
   let(:entity) { described_class.represent(feedback, request: request) }
 
@@ -192,14 +193,6 @@ RSpec.describe Vulnerabilities::FeedbackEntity do
 
     it 'exposes dismissal_reason' do
       expect(subject[:dismissal_reason]).to eq(feedback.dismissal_reason)
-    end
-  end
-
-  context 'when dismissal descriptions are available' do
-    let(:feedback) { build_stubbed(:vulnerability_feedback, :dismissal, project: project) }
-
-    it 'exposes dismissal_descriptions' do
-      expect(subject[:dismissal_descriptions]).to eq(Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] })
     end
   end
 end

@@ -13,4 +13,3 @@
         .flex-grow-1
           = f.radio_button :setup_for_company, false, class: 'js-setup-for-me'
           = f.label :setup_for_company, _('Just me'), class: 'normal', value: 'false'
-      = render_if_exists 'devise/shared/email_opted_in', f: f, hidden: true

@@ -46,6 +46,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     this.mergeTrainsCount = data.merge_trains_count || 0;
     this.mergeTrainIndex = data.merge_train_index;
     this.policyViolation = data.policy_violation;
+    this.jiraAssociation = data.jira_associations || {};
 
     super.setData(data, isRebased);
   }

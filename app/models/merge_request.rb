@@ -288,9 +288,6 @@ class MergeRequest < ApplicationRecord
       ]
     )
   end
-  scope :by_cherry_pick_sha, -> (sha) do
-    joins(:notes).where(notes: { commit_id: sha })
-  end
   scope :join_project, -> { joins(:target_project) }
   scope :join_metrics, -> (target_project_id = nil) do
     # Do not join the relation twice
@@ -359,6 +356,8 @@ class MergeRequest < ApplicationRecord
   scope :preload_metrics, -> (relation) { preload(metrics: relation) }
   scope :preload_project_and_latest_diff, -> { preload(:source_project, :latest_merge_request_diff) }
   scope :preload_latest_diff_commit, -> { preload(latest_merge_request_diff: :merge_request_diff_commits) }
+  scope :preload_milestoneish_associations, -> { preload_routables.preload(:assignees, :labels) }
+
   scope :with_web_entity_associations, -> { preload(:author, target_project: [:project_feature, group: [:route, :parent], namespace: :route]) }
 
   scope :with_auto_merge_enabled, -> do
@@ -1315,11 +1314,8 @@ class MergeRequest < ApplicationRecord
     message.join("\n\n")
   end
 
-  # Returns the oldest multi-line commit message, or the MR title if none found
   def default_squash_commit_message
-    strong_memoize(:default_squash_commit_message) do
-      first_multiline_commit&.safe_message || title
-    end
+    title
   end
 
   # Returns the oldest multi-line commit
@@ -1350,8 +1346,8 @@ class MergeRequest < ApplicationRecord
     has_no_commits? || branch_missing? || cannot_be_merged?
   end
 
-  def can_be_merged_by?(user)
-    access = ::Gitlab::UserAccess.new(user, container: project)
+  def can_be_merged_by?(user, skip_collaboration_check: false)
+    access = ::Gitlab::UserAccess.new(user, container: project, skip_collaboration_check: skip_collaboration_check)
     access.can_update_branch?(target_branch)
   end
 
@@ -1371,11 +1367,11 @@ class MergeRequest < ApplicationRecord
   def environments_for(current_user, latest: false)
     return [] unless diff_head_commit
 
-    envs = EnvironmentsFinder.new(target_project, current_user,
+    envs = EnvironmentsByDeploymentsFinder.new(target_project, current_user,
       ref: target_branch, commit: diff_head_commit, with_tags: true, find_latest: latest).execute
 
     if source_project
-      envs.concat EnvironmentsFinder.new(source_project, current_user,
+      envs.concat EnvironmentsByDeploymentsFinder.new(source_project, current_user,
         ref: source_branch, commit: diff_head_commit, find_latest: latest).execute
     end
 

@@ -43,7 +43,7 @@ const mutateWithErrors = jest.fn().mockRejectedValue(genericErrorMessage);
 describe('DevopsAdoptionSegmentModal', () => {
   let wrapper;
 
-  const createComponent = ({ mutationMock = mutate, props = {} } = {}) => {
+  const createComponent = ({ mutationMock = mutate, props = {}, provide = {} } = {}) => {
     const $apollo = {
       mutate: mutationMock,
     };
@@ -53,6 +53,7 @@ describe('DevopsAdoptionSegmentModal', () => {
         groups: groupNodes,
         ...props,
       },
+      provide,
       stubs: {
         GlSprintf,
         ApolloMutation,
@@ -81,6 +82,24 @@ describe('DevopsAdoptionSegmentModal', () => {
 
     expect(modal.exists()).toBe(true);
     expect(modal.props('modalId')).toBe(DEVOPS_ADOPTION_SEGMENT_MODAL_ID);
+  });
+
+  describe('modal title', () => {
+    it('contains the correct admin level title', () => {
+      createComponent();
+
+      const modal = findModal();
+
+      expect(modal.props('title')).toBe('Add/remove groups');
+    });
+
+    it('contains the corrrect group level title', () => {
+      createComponent({ provide: { isGroup: true } });
+
+      const modal = findModal();
+
+      expect(modal.props('title')).toBe('Add/remove sub-groups');
+    });
   });
 
   it.each`

@@ -73,7 +73,14 @@ module Ci
       return unless has_environment?
 
       strong_memoize(:persisted_environment) do
-        Environment.find_by(name: expanded_environment_name, project: project)
+        # This code path has caused N+1s in the past, since environments are only indirectly
+        # associated to builds and pipelines; see https://gitlab.com/gitlab-org/gitlab/-/issues/326445
+        # We therefore batch-load them to prevent dormant N+1s until we found a proper solution.
+        BatchLoader.for(expanded_environment_name).batch(key: project_id) do |names, loader, args|
+          Environment.where(name: names, project: args[:key]).find_each do |environment|
+            loader.call(environment.name, environment)
+          end
+        end
       end
     end
 
@@ -86,8 +93,7 @@ module Ci
     validates :ref, presence: true
 
     scope :not_interruptible, -> do
-      joins(:metadata).where('ci_builds_metadata.id NOT IN (?)',
-        Ci::BuildMetadata.scoped_build.with_interruptible.select(:id))
+      joins(:metadata).where.not('ci_builds_metadata.id' => Ci::BuildMetadata.scoped_build.with_interruptible.select(:id))
     end
 
     scope :unstarted, -> { where(runner_id: nil) }
@@ -317,7 +323,7 @@ module Ci
         end
       end
 
-      before_transition any => [:failed] do |build|
+      after_transition any => [:failed] do |build|
         next unless build.project
         next unless build.deployment
 

@@ -1,0 +1,6 @@
+query getCorpuses($projectPath: ID!) {
+  mockedPackages(projectPath: $projectPath) @client {
+    data
+    totalSize
+  }
+}

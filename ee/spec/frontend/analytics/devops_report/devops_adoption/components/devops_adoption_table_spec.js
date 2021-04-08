@@ -99,6 +99,10 @@ describe('DevopsAdoptionTable', () => {
 
   describe('table fields', () => {
     describe('segment name', () => {
+      beforeEach(() => {
+        createComponent();
+      });
+
       it('displays the correct segment name', () => {
         createComponent();
 
@@ -165,14 +169,32 @@ describe('DevopsAdoptionTable', () => {
       expect(booleanFlag.props('enabled')).toBe(flag);
     });
 
-    it('displays the actions icon', () => {
-      createComponent();
+    describe.each`
+      scenario              | tooltipText                                            | provide                                                           | disabled
+      ${'not active group'} | ${'Remove Group from the table.'}                      | ${{}}                                                             | ${false}
+      ${'active group'}     | ${'You cannot remove the group you are currently in.'} | ${{ groupGid: devopsAdoptionSegmentsData.nodes[0].namespace.id }} | ${true}
+    `('actions column when $scenario', ({ tooltipText, provide, disabled }) => {
+      beforeEach(() => {
+        createComponent({ provide });
+      });
 
-      const button = findColSubComponent(TEST_IDS.ACTIONS, GlButton);
+      it('displays the actions icon', () => {
+        const button = findColSubComponent(TEST_IDS.ACTIONS, GlButton);
 
-      expect(button.exists()).toBe(true);
-      expect(button.props('icon')).toBe('remove');
-      expect(button.props('category')).toBe('tertiary');
+        expect(button.exists()).toBe(true);
+        expect(button.props('disabled')).toBe(disabled);
+        expect(button.props('icon')).toBe('remove');
+        expect(button.props('category')).toBe('tertiary');
+      });
+
+      it('wraps the icon in an element with a tooltip', () => {
+        const iconWrapper = findCol(TEST_IDS.ACTIONS);
+        const tooltip = getBinding(iconWrapper.element, 'gl-tooltip');
+
+        expect(iconWrapper.exists()).toBe(true);
+        expect(tooltip).toBeDefined();
+        expect(tooltip.value).toBe(tooltipText);
+      });
     });
   });
 

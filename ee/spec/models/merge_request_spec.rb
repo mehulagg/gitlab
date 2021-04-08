@@ -908,6 +908,7 @@ RSpec.describe MergeRequest do
     subject { merge_request.compare_coverage_fuzzing_reports(current_user) }
 
     let_it_be(:project) { create(:project, :repository) }
+
     let(:current_user) { project.users.first }
     let(:merge_request) { create(:merge_request, source_project: project) }
 
@@ -968,6 +969,7 @@ RSpec.describe MergeRequest do
     subject { merge_request.compare_api_fuzzing_reports(current_user) }
 
     let_it_be(:project) { create(:project, :repository) }
+
     let(:current_user) { project.users.first }
     let(:merge_request) { create(:merge_request, source_project: project) }
 

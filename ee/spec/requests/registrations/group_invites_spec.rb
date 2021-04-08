@@ -82,7 +82,7 @@ RSpec.describe 'view group invites' do
           it 'tracks experiment as expected', :experiment do
             expect(experiment(:registrations_group_invite))
               .to track(:invites_sent, { property: group.id.to_s, value: valid_emails.size })
-                    .on_any_instance
+                    .on_next_instance
                     .with_context(actor: user)
 
             post_request

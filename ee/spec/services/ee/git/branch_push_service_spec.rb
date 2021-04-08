@@ -6,6 +6,7 @@ RSpec.describe Git::BranchPushService do
   include RepoHelpers
 
   let_it_be(:user) { create(:user) }
+
   let(:blankrev)   { Gitlab::Git::BLANK_SHA }
   let(:oldrev)     { sample_commit.parent_id }
   let(:newrev)     { sample_commit.id }

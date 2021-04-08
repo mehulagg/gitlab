@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Projects::Settings::IntegrationsController do
-  let(:project) { create(:project, :public) }
-  let(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :public) }
+  let_it_be(:user) { create(:user) }
 
   before do
     project.add_maintainer(user)
@@ -27,7 +27,7 @@ RSpec.describe Projects::Settings::IntegrationsController do
     end
   end
 
-  context 'Sets correct services list' do
+  context 'sets correct services list' do
     let(:active_services) { assigns(:services).map(&:type) }
     let(:disabled_services) { %w[GithubService] }
 
@@ -49,16 +49,12 @@ RSpec.describe Projects::Settings::IntegrationsController do
     end
 
     context 'without a license key' do
-      before do
-        License.destroy_all # rubocop: disable Cop/DestroyAll
-      end
-
       it_behaves_like 'endpoint with some disabled services'
     end
 
     context 'with a license key' do
-      let(:namespace) { create(:group, :private) }
-      let(:project) { create(:project, :private, namespace: namespace) }
+      let_it_be(:namespace) { create(:group, :private) }
+      let_it_be(:project) { create(:project, :private, namespace: namespace) }
 
       before do
         create(:license, plan: ::License::PREMIUM_PLAN)

@@ -164,7 +164,7 @@ module MergeRequests
 
     def pipeline_merge_requests(pipeline)
       pipeline.all_merge_requests.opened.each do |merge_request|
-        next unless pipeline == merge_request.head_pipeline
+        next unless pipeline.id == merge_request.head_pipeline_id
 
         yield merge_request
       end
@@ -194,6 +194,12 @@ module MergeRequests
       Gitlab::GitLogger.error(data)
 
       merge_request.update(merge_error: message) if save_message_on_model
+    end
+
+    def delete_milestone_total_merge_requests_counter_cache(milestone)
+      return unless milestone
+
+      Milestones::MergeRequestsCountService.new(milestone).delete_cache
     end
   end
 end

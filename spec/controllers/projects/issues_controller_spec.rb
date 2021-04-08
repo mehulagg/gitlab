@@ -8,6 +8,7 @@ RSpec.describe Projects::IssuesController do
 
   let_it_be(:project, reload: true) { create(:project) }
   let_it_be(:user, reload: true) { create(:user) }
+
   let(:issue) { create(:issue, project: project) }
   let(:spam_action_response_fields) { { 'stub_spam_action_response_fields' => true } }
 
@@ -74,8 +75,9 @@ RSpec.describe Projects::IssuesController do
         end
 
         it 'assigns the candidate experience and tracks the event' do
-          expect(experiment(:null_hypothesis)).to track('index').on_any_instance.for(:candidate)
+          expect(experiment(:null_hypothesis)).to track('index').for(:candidate)
             .with_context(project: project)
+            .on_next_instance
 
           get :index, params: { namespace_id: project.namespace, project_id: project }
         end
@@ -218,10 +220,10 @@ RSpec.describe Projects::IssuesController do
         end
 
         it 'assigns the candidate experience and tracks the event' do
-          expect(experiment(:invite_member_link)).to track(:view, property: project.root_ancestor.id.to_s)
-                                                       .on_any_instance
-                                                       .for(:invite_member_link)
-                                                       .with_context(namespace: project.root_ancestor)
+          expect(experiment(:invite_members_in_comment)).to track(:view, property: project.root_ancestor.id.to_s)
+            .for(:invite_member_link)
+            .with_context(namespace: project.root_ancestor)
+            .on_next_instance
 
           get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }
         end
@@ -229,7 +231,7 @@ RSpec.describe Projects::IssuesController do
 
       context 'when user can not invite' do
         it 'does not track the event' do
-          expect(experiment(:invite_member_link)).not_to track(:view)
+          expect(experiment(:invite_members_in_comment)).not_to track(:view)
 
           get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }
         end
@@ -368,6 +370,7 @@ RSpec.describe Projects::IssuesController do
     end
 
     let_it_be(:issue) { create(:issue, project: project) }
+
     let(:developer) { user }
     let(:params) do
       {
@@ -1184,6 +1187,7 @@ RSpec.describe Projects::IssuesController do
 
     context 'resolving discussions in MergeRequest' do
       let_it_be(:discussion) { create(:diff_note_on_merge_request).to_discussion }
+
       let(:merge_request) { discussion.noteable }
       let(:project) { merge_request.source_project }
 
@@ -1514,12 +1518,6 @@ RSpec.describe Projects::IssuesController do
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
         expect(json_response).to eq({ 'errors' => 'Destroy confirmation not provided for issue' })
       end
-
-      it 'delegates the update of the todos count cache to TodoService' do
-        expect_any_instance_of(TodoService).to receive(:destroy_target).with(issue).once
-
-        delete :destroy, params: { namespace_id: project.namespace, project_id: project, id: issue.iid, destroy_confirm: true }
-      end
     end
   end
 
@@ -1647,6 +1645,7 @@ RSpec.describe Projects::IssuesController do
 
   describe 'POST #import_csv' do
     let_it_be(:project) { create(:project, :public) }
+
     let(:file) { fixture_file_upload('spec/fixtures/csv_comma.csv') }
 
     context 'unauthorized' do
@@ -1846,6 +1845,7 @@ RSpec.describe Projects::IssuesController do
 
       context 'with cross-reference system note', :request_store do
         let_it_be(:new_issue) { create(:issue) }
+
         let(:cross_reference) { "mentioned in #{new_issue.to_reference(issue.project)}" }
 
         before do

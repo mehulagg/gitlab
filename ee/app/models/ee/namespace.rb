@@ -47,10 +47,6 @@ module EE
           .where(plans: { name: [nil, *::Plan.default_plans] })
       end
 
-      scope :eligible_for_subscription, -> do
-        top_most.in_active_trial.or(top_most.in_default_plan)
-      end
-
       scope :eligible_for_trial, -> do
         left_joins(gitlab_subscription: :hosted_plan)
           .where(

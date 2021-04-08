@@ -10,6 +10,9 @@ module Dast
 
     has_many :secret_variables, through: :dast_site_profile, class_name: 'Dast::SiteProfileSecretVariable'
 
+    has_many :dast_profiles_pipelines, class_name: 'Dast::ProfilesPipeline', foreign_key: :dast_profile_id, inverse_of: :dast_profile
+    has_many :ci_pipelines, class_name: 'Ci::Pipeline', through: :dast_profiles_pipelines
+
     validates :description, length: { maximum: 255 }
     validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
     validates :branch_name, length: { maximum: 255 }
@@ -26,6 +29,10 @@ module Dast
       return unless project.repository.exists?
 
       Dast::Branch.new(self)
+    end
+
+    def ci_variables
+      ::Gitlab::Ci::Variables::Collection.new(secret_variables)
     end
 
     private

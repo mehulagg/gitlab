@@ -12,6 +12,12 @@ module Geo
       event :deleted
     end
 
+    class_methods do
+      def sync_timeout
+        ::Geo::BlobDownloadService::LEASE_TIMEOUT
+      end
+    end
+
     def handle_after_create_commit
       return false unless Gitlab::Geo.primary?
       return unless self.class.enabled?

@@ -188,7 +188,7 @@ RSpec.describe 'Epics through GroupQuery' do
           end.count
 
           epics_with_parent = create_list(:epic, 3, group: group) do |epic|
-            epic.update(parent: create(:epic, group: group))
+            epic.update!(parent: create(:epic, group: group))
           end
           group.reload
 
@@ -219,8 +219,8 @@ RSpec.describe 'Epics through GroupQuery' do
           end
 
           it 'returns a nil group for a user without permissions to see the group' do
-            project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-            group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+            project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+            group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
             post_graphql(query, current_user: user)
 

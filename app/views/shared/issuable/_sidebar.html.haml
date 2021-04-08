@@ -34,7 +34,7 @@
 
       - if issuable_sidebar[:supports_milestone]
         - milestone = issuable_sidebar[:milestone] || {}
-        .block.milestone{ class: 'gl-border-b-0!', data: { qa_selector: 'milestone_block' } }
+        .block.milestone{ :class => ("gl-border-b-0!" if issuable_sidebar[:supports_iterations]), data: { qa_selector: 'milestone_block' } }
           .sidebar-collapsed-icon.has-tooltip{ title: sidebar_milestone_tooltip_label(milestone), data: { container: 'body', html: 'true', placement: 'left', boundary: 'viewport' } }
             = sprite_icon('clock')
             %span.milestone-title.collapse-truncated-title
@@ -138,7 +138,7 @@
               = clipboard_button(text: source_branch, title: _('Copy branch name'), placement: "left", boundary: 'viewport')
             .gl-display-flex.gl-align-items-center.gl-justify-content-space-between.gl-mb-2.hide-collapsed
               %span.gl-overflow-hidden.gl-text-overflow-ellipsis.gl-white-space-nowrap
-                = _('Source branch: %{source_branch_open}%{source_branch}%{source_branch_close}').html_safe % { source_branch_open: "<span class='gl-font-monospace' title='#{source_branch}'>".html_safe, source_branch_close: "</span>".html_safe, source_branch: source_branch }
+                = _('Source branch: %{source_branch_open}%{source_branch}%{source_branch_close}').html_safe % { source_branch_open: "<span class='gl-font-monospace' data-testid='ref-name' title='#{html_escape(source_branch)}'>".html_safe, source_branch_close: "</span>".html_safe, source_branch: html_escape(source_branch) }
               = clipboard_button(text: source_branch, title: _('Copy branch name'), placement: "left", boundary: 'viewport')
 
       - if show_forwarding_email

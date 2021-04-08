@@ -1,4 +1,4 @@
-import { GlForm, GlFormInput } from '@gitlab/ui';
+import { GlForm, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import CloudLicenseSubscriptionActivationForm, {
@@ -25,8 +25,10 @@ describe('CloudLicenseApp', () => {
   };
 
   const findActivateButton = () => wrapper.findByTestId('activate-button');
+  const findAgreementCheckbox = () => wrapper.findComponent(GlFormCheckbox);
   const findActivationCodeInput = () => wrapper.findComponent(GlFormInput);
   const findActivateSubscriptionForm = () => wrapper.findComponent(GlForm);
+  const enableAcceptAgreementCheckbox = () => findAgreementCheckbox().vm.$emit('input', true);
 
   const GlFormInputStub = stubComponent(GlFormInput, {
     template: `<input />`,
@@ -69,6 +71,21 @@ describe('CloudLicenseApp', () => {
 
     it('has an `Activate` button', () => {
       expect(findActivateButton().text()).toBe('Activate');
+    });
+
+    it('has a checkbox to accept subscription agreement', () => {
+      expect(findAgreementCheckbox().exists()).toBe(true);
+    });
+
+    it('disables the activate button if the agreement is unaccepted', () => {
+      expect(findActivateButton().props('disabled')).toBe(true);
+    });
+
+    it('enables the activate button if the agreement is accepted', async () => {
+      expect(findActivateButton().props('disabled')).toBe(true);
+      enableAcceptAgreementCheckbox();
+      await wrapper.vm.$nextTick();
+
       expect(findActivateButton().props('disabled')).toBe(false);
     });
   });

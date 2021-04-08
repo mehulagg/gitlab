@@ -27,7 +27,7 @@
 
       = render 'enforce_terms'
 
-      = render_if_exists 'devise/shared/email_opted_in', f: f
+      = render 'devise/shared/email_opted_in', f: f
 
       - if current_user
         %p.text-center= _("You'll be signed out from your current account automatically.")

@@ -8,8 +8,12 @@ RSpec.describe Types::Ci::JobType do
 
   it 'exposes the expected fields' do
     expected_fields = %i[
+      active
       allow_failure
       artifacts
+      cancelable
+      commitPath
+      coverage
       created_at
       detailedStatus
       duration
@@ -18,13 +22,18 @@ RSpec.describe Types::Ci::JobType do
       name
       needs
       pipeline
+      playable
       queued_at
+      refName
+      refPath
+      retryable
       scheduledAt
       schedulingType
       shortSha
       stage
       started_at
       status
+      tags
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)

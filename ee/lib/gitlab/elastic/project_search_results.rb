@@ -17,7 +17,7 @@ module Gitlab
 
       private
 
-      def blobs(page: 1, per_page: DEFAULT_PER_PAGE, count_only: false)
+      def blobs(page: 1, per_page: DEFAULT_PER_PAGE, count_only: false, preload_method: nil)
         return Kaminari.paginate_array([]) unless Ability.allowed?(@current_user, :download_code, project)
         return Kaminari.paginate_array([]) if project.empty_repo? || query.blank?
         return Kaminari.paginate_array([]) unless root_ref?
@@ -27,7 +27,8 @@ module Gitlab
             query,
             page: (page || 1).to_i,
             per: per_page,
-            options: { count_only: count_only }
+            options: { count_only: count_only },
+            preload_method: preload_method
           )
         end
       end

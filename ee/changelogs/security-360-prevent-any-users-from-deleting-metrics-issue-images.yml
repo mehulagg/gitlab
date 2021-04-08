@@ -1,0 +1,5 @@
+---
+title: Fix permissions for modifying issue metric images
+merge_request:
+author:
+type: security

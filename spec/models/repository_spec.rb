@@ -170,6 +170,22 @@ RSpec.describe Repository do
     end
   end
 
+  describe '#search_branch_names' do
+    subject(:search_branch_names) { repository.search_branch_names('conflict-*') }
+
+    it 'returns matching branch names' do
+      expect(search_branch_names).to contain_exactly(
+        'conflict-binary-file',
+        'conflict-resolvable',
+        'conflict-contains-conflict-markers',
+        'conflict-missing-side',
+        'conflict-start',
+        'conflict-non-utf8',
+        'conflict-too-large'
+      )
+    end
+  end
+
   describe '#list_last_commits_for_tree' do
     let(:path_to_commit) do
       {
@@ -1698,12 +1714,13 @@ RSpec.describe Repository do
     end
 
     it 'writes merge of source SHA and first parent ref to MR merge_ref_path' do
-      merge_commit_id = repository.merge_to_ref(user,
-                                                merge_request.diff_head_sha,
-                                                merge_request,
-                                                merge_request.merge_ref_path,
-                                                'Custom message',
-                                                merge_request.target_branch_ref)
+      merge_commit_id =
+        repository.merge_to_ref(user,
+          source_sha: merge_request.diff_head_sha,
+          branch: merge_request.target_branch,
+          target_ref: merge_request.merge_ref_path,
+          message: 'Custom message',
+          first_parent_ref: merge_request.target_branch_ref)
 
       merge_commit = repository.commit(merge_commit_id)
 

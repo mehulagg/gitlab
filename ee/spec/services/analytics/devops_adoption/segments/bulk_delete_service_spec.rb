@@ -7,6 +7,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::BulkDeleteService do
 
   let_it_be(:group) { create(:group) }
   let_it_be(:admin) { create(:user, :admin) }
+
   let(:segment) { create(:devops_adoption_segment, namespace: group) }
   let(:segment2) { create(:devops_adoption_segment) }
   let(:current_user) { admin }

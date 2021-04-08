@@ -584,10 +584,18 @@ module Ci
     end
 
     def cancel_running(retries: nil)
-      retry_optimistic_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelable|
-        cancelable.find_each do |job|
-          yield(job) if block_given?
-          job.cancel
+      commit_status_relations = [:project, :pipeline]
+      ci_build_relations = [:deployment, :taggings]
+
+      retry_optimistic_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelables|
+        cancelables.find_in_batches do |batch|
+          ActiveRecord::Associations::Preloader.new.preload(batch, commit_status_relations)
+          ActiveRecord::Associations::Preloader.new.preload(batch.select { |job| job.is_a?(Ci::Build) }, ci_build_relations)
+
+          batch.each do |job|
+            yield(job) if block_given?
+            job.cancel
+          end
         end
       end
     end

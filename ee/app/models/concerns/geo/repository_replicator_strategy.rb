@@ -13,6 +13,12 @@ module Geo
       event :deleted
     end
 
+    class_methods do
+      def sync_timeout
+        ::Geo::FrameworkRepositorySyncService::LEASE_TIMEOUT
+      end
+    end
+
     # Called by Gitlab::Geo::Replicator#consume
     def consume_event_updated(**params)
       return unless in_replicables_for_current_secondary?

@@ -1,4 +1,5 @@
 import { helpPagePath } from '~/helpers/help_page_helper';
+import { __ } from '~/locale';
 
 export const GEO_INFO_URL = helpPagePath('administration/geo/index.md');
 
@@ -16,6 +17,10 @@ export const HELP_INFO_URL = helpPagePath(
   'administration/geo/disaster_recovery/background_verification.html',
   { anchor: 'repository-verification' },
 );
+
+export const REPLICATION_PAUSE_URL = helpPagePath('administration/geo/index.html', {
+  anchor: 'pausing-and-resuming-replication',
+});
 
 export const HEALTH_STATUS_UI = {
   healthy: {
@@ -37,6 +42,19 @@ export const HEALTH_STATUS_UI = {
   offline: {
     icon: 'status_canceled',
     variant: 'neutral',
+  },
+};
+
+export const REPLICATION_STATUS_UI = {
+  enabled: {
+    icon: 'play',
+    color: 'gl-text-green-600',
+    text: __('Enabled'),
+  },
+  disabled: {
+    icon: 'pause',
+    color: 'gl-text-orange-600',
+    text: __('Paused'),
   },
 };
 

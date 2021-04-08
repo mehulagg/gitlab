@@ -111,44 +111,80 @@ RSpec.describe Registrations::WelcomeController do
       end
 
       context 'email updates' do
-        context 'when setup for company is false' do
+        context 'when not on gitlab.com' do
+          before do
+            allow(::Gitlab).to receive(:com?).and_return(false)
+          end
+
           context 'when the user opted in' do
             let(:email_opted_in) { '1' }
 
-            it 'sets the email_opted_in fields' do
+            it 'sets the email_opted_in field' do
               subject
 
-              expect(controller.current_user.email_opted_in).to be_truthy
-              expect(controller.current_user.email_opted_in_ip).to be_present
-              expect(controller.current_user.email_opted_in_source).to eq('GitLab.com')
-              expect(controller.current_user.email_opted_in_at).not_to be_nil
+              expect(controller.current_user).to be_email_opted_in
             end
           end
 
-          context 'when user opted out' do
-            let(:email_opted_in) { '0' }
-
-            it 'does not set the rest of the email_opted_in fields' do
+          context 'when the user opted out' do
+            it 'sets the email_opted_in field' do
               subject
 
-              expect(controller.current_user.email_opted_in).to be_falsey
-              expect(controller.current_user.email_opted_in_ip).to be_blank
-              expect(controller.current_user.email_opted_in_source).to be_blank
-              expect(controller.current_user.email_opted_in_at).to be_nil
+              expect(controller.current_user).not_to be_email_opted_in
             end
           end
         end
 
-        context 'when setup for company is true' do
-          let(:setup_for_company) { 'true' }
+        context 'when on gitlab.com' do
+          before do
+            allow(::Gitlab).to receive(:com?).and_return(true)
+          end
 
-          it 'sets email_opted_in fields' do
-            subject
+          context 'when setup for company is false' do
+            context 'when the user opted in' do
+              let(:email_opted_in) { '1' }
 
-            expect(controller.current_user.email_opted_in).to be_truthy
-            expect(controller.current_user.email_opted_in_ip).to be_present
-            expect(controller.current_user.email_opted_in_source).to eq('GitLab.com')
-            expect(controller.current_user.email_opted_in_at).not_to be_nil
+              it 'sets the email_opted_in fields' do
+                subject
+
+                expect(controller.current_user).to have_attributes(
+                  email_opted_in: be_truthy,
+                  email_opted_in_ip: be_present,
+                  email_opted_in_source: eq('GitLab.com'),
+                  email_opted_in_at: be_present
+                )
+              end
+            end
+
+            context 'when user opted out' do
+              let(:email_opted_in) { '0' }
+
+              it 'does not set the rest of the email_opted_in fields' do
+                subject
+
+                expect(controller.current_user).to have_attributes(
+                  email_opted_in: false,
+                  email_opted_in_ip: nil,
+                  email_opted_in_source: "",
+                  email_opted_in_at: nil
+                )
+              end
+            end
+          end
+
+          context 'when setup for company is true' do
+            let(:setup_for_company) { 'true' }
+
+            it 'sets email_opted_in fields' do
+              subject
+
+              expect(controller.current_user).to have_attributes(
+                email_opted_in: be_truthy,
+                email_opted_in_ip: be_present,
+                email_opted_in_source: eq('GitLab.com'),
+                email_opted_in_at: be_present
+              )
+            end
           end
         end
       end

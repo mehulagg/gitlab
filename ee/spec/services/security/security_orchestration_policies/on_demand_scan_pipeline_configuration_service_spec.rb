@@ -53,6 +53,7 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
         auth_password_field: site_profile.auth_password_field,
         auth_username: site_profile.auth_username,
         auth_username_field: site_profile.auth_username_field,
+        dast_profile: nil,
         branch: project.default_branch_or_master,
         excluded_urls: site_profile.excluded_urls.join(','),
         full_scan_enabled: false,

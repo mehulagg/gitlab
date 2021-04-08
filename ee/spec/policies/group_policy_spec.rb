@@ -1395,6 +1395,19 @@ RSpec.describe GroupPolicy do
 
             it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
           end
+
+          context 'when parent group has resource access token creation disabled' do
+            let(:parent) { create(:group_with_plan, plan: :bronze_plan) }
+            let(:group) { create(:group, parent: parent) }
+
+            before do
+              parent.namespace_settings.update_column(:resource_access_token_creation_allowed, false)
+            end
+
+            context 'cannot create resource access tokens' do
+              it { is_expected.not_to be_allowed(:create_resource_access_tokens) }
+            end
+          end
         end
 
         context 'read resource access tokens' do

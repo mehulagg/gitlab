@@ -69,8 +69,14 @@ module Gitlab
             end
 
             def validate_service_request
+              headers = {
+                'X-Request-ID' => Labkit::Correlation::CorrelationId.current_id,
+                'X-Gitlab-Token' => validation_service_token
+              }.compact
+
               Gitlab::HTTP.post(
                 validation_service_url, timeout: validation_service_timeout,
+                headers: headers,
                 body: validation_service_payload.to_json
               )
             end
@@ -84,6 +90,10 @@ module Gitlab
 
             def validation_service_url
               ENV['EXTERNAL_VALIDATION_SERVICE_URL']
+            end
+
+            def validation_service_token
+              ENV['EXTERNAL_VALIDATION_SERVICE_TOKEN']
             end
 
             def validation_service_payload

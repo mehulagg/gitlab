@@ -25,7 +25,7 @@ ENV["RAILS_ENV"] = 'test'
 ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
 ENV["RSPEC_ALLOW_INVALID_URLS"] = 'true'
 
-require File.expand_path('../config/environment', __dir__)
+require_relative '../config/environment'
 
 require 'rspec/mocks'
 require 'rspec/rails'
@@ -71,6 +71,8 @@ Dir[Rails.root.join("spec/support/helpers/*.rb")].sort.each { |f| require f }
 Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].sort.each { |f| require f }
 Dir[Rails.root.join("spec/support/shared_examples/*.rb")].sort.each { |f| require f }
 Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
+
+require_relative '../tooling/quality/test_level'
 
 quality_level = Quality::TestLevel.new
 
@@ -275,6 +277,11 @@ RSpec.configure do |config|
       # Vue issues page has feature parity with the current Haml page
       stub_feature_flags(vue_issues_list: false)
 
+      # Disable `refactor_blob_viewer` as we refactor
+      # the blob viewer. See the follwing epic for more:
+      # https://gitlab.com/groups/gitlab-org/-/epics/5531
+      stub_feature_flags(refactor_blob_viewer: false)
+
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
     else
       unstub_all_feature_flags
@@ -336,20 +343,10 @@ RSpec.configure do |config|
     RequestStore.clear!
   end
 
-  if ENV['SKIP_RSPEC_CONTEXT_WRAPPING']
-    config.around(:example, :context_aware) do |example|
-      # Wrap each example in it's own context to make sure the contexts don't
-      # leak
-      Gitlab::ApplicationContext.with_raw_context { example.run }
-    end
-  else
-    config.around do |example|
-      if [:controller, :request, :feature].include?(example.metadata[:type]) || example.metadata[:context_aware]
-        Gitlab::ApplicationContext.with_raw_context { example.run }
-      else
-        example.run
-      end
-    end
+  config.around do |example|
+    # Wrap each example in it's own context to make sure the contexts don't
+    # leak
+    Gitlab::ApplicationContext.with_raw_context { example.run }
   end
 
   config.around do |example|

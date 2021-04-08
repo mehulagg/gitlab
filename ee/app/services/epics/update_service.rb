@@ -47,9 +47,18 @@ module Epics
 
       todo_service.update_epic(epic, current_user, old_mentioned_users)
 
-      if epic.previous_changes.include?('confidential') && epic.confidential?
+      if epic.saved_change_to_attribute?(:confidential)
+        handle_confidentiality_change(epic)
+      end
+    end
+
+    def handle_confidentiality_change(epic)
+      if epic.confidential?
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_confidential_action(author: current_user)
         # don't enqueue immediately to prevent todos removal in case of a mistake
         ::TodosDestroyer::ConfidentialEpicWorker.perform_in(::Todo::WAIT_FOR_DELETE, epic.id)
+      else
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_visible_action(author: current_user)
       end
     end
 

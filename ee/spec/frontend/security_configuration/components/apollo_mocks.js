@@ -1,20 +1,12 @@
-const buildConfigureDependencyScanningMock = ({
+export const buildConfigureSecurityFeatureMockFactory = (mutationType) => ({
   successPath = 'testSuccessPath',
   errors = [],
 } = {}) => ({
   data: {
-    configureDependencyScanning: {
+    [mutationType]: {
       successPath,
       errors,
-      __typename: 'ConfigureDependencyScanningPayload',
+      __typename: `${mutationType}Payload`,
     },
   },
-});
-
-export const configureDependencyScanningSuccess = buildConfigureDependencyScanningMock();
-export const configureDependencyScanningNoSuccessPath = buildConfigureDependencyScanningMock({
-  successPath: '',
-});
-export const configureDependencyScanningError = buildConfigureDependencyScanningMock({
-  errors: ['foo'],
 });

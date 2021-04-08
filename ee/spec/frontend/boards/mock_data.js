@@ -115,7 +115,7 @@ export const mockIterations = [
   },
 ];
 
-const labels = [
+export const labels = [
   {
     id: 'gid://gitlab/GroupLabel/5',
     title: 'Cosync',

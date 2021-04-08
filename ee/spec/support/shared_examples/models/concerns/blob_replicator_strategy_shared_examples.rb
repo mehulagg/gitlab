@@ -30,6 +30,8 @@ RSpec.shared_examples 'a blob replicator' do
 
   describe '#handle_after_create_commit' do
     it 'creates a Geo::Event' do
+      model_record.save!
+
       expect do
         replicator.handle_after_create_commit
       end.to change { ::Geo::Event.count }.by(1)

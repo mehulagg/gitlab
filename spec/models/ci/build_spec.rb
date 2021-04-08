@@ -1135,6 +1135,8 @@ RSpec.describe Ci::Build do
   end
 
   describe 'state transition as a deployable' do
+    subject { build.send(event) }
+
     let!(:build) { create(:ci_build, :with_deployment, :start_review_app, project: project, pipeline: pipeline) }
     let(:deployment) { build.deployment }
     let(:environment) { deployment.environment }
@@ -1149,54 +1151,78 @@ RSpec.describe Ci::Build do
       expect(environment.name).to eq('review/master')
     end
 
-    context 'when transits to running' do
-      before do
-        build.run!
+    shared_examples_for 'avoid deadlock' do
+      it 'executes UPDATE in the right order' do
+        recorded = ActiveRecord::QueryRecorder.new { subject }
+
+        index_for_build = recorded.log.index { |l| l.include?("UPDATE \"ci_builds\"") }
+        index_for_deployment = recorded.log.index { |l| l.include?("UPDATE \"deployments\"") }
+
+        expect(index_for_build).to be < index_for_deployment
       end
+    end
+
+    context 'when transits to running' do
+      let(:event) { :run! }
+
+      it_behaves_like 'avoid deadlock'
 
       it 'transits deployment status to running' do
+        subject
+
         expect(deployment).to be_running
       end
     end
 
     context 'when transits to success' do
+      let(:event) { :success! }
+
       before do
         allow(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
         allow(Deployments::ExecuteHooksWorker).to receive(:perform_async)
-        build.success!
       end
 
+      it_behaves_like 'avoid deadlock'
+
       it 'transits deployment status to success' do
+        subject
+
         expect(deployment).to be_success
       end
     end
 
     context 'when transits to failed' do
-      before do
-        build.drop!
-      end
+      let(:event) { :drop! }
+
+      it_behaves_like 'avoid deadlock'
 
       it 'transits deployment status to failed' do
+        subject
+
         expect(deployment).to be_failed
       end
     end
 
     context 'when transits to skipped' do
-      before do
-        build.skip!
-      end
+      let(:event) { :skip! }
+
+      it_behaves_like 'avoid deadlock'
 
       it 'transits deployment status to skipped' do
+        subject
+
         expect(deployment).to be_skipped
       end
     end
 
     context 'when transits to canceled' do
-      before do
-        build.cancel!
-      end
+      let(:event) { :cancel! }
+
+      it_behaves_like 'avoid deadlock'
 
       it 'transits deployment status to canceled' do
+        subject
+
         expect(deployment).to be_canceled
       end
     end
@@ -3582,10 +3608,10 @@ RSpec.describe Ci::Build do
   end
 
   describe 'state transition when build fails' do
-    let(:service) { MergeRequests::AddTodoWhenBuildFailsService.new(project, user) }
+    let(:service) { ::MergeRequests::AddTodoWhenBuildFailsService.new(project, user) }
 
     before do
-      allow(MergeRequests::AddTodoWhenBuildFailsService).to receive(:new).and_return(service)
+      allow(::MergeRequests::AddTodoWhenBuildFailsService).to receive(:new).and_return(service)
       allow(service).to receive(:close)
     end
 
@@ -3670,15 +3696,42 @@ RSpec.describe Ci::Build do
         subject.drop!
       end
 
-      it 'creates a todo' do
-        project.add_developer(user)
+      context 'when async_add_build_failure_todo flag enabled' do
+        it 'creates a todo async', :sidekiq_inline do
+          project.add_developer(user)
 
-        expect_next_instance_of(TodoService) do |todo_service|
-          expect(todo_service)
-            .to receive(:merge_request_build_failed).with(merge_request)
+          expect_next_instance_of(TodoService) do |todo_service|
+            expect(todo_service)
+              .to receive(:merge_request_build_failed).with(merge_request)
+          end
+
+          subject.drop!
         end
 
-        subject.drop!
+        it 'does not create a sync todo' do
+          project.add_developer(user)
+
+          expect(TodoService).not_to receive(:new)
+
+          subject.drop!
+        end
+      end
+
+      context 'when async_add_build_failure_todo flag disabled' do
+        before do
+          stub_feature_flags(async_add_build_failure_todo: false)
+        end
+
+        it 'creates a todo sync' do
+          project.add_developer(user)
+
+          expect_next_instance_of(TodoService) do |todo_service|
+            expect(todo_service)
+              .to receive(:merge_request_build_failed).with(merge_request)
+          end
+
+          subject.drop!
+        end
       end
     end
 
@@ -3703,6 +3756,7 @@ RSpec.describe Ci::Build do
 
   describe '.matches_tag_ids' do
     let_it_be(:build, reload: true) { create(:ci_build, project: project, user: user) }
+
     let(:tag_ids) { ::ActsAsTaggableOn::Tag.named_any(tag_list).ids }
 
     subject { described_class.where(id: build).matches_tag_ids(tag_ids) }
@@ -4154,6 +4208,7 @@ RSpec.describe Ci::Build do
 
   describe '#artifacts_metadata_entry' do
     let_it_be(:build) { create(:ci_build, project: project) }
+
     let(:path) { 'other_artifacts_0.1.2/another-subdirectory/banana_sample.gif' }
 
     around do |example|

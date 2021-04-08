@@ -244,7 +244,7 @@ export default {
       <template v-if="canCreateIssue" #header-actions>
         <gl-button
           ref="createIssue"
-          variant="success"
+          variant="confirm"
           category="secondary"
           data-qa-selector="create_issue_button"
           :loading="isProcessingAction"

@@ -272,6 +272,41 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           it_behaves_like 'updates milestone'
         end
+
+        context 'milestone counters cache reset' do
+          let(:milestone_old) { create(:milestone, project: project) }
+          let(:opts) { { milestone: milestone_old } }
+
+          it 'deletes milestone counters' do
+            expect_next_instance_of(Milestones::MergeRequestsCountService, milestone_old) do |service|
+              expect(service).to receive(:delete_cache).and_call_original
+            end
+
+            expect_next_instance_of(Milestones::MergeRequestsCountService, milestone) do |service|
+              expect(service).to receive(:delete_cache).and_call_original
+            end
+
+            update_merge_request(milestone: milestone)
+          end
+
+          it 'deletes milestone counters when the milestone is removed' do
+            expect_next_instance_of(Milestones::MergeRequestsCountService, milestone_old) do |service|
+              expect(service).to receive(:delete_cache).and_call_original
+            end
+
+            update_merge_request(milestone: nil)
+          end
+
+          it 'deletes milestone counters when the milestone was not set' do
+            update_merge_request(milestone: nil)
+
+            expect_next_instance_of(Milestones::MergeRequestsCountService, milestone) do |service|
+              expect(service).to receive(:delete_cache).and_call_original
+            end
+
+            update_merge_request(milestone: milestone)
+          end
+        end
       end
 
       it 'executes hooks with update action' do
@@ -948,18 +983,8 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       end
 
       it 'removes `MergeRequestsClosingIssues` records when issues are not closed anymore' do
-        opts = {
-          title: 'Awesome merge_request',
-          description: "Closes #{first_issue.to_reference} and #{second_issue.to_reference}",
-          source_branch: 'feature',
-          target_branch: 'master',
-          force_remove_source_branch: '1'
-        }
-
-        merge_request = MergeRequests::CreateService.new(project, user, opts).execute
-
-        issue_ids = MergeRequestsClosingIssues.where(merge_request: merge_request).pluck(:issue_id)
-        expect(issue_ids).to match_array([first_issue.id, second_issue.id])
+        create(:merge_requests_closing_issues, issue: first_issue, merge_request: merge_request)
+        create(:merge_requests_closing_issues, issue: second_issue, merge_request: merge_request)
 
         service = described_class.new(project, user, description: "not closing any issues")
         allow(service).to receive(:execute_hooks)

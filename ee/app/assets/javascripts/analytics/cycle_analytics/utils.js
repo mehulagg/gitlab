@@ -1,7 +1,8 @@
 import dateFormat from 'dateformat';
-import { isNumber } from 'lodash';
+import { unescape, isNumber } from 'lodash';
 import createFlash, { hideFlash } from '~/flash';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { sanitize } from '~/lib/dompurify';
+import { convertObjectPropsToCamelCase, roundToNearestHalf } from '~/lib/utils/common_utils';
 import {
   newDate,
   dayAfter,
@@ -14,6 +15,7 @@ import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
 import { s__, sprintf } from '~/locale';
 import { dateFormats } from '../shared/constants';
 import { toYmd } from '../shared/utils';
+import { OVERVIEW_STAGE_ID } from './constants';
 
 const EVENT_TYPE_LABEL = 'label';
 const ERROR_NAME_RESERVED = 'is reserved';
@@ -358,6 +360,71 @@ export const throwIfUserForbidden = (error) => {
 export const isStageNameExistsError = ({ status, errors }) =>
   status === httpStatus.UNPROCESSABLE_ENTITY && errors?.name?.includes(ERROR_NAME_RESERVED);
 
+export const timeSummaryForPathNavigation = ({ seconds, hours, days, minutes, weeks, months }) => {
+  if (months) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}M'), {
+      value: roundToNearestHalf(months),
+    });
+  } else if (weeks) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}w'), {
+      value: roundToNearestHalf(weeks),
+    });
+  } else if (days) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}d'), {
+      value: roundToNearestHalf(days),
+    });
+  } else if (hours) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}h'), { value: hours });
+  } else if (minutes) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}m'), { value: minutes });
+  } else if (seconds) {
+    return unescape(sanitize(s__('ValueStreamAnalytics|&lt;1m'), { ALLOWED_TAGS: [] }));
+  }
+  return '-';
+};
+
+/**
+ * Takes a raw median value in seconds and converts it to a string representation
+ * ie. converts 172800 => 2d (2 days)
+ *
+ * @param {Number} Median - The number of seconds for the median calculation
+ * @returns {String} String representation ie 2w
+ */
+export const medianTimeToParsedSeconds = (value) =>
+  timeSummaryForPathNavigation({
+    ...parseSeconds(value, { daysPerWeek: 7, hoursPerDay: 24 }),
+    seconds: value,
+  });
+
+/**
+ * Takes the raw median value arrays and converts them into a useful object
+ * containing the string for display in the path navigation, additionally
+ * the overview is calculated as a sum of all the stages.
+ * ie. converts [{ id: 'test', value: 172800 }] => { 'test': '2d' }
+ *
+ * @param {Array} Medians - Array of stage median objects, each contains a `id`, `value` and `error`
+ * @returns {Object} Returns key value pair with the stage name and its display median value
+ */
+export const formatMedianValuesWithOverview = (medians = []) => {
+  const calculatedMedians = medians.reduce(
+    (acc, { id, value = 0 }) => {
+      return {
+        ...acc,
+        [id]: value ? medianTimeToParsedSeconds(value) : '-',
+        [OVERVIEW_STAGE_ID]: acc[OVERVIEW_STAGE_ID] + value,
+      };
+    },
+    {
+      [OVERVIEW_STAGE_ID]: 0,
+    },
+  );
+  const overviewMedian = calculatedMedians[OVERVIEW_STAGE_ID];
+  return {
+    ...calculatedMedians,
+    [OVERVIEW_STAGE_ID]: overviewMedian ? medianTimeToParsedSeconds(overviewMedian) : '-',
+  };
+};
+
 /**
  * Takes the stages and median data, combined with the selected stage, to build an
  * array which is formatted to proivde the data required for the path navigation.
@@ -369,14 +436,8 @@ export const isStageNameExistsError = ({ status, errors }) =>
  */
 export const transformStagesForPathNavigation = ({ stages, medians, selectedStage }) => {
   const formattedStages = stages.map((stage) => {
-    const { days } = parseSeconds(medians[stage.id], {
-      daysPerWeek: 7,
-      hoursPerDay: 24,
-      limitToDays: true,
-    });
-
     return {
-      metric: days ? sprintf(s__('ValueStreamAnalytics|%{days}d'), { days }) : null,
+      metric: medians[stage?.id],
       selected: stage.title === selectedStage.title,
       icon: null,
       ...stage,

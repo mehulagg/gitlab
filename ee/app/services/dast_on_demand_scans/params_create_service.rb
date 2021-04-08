@@ -25,9 +25,21 @@ module DastOnDemandScans
       ).execute.present?
     end
 
-    def branch
-      strong_memoize(:branch) do
-        params[:branch] || container.default_branch
+    def dast_profile
+      strong_memoize(:dast_profile) do
+        params[:dast_profile]
+      end
+    end
+
+    def dast_site_profile
+      strong_memoize(:dast_site_profile) do
+        dast_profile&.dast_site_profile || params[:dast_site_profile]
+      end
+    end
+
+    def dast_scanner_profile
+      strong_memoize(:dast_scanner_profile) do
+        dast_profile&.dast_scanner_profile || params[:dast_scanner_profile]
       end
     end
 
@@ -37,15 +49,9 @@ module DastOnDemandScans
       end
     end
 
-    def dast_site_profile
-      strong_memoize(:dast_site_profile) do
-        params[:dast_site_profile]
-      end
-    end
-
-    def dast_scanner_profile
-      strong_memoize(:dast_scanner_profile) do
-        params[:dast_scanner_profile]
+    def branch
+      strong_memoize(:branch) do
+        dast_profile&.branch_name || params[:branch] || container.default_branch
       end
     end
 
@@ -57,6 +63,7 @@ module DastOnDemandScans
 
     def default_config
       {
+        dast_profile: dast_profile,
         branch: branch,
         target_url: dast_site&.url
       }
@@ -66,7 +73,7 @@ module DastOnDemandScans
       return {} unless dast_site_profile
 
       {
-        excluded_urls: dast_site_profile.excluded_urls.join(','),
+        excluded_urls: dast_site_profile.excluded_urls.presence&.join(','),
         auth_username_field: dast_site_profile.auth_username_field,
         auth_password_field: dast_site_profile.auth_password_field,
         auth_username: dast_site_profile.auth_username

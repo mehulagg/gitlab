@@ -118,20 +118,24 @@ const stageFixtures = defaultStages.reduce((acc, stage) => {
   };
 }, {});
 
-export const stageMedians = defaultStages.reduce((acc, stage) => {
-  const { value } = getJSONFixture(fixtureEndpoints.stageMedian(stage));
-  return {
-    ...acc,
-    [stage]: value,
-  };
-}, {});
+export const rawStageMedians = defaultStages.map((id) => ({
+  id,
+  ...getJSONFixture(fixtureEndpoints.stageMedian(id)),
+}));
 
-export const stageMediansWithNumericIds = defaultStages.reduce((acc, stage) => {
-  const { value } = getJSONFixture(fixtureEndpoints.stageMedian(stage));
-  const { id } = getStageByTitle(dummyState.stages, stage);
-  return {
+export const stageMedians = rawStageMedians.reduce(
+  (acc, { id, value }) => ({
     ...acc,
     [id]: value,
+  }),
+  {},
+);
+
+export const stageMediansWithNumericIds = rawStageMedians.reduce((acc, { id, value }) => {
+  const { id: stageId } = getStageByTitle(dummyState.stages, id);
+  return {
+    ...acc,
+    [stageId]: value,
   };
 }, {});
 
@@ -206,7 +210,7 @@ export const rawTasksByTypeData = transformRawTasksByTypeData(apiTasksByTypeData
 export const transformedTasksByTypeData = getTasksByTypeData(apiTasksByTypeData);
 
 export const transformedStagePathData = transformStagesForPathNavigation({
-  stages: [OVERVIEW_STAGE_CONFIG, ...allowedStages],
+  stages: [{ ...OVERVIEW_STAGE_CONFIG }, ...allowedStages],
   medians,
   selectedStage: issueStage,
 });
@@ -297,5 +301,4 @@ export const selectedProjects = [
   },
 ];
 
-// Value returned from JSON fixture is 172800 for issue stage which equals 2d
-export const pathNavIssueMetric = '2d';
+export const pathNavIssueMetric = 172800;

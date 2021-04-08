@@ -129,7 +129,7 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
     it 'returns the vulnerability count' do
       expect(result).to match(a_hash_including(
                                 dast: a_hash_including(vulnerabilities_count: 20),
-                                sast: a_hash_including(vulnerabilities_count: 33),
+                                sast: a_hash_including(vulnerabilities_count: 5),
                                 container_scanning: a_hash_including(vulnerabilities_count: 8),
                                 dependency_scanning: a_hash_including(vulnerabilities_count: 4)
                               ))

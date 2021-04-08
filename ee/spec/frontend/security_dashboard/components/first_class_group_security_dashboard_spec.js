@@ -6,6 +6,7 @@ import FirstClassGroupDashboard from 'ee/security_dashboard/components/first_cla
 import FirstClassGroupVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import SurveyRequestBanner from 'ee/security_dashboard/components/survey_request_banner.vue';
 import VulnerabilitiesCountList from 'ee/security_dashboard/components/vulnerability_count_list.vue';
 
 describe('First Class Group Dashboard Component', () => {
@@ -15,15 +16,16 @@ describe('First Class Group Dashboard Component', () => {
   const emptyStateSvgPath = 'empty-state-path';
   const groupFullPath = 'group-full-path';
 
-  const findDashboardLayout = () => wrapper.find(SecurityDashboardLayout);
-  const findGroupVulnerabilities = () => wrapper.find(FirstClassGroupVulnerabilities);
-  const findCsvExportButton = () => wrapper.find(CsvExportButton);
-  const findFilters = () => wrapper.find(Filters);
-  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findEmptyState = () => wrapper.find(DashboardNotConfigured);
-  const findVulnerabilitiesCountList = () => wrapper.find(VulnerabilitiesCountList);
+  const findDashboardLayout = () => wrapper.findComponent(SecurityDashboardLayout);
+  const findGroupVulnerabilities = () => wrapper.findComponent(FirstClassGroupVulnerabilities);
+  const findCsvExportButton = () => wrapper.findComponent(CsvExportButton);
+  const findFilters = () => wrapper.findComponent(Filters);
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findEmptyState = () => wrapper.findComponent(DashboardNotConfigured);
+  const findVulnerabilitiesCountList = () => wrapper.findComponent(VulnerabilitiesCountList);
+  const findSurveyRequestBanner = () => wrapper.findComponent(SurveyRequestBanner);
 
-  const createWrapper = ({ data } = {}) => {
+  const createWrapper = ({ data, loading = false } = {}) => {
     return shallowMount(FirstClassGroupDashboard, {
       propsData: {
         dashboardDocumentation,
@@ -34,6 +36,13 @@ describe('First Class Group Dashboard Component', () => {
       stubs: {
         SecurityDashboardLayout,
       },
+      mocks: {
+        $apollo: {
+          queries: {
+            projects: { loading },
+          },
+        },
+      },
     });
   };
 
@@ -43,7 +52,7 @@ describe('First Class Group Dashboard Component', () => {
 
   describe('when loading', () => {
     beforeEach(() => {
-      wrapper = createWrapper();
+      wrapper = createWrapper({ loading: true });
     });
 
     it('loading button should be visible', () => {
@@ -52,6 +61,10 @@ describe('First Class Group Dashboard Component', () => {
 
     it('should not display the dashboard not configured component', () => {
       expect(findEmptyState().exists()).toBe(false);
+    });
+
+    it('should not show the survey request banner', () => {
+      expect(findSurveyRequestBanner().exists()).toBe(false);
     });
   });
 
@@ -105,6 +118,10 @@ describe('First Class Group Dashboard Component', () => {
         filters: wrapper.vm.filters,
       });
     });
+
+    it('should show the survey request banner', () => {
+      expect(findSurveyRequestBanner().exists()).toBe(true);
+    });
   });
 
   describe('when has no projects', () => {
@@ -124,6 +141,10 @@ describe('First Class Group Dashboard Component', () => {
 
     it('should display the dashboard not configured component', () => {
       expect(findEmptyState().exists()).toBe(true);
+    });
+
+    it('should show the survey request banner', () => {
+      expect(findSurveyRequestBanner().exists()).toBe(true);
     });
   });
 });

@@ -108,7 +108,6 @@ export default {
     show
     :target="target"
     placement="right"
-    triggers="manual"
     container="viewport"
     :css-classes="['suggest-gitlab-ci-yml', 'ml-4']"
   >

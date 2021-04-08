@@ -132,10 +132,11 @@ module API
                                 .preload(:project_setting)
                                 .preload(:container_expiration_policy)
                                 .preload(:auto_devops)
+                                .preload(:service_desk_setting)
                                 .preload(project_group_links: { group: :route },
                                          fork_network: :root_project,
                                          fork_network_member: :forked_from_project,
-                                         forked_from_project: [:route, :forks, :tags, namespace: :route])
+                                         forked_from_project: [:route, :forks, :tags, :group, :project_feature, namespace: [:route, :owner]])
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

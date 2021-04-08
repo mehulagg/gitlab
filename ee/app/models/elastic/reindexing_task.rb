@@ -18,7 +18,7 @@ class Elastic::ReindexingTask < ApplicationRecord
     original_index_deleted: 12
   }
 
-  scope :old_indices_scheduled_for_deletion, -> { where(state: :success).where('delete_original_index_at IS NOT NULL') }
+  scope :old_indices_scheduled_for_deletion, -> { where(state: :success).where.not(delete_original_index_at: nil) }
   scope :old_indices_to_be_deleted, -> { old_indices_scheduled_for_deletion.where('delete_original_index_at < NOW()') }
 
   before_save :set_in_progress_flag

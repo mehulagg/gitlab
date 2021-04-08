@@ -20,8 +20,13 @@ module Gitlab
       EPIC_FIXED_START_DATE_UPDATED = 'g_project_management_users_updating_fixed_epic_start_date'
       EPIC_FIXED_DUE_DATE_UPDATED = 'g_project_management_users_updating_fixed_epic_due_date'
       EPIC_ISSUE_ADDED = 'g_project_management_epic_issue_added'
+      EPIC_ISSUE_REMOVED = 'g_project_management_epic_issue_removed'
       EPIC_CLOSED = 'g_project_management_epic_closed'
       EPIC_REOPENED = 'g_project_management_epic_reopened'
+      ISSUE_PROMOTED_TO_EPIC = 'g_project_management_issue_promoted_to_epic'
+      EPIC_CONFIDENTIAL = 'g_project_management_users_setting_epic_confidential'
+      EPIC_VISIBLE = 'g_project_management_users_setting_epic_visible'
+      EPIC_LABELS = 'g_project_management_epic_users_changing_labels'
 
       class << self
         def track_epic_created_action(author:)
@@ -76,12 +81,32 @@ module Gitlab
           track_unique_action(EPIC_ISSUE_ADDED, author)
         end
 
+        def track_epic_issue_removed(author:)
+          track_unique_action(EPIC_ISSUE_REMOVED, author)
+        end
+
         def track_epic_closed_action(author:)
           track_unique_action(EPIC_CLOSED, author)
         end
 
         def track_epic_reopened_action(author:)
           track_unique_action(EPIC_REOPENED, author)
+        end
+
+        def track_issue_promoted_to_epic(author:)
+          track_unique_action(ISSUE_PROMOTED_TO_EPIC, author)
+        end
+
+        def track_epic_confidential_action(author:)
+          track_unique_action(EPIC_CONFIDENTIAL, author)
+        end
+
+        def track_epic_visible_action(author:)
+          track_unique_action(EPIC_VISIBLE, author)
+        end
+
+        def track_epic_labels_changed_action(author:)
+          track_unique_action(EPIC_LABELS, author)
         end
 
         private

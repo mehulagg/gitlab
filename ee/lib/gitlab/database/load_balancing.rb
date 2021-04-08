@@ -143,7 +143,8 @@ module Gitlab
 
       DB_ROLES = [
         ROLE_PRIMARY = :primary,
-        ROLE_REPLICA = :replica
+        ROLE_REPLICA = :replica,
+        ROLE_UNKNOWN = :unknown
       ].freeze
 
       # Returns the role (primary/replica) of the database the connection is
@@ -155,7 +156,7 @@ module Gitlab
       def self.db_role_for_connection(connection)
         return ROLE_PRIMARY if !enable? || @proxy.blank?
 
-        proxy.load_balancer.db_role_for_connection(connection) || ROLE_PRIMARY
+        proxy.load_balancer.db_role_for_connection(connection)
       end
     end
   end

@@ -19,9 +19,20 @@ module Gitlab
       @active_users = active_users || default_active_count
     end
 
-    # Returns true if historical data exists between license start and the given date.
-    def historical_data_exists?
-      historical_data.present?
+    def sync
+      return unless should_sync_seats?
+
+      SyncSeatLinkWorker.perform_async
+    end
+
+    # Only sync paid licenses from start date until 14 days after expiration
+    # when seat link feature is enabled.
+    def should_sync_seats?
+      Gitlab::CurrentSettings.seat_link_enabled? &&
+        !license&.trial? &&
+        license&.expires_at && # Skip sync if license has no expiration
+        historical_data.present? && # Skip sync if there is no historical data
+        timestamp.between?(license.starts_at.beginning_of_day, license.expires_at.end_of_day + 14.days)
     end
 
     private
@@ -36,19 +47,23 @@ module Gitlab
       }
     end
 
+    def license
+      ::License.current
+    end
+
     def default_key
-      ::License.current.data
+      license&.data
     end
 
     def default_max_count
-      ::License.current.historical_max(to: timestamp)
+      license&.historical_max(to: timestamp)
     end
 
     def historical_data
       strong_memoize(:historical_data) do
         to_timestamp = timestamp || Time.current
 
-        ::License.current.historical_data(to: to_timestamp).order(:recorded_at).last
+        license&.historical_data(to: to_timestamp)&.order(:recorded_at)&.last
       end
     end
 

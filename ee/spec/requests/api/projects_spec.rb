@@ -171,7 +171,7 @@ RSpec.describe API::Projects do
         before do
           create(:ip_restriction, group: group)
           group.add_maintainer(user)
-          project.update(namespace: group)
+          project.update!(namespace: group)
         end
 
         context 'when the group_ip_restriction feature is not available' do
@@ -1019,7 +1019,7 @@ RSpec.describe API::Projects do
       end
 
       it 'restores project' do
-        project.update(archived: true, marked_for_deletion_at: 1.day.ago, deleting_user: user)
+        project.update!(archived: true, marked_for_deletion_at: 1.day.ago, deleting_user: user)
 
         post api("/projects/#{project.id}/restore", user)
 
@@ -1088,7 +1088,7 @@ RSpec.describe API::Projects do
         let(:group) { create(:group) }
 
         before do
-          group.namespace_settings.update(delayed_project_removal: true)
+          group.namespace_settings.update!(delayed_project_removal: true)
         end
 
         it_behaves_like 'marks project for deletion'

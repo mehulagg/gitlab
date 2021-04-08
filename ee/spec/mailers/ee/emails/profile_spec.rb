@@ -8,6 +8,7 @@ RSpec.describe EE::Emails::Profile do
 
   describe '#policy_revoked_personal_access_tokens_email' do
     let_it_be(:user) { create(:user) }
+
     let(:token_names) { %w(name1 name2) }
 
     subject { Notify.policy_revoked_personal_access_tokens_email(user, token_names) }

@@ -6,7 +6,7 @@ import { formatDate, getDateInPast } from '~/lib/utils/datetime_utility';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { s__, __ } from '~/locale';
 import projectsHistoryQuery from '../graphql/queries/project_vulnerabilities_by_day_and_count.query.graphql';
-import { createProjectLoadingError } from '../helpers';
+import { PROJECT_LOADING_ERROR_MESSAGE } from '../helpers';
 import DashboardNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityChartsLayout from './security_charts_layout.vue';
 
@@ -59,7 +59,7 @@ export default {
         return data?.project?.vulnerabilitiesCountByDay?.nodes ?? [];
       },
       error() {
-        createFlash({ message: createProjectLoadingError() });
+        createFlash({ message: PROJECT_LOADING_ERROR_MESSAGE });
       },
       skip() {
         return !this.hasVulnerabilities;

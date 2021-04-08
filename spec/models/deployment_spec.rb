@@ -161,9 +161,9 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+      it 'does not execute Deployments::LinkMergeRequestWorker' do
         expect(Deployments::LinkMergeRequestWorker)
-          .to receive(:perform_async).with(deployment.id)
+          .not_to receive(:perform_async).with(deployment.id)
 
         deployment.drop!
       end
@@ -188,9 +188,9 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+      it 'does not execute Deployments::LinkMergeRequestWorker' do
         expect(Deployments::LinkMergeRequestWorker)
-          .to receive(:perform_async).with(deployment.id)
+          .not_to receive(:perform_async).with(deployment.id)
 
         deployment.cancel!
       end
@@ -497,7 +497,7 @@ RSpec.describe Deployment do
 
     context 'when the SHA for the deployment does not exist in the repo' do
       it 'returns false' do
-        deployment.update(sha: Gitlab::Git::BLANK_SHA)
+        deployment.update!(sha: Gitlab::Git::BLANK_SHA)
         commit = project.commit
 
         expect(deployment.includes_commit?(commit)).to be false

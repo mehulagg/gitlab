@@ -10,7 +10,7 @@ RSpec.describe Dast::SiteProfileSecretVariables::CreateOrUpdateService do
   let_it_be(:default_params) do
     {
       dast_site_profile: dast_profile.dast_site_profile,
-      key: 'DAST_PASSWORD_BASE64',
+      key: Dast::SiteProfileSecretVariable::PASSWORD,
       raw_value: SecureRandom.hex
     }
   end
