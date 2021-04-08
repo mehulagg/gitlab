@@ -80,9 +80,9 @@ export default {
     genericError: GENERIC_ERROR,
   },
   computed: {
-    ...mapState('diffs', ['currentDiffFileId']),
+    ...mapState('diffs', ['currentDiffFileId', 'codequalityDiff']),
     ...mapGetters(['isNotesFetched']),
-    ...mapGetters('diffs', ['getDiffFileDiscussions', 'getDiffFileCodequality']),
+    ...mapGetters('diffs', ['getDiffFileDiscussions']),
     viewBlobHref() {
       return escape(this.file.view_path);
     },
@@ -149,7 +149,9 @@ export default {
       return loggedIn && featureOn;
     },
     hasCodequalityChanges() {
-      return this.getDiffFileCodequality(this.file.file_path)?.length > 0;
+      return (
+        this.codequalityDiff?.files && this.codequalityDiff?.files[this.file.file_path]?.length > 0
+      );
     },
   },
   watch: {
