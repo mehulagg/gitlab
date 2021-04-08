@@ -31,7 +31,7 @@ export default {
   },
   data() {
     const {
-      enabled,
+      enabled = false,
       url,
       username,
       password,
