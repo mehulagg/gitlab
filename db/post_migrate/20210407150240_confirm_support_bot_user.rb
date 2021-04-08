@@ -14,7 +14,7 @@ class ConfirmSupportBotUser < ActiveRecord::Migration[6.0]
   def down
     # no op
 
-    # The up migration allows for the possibility that the support user might 
+    # The up migration allows for the possibility that the support user might
     # have already been manually confirmed. It's not reversible as this data is
     # subsequently lost.
   end
