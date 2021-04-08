@@ -16155,7 +16155,7 @@ msgstr ""
 msgid "InProductMarketing|*GitLab*, noun: a synonym for efficient teams"
 msgstr ""
 
-msgid "InProductMarketing|...and you can get a free trial of GitLab Gold"
+msgid "InProductMarketing|...and you can get a free trial of GitLab Ultimate"
 msgstr ""
 
 msgid "InProductMarketing|3 ways to dive into GitLab CI/CD"
@@ -16185,7 +16185,7 @@ msgstr ""
 msgid "InProductMarketing|By enabling code owners and required merge approvals the right person will review the right MR. This is a win-win: cleaner code and a more efficient review process."
 msgstr ""
 
-msgid "InProductMarketing|Code owners and required merge approvals are part of the paid tiers of GitLab. You can start a free 30-day trial of GitLab Gold and enable these features in less than 5 minutes with no credit card required."
+msgid "InProductMarketing|Code owners and required merge approvals are part of the paid tiers of GitLab. You can start a free 30-day trial of GitLab Ultimate and enable these features in less than 5 minutes with no credit card required."
 msgstr ""
 
 msgid "InProductMarketing|Create a project in GitLab in 5 minutes"
@@ -16230,7 +16230,7 @@ msgstr ""
 msgid "InProductMarketing|Get started today"
 msgstr ""
 
-msgid "InProductMarketing|Get started today with a 30-day GitLab Gold trial, no credit card required."
+msgid "InProductMarketing|Get started today with a 30-day GitLab Ultimate trial, no credit card required."
 msgstr ""
 
 msgid "InProductMarketing|Get started with GitLab CI/CD"
@@ -16350,7 +16350,7 @@ msgstr ""
 msgid "InProductMarketing|Sometimes you're not ready to make a full transition to a new tool. If you're not ready to fully commit, %{mirroring_link} gives you a safe way to try out GitLab in parallel with your current tool."
 msgstr ""
 
-msgid "InProductMarketing|Start a GitLab Gold trial today in less than one minute, no credit card required."
+msgid "InProductMarketing|Start a GitLab Ultimate trial today in less than one minute, no credit card required."
 msgstr ""
 
 msgid "InProductMarketing|Start a free trial of GitLab Ultimate – no CC required"
@@ -16365,7 +16365,7 @@ msgstr ""
 msgid "InProductMarketing|Start by importing your projects"
 msgstr ""
 
-msgid "InProductMarketing|Start with a GitLab Gold free trial"
+msgid "InProductMarketing|Start with a GitLab Ultimate free trial"
 msgstr ""
 
 msgid "InProductMarketing|Stop wondering and use GitLab to answer questions like:"
@@ -16401,7 +16401,7 @@ msgstr ""
 msgid "InProductMarketing|To understand and get the most out of GitLab, start at the beginning and %{project_link}. In GitLab, repositories are part of a project, so after you've created your project you can go ahead and %{repo_link}."
 msgstr ""
 
-msgid "InProductMarketing|Try GitLab Gold for free"
+msgid "InProductMarketing|Try GitLab Ultimate for free"
 msgstr ""
 
 msgid "InProductMarketing|Try it out"
@@ -16422,7 +16422,7 @@ msgstr ""
 msgid "InProductMarketing|Use GitLab CI/CD"
 msgstr ""
 
-msgid "InProductMarketing|We know a thing or two about efficiency and we don't want to keep that to ourselves. Sign up for a free trial of GitLab Gold and your teams will be on it from day one."
+msgid "InProductMarketing|We know a thing or two about efficiency and we don't want to keep that to ourselves. Sign up for a free trial of GitLab Ultimate and your teams will be on it from day one."
 msgstr ""
 
 msgid "InProductMarketing|What does our value stream timeline look like from product to development to review and production?"
