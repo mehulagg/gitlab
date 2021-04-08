@@ -1,6 +1,6 @@
 <script>
 import { GlBadge, GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { s__, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 
 export default {
@@ -13,12 +13,31 @@ export default {
   },
   mixins: [Tracking.mixin()],
   props: {
-    title: {
-      type: String,
+    containerId: {
+      type: [String, undefined],
       required: false,
-      default: s__('FeatureHighlight|This feature is part of your GitLab Ultimate trial.'),
+      default: undefined,
+    },
+    featureName: {
+      type: [String, undefined],
+      required: false,
+      default: undefined,
     },
   },
+  computed: {
+    title() {
+      if (this.featureName === undefined) {
+        return s__('FeatureHighlight|This feature is part of your GitLab Ultimate trial.');
+      }
+      const i18nTitle = s__(
+        'FeatureHighlight|The %{featureName} feature is part of your GitLab Ultimate trial.',
+      );
+      return sprintf(i18nTitle, { featureName: this.featureName });
+    },
+  },
+  // TODO:
+  // - [ ] only show the tooltip on small screen sizes
+  // - [ ] only show the popover on screen sizes larger than "small"
   mounted() {
     this.trackBadgeDisplayedForExperiment();
   },
@@ -34,7 +53,14 @@ export default {
 </script>
 
 <template>
-  <gl-badge v-gl-tooltip :title="title" tabindex="0" size="sm" class="feature-highlight-badge">
+  <gl-badge
+    :id="containerId"
+    v-gl-tooltip
+    :title="title"
+    size="sm"
+    tabindex
+    class="feature-highlight-badge"
+  >
     <gl-icon name="license" :size="12" />
   </gl-badge>
 </template>
