@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe "projects/security/dast_site_profiles/edit", type: :view do
-  let_it_be(:site_profile) { create(:dast_site_profile) }
+  let_it_be(:site_profile) { Dast::SiteProfilePresenter.new(create(:dast_site_profile)) }
   let_it_be(:site_profile_gid) { ::URI::GID.parse("gid://gitlab/DastSiteProfile/#{site_profile.id}") }
 
   before do
