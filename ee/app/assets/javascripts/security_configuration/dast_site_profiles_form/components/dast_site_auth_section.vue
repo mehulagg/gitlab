@@ -60,11 +60,6 @@ export default {
       isSensitiveFieldRequired: !isEditMode,
     };
   },
-  computed: {
-    passwordFieldPlaceholder() {
-      return this.isEditMode ? '••••••••' : '';
-    },
-  },
   watch: {
     form: { handler: 'emitUpdate', immediate: true, deep: true },
   },
@@ -128,7 +123,6 @@ export default {
               autocomplete="off"
               name="password"
               type="password"
-              :placeholder="passwordFieldPlaceholder"
               :required="isSensitiveFieldRequired"
               :state="form.fields.password.state"
             />

@@ -61,7 +61,8 @@ export default {
     },
   },
   data() {
-    const { name = '', targetUrl = '', excludedUrls = [], auth = {} } = this.siteProfile || {};
+    const { name = '', targetUrl = '', excludedUrls = [], requestHeaders = '', auth = {} } =
+      this.siteProfile || {};
 
     const form = {
       state: false,
@@ -75,7 +76,7 @@ export default {
           skipValidation: true,
         }),
         requestHeaders: initFormField({
-          value: '',
+          value: requestHeaders,
           required: false,
           skipValidation: true,
         }),
@@ -131,10 +132,8 @@ export default {
           tooltip: s__(
             'DastProfiles|Request header names and values. Headers are added to every request made by DAST.',
           ),
-          placeholder: this.hasRequestHeaders
-            ? __('[Redacted]')
-            : // eslint-disable-next-line @gitlab/require-i18n-strings
-              'Cache-control: no-cache, User-Agent: DAST/1.0',
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          placeholder: 'Cache-control: no-cache, User-Agent: DAST/1.0',
         },
       };
     },
@@ -148,6 +147,9 @@ export default {
       return this.form.fields.excludedUrls.value
         .split(EXCLUDED_URLS_SEPARATOR)
         .map((url) => url.trim());
+    },
+    serializedAuthFields() {
+      return serializeFormObject(this.authSection.fields);
     },
   },
   methods: {
@@ -166,7 +168,9 @@ export default {
       this.hideErrors();
       const { errorMessage } = this.i18n;
 
-      const { profileName, targetUrl, ...additionalFields } = serializeFormObject(this.form.fields);
+      let { profileName, targetUrl, auth, requestHeaders, excludedUrls } = serializeFormObject(
+        this.form.fields,
+      );
 
       const variables = {
         input: {
@@ -175,10 +179,12 @@ export default {
           profileName,
           targetUrl,
           ...(this.glFeatures.securityDastSiteProfilesAdditionalFields && {
-            ...additionalFields,
-            auth: serializeFormObject(this.authSection.fields),
-            ...(additionalFields.excludedUrls && {
+            auth: serializedAuthFields,
+            ...(excludedUrls && {
               excludedUrls: this.parsedExcludedUrls,
+            }),
+            ...(requestHeaders !== '[Redacted]' && {
+              requestHeaders,
             }),
           }),
         },
