@@ -289,7 +289,7 @@ In the example above, when we will exclude from `gl-container-scanning-report.js
   * as full image name with registry hostname and sha256 image digest (ie. `your.private.registry:5000/centos@@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e`)
 
 NOTE:
-The string after CVE ID has **no impact** whatsoever, it is simply included to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
+The string after CVE ID (ie. `cups` in the example above) has **no impact** whatsoever, it is simply included to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
 
 ### Running container scanning in an offline environment
 
