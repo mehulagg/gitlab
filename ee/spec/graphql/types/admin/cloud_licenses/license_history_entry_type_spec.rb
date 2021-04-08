@@ -14,7 +14,7 @@ RSpec.describe GitlabSchema.types['LicenseHistoryEntry'], :enable_admin_mode do
 
   let_it_be(:license) { create_current_license(licensee: licensee, type: License::CLOUD_LICENSE_TYPE) }
 
-  let(:fields) { %w[created_at] }
+  let(:fields) { %w[activated_on] }
 
   def query(field_name)
     %(

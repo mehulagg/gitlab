@@ -10,8 +10,9 @@ module Types
         graphql_name 'LicenseHistoryEntry'
         description 'Represents an entry from the Cloud License history'
 
-        field :created_at, ::Types::DateType, null: true,
-              description: 'Date when the license was activated.'
+        field :activated_on, ::Types::DateType, null: true,
+              description: 'Date when the license was activated.',
+              method: :created_at
       end
     end
   end

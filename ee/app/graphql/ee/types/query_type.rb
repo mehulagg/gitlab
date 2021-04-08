@@ -70,7 +70,7 @@ module EE
         field :license_history_entries, ::Types::Admin::CloudLicenses::LicenseHistoryEntryType.connection_type,
               null: true,
               resolver: ::Resolvers::Admin::CloudLicenses::LicenseHistoryEntriesResolver,
-              description: 'Fields related to an entry in the license history.'
+              description: 'Fields related to entries in the license history.'
       end
 
       def vulnerability(id:)

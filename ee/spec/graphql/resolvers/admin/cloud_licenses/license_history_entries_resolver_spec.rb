@@ -24,16 +24,8 @@ RSpec.describe Resolvers::Admin::CloudLicenses::LicenseHistoryEntriesResolver do
     end
 
     context 'when application setting for cloud license is disabled', :enable_admin_mode do
-      it 'raises error' do
+      it 'returns nil' do
         stub_application_setting(cloud_license_enabled: false)
-
-        expect(result).to be_nil
-      end
-    end
-
-    context 'when GitLab.com', :enable_admin_mode do
-      it 'raises error' do
-        allow(::Gitlab).to receive(:com?).and_return(true)
 
         expect(result).to be_nil
       end
