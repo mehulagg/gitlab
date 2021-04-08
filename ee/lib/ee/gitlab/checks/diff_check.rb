@@ -72,7 +72,7 @@ module EE
             if changed_path.new_file? && denylisted_regex = push_rule.filename_denylisted?(changed_path.path)
               return unless denylisted_regex.present?
 
-              "File name #{changed_path.path} was blacklisted by the pattern #{denylisted_regex}."
+              "File name #{changed_path.path} was prohibited by the denylist pattern #{denylisted_regex}."
             end
           rescue ::PushRule::MatchError => e
             raise ::Gitlab::GitAccess::ForbiddenError, e.message
