@@ -83,12 +83,12 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         # use the same number of queries, regardless of the number of findings
         # contained in the pipeline report.
 
-        sast_findings = pipeline.security_reports.reports['sast'].findings
+        container_scanning_findings = pipeline.security_reports.reports['container_scanning'].findings
         dep_findings = pipeline.security_reports.reports['dependency_scanning'].findings
-        # this test is invalid if we don't have more sast findings than dep findings
-        expect(sast_findings.count).to be > dep_findings.count
+        # this test is invalid if we don't have more container_scanning findings than dep findings
+        expect(container_scanning_findings.count).to be > dep_findings.count
 
-        (sast_findings + dep_findings).each do |report_finding|
+        (container_scanning_findings + dep_findings).each do |report_finding|
           # create a finding and a vulnerability for each report finding
           # (the vulnerability is created with the :confirmed trait)
           create(:vulnerabilities_finding,
@@ -103,7 +103,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
 
         # should be the same number of queries between different report types
         expect do
-          described_class.new(pipeline: pipeline, params: { report_type: %w[sast] }).execute
+          described_class.new(pipeline: pipeline, params: { report_type: %w[container_scanning] }).execute
         end.to issue_same_number_of_queries_as {
           described_class.new(pipeline: pipeline, params: { report_type: %w[dependency_scanning] }).execute
         }
@@ -117,11 +117,11 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         orig_security_reports = pipeline.security_reports
         new_finding = create(:ci_reports_security_finding)
         expect do
-          described_class.new(pipeline: pipeline, params: { report_type: %w[sast] }).execute
+          described_class.new(pipeline: pipeline, params: { report_type: %w[container_scanning] }).execute
         end.to issue_same_number_of_queries_as {
-          orig_security_reports.reports['sast'].add_finding(new_finding)
+          orig_security_reports.reports['container_scanning'].add_finding(new_finding)
           allow(pipeline).to receive(:security_reports).and_return(orig_security_reports)
-          described_class.new(pipeline: pipeline, params: { report_type: %w[sast] }).execute
+          described_class.new(pipeline: pipeline, params: { report_type: %w[container_scanning] }).execute
         }
       end
     end
