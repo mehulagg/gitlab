@@ -259,8 +259,8 @@ To allowlist specific vulnerabilities, follow these steps:
 
 If a matching entry is found in the `vulnerability-allowlist.yml` file, the following will happen:
 
-* The vulnerability **will not be included** when the analyzer generates the `gl-container-scanning-report.json` file.
-* The Security tab of the pipeline **will not show** the vulnerability, since it hasn't been included in the gl-container-scanning-report.json file, and this is the source of truth where the vulnerability list is retrieved from.
+- The vulnerability **will not be included** when the analyzer generates the `gl-container-scanning-report.json` file.
+- The Security tab of the pipeline **will not show** the vulnerability, since it hasn't been included in the JSON file, and this is the source of truth where the vulnerability list is retrieved from.
 
 Here's an example `vulnerability-allowlist.yml` file:
 
@@ -281,12 +281,12 @@ In the example above, when we will exclude from `gl-container-scanning-report.js
 
 ##### File format
 
-* `generalallowlist` collection allows you to specify CVE IDs globally. All vulnerabilities with matching CVE IDs will be excluded from the scan report.
+- `generalallowlist` collection allows you to specify CVE IDs globally. All vulnerabilities with matching CVE IDs will be excluded from the scan report.
 
-* `images` collection allows you to specify CVE IDs for each container image independently. All vulnerabilities from given image with matching CVE IDs will be excluded from the scan report. You can specify container image in multiple ways:
-  * as image name only (ie. `centos`)
-  * as full image name with registry hostname (ie. `your.private.registry:5000/centos`)
-  * as full image name with registry hostname and sha256 image digest (ie. `your.private.registry:5000/centos@@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e`)
+- `images` collection allows you to specify CVE IDs for each container image independently. All vulnerabilities from given image with matching CVE IDs will be excluded from the scan report. You can specify container image in multiple ways:
+  - as image name only (ie. `centos`)
+  - as full image name with registry hostname (ie. `your.private.registry:5000/centos`)
+  - as full image name with registry hostname and sha256 image digest (ie. `your.private.registry:5000/centos@@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e`)
 
 NOTE:
 The string after CVE ID (ie. `cups` in the example above) has **no impact** whatsoever, it is simply included to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
