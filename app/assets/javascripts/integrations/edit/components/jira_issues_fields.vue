@@ -1,15 +1,8 @@
 <script>
-import {
-  GlFormGroup,
-  GlFormCheckbox,
-  GlFormInput,
-  GlSprintf,
-  GlLink,
-  GlButton,
-  GlCard,
-} from '@gitlab/ui';
+import { GlFormGroup, GlFormCheckbox, GlFormInput, GlSprintf, GlLink } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../event_hub';
+import JiraUpgradeCta from './jira_upgrade_cta.vue';
 
 export default {
   name: 'JiraIssuesFields',
@@ -19,8 +12,7 @@ export default {
     GlFormInput,
     GlSprintf,
     GlLink,
-    GlButton,
-    GlCard,
+    JiraUpgradeCta,
     JiraIssueCreationVulnerabilities: () =>
       import('ee_component/integrations/edit/components/jira_issue_creation_vulnerabilities.vue'),
   },
@@ -143,19 +135,7 @@ export default {
             @request-get-issue-types="getJiraIssueTypes"
           />
         </template>
-        <gl-card v-else class="gl-mt-7">
-          <strong>{{ __('This is a Premium feature') }}</strong>
-          <p>{{ __('Upgrade your plan to enable this feature of the Jira Integration.') }}</p>
-          <gl-button
-            v-if="upgradePlanPath"
-            category="primary"
-            variant="info"
-            :href="upgradePlanPath"
-            target="_blank"
-          >
-            {{ __('Upgrade your plan') }}
-          </gl-button>
-        </gl-card>
+        <jira-upgrade-cta v-else class="gl-mt-7" :upgrade-plan-path="upgradePlanPath" />
       </div>
     </gl-form-group>
     <template v-if="showJiraIssuesIntegration">
