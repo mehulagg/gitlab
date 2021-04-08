@@ -1,5 +1,5 @@
 <script>
-import { GlPopover, GlSprintf } from '@gitlab/ui';
+import { GlButton, GlPopover, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
 import { n__, s__, sprintf } from '~/locale';
@@ -8,7 +8,13 @@ import Tracking from '~/tracking';
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
 
 export default {
+  tracking: {
+    event: 'click_button',
+    labels: { upgrade: 'upgrade_to_ultimate', compare: 'compare_all_plans' },
+    property: 'experiment:highlight_paid_features_during_active_trial',
+  },
   components: {
+    GlButton,
     GlPopover,
     GlSprintf,
   },
@@ -24,6 +30,14 @@ export default {
       required: true,
     },
     featureName: {
+      type: String,
+      required: true,
+    },
+    hrefComparePlans: {
+      type: String,
+      required: true,
+    },
+    hrefUpgradeToPaid: {
       type: String,
       required: true,
     },
@@ -51,8 +65,10 @@ export default {
     };
   },
   i18n: {
+    compareAllButtonTitle: s__('FeatureHighlight|Compare all plans'),
     popoverContent: s__(`FeatureHighlight|Enjoying your GitLab %{planNameForTrial} trial? To continue using
       %{featureName} after your trial ends, upgrade to GitLab %{planNameForUpgrade}.`),
+    upgradeButtonTitle: s__('FeatureHighlight|Upgrade to GitLab %{planNameForUpgrade}'),
   },
   computed: {
     popoverTitle() {
@@ -112,5 +128,40 @@ export default {
       <template #planNameForTrial>{{ planNameForTrial }}</template>
       <template #planNameForUpgrade>{{ planNameForUpgrade }}</template>
     </gl-sprintf>
+
+    <div class="gl-mt-5">
+      <gl-button
+        :href="hrefUpgradeToPaid"
+        category="primary"
+        variant="confirm"
+        size="small"
+        class="gl-mb-0"
+        block
+        data-testid="upgradeBtn"
+        :data-track-event="$options.tracking.event"
+        :data-track-label="$options.tracking.labels.upgrade"
+        :data-track-property="$options.tracking.property"
+      >
+        <span class="gl-font-sm">
+          <gl-sprintf :message="$options.i18n.upgradeButtonTitle">
+            <template #planNameForUpgrade>{{ planNameForUpgrade }}</template>
+          </gl-sprintf>
+        </span>
+      </gl-button>
+      <gl-button
+        :href="hrefComparePlans"
+        category="secondary"
+        variant="confirm"
+        size="small"
+        class="gl-mb-0"
+        block
+        data-testid="compareBtn"
+        :data-track-event="$options.tracking.event"
+        :data-track-label="$options.tracking.labels.compare"
+        :data-track-property="$options.tracking.property"
+      >
+        <span class="gl-font-sm">{{ $options.i18n.compareAllButtonTitle }}</span>
+      </gl-button>
+    </div>
   </gl-popover>
 </template>
