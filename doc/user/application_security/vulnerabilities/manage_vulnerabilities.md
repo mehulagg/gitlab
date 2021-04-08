@@ -7,12 +7,12 @@ type: reference, howto
 
 # Manage vulnerabilities
 
-For each security vulnerability in a merge request or [Vulnerability Report](vulnerability_report/index.md),
+For each security vulnerability in a merge request or [Vulnerability Report](../vulnerability_report/index.md),
 you can:
 
 - [Dismiss the vulnerability](#dismiss-a-vulnerability).
-- Create a [confidential](../project/issues/confidential_issues.md)
-  [issue](vulnerabilities/index.md#create-a-gitlab-issue-for-a-vulnerability).
+- Create a [confidential](../../project/issues/confidential_issues.md)
+  [issue](index.md#create-a-gitlab-issue-for-a-vulnerability).
 - Apply an [automatically remediation](#apply-an-automatic-remediation-for-a-vulnerability).
 
 ## Dismiss a vulnerability
@@ -40,7 +40,7 @@ You can dismiss multiple vulnerabilities at once.
 
 ## Create an issue for a vulnerability
 
-You can create a GitLab or Jira issue for a vulnerability. For details, see [Vulnerability Pages](vulnerabilities/index.md).
+You can create a GitLab or Jira issue for a vulnerability. For details, see [Vulnerability Pages](index.md).
 
 ### Link to an existing issue
 
@@ -70,10 +70,10 @@ To remove an issue, to the right of the issue number, select **{close}**.
 Some vulnerabilities can be fixed by applying the solution that GitLab automatically generates.
 The following scanners are supported:
 
-- [Dependency Scanning](dependency_scanning/index.md).
+- [Dependency Scanning](../dependency_scanning/index.md).
   Automatic Patch creation is only available for Node.js projects managed with
   `yarn`.
-- [Container Scanning](container_scanning/index.md).
+- [Container Scanning](../container_scanning/index.md).
 
 ### Manually apply the suggested patch
 
