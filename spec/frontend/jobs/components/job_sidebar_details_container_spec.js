@@ -49,7 +49,7 @@ describe('Job Sidebar Details Container', () => {
       ['erased_at', 'Erased: 3 weeks ago'],
       ['finished_at', 'Finished: 3 weeks ago'],
       ['queued', 'Queued: 9 seconds'],
-      ['runner', 'Runner: local ci runner (#1)'],
+      ['runner', 'Runner: #1 (ABCDEFGH) local ci runner'],
       ['coverage', 'Coverage: 20%'],
     ])('uses %s to render job-%s', async (detail, value) => {
       await store.dispatch('receiveJobSuccess', { [detail]: job[detail] });
