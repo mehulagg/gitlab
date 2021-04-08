@@ -34,19 +34,29 @@ module OptimizedIssuableLabelFilter
     count_params = params.merge(state: nil, sort: nil, force_cte: true)
     finder = self.class.new(current_user, count_params)
 
-    state_counts = finder
-      .execute
-      .reorder(nil)
-      .group(:state_id)
-      .count
-
-    counts = state_counts.transform_keys { |key| count_key(key) }
-
-    counts[:all] = counts.values.sum
-    counts.with_indifferent_access
+    if filters_set?(finder, count_params)
+      uncached_issuables_count(finder)
+    else
+      Rails.cache.fetch(['users', current_user.id, 'issuables_count_by_state'], expires_in: 1.day) do
+        uncached_issuables_count(finder)
+      end
+    end
   end
 
   private
+
+  def filters_set?(finder, params)
+    scalar_and_array_filters = finder.class.scalar_params + finder.class.array_params.keys
+    scalar_and_array_filters.any? { |filter| params.with_indifferent_access.include?(filter) }
+  end
+
+  def uncached_issuables_count(finder)
+    state_counts = finder.execute.reorder(nil).group(:state_id).count
+    counts       = state_counts.transform_keys { |key| count_key(key) }
+    counts[:all] = counts.values.sum
+
+    counts.with_indifferent_access
+  end
 
   def issuables_with_selected_labels(items, target_model)
     if root_namespace
