@@ -4,7 +4,7 @@ description: Total weekly users count for epics_usage
 product_section: dev
 product_stage: plan
 product_group: group::product planning
-product_category: epics_usage
+product_category: epics
 value_type: number
 status: implemented
 milestone: "13.11"

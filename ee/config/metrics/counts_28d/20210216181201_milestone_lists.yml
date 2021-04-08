@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage_monthly.plan.milestone_lists
-description: Count of Board lists defined by a milestone 
+description: Count of MAU created milestone lists on Boards 
 product_section: dev
 product_stage: plan 
 product_group: group::project management 
