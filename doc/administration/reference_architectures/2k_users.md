@@ -459,8 +459,6 @@ To configure the Gitaly server, on the server node you want to use for Gitaly:
    alertmanager['enable'] = false
    prometheus['enable'] = false
 
-   # Prevent database connections during 'gitlab-ctl reconfigure'
-   gitlab_rails['rake_cache_clear'] = false
    # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
 

@@ -1241,8 +1241,6 @@ To configure the Praefect nodes, on each one:
    praefect['enable'] = true
    praefect['listen_addr'] = '0.0.0.0:2305'
 
-   # Prevent database connections during 'gitlab-ctl reconfigure'
-   gitlab_rails['rake_cache_clear'] = false
    # Prevent database migrations from running on upgrade automatically
    praefect['auto_migrate'] = false
    gitlab_rails['auto_migrate'] = false
@@ -1368,8 +1366,6 @@ On each node:
    alertmanager['enable'] = false
    prometheus['enable'] = false
 
-   # Prevent database connections during 'gitlab-ctl reconfigure'
-   gitlab_rails['rake_cache_clear'] = false
    # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
 
