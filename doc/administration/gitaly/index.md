@@ -645,7 +645,7 @@ This is a GRPC call
 [error response code](https://grpc.github.io/grpc/core/md_doc_statuscodes.html).
 
 If this error occurs even though
-[the Gitaly auth tokens are correctly setup](../praefect.md#debugging-praefect),
+[the Gitaly auth tokens are correctly setup](../gitaly/praefect.md#debugging-praefect),
 it's likely that the Gitaly server(s) are experiencing
 [clock drift](https://en.wikipedia.org/wiki/Clock_drift).
 
