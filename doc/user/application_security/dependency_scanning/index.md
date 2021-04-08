@@ -227,7 +227,7 @@ Read more on [how to use private Maven repositories](../index.md#using-private-m
 ## Interacting with the vulnerabilities
 
 Once a vulnerability is found, you can interact with it. Read more on how to
-[address the vulnerabilities](../vulnerabilities.md#addressing-vulnerabilities).
+[address the vulnerabilities](../vulnerabilities/manage_vulnerabilities.md#addressing-vulnerabilities).
 
 ## Solutions for vulnerabilities (auto-remediation)
 
