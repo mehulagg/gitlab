@@ -218,4 +218,16 @@ RSpec.describe Gitlab::Database::MigrationHelpers::V2 do
       let(:added_column) { :original }
     end
   end
+
+  describe '#add_cascading_namespace_setting' do
+    it 'creates the required columns' do
+      expect(migration).to receive(:add_column).with(:namespace_settings, :some_setting, :integer, null: true, default: nil)
+      expect(migration).to receive(:add_column).with(:namespace_settings, :lock_some_setting, :boolean, null: false, default: false)
+
+      expect(migration).to receive(:add_column).with(:application_settings, :some_setting, :integer, null: false, default: 5)
+      expect(migration).to receive(:add_column).with(:application_settings, :lock_some_setting, :boolean, null: false, default: false)
+
+      migration.add_cascading_namespace_setting(:some_setting, :integer, null: false, default: 5)
+    end
+  end
 end

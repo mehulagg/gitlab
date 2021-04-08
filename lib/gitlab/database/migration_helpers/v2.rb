@@ -76,6 +76,33 @@ module Gitlab
           end
         end
 
+        # Creates the four required columns that constitutes a single cascading
+        # namespace settings attribute. This helper is only appropriate if the
+        # setting is not already present as a non-cascading attribute.
+        #
+        # Creates the `setting_name` column along with the `lock_setting_name`
+        # column in both `namespace_settings` and `application_settings`.
+        #
+        # setting_name - The name of the cascading attribute - same as defined
+        #                in `NamespaceSetting` with the `cascading_attr` method.
+        # type - The column type for the setting itself (:boolean, :integer, etc.)
+        # options - Standard Rails column options hash. Accepts keys such as
+        #           `null` and `default`.
+        #
+        # `null` and `default` options will only be applied to the `application_settings`
+        # column. In most cases, a non-null default value should be specified.
+        def add_cascading_namespace_setting(setting_name, type, **options)
+          lock_column_name = "lock_#{setting_name}".to_sym
+
+          namespace_options = options.merge(null: true, default: nil)
+
+          add_column(:namespace_settings, setting_name, type, namespace_options)
+          add_column(:namespace_settings, lock_column_name, :boolean, default: false, null: false)
+
+          add_column(:application_settings, setting_name, type, options)
+          add_column(:application_settings, lock_column_name, :boolean, default: false, null: false)
+        end
+
         private
 
         def setup_renamed_column(calling_operation, table, old_column, new_column, type, batch_column_name)
