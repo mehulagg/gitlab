@@ -10,10 +10,6 @@ module Types
         graphql_name 'CurrentLicense'
         description 'Represents the current license'
 
-        field :id, GraphQL::ID_TYPE, null: false,
-              description: 'ID of the license in the database.',
-              method: :license_id
-
         field :last_sync, ::Types::TimeType, null: true,
               description: 'Date when the license was last synced.',
               method: :last_synced_at

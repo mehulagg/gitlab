@@ -15,7 +15,7 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
   let_it_be(:license) { create_current_license(licensee: licensee, type: License::CLOUD_LICENSE_TYPE) }
 
   let(:fields) do
-    %w[id last_sync billable_users maximum_users users_over_subscription]
+    %w[last_sync billable_users maximum_users users_over_subscription]
   end
 
   def query(field_name)
