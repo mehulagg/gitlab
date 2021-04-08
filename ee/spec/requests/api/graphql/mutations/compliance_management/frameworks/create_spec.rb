@@ -65,14 +65,6 @@ RSpec.describe 'Create a Compliance Framework' do
       stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: true)
     end
 
-    context 'framework feature is disabled' do
-      before do
-        stub_feature_flags(ff_custom_compliance_frameworks: false)
-      end
-
-      it_behaves_like 'a mutation that returns errors in the response', errors: ['Not permitted to create framework']
-    end
-
     context 'pipeline configuration feature is disabled' do
       before do
         stub_feature_flags(ff_evaluate_group_level_compliance_pipeline: false)

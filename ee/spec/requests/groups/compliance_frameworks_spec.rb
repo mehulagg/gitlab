@@ -11,9 +11,8 @@ RSpec.describe 'group compliance frameworks' do
     login_as(user)
   end
 
-  context 'when compliance frameworks feature is disabled' do
+  context 'when compliance frameworks feature is unlicensed' do
     before do
-      stub_feature_flags(ff_custom_compliance_frameworks: false)
       stub_licensed_features(custom_compliance_frameworks: false)
     end
 
@@ -34,9 +33,8 @@ RSpec.describe 'group compliance frameworks' do
     end
   end
 
-  context 'when compliance frameworks feature is enabled' do
+  context 'when compliance frameworks feature is licensed' do
     before do
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
       stub_licensed_features(custom_compliance_frameworks: true)
     end
 

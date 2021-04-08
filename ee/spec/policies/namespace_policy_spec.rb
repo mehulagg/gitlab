@@ -53,10 +53,9 @@ RSpec.describe NamespacePolicy do
       it { is_expected.to(be_disallowed(:admin_compliance_framework)) }
     end
 
-    context 'when feature is available' do
+    context 'when feature is licensed' do
       before do
         stub_licensed_features(custom_compliance_frameworks: true)
-        stub_feature_flags(ff_custom_compliance_frameworks: true)
       end
 
       context 'when user is admin', :enable_admin_mode do
@@ -72,10 +71,9 @@ RSpec.describe NamespacePolicy do
       end
     end
 
-    context 'when feature is not available' do
+    context 'when feature is not licensed' do
       before do
         stub_licensed_features(custom_compliance_frameworks: false)
-        stub_feature_flags(ff_custom_compliance_frameworks: false)
       end
 
       context 'when user is admin', :enable_admin_mode do

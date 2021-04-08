@@ -60,10 +60,6 @@ module EE
         @subject.feature_available?(:project_merge_request_analytics)
       end
 
-      condition(:custom_compliance_framework_available) do
-        ::Feature.enabled?(:ff_custom_compliance_frameworks, default_enabled: :yaml)
-      end
-
       with_scope :subject
       condition(:group_push_rules_enabled) do
         @subject.group && @subject.group.feature_available?(:push_rules)
@@ -399,7 +395,7 @@ module EE
       rule { requirements_available & owner }.enable :destroy_requirement
 
       rule { compliance_framework_available & can?(:owner_access) }.enable :admin_compliance_framework
-      rule { compliance_framework_available & can?(:maintainer_access) & ~custom_compliance_framework_available }.enable :admin_compliance_framework
+      rule { compliance_framework_available & can?(:maintainer_access) }.enable :admin_compliance_framework
 
       rule { status_page_available & can?(:owner_access) }.enable :mark_issue_for_publication
       rule { status_page_available & can?(:developer_access) }.enable :publish_status_page
