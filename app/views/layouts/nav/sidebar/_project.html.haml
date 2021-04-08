@@ -43,7 +43,7 @@
 
       - if project_nav_tab? :files
         = nav_link(controller: sidebar_repository_paths, unless: -> { current_path?('projects/graphs#charts') }) do
-          = link_to project_tree_path(@project), class: 'shortcuts-tree', data: { qa_selector: "repository_link" } do
+          = link_to project_tree_path(@project), class: 'shortcuts-tree', data: { qa_selector: 'repository_link' } do
             .nav-icon-container
               = sprite_icon('doc-text')
             %span.nav-item-name#js-onboarding-repo-link
@@ -195,7 +195,7 @@
 
             - if can_view_pipeline_editor?(@project)
               = nav_link(controller: :pipeline_editor, action: :show) do
-                = link_to project_ci_pipeline_editor_path(@project), title: s_('Pipelines|Editor') do
+                = link_to project_ci_pipeline_editor_path(@project), title: s_('Pipelines|Editor'), data: { qa_selector: 'pipeline_editor_link' } do
                   %span
                     = s_('Pipelines|Editor')
 

@@ -49,6 +49,7 @@ export default {
       variant="confirm"
       class="gl-mt-3"
       @click="createEmptyConfigFile"
+      data-qa-selector="create_new_pipeline_button"
     >
       {{ $options.i18n.btnText }}
     </gl-button>

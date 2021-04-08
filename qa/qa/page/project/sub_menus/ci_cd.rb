@@ -14,14 +14,21 @@ module QA
               include QA::Page::Project::SubMenus::Common
 
               view 'app/views/layouts/nav/sidebar/_project.html.haml' do
-                element :link_pipelines
+                element :ci_cd_link
+                element :pipeline_editor_link
               end
             end
           end
 
           def click_ci_cd_pipelines
             within_sidebar do
-              click_element :link_pipelines
+              click_element :ci_cd_link
+            end
+          end
+
+          def click_pipelines_editor
+            within_sidebar do
+              click_element :pipeline_editor_link
             end
           end
         end

@@ -88,6 +88,7 @@ export default {
       lazy
       data-testid="editor-tab"
       @click="setCurrentTab($options.tabConstants.CREATE_TAB)"
+      data-qa-selector="editor_tab"
     >
       <text-editor :value="ciFileContent" v-on="$listeners" />
     </editor-tab>
@@ -98,6 +99,7 @@ export default {
       lazy
       data-testid="visualization-tab"
       @click="setCurrentTab($options.tabConstants.VISUALIZE_TAB)"
+      data-qa-selector="visualization_tab"
     >
       <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
       <pipeline-graph v-else :pipeline-data="ciConfigData" />
@@ -107,6 +109,7 @@ export default {
       :title="$options.i18n.tabLint"
       data-testid="lint-tab"
       @click="setCurrentTab($options.tabConstants.LINT_TAB)"
+      data-qa-selector="lint_tab"
     >
       <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
       <ci-lint v-else :is-valid="isValid" :ci-config="ciConfigData" />
@@ -118,6 +121,7 @@ export default {
       lazy
       data-testid="merged-tab"
       @click="setCurrentTab($options.tabConstants.MERGED_TAB)"
+      data-qa-selector="merged_tab"
     >
       <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
       <gl-alert v-else-if="hasAppError" variant="danger" :dismissible="false">
