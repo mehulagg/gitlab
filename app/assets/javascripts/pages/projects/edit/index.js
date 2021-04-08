@@ -4,6 +4,7 @@ import dirtySubmitFactory from '~/dirty_submit/dirty_submit_factory';
 import initFilePickers from '~/file_pickers';
 import mountBadgeSettings from '~/pages/shared/mount_badge_settings';
 import initProjectDeleteButton from '~/projects/project_delete_button';
+import initProjectRemoveForkButton from '~/projects/project_remove_fork_button';
 import initServiceDesk from '~/projects/settings_service_desk';
 import initSearchSettings from '~/search_settings';
 import initSettingsPanels from '~/settings_panels';
@@ -16,6 +17,7 @@ initFilePickers();
 initConfirmDangerModal();
 initSettingsPanels();
 initProjectDeleteButton();
+initProjectRemoveForkButton();
 mountBadgeSettings(PROJECT_BADGE);
 
 new UserCallout({ className: 'js-service-desk-callout' }); // eslint-disable-line no-new
