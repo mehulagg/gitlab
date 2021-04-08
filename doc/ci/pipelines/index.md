@@ -332,7 +332,7 @@ GitLab capitalizes the stages' names in the pipeline graphs.
 
 ### Regular pipeline graphs
 
-> - [Visualization improved](https://gitlab.com/gitlab-org/gitlab/-/issues/276949) in GitLab 13.11
+> - [Visualization improved](https://gitlab.com/gitlab-org/gitlab/-/issues/276949) in GitLab 13.11.
 
 Regular pipeline graphs show the names of the jobs in each stage. Regular pipeline graphs can
 be found when you are on a [single pipeline page](#view-pipelines). For example:
