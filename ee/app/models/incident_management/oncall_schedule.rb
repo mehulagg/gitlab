@@ -22,6 +22,10 @@ module IncidentManagement
 
     scope :for_iid, -> (iid) { where(iid: iid) }
 
+    def project_name
+      project.name
+    end
+
     private
 
     def timezones

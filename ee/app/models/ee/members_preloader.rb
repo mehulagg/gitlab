@@ -9,6 +9,7 @@ module EE
       super
 
       ActiveRecord::Associations::Preloader.new.preload(members.map(&:user), group_saml_identities: :saml_provider)
+      ActiveRecord::Associations::Preloader.new.preload(members.map(&:user), oncall_participants: { rotation: :schedule })
     end
   end
 end

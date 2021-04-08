@@ -7,6 +7,7 @@ module EE
     prepended do
       unexpose :gitlab_employee
       unexpose :email
+      expose :oncall_schedules, with: IncidentManagement::OncallScheduleEntity
     end
   end
 end

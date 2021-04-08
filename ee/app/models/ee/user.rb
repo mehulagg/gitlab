@@ -73,6 +73,10 @@ module EE
 
       has_many :user_permission_export_uploads
 
+      has_many :oncall_participants, class_name: 'IncidentManagement::OncallParticipant', inverse_of: :user
+      has_many :oncall_rotations, class_name: 'IncidentManagement::OncallRotation', through: :oncall_participants, source: :rotation
+      has_many :oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', through: :oncall_rotations, source: :schedule
+
       scope :not_managed, ->(group: nil) {
         scope = where(managing_group_id: nil)
         scope = scope.or(where.not(managing_group_id: group.id)) if group
