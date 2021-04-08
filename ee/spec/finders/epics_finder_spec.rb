@@ -185,7 +185,7 @@ RSpec.describe EpicsFinder do
               end
             end
 
-            context 'when user is not member of top level group' do
+            context 'when user is a guest of top level group' do
               it 'does not have N+1 queries for subgroups when searched by guests' do
                 GroupMember.where(user_id: search_user.id).delete_all
                 group.add_guest(search_user)
