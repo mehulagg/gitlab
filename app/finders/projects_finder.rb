@@ -93,7 +93,7 @@ class ProjectsFinder < UnionFinder
     elsif min_access_level?
       current_user.authorized_projects(params[:min_access_level])
     else
-      if private_only? || impossible_visibility_level?
+      if private_only? || impossible_visibility_level? 
         current_user.authorized_projects
       else
         Project.public_or_visible_to_user(current_user)

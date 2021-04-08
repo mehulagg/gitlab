@@ -62,5 +62,19 @@ RSpec.describe ProjectsFinder do
         create(:project, :public, namespace: create(:namespace_with_plan, plan: plan))
       end
     end
+
+    describe 'when user is auditor' do
+      let(:params) { {} }
+      let(:project_ids_relation) { nil }
+      let(:user) { create(:user, :auditor) }
+
+      let_it_be(:group) { create(:group, :public) }
+      let_it_be(:private_project) { create(:project, :private, name: 'A', path: 'A') }
+      let_it_be(:internal_project) { create(:project, :internal, group: group, name: 'B', path: 'B') }
+      let_it_be(:public_project) { create(:project, :public, group: group, name: 'C', path: 'C') }
+      let_it_be(:shared_project) { create(:project, :private, name: 'D', path: 'D') }
+
+      it { is_expected.to match_array([public_project, internal_project, private_project, shared_project]) }
+    end
   end
 end

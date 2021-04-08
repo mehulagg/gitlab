@@ -13,6 +13,11 @@ module EE
 
     private
 
+    override :collection_with_user
+    def collection_with_user
+      current_user.auditor? ? ::Project.public_or_visible_to_user(current_user) : super
+    end
+
     override :filter_projects
     def filter_projects(collection)
       collection = super(collection)
