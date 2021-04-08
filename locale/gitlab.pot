@@ -5475,9 +5475,6 @@ msgstr ""
 msgid "CVE|Why Request a CVE ID?"
 msgstr ""
 
-msgid "Cadence name"
-msgstr ""
-
 msgid "Callback URL"
 msgstr ""
 
@@ -8835,9 +8832,6 @@ msgid "Create blank project"
 msgstr ""
 
 msgid "Create branch"
-msgstr ""
-
-msgid "Create cadence"
 msgstr ""
 
 msgid "Create commit"
@@ -13664,9 +13658,6 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
-msgid "Future iterations"
-msgstr ""
-
 msgid "GPG Key ID:"
 msgstr ""
 
@@ -17321,9 +17312,6 @@ msgstr ""
 msgid "Iteration"
 msgstr ""
 
-msgid "Iteration cadences"
-msgstr ""
-
 msgid "Iteration changed to"
 msgstr ""
 
@@ -17345,22 +17333,46 @@ msgstr ""
 msgid "Iterations|Automated scheduling"
 msgstr ""
 
+msgid "Iterations|Cadence name"
+msgstr ""
+
+msgid "Iterations|Create cadence"
+msgstr ""
+
+msgid "Iterations|Duration"
+msgstr ""
+
+msgid "Iterations|Future iterations"
+msgstr ""
+
 msgid "Iterations|Iteration scheduling will be handled automatically"
 msgstr ""
 
-msgid "Iterations|Move incomplete issues to the next iteration"
+msgid "Iterations|New iteration cadence"
 msgstr ""
 
 msgid "Iterations|Number of future iterations you would like to have scheduled"
 msgstr ""
 
-msgid "Iterations|Roll over issues"
+msgid "Iterations|Select duration"
+msgstr ""
+
+msgid "Iterations|Select number"
+msgstr ""
+
+msgid "Iterations|Select start date"
+msgstr ""
+
+msgid "Iterations|Start date"
 msgstr ""
 
 msgid "Iterations|The duration for each iteration (in weeks)"
 msgstr ""
 
 msgid "Iterations|The start date of your first iteration"
+msgstr ""
+
+msgid "Iterations|Title"
 msgstr ""
 
 msgid "Iteration|Dates cannot overlap with other existing Iterations within this group"
@@ -27500,9 +27512,6 @@ msgstr ""
 msgid "Select due date"
 msgstr ""
 
-msgid "Select duration"
-msgstr ""
-
 msgid "Select epic"
 msgstr ""
 
@@ -31105,6 +31114,9 @@ msgid "This feature requires local storage to be enabled"
 msgstr ""
 
 msgid "This feature should be used with an index that was created after 13.0"
+msgstr ""
+
+msgid "This field is required"
 msgstr ""
 
 msgid "This field is required."

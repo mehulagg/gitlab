@@ -90,6 +90,12 @@ export default {
         durationInWeeks: null,
         iterationsInAdvance: null,
       },
+      touched: {
+        title: null,
+        startDate: null,
+        durationInWeeks: null,
+        iterationsInAdvance: null,
+      },
       i18n,
     };
   },
@@ -98,22 +104,29 @@ export default {
       return !Object.values(this.validationState).includes(false);
     },
     variables() {
-      return {
+      let vars = {
         input: {
           groupPath: this.groupPath,
           title: this.title,
           automatic: this.automatic,
-          startDate: this.startDate,
-          durationInWeeks: this.durationInWeeks,
-          iterationsInAdvance: this.iterationsInAdvance,
           active: true, // TODO: where is this toggled?
         },
       };
+      if (this.automatic) {
+        vars = {
+          ...vars,
+          startDate: this.startDate,
+          durationInWeeks: this.durationInWeeks,
+          iterationsInAdvance: this.iterationsInAdvance,
+        };
+      }
+      return vars;
     },
   },
   methods: {
     validate(field) {
       this.validationState[field] = Boolean(this[field]);
+      this.touched[field] = true;
     },
     validateAllFields() {
       if (this.automatic) {
@@ -193,7 +206,7 @@ export default {
         label-class="text-right-md gl-pt-3!"
         label-for="cadence-title"
         :invalid-feedback="i18n.requiredField"
-        :state="validationState.title"
+        :validated="touched.title"
       >
         <gl-form-input
           id="cadence-title"
@@ -203,7 +216,7 @@ export default {
           data-qa-selector="iteration_cadence_title_field"
           :placeholder="i18n.title.placeholder"
           size="xl"
-          @blur="validate('title')"
+          @blur="touched.title = true"
         />
       </gl-form-group>
 
