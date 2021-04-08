@@ -28737,6 +28737,9 @@ msgstr ""
 msgid "Something went wrong on our end"
 msgstr ""
 
+msgid "Something went wrong on our end while loading the code quality diff."
+msgstr ""
+
 msgid "Something went wrong on our end."
 msgstr ""
 

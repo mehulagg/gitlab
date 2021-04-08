@@ -41,7 +41,8 @@ export const fetchCodequality = ({ commit, state, dispatch }) => {
         dispatch('stopCodequalityPolling');
       }
     },
-    errorCallback: () => createFlash(__('Something went wrong on our end. Please try again.')),
+    errorCallback: () =>
+      createFlash(__('Something went wrong on our end while loading the code quality diff.')),
   });
 
   if (!Visibility.hidden()) {
