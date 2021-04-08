@@ -34,6 +34,7 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
     let_it_be(:lfs_object_3) { create(:lfs_object) }
     let_it_be(:lfs_object_4) { create(:lfs_object) }
     let_it_be(:lfs_object_5) { create(:lfs_object) }
+
     let!(:lfs_object_remote_1) { create(:lfs_object, :object_storage) }
     let!(:lfs_object_remote_2) { create(:lfs_object, :object_storage) }
     let!(:lfs_object_remote_3) { create(:lfs_object, :object_storage) }

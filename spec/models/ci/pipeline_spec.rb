@@ -427,6 +427,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     subject { pipeline.legacy_detached_merge_request_pipeline? }
 
     let_it_be(:merge_request) { create(:merge_request) }
+
     let(:ref) { 'feature' }
     let(:target_sha) { nil }
 
@@ -832,6 +833,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       let_it_be(:assignees) { create_list(:user, 2) }
       let_it_be(:milestone) { create(:milestone, project: project) }
       let_it_be(:labels) { create_list(:label, 2) }
+
       let(:merge_request) do
         create(:merge_request, :simple,
                source_project: project,
@@ -1276,6 +1278,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
   describe 'state machine' do
     let_it_be_with_reload(:pipeline) { create(:ci_empty_pipeline, :created) }
+
     let(:current) { Time.current.change(usec: 0) }
     let(:build) { create_build('build1', queued_at: 0) }
     let(:build_b) { create_build('build2', queued_at: 0) }
@@ -2327,6 +2330,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     subject { pipeline.reload.status }
 
     let_it_be(:pipeline) { create(:ci_empty_pipeline, :created) }
+
     let(:build) { create(:ci_build, :created, pipeline: pipeline, name: 'test') }
 
     context 'on waiting for resource' do
@@ -2635,6 +2639,37 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         expect(latest_status).to eq %w(canceled canceled)
       end
     end
+
+    context 'preloading relations' do
+      let(:pipeline1) { create(:ci_empty_pipeline, :created) }
+      let(:pipeline2) { create(:ci_empty_pipeline, :created) }
+
+      before do
+        create(:ci_build, :pending, pipeline: pipeline1)
+        create(:generic_commit_status, :pending, pipeline: pipeline1)
+
+        create(:ci_build, :pending, pipeline: pipeline2)
+        create(:ci_build, :pending, pipeline: pipeline2)
+        create(:generic_commit_status, :pending, pipeline: pipeline2)
+        create(:generic_commit_status, :pending, pipeline: pipeline2)
+        create(:generic_commit_status, :pending, pipeline: pipeline2)
+      end
+
+      it 'preloads relations for each build to avoid N+1 queries' do
+        control1 = ActiveRecord::QueryRecorder.new do
+          pipeline1.cancel_running
+        end
+
+        control2 = ActiveRecord::QueryRecorder.new do
+          pipeline2.cancel_running
+        end
+
+        extra_update_queries = 3 # transition ... => :canceled
+        extra_generic_commit_status_validation_queries = 2 # name_uniqueness_across_types
+
+        expect(control2.count).to eq(control1.count + extra_update_queries + extra_generic_commit_status_validation_queries)
+      end
+    end
   end
 
   describe '#retry_failed' do
@@ -2690,6 +2725,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
   describe '#execute_hooks' do
     let_it_be(:pipeline) { create(:ci_empty_pipeline, :created) }
+
     let!(:build_a) { create_build('a', 0) }
     let!(:build_b) { create_build('b', 0) }
 
@@ -3355,6 +3391,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
   describe '#build_with_artifacts_in_self_and_descendants' do
     let_it_be(:pipeline) { create(:ci_pipeline) }
+
     let!(:build) { create(:ci_build, name: 'test', pipeline: pipeline) }
     let(:child_pipeline) { create(:ci_pipeline, child_of: pipeline) }
     let!(:child_build) { create(:ci_build, :artifacts, name: 'test', pipeline: child_pipeline) }
@@ -3865,6 +3902,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
   describe '#find_stage_by_name' do
     let_it_be(:pipeline) { create(:ci_pipeline) }
+
     let(:stage_name) { 'test' }
 
     let(:stage) do
@@ -4150,6 +4188,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     subject { pipeline.base_and_ancestors(same_project: same_project) }
 
     let_it_be(:pipeline) { create(:ci_pipeline, :created) }
+
     let(:same_project) { false }
 
     context 'when pipeline is not child nor parent' do
@@ -4186,6 +4225,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
     context 'when pipeline is a child of a child pipeline' do
       let_it_be(:pipeline) { create(:ci_pipeline, :created) }
+
       let(:ancestor) { create(:ci_pipeline) }
       let(:parent) { create(:ci_pipeline) }
 
@@ -4201,6 +4241,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
     context 'when pipeline is a triggered pipeline' do
       let_it_be(:pipeline) { create(:ci_pipeline, :created) }
+
       let(:upstream) { create(:ci_pipeline, project: create(:project)) }
 
       before do

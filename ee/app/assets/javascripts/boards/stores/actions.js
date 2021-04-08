@@ -46,6 +46,7 @@ import projectBoardAssigneesQuery from '../graphql/project_board_assignees.query
 import projectBoardIterationsQuery from '../graphql/project_board_iterations.query.graphql';
 import projectBoardMilestonesQuery from '../graphql/project_board_milestones.query.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/update_board_epic_user_preferences.mutation.graphql';
+import updateEpicLabelsMutation from '../graphql/update_epic_labels.mutation.graphql';
 
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
@@ -379,13 +380,13 @@ export default {
   },
 
   fetchEpicForActiveIssue: async ({ state, commit, getters }) => {
-    if (!getters.activeIssue.epic) {
+    if (!getters.activeBoardItem.epic) {
       return false;
     }
 
     const {
       epic: { id, iid },
-    } = getters.activeIssue;
+    } = getters.activeBoardItem;
 
     if (state.epicsCacheById[id]) {
       return false;
@@ -421,7 +422,7 @@ export default {
       mutation: issueSetEpicMutation,
       variables: {
         input: {
-          iid: String(getters.activeIssue.iid),
+          iid: String(getters.activeBoardItem.iid),
           epicId,
           projectPath: getters.projectPathForActiveIssue,
         },
@@ -439,8 +440,8 @@ export default {
       commit(types.UPDATE_CACHED_EPICS, [epic]);
     }
 
-    commit(typesCE.UPDATE_ISSUE_BY_ID, {
-      issueId: getters.activeIssue.id,
+    commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
+      itemId: getters.activeBoardItem.id,
       prop: 'epic',
       value: epic ? { id: epic.id, iid: epic.iid } : null,
     });
@@ -452,7 +453,7 @@ export default {
       mutation: issueSetWeightMutation,
       variables: {
         input: {
-          iid: String(getters.activeIssue.iid),
+          iid: String(getters.activeBoardItem.iid),
           weight: input.weight,
           projectPath: input.projectPath,
         },
@@ -463,8 +464,8 @@ export default {
       throw new Error(data.issueSetWeight?.errors);
     }
 
-    commit(typesCE.UPDATE_ISSUE_BY_ID, {
-      issueId: getters.activeIssue.id,
+    commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
+      itemId: getters.activeBoardItem.id,
       prop: 'weight',
       value: data.issueSetWeight.issue.weight,
     });
@@ -764,5 +765,38 @@ export default {
         commit(types.CREATE_LIST_FAILURE);
         throw e;
       });
+  },
+
+  setActiveBoardItemLabels: ({ getters, dispatch }, params) => {
+    if (!getters.isEpicBoard) {
+      dispatch('setActiveIssueLabels', params);
+    } else {
+      dispatch('setActiveEpicLabels', params);
+    }
+  },
+
+  setActiveEpicLabels: async ({ commit, getters, state }, input) => {
+    const { activeBoardItem } = getters;
+    const { data } = await gqlClient.mutate({
+      mutation: updateEpicLabelsMutation,
+      variables: {
+        input: {
+          iid: String(activeBoardItem.iid),
+          addLabelIds: input.addLabelIds ?? [],
+          removeLabelIds: input.removeLabelIds ?? [],
+          groupPath: state.fullPath,
+        },
+      },
+    });
+
+    if (data.updateEpic?.errors?.length > 0) {
+      throw new Error(data.updateEpic.errors);
+    }
+
+    commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
+      itemId: activeBoardItem.id,
+      prop: 'labels',
+      value: data.updateEpic.epic.labels.nodes,
+    });
   },
 };

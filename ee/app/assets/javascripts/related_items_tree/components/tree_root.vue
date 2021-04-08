@@ -2,7 +2,7 @@
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 
-import { ChildType } from '../constants';
+import { ChildType, EXPAND_DELAY } from '../constants';
 import TreeDragAndDropMixin from '../mixins/tree_dd_mixin';
 
 export default {
@@ -24,6 +24,8 @@ export default {
   data() {
     return {
       fetchInProgress: false,
+      currentClientX: 0,
+      currentClientY: 0,
     };
   },
   computed: {
@@ -48,13 +50,34 @@ export default {
           this.fetchInProgress = false;
         });
     },
-    onMove(e) {
+    onMove(e, originalEvent) {
       const item = e.relatedContext.element;
-      if (item?.type === ChildType.Epic)
-        this.toggleItem({
-          parentItem: item,
-          isDragging: true,
-        });
+      const { clientX, clientY } = originalEvent;
+
+      // Cache current cursor position
+      this.currentClientX = clientX;
+      this.currentClientY = clientY;
+
+      // Check if current item is an Epic, and has any children.
+      if (item?.type === ChildType.Epic && (item.hasChildren || item.hasIssues)) {
+        const { top, left } = originalEvent.target.getBoundingClientRect();
+
+        // Check if user has paused cursor on top of current item's boundary
+        if (clientY >= top && clientX >= left) {
+          // Wait for moment before expanding the epic
+          this.toggleTimer = setTimeout(() => {
+            // Ensure that current cursor position is still within item's boundary
+            if (this.currentClientX === clientX && this.currentClientY === clientY) {
+              this.toggleItem({
+                parentItem: item,
+                isDragging: true,
+              });
+            }
+          }, EXPAND_DELAY);
+        } else {
+          clearTimeout(this.toggleTimer);
+        }
+      }
     },
   },
 };

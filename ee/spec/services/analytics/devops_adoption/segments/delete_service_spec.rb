@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Analytics::DevopsAdoption::Segments::DeleteService do
   let_it_be(:group) { create(:group) }
   let_it_be(:reporter) { create(:user).tap { |u| group.add_reporter(u) } }
+
   let(:segment) { create(:devops_adoption_segment, namespace: group) }
   let(:current_user) { reporter }
 

@@ -69,7 +69,8 @@ module SubscriptionsHelper
       {
         id: namespace.id,
         name: namespace.name,
-        users: namespace.member_count
+        users: namespace.member_count,
+        guests: namespace.guest_count
       }
     end
   end

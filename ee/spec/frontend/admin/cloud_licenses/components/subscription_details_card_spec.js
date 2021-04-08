@@ -67,14 +67,6 @@ describe('Subscription Details Card', () => {
     });
   });
 
-  describe('with empty subscription', () => {
-    it('passes an empty array to the table component', () => {
-      createComponent({ subscription: {} });
-
-      expect(findSubscriptionDetailsTable().props('details')).toEqual([]);
-    });
-  });
-
   describe('with no title', () => {
     it('does not display a title', () => {
       createComponent();

@@ -35,7 +35,13 @@ export default {
 
 <template>
   <div class="gl-display-flex gl-justify-content-center gl-flex-direction-column">
-    <h3 class="gl-mb-7 gl-mt-6 gl-text-center">{{ mainTitle }}</h3>
-    <cloud-license-subscription-activation-form v-if="!subscriptionData" />
+    <h4>{{ s__('CloudLicense|Your subscription') }}</h4>
+    <hr />
+    <div class="row">
+      <div class="col-12 col-lg-8 offset-lg-2">
+        <h3 class="gl-mb-7 gl-mt-6 gl-text-center">{{ mainTitle }}</h3>
+        <cloud-license-subscription-activation-form v-if="!subscriptionData" />
+      </div>
+    </div>
   </div>
 </template>

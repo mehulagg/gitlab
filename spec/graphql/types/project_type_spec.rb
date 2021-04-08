@@ -243,6 +243,7 @@ RSpec.describe GitlabSchema.types['Project'] do
                                             :assignee_username,
                                             :reviewer_username,
                                             :milestone_title,
+                                            :not,
                                             :sort
                                            )
     end
@@ -370,5 +371,12 @@ RSpec.describe GitlabSchema.types['Project'] do
 
     it { is_expected.to have_graphql_type(Types::Ci::AnalyticsType) }
     it { is_expected.to have_graphql_resolver(Resolvers::ProjectPipelineStatisticsResolver) }
+  end
+
+  describe 'jobs field' do
+    subject { described_class.fields['jobs'] }
+
+    it { is_expected.to have_graphql_type(Types::Ci::JobType.connection_type) }
+    it { is_expected.to have_graphql_arguments(:statuses) }
   end
 end

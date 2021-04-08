@@ -106,3 +106,9 @@
     min-height: 335px;
   }
 }
+
+.add-item-form-container {
+  .select-project-dropdown .gl-new-dropdown-item-text-primary {
+    display: flex;
+  }
+}

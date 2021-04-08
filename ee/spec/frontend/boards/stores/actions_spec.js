@@ -15,6 +15,7 @@ import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import {
+  labels,
   mockLists,
   mockIssue,
   mockIssue2,
@@ -578,7 +579,7 @@ describe('fetchEpicForActiveIssue', () => {
   };
 
   describe("when active issue doesn't have an assigned epic", () => {
-    const getters = { activeIssue: { ...mockIssue, epic: null } };
+    const getters = { activeBoardItem: { ...mockIssue, epic: null } };
 
     it('should not fetch any epic', async () => {
       await testAction(actions.fetchEpicForActiveIssue, undefined, { ...getters }, [], []);
@@ -586,7 +587,7 @@ describe('fetchEpicForActiveIssue', () => {
   });
 
   describe('when the assigned epic for active issue is found in state.epicsCacheById', () => {
-    const getters = { activeIssue: { ...mockIssue, epic: assignedEpic } };
+    const getters = { activeBoardItem: { ...mockIssue, epic: assignedEpic } };
     const state = { epicsCacheById: { [assignedEpic.id]: assignedEpic } };
 
     it('should not fetch any epic', async () => {
@@ -601,7 +602,7 @@ describe('fetchEpicForActiveIssue', () => {
   });
 
   describe('when fetching fails', () => {
-    const getters = { activeIssue: { ...mockIssue, epic: assignedEpic } };
+    const getters = { activeBoardItem: { ...mockIssue, epic: assignedEpic } };
     const state = { epicsCacheById: {} };
 
     it('should not commit UPDATE_CACHED_EPICS mutation and should throw an error', () => {
@@ -630,7 +631,7 @@ describe('fetchEpicForActiveIssue', () => {
   });
 
   describe("when the assigned epic for active issue isn't found in state.epicsCacheById", () => {
-    const getters = { activeIssue: { ...mockIssue, epic: assignedEpic } };
+    const getters = { activeBoardItem: { ...mockIssue, epic: assignedEpic } };
     const state = { epicsCacheById: {} };
 
     it('should commit mutation SET_EPIC_FETCH_IN_PROGRESS before and after committing mutation UPDATE_CACHED_EPICS', async () => {
@@ -664,7 +665,7 @@ describe('setActiveIssueEpic', () => {
   const state = {
     epics: [{ id: 'gid://gitlab/Epic/422', iid: 99, title: 'existing epic' }],
   };
-  const getters = { activeIssue: { ...mockIssue, projectPath: 'h/b' } };
+  const getters = { activeBoardItem: { ...mockIssue, projectPath: 'h/b' } };
   const epicWithData = {
     id: 'gid://gitlab/Epic/42',
     iid: 1,
@@ -672,7 +673,7 @@ describe('setActiveIssueEpic', () => {
   };
 
   describe('when the updated issue has an assigned epic', () => {
-    it('should commit mutation RECEIVE_EPICS_SUCCESS, UPDATE_CACHED_EPICS and UPDATE_ISSUE_BY_ID on success', async () => {
+    it('should commit mutation RECEIVE_EPICS_SUCCESS, UPDATE_CACHED_EPICS and UPDATE_BOARD_ITEM_BY_ID on success', async () => {
       jest
         .spyOn(gqlClient, 'mutate')
         .mockResolvedValue({ data: { issueSetEpic: { issue: { epic: epicWithData } } } });
@@ -695,9 +696,9 @@ describe('setActiveIssueEpic', () => {
             payload: [epicWithData],
           },
           {
-            type: typesCE.UPDATE_ISSUE_BY_ID,
+            type: typesCE.UPDATE_BOARD_ITEM_BY_ID,
             payload: {
-              issueId: mockIssue.id,
+              itemId: mockIssue.id,
               prop: 'epic',
               value: { id: epicWithData.id, iid: epicWithData.iid },
             },
@@ -713,7 +714,7 @@ describe('setActiveIssueEpic', () => {
   });
 
   describe('when the updated issue does not have an epic (unassigned)', () => {
-    it('should only commit UPDATE_ISSUE_BY_ID on success', async () => {
+    it('should only commit UPDATE_BOARD_ITEM_BY_ID on success', async () => {
       jest
         .spyOn(gqlClient, 'mutate')
         .mockResolvedValue({ data: { issueSetEpic: { issue: { epic: null } } } });
@@ -728,8 +729,8 @@ describe('setActiveIssueEpic', () => {
             payload: true,
           },
           {
-            type: typesCE.UPDATE_ISSUE_BY_ID,
-            payload: { issueId: mockIssue.id, prop: 'epic', value: null },
+            type: typesCE.UPDATE_BOARD_ITEM_BY_ID,
+            payload: { itemId: mockIssue.id, prop: 'epic', value: null },
           },
           {
             type: types.SET_EPIC_FETCH_IN_PROGRESS,
@@ -752,7 +753,7 @@ describe('setActiveIssueEpic', () => {
 
 describe('setActiveIssueWeight', () => {
   const state = { boardItems: { [mockIssue.id]: mockIssue } };
-  const getters = { activeIssue: mockIssue };
+  const getters = { activeBoardItem: mockIssue };
   const testWeight = mockIssue.weight + 1;
   const input = {
     weight: testWeight,
@@ -772,7 +773,7 @@ describe('setActiveIssueWeight', () => {
     });
 
     const payload = {
-      issueId: getters.activeIssue.id,
+      itemId: getters.activeBoardItem.id,
       prop: 'weight',
       value: testWeight,
     };
@@ -783,7 +784,7 @@ describe('setActiveIssueWeight', () => {
       { ...state, ...getters },
       [
         {
-          type: typesCE.UPDATE_ISSUE_BY_ID,
+          type: typesCE.UPDATE_BOARD_ITEM_BY_ID,
           payload,
         },
       ],
@@ -1365,5 +1366,50 @@ describe('fetchAssignees', () => {
       expect(store.state.assigneesLoading).toBe(false);
       expect(store.state.error).toBe('Failed to load assignees.');
     });
+  });
+});
+
+describe('setActiveEpicLabels', () => {
+  const state = { boardItems: { [mockEpic.id]: mockEpic } };
+  const getters = { activeBoardItem: mockEpic };
+  const testLabelIds = labels.map((label) => label.id);
+  const input = {
+    addLabelIds: testLabelIds,
+    removeLabelIds: [],
+    groupPath: 'h/b',
+  };
+
+  it('should assign labels on success', (done) => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { updateEpic: { epic: { labels: { nodes: labels } } } } });
+
+    const payload = {
+      itemId: getters.activeBoardItem.id,
+      prop: 'labels',
+      value: labels,
+    };
+
+    testAction(
+      actions.setActiveEpicLabels,
+      input,
+      { ...state, ...getters },
+      [
+        {
+          type: typesCE.UPDATE_BOARD_ITEM_BY_ID,
+          payload,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { updateEpic: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveEpicLabels({ getters }, input)).rejects.toThrow(Error);
   });
 });

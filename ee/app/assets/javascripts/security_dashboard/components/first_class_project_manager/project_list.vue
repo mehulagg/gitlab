@@ -1,8 +1,12 @@
 <script>
 import { GlBadge, GlButton, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import { s__ } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 export default {
+  i18n: {
+    removeLabel: s__('SecurityReports|Remove project from dashboard'),
+  },
   components: {
     GlBadge,
     GlButton,
@@ -52,7 +56,8 @@ export default {
             v-gl-tooltip
             icon="remove"
             class="gl-ml-auto js-projects-list-project-remove"
-            :title="s__('SecurityReports|Remove project from dashboard')"
+            :title="$options.i18n.removeLabel"
+            :aria-label="$options.i18n.removeLabel"
             @click="projectRemoved(project)"
           />
         </li>

@@ -26,10 +26,6 @@ export default {
   },
   computed: {
     details() {
-      if (!Object.keys(this.subscription).length) {
-        return [];
-      }
-
       return this.detailsFields.map((detail) => ({
         canCopy: detail === 'id',
         label: detailsLabels[detail],

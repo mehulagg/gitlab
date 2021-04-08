@@ -11,7 +11,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
   let(:description) { 'simple description' }
   let(:issue) do
     create(:issue, project: project, labels: [label1, label2],
-                   milestone: milestone, description: description)
+                   milestone: milestone, description: description, weight: 3)
   end
 
   subject { described_class.new(issue.project, user) }
@@ -103,7 +103,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
 
           it 'emits a snowplow event' do
             expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  project: project, user: user, namespace: group)
+                                  project: project, user: user, namespace: group, weight: 3)
           end
 
           context 'when issue description has mentions and has notes with mentions' do
@@ -210,7 +210,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
             expect(epic.notes.where(discussion_id: discussion.discussion_id).count).to eq(0)
             expect(issue.notes.where(discussion_id: discussion.discussion_id).count).to eq(1)
             expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  project: project, user: user, namespace: group)
+                                  project: project, user: user, namespace: group, weight: 3)
           end
 
           it 'copies note attachments' do
@@ -220,7 +220,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
 
             expect(epic.notes.user.first.attachment).to be_kind_of(AttachmentUploader)
             expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  project: project, user: user, namespace: group)
+                                  project: project, user: user, namespace: group, weight: 3)
           end
         end
 

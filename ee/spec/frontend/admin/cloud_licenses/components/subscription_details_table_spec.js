@@ -1,5 +1,5 @@
 import { GlSkeletonLoader } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import SubscriptionDetailsTable from 'ee/pages/admin/cloud_licenses/components/subscription_details_table.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -22,11 +22,10 @@ describe('Subscription Details Table', () => {
 
   const findContentCells = () => wrapper.findAllByTestId('details-content');
   const findLabelCells = () => wrapper.findAllByTestId('details-label');
-  const findLastRow = () => wrapper.findAll('li').wrappers.slice(-1).pop();
   const findClipboardButton = () => wrapper.findComponent(ClipboardButton);
 
   const createComponent = (details = licenseDetails) => {
-    wrapper = extendedWrapper(shallowMount(SubscriptionDetailsTable, { propsData: { details } }));
+    wrapper = extendedWrapper(mount(SubscriptionDetailsTable, { propsData: { details } }));
   };
 
   afterEach(() => {
@@ -50,10 +49,6 @@ describe('Subscription Details Table', () => {
 
     it('displays the labels in bold', () => {
       expect(findLabelCells().wrappers.every(hasFontWeightBold)).toBe(true);
-    });
-
-    it('does not add space to the last row', () => {
-      expect(findLastRow().classes('gl-mb-3')).toBe(false);
     });
 
     it('does not show a clipboard button', () => {

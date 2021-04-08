@@ -28,7 +28,7 @@
               = _("Overview")
               %span.badge.badge-pill= @merge_request.related_notes.user.count
           - if @merge_request.source_project
-            = render "projects/merge_requests/tabs/tab", name: "commits", class: "commits-tab" do
+            = render "projects/merge_requests/tabs/tab", name: "commits", class: "commits-tab", qa_selector: "commits_tab" do
               = tab_link_for @merge_request, :commits do
                 = _("Commits")
                 %span.badge.badge-pill= @commits_count
@@ -62,7 +62,7 @@
                   - add_page_startup_api_call notes_url
                 - else
                   - add_page_startup_api_call discussions_path(@merge_request)
-                - add_page_startup_api_call widget_project_json_merge_request_path(@project, @merge_request, format: :json)
+                - add_page_startup_api_call widget_project_json_merge_request_path(@project, @merge_request, async_mergeability_check: true, format: :json)
                 - add_page_startup_api_call cached_widget_project_json_merge_request_path(@project, @merge_request, format: :json)
               #js-vue-mr-discussions{ data: { notes_data: notes_data(@merge_request, Feature.enabled?(:paginated_notes, @project)).to_json,
                 endpoint_metadata: @endpoint_metadata_url,

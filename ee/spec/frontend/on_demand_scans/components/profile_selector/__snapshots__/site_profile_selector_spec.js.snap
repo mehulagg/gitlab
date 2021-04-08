@@ -291,6 +291,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
           data-testid="selected-profile-summary"
         >
           <a
+            aria-label="Edit profile"
             class="btn gl-absolute gl-right-7 btn-default btn-md gl-button btn-icon"
             href="/site_profiles/edit/1"
             title="Edit profile"

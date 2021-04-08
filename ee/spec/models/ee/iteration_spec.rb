@@ -36,6 +36,7 @@ RSpec.describe Iteration do
 
   describe 'setting iteration cadence' do
     let_it_be(:iterations_cadence) { create(:iterations_cadence, group: group, start_date: 10.days.ago) }
+
     let(:iteration) { create(:iteration, group: group, iterations_cadence: set_cadence, start_date: 2.days.from_now) }
 
     context 'when iterations_cadence is set correctly' do
@@ -56,6 +57,7 @@ RSpec.describe Iteration do
 
     context 'when iterations_cadence does not exists for the group' do
       let_it_be(:group) { create(:group, name: 'Test group')}
+
       let(:iteration) { build(:iteration, group: group, iterations_cadence: set_cadence) }
 
       it 'creates a default iterations_cadence and uses it for the iteration' do

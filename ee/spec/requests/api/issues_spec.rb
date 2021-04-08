@@ -47,7 +47,7 @@ RSpec.describe API::Issues, :mailer do
 
       context 'and epic issue is not present' do
         it 'exposes epic as nil' do
-          issue_with_epic.epic_issue.destroy
+          issue_with_epic.epic_issue.destroy!
 
           subject
 

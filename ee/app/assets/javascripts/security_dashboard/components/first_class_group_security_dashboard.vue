@@ -4,7 +4,7 @@ import GroupSecurityVulnerabilities from 'ee/security_dashboard/components/first
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import { vulnerabilitiesSeverityCountScopes } from '../constants';
-import vulnerableProjectsQuery from '../graphql/queries/vulnerable_projects.query.graphql';
+import groupProjectsQuery from '../graphql/queries/group_projects.query.graphql';
 import CsvExportButton from './csv_export_button.vue';
 import DashboardNotConfigured from './empty_states/group_dashboard_not_configured.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
@@ -22,7 +22,7 @@ export default {
   inject: ['groupFullPath'],
   apollo: {
     projects: {
-      query: vulnerableProjectsQuery,
+      query: groupProjectsQuery,
       variables() {
         return { fullPath: this.groupFullPath };
       },

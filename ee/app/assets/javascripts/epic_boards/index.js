@@ -63,6 +63,7 @@ export default () => {
       rootPath: $boardApp.dataset.rootPath,
       currentUserId: gon.current_user_id || null,
       canUpdate: $boardApp.dataset.canUpdate,
+      canAdminList: parseBoolean($boardApp.dataset.canAdminList),
       labelsFetchPath: $boardApp.dataset.labelsFetchPath,
       labelsManagePath: $boardApp.dataset.labelsManagePath,
       labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,

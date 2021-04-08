@@ -15,6 +15,7 @@ import {
   DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
   DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_BY_STORAGE_KEY,
   DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY,
+  DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED,
 } from '../constants';
 import DevopsAdoptionDeleteModal from './devops_adoption_delete_modal.vue';
 import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
@@ -67,9 +68,6 @@ export default {
     GlIcon,
     GlBadge,
   },
-  i18n,
-  devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
-  devopsSegmentDeleteModalId: DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
   directives: {
     GlTooltip: GlTooltipDirective,
     GlModal: GlModalDirective,
@@ -79,6 +77,12 @@ export default {
       default: null,
     },
   },
+  i18n: {
+    ...i18n,
+    removeButtonDisabled: DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED,
+  },
+  devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
+  devopsSegmentDeleteModalId: DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
   tableHeaderFields: [
     ...headers,
     {
@@ -117,6 +121,11 @@ export default {
     },
     isCurrentGroup(item) {
       return item.namespace?.id === this.groupGid;
+    },
+    getDeleteButtonTooltipText(item) {
+      return this.isCurrentGroup(item)
+        ? this.$options.i18n.removeButtonDisabled
+        : this.$options.i18n.removeButton;
     },
   },
 };
@@ -226,15 +235,19 @@ export default {
       </template>
 
       <template #cell(actions)="{ item }">
-        <div :data-testid="$options.testids.ACTIONS">
+        <span
+          v-gl-tooltip.hover="getDeleteButtonTooltipText(item)"
+          :data-testid="$options.testids.ACTIONS"
+        >
           <gl-button
             v-gl-modal="$options.devopsSegmentDeleteModalId"
-            v-gl-tooltip.hover="$options.i18n.removeButton"
+            :disabled="isCurrentGroup(item)"
             category="tertiary"
             icon="remove"
+            :aria-label="$options.i18n.removeButton"
             @click="setSelectedSegment(item)"
           />
-        </div>
+        </span>
       </template>
     </gl-table>
     <devops-adoption-delete-modal

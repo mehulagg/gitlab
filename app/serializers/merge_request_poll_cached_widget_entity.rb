@@ -64,6 +64,10 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
     presenter(merge_request).target_branch_commits_path
   end
 
+  expose :merge_request_widget_path do |merge_request|
+    widget_project_json_merge_request_path(merge_request.target_project, merge_request, format: :json)
+  end
+
   expose :target_branch_tree_path do |merge_request|
     presenter(merge_request).target_branch_tree_path
   end
@@ -108,6 +112,36 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
 
   expose :api_unapprove_path do |merge_request|
     presenter(merge_request).api_unapprove_path
+  end
+
+  expose :test_reports_path do |merge_request|
+    if merge_request.has_test_reports?
+      test_reports_project_merge_request_path(merge_request.project, merge_request, format: :json)
+    end
+  end
+
+  expose :accessibility_report_path do |merge_request|
+    if merge_request.has_accessibility_reports?
+      accessibility_reports_project_merge_request_path(merge_request.project, merge_request, format: :json)
+    end
+  end
+
+  expose :codequality_reports_path do |merge_request|
+    if merge_request.has_codequality_reports?
+      codequality_reports_project_merge_request_path(merge_request.project, merge_request, format: :json)
+    end
+  end
+
+  expose :terraform_reports_path do |merge_request|
+    if merge_request.has_terraform_reports?
+      terraform_reports_project_merge_request_path(merge_request.project, merge_request, format: :json)
+    end
+  end
+
+  expose :exposed_artifacts_path do |merge_request|
+    if merge_request.has_exposed_artifacts?
+      exposed_artifacts_project_merge_request_path(merge_request.project, merge_request, format: :json)
+    end
   end
 
   expose :blob_path do

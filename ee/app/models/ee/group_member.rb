@@ -22,6 +22,7 @@ module EE
       end
 
       scope :reporters, -> { where(access_level: ::Gitlab::Access::REPORTER) }
+      scope :guests, -> { where(access_level: ::Gitlab::Access::GUEST) }
       scope :non_owners, -> { where("members.access_level < ?", ::Gitlab::Access::OWNER) }
       scope :by_user_id, ->(user_id) { where(user_id: user_id) }
     end

@@ -10,6 +10,7 @@ RSpec.describe Projects::Security::ScannedResourcesController, type: :request do
     let_it_be(:pipeline_without_scan) { create(:ci_pipeline, project: project) }
     let_it_be(:pipeline_on_another_project) { create(:ci_pipeline) }
     let_it_be(:pipeline_id) { pipeline.id }
+
     let(:parsed_csv_data) { CSV.parse(response.body, headers: true) }
 
     subject(:request) { get project_security_scanned_resources_path(project, :csv, pipeline_id: pipeline_id) }

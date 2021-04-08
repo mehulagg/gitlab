@@ -10,6 +10,7 @@ RSpec.describe ProjectsController do
   let_it_be(:project, reload: true) { create(:project, service_desk_enabled: false) }
   let_it_be(:public_project) { create(:project, :public) }
   let_it_be(:user) { create(:user) }
+
   let(:jpg) { fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpg') }
   let(:txt) { fixture_file_upload('spec/fixtures/doc_sample.txt', 'text/plain') }
 
@@ -447,6 +448,12 @@ RSpec.describe ProjectsController do
 
       post :create, params: { project: project_params }
     end
+
+    it 'tracks a created event for the new_repo experiment', :experiment do
+      expect(experiment(:new_repo, :candidate)).to track(:project_created).on_next_instance
+
+      post :create, params: { project: project_params }
+    end
   end
 
   describe 'POST #archive' do
@@ -548,6 +555,7 @@ RSpec.describe ProjectsController do
   describe '#housekeeping' do
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, group: group) }
+
     let(:housekeeping) { Repositories::HousekeepingService.new(project) }
 
     context 'when authenticated as owner' do
@@ -1097,6 +1105,7 @@ RSpec.describe ProjectsController do
 
     context 'state filter on references' do
       let_it_be(:issue) { create(:issue, :closed, project: public_project) }
+
       let(:merge_request) { create(:merge_request, :closed, target_project: public_project) }
 
       it 'renders JSON body with state filter for issues' do

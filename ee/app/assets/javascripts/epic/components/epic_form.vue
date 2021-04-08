@@ -231,7 +231,7 @@ export default {
       <div class="footer-block row-content-block gl-display-flex">
         <gl-button
           type="submit"
-          variant="success"
+          variant="confirm"
           :loading="loading"
           :disabled="!title"
           data-testid="save-epic"

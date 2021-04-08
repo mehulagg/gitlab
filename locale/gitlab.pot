@@ -817,9 +817,6 @@ msgstr ""
 msgid "%{spanStart}in%{spanEnd} %{errorFn}"
 msgstr ""
 
-msgid "%{startDate} - %{endDate}"
-msgstr ""
-
 msgid "%{start} to %{end}"
 msgstr ""
 
@@ -1776,6 +1773,9 @@ msgstr ""
 msgid "Activity"
 msgstr ""
 
+msgid "Activity|An error occured while retrieving activity. Reload the page to try again."
+msgstr ""
+
 msgid "Add"
 msgstr ""
 
@@ -2022,19 +2022,13 @@ msgstr ""
 msgid "AddContextCommits|Add/remove"
 msgstr ""
 
-msgid "AddMember|Already a member of %{source_name}"
+msgid "AddMember|Emails cannot be blank"
 msgstr ""
 
-msgid "AddMember|Email cannot be blank"
+msgid "AddMember|Invite email is invalid"
 msgstr ""
 
 msgid "AddMember|Invite limit of %{daily_invites} per day exceeded"
-msgstr ""
-
-msgid "AddMember|Member already invited to %{source_name}"
-msgstr ""
-
-msgid "AddMember|Member cannot be invited because they already requested to join %{source_name}"
 msgstr ""
 
 msgid "AddMember|No users specified."
@@ -3677,6 +3671,9 @@ msgstr ""
 msgid "An example showing how to use Jsonnet with GitLab dynamic child pipelines"
 msgstr ""
 
+msgid "An extendable open source CI/CD server."
+msgstr ""
+
 msgid "An instance-level serverless domain already exists."
 msgstr ""
 
@@ -4714,25 +4711,25 @@ msgstr ""
 msgid "Balsamiq file could not be loaded."
 msgstr ""
 
-msgid "BambooService|A continuous integration and build server"
-msgstr ""
-
-msgid "BambooService|A user with API access, if applicable"
-msgstr ""
-
-msgid "BambooService|Atlassian Bamboo CI"
+msgid "BambooService|Atlassian Bamboo"
 msgstr ""
 
 msgid "BambooService|Bamboo URL"
 msgstr ""
 
-msgid "BambooService|Bamboo build plan key like KEY"
+msgid "BambooService|Bamboo build plan key."
 msgstr ""
 
-msgid "BambooService|Bamboo root URL like https://bamboo.example.com"
+msgid "BambooService|Bamboo service root URL."
 msgstr ""
 
-msgid "BambooService|You must set up automatic revision labeling and a repository trigger in Bamboo."
+msgid "BambooService|The user with API access to the Bamboo server."
+msgstr ""
+
+msgid "BambooService|Use Atlassian Bamboo to run CI/CD pipelines. You must set up automatic revision labeling and a repository trigger in Bamboo. %{docs_link}"
+msgstr ""
+
+msgid "BambooService|Use the Atlassian Bamboo CI/CD server with GitLab."
 msgstr ""
 
 msgid "Based on"
@@ -5643,6 +5640,12 @@ msgstr ""
 msgid "Capacity threshold"
 msgstr ""
 
+msgid "CascadingSettings|cannot be changed because it is locked by an ancestor"
+msgstr ""
+
+msgid "CascadingSettings|cannot be nil when locking the attribute"
+msgstr ""
+
 msgid "Certain user content will be moved to a system-wide \"Ghost User\" in order to maintain content for posterity. For further information, please refer to the %{link_start}user account deletion documentation.%{link_end}"
 msgstr ""
 
@@ -5800,9 +5803,6 @@ msgid "Changes won't take place until the index is %{link_start}recreated%{link_
 msgstr ""
 
 msgid "Changing group URL can have unintended side effects."
-msgstr ""
-
-msgid "Channel handle (e.g. town-square)"
 msgstr ""
 
 msgid "Charts can't be displayed as the request for data has timed out. %{documentationLink}"
@@ -6438,10 +6438,25 @@ msgstr ""
 msgid "CloudLicense|Activate"
 msgstr ""
 
+msgid "CloudLicense|Activate subscription"
+msgstr ""
+
+msgid "CloudLicense|Activation code"
+msgstr ""
+
+msgid "CloudLicense|Billable users"
+msgstr ""
+
+msgid "CloudLicense|I agree that my use of the GitLab Software is subject to the Subscription Agreement located at the %{linkStart}Terms of Service%{linkEnd}, unless otherwise agreed to in writing with GitLab."
+msgstr ""
+
 msgid "CloudLicense|ID"
 msgstr ""
 
 msgid "CloudLicense|Last Sync"
+msgstr ""
+
+msgid "CloudLicense|Learn how to %{linkStart}activate your subscription%{linkEnd}."
 msgstr ""
 
 msgid "CloudLicense|Licensed to"
@@ -6450,10 +6465,10 @@ msgstr ""
 msgid "CloudLicense|Manage"
 msgstr ""
 
-msgid "CloudLicense|Paste your activation code"
+msgid "CloudLicense|Maximum users"
 msgstr ""
 
-msgid "CloudLicense|Paste your activation code below"
+msgid "CloudLicense|Paste your activation code"
 msgstr ""
 
 msgid "CloudLicense|Plan"
@@ -6472,6 +6487,27 @@ msgid "CloudLicense|Sync Subscription details"
 msgstr ""
 
 msgid "CloudLicense|This instance is currently using the %{planName} plan."
+msgstr ""
+
+msgid "CloudLicense|This is the highest peak of users on your installation since the license started."
+msgstr ""
+
+msgid "CloudLicense|This is the number of %{billableUsersLinkStart}billable users%{billableUsersLinkEnd} on your installation, and this is the minimum number you need to purchase when you renew your license."
+msgstr ""
+
+msgid "CloudLicense|Users in subscription"
+msgstr ""
+
+msgid "CloudLicense|Users over subscription"
+msgstr ""
+
+msgid "CloudLicense|Users with a Guest role or those who don't belong to a Project or Group will not use a seat from your license."
+msgstr ""
+
+msgid "CloudLicense|You'll be charged for %{trueUpLinkStart}users over license%{trueUpLinkEnd} on a quarterly or annual basis, depending on the terms of your agreement."
+msgstr ""
+
+msgid "CloudLicense|Your subscription"
 msgstr ""
 
 msgid "Cluster"
@@ -6678,6 +6714,9 @@ msgstr ""
 msgid "ClusterIntegration|Base domain"
 msgstr ""
 
+msgid "ClusterIntegration|Before you enable this integration, follow the %{link_start}documented process%{link_end}."
+msgstr ""
+
 msgid "ClusterIntegration|Blocking mode"
 msgstr ""
 
@@ -6843,6 +6882,9 @@ msgstr ""
 msgid "ClusterIntegration|Enable Cloud Run for Anthos"
 msgstr ""
 
+msgid "ClusterIntegration|Enable Prometheus integration"
+msgstr ""
+
 msgid "ClusterIntegration|Enable or disable GitLab's connection to your Kubernetes cluster."
 msgstr ""
 
@@ -6979,6 +7021,15 @@ msgid "ClusterIntegration|Integrate Kubernetes with a cluster certificate"
 msgstr ""
 
 msgid "ClusterIntegration|Integrate with a cluster certificate"
+msgstr ""
+
+msgid "ClusterIntegration|Integration disabled"
+msgstr ""
+
+msgid "ClusterIntegration|Integration enabled"
+msgstr ""
+
+msgid "ClusterIntegration|Integrations enable you to integrate your cluster as part of your GitLab workflow."
 msgstr ""
 
 msgid "ClusterIntegration|Issuer Email"
@@ -7665,6 +7716,9 @@ msgstr ""
 msgid "ComboSearch is not defined"
 msgstr ""
 
+msgid "Comma-separated list of email addresses."
+msgstr ""
+
 msgid "Comma-separated, e.g. '1.1.1.1, 2.2.2.0/24'"
 msgstr ""
 
@@ -7857,6 +7911,9 @@ msgid "CompareRevisions|Select branch/tag"
 msgstr ""
 
 msgid "CompareRevisions|Select target project"
+msgstr ""
+
+msgid "CompareRevisions|Swap revisions"
 msgstr ""
 
 msgid "CompareRevisions|Tags"
@@ -8537,7 +8594,7 @@ msgstr ""
 msgid "ContributionAnalytics|Last week"
 msgstr ""
 
-msgid "ContributionAnalytics|Merge Requests"
+msgid "ContributionAnalytics|Merge requests"
 msgstr ""
 
 msgid "ContributionAnalytics|No issues for the selected time period."
@@ -8889,6 +8946,9 @@ msgid "Create and provide your GitHub %{link_start}Personal Access Token%{link_e
 msgstr ""
 
 msgid "Create blank project"
+msgstr ""
+
+msgid "Create blank project/repository"
 msgstr ""
 
 msgid "Create branch"
@@ -9571,6 +9631,24 @@ msgid "DAST Scans"
 msgstr ""
 
 msgid "DNS"
+msgstr ""
+
+msgid "DORA4Metrics|%{startDate} - %{endDate}"
+msgstr ""
+
+msgid "DORA4Metrics|Date"
+msgstr ""
+
+msgid "DORA4Metrics|Deployments"
+msgstr ""
+
+msgid "DORA4Metrics|Deployments charts"
+msgstr ""
+
+msgid "DORA4Metrics|Something went wrong while getting deployment frequency data"
+msgstr ""
+
+msgid "DORA4Metrics|These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named %{codeStart}production%{codeEnd} for its data to appear in these charts."
 msgstr ""
 
 msgid "Dashboard"
@@ -10559,24 +10637,6 @@ msgstr ""
 msgid "Deployment Frequency"
 msgstr ""
 
-msgid "DeploymentFrequencyCharts|%{startDate} - %{endDate}"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|Date"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|Deployments"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|Deployments charts"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|Something went wrong while getting deployment frequency data"
-msgstr ""
-
-msgid "DeploymentFrequencyCharts|These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named %{codeStart}production%{codeEnd} for its data to appear in these charts."
-msgstr ""
-
 msgid "Deployments"
 msgstr ""
 
@@ -10807,13 +10867,16 @@ msgstr ""
 msgid "DevOps Report"
 msgstr ""
 
-msgid "DevopsAdoption|Add / remove groups"
-msgstr ""
-
 msgid "DevopsAdoption|Add Group"
 msgstr ""
 
 msgid "DevopsAdoption|Add a group to get started"
+msgstr ""
+
+msgid "DevopsAdoption|Add/remove groups"
+msgstr ""
+
+msgid "DevopsAdoption|Add/remove sub-groups"
 msgstr ""
 
 msgid "DevopsAdoption|Adopted"
@@ -10888,7 +10951,7 @@ msgstr ""
 msgid "DevopsAdoption|Remove Group"
 msgstr ""
 
-msgid "DevopsAdoption|Remove Group from the table"
+msgid "DevopsAdoption|Remove Group from the table."
 msgstr ""
 
 msgid "DevopsAdoption|Runner configured for project/group"
@@ -10903,10 +10966,16 @@ msgstr ""
 msgid "DevopsAdoption|Scanning"
 msgstr ""
 
-msgid "DevopsAdoption|There was an error fetching Group adoption data. Please refresh the page to try again."
+msgid "DevopsAdoption|There was an error enabling the current group. Please refresh the page."
 msgstr ""
 
-msgid "DevopsAdoption|There was an error fetching Groups. Please refresh the page to try again."
+msgid "DevopsAdoption|There was an error fetching Group adoption data. Please refresh the page."
+msgstr ""
+
+msgid "DevopsAdoption|There was an error fetching Groups. Please refresh the page."
+msgstr ""
+
+msgid "DevopsAdoption|You cannot remove the group you are currently in."
 msgstr ""
 
 msgid "DevopsReport|Adoption"
@@ -11068,9 +11137,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Dismiss DevOps Report introduction"
-msgstr ""
-
-msgid "Dismiss Merge Request promotion"
 msgstr ""
 
 msgid "Dismiss Value Stream Analytics introduction box"
@@ -11469,7 +11535,7 @@ msgstr ""
 msgid "Email sent"
 msgstr ""
 
-msgid "Email the pipelines status to a list of recipients."
+msgid "Email the pipeline status to a list of recipients."
 msgstr ""
 
 msgid "Email updates (optional)"
@@ -11520,9 +11586,6 @@ msgstr ""
 msgid "Emails sent to %{email} are also supported."
 msgstr ""
 
-msgid "Emails separated by comma"
-msgstr ""
-
 msgid "EmailsOnPushService|Disable code diffs"
 msgstr ""
 
@@ -11535,13 +11598,19 @@ msgstr ""
 msgid "EmailsOnPushService|Emails on push"
 msgstr ""
 
-msgid "EmailsOnPushService|Emails separated by whitespace"
+msgid "EmailsOnPushService|Emails separated by whitespace."
 msgstr ""
 
 msgid "EmailsOnPushService|Send from committer"
 msgstr ""
 
 msgid "EmailsOnPushService|Send notifications from the committer's email address if the domain is part of the domain GitLab is running on (e.g. %{domains})."
+msgstr ""
+
+msgid "EmailsOnPushService|can't exceed %{recipients_limit}"
+msgstr ""
+
+msgid "EmailsOnPushService|tanuki@example.com gitlab@example.com"
 msgstr ""
 
 msgid "Embed"
@@ -12106,6 +12175,9 @@ msgid "Epic Boards"
 msgstr ""
 
 msgid "Epic cannot be found."
+msgstr ""
+
+msgid "Epic details"
 msgstr ""
 
 msgid "Epic events"
@@ -12775,6 +12847,9 @@ msgid "ExternalWikiService|Replaces the link to the internal wiki with a link to
 msgstr ""
 
 msgid "ExternalWikiService|The URL of the external wiki"
+msgstr ""
+
+msgid "Externally installed"
 msgstr ""
 
 msgid "Facebook"
@@ -13733,6 +13808,9 @@ msgstr ""
 msgid "From the Kubernetes cluster details view, applications list, install GitLab Runner."
 msgstr ""
 
+msgid "Full"
+msgstr ""
+
 msgid "Full name"
 msgstr ""
 
@@ -13940,6 +14018,9 @@ msgstr ""
 msgid "Geo|%{name} is scheduled for re-verify"
 msgstr ""
 
+msgid "Geo|%{timeAgoStr} (%{pendingEvents} events)"
+msgstr ""
+
 msgid "Geo|%{title} checksum progress"
 msgstr ""
 
@@ -14001,6 +14082,9 @@ msgid "Geo|Filter by status"
 msgstr ""
 
 msgid "Geo|Geo Status"
+msgstr ""
+
+msgid "Geo|Geo nodes are paused using a command run on the node"
 msgstr ""
 
 msgid "Geo|Geo sites"
@@ -14154,6 +14238,9 @@ msgid "Geo|Secondary node"
 msgstr ""
 
 msgid "Geo|Secondary site"
+msgstr ""
+
+msgid "Geo|Selective (%{syncLabel})"
 msgstr ""
 
 msgid "Geo|Status"
@@ -15137,6 +15224,9 @@ msgstr ""
 msgid "GroupSelect|Select a group"
 msgstr ""
 
+msgid "GroupSettings|Allow project access token creation"
+msgstr ""
+
 msgid "GroupSettings|Apply integration settings to all Projects"
 msgstr ""
 
@@ -15249,6 +15339,9 @@ msgid "GroupSettings|This setting will prevent group members from forking projec
 msgstr ""
 
 msgid "GroupSettings|Transfer group"
+msgstr ""
+
+msgid "GroupSettings|Users can create %{link_start}project access tokens%{link_end} for projects in this group."
 msgstr ""
 
 msgid "GroupSettings|What are badges?"
@@ -15902,6 +15995,9 @@ msgid "Import project from"
 msgstr ""
 
 msgid "Import project members"
+msgstr ""
+
+msgid "Import project/repository"
 msgstr ""
 
 msgid "Import projects from Bitbucket"
@@ -17282,7 +17378,7 @@ msgstr ""
 msgid "Issue label"
 msgstr ""
 
-msgid "Issue or Merge Request ID is required"
+msgid "Issue or merge request ID is required"
 msgstr ""
 
 msgid "Issue published on status page."
@@ -17847,6 +17943,9 @@ msgid "Just me"
 msgstr ""
 
 msgid "K8s pod health"
+msgstr ""
+
+msgid "KEY"
 msgstr ""
 
 msgid "Keep artifacts from most recent successful jobs"
@@ -18843,6 +18942,9 @@ msgstr ""
 msgid "Manage project labels"
 msgstr ""
 
+msgid "Manage projects."
+msgstr ""
+
 msgid "Manage storage usage"
 msgstr ""
 
@@ -18964,6 +19066,15 @@ msgid "Mask variable"
 msgstr ""
 
 msgid "Match not found; try refining your search query."
+msgstr ""
+
+msgid "Mattermost"
+msgstr ""
+
+msgid "Mattermost URL:"
+msgstr ""
+
+msgid "Mattermost notifications"
 msgstr ""
 
 msgid "MattermostService|Add to Mattermost"
@@ -19363,6 +19474,9 @@ msgid "Merge request %{mr_link} was reviewed by %{mr_author}"
 msgstr ""
 
 msgid "Merge request (MR) approvals"
+msgstr ""
+
+msgid "Merge request analytics"
 msgstr ""
 
 msgid "Merge request approval settings have been updated."
@@ -20824,6 +20938,9 @@ msgstr ""
 msgid "New project"
 msgstr ""
 
+msgid "New project/repository"
+msgstr ""
+
 msgid "New release"
 msgstr ""
 
@@ -21642,6 +21759,12 @@ msgstr ""
 msgid "OnCallSchedules|Try adding a rotation"
 msgstr ""
 
+msgid "OnCallSchedules|View next timeframe"
+msgstr ""
+
+msgid "OnCallSchedules|View previous timeframe"
+msgstr ""
+
 msgid "OnCallSchedules|Your schedule has been successfully created and all alerts from this project will now be routed to this schedule. Currently, only one schedule can be created per project. More coming soon! To add individual users to this schedule, use the add a rotation button."
 msgstr ""
 
@@ -21776,7 +21899,7 @@ msgstr ""
 msgid "Only 1 appearances row can exist"
 msgstr ""
 
-msgid "Only Issue ID or Merge Request ID is required"
+msgid "Only Issue ID or merge request ID is required"
 msgstr ""
 
 msgid "Only Project Members"
@@ -22478,6 +22601,9 @@ msgstr ""
 msgid "Pause replication"
 msgstr ""
 
+msgid "Paused"
+msgstr ""
+
 msgid "Paused runners don't accept new jobs"
 msgstr ""
 
@@ -22607,6 +22733,9 @@ msgstr ""
 msgid "Pipeline ran in fork of project"
 msgstr ""
 
+msgid "Pipeline status emails"
+msgstr ""
+
 msgid "Pipeline subscriptions"
 msgstr ""
 
@@ -22694,9 +22823,6 @@ msgstr ""
 msgid "Pipelines charts"
 msgstr ""
 
-msgid "Pipelines emails"
-msgstr ""
-
 msgid "Pipelines for merge requests are configured. A detached pipeline runs in the context of the merge request, and not against the merged result. Learn more in the documentation for Pipelines for Merged Results."
 msgstr ""
 
@@ -22704,6 +22830,9 @@ msgid "Pipelines settings for '%{project_name}' were successfully updated."
 msgstr ""
 
 msgid "Pipelines|API"
+msgstr ""
+
+msgid "Pipelines|An error occurred. Please try again."
 msgstr ""
 
 msgid "Pipelines|Are you sure you want to run this pipeline?"
@@ -22722,6 +22851,9 @@ msgid "Pipelines|Child pipeline"
 msgstr ""
 
 msgid "Pipelines|Clear Runner Caches"
+msgstr ""
+
+msgid "Pipelines|Continuous deployment template to test and deploy your %{name} project."
 msgstr ""
 
 msgid "Pipelines|Copy trigger token"
@@ -22833,6 +22965,15 @@ msgid "Pipelines|Token"
 msgstr ""
 
 msgid "Pipelines|Trigger user has insufficient permissions to project"
+msgstr ""
+
+msgid "Pipelines|Try a sample CI/CD file"
+msgstr ""
+
+msgid "Pipelines|Use a sample file to implement GitLab CI/CD based on your project’s language/framework."
+msgstr ""
+
+msgid "Pipelines|Use template"
 msgstr ""
 
 msgid "Pipelines|Validating GitLab CI configuration…"
@@ -23948,6 +24089,9 @@ msgstr ""
 msgid "Project access must be granted explicitly to each user. If this project is part of a group, access will be granted to members of the group."
 msgstr ""
 
+msgid "Project access token creation is disabled in this group. You can still use and manage existing tokens."
+msgstr ""
+
 msgid "Project already deleted"
 msgstr ""
 
@@ -24128,52 +24272,22 @@ msgstr ""
 msgid "ProjectService|Enter new password"
 msgstr ""
 
-msgid "ProjectService|Event triggered when a commit is created or updated."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a confidential issue is created, updated, or closed."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a deployment starts or finishes."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a merge request is created, updated, or merged."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a new tag is pushed to the repository."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a new, unique alert is recorded."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a pipeline status changes."
-msgstr ""
-
-msgid "ProjectService|Event triggered when a wiki page is created or updated."
-msgstr ""
-
-msgid "ProjectService|Event triggered when an issue is created, updated, or closed."
-msgstr ""
-
-msgid "ProjectService|Event triggered when someone adds a comment on a confidential issue."
-msgstr ""
-
-msgid "ProjectService|Event triggered when someone adds a comment."
-msgstr ""
-
-msgid "ProjectService|Event triggered when someone pushes to the repository."
+msgid "ProjectService|Enter new password."
 msgstr ""
 
 msgid "ProjectService|Issue URL"
 msgstr ""
 
-msgid "ProjectService|Jenkins URL"
+msgid "ProjectService|Jenkins server URL"
 msgstr ""
 
 msgid "ProjectService|Leave blank to use your current API key"
 msgstr ""
 
 msgid "ProjectService|Leave blank to use your current password"
+msgstr ""
+
+msgid "ProjectService|Leave blank to use your current password."
 msgstr ""
 
 msgid "ProjectService|Mock service URL"
@@ -24189,6 +24303,42 @@ msgid "ProjectService|TeamCity URL"
 msgstr ""
 
 msgid "ProjectService|To configure this integration, you should:"
+msgstr ""
+
+msgid "ProjectService|Trigger event for new comments on confidential issues."
+msgstr ""
+
+msgid "ProjectService|Trigger event for new comments."
+msgstr ""
+
+msgid "ProjectService|Trigger event for new tags pushed to the repository."
+msgstr ""
+
+msgid "ProjectService|Trigger event for pushes to the repository."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a commit is created or updated."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a confidential issue is created, updated, or closed."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a deployment starts or finishes."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a merge request is created, updated, or merged."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a new, unique alert is recorded."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a pipeline status changes."
+msgstr ""
+
+msgid "ProjectService|Trigger event when a wiki page is created or updated."
+msgstr ""
+
+msgid "ProjectService|Trigger event when an issue is created, updated, or closed."
 msgstr ""
 
 msgid "ProjectSettings|%{link_start}What are description templates?%{link_end}"
@@ -24668,6 +24818,9 @@ msgstr ""
 msgid "ProjectsNew|Create blank project"
 msgstr ""
 
+msgid "ProjectsNew|Create blank project/repository"
+msgstr ""
+
 msgid "ProjectsNew|Create from template"
 msgstr ""
 
@@ -24684,6 +24837,9 @@ msgid "ProjectsNew|Import"
 msgstr ""
 
 msgid "ProjectsNew|Import project"
+msgstr ""
+
+msgid "ProjectsNew|Import project/repository"
 msgstr ""
 
 msgid "ProjectsNew|Initialize repository with a README"
@@ -25418,6 +25574,9 @@ msgstr ""
 msgid "Recent searches"
 msgstr ""
 
+msgid "Recently used"
+msgstr ""
+
 msgid "Reconfigure"
 msgstr ""
 
@@ -25624,6 +25783,9 @@ msgid "Release|Something went wrong while saving the release details"
 msgstr ""
 
 msgid "Remediations"
+msgstr ""
+
+msgid "Remember me"
 msgstr ""
 
 msgid "Remind later"
@@ -26243,6 +26405,9 @@ msgstr ""
 msgid "Require admin approval for new sign-ups"
 msgstr ""
 
+msgid "Require all users in this group to setup Two-factor authentication"
+msgstr ""
+
 msgid "Require all users in this group to setup two-factor authentication"
 msgstr ""
 
@@ -26647,16 +26812,19 @@ msgstr ""
 msgid "Runners|Can run untagged jobs"
 msgstr ""
 
+msgid "Runners|Command to register runner"
+msgstr ""
+
 msgid "Runners|Copy instructions"
 msgstr ""
 
 msgid "Runners|Description"
 msgstr ""
 
-msgid "Runners|Download Latest Binary"
+msgid "Runners|Download and install binary"
 msgstr ""
 
-msgid "Runners|Download and Install Binary"
+msgid "Runners|Download latest binary"
 msgstr ""
 
 msgid "Runners|Group"
@@ -26665,7 +26833,7 @@ msgstr ""
 msgid "Runners|IP Address"
 msgstr ""
 
-msgid "Runners|Install a Runner"
+msgid "Runners|Install a runner"
 msgstr ""
 
 msgid "Runners|Last contact"
@@ -26687,9 +26855,6 @@ msgid "Runners|Property Name"
 msgstr ""
 
 msgid "Runners|Protected"
-msgstr ""
-
-msgid "Runners|Register Runner"
 msgstr ""
 
 msgid "Runners|Revision"
@@ -27776,6 +27941,12 @@ msgstr ""
 msgid "Send message"
 msgstr ""
 
+msgid "Send notifications about project events to Mattermost channels."
+msgstr ""
+
+msgid "Send notifications about project events to Mattermost channels. %{docs_link}"
+msgstr ""
+
 msgid "Send report"
 msgstr ""
 
@@ -28404,6 +28575,9 @@ msgstr ""
 msgid "Sign in via 2FA code"
 msgstr ""
 
+msgid "Sign in with"
+msgstr ""
+
 msgid "Sign in with Single Sign-On"
 msgstr ""
 
@@ -28687,6 +28861,9 @@ msgid "Something went wrong while fetching comments. Please try again."
 msgstr ""
 
 msgid "Something went wrong while fetching description changes. Please try again."
+msgstr ""
+
+msgid "Something went wrong while fetching details"
 msgstr ""
 
 msgid "Something went wrong while fetching group member contributions"
@@ -30292,6 +30469,9 @@ msgstr ""
 msgid "The URL defined on the primary node that secondary nodes should use to contact it. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
+msgid "The URL of the Jenkins server."
+msgstr ""
+
 msgid "The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., \"http://localhost:9200, http://localhost:9201\")."
 msgstr ""
 
@@ -30528,6 +30708,9 @@ msgstr ""
 msgid "The name of the CI/CD configuration file. A path relative to the root directory is optional (for example %{code_open}my/path/.myfile.yml%{code_close})."
 msgstr ""
 
+msgid "The name of the Jenkins project. Copy the name from the end of the URL to the project."
+msgstr ""
+
 msgid "The number of changes to fetch from GitLab when cloning a repository. Lower values can speed up pipeline execution. Set to %{code_open}0%{code_close} or blank to fetch all branches and tags for each job"
 msgstr ""
 
@@ -30544,6 +30727,9 @@ msgid "The parent epic is confidential and can only contain confidential epics a
 msgstr ""
 
 msgid "The passphrase required to decrypt the private key. This is optional and the value is encrypted at rest."
+msgstr ""
+
+msgid "The password for the Jenkins server."
 msgstr ""
 
 msgid "The phase of the development lifecycle."
@@ -30688,6 +30874,9 @@ msgid "The user you are trying to approve is not pending approval"
 msgstr ""
 
 msgid "The user you are trying to deactivate has been active in the past %{minimum_inactive_days} days and cannot be deactivated"
+msgstr ""
+
+msgid "The username for the Jenkins server."
 msgstr ""
 
 msgid "The value lying at the midpoint of a series of observed values. E.g., between 3, 5, 9, the median is 5. Between 3, 5, 7, 8, the median is (5+7)/2 = 6."
@@ -32389,6 +32578,9 @@ msgid "Trial|We will activate your trial on your group after you complete this s
 msgstr ""
 
 msgid "Trigger"
+msgstr ""
+
+msgid "Trigger Jenkins builds when you push to a repository, or when a merge request is created, updated, or merged. %{docs_link}"
 msgstr ""
 
 msgid "Trigger a pipeline for a branch or tag by generating a trigger token and using it with an API call. The token impersonates a user's project access and permissions."
@@ -34965,6 +35157,9 @@ msgstr ""
 msgid "You can easily contribute to them by requesting to join these groups."
 msgstr ""
 
+msgid "You can enable project access token creation in %{link_start}group settings%{link_end}."
+msgstr ""
+
 msgid "You can filter by 'days to merge' by clicking on the columns in the chart."
 msgstr ""
 
@@ -35451,10 +35646,16 @@ msgstr ""
 msgid "Your SSH key has expired"
 msgstr ""
 
+msgid "Your SSH key is expiring soon."
+msgstr ""
+
 msgid "Your SSH key was deleted"
 msgstr ""
 
 msgid "Your SSH keys (%{count})"
+msgstr ""
+
+msgid "Your SSH keys with the following fingerprints are scheduled to expire soon:"
 msgstr ""
 
 msgid "Your SSH keys with the following fingerprints has expired:"
@@ -35778,6 +35979,9 @@ msgid "cURL:"
 msgstr ""
 
 msgid "can contain only letters of the Base64 alphabet (RFC4648) with the addition of '@', ':' and '.'"
+msgstr ""
+
+msgid "can only be changed by a group admin."
 msgstr ""
 
 msgid "can't be enabled because signed commits are required for this project"
@@ -36284,6 +36488,9 @@ msgstr ""
 msgid "http://www.example.com"
 msgstr ""
 
+msgid "https://bamboo.example.com"
+msgstr ""
+
 msgid "https://your-bitbucket-server"
 msgstr ""
 
@@ -36612,9 +36819,6 @@ msgstr ""
 msgid "mrWidget|Jump to first unresolved thread"
 msgstr ""
 
-msgid "mrWidget|Learn more about resolving conflicts"
-msgstr ""
-
 msgid "mrWidget|Loading deployment statistics"
 msgstr ""
 
@@ -36729,9 +36933,6 @@ msgstr ""
 msgid "mrWidget|This action will start a merge train when pipeline %{pipelineLink} succeeds."
 msgstr ""
 
-msgid "mrWidget|This feature merges changes from the target branch to the source branch. You cannot use this feature since the source branch is protected."
-msgstr ""
-
 msgid "mrWidget|This merge request failed to be merged automatically"
 msgstr ""
 
@@ -36796,6 +36997,9 @@ msgid "must contain only valid frameworks"
 msgstr ""
 
 msgid "my-awesome-group"
+msgstr ""
+
+msgid "my-channel"
 msgstr ""
 
 msgid "n/a"

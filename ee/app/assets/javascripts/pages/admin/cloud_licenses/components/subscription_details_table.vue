@@ -1,16 +1,36 @@
 <script>
-import { GlSkeletonLoader } from '@gitlab/ui';
+import { GlSkeletonLoader, GlTable } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import { copySubscriptionIdButtonText } from '../constants';
+
+const placeholderHeightFactor = 32;
+const placeholderWidth = 180;
+const DEFAULT_TH_CLASSES = 'gl-display-none';
+const DEFAULT_TD_CLASSES = 'gl-border-none! gl-h-7 gl-line-height-normal! gl-p-0!';
 
 export default {
   i18n: {
     copySubscriptionIdButtonText,
   },
+  fields: [
+    {
+      key: 'label',
+      label: '',
+      thClass: DEFAULT_TH_CLASSES,
+      tdClass: `${DEFAULT_TD_CLASSES} gl-w-13`,
+    },
+    {
+      key: 'value',
+      label: '',
+      thClass: DEFAULT_TH_CLASSES,
+      tdClass: DEFAULT_TD_CLASSES,
+    },
+  ],
   name: 'SubscriptionDetailsTable',
   components: {
     ClipboardButton,
     GlSkeletonLoader,
+    GlTable,
   },
   props: {
     details: {
@@ -18,36 +38,65 @@ export default {
       required: true,
     },
   },
+  computed: {
+    hasContent() {
+      return this.details.some(({ value }) => Boolean(value));
+    },
+    placeholderContainerHeight() {
+      return this.details.length * placeholderHeightFactor;
+    },
+    placeholderContainerWidth() {
+      return placeholderWidth;
+    },
+    placeHolderHeight() {
+      return placeholderHeightFactor / 2;
+    },
+  },
   methods: {
-    isNotLast(index) {
-      return index < this.details.length - 1;
+    isLastRow(index) {
+      return index === this.details.length - 1;
+    },
+    placeHolderPosition(index) {
+      return (index - 1) * placeholderHeightFactor;
     },
   },
 };
 </script>
 
 <template>
-  <div v-if="!details.length">
-    <gl-skeleton-loader :lines="1" />
-    <gl-skeleton-loader :lines="1" />
-  </div>
-  <ul v-else class="gl-list-style-none gl-m-0 gl-p-0">
-    <li
-      v-for="(detail, index) in details"
-      :key="detail.label"
-      :class="{ 'gl-mb-3': isNotLast(index) }"
-      class="gl-display-flex"
-    >
-      <p class="gl-font-weight-bold gl-m-0" data-testid="details-label">{{ detail.label }}:</p>
-      <p class="gl-m-0 gl-ml-4" data-testid="details-content">{{ detail.value }}</p>
-      <clipboard-button
-        v-if="detail.canCopy"
-        :text="detail.value"
-        :title="$options.i18n.copySubscriptionIdButtonText"
-        category="tertiary"
-        class="gl-ml-2"
-        size="small"
+  <gl-table v-if="hasContent" :fields="$options.fields" :items="details" class="gl-m-0!">
+    <template #cell(label)="{ item }">
+      <p class="gl-font-weight-bold" data-testid="details-label">{{ item.label }}:</p>
+    </template>
+
+    <template #cell(value)="{ item }">
+      <p class="gl-relative" data-testid="details-content">
+        {{ item.value }}
+        <clipboard-button
+          v-if="item.canCopy"
+          :text="item.value"
+          :title="$options.i18n.copySubscriptionIdButtonText"
+          category="tertiary"
+          class="gl-absolute gl-mt-n2 gl-ml-2"
+          size="small"
+        />
+      </p>
+    </template>
+  </gl-table>
+  <div
+    v-else
+    :style="{ height: `${placeholderContainerHeight}px`, width: `${placeholderContainerWidth}px` }"
+    class="gl-pt-2"
+  >
+    <gl-skeleton-loader :height="placeholderContainerHeight" :width="placeholderContainerWidth">
+      <rect
+        v-for="index in details.length"
+        :key="index"
+        :height="placeHolderHeight"
+        :width="placeholderContainerWidth"
+        :y="placeHolderPosition(index)"
+        rx="8"
       />
-    </li>
-  </ul>
+    </gl-skeleton-loader>
+  </div>
 </template>

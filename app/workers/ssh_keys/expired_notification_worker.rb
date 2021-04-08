@@ -17,7 +17,7 @@ module SshKeys
 
           keys = user.expired_today_and_unnotified_keys
 
-          Keys::ExpiryNotificationService.new(user, { keys: keys }).execute
+          Keys::ExpiryNotificationService.new(user, { keys: keys, expiring_soon: false }).execute
         end
       end
     end

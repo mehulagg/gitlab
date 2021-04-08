@@ -362,7 +362,7 @@ RSpec.describe API::Scim do
         let_it_be(:params) { { Operations: [{ 'op': 'Replace', 'path': 'active', 'value': 'true' }] }.to_query }
 
         it 'activates the scim_identity' do
-          identity.update(active: false)
+          identity.update!(active: false)
 
           call_patch_api(params)
 

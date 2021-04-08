@@ -1,10 +1,17 @@
 export const license = {
   ULTIMATE: {
+    billableUsers: '8',
+    company: 'ACME Corp',
+    email: 'user@acmecorp.com',
     id: '1309188',
-    plan: 'Ultimate',
     lastSync: 'just now - actual date',
+    maximumUsers: '8',
+    name: 'Jane Doe',
+    plan: 'Ultimate',
     startsAt: '22 February',
     renews: 'in 11 months',
+    usersInLicense: '10',
+    usersOverSubscription: '0',
   },
 };
 

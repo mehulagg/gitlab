@@ -36,7 +36,7 @@ RSpec.describe 'Issue Boards new issue', :js do
         find('.board-card').click
       end
 
-      page.within(first('.issue-boards-sidebar')) do
+      page.within(first('[data-testid="issue-boards-sidebar"]')) do
         find('.weight [data-testid="edit-button"]').click
         find('.weight .form-control').set("10\n")
       end

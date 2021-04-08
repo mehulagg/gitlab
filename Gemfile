@@ -399,7 +399,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 1.1.0', require: false
+  gem 'gitlab-dangerfiles', '~> 1.1.1', require: false
 end
 
 group :development, :test, :coverage do
@@ -488,7 +488,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.2'
+gem 'gitlab-experiment', '~> 0.5.3'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

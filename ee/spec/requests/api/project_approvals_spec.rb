@@ -77,7 +77,7 @@ RSpec.describe API::ProjectApprovals do
           project.merge_requests_author_approval = false
           project.merge_requests_disable_committers_approval = true
           project.require_password_to_approve = false
-          project.save
+          project.save!
 
           settings = {
             approvals_before_merge: 4,
@@ -95,7 +95,7 @@ RSpec.describe API::ProjectApprovals do
 
         it 'only shows approver groups that are visible to the current user' do
           private_group = create(:group, :private)
-          project.approver_groups.create(group: private_group)
+          project.approver_groups.create!(group: private_group)
 
           post api(url, current_user), params: { approvals_before_merge: 3 }
 

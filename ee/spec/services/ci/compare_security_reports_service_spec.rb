@@ -197,7 +197,7 @@ RSpec.describe Ci::CompareSecurityReportsService do
 
       it 'reports new vulnerabilities' do
         expect(subject[:status]).to eq(:parsed)
-        expect(subject[:data]['added'].count).to eq(33)
+        expect(subject[:data]['added'].count).to eq(5)
         expect(subject[:data]['fixed'].count).to eq(0)
       end
     end
@@ -218,13 +218,13 @@ RSpec.describe Ci::CompareSecurityReportsService do
 
       it 'reports new vulnerability' do
         expect(subject[:data]['added'].count).to eq(1)
-        expect(subject[:data]['added'].first['identifiers']).to include(a_hash_including('name' => 'CWE-120'))
+        expect(subject[:data]['added'].first['identifiers']).to include(a_hash_including('name' => 'CWE-327'))
       end
 
       it 'reports fixed sast vulnerabilities' do
-        expect(subject[:data]['fixed'].count).to eq(4)
+        expect(subject[:data]['fixed'].count).to eq(1)
         compare_keys = collect_ids(subject[:data]['fixed'])
-        expected_keys = %w(char fopen strcpy char)
+        expected_keys = %w(CIPHER_INTEGRITY)
         expect(compare_keys - expected_keys).to eq([])
       end
     end

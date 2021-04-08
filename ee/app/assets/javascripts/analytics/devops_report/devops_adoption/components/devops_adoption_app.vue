@@ -17,9 +17,12 @@ import {
   DATE_TIME_FORMAT,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   DEFAULT_POLLING_INTERVAL,
+  DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
 } from '../constants';
+import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
+import { addSegmentsToCache } from '../utils/cache_updates';
 import { shouldPollTableData } from '../utils/helpers';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
 import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
@@ -40,7 +43,16 @@ export default {
     GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
+  inject: {
+    isGroup: {
+      default: false,
+    },
+    groupGid: {
+      default: null,
+    },
+  },
   i18n: {
+    groupLevelLabel: DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
     ...DEVOPS_ADOPTION_STRINGS.app,
   },
   maxSegments: MAX_SEGMENTS,
@@ -48,23 +60,45 @@ export default {
   data() {
     return {
       isLoadingGroups: false,
+      isLoadingEnableGroup: false,
       requestCount: 0,
       selectedSegment: null,
       openModal: false,
       errors: {
         [DEVOPS_ADOPTION_ERROR_KEYS.groups]: false,
         [DEVOPS_ADOPTION_ERROR_KEYS.segments]: false,
+        [DEVOPS_ADOPTION_ERROR_KEYS.addSegment]: false,
       },
       groups: {
         nodes: [],
         pageInfo: null,
       },
       pollingTableData: null,
+      variables: this.isGroup
+        ? {
+            parentNamespaceId: this.groupGid,
+            directDescendantsOnly: false,
+          }
+        : {},
     };
   },
   apollo: {
     devopsAdoptionSegments: {
       query: devopsAdoptionSegmentsQuery,
+      variables() {
+        return this.variables;
+      },
+      result({ data }) {
+        if (this.isGroup) {
+          const groupEnabled = data.devopsAdoptionSegments.nodes.some(
+            ({ namespace: { id } }) => id === this.groupGid,
+          );
+
+          if (!groupEnabled) {
+            this.enableGroup();
+          }
+        }
+      },
       error(error) {
         this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.segments, error);
       },
@@ -87,7 +121,11 @@ export default {
       );
     },
     isLoading() {
-      return this.isLoadingGroups || this.$apollo.queries.devopsAdoptionSegments.loading;
+      return (
+        this.isLoadingGroups ||
+        this.isLoadingEnableGroup ||
+        this.$apollo.queries.devopsAdoptionSegments.loading
+      );
     },
     modalKey() {
       return this.selectedSegment?.id;
@@ -98,6 +136,11 @@ export default {
     addSegmentButtonTooltipText() {
       return this.segmentLimitReached ? this.$options.i18n.tableHeader.buttonTooltip : false;
     },
+    editGroupsButtonLabel() {
+      return this.isGroup
+        ? this.$options.i18n.groupLevelLabel
+        : this.$options.i18n.tableHeader.button;
+    },
   },
   created() {
     this.fetchGroups();
@@ -106,6 +149,34 @@ export default {
     clearInterval(this.pollingTableData);
   },
   methods: {
+    enableGroup() {
+      this.isLoadingEnableGroup = true;
+
+      this.$apollo
+        .mutate({
+          mutation: bulkFindOrCreateDevopsAdoptionSegmentsMutation,
+          variables: {
+            namespaceIds: [this.groupGid],
+          },
+          update: (store, { data }) => {
+            const {
+              bulkFindOrCreateDevopsAdoptionSegments: { segments, errors },
+            } = data;
+
+            if (errors.length) {
+              this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.addSegment, errors);
+            } else {
+              addSegmentsToCache(store, segments, this.variables);
+            }
+          },
+        })
+        .catch((error) => {
+          this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.addSegment, error);
+        })
+        .finally(() => {
+          this.isLoadingEnableGroup = false;
+        });
+    },
     pollTableData() {
       const shouldPoll = shouldPollTableData({
         segments: this.devopsAdoptionSegments.nodes,
@@ -191,12 +262,16 @@ export default {
             <template #timestamp>{{ timestamp }}</template>
           </gl-sprintf>
         </span>
-        <span v-gl-tooltip.hover="addSegmentButtonTooltipText" data-testid="segmentButtonWrapper">
+        <span
+          v-if="hasGroupData"
+          v-gl-tooltip.hover="addSegmentButtonTooltipText"
+          data-testid="segmentButtonWrapper"
+        >
           <gl-button
             v-gl-modal="$options.devopsSegmentModalId"
             :disabled="segmentLimitReached"
             @click="clearSelectedSegment"
-            >{{ $options.i18n.tableHeader.button }}</gl-button
+            >{{ editGroupsButtonLabel }}</gl-button
           ></span
         >
       </div>

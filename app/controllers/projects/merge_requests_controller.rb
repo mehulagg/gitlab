@@ -42,6 +42,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:paginated_notes, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:new_pipelines_table, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:confidential_notes, @project, default_enabled: :yaml)
+    push_frontend_feature_flag(:usage_data_i_testing_summary_widget_total, @project, default_enabled: :yaml)
 
     record_experiment_user(:invite_members_version_b)
 
@@ -91,7 +92,10 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   def show
     close_merge_request_if_no_source_project
-    @merge_request.check_mergeability(async: true)
+
+    if Feature.disabled?(:check_mergeability_async_in_widget, @project, default_enabled: :yaml)
+      @merge_request.check_mergeability(async: true)
+    end
 
     respond_to do |format|
       format.html do

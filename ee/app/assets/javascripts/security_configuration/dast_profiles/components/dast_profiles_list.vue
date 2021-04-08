@@ -254,6 +254,7 @@ export default {
                 data-testid="dast-profile-delete-button"
                 :disabled="isPolicyProfile(item)"
                 :aria-disabled="isPolicyProfile(item)"
+                :aria-label="s__('DastProfiles|Delete profile')"
                 @click="prepareProfileDeletion(item.id)"
               />
             </span>

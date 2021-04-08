@@ -83,6 +83,48 @@ RSpec.describe ::Gitlab::Metrics::Subscribers::ActiveRecord do
         it_behaves_like 'record ActiveRecord metrics', :primary
         it_behaves_like 'store ActiveRecord info in RequestStore', :primary
       end
+
+      context 'query using a connection to an unknown source' do
+        let(:transaction) { double('Gitlab::Metrics::WebTransaction') }
+
+        before do
+          allow(Gitlab::Database::LoadBalancing).to receive(:db_role_for_connection).and_return(nil)
+
+          allow(::Gitlab::Metrics::WebTransaction).to receive(:current).and_return(transaction)
+          allow(::Gitlab::Metrics::BackgroundTransaction).to receive(:current).and_return(nil)
+
+          allow(transaction).to receive(:increment)
+          allow(transaction).to receive(:observe)
+        end
+
+        it 'does not record DB role metrics' do
+          expect(transaction).not_to receive(:increment).with("gitlab_transaction_db_primary_count_total".to_sym, any_args)
+          expect(transaction).not_to receive(:increment).with("gitlab_transaction_db_replica_count_total".to_sym, any_args)
+
+          expect(transaction).not_to receive(:increment).with("gitlab_transaction_db_primary_cached_count_total".to_sym, any_args)
+          expect(transaction).not_to receive(:increment).with("gitlab_transaction_db_replica_cached_count_total".to_sym, any_args)
+
+          expect(transaction).not_to receive(:observe).with("gitlab_sql_primary_duration_seconds".to_sym, any_args)
+          expect(transaction).not_to receive(:observe).with("gitlab_sql_replica_duration_seconds".to_sym, any_args)
+
+          subscriber.sql(event)
+        end
+
+        it 'does not store DB roles into into RequestStore' do
+          Gitlab::WithRequestStore.with_request_store do
+            subscriber.sql(event)
+
+            expect(described_class.db_counter_payload).to include(
+              db_primary_cached_count: 0,
+              db_primary_count: 0,
+              db_primary_duration_s: 0,
+              db_replica_cached_count: 0,
+              db_replica_count: 0,
+              db_replica_duration_s: 0
+            )
+          end
+        end
+      end
     end
   end
 

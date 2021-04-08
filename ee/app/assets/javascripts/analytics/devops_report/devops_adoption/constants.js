@@ -15,21 +15,31 @@ export const DATE_TIME_FORMAT = 'yyyy-mm-dd HH:MM';
 export const DEVOPS_ADOPTION_ERROR_KEYS = {
   groups: 'groupsError',
   segments: 'segmentsError',
+  addSegment: 'addSegmentsError',
 };
+
+export const DEVOPS_ADOPTION_GROUP_LEVEL_LABEL = s__('DevopsAdoption|Add/remove sub-groups');
+
+export const DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED = s__(
+  'DevopsAdoption|You cannot remove the group you are currently in.',
+);
 
 export const DEVOPS_ADOPTION_STRINGS = {
   app: {
     [DEVOPS_ADOPTION_ERROR_KEYS.groups]: s__(
-      'DevopsAdoption|There was an error fetching Groups. Please refresh the page to try again.',
+      'DevopsAdoption|There was an error fetching Groups. Please refresh the page.',
     ),
     [DEVOPS_ADOPTION_ERROR_KEYS.segments]: s__(
-      'DevopsAdoption|There was an error fetching Group adoption data. Please refresh the page to try again.',
+      'DevopsAdoption|There was an error fetching Group adoption data. Please refresh the page.',
+    ),
+    [DEVOPS_ADOPTION_ERROR_KEYS.addSegment]: s__(
+      'DevopsAdoption|There was an error enabling the current group. Please refresh the page.',
     ),
     tableHeader: {
       text: s__(
         'DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}.',
       ),
-      button: s__('DevopsAdoption|Add / remove groups'),
+      button: s__('DevopsAdoption|Add/remove groups'),
       buttonTooltip: sprintf(s__('DevopsAdoption|Maximum %{maxSegments} groups allowed'), {
         maxSegments: MAX_SEGMENTS,
       }),
@@ -43,7 +53,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
     button: s__('DevopsAdoption|Add Group'),
   },
   modal: {
-    addingTitle: s__('DevopsAdoption|Add / remove groups'),
+    addingTitle: s__('DevopsAdoption|Add/remove groups'),
     addingButton: s__('DevopsAdoption|Save changes'),
     cancel: __('Cancel'),
     namePlaceholder: s__('DevopsAdoption|My group'),
@@ -52,7 +62,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
     noResults: s__('DevopsAdoption|No filter results.'),
   },
   table: {
-    removeButton: s__('DevopsAdoption|Remove Group from the table'),
+    removeButton: s__('DevopsAdoption|Remove Group from the table.'),
     headers: {
       name: {
         label: __('Group'),

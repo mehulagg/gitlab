@@ -8,6 +8,7 @@ RSpec.describe Clusters::EnvironmentSerializer do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, namespace: user.namespace) }
   let_it_be(:cluster) { create(:cluster) }
+
   let(:resource) { create(:environment, project: project) }
 
   let(:json_entity) do

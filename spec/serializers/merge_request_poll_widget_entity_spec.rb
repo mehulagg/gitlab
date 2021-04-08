@@ -11,9 +11,10 @@ RSpec.describe MergeRequestPollWidgetEntity do
   let_it_be(:user)     { create(:user) }
 
   let(:request) { double('request', current_user: user, project: project) }
+  let(:options) { {} }
 
   subject do
-    described_class.new(resource, request: request).as_json
+    described_class.new(resource, { request: request }.merge(options)).as_json
   end
 
   it 'has default_merge_commit_message_with_description' do
@@ -82,72 +83,6 @@ RSpec.describe MergeRequestPollWidgetEntity do
     context 'when user cannot push to project' do
       it 'returns nil' do
         expect(subject[:new_blob_path]).to be_nil
-      end
-    end
-  end
-
-  describe 'terraform_reports_path' do
-    context 'when merge request has terraform reports' do
-      before do
-        allow(resource).to receive(:has_terraform_reports?).and_return(true)
-      end
-
-      it 'set the path to poll data' do
-        expect(subject[:terraform_reports_path]).to be_present
-      end
-    end
-
-    context 'when merge request has no terraform reports' do
-      before do
-        allow(resource).to receive(:has_terraform_reports?).and_return(false)
-      end
-
-      it 'set the path to poll data' do
-        expect(subject[:terraform_reports_path]).to be_nil
-      end
-    end
-  end
-
-  describe 'accessibility_report_path' do
-    context 'when merge request has accessibility reports' do
-      before do
-        allow(resource).to receive(:has_accessibility_reports?).and_return(true)
-      end
-
-      it 'set the path to poll data' do
-        expect(subject[:accessibility_report_path]).to be_present
-      end
-    end
-
-    context 'when merge request has no accessibility reports' do
-      before do
-        allow(resource).to receive(:has_accessibility_reports?).and_return(false)
-      end
-
-      it 'set the path to poll data' do
-        expect(subject[:accessibility_report_path]).to be_nil
-      end
-    end
-  end
-
-  describe 'exposed_artifacts_path' do
-    context 'when merge request has exposed artifacts' do
-      before do
-        expect(resource).to receive(:has_exposed_artifacts?).and_return(true)
-      end
-
-      it 'set the path to poll data' do
-        expect(subject[:exposed_artifacts_path]).to be_present
-      end
-    end
-
-    context 'when merge request has no exposed artifacts' do
-      before do
-        expect(resource).to receive(:has_exposed_artifacts?).and_return(false)
-      end
-
-      it 'set the path to poll data' do
-        expect(subject[:exposed_artifacts_path]).to be_nil
       end
     end
   end
@@ -276,6 +211,41 @@ RSpec.describe MergeRequestPollWidgetEntity do
         { name: 'rspec', coverage: 91.5 },
         { name: 'jest', coverage: 94.1 }
       ])
+    end
+  end
+
+  describe '#mergeable' do
+    it 'shows whether a merge request is mergeable' do
+      expect(subject[:mergeable]).to eq(true)
+    end
+
+    context 'when merge request is in checking state' do
+      before do
+        resource.mark_as_unchecked!
+        resource.mark_as_checking!
+      end
+
+      it 'calculates mergeability and returns true' do
+        expect(subject[:mergeable]).to eq(true)
+      end
+
+      context 'when async_mergeability_check is passed' do
+        let(:options) { { async_mergeability_check: true } }
+
+        it 'returns false' do
+          expect(subject[:mergeable]).to eq(false)
+        end
+
+        context 'when check_mergeability_async_in_widget is disabled' do
+          before do
+            stub_feature_flags(check_mergeability_async_in_widget: false)
+          end
+
+          it 'calculates mergeability and returns true' do
+            expect(subject[:mergeable]).to eq(true)
+          end
+        end
+      end
     end
   end
 end

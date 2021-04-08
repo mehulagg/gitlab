@@ -8,6 +8,7 @@ RSpec.describe Projects::MergeRequestsController do
 
   let_it_be_with_refind(:project) { create(:project, :repository) }
   let_it_be_with_reload(:project_public_with_private_builds) { create(:project, :repository, :public, :builds_private) }
+
   let(:user) { project.owner }
   let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
 
@@ -81,13 +82,19 @@ RSpec.describe Projects::MergeRequestsController do
         merge_request.mark_as_unchecked!
       end
 
-      it 'checks mergeability asynchronously' do
-        expect_next_instance_of(MergeRequests::MergeabilityCheckService) do |service|
-          expect(service).not_to receive(:execute)
-          expect(service).to receive(:async_execute)
+      context 'check_mergeability_async_in_widget feature flag is disabled' do
+        before do
+          stub_feature_flags(check_mergeability_async_in_widget: false)
         end
 
-        go
+        it 'checks mergeability asynchronously' do
+          expect_next_instance_of(MergeRequests::MergeabilityCheckService) do |service|
+            expect(service).not_to receive(:execute)
+            expect(service).to receive(:async_execute)
+          end
+
+          go
+        end
       end
     end
 

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Ci::BuildDependencies do
   let_it_be(:user) { create(:user) }
   let_it_be(:project, refind: true) { create(:project, :repository) }
+
   let(:dependencies) { }
 
   let(:pipeline) do

@@ -11,6 +11,7 @@ RSpec.describe LabelNote do
   let_it_be(:label2) { create(:group_label, group: group) }
   let(:resource_parent) { group }
   let_it_be(:resource) { create(:epic, group: group) }
+
   let(:project) { nil }
   let(:resource_key) { resource.class.name.underscore.to_s }
   let(:events) { [create(:resource_label_event, label: label, resource_key => resource)] }

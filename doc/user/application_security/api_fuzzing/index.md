@@ -953,7 +953,7 @@ faults it reports.
 ## Viewing fuzzing faults
 
 The API Fuzzing analyzer produces a JSON report that is collected and used
-[to populate the faults into GitLab vulnerability screens](../index.md#view-details-of-an-api-fuzzing-vulnerability).
+[to populate the faults into GitLab vulnerability screens](#view-details-of-an-api-fuzzing-vulnerability).
 Fuzzing faults show up as vulnerabilities with a severity of Unknown.
 
 The faults that API fuzzing finds require manual investigation and aren't associated with a specific
@@ -962,8 +962,42 @@ they should be fixed. See [handling false positives](#handling-false-positives)
 for information about configuration changes you can make to limit the number of false positives
 reported.
 
-For additional information, see
-[View details of an API Fuzzing vulnerability](../index.md#view-details-of-an-api-fuzzing-vulnerability).
+### View details of an API Fuzzing vulnerability
+
+> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.7.
+
+Faults detected by API Fuzzing occur in the live web application, and require manual investigation
+to determine if they are vulnerabilities. Fuzzing faults are included as vulnerabilities with a
+severity of Unknown. To facilitate investigation of the fuzzing faults, detailed information is
+provided about the HTTP messages sent and received along with a description of the modification(s)
+made.
+
+Follow these steps to view details of a fuzzing fault:
+
+1. You can view faults in a project, or a merge request:
+
+   - In a project, go to the project's **{shield}** **Security & Compliance > Vulnerability Report**
+     page. This page shows all vulnerabilities from the default branch only.
+   - In a merge request, go the merge request's **Security** section and click the **Expand**
+     button. API Fuzzing faults are available in a section labeled
+     **API Fuzzing detected N potential vulnerabilities**. Click the title to display the fault
+     details.
+
+1. Click the fault's title to display the fault's details. The table below describes these details.
+
+   | Field               | Description                                                                             |
+   |:--------------------|:----------------------------------------------------------------------------------------|
+   | Description         | Description of the fault including what was modified.                                   |
+   | Project             | Namespace and project in which the vulnerability was detected.                          |
+   | Method              | HTTP method used to detect the vulnerability.                                           |
+   | URL                 | URL at which the vulnerability was detected.                                            |
+   | Request             | The HTTP request that caused the fault.                                                 |
+   | Unmodified Response | Response from an unmodified request. This is what a normal working response looks like. |
+   | Actual Response     | Response received from fuzzed request.                                                  |
+   | Evidence            | How we determined a fault occurred.                                                     |
+   | Identifiers         | The fuzzing check used to find this fault.                                              |
+   | Severity            | Severity of the finding is always Unknown.                                              |
+   | Scanner Type        | Scanner used to perform testing.                                                        |
 
 ### Security Dashboard
 
@@ -1140,6 +1174,19 @@ For OpenAPI specifications that are generated automatically validation errors ar
    1. Alternatively, you can check the log output and look for schema validation warnings. They are prefixed with messages such as `OpenAPI 2.0 schema validation error` or `OpenAPI 3.0.x schema validation error`. Each failed validation provides extra information about `location` and `description`. Correct each of the validation failures and then resubmit the OpenAPI doc. Note that JSON Schema validation message might not be easy to understand. This is why we recommend the use of editors to validate document.
 1. Once the validation issues are resolved, re-run your pipeline.
 
+### Failed to start scanner session (version header not found)
+
+The API Fuzzing engine outputs an error message when it cannot establish a connection with the scanner application component. The error message is shown in the job output window of the `apifuzzer_fuzz` job. A common cause of this issue is changing the `FUZZAPI_API` variable from its default.
+
+**Error message**
+
+- In [GitLab 13.11 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/323939), `Failed to start scanner session (version header not found).`
+- In GitLab 13.10 and earlier, `API Security version header not found.  Are you sure that you are connecting to the API Security server?`.
+
+**Solution** 
+
+- Remove the `FUZZAPI_API` variable from the `.gitlab-ci.yml` file. The value will be inherited from the API Fuzzing CI/CD template. We recommend this method instead of manually setting a value.
+- If removing the variable is not possible, check to see if this value has changed in the latest version of the [API Fuzzing CI/CD template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). If so, update the value in the `.gitlab-ci.yml` file.
 
 <!--
 ### Target Container

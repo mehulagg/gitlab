@@ -1,0 +1,5 @@
+---
+title: Fix inaccurate role classification in DB instrumentation
+merge_request: 57998
+author:
+type: fixed

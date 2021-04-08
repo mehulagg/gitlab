@@ -60,6 +60,7 @@ RSpec.describe Projects::IssuesController do
     context 'when listing epic issues' do
       let_it_be(:epic) { create(:epic, group: group) }
       let_it_be(:subepic) { create(:epic, group: group, parent: epic) }
+
       let(:params) { { epic_id: epic.id, include_subepics: true } }
 
       before do

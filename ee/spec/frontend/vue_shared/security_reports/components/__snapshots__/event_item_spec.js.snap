@@ -81,6 +81,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
     class="gl-flex-shrink-0 gl-align-self-start"
   >
     <button
+      aria-label="Foo Action"
       class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
       title="Foo Action"
       type="button"
@@ -100,6 +101,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
       <!---->
     </button>
     <button
+      aria-label="Bar Action"
       class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
       title="Bar Action"
       type="button"

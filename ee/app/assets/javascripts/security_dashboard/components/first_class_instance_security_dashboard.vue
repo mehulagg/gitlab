@@ -1,10 +1,10 @@
 <script>
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
-import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
+import instanceProjectsQuery from 'ee/security_dashboard/graphql/queries/instance_projects.query.graphql';
 import createFlash from '~/flash';
 import { vulnerabilitiesSeverityCountScopes } from '../constants';
-import { createProjectLoadingError } from '../helpers';
+import { PROJECT_LOADING_ERROR_MESSAGE } from '../helpers';
 import CsvExportButton from './csv_export_button.vue';
 import DashboardNotConfigured from './empty_states/instance_dashboard_not_configured.vue';
 import InstanceSecurityVulnerabilities from './first_class_instance_security_dashboard_vulnerabilities.vue';
@@ -21,12 +21,12 @@ export default {
   },
   apollo: {
     projects: {
-      query: projectsQuery,
+      query: instanceProjectsQuery,
       update(data) {
         return data.instanceSecurityDashboard.projects.nodes;
       },
       error() {
-        createFlash({ message: createProjectLoadingError() });
+        createFlash({ message: PROJECT_LOADING_ERROR_MESSAGE });
       },
     },
   },

@@ -272,6 +272,7 @@ RSpec.describe Vulnerabilities::Finding do
   describe '.undismissed' do
     let_it_be(:project) { create(:project) }
     let_it_be(:project2) { create(:project) }
+
     let!(:finding1) { create(:vulnerabilities_finding, project: project) }
     let!(:finding2) { create(:vulnerabilities_finding, project: project, report_type: :dast) }
     let!(:finding3) { create(:vulnerabilities_finding, project: project2) }
@@ -310,6 +311,7 @@ RSpec.describe Vulnerabilities::Finding do
   describe '.dismissed' do
     let_it_be(:project) { create(:project) }
     let_it_be(:project2) { create(:project) }
+
     let!(:finding1) { create(:vulnerabilities_finding, project: project) }
     let!(:finding2) { create(:vulnerabilities_finding, project: project, report_type: :dast) }
     let!(:finding3) { create(:vulnerabilities_finding, project: project2) }
@@ -509,6 +511,7 @@ RSpec.describe Vulnerabilities::Finding do
 
   describe 'feedback' do
     let_it_be(:project) { create(:project) }
+
     let(:finding) do
       create(
         :vulnerabilities_finding,

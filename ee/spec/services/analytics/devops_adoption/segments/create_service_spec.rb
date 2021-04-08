@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
   let_it_be(:group) { create(:group) }
   let_it_be(:reporter) { create(:user).tap { |u| group.add_reporter(u) } }
+
   let(:current_user) { reporter }
 
   let(:params) { { namespace: group } }

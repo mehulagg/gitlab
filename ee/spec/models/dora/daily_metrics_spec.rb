@@ -66,6 +66,7 @@ RSpec.describe Dora::DailyMetrics, type: :model do
 
     let_it_be(:project) { create(:project, :repository) }
     let_it_be(:environment) { create(:environment, project: project) }
+
     let(:date) { 1.day.ago.to_date }
 
     context 'with finished deployments' do

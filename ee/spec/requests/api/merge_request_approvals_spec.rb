@@ -60,7 +60,7 @@ RSpec.describe API::MergeRequestApprovals do
     it 'retrieves the approval status' do
       project.add_developer(approver)
       project.add_developer(create(:user))
-      merge_request.approvals.create(user: approver)
+      merge_request.approvals.create!(user: approver)
       rule.users << approver
       rule.groups << group
 
@@ -105,7 +105,7 @@ RSpec.describe API::MergeRequestApprovals do
       before do
         private_group = create(:group, :private)
         private_group.add_developer(create(:user))
-        merge_request.approver_groups.create(group: private_group)
+        merge_request.approver_groups.create!(group: private_group)
       end
 
       it 'hides private group' do
@@ -156,7 +156,7 @@ RSpec.describe API::MergeRequestApprovals do
 
     before do
       project.add_developer(approver)
-      merge_request.approvals.create(user: approver)
+      merge_request.approvals.create!(user: approver)
       rule.users << approver
     end
 
@@ -250,7 +250,7 @@ RSpec.describe API::MergeRequestApprovals do
 
     before do
       project.add_developer(approver)
-      merge_request.approvals.create(user: approver)
+      merge_request.approvals.create!(user: approver)
       rule.users << approver
     end
 
@@ -276,7 +276,7 @@ RSpec.describe API::MergeRequestApprovals do
     shared_examples_for 'user allowed to override approvals_before_merge' do
       context 'when disable_overriding_approvers_per_merge_request is false on the project' do
         before do
-          project.update(disable_overriding_approvers_per_merge_request: false)
+          project.update!(disable_overriding_approvers_per_merge_request: false)
         end
 
         it 'allows you to set approvals required' do
@@ -291,7 +291,7 @@ RSpec.describe API::MergeRequestApprovals do
 
       context 'when disable_overriding_approvers_per_merge_request is true on the project' do
         before do
-          project.update(disable_overriding_approvers_per_merge_request: true)
+          project.update!(disable_overriding_approvers_per_merge_request: true)
         end
 
         it 'does not allow you to set approvals_before_merge' do
@@ -320,7 +320,7 @@ RSpec.describe API::MergeRequestApprovals do
 
     context 'as a random user' do
       before do
-        project.update(disable_overriding_approvers_per_merge_request: false)
+        project.update!(disable_overriding_approvers_per_merge_request: false)
       end
 
       it 'does not allow you to override approvals required' do
@@ -403,8 +403,8 @@ RSpec.describe API::MergeRequestApprovals do
 
       context 'when project requires force auth for approval' do
         before do
-          project.update(require_password_to_approve: true)
-          approver.update(password: 'password')
+          project.update!(require_password_to_approve: true)
+          approver.update!(password: 'password')
         end
 
         it 'does not approve the merge request with no password' do
@@ -431,7 +431,7 @@ RSpec.describe API::MergeRequestApprovals do
 
       it 'only shows group approvers visible to the user' do
         private_group = create(:group, :private)
-        merge_request.approver_groups.create(group: private_group)
+        merge_request.approver_groups.create!(group: private_group)
 
         approve
 
@@ -452,8 +452,8 @@ RSpec.describe API::MergeRequestApprovals do
         project.add_developer(approver)
         project.add_developer(unapprover)
         project.add_developer(create(:user))
-        merge_request.approvals.create(user: approver)
-        merge_request.approvals.create(user: unapprover)
+        merge_request.approvals.create!(user: approver)
+        merge_request.approvals.create!(user: unapprover)
         rule.users = [approver, unapprover]
       end
 
@@ -473,7 +473,7 @@ RSpec.describe API::MergeRequestApprovals do
 
       it 'only shows group approvers visible to the user' do
         private_group = create(:group, :private)
-        merge_request.approver_groups.create(group: private_group)
+        merge_request.approver_groups.create!(group: private_group)
 
         post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/unapprove", unapprover)
 

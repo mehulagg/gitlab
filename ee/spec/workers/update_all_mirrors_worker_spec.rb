@@ -27,7 +27,7 @@ RSpec.describe UpdateAllMirrorsWorker do
       worker.perform
     end
 
-    it 'removes metadata except correlation_id from the application context before scheduling mirrors', :context_aware do
+    it 'removes metadata except correlation_id from the application context before scheduling mirrors' do
       inner_context = nil
       outer_context = nil
 

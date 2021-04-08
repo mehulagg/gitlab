@@ -267,17 +267,14 @@ RSpec.describe EE::WelcomeHelper do
   describe '#signup_onboarding_enabled?' do
     subject { helper.signup_onboarding_enabled? }
 
-    where(:is_com, :feature_flag_enabled, :result) do
-      true  | true  | true
-      true  | false | false
-      false | true  | false
-      false | false | false
+    where(:is_com, :result) do
+      true  | true
+      false | false
     end
 
     with_them do
       before do
         expect(Gitlab).to receive(:com?).and_return(is_com)
-        stub_feature_flags(signup_onboarding: feature_flag_enabled)
       end
 
       it { is_expected.to eq(result) }

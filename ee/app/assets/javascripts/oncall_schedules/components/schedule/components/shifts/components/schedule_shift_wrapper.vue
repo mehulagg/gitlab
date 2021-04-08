@@ -1,6 +1,7 @@
 <script>
 import { PRESET_TYPES, SHIFT_WIDTH_CALCULATION_DELAY } from 'ee/oncall_schedules/constants';
 import getShiftTimeUnitWidthQuery from 'ee/oncall_schedules/graphql/queries/get_shift_time_unit_width.query.graphql';
+import getTimelineWidthQuery from 'ee/oncall_schedules/graphql/queries/get_timeline_width.query.graphql';
 import DaysScheduleShift from './days_schedule_shift.vue';
 import { shiftsToRender } from './shift_utils';
 import WeeksScheduleShift from './weeks_schedule_shift.vue';
@@ -35,11 +36,16 @@ export default {
         [PRESET_TYPES.DAYS]: DaysScheduleShift,
         [PRESET_TYPES.WEEKS]: WeeksScheduleShift,
       },
+      timelineWidth: 0,
     };
   },
   apollo: {
     shiftTimeUnitWidth: {
       query: getShiftTimeUnitWidthQuery,
+      debounce: SHIFT_WIDTH_CALCULATION_DELAY,
+    },
+    timelineWidth: {
+      query: getTimelineWidthQuery,
       debounce: SHIFT_WIDTH_CALCULATION_DELAY,
     },
   },
@@ -78,6 +84,7 @@ export default {
       :timeframe="timeframe"
       :shift-time-unit-width="shiftTimeUnitWidth"
       :rotation-length="rotationLength"
+      :timeline-width="timelineWidth"
     />
   </div>
 </template>
