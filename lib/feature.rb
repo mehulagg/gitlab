@@ -54,7 +54,7 @@ class Feature
     # unless set explicitly.  The default is `disabled`
     # TODO: remove the `default_enabled:` and read it from the `defintion_yaml`
     # check: https://gitlab.com/gitlab-org/gitlab/-/issues/30228
-    def enabled?(key, thing = nil, type: :development, default_enabled: false)
+    def enabled?(key, thing = nil, type: :development, default_enabled: false, safe: true)
       if check_feature_flags_definition?
         if thing && !thing.respond_to?(:flipper_id)
           raise InvalidFeatureFlagError,
@@ -64,6 +64,19 @@ class Feature
         Feature::Definition.valid_usage!(key, type: type, default_enabled: default_enabled)
       end
 
+      if safe && Gitlab::SafeRequestStore.active?
+        Gitlab::SafeRequestStore[:feature_flags] ||= {}
+        store_key = [key, type, thing&.to_global_id&.to_s].compact.join('-')
+        current_value = Gitlab::SafeRequestStore[:feature_flags][store_key]
+        return current_value unless current_value.nil?
+
+        Gitlab::SafeRequestStore[:feature_flags][store_key] = unsafe_enabled?(key, thing, type: type, default_enabled: default_enabled)
+      else
+        unsafe_enabled?(key, thing, type: type, default_enabled: default_enabled)
+      end
+    end
+
+    def unsafe_enabled?(key, thing = nil, type: :development, default_enabled: false)
       # If `default_enabled: :yaml` we fetch the value from the YAML definition instead.
       default_enabled = Feature::Definition.default_enabled?(key) if default_enabled == :yaml
 
