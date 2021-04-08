@@ -288,7 +288,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect(signature_algs).to eq(%w[hash scope_offset])
 
         # check that the existing hash signature was updated/reused
-        expect(existing_signature.id).to eq(finding.signatures.last.id)
+        expect(existing_signature.id).to eq(finding.signatures.find(&:algorithm_hash?).id)
       end
 
       it 'updates existing vulnerability with new data' do
