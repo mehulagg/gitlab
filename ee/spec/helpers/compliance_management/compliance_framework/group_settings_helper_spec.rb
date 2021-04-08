@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ComplianceManagement::ComplianceFramework::GroupSettingsHelper do
   let_it_be_with_refind(:group) { create(:group) }
+  let_it_be(:subgroup) { create(:group, :nested) }
   let_it_be(:current_user) { build(:admin) }
 
   before do
@@ -22,11 +23,21 @@ RSpec.describe ComplianceManagement::ComplianceFramework::GroupSettingsHelper do
     end
 
     context 'the user does not have permission' do
-      before do
-        allow(helper).to receive(:can?).with(current_user, :admin_compliance_framework, group).and_return(false)
+      context 'group is a subgroup' do
+        before do
+          allow(helper).to receive(:can?).with(current_user, :admin_compliance_framework, subgroup).and_return(false)
+        end
+
+        it { is_expected.to be false }
       end
 
-      it { is_expected.to be false }
+      context 'group is not a subgroup' do
+        before do
+          allow(helper).to receive(:can?).with(current_user, :admin_compliance_framework, group).and_return(false)
+        end
+
+        it { is_expected.to be false }
+      end
     end
   end
 

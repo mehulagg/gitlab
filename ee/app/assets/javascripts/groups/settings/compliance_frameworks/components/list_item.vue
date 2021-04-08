@@ -49,6 +49,7 @@ export default {
     </p>
     <div class="gl-display-flex">
       <gl-button
+        v-if="framework.editPath"
         v-gl-tooltip="$options.i18n.editFramework"
         :disabled="loading"
         :aria-label="$options.i18n.editFramework"
@@ -58,6 +59,7 @@ export default {
         category="tertiary"
       />
       <gl-button
+        v-if="framework.editPath"
         v-gl-tooltip="$options.i18n.deleteFramework"
         class="gl-ml-3"
         :loading="loading"

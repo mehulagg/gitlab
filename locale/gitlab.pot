@@ -7973,7 +7973,7 @@ msgstr ""
 msgid "ComplianceFrameworks|Invalid format: it should follow the format [PATH].y(a)ml@[GROUP]/[PROJECT]"
 msgstr ""
 
-msgid "ComplianceFrameworks|Once you have created a compliance framework it will appear here."
+msgid "ComplianceFrameworks|Once a compliance framework is added it will appear here."
 msgstr ""
 
 msgid "ComplianceFrameworks|Regulated"
