@@ -2,6 +2,8 @@
 
 module Resolvers
   class GroupPackagesResolver < PackageBaseResolver
+    type Types::Packages::PackageType.connection_type, null: true
+
     def ready?(**args)
       context[self.class] ||= { executions: 0 }
       context[self.class][:executions] += 1
@@ -13,7 +15,7 @@ module Resolvers
     def resolve(sort:)
       return unless packages_available?
 
-      ::Packages::GroupPackagesFinder.new(current_user, object,  SORT_TO_PARAMS_MAP[sort]).execute
+      ::Packages::GroupPackagesFinder.new(current_user, object, SORT_TO_PARAMS_MAP[sort]).execute
     end
   end
 end
