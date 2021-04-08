@@ -43,7 +43,9 @@ include:
   - template: API-Fuzzing.gitlab-ci.yml
 ```
 
-In GitLab 13.12 and earlier, when using the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). The template already defines `build`,`test`, `deploy`, and `fuzz` stages, and the `fuzz` stage runs last by default.
+In GitLab 13.12 and earlier, when using the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). The template already defines `build`,`test`, `deploy`, and `fuzz` stages, and the `fuzz` stage runs last by default. 
+
+In GitLab 13.11, the predefined stages are deprecated, thus they've been removed from the `API-Fuzzing.latest.gitlab-ci.yml` template. Anyone can test and see if any changes are needed in their configuration files.
 
 Always, to ensure API fuzzing scans the latest code, your CI pipeline should deploy changes to a test environment in one of the jobs preceding the `fuzz` job.
 
