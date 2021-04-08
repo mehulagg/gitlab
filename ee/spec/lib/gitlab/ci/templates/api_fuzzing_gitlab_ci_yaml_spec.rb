@@ -38,7 +38,10 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
     before do
       stub_ci_pipeline_yaml_file(template.content)
 
-      allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+      allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
+        allow(worker).to receive(:perform).and_return(true)
+      end
+
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
@@ -110,30 +113,30 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
           expect(build_names).to match_array(%w[apifuzzer_fuzz_dnd])
         end
       end
-    end
 
-    context 'when API_FUZZING_DISABLED=1' do
-      before do
-        create(:ci_variable, project: project, key: 'API_FUZZING_DISABLED', value: '1')
-        create(:ci_variable, project: project, key: 'FUZZAPI_HAR', value: 'testing.har')
-        create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
+      context 'when API_FUZZING_DISABLED=1' do
+        before do
+          create(:ci_variable, project: project, key: 'API_FUZZING_DISABLED', value: '1')
+          create(:ci_variable, project: project, key: 'FUZZAPI_HAR', value: 'testing.har')
+          create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
+        end
+
+        it 'includes no jobs' do
+          expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+        end
       end
 
-      it 'includes no jobs' do
-        expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
-      end
-    end
+      context 'when API_FUZZING_DISABLED=1 with DnD' do
+        before do
+          create(:ci_variable, project: project, key: 'API_FUZZING_DISABLED', value: '1')
+          create(:ci_variable, project: project, key: 'FUZZAPI_D_TARGET_IMAGE', value: 'imagename:latest')
+          create(:ci_variable, project: project, key: 'FUZZAPI_HAR', value: 'testing.har')
+          create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
+        end
 
-    context 'when API_FUZZING_DISABLED=1 with DnD' do
-      before do
-        create(:ci_variable, project: project, key: 'API_FUZZING_DISABLED', value: '1')
-        create(:ci_variable, project: project, key: 'FUZZAPI_D_TARGET_IMAGE', value: 'imagename:latest')
-        create(:ci_variable, project: project, key: 'FUZZAPI_HAR', value: 'testing.har')
-        create(:ci_variable, project: project, key: 'FUZZAPI_TARGET_URL', value: 'http://example.com')
-      end
-
-      it 'includes no jobs' do
-        expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+        it 'includes no jobs' do
+          expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)
+        end
       end
     end
   end
