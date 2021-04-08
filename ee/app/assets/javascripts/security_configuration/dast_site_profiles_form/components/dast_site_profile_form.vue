@@ -150,11 +150,6 @@ export default {
         .map((url) => url.trim());
     },
   },
-  async mounted() {
-    if (this.isEdit) {
-      this.form.showValidation = true;
-    }
-  },
   methods: {
     onSubmit() {
       const isAuthEnabled =
