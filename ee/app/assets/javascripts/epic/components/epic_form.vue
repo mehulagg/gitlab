@@ -165,11 +165,11 @@ export default {
       <gl-form-group
         :label="__('Confidentiality')"
         label-for="epic-confidentiality"
-        data-qa-selector="confidential_epic_checkbox"
       >
         <gl-form-checkbox
           id="epic-confidentiality"
           v-model="confidential"
+          data-qa-selector="confidential_epic_checkbox"
           data-testid="epic-confidentiality"
         >
           {{ $options.i18n.confidentialityLabel }}
