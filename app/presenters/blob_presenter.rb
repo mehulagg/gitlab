@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class BlobPresenter < Gitlab::View::Presenter::Delegated
+  include GitlabRoutingHelper
+
   presents :blob
 
   def highlight(to: nil, plain: nil)
@@ -15,11 +17,11 @@ class BlobPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def web_url
-    Gitlab::Routing.url_helpers.project_blob_url(blob.repository.project, File.join(blob.commit_id, blob.path))
+    project_blob_url(blob.repository.project, File.join(blob.commit_id, blob.path))
   end
 
   def web_path
-    Gitlab::Routing.url_helpers.project_blob_path(blob.repository.project, File.join(blob.commit_id, blob.path))
+    project_blob_path(blob.repository.project, File.join(blob.commit_id, blob.path))
   end
 
   private

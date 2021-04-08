@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class SnippetBlobPresenter < BlobPresenter
-  include GitlabRoutingHelper
-
   def rich_data
     return unless blob.rich_viewer
 
