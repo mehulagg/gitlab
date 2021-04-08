@@ -26,7 +26,7 @@ exports[`MergeRequestTable component template matches the snapshot 1`] = `
         role="columnheader"
         scope="col"
       >
-        Merge Request
+        Merge request
       </th>
       <th
         aria-colindex="2"
@@ -89,7 +89,7 @@ exports[`MergeRequestTable component template matches the snapshot 1`] = `
       <td
         aria-colindex="1"
         class="table-col d-flex align-items-center"
-        data-label="Merge Request"
+        data-label="Merge request"
         role="cell"
       >
         <div>
