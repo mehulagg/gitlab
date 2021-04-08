@@ -66,7 +66,9 @@ export default {
 <template>
   <gl-table v-if="hasContent" :fields="$options.fields" :items="details" class="gl-m-0!">
     <template #cell(label)="{ item }">
-      <p class="gl-font-weight-bold" data-testid="details-label">{{ item.label }}:</p>
+      <p class="gl-font-weight-bold gl-text-gray-800" data-testid="details-label">
+        {{ item.label }}:
+      </p>
     </template>
 
     <template #cell(value)="{ item }">
