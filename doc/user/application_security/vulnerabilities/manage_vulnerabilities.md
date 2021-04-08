@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# Manage vulnerabilities
+# Addressing vulnerabilities
 
 For each security vulnerability in a merge request or [Vulnerability Report](../vulnerability_report/index.md),
 you can:
