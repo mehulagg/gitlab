@@ -16,4 +16,4 @@ What's new cannot be disabled.
 
 # How it works for self-managed 
 
-Due to our release post process, the content for What's New is being finalized after the version is already cut. Because of this, we don't  ship an updated What's New with the .0 release. It is included in the first patch release ex 13.10.1. 
+Due to our release post process, the content for What's New is being finalized after the version is already cut. Because of this, we don't ship an updated What's New with the .0 release. It is included in the first patch release ex 13.10.1. 
