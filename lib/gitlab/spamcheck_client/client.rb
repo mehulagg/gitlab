@@ -55,14 +55,23 @@ module Gitlab
         user_pb.org = user.organization || ''
         user_pb.created_at = convert_to_pb_timestamp(user.created_at)
 
+        primary_email = build_email(user.email, !user.confirmed_at.nil?)
+
         emails = user.emails.map do |email|
-          email_pb = Spamcheck::Email.new
-          email_pb.email = email.email
-          email_pb.verified = !email.confirmed_at.nil?
+          build_email(email.email, !email.confirmed_at.nil?)
         end
+
+        emails.unshift(primary_email)
 
         user_pb.emails.replace(emails)
         user_pb
+      end
+
+      def build_email(email, verified)
+        email_pb = Spamcheck::User::Email.new
+        email_pb.email = email
+        email_pb.verified = verified
+        email_pb
       end
 
       def convert_to_pb_timestamp(ar_timestamp)
