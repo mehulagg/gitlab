@@ -14,13 +14,16 @@ module Types
                 description: 'Name of the subscription plan.'
 
           field :name, GraphQL::STRING_TYPE, null: true,
-                description: 'Name of the licensee.'
+                description: 'Name of the licensee.',
+                method: :licensee_name
 
           field :email, GraphQL::STRING_TYPE, null: true,
-                description: 'Email of the licensee.'
+                description: 'Email of the licensee.',
+                method: :licensee_email
 
           field :company, GraphQL::STRING_TYPE, null: true,
-                description: 'Company of the licensee.'
+                description: 'Company of the licensee.',
+                method: :licensee_company
 
           field :starts_at, ::Types::DateType, null: true,
                 description: 'Date when the license started.'
@@ -29,7 +32,7 @@ module Types
                 description: 'Date when the license expires.'
 
           field :users_in_license, GraphQL::INT_TYPE, null: true,
-                description: 'Number of users paid for in the license.'
+                description: 'Number of paid users in the license.'
 
           def type
             object.cloud? ? :cloud : :legacy
@@ -37,18 +40,6 @@ module Types
 
           def plan
             object.plan.capitalize
-          end
-
-          def name
-            object.licensee['Name']
-          end
-
-          def email
-            object.licensee['Email']
-          end
-
-          def company
-            object.licensee['Company']
           end
 
           def users_in_license

@@ -8,15 +8,14 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
     {
       'Name' => 'User Example',
       'Email' => 'user@example.com',
-      'Company' => 'Example Inc.',
-      'Address' => 'Example Street 1, 12345 Example City'
+      'Company' => 'Example Inc.'
     }
   end
 
   let_it_be(:license) { create_current_license(licensee: licensee, type: License::CLOUD_LICENSE_TYPE) }
 
   let(:fields) do
-    %w[id last_sync address billable_users maximum_users users_over_subscription]
+    %w[id last_sync billable_users maximum_users users_over_subscription]
   end
 
   def query(field_name)
@@ -41,14 +40,6 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
   it { expect(described_class).to include_graphql_fields(*fields) }
 
   include_examples 'license type fields', %w[data currentLicense]
-
-  describe "#address" do
-    it 'returns the address of the licensee' do
-      result_as_json = query_field('address')
-
-      expect(result_as_json['data']['currentLicense']['address']).to eq('Example Street 1, 12345 Example City')
-    end
-  end
 
   describe "#users_over_subscription" do
     context 'when license is for a trial' do

@@ -9,7 +9,6 @@ module Resolvers
         type [::Types::Admin::CloudLicenses::LicenseHistoryEntryType], null: true
 
         def resolve
-          return if ::Gitlab.com?
           return unless application_settings.cloud_license_enabled?
 
           authorize!

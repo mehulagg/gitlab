@@ -1485,4 +1485,28 @@ RSpec.describe License do
       it { is_expected.to eq(result) }
     end
   end
+
+  describe '#licensee_name' do
+    subject { license.licensee_name }
+
+    let(:gl_license) { build(:gitlab_license, licensee: { 'Name' => 'User Example' }) }
+
+    it { is_expected.to eq('User Example') }
+  end
+
+  describe '#licensee_email' do
+    subject { license.licensee_email }
+
+    let(:gl_license) { build(:gitlab_license, licensee: { 'Email' => 'user@example.com' }) }
+
+    it { is_expected.to eq('user@example.com') }
+  end
+
+  describe '#licensee_company' do
+    subject { license.licensee_company }
+
+    let(:gl_license) { build(:gitlab_license, licensee: { 'Company' => 'Example Inc.' }) }
+
+    it { is_expected.to eq('Example Inc.') }
+  end
 end

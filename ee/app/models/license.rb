@@ -237,6 +237,8 @@ class License < ApplicationRecord
     { range: (1000..nil), percentage: true, value: 5 }
   ].freeze
 
+  LICENSEE_ATTRIBUTES = %w[Name Email Company].freeze
+
   validate :valid_license
   validate :check_users_limit, if: :new_record?, unless: :validate_with_trueup?
   validate :check_trueup, unless: :persisted?, if: :validate_with_trueup?
@@ -574,6 +576,12 @@ class License < ApplicationRecord
 
   def remaining_user_count
     restricted_user_count - daily_billable_users_count
+  end
+
+  LICENSEE_ATTRIBUTES.each do |attribute|
+    define_method "licensee_#{attribute.downcase}" do
+      licensee[attribute]
+    end
   end
 
   private

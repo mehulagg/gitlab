@@ -35,33 +35,9 @@ RSpec.shared_examples_for 'license type fields' do |keys|
       end
     end
 
-    describe "#name" do
-      it 'returns the email of the licensee' do
-        result_as_json = query_field('name')
-
-        expect(result_as_json.dig(*keys)['name']).to eq('User Example')
-      end
-    end
-
-    describe "#email" do
-      it 'returns the email of the licensee' do
-        result_as_json = query_field('email')
-
-        expect(result_as_json.dig(*keys)['email']).to eq('user@example.com')
-      end
-    end
-
-    describe "#company" do
-      it 'returns the company of the licensee' do
-        result_as_json = query_field('company')
-
-        expect(result_as_json.dig(*keys)['company']).to eq('Example Inc.')
-      end
-    end
-
     describe "#users_in_license" do
       context 'when active_user_count is set' do
-        it 'returns the number of users paid for in the license' do
+        it 'returns the number of paid users in the license' do
           create_current_license(licensee: licensee, restrictions: { active_user_count: 10 })
 
           result_as_json = query_field('usersInLicense')
@@ -70,7 +46,7 @@ RSpec.shared_examples_for 'license type fields' do |keys|
         end
       end
 
-      it 'returns the number of users paid for in the license' do
+      it 'returns the number of paid users in the license' do
         result_as_json = query_field('usersInLicense')
 
         expect(result_as_json.dig(*keys)['usersInLicense']).to be_nil
