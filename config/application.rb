@@ -73,6 +73,23 @@ module Gitlab
       config.paths['app/views'].unshift "#{config.root}/ee/app/views"
     end
 
+    if Gitlab.jh?
+      jh_paths = config.eager_load_paths.each_with_object([]) do |path, memo|
+        jh_path = config.root.join('jh', Pathname.new(path).relative_path_from(config.root))
+        memo << jh_path.to_s
+      end
+
+      jh_paths << "#{config.root}/jh/app/replicators"
+
+      # Eager load should load CE/EE first
+      config.eager_load_paths.push(*jh_paths)
+      config.helpers_paths.push "#{config.root}/jh/app/helpers"
+
+      # Other than Ruby modules we load JH first
+      config.paths['lib/tasks'].unshift "#{config.root}/jh/lib/tasks"
+      config.paths['app/views'].unshift "#{config.root}/jh/app/views"
+    end
+
     # Rake tasks ignore the eager loading settings, so we need to set the
     # autoload paths explicitly
     config.autoload_paths = config.eager_load_paths.dup
