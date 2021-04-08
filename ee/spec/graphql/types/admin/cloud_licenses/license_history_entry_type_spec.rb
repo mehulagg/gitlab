@@ -14,8 +14,6 @@ RSpec.describe GitlabSchema.types['LicenseHistoryEntry'], :enable_admin_mode do
 
   let_it_be(:license) { create_current_license(licensee: licensee, type: License::CLOUD_LICENSE_TYPE) }
 
-  let(:fields) { %w[activated_on] }
-
   def query(field_name)
     %(
       {
@@ -37,7 +35,6 @@ RSpec.describe GitlabSchema.types['LicenseHistoryEntry'], :enable_admin_mode do
   end
 
   it { expect(described_class.graphql_name).to eq('LicenseHistoryEntry') }
-  it { expect(described_class).to include_graphql_fields(*fields) }
 
   include_examples 'license type fields', ['data', 'licenseHistoryEntries', 'nodes', -1]
 end

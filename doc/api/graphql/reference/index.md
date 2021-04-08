@@ -1868,6 +1868,7 @@ Represents the current license.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `activatedAt` | [`Date`](#date) | Date when the license was activated. |
 | `billableUsers` | [`Int`](#int) | Number of billable users on the system. |
 | `company` | [`String`](#string) | Company of the licensee. |
 | `email` | [`String`](#string) | Email of the licensee. |
@@ -3885,7 +3886,7 @@ Represents an entry from the Cloud License history.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `activatedOn` | [`Date`](#date) | Date when the license was activated. |
+| `activatedAt` | [`Date`](#date) | Date when the license was activated. |
 | `company` | [`String`](#string) | Company of the licensee. |
 | `email` | [`String`](#string) | Email of the licensee. |
 | `expiresAt` | [`Date`](#date) | Date when the license expires. |
