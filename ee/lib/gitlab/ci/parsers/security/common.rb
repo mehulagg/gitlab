@@ -128,24 +128,19 @@ module Gitlab
               end
             end
 
-            # We should *always* include the hash or physical-location-based
-            # signature!
-            #
-            # See the comments in VulnerabilityFindingSignatureHelpers about
-            # creating default signatures from location data
-            is_location = [:file_path, :start_line].all? { |x| location.respond_to?(x) }
-            algorithm_type = is_location ? 'location' : 'hash'
-            unless signature_algorithms.has_key?(algorithm_type)
-              signature_algorithms[algorithm_type] = [location.fingerprint_data]
-            end
-
             signature_algorithms.map do |algorithm, values|
               value = values.join('|')
               signature = ::Gitlab::Ci::Reports::Security::FindingSignature.new(
                 algorithm_type: algorithm,
                 signature_value: value
               )
-              signature.valid? ? signature : nil
+
+              if signature.valid?
+                signature
+              else
+                Gitlab::AppLogger.warn(message: "Vulnerability tracking signature is not valid", signature: signature.to_s)
+                nil
+              end
             end.compact
           end
 

@@ -255,8 +255,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
             identifiers = if vulnerability_finding_signatures_enabled
                             "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{highest_signature.signature_hex}-#{report.project_id}"
                           else
-                            location_fingerprint = "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5"
-                            "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{location_fingerprint}-#{report.project_id}"
+                            "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{finding.location.fingerprint}-#{report.project_id}"
                           end
 
             expect(finding.uuid).to eq(Gitlab::UUID.v5(identifiers))
