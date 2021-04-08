@@ -475,7 +475,7 @@ group :ed25519 do
 end
 
 # Spamcheck GRPC protocol definitions
-gem 'spamcheck', '~> 0.1.0', git: 'https://gitlab.com/gitlab-com/gl-security/engineering-and-research/automation-team/spam/spamcheck', branch: '40-eurie-publish-protobuf-as-gem'
+gem 'spamcheck', '~> 0.1.0', git: 'https://gitlab.com/gitlab-com/gl-security/engineering-and-research/automation-team/spam/spamcheck'
 
 # Gitaly GRPC protocol definitions
 gem 'gitaly', '~> 13.9.0.pre.rc1'
