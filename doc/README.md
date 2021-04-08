@@ -12,7 +12,7 @@ description: 'Learn how to use and administer GitLab, the most scalable Git-base
 </div>
 <!-- the div above will not display on the docs site but will display on /help -->
 
-# GitLab Docs
+# GitLab Documentation
 
 Welcome to [GitLab](https://about.gitlab.com/) documentation.
 
