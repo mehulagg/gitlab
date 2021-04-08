@@ -39,6 +39,7 @@ stages:
   - test
   - deploy
   - fuzz
+
 include:
   - template: API-Fuzzing.gitlab-ci.yml
 ```
