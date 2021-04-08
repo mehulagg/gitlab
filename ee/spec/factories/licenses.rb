@@ -15,6 +15,10 @@ FactoryBot.define do
       expires_at { 3.weeks.ago.to_date }
     end
 
+    trait :cloud do
+      type { 'cloud' }
+    end
+
     transient do
       plan { License::STARTER_PLAN }
     end
@@ -48,10 +52,15 @@ FactoryBot.define do
       trial { false }
     end
 
+    trait :cloud do
+      cloud { true }
+    end
+
     data do
       attrs = [:gitlab_license]
       attrs << :trial if trial
       attrs << :expired if expired
+      attrs << :cloud if cloud
 
       build(*attrs, plan: plan).export
     end
