@@ -19,7 +19,7 @@ function mapApprovalRule(rule, settings) {
     // Give a friendly name to the single rule
     return {
       ...rule,
-      name: __('Merge Request'),
+      name: __('Merge request'),
     };
   }
 

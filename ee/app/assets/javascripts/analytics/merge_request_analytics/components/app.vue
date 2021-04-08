@@ -48,7 +48,7 @@ export default {
 </script>
 <template>
   <div class="merge-request-analytics-wrapper">
-    <h3 data-testid="pageTitle" class="gl-mb-5">{{ __('Merge Request Analytics') }}</h3>
+    <h3 data-testid="pageTitle" class="gl-mb-5">{{ __('Merge request analytics') }}</h3>
     <div
       class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between gl-bg-gray-10 gl-border-t-solid gl-border-t-1 gl-border-t-gray-100 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-py-3"
     >

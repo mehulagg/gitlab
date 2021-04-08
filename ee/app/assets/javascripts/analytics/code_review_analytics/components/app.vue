@@ -86,7 +86,7 @@ export default {
         </gl-empty-state>
         <template v-else>
           <div>
-            <span class="font-weight-bold">{{ __('Merge Requests in Review') }}</span>
+            <span class="font-weight-bold">{{ __('Merge requests in review') }}</span>
             <gl-badge size="sm">{{ totalItems }}</gl-badge>
           </div>
           <merge-request-table />

@@ -59,13 +59,13 @@ export default {
   tableHeaderFields: [
     {
       key: 'mr_details',
-      label: s__('MergeRequestAnalytics|Merge Request'),
+      label: s__('MergeRequestAnalytics|Merge request'),
       tdClass: 'merge-request-analytics-td',
       thAttr: TH_TEST_ID,
     },
     {
       key: 'date_merged',
-      label: s__('MergeRequestAnalytics|Date Merged'),
+      label: s__('MergeRequestAnalytics|Date merged'),
       tdClass: 'merge-request-analytics-td',
       thAttr: TH_TEST_ID,
     },

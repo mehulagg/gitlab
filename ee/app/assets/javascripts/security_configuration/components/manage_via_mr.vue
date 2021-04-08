@@ -62,7 +62,7 @@ export default {
     },
   },
   i18n: {
-    buttonLabel: s__('SecurityConfiguration|Configure via Merge Request'),
+    buttonLabel: s__('SecurityConfiguration|Configure via merge request'),
     noSuccessPathError: s__(
       'SecurityConfiguration|%{featureName} merge request creation mutation failed',
     ),

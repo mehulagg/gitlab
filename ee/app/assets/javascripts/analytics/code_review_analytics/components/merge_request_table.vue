@@ -46,7 +46,7 @@ export default {
   tableHeaderFields: [
     {
       key: 'mr_details',
-      label: __('Merge Request'),
+      label: __('Merge request'),
       thClass: 'w-30p',
       tdClass: 'table-col d-flex align-items-center',
     },

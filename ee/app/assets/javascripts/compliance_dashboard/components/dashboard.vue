@@ -52,7 +52,7 @@ export default {
   strings: {
     heading: __('Compliance Dashboard'),
     subheading: __('Here you will find recent merge request activity'),
-    mergeRequestsTabLabel: __('Merge Requests'),
+    mergeRequestsTabLabel: __('Merge requests'),
   },
 };
 </script>

@@ -6,7 +6,7 @@ module Security
       title: 'GitLab-auto-fix',
       color: '#FF8167',
       description: <<~DESCRIPTION.chomp
-        Merge Requests created automatically by @GitLab-Security-Bot \
+        Merge requests created automatically by @GitLab-Security-Bot \
         as a remediation of a security vulnerability
       DESCRIPTION
     }.freeze

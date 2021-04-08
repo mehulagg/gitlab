@@ -63,7 +63,7 @@ export default (dataEl) => {
           props: {
             chartData: sortByValue(formattedData.merge_requests_created),
             xAxisTitle,
-            yAxisTitle: __('Merge Requests created'),
+            yAxisTitle: __('Merge requests created'),
             xAxisType,
           },
         });

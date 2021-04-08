@@ -183,7 +183,7 @@ export default {
     />
     <template v-if="showAppContent">
       <div class="d-flex justify-content-between">
-        <h4>{{ s__('ProductivityAnalytics|Merge Requests') }}</h4>
+        <h4>{{ s__('ProductivityAnalytics|Merge requests') }}</h4>
         <gl-button
           v-if="isFilteringByDaysToMerge"
           ref="clearChartFiltersBtn"

@@ -4537,7 +4537,7 @@ msgstr ""
 msgid "AutoDevOps|The Auto DevOps pipeline has been enabled and will be used if no alternative CI configuration file is found."
 msgstr ""
 
-msgid "AutoRemediation| 1 Merge Request"
+msgid "AutoRemediation| 1 merge request"
 msgstr ""
 
 msgid "AutoRemediation|%{mrsCount} ready for review"
@@ -7687,6 +7687,9 @@ msgid "Code owner approval is required"
 msgstr ""
 
 msgid "Code owners"
+msgstr ""
+
+msgid "Code review"
 msgstr ""
 
 msgid "CodeIntelligence|This is the definition"
@@ -10895,6 +10898,9 @@ msgid "DevOps Adoption"
 msgstr ""
 
 msgid "DevOps Report"
+msgstr ""
+
+msgid "DevOps adoption"
 msgstr ""
 
 msgid "DevopsAdoption|Add Group"
@@ -15023,7 +15029,7 @@ msgstr ""
 msgid "GroupActivityMetrics|Members added"
 msgstr ""
 
-msgid "GroupActivityMetrics|Merge Requests opened"
+msgid "GroupActivityMetrics|Merge requests opened"
 msgstr ""
 
 msgid "GroupActivityMetrics|Recent activity (last 90 days)"
@@ -19446,24 +19452,6 @@ msgstr ""
 msgid "Merge Conflicts"
 msgstr ""
 
-msgid "Merge Request"
-msgstr ""
-
-msgid "Merge Request Analytics"
-msgstr ""
-
-msgid "Merge Requests"
-msgstr ""
-
-msgid "Merge Requests created"
-msgstr ""
-
-msgid "Merge Requests in Review"
-msgstr ""
-
-msgid "Merge Requests merged"
-msgstr ""
-
 msgid "Merge automatically (%{strategy})"
 msgstr ""
 
@@ -19530,6 +19518,15 @@ msgstr ""
 msgid "Merge requests are read-only in a secondary Geo node"
 msgstr ""
 
+msgid "Merge requests created"
+msgstr ""
+
+msgid "Merge requests in review"
+msgstr ""
+
+msgid "Merge requests merged"
+msgstr ""
+
 msgid "Merge the branch and fix any conflicts that come up"
 msgstr ""
 
@@ -19563,13 +19560,13 @@ msgstr ""
 msgid "MergeRequestAnalytics|Assignees"
 msgstr ""
 
-msgid "MergeRequestAnalytics|Date Merged"
+msgid "MergeRequestAnalytics|Date merged"
 msgstr ""
 
 msgid "MergeRequestAnalytics|Line changes"
 msgstr ""
 
-msgid "MergeRequestAnalytics|Merge Request"
+msgid "MergeRequestAnalytics|Merge request"
 msgstr ""
 
 msgid "MergeRequestAnalytics|Milestone"
@@ -23699,9 +23696,6 @@ msgstr ""
 msgid "ProductivityAnalytics|List"
 msgstr ""
 
-msgid "ProductivityAnalytics|Merge Requests"
-msgstr ""
-
 msgid "ProductivityAnalytics|Merge date"
 msgstr ""
 
@@ -27416,13 +27410,10 @@ msgstr ""
 msgid "SecurityConfiguration|Available with %{linkStart}upgrade or free trial%{linkEnd}"
 msgstr ""
 
-msgid "SecurityConfiguration|By default, all analyzers are applied in order to cover all languages across your project, and only run if the language is detected in the Merge Request."
+msgid "SecurityConfiguration|By default, all analyzers are applied in order to cover all languages across your project, and only run if the language is detected in the merge request."
 msgstr ""
 
 msgid "SecurityConfiguration|Configure"
-msgstr ""
-
-msgid "SecurityConfiguration|Configure via Merge Request"
 msgstr ""
 
 msgid "SecurityConfiguration|Configure via merge request"
@@ -27431,7 +27422,7 @@ msgstr ""
 msgid "SecurityConfiguration|Could not retrieve configuration data. Please refresh the page, or try again later."
 msgstr ""
 
-msgid "SecurityConfiguration|Create Merge Request"
+msgid "SecurityConfiguration|Create merge request"
 msgstr ""
 
 msgid "SecurityConfiguration|Customize common SAST settings to suit your requirements. Configuration changes made here override those provided by GitLab and are excluded from updates. For details of more advanced configuration options, see the %{linkStart}GitLab SAST documentation%{linkEnd}."
@@ -33901,6 +33892,9 @@ msgid "Value Stream Analytics can help you determine your team’s velocity"
 msgstr ""
 
 msgid "Value Stream Analytics gives an overview of how much time it takes to go from idea to production in your project."
+msgstr ""
+
+msgid "Value stream"
 msgstr ""
 
 msgid "ValueStreamAnalyticsStage|We don't have enough data to show this stage."

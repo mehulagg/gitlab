@@ -44,7 +44,7 @@ export default {
   strings: {
     approvalStatusLabel: __('Approval Status'),
     mergedAtText: __('merged %{timeAgo}'),
-    mergeRequestLabel: __('Merge Request'),
+    mergeRequestLabel: __('Merge request'),
     pipelineStatusLabel: __('Pipeline'),
     updatesLabel: __('Updates'),
   },

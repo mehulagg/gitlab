@@ -50,7 +50,7 @@ export default {
       placement="top"
     >
       <template #title>
-        <span>{{ s__('AutoRemediation| 1 Merge Request') }}</span>
+        <span>{{ s__('AutoRemediation| 1 merge request') }}</span>
       </template>
       <ul class="gl-list-style-none gl-pl-0 gl-mb-0">
         <li class="gl-align-items-center gl-display-flex gl-mb-2">

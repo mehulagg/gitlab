@@ -45,10 +45,10 @@ module MergeCommits
 
     def header_to_value_hash
       {
-        'Merge Commit' => 'merged_commit_sha',
+        'Merge commit' => 'merged_commit_sha',
         'Author' => -> (merge_request) { merge_request.author&.name },
-        'Merge Request' => 'id',
-        'Merged By' => -> (merge_request) { merge_request.metrics&.merged_by&.name },
+        'Merge request' => 'id',
+        'Merged ny' => -> (merge_request) { merge_request.metrics&.merged_by&.name },
         'Pipeline' => -> (merge_request) { merge_request.metrics&.pipeline_id },
         'Group' => -> (merge_request) { merge_request.project&.namespace&.name },
         'Project' => -> (merge_request) { merge_request.project&.name },

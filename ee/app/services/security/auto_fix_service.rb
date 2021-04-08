@@ -29,7 +29,7 @@ module Security
       if processed_vuln_ids.any?
         ServiceResponse.success
       else
-        ServiceResponse.error(message: 'Impossible to create Merge Requests')
+        ServiceResponse.error(message: 'Impossible to create merge requests')
       end
     end
 
