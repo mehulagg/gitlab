@@ -1872,7 +1872,7 @@ Represents the current license.
 | `company` | [`String`](#string) | Company of the licensee. |
 | `email` | [`String`](#string) | Email of the licensee. |
 | `expiresAt` | [`Date`](#date) | Date when the license expires. |
-| `id` | [`ID!`](#id) | ID of the license in the database. |
+| `id` | [`ID!`](#id) | ID of the license. |
 | `lastSync` | [`Time`](#time) | Date when the license was last synced. |
 | `maximumUsers` | [`Int`](#int) | Highest number of billable users on the system during the term of the current license. |
 | `name` | [`String`](#string) | Name of the licensee. |
@@ -3889,6 +3889,7 @@ Represents an entry from the Cloud License history.
 | `company` | [`String`](#string) | Company of the licensee. |
 | `email` | [`String`](#string) | Email of the licensee. |
 | `expiresAt` | [`Date`](#date) | Date when the license expires. |
+| `id` | [`ID!`](#id) | ID of the license. |
 | `name` | [`String`](#string) | Name of the licensee. |
 | `plan` | [`String!`](#string) | Name of the subscription plan. |
 | `startsAt` | [`Date`](#date) | Date when the license started. |

@@ -7,6 +7,10 @@ module Types
         extend ActiveSupport::Concern
 
         included do
+          field :id, GraphQL::ID_TYPE, null: false,
+                description: 'ID of the license.',
+                method: :license_id
+
           field :type, GraphQL::STRING_TYPE, null: false,
                 description: 'Type of the subscription.'
 
