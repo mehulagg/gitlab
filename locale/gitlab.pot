@@ -17495,7 +17495,7 @@ msgstr ""
 msgid "IssueTracker|EWM work items tracker"
 msgstr ""
 
-msgid "IssueTracker|Redmine issue tracker"
+msgid "IssueTracker|Use Redmine as the issue tracker."
 msgstr ""
 
 msgid "IssueTracker|YouTrack issue tracker"
@@ -33508,6 +33508,9 @@ msgid "Use %{code_start}::%{code_end} to create a %{link_start}scoped label set%
 msgstr ""
 
 msgid "Use .gitlab-ci.yml"
+msgstr ""
+
+msgid "IssueTracker|Use Redmine as the issue tracker. %{docs_link}"
 msgstr ""
 
 msgid "Use a one-time password authenticator on your mobile device or computer to enable two-factor authentication (2FA)."
