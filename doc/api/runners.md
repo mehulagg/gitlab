@@ -156,9 +156,9 @@ Example response:
 
 Get details of a runner.
 
-[Maintainer access or higher](doc/user/permissions.md) is required for queries on this endpoint.
+[Maintainer access or higher](doc/user/permissions.md) is required to get runner details at the project and group level. 
 
-```plaintext
+Instance-level runner details via this endpoint are only available to Administrators.
 GET /runners/:id
 ```
 
