@@ -65,7 +65,7 @@ can now create their own.
 
 New compliance framework labels can be created and updated using GraphQL.
 
-#### Compliance pipeline configuration
+#### Compliance pipeline configuration **(Ultimate)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3156) in GitLab 13.11.
 > - [Deployed behind a feature flag](../../feature_flags.md).
