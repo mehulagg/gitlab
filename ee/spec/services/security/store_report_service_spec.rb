@@ -284,8 +284,8 @@ RSpec.describe Security::StoreReportService, '#execute' do
         existing_signature.reload
 
         expect(finding.signatures.count).to eq(2)
-        signature_algs = finding.signatures.map(&:algorithm_type)
-        expect(signature_algs).to eq(%w[scope_offset hash])
+        signature_algs = finding.signatures.sort_by(&:priority).map(&:algorithm_type)
+        expect(signature_algs).to eq(%w[hash scope_offset])
 
         # check that the existing hash signature was updated/reused
         expect(existing_signature.id).to eq(finding.signatures.last.id)
