@@ -517,6 +517,7 @@ RSpec.describe Vulnerabilities::Finding do
 
     describe 'feedback' do
       let_it_be(:project) { create(:project) }
+
       let(:finding) do
         create(
           :vulnerabilities_finding,
