@@ -71,7 +71,7 @@ describe('MergeRequestTable component', () => {
 
     it('renders the correct table headers', () => {
       const tableHeaders = [
-        'Merge Request',
+        'Merge request',
         'Review time',
         'Author',
         'Approvers',

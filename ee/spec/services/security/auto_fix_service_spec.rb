@@ -116,7 +116,7 @@ RSpec.describe Security::AutoFixService do
         result = execute_service
 
         expect(result).to be_error
-        expect(result.message).to eq('Impossible to create Merge Requests')
+        expect(result.message).to eq('Impossible to create merge requests')
       end
     end
   end

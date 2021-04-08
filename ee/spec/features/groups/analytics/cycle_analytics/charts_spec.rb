@@ -133,10 +133,10 @@ RSpec.describe 'Value stream analytics charts', :js do
 
           page.within filters_selector do
             find('.dropdown-toggle').click
-            find('[data-testid="type-of-work-filters-subject"] label', text: 'Merge Requests').click
+            find('[data-testid="type-of-work-filters-subject"] label', text: 'Merge requests').click
           end
 
-          expect(page).to have_text('Showing Merge Requests and 1 label')
+          expect(page).to have_text('Showing merge requests and 1 label')
         end
       end
 

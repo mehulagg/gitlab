@@ -30,7 +30,7 @@ describe('MergeRequestAnalyticsApp', () => {
   it('displays the page title', () => {
     const pageTitle = wrapper.find('[data-testid="pageTitle"').text();
 
-    expect(pageTitle).toBe('Merge Request Analytics');
+    expect(pageTitle).toBe('Merge request analytics');
   });
 
   it('displays the filter bar component', () => {

@@ -87,7 +87,7 @@ describe('GroupActivity component', () => {
       .then(waitForPromises)
       .then(() => {
         expect(findMetricCard().props('metrics')).toEqual([
-          { key: 'mergeRequests', value: 10, label: 'Merge Requests opened' },
+          { key: 'mergeRequests', value: 10, label: 'Merge requests opened' },
           { key: 'issues', value: 20, label: 'Issues opened' },
           { key: 'newMembers', value: 30, label: 'Members added' },
         ]);
