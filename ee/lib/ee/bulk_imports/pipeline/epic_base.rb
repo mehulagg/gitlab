@@ -9,13 +9,15 @@ module EE
         def initialize(context)
           super(context)
 
+          return if context.group.blank?
+
           @epic_iids = context.group.epics.order(iid: :desc).pluck(:iid) # rubocop: disable CodeReuse/ActiveRecord
 
           set_next_epic
         end
 
         def run
-          return skip!('Skipping because group has no epics') if current_epic_iid.blank?
+          return skip!(skip_reason) if current_epic_iid.blank?
 
           super
         end
@@ -42,6 +44,14 @@ module EE
 
         def current_epic_iid
           context.extra[:epic_iid]
+        end
+
+        def skip_reason
+          if context.group.blank?
+            'Skipping because bulk import has no group'
+          else
+            'Skipping because group has no epics'
+          end
         end
       end
     end
