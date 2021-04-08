@@ -62,7 +62,7 @@ export default {
     },
     {
       key: 'timeago',
-      label: s__('Pipeline|Duration'),
+      label: s__('Pipeline|Run time'),
       thClass: DEFAULT_TH_CLASSES,
       tdClass: DEFAULT_TD_CLASS,
       columnClass: 'gl-w-15p',

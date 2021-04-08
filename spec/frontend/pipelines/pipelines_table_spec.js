@@ -129,7 +129,7 @@ describe('Pipelines Table', () => {
       expect(findTriggererTh().text()).toBe('Triggerer');
       expect(findCommitTh().text()).toBe('Commit');
       expect(findStagesTh().text()).toBe('Stages');
-      expect(findTimeAgoTh().text()).toBe('Duration');
+      expect(findTimeAgoTh().text()).toBe('Run time');
       expect(findActionsTh().text()).toBe('Actions');
     });
 
