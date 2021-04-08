@@ -35,6 +35,10 @@ module Types
           field :expires_at, ::Types::DateType, null: true,
                 description: 'Date when the license expires.'
 
+          field :activated_at, ::Types::DateType, null: true,
+                description: 'Date when the license was activated.',
+                method: :created_at
+
           field :users_in_license, GraphQL::INT_TYPE, null: true,
                 description: 'Number of paid users in the license.'
 
