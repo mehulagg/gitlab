@@ -1,11 +1,15 @@
 import Vue from 'vue';
 import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_search.vue';
 import store from '~/boards/stores';
-import { queryToObject } from '~/lib/utils/url_utility';
+import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 export default (apolloProvider) => {
-  const queryParams = queryToObject(window.location.search);
   const el = document.getElementById('js-board-filtered-search');
+  const rawFilterParams = urlParamsToObject(window.location.search);
+  const initialFilterParams = {
+    ...convertObjectPropsToCamelCase(rawFilterParams, {
+    })
+  }
 
   if (!el) {
     return null;
@@ -14,7 +18,7 @@ export default (apolloProvider) => {
   return new Vue({
     el,
     provide: {
-      search: queryParams?.search || '',
+      initialFilterParams,
     },
     store, // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/324094
     apolloProvider,
