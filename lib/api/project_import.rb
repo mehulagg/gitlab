@@ -98,6 +98,23 @@ module API
       end
 
       params do
+        requires :url, type: String, desc: 'batman'
+        requires :token, type: String, desc: 'robin'
+        requires :path, type: String, desc: 'joker'
+      end
+      desc 'Foo bar' do
+        detail 'This feature was introduced in GitLab not-yet.'
+        success Entities::ProjectImportStatus
+      end
+      get 'import-remote' do
+        puts '*' * 80
+        p import_params
+        puts '*' * 80
+
+        status 200
+      end
+
+      params do
         requires :id, type: String, desc: 'The ID of a project'
       end
       desc 'Get a project export status' do
