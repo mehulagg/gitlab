@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class GraphqlController < ApplicationController
+  include ::Gitlab::Auth::AuthFinders
+
   # Unauthenticated users have access to the API for public data
   skip_before_action :authenticate_user!
 
@@ -110,7 +112,12 @@ class GraphqlController < ApplicationController
   end
 
   def context
-    @context ||= { current_user: current_user, is_sessionless_user: !!sessionless_user?, request: request }
+    @context ||= {
+      current_user: current_user,
+      is_sessionless_user: !!sessionless_user?,
+      request: request,
+      api_scopes: Array.wrap(access_token&.scopes).dup.freeze
+    }
   end
 
   def build_variables(variable_info)

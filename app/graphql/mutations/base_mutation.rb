@@ -45,8 +45,9 @@ module Mutations
     end
 
     def self.authorized?(object, context)
-      # we never provide an object to mutations, but we do need to have a user.
-      context[:current_user].present? && !context[:current_user].blocked?
+      return context[:api_scopes].include?('api') if context[:is_sessionless_user]
+
+      Ability.allowed?(context[:current_user], :execute_graphql_mutation)
     end
 
     # See: AuthorizeResource#authorized_resource?
