@@ -519,7 +519,8 @@ In the latter case, ensure the bucket exists and GitLab has write access to it.
 
 ## Supported CLI commands
 
-The GitLab npm repository supports the following npm and yarn CLI commands:
+The GitLab npm repository supports the following commands for the npm CLI (`npm`) and yarn CLI
+(`yarn`):
 
 - `npm install`: Install npm packages.
 - `npm publish`: Publish an npm package to the registry.
