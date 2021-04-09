@@ -1,0 +1,8 @@
+---
+name: vue_epic_show
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.11'
+type: development
+group: group::product planning
+default_enabled: false
