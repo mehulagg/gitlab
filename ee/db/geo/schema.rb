@@ -118,15 +118,6 @@ ActiveRecord::Schema.define(version: 2021_03_30_170348) do
     t.integer "state", limit: 2, default: 0, null: false
     t.integer "retry_count", limit: 2, default: 0
     t.text "last_sync_failure"
-    t.datetime_with_timezone "verification_started_at"
-    t.datetime_with_timezone "verified_at"
-    t.datetime_with_timezone "verification_retry_at"
-    t.integer "verification_retry_count"
-    t.integer "verification_state", limit: 2, default: 0, null: false
-    t.boolean "checksum_mismatch"
-    t.binary "verification_checksum"
-    t.binary "verification_checksum_mismatched"
-    t.string "verification_failure", limit: 255
     t.index ["merge_request_diff_id"], name: "index_merge_request_diff_registry_on_mr_diff_id"
     t.index ["retry_at"], name: "index_merge_request_diff_registry_on_retry_at"
     t.index ["state"], name: "index_merge_request_diff_registry_on_state"
