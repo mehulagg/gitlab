@@ -34,7 +34,7 @@ module EE
             optional :import_url, type: String, desc: 'URL from which the project is imported'
             optional :fallback_approvals_required, type: Integer, desc: 'Overall approvals required when no rule is present'
             optional :issues_template, type: String, desc: 'Default description for Issues. Description is parsed with GitLab Flavored Markdown.'
-            optional :merge_requests_template, type: String, desc: 'Default description for Merge Requests. Description is parsed with GitLab Flavored Markdown.'
+            optional :merge_requests_template, type: String, desc: 'Default description for merge requests. Description is parsed with GitLab Flavored Markdown.'
           end
         end
 
