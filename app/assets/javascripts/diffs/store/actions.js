@@ -81,6 +81,9 @@ export const setBaseConfig = ({ commit }, options) => {
   });
 };
 
+// Noop on FOSS
+export const setCodequalityEndpoint = () => {};
+
 export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
   const diffsGradualLoad = window.gon?.features?.diffsGradualLoad;
   let perPage = DIFFS_PER_PAGE;

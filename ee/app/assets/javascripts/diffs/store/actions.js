@@ -7,10 +7,12 @@ import { __ } from '~/locale';
 
 import * as types from './mutation_types';
 
+// eslint-disable-next-line import/export
 export * from '~/diffs/store/actions';
 
 let codequalityPoll;
 
+// eslint-disable-next-line import/export
 export const setCodequalityEndpoint = ({ commit }, endpoint) => {
   commit(types.SET_CODEQUALITY_ENDPOINT, endpoint);
 };

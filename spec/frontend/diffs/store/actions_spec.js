@@ -14,6 +14,7 @@ import {
 } from '~/diffs/constants';
 import {
   setBaseConfig,
+  setCodequalityEndpoint,
   fetchDiffFilesBatch,
   fetchDiffFilesMeta,
   fetchCoverageFiles,
@@ -139,6 +140,14 @@ describe('DiffsStoreActions', () => {
         [],
         done,
       );
+    });
+  });
+
+  describe('setCodequalityEndpoint', () => {
+    it('should do nothing on FOSS', (done) => {
+      const endpoint = '/codequality_mr_diff.json';
+
+      testAction(setCodequalityEndpoint, { endpoint }, {}, [], [], done);
     });
   });
 
