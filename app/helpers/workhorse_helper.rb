@@ -50,10 +50,6 @@ module WorkhorseHelper
   end
 
   def content_disposition_attachment(project, filename)
-    if Feature.enabled?(:attachment_with_filename, project, default_enabled: :yaml)
-      ActionDispatch::Http::ContentDisposition.format(disposition: 'attachment', filename: filename)
-    else
-      'attachment'
-    end
+    ActionDispatch::Http::ContentDisposition.format(disposition: 'attachment', filename: filename)
   end
 end
