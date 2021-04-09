@@ -9,8 +9,6 @@ RSpec.describe ConfirmSupportBotUser, :migration do
   context 'when support bot user is currently unconfirmed' do
     let!(:support_bot) do
       create_user!(
-        name: 'GitLab Support Bot',
-        email: 'support_bot@example.com',
         created_at: 2.days.ago,
         user_type: User::USER_TYPES['support_bot']
       )
@@ -30,8 +28,6 @@ RSpec.describe ConfirmSupportBotUser, :migration do
   context 'when support bot user is already confirmed' do
     let!(:confirmed_support_bot) do
       create_user!(
-        name: 'GitLab Support Bot',
-        email: 'support@example.com',
         user_type: User::USER_TYPES['support_bot'],
         confirmed_at: 1.day.ago
       )
@@ -58,7 +54,7 @@ RSpec.describe ConfirmSupportBotUser, :migration do
 
   private
 
-  def create_user!(name:, email:, user_type:, created_at: Time.now, confirmed_at: nil)
+  def create_user!(name: 'GitLab Support Bot', email: 'support@example.com', user_type:, created_at: Time.now, confirmed_at: nil)
     users.create!(
       name: name,
       email: email,
