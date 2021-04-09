@@ -93,6 +93,16 @@ This rule enforces the defined actions whenever the pipeline runs for a selected
 | `type` | `string` | `pipeline` | The rule's type. |
 | `branch` | `string` | `*` or the branch's name | The branch the given policy applies to (supports wildcard). |
 
+### `schedule` rule type
+
+This rule enforces the defined actions and schedules a scan on provided date/time.
+
+| Field | Type | Possible values | Description |
+|-------|------|-----------------|-------------|
+| `type` | `string` | `schedule` | The rule's type. |
+| `branch` | `string` | `*` or the branch's name | The branch the given policy applies to (supports wildcard). |
+| `cadence` | `string` | *CRON expression:* ie. `0 0 * * *` | The string containing five fields separated by whitespace that are representing scheduled time. |
+
 ### `scan` action type
 
 This action executes the selected `scan` with additional parameters when conditions for at least one

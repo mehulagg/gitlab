@@ -22,7 +22,7 @@ module Gitlab
           def on_demand_scans_template
             ::Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConfigurationService
               .new(project)
-              .execute(security_orchestration_policy_configuration.on_demand_scan_actions(@ref))
+              .execute(on_demand_scan_actions)
           end
 
           private
@@ -30,6 +30,11 @@ module Gitlab
           attr_reader :project
 
           delegate :security_orchestration_policy_configuration, to: :project, allow_nil: true
+
+          def on_demand_scan_actions
+            security_orchestration_policy_configuration
+              .on_demand_scan_actions(@ref, Security::OrchestrationPolicyConfiguration::RULE_TYPES[:pipeline])
+          end
         end
       end
     end

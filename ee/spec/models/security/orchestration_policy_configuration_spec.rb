@@ -190,7 +190,7 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     end
 
     subject(:on_demand_scan_actions) do
-      security_orchestration_policy_configuration.on_demand_scan_actions('release/123')
+      security_orchestration_policy_configuration.on_demand_scan_actions('release/123', Security::OrchestrationPolicyConfiguration::RULE_TYPES[:pipeline])
     end
 
     before do
