@@ -228,30 +228,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
             end
           end
         end
-
-        context 'reviewers' do
-          context 'when reviewers changed' do
-            it 'tracks reviewers changed event' do
-              expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
-                .to receive(:track_reviewers_changed_action).once.with(user: user)
-
-              opts[:reviewers] = [user2]
-
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
-            end
-          end
-
-          context 'when reviewers did not change' do
-            it 'does not track reviewers changed event' do
-              expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
-                .not_to receive(:track_reviewers_changed_action)
-
-              opts[:reviewers] = merge_request.reviewers
-
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
-            end
-          end
-        end
       end
 
       context 'updating milestone' do
@@ -339,25 +315,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
         expect(note).not_to be_nil
         expect(note.note).to include "assigned to #{user.to_reference} and unassigned #{user3.to_reference}"
-      end
-
-      context 'with reviewers' do
-        let(:opts) { { reviewer_ids: [user2.id] } }
-
-        it 'creates system note about merge_request review request' do
-          note = find_note('requested review from')
-
-          expect(note).not_to be_nil
-          expect(note.note).to include "requested review from #{user2.to_reference}"
-        end
-
-        it 'updates the tracking' do
-          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
-            .to receive(:track_users_review_requested)
-            .with(users: [user])
-
-          update_merge_request(reviewer_ids: [user.id])
-        end
       end
 
       it 'creates a resource label event' do
@@ -685,46 +642,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
           update_merge_request({ reviewer_ids: [user2.id] })
 
           expect(pending_todo.reload).to be_done
-        end
-
-        it 'creates a pending todo for new review request' do
-          update_merge_request({ reviewer_ids: [user2.id] })
-
-          attributes = {
-            project: project,
-            author: user,
-            user: user2,
-            target_id: merge_request.id,
-            target_type: merge_request.class.name,
-            action: Todo::REVIEW_REQUESTED,
-            state: :pending
-          }
-
-          expect(Todo.where(attributes).count).to eq 1
-        end
-
-        it 'sends email reviewer change notifications to old and new reviewers', :sidekiq_might_not_need_inline do
-          merge_request.reviewers = [user2]
-
-          perform_enqueued_jobs do
-            update_merge_request({ reviewer_ids: [user3.id] })
-          end
-
-          should_email(user2)
-          should_email(user3)
-        end
-
-        it 'updates open merge request counter for reviewers', :use_clean_rails_memory_store_caching do
-          merge_request.reviewers = [user3]
-
-          # Cache them to ensure the cache gets invalidated on update
-          expect(user2.review_requested_open_merge_requests_count).to eq(0)
-          expect(user3.review_requested_open_merge_requests_count).to eq(1)
-
-          update_merge_request(reviewer_ids: [user2.id])
-
-          expect(user2.review_requested_open_merge_requests_count).to eq(1)
-          expect(user3.review_requested_open_merge_requests_count).to eq(0)
         end
       end
 

@@ -223,15 +223,9 @@ module MergeRequests
     end
 
     def handle_reviewers_change(merge_request, old_reviewers)
-      affected_reviewers = (old_reviewers + merge_request.reviewers) - (old_reviewers & merge_request.reviewers)
-      create_reviewer_note(merge_request, old_reviewers)
-      notification_service.async.changed_reviewer_of_merge_request(merge_request, current_user, old_reviewers)
-      todo_service.reassigned_reviewable(merge_request, current_user, old_reviewers)
-      invalidate_cache_counts(merge_request, users: affected_reviewers.compact)
-
-      new_reviewers = merge_request.reviewers - old_reviewers
-      merge_request_activity_counter.track_users_review_requested(users: new_reviewers)
-      merge_request_activity_counter.track_reviewers_changed_action(user: current_user)
+      MergeRequests::HandleReviewersChangeService
+        .new(project, current_user)
+        .async_execute(merge_request, old_reviewers)
     end
 
     def create_branch_change_note(issuable, branch_type, event_type, old_branch, new_branch)
