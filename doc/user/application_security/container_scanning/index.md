@@ -266,20 +266,20 @@ Here's an example `vulnerability-allowlist.yml` file:
 
 ```yaml
 generalallowlist:
-  CVE-2019-8696: cups
+  CVE-2019-8696:
   CVE-2014-8166: cups
-  CVE-2017-18248: cups
+  CVE-2017-18248:
 images:
   registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:
-    CVE-2018-4180: cups
+    CVE-2018-4180:
   your.private.registry:5000/centos:
     CVE-2015-1419: libxml2
-    CVE-2015-1447: grep
+    CVE-2015-1447:
 ```
 
 The example above will exclude from `gl-container-scanning-report.json`:
 
-1. All vulnerabilities with CVE IDs: _CVE-2019-8696_, _CVE-2014-8166_, _CVE-2017-18248_ 
+1. All vulnerabilities with CVE IDs: _CVE-2019-8696_, _CVE-2014-8166_, _CVE-2017-18248_
 1. All vulnerabilities found in the `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256` container image with CVE ID _CVE-2018-4180_
 1. All vulnerabilities found in `your.private.registry:5000/centos` container with CVE IDs _CVE-2015-1419_, _CVE-2015-1447_.
 
@@ -293,9 +293,41 @@ The example above will exclude from `gl-container-scanning-report.json`:
   - as image name only (ie. `centos`)
   - as full image name with registry hostname (ie. `your.private.registry:5000/centos`)
   - as full image name with registry hostname and sha256 label (ie. `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256`)
-  
+
 NOTE:
-The string after CVE ID (ie. `cups` in the example above) has **no impact** whatsoever, it is simply included as a "hint" to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
+The string after CVE ID (ie. `cups` or `libxml2` in the example above) has **no impact** whatsoever, it is simply included as a "hint" to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
+
+##### Container scanning job log format
+
+You can verify the results of your scan and the correctness of your `vulnerability-allowlist.yml` file by looking
+at the logs that are produced by the container scanning analyzer in `container_scanning` job details.
+
+The log will contain a list of found vulnerabilities as a table:
+
+```
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+|   STATUS   |      CVE SEVERITY       |      PACKAGE NAME      |    PACKAGE VERSION    |                            CVE DESCRIPTION                             |
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+|  Approved  |   High CVE-2019-3462    |          apt           |         1.4.8         | Incorrect sanitation of the 302 redirect field in HTTP transport metho |
+|            |                         |                        |                       | d of apt versions 1.4.8 and earlier can lead to content injection by a |
+|            |                         |                        |                       |  MITM attacker, potentially leading to remote code execution on the ta |
+|            |                         |                        |                       |                             rget machine.                              |
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+| Unapproved |  Medium CVE-2020-27350  |          apt           |         1.4.8         | APT had several integer overflows and underflows while parsing .deb pa |
+|            |                         |                        |                       | ckages, aka GHSL-2020-168 GHSL-2020-169, in files apt-pkg/contrib/extr |
+|            |                         |                        |                       | acttar.cc, apt-pkg/deb/debfile.cc, and apt-pkg/contrib/arfile.cc. This |
+|            |                         |                        |                       |  issue affects: apt 1.2.32ubuntu0 versions prior to 1.2.32ubuntu0.2; 1 |
+|            |                         |                        |                       | .6.12ubuntu0 versions prior to 1.6.12ubuntu0.2; 2.0.2ubuntu0 versions  |
+|            |                         |                        |                       | prior to 2.0.2ubuntu0.2; 2.1.10ubuntu0 versions prior to 2.1.10ubuntu0 |
+|            |                         |                        |                       |                                  .1;                                   |
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+| Unapproved |  Medium CVE-2020-3810   |          apt           |         1.4.8         | Missing input validation in the ar/tar implementations of APT before v |
+|            |                         |                        |                       | ersion 2.1.2 could result in denial of service when processing special |
+|            |                         |                        |                       |                         ly crafted deb files.                          |
++------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+```
+
+Vulnerabilities in the log will be marked as `Approved` when the corresponding CVE ID was added to the `vulnerability-allowlist.yml` file.
 
 ### Running container scanning in an offline environment
 
