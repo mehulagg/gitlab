@@ -5,7 +5,7 @@ class RemoveMembersIndexOnUserId < ActiveRecord::Migration[6.0]
 
   disable_ddl_transaction!
 
-  INDEX_NAME='index_members_on_user_id'
+  INDEX_NAME = 'index_members_on_user_id'
 
   def up
     remove_concurrent_index_by_name(:members, INDEX_NAME)
