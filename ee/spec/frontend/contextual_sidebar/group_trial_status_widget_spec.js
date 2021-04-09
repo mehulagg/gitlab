@@ -8,7 +8,7 @@ describe('TrialStatusWidget component', () => {
 
   const getGlLink = () => wrapper.findComponent(GlLink);
 
-  const createComponent = ({ props } = {}) => {
+  const createComponent = (props = {}) => {
     return shallowMount(TrialStatusWidget, {
       propsData: {
         daysRemaining: 20,
@@ -49,7 +49,7 @@ describe('TrialStatusWidget component', () => {
 
   describe('with the optional containerId prop', () => {
     beforeEach(() => {
-      wrapper = createComponent({ props: { containerId: 'some-id' } });
+      wrapper = createComponent({ containerId: 'some-id' });
     });
 
     it('renders with the given id', () => {
