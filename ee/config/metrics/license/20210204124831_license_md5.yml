@@ -8,11 +8,10 @@ product_category: license
 value_type: string
 status: data_available
 time_frame: none
-data_source:
+data_source: database
 distribution:
 - ee
 tier:
 - free
 - premium
 - ultimate
-skip_validation: true
