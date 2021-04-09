@@ -66,6 +66,10 @@ The minimum required Go version is 1.13.
 
 ### Git versions
 
+From GitLab 13.11:
+
+- Use the [Git version provided by Gitaly](https://docs.gitlab.com/ee/install/installation.html#git).
+
 From GitLab 13.6:
 
 - Git 2.29.x and later is required.

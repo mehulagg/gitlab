@@ -352,6 +352,10 @@ NOTE:
 Specific information that follow related to Ruby and Git versions do not apply to [Omnibus installations](https://docs.gitlab.com/omnibus/)
 and [Helm Chart deployments](https://docs.gitlab.com/charts/). They come with appropriate Ruby and Git versions and are not using system binaries for Ruby and Git. There is no need to install Ruby or Git when utilizing these two approaches.
 
+### 13.11.0
+
+The recommended Git version is the [one provided by Gitaly](https://docs.gitlab.com/ee/install/installation.html#git). The minimum required version has been bumped to v2.31.0.
+
 ### 13.6.0
 
 Ruby 2.7.2 is required. GitLab will not start with Ruby 2.6.6 or older versions.
