@@ -1,10 +1,10 @@
 import Cookies from 'js-cookie';
 import Vue from 'vue';
 import { mapActions, mapState, mapGetters } from 'vuex';
+import diffsApp from 'ee_else_ce/diffs/components/app.vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import FindFile from '~/vue_shared/components/file_finder/index.vue';
 import eventHub from '../notes/event_hub';
-import diffsApp from './components/app.vue';
 
 import { TREE_LIST_STORAGE_KEY, DIFF_WHITESPACE_COOKIE_NAME } from './constants';
 import { getReviewsForMergeRequest } from './utils/file_reviews';

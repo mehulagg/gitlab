@@ -84,11 +84,6 @@ export default {
       required: false,
       default: '',
     },
-    endpointCodequality: {
-      type: String,
-      required: false,
-      default: '',
-    },
     endpointUpdateUser: {
       type: String,
       required: false,
@@ -170,7 +165,6 @@ export default {
       plainDiffPath: (state) => state.diffs.plainDiffPath,
       emailPatchPath: (state) => state.diffs.emailPatchPath,
       retrievingBatches: (state) => state.diffs.retrievingBatches,
-      codequalityDiff: (state) => state.diffs.codequalityDiff,
     }),
     ...mapState('diffs', [
       'showTreeList',
@@ -291,8 +285,6 @@ export default {
       mrReviews: this.rehydratedMrReviews,
     });
 
-    this.setCodequalityEndpoint(this.endpointCodequality);
-
     if (this.shouldShow) {
       this.fetchData();
     }
@@ -337,11 +329,9 @@ export default {
     ...mapActions('diffs', [
       'moveToNeighboringCommit',
       'setBaseConfig',
-      'setCodequalityEndpoint',
       'fetchDiffFilesMeta',
       'fetchDiffFilesBatch',
       'fetchCoverageFiles',
-      'fetchCodequality',
       'startRenderDiffsQueue',
       'assignDiscussionsToDiff',
       'setHighlightedRow',
@@ -396,10 +386,6 @@ export default {
 
       if (this.endpointCoverage) {
         this.fetchCoverageFiles();
-      }
-
-      if (this.endpointCodequality) {
-        this.fetchCodequality();
       }
 
       if (!this.isNotesFetched) {
