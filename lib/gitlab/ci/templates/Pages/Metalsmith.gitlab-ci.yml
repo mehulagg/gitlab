@@ -1,3 +1,8 @@
+# Please contribute improvements to this template via the CI/CD templates development guide:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific templates file can be found here:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
+
 # Full project: https://gitlab.com/pages/metalsmith
 image: node:4.2.2
 

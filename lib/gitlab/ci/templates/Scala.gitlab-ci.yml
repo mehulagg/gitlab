@@ -1,3 +1,8 @@
+# Please contribute improvements to this template via the CI/CD templates development guide:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific templates file can be found here:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
+
 # Official OpenJDK Java image. Look for the different tagged releases at
 # https://hub.docker.com/_/openjdk/ . A Java image is not required
 # but an image with a JVM speeds up the build a bit.

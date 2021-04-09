@@ -1,6 +1,11 @@
 # Read more about this script on this blog post https://about.gitlab.com/2018/10/24/setting-up-gitlab-ci-for-android-projects/, by Jason Lenny
 # If you are interested in using Android with FastLane for publishing take a look at the Android-Fastlane template.
 
+# Please contribute improvements to this template via the CI/CD templates development guide:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific templates file can be found here:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
+
 image: openjdk:8-jdk
 
 variables:

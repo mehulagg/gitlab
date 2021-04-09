@@ -10,6 +10,11 @@
 # https://docs.gitlab.com/runner/security/#usage-of-shell-executor for additional
 # detail on what to keep in mind in this scenario.
 
+# Please contribute improvements to this template via the CI/CD templates development guide:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific templates file can be found here:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
+
 stages:
   - build
   - test

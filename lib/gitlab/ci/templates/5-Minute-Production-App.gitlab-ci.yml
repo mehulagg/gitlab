@@ -2,6 +2,11 @@
 # Use it with caution. For usage instruction please read
 # https://gitlab.com/gitlab-org/5-minute-production-app/deploy-template/-/blob/v2.3.0/README.md
 
+# Please contribute improvements to this template via the CI/CD templates development guide:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific templates file can be found here:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/5-Minute-Production-App.gitlab-ci.yml
+
 include:
   # workflow rules to prevent duplicate detached pipelines
   - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'

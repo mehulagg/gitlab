@@ -1,6 +1,11 @@
 # Read more on when to use this template at
 # https://docs.gitlab.com/ee/ci/yaml/#workflowrules
 
+# Please contribute improvements to this template via the CI/CD templates development guide:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific templates file can be found here:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
+
 workflow:
   rules:
     - if: $CI_COMMIT_TAG

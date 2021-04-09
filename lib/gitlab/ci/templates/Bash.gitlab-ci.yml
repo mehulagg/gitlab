@@ -1,5 +1,10 @@
 # see https://docs.gitlab.com/ee/ci/yaml/README.html for all available options
 
+# Please contribute improvements to this template via the CI/CD templates development guide:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific templates file can be found here:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
+
 # you can delete this line if you're not using Docker
 image: busybox:latest
 

@@ -4,6 +4,11 @@
 # List of the variables: https://docs.gitlab.com/ee/user/application_security/api_fuzzing/#available-variables
 # How to set: https://docs.gitlab.com/ee/ci/yaml/#variables
 
+# Please contribute improvements to this template via the CI/CD templates development guide:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific templates file can be found here:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
+
 stages:
     - build
     - test
