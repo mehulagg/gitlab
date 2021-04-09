@@ -24,7 +24,7 @@ export default () => {
         props: {
           noDataSvgPath,
           noAccessSvgPath,
-          store: CycleAnalyticsStore,
+          legacyStore: CycleAnalyticsStore,
           service: createCycleAnalyticsService(el.dataset.requestPath),
         },
       }),

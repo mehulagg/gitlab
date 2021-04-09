@@ -39,7 +39,7 @@ export default {
       type: String,
       required: true,
     },
-    store: {
+    legacyStore: {
       type: Object,
       required: true,
     },
@@ -50,7 +50,7 @@ export default {
   },
   data() {
     return {
-      state: this.store.state,
+      state: this.legacyStore.state,
       isLoading: false,
       isLoadingStage: false,
       isEmptyStage: false,
@@ -61,7 +61,7 @@ export default {
   },
   computed: {
     currentStage() {
-      return this.store.currentActiveStage();
+      return this.legacyStore.currentActiveStage();
     },
   },
   created() {
@@ -69,7 +69,7 @@ export default {
   },
   methods: {
     handleError() {
-      this.store.setErrorState(true);
+      this.legacyStore.setErrorState(true);
       return new Flash(__('There was an error while fetching value stream analytics data.'));
     },
     handleDateSelect(startDate) {
@@ -84,7 +84,7 @@ export default {
       this.service
         .fetchCycleAnalyticsData(fetchOptions)
         .then((response) => {
-          this.store.setCycleAnalyticsData(response);
+          this.legacyStore.setCycleAnalyticsData(response);
           this.selectDefaultStage();
         })
         .catch(() => {
@@ -103,13 +103,13 @@ export default {
       if (this.currentStage === stage) return;
 
       if (!stage.isUserAllowed) {
-        this.store.setActiveStage(stage);
+        this.legacyStore.setActiveStage(stage);
         return;
       }
 
       this.isLoadingStage = true;
-      this.store.setStageEvents([], stage);
-      this.store.setActiveStage(stage);
+      this.legacyStore.setStageEvents([], stage);
+      this.legacyStore.setActiveStage(stage);
 
       this.service
         .fetchStageData({
@@ -119,7 +119,7 @@ export default {
         })
         .then((response) => {
           this.isEmptyStage = !response.events.length;
-          this.store.setStageEvents(response.events, stage);
+          this.legacyStore.setStageEvents(response.events, stage);
         })
         .catch(() => {
           this.isEmptyStage = true;
