@@ -67,7 +67,7 @@ information to appear on the graphs.
 
 ![Deployment frequency](img/deployment_frequency_chart_v13_8.png)
 
-### Lead time charts
+### Lead time charts **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250329) in GitLab 13.11
 
