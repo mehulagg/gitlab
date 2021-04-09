@@ -57,9 +57,7 @@ describe('First Class Instance Dashboard Component', () => {
     });
 
     it('should render the vulnerabilities', () => {
-      expect(findInstanceVulnerabilities().props()).toEqual({
-        filters: {},
-      });
+      expect(findInstanceVulnerabilities().exists()).toBe(true);
     });
 
     it('should show the survey banner', () => {

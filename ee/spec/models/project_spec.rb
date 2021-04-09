@@ -1086,37 +1086,40 @@ RSpec.describe Project do
     end
   end
 
-  describe '#any_runners_limit' do
-    let(:project) { create(:project, shared_runners_enabled: shared_runners_enabled) }
-    let(:specific_runner) { create(:ci_runner, :project) }
-    let(:shared_runner) { create(:ci_runner, :instance) }
+  describe '#any_active_runners?' do
+    let!(:shared_runner) { create(:ci_runner, :instance) }
 
-    context 'for shared runners enabled' do
-      let(:shared_runners_enabled) { true }
+    it { expect(project.any_active_runners?).to be_truthy }
 
-      before do
-        shared_runner
+    context 'with used pipeline minutes' do
+      let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
+      let(:project) do
+        create(:project,
+               namespace: namespace,
+               shared_runners_enabled: true)
       end
 
-      it 'has a shared runner' do
-        expect(project.any_active_runners?).to be_truthy
+      it 'does not have any active runners' do
+        expect(project.any_active_runners?).to be_falsey
+      end
+    end
+  end
+
+  describe '#any_online_runners?' do
+    let!(:shared_runner) { create(:ci_runner, :instance, :online) }
+
+    it { expect(project.any_online_runners?).to be_truthy }
+
+    context 'with used pipeline minutes' do
+      let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
+      let(:project) do
+        create(:project,
+               namespace: namespace,
+               shared_runners_enabled: true)
       end
 
-      it 'checks the presence of shared runner' do
-        expect(project.any_active_runners? { |runner| runner == shared_runner }).to be_truthy
-      end
-
-      context 'with used pipeline minutes' do
-        let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
-        let(:project) do
-          create(:project,
-            namespace: namespace,
-            shared_runners_enabled: shared_runners_enabled)
-        end
-
-        it 'does not have a shared runner' do
-          expect(project.any_active_runners?).to be_falsey
-        end
+      it 'does not have any online runners' do
+        expect(project.any_online_runners?).to be_falsey
       end
     end
   end

@@ -15,7 +15,8 @@ import { mapState, mapActions } from 'vuex';
 
 import Api from '~/api';
 import createFlash, { FLASH_TYPES } from '~/flash';
-import { STORAGE_KEY, FREQUENT_ITEMS } from '~/frequent_items/constants';
+import { STORAGE_KEY } from '~/frequent_items/constants';
+import { getTopFrequentItems } from '~/frequent_items/utils';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { __ } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
@@ -137,11 +138,9 @@ export default {
       let storedFrequentItems = storedRawItems ? JSON.parse(storedRawItems) : [];
 
       /* Filter for the current group */
-      storedFrequentItems = storedFrequentItems
-        .filter((item) => {
-          return Boolean(item.webUrl?.slice(1)?.startsWith(this.parentItem.fullPath));
-        })
-        .sort((a, b) => a.frequency > b.frequency);
+      storedFrequentItems = storedFrequentItems.filter((item) => {
+        return Boolean(item.webUrl?.slice(1)?.startsWith(this.parentItem.fullPath));
+      });
 
       if (searchTerm) {
         storedFrequentItems = fuzzaldrinPlus.filter(storedFrequentItems, searchTerm, {
@@ -149,11 +148,9 @@ export default {
         });
       }
 
-      this.recentItems = storedFrequentItems
-        .map((item) => {
-          return { ...item, avatar_url: item.avatarUrl, web_url: item.webUrl };
-        })
-        .slice(0, FREQUENT_ITEMS.LIST_COUNT_DESKTOP); // Only keep top 5 results
+      this.recentItems = getTopFrequentItems(storedFrequentItems).map((item) => {
+        return { ...item, avatar_url: item.avatarUrl, web_url: item.webUrl };
+      });
 
       return this.recentItems;
     },

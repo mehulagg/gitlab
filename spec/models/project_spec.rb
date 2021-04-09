@@ -891,6 +891,7 @@ RSpec.describe Project, factory_default: :keep do
   describe '#get_issue' do
     let_it_be(:project) { create(:project) }
     let_it_be(:user) { create(:user) }
+
     let!(:issue) { create(:issue, project: project) }
 
     before_all do
@@ -1628,6 +1629,8 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#any_active_runners?' do
+    subject { project.any_active_runners? }
+
     context 'shared runners' do
       let(:project) { create(:project, shared_runners_enabled: shared_runners_enabled) }
       let(:specific_runner) { create(:ci_runner, :project, projects: [project]) }
@@ -1637,19 +1640,19 @@ RSpec.describe Project, factory_default: :keep do
         let(:shared_runners_enabled) { false }
 
         it 'has no runners available' do
-          expect(project.any_active_runners?).to be_falsey
+          is_expected.to be_falsey
         end
 
         it 'has a specific runner' do
           specific_runner
 
-          expect(project.any_active_runners?).to be_truthy
+          is_expected.to be_truthy
         end
 
         it 'has a shared runner, but they are prohibited to use' do
           shared_runner
 
-          expect(project.any_active_runners?).to be_falsey
+          is_expected.to be_falsey
         end
 
         it 'checks the presence of specific runner' do
@@ -1671,7 +1674,7 @@ RSpec.describe Project, factory_default: :keep do
         it 'has a shared runner' do
           shared_runner
 
-          expect(project.any_active_runners?).to be_truthy
+          is_expected.to be_truthy
         end
 
         it 'checks the presence of shared runner' do
@@ -1697,13 +1700,13 @@ RSpec.describe Project, factory_default: :keep do
         let(:group_runners_enabled) { false }
 
         it 'has no runners available' do
-          expect(project.any_active_runners?).to be_falsey
+          is_expected.to be_falsey
         end
 
         it 'has a group runner, but they are prohibited to use' do
           group_runner
 
-          expect(project.any_active_runners?).to be_falsey
+          is_expected.to be_falsey
         end
       end
 
@@ -1713,7 +1716,7 @@ RSpec.describe Project, factory_default: :keep do
         it 'has a group runner' do
           group_runner
 
-          expect(project.any_active_runners?).to be_truthy
+          is_expected.to be_truthy
         end
 
         it 'checks the presence of group runner' do
@@ -1726,6 +1729,126 @@ RSpec.describe Project, factory_default: :keep do
           group_runner
 
           expect(project.any_active_runners? { false }).to be_falsey
+        end
+      end
+    end
+  end
+
+  describe '#any_online_runners?' do
+    subject { project.any_online_runners? }
+
+    context 'shared runners' do
+      let(:project) { create(:project, shared_runners_enabled: shared_runners_enabled) }
+      let(:specific_runner) { create(:ci_runner, :project, :online, projects: [project]) }
+      let(:shared_runner) { create(:ci_runner, :instance, :online) }
+      let(:offline_runner) { create(:ci_runner, :instance) }
+
+      context 'for shared runners disabled' do
+        let(:shared_runners_enabled) { false }
+
+        it 'has no runners available' do
+          is_expected.to be_falsey
+        end
+
+        it 'has a specific runner' do
+          specific_runner
+
+          is_expected.to be_truthy
+        end
+
+        it 'has a shared runner, but they are prohibited to use' do
+          shared_runner
+
+          is_expected.to be_falsey
+        end
+
+        it 'checks the presence of specific runner' do
+          specific_runner
+
+          expect(project.any_online_runners? { |runner| runner == specific_runner }).to be_truthy
+        end
+
+        it 'returns false if match cannot be found' do
+          specific_runner
+
+          expect(project.any_online_runners? { false }).to be_falsey
+        end
+
+        it 'returns false if runner is offline' do
+          offline_runner
+
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'for shared runners enabled' do
+        let(:shared_runners_enabled) { true }
+
+        it 'has a shared runner' do
+          shared_runner
+
+          is_expected.to be_truthy
+        end
+
+        it 'checks the presence of shared runner' do
+          shared_runner
+
+          expect(project.any_online_runners? { |runner| runner == shared_runner }).to be_truthy
+        end
+
+        it 'returns false if match cannot be found' do
+          shared_runner
+
+          expect(project.any_online_runners? { false }).to be_falsey
+        end
+      end
+    end
+
+    context 'group runners' do
+      let(:project) { create(:project, group_runners_enabled: group_runners_enabled) }
+      let(:group) { create(:group, projects: [project]) }
+      let(:group_runner) { create(:ci_runner, :group, :online, groups: [group]) }
+      let(:offline_runner) { create(:ci_runner, :group, groups: [group]) }
+
+      context 'for group runners disabled' do
+        let(:group_runners_enabled) { false }
+
+        it 'has no runners available' do
+          is_expected.to be_falsey
+        end
+
+        it 'has a group runner, but they are prohibited to use' do
+          group_runner
+
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'for group runners enabled' do
+        let(:group_runners_enabled) { true }
+
+        it 'has a group runner' do
+          group_runner
+
+          is_expected.to be_truthy
+        end
+
+        it 'has an offline group runner' do
+          offline_runner
+
+          is_expected.to be_falsey
+        end
+
+        it 'checks the presence of group runner' do
+          group_runner
+
+          expect(project.any_online_runners? { |runner| runner == group_runner }).to be_truthy
+        end
+
+        it 'returns false if match cannot be found' do
+          group_runner
+
+          expect(project.any_online_runners? { false }).to be_falsey
         end
       end
     end
@@ -2406,6 +2529,7 @@ RSpec.describe Project, factory_default: :keep do
 
   describe '#latest_pipeline' do
     let_it_be(:project) { create(:project, :repository) }
+
     let(:second_branch) { project.repository.branches[2] }
 
     let!(:pipeline_for_default_branch) do
@@ -2870,6 +2994,7 @@ RSpec.describe Project, factory_default: :keep do
 
   describe '#emails_disabled?' do
     let_it_be(:namespace) { create(:namespace) }
+
     let(:project) { build(:project, namespace: namespace, emails_disabled: false) }
 
     context 'emails disabled in group' do
@@ -3190,6 +3315,7 @@ RSpec.describe Project, factory_default: :keep do
 
   describe '#ci_variables_for' do
     let_it_be(:project) { create(:project) }
+
     let(:environment_scope) { '*' }
 
     let!(:ci_variable) do
@@ -4035,6 +4161,7 @@ RSpec.describe Project, factory_default: :keep do
     include ProjectHelpers
 
     let_it_be(:group) { create(:group) }
+
     let!(:project) { create(:project, project_level, namespace: group ) }
     let(:user) { create_user_from_membership(project, membership) }
 
@@ -4300,6 +4427,7 @@ RSpec.describe Project, factory_default: :keep do
 
   context 'legacy storage' do
     let_it_be(:project) { create(:project, :repository, :legacy_storage) }
+
     let(:gitlab_shell) { Gitlab::Shell.new }
     let(:project_storage) { project.send(:storage) }
 
@@ -4399,6 +4527,7 @@ RSpec.describe Project, factory_default: :keep do
 
   context 'hashed storage' do
     let_it_be(:project) { create(:project, :repository, skip_disk_validation: true) }
+
     let(:gitlab_shell) { Gitlab::Shell.new }
     let(:hash) { Digest::SHA2.hexdigest(project.id.to_s) }
     let(:hashed_prefix) { File.join('@hashed', hash[0..1], hash[2..3]) }
@@ -4489,6 +4618,7 @@ RSpec.describe Project, factory_default: :keep do
 
   describe '#has_ci?' do
     let_it_be(:project, reload: true) { create(:project) }
+
     let(:repository) { double }
 
     before do
@@ -4985,6 +5115,7 @@ RSpec.describe Project, factory_default: :keep do
 
     context 'branch protection' do
       let_it_be(:namespace) { create(:namespace) }
+
       let(:project) { create(:project, :repository, namespace: namespace) }
 
       before do
@@ -6597,6 +6728,7 @@ RSpec.describe Project, factory_default: :keep do
 
   describe '#latest_jira_import' do
     let_it_be(:project) { create(:project) }
+
     context 'when no jira imports' do
       it 'returns nil' do
         expect(project.latest_jira_import).to be nil

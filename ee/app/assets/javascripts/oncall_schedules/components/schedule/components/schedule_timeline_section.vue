@@ -1,6 +1,6 @@
 <script>
 import { GlResizeObserverDirective } from '@gitlab/ui';
-import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
+import { PRESET_TYPES, TIMELINE_CELL_WIDTH } from 'ee/oncall_schedules/constants';
 import updateTimelineWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_timeline_width.mutation.graphql';
 import DaysHeaderItem from './preset_days/days_header_item.vue';
 import WeeksHeaderItem from './preset_weeks/weeks_header_item.vue';
@@ -37,7 +37,8 @@ export default {
       this.$apollo.mutate({
         mutation: updateTimelineWidthMutation,
         variables: {
-          timelineWidth: this.$refs.timelineHeaderWrapper.offsetWidth,
+          timelineWidth:
+            this.$refs.timelineHeaderWrapper.getBoundingClientRect().width - TIMELINE_CELL_WIDTH,
         },
       });
     },

@@ -2,6 +2,7 @@
 import { GlDrawer } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
+import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 
@@ -10,6 +11,7 @@ export default {
   components: {
     GlDrawer,
     BoardSidebarLabelsSelect,
+    BoardSidebarTitle,
   },
   computed: {
     ...mapGetters(['isSidebarOpen', 'activeBoardItem']),
@@ -39,6 +41,7 @@ export default {
   >
     <template #header>{{ __('Epic details') }}</template>
     <template #default>
+      <board-sidebar-title data-testid="sidebar-title" />
       <board-sidebar-labels-select class="labels" />
     </template>
   </gl-drawer>

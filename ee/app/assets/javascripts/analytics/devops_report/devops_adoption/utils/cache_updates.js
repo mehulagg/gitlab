@@ -21,9 +21,10 @@ export const addSegmentsToCache = (store, segments, variables) => {
   });
 };
 
-export const deleteSegmentsFromCache = (store, segmentIds) => {
+export const deleteSegmentsFromCache = (store, segmentIds, variables) => {
   const sourceData = store.readQuery({
     query: devopsAdoptionSegmentsQuery,
+    variables,
   });
 
   const updatedData = produce(sourceData, (draftData) => {
@@ -34,6 +35,7 @@ export const deleteSegmentsFromCache = (store, segmentIds) => {
 
   store.writeQuery({
     query: devopsAdoptionSegmentsQuery,
+    variables,
     data: updatedData,
   });
 };

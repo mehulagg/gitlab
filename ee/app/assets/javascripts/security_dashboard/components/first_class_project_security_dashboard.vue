@@ -41,7 +41,7 @@ export default {
     const shouldShowAutoFixUserCallout =
       this.glFeatures.securityAutoFix && !Cookies.get('auto_fix_user_callout_dismissed');
     return {
-      filters: {},
+      filters: null,
       shouldShowAutoFixUserCallout,
     };
   },

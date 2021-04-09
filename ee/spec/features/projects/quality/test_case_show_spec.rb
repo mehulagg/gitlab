@@ -72,6 +72,15 @@ RSpec.describe 'Test Cases', :js do
         end
       end
 
+      it 'enters into zen mode when clicking on zen mode button' do
+        page.within('.test-case-container .issuable-details') do
+          page.find('.js-issuable-edit').click
+          page.find('.js-vue-markdown-field button.js-zen-enter').click
+
+          expect(page).to have_selector('.zen-backdrop.fullscreen')
+        end
+      end
+
       it 'update title and description' do
         title = 'Updated title'
         description = 'Updated test case description.'

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe ProjectsFinder do
   describe '#execute' do
     let_it_be(:user) { create(:user) }
+
     let(:finder) { described_class.new(current_user: user, params: params, project_ids_relation: project_ids_relation) }
 
     subject { finder.execute }

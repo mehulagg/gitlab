@@ -16,7 +16,7 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
 
   let(:new_auth) do
     {
-      enabled: true,
+      enabled: false,
       url: "#{new_target_url}/login",
       username_field: 'login[username]',
       password_field: 'login[password]',

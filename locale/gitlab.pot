@@ -2019,6 +2019,9 @@ msgstr ""
 msgid "Add to tree"
 msgstr ""
 
+msgid "Add trigger"
+msgstr ""
+
 msgid "Add user(s) to the group:"
 msgstr ""
 
@@ -3362,10 +3365,10 @@ msgstr ""
 msgid "An error occurred when updating the issue due date"
 msgstr ""
 
-msgid "An error occurred when updating the issue title"
+msgid "An error occurred when updating the issue weight"
 msgstr ""
 
-msgid "An error occurred when updating the issue weight"
+msgid "An error occurred when updating the title"
 msgstr ""
 
 msgid "An error occurred while acknowledging the notification. Refresh the page and try again."
@@ -3698,9 +3701,6 @@ msgstr ""
 msgid "An issue already exists"
 msgstr ""
 
-msgid "An issue title is required"
-msgstr ""
-
 msgid "An unauthenticated user"
 msgstr ""
 
@@ -3738,6 +3738,9 @@ msgid "Analyze your source code and git history for secrets."
 msgstr ""
 
 msgid "Analyze your source code for known vulnerabilities."
+msgstr ""
+
+msgid "Analyzing file…"
 msgstr ""
 
 msgid "Ancestors"
@@ -4478,6 +4481,9 @@ msgid "Authorization key"
 msgstr ""
 
 msgid "Authorization required"
+msgstr ""
+
+msgid "Authorization token duration (minutes)"
 msgstr ""
 
 msgid "Authorization was granted by entering your username and password in the application."
@@ -5323,9 +5329,6 @@ msgstr ""
 msgid "Burndown chart"
 msgstr ""
 
-msgid "Burndown charts are now fixed. This means that removing issues from a milestone after it has expired won't affect the chart. You can view the old chart using the %{strongStart}Legacy burndown chart%{strongEnd} button."
-msgstr ""
-
 msgid "BurndownChartLabel|Open issue weight"
 msgstr ""
 
@@ -5908,6 +5911,9 @@ msgid "Check out, review, and merge locally"
 msgstr ""
 
 msgid "Check the %{docs_link_start}documentation%{docs_link_end}."
+msgstr ""
+
+msgid "Check the current instance configuration "
 msgstr ""
 
 msgid "Check the elasticsearch.log file to debug why the migration was halted and make any changes before retrying the migration. When you fix the cause of the failure, click \"Retry migration\", and the migration will be scheduled to be retried in the background."
@@ -7884,6 +7890,9 @@ msgid "Compare %{oldCommitId}...%{newCommitId}"
 msgstr ""
 
 msgid "Compare Git revisions"
+msgstr ""
+
+msgid "Compare GitLab editions"
 msgstr ""
 
 msgid "Compare Revisions"
@@ -11352,6 +11361,9 @@ msgstr ""
 msgid "Dynamic Application Security Testing (DAST)"
 msgstr ""
 
+msgid "Each project can also have an issue tracker and a wiki."
+msgstr ""
+
 msgid "Edit"
 msgstr ""
 
@@ -14348,6 +14360,9 @@ msgstr ""
 msgid "Get a free instance review"
 msgstr ""
 
+msgid "Get a support subscription"
+msgstr ""
+
 msgid "Get started"
 msgstr ""
 
@@ -14475,6 +14490,9 @@ msgid "GitLab is a single application for the entire software development lifecy
 msgstr ""
 
 msgid "GitLab is obtaining a Let's Encrypt SSL certificate for this domain. This process can take some time. Please try again later."
+msgstr ""
+
+msgid "GitLab is open source software to collaborate on code."
 msgstr ""
 
 msgid "GitLab is undergoing maintenance and is operating in a read-only mode."
@@ -15090,6 +15108,9 @@ msgid "GroupSAML|Are you sure you want to remove the SAML group link?"
 msgstr ""
 
 msgid "GroupSAML|Before enforcing SSO, enable SAML authentication."
+msgstr ""
+
+msgid "GroupSAML|Before enforcing SSO-access for Git, enable SSO-only authentication for web activity."
 msgstr ""
 
 msgid "GroupSAML|Certificate fingerprint"
@@ -15738,6 +15759,9 @@ msgstr ""
 msgid "How do I mirror repositories?"
 msgstr ""
 
+msgid "How do I set up this service?"
+msgstr ""
+
 msgid "How does cleanup work?"
 msgstr ""
 
@@ -16134,6 +16158,9 @@ msgstr ""
 msgid "In case of pull mirroring, your user will be the author of all events in the activity feed that are the result of an update, like new branches being created or new commits being pushed to existing branches."
 msgstr ""
 
+msgid "In each example, replace %{code_start}TOKEN%{code_end} with the trigger token you generated and replace %{code_start}REF_NAME%{code_end} with the branch or tag name."
+msgstr ""
+
 msgid "In progress"
 msgstr ""
 
@@ -16158,7 +16185,7 @@ msgstr ""
 msgid "InProductMarketing|*GitLab*, noun: a synonym for efficient teams"
 msgstr ""
 
-msgid "InProductMarketing|...and you can get a free trial of GitLab Gold"
+msgid "InProductMarketing|...and you can get a free trial of GitLab Ultimate"
 msgstr ""
 
 msgid "InProductMarketing|3 ways to dive into GitLab CI/CD"
@@ -16188,7 +16215,7 @@ msgstr ""
 msgid "InProductMarketing|By enabling code owners and required merge approvals the right person will review the right MR. This is a win-win: cleaner code and a more efficient review process."
 msgstr ""
 
-msgid "InProductMarketing|Code owners and required merge approvals are part of the paid tiers of GitLab. You can start a free 30-day trial of GitLab Gold and enable these features in less than 5 minutes with no credit card required."
+msgid "InProductMarketing|Code owners and required merge approvals are part of the paid tiers of GitLab. You can start a free 30-day trial of GitLab Ultimate and enable these features in less than 5 minutes with no credit card required."
 msgstr ""
 
 msgid "InProductMarketing|Create a project in GitLab in 5 minutes"
@@ -16233,7 +16260,7 @@ msgstr ""
 msgid "InProductMarketing|Get started today"
 msgstr ""
 
-msgid "InProductMarketing|Get started today with a 30-day GitLab Gold trial, no credit card required."
+msgid "InProductMarketing|Get started today with a 30-day GitLab Ultimate trial, no credit card required."
 msgstr ""
 
 msgid "InProductMarketing|Get started with GitLab CI/CD"
@@ -16264,9 +16291,6 @@ msgid "InProductMarketing|Give us one minute..."
 msgstr ""
 
 msgid "InProductMarketing|Go farther with GitLab"
-msgstr ""
-
-msgid "InProductMarketing|Go for the gold!"
 msgstr ""
 
 msgid "InProductMarketing|Goldman Sachs went from 1 build every two weeks to thousands of builds a day"
@@ -16353,7 +16377,7 @@ msgstr ""
 msgid "InProductMarketing|Sometimes you're not ready to make a full transition to a new tool. If you're not ready to fully commit, %{mirroring_link} gives you a safe way to try out GitLab in parallel with your current tool."
 msgstr ""
 
-msgid "InProductMarketing|Start a GitLab Gold trial today in less than one minute, no credit card required."
+msgid "InProductMarketing|Start a GitLab Ultimate trial today in less than one minute, no credit card required."
 msgstr ""
 
 msgid "InProductMarketing|Start a free trial of GitLab Ultimate – no CC required"
@@ -16368,7 +16392,10 @@ msgstr ""
 msgid "InProductMarketing|Start by importing your projects"
 msgstr ""
 
-msgid "InProductMarketing|Start with a GitLab Gold free trial"
+msgid "InProductMarketing|Start with a GitLab Ultimate free trial"
+msgstr ""
+
+msgid "InProductMarketing|Start your trial now!"
 msgstr ""
 
 msgid "InProductMarketing|Stop wondering and use GitLab to answer questions like:"
@@ -16404,7 +16431,7 @@ msgstr ""
 msgid "InProductMarketing|To understand and get the most out of GitLab, start at the beginning and %{project_link}. In GitLab, repositories are part of a project, so after you've created your project you can go ahead and %{repo_link}."
 msgstr ""
 
-msgid "InProductMarketing|Try GitLab Gold for free"
+msgid "InProductMarketing|Try GitLab Ultimate for free"
 msgstr ""
 
 msgid "InProductMarketing|Try it out"
@@ -16425,7 +16452,7 @@ msgstr ""
 msgid "InProductMarketing|Use GitLab CI/CD"
 msgstr ""
 
-msgid "InProductMarketing|We know a thing or two about efficiency and we don't want to keep that to ourselves. Sign up for a free trial of GitLab Gold and your teams will be on it from day one."
+msgid "InProductMarketing|We know a thing or two about efficiency and we don't want to keep that to ourselves. Sign up for a free trial of GitLab Ultimate and your teams will be on it from day one."
 msgstr ""
 
 msgid "InProductMarketing|What does our value stream timeline look like from product to development to review and production?"
@@ -16841,7 +16868,7 @@ msgstr ""
 msgid "Integrations|Add namespace"
 msgstr ""
 
-msgid "Integrations|Adding a namespace currently works only in browsers that allow cross‑site cookies. Please make sure to use %{firefox_link_start}Firefox%{firefox_link_end} or enable cross‑site cookies in your browser when adding a namespace."
+msgid "Integrations|Adding a namespace works only in browsers that allow cross‑site cookies. Use %{firefox_link_start}Firefox%{firefox_link_end}, or enable cross‑site cookies in your browser, when adding a namespace."
 msgstr ""
 
 msgid "Integrations|All details"
@@ -16901,7 +16928,7 @@ msgstr ""
 msgid "Integrations|Namespace successfully linked"
 msgstr ""
 
-msgid "Integrations|Namespaces are your GitLab groups and subgroups that will be linked to this Jira instance."
+msgid "Integrations|Namespaces are the GitLab groups and subgroups you link to this Jira instance."
 msgstr ""
 
 msgid "Integrations|No available namespaces."
@@ -17412,9 +17439,6 @@ msgid "Issue or merge request ID is required"
 msgstr ""
 
 msgid "Issue published on status page."
-msgstr ""
-
-msgid "Issue title"
 msgstr ""
 
 msgid "Issue types"
@@ -18409,10 +18433,7 @@ msgstr ""
 msgid "LearnGitLab|Route code reviews to the right reviewers, every time."
 msgstr ""
 
-msgid "LearnGitLab|Run a Security scan"
-msgstr ""
-
-msgid "LearnGitLab|Run a security scan"
+msgid "LearnGitLab|Run a Security scan using CI/CD"
 msgstr ""
 
 msgid "LearnGitLab|Save time by automating your integration and deployment tasks."
@@ -18446,6 +18467,9 @@ msgid "LearnGitLab|Try all GitLab features for 30 days, no credit card required.
 msgstr ""
 
 msgid "LearnGitLab|Use your new GitLab workflow to deploy your application, monitor its health, and keep it secure:"
+msgstr ""
+
+msgid "LearnGitlab|Trial only"
 msgstr ""
 
 msgid "Leave"
@@ -18961,6 +18985,9 @@ msgid "Manage applications that can use GitLab as an OAuth provider."
 msgstr ""
 
 msgid "Manage applications that you've authorized to use your account."
+msgstr ""
+
+msgid "Manage git repositories with fine-grained access controls that keep your code secure."
 msgstr ""
 
 msgid "Manage group labels"
@@ -22653,6 +22680,9 @@ msgstr ""
 msgid "Pending comments"
 msgstr ""
 
+msgid "Pending sync…"
+msgstr ""
+
 msgid "People without permission will never get a notification and won't be able to comment."
 msgstr ""
 
@@ -22666,6 +22696,9 @@ msgid "Percentage"
 msgstr ""
 
 msgid "Perform advanced options such as changing path, transferring, exporting, or removing the group."
+msgstr ""
+
+msgid "Perform code reviews and enhance collaboration with merge requests."
 msgstr ""
 
 msgid "Perform common operations on GitLab project"
@@ -22881,9 +22914,6 @@ msgstr ""
 msgid "Pipelines|API"
 msgstr ""
 
-msgid "Pipelines|An error occurred. Please try again."
-msgstr ""
-
 msgid "Pipelines|Are you sure you want to run this pipeline?"
 msgstr ""
 
@@ -22893,16 +22923,16 @@ msgstr ""
 msgid "Pipelines|By revoking a trigger you will break any processes making use of it. Are you sure?"
 msgstr ""
 
-msgid "Pipelines|CI Lint"
+msgid "Pipelines|CI lint"
+msgstr ""
+
+msgid "Pipelines|CI/CD template to test and deploy your %{name} project."
 msgstr ""
 
 msgid "Pipelines|Child pipeline"
 msgstr ""
 
-msgid "Pipelines|Clear Runner Caches"
-msgstr ""
-
-msgid "Pipelines|Continuous deployment template to test and deploy your %{name} project."
+msgid "Pipelines|Clear runner caches"
 msgstr ""
 
 msgid "Pipelines|Copy trigger token"
@@ -22918,6 +22948,9 @@ msgid "Pipelines|Edit"
 msgstr ""
 
 msgid "Pipelines|Editor"
+msgstr ""
+
+msgid "Pipelines|Get familiar with GitLab CI/CD syntax by starting with a simple pipeline that runs a “Hello world” script."
 msgstr ""
 
 msgid "Pipelines|Get started with CI/CD"
@@ -22947,6 +22980,9 @@ msgstr ""
 msgid "Pipelines|Loading Pipelines"
 msgstr ""
 
+msgid "Pipelines|Loading pipelines"
+msgstr ""
+
 msgid "Pipelines|Merged YAML is view only"
 msgstr ""
 
@@ -22966,9 +23002,6 @@ msgid "Pipelines|Project cache successfully reset."
 msgstr ""
 
 msgid "Pipelines|Revoke"
-msgstr ""
-
-msgid "Pipelines|Run Pipeline"
 msgstr ""
 
 msgid "Pipelines|Something went wrong while cleaning runners cache."
@@ -23016,10 +23049,16 @@ msgstr ""
 msgid "Pipelines|Trigger user has insufficient permissions to project"
 msgstr ""
 
-msgid "Pipelines|Try a sample CI/CD file"
+msgid "Pipelines|Use a CI/CD template"
 msgstr ""
 
-msgid "Pipelines|Use a sample file to implement GitLab CI/CD based on your project’s language/framework."
+msgid "Pipelines|Use a sample %{codeStart}.gitlab-ci.yml%{codeEnd} template file to explore how CI/CD works."
+msgstr ""
+
+msgid "Pipelines|Use a sample CI/CD template"
+msgstr ""
+
+msgid "Pipelines|Use a template based on your project's language or framework to get started with GitLab CI/CD."
 msgstr ""
 
 msgid "Pipelines|Use template"
@@ -23041,6 +23080,9 @@ msgid "Pipelines|invalid"
 msgstr ""
 
 msgid "Pipelines|parent"
+msgstr ""
+
+msgid "Pipelines|“Hello world” with GitLab CI/CD"
 msgstr ""
 
 msgid "Pipeline|Actions"
@@ -23124,13 +23166,13 @@ msgstr ""
 msgid "Pipeline|Raw text search is not currently supported. Please use the available search tokens."
 msgstr ""
 
-msgid "Pipeline|Run Pipeline"
-msgstr ""
-
 msgid "Pipeline|Run for"
 msgstr ""
 
 msgid "Pipeline|Run for branch name or tag"
+msgstr ""
+
+msgid "Pipeline|Run pipeline"
 msgstr ""
 
 msgid "Pipeline|Running"
@@ -25539,6 +25581,9 @@ msgstr ""
 msgid "Quick actions can be used in the issues description and comment boxes."
 msgstr ""
 
+msgid "Quick help"
+msgstr ""
+
 msgid "Quick range"
 msgstr ""
 
@@ -25576,6 +25621,9 @@ msgid "Read documentation"
 msgstr ""
 
 msgid "Read more"
+msgstr ""
+
+msgid "Read more about GitLab at %{link_to_promo}."
 msgstr ""
 
 msgid "Read more about project permissions %{help_link_open}here%{help_link_close}"
@@ -27765,6 +27813,9 @@ msgstr ""
 msgid "See metrics"
 msgstr ""
 
+msgid "See our website for getting help"
+msgstr ""
+
 msgid "See the affected projects in the GitLab admin panel"
 msgstr ""
 
@@ -28738,25 +28789,10 @@ msgstr ""
 msgid "Slack application"
 msgstr ""
 
-msgid "Slack channels (e.g. general, development)"
-msgstr ""
-
 msgid "Slack integration allows you to interact with GitLab via slash commands in a chat window."
 msgstr ""
 
-msgid "SlackIntegration|%{strong_open}Note:%{strong_close} Usernames and private channels are not supported."
-msgstr ""
-
-msgid "SlackIntegration|%{webhooks_link_start}Add an incoming webhook%{webhooks_link_end} in your Slack team. The default channel can be overridden for each event."
-msgstr ""
-
-msgid "SlackIntegration|Paste the %{strong_open}Webhook URL%{strong_close} into the field below."
-msgstr ""
-
-msgid "SlackIntegration|Select events below to enable notifications. The %{strong_open}Slack channel names%{strong_close} and %{strong_open}Slack username%{strong_close} fields are optional."
-msgstr ""
-
-msgid "SlackIntegration|This service sends notifications about project events to Slack channels. To set up this service:"
+msgid "SlackIntegration|Sends notifications about project events to Slack channels."
 msgstr ""
 
 msgid "SlackService|2. Paste the %{strong_open}Token%{strong_close} into the field below"
@@ -29861,6 +29897,9 @@ msgid "Successfully unblocked"
 msgstr ""
 
 msgid "Successfully unlocked"
+msgstr ""
+
+msgid "Successfully updated %{last_updated_timeago}."
 msgstr ""
 
 msgid "Successfully verified domain ownership"
@@ -32077,6 +32116,9 @@ msgstr ""
 msgid "Time until first merge request"
 msgstr ""
 
+msgid "Time zone"
+msgstr ""
+
 msgid "TimeTrackingEstimated|Est"
 msgstr ""
 
@@ -32355,6 +32397,9 @@ msgid "To only use CI/CD features for an external repository, choose %{strong_op
 msgstr ""
 
 msgid "To open Jaeger from GitLab to view tracing from the %{link} page, add a URL to your Jaeger server."
+msgstr ""
+
+msgid "To pass variables to the triggered pipeline, add %{code_start}variables[VARIABLE]=VALUE%{code_end} to the API request."
 msgstr ""
 
 msgid "To personalize your GitLab experience, we'd like to know a bit more about you. We won't share this information with anyone."
@@ -32743,12 +32788,6 @@ msgstr ""
 msgid "Triggerer"
 msgstr ""
 
-msgid "Triggers|In each example, replace %{code_start}TOKEN%{code_end} with the trigger token you generated and replace %{code_start}REF_NAME%{code_end} with the branch or tag name."
-msgstr ""
-
-msgid "Triggers|To pass variables to the triggered pipeline, add %{code_start}variables[VARIABLE]=VALUE%{code_end} to the API request."
-msgstr ""
-
 msgid "Troubleshoot and monitor your application with tracing"
 msgstr ""
 
@@ -32927,6 +32966,9 @@ msgid "Unable to convert Kubernetes logs encoding to UTF-8"
 msgstr ""
 
 msgid "Unable to create link to vulnerability"
+msgstr ""
+
+msgid "Unable to fetch branch list for this project."
 msgstr ""
 
 msgid "Unable to fetch unscanned projects"
@@ -33178,6 +33220,12 @@ msgstr ""
 msgid "Update %{sourcePath} file"
 msgstr ""
 
+msgid "Update Now"
+msgstr ""
+
+msgid "Update Scheduled…"
+msgstr ""
+
 msgid "Update all"
 msgstr ""
 
@@ -33248,6 +33296,9 @@ msgid "Updates"
 msgstr ""
 
 msgid "Updating"
+msgstr ""
+
+msgid "Updating…"
 msgstr ""
 
 msgid "Upgrade offers available!"
@@ -33595,7 +33646,13 @@ msgstr ""
 msgid "Use one line per URI"
 msgstr ""
 
+msgid "Use shortcuts"
+msgstr ""
+
 msgid "Use template"
+msgstr ""
+
+msgid "Use the search bar on the top of this page"
 msgstr ""
 
 msgid "Use this token to validate received payloads."
@@ -33611,6 +33668,9 @@ msgid "Use your smart card to authenticate with the LDAP server."
 msgstr ""
 
 msgid "Used by members to sign in to your group in GitLab"
+msgstr ""
+
+msgid "Used by more than 100,000 organizations, GitLab is the most popular solution to manage git repositories on-premises."
 msgstr ""
 
 msgid "Used programming language"
@@ -35227,7 +35287,7 @@ msgstr ""
 msgid "You are receiving this message because you are a GitLab administrator for %{url}."
 msgstr ""
 
-msgid "You are signed into GitLab as %{user_link}"
+msgid "You are signed in to GitLab as %{user_link}"
 msgstr ""
 
 msgid "You are trying to upload something other than an image. Please upload a .png, .jpg, .jpeg, .gif, .bmp, .tiff or .ico."
@@ -36584,6 +36644,9 @@ msgid "from %d job"
 msgid_plural "from %d jobs"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "general, development"
+msgstr ""
 
 msgid "group"
 msgstr ""

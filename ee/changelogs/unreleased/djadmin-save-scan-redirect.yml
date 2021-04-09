@@ -1,0 +1,5 @@
+---
+title: Navigate to Manage scans page after saving a DAST Scan
+merge_request: 59027
+author:
+type: fixed

@@ -285,7 +285,7 @@ export default {
             this.showErrors(ERROR_RUN_SCAN, errors);
             this.loading = false;
           } else if (!runAfter) {
-            redirectTo(response.dastProfile.editPath);
+            redirectTo(this.profilesLibraryPath);
             this.clearStorage = true;
           } else {
             this.clearStorage = true;

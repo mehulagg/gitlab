@@ -1,4 +1,4 @@
-query($parentNamespaceId: NamespaceID, $directDescendantsOnly: Boolean) {
+query devopsAdoptionSegments($parentNamespaceId: NamespaceID, $directDescendantsOnly: Boolean) {
   devopsAdoptionSegments(
     parentNamespaceId: $parentNamespaceId
     directDescendantsOnly: $directDescendantsOnly

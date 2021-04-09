@@ -318,7 +318,7 @@ describe('OnDemandScansForm', () => {
     describe.each`
       action      | actionFunction | submitButtonLoading | saveButtonLoading | runAfter | redirectPath
       ${'submit'} | ${submitForm}  | ${true}             | ${false}          | ${true}  | ${pipelineUrl}
-      ${'save'}   | ${saveScan}    | ${false}            | ${true}           | ${false} | ${editPath}
+      ${'save'}   | ${saveScan}    | ${false}            | ${true}           | ${false} | ${profilesLibraryPath}
     `(
       'on $action',
       ({ actionFunction, submitButtonLoading, saveButtonLoading, runAfter, redirectPath }) => {

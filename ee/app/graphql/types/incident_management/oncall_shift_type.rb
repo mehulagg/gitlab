@@ -2,11 +2,10 @@
 
 module Types
   module IncidentManagement
+    # rubocop: disable Graphql/AuthorizeTypes
     class OncallShiftType < BaseObject
       graphql_name 'IncidentManagementOncallShift'
       description 'A block of time for which a participant is on-call.'
-
-      authorize :read_incident_management_oncall_schedule
 
       field :participant,
             ::Types::IncidentManagement::OncallParticipantType,
@@ -22,6 +21,11 @@ module Types
             Types::TimeType,
             null: true,
             description: 'End time of the on-call shift.'
+
+      def participant
+        Gitlab::Graphql::Loaders::OncallParticipantLoader.new(object.participant_id).find
+      end
     end
+    # rubocop: enable Graphql/AuthorizeTypes
   end
 end

@@ -109,9 +109,10 @@ RSpec.describe 'Setting assignees of a merge request' do
         #   - SELECT 1 AS one FROM "merge_request_assignees"...
         # Followed by:
         #   - INSERT INTO "merge_request_assignees" ("user_id", "merge_request_id", "created_at")...
+        # On top of which, we have to do an extra authorization fetch
         expect do
           post_graphql_mutation(add_two_assignees, current_user: current_user)
-        end.not_to exceed_query_limit(baseline.count + 2)
+        end.not_to exceed_query_limit(baseline.count + 3)
       end
     end
   end

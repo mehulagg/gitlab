@@ -1,0 +1,5 @@
+---
+title: Improve performance of on-call schedules SQL queries
+merge_request: 58209
+author:
+type: performance

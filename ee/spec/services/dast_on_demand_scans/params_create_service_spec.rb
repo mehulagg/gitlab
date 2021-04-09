@@ -42,6 +42,7 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
             auth_password_field: dast_site_profile.auth_password_field,
             auth_username: dast_site_profile.auth_username,
             auth_username_field: dast_site_profile.auth_username_field,
+            auth_url: dast_site_profile.auth_url,
             branch: project.default_branch,
             dast_profile: nil,
             excluded_urls: dast_site_profile.excluded_urls.join(','),
@@ -58,6 +59,7 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
             auth_password_field: dast_site_profile.auth_password_field,
             auth_username: dast_site_profile.auth_username,
             auth_username_field: dast_site_profile.auth_username_field,
+            auth_url: dast_site_profile.auth_url,
             branch: project.default_branch,
             dast_profile: nil,
             excluded_urls: dast_site_profile.excluded_urls.join(','),
@@ -89,6 +91,24 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
           end
         end
       end
+
+      context 'when authentication is not enabled' do
+        let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project, auth_enabled: false) }
+
+        it 'returns prepared scanner params excluding auth params in the payload' do
+          expect(subject.payload).to eq(
+            branch: project.default_branch,
+            dast_profile: nil,
+            excluded_urls: dast_site_profile.excluded_urls.join(','),
+            full_scan_enabled: false,
+            show_debug_messages: false,
+            spider_timeout: nil,
+            target_timeout: nil,
+            target_url: dast_site_profile.dast_site.url,
+            use_ajax_spider: false
+          )
+        end
+      end
     end
 
     context 'when the dast_profile is provided' do
@@ -102,6 +122,7 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
           auth_username: dast_site_profile.auth_username,
           auth_username_field: dast_site_profile.auth_username_field,
           branch: dast_profile.branch_name,
+          auth_url: dast_site_profile.auth_url,
           dast_profile: dast_profile,
           excluded_urls: dast_site_profile.excluded_urls.join(','),
           full_scan_enabled: false,

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe BilledUsersFinder do
   let_it_be(:group) { create(:group) }
+
   let(:search_term) { nil }
   let(:order_by) { nil }
 

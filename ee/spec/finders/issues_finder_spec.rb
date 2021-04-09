@@ -49,6 +49,7 @@ RSpec.describe IssuesFinder do
 
       context 'filtering by assignee IDs' do
         let_it_be(:user3) { create(:user) }
+
         let(:params) { { assignee_ids: [user2.id, user3.id] } }
 
         before do
@@ -64,6 +65,7 @@ RSpec.describe IssuesFinder do
 
       context 'filter by username' do
         let_it_be(:user3) { create(:user) }
+
         let(:issuables) { issues }
 
         before do

@@ -71,7 +71,11 @@ describe('First Class Group Dashboard Component', () => {
   describe('when has projects', () => {
     beforeEach(() => {
       wrapper = createWrapper({
-        data: () => ({ projects: [{ id: 1, name: 'GitLab Org' }], projectsWereFetched: true }),
+        data: () => ({
+          projects: [{ id: 1, name: 'GitLab Org' }],
+          projectsWereFetched: true,
+          filters: {},
+        }),
       });
     });
 

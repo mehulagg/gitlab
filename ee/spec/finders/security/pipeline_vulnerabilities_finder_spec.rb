@@ -23,6 +23,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
     let_it_be(:artifact_cs) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs, project: project) }
     let_it_be(:artifact_dast) { create(:ee_ci_job_artifact, :dast, job: build_dast, project: project) }
     let_it_be(:artifact_ds) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds, project: project) }
+
     let!(:artifact_sast) { create(:ee_ci_job_artifact, :sast, job: build_sast, project: project) }
 
     let(:cs_count) { read_fixture(artifact_cs)['vulnerabilities'].count }

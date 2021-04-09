@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Projects::Integrations::Jira::IssuesFinder do
   let_it_be(:project, refind: true) { create(:project) }
   let_it_be(:jira_service, reload: true) { create(:jira_service, project: project) }
+
   let(:params) { {} }
   let(:service) { described_class.new(project, params) }
 
