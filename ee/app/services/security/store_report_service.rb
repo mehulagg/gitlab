@@ -12,7 +12,7 @@ module Security
       @pipeline = pipeline
       @report = report
       @project = @pipeline.project
-      @vulnerability_finding_id_to_finding_map = Hash.new
+      @vulnerability_finding_id_to_finding_map = {}
     end
 
     def execute
@@ -139,7 +139,7 @@ module Security
       records = []
       vulnerability_finding_id_to_finding_map.each do |vulnerability_id, finding|
         finding.links.each do |link|
-          records << {vulnerability_occurrence_id: vulnerability_id, url: link.to_hash}
+          records << { vulnerability_occurrence_id: vulnerability_id, url: link.to_hash }
         end
       end
 
