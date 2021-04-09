@@ -1,7 +1,6 @@
 import { GlSprintf, GlLink, GlAlert } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import { createGqlMockFactory } from 'helpers/create_gql_mock_factory';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import component from '~/packages_and_registries/settings/group/components/group_settings_app.vue';
@@ -21,23 +20,45 @@ import { groupPackageSettingsMutationGraphQLError } from '../mock_data';
 
 jest.mock('~/flash');
 
-const localVue = createLocalVue();
-const mockGql = createGqlMockFactory({
-  mocks: {
-    Mutation: {
-      updateNamespacePackageSettings: ({ input }) => ({
-        packageSettings: {
-          mavenDuplicateExceptionRegex: input.mavenDuplicateExceptionRegex,
-        },
-        errors: [],
-      }),
-    },
-  },
+/**
+ * TODO: Wrap this all up into a helper function
+ */
+
+import { requireGitLabSchema } from 'helpers/require_gitlab_schema_graphql';
+import { mockServer } from 'graphql-tools';
+import { ApolloClient, ApolloLink, Observable } from '@apollo/client/core';
+import { InMemoryCache as Cache } from '@apollo/client/cache';
+
+const schema = requireGitLabSchema();
+const server = mockServer(schema.loc.source.body, { UntrustedRegexp: () => '^test$' }, false);
+
+const querySpy = jest
+  .fn()
+  .mockImplementation((queryString, variables) => server.query(queryString, variables));
+
+const client = new ApolloClient({
+  cache: new Cache({ addTypename: false }),
+  link: new ApolloLink((operation) => {
+    return new Observable((observer) => {
+      const resultPromise = querySpy(operation.query.loc.source.body, operation.variables);
+
+      resultPromise
+        .then((result) => {
+          observer.next(result);
+          observer.complete();
+        })
+        .catch((error) => {
+          observer.error(error);
+        });
+    });
+  }),
 });
+const apolloProvider = new VueApollo({ defaultClient: client });
+
+const localVue = createLocalVue();
 
 describe('Group Settings App', () => {
   let wrapper;
-  let apolloProvider;
   let show;
 
   const defaultProvide = {
@@ -45,32 +66,8 @@ describe('Group Settings App', () => {
     groupPath: 'foo_group_path',
   };
 
-  const createResolver = () =>
-    jest
-      .fn()
-      .mockImplementation((variables) => mockGql.resolve(getGroupPackagesSettingsQuery, variables));
-
-  const createMutationResolver = (mockOverrides = {}) =>
-    jest.fn().mockImplementation((variables) =>
-      mockGql.resolve(updateNamespacePackageSettings, variables, {
-        updateNamespacePackageSettings: mockOverrides,
-      }),
-    );
-
-  const mountComponent = ({
-    provide = defaultProvide,
-    resolver = createResolver(),
-    mutationResolver = createMutationResolver(),
-    data = {},
-  } = {}) => {
+  const mountComponent = ({ provide = defaultProvide, data = {} } = {}) => {
     localVue.use(VueApollo);
-
-    const requestHandlers = [
-      [getGroupPackagesSettingsQuery, resolver],
-      [updateNamespacePackageSettings, mutationResolver],
-    ];
-
-    apolloProvider = createMockApollo(requestHandlers);
 
     wrapper = shallowMount(component, {
       localVue,
