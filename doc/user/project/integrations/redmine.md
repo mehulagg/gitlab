@@ -15,13 +15,13 @@ To enable the Redmine integration in a project:
 1. Select the checkbox under **Enable integration**.
 1. Fill in the required fields:
 
-   - **Project URL**: The URL to the project in Redmine that is being linked to this GitLab project.
-   - **Issue URL**: The URL to the issue in Redmine project that is being linked to this GitLab project.
-     This URL must contain `:id`. This ID is used by GitLab as a placeholder to replace the issue number.
-   - **New issue URL**: This is the URL to create a new issue in Redmine for the project linked to
+   - **Project URL**: The URL to the Redmine project to link to this GitLab project.
+   - **Issue URL**: The URL to the Redmine project issue to link to this GitLab project.
+     The URL must contain `:id`. GitLab replaces this ID with the issue number.
+   - **New issue URL**: The URL to use to create a new issue in the Redmine project linked to
      this GitLab project.
      <!-- The line below was originally added in January 2018: https://gitlab.com/gitlab-org/gitlab/-/commit/778b231f3a5dd42ebe195d4719a26bf675093350 -->
-     **This is currently not being used and is planned be removed in a future release.**
+     **This URL is not used and removal is planned in a future release.**
 
 After you have configured and enabled Redmine, you see the Redmine link on the GitLab project pages,
 which takes you to your Redmine project.
@@ -44,7 +44,7 @@ To disable GitLab issues:
 
 ## Reference issues in Redmine
 
-Issues in Redmine can be referenced in two alternative ways:
+You can reference issues in Redmine using:
 
 - `#<ID>`, where `<ID>` is a number (example `#143`).
 - `<PROJECT>-<ID>`, for example `API_32-143`, where:
