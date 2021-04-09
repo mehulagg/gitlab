@@ -302,4 +302,3 @@ The GitLab Composer repository supports the following Composer CLI commands:
 
 - `composer install`: Install Composer dependencies.
 - `composer update`: Install the latest version of Composer dependencies.
-  includes using the `conanfile.txt` file.

@@ -515,7 +515,7 @@ This is usually a permissions issue with either:
 - The remote bucket if [object storage](../../../administration/packages/#using-object-storage)
   is used.
 
-In the latter case, ensure the bucket exists and the GitLab has write access to it.
+In the latter case, ensure the bucket exists and GitLab has write access to it.
 
 ## Supported CLI commands
 
