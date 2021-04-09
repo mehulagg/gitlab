@@ -93,6 +93,9 @@ export default {
     shouldHideLinks() {
       return this.isStageView;
     },
+    shouldShowStageName() {
+      return !this.isStageView;
+    },
     // The show downstream check prevents showing redundant linked columns
     showDownstreamPipelines() {
       return (
@@ -208,6 +211,7 @@ export default {
                 :groups="column.groups"
                 :action="column.status.action"
                 :highlighted-jobs="highlightedJobs"
+                :show-stage-name="shouldShowStageName"
                 :job-hovered="hoveredJobName"
                 :pipeline-expanded="pipelineExpanded"
                 :pipeline-id="pipeline.id"

@@ -203,7 +203,10 @@ export default {
         <ci-icon :size="24" :status="job.status" class="gl-line-height-0" />
         <div class="gl-pl-3 gl-display-flex gl-flex-direction-column gl-w-full">
           <div class="gl-text-truncate mw-70p gl-line-height-normal">{{ job.name }}</div>
-          <div class="gl-text-truncate mw-70p gl-font-sm gl-text-gray-500 gl-line-height-normal">
+          <div
+            v-if="showStageName"
+            class="gl-text-truncate mw-70p gl-font-sm gl-text-gray-500 gl-line-height-normal"
+          >
             {{ stageName }}
           </div>
         </div>
@@ -215,6 +218,7 @@ export default {
       :tooltip-text="status.action.title"
       :link="status.action.path"
       :action-icon="status.action.icon"
+      class="gl-mr-1"
       data-qa-selector="action_button"
       @pipelineActionRequestComplete="pipelineActionRequestComplete"
     />

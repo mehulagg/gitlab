@@ -64,7 +64,7 @@ export default {
           @pipelineActionRequestComplete="pipelineActionRequestComplete"
         />
 
-        <span class="gl-font-weight-100 gl-font-size-lg"> {{ group.size }} </span>
+        <div class="gl-font-weight-100 gl-font-size-lg gl-mr-1">{{ group.size }}</div>
       </div>
     </button>
 
