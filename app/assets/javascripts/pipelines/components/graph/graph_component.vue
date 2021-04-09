@@ -54,6 +54,7 @@ export default {
   data() {
     return {
       hoveredJobName: '',
+      hoveredSourceJobName: '',
       highlightedJobs: [],
       measurements: {
         width: 0,
@@ -151,6 +152,9 @@ export default {
     setJob(jobName) {
       this.hoveredJobName = jobName;
     },
+    setSourceJob(jobName) {
+      this.hoveredSourceJobName = jobName;
+    },
     slidePipelineContainer() {
       this.$refs.mainPipelineContainer.scrollBy({
         left: ONE_COL_WIDTH,
@@ -213,6 +217,7 @@ export default {
                 :highlighted-jobs="highlightedJobs"
                 :show-stage-name="shouldShowStageName"
                 :job-hovered="hoveredJobName"
+                :source-job-hovered="hoveredSourceJobName"
                 :pipeline-expanded="pipelineExpanded"
                 :pipeline-id="pipeline.id"
                 @refreshPipelineGraph="$emit('refreshPipelineGraph')"
@@ -231,7 +236,7 @@ export default {
             :column-title="__('Downstream')"
             :type="$options.pipelineTypeConstants.DOWNSTREAM"
             :view-type="viewType"
-            @downstreamHovered="setJob"
+            @downstreamHovered="setSourceJob"
             @pipelineExpandToggle="togglePipelineExpanded"
             @scrollContainer="slidePipelineContainer"
             @error="onError"

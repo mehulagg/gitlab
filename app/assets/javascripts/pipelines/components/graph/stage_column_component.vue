@@ -55,6 +55,11 @@ export default {
       required: false,
       default: false,
     },
+    sourceJobHovered: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   titleClasses: [
     'gl-font-weight-bold',
@@ -150,6 +155,7 @@ export default {
           v-if="singleJobExists(group)"
           :job="group.jobs[0]"
           :job-hovered="jobHovered"
+          :source-job-hovered="sourceJobHovered"
           :pipeline-expanded="pipelineExpanded"
           :pipeline-id="pipelineId"
           :stage-name="showStageName ? group.stageName : ''"

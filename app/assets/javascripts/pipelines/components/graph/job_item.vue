@@ -87,6 +87,11 @@ export default {
       required: false,
       default: -1,
     },
+    sourceJobHovered: {
+      type: String,
+      required: false,
+      default: '',
+    },
     stageName: {
       type: String,
       required: false,
@@ -104,7 +109,6 @@ export default {
       return accessValue(this.dataMethod, 'detailsPath', this.status);
     },
     hasDetails() {
-      // return false;
       return accessValue(this.dataMethod, 'hasDetails', this.status);
     },
     nameComponent() {
@@ -155,7 +159,7 @@ export default {
       return this.job.status && this.job.status.action && this.job.status.action.path;
     },
     relatedDownstreamHovered() {
-      return this.job.name === this.jobHovered;
+      return this.job.name === this.sourceJobHovered;
     },
     relatedDownstreamExpanded() {
       return this.job.name === this.pipelineExpanded.jobName && this.pipelineExpanded.expanded;
