@@ -414,7 +414,6 @@ starting a [Pipeline for Merged Results](../ci/merge_request_pipelines/index.md#
 Pay particular attention to new dependencies and dependency updates, such as Ruby gems and Node packages.
 While changes to files like `Gemfile.lock` or `yarn.lock` might appear trivial, they could lead to the
 fetching of malicious packages.
-If the MR source branch is more than 100 commits behind the target branch, ask the author to rebase it.
 Review links and images, especially in documentation MRs.
 When in doubt, ask someone from `@gitlab-com/gl-security/appsec` to review the merge request **before starting any merge request pipeline**.
 
