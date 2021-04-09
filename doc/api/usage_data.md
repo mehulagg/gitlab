@@ -10,6 +10,39 @@ type: reference, api
 The UsageData API, associated with [Usage Ping](../development/usage_ping/index.md), is available only for
 the use of GitLab instance [Administrator](../user/permissions.md) users.
 
+## Export metric definitions as a single YAML file
+
+- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57016) in GitLab 13.11.
+
+Export all metric definitions as a single YAML file, similar to the [Metrics Dictionary](../development/usage_ping/dictionary.md), for easier importing.
+
+```plaintext
+GET /usage_data/metric_definitions
+```
+
+Response
+
+```yaml
+---
+- key_path: redis_hll_counters.search.i_search_paid_monthly
+  description: Calculated unique users to perform a search with a paid license enabled
+    by month
+  product_section: enablement
+  product_stage: enablement
+  product_group: group::global search
+  product_category: global_search
+  value_type: number
+  status: data_available
+  time_frame: 28d
+  data_source: redis_hll
+  distribution:
+  - ee
+  tier:
+  - premium
+  - ultimate
+...
+```
+
 ## UsageDataQueries API
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57016) in GitLab 13.11.
