@@ -4,12 +4,6 @@
 # List of the variables: https://docs.gitlab.com/ee/user/application_security/api_fuzzing/#available-variables
 # How to set: https://docs.gitlab.com/ee/ci/yaml/#variables
 
-stages:
-    - build
-    - test
-    - deploy
-    - fuzz
-
 variables:
     FUZZAPI_PROFILE: Quick
     FUZZAPI_VERSION: latest
