@@ -27,8 +27,15 @@ export default {
     SidebarConfidentialityContent,
     SidebarConfidentialityForm,
   },
-  inject: ['fullPath', 'iid'],
   props: {
+    iid: {
+      type: String,
+      required: true,
+    },
+    fullPath: {
+      type: String,
+      required: true,
+    },
     issuableType: {
       required: true,
       type: String,
@@ -133,6 +140,8 @@ export default {
     <template #default>
       <sidebar-confidentiality-content :confidential="confidential" :issuable-type="issuableType" />
       <sidebar-confidentiality-form
+        :iid="iid"
+        :full-path="fullPath"
         :confidential="confidential"
         :issuable-type="issuableType"
         @closeForm="closeForm"

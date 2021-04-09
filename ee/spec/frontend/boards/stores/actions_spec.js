@@ -1413,3 +1413,30 @@ describe('setActiveEpicLabels', () => {
     await expect(actions.setActiveEpicLabels({ getters }, input)).rejects.toThrow(Error);
   });
 });
+
+describe('setActiveEpicConfidential', () => {
+  const state = { boardItems: { [mockEpic.id]: mockEpic } };
+  const getters = { activeBoardItem: mockEpic };
+
+  it('set confidential value on epic', (done) => {
+    const payload = {
+      itemId: getters.activeBoardItem.id,
+      prop: 'confidential',
+      value: true,
+    };
+
+    testAction(
+      actions.setActiveEpicConfidential,
+      true,
+      { ...state, ...getters },
+      [
+        {
+          type: typesCE.UPDATE_BOARD_ITEM_BY_ID,
+          payload,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+});

@@ -33,6 +33,9 @@ describe('EpicSidebarComponent', () => {
 
     return shallowMount(EpicSidebar, {
       store,
+      provide: {
+        iid: '1',
+      },
     });
   };
 

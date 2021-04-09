@@ -4,16 +4,18 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
+import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
   components: {
     GlDrawer,
     BoardSidebarLabelsSelect,
+    SidebarConfidentialityWidget,
   },
   computed: {
     ...mapGetters(['isSidebarOpen', 'activeBoardItem']),
-    ...mapState(['sidebarType']),
+    ...mapState(['sidebarType', 'fullPath']),
     isIssuableSidebar() {
       return this.sidebarType === ISSUABLE;
     },
@@ -22,7 +24,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['toggleBoardItem']),
+    ...mapActions(['toggleBoardItem', 'setActiveEpicConfidential']),
     handleClose() {
       this.toggleBoardItem({ boardItem: this.activeBoardItem, sidebarType: this.sidebarType });
     },
@@ -40,6 +42,12 @@ export default {
     <template #header>{{ __('Epic details') }}</template>
     <template #default>
       <board-sidebar-labels-select class="labels" />
+      <sidebar-confidentiality-widget
+        :iid="String(activeBoardItem.iid)"
+        :full-path="fullPath"
+        issuable-type="epic"
+        @confidentialityUpdated="setActiveEpicConfidential($event)"
+      />
     </template>
   </gl-drawer>
 </template>

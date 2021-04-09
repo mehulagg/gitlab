@@ -799,4 +799,13 @@ export default {
       value: data.updateEpic.epic.labels.nodes,
     });
   },
+
+  setActiveEpicConfidential: ({ commit, getters }, confidential) => {
+    const { activeBoardItem } = getters;
+    commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
+      itemId: activeBoardItem.id,
+      prop: 'confidential',
+      value: confidential,
+    });
+  },
 };
