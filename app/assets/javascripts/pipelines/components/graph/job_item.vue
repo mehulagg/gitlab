@@ -3,6 +3,7 @@ import { GlTooltipDirective, GlLink } from '@gitlab/ui';
 import delayedJobMixin from '~/jobs/mixins/delayed_job_mixin';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { sprintf } from '~/locale';
+import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import { reportToSentry } from '../../utils';
 import ActionComponent from '../jobs_shared/action_component.vue';
 import JobNameComponent from '../jobs_shared/job_name_component.vue';
@@ -38,6 +39,7 @@ export default {
   hoverClass: 'gl-shadow-x0-y0-b3-s1-blue-500',
   components: {
     ActionComponent,
+    CiIcon,
     JobNameComponent,
     GlLink,
   },
@@ -85,17 +87,24 @@ export default {
     boundary() {
       return this.dropdownLength === 1 ? 'viewport' : 'scrollParent';
     },
+    computedJobId() {
+      return this.pipelineId > -1 ? `${this.job.name}-${this.pipelineId}` : '';
+    },
     detailsPath() {
       return accessValue(this.dataMethod, 'detailsPath', this.status);
     },
     hasDetails() {
+      // return false;
       return accessValue(this.dataMethod, 'hasDetails', this.status);
     },
-    computedJobId() {
-      return this.pipelineId > -1 ? `${this.job.name}-${this.pipelineId}` : '';
+    nameComponent() {
+      return this.hasDetails ? 'gl-link' : 'div';
     },
     status() {
       return this.job && this.job.status ? this.job.status : {};
+    },
+    testId() {
+      return this.hasDetails ? 'job-with-link' : 'job-without-link';
     },
     tooltipText() {
       const textBuilder = [];
@@ -159,35 +168,28 @@ export default {
     class="ci-job-component gl-display-flex gl-align-items-center gl-justify-content-space-between"
     data-qa-selector="job_item_container"
   >
-    <gl-link
-      v-if="hasDetails"
+    <component
+      :is="nameComponent"
       v-gl-tooltip="{
         boundary: 'viewport',
         placement: 'bottom',
         customClass: 'gl-pointer-events-none',
       }"
-      :href="detailsPath"
       :title="tooltipText"
       :class="jobClasses"
       class="js-pipeline-graph-job-link qa-job-link menu-item gl-text-gray-900 gl-active-text-decoration-none gl-focus-text-decoration-none gl-hover-text-decoration-none"
-      data-testid="job-with-link"
+      :data-testid="testId"
       @click.stop="hideTooltips"
       @mouseout="hideTooltips"
     >
-      <job-name-component :name="job.name" :status="job.status" :icon-size="24" />
-    </gl-link>
-
-    <div
-      v-else
-      v-gl-tooltip="{ boundary, placement: 'bottom', customClass: 'gl-pointer-events-none' }"
-      :title="tooltipText"
-      :class="jobClasses"
-      class="js-job-component-tooltip non-details-job-component menu-item"
-      data-testid="job-without-link"
-      @mouseout="hideTooltips"
-    >
-      <job-name-component :name="job.name" :status="job.status" :icon-size="24" />
-    </div>
+      <div class="ci-job-name-component gl-display-flex gl-align-items-center">
+        <ci-icon :size="24" :status="job.status" class="gl-line-height-0" />
+        <div class="gl-pl-3 gl-display-flex gl-flex-direction-column gl-w-full">
+          <div class="gl-text-truncate mw-70p gl-line-height-normal">{{ job.name }}</div>
+          <div class="gl-text-truncate mw-70p gl-font-sm gl-text-gray-500 gl-line-height-normal">test</div>
+        </div>
+      </div>
+    </component>
 
     <action-component
       v-if="hasAction"
