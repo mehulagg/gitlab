@@ -6,6 +6,11 @@ RSpec.describe Issues::CreateService do
   let_it_be_with_reload(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
 
+  before do
+    stub_request(:get, "http://169.254.169.254/")
+      .to_return(status: 200, body: "", headers: {})
+  end
+
   describe '#execute' do
     let_it_be(:assignee) { create(:user) }
     let_it_be(:milestone) { create(:milestone, project: project) }

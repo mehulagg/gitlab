@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::SpamcheckClient::Client do
+RSpec.describe Gitlab::Spamcheck::Client do
   include_context 'includes Spam constants'
 
   let(:endpoint) { 'grpc://grpc.test.url' }
@@ -12,7 +12,7 @@ RSpec.describe Gitlab::SpamcheckClient::Client do
   let(:issue) { create(:issue) }
 
   let(:response) do
-    verdict = Spamcheck::SpamVerdict.new
+    verdict = ::Spamcheck::SpamVerdict.new
     verdict.verdict = verdict_value
     verdict.error = error_value
     verdict
@@ -30,10 +30,10 @@ RSpec.describe Gitlab::SpamcheckClient::Client do
     using RSpec::Parameterized::TableSyntax
 
     where(:verdict, :expected) do
-      Spamcheck::SpamVerdict::Verdict::ALLOW                | Spam::SpamConstants::ALLOW
-      Spamcheck::SpamVerdict::Verdict::CONDITIONAL_ALLOW    | Spam::SpamConstants::CONDITIONAL_ALLOW
-      Spamcheck::SpamVerdict::Verdict::DISALLOW             | Spam::SpamConstants::DISALLOW
-      Spamcheck::SpamVerdict::Verdict::BLOCK                | Spam::SpamConstants::BLOCK_USER
+      ::Spamcheck::SpamVerdict::Verdict::ALLOW                | Spam::SpamConstants::ALLOW
+      ::Spamcheck::SpamVerdict::Verdict::CONDITIONAL_ALLOW    | Spam::SpamConstants::CONDITIONAL_ALLOW
+      ::Spamcheck::SpamVerdict::Verdict::DISALLOW             | Spam::SpamConstants::DISALLOW
+      ::Spamcheck::SpamVerdict::Verdict::BLOCK                | Spam::SpamConstants::BLOCK_USER
     end
 
     with_them do

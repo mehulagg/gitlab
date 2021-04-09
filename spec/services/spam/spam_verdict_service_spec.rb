@@ -161,7 +161,7 @@ RSpec.describe Spam::SpamVerdictService do
       let(:endpoint_url) { "http://www.spamcheckurl.com/spam_check" }
 
       let(:spam_client) do
-        Gitlab::SpamcheckClient::Client.new(endpoint_url: endpoint_url)
+        Gitlab::Spamcheck::Client.new(endpoint_url: endpoint_url)
       end
 
       before do

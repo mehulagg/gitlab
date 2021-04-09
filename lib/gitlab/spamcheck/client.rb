@@ -2,23 +2,23 @@
 require 'spamcheck'
 
 module Gitlab
-  module SpamcheckClient
+  module Spamcheck
     class Client
       include ::Spam::SpamConstants
       DEFAULT_TIMEOUT = 5
 
       VERDICT_MAPPING = {
-        Spamcheck::SpamVerdict::Verdict::ALLOW => ALLOW,
-        Spamcheck::SpamVerdict::Verdict::CONDITIONAL_ALLOW => CONDITIONAL_ALLOW,
-        Spamcheck::SpamVerdict::Verdict::DISALLOW => DISALLOW,
-        Spamcheck::SpamVerdict::Verdict::BLOCK => BLOCK_USER
+        ::Spamcheck::SpamVerdict::Verdict::ALLOW => ALLOW,
+        ::Spamcheck::SpamVerdict::Verdict::CONDITIONAL_ALLOW => CONDITIONAL_ALLOW,
+        ::Spamcheck::SpamVerdict::Verdict::DISALLOW => DISALLOW,
+        ::Spamcheck::SpamVerdict::Verdict::BLOCK => BLOCK_USER
       }.freeze
 
       def initialize(endpoint_url:)
         # remove the `grpc://` as it's only useful to ensure we're expecting to
         # connect with Spamcheck
         @endpoint_url = endpoint_url.gsub(/^grpc:\/\//, '')
-        @stub = Spamcheck::SpamcheckService::Stub.new(@endpoint_url,
+        @stub = ::Spamcheck::SpamcheckService::Stub.new(@endpoint_url,
                                                       :this_channel_is_insecure,
                                                       timeout: DEFAULT_TIMEOUT)
       end
@@ -34,11 +34,11 @@ module Gitlab
       private
 
       def convert_verdict_to_gitlab_constant(verdict)
-        VERDICT_MAPPING.fetch(Spamcheck::SpamVerdict::Verdict.resolve(verdict), verdict)
+        VERDICT_MAPPING.fetch(::Spamcheck::SpamVerdict::Verdict.resolve(verdict), verdict)
       end
 
       def build_issue_pb(issue:, user:, context: nil )
-        issue_pb = Spamcheck::Issue.new
+        issue_pb = ::Spamcheck::Issue.new
         issue_pb.title = issue.spam_title || ''
         issue_pb.description = issue.spam_description || ''
         issue_pb.created_at = convert_to_pb_timestamp(issue.created_at) unless issue.created_at.nil?
@@ -50,7 +50,7 @@ module Gitlab
       end
 
       def build_user_pb(user)
-        user_pb = Spamcheck::User.new
+        user_pb = ::Spamcheck::User.new
         user_pb.username = user.username
         user_pb.org = user.organization || ''
         user_pb.created_at = convert_to_pb_timestamp(user.created_at)
@@ -68,7 +68,7 @@ module Gitlab
       end
 
       def build_email(email, verified)
-        email_pb = Spamcheck::User::Email.new
+        email_pb = ::Spamcheck::User::Email.new
         email_pb.email = email
         email_pb.verified = verified
         email_pb

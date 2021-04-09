@@ -67,7 +67,7 @@ module Spam
     end
 
     def client
-      @client ||= Gitlab::SpamcheckClient::Client.new(endpoint_url: endpoint_url)
+      @client ||= Gitlab::Spamcheck::Client.new(endpoint_url: endpoint_url)
     end
 
     def action_to_enum(action_str)
