@@ -69,7 +69,10 @@ export default {
       variables() {
         this.timeframeStartDate.setHours(0, 0, 0, 0);
         const startsAt = this.timeframeStartDate;
-        const endsAt = nWeeksAfter(startsAt, 2);
+        const endsAt =
+          this.presetType === this.$options.PRESET_TYPES.WEEKS
+            ? nWeeksAfter(startsAt, 2)
+            : nDaysAfter(startsAt, 1);
 
         return {
           projectPath: this.projectPath,
