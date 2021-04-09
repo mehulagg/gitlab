@@ -30,7 +30,7 @@ Browserker is an extension to the GitLab DAST product. DAST should be included i
 1. Install the DAST [prerequisites](index.md#prerequisite)
 1. Include the [DAST CI template](index.md#include-the-dast-template)
 1. Set the target website using the `DAST_WEBSITE` environment variable
-1. Set the environment variable `DAST_BROWSERKER_SCAN` to `true`
+1. Set the environment variable `DAST_BROWSER_SCAN` to `true`
  
 An example configuration might look like the following:
 
@@ -40,7 +40,7 @@ include:
 
 variables:
   DAST_WEBSITE: "https://example.com"
-  DAST_BROWSERKER_SCAN: "true"
+  DAST_BROWSER_SCAN: "true"
 ```
 
 ### Available variables
@@ -50,14 +50,14 @@ Browserker can be configured using CI/CD variables.
 | CI/CD variable                       | Type            | Example                           | Description | 
 |--------------------------------------| ----------------| --------------------------------- | ------------|
 | `DAST_WEBSITE`                       | URL             | `http://www.site.com`             | The URL of the website to scan. |
-| `DAST_BROWSERKER_SCAN`               | boolean         | `true`                            | Configures DAST to use the Browserker crawler engine. |
-| `DAST_BROWSERKER_ALLOWED_HOSTS`      | List of strings | `site.com,another.com`            | Hostnames included in this variable are considered in scope when crawled. By default the `DAST_WEBSITE` hostname is included in the allowed hosts list. |
-| `DAST_BROWSERKER_EXCLUDED_HOSTS`     | List of strings | `site.com,another.com`            | Hostnames included in this variable are considered excluded and connections are forcibly dropped. |
-| `DAST_BROWSERKER_IGNORED_HOSTS`      | List of strings | `site.com,another.com`            | Hostnames included in this variable are accessed but not reported against. |
-| `DAST_BROWSERKER_MAX_ACTIONS`        | number          | `10000`                           | The maximum number of actions that the crawler performs. For example, clicking a link, or filling a form.  |
-| `DAST_BROWSERKER_MAX_DEPTH`          | number          | `10`                              | The maximum number of chained actions that the crawler takes. For example, `Click -> Form Fill -> Click` is a depth of three. |
-| `DAST_BROWSERKER_NUMBER_OF_BROWSERS` | number          | `3`                               | The maximum number of concurrent browser instances to use. For shared runners on GitLab.com we recommended a maximum of three. Private runners with more resources may benefit from a higher number, but will likely produce little benefit after five to seven instances. |
-| `DAST_BROWSERKER_COOKIES`            | dictionary      | `abtesting_group:3,region:locked` | A cookie name and value to be added to every request. |
+| `DAST_BROWSER_SCAN`               | boolean         | `true`                            | Configures DAST to use the Browserker crawler engine. |
+| `DAST_BROWSER_ALLOWED_HOSTS`      | List of strings | `site.com,another.com`            | Hostnames included in this variable are considered in scope when crawled. By default the `DAST_WEBSITE` hostname is included in the allowed hosts list. |
+| `DAST_BROWSER_EXCLUDED_HOSTS`     | List of strings | `site.com,another.com`            | Hostnames included in this variable are considered excluded and connections are forcibly dropped. |
+| `DAST_BROWSER_IGNORED_HOSTS`      | List of strings | `site.com,another.com`            | Hostnames included in this variable are accessed but not reported against. |
+| `DAST_BROWSER_MAX_ACTIONS`        | number          | `10000`                           | The maximum number of actions that the crawler performs. For example, clicking a link, or filling a form.  |
+| `DAST_BROWSER_MAX_DEPTH`          | number          | `10`                              | The maximum number of chained actions that the crawler takes. For example, `Click -> Form Fill -> Click` is a depth of three. |
+| `DAST_BROWSER_NUMBER_OF_BROWSERS` | number          | `3`                               | The maximum number of concurrent browser instances to use. For shared runners on GitLab.com we recommended a maximum of three. Private runners with more resources may benefit from a higher number, but will likely produce little benefit after five to seven instances. |
+| `DAST_BROWSER_COOKIES`            | dictionary      | `abtesting_group:3,region:locked` | A cookie name and value to be added to every request. |
 | `DAST_AUTH_URL`                      | string          | `https://example.com/sign-in`     | The URL of page that hosts the sign-in form. |
 | `DAST_USERNAME`                      | string          | `user123`                         | The username to enter into the username field on the sign-in HTML form. |
 | `DAST_PASSWORD`                      | string          | `p@55w0rd`                        | The password to enter into the password field on the sign-in HTML form. |
@@ -99,6 +99,6 @@ This can come at a cost of increased scan time.
 
 You can manage the trade-off between coverage and scan time with the following measures:
 
-- Limit the number of actions executed by the browser with the [variable](#available-variables) `DAST_BROWSERKER_MAX_ACTIONS`. The default is `10,000`.
-- Limit the page depth that Browserker will check coverage on with the [variable](#available-variables) `DAST_BROWSERKER_MAX_DEPTH`. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
-- Vertically scaling the runner and using a higher number of browsers with [variable](#available-variables) `DAST_BROWSERKER_NUMBER_OF_BROWSERS`. The default is `3`.
+- Limit the number of actions executed by the browser with the [variable](#available-variables) `DAST_BROWSER_MAX_ACTIONS`. The default is `10,000`.
+- Limit the page depth that Browserker will check coverage on with the [variable](#available-variables) `DAST_BROWSER_MAX_DEPTH`. Browserker uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
+- Vertically scaling the runner and using a higher number of browsers with [variable](#available-variables) `DAST_BROWSER_NUMBER_OF_BROWSERS`. The default is `3`.
