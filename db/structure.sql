@@ -123,15 +123,13 @@ CREATE TABLE audit_events (
     details text,
     ip_address inet,
     author_name text,
-    entity_path text,
     target_details text,
+    entity_path text,
     created_at timestamp without time zone NOT NULL,
     target_type text,
     target_id bigint,
-    CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
     CONSTRAINT check_83ff8406e2 CHECK ((char_length(author_name) <= 255)),
-    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255)),
-    CONSTRAINT check_d493ec90b5 CHECK ((char_length(target_details) <= 5500))
+    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255))
 )
 PARTITION BY RANGE (created_at);
 
@@ -9032,8 +9030,7 @@ CREATE TABLE analytics_devops_adoption_segments (
     last_recorded_at timestamp with time zone,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    namespace_id integer,
-    CONSTRAINT check_4be7a006fd CHECK ((char_length(name) <= 255))
+    namespace_id integer
 );
 
 CREATE SEQUENCE analytics_devops_adoption_segments_id_seq
@@ -9397,8 +9394,6 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
-    kroki_url character varying,
-    kroki_enabled boolean,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
@@ -9417,19 +9412,21 @@ CREATE TABLE application_settings (
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
     encrypted_secret_detection_token_revocation_token_iv text,
+    new_user_signups_cap integer,
     domain_denylist_enabled boolean DEFAULT false,
     domain_denylist text,
     domain_allowlist text,
-    new_user_signups_cap integer,
     encrypted_cloud_license_auth_token text,
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
+    kroki_url text,
+    kroki_enabled boolean DEFAULT false NOT NULL,
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     rate_limiting_response_text text,
-    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
+    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
     git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
     keep_latest_artifact boolean DEFAULT true NOT NULL,
@@ -9443,7 +9440,7 @@ CREATE TABLE application_settings (
     lock_delayed_project_removal boolean DEFAULT false NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
-    CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
+    CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
@@ -15866,8 +15863,8 @@ CREATE TABLE plan_limits (
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL,
     ci_pipeline_deployments integer DEFAULT 500 NOT NULL,
     pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL,
-    daily_invites integer DEFAULT 0 NOT NULL,
     rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
+    daily_invites integer DEFAULT 0 NOT NULL,
     terraform_module_max_file_size bigint DEFAULT 1073741824 NOT NULL
 );
 
@@ -18124,8 +18121,8 @@ CREATE TABLE user_details (
     bio_html text,
     cached_markdown_version integer,
     webauthn_xid text,
-    other_role text,
     provisioned_by_group_id bigint,
+    other_role text,
     CONSTRAINT check_245664af82 CHECK ((char_length(webauthn_xid) <= 100)),
     CONSTRAINT check_b132136b01 CHECK ((char_length(other_role) <= 100))
 );
@@ -18870,8 +18867,8 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
-    releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL,
     member_events boolean DEFAULT false NOT NULL,
     subgroup_events boolean DEFAULT false NOT NULL
 );
@@ -23275,11 +23272,13 @@ CREATE INDEX index_on_projects_lower_path ON projects USING btree (lower((path):
 
 CREATE INDEX index_on_routes_lower_path ON routes USING btree (lower((path)::text));
 
-CREATE UNIQUE INDEX index_on_segment_selections_group_id_segment_id ON analytics_devops_adoption_segment_selections USING btree (group_id, segment_id);
+CREATE INDEX index_on_segment_selections_group_id ON analytics_devops_adoption_segment_selections USING btree (group_id);
 
-CREATE UNIQUE INDEX index_on_segment_selections_project_id_segment_id ON analytics_devops_adoption_segment_selections USING btree (project_id, segment_id);
+CREATE INDEX index_on_segment_selections_project_id ON analytics_devops_adoption_segment_selections USING btree (project_id);
 
-CREATE INDEX index_on_segment_selections_segment_id ON analytics_devops_adoption_segment_selections USING btree (segment_id);
+CREATE UNIQUE INDEX index_on_segment_selections_segment_id_group_id ON analytics_devops_adoption_segment_selections USING btree (segment_id, group_id);
+
+CREATE UNIQUE INDEX index_on_segment_selections_segment_id_project_id ON analytics_devops_adoption_segment_selections USING btree (segment_id, project_id);
 
 CREATE INDEX index_on_snapshots_segment_id_end_time ON analytics_devops_adoption_snapshots USING btree (segment_id, end_time);
 

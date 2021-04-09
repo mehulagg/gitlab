@@ -37,7 +37,7 @@
                 .form-group.col-sm-12
                   = f.label :path, class: 'label-bold' do
                     %span= _('Project URL')
-                  .input-group.flex-nowrap
+                  .input-group.gl-flex-nowrap
                     .input-group-prepend.flex-shrink-0.has-tooltip{ title: "#{group_url(@project.namespace)}/" }
                       .input-group-text
                         #{group_url(@project.namespace)}/
