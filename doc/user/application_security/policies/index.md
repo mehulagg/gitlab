@@ -71,6 +71,16 @@ scan_execution_policy:
   - scan: dast
     scanner_profile: Scanner Profile A
     site_profile: Site Profile B
+- name: Enforce DAST in every pipeline in main branch
+  description: This policy enforces pipeline configuration to have a job with DAST scan for main branch
+  enabled: true
+  rules:
+  - type: pipeline
+    branch: main
+  actions:
+  - scan: dast
+    scanner_profile: Scanner Profile C
+    site_profile: Site Profile D
 ```
 
 ### Scan Execution Policies Schema
@@ -112,7 +122,7 @@ rule in the defined policy are met.
 Note the following:
 
 - You must create the [site profile](../dast/index.md#site-profile) and [scanner profile](../dast/index.md#scanner-profile)
-  with selected names for the project that is assigned to the selected Security Policy Project.
+  with selected names for each project that is assigned to the selected Security Policy Project.
   Otherwise, the policy is not applied and a job with an error message is created instead.
 - Once you associate the site profile and scanner profile by name in the policy, it is not possible
   to modify or delete them. If you want to modify them, you must first disable the policy by setting
@@ -123,8 +133,7 @@ Here's an example:
 ```yaml
 ---
 scan_execution_policy:
-- type: scan_execution_policy
-  name: Enforce DAST in every release pipeline
+- name: Enforce DAST in every release pipeline
   description: This policy enforces pipeline configuration to have a job with DAST scan for release branches
   enabled: true
   rules:
@@ -134,8 +143,7 @@ scan_execution_policy:
   - scan: dast
     scanner_profile: Scanner Profile A
     site_profile: Site Profile B
-- type: scan_execution_policy
-  name: Enforce DAST in every pipeline in main branch
+- name: Enforce DAST in every pipeline in main branch
   description: This policy enforces pipeline configuration to have a job with DAST scan for main branch
   enabled: true
   rules:
@@ -151,6 +159,10 @@ In this example, the DAST scan runs with the scanner profile `Scanner Profile A`
 profile `Site Profile B` for every pipeline executed on branches that match the
 `release/*` wildcard (for example, branch name `release/v1.2.1`); and the DAST scan runs with
 the scanner profile `Scanner Profile C` and the site profile `Site Profile D` for every pipeline executed on `main` branch.
+
+NOTE:
+All scanner and site profiles must be configured and created for each project that is assigned to the selected Security Policy Project.
+If they are not created, the job will fail with the error message.
 
 ## Security Policy project selection
 
