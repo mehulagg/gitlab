@@ -8,6 +8,8 @@ module Security
 
     attr_reader :pipeline, :report, :project, :vulnerability_finding_id_to_finding_map
 
+    BATCH_SIZE = 1000
+
     def initialize(pipeline, report)
       @pipeline = pipeline
       @report = report
@@ -40,9 +42,13 @@ module Security
         .where(uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
         .to_h { |vf| [vf.uuid, vf] }
 
+      update_vulnerability_scanners!(@report.findings) if Feature.enabled?(:optimize_sql_query_for_security_report, project)
+
       @report.findings.map do |finding|
         create_vulnerability_finding(vulnerability_findings_by_uuid, finding)&.id
       end.compact.uniq
+
+      update_vulnerability_links_info if Feature.enabled?(:optimize_sql_query_for_security_report, project)
     end
 
     def mark_as_resolved_except(vulnerability_ids)
@@ -65,8 +71,7 @@ module Security
         create_new_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
       vulnerability_finding_id_to_finding_map[vulnerability_finding.id] = finding
-
-      update_vulnerability_scanner(finding)
+      update_vulnerability_scanner(finding) unless Feature.enabled?(:optimize_sql_query_for_security_report, project)
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
@@ -78,7 +83,7 @@ module Security
         create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
       end
 
-      create_or_update_vulnerability_links(finding, vulnerability_finding)
+      create_or_update_vulnerability_links(finding, vulnerability_finding) unless Feature.enabled?(:optimize_sql_query_for_security_report, project)
 
       create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
 
@@ -124,6 +129,50 @@ module Security
       scanner.update!(finding.scanner.to_hash)
     end
 
+    def vulnerability_scanner_attributes_keys
+      strong_memoize(:vulnerability_scanner_attributes_keys) do
+        Vulnerabilities::Scanner.new.attributes.keys
+      end
+    end
+
+    def valid_vulnerability_scanner_record?(record)
+      return false if (record.keys - vulnerability_scanner_attributes_keys).present?
+
+      record.values.all? {|value| value.present?}
+    end
+
+    def create_vulnerability_scanner_records(findings)
+      findings.map do |finding|
+        scanner = scanners_objects[finding.scanner.key]
+
+        next nil if scanner.nil?
+
+        scanner_attr = scanner.attributes.with_indifferent_access.except(:id)
+          .merge(finding.scanner.to_hash)
+
+        scanner_attr.compact!
+
+        scanner_attr
+      end
+    end
+
+    def update_vulnerability_scanners!(report_findings)
+      report_findings.in_groups_of(BATCH_SIZE, false) do |findings|
+        records = create_vulnerability_scanner_records(findings)
+        records.compact!
+        records.uniq!
+        records.each { |record| record.merge!({ created_at: Time.current, updated_at: Time.current }) }
+        records.filter! { |record| valid_vulnerability_scanner_record?(record) }
+
+        Vulnerabilities::Scanner.insert_all(records) if records.present?
+      end
+    rescue StandardError => e
+      Gitlab::ErrorTracking.track_exception(e)
+    ensure
+      clear_memoization(:scanners_objects)
+      clear_memoization(:existing_scanner_objects)
+    end
+
     def update_vulnerability_finding(vulnerability_finding, update_params)
       vulnerability_finding.update!(update_params)
     end
@@ -139,7 +188,10 @@ module Security
       records = []
       vulnerability_finding_id_to_finding_map.each do |vulnerability_id, finding|
         finding.links.each do |link|
-          records << { vulnerability_occurrence_id: vulnerability_id, url: link.to_hash }
+          link_info = { vulnerability_occurrence_id: vulnerability_id }
+          link_info.merge!(link.to_hash)
+          link_info.compact!
+          records << link_info
         end
       end
 
