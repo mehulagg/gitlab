@@ -393,3 +393,12 @@ dotnet add package <package_id> \
 
 - `<package_id>` is the package ID.
 - `<package_version>` is the package version. Optional.
+
+## Supported CLI commands
+
+The GitLab NuGet repository supports the following NuGet and .NET CLI commands:
+
+- `nuget push`: Upload a package to the registry.
+- `dotnet nuget push`: Upload a package to the registry.
+- `nuget install`: Install a package from the registry.
+- `dotnet add`: Install a package from the registry.
