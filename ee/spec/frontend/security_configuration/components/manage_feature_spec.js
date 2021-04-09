@@ -1,8 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
+import { featureToMutationMap } from 'ee/security_configuration/components/constants';
 import ManageDastProfiles from 'ee/security_configuration/components/manage_dast_profiles.vue';
 import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
 import ManageGeneric from 'ee/security_configuration/components/manage_generic.vue';
-import ManageViaMr from 'ee/security_configuration/components/manage_via_mr.vue';
+import ManageViaMr from '~/vue_shared/security_configuration/components/manage_via_mr.vue';
 import {
   REPORT_TYPE_DAST_PROFILES,
   REPORT_TYPE_DEPENDENCY_SCANNING,
@@ -72,8 +73,22 @@ describe('ManageFeature component', () => {
       expect(component.exists()).toBe(true);
     });
 
-    it('passes through props to expected component', () => {
-      expect(component.props()).toEqual({ feature });
+    it('passes correct props to child component', () => {
+      if (
+        feature.type === REPORT_TYPE_DEPENDENCY_SCANNING ||
+        feature.type === REPORT_TYPE_SECRET_DETECTION
+      ) {
+        expect(component.props()).toEqual({
+          mutation: {
+            mutation: featureToMutationMap[feature.type].mutation,
+            ...featureToMutationMap[feature.type].getMutationPayload(''),
+          },
+          mutationId: featureToMutationMap[feature.type].mutationId,
+          feature,
+        });
+      } else {
+        expect(component.props()).toEqual({ feature });
+      }
     });
   });
 

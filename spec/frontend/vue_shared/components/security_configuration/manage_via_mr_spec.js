@@ -6,8 +6,8 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { redirectTo } from '~/lib/utils/url_utility';
-import ManageSast from '~/security_configuration/components/manage_sast.vue';
 import configureSastMutation from '~/security_configuration/graphql/configure_sast.mutation.graphql';
+import ManageViaMR from '~/vue_shared/security_configuration/components/manage_via_mr.vue';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
@@ -66,7 +66,7 @@ describe('Manage Sast Component', () => {
   function createComponent(options = {}) {
     const { mockApollo } = options;
     wrapper = extendedWrapper(
-      mount(ManageSast, {
+      mount(ManageViaMR, {
         apolloProvider: mockApollo,
       }),
     );

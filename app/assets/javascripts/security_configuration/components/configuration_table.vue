@@ -1,6 +1,7 @@
 <script>
 import { GlLink, GlTable, GlAlert } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
+import ManageViaMR from '~/vue_shared/security_configuration/components/manage_via_mr.vue';
 import {
   REPORT_TYPE_SAST,
   REPORT_TYPE_DAST,
@@ -10,9 +11,10 @@ import {
   REPORT_TYPE_COVERAGE_FUZZING,
   REPORT_TYPE_API_FUZZING,
   REPORT_TYPE_LICENSE_COMPLIANCE,
+  REPORT_TYPE_SECRET_DETECTION,
 } from '~/vue_shared/security_reports/constants';
-import ManageSast from './manage_sast.vue';
-import { scanners } from './scanners_constants';
+
+import { scanners, featureToMutationMap } from './scanners_constants';
 import Upgrade from './upgrade.vue';
 
 const borderClasses = 'gl-border-b-1! gl-border-b-solid! gl-border-gray-100!';
@@ -23,6 +25,12 @@ export default {
     GlLink,
     GlTable,
     GlAlert,
+  },
+  inject: {
+    projectPath: {
+      from: 'projectPath',
+      default: '',
+    },
   },
   data() {
     return {
@@ -40,16 +48,46 @@ export default {
     },
     getComponentForItem(item) {
       const COMPONENTS = {
-        [REPORT_TYPE_SAST]: ManageSast,
-        [REPORT_TYPE_DAST]: Upgrade,
-        [REPORT_TYPE_DAST_PROFILES]: Upgrade,
-        [REPORT_TYPE_DEPENDENCY_SCANNING]: Upgrade,
-        [REPORT_TYPE_CONTAINER_SCANNING]: Upgrade,
-        [REPORT_TYPE_COVERAGE_FUZZING]: Upgrade,
-        [REPORT_TYPE_API_FUZZING]: Upgrade,
-        [REPORT_TYPE_LICENSE_COMPLIANCE]: Upgrade,
+        [REPORT_TYPE_SAST]: {
+          component: ManageViaMR,
+          props: {
+            mutationId: featureToMutationMap[REPORT_TYPE_SAST].mutationId,
+            mutation: {
+              mutation: featureToMutationMap[REPORT_TYPE_SAST].mutation,
+              variables: featureToMutationMap[REPORT_TYPE_SAST].getMutationPayload(
+                this.projectPath,
+              ),
+            },
+            feature: {
+              type: REPORT_TYPE_SAST,
+            },
+          },
+        },
+        [REPORT_TYPE_DAST]: {
+          component: Upgrade,
+        },
+        [REPORT_TYPE_DAST_PROFILES]: {
+          component: Upgrade,
+        },
+        [REPORT_TYPE_DEPENDENCY_SCANNING]: {
+          component: Upgrade,
+        },
+        [REPORT_TYPE_CONTAINER_SCANNING]: {
+          component: Upgrade,
+        },
+        [REPORT_TYPE_COVERAGE_FUZZING]: {
+          component: Upgrade,
+        },
+        [REPORT_TYPE_API_FUZZING]: {
+          component: Upgrade,
+        },
+        [REPORT_TYPE_LICENSE_COMPLIANCE]: {
+          component: Upgrade,
+        },
+        [REPORT_TYPE_SECRET_DETECTION]: {
+          component: Upgrade,
+        },
       };
-
       return COMPONENTS[item.type];
     },
   },
@@ -95,7 +133,12 @@ export default {
       </template>
 
       <template #cell(manage)="{ item }">
-        <component :is="getComponentForItem(item)" :data-testid="item.type" @error="onError" />
+        <component
+          :is="getComponentForItem(item).component"
+          v-bind="getComponentForItem(item).props"
+          :data-testid="item.type"
+          @error="onError"
+        />
       </template>
     </gl-table>
   </div>

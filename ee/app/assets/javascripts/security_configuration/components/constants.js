@@ -24,11 +24,17 @@ export const CUSTOM_VALUE_MESSAGE = s__(
 
 export const featureToMutationMap = {
   [REPORT_TYPE_DEPENDENCY_SCANNING]: {
-    type: 'configureDependencyScanning',
+    mutationId: 'configureDependencyScanning',
     mutation: configureDependencyScanningMutation,
+    getMutationPayload: (projectPath) => {
+      return { variables: { fullPath: projectPath } };
+    },
   },
   [REPORT_TYPE_SECRET_DETECTION]: {
-    type: 'configureSecretDetection',
+    mutationId: 'configureSecretDetection',
     mutation: configureSecretDetectionMutation,
+    getMutationPayload: (projectPath) => {
+      return { variables: { fullPath: projectPath } };
+    },
   },
 };
