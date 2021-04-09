@@ -1,7 +1,7 @@
 # Please contribute improvements to this template via the CI/CD templates development guide:
 # https://docs.gitlab.com/ee/development/cicd/templates.html
 # This specific templates file can be found here:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Pages/Jekyll.gitlab-ci.yml
 
 # Template project: https://gitlab.com/pages/jekyll
 # Docs: https://docs.gitlab.com/ee/pages/
