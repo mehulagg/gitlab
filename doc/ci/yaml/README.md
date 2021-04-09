@@ -1026,8 +1026,6 @@ added to it.
 in the same job. If you configure one job to use both keywords, the linter returns a
 `key may not be used with rules` error.
 
-#### Rules attributes
-
 The job attributes you can use with `rules` are:
 
 - [`when`](#when): If not defined, defaults to `when: on_success`.
@@ -1048,173 +1046,6 @@ docker build:
       start_in: '3 hours'
       allow_failure: true
 ```
-
-#### Rules clauses
-
-Available rule clauses are:
-
-| Clause                     | Description                                                                                                                        |
-|----------------------------|------------------------------------------------------------------------------------------------------------------------------------|
-| [`if`](#rulesif)           | Add or exclude jobs from a pipeline by evaluating an `if` statement. Similar to [`only:variables`](#onlyvariablesexceptvariables). |
-| [`changes`](#ruleschanges) | Add or exclude jobs from a pipeline based on what files are changed. Same as [`only:changes`](#onlychangesexceptchanges).          |
-| [`exists`](#rulesexists)   | Add or exclude jobs from a pipeline based on the presence of specific files.                                                       |
-
-Rules are evaluated in order until a match is found. If a match is found, the attributes
-are checked to see if the job should be added to the pipeline. If no attributes are defined,
-the defaults are:
-
-- `when: on_success`
-- `allow_failure: false`
-
-The job is added to the pipeline:
-
-- If a rule matches and has `when: on_success`, `when: delayed` or `when: always`.
-- If no rules match, but the last clause is `when: on_success`, `when: delayed`
-  or `when: always` (with no rule).
-
-The job is not added to the pipeline:
-
-- If no rules match, and there is no standalone `when: on_success`, `when: delayed` or
-  `when: always`.
-- If a rule matches, and has `when: never` as the attribute.
-
-The following example uses `if` to strictly limit when jobs run:
-
-```yaml
-job:
-  script: echo "Hello, Rules!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: manual
-      allow_failure: true
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-```
-
-- If the pipeline is for a merge request, the first rule matches, and the job
-  is added to the [merge request pipeline](../merge_request_pipelines/index.md)
-  with attributes of:
-  - `when: manual` (manual job)
-  - `allow_failure: true` (the pipeline continues running even if the manual job is not run)
-- If the pipeline is **not** for a merge request, the first rule doesn't match, and the
-  second rule is evaluated.
-- If the pipeline is a scheduled pipeline, the second rule matches, and the job
-  is added to the scheduled pipeline. No attributes were defined, so it is added
-  with:
-  - `when: on_success` (default)
-  - `allow_failure: false` (default)
-- In **all other cases**, no rules match, so the job is **not** added to any other pipeline.
-
-Alternatively, you can define a set of rules to exclude jobs in a few cases, but
-run them in all other cases:
-
-```yaml
-job:
-  script: echo "Hello, Rules!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - when: on_success
-```
-
-- If the pipeline is for a merge request, the job is **not** added to the pipeline.
-- If the pipeline is a scheduled pipeline, the job is **not** added to the pipeline.
-- In **all other cases**, the job is added to the pipeline, with `when: on_success`.
-
-WARNING:
-If you use a `when:` clause as the final rule (not including `when: never`), two
-simultaneous pipelines may start. Both push pipelines and merge request pipelines can
-be triggered by the same event (a push to the source branch for an open merge request).
-See how to [prevent duplicate pipelines](#avoid-duplicate-pipelines)
-for more details.
-
-#### Avoid duplicate pipelines
-
-If a job uses `rules`, a single action, like pushing a commit to a branch, can trigger
-multiple pipelines. You don't have to explicitly configure rules for multiple types
-of pipeline to trigger them accidentally.
-
-Some configurations that have the potential to cause duplicate pipelines cause a
-[pipeline warning](../troubleshooting.md#pipeline-warnings) to be displayed.
-[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/219431) in GitLab 13.3.
-
-For example:
-
-```yaml
-job:
-  script: echo "This job creates double pipelines!"
-  rules:
-    - if: '$CUSTOM_VARIABLE == "false"'
-      when: never
-    - when: always
-```
-
-This job does not run when `$CUSTOM_VARIABLE` is false, but it *does* run in **all**
-other pipelines, including **both** push (branch) and merge request pipelines. With
-this configuration, every push to an open merge request's source branch
-causes duplicated pipelines.
-
-To avoid duplicate pipelines, you can:
-
-- Use [`workflow`](#workflow) to specify which types of pipelines
-  can run.
-- Rewrite the rules to run the job only in very specific cases,
-  and avoid a final `when:` rule:
-
-  ```yaml
-  job:
-    script: echo "This job does NOT create double pipelines!"
-    rules:
-      - if: '$CUSTOM_VARIABLE == "true" && $CI_PIPELINE_SOURCE == "merge_request_event"'
-  ```
-
-You can also avoid duplicate pipelines by changing the job rules to avoid either push (branch)
-pipelines or merge request pipelines. However, if you use a `- when: always` rule without
-`workflow: rules`, GitLab still displays a [pipeline warning](../troubleshooting.md#pipeline-warnings).
-
-For example, the following does not trigger double pipelines, but is not recommended
-without `workflow: rules`:
-
-```yaml
-job:
-  script: echo "This job does NOT create double pipelines!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      when: never
-    - when: always
-```
-
-You should not include both push and merge request pipelines in the same job without
-[`workflow:rules` that prevent duplicate pipelines](#switch-between-branch-pipelines-and-merge-request-pipelines):
-
-```yaml
-job:
-  script: echo "This job creates double pipelines!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-```
-
-Also, do not mix `only/except` jobs with `rules` jobs in the same pipeline.
-It may not cause YAML errors, but the different default behaviors of `only/except`
-and `rules` can cause issues that are difficult to troubleshoot:
-
-```yaml
-job-with-no-rules:
-  script: echo "This job runs in branch pipelines."
-
-job-with-rules:
-  script: echo "This job runs in merge request pipelines."
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-```
-
-For every change pushed to the branch, duplicate pipelines run. One
-branch pipeline runs a single job (`job-with-no-rules`), and one merge request pipeline
-runs the other job (`job-with-rules`). Jobs with no rules default
-to [`except: merge_requests`](#onlyexcept-basic), so `job-with-no-rules`
-runs in all cases except merge requests.
 
 #### `rules:if`
 
@@ -1259,65 +1090,6 @@ Some details regarding the logic that determines the `when` for the job:
   defined for the job, which defaults to `on_success` if not defined.
 - You can define `when` once per rule, or once at the job-level, which applies to
   all rules. You can't mix `when` at the job-level with `when` in rules.
-
-##### Common `if` clauses for `rules`
-
-For behavior similar to the [`only`/`except` keywords](#onlyexcept-basic), you can
-check the value of the `$CI_PIPELINE_SOURCE` variable:
-
-| Value                         | Description                                                                                                                                                                                                                      |
-|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `api`                         | For pipelines triggered by the [pipelines API](../../api/pipelines.md#create-a-new-pipeline).                                                                                                                                    |
-| `chat`                        | For pipelines created by using a [GitLab ChatOps](../chatops/index.md) command.                                                                                                                                                 |
-| `external`                    | When you use CI services other than GitLab.                                                                                                                                                                                        |
-| `external_pull_request_event` | When an external pull request on GitHub is created or updated. See [Pipelines for external pull requests](../ci_cd_for_external_repos/index.md#pipelines-for-external-pull-requests).                                            |
-| `merge_request_event`         | For pipelines created when a merge request is created or updated. Required to enable [merge request pipelines](../merge_request_pipelines/index.md), [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md), and [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md). |
-| `parent_pipeline`             | For pipelines triggered by a [parent/child pipeline](../parent_child_pipelines.md) with `rules`. Use this pipeline source in the child pipeline configuration so that it can be triggered by the parent pipeline.                |
-| `pipeline`                    | For [multi-project pipelines](../multi_project_pipelines.md) created by [using the API with `CI_JOB_TOKEN`](../multi_project_pipelines.md#triggering-multi-project-pipelines-through-api), or the [`trigger`](#trigger) keyword. |
-| `push`                        | For pipelines triggered by a `git push` event, including for branches and tags.                                                                                                                                                  |
-| `schedule`                    | For [scheduled pipelines](../pipelines/schedules.md).                                                                                                                                                                            |
-| `trigger`                     | For pipelines created by using a [trigger token](../triggers/README.md#trigger-token).                                                                                                                                           |
-| `web`                         | For pipelines created by using **Run pipeline** button in the GitLab UI, from the project's **CI/CD > Pipelines** section.                                                                                                       |
-| `webide`                      | For pipelines created by using the [WebIDE](../../user/project/web_ide/index.md).                                                                                                                                                |
-
-The following example runs the job as a manual job in scheduled pipelines or in push
-pipelines (to branches or tags), with `when: on_success` (default). It does not
-add the job to any other pipeline type.
-
-```yaml
-job:
-  script: echo "Hello, Rules!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: manual
-      allow_failure: true
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-```
-
-The following example runs the job as a `when: on_success` job in [merge request pipelines](../merge_request_pipelines/index.md)
-and scheduled pipelines. It does not run in any other pipeline type.
-
-```yaml
-job:
-  script: echo "Hello, Rules!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-```
-
-Other commonly used variables for `if` clauses:
-
-- `if: $CI_COMMIT_TAG`: If changes are pushed for a tag.
-- `if: $CI_COMMIT_BRANCH`: If changes are pushed to any branch.
-- `if: '$CI_COMMIT_BRANCH == "main"'`: If changes are pushed to `main`.
-- `if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'`: If changes are pushed to the default
-  branch. Use when you want to have the same configuration in multiple
-  projects with different default branches.
-- `if: '$CI_COMMIT_BRANCH =~ /regex-expression/'`: If the commit branch matches a regular expression.
-- `if: '$CUSTOM_VARIABLE !~ /regex-expression/'`: If the [custom variable](../variables/README.md#custom-cicd-variables)
-  `CUSTOM_VARIABLE` does **not** match a regular expression.
-- `if: '$CUSTOM_VARIABLE == "value1"'`: If the custom variable `CUSTOM_VARIABLE` is
-  exactly `value1`.
 
 #### `rules:changes`
 
@@ -1364,28 +1136,6 @@ because `rules: changes` always evaluates to true when there is no Git `push` ev
 Tag pipelines, scheduled pipelines, and so on do **not** have a Git `push` event
 associated with them. A `rules: changes` job is **always** added to those pipeline
 if there is no `if:` statement that limits the job to branch or merge request pipelines.
-
-##### Variables in `rules:changes`
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34272) in GitLab 13.6.
-> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/267192) in GitLab 13.7.
-
-You can use CI/CD variables in `rules:changes` expressions to determine when
-to add jobs to a pipeline:
-
-```yaml
-docker build:
-  variables:
-    DOCKERFILES_DIR: 'path/to/files/'
-  script: docker build -t my-image:$CI_COMMIT_REF_SLUG .
-  rules:
-    - changes:
-        - $DOCKERFILES_DIR/*
-```
-
-You can use the `$` character for both variables and paths. For example, if the
-`$DOCKERFILES_DIR` variable exists, its value is used. If it does not exist, the
-`$` is interpreted as being part of a path.
 
 #### `rules:exists`
 
@@ -1469,50 +1219,6 @@ job:
     - echo "Run another script if $IS_A_FEATURE exists"
 ```
 
-#### Complex rule clauses
-
-To conjoin `if`, `changes`, and `exists` clauses with an `AND`, use them in the
-same rule.
-
-In the following example:
-
-- If the `Dockerfile` file or any file in `/docker/scripts` has changed, and `$VAR` == "string value",
-  then the job runs manually
-- Otherwise, the job isn't included in the pipeline.
-
-```yaml
-docker build:
-  script: docker build -t my-image:$CI_COMMIT_REF_SLUG .
-  rules:
-    - if: '$VAR == "string value"'
-      changes:  # Include the job and set to when:manual if any of the follow paths match a modified file.
-        - Dockerfile
-        - docker/scripts/*
-      when: manual
-      # - "when: never" would be redundant here. It is implied any time rules are listed.
-```
-
-Keywords such as `branches` or `refs` that are available for
-`only`/`except` are not available in `rules`. They are being individually
-considered for their usage and behavior in this context. Future keyword improvements
-are being discussed in our [epic for improving `rules`](https://gitlab.com/groups/gitlab-org/-/epics/2783),
-where anyone can add suggestions or requests.
-
-You can use [parentheses](../variables/README.md#parentheses) with `&&` and `||` to build more complicated variable expressions.
-[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230938) in GitLab 13.3:
-
-```yaml
-job1:
-  script:
-    - echo This rule uses parentheses.
-  rules:
-    if: ($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
-```
-
-WARNING:
-[Before GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/230938),
-rules that use both `||` and `&&` may evaluate with an unexpected order of operations.
-
 ### `only`/`except`
 
 NOTE:
@@ -1579,50 +1285,7 @@ job:
     - branches
 ```
 
-In the following example, `job` runs only for:
-
-- Git tags
-- [Triggers](../triggers/README.md#trigger-token)
-- [Scheduled pipelines](../pipelines/schedules.md)
-
-```yaml
-job:
-  # use special keywords
-  only:
-    - tags
-    - triggers
-    - schedules
-```
-
-To execute jobs only for the parent repository and not forks:
-
-```yaml
-job:
-  only:
-    - branches@gitlab-org/gitlab
-  except:
-    - master@gitlab-org/gitlab
-    - /^release/.*$/@gitlab-org/gitlab
-```
-
-This example runs `job` for all branches on `gitlab-org/gitlab`,
-except `master` and branches that start with `release/`.
-
-If a job does not have an `only` rule, `only: ['branches', 'tags']` is set by
-default. If the job does not have an `except` rule, it's empty.
-
-For example, `job1` and `job2` are essentially the same:
-
-```yaml
-job1:
-  script: echo 'test'
-
-job2:
-  script: echo 'test'
-  only: ['branches', 'tags']
-```
-
-### `only`/`except` with multiple strategies
+#### `only:refs`/`except:refs`
 
 GitLab supports multiple strategies, and it's possible to use an
 array or a hash configuration scheme.
@@ -1681,24 +1344,6 @@ test:
       - master
     changes:
       - "README.md"
-```
-
-#### `only:refs`/`except:refs`
-
-> `refs` policy introduced in GitLab 10.0.
-
-The `refs` strategy can take the same values as the
-[simplified only/except configuration](#onlyexcept-basic).
-
-In the following example, the `deploy` job is created only when the
-pipeline is [scheduled](../pipelines/schedules.md) or runs for the `master` branch:
-
-```yaml
-deploy:
-  only:
-    refs:
-      - master
-      - schedules
 ```
 
 #### `only:kubernetes`/`except:kubernetes`
@@ -1816,91 +1461,6 @@ test:
       - "**/*.sql"
 ```
 
-You can skip a job if a change is detected in any file with a
-`.md` extension in the root directory of the repository:
-
-```yaml
-build:
-  script: npm run build
-  except:
-    changes:
-      - "*.md"
-```
-
-If you change multiple files, but only one file ends in `.md`,
-the `build` job is still skipped. The job does not run for any of the files.
-
-Read more about how to use this feature with:
-
-- [New branches or tags *without* pipelines for merge requests](#use-onlychanges-without-pipelines-for-merge-requests).
-- [Scheduled pipelines](#use-onlychanges-with-scheduled-pipelines).
-
-##### Use `only:changes` with pipelines for merge requests
-
-With [pipelines for merge requests](../merge_request_pipelines/index.md),
-it's possible to define a job to be created based on files modified
-in a merge request.
-
-Use this keyword with `only: [merge_requests]` so GitLab can find the correct base
-SHA of the source branch. File differences are correctly calculated from any further
-commits, and all changes in the merge requests are properly tested in pipelines.
-
-For example:
-
-```yaml
-docker build service one:
-  script: docker build -t my-service-one-image:$CI_COMMIT_REF_SLUG .
-  only:
-    refs:
-      - merge_requests
-    changes:
-      - Dockerfile
-      - service-one/**/*
-```
-
-In this scenario, if a merge request changes
-files in the `service-one` directory or the `Dockerfile`, GitLab creates
-the `docker build service one` job.
-
-For example:
-
-```yaml
-docker build service one:
-  script: docker build -t my-service-one-image:$CI_COMMIT_REF_SLUG .
-  only:
-    changes:
-      - Dockerfile
-      - service-one/**/*
-```
-
-In this example, the pipeline might fail because of changes to a file in `service-one/**/*`.
-
-A later commit that doesn't have changes in `service-one/**/*`
-but does have changes to the `Dockerfile` can pass. The job
-only tests the changes to the `Dockerfile`.
-
-GitLab checks the **most recent pipeline** that **passed**. If the merge request is mergeable,
-it doesn't matter that an earlier pipeline failed because of a change that has not been corrected.
-
-When you use this configuration, ensure that the most recent pipeline
-properly corrects any failures from previous pipelines.
-
-##### Use `only:changes` without pipelines for merge requests
-
-Without [pipelines for merge requests](../merge_request_pipelines/index.md), pipelines
-run on branches or tags that don't have an explicit association with a merge request.
-In this case, a previous SHA is used to calculate the diff, which is equivalent to `git diff HEAD~`.
-This can result in some unexpected behavior, including:
-
-- When pushing a new branch or a new tag to GitLab, the policy always evaluates to true.
-- When pushing a new commit, the changed files are calculated by using the previous commit
-  as the base SHA.
-
-##### Use `only:changes` with scheduled pipelines
-
-`only:changes` always evaluates as true in [Scheduled pipelines](../pipelines/schedules.md).
-All files are considered to have changed when a scheduled pipeline runs.
-
 ### `needs`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/47063) in GitLab 12.2.
@@ -1986,7 +1546,7 @@ Plan.default.actual_limits.update!(ci_needs_size_limit: 100)
 
 To disable directed acyclic graphs (DAG), set the limit to `0`.
 
-#### Artifact downloads with `needs`
+#### `needs:artifacts`
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14311) in GitLab v12.6.
 
