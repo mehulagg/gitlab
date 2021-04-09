@@ -33,6 +33,17 @@ describe('Experimental new project creation app', () => {
 
         expect(findPanel('blank_project').title).toBe('Create blank project/repository');
       });
+
+      describe('when hash is not empty on load', () => {
+        beforeEach(() => {
+          window.location.hash = '#blank_project';
+          createComponent();
+        });
+
+        it('renders "project/repository"', () => {
+          expect(wrapper.text()).toMatch('blank project/repository');
+        });
+      });
     });
 
     describe('when in the control variant', () => {
@@ -42,6 +53,18 @@ describe('Experimental new project creation app', () => {
         createComponent();
 
         expect(findPanel('blank_project').title).toBe('Create blank project');
+      });
+
+      describe('when hash is not empty on load', () => {
+        beforeEach(() => {
+          window.location.hash = '#blank_project';
+          createComponent();
+        });
+
+        it('renders "project"', () => {
+          expect(wrapper.text()).not.toMatch('blank project/repository');
+          expect(wrapper.text()).toMatch('blank project');
+        });
       });
     });
   });
