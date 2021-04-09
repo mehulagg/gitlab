@@ -954,10 +954,24 @@ RSpec.describe Gitlab::GitAccess do
 
         it 'does not allow pull or push changes with proper url in the message' do
           aggregate_failures do
-            address = "http://localhost/groups/#{group.name}/-/saml/sso"
+            address = "http://localhost/groups/#{group.name}/-/saml/sso?token=#{group.saml_discovery_token}"
 
             expect { pull_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError, /#{Regexp.quote(address)}/)
             expect { push_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError, /#{Regexp.quote(address)}/)
+          end
+        end
+
+        context 'with a subgroup' do
+          let_it_be(:root_group) { create(:group) }
+          let_it_be(:group) { create(:group, parent: root_group) }
+
+          it 'does not allow pull or push changes with proper url in the message' do
+            aggregate_failures do
+              address = "http://localhost/groups/#{root_group.name}/-/saml/sso?token=#{root_group.saml_discovery_token}"
+
+              expect { pull_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError, /#{Regexp.quote(address)}/)
+              expect { push_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError, /#{Regexp.quote(address)}/)
+            end
           end
         end
       end

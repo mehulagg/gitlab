@@ -10,6 +10,7 @@ import {
   GlLink,
   GlSkeletonLoader,
   GlSprintf,
+  GlSafeHtmlDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
@@ -90,6 +91,7 @@ export default {
     LocalStorageSync,
   },
   directives: {
+    SafeHtml: GlSafeHtmlDirective,
     GlTooltip: GlTooltipDirective,
     validation: validation(),
   },
@@ -283,7 +285,7 @@ export default {
             this.showErrors(ERROR_RUN_SCAN, errors);
             this.loading = false;
           } else if (!runAfter) {
-            redirectTo(response.dastProfile.editPath);
+            redirectTo(this.profilesLibraryPath);
             this.clearStorage = true;
           } else {
             this.clearStorage = true;
@@ -375,7 +377,7 @@ export default {
     >
       {{ errorMessage }}
       <ul v-if="errors.length" class="gl-mt-3 gl-mb-0">
-        <li v-for="error in errors" :key="error">{{ error }}</li>
+        <li v-for="error in errors" :key="error" v-safe-html="error"></li>
       </ul>
     </gl-alert>
 

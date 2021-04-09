@@ -128,6 +128,7 @@ module EE
               ::Types::IncidentManagement::OncallScheduleType.connection_type,
               null: true,
               description: 'Incident Management On-call schedules of the project.',
+              extras: [:lookahead],
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
 
         field :api_fuzzing_ci_configuration,

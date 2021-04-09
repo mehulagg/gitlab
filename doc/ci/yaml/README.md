@@ -250,7 +250,40 @@ workflow:
     - if: $CI_COMMIT_REF_NAME =~ /feature/
       variables:
         IS_A_FEATURE: "true"                  # Define a new variable.
+    - when: always                            # Run the pipeline in other cases
+
+job1:
+  variables:
+    DEPLOY_VARIABLE: "job1-default-deploy"
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /master/
+      variables:                                   # Override DEPLOY_VARIABLE defined
+        DEPLOY_VARIABLE: "job1-deploy-production"  # at the job level.
+    - when: on_success                             # Run the job in other cases
+  script:
+    - echo "Run script with $DEPLOY_VARIABLE as an argument"
+    - echo "Run another script if $IS_A_FEATURE exists"
+
+job2:
+  script:
+    - echo "Run script with $DEPLOY_VARIABLE as an argument"
+    - echo "Run another script if $IS_A_FEATURE exists"
 ```
+
+When the branch is `master`:
+
+- job1's `DEPLOY_VARIABLE` is `job1-deploy-production`.
+- job2's `DEPLOY_VARIABLE` is `deploy-production`.
+
+When the branch is `feature`:
+
+- job1's `DEPLOY_VARIABLE` is `job1-default-deploy`, and `IS_A_FEATURE` is `true`.
+- job2's `DEPLOY_VARIABLE` is `default-deploy`, and `IS_A_FEATURE` is `true`.
+
+When the branch is something else:
+
+- job1's `DEPLOY_VARIABLE` is `job1-default-deploy`.
+- job2's `DEPLOY_VARIABLE` is `default-deploy`.
 
 ##### Enable or disable workflow:rules:variables **(CORE ONLY)**
 
@@ -4151,7 +4184,8 @@ finishes.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/19298) in GitLab 13.2.
 
 Use `release` to create a [release](../../user/project/releases/index.md).
-Requires the `release-cli` to be available in your GitLab Runner Docker or shell executor.
+Requires the [`release-cli`](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs)
+to be available in your GitLab Runner Docker or shell executor.
 
 These keywords are supported:
 
@@ -4235,6 +4269,36 @@ Once installed, the `release` keyword should be available to you.
 
   release-cli version 0.6.0
   ```
+
+#### Use a custom SSL CA certificate authority
+
+You can use the `ADDITIONAL_CA_CERT_BUNDLE` CI/CD variable to configure a custom SSL CA certificate authority,
+which is used to verify the peer when the `release-cli` creates a release through the API using HTTPS with custom certificates.
+The `ADDITIONAL_CA_CERT_BUNDLE` value should contain the
+[text representation of the X.509 PEM public-key certificate](https://tools.ietf.org/html/rfc7468#section-5.1)
+or the `path/to/file` containing the certificate authority.
+For example, to configure this value in the `.gitlab-ci.yml` file, use the following:
+
+```yaml
+release:
+  variables:
+    ADDITIONAL_CA_CERT_BUNDLE: |
+        -----BEGIN CERTIFICATE-----
+        MIIGqTCCBJGgAwIBAgIQI7AVxxVwg2kch4d56XNdDjANBgkqhkiG9w0BAQsFADCB
+        ...
+        jWgmPqF3vUbZE0EyScetPJquRFRKIesyJuBFMAs=
+        -----END CERTIFICATE-----
+  script:
+    - echo "Create release"
+  release:
+    name: 'My awesome release'
+    tag_name: '$CI_COMMIT_TAG'
+```
+
+The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a
+[custom variable in the UI](../variables/README.md#custom-cicd-variables),
+either as a `file`, which requires the path to the certificate, or as a variable,
+which requires the text representation of the certificate.
 
 #### `script`
 
@@ -4636,7 +4700,7 @@ meaning it applies to all jobs. If you define a variable in a job, it's availabl
 to that job only.
 
 If a variable of the same name is defined globally and for a specific job, the
-[job-specific variable overrides the global variable](../variables/README.md#priority-of-cicd-variables).
+[job-specific variable overrides the global variable](../variables/README.md#cicd-variable-precedence).
 
 All YAML-defined variables are also set to any linked
 [Docker service containers](../services/index.md).

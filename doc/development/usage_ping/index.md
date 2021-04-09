@@ -497,6 +497,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      redis_slot: compliance
      expiry: 42  # 6 weeks
      aggregation: weekly
+     feature_flag: usage_data_i_compliance_credential_inventory
    ```
 
    Keys:
@@ -528,7 +529,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      aggregation.
    - `aggregation`: may be set to a `:daily` or `:weekly` key. Defines how counting data is stored in Redis.
      Aggregation on a `daily` basis does not pull more fine grained data.
-   - `feature_flag`: optional `default_enabled: :yaml`. If no feature flag is set then the tracking is enabled. For details, see our [GitLab internal Feature flags](../feature_flags/index.md) documentation. The feature flags are owned by the group adding the event tracking.
+   - `feature_flag`: optional `default_enabled: :yaml`. If no feature flag is set then the tracking is enabled. One feature flag can be used for multiple events. For details, see our [GitLab internal Feature flags](../feature_flags/index.md) documentation. The feature flags are owned by the group adding the event tracking.
 
 Use one of the following methods to track events:
 
@@ -566,8 +567,6 @@ Use one of the following methods to track events:
    ```
 
 1. Track event in API using `increment_unique_values(event_name, values)` helper method.
-
-   To be able to track the event, Usage Ping must be enabled and the event feature `usage_data_<event_name>` must be enabled.
 
    Arguments:
 
@@ -612,10 +611,6 @@ Use one of the following methods to track events:
 
    API requests are protected by checking for a valid CSRF token.
 
-   To increment the values, the related feature `usage_data_<event_name>` should be
-   set to `default_enabled: true`. For more information, see
-   [Feature flags in development of GitLab](../feature_flags/index.md).
-
    ```plaintext
    POST /usage_data/increment_unique_users
    ```
@@ -639,8 +634,6 @@ Use one of the following methods to track events:
 
    Usage Data API is behind  `usage_data_api` feature flag which, as of GitLab 13.7, is
    now set to `default_enabled: true`.
-
-   Each event tracked using Usage Data API is behind a feature flag `usage_data_#{event_name}` which should be `default_enabled: true`
 
    ```javascript
    import api from '~/api';
@@ -1416,6 +1409,37 @@ bin/rake gitlab:usage_data:dump_sql_in_json
 
 # You may pipe the output into a file
 bin/rake gitlab:usage_data:dump_sql_in_yaml > ~/Desktop/usage-metrics-2020-09-02.yaml
+```
+
+## Export metric definitions as a single YAML file
+
+Use this API endpoint to export all metric definitions as a single YAML file, similar to the [Metrics Dictionary](dictionary.md), for easier importing.
+
+```plaintext
+GET /usage_data/metric_definitions
+```
+
+Response
+
+```yaml
+---
+- key_path: redis_hll_counters.search.i_search_paid_monthly
+  description: Calculated unique users to perform a search with a paid license enabled
+    by month
+  product_section: enablement
+  product_stage: enablement
+  product_group: group::global search
+  product_category: global_search
+  value_type: number
+  status: data_available
+  time_frame: 28d
+  data_source: redis_hll
+  distribution:
+  - ee
+  tier:
+  - premium
+  - ultimate
+...
 ```
 
 ## Generating and troubleshooting usage ping

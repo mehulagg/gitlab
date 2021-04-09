@@ -115,6 +115,7 @@ RSpec.describe RequirementsManagement::TestReport do
     let_it_be(:build_author) { create(:user) }
     let_it_be(:build) { create(:ci_build, author: build_author) }
     let_it_be(:requirement) { create(:requirement, state: :opened) }
+
     let(:now) { Time.current }
 
     context 'when build is passed as argument' do

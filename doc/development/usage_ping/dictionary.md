@@ -1028,18 +1028,6 @@ Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
-### `counts.geo_node_usage.git_fetch_event_count_weekly`
-
-Number of Git fetch events from Prometheus on the Geo secondary
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210309194425_git_fetch_event_count_weekly.yml)
-
-Group: `group::geo`
-
-Status: `implemented`
-
-Tiers: `premium`, `ultimate`
-
 ### `counts.geo_nodes`
 
 Total number of sites in a Geo deployment
@@ -5998,7 +5986,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_merge_requests`
 
-Count of Merge Requests created from Web IDE
+Count of merge requests created from Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180246_web_ide_merge_requests.yml)
 
@@ -9908,6 +9896,30 @@ Status: `implemented`
 
 Tiers: `premium`, `ultimate`
 
+### `redis_hll_counters.epics_usage.g_project_management_epic_issue_moved_from_project_monthly`
+
+Counts of MAU moving epic issues between projects
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210405190240_g_project_management_epic_issue_moved_from_project_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_issue_moved_from_project_weekly`
+
+Counts of WAU moving epic issues between projects
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210405185814_g_project_management_epic_issue_moved_from_project_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `redis_hll_counters.epics_usage.g_project_management_epic_issue_removed_monthly`
 
 Count of MAU removing issues from epics
@@ -9949,6 +9961,30 @@ Tiers: `premium`, `ultimate`
 Counts of WAU re-opening epics
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210310164112_g_project_management_epic_reopened_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_users_changing_labels_monthly`
+
+Count of MAU chaging the epic lables
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312195730_g_project_management_epic_labels_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_users_changing_labels_weekly`
+
+Count of WAU chaging the epic lables
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210312195849_g_project_management_epic_labels_weekly.yml)
 
 Group: `group::product planning`
 
@@ -10411,6 +10447,30 @@ Group: `group::editor`
 Status: `data_available`
 
 Tiers:
+
+### `redis_hll_counters.incident_management.i_incident_management_oncall_notification_sent_monthly`
+
+Count of unique users to receive a notification while on-call
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210405222005_i_incident_management_oncall_notification_sent_monthly.yml)
+
+Group: `group::monitor`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.incident_management.i_incident_management_oncall_notification_sent_weekly`
+
+Count of unique users to receive a notification while on-call
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210405220139_i_incident_management_oncall_notification_sent_weekly.yml)
+
+Group: `group::monitor`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_monthly`
 
@@ -14769,6 +14829,18 @@ Group: ``
 Status: `data_available`
 
 Tiers: `free`
+
+### `usage_activity_by_stage.enablement.counts.geo_node_usage.git_fetch_event_count_weekly`
+
+Number of Git fetch events from Prometheus on the Geo secondary
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210309194425_git_fetch_event_count_weekly.yml)
+
+Group: `group::geo`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.bulk_imports.gitlab`
 

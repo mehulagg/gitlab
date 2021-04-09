@@ -70,7 +70,8 @@ describe('RotationsListSectionComponent', () => {
     });
 
     it('renders timeline cell items based on timeframe data', () => {
-      expect(findTimelineCells().length).toBe(mockTimeframeWeeks.length);
+      const mockTimelineCellWidth = 1;
+      expect(findTimelineCells().length).toBe(mockTimelineCellWidth);
     });
 
     it('renders current day indicator in the first timeline cell', () => {
@@ -78,7 +79,7 @@ describe('RotationsListSectionComponent', () => {
     });
 
     it('render the correct amount of rotation assignees with their related information', () => {
-      expect(findRotationAssignees()).toHaveLength(2);
+      expect(findRotationAssignees()).toHaveLength(mockRotations[0].shifts.nodes.length);
       expect(findRotationAssignees().at(0).props().assignee.user).toEqual(
         mockRotations[0].shifts.nodes[0].participant.user,
       );

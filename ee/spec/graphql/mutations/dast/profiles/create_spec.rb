@@ -28,7 +28,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
         full_path: project.full_path,
         name: name,
         description: description,
-        branch_name: 'orphaned-branch',
+        branch_name: project.default_branch,
         dast_site_profile_id: dast_site_profile.to_global_id.to_s,
         dast_scanner_profile_id: dast_scanner_profile.to_global_id.to_s,
         run_after_create: run_after_create
@@ -62,7 +62,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
 
           context 'when the feature flag dast_branch_selection is enabled' do
             it 'sets the branch_name' do
-              expect(subject[:dast_profile].branch_name).to eq('orphaned-branch')
+              expect(subject[:dast_profile].branch_name).to eq(project.default_branch)
             end
           end
         end

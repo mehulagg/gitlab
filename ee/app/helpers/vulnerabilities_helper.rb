@@ -24,10 +24,15 @@ module VulnerabilitiesHelper
       pipeline: vulnerability_pipeline_data(pipeline),
       can_modify_related_issues: current_user.can?(:admin_vulnerability_issue_link, vulnerability),
       issue_tracking_help_path: help_page_path('user/project/settings', anchor: 'sharing-and-permissions'),
-      permissions_help_path: help_page_path('user/permissions', anchor: 'project-members-permissions')
+      permissions_help_path: help_page_path('user/permissions', anchor: 'project-members-permissions'),
+      dismissal_descriptions: dismissal_descriptions
     }
 
     result.merge(vulnerability_data(vulnerability), vulnerability_finding_data(vulnerability))
+  end
+
+  def dismissal_descriptions
+    Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] }
   end
 
   def new_issue_url_for(vulnerability)

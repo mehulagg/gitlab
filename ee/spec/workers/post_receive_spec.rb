@@ -129,6 +129,7 @@ RSpec.describe PostReceive do
 
     context 'with a group wiki' do
       let_it_be(:group) { create(:group) }
+
       let(:wiki) { build(:group_wiki, group: group) }
 
       it 'calls Git::WikiPushService#execute' do

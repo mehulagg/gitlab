@@ -38,10 +38,14 @@ export default {
     preventMrApprovalRuleEditDocsAnchor: 'editing--overriding-approval-rules-per-merge-request',
     requireUserPasswordDocsAnchor: 'require-authentication-when-approving-a-merge-request',
     removeApprovalsOnPushDocsAnchor: 'resetting-approvals-on-push',
+    preventCommittersApprovalAnchor: 'prevent-approval-of-merge-requests-by-their-committers',
   },
   i18n: {
     authorApprovalLabel: __('Prevent MR approvals by the author.'),
     preventMrApprovalRuleEditLabel: __('Prevent users from modifying MR approval rules.'),
+    preventCommittersApprovalLabel: __(
+      'Prevent approval of merge requests by merge request committers.',
+    ),
     requireUserPasswordLabel: __('Require user password for approvals.'),
     removeApprovalsOnPushLabel: __(
       'Remove all approvals in a merge request when new commits are pushed to its source branch.',
@@ -77,6 +81,12 @@ export default {
         :label="$options.i18n.removeApprovalsOnPushLabel"
         :anchor="$options.links.removeApprovalsOnPushDocsAnchor"
         data-testid="remove-approvals-on-push"
+      />
+      <approval-settings-checkbox
+        v-model="settings.preventCommittersApproval"
+        :label="$options.i18n.preventCommittersApprovalLabel"
+        :anchor="$options.links.preventCommittersApprovalAnchor"
+        data-testid="prevent-committers-approval"
       />
     </gl-form-group>
     <gl-button type="submit" variant="success" category="primary" :disabled="isLoading">

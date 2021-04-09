@@ -5,6 +5,7 @@ import {
   GlModal,
   GlSkeletonLoader,
   GlTable,
+  GlSafeHtmlDirective,
   GlTooltipDirective,
   GlDropdown,
   GlDropdownItem,
@@ -26,6 +27,7 @@ export default {
     GlIcon,
   },
   directives: {
+    SafeHtml: GlSafeHtmlDirective,
     GlTooltip: GlTooltipDirective,
   },
   props: {
@@ -164,7 +166,11 @@ export default {
                 :aria-label="__('DastProfiles|Error Details')"
                 class="gl-p-0 gl-m-0"
               >
-                <li v-for="errorDetail in errorDetails" :key="errorDetail">{{ errorDetail }}</li>
+                <li
+                  v-for="errorDetail in errorDetails"
+                  :key="errorDetail"
+                  v-safe-html="errorDetail"
+                ></li>
               </ul>
             </gl-alert>
           </td>

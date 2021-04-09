@@ -1,4 +1,4 @@
-#import "~/graphql_shared/fragments/epic.fragment.graphql"
+#import "ee/graphql_shared/fragments/epic.fragment.graphql"
 
 mutation issueSetEpic($input: IssueSetEpicInput!) {
   issueSetEpic(input: $input) {

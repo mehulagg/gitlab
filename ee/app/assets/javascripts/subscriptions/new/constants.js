@@ -1,5 +1,12 @@
 // The order of the steps in this array determines the flow of the application
-export const STEPS = ['subscriptionDetails', 'billingAddress', 'paymentMethod', 'confirmOrder'];
+/* eslint-disable @gitlab/require-i18n-strings */
+export const STEPS = [
+  { id: 'subscriptionDetails', __typename: 'Step' },
+  { id: 'billingAddress', __typename: 'Step' },
+  { id: 'paymentMethod', __typename: 'Step' },
+  { id: 'confirmOrder', __typename: 'Step' },
+];
+/* eslint-enable @gitlab/require-i18n-strings */
 
 export const ZUORA_SCRIPT_URL = 'https://static.zuora.com/Resources/libs/hosted/1.3.1/zuora-min.js';
 

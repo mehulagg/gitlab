@@ -10,7 +10,6 @@ import {
 } from '../constants';
 import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import deleteDevopsAdoptionSegmentMutation from '../graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
-import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
 
 export default {
   name: 'DevopsAdoptionSegmentModal',
@@ -25,6 +24,9 @@ export default {
   inject: {
     isGroup: {
       default: false,
+    },
+    groupGid: {
+      default: null,
     },
   },
   props: {
@@ -139,7 +141,7 @@ export default {
                 bulkFindOrCreateDevopsAdoptionSegments: { segments, errors: requestErrors },
               } = data;
 
-              if (!requestErrors.length) addSegmentsToCache(store, segments);
+              if (!requestErrors.length) this.$emit('segmentsAdded', segments);
             },
           });
 
@@ -157,7 +159,11 @@ export default {
     async deleteMissingGroups() {
       try {
         const removedGroupGids = this.enabledGroups
-          .filter((group) => !this.checkboxValues.includes(getIdFromGraphQLId(group.namespace.id)))
+          .filter(
+            (group) =>
+              !this.checkboxValues.includes(getIdFromGraphQLId(group.namespace.id)) &&
+              group.namespace.id !== this.groupGid,
+          )
           .map((group) => group.id);
 
         if (removedGroupGids.length) {
@@ -177,7 +183,7 @@ export default {
                 deleteDevopsAdoptionSegment: { errors: requestErrors },
               } = data;
 
-              if (!requestErrors.length) deleteSegmentsFromCache(store, removedGroupGids);
+              if (!requestErrors.length) this.$emit('segmentsRemoved', removedGroupGids);
             },
           });
 
@@ -199,7 +205,6 @@ export default {
       this.$refs.modal.hide();
     },
     resetForm() {
-      this.checkboxValues = [];
       this.filter = '';
       this.$emit('trackModalOpenState', false);
     },

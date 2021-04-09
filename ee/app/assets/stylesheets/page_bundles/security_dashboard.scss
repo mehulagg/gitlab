@@ -128,3 +128,16 @@ $selection-summary-with-error-height: 118px;
     @include gl-border-b-0;
   }
 }
+
+.generic-report-list {
+  li {
+    @include gl-ml-0;
+    @include gl-list-style-none;
+  }
+
+  &.generic-report-list-nested li {
+    @include gl-ml-5;
+    list-style-type: disc;
+  }
+}
+

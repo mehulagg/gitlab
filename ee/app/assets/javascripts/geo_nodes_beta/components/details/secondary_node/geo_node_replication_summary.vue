@@ -1,6 +1,8 @@
 <script>
 import { GlCard, GlButton } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import GeoNodeReplicationStatus from './geo_node_replication_status.vue';
+import GeoNodeSyncSettings from './geo_node_sync_settings.vue';
 
 export default {
   name: 'GeoNodeReplicationSummary',
@@ -14,6 +16,8 @@ export default {
   components: {
     GlCard,
     GlButton,
+    GeoNodeReplicationStatus,
+    GeoNodeSyncSettings,
   },
   props: {
     node: {
@@ -38,10 +42,12 @@ export default {
       >
     </template>
     <div class="gl-display-flex gl-flex-direction-column gl-mb-5">
-      <span data-testid="replication-status">{{ $options.i18n.replicationStatus }}</span>
+      <span>{{ $options.i18n.replicationStatus }}</span>
+      <geo-node-replication-status class="gl-mt-3" :node="node" />
     </div>
     <div class="gl-display-flex gl-flex-direction-column gl-mb-5">
-      <span data-testid="sync-settings">{{ $options.i18n.syncSettings }}</span>
+      <span>{{ $options.i18n.syncSettings }}</span>
+      <geo-node-sync-settings class="gl-mt-2" :node="node" />
     </div>
     <span data-testid="replication-counts">{{ $options.i18n.replicationCounts }}</span>
   </gl-card>

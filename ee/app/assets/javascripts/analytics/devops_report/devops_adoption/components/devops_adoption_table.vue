@@ -253,6 +253,7 @@ export default {
     <devops-adoption-delete-modal
       v-if="selectedSegment"
       :segment="selectedSegment"
+      @segmentsRemoved="$emit('segmentsRemoved', $event)"
       @trackModalOpenState="$emit('trackModalOpenState', $event)"
     />
   </div>

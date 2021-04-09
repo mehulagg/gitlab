@@ -104,6 +104,7 @@ class User < ApplicationRecord
   # Profile
   has_many :keys, -> { regular_keys }, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :expired_today_and_unnotified_keys, -> { expired_today_and_not_notified }, class_name: 'Key'
+  has_many :expiring_soon_and_unnotified_keys, -> { expiring_soon_and_not_notified }, class_name: 'Key'
   has_many :deploy_keys, -> { where(type: 'DeployKey') }, dependent: :nullify # rubocop:disable Cop/ActiveRecordDependent
   has_many :group_deploy_keys
   has_many :gpg_keys
@@ -401,6 +402,14 @@ class User < ApplicationRecord
         .select(1)
         .where('keys.user_id = users.id')
         .expired_today_and_not_notified)
+  end
+  scope :with_ssh_key_expiring_soon, -> do
+    includes(:expiring_soon_and_unnotified_keys)
+      .where('EXISTS (?)',
+         ::Key
+         .select(1)
+         .where('keys.user_id = users.id')
+         .expiring_soon_and_not_notified)
   end
   scope :order_recent_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('current_sign_in_at', 'DESC')) }
   scope :order_oldest_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('current_sign_in_at', 'ASC')) }
@@ -1349,9 +1358,11 @@ class User < ApplicationRecord
   end
 
   def public_verified_emails
-    emails = verified_emails(include_private_email: false)
-    emails << email unless temp_oauth_email?
-    emails.uniq
+    strong_memoize(:public_verified_emails) do
+      emails = verified_emails(include_private_email: false)
+      emails << email unless temp_oauth_email?
+      emails.uniq
+    end
   end
 
   def any_email?(check_email)
@@ -1659,8 +1670,7 @@ class User < ApplicationRecord
   def invalidate_cache_counts
     invalidate_issue_cache_counts
     invalidate_merge_request_cache_counts
-    invalidate_todos_done_count
-    invalidate_todos_pending_count
+    invalidate_todos_cache_counts
     invalidate_personal_projects_count
   end
 
@@ -1673,11 +1683,8 @@ class User < ApplicationRecord
     Rails.cache.delete(['users', id, 'review_requested_open_merge_requests_count'])
   end
 
-  def invalidate_todos_done_count
+  def invalidate_todos_cache_counts
     Rails.cache.delete(['users', id, 'todos_done_count'])
-  end
-
-  def invalidate_todos_pending_count
     Rails.cache.delete(['users', id, 'todos_pending_count'])
   end
 

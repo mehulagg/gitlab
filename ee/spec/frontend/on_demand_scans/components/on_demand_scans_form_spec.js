@@ -60,7 +60,7 @@ const LOCAL_STORAGE_KEY = 'group/project/on-demand-scans-new-form';
 
 describe('OnDemandScansForm', () => {
   let localVue;
-  let subject;
+  let wrapper;
   let requestHandlers;
 
   const GlFormInputStub = stubComponent(GlFormInput, {
@@ -70,13 +70,13 @@ describe('OnDemandScansForm', () => {
     template: '<input />',
   });
 
-  const findForm = () => subject.find(GlForm);
-  const findByTestId = (testId) => subject.find(`[data-testid="${testId}"]`);
+  const findForm = () => wrapper.find(GlForm);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findNameInput = () => findByTestId('dast-scan-name-input');
   const findBranchInput = () => findByTestId('dast-scan-branch-input');
   const findDescriptionInput = () => findByTestId('dast-scan-description-input');
-  const findScannerProfilesSelector = () => subject.find(ScannerProfileSelector);
-  const findSiteProfilesSelector = () => subject.find(SiteProfileSelector);
+  const findScannerProfilesSelector = () => wrapper.find(ScannerProfileSelector);
+  const findSiteProfilesSelector = () => wrapper.find(SiteProfileSelector);
   const findAlert = () => findByTestId('on-demand-scan-error');
   const findProfilesConflictAlert = () => findByTestId('on-demand-scans-profiles-conflict-alert');
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
@@ -89,10 +89,10 @@ describe('OnDemandScansForm', () => {
     findBranchInput().vm.$emit('input', 'some-other-branch');
     findScannerProfilesSelector().vm.$emit('input', passiveScannerProfile.id);
     findSiteProfilesSelector().vm.$emit('input', nonValidatedSiteProfile.id);
-    return subject.vm.$nextTick();
+    return wrapper.vm.$nextTick();
   };
   const setupSuccess = ({ edit = false } = {}) => {
-    subject.vm.$apollo.mutate.mockResolvedValue({
+    wrapper.vm.$apollo.mutate.mockResolvedValue({
       data: {
         [edit ? 'dastProfileUpdate' : 'dastProfileCreate']: {
           dastProfile: { editPath },
@@ -104,8 +104,8 @@ describe('OnDemandScansForm', () => {
     return setValidFormData();
   };
   const selectProfile = (component) => async (profile) => {
-    subject.find(component).vm.$emit('input', profile.id);
-    await subject.vm.$nextTick();
+    wrapper.find(component).vm.$emit('input', profile.id);
+    await wrapper.vm.$nextTick();
   };
   const selectScannerProfile = selectProfile(ScannerProfileSelector);
   const selectSiteProfile = selectProfile(SiteProfileSelector);
@@ -127,7 +127,7 @@ describe('OnDemandScansForm', () => {
     ]);
   };
 
-  const subjectMounterFactory = (mountFn = shallowMount) => (options = {}, withHandlers) => {
+  const createComponentFactory = (mountFn = shallowMount) => (options = {}, withHandlers) => {
     localVue = createLocalVue();
     let defaultMocks = {
       $apollo: {
@@ -144,7 +144,7 @@ describe('OnDemandScansForm', () => {
       apolloProvider = createMockApolloProvider(withHandlers);
       defaultMocks = {};
     }
-    subject = mountFn(
+    wrapper = mountFn(
       OnDemandScansForm,
       merge(
         {},
@@ -180,8 +180,8 @@ describe('OnDemandScansForm', () => {
       ),
     );
   };
-  const mountSubject = subjectMounterFactory(mount);
-  const mountShallowSubject = subjectMounterFactory();
+  const createComponent = createComponentFactory(mount);
+  const createShallowComponent = createComponentFactory();
 
   const itClearsLocalStorage = () => {
     it('clears local storage', () => {
@@ -190,20 +190,20 @@ describe('OnDemandScansForm', () => {
   };
 
   afterEach(() => {
-    subject.destroy();
-    subject = null;
+    wrapper.destroy();
+    wrapper = null;
     localStorage.clear();
   });
 
   describe('when creating a new scan', () => {
     it('renders properly', () => {
-      mountSubject();
+      createComponent();
 
-      expect(subject.text()).toContain('New on-demand DAST scan');
+      expect(wrapper.text()).toContain('New on-demand DAST scan');
     });
 
     it('populates the branch input with the default branch', () => {
-      mountSubject();
+      createComponent();
 
       expect(findBranchInput().props('value')).toBe(defaultBranch);
     });
@@ -217,7 +217,7 @@ describe('OnDemandScansForm', () => {
     `(
       'sets loading state to $isLoading if scanner profiles loading is $scannerProfilesLoading and site profiles loading is $siteProfilesLoading',
       ({ scannerProfilesLoading, siteProfilesLoading, isLoading }) => {
-        mountShallowSubject({
+        createShallowComponent({
           mocks: {
             $apollo: {
               queries: {
@@ -228,14 +228,14 @@ describe('OnDemandScansForm', () => {
           },
         });
 
-        expect(subject.find(GlSkeletonLoader).exists()).toBe(isLoading);
+        expect(wrapper.find(GlSkeletonLoader).exists()).toBe(isLoading);
       },
     );
   });
 
   describe('when editing an existing scan', () => {
     beforeEach(() => {
-      mountShallowSubject({
+      createShallowComponent({
         propsData: {
           dastScan,
         },
@@ -243,7 +243,7 @@ describe('OnDemandScansForm', () => {
     });
 
     it('sets the title properly', () => {
-      expect(subject.text()).toContain('Edit on-demand DAST scan');
+      expect(wrapper.text()).toContain('Edit on-demand DAST scan');
     });
 
     it('populates the fields with passed values', () => {
@@ -257,7 +257,7 @@ describe('OnDemandScansForm', () => {
 
   describe('local storage', () => {
     it('get updated when form is modified', async () => {
-      mountShallowSubject();
+      createShallowComponent();
 
       await setValidFormData();
 
@@ -285,8 +285,8 @@ describe('OnDemandScansForm', () => {
         }),
       );
 
-      mountShallowSubject();
-      await subject.vm.$nextTick();
+      createShallowComponent();
+      await wrapper.vm.$nextTick();
 
       expect(findNameInput().attributes('value')).toBe(dastScan.name);
       expect(findDescriptionInput().attributes('value')).toBe(dastScan.description);
@@ -299,7 +299,7 @@ describe('OnDemandScansForm', () => {
     let submitButton;
 
     beforeEach(() => {
-      mountShallowSubject();
+      createShallowComponent();
       submitButton = findSubmitButton();
     });
 
@@ -318,13 +318,13 @@ describe('OnDemandScansForm', () => {
     describe.each`
       action      | actionFunction | submitButtonLoading | saveButtonLoading | runAfter | redirectPath
       ${'submit'} | ${submitForm}  | ${true}             | ${false}          | ${true}  | ${pipelineUrl}
-      ${'save'}   | ${saveScan}    | ${false}            | ${true}           | ${false} | ${editPath}
+      ${'save'}   | ${saveScan}    | ${false}            | ${true}           | ${false} | ${profilesLibraryPath}
     `(
       'on $action',
       ({ actionFunction, submitButtonLoading, saveButtonLoading, runAfter, redirectPath }) => {
         describe('with valid form data', () => {
           beforeEach(async () => {
-            mountShallowSubject();
+            createShallowComponent();
             await setupSuccess();
             actionFunction();
           });
@@ -344,7 +344,7 @@ describe('OnDemandScansForm', () => {
           });
 
           it(`triggers dastProfileCreateMutation mutation with runAfterCreate set to ${runAfter}`, () => {
-            expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+            expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
               mutation: dastProfileCreateMutation,
               variables: {
                 input: {
@@ -372,7 +372,7 @@ describe('OnDemandScansForm', () => {
 
         describe('when editing an existing scan', () => {
           beforeEach(async () => {
-            mountShallowSubject({
+            createShallowComponent({
               propsData: {
                 dastScan,
               },
@@ -382,7 +382,7 @@ describe('OnDemandScansForm', () => {
           });
 
           it(`triggers dastProfileUpdateMutation mutation with runAfterUpdate set to ${runAfter}`, async () => {
-            expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+            expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
               mutation: dastProfileUpdateMutation,
               variables: {
                 input: {
@@ -401,26 +401,26 @@ describe('OnDemandScansForm', () => {
         });
 
         it('does not run any mutation if name is empty', () => {
-          mountShallowSubject();
+          createShallowComponent();
           setValidFormData();
           findNameInput().vm.$emit('input', '');
           actionFunction();
 
-          expect(subject.vm.$apollo.mutate).not.toHaveBeenCalled();
+          expect(wrapper.vm.$apollo.mutate).not.toHaveBeenCalled();
         });
       },
     );
 
     describe('on top-level error', () => {
       beforeEach(async () => {
-        mountShallowSubject();
-        subject.vm.$apollo.mutate.mockRejectedValue();
+        createShallowComponent();
+        wrapper.vm.$apollo.mutate.mockRejectedValue();
         await setValidFormData();
         submitForm();
       });
 
       it('resets loading state', () => {
-        expect(subject.vm.loading).toBe(false);
+        expect(wrapper.vm.loading).toBe(false);
       });
 
       it('shows an alert', () => {
@@ -431,22 +431,27 @@ describe('OnDemandScansForm', () => {
     });
 
     describe('on errors as data', () => {
-      const errors = ['error#1', 'error#2', 'error#3'];
-
-      beforeEach(async () => {
-        mountShallowSubject();
-        subject.vm.$apollo.mutate.mockResolvedValue({
+      const submitWithError = async (errors) => {
+        wrapper.vm.$apollo.mutate.mockResolvedValue({
           data: { dastProfileCreate: { pipelineUrl: null, errors } },
         });
         await setValidFormData();
-        submitForm();
+        await submitForm();
+      };
+
+      beforeEach(async () => {
+        createShallowComponent();
       });
 
-      it('resets loading state', () => {
-        expect(subject.vm.loading).toBe(false);
+      it('resets loading state', async () => {
+        await submitWithError(['error']);
+
+        expect(wrapper.vm.loading).toBe(false);
       });
 
-      it('shows an alert with the returned errors', () => {
+      it('shows an alert with the returned errors', async () => {
+        const errors = ['error#1', 'error#2', 'error#3'];
+        await submitWithError(errors);
         const alert = findAlert();
 
         expect(alert.exists()).toBe(true);
@@ -454,12 +459,20 @@ describe('OnDemandScansForm', () => {
           expect(alert.text()).toContain(error);
         });
       });
+
+      it('properly renders errors containing markup', async () => {
+        await submitWithError(['an error <a href="#" data-testid="error-link">with a link</a>']);
+        const alert = findAlert();
+
+        expect(alert.text()).toContain('an error with a link');
+        expect(alert.find('[data-testid="error-link"]').exists()).toBe(true);
+      });
     });
   });
 
   describe('cancellation', () => {
     beforeEach(() => {
-      mountShallowSubject();
+      createShallowComponent();
       findCancelButton().vm.$emit('click');
     });
 
@@ -480,9 +493,9 @@ describe('OnDemandScansForm', () => {
     'profiles conflict prevention',
     ({ description, selectedScannerProfile, selectedSiteProfile, hasConflict }) => {
       const setFormData = () => {
-        subject.find(ScannerProfileSelector).vm.$emit('input', selectedScannerProfile.id);
-        subject.find(SiteProfileSelector).vm.$emit('input', selectedSiteProfile.id);
-        return subject.vm.$nextTick();
+        wrapper.find(ScannerProfileSelector).vm.$emit('input', selectedScannerProfile.id);
+        wrapper.find(SiteProfileSelector).vm.$emit('input', selectedSiteProfile.id);
+        return wrapper.vm.$nextTick();
       };
 
       it(
@@ -490,7 +503,7 @@ describe('OnDemandScansForm', () => {
           ? `warns about conflicting profiles when user selects ${description}`
           : `does not report any conflict when user selects ${description}`,
         async () => {
-          mountShallowSubject();
+          createShallowComponent();
           await setFormData();
 
           expect(findProfilesConflictAlert().exists()).toBe(hasConflict);
@@ -508,7 +521,7 @@ describe('OnDemandScansForm', () => {
     const [profile] = profiles;
 
     beforeEach(async () => {
-      mountShallowSubject(
+      createShallowComponent(
         {},
         {
           [query]: jest.fn().mockResolvedValue(responses[query]([profile])),
@@ -519,13 +532,13 @@ describe('OnDemandScansForm', () => {
     });
 
     it('automatically selects the only available profile', () => {
-      expect(subject.find(selector).attributes('value')).toBe(profile.id);
+      expect(wrapper.find(selector).attributes('value')).toBe(profile.id);
     });
   });
 
   describe('scanner profile summary', () => {
     beforeEach(() => {
-      mountSubject({
+      createComponent({
         provide: {
           glFeatures: {
             securityDastSiteProfilesAdditionalFields: true,
@@ -545,7 +558,7 @@ describe('OnDemandScansForm', () => {
     const [authEnabledProfile] = siteProfiles;
 
     beforeEach(() => {
-      mountSubject({
+      createComponent({
         provide: {
           glFeatures: {
             securityDastSiteProfilesAdditionalFields: true,
@@ -556,7 +569,7 @@ describe('OnDemandScansForm', () => {
 
     it('renders all fields correctly', async () => {
       await selectSiteProfile(authEnabledProfile);
-      const summary = subject.find(SiteProfileSelector).text();
+      const summary = wrapper.find(SiteProfileSelector).text();
       const defaultPassword = '••••••••';
       const defaultRequestHeaders = '[Redacted]';
 
@@ -585,28 +598,28 @@ describe('OnDemandScansForm', () => {
       global.jsdom.reconfigure({
         url: setUrlParams({ scanner_profile_id: 1 }, URL_HOST),
       });
-      mountShallowSubject();
+      createShallowComponent();
 
-      expect(subject.find(ScannerProfileSelector).attributes('value')).toBe(scannerProfile.id);
+      expect(wrapper.find(ScannerProfileSelector).attributes('value')).toBe(scannerProfile.id);
     });
 
     it('site profile', () => {
       global.jsdom.reconfigure({
         url: setUrlParams({ site_profile_id: 1 }, URL_HOST),
       });
-      mountShallowSubject();
+      createShallowComponent();
 
-      expect(subject.find(SiteProfileSelector).attributes('value')).toBe(siteProfile.id);
+      expect(wrapper.find(SiteProfileSelector).attributes('value')).toBe(siteProfile.id);
     });
 
     it('both scanner & site profile', () => {
       global.jsdom.reconfigure({
         url: setUrlParams({ site_profile_id: 1, scanner_profile_id: 1 }, URL_HOST),
       });
-      mountShallowSubject();
+      createShallowComponent();
 
-      expect(subject.find(SiteProfileSelector).attributes('value')).toBe(siteProfile.id);
-      expect(subject.find(ScannerProfileSelector).attributes('value')).toBe(scannerProfile.id);
+      expect(wrapper.find(SiteProfileSelector).attributes('value')).toBe(siteProfile.id);
+      expect(wrapper.find(ScannerProfileSelector).attributes('value')).toBe(scannerProfile.id);
     });
 
     it('when local storage data is available', async () => {
@@ -622,8 +635,8 @@ describe('OnDemandScansForm', () => {
         url: setUrlParams({ site_profile_id: 1, scanner_profile_id: 1 }, URL_HOST),
       });
 
-      mountShallowSubject();
-      await subject.vm.$nextTick();
+      createShallowComponent();
+      await wrapper.vm.$nextTick();
 
       expect(findScannerProfilesSelector().attributes('value')).toBe(scannerProfile.id);
       expect(findSiteProfilesSelector().attributes('value')).toBe(siteProfile.id);
@@ -632,7 +645,7 @@ describe('OnDemandScansForm', () => {
 
   describe('when no repository exists', () => {
     beforeEach(() => {
-      mountShallowSubject({
+      createShallowComponent({
         propsData: {
           /**
            * The assumption here is that, if a default branch is not defined, then the project
@@ -644,7 +657,7 @@ describe('OnDemandScansForm', () => {
     });
 
     it('shows an error message', () => {
-      expect(subject.text()).toContain(
+      expect(wrapper.text()).toContain(
         'You must create a repository within your project to run an on-demand scan.',
       );
     });
@@ -658,14 +671,14 @@ describe('OnDemandScansForm', () => {
     `('on $action', ({ actionFunction, runAfter }) => {
       describe('when creating a new scan', () => {
         beforeEach(async () => {
-          mountShallowSubject({
+          createShallowComponent({
             provide: {
               glFeatures: {
                 dastBranchSelection: false,
               },
             },
           });
-          subject.vm.$apollo.mutate.mockResolvedValue({
+          wrapper.vm.$apollo.mutate.mockResolvedValue({
             data: {
               dastProfileCreate: {
                 dastProfile: { editPath },
@@ -677,12 +690,12 @@ describe('OnDemandScansForm', () => {
           findNameInput().vm.$emit('input', 'My daily scan');
           findScannerProfilesSelector().vm.$emit('input', passiveScannerProfile.id);
           findSiteProfilesSelector().vm.$emit('input', nonValidatedSiteProfile.id);
-          await subject.vm.$nextTick();
+          await wrapper.vm.$nextTick();
           actionFunction();
         });
 
         it(`triggers dastProfileCreateMutation mutation without the branch name and runAfterCreate set to ${runAfter}`, async () => {
-          expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
             mutation: dastProfileCreateMutation,
             variables: {
               input: {
@@ -699,7 +712,7 @@ describe('OnDemandScansForm', () => {
 
       describe('when editing an existing scan', () => {
         beforeEach(async () => {
-          mountShallowSubject({
+          createShallowComponent({
             propsData: {
               dastScan,
             },
@@ -709,7 +722,7 @@ describe('OnDemandScansForm', () => {
               },
             },
           });
-          subject.vm.$apollo.mutate.mockResolvedValue({
+          wrapper.vm.$apollo.mutate.mockResolvedValue({
             data: {
               dastProfileUpdate: {
                 dastProfile: { editPath },
@@ -721,12 +734,12 @@ describe('OnDemandScansForm', () => {
           findNameInput().vm.$emit('input', 'My daily scan');
           findScannerProfilesSelector().vm.$emit('input', passiveScannerProfile.id);
           findSiteProfilesSelector().vm.$emit('input', nonValidatedSiteProfile.id);
-          await subject.vm.$nextTick();
+          await wrapper.vm.$nextTick();
           actionFunction();
         });
 
         it(`triggers dastProfileUpdateMutation mutation without the branch name and runAfterUpdate set to ${runAfter}`, async () => {
-          expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
+          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
             mutation: dastProfileUpdateMutation,
             variables: {
               input: {

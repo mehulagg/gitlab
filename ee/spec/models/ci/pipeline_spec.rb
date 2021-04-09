@@ -168,69 +168,63 @@ RSpec.describe Ci::Pipeline do
     end
   end
 
-  shared_examples_for 'storing the security reports' do |transition|
-    let(:default_branch) { pipeline.ref }
+  describe 'Store security reports worker' do
+    shared_examples_for 'storing the security reports' do |transition|
+      let(:default_branch) { pipeline.ref }
 
-    subject(:transition_pipeline) { pipeline.update!(status_event: transition) }
+      subject(:transition_pipeline) { pipeline.update!(status_event: transition) }
 
-    before do
-      allow(StoreSecurityReportsWorker).to receive(:perform_async)
-      allow(::Security::StoreScansWorker).to receive(:perform_async)
-      allow(SyncSecurityReportsToReportApprovalRulesWorker).to receive(:perform_async)
-      allow(project).to receive(:default_branch).and_return(default_branch)
-      allow(pipeline).to receive(:can_store_security_reports?).and_return(can_store_security_reports)
-    end
+      before do
+        allow(StoreSecurityReportsWorker).to receive(:perform_async)
+        allow(project).to receive(:default_branch).and_return(default_branch)
+        allow(pipeline).to receive(:can_store_security_reports?).and_return(can_store_security_reports)
+      end
 
-    context 'when the security reports can be stored for the pipeline' do
-      let(:can_store_security_reports) { true }
+      context 'when the security reports can be stored for the pipeline' do
+        let(:can_store_security_reports) { true }
 
-      context 'when the ref is the default branch of project' do
-        it 'schedules relevant workers', :aggregate_failures do
-          transition_pipeline
+        context 'when the ref is the default branch of project' do
+          it 'schedules store security report worker' do
+            transition_pipeline
 
-          expect(StoreSecurityReportsWorker).to have_received(:perform_async).with(pipeline.id)
-          expect(::Security::StoreScansWorker).to have_received(:perform_async).with(pipeline.id)
-          expect(SyncSecurityReportsToReportApprovalRulesWorker).to have_received(:perform_async).with(pipeline.id)
+            expect(StoreSecurityReportsWorker).to have_received(:perform_async).with(pipeline.id)
+          end
+        end
+
+        context 'when the ref is not the default branch of project' do
+          let(:default_branch) { 'another_branch' }
+
+          it 'does not schedule store security report worker' do
+            transition_pipeline
+
+            expect(StoreSecurityReportsWorker).not_to have_received(:perform_async)
+          end
         end
       end
 
-      context 'when the ref is not the default branch of project' do
-        let(:default_branch) { 'another_branch' }
+      context 'when the security reports can not be stored for the pipeline' do
+        let(:can_store_security_reports) { false }
 
-        it 'does not schedule store security report worker' do
-          transition_pipeline
+        context 'when the ref is the default branch of project' do
+          it 'does not schedule store security report worker' do
+            transition_pipeline
 
-          expect(StoreSecurityReportsWorker).not_to have_received(:perform_async)
+            expect(StoreSecurityReportsWorker).not_to have_received(:perform_async)
+          end
         end
-      end
-    end
 
-    context 'when the security reports can not be stored for the pipeline' do
-      let(:can_store_security_reports) { false }
+        context 'when the ref is not the default branch of project' do
+          let(:default_branch) { 'another_branch' }
 
-      context 'when the ref is the default branch of project', :aggregate_failures do
-        it 'does not relevant workers' do
-          transition_pipeline
+          it 'does not schedule store security report worker' do
+            transition_pipeline
 
-          expect(StoreSecurityReportsWorker).not_to have_received(:perform_async)
-          expect(::Security::StoreScansWorker).not_to have_received(:perform_async)
-          expect(SyncSecurityReportsToReportApprovalRulesWorker).not_to have_received(:perform_async)
-        end
-      end
-
-      context 'when the ref is not the default branch of project' do
-        let(:default_branch) { 'another_branch' }
-
-        it 'does not schedule store security report worker' do
-          transition_pipeline
-
-          expect(StoreSecurityReportsWorker).not_to have_received(:perform_async)
+            expect(StoreSecurityReportsWorker).not_to have_received(:perform_async)
+          end
         end
       end
     end
-  end
 
-  describe 'schedules security report related workers' do
     context 'when pipeline is succeeded' do
       it_behaves_like 'storing the security reports', :succeed
     end
@@ -245,10 +239,6 @@ RSpec.describe Ci::Pipeline do
 
     context 'when pipeline is canceled' do
       it_behaves_like 'storing the security reports', :cancel
-    end
-
-    context 'when pipeline is blocked' do
-      it_behaves_like 'storing the security reports', :block
     end
   end
 

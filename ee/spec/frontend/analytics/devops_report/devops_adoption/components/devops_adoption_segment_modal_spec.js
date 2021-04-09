@@ -1,10 +1,13 @@
 import { GlModal, GlFormInput, GlSprintf, GlAlert, GlIcon } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { shallowMount } from '@vue/test-utils';
-import { nextTick } from 'vue';
-import { ApolloMutation } from 'vue-apollo';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vue, { nextTick } from 'vue';
+import VueApollo from 'vue-apollo';
 import DevopsAdoptionSegmentModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_segment_modal.vue';
 import { DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from 'ee/analytics/devops_report/devops_adoption/constants';
+import bulkFindOrCreateDevopsAdoptionSegmentsMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
+import deleteDevopsAdoptionSegmentMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   groupNodes,
@@ -16,13 +19,18 @@ import {
   devopsAdoptionSegmentsData,
 } from '../mock_data';
 
+const localVue = createLocalVue();
+Vue.use(VueApollo);
+
 const mockEvent = { preventDefault: jest.fn() };
 const mutate = jest.fn().mockResolvedValue({
   data: {
     bulkFindOrCreateDevopsAdoptionSegments: {
+      segments: [devopsAdoptionSegmentsData.nodes[0]],
       errors: [],
     },
     deleteDevopsAdoptionSegment: {
+      segments: [devopsAdoptionSegmentsData.nodes[0]],
       errors: [],
     },
   },
@@ -31,9 +39,11 @@ const mutateWithDataErrors = jest.fn().mockResolvedValue({
   data: {
     bulkFindOrCreateDevopsAdoptionSegments: {
       errors: [dataErrorMessage],
+      segments: [],
     },
     deleteDevopsAdoptionSegment: {
-      errors: [],
+      errors: [dataErrorMessage],
+      segments: [],
     },
   },
 });
@@ -43,12 +53,20 @@ const mutateWithErrors = jest.fn().mockRejectedValue(genericErrorMessage);
 describe('DevopsAdoptionSegmentModal', () => {
   let wrapper;
 
-  const createComponent = ({ mutationMock = mutate, props = {}, provide = {} } = {}) => {
-    const $apollo = {
-      mutate: mutationMock,
-    };
+  const createComponent = ({
+    deleteSegmentsSpy = mutate,
+    addSegmentsSpy = mutate,
+    props = {},
+    provide = {},
+  } = {}) => {
+    const mockApollo = createMockApollo([
+      [deleteDevopsAdoptionSegmentMutation, deleteSegmentsSpy],
+      [bulkFindOrCreateDevopsAdoptionSegmentsMutation, addSegmentsSpy],
+    ]);
 
     wrapper = shallowMount(DevopsAdoptionSegmentModal, {
+      localVue,
+      apolloProvider: mockApollo,
       propsData: {
         groups: groupNodes,
         ...props,
@@ -56,12 +74,10 @@ describe('DevopsAdoptionSegmentModal', () => {
       provide,
       stubs: {
         GlSprintf,
-        ApolloMutation,
-      },
-      mocks: {
-        $apollo,
       },
     });
+
+    wrapper.vm.$refs.modal.hide = jest.fn();
   };
 
   const findModal = () => wrapper.find(GlModal);
@@ -274,49 +290,48 @@ describe('DevopsAdoptionSegmentModal', () => {
       `(
         '$action groups',
         ({ enabledGroups, newGroups, expectedAddGroupGids, expectedDeleteIds }) => {
-          describe('successful submission', () => {
-            beforeEach(async () => {
-              createComponent({ props: { enabledGroups } });
+          beforeEach(async () => {
+            createComponent({ props: { enabledGroups } });
 
-              wrapper.setData(newGroups);
+            wrapper.setData(newGroups);
 
-              wrapper.vm.$refs.modal.hide = jest.fn();
+            findModal().vm.$emit('primary', mockEvent);
 
-              findModal().vm.$emit('primary', mockEvent);
+            await waitForPromises();
+          });
 
-              await waitForPromises();
+          if (expectedAddGroupGids.length) {
+            it('submits the correct add request variables', () => {
+              expect(mutate).toHaveBeenCalledWith({ namespaceIds: expectedAddGroupGids });
             });
 
-            if (expectedAddGroupGids.length) {
-              it('submits the correct add request variables', () => {
-                expect(mutate).toHaveBeenCalledWith(
-                  expect.objectContaining({
-                    variables: { namespaceIds: expectedAddGroupGids },
-                  }),
-                );
-              });
-            }
+            it('emits segmentsAdded with the correct variables', () => {
+              const [params] = wrapper.emitted().segmentsAdded[0];
 
-            if (expectedDeleteIds.length) {
-              it('submits the correct delete request variables', () => {
-                expect(mutate).toHaveBeenCalledWith(
-                  expect.objectContaining({
-                    variables: { id: expectedDeleteIds },
-                  }),
-                );
-              });
-            }
+              expect(params).toStrictEqual([devopsAdoptionSegmentsData.nodes[0]]);
+            });
+          }
 
-            it('closes the modal after a successful mutation', () => {
-              expect(wrapper.vm.$refs.modal.hide).toHaveBeenCalled();
+          if (expectedDeleteIds.length) {
+            it('submits the correct delete request variables', () => {
+              expect(mutate).toHaveBeenCalledWith({ id: expectedDeleteIds });
             });
 
-            it('resets the form fields', () => {
-              findModal().vm.$emit('hidden');
+            it('emits segmentsRemoved with the correct variables', () => {
+              const [params] = wrapper.emitted().segmentsRemoved[0];
 
-              expect(wrapper.vm.checkboxValues).toEqual([]);
-              expect(wrapper.vm.filter).toBe('');
+              expect(params).toStrictEqual(firstGroupId);
             });
+          }
+
+          it('closes the modal after a successful mutation', () => {
+            expect(wrapper.vm.$refs.modal.hide).toHaveBeenCalled();
+          });
+
+          it('resets the filter', () => {
+            findModal().vm.$emit('hidden');
+
+            expect(wrapper.vm.filter).toBe('');
           });
         },
       );
@@ -329,7 +344,7 @@ describe('DevopsAdoptionSegmentModal', () => {
         `(
           'displays a $errorType error if the mutation has a $errorLocation error',
           async ({ mutationSpy, message }) => {
-            createComponent({ mutationMock: mutationSpy });
+            createComponent({ addSegmentsSpy: mutationSpy, deleteSegmentsSpy: mutationSpy });
 
             wrapper.setData(enableFirstGroup);
 
@@ -348,7 +363,10 @@ describe('DevopsAdoptionSegmentModal', () => {
         it('calls sentry on top level error', async () => {
           const captureException = jest.spyOn(Sentry, 'captureException');
 
-          createComponent({ mutationMock: mutateWithErrors });
+          createComponent({
+            addSegmentsSpy: mutateWithErrors,
+            deleteSegmentsSpy: mutateWithErrors,
+          });
 
           wrapper.setData(enableFirstGroup);
 
@@ -356,7 +374,7 @@ describe('DevopsAdoptionSegmentModal', () => {
 
           await waitForPromises();
 
-          expect(captureException).toHaveBeenCalledWith(genericErrorMessage);
+          expect(captureException.mock.calls[0][0].networkError).toBe(genericErrorMessage);
         });
       });
     });

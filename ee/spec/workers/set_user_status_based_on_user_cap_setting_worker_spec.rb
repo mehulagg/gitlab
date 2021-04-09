@@ -7,6 +7,7 @@ RSpec.describe SetUserStatusBasedOnUserCapSettingWorker, type: :worker do
 
   describe '#perform' do
     let_it_be(:user) { create(:user, :blocked_pending_approval) }
+
     let(:new_user_signups_cap) { 10 }
 
     subject { described_class.new.perform(user.id) }

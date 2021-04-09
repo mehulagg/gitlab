@@ -9,6 +9,7 @@ RSpec.describe Analytics::Deployments::Frequency::AggregateService do
   let_it_be(:subgroup_project, refind: true) { create(:project, :repository, group: subgroup) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:guest) { create(:user) }
+
   let(:container) { group_project }
   let(:actor) { developer }
   let(:service) { described_class.new(container: container, current_user: actor, params: params) }

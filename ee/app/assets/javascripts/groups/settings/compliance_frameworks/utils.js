@@ -45,7 +45,7 @@ export const fetchPipelineConfigurationFileExists = async (path) => {
   }
 
   try {
-    const { status } = await Api.getRawFile(`${group}/${project}`, file);
+    const { status } = await Api.getRawFile(`${group}/${project}`, file, { ref: undefined });
 
     return status === httpStatus.OK;
   } catch (e) {

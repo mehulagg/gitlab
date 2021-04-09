@@ -82,13 +82,19 @@ RSpec.describe Projects::MergeRequestsController do
         merge_request.mark_as_unchecked!
       end
 
-      it 'checks mergeability asynchronously' do
-        expect_next_instance_of(MergeRequests::MergeabilityCheckService) do |service|
-          expect(service).not_to receive(:execute)
-          expect(service).to receive(:async_execute)
+      context 'check_mergeability_async_in_widget feature flag is disabled' do
+        before do
+          stub_feature_flags(check_mergeability_async_in_widget: false)
         end
 
-        go
+        it 'checks mergeability asynchronously' do
+          expect_next_instance_of(MergeRequests::MergeabilityCheckService) do |service|
+            expect(service).not_to receive(:execute)
+            expect(service).to receive(:async_execute)
+          end
+
+          go
+        end
       end
     end
 
@@ -721,12 +727,6 @@ RSpec.describe Projects::MergeRequestsController do
 
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
         expect(json_response).to eq({ 'errors' => 'Destroy confirmation not provided for merge request' })
-      end
-
-      it 'delegates the update of the todos count cache to TodoService' do
-        expect_any_instance_of(TodoService).to receive(:destroy_target).with(merge_request).once
-
-        delete :destroy, params: { namespace_id: project.namespace, project_id: project, id: merge_request.iid, destroy_confirm: true }
       end
     end
   end

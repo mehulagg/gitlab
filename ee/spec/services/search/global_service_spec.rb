@@ -46,6 +46,7 @@ RSpec.describe Search::GlobalService do
     end
 
     let_it_be(:group) { create(:group) }
+
     let(:project) { create(:project, project_level, namespace: group) }
     let(:user) { create_user_from_membership(project, membership) }
 

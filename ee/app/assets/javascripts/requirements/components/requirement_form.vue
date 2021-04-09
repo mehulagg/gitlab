@@ -250,6 +250,7 @@ export default {
       :enable-edit="canEditRequirement"
       :enable-autocomplete="false"
       :enable-autosave="false"
+      :enable-zen-mode="false"
       :edit-form-visible="enableRequirementEdit || isCreate"
       :show-field-title="true"
       :description-preview-path="descriptionPreviewPath"

@@ -10,5 +10,9 @@ export default function getStateKey() {
     return stateKey.policyViolation;
   }
 
+  if (this.jiraAssociation.enforced && this.jiraAssociation.issue_keys.length === 0) {
+    return stateKey.jiraAssociationMissing;
+  }
+
   return CEGetStateKey.call(this);
 }

@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlButton, GlButtonGroup, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlButton, GlButtonGroup } from '@gitlab/ui';
 import dateFormat from 'dateformat';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
@@ -21,7 +21,6 @@ export default {
     GlButtonGroup,
     BurndownChart,
     BurnupChart,
-    GlSprintf,
     OpenTimeboxSummary,
     TimeboxSummaryCards,
   },
@@ -116,7 +115,6 @@ export default {
         },
       },
       useLegacyBurndown: false,
-      showInfo: this.showNewOldBurndownToggle,
       error: '',
     };
   },
@@ -281,19 +279,6 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="showInfo" variant="info" class="col-12 gl-mt-3" @dismiss="showInfo = false">
-      <gl-sprintf
-        :message="
-          __(
-            `Burndown charts are now fixed. This means that removing issues from a milestone after it has expired won't affect the chart. You can view the old chart using the %{strongStart}Legacy burndown chart%{strongEnd} button.`,
-          )
-        "
-      >
-        <template #strong="{ content }">
-          <strong>{{ content }}</strong>
-        </template>
-      </gl-sprintf>
-    </gl-alert>
     <div class="burndown-header gl-display-flex gl-align-items-center gl-flex-wrap">
       <strong ref="filterLabel">{{ __('Filter by') }}</strong>
       <gl-button-group>

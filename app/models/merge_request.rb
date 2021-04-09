@@ -288,9 +288,6 @@ class MergeRequest < ApplicationRecord
       ]
     )
   end
-  scope :by_cherry_pick_sha, -> (sha) do
-    joins(:notes).where(notes: { commit_id: sha })
-  end
   scope :join_project, -> { joins(:target_project) }
   scope :join_metrics, -> (target_project_id = nil) do
     # Do not join the relation twice
@@ -1370,11 +1367,11 @@ class MergeRequest < ApplicationRecord
   def environments_for(current_user, latest: false)
     return [] unless diff_head_commit
 
-    envs = EnvironmentsFinder.new(target_project, current_user,
+    envs = EnvironmentsByDeploymentsFinder.new(target_project, current_user,
       ref: target_branch, commit: diff_head_commit, with_tags: true, find_latest: latest).execute
 
     if source_project
-      envs.concat EnvironmentsFinder.new(source_project, current_user,
+      envs.concat EnvironmentsByDeploymentsFinder.new(source_project, current_user,
         ref: source_branch, commit: diff_head_commit, find_latest: latest).execute
     end
 

@@ -220,18 +220,29 @@ RSpec.describe Epics::UpdateService do
             user: user2)
         end
 
+        subject { update_epic(label_ids: [label.id]) }
+
         before do
           group.add_developer(user)
-
-          update_epic(label_ids: [label.id])
         end
 
         it 'marks todo as done for a user who added a label' do
+          subject
+
           expect(todo1.reload.state).to eq('done')
         end
 
         it 'does not mark todos as done for other users' do
+          subject
+
           expect(todo2.reload.state).to eq('pending')
+        end
+
+        it 'tracks the label change' do
+          expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter)
+            .to receive(:track_epic_labels_changed_action).with(author: user)
+
+          subject
         end
       end
 

@@ -17,7 +17,7 @@ RSpec.describe Mutations::Dast::Profiles::Update do
       id: dast_profile_gid,
       name: SecureRandom.hex,
       description: SecureRandom.hex,
-      branch_name: 'orphaned-branch',
+      branch_name: project.default_branch,
       dast_site_profile_id: global_id_of(create(:dast_site_profile, project: project)),
       dast_scanner_profile_id: global_id_of(create(:dast_scanner_profile, project: project)),
       run_after_update: run_after_update

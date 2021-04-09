@@ -10,7 +10,7 @@ FactoryBot.define do
       "#{FFaker::Product.product_name.truncate(200)} - #{i}"
     end
 
-    auth_enabled { false }
+    auth_enabled { true }
     auth_url { "#{dast_site.url}/sign-in" }
     auth_username_field { 'session[username]' }
     auth_password_field { 'session[password]' }

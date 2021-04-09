@@ -10,6 +10,7 @@ RSpec.describe Resolvers::EpicsResolver do
 
   context "with a group" do
     let_it_be_with_refind(:group) { create(:group) }
+
     let(:project) { create(:project, :public, group: group) }
     let(:epic1)   { create(:epic, group: group, state: :closed, created_at: 3.days.ago, updated_at: 2.days.ago) }
     let(:epic2)   { create(:epic, group: group, author: user2, title: 'foo', description: 'bar', created_at: 2.days.ago, updated_at: 3.days.ago) }

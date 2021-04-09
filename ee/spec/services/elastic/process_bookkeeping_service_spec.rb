@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_state do
+RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_state, :elastic do
   let(:ref_class) { ::Gitlab::Elastic::DocumentReference }
 
   let(:fake_refs) { Array.new(10) { |i| ref_class.new(Issue, i, "issue_#{i}", 'project_1') } }
@@ -125,17 +125,11 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
   end
 
   describe '#execute' do
-    let(:shard_limit) { 5 }
-    let(:shard_number) { 2 }
-    let(:limit) { shard_limit * shard_number }
-
-    before do
-      stub_const('Elastic::ProcessBookkeepingService::SHARD_LIMIT', shard_limit)
-      stub_const('Elastic::ProcessBookkeepingService::SHARDS_NUMBER', shard_number)
-    end
-
     context 'limit is less than refs count' do
-      let(:shard_limit) { 2 }
+      before do
+        stub_const('Elastic::ProcessBookkeepingService::SHARD_LIMIT', 2)
+        stub_const('Elastic::ProcessBookkeepingService::SHARDS_NUMBER', 2)
+      end
 
       it 'processes only up to limit' do
         described_class.track!(*fake_refs)
@@ -143,7 +137,7 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
         expect(described_class.queue_size).to eq(fake_refs.size)
         allow_processing(*fake_refs)
 
-        expect { described_class.new.execute }.to change(described_class, :queue_size).by(-limit)
+        expect { described_class.new.execute }.to change(described_class, :queue_size).by(-4)
       end
     end
 
@@ -151,17 +145,17 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
       described_class.track!(*fake_refs)
 
       expect(described_class.queue_size).to eq(fake_refs.size)
-      expect_processing(*fake_refs[0...limit])
+      expect_processing(*fake_refs)
 
-      expect { described_class.new.execute }.to change(described_class, :queue_size).by(-limit)
+      expect { described_class.new.execute }.to change(described_class, :queue_size).by(-fake_refs.count)
     end
 
     it 'returns the number of documents processed' do
       described_class.track!(*fake_refs)
 
-      expect_processing(*fake_refs[0...limit])
+      expect_processing(*fake_refs)
 
-      expect(described_class.new.execute).to eq(limit)
+      expect(described_class.new.execute).to eq(fake_refs.count)
     end
 
     it 'returns 0 without writing to the index when there are no documents' do
@@ -175,9 +169,9 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
       failed = fake_refs[0]
 
       expect(described_class.queue_size).to eq(10)
-      expect_processing(*fake_refs[0...limit], failures: [failed])
+      expect_processing(*fake_refs, failures: [failed])
 
-      expect { described_class.new.execute }.to change(described_class, :queue_size).by(-limit + 1)
+      expect { described_class.new.execute }.to change(described_class, :queue_size).by(-fake_refs.count + 1)
 
       shard = described_class.shard_number(failed.serialize)
       serialized = described_class.queued_items[shard].first[0]
@@ -224,29 +218,37 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
       end
 
       it 'does not have N+1 queries for notes' do
-        notes = []
+        # Gitaly N+1 calls when processing notes on commits
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/327086 . Even though
+        # this block is in the spec there is still an N+1 to fix in the actual
+        # code.
+        Gitlab::GitalyClient.allow_n_plus_1_calls do
+          notes = []
 
-        2.times do
-          notes << create(:note)
-          notes << create(:discussion_note_on_merge_request)
-          notes << create(:note_on_merge_request)
-          notes << create(:note_on_commit)
+          2.times do
+            notes << create(:note)
+            notes << create(:discussion_note_on_merge_request)
+            notes << create(:note_on_merge_request)
+            notes << create(:note_on_commit)
+            notes << create(:diff_note_on_merge_request)
+          end
+
+          described_class.track!(*notes)
+
+          control = ActiveRecord::QueryRecorder.new(skip_cached: false) { described_class.new.execute }
+
+          3.times do
+            notes << create(:note)
+            notes << create(:discussion_note_on_merge_request)
+            notes << create(:note_on_merge_request)
+            notes << create(:note_on_commit)
+            notes << create(:diff_note_on_merge_request)
+          end
+
+          described_class.track!(*notes)
+
+          expect { described_class.new.execute }.not_to exceed_all_query_limit(control)
         end
-
-        described_class.track!(*notes)
-
-        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { described_class.new.execute }
-
-        3.times do
-          notes << create(:note)
-          notes << create(:discussion_note_on_merge_request)
-          notes << create(:note_on_merge_request)
-          notes << create(:note_on_commit)
-        end
-
-        described_class.track!(*notes)
-
-        expect { described_class.new.execute }.not_to exceed_all_query_limit(control)
       end
 
       it 'does not have N+1 queries for issues' do

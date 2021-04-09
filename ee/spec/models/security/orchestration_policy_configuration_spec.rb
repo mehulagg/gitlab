@@ -29,6 +29,10 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     subject { security_orchestration_policy_configuration.enabled? }
 
     context 'when feature is enabled' do
+      before do
+        stub_feature_flags(security_orchestration_policies_configuration: true)
+      end
+
       it { is_expected.to eq(true) }
     end
 

@@ -3,7 +3,9 @@ import { GlCollapse, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ReportItem from './report_item.vue';
 import ReportRow from './report_row.vue';
-import { isValidReportType } from './types/utils';
+import { filterTypesAndLimitListDepth } from './types/utils';
+
+const NESTED_LISTS_MAX_DEPTH = 4;
 
 export default {
   i18n: {
@@ -27,8 +29,13 @@ export default {
     };
   },
   computed: {
+    filteredDetails() {
+      return filterTypesAndLimitListDepth(this.details, {
+        maxDepth: NESTED_LISTS_MAX_DEPTH,
+      });
+    },
     detailsEntries() {
-      return Object.entries(this.details).filter(([, item]) => isValidReportType(item.type));
+      return Object.entries(this.filteredDetails);
     },
     hasDetails() {
       return this.detailsEntries.length > 0;

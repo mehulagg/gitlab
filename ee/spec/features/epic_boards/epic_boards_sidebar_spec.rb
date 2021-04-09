@@ -50,6 +50,37 @@ RSpec.describe 'Epic boards sidebar', :js do
     expect(page).not_to have_selector('[data-testid="epic-boards-sidebar"]')
   end
 
+  it 'shows epic details when sidebar is open', :aggregate_failures do
+    click_card(card)
+
+    page.within('[data-testid="epic-boards-sidebar"]') do
+      expect(page).to have_content(epic1.title)
+      expect(page).to have_content(epic1.to_reference)
+    end
+  end
+
+  context 'title' do
+    it 'edits epic title' do
+      click_card(card)
+
+      page.within('[data-testid="sidebar-title"]') do
+        click_button 'Edit'
+
+        wait_for_requests
+
+        find('input').set('Test title')
+
+        click_button 'Save changes'
+
+        wait_for_requests
+
+        expect(page).to have_content('Test title')
+      end
+
+      expect(card).to have_content('Test title')
+    end
+  end
+
   context 'labels' do
     it 'adds a single label' do
       click_card(card)

@@ -1,6 +1,0 @@
----
-title: Extend state transition that initiate creation of vulnerabilities in database
-  to blocked pipeline state
-merge_request: 56779
-author:
-type: added

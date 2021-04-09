@@ -1,3 +1,4 @@
+import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
@@ -5,6 +6,7 @@ import FirstClassInstanceDashboard from 'ee/security_dashboard/components/first_
 import FirstClassInstanceVulnerabilities from 'ee/security_dashboard/components/first_class_instance_security_dashboard_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import SurveyRequestBanner from 'ee/security_dashboard/components/survey_request_banner.vue';
 import VulnerabilitiesCountList from 'ee/security_dashboard/components/vulnerability_count_list.vue';
 
 describe('First Class Instance Dashboard Component', () => {
@@ -14,12 +16,14 @@ describe('First Class Instance Dashboard Component', () => {
     $apollo: { queries: { projects: { loading } } },
   });
 
-  const findInstanceVulnerabilities = () => wrapper.find(FirstClassInstanceVulnerabilities);
-  const findCsvExportButton = () => wrapper.find(CsvExportButton);
-  const findEmptyState = () => wrapper.find(DashboardNotConfigured);
-  const findFilters = () => wrapper.find(Filters);
-  const findVulnerabilitiesCountList = () => wrapper.find(VulnerabilitiesCountList);
+  const findInstanceVulnerabilities = () =>
+    wrapper.findComponent(FirstClassInstanceVulnerabilities);
+  const findCsvExportButton = () => wrapper.findComponent(CsvExportButton);
+  const findEmptyState = () => wrapper.findComponent(DashboardNotConfigured);
+  const findFilters = () => wrapper.findComponent(Filters);
+  const findVulnerabilitiesCountList = () => wrapper.findComponent(VulnerabilitiesCountList);
   const findHeader = () => wrapper.find('[data-testid="header"]');
+  const findSurveyBanner = () => wrapper.findComponent(SurveyRequestBanner);
 
   const createWrapper = ({ data = {}, stubs, mocks = defaultMocks() }) => {
     return shallowMount(FirstClassInstanceDashboard, {
@@ -53,9 +57,11 @@ describe('First Class Instance Dashboard Component', () => {
     });
 
     it('should render the vulnerabilities', () => {
-      expect(findInstanceVulnerabilities().props()).toEqual({
-        filters: {},
-      });
+      expect(findInstanceVulnerabilities().exists()).toBe(true);
+    });
+
+    it('should show the survey banner', () => {
+      expect(findSurveyBanner().exists()).toBe(true);
     });
 
     it('has filters', () => {
@@ -93,10 +99,12 @@ describe('First Class Instance Dashboard Component', () => {
       });
     });
 
-    it('does not render the export button, vulnerabilities count list, or header', () => {
+    it('only shows the loading icon', () => {
+      expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(true);
       expect(findCsvExportButton().exists()).toBe(false);
       expect(findVulnerabilitiesCountList().exists()).toBe(false);
       expect(findHeader().exists()).toBe(false);
+      expect(findSurveyBanner().exists()).toBe(false);
     });
   });
 
@@ -109,8 +117,9 @@ describe('First Class Instance Dashboard Component', () => {
       });
     });
 
-    it('only renders the empty state', () => {
+    it('only renders the empty state and survey banner', () => {
       expect(findEmptyState().exists()).toBe(true);
+      expect(findSurveyBanner().exists()).toBe(true);
       expect(findCsvExportButton().exists()).toBe(false);
       expect(findInstanceVulnerabilities().exists()).toBe(false);
       expect(findFilters().exists()).toBe(false);

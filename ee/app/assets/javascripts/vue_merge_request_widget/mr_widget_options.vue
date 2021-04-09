@@ -10,6 +10,7 @@ import { s__, __, sprintf } from '~/locale';
 import ReportSection from '~/reports/components/report_section.vue';
 import CEWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
 import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
+import MrWidgetJiraAssociationMissing from './components/states/mr_widget_jira_association_missing.vue';
 import MrWidgetPolicyViolation from './components/states/mr_widget_policy_violation.vue';
 import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
 
@@ -18,6 +19,7 @@ export default {
     MrWidgetLicenses,
     MrWidgetGeoSecondaryNode,
     MrWidgetPolicyViolation,
+    MrWidgetJiraAssociationMissing,
     BlockingMergeRequestsReport,
     GroupedSecurityReportsApp: () =>
       import('ee/vue_shared/security_reports/grouped_security_reports_app.vue'),

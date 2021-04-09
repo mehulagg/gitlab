@@ -8,6 +8,7 @@ RSpec.describe Vulnerabilities::UpdateService do
   end
 
   let_it_be(:user) { create(:user) }
+
   let!(:project) { create(:project) } # cannot use let_it_be here: caching causes problems with permission-related tests
   let!(:updated_finding) { create(:vulnerabilities_finding, project: project, name: finding_name, severity: :critical, confidence: :confirmed, vulnerability: vulnerability) }
 

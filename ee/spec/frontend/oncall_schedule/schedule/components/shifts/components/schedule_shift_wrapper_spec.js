@@ -1,7 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import DaysScheduleShift from 'ee/oncall_schedules/components/schedule/components/shifts/components/days_schedule_shift.vue';
 import ScheduleShiftWrapper from 'ee/oncall_schedules/components/schedule/components/shifts/components/schedule_shift_wrapper.vue';
-import WeeksScheduleShift from 'ee/oncall_schedules/components/schedule/components/shifts/components/weeks_schedule_shift.vue';
+import ShiftItem from 'ee/oncall_schedules/components/schedule/components/shifts/components/shift_item.vue';
 import { PRESET_TYPES, DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
 import { nDaysAfter } from '~/lib/utils/datetime_utility';
 import mockRotations from '../../../../mocks/mock_rotation.json';
@@ -23,14 +22,14 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/s
       },
       data() {
         return {
-          shiftTimeUnitWidth: 0,
+          timelineWidth: 0,
           ...data,
         };
       },
       mocks: {
         $apollo: {
           queries: {
-            shiftTimeUnitWidth: 0,
+            timelineWidth: 0,
           },
         },
       },
@@ -45,14 +44,13 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/s
     wrapper.destroy();
   });
 
-  const findDaysScheduleShifts = () => wrapper.findAllComponents(DaysScheduleShift);
-  const findWeeksScheduleShifts = () => wrapper.findAllComponents(WeeksScheduleShift);
+  const findShiftItems = () => wrapper.findAllComponents(ShiftItem);
   const updateShifts = (startsAt, endsAt) =>
     mockRotations[0].shifts.nodes.map((el) => ({ ...el, startsAt, endsAt }));
 
   describe('when the preset type is WEEKS', () => {
     it('should render a selection of week grid shifts inside the rotation', () => {
-      expect(findWeeksScheduleShifts()).toHaveLength(2);
+      expect(findShiftItems()).toHaveLength(2);
     });
 
     it.each`
@@ -78,14 +76,14 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/s
         },
       });
 
-      expect(findWeeksScheduleShifts().exists()).toBe(false);
+      expect(findShiftItems().exists()).toBe(false);
     });
   });
 
   describe('when the preset type is DAYS', () => {
     it('should render a selection of day grid shifts inside the rotation', () => {
       createComponent({ props: { presetType: PRESET_TYPES.DAYS } });
-      expect(findDaysScheduleShifts()).toHaveLength(1);
+      expect(findShiftItems()).toHaveLength(2);
     });
 
     it.each`
@@ -111,7 +109,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/s
         },
       });
 
-      expect(findDaysScheduleShifts().exists()).toBe(false);
+      expect(findShiftItems().exists()).toBe(false);
     });
   });
 });

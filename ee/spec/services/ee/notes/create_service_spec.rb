@@ -63,6 +63,7 @@ RSpec.describe Notes::CreateService do
 
     context 'for epics' do
       let_it_be(:epic) { create(:epic) }
+
       let(:opts) { { noteable_type: 'Epic', noteable_id: epic.id, note: "hello" } }
 
       it 'tracks epic note creation' do

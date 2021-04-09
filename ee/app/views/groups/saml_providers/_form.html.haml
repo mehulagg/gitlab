@@ -21,7 +21,7 @@
         %span.form-text.d-inline.font-weight-normal.align-text-bottom.ml-3= s_('GroupSAML|Enforce SSO-access for Git in this group.')
       .form-text.text-muted.js-helper-text{ style: "display: #{saml_provider.enabled? ? 'none' : 'block'}" }
         %span
-          = s_('GroupSAML|Before enforcing SSO, enable SAML authentication.')
+          = s_('GroupSAML|Before enforcing SSO-access for Git, enable SSO-only authentication for web activity.')
     - if Feature.enabled?(:group_managed_accounts, group)
       .form-group
         %label.gl-mt-2.mb-0.js-group-saml-enforced-group-managed-accounts-toggle-area

@@ -7,6 +7,7 @@ RSpec.describe Gitlab::Geo::Replication::FileTransfer do
 
   let_it_be(:primary_node) { create(:geo_node, :primary) }
   let_it_be(:secondary_node) { create(:geo_node) }
+
   let(:user) { create(:user, :with_avatar) }
   let(:upload) { Upload.find_by(model: user, uploader: 'AvatarUploader') }
 

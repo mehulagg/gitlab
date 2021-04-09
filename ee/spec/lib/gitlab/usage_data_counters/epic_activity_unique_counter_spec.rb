@@ -208,6 +208,16 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
     it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::EPIC_ISSUE_ADDED }
     end
+  end
+
+  context 'for changing labels epic event' do
+    def track_action(params)
+      described_class.track_epic_labels_changed_action(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_LABELS }
+    end
 
     it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
   end
@@ -219,6 +229,18 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
 
     it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::EPIC_ISSUE_REMOVED }
+    end
+
+    it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
+  end
+
+  context 'for moving an issue that belongs to epic' do
+    def track_action(params)
+      described_class.track_epic_issue_moved_from_project(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_ISSUE_MOVED_FROM_PROJECT }
     end
 
     it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity

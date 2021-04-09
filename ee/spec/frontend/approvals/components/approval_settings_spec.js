@@ -52,6 +52,7 @@ describe('ApprovalSettings', () => {
   describe.each`
     testid                             | setting                        | label                                                                                          | anchor
     ${'prevent-author-approval'}       | ${'preventAuthorApproval'}     | ${'Prevent MR approvals by the author.'}                                                       | ${'allowing-merge-request-authors-to-approve-their-own-merge-requests'}
+    ${'prevent-committers-approval'}   | ${'preventCommittersApproval'} | ${'Prevent approval of merge requests by merge request committers.'}                           | ${'prevent-approval-of-merge-requests-by-their-committers'}
     ${'prevent-mr-approval-rule-edit'} | ${'preventMrApprovalRuleEdit'} | ${'Prevent users from modifying MR approval rules.'}                                           | ${'editing--overriding-approval-rules-per-merge-request'}
     ${'require-user-password'}         | ${'requireUserPassword'}       | ${'Require user password for approvals.'}                                                      | ${'require-authentication-when-approving-a-merge-request'}
     ${'remove-approvals-on-push'}      | ${'removeApprovalsOnPush'}     | ${'Remove all approvals in a merge request when new commits are pushed to its source branch.'} | ${'resetting-approvals-on-push'}

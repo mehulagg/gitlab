@@ -31,6 +31,7 @@ module EE
       private
 
       def add_issue_sla(issue)
+        return if ::Feature.enabled?(:issue_perform_after_creation_tasks_async, issue.project)
         return unless issue.sla_available?
 
         ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute

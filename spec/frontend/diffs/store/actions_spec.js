@@ -258,6 +258,8 @@ describe('DiffsStoreActions', () => {
           { type: types.SET_LOADING, payload: false },
           { type: types.SET_MERGE_REQUEST_DIFFS, payload: diffMetadata.merge_request_diffs },
           { type: types.SET_DIFF_METADATA, payload: noFilesData },
+          // Workers are synchronous in Jest environment (see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/58805)
+          { type: types.SET_TREE_DATA, payload: utils.generateTreeList(diffMetadata.diff_files) },
         ],
         [],
         () => {
@@ -1507,19 +1509,42 @@ describe('DiffsStoreActions', () => {
   });
 
   describe('setFileByFile', () => {
+    const updateUserEndpoint = 'user/prefs';
+    let putSpy;
+    let mock;
+
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+      putSpy = jest.spyOn(axios, 'put');
+
+      mock.onPut(updateUserEndpoint).reply(200, {});
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
     it.each`
       value
       ${true}
       ${false}
-    `('commits SET_FILE_BY_FILE with the new value $value', ({ value }) => {
-      return testAction(
-        setFileByFile,
-        { fileByFile: value },
-        { viewDiffsFileByFile: null },
-        [{ type: types.SET_FILE_BY_FILE, payload: value }],
-        [],
-      );
-    });
+    `(
+      'commits SET_FILE_BY_FILE and persists the File-by-File user preference with the new value $value',
+      async ({ value }) => {
+        await testAction(
+          setFileByFile,
+          { fileByFile: value },
+          {
+            viewDiffsFileByFile: null,
+            endpointUpdateUser: updateUserEndpoint,
+          },
+          [{ type: types.SET_FILE_BY_FILE, payload: value }],
+          [],
+        );
+
+        expect(putSpy).toHaveBeenCalledWith(updateUserEndpoint, { view_diffs_file_by_file: value });
+      },
+    );
   });
 
   describe('reviewFile', () => {

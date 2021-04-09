@@ -25,12 +25,6 @@ module DastOnDemandScans
       ).execute.present?
     end
 
-    def branch
-      strong_memoize(:branch) do
-        params[:branch] || container.default_branch
-      end
-    end
-
     def dast_profile
       strong_memoize(:dast_profile) do
         params[:dast_profile]
@@ -55,6 +49,12 @@ module DastOnDemandScans
       end
     end
 
+    def branch
+      strong_memoize(:branch) do
+        dast_profile&.branch_name || params[:branch] || container.default_branch
+      end
+    end
+
     def url_base
       strong_memoize(:url_base) do
         DastSiteValidation.get_normalized_url_base(dast_site&.url)
@@ -72,11 +72,15 @@ module DastOnDemandScans
     def site_profile_config
       return {} unless dast_site_profile
 
+      excluded_urls = dast_site_profile.excluded_urls.presence&.join(',')
+      return { excluded_urls: excluded_urls } unless dast_site_profile.auth_enabled
+
       {
-        excluded_urls: dast_site_profile.excluded_urls.join(','),
+        excluded_urls: excluded_urls,
         auth_username_field: dast_site_profile.auth_username_field,
         auth_password_field: dast_site_profile.auth_password_field,
-        auth_username: dast_site_profile.auth_username
+        auth_username: dast_site_profile.auth_username,
+        auth_url: dast_site_profile.auth_url
       }
     end
 

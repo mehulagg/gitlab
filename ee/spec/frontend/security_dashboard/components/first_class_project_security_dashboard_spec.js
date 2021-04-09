@@ -10,6 +10,7 @@ import Filters from 'ee/security_dashboard/components/first_class_vulnerability_
 import ProjectPipelineStatus from 'ee/security_dashboard/components/project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from 'ee/security_dashboard/components/project_vulnerabilities.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import SurveyRequestBanner from 'ee/security_dashboard/components/survey_request_banner.vue';
 import VulnerabilityCountList from 'ee/security_dashboard/components/vulnerability_count_list.vue';
 
 const props = {
@@ -38,13 +39,14 @@ const filters = { foo: 'bar' };
 describe('First class Project Security Dashboard component', () => {
   let wrapper;
 
-  const findFilters = () => wrapper.find(Filters);
-  const findProjectPipelineStatus = () => wrapper.find(ProjectPipelineStatus);
-  const findVulnerabilities = () => wrapper.find(ProjectVulnerabilitiesApp);
-  const findVulnerabilityCountList = () => wrapper.find(VulnerabilityCountList);
-  const findUnconfiguredState = () => wrapper.find(ReportsNotConfigured);
-  const findCsvExportButton = () => wrapper.find(CsvExportButton);
-  const findAutoFixUserCallout = () => wrapper.find(AutoFixUserCallout);
+  const findFilters = () => wrapper.findComponent(Filters);
+  const findProjectPipelineStatus = () => wrapper.findComponent(ProjectPipelineStatus);
+  const findVulnerabilities = () => wrapper.findComponent(ProjectVulnerabilitiesApp);
+  const findVulnerabilityCountList = () => wrapper.findComponent(VulnerabilityCountList);
+  const findUnconfiguredState = () => wrapper.findComponent(ReportsNotConfigured);
+  const findCsvExportButton = () => wrapper.findComponent(CsvExportButton);
+  const findAutoFixUserCallout = () => wrapper.findComponent(AutoFixUserCallout);
+  const findSurveyRequestBanner = () => wrapper.findComponent(SurveyRequestBanner);
 
   const createComponent = (options) => {
     wrapper = shallowMount(FirstClassProjectSecurityDashboard, {
@@ -112,6 +114,10 @@ describe('First class Project Security Dashboard component', () => {
 
     it('should display the project pipeline status', () => {
       expect(findProjectPipelineStatus()).toExist();
+    });
+
+    it('should show the survey request banner', () => {
+      expect(findSurveyRequestBanner().exists()).toBe(true);
     });
   });
 
@@ -198,6 +204,10 @@ describe('First class Project Security Dashboard component', () => {
 
     it('displays the unconfigured state', () => {
       expect(findUnconfiguredState().exists()).toBe(true);
+    });
+
+    it('shows the survey request banner', () => {
+      expect(findSurveyRequestBanner().exists()).toBe(true);
     });
   });
 });

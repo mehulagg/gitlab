@@ -198,7 +198,7 @@ module EE
                 geo_nodes: count(::GeoNode),
                 geo_event_log_max_id: alt_usage_data { Geo::EventLog.maximum(:id) || 0 },
                 ldap_group_links: count(::LdapGroupLink),
-                issues_with_health_status: count(::Issue.with_health_status, start: issue_minimum_id, finish: issue_maximum_id),
+                issues_with_health_status: count(::Issue.with_health_status, start: minimum_id(::Issue), finish: maximum_id(::Issue)),
                 ldap_keys: count(::LDAPKey),
                 ldap_users: count(::User.ldap, 'users.id'),
                 pod_logs_usages_total: redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] },
@@ -208,7 +208,7 @@ module EE
                 projects_mirrored_with_pipelines_enabled: count(::Project.mirrored_with_enabled_pipelines),
                 projects_reporting_ci_cd_back_to_github: count(::GithubService.active),
                 status_page_projects: count(::StatusPage::ProjectSetting.enabled),
-                status_page_issues: count(::Issue.on_status_page, start: issue_minimum_id, finish: issue_maximum_id),
+                status_page_issues: count(::Issue.on_status_page, start: minimum_id(::Issue), finish: maximum_id(::Issue)),
                 template_repositories: add(count(::Project.with_repos_templates), count(::Project.with_groups_level_repos_templates))
               },
               requirements_counts,
@@ -260,16 +260,16 @@ module EE
             projects_imported_from_github: distinct_count(::Project.github_imported.where(time_period), :creator_id),
             projects_with_repositories_enabled: distinct_count(::Project.with_repositories_enabled.where(time_period),
                                                                :creator_id,
-                                                               start: user_minimum_id,
-                                                               finish: user_maximum_id),
+                                                               start: minimum_id(::User),
+                                                               finish: maximum_id(::User)),
             protected_branches: distinct_count(::Project.with_protected_branches.where(time_period),
                                                :creator_id,
-                                               start: user_minimum_id,
-                                               finish: user_maximum_id),
+                                               start: minimum_id(::User),
+                                               finish: maximum_id(::User)),
             suggestions: distinct_count(::Note.with_suggestions.where(time_period),
                                         :author_id,
-                                        start: user_minimum_id,
-                                        finish: user_maximum_id),
+                                        start: minimum_id(::User),
+                                        finish: maximum_id(::User)),
             users_using_path_locks: distinct_count(PathLock.where(time_period), :user_id),
             users_using_lfs_locks: distinct_count(LfsFileLock.where(time_period), :user_id),
             total_number_of_path_locks: count(::PathLock.where(time_period)),
@@ -377,8 +377,8 @@ module EE
           SECURE_PRODUCT_TYPES.each do |secure_type, attribs|
             results["#{prefix}#{attribs[:name]}".to_sym] = distinct_count(::Ci::Build.where(name: secure_type).where(time_period),
                                                                           :user_id,
-                                                                          start: user_minimum_id,
-                                                                          finish: user_maximum_id)
+                                                                          start: minimum_id(::User),
+                                                                          finish: maximum_id(::User))
           end
 
           results.merge!(count_secure_user_scans(time_period))
@@ -613,8 +613,8 @@ module EE
               .where.not(section: ::Gitlab::CodeOwners::Entry::DEFAULT_SECTION)
               .where(time_period),
             'merge_requests.target_project_id',
-            start: project_minimum_id,
-            finish: project_maximum_id
+            start: minimum_id(::Project),
+            finish: maximum_id(::Project)
           )
         end
         # rubocop:enable CodeReuse/ActiveRecord

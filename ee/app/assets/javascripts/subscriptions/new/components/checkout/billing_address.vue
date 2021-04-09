@@ -2,9 +2,10 @@
 import { GlFormGroup, GlFormInput, GlFormSelect } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { mapState, mapActions } from 'vuex';
+import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import { s__ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
-import Step from './step.vue';
+import { STEPS } from '../../constants';
 
 export default {
   components: {
@@ -128,11 +129,12 @@ export default {
     stateSelectPrompt: s__('Checkout|Please select a state'),
     zipCodeLabel: s__('Checkout|Zip code'),
   },
+  stepId: STEPS[1].id,
 };
 </script>
 <template>
   <step
-    step="billingAddress"
+    :step-id="$options.stepId"
     :title="$options.i18n.stepTitle"
     :is-valid="isValid"
     :next-step-button-text="$options.i18n.nextStepButtonText"

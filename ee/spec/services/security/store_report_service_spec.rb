@@ -30,7 +30,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :fingerprints) do
+    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures) do
       'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2
       'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0
       'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0
@@ -66,8 +66,8 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
       end
 
-      it 'inserts all fingerprints' do
-        expect { subject }.to change { Vulnerabilities::FindingFingerprint.count }.by(fingerprints)
+      it 'inserts all signatures' do
+        expect { subject }.to change { Vulnerabilities::FindingSignature.count }.by(signatures)
       end
     end
 
@@ -124,11 +124,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
     let(:new_pipeline) { create(:ci_pipeline, project: project) }
     let(:new_report) { new_pipeline.security_reports.get_report(report_type.to_s, artifact) }
-    let(:existing_fingerprint) { create(:vulnerabilities_finding_fingerprint, finding: finding) }
-    let(:unsupported_fingerprint) do
-      create(:vulnerabilities_finding_fingerprint,
+    let(:existing_signature) { create(:vulnerabilities_finding_signature, finding: finding) }
+    let(:unsupported_signature) do
+      create(:vulnerabilities_finding_signature,
         finding: finding,
-        algorithm_type: ::Vulnerabilities::FindingFingerprint.algorithm_types[:location])
+        algorithm_type: ::Vulnerabilities::FindingSignature.algorithm_types[:location])
     end
 
     let(:trait) { :sast }
@@ -219,29 +219,29 @@ RSpec.describe Security::StoreReportService, '#execute' do
       expect(finding.reload).to have_attributes(severity: 'medium', name: 'Cipher with no integrity')
     end
 
-    it 'updates fingerprints to match new values' do
-      existing_fingerprint
-      unsupported_fingerprint
+    it 'updates signatures to match new values' do
+      existing_signature
+      unsupported_signature
 
-      expect(finding.fingerprints.count).to eq(2)
-      fingerprint_algs = finding.fingerprints.map(&:algorithm_type).sort
-      expect(fingerprint_algs).to eq(%w[hash location])
+      expect(finding.signatures.count).to eq(2)
+      signature_algs = finding.signatures.map(&:algorithm_type).sort
+      expect(signature_algs).to eq(%w[hash location])
 
       subject
 
       finding.reload
-      existing_fingerprint.reload
+      existing_signature.reload
 
       # check that unsupported algorithm is not deleted
-      expect(finding.fingerprints.count).to eq(3)
-      fingerprint_algs = finding.fingerprints.sort.map(&:algorithm_type)
-      expect(fingerprint_algs).to eq(%w[hash location scope_offset])
+      expect(finding.signatures.count).to eq(3)
+      signature_algs = finding.signatures.sort.map(&:algorithm_type)
+      expect(signature_algs).to eq(%w[hash location scope_offset])
 
-      # check that the existing hash fingerprint was updated/reused
-      expect(existing_fingerprint.id).to eq(finding.fingerprints.min.id)
+      # check that the existing hash signature was updated/reused
+      expect(existing_signature.id).to eq(finding.signatures.min.id)
 
-      # check that the unsupported fingerprint was not deleted
-      expect(::Vulnerabilities::FindingFingerprint.exists?(unsupported_fingerprint.id)).to eq(true)
+      # check that the unsupported signature was not deleted
+      expect(::Vulnerabilities::FindingSignature.exists?(unsupported_signature.id)).to eq(true)
     end
 
     it 'updates existing vulnerability with new data' do

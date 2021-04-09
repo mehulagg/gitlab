@@ -18,6 +18,8 @@ export const mockParentItem = {
   title: 'Some sample epic',
   reference: 'gitlab-org&1',
   type: 'Epic',
+  hasChildren: true,
+  hasIssues: true,
   userPermissions: {
     adminEpic: true,
     createEpic: true,
@@ -366,7 +368,7 @@ export const mockFrequentlyUsedProjects = [
     webUrl: '/gitlab-org/project1',
     avatarUrl: null,
     lastAccessedOn: 123,
-    frequency: 1,
+    frequency: 4,
   },
   {
     id: 2,
@@ -375,7 +377,7 @@ export const mockFrequentlyUsedProjects = [
     webUrl: '/gitlab-org/project2',
     avatarUrl: null,
     lastAccessedOn: 124,
-    frequency: 1,
+    frequency: 3,
   },
 ];
 
@@ -387,7 +389,7 @@ export const mockMixedFrequentlyUsedProjects = [
     webUrl: '/gitlab-org/project1',
     avatarUrl: null,
     lastAccessedOn: 123,
-    frequency: 1,
+    frequency: 4,
   },
   {
     id: 2,
@@ -396,6 +398,6 @@ export const mockMixedFrequentlyUsedProjects = [
     webUrl: '/gitlab-com/project2',
     avatarUrl: null,
     lastAccessedOn: 124,
-    frequency: 1,
+    frequency: 3,
   },
 ];

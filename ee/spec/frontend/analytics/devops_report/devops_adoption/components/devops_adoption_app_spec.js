@@ -515,7 +515,18 @@ describe('DevopsAdoptionApp', () => {
                 namespaceIds: [groupGid],
               }),
             );
+          });
+
+          it('calls addSegmentsToCache with the correct variables', () => {
             expect(addSegmentsToCache).toHaveBeenCalledTimes(1);
+            expect(addSegmentsToCache).toHaveBeenCalledWith(
+              expect.anything(),
+              [devopsAdoptionSegmentsData.nodes[0]],
+              {
+                parentNamespaceId: groupGid,
+                directDescendantsOnly: false,
+              },
+            );
           });
 
           describe('error handling', () => {

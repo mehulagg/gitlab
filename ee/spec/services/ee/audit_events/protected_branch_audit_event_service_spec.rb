@@ -8,6 +8,7 @@ RSpec.describe EE::AuditEvents::ProtectedBranchAuditEventService, :request_store
   let_it_be(:author) { create(:user, :with_sign_ins) }
   let_it_be(:entity) { create(:project, creator: author) }
   let_it_be(:protected_branch) { create(:protected_branch, :no_one_can_push, project: entity) }
+
   let(:logger) { instance_spy(Gitlab::AuditJsonLogger) }
   let(:ip_address) { '192.168.15.18' }
 

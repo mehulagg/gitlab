@@ -6,6 +6,7 @@ RSpec.describe Projects::OnDemandScansController, type: :request do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
+
   let(:user) { create(:user) }
 
   shared_examples 'on-demand scans page' do

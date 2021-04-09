@@ -848,9 +848,11 @@ module EE
     end
 
     def requirements_ci_variables
-      ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        if requirements.opened.any?
-          variables.append(key: 'CI_HAS_OPEN_REQUIREMENTS', value: 'true')
+      strong_memoize(:requirements_ci_variables) do
+        ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
+          if requirements.opened.any?
+            variables.append(key: 'CI_HAS_OPEN_REQUIREMENTS', value: 'true')
+          end
         end
       end
     end

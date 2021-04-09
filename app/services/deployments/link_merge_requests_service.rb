@@ -33,7 +33,7 @@ module Deployments
       # meaningful way (i.e. they can't just retry the deploy themselves).
       return unless deployment.success?
 
-      if (prev = deployment.previous_environment_deployment)
+      if (prev = deployment.previous_deployment)
         link_merge_requests_for_range(prev.sha, deployment.sha)
       else
         # When no previous deployment is found we fall back to linking all merge
@@ -66,8 +66,15 @@ module Deployments
 
         deployment.link_merge_requests(merge_requests)
 
-        picked_merge_requests =
-          project.merge_requests.by_cherry_pick_sha(slice)
+        # The cherry picked commits are tracked via `notes.commit_id`
+        # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22209
+        #
+        # NOTE: cross-joining `merge_requests` table and `notes` table could
+        # result in very poor performance because PG planner often uses an
+        # inappropriate index.
+        # See https://gitlab.com/gitlab-org/gitlab/-/issues/321032.
+        mr_ids = project.notes.cherry_picked_merge_requests(slice)
+        picked_merge_requests = project.merge_requests.id_in(mr_ids)
 
         deployment.link_merge_requests(picked_merge_requests)
       end

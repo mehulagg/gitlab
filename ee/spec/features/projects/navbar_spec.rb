@@ -81,18 +81,42 @@ RSpec.describe 'Project navbar' do
   context 'when requirements is available' do
     before do
       stub_licensed_features(requirements: true)
-
-      insert_after_nav_item(
-        _('Merge requests'),
-        new_nav_item: {
-          nav_item: _('Requirements'),
-          nav_sub_items: [_('List')]
-        }
-      )
-
-      visit project_path(project)
     end
 
-    it_behaves_like 'verified navigation bar'
+    context 'with flag enabled' do
+      before do
+        stub_feature_flags(project_sidebar_refactor: true)
+
+        insert_after_nav_item(
+          _('Merge requests'),
+          new_nav_item: {
+            nav_item: _('Requirements'),
+            nav_sub_items: []
+          }
+        )
+
+        visit project_path(project)
+      end
+
+      it_behaves_like 'verified navigation bar'
+    end
+
+    context 'with flag disabled' do
+      before do
+        stub_feature_flags(project_sidebar_refactor: false)
+
+        insert_after_nav_item(
+          _('Merge requests'),
+          new_nav_item: {
+            nav_item: _('Requirements'),
+            nav_sub_items: [_('List')]
+          }
+        )
+
+        visit project_path(project)
+      end
+
+      it_behaves_like 'verified navigation bar'
+    end
   end
 end

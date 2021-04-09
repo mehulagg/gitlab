@@ -8,6 +8,7 @@ RSpec.describe DeploymentsFinder do
   context 'at group scope' do
     let_it_be(:group) { create(:group) }
     let_it_be(:subgroup) { create(:group, parent: group) }
+
     let(:group_project_1) { create(:project, :public, :test_repo, group: group) }
     let(:group_project_2) { create(:project, :public, :test_repo, group: group) }
     let(:subgroup_project_1) { create(:project, :public, :test_repo, group: subgroup) }

@@ -1,7 +1,9 @@
 <script>
 import { s__ } from '~/locale';
+import SurveyRequestBanner from './survey_request_banner.vue';
 
 export default {
+  components: { SurveyRequestBanner },
   i18n: {
     title: s__('SecurityReports|Security Dashboard'),
   },
@@ -11,6 +13,8 @@ export default {
 <template>
   <div>
     <slot name="loading"></slot>
+
+    <survey-request-banner v-if="!$slots.loading" class="gl-mt-5" />
 
     <template v-if="$slots.default">
       <h2 data-testid="title">{{ $options.i18n.title }}</h2>

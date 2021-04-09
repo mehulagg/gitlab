@@ -65,7 +65,7 @@
   :urgency: :throttled
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: true
+  :idempotent:
   :tags: []
 - :name: cronjob:elastic_index_initial_bulk_cron
   :feature_category: :global_search
@@ -73,7 +73,7 @@
   :urgency: :throttled
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: true
+  :idempotent:
   :tags: []
 - :name: cronjob:elastic_migration
   :feature_category: :global_search

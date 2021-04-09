@@ -277,6 +277,11 @@ RSpec.configure do |config|
       # Vue issues page has feature parity with the current Haml page
       stub_feature_flags(vue_issues_list: false)
 
+      # Disable `refactor_blob_viewer` as we refactor
+      # the blob viewer. See the follwing epic for more:
+      # https://gitlab.com/groups/gitlab-org/-/epics/5531
+      stub_feature_flags(refactor_blob_viewer: false)
+
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
     else
       unstub_all_feature_flags
@@ -338,20 +343,10 @@ RSpec.configure do |config|
     RequestStore.clear!
   end
 
-  if ENV['SKIP_RSPEC_CONTEXT_WRAPPING']
-    config.around(:example, :context_aware) do |example|
-      # Wrap each example in it's own context to make sure the contexts don't
-      # leak
-      Gitlab::ApplicationContext.with_raw_context { example.run }
-    end
-  else
-    config.around do |example|
-      if [:controller, :request, :feature].include?(example.metadata[:type]) || example.metadata[:context_aware]
-        Gitlab::ApplicationContext.with_raw_context { example.run }
-      else
-        example.run
-      end
-    end
+  config.around do |example|
+    # Wrap each example in it's own context to make sure the contexts don't
+    # leak
+    Gitlab::ApplicationContext.with_raw_context { example.run }
   end
 
   config.around do |example|

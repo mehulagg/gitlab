@@ -22,7 +22,7 @@ import {
 import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
-import { addSegmentsToCache } from '../utils/cache_updates';
+import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
 import { shouldPollTableData } from '../utils/helpers';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
 import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
@@ -74,7 +74,7 @@ export default {
         pageInfo: null,
       },
       pollingTableData: null,
-      variables: this.isGroup
+      segmentsQueryVariables: this.isGroup
         ? {
             parentNamespaceId: this.groupGid,
             directDescendantsOnly: false,
@@ -86,7 +86,7 @@ export default {
     devopsAdoptionSegments: {
       query: devopsAdoptionSegmentsQuery,
       variables() {
-        return this.variables;
+        return this.segmentsQueryVariables;
       },
       result({ data }) {
         if (this.isGroup) {
@@ -166,7 +166,7 @@ export default {
             if (errors.length) {
               this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.addSegment, errors);
             } else {
-              addSegmentsToCache(store, segments, this.variables);
+              this.addSegmentsToCache(segments);
             }
           },
         })
@@ -232,6 +232,16 @@ export default {
     clearSelectedSegment() {
       this.selectedSegment = null;
     },
+    addSegmentsToCache(segments) {
+      const { cache } = this.$apollo.getClient();
+
+      addSegmentsToCache(cache, segments, this.segmentsQueryVariables);
+    },
+    deleteSegmentsFromCache(ids) {
+      const { cache } = this.$apollo.getClient();
+
+      deleteSegmentsFromCache(cache, ids, this.segmentsQueryVariables);
+    },
   },
 };
 </script>
@@ -250,6 +260,8 @@ export default {
       :key="modalKey"
       :groups="groups.nodes"
       :enabled-groups="devopsAdoptionSegments.nodes"
+      @segmentsAdded="addSegmentsToCache"
+      @segmentsRemoved="deleteSegmentsFromCache"
       @trackModalOpenState="trackModalOpenState"
     />
     <div v-if="hasSegmentsData" class="gl-mt-3">
@@ -279,6 +291,7 @@ export default {
         :segments="devopsAdoptionSegments.nodes"
         :selected-segment="selectedSegment"
         @set-selected-segment="setSelectedSegment"
+        @segmentsRemoved="deleteSegmentsFromCache"
         @trackModalOpenState="trackModalOpenState"
       />
     </div>

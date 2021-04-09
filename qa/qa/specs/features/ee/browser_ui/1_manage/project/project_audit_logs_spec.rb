@@ -83,7 +83,7 @@ module QA
         it_behaves_like 'audit event', ["Changed visibility from Public to Private"]
       end
 
-      context "Export file download", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1127', quarantine: { only: { pipeline: [:staging, :canary, :production] }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/296212', type: :bug } do
+      context "Export file download", :skip_live_env, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1127' do
         before do
           QA::Support::Retrier.retry_until do
             project = Resource::Project.fabricate_via_api! do |project|

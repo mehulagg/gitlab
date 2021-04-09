@@ -6,7 +6,7 @@ RSpec.describe Mutations::Dast::Profiles::Run do
   let_it_be_with_refind(:project) { create(:project, :repository) }
 
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_profile) { create(:dast_profile, project: project, branch_name: 'orphaned-branch') }
+  let_it_be(:dast_profile) { create(:dast_profile, project: project, branch_name: project.default_branch) }
 
   let(:full_path) { project.full_path }
   let(:dast_profile_id) { dast_profile.to_global_id }

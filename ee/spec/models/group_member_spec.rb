@@ -370,6 +370,7 @@ RSpec.describe GroupMember do
 
   context 'group member welcome email', :sidekiq_inline do
     let_it_be(:group) { create(:group_with_plan, plan: :ultimate_plan) }
+
     let(:user) { create(:user) }
 
     context 'when user is provisioned by group' do
