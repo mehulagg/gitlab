@@ -1,7 +1,6 @@
 ---
 key_path: redis_hll_counters.testing.i_testing_metrics_report_artifact_uploaders_weekly
-description: Internal Tracking to count number of unit tests parsed for planning of
-  future code testing features. Data available [here](https://app.periscopedata.com/app/gitlab/788674/Verify:Testing-Group-Metrics?widget=10454394&udv=0)
+description: Count of unique users per week who trigger a pipeline that uploads a metrics report.
 product_section: ops
 product_stage: verify
 product_group: group::testing
@@ -12,9 +11,6 @@ time_frame: 7d
 data_source: redis_hll
 distribution:
 - ee
-- ce
 tier:
-- free
 - premium
 - ultimate
-skip_validation: true
