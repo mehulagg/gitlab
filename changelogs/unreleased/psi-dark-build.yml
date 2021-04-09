@@ -1,5 +1,5 @@
 ---
-title: Fix job page in dark mode
+title: Fix dark mode colors of retried jobs in job details page
 merge_request: 58855
 author:
 type: fixed
