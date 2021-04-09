@@ -628,6 +628,8 @@ unset https_proxy
 
 ### Permission denied errors appearing in Gitaly or Praefect logs when accessing repositories
 
+You might see the following in Gitaly and Praefect logs:
+
 ```shell
 {
   ...
@@ -644,9 +646,9 @@ unset https_proxy
 This is a GRPC call
 [error response code](https://grpc.github.io/grpc/core/md_doc_statuscodes.html).
 
-If this error occurs even though
+If this error occurs, even though
 [the Gitaly auth tokens are correctly setup](../gitaly/praefect.md#debugging-praefect),
-it's likely that the Gitaly server(s) are experiencing
+it's likely that the Gitaly servers are experiencing
 [clock drift](https://en.wikipedia.org/wiki/Clock_drift).
 
 Ensure the Gitaly clients and servers are synchronized, and use an NTP time
