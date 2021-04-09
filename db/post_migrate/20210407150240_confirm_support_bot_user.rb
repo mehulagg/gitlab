@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 class ConfirmSupportBotUser < ActiveRecord::Migration[6.0]
+  SUPPORT_BOT_TYPE = 1
+
   def up
     users = Arel::Table.new(:users)
     um = Arel::UpdateManager.new
     um.table(users)
-      .where(users[:user_type].eq(User.user_types['support_bot']))
+      .where(users[:user_type].eq(SUPPORT_BOT_TYPE))
       .where(users[:confirmed_at].eq(nil))
       .set([[users[:confirmed_at], users[:created_at]]])
     connection.execute(um.to_sql)
