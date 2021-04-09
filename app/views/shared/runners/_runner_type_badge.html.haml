@@ -1,0 +1,9 @@
+- if runner.instance_type?
+  %span.badge.badge-pill.gl-badge.badge-success{ data: { toggle: 'tooltip', title: 'This runner processes jobs for all unassigned projects.' } }
+    = s_('Runners|Shared')
+- elsif runner.group_type?
+  %span.badge.badge-pill.gl-badge.badge-success{ data: { toggle: 'tooltip', title: 'This runner processes jobs for all projects in its group and subgroups.' } }
+    = s_('Runners|Group')
+- else
+  %span.badge.badge-pill.gl-badge.badge-info{ data: { toggle: 'tooltip', title: 'This runner processes jobs for assigned projects only.' } }
+    = s_('Runners|Specific')

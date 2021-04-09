@@ -1,0 +1,16 @@
+- if runner.instance_type?
+  .gl-alert.gl-alert-success.gl-my-5
+    = sprite_icon('information-o', css_class: 'gl-alert-icon')
+    %h4.gl-alert-title= _('This runner processes jobs for all unassigned projects.')
+    .gl-alert-body
+      = _('If you want a runner to build only specific projects, restrict the project in the table below. After you restrict a runner to a project, you cannot change it back to a shared runner.')
+- elsif runner.group_type?
+  .gl-alert.gl-alert-success.gl-my-5
+    = sprite_icon('information-o', css_class: 'gl-alert-icon')
+    %h4.gl-alert-title= _('This runner processes jobs for all projects in its group and subgroups.')
+- else
+  .gl-alert.gl-alert-info.gl-my-5
+    = sprite_icon('information-o', css_class: 'gl-alert-icon')
+    %h4.gl-alert-title= _('This runner processes jobs for assigned projects only.')
+    .gl-alert-body
+      = _('You cannot make this a shared runner.')

@@ -37382,9 +37382,6 @@ msgstr ""
 msgid "revised"
 msgstr ""
 
-msgid "runners"
-msgstr ""
-
 msgid "satisfied"
 msgstr ""
 
