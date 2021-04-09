@@ -270,14 +270,18 @@ generalallowlist:
   CVE-2014-8166: cups
   CVE-2017-18248: cups
 images:
-  registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e:
+  registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:
     CVE-2018-4180: cups
   your.private.registry:5000/centos:
     CVE-2015-1419: libxml2
     CVE-2015-1447: grep
 ```
 
-In the example above, when we will exclude from `gl-container-scanning-report.json` all vulnerabilities with CVE IDs: _CVE-2019-8696_, _CVE-2014-8166_, _CVE-2017-18248_ and all vulnerabilities found in `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e` container image with CVE ID _CVE-2018-4180_ and all vulnerabilities found in `your.private.registry:5000/centos` container with CVE IDs _CVE-2015-1419_, _CVE-2015-1447_.
+The example above will exclude from `gl-container-scanning-report.json`:
+
+1. All vulnerabilities with CVE IDs: _CVE-2019-8696_, _CVE-2014-8166_, _CVE-2017-18248_ 
+1. All vulnerabilities found in the `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256` container image with CVE ID _CVE-2018-4180_
+1. All vulnerabilities found in `your.private.registry:5000/centos` container with CVE IDs _CVE-2015-1419_, _CVE-2015-1447_.
 
 ##### File format
 
@@ -286,10 +290,10 @@ In the example above, when we will exclude from `gl-container-scanning-report.js
 - `images` collection allows you to specify CVE IDs for each container image independently. All vulnerabilities from given image with matching CVE IDs will be excluded from the scan report. You can specify container image in multiple ways:
   - as image name only (ie. `centos`)
   - as full image name with registry hostname (ie. `your.private.registry:5000/centos`)
-  - as full image name with registry hostname and sha256 image digest (ie. `your.private.registry:5000/centos@@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e`)
+  - as full image name with registry hostname and sha256 label (ie. `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256`)
 
 NOTE:
-The string after CVE ID (ie. `cups` in the example above) has **no impact** whatsoever, it is simply included to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
+The string after CVE ID (ie. `cups` in the example above) has **no impact** whatsoever, it is simply included as a "hint" to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
 
 ### Running container scanning in an offline environment
 
