@@ -23,8 +23,10 @@ module Types
           description: 'Internal ID of the epic.'
     field :title, GraphQL::STRING_TYPE, null: true,
           description: 'Title of the epic.'
+    markdown_field :title_html, null: true
     field :description, GraphQL::STRING_TYPE, null: true,
           description: 'Description of the epic.'
+    markdown_field :description_html, null: true
     field :state, EpicStateEnum, null: false,
           description: 'State of the epic.'
     field :confidential, GraphQL::BOOLEAN_TYPE, null: true,

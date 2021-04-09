@@ -863,6 +863,7 @@ Represents an epic on an issue board.
 | `descendantCounts` | [`EpicDescendantCount`](#epicdescendantcount) | Number of open and closed descendant epics and issues. |
 | `descendantWeightSum` | [`EpicDescendantWeights`](#epicdescendantweights) | Total weight of open and closed issues in the epic and its descendants. |
 | `description` | [`String`](#string) | Description of the epic. |
+| `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description`. |
 | `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `downvotes` | [`Int!`](#int) | Number of downvotes the epic has received. |
 | `dueDate` | [`Time`](#time) | Due date of the epic. |
@@ -892,6 +893,7 @@ Represents an epic on an issue board.
 | `state` | [`EpicState!`](#epicstate) | State of the epic. |
 | `subscribed` | [`Boolean!`](#boolean) | Indicates the currently logged in user is subscribed to the epic. |
 | `title` | [`String`](#string) | Title of the epic. |
+| `titleHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `title`. |
 | `updatedAt` | [`Time`](#time) | Timestamp of when the epic was updated. |
 | `upvotes` | [`Int!`](#int) | Number of upvotes the epic has received. |
 | `userDiscussionsCount` | [`Int!`](#int) | Number of user discussions in the epic. |
@@ -2662,6 +2664,7 @@ Represents an epic.
 | `descendantCounts` | [`EpicDescendantCount`](#epicdescendantcount) | Number of open and closed descendant epics and issues. |
 | `descendantWeightSum` | [`EpicDescendantWeights`](#epicdescendantweights) | Total weight of open and closed issues in the epic and its descendants. |
 | `description` | [`String`](#string) | Description of the epic. |
+| `descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description`. |
 | `discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. |
 | `downvotes` | [`Int!`](#int) | Number of downvotes the epic has received. |
 | `dueDate` | [`Time`](#time) | Due date of the epic. |
@@ -2691,6 +2694,7 @@ Represents an epic.
 | `state` | [`EpicState!`](#epicstate) | State of the epic. |
 | `subscribed` | [`Boolean!`](#boolean) | Indicates the currently logged in user is subscribed to the epic. |
 | `title` | [`String`](#string) | Title of the epic. |
+| `titleHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `title`. |
 | `updatedAt` | [`Time`](#time) | Timestamp of when the epic was updated. |
 | `upvotes` | [`Int!`](#int) | Number of upvotes the epic has received. |
 | `userDiscussionsCount` | [`Int!`](#int) | Number of user discussions in the epic. |
