@@ -1,6 +1,7 @@
 <script>
 import { GlIcon, GlEmptyState, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import Cookies from 'js-cookie';
+import { mapActions } from 'vuex';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
 import banner from './banner.vue';
@@ -43,10 +44,6 @@ export default {
       type: Object,
       required: true,
     },
-    service: {
-      type: Object,
-      required: true,
-    },
   },
   data() {
     return {
@@ -68,6 +65,7 @@ export default {
     this.fetchCycleAnalyticsData();
   },
   methods: {
+    ...mapActions(['legacyFetchCycleAnalyticsData', 'legacyFetchStageData']),
     handleError() {
       this.legacyStore.setErrorState(true);
       return new Flash(__('There was an error while fetching value stream analytics data.'));
@@ -81,9 +79,9 @@ export default {
 
       this.isLoading = true;
 
-      this.service
-        .fetchCycleAnalyticsData(fetchOptions)
+      this.legacyFetchCycleAnalyticsData({ ...fetchOptions })
         .then((response) => {
+          console.log('response', response);
           this.legacyStore.setCycleAnalyticsData(response);
           this.selectDefaultStage();
         })
@@ -111,12 +109,11 @@ export default {
       this.legacyStore.setStageEvents([], stage);
       this.legacyStore.setActiveStage(stage);
 
-      this.service
-        .fetchStageData({
-          stage,
-          startDate: this.startDate,
-          projectIds: this.selectedProjectIds,
-        })
+      this.legacyFetchStageData({
+        stage,
+        startDate: this.startDate,
+        projectIds: this.selectedProjectIds,
+      })
         .then((response) => {
           this.isEmptyStage = !response.events.length;
           this.legacyStore.setStageEvents(response.events, stage);

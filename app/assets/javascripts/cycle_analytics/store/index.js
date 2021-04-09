@@ -25,10 +25,11 @@ export default () =>
       ...actions,
     },
     getters,
-    mutations: {
-      ...groupMutations,
-      mutations,
-    },
+    // mutations: {
+    //   ...groupMutations,
+    //   mutations,
+    // },
+    mutations,
     state: {
       ...groupState,
       ...state,
