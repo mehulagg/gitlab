@@ -4,6 +4,8 @@ class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   DOWNTIME = false
 
   class Plan < ActiveRecord::Base
+    self.inheritance_column = :_type_disabled
+
     has_one :limits, class_name: 'PlanLimits'
 
     def actual_limits
@@ -12,6 +14,8 @@ class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   end
 
   class PlanLimits < ActiveRecord::Base
+    self.inheritance_column = :_type_disabled
+
     belongs_to :plan
   end
 
@@ -24,11 +28,8 @@ class AddNewTrailPlans < ActiveRecord::Migration[6.0]
   def up
     return unless Gitlab.dev_env_org_or_com?
 
-    Plan.reset_column_information
-    PlanLimits.reset_column_information
-
-    ultimate_trial = Plan.create(name: 'ultimate_trial', title: 'Ultimate Trial')
-    premium_trial = Plan.create(name: 'premium_trial', title: 'Premium Trial')
+    ultimate_trial = Plan.create!(name: 'ultimate_trial', title: 'Ultimate Trial')
+    premium_trial = Plan.create!(name: 'premium_trial', title: 'Premium Trial')
 
     create_plan_limits('gold', ultimate_trial)
     create_plan_limits('silver', premium_trial)
