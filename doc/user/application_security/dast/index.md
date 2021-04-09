@@ -139,11 +139,11 @@ page.
 
 #### Crawling web applications dependent on JavaScript
 
-GitLab has released Browserker, an add-on to DAST that uses a browser to crawl web applications for content. Browserker replaces the standard DAST Spider and Ajax Crawler.
+GitLab has released a new browser-based crawler, an add-on to DAST that uses a browser to crawl web applications for content. This crawler replaces the standard DAST Spider and Ajax Crawler.
 
-Browserker crawls websites by browsing web pages as a user would. This approach works well with web applications that make heavy use of JavaScript, such as Single Page Applications.
+The browser-based crawler crawls websites by browsing web pages as a user would. This approach works well with web applications that make heavy use of JavaScript, such as Single Page Applications.
 
-For more details, including setup instructions, see [Browserker](browserker.md).
+For more details, including setup instructions, see [DAST browser-based crawler](browser_based.md).
 
 ## Deployment options
 
