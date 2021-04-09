@@ -27453,9 +27453,6 @@ msgstr ""
 msgid "SecurityApprovals|Requires approval for vulnerabilities of Critical, High, or Unknown severity. %{linkStart}Learn more.%{linkEnd}"
 msgstr ""
 
-msgid "SecurityConfiguration|%{featureName} merge request creation mutation failed"
-msgstr ""
-
 msgid "SecurityConfiguration|An error occurred while creating the merge request."
 msgstr ""
 
@@ -27472,9 +27469,6 @@ msgid "SecurityConfiguration|Configure"
 msgstr ""
 
 msgid "SecurityConfiguration|Configure via Merge Request"
-msgstr ""
-
-msgid "SecurityConfiguration|Configure via merge request"
 msgstr ""
 
 msgid "SecurityConfiguration|Could not retrieve configuration data. Please refresh the page, or try again later."
@@ -27511,9 +27505,6 @@ msgid "SecurityConfiguration|SAST Analyzers"
 msgstr ""
 
 msgid "SecurityConfiguration|SAST Configuration"
-msgstr ""
-
-msgid "SecurityConfiguration|SAST merge request creation mutation failed"
 msgstr ""
 
 msgid "SecurityConfiguration|Security Control"
