@@ -16,6 +16,12 @@ RSpec.describe 'Error Pages' do
       expect(page).to have_link("Help", href: help_path)
       expect(page).to have_link(nil, href: destroy_user_session_path)
     end
+
+    it 'user can sign out' do
+      click_on 'Sign out and sign in with a different account'
+
+      expect(current_path).to eq new_user_session_path
+    end
   end
 
   describe '404' do
