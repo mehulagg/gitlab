@@ -18,9 +18,6 @@ let state = {
   boardItemsByListId: {},
   boardItems: {},
   boardLists: initialBoardListsState,
-  epicsFlags: {
-    [epicId]: { isLoading: true },
-  },
 };
 
 describe('SET_SHOW_LABELS', () => {
@@ -76,53 +73,6 @@ describe('TOGGLE_PROMOTION_STATE', () => {
   expectNotImplemented(mutations.TOGGLE_PROMOTION_STATE);
 });
 
-describe('REQUEST_ISSUES_FOR_EPIC', () => {
-  it('sets isLoading epicsFlags in state for epicId to true', () => {
-    state = {
-      ...state,
-      epicsFlags: {
-        [epicId]: { isLoading: false },
-      },
-    };
-
-    mutations.REQUEST_ISSUES_FOR_EPIC(state, epicId);
-
-    expect(state.epicsFlags[epicId].isLoading).toBe(true);
-  });
-});
-
-describe('RECEIVE_ISSUES_FOR_EPIC_SUCCESS', () => {
-  it('sets boardItemsByListId and issues state for epic issues and loading state to false', () => {
-    const listIssues = {
-      'gid://gitlab/List/1': [mockIssue.id],
-      'gid://gitlab/List/2': [mockIssue2.id],
-    };
-    const issues = {
-      436: mockIssue,
-      437: mockIssue2,
-    };
-
-    mutations.RECEIVE_ISSUES_FOR_EPIC_SUCCESS(state, {
-      listData: listIssues,
-      boardItems: issues,
-      epicId,
-    });
-
-    expect(state.boardItemsByListId).toEqual(listIssues);
-    expect(state.boardItems).toEqual(issues);
-    expect(state.epicsFlags[epicId].isLoading).toBe(false);
-  });
-});
-
-describe('RECEIVE_ISSUES_FOR_EPIC_FAILURE', () => {
-  it('sets loading state to false for epic and error message', () => {
-    mutations.RECEIVE_ISSUES_FOR_EPIC_FAILURE(state, epicId);
-
-    expect(state.error).toEqual('An error occurred while fetching issues. Please reload the page.');
-    expect(state.epicsFlags[epicId].isLoading).toBe(false);
-  });
-});
-
 describe('TOGGLE_EPICS_SWIMLANES', () => {
   it('toggles isShowingEpicsSwimlanes from true to false', () => {
     state = {
@@ -149,12 +99,18 @@ describe('TOGGLE_EPICS_SWIMLANES', () => {
   it('sets epicsSwimlanesFetchInProgress to true', () => {
     state = {
       ...state,
-      epicsSwimlanesFetchInProgress: false,
+      epicsSwimlanesFetchInProgress: {
+        epicLanesFetchInProgress: false,
+        listItemsFetchInProgress: false,
+      },
     };
 
     mutations.TOGGLE_EPICS_SWIMLANES(state);
 
-    expect(state.epicsSwimlanesFetchInProgress).toBe(true);
+    expect(state.epicsSwimlanesFetchInProgress).toEqual({
+      epicLanesFetchInProgress: true,
+      listItemsFetchInProgress: true,
+    });
   });
 });
 
@@ -163,42 +119,63 @@ describe('SET_EPICS_SWIMLANES', () => {
     state = {
       ...state,
       isShowingEpicsSwimlanes: false,
-      epicsSwimlanesFetchInProgress: false,
+      epicsSwimlanesFetchInProgress: {
+        epicLanesFetchInProgress: false,
+        listItemsFetchInProgress: false,
+      },
     };
 
     mutations.SET_EPICS_SWIMLANES(state);
 
     expect(state.isShowingEpicsSwimlanes).toBe(true);
-    expect(state.epicsSwimlanesFetchInProgress).toBe(true);
+    expect(state.epicsSwimlanesFetchInProgress).toEqual({
+      epicLanesFetchInProgress: true,
+      listItemsFetchInProgress: true,
+    });
+  });
+});
+
+describe('DONE_LOADING_SWIMLANES_ITEMS', () => {
+  it('set listItemsFetchInProgress to false', () => {
+    state = {
+      ...state,
+      epicsSwimlanesFetchInProgress: {
+        listItemsFetchInProgress: true,
+      },
+    };
+
+    mutations.DONE_LOADING_SWIMLANES_ITEMS(state);
+
+    expect(state.epicsSwimlanesFetchInProgress.listItemsFetchInProgress).toBe(false);
   });
 });
 
 describe('RECEIVE_BOARD_LISTS_SUCCESS', () => {
-  it('sets epicsSwimlanesFetchInProgress to false and populates boardLists with payload', () => {
+  it('populates boardLists with payload', () => {
     state = {
       ...state,
-      epicsSwimlanesFetchInProgress: true,
       boardLists: {},
     };
 
     mutations.RECEIVE_BOARD_LISTS_SUCCESS(state, initialBoardListsState);
 
-    expect(state.epicsSwimlanesFetchInProgress).toBe(false);
     expect(state.boardLists).toEqual(initialBoardListsState);
   });
 });
 
 describe('RECEIVE_SWIMLANES_FAILURE', () => {
-  it('sets epicsSwimlanesFetchInProgress to false and sets error message', () => {
+  it('sets epicLanesFetchInProgress to false and sets error message', () => {
     state = {
       ...state,
-      epicsSwimlanesFetchInProgress: true,
+      epicsSwimlanesFetchInProgress: {
+        epicLanesFetchInProgress: true,
+      },
       error: undefined,
     };
 
     mutations.RECEIVE_SWIMLANES_FAILURE(state);
 
-    expect(state.epicsSwimlanesFetchInProgress).toBe(false);
+    expect(state.epicsSwimlanesFetchInProgress.epicLanesFetchInProgress).toBe(false);
     expect(state.error).toEqual(
       'An error occurred while fetching the board swimlanes. Please reload the page.',
     );

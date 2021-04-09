@@ -474,4 +474,81 @@ RSpec.describe API::Internal::Base do
       end
     end
   end
+
+  describe 'GET /internal/geo_proxy' do
+    subject { get api('/internal/geo_proxy'), params: { secret_token: secret_token } }
+
+    context 'with valid auth' do
+      context 'when Geo is not being used' do
+        it 'returns empty data' do
+          allow(::Gitlab::Geo).to receive(:enabled?).and_return(false)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_empty
+        end
+      end
+
+      context 'when this is a primary site' do
+        it 'returns empty data' do
+          stub_current_geo_node(primary_node)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_empty
+        end
+      end
+
+      context 'when this is a secondary site' do
+        before do
+          stub_current_geo_node(secondary_node)
+        end
+
+        context 'when a primary exists' do
+          it 'returns the primary internal URL' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['geo_proxy_url']).to match(primary_node.internal_url)
+          end
+        end
+
+        context 'when a primary does not exist' do
+          it 'returns empty data' do
+            allow(::Gitlab::Geo).to receive(:primary_node_configured?).and_return(false)
+
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response).to be_empty
+          end
+        end
+      end
+
+      context 'when geo_secondary_proxy feature flag is disabled' do
+        before do
+          stub_feature_flags(geo_secondary_proxy: false)
+        end
+
+        it 'returns empty data' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_empty
+        end
+      end
+    end
+
+    context 'with invalid auth' do
+      let(:secret_token) { 'invalid_token' }
+
+      it 'returns unauthorized' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+  end
 end

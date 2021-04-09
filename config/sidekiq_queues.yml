@@ -210,6 +210,8 @@
   - 1
 - - merge_request_reset_approvals
   - 1
+- - merge_requests_assignees_change
+  - 1
 - - merge_requests_delete_source_branch
   - 1
 - - metrics_dashboard_prune_old_annotations
@@ -295,6 +297,8 @@
 - - project_update_repository_storage
   - 1
 - - projects_git_garbage_collect
+  - 1
+- - projects_post_creation
   - 1
 - - projects_schedule_bulk_repository_shard_moves
   - 1

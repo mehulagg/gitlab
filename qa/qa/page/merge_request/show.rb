@@ -49,6 +49,7 @@ module QA
 
         view 'app/views/projects/merge_requests/show.html.haml' do
           element :notes_tab
+          element :commits_tab
           element :diffs_tab
         end
 
@@ -105,6 +106,17 @@ module QA
 
         view 'app/assets/javascripts/vue_shared/components/markdown/header.vue' do
           element :suggestion_button
+        end
+
+        view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_merged.vue' do
+          element :revert_button
+          element :cherry_pick_button
+        end
+
+        view 'app/assets/javascripts/vue_shared/components/markdown/apply_suggestion.vue' do
+          element :apply_suggestion_button
+          element :commit_message_textbox
+          element :commit_with_custom_message_button
         end
 
         def start_review
@@ -171,6 +183,10 @@ module QA
           click_element(:notes_tab)
 
           wait_for_requests
+        end
+
+        def click_commits_tab
+          click_element(:commits_tab)
         end
 
         def click_diffs_tab
@@ -352,12 +368,28 @@ module QA
           click_element(:comment_now_button)
         end
 
+        def apply_suggestion_with_message(message)
+          click_element(:apply_suggestion_button)
+          fill_element(:commit_message_textbox, message)
+          click_element(:commit_with_custom_message_button)
+        end
+
         def add_suggestion_to_batch
           all_elements(:add_suggestion_batch_button, minimum: 1).first.click
         end
 
         def apply_suggestions_batch
           all_elements(:apply_suggestions_batch_button, minimum: 1).first.click
+        end
+
+        def cherry_pick!
+          click_element(:cherry_pick_button, Page::Component::CommitModal)
+          click_element(:submit_commit_button)
+        end
+
+        def revert_change!
+          click_element(:revert_button, Page::Component::CommitModal)
+          click_element(:submit_commit_button)
         end
       end
     end

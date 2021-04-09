@@ -11,7 +11,7 @@ import getInitialState from 'ee/license_compliance/store/modules/list/state';
 
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 
 import mockLicensesResponse from './data/mock_licenses.json';
 
@@ -107,7 +107,9 @@ describe('Licenses actions', () => {
         [],
       ).then(() => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(FETCH_ERROR_MESSAGE);
+        expect(createFlash).toHaveBeenCalledWith({
+          message: FETCH_ERROR_MESSAGE,
+        });
       });
     });
   });

@@ -115,30 +115,7 @@ module Gitlab
           alias_name = proxy.index_name
           new_index_name = "#{alias_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
 
-          raise "Index under '#{new_index_name}' already exists" if index_exists?(index_name: new_index_name)
-
-          if with_alias
-            raise "Alias under '#{alias_name}' already exists" if alias_exists?(name: alias_name)
-          end
-
-          settings = proxy.settings.to_hash
-          settings = settings.merge(options[:settings]) if options[:settings]
-
-          mappings = proxy.mappings.to_hash
-          mappings = mappings.merge(options[:mappings]) if options[:mappings]
-
-          create_index_options = {
-            index: new_index_name,
-            body: {
-              settings: settings,
-              mappings: mappings
-            }
-          }.merge(additional_index_options)
-
-          client.indices.create create_index_options
-
-          client.indices.put_alias(name: alias_name, index: new_index_name) if with_alias
-
+          create_index(new_index_name, alias_name, with_alias, proxy.settings.to_hash, proxy.mappings.to_hash, options)
           indices[new_index_name] = alias_name
         end
       end
@@ -163,26 +140,7 @@ module Gitlab
       def create_empty_index(with_alias: true, options: {})
         new_index_name = options[:index_name] || "#{target_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
 
-        if with_alias ? index_exists? : index_exists?(index_name: new_index_name)
-          raise "Index under '#{with_alias ? target_name : new_index_name}' already exists, use `recreate_index` to recreate it."
-        end
-
-        settings = default_settings
-        settings.merge!(options[:settings]) if options[:settings]
-
-        mappings = default_mappings
-        mappings.merge!(options[:mappings]) if options[:mappings]
-
-        create_index_options = {
-          index: new_index_name,
-          body: {
-            settings: settings.to_hash,
-            mappings: mappings.to_hash
-          }
-        }.merge(additional_index_options)
-
-        client.indices.create create_index_options
-        client.indices.put_alias(name: target_name, index: new_index_name) if with_alias
+        create_index(new_index_name, target_name, with_alias, default_settings, default_mappings, options)
 
         {
           new_index_name => target_name
@@ -303,6 +261,34 @@ module Gitlab
       end
 
       private
+
+      def create_index(index_name, alias_name, with_alias, settings, mappings, options)
+        if index_exists?(index_name: index_name)
+          return if options[:skip_if_exists]
+
+          raise "Index under '#{index_name}' already exists."
+        end
+
+        if with_alias && index_exists?(index_name: alias_name)
+          return if options[:skip_if_exists]
+
+          raise "Index or alias under '#{alias_name}' already exists."
+        end
+
+        settings.merge!(options[:settings]) if options[:settings]
+        mappings.merge!(options[:mappings]) if options[:mappings]
+
+        create_index_options = {
+          index: index_name,
+          body: {
+            settings: settings,
+            mappings: mappings
+          }
+        }.merge(additional_index_options)
+
+        client.indices.create create_index_options
+        client.indices.put_alias(name: alias_name, index: index_name) if with_alias
+      end
 
       def additional_index_options
         {}.tap do |options|

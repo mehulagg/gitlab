@@ -12,12 +12,11 @@ RSpec.describe 'Project issue boards sidebar milestones', :js do
   let_it_be(:issue2)    { create(:issue, project: project, milestone: milestone, relative_position: 2) }
   let_it_be(:board)     { create(:board, project: project) }
   let_it_be(:list)      { create(:list, board: board, position: 0) }
+
   let(:card1)           { find('.board:nth-child(1) .board-card:nth-of-type(1)') }
   let(:card2)           { find('.board:nth-child(1) .board-card:nth-of-type(2)') }
 
   before do
-    stub_feature_flags(graphql_board_lists: false)
-
     project.add_maintainer(user)
 
     sign_in(user)
@@ -30,12 +29,12 @@ RSpec.describe 'Project issue boards sidebar milestones', :js do
     it 'adds a milestone' do
       click_card(card1)
 
-      page.within('.milestone') do
-        click_link 'Edit'
+      page.within('[data-testid="sidebar-milestones"]') do
+        click_button 'Edit'
 
         wait_for_requests
 
-        click_link milestone.title
+        click_button milestone.title
 
         wait_for_requests
 
@@ -48,12 +47,12 @@ RSpec.describe 'Project issue boards sidebar milestones', :js do
     it 'removes a milestone' do
       click_card(card2)
 
-      page.within('.milestone') do
-        click_link 'Edit'
+      page.within('[data-testid="sidebar-milestones"]') do
+        click_button 'Edit'
 
         wait_for_requests
 
-        click_link "No milestone"
+        click_button "No milestone"
 
         wait_for_requests
 

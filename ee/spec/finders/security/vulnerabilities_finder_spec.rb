@@ -67,7 +67,7 @@ RSpec.describe Security::VulnerabilitiesFinder do
   end
 
   context 'when filtered by scanner_id' do
-    let(:filters) { { scanner_ids: [vulnerability1.finding_scanner_id, vulnerability3.finding_scanner_id] } }
+    let(:filters) { { scanner_id: [vulnerability1.finding_scanner_id, vulnerability3.finding_scanner_id] } }
 
     it 'only returns vulnerabilities matching the given scanner IDs' do
       is_expected.to contain_exactly(vulnerability1, vulnerability3)

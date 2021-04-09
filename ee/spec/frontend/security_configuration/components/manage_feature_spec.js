@@ -2,7 +2,12 @@ import { shallowMount } from '@vue/test-utils';
 import ManageDastProfiles from 'ee/security_configuration/components/manage_dast_profiles.vue';
 import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
 import ManageGeneric from 'ee/security_configuration/components/manage_generic.vue';
-import { REPORT_TYPE_DAST_PROFILES } from '~/vue_shared/security_reports/constants';
+import ManageViaMr from 'ee/security_configuration/components/manage_via_mr.vue';
+import {
+  REPORT_TYPE_DAST_PROFILES,
+  REPORT_TYPE_DEPENDENCY_SCANNING,
+  REPORT_TYPE_SECRET_DETECTION,
+} from '~/vue_shared/security_reports/constants';
 import { generateFeatures } from './helpers';
 
 const attrs = {
@@ -13,7 +18,15 @@ describe('ManageFeature component', () => {
   let wrapper;
 
   const createComponent = (options) => {
-    wrapper = shallowMount(ManageFeature, options);
+    wrapper = shallowMount(ManageFeature, {
+      provide: {
+        glFeatures: {
+          secDependencyScanningUiEnable: true,
+          secSecretDetectionUiEnable: true,
+        },
+      },
+      ...options,
+    });
   };
 
   afterEach(() => {
@@ -29,12 +42,21 @@ describe('ManageFeature component', () => {
     it('passes through attributes to the expected component', () => {
       expect(wrapper.attributes()).toMatchObject(attrs);
     });
+
+    it('re-emits caught errors', () => {
+      const component = wrapper.findComponent(ManageGeneric);
+      component.vm.$emit('error', 'testerror');
+
+      expect(wrapper.emitted('error')).toEqual([['testerror']]);
+    });
   });
 
   describe.each`
-    type                         | expectedComponent
-    ${REPORT_TYPE_DAST_PROFILES} | ${ManageDastProfiles}
-    ${'foo'}                     | ${ManageGeneric}
+    type                               | expectedComponent
+    ${REPORT_TYPE_DAST_PROFILES}       | ${ManageDastProfiles}
+    ${REPORT_TYPE_DEPENDENCY_SCANNING} | ${ManageViaMr}
+    ${REPORT_TYPE_SECRET_DETECTION}    | ${ManageViaMr}
+    ${'foo'}                           | ${ManageGeneric}
   `('given a $type feature', ({ type, expectedComponent }) => {
     let feature;
     let component;
@@ -43,7 +65,6 @@ describe('ManageFeature component', () => {
       [feature] = generateFeatures(1, { type });
 
       createComponent({ propsData: { feature } });
-
       component = wrapper.findComponent(expectedComponent);
     });
 
@@ -54,5 +75,23 @@ describe('ManageFeature component', () => {
     it('passes through props to expected component', () => {
       expect(component.props()).toEqual({ feature });
     });
+  });
+
+  it.each`
+    type                               | featureFlag
+    ${REPORT_TYPE_DEPENDENCY_SCANNING} | ${'secDependencyScanningUiEnable'}
+    ${REPORT_TYPE_SECRET_DETECTION}    | ${'secSecretDetectionUiEnable'}
+  `('renders generic component for $type if $featureFlag is disabled', ({ type, featureFlag }) => {
+    const [feature] = generateFeatures(1, { type });
+    createComponent({
+      propsData: { feature },
+      provide: {
+        glFeatures: {
+          [featureFlag]: false,
+        },
+      },
+    });
+
+    expect(wrapper.findComponent(ManageGeneric).exists()).toBe(true);
   });
 });

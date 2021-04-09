@@ -125,6 +125,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_
       expect(described_class.transformers)
         .to contain_exactly(
           { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil },
+          { klass: BulkImports::Common::Transformers::UserReferenceTransformer, options: { reference: :author } },
           { klass: EE::BulkImports::Groups::Transformers::EpicAttributesTransformer, options: nil }
         )
     end

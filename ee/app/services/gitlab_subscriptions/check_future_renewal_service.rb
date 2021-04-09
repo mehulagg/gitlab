@@ -9,8 +9,8 @@
 # returns true, false
 module GitlabSubscriptions
   class CheckFutureRenewalService
-    def initialize(namespace_id:)
-      @namespace_id = namespace_id
+    def initialize(namespace:)
+      @namespace = namespace
     end
 
     def execute
@@ -21,14 +21,14 @@ module GitlabSubscriptions
 
     private
 
-    attr_reader :namespace_id
+    attr_reader :namespace
 
     def client
       Gitlab::SubscriptionPortal::Client
     end
 
     def last_term_request
-      response = client.subscription_last_term(namespace_id)
+      response = client.subscription_last_term(namespace.id)
 
       if response[:success]
         response[:last_term] == false
@@ -42,7 +42,7 @@ module GitlabSubscriptions
     end
 
     def cache_key
-      "subscription:future_renewal:namespace:#{namespace_id}"
+      "subscription:future_renewal:namespace:#{namespace.gitlab_subscription.cache_key}"
     end
 
     def future_renewal

@@ -765,6 +765,35 @@ RSpec.describe Group do
     end
   end
 
+  describe '#users_count' do
+    subject { group.users_count }
+
+    let(:group) { create(:group) }
+    let(:user) { create(:user) }
+
+    context 'with `minimal_access_role` not licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      it 'does not count the minimal access user' do
+        expect(group.users_count).to eq(0)
+      end
+    end
+
+    context 'with `minimal_access_role` licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      it 'counts the minimal access user' do
+        expect(group.users_count).to eq(1)
+      end
+    end
+  end
+
   describe '#saml_discovery_token' do
     it 'returns existing tokens' do
       group = create(:group, saml_discovery_token: 'existing')

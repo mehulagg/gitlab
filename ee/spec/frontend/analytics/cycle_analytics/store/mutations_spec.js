@@ -184,6 +184,28 @@ describe('Value Stream Analytics mutations', () => {
         2: { value: 10, error: null },
       });
     });
+
+    describe('with hasPathNavigation set to true', () => {
+      beforeEach(() => {
+        state = {
+          featureFlags: { hasPathNavigation: true },
+          medians: {},
+        };
+
+        mutations[types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, [
+          { id: 1, value: 7580 },
+          { id: 2, value: 434340 },
+        ]);
+      });
+
+      it('formats each stage median for display in the path navigation', () => {
+        expect(state.medians).toMatchObject({ 1: '2h', 2: '5d' });
+      });
+
+      it('calculates the overview median', () => {
+        expect(state.medians).toMatchObject({ overview: '5d' });
+      });
+    });
   });
 
   describe(`${types.INITIALIZE_VSA}`, () => {

@@ -155,7 +155,7 @@ on how to configure Review Apps for DAST.
 
 If your application utilizes Docker containers you have another option for deploying and scanning with DAST.
 After your Docker build job completes and your image is added to your container registry, you can utilize the image as a
-[service](../../../ci/docker/using_docker_images.md#what-is-a-service).
+[service](../../../ci/services/index.md).
 
 By using service definitions in your `gitlab-ci.yml`, you can scan services with the DAST analyzer.
 
@@ -271,7 +271,7 @@ that you periodically confirm the scanner's authentication is still working as t
 time due to authentication changes to the application.
 
 Create masked CI/CD variables to pass the credentials that DAST uses.
-To create masked variables for the username and password, see [Create a custom variable in the UI](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
+To create masked variables for the username and password, see [Create a custom variable in the UI](../../../ci/variables/README.md#custom-cicd-variables).
 Note that the key of the username variable must be `DAST_USERNAME`
 and the key of the password variable must be `DAST_PASSWORD`.
 
@@ -588,7 +588,7 @@ include:
   - template: DAST.gitlab-ci.yml
 
 variables:
-  DAST_PATHS=/page1.html,/category1/page1.html,/page3.html
+  DAST_PATHS: "/page1.html,/category1/page1.html,/page3.html"
 ```
 
 When using `DAST_PATHS` and `DAST_PATHS_FILE`, note the following:

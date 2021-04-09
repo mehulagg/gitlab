@@ -1,10 +1,10 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
-import projectsQuery from '../graphql/queries/get_instance_security_dashboard_projects.query.graphql';
+import instanceProjectsQuery from '../graphql/queries/instance_projects.query.graphql';
 import vulnerabilityGradesQuery from '../graphql/queries/instance_vulnerability_grades.query.graphql';
 import vulnerabilityHistoryQuery from '../graphql/queries/instance_vulnerability_history.query.graphql';
-import { createProjectLoadingError } from '../helpers';
+import { PROJECT_LOADING_ERROR_MESSAGE } from '../helpers';
 import DashboardNotConfigured from './empty_states/instance_dashboard_not_configured.vue';
 import VulnerabilityChart from './first_class_vulnerability_chart.vue';
 import VulnerabilitySeverities from './first_class_vulnerability_severities.vue';
@@ -20,12 +20,12 @@ export default {
   },
   apollo: {
     projects: {
-      query: projectsQuery,
+      query: instanceProjectsQuery,
       update(data) {
         return data?.instanceSecurityDashboard?.projects?.nodes ?? [];
       },
       error() {
-        createFlash({ message: createProjectLoadingError() });
+        createFlash({ message: PROJECT_LOADING_ERROR_MESSAGE });
       },
     },
   },

@@ -38,7 +38,7 @@ Depending on the areas your merge request touches, it must be **approved** by on
 or more [maintainers](https://about.gitlab.com/handbook/engineering/workflow/code-review/#maintainer):
 
 For approvals, we use the approval functionality found in the merge request
-widget. For reviewers, we use the [reviewer functionality](../user/project/merge_requests/getting_started.md#reviewer) in the sidebar. 
+widget. For reviewers, we use the [reviewer functionality](../user/project/merge_requests/getting_started.md#reviewer) in the sidebar.
 Reviewers can add their approval by [approving additionally](../user/project/merge_requests/merge_request_approvals.md#adding-or-removing-an-approval).
 
 Getting your merge request **merged** also requires a maintainer. If it requires
@@ -100,8 +100,9 @@ with [domain expertise](#domain-experts).
    Read the [database review guidelines](database_review.md) for more details.
 1. If your merge request includes frontend changes (*1*), it must be
    **approved by a [frontend maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_frontend)**.
-1. If your merge request includes UX changes (*1*), it must be
-   **approved by a [UX team member](https://about.gitlab.com/company/team/)**.
+1. If your merge request includes user-facing changes (*3*), it must be
+   **approved by a [Product Designer](https://about.gitlab.com/handbook/engineering/ux/product-design/)**,
+   based on assignments in the appropriate [DevOps stage group](https://about.gitlab.com/handbook/product/categories/#devops-stages).
 1. If your merge request includes adding a new JavaScript library (*1*)...
    - If the library significantly increases the
      [bundle size](https://gitlab.com/gitlab-org/frontend/playground/webpack-memory-metrics/-/blob/master/doc/report.md), it must
@@ -110,16 +111,14 @@ with [domain expertise](#domain-experts).
      GitLab, the license must be **approved by a [legal department member](https://about.gitlab.com/handbook/legal/)**.
      More information about license compatibility can be found in our
      [GitLab Licensing and Compatibility documentation](licensing.md).
-1. If your merge request includes adding a new UI/UX paradigm (*1*), it must be
-   **approved by a [UX lead](https://about.gitlab.com/company/team/)**.
 1. If your merge request includes a new dependency or a file system change, it must be
    **approved by a [Distribution team member](https://about.gitlab.com/company/team/)**. See how to work with the [Distribution team](https://about.gitlab.com/handbook/engineering/development/enablement/distribution/#how-to-work-with-distribution) for more details.
 1. If your merge request includes documentation changes, it must be **approved
    by a [Technical writer](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments)**, based on
    the appropriate [product category](https://about.gitlab.com/handbook/product/categories/).
-1. If your merge request includes end-to-end **and** non-end-to-end changes (*3*), it must be **approved
+1. If your merge request includes end-to-end **and** non-end-to-end changes (*4*), it must be **approved
    by a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors)**.
-1. If your merge request only includes end-to-end changes (*3*) **or** if the MR author is a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors), it must be **approved by a [Quality maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_qa)**
+1. If your merge request only includes end-to-end changes (*4*) **or** if the MR author is a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors), it must be **approved by a [Quality maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_qa)**
 1. If your merge request includes a new or updated [application limit](https://about.gitlab.com/handbook/product/product-processes/#introducing-application-limits), it must be **approved by a [product manager](https://about.gitlab.com/company/team/)**.
 1. If your merge request includes Product Intelligence (telemetry or analytics) changes, it should be reviewed and approved by a [Product Intelligence engineer](https://gitlab.com/gitlab-org/growth/product_intelligence/engineers).
 1. If your merge request includes an addition of, or changes to a [Feature spec](testing_guide/testing_levels.md#frontend-feature-tests), it must be **approved by a [Quality maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_qa) or [Quality reviewer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_reviewers_qa)**.
@@ -129,7 +128,10 @@ with [domain expertise](#domain-experts).
 - (*2*): We encourage you to seek guidance from a database maintainer if your merge
   request is potentially introducing expensive queries. It is most efficient to comment
   on the line of code in question with the SQL queries so they can give their advice.
-- (*3*): End-to-end changes include all files within the `qa` directory.
+- (*3*): User-facing changes include both visual changes (regardless of how minor),
+  and changes to the rendered DOM which impact how a screen reader may announce
+  the content.
+- (*4*): End-to-end changes include all files within the `qa` directory.
 
 #### Security requirements
 
@@ -252,7 +254,7 @@ After merging, a maintainer should stay as the reviewer listed on the merge requ
 
 ### Dogfooding the Reviewers feature
 
-In March 18th 2021, an updated process was put in place aimed at efficiently and consistently dogfooding the Reviewers feature.
+On March 18th 2021, an updated process was put in place aimed at efficiently and consistently dogfooding the Reviewers feature.
 
 Here is a summary of the changes, also reflected in this section above.
 
@@ -363,7 +365,7 @@ experience, refactors the existing code). Then:
   - For non-mandatory suggestions, decorate with (non-blocking) so the author knows they can
     optionally resolve within the merge request or follow-up at a later stage.
   - There's a [Chrome/Firefox add-on](https://gitlab.com/conventionalcomments/conventional-comments-button) which you can use to apply [Conventional Comment](https://conventionalcomments.org/) prefixes.
-- Ensure there are no open dependencies. Check [related issues](../user/project/issues/related_issues.md) for blockers. Clarify with the author(s)
+- Ensure there are no open dependencies. Check [linked issues](../user/project/issues/related_issues.md) for blockers. Clarify with the author(s)
 if necessary. If blocked by one or more open MRs, set an [MR dependency](../user/project/merge_requests/merge_request_dependencies.md).
 - After a round of line notes, it can be helpful to post a summary note such as
   "Looks good to me", or "Just a couple things to address."
@@ -406,17 +408,26 @@ When ready to merge:
   circling back with the author about that. Otherwise, if the MR only has a few commits, we'll
   be respecting the author's setting by not squashing them.
 
-- **Start a new merge request pipeline with the `Run Pipeline` button in the merge
-  request's "Pipelines" tab, and enable "Merge When Pipeline Succeeds" (MWPS).** Note that:
+WARNING:
+**If the merge request is from a fork, review all changes thoroughly for malicious code before
+starting a [Pipeline for Merged Results](../ci/merge_request_pipelines/index.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project).**
+Pay particular attention to new dependencies and dependency updates, such as Ruby gems and Node packages.
+While changes to files like `Gemfile.lock` or `yarn.lock` might appear trivial, they could lead to the
+fetching of malicious packages.
+If the MR source branch is more than 100 commits behind the target branch, ask the author to rebase it.
+Review links and images, especially in documentation MRs.
+When in doubt, ask someone from `@gitlab-com/gl-security/appsec` to review the merge request **before starting any merge request pipeline**.
+
+- Start a new merge request pipeline with the `Run pipeline` button in the merge
+  request's "Pipelines" tab, and enable "Merge When Pipeline Succeeds" (MWPS).
+  Note that:
   - If **[master is broken](https://about.gitlab.com/handbook/engineering/workflow/#broken-master),
-    do not merge the merge request**. Follow these specific [handbook instructions](https://about.gitlab.com/handbook/engineering/workflow/#maintaining-throughput-during-broken-master).
+    do not merge the merge request** except for
+    [very specific cases](https://about.gitlab.com/handbook/engineering/workflow/#criteria-for-merging-during-broken-master).
+    For other cases, follow these [handbook instructions](https://about.gitlab.com/handbook/engineering/workflow/#merging-during-broken-master).
   - If the **latest [Pipeline for Merged Results](../ci/merge_request_pipelines/pipelines_for_merged_results/#pipelines-for-merged-results)** finished less than 2 hours ago, you
     might merge without starting a new pipeline as the merge request is close
     enough to `master`.
-  - If the **merge request is from a fork**, we can use [Pipelines for Merged Results from a forked project](../ci/merge_request_pipelines/index.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project) with caution.
-    Before triggering the pipeline, review all changes for **malicious code**.
-    If you cannot trigger the pipeline, review the status of the fork relative to `master`.
-    If it's more than 100 commits behind, ask the author to rebase it before merging.
 - When you set the MR to "Merge When Pipeline Succeeds", you should take over
   subsequent revisions for anything that would be spotted after that.
 

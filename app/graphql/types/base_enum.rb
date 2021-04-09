@@ -22,8 +22,16 @@ module Types
         description(enum_mod.description) if use_description
 
         enum_mod.definition.each do |key, content|
-          desc = content.delete(:description)
-          value(key.to_s.upcase, description: desc, **content)
+          value(key.to_s.upcase, **content)
+        end
+      end
+
+      # Helper to define an enum member for each element of a Rails AR enum
+      def from_rails_enum(enum, description:)
+        enum.each_key do |name|
+          value name.to_s.upcase,
+                value: name,
+                description: format(description, name: name)
         end
       end
 

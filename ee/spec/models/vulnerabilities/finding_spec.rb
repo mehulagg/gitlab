@@ -19,6 +19,7 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to have_many(:finding_links).class_name('Vulnerabilities::FindingLink').with_foreign_key('vulnerability_occurrence_id') }
     it { is_expected.to have_many(:finding_remediations).class_name('Vulnerabilities::FindingRemediation').with_foreign_key('vulnerability_occurrence_id') }
     it { is_expected.to have_many(:remediations).through(:finding_remediations) }
+    it { is_expected.to have_many(:finding_evidences).class_name('Vulnerabilities::FindingEvidence').with_foreign_key('vulnerability_occurrence_id') }
   end
 
   describe 'validations' do
@@ -271,6 +272,7 @@ RSpec.describe Vulnerabilities::Finding do
   describe '.undismissed' do
     let_it_be(:project) { create(:project) }
     let_it_be(:project2) { create(:project) }
+
     let!(:finding1) { create(:vulnerabilities_finding, project: project) }
     let!(:finding2) { create(:vulnerabilities_finding, project: project, report_type: :dast) }
     let!(:finding3) { create(:vulnerabilities_finding, project: project2) }
@@ -309,6 +311,7 @@ RSpec.describe Vulnerabilities::Finding do
   describe '.dismissed' do
     let_it_be(:project) { create(:project) }
     let_it_be(:project2) { create(:project) }
+
     let!(:finding1) { create(:vulnerabilities_finding, project: project) }
     let!(:finding2) { create(:vulnerabilities_finding, project: project, report_type: :dast) }
     let!(:finding3) { create(:vulnerabilities_finding, project: project2) }
@@ -508,6 +511,7 @@ RSpec.describe Vulnerabilities::Finding do
 
   describe 'feedback' do
     let_it_be(:project) { create(:project) }
+
     let(:finding) do
       create(
         :vulnerabilities_finding,

@@ -77,9 +77,10 @@ module EE
         # The order of checks is important. We should not attempt to create a new index
         # unless elasticsearch_indexing is enabled
         return unless application_setting.elasticsearch_indexing
-        return if elasticsearch_helper.index_exists?
 
-        elasticsearch_helper.create_empty_index
+        elasticsearch_helper.create_empty_index(options: { skip_if_exists: true })
+        elasticsearch_helper.create_standalone_indices(options: { skip_if_exists: true })
+        elasticsearch_helper.create_migrations_index unless elasticsearch_helper.migrations_index_exists?
       rescue Faraday::Error => e
         log_error(e)
       end

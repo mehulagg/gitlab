@@ -11,6 +11,18 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
   let(:profile_name) { SecureRandom.hex }
   let(:target_url) { generate(:url) }
   let(:excluded_urls) { ["#{target_url}/signout"] }
+  let(:request_headers) { 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0' }
+
+  let(:auth) do
+    {
+      enabled: true,
+      url: "#{target_url}/login",
+      username_field: 'session[username]',
+      password_field: 'session[password]',
+      username: generate(:email),
+      password: SecureRandom.hex
+    }
+  end
 
   let(:dast_site_profile) { DastSiteProfile.find_by(project: project, name: profile_name) }
 
@@ -29,15 +41,8 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
         profile_name: profile_name,
         target_url: target_url,
         excluded_urls: excluded_urls,
-        request_headers: 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0',
-        auth: {
-          enabled: true,
-          url: "#{target_url}/login",
-          username_field: 'session[username]',
-          password_field: 'session[password]',
-          username: generate(:email),
-          password: SecureRandom.hex
-        }
+        request_headers: request_headers,
+        auth: auth
       )
     end
 
@@ -55,15 +60,47 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
           project.add_developer(user)
         end
 
+        it 'creates a dast_site_profile and dast_site_profile_secret_variables', :aggregate_failures do
+          dast_site_profile = subject[:id].find
+
+          expect(dast_site_profile).to have_attributes(
+            name: profile_name,
+            excluded_urls: excluded_urls,
+            auth_enabled: auth[:enabled],
+            auth_url: auth[:url],
+            auth_username_field: auth[:username_field],
+            auth_password_field: auth[:password_field],
+            auth_username: auth[:username],
+            dast_site: have_attributes(url: target_url)
+          )
+
+          password_variable = dast_site_profile.secret_variables.find_by!(key: Dast::SiteProfileSecretVariable::PASSWORD)
+          expect(password_variable.value).to eq(Base64.strict_encode64(auth[:password]))
+
+          request_headers_variable = dast_site_profile.secret_variables.find_by!(key: Dast::SiteProfileSecretVariable::REQUEST_HEADERS)
+          expect(request_headers_variable.value).to eq(Base64.strict_encode64(request_headers))
+        end
+
         it 'returns the dast_site_profile id' do
           expect(subject[:id]).to eq(dast_site_profile.to_global_id)
         end
 
         it 'calls the dast_site_profile creation service' do
-          service = double(described_class)
-          result = double('result', success?: false, errors: [])
+          service = double(DastSiteProfiles::CreateService)
+          result = ServiceResponse.error(message: '')
 
-          service_params = { name: profile_name, target_url: target_url, excluded_urls: excluded_urls }
+          service_params = {
+            name: profile_name,
+            target_url: target_url,
+            excluded_urls: excluded_urls,
+            request_headers: request_headers,
+            auth_enabled: auth[:enabled],
+            auth_url: auth[:url],
+            auth_username_field: auth[:username_field],
+            auth_password_field: auth[:password_field],
+            auth_username: auth[:username],
+            auth_password: auth[:password]
+          }
 
           expect(DastSiteProfiles::CreateService).to receive(:new).and_return(service)
           expect(service).to receive(:execute).with(service_params).and_return(result)
@@ -85,23 +122,39 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
           end
         end
 
-        context 'when excluded_urls is supplied as a param' do
-          context 'when the feature flag security_dast_site_profiles_additional_fields is disabled' do
-            it 'does not set the excluded_urls' do
-              stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-
-              subject
-
-              expect(dast_site_profile.excluded_urls).to be_empty
-            end
+        context 'when the feature flag security_dast_site_profiles_additional_fields is disabled' do
+          before do
+            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
           end
 
-          context 'when the feature flag security_dast_site_profiles_additional_fields is enabled' do
-            it 'sets the excluded_urls' do
-              subject
+          it 'does not set the request_headers or the password dast_site_profile_secret_variables' do
+            subject
 
-              expect(dast_site_profile.excluded_urls).to eq(excluded_urls)
-            end
+            expect(dast_site_profile.secret_variables).to be_empty
+          end
+
+          it 'does not set non-secret auth fields' do
+            subject
+
+            expect(dast_site_profile).to have_attributes(
+              auth_enabled: false,
+              auth_url: nil,
+              auth_username_field: nil,
+              auth_password_field: nil,
+              auth_username: nil
+            )
+          end
+        end
+
+        context 'when variable creation fails' do
+          it 'returns an error and the dast_site_profile' do
+            service = double(Dast::SiteProfileSecretVariables::CreateOrUpdateService)
+            result = ServiceResponse.error(payload: create(:dast_site_profile), message: 'Oops')
+
+            allow(Dast::SiteProfileSecretVariables::CreateOrUpdateService).to receive(:new).and_return(service)
+            allow(service).to receive(:execute).and_return(result)
+
+            expect(subject).to include(errors: ['Oops'])
           end
         end
       end

@@ -109,6 +109,16 @@ RSpec.describe GroupsHelper do
 
       subject
     end
+
+    it 'avoids N+1 queries' do
+      control_count = ActiveRecord::QueryRecorder.new do
+        helper.group_title(nested_group)
+      end
+
+      expect do
+        helper.group_title(very_deep_nested_group)
+      end.not_to exceed_query_limit(control_count)
+    end
   end
 
   describe '#share_with_group_lock_help_text' do
@@ -451,6 +461,26 @@ RSpec.describe GroupsHelper do
     end
   end
 
+  describe '#render_setting_to_allow_project_access_token_creation?' do
+    let_it_be(:current_user) { create(:user) }
+    let_it_be(:parent) { create(:group) }
+    let_it_be(:group) { create(:group, parent: parent) }
+
+    before do
+      allow(helper).to receive(:current_user) { current_user }
+      parent.add_owner(current_user)
+      group.add_owner(current_user)
+    end
+
+    it 'returns true if group is root' do
+      expect(helper.render_setting_to_allow_project_access_token_creation?(parent)).to be_truthy
+    end
+
+    it 'returns false if group is subgroup' do
+      expect(helper.render_setting_to_allow_project_access_token_creation?(group)).to be_falsy
+    end
+  end
+
   describe '#group_open_issues_count' do
     let_it_be(:current_user) { create(:user) }
     let_it_be(:group) { create(:group, :public) }
@@ -481,45 +511,22 @@ RSpec.describe GroupsHelper do
     end
   end
 
-  describe '#cached_open_group_issues_count' do
+  describe '#cached_issuables_count' do
     let_it_be(:current_user) { create(:user) }
     let_it_be(:group) { create(:group, name: 'group') }
-    let_it_be(:count_service) { Groups::OpenIssuesCountService }
 
-    before do
-      allow(helper).to receive(:current_user) { current_user }
+    context 'with issues type' do
+      let(:type) { :issues }
+      let(:count_service) { Groups::OpenIssuesCountService }
+
+      it_behaves_like 'cached issuables count'
     end
 
-    it 'returns all digits for count value under 1000' do
-      allow_next_instance_of(count_service) do |service|
-        allow(service).to receive(:count).and_return(999)
-      end
+    context 'with merge requests type' do
+      let(:type) { :merge_requests }
+      let(:count_service) { Groups::MergeRequestsCountService }
 
-      expect(helper.cached_open_group_issues_count(group)).to eq('999')
-    end
-
-    it 'returns truncated digits for count value over 1000' do
-      allow_next_instance_of(count_service) do |service|
-        allow(service).to receive(:count).and_return(2300)
-      end
-
-      expect(helper.cached_open_group_issues_count(group)).to eq('2.3k')
-    end
-
-    it 'returns truncated digits for count value over 10000' do
-      allow_next_instance_of(count_service) do |service|
-        allow(service).to receive(:count).and_return(12560)
-      end
-
-      expect(helper.cached_open_group_issues_count(group)).to eq('12.6k')
-    end
-
-    it 'returns truncated digits for count value over 100000' do
-      allow_next_instance_of(count_service) do |service|
-        allow(service).to receive(:count).and_return(112560)
-      end
-
-      expect(helper.cached_open_group_issues_count(group)).to eq('112.6k')
+      it_behaves_like 'cached issuables count'
     end
   end
 end

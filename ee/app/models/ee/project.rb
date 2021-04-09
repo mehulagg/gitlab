@@ -804,6 +804,16 @@ module EE
       jira_issue_association_required_to_merge_enabled? && prevent_merge_without_jira_issue
     end
 
+    def licensed_feature_available?(feature, user = nil)
+      available_features = strong_memoize(:licensed_feature_available) do
+        Hash.new do |h, f|
+          h[f] = load_licensed_feature_available(f)
+        end
+      end
+
+      available_features[feature]
+    end
+
     private
 
     def group_hooks
@@ -817,16 +827,6 @@ module EE
 
     def set_next_execution_timestamp_to_now
       import_state.set_next_execution_to_now
-    end
-
-    def licensed_feature_available?(feature, user = nil)
-      available_features = strong_memoize(:licensed_feature_available) do
-        Hash.new do |h, f|
-          h[f] = load_licensed_feature_available(f)
-        end
-      end
-
-      available_features[feature]
     end
 
     def load_licensed_feature_available(feature)
@@ -848,9 +848,11 @@ module EE
     end
 
     def requirements_ci_variables
-      ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        if requirements.opened.any?
-          variables.append(key: 'CI_HAS_OPEN_REQUIREMENTS', value: 'true')
+      strong_memoize(:requirements_ci_variables) do
+        ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
+          if requirements.opened.any?
+            variables.append(key: 'CI_HAS_OPEN_REQUIREMENTS', value: 'true')
+          end
         end
       end
     end

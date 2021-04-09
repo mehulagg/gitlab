@@ -106,7 +106,7 @@ RSpec.describe API::Todos do
       end
 
       it 'returns an error if the epic is not accessible' do
-        group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+        group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
         subject
 

@@ -12,7 +12,7 @@ module Resolvers
       def resolve(**args)
         return ::Clusters::AgentToken.none unless can_read_agent_tokens?
 
-        agent.agent_tokens
+        agent.last_used_agent_tokens
       end
 
       private

@@ -97,7 +97,7 @@ describe('Schedule Common Mixins', () => {
       const leftOffset = oneDayOffsetWeekView * daysSinceShiftStart + hourOffset;
       expect(wrapper.vm.getIndicatorStyles(PRESET_TYPES.WEEKS, mockTimeframeInitialDate)).toEqual(
         expect.objectContaining({
-          left: `${Math.round(leftOffset)}%`,
+          left: `${leftOffset}%`,
         }),
       );
     });

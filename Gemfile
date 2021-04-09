@@ -274,7 +274,7 @@ gem 'licensee', '~> 9.14.1'
 gem 'charlock_holmes', '~> 0.7.7'
 
 # Detect mime content type from content
-gem 'ruby-magic-static', '~> 0.3.4'
+gem 'ruby-magic', '~> 0.4'
 
 # Fake version of the gem to trick bundler
 gem 'mimemagic', '0.3.7', path: 'vendor/shims/mimemagic', require: false
@@ -343,13 +343,13 @@ group :metrics do
 end
 
 group :development do
-  gem 'brakeman', '~> 4.2', require: false
-  gem 'lefthook', '~> 0.7', require: false
+  gem 'brakeman', '~> 4.10.0', require: false
+  gem 'lefthook', '~> 0.7.0', require: false
 
-  gem 'letter_opener_web', '~> 1.3.4'
+  gem 'letter_opener_web', '~> 1.4.0'
 
   # Better errors handler
-  gem 'better_errors', '~> 2.7.1'
+  gem 'better_errors', '~> 2.9.0'
 
   # thin instead webrick
   gem 'thin', '~> 1.8.0'
@@ -399,7 +399,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 1.1.0', require: false
+  gem 'gitlab-dangerfiles', '~> 1.1.1', require: false
 end
 
 group :development, :test, :coverage do
@@ -488,7 +488,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.1'
+gem 'gitlab-experiment', '~> 0.5.3'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

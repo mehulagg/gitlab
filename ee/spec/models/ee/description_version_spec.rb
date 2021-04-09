@@ -49,7 +49,7 @@ RSpec.describe DescriptionVersion do
     def deleted_count
       DescriptionVersion
         .where('issue_id = ? or epic_id = ? or merge_request_id = ?', issue.id, epic.id, merge_request.id)
-        .where('deleted_at IS NOT NULL')
+        .where.not(deleted_at: nil)
         .count
     end
 

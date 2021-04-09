@@ -3,12 +3,16 @@ import ReportItem from 'ee/vulnerabilities/components/generic_report/report_item
 import {
   REPORT_TYPES,
   REPORT_TYPE_URL,
+  REPORT_TYPE_LIST,
 } from 'ee/vulnerabilities/components/generic_report/types/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const TEST_DATA = {
   [REPORT_TYPE_URL]: {
     href: 'http://foo.com',
+  },
+  [REPORT_TYPE_LIST]: {
+    items: [{ type: 'foo' }],
   },
 };
 

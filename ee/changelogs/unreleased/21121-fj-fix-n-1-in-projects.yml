@@ -1,0 +1,5 @@
+---
+title: Fix N+1 in /projects endpoint
+merge_request: 57746
+author:
+type: performance

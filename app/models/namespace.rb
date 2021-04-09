@@ -46,6 +46,9 @@ class Namespace < ApplicationRecord
   has_one :aggregation_schedule, class_name: 'Namespace::AggregationSchedule'
   has_one :package_setting_relation, inverse_of: :namespace, class_name: 'PackageSetting'
 
+  has_one :admin_note, inverse_of: :namespace
+  accepts_nested_attributes_for :admin_note, update_only: true
+
   validates :owner, presence: true, unless: ->(n) { n.type == "Group" }
   validates :name,
     presence: true,
@@ -108,7 +111,7 @@ class Namespace < ApplicationRecord
 
   # Make sure that the name is same as strong_memoize name in root_ancestor
   # method
-  attr_writer :root_ancestor
+  attr_writer :root_ancestor, :emails_disabled_memoized
 
   class << self
     def by_path(path)
@@ -236,7 +239,7 @@ class Namespace < ApplicationRecord
 
   # any ancestor can disable emails for all descendants
   def emails_disabled?
-    strong_memoize(:emails_disabled) do
+    strong_memoize(:emails_disabled_memoized) do
       if parent_id
         self_and_ancestors.where(emails_disabled: true).exists?
       else
@@ -284,8 +287,13 @@ class Namespace < ApplicationRecord
     false
   end
 
+  # Deprecated, use #licensed_feature_available? instead. Remove once Namespace#feature_available? isn't used anymore.
+  def feature_available?(feature)
+    licensed_feature_available?(feature)
+  end
+
   # Overridden in EE::Namespace
-  def feature_available?(_feature)
+  def licensed_feature_available?(_feature)
     false
   end
 

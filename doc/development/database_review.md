@@ -30,9 +30,9 @@ A database review is required for:
   See the [Product Intelligence Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
   for implementation details.
 
-A database reviewer is expected to look out for obviously complex
+A database reviewer is expected to look out for overly complex
 queries in the change and review those closer. If the author does not
-point out specific queries for review and there are no obviously
+point out specific queries for review and there are no overly
 complex queries, it is enough to concentrate on reviewing the
 migration only.
 
@@ -176,7 +176,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
 
 #### Preparation when removing columns, tables, indexes, or other structures
 
-- Follow the [guidelines on dropping columns](what_requires_downtime.md#dropping-columns).
+- Follow the [guidelines on dropping columns](avoiding_downtime_in_migrations.md#dropping-columns).
 - Generally it's best practice (but not a hard rule) to remove indexes and foreign keys in a post-deployment migration.
   - Exceptions include removing indexes and foreign keys for small tables.
 - If you're adding a composite index, another index might become redundant, so remove that in the same migration.
@@ -199,7 +199,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   - Check that the relevant version files under `db/schema_migrations` were added or removed.
   - Check queries timing (If any): In a single transaction, cumulative query time executed in a migration
     needs to fit comfortably within `15s` - preferably much less than that - on GitLab.com.
-  - For column removals, make sure the column has been [ignored in a previous release](what_requires_downtime.md#dropping-columns)
+  - For column removals, make sure the column has been [ignored in a previous release](avoiding_downtime_in_migrations.md#dropping-columns)
 - Check [background migrations](background_migrations.md):
   - Establish a time estimate for execution on GitLab.com. For historical purposes,
     it's highly recommended to include this estimation on the merge request description.
@@ -221,7 +221,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   - Data migrations should be reversible too or come with a description of how to reverse, when possible.
     This applies to all types of migrations (regular, post-deploy, background).
 - Query performance
-  - Check for any obviously complex queries and queries the author specifically
+  - Check for any overly complex queries and queries the author specifically
     points out for review (if any)
   - If not present yet, ask the author to provide SQL queries and query plans
     (for example, by using [ChatOps](understanding_explain_plans.md#chatops) or direct

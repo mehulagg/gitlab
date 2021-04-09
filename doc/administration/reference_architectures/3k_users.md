@@ -12,7 +12,7 @@ users, and then maintain uptime and access for those users. You can also use
 this architecture to provide improved GitLab uptime and availability for fewer
 than 3,000 users. For fewer users, reduce the stated node sizes as needed.
 
-If maintining a high level of uptime for your GitLab environment isn't a
+If maintaining a high level of uptime for your GitLab environment isn't a
 requirement, or if you don't have the expertise to maintain this sort of
 environment, we recommend using the [2,000-user reference architecture](2k_users.md)
 for your GitLab installation.
@@ -26,20 +26,20 @@ For a full list of reference architectures, see
 
 | Service                                    | Nodes       | Configuration         | GCP            | AWS         | Azure   |
 |--------------------------------------------|-------------|-----------------------|----------------|-------------|---------|
-| External load balancing node               | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Redis                                      | 3           | 2 vCPU, 7.5 GB memory | n1-standard-2  | m5.large    | D2s v3  |
-| Consul + Sentinel                          | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| PostgreSQL                                 | 3           | 2 vCPU, 7.5 GB memory | n1-standard-2  | m5.large    | D2s v3  |
-| PgBouncer                                  | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Gitaly                                     | 3           | 4 vCPU, 15 GB memory  | n1-standard-4  | m5.xlarge   | D4s v3  |
-| Praefect                                   | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Praefect PostgreSQL                        | 1+*         | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
-| Sidekiq                                    | 4           | 2 vCPU, 7.5 GB memory | n1-standard-2  | m5.large    | D2s v3  |
-| GitLab Rails                               | 3           | 8 vCPU, 7.2 GB memory | n1-highcpu-8   | c5.2xlarge  | F8s v2  |
-| Monitoring node                            | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | c5.large    | F2s v2  |
+| External load balancing node               | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Redis                                      | 3           | 2 vCPU, 7.5 GB memory | n1-standard-2  | `m5.large`    | D2s v3  |
+| Consul + Sentinel                          | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| PostgreSQL                                 | 3           | 2 vCPU, 7.5 GB memory | n1-standard-2  | `m5.large`    | D2s v3  |
+| PgBouncer                                  | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Gitaly                                     | 3           | 4 vCPU, 15 GB memory  | n1-standard-4  | `m5.xlarge`   | D4s v3  |
+| Praefect                                   | 3           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Praefect PostgreSQL                        | 1+*         | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
+| Sidekiq                                    | 4           | 2 vCPU, 7.5 GB memory | n1-standard-2  | `m5.large`    | D2s v3  |
+| GitLab Rails                               | 3           | 8 vCPU, 7.2 GB memory | n1-highcpu-8   | `c5.2xlarge`  | F8s v2  |
+| Monitoring node                            | 1           | 2 vCPU, 1.8 GB memory | n1-highcpu-2   | `c5.large`    | F2s v2  |
 | Object storage                             | n/a         | n/a                   | n/a            | n/a         | n/a     |
-| NFS server (optional, not recommended)     | 1           | 4 vCPU, 3.6 GB memory | n1-highcpu-4   | c5.xlarge   | F4s v2  |
+| NFS server (optional, not recommended)     | 1           | 4 vCPU, 3.6 GB memory | n1-highcpu-4   | `c5.xlarge`   | F4s v2  |
 
 ```plantuml
 @startuml 3k
@@ -494,7 +494,7 @@ a node and change its status from primary to replica (and vice versa).
         'redis.password' => 'redis-password-goes-here',
    }
 
-   # Disable auto migrations
+   # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
    ```
 
@@ -577,7 +577,7 @@ run: redis-exporter: (pid 30075) 76861s; run: log: (pid 29674) 76896s
         'redis.password' => 'redis-password-goes-here',
    }
 
-   # Disable auto migrations
+   # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
    ```
 
@@ -706,7 +706,7 @@ To configure the Sentinel:
    node_exporter['listen_address'] = '0.0.0.0:9100'
    redis_exporter['listen_address'] = '0.0.0.0:9121'
 
-   # Disable auto migrations
+   # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
    ```
 
@@ -831,7 +831,7 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    # Incoming recommended value for max connections is 500. See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5691.
    patroni['postgresql']['max_connections'] = 500
 
-   # Disable automatic database migrations
+   # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
 
    # Configure the Consul agent
@@ -1095,6 +1095,7 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    postgresql['listen_address'] = '0.0.0.0'
    postgresql['max_connections'] = 200
 
+   # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
 
    # Configure the Consul agent
@@ -1240,7 +1241,8 @@ To configure the Praefect nodes, on each one:
    praefect['enable'] = true
    praefect['listen_addr'] = '0.0.0.0:2305'
 
-   gitlab_rails['rake_cache_clear'] = false
+   # Prevent database migrations from running on upgrade automatically
+   praefect['auto_migrate'] = false
    gitlab_rails['auto_migrate'] = false
 
    # Configure the Consul agent
@@ -1364,8 +1366,7 @@ On each node:
    alertmanager['enable'] = false
    prometheus['enable'] = false
 
-   # Prevent database connections during 'gitlab-ctl reconfigure'
-   gitlab_rails['rake_cache_clear'] = false
+   # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
 
    # Configure the gitlab-shell API callback URL. Without this, `git push` will
@@ -1533,7 +1534,6 @@ To configure the Sidekiq nodes, one each one:
    nginx['enable'] = false
    grafana['enable'] = false
    prometheus['enable'] = false
-   gitlab_rails['auto_migrate'] = false
    alertmanager['enable'] = false
    gitaly['enable'] = false
    gitlab_workhorse['enable'] = false
@@ -1584,6 +1584,7 @@ To configure the Sidekiq nodes, one each one:
    gitlab_rails['db_password'] = '<postgresql_user_password>'
    gitlab_rails['db_adapter'] = 'postgresql'
    gitlab_rails['db_encoding'] = 'unicode'
+   # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
 
    #######################################
@@ -1720,6 +1721,7 @@ On each node perform the following:
    gitlab_rails['db_host'] = '10.6.0.20' # internal load balancer IP
    gitlab_rails['db_port'] = 6432
    gitlab_rails['db_password'] = '<postgresql_user_password>'
+   # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
 
    ## Redis connection details
@@ -1885,7 +1887,6 @@ running [Prometheus](../monitoring/prometheus/index.md) and
    external_url 'http://gitlab.example.com'
 
    # Disable all other services
-   gitlab_rails['auto_migrate'] = false
    alertmanager['enable'] = false
    gitaly['enable'] = false
    gitlab_exporter['enable'] = false
@@ -1919,6 +1920,9 @@ running [Prometheus](../monitoring/prometheus/index.md) and
    consul['configuration'] = {
       retry_join: %w(10.6.0.11 10.6.0.12 10.6.0.13)
    }
+
+   # Prevent database migrations from running on upgrade automatically
+   gitlab_rails['auto_migrate'] = false
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).

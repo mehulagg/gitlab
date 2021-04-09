@@ -37,7 +37,7 @@ RSpec.describe 'EE-specific project routing' do
   # security_namespace_project_pipeline GET /:project_id/pipelines/:id/security(.:format)
   describe Projects::PipelinesController, 'routing' do
     it 'to #security' do
-      expect(get('/gitlab/gitlabhq/pipelines/12/security')).to route_to('projects/pipelines#security', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '12')
+      expect(get('/gitlab/gitlabhq/-/pipelines/12/security')).to route_to('projects/pipelines#security', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '12')
     end
   end
 

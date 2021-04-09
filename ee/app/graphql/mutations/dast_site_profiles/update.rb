@@ -47,33 +47,38 @@ module Mutations
 
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, id:, profile_name:, target_url: nil, excluded_urls: nil, request_headers: nil, auth: nil)
+      def resolve(full_path:, id:, profile_name:, target_url: nil, **params)
         project = authorized_find!(full_path)
+
+        auth_params = feature_flagged(project, params[:auth], default: {})
 
         # TODO: remove explicit coercion once compatibility layer has been removed
         # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
-        params = {
+        dast_site_profile_params = {
           id: SiteProfileID.coerce_isolated_input(id).model_id,
+          excluded_urls: feature_flagged(project, params[:excluded_urls]),
           name: profile_name,
+          request_headers: feature_flagged(project, params[:request_headers]),
           target_url: target_url,
-          excluded_urls: feature_flagged_excluded_urls(project, excluded_urls)
+          auth_enabled: auth_params[:enabled],
+          auth_url: auth_params[:url],
+          auth_username_field: auth_params[:username_field],
+          auth_password_field: auth_params[:password_field],
+          auth_username: auth_params[:username],
+          auth_password: auth_params[:password]
         }.compact
 
-        result = ::DastSiteProfiles::UpdateService.new(project, current_user).execute(**params)
+        result = ::DastSiteProfiles::UpdateService.new(project, current_user).execute(**dast_site_profile_params)
 
-        if result.success?
-          { id: result.payload.to_global_id, errors: [] }
-        else
-          { errors: result.errors }
-        end
+        { id: result.payload.try(:to_global_id), errors: result.errors }
       end
 
       private
 
-      def feature_flagged_excluded_urls(project, excluded_urls)
-        return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
+      def feature_flagged(project, value, opts = {})
+        return opts[:default] unless Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
 
-        excluded_urls
+        value || opts[:default]
       end
     end
   end

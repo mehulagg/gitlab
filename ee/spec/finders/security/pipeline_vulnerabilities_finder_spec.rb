@@ -262,7 +262,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         subject { described_class.new(pipeline: pipeline).execute }
 
         it 'returns all vulnerabilities with all scanners available' do
-          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bandit bundler_audit find_sec_bugs flawfinder gemnasium klar zaproxy]
+          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bundler_audit find_sec_bugs gemnasium klar zaproxy]
         end
       end
 
@@ -277,11 +277,11 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
 
     context 'by all filters' do
       context 'with found entity' do
-        let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scanner: %w[bandit bundler_audit find_sec_bugs flawfinder gemnasium klar zaproxy], scope: 'all' } }
+        let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scanner: %w[bundler_audit find_sec_bugs gemnasium klar zaproxy], scope: 'all' } }
 
         it 'filters by all params' do
           expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
-          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bandit bundler_audit find_sec_bugs flawfinder gemnasium klar zaproxy]
+          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bundler_audit find_sec_bugs gemnasium klar zaproxy]
           expect(subject.findings.map(&:confidence).uniq).to match_array(%w[unknown low medium high])
           expect(subject.findings.map(&:severity).uniq).to match_array(%w[unknown low medium high critical info])
         end
@@ -326,7 +326,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
 
       let(:confirmed_fingerprint) do
         Digest::SHA1.hexdigest(
-          'python/hardcoded/hardcoded-tmp.py:52865813c884a507be1f152d654245af34aba8a391626d01f1ab6d3f52ec8779:B108')
+          'groovy/src/main/java/com/gitlab/security_products/tests/App.groovy:29:CIPHER_INTEGRITY')
       end
 
       let(:resolved_fingerprint) do

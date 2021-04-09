@@ -242,12 +242,11 @@ to learn more about how to define one.
 To disable the `code_quality` job, add `CODE_QUALITY_DISABLED` as a custom CI/CD variable.
 This can be done:
 
-- For the whole project, [in the project settings](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui)
-  or [CI/CD configuration](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
+- For [the whole project](../../../ci/variables/README.md#custom-cicd-variables).
 - For a single pipeline run:
 
   1. Go to **CI/CD > Pipelines**
-  1. Click **Run Pipeline**
+  1. Click **Run pipeline**
   1. Add `CODE_QUALITY_DISABLED` as the variable key, with any value.
 
 ### Using with merge request pipelines

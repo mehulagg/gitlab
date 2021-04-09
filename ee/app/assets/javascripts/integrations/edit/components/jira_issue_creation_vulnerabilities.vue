@@ -182,6 +182,7 @@ export default {
           <gl-button
             v-gl-tooltip.hover
             :title="$options.i18n.fetchIssueTypesButtonLabel"
+            :aria-label="$options.i18n.fetchIssueTypesButtonLabel"
             :disabled="!projectKey"
             icon="retry"
             data-testid="fetch-issue-types"

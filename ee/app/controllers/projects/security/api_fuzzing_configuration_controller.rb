@@ -11,7 +11,6 @@ module Projects
       feature_category :fuzz_testing
 
       def show
-        not_found unless Feature.enabled?(:api_fuzzing_configuration_ui, @project, default_enabled: :yaml)
       end
     end
   end

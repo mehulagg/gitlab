@@ -192,7 +192,7 @@ source repository. Be sure to URL-encode `ref` if it contains slashes.
 
 If you trigger a pipeline by using a webhook, you can access the webhook payload with
 the `TRIGGER_PAYLOAD` [predefined CI/CD variable](../variables/predefined_variables.md).
-The payload is exposed as a [file-type variable](../variables/README.md#custom-cicd-variables-of-type-file),
+The payload is exposed as a [file-type variable](../variables/README.md#cicd-variable-types),
 so you can access the data with `cat $TRIGGER_PAYLOAD` or a similar command.
 
 ## Making use of trigger variables
@@ -255,7 +255,7 @@ curl --request POST \
   "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
 ```
 
-Trigger variables have the [highest priority](../variables/README.md#priority-of-cicd-variables)
+Trigger variables have the [highest priority](../variables/README.md#cicd-variable-precedence)
 of all types of variables.
 
 ## Using cron to trigger nightly pipelines

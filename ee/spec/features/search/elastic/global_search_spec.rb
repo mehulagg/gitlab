@@ -78,11 +78,31 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       let(:object) { :milestone }
       let(:creation_args) { { project: project } }
       let(:path) { search_path(search: '*', scope: 'milestones') }
-      # N+1 queries still exist and will be fixed per
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/325887
-      let(:query_count_multiplier) { 1 }
+      let(:query_count_multiplier) { 0 }
 
       it_behaves_like 'an efficient database result'
+    end
+
+    context 'searching code' do
+      let(:path) { search_path(search: '*', scope: 'blobs') }
+
+      it 'avoids N+1 database queries' do
+        project.repository.index_commits_and_blobs
+
+        ensure_elasticsearch_index!
+
+        control = ActiveRecord::QueryRecorder.new { visit path }
+        expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
+
+        projects.each do |project|
+          project.repository.index_commits_and_blobs
+        end
+
+        ensure_elasticsearch_index!
+
+        expect { visit path }.not_to exceed_query_limit(control.count)
+        expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
+      end
     end
   end
 

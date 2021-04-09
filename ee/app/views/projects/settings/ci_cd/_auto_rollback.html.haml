@@ -25,4 +25,4 @@
                         = s_('AutoRollback|Automatic rollbacks start when a critical alert is triggered. If the last successful deployment fails to roll back automatically, it can still be done manually.')
                         = link_to _('More information'), help_page_path('ci/environments/index.md', anchor: 'auto-rollback'), target: '_blank'
 
-              = f.submit _('Save changes'), class: "gl-button btn btn-success gl-mt-5", data: { qa_selector: 'save_changes_button' }
+              = f.submit _('Save changes'), class: "gl-button btn btn-confirm gl-mt-5", data: { qa_selector: 'save_changes_button' }

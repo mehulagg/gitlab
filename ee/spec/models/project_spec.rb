@@ -167,6 +167,7 @@ RSpec.describe Project do
 
     describe 'approval_rules association' do
       let_it_be(:rule, reload: true) { create(:approval_project_rule) }
+
       let(:project) { rule.project }
       let(:branch) { 'stable' }
 
@@ -399,6 +400,7 @@ RSpec.describe Project do
       let_it_be(:project_1) { create(:project_statistics, lfs_objects_size: 10, repository_size: 10).project }
       let_it_be(:project_2) { create(:project_statistics, lfs_objects_size: 5, repository_size: 55).project }
       let_it_be(:project_3) { create(:project, repository_size_limit: 30, statistics: create(:project_statistics, lfs_objects_size: 8, repository_size: 32)) }
+
       let(:limit) { 20 }
 
       subject { described_class.order_by_total_repository_size_excess_desc(limit) }
@@ -1175,6 +1177,7 @@ RSpec.describe Project do
   describe '#shared_runners_limit_namespace' do
     let_it_be(:root_ancestor) { create(:group) }
     let_it_be(:group) { create(:group, parent: root_ancestor) }
+
     let(:project) { create(:project, namespace: group) }
 
     subject { project.shared_runners_limit_namespace }
@@ -1337,6 +1340,7 @@ RSpec.describe Project do
 
   describe '#visible_user_defined_inapplicable_rules' do
     let_it_be(:project) { create(:project) }
+
     let!(:rule) { create(:approval_project_rule, project: project) }
     let!(:another_rule) { create(:approval_project_rule, project: project) }
 
@@ -1926,6 +1930,7 @@ RSpec.describe Project do
 
     context 'Geo repository update events' do
       let_it_be(:import_state) { create(:import_state, :started, project: project) }
+
       let(:repository_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
       let(:wiki_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
       let(:design_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }

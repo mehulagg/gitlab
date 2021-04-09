@@ -10,6 +10,7 @@ RSpec.describe Vulnerabilities::RevertToDetectedService do
   end
 
   let_it_be(:user) { create(:user) }
+
   let(:project) { create(:project) } # cannot use let_it_be here: caching causes problems with permission-related tests
   let(:vulnerability) { create(:vulnerability, :with_findings, project: project) }
   let(:service) { described_class.new(user, vulnerability) }

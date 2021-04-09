@@ -5,6 +5,8 @@ class Packages::Package < ApplicationRecord
   include UsageStatistics
   include Gitlab::Utils::StrongMemoize
 
+  DISPLAYABLE_STATUSES = [:default, :error].freeze
+
   belongs_to :project
   belongs_to :creator, class_name: 'User'
 
@@ -70,7 +72,7 @@ class Packages::Package < ApplicationRecord
                        composer: 6, generic: 7, golang: 8, debian: 9,
                        rubygems: 10 }
 
-  enum status: { default: 0, hidden: 1, processing: 2 }
+  enum status: { default: 0, hidden: 1, processing: 2, error: 3 }
 
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }
@@ -80,7 +82,7 @@ class Packages::Package < ApplicationRecord
   scope :without_version_like, -> (version) { where.not(arel_table[:version].matches(version)) }
   scope :with_package_type, ->(package_type) { where(package_type: package_type) }
   scope :with_status, ->(status) { where(status: status) }
-  scope :displayable, -> { with_status(:default) }
+  scope :displayable, -> { with_status(DISPLAYABLE_STATUSES) }
   scope :including_build_info, -> { includes(pipelines: :user) }
   scope :including_project_route, -> { includes(project: { namespace: :route }) }
   scope :including_tags, -> { includes(:tags) }
@@ -136,13 +138,15 @@ class Packages::Package < ApplicationRecord
   after_commit :update_composer_cache, on: :destroy, if: -> { composer? }
 
   def self.for_projects(projects)
-    return none unless projects.any?
+    unless Feature.enabled?(:maven_packages_group_level_improvements)
+      return none unless projects.any?
+    end
 
     where(project_id: projects)
   end
 
   def self.only_maven_packages_with_path(path, use_cte: false)
-    if use_cte && Feature.enabled?(:maven_metadata_by_path_with_optimization_fence)
+    if use_cte && Feature.enabled?(:maven_metadata_by_path_with_optimization_fence, default_enabled: :yaml)
       # This is an optimization fence which assumes that looking up the Metadatum record by path (globally)
       # and then filter down the packages (by project or by group and subgroups) will be cheaper than
       # looking up all packages within a project or group and filter them by path.

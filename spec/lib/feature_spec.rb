@@ -123,35 +123,12 @@ RSpec.describe Feature, stub_feature_flags: false do
   end
 
   describe '.enabled?' do
-    let(:disabled_ff_definition) do
-      Feature::Definition.new(
-        'development/disabled_feature_flag.yml',
-        name: 'disabled_feature_flag',
-        type: 'development',
-        default_enabled: false
-      )
+    it 'returns false for undefined feature' do
+      expect(described_class.enabled?(:some_random_feature_flag)).to be_falsey
     end
 
-    let(:enabled_ff_definition) do
-      Feature::Definition.new(
-        'development/enabled_feature_flag.yml',
-        name: 'enabled_feature_flag',
-        type: 'development',
-        default_enabled: true
-      )
-    end
-
-    before do
-      allow(Feature::Definition).to receive(:definitions) do
-        {
-          disabled_ff_definition.key => disabled_ff_definition,
-          enabled_ff_definition.key => enabled_ff_definition
-        }
-      end
-    end
-
-    it 'raises an exception for undefined feature' do
-      expect { described_class.enabled?(:some_random_feature_flag) }.to raise_error Feature::InvalidFeatureFlagError
+    it 'returns true for undefined feature with default_enabled' do
+      expect(described_class.enabled?(:some_random_feature_flag, default_enabled: true)).to be_truthy
     end
 
     it 'returns false for existing disabled feature in the database' do
@@ -169,58 +146,39 @@ RSpec.describe Feature, stub_feature_flags: false do
     it { expect(described_class.send(:l1_cache_backend)).to eq(Gitlab::ProcessMemoryCache.cache_backend) }
     it { expect(described_class.send(:l2_cache_backend)).to eq(Rails.cache) }
 
-    it 'caches the status in L1 and L2 caches', :request_store, :use_clean_rails_memory_store_caching, :aggregate_failures do
+    it 'caches the status in L1 and L2 caches',
+       :request_store, :use_clean_rails_memory_store_caching do
       described_class.enable(:enabled_feature_flag)
-      flipper_features_key = 'flipper/v1/features'
-      flipper_feature_key = 'flipper/v1/feature/enabled_feature_flag'
+      flipper_key = "flipper/v1/feature/enabled_feature_flag"
 
-      allow(described_class.send(:l2_cache_backend)).to receive(:fetch).twice.and_call_original
-      allow(described_class.send(:l1_cache_backend)).to receive(:fetch).twice.and_call_original
+      expect(described_class.send(:l2_cache_backend))
+        .to receive(:fetch)
+        .once
+        .with(flipper_key, expires_in: 1.hour)
+        .and_call_original
+
+      expect(described_class.send(:l1_cache_backend))
+        .to receive(:fetch)
+        .once
+        .with(flipper_key, expires_in: 1.minute)
+        .and_call_original
 
       2.times do
         expect(described_class.enabled?(:enabled_feature_flag)).to be_truthy
       end
-
-      expect(described_class.send(:l2_cache_backend)).to have_received(:fetch).with(flipper_features_key, expires_in: 1.hour)
-      expect(described_class.send(:l2_cache_backend)).to have_received(:fetch).with(flipper_feature_key, expires_in: 1.hour)
-
-      expect(described_class.send(:l1_cache_backend)).to have_received(:fetch).with(flipper_features_key, expires_in: 1.minute)
-      expect(described_class.send(:l1_cache_backend)).to have_received(:fetch).with(flipper_feature_key, expires_in: 1.minute)
     end
 
-    it 'returns the default value when the database does not exist', :aggregate_falures do
-      a_feature = Feature::Definition.new(
-        'development/a_feature.yml',
-        name: 'a_feature',
-        type: 'development',
-        default_enabled: true
-      )
-
-      allow(Feature::Definition).to receive(:definitions) do
-        { a_feature.key => a_feature }
-      end
-
+    it 'returns the default value when the database does not exist' do
+      fake_default = double('fake default')
       expect(ActiveRecord::Base).to receive(:connection) { raise ActiveRecord::NoDatabaseError, "No database" }
 
-      expect(described_class.enabled?(:a_feature)).to eq(true)
+      expect(described_class.enabled?(:a_feature, default_enabled: fake_default)).to eq(fake_default)
     end
 
-    context 'cached feature flag', :request_store, :use_clean_rails_memory_store_caching, :aggregate_failures do
+    context 'cached feature flag', :request_store do
       let(:flag) { :some_feature_flag }
-      let(:some_feature_flag) do
-        Feature::Definition.new(
-          "development/#{flag}.yml",
-          name: flag.to_s,
-          type: 'development',
-          default_enabled: true
-        )
-      end
 
       before do
-        allow(Feature::Definition).to receive(:definitions) do
-          { some_feature_flag.key => some_feature_flag }
-        end
-
         described_class.send(:flipper).memoize = false
         described_class.enabled?(flag)
       end
@@ -315,48 +273,63 @@ RSpec.describe Feature, stub_feature_flags: false do
           .to raise_error(/The `type:` of/)
       end
 
-      it 'reads the default from the YAML definition' do
-        expect(described_class.enabled?(:my_feature_flag)).to eq(false)
+      it 'when invalid default_enabled is used' do
+        expect { described_class.enabled?(:my_feature_flag, default_enabled: true) }
+          .to raise_error(/The `default_enabled:` of/)
       end
 
-      context 'when YAML definition does not exist for an optional type' do
-        let(:optional_type) { described_class::Shared::TYPES.find { |name, attrs| attrs[:optional] }.first }
+      context 'when `default_enabled: :yaml` is used in code' do
+        it 'reads the default from the YAML definition' do
+          expect(described_class.enabled?(:my_feature_flag, default_enabled: :yaml)).to eq(false)
+        end
 
-        context 'when in dev or test environment' do
-          it 'raises an error for dev' do
-            expect { described_class.enabled?(:non_existent_flag, type: optional_type) }
-              .to raise_error(
-                Feature::InvalidFeatureFlagError,
-                "The feature flag YAML definition for 'non_existent_flag' does not exist")
+        context 'when default_enabled is true in the YAML definition' do
+          let(:default_enabled) { true }
+
+          it 'reads the default from the YAML definition' do
+            expect(described_class.enabled?(:my_feature_flag, default_enabled: :yaml)).to eq(true)
           end
         end
 
-        context 'when in production' do
-          before do
-            allow(Gitlab::ErrorTracking).to receive(:should_raise_for_dev?).and_return(false)
-          end
+        context 'when YAML definition does not exist for an optional type' do
+          let(:optional_type) { described_class::Shared::TYPES.find { |name, attrs| attrs[:optional] }.first }
 
-          context 'when database exists' do
-            before do
-              allow(Gitlab::Database).to receive(:exists?).and_return(true)
-            end
-
-            it 'checks the persisted status and returns false' do
-              expect(described_class).to receive(:get).with(:non_existent_flag).and_call_original
-
-              expect(described_class.enabled?(:non_existent_flag, type: optional_type)).to eq(false)
+          context 'when in dev or test environment' do
+            it 'raises an error for dev' do
+              expect { described_class.enabled?(:non_existent_flag, type: optional_type, default_enabled: :yaml) }
+                .to raise_error(
+                  Feature::InvalidFeatureFlagError,
+                  "The feature flag YAML definition for 'non_existent_flag' does not exist")
             end
           end
 
-          context 'when database does not exist' do
+          context 'when in production' do
             before do
-              allow(Gitlab::Database).to receive(:exists?).and_return(false)
+              allow(Gitlab::ErrorTracking).to receive(:should_raise_for_dev?).and_return(false)
             end
 
-            it 'returns false without checking the status in the database' do
-              expect(described_class).not_to receive(:get)
+            context 'when database exists' do
+              before do
+                allow(Gitlab::Database).to receive(:exists?).and_return(true)
+              end
 
-              expect(described_class.enabled?(:non_existent_flag, type: optional_type)).to eq(false)
+              it 'checks the persisted status and returns false' do
+                expect(described_class).to receive(:get).with(:non_existent_flag).and_call_original
+
+                expect(described_class.enabled?(:non_existent_flag, type: optional_type, default_enabled: :yaml)).to eq(false)
+              end
+            end
+
+            context 'when database does not exist' do
+              before do
+                allow(Gitlab::Database).to receive(:exists?).and_return(false)
+              end
+
+              it 'returns false without checking the status in the database' do
+                expect(described_class).not_to receive(:get)
+
+                expect(described_class.enabled?(:non_existent_flag, type: optional_type, default_enabled: :yaml)).to eq(false)
+              end
             end
           end
         end
@@ -364,36 +337,13 @@ RSpec.describe Feature, stub_feature_flags: false do
     end
   end
 
-  describe '.disabled?' do
-    let(:disabled_ff_definition) do
-      Feature::Definition.new(
-        'development/disabled_feature_flag.yml',
-        name: 'disabled_feature_flag',
-        type: 'development',
-        default_enabled: false
-      )
+  describe '.disable?' do
+    it 'returns true for undefined feature' do
+      expect(described_class.disabled?(:some_random_feature_flag)).to be_truthy
     end
 
-    let(:enabled_ff_definition) do
-      Feature::Definition.new(
-        'development/enabled_feature_flag.yml',
-        name: 'enabled_feature_flag',
-        type: 'development',
-        default_enabled: true
-      )
-    end
-
-    before do
-      allow(Feature::Definition).to receive(:definitions) do
-        {
-          disabled_ff_definition.key => disabled_ff_definition,
-          enabled_ff_definition.key => enabled_ff_definition
-        }
-      end
-    end
-
-    it 'raises an exception for undefined feature' do
-      expect { described_class.disabled?(:some_random_feature_flag) }.to raise_error Feature::InvalidFeatureFlagError
+    it 'returns false for undefined feature with default_enabled' do
+      expect(described_class.disabled?(:some_random_feature_flag, default_enabled: true)).to be_falsey
     end
 
     it 'returns true for existing disabled feature in the database' do
@@ -533,6 +483,109 @@ RSpec.describe Feature, stub_feature_flags: false do
         described_class.enable(:persisted_feature_flag)
 
         expect(described_class.remove(:persisted_feature_flag)).to be_truthy
+      end
+    end
+  end
+
+  context 'caching with stale reads from the database', :use_clean_rails_redis_caching, :request_store, :aggregate_failures do
+    let(:actor) { stub_feature_flag_gate('CustomActor:5') }
+    let(:another_actor) { stub_feature_flag_gate('CustomActor:10') }
+
+    # This is a bit unpleasant. For these tests we want to simulate stale reads
+    # from the database (due to database load balancing). A simple way to do
+    # that is to stub the response on the adapter Flipper uses for reading from
+    # the database. However, there isn't a convenient API for this. We know that
+    # the ActiveRecord adapter is always at the 'bottom' of the chain, so we can
+    # find it that way.
+    let(:active_record_adapter) do
+      adapter = described_class.flipper
+
+      loop do
+        break adapter unless adapter.instance_variable_get(:@adapter)
+
+        adapter = adapter.instance_variable_get(:@adapter)
+      end
+    end
+
+    [true, false].each do |enabled|
+      context "with feature_flags_cache_stale_read_fix #{enabled ? 'enabled' : 'disabled'}" do # rubocop:disable RSpec/EmptyExampleGroup
+        # Without this environment variable enabled we want the specs to fail.
+        method = enabled ? :it : :pending
+
+        before do
+          stub_feature_flags(feature_flags_cache_stale_read_fix: enabled)
+        end
+
+        send(method, 'gives the correct value when enabling for an additional actor') do
+          described_class.enable(:enabled_feature_flag, actor)
+          initial_gate_values = active_record_adapter.get(described_class.get(:enabled_feature_flag))
+
+          # This should only be enabled for `actor`
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag, another_actor)).to be(false)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+
+          # Enable for `another_actor` and simulate a stale read
+          described_class.enable(:enabled_feature_flag, another_actor)
+          allow(active_record_adapter).to receive(:get).once.and_return(initial_gate_values)
+
+          # Should read from the cache and be enabled for both of these actors
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag, another_actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+        end
+
+        send(method, 'gives the correct value when enabling for percentage of time') do
+          described_class.enable_percentage_of_time(:enabled_feature_flag, 10)
+          initial_gate_values = active_record_adapter.get(described_class.get(:enabled_feature_flag))
+
+          # Test against `gate_values` directly as otherwise it would be non-determistic
+          expect(described_class.get(:enabled_feature_flag).gate_values.percentage_of_time).to eq(10)
+
+          # Enable 50% of time and simulate a stale read
+          described_class.enable_percentage_of_time(:enabled_feature_flag, 50)
+          allow(active_record_adapter).to receive(:get).once.and_return(initial_gate_values)
+
+          # Should read from the cache and be enabled 50% of the time
+          expect(described_class.get(:enabled_feature_flag).gate_values.percentage_of_time).to eq(50)
+        end
+
+        send(method, 'gives the correct value when disabling the flag') do
+          described_class.enable(:enabled_feature_flag, actor)
+          described_class.enable(:enabled_feature_flag, another_actor)
+          initial_gate_values = active_record_adapter.get(described_class.get(:enabled_feature_flag))
+
+          # This be enabled for `actor` and `another_actor`
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag, another_actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+
+          # Disable for `another_actor` and simulate a stale read
+          described_class.disable(:enabled_feature_flag, another_actor)
+          allow(active_record_adapter).to receive(:get).once.and_return(initial_gate_values)
+
+          # Should read from the cache and be enabled only for `actor`
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag, another_actor)).to be(false)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+        end
+
+        send(method, 'gives the correct value when deleting the flag') do
+          described_class.enable(:enabled_feature_flag, actor)
+          initial_gate_values = active_record_adapter.get(described_class.get(:enabled_feature_flag))
+
+          # This should only be enabled for `actor`
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(true)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+
+          # Remove and simulate a stale read
+          described_class.remove(:enabled_feature_flag)
+          allow(active_record_adapter).to receive(:get).once.and_return(initial_gate_values)
+
+          # Should read from the cache and be disabled everywhere
+          expect(described_class.enabled?(:enabled_feature_flag, actor)).to be(false)
+          expect(described_class.enabled?(:enabled_feature_flag)).to be(false)
+        end
       end
     end
   end

@@ -111,7 +111,7 @@ module EE
     end
 
     def approvals_app_data(project = @project)
-      { data: { 'project_id': project.id,
+      data = { 'project_id': project.id,
       'can_edit': can_modify_approvers.to_s,
       'project_path': expose_path(api_v4_projects_path(id: project.id)),
       'settings_path': expose_path(api_v4_projects_approval_settings_path(id: project.id)),
@@ -121,7 +121,13 @@ module EE
       'security_approvals_help_page_path': help_page_path('user/application_security/index.md', anchor: 'security-approvals-in-merge-requests'),
       'security_configuration_path': project_security_configuration_path(project),
       'vulnerability_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-security-approvals-within-a-project'),
-      'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project') } }
+      'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project') }
+
+      if ::Feature.enabled?(:ff_compliance_approval_gates, project, default_enabled: :yaml)
+        data[:external_approval_rules_path] = expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+      end
+
+      { data: data }
     end
 
     def can_modify_approvers(project = @project)

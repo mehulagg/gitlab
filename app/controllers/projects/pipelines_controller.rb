@@ -46,7 +46,17 @@ class Projects::PipelinesController < Projects::ApplicationController
     @pipelines_count = limited_pipelines_count(project)
 
     respond_to do |format|
-      format.html
+      format.html do
+        experiment(:pipeline_empty_state_templates, actor: current_user) do |e|
+          e.exclude! unless current_user
+          e.exclude! if @pipelines_count.to_i > 0
+          e.exclude! if helpers.has_gitlab_ci?(project)
+
+          e.use {}
+          e.try {}
+          e.track(:view, value: project.namespace_id)
+        end
+      end
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
 
@@ -97,7 +107,7 @@ class Projects::PipelinesController < Projects::ApplicationController
     Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/26657')
 
     respond_to do |format|
-      format.html
+      format.html { render_show }
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
 
@@ -152,15 +162,6 @@ class Projects::PipelinesController < Projects::ApplicationController
       .represent(@stage, details: true, retried: params[:retried])
   end
 
-  # TODO: This endpoint is used by mini-pipeline-graph
-  # TODO: This endpoint should be migrated to `stage.json`
-  def stage_ajax
-    @stage = pipeline.legacy_stage(params[:stage])
-    return not_found unless @stage
-
-    render json: { html: view_to_html_string('projects/pipelines/_stage') }
-  end
-
   def retry
     pipeline.retry_failed(current_user)
 
@@ -187,10 +188,7 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   def test_report
     respond_to do |format|
-      format.html do
-        render 'show'
-      end
-
+      format.html { render_show }
       format.json do
         render json: TestReportSerializer
           .new(current_user: @current_user)
@@ -219,6 +217,8 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def render_show
+    @stages = @pipeline.stages.with_latest_and_retried_statuses
+
     respond_to do |format|
       format.html do
         render 'show'

@@ -30,42 +30,23 @@ RSpec.describe Mutations::AppSec::Fuzzing::Api::CiConfiguration::Create do
         stub_licensed_features(security_dashboard: true)
       end
 
-      context 'when the api_fuzzing_configuration_ui feature is on' do
-        before do
-          stub_feature_flags(api_fuzzing_configuration_ui: true)
-        end
-
-        it 'returns a YAML snippet that can be used to configure API fuzzing scans for the project' do
-          aggregate_failures do
-            expect(subject[:errors]).to be_empty
-            expect(subject[:gitlab_ci_yaml_edit_path]).to eq(
-              Rails.application.routes.url_helpers.project_ci_pipeline_editor_path(project)
-            )
-            expect(Psych.load(subject[:configuration_yaml])).to eq({
-              'stages' => ['fuzz'],
-              'include' => [{ 'template' => 'API-Fuzzing.gitlab-ci.yml' }],
-              'variables' => {
-                'FUZZAPI_HTTP_PASSWORD' => '$PASSWORD',
-                'FUZZAPI_HTTP_USERNAME' => '$USERNAME',
-                'FUZZAPI_HAR' => 'https://api.gov/api_spec',
-                'FUZZAPI_PROFILE' => 'Quick-10',
-                'FUZZAPI_TARGET_URL' => 'https://api.gov'
-              }
-            })
-          end
-        end
-
-        context 'when the api_fuzzing_configuration_ui feature is off' do
-          before do
-            stub_feature_flags(api_fuzzing_configuration_ui: false)
-          end
-
-          it 'errors' do
-            expect { subject }.to raise_error(
-              ::Gitlab::Graphql::Errors::ResourceNotAvailable,
-              'The API fuzzing CI configuration feature is off'
-            )
-          end
+      it 'returns a YAML snippet that can be used to configure API fuzzing scans for the project' do
+        aggregate_failures do
+          expect(subject[:errors]).to be_empty
+          expect(subject[:gitlab_ci_yaml_edit_path]).to eq(
+            Rails.application.routes.url_helpers.project_ci_pipeline_editor_path(project)
+          )
+          expect(Psych.load(subject[:configuration_yaml])).to eq({
+            'stages' => ['fuzz'],
+            'include' => [{ 'template' => 'API-Fuzzing.gitlab-ci.yml' }],
+            'variables' => {
+              'FUZZAPI_HTTP_PASSWORD' => '$PASSWORD',
+              'FUZZAPI_HTTP_USERNAME' => '$USERNAME',
+              'FUZZAPI_HAR' => 'https://api.gov/api_spec',
+              'FUZZAPI_PROFILE' => 'Quick-10',
+              'FUZZAPI_TARGET_URL' => 'https://api.gov'
+            }
+          })
         end
       end
 

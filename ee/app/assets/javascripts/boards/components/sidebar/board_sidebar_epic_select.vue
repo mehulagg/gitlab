@@ -26,9 +26,9 @@ export default {
   inject: ['groupId'],
   computed: {
     ...mapState(['epics', 'epicsCacheById', 'epicFetchInProgress']),
-    ...mapGetters(['activeIssue', 'projectPathForActiveIssue']),
+    ...mapGetters(['activeBoardItem', 'projectPathForActiveIssue']),
     epic() {
-      return this.activeIssue.epic;
+      return this.activeBoardItem.epic;
     },
     epicData() {
       const hasEpic = this.epic !== null;

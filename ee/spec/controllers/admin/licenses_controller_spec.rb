@@ -83,4 +83,35 @@ RSpec.describe Admin::LicensesController do
       end
     end
   end
+
+  describe 'POST sync_seat_link' do
+    let_it_be(:historical_data) { create(:historical_data, recorded_at: Time.current) }
+
+    before do
+      allow(License).to receive(:current).and_return(create(:license))
+      allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(seat_link_enabled)
+    end
+
+    context 'with seat link enabled' do
+      let(:seat_link_enabled) { true }
+
+      it 'redirects with a successful message' do
+        post :sync_seat_link
+
+        expect(response).to redirect_to(admin_license_path)
+        expect(flash[:notice]).to eq('Your license was successfully synced.')
+      end
+    end
+
+    context 'with seat link disabled' do
+      let(:seat_link_enabled) { false }
+
+      it 'redirects with an error message' do
+        post :sync_seat_link
+
+        expect(response).to redirect_to(admin_license_path)
+        expect(flash[:error]).to match('There was an error when trying to sync your license.')
+      end
+    end
+  end
 end

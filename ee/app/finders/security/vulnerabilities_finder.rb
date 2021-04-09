@@ -67,8 +67,8 @@ module Security
     end
 
     def filter_by_scanner_ids
-      if params[:scanner_ids].present?
-        @vulnerabilities = vulnerabilities.by_scanner_ids(params[:scanner_ids])
+      if params[:scanner_id].present?
+        @vulnerabilities = vulnerabilities.by_scanner_ids(params[:scanner_id])
       end
     end
 

@@ -68,19 +68,20 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
       </span>
        
       <span
-        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1"
+        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-overflow-hidden"
         data-testid="timeline-cell"
+        style="width: calc(100% - 180px);"
       >
         <span
           class="current-day-indicator"
           data-testid="current-day-indicator"
-          style="left: 29%;"
+          style="left: 14.285714285714286%;"
         />
          
         <div>
           <div
-            class="gl-absolute gl-h-7 gl-mt-3"
-            style="left: 0px; width: -2px;"
+            class="gl-absolute gl-h-7 gl-mt-3 gl-pr-1"
+            style="left: 0px; width: 0px;"
           >
             <div
               class="gl-h-6 gl-bg-data-viz-blue-500 gl-display-flex gl-justify-content-center gl-align-items-center"
@@ -119,8 +120,8 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
             </div>
           </div>
           <div
-            class="gl-absolute gl-h-7 gl-mt-3"
-            style="left: 0px; width: -2px;"
+            class="gl-absolute gl-h-7 gl-mt-3 gl-pr-1"
+            style="left: 0px; width: 0px;"
           >
             <div
               class="gl-h-6 gl-bg-data-viz-orange-500 gl-display-flex gl-justify-content-center gl-align-items-center"
@@ -159,14 +160,6 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
             </div>
           </div>
         </div>
-      </span>
-      <span
-        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-overflow-hidden"
-        data-testid="timeline-cell"
-      >
-        <!---->
-         
-        <div />
       </span>
     </div>
   </div>

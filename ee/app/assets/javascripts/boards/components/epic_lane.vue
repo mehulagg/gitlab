@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLink, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import createFlash from '~/flash';
 import { formatDate } from '~/lib/utils/datetime_utility';
@@ -13,7 +13,6 @@ export default {
     GlButton,
     GlIcon,
     GlLink,
-    GlLoadingIcon,
     GlPopover,
     IssuesLaneList,
   },
@@ -50,7 +49,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['epicsFlags', 'filterParams']),
+    ...mapState(['filterParams']),
     ...mapGetters(['getIssuesByEpic']),
     isOpen() {
       return this.epic.state === statusType.open;
@@ -82,28 +81,12 @@ export default {
     epicDateString() {
       return formatDate(this.epic.createdAt);
     },
-    isLoading() {
-      return Boolean(this.epicsFlags[this.epic.id]?.isLoading);
-    },
     shouldDisplay() {
-      return this.issuesCount > 0 || this.isLoading;
+      return this.issuesCount > 0;
     },
-  },
-  watch: {
-    filterParams: {
-      handler() {
-        if (!this.filterParams.epicId || this.filterParams.epicId === this.epic.id) {
-          this.fetchIssuesForEpic(this.epic.id);
-        }
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.fetchIssuesForEpic(this.epic.id);
   },
   methods: {
-    ...mapActions(['fetchIssuesForEpic', 'updateBoardEpicUserPreferences']),
+    ...mapActions(['updateBoardEpicUserPreferences']),
     toggleCollapsed() {
       this.isCollapsed = !this.isCollapsed;
 
@@ -149,7 +132,6 @@ export default {
           <gl-link :href="epic.webUrl" class="gl-font-sm">{{ __('Go to epic') }}</gl-link>
         </gl-popover>
         <span
-          v-if="!isLoading"
           v-gl-tooltip.hover
           :title="issuesCountTooltipText"
           class="gl-display-flex gl-align-items-center gl-text-gray-500"
@@ -160,7 +142,6 @@ export default {
           <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
           <span aria-hidden="true">{{ issuesCount }}</span>
         </span>
-        <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       </div>
     </div>
     <div v-if="!isCollapsed" class="gl-display-flex gl-pb-5" data-testid="board-epic-lane-issues">

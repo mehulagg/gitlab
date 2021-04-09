@@ -1,8 +1,10 @@
 import Vue from 'vue';
+import ensureData from '~/ensure_data';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import App from './components/app.vue';
 import apolloProvider from './graphql';
 import seedQuery from './graphql/queries/seed.query.graphql';
+import { parseData } from './utils';
 
 const arrayToGraphqlArray = (arr, typename) =>
   Array.from(arr, (item) => Object.assign(item, { __typename: typename }));
@@ -24,8 +26,15 @@ const writeInitialDataToApolloProvider = (dataset) => {
   });
 };
 
-export default () => {
-  const el = document.getElementById('js-buy-minutes');
+export default (el) => {
+  if (!el) {
+    return null;
+  }
+
+  const ExtendedApp = ensureData(App, {
+    parseData,
+    data: el.dataset,
+  });
 
   writeInitialDataToApolloProvider(el.dataset);
 
@@ -33,7 +42,7 @@ export default () => {
     el,
     apolloProvider,
     render(createElement) {
-      return createElement(App);
+      return createElement(ExtendedApp);
     },
   });
 };

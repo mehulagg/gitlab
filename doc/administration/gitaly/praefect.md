@@ -24,6 +24,10 @@ See the [design
 document](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/design_ha.md)
 for implementation details.
 
+NOTE:
+If not set in GitLab, feature flags are read as false from the console and Praefect uses their
+default value. The default value depends on the GitLab version.
+
 ## Setup Instructions
 
 If you [installed](https://about.gitlab.com/install/) GitLab using the Omnibus
@@ -319,7 +323,7 @@ application server, or a Gitaly node.
    WARNING:
    If you have data on an already existing storage called
    `default`, you should configure the virtual storage with another name and
-   [migrate the data to the Gitaly Cluster storage](#migrate-existing-repositories-to-gitaly-cluster)
+   [migrate the data to the Gitaly Cluster storage](#migrate-to-gitaly-cluster)
    afterwards.
 
    Replace `PRAEFECT_INTERNAL_TOKEN` with a strong secret, which is used by
@@ -760,7 +764,7 @@ Particular attention should be shown to:
 
    WARNING:
    If you have existing data stored on the default Gitaly storage,
-   you should [migrate the data your Gitaly Cluster storage](#migrate-existing-repositories-to-gitaly-cluster)
+   you should [migrate the data your Gitaly Cluster storage](#migrate-to-gitaly-cluster)
    first.
 
    ```ruby
@@ -945,8 +949,10 @@ They reflect configuration defined for this instance of Praefect.
 
 > - Introduced in GitLab 13.1 in [alpha](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga), disabled by default.
 > - Entered [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) in GitLab 13.2, disabled by default.
-> - From GitLab 13.3, disabled unless primary-wins reference transactions strategy is disabled.
+> - In GitLab 13.3, disabled unless primary-wins voting strategy is disabled.
 > - From GitLab 13.4, enabled by default.
+> - From GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable strong consistency.
+> - From GitLab 13.6, primary-wins voting strategy and `gitaly_reference_transactions_primary_wins` feature flag were removed from the source code.
 
 Praefect guarantees eventual consistency by replicating all writes to secondary nodes
 after the write to the primary Gitaly node has happened.
@@ -958,18 +964,12 @@ information, see the [strong consistency epic](https://gitlab.com/groups/gitlab-
 
 To enable strong consistency:
 
-- In GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable
-  strong consistency.
-- In GitLab 13.4 and later, the strong consistency voting strategy has been
-  improved. Instead of requiring all nodes to agree, only the primary and half
-  of the secondaries need to agree. This strategy is enabled by default. To
-  disable it and continue using the primary-wins strategy, enable the
-  `:gitaly_reference_transactions_primary_wins` feature flag.
-- In GitLab 13.3, reference transactions are enabled by default with a
-  primary-wins strategy. This strategy causes all transactions to succeed for
-  the primary and thus does not ensure strong consistency. To enable strong
-  consistency, disable the `:gitaly_reference_transactions_primary_wins`
-  feature flag.
+- In GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable strong consistency.
+- In GitLab 13.4 and later, the strong consistency voting strategy has been improved and enabled by default.
+  Instead of requiring all nodes to agree, only the primary and half of the secondaries need to agree.
+- In GitLab 13.3, reference transactions are enabled by default with a primary-wins strategy.
+  This strategy causes all transactions to succeed for the primary and thus does not ensure strong consistency.
+  To enable strong consistency, disable the `:gitaly_reference_transactions_primary_wins` feature flag.
 - In GitLab 13.2, enable the `:gitaly_reference_transactions` feature flag.
 - In GitLab 13.1, enable the `:gitaly_reference_transactions` and `:gitaly_hooks_rpc`
   feature flags.
@@ -1249,8 +1249,9 @@ affected repositories. Praefect provides tools for:
 - [Automatic](#automatic-reconciliation) reconciliation, for GitLab 13.4 and later.
 - [Manual](#manual-reconciliation) reconciliation, for:
   - GitLab 13.3 and earlier.
-  - Repositories upgraded to GitLab 13.4 and later without entries in the `repositories` table.
-    A migration tool [is planned](https://gitlab.com/gitlab-org/gitaly/-/issues/3033).
+  - Repositories upgraded to GitLab 13.4 and later without entries in the `repositories` table. In
+    GitLab 13.6 and later, [a migration is run](https://gitlab.com/gitlab-org/gitaly/-/issues/3033)
+    when Praefect starts for these repositories.
 
 These tools reconcile the outdated repositories to bring them fully up to date again.
 
@@ -1294,23 +1295,37 @@ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.t
 - Replace the placeholder `<up-to-date-storage>` with the Gitaly storage name containing up to date repositories.
 - Replace the placeholder `<outdated-storage>` with the Gitaly storage name containing outdated repositories.
 
-## Migrate existing repositories to Gitaly Cluster
+## Migrate to Gitaly Cluster
 
-If your GitLab instance already has repositories on single Gitaly nodes, these aren't migrated to
-Gitaly Cluster automatically.
+To migrate to Gitaly Cluster, existing repositories stored outside Gitaly Cluster must be
+moved. There is no automatic migration but the moves can be scheduled with the GitLab API.
 
-Project repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md). Note that this API cannot move all repository types. For moving other repositories types, see:
+GitLab repositories can be associated with projects, groups, and snippets. Each of these types
+have a separate API to schedule the respective repositories to move. To move all repositories
+on a GitLab instance, each of these types must be scheduled to move for each storage.
 
-- [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md).
-- [Group repository storage moves API](../../api/group_repository_storage_moves.md).
+Each repository is made read only when the move is scheduled. The repository is not writable
+until the move has completed.
 
-To move repositories to Gitaly Cluster:
+After creating and configuring Gitaly Cluster:
+
+1. Ensure all storages are accessible to the GitLab instance. In this example, these are
+   `<original_storage_name>` and `<cluster_storage_name>`.
+1. [Configure repository storage weights](../repository_storage_paths.md#configure-where-new-repositories-are-stored)
+   so that the Gitaly Cluster receives all new projects. This stops new projects being created
+   on existing Gitaly nodes while the migration is in progress.
+1. Schedule repository moves for:
+   - [Projects](#bulk-schedule-projects).
+   - [Snippets](#bulk-schedule-snippets).
+   - [Groups](#bulk-schedule-groups). **(PREMIUM SELF)**
+
+### Bulk schedule projects
 
 1. [Schedule repository storage moves for all projects on a storage shard](../../api/project_repository_storage_moves.md#schedule-repository-storage-moves-for-all-projects-on-a-storage-shard) using the API. For example:
 
    ```shell
    curl --request POST --header "Private-Token: <your_access_token>" --header "Content-Type: application/json" \
-   --data '{"source_storage_name":"gitaly","destination_storage_name":"praefect"}' "https://gitlab.example.com/api/v4/project_repository_storage_moves"
+   --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/project_repository_storage_moves"
    ```
 
 1. [Query the most recent repository moves](../../api/project_repository_storage_moves.md#retrieve-all-project-repository-storage-moves)
@@ -1323,9 +1338,69 @@ To move repositories to Gitaly Cluster:
    using the API to confirm that all projects have moved. No projects should be returned
    with `repository_storage` field set to the old storage.
 
-In a similar way, you can move other repository types by using the
-[Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md) **(FREE SELF)**
-or the [Groups repository storage moves API](../../api/group_repository_storage_moves.md) **(PREMIUM SELF)**.
+   ```shell
+   curl --header "Private-Token: <your_access_token>" --header "Content-Type: application/json" \
+   "https://gitlab.example.com/api/v4/projects?repository_storage=<original_storage_name>"
+   ```
+
+   Alternatively use [the rails console](../operations/rails_console.md) to
+   confirm that all projects have moved. Run the following in the rails console:
+
+   ```ruby
+   ProjectRepository.for_repository_storage('<original_storage_name>')
+   ```
+
+1. Repeat for each storage as required.
+
+### Bulk schedule snippets
+
+1. [Schedule repository storage moves for all snippets on a storage shard](../../api/snippet_repository_storage_moves.md#schedule-repository-storage-moves-for-all-snippets-on-a-storage-shard) using the API. For example:
+
+   ```shell
+   curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+   --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/snippet_repository_storage_moves"
+   ```
+
+1. [Query the most recent repository moves](../../api/snippet_repository_storage_moves.md#retrieve-all-snippet-repository-storage-moves)
+   using the API. The query indicates either:
+   - The moves have completed successfully. The `state` field is `finished`.
+   - The moves are in progress. Re-query the repository move until it completes successfully.
+   - The moves have failed. Most failures are temporary and are solved by rescheduling the move.
+
+1. After the moves are complete, use [the rails console](../operations/rails_console.md) to
+   confirm that all snippets have moved. No snippets should be returned for the original
+   storage. Run the following in the rails console:
+
+   ```ruby
+   SnippetRepository.for_repository_storage('<original_storage_name>')
+   ```
+
+1. Repeat for each storage as required.
+
+### Bulk schedule groups **(PREMIUM SELF)**
+
+1. [Schedule repository storage moves for all groups on a storage shard](../../api/group_repository_storage_moves.md#schedule-repository-storage-moves-for-all-groups-on-a-storage-shard) using the API.
+
+    ```shell
+    curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+    --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/group_repository_storage_moves"
+    ```
+
+1. [Query the most recent repository moves](../../api/group_repository_storage_moves.md#retrieve-all-group-repository-storage-moves)
+   using the API. The query indicates either:
+   - The moves have completed successfully. The `state` field is `finished`.
+   - The moves are in progress. Re-query the repository move until it completes successfully.
+   - The moves have failed. Most failures are temporary and are solved by rescheduling the move.
+
+1. After the moves are complete, use [the rails console](../operations/rails_console.md) to
+   confirm that all groups have moved. No groups should be returned for the original
+   storage. Run the following in the rails console:
+
+   ```ruby
+   GroupWikiRepository.for_repository_storage('<original_storage_name>')
+   ```
+
+1. Repeat for each storage as required.
 
 ## Debugging Praefect
 

@@ -267,6 +267,7 @@ RSpec.describe Notify do
 
       context 'for epic notes' do
         let_it_be(:note) { create(:note, project: nil, noteable: epic) }
+
         let(:note_author) { note.author }
 
         subject { described_class.note_epic_email(recipient.id, note.id) }

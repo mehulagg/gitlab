@@ -255,10 +255,6 @@ module EE
         .any?
     end
 
-    def manageable_groups_eligible_for_subscription
-      manageable_groups.eligible_for_subscription.order(:name)
-    end
-
     def manageable_groups_eligible_for_trial
       manageable_groups.eligible_for_trial.order(:name)
     end

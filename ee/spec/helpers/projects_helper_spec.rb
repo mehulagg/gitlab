@@ -644,4 +644,28 @@ RSpec.describe ProjectsHelper do
       end
     end
   end
+
+  describe '#approvals_app_data' do
+    subject { helper.approvals_app_data(project) }
+
+    let(:user) { instance_double(User, admin?: false) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(true)
+    end
+
+    context 'with the approval gate feature flag' do
+      where(feature_flag_enabled: [true, false])
+      with_them do
+        before do
+          stub_feature_flags(ff_compliance_approval_gates: feature_flag_enabled)
+        end
+
+        it 'includes external_approval_rules_path only when enabled' do
+          expect(subject[:data].key?(:external_approval_rules_path)).to eq(feature_flag_enabled)
+        end
+      end
+    end
+  end
 end

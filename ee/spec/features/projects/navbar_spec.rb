@@ -12,6 +12,8 @@ RSpec.describe 'Project navbar' do
 
   before do
     insert_package_nav(_('Operations'))
+    insert_infrastructure_registry_nav
+    stub_config(registry: { enabled: false })
 
     project.add_maintainer(user)
     sign_in(user)
@@ -67,11 +69,7 @@ RSpec.describe 'Project navbar' do
       before do
         stub_config(registry: { enabled: true })
 
-        insert_after_sub_nav_item(
-          _('Package Registry'),
-          within: _('Packages & Registries'),
-          new_sub_nav_item_name: _('Container Registry')
-        )
+        insert_container_nav
 
         visit project_path(project)
       end
@@ -83,18 +81,42 @@ RSpec.describe 'Project navbar' do
   context 'when requirements is available' do
     before do
       stub_licensed_features(requirements: true)
-
-      insert_after_nav_item(
-        _('Merge Requests'),
-        new_nav_item: {
-          nav_item: _('Requirements'),
-          nav_sub_items: [_('List')]
-        }
-      )
-
-      visit project_path(project)
     end
 
-    it_behaves_like 'verified navigation bar'
+    context 'with flag enabled' do
+      before do
+        stub_feature_flags(project_sidebar_refactor: true)
+
+        insert_after_nav_item(
+          _('Merge requests'),
+          new_nav_item: {
+            nav_item: _('Requirements'),
+            nav_sub_items: []
+          }
+        )
+
+        visit project_path(project)
+      end
+
+      it_behaves_like 'verified navigation bar'
+    end
+
+    context 'with flag disabled' do
+      before do
+        stub_feature_flags(project_sidebar_refactor: false)
+
+        insert_after_nav_item(
+          _('Merge requests'),
+          new_nav_item: {
+            nav_item: _('Requirements'),
+            nav_sub_items: [_('List')]
+          }
+        )
+
+        visit project_path(project)
+      end
+
+      it_behaves_like 'verified navigation bar'
+    end
   end
 end

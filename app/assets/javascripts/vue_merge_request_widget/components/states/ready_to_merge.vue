@@ -16,8 +16,10 @@ import readyToMergeMixin from 'ee_else_ce/vue_merge_request_widget/mixins/ready_
 import readyToMergeQuery from 'ee_else_ce/vue_merge_request_widget/queries/states/ready_to_merge.query.graphql';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import createFlash from '~/flash';
+import { secondsToMilliseconds } from '~/lib/utils/datetime_utility';
 import simplePoll from '~/lib/utils/simple_poll';
 import { __ } from '~/locale';
+import SmartInterval from '~/smart_interval';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import MergeRequest from '../../../merge_request';
 import { AUTO_MERGE_STRATEGIES, DANGER, INFO, WARNING } from '../../constants';
@@ -52,20 +54,27 @@ export default {
       },
       manual: true,
       result({ data }) {
+        if (Object.keys(this.state).length === 0) {
+          this.removeSourceBranch =
+            data.project.mergeRequest.shouldRemoveSourceBranch ||
+            data.project.mergeRequest.forceRemoveSourceBranch ||
+            false;
+          this.commitMessage = data.project.mergeRequest.defaultMergeCommitMessage;
+          this.squashBeforeMerge = data.project.mergeRequest.squashOnMerge;
+          this.isSquashReadOnly = data.project.squashReadOnly;
+          this.squashCommitMessage = data.project.mergeRequest.defaultSquashCommitMessage;
+        }
+
         this.state = {
           ...data.project.mergeRequest,
           mergeRequestsFfOnlyEnabled: data.project.mergeRequestsFfOnlyEnabled,
           onlyAllowMergeIfPipelineSucceeds: data.project.onlyAllowMergeIfPipelineSucceeds,
         };
-        this.removeSourceBranch =
-          data.project.mergeRequest.shouldRemoveSourceBranch ||
-          data.project.mergeRequest.forceRemoveSourceBranch ||
-          false;
-        this.commitMessage = data.project.mergeRequest.defaultMergeCommitMessage;
-        this.squashBeforeMerge = data.project.mergeRequest.squashOnMerge;
-        this.isSquashReadOnly = data.project.squashReadOnly;
-        this.squashCommitMessage = data.project.mergeRequest.defaultSquashCommitMessage;
         this.loading = false;
+
+        if (this.state.mergeTrainsCount !== null && this.state.mergeTrainsCount !== undefined) {
+          this.initPolling();
+        }
       },
     },
   },
@@ -291,8 +300,23 @@ export default {
     if (this.glFeatures.mergeRequestWidgetGraphql) {
       eventHub.$off('ApprovalUpdated', this.updateGraphqlState);
     }
+
+    if (this.pollingInterval) {
+      this.pollingInterval.destroy();
+    }
   },
   methods: {
+    initPolling() {
+      const startingPollInterval = secondsToMilliseconds(5);
+
+      this.pollingInterval = new SmartInterval({
+        callback: () => this.$apollo.queries.state.refetch(),
+        startingInterval: startingPollInterval,
+        maxInterval: startingPollInterval + secondsToMilliseconds(4 * 60),
+        hiddenInterval: secondsToMilliseconds(6 * 60),
+        incrementByFactorOf: 2,
+      });
+    },
     updateGraphqlState() {
       return this.$apollo.queries.state.refetch();
     },

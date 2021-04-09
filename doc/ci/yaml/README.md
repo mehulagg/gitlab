@@ -172,6 +172,7 @@ a preconfigured `workflow: rules` entry.
 - [`when`](#when): Specify what to do when the `if` rule evaluates to true.
   - To run a pipeline, set to `always`.
   - To prevent pipelines from running, set to `never`.
+- [`variables`](#workflowrulesvariables): If not defined, uses the [variables defined elsewhere](#variables).
 
 When no rules evaluate to true, the pipeline does not run.
 
@@ -221,6 +222,54 @@ request pipelines.
 
 If your rules match both branch pipelines and merge request pipelines,
 [duplicate pipelines](#avoid-duplicate-pipelines) can occur.
+
+#### `workflow:rules:variables`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/294232) in GitLab 13.11.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-workflowrulesvariables). **(CORE ONLY)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can use [`variables`](#variables) in `workflow:rules:` to define variables for specific pipeline conditions.
+
+For example:
+
+```yaml
+variables:
+  DEPLOY_VARIABLE: "default-deploy"
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /master/
+      variables:
+        DEPLOY_VARIABLE: "deploy-production"  # Override globally-defined DEPLOY_VARIABLE
+    - if: $CI_COMMIT_REF_NAME =~ /feature/
+      variables:
+        IS_A_FEATURE: "true"                  # Define a new variable.
+```
+
+##### Enable or disable workflow:rules:variables **(CORE ONLY)**
+
+rules:variables is under development and not ready for production use.
+It is deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_workflow_rules_variables)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_workflow_rules_variables)
+```
 
 #### `workflow:rules` templates
 
@@ -512,7 +561,7 @@ Use `image` to specify [a Docker image](../docker/using_docker_images.md#what-is
 
 For:
 
-- Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
+- Usage examples, see [Define `image` in the `.gitlab-ci.yml` file](../docker/using_docker_images.md#define-image-in-the-gitlab-ciyml-file).
 - Detailed usage information, refer to [Docker integration](../docker/index.md) documentation.
 
 #### `image:name`
@@ -529,11 +578,11 @@ For more information, see [Available settings for `image`](../docker/using_docke
 
 #### `services`
 
-Use `services` to specify a [service Docker image](../docker/using_docker_images.md#what-is-a-service), linked to a base image specified in [`image`](#image).
+Use `services` to specify a [service Docker image](../services/index.md), linked to a base image specified in [`image`](#image).
 
 For:
 
-- Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
+- Usage examples, see [Define `services` in the `.gitlab-ci.yml` file](../services/index.md#define-services-in-the-gitlab-ciyml-file).
 - Detailed usage information, refer to [Docker integration](../docker/index.md) documentation.
 - Example services, see [GitLab CI/CD Services](../services/index.md).
 
@@ -541,25 +590,25 @@ For:
 
 An [extended Docker configuration option](../docker/using_docker_images.md#extended-docker-configuration-options).
 
-For more information, see [Available settings for `services`](../docker/using_docker_images.md#available-settings-for-services).
+For more information, see [Available settings for `services`](../services/index.md#available-settings-for-services).
 
 ##### `services:alias`
 
 An [extended Docker configuration option](../docker/using_docker_images.md#extended-docker-configuration-options).
 
-For more information, see [Available settings for `services`](../docker/using_docker_images.md#available-settings-for-services).
+For more information, see [Available settings for `services`](../services/index.md#available-settings-for-services).
 
 ##### `services:entrypoint`
 
 An [extended Docker configuration option](../docker/using_docker_images.md#extended-docker-configuration-options).
 
-For more information, see [Available settings for `services`](../docker/using_docker_images.md#available-settings-for-services).
+For more information, see [Available settings for `services`](../services/index.md#available-settings-for-services).
 
 ##### `services:command`
 
 An [extended Docker configuration option](../docker/using_docker_images.md#extended-docker-configuration-options).
 
-For more information, see [Available settings for `services`](../docker/using_docker_images.md#available-settings-for-services).
+For more information, see [Available settings for `services`](../services/index.md#available-settings-for-services).
 
 ### `script`
 
@@ -1180,7 +1229,7 @@ expression string per rule, rather than an array of them. Any set of expressions
 evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
 by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-cicd-variable-expressions).
 
-Unlike variables in [`script`](../variables/README.md#syntax-of-cicd-variables-in-job-scripts)
+Unlike variables in [`script`](../variables/README.md#use-cicd-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
 
 `if:` clauses are evaluated based on the values of [predefined CI/CD variables](../variables/predefined_variables.md)
@@ -2149,10 +2198,11 @@ To download artifacts from a job in the current pipeline, use the basic form of 
 #### Optional `needs`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30680) in GitLab 13.10.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-optional-needs). **(FREE SELF)**
+> - [Deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/323891) in GitLab 13.11.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-optional-needs). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -2191,10 +2241,10 @@ rspec:
 
 #### Enable or disable optional needs **(FREE SELF)**
 
-Optional needs is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+Optional needs is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -4586,10 +4636,10 @@ meaning it applies to all jobs. If you define a variable in a job, it's availabl
 to that job only.
 
 If a variable of the same name is defined globally and for a specific job, the
-[job-specific variable overrides the global variable](../variables/README.md#priority-of-cicd-variables).
+[job-specific variable overrides the global variable](../variables/README.md#cicd-variable-precedence).
 
 All YAML-defined variables are also set to any linked
-[Docker service containers](../docker/using_docker_images.md#what-is-a-service).
+[Docker service containers](../services/index.md).
 
 You can use [YAML anchors for variables](#yaml-anchors-for-variables).
 

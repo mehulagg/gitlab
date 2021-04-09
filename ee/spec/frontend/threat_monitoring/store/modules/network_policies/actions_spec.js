@@ -3,7 +3,7 @@ import * as actions from 'ee/threat_monitoring/store/modules/network_policies/ac
 import * as types from 'ee/threat_monitoring/store/modules/network_policies/mutation_types';
 import getInitialState from 'ee/threat_monitoring/store/modules/network_policies/state';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 import { joinPaths } from '~/lib/utils/url_utility';

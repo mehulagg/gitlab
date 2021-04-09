@@ -225,8 +225,7 @@
     }
   }
 
-  .cross-project-reference,
-  .sidebar-mr-source-branch {
+  .cross-project-reference {
     color: inherit;
 
     span {
@@ -288,7 +287,7 @@
       padding-top: 10px;
     }
 
-    &:not(.issue-boards-sidebar):not([data-signed-in]):not([data-always-show-toggle]) {
+    &:not(.boards-sidebar):not([data-signed-in]):not([data-always-show-toggle]) {
       .issuable-sidebar-header {
         display: none;
       }
@@ -634,7 +633,7 @@
   }
 
   .btn-link:hover {
-    @extend a:hover;
+    color: $blue-800;
     text-decoration: none;
   }
 

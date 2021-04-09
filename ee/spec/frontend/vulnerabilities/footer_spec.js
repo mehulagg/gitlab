@@ -10,7 +10,7 @@ import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
 import RelatedJiraIssues from 'ee/vulnerabilities/components/related_jira_issues.vue';
 import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import initUserPopovers from '~/user_popovers';
 

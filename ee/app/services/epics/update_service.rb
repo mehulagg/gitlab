@@ -23,6 +23,7 @@ module Epics
 
         track_start_date_fixed_events(epic)
         track_due_date_fixed_events(epic)
+        track_fixed_dates_updated_events(epic)
 
         epic.reset
       end
@@ -46,9 +47,18 @@ module Epics
 
       todo_service.update_epic(epic, current_user, old_mentioned_users)
 
-      if epic.previous_changes.include?('confidential') && epic.confidential?
+      if epic.saved_change_to_attribute?(:confidential)
+        handle_confidentiality_change(epic)
+      end
+    end
+
+    def handle_confidentiality_change(epic)
+      if epic.confidential?
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_confidential_action(author: current_user)
         # don't enqueue immediately to prevent todos removal in case of a mistake
         ::TodosDestroyer::ConfidentialEpicWorker.perform_in(::Todo::WAIT_FOR_DELETE, epic.id)
+      else
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_visible_action(author: current_user)
       end
     end
 
@@ -59,8 +69,22 @@ module Epics
 
     private
 
+    def track_fixed_dates_updated_events(epic)
+      fixed_start_date_updated = epic.saved_change_to_attribute?(:start_date_fixed)
+      fixed_due_date_updated = epic.saved_change_to_attribute?(:due_date_fixed)
+      return unless fixed_start_date_updated || fixed_due_date_updated
+
+      if fixed_start_date_updated
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_fixed_start_date_updated_action(author: current_user)
+      end
+
+      if fixed_due_date_updated
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_fixed_due_date_updated_action(author: current_user)
+      end
+    end
+
     def track_start_date_fixed_events(epic)
-      return unless epic.saved_changes.key?('start_date_is_fixed')
+      return unless epic.saved_change_to_attribute?(:start_date_is_fixed)
 
       if epic.start_date_is_fixed?
         ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_start_date_set_as_fixed_action(author: current_user)
@@ -70,7 +94,7 @@ module Epics
     end
 
     def track_due_date_fixed_events(epic)
-      return unless epic.saved_changes.key?('due_date_is_fixed')
+      return unless epic.saved_change_to_attribute?(:due_date_is_fixed)
 
       if epic.due_date_is_fixed?
         ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_due_date_set_as_fixed_action(author: current_user)
@@ -105,11 +129,11 @@ module Epics
     end
 
     def track_changes(epic)
-      if epic.saved_changes.key?('title')
+      if epic.saved_change_to_attribute?(:title)
         ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_title_changed_action(author: current_user)
       end
 
-      if epic.saved_changes.key?('description')
+      if epic.saved_change_to_attribute?(:description)
         ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_description_changed_action(author: current_user)
       end
     end

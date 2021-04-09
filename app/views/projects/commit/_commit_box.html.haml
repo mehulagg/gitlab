@@ -18,10 +18,7 @@
         = commit_committer_link(@commit, avatar: true, size: 24)
       #{time_ago_with_tooltip(@commit.committed_date)}
 
-  - if defined?(@notes_count) && @notes_count > 0
-    %span.btn.gl-button.btn-default.disabled.gl-button.btn-icon.d-none.d-sm-inline.gl-mr-3.has-tooltip{ title: n_("%d comment on this commit", "%d comments on this commit", @notes_count) % @notes_count }
-      = sprite_icon('comment')
-      = @notes_count
+  #js-commit-comments-button{ data: { comments_count: @notes_count.to_i } }
   = link_to _('Browse files'), project_tree_path(@project, @commit), class: "btn gl-button btn-default gl-mr-3 gl-xs-w-full gl-xs-mb-3"
   #js-commit-options-dropdown{ data: commit_options_dropdown_data(@project, @commit) }
 
@@ -59,11 +56,8 @@
       - if @last_pipeline.stages_count.nonzero?
         #{ n_(s_('Pipeline|with stage'), s_('Pipeline|with stages'), @last_pipeline.stages_count) }
         .mr-widget-pipeline-graph
-          - if ::Gitlab::Ci::Features.ci_commit_pipeline_mini_graph_vue_enabled?(@project)
-            .stage-cell
-              .js-commit-pipeline-mini-graph{ data: { stages: @last_pipeline_stages.to_json.html_safe } }
-          - else
-            = render 'shared/mini_pipeline_graph', pipeline: @last_pipeline, klass: 'js-commit-pipeline-graph'
+          .stage-cell
+            .js-commit-pipeline-mini-graph{ data: { stages: @last_pipeline_stages.to_json.html_safe } }
       - if @last_pipeline.duration
         in
         = time_interval_in_words @last_pipeline.duration

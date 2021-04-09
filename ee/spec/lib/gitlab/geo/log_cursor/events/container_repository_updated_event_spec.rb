@@ -7,6 +7,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::ContainerRepositoryUpdatedEvent, 
 
   let_it_be(:secondary) { create(:geo_node) }
   let_it_be(:secondary_excludes_all_projects) { create(:geo_node, :selective_sync_excludes_all_projects) }
+
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
   let(:event_log) { create(:geo_event_log, :container_repository_updated_event) }
   let!(:event_log_state) { create(:geo_event_log_state, event_id: event_log.id - 1) }

@@ -5,6 +5,7 @@ module Gitlab
     class MetricDefinition
       METRIC_SCHEMA_PATH = Rails.root.join('config', 'metrics', 'schema.json')
       BASE_REPO_PATH = 'https://gitlab.com/gitlab-org/gitlab/-/blob/master'
+      SKIP_VALIDATION_STATUSES = %w[deprecated removed].to_set.freeze
 
       attr_reader :path
       attr_reader :attributes
@@ -56,7 +57,7 @@ module Gitlab
 
       class << self
         def paths
-          @paths ||= [Rails.root.join('config', 'metrics', '**', '*.yml')]
+          @paths ||= [Rails.root.join('config', 'metrics', '[^agg]*', '*.yml')]
         end
 
         def definitions(skip_validation: false)
@@ -66,6 +67,10 @@ module Gitlab
 
         def schemer
           @schemer ||= ::JSONSchemer.schema(Pathname.new(METRIC_SCHEMA_PATH))
+        end
+
+        def dump_metrics_yaml
+          @metrics_yaml ||= definitions.values.map(&:to_h).map(&:deep_stringify_keys).to_yaml
         end
 
         private
@@ -106,7 +111,7 @@ module Gitlab
       end
 
       def skip_validation?
-        !!attributes[:skip_validation] || @skip_validation
+        !!attributes[:skip_validation] || @skip_validation || SKIP_VALIDATION_STATUSES.include?(attributes[:status])
       end
     end
   end

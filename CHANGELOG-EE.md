@@ -1,5 +1,16 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.10.2 (2021-04-01)
+
+- No changes.
+
+## 13.10.1 (2021-03-31)
+
+### Security (1 change)
+
+- Escape HTML on scoped labels tooltip.
+
+
 ## 13.10.0 (2021-03-22)
 
 ### Removed (1 change)
@@ -165,6 +176,13 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Add a separator between milestone and iteration dropdown in sidebars. !54895
 - Update usage ping dictionary. !55024
 - Delete redirect files. !56169
+
+
+## 13.9.5 (2021-03-31)
+
+### Security (1 change)
+
+- Escape HTML on scoped labels tooltip.
 
 
 ## 13.9.4 (2021-03-17)
@@ -335,6 +353,13 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Add manual renew button to billings page. !52652
 - Abstract out details of policy_helper. !52714
 - Review UI text - repo push rules settings. !52797
+
+
+## 13.8.7 (2021-03-31)
+
+### Security (1 change)
+
+- Escape HTML on scoped labels tooltip.
 
 
 ## 13.8.6 (2021-03-17)

@@ -60,7 +60,7 @@ RSpec.describe 'Issue Boards new issue', :js do
 
       page.within(first('.board-new-issue-form')) do
         find('.form-control').set('bug')
-        click_button 'Submit issue'
+        click_button 'Create issue'
       end
 
       wait_for_requests
@@ -85,12 +85,12 @@ RSpec.describe 'Issue Boards new issue', :js do
 
       page.within(first('.board-new-issue-form')) do
         find('.form-control').set('bug')
-        click_button 'Submit issue'
+        click_button 'Create issue'
       end
 
       wait_for_requests
 
-      expect(page).to have_selector('.issue-boards-sidebar')
+      expect(page).to have_selector('[data-testid="issue-boards-sidebar"]')
     end
 
     it 'successfuly loads labels to be added to newly created issue' do
@@ -100,7 +100,7 @@ RSpec.describe 'Issue Boards new issue', :js do
 
       page.within(first('.board-new-issue-form')) do
         find('.form-control').set('new issue')
-        click_button 'Submit issue'
+        click_button 'Create issue'
       end
 
       wait_for_requests
@@ -109,7 +109,7 @@ RSpec.describe 'Issue Boards new issue', :js do
         find('.board-card').click
       end
 
-      page.within(first('.issue-boards-sidebar')) do
+      page.within(first('[data-testid="issue-boards-sidebar"]')) do
         find('.labels [data-testid="edit-button"]').click
 
         wait_for_requests

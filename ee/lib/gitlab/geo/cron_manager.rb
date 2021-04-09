@@ -22,6 +22,7 @@ module Gitlab
         geo_repository_verification_secondary_scheduler_worker
         geo_secondary_registry_consistency_worker
         geo_secondary_usage_data_cron_worker
+        geo_sync_timeout_cron_worker
       ].freeze
 
       GEO_JOBS = (COMMON_JOBS + PRIMARY_JOBS + SECONDARY_JOBS).freeze

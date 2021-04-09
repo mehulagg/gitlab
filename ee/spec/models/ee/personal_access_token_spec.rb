@@ -7,6 +7,7 @@ RSpec.describe PersonalAccessToken do
     let_it_be(:expired_token) { create(:personal_access_token, expires_at: 1.day.ago) }
     let_it_be(:valid_token) { create(:personal_access_token, expires_at: 1.day.from_now) }
     let_it_be(:long_expiry_token) { create(:personal_access_token, expires_at: '999999-12-31'.to_date) }
+
     let!(:pat) { create(:personal_access_token, expires_at: expiration_date) }
 
     describe 'with_expires_at_after' do

@@ -3,7 +3,7 @@ require 'securerandom'
 
 module QA
   RSpec.describe 'Manage' do
-    describe 'Group access', :requires_admin, :skip_live_env do
+    describe 'Group access', :requires_admin, :skip_live_env, exclude: { job: 'review-qa-*' } do
       include Runtime::IPAddress
 
       before(:all) do
@@ -30,7 +30,7 @@ module QA
 
         @api_client = Runtime::API::Client.new(:gitlab, user: @user)
 
-        enable_plan_on_group(@sandbox_group.path, "Gold") if Runtime::Env.dot_com?
+        enable_plan_on_group(@sandbox_group.path, "Gold") if Specs::Helpers::ContextSelector.dot_com?
       end
 
       after(:all) do

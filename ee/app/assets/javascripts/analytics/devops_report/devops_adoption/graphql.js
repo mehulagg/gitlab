@@ -6,10 +6,12 @@ import axios from '~/lib/utils/axios_utils';
 
 Vue.use(VueApollo);
 
-export const resolvers = {
+export const createResolvers = (groupId) => ({
   Query: {
     groups(_, { search, nextPage }) {
-      const url = Api.buildUrl(Api.groupsPath);
+      const url = groupId
+        ? Api.buildUrl(Api.subgroupsPath).replace(':id', groupId)
+        : Api.buildUrl(Api.groupsPath);
       const params = {
         per_page: Api.DEFAULT_PER_PAGE,
         search,
@@ -34,10 +36,9 @@ export const resolvers = {
       });
     },
   },
-};
-
-const defaultClient = createDefaultClient(resolvers);
-
-export default new VueApollo({
-  defaultClient,
 });
+
+export const createApolloProvider = (groupId) =>
+  new VueApollo({
+    defaultClient: createDefaultClient(createResolvers(groupId)),
+  });

@@ -446,6 +446,10 @@ module Ci
       @auto_devops_pipelines_completed_total ||= Gitlab::Metrics.counter(:auto_devops_pipelines_completed_total, 'Number of completed auto devops pipelines')
     end
 
+    def uses_needs?
+      builds.where(scheduling_type: :dag).any?
+    end
+
     def stages_count
       statuses.select(:stage).distinct.count
     end
@@ -580,10 +584,18 @@ module Ci
     end
 
     def cancel_running(retries: nil)
-      retry_optimistic_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelable|
-        cancelable.find_each do |job|
-          yield(job) if block_given?
-          job.cancel
+      commit_status_relations = [:project, :pipeline]
+      ci_build_relations = [:deployment, :taggings]
+
+      retry_optimistic_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelables|
+        cancelables.find_in_batches do |batch|
+          ActiveRecord::Associations::Preloader.new.preload(batch, commit_status_relations)
+          ActiveRecord::Associations::Preloader.new.preload(batch.select { |job| job.is_a?(Ci::Build) }, ci_build_relations)
+
+          batch.each do |job|
+            yield(job) if block_given?
+            job.cancel
+          end
         end
       end
     end
@@ -671,7 +683,9 @@ module Ci
     end
 
     def has_kubernetes_active?
-      project.deployment_platform&.active?
+      strong_memoize(:has_kubernetes_active) do
+        project.deployment_platform&.active?
+      end
     end
 
     def freeze_period?

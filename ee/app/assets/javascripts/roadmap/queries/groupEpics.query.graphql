@@ -9,6 +9,7 @@ query groupEpics(
   $labelName: [String!] = []
   $authorUsername: String = ""
   $milestoneTitle: String = ""
+  $myReactionEmoji: String
   $confidential: Boolean
   $search: String = ""
   $first: Int = 1001
@@ -24,6 +25,7 @@ query groupEpics(
       labelName: $labelName
       authorUsername: $authorUsername
       milestoneTitle: $milestoneTitle
+      myReactionEmoji: $myReactionEmoji
       confidential: $confidential
       search: $search
       first: $first

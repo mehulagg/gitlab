@@ -51,8 +51,10 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
     it 'delegates variables preparation to ::Ci::DastScanCiConfigurationService' do
       expected_params = {
         auth_password_field: site_profile.auth_password_field,
+        auth_url: site_profile.auth_url,
         auth_username: site_profile.auth_username,
         auth_username_field: site_profile.auth_username_field,
+        dast_profile: nil,
         branch: project.default_branch_or_master,
         excluded_urls: site_profile.excluded_urls.join(','),
         full_scan_enabled: false,
@@ -80,6 +82,7 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
           stage: 'test',
           image: { name: '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION' },
           variables: {
+            DAST_AUTH_URL: site_profile.auth_url,
             DAST_DEBUG: 'false',
             DAST_EXCLUDE_URLS: site_profile.excluded_urls.join(','),
             DAST_FULL_SCAN_ENABLED: 'false',

@@ -70,6 +70,7 @@ RSpec.describe Search::GroupService, :elastic do
   context 'notes search' do
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, namespace: group) }
+
     let(:results) { described_class.new(nil, group, search: 'test').execute.objects('notes') }
 
     it_behaves_like 'search query applies joins based on migrations shared examples', :add_permissions_data_to_notes_documents
@@ -93,6 +94,7 @@ RSpec.describe Search::GroupService, :elastic do
     end
 
     let_it_be(:group) { create(:group) }
+
     let!(:project) { create(:project, project_level, namespace: group) }
     let!(:project2) { create(:project, project_level) }
     let(:user) { create_user_from_membership(project, membership) }

@@ -13,7 +13,7 @@ import {
 import createStore from 'ee/analytics/cycle_analytics/store';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import waitForPromises from 'helpers/wait_for_promises';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { groupLabels } from '../../mock_data';
 
 const selectedLabelIds = [groupLabels[0].id];
@@ -174,10 +174,10 @@ describe('TasksByTypeFilters', () => {
       });
 
       it('should display a message', () => {
-        expect(createFlash).toHaveBeenCalledWith(
-          'Only 2 labels can be selected at this time',
-          'notice',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Only 2 labels can be selected at this time',
+          type: 'notice',
+        });
       });
     });
   });

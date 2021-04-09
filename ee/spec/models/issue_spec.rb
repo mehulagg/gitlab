@@ -541,6 +541,7 @@ RSpec.describe Issue do
     let_it_be(:project1) { create(:project, group: group) }
     let_it_be_with_reload(:issue) { create(:issue, project: project) }
     let_it_be_with_reload(:issue1) { create(:issue, project: project1, relative_position: issue.relative_position + RelativePositioning::IDEAL_DISTANCE) }
+
     let(:new_issue) { build(:issue, project: project1, relative_position: nil) }
 
     describe '.relative_positioning_query_base' do
@@ -896,6 +897,7 @@ RSpec.describe Issue do
     end
 
     let_it_be(:user) { create(:user) }
+
     let(:group) { nil }
 
     subject { issue.can_be_promoted_to_epic?(user, group) }

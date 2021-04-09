@@ -1,5 +1,4 @@
 <script>
-import VirtualList from 'vue-virtual-scroll-list';
 import { mapState, mapActions } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
@@ -14,7 +13,6 @@ export default {
   EpicItem,
   epicItemHeight: EPIC_ITEM_HEIGHT,
   components: {
-    VirtualList,
     EpicItem,
     CurrentDayIndicator,
   },
@@ -140,22 +138,6 @@ export default {
     handleEpicsListScroll({ scrollTop, clientHeight, scrollHeight }) {
       this.showBottomShadow = Math.ceil(scrollTop) + clientHeight < scrollHeight;
     },
-    getEpicItemProps(index) {
-      return {
-        key: generateKey(this.displayedEpics[index]),
-        props: {
-          epic: this.displayedEpics[index],
-          presetType: this.presetType,
-          timeframe: this.timeframe,
-          currentGroupId: this.currentGroupId,
-          clientWidth: this.clientWidth,
-          childLevel: 0,
-          childrenEpics: this.childrenEpics,
-          childrenFlags: this.childrenFlags,
-          hasFiltersApplied: this.hasFiltersApplied,
-        },
-      };
-    },
     toggleIsEpicExpanded(epic) {
       this.toggleEpic({ parentItem: epic });
     },
@@ -166,34 +148,20 @@ export default {
 
 <template>
   <div :style="sectionContainerStyles" class="epics-list-section">
-    <template v-if="glFeatures.roadmapBufferedRendering && !emptyRowContainerVisible">
-      <virtual-list
-        v-if="displayedEpics.length"
-        :size="$options.epicItemHeight"
-        :remain="bufferSize"
-        :bench="bufferSize"
-        :scrollelement="roadmapShellEl"
-        :item="$options.EpicItem"
-        :itemcount="displayedEpics.length"
-        :itemprops="getEpicItemProps"
-      />
-    </template>
-    <template v-else>
-      <epic-item
-        v-for="epic in displayedEpics"
-        ref="epicItems"
-        :key="generateKey(epic)"
-        :preset-type="presetType"
-        :epic="epic"
-        :timeframe="timeframe"
-        :current-group-id="currentGroupId"
-        :client-width="clientWidth"
-        :child-level="0"
-        :children-epics="childrenEpics"
-        :children-flags="childrenFlags"
-        :has-filters-applied="hasFiltersApplied"
-      />
-    </template>
+    <epic-item
+      v-for="epic in displayedEpics"
+      ref="epicItems"
+      :key="generateKey(epic)"
+      :preset-type="presetType"
+      :epic="epic"
+      :timeframe="timeframe"
+      :current-group-id="currentGroupId"
+      :client-width="clientWidth"
+      :child-level="0"
+      :children-epics="childrenEpics"
+      :children-flags="childrenFlags"
+      :has-filters-applied="hasFiltersApplied"
+    />
     <div
       v-if="emptyRowContainerVisible"
       :style="emptyRowContainerStyles"

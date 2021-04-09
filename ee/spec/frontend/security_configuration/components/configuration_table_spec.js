@@ -1,4 +1,4 @@
-import { GlLink } from '@gitlab/ui';
+import { GlAlert, GlLink } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import ConfigurationTable from 'ee/security_configuration/components/configuration_table.vue';
 import FeatureStatus from 'ee/security_configuration/components/feature_status.vue';
@@ -41,6 +41,7 @@ describe('ConfigurationTable component', () => {
     });
   };
 
+  const getTable = () => wrapper.find('table');
   const getRows = () => wrapper.findAll('tbody tr');
   const getRowCells = (row) => {
     const [description, status, manage] = row.findAll('td').wrappers;
@@ -53,8 +54,7 @@ describe('ConfigurationTable component', () => {
 
   it.each(mockFeatures)('renders the feature %p correctly', (feature) => {
     createComponent({ features: [feature] });
-
-    expect(wrapper.classes('b-table-stacked-md')).toBeTruthy();
+    expect(getTable().classes('b-table-stacked-md')).toBe(true);
     const rows = getRows();
     expect(rows).toHaveLength(1);
 
@@ -69,5 +69,17 @@ describe('ConfigurationTable component', () => {
     });
     expect(manage.find(ManageFeature).props()).toEqual({ feature });
     expect(description.find(GlLink).attributes('href')).toBe(feature.helpPath);
+  });
+
+  it('catches errors and displays them in an alert', async () => {
+    const error = 'error message';
+    createComponent({ features: mockFeatures });
+
+    const firstRow = getRows().at(0);
+    await firstRow.findComponent(ManageFeature).vm.$emit('error', error);
+
+    const alert = wrapper.findComponent(GlAlert);
+    expect(alert.exists()).toBe(true);
+    expect(alert.text()).toBe(error);
   });
 });
