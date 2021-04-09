@@ -67,6 +67,11 @@ export default {
       required: false,
       default: Infinity,
     },
+    groupTooltip: {
+      type: String,
+      required: false,
+      default: '',
+    },
     jobHovered: {
       type: String,
       required: false,
@@ -81,6 +86,11 @@ export default {
       type: Number,
       required: false,
       default: -1,
+    },
+    stageName: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   computed: {
@@ -100,6 +110,9 @@ export default {
     nameComponent() {
       return this.hasDetails ? 'gl-link' : 'div';
     },
+    showStageName() {
+      return Boolean(this.stageName);
+    },
     status() {
       return this.job && this.job.status ? this.job.status : {};
     },
@@ -107,6 +120,10 @@ export default {
       return this.hasDetails ? 'job-with-link' : 'job-without-link';
     },
     tooltipText() {
+      if (this.groupTooltip) {
+        return this.groupTooltip;
+      }
+
       const textBuilder = [];
       const { name: jobName } = this.job;
 
@@ -165,7 +182,7 @@ export default {
 <template>
   <div
     :id="computedJobId"
-    class="ci-job-component gl-display-flex gl-align-items-center gl-justify-content-space-between"
+    class="ci-job-component gl-display-flex gl-align-items-center gl-justify-content-space-between gl-w-full"
     data-qa-selector="job_item_container"
   >
     <component
@@ -177,7 +194,7 @@ export default {
       }"
       :title="tooltipText"
       :class="jobClasses"
-      class="js-pipeline-graph-job-link qa-job-link menu-item gl-text-gray-900 gl-active-text-decoration-none gl-focus-text-decoration-none gl-hover-text-decoration-none"
+      class="js-pipeline-graph-job-link qa-job-link menu-item gl-text-gray-900 gl-active-text-decoration-none gl-focus-text-decoration-none gl-hover-text-decoration-none gl-w-full"
       :data-testid="testId"
       @click.stop="hideTooltips"
       @mouseout="hideTooltips"
@@ -186,7 +203,9 @@ export default {
         <ci-icon :size="24" :status="job.status" class="gl-line-height-0" />
         <div class="gl-pl-3 gl-display-flex gl-flex-direction-column gl-w-full">
           <div class="gl-text-truncate mw-70p gl-line-height-normal">{{ job.name }}</div>
-          <div class="gl-text-truncate mw-70p gl-font-sm gl-text-gray-500 gl-line-height-normal">test</div>
+          <div class="gl-text-truncate mw-70p gl-font-sm gl-text-gray-500 gl-line-height-normal">
+            {{ stageName }}
+          </div>
         </div>
       </div>
     </component>

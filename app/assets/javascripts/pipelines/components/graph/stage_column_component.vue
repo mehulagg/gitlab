@@ -22,12 +22,12 @@ export default {
       type: Array,
       required: true,
     },
-    pipelineId: {
-      type: Number,
+    name: {
+      type: String,
       required: true,
     },
-    title: {
-      type: String,
+    pipelineId: {
+      type: Number,
       required: true,
     },
     action: {
@@ -75,7 +75,7 @@ export default {
       });
     },
     formattedTitle() {
-      return capitalize(escape(this.title));
+      return capitalize(escape(this.name));
     },
     hasAction() {
       return !isEmpty(this.action);
@@ -147,12 +147,13 @@ export default {
           :job-hovered="jobHovered"
           :pipeline-expanded="pipelineExpanded"
           :pipeline-id="pipelineId"
+          :stage-name="name"
           css-class-job-name="gl-build-content"
           :class="{ 'gl-opacity-3': isFadedOut(group.name) }"
           @pipelineActionRequestComplete="$emit('refreshPipelineGraph')"
         />
         <div v-else-if="isParallel(group)" :class="{ 'gl-opacity-3': isFadedOut(group.name) }">
-          <job-group-dropdown :group="group" :pipeline-id="pipelineId" />
+          <job-group-dropdown :group="group" :stage-name="name" :pipeline-id="pipelineId" />
         </div>
       </div>
     </template>

@@ -204,7 +204,7 @@ export default {
               <stage-column-component
                 v-for="column in layout"
                 :key="column.id || column.name"
-                :title="column.name"
+                :name="column.name"
                 :groups="column.groups"
                 :action="column.status.action"
                 :highlighted-jobs="highlightedJobs"
