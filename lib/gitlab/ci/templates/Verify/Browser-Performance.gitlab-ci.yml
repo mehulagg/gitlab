@@ -3,7 +3,7 @@
 # Please contribute improvements to this template via the CI/CD templates development guide:
 # https://docs.gitlab.com/ee/development/cicd/templates.html
 # This specific templates file can be found here:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Verify/Browser-Performance.gitlab-ci.yml
 
 stages:
   - build
