@@ -148,6 +148,7 @@ RSpec.describe Ci::PipelinePresenter do
 
   describe '#degradation_threshold' do
     let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_browser_performance_report, project: project) }
+
     let(:current_user) { create(:user) }
 
     before do

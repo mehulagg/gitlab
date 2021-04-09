@@ -50,6 +50,7 @@ module IncidentManagement
 
     scope :in_progress, -> { where('starts_at < :time AND (ends_at > :time OR ends_at IS NULL)', time: Time.current) }
     scope :except_ids, -> (ids) { where.not(id: ids) }
+    scope :with_active_period, -> { where.not(active_period_start: nil) }
     scope :with_shift_generation_associations, -> do
       joins(:active_participants, :schedule)
         .distinct

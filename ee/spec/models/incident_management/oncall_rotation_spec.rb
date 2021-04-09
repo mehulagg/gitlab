@@ -107,6 +107,18 @@ RSpec.describe IncidentManagement::OncallRotation do
 
       it { is_expected.to contain_exactly(rotation_1, rotation_2) }
     end
+
+    describe '.with_active_period' do
+      subject { described_class.with_active_period }
+
+      it { is_expected.to be_empty }
+
+      context 'rotation has active period' do
+        let(:rotation) { create(:incident_management_oncall_rotation, :with_active_period, schedule: schedule) }
+
+        it { is_expected.to contain_exactly(rotation) }
+      end
+    end
   end
 
   describe '#shift_cycle_duration' do
