@@ -15420,7 +15420,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.plan.assignee_lists`
 
-Count of MAU creating assignee lists on Boards
+Count of users creating assignee lists on Boards
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181132_assignee_lists.yml)
 
@@ -15444,7 +15444,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.plan.issues`
 
-Count of MAU creating Issues
+Count of users creating Issues
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181115_issues.yml)
 
@@ -15456,7 +15456,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.plan.label_lists`
 
-Count of MAU creating label lists on Boards
+Count of users creating label lists on Boards
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181135_label_lists.yml)
 
@@ -15468,7 +15468,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.plan.milestone_lists`
 
-Count of MAU creating milestone lists on Boards
+Count of users creating milestone lists on Boards
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181137_milestone_lists.yml)
 
@@ -15480,7 +15480,7 @@ Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.plan.notes`
 
-Count of MAU creating Notes on Issues
+Count of users creating Notes on Issues
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181117_notes.yml)
 
@@ -15492,7 +15492,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.plan.projects`
 
-Count of MAU creating projects
+Count of users creating projects
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181119_projects.yml)
 
@@ -15564,7 +15564,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.plan.todos`
 
-Count of todos created
+Count of users todos created
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181121_todos.yml)
 
