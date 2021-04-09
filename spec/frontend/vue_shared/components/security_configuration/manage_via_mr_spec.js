@@ -6,10 +6,13 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { redirectTo } from '~/lib/utils/url_utility';
+import { featureToMutationMap } from '~/security_configuration/components/scanners_constants';
 import configureSastMutation from '~/security_configuration/graphql/configure_sast.mutation.graphql';
 import ManageViaMR from '~/vue_shared/security_configuration/components/manage_via_mr.vue';
+import { REPORT_TYPE_SAST } from '~/vue_shared/security_reports/constants';
 
 jest.mock('~/lib/utils/url_utility', () => ({
+  ...jest.requireActual('~/lib/utils/url_utility'),
   redirectTo: jest.fn(),
 }));
 
@@ -68,6 +71,15 @@ describe('Manage Sast Component', () => {
     wrapper = extendedWrapper(
       mount(ManageViaMR, {
         apolloProvider: mockApollo,
+        propsData: {
+          mutation: {
+            mutation: configureSastMutation,
+          },
+          mutationId: featureToMutationMap[REPORT_TYPE_SAST].mutationId,
+          feature: {
+            name: 'SAST',
+          },
+        },
       }),
     );
   }
@@ -79,7 +91,7 @@ describe('Manage Sast Component', () => {
 
   it('should render Button with correct text', () => {
     createComponent();
-    expect(findButton().text()).toContain('Configure via merge request');
+    expect(findButton().text()).toContain('Configure via Merge Request');
   });
 
   describe('given a successful response', () => {
