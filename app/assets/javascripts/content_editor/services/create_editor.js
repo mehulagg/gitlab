@@ -37,6 +37,11 @@ const createEditor = async ({ content, renderMarkdown, serializer: customSeriali
       new OrderedList(),
       new CodeBlockHighlight(),
     ],
+    editorProps: {
+      attributes: {
+        class: 'gl-py-4 gl-px-5',
+      },
+    },
   });
   const serializer = customSerializer || createMarkdownSerializer({ render: renderMarkdown });
 

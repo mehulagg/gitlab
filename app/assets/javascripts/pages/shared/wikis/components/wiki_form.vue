@@ -1,5 +1,7 @@
 <script>
 import { GlForm, GlIcon, GlLink, GlButton, GlSprintf } from '@gitlab/ui';
+import { ContentEditor, createEditor } from '~/content_editor';
+import axios from '~/lib/utils/axios_utils';
 import csrf from '~/lib/utils/csrf';
 import { setUrlFragment } from '~/lib/utils/url_utility';
 import { __, s__, sprintf } from '~/locale';
@@ -20,6 +22,7 @@ export default {
     GlLink,
     GlButton,
     MarkdownField,
+    ContentEditor,
   },
   inject: ['formatOptions', 'pageInfo'],
   data() {
@@ -28,6 +31,7 @@ export default {
       format: this.pageInfo.format || 'markdown',
       content: this.pageInfo.content?.trim() || '',
       commitMessage: '',
+      editor: null,
     };
   },
   computed: {
@@ -63,8 +67,18 @@ export default {
       return setUrlFragment(this.pageInfo.markdownHelpPath, 'wiki-specific-markdown');
     },
   },
-  mounted() {
+  async mounted() {
     this.updateCommitMessage();
+    this.editor = await createEditor({
+      renderMarkdown: async (markdown) => {
+        const {
+          data: { body },
+        } = await axios.post(this.pageInfo.markdownPreviewPath, { text: markdown });
+
+        return body;
+      },
+      content: this.content,
+    });
   },
   methods: {
     handleFormSubmit() {
@@ -99,6 +113,7 @@ export default {
     class="wiki-form common-note-form gl-mt-3 js-quick-submit"
     @submit="handleFormSubmit"
   >
+    <content-editor v-if="editor" :editor="editor" />
     <input :value="csrfToken" type="hidden" name="authenticity_token" />
     <input v-if="pageInfo.persisted" type="hidden" name="_method" value="put" />
     <input
