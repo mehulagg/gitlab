@@ -178,10 +178,136 @@ The correct approach is to add a new metric for GitLab 12.6 release with updated
 
 and update existing business analysis artefacts to use `example_metric_without_archived` instead of `example_metric`
 
-### 3. Metrics deprecation and removal
+### 3. Metrics deprecation
 
-The process for deprecating and removing metrics is under development. For
-more information, see the following [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/284637).
+When metrics becomes obsolete and team's that owns it no longer wish to use they should follow below steps in order to
+mark metric as deprecated. 
+
+#### Verify that metric is not used within any aggregate
+
+You should check if metric in not referred in any of YAML files at [`config/metrics/aggregates/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/aggregates/) and  [`ee/config/metrics/aggregates/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/aggregates/) locations.
+
+#### Verify that no other teams is using metric
+
+You should create issue in [GitLab Data Team project](https://gitlab.com/gitlab-data/analytics/-/issues),
+and ask for verification if metric is not used in any of Sisense dashboards.
+
+#### Verify that metric is not used to calculate Conversational Index
+
+Conversational index is a measure that reports back to self-managed instances to inform their administrators how well in terms of devops adoption given instance is doing. 
+One place to look up which metrics are taken into account is https://gitlab.com/gitlab-services/version-gitlab-com/-/blob/master/app/services/calculate_conv_index_service.rb 
+Metrics that are used are represented as the keys that are passed as field argument into `get_value` method.
+ 
+#### Document metric deprecation in metrics YAML definition
+
+Before changing metric instrumentation one should change metrics YAML definition
+and set it's `status:` attribute to `deprecated`, eg:
+
+```yaml
+---
+key_path: analytics_unique_visits.analytics_unique_visits_for_any_target_monthly
+description: Visits to any of the pages listed above per month
+product_section: dev
+product_stage: manage
+product_group: group::analytics
+product_category:
+value_type: number
+status: deprecated
+time_frame: 28d
+data_source:
+distribution:
+- ce
+tier:
+- free
+```
+
+#### Replace deprecated metrics instrumentation with fixed value
+
+In order to avoid wasteful usage of resources in order to calculate deprecated metrics
+one should head into [`lib/gitlab/usage_data.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb) or [`ee/lib/ee/gitlab/usage_data.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/usage_data.rb).  and replace 
+code used to calculate metric value with fixed value indicating deprecation 
+
+```ruby
+module Gitlab
+  class UsageData
+    DEPRECATED_VALUE = -1000
+    MAX_GENERATION_TIME_FOR_SAAS = 40.hours
+    
+    #....
+    
+      def analytics_unique_visits_data
+        results = ::Gitlab::Analytics::UniqueVisits.analytics_events.each_with_object({}) do |target, hash|
+          hash[target] = redis_usage_data { unique_visit_service.unique_visits_for(targets: target) }
+        end
+        results['analytics_unique_visits_for_any_target'] = redis_usage_data { unique_visit_service.unique_visits_for(targets: :analytics) }
+        results['analytics_unique_visits_for_any_target_monthly'] = DEPRECATED_VALUE
+
+        { analytics_unique_visits: results }
+      end
+  # ...
+  end 
+end 
+```
+ 
+### 4. Metric removal
+
+Only deprecated metrics can be removed from codebase. 
+
+To remove deprecated metrics one should complete following steps
+
+#### Verify that metrics removal from Usage Ping will not raise errors in Version App upon Usage Ping collection
+
+All Usage Ping reports are collected and persisted by [Version App](https://gitlab.com/gitlab-services/version-gitlab-com), 
+before removing metric from Usage Ping payload one have to assure that updated payload will still be processed and persisted correctly.
+
+#### Verify that metrics removal from Usage Ping will not break any of existing Sisense dashboards
+
+There might be some Sisense dashboards that still refers to metric that is deprecated, one should create issue in GitLab Data Team project,
+and ask for verification if metric can safely removed. Example issue: https://gitlab.com/gitlab-data/analytics/-/issues/7539 
+  
+#### Document metric as removed
+
+After verification is completed and it is assured that metric can be safely removed, but
+before changing metric instrumentation one should change metrics YAML definition
+and updates it's attributes:
+ - `status:` to `removed`
+ - `milestone_removed:` to number of milestone in which metric was removed 
+
+Example:   
+```yaml
+---
+key_path: analytics_unique_visits.analytics_unique_visits_for_any_target_monthly
+description: Visits to any of the pages listed above per month
+product_section: dev
+product_stage: manage
+product_group: group::analytics
+product_category:
+value_type: number
+status: removed
+milestone_removed: '13.7'
+time_frame: 28d
+data_source:
+distribution:
+- ce
+tier:
+- free
+```
+
+It is important to not remove metrics YAML because some of self-managed instances may not update immediately to latest version of GitLab and will
+still continue to report removed metric, in order to be able to identify and filter such metrics Product Intelligence team needs to keep record of 
+all metrics that has been removed.  
+
+#### Remove metric instrumentation
+
+After verification is completed and it is assured that metric can be safely removed one can proceed and actually remove
+metric instrumentation from [`lib/gitlab/usage_data.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb) or [`ee/lib/ee/gitlab/usage_data.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/usage_data.rb). 
+
+#### Remove other metric related records 
+
+Metric may have additional corresponding entries that should be removed along with metric instrumentation:
+
+1. Feature flag YAML file at [`config/feature_flags/*/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/config/feature_flags)
+1. Entry in known events YAML at [`lib/gitlab/usage_data_counters/known_events/*.yaml`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/usage_data_counters/known_events)
 
 ## Implementing Usage Ping
 
