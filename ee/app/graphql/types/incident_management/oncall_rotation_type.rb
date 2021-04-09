@@ -12,12 +12,12 @@ module Types
 
       field :id,
             Types::GlobalIDType[::IncidentManagement::OncallRotation],
-            null: false,
+            null: true,
             description: 'ID of the on-call rotation.'
 
       field :name,
             GraphQL::STRING_TYPE,
-            null: false,
+            null: true,
             description: 'Name of the on-call rotation.'
 
       field :starts_at,

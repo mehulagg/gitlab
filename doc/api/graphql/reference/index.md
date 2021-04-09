@@ -3292,10 +3292,10 @@ Describes an incident management on-call rotation.
 | ----- | ---- | ----------- |
 | `activePeriod` | [`OncallRotationActivePeriodType`](#oncallrotationactiveperiodtype) | Active period for the on-call rotation. |
 | `endsAt` | [`Time`](#time) | End date and time of the on-call rotation. |
-| `id` | [`IncidentManagementOncallRotationID!`](#incidentmanagementoncallrotationid) | ID of the on-call rotation. |
+| `id` | [`IncidentManagementOncallRotationID`](#incidentmanagementoncallrotationid) | ID of the on-call rotation. |
 | `length` | [`Int`](#int) | Length of the on-call schedule, in the units specified by lengthUnit. |
 | `lengthUnit` | [`OncallRotationUnitEnum`](#oncallrotationunitenum) | Unit of the on-call rotation length. |
-| `name` | [`String!`](#string) | Name of the on-call rotation. |
+| `name` | [`String`](#string) | Name of the on-call rotation. |
 | `participants` | [`OncallParticipantTypeConnection`](#oncallparticipanttypeconnection) | Participants of the on-call rotation. |
 | `shifts` | [`IncidentManagementOncallShiftConnection`](#incidentmanagementoncallshiftconnection) | Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month. |
 | `startsAt` | [`Time`](#time) | Start date of the on-call rotation. |
@@ -3326,10 +3326,10 @@ Describes an incident management on-call schedule.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `description` | [`String`](#string) | Description of the on-call schedule. |
-| `iid` | [`ID!`](#id) | Internal ID of the on-call schedule. |
-| `name` | [`String!`](#string) | Name of the on-call schedule. |
-| `rotations` | [`IncidentManagementOncallRotationConnection!`](#incidentmanagementoncallrotationconnection) | On-call rotations for the on-call schedule. |
-| `timezone` | [`String!`](#string) | Time zone of the on-call schedule. |
+| `iid` | [`ID`](#id) | Internal ID of the on-call schedule. |
+| `name` | [`String`](#string) | Name of the on-call schedule. |
+| `rotations` | [`IncidentManagementOncallRotationConnection`](#incidentmanagementoncallrotationconnection) | On-call rotations for the on-call schedule. |
+| `timezone` | [`String`](#string) | Time zone of the on-call schedule. |
 
 ### `IncidentManagementOncallScheduleConnection`
 
@@ -4402,8 +4402,8 @@ The rotation participant and color palette.
 | ----- | ---- | ----------- |
 | `colorPalette` | [`String`](#string) | The color palette to assign to the on-call user. For example "blue". |
 | `colorWeight` | [`String`](#string) | The color weight to assign to for the on-call user, for example "500". Max 4 chars. For easy identification of the user. |
-| `id` | [`IncidentManagementOncallParticipantID!`](#incidentmanagementoncallparticipantid) | ID of the on-call participant. |
-| `user` | [`User!`](#user) | The user who is participating. |
+| `id` | [`IncidentManagementOncallParticipantID`](#incidentmanagementoncallparticipantid) | ID of the on-call participant. |
+| `user` | [`User`](#user) | The user who is participating. |
 
 ### `OncallParticipantTypeConnection`
 
