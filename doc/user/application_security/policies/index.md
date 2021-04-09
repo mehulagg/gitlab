@@ -55,29 +55,34 @@ Feature.disable(:security_orchestration_policies_configuration, Project.find(<pr
 
 ## Security Policies project
 
-The Security Policies feature is a repository to store policies. All security policies are stored in
-the `.gitlab/security-policies` directory as a YAML file with this format:
+The Security Policies feature is a repository to store policies. All security policies are stored as
+the `.gitlab/security-policies/policy.yml` YAML file with this format:
 
 ```yaml
 ---
-type: scan_execution_policy
-name: Enforce DAST in every pipeline
-description: This policy enforces pipeline configuration to have a job with DAST scan
-enabled: true
-rules:
-- type: pipeline
-  branch: master
-actions:
-- scan: dast
-  scanner_profile: Scanner Profile A
-  site_profile: Site Profile B
+scan_execution_policy:
+- name: Enforce DAST in every pipeline
+  description: This policy enforces pipeline configuration to have a job with DAST scan
+  enabled: true
+  rules:
+  - type: pipeline
+    branch: master
+  actions:
+  - scan: dast
+    scanner_profile: Scanner Profile A
+    site_profile: Site Profile B
 ```
+
+### Scan Execution Policies Schema
+
+| Field | Type | Possible values | Description |
+|-------|------|-----------------|-------------|
+| `scan_execution_policy` | `array` of Scan Execution Policy |  | List of scan execution policies (maximum 5) |
 
 ### Scan Execution Policy Schema
 
 | Field | Type | Possible values | Description |
 |-------|------|-----------------|-------------|
-| `type` | `string` | `scan_execution_policy` | The policy's type. |
 | `name` | `string` |  | Name of the policy. |
 | `description` (optional) | `string` |  | Description of the policy. |
 | `enabled` | `boolean` | `true`, `false` | Flag to enable (`true`) or disable (`false`) the policy. |
@@ -117,22 +122,35 @@ Here's an example:
 
 ```yaml
 ---
-type: scan_execution_policy
-name: Enforce DAST in every pipeline
-description: This policy enforces pipeline configuration to have a job with DAST scan
-enabled: true
-rules:
-- type: pipeline
-  branch: release/*
-actions:
-- scan: dast
-  scanner_profile: Scanner Profile A
-  site_profile: Site Profile B
+scan_execution_policy:
+- type: scan_execution_policy
+  name: Enforce DAST in every release pipeline
+  description: This policy enforces pipeline configuration to have a job with DAST scan for release branches
+  enabled: true
+  rules:
+  - type: pipeline
+    branch: release/*
+  actions:
+  - scan: dast
+    scanner_profile: Scanner Profile A
+    site_profile: Site Profile B
+- type: scan_execution_policy
+  name: Enforce DAST in every pipeline in main branch
+  description: This policy enforces pipeline configuration to have a job with DAST scan for main branch
+  enabled: true
+  rules:
+  - type: pipeline
+    branch: main
+  actions:
+  - scan: dast
+    scanner_profile: Scanner Profile C
+    site_profile: Site Profile D
 ```
 
 In this example, the DAST scan runs with the scanner profile `Scanner Profile A` and the site
-profile `Site Profile B`. The scan runs for every pipeline executed on branches that match the
-`release/*` wildcard (for example, branch name `release/v1.2.1`).
+profile `Site Profile B` for every pipeline executed on branches that match the
+`release/*` wildcard (for example, branch name `release/v1.2.1`); and the DAST scan runs with
+the scanner profile `Scanner Profile C` and the site profile `Site Profile D` for every pipeline executed on `main` branch.
 
 ## Security Policy project selection
 
