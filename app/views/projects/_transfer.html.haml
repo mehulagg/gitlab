@@ -15,3 +15,4 @@
       .form-group
         = select_tag :new_namespace_id, namespaces_options(nil), include_blank: true, class: 'select2'
     = f.submit 'Transfer project', class: "gl-button btn btn-danger js-confirm-danger qa-transfer-button", data: { "confirm-danger-message" => transfer_project_message(@project) }
+    #js-project-transfer-form{ data: { form_path: transfer_project_path(@project), confirm_phrase: project.path, namespace_options: namespaces_options(nil) } }
