@@ -285,13 +285,15 @@ The example above will exclude from `gl-container-scanning-report.json`:
 
 ##### File format
 
-- `generalallowlist` collection allows you to specify CVE IDs globally. All vulnerabilities with matching CVE IDs will be excluded from the scan report.
+- `generalallowlist` block allows you to specify CVE IDs globally. All vulnerabilities with matching CVE IDs will be excluded from the scan report.
 
-- `images` collection allows you to specify CVE IDs for each container image independently. All vulnerabilities from given image with matching CVE IDs will be excluded from the scan report. You can specify container image in multiple ways:
+- `images` block allows you to specify CVE IDs for each container image independently. All vulnerabilities from the given image with matching CVE IDs will be excluded from the scan report. The image name is retrieved from one of the environment variables used to specify the Docker image to be scanned, such as `$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG` or `DOCKER_IMAGE`, therefore the image provided in this block **must** match this value and **must not** include the tag value. For example, if you specify the image to be scanned using `DOCKER_IMAGE=alpine:3.7`, then you would use `alpine` in the `images` block, but you cannot use `alpine:3.7`.
+
+  You can specify container image in multiple ways:
   - as image name only (ie. `centos`)
   - as full image name with registry hostname (ie. `your.private.registry:5000/centos`)
   - as full image name with registry hostname and sha256 label (ie. `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256`)
-
+  
 NOTE:
 The string after CVE ID (ie. `cups` in the example above) has **no impact** whatsoever, it is simply included as a "hint" to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
 
