@@ -128,7 +128,6 @@ linters:
       - Performance/RedundantMatch
       - Performance/StringReplacement
       - Rails/LinkToBlank
-      - Rails/Presence
       - Rails/RequestReferer
       - Style/AndOr
       - Style/ColonMethodCall
