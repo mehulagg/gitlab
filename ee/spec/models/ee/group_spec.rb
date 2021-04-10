@@ -810,7 +810,7 @@ RSpec.describe Group do
         expect { group.saml_discovery_token }.to change { group.reload.read_attribute(:saml_discovery_token) }
       end
 
-      context 'in read only mode' do
+      context 'in read-only mode' do
         before do
           allow(Gitlab::Database).to receive(:read_only?).and_return(true)
           allow(group).to receive(:create_or_update).and_raise(ActiveRecord::ReadOnlyRecord)
