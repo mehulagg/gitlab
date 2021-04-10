@@ -2091,6 +2091,9 @@ msgstr ""
 msgid "Additional minutes"
 msgstr ""
 
+msgid "Additional minutes:"
+msgstr ""
+
 msgid "Additional text"
 msgstr ""
 
