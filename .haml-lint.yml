@@ -118,7 +118,6 @@ linters:
       - Layout/SpaceInsideHashLiteralBraces
       - Layout/SpaceInsideStringInterpolation
       - Layout/TrailingEmptyLines
-      - Lint/BooleanSymbol
       - Lint/LiteralInInterpolation
       - Lint/ParenthesesAsGroupedExpression
       - Lint/RedundantWithIndex
