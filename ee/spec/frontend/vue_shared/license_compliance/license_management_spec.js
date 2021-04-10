@@ -226,7 +226,7 @@ describe('License Management', () => {
           expect(wrapper.find(DeleteConfirmationModal).exists()).toBe(false);
         });
 
-        it('renders the read only row', () => {
+        it('renders the read-only row', () => {
           expect(wrapper.find(LicenseManagementRow).exists()).toBe(true);
           expect(wrapper.find(AdminLicenseManagementRow).exists()).toBe(false);
         });
