@@ -110,7 +110,7 @@ Gitaly Cluster supports:
 - [Strong consistency](praefect.md#strong-consistency) of the secondary replicas.
 - [Automatic failover](praefect.md#automatic-failover-and-leader-election) from the primary to the secondary.
 - Reporting of possible data loss if replication queue is non-empty.
-- Marking repositories as [read only](praefect.md#read-only-mode) if data loss is detected to prevent data inconsistencies.
+- Marking repositories as [read-only](praefect.md#read-only-mode) if data loss is detected to prevent data inconsistencies.
 
 Follow the [Gitaly Cluster epic](https://gitlab.com/groups/gitlab-org/-/epics/1489)
 for improvements including
