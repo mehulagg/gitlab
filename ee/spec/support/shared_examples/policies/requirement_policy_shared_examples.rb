@@ -19,7 +19,7 @@ RSpec.shared_examples 'resource with requirement permissions' do
     it { is_expected.to be_disallowed(:destroy_requirement) }
   end
 
-  shared_examples 'user with read only permissions' do
+  shared_examples 'user with read-only permissions' do
     it { is_expected.to be_allowed(:read_requirement) }
     it { is_expected.to be_disallowed(*non_read_permissions) }
   end
@@ -32,7 +32,7 @@ RSpec.shared_examples 'resource with requirement permissions' do
     context 'with admin' do
       let(:current_user) { admin }
 
-      it_behaves_like 'user with read only permissions'
+      it_behaves_like 'user with read-only permissions'
     end
 
     context 'with owner' do
@@ -62,13 +62,13 @@ RSpec.shared_examples 'resource with requirement permissions' do
     context 'with guest' do
       let(:current_user) { guest }
 
-      it_behaves_like 'user with read only permissions'
+      it_behaves_like 'user with read-only permissions'
     end
 
     context 'with non member' do
       let(:current_user) { create(:user) }
 
-      it_behaves_like 'user with read only permissions'
+      it_behaves_like 'user with read-only permissions'
 
       context 'with private resource parent' do
         before do
@@ -115,7 +115,7 @@ RSpec.shared_examples 'resource with requirement permissions' do
             enable_admin_mode!(current_user)
           end
 
-          it_behaves_like 'user with read only permissions'
+          it_behaves_like 'user with read-only permissions'
         end
       end
 
@@ -146,7 +146,7 @@ RSpec.shared_examples 'resource with requirement permissions' do
       context 'with guest' do
         let(:current_user) { guest }
 
-        it_behaves_like 'user with read only permissions'
+        it_behaves_like 'user with read-only permissions'
       end
 
       context 'with non member' do
