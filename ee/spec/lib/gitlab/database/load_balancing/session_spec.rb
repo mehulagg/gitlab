@@ -139,12 +139,12 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
     end
   end
 
-  describe '#use_replica_if_possible' do
+  describe '#fallback_to_replicas_for_ambiguous_queries' do
     let(:instance) { described_class.new }
 
     it 'uses replica during block' do
       expect do |blk|
-        instance.use_replica_if_possible do
+        instance.fallback_to_replicas_for_ambiguous_queries do
           expect(instance.use_replica?).to eq(true)
 
           # call yield probe
@@ -157,8 +157,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
 
     it 'restores state after use' do
       expect do |blk|
-        instance.use_replica_if_possible do
-          instance.use_replica_if_possible do
+        instance.fallback_to_replicas_for_ambiguous_queries do
+          instance.fallback_to_replicas_for_ambiguous_queries do
             expect(instance.use_replica?).to eq(true)
 
             # call yield probe
@@ -181,7 +181,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
         expect(instance.use_replica?).to eq(false)
 
         expect do |blk|
-          instance.use_replica_if_possible do
+          instance.fallback_to_replicas_for_ambiguous_queries do
             expect(instance.use_replica?).to eq(false)
 
             # call yield probe
@@ -202,7 +202,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
         expect(instance.use_replica?).to eq(false)
 
         expect do |blk|
-          instance.use_replica_if_possible do
+          instance.fallback_to_replicas_for_ambiguous_queries do
             expect(instance.use_replica?).to eq(false)
 
             # call yield probe
@@ -218,7 +218,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
       it 'uses primary aterward' do
         expect(instance.use_replica?).to eq(false)
 
-        instance.use_replica_if_possible do
+        instance.fallback_to_replicas_for_ambiguous_queries do
           expect(instance.use_replica?).to eq(true)
 
           instance.use_primary!
@@ -230,8 +230,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
       end
 
       it 'restores state after use' do
-        instance.use_replica_if_possible do
-          instance.use_replica_if_possible do
+        instance.fallback_to_replicas_for_ambiguous_queries do
+          instance.fallback_to_replicas_for_ambiguous_queries do
             expect(instance.use_replica?).to eq(true)
 
             instance.use_primary!
@@ -250,7 +250,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
       it 'uses primary aterward' do
         expect(instance.use_replica?).to eq(false)
 
-        instance.use_replica_if_possible do
+        instance.fallback_to_replicas_for_ambiguous_queries do
           expect(instance.use_replica?).to eq(true)
 
           instance.write!
@@ -262,8 +262,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
       end
 
       it 'restores state after use' do
-        instance.use_replica_if_possible do
-          instance.use_replica_if_possible do
+        instance.fallback_to_replicas_for_ambiguous_queries do
+          instance.fallback_to_replicas_for_ambiguous_queries do
             expect(instance.use_replica?).to eq(true)
 
             instance.write!
