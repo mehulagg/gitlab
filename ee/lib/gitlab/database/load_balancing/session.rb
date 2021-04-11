@@ -61,7 +61,7 @@ module Gitlab
         # - If the queries are about to write
         # - The current session already performed writes
         # - It prefers to use primary, aka, use_primary or use_primary! were called
-        def use_replica_if_possible(&blk)
+        def fallback_to_replicas_for_ambiguous_queries(&blk)
           used_replica = @use_replica
           @use_replica = true
           yield
