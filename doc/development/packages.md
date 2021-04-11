@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Packages
 
-This document guides you through adding support to GitLab for a new a [package management system](../administration/packages/index.md).
+This document guides you through adding support to GitLab for a new [package management system](../administration/packages/index.md).
 
 See the already supported formats in the [Packages & Registries documentation](../user/packages/index.md)
 
