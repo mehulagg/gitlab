@@ -615,3 +615,69 @@ incoming_email:
     # Whether the IMAP server uses SSL
     ssl: true
 ```
+
+#### Microsoft Graph
+
+> Introduced in [GitLab 13.11](https://gitlab.com/gitlab-org/gitlab/-/issues/214900)
+
+GitLab can read incoming e-mail via the Microsoft Graph API instead of
+IMAP.  Because [Microsoft is deprecating IMAP usage with Basic Authentication](https://techcommunity.microsoft.com/t5/exchange-team-blog/announcing-oauth-2-0-support-for-imap-and-smtp-auth-protocols-in/ba-p/1330432),
+this method is required for Microsoft Exchange Online mailboxes.
+
+To configure GitLab for Microsoft Graph, create an application in the
+Azure Active Directory:
+
+1. Sign in to the [Azure portal](https://portal.azure.com).
+1. Search for and select `Azure Active Directory`.
+1. Under `Manage`, select `App registrations` > `New registration`.
+1. Enter a `Name` for your application, such as `GitLab Mail`. Users of your app might see this name, and you can change it later.
+1. If `Supported account types` is listed, select the appropriate option.
+1. Leave `Redirect URI` blank. This is not needed.
+1. Select `Register`.
+1. Under `Manage`, select `Certificates & secrets`.
+1. Under `Client secrets`, select `New client secret`, and enter a name.
+1. Under `Expires`, select `Never`, unless you plan on updating the credentials every time it expires.
+1. Select `Add`. Record the secret value in a safe location for use in a later step.
+1. Under `Manage`, select `API Permissions` > `Add a permission`. Select `Microsoft Graph`.
+1. Select `Application permissions`.
+1. Under the `Mail` node, select `Mail.ReadWrite`, and then select Add permissions.
+1. If `User.Read` is listed in the permission list, you can delete this.
+1. Click `Grant admin consent` for these permissions.
+
+See the [Microsoft instructions](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app)
+for more details.
+
+##### Restrict mailbox access
+
+Note that for MailRoom to work as a service account, this application
+must have the `Mail.ReadWrite` to read/write mail in *all* mailboxes. To
+mitigate security concerns, we highly recommend configuring an
+application access policy to limit the mailbox access for this
+account. [Follow these instructions](https://docs.microsoft.com/en-us/graph/auth-limit-mailbox-access)
+to setup PowerShell and configure this policy.
+
+This example for Omnibus GitLab assumes the mailbox `incoming@office365.example.com`:
+
+##### Configure Microsoft Graph
+
+```ruby
+gitlab_rails['incoming_email_enabled'] = true
+
+# The email address including the `%{key}` placeholder that will be replaced
+# to reference the item being replied to. The placeholder can be omitted, but if
+# present, it must appear in the "user" part of the address (before the `@`).
+gitlab_rails['incoming_email_address'] = "incoming+%{key}@example.onmicrosoft.com"
+
+# Email account username
+gitlab_rails['incoming_email_email'] = "incoming@example.onmicrosoft.com"
+
+gitlab_rails['incoming_email_inbox_method'] = 'microsoft_graph'
+gitlab_rails['incoming_email_inbox_options'] = {
+   'tenant_id': '<YOUR-TENANT-ID>',
+   'client_id': '<YOUR-CLIENT-ID>',
+   'client_secret': '<YOUR-CLIENT-SECRET>',
+   'poll_interval': 60  # Optional
+}
+```
+
+Microsoft Graph API is not yet supported in source installations. See [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/326169) for more details.
