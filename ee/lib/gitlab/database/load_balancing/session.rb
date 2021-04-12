@@ -55,6 +55,27 @@ module Gitlab
           @ignore_writes = false
         end
 
+        # Indicates that the read SQL statements from anywhere inside this
+        # blocks should use a replia, regardless of the current primary
+        # stickiness or whether a write query is already performed in the
+        # current session. This interface is reserved mostly for performance
+        # purpose. This is a good tool to push expensive queries, which can
+        # tolerate the replica lags, to the replicas.
+        #
+        # Write and ambiguous queries inside this block are still handled by
+        # the primary.
+        def use_replicas_for_read_queries(&blk)
+          previous_flag = @use_replicas_for_read_queries
+          @use_replicas_for_read_queries = true
+          yield
+        ensure
+          @use_replicas_for_read_queries = previous_flag
+        end
+
+        def use_replicas_for_read_queries?
+          @fallback_to_replicas_for_ambiguous_queries == true
+        end
+
         # Indicate that the ambiguous SQL statements from anywhere inside this
         # block should use a replica. The ambiguous statements include:
         # - Transactions.

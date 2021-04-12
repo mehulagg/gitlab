@@ -84,7 +84,13 @@ module Gitlab
         #
         # name - The name of the method to call on a connection object.
         def read_using_load_balancer(name, args, &block)
-          method = ::Gitlab::Database::LoadBalancing::Session.current.use_primary? ? :read_write : :read
+          method =
+            if ::Gitlab::Database::LoadBalancing::Session.use_replicas_for_read_queries? ||
+               !::Gitlab::Database::LoadBalancing::Session.current.use_primary?
+              :read
+            else
+              :write
+            end
 
           @load_balancer.send(method) do |connection|
             connection.send(name, *args, &block)
