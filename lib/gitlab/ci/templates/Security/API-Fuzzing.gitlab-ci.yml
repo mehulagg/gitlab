@@ -12,7 +12,7 @@ stages:
 
 variables:
     FUZZAPI_PROFILE: Quick
-    FUZZAPI_VERSION: latest
+    FUZZAPI_VERSION: "1.6"
     FUZZAPI_CONFIG: .gitlab-api-fuzzing.yml
     FUZZAPI_TIMEOUT: 30
     FUZZAPI_REPORT: gl-api-fuzzing-report.json
