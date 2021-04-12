@@ -56,13 +56,17 @@ the use of GitLab instance [Administrator](../user/permissions.md) users.
 
 Return all of the raw SQL queries used to compute usage ping.
 
+```plaintext
+GET /usage_data/queries
+```
+
 Example request:
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/usage_data/queries
 ```
 
-Sample response
+Example response:
 
 ```json
 {
