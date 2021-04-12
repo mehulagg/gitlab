@@ -162,7 +162,7 @@ class EpicsFinder < IssuableFinder
     elsif include_ancestors
       group.self_and_ancestors
     elsif include_descendants
-      group.self_and_descendants
+      group.recursive_self_and_descendants
     else
       Group.id_in(group.id)
     end
