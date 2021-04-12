@@ -340,7 +340,7 @@ module Banzai
         result = klass.where_full_path_in(paths)
         return result if parent_type == :group
 
-        result.includes(:namespace) if parent_type == :project
+        result.inc_routes if parent_type == :project
       end
 
       # Returns projects for the given paths.
