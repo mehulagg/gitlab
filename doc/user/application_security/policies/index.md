@@ -85,6 +85,8 @@ scan_execution_policy:
 
 ### Scan Execution Policies Schema
 
+The YAML file with Scan Execution Policies consists of an array of objects matching Scan Execution Policy Schema nested under the `scan_execution_policy` key. You can configure a maximum of 5 policies under the `scan_execution_policy` key.
+
 | Field | Type | Possible values | Description |
 |-------|------|-----------------|-------------|
 | `scan_execution_policy` | `array` of Scan Execution Policy |  | List of scan execution policies (maximum 5) |
