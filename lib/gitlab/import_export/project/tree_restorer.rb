@@ -14,6 +14,7 @@ module Gitlab
           @user = user
           @shared = shared
           @project = project
+          @project.hierarchy_max_issues_relative_position = mover.context(Issue.in_projects(project.group&.root_ancestor&.all_projects).first)&.max_relative_position || 0
         end
 
         def restore
@@ -112,6 +113,12 @@ module Gitlab
 
         def importable_path
           "project"
+        end
+
+        def mover
+          ::Gitlab::RelativePositioning::Mover.new(
+            ::Gitlab::RelativePositioning::START_POSITION,
+            (::Gitlab::RelativePositioning::MIN_POSITION..::Gitlab::RelativePositioning::MAX_POSITION))
         end
       end
     end

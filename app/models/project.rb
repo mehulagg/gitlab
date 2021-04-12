@@ -137,6 +137,7 @@ class Project < ApplicationRecord
   attr_accessor :template_name
   attr_writer :pipeline_status
   attr_accessor :skip_disk_validation
+  attr_accessor :hierarchy_max_issues_relative_position
 
   alias_attribute :title, :name
 

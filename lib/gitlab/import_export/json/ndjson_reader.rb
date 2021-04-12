@@ -4,7 +4,7 @@ module Gitlab
   module ImportExport
     module JSON
       class NdjsonReader
-        MAX_JSON_DOCUMENT_SIZE = 50.megabytes
+        MAX_JSON_DOCUMENT_SIZE = 1.megabytes
 
         attr_reader :dir_path
 
@@ -30,7 +30,7 @@ module Gitlab
         end
 
         def consume_relation(importable_path, key, mark_as_consumed: true)
-          Enumerator.new do |documents|
+          enumerator = Enumerator.new do |documents|
             next if mark_as_consumed && !@consumed_relations.add?("#{importable_path}/#{key}")
 
             # This reads from `tree/project/merge_requests.ndjson`
@@ -42,6 +42,8 @@ module Gitlab
               documents << [json_decode(line), line_num]
             end
           end
+
+          key.to_s == 'issues' ? enumerator.sort_by { |el| el.first['relative_position'] } : enumerator
         end
 
         private

@@ -80,6 +80,7 @@ module Gitlab
           when :notes then setup_note
           when :'Ci::Pipeline' then setup_pipeline
           when *BUILD_MODELS then setup_build
+          when :issues then setup_issue
           end
 
           update_project_references
@@ -133,6 +134,10 @@ module Gitlab
               status.pipeline = imported_object
             end
           end
+        end
+
+        def setup_issue
+          @relation_hash['relative_position'] = @importable.hierarchy_max_issues_relative_position + (@relation_index + 1) * 513
         end
 
         def legacy_trigger?
