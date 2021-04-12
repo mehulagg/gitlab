@@ -141,7 +141,7 @@ The following metrics can be controlled by feature flags:
 
 ## Gitaly metrics
 
-You can [configure Praefect to report metrics](../../../gitaly/praefect.md#praefect).
+You can [configure Praefect to report metrics](../../gitaly/praefect.md#praefect).
 These are some of the Gitaly metrics served from the `/metrics` path on the [configured port](index.md#changing-the-port-and-address-prometheus-listens-on)
 (9090 by default).
 
