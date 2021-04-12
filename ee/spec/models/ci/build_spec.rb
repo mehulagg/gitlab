@@ -374,7 +374,6 @@ RSpec.describe Ci::Build do
 
       before do
         stub_licensed_features(dependency_scanning: true)
-        stub_feature_flags(standalone_vuln_dependency_list: false)
       end
 
       subject { job.collect_dependency_list_reports!(dependency_list_report) }

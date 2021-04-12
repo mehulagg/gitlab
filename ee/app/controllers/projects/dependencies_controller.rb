@@ -6,10 +6,6 @@ module Projects
 
     before_action :authorize_read_dependency_list!
 
-    before_action do
-      push_frontend_feature_flag(:standalone_vuln_dependency_list, project)
-    end
-
     feature_category :dependency_scanning
 
     def index

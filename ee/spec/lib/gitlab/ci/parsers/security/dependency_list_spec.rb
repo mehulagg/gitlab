@@ -53,8 +53,6 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyList do
       let(:artifact) { pipeline.job_artifacts.last }
 
       before do
-        stub_feature_flags(standalone_vuln_dependency_list: false)
-
         artifact.each_blob do |blob|
           parser.parse!(blob, report)
         end
