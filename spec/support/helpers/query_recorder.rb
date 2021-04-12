@@ -18,7 +18,9 @@ module ActiveRecord
     end
 
     def show_backtrace(values)
-      Rails.logger.debug("QueryRecorder SQL: #{values[:sql]}")
+      values[:sql].lines.each do |line|
+        Rails.logger.debug("QueryRecorder SQL:  --> #{line}")
+      end
       Gitlab::BacktraceCleaner.clean_backtrace(caller).each do |line|
         Rails.logger.debug("QueryRecorder backtrace:  --> #{line}")
       end
