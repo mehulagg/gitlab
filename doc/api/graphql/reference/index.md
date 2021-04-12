@@ -1869,19 +1869,19 @@ Represents the current license.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `activatedAt` | [`Date`](#date) | Date when the license was activated. |
-| `billableUsers` | [`Int`](#int) | Number of billable users on the system. |
+| `billableUsersCount` | [`Int`](#int) | Number of billable users on the system. |
 | `company` | [`String`](#string) | Company of the licensee. |
 | `email` | [`String`](#string) | Email of the licensee. |
 | `expiresAt` | [`Date`](#date) | Date when the license expires. |
 | `id` | [`ID!`](#id) | ID of the license. |
 | `lastSync` | [`Time`](#time) | Date when the license was last synced. |
-| `maximumUsers` | [`Int`](#int) | Highest number of billable users on the system during the term of the current license. |
+| `maximumUserCount` | [`Int`](#int) | Highest number of billable users on the system during the term of the current license. |
 | `name` | [`String`](#string) | Name of the licensee. |
 | `plan` | [`String!`](#string) | Name of the subscription plan. |
 | `startsAt` | [`Date`](#date) | Date when the license started. |
 | `type` | [`String!`](#string) | Type of the license. |
-| `usersInLicense` | [`Int`](#int) | Number of paid users in the license. |
-| `usersOverSubscription` | [`Int`](#int) | Number of users over the paid users in the license. |
+| `usersInLicenseCount` | [`Int`](#int) | Number of paid users in the license. |
+| `usersOverLicenseCount` | [`Int`](#int) | Number of users over the paid users in the license. |
 
 ### `CustomEmoji`
 
@@ -3895,7 +3895,7 @@ Represents an entry from the Cloud License history.
 | `plan` | [`String!`](#string) | Name of the subscription plan. |
 | `startsAt` | [`Date`](#date) | Date when the license started. |
 | `type` | [`String!`](#string) | Type of the license. |
-| `usersInLicense` | [`Int`](#int) | Number of paid users in the license. |
+| `usersInLicenseCount` | [`Int`](#int) | Number of paid users in the license. |
 
 ### `LicenseHistoryEntryConnection`
 

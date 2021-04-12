@@ -15,7 +15,7 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
   let_it_be(:license) { create_current_license(licensee: licensee, type: License::CLOUD_LICENSE_TYPE) }
 
   let(:fields) do
-    %w[last_sync billable_users maximum_users users_over_subscription]
+    %w[last_sync billable_users_count maximum_user_count users_over_license_count]
   end
 
   def query(field_name)
@@ -41,14 +41,14 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
 
   include_examples 'license type fields', %w[data currentLicense]
 
-  describe "#users_over_subscription" do
+  describe "#users_over_license_count" do
     context 'when license is for a trial' do
       it 'returns 0' do
         create_current_license(licensee: licensee, restrictions: { trial: true })
 
-        result_as_json = query_field('usersOverSubscription')
+        result_as_json = query_field('usersOverLicenseCount')
 
-        expect(result_as_json['data']['currentLicense']['usersOverSubscription']).to eq(0)
+        expect(result_as_json['data']['currentLicense']['usersOverLicenseCount']).to eq(0)
       end
     end
 
@@ -56,9 +56,9 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
       create(:historical_data, active_user_count: 15)
       create_current_license(licensee: licensee, restrictions: { active_user_count: 10 })
 
-      result_as_json = query_field('usersOverSubscription')
+      result_as_json = query_field('usersOverLicenseCount')
 
-      expect(result_as_json['data']['currentLicense']['usersOverSubscription']).to eq(5)
+      expect(result_as_json['data']['currentLicense']['usersOverLicenseCount']).to eq(5)
     end
   end
 end
