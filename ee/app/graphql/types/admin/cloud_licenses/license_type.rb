@@ -12,7 +12,8 @@ module Types
                 method: :license_id
 
           field :type, GraphQL::STRING_TYPE, null: false,
-                description: 'Type of the license.'
+                description: 'Type of the license.',
+                method: :license_type
 
           field :plan, GraphQL::STRING_TYPE, null: false,
                 description: 'Name of the subscription plan.'
@@ -39,24 +40,9 @@ module Types
                 description: 'Date when the license was activated.',
                 method: :created_at
 
-          field :users_in_license, GraphQL::INT_TYPE, null: true,
-                description: 'Number of paid users in the license.'
-
-          def type
-            object.cloud? ? :cloud : :legacy
-          end
-
-          def plan
-            object.plan.capitalize
-          end
-
-          def users_in_license
-            if object.restricted?(:active_user_count)
-              object.restrictions[:active_user_count]
-            else
-              nil
-            end
-          end
+          field :users_in_license_count, GraphQL::INT_TYPE, null: true,
+                description: 'Number of paid users in the license.',
+                method: :restricted_user_count
         end
       end
     end
