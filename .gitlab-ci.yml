@@ -53,6 +53,7 @@ workflow:
 variables:
   RAILS_ENV: "test"
   NODE_ENV: "test"
+  BUNDLE_INSTALL_FLAGS: "--without=production development --jobs=$(nproc) --path=vendor --retry=3 --quiet"
   # we override the max_old_space_size to prevent OOM errors
   NODE_OPTIONS: --max_old_space_size=3584
   SIMPLECOV: "true"
