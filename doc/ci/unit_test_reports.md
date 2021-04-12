@@ -344,7 +344,7 @@ When [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/6061) is complet
 
 If JUnit report format XML files contain an `attachment` tag, GitLab parses the attachment.
 
-Upload your screenshots as [artifacts](ci/yaml/README.md#artifactsreportsjunit) to GitLab. The `attachment` tag **must** contain the absolute path to the screenshots you uploaded.
+Upload your screenshots as [artifacts](yaml/README.md#artifactsreportsjunit) to GitLab. The `attachment` tag **must** contain the absolute path to the screenshots you uploaded.
 
 ```xml
 <testcase time="1.00" name="Test">
