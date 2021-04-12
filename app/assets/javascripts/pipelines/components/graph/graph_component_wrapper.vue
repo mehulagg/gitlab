@@ -45,9 +45,12 @@ export default {
     return {
       alertType: null,
       currentViewType: STAGE_VIEW,
+      loadLinks: false,
       pipeline: null,
       pipelineLayers: null,
       showAlert: false,
+      showLinks: false,
+      noms: false,
     };
   },
   errorTexts: {
@@ -182,6 +185,10 @@ export default {
       }
     },
     /* eslint-enable @gitlab/require-i18n-strings */
+    updateShowLinks(val) {
+      this.loadLinks = val;
+      this.showLinks = val;
+    },
     updateViewType(type) {
       this.currentViewType = type;
     },
@@ -202,7 +209,9 @@ export default {
       <graph-view-selector
         v-if="showGraphViewSelector"
         :type="currentViewType"
+        :links-loading="showLinks"
         @updateViewType="updateViewType"
+        @updateShowLinks="updateShowLinks"
       />
     </local-storage-sync>
     <gl-loading-icon v-if="showLoadingIcon" class="gl-mx-auto gl-my-4" size="lg" />
@@ -211,6 +220,7 @@ export default {
       :config-paths="configPaths"
       :pipeline="pipeline"
       :pipeline-layers="getPipelineLayers()"
+      :show-links="showLinks"
       :view-type="currentViewType"
       @error="reportFailure"
       @refreshPipelineGraph="refreshPipelineGraph"
