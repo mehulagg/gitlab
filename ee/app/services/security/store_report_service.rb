@@ -44,11 +44,13 @@ module Security
 
       update_vulnerability_scanners!(@report.findings) if Feature.enabled?(:optimize_sql_query_for_security_report, project)
 
-      @report.findings.map do |finding|
+      vulnerability_ids = @report.findings.map do |finding|
         create_vulnerability_finding(vulnerability_findings_by_uuid, finding)&.id
       end.compact.uniq
 
       update_vulnerability_links_info if Feature.enabled?(:optimize_sql_query_for_security_report, project)
+
+      vulnerability_ids
     end
 
     def mark_as_resolved_except(vulnerability_ids)
