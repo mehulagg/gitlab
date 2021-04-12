@@ -36,7 +36,8 @@ module SidebarsHelper
     {
       current_user: current_user,
       container: project,
-      project: project
+      project: project,
+      learn_gitlab_experiment_enabled: learn_gitlab_experiment_enabled?(project)
     }
   end
 end
