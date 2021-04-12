@@ -3,7 +3,7 @@
 module Ci
   class AbortPipelinesService
     # Danger: Cancels in bulk without callbacks
-    # Only for pipeline abandonment scenarios (examples: project delete, user block)
+    # Only for pipeline abandonment scenarios (examples: project delete)
     def execute(pipelines)
       @time = Time.current
 
