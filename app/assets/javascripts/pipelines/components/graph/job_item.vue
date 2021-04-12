@@ -198,6 +198,7 @@ export default {
       }"
       :title="tooltipText"
       :class="jobClasses"
+      :href="detailsPath"
       class="js-pipeline-graph-job-link qa-job-link menu-item gl-text-gray-900 gl-active-text-decoration-none gl-focus-text-decoration-none gl-hover-text-decoration-none gl-w-full"
       :data-testid="testId"
       @click.stop="hideTooltips"
@@ -209,6 +210,7 @@ export default {
           <div class="gl-text-truncate mw-70p gl-line-height-normal">{{ job.name }}</div>
           <div
             v-if="showStageName"
+            data-testid="stage-name-in-job"
             class="gl-text-truncate mw-70p gl-font-sm gl-text-gray-500 gl-line-height-normal"
           >
             {{ stageName }}
