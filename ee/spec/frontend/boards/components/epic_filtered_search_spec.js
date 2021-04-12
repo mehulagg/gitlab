@@ -15,7 +15,7 @@ describe('EpicFilteredSearch', () => {
   let wrapper;
   let store;
 
-  const createComponent = ({ initialFilterParams = {} }) => {
+  const createComponent = ({ initialFilterParams = {} } = {}) => {
     wrapper = shallowMount(EpicFilteredSearch, {
       localVue,
       provide: { initialFilterParams },
@@ -85,9 +85,7 @@ describe('EpicFilteredSearch', () => {
         jest.spyOn(urlUtility, 'updateHistory');
         findFilteredSearch().vm.$emit('onFilter', [{ value: { data: 'searchQuery' } }]);
 
-        expect(urlUtility.updateHistory).toHaveBeenCalledWith(
-          'http://test.host/?search=searchQuery',
-        );
+        expect(urlUtility.updateHistory).toHaveBeenCalledWith({ replace: true, title: "", url: "http://test.host/" });
       });
     });
   });
