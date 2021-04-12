@@ -34,6 +34,8 @@
   script:
     - !reference [.base-script, script]
     - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag ~level:migration"
+    # TODO: Handle updating junit_rspec.xml if tests pass after retry?
+    - "[[ $(grep -q "failed" spec/examples.txt; echo $?) -eq 1 ]] || FLAKY_RSPEC_GENERATE_REPORT="true" bin/rspec -Ispec -rspec_helper --color --format documentation --format RspecJunitFormatter --only-failures"
   artifacts:
     expire_in: 31d
     when: always
@@ -56,6 +58,8 @@
   script:
     - !reference [.base-script, script]
     - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag level:migration"
+    # TODO: Handle updating junit_rspec.xml if tests pass after retry?
+    - "[[ $(grep -q "failed" spec/examples.txt; echo $?) -eq 1 ]] || FLAKY_RSPEC_GENERATE_REPORT="true" bin/rspec -Ispec -rspec_helper --color --format documentation --format RspecJunitFormatter --only-failures"
 
 .rspec-base-pg11:
   extends:
@@ -89,6 +93,8 @@
   script:
     - !reference [.base-script, script]
     - rspec_paralellized_job "--tag ~quarantine --tag geo"
+    # TODO: Handle updating junit_rspec.xml if tests pass after retry?
+    - "[[ $(grep -q "failed" spec/examples.txt; echo $?) -eq 1 ]] || FLAKY_RSPEC_GENERATE_REPORT="true" bin/rspec -Ispec -rspec_helper --color --format documentation --format RspecJunitFormatter --only-failures"
 
 .rspec-ee-base-geo-pg11:
   extends:

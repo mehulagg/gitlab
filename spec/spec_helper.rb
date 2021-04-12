@@ -111,10 +111,8 @@ RSpec.configure do |config|
     end
   end
 
-  unless ENV['CI']
-    # Re-run failures locally with `--only-failures`
-    config.example_status_persistence_file_path = './spec/examples.txt'
-  end
+  # Re-run failures locally with `--only-failures`
+  config.example_status_persistence_file_path = './spec/examples.txt'
 
   config.define_derived_metadata(file_path: %r{(ee)?/spec/.+_spec\.rb\z}) do |metadata|
     location = metadata[:location]
@@ -198,7 +196,7 @@ RSpec.configure do |config|
     config.exceptions_to_hard_fail = [DeprecationToolkitEnv::DeprecationBehaviors::SelectiveRaise::RaiseDisallowedDeprecation]
   end
 
-  if ENV['FLAKY_RSPEC_GENERATE_REPORT']
+  if ENV['FLAKY_RSPEC_GENERATE_REPORT'] == "true"
     require_relative '../tooling/rspec_flaky/listener'
 
     config.reporter.register_listener(
