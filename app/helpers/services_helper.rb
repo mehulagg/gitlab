@@ -155,6 +155,10 @@ module ServicesHelper
       'project'
     end
   end
+
+  def show_service_templates?
+    !Feature.enabled?(:disable_service_templates, type: :ops, default_enabled: :yaml) && Service.for_template.active.exists?
+  end
 end
 
 ServicesHelper.prepend_if_ee('EE::ServicesHelper')
