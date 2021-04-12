@@ -11,11 +11,6 @@ module EE
       ]
     end
 
-    override :sidebar_repository_paths
-    def sidebar_repository_paths
-      super + %w(path_locks)
-    end
-
     override :sidebar_operations_paths
     def sidebar_operations_paths
       super + %w[
