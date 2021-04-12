@@ -294,6 +294,10 @@ module EE
       managing_group.present?
     end
 
+    def provisioned_by_group?
+      ::Feature.enabled?(:block_password_auth_for_saml_users, type: :ops) && user_detail.provisioned_by_group?
+    end
+
     def managed_by?(user)
       self.group_managed_account? && self.managing_group.owned_by?(user)
     end
@@ -310,7 +314,7 @@ module EE
     override :allow_password_authentication_for_web?
     def allow_password_authentication_for_web?(*)
       return false if group_managed_account?
-      return false if user_detail.provisioned_by_group?
+      return false if provisioned_by_group?
 
       super
     end
@@ -318,7 +322,7 @@ module EE
     override :allow_password_authentication_for_git?
     def allow_password_authentication_for_git?(*)
       return false if group_managed_account?
-      return false if user_detail.provisioned_by_group?
+      return false if provisioned_by_group?
 
       super
     end

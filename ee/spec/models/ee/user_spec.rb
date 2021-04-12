@@ -766,6 +766,16 @@ RSpec.describe User do
       it 'is false' do
         expect(user.allow_password_authentication_for_web?).to eq false
       end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is true' do
+          expect(user.allow_password_authentication_for_web?).to eq true
+        end
+      end
     end
   end
 
@@ -786,7 +796,17 @@ RSpec.describe User do
       end
 
       it 'is false' do
-        expect(user.allow_password_authentication_for_web?).to eq false
+        expect(user.allow_password_authentication_for_git?).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is true' do
+          expect(user.allow_password_authentication_for_git?).to eq true
+        end
       end
     end
   end
