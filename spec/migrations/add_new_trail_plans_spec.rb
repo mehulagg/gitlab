@@ -7,7 +7,7 @@ require_migration!
 RSpec.describe AddNewTrailPlans, :migration do
   describe '#up' do
     before do
-      allow(Gitlab).to receive(:dev_env_org_or_com?).and_return true
+      allow(Gitlab).to receive(:dev_env_or_com?).and_return true
     end
 
     it 'creates 2 entries within the plans table' do
@@ -40,7 +40,7 @@ RSpec.describe AddNewTrailPlans, :migration do
 
     context 'when the instance is not SaaS' do
       before do
-        allow(Gitlab).to receive(:dev_env_org_or_com?).and_return false
+        allow(Gitlab).to receive(:dev_env_or_com?).and_return false
       end
 
       it 'does not create plans and plan limits and returns' do
@@ -54,7 +54,7 @@ RSpec.describe AddNewTrailPlans, :migration do
     context 'when the instance is SaaS' do
       before do
         table(:plans).create!(name: 'random')
-        allow(Gitlab).to receive(:dev_env_org_or_com?).and_return true
+        allow(Gitlab).to receive(:dev_env_or_com?).and_return true
       end
 
       it 'removes the newly added ultimate and premium trial entries' do
@@ -83,7 +83,7 @@ RSpec.describe AddNewTrailPlans, :migration do
 
     context 'when the instance is not SaaS' do
       before do
-        allow(Gitlab).to receive(:dev_env_org_or_com?).and_return false
+        allow(Gitlab).to receive(:dev_env_or_com?).and_return false
         table(:plans).create!(id: 1, name: 'ultimate_trial', title: 'Ultimate Trial')
         table(:plans).create!(id: 2, name: 'premium_trial', title: 'Premium Trial')
         table(:plan_limits).create!(id: 1, plan_id: 1)
