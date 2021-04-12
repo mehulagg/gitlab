@@ -1,4 +1,4 @@
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 
 export const PROJECTS_PER_PAGE = 50;
 
@@ -69,3 +69,7 @@ export const OVERVIEW_STAGE_CONFIG = {
   title: __('Overview'),
   icon: 'home',
 };
+
+export const NOT_ENOUGH_DATA_ERROR = s__(
+  "ValueStreamAnalyticsStage|We don't have enough data to show this stage.",
+);

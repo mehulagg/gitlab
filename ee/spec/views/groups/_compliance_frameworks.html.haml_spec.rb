@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'groups/_compliance_frameworks.html.haml' do
   let_it_be(:group) { build(:group) }
+
   let(:title) { 'Compliance frameworks' }
   let(:description) { 'Configure frameworks to apply enforceable rules to projects.' }
 

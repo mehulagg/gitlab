@@ -32,7 +32,7 @@
         .filtered-search-box
           = dropdown_tag(_('Recent searches'),
             options: { wrapper_class: "filtered-search-history-dropdown-wrapper",
-            toggle_class: "btn filtered-search-history-dropdown-toggle-button",
+            toggle_class: "gl-button btn btn-default filtered-search-history-dropdown-toggle-button",
             dropdown_class: "filtered-search-history-dropdown",
             content_class: "filtered-search-history-dropdown-content" }) do
             .js-filtered-search-history-dropdown{ data: { full_path: search_history_storage_prefix } }
@@ -44,7 +44,7 @@
             #js-dropdown-hint.filtered-search-input-dropdown-menu.dropdown-menu.hint-dropdown
               %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                 %li.filter-dropdown-item{ data: {hint: "#{'{{hint}}'}", tag: "#{'{{tag}}'}", action: "#{'{{hint === \'search\' ? \'submit\' : \'\' }}'}" } }
-                  %button.btn.btn-link{ type: 'button' }
+                  %button.gl-button.btn.btn-link{ type: 'button' }
                     -# Encapsulate static class name `{{icon}}` inside #{} to bypass
                     -# haml lint's ClassAttributeWithStaticValue
                     %svg
@@ -54,7 +54,7 @@
             #js-dropdown-operator.filtered-search-input-dropdown-menu.dropdown-menu
               %ul.filter-dropdown{ data: { dropdown: true, dynamic: true } }
                 %li.filter-dropdown-item{ data: { value: "{{ title }}" } }
-                  %button.btn.btn-link{ type: 'button' }
+                  %button.gl-button.btn.btn-link{ type: 'button' }
                     {{ title }}
                     %span.btn-helptext
                       {{ help }}
@@ -70,12 +70,12 @@
             #js-dropdown-label.filtered-search-input-dropdown-menu.dropdown-menu
               %ul{ data: { dropdown: true } }
                 %li.filter-dropdown-item{ data: { value: 'none' } }
-                  %button.btn.btn-link{ type: 'button' }
+                  %button.gl-button.btn.btn-link{ type: 'button' }
                     = _("No label")
                 %li.divider.droplab-item-ignore
               %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                 %li.filter-dropdown-item{ type: 'button' }
-                  %button.btn.btn-link
+                  %button.gl-button.btn.btn-link
                     %span.dropdown-label-box{ style: 'background: {{color}}' }
                     %span.label-title.js-data-value
                       {{ title }}

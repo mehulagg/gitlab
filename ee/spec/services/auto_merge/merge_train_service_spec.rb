@@ -7,6 +7,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
   let_it_be(:project) { create(:project, :repository, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:user) { create(:user) }
+
   let(:service) { described_class.new(project, user, params) }
   let(:params) { {} }
 
