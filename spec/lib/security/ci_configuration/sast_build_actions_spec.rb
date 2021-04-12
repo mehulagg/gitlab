@@ -342,8 +342,8 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def sast_yaml_with_no_variables_set_but_analyzers
     <<-CI_YML.strip_heredoc
     # You can override the included template(s) by including variable overrides
-    # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-    # See https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+    # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+    # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
     # Note that environment variables can be set in several places
     # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
     stages:
@@ -361,8 +361,8 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def sast_yaml_with_no_variables_set
     <<-CI_YML.strip_heredoc
     # You can override the included template(s) by including variable overrides
-    # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-    # See https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+    # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+    # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
     # Note that environment variables can be set in several places
     # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
     stages:
@@ -377,8 +377,8 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def sast_yaml_all_params
     <<-CI_YML.strip_heredoc
       # You can override the included template(s) by including variable overrides
-      # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-      # See https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+      # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+      # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
       # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
       stages:
@@ -399,8 +399,8 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def auto_devops_with_custom_stage
     <<-CI_YML.strip_heredoc
       # You can override the included template(s) by including variable overrides
-      # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-      # See https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+      # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+      # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
       # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
       stages:
@@ -434,8 +434,8 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def sast_yaml_two_includes
     <<-CI_YML.strip_heredoc
       # You can override the included template(s) by including variable overrides
-      # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-      # See https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+      # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+      # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
       # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
       stages:
@@ -458,8 +458,8 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def sast_yaml_variable_section_added
     <<-CI_YML.strip_heredoc
       # You can override the included template(s) by including variable overrides
-      # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-      # See https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+      # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+      # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
       # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
       stages:
@@ -480,8 +480,8 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def sast_yaml_sast_section_added
     <<-CI_YML.strip_heredoc
       # You can override the included template(s) by including variable overrides
-      # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-      # See https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+      # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+      # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
       # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
       stages:
@@ -503,8 +503,8 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def sast_yaml_sast_variables_section_added
     <<-CI_YML.strip_heredoc
       # You can override the included template(s) by including variable overrides
-      # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-      # See https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+      # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+      # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
       # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
       stages:
@@ -526,8 +526,8 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def sast_yaml_updated_stage
     <<-CI_YML.strip_heredoc
       # You can override the included template(s) by including variable overrides
-      # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-      # See https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+      # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+      # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
       # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
       stages:
