@@ -47,10 +47,9 @@ export default class PerformanceBarStore {
   }
 
   canTrackRequest(requestUrl) {
-    return (
-      requestUrl.endsWith('/api/graphql') ||
-      this.requests.filter((request) => request.url === requestUrl).length < 2
-    );
+    const requestsLimit = requestUrl.endsWith('/api/graphql') ? 10 : 2;
+
+    return this.requests.filter((request) => request.url === requestUrl).length < requestsLimit;
   }
 
   static truncateUrl(requestUrl) {
