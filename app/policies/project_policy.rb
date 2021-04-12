@@ -30,6 +30,9 @@ class ProjectPolicy < BasePolicy
   desc "User has maintainer access"
   condition(:maintainer) { team_access_level >= Gitlab::Access::MAINTAINER }
 
+  desc "User is an external user"
+  condition(:external_user) { user&.external? }
+
   desc "User is a project bot"
   condition(:project_bot) { user.project_bot? && team_member? }
 
@@ -224,6 +227,11 @@ class ProjectPolicy < BasePolicy
     enable :read_release
     enable :read_analytics
     enable :read_insights
+  end
+
+  rule { external_user }.policy do
+    prevent :create_snippet
+    prevent :fork_project
   end
 
   # These abilities are not allowed to admins that are not members of the project,

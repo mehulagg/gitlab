@@ -17,6 +17,7 @@ class GroupPolicy < BasePolicy
   condition(:owner) { access_level >= GroupMember::OWNER }
   condition(:maintainer) { access_level >= GroupMember::MAINTAINER }
   condition(:reporter) { access_level >= GroupMember::REPORTER }
+  condition(:external_user) { @user&.external? }
 
   condition(:has_parent, scope: :subject) { @subject.has_parent? }
   condition(:share_with_group_locked, scope: :subject) { @subject.share_with_group_lock? }
@@ -132,6 +133,11 @@ class GroupPolicy < BasePolicy
     enable :read_package
     enable :read_package_settings
     enable :read_group_timelogs
+  end
+
+  rule { external_user }.policy do
+    prevent :create_projects
+    prevent :create_subgroup
   end
 
   rule { maintainer }.policy do

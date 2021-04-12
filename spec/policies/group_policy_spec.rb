@@ -525,6 +525,12 @@ RSpec.describe GroupPolicy do
 
         it { is_expected.to be_allowed(:create_projects) }
       end
+
+      context 'external user' do
+        let(:current_user) { external_user }
+
+        it { is_expected.to be_disallowed(:create_projects) }
+      end
     end
 
     context 'when group has project creation level set to no one' do
@@ -552,6 +558,12 @@ RSpec.describe GroupPolicy do
 
       context 'owner' do
         let(:current_user) { owner }
+
+        it { is_expected.to be_disallowed(:create_projects) }
+      end
+
+      context 'external user' do
+        let(:current_user) { external_user }
 
         it { is_expected.to be_disallowed(:create_projects) }
       end
@@ -585,6 +597,12 @@ RSpec.describe GroupPolicy do
 
         it { is_expected.to be_allowed(:create_projects) }
       end
+
+      context 'external user' do
+        let(:current_user) { external_user }
+
+        it { is_expected.to be_disallowed(:create_projects) }
+      end
     end
 
     context 'when group has project creation level set to developers + maintainer' do
@@ -614,6 +632,12 @@ RSpec.describe GroupPolicy do
         let(:current_user) { owner }
 
         it { is_expected.to be_allowed(:create_projects) }
+      end
+
+      context 'external user' do
+        let(:current_user) { external_user }
+
+        it { is_expected.to be_disallowed(:create_projects) }
       end
     end
   end
@@ -647,6 +671,12 @@ RSpec.describe GroupPolicy do
 
         it { is_expected.to be_allowed(:create_subgroup) }
       end
+
+      context 'external user' do
+        let(:current_user) { external_user }
+
+        it { is_expected.to be_disallowed(:create_subgroup) }
+      end
     end
 
     context 'when group has subgroup creation level set to maintainer' do
@@ -676,6 +706,12 @@ RSpec.describe GroupPolicy do
         let(:current_user) { owner }
 
         it { is_expected.to be_allowed(:create_subgroup) }
+      end
+
+      context 'external user' do
+        let(:current_user) { external_user }
+
+        it { is_expected.to be_disallowed(:create_subgroup) }
       end
     end
   end

@@ -8,6 +8,7 @@ RSpec.shared_context 'ProjectPolicy context' do
   let_it_be(:maintainer) { create(:user) }
   let_it_be(:owner) { create(:user) }
   let_it_be(:admin) { create(:admin) }
+  let_it_be(:external_user) { create(:user, :external) }
   let_it_be(:non_member) { create(:user) }
   let_it_be_with_refind(:private_project) { create(:project, :private, namespace: owner.namespace) }
   let_it_be_with_refind(:internal_project) { create(:project, :internal, namespace: owner.namespace) }

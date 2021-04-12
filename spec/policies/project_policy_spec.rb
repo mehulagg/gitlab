@@ -355,6 +355,12 @@ RSpec.describe ProjectPolicy do
         it { is_expected.to be_disallowed(:fork_project) }
       end
 
+      context 'external user' do
+        let(:current_user) { external_user }
+
+        it { is_expected.to be_disallowed(:fork_project) }
+      end
+
       %w(reporter developer maintainer).each do |role|
         context role do
           let(:current_user) { send(role) }
