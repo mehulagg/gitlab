@@ -17,7 +17,6 @@ We recommend that you use fuzz testing in addition to [GitLab Secure](../index.m
 other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/README.md),
 you can run fuzz tests as part your CI/CD workflow.
 
-
 ## Requirements
 
 - One of the following web API types:
@@ -162,7 +161,7 @@ This is a minimal configuration for DAST API. From here you can:
 - Learn how to [handle false positives](#handling-false-positives).
 
 WARNING:
-**NEVER** run DAST API testing against a production server. Not only can it perform *any* function that the API can, it may also trigger bugs in the API. This includes actions like modifying and deleting data. Only run fuzzing against a test server.
+**NEVER** run DAST API testing against a production server. Not only can it perform *any* function that the API can, it may also trigger bugs in the API. This includes actions like modifying and deleting data. Only run DAST API scanning against a test server.
 
 ### HTTP Archive (HAR)
 
@@ -199,7 +198,7 @@ target API to test:
    ```
 
 1. The [configuration file](#configuration-files) has several testing profiles defined with varying
-   amounts of fuzzing. We recommend that you start with the `Quick` profile. Testing with this
+   amounts of testing. We recommend that you start with the `Quick` profile. Testing with this
    profile completes quickly, allowing for easier configuration validation.
 
    Provide the profile by adding the `DAST_API_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file,
@@ -373,17 +372,17 @@ requests. These placeholders are called variables, as explained in [Using variab
 You can use variables to store and reuse values in your requests and scripts. For example, you can
 edit the collection to add variables to the document:
 
-![Edit collection variable tab View](img/api_fuzzing_postman_collection_edit_variable.png)
+![Edit collection variable tab View](img/dast_api_postman_collection_edit_variable.png)
 
 You can then use the variables in sections such as URL, headers, and others:
 
-![Edit request using variables View](img/api_fuzzing_postman_request_edit.png)
+![Edit request using variables View](img/dast_api_postman_request_edit.png)
 
 Variables can be defined at different [scopes](https://learning.postman.com/docs/sending-requests/variables/#variable-scopes)
 (for example, Global, Collection, Environment, Local, and Data). In this example, they're defined at
 the Environment scope:
 
-![Edit environment variables View](img/api_fuzzing_postman_environment_edit_variable.png)
+![Edit environment variables View](img/dast_api_postman_environment_edit_variable.png)
 
 When you export a Postman collection, only Postman collection variables are exported into the
 Postman file. For example, Postman does not export environment-scoped variables into the Postman
@@ -498,13 +497,12 @@ Follow these steps to provide the bearer token with `DAST_API_OVERRIDES_ENV`:
      DAST_API_OVERRIDES_ENV: $TEST_API_BEARERAUTH
    ```
 
-1. To validate that authentication is working, run an DAST API test and review the fuzzing logs
+1. To validate that authentication is working, run an DAST API test and review the job logs
    and the test API's application logs.
 
 ##### Token generated at test runtime
 
-If the bearer token must be generated and doesn't expire during testing, you can provide to API
-fuzzing a file containing the token. A prior stage and job, or part of the DAST API job, can
+If the bearer token must be generated and doesn't expire during testing, you can provide to DAST API a file containing the token. A prior stage and job, or part of the DAST API job, can
 generate this file.
 
 DAST API expects to receive a JSON file with the following structure:
@@ -533,7 +531,7 @@ variables:
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
-  DAST_API_OVERRIDES_FILE: output/api-fuzzing-overrides.json
+  DAST_API_OVERRIDES_FILE: output/dast-api-overrides.json
 ```
 
 To validate that authentication is working, run an DAST API test and review the job logs and
@@ -575,7 +573,7 @@ variables:
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
-  DAST_API_OVERRIDES_FILE: output/api-fuzzing-overrides.json
+  DAST_API_OVERRIDES_FILE: output/dast-api-overrides.json
   DAST_API_OVERRIDES_CMD: renew_token.py
   DAST_API_OVERRIDES_INTERVAL: 300
 ```
@@ -589,12 +587,47 @@ To get you started quickly, GitLab provides the configuration file
 [`gitlab-dast-api-config.yml`](https://gitlab.com/gitlab-org/security-products/analyzers/dast/-/blob/master/config/gitlab-dast-api-config.yml).
 This file has several testing profiles that perform various numbers of tests. The run time of each
 profile increases as the test numbers go up. To use a configuration file, add it to your
-repository's root as `.gitlab-api-fuzzing.yml`.
+repository's root as `.gitlab/gitlab-dast-api-config.yml`.
 
-| Profile  | Fuzz Tests (per parameter) |
-|:---------|:-----------|
-| Quick  | 10 |
-| Full  | 100 |
+#### Profiles
+
+The following profiles are pre-defined in the default configuration file. Profiles
+can be added, removed, and modified by creating a custom configuration.
+
+##### Quick
+
+ - Application Information Check
+ - Cleartext Authentication Check
+ - FrameworkDebugModeCheck
+ - Html Injection Check
+ - Insecure Http Methods Check
+ - Json Hijacking Check
+ - Json Injection Check
+ - Sensitive Information Check
+ - Session Cookie Check
+ - Sql Injection Check
+ - Token Check
+ - Xml Injection Check
+
+##### Full
+
+ - Application Information Check
+ - Cleartext AuthenticationCheck
+ - Cors Check
+ - Dns Rebinding Check
+ - Framework Debug Mode Check
+ - Html Injection Check
+ - Insecure Http Methods Check
+ - Json Hijacking Check
+ - Json Injection Check
+ - Open Redirect Check
+ - Sensitive File Check
+ - Sensitive Information Check
+ - Session Cookie Check
+ - Sql Injection Check
+ - Tls Configuration Check
+ - Token Check
+ - Xml Injection Check
 
 ### Available CI/CD variables
 
@@ -1033,7 +1066,7 @@ example provides only the other two Assertions (`LogAnalysisAssertion`,
 
 ```yaml
 Profiles:
-  - Name: Quick-10
+  - Name: Quick
     DefaultProfile: Quick
     Routes:
       - Route: *Route0
@@ -1074,14 +1107,6 @@ The DAST API engine outputs an error message when it cannot establish a connecti
 
 - Remove the `DAST_API_API` variable from the `.gitlab-ci.yml` file. The value will be inherited from the DAST API CI/CD template. We recommend this method instead of manually setting a value.
 - If removing the variable is not possible, check to see if this value has changed in the latest version of the [DAST API CI/CD template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST.latest.gitlab-ci.yml). If so, update the value in the `.gitlab-ci.yml` file.
-
-<!--
-### Target Container
-
-The DAST API template supports launching a docker container containing an API target using docker-in-docker.
-
-TODO
--->
 
 ## Glossary
 
