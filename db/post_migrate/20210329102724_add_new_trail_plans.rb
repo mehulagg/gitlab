@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class AddNewTrailPlans < ActiveRecord::Migration[6.0]
-  DOWNTIME = false
-
   class Plan < ActiveRecord::Base
     self.inheritance_column = :_type_disabled
 
