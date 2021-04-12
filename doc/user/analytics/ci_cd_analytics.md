@@ -69,7 +69,7 @@ information to appear on the graphs.
 
 ### Lead time charts **(ULTIMATE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250329) in GitLab 13.11
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250329) in GitLab 13.11.
 
 The charts in the **Lead Time** tab show information about how long it takes
 merge requests to be deployed to a production environment.
