@@ -32,6 +32,7 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
     emptyStateIllustrationPath,
     lintHelpPagePath,
     newMergeRequestPath,
+    pipelineGraphqlEtag,
     projectFullPath,
     projectPath,
     projectNamespace,
@@ -49,6 +50,9 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
 
   const apolloProvider = new VueApollo({
     defaultClient: createDefaultClient(resolvers, { typeDefs }),
+  },
+  {
+    useGet: true,
   });
   const { cache } = apolloProvider.clients.defaultClient;
 
@@ -75,6 +79,7 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
       emptyStateIllustrationPath,
       lintHelpPagePath,
       newMergeRequestPath,
+      pipelineGraphqlEtag,
       projectFullPath,
       projectPath,
       projectNamespace,
