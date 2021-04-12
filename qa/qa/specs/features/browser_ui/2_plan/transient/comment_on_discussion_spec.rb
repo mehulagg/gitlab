@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan' do
-    context 'Transient tests', :transient do
+  RSpec.describe 'Plan', :transient do
+    describe 'Discussion comments transient bugs' do
       let(:user1) do
         Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)
       end
