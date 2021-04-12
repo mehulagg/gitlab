@@ -12,7 +12,6 @@ import { apolloProvider } from './pipeline_shared_client';
 import createTestReportsStore from './stores/test_reports';
 import { reportToSentry } from './utils';
 
-
 Vue.use(Translate);
 
 const SELECTORS = {
@@ -83,7 +82,6 @@ const createTestDetails = () => {
 };
 
 export default async function initPipelineDetailsBundle() {
-
   const canShowNewPipelineDetails =
     gon.features.graphqlPipelineDetails || gon.features.graphqlPipelineDetailsUsers;
 
@@ -94,7 +92,6 @@ export default async function initPipelineDetailsBundle() {
   } catch {
     Flash(__('An error occurred while loading a section of this page.'));
   }
-
 
   if (canShowNewPipelineDetails) {
     try {
@@ -114,5 +111,4 @@ export default async function initPipelineDetailsBundle() {
 
   createDagApp(apolloProvider);
   createTestDetails();
-
 }
