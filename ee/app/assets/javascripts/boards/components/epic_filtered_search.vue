@@ -77,36 +77,13 @@ export default {
 
       this.performSearch();
     },
-    tokens() {
-      return [
-        {
-          icon: 'labels',
-          title: __('Label'),
-          type: 'labels',
-          operators: [{ value: '=', description: 'is' }],
-          token: LabelToken,
-          unique: false,
-          symbol: '~',
-          fetchLabels: this.fetchLabels,
-        },
-        {
-          icon: 'pencil',
-          title: __('Author'),
-          type: 'author',
-          operators: [{ value: '=', description: 'is' }],
-          symbol: '@',
-          token: AuthorToken,
-          unique: true,
-          fetchAuthors: this.fetchAuthors,
-        },
-      ];
-    },
   },
 };
 </script>
 
 <template>
   <filtered-search
+    data-testid="epic-filtered-search"
     class="gl-w-full"
     namespace=""
     :tokens="tokens"
