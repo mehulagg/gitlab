@@ -139,6 +139,21 @@ definition they could execute privileged Docker commands on the runner
 host. Having proper access control policies mitigates this attack vector by
 allowing access only to trusted actors.
 
+## Code Quality MR diff Visualization
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/267612) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.11.
+> - [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+
+You can now visualize code quality degradation inside the file diff view of your merge requests (MRs). A badge is rendered on a given file if it contains a code quality degradation.
+
+![Code Quality MR diff report](img/code_quality_mr_diff_report.png)
+
+To enable this feature, you can enable the `codequality_mr_diff` feature flag from a Rails console.
+
+```ruby
+  Feature.enable(:codequality_mr_diff, Project)
+```
+
 ### Set up a private runner for code quality without Docker-in-Docker
 
 It's possible to configure your own runners and avoid Docker-in-Docker. You can use a
