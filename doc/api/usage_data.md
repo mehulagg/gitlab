@@ -7,12 +7,9 @@ type: reference, api
 
 # UsageData API **(FREE SELF)**
 
-The UsageData API, associated with [Usage Ping](../development/usage_ping/index.md), is available only for
-the use of GitLab instance [Administrator](../user/permissions.md) users.
-
 ## Export metric definitions as a single YAML file
 
-- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57016) in GitLab 13.11.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57016) in GitLab 13.11.
 
 Export all metric definitions as a single YAML file, similar to the [Metrics Dictionary](../development/usage_ping/dictionary.md), for easier importing.
 
@@ -20,7 +17,13 @@ Export all metric definitions as a single YAML file, similar to the [Metrics Dic
 GET /usage_data/metric_definitions
 ```
 
-Response
+Example request:
+
+```shell
+curl "https://gitlab.example.com/api/v4/usage_data/metric_definitions"
+```
+
+Example response:
 
 ```yaml
 ---
@@ -44,6 +47,9 @@ Response
 ```
 
 ## UsageDataQueries API
+
+The UsageDataQueries API, associated with [Usage Ping](../development/usage_ping/index.md), is available only for
+the use of GitLab instance [Administrator](../user/permissions.md) users.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57016) in GitLab 13.11.
 > - [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
