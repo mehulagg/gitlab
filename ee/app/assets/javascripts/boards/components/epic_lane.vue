@@ -109,7 +109,7 @@ export default {
     >
       <div class="gl-pb-5 gl-px-3 gl-display-flex gl-align-items-center">
         <gl-button
-          v-gl-tooltip.hover.right
+          v-gl-tooltip.right
           :aria-label="chevronTooltip"
           :title="chevronTooltip"
           :icon="chevronIcon"
@@ -132,7 +132,7 @@ export default {
           <gl-link :href="epic.webUrl" class="gl-font-sm">{{ __('Go to epic') }}</gl-link>
         </gl-popover>
         <span
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :title="issuesCountTooltipText"
           class="gl-display-flex gl-align-items-center gl-text-gray-500"
           tabindex="0"

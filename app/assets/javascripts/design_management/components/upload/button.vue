@@ -30,7 +30,7 @@ export default {
 <template>
   <div>
     <gl-button
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :title="
         s__(
           'DesignManagement|Adding a design with the same filename replaces the file in a new version.',

@@ -97,7 +97,7 @@ export default {
 
     <gl-button
       v-show="hasError"
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :title="$options.i18n.buttonLabel"
       :aria-label="$options.i18n.buttonLabel"
       category="tertiary"

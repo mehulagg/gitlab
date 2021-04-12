@@ -90,7 +90,7 @@ export default {
     <gl-button-group>
       <gl-button
         v-if="showExportButton"
-        v-gl-tooltip.hover="$options.i18n.exportAsCsvButtonText"
+        v-gl-tooltip="$options.i18n.exportAsCsvButtonText"
         v-gl-modal="exportModalId"
         icon="export"
         :aria-label="$options.i18n.exportAsCsvButtonText"
@@ -99,7 +99,7 @@ export default {
       />
       <gl-dropdown
         v-if="showImportButton"
-        v-gl-tooltip.hover="importButtonTooltipText"
+        v-gl-tooltip="importButtonTooltipText"
         data-qa-selector="import_issues_dropdown"
         data-testid="import-csv-dropdown"
         :text="importButtonText"

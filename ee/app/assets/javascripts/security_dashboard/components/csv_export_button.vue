@@ -76,7 +76,7 @@ export default {
 <template>
   <gl-button
     ref="csvExportButton"
-    v-gl-tooltip.hover
+    v-gl-tooltip
     class="gl-align-self-center"
     v-bind="buttonProps"
     @click="initiateCsvExport"

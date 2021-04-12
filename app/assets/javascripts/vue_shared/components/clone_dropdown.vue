@@ -54,7 +54,7 @@ export default {
           <gl-form-input-group :value="sshLink" readonly select-on-click>
             <template #append>
               <gl-button
-                v-gl-tooltip.hover
+                v-gl-tooltip
                 :title="$options.copyURLTooltip"
                 :aria-label="$options.copyURLTooltip"
                 :data-clipboard-text="sshLink"
@@ -74,7 +74,7 @@ export default {
           <gl-form-input-group :value="httpLink" readonly select-on-click>
             <template #append>
               <gl-button
-                v-gl-tooltip.hover
+                v-gl-tooltip
                 :title="$options.copyURLTooltip"
                 :aria-label="$options.copyURLTooltip"
                 :data-clipboard-text="httpLink"

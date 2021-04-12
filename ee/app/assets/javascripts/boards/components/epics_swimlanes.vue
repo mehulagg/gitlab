@@ -236,7 +236,7 @@ export default {
               {{ __('Issues with no epic assigned') }}
             </span>
             <span
-              v-gl-tooltip.hover
+              v-gl-tooltip
               :title="unassignedIssuesCountTooltipText"
               class="gl-display-flex gl-align-items-center gl-text-gray-500"
               tabindex="0"

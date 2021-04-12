@@ -501,7 +501,7 @@ export default {
               >
               <gl-dropdown
                 v-if="shouldShowMergeImmediatelyDropdown"
-                v-gl-tooltip.hover.focus="__('Select merge moment')"
+                v-gl-tooltip="__('Select merge moment')"
                 :disabled="isMergeButtonDisabled"
                 variant="info"
                 data-qa-selector="merge_moment_dropdown"

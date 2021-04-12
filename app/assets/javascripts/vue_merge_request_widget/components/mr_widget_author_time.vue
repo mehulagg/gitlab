@@ -35,6 +35,6 @@ export default {
     {{ actionText }}
     <mr-widget-author :author="author" />
     <span class="sr-only">{{ dateReadable }} ({{ dateTitle }})</span>
-    <time v-gl-tooltip.hover aria-hidden :title="dateTitle"> {{ dateReadable }} </time>
+    <time v-gl-tooltip aria-hidden :title="dateTitle"> {{ dateReadable }} </time>
   </h4>
 </template>

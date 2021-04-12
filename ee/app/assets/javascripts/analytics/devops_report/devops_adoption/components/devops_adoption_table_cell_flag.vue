@@ -26,7 +26,7 @@ export default {
 </script>
 <template>
   <span
-    v-gl-tooltip.hover="tooltipText"
+    v-gl-tooltip="tooltipText"
     class="circle"
     :class="{ 'circle-enabled': enabled }"
   ></span>

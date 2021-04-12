@@ -176,7 +176,7 @@ export default {
         <h6 v-for="slot in formSlots" :key="slot.name" :slot="slot.name">
           {{ slot.value }}
           <gl-icon
-            v-gl-tooltip.hover
+            v-gl-tooltip
             name="question-o"
             class="gl-text-gray-500"
             :title="

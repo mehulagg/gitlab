@@ -24,7 +24,7 @@ export default {
 
 <template>
   <gl-button
-    v-gl-tooltip.hover
+    v-gl-tooltip
     :href="exportHref"
     icon="export"
     :title="$options.strings.tooltipText"

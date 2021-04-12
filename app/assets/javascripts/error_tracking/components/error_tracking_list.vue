@@ -273,7 +273,7 @@ export default {
             <div class="gl-search-box-by-type-right-icons">
               <gl-button
                 v-if="errorSearchQuery.length > 0"
-                v-gl-tooltip.hover
+                v-gl-tooltip
                 :title="__('Clear')"
                 class="clear-search text-secondary"
                 name="clear"

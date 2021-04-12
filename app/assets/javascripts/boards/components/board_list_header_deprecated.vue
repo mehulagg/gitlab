@@ -183,7 +183,7 @@ export default {
     >
       <gl-button
         v-if="list.isExpandable"
-        v-gl-tooltip.hover
+        v-gl-tooltip
         :aria-label="chevronTooltip"
         :title="chevronTooltip"
         :icon="chevronIcon"
@@ -225,7 +225,7 @@ export default {
         }"
       >
         <img
-          v-gl-tooltip.hover.bottom
+          v-gl-tooltip.bottom
           :title="listAssignee"
           :alt="list.assignee.name"
           :src="list.assignee.avatar"
@@ -244,7 +244,7 @@ export default {
       >
         <span
           v-if="list.type !== 'label'"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :class="{
             'gl-display-block': !list.isExpanded || list.type === 'milestone',
           }"
@@ -262,7 +262,7 @@ export default {
         </span>
         <gl-label
           v-if="list.type === 'label'"
-          v-gl-tooltip.hover.bottom
+          v-gl-tooltip.bottom
           :background-color="list.label.color"
           :description="list.label.description"
           :scoped="showScopedLabels(list.label)"
@@ -327,7 +327,7 @@ export default {
         <gl-button
           v-if="isNewIssueShown"
           ref="newIssueBtn"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :class="{
             'gl-display-none': !list.isExpanded,
           }"
@@ -341,7 +341,7 @@ export default {
         <gl-button
           v-if="isSettingsShown"
           ref="settingsBtn"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :aria-label="__('List settings')"
           class="no-drag js-board-settings-button"
           :title="__('List settings')"

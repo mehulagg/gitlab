@@ -206,7 +206,7 @@ export default {
       class="board-title gl-m-0 gl-display-flex gl-align-items-center gl-font-base gl-px-3 js-board-handle"
     >
       <gl-button
-        v-gl-tooltip.hover
+        v-gl-tooltip
         :aria-label="chevronTooltip"
         :title="chevronTooltip"
         :icon="chevronIcon"
@@ -249,7 +249,7 @@ export default {
         }"
       >
         <img
-          v-gl-tooltip.hover.bottom
+          v-gl-tooltip.bottom
           :title="listAssignee"
           :alt="list.assignee.name"
           :src="list.assignee.avatarUrl"
@@ -270,7 +270,7 @@ export default {
         <!-- EE start -->
         <span
           v-if="listType !== 'label'"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :class="{
             'gl-display-block': list.collapsed || listType === 'milestone',
           }"
@@ -289,7 +289,7 @@ export default {
         <!-- EE end -->
         <gl-label
           v-if="listType === 'label'"
-          v-gl-tooltip.hover.bottom
+          v-gl-tooltip.bottom
           :background-color="list.label.color"
           :description="list.label.description"
           :scoped="showScopedLabels(list.label)"
@@ -359,7 +359,7 @@ export default {
           v-if="isNewIssueShown"
           v-show="!list.collapsed"
           ref="newIssueBtn"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :aria-label="$options.i18n.newIssue"
           :title="$options.i18n.newIssue"
           class="issue-count-badge-add-button no-drag"
@@ -370,7 +370,7 @@ export default {
         <gl-button
           v-if="isSettingsShown"
           ref="settingsBtn"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :aria-label="$options.i18n.listSettings"
           class="no-drag js-board-settings-button"
           :title="$options.i18n.listSettings"

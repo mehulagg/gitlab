@@ -29,7 +29,7 @@ export default {
   <div class="ide-status-list d-flex">
     <template v-if="activeFile">
       <div>
-        <gl-link v-gl-tooltip.hover :href="activeFile.permalink" :title="__('Open in file view')">
+        <gl-link v-gl-tooltip :href="activeFile.permalink" :title="__('Open in file view')">
           {{ activeFile.name }}
         </gl-link>
       </div>

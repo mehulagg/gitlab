@@ -48,7 +48,7 @@ export default {
       <gl-button
         :key="ignoreBtn.status"
         :ref="`${ignoreBtn.title.toLowerCase()}Error`"
-        v-gl-tooltip.hover
+        v-gl-tooltip
         class="gl-display-block gl-mb-4 mb-md-0 gl-w-full"
         :title="ignoreBtn.title"
         @click="$emit('update-issue-status', { errorId: error.id, status: ignoreBtn.status })"
@@ -59,7 +59,7 @@ export default {
       <gl-button
         :key="resolveBtn.status"
         :ref="`${resolveBtn.title.toLowerCase()}Error`"
-        v-gl-tooltip.hover
+        v-gl-tooltip
         class="gl-display-block gl-mb-4 mb-md-0 gl-w-full"
         :title="resolveBtn.title"
         @click="$emit('update-issue-status', { errorId: error.id, status: resolveBtn.status })"

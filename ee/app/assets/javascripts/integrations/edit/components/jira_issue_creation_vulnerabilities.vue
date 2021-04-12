@@ -180,7 +180,7 @@ export default {
             </gl-dropdown-item>
           </gl-dropdown>
           <gl-button
-            v-gl-tooltip.hover
+            v-gl-tooltip
             :title="$options.i18n.fetchIssueTypesButtonLabel"
             :aria-label="$options.i18n.fetchIssueTypesButtonLabel"
             :disabled="!projectKey"

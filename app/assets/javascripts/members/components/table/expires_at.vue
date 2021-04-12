@@ -55,7 +55,7 @@ export default {
 
 <template>
   <span v-if="noExpirationSet">{{ s__('Members|No expiration set') }}</span>
-  <span v-else v-gl-tooltip.hover :title="formatted" :class="cssClass">
+  <span v-else v-gl-tooltip :title="formatted" :class="cssClass">
     <template v-if="isExpired">{{ s__('Members|Expired') }}</template>
     <gl-sprintf v-else :message="s__('Members|in %{time}')">
       <template #time>

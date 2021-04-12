@@ -19,7 +19,7 @@ export default {
 
 <template>
   <gl-icon
-    v-gl-tooltip.hover="title"
+    v-gl-tooltip="title"
     name="information-o"
     class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
   />

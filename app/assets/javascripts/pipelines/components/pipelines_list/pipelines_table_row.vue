@@ -236,7 +236,7 @@ export default {
 
         <gl-button
           v-if="pipeline.flags.retryable"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :aria-label="$options.i18n.redeployTitle"
           :title="$options.i18n.redeployTitle"
           :disabled="isRetrying"
@@ -251,7 +251,7 @@ export default {
 
         <gl-button
           v-if="pipeline.flags.cancelable"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           v-gl-modal-directive="'confirmation-modal'"
           :aria-label="$options.i18n.cancelTitle"
           :title="$options.i18n.cancelTitle"

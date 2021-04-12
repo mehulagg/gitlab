@@ -26,7 +26,7 @@ export default {
 
 <template>
   <gl-button
-    v-gl-tooltip.hover
+    v-gl-tooltip
     variant="danger"
     :title="$options.i18n.buttonTitle"
     :aria-label="$options.i18n.buttonTitle"

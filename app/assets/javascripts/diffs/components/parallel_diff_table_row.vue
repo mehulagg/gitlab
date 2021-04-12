@@ -268,7 +268,7 @@ export default {
         />
       </td>
       <td
-        v-gl-tooltip.hover
+        v-gl-tooltip
         :title="coverageState.text"
         :class="[line.right.type, coverageState.class, { hll: isHighlighted }]"
         class="line-coverage right-side"

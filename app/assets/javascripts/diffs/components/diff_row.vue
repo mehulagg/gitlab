@@ -242,7 +242,7 @@ export default {
           </a>
         </div>
         <div
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :title="coverageStateLeft.text"
           :class="[...parallelViewLeftLineType, coverageStateLeft.class]"
           class="diff-td line-coverage left-side"
@@ -333,7 +333,7 @@ export default {
           />
         </div>
         <div
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :title="coverageStateRight.text"
           :class="[
             line.right.type,

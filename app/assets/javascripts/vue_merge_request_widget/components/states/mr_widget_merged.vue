@@ -125,7 +125,7 @@ export default {
         />
         <gl-button
           v-if="mr.canRevertInCurrentMR"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :title="revertTitle"
           size="small"
           category="secondary"
@@ -137,7 +137,7 @@ export default {
         </gl-button>
         <gl-button
           v-else-if="mr.revertInForkPath"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :href="mr.revertInForkPath"
           :title="revertTitle"
           size="small"
@@ -149,7 +149,7 @@ export default {
         </gl-button>
         <gl-button
           v-if="mr.canCherryPickInCurrentMR"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :title="cherryPickTitle"
           size="small"
           data-qa-selector="cherry_pick_button"
@@ -159,7 +159,7 @@ export default {
         </gl-button>
         <gl-button
           v-else-if="mr.cherryPickInForkPath"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :href="mr.cherryPickInForkPath"
           :title="cherryPickTitle"
           size="small"

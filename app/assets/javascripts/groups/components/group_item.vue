@@ -158,7 +158,7 @@ export default {
               }}
             </a>
             <gl-icon
-              v-gl-tooltip.hover.bottom
+              v-gl-tooltip.bottom
               class="gl-display-inline-flex gl-align-items-center gl-mr-3 gl-mt-3 gl-text-gray-500"
               :name="visibilityIcon"
               :title="visibilityTooltip"

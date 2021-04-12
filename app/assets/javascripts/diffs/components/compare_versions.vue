@@ -96,7 +96,7 @@ export default {
     >
       <gl-button
         v-if="hasChanges"
-        v-gl-tooltip.hover
+        v-gl-tooltip
         variant="default"
         icon="file-tree"
         class="gl-mr-3 js-toggle-tree-list"

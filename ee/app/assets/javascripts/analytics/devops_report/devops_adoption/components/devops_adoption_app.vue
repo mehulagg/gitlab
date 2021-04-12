@@ -276,7 +276,7 @@ export default {
         </span>
         <span
           v-if="hasGroupData"
-          v-gl-tooltip.hover="addSegmentButtonTooltipText"
+          v-gl-tooltip="addSegmentButtonTooltipText"
           data-testid="segmentButtonWrapper"
         >
           <gl-button

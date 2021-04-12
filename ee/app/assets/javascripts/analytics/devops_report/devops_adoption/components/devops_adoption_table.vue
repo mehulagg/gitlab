@@ -157,7 +157,7 @@ export default {
           <span>{{ header.label }}</span>
           <gl-icon
             v-if="header.tooltip"
-            v-gl-tooltip.hover="header.tooltip"
+            v-gl-tooltip="header.tooltip"
             name="information-o"
             class="gl-text-gray-200 gl-ml-1"
             :size="14"
@@ -236,7 +236,7 @@ export default {
 
       <template #cell(actions)="{ item }">
         <span
-          v-gl-tooltip.hover="getDeleteButtonTooltipText(item)"
+          v-gl-tooltip="getDeleteButtonTooltipText(item)"
           :data-testid="$options.testids.ACTIONS"
         >
           <gl-button

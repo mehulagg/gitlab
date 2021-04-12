@@ -80,7 +80,7 @@ export default {
 
 <template>
   <gl-button
-    v-gl-tooltip.hover.blur.viewport="{
+    v-gl-tooltip.blur.viewport="{
       placement: tooltipPlacement,
       container: tooltipContainer,
       boundary: tooltipBoundary,

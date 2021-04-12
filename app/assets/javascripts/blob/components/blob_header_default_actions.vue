@@ -53,7 +53,7 @@ export default {
   <gl-button-group data-qa-selector="default_actions_container">
     <gl-button
       v-if="!hasRenderError"
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :aria-label="$options.BTN_COPY_CONTENTS_TITLE"
       :title="$options.BTN_COPY_CONTENTS_TITLE"
       :disabled="copyDisabled"
@@ -65,7 +65,7 @@ export default {
       variant="default"
     />
     <gl-button
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :aria-label="$options.BTN_RAW_TITLE"
       :title="$options.BTN_RAW_TITLE"
       :href="rawPath"
@@ -75,7 +75,7 @@ export default {
       variant="default"
     />
     <gl-button
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :aria-label="$options.BTN_DOWNLOAD_TITLE"
       :title="$options.BTN_DOWNLOAD_TITLE"
       :href="downloadUrl"

@@ -182,14 +182,14 @@ export default {
             />
             <gl-icon
               v-if="item.confidential"
-              v-gl-tooltip.hover
+              v-gl-tooltip
               :title="__('Confidential')"
               :aria-label="__('Confidential')"
               name="eye-slash"
               class="confidential-icon gl-mr-2 align-self-baseline align-self-md-auto mt-xl-0"
             />
             <gl-link
-              v-gl-tooltip.hover
+              v-gl-tooltip
               :aria-label="item.title"
               :title="item.title"
               :href="computedPath"
@@ -288,7 +288,7 @@ export default {
 
         <gl-button
           v-if="parentItem.userPermissions.adminEpic"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           v-gl-modal-directive="$options.itemRemoveModalId"
           category="tertiary"
           :title="__('Remove')"

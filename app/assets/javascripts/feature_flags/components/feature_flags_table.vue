@@ -171,7 +171,7 @@ export default {
               </div>
               <gl-icon
                 v-if="isLegacyFlag(featureFlag)"
-                v-gl-tooltip.hover="$options.translations.legacyFlagReadOnlyAlert"
+                v-gl-tooltip="$options.translations.legacyFlagReadOnlyAlert"
                 class="gl-ml-3"
                 name="information-o"
               />
@@ -193,7 +193,7 @@ export default {
               <gl-badge
                 v-for="scope in featureFlag.scopes"
                 :key="scope.id"
-                v-gl-tooltip.hover="scopeTooltipText(scope)"
+                v-gl-tooltip="scopeTooltipText(scope)"
                 :variant="badgeVariant(scope)"
                 :data-qa-selector="`feature-flag-scope-${badgeVariant(scope)}-badge`"
                 class="gl-mr-3 gl-mt-2"
@@ -217,7 +217,7 @@ export default {
           <div class="table-action-buttons btn-group">
             <template v-if="featureFlag.edit_path">
               <gl-button
-                v-gl-tooltip.hover.bottom="$options.i18n.editLabel"
+                v-gl-tooltip.bottom="$options.i18n.editLabel"
                 class="js-feature-flag-edit-button"
                 icon="pencil"
                 :aria-label="$options.i18n.editLabel"
@@ -226,7 +226,7 @@ export default {
             </template>
             <template v-if="featureFlag.destroy_path">
               <gl-button
-                v-gl-tooltip.hover.bottom="$options.i18n.deleteLabel"
+                v-gl-tooltip.bottom="$options.i18n.deleteLabel"
                 class="js-feature-flag-delete-button"
                 variant="danger"
                 icon="remove"

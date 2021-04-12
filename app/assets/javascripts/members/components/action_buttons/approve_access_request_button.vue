@@ -31,7 +31,7 @@ export default {
   <gl-form :action="approvePath" method="post">
     <input :value="$options.csrf.token" type="hidden" name="authenticity_token" />
     <gl-button
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :title="$options.title"
       :aria-label="$options.title"
       icon="check"

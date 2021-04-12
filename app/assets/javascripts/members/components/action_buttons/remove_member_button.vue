@@ -53,7 +53,7 @@ export default {
 
 <template>
   <gl-button
-    v-gl-tooltip.hover
+    v-gl-tooltip
     class="js-remove-member-button"
     variant="danger"
     :title="title"

@@ -247,7 +247,7 @@ export default {
               {{ __('Edit') }}
             </gl-button>
             <span
-              v-gl-tooltip.hover.focus
+              v-gl-tooltip
               :title="deleteTitle(item)"
               data-testid="dast-profile-delete-tooltip"
             >

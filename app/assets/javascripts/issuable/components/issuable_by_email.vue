@@ -117,7 +117,7 @@ export default {
         <template #append>
           <modal-copy-button :text="email" :title="__('Copy')" :modal-id="$options.modalId" />
           <gl-button
-            v-gl-tooltip.hover
+            v-gl-tooltip
             :href="mailToLink"
             :title="$options.i18n.sendEmail"
             :aria-label="$options.i18n.sendEmail"

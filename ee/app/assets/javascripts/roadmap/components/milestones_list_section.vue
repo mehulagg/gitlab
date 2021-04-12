@@ -121,7 +121,7 @@ export default {
     >
       <div class="gl-display-flex gl-align-items-center">
         <span
-          v-gl-tooltip.hover.topright="{
+          v-gl-tooltip.topright="{
             title: expandButton.tooltip,
             offset: 15,
             boundary: 'viewport',

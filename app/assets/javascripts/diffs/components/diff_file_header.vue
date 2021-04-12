@@ -349,7 +349,7 @@ export default {
       <diff-stats :added-lines="diffFile.added_lines" :removed-lines="diffFile.removed_lines" />
       <gl-form-checkbox
         v-if="isReviewable && showLocalFileReviews"
-        v-gl-tooltip.hover
+        v-gl-tooltip
         data-testid="fileReviewCheckbox"
         class="gl-mr-5 gl-display-flex gl-align-items-center"
         :title="$options.i18n.fileReviewTooltip"
@@ -362,7 +362,7 @@ export default {
         <gl-button
           v-if="diffFile.external_url"
           ref="externalLink"
-          v-gl-tooltip.hover
+          v-gl-tooltip
           :href="diffFile.external_url"
           :title="externalUrlLabel"
           :aria-label="externalUrlLabel"
@@ -373,7 +373,7 @@ export default {
           icon="external-link"
         />
         <gl-dropdown
-          v-gl-tooltip.hover.focus="$options.i18n.optionsDropdownTitle"
+          v-gl-tooltip="$options.i18n.optionsDropdownTitle"
           right
           toggle-class="btn-icon js-diff-more-actions"
           class="gl-pt-0!"
@@ -454,7 +454,7 @@ export default {
       class="file-actions d-none d-sm-flex align-items-center flex-wrap"
     >
       <gl-button
-        v-gl-tooltip.hover
+        v-gl-tooltip
         v-safe-html="submoduleDiffCompareLinkText"
         class="submodule-compare"
         :title="$options.i18n.compareButtonLabel"

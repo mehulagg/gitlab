@@ -127,7 +127,7 @@ export default {
         {{ __('Remove') }}
       </gl-button>
       <div
-        v-gl-tooltip.hover
+        v-gl-tooltip
         name="disabledRemovalTooltip"
         class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
         :title="disabledRemovalTooltip"

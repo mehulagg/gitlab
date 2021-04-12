@@ -28,7 +28,7 @@ export default {
 <template>
   <div>
     <gl-button
-      v-gl-tooltip.hover
+      v-gl-tooltip
       v-gl-modal="$options.modalId"
       :title="$options.title"
       :aria-label="$options.title"

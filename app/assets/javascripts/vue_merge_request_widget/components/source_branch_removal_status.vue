@@ -27,7 +27,7 @@ export default {
       </gl-sprintf>
     </span>
     <gl-icon
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :title="$options.i18n.tooltipTitle"
       :aria-label="$options.i18n.tooltipTitle"
       name="question-o"

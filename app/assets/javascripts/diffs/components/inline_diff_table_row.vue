@@ -179,7 +179,7 @@ export default {
       </a>
     </td>
     <td
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :title="coverageState.text"
       :class="[line.type, coverageState.class, { hll: isHighlighted }]"
       class="line-coverage"

@@ -16,7 +16,7 @@ export default {
 
 <template>
   <span
-    v-gl-tooltip.hover
+    v-gl-tooltip
     :title="$options.gitlabTeamMemberLabel"
     role="img"
     :aria-label="$options.gitlabTeamMemberLabel"

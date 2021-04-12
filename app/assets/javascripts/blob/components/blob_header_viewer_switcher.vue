@@ -46,7 +46,7 @@ export default {
 <template>
   <gl-button-group class="js-blob-viewer-switcher mx-2">
     <gl-button
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :aria-label="$options.SIMPLE_BLOB_VIEWER_TITLE"
       :title="$options.SIMPLE_BLOB_VIEWER_TITLE"
       :selected="isSimpleViewer"
@@ -56,7 +56,7 @@ export default {
       @click="switchToViewer($options.SIMPLE_BLOB_VIEWER)"
     />
     <gl-button
-      v-gl-tooltip.hover
+      v-gl-tooltip
       :aria-label="$options.RICH_BLOB_VIEWER_TITLE"
       :title="$options.RICH_BLOB_VIEWER_TITLE"
       :selected="isRichViewer"

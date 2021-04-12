@@ -63,7 +63,7 @@ export default {
         <gl-form-input-group :value="value" readonly select-on-click :aria-label="name">
           <template #append>
             <gl-button
-              v-gl-tooltip.hover
+              v-gl-tooltip
               :title="$options.MSG_COPY"
               :aria-label="$options.MSG_COPY"
               :data-clipboard-text="value"
