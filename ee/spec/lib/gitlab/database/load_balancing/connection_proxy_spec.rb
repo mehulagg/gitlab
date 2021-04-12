@@ -153,6 +153,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
 
       before do
         allow(session).to receive(:fallback_to_replicas_for_ambiguous_queries?).and_return(false)
+        allow(session).to receive(:use_replicas_for_read_queries?).and_return(false)
         allow(session).to receive(:use_primary?).and_return(true)
         allow(primary).to receive(:transaction).and_yield
         allow(primary).to receive(:select)
@@ -239,6 +240,31 @@ RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
     describe 'with a regular session' do
       it 'uses a secondary' do
         allow(session).to receive(:use_primary?).and_return(false)
+        allow(session).to receive(:use_replicas_for_read_queries?).and_return(false)
+
+        expect(connection).to receive(:foo).with('foo')
+        expect(proxy.load_balancer).to receive(:read).and_yield(connection)
+
+        proxy.read_using_load_balancer(:foo, ['foo'])
+      end
+    end
+
+    describe 'with a regular session and forcing all reads to replicas' do
+      it 'uses a secondary' do
+        allow(session).to receive(:use_primary?).and_return(false)
+        allow(session).to receive(:use_replicas_for_read_queries?).and_return(true)
+
+        expect(connection).to receive(:foo).with('foo')
+        expect(proxy.load_balancer).to receive(:read).and_yield(connection)
+
+        proxy.read_using_load_balancer(:foo, ['foo'])
+      end
+    end
+
+    describe 'with a session using the primary but forcing all reads to replicas' do
+      it 'uses a secondary' do
+        allow(session).to receive(:use_primary?).and_return(true)
+        allow(session).to receive(:use_replicas_for_read_queries?).and_return(true)
 
         expect(connection).to receive(:foo).with('foo')
         expect(proxy.load_balancer).to receive(:read).and_yield(connection)
@@ -250,6 +276,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
     describe 'with a session using the primary' do
       it 'uses the primary' do
         allow(session).to receive(:use_primary?).and_return(true)
+        allow(session).to receive(:use_replicas_for_read_queries?).and_return(false)
 
         expect(connection).to receive(:foo).with('foo')
 

@@ -27,6 +27,8 @@ module Gitlab
           @use_primary = false
           @performed_write = false
           @ignore_writes = false
+          @fallback_to_replicas_for_ambiguous_queries = false
+          @use_replicas_for_read_queries = false
         end
 
         def use_primary?
@@ -73,7 +75,7 @@ module Gitlab
         end
 
         def use_replicas_for_read_queries?
-          @fallback_to_replicas_for_ambiguous_queries == true
+          @use_replicas_for_read_queries == true
         end
 
         # Indicate that the ambiguous SQL statements from anywhere inside this
