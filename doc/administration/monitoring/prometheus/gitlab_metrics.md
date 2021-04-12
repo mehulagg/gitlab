@@ -141,14 +141,15 @@ The following metrics can be controlled by feature flags:
 
 ## Gitaly metrics
 
-Gitaly can be [configured to report metrics](https://gitlab.com/gitlab-org/gitaly/-/issues/3431). These are some of the Gitaly metrics served from the `/metrics` path on the [configured port](index.md#changing-the-port-and-address-prometheus-listens-on) (9090 by default). 
+You can [configure Gitaly to report metrics](https://gitlab.com/gitlab-org/gitaly/-/issues/3431).
+These are some of the Gitaly metrics served from the `/metrics` path on the [configured port](index.md#changing-the-port-and-address-prometheus-listens-on)
+(9090 by default).
 
-
-| Metric                                                           | Type        | Since   | Description                                                                                                           | Labels                                                    |
-| :--------------------------------------------------------------- | :---------- | ------: | :-------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| `gitaly_praefect_replication_latency_bucket`                     | Histogram   | 12.10   | The amount of time it takes for replication to complete once the replication job has started                         |                                              |
-| `gitaly_praefect_replication_delay_bucket`                       | Histogram   | 12.10   | A measure of how much time passes between when the replication job is created and when it is started                 |                                              |
-| `gitaly_praefect_node_latency_bucket`                            | Histogram   | 12.10   | Latency in Gitaly returning health check information to Praefect, indicates Praefect connection saturation           |                                              |
+| Metric | Type | Since | Description | Labels |
+| :----- | :--- | ----: | :---------- | :----- |
+| `gitaly_praefect_replication_latency_bucket` | Histogram | 12.10 | The amount of time it takes for replication to complete once the replication job starts. |  |
+| `gitaly_praefect_replication_delay_bucket` | Histogram | 12.10 | A measure of how much time passes between when the replication job is created and when it starts. |  |
+| `gitaly_praefect_node_latency_bucket` | Histogram | 12.10 | The latency in Gitaly returning health check information to Praefect. This indicates Praefect connection saturation. |  |
 
 ## Sidekiq metrics
 
