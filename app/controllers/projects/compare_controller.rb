@@ -26,6 +26,8 @@ class Projects::CompareController < Projects::ApplicationController
 
   feature_category :source_code_management
 
+  COMMIT_DIFFS_PER_PAGE = 10
+
   def index
   end
 
