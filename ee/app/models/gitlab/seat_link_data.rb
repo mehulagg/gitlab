@@ -13,7 +13,7 @@ module Gitlab
     # like for SyncSeatLinkRequestWorker, the params are passed because the values from when
     # the job was enqueued are necessary.
     def initialize(timestamp: nil, key: default_key, max_users: nil, active_users: nil)
-      @timestamp = timestamp || historical_data&.recorded_at
+      @timestamp = timestamp || historical_data&.recorded_at || current_time
       @key = key
       @max_users = max_users || default_max_count
       @active_users = active_users || default_active_count
@@ -39,8 +39,8 @@ module Gitlab
 
     def data
       {
-        timestamp: timestamp&.iso8601,
-        date: timestamp&.to_date&.to_s,
+        timestamp: timestamp.iso8601,
+        date: timestamp.to_date.to_s,
         license_key: key,
         max_historical_user_count: max_users,
         active_users: active_users
@@ -61,10 +61,14 @@ module Gitlab
 
     def historical_data
       strong_memoize(:historical_data) do
-        to_timestamp = timestamp || Time.current
+        to_timestamp = timestamp || current_time
 
         license&.historical_data(to: to_timestamp)&.order(:recorded_at)&.last
       end
+    end
+
+    def current_time
+      strong_memoize(:current_time) { Time.current }
     end
 
     def default_active_count
