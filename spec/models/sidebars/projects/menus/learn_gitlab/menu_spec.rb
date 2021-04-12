@@ -3,9 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Sidebars::Projects::Menus::LearnGitlab::Menu do
-  let_it_be(:project) { create(:project) }
-
-  let(:context) { Sidebars::Context.new(current_user: nil, container: project, project: project, learn_gitlab_experiment_enabled: experiment_enabled) }
+  let(:project) { build(:project) }
+  let(:context) { Sidebars::Projects::Context.new(current_user: nil, container: project, learn_gitlab_experiment_enabled: experiment_enabled) }
 
   subject { described_class.new(context) }
 

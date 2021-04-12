@@ -6,7 +6,7 @@ RSpec.describe Sidebars::Projects::Menus::ProjectOverview::MenuItems::Releases d
   let_it_be(:project) { create(:project, :repository) }
 
   let(:user) { project.owner }
-  let(:context) { Sidebars::Context.new(current_user: user, container: project, project: project) }
+  let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project) }
 
   subject { described_class.new(context) }
 
