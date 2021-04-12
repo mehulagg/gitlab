@@ -1,0 +1,5 @@
+---
+title: Set API Fuzzing version to 1.6 in CI template
+merge_request: 59181
+author:
+type: changed
