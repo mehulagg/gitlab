@@ -12,19 +12,7 @@ RSpec.describe Gitlab::UsageMetricDefinitionGenerator do
   before do
     stub_const("#{described_class}::TOP_LEVEL_DIR", temp_dir)
     # Stub Prometheus requests from Gitlab::Utils::UsageData
-    stub_request(:get, 'https://::1:9090/-/ready')
-      .to_return(
-        status: 200,
-        body: [{}].to_json,
-        headers: { 'Content-Type' => 'application/json' }
-      )
-
-    stub_request(:get, %r{^https://::1:9090/api/v1/query\?query=.*})
-      .to_return(
-        status: 200,
-        body: [{}].to_json,
-        headers: { 'Content-Type' => 'application/json' }
-      )
+    stub_prometheus_queries
   end
 
   after do

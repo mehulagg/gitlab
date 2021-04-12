@@ -13,19 +13,7 @@ RSpec.describe Gitlab::UsageMetricDefinition::RedisHllGenerator do
   before do
     stub_const("#{Gitlab::UsageMetricDefinitionGenerator}::TOP_LEVEL_DIR", temp_dir)
     # Stub Prometheus requests from Gitlab::Utils::UsageData
-    stub_request(:get, %r{^https?://::1:9090/-/ready})
-      .to_return(
-        status: 200,
-        body: [{}].to_json,
-        headers: { 'Content-Type' => 'application/json' }
-      )
-
-    stub_request(:get, %r{^https?://::1:9090/api/v1/query\?query=.*})
-      .to_return(
-        status: 200,
-        body: [{}].to_json,
-        headers: { 'Content-Type' => 'application/json' }
-      )
+    stub_prometheus_queries
   end
 
   it 'creates metric definition files' do
