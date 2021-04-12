@@ -13830,7 +13830,7 @@ Group: ``
 
 Status: `removed`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_composer_user_monthly`
 
