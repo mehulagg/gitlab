@@ -29,7 +29,7 @@ export default {
         {
           icon: 'labels',
           title: __('Label'),
-          type: 'labels',
+          type: 'label_name',
           operators: [{ value: '=', description: 'is' }],
           token: LabelToken,
           unique: false,
@@ -39,7 +39,7 @@ export default {
         {
           icon: 'pencil',
           title: __('Author'),
-          type: 'author',
+          type: 'author_username',
           operators: [{ value: '=', description: 'is' }],
           symbol: '@',
           token: AuthorToken,
@@ -114,7 +114,7 @@ export default {
       if (plainText.length) {
         filterParams.search = plainText.join(' ');
       }
-
+  console.log(filterParams)
       return filterParams;
     },
     fetchAuthors(authorsSearchTerm) {
@@ -141,7 +141,7 @@ export default {
     },
     handleFilterEpics(filters) {
       this.filterParams = this.getFilterParams(filters);
-
+      console.log(this.filterParams, this.urlParams)
       updateHistory({
         url: setUrlParams(this.urlParams, window.location.href, true, false, true),
         title: document.title,
