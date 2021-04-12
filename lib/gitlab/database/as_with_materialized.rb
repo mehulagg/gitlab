@@ -3,19 +3,17 @@
 module Gitlab
   module Database
     # This class is a special Arel node which allows optionally define the `MATERIALIZED` keyword for CTE and Recursive CTE queries.
-    class AsWithMaterialized < Arel::Nodes::Binary
+    class AsWithMaterialized < Arel::Nodes::As
       extend Gitlab::Utils::StrongMemoize
 
-      MATERIALIZED = Arel.sql(' MATERIALIZED')
-      EMPTY_STRING = Arel.sql('')
+      MATERIALIZED = 'MATERIALIZED '
+
       attr_reader :expr
 
       def initialize(left, right, materialized: true)
-        @expr = if materialized && self.class.materialized_supported?
-                  MATERIALIZED
-                else
-                  EMPTY_STRING
-                end
+        if materialized && self.class.materialized_supported?
+          right.prepend(MATERIALIZED)
+        end
 
         super(left, right)
       end
