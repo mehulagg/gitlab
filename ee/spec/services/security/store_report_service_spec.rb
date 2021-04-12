@@ -307,7 +307,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
       context 'when the existing resolved vulnerability is discovered again on the latest report' do
         before do
-          vulnerability.update!(resolved_on_default_branch: true)
+          vulnerability.update_column(:resolved_on_default_branch, true)
         end
 
         it 'marks the vulnerability as not resolved on default branch' do
@@ -422,7 +422,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
           context 'when auto fix feature is disabled' do
             before do
-              project.security_setting.update!(auto_fix_dependency_scanning: false)
+              project.security_setting.update_column(:auto_fix_dependency_scanning, false)
             end
 
             it 'does not start auto fix worker' do

@@ -121,28 +121,27 @@ module Security
       end
     end
 
-    def dismissal_feedback_by_finding_signatures(finding)
-      all_dismissals = strong_memoize(:all_dismissal_feedbacks) do
+    def all_dismissal_feedbacks
+      strong_memoize(:all_dismissal_feedbacks) do
         pipeline.project
-                .vulnerability_feedback
-                .for_dismissal
+          .vulnerability_feedback
+          .for_dismissal
       end
-
-      potential_uuids = Set.new([*finding.signature_uuids, finding.uuid].compact)
-      all_dismissals.any? { |dismissal| potential_uuids.include?(dismissal.finding_uuid) }
     end
 
-    def dismissal_feedback_by_project_fingerprint(finding)
-      dismissal_feedback_by_fingerprint[finding.project_fingerprint]
+    def dismissal_feedback_by_finding_signatures(finding)
+      potential_uuids = Set.new([*finding.signature_uuids, finding.uuid].compact)
+      all_dismissal_feedbacks.any? { |dismissal| potential_uuids.include?(dismissal.finding_uuid) }
     end
 
     def dismissal_feedback_by_fingerprint
       strong_memoize(:dismissal_feedback_by_fingerprint) do
-        pipeline.project
-                .vulnerability_feedback
-                .for_dismissal
-                .group_by(&:project_fingerprint)
+        all_dismissal_feedbacks.group_by(&:project_fingerprint)
       end
+    end
+
+    def dismissal_feedback_by_project_fingerprint(finding)
+      dismissal_feedback_by_fingerprint[finding.project_fingerprint]
     end
 
     def confidence_levels
