@@ -102,7 +102,6 @@ module Clusters
     delegate :rbac?, to: :platform_kubernetes, prefix: true, allow_nil: true
     delegate :available?, to: :application_helm, prefix: true, allow_nil: true
     delegate :available?, to: :application_ingress, prefix: true, allow_nil: true
-    delegate :available?, to: :application_prometheus, prefix: true, allow_nil: true
     delegate :available?, to: :application_knative, prefix: true, allow_nil: true
     delegate :available?, to: :application_elastic_stack, prefix: true, allow_nil: true
     delegate :external_ip, to: :application_ingress, prefix: true, allow_nil: true
@@ -366,8 +365,12 @@ module Clusters
       end
     end
 
+    def application_prometheus_available?
+      integration_prometheus&.available? || application_prometheus&.available?
+    end
+
     def prometheus_adapter
-      application_prometheus
+      integration_prometheus || application_prometheus
     end
 
     private
