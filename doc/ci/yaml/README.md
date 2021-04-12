@@ -3505,98 +3505,257 @@ In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026)
 
 #### `artifacts:reports`
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20390) in GitLab 11.2.
+> - Requires GitLab Runner 11.2 and above.
+
 Use [`artifacts:reports`](../pipelines/job_artifacts.md#artifactsreports)
 to collect test reports, code quality reports, and security reports from jobs.
 It also exposes these reports in the GitLab UI (merge requests, pipeline views, and security dashboards).
 
-These are the available report types:
+The test reports are collected regardless of the job results (success or failure).
+You can use [`artifacts:expire_in`](../yaml/README.md#artifactsexpire_in) to set up an expiration
+date for their artifacts.
 
-| Keyword                                                                                                                     | Description                                                                      |
-|-----------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| [`artifacts:reports:cobertura`](../pipelines/job_artifacts.md#artifactsreportscobertura)                                    | The `cobertura` report collects Cobertura coverage XML files.                    |
-| [`artifacts:reports:codequality`](../pipelines/job_artifacts.md#artifactsreportscodequality)                                | The `codequality` report collects Code Quality issues.                            |
-| [`artifacts:reports:container_scanning`](../pipelines/job_artifacts.md#artifactsreportscontainer_scanning) **(ULTIMATE)**   | The `container_scanning` report collects Container Scanning vulnerabilities.     |
-| [`artifacts:reports:dast`](../pipelines/job_artifacts.md#artifactsreportsdast) **(ULTIMATE)**                               | The `dast` report collects Dynamic Application Security Testing vulnerabilities. |
-| [`artifacts:reports:dependency_scanning`](../pipelines/job_artifacts.md#artifactsreportsdependency_scanning) **(ULTIMATE)** | The `dependency_scanning` report collects Dependency Scanning vulnerabilities.   |
-| [`artifacts:reports:dotenv`](../pipelines/job_artifacts.md#artifactsreportsdotenv)                                          | The `dotenv` report collects a set of environment variables.                     |
-| [`artifacts:reports:junit`](../pipelines/job_artifacts.md#artifactsreportsjunit)                                            | The `junit` report collects JUnit XML files.                                     |
-| [`artifacts:reports:license_management`](../pipelines/job_artifacts.md#artifactsreportslicense_management) **(ULTIMATE)**   | The `license_management` report collects Licenses (*removed from GitLab 13.0*).  |
-| [`artifacts:reports:license_scanning`](../pipelines/job_artifacts.md#artifactsreportslicense_scanning) **(ULTIMATE)**       | The `license_scanning` report collects Licenses.                                 |
-| [`artifacts:reports:load_performance`](../pipelines/job_artifacts.md#artifactsreportsload_performance) **(PREMIUM)**        | The `load_performance` report collects load performance metrics.                 |
-| [`artifacts:reports:metrics`](../pipelines/job_artifacts.md#artifactsreportsmetrics) **(PREMIUM)**                          | The `metrics` report collects Metrics.                                           |
-| [`artifacts:reports:performance`](../pipelines/job_artifacts.md#artifactsreportsperformance) **(PREMIUM)**                  | The `performance` report collects Browser Performance metrics.                   |
-| [`artifacts:reports:sast`](../pipelines/job_artifacts.md#artifactsreportssast)                                              | The `sast` report collects Static Application Security Testing vulnerabilities.  |
-| [`artifacts:reports:terraform`](../pipelines/job_artifacts.md#artifactsreportsterraform)                                    | The `terraform` report collects Terraform `tfplan.json` files.                   |
+If you also want the ability to browse the report output files, include the
+[`artifacts:paths`](../yaml/README.md#artifactspaths) keyword.
 
-#### `dependencies`
+##### `artifacts:reports:api_fuzzing` **(ULTIMATE)**
 
-By default, all [`artifacts`](#artifacts) from previous [stages](#stages)
-are passed to each job. However, you can use the `dependencies` keyword to
-define a limited list of jobs to fetch artifacts from. You can also set a job to download no artifacts at all.
+> - Introduced in GitLab 13.4.
+> - Requires GitLab Runner 13.4 or later.
 
-To use this feature, define `dependencies` in context of the job and pass
-a list of all previous jobs the artifacts should be downloaded from.
+The `api_fuzzing` report collects [API Fuzzing bugs](../../user/application_security/api_fuzzing/index.md)
+as artifacts.
 
-You can define jobs from stages that were executed before the current one.
-An error occurs if you define jobs from the current or an upcoming stage.
+The collected API Fuzzing report uploads to GitLab as an artifact and is summarized in merge
+requests and the pipeline view. It's also used to provide data for security dashboards.
 
-To prevent a job from downloading artifacts, define an empty array.
+##### `artifacts:reports:cobertura`
 
-When you use `dependencies`, the status of the previous job is not considered.
-If a job fails or it's a manual job that isn't triggered, no error occurs.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3708) in GitLab 12.9.
+> - Requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 and above.
 
-The following example defines two jobs with artifacts: `build:osx` and
-`build:linux`. When the `test:osx` is executed, the artifacts from `build:osx`
-are downloaded and extracted in the context of the build. The same happens
-for `test:linux` and artifacts from `build:linux`.
+The `cobertura` report collects [Cobertura coverage XML files](../../user/project/merge_requests/test_coverage_visualization.md).
+The collected Cobertura coverage reports upload to GitLab as an artifact
+and display in merge requests.
 
-The job `deploy` downloads artifacts from all previous jobs because of
-the [stage](#stages) precedence:
+Cobertura was originally developed for Java, but there are many
+third party ports for other languages like JavaScript, Python, Ruby, and so on.
+
+##### `artifacts:reports:codequality`
+
+> - Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 11.5.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in GitLab 13.2.
+> - Requires GitLab Runner 11.5 and above.
+
+The `codequality` report collects [Code Quality issues](../../user/project/merge_requests/code_quality.md)
+as artifacts.
+
+The collected Code Quality report uploads to GitLab as an artifact and is summarized in merge requests.
+
+##### `artifacts:reports:container_scanning` **(ULTIMATE)**
+
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+The `container_scanning` report collects [Container Scanning vulnerabilities](../../user/application_security/container_scanning/index.md)
+as artifacts.
+
+The collected Container Scanning report uploads to GitLab as an artifact and
+is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:coverage_fuzzing` **(ULTIMATE)**
+
+> - Introduced in GitLab 13.4.
+> - Requires GitLab Runner 13.4 or later.
+
+The `coverage_fuzzing` report collects [coverage fuzzing bugs](../../user/application_security/coverage_fuzzing/index.md)
+as artifacts.
+
+The collected coverage fuzzing report uploads to GitLab as an artifact and is summarized in merge
+requests and the pipeline view. It's also used to provide data for security dashboards.
+
+##### `artifacts:reports:dast` **(ULTIMATE)**
+
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+The `dast` report collects [DAST vulnerabilities](../../user/application_security/dast/index.md)
+as artifacts.
+
+The collected DAST report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:dependency_scanning` **(ULTIMATE)**
+
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+The `dependency_scanning` report collects [Dependency Scanning vulnerabilities](../../user/application_security/dependency_scanning/index.md)
+as artifacts.
+
+The collected Dependency Scanning report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:dotenv`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17066) in GitLab 12.9.
+> - Requires GitLab Runner 11.5 and later.
+
+The `dotenv` report collects a set of environment variables as artifacts.
+
+The collected variables are registered as runtime-created variables of the job,
+which is useful to [set dynamic environment URLs after a job finishes](../environments/index.md#set-dynamic-environment-urls-after-a-job-finishes).
+
+There are a couple of exceptions to the [original dotenv rules](https://github.com/motdotla/dotenv#rules):
+
+- The variable key can contain only letters, digits, and underscores (`_`).
+- The maximum size of the `.env` file is 5 KB.
+- In GitLab 13.5 and older, the maximum number of inherited variables is 10.
+- In [GitLab 13.6 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/247913),
+  the maximum number of inherited variables is 20.
+- Variable substitution in the `.env` file is not supported.
+- The `.env` file can't have empty lines or comments (starting with `#`).
+- Key values in the `env` file cannot have spaces or newline characters (`\n`), including when using single or double quotes.
+- Quote escaping during parsing (`key = 'value'` -> `{key: "value"}`) is not supported.
+
+##### `artifacts:reports:junit`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20390) in GitLab 11.2.
+> - Requires GitLab Runner 11.2 and above.
+
+The `junit` report collects [JUnit report format XML files](https://www.ibm.com/support/knowledgecenter/en/SSQ2R2_14.1.0/com.ibm.rsar.analysis.codereview.cobol.doc/topics/cac_useresults_junit.html)
+as artifacts. Although JUnit was originally developed in Java, there are many
+third party ports for other
+languages like JavaScript, Python, Ruby, and so on.
+
+See [Unit test reports](../unit_test_reports.md) for more details and examples.
+Below is an example of collecting a JUnit report format XML file from Ruby's RSpec test tool:
 
 ```yaml
-build:osx:
-  stage: build
-  script: make build:osx
-  artifacts:
-    paths:
-      - binaries/
-
-build:linux:
-  stage: build
-  script: make build:linux
-  artifacts:
-    paths:
-      - binaries/
-
-test:osx:
+rspec:
   stage: test
-  script: make test:osx
-  dependencies:
-    - build:osx
-
-test:linux:
-  stage: test
-  script: make test:linux
-  dependencies:
-    - build:linux
-
-deploy:
-  stage: deploy
-  script: make deploy
+  script:
+    - bundle install
+    - rspec --format RspecJunitFormatter --out rspec.xml
+  artifacts:
+    reports:
+      junit: rspec.xml
 ```
 
-##### When a dependent job fails
+The collected Unit test reports upload to GitLab as an artifact and display in merge requests.
 
-> Introduced in GitLab 10.3.
+If the JUnit tool you use exports to multiple XML files, specify
+multiple test report paths within a single job to
+concatenate them into a single file. Use a filename pattern (`junit: rspec-*.xml`),
+an array of filenames (`junit: [rspec-1.xml, rspec-2.xml, rspec-3.xml]`), or a
+combination thereof (`junit: [rspec.xml, test-results/TEST-*.xml]`).
 
-If the artifacts of the job that is set as a dependency are
-[expired](#artifactsexpire_in) or
-[erased](../pipelines/job_artifacts.md#erase-job-artifacts), then
-the dependent job fails.
+##### `artifacts:reports:license_management` **(ULTIMATE)**
 
-You can ask your administrator to
-[flip this switch](../../administration/job_artifacts.md#validation-for-dependencies)
-and bring back the old behavior.
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+WARNING:
+This artifact is still valid but is **deprecated** in favor of the
+[artifacts:reports:license_scanning](../pipelines/job_artifacts.md#artifactsreportslicense_scanning)
+introduced in GitLab 12.8.
+
+The `license_management` report collects [Licenses](../../user/compliance/license_compliance/index.md)
+as artifacts.
+
+The collected License Compliance report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:license_scanning` **(ULTIMATE)**
+
+> - Introduced in GitLab 12.8.
+> - Requires GitLab Runner 11.5 and above.
+
+The `license_scanning` report collects [Licenses](../../user/compliance/license_compliance/index.md)
+as artifacts.
+
+The License Compliance report uploads to GitLab as an artifact and displays automatically in merge requests and the pipeline view, and provide data for security
+dashboards.
+
+##### `artifacts:reports:load_performance` **(PREMIUM)**
+
+> - Introduced in [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35260) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+> - Requires GitLab Runner 11.5 and above.
+
+The `load_performance` report collects [Load Performance Testing metrics](../../user/project/merge_requests/load_performance_testing.md)
+as artifacts.
+
+The report is uploaded to GitLab as an artifact and is
+shown in merge requests automatically.
+
+##### `artifacts:reports:metrics` **(PREMIUM)**
+
+> Introduced in GitLab 11.10.
+
+The `metrics` report collects [Metrics](../metrics_reports.md)
+as artifacts.
+
+The collected Metrics report uploads to GitLab as an artifact and displays in merge requests.
+
+##### `artifacts:reports:performance` **(PREMIUM)**
+
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+The `performance` report collects [Browser Performance Testing metrics](../../user/project/merge_requests/browser_performance_testing.md)
+as artifacts.
+
+The collected Browser Performance report uploads to GitLab as an artifact and displays in merge requests.
+
+##### `artifacts:reports:requirements` **(ULTIMATE)**
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2859) in GitLab 13.1.
+> - Requires GitLab Runner 11.5 and above.
+
+The `requirements` report collects `requirements.json` files as artifacts.
+
+The collected Requirements report uploads to GitLab as an artifact and
+existing [requirements](../../user/project/requirements/index.md) are
+marked as Satisfied.
+
+##### `artifacts:reports:sast`
+
+> - Introduced in GitLab 11.5.
+> - Made [available in all tiers](https://gitlab.com/groups/gitlab-org/-/epics/2098) in GitLab 13.3.
+> - Requires GitLab Runner 11.5 and above.
+
+The `sast` report collects [SAST vulnerabilities](../../user/application_security/sast/index.md)
+as artifacts.
+
+The collected SAST report uploads to GitLab as an artifact and is summarized
+in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:secret_detection`
+
+> - Introduced in GitLab 13.1.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/222788) in GitLab
+    13.3.
+> - Requires GitLab Runner 11.5 and above.
+
+The `secret-detection` report collects [detected secrets](../../user/application_security/secret_detection/index.md)
+as artifacts.
+
+The collected Secret Detection report is uploaded to GitLab as an artifact and summarized
+in the merge requests and pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:terraform`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207528) in GitLab 13.0.
+> - Requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 and above.
+
+The `terraform` report obtains a Terraform `tfplan.json` file. [JQ processing required to remove credentials](../../user/infrastructure/mr_integration.md#setup). The collected Terraform
+plan report uploads to GitLab as an artifact and displays
+in merge requests. For more information, see
+[Output `terraform plan` information into a merge request](../../user/infrastructure/mr_integration.md).
 
 ### `coverage`
 
