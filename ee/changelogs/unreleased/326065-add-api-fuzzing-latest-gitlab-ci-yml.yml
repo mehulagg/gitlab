@@ -1,5 +1,5 @@
 ---
 title: Allows user to define when fuzz stage should execute during pipeline.
-merge_request:
+merge_request: 59154
 author:
 type: changed
