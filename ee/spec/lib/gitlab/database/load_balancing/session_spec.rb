@@ -139,6 +139,78 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
     end
   end
 
+  describe '#use_replicas_for_read_queries' do
+    let(:instance) { described_class.new }
+
+    it 'sets the flag inside the block' do
+      expect do |blk|
+        instance.use_replicas_for_read_queries do
+          expect(instance.use_replicas_for_read_queries?).to eq(true)
+
+          # call yield probe
+          blk.to_proc.call
+        end
+      end.to yield_control
+
+      expect(instance.use_replicas_for_read_queries?).to eq(false)
+    end
+
+    it 'restores state after use' do
+      expect do |blk|
+        instance.use_replicas_for_read_queries do
+          instance.use_replicas_for_read_queries do
+            expect(instance.use_replicas_for_read_queries?).to eq(true)
+
+            # call yield probe
+            blk.to_proc.call
+          end
+
+          expect(instance.use_replicas_for_read_queries?).to eq(true)
+        end
+      end.to yield_control
+
+      expect(instance.use_replicas_for_read_queries?).to eq(false)
+    end
+
+    context 'when primary was used before' do
+      before do
+        instance.use_primary!
+      end
+
+      it 'sets the flag inside the block' do
+        expect do |blk|
+          instance.use_replicas_for_read_queries do
+            expect(instance.use_replicas_for_read_queries?).to eq(true)
+
+            # call yield probe
+            blk.to_proc.call
+          end
+        end.to yield_control
+
+        expect(instance.use_replicas_for_read_queries?).to eq(false)
+      end
+    end
+
+    context 'when a write query is performed before' do
+      before do
+        instance.write!
+      end
+
+      it 'sets the flag inside the block' do
+        expect do |blk|
+          instance.use_replicas_for_read_queries do
+            expect(instance.use_replicas_for_read_queries?).to eq(true)
+
+            # call yield probe
+            blk.to_proc.call
+          end
+        end.to yield_control
+
+        expect(instance.use_replicas_for_read_queries?).to eq(false)
+      end
+    end
+  end
+
   describe '#fallback_to_replicas_for_ambiguous_queries' do
     let(:instance) { described_class.new }
 
