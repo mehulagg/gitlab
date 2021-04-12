@@ -7,7 +7,7 @@ FactoryBot.define do
     event { :creation }
 
     trait :with_image_v432x230 do
-      image_v432x230 { fixture_file_upload('spec/fixtures/dk.png') }
+      image_v432x230 { Rack::Test::UploadedFile.new('spec/fixtures/dk.png') }
     end
   end
 end

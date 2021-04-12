@@ -11,15 +11,15 @@ FactoryBot.define do
   end
 
   trait :with_logo do
-    logo { fixture_file_upload('spec/fixtures/dk.png') }
+    logo { Rack::Test::UploadedFile.new('spec/fixtures/dk.png') }
   end
 
   trait :with_header_logo do
-    header_logo { fixture_file_upload('spec/fixtures/dk.png') }
+    header_logo { Rack::Test::UploadedFile.new('spec/fixtures/dk.png') }
   end
 
   trait :with_favicon do
-    favicon { fixture_file_upload('spec/fixtures/dk.png') }
+    favicon { Rack::Test::UploadedFile.new('spec/fixtures/dk.png') }
   end
 
   trait :with_logos do

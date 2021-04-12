@@ -7,7 +7,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/security_reports/master/gl-sast-report.json'), 'application/json')
       end
     end
@@ -17,7 +17,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-sast-report-with-exceeding-identifiers.json'), 'application/json')
       end
     end
@@ -27,7 +27,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/security_reports/master/gl-secret-detection-report.json'), 'application/json')
       end
     end
@@ -37,7 +37,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dast-report.json'), 'application/json')
       end
     end
@@ -47,7 +47,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/feature-branch/gl-dast-report.json'), 'application/json')
       end
     end
@@ -57,7 +57,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/trace/sample_trace'), 'application/json')
       end
     end
@@ -72,7 +72,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/deprecated/gl-dast-report-no-spider.json'), 'application/json')
       end
     end
@@ -82,7 +82,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/deprecated/gl-dast-report-no-common-fields.json'),
           'application/json'
         )
@@ -94,7 +94,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dast-report-multiple-sites.json'), 'application/json')
       end
     end
@@ -104,7 +104,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dast-missing-scan.json'), 'application/json')
       end
     end
@@ -114,7 +114,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dast-missing-scanned-resources.json'), 'application/json')
       end
     end
@@ -124,7 +124,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dast-large-scanned-resources.json'), 'application/json')
       end
     end
@@ -134,7 +134,7 @@ FactoryBot.define do
       file_type { :dast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dast-report-low-severity.json'), 'application/json')
       end
     end
@@ -144,7 +144,7 @@ FactoryBot.define do
       file_type { :sast }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/feature-branch/gl-sast-report.json'), 'application/json')
       end
     end
@@ -154,7 +154,7 @@ FactoryBot.define do
       file_type { :secret_detection }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/feature-branch/gl-secret-detection-report.json'), 'application/json')
       end
     end
@@ -164,7 +164,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/deprecated/gl-sast-report.json'), 'application/json')
       end
     end
@@ -174,7 +174,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/trace/sample_trace'), 'application/json')
       end
     end
@@ -184,7 +184,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-sast-missing-scanner.json'), 'application/json')
       end
     end
@@ -196,7 +196,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/deprecated/gl-license-management-report.json'), 'application/json')
       end
     end
@@ -206,7 +206,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-license-scanning-report.json'), 'application/json')
       end
     end
@@ -216,7 +216,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/feature-branch/gl-license-scanning-report.json'), 'application/json')
       end
     end
@@ -226,7 +226,7 @@ FactoryBot.define do
       file_type { :performance }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/trace/sample_trace'), 'text/plain')
       end
     end
@@ -236,7 +236,7 @@ FactoryBot.define do
       file_type { :browser_performance }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/trace/sample_trace'), 'text/plain')
       end
     end
@@ -246,7 +246,7 @@ FactoryBot.define do
       file_type { :load_performance }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/trace/sample_trace'), 'text/plain')
       end
     end
@@ -256,7 +256,7 @@ FactoryBot.define do
       file_type { :dependency_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dependency-scanning-report.json'), 'application/json')
       end
     end
@@ -266,7 +266,7 @@ FactoryBot.define do
       file_type { :dependency_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/remediations/gl-dependency-scanning-report.json'), 'application/json')
       end
     end
@@ -276,7 +276,7 @@ FactoryBot.define do
       file_type { :dependency_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/deprecated/gl-dependency-scanning-report.json'), 'application/json')
       end
     end
@@ -286,7 +286,7 @@ FactoryBot.define do
       file_type { :dependency_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/feature-branch/gl-dependency-scanning-report.json'), 'application/json')
       end
     end
@@ -296,7 +296,7 @@ FactoryBot.define do
       file_type { :dependency_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/trace/sample_trace'), 'application/json')
       end
     end
@@ -306,7 +306,7 @@ FactoryBot.define do
       file_type { :container_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-container-scanning-report.json'), 'application/json')
       end
     end
@@ -316,7 +316,7 @@ FactoryBot.define do
       file_type { :dependency_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-common-scanning-report.json'), 'application/json')
       end
     end
@@ -326,7 +326,7 @@ FactoryBot.define do
       file_type { :dependency_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-common-scanning-report-names.json'), 'application/json')
       end
     end
@@ -336,7 +336,7 @@ FactoryBot.define do
       file_type { :container_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/feature-branch/gl-container-scanning-report.json'), 'application/json')
       end
     end
@@ -346,7 +346,7 @@ FactoryBot.define do
       file_type { :container_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/trace/sample_trace'), 'application/json')
       end
     end
@@ -356,7 +356,7 @@ FactoryBot.define do
       file_type { :metrics }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/metrics.txt.gz'), 'application/x-gzip')
       end
     end
@@ -366,7 +366,7 @@ FactoryBot.define do
       file_type { :metrics }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/alternate_metrics.txt.gz'), 'application/x-gzip')
       end
     end
@@ -376,7 +376,7 @@ FactoryBot.define do
       file_type { :dependency_scanning }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/dependency_list/gl-dependency-scanning-report.json'), 'application/json')
       end
     end
@@ -391,7 +391,7 @@ FactoryBot.define do
         after(:build) do |artifact, _|
           filename = "gl-#{artifact.file_type.dasherize}-report-v#{version.sub(/_/, '.')}.json"
           path = Rails.root.join("ee/spec/fixtures/security_reports/#{filename}")
-          artifact.file = fixture_file_upload(path, "application/json")
+          artifact.file = Rack::Test::UploadedFile.new(path, "application/json")
         end
       end
     end
@@ -399,7 +399,7 @@ FactoryBot.define do
     trait :with_corrupted_data do
       after :build do |artifact, _|
         path = Rails.root.join('spec/fixtures/trace/sample_trace')
-        artifact.file = fixture_file_upload(path, 'application/json')
+        artifact.file = Rack::Test::UploadedFile.new(path, 'application/json')
       end
     end
 
@@ -408,7 +408,7 @@ FactoryBot.define do
       file_type { :requirements }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/requirements_management/all_passing_report.json'), 'application/json')
       end
     end
@@ -418,7 +418,7 @@ FactoryBot.define do
       file_type { :requirements }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/requirements_management/report_by_requirement.json'), 'application/json')
       end
     end
@@ -428,7 +428,7 @@ FactoryBot.define do
       file_type { :coverage_fuzzing }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-coverage-fuzzing-report.json'),
           'application/json')
       end
@@ -439,7 +439,7 @@ FactoryBot.define do
       file_type { :api_fuzzing }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-api-fuzzing-report.json'),
           'application/json')
       end

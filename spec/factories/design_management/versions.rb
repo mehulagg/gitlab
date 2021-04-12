@@ -72,7 +72,7 @@ FactoryBot.define do
       committed
 
       transient do
-        raw_file { fixture_file_upload('spec/fixtures/dk.png', 'image/png') }
+        raw_file { Rack::Test::UploadedFile.new('spec/fixtures/dk.png', 'image/png') }
         lfs_pointer { Gitlab::Git::LfsPointerFile.new(SecureRandom.random_bytes) }
         file { lfs_pointer.pointer }
       end

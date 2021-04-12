@@ -69,7 +69,7 @@ FactoryBot.define do
     end
 
     trait :with_avatar do
-      avatar { fixture_file_upload('spec/fixtures/dk.png') }
+      avatar { Rack::Test::UploadedFile.new('spec/fixtures/dk.png') }
     end
 
     trait :with_sign_ins do

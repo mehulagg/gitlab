@@ -2,8 +2,6 @@
 
 require_relative '../support/helpers/repo_helpers'
 
-include ActionDispatch::TestProcess
-
 FactoryBot.define do
   factory :note do
     project
@@ -177,15 +175,15 @@ FactoryBot.define do
     end
 
     trait :with_attachment do
-      attachment { fixture_file_upload("spec/fixtures/dk.png", "image/png") }
+      attachment { Rack::Test::UploadedFile.new("spec/fixtures/dk.png", "image/png") }
     end
 
     trait :with_svg_attachment do
-      attachment { fixture_file_upload("spec/fixtures/unsanitized.svg", "image/svg+xml") }
+      attachment { Rack::Test::UploadedFile.new("spec/fixtures/unsanitized.svg", "image/svg+xml") }
     end
 
     trait :with_pdf_attachment do
-      attachment { fixture_file_upload("spec/fixtures/git-cheat-sheet.pdf", "application/pdf") }
+      attachment { Rack::Test::UploadedFile.new("spec/fixtures/git-cheat-sheet.pdf", "application/pdf") }
     end
 
     trait :confidential do

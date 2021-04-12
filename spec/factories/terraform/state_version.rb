@@ -7,7 +7,7 @@ FactoryBot.define do
     build { association(:ci_build, project: terraform_state.project) }
 
     sequence(:version)
-    file { fixture_file_upload('spec/fixtures/terraform/terraform.tfstate', 'application/json') }
+    file { Rack::Test::UploadedFile.new('spec/fixtures/terraform/terraform.tfstate', 'application/json') }
 
     trait(:checksummed) do
       verification_checksum { 'abc' }

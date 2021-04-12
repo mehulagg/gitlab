@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-include ActionDispatch::TestProcess
-
 FactoryBot.define do
   factory :ci_job_artifact, class: 'Ci::JobArtifact' do
     job factory: :ci_build
@@ -24,7 +22,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/trace/sample_trace'), 'text/plain')
       end
     end
@@ -33,7 +31,7 @@ FactoryBot.define do
       file_format { :zip }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/ci_build_artifacts.zip'), 'application/zip')
       end
     end
@@ -42,7 +40,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/ci_build_artifacts_metadata.gz'), 'application/x-gzip')
       end
     end
@@ -52,7 +50,7 @@ FactoryBot.define do
       file_format { :zip }
 
       transient do
-        file { fixture_file_upload(Rails.root.join('spec/fixtures/ci_build_artifacts.zip'), 'application/zip') }
+        file { Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/ci_build_artifacts.zip'), 'application/zip') }
       end
 
       after(:build) do |artifact, evaluator|
@@ -71,7 +69,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       transient do
-        file { fixture_file_upload(Rails.root.join('spec/fixtures/ci_build_artifacts_metadata.gz'), 'application/x-gzip') }
+        file { Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/ci_build_artifacts_metadata.gz'), 'application/x-gzip') }
       end
 
       after(:build) do |artifact, evaluator|
@@ -84,7 +82,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/trace/sample_trace'), 'text/plain')
       end
     end
@@ -94,7 +92,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/junit/junit.xml.gz'), 'application/x-gzip')
       end
     end
@@ -104,7 +102,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/junit/junit_with_attachment.xml.gz'), 'application/x-gzip')
       end
     end
@@ -114,7 +112,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/junit/junit_with_duplicate_failed_test_names.xml.gz'), 'application/x-gzip')
       end
     end
@@ -124,7 +122,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/junit/junit_ant.xml.gz'), 'application/x-gzip')
       end
     end
@@ -134,7 +132,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/junit/junit_with_three_testsuites.xml.gz'), 'application/x-gzip')
       end
     end
@@ -144,7 +142,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/junit/junit_with_corrupted_data.xml.gz'), 'application/x-gzip')
       end
     end
@@ -154,7 +152,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/junit/junit_with_three_failures.xml.gz'), 'application/x-gzip')
       end
     end
@@ -164,7 +162,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/accessibility/pa11y_with_errors.json'), 'application/json')
       end
     end
@@ -174,7 +172,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/accessibility/pa11y_with_invalid_url.json'), 'application/json')
       end
     end
@@ -184,7 +182,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/accessibility/pa11y_without_errors.json'), 'application/json')
       end
     end
@@ -194,7 +192,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/cobertura/coverage.xml.gz'), 'application/x-gzip')
       end
     end
@@ -204,7 +202,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/terraform/tfplan.json'), 'application/json')
       end
     end
@@ -214,7 +212,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/terraform/tfplan_with_corrupted_data.json'), 'application/json')
       end
     end
@@ -224,7 +222,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/cobertura/coverage_gocov_xml.xml.gz'), 'application/x-gzip')
       end
     end
@@ -234,7 +232,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/cobertura/coverage_with_paths_not_relative_to_project_root.xml.gz'), 'application/x-gzip')
       end
     end
@@ -244,7 +242,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/cobertura/coverage_with_corrupted_data.xml.gz'), 'application/x-gzip')
       end
     end
@@ -254,7 +252,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/codequality/codeclimate.json'), 'application/json')
       end
     end
@@ -264,7 +262,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/codequality/codeclimate_without_errors.json'), 'application/json')
       end
     end
@@ -274,7 +272,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/security_reports/master/gl-sast-report.json'), 'application/json')
       end
     end
@@ -284,7 +282,7 @@ FactoryBot.define do
       file_format { :raw }
 
       after(:build) do |artifact, _|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/security_reports/master/gl-secret-detection-report.json'), 'application/json')
       end
     end
@@ -294,7 +292,7 @@ FactoryBot.define do
       file_format { :zip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/lsif.json.zip'), 'application/zip')
       end
     end
@@ -304,7 +302,7 @@ FactoryBot.define do
       file_format { :gzip }
 
       after(:build) do |artifact, evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/build.env.gz'), 'application/x-gzip')
       end
     end
@@ -315,7 +313,7 @@ FactoryBot.define do
 
       transient do
         file do
-          fixture_file_upload(Rails.root.join('spec/fixtures/helm/helm_list_v2_prometheus_missing.json.gz'), 'application/x-gzip')
+          Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/helm/helm_list_v2_prometheus_missing.json.gz'), 'application/x-gzip')
         end
       end
 

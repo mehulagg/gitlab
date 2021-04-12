@@ -226,7 +226,7 @@ FactoryBot.define do
     end
 
     after(:build) do |cache_file, evaluator|
-      cache_file.file = fixture_file_upload(evaluator.file_fixture)
+      cache_file.file = Rack::Test::UploadedFile.new(evaluator.file_fixture)
     end
 
     trait(:object_storage) do

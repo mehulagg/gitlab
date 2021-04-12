@@ -11,7 +11,7 @@ FactoryBot.define do
     end
 
     after(:build) do |package_file, evaluator|
-      package_file.file = fixture_file_upload(evaluator.file_fixture)
+      package_file.file = Rack::Test::UploadedFile.new(evaluator.file_fixture)
     end
 
     factory :conan_package_file do

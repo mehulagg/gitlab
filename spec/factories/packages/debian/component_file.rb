@@ -13,7 +13,7 @@ FactoryBot.define do
     file_type { :packages }
 
     after(:build) do |component_file, evaluator|
-      component_file.file = fixture_file_upload('spec/fixtures/packages/debian/distribution/Packages')
+      component_file.file = Rack::Test::UploadedFile.new('spec/fixtures/packages/debian/distribution/Packages')
     end
 
     file_md5 { '12345abcde' }

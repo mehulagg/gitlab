@@ -9,7 +9,7 @@ FactoryBot.define do
     size { 1.megabyte }
     file_type { :code_coverage }
     after(:build) do |artifact, _evaluator|
-      artifact.file = fixture_file_upload(
+      artifact.file = Rack::Test::UploadedFile.new(
         Rails.root.join('spec/fixtures/pipeline_artifacts/code_coverage.json'), 'application/json')
     end
 
@@ -33,7 +33,7 @@ FactoryBot.define do
       file_type { :code_coverage }
 
       after(:build) do |artifact, _evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/pipeline_artifacts/code_coverage.json'), 'application/json')
       end
 
@@ -57,7 +57,7 @@ FactoryBot.define do
       file_type { :code_coverage }
 
       after(:build) do |artifact, _evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/pipeline_artifacts/code_coverage_with_multiple_files.json'), 'application/json'
         )
       end
@@ -69,7 +69,7 @@ FactoryBot.define do
       file_type { :code_quality_mr_diff }
 
       after(:build) do |artifact, _evaluator|
-        artifact.file = fixture_file_upload(
+        artifact.file = Rack::Test::UploadedFile.new(
           Rails.root.join('spec/fixtures/pipeline_artifacts/code_quality_mr_diff.json'), 'application/json')
       end
 

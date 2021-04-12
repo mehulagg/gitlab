@@ -13,7 +13,7 @@ FactoryBot.define do
     diff_type { :regular }
 
     trait :external do
-      external_diff { fixture_file_upload("spec/fixtures/doc_sample.txt", "plain/txt") }
+      external_diff { Rack::Test::UploadedFile.new("spec/fixtures/doc_sample.txt", "plain/txt") }
       stored_externally { true }
       importing { true } # this avoids setting the state to 'empty'
     end

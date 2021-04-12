@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-include ActionDispatch::TestProcess
-
 FactoryBot.define do
   factory :lfs_object do
     sequence(:oid) { |n| "b68143e6463773b1b6c6fd009a76c32aeec041faff32ba2ed42fd7f708a%05x" % n }
@@ -9,7 +7,7 @@ FactoryBot.define do
   end
 
   trait :with_file do
-    file { fixture_file_upload("spec/fixtures/dk.png", "`/png") }
+    file { Rack::Test::UploadedFile.new("spec/fixtures/dk.png", "`/png") }
   end
 
   # The uniqueness constraint means we can't use the correct OID for all LFS
