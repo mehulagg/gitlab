@@ -103,6 +103,7 @@ module EE
           .fetch('values', [])
           .map { |schemes| schemes.dig('issueTypeScheme', 'id') }
       else
+        raise NotImplementedError
       end
     end
 
@@ -136,6 +137,7 @@ module EE
             .fetch('values', [])
             .map { |schemes| schemes['issueTypeId'] }
         else
+          raise NotImplementedError
         end
       end
     end
