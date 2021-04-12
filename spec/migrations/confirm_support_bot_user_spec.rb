@@ -38,6 +38,26 @@ RSpec.describe ConfirmSupportBotUser, :migration do
     end
   end
 
+  context 'when support bot user created_at is null' do
+    let!(:support_bot) do
+      create_user!(
+        user_type: User::USER_TYPES['support_bot'],
+        confirmed_at: nil,
+        record_timestamps: false
+      )
+    end
+
+    it 'updates the `confirmed_at` attribute' do
+      expect { migrate! }.to change { support_bot.reload.confirmed_at }.from(nil)
+    end
+
+    it 'does not change the `created_at` attribute' do
+      migrate!
+
+      expect(support_bot.reload.created_at).to be(nil)
+    end
+  end
+
   context 'with human users that are currently unconfirmed' do
     let!(:unconfirmed_human) do
       create_user!(
@@ -54,14 +74,15 @@ RSpec.describe ConfirmSupportBotUser, :migration do
 
   private
 
-  def create_user!(name: 'GitLab Support Bot', email: 'support@example.com', user_type:, created_at: Time.now, confirmed_at: nil)
-    users.create!(
+  def create_user!(name: 'GitLab Support Bot', email: 'support@example.com', user_type:, created_at: Time.now, confirmed_at: nil, record_timestamps: true)
+    user = users.create!(
       name: name,
       email: email,
       username: name,
       projects_limit: 0,
       user_type: user_type,
-      confirmed_at: confirmed_at
+      confirmed_at: confirmed_at,
+      record_timestamps: record_timestamps
     )
   end
 end

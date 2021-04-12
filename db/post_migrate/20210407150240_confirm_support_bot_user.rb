@@ -9,7 +9,7 @@ class ConfirmSupportBotUser < ActiveRecord::Migration[6.0]
     um.table(users)
       .where(users[:user_type].eq(SUPPORT_BOT_TYPE))
       .where(users[:confirmed_at].eq(nil))
-      .set([[users[:confirmed_at], users[:created_at]]])
+      .set([[users[:confirmed_at], Arel::Nodes::NamedFunction.new('COALESCE', [users[:created_at], Arel::Nodes::SqlLiteral.new('NOW()')])]])
     connection.execute(um.to_sql)
   end
 
