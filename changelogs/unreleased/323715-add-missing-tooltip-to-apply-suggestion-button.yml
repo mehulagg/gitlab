@@ -1,0 +1,5 @@
+---
+title: Fix tooltip not rendering
+merge_request: 323715
+author:
+type: fixed
