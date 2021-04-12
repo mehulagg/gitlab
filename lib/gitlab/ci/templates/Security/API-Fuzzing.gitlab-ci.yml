@@ -13,7 +13,7 @@ stages:
 variables:
     FUZZAPI_PROFILE: Quick
     FUZZAPI_VERSION: latest
-    FUZZAPI_CONFIG: .gitlab-api-fuzzing.yml
+    FUZZAPI_CONFIG: .gitlab/gitlab-api-fuzzing-config.yml
     FUZZAPI_TIMEOUT: 30
     FUZZAPI_REPORT: gl-api-fuzzing-report.json
     FUZZAPI_REPORT_ASSET_PATH: assets
