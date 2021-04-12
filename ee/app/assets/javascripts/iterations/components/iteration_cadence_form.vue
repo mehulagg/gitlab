@@ -109,14 +109,14 @@ export default {
           groupPath: this.groupPath,
           title: this.title,
           automatic: this.automatic,
+          startDate: this.startDate,
+          durationInWeeks: this.durationInWeeks,
           active: true, // TODO: where is this toggled?
         },
       };
       if (this.automatic) {
         vars = {
           ...vars,
-          startDate: this.startDate,
-          durationInWeeks: this.durationInWeeks,
           iterationsInAdvance: this.iterationsInAdvance,
         };
       }
@@ -129,13 +129,17 @@ export default {
       this.touched[field] = true;
     },
     validateAllFields() {
-      if (this.automatic) {
-        Object.keys(this.validationState).forEach((field) => {
+      Object.keys(this.validationState)
+        .filter((field) => {
+          if (this.automatic) {
+            return true;
+          }
+          const requiredFieldsForAutomatedScheduling = ['iterationsInAdvance'];
+          return !requiredFieldsForAutomatedScheduling.includes(field);
+        })
+        .forEach((field) => {
           this.validate(field);
         });
-      } else {
-        this.validate('title');
-      }
     },
     clearValidation() {
       this.validationState.startDate = null;
@@ -216,7 +220,7 @@ export default {
           data-qa-selector="iteration_cadence_title_field"
           :placeholder="i18n.title.placeholder"
           size="xl"
-          @blur="touched.title = true"
+          @blur="validate('title')"
         />
       </gl-form-group>
 
@@ -238,14 +242,13 @@ export default {
         label-for="start-date"
         :description="i18n.startDate.description"
         :invalid-feedback="i18n.requiredField"
-        :state="validationState.startDate"
+        :validated="touched.startDate"
       >
         <gl-datepicker :target="null">
           <gl-form-input
             id="start-date"
             v-model="startDate"
             :placeholder="i18n.startDate.placeholder"
-            :disabled="!automatic"
             class="datepicker gl-datepicker-input"
             autocomplete="off"
             inputmode="none"
@@ -263,14 +266,14 @@ export default {
         label-for="cadence-duration"
         :description="i18n.duration.description"
         :invalid-feedback="i18n.requiredField"
-        :state="validationState.durationInWeeks"
+        :validated="touched.startDate"
       >
         <gl-form-select
           id="cadence-duration"
           v-model.number="durationInWeeks"
-          :disabled="!automatic"
           :options="$options.availableDurations"
           class="gl-form-input-md"
+          required
           data-qa-selector="iteration_cadence_name_field"
           @change="validate('durationInWeeks')"
         />
@@ -285,12 +288,14 @@ export default {
         :description="i18n.futureIterations.description"
         :invalid-feedback="i18n.requiredField"
         :state="validationState.iterationsInAdvance"
+        :validated="touched.iterationsInAdvance"
       >
         <gl-form-select
           id="cadence-schedule-future-iterations"
           v-model.number="iterationsInAdvance"
           :disabled="!automatic"
           :options="$options.availableFutureIterations"
+          :required="automatic"
           class="gl-form-input-md"
           data-qa-selector="iteration_cadence_name_field"
           @change="validate('iterationsInAdvance')"
