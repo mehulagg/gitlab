@@ -2717,8 +2717,8 @@ The `stop_review_app` job is **required** to have the following keywords defined
 - `environment:name`
 - `environment:action`
 
-Additionally, both jobs should have matching [`rules`](../yaml/README.md#onlyexcept-basic)
-or [`only/except`](../yaml/README.md#onlyexcept-basic) configuration.
+Additionally, both jobs should have matching [`rules`](#onlyexcept-basic)
+or [`only/except`](#onlyexcept-basic) configuration.
 
 In the examples above, if the configuration is not identical:
 
@@ -3171,94 +3171,6 @@ artifacts are restored after [caches](#cache).
 
 [Read more about artifacts](../pipelines/job_artifacts.md).
 
-#### `artifacts:paths`
-
-Paths are relative to the project directory (`$CI_PROJECT_DIR`) and can't directly
-link outside it. You can use Wildcards that use [glob](https://en.wikipedia.org/wiki/Glob_(programming))
-patterns and:
-
-- In [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620) and later,
-[`doublestar.Glob`](https://pkg.go.dev/github.com/bmatcuk/doublestar@v1.2.2?tab=doc#Match).
-- In GitLab Runner 12.10 and earlier,
-[`filepath.Match`](https://pkg.go.dev/path/filepath#Match).
-
-To restrict which jobs a specific job fetches artifacts from, see [dependencies](#dependencies).
-
-Send all files in `binaries` and `.config`:
-
-```yaml
-artifacts:
-  paths:
-    - binaries/
-    - .config
-```
-
-To disable artifact passing, define the job with empty [dependencies](#dependencies):
-
-```yaml
-job:
-  stage: build
-  script: make build
-  dependencies: []
-```
-
-You may want to create artifacts only for tagged releases to avoid filling the
-build server storage with temporary build artifacts.
-
-Create artifacts only for tags (`default-job` doesn't create artifacts):
-
-```yaml
-default-job:
-  script:
-    - mvn test -U
-  except:
-    - tags
-
-release-job:
-  script:
-    - mvn package -U
-  artifacts:
-    paths:
-      - target/*.war
-  only:
-    - tags
-```
-
-You can use wildcards for directories too. For example, if you want to get all the files inside the directories that end with `xyz`:
-
-```yaml
-job:
-  artifacts:
-    paths:
-      - path/*xyz/*
-```
-
-#### `artifacts:public`
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49775) in GitLab 13.8
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-
-Use `artifacts:public` to determine whether the job artifacts should be
-publicly available.
-
-The default for `artifacts:public` is `true` which means that the artifacts in
-public pipelines are available for download by anonymous and guest users:
-
-```yaml
-artifacts:
-  public: true
-```
-
-To deny read access for anonymous and guest users to artifacts in public
-pipelines, set `artifacts:public` to `false`:
-
-```yaml
-artifacts:
-  public: false
-```
-
 #### `artifacts:exclude`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15122) in GitLab 13.1
@@ -3285,6 +3197,53 @@ artifacts:
 
 Files matched by [`artifacts:untracked`](#artifactsuntracked) can be excluded using
 `artifacts:exclude` too.
+
+#### `artifacts:expire_in`
+
+Use `expire_in` to specify how long artifacts are active before they
+expire and are deleted.
+
+The expiration time period begins when the artifact is uploaded and
+stored on GitLab. If the expiry time is not defined, it defaults to the
+[instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration)
+(30 days by default).
+
+To override the expiration date and protect artifacts from being automatically deleted:
+
+- Use the **Keep** button on the job page.
+- Set the value of `expire_in` to `never`. [Available](https://gitlab.com/gitlab-org/gitlab/-/issues/22761)
+  in GitLab 13.3 and later.
+
+After their expiry, artifacts are deleted hourly by default (via a cron job),
+and are not accessible anymore.
+
+The value of `expire_in` is an elapsed time in seconds, unless a unit is
+provided. Examples of valid values:
+
+- `'42'`
+- `42 seconds`
+- `3 mins 4 sec`
+- `2 hrs 20 min`
+- `2h20min`
+- `6 mos 1 day`
+- `47 yrs 6 mos and 4d`
+- `3 weeks and 2 days`
+- `never`
+
+To expire artifacts 1 week after being uploaded:
+
+```yaml
+job:
+  artifacts:
+    expire_in: 1 week
+```
+
+The latest artifacts for refs are locked against deletion, and kept regardless of
+the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
+GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
+in GitLab 13.4.
+
+In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior at the project level in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs). In [GitLab 13.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/276583), you can [disable this behavior instance-wide](../../user/admin_area/settings/continuous_integration.md#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines).
 
 #### `artifacts:expose_as`
 
@@ -3406,118 +3365,109 @@ job:
       - binaries/
 ```
 
-#### `artifacts:untracked`
+#### `artifacts:paths`
 
-Use `artifacts:untracked` to add all Git untracked files as artifacts (along
-with the paths defined in `artifacts:paths`). `artifacts:untracked` ignores configuration
-in the repository's `.gitignore` file.
+Paths are relative to the project directory (`$CI_PROJECT_DIR`) and can't directly
+link outside it. You can use Wildcards that use [glob](https://en.wikipedia.org/wiki/Glob_(programming))
+patterns and:
 
-Send all Git untracked files:
+- In [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620) and later,
+[`doublestar.Glob`](https://pkg.go.dev/github.com/bmatcuk/doublestar@v1.2.2?tab=doc#Match).
+- In GitLab Runner 12.10 and earlier,
+[`filepath.Match`](https://pkg.go.dev/path/filepath#Match).
+
+To restrict which jobs a specific job fetches artifacts from, see [dependencies](#dependencies).
+
+Send all files in `binaries` and `.config`:
 
 ```yaml
 artifacts:
-  untracked: true
-```
-
-Send all Git untracked files and files in `binaries`:
-
-```yaml
-artifacts:
-  untracked: true
   paths:
     - binaries/
+    - .config
 ```
 
-Send all untracked files but [exclude](#artifactsexclude) `*.txt`:
+To disable artifact passing, define the job with empty [dependencies](#dependencies):
+
+```yaml
+job:
+  stage: build
+  script: make build
+  dependencies: []
+```
+
+You may want to create artifacts only for tagged releases to avoid filling the
+build server storage with temporary build artifacts.
+
+Create artifacts only for tags (`default-job` doesn't create artifacts):
+
+```yaml
+default-job:
+  script:
+    - mvn test -U
+  except:
+    - tags
+
+release-job:
+  script:
+    - mvn package -U
+  artifacts:
+    paths:
+      - target/*.war
+  only:
+    - tags
+```
+
+You can use wildcards for directories too. For example, if you want to get all the files inside the directories that end with `xyz`:
+
+```yaml
+job:
+  artifacts:
+    paths:
+      - path/*xyz/*
+```
+
+#### `artifacts:public`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49775) in GitLab 13.8
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+
+Use `artifacts:public` to determine whether the job artifacts should be
+publicly available.
+
+The default for `artifacts:public` is `true` which means that the artifacts in
+public pipelines are available for download by anonymous and guest users:
 
 ```yaml
 artifacts:
-  untracked: true
-  exclude:
-    - "*.txt"
+  public: true
 ```
 
-#### `artifacts:when`
-
-Use `artifacts:when` to upload artifacts on job failure or despite the
-failure.
-
-`artifacts:when` can be set to one of the following values:
-
-1. `on_success` (default): Upload artifacts only when the job succeeds.
-1. `on_failure`: Upload artifacts only when the job fails.
-1. `always`: Always upload artifacts.
-
-For example, to upload artifacts only when a job fails:
+To deny read access for anonymous and guest users to artifacts in public
+pipelines, set `artifacts:public` to `false`:
 
 ```yaml
-job:
-  artifacts:
-    when: on_failure
+artifacts:
+  public: false
 ```
-
-#### `artifacts:expire_in`
-
-Use `expire_in` to specify how long artifacts are active before they
-expire and are deleted.
-
-The expiration time period begins when the artifact is uploaded and
-stored on GitLab. If the expiry time is not defined, it defaults to the
-[instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration)
-(30 days by default).
-
-To override the expiration date and protect artifacts from being automatically deleted:
-
-- Use the **Keep** button on the job page.
-- Set the value of `expire_in` to `never`. [Available](https://gitlab.com/gitlab-org/gitlab/-/issues/22761)
-  in GitLab 13.3 and later.
-
-After their expiry, artifacts are deleted hourly by default (via a cron job),
-and are not accessible anymore.
-
-The value of `expire_in` is an elapsed time in seconds, unless a unit is
-provided. Examples of valid values:
-
-- `'42'`
-- `42 seconds`
-- `3 mins 4 sec`
-- `2 hrs 20 min`
-- `2h20min`
-- `6 mos 1 day`
-- `47 yrs 6 mos and 4d`
-- `3 weeks and 2 days`
-- `never`
-
-To expire artifacts 1 week after being uploaded:
-
-```yaml
-job:
-  artifacts:
-    expire_in: 1 week
-```
-
-The latest artifacts for refs are locked against deletion, and kept regardless of
-the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
-GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
-in GitLab 13.4.
-
-In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior at the project level in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs). In [GitLab 13.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/276583), you can [disable this behavior instance-wide](../../user/admin_area/settings/continuous_integration.md#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines).
 
 #### `artifacts:reports`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20390) in GitLab 11.2.
 > - Requires GitLab Runner 11.2 and above.
 
-Use [`artifacts:reports`](../ci/yaml/README.md#artifactsreports)
+Use [`artifacts:reports`](#artifactsreports)
 to collect test reports, code quality reports, and security reports from jobs.
 It also exposes these reports in the GitLab UI (merge requests, pipeline views, and security dashboards).
 
 The test reports are collected regardless of the job results (success or failure).
-You can use [`artifacts:expire_in`](../yaml/README.md#artifactsexpire_in) to set up an expiration
+You can use [`artifacts:expire_in`](#artifactsexpire_in) to set up an expiration
 date for their artifacts.
 
 If you also want the ability to browse the report output files, include the
-[`artifacts:paths`](../yaml/README.md#artifactspaths) keyword.
+[`artifacts:paths`](#artifactspaths) keyword.
 
 ##### `artifacts:reports:api_fuzzing` **(ULTIMATE)**
 
@@ -3659,7 +3609,7 @@ combination thereof (`junit: [rspec.xml, test-results/TEST-*.xml]`).
 
 WARNING:
 This artifact is still valid but is **deprecated** in favor of the
-[artifacts:reports:license_scanning](../ci/yaml/README.md#artifactsreportslicense_scanning)
+[artifacts:reports:license_scanning](#artifactsreportslicense_scanning)
 introduced in GitLab 12.8.
 
 The `license_management` report collects [Licenses](../../user/compliance/license_compliance/index.md)
@@ -3826,6 +3776,56 @@ the dependent job fails.
 You can ask your administrator to
 [flip this switch](../../administration/job_artifacts.md#validation-for-dependencies)
 and bring back the old behavior.
+
+#### `artifacts:untracked`
+
+Use `artifacts:untracked` to add all Git untracked files as artifacts (along
+with the paths defined in `artifacts:paths`). `artifacts:untracked` ignores configuration
+in the repository's `.gitignore` file.
+
+Send all Git untracked files:
+
+```yaml
+artifacts:
+  untracked: true
+```
+
+Send all Git untracked files and files in `binaries`:
+
+```yaml
+artifacts:
+  untracked: true
+  paths:
+    - binaries/
+```
+
+Send all untracked files but [exclude](#artifactsexclude) `*.txt`:
+
+```yaml
+artifacts:
+  untracked: true
+  exclude:
+    - "*.txt"
+```
+
+#### `artifacts:when`
+
+Use `artifacts:when` to upload artifacts on job failure or despite the
+failure.
+
+`artifacts:when` can be set to one of the following values:
+
+1. `on_success` (default): Upload artifacts only when the job succeeds.
+1. `on_failure`: Upload artifacts only when the job fails.
+1. `always`: Always upload artifacts.
+
+For example, to upload artifacts only when a job fails:
+
+```yaml
+job:
+  artifacts:
+    when: on_failure
+```
 
 ### `coverage`
 
