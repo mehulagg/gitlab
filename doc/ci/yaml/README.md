@@ -3508,7 +3508,7 @@ In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026)
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20390) in GitLab 11.2.
 > - Requires GitLab Runner 11.2 and above.
 
-Use [`artifacts:reports`](../pipelines/job_artifacts.md#artifactsreports)
+Use [`artifacts:reports`](../ci/yaml/README.md#artifactsreports)
 to collect test reports, code quality reports, and security reports from jobs.
 It also exposes these reports in the GitLab UI (merge requests, pipeline views, and security dashboards).
 
@@ -3659,7 +3659,7 @@ combination thereof (`junit: [rspec.xml, test-results/TEST-*.xml]`).
 
 WARNING:
 This artifact is still valid but is **deprecated** in favor of the
-[artifacts:reports:license_scanning](../pipelines/job_artifacts.md#artifactsreportslicense_scanning)
+[artifacts:reports:license_scanning](../ci/yaml/README.md#artifactsreportslicense_scanning)
 introduced in GitLab 12.8.
 
 The `license_management` report collects [Licenses](../../user/compliance/license_compliance/index.md)

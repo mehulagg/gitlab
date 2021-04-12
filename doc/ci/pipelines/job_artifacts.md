@@ -198,7 +198,7 @@ You can disable this behavior for all projects on a self-managed instance in the
 When you disable the feature, the latest artifacts do not immediately expire.
 A new pipeline must run before the latest artifacts can expire and be deleted.
 
-## Define a list of job to fetch artifacts from
+## Define a list of jobs to fetch artifacts from
 
 By default, all `artifacts` from previous stages
 are passed to each job. However, you can use the `dependencies` keyword to

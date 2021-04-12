@@ -123,7 +123,7 @@ You can also sort the requirements list by:
 > - [Added](https://gitlab.com/gitlab-org/gitlab/-/issues/215514) ability to specify individual requirements and their statuses in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.2.
 
 GitLab supports [requirements test
-reports](../../../ci/pipelines/job_artifacts.md#artifactsreportsrequirements) now.
+reports](../../../ci/yaml/README.md#artifactsreportsrequirements) now.
 You can add a job to your CI pipeline that, when triggered, marks all existing
 requirements as Satisfied (you may manually satisfy a requirement in the edit form [edit a requirement](#edit-a-requirement)).
 
