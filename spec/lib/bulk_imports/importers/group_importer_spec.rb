@@ -26,10 +26,10 @@ RSpec.describe BulkImports::Importers::GroupImporter do
       expect_to_run_pipeline BulkImports::Groups::Pipelines::BadgesPipeline, context: context
 
       if Gitlab.ee?
-        expect_to_run_pipeline('EE::BulkImports::Groups::Pipelines::EpicsPipeline'.constantize, context: context)
-        expect_to_run_pipeline('EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline'.constantize, context: context)
-        expect_to_run_pipeline('EE::BulkImports::Groups::Pipelines::EpicEventsPipeline'.constantize, context: context)
-        expect_to_run_pipeline('EE::BulkImports::Groups::Pipelines::IterationsPipeline'.constantize, context: context)
+        expect_to_run_pipeline('BulkImports::Groups::Pipelines::EpicsPipeline'.constantize, context: context)
+        expect_to_run_pipeline('BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline'.constantize, context: context)
+        expect_to_run_pipeline('BulkImports::Groups::Pipelines::EpicEventsPipeline'.constantize, context: context)
+        expect_to_run_pipeline('BulkImports::Groups::Pipelines::IterationsPipeline'.constantize, context: context)
       end
 
       subject.execute

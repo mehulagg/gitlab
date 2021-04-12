@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
+RSpec.describe BulkImports::Groups::Pipelines::IterationsPipeline do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:timestamp) { Time.new(2020, 01, 01).utc }
@@ -84,7 +84,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::IterationsPipeline do
         .to eq(
           klass: BulkImports::Common::Extractors::GraphqlExtractor,
           options: {
-            query: EE::BulkImports::Groups::Graphql::GetIterationsQuery
+            query: BulkImports::Groups::Graphql::GetIterationsQuery
           }
         )
     end

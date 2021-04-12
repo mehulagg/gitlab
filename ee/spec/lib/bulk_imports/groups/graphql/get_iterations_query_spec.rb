@@ -2,21 +2,24 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Graphql::GetEpicAwardEmojiQuery do
+RSpec.describe BulkImports::Groups::Graphql::GetIterationsQuery do
   it 'has a valid query' do
-    context = BulkImports::Pipeline::Context.new(create(:bulk_import_tracker), epic_iid: 1)
+    tracker = create(:bulk_import_tracker)
+    context = BulkImports::Pipeline::Context.new(tracker)
 
-    result = GitlabSchema.execute(
+    query = GraphQL::Query.new(
+      GitlabSchema,
       described_class.to_s,
       variables: described_class.variables(context)
-    ).to_h
+    )
+    result = GitlabSchema.static_validator.validate(query)
 
-    expect(result['errors']).to be_blank
+    expect(result[:errors]).to be_empty
   end
 
   describe '#data_path' do
     it 'returns data path' do
-      expected = %w[data group epic award_emoji nodes]
+      expected = %w[data group iterations nodes]
 
       expect(described_class.data_path).to eq(expected)
     end
@@ -24,7 +27,7 @@ RSpec.describe EE::BulkImports::Groups::Graphql::GetEpicAwardEmojiQuery do
 
   describe '#page_info_path' do
     it 'returns pagination information path' do
-      expected = %w[data group epic award_emoji page_info]
+      expected = %w[data group iterations page_info]
 
       expect(described_class.page_info_path).to eq(expected)
     end

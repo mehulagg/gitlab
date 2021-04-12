@@ -2,24 +2,21 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Graphql::GetIterationsQuery do
+RSpec.describe BulkImports::Groups::Graphql::GetEpicEventsQuery do
   it 'has a valid query' do
-    tracker = create(:bulk_import_tracker)
-    context = BulkImports::Pipeline::Context.new(tracker)
+    context = BulkImports::Pipeline::Context.new(create(:bulk_import_tracker), epic_iid: 1)
 
-    query = GraphQL::Query.new(
-      GitlabSchema,
+    result = GitlabSchema.execute(
       described_class.to_s,
       variables: described_class.variables(context)
-    )
-    result = GitlabSchema.static_validator.validate(query)
+    ).to_h
 
-    expect(result[:errors]).to be_empty
+    expect(result['errors']).to be_blank
   end
 
   describe '#data_path' do
     it 'returns data path' do
-      expected = %w[data group iterations nodes]
+      expected = %w[data group epic events nodes]
 
       expect(described_class.data_path).to eq(expected)
     end
@@ -27,7 +24,7 @@ RSpec.describe EE::BulkImports::Groups::Graphql::GetIterationsQuery do
 
   describe '#page_info_path' do
     it 'returns pagination information path' do
-      expected = %w[data group iterations page_info]
+      expected = %w[data group epic events page_info]
 
       expect(described_class.page_info_path).to eq(expected)
     end

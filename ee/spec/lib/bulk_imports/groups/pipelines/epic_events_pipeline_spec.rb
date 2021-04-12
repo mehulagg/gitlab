@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Pipelines::EpicEventsPipeline do
+RSpec.describe BulkImports::Groups::Pipelines::EpicEventsPipeline do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:epic) { create(:epic, group: group) }
@@ -143,7 +143,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicEventsPipeline do
         .to eq(
           klass: BulkImports::Common::Extractors::GraphqlExtractor,
           options: {
-            query: EE::BulkImports::Groups::Graphql::GetEpicEventsQuery
+            query: BulkImports::Groups::Graphql::GetEpicEventsQuery
           }
         )
     end

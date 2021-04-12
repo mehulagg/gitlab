@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_redis_cache do
+RSpec.describe BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_redis_cache do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:bulk_import) { create(:bulk_import, user: user) }
@@ -116,7 +116,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_
         .to eq(
           klass: BulkImports::Common::Extractors::GraphqlExtractor,
           options: {
-            query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
+            query: BulkImports::Groups::Graphql::GetEpicsQuery
           }
         )
     end
@@ -126,7 +126,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_
         .to contain_exactly(
           { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil },
           { klass: BulkImports::Common::Transformers::UserReferenceTransformer, options: { reference: 'author' } },
-          { klass: EE::BulkImports::Groups::Transformers::EpicAttributesTransformer, options: nil }
+          { klass: BulkImports::Groups::Transformers::EpicAttributesTransformer, options: nil }
         )
     end
   end

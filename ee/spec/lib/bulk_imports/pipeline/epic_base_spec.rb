@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Pipeline::EpicBase do
+RSpec.describe BulkImports::Pipeline::EpicBase do
   let(:pipeline_class) do
-    Class.new(EE::BulkImports::Pipeline::EpicBase) do
+    Class.new(BulkImports::Pipeline::EpicBase) do
       def extract(_)
         ::BulkImports::Pipeline::ExtractedData.new
       end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Graphql::GetEpicsQuery do
+RSpec.describe BulkImports::Groups::Graphql::GetEpicsQuery do
   it 'has a valid query' do
     context = BulkImports::Pipeline::Context.new(create(:bulk_import_tracker))
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Graphql::GetEpicEventsQuery do
+RSpec.describe BulkImports::Groups::Graphql::GetEpicAwardEmojiQuery do
   it 'has a valid query' do
     context = BulkImports::Pipeline::Context.new(create(:bulk_import_tracker), epic_iid: 1)
 
@@ -16,7 +16,7 @@ RSpec.describe EE::BulkImports::Groups::Graphql::GetEpicEventsQuery do
 
   describe '#data_path' do
     it 'returns data path' do
-      expected = %w[data group epic events nodes]
+      expected = %w[data group epic award_emoji nodes]
 
       expect(described_class.data_path).to eq(expected)
     end
@@ -24,7 +24,7 @@ RSpec.describe EE::BulkImports::Groups::Graphql::GetEpicEventsQuery do
 
   describe '#page_info_path' do
     it 'returns pagination information path' do
-      expected = %w[data group epic events page_info]
+      expected = %w[data group epic award_emoji page_info]
 
       expect(described_class.page_info_path).to eq(expected)
     end

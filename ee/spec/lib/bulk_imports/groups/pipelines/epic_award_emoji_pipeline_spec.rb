@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
+RSpec.describe BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:epic) { create(:epic, group: group) }
@@ -134,7 +134,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
         .to eq(
           klass: BulkImports::Common::Extractors::GraphqlExtractor,
           options: {
-            query: EE::BulkImports::Groups::Graphql::GetEpicAwardEmojiQuery
+            query: BulkImports::Groups::Graphql::GetEpicAwardEmojiQuery
           }
         )
     end

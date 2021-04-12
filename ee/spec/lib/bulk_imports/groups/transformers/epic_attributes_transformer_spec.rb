@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Transformers::EpicAttributesTransformer do
+RSpec.describe BulkImports::Groups::Transformers::EpicAttributesTransformer do
   let_it_be(:importer_user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:bulk_import) { create(:bulk_import, user: importer_user) }
