@@ -52,7 +52,10 @@ export default {
         .then(
           ({
             data: {
-              gitlabSubscriptionActivate: { errors },
+              gitlabSubscriptionActivate: {
+                license,
+                errors
+              },
             },
           }) => {
             if (errors.length) {

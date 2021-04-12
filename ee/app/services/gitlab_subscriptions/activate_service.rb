@@ -20,7 +20,7 @@ module GitlabSubscriptions
       license = License.new(data: response[:license_key])
 
       if license.save
-        { success: true }
+        { success: true, license: license }
       else
         error(license.errors.full_messages)
       end

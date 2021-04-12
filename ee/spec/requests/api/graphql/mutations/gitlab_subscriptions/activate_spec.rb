@@ -45,8 +45,29 @@ RSpec.describe 'Activate a subscription' do
 
     post_graphql_mutation(mutation, current_user: current_user)
 
+    mutation_response = graphql_mutation_response(:gitlab_subscription_activate)
+    created_license = License.last
+
     expect(response).to have_gitlab_http_status(:success)
-    expect(graphql_mutation_response(:gitlab_subscription_activate)['errors']).to be_empty
-    expect(License.last.data).to eq(license_key)
+    expect(mutation_response['errors']).to be_empty
+    expect(mutation_response['license']).to eq(
+      {
+        'id' => "gid://gitlab/License/#{created_license.id}",
+        'type' => License::LEGACY_LICENSE_TYPE,
+        'plan' => created_license.plan,
+        'name' => created_license.licensee_name,
+        'email' => created_license.licensee_email,
+        'company' => created_license.licensee_company,
+        'startsAt' => created_license.starts_at.to_s,
+        'expiresAt' => created_license.expires_at.to_s,
+        'activatedAt' => created_license.created_at.to_date.to_s,
+        'lastSync' => nil,
+        'usersInLicenseCount' => nil,
+        'billableUsersCount' => 1,
+        'maximumUserCount' => 1,
+        'usersOverLicenseCount' => 0
+      }
+    )
+    expect(created_license.data).to eq(license_key)
   end
 end

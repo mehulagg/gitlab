@@ -15,6 +15,23 @@ export const license = {
   },
 };
 
+export const activated_license = {
+  id: 'gid://gitlab/License/3',
+  type: 'legacy',
+  plan: 'ultimate',
+  name: 'Test license',
+  email: 'user@example.com',
+  company: 'Example Inc',
+  startsAt: '2020-01-01',
+  expiresAt: '2022-01-01',
+  activatedAt: '2021-01-02',
+  lastSync: null,
+  usersInLicenseCount: 100,
+  billableUsersCount: 50,
+  maximumUserCount: 50,
+  usersOverLicenseCount: 0
+};
+
 export const activateLicenseMutationResponse = {
   FAILURE: [
     {
@@ -44,7 +61,7 @@ export const activateLicenseMutationResponse = {
   FAILURE_IN_DISGUISE: {
     data: {
       gitlabSubscriptionActivate: {
-        clientMutationId: null,
+        license: activated_license,
         errors: ["undefined method `[]' for nil:NilClass"],
         __typename: 'GitlabSubscriptionActivatePayload',
       },
@@ -53,7 +70,7 @@ export const activateLicenseMutationResponse = {
   SUCCESS: {
     data: {
       gitlabSubscriptionActivate: {
-        clientMutationId: null,
+        license: activated_license,
         errors: [],
       },
     },
