@@ -151,7 +151,7 @@ class BuildDetailsEntity < JobEntity
   end
 
   def help_message(docs_url)
-    html_escape(_("Please refer to %{docs_url}")) % { docs_url: "<a href=\"#{docs_url}\">#{html_escape(docs_url)}</a>".html_safe }
+    ERB::Util.html_escape(_("Please refer to %{docs_url}")) % { docs_url: "<a href=\"#{docs_url}\">#{ERB::Util.html_escape(docs_url)}</a>".html_safe }
   end
 end
 

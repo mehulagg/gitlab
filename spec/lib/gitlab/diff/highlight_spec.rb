@@ -19,7 +19,7 @@ RSpec.describe Gitlab::Diff::Highlight do
     end
 
     it 'returns html escaped diff text' do
-      expect(subject[1].rich_text).to eq html_escape(code)
+      expect(subject[1].rich_text).to eq ERB::Util.html_escape(code)
       expect(subject[1].rich_text).to be_html_safe
     end
   end

@@ -99,6 +99,6 @@ RSpec.describe "User Feed" do
   end
 
   def safe_name
-    html_escape(user.name)
+    ERB::Util.html_escape(user.name)
   end
 end

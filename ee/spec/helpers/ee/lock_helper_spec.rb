@@ -45,25 +45,25 @@ RSpec.describe EE::LockHelper do
 
       it "returns Lock with no toltip" do
         expect(helper.lock_file_link(project, requested_path)).to match('Unlock')
-        expect(helper.lock_file_link(project, requested_path)).to match(html_escape("#{user.name} has a lock on \"app/models\". Unlock that directory in order to unlock this"))
+        expect(helper.lock_file_link(project, requested_path)).to match(ERB::Util.html_escape("#{user.name} has a lock on \"app/models\". Unlock that directory in order to unlock this"))
       end
 
       it "returns Lock button with tooltip" do
         allow(helper).to receive(:can?).and_return(false)
         expect(helper.lock_file_link(project, requested_path)).to match('Unlock')
-        expect(helper.lock_file_link(project, requested_path)).to match(html_escape("#{user.name} has a lock on \"app/models\". You do not have permission to unlock it"))
+        expect(helper.lock_file_link(project, requested_path)).to match(ERB::Util.html_escape("#{user.name} has a lock on \"app/models\". You do not have permission to unlock it"))
       end
     end
 
     context "downstream lock" do
       it "returns Lock with no toltip" do
-        expect(helper.lock_file_link(project, 'app')).to match(html_escape("This directory cannot be locked while #{user.name} has a lock on \"app/models\". Unlock this in order to proceed"))
+        expect(helper.lock_file_link(project, 'app')).to match(ERB::Util.html_escape("This directory cannot be locked while #{user.name} has a lock on \"app/models\". Unlock this in order to proceed"))
       end
 
       it "returns Lock button with tooltip" do
         allow(helper).to receive(:can?).and_return(false)
         expect(helper.lock_file_link(project, 'app')).to match('Lock')
-        expect(helper.lock_file_link(project, 'app')).to match(html_escape("This directory cannot be locked while #{user.name} has a lock on \"app/models\". You do not have permission to unlock it"))
+        expect(helper.lock_file_link(project, 'app')).to match(ERB::Util.html_escape("This directory cannot be locked while #{user.name} has a lock on \"app/models\". You do not have permission to unlock it"))
       end
     end
   end

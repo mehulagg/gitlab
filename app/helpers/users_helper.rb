@@ -297,7 +297,7 @@ module UsersHelper
       organization = '<span itemprop="worksFor">'.html_safe + organization + "</span>".html_safe
     end
 
-    html_escape(s_('Profile|%{job_title} at %{organization}')) % { job_title: job_title, organization: organization }
+    ERB::Util.html_escape(s_('Profile|%{job_title} at %{organization}')) % { job_title: job_title, organization: organization }
   end
 
   def user_table_headers

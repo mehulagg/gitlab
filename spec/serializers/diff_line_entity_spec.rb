@@ -27,7 +27,7 @@ RSpec.describe DiffLineEntity do
 
     shared_examples 'escapes html tags' do
       it do
-        expect(subject[:rich_text]).to eq html_escape(code)
+        expect(subject[:rich_text]).to eq ERB::Util.html_escape(code)
         expect(subject[:rich_text]).to be_html_safe
       end
     end
