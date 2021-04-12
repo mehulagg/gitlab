@@ -83,7 +83,6 @@ const createTestDetails = () => {
 };
 
 export default async function initPipelineDetailsBundle() {
-  createTestDetails();
 
   const canShowNewPipelineDetails =
     gon.features.graphqlPipelineDetails || gon.features.graphqlPipelineDetailsUsers;
@@ -96,7 +95,6 @@ export default async function initPipelineDetailsBundle() {
     Flash(__('An error occurred while loading a section of this page.'));
   }
 
-  createDagApp(apolloProvider);
 
   if (canShowNewPipelineDetails) {
     try {
@@ -113,5 +111,8 @@ export default async function initPipelineDetailsBundle() {
 
     createLegacyPipelinesDetailApp(mediator);
   }
+
+  createDagApp(apolloProvider);
+  createTestDetails();
 
 }
