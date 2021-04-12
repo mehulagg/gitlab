@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-class IssuableBaseService < BaseService
+class IssuableBaseService < ::Projects::BaseProjectService
   private
 
   attr_accessor :params, :skip_milestone_email
 
-  def initialize(project, user = nil, params = {})
+  def initialize(container: project, current_user: nil, params: {})
     super
 
     @skip_milestone_email = @params.delete(:skip_milestone_email)

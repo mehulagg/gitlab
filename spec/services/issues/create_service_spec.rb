@@ -12,7 +12,7 @@ RSpec.describe Issues::CreateService do
     let_it_be(:assignee) { create(:user) }
     let_it_be(:milestone) { create(:milestone, project: project) }
 
-    let(:issue) { described_class.new(project, user, opts).execute }
+    let(:issue) { described_class.new(container: project, current_user: user, params: opts).execute }
 
     context 'when params are valid' do
       let_it_be(:labels) { create_pair(:label, project: project) }
@@ -44,7 +44,7 @@ RSpec.describe Issues::CreateService do
       end
 
       context 'when skip_system_notes is true' do
-        let(:issue) { described_class.new(project, user, opts).execute(skip_system_notes: true) }
+        let(:issue) { described_class.new(container: project, current_user: user, params: opts).execute(skip_system_notes: true) }
 
         it 'does not call Issuable::CommonSystemNotesService' do
           expect(Issuable::CommonSystemNotesService).not_to receive(:new)
@@ -96,7 +96,7 @@ RSpec.describe Issues::CreateService do
         end
 
         it 'filters out params that cannot be set without the :admin_issue permission' do
-          issue = described_class.new(project, guest, opts).execute
+          issue = described_class.new(container: project, current_user: guest, params: opts).execute
 
           expect(issue).to be_persisted
           expect(issue.title).to eq('Awesome issue')
@@ -108,7 +108,7 @@ RSpec.describe Issues::CreateService do
         end
 
         it 'creates confidential issues' do
-          issue = described_class.new(project, guest, confidential: true).execute
+          issue = described_class.new(container: project, current_user: guest, params: { confidential: true }).execute
 
           expect(issue.confidential).to be_truthy
         end
@@ -117,7 +117,7 @@ RSpec.describe Issues::CreateService do
       it 'moves the issue to the end, in an asynchronous worker' do
         expect(IssuePlacementWorker).to receive(:perform_async).with(be_nil, Integer)
 
-        described_class.new(project, user, opts).execute
+        described_class.new(container: project, current_user: user, params: opts).execute
       end
 
       context 'with issue_perform_after_creation_tasks_async feature disabled' do
@@ -128,7 +128,7 @@ RSpec.describe Issues::CreateService do
         it 'calls Issues::AfterCreateService' do
           expect_next(::Issues::AfterCreateService, project, user).to receive(:execute)
 
-          described_class.new(project, user, opts).execute
+          described_class.new(container: project, current_user: user, params: opts).execute
         end
       end
 
@@ -140,7 +140,7 @@ RSpec.describe Issues::CreateService do
         it 'does not call Issues::AfterCreateService' do
           expect(::Issues::AfterCreateService).not_to receive(:new)
 
-          described_class.new(project, user, opts).execute
+          described_class.new(container: project, current_user: user, params: opts).execute
         end
       end
 
@@ -228,7 +228,7 @@ RSpec.describe Issues::CreateService do
         it 'invalidates open issues counter for assignees when issue is assigned' do
           project.add_maintainer(assignee)
 
-          described_class.new(project, user, opts).execute
+          described_class.new(container: project, current_user: user, params: opts).execute
 
           expect(assignee.assigned_open_issues_count).to eq 1
         end
@@ -254,7 +254,7 @@ RSpec.describe Issues::CreateService do
         expect(project).to receive(:execute_hooks).with(an_instance_of(Hash), :issue_hooks)
         expect(project).to receive(:execute_services).with(an_instance_of(Hash), :issue_hooks)
 
-        described_class.new(project, user, opts).execute
+        described_class.new(container: project, current_user: user, params: opts).execute
       end
 
       it 'executes confidential issue hooks when issue is confidential' do
@@ -263,7 +263,7 @@ RSpec.describe Issues::CreateService do
         expect(project).to receive(:execute_hooks).with(an_instance_of(Hash), :confidential_issue_hooks)
         expect(project).to receive(:execute_services).with(an_instance_of(Hash), :confidential_issue_hooks)
 
-        described_class.new(project, user, opts).execute
+        described_class.new(container: project, current_user: user, params: opts).execute
       end
 
       context 'after_save callback to store_mentions' do
@@ -307,7 +307,7 @@ RSpec.describe Issues::CreateService do
         it 'removes assignee when user id is invalid' do
           opts = { title: 'Title', description: 'Description', assignee_ids: [-1] }
 
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(container: project, current_user: user, params: opts).execute
 
           expect(issue.assignees).to be_empty
         end
@@ -315,7 +315,7 @@ RSpec.describe Issues::CreateService do
         it 'removes assignee when user id is 0' do
           opts = { title: 'Title', description: 'Description', assignee_ids: [0] }
 
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(container: project, current_user: user, params: opts).execute
 
           expect(issue.assignees).to be_empty
         end
@@ -324,7 +324,7 @@ RSpec.describe Issues::CreateService do
           project.add_maintainer(assignee)
           opts = { title: 'Title', description: 'Description', assignee_ids: [assignee.id] }
 
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(container: project, current_user: user, params: opts).execute
 
           expect(issue.assignees).to eq([assignee])
         end
@@ -342,7 +342,7 @@ RSpec.describe Issues::CreateService do
               project.update!(visibility_level: level)
               opts = { title: 'Title', description: 'Description', assignee_ids: [assignee.id] }
 
-              issue = described_class.new(project, user, opts).execute
+              issue = described_class.new(container: project, current_user: user, params: opts).execute
 
               expect(issue.assignees).to be_empty
             end
@@ -352,7 +352,7 @@ RSpec.describe Issues::CreateService do
     end
 
     it_behaves_like 'issuable record that supports quick actions' do
-      let(:issuable) { described_class.new(project, user, params).execute }
+      let(:issuable) { described_class.new(container: project, current_user: user, params: params).execute }
     end
 
     context 'Quick actions' do
@@ -392,14 +392,14 @@ RSpec.describe Issues::CreateService do
         let(:opts) { { discussion_to_resolve: discussion.id, merge_request_to_resolve_discussions_of: merge_request.iid } }
 
         it 'resolves the discussion' do
-          described_class.new(project, user, opts).execute
+          described_class.new(container: project, current_user: user, params: opts).execute
           discussion.first_note.reload
 
           expect(discussion.resolved?).to be(true)
         end
 
         it 'added a system note to the discussion' do
-          described_class.new(project, user, opts).execute
+          described_class.new(container: project, current_user: user, params: opts).execute
 
           reloaded_discussion = MergeRequest.find(merge_request.id).discussions.first
 
@@ -414,10 +414,12 @@ RSpec.describe Issues::CreateService do
         end
 
         it 'can set nil explicitly to the title and description' do
-          issue = described_class.new(project, user,
-                                      merge_request_to_resolve_discussions_of: merge_request,
-                                      description: nil,
-                                      title: nil).execute
+          issue = described_class.new(container: project, current_user: user,
+                                      params: {
+                                        merge_request_to_resolve_discussions_of: merge_request,
+                                        description: nil,
+                                        title: nil
+                                      }).execute
 
           expect(issue.description).to be_nil
           expect(issue.title).to be_nil
@@ -428,14 +430,14 @@ RSpec.describe Issues::CreateService do
         let(:opts) { { merge_request_to_resolve_discussions_of: merge_request.iid } }
 
         it 'resolves the discussion' do
-          described_class.new(project, user, opts).execute
+          described_class.new(container: project, current_user: user, params: opts).execute
           discussion.first_note.reload
 
           expect(discussion.resolved?).to be(true)
         end
 
         it 'added a system note to the discussion' do
-          described_class.new(project, user, opts).execute
+          described_class.new(container: project, current_user: user, params: opts).execute
 
           reloaded_discussion = MergeRequest.find(merge_request.id).discussions.first
 
@@ -443,17 +445,19 @@ RSpec.describe Issues::CreateService do
         end
 
         it 'assigns the title and description for the issue' do
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(container: project, current_user: user, params: opts).execute
 
           expect(issue.title).not_to be_nil
           expect(issue.description).not_to be_nil
         end
 
         it 'can set nil explicitly to the title and description' do
-          issue = described_class.new(project, user,
-                                      merge_request_to_resolve_discussions_of: merge_request,
-                                      description: nil,
-                                      title: nil).execute
+          issue = described_class.new(container: project, current_user: user,
+                                      params: {
+                                        merge_request_to_resolve_discussions_of: merge_request,
+                                        description: nil,
+                                        title: nil
+                                      }).execute
 
           expect(issue.description).to be_nil
           expect(issue.title).to be_nil
@@ -478,7 +482,7 @@ RSpec.describe Issues::CreateService do
       end
 
       subject do
-        described_class.new(project, user, params)
+        described_class.new(container: project, current_user: user, params: params)
       end
 
       before do
