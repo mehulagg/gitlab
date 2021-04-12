@@ -70,7 +70,7 @@ RSpec.describe Analytics::CycleAnalytics::ValueStreams::CreateService do
 
       context 'when creating a default stage' do
         before do
-          params[:stages] = [{ name: 'plan', custom: false }]
+          params[:stages] = [{ id: 'plan', name: 'plan', custom: false }]
         end
 
         let(:custom_stage) { subject.payload[:value_stream].stages.first }
