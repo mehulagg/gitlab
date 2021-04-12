@@ -11572,6 +11572,23 @@ CREATE SEQUENCE clusters_id_seq
 
 ALTER SEQUENCE clusters_id_seq OWNED BY clusters.id;
 
+CREATE TABLE clusters_integration_prometheus (
+    id bigint NOT NULL,
+    cluster_id bigint NOT NULL,
+    enabled boolean DEFAULT true NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE clusters_integration_prometheus_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE clusters_integration_prometheus_id_seq OWNED BY clusters_integration_prometheus.id;
+
 CREATE TABLE clusters_kubernetes_namespaces (
     id bigint NOT NULL,
     cluster_id integer NOT NULL,
@@ -19254,6 +19271,8 @@ ALTER TABLE ONLY clusters_applications_prometheus ALTER COLUMN id SET DEFAULT ne
 
 ALTER TABLE ONLY clusters_applications_runners ALTER COLUMN id SET DEFAULT nextval('clusters_applications_runners_id_seq'::regclass);
 
+ALTER TABLE ONLY clusters_integration_prometheus ALTER COLUMN id SET DEFAULT nextval('clusters_integration_prometheus_id_seq'::regclass);
+
 ALTER TABLE ONLY clusters_kubernetes_namespaces ALTER COLUMN id SET DEFAULT nextval('clusters_kubernetes_namespaces_id_seq'::regclass);
 
 ALTER TABLE ONLY commit_user_mentions ALTER COLUMN id SET DEFAULT nextval('commit_user_mentions_id_seq'::regclass);
@@ -20445,6 +20464,9 @@ ALTER TABLE ONLY clusters_applications_prometheus
 
 ALTER TABLE ONLY clusters_applications_runners
     ADD CONSTRAINT clusters_applications_runners_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY clusters_integration_prometheus
+    ADD CONSTRAINT clusters_integration_prometheus_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY clusters_kubernetes_namespaces
     ADD CONSTRAINT clusters_kubernetes_namespaces_pkey PRIMARY KEY (id);
@@ -22360,6 +22382,8 @@ CREATE UNIQUE INDEX index_clusters_applications_prometheus_on_cluster_id ON clus
 CREATE UNIQUE INDEX index_clusters_applications_runners_on_cluster_id ON clusters_applications_runners USING btree (cluster_id);
 
 CREATE INDEX index_clusters_applications_runners_on_runner_id ON clusters_applications_runners USING btree (runner_id);
+
+CREATE UNIQUE INDEX index_clusters_integration_prometheus_on_cluster_id ON clusters_integration_prometheus USING btree (cluster_id);
 
 CREATE INDEX index_clusters_kubernetes_namespaces_on_cluster_id ON clusters_kubernetes_namespaces USING btree (cluster_id);
 
@@ -26667,6 +26691,9 @@ ALTER TABLE ONLY ci_builds_metadata
 
 ALTER TABLE ONLY vulnerability_finding_evidences
     ADD CONSTRAINT fk_rails_e3205a0c65 FOREIGN KEY (vulnerability_occurrence_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY clusters_integration_prometheus
+    ADD CONSTRAINT fk_rails_e44472034c FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY vulnerability_occurrence_identifiers
     ADD CONSTRAINT fk_rails_e4ef6d027c FOREIGN KEY (occurrence_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
