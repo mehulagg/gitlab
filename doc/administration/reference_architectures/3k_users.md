@@ -214,7 +214,7 @@ The following list includes descriptions of each server and its assigned IP:
 
 In a multi-node GitLab configuration, you'll need a load balancer to route
 traffic to the application servers. The specifics on which load balancer to use
-or its exact configuration is beyond the scope of GitLab documentation.We assume
+or its exact configuration is beyond the scope of GitLab documentation. We assume
 that if you're managing multi-node systems like GitLab, you already have a load
 balancer of choice and that the routing methods used are distributing calls evenly
 between all nodes. Some load balancer examples include HAProxy (open-source),
