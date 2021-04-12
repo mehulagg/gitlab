@@ -52,9 +52,7 @@ RSpec.describe ConfirmSupportBotUser, :migration do
     end
 
     it 'does not change the `created_at` attribute' do
-      migrate!
-
-      expect(support_bot.reload.created_at).to be(nil)
+      expect { migrate!}.not_to change { support_bot.reload.created_at }.from(nil)
     end
   end
 
@@ -75,7 +73,7 @@ RSpec.describe ConfirmSupportBotUser, :migration do
   private
 
   def create_user!(name: 'GitLab Support Bot', email: 'support@example.com', user_type:, created_at: Time.now, confirmed_at: nil, record_timestamps: true)
-    user = users.create!(
+    users.create!(
       name: name,
       email: email,
       username: name,
