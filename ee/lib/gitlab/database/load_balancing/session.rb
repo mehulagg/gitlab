@@ -67,11 +67,11 @@ module Gitlab
         # - The current session already performed writes
         # - It prefers to use primary, aka, use_primary or use_primary! were called
         def fallback_to_replicas_for_ambiguous_queries(&blk)
-          used_replica = @fallback_to_replicas_for_ambiguous_queries
+          previous_flag = @fallback_to_replicas_for_ambiguous_queries
           @fallback_to_replicas_for_ambiguous_queries = true
           yield
         ensure
-          @fallback_to_replicas_for_ambiguous_queries = used_replica
+          @fallback_to_replicas_for_ambiguous_queries = previous_flag
         end
 
         def fallback_to_replicas_for_ambiguous_queries?
