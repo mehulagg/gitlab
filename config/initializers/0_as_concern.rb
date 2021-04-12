@@ -2,6 +2,6 @@
 
 module ActiveSupport
   module Concern
-    prepend Gitlab::Patch::Prependable
+    # prepend Gitlab::Patch::Prependable
   end
 end
