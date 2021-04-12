@@ -2269,6 +2269,17 @@ RSpec.describe MergeRequest, factory_default: :keep do
     subject(:mr_diff_report) { merge_request.find_codequality_mr_diff_reports }
 
     context 'when head pipeline has coverage reports' do
+      context 'when unlicensed' do
+        before do
+          stub_licensed_features(codequality_mr_diff_report: false)
+        end
+
+        it 'return status unauthorized' do
+          expect(mr_diff_report[:status]).to eq(:unauthorized)
+          expect(mr_diff_report[:status_reason]).to eq("You must have a GitLab ultimate plan to use this feature.")
+        end
+      end
+
       context 'when reactive cache worker is parsing results asynchronously' do
         it 'returns status' do
           expect(mr_diff_report[:status]).to eq(:parsing)

@@ -141,6 +141,7 @@ class License < ApplicationRecord
     api_fuzzing
     auto_rollback
     cilium_alerts
+    codequality_mr_diff_report
     compliance_approval_gates
     container_scanning
     coverage_fuzzing
