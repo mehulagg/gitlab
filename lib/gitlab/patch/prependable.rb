@@ -12,16 +12,10 @@
 module Gitlab
   module Patch
     module Prependable
-      class MultiplePrependedBlocks < StandardError
-        def initialize
-          super "Cannot define multiple 'prepended' blocks for a Concern"
-        end
-      end
-
       def prepend_features(base)
         return false if prepended?(base)
 
-        super
+        Module.instance_method(:prepend_features).bind(self).call(base)
 
         if const_defined?(:ClassMethods)
           klass_methods = const_get(:ClassMethods, false)
@@ -47,17 +41,6 @@ module Gitlab
 
         # Hack to resolve https://gitlab.com/gitlab-org/gitlab/-/issues/23932
         extend class_methods_module if ENV['STATIC_VERIFICATION']
-      end
-
-      def prepended(base = nil, &block)
-        if base.nil?
-          raise MultiplePrependedBlocks if
-            instance_variable_defined?(:@_prepended_block)
-
-          @_prepended_block = block
-        else
-          super
-        end
       end
 
       def prepended?(base)
