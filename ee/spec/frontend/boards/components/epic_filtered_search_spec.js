@@ -1,9 +1,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { __ } from '~/locale';
 import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_search.vue';
 import { createStore } from '~/boards/stores';
-import * as commonUtils from '~/lib/utils/common_utils';
+import * as urlUtility from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
@@ -16,10 +15,10 @@ describe('EpicFilteredSearch', () => {
   let wrapper;
   let store;
 
-  const createComponent = () => {
+  const createComponent = ({ initialFilterParams = {} }) => {
     wrapper = shallowMount(EpicFilteredSearch, {
       localVue,
-      provide: { search: '' },
+      provide: { initialFilterParams },
       store,
     });
   };
@@ -53,7 +52,7 @@ describe('EpicFilteredSearch', () => {
         {
           icon: 'labels',
           title: __('Label'),
-          type: 'labels',
+          type: 'label_name',
           operators: [{ value: '=', description: 'is' }],
           token: LabelToken,
           unique: false,
@@ -63,7 +62,7 @@ describe('EpicFilteredSearch', () => {
         {
           icon: 'pencil',
           title: __('Author'),
-          type: 'author',
+          type: 'author_username',
           operators: [{ value: '=', description: 'is' }],
           symbol: '@',
           token: AuthorToken,
@@ -83,13 +82,56 @@ describe('EpicFilteredSearch', () => {
       });
 
       it('calls historyPushState', () => {
-        jest.spyOn(commonUtils, 'historyPushState');
+        jest.spyOn(urlUtility, 'updateHistory');
         findFilteredSearch().vm.$emit('onFilter', [{ value: { data: 'searchQuery' } }]);
 
-        expect(commonUtils.historyPushState).toHaveBeenCalledWith(
+        expect(urlUtility.updateHistory).toHaveBeenCalledWith(
           'http://test.host/?search=searchQuery',
         );
       });
+    });
+  });
+
+  describe('when searching', () => {
+    beforeEach(() => {
+      store = createStore();
+
+      jest.spyOn(store, 'dispatch');
+
+      createComponent();
+    });
+
+    it('sets the url params to the correct results', async () => {
+      const mockFilters = [
+        { type: 'author_username', value: { data: 'root' } },
+        { type: 'label_name', value: { data: 'label' } },
+        { type: 'label_name', value: { data: 'label2' } },
+      ];
+      jest.spyOn(urlUtility, 'updateHistory');
+      findFilteredSearch().vm.$emit('onFilter', mockFilters);
+
+      expect(urlUtility.updateHistory).toHaveBeenCalledWith({
+        title: '',
+        replace: true,
+        url: 'http://test.host/?author_username=root&label_name[]=label&label_name[]=label2',
+      });
+    });
+  });
+
+  describe('when url params are already set', () => {
+    beforeEach(() => {
+      store = createStore();
+
+      jest.spyOn(store, 'dispatch');
+
+      createComponent({ initialFilterParams: { authorUsername: 'root', labelName: ['label'] } });
+    });
+
+    it('passes the correct props to FitlerSearchBar', async () => {
+      expect(findFilteredSearch().props('initialFilterValue')).toEqual([
+        { type: 'author_username', value: { data: 'root' } },
+        { type: 'label_name', value: { data: 'label' } },
+      ]);
     });
   });
 });

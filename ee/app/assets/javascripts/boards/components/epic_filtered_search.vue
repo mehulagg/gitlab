@@ -17,13 +17,10 @@ export default {
   data() {
     return {
       filterParams: this.initialFilterParams,
-    }
+    };
   },
   computed: {
     ...mapState(['fullPath']),
-    initialSearch() {
-      return [{ type: 'filtered-search-term', value: { data: this.search } }];
-    },
     tokens() {
       return [
         {
@@ -49,14 +46,14 @@ export default {
       ];
     },
     urlParams() {
-      const  { authorUsername, labelName, search } = this.filterParams;
+      const { authorUsername, labelName, search } = this.filterParams;
 
       return {
         author_username: authorUsername,
         'label_name[]': labelName,
         search,
       };
-    }
+    },
   },
   methods: {
     ...mapActions(['performSearch']),
@@ -114,7 +111,6 @@ export default {
       if (plainText.length) {
         filterParams.search = plainText.join(' ');
       }
-  console.log(filterParams)
       return filterParams;
     },
     fetchAuthors(authorsSearchTerm) {
@@ -141,7 +137,6 @@ export default {
     },
     handleFilterEpics(filters) {
       this.filterParams = this.getFilterParams(filters);
-      console.log(this.filterParams, this.urlParams)
       updateHistory({
         url: setUrlParams(this.urlParams, window.location.href, true, false, true),
         title: document.title,

@@ -7,9 +7,8 @@ export default (apolloProvider) => {
   const el = document.getElementById('js-board-filtered-search');
   const rawFilterParams = urlParamsToObject(window.location.search);
   const initialFilterParams = {
-    ...convertObjectPropsToCamelCase(rawFilterParams, {
-    })
-  }
+    ...convertObjectPropsToCamelCase(rawFilterParams, {}),
+  };
 
   if (!el) {
     return null;

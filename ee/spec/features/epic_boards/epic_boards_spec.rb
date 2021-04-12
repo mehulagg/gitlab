@@ -183,6 +183,23 @@ RSpec.describe 'epic boards', :js do
         expect(page).to have_text("Author = #{user.name} Label = ~#{label.title}")
       end
     end
+
+    it 'can select a Label and filter the board' do
+      page.find('[data-testid="epic-filtered-search"]').click
+
+      page.within('[data-testid="epic-filtered-search"]') do
+        click_link 'Label'
+        wait_for_requests
+        click_link label.title
+
+        find('input').native.send_keys(:return)
+
+        wait_for_requests
+
+        expect(page).to have_text(label.title)
+        expect(page).not_to have_text(label2.title)
+      end
+    end
   end
 
   def visit_epic_boards_page
