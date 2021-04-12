@@ -93,7 +93,7 @@ module Gitlab
             end
 
             def validation_service_token
-              ENV['EXTERNAL_VALIDATION_SERVICE_TOKEN']
+              Gitlab.config.pipeline_validation_service.token
             end
 
             def validation_service_payload
