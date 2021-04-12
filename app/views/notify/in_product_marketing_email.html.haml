@@ -186,7 +186,7 @@
                     %tr{ style: "background-color: #ffffff;" }
                       %td{ style: "color: #424242; padding: 10px 30px; text-align: center; font-family: 'Source Sans Pro', helvetica, arial, sans-serif;font-size: 16px; line-height: 22px; border: 1px solid #dddddd" }
                         %p
-                          = in_product_marketing_progress(@track, @series)
+                          = in_product_marketing_progress(@track, @series, format: :html).html_safe
                     %tr{ style: "background-color: #ffffff;" }
                       %td{ align: "center", style: "padding:75px 20px 25px;" }
                         = about_link('', 'gitlab_logo.png', 80)
