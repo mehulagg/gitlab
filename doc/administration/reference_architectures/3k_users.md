@@ -2053,10 +2053,10 @@ The 3k GitLab reference architecture is the smallest we recommend that achieves 
 However, for environments that need to serve less users but maintain HA there's several
 supported modifications you can make to this architecture to reduce complexity and cost.
 
-It should be noted that to achieve HA with GitLab this architecture's makeup is what is
+It should be noted that to achieve HA with GitLab this architecture's makeup is ultimately what is
 required. Each component has various considerations and rules to follow and this architecture
 meets all of these. Smaller versions of this architecture then will be fundamentally the same
-but with smaller performance requirements several modifications can be considered as follows:
+but with smaller performance requirements, several modifications can be considered as follows:
 
 - Lowering Node Specs - Depending on your user count you can lower all suggested node specs as desired. We recommend that you don't go lower than the [general requirements](../../install/requirements.md) however.
 - Combining select nodes - Some nodes can be combined to reduce complexity at the cost of some performance as follows:
