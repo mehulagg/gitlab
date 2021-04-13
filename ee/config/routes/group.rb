@@ -124,6 +124,8 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
 
     resources :iterations, only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }
 
+    resources :cadences, only: [:index, :new], constraints: { id: /\d+/ }
+
     resources :issues, only: [] do
       collection do
         post :bulk_update
