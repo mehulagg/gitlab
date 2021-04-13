@@ -26,11 +26,30 @@ module EE
         labels: board.labels.to_json(only: [:id, :title, :color, :text_color] ),
         board_weight: board.weight,
         weight_feature_available: current_board_parent.feature_available?(:issue_weights).to_s,
+        milestone_lists_available: current_board_parent.feature_available?(:board_milestone_lists).to_s,
+        assignee_lists_available: current_board_parent.feature_available?(:board_assignee_lists).to_s,
+        iteration_lists_available: current_board_parent.feature_available?(:board_iteration_lists).to_s,
         show_promotion: show_feature_promotion,
-        scoped_labels: current_board_parent.feature_available?(:scoped_labels)&.to_s
+        scoped_labels: current_board_parent.feature_available?(:scoped_labels)&.to_s,
+        can_update: can_update?.to_s,
+        can_admin_list: can_admin_list?.to_s
       }
 
       super.merge(data)
+    end
+
+    override :can_update?
+    def can_update?
+      return can?(current_user, :admin_epic, board) if board.is_a?(::Boards::EpicBoard)
+
+      super
+    end
+
+    override :can_admin_list?
+    def can_admin_list?
+      return can?(current_user, :admin_epic_board_list, current_board_parent) if board.is_a?(::Boards::EpicBoard)
+
+      super
     end
 
     override :board_base_url

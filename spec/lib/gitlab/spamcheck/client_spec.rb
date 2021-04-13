@@ -39,7 +39,7 @@ RSpec.describe Gitlab::Spamcheck::Client do
     with_them do
       let(:verdict_value) { verdict }
 
-      it 'returns ALLOW' do
+      it "returns expected spam constant" do
         expect(subject).to eq([expected, ""])
       end
     end

@@ -3,51 +3,53 @@
 require 'spec_helper'
 
 RSpec.describe Analytics::DevopsAdoption::Segments::FindOrCreateService do
-  include AdminModeHelper
-
-  let_it_be(:user) { create(:user, :admin) }
   let_it_be(:group) { create(:group) }
+  let_it_be(:reporter) { create(:user).tap { |u| group.add_reporter(u) } }
+
+  let(:current_user) { reporter }
 
   let(:params) { { namespace: group } }
-  let(:segment) { subject.payload[:segment] }
 
-  subject { described_class.new(params: params, current_user: user).execute }
+  subject(:response) { described_class.new(params: params, current_user: current_user).execute }
 
   before do
-    enable_admin_mode!(user)
+    stub_licensed_features(group_level_devops_adoption: true)
   end
 
-  context 'for admins' do
-    context 'when segment for given namespace already exists' do
-      let!(:segment) { create :devops_adoption_segment, namespace: group }
+  context 'when segment for given namespace already exists' do
+    let!(:segment) { create :devops_adoption_segment, namespace: group }
 
-      it 'returns existing segment' do
-        expect do
-          subject
-        end.not_to change { Analytics::DevopsAdoption::Segment.count }
+    it 'returns existing segment' do
+      expect { response }.not_to change { Analytics::DevopsAdoption::Segment.count }
 
-        expect(subject.payload.fetch(:segment)).to eq(segment)
-      end
-    end
-
-    context 'when segment for given namespace does not exist' do
-      it 'calls for segment creation' do
-        expect_next_instance_of(Analytics::DevopsAdoption::Segments::CreateService, current_user: user, params: { namespace: group }) do |instance|
-          expect(instance).to receive(:execute).and_return('create_response')
-        end
-
-        expect(subject).to eq 'create_response'
-      end
+      expect(subject.payload.fetch(:segment)).to eq(segment)
     end
   end
 
-  context 'for non-admins' do
-    let_it_be(:user) { build(:user) }
+  context 'when segment for given namespace does not exist' do
+    it 'calls for segment creation' do
+      expect_next_instance_of(Analytics::DevopsAdoption::Segments::CreateService, current_user: current_user, params: { namespace: group }) do |instance|
+        expect(instance).to receive(:execute).and_return('create_response')
+      end
+
+      expect(response).to eq 'create_response'
+    end
+  end
+
+  it 'authorizes for manage_devops_adoption' do
+    expect(::Ability).to receive(:allowed?)
+                           .with(current_user, :manage_devops_adoption_segments, group)
+                           .at_least(1)
+                           .and_return(true)
+
+    response
+  end
+
+  context 'when user cannot manage devops adoption for given namespace' do
+    let(:current_user) { create(:user) }
 
     it 'returns forbidden error' do
-      expect do
-        subject
-      end.to raise_error(Analytics::DevopsAdoption::Segments::AuthorizationError)
+      expect { response }.to raise_error(Analytics::DevopsAdoption::Segments::AuthorizationError)
     end
   end
 end

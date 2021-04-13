@@ -16,4 +16,4 @@
             .text-secondary
               - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/markdown') }
               = _('Description parsed with %{link_start}GitLab Flavored Markdown%{link_end}.').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
-        = f.submit _('Save changes'), class: "gl-button btn btn-success", data: { qa_selector: 'save_issue_template_button' }
+        = f.submit _('Save changes'), class: "gl-button btn btn-confirm", data: { qa_selector: 'save_issue_template_button' }

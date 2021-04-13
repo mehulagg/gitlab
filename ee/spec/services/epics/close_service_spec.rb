@@ -59,8 +59,15 @@ RSpec.describe Epics::CloseService do
             subject.execute(epic)
           end
 
-          it "creates new event" do
+          it 'creates new event' do
             expect { subject.execute(epic) }.to change { Event.count }
+          end
+
+          it 'tracks closing the epic' do
+            expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter)
+              .to receive(:track_epic_closed_action).with(author: user)
+
+            subject.execute(epic)
           end
         end
 
@@ -93,6 +100,12 @@ RSpec.describe Epics::CloseService do
 
           it "does not create an event" do
             expect { subject.execute(epic) }.not_to change { Event.count }
+          end
+
+          it 'does not track closing the epic' do
+            expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).not_to receive(:track_epic_closed_action)
+
+            subject.execute(epic)
           end
         end
       end

@@ -11,10 +11,22 @@ module EE
           detail = super
 
           if ::Gitlab::Database::LoadBalancing.enable?
-            detail[:db_role] = ::Gitlab::Database::LoadBalancing.db_role_for_connection(data[:connection])
+            role = ::Gitlab::Database::LoadBalancing.db_role_for_connection(data[:connection]) ||
+              ::Gitlab::Database::LoadBalancing::ROLE_UNKNOWN
+            detail[:db_role] = role.to_s.capitalize
           end
 
           detail
+        end
+
+        override :count_summary
+        def count_summary(item, count)
+          super
+
+          if ::Gitlab::Database::LoadBalancing.enable?
+            count[item[:db_role]] ||= 0
+            count[item[:db_role]] += 1
+          end
         end
       end
     end

@@ -228,6 +228,7 @@ RSpec.describe Epic do
 
     context 'when adding an Epic that has existing children' do
       let_it_be(:parent_epic) { create(:epic, group: group) }
+
       let(:epic) { build(:epic, group: group) }
 
       it 'returns true when total depth after adding will not exceed limit' do
@@ -250,6 +251,7 @@ RSpec.describe Epic do
     context 'when parent has ancestors and epic has children' do
       let_it_be(:root_epic) { create(:epic, group: group) }
       let_it_be(:parent_epic) { create(:epic, group: group, parent: root_epic) }
+
       let(:epic) { build(:epic, group: group) }
       let(:child_epic1) { create(:epic, group: group, parent: epic)}
 

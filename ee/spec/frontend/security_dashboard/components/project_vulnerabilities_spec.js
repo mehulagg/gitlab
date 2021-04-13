@@ -1,8 +1,14 @@
 import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import ProjectVulnerabilitiesApp from 'ee/security_dashboard/components/project_vulnerabilities.vue';
 import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
+import vulnerabilitiesQuery from 'ee/security_dashboard/graphql/queries/project_vulnerabilities.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { generateVulnerabilities } from './mock_data';
+
+const localVue = createLocalVue();
+localVue.use(VueApollo);
 
 describe('Vulnerabilities app component', () => {
   let wrapper;
@@ -178,6 +184,40 @@ describe('Vulnerabilities app component', () => {
       wrapper.setData({ securityScanners });
 
       expect(findVulnerabilityList().props().securityScanners).toEqual(securityScanners);
+    });
+  });
+
+  describe('filters prop', () => {
+    const mockQuery = jest.fn().mockResolvedValue({
+      data: {
+        project: {
+          vulnerabilities: {
+            nodes: [],
+            pageInfo: { startCursor: '', endCursor: '' },
+          },
+        },
+      },
+    });
+
+    const createWrapperWithApollo = ({ query, filters }) => {
+      wrapper = shallowMount(ProjectVulnerabilitiesApp, {
+        localVue,
+        apolloProvider: createMockApollo([[vulnerabilitiesQuery, query]]),
+        propsData: { filters },
+        provide: { groupFullPath: 'path' },
+      });
+    };
+
+    it('does not run the query when filters is null', () => {
+      createWrapperWithApollo({ query: mockQuery, filters: null });
+
+      expect(mockQuery).not.toHaveBeenCalled();
+    });
+
+    it('runs query when filters is an object', () => {
+      createWrapperWithApollo({ query: mockQuery, filters: {} });
+
+      expect(mockQuery).toHaveBeenCalled();
     });
   });
 });

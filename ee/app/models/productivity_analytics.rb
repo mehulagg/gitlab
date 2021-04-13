@@ -14,7 +14,7 @@ class ProductivityAnalytics
   }.freeze
 
   METRIC_TYPES = METRIC_COLUMNS.keys.freeze
-  DEFAULT_TYPE = 'days_to_merge'.freeze
+  DEFAULT_TYPE = 'days_to_merge'
 
   def self.start_date
     ApplicationSetting.current&.productivity_analytics_start_date
@@ -28,17 +28,17 @@ class ProductivityAnalytics
   def histogram_data(type:)
     return unless column = METRIC_COLUMNS[type]
 
-    histogram_query(column).map do |data|
+    histogram_query(column).to_h do |data|
       [data[:metric]&.to_i, data[:mr_count]]
-    end.to_h
+    end
   end
 
   def scatterplot_data(type:)
     return unless column = METRIC_COLUMNS[type]
 
-    scatterplot_query(column).map do |data|
+    scatterplot_query(column).to_h do |data|
       [data.id, { metric: data[:metric], merged_at: data[:merged_at] }]
-    end.to_h
+    end
   end
 
   def merge_requests_extended

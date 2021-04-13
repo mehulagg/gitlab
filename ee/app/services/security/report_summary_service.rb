@@ -4,6 +4,8 @@ module Security
   class ReportSummaryService
     include Gitlab::Utils::StrongMemoize
 
+    SCANNED_RESOURCES_LIMIT = 20
+
     # @param [Ci::Pipeline] pipeline
     # @param [Hash[Symbol, Array[Symbol]] selection_information keys must be in the set of Enums::Vulnerability.report_types for example: {dast: [:scanned_resources_count, :vulnerabilities_count], container_scanning:[:vulnerabilities_count]}
     def initialize(pipeline, selection_information)
@@ -32,6 +34,8 @@ module Security
           response[:scanned_resources] = scanned_resources[report_type.to_s]
         when :scanned_resources_csv_path
           response[:scanned_resources_csv_path] = csv_path
+        when :scans
+          response[:scans] = grouped_scans[report_type.to_s]
         end
       end
     end
@@ -50,8 +54,7 @@ module Security
 
     def scanned_resources
       strong_memoize(:scanned_resources) do
-        scanned_resources_limit = 20
-        ::Security::ScannedResourcesService.new(@pipeline, requested_report_types(:scanned_resources), scanned_resources_limit).execute
+        ::Security::ScannedResourcesService.new(@pipeline, requested_report_types(:scanned_resources), SCANNED_RESOURCES_LIMIT).execute
       end
     end
 
@@ -65,6 +68,10 @@ module Security
       strong_memoize(:scanned_resources_counts) do
         ::Security::ScannedResourcesCountingService.new(@pipeline, requested_report_types(:scanned_resources_count)).execute
       end
+    end
+
+    def grouped_scans
+      @grouped_scans ||= @pipeline.security_scans.by_scan_types(@selection_information.keys).group_by(&:scan_type)
     end
 
     def report_exists?(report_type)

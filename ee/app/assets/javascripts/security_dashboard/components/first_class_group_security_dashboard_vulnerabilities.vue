@@ -13,15 +13,12 @@ export default {
     GlIntersectionObserver,
     VulnerabilityList,
   },
+  inject: ['groupFullPath'],
   props: {
-    groupFullPath: {
-      type: String,
-      required: true,
-    },
     filters: {
       type: Object,
       required: false,
-      default: () => ({}),
+      default: null,
     },
   },
   data() {
@@ -50,6 +47,9 @@ export default {
       },
       error() {
         this.errorLoadingVulnerabilities = true;
+      },
+      skip() {
+        return !this.filters;
       },
     },
   },

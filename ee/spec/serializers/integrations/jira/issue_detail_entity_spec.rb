@@ -40,11 +40,7 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
         'comment' => {
           'comments' => [
             {
-              'id' => '10022',
-              'author' => comment_author,
-              'body' => '<p>Comment</p>',
-              'created' => '2020-06-25T15:50:00.000+0000',
-              'updated' => '2020-06-25T15:51:00.000+0000'
+              'body' => '<p>Comment</p>'
             }
           ]
         }
@@ -56,7 +52,18 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       labels: ['backend'],
       fields: {
         'reporter' => reporter,
-        'assignee' => assignee
+        'assignee' => assignee,
+        'comment' => {
+          'comments' => [
+            {
+              'id' => '10022',
+              'author' => comment_author,
+              'body' => '<p>Comment</p>',
+              'created' => '2020-06-25T15:50:00.000+0000',
+              'updated' => '2020-06-25T15:51:00.000+0000'
+            }
+          ]
+        }
       },
       project: double(key: 'GL'),
       key: 'GL-5',

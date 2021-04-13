@@ -1,14 +1,9 @@
 <script>
-import { GlResizeObserverDirective } from '@gitlab/ui';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
-import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 
 export default {
   PRESET_TYPES,
-  directives: {
-    GlResizeObserver: GlResizeObserverDirective,
-  },
   mixins: [CommonMixin],
   props: {
     timeframeItem: {
@@ -33,9 +28,6 @@ export default {
       return headerSubItems;
     },
   },
-  mounted() {
-    this.updateShiftStyles();
-  },
   methods: {
     getSubItemValueClass(subItem) {
       // Show dark color text only for current & upcoming dates
@@ -49,24 +41,12 @@ export default {
     getSubItemValue(subItem) {
       return subItem.getDate();
     },
-    updateShiftStyles() {
-      this.$apollo.mutate({
-        mutation: updateShiftTimeUnitWidthMutation,
-        variables: {
-          shiftTimeUnitWidth: this.$refs.weeklyDayCell[0].offsetWidth,
-        },
-      });
-    },
   },
 };
 </script>
 
 <template>
-  <div
-    v-gl-resize-observer="updateShiftStyles"
-    class="item-sublabel"
-    data-testid="week-item-sublabel"
-  >
+  <div class="item-sublabel" data-testid="week-item-sublabel">
     <span
       v-for="(subItem, index) in headerSubItems"
       :key="index"
@@ -78,7 +58,7 @@ export default {
     >
     <span
       v-if="hasToday"
-      :style="getIndicatorStyles($options.PRESET_TYPES.WEEKS)"
+      :style="getIndicatorStyles($options.PRESET_TYPES.WEEKS, timeframeItem)"
       class="current-day-indicator-header preset-weeks"
     ></span>
   </div>

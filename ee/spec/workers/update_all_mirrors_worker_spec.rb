@@ -32,10 +32,10 @@ RSpec.describe UpdateAllMirrorsWorker do
       outer_context = nil
 
       Gitlab::ApplicationContext.with_context(project: build(:project)) do
-        outer_context = Labkit::Context.current.to_h
+        outer_context = Gitlab::ApplicationContext.current
 
         expect(worker).to receive(:schedule_mirrors!) do
-          inner_context = Labkit::Context.current.to_h
+          inner_context = Gitlab::ApplicationContext.current
 
           # `schedule_mirrors!` needs to return an integer.
           0

@@ -1,7 +1,6 @@
 <script>
-import { GlButton, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
+import { GlButton, GlEmptyState, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
 import { getParameterByName } from '~/lib/utils/common_utils';
-import SvgBlankState from '~/pipelines/components/pipelines_list/blank_state.vue';
 import PipelinesTableComponent from '~/pipelines/components/pipelines_list/pipelines_table.vue';
 import eventHub from '~/pipelines/event_hub';
 import PipelinesMixin from '~/pipelines/mixins/pipelines_mixin';
@@ -13,12 +12,12 @@ import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 export default {
   components: {
     GlButton,
+    GlEmptyState,
     GlLink,
     GlLoadingIcon,
     GlModal,
     PipelinesTableComponent,
     TablePagination,
-    SvgBlankState,
   },
   mixins: [PipelinesMixin, glFeatureFlagMixin()],
   props: {
@@ -82,7 +81,7 @@ export default {
       return this.hasError && !this.isLoading;
     },
     /**
-     * The Run Pipeline button can only be rendered when:
+     * The "Run pipeline" button can only be rendered when:
      * - In MR view -  we use `canCreatePipelineInTargetProject` for that purpose
      * - If the latest pipeline has the `detached_merge_request_pipeline` flag
      *
@@ -149,7 +148,7 @@ export default {
       }
     },
     /**
-     * When the user clicks on the Run Pipeline button
+     * When the user clicks on the "Run pipeline" button
      * we need to make a post request and
      * to update the table content once the request is finished.
      *
@@ -178,17 +177,17 @@ export default {
   <div class="content-list pipelines">
     <gl-loading-icon
       v-if="isLoading"
-      :label="s__('Pipelines|Loading Pipelines')"
+      :label="s__('Pipelines|Loading pipelines')"
       size="lg"
       class="prepend-top-20"
     />
 
-    <svg-blank-state
+    <gl-empty-state
       v-else-if="shouldRenderErrorState"
       :svg-path="errorStateSvgPath"
-      :message="
+      :title="
         s__(`Pipelines|There was an error fetching the pipelines.
-      Try again in a few moments or contact your support team.`)
+        Try again in a few moments or contact your support team.`)
       "
     />
 
@@ -198,12 +197,12 @@ export default {
         block
         class="gl-mt-3 gl-mb-3"
         :class="pipelineButtonClass"
-        variant="success"
+        variant="confirm"
         data-testid="run_pipeline_button_mobile"
         :loading="state.isRunningMergeRequestPipeline"
         @click="tryRunPipeline"
       >
-        {{ s__('Pipelines|Run Pipeline') }}
+        {{ s__('Pipeline|Run pipeline') }}
       </gl-button>
 
       <pipelines-table-component
@@ -214,12 +213,12 @@ export default {
         <template #table-header-actions>
           <div v-if="canRenderPipelineButton" class="gl-text-right">
             <gl-button
-              variant="success"
+              variant="confirm"
               data-testid="run_pipeline_button"
               :loading="state.isRunningMergeRequestPipeline"
               @click="tryRunPipeline"
             >
-              {{ s__('Pipelines|Run Pipeline') }}
+              {{ s__('Pipeline|Run pipeline') }}
             </gl-button>
           </div>
         </template>
@@ -232,7 +231,7 @@ export default {
       ref="modal"
       :modal-id="modalId"
       :title="s__('Pipelines|Are you sure you want to run this pipeline?')"
-      :ok-title="s__('Pipelines|Run Pipeline')"
+      :ok-title="s__('Pipeline|Run pipeline')"
       ok-variant="danger"
       @ok="onClickRunPipeline"
     >

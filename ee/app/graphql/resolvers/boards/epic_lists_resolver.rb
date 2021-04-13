@@ -17,22 +17,26 @@ module Resolvers
       def resolve_with_lookahead(id: nil)
         authorize!
 
-        # eventually we may want to (re)use Boards::Lists::ListService
-        # but we don't support yet creation of default lists so at this
-        # point there is not reason to introduce a ListService
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/294043
-        lists = epic_board.epic_lists
+        lists = board_lists(id)
 
         if load_preferences?(lookahead)
           ::Boards::EpicList.preload_preferences_for_user(lists, current_user)
         end
 
-        lists = lists.where(id: id.model_id) if id # rubocop: disable CodeReuse/ActiveRecord
-
         offset_pagination(apply_lookahead(lists))
       end
 
       private
+
+      def board_lists(id)
+        service = ::Boards::EpicLists::ListService.new(
+          epic_board.resource_parent,
+          current_user,
+          list_id: id&.model_id
+        )
+
+        service.execute(epic_board, create_default_lists: false)
+      end
 
       def load_preferences?(lookahead)
         lookahead&.selection(:edges)&.selection(:node)&.selects?(:collapsed) ||

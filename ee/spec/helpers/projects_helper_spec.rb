@@ -135,6 +135,7 @@ RSpec.describe ProjectsHelper do
           has_vulnerabilities: 'false',
           has_jira_vulnerabilities_integration_enabled: 'true',
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
+          survey_request_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
           project_full_path: project.full_path,
           no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-'),
@@ -155,6 +156,7 @@ RSpec.describe ProjectsHelper do
           vulnerabilities_export_endpoint: "/api/v4/security/projects/#{project.id}/vulnerability_exports",
           no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-'),
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard-empty-state'),
+          survey_request_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
           dashboard_documentation: '/help/user/application_security/security_dashboard/index',
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
@@ -638,6 +640,30 @@ RSpec.describe ProjectsHelper do
 
         it 'includes requestCveAvailable' do
           expect(subject.key?(:requestCveAvailable)).to eq(feature_flag_enabled)
+        end
+      end
+    end
+  end
+
+  describe '#approvals_app_data' do
+    subject { helper.approvals_app_data(project) }
+
+    let(:user) { instance_double(User, admin?: false) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(true)
+    end
+
+    context 'with the approval gate feature flag' do
+      where(feature_flag_enabled: [true, false])
+      with_them do
+        before do
+          stub_feature_flags(ff_compliance_approval_gates: feature_flag_enabled)
+        end
+
+        it 'includes external_approval_rules_path only when enabled' do
+          expect(subject[:data].key?(:external_approval_rules_path)).to eq(feature_flag_enabled)
         end
       end
     end

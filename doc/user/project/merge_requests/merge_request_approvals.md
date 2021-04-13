@@ -23,6 +23,39 @@ This provides a consistent mechanism for reviewers to approve merge requests, an
 maintainers know a change is ready to merge. Approvals in Free are optional, and do
 not prevent a merge request from being merged when there is no approval.
 
+## External approvals **(ULTIMATE)**
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3869) in GitLab Ultimate 13.10.
+> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](../../../api/merge_request_approvals.md#enable-or-disable-external-project-level-mr-approvals). **(ULTIMATE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+When you create an external approval rule, the following merge request actions sends information
+about a merge request to a third party service:
+
+- Create
+- Change
+- Close
+
+This action enables use-cases such as:
+
+- Integration with 3rd party workflow tools, such as [ServiceNow](https://www.servicenow.co.uk/).
+- Integration with custom tools designed to approve merge requests from outside of GitLab.
+
+You can find more information about use-cases, development timelines and the feature discovery in
+the [External API approval rules epic](https://gitlab.com/groups/gitlab-org/-/epics/3869).
+
+The intention for this feature is to allow those 3rd party tools to approve a merge request similarly to how users current do.
+
+NOTE:
+The lack of an external approval does not block the merging of a merge request.
+
+You can modify external approval rules through the [REST API](../../../api/merge_request_approvals.md#external-project-level-mr-approvals).
+
 ## Required Approvals **(PREMIUM)**
 
 > - [Introduced](https://about.gitlab.com/releases/2015/06/22/gitlab-7-12-released/#merge-request-approvers-ee-only) in GitLab Enterprise Edition 7.12.
@@ -53,7 +86,7 @@ be merged, and optionally which users should do the approving. Approvals can be 
 
 If no approval rules are defined, any user can approve a merge request. However, the default
 minimum number of required approvers can still be set in the
-[project settings for merge request approvals](#merge-request-approvals-project-settings).
+[settings for merge request approvals](#approval-settings).
 
 You can opt to define one single rule to approve a merge request among the available rules
 or choose more than one with [multiple approval rules](#multiple-approval-rules).
@@ -114,7 +147,7 @@ or higher [permissions](../../permissions.md).
 To enable this merge request approval rule:
 
 1. Navigate to your project's **Settings > General** and expand
-   **Merge request approvals**.
+   **Merge request (MR) approvals**.
 1. Locate **Any eligible user** and choose the number of approvals required.
 
 ![MR approvals by Code Owners](img/mr_approvals_by_code_owners_v12_7.png)
@@ -145,7 +178,7 @@ To enable this access:
 1. [Share the project with your group](../members/share_project_with_groups.md#sharing-a-project-with-a-group-of-users),
    based on the Reporter role.
 1. Navigate to your project's **Settings > General**, and in the
-   **Merge request approvals** section, click **Expand**.
+   **Merge request (MR) approvals** section, click **Expand**.
 1. Select **Add approval rule** or **Update approval rule**.
 1. [Add the group](../../group/index.md#create-a-group) to the permission list.
 
@@ -155,7 +188,7 @@ To enable this access:
 
 To add or edit the default merge request approval rule:
 
-1. Navigate to your project's **Settings > General** and expand **Merge request approvals**.
+1. Navigate to your project's **Settings > General** and expand **Merge request (MR) approvals**.
 
 1. Click **Add approval rule**, or **Edit**.
    - Add or change the **Rule name**.
@@ -235,14 +268,14 @@ reduces the number of approvals left for all rules that the approver belongs to.
 Approval rules are often only relevant to specific branches, like `master`.
 When configuring [**Default Approval Rules**](#adding--editing-a-default-approval-rule)
 these can be scoped to all the protected branches at once by navigating to your project's
-**Settings**, expanding **Merge request approvals**, and selecting **Any branch** from
+**Settings**, expanding **Merge request (MR) approvals**, and selecting **Any branch** from
 the **Target branch** dropdown.
 
 Alternatively, you can select a very specific protected branch from the **Target branch** dropdown:
 
 ![Scoped to protected branch](img/scoped_to_protected_branch_v13_10.png)
 
-To enable this configuration, see [Code Owner’s approvals for protected branches](../protected_branches.md#protected-branches-approval-by-code-owners).
+To enable this configuration, see [Code Owner's approvals for protected branches](../protected_branches.md#protected-branches-approval-by-code-owners).
 
 ### Adding or removing an approval
 
@@ -278,10 +311,10 @@ else blocking it. Note that the merge request could still be blocked by other co
 such as merge conflicts, [pending discussions](../../discussions/index.md#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolved),
 or a [failed CI/CD pipeline](merge_when_pipeline_succeeds.md).
 
-### Merge request approvals project settings
+### Approval settings
 
-The project settings for Merge request approvals are found by going to
-**Settings > General** and expanding **Merge request approvals**.
+The settings for Merge Request Approvals are found by going to
+**Settings > General** and expanding **Merge request (MR) approvals**.
 
 #### Prevent overriding default approvals
 
@@ -289,7 +322,7 @@ Regardless of the approval rules you choose for your project, users can edit the
 request, overriding the rules you set as [default](#adding--editing-a-default-approval-rule).
 To prevent that from happening:
 
-1. Uncheck the **Allow overrides to approval lists per merge request (MR).** checkbox.
+1. Select the **Prevent users from modifying MR approval rules in merge requests.** checkbox.
 1. Click **Save changes**.
 
 #### Resetting approvals on push
@@ -314,7 +347,7 @@ from the UI. However, approvals are reset if the target branch is changed.
 By default, projects are configured to prevent merge requests from being approved by
 their own authors. To change this setting:
 
-1. Go to your project's **Settings > General**, expand **Merge request approvals**.
+1. Go to your project's **Settings > General**, expand **Merge request (MR) approvals**.
 1. Uncheck the **Prevent MR approval by the author.** checkbox.
 1. Click **Save changes**.
 

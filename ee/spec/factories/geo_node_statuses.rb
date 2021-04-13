@@ -68,6 +68,10 @@ FactoryBot.define do
       GeoNodeStatus.replicator_class_status_fields.each do |field|
         send(field) { rand(10000) }
       end
+
+      Geo::SecondaryUsageData::PAYLOAD_COUNT_FIELDS.each do |field|
+        send(field) { rand(10000) }
+      end
     end
 
     trait :replicated_and_verified do

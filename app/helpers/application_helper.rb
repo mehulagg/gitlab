@@ -194,8 +194,14 @@ module ApplicationHelper
     end
   end
 
-  def promo_host
+  # This needs to be used outside of Rails
+  def self.promo_host
     'about.gitlab.com'
+  end
+
+  # Convenient method for Rails helper
+  def promo_host
+    ApplicationHelper.promo_host
   end
 
   def promo_url
@@ -281,6 +287,7 @@ module ApplicationHelper
   def page_class
     class_names = []
     class_names << 'issue-boards-page gl-overflow-auto' if current_controller?(:boards)
+    class_names << 'epic-boards-page' if current_controller?(:epic_boards)
     class_names << 'environment-logs-page' if current_controller?(:logs)
     class_names << 'with-performance-bar' if performance_bar_enabled?
     class_names << system_message_class
@@ -405,3 +412,4 @@ module ApplicationHelper
 end
 
 ApplicationHelper.prepend_if_ee('EE::ApplicationHelper')
+ApplicationHelper.prepend_if_jh('JH::ApplicationHelper')

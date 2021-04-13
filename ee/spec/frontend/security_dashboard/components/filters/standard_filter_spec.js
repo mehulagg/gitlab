@@ -23,11 +23,11 @@ const optionIdsAt = (indexes) => optionsAt(indexes).map((x) => x.id);
 describe('Standard Filter component', () => {
   let wrapper;
 
-  const createWrapper = (filterOptions, showSearchBox) => {
+  const createWrapper = (filterOptions, props) => {
     wrapper = shallowMount(StandardFilter, {
       localVue,
       router,
-      propsData: { filter: { ...filter, ...filterOptions }, showSearchBox },
+      propsData: { filter: { ...filter, ...filterOptions }, ...props },
     });
   };
 
@@ -100,7 +100,7 @@ describe('Standard Filter component', () => {
       ${'shows'}         | ${true}
       ${'does not show'} | ${false}
     `('$phrase search box if showSearchBox is $showSearchBox', ({ showSearchBox }) => {
-      createWrapper({}, showSearchBox);
+      createWrapper({}, { showSearchBox });
 
       expect(filterBody().props('showSearchBox')).toBe(showSearchBox);
     });
@@ -113,6 +113,14 @@ describe('Standard Filter component', () => {
 
       expect(dropdownItems()).toHaveLength(3);
       expect(dropdownItems().wrappers.map((x) => x.props('text'))).toEqual(expectedItems);
+    });
+  });
+
+  describe('loading prop', () => {
+    it.each([true, false])(`sets the filter body loading prop to %s`, (loading) => {
+      createWrapper({}, { loading });
+
+      expect(filterBody().props('loading')).toBe(loading);
     });
   });
 

@@ -23,7 +23,7 @@ class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analyt
   end
 
   def update
-    value_stream = Analytics::CycleAnalytics::GroupValueStream.find(params[:id])
+    value_stream = @group.value_streams.find(params[:id])
     result = Analytics::CycleAnalytics::ValueStreams::UpdateService.new(group: @group, params: update_params, current_user: current_user, value_stream: value_stream).execute
 
     if result.success?

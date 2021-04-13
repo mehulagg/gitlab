@@ -39,9 +39,11 @@ describe('UserActionButtons', () => {
     it('sets props correctly', () => {
       expect(findRemoveMemberButton().props()).toEqual({
         memberId: member.id,
+        memberType: 'GroupMember',
         message: `Are you sure you want to remove ${member.user.name} from "${member.source.fullName}"`,
         title: 'Remove member',
         isAccessRequest: false,
+        isInvite: false,
         icon: 'remove',
       });
     });
@@ -84,6 +86,42 @@ describe('UserActionButtons', () => {
       });
 
       expect(findRemoveMemberButton().exists()).toBe(false);
+    });
+  });
+
+  describe('when group member', () => {
+    beforeEach(() => {
+      createComponent({
+        member: {
+          ...member,
+          type: 'GroupMember',
+        },
+        permissions: {
+          canRemove: true,
+        },
+      });
+    });
+
+    it('sets member type correctly', () => {
+      expect(findRemoveMemberButton().props().memberType).toBe('GroupMember');
+    });
+  });
+
+  describe('when project member', () => {
+    beforeEach(() => {
+      createComponent({
+        member: {
+          ...member,
+          type: 'ProjectMember',
+        },
+        permissions: {
+          canRemove: true,
+        },
+      });
+    });
+
+    it('sets member type correctly', () => {
+      expect(findRemoveMemberButton().props().memberType).toBe('ProjectMember');
     });
   });
 });

@@ -1,5 +1,8 @@
-query devopsAdoptionSegments {
-  devopsAdoptionSegments {
+query devopsAdoptionSegments($parentNamespaceId: NamespaceID, $directDescendantsOnly: Boolean) {
+  devopsAdoptionSegments(
+    parentNamespaceId: $parentNamespaceId
+    directDescendantsOnly: $directDescendantsOnly
+  ) {
     nodes {
       id
       latestSnapshot {

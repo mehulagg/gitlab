@@ -13,6 +13,7 @@ RSpec.describe Resolvers::Ci::CodeCoverageActivitiesResolver do
     let_it_be(:project_1) { create(:project) }
     let_it_be(:project_2) { create(:project) }
     let_it_be(:group) { create(:group, projects: [project_1, project_2]) }
+
     let(:start_date) { 1.day.ago.to_date.to_s }
 
     context 'when group has projects with coverage' do

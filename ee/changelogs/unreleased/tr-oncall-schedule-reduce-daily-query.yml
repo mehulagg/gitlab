@@ -1,0 +1,5 @@
+---
+title: Reduce query timespan to one day in schedule daily view
+merge_request: 58974
+author:
+type: fixed

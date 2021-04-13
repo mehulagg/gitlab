@@ -58,7 +58,7 @@ RSpec.describe 'group epic roadmap', :js do
       it 'renders the sort dropdown correctly' do
         page.within('.content-wrapper .content .epics-other-filters') do
           expect(page).to have_css('.filter-dropdown-container')
-          find('.dropdown-toggle').click
+          find('.epics-sort-btn').click
           page.within('.dropdown-menu') do
             expect(page).to have_selector('li a', count: 2)
             expect(page).to have_content('Start date')
@@ -179,7 +179,7 @@ RSpec.describe 'group epic roadmap', :js do
 
       it 'is removed after dismissal and even after reload' do
         page.within('[data-testid="epics_limit_callout"]') do
-          find('.gl-alert-dismiss').click
+          find('.gl-dismiss-btn').click
         end
 
         expect(page).not_to have_selector('[data-testid="epics_limit_callout"]')

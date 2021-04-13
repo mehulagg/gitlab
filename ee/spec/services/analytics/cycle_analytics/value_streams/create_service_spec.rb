@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Analytics::CycleAnalytics::ValueStreams::CreateService do
   let_it_be(:user) { create(:user) }
   let_it_be(:group, refind: true) { create(:group) }
+
   let(:params) { {} }
 
   subject { described_class.new(group: group, params: params, current_user: user).execute }
@@ -69,7 +70,7 @@ RSpec.describe Analytics::CycleAnalytics::ValueStreams::CreateService do
 
       context 'when creating a default stage' do
         before do
-          params[:stages] = [{ name: 'plan', custom: false }]
+          params[:stages] = [{ id: 'plan', name: 'plan', custom: false }]
         end
 
         let(:custom_stage) { subject.payload[:value_stream].stages.first }

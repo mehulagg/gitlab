@@ -4,10 +4,11 @@ class License < ApplicationRecord
   include ActionView::Helpers::NumberHelper
   include Gitlab::Utils::StrongMemoize
 
-  STARTER_PLAN = 'starter'.freeze
-  PREMIUM_PLAN = 'premium'.freeze
-  ULTIMATE_PLAN = 'ultimate'.freeze
-  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0).freeze
+  STARTER_PLAN = 'starter'
+  PREMIUM_PLAN = 'premium'
+  ULTIMATE_PLAN = 'ultimate'
+  CLOUD_LICENSE_TYPE = 'cloud'
+  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
@@ -24,8 +25,8 @@ class License < ApplicationRecord
     group_activity_analytics
     group_bulk_edit
     group_webhooks
-    group_level_devops_adoption
     instance_level_devops_adoption
+    group_level_devops_adoption
     issuable_default_templates
     issue_weights
     iterations
@@ -96,6 +97,7 @@ class License < ApplicationRecord
     group_repository_analytics
     group_saml
     group_saml_group_sync
+    group_scoped_ci_variables
     group_wikis
     incident_sla
     incident_metric_upload
@@ -124,7 +126,6 @@ class License < ApplicationRecord
     scoped_labels
     smartcard_auth
     swimlanes
-    group_timelogs
     type_of_work_analytics
     minimal_access_role
     unprotection_restrictions
@@ -155,6 +156,7 @@ class License < ApplicationRecord
     group_ci_cd_analytics
     group_level_compliance_dashboard
     incident_management
+    inline_codequality
     insights
     issuable_health_status
     jira_vulnerabilities_integration
@@ -177,7 +179,6 @@ class License < ApplicationRecord
     subepics
     threat_monitoring
     vulnerability_auto_fix
-    evaluate_group_level_compliance_pipeline
   ]
   EEU_FEATURES.freeze
 
@@ -545,6 +546,10 @@ class License < ApplicationRecord
     starts_at > Date.current
   end
 
+  def cloud?
+    license&.type == CLOUD_LICENSE_TYPE
+  end
+
   def auto_renew
     false
   end
@@ -615,6 +620,7 @@ class License < ApplicationRecord
   end
 
   def check_users_limit
+    return if cloud?
     return unless restricted_user_count
 
     if previous_user_count && (prior_historical_max <= previous_user_count)

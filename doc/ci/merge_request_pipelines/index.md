@@ -19,6 +19,12 @@ you can use *pipelines for merge requests*.
 In the UI, these pipelines are labeled as `detached`. Otherwise, these pipelines appear the same
 as other pipelines.
 
+Pipelines for merge requests can run when you:
+
+- Create a new merge request.
+- Commit changes to the source branch for the merge request.
+- Select the **Run pipeline** button from the **Pipelines** tab in the merge request.
+
 Any user who has developer [permissions](../../user/permissions.md)
 can run a pipeline for merge requests.
 
@@ -191,7 +197,7 @@ could mistakenly trust the merge request because it passed a faked pipeline.
 Parent project members with at least [Developer permissions](../../user/permissions.md)
 can create pipelines in the parent project for merge requests
 from a forked project. In the merge request, go to the **Pipelines** and click
-**Run Pipeline** button.
+**Run pipeline** button.
 
 WARNING:
 Fork merge requests could contain malicious code that tries to steal secrets in the

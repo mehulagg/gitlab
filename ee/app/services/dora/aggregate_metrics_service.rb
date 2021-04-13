@@ -2,7 +2,7 @@
 
 module Dora
   class AggregateMetricsService < ::BaseContainerService
-    MAX_RANGE = 3.months / 1.day
+    MAX_RANGE = 92 # the maximum number of days in 3 months
     DEFAULT_ENVIRONMENT_TIER = 'production'
     DEFAULT_INTERVAL = Dora::DailyMetrics::INTERVAL_DAILY
 
@@ -31,8 +31,8 @@ module Dora
         return error(_('The start date must be ealier than the end date.'), :bad_request)
       end
 
-      unless project?
-        return error(_('Container must be a project.'), :bad_request)
+      unless project? || group?
+        return error(_('Container must be a project or a group.'), :bad_request)
       end
 
       unless ::Dora::DailyMetrics::AVAILABLE_INTERVALS.include?(interval)
@@ -58,11 +58,30 @@ module Dora
     end
 
     def environments
-      Environment.for_project(container).for_tier(environment_tier)
+      Environment.for_project(target_projects).for_tier(environment_tier)
+    end
+
+    def target_projects
+      if project?
+        [container]
+      elsif group?
+        # The actor definitely has read permission in all subsequent projects of the group by the following reasons:
+        # - DORA metrics can be read by reporter (or above) at project-level.
+        # - With `read_dora4_analytics` permission check, we make sure that the
+        #   user is at-least reporter role at group-level.
+        # - In the subsequent projects, the assigned role at the group-level
+        #   can't be lowered. For example, if the user is reporter at group-level,
+        #   the user can be developer in subsequent projects, but can't be guest.
+        container.all_projects
+      end
     end
 
     def project?
       container.is_a?(Project)
+    end
+
+    def group?
+      container.is_a?(Group)
     end
 
     def start_date

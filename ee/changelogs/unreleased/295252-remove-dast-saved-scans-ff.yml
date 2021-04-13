@@ -1,5 +1,0 @@
----
-title: Remove the dast_saved_scans feature flag
-merge_request: 56540
-author:
-type: removed

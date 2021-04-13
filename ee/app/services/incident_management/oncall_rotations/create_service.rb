@@ -33,22 +33,17 @@ module IncidentManagement
         return error_no_permissions unless allowed?
         return error_too_many_participants if participants_params.size > MAXIMUM_PARTICIPANTS
         return error_duplicate_participants if duplicated_users?
+        return error_participants_without_permission if users_without_permissions?
 
         OncallRotation.transaction do
           @oncall_rotation = schedule.rotations.create!(rotation_params)
 
-          participants = participants_for(oncall_rotation)
-          raise InsufficientParticipantPermissionsError.new(participant_has_no_permission) if participants.nil?
-
-          participants.each(&:validate!)
-
-          upsert_participants(participants)
+          save_participants!
+          save_current_shift!
 
           success(oncall_rotation.reset)
         end
 
-      rescue InsufficientParticipantPermissionsError => err
-        error(err.message)
       rescue ActiveRecord::RecordInvalid => err
         error_in_validation(err.record)
       end

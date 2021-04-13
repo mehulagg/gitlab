@@ -10,7 +10,11 @@ module Elastic
       super(target)
 
       const_name = if use_separate_indices
-                     "#{target.class.name}Config"
+                     if target.class.superclass.abstract_class?
+                       "#{target.class.name}Config"
+                     else
+                       "#{target.class.superclass.name}Config"
+                     end
                    else
                      'Config'
                    end

@@ -147,7 +147,11 @@ module MergeRequests
     def resolve_todos(merge_request, old_labels, old_assignees, old_reviewers)
       return unless has_changes?(merge_request, old_labels: old_labels, old_assignees: old_assignees, old_reviewers: old_reviewers)
 
-      todo_service.resolve_todos_for_target(merge_request, current_user)
+      service_user = current_user
+
+      merge_request.run_after_commit_or_now do
+        ::MergeRequests::ResolveTodosService.new(merge_request, service_user).async_execute
+      end
     end
 
     def handle_target_branch_change(merge_request)
@@ -200,21 +204,22 @@ module MergeRequests
 
       merge_request_activity_counter.track_milestone_changed_action(user: current_user)
 
+      previous_milestone = Milestone.find_by_id(merge_request.previous_changes['milestone_id'].first)
+      delete_milestone_total_merge_requests_counter_cache(previous_milestone)
+
       if merge_request.milestone.nil?
         notification_service.async.removed_milestone_merge_request(merge_request, current_user)
       else
         notification_service.async.changed_milestone_merge_request(merge_request, merge_request.milestone, current_user)
+
+        delete_milestone_total_merge_requests_counter_cache(merge_request.milestone)
       end
     end
 
     def handle_assignees_change(merge_request, old_assignees)
-      create_assignee_note(merge_request, old_assignees)
-      notification_service.async.reassigned_merge_request(merge_request, current_user, old_assignees)
-      todo_service.reassigned_assignable(merge_request, current_user, old_assignees)
-
-      new_assignees = merge_request.assignees - old_assignees
-      merge_request_activity_counter.track_users_assigned_to_mr(users: new_assignees)
-      merge_request_activity_counter.track_assignees_changed_action(user: current_user)
+      MergeRequests::HandleAssigneesChangeService
+        .new(project, current_user)
+        .async_execute(merge_request, old_assignees)
     end
 
     def handle_reviewers_change(merge_request, old_reviewers)

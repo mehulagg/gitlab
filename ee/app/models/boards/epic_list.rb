@@ -12,6 +12,9 @@ module Boards
 
     enum list_type: { backlog: 0, label: 1, closed: 2 }
 
+    scope :preload_associated_models, -> { preload(:epic_board, label: :priorities) }
+    scope :movable, -> { where(list_type: list_types.slice(*movable_types).values) }
+
     alias_method :preferences, :epic_list_user_preferences
 
     def preferences_for(user)
@@ -25,6 +28,10 @@ module Boards
           loader.call({ epic_list_id: preference.epic_list_id, user_id: preference.user_id }, preference)
         end
       end
+    end
+
+    def board
+      epic_board
     end
   end
 end

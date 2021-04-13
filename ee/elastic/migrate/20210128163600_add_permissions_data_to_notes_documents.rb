@@ -4,7 +4,7 @@ class AddPermissionsDataToNotesDocuments < Elastic::Migration
   batched!
   throttle_delay 3.minutes
 
-  QUERY_BATCH_SIZE = 9_000
+  QUERY_BATCH_SIZE = 6_000
   UPDATE_BATCH_SIZE = 100
 
   def migrate
@@ -30,7 +30,7 @@ class AddPermissionsDataToNotesDocuments < Elastic::Migration
     end
 
     document_references.each_slice(UPDATE_BATCH_SIZE) do |refs|
-      Elastic::ProcessBookkeepingService.track!(*refs)
+      Elastic::ProcessInitialBookkeepingService.track!(*refs)
     end
 
     log "Adding permission data to notes documents is completed for batch of #{document_references.size} documents"

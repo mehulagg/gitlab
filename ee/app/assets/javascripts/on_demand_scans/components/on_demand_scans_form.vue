@@ -10,6 +10,7 @@ import {
   GlLink,
   GlSkeletonLoader,
   GlSprintf,
+  GlSafeHtmlDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
@@ -38,7 +39,6 @@ import {
   ERROR_MESSAGES,
   SCANNER_PROFILES_QUERY,
   SITE_PROFILES_QUERY,
-  SITE_PROFILES_EXTENDED_QUERY,
   TYPE_SITE_PROFILE,
   TYPE_SCANNER_PROFILE,
 } from '../settings';
@@ -91,6 +91,7 @@ export default {
     LocalStorageSync,
   },
   directives: {
+    SafeHtml: GlSafeHtmlDirective,
     GlTooltip: GlTooltipDirective,
     validation: validation(),
   },
@@ -101,15 +102,11 @@ export default {
       'selectedScannerProfileId',
       SCANNER_PROFILES_QUERY,
     ),
-    siteProfiles() {
-      return createProfilesApolloOptions(
-        'siteProfiles',
-        'selectedSiteProfileId',
-        this.glFeatures.securityDastSiteProfilesAdditionalFields
-          ? SITE_PROFILES_EXTENDED_QUERY
-          : SITE_PROFILES_QUERY,
-      );
-    },
+    siteProfiles: createProfilesApolloOptions(
+      'siteProfiles',
+      'selectedSiteProfileId',
+      SITE_PROFILES_QUERY,
+    ),
   },
   inject: {
     dastSiteValidationDocsPath: {
@@ -226,12 +223,19 @@ export default {
       return isFormInvalid || (loading && loading !== saveScanBtnId);
     },
     formFieldValues() {
-      const { selectedScannerProfileId, selectedSiteProfileId } = this;
+      const { selectedScannerProfileId, selectedSiteProfileId, selectedBranch } = this;
       return {
         ...serializeFormObject(this.form.fields),
         selectedScannerProfileId,
         selectedSiteProfileId,
+        selectedBranch,
       };
+    },
+    hasExcludedUrls() {
+      return this.selectedSiteProfile.excludedUrls?.length > 0;
+    },
+    storageKey() {
+      return `${this.projectPath}/${ON_DEMAND_SCANS_STORAGE_KEY}`;
     },
   },
   created() {
@@ -281,7 +285,7 @@ export default {
             this.showErrors(ERROR_RUN_SCAN, errors);
             this.loading = false;
           } else if (!runAfter) {
-            redirectTo(response.dastProfile.editPath);
+            redirectTo(this.profilesLibraryPath);
             this.clearStorage = true;
           } else {
             this.clearStorage = true;
@@ -309,17 +313,22 @@ export default {
       this.showAlert = false;
     },
     updateFromStorage(val) {
-      const { selectedSiteProfileId, selectedScannerProfileId, name, description } = val;
+      const {
+        selectedSiteProfileId,
+        selectedScannerProfileId,
+        name,
+        description,
+        selectedBranch,
+      } = val;
 
       this.form.fields.name.value = name ?? this.form.fields.name.value;
       this.form.fields.description.value = description ?? this.form.fields.description.value;
-
+      this.selectedBranch = selectedBranch;
       // precedence is given to profile IDs passed from the query params
       this.selectedSiteProfileId = this.selectedSiteProfileId ?? selectedSiteProfileId;
       this.selectedScannerProfileId = this.selectedScannerProfileId ?? selectedScannerProfileId;
     },
   },
-  ON_DEMAND_SCANS_STORAGE_KEY,
   EXCLUDED_URLS_SEPARATOR,
 };
 </script>
@@ -329,7 +338,7 @@ export default {
     <local-storage-sync
       v-if="!isEdit"
       as-json
-      :storage-key="$options.ON_DEMAND_SCANS_STORAGE_KEY"
+      :storage-key="storageKey"
       :clear="clearStorage"
       :value="formFieldValues"
       @input="updateFromStorage"
@@ -368,7 +377,7 @@ export default {
     >
       {{ errorMessage }}
       <ul v-if="errors.length" class="gl-mt-3 gl-mb-0">
-        <li v-for="error in errors" :key="error">{{ error }}</li>
+        <li v-for="error in errors" :key="error" v-safe-html="error"></li>
       </ul>
     </gl-alert>
 
@@ -430,8 +439,17 @@ export default {
           :translations="{
             dropdownHeader: __('Select a branch'),
             searchPlaceholder: __('Search'),
+            noRefSelected: __('No available branches'),
+            noResults: __('No available branches'),
           }"
         />
+        <div v-if="!defaultBranch" class="gl-text-red-500 gl-mt-3">
+          {{
+            s__(
+              'OnDemandScans|You must create a repository within your project to run an on-demand scan.',
+            )
+          }}
+        </div>
       </gl-form-group>
 
       <scanner-profile-selector
@@ -450,11 +468,11 @@ export default {
           <div class="row">
             <profile-selector-summary-cell
               :label="s__('DastProfiles|Spider timeout')"
-              :value="n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout)"
+              :value="n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout || 0)"
             />
             <profile-selector-summary-cell
               :label="s__('DastProfiles|Target timeout')"
-              :value="n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout)"
+              :value="n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout || 0)"
             />
           </div>
           <div class="row">
@@ -499,6 +517,10 @@ export default {
                   :label="s__('DastProfiles|Username')"
                   :value="selectedSiteProfile.auth.username"
                 />
+                <profile-selector-summary-cell
+                  :label="s__('DastProfiles|Password')"
+                  value="••••••••"
+                />
               </div>
               <div class="row">
                 <profile-selector-summary-cell
@@ -513,12 +535,14 @@ export default {
             </template>
             <div class="row">
               <profile-selector-summary-cell
+                v-if="hasExcludedUrls"
                 :label="s__('DastProfiles|Excluded URLs')"
                 :value="selectedSiteProfile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR)"
               />
               <profile-selector-summary-cell
+                v-if="selectedSiteProfile.requestHeaders"
                 :label="s__('DastProfiles|Request headers')"
-                :value="selectedSiteProfile.requestHeaders"
+                :value="__('[Redacted]')"
               />
             </div>
           </template>

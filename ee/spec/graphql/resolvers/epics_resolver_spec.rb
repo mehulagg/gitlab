@@ -10,6 +10,7 @@ RSpec.describe Resolvers::EpicsResolver do
 
   context "with a group" do
     let_it_be_with_refind(:group) { create(:group) }
+
     let(:project) { create(:project, :public, group: group) }
     let(:epic1)   { create(:epic, group: group, state: :closed, created_at: 3.days.ago, updated_at: 2.days.ago) }
     let(:epic2)   { create(:epic, group: group, author: user2, title: 'foo', description: 'bar', created_at: 2.days.ago, updated_at: 3.days.ago) }
@@ -131,6 +132,17 @@ RSpec.describe Resolvers::EpicsResolver do
           epics = resolve_epics(label_name: [label_1.title, label_2.title])
 
           expect(epics).to match_array([epic_1])
+        end
+      end
+
+      context 'with my_reaction_emoji' do
+        it 'filters epics by reaction emoji' do
+          create(:award_emoji, name: 'man_in_business_suit_levitating', user: current_user, awardable: epic1)
+          create(:award_emoji, name: 'thumbsdown', user: current_user, awardable: epic2)
+
+          epics = resolve_epics(my_reaction_emoji: 'man_in_business_suit_levitating')
+
+          expect(epics).to contain_exactly(epic1)
         end
       end
 

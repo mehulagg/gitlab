@@ -1,5 +1,4 @@
-import { gray10 } from '@gitlab/ui/scss_to_js/scss_variables';
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 
 export const PROJECTS_PER_PAGE = 50;
 
@@ -33,7 +32,6 @@ export const DEFAULT_STAGE_NAMES = [...Object.keys(EMPTY_STAGE_TEXT)];
 export const TASKS_BY_TYPE_SUBJECT_ISSUE = 'Issue';
 export const TASKS_BY_TYPE_SUBJECT_MERGE_REQUEST = 'MergeRequest';
 export const TASKS_BY_TYPE_MAX_LABELS = 15;
-export const PATH_BACKGROUND_COLOR = gray10;
 
 export const TASKS_BY_TYPE_SUBJECT_FILTER_OPTIONS = {
   [TASKS_BY_TYPE_SUBJECT_ISSUE]: __('Issues'),
@@ -63,3 +61,15 @@ export const OVERVIEW_METRICS = {
 };
 
 export const FETCH_VALUE_STREAM_DATA = 'fetchValueStreamData';
+
+export const OVERVIEW_STAGE_ID = 'overview';
+export const OVERVIEW_STAGE_CONFIG = {
+  id: OVERVIEW_STAGE_ID,
+  slug: OVERVIEW_STAGE_ID,
+  title: __('Overview'),
+  icon: 'home',
+};
+
+export const NOT_ENOUGH_DATA_ERROR = s__(
+  "ValueStreamAnalyticsStage|We don't have enough data to show this stage.",
+);

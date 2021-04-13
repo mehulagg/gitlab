@@ -521,6 +521,7 @@ RSpec.describe EpicsFinder do
           let_it_be(:public_group1) { create(:group, :public, parent: base_group) }
           let_it_be(:public_epic1) { create(:epic, group: public_group1) }
           let_it_be(:public_epic2) { create(:epic, :confidential, group: public_group1) }
+
           let(:execute_params) { {} }
 
           subject { described_class.new(search_user, group_id: base_group.id).execute(**execute_params) }
@@ -546,8 +547,13 @@ RSpec.describe EpicsFinder do
               expect(subject).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2])
             end
 
-            it 'does not execute more than 5 SQL queries' do
-              expect { subject }.not_to exceed_all_query_limit(5)
+            it 'does not execute more than 6 SQL queries' do
+              normal_query_count = 5
+              # sync_traversal_ids feature flag has to query for root_ancestor.
+              ff_query_count = 1
+              total_count = normal_query_count + ff_query_count
+
+              expect { subject }.not_to exceed_all_query_limit(total_count)
             end
 
             it 'does not check permission for subgroups because user inherits permission' do

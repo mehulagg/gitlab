@@ -589,7 +589,7 @@ export default {
               <div class="text-nowrap">
                 {{ n__('%d URL scanned', '%d URLs scanned', dastSummary.scannedResourcesCount) }}
               </div>
-              <gl-link v-gl-modal.dastUrl class="ml-2" data-qa-selector="dast-ci-job-link">
+              <gl-link v-gl-modal.dastUrl class="ml-2" data-testid="dast-ci-job-link">
                 {{ __('View details') }}
               </gl-link>
               <dast-modal
@@ -613,7 +613,7 @@ export default {
             :status-icon="secretDetectionStatusIcon"
             :popover-options="secretScanningPopover"
             class="js-secret-scanning"
-            data-qa-selector="secret_scan_report"
+            data-testid="secret-scan-report"
           >
             <template #summary>
               <security-summary :message="groupedSecretDetectionText" />

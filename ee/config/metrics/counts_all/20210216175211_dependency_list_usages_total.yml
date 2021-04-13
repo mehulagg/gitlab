@@ -8,9 +8,8 @@ product_category: dependency_scanning
 value_type: number
 status: data_available
 time_frame: all
-data_source: database
+data_source: redis
 distribution:
 - ee
 tier:
 - ultimate
-skip_validation: true

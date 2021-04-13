@@ -70,11 +70,8 @@ RSpec.describe Search::GroupService, :elastic do
   context 'notes search' do
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, namespace: group) }
-    let(:results) { described_class.new(nil, group, search: 'test').execute.objects('notes') }
 
-    before do
-      allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
-    end
+    let(:results) { described_class.new(nil, group, search: 'test').execute.objects('notes') }
 
     it_behaves_like 'search query applies joins based on migrations shared examples', :add_permissions_data_to_notes_documents
   end
@@ -97,6 +94,7 @@ RSpec.describe Search::GroupService, :elastic do
     end
 
     let_it_be(:group) { create(:group) }
+
     let!(:project) { create(:project, project_level, namespace: group) }
     let!(:project2) { create(:project, project_level) }
     let(:user) { create_user_from_membership(project, membership) }
@@ -156,17 +154,13 @@ RSpec.describe Search::GroupService, :elastic do
         end
 
         with_them do
-          before do
-            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
-          end
-
           context 'when add_permissions_data_to_notes_documents migration is finished' do
             it_behaves_like 'search respects visibility'
           end
 
           context 'when add_permissions_data_to_notes_documents migration is not finished' do
             before do
-              allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).with(:add_permissions_data_to_notes_documents).and_return(false)
+              set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
             end
 
             it_behaves_like 'search respects visibility'
@@ -183,17 +177,13 @@ RSpec.describe Search::GroupService, :elastic do
         end
 
         with_them do
-          before do
-            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
-          end
-
           context 'when add_permissions_data_to_notes_documents migration is finished' do
             it_behaves_like 'search respects visibility'
           end
 
           context 'when add_permissions_data_to_notes_documents migration is not finished' do
             before do
-              allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).with(:add_permissions_data_to_notes_documents).and_return(false)
+              set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
             end
 
             it_behaves_like 'search respects visibility'
@@ -213,8 +203,6 @@ RSpec.describe Search::GroupService, :elastic do
 
         with_them do
           before do
-            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
-
             project.repository.index_commits_and_blobs
             project2.repository.index_commits_and_blobs
           end
@@ -225,7 +213,7 @@ RSpec.describe Search::GroupService, :elastic do
 
           context 'when add_permissions_data_to_notes_documents migration is not finished' do
             before do
-              allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).with(:add_permissions_data_to_notes_documents).and_return(false)
+              set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
             end
 
             it_behaves_like 'search respects visibility'
@@ -242,17 +230,13 @@ RSpec.describe Search::GroupService, :elastic do
         end
 
         with_them do
-          before do
-            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
-          end
-
           context 'when add_permissions_data_to_notes_documents migration is finished' do
             it_behaves_like 'search respects visibility'
           end
 
           context 'when add_permissions_data_to_notes_documents migration is not finished' do
             before do
-              allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).with(:add_permissions_data_to_notes_documents).and_return(false)
+              set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
             end
 
             it_behaves_like 'search respects visibility'

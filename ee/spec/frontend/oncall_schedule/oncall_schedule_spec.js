@@ -70,12 +70,12 @@ describe('On-call schedule', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findScheduleHeader = () => wrapper.findByTestId('scheduleHeader');
   const findRotationsHeader = () => wrapper.findByTestId('rotationsHeader');
   const findSchedule = () => wrapper.findByTestId('scheduleBody');
+  const findScheduleDescription = () => findSchedule().text();
   const findRotations = () => wrapper.findByTestId('rotationsBody');
   const findRotationsShiftPreset = () => wrapper.findByTestId('shift-preset-change');
   const findAddRotationsBtn = () => findRotationsHeader().find(GlButton);
@@ -88,12 +88,23 @@ describe('On-call schedule', () => {
     expect(findScheduleHeader().text()).toBe(mockSchedule.name);
   });
 
-  it('shows timezone info', () => {
+  describe('Timeframe schedule card header information', () => {
     const timezone = lastTz.identifier;
     const offset = `(UTC ${lastTz.formatted_offset})`;
-    const description = findSchedule().text();
-    expect(description).toContain(timezone);
-    expect(description).toContain(offset);
+
+    it('shows timezone info', () => {
+      expect(findScheduleDescription()).toContain(timezone);
+      expect(findScheduleDescription()).toContain(offset);
+    });
+
+    it('shows schedule description if present', () => {
+      expect(findScheduleDescription()).toContain(mockSchedule.description);
+    });
+
+    it('does not show schedule description if none present', () => {
+      createComponent({ schedule: { ...mockSchedule, description: null }, loading: false });
+      expect(findScheduleDescription()).not.toContain(mockSchedule.description);
+    });
   });
 
   it('renders rotations header', () => {

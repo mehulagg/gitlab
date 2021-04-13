@@ -1,6 +1,0 @@
----
-title: Add support for updating default description templates for issues and merge
-  requests via API
-merge_request: 55718
-author:
-type: added

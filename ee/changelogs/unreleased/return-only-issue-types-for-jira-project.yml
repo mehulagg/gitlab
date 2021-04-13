@@ -1,5 +1,0 @@
----
-title: Return only supported issue types for selected Jira Project
-merge_request: 53705
-author:
-type: fixed

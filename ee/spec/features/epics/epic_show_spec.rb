@@ -125,7 +125,7 @@ RSpec.describe 'Epic show', :js do
     it 'shows epic status, date and author in header' do
       page.within('.epic-page-container .detail-page-header-body') do
         expect(find('.issuable-status-box > span')).to have_content('Open')
-        expect(find('.issuable-meta')).to have_content('Opened')
+        expect(find('.issuable-meta')).to have_content('Created')
         expect(find('.issuable-meta .js-user-avatar-link-username')).to have_content('Rick Sanchez')
       end
     end
@@ -165,11 +165,7 @@ RSpec.describe 'Epic show', :js do
           end
         end
 
-        it 'shows comments in the correct order', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225637' do
-          page.within('[data-testid="sort-discussion-filter"]') do
-            expect(find('.js-newest-first')).to have_content('Newest first')
-          end
-
+        it 'shows comments in the correct order' do
           items = all('.timeline-entry .timeline-discussion-body .note-text')
           expect(items[0]).to have_content(notes[1].note)
           expect(items[1]).to have_content(notes[0].note)

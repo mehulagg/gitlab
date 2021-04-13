@@ -108,7 +108,7 @@ export default {
       return this.tables[tableKey].rows;
     },
   },
-  mounted() {
+  created() {
     this.fetchSubscription();
   },
   methods: {
@@ -151,6 +151,7 @@ export default {
           :last="isLast(i)"
           :header="row.header"
           :columns="row.columns"
+          :is-free-plan="isFreePlan"
         />
       </div>
     </div>

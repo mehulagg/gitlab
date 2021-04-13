@@ -27,7 +27,9 @@ module EE
 
       override :update_params
       def update_params
-        clean_params = super.merge(params.require(:user).permit(:email_opted_in))
+        clean_params = super
+
+        return clean_params unless ::Gitlab.dev_env_or_com?
 
         clean_params[:email_opted_in] = '1' if clean_params[:setup_for_company] == 'true'
 
@@ -43,7 +45,7 @@ module EE
       override :show_signup_onboarding?
       def show_signup_onboarding?
         !helpers.in_subscription_flow? &&
-          !helpers.in_invitation_flow? &&
+          !helpers.user_has_memberships? &&
           !helpers.in_oauth_flow? &&
           !helpers.in_trial_flow? &&
           helpers.signup_onboarding_enabled?

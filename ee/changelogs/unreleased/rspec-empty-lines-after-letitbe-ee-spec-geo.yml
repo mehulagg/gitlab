@@ -1,0 +1,5 @@
+---
+title: Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/geo
+merge_request: 58348
+author: Abdul Wadood @abdulwd
+type: fixed

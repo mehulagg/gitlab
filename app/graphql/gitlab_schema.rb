@@ -12,7 +12,6 @@ class GitlabSchema < GraphQL::Schema
 
   use GraphQL::Pagination::Connections
   use BatchLoader::GraphQL
-  use Gitlab::Graphql::Authorize
   use Gitlab::Graphql::Pagination::Connections
   use Gitlab::Graphql::GenericTracing
   use Gitlab::Graphql::Timeout, max_seconds: Gitlab.config.gitlab.graphql_timeout
@@ -32,9 +31,10 @@ class GitlabSchema < GraphQL::Schema
 
   class << self
     def multiplex(queries, **kwargs)
-      kwargs[:max_complexity] ||= max_query_complexity(kwargs[:context])
+      kwargs[:max_complexity] ||= max_query_complexity(kwargs[:context]) unless kwargs.key?(:max_complexity)
 
       queries.each do |query|
+        query[:max_complexity] ||= max_query_complexity(kwargs[:context]) unless query.key?(:max_complexity)
         query[:max_depth] = max_query_depth(kwargs[:context])
       end
 
@@ -125,7 +125,7 @@ class GitlabSchema < GraphQL::Schema
 
       raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab ID." unless gid
 
-      if expected_type && !gid.model_class.ancestors.include?(expected_type)
+      if expected_type && gid.model_class.ancestors.exclude?(expected_type)
         vars = { global_id: global_id, expected_type: expected_type }
         msg = _('%{global_id} is not a valid ID for %{expected_type}.') % vars
         raise Gitlab::Graphql::Errors::ArgumentError, msg

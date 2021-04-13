@@ -41,16 +41,8 @@ module TrialStatusWidgetHelper
     }
   end
 
-  def trial_status_widget_experiment_enabled?(group)
-    experiment_enabled?(:show_trial_status_in_sidebar, subject: group)
-  end
-
   def ultimate_subscription_path_for_group(group)
     # Hard-coding the plan_id to the Ultimate plan on production & staging
     new_subscriptions_path(namespace_id: group.id, plan_id: '2c92a0fc5a83f01d015aa6db83c45aac')
-  end
-
-  def user_can_administer_group?(group)
-    can?(current_user, :admin_namespace, group)
   end
 end

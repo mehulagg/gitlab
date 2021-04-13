@@ -122,4 +122,21 @@ describe('EE Boards Store Getters', () => {
       ).toBeUndefined();
     });
   });
+
+  describe('isEpicBoard', () => {
+    it.each`
+      issuableType | expected
+      ${'epic'}    | ${true}
+      ${'issue'}   | ${false}
+    `(
+      'returns $expected when issuableType on state is $issuableType',
+      ({ issuableType, expected }) => {
+        const state = {
+          issuableType,
+        };
+
+        expect(getters.isEpicBoard(state)).toBe(expected);
+      },
+    );
+  });
 });

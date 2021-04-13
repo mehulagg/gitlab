@@ -10,6 +10,9 @@ module Gitlab
       # The ConnectionProxy class redirects ActiveRecord connection requests to
       # the right load balancer pool, depending on the type of query.
       class ConnectionProxy
+        WriteInsideReadOnlyTransactionError = Class.new(StandardError)
+        READ_ONLY_TRANSACTION_KEY = :load_balacing_read_only_transaction
+
         attr_reader :load_balancer
 
         # These methods perform writes after which we need to stick to the
@@ -18,7 +21,6 @@ module Gitlab
           delete
           delete_all
           insert
-          transaction
           update
           update_all
         ).freeze
@@ -57,9 +59,25 @@ module Gitlab
           end
         end
 
+        def transaction(*args, &block)
+          if ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries?
+            track_read_only_transaction!
+            read_using_load_balancer(:transaction, args, &block)
+          else
+            write_using_load_balancer(:transaction, args, sticky: true, &block)
+          end
+
+        ensure
+          untrack_read_only_transaction!
+        end
+
         # Delegates all unknown messages to a read-write connection.
         def method_missing(name, *args, &block)
-          write_using_load_balancer(name, args, &block)
+          if ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries?
+            read_using_load_balancer(name, args, &block)
+          else
+            write_using_load_balancer(name, args, &block)
+          end
         end
 
         # Performs a read using the load balancer.
@@ -79,6 +97,10 @@ module Gitlab
         # sticky - If set to true the session will stick to the master after
         #          the write.
         def write_using_load_balancer(name, args, sticky: false, &block)
+          if read_only_transaction?
+            raise WriteInsideReadOnlyTransactionError, 'A write query is performed inside a read-only transaction'
+          end
+
           result = @load_balancer.read_write do |connection|
             # Sticking has to be enabled before calling the method. Not doing so
             # could lead to methods called in a block still being performed on a
@@ -89,6 +111,20 @@ module Gitlab
           end
 
           result
+        end
+
+        private
+
+        def track_read_only_transaction!
+          Thread.current[READ_ONLY_TRANSACTION_KEY] = true
+        end
+
+        def untrack_read_only_transaction!
+          Thread.current[READ_ONLY_TRANSACTION_KEY] = nil
+        end
+
+        def read_only_transaction?
+          Thread.current[READ_ONLY_TRANSACTION_KEY] == true
         end
       end
     end

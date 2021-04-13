@@ -1,11 +1,10 @@
 ---
 key_path: redis_hll_counters.testing.i_testing_group_code_coverage_project_click_total_monthly
-description: Count of unique users per week|month who click on a project link in the
-  group code coverage table
+description: Aggregated count of unique users who have clicked from group code coverage page to an individual project page each month.
 product_section: ops
 product_stage: verify
 product_group: group::testing
-product_category: code_analytics
+product_category: code_testing
 value_type: number
 status: data_available
 time_frame: 28d
@@ -15,4 +14,3 @@ distribution:
 tier:
 - premium
 - ultimate
-skip_validation: true

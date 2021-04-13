@@ -15,7 +15,7 @@ RSpec.describe API::Dora::Metrics do
     let(:user) { maintainer }
 
     around do |example|
-      freeze_time do
+      travel_to '2021-01-03'.to_time do
         example.run
       end
     end
@@ -35,8 +35,8 @@ RSpec.describe API::Dora::Metrics do
       subject
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response).to eq([{ '2021-01-01' => 1 },
-                                   { '2021-01-02' => 2 }])
+      expect(json_response).to eq([{ '2021-01-01' => 1, 'date' => '2021-01-01', 'value' => 1 },
+                                   { '2021-01-02' => 2, 'date' => '2021-01-02', 'value' => 2 }])
     end
 
     context 'when user is guest' do
@@ -49,16 +49,53 @@ RSpec.describe API::Dora::Metrics do
         expect(json_response['message']).to eq('You do not have permission to access dora metrics.')
       end
     end
+  end
 
-    context 'when dora_daily_metrics feature flag is disabled' do
-      before do
-        stub_feature_flags(dora_daily_metrics: false)
+  describe 'GET /groups/:id/dora/metrics' do
+    subject { get api(url, user), params: params }
+
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:production) { create(:environment, :production, project: project) }
+    let_it_be(:maintainer) { create(:user) }
+    let_it_be(:guest) { create(:user) }
+    let(:url) { "/groups/#{group.id}/dora/metrics" }
+    let(:params) { { metric: :deployment_frequency } }
+    let(:user) { maintainer }
+
+    around do |example|
+      freeze_time do
+        example.run
       end
+    end
 
-      it 'returns not found' do
+    before_all do
+      group.add_maintainer(maintainer)
+      group.add_guest(guest)
+      create(:dora_daily_metrics, deployment_frequency: 1, environment: production, date: 1.day.ago.to_date)
+      create(:dora_daily_metrics, deployment_frequency: 2, environment: production, date: Time.current.to_date)
+    end
+
+    before do
+      stub_licensed_features(dora4_analytics: true)
+    end
+
+    it 'returns data' do
+      subject
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response).to eq([{ 1.day.ago.to_date.to_s => 1, 'date' => 1.day.ago.to_date.to_s, 'value' => 1 },
+                                   { Time.current.to_date.to_s => 2, 'date' => Time.current.to_date.to_s, 'value' => 2 }])
+    end
+
+    context 'when user is guest' do
+      let(:user) { guest }
+
+      it 'returns authorization error' do
         subject
 
-        expect(response).to have_gitlab_http_status(:not_found)
+        expect(response).to have_gitlab_http_status(:unauthorized)
+        expect(json_response['message']).to eq('You do not have permission to access dora metrics.')
       end
     end
   end

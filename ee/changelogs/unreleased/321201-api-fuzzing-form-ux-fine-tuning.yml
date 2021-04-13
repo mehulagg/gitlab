@@ -1,0 +1,5 @@
+---
+title: Scroll to top of window when API Fuzzing configuration fails
+merge_request: 56890
+author:
+type: changed

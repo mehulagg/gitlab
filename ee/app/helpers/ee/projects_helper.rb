@@ -111,7 +111,7 @@ module EE
     end
 
     def approvals_app_data(project = @project)
-      { data: { 'project_id': project.id,
+      data = { 'project_id': project.id,
       'can_edit': can_modify_approvers.to_s,
       'project_path': expose_path(api_v4_projects_path(id: project.id)),
       'settings_path': expose_path(api_v4_projects_approval_settings_path(id: project.id)),
@@ -121,7 +121,13 @@ module EE
       'security_approvals_help_page_path': help_page_path('user/application_security/index.md', anchor: 'security-approvals-in-merge-requests'),
       'security_configuration_path': project_security_configuration_path(project),
       'vulnerability_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-security-approvals-within-a-project'),
-      'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project') } }
+      'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project') }
+
+      if ::Feature.enabled?(:ff_compliance_approval_gates, project, default_enabled: :yaml)
+        data[:external_approval_rules_path] = expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+      end
+
+      { data: data }
     end
 
     def can_modify_approvers(project = @project)
@@ -225,9 +231,9 @@ module EE
     end
 
     def size_limit_message(project)
-      show_lfs = project.lfs_enabled? ? 'including files in LFS' : ''
+      show_lfs = project.lfs_enabled? ? 'including LFS files' : ''
 
-      "The total size of this project's repository #{show_lfs} will be limited to this size. 0 for unlimited. Leave empty to inherit the group/global value."
+      "Max size of this project's repository, #{show_lfs}. For no limit, enter 0. To inherit the group/global value, leave blank."
     end
 
     override :membership_locked?
@@ -251,6 +257,7 @@ module EE
           has_vulnerabilities: 'false',
           has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
+          survey_request_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
           project_full_path: project.full_path,
@@ -264,6 +271,7 @@ module EE
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: api_v4_security_projects_vulnerability_exports_path(id: project.id),
           empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
+          survey_request_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
           dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),

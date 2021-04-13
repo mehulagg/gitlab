@@ -74,14 +74,14 @@
 
             .form-group
               = f.label :elasticsearch_shards, _('Number of Elasticsearch shards'), class: 'label-bold'
-              = f.number_field :elasticsearch_shards, value: @application_setting.elasticsearch_shards, class: 'form-control gl-form-input'
+              = f.number_field :elasticsearch_shards, value: Elastic::IndexSetting.number_of_shards, class: 'form-control gl-form-input'
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('How many shards to split the Elasticsearch index over.')
                 = recreate_index_text
 
             .form-group
               = f.label :elasticsearch_replicas, _('Number of Elasticsearch replicas'), class: 'label-bold'
-              = f.number_field :elasticsearch_replicas, value: @application_setting.elasticsearch_replicas, class: 'form-control gl-form-input'
+              = f.number_field :elasticsearch_replicas, value: Elastic::IndexSetting.number_of_replicas, class: 'form-control gl-form-input'
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('How many replicas each Elasticsearch shard has.')
                 = recreate_index_text

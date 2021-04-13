@@ -22,8 +22,8 @@ exports[`PolicyEditorApp component given .yaml editor mode is enabled renders ya
       <div
         class="gl-p-4"
       >
-        <network-policy-editor-stub
-          height="400"
+        <networkpolicyeditor-stub
+          data-testid="network-policy-editor"
           value=""
         />
       </div>
@@ -112,11 +112,10 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
       class="col-md-auto"
     >
       <gl-form-group-stub
-        label="Policy status"
-        label-for="policyStatus"
+        data-testid="policy-enable"
       >
         <gl-toggle-stub
-          id="policyStatus"
+          label="Policy status"
           labelposition="top"
         />
       </gl-form-group-stub>

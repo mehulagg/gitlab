@@ -27,6 +27,37 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
       )
     end
 
+    context 'when response contains a license' do
+      let(:license_key) { build(:gitlab_license).export }
+      let(:body) { { success: true, license: license_key }.to_json }
+
+      before do
+        stub_request(:post, seat_link_url).to_return(
+          status: 200,
+          body: body,
+          headers: { content_type: 'application/json' }
+        )
+      end
+
+      it 'persists returned license' do
+        expect { subject }.to change(License, :count).by(1)
+        expect(License.last).to have_attributes(
+          data: license_key,
+          cloud: true
+        )
+      end
+
+      context 'when persisting fails' do
+        let(:license_key) { 'invalid-key' }
+
+        it 'logs error' do
+          expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).and_call_original
+
+          expect { subject }.to raise_error
+        end
+      end
+    end
+
     context 'with old date format string' do
       subject do
         described_class.new.perform('2020-01-01', '123', 5, 4)

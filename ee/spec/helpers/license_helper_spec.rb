@@ -78,4 +78,24 @@ RSpec.describe LicenseHelper do
       end
     end
   end
+
+  describe '#cloud_license_view_data' do
+    context 'when there is a current license' do
+      it 'returns the data for the view' do
+        custom_plan = 'custom plan'
+        license = double('License', plan: custom_plan)
+        allow(License).to receive(:current).and_return(license)
+
+        expect(cloud_license_view_data).to eq({ plan_name: 'Custom Plan' })
+      end
+    end
+
+    context 'when there is no current license' do
+      it 'returns the data for the view' do
+        allow(License).to receive(:current).and_return(nil)
+
+        expect(cloud_license_view_data).to eq({ plan_name: 'Core' })
+      end
+    end
+  end
 end

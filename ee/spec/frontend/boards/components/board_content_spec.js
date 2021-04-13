@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import BoardContentSidebar from 'ee/boards/components/board_content_sidebar.vue';
 import BoardContent from '~/boards/components/board_content.vue';
+import BoardContentSidebar from '~/boards/components/board_content_sidebar.vue';
 import { createStore } from '~/boards/stores';
 
 describe('ee/BoardContent', () => {
@@ -13,10 +13,10 @@ describe('ee/BoardContent', () => {
       store,
       provide: {
         timeTrackingLimitToHours: false,
+        canAdminList: false,
       },
       propsData: {
         lists: [],
-        canAdminList: false,
         disabled: false,
       },
       stubs: {

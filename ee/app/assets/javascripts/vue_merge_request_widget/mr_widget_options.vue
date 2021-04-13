@@ -10,6 +10,7 @@ import { s__, __, sprintf } from '~/locale';
 import ReportSection from '~/reports/components/report_section.vue';
 import CEWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
 import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
+import MrWidgetJiraAssociationMissing from './components/states/mr_widget_jira_association_missing.vue';
 import MrWidgetPolicyViolation from './components/states/mr_widget_policy_violation.vue';
 import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
 
@@ -18,6 +19,7 @@ export default {
     MrWidgetLicenses,
     MrWidgetGeoSecondaryNode,
     MrWidgetPolicyViolation,
+    MrWidgetJiraAssociationMissing,
     BlockingMergeRequestsReport,
     GroupedSecurityReportsApp: () =>
       import('ee/vue_shared/security_reports/grouped_security_reports_app.vue'),
@@ -372,7 +374,7 @@ export default {
         :can-manage-licenses="mr.licenseScanning.can_manage_licenses"
         :full-report-path="mr.licenseScanning.full_report_path"
         :license-management-settings-path="mr.licenseScanning.settings_path"
-        :security-approvals-help-page-path="mr.securityApprovalsHelpPagePath"
+        :license-compliance-docs-path="mr.licenseComplianceDocsPath"
         report-section-class="mr-widget-border-top"
       />
 
@@ -380,6 +382,7 @@ export default {
         v-if="mr.testResultsPath"
         class="js-reports-container"
         :endpoint="mr.testResultsPath"
+        :head-blob-path="mr.headBlobPath"
         :pipeline-path="mr.pipeline.path"
       />
 
@@ -424,7 +427,6 @@ export default {
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />
         </div>
       </div>
-      <div v-if="shouldRenderMergeHelp" class="mr-widget-footer"><mr-widget-merge-help /></div>
     </div>
     <mr-widget-pipeline-container
       v-if="shouldRenderMergedPipeline"

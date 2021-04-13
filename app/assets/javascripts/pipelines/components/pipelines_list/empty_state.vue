@@ -1,18 +1,24 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { GlEmptyState } from '@gitlab/ui';
+import Experiment from '~/experimentation/components/experiment.vue';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
+import PipelinesCiTemplates from './pipelines_ci_templates.vue';
 
 export default {
   i18n: {
-    infoMessage: s__(`Pipelines|GitLab CI/CD can automatically build,
-          test, and deploy your code. Let GitLab take care of time
-          consuming tasks, so you can spend more time creating.`),
-    buttonMessage: s__('Pipelines|Get started with CI/CD'),
+    title: s__('Pipelines|Build with confidence'),
+    description: s__(`Pipelines|GitLab CI/CD can automatically build,
+      test, and deploy your code. Let GitLab take care of time
+      consuming tasks, so you can spend more time creating.`),
+    btnText: s__('Pipelines|Get started with CI/CD'),
+    noCiDescription: s__('Pipelines|This project is not currently set up to run pipelines.'),
   },
   name: 'PipelinesEmptyState',
   components: {
-    GlButton,
+    GlEmptyState,
+    Experiment,
+    PipelinesCiTemplates,
   },
   props: {
     emptyStateSvgPath: {
@@ -32,37 +38,27 @@ export default {
 };
 </script>
 <template>
-  <div class="row empty-state js-empty-state">
-    <div class="col-12">
-      <div class="svg-content svg-250"><img :src="emptyStateSvgPath" /></div>
-    </div>
-
-    <div class="col-12">
-      <div class="text-content">
-        <template v-if="canSetCi">
-          <h4 data-testid="header-text" class="gl-text-center">
-            {{ s__('Pipelines|Build with confidence') }}
-          </h4>
-          <p data-testid="info-text">
-            {{ $options.i18n.infoMessage }}
-          </p>
-
-          <div class="gl-text-center">
-            <gl-button
-              :href="ciHelpPagePath"
-              variant="info"
-              category="primary"
-              data-testid="get-started-pipelines"
-            >
-              {{ $options.i18n.buttonMessage }}
-            </gl-button>
-          </div>
-        </template>
-
-        <p v-else class="gl-text-center">
-          {{ s__('Pipelines|This project is not currently set up to run pipelines.') }}
-        </p>
-      </div>
-    </div>
+  <div>
+    <experiment name="pipeline_empty_state_templates">
+      <template #control>
+        <gl-empty-state
+          v-if="canSetCi"
+          :title="$options.i18n.title"
+          :svg-path="emptyStateSvgPath"
+          :description="$options.i18n.description"
+          :primary-button-text="$options.i18n.btnText"
+          :primary-button-link="ciHelpPagePath"
+        />
+        <gl-empty-state
+          v-else
+          title=""
+          :svg-path="emptyStateSvgPath"
+          :description="$options.i18n.noCiDescription"
+        />
+      </template>
+      <template #candidate>
+        <pipelines-ci-templates />
+      </template>
+    </experiment>
   </div>
 </template>

@@ -24,16 +24,6 @@ module EE
       condition(:is_development) { Rails.env.development? }
 
       with_scope :global
-      condition(:reject_unsigned_commits_disabled_globally) do
-        !PushRule.global&.reject_unsigned_commits
-      end
-
-      with_scope :global
-      condition(:commit_committer_check_disabled_globally) do
-        !PushRule.global&.commit_committer_check
-      end
-
-      with_scope :global
       condition(:locked_approvers_rules) do
         License.feature_available?(:admin_merge_request_approvers_rules) &&
           ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request
@@ -61,7 +51,7 @@ module EE
       end
 
       condition(:custom_compliance_framework_available) do
-        ::Feature.enabled?(:ff_custom_compliance_frameworks)
+        ::Feature.enabled?(:ff_custom_compliance_frameworks, default_enabled: :yaml)
       end
 
       with_scope :subject
@@ -75,39 +65,8 @@ module EE
       end
 
       with_scope :subject
-      condition(:reject_unsigned_commits_disabled_by_group) do
-        if group_push_rule_present?
-          !subject.group.push_rule.reject_unsigned_commits
-        else
-          true
-        end
-      end
-
-      condition(:can_change_reject_unsigned_commits) do
-        admin? ||
-          (can?(:maintainer_access) &&
-            reject_unsigned_commits_disabled_globally? &&
-            reject_unsigned_commits_disabled_by_group?)
-      end
-
-      condition(:commit_committer_check_disabled_by_group) do
-        if group_push_rule_present?
-          !subject.group.push_rule.commit_committer_check
-        else
-          true
-        end
-      end
-
-      with_scope :subject
       condition(:commit_committer_check_available) do
         @subject.feature_available?(:commit_committer_check)
-      end
-
-      condition(:can_change_commit_commiter_check) do
-        admin? ||
-          (can?(:maintainer_access) &&
-            commit_committer_check_disabled_globally? &&
-            commit_committer_check_disabled_by_group?)
       end
 
       with_scope :subject
@@ -164,10 +123,6 @@ module EE
         @subject.feature_available?(:status_page, @user)
       end
 
-      condition(:group_timelogs_available) do
-        @subject.feature_available?(:group_timelogs)
-      end
-
       condition(:over_storage_limit, scope: :subject) do
         @subject.root_namespace.over_storage_limit?
       end
@@ -204,14 +159,11 @@ module EE
         prevent :admin_feature_flags_issue_links
       end
 
-      rule { ~group_timelogs_available }.prevent :read_group_timelogs
-
       rule { can?(:guest_access) & iterations_available }.enable :read_iteration
 
       rule { can?(:reporter_access) }.policy do
         enable :admin_issue_board
         enable :admin_epic_issue
-        enable :read_group_timelogs
       end
 
       rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
@@ -329,13 +281,13 @@ module EE
 
       rule { ~can?(:push_code) }.prevent :push_code_to_protected_branches
 
-      rule { can_change_reject_unsigned_commits }.enable :change_reject_unsigned_commits
+      rule { admin | maintainer }.enable :change_reject_unsigned_commits
 
       rule { reject_unsigned_commits_available }.enable :read_reject_unsigned_commits
 
       rule { ~reject_unsigned_commits_available }.prevent :change_reject_unsigned_commits
 
-      rule { can_change_commit_commiter_check }.enable :change_commit_committer_check
+      rule { admin | maintainer }.enable :change_commit_committer_check
 
       rule { commit_committer_check_available }.enable :read_commit_committer_check
 
@@ -430,14 +382,13 @@ module EE
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
-    override :resource_access_token_available?
-    def resource_access_token_available?
-      return true unless ::Gitlab.com?
+    override :resource_access_token_feature_available?
+    def resource_access_token_feature_available?
+      return super unless ::Gitlab.com?
 
-      group = project.namespace
+      namespace = project.namespace
 
-      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
-        group.feature_available_non_trial?(:resource_access_token)
+      namespace.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

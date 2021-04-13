@@ -231,6 +231,7 @@ RSpec.describe EE::NotificationService, :mailer do
   describe 'mirror was disabled' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project) }
+
     let(:deleted_username) { 'deleted_user_name' }
 
     context 'when the project has invited members' do
@@ -655,7 +656,7 @@ RSpec.describe EE::NotificationService, :mailer do
 
       shared_examples 'is not able to send notifications' do
         it 'does not send any notification' do
-          expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: current_user.id, klass: epic.class, object_id: epic.id)
+          expect(Gitlab::AppLogger).to receive(:warn).with(message: 'Skipping sending notifications', user: current_user.id, klass: epic.class.to_s, object_id: epic.id)
 
           execute
 
@@ -900,10 +901,24 @@ RSpec.describe EE::NotificationService, :mailer do
       let_it_be(:alert) { create(:alert_management_alert) }
       let_it_be(:project) { alert.project }
 
+      let(:tracking_params) do
+        {
+          event_names: 'i_incident_management_oncall_notification_sent',
+          start_date: 1.week.ago,
+          end_date: 1.week.from_now
+        }
+      end
+
       it 'sends an email to the specified users' do
         expect(Notify).to receive(:prometheus_alert_fired_email).with(project, user, alert).and_call_original
 
         subject.notify_oncall_users_of_alert([user], alert)
+      end
+
+      it 'tracks a count of unique recipients', :clean_gitlab_redis_shared_state do
+        expect { subject.notify_oncall_users_of_alert([user], alert) }
+          .to change { Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(**tracking_params) }
+          .by 1
       end
     end
   end

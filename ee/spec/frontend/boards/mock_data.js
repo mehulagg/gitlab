@@ -104,7 +104,18 @@ export const mockMilestones = [
   },
 ];
 
-const labels = [
+export const mockIterations = [
+  {
+    id: 'gid://gitlab/Iteration/1',
+    title: 'Iteration 1',
+  },
+  {
+    id: 'gid://gitlab/Iteration/2',
+    title: 'Iteration 2',
+  },
+];
+
+export const labels = [
   {
     id: 'gid://gitlab/GroupLabel/5',
     title: 'Cosync',
@@ -214,7 +225,7 @@ export const mockIssues = [mockIssue, mockIssue2];
 
 export const mockEpic = {
   id: 'gid://gitlab/Epic/41',
-  iid: 1,
+  iid: '1',
   title: 'Epic title',
   state: 'opened',
   webUrl: '/groups/gitlab-org/-/epics/1',

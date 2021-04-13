@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe StatusPage::IncidentCommentEntity do
   let_it_be(:note, reload: true) { create(:note, note: ':ok:') }
+
   let(:json) { subject.as_json }
   let(:issue) { instance_double(Issue, iid: 1) }
 

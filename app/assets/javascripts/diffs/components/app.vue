@@ -3,6 +3,13 @@ import { GlLoadingIcon, GlPagination, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Mousetrap from 'mousetrap';
 import { mapState, mapGetters, mapActions } from 'vuex';
+import {
+  keysFor,
+  MR_PREVIOUS_FILE_IN_DIFF,
+  MR_NEXT_FILE_IN_DIFF,
+  MR_COMMITS_NEXT_COMMIT,
+  MR_COMMITS_PREVIOUS_COMMIT,
+} from '~/behaviors/shortcuts/keybindings';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { isSingleViewStyle } from '~/helpers/diffs_helper';
 import { getParameterByName, parseBoolean } from '~/lib/utils/common_utils';
@@ -73,6 +80,16 @@ export default {
       required: true,
     },
     endpointCoverage: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    endpointCodequality: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    endpointUpdateUser: {
       type: String,
       required: false,
       default: '',
@@ -153,6 +170,7 @@ export default {
       plainDiffPath: (state) => state.diffs.plainDiffPath,
       emailPatchPath: (state) => state.diffs.emailPatchPath,
       retrievingBatches: (state) => state.diffs.retrievingBatches,
+      codequalityDiff: (state) => state.diffs.codequalityDiff,
     }),
     ...mapState('diffs', [
       'showTreeList',
@@ -166,7 +184,12 @@ export default {
       'viewDiffsFileByFile',
       'mrReviews',
     ]),
-    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
+    ...mapGetters('diffs', [
+      'whichCollapsedTypes',
+      'isParallelView',
+      'currentDiffIndex',
+      'fileCodequalityDiff',
+    ]),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -264,6 +287,8 @@ export default {
       endpointMetadata: this.endpointMetadata,
       endpointBatch: this.endpointBatch,
       endpointCoverage: this.endpointCoverage,
+      endpointCodequality: this.endpointCodequality,
+      endpointUpdateUser: this.endpointUpdateUser,
       projectPath: this.projectPath,
       dismissEndpoint: this.dismissEndpoint,
       showSuggestPopover: this.showSuggestPopover,
@@ -319,6 +344,7 @@ export default {
       'fetchDiffFilesMeta',
       'fetchDiffFilesBatch',
       'fetchCoverageFiles',
+      'fetchCodequality',
       'startRenderDiffsQueue',
       'assignDiscussionsToDiff',
       'setHighlightedRow',
@@ -342,14 +368,6 @@ export default {
     refetchDiffData() {
       this.fetchData(false);
     },
-    startDiffRendering() {
-      requestIdleCallback(
-        () => {
-          this.startRenderDiffsQueue();
-        },
-        { timeout: 1000 },
-      );
-    },
     needsReload() {
       return this.diffFiles.length && isSingleViewStyle(this.diffFiles[0]);
     },
@@ -361,8 +379,6 @@ export default {
         .then(({ real_size }) => {
           this.diffFilesLength = parseInt(real_size, 10);
           if (toggleTree) this.setTreeDisplay();
-
-          this.startDiffRendering();
         })
         .catch(() => {
           createFlash(__('Something went wrong on our end. Please try again!'));
@@ -377,13 +393,16 @@ export default {
           // change when loading the other half of the diff files.
           this.setDiscussions();
         })
-        .then(() => this.startDiffRendering())
         .catch(() => {
           createFlash(__('Something went wrong on our end. Please try again!'));
         });
 
       if (this.endpointCoverage) {
         this.fetchCoverageFiles();
+      }
+
+      if (this.endpointCodequality) {
+        this.fetchCodequality();
       }
 
       if (!this.isNotesFetched) {
@@ -406,30 +425,23 @@ export default {
       }
     },
     setEventListeners() {
-      Mousetrap.bind(['[', 'k', ']', 'j'], (e, combo) => {
-        switch (combo) {
-          case '[':
-          case 'k':
-            this.jumpToFile(-1);
-            break;
-          case ']':
-          case 'j':
-            this.jumpToFile(+1);
-            break;
-          default:
-            break;
-        }
-      });
+      Mousetrap.bind(keysFor(MR_PREVIOUS_FILE_IN_DIFF), () => this.jumpToFile(-1));
+      Mousetrap.bind(keysFor(MR_NEXT_FILE_IN_DIFF), () => this.jumpToFile(+1));
 
       if (this.commit) {
-        Mousetrap.bind('c', () => this.moveToNeighboringCommit({ direction: 'next' }));
-        Mousetrap.bind('x', () => this.moveToNeighboringCommit({ direction: 'previous' }));
+        Mousetrap.bind(keysFor(MR_COMMITS_NEXT_COMMIT), () =>
+          this.moveToNeighboringCommit({ direction: 'next' }),
+        );
+        Mousetrap.bind(keysFor(MR_COMMITS_PREVIOUS_COMMIT), () =>
+          this.moveToNeighboringCommit({ direction: 'previous' }),
+        );
       }
     },
     removeEventListeners() {
-      Mousetrap.unbind(['[', 'k', ']', 'j']);
-      Mousetrap.unbind('c');
-      Mousetrap.unbind('x');
+      Mousetrap.unbind(keysFor(MR_PREVIOUS_FILE_IN_DIFF));
+      Mousetrap.unbind(keysFor(MR_NEXT_FILE_IN_DIFF));
+      Mousetrap.unbind(keysFor(MR_COMMITS_NEXT_COMMIT));
+      Mousetrap.unbind(keysFor(MR_COMMITS_PREVIOUS_COMMIT));
     },
     jumpToFile(step) {
       const targetIndex = this.currentDiffIndex + step;
@@ -520,6 +532,7 @@ export default {
               :help-page-path="helpPagePath"
               :can-current-user-fork="canCurrentUserFork"
               :view-diffs-file-by-file="viewDiffsFileByFile"
+              :codequality-diff="fileCodequalityDiff(file.file_path)"
             />
             <div
               v-if="showFileByFileNavigation"

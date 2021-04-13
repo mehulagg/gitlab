@@ -18,18 +18,6 @@ RSpec.describe Deployment do
           deployment.succeed!
         end
       end
-
-      context 'when dora_daily_metrics feature flag is disabled' do
-        before do
-          stub_feature_flags(dora_daily_metrics: false)
-        end
-
-        it 'does not schedule Dora::DailyMetrics::RefreshWorker' do
-          expect(::Dora::DailyMetrics::RefreshWorker).not_to receive(:perform_in)
-
-          deployment.succeed!
-        end
-      end
     end
   end
 end

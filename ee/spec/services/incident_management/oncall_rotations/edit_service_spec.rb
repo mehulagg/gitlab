@@ -7,7 +7,7 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
   let_it_be(:user_without_permissions) { create(:user) }
   let_it_be_with_refind(:project) { create(:project) }
 
-  let_it_be_with_refind(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
+  let_it_be_with_refind(:oncall_schedule) { create(:incident_management_oncall_schedule, :utc, project: project) }
   let_it_be_with_refind(:oncall_rotation) { create(:incident_management_oncall_rotation, :with_participants, schedule: oncall_schedule, participants_count: 2) }
   let(:current_user) { user_with_permissions }
   let(:params) { rotation_params }
@@ -41,14 +41,6 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
       let(:current_user) { user_without_permissions }
 
       it_behaves_like 'error response', 'You have insufficient permissions to edit an on-call rotation in this project'
-    end
-
-    it 'runs the persist shift job before editing' do
-      expect_next_instance_of(IncidentManagement::OncallRotations::PersistShiftsJob) do |persist_job|
-        expect(persist_job).to receive(:perform).with(oncall_rotation.id)
-      end
-
-      subject
     end
 
     context 'adding one participant' do
@@ -176,6 +168,79 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
           subject
 
           expect(oncall_rotation.reload).not_to have_attributes(params)
+        end
+      end
+    end
+
+    context 'for an already-started rotation' do
+      let(:active_period_shift) { { starts_at: oncall_rotation.starts_at.change(hour: 8), ends_at: oncall_rotation.starts_at.change(hour: 17) } }
+
+      around do |example|
+        travel_to(updated_at) { example.run }
+      end
+
+      context 'when the "current" shift and new "current" shift would conflict' do
+        let(:updated_at) { 8.days.after(oncall_rotation.starts_at) }
+        let(:params) { { length: 1, length_unit: 'weeks' } }
+
+        let(:previous_completed_shift) { { starts_at: oncall_rotation.starts_at, ends_at: 5.days.after(oncall_rotation.starts_at) } }
+        let(:previous_current_shift) { { starts_at: 5.days.after(oncall_rotation.starts_at), ends_at: updated_at } }
+        let(:new_current_shift) { { starts_at: updated_at, ends_at: 2.weeks.after(oncall_rotation.starts_at) } }
+
+        it 'ensures the shift history is up-to-date, ends the current shift, and starts the new shift partway' do
+          expect(execute).to be_success
+
+          first_shift, second_shift, third_shift = oncall_rotation.shifts
+          expect(oncall_rotation.shifts.length).to eq(3)
+          expect(first_shift).to have_attributes(previous_completed_shift)
+          expect(second_shift).to have_attributes(previous_current_shift)
+          expect(third_shift).to have_attributes(new_current_shift)
+        end
+      end
+
+      context 'when the next shift has not started' do
+        let(:updated_at) { 3.days.after(oncall_rotation.starts_at).change(hour: 20) }
+        let(:params) { { active_period_start: active_period_shift[:starts_at], active_period_end: active_period_shift[:ends_at] } }
+
+        let(:previous_current_shift) { { starts_at: oncall_rotation.starts_at, ends_at: updated_at } }
+
+        it 'ends the original "current" shift and does not save a new shift' do
+          expect(execute).to be_success
+
+          first_shift = oncall_rotation.shifts.first
+          expect(oncall_rotation.shifts.length).to eq(1)
+          expect(first_shift).to have_attributes(previous_current_shift)
+        end
+      end
+
+      context 'when all previous shifts have already ended' do
+        let_it_be(:starts_at) { Time.current.next_day.change(hour: 3, usec: 0) }
+        let_it_be_with_refind(:oncall_rotation) { create(:incident_management_oncall_rotation, :with_participants, :with_active_period, schedule: oncall_schedule, starts_at: starts_at) }
+
+        let(:updated_at) { starts_at.next_day }
+        let(:params) { { active_period_start: nil, active_period_end: nil } }
+
+        let(:new_current_shift) { { starts_at: updated_at, ends_at: 5.days.after(oncall_rotation.starts_at) } }
+
+        it 'starts the new "current" shift partway' do
+          expect(execute).to be_success
+
+          first_shift, second_shift = oncall_rotation.shifts
+          expect(oncall_rotation.shifts.length).to eq(2)
+          expect(first_shift).to have_attributes(active_period_shift)
+          expect(second_shift).to have_attributes(new_current_shift)
+        end
+
+        context 'when there is not a new shift' do
+          let(:params) { { ends_at: updated_at } }
+
+          it 'does not modify or save any shifts' do
+            expect(execute).to be_success
+
+            first_shift = oncall_rotation.shifts.first
+            expect(oncall_rotation.shifts.length).to eq(1)
+            expect(first_shift).to have_attributes(active_period_shift)
+          end
         end
       end
     end

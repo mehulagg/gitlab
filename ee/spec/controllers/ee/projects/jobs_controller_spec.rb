@@ -6,6 +6,7 @@ RSpec.describe Projects::JobsController do
   describe 'GET #show', :clean_gitlab_redis_shared_state do
     context 'when requesting JSON' do
       let_it_be(:user) { create(:user) }
+
       let(:merge_request) { create(:merge_request, source_project: project) }
       let(:runner) { create(:ci_runner, :instance, description: 'Shared runner') }
       let(:pipeline) { create(:ci_pipeline, project: project) }

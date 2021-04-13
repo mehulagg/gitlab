@@ -1,6 +1,7 @@
 <script>
 import { GlButton, GlIcon, GlLoadingIcon, GlTooltip } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __, n__ } from '~/locale';
 import { EPIC_LEVEL_MARGIN } from '../constants';
 import eventHub from '../event_hub';
@@ -48,8 +49,11 @@ export default {
     itemId() {
       return this.epic.id;
     },
+    epicGroupId() {
+      return getIdFromGraphQLId(this.epic.group.id);
+    },
     isEpicGroupDifferent() {
-      return this.currentGroupId !== this.epic.groupId;
+      return this.currentGroupId !== this.epicGroupId;
     },
     isExpandIconHidden() {
       return !this.epic.hasChildren;
@@ -147,10 +151,10 @@ export default {
         <div class="epic-group-timeframe d-flex text-secondary">
           <span
             v-if="isEpicGroupDifferent && !epic.hasParent"
-            :title="epic.groupFullName"
+            :title="epic.group.fullName"
             class="epic-group"
           >
-            {{ epic.groupName }}
+            {{ epic.group.name }}
           </span>
           <span v-if="isEpicGroupDifferent && !epic.hasParent" class="mx-1" aria-hidden="true"
             >&middot;</span

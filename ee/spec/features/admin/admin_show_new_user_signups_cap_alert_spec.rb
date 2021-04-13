@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'displays new user signups cap alert', :js do
   let_it_be(:admin) { create(:admin) }
+
   let(:help_page_href) { help_page_path('user/admin_area/settings/sign_up_restrictions.md') }
   let(:expected_content) { 'Your instance has reached its user cap' }
 

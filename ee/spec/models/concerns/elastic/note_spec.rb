@@ -110,10 +110,6 @@ RSpec.describe Note, :elastic do
                   'confidential' => issue.confidential
                 },
                 'type' => note.es_type,
-                'join_field' => {
-                  'name' => note.es_type,
-                  'parent' => note.es_parent
-                },
                 'visibility_level' => project.visibility_level,
                 'issues_access_level' => project.issues_access_level
               })
@@ -165,6 +161,9 @@ RSpec.describe Note, :elastic do
       it 'does not contain permissions if remove_permissions_data_from_notes_documents is not finished' do
         allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
                                                   .with(:remove_permissions_data_from_notes_documents)
+                                                  .and_return(false)
+        allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+                                                  .with(:migrate_notes_to_separate_index)
                                                   .and_return(false)
 
         expect(note_json).not_to have_key(access_level) if access_level.present?

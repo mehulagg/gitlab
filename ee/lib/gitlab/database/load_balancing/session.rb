@@ -19,9 +19,14 @@ module Gitlab
           RequestStore.delete(CACHE_KEY)
         end
 
+        def self.without_sticky_writes(&block)
+          current.ignore_writes(&block)
+        end
+
         def initialize
           @use_primary = false
           @performed_write = false
+          @ignore_writes = false
         end
 
         def use_primary?
@@ -42,8 +47,42 @@ module Gitlab
           @use_primary = used_primary || @performed_write
         end
 
+        def ignore_writes(&block)
+          @ignore_writes = true
+
+          yield
+        ensure
+          @ignore_writes = false
+        end
+
+        # Indicate that the ambiguous SQL statements from anywhere inside this
+        # block should use a replica. The ambiguous statements include:
+        # - Transactions.
+        # - Custom queries (via exec_query, execute, etc.)
+        # - In-flight connection configuration change (SET LOCAL statement_timeout = 5000)
+        #
+        # This is a weak enforcement. This helper incorporates well with
+        # primary stickiness:
+        # - If the queries are about to write
+        # - The current session already performed writes
+        # - It prefers to use primary, aka, use_primary or use_primary! were called
+        def fallback_to_replicas_for_ambiguous_queries(&blk)
+          previous_flag = @fallback_to_replicas_for_ambiguous_queries
+          @fallback_to_replicas_for_ambiguous_queries = true
+          yield
+        ensure
+          @fallback_to_replicas_for_ambiguous_queries = previous_flag
+        end
+
+        def fallback_to_replicas_for_ambiguous_queries?
+          @fallback_to_replicas_for_ambiguous_queries == true && !use_primary? && !performed_write?
+        end
+
         def write!
           @performed_write = true
+
+          return if @ignore_writes
+
           use_primary!
         end
 

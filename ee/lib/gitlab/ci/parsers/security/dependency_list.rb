@@ -34,7 +34,8 @@ module Gitlab
                 next unless dependency
 
                 file = finding.file
-                vulnerability = finding.metadata
+                vulnerability = finding.metadata.merge(vulnerability_id: finding.vulnerability_id)
+
                 report.add_dependency(formatter.format(dependency, '', file, vulnerability))
               end
             else

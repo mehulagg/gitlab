@@ -54,7 +54,7 @@ RSpec.describe 'Disable Merge Trains Setting', :js do
     include_examples 'loads correct checkbox state'
 
     it "checking merge trains checkbox doesn't affect merge pipelines checkbox" do
-      check('Enable merge trains.')
+      check('Enable merge trains')
 
       expect(find('#project_merge_trains_enabled')).to be_checked
       expect(find('#project_merge_pipelines_enabled')).not_to be_disabled
@@ -69,7 +69,7 @@ RSpec.describe 'Disable Merge Trains Setting', :js do
     end
 
     it 'unchecking merge pipelines checkbox unchecks merge trains checkbox if it was previously checked' do
-      check('Enable merge trains.')
+      check('Enable merge trains')
       uncheck('Enable merged results pipelines')
 
       expect(find('#project_merge_pipelines_enabled')).not_to be_checked
@@ -120,7 +120,7 @@ RSpec.describe 'Disable Merge Trains Setting', :js do
     end
 
     it "unchecking merge trains checkbox doesn't affect merge pipelines checkbox" do
-      uncheck('Enable merge trains.')
+      uncheck('Enable merge trains')
 
       expect(find('#project_merge_trains_enabled')).not_to be_checked
       expect(find('#project_merge_pipelines_enabled')).not_to be_disabled

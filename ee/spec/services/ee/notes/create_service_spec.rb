@@ -7,6 +7,8 @@ RSpec.describe Notes::CreateService do
     let(:project) { create(:project) }
     let(:note_params) { opts }
 
+    let_it_be(:user) { create(:user) }
+
     context 'for issues' do
       let(:issuable) { create(:issue, project: project, weight: 10) }
       let(:opts) { { noteable_type: 'Issue', noteable_id: issuable.id } }
@@ -38,7 +40,6 @@ RSpec.describe Notes::CreateService do
     context 'for merge_requests' do
       let(:issuable) { create(:merge_request, project: project, source_project: project) }
       let(:developer) { create(:user) }
-      let(:user) { create(:user) }
       let(:opts) { { noteable_type: 'MergeRequest', noteable_id: issuable.id } }
 
       it_behaves_like 'issuable quick actions' do
@@ -57,6 +58,18 @@ RSpec.describe Notes::CreateService do
             )
           ]
         end
+      end
+    end
+
+    context 'for epics' do
+      let_it_be(:epic) { create(:epic) }
+
+      let(:opts) { { noteable_type: 'Epic', noteable_id: epic.id, note: "hello" } }
+
+      it 'tracks epic note creation' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_note_created_action)
+
+        described_class.new(nil, user, opts).execute
       end
     end
   end

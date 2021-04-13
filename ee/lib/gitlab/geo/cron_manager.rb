@@ -22,12 +22,13 @@ module Gitlab
         geo_repository_verification_secondary_scheduler_worker
         geo_secondary_registry_consistency_worker
         geo_secondary_usage_data_cron_worker
+        geo_sync_timeout_cron_worker
       ].freeze
 
       GEO_JOBS = (COMMON_JOBS + PRIMARY_JOBS + SECONDARY_JOBS).freeze
 
-      CONFIG_WATCHER = 'geo_sidekiq_cron_config_worker'.freeze
-      CONFIG_WATCHER_CLASS = 'Geo::SidekiqCronConfigWorker'.freeze
+      CONFIG_WATCHER = 'geo_sidekiq_cron_config_worker'
+      CONFIG_WATCHER_CLASS = 'Geo::SidekiqCronConfigWorker'
 
       def execute
         return unless Geo.connected?

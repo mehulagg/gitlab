@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 
@@ -21,5 +21,9 @@ if (selectElement?.dataset) {
       });
       $(selectElement).val(selectedOption).trigger('change.select2');
     })
-    .catch(() => new Flash(__('Error loading countries data.')));
+    .catch(() =>
+      createFlash({
+        message: __('Error loading countries data.'),
+      }),
+    );
 }

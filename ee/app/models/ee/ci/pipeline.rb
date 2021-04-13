@@ -20,6 +20,8 @@ module EE
         has_many :security_scans, class_name: 'Security::Scan', through: :builds
         has_many :security_findings, class_name: 'Security::Finding', through: :security_scans, source: :findings
 
+        has_one :dast_profiles_pipeline, class_name: 'Dast::ProfilesPipeline', foreign_key: :ci_pipeline_id, inverse_of: :ci_pipeline
+        has_one :dast_profile, class_name: 'Dast::Profile', through: :dast_profiles_pipeline
         has_one :source_project, class_name: 'Ci::Sources::Project', foreign_key: :pipeline_id
 
         # Legacy way to fetch security reports based on job name. This has been replaced by the reports feature.
@@ -164,6 +166,11 @@ module EE
 
       def has_security_findings?
         security_findings.exists?
+      end
+
+      def triggered_for_ondemand_dast_scan?
+        ondemand_dast_scan? && parameter_source? &&
+          ::Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
       end
 
       private

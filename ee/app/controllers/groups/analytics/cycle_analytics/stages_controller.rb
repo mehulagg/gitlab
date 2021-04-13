@@ -56,7 +56,11 @@ module Groups
         def records
           return render_403 unless can?(current_user, :read_group_stage, @group)
 
-          render json: data_collector.serialized_records
+          serialized_records = data_collector.serialized_records do |relation|
+            add_pagination_headers(relation)
+          end
+
+          render json: serialized_records
         end
 
         def duration_chart
@@ -134,6 +138,17 @@ module Groups
           if params[:value_stream_id] && params[:value_stream_id] != ::Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME
             @value_stream = @group.value_streams.find(params[:value_stream_id])
           end
+        end
+
+        def add_pagination_headers(relation)
+          Gitlab::Pagination::OffsetHeaderBuilder.new(
+            request_context: self,
+            per_page: relation.limit_value,
+            page: relation.current_page,
+            next_page: relation.next_page,
+            prev_page: relation.prev_page,
+            params: permitted_cycle_analytics_params
+          ).execute(exclude_total_headers: true, data_without_counts: true)
         end
       end
     end

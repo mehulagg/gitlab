@@ -18,6 +18,7 @@ module Gitlab
           :milestone_title,
           :sort,
           :direction,
+          :page,
           label_name: [].freeze,
           assignee_username: [].freeze,
           project_ids: [].freeze
@@ -39,6 +40,7 @@ module Gitlab
         attribute :value_stream
         attribute :sort
         attribute :direction
+        attribute :page
 
         FINDER_PARAM_NAMES.each do |param_name|
           attribute param_name
@@ -68,7 +70,8 @@ module Gitlab
             to: created_before,
             project_ids: project_ids,
             sort: sort&.to_sym,
-            direction: direction&.to_sym
+            direction: direction&.to_sym,
+            page: page
           }.merge(attributes.symbolize_keys.slice(*FINDER_PARAM_NAMES))
         end
 

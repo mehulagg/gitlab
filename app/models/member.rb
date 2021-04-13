@@ -75,7 +75,20 @@ class Member < ApplicationRecord
 
     left_join_users
       .where(user_ok)
-      .where(requested_at: nil)
+      .non_request
+      .non_minimal_access
+      .reorder(nil)
+  end
+
+  scope :blocked, -> do
+    is_external_invite = arel_table[:user_id].eq(nil).and(arel_table[:invite_token].not_eq(nil))
+    user_is_blocked = User.arel_table[:state].eq(:blocked)
+
+    user_ok = Arel::Nodes::Grouping.new(is_external_invite).or(user_is_blocked)
+
+    left_join_users
+      .where(user_ok)
+      .non_request
       .non_minimal_access
       .reorder(nil)
   end
@@ -123,6 +136,12 @@ class Member < ApplicationRecord
 
   scope :with_source_id, ->(source_id) { where(source_id: source_id) }
   scope :including_source, -> { includes(:source) }
+
+  scope :distinct_on_user_with_max_access_level, -> do
+    distinct_members = select('DISTINCT ON (user_id, invite_email) *')
+                       .order('user_id, invite_email, access_level DESC, expires_at DESC, created_at ASC')
+    Member.from(distinct_members, :members)
+  end
 
   scope :order_name_asc, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.name', 'ASC')) }
   scope :order_name_desc, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.name', 'DESC')) }
@@ -265,6 +284,10 @@ class Member < ApplicationRecord
       Gitlab::Access.sym_options
     end
 
+    def valid_email?(email)
+      Devise.email_regexp.match?(email)
+    end
+
     private
 
     def parse_users_list(source, list)
@@ -286,6 +309,7 @@ class Member < ApplicationRecord
 
       if user_ids.present?
         users.concat(User.where(id: user_ids))
+        # the below will automatically discard invalid user_ids
         existing_members = source.members_and_requesters.where(user_id: user_ids).index_by(&:user_id)
       end
 

@@ -16,7 +16,6 @@ module EE
           push_frontend_feature_flag(:usage_data_i_testing_load_performance_widget_total, @project, default_enabled: true)
         end
 
-        before_action :whitelist_query_limiting_ee_merge, only: [:merge]
         before_action :authorize_read_pipeline!, only: [:container_scanning_reports, :dependency_scanning_reports,
                                                         :sast_reports, :secret_detection_reports, :dast_reports,
                                                         :metrics_reports, :coverage_fuzzing_reports,
@@ -60,12 +59,6 @@ module EE
 
       def api_fuzzing_reports
         reports_response(merge_request.compare_api_fuzzing_reports(current_user), head_pipeline)
-      end
-
-      private
-
-      def whitelist_query_limiting_ee_merge
-        ::Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/4792')
       end
     end
   end

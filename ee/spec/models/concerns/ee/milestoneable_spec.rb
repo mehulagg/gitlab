@@ -4,11 +4,11 @@ require 'spec_helper'
 
 RSpec.describe EE::Milestoneable do
   describe '#milestone_available?' do
-    context 'no Epic' do
-      let(:issue) { create(:issue) }
+    context 'for epics' do
+      let(:epic) { build(:epic) }
 
-      it 'returns false' do
-        expect(issue.milestone_available?).to be_falsy
+      it 'returns true' do
+        expect(epic.milestone_available?).to be(true)
       end
     end
   end
@@ -21,7 +21,7 @@ RSpec.describe EE::Milestoneable do
       let(:epic) { build(:epic) }
 
       it 'returns false' do
-        expect(epic.supports_milestone?).to be_falsy
+        expect(epic.supports_milestone?).to be(false)
       end
     end
   end

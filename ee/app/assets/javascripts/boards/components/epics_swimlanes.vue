@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import VirtualList from 'vue-virtual-scroll-list';
 import Draggable from 'vuedraggable';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BoardAddNewColumn from 'ee_else_ce/boards/components/board_add_new_column.vue';
@@ -7,11 +8,16 @@ import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue'
 import { isListDraggable } from '~/boards/boards_util';
 import { n__ } from '~/locale';
 import defaultSortableConfig from '~/sortable/sortable_config';
-import { DRAGGABLE_TAG } from '../constants';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { calculateSwimlanesBufferSize } from '../boards_util';
+import { DRAGGABLE_TAG, EPIC_LANE_BASE_HEIGHT } from '../constants';
 import EpicLane from './epic_lane.vue';
 import IssuesLaneList from './issues_lane_list.vue';
+import SwimlanesLoadingSkeleton from './swimlanes_loading_skeleton.vue';
 
 export default {
+  EpicLane,
+  epicLaneBaseHeight: EPIC_LANE_BASE_HEIGHT,
   components: {
     BoardAddNewColumn,
     BoardListHeader,
@@ -19,10 +25,13 @@ export default {
     IssuesLaneList,
     GlButton,
     GlIcon,
+    SwimlanesLoadingSkeleton,
+    VirtualList,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     lists: {
       type: Array,
@@ -38,8 +47,20 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      bufferSize: 0,
+    };
+  },
   computed: {
-    ...mapState(['epics', 'pageInfoByListId', 'listsFlags', 'addColumnForm']),
+    ...mapState([
+      'epics',
+      'pageInfoByListId',
+      'listsFlags',
+      'addColumnForm',
+      'filterParams',
+      'epicsSwimlanesFetchInProgress',
+    ]),
     ...mapGetters(['getUnassignedIssues']),
     addColumnFormVisible() {
       return this.addColumnForm?.visible;
@@ -77,9 +98,34 @@ export default {
         this.lists.some((list) => this.pageInfoByListId[list.id]?.hasNextPage)
       );
     },
+    isLoading() {
+      const {
+        epicLanesFetchInProgress,
+        listItemsFetchInProgress,
+      } = this.epicsSwimlanesFetchInProgress;
+      return epicLanesFetchInProgress && listItemsFetchInProgress;
+    },
+  },
+  watch: {
+    filterParams: {
+      handler() {
+        Promise.all(
+          this.lists.map((list) => {
+            return this.fetchItemsForList({ listId: list.id, forSwimlanes: true });
+          }),
+        )
+          .then(() => this.doneLoadingSwimlanesItems())
+          .catch(() => {});
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
+  mounted() {
+    this.bufferSize = calculateSwimlanesBufferSize(this.$el.offsetTop);
   },
   methods: {
-    ...mapActions(['moveList', 'fetchItemsForList']),
+    ...mapActions(['moveList', 'fetchItemsForList', 'doneLoadingSwimlanesItems']),
     handleDragOnEnd(params) {
       const { newIndex, oldIndex, item, to } = params;
       const { listId } = item.dataset;
@@ -109,6 +155,17 @@ export default {
         behavior: 'smooth',
       });
     },
+    getEpicLaneProps(index) {
+      return {
+        key: this.epics[index].id,
+        props: {
+          epic: this.epics[index],
+          lists: this.lists,
+          disabled: this.disabled,
+          canAdminList: this.canAdminList,
+        },
+      };
+    },
   },
 };
 </script>
@@ -120,7 +177,8 @@ export default {
     data-testid="board-swimlanes"
     data_qa_selector="board_epics_swimlanes"
   >
-    <div>
+    <swimlanes-loading-skeleton v-if="isLoading" />
+    <div v-else>
       <component
         :is="treeRootWrapper"
         v-bind="treeRootOptions"
@@ -148,14 +206,28 @@ export default {
         </div>
       </component>
       <div class="board-epics-swimlanes gl-display-table">
-        <epic-lane
-          v-for="epic in epics"
-          :key="epic.id"
-          :epic="epic"
-          :lists="lists"
-          :disabled="disabled"
-          :can-admin-list="canAdminList"
-        />
+        <template v-if="glFeatures.swimlanesBufferedRendering">
+          <virtual-list
+            v-if="epics.length"
+            :size="$options.epicLaneBaseHeight"
+            :remain="bufferSize"
+            :bench="bufferSize"
+            :scrollelement="$refs.scrollableContainer"
+            :item="$options.EpicLane"
+            :itemcount="epics.length"
+            :itemprops="getEpicLaneProps"
+          />
+        </template>
+        <template v-else>
+          <epic-lane
+            v-for="epic in epics"
+            :key="epic.id"
+            :epic="epic"
+            :lists="lists"
+            :disabled="disabled"
+            :can-admin-list="canAdminList"
+          />
+        </template>
         <div class="board-lane-unassigned-issues-title gl-sticky gl-display-inline-block gl-left-0">
           <div class="gl-left-0 gl-pb-5 gl-px-3 gl-display-flex gl-align-items-center">
             <span
@@ -197,7 +269,7 @@ export default {
       >
         <gl-button
           category="tertiary"
-          variant="info"
+          variant="confirm"
           class="gl-w-full"
           @click="fetchMoreUnassignedIssues()"
         >

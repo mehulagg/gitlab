@@ -10,6 +10,8 @@ module EE
       def set_filter_values(filters)
         filter_by_epic(filters)
         filter_by_iteration(filters)
+
+        super
       end
 
       private

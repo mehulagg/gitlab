@@ -220,7 +220,7 @@ the ones defined in the upstream project take precedence.
 
 #### With variable inheritance
 
-You can pass variables to a downstream pipeline with [`dotenv` variable inheritance](variables/README.md#inherit-cicd-variables) and [cross project artifact downloads](yaml/README.md#cross-project-artifact-downloads-with-needs).
+You can pass variables to a downstream pipeline with [`dotenv` variable inheritance](variables/README.md#pass-an-environment-variable-to-another-job) and [cross project artifact downloads](yaml/README.md#cross-project-artifact-downloads-with-needs).
 
 In the upstream pipeline:
 
@@ -324,8 +324,9 @@ now trigger a pipeline on the current project's default branch. The maximum
 number of upstream pipeline subscriptions is 2 by default, for both the upstream and
 downstream projects. This [application limit](../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) can be changed on self-managed instances by a GitLab administrator.
 
-The upstream project needs to be [public](../public_access/public_access.md) for
-pipeline subscription to work.
+The upstream project needs to be [public](../public_access/public_access.md)
+and the user must have [developer permissions](../user/permissions.md#project-members-permissions)
+for the upstream project.
 
 ## Downstream private projects confidentiality concern
 

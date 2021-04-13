@@ -28,6 +28,9 @@ RSpec.describe User do
     it { is_expected.to have_many(:board_preferences) }
     it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference') }
     it { is_expected.to have_many(:user_permission_export_uploads) }
+    it { is_expected.to have_many(:oncall_participants).class_name('IncidentManagement::OncallParticipant') }
+    it { is_expected.to have_many(:oncall_rotations).class_name('IncidentManagement::OncallRotation').through(:oncall_participants) }
+    it { is_expected.to have_many(:oncall_schedules).class_name('IncidentManagement::OncallSchedule').through(:oncall_rotations) }
   end
 
   describe 'nested attributes' do
@@ -1006,88 +1009,6 @@ RSpec.describe User do
 
         expect(username).to eq('')
       end
-    end
-  end
-
-  describe '#manageable_groups_eligible_for_subscription' do
-    let_it_be(:user) { create(:user) }
-    let_it_be(:licensed_group) { create(:group_with_plan, plan: :bronze_plan) }
-    let_it_be(:free_group_z) { create(:group_with_plan, plan: :free_plan, name: 'AZ') }
-    let_it_be(:free_group_a) { create(:group_with_plan, plan: :free_plan, name: 'AA') }
-    let_it_be(:sub_group) { create(:group, name: 'SubGroup', parent: free_group_a) }
-    let_it_be(:trial_group) { create(:group_with_plan, plan: :ultimate_plan, trial_ends_on: Date.current + 1.day, name: 'AB') }
-
-    subject { user.manageable_groups_eligible_for_subscription }
-
-    context 'user with no groups' do
-      it { is_expected.to eq [] }
-    end
-
-    context 'owner of a licensed group' do
-      before do
-        licensed_group.add_owner(user)
-      end
-
-      it { is_expected.not_to include licensed_group }
-    end
-
-    context 'guest of a free group' do
-      before do
-        free_group_a.add_guest(user)
-      end
-
-      it { is_expected.not_to include free_group_a }
-    end
-
-    context 'developer of a free group' do
-      before do
-        free_group_a.add_developer(user)
-      end
-
-      it { is_expected.not_to include free_group_a }
-    end
-
-    context 'maintainer of a free group' do
-      before do
-        free_group_a.add_maintainer(user)
-      end
-
-      it { is_expected.to include free_group_a }
-    end
-
-    context 'owner of 2 free groups' do
-      before do
-        free_group_a.add_owner(user)
-        free_group_z.add_owner(user)
-      end
-
-      it { is_expected.to eq [free_group_a, free_group_z] }
-
-      it { is_expected.not_to include(sub_group) }
-    end
-
-    context 'developer of a trial group' do
-      before do
-        trial_group.add_developer(user)
-      end
-
-      it { is_expected.not_to include(trial_group) }
-    end
-
-    context 'owner of a trial group' do
-      before do
-        trial_group.add_owner(user)
-      end
-
-      it { is_expected.to include(trial_group) }
-    end
-
-    context 'maintainer of a trial group' do
-      before do
-        trial_group.add_maintainer(user)
-      end
-
-      it { is_expected.to include(trial_group) }
     end
   end
 

@@ -106,13 +106,87 @@ function parseRule(item, direction) {
   };
 }
 
+/**
+ * Checks for parameters unsupported by the network policy "Rule Mode"
+ * @param {String} manifest YAML of network policy
+ * @returns {Boolean} whether the YAML is valid to be parsed into "Rule Mode"
+ */
+const hasUnsupportedAttribute = (manifest) => {
+  const primaryKeys = ['apiVersion', 'description', 'kind', 'metadata', 'spec'];
+  const metadataKeys = ['annotations', 'labels', 'name', 'namespace', 'resourceVersion'];
+  const specKeys = ['egress', 'endpointSelector', 'ingress'];
+  const ruleKeys = [
+    'fromEntities',
+    'toEntities',
+    'fromCIDR',
+    'toCIDR',
+    'toFQDNs',
+    'fromEndpoints',
+    'toEndpoints',
+    'toPorts',
+  ];
+  const toPortKeys = ['ports'];
+  const portKeys = ['port', 'protocol'];
+  let isUnsupported = false;
+  const hasInvalidKey = (object, allowedValues) => {
+    return !Object.keys(object).every((item) => allowedValues.includes(item));
+  };
+
+  const hasInvalidPolicy = (ingress = [], egress = []) => {
+    let isInvalidPolicy = false;
+    [...ingress, ...egress].forEach((item) => {
+      isInvalidPolicy = hasInvalidKey(item, ruleKeys);
+      if (item.toPorts?.length && !isInvalidPolicy) {
+        item.toPorts.forEach((entry) => {
+          isInvalidPolicy = hasInvalidKey(entry, toPortKeys);
+          if (entry.ports?.length && !isInvalidPolicy) {
+            entry.ports.forEach((portEntry) => {
+              isInvalidPolicy = hasInvalidKey(portEntry, portKeys);
+            });
+          }
+        });
+      }
+    });
+    return isInvalidPolicy;
+  };
+
+  isUnsupported = hasInvalidKey(manifest, primaryKeys);
+
+  if (manifest?.metadata && !isUnsupported) {
+    isUnsupported = hasInvalidKey(manifest.metadata, metadataKeys);
+  }
+  if (manifest?.spec && !isUnsupported) {
+    isUnsupported = hasInvalidKey(manifest.spec, specKeys);
+  }
+  if (!isUnsupported && (manifest?.spec?.ingress?.length || manifest?.spec?.egress?.length)) {
+    isUnsupported = hasInvalidPolicy(manifest.spec.ingress, manifest.spec.egress);
+  }
+
+  return isUnsupported;
+};
+
+/**
+ * Removes inital line dashes from a policy YAML that is received from the API, which
+ * is not required for the user.
+ * @param {String} manifest the policy from the API request
+ * @returns {String} the policy without the initial dashes or the initial string
+ */
+export const removeUnnecessaryDashes = (manifest) => {
+  return manifest.replace('---\n', '');
+};
+
 /*
   Construct a policy object expected by the policy editor from a yaml manifest.
   Expected yaml structure is defined in the official documentation:
     https://docs.cilium.io/en/v1.8/policy/language
 */
 export default function fromYaml(manifest) {
-  const { description, metadata, spec } = safeLoad(manifest, { json: true });
+  const policy = safeLoad(manifest, { json: true });
+
+  const unsupportedAttribute = hasUnsupportedAttribute(policy);
+  if (unsupportedAttribute) return { error: unsupportedAttribute };
+
+  const { description, metadata, spec } = policy;
   const { name, resourceVersion, annotations, labels } = metadata;
   const { endpointSelector = {}, ingress = [], egress = [] } = spec;
   const matchLabels = endpointSelector.matchLabels || {};

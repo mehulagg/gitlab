@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, :wiki_repo, namespace: user.namespace) }
+  let(:projects) { create_list(:project, 5, :public, :repository, :wiki_repo) }
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
@@ -22,7 +23,11 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       control_count = ActiveRecord::QueryRecorder.new { visit path }.count
       expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
 
-      create_list(object, 10, *creation_traits, creation_args)
+      projects.each do |project|
+        creation_args[:source_project] = project if creation_args.key?(:source_project)
+        creation_args[:project] = project if creation_args.key?(:project)
+        create(object, *creation_traits, creation_args)
+      end
 
       ensure_elasticsearch_index!
 
@@ -59,8 +64,8 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
 
     context 'searching merge requests' do
       let(:object) { :merge_request }
-      let(:creation_traits) { [:sequence_source_branch] }
-      let(:creation_args) { { source_project: project, title: 'initial' } }
+      let(:creation_traits) { [:unique_branches, :unique_author] }
+      let(:creation_args) { { title: 'initial', source_project: project } }
       let(:path) { search_path(search: '*', scope: 'merge_requests') }
       let(:query_count_multiplier) { 0 }
 
@@ -74,6 +79,28 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       let(:query_count_multiplier) { 0 }
 
       it_behaves_like 'an efficient database result'
+    end
+
+    context 'searching code' do
+      let(:path) { search_path(search: '*', scope: 'blobs') }
+
+      it 'avoids N+1 database queries' do
+        project.repository.index_commits_and_blobs
+
+        ensure_elasticsearch_index!
+
+        control = ActiveRecord::QueryRecorder.new { visit path }
+        expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
+
+        projects.each do |project|
+          project.repository.index_commits_and_blobs
+        end
+
+        ensure_elasticsearch_index!
+
+        expect { visit path }.not_to exceed_query_limit(control.count)
+        expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
+      end
     end
   end
 

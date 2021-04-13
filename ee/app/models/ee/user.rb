@@ -11,8 +11,8 @@ module EE
 
     include AuditorUserHelper
 
-    DEFAULT_ROADMAP_LAYOUT = 'months'.freeze
-    DEFAULT_GROUP_VIEW = 'details'.freeze
+    DEFAULT_ROADMAP_LAYOUT = 'months'
+    DEFAULT_GROUP_VIEW = 'details'
     MAX_USERNAME_SUGGESTION_ATTEMPTS = 15
 
     prepended do
@@ -49,7 +49,7 @@ module EE
       has_many :approvals,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :approvers,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
 
-      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, class_name: 'GroupMember'
       has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
       has_many :users_ops_dashboard_projects
@@ -57,7 +57,7 @@ module EE
       has_many :users_security_dashboard_projects
       has_many :security_dashboard_projects, through: :users_security_dashboard_projects, source: :project
 
-      has_many :group_saml_identities, -> { where.not(saml_provider_id: nil) }, source: :identities, class_name: "::Identity"
+      has_many :group_saml_identities, -> { where.not(saml_provider_id: nil) }, class_name: "::Identity"
 
       # Protected Branch Access
       has_many :protected_branch_merge_access_levels, dependent: :destroy, class_name: "::ProtectedBranch::MergeAccessLevel" # rubocop:disable Cop/ActiveRecordDependent
@@ -72,6 +72,10 @@ module EE
       belongs_to :managing_group, class_name: 'Group', optional: true, inverse_of: :managed_users
 
       has_many :user_permission_export_uploads
+
+      has_many :oncall_participants, class_name: 'IncidentManagement::OncallParticipant', inverse_of: :user
+      has_many :oncall_rotations, class_name: 'IncidentManagement::OncallRotation', through: :oncall_participants, source: :rotation
+      has_many :oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', through: :oncall_rotations, source: :schedule
 
       scope :not_managed, ->(group: nil) {
         scope = where(managing_group_id: nil)
@@ -253,10 +257,6 @@ module EE
         .include_gitlab_subscription
         .where(gitlab_subscriptions: { hosted_plan: ::Plan.where(name: plans) })
         .any?
-    end
-
-    def manageable_groups_eligible_for_subscription
-      manageable_groups.eligible_for_subscription.order(:name)
     end
 
     def manageable_groups_eligible_for_trial

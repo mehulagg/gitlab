@@ -1,6 +1,6 @@
 <script>
 import { GlFormTextarea } from '@gitlab/ui';
-import fromYaml from './lib/from_yaml';
+import fromYaml, { removeUnnecessaryDashes } from './lib/from_yaml';
 import humanizeNetworkPolicy from './lib/humanize';
 import toYaml from './lib/to_yaml';
 import PolicyPreview from './policy_preview.vue';
@@ -17,14 +17,18 @@ export default {
     },
   },
   computed: {
+    initialTab() {
+      return this.policy ? 1 : 0;
+    },
     policy() {
-      return fromYaml(this.value);
+      const policy = fromYaml(this.value);
+      return policy.error ? null : policy;
     },
     humanizedPolicy() {
-      return humanizeNetworkPolicy(this.policy);
+      return this.policy ? humanizeNetworkPolicy(this.policy) : this.policy;
     },
     policyYaml() {
-      return toYaml(this.policy);
+      return removeUnnecessaryDashes(this.value);
     },
   },
   methods: {
@@ -43,12 +47,14 @@ export default {
     <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Policy type') }}</h5>
     <p>{{ s__('NetworkPolicies|Network Policy') }}</p>
 
-    <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Description') }}</h5>
-    <gl-form-textarea :value="policy.description" @input="updateManifest" />
+    <div v-if="policy">
+      <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Description') }}</h5>
+      <gl-form-textarea :value="policy.description" @input="updateManifest" />
+    </div>
 
     <policy-preview
       class="gl-mt-4"
-      :initial-tab="1"
+      :initial-tab="initialTab"
       :policy-yaml="policyYaml"
       :policy-description="humanizedPolicy"
     />

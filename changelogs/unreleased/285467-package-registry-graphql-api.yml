@@ -1,5 +1,5 @@
 ---
-title: Add package list to group graphql type
-merge_request: 54672
+title: Add Conan GraphQL type to package
+merge_request: 57719
 author:
 type: added

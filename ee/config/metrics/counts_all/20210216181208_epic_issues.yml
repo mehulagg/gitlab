@@ -3,7 +3,7 @@ key_path: counts.epic_issues
 description: Count of issues that are assigned to an epic
 product_section: dev
 product_stage: plan
-product_group: group::portfolio management
+product_group: group::product planning
 product_category: epics
 value_type: number
 status: data_available
@@ -14,4 +14,3 @@ distribution:
 tier:
 - premium
 - ultimate
-skip_validation: true

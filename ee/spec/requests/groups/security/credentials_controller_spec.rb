@@ -173,118 +173,81 @@ RSpec.describe Groups::Security::CredentialsController do
     context 'when `credentials_inventory` feature is enabled' do
       before do
         stub_licensed_features(credentials_inventory: true, group_saml: true)
-        stub_feature_flags(revoke_managed_users_token: true)
       end
 
       context 'for a group that enforces group managed accounts' do
-        context 'when `revoke_managed_users_token` feature is enabled' do
-          before_all do
-            stub_feature_flags(revoke_managed_users_token: true)
-          end
-
-          context 'for a user with access to view credentials inventory' do
-            context 'non-existent personal access token specified' do
-              let(:token_id) { 999999999999999999999999999999999 }
-
-              it_behaves_like 'responds with 404'
-            end
-
-            describe 'with an existing personal access token' do
-              context 'personal access token is already revoked' do
-                let_it_be(:token_id) { create(:personal_access_token, revoked: true, user: maintainer).id }
-
-                it_behaves_like 'displays the flash success message'
-              end
-
-              context 'personal access token is already expired' do
-                let_it_be(:token_id) { create(:personal_access_token, expires_at: 5.days.ago, user: maintainer).id }
-
-                it_behaves_like 'displays the flash success message'
-              end
-
-              context 'does not have permissions to revoke the credential' do
-                let_it_be(:token_id) { create(:personal_access_token, user: create(:user)).id }
-
-                it_behaves_like 'responds with 404'
-              end
-
-              context 'personal access token is already revoked' do
-                let_it_be(:token_id) { create(:personal_access_token, revoked: true, user: maintainer).id }
-
-                it_behaves_like 'displays the flash success message'
-              end
-
-              context 'personal access token is already expired' do
-                let_it_be(:token_id) { create(:personal_access_token, expires_at: 5.days.ago, user: maintainer).id }
-
-                it_behaves_like 'displays the flash success message'
-              end
-
-              context 'personal access token is not revoked or expired' do
-                let_it_be(:token_id) { personal_access_token.id }
-
-                it_behaves_like 'displays the flash success message'
-
-                it 'informs the token owner' do
-                  expect(CredentialsInventoryMailer).to receive_message_chain(:personal_access_token_revoked_email, :deliver_later)
-
-                  put revoke_group_security_credential_path(group_id: group_id.to_param, id: personal_access_token.id)
-                end
-
-                context 'when credentials_inventory_revocation_emails flag is disabled' do
-                  before do
-                    stub_feature_flags(credentials_inventory_revocation_emails: false)
-                  end
-
-                  it 'does not inform the token owner' do
-                    expect do
-                      put revoke_group_security_credential_path(group_id: group_id.to_param, id: personal_access_token.id)
-                    end.not_to change { ActionMailer::Base.deliveries.size }
-                  end
-                end
-              end
-            end
-          end
-
-          context 'for a user without access to view credentials inventory' do
-            let_it_be(:token_id) { create(:personal_access_token, user: owner).id }
-
-            before do
-              sign_in(maintainer)
-            end
+        context 'for a user with access to view credentials inventory' do
+          context 'non-existent personal access token specified' do
+            let(:token_id) { 999999999999999999999999999999999 }
 
             it_behaves_like 'responds with 404'
           end
-        end
 
-        context 'when `revoke_managed_users_token` feature is disabled' do
-          before_all do
-            stub_feature_flags(revoke_managed_users_token: false)
-          end
+          describe 'with an existing personal access token' do
+            context 'personal access token is already revoked' do
+              let_it_be(:token_id) { create(:personal_access_token, revoked: true, user: maintainer).id }
 
-          context 'for a user with access to view credentials inventory' do
-            context 'non-existent personal access token specified' do
-              let(:token_id) { 999999999999999999999999999999999 }
-
-              it_behaves_like 'responds with 404'
+              it_behaves_like 'displays the flash success message'
             end
 
-            context 'valid personal access token specified' do
+            context 'personal access token is already expired' do
+              let_it_be(:token_id) { create(:personal_access_token, expires_at: 5.days.ago, user: maintainer).id }
+
+              it_behaves_like 'displays the flash success message'
+            end
+
+            context 'does not have permissions to revoke the credential' do
               let_it_be(:token_id) { create(:personal_access_token, user: create(:user)).id }
 
               it_behaves_like 'responds with 404'
             end
-          end
 
-          context 'for a user without access to view credentials inventory' do
-            let_it_be(:token_id) { create(:personal_access_token, user: owner).id }
+            context 'personal access token is already revoked' do
+              let_it_be(:token_id) { create(:personal_access_token, revoked: true, user: maintainer).id }
 
-            before do
-              sign_in(maintainer)
+              it_behaves_like 'displays the flash success message'
             end
 
-            it_behaves_like 'responds with 404'
+            context 'personal access token is already expired' do
+              let_it_be(:token_id) { create(:personal_access_token, expires_at: 5.days.ago, user: maintainer).id }
+
+              it_behaves_like 'displays the flash success message'
+            end
+
+            context 'personal access token is not revoked or expired' do
+              let_it_be(:token_id) { personal_access_token.id }
+
+              it_behaves_like 'displays the flash success message'
+
+              it 'informs the token owner' do
+                expect(CredentialsInventoryMailer).to receive_message_chain(:personal_access_token_revoked_email, :deliver_later)
+
+                put revoke_group_security_credential_path(group_id: group_id.to_param, id: personal_access_token.id)
+              end
+
+              context 'when credentials_inventory_revocation_emails flag is disabled' do
+                before do
+                  stub_feature_flags(credentials_inventory_revocation_emails: false)
+                end
+
+                it 'does not inform the token owner' do
+                  expect do
+                    put revoke_group_security_credential_path(group_id: group_id.to_param, id: personal_access_token.id)
+                  end.not_to change { ActionMailer::Base.deliveries.size }
+                end
+              end
+            end
           end
+        end
+
+        context 'for a user without access to view credentials inventory' do
+          let_it_be(:token_id) { create(:personal_access_token, user: owner).id }
+
+          before do
+            sign_in(maintainer)
+          end
+
+          it_behaves_like 'responds with 404'
         end
       end
 

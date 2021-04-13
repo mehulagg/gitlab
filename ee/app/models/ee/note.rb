@@ -20,6 +20,13 @@ module EE
       end
     end
 
+    class_methods do
+      # override
+      def use_separate_indices?
+        Elastic::DataMigrationService.migration_has_finished?(:migrate_notes_to_separate_index)
+      end
+    end
+
     # Original method in Elastic::ApplicationSearch
     def searchable?
       !system && super
@@ -74,6 +81,10 @@ module EE
     override :skip_notification?
     def skip_notification?
       for_vulnerability? || super
+    end
+
+    def usage_ping_track_updated_epic_note(user)
+      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_note_updated_action(author: user) if for_epic?
     end
 
     private

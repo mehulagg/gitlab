@@ -65,6 +65,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
             updated_at: updated_at # Friday @ 6:00
           )
         end
+
         let_it_be(:active_period) { active_period_for_date_with_tz(updated_at, rotation) }
 
         around do |example|
@@ -120,16 +121,6 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
           travel_to(existing_shift.ends_at + (3 * rotation.shift_cycle_duration)) { example.run }
         end
 
-        context 'when feature flag is not enabled' do
-          before do
-            stub_feature_flags(oncall_schedules_mvc: false)
-          end
-
-          it 'does not create shifts' do
-            expect { perform }.not_to change { IncidentManagement::OncallShift.count }
-          end
-        end
-
         it 'creates multiple shifts' do
           expect { perform }.to change { rotation.shifts.count }.by(3)
 
@@ -149,6 +140,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
       context 'when current time is after a rotation has re-started after an edit' do
         let_it_be(:new_starts_at) { rotation.starts_at + 3 * rotation.shift_cycle_duration }
         let_it_be(:updated_at) { rotation.starts_at + rotation.shift_cycle_duration }
+
         let(:current_time) { 2.minutes.after(new_starts_at) }
 
         before do
@@ -181,6 +173,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
             starts_at: starts_at
           )
         end
+
         let_it_be(:active_period) { active_period_for_date_with_tz(starts_at, rotation) }
         let_it_be(:existing_shift) do
           create(
@@ -208,6 +201,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
 
           context 'when rotation was previously ended but is now in progress' do
             let_it_be(:updated_at) { rotation.reload.starts_at + 3 * rotation.shift_cycle_duration }
+
             let(:current_time) { updated_at.change(hour: 8, min: 2) }
             let(:expected_shift_start) { updated_at.change(hour: existing_shift.starts_at.hour) }
             let(:expected_shift_end) { updated_at.change(hour: existing_shift.ends_at.hour) }

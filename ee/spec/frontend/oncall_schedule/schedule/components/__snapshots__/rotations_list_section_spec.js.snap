@@ -12,7 +12,9 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
         <span
-          class="gl-text-truncated"
+          aria-label="Rotation 242"
+          class="gl-text-truncate"
+          data-testid="rotation-name-gid://gitlab/IncidentManagement::OncallRotation/2"
         >
           Rotation 242
         </span>
@@ -23,7 +25,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         >
           <button
             aria-label="Edit rotation"
-            class="btn gl-display-none btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
             title="Edit rotation"
             type="button"
           >
@@ -66,19 +68,20 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
       </span>
        
       <span
-        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1"
+        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-overflow-hidden"
         data-testid="timeline-cell"
+        style="width: calc(100% - 180px);"
       >
         <span
           class="current-day-indicator"
           data-testid="current-day-indicator"
-          style="left: 7.142857142857143%;"
+          style="left: 14.285714285714286%;"
         />
          
         <div>
           <div
-            class="gl-absolute gl-h-7 gl-mt-3"
-            style="left: 0px; width: -2px;"
+            class="gl-absolute gl-h-7 gl-mt-3 gl-pr-1"
+            style="left: 0px; width: 0px;"
           >
             <div
               class="gl-h-6 gl-bg-data-viz-blue-500 gl-display-flex gl-justify-content-center gl-align-items-center"
@@ -102,7 +105,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 data-testid="rotation-assignee-starts-at"
               >
                 
-      Starts: January 12, 2021, 10:04 (UTC -12:00)
+      Starts: January 12, 2021, 10:04 (UTC: +0000)
     
               </p>
                
@@ -111,14 +114,14 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 data-testid="rotation-assignee-ends-at"
               >
                 
-      Ends: January 15, 2021, 10:04 (UTC -12:00)
+      Ends: January 15, 2021, 10:04 (UTC: +0000)
     
               </p>
             </div>
           </div>
           <div
-            class="gl-absolute gl-h-7 gl-mt-3"
-            style="left: 0px; width: -2px;"
+            class="gl-absolute gl-h-7 gl-mt-3 gl-pr-1"
+            style="left: 0px; width: 0px;"
           >
             <div
               class="gl-h-6 gl-bg-data-viz-orange-500 gl-display-flex gl-justify-content-center gl-align-items-center"
@@ -142,7 +145,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 data-testid="rotation-assignee-starts-at"
               >
                 
-      Starts: January 16, 2021, 10:04 (UTC -12:00)
+      Starts: January 16, 2021, 10:04 (UTC: +0000)
     
               </p>
                
@@ -151,20 +154,12 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 data-testid="rotation-assignee-ends-at"
               >
                 
-      Ends: January 18, 2021, 10:04 (UTC -12:00)
+      Ends: January 18, 2021, 10:04 (UTC: +0000)
     
               </p>
             </div>
           </div>
         </div>
-      </span>
-      <span
-        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-overflow-hidden"
-        data-testid="timeline-cell"
-      >
-        <!---->
-         
-        <div />
       </span>
     </div>
   </div>

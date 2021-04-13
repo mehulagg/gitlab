@@ -11,6 +11,21 @@ module EE
         .count
     end
 
+    def open_epics_count(group)
+      if ::Feature.enabled?(:cached_sidebar_open_epics_count, group, default_enabled: :yaml)
+        cached_issuables_count(group, type: :epics)
+      else
+        number_with_delimiter(group_epics_count(state: 'opened'))
+      end
+    end
+
+    override :issuables_count_service_class
+    def issuables_count_service_class(type)
+      return super unless type == :epics
+
+      ::Groups::EpicsCountService
+    end
+
     def group_nav_link_paths
       %w[saml_providers#show usage_quotas#index billings#index]
     end
@@ -28,9 +43,9 @@ module EE
     end
 
     def size_limit_message_for_group(group)
-      show_lfs = group.lfs_enabled? ? 'and their respective LFS files' : ''
+      show_lfs = group.lfs_enabled? ? 'including LFS files' : ''
 
-      "Repositories within this group #{show_lfs} will be restricted to this maximum size. Can be overridden inside each project. 0 for unlimited. Leave empty to inherit the global value."
+      "Max size for repositories within this group #{show_lfs}. Can be overridden inside each project. For no limit, enter 0. To inherit the global value, leave blank."
     end
 
     override :group_packages_nav_link_paths

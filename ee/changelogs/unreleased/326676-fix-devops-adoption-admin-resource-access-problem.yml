@@ -1,0 +1,5 @@
+---
+title: Fix access bug for DevOps Adoption page and free tier groups
+merge_request: 58684
+author:
+type: fixed

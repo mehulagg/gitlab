@@ -21,7 +21,6 @@ RSpec.describe BillingPlansHelper do
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
-                 is_group: "true",
                  add_seats_href: add_seats_href,
                  plan_upgrade_href: upgrade_href,
                  plan_renew_href: renew_href,
@@ -51,7 +50,6 @@ RSpec.describe BillingPlansHelper do
           .to eq(add_seats_href:  add_seats_href,
                  billable_seats_href: billable_seats_href,
                  customer_portal_url: customer_portal_url,
-                 is_group: "true",
                  namespace_id: nil,
                  namespace_name: group.name,
                  plan_renew_href: renew_href,
@@ -71,7 +69,6 @@ RSpec.describe BillingPlansHelper do
         expect(helper.subscription_plan_data_attributes(group, plan))
           .to eq(namespace_id: group.id,
                  namespace_name: group.name,
-                 is_group: "true",
                  customer_portal_url: customer_portal_url,
                  billable_seats_href: billable_seats_href,
                  add_seats_href: add_seats_href,
@@ -81,13 +78,23 @@ RSpec.describe BillingPlansHelper do
       end
     end
 
-    context 'when namespace is passed in' do
-      it 'returns false for is_group' do
-        namespace = build(:namespace)
+    context 'with different namespaces' do
+      subject { helper.subscription_plan_data_attributes(namespace, plan) }
 
-        result = helper.subscription_plan_data_attributes(namespace, plan)
+      context 'with namespace' do
+        let(:namespace) { build(:namespace) }
 
-        expect(result).to include(is_group: "false")
+        it 'does not return billable_seats_href' do
+          expect(subject).not_to include(billable_seats_href: helper.group_seat_usage_path(namespace))
+        end
+      end
+
+      context 'with group' do
+        let(:namespace) { build(:group) }
+
+        it 'returns billable_seats_href for group' do
+          expect(subject).to include(billable_seats_href: helper.group_seat_usage_path(namespace))
+        end
       end
     end
   end

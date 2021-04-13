@@ -3,13 +3,13 @@ key_path: redis_hll_counters.issues_edit.g_project_management_issue_health_statu
 description: Count of WAU changing the health status on an issue
 product_section: dev
 product_stage: plan
-product_group: group::project management
-product_category: issue_tracking
+product_group: group::product planning 
+product_category: epics
 value_type: number
 status: data_available
 time_frame: 7d
 data_source: redis_hll
 distribution:
 - ee
-tier: []
-skip_validation: true
+tier:
+- ultimate 

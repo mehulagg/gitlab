@@ -4,17 +4,16 @@ module IncidentManagement
   module OncallRotations
     module SharedRotationLogic
       MAXIMUM_PARTICIPANTS = 100
-      InsufficientParticipantPermissionsError = Class.new(StandardError)
 
-      # Merges existing participants with API-provided
-      # participants instead of using just the API-provided ones
+      def save_participants!
+        participants = participants_for(oncall_rotation).each(&:validate!)
+
+        upsert_participants(participants)
+      end
+
+      # Merge the new expected attributes over the existing
+      # participant's attributes to apply any changes.
       def participants_for(oncall_rotation)
-        # Exit early if the participants that the caller
-        # wants on the rotation don't have permissions.
-        return if expected_participants_by_user.nil?
-
-        # Merge the new expected attributes over the existing .
-        # participant's attributes to apply any changes
         existing_participants_by_user.merge(expected_participants_by_user) do |_, existing_participant, expected_participant|
           existing_participant.assign_attributes(expected_participant.attributes.except('id'))
           existing_participant
@@ -34,8 +33,6 @@ module IncidentManagement
 
       def expected_participants_by_user
         participants_params.to_h do |participant|
-          break unless participant[:user].can?(:read_project, project)
-
           [
             participant[:user].id,
             OncallParticipant.new(
@@ -69,12 +66,35 @@ module IncidentManagement
         participant_users != participant_users.uniq
       end
 
+      def users_without_permissions?
+        DeclarativePolicy.subject_scope do
+          participant_users.any? { |user| !user.can?(:read_project, project) }
+        end
+      end
+
       def participant_users
         @participant_users ||= participants_params.map { |participant| participant[:user] }
       end
 
-      def participant_has_no_permission
-        'A participant has insufficient permissions to access the project'
+      # Used to accurately record shift history when rotations
+      # are created or edited. Any currently running shift will
+      # be cut short and a new shift will be saved starting
+      # at the creation/update time.
+      def save_current_shift!
+        existing_shift&.update!(ends_at: oncall_rotation.updated_at)
+        new_shift&.update!(starts_at: oncall_rotation.updated_at)
+      end
+
+      def existing_shift
+        oncall_rotation.shifts.for_timestamp(oncall_rotation.updated_at).first
+      end
+
+      def new_shift
+        IncidentManagement::OncallShiftGenerator.new(oncall_rotation).for_timestamp(oncall_rotation.updated_at)
+      end
+
+      def error_participants_without_permission
+        error('A participant has insufficient permissions to access the project')
       end
 
       def error_too_many_participants

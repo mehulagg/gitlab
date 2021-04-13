@@ -67,6 +67,8 @@ module Types
     mount_mutation Mutations::Releases::Update
     mount_mutation Mutations::Releases::Delete
     mount_mutation Mutations::ReleaseAssetLinks::Create
+    mount_mutation Mutations::ReleaseAssetLinks::Update
+    mount_mutation Mutations::ReleaseAssetLinks::Delete
     mount_mutation Mutations::Terraform::State::Delete
     mount_mutation Mutations::Terraform::State::Lock
     mount_mutation Mutations::Terraform::State::Unlock

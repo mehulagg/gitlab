@@ -5,7 +5,7 @@
 class Geo::SecondaryUsageData < Geo::TrackingBase
   include Gitlab::Utils::UsageData
 
-  GIT_FETCH_EVENT_COUNT_WEEKLY_QUERY = 'round(sum(increase(grpc_server_handled_total{grpc_method=~"SSHUploadPack|PostUploadPack"}[7d])))'.freeze
+  GIT_FETCH_EVENT_COUNT_WEEKLY_QUERY = 'round(sum(increase(grpc_server_handled_total{grpc_method=~"SSHUploadPack|PostUploadPack"}[7d])))'
 
   # Eventually, we'll find a way to auto-load this
   # from the metric yaml files that include something

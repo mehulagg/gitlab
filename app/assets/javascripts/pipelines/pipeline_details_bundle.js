@@ -3,11 +3,14 @@ import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
 import Translate from '~/vue_shared/translate';
 import PipelineGraphLegacy from './components/graph/graph_component_legacy.vue';
-import { reportToSentry } from './components/graph/utils';
 import TestReports from './components/test_reports/test_reports.vue';
 import GraphBundleMixin from './mixins/graph_pipeline_bundle_mixin';
 import createDagApp from './pipeline_details_dag';
+import { createPipelinesDetailApp } from './pipeline_details_graph';
+import { createPipelineHeaderApp } from './pipeline_details_header';
+import { apolloProvider } from './pipeline_shared_client';
 import createTestReportsStore from './stores/test_reports';
+import { reportToSentry } from './utils';
 
 Vue.use(Translate);
 
@@ -79,21 +82,20 @@ const createTestDetails = () => {
 };
 
 export default async function initPipelineDetailsBundle() {
-  createTestDetails();
-  createDagApp();
-
   const canShowNewPipelineDetails =
     gon.features.graphqlPipelineDetails || gon.features.graphqlPipelineDetailsUsers;
 
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
 
+  try {
+    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER, apolloProvider, dataset.graphqlResourceEtag);
+  } catch {
+    Flash(__('An error occurred while loading a section of this page.'));
+  }
+
   if (canShowNewPipelineDetails) {
     try {
-      const { createPipelinesDetailApp } = await import(
-        /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
-      );
-
-      createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH, dataset);
+      createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH, apolloProvider, dataset);
     } catch {
       Flash(__('An error occurred while loading the pipeline.'));
     }
@@ -107,12 +109,6 @@ export default async function initPipelineDetailsBundle() {
     createLegacyPipelinesDetailApp(mediator);
   }
 
-  try {
-    const { createPipelineHeaderApp } = await import(
-      /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
-    );
-    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
-  } catch {
-    Flash(__('An error occurred while loading a section of this page.'));
-  }
+  createDagApp(apolloProvider);
+  createTestDetails();
 }

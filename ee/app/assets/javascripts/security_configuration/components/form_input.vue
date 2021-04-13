@@ -89,6 +89,7 @@ export default {
       :value="value"
       :disabled="disabled"
       :placeholder="placeholder"
+      :data-qa-selector="`${field}_field`"
       @input="$emit('input', $event)"
     />
 

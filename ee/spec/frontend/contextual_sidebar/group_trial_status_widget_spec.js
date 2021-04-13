@@ -6,9 +6,9 @@ import TrialStatusWidget from 'ee/contextual_sidebar/components/trial_status_wid
 describe('TrialStatusWidget component', () => {
   let wrapper;
 
-  const getGlLink = () => wrapper.findComponent(GlLink);
+  const findGlLink = () => wrapper.findComponent(GlLink);
 
-  const createComponent = ({ props } = {}) => {
+  const createComponent = (props = {}) => {
     return shallowMount(TrialStatusWidget, {
       propsData: {
         daysRemaining: 20,
@@ -36,17 +36,24 @@ describe('TrialStatusWidget component', () => {
     });
 
     it('renders without an id', () => {
-      expect(getGlLink().attributes('id')).toBe(undefined);
+      expect(findGlLink().attributes('id')).toBe(undefined);
+    });
+
+    it('renders with the correct tracking data attributes', () => {
+      const attrs = findGlLink().attributes();
+      expect(attrs['data-track-event']).toBe('click_link');
+      expect(attrs['data-track-label']).toBe('trial_status_widget');
+      expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
     });
   });
 
   describe('with the optional containerId prop', () => {
     beforeEach(() => {
-      wrapper = createComponent({ props: { containerId: 'some-id' } });
+      wrapper = createComponent({ containerId: 'some-id' });
     });
 
     it('renders with the given id', () => {
-      expect(getGlLink().attributes('id')).toBe('some-id');
+      expect(findGlLink().attributes('id')).toBe('some-id');
     });
   });
 });

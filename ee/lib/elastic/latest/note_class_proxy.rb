@@ -24,6 +24,12 @@ module Elastic
         search(query_hash, options)
       end
 
+      # rubocop: disable CodeReuse/ActiveRecord
+      def preload_indexing_data(relation)
+        relation.includes(noteable: :assignees, project: [:project_feature, :route])
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
       private
 
       def confidentiality_filter(query_hash, options)

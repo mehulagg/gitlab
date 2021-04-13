@@ -1,13 +1,13 @@
-import { GlAvatarLabeled, GlSearchBoxByType, GlFormSelect } from '@gitlab/ui';
+import { GlAvatarLabeled, GlDropdown, GlFormRadio, GlFormRadioGroup } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
-import BoardAddNewColumn from 'ee/boards/components/board_add_new_column.vue';
+import BoardAddNewColumn, { listTypeInfo } from 'ee/boards/components/board_add_new_column.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import BoardAddNewColumnForm from '~/boards/components/board_add_new_column_form.vue';
 import { ListType } from '~/boards/constants';
 import defaultState from '~/boards/stores/state';
-import { mockAssignees, mockLists } from '../mock_data';
+import { mockAssignees, mockLists, mockIterations } from '../mock_data';
 
 const mockLabelList = mockLists[1];
 
@@ -16,6 +16,10 @@ Vue.use(Vuex);
 describe('BoardAddNewColumn', () => {
   let wrapper;
   let shouldUseGraphQL;
+
+  const selectItem = (id) => {
+    wrapper.findByTestId('selectItem').vm.$emit('change', id);
+  };
 
   const createStore = ({ actions = {}, getters = {}, state = {} } = {}) => {
     return new Vuex.Store({
@@ -32,6 +36,7 @@ describe('BoardAddNewColumn', () => {
     selectedId,
     labels = [],
     assignees = [],
+    iterations = [],
     getListByTypeId = jest.fn(),
     actions = {},
   } = {}) => {
@@ -39,6 +44,8 @@ describe('BoardAddNewColumn', () => {
       shallowMount(BoardAddNewColumn, {
         stubs: {
           BoardAddNewColumnForm,
+          GlFormRadio,
+          GlFormRadioGroup,
         },
         data() {
           return {
@@ -61,36 +68,43 @@ describe('BoardAddNewColumn', () => {
             labelsLoading: false,
             assignees,
             assigneesLoading: false,
+            iterations,
+            iterationsLoading: false,
           },
         }),
         provide: {
           scopedLabelsAvailable: true,
+          milestoneListsAvailable: true,
+          assigneeListsAvailable: true,
+          iterationListsAvailable: true,
         },
       }),
     );
+
+    // trigger change event
+    if (selectedId) {
+      selectItem(selectedId);
+    }
   };
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findForm = () => wrapper.findComponent(BoardAddNewColumnForm);
-  const formTitle = () => wrapper.findByTestId('board-add-column-form-title').text();
-  const findSearchInput = () => wrapper.find(GlSearchBoxByType);
   const cancelButton = () => wrapper.findByTestId('cancelAddNewColumn');
   const submitButton = () => wrapper.findByTestId('addNewColumnButton');
-  const listTypeSelect = () => wrapper.findComponent(GlFormSelect);
+  const listTypeSelect = (type) => {
+    const radio = wrapper
+      .findAllComponents(GlFormRadio)
+      .filter((r) => r.attributes('value') === type)
+      .at(0);
+    radio.element.value = type;
+    radio.vm.$emit('change', type);
+  };
 
   beforeEach(() => {
     shouldUseGraphQL = true;
-  });
-
-  it('shows form title & search input', () => {
-    mountComponent();
-
-    expect(formTitle()).toEqual(BoardAddNewColumnForm.i18n.newList);
-    expect(findSearchInput().exists()).toBe(true);
   });
 
   it('clicking cancel hides the form', () => {
@@ -168,16 +182,16 @@ describe('BoardAddNewColumn', () => {
         },
       });
 
-      listTypeSelect().vm.$emit('change', ListType.assignee);
+      listTypeSelect(ListType.assignee);
 
       await nextTick();
     });
 
     it('sets assignee placeholder text in form', async () => {
       expect(findForm().props()).toMatchObject({
-        formDescription: BoardAddNewColumn.i18n.assigneeListDescription,
-        searchLabel: BoardAddNewColumn.i18n.selectAssignee,
-        searchPlaceholder: BoardAddNewColumn.i18n.searchAssignees,
+        noneSelected: listTypeInfo.assignee.noneSelected,
+        searchLabel: BoardAddNewColumn.i18n.value,
+        searchPlaceholder: listTypeInfo.assignee.searchPlaceholder,
       });
     });
 
@@ -189,8 +203,38 @@ describe('BoardAddNewColumn', () => {
       expect(userList).toHaveLength(mockAssignees.length);
       expect(userList.at(0).props()).toMatchObject({
         label: firstUser.name,
-        subLabel: firstUser.username,
+        subLabel: `@${firstUser.username}`,
       });
+    });
+  });
+
+  describe('iteration list', () => {
+    beforeEach(async () => {
+      mountComponent({
+        iterations: mockIterations,
+        actions: {
+          fetchIterations: jest.fn(),
+        },
+      });
+
+      listTypeSelect(ListType.iteration);
+
+      await nextTick();
+    });
+
+    it('sets iteration placeholder text in form', () => {
+      expect(findForm().props()).toMatchObject({
+        searchLabel: BoardAddNewColumn.i18n.value,
+        searchPlaceholder: listTypeInfo.iteration.searchPlaceholder,
+      });
+    });
+
+    it('shows list of iterations', () => {
+      const itemList = wrapper.findComponent(GlDropdown).findAllComponents(GlFormRadio);
+
+      expect(itemList).toHaveLength(mockIterations.length);
+      expect(itemList.at(0).attributes('value')).toBe(mockIterations[0].id);
+      expect(itemList.at(1).attributes('value')).toBe(mockIterations[1].id);
     });
   });
 });

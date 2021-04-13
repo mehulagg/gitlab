@@ -5,11 +5,11 @@ module DastOnDemandScans
     include Gitlab::Utils::StrongMemoize
 
     def execute
-      return ServiceResponse.error(message: 'Site Profile was not provided') unless dast_site.present?
+      return ServiceResponse.error(message: 'Dast site profile was not provided') unless dast_site_profile.present?
       return ServiceResponse.error(message: 'Cannot run active scan against unvalidated target') unless active_scan_allowed?
 
       ServiceResponse.success(
-        payload: default_config.merge(scanner_profile_config)
+        payload: default_config.merge(site_profile_config, scanner_profile_config)
       )
     end
 
@@ -25,21 +25,33 @@ module DastOnDemandScans
       ).execute.present?
     end
 
-    def branch
-      strong_memoize(:branch) do
-        params[:branch] || container.default_branch
+    def dast_profile
+      strong_memoize(:dast_profile) do
+        params[:dast_profile]
       end
     end
 
-    def dast_site
-      strong_memoize(:dast_site) do
-        params[:dast_site_profile]&.dast_site
+    def dast_site_profile
+      strong_memoize(:dast_site_profile) do
+        dast_profile&.dast_site_profile || params[:dast_site_profile]
       end
     end
 
     def dast_scanner_profile
       strong_memoize(:dast_scanner_profile) do
-        params[:dast_scanner_profile]
+        dast_profile&.dast_scanner_profile || params[:dast_scanner_profile]
+      end
+    end
+
+    def dast_site
+      strong_memoize(:dast_site) do
+        dast_site_profile&.dast_site
+      end
+    end
+
+    def branch
+      strong_memoize(:branch) do
+        dast_profile&.branch_name || params[:branch] || container.default_branch
       end
     end
 
@@ -51,8 +63,24 @@ module DastOnDemandScans
 
     def default_config
       {
+        dast_profile: dast_profile,
         branch: branch,
         target_url: dast_site&.url
+      }
+    end
+
+    def site_profile_config
+      return {} unless dast_site_profile
+
+      excluded_urls = dast_site_profile.excluded_urls.presence&.join(',')
+      return { excluded_urls: excluded_urls } unless dast_site_profile.auth_enabled
+
+      {
+        excluded_urls: excluded_urls,
+        auth_username_field: dast_site_profile.auth_username_field,
+        auth_password_field: dast_site_profile.auth_password_field,
+        auth_username: dast_site_profile.auth_username,
+        auth_url: dast_site_profile.auth_url
       }
     end
 

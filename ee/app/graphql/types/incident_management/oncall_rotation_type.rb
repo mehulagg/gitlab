@@ -56,6 +56,10 @@ module Types
             description: 'Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.',
             max_page_size: MAX_SHIFTS_FOR_TIMEFRAME,
             resolver: ::Resolvers::IncidentManagement::OncallShiftsResolver
+
+      def participants
+        object.active_participants
+      end
     end
   end
 end

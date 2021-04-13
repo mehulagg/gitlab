@@ -8,6 +8,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   let_it_be(:plan_limits) { create(:plan_limits, plan: ultimate_plan) }
   let_it_be(:project, reload: true) { create(:project, :repository, namespace: namespace) }
   let_it_be(:user) { create(:user) }
+
   let(:ref_name) { 'master' }
 
   let(:service) do
@@ -31,8 +32,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
       it 'enqueues a new pipeline' do
         pipeline = create_pipeline!
 
-        expect(pipeline).to be_persisted
-        expect(pipeline).to be_pending
+        expect(pipeline).to be_created_successfully
       end
     end
 

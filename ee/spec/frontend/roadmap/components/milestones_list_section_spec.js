@@ -9,7 +9,11 @@ import {
 } from 'ee/roadmap/constants';
 import createStore from 'ee/roadmap/store';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
-import { mockTimeframeInitialDate, mockGroupId, rawMilestones } from 'ee_jest/roadmap/mock_data';
+import {
+  mockTimeframeInitialDate,
+  mockGroupId,
+  mockGroupMilestones,
+} from 'ee_jest/roadmap/mock_data';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 const initializeStore = (mockTimeframeMonths) => {
@@ -19,7 +23,7 @@ const initializeStore = (mockTimeframeMonths) => {
     presetType: PRESET_TYPES.MONTHS,
     timeframe: mockTimeframeMonths,
   });
-  store.dispatch('receiveMilestonesSuccess', { rawMilestones });
+  store.dispatch('receiveMilestonesSuccess', { rawMilestones: mockGroupMilestones });
   return store;
 };
 

@@ -1,5 +1,0 @@
----
-title: 'Geo: Add unique constraints to container repository and terraform state registries'
-merge_request: 54841
-author:
-type: fixed

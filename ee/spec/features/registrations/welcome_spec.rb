@@ -5,19 +5,17 @@ require 'spec_helper'
 RSpec.describe 'Welcome screen', :js do
   let_it_be(:user) { create(:user) }
 
-  let(:signup_onboarding_enabled) { true }
-  let(:in_invitation_flow) { false }
-  let(:in_subscription_flow) { false }
-  let(:in_trial_flow) { false }
+  context 'when on GitLab.com' do
+    let(:user_has_memberships) { false }
+    let(:in_subscription_flow) { false }
+    let(:in_trial_flow) { false }
 
-  describe 'on GitLab.com' do
     before do
       allow(Gitlab).to receive(:com?).and_return(true)
       gitlab_sign_in(user)
-      allow_any_instance_of(EE::WelcomeHelper).to receive(:in_invitation_flow?).and_return(in_invitation_flow)
+      allow_any_instance_of(EE::WelcomeHelper).to receive(:user_has_memberships?).and_return(user_has_memberships)
       allow_any_instance_of(EE::WelcomeHelper).to receive(:in_subscription_flow?).and_return(in_subscription_flow)
       allow_any_instance_of(EE::WelcomeHelper).to receive(:in_trial_flow?).and_return(in_trial_flow)
-      stub_feature_flags(signup_onboarding: signup_onboarding_enabled)
 
       visit users_sign_up_welcome_path
     end
@@ -36,8 +34,8 @@ RSpec.describe 'Welcome screen', :js do
       end
     end
 
-    context 'when in the invitation flow' do
-      let(:in_invitation_flow) { true }
+    context 'when user has memberships' do
+      let(:user_has_memberships) { true }
 
       it 'does not show the progress bar' do
         expect(page).not_to have_content('Your profile')
@@ -52,13 +50,44 @@ RSpec.describe 'Welcome screen', :js do
       end
     end
 
-    context 'when onboarding_signup is disabled' do
-      let(:signup_onboarding_enabled) { false }
+    context 'email opt in' do
+      it 'does not show the email opt in checkbox when setting up for a company' do
+        expect(page).not_to have_selector('input[name="user[email_opted_in]', visible: true)
 
-      it 'does not show the progress bar' do
-        expect(page).not_to have_content('Your profile')
-        expect(page).to have_content('Get started!')
+        choose 'user_setup_for_company_true'
+
+        expect(page).not_to have_selector('input[name="user[email_opted_in]', visible: true)
+
+        click_button 'Continue'
+
+        expect(user.reload.email_opted_in).to eq(true)
       end
+
+      it 'shows the email opt checkbox in when setting up for just me' do
+        expect(page).not_to have_selector('input[name="user[email_opted_in]', visible: true)
+
+        choose 'user_setup_for_company_false'
+
+        expect(page).to have_selector('input[name="user[email_opted_in]', visible: true)
+
+        click_button 'Continue'
+
+        expect(user.reload.email_opted_in).to eq(false)
+      end
+    end
+  end
+
+  context 'when not on GitLab.com' do
+    before do
+      allow(Gitlab).to receive(:com?).and_return(false)
+      gitlab_sign_in(user)
+
+      visit users_sign_up_welcome_path
+    end
+
+    it 'does not show the progress bar' do
+      expect(page).not_to have_content('Your profile')
+      expect(page).to have_content('Get started!')
     end
   end
 end

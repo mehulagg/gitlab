@@ -17,7 +17,7 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
 
       it 'responds with error message', :aggregate_failures do
         expect(subject).not_to be_success
-        expect(subject.message).to eq('Site Profile was not provided')
+        expect(subject.message).to eq('Dast site profile was not provided')
       end
     end
 
@@ -39,7 +39,13 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
 
         it 'returns prepared scanner params in the payload' do
           expect(subject.payload).to eq(
-            branch: 'master',
+            auth_password_field: dast_site_profile.auth_password_field,
+            auth_username: dast_site_profile.auth_username,
+            auth_username_field: dast_site_profile.auth_username_field,
+            auth_url: dast_site_profile.auth_url,
+            branch: project.default_branch,
+            dast_profile: nil,
+            excluded_urls: dast_site_profile.excluded_urls.join(','),
             target_url: dast_site_profile.dast_site.url
           )
         end
@@ -50,7 +56,13 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
 
         it 'returns prepared scanner params in the payload' do
           expect(subject.payload).to eq(
+            auth_password_field: dast_site_profile.auth_password_field,
+            auth_username: dast_site_profile.auth_username,
+            auth_username_field: dast_site_profile.auth_username_field,
+            auth_url: dast_site_profile.auth_url,
             branch: project.default_branch,
+            dast_profile: nil,
+            excluded_urls: dast_site_profile.excluded_urls.join(','),
             full_scan_enabled: false,
             show_debug_messages: false,
             spider_timeout: nil,
@@ -58,6 +70,14 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
             target_url: dast_site_profile.dast_site.url,
             use_ajax_spider: false
           )
+        end
+
+        context 'when dast_site_profile.excluded_urls is empty' do
+          let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project, excluded_urls: []) }
+
+          it 'returns nil' do
+            expect(subject.payload[:excluded_urls]).to be_nil
+          end
         end
 
         context 'when the target is not validated and an active scan is requested' do
@@ -70,6 +90,48 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
             expect(subject.message).to eq('Cannot run active scan against unvalidated target')
           end
         end
+      end
+
+      context 'when authentication is not enabled' do
+        let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project, auth_enabled: false) }
+
+        it 'returns prepared scanner params excluding auth params in the payload' do
+          expect(subject.payload).to eq(
+            branch: project.default_branch,
+            dast_profile: nil,
+            excluded_urls: dast_site_profile.excluded_urls.join(','),
+            full_scan_enabled: false,
+            show_debug_messages: false,
+            spider_timeout: nil,
+            target_timeout: nil,
+            target_url: dast_site_profile.dast_site.url,
+            use_ajax_spider: false
+          )
+        end
+      end
+    end
+
+    context 'when the dast_profile is provided' do
+      let_it_be(:dast_profile) { create(:dast_profile, project: project, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile, branch_name: 'hello-world') }
+
+      let(:params) { { dast_profile: dast_profile } }
+
+      it 'returns prepared scanner params in the payload' do
+        expect(subject.payload).to eq(
+          auth_password_field: dast_site_profile.auth_password_field,
+          auth_username: dast_site_profile.auth_username,
+          auth_username_field: dast_site_profile.auth_username_field,
+          branch: dast_profile.branch_name,
+          auth_url: dast_site_profile.auth_url,
+          dast_profile: dast_profile,
+          excluded_urls: dast_site_profile.excluded_urls.join(','),
+          full_scan_enabled: false,
+          show_debug_messages: false,
+          spider_timeout: nil,
+          target_timeout: nil,
+          target_url: dast_site_profile.dast_site.url,
+          use_ajax_spider: false
+        )
       end
     end
   end

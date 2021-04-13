@@ -56,6 +56,10 @@ module EE
               description: 'Find iterations.',
               resolver: ::Resolvers::IterationsResolver
 
+        field :iteration_cadences, ::Types::Iterations::CadenceType.connection_type, null: true,
+              description: 'Find iteration cadences.',
+              resolver: ::Resolvers::Iterations::CadencesResolver
+
         field :dast_profiles,
               ::Types::Dast::ProfileType.connection_type,
               null: true,
@@ -124,13 +128,13 @@ module EE
               ::Types::IncidentManagement::OncallScheduleType.connection_type,
               null: true,
               description: 'Incident Management On-call schedules of the project.',
+              extras: [:lookahead],
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
 
         field :api_fuzzing_ci_configuration,
               ::Types::AppSec::Fuzzing::Api::CiConfigurationType,
               null: true,
-              description: 'API fuzzing configuration for the project.',
-              feature_flag: :api_fuzzing_configuration_ui
+              description: 'API fuzzing configuration for the project. '
 
         field :push_rules,
               ::Types::PushRulesType,

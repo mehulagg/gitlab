@@ -27,25 +27,25 @@ module IncidentManagement
       def execute
         return error_no_license unless available?
         return error_no_permissions unless allowed?
-        return error_too_many_participants if participants_params && participants_params.size > MAXIMUM_PARTICIPANTS
-        return error_duplicate_participants if !participants_params.nil? && duplicated_users?
+
+        if participants_params
+          return error_too_many_participants if participants_params.size > MAXIMUM_PARTICIPANTS
+          return error_duplicate_participants if duplicated_users?
+          return error_participants_without_permission if users_without_permissions?
+        end
 
         # Ensure shift history is up to date before saving new params
         IncidentManagement::OncallRotations::PersistShiftsJob.new.perform(oncall_rotation.id)
 
         OncallRotation.transaction do
-          update_and_remove_participants
-
-          # TODO Recalculate rotation with new params
-          # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55570
-
           oncall_rotation.update!(params)
+
+          save_participants!
+          save_current_shift!
 
           success(oncall_rotation.reset)
         end
 
-      rescue InsufficientParticipantPermissionsError => err
-        error(err.message)
       rescue ActiveRecord::RecordInvalid => err
         error_in_validation(err.record)
       end
@@ -54,15 +54,10 @@ module IncidentManagement
 
       attr_reader :oncall_rotation, :user, :project, :params, :participants_params
 
-      def update_and_remove_participants
+      def save_participants!
         return if participants_params.nil?
 
-        participants = participants_for(oncall_rotation)
-        raise InsufficientParticipantPermissionsError.new(participant_has_no_permission) if participants.nil?
-
-        participants.each(&:validate!)
-
-        upsert_participants(participants)
+        super
 
         oncall_rotation.touch
       end

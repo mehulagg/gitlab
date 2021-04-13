@@ -11,7 +11,6 @@ import {
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
-import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
 import { initFormField } from 'ee/security_configuration/utils';
 import { serializeFormObject } from '~/lib/utils/forms';
 import { __, s__, n__, sprintf } from '~/locale';
@@ -22,6 +21,8 @@ import {
   MAX_CHAR_LIMIT_EXCLUDED_URLS,
   MAX_CHAR_LIMIT_REQUEST_HEADERS,
   EXCLUDED_URLS_SEPARATOR,
+  REDACTED_PASSWORD,
+  REDACTED_REQUEST_HEADERS,
 } from '../constants';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
@@ -50,18 +51,15 @@ export default {
       type: String,
       required: true,
     },
-    profilesLibraryPath: {
-      type: String,
-      required: true,
-    },
-    onDemandScansPath: {
-      type: String,
-      required: true,
-    },
     siteProfile: {
       type: Object,
       required: false,
       default: null,
+    },
+    showHeader: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
   },
   data() {
@@ -75,12 +73,12 @@ export default {
         profileName: initFormField({ value: name }),
         targetUrl: initFormField({ value: targetUrl }),
         excludedUrls: initFormField({
-          value: excludedUrls.join(EXCLUDED_URLS_SEPARATOR),
+          value: (excludedUrls || []).join(EXCLUDED_URLS_SEPARATOR),
           required: false,
           skipValidation: true,
         }),
         requestHeaders: initFormField({
-          value: requestHeaders,
+          value: requestHeaders || '',
           required: false,
           skipValidation: true,
         }),
@@ -97,16 +95,14 @@ export default {
       token: null,
       errorMessage: '',
       errors: [],
-      returnToPreviousPage: returnToPreviousPageFactory({
-        onDemandScansPath: this.onDemandScansPath,
-        profilesLibraryPath: this.profilesLibraryPath,
-        urlParamKey: 'site_profile_id',
-      }),
     };
   },
   computed: {
     isEdit() {
       return Boolean(this.siteProfile?.id);
+    },
+    hasRequestHeaders() {
+      return Boolean(this.siteProfile?.requestHeaders);
     },
     i18n() {
       const { isEdit } = this;
@@ -154,11 +150,14 @@ export default {
         .split(EXCLUDED_URLS_SEPARATOR)
         .map((url) => url.trim());
     },
-  },
-  async mounted() {
-    if (this.isEdit) {
-      this.form.showValidation = true;
-    }
+    serializedAuthFields() {
+      const authFields = serializeFormObject(this.authSection.fields);
+      // not to send password value if unchanged
+      if (authFields.password === REDACTED_PASSWORD) {
+        delete authFields.password;
+      }
+      return authFields;
+    },
   },
   methods: {
     onSubmit() {
@@ -176,7 +175,9 @@ export default {
       this.hideErrors();
       const { errorMessage } = this.i18n;
 
-      const { profileName, targetUrl, ...additionalFields } = serializeFormObject(this.form.fields);
+      const { profileName, targetUrl, requestHeaders, excludedUrls } = serializeFormObject(
+        this.form.fields,
+      );
 
       const variables = {
         input: {
@@ -185,10 +186,12 @@ export default {
           profileName,
           targetUrl,
           ...(this.glFeatures.securityDastSiteProfilesAdditionalFields && {
-            ...additionalFields,
-            auth: serializeFormObject(this.authSection.fields),
-            ...(additionalFields.excludedUrls && {
+            auth: this.serializedAuthFields,
+            ...(excludedUrls && {
               excludedUrls: this.parsedExcludedUrls,
+            }),
+            ...(requestHeaders !== REDACTED_REQUEST_HEADERS && {
+              requestHeaders,
             }),
           }),
         },
@@ -212,7 +215,9 @@ export default {
               this.showErrors({ message: errorMessage, errors });
               this.isLoading = false;
             } else {
-              this.returnToPreviousPage(id);
+              this.$emit('success', {
+                id,
+              });
             }
           },
         )
@@ -230,7 +235,7 @@ export default {
       }
     },
     discard() {
-      this.returnToPreviousPage();
+      this.$emit('cancel');
     },
     captureException(exception) {
       Sentry.captureException(exception);
@@ -261,7 +266,7 @@ export default {
 
 <template>
   <gl-form novalidate @submit.prevent="onSubmit">
-    <h2 class="gl-mb-6">
+    <h2 v-if="showHeader" class="gl-mb-6">
       {{ i18n.title }}
     </h2>
 

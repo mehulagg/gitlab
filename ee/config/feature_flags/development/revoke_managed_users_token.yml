@@ -1,8 +1,0 @@
----
-name: revoke_managed_users_token
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44783
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/267184
-milestone: '13.5'
-type: development
-group: group::compliance
-default_enabled: false

@@ -10,10 +10,6 @@ module Gitlab
         ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
       end
 
-      def self.instance_variables_ui_enabled?
-        ::Feature.enabled?(:ci_instance_variables_ui, default_enabled: true)
-      end
-
       def self.pipeline_latest?
         ::Feature.enabled?(:ci_pipeline_latest, default_enabled: true)
       end
@@ -66,6 +62,10 @@ module Gitlab
 
       def self.multiple_cache_per_job?
         ::Feature.enabled?(:multiple_cache_per_job, default_enabled: :yaml)
+      end
+
+      def self.gldropdown_tags_enabled?
+        ::Feature.enabled?(:gldropdown_tags, default_enabled: :yaml)
       end
     end
   end

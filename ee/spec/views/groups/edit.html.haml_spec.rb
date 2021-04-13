@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'groups/edit.html.haml' do
   let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group) }
 
   before do

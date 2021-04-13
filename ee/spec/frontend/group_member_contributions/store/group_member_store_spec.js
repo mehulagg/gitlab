@@ -1,7 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 import defaultColumns from 'ee/group_member_contributions/constants';
 import GroupMemberStore from 'ee/group_member_contributions/store/group_member_store';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 import { rawMembers, contributionsPath } from '../mock_data';
@@ -97,9 +97,9 @@ describe('GroupMemberStore', () => {
         .catch((e) => {
           expect(e.message).toBe('Request failed with status code 500');
           expect(store.isLoading).toBe(false);
-          expect(createFlash).toHaveBeenCalledWith(
-            'Something went wrong while fetching group member contributions',
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'Something went wrong while fetching group member contributions',
+          });
         })
         .then(done)
         .catch(done.fail);

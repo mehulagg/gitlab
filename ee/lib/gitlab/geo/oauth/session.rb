@@ -57,7 +57,7 @@ module Gitlab
         end
 
         def oauth_authorization_url
-          Gitlab::Utils.append_path(Gitlab::Geo.primary_node.internal_url, AUTHORIZATION_PATH)
+          Gitlab::Utils.append_path(Gitlab::Geo.primary_node.url, AUTHORIZATION_PATH)
         end
       end
     end

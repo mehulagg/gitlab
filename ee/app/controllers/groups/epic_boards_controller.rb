@@ -9,6 +9,7 @@ class Groups::EpicBoardsController < Groups::ApplicationController
   before_action :assign_endpoint_vars
   before_action do
     push_frontend_feature_flag(:epic_boards, group, default_enabled: :yaml)
+    push_frontend_feature_flag(:boards_filtered_search, group)
   end
 
   feature_category :boards

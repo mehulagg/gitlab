@@ -31,7 +31,7 @@ describe('EpicItemDetails', () => {
         currentGroupId: mockGroupId,
         timeframeString: 'Jul 10, 2017 – Jun 2, 2018',
         childLevel: 0,
-        childrenFlags: { 41: { itemExpanded: false } },
+        childrenFlags: { [mockFormattedEpic.id]: { itemExpanded: false } },
         hasFiltersApplied: false,
         isChildrenEmpty: false,
         ...props,
@@ -88,31 +88,19 @@ describe('EpicItemDetails', () => {
   });
 
   describe('epic group name', () => {
-    const epic = {
-      id: '41',
-      ...mockFormattedEpic,
-      groupId: 1,
-      groupName: 'Bar',
-      groupFullName: 'Foo / Bar',
-      descendantCounts: {
-        closedIssues: 3,
-        openedIssues: 2,
-      },
-    };
-
     describe('when the epic group ID is different from the current group ID', () => {
       it('is displayed and set to the title attribute', () => {
-        createWrapper({ epic, currentGroupId: 2 });
+        createWrapper({ currentGroupId: 123 });
         expect(getEpicGroupNameData()).toEqual({
-          groupName: epic.groupName,
-          title: epic.groupFullName,
+          groupName: mockFormattedEpic.group.name,
+          title: mockFormattedEpic.group.fullName,
         });
       });
     });
 
     describe('when the epic group ID is the same as the current group ID', () => {
       it('is hidden', () => {
-        createWrapper({ epic, currentGroupId: 1 });
+        createWrapper({ currentGroupId: mockGroupId });
         expect(getGroupName().exists()).toBe(false);
       });
     });
@@ -178,7 +166,6 @@ describe('EpicItemDetails', () => {
         let epic;
         beforeEach(() => {
           epic = createMockEpic({
-            id: 41,
             hasChildren: true,
             children: {
               edges: [mockFormattedChildEpic1],
@@ -203,7 +190,7 @@ describe('EpicItemDetails', () => {
 
         describe('when child epics are expanded', () => {
           const childrenFlags = {
-            41: { itemExpanded: true },
+            [mockFormattedEpic.id]: { itemExpanded: true },
           };
 
           beforeEach(() => {
@@ -241,7 +228,7 @@ describe('EpicItemDetails', () => {
         describe('when child epics are not expanded', () => {
           beforeEach(() => {
             const childrenFlags = {
-              41: { itemExpanded: false },
+              [mockFormattedEpic.id]: { itemExpanded: false },
             };
             createWrapper({
               epic,

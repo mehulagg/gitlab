@@ -64,7 +64,7 @@ RSpec.describe 'User views iteration' do
 
     it_behaves_like 'render iteration page'
 
-    context 'when grouping by label', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/323731' do
+    context 'when grouping by label' do
       it_behaves_like 'iteration report group by label'
     end
 

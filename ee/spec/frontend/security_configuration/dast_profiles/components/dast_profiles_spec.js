@@ -2,6 +2,7 @@ import { GlDropdown, GlTabs } from '@gitlab/ui';
 import { within } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
+import DastFailedSiteValidations from 'ee/security_configuration/dast_profiles/components/dast_failed_site_validations.vue';
 import DastProfiles from 'ee/security_configuration/dast_profiles/components/dast_profiles.vue';
 import setWindowLocation from 'helpers/set_window_location_helper';
 
@@ -48,6 +49,11 @@ describe('EE - DastProfiles', () => {
         {
           propsData: defaultProps,
           mocks: defaultMocks,
+          provide: {
+            glFeatures: {
+              dastFailedSiteValidations: true,
+            },
+          },
         },
         options,
       ),
@@ -71,6 +77,14 @@ describe('EE - DastProfiles', () => {
 
   afterEach(() => {
     wrapper.destroy();
+  });
+
+  describe('failed validations', () => {
+    it('renders the failed site validations summary', () => {
+      createComponent();
+
+      expect(wrapper.findComponent(DastFailedSiteValidations).exists()).toBe(true);
+    });
   });
 
   describe('header', () => {
@@ -134,7 +148,7 @@ describe('EE - DastProfiles', () => {
 
     describe.each`
       tabName               | index | givenLocationHash
-      ${'Saved Scans'}      | ${0}  | ${'dast-profiles'}
+      ${'Saved Scans'}      | ${0}  | ${'saved-scans'}
       ${'Site Profiles'}    | ${1}  | ${'site-profiles'}
       ${'Scanner Profiles'} | ${2}  | ${'scanner-profiles'}
     `('with location hash set to "$givenLocationHash"', ({ tabName, index, givenLocationHash }) => {
@@ -233,6 +247,20 @@ describe('EE - DastProfiles', () => {
       getProfilesComponent(profileType).vm.$emit('delete-profile');
 
       expect(mutate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('dastFailedSiteValidations feature flag disabled', () => {
+    it('does not render the failed site validations summary', () => {
+      createComponent({
+        provide: {
+          glFeatures: {
+            dastFailedSiteValidations: false,
+          },
+        },
+      });
+
+      expect(wrapper.findComponent(DastFailedSiteValidations).exists()).toBe(false);
     });
   });
 });

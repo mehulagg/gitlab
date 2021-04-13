@@ -3,6 +3,7 @@ import DiffGutterAvatars from '~/diffs/components/diff_gutter_avatars.vue';
 import { mapInline } from '~/diffs/components/diff_row_utils';
 import InlineDiffTableRow from '~/diffs/components/inline_diff_table_row.vue';
 import { createStore } from '~/mr_notes/stores';
+import { findInteropAttributes } from '../find_interop_attributes';
 import discussionsMockData from '../mock_data/diff_discussions';
 import diffFileMockData from '../mock_data/diff_file';
 
@@ -215,14 +216,14 @@ describe('InlineDiffTableRow', () => {
         const TEST_LINE_NUMBER = 1;
 
         describe.each`
-          lineProps                                                                                     | findLineNumber       | expectedHref            | expectedClickArg
-          ${{ line_code: TEST_LINE_CODE, old_line: TEST_LINE_NUMBER }}                                  | ${findLineNumberOld} | ${`#${TEST_LINE_CODE}`} | ${TEST_LINE_CODE}
-          ${{ line_code: undefined, old_line: TEST_LINE_NUMBER }}                                       | ${findLineNumberOld} | ${'#'}                  | ${undefined}
-          ${{ line_code: undefined, left: { line_code: TEST_LINE_CODE }, old_line: TEST_LINE_NUMBER }}  | ${findLineNumberOld} | ${'#'}                  | ${TEST_LINE_CODE}
-          ${{ line_code: undefined, right: { line_code: TEST_LINE_CODE }, new_line: TEST_LINE_NUMBER }} | ${findLineNumberNew} | ${'#'}                  | ${TEST_LINE_CODE}
+          lineProps                                                                                     | findLineNumber       | expectedHref            | expectedClickArg  | expectedQaSelector
+          ${{ line_code: TEST_LINE_CODE, old_line: TEST_LINE_NUMBER }}                                  | ${findLineNumberOld} | ${`#${TEST_LINE_CODE}`} | ${TEST_LINE_CODE} | ${undefined}
+          ${{ line_code: undefined, old_line: TEST_LINE_NUMBER }}                                       | ${findLineNumberOld} | ${'#'}                  | ${undefined}      | ${undefined}
+          ${{ line_code: undefined, left: { line_code: TEST_LINE_CODE }, old_line: TEST_LINE_NUMBER }}  | ${findLineNumberOld} | ${'#'}                  | ${TEST_LINE_CODE} | ${undefined}
+          ${{ line_code: undefined, right: { line_code: TEST_LINE_CODE }, new_line: TEST_LINE_NUMBER }} | ${findLineNumberNew} | ${'#'}                  | ${TEST_LINE_CODE} | ${'new_diff_line_link'}
         `(
           'with line ($lineProps)',
-          ({ lineProps, findLineNumber, expectedHref, expectedClickArg }) => {
+          ({ lineProps, findLineNumber, expectedHref, expectedClickArg, expectedQaSelector }) => {
             beforeEach(() => {
               jest.spyOn(store, 'dispatch').mockImplementation();
               createComponent({
@@ -235,6 +236,7 @@ describe('InlineDiffTableRow', () => {
               expect(findLineNumber().attributes()).toEqual({
                 href: expectedHref,
                 'data-linenumber': TEST_LINE_NUMBER.toString(),
+                'data-qa-selector': expectedQaSelector,
               });
             });
 
@@ -307,6 +309,18 @@ describe('InlineDiffTableRow', () => {
           });
         });
       });
+    });
+  });
+
+  describe('interoperability', () => {
+    it.each`
+      desc               | line                                                      | expectation
+      ${'with type old'} | ${{ ...thisLine, type: 'old', old_line: 3, new_line: 5 }} | ${{ type: 'old', line: '3', oldLine: '3', newLine: '5' }}
+      ${'with type new'} | ${{ ...thisLine, type: 'new', old_line: 3, new_line: 5 }} | ${{ type: 'new', line: '5', oldLine: '3', newLine: '5' }}
+    `('$desc, sets interop data attributes', ({ line, expectation }) => {
+      createComponent({ line });
+
+      expect(findInteropAttributes(wrapper)).toEqual(expectation);
     });
   });
 });

@@ -244,6 +244,17 @@ describe('EE - DastProfilesList', () => {
       expect(within(getErrorDetails()).getByText(errorDetails[0])).not.toBe(null);
       expect(within(getErrorDetails()).getByText(errorDetails[1])).not.toBe(null);
     });
+
+    it('properly renders errors containing markup', () => {
+      const errorDetails = ['an error <a href="#">with a link</a>'];
+      createFullComponent({
+        propsData: { errorMessage: TEST_ERROR_MESSAGE, errorDetails },
+      });
+
+      expect(getErrorMessage()).not.toBe(null);
+      expect(getErrorDetails()).not.toBe(null);
+      expect(within(getErrorDetails()).getByRole('link', { name: 'with a link' })).not.toBe(null);
+    });
   });
 
   describe('profile referenced in a security policy', () => {

@@ -31,7 +31,7 @@ module Gitlab
           @refs.group_by(&:klass).each do |klass, group|
             ids = group.map(&:db_id)
 
-            records = klass.id_in(ids)
+            records = klass.id_in(ids).preload_indexing_data
             records_by_id = records.each_with_object({}) { |record, hash| hash[record.id] = record }
 
             group.each do |ref|
@@ -112,7 +112,6 @@ module Gitlab
         klass.to_s
       end
 
-      # TODO: return a promise for batch loading: https://gitlab.com/gitlab-org/gitlab/issues/207280
       def database_record
         strong_memoize(:database_record) { klass.find_by_id(db_id) }
       end

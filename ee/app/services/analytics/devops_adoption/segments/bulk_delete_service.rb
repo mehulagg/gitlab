@@ -4,21 +4,19 @@ module Analytics
   module DevopsAdoption
     module Segments
       class BulkDeleteService
-        include CommonMethods
-
         def initialize(segments:, current_user:)
           @segments = segments
           @current_user = current_user
         end
 
         def execute
-          authorize!
+          deletion_services.map(&:authorize!)
 
           result = nil
 
           ActiveRecord::Base.transaction do
-            segments.each do |segment|
-              response = delete_segment(segment)
+            deletion_services.each do |service|
+              response = service.execute
 
               if response.error?
                 result = ServiceResponse.error(message: response.message, payload: response_payload)
@@ -40,8 +38,10 @@ module Analytics
           { segments: segments }
         end
 
-        def delete_segment(segment)
-          DeleteService.new(current_user: current_user, segment: segment).execute
+        def deletion_services
+          @deletion_services ||= segments.map do |segment|
+            DeleteService.new(current_user: current_user, segment: segment)
+          end
         end
       end
     end

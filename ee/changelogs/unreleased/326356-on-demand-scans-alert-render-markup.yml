@@ -1,0 +1,5 @@
+---
+title: Render links in DAST scans errors
+merge_request: 58815
+author:
+type: fixed

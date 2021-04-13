@@ -1,10 +1,11 @@
-#import "~/graphql_shared/fragments/epic.fragment.graphql"
+#import "ee/graphql_shared/fragments/epic.fragment.graphql"
 #import "~/graphql_shared/fragments/label.fragment.graphql"
 
 query ListEpics(
   $fullPath: ID!
   $boardId: BoardsEpicBoardID!
   $id: BoardsEpicListID
+  $filters: EpicFilters
   $after: String
   $first: Int
 ) {
@@ -13,7 +14,7 @@ query ListEpics(
       lists(id: $id) {
         nodes {
           id
-          epics(first: $first, after: $after) {
+          epics(first: $first, after: $after, filters: $filters) {
             edges {
               node {
                 ...EpicNode

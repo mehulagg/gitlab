@@ -133,6 +133,7 @@ export default {
             v-if="canUpdate"
             class="gl-ml-auto"
             icon="remove"
+            :aria-label="__('Delete')"
             data-testid="delete-button"
             @click="modalVisible = true"
           />

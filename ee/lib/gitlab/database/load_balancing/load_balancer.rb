@@ -19,6 +19,7 @@ module Gitlab
         def initialize(hosts = [])
           @host_list = HostList.new(hosts.map { |addr| Host.new(addr, self) })
           @connection_db_roles = {}.compare_by_identity
+          @connection_db_roles_count = {}.compare_by_identity
         end
 
         # Yields a connection that can be used for reads.
@@ -34,11 +35,11 @@ module Gitlab
 
             begin
               connection = host.connection
-              @connection_db_roles[connection] = ROLE_REPLICA
+              track_connection_role(connection, ROLE_REPLICA)
 
               return yield connection
             rescue => error
-              @connection_db_roles.delete(connection) if connection.present?
+              untrack_connection_role(connection)
 
               if serialization_failure?(error)
                 # This error can occur when a query conflicts. See
@@ -83,7 +84,7 @@ module Gitlab
 
           read_write(&block)
         ensure
-          @connection_db_roles.delete(connection) if connection.present?
+          untrack_connection_role(connection)
         end
 
         # Yields a connection that can be used for both reads and writes.
@@ -94,19 +95,21 @@ module Gitlab
           # a few times.
           retry_with_backoff do
             connection = ActiveRecord::Base.retrieve_connection
-            @connection_db_roles[connection] = ROLE_PRIMARY
+            track_connection_role(connection, ROLE_PRIMARY)
 
             yield connection
           end
         ensure
-          @connection_db_roles.delete(connection) if connection.present?
+          untrack_connection_role(connection)
         end
 
         # Recognize the role (primary/replica) of the database this connection
         # is connecting to. If the connection is not issued by this load
         # balancer, return nil
         def db_role_for_connection(connection)
-          @connection_db_roles[connection]
+          return @connection_db_roles[connection] if @connection_db_roles[connection]
+          return ROLE_REPLICA if @host_list.manage_pool?(connection.pool)
+          return ROLE_PRIMARY if connection.pool == ActiveRecord::Base.connection_pool
         end
 
         # Returns a host to use for queries.
@@ -202,6 +205,22 @@ module Gitlab
 
         def ensure_caching!
           host.enable_query_cache! unless host.query_cache_enabled
+        end
+
+        def track_connection_role(connection, role)
+          @connection_db_roles[connection] = role
+          @connection_db_roles_count[connection] ||= 0
+          @connection_db_roles_count[connection] += 1
+        end
+
+        def untrack_connection_role(connection)
+          return if connection.blank? || @connection_db_roles_count[connection].blank?
+
+          @connection_db_roles_count[connection] -= 1
+          if @connection_db_roles_count[connection] <= 0
+            @connection_db_roles.delete(connection)
+            @connection_db_roles_count.delete(connection)
+          end
         end
       end
     end

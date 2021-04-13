@@ -1,0 +1,77 @@
+scan_execution_policy:
+  - name: Run DAST in every pipeline
+    description: This policy enforces to run DAST for every pipeline within the project
+    enabled: true
+    rules:
+    - type: pipeline
+      branches:
+      - "production"
+    actions:
+    - scan: dast
+      site_profile: Site Profile
+      scanner_profile: Scanner Profile
+  - name: Run DAST in every pipeline_v1
+    description: This policy enforces to run DAST for every pipeline within the project
+    enabled: true
+    rules:
+    - type: pipeline
+      branches:
+      - "master"
+    actions:
+    - scan: dast
+      site_profile: Site Profile
+      scanner_profile: Scanner Profile
+  - name: Disabled policy
+    description: This policy is disabled
+    enabled: false
+    rules: []
+    actions: []
+  - name: Disabled policy_v2
+    description: This policy is disabled v2
+    enabled: false
+    rules: []
+    actions: []
+  - name: Run DAST in every pipeline_v3
+    description: This policy enforces to run DAST for every pipeline within the project
+    enabled: true
+    rules:
+    - type: pipeline
+      branches:
+      - "master"
+    actions:
+    - scan: dast
+      site_profile: Site Profile
+      scanner_profile: Scanner Profile
+  - name: Run DAST in every pipeline_v4
+    description: This policy enforces to run DAST for every pipeline within the project
+    enabled: true
+    rules:
+    - type: pipeline
+      branches:
+      - "master"
+    actions:
+    - scan: dast
+      site_profile: Site Profile
+      scanner_profile: Scanner Profile
+  - name: Run DAST in every pipeline_v5
+    description: This policy enforces to run DAST for every pipeline within the project
+    enabled: true
+    rules:
+    - type: pipeline
+      branches:
+      - "master"
+    actions:
+    - scan: dast
+      site_profile: Site Profile
+      scanner_profile: Scanner Profile
+  - name: Run DAST in every pipeline_v6
+    description: This policy enforces to run DAST for every pipeline within the project
+    enabled: true
+    rules:
+    - type: pipeline
+      branches:
+      - "master"
+    actions:
+    - scan: dast
+      site_profile: Site Profile
+      scanner_profile: Scanner Profile

@@ -10,6 +10,14 @@ FactoryBot.define do
       "#{FFaker::Product.product_name.truncate(200)} - #{i}"
     end
 
+    auth_enabled { true }
+    auth_url { "#{dast_site.url}/sign-in" }
+    auth_username_field { 'session[username]' }
+    auth_password_field { 'session[password]' }
+    auth_username { generate(:email) }
+
+    excluded_urls { ["#{dast_site.url}/sign-out", "#{dast_site.url}/hidden"] }
+
     trait :with_dast_site_validation do
       dast_site { association :dast_site, :with_dast_site_validation, project: project }
     end

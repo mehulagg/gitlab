@@ -7,16 +7,26 @@ export const initTrialStatusWidget = () => {
 
   if (!el) return undefined;
 
-  const { daysRemaining, percentageComplete, ...props } = el.dataset;
+  const {
+    containerId,
+    daysRemaining,
+    navIconImagePath,
+    percentageComplete,
+    planName,
+    plansHref,
+  } = el.dataset;
 
   return new Vue({
     el,
     render: (createElement) =>
       createElement(TrialStatusWidget, {
         props: {
-          ...props,
+          containerId,
           daysRemaining: Number(daysRemaining),
+          navIconImagePath,
           percentageComplete: Number(percentageComplete),
+          planName,
+          plansHref,
         },
       }),
   });
@@ -27,14 +37,27 @@ export const initTrialStatusPopover = () => {
 
   if (!el) return undefined;
 
-  const { trialEndDate, ...props } = el.dataset;
+  const {
+    containerId,
+    groupName,
+    planName,
+    plansHref,
+    purchaseHref,
+    targetId,
+    trialEndDate,
+  } = el.dataset;
 
   return new Vue({
     el,
     render: (createElement) =>
       createElement(TrialStatusPopover, {
         props: {
-          ...props,
+          containerId,
+          groupName,
+          planName,
+          plansHref,
+          purchaseHref,
+          targetId,
           trialEndDate: new Date(trialEndDate),
         },
       }),

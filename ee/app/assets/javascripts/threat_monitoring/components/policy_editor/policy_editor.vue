@@ -16,16 +16,16 @@ import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, sprintf } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import EnvironmentPicker from '../environment_picker.vue';
-import NetworkPolicyEditor from '../network_policy_editor.vue';
 import {
   EditorModeRule,
   EditorModeYAML,
   EndpointMatchModeAny,
   RuleTypeEndpoint,
   ProjectIdLabel,
+  PARSING_ERROR_MESSAGE,
 } from './constants';
 import DimDisableContainer from './dim_disable_container.vue';
-import fromYaml from './lib/from_yaml';
+import fromYaml, { removeUnnecessaryDashes } from './lib/from_yaml';
 import humanizeNetworkPolicy from './lib/humanize';
 import { buildRule } from './lib/rules';
 import toYaml from './lib/to_yaml';
@@ -35,6 +35,10 @@ import PolicyPreview from './policy_preview.vue';
 import PolicyRuleBuilder from './policy_rule_builder.vue';
 
 export default {
+  i18n: {
+    toggleLabel: s__('NetworkPolicies|Policy status'),
+    PARSING_ERROR_MESSAGE,
+  },
   components: {
     GlFormGroup,
     GlFormSelect,
@@ -46,7 +50,8 @@ export default {
     GlAlert,
     GlModal,
     EnvironmentPicker,
-    NetworkPolicyEditor,
+    NetworkPolicyEditor: () =>
+      import(/* webpackChunkName: 'network_policy_editor' */ '../network_policy_editor.vue'),
     PolicyRuleBuilder,
     PolicyPreview,
     PolicyActionPicker,
@@ -84,22 +89,27 @@ export default {
           labels: '',
         };
     policy.labels = { [ProjectIdLabel]: this.projectId };
+
+    const yamlEditorValue = this.existingPolicy
+      ? removeUnnecessaryDashes(this.existingPolicy.manifest)
+      : '';
+
     return {
       editorMode: EditorModeRule,
-      yamlEditorValue: '',
-      yamlEditorError: null,
+      yamlEditorValue,
+      yamlEditorError: policy.error ? true : null,
       policy,
     };
   },
   computed: {
     humanizedPolicy() {
-      return humanizeNetworkPolicy(this.policy);
+      return this.policy.error ? null : humanizeNetworkPolicy(this.policy);
     },
     policyAlert() {
       return Boolean(this.policy.annotations);
     },
     policyYaml() {
-      return toYaml(this.policy);
+      return this.hasParsingError ? '' : toYaml(this.policy);
     },
     ...mapState('threatMonitoring', ['currentEnvironmentId']),
     ...mapState('networkPolicies', [
@@ -162,7 +172,11 @@ export default {
       this.yamlEditorError = null;
 
       try {
-        Object.assign(this.policy, fromYaml(manifest));
+        const newPolicy = fromYaml(manifest);
+        if (newPolicy.error) {
+          throw new Error(newPolicy.error);
+        }
+        Object.assign(this.policy, newPolicy);
       } catch (error) {
         this.yamlEditorError = error;
       }
@@ -200,9 +214,6 @@ export default {
     { value: EditorModeRule, text: s__('NetworkPolicies|Rule mode') },
     { value: EditorModeYAML, text: s__('NetworkPolicies|.yaml mode') },
   ],
-  parsingErrorMessage: s__(
-    'NetworkPolicies|Rule mode is unavailable for this policy. In some cases, we cannot parse the YAML file back into the rules editor.',
-  ),
   deleteModal: {
     id: 'delete-modal',
     secondary: {
@@ -237,14 +248,18 @@ export default {
       </div>
       <div class="col-sm-6 col-md-6 col-lg-5 col-xl-4">
         <gl-form-group :label="s__('NetworkPolicies|Name')" label-for="policyName">
-          <gl-form-input id="policyName" v-model="policy.name" />
+          <gl-form-input id="policyName" v-model="policy.name" :disabled="hasParsingError" />
         </gl-form-group>
       </div>
     </div>
     <div class="row">
       <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
         <gl-form-group :label="s__('NetworkPolicies|Description')" label-for="policyDescription">
-          <gl-form-textarea id="policyDescription" v-model="policy.description" />
+          <gl-form-textarea
+            id="policyDescription"
+            v-model="policy.description"
+            :disabled="hasParsingError"
+          />
         </gl-form-group>
       </div>
     </div>
@@ -253,8 +268,8 @@ export default {
     </div>
     <div class="row">
       <div class="col-md-auto">
-        <gl-form-group :label="s__('NetworkPolicies|Policy status')" label-for="policyStatus">
-          <gl-toggle id="policyStatus" v-model="policy.isEnabled" />
+        <gl-form-group :disabled="hasParsingError" data-testid="policy-enable">
+          <gl-toggle v-model="policy.isEnabled" :label="$options.i18n.toggleLabel" />
         </gl-form-group>
       </div>
     </div>
@@ -278,7 +293,7 @@ export default {
           class="gl-z-index-1"
           data-testid="parsing-alert"
           :dismissible="false"
-          >{{ $options.parsingErrorMessage }}</gl-alert
+          >{{ $options.i18n.PARSING_ERROR_MESSAGE }}</gl-alert
         >
 
         <dim-disable-container data-testid="rule-builder-container" :disabled="hasParsingError">
@@ -364,8 +379,8 @@ export default {
           </h5>
           <div class="gl-p-4">
             <network-policy-editor
+              data-testid="network-policy-editor"
               :value="yamlEditorValue"
-              :height="400"
               :read-only="false"
               @input="loadYaml"
             />

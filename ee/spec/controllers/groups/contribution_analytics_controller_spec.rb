@@ -3,14 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe Groups::ContributionAnalyticsController do
-  let(:user) { create(:user) }
-  let(:user2) { create(:user) }
-  let(:user3) { create(:user) }
-  let(:guest_user) { create(:user) }
-  let(:group) { create(:group) }
-  let(:project) { create(:project, :repository, group: group) }
-  let(:issue) { create(:issue, project: project) }
-  let(:merge_request) { create(:merge_request, :simple, source_project: project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:user2) { create(:user) }
+  let_it_be(:user3) { create(:user) }
+  let_it_be(:guest_user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, :repository, group: group) }
+  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:merge_request) { create(:merge_request, :simple, source_project: project) }
+
   let(:push_data) { Gitlab::DataBuilder::Push.build_sample(project, user) }
 
   def create_event(author, project, target, action)
@@ -71,7 +72,8 @@ RSpec.describe Groups::ContributionAnalyticsController do
           it 'renders 403' do
             request
 
-            expect(response).to have_gitlab_http_status(:forbidden)
+            expect(response).to render_template(
+              'shared/promotions/_promote_contribution_analytics')
           end
         end
       end

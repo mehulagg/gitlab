@@ -12,7 +12,7 @@ process of working across these systems more efficient.
 The GitLab Jira integration, available in every GitLab project by default, allows you to connect
 to any Jira instance, whether on Atlassian cloud or self-managed.
 
-You can also install the [Jira Development Panel integration](../../../integration/jira_development_panel.md).
+You can also install the [Jira Development Panel integration](../../../integration/jira/index.md).
 For more information about the differences between the two integrations, see
 [Jira integrations](jira_integrations.md).
 
@@ -54,11 +54,8 @@ project can interact with _all_ Jira projects in that instance, once configured.
 - Other features, you do not have to explicitly associate a GitLab project with any single Jira
   project.
 
-If you have one Jira instance, you can pre-fill the settings. For more information, see the
-documentation for:
-
-- [Project integration management](../../admin_area/settings/project_integration_management.md).
-- [Services Templates](services_templates.md).
+If you have a single Jira instance, you can pre-fill the settings. For more information, read the
+documentation for [central administration of project integrations](../../admin_area/settings/project_integration_management.md).
 
 To enable the Jira service in GitLab, you must:
 
@@ -74,13 +71,13 @@ The process for configuring Jira depends on whether you host Jira on your own se
 
 Jira Server supports basic authentication. When connecting, a **username and password** are
 required. Connecting to Jira Server via CAS is not possible. For more information, see
-[set up a user in Jira Server](jira_server_configuration.md).
+[set up a user in Jira Server](../../../integration/jira/jira_server_configuration.md).
 
 #### Jira on Atlassian cloud
 
 Jira on Atlassian cloud supports authentication through an API token. When connecting to Jira on
 Atlassian cloud, an **email and API token** are required. For more information, see
-[set up a user in Jira on Atlassian cloud](jira_cloud_configuration.md).
+[set up a user in Jira on Atlassian cloud](../../../integration/jira/jira_cloud_configuration.md).
 
 ### Configure GitLab
 
@@ -106,7 +103,8 @@ To enable the Jira integration in a project:
 1. To include a comment on the Jira issue when the above reference is made in GitLab, select
    **Enable comments**.
 
-   1. Select the **Comment detail**: **Standard** or **All details**.
+1. To transition Jira issues when a [closing reference](../issues/managing_issues.md#closing-issues-automatically) is made in GitLab,
+   select **Enable Jira transitions**.
 
 1. Enter the further details on the page as described in the following table.
 
@@ -116,7 +114,6 @@ To enable the Jira integration in a project:
    | `Jira API URL` | The base URL to the Jira instance API. Web URL value is used if not set. For example, `https://jira-api.example.com`. Leave this field blank (or use the same value of `Web URL`) if using **Jira on Atlassian cloud**. |
    | `Username or Email` | Created in [configure Jira](#configure-jira) step. Use `username` for **Jira Server** or `email` for **Jira on Atlassian cloud**. |
    | `Password/API token` | Created in [configure Jira](#configure-jira) step. Use `password` for **Jira Server** or `API token` for **Jira on Atlassian cloud**. |
-   | `Jira workflow transition IDs` | Required for closing Jira issues via commits or merge requests. These are the IDs of transitions in Jira that move issues to a particular state. (See [Obtaining a transition ID](#obtaining-a-transition-id).) If you insert multiple transition IDs separated by `,` or `;`, the issue is moved to each state, one after another, using the given order. In GitLab 13.6 and earlier, field was called `Transition ID`. |
 
 1. To enable users to view Jira issues inside the GitLab project, select **Enable Jira issues** and
    enter a Jira project key. **(PREMIUM)**
@@ -138,10 +135,26 @@ To enable the Jira integration in a project:
 Your GitLab project can now interact with all Jira projects in your instance and the project now
 displays a Jira link that opens the Jira project.
 
-#### Obtaining a transition ID
+#### Automatic issue transitions
 
-In the most recent Jira user interface, you can no longer see transition IDs in the workflow
-administration UI. You can get the ID you need in either of the following ways:
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/...) in GitLab 13.10.
+
+In this mode the referenced Jira issue is transitioned to the next available status with a category of "Done".
+
+See the [Configure GitLab](#configure-gitlab) section, check the **Enable Jira transitions** setting and select the **Move to Done** option.
+
+#### Custom issue transitions
+
+For advanced workflows you can specify custom Jira transition IDs.
+
+See the [Configure GitLab](#configure-gitlab) section, check the **Enable Jira transitions** setting, select the **Custom transitions** option, and enter your transition IDs in the text field.
+
+If you insert multiple transition IDs separated by `,` or `;`, the issue is moved to each state, one after another, using the given order. If a transition fails the sequence is aborted.
+
+To see the transition IDs on Jira Cloud, edit a workflow in the **Text** view.
+The transition IDs display in the **Transitions** column.
+
+On Jira Server you can get the transition IDs in either of the following ways:
 
 1. By using the API, with a request like `https://yourcompany.atlassian.net/rest/api/2/issue/ISSUE-123/transitions`
    using an issue that is in the appropriate "open" state
@@ -242,19 +255,32 @@ with a link to the commit that resolved the issue.
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3622) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
 
-You can browse and search issues from a selected Jira project directly in GitLab. This requires [configuration](#configure-gitlab) in GitLab by an administrator.
+You can browse, search, and view issues from a selected Jira project directly in GitLab,
+if your GitLab administrator [has configured it](#configure-gitlab):
 
-![Jira issues integration enabled](img/jira/open_jira_issues_list_v13.2.png)
+1. In the left navigation bar, go to **Jira > Issues list**.
+1. The issue list sorts by **Created date** by default, with the newest issues listed at the top:
 
-From the **Jira Issues** menu, click **Issues List**. The issue list defaults to sort by **Created date**, with the newest issues listed at the top. You can change this to **Last updated**.
+   ![Jira issues integration enabled](img/jira/open_jira_issues_list_v13.2.png)
 
-Issues are grouped into tabs based on their [Jira status](https://confluence.atlassian.com/adminjiraserver070/defining-status-field-values-749382903.html).
+1. To display the most recently updated issues first, click **Last updated**.
+1. In GitLab versions 13.10 and later, you can view [individual Jira issues](#view-a-jira-issue).
+
+Issues are grouped into tabs based on their [Jira status](https://confluence.atlassian.com/adminjiraserver070/defining-status-field-values-749382903.html):
 
 - The **Open** tab displays all issues with a Jira status in any category other than Done.
 - The **Closed** tab displays all issues with a Jira status categorized as Done.
 - The **All** tab displays all issues of any status.
 
-Click an issue title to open its original Jira issue page for full details.
+#### View a Jira issue
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299832) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.10 behind a feature flag, disabled by default.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/299832) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.11.
+
+When viewing the [Jira issues list](#view-jira-issues), select an issue from the
+list to open it in GitLab:
+
+![Jira issue detail view](img/jira/jira_issue_detail_view_v13.10.png)
 
 #### Search and filter the issues list
 

@@ -4,8 +4,7 @@ module Integrations
   module Jira
     class IssueDetailEntity < ::Integrations::Jira::IssueEntity
       expose :description_html do |jira_issue|
-        Banzai::Pipeline::JiraGfmPipeline
-          .call(jira_issue.renderedFields['description'], project: project)[:output].to_html
+        jira_gfm_pipeline(jira_issue.renderedFields['description'])
       end
 
       expose :state do |jira_issue|
@@ -17,15 +16,21 @@ module Integrations
       end
 
       expose :comments do |jira_issue|
-        jira_issue.renderedFields['comment']['comments'].map do |comment|
+        jira_issue.fields['comment']['comments'].map.with_index do |comment, index|
           {
             id: comment['id'],
-            body_html: Banzai::Pipeline::JiraGfmPipeline.call(comment['body'], project: project)[:output].to_html,
+            body_html: jira_gfm_pipeline(jira_issue.renderedFields['comment']['comments'][index]['body']),
             created_at: comment['created'].to_datetime.utc,
             updated_at: comment['updated'].to_datetime.utc,
             author: jira_user(comment['author'])
           }
         end
+      end
+
+      private
+
+      def jira_gfm_pipeline(html)
+        Banzai::Pipeline::JiraGfmPipeline.call(html, project: project)[:output].to_html
       end
     end
   end

@@ -111,6 +111,28 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
         expect(json_response['name']).to eq('new name')
       end
 
+      context 'when updating value stream with in-memory stages' do
+        let(:value_stream_params) do
+          {
+            name: 'updated name',
+            stages: [
+              {
+                id: 'issue', # in memory stage
+                name: 'issue',
+                custom: false
+              }
+            ]
+          }
+        end
+
+        it 'returns a successful 200 response' do
+          put :update, params: { id: value_stream.id, group_id: group, value_stream: value_stream_params }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['name']).to eq('updated name')
+        end
+      end
+
       context 'with stages' do
         let!(:stage) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream, name: 'stage 1', custom: true) }
 

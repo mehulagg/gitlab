@@ -36,17 +36,9 @@ module EE
                 presence: true,
                 numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
-      validates :elasticsearch_shards,
-                presence: true,
-                numericality: { only_integer: true, greater_than: 0 }
-
       validates :deletion_adjourned_period,
                 presence: true,
                 numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 90 }
-
-      validates :elasticsearch_replicas,
-                presence: true,
-                numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
       validates :elasticsearch_max_bulk_size_mb,
                 presence: true,
@@ -143,8 +135,6 @@ module EE
           elasticsearch_indexed_file_size_limit_kb: 1024, # 1 MiB (units in KiB)
           elasticsearch_max_bulk_concurrency: 10,
           elasticsearch_max_bulk_size_bytes: 10.megabytes,
-          elasticsearch_replicas: 1,
-          elasticsearch_shards: 5,
           elasticsearch_url: ENV['ELASTIC_URL'] || 'http://localhost:9200',
           elasticsearch_client_request_timeout: 0,
           elasticsearch_analyzers_smartcn_enabled: false,
@@ -183,6 +173,14 @@ module EE
 
     def elasticsearch_project_ids
       ElasticsearchIndexedProject.target_ids
+    end
+
+    def elasticsearch_shards
+      Elastic::IndexSetting.number_of_shards
+    end
+
+    def elasticsearch_replicas
+      Elastic::IndexSetting.number_of_replicas
     end
 
     def elasticsearch_indexes_project?(project)

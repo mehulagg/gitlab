@@ -4,7 +4,7 @@
   .gl-pl-6
     = form.check_box :merge_trains_enabled, class: 'form-check-input js-merge-options-merge-trains gl-pl-6', data: { qa_selector: 'merge_trains_checkbox' }
     = form.label :merge_trains_enabled, class: 'form-check-label' do
-      = s_('ProjectSettings|Enable merge trains.')
+      = s_('ProjectSettings|Enable merge trains')
       .text-secondary.mb-2
         - merge_trains_help_link_url = help_page_path('ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md')
         - merge_trains_help_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: merge_trains_help_link_url }

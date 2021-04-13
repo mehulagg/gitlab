@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import CreateItemDropdown from '~/create_item_dropdown';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import AccessorUtilities from '~/lib/utils/accessor';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
@@ -67,7 +67,9 @@ export default class ProtectedEnvironmentCreate {
         callback(results);
       })
       .catch(() => {
-        Flash(__('An error occurred while fetching environments.'));
+        createFlash({
+          message: __('An error occurred while fetching environments.'),
+        });
         callback([]);
       });
   }
@@ -115,6 +117,10 @@ export default class ProtectedEnvironmentCreate {
         window.location.hash = 'js-protected-environments-settings';
         window.location.reload();
       })
-      .catch(() => Flash(__('Failed to protect the environment')));
+      .catch(() =>
+        createFlash({
+          message: __('Failed to protect the environment'),
+        }),
+      );
   }
 }

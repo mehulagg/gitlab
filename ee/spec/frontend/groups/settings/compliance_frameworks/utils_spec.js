@@ -41,6 +41,43 @@ describe('Utils', () => {
     });
   });
 
+  describe('getSubmissionParams', () => {
+    const baseFormData = {
+      name: 'a',
+      description: 'b',
+      color: '#000',
+    };
+
+    it.each([true, false])(
+      'should return the initial object when pipelineConfigurationFullPath is undefined and pipelineConfigurationFullPathEnabled is %s',
+      (enabled) => {
+        expect(Utils.getSubmissionParams(baseFormData, enabled)).toStrictEqual(baseFormData);
+      },
+    );
+
+    it.each`
+      pipelineConfigurationFullPath | pipelineConfigurationFullPathEnabled
+      ${'a/b'}                      | ${true}
+      ${null}                       | ${true}
+      ${'a/b'}                      | ${false}
+      ${null}                       | ${false}
+    `(
+      'should return the correct object when pipelineConfigurationFullPathEnabled is $pipelineConfigurationFullPathEnabled',
+      ({ pipelineConfigurationFullPath, pipelineConfigurationFullPathEnabled }) => {
+        const formData = Utils.getSubmissionParams(
+          { ...baseFormData, pipelineConfigurationFullPath },
+          pipelineConfigurationFullPathEnabled,
+        );
+
+        if (pipelineConfigurationFullPathEnabled) {
+          expect(formData).toStrictEqual({ ...baseFormData, pipelineConfigurationFullPath });
+        } else {
+          expect(formData).toStrictEqual(baseFormData);
+        }
+      },
+    );
+  });
+
   describe('getPipelineConfigurationPathParts', () => {
     it.each`
       path                 | parts

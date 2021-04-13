@@ -503,6 +503,115 @@ RSpec.describe API::Members do
       end
     end
 
+    describe 'GET /groups/:id/billable_members/:user_id/memberships' do
+      let_it_be(:developer) { create(:user) }
+      let_it_be(:guest) { create(:user) }
+
+      before_all do
+        group.add_developer(developer)
+        group.add_guest(guest)
+      end
+
+      it 'returns memberships for the billable group member' do
+        membership = developer.members.first
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq([{
+          'id' => membership.id,
+          'source_id' => group.id,
+          'source_full_name' => group.full_name,
+          'created_at' => membership.created_at.as_json,
+          'expires_at' => nil,
+          'access_level' => {
+            'string_value' => 'Developer',
+            'integer_value' => 30
+          }
+        }])
+      end
+
+      it 'returns not found when the user does not exist' do
+        get api("/groups/#{group.id}/billable_members/#{non_existing_record_id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response).to eq({ 'message' => '404 Not found' })
+      end
+
+      it 'returns not found when the group does not exist' do
+        get api("/groups/#{non_existing_record_id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response).to eq({ 'message' => '404 Group Not Found' })
+      end
+
+      it 'returns not found when the user is not billable' do
+        create(:gitlab_subscription, :ultimate, namespace: group)
+
+        get api("/groups/#{group.id}/billable_members/#{guest.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response).to eq({ 'message' => '404 User Not Found' })
+      end
+
+      it 'returns bad request if the user cannot admin group members' do
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", developer)
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response).to eq({ 'message' => '400 Bad request' })
+      end
+
+      it 'returns bad request if the group is a subgroup' do
+        subgroup = create(:group, name: 'My SubGroup', parent: group)
+        subgroup.add_developer(developer)
+
+        get api("/groups/#{subgroup.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response).to eq({ 'message' => '400 Bad request' })
+      end
+
+      it 'excludes memberships outside the requested group hierarchy' do
+        other_group = create(:group, name: 'My Other Group')
+        other_group.add_developer(developer)
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.map { |m| m['source_full_name'] }).to eq([group.full_name])
+      end
+
+      it 'includes subgroup memberships' do
+        subgroup = create(:group, name: 'My SubGroup', parent: group)
+        subgroup.add_developer(developer)
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.map { |m| m['source_full_name'] }).to include(subgroup.full_name)
+      end
+
+      it 'includes project memberships' do
+        project = create(:project, name: 'My Project', group: group)
+        project.add_developer(developer)
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.map { |m| m['source_full_name'] }).to include(project.full_name)
+      end
+
+      it 'paginates results' do
+        subgroup = create(:group, name: 'SubGroup A', parent: group)
+        subgroup.add_developer(developer)
+
+        get api("/groups/#{group.id}/billable_members/#{developer.id}/memberships", owner), params: { page: 2, per_page: 1 }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.map { |m| m['source_full_name'] }).to eq([subgroup.full_name])
+      end
+    end
+
     describe 'DELETE /groups/:id/billable_members/:user_id' do
       context 'when the current user has insufficient rights' do
         it 'returns 400' do

@@ -142,6 +142,7 @@ RSpec.describe Gitlab::WebIde::Config::Entry::Terminal do
             .to eq(
               tag_list: ['webide'],
               yaml_variables: [{ key: 'KEY', value: 'value', public: true }],
+              job_variables: [{ key: 'KEY', value: 'value', public: true }],
               options: {
                 image: { name: "ruby:2.5" },
                 services: [{ name: "mysql" }],

@@ -12,11 +12,13 @@ RSpec.describe 'User adds milestone lists', :js do
   let_it_be(:user) { create(:user) }
 
   let_it_be(:milestone) { create(:milestone, group: group) }
+  let_it_be(:iteration) { create(:iteration, group: group) }
 
   let_it_be(:group_backlog_list) { create(:backlog_list, board: group_board) }
 
   let_it_be(:issue_with_milestone) { create(:issue, project: project, milestone: milestone) }
   let_it_be(:issue_with_assignee) { create(:issue, project: project, assignees: [user]) }
+  let_it_be(:issue_with_iteration) { create(:issue, project: project, iteration: iteration) }
 
   before_all do
     project.add_maintainer(user)
@@ -34,7 +36,8 @@ RSpec.describe 'User adds milestone lists', :js do
     before do
       stub_licensed_features(
         board_milestone_lists: true,
-        board_assignee_lists: true
+        board_assignee_lists: true,
+        board_iteration_lists: true
       )
       sign_in(user)
 
@@ -67,18 +70,59 @@ RSpec.describe 'User adds milestone lists', :js do
       expect(page).to have_selector('.board', text: user.name)
       expect(find('.board:nth-child(2) .board-card')).to have_content(issue_with_assignee.title)
     end
+
+    it 'creates iteration column' do
+      add_list('Iteration', iteration.title)
+
+      expect(page).to have_selector('.board', text: iteration.title)
+      expect(find('.board:nth-child(2) .board-card')).to have_content(issue_with_iteration.title)
+    end
+  end
+
+  describe 'without a license' do
+    before do
+      stub_licensed_features(
+        board_milestone_lists: false,
+        board_assignee_lists: false,
+        board_iteration_lists: false
+      )
+
+      sign_in(user)
+
+      stub_feature_flags(
+        board_new_list: true
+      )
+
+      visit project_board_path(project, project_board)
+
+      wait_for_all_requests
+    end
+
+    it 'does not show other list types', :aggregate_failures do
+      click_button 'Create list'
+      wait_for_all_requests
+
+      page.within(find("[data-testid='board-add-new-column']")) do
+        expect(page).not_to have_text('Iteration')
+        expect(page).not_to have_text('Assignee')
+        expect(page).not_to have_text('Milestone')
+      end
+    end
   end
 
   def add_list(list_type, title)
     click_button 'Create list'
     wait_for_all_requests
 
-    select(list_type, from: 'List type')
+    page.choose(list_type)
 
-    page.within('.board-add-new-list') do
+    find_button("Select a").click
+
+    page.within('.dropdown-menu') do
       find('label', text: title).click
-      click_button 'Add'
     end
+
+    click_button 'Add to board'
 
     wait_for_all_requests
   end

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe CustomProjectTemplatesFinder do
   let_it_be(:user) { create(:user) }
+
   let(:base_params) { { current_user: user } }
   let(:params) { {} }
 

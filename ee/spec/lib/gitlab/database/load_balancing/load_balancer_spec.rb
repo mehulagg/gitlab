@@ -147,6 +147,20 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       end
     end
 
+    context 'when the load balancer uses nested #read' do
+      it 'returns :replica' do
+        roles = []
+        lb.read do |connection_1|
+          lb.read do |connection_2|
+            roles << lb.db_role_for_connection(connection_2)
+          end
+          roles << lb.db_role_for_connection(connection_1)
+        end
+
+        expect(roles).to eq([:replica, :replica])
+      end
+    end
+
     context 'when the load balancer creates the connection with #read_write' do
       it 'returns :primary' do
         role = nil
@@ -155,6 +169,20 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
         end
 
         expect(role).to be(:primary)
+      end
+    end
+
+    context 'when the load balancer uses nested #read_write' do
+      it 'returns :primary' do
+        roles = []
+        lb.read_write do |connection_1|
+          lb.read_write do |connection_2|
+            roles << lb.db_role_for_connection(connection_2)
+          end
+          roles << lb.db_role_for_connection(connection_1)
+        end
+
+        expect(roles).to eq([:primary, :primary])
       end
     end
 
@@ -198,9 +226,29 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       end
     end
 
-    context 'when the connection does not come from the load balancer' do
+    context 'when the connection comes from a pool managed by the host list' do
+      it 'returns :replica' do
+        connection = double(:connection)
+        allow(connection).to receive(:pool).and_return(lb.host_list.hosts.first.pool)
+
+        expect(lb.db_role_for_connection(connection)).to be(:replica)
+      end
+    end
+
+    context 'when the connection comes from the primary pool' do
+      it 'returns :primary' do
+        connection = double(:connection)
+        allow(connection).to receive(:pool).and_return(ActiveRecord::Base.connection_pool)
+
+        expect(lb.db_role_for_connection(connection)).to be(:primary)
+      end
+    end
+
+    context 'when the connection does not come from any known pool' do
       it 'returns nil' do
         connection = double(:connection)
+        pool = double(:connection_pool)
+        allow(connection).to receive(:pool).and_return(pool)
 
         expect(lb.db_role_for_connection(connection)).to be(nil)
       end
@@ -243,8 +291,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
   end
 
   describe '#primary_write_location' do
-    it 'returns a String' do
-      expect(lb.primary_write_location).to be_an_instance_of(String)
+    it 'returns a String in the right format' do
+      expect(lb.primary_write_location).to match(/[A-F0-9]{1,8}\/[A-F0-9]{1,8}/)
     end
 
     it 'raises an error if the write location could not be retrieved' do

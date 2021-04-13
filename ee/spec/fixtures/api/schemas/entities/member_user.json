@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "allOf": [
+    { "$ref": "../../../../../../spec/fixtures/api/schemas/entities/member_user.json" },
+    {
+      "required" : [
+        "oncall_schedules"
+      ],
+      "properties" : {
+        "oncall_schedules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "project_name": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

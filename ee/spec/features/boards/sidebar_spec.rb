@@ -21,11 +21,8 @@ RSpec.describe 'Issue Boards', :js do
   let(:card1) { find('.board:nth-child(2)').find('.board-card:nth-child(2)') }
   let(:card2) { find('.board:nth-child(2)').find('.board-card:nth-child(1)') }
 
-  around do |example|
-    freeze_time { example.run }
-  end
-
   before do
+    stub_feature_flags(graphql_board_lists: false)
     stub_licensed_features(multiple_issue_assignees: true)
 
     project.add_maintainer(user)
@@ -51,7 +48,7 @@ RSpec.describe 'Issue Boards', :js do
           first('.gl-avatar-labeled').click
         end
 
-        click_button('Edit')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_content(assignee)
@@ -76,7 +73,7 @@ RSpec.describe 'Issue Boards', :js do
           all('.gl-avatar-labeled')[1].click
         end
 
-        click_button('Edit')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_link(nil, title: user.name)
@@ -97,7 +94,7 @@ RSpec.describe 'Issue Boards', :js do
           find('[data-testid="unassign"]').click
         end
 
-        click_button('Edit')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_content('None')
@@ -137,7 +134,7 @@ RSpec.describe 'Issue Boards', :js do
           first('.gl-avatar-labeled').click
         end
 
-        click_button('Edit')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_content(assignee)

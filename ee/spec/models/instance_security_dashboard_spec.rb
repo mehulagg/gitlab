@@ -9,6 +9,7 @@ RSpec.describe InstanceSecurityDashboard do
   let_it_be(:pipeline1) { create(:ci_pipeline, project: project1) }
   let_it_be(:pipeline2) { create(:ci_pipeline, project: project2) }
   let_it_be(:pipeline3) { create(:ci_pipeline, project: project3) }
+
   let(:project_ids) { [project1.id] }
   let(:user) { create(:user) }
 
