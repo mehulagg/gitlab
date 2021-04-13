@@ -352,7 +352,7 @@ Example response:
     "source_full_name": "Root Group / Sub Group One",
     "source_members_url": "https://gitlab.example.com/groups/root-group/sub-group-one/-/group_members",
     "created_at": "2021-03-31T17:28:44.812Z",
-    "expires_at": "2030-03-21",
+    "expires_at": "2022-03-21",
     "access_level": {
       "string_value": "Developer",
       "integer_value": 30
