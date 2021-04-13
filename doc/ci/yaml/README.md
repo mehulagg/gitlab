@@ -92,19 +92,19 @@ These job keywords can be defined inside a `default:` section:
 - [`tags`](#tags)
 - [`timeout`](#timeout)
 
-The following example sets the `ruby:2.5` image as the default for all jobs in the pipeline.
+The following example sets the `ruby:3.0` image as the default for all jobs in the pipeline.
 The `rspec 2.6` job does not use the default, because it overrides the default with
 a job-specific `image:` section:
 
 ```yaml
 default:
-  image: ruby:2.5
+  image: ruby:3.0
 
 rspec:
   script: bundle exec rspec
 
 rspec 2.6:
-  image: ruby:2.6
+  image: ruby:2.7
   script: bundle exec rspec
 ```
 
@@ -5078,13 +5078,14 @@ Use [`default:`](#custom-default-keyword-values) instead. For example:
 
 ```yaml
 default:
-  image: ruby:2.5
+  image: ruby:3.0
   services:
     - docker:dind
   cache:
     paths: [vendor/]
   before_script:
-    - bundle install --path vendor/
+    - bundle config set path vendor/bundle
+    - bundle install
   after_script:
     - rm -rf tmp/
 ```
