@@ -255,14 +255,14 @@ To allowlist specific vulnerabilities, follow these steps:
 
 #### vulnerability-allowlist.yml data format
 
-`vulnerability-allowlist.yml` is a YAML file that specifies a **list of CVE IDs** of vulnerabilities that are **allowed** to exist, because they're *false positives*, or *they're not applicable*.
+The `vulnerability-allowlist.yml` file is a YAML file that specifies a list of CVE IDs of vulnerabilities that are **allowed** to exist, because they're _false positives_, or they're _not applicable_.
 
-If a matching entry is found in the `vulnerability-allowlist.yml` file, the following will happen:
+If a matching entry is found in the `vulnerability-allowlist.yml` file, the following happens:
 
-- The vulnerability **will not be included** when the analyzer generates the `gl-container-scanning-report.json` file.
-- The Security tab of the pipeline **will not show** the vulnerability, since it hasn't been included in the JSON file, and this is the source of truth where the vulnerability list is retrieved from.
+- The vulnerability **is not included** when the analyzer generates the `gl-container-scanning-report.json` file.
+- The Security tab of the pipeline **does not show** the vulnerability. It is not included in the JSON file, which is the source of truth for the Security tab.
 
-Here's an example `vulnerability-allowlist.yml` file:
+Example `vulnerability-allowlist.yml` file:
 
 ```yaml
 generalallowlist:
@@ -277,25 +277,25 @@ images:
     CVE-2015-1447:
 ```
 
-The example above will exclude from `gl-container-scanning-report.json`:
+This example excludes from `gl-container-scanning-report.json`:
 
-1. All vulnerabilities with CVE IDs: _CVE-2019-8696_, _CVE-2014-8166_, _CVE-2017-18248_
-1. All vulnerabilities found in the `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256` container image with CVE ID _CVE-2018-4180_
+1. All vulnerabilities with CVE IDs: _CVE-2019-8696_, _CVE-2014-8166_, _CVE-2017-18248_.
+1. All vulnerabilities found in the `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256` container image with CVE ID _CVE-2018-4180_.
 1. All vulnerabilities found in `your.private.registry:5000/centos` container with CVE IDs _CVE-2015-1419_, _CVE-2015-1447_.
 
 ##### File format
 
-- `generalallowlist` block allows you to specify CVE IDs globally. All vulnerabilities with matching CVE IDs will be excluded from the scan report.
+- `generalallowlist` block allows you to specify CVE IDs globally. All vulnerabilities with matching CVE IDs are excluded from the scan report.
 
-- `images` block allows you to specify CVE IDs for each container image independently. All vulnerabilities from the given image with matching CVE IDs will be excluded from the scan report. The image name is retrieved from one of the environment variables used to specify the Docker image to be scanned, such as `$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG` or `DOCKER_IMAGE`, therefore the image provided in this block **must** match this value and **must not** include the tag value. For example, if you specify the image to be scanned using `DOCKER_IMAGE=alpine:3.7`, then you would use `alpine` in the `images` block, but you cannot use `alpine:3.7`.
+- `images` block allows you to specify CVE IDs for each container image independently. All vulnerabilities from the given image with matching CVE IDs are excluded from the scan report. The image name is retrieved from one of the environment variables used to specify the Docker image to be scanned, such as `$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG` or `DOCKER_IMAGE`. The image provided in this block **must** match this value and **must not** include the tag value. For example, if you specify the image to be scanned using `DOCKER_IMAGE=alpine:3.7`, then you would use `alpine` in the `images` block, but you cannot use `alpine:3.7`.
 
   You can specify container image in multiple ways:
-  - as image name only (ie. `centos`)
-  - as full image name with registry hostname (ie. `your.private.registry:5000/centos`)
-  - as full image name with registry hostname and sha256 label (ie. `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256`)
+  - as image name only (ie. `centos`).
+  - as full image name with registry hostname (ie. `your.private.registry:5000/centos`).
+  - as full image name with registry hostname and sha256 label (ie. `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256`).
 
 NOTE:
-The string after CVE ID (ie. `cups` or `libxml2` in the example above) has **no impact** whatsoever, it is simply included as a "hint" to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
+The string after CVE ID (`cups` and `libxml2` in the previous example) has **no impact**. It is included as a "hint" to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
 
 ##### Container scanning job log format
 
@@ -304,7 +304,6 @@ at the logs that are produced by the container scanning analyzer in `container_s
 
 The log will contain a list of found vulnerabilities as a table:
 
-```plaintext
 +------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
 |   STATUS   |      CVE SEVERITY       |      PACKAGE NAME      |    PACKAGE VERSION    |                            CVE DESCRIPTION                             |
 +------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
@@ -325,9 +324,8 @@ The log will contain a list of found vulnerabilities as a table:
 |            |                         |                        |                       | ersion 2.1.2 could result in denial of service when processing special |
 |            |                         |                        |                       |                         ly crafted deb files.                          |
 +------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
-```
 
-Vulnerabilities in the log will be marked as `Approved` when the corresponding CVE ID was added to the `vulnerability-allowlist.yml` file.
+Vulnerabilities in the log are marked as `Approved` when the corresponding CVE ID is added to the `vulnerability-allowlist.yml` file.
 
 ### Running container scanning in an offline environment
 
