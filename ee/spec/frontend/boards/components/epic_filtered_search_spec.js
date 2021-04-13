@@ -85,7 +85,11 @@ describe('EpicFilteredSearch', () => {
         jest.spyOn(urlUtility, 'updateHistory');
         findFilteredSearch().vm.$emit('onFilter', [{ value: { data: 'searchQuery' } }]);
 
-        expect(urlUtility.updateHistory).toHaveBeenCalledWith({ replace: true, title: "", url: "http://test.host/" });
+        expect(urlUtility.updateHistory).toHaveBeenCalledWith({
+          replace: true,
+          title: '',
+          url: 'http://test.host/',
+        });
       });
     });
   });
