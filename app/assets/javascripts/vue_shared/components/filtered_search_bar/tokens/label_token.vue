@@ -4,15 +4,17 @@ import {
   GlFilteredSearchToken,
   GlFilteredSearchSuggestion,
   GlDropdownDivider,
+  GlDropdownSectionHeader,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import { debounce } from 'lodash';
+import { uniqWith, isEqual } from 'lodash';
 
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import AccessorUtilities from '~/lib/utils/accessor';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
-import { DEFAULT_LABELS, DEBOUNCE_DELAY } from '../constants';
+import { DEFAULT_LABELS, DEBOUNCE_DELAY, MAX_RECENT_TOKENS_SIZE } from '../constants';
 import { stripQuotes } from '../filtered_search_utils';
 
 export default {
@@ -21,6 +23,7 @@ export default {
     GlFilteredSearchToken,
     GlFilteredSearchSuggestion,
     GlDropdownDivider,
+    GlDropdownSectionHeader,
     GlLoadingIcon,
   },
   props: {
@@ -35,12 +38,19 @@ export default {
   },
   data() {
     return {
+      searchKey: '',
       labels: this.config.initialLabels || [],
+      recentLabels: [],
       defaultLabels: this.config.defaultLabels || DEFAULT_LABELS,
       loading: true,
     };
   },
   computed: {
+    isRecentLabelsEnabled() {
+      return Boolean(
+        this.config.recentTokenValuesStorageKey && AccessorUtilities.isLocalStorageAccessSafe(),
+      );
+    },
     currentValue() {
       return this.value.data.toLowerCase();
     },
@@ -57,6 +67,11 @@ export default {
       }
       return {};
     },
+    availableRecentLabels() {
+      return this.recentLabels.filter((label) =>
+        this.getLabelName(label).toLowerCase().includes(this.searchKey.toLowerCase()),
+      );
+    },
   },
   watch: {
     active: {
@@ -67,6 +82,9 @@ export default {
         }
       },
     },
+  },
+  mounted() {
+    if (this.isRecentLabelsEnabled) this.populateRecentLabels();
   },
   methods: {
     /**
@@ -84,6 +102,10 @@ export default {
     getLabelName(label) {
       return label.name || label.title;
     },
+    populateRecentLabels() {
+      this.recentLabels =
+        JSON.parse(localStorage.getItem(this.config.recentTokenValuesStorageKey)) || [];
+    },
     fetchLabelBySearchTerm(searchTerm) {
       this.loading = true;
       this.config
@@ -99,9 +121,25 @@ export default {
           this.loading = false;
         });
     },
-    searchLabels: debounce(function debouncedSearch({ data }) {
-      if (!this.loading) this.fetchLabelBySearchTerm(data);
-    }, DEBOUNCE_DELAY),
+    searchLabels({ data }) {
+      this.searchKey = data;
+      setTimeout(() => {
+        if (!this.loading) this.fetchLabelBySearchTerm(data);
+      }, DEBOUNCE_DELAY);
+    },
+    handleLabelSelected() {
+      if (this.isRecentLabelsEnabled) {
+        const recentLabels =
+          JSON.parse(localStorage.getItem(this.config.recentTokenValuesStorageKey)) || [];
+
+        recentLabels.splice(0, 0, { ...this.activeLabel });
+
+        localStorage.setItem(
+          this.config.recentTokenValuesStorageKey,
+          JSON.stringify(uniqWith(recentLabels, isEqual).slice(0, MAX_RECENT_TOKENS_SIZE)),
+        );
+      }
+    },
   },
 };
 </script>
@@ -112,6 +150,7 @@ export default {
     v-bind="{ ...$props, ...$attrs }"
     v-on="$listeners"
     @input="searchLabels"
+    @select="handleLabelSelected"
   >
     <template #view-token="{ inputValue, cssClasses, listeners }">
       <gl-token variant="search-value" :class="cssClasses" :style="containerStyle" v-on="listeners"
@@ -126,6 +165,23 @@ export default {
       >
         {{ label.text }}
       </gl-filtered-search-suggestion>
+      <gl-dropdown-divider v-if="availableRecentLabels.length" />
+      <template v-if="config.recentTokenValuesStorageKey && availableRecentLabels.length">
+        <gl-dropdown-section-header>{{ __('Recent Labels') }}</gl-dropdown-section-header>
+        <gl-filtered-search-suggestion
+          v-for="label in availableRecentLabels"
+          :key="`recent-${label.id}`"
+          :value="getLabelName(label)"
+        >
+          <div class="gl-display-flex gl-align-items-center">
+            <span
+              :style="{ backgroundColor: label.color }"
+              class="gl-display-inline-block mr-2 p-2"
+            ></span>
+            <div>{{ getLabelName(label) }}</div>
+          </div>
+        </gl-filtered-search-suggestion>
+      </template>
       <gl-dropdown-divider v-if="defaultLabels.length" />
       <gl-loading-icon v-if="loading" />
       <template v-else>

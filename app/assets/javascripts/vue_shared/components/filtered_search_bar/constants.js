@@ -9,6 +9,8 @@ export const DEFAULT_LABELS = [DEFAULT_LABEL_NO_LABEL];
 
 export const DEBOUNCE_DELAY = 200;
 
+export const MAX_RECENT_TOKENS_SIZE = 10;
+
 export const SortDirection = {
   descending: 'descending',
   ascending: 'ascending',
