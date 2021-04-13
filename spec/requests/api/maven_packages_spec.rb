@@ -47,7 +47,27 @@ RSpec.describe API::MavenPackages do
     end
   end
 
-  shared_examples 'processing HEAD requests' do
+  shared_examples 'rejecting the request for non existing maven path' do |expected_status_when_ff_disabled: nil|
+    before do
+      if Feature.enabled?(:check_maven_path_first)
+        expect(::Packages::Maven::PackageFinder).not_to receive(:new)
+      end
+    end
+
+    it 'rejects the request' do
+      subject
+
+      expected_status = :not_found
+
+      if expected_status_when_ff_disabled.present? && !Feature.enabled?(:check_maven_path_first)
+        expected_status = expected_status_when_ff_disabled
+      end
+
+      expect(response).to have_gitlab_http_status(expected_status)
+    end
+  end
+
+  shared_examples 'processing HEAD requests' do |instance_level: false|
     subject { head api(url) }
 
     before do
@@ -92,6 +112,12 @@ RSpec.describe API::MavenPackages do
 
         subject
       end
+
+      context 'with a non existing maven path' do
+        let(:path) { 'foo/bar/1.2.3' }
+
+        it_behaves_like 'rejecting the request for non existing maven path', expected_status_when_ff_disabled: instance_level ? :forbidden : :not_found
+      end
     end
   end
 
@@ -99,9 +125,8 @@ RSpec.describe API::MavenPackages do
     context 'successful download' do
       subject do
         download_file(
-          package_file.file_name,
-          {},
-          Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => deploy_token.token
+          file_name: package_file.file_name,
+          request_headers: { Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => deploy_token.token }
         )
       end
 
@@ -126,7 +151,7 @@ RSpec.describe API::MavenPackages do
   shared_examples 'downloads with a job token' do
     context 'with a running job' do
       it 'allows download with job token' do
-        download_file(package_file.file_name, job_token: job.token)
+        download_file(file_name: package_file.file_name, params: { job_token: job.token })
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.media_type).to eq('application/octet-stream')
@@ -139,7 +164,7 @@ RSpec.describe API::MavenPackages do
       end
 
       it 'returns unauthorized error' do
-        download_file(package_file.file_name, job_token: job.token)
+        download_file(file_name: package_file.file_name, params: { job_token: job.token })
 
         expect(response).to have_gitlab_http_status(:unauthorized)
       end
@@ -149,7 +174,7 @@ RSpec.describe API::MavenPackages do
   describe 'GET /api/v4/packages/maven/*path/:file_name' do
     shared_examples 'handling all conditions' do
       context 'a public project' do
-        subject { download_file(package_file.file_name) }
+        subject { download_file(file_name: package_file.file_name) }
 
         it_behaves_like 'tracking the file download event'
 
@@ -161,11 +186,17 @@ RSpec.describe API::MavenPackages do
         end
 
         it 'returns sha1 of the file' do
-          download_file(package_file.file_name + '.sha1')
+          download_file(file_name: package_file.file_name + '.sha1')
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response.media_type).to eq('text/plain')
           expect(response.body).to eq(package_file.file_sha1)
+        end
+
+        context 'with a non existing maven path' do
+          subject { download_file(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
+
+          it_behaves_like 'rejecting the request for non existing maven path', expected_status_when_ff_disabled: :forbidden
         end
       end
 
@@ -175,7 +206,7 @@ RSpec.describe API::MavenPackages do
           project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
         end
 
-        subject { download_file_with_token(package_file.file_name) }
+        subject { download_file_with_token(file_name: package_file.file_name) }
 
         it_behaves_like 'tracking the file download event'
 
@@ -187,7 +218,7 @@ RSpec.describe API::MavenPackages do
         end
 
         it 'denies download when no private token' do
-          download_file(package_file.file_name)
+          download_file(file_name: package_file.file_name)
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
@@ -195,10 +226,16 @@ RSpec.describe API::MavenPackages do
         it_behaves_like 'downloads with a job token'
 
         it_behaves_like 'downloads with a deploy token'
+
+        context 'with a non existing maven path' do
+          subject { download_file_with_token(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
+
+          it_behaves_like 'rejecting the request for non existing maven path', expected_status_when_ff_disabled: :forbidden
+        end
       end
 
       context 'private project' do
-        subject { download_file_with_token(package_file.file_name) }
+        subject { download_file_with_token(file_name: package_file.file_name) }
 
         before do
           project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
@@ -222,7 +259,7 @@ RSpec.describe API::MavenPackages do
         end
 
         it 'denies download when no private token' do
-          download_file(package_file.file_name)
+          download_file(file_name: package_file.file_name)
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
@@ -241,12 +278,17 @@ RSpec.describe API::MavenPackages do
           unauthorized_deploy_token.update!(id: another_user.id)
 
           download_file(
-            package_file.file_name,
-            {},
-            Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => unauthorized_deploy_token.token
+            file_name: package_file.file_name,
+            request_headers: { Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => unauthorized_deploy_token.token }
           )
 
           expect(response).to have_gitlab_http_status(:forbidden)
+        end
+
+        context 'with a non existing maven path' do
+          subject { download_file_with_token(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
+
+          it_behaves_like 'rejecting the request for non existing maven path', expected_status_when_ff_disabled: :forbidden
         end
       end
 
@@ -256,7 +298,7 @@ RSpec.describe API::MavenPackages do
         end
 
         it 'rejects request' do
-          download_file(package_file.file_name)
+          download_file(file_name: package_file.file_name)
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
@@ -279,26 +321,43 @@ RSpec.describe API::MavenPackages do
       it_behaves_like 'handling all conditions'
     end
 
-    def download_file(file_name, params = {}, request_headers = headers)
-      get api("/packages/maven/#{maven_metadatum.path}/#{file_name}"), params: params, headers: request_headers
+    context 'with check_maven_path_first enabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: true)
+      end
+
+      it_behaves_like 'handling all conditions'
     end
 
-    def download_file_with_token(file_name, params = {}, request_headers = headers_with_token)
-      download_file(file_name, params, request_headers)
+    context 'with check_maven_path_first disabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: false)
+      end
+
+      it_behaves_like 'handling all conditions'
+    end
+
+    def download_file(file_name:, params: {}, request_headers: headers, path: maven_metadatum.path)
+      get api("/packages/maven/#{path}/#{file_name}"), params: params, headers: request_headers
+    end
+
+    def download_file_with_token(file_name:, params: {}, request_headers: headers_with_token, path: maven_metadatum.path)
+      download_file(file_name: file_name, params: params, request_headers: request_headers, path: path)
     end
   end
 
   describe 'HEAD /api/v4/packages/maven/*path/:file_name' do
-    let(:url) { "/packages/maven/#{package.maven_metadatum.path}/#{package_file.file_name}" }
+    let(:path) { package.maven_metadatum.path }
+    let(:url) { "/packages/maven/#{path}/#{package_file.file_name}" }
 
-    it_behaves_like 'processing HEAD requests'
+    it_behaves_like 'processing HEAD requests', instance_level: true
 
     context 'with maven_packages_group_level_improvements enabled' do
       before do
         stub_feature_flags(maven_packages_group_level_improvements: true)
       end
 
-      it_behaves_like 'processing HEAD requests'
+      it_behaves_like 'processing HEAD requests', instance_level: true
     end
 
     context 'with maven_packages_group_level_improvements disabled' do
@@ -306,7 +365,23 @@ RSpec.describe API::MavenPackages do
         stub_feature_flags(maven_packages_group_level_improvements: false)
       end
 
-      it_behaves_like 'processing HEAD requests'
+      it_behaves_like 'processing HEAD requests', instance_level: true
+    end
+
+    context 'with check_maven_path_first enabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: true)
+      end
+
+      it_behaves_like 'processing HEAD requests', instance_level: true
+    end
+
+    context 'with check_maven_path_first disabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: false)
+      end
+
+      it_behaves_like 'processing HEAD requests', instance_level: true
     end
   end
 
@@ -318,7 +393,7 @@ RSpec.describe API::MavenPackages do
 
     shared_examples 'handling all conditions' do
       context 'a public project' do
-        subject { download_file(package_file.file_name) }
+        subject { download_file(file_name: package_file.file_name) }
 
         it_behaves_like 'tracking the file download event'
 
@@ -330,11 +405,17 @@ RSpec.describe API::MavenPackages do
         end
 
         it 'returns sha1 of the file' do
-          download_file(package_file.file_name + '.sha1')
+          download_file(file_name: package_file.file_name + '.sha1')
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response.media_type).to eq('text/plain')
           expect(response.body).to eq(package_file.file_sha1)
+        end
+
+        context 'with a non existing maven path' do
+          subject { download_file(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
+
+          it_behaves_like 'rejecting the request for non existing maven path'
         end
       end
 
@@ -344,7 +425,7 @@ RSpec.describe API::MavenPackages do
           project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
         end
 
-        subject { download_file_with_token(package_file.file_name) }
+        subject { download_file_with_token(file_name: package_file.file_name) }
 
         it_behaves_like 'tracking the file download event'
 
@@ -356,7 +437,7 @@ RSpec.describe API::MavenPackages do
         end
 
         it 'denies download when no private token' do
-          download_file(package_file.file_name)
+          download_file(file_name: package_file.file_name)
 
           expect(response).to have_gitlab_http_status(:not_found)
         end
@@ -364,6 +445,12 @@ RSpec.describe API::MavenPackages do
         it_behaves_like 'downloads with a job token'
 
         it_behaves_like 'downloads with a deploy token'
+
+        context 'with a non existing maven path' do
+          subject { download_file_with_token(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
+
+          it_behaves_like 'rejecting the request for non existing maven path'
+        end
       end
 
       context 'private project' do
@@ -371,7 +458,7 @@ RSpec.describe API::MavenPackages do
           project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
         end
 
-        subject { download_file_with_token(package_file.file_name) }
+        subject { download_file_with_token(file_name: package_file.file_name) }
 
         it_behaves_like 'tracking the file download event'
 
@@ -392,7 +479,7 @@ RSpec.describe API::MavenPackages do
         end
 
         it 'denies download when no private token' do
-          download_file(package_file.file_name)
+          download_file(file_name: package_file.file_name)
 
           expect(response).to have_gitlab_http_status(:not_found)
         end
@@ -401,8 +488,14 @@ RSpec.describe API::MavenPackages do
 
         it_behaves_like 'downloads with a deploy token'
 
+        context 'with a non existing maven path' do
+          subject { download_file_with_token(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
+
+          it_behaves_like 'rejecting the request for non existing maven path'
+        end
+
         context 'with group deploy token' do
-          subject { download_file_with_token(package_file.file_name, {}, group_deploy_token_headers) }
+          subject { download_file_with_token(file_name: package_file.file_name, request_headers: group_deploy_token_headers) }
 
           it 'returns the file' do
             subject
@@ -419,13 +512,19 @@ RSpec.describe API::MavenPackages do
             expect(response).to have_gitlab_http_status(:ok)
             expect(response.media_type).to eq('application/octet-stream')
           end
+
+          context 'with a non existing maven path' do
+            subject { download_file_with_token(file_name: package_file.file_name, path: 'foo/bar/1.2.3', request_headers: group_deploy_token_headers) }
+
+            it_behaves_like 'rejecting the request for non existing maven path'
+          end
         end
 
         context 'with a reporter from a subgroup accessing the root group' do
           let_it_be(:root_group) { create(:group, :private) }
           let_it_be(:group) { create(:group, :private, parent: root_group) }
 
-          subject { download_file_with_token(package_file.file_name, {}, headers_with_token, root_group.id) }
+          subject { download_file_with_token(file_name: package_file.file_name, request_headers: headers_with_token, group_id: root_group.id) }
 
           before do
             project.update!(namespace: group)
@@ -437,6 +536,12 @@ RSpec.describe API::MavenPackages do
 
             expect(response).to have_gitlab_http_status(:ok)
             expect(response.media_type).to eq('application/octet-stream')
+          end
+
+          context 'with a non existing maven path' do
+            subject { download_file_with_token(file_name: package_file.file_name, path: 'foo/bar/1.2.3', request_headers: headers_with_token, group_id: root_group.id) }
+
+            it_behaves_like 'rejecting the request for non existing maven path'
           end
         end
       end
@@ -457,7 +562,7 @@ RSpec.describe API::MavenPackages do
 
         let(:maven_metadatum) { package3.maven_metadatum }
 
-        subject { download_file_with_token(package_file3.file_name) }
+        subject { download_file_with_token(file_name: package_file3.file_name) }
 
         before do
           sub_group1.add_developer(user)
@@ -511,17 +616,34 @@ RSpec.describe API::MavenPackages do
       it_behaves_like 'handling all conditions'
     end
 
-    def download_file(file_name, params = {}, request_headers = headers, group_id = group.id)
-      get api("/groups/#{group_id}/-/packages/maven/#{maven_metadatum.path}/#{file_name}"), params: params, headers: request_headers
+    context 'with check_maven_path_first enabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: true)
+      end
+
+      it_behaves_like 'handling all conditions'
     end
 
-    def download_file_with_token(file_name, params = {}, request_headers = headers_with_token, group_id = group.id)
-      download_file(file_name, params, request_headers, group_id)
+    context 'with check_maven_path_first disabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: false)
+      end
+
+      it_behaves_like 'handling all conditions'
+    end
+
+    def download_file(file_name:, params: {}, request_headers: headers, path: maven_metadatum.path, group_id: group.id)
+      get api("/groups/#{group_id}/-/packages/maven/#{path}/#{file_name}"), params: params, headers: request_headers
+    end
+
+    def download_file_with_token(file_name:, params: {}, request_headers: headers_with_token, path: maven_metadatum.path, group_id: group.id)
+      download_file(file_name: file_name, params: params, request_headers: request_headers, path: path, group_id: group_id)
     end
   end
 
   describe 'HEAD /api/v4/groups/:id/-/packages/maven/*path/:file_name' do
-    let(:url) { "/groups/#{group.id}/-/packages/maven/#{package.maven_metadatum.path}/#{package_file.file_name}" }
+    let(:path) { package.maven_metadatum.path }
+    let(:url) { "/groups/#{group.id}/-/packages/maven/#{path}/#{package_file.file_name}" }
 
     context 'with maven_packages_group_level_improvements enabled' do
       before do
@@ -538,12 +660,28 @@ RSpec.describe API::MavenPackages do
 
       it_behaves_like 'processing HEAD requests'
     end
+
+    context 'with check_maven_path_first enabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: true)
+      end
+
+      it_behaves_like 'processing HEAD requests'
+    end
+
+    context 'with check_maven_path_first disabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: false)
+      end
+
+      it_behaves_like 'processing HEAD requests'
+    end
   end
 
   describe 'GET /api/v4/projects/:id/packages/maven/*path/:file_name' do
     shared_examples 'handling all conditions' do
       context 'a public project' do
-        subject { download_file(package_file.file_name) }
+        subject { download_file(file_name: package_file.file_name) }
 
         it_behaves_like 'tracking the file download event'
 
@@ -555,11 +693,17 @@ RSpec.describe API::MavenPackages do
         end
 
         it 'returns sha1 of the file' do
-          download_file(package_file.file_name + '.sha1')
+          download_file(file_name: package_file.file_name + '.sha1')
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response.media_type).to eq('text/plain')
           expect(response.body).to eq(package_file.file_sha1)
+        end
+
+        context 'with a non existing maven path' do
+          subject { download_file(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
+
+          it_behaves_like 'rejecting the request for non existing maven path'
         end
       end
 
@@ -568,7 +712,7 @@ RSpec.describe API::MavenPackages do
           project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
         end
 
-        subject { download_file_with_token(package_file.file_name) }
+        subject { download_file_with_token(file_name: package_file.file_name) }
 
         it_behaves_like 'tracking the file download event'
 
@@ -588,7 +732,7 @@ RSpec.describe API::MavenPackages do
         end
 
         it 'denies download when no private token' do
-          download_file(package_file.file_name)
+          download_file(file_name: package_file.file_name)
 
           expect(response).to have_gitlab_http_status(:not_found)
         end
@@ -596,6 +740,12 @@ RSpec.describe API::MavenPackages do
         it_behaves_like 'downloads with a job token'
 
         it_behaves_like 'downloads with a deploy token'
+
+        context 'with a non existing maven path' do
+          subject { download_file_with_token(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
+
+          it_behaves_like 'rejecting the request for non existing maven path'
+        end
       end
     end
 
@@ -615,18 +765,35 @@ RSpec.describe API::MavenPackages do
       it_behaves_like 'handling all conditions'
     end
 
-    def download_file(file_name, params = {}, request_headers = headers)
-      get api("/projects/#{project.id}/packages/maven/" \
-              "#{maven_metadatum.path}/#{file_name}"), params: params, headers: request_headers
+    context 'with check_maven_path_first enabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: true)
+      end
+
+      it_behaves_like 'handling all conditions'
     end
 
-    def download_file_with_token(file_name, params = {}, request_headers = headers_with_token)
-      download_file(file_name, params, request_headers)
+    context 'with check_maven_path_first disabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: false)
+      end
+
+      it_behaves_like 'handling all conditions'
+    end
+
+    def download_file(file_name:, params: {}, request_headers: headers, path: maven_metadatum.path)
+      get api("/projects/#{project.id}/packages/maven/" \
+              "#{path}/#{file_name}"), params: params, headers: request_headers
+    end
+
+    def download_file_with_token(file_name:, params: {}, request_headers: headers_with_token, path: maven_metadatum.path)
+      download_file(file_name: file_name, params: params, request_headers: request_headers, path: path)
     end
   end
 
   describe 'HEAD /api/v4/projects/:id/packages/maven/*path/:file_name' do
-    let(:url) { "/projects/#{project.id}/packages/maven/#{package.maven_metadatum.path}/#{package_file.file_name}" }
+    let(:path) { package.maven_metadatum.path }
+    let(:url) { "/projects/#{project.id}/packages/maven/#{path}/#{package_file.file_name}" }
 
     context 'with maven_packages_group_level_improvements enabled' do
       before do
@@ -639,6 +806,22 @@ RSpec.describe API::MavenPackages do
     context 'with maven_packages_group_level_improvements disabled' do
       before do
         stub_feature_flags(maven_packages_group_level_improvements: false)
+      end
+
+      it_behaves_like 'processing HEAD requests'
+    end
+
+    context 'with check_maven_path_first enabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: true)
+      end
+
+      it_behaves_like 'processing HEAD requests'
+    end
+
+    context 'with check_maven_path_first disabled' do
+      before do
+        stub_feature_flags(check_maven_path_first: false)
       end
 
       it_behaves_like 'processing HEAD requests'
@@ -647,7 +830,7 @@ RSpec.describe API::MavenPackages do
 
   describe 'PUT /api/v4/projects/:id/packages/maven/*path/:file_name/authorize' do
     it 'rejects a malicious request' do
-      put api("/projects/#{project.id}/packages/maven/com/example/my-app/#{version}/%2e%2e%2F.ssh%2Fauthorized_keys/authorize"), params: {}, headers: headers_with_token
+      put api("/projects/#{project.id}/packages/maven/com/example/my-app/#{version}/%2e%2e%2F.ssh%2Fauthorized_keys/authorize"), headers: headers_with_token
 
       expect(response).to have_gitlab_http_status(:bad_request)
     end

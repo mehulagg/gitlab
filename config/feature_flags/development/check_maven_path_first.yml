@@ -1,0 +1,8 @@
+---
+name: check_maven_path_first
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/327487
+milestone: '13.11'
+type: development
+group: group::package
+default_enabled: false
