@@ -505,7 +505,7 @@ for another **primary** node. All the old replication settings will be overwritt
 
 When updating a Cloud Native Geo deployment, the process for updating any node that is external to the secondary Kubernetes cluster does not differ from the non Cloud Native approach. As such, you can always defer to [Promoting a secondary Geo node in single-secondary configurations](#promoting-a-secondary-geo-node-in-single-secondary-configurations) for more information.
 
-The following sections assume you are using the `gitlab` namespace. If you used a different namespace when setting up your cluster you should also replace `--namespace gitlab` with your namespace.
+The following sections assume you are using the `gitlab` namespace. If you used a different namespace when setting up your cluster, you should also replace `--namespace gitlab` with your namespace.
 
 WARNING:
 In GitLab 13.2 and 13.3, promoting a secondary site to a primary while the
@@ -576,7 +576,7 @@ Data that was created on the primary while the secondary was paused will be lost
    roles ['geo_secondary_role']
    ```
 
-   After making these changes [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) on the database node.
+   After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) on the database node.
 
 ### Step 3. Promote the **secondary** cluster
 
