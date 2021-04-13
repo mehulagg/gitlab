@@ -9945,7 +9945,7 @@ msgstr ""
 msgid "DastProfiles|URL"
 msgstr ""
 
-msgid "DastProfiles|URLs to skip during the authenticated scan. Use regular expression syntax to match multiple URLs."
+msgid "DastProfiles|URLs to skip during the authenticated scan."
 msgstr ""
 
 msgid "DastProfiles|Username"
