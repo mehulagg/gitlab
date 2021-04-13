@@ -17597,7 +17597,7 @@ msgstr ""
 msgid "IssueTracker|Use a custom issue tracker."
 msgstr ""
 
-msgid "IssueTracker|Use a custom issue tracker. %{docs_link}"
+msgid "IssueTracker|Use a custom issue tracker that is not listed in the integration list. %{docs_link}"
 msgstr ""
 
 msgid "IssueTracker|YouTrack issue tracker"
