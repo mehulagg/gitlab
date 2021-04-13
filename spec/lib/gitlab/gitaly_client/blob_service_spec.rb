@@ -9,6 +9,24 @@ RSpec.describe Gitlab::GitalyClient::BlobService do
   let(:repository) { project.repository }
   let(:client) { described_class.new(repository) }
 
+  describe '#batch_lfs_pointers' do
+    let(:blob_ids) { ["4206f951d2691c78aac4c0ce9f2b23580b2c92cdcc4336e1028742c0274938e0"] }
+    let(:expected_params) do
+      { blob_ids: blob_ids }
+    end
+
+    subject { client.batch_lfs_pointers(blob_ids) }
+
+    it 'sends a get_lfs_pointers message' do
+      expect_any_instance_of(Gitaly::BlobService::Stub)
+        .to receive(:get_lfs_pointers)
+        .with(gitaly_request_with_params(expected_params), kind_of(Hash))
+        .and_return([])
+
+      subject
+    end
+  end
+
   describe '#get_new_lfs_pointers' do
     let(:revision) { 'master' }
     let(:limit) { 5 }
