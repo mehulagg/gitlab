@@ -11457,6 +11457,9 @@ msgstr ""
 msgid "Edit iteration"
 msgstr ""
 
+msgid "Edit iteration cadence"
+msgstr ""
+
 msgid "Edit public deploy key"
 msgstr ""
 
@@ -17630,6 +17633,9 @@ msgstr ""
 msgid "Iterations"
 msgstr ""
 
+msgid "Iterations cadences"
+msgstr ""
+
 msgid "Iteration|Dates cannot overlap with other existing Iterations within this group"
 msgstr ""
 
@@ -20982,6 +20988,9 @@ msgid "New issue title"
 msgstr ""
 
 msgid "New iteration"
+msgstr ""
+
+msgid "New iteration cadence"
 msgstr ""
 
 msgid "New iteration created"
