@@ -36,7 +36,7 @@ function collapsed(file) {
   };
 }
 
-function identifier(file) {
+export function identifier(file) {
   const { userOrGroup, project, id } = getDerivedMergeRequestInformation({
     endpoint: file.load_collapsed_diff_url,
   });
