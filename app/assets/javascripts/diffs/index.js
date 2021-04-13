@@ -85,6 +85,8 @@ export default function initDiffsApp(store) {
         showWhitespaceDefault: parseBoolean(dataset.showWhitespaceDefault),
         viewDiffsFileByFile: parseBoolean(dataset.fileByFileDefault),
         defaultSuggestionCommitMessage: dataset.defaultSuggestionCommitMessage,
+        version: Number( dataset.version ),
+        size: Number( dataset.size ),
       };
     },
     computed: {
@@ -129,6 +131,8 @@ export default function initDiffsApp(store) {
           fileByFileUserPreference: this.viewDiffsFileByFile,
           defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
           rehydratedMrReviews: getReviewsForMergeRequest(mrPath),
+          version: this.version,
+          size: this.size,
         },
       });
     },

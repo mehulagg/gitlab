@@ -147,6 +147,14 @@ export default {
       required: false,
       default: () => ({}),
     },
+    version: {
+      type: Number,
+      required: true,
+    },
+    size: {
+      type: Number,
+      required: true,
+    },
   },
   data() {
     const treeWidth =
@@ -295,6 +303,8 @@ export default {
       viewDiffsFileByFile: fileByFile(this.fileByFileUserPreference),
       defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
       mrReviews: this.rehydratedMrReviews,
+      version: this.version,
+      size: this.size,
     });
 
     if (this.shouldShow) {

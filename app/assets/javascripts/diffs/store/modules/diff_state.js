@@ -50,4 +50,5 @@ export default () => ({
   defaultSuggestionCommitMessage: '',
   mrReviews: {},
   latestDiff: true,
+  mr: {},
 });

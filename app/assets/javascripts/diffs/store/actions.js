@@ -69,6 +69,8 @@ export const setBaseConfig = ({ commit }, options) => {
     defaultSuggestionCommitMessage,
     viewDiffsFileByFile,
     mrReviews,
+    version,
+    size,
   } = options;
   commit(types.SET_BASE_CONFIG, {
     endpoint,
@@ -83,6 +85,8 @@ export const setBaseConfig = ({ commit }, options) => {
     defaultSuggestionCommitMessage,
     viewDiffsFileByFile,
     mrReviews,
+    version,
+    size,
   });
 };
 

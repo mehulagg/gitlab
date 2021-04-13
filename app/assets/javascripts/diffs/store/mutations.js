@@ -41,6 +41,8 @@ export default {
       defaultSuggestionCommitMessage,
       viewDiffsFileByFile,
       mrReviews,
+      version,
+      size,
     } = options;
     Object.assign(state, {
       endpoint,
@@ -55,6 +57,10 @@ export default {
       defaultSuggestionCommitMessage,
       viewDiffsFileByFile,
       mrReviews,
+      mr: {
+        version,
+        size,
+      },
     });
   },
 

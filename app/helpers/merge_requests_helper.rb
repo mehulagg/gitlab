@@ -202,7 +202,9 @@ module MergeRequestsHelper
       show_suggest_popover: show_suggest_popover?.to_s,
       show_whitespace_default: @show_whitespace_default.to_s,
       file_by_file_default: @file_by_file_default.to_s,
-      default_suggestion_commit_message: default_suggestion_commit_message
+      default_suggestion_commit_message: default_suggestion_commit_message,
+      version: merge_request.merge_request_diffs.index(merge_request.merge_request_diff) + 1,
+      size: merge_request.merge_request_diff.files_count
     }
   end
 
