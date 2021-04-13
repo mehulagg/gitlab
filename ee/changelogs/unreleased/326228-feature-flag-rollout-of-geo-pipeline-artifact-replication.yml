@@ -1,0 +1,5 @@
+---
+title: Geo - Set geo_pipeline_artifact_replication default enabled
+merge_request: 59323
+author:
+type: added
