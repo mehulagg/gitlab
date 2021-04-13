@@ -67,10 +67,13 @@ class DeploymentsFinder
   end
 
   def by_environment(items)
-    if params[:environment].present?
-      items.for_environment_name(params[:environment])
+    return items unless params[:environment].present?
+
+    if params[:project]
+      # *Much faster* when also filtering environments by project
+      items.for_environment_name_and_project(params[:environment], params[:project].id)
     else
-      items
+      items.for_environment_name(params[:environment])
     end
   end
 

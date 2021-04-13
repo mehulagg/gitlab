@@ -35,6 +35,9 @@ class Deployment < ApplicationRecord
   scope :for_environment_name, -> (name) do
     joins(:environment).where(environments: { name: name })
   end
+  scope :for_environment_name_and_project, -> (name, project) do
+    joins(:environment).where(environments: { name: name, project: project })
+  end
 
   scope :for_status, -> (status) { where(status: status) }
   scope :for_project, -> (project_id) { where(project_id: project_id) }
