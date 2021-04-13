@@ -73,8 +73,8 @@ terminated at the load balancer.
 WARNING:
 Starting with GitLab 13.3 and [until 13.11](https://gitlab.com/gitlab-org/gitlab/-/issues/325522),
 using an internal URL that is not accessible to the users will result in the
-OAuth authorization flow not working properly - as the users will get redirected
-to this internal URL, and not the external URL, as part of the OAuth flow.
+OAuth authorization flow not working properly, as the users will get redirected
+to the internal URL instead of the external one.
 
 ## Multiple secondary nodes behind a load balancer
 
