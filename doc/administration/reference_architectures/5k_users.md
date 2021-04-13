@@ -25,19 +25,25 @@ costly-to-operate environment by using the
 | Service                                    | Nodes       | Configuration           | GCP            | AWS         | Azure    |
 |--------------------------------------------|-------------|-------------------------|----------------|-------------|----------|
 | External load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
-| Redis                                      | 3           | 2 vCPU, 7.5 GB memory   | n1-standard-2  | `m5.large`    | D2s v3   |
-| Consul + Sentinel                          | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
-| PostgreSQL                                 | 3           | 4 vCPU, 15 GB memory    | n1-standard-4  | `m5.xlarge`   | D4s v3   |
-| PgBouncer                                  | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
+| Redis**                                    | 3           | 2 vCPU, 7.5 GB memory   | n1-standard-2  | `m5.large`    | D2s v3   |
+| Consul* + Sentinel**                       | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
+| PostgreSQL*                                | 3           | 4 vCPU, 15 GB memory    | n1-standard-4  | `m5.xlarge`   | D4s v3   |
+| PgBouncer*                                 | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
 | Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
 | Gitaly                                     | 3           | 8 vCPU, 30 GB memory    | n1-standard-8  | `m5.2xlarge`  | D8s v3   |
 | Praefect                                   | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
-| Praefect PostgreSQL                        | 1+*         | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
+| Praefect PostgreSQL*                       | 1+          | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
 | Sidekiq                                    | 4           | 2 vCPU, 7.5 GB memory   | n1-standard-2  | `m5.large`    | D2s v3   |
 | GitLab Rails                               | 3           | 16 vCPU, 14.4 GB memory | n1-highcpu-16  | `c5.4xlarge`  | F16s v2  |
 | Monitoring node                            | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
-| Object storage                             | n/a         | n/a                     | n/a            | n/a         | n/a      |
+| Object storage                             | n/a         | n/a                     | n/a            | n/a           | n/a      |
 | NFS server (optional, not recommended)     | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | `c5.xlarge`   | F4s v2   |
+
+NOTE:
+Components marked with * can be optionally run on reputable
+third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work.
+Components marked with ** can be optionally run on reputable
+third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
 
 ```plantuml
 @startuml 5k
@@ -127,7 +133,7 @@ The Google Cloud Platform (GCP) architectures were built and tested using the
 CPU platform. On different hardware you may find that adjustments, either lower
 or higher, are required for your CPU or node counts. For more information, see
 our [Sysbench](https://github.com/akopytov/sysbench)-based
-[CPU benchmark](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Reference-Architectures/GCP-CPU-Benchmarks).
+[CPU benchmarks](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Reference-Architectures/GCP-CPU-Benchmarks).
 
 Due to better performance and availability, for data objects (such as LFS,
 uploads, or artifacts), using an [object storage service](#configure-the-object-storage)
