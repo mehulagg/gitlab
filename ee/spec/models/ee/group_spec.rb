@@ -117,6 +117,20 @@ RSpec.describe Group do
         expect(subject).to contain_exactly(group_with_no_pat_expiry_policy)
       end
     end
+
+    describe '.containing_epics' do
+      subject { described_class.containing_epics }
+
+      it 'returns only groups containing one or more epic' do
+        group1 = create(:group)
+        group2 = create(:group, parent: group1)
+        create(:group)
+        create(:epic, group: group1)
+        create(:epic, group: group2)
+
+        expect(subject).to match_array([group1, group2])
+      end
+    end
   end
 
   describe 'validations' do

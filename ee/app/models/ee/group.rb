@@ -106,6 +106,8 @@ module EE
         joins("INNER JOIN (#{epics_query.to_sql}) as epics on epics.group_id = namespaces.id")
       end
 
+      scope :containing_epics, -> { where(id: ::Epic.select(:group_id).distinct) }
+
       state_machine :ldap_sync_status, namespace: :ldap_sync, initial: :ready do
         state :ready
         state :started

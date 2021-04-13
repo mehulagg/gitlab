@@ -521,6 +521,7 @@ RSpec.describe EpicsFinder do
           let_it_be(:public_group1) { create(:group, :public, parent: base_group) }
           let_it_be(:public_epic1) { create(:epic, group: public_group1) }
           let_it_be(:public_epic2) { create(:epic, :confidential, group: public_group1) }
+          let_it_be(:subgroup_noepics) { create(:group, :private, parent: private_group1) }
 
           let(:execute_params) { {} }
 
@@ -576,17 +577,35 @@ RSpec.describe EpicsFinder do
 
             # if user is not member of top-level group, we need to check
             # if he can read epics in each subgroup
-            it 'does not execute more than 15 SQL queries' do
+            it 'does not execute any new additional SQL queries' do
               # The limit here is fragile!
-              expect { subject }.not_to exceed_all_query_limit(15)
+              expect { subject }.not_to exceed_all_query_limit(14)
             end
 
-            it 'checks permission for each subgroup' do
+            it 'checks permission for each subgroup containing epics' do
               finder = described_class.new(search_user, group_id: base_group.id)
 
-              expect(finder).to receive(:groups_user_can_read_epics).and_call_original
+              expect(finder).to receive(:groups_user_can_read_epics).with(match_array([base_group, private_group1, public_group1])).and_call_original
 
               finder.execute
+            end
+
+            context 'when limit_epic_groups_query is disabled' do
+              before do
+                stub_feature_flags(limit_epic_groups_query: false)
+              end
+
+              it 'checks permission for each subgroup' do
+                finder = described_class.new(search_user, group_id: base_group.id)
+
+                expect(finder).to receive(:groups_user_can_read_epics).with(match_array([base_group, private_group1, public_group1, subgroup_noepics])).and_call_original
+
+                finder.execute
+              end
+
+              it 'does not execute any new additional SQL queries' do
+                expect { subject }.not_to exceed_all_query_limit(17)
+              end
             end
           end
 

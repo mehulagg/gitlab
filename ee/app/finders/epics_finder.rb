@@ -93,6 +93,11 @@ class EpicsFinder < IssuableFinder
     strong_memoize(:permissioned_related_groups) do
       groups = related_groups
 
+      # we can limit the scope of groups only to groups which have any epic included
+      if Feature.enabled?(:limit_epic_groups_query, group)
+        groups = groups.containing_epics
+      end
+
       # if user is member of top-level related group, he can automatically read
       # all epics in all subgroups
       next groups if can_read_all_epics_in_related_groups?(groups)
