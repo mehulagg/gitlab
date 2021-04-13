@@ -51,33 +51,27 @@ RSpec.describe AddNewTrailPlans, :migration do
   end
 
   describe '#down' do
+    before do
+      table(:plans).create!(id: 3, name: 'other')
+      table(:plan_limits).create!(plan_id: 3)
+    end
+
     context 'when the instance is SaaS' do
       before do
-        table(:plans).create!(name: 'random')
         allow(Gitlab).to receive(:dev_env_or_com?).and_return true
       end
 
       it 'removes the newly added ultimate and premium trial entries' do
-        reversible_migration do |migration|
-          migration.before -> {
-            expect(AddNewTrailPlans::Plan.count).to be(1)
-            expect(AddNewTrailPlans::Plan.pluck(:name, :title)).to match_array(
-              [['random', nil]]
-            )
-            expect(AddNewTrailPlans::PlanLimits.count).to be(0)
-          }
+        migrate!
 
-          migration.after -> {
-            expect(AddNewTrailPlans::Plan.pluck(:name, :title)).to match_array(
-              [
-                ['premium_trial', 'Premium Trial'],
-                ['random', nil],
-                ['ultimate_trial', 'Ultimate Trial']
-              ]
-            )
-            expect(AddNewTrailPlans::PlanLimits.count).to be(2)
-          }
-        end
+        expect { described_class.new.down }.to change { AddNewTrailPlans::Plan.count }.by(-2)
+        expect(AddNewTrailPlans::Plan.find_by(name: 'premium_trial')).to be_nil
+        expect(AddNewTrailPlans::Plan.find_by(name: 'ultimate_trial')).to be_nil
+
+        other_plan = AddNewTrailPlans::Plan.find_by(name: 'other')
+        expect(other_plan).to be_persisted
+        expect(AddNewTrailPlans::PlanLimits.count).to eq(1)
+        expect(AddNewTrailPlans::PlanLimits.first.plan_id).to eq(other_plan.id)
       end
     end
 
@@ -91,17 +85,10 @@ RSpec.describe AddNewTrailPlans, :migration do
       end
 
       it 'does not delete plans and plan limits and returns' do
-        reversible_migration do |migration|
-          migration.before -> {
-            expect(AddNewTrailPlans::Plan.count).to be(2)
-            expect(AddNewTrailPlans::PlanLimits.count).to be(2)
-          }
+        migrate!
 
-          migration.after -> {
-            expect(AddNewTrailPlans::Plan.count).to be(2)
-            expect(AddNewTrailPlans::PlanLimits.count).to be(2)
-          }
-        end
+        expect { described_class.new.down }.not_to change { AddNewTrailPlans::Plan.count }
+        expect(AddNewTrailPlans::PlanLimits.count).to eq(3)
       end
     end
   end
