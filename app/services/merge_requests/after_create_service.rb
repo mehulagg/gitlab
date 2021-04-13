@@ -35,7 +35,7 @@ module MergeRequests
     end
 
     def link_lfs_objects(merge_request)
-      LinkLfsObjectsService.new(merge_request.target_project).execute(merge_request)
+      LinkLfsObjectsService.new(container: merge_request.target_project).execute(merge_request)
     end
   end
 end

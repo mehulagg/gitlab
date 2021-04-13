@@ -2,16 +2,17 @@
 
 module MergeRequests
   class CreateFromIssueService < MergeRequests::CreateService
-    def initialize(project, user, params)
+    def initialize(container:, current_user:, mr_params: {})
       # branch - the name of new branch
       # ref    - the source of new branch.
 
-      @branch_name       = params[:branch_name]
-      @issue_iid         = params[:issue_iid]
-      @ref               = params[:ref]
-      @target_project_id = params[:target_project_id]
+      @branch_name       = mr_params[:branch_name]
+      @issue_iid         = mr_params[:issue_iid]
+      @ref               = mr_params[:ref]
+      @target_project_id = mr_params[:target_project_id]
 
-      super(project, user)
+      # NOTE: We intentionally do not pass along the params
+      super(container: container, current_user: current_user)
     end
 
     def execute
@@ -77,7 +78,7 @@ module MergeRequests
     end
 
     def merge_request
-      MergeRequests::BuildService.new(target_project, current_user, merge_request_params).execute
+      MergeRequests::BuildService.new(container: target_project, current_user: current_user, params: merge_request_params).execute
     end
 
     def merge_request_params

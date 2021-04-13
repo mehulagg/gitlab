@@ -117,7 +117,7 @@ class Projects::IssuesController < Projects::ApplicationController
       discussion_to_resolve: params[:discussion_to_resolve],
       confidential: !!Gitlab::Utils.to_boolean(issue_create_params[:confidential])
     )
-    service = ::Issues::BuildService.new(project, current_user, build_params)
+    service = ::Issues::BuildService.new(container: project, current_user: current_user, params: build_params)
 
     @issue = @noteable = service.execute
 
@@ -137,7 +137,7 @@ class Projects::IssuesController < Projects::ApplicationController
       discussion_to_resolve: params[:discussion_to_resolve]
     )
 
-    service = ::Issues::CreateService.new(project, current_user, create_params)
+    service = ::Issues::CreateService.new(container: project, current_user: current_user, params: create_params)
     @issue = service.execute
 
     create_vulnerability_issue_feedback(issue)
@@ -164,7 +164,7 @@ class Projects::IssuesController < Projects::ApplicationController
       new_project = Project.find(params[:move_to_project_id])
       return render_404 unless issue.can_move?(current_user, new_project)
 
-      @issue = ::Issues::UpdateService.new(project, current_user, target_project: new_project).execute(issue)
+      @issue = ::Issues::UpdateService.new(container: project, current_user: current_user, params: { target_project: new_project }).execute(issue)
     end
 
     respond_to do |format|
@@ -178,7 +178,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def reorder
-    service = ::Issues::ReorderService.new(project, current_user, reorder_params)
+    service = ::Issues::ReorderService.new(container: project, current_user: current_user, params: reorder_params)
 
     if service.execute(issue)
       head :ok
@@ -189,7 +189,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
   def related_branches
     @related_branches = ::Issues::RelatedBranchesService
-      .new(project, current_user)
+      .new(container: project, current_user: current_user)
       .execute(issue)
       .map { |branch| branch.merge(link: branch_link(branch)) }
 
@@ -217,7 +217,7 @@ class Projects::IssuesController < Projects::ApplicationController
   def create_merge_request
     create_params = params.slice(:branch_name, :ref).merge(issue_iid: issue.iid)
     create_params[:target_project_id] = params[:target_project_id]
-    result = ::MergeRequests::CreateFromIssueService.new(project, current_user, create_params).execute
+    result = ::MergeRequests::CreateFromIssueService.new(container: project, current_user: current_user, mr_params: create_params).execute
 
     if result[:status] == :success
       render json: MergeRequestCreateSerializer.new.represent(result[:merge_request])
@@ -347,7 +347,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
   def update_service
     update_params = issue_params.merge(spammable_params)
-    ::Issues::UpdateService.new(project, current_user, update_params)
+    ::Issues::UpdateService.new(container: project, current_user: current_user, params: update_params)
   end
 
   def finder_type

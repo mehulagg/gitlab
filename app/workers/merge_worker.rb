@@ -13,7 +13,7 @@ class MergeWorker # rubocop:disable Scalability/IdempotentWorker
     current_user = User.find(current_user_id)
     merge_request = MergeRequest.find(merge_request_id)
 
-    MergeRequests::MergeService.new(merge_request.target_project, current_user, params)
+    MergeRequests::MergeService.new(container: merge_request.target_project, current_user: current_user, params: params)
       .execute(merge_request)
   end
 end

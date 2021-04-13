@@ -5,7 +5,7 @@ class IssuableBaseService < ::Projects::BaseProjectService
 
   attr_accessor :params, :skip_milestone_email
 
-  def initialize(container: project, current_user: nil, params: {})
+  def initialize(container:, current_user: nil, params: {})
     super
 
     @skip_milestone_email = @params.delete(:skip_milestone_email)
@@ -406,7 +406,7 @@ class IssuableBaseService < ::Projects::BaseProjectService
   end
 
   def create_system_notes(issuable, **options)
-    Issuable::CommonSystemNotesService.new(project, current_user).execute(issuable, **options)
+    Issuable::CommonSystemNotesService.new(container: project, current_user: current_user).execute(issuable, **options)
   end
 
   def associations_before_update(issuable)

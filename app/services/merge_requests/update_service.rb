@@ -4,7 +4,7 @@ module MergeRequests
   class UpdateService < MergeRequests::BaseService
     extend ::Gitlab::Utils::Override
 
-    def initialize(project, user = nil, params = {})
+    def initialize(container:, current_user: nil, params: {})
       super
 
       @target_branch_was_deleted = @params.delete(:target_branch_was_deleted)

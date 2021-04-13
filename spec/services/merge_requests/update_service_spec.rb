@@ -43,7 +43,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
     end
 
     def update_merge_request(opts)
-      @merge_request = MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+      @merge_request = MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
       @merge_request.reload
     end
 
@@ -64,7 +64,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         }
       end
 
-      let(:service) { described_class.new(project, current_user, opts) }
+      let(:service) { described_class.new(container: project, current_user: current_user, params: opts) }
       let(:current_user) { user }
 
       before do
@@ -99,7 +99,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
           expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
             .to receive(:track_description_edit_action).once.with(user: user)
 
-          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request2)
+          MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request2)
         end
 
         it 'tracks Draft/WIP marking' do
@@ -108,7 +108,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           opts[:title] = "WIP: #{opts[:title]}"
 
-          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request2)
+          MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request2)
         end
 
         it 'tracks Draft/WIP un-marking' do
@@ -117,7 +117,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           opts[:title] = "Non-draft/wip title string"
 
-          MergeRequests::UpdateService.new(project, user, opts).execute(draft_merge_request)
+          MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(draft_merge_request)
         end
 
         context 'when MR is locked' do
@@ -128,7 +128,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
               opts[:discussion_locked] = true
 
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+              MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
             end
           end
 
@@ -139,7 +139,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
               opts[:discussion_locked] = false
 
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+              MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
             end
           end
         end
@@ -154,7 +154,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
               opts[:discussion_locked] = false
 
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+              MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
             end
           end
 
@@ -165,7 +165,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
               opts[:discussion_locked] = true
 
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+              MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
             end
           end
         end
@@ -184,7 +184,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
             spent_at: Date.parse('2021-02-24')
           }
 
-          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+          MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
         end
 
         it 'tracks milestone change' do
@@ -193,7 +193,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           opts[:milestone] = milestone
 
-          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+          MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
         end
 
         it 'track labels change' do
@@ -202,7 +202,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           opts[:label_ids] = [label2.id]
 
-          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+          MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
         end
 
         context 'assignees' do
@@ -213,7 +213,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
               opts[:assignees] = [user2]
 
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+              MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
             end
           end
 
@@ -224,7 +224,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
               opts[:assignees] = merge_request.assignees
 
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+              MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
             end
           end
         end
@@ -237,7 +237,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
               opts[:reviewers] = [user2]
 
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+              MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
             end
           end
 
@@ -248,7 +248,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
               opts[:reviewers] = merge_request.reviewers
 
-              MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+              MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request)
             end
           end
         end
@@ -478,7 +478,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       let(:milestone) { create(:milestone, project: project) }
       let(:req_opts) { { source_branch: 'feature', target_branch: 'master' } }
 
-      subject { MergeRequests::UpdateService.new(project, user, opts).execute(merge_request) }
+      subject { MergeRequests::UpdateService.new(container: project, current_user: user, params: opts).execute(merge_request) }
 
       context 'when mentionable attributes change' do
         let(:opts) { { description: "Description with #{user.to_reference}" }.merge(req_opts) }
@@ -525,7 +525,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         }
       end
 
-      let(:service) { described_class.new(project, user, opts) }
+      let(:service) { described_class.new(container: project, current_user: user, params: opts) }
 
       context 'without pipeline' do
         before do
@@ -586,7 +586,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
       context 'with a non-authorised user' do
         let(:visitor) { create(:user) }
-        let(:service) { described_class.new(project, visitor, opts) }
+        let(:service) { described_class.new(container: project, current_user: visitor, params: opts) }
 
         before do
           merge_request.update_attribute(:merge_error, 'Error')
@@ -846,7 +846,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
           opts = { title: 'New title' }
 
           perform_enqueued_jobs do
-            @merge_request = described_class.new(project, user, opts).execute(merge_request)
+            @merge_request = described_class.new(container: project, current_user: user, params: opts).execute(merge_request)
           end
 
           should_email(subscriber)
@@ -859,7 +859,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
           opts = { title: 'Draft: New title' }
 
           perform_enqueued_jobs do
-            @merge_request = described_class.new(project, user, opts).execute(merge_request)
+            @merge_request = described_class.new(container: project, current_user: user, params: opts).execute(merge_request)
           end
 
           should_not_email(subscriber)
@@ -881,7 +881,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         opts = { label_ids: [label.id] }
 
         perform_enqueued_jobs do
-          @merge_request = described_class.new(project, user, opts).execute(merge_request)
+          @merge_request = described_class.new(container: project, current_user: user, params: opts).execute(merge_request)
         end
 
         should_email(subscriber)
@@ -897,7 +897,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
           opts = { label_ids: [label.id, label2.id] }
 
           perform_enqueued_jobs do
-            @merge_request = described_class.new(project, user, opts).execute(merge_request)
+            @merge_request = described_class.new(container: project, current_user: user, params: opts).execute(merge_request)
           end
 
           should_not_email(subscriber)
@@ -908,7 +908,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
           opts = { label_ids: [label2.id] }
 
           perform_enqueued_jobs do
-            @merge_request = described_class.new(project, user, opts).execute(merge_request)
+            @merge_request = described_class.new(container: project, current_user: user, params: opts).execute(merge_request)
           end
 
           should_not_email(subscriber)
@@ -974,7 +974,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
       it 'creates a `MergeRequestsClosingIssues` record for each issue' do
         issue_closing_opts = { description: "Closes #{first_issue.to_reference} and #{second_issue.to_reference}" }
-        service = described_class.new(project, user, issue_closing_opts)
+        service = described_class.new(container: project, current_user: user, params: issue_closing_opts)
         allow(service).to receive(:execute_hooks)
         service.execute(merge_request)
 
@@ -986,7 +986,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         create(:merge_requests_closing_issues, issue: first_issue, merge_request: merge_request)
         create(:merge_requests_closing_issues, issue: second_issue, merge_request: merge_request)
 
-        service = described_class.new(project, user, description: "not closing any issues")
+        service = described_class.new(container: project, current_user: user, params: { description: "not closing any issues" })
         allow(service).to receive(:execute_hooks)
         service.execute(merge_request.reload)
 
@@ -1144,7 +1144,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
     it_behaves_like 'issuable record that supports quick actions' do
       let(:existing_merge_request) { create(:merge_request, source_project: project) }
-      let(:issuable) { described_class.new(project, user, params).execute(existing_merge_request) }
+      let(:issuable) { described_class.new(container: project, current_user: user, params: params).execute(existing_merge_request) }
     end
   end
 end

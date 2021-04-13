@@ -144,7 +144,7 @@ module MergeRequests
     end
 
     def create_pipeline_for(merge_request, user)
-      MergeRequests::CreatePipelineService.new(project, user).execute(merge_request)
+      MergeRequests::CreatePipelineService.new(container: project, current_user: user).execute(merge_request)
     end
 
     def abort_auto_merge(merge_request, reason)

@@ -187,9 +187,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           issue = create(:issue, :opened, project: example_class.project)
 
           Issues::UpdateService.new(
-            example_class.project,
-            user,
-            label_ids: [example_class.label.id]
+            container: example_class.project,
+            current_user: user,
+            params: { label_ids: [example_class.label.id] }
           ).execute(issue)
 
           issue
@@ -197,9 +197,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
         def create_data_for_end_event(resource, example_class)
           Issues::UpdateService.new(
-            example_class.project,
-            user,
-            label_ids: []
+            container: example_class.project,
+            current_user: user,
+            params: { label_ids: [] }
           ).execute(resource)
         end
 
@@ -219,9 +219,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           issue = create(:issue, :opened, project: example_class.project)
 
           Issues::UpdateService.new(
-            example_class.project,
-            user,
-            label_ids: [example_class.label.id]
+            container: example_class.project,
+            current_user: user,
+            params: { label_ids: [example_class.label.id] }
           ).execute(issue)
 
           issue
@@ -229,9 +229,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
         def create_data_for_end_event(issue, example_class)
           Issues::UpdateService.new(
-            example_class.project,
-            user,
-            label_ids: [example_class.label.id, example_class.other_label.id]
+            container: example_class.project,
+            current_user: user,
+            params: { label_ids: [example_class.label.id, example_class.other_label.id] }
           ).execute(issue)
         end
 
@@ -269,9 +269,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
         def create_data_for_end_event(issue, example_class)
           Issues::UpdateService.new(
-            example_class.project,
-            user,
-            label_ids: [example_class.label.id]
+            container: example_class.project,
+            current_user: user,
+            params: { label_ids: [example_class.label.id] }
           ).execute(issue)
         end
 

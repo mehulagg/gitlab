@@ -26,7 +26,7 @@ RSpec.describe MergeRequests::UpdateAssigneesService do
     project.add_developer(user3)
   end
 
-  let(:service) { described_class.new(project, user, opts) }
+  let(:service) { described_class.new(container: project, current_user: user, params: opts) }
   let(:opts) { { assignee_ids: [user2.id] } }
 
   describe 'execute' do
@@ -65,7 +65,7 @@ RSpec.describe MergeRequests::UpdateAssigneesService do
                           source_project: merge_request.project,
                           author: merge_request.author)
 
-        update_service = ::MergeRequests::UpdateService.new(project, user, opts)
+        update_service = ::MergeRequests::UpdateService.new(container: project, current_user: user, params: opts)
 
         expect { service.execute(merge_request) }
           .to issue_fewer_queries_than { update_service.execute(other_mr) }

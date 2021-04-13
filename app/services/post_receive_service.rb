@@ -56,7 +56,7 @@ class PostReceiveService
     end
 
     service = ::MergeRequests::PushOptionsHandlerService.new(
-      project, user, changes, push_options
+      container: project, current_user: user, changes: changes, push_options: push_options
     ).execute
 
     if service.errors.present?

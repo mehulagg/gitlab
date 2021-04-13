@@ -254,9 +254,9 @@ module API
         issue_params = convert_parameters_from_legacy_format(issue_params)
 
         begin
-          issue = ::Issues::CreateService.new(user_project,
-                                              current_user,
-                                              issue_params.merge(request: request, api: true)).execute
+          issue = ::Issues::CreateService.new(container: user_project,
+                                              current_user: current_user,
+                                              params: issue_params.merge(request: request, api: true)).execute
 
           if issue.spam?
             render_api_error!({ error: 'Spam detected' }, 400)
@@ -299,9 +299,9 @@ module API
 
         update_params = convert_parameters_from_legacy_format(update_params)
 
-        issue = ::Issues::UpdateService.new(user_project,
-                                            current_user,
-                                            update_params).execute(issue)
+        issue = ::Issues::UpdateService.new(container: user_project,
+                                            current_user: current_user,
+                                            params: update_params).execute(issue)
 
         render_spam_error! if issue.spam?
 

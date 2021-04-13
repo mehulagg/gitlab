@@ -108,16 +108,16 @@ class Gitlab::Seeder::CustomizableCycleAnalytics
     issues.pop(5).each do |issue|
       Timecop.travel(issue.created_at + random_duration_in_hours.hours)
       Issues::UpdateService.new(
-        project,
-        user,
-        label_ids: [in_dev_label.id]
+        container: project,
+        current_user: user,
+        params: { label_ids: [in_dev_label.id] }
       ).execute(issue)
 
       Timecop.travel(random_duration_in_hours.hours.from_now)
       Issues::UpdateService.new(
-        project,
-        user,
-        label_ids: [in_review_label.id]
+        container: project,
+        current_user: user,
+        params: { label_ids: [in_review_label.id] }
       ).execute(issue)
     end
   end
@@ -153,7 +153,7 @@ class Gitlab::Seeder::CustomizableCycleAnalytics
         assignees: [project.team.users.sample]
       }
 
-      Issues::CreateService.new(@project, project.team.users.sample, issue_params).execute
+      Issues::CreateService.new(container: @project, current_user: project.team.users.sample, params: issue_params).execute
     end
   end
 

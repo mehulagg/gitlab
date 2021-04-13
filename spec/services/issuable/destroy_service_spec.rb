@@ -6,7 +6,7 @@ RSpec.describe Issuable::DestroyService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :public) }
 
-  subject(:service) { described_class.new(project, user) }
+  subject(:service) { described_class.new(container: project, current_user: user) }
 
   describe '#execute' do
     shared_examples_for 'service deleting todos' do

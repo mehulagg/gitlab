@@ -9,7 +9,7 @@ RSpec.describe MergeRequests::RemoveApprovalService do
     let(:merge_request) { create(:merge_request, source_project: project) }
     let!(:existing_approval) { create(:approval, merge_request: merge_request) }
 
-    subject(:service) { described_class.new(project, user) }
+    subject(:service) { described_class.new(container: project, current_user: user) }
 
     def execute!
       service.execute(merge_request)
