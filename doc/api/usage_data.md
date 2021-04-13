@@ -9,7 +9,7 @@ type: reference, api
 
 ## Export metric definitions as a single YAML file
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57016) in GitLab 13.11.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57270) in GitLab 13.11.
 
 Export all metric definitions as a single YAML file, similar to the [Metrics Dictionary](../development/usage_ping/dictionary.md), for easier importing.
 
