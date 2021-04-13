@@ -123,7 +123,11 @@ module TabHelper
 
   def route_matches_pages?(pages)
     Array(pages).compact.any? do |single_page|
-      current_page?(single_page)
+      if single_page.is_a?(Hash)
+        current_page?(**single_page)
+      else
+        current_page?(single_page)
+      end
     end
   end
 
