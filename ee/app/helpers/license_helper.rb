@@ -50,7 +50,9 @@ module LicenseHelper
 
   def cloud_license_view_data
     {
-      plan_name: current_license_title
+      plan_name: current_license_title,
+      free_trial_path: new_trial_url,
+      buy_subscription_path: ::EE::SUBSCRIPTIONS_PLANS_URL
     }
   end
 

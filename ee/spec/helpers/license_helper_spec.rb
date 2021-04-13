@@ -80,13 +80,17 @@ RSpec.describe LicenseHelper do
   end
 
   describe '#cloud_license_view_data' do
+    let(:current_user) { create(:user, :admin) }
+
     context 'when there is a current license' do
       it 'returns the data for the view' do
         custom_plan = 'custom plan'
         license = double('License', plan: custom_plan)
         allow(License).to receive(:current).and_return(license)
 
-        expect(cloud_license_view_data).to eq({ plan_name: 'Custom Plan' })
+        expect(cloud_license_view_data).to eq({ plan_name: 'Custom Plan',
+                                                free_trial_path: 'https://customers.stg.gitlab.com/trials/new?return_to=http%3A%2F%2Flocalhost&id=dXNlcjFAZXhhbXBsZS5vcmc=',
+                                                buy_subscription_path: 'https://customers.stg.gitlab.com/plans' })
       end
     end
 
@@ -94,7 +98,9 @@ RSpec.describe LicenseHelper do
       it 'returns the data for the view' do
         allow(License).to receive(:current).and_return(nil)
 
-        expect(cloud_license_view_data).to eq({ plan_name: 'Core' })
+        expect(cloud_license_view_data).to eq({ plan_name: 'Core',
+                                                free_trial_path: 'https://customers.stg.gitlab.com/trials/new?return_to=http%3A%2F%2Flocalhost&id=dXNlcjJAZXhhbXBsZS5vcmc=',
+                                                buy_subscription_path: 'https://customers.stg.gitlab.com/plans' })
       end
     end
   end
