@@ -25,8 +25,8 @@ RSpec.describe Gitlab::Utils::MimeType do
         "rails_sample.bmp"           | "image/bmp"
         "rails_sample.tif"           | "image/tiff"
         "sample.ico"                 | "image/vnd.microsoft.icon"
-        "blockquote_fence_before.md" | "text/plain"
-        "csv_empty.csv"              | "application/x-empty"
+        "blockquote_fence_before.md" | "application/octet-stream"
+        "csv_empty.csv"              | "application/octet-stream"
       end
 
       with_them do
@@ -51,7 +51,7 @@ RSpec.describe Gitlab::Utils::MimeType do
     context "input is a string" do
       let(:str) { "plain text" }
 
-      it { is_expected.to eq('text/plain') }
+      it { is_expected.to eq('application/octet-stream') }
     end
   end
 end
