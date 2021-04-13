@@ -2,6 +2,7 @@
 
 module Registrations
   class ProjectsController < ApplicationController
+    include LearnGitlabHelper
     layout 'checkout'
 
     LEARN_GITLAB_TEMPLATE = 'learn_gitlab.tar.gz'
@@ -40,7 +41,11 @@ module Registrations
 
           redirect_to trial_getting_started_users_sign_up_welcome_path(learn_gitlab_project_id: learn_gitlab_project.id)
         else
-          redirect_to users_sign_up_experience_level_path(namespace_path: @project.namespace)
+          if continous_onboarding_experiment_enabled_for_user?
+            redirect_to continuous_onboarding_getting_started_users_sign_up_welcome_path(project_id: @project.id)
+          else
+            redirect_to users_sign_up_experience_level_path(namespace_path: @project.namespace)
+          end
         end
       else
         render :new
