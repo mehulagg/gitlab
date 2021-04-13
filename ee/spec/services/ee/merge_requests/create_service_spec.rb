@@ -39,12 +39,14 @@ RSpec.describe MergeRequests::CreateService do
     end
 
     context 'report approvers' do
-      it 'refreshes report approvers for the merge request' do
-        expect_next_instance_of(::MergeRequests::SyncReportApproverApprovalRules) do |service|
-          expect(service).to receive(:execute)
-        end
+      it 'schedules refresh of report approvers for the merge request' do
+        expect(::MergeRequests::SyncReportApproverApprovalRulesWorker).to receive(:perform_async).and_call_original
 
-        service.execute
+        Sidekiq::Testing.fake! do
+          expect { service.execute }.to change(::MergeRequests::SyncReportApproverApprovalRulesWorker.jobs, :size).by(1)
+
+          ::MergeRequests::SyncReportApproverApprovalRulesWorker.clear
+        end
       end
     end
 

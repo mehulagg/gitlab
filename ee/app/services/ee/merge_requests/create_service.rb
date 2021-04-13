@@ -10,7 +10,8 @@ module EE
         super
 
         ::MergeRequests::SyncCodeOwnerApprovalRules.new(issuable).execute
-        ::MergeRequests::SyncReportApproverApprovalRules.new(issuable).execute
+
+        ::MergeRequests::SyncReportApproverApprovalRulesWorker.perform_async(issuable.id)
 
         ::MergeRequests::UpdateBlocksService
           .new(issuable, current_user, blocking_merge_requests_params)
