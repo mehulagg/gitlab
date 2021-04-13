@@ -19,6 +19,12 @@ module PersonalAccessTokensHelper
     License.feature_available?(:personal_access_token_expiration_policy)
   end
 
+  def expiration_enforced?
+    return true unless enforce_pat_expiration_feature_available?
+
+    ::Gitlab::CurrentSettings.enforce_pat_expiration?
+  end
+
   def enforce_pat_expiration_feature_available?
     PersonalAccessToken.enforce_pat_expiration_feature_available?
   end

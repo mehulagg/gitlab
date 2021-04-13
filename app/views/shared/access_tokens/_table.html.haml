@@ -5,6 +5,9 @@
 
 %h5
   = _('Active %{type} (%{token_length})') % { type: type_plural, token_length: active_tokens.length }
+- unless expiration_enforced?
+  %p.profile-settings-content
+    = _("Personal access tokens are not revoked upon expiration.")
 - if impersonation
   %p.profile-settings-content
     = _("To see all the user's personal access tokens you must impersonate them first.")
