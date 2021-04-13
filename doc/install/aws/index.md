@@ -348,10 +348,6 @@ Now that the database is created, let's move on to setting up Redis with ElastiC
 ElastiCache is an in-memory hosted caching solution. Redis maintains its own
 persistence and is used to store session data, temporary cache information, and background job queues for the GitLab application.
 
-WARNING:
-GitLab recommends you use ElastiCache Redis version 5.0.x, because version 6.x contains
-a bug that [prevents Sidekiq from processing jobs](https://gitlab.com/gitlab-org/gitlab/-/issues/281683).
-
 ### Create a Redis Security Group
 
 1. Navigate to the EC2 dashboard.
@@ -654,8 +650,9 @@ That concludes the configuration changes for our GitLab instance. Next, we'll cr
 
 ### Log in for the first time
 
-Using the domain name you used when setting up [DNS for the load balancer](#configure-dns-for-load-balancer), you should now be able to visit GitLab in your browser. You will be asked to set up a password
-for the `root` user which has admin privileges on the GitLab instance. This password will be stored in the database.
+Using the domain name you used when setting up [DNS for the load balancer](#configure-dns-for-load-balancer), you should now be able to visit GitLab in your browser.
+If you didn't change the password by any other means, the default password will be the same as the instance ID. To change the default password, login as the `root` user
+with the default password and [change it in the user profile](../../user/profile#change-your-password).
 
 When our [auto scaling group](#create-an-auto-scaling-group) spins up new instances, we'll be able to log in with username `root` and the newly created password.
 

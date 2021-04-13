@@ -1,0 +1,5 @@
+---
+title: Fix Group SAML disabled git enforcement text
+merge_request: 58825
+author:
+type: fixed

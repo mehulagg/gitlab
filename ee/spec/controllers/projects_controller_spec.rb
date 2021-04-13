@@ -764,7 +764,7 @@ RSpec.describe ProjectsController do
 
       context 'when feature is enabled for group' do
         before do
-          allow(group).to receive(:delayed_project_removal?).and_return(true)
+          allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(true)
         end
 
         it_behaves_like 'marks project for deletion'
@@ -796,7 +796,7 @@ RSpec.describe ProjectsController do
 
       context 'when feature is disabled for group' do
         before do
-          allow(group).to receive(:delayed_project_removal).and_return(false)
+          allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(false)
         end
 
         it_behaves_like 'deletes project right away'

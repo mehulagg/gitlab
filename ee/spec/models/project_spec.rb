@@ -167,6 +167,7 @@ RSpec.describe Project do
 
     describe 'approval_rules association' do
       let_it_be(:rule, reload: true) { create(:approval_project_rule) }
+
       let(:project) { rule.project }
       let(:branch) { 'stable' }
 
@@ -399,6 +400,7 @@ RSpec.describe Project do
       let_it_be(:project_1) { create(:project_statistics, lfs_objects_size: 10, repository_size: 10).project }
       let_it_be(:project_2) { create(:project_statistics, lfs_objects_size: 5, repository_size: 55).project }
       let_it_be(:project_3) { create(:project, repository_size_limit: 30, statistics: create(:project_statistics, lfs_objects_size: 8, repository_size: 32)) }
+
       let(:limit) { 20 }
 
       subject { described_class.order_by_total_repository_size_excess_desc(limit) }
@@ -874,6 +876,16 @@ RSpec.describe Project do
     end
   end
 
+  describe '#execute_external_compliance_hooks' do
+    let_it_be(:rule) { create(:external_approval_rule) }
+
+    it 'enqueues the correct number of workers' do
+      allow(rule).to receive(:async_execute).once
+
+      rule.project.execute_external_compliance_hooks({})
+    end
+  end
+
   describe "#execute_hooks" do
     context "group hooks" do
       let(:group) { create(:group) }
@@ -889,7 +901,7 @@ RSpec.describe Project do
         project.execute_hooks(some: 'info')
       end
 
-      context 'when group_webhooks frature is enabled' do
+      context 'when group_webhooks feature is enabled' do
         before do
           stub_licensed_features(group_webhooks: true)
         end
@@ -1074,37 +1086,40 @@ RSpec.describe Project do
     end
   end
 
-  describe '#any_runners_limit' do
-    let(:project) { create(:project, shared_runners_enabled: shared_runners_enabled) }
-    let(:specific_runner) { create(:ci_runner, :project) }
-    let(:shared_runner) { create(:ci_runner, :instance) }
+  describe '#any_active_runners?' do
+    let!(:shared_runner) { create(:ci_runner, :instance) }
 
-    context 'for shared runners enabled' do
-      let(:shared_runners_enabled) { true }
+    it { expect(project.any_active_runners?).to be_truthy }
 
-      before do
-        shared_runner
+    context 'with used pipeline minutes' do
+      let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
+      let(:project) do
+        create(:project,
+               namespace: namespace,
+               shared_runners_enabled: true)
       end
 
-      it 'has a shared runner' do
-        expect(project.any_active_runners?).to be_truthy
+      it 'does not have any active runners' do
+        expect(project.any_active_runners?).to be_falsey
+      end
+    end
+  end
+
+  describe '#any_online_runners?' do
+    let!(:shared_runner) { create(:ci_runner, :instance, :online) }
+
+    it { expect(project.any_online_runners?).to be_truthy }
+
+    context 'with used pipeline minutes' do
+      let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
+      let(:project) do
+        create(:project,
+               namespace: namespace,
+               shared_runners_enabled: true)
       end
 
-      it 'checks the presence of shared runner' do
-        expect(project.any_active_runners? { |runner| runner == shared_runner }).to be_truthy
-      end
-
-      context 'with used pipeline minutes' do
-        let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
-        let(:project) do
-          create(:project,
-            namespace: namespace,
-            shared_runners_enabled: shared_runners_enabled)
-        end
-
-        it 'does not have a shared runner' do
-          expect(project.any_active_runners?).to be_falsey
-        end
+      it 'does not have any online runners' do
+        expect(project.any_online_runners?).to be_falsey
       end
     end
   end
@@ -1165,6 +1180,7 @@ RSpec.describe Project do
   describe '#shared_runners_limit_namespace' do
     let_it_be(:root_ancestor) { create(:group) }
     let_it_be(:group) { create(:group, parent: root_ancestor) }
+
     let(:project) { create(:project, namespace: group) }
 
     subject { project.shared_runners_limit_namespace }
@@ -1327,6 +1343,7 @@ RSpec.describe Project do
 
   describe '#visible_user_defined_inapplicable_rules' do
     let_it_be(:project) { create(:project) }
+
     let!(:rule) { create(:approval_project_rule, project: project) }
     let!(:another_rule) { create(:approval_project_rule, project: project) }
 
@@ -1916,6 +1933,7 @@ RSpec.describe Project do
 
     context 'Geo repository update events' do
       let_it_be(:import_state) { create(:import_state, :started, project: project) }
+
       let(:repository_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
       let(:wiki_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
       let(:design_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
@@ -2699,7 +2717,7 @@ RSpec.describe Project do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: licensed?)
         stub_application_setting(deletion_adjourned_period: adjourned_period)
-        allow(group).to receive(:delayed_project_removal?).and_return(feature_enabled_on_group?)
+        allow(group.namespace_settings).to receive(:delayed_project_removal?).and_return(feature_enabled_on_group?)
       end
 
       it { is_expected.to be result }

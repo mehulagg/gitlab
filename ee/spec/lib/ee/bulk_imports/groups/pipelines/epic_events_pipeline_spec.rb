@@ -171,7 +171,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicEventsPipeline do
 
     page_info = {
       'has_next_page' => has_next_page,
-      'end_cursor' => has_next_page ? 'cursor' : nil
+      'next_page' => has_next_page ? 'cursor' : nil
     }
 
     BulkImports::Pipeline::ExtractedData.new(

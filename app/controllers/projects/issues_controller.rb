@@ -18,7 +18,7 @@ class Projects::IssuesController < Projects::ApplicationController
   prepend_before_action :authenticate_user!, only: [:new, :export_csv]
   prepend_before_action :store_uri, only: [:new, :show, :designs]
 
-  before_action :disable_query_limiting, only: [:create, :create_merge_request, :move, :bulk_update]
+  before_action :disable_query_limiting, only: [:create_merge_request, :move, :bulk_update]
   before_action :check_issues_available!
   before_action :issue, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
   after_action :log_issue_show, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
@@ -45,6 +45,7 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:vue_issuables_list, project)
     push_frontend_feature_flag(:usage_data_design_action, project, default_enabled: true)
     push_frontend_feature_flag(:improved_emoji_picker, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:vue_issues_list, project)
   end
 
   before_action only: :show do
@@ -356,10 +357,10 @@ class Projects::IssuesController < Projects::ApplicationController
   def disable_query_limiting
     # Also see the following issues:
     #
-    # 1. https://gitlab.com/gitlab-org/gitlab-foss/issues/42423
-    # 2. https://gitlab.com/gitlab-org/gitlab-foss/issues/42424
-    # 3. https://gitlab.com/gitlab-org/gitlab-foss/issues/42426
-    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab-foss/issues/42422')
+    # 1. https://gitlab.com/gitlab-org/gitlab/-/issues/20815
+    # 2. https://gitlab.com/gitlab-org/gitlab/-/issues/20816
+    # 3. https://gitlab.com/gitlab-org/gitlab/-/issues/21068
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20814')
   end
 
   private

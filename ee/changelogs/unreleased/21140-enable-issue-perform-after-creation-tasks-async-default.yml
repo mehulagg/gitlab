@@ -1,0 +1,5 @@
+---
+title: Set issue_perform_after_creation_tasks_async feature flag to default
+merge_request: 59040
+author:
+type: added

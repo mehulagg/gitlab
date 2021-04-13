@@ -27,8 +27,8 @@ RSpec.describe API::Epics do
         end
 
         it 'returns 404 not found error for a user without permissions to see the group' do
-          project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-          group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+          project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+          group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
           get api(url, user), params: params
 
@@ -378,7 +378,7 @@ RSpec.describe API::Epics do
           let(:parent_group) { create(:group) }
 
           before do
-            group.update(parent_id: parent_group.id)
+            group.update!(parent_id: parent_group.id)
           end
 
           it 'exposes full reference path' do

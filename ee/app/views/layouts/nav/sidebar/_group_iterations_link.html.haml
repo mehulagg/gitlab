@@ -1,5 +1,5 @@
 - if group_sidebar_link?(:iterations)
-  = nav_link(path: 'iterations#index') do
+  = nav_link(path: iterations_sub_menu_controllers) do
     = link_to group_iterations_path(@group), data: { qa_selector: 'group_iterations_link' } do
       %span
         = _('Iterations')

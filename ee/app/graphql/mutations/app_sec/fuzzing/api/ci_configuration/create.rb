@@ -53,8 +53,6 @@ module Mutations
             def resolve(args)
               project = authorized_find!(args[:project_path])
 
-              raise_feature_off_error unless feature_enabled?(project)
-
               create_service = ::AppSec::Fuzzing::Api::CiConfigurationCreateService.new(
                 container: project, current_user: current_user, params: args
               )
@@ -71,10 +69,6 @@ module Mutations
             def raise_feature_off_error
               raise ::Gitlab::Graphql::Errors::ResourceNotAvailable,
                 'The API fuzzing CI configuration feature is off'
-            end
-
-            def feature_enabled?(project)
-              Feature.enabled?(:api_fuzzing_configuration_ui, project, default_enabled: :yaml)
             end
           end
         end

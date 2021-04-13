@@ -32,6 +32,12 @@ module Types
             OncallRotationType.connection_type,
             null: false,
             description: 'On-call rotations for the on-call schedule.'
+
+      field :rotation,
+            OncallRotationType,
+            null: true,
+            description: 'On-call rotation for the on-call schedule.',
+            resolver: ::Resolvers::IncidentManagement::OncallRotationsResolver.single
     end
   end
 end

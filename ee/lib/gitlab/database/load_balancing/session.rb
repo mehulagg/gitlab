@@ -55,22 +55,27 @@ module Gitlab
           @ignore_writes = false
         end
 
-        # Indicate that all the SQL statements from anywhere inside this block
-        # should use a replica. This is a weak enforcement. The queries
-        # prioritize using a primary over a replica in those cases:
+        # Indicate that the ambiguous SQL statements from anywhere inside this
+        # block should use a replica. The ambiguous statements include:
+        # - Transactions.
+        # - Custom queries (via exec_query, execute, etc.)
+        # - In-flight connection configuration change (SET LOCAL statement_timeout = 5000)
+        #
+        # This is a weak enforcement. This helper incorporates well with
+        # primary stickiness:
         # - If the queries are about to write
         # - The current session already performed writes
         # - It prefers to use primary, aka, use_primary or use_primary! were called
-        def use_replica_if_possible(&blk)
-          used_replica = @use_replica
-          @use_replica = true
+        def fallback_to_replicas_for_ambiguous_queries(&blk)
+          previous_flag = @fallback_to_replicas_for_ambiguous_queries
+          @fallback_to_replicas_for_ambiguous_queries = true
           yield
         ensure
-          @use_replica = used_replica
+          @fallback_to_replicas_for_ambiguous_queries = previous_flag
         end
 
-        def use_replica?
-          @use_replica == true && !use_primary? && !performed_write?
+        def fallback_to_replicas_for_ambiguous_queries?
+          @fallback_to_replicas_for_ambiguous_queries == true && !use_primary? && !performed_write?
         end
 
         def write!

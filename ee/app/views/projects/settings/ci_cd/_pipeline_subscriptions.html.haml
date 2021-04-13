@@ -2,7 +2,7 @@
 
 - expanded = expanded_by_default?
 
-%section.settings.no-animate#pipeline-subscriptions{ class: ('expanded' if expanded) }
+%section.settings.no-animate#pipeline-subscriptions{ class: ('expanded' if expanded), data: { qa_selector: 'pipeline_subscriptions_setting_content' } }
   .settings-header
     %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
       = _("Pipeline subscriptions")

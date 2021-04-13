@@ -6,6 +6,7 @@ RSpec.describe 'shared/billings/_trial_status.html.haml' do
   include ApplicationHelper
 
   let_it_be(:group) { create(:group) }
+
   let(:plan) { nil }
   let(:trial_ends_on) { nil }
   let(:trial) { false }

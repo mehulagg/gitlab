@@ -8,6 +8,7 @@ import { calculateSwimlanesBufferSize } from 'ee/boards/boards_util';
 import EpicLane from 'ee/boards/components/epic_lane.vue';
 import EpicsSwimlanes from 'ee/boards/components/epics_swimlanes.vue';
 import IssueLaneList from 'ee/boards/components/issues_lane_list.vue';
+import SwimlanesLoadingSkeleton from 'ee/boards/components/swimlanes_loading_skeleton.vue';
 import { EPIC_LANE_BASE_HEIGHT } from 'ee/boards/constants';
 import getters from 'ee/boards/stores/getters';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
@@ -19,7 +20,12 @@ jest.mock('ee/boards/boards_util');
 describe('EpicsSwimlanes', () => {
   let wrapper;
 
-  const createStore = () => {
+  const fetchItemsForListSpy = jest.fn();
+
+  const createStore = ({
+    epicLanesFetchInProgress = false,
+    listItemsFetchInProgress = false,
+  } = {}) => {
     return new Vuex.Store({
       state: {
         epics: mockEpics,
@@ -37,13 +43,25 @@ describe('EpicsSwimlanes', () => {
             unassignedIssuesCount: 1,
           },
         },
+        epicsSwimlanesFetchInProgress: {
+          epicLanesFetchInProgress,
+          listItemsFetchInProgress,
+        },
       },
       getters,
+      actions: {
+        fetchItemsForList: fetchItemsForListSpy,
+      },
     });
   };
 
-  const createComponent = ({ canAdminList = false, swimlanesBufferedRendering = false } = {}) => {
-    const store = createStore();
+  const createComponent = ({
+    canAdminList = false,
+    swimlanesBufferedRendering = false,
+    epicLanesFetchInProgress = false,
+    listItemsFetchInProgress = false,
+  } = {}) => {
+    const store = createStore({ epicLanesFetchInProgress, listItemsFetchInProgress });
     const defaultProps = {
       lists: mockLists,
       disabled: false,
@@ -60,6 +78,11 @@ describe('EpicsSwimlanes', () => {
 
   afterEach(() => {
     wrapper.destroy();
+  });
+
+  it('calls fetchItemsForList on mounted', () => {
+    createComponent();
+    expect(fetchItemsForListSpy).toHaveBeenCalled();
   });
 
   describe('computed', () => {
@@ -119,6 +142,23 @@ describe('EpicsSwimlanes', () => {
         wrapper.findAll('[data-testid="board-header-container"]').at(0).classes(),
       ).not.toContain('is-draggable');
     });
+  });
+
+  describe('Loading skeleton', () => {
+    it.each`
+      epicLanesFetchInProgress | listItemsFetchInProgress | expected
+      ${true}                  | ${true}                  | ${true}
+      ${false}                 | ${true}                  | ${false}
+      ${true}                  | ${false}                 | ${false}
+      ${false}                 | ${false}                 | ${false}
+    `(
+      'loading is $expected when epicLanesFetchInProgress is $epicLanesFetchInProgress and listItemsFetchInProgress is $listItemsFetchInProgress',
+      ({ epicLanesFetchInProgress, listItemsFetchInProgress, expected }) => {
+        createComponent({ epicLanesFetchInProgress, listItemsFetchInProgress });
+
+        expect(wrapper.find(SwimlanesLoadingSkeleton).exists()).toBe(expected);
+      },
+    );
   });
 
   describe('when swimlanesBufferedRendering is true', () => {

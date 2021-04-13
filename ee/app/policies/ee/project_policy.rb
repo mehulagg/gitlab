@@ -61,7 +61,7 @@ module EE
       end
 
       condition(:custom_compliance_framework_available) do
-        ::Feature.enabled?(:ff_custom_compliance_frameworks)
+        ::Feature.enabled?(:ff_custom_compliance_frameworks, default_enabled: :yaml)
       end
 
       with_scope :subject
@@ -423,14 +423,13 @@ module EE
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
-    override :resource_access_token_available?
-    def resource_access_token_available?
-      return true unless ::Gitlab.com?
+    override :resource_access_token_feature_available?
+    def resource_access_token_feature_available?
+      return super unless ::Gitlab.com?
 
-      group = project.namespace
+      namespace = project.namespace
 
-      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
-        group.feature_available_non_trial?(:resource_access_token)
+      namespace.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

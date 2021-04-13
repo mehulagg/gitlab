@@ -1,0 +1,5 @@
+---
+title: Remove key parameter check when validating actor in personal access token API
+merge_request: 57675
+author:
+type: fixed

@@ -8,6 +8,7 @@ RSpec.describe IncidentManagement::OncallSchedulesFinder do
   let_it_be(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
   let_it_be(:another_oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
   let_it_be(:oncall_schedule_from_another_project) { create(:incident_management_oncall_schedule) }
+
   let(:params) { {} }
 
   describe '#execute' do

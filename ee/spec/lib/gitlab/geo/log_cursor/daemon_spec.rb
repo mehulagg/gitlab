@@ -8,6 +8,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state 
 
   let_it_be(:primary, reload: true) { create(:geo_node, :primary) }
   let_it_be(:secondary, reload: true) { create(:geo_node) }
+
   let(:options) { {} }
 
   subject(:daemon) { described_class.new(options) }

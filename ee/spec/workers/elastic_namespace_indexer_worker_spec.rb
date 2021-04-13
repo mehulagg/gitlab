@@ -34,6 +34,7 @@ RSpec.describe ElasticNamespaceIndexerWorker do
 
     describe 'indexing and deleting' do
       let_it_be(:namespace) { create :namespace }
+
       let(:projects) { create_list :project, 3, namespace: namespace }
 
       it 'indexes all projects belonging to the namespace' do

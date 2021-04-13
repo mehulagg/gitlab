@@ -28,6 +28,7 @@ namespace :admin do
 
   resource :license, only: [:show, :new, :create, :destroy] do
     get :download, on: :member
+    post :sync_seat_link, on: :collection
 
     resource :usage_export, controller: 'licenses/usage_exports', only: [:show]
   end

@@ -6,6 +6,8 @@ class GitlabSubscription < ApplicationRecord
 
   EOA_ROLLOUT_DATE = '2021-01-26'
 
+  enum trial_extension_type: { extended: 1, reactivated: 2 }
+
   default_value_for(:start_date) { Date.today }
   before_update :log_previous_state_for_update
   after_commit :index_namespace, on: [:create, :update]
@@ -105,6 +107,10 @@ class GitlabSubscription < ApplicationRecord
     return super if has_a_paid_hosted_plan?
 
     seats_in_use_now
+  end
+
+  def trial_extended_or_reactivated?
+    trial_extension_type.present?
   end
 
   def trial_days_remaining

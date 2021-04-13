@@ -12,7 +12,7 @@ module Registrations
     end
 
     def create
-      result = Members::CreateService.new(current_user, invite_params).execute(group)
+      result = Members::CreateService.new(current_user, invite_params).execute
 
       if result[:status] == :success
         experiment(:registrations_group_invite, actor: current_user)
@@ -37,6 +37,7 @@ module Registrations
 
     def invite_params
       {
+        source: group,
         user_ids: emails_param[:emails]&.reject(&:blank?)&.join(','),
         access_level: Gitlab::Access::DEVELOPER
       }

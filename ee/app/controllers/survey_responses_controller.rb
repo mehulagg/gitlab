@@ -26,7 +26,9 @@ class SurveyResponsesController < ApplicationController
       response: params[:response]
     }.compact
 
-    ::Gitlab::Tracking.self_describing_event(SURVEY_RESPONSE_SCHEMA_URL, data: data)
+    context = SnowplowTracker::SelfDescribingJson.new(SURVEY_RESPONSE_SCHEMA_URL, data)
+
+    ::Gitlab::Tracking.event(self.class.name, 'submit_response', context: [context])
   end
 
   def to_number(param)

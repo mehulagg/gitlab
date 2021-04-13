@@ -128,13 +128,13 @@ module EE
               ::Types::IncidentManagement::OncallScheduleType.connection_type,
               null: true,
               description: 'Incident Management On-call schedules of the project.',
+              extras: [:lookahead],
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
 
         field :api_fuzzing_ci_configuration,
               ::Types::AppSec::Fuzzing::Api::CiConfigurationType,
               null: true,
-              description: 'API fuzzing configuration for the project. '\
-                           'Null unless feature flag `api_fuzzing_configuration_ui` is enabled.'
+              description: 'API fuzzing configuration for the project. '
 
         field :push_rules,
               ::Types::PushRulesType,
@@ -144,8 +144,7 @@ module EE
       end
 
       def api_fuzzing_ci_configuration
-        return unless ::Feature.enabled?(:api_fuzzing_configuration_ui, object, default_enabled: :yaml) && \
-                      Ability.allowed?(current_user, :read_vulnerability, object)
+        return unless Ability.allowed?(current_user, :read_vulnerability, object)
 
         configuration = ::AppSec::Fuzzing::Api::CiConfiguration.new(project: object)
 

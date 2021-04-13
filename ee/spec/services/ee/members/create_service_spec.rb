@@ -12,7 +12,7 @@ RSpec.describe Members::CreateService do
 
   let(:params) { { user_ids: project_users.map(&:id).join(','), access_level: Gitlab::Access::GUEST } }
 
-  subject { described_class.new(user, params).execute(project) }
+  subject { described_class.new(user, params.merge({ source: project })).execute }
 
   before_all do
     project.add_maintainer(user)

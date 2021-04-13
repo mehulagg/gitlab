@@ -285,10 +285,7 @@ module EE
       end
 
       def related_issues(ids: nil, preload: nil)
-        items = ::Issue.select('issues.*, epic_issues.id as epic_issue_id, epic_issues.relative_position, epic_issues.epic_id as epic_id')
-          .joins(:epic_issue)
-          .preload(preload)
-          .order('epic_issues.relative_position, epic_issues.id')
+        items = ::Issue.preload(preload).sorted_by_epic_position
 
         return items unless ids
 

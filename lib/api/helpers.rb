@@ -544,17 +544,6 @@ module API
       end
     end
 
-    def track_event(action = action_name, **args)
-      category = args.delete(:category) || self.options[:for].name
-      raise "invalid category" unless category
-
-      ::Gitlab::Tracking.event(category, action.to_s, **args)
-    rescue => error
-      Gitlab::AppLogger.warn(
-        "Tracking event failed for action: #{action}, category: #{category}, message: #{error.message}"
-      )
-    end
-
     def increment_counter(event_name)
       feature_name = "usage_data_#{event_name}"
       return unless Feature.enabled?(feature_name)
@@ -568,10 +557,6 @@ module API
     # @param values [Array|String] the values counted
     def increment_unique_values(event_name, values)
       return unless values.present?
-
-      feature_flag = "usage_data_#{event_name}"
-
-      return unless Feature.enabled?(feature_flag, default_enabled: true)
 
       Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: values)
     rescue => error

@@ -22,6 +22,12 @@ export default {
     finishedTime() {
       return this.pipeline?.details?.finished_at;
     },
+    skipped() {
+      return this.pipeline?.details?.status?.label === 'skipped';
+    },
+    stuck() {
+      return this.pipeline.flags.stuck;
+    },
     durationFormatted() {
       const date = new Date(this.duration * 1000);
 
@@ -48,16 +54,11 @@ export default {
     legacyTableMobileClass() {
       return !this.glFeatures.newPipelinesTable ? 'table-mobile-content' : '';
     },
-    singleStagePipelineManual() {
-      return (
-        this.pipeline.details.manual_actions.length > 0 && this.pipeline.details.stages.length === 1
-      );
-    },
     showInProgress() {
-      return !this.duration && !this.finishedTime && !this.singleStagePipelineManual;
+      return !this.duration && !this.finishedTime && !this.skipped;
     },
     showSkipped() {
-      return !this.duration && !this.finishedTime && this.singleStagePipelineManual;
+      return !this.duration && !this.finishedTime && this.skipped;
     },
   },
 };
@@ -69,7 +70,20 @@ export default {
     </div>
     <div :class="legacyTableMobileClass">
       <span v-if="showInProgress" data-testid="pipeline-in-progress">
-        <gl-icon name="hourglass" class="gl-vertical-align-baseline! gl-mr-2" :size="12" />
+        <gl-icon
+          v-if="stuck"
+          name="warning"
+          class="gl-mr-2"
+          :size="12"
+          data-testid="warning-icon"
+        />
+        <gl-icon
+          v-else
+          name="hourglass"
+          class="gl-vertical-align-baseline! gl-mr-2"
+          :size="12"
+          data-testid="hourglass-icon"
+        />
         {{ s__('Pipeline|In progress') }}
       </span>
 

@@ -1,53 +1,42 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { propsUnion } from '~/vue_shared/components/lib/utils/props_utils';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import {
+  REPORT_TYPE_DAST_PROFILES,
+  REPORT_TYPE_DEPENDENCY_SCANNING,
+  REPORT_TYPE_SECRET_DETECTION,
+} from '~/vue_shared/security_reports/constants';
+import ManageDastProfiles from './manage_dast_profiles.vue';
+import ManageGeneric from './manage_generic.vue';
+import ManageViaMr from './manage_via_mr.vue';
+
+const scannerComponentMap = {
+  [REPORT_TYPE_DAST_PROFILES]: ManageDastProfiles,
+  [REPORT_TYPE_DEPENDENCY_SCANNING]: ManageViaMr,
+  [REPORT_TYPE_SECRET_DETECTION]: ManageViaMr,
+};
 
 export default {
-  components: {
-    GlButton,
-  },
-  props: {
-    feature: {
-      type: Object,
-      required: true,
-    },
-    autoDevopsEnabled: {
-      type: Boolean,
-      required: true,
-    },
-  },
+  mixins: [glFeatureFlagMixin()],
+  props: propsUnion([ManageGeneric, ...Object.values(scannerComponentMap)]),
   computed: {
-    canConfigureFeature() {
-      return Boolean(this.feature.configuration_path);
+    filteredScannerComponentMap() {
+      const scannerComponentMapCopy = { ...scannerComponentMap };
+      if (!this.glFeatures.secDependencyScanningUiEnable) {
+        delete scannerComponentMapCopy[REPORT_TYPE_DEPENDENCY_SCANNING];
+      }
+      if (!this.glFeatures.secSecretDetectionUiEnable) {
+        delete scannerComponentMapCopy[REPORT_TYPE_SECRET_DETECTION];
+      }
+      return scannerComponentMapCopy;
     },
-    canManageProfiles() {
-      return this.feature.type === 'dast_profiles';
+    manageComponent() {
+      return this.filteredScannerComponentMap[this.feature.type] ?? ManageGeneric;
     },
   },
 };
 </script>
 
 <template>
-  <gl-button
-    v-if="canManageProfiles"
-    :href="feature.configuration_path"
-    data-testid="manageButton"
-    >{{ s__('SecurityConfiguration|Manage') }}</gl-button
-  >
-
-  <gl-button
-    v-else-if="canConfigureFeature && feature.configured"
-    :href="feature.configuration_path"
-    data-testid="configureButton"
-    >{{ s__('SecurityConfiguration|Configure') }}</gl-button
-  >
-
-  <gl-button
-    v-else-if="canConfigureFeature"
-    variant="success"
-    category="primary"
-    :href="feature.configuration_path"
-    data-testid="enableButton"
-    :data-qa-selector="`${feature.type}_enable_button`"
-    >{{ s__('SecurityConfiguration|Enable') }}</gl-button
-  >
+  <component :is="manageComponent" v-bind="$props" @error="$emit('error', $event)" />
 </template>

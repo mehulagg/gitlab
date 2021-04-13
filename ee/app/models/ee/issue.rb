@@ -30,6 +30,7 @@ module EE
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
       scope :not_in_epics, ->(epics) { left_outer_joins(:epic_issue).where('epic_issues.epic_id NOT IN (?) OR epic_issues.epic_id IS NULL', epics) }
+      scope :sorted_by_epic_position, -> { joins(:epic_issue).select('issues.*, epic_issues.id as epic_issue_id, epic_issues.relative_position, epic_issues.epic_id as epic_id').order('epic_issues.relative_position, epic_issues.id') }
       scope :no_iteration, -> { where(sprint_id: nil) }
       scope :any_iteration, -> { where.not(sprint_id: nil) }
       scope :in_iterations, ->(iterations) { where(sprint_id: iterations) }
@@ -112,25 +113,6 @@ module EE
         ::IssuesFinder.new(user).execute.where(id: blocking_issues_ids)
 
       issues.preload(project: [:route, { namespace: [:route] }])
-    end
-
-    # override
-    def subscribed_without_subscriptions?(user, *)
-      # TODO: this really shouldn't be necessary, because the support
-      # bot should be a participant (which is what the superclass
-      # method checks for). However, the support bot gets filtered out
-      # at the end of Participable#raw_participants as not being able
-      # to read the project. Overriding *that* behavior is problematic
-      # because it doesn't use the Policy framework, and instead uses a
-      # custom-coded Ability.users_that_can_read_project, which is...
-      # a pain to override in EE. So... here we say, the support bot
-      # is subscribed by default, until an unsubscribed record appears,
-      # even though it's not *technically* a participant in this issue.
-
-      # Making the support bot subscribed to every issue is not as bad as it
-      # seems, though, since it isn't permitted to :receive_notifications,
-      # and doesn't actually show up in the participants list.
-      user.bot? || super
     end
 
     # override

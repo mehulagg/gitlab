@@ -43,6 +43,7 @@ export default () => {
 
   return new Vue({
     el,
+    apolloProvider: {},
     store: createStore(),
     components: {
       roadmapApp,

@@ -11,7 +11,6 @@ module Gitlab
       LOCK_SLEEP = 0.001.seconds
       WATCH_FLAG_TTL = 10.seconds
 
-      LEGACY_UPDATE_FREQUENCY_DEFAULT = 30.seconds
       UPDATE_FREQUENCY_DEFAULT = 60.seconds
       UPDATE_FREQUENCY_WHEN_BEING_WATCHED = 3.seconds
 
@@ -94,6 +93,10 @@ module Gitlab
         end
       end
 
+      def erase_trace_chunks!
+        job.trace_chunks.fast_destroy_all # Destroy chunks of a live trace
+      end
+
       def erase!
         ##
         # Erase the archived trace
@@ -101,7 +104,7 @@ module Gitlab
 
         ##
         # Erase the live trace
-        job.trace_chunks.fast_destroy_all # Destroy chunks of a live trace
+        erase_trace_chunks!
         FileUtils.rm_f(current_path) if current_path # Remove a trace file of a live trace
         job.erase_old_trace! if job.has_old_trace? # Remove a trace in database of a live trace
       ensure
@@ -118,11 +121,7 @@ module Gitlab
         if being_watched?
           UPDATE_FREQUENCY_WHEN_BEING_WATCHED
         else
-          if Feature.enabled?(:ci_lower_frequency_trace_update, job.project, default_enabled: :yaml)
-            UPDATE_FREQUENCY_DEFAULT
-          else
-            LEGACY_UPDATE_FREQUENCY_DEFAULT
-          end
+          UPDATE_FREQUENCY_DEFAULT
         end
       end
 
@@ -185,8 +184,13 @@ module Gitlab
       end
 
       def unsafe_archive!
-        raise AlreadyArchivedError, 'Could not archive again' if trace_artifact
         raise ArchiveError, 'Job is not finished yet' unless job.complete?
+
+        if trace_artifact
+          unsafe_trace_cleanup! if Feature.enabled?(:erase_traces_from_already_archived_jobs_when_archiving_again, job.project, default_enabled: :yaml)
+
+          raise AlreadyArchivedError, 'Could not archive again'
+        end
 
         if job.trace_chunks.any?
           Gitlab::Ci::Trace::ChunkedIO.new(job) do |stream|
@@ -203,6 +207,18 @@ module Gitlab
             archive_stream!(stream)
             job.erase_old_trace!
           end
+        end
+      end
+
+      def unsafe_trace_cleanup!
+        return unless trace_artifact
+
+        if trace_artifact.archived_trace_exists?
+          # An archive already exists, so make sure to remove the trace chunks
+          erase_trace_chunks!
+        else
+          # An archive already exists, but its associated file does not, so remove it
+          trace_artifact.destroy!
         end
       end
 

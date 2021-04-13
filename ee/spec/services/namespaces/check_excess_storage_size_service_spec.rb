@@ -172,7 +172,7 @@ RSpec.describe Namespaces::CheckExcessStorageSizeService, '#execute' do
 
         it 'returns message to have reached the free storage limit' do
           expect(response).to include("You have reached the free storage limit of 10 GB")
-          expect(response).to include("#{locked_project_count} projects")
+          expect(response).to include("one or more projects")
         end
       end
     end

@@ -63,7 +63,7 @@ RSpec.describe 'User searches project settings', :js do
       visit project_settings_operations_path(project)
     end
 
-    it_behaves_like 'can search settings', 'Alerts', 'Error tracking'
+    it_behaves_like 'can search settings', 'Alert integrations', 'Error tracking'
   end
 
   context 'in Pages page' do
@@ -73,6 +73,6 @@ RSpec.describe 'User searches project settings', :js do
       visit project_pages_path(project)
     end
 
-    it_behaves_like 'can highlight results', 'static websites'
+    it_behaves_like 'can highlight results', 'static website'
   end
 end

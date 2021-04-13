@@ -1,6 +1,6 @@
 import Api from 'ee/api';
 import epicChildren from 'shared_queries/epic/epic_children.query.graphql';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -75,7 +75,9 @@ export const setIssuePageInfo = ({ commit }, data) => commit(types.SET_ISSUE_PAG
 export const requestItems = ({ commit }, data) => commit(types.REQUEST_ITEMS, data);
 export const receiveItemsSuccess = ({ commit }, data) => commit(types.RECEIVE_ITEMS_SUCCESS, data);
 export const receiveItemsFailure = ({ commit }, data) => {
-  flash(s__('Epics|Something went wrong while fetching child epics.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while fetching child epics.'),
+  });
   commit(types.RECEIVE_ITEMS_FAILURE, data);
 };
 export const fetchItems = ({ dispatch }, { parentItem, isSubItem = false }) => {
@@ -135,7 +137,9 @@ export const fetchItems = ({ dispatch }, { parentItem, isSubItem = false }) => {
 };
 
 export const receiveNextPageItemsFailure = () => {
-  flash(s__('Epics|Something went wrong while fetching child epics.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while fetching child epics.'),
+  });
 };
 export const fetchNextPageItems = ({ dispatch, state }, { parentItem, isSubItem = false }) => {
   const { iid, fullPath } = parentItem;
@@ -224,11 +228,12 @@ export const receiveRemoveItemSuccess = ({ commit }, data) =>
 export const receiveRemoveItemFailure = ({ commit }, { item, status }) => {
   commit(types.RECEIVE_REMOVE_ITEM_FAILURE, item);
   const issuableType = issuableTypesMap[item.type.toUpperCase()];
-  flash(
-    status === httpStatusCodes.NOT_FOUND
-      ? pathIndeterminateErrorMap[issuableType]
-      : relatedIssuesRemoveErrorMap[issuableType],
-  );
+  createFlash({
+    message:
+      status === httpStatusCodes.NOT_FOUND
+        ? pathIndeterminateErrorMap[issuableType]
+        : relatedIssuesRemoveErrorMap[issuableType],
+  });
 };
 export const removeItem = ({ dispatch }, { parentItem, item }) => {
   dispatch('requestRemoveItem', {
@@ -383,7 +388,9 @@ export const receiveCreateItemSuccess = ({ state, commit, dispatch, getters }, {
 };
 export const receiveCreateItemFailure = ({ commit }) => {
   commit(types.RECEIVE_CREATE_ITEM_FAILURE);
-  flash(s__('Epics|Something went wrong while creating child epics.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while creating child epics.'),
+  });
 };
 export const createItem = ({ state, dispatch }, { itemTitle, groupFullPath }) => {
   dispatch('requestCreateItem');
@@ -415,7 +422,9 @@ export const createItem = ({ state, dispatch }, { itemTitle, groupFullPath }) =>
 
 export const receiveReorderItemFailure = ({ commit }, data) => {
   commit(types.REORDER_ITEM, data);
-  flash(s__('Epics|Something went wrong while ordering item.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while ordering item.'),
+  });
 };
 export const reorderItem = (
   { dispatch, commit },
@@ -460,7 +469,9 @@ export const reorderItem = (
 
 export const receiveMoveItemFailure = ({ commit }, data) => {
   commit(types.MOVE_ITEM_FAILURE, data);
-  flash(s__('Epics|Something went wrong while moving item.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while moving item.'),
+  });
 };
 
 export const moveItem = (
@@ -540,7 +551,9 @@ export const receiveCreateIssueSuccess = ({ commit }) =>
   commit(types.RECEIVE_CREATE_ITEM_SUCCESS, { insertAt: 0, items: [] });
 export const receiveCreateIssueFailure = ({ commit }) => {
   commit(types.RECEIVE_CREATE_ITEM_FAILURE);
-  flash(s__('Epics|Something went wrong while creating issue.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while creating issue.'),
+  });
 };
 export const createNewIssue = ({ state, dispatch }, { issuesEndpoint, title }) => {
   const { parentItem } = state;
@@ -568,7 +581,9 @@ export const receiveProjectsSuccess = ({ commit }, data) =>
   commit(types.RECIEVE_PROJECTS_SUCCESS, data);
 export const receiveProjectsFailure = ({ commit }) => {
   commit(types.RECIEVE_PROJECTS_FAILURE);
-  flash(__('Something went wrong while fetching projects.'));
+  createFlash({
+    message: __('Something went wrong while fetching projects.'),
+  });
 };
 export const fetchProjects = ({ state, dispatch }, searchKey = '') => {
   const params = {

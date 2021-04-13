@@ -93,10 +93,13 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
          [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-23 00:00:00 UTC']]
 
       context 'with shift active period times set' do
+        let(:active_period_start) { "08:00" }
+        let(:active_period_end) { "17:00" }
+
         before do
           rotation.update!(
-            active_period_start: "08:00",
-            active_period_end: "17:00"
+            active_period_start: active_period_start,
+            active_period_end: active_period_end
           )
         end
 
@@ -164,6 +167,28 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
              [:participant2, '2020-12-15 08:00:00 UTC', '2020-12-15 17:00:00 UTC'],
              [:participant2, '2020-12-16 08:00:00 UTC', '2020-12-16 17:00:00 UTC'],
              [:participant2, '2020-12-17 08:00:00 UTC', '2020-12-17 17:00:00 UTC']]
+        end
+
+        context 'active period is overnight' do
+          let(:active_period_start) { "17:00" }
+          let(:active_period_end) { "08:00" }
+
+          it 'splits the shifts daily by each active period' do
+            expect(shifts.count).to eq (ends_at.to_date - starts_at.to_date).to_i
+          end
+
+          it_behaves_like 'unsaved shifts',
+          '5 shifts for each participant with overnight shifts',
+          [[:participant1, '2020-12-08 17:00:00 UTC', '2020-12-09 08:00:00 UTC'],
+           [:participant1, '2020-12-09 17:00:00 UTC', '2020-12-10 08:00:00 UTC'],
+           [:participant1, '2020-12-10 17:00:00 UTC', '2020-12-11 08:00:00 UTC'],
+           [:participant1, '2020-12-11 17:00:00 UTC', '2020-12-12 08:00:00 UTC'],
+           [:participant1, '2020-12-12 17:00:00 UTC', '2020-12-13 08:00:00 UTC'],
+           [:participant2, '2020-12-13 17:00:00 UTC', '2020-12-14 08:00:00 UTC'],
+           [:participant2, '2020-12-14 17:00:00 UTC', '2020-12-15 08:00:00 UTC'],
+           [:participant2, '2020-12-15 17:00:00 UTC', '2020-12-16 08:00:00 UTC'],
+           [:participant2, '2020-12-16 17:00:00 UTC', '2020-12-17 08:00:00 UTC'],
+           [:participant2, '2020-12-17 17:00:00 UTC', '2020-12-18 08:00:00 UTC']]
         end
       end
 

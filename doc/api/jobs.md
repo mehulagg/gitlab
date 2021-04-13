@@ -295,7 +295,8 @@ In GitLab 13.3 and later, this endpoint [returns data for any pipeline](pipeline
 including [child pipelines](../ci/parent_child_pipelines.md).
 
 In GitLab 13.5 and later, this endpoint does not return retried jobs in the response
-by default.
+by default. Additionally, jobs are sorted by ID in descending order (newest first).
+In earlier GitLab versions, jobs are sorted by ID in ascending order (oldest first).
 
 In GitLab 13.9 and later, this endpoint can include retried jobs in the response
 with `include_retried` set to `true`.
@@ -386,6 +387,8 @@ Example of response
 ```
 
 ## Get job token's job
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51727) in GitLab 13.10.
 
 Retrieve the job that generated a job token.
 

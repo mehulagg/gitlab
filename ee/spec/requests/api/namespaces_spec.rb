@@ -290,7 +290,8 @@ RSpec.describe API::Namespaces do
           auto_renew: true,
           trial: true,
           trial_ends_on: '2019-05-01',
-          trial_starts_on: '2019-06-01'
+          trial_starts_on: '2019-06-01',
+          trial_extension_type: GitlabSubscription.trial_extension_types[:reactivated]
         }
       end
 
@@ -310,7 +311,8 @@ RSpec.describe API::Namespaces do
           auto_renew: true,
           trial: true,
           trial_starts_on: Date.parse(gitlab_subscription[:trial_starts_on]),
-          trial_ends_on: Date.parse(gitlab_subscription[:trial_ends_on])
+          trial_ends_on: Date.parse(gitlab_subscription[:trial_ends_on]),
+          trial_extension_type: 'reactivated'
         )
       end
 
@@ -531,6 +533,12 @@ RSpec.describe API::Namespaces do
             seats: 20,
             max_seats_used: 42
           )
+        end
+
+        it 'updates the timestamp when the attributes are the same' do
+          expect do
+            do_put(namespace.id, admin, gitlab_subscription.attributes)
+          end.to change { gitlab_subscription.reload.updated_at }
         end
       end
     end

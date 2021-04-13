@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Vulnerabilities::IssueLinkPolicy do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, namespace: user.namespace) }
+
   let(:vulnerability) { create(:vulnerability, project: project) }
   let(:issue) { create(:issue, project: project) }
   let(:vulnerability_issue_link) { build(:vulnerabilities_issue_link, vulnerability: vulnerability, issue: issue) }

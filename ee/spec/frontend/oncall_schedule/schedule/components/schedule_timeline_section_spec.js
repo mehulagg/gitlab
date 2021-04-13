@@ -21,6 +21,9 @@ describe('TimelineSectionComponent', () => {
         schedule,
         ...props,
       },
+      mocks: {
+        $apollo: { mutate: () => {} },
+      },
     });
   }
 

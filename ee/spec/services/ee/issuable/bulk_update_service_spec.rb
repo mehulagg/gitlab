@@ -31,6 +31,7 @@ RSpec.describe Issuable::BulkUpdateService do
   context 'with issues' do
     let_it_be(:type) { 'issue' }
     let_it_be(:parent) { group }
+
     let(:issue1) { create(:issue, project: project1, health_status: :at_risk) }
     let(:issue2) { create(:issue, project: project2, health_status: :at_risk) }
     let(:issuables) { [issue1, issue2] }

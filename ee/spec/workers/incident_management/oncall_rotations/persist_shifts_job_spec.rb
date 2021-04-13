@@ -140,6 +140,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
       context 'when current time is after a rotation has re-started after an edit' do
         let_it_be(:new_starts_at) { rotation.starts_at + 3 * rotation.shift_cycle_duration }
         let_it_be(:updated_at) { rotation.starts_at + rotation.shift_cycle_duration }
+
         let(:current_time) { 2.minutes.after(new_starts_at) }
 
         before do
@@ -200,6 +201,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
 
           context 'when rotation was previously ended but is now in progress' do
             let_it_be(:updated_at) { rotation.reload.starts_at + 3 * rotation.shift_cycle_duration }
+
             let(:current_time) { updated_at.change(hour: 8, min: 2) }
             let(:expected_shift_start) { updated_at.change(hour: existing_shift.starts_at.hour) }
             let(:expected_shift_end) { updated_at.change(hour: existing_shift.ends_at.hour) }

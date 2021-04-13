@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Analytics::CycleAnalytics::ValueStreams::CreateService do
   let_it_be(:user) { create(:user) }
   let_it_be(:group, refind: true) { create(:group) }
+
   let(:params) { {} }
 
   subject { described_class.new(group: group, params: params, current_user: user).execute }

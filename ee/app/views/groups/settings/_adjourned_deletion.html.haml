@@ -10,4 +10,4 @@
       %li= _("The group will be placed in 'pending removal' state")
       %li= _("The group can be fully restored")
 
-    = button_to _('Remove group'), '#', class: 'gl-button btn btn-danger js-confirm-danger', data: { 'confirm-danger-message' => remove_group_message(group) }
+    = render 'groups/settings/remove_button', group: group

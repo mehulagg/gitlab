@@ -23,13 +23,13 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['activeIssue', 'projectPathForActiveIssue']),
+    ...mapGetters(['activeBoardItem', 'projectPathForActiveIssue']),
     hasWeight() {
-      return this.activeIssue.weight > 0;
+      return this.activeBoardItem.weight > 0;
     },
   },
   watch: {
-    activeIssue: {
+    activeBoardItem: {
       handler(updatedIssue) {
         this.weight = updatedIssue.weight;
       },
@@ -45,7 +45,7 @@ export default {
     async setWeight(provided) {
       const weight = provided ?? this.weight;
 
-      if (this.loading || weight === this.activeIssue.weight) {
+      if (this.loading || weight === this.activeBoardItem.weight) {
         return;
       }
 
@@ -55,7 +55,7 @@ export default {
         await this.setActiveIssueWeight({ weight, projectPath: this.projectPathForActiveIssue });
         this.weight = weight;
       } catch (e) {
-        this.weight = this.activeIssue.weight;
+        this.weight = this.activeBoardItem.weight;
         createFlash({ message: __('An error occurred when updating the issue weight') });
       } finally {
         this.loading = false;
@@ -77,7 +77,7 @@ export default {
         <strong
           class="gl-text-gray-900 js-weight-weight-label-value"
           data-qa-selector="weight_label_value"
-          >{{ activeIssue.weight }}</strong
+          >{{ activeBoardItem.weight }}</strong
         >
         <span class="gl-mx-2">-</span>
         <gl-button

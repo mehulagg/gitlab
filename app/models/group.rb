@@ -86,7 +86,7 @@ class Group < Namespace
   validate :visibility_level_allowed_by_sub_groups
   validate :visibility_level_allowed_by_parent
   validate :two_factor_authentication_allowed
-  validates :variables, nested_attributes_duplicates: true
+  validates :variables, nested_attributes_duplicates: { scope: :environment_scope }
 
   validates :two_factor_grace_period, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
@@ -178,6 +178,25 @@ class Group < Namespace
 
       root = groups.first.root_ancestor
       groups.drop(1).each { |group| group.root_ancestor = root }
+    end
+
+    # Returns the ids of the passed group models where the `emails_disabled`
+    # column is set to true anywhere in the ancestor hierarchy.
+    def ids_with_disabled_email(groups)
+      innner_query = Gitlab::ObjectHierarchy
+        .new(Group.where('id = namespaces_with_emails_disabled.id'))
+        .base_and_ancestors
+        .where(emails_disabled: true)
+        .select('1')
+        .limit(1)
+
+      group_ids = Namespace
+        .from('(SELECT * FROM namespaces) as namespaces_with_emails_disabled')
+        .where(namespaces_with_emails_disabled: { id: groups })
+        .where('EXISTS (?)', innner_query)
+        .pluck(:id)
+
+      Set.new(group_ids)
     end
 
     private

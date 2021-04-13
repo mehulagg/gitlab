@@ -74,13 +74,23 @@ describe('EE approvals group settings module actions', () => {
       state = {
         settings: {
           preventAuthorApproval: false,
+          preventCommittersApproval: false,
+          preventMrApprovalRuleEdit: false,
+          requireUserPassword: false,
+          removeApprovalsOnPush: false,
         },
       };
     });
 
     describe('on success', () => {
       it('dispatches the request and updates payload', () => {
-        const data = { allow_author_approval: true };
+        const data = {
+          allow_author_approval: true,
+          allow_committer_approval: true,
+          allow_overrides_to_approver_list_per_merge_request: true,
+          require_password_to_approve: true,
+          retain_approvals_on_push: true,
+        };
         mock.onPut(approvalSettingsPath).replyOnce(httpStatus.OK, data);
 
         return testAction(

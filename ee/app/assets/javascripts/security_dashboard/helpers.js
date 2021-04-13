@@ -134,6 +134,6 @@ export const preparePageInfo = (pageInfo) => {
   return { ...pageInfo, hasNextPage: Boolean(pageInfo?.endCursor) };
 };
 
-export const createProjectLoadingError = () => __('An error occurred while retrieving projects.');
+export const PROJECT_LOADING_ERROR_MESSAGE = __('An error occurred while retrieving projects.');
 
 export default () => ({});

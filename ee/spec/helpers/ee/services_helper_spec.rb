@@ -3,9 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe EE::ServicesHelper do
+  include Devise::Test::ControllerHelpers
+
   let(:controller_class) do
     Class.new(ActionController::Base) do
       include EE::ServicesHelper
+      include ActionView::Helpers::AssetUrlHelper
 
       def slack_auth_project_settings_slack_url(project)
         "http://some-path/project/1"
@@ -109,6 +112,56 @@ RSpec.describe EE::ServicesHelper do
 
     it 'includes Jira issues show data' do
       is_expected.to include(:issues_show_path)
+    end
+  end
+
+  describe '#add_to_slack_data' do
+    let_it_be(:projects) { create_list(:project, 3) }
+
+    def relation
+      Project.id_in(projects.pluck(:id))
+    end
+
+    let(:request) do
+      double(:Request,
+             optional_port: nil,
+             path_parameters: {},
+             protocol: 'https',
+             routes: nil,
+             env: { 'warden' => warden },
+             engine_script_name: nil,
+             original_script_name: nil,
+             host: 'example.com')
+    end
+
+    before do
+      allow(subject).to receive(:request).and_return(request)
+    end
+
+    it 'includes the required keys' do
+      additions = Gitlab::Json.parse(subject.add_to_slack_data(relation))
+      expect(additions.keys).to match_array %w[
+        projects
+        sign_in_path
+        is_signed_in
+        slack_link_profile_slack_path
+        gitlab_for_slack_gif_path
+        gitlab_logo_path
+        slack_logo_path
+        docs_path
+      ]
+    end
+
+    it 'does not suffer from N+1 performance issues' do
+      baseline = ActiveRecord::QueryRecorder.new { subject.add_to_slack_data(relation.limit(1)) }
+
+      expect do
+        subject.add_to_slack_data(relation)
+      end.not_to exceed_query_limit(baseline)
+    end
+
+    it 'serializes nil projects without error' do
+      expect(subject.add_to_slack_data(nil)).to include('"projects":null')
     end
   end
 end

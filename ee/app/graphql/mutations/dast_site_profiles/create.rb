@@ -42,29 +42,35 @@ module Mutations
 
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, profile_name:, target_url: nil, excluded_urls: [], request_headers: nil, auth: nil)
+      def resolve(full_path:, profile_name:, target_url: nil, **params)
         project = authorized_find!(full_path)
 
-        service = ::DastSiteProfiles::CreateService.new(project, current_user)
-        result = service.execute(
+        auth_params = feature_flagged(project, params[:auth], default: {})
+
+        dast_site_profile_params = {
           name: profile_name,
           target_url: target_url,
-          excluded_urls: feature_flagged_excluded_urls(project, excluded_urls)
-        )
+          excluded_urls: feature_flagged(project, params[:excluded_urls]),
+          request_headers: feature_flagged(project, params[:request_headers]),
+          auth_enabled: auth_params[:enabled],
+          auth_url: auth_params[:url],
+          auth_username_field: auth_params[:username_field],
+          auth_password_field: auth_params[:password_field],
+          auth_username: auth_params[:username],
+          auth_password: auth_params[:password]
+        }.compact
 
-        if result.success?
-          { id: result.payload.to_global_id, errors: [] }
-        else
-          { errors: result.errors }
-        end
+        result = ::DastSiteProfiles::CreateService.new(project, current_user).execute(**dast_site_profile_params)
+
+        { id: result.payload.try(:to_global_id), errors: result.errors }
       end
 
       private
 
-      def feature_flagged_excluded_urls(project, excluded_urls)
-        return [] unless Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
+      def feature_flagged(project, value, opts = {})
+        return opts[:default] unless Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
 
-        excluded_urls
+        value || opts[:default]
       end
     end
   end

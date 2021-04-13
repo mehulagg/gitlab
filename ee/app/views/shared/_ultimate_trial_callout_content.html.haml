@@ -16,6 +16,6 @@
         = link_to _('Start your trial'), new_trial_registration_path(glm_source: 'gitlab.com', glm_content: 'gold-callout'), class: "btn btn-confirm gl-button mt-2 mt-sm-0 #{button_css_class}", target: '_blank'
 
       - if is_dismissable
-        %button.btn.btn-default.close.js-close{ type: 'button',
+        %button.gl-button.btn.btn-default.close.js-close{ type: 'button',
           'aria-label' => _('Dismiss trial promotion') }
           = sprite_icon('close', css_class: 'dismiss-icon')

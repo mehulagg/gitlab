@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import CurrentDayIndicator from 'ee/oncall_schedules/components/schedule/components/current_day_indicator.vue';
-import { PRESET_TYPES, DAYS_IN_WEEK, HOURS_IN_DAY } from 'ee/oncall_schedules/constants';
+import { PRESET_TYPES, HOURS_IN_DAY } from 'ee/oncall_schedules/constants';
 import { useFakeDate } from 'helpers/fake_date';
 
 describe('CurrentDayIndicator', () => {
@@ -10,7 +10,8 @@ describe('CurrentDayIndicator', () => {
   // January 1st, 2018 is the first  day of the week-long timeframe
   // so as long as current date (faked January 3rd, 2018) is within week timeframe
   // current indicator will be rendered
-  const mockTimeframeInitialDate = new Date(2018, 0, 1);
+  const mockTimeframeInitialDate = new Date(2018, 0, 1); // Monday
+  const mockCurrentDate = new Date(2018, 0, 3); // Wednesday
 
   function createComponent({
     props = { presetType: PRESET_TYPES.WEEKS, timeframeItem: mockTimeframeInitialDate },
@@ -36,19 +37,27 @@ describe('CurrentDayIndicator', () => {
     expect(wrapper.classes('current-day-indicator')).toBe(true);
   });
 
-  it('sets correct styles for a week', async () => {
-    const left = 100 / DAYS_IN_WEEK / 2;
-    expect(wrapper.attributes('style')).toBe(`left: ${left}%;`);
+  it('sets correct styles for a week that on a different day than the timeframe start date', () => {
+    /**
+     * Our start date for the timeframe in this spec is a Monday,
+     * and the current day is the following Wednesday.
+     * This creates a gap of two days so our generated offset should represent:
+     * DayDiffOffset + weeklyOffset + weeklyHourOffset
+     * Note: We do not round these calculations
+     * 28.571428571428573 + 0
+     */
+    const leftOffset = '28.571428571428573';
+    expect(wrapper.attributes('style')).toBe(`left: ${leftOffset}%;`);
   });
 
-  it('sets correct styles for a day', async () => {
+  it('sets correct styles for a day', () => {
     createComponent({
-      props: { presetType: PRESET_TYPES.DAYS, timeframeItem: new Date(2018, 0, 3) },
+      props: { presetType: PRESET_TYPES.DAYS, timeframeItem: mockCurrentDate },
     });
     const currentDate = new Date();
     const base = 100 / HOURS_IN_DAY;
     const hours = base * currentDate.getHours();
-    const minutes = base * (currentDate.getMinutes() / 60) - 2.25;
+    const minutes = base * (currentDate.getMinutes() / 60);
     const left = hours + minutes;
     expect(wrapper.attributes('style')).toBe(`left: ${left}%;`);
   });

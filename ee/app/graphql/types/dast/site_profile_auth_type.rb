@@ -6,6 +6,8 @@ module Types
       graphql_name 'DastSiteProfileAuth'
       description 'Input type for DastSiteProfile authentication'
 
+      present_using ::Dast::SiteProfilePresenter
+
       authorize :read_on_demand_scans
 
       field :enabled, GraphQL::BOOLEAN_TYPE,
@@ -37,10 +39,6 @@ module Types
       field :password, GraphQL::STRING_TYPE,
             null: true,
             description: 'Redacted password to authenticate with on the target website.'
-
-      def password
-        nil
-      end
     end
   end
 end

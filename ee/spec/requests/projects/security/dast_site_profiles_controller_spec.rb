@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Projects::Security::DastSiteProfilesController, type: :request do
+  include GraphqlHelpers
+
   let(:project) { create(:project) }
   let(:user) { create(:user) }
   let(:dast_site_profile) { create(:dast_site_profile, project: project) }
@@ -87,18 +89,52 @@ RSpec.describe Projects::Security::DastSiteProfilesController, type: :request do
       let(:path) { edit_path }
     end
 
-    context 'record does not exist' do
-      let(:dast_site_profile) { 0 }
-
+    context 'feature available and user authorized' do
       before do
         with_feature_available
         with_user_authorized
       end
 
-      it 'sees a 404 error' do
-        get edit_path
+      context 'record exists' do
+        before do
+          create(:dast_site_profile_secret_variable, dast_site_profile: dast_site_profile, key: Dast::SiteProfileSecretVariable::PASSWORD)
+          create(:dast_site_profile_secret_variable, dast_site_profile: dast_site_profile, key: Dast::SiteProfileSecretVariable::REQUEST_HEADERS)
+        end
 
-        expect(response).to have_gitlab_http_status(:not_found)
+        it 'includes a serialized dast_profile in the response body' do
+          get edit_path
+
+          json_data = {
+            id: global_id_of(dast_site_profile),
+            name: dast_site_profile.name,
+            targetUrl:  dast_site_profile.dast_site.url,
+            excludedUrls:  dast_site_profile.excluded_urls,
+            requestHeaders:  Dast::SiteProfilePresenter::REDACTED_REQUEST_HEADERS,
+            auth: {
+              enabled: dast_site_profile.auth_enabled,
+              url: dast_site_profile.auth_url,
+              username: dast_site_profile.auth_username,
+              usernameField: dast_site_profile.auth_username_field,
+              password: Dast::SiteProfilePresenter::REDACTED_PASSWORD,
+              passwordField: dast_site_profile.auth_password_field
+            },
+            referencedInSecurityPolicies: dast_site_profile.referenced_in_security_policies
+          }.to_json
+
+          form = Nokogiri::HTML.parse(response.body).at_css('div.js-dast-site-profile-form')
+
+          expect(form.attributes['data-site-profile'].value).to include(json_data)
+        end
+      end
+
+      context 'record does not exist' do
+        let(:dast_site_profile) { 0 }
+
+        it 'sees a 404 error' do
+          get edit_path
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
       end
     end
   end

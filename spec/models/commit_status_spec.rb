@@ -213,12 +213,12 @@ RSpec.describe CommitStatus do
 
     context 'when it is canceled' do
       before do
-        commit_status.update(status: 'canceled')
+        commit_status.update!(status: 'canceled')
       end
 
       context 'when there is auto_canceled_by' do
         before do
-          commit_status.update(auto_canceled_by: create(:ci_empty_pipeline))
+          commit_status.update!(auto_canceled_by: create(:ci_empty_pipeline))
         end
 
         it 'is auto canceled' do
@@ -510,10 +510,6 @@ RSpec.describe CommitStatus do
   end
 
   describe '#group_name' do
-    before do
-      stub_feature_flags(simplified_commit_status_group_name: false)
-    end
-
     using RSpec::Parameterized::TableSyntax
 
     let(:commit_status) do
@@ -528,18 +524,24 @@ RSpec.describe CommitStatus do
       'rspec1 0/2'                                          | 'rspec1'
       'rspec:windows'                                       | 'rspec:windows'
       'rspec:windows 0'                                     | 'rspec:windows 0'
+      'rspec:windows 0 2/2'                                 | 'rspec:windows 0'
       'rspec:windows 0 test'                                | 'rspec:windows 0 test'
-      'rspec:windows 0 1'                                   | 'rspec:windows'
-      'rspec:windows 0 1 name'                              | 'rspec:windows name'
+      'rspec:windows 0 test 2/2'                            | 'rspec:windows 0 test'
+      'rspec:windows 0 1 2/2'                               | 'rspec:windows'
+      'rspec:windows 0 1 [aws] 2/2'                         | 'rspec:windows'
+      'rspec:windows 0 1 name [aws] 2/2'                    | 'rspec:windows 0 1 name'
+      'rspec:windows 0 1 name'                              | 'rspec:windows 0 1 name'
+      'rspec:windows 0 1 name 1/2'                          | 'rspec:windows 0 1 name'
       'rspec:windows 0/1'                                   | 'rspec:windows'
-      'rspec:windows 0/1 name'                              | 'rspec:windows name'
+      'rspec:windows 0/1 name'                              | 'rspec:windows 0/1 name'
+      'rspec:windows 0/1 name 1/2'                          | 'rspec:windows 0/1 name'
       'rspec:windows 0:1'                                   | 'rspec:windows'
-      'rspec:windows 0:1 name'                              | 'rspec:windows name'
+      'rspec:windows 0:1 name'                              | 'rspec:windows 0:1 name'
       'rspec:windows 10000 20000'                           | 'rspec:windows'
       'rspec:windows 0 : / 1'                               | 'rspec:windows'
-      'rspec:windows 0 : / 1 name'                          | 'rspec:windows name'
-      '0 1 name ruby'                                       | 'name ruby'
-      '0 :/ 1 name ruby'                                    | 'name ruby'
+      'rspec:windows 0 : / 1 name'                          | 'rspec:windows 0 : / 1 name'
+      '0 1 name ruby'                                       | '0 1 name ruby'
+      '0 :/ 1 name ruby'                                    | '0 :/ 1 name ruby'
       'rspec: [aws]'                                        | 'rspec'
       'rspec: [aws] 0/1'                                    | 'rspec'
       'rspec: [aws, max memory]'                            | 'rspec'
@@ -559,58 +561,6 @@ RSpec.describe CommitStatus do
         commit_status.name = name
 
         is_expected.to eq(group_name)
-      end
-    end
-
-    context 'with simplified_commit_status_group_name' do
-      before do
-        stub_feature_flags(simplified_commit_status_group_name: true)
-      end
-
-      where(:name, :group_name) do
-        'rspec1'                                              | 'rspec1'
-        'rspec1 0 1'                                          | 'rspec1'
-        'rspec1 0/2'                                          | 'rspec1'
-        'rspec:windows'                                       | 'rspec:windows'
-        'rspec:windows 0'                                     | 'rspec:windows 0'
-        'rspec:windows 0 2/2'                                 | 'rspec:windows 0'
-        'rspec:windows 0 test'                                | 'rspec:windows 0 test'
-        'rspec:windows 0 test 2/2'                            | 'rspec:windows 0 test'
-        'rspec:windows 0 1 2/2'                               | 'rspec:windows'
-        'rspec:windows 0 1 [aws] 2/2'                         | 'rspec:windows'
-        'rspec:windows 0 1 name [aws] 2/2'                    | 'rspec:windows 0 1 name'
-        'rspec:windows 0 1 name'                              | 'rspec:windows 0 1 name'
-        'rspec:windows 0 1 name 1/2'                          | 'rspec:windows 0 1 name'
-        'rspec:windows 0/1'                                   | 'rspec:windows'
-        'rspec:windows 0/1 name'                              | 'rspec:windows 0/1 name'
-        'rspec:windows 0/1 name 1/2'                          | 'rspec:windows 0/1 name'
-        'rspec:windows 0:1'                                   | 'rspec:windows'
-        'rspec:windows 0:1 name'                              | 'rspec:windows 0:1 name'
-        'rspec:windows 10000 20000'                           | 'rspec:windows'
-        'rspec:windows 0 : / 1'                               | 'rspec:windows'
-        'rspec:windows 0 : / 1 name'                          | 'rspec:windows 0 : / 1 name'
-        '0 1 name ruby'                                       | '0 1 name ruby'
-        '0 :/ 1 name ruby'                                    | '0 :/ 1 name ruby'
-        'rspec: [aws]'                                        | 'rspec'
-        'rspec: [aws] 0/1'                                    | 'rspec'
-        'rspec: [aws, max memory]'                            | 'rspec'
-        'rspec:linux: [aws, max memory, data]'                | 'rspec:linux'
-        'rspec: [inception: [something, other thing], value]' | 'rspec'
-        'rspec:windows 0/1: [name, other]'                    | 'rspec:windows'
-        'rspec:windows: [name, other] 0/1'                    | 'rspec:windows'
-        'rspec:windows: [name, 0/1] 0/1'                      | 'rspec:windows'
-        'rspec:windows: [0/1, name]'                          | 'rspec:windows'
-        'rspec:windows: [, ]'                                 | 'rspec:windows'
-        'rspec:windows: [name]'                               | 'rspec:windows'
-        'rspec:windows: [name,other]'                         | 'rspec:windows'
-      end
-
-      with_them do
-        it "#{params[:name]} puts in #{params[:group_name]}" do
-          commit_status.name = name
-
-          is_expected.to eq(group_name)
-        end
       end
     end
   end
@@ -660,7 +610,7 @@ RSpec.describe CommitStatus do
       end
 
       it "raise exception when trying to update" do
-        expect { commit_status.save }.to raise_error(ActiveRecord::StaleObjectError)
+        expect { commit_status.save! }.to raise_error(ActiveRecord::StaleObjectError)
       end
     end
 

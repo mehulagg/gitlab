@@ -1,0 +1,5 @@
+---
+title: Use `getTopFrequentItems` in projects dropdown to show recently used
+merge_request: 58851
+author:
+type: fixed

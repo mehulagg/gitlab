@@ -10,5 +10,23 @@ module ApprovalRules
 
     validates :external_url, presence: true, uniqueness: { scope: :project_id }, addressable_url: true
     validates :name, uniqueness: { scope: :project_id }, presence: true
+
+    def async_execute(data)
+      ApprovalRules::ExternalApprovalRulePayloadWorker.perform_async(self.id, payload_data(data))
+    end
+
+    def to_h
+      {
+        id: self.id,
+        name: self.name,
+        external_url: self.external_url
+      }
+    end
+
+    private
+
+    def payload_data(merge_request_hook_data)
+      merge_request_hook_data.merge(external_approval_rule: self.to_h)
+    end
   end
 end

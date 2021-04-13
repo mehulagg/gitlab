@@ -1,0 +1,5 @@
+---
+title: Fix the 'errors' attribute of the 'ScanType' on GraphQL API
+merge_request: 57882
+author:
+type: fixed

@@ -171,11 +171,11 @@ apt-get install nfs-common
 Here is an example snippet to add to `/etc/fstab`:
 
 ```plaintext
-10.1.0.1:/var/opt/gitlab/.ssh /var/opt/gitlab/.ssh nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,lookupcache=positive 0 2
-10.1.0.1:/var/opt/gitlab/gitlab-rails/uploads /var/opt/gitlab/gitlab-rails/uploads nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,lookupcache=positive 0 2
-10.1.0.1:/var/opt/gitlab/gitlab-rails/shared /var/opt/gitlab/gitlab-rails/shared nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,lookupcache=positive 0 2
-10.1.0.1:/var/opt/gitlab/gitlab-ci/builds /var/opt/gitlab/gitlab-ci/builds nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,lookupcache=positive 0 2
-10.1.0.1:/var/opt/gitlab/git-data /var/opt/gitlab/git-data nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,lookupcache=positive 0 2
+10.1.0.1:/var/opt/gitlab/.ssh /var/opt/gitlab/.ssh nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,_netdev,lookupcache=positive 0 2
+10.1.0.1:/var/opt/gitlab/gitlab-rails/uploads /var/opt/gitlab/gitlab-rails/uploads nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,_netdev,lookupcache=positive 0 2
+10.1.0.1:/var/opt/gitlab/gitlab-rails/shared /var/opt/gitlab/gitlab-rails/shared nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,_netdev,lookupcache=positive 0 2
+10.1.0.1:/var/opt/gitlab/gitlab-ci/builds /var/opt/gitlab/gitlab-ci/builds nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,_netdev,lookupcache=positive 0 2
+10.1.0.1:/var/opt/gitlab/git-data /var/opt/gitlab/git-data nfs4 defaults,vers=4.1,hard,rsize=1048576,wsize=1048576,noatime,nofail,_netdev,lookupcache=positive 0 2
 ```
 
 You can view information and options set for each of the mounted NFS file
@@ -189,6 +189,8 @@ Note there are several options that you should consider using:
 | `nofail` | Don't halt boot process waiting for this mount to become available
 | `lookupcache=positive` | Tells the NFS client to honor `positive` cache results but invalidates any `negative` cache results. Negative cache results cause problems with Git. Specifically, a `git push` can fail to register uniformly across all NFS clients. The negative cache causes the clients to 'remember' that the files did not exist previously.
 | `hard` | Instead of `soft`. [Further details](#soft-mount-option).
+| `cto` | `cto` is the default option, which you should use. Do not use `nocto`. [Further details](#nocto-mount-option).
+| `_netdev` | Wait to mount filesystem until network is online. See also the [`high_availability['mountpoint']`](https://docs.gitlab.com/omnibus/settings/configuration.html#only-start-omnibus-gitlab-services-after-a-given-file-system-is-mounted) option.
 
 #### `soft` mount option
 
@@ -224,6 +226,25 @@ NFS server goes down, `hard` will cause processes to hang when interacting with
 the mount point. Use `SIGKILL` (`kill -9`) to deal with hung processes.
 The `intr` option
 [stopped working in the 2.6 kernel](https://access.redhat.com/solutions/157873).
+
+#### `nocto` mount option
+
+Do not use `nocto`. Instead, use `cto`, which is the default.
+
+When using `nocto`, the dentry cache is always used, up to `acdirmax` seconds (attribute cache time) from the time it's created.
+
+This results in stale dentry cache issues with multiple clients, where each client can see a different (cached)
+version of a directory.
+
+From the [Linux man page](https://linux.die.net/man/5/nfs), the important parts:
+
+> If the nocto option is specified, the client uses a non-standard heuristic to determine when files on the server have changed.
+>
+> Using the nocto option may improve performance for read-only mounts, but should be used only if the data on the server changes only occasionally.
+
+We have noticed this behavior in an issue about [refs not found after a push](https://gitlab.com/gitlab-org/gitlab/-/issues/326066),
+where newly added loose refs can be seen as missing on a different client with a local dentry cache, as
+[described in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/326066#note_539436931).
 
 ### A single NFS mount
 

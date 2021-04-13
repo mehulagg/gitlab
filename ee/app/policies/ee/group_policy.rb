@@ -126,7 +126,7 @@ module EE
 
       condition(:compliance_framework_available) do
         @subject.feature_available?(:custom_compliance_frameworks) &&
-          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject)
+          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject, default_enabled: :yaml)
       end
 
       condition(:group_level_compliance_pipeline_available) do
@@ -282,7 +282,10 @@ module EE
 
       rule { security_dashboard_enabled & developer }.enable :read_group_security_dashboard
 
-      rule { can?(:read_group_security_dashboard) }.enable :create_vulnerability_export
+      rule { can?(:read_group_security_dashboard) }.policy do
+        enable :create_vulnerability_export
+        enable :read_vulnerability
+      end
 
       rule { admin | owner }.policy do
         enable :read_group_compliance_dashboard
@@ -388,12 +391,11 @@ module EE
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
-    override :resource_access_token_available?
-    def resource_access_token_available?
-      return true unless ::Gitlab.com?
+    override :resource_access_token_feature_available?
+    def resource_access_token_feature_available?
+      return super unless ::Gitlab.com?
 
-      ::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true) &&
-        group.feature_available_non_trial?(:resource_access_token)
+      group.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

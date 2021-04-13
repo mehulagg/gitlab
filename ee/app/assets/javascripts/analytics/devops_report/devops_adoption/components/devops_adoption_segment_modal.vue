@@ -3,10 +3,13 @@ import { GlFormGroup, GlFormInput, GlFormCheckboxTree, GlModal, GlAlert, GlIcon 
 import * as Sentry from '@sentry/browser';
 import _ from 'lodash';
 import { convertToGraphQLId, getIdFromGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
-import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from '../constants';
+import {
+  DEVOPS_ADOPTION_STRINGS,
+  DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
+  DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
+} from '../constants';
 import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import deleteDevopsAdoptionSegmentMutation from '../graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
-import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
 
 export default {
   name: 'DevopsAdoptionSegmentModal',
@@ -17,6 +20,14 @@ export default {
     GlFormCheckboxTree,
     GlAlert,
     GlIcon,
+  },
+  inject: {
+    isGroup: {
+      default: false,
+    },
+    groupGid: {
+      default: null,
+    },
   },
   props: {
     groups: {
@@ -81,7 +92,7 @@ export default {
       return this.errors[0];
     },
     modalTitle() {
-      return this.$options.i18n.addingTitle;
+      return this.isGroup ? DEVOPS_ADOPTION_GROUP_LEVEL_LABEL : this.$options.i18n.addingTitle;
     },
     filteredOptions() {
       return this.filter
@@ -130,7 +141,7 @@ export default {
                 bulkFindOrCreateDevopsAdoptionSegments: { segments, errors: requestErrors },
               } = data;
 
-              if (!requestErrors.length) addSegmentsToCache(store, segments);
+              if (!requestErrors.length) this.$emit('segmentsAdded', segments);
             },
           });
 
@@ -148,7 +159,11 @@ export default {
     async deleteMissingGroups() {
       try {
         const removedGroupGids = this.enabledGroups
-          .filter((group) => !this.checkboxValues.includes(getIdFromGraphQLId(group.namespace.id)))
+          .filter(
+            (group) =>
+              !this.checkboxValues.includes(getIdFromGraphQLId(group.namespace.id)) &&
+              group.namespace.id !== this.groupGid,
+          )
           .map((group) => group.id);
 
         if (removedGroupGids.length) {
@@ -168,7 +183,7 @@ export default {
                 deleteDevopsAdoptionSegment: { errors: requestErrors },
               } = data;
 
-              if (!requestErrors.length) deleteSegmentsFromCache(store, removedGroupGids);
+              if (!requestErrors.length) this.$emit('segmentsRemoved', removedGroupGids);
             },
           });
 
@@ -190,7 +205,6 @@ export default {
       this.$refs.modal.hide();
     },
     resetForm() {
-      this.checkboxValues = [];
       this.filter = '';
       this.$emit('trackModalOpenState', false);
     },

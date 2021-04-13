@@ -109,7 +109,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
           click_button 'Add approval rule'
         end
 
-        click_on("Submit merge request")
+        click_on("Create merge request")
         wait_for_all_requests
 
         expect(page).to have_content("Requires approval.")
@@ -134,7 +134,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         end
 
         click_button 'Update approval rule'
-        click_on("Submit merge request")
+        click_on("Create merge request")
         wait_for_all_requests
         click_on("View eligible approvers") if page.has_button?("View eligible approvers")
         wait_for_requests

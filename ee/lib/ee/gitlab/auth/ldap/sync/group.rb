@@ -293,8 +293,7 @@ module EE
             # returns a hash user_id -> LDAP identity in current LDAP provider
             def resolve_ldap_identities(for_users:)
               ::Identity.for_user(for_users).with_provider(provider)
-                .map {|identity| [identity.user_id, identity] }
-                .to_h
+                .to_h { |identity| [identity.user_id, identity] }
             end
 
             # returns a hash of normalized DN -> user for the current LDAP provider
@@ -302,8 +301,7 @@ module EE
             def resolve_users_from_normalized_dn(for_normalized_dns:)
               ::Identity.with_provider(provider).iwhere(extern_uid: for_normalized_dns)
                 .preload(:user)
-                .map {|identity| [identity.extern_uid, identity.user] }
-                .to_h
+                .to_h { |identity| [identity.extern_uid, identity.user] }
             end
             # rubocop: enable CodeReuse/ActiveRecord
 

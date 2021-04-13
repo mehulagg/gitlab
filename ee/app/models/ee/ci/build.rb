@@ -43,6 +43,17 @@ module EE
         end
       end
 
+      override :variables
+      def variables
+        strong_memoize(:variables) do
+          super.tap do |collection|
+            if pipeline.triggered_for_ondemand_dast_scan? && pipeline.dast_profile
+              collection.concat(pipeline.dast_profile.ci_variables)
+            end
+          end
+        end
+      end
+
       def shared_runners_minutes_limit_enabled?
         project.shared_runners_minutes_limit_enabled? && runner&.minutes_cost_factor(project.visibility_level)&.positive?
       end
@@ -153,9 +164,9 @@ module EE
       private
 
       def variables_hash
-        @variables_hash ||= variables.map do |variable|
+        @variables_hash ||= variables.to_h do |variable|
           [variable[:key], variable[:value]]
-        end.to_h
+        end
       end
 
       def parse_security_artifact_blob(security_report, blob)
@@ -173,7 +184,6 @@ module EE
       end
 
       def track_ci_secrets_management_usage
-        return unless ::Feature.enabled?(:usage_data_i_ci_secrets_management_vault_build_created, default_enabled: true)
         return unless ci_secrets_management_available? && secrets?
 
         ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event('i_ci_secrets_management_vault_build_created', values: user_id)

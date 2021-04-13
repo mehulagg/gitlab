@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Clusters::AgentTokenPolicy do
   let_it_be(:token) { create(:cluster_agent_token) }
+
   let(:user) { create(:user) }
   let(:policy) { described_class.new(user, token) }
   let(:project) { token.agent.project }

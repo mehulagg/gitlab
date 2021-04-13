@@ -7,6 +7,7 @@ RSpec.describe 'Iterations list', :js do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, :public, group: group) }
   let_it_be(:user) { create(:user) }
+
   let!(:started_iteration) { create(:iteration, :skip_future_date_validation, group: group, start_date: now - 1.day, due_date: now, title: 'Started iteration') }
   let!(:upcoming_iteration) { create(:iteration, group: group, start_date: now + 1.day, due_date: now + 2.days) }
   let!(:closed_iteration) { create(:closed_iteration, :skip_future_date_validation, group: group, start_date: now - 3.days, due_date: now - 2.days) }

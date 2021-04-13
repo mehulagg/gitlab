@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   let_it_be(:admin) { create(:admin) }
+
   let(:page) { Capybara::Node::Simple.new(rendered) }
   let(:pause_indexing) { false }
   let(:pending_migrations) { false }

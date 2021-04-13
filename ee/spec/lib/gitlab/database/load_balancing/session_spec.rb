@@ -139,37 +139,37 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
     end
   end
 
-  describe '#use_replica_if_possible' do
+  describe '#fallback_to_replicas_for_ambiguous_queries' do
     let(:instance) { described_class.new }
 
-    it 'uses replica during block' do
+    it 'sets the flag inside the block' do
       expect do |blk|
-        instance.use_replica_if_possible do
-          expect(instance.use_replica?).to eq(true)
+        instance.fallback_to_replicas_for_ambiguous_queries do
+          expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(true)
 
           # call yield probe
           blk.to_proc.call
         end
       end.to yield_control
 
-      expect(instance.use_replica?).to eq(false)
+      expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
     end
 
     it 'restores state after use' do
       expect do |blk|
-        instance.use_replica_if_possible do
-          instance.use_replica_if_possible do
-            expect(instance.use_replica?).to eq(true)
+        instance.fallback_to_replicas_for_ambiguous_queries do
+          instance.fallback_to_replicas_for_ambiguous_queries do
+            expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(true)
 
             # call yield probe
             blk.to_proc.call
           end
 
-          expect(instance.use_replica?).to eq(true)
+          expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(true)
         end
       end.to yield_control
 
-      expect(instance.use_replica?).to eq(false)
+      expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
     end
 
     context 'when primary was used before' do
@@ -178,18 +178,18 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
       end
 
       it 'uses primary during block' do
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
 
         expect do |blk|
-          instance.use_replica_if_possible do
-            expect(instance.use_replica?).to eq(false)
+          instance.fallback_to_replicas_for_ambiguous_queries do
+            expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
 
             # call yield probe
             blk.to_proc.call
           end
         end.to yield_control
 
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
       end
     end
 
@@ -199,82 +199,82 @@ RSpec.describe Gitlab::Database::LoadBalancing::Session do
       end
 
       it 'uses primary during block' do
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
 
         expect do |blk|
-          instance.use_replica_if_possible do
-            expect(instance.use_replica?).to eq(false)
+          instance.fallback_to_replicas_for_ambiguous_queries do
+            expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
 
             # call yield probe
             blk.to_proc.call
           end
         end.to yield_control
 
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
       end
     end
 
     context 'when primary was used inside the block' do
       it 'uses primary aterward' do
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
 
-        instance.use_replica_if_possible do
-          expect(instance.use_replica?).to eq(true)
+        instance.fallback_to_replicas_for_ambiguous_queries do
+          expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(true)
 
           instance.use_primary!
 
-          expect(instance.use_replica?).to eq(false)
+          expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
         end
 
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
       end
 
       it 'restores state after use' do
-        instance.use_replica_if_possible do
-          instance.use_replica_if_possible do
-            expect(instance.use_replica?).to eq(true)
+        instance.fallback_to_replicas_for_ambiguous_queries do
+          instance.fallback_to_replicas_for_ambiguous_queries do
+            expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(true)
 
             instance.use_primary!
 
-            expect(instance.use_replica?).to eq(false)
+            expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
           end
 
-          expect(instance.use_replica?).to eq(false)
+          expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
         end
 
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
       end
     end
 
     context 'when a write was performed inside the block' do
       it 'uses primary aterward' do
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
 
-        instance.use_replica_if_possible do
-          expect(instance.use_replica?).to eq(true)
+        instance.fallback_to_replicas_for_ambiguous_queries do
+          expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(true)
 
           instance.write!
 
-          expect(instance.use_replica?).to eq(false)
+          expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
         end
 
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
       end
 
       it 'restores state after use' do
-        instance.use_replica_if_possible do
-          instance.use_replica_if_possible do
-            expect(instance.use_replica?).to eq(true)
+        instance.fallback_to_replicas_for_ambiguous_queries do
+          instance.fallback_to_replicas_for_ambiguous_queries do
+            expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(true)
 
             instance.write!
 
-            expect(instance.use_replica?).to eq(false)
+            expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
           end
 
-          expect(instance.use_replica?).to eq(false)
+          expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
         end
 
-        expect(instance.use_replica?).to eq(false)
+        expect(instance.fallback_to_replicas_for_ambiguous_queries?).to eq(false)
       end
     end
   end

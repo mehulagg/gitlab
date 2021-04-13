@@ -1,0 +1,3 @@
+mutation updateTimelineWidth($timelineWidth: Int) {
+  updateTimelineWidth(timelineWidth: $timelineWidth) @client
+}

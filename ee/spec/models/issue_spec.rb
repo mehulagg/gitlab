@@ -75,8 +75,8 @@ RSpec.describe Issue do
     context 'epics' do
       let_it_be(:epic1) { create(:epic) }
       let_it_be(:epic2) { create(:epic) }
-      let_it_be(:epic_issue1) { create(:epic_issue, epic: epic1) }
-      let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2) }
+      let_it_be(:epic_issue1) { create(:epic_issue, epic: epic1, relative_position: 2) }
+      let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2, relative_position: 1) }
       let_it_be(:issue_no_epic) { create(:issue) }
 
       before do
@@ -126,6 +126,12 @@ RSpec.describe Issue do
             ).distinct_epic_ids.map(&:epic_id)
             expect(ids).to eq([epic1.id])
           end
+        end
+      end
+
+      describe '.sorted_by_epic_position' do
+        it 'sorts by epic relative position' do
+          expect(described_class.sorted_by_epic_position.ids).to eq([epic_issue2.issue_id, epic_issue1.issue_id])
         end
       end
     end
@@ -535,6 +541,7 @@ RSpec.describe Issue do
     let_it_be(:project1) { create(:project, group: group) }
     let_it_be_with_reload(:issue) { create(:issue, project: project) }
     let_it_be_with_reload(:issue1) { create(:issue, project: project1, relative_position: issue.relative_position + RelativePositioning::IDEAL_DISTANCE) }
+
     let(:new_issue) { build(:issue, project: project1, relative_position: nil) }
 
     describe '.relative_positioning_query_base' do
@@ -890,6 +897,7 @@ RSpec.describe Issue do
     end
 
     let_it_be(:user) { create(:user) }
+
     let(:group) { nil }
 
     subject { issue.can_be_promoted_to_epic?(user, group) }

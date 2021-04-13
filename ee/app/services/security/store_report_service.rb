@@ -8,6 +8,8 @@ module Security
 
     attr_reader :pipeline, :report, :project
 
+    BATCH_SIZE = 1000
+
     def initialize(pipeline, report)
       @pipeline = pipeline
       @report = report
@@ -39,6 +41,8 @@ module Security
         .where(uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
         .to_h { |vf| [vf.uuid, vf] }
 
+      update_vulnerability_scanners!(@report.findings) if Feature.enabled?(:optimize_sql_query_for_security_report, project)
+
       @report.findings.map do |finding|
         create_vulnerability_finding(vulnerability_findings_by_uuid, finding)&.id
       end.compact.uniq
@@ -63,11 +67,11 @@ module Security
       vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
         create_new_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
-      update_vulnerability_scanner(finding)
+      update_vulnerability_scanner(finding) unless Feature.enabled?(:optimize_sql_query_for_security_report, project)
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
-      update_finding_fingerprints(finding, vulnerability_finding)
+      update_finding_signatures(finding, vulnerability_finding)
 
       # The maximum number of identifiers is not used in validation
       # we just want to ignore the rest if a finding has more than that.
@@ -119,6 +123,50 @@ module Security
     def update_vulnerability_scanner(finding)
       scanner = scanners_objects[finding.scanner.key]
       scanner.update!(finding.scanner.to_hash)
+    end
+
+    def vulnerability_scanner_attributes_keys
+      strong_memoize(:vulnerability_scanner_attributes_keys) do
+        Vulnerabilities::Scanner.new.attributes.keys
+      end
+    end
+
+    def valid_vulnerability_scanner_record?(record)
+      return false if (record.keys - vulnerability_scanner_attributes_keys).present?
+
+      record.values.all? {|value| value.present?}
+    end
+
+    def create_vulnerability_scanner_records(findings)
+      findings.map do |finding|
+        scanner = scanners_objects[finding.scanner.key]
+
+        next nil if scanner.nil?
+
+        scanner_attr = scanner.attributes.with_indifferent_access.except(:id)
+          .merge(finding.scanner.to_hash)
+
+        scanner_attr.compact!
+
+        scanner_attr
+      end
+    end
+
+    def update_vulnerability_scanners!(report_findings)
+      report_findings.in_groups_of(BATCH_SIZE, false) do |findings|
+        records = create_vulnerability_scanner_records(findings)
+        records.compact!
+        records.uniq!
+        records.each { |record| record.merge!({ created_at: Time.current, updated_at: Time.current }) }
+        records.filter! { |record| valid_vulnerability_scanner_record?(record) }
+
+        Vulnerabilities::Scanner.insert_all(records) if records.present?
+      end
+    rescue StandardError => e
+      Gitlab::ErrorTracking.track_exception(e)
+    ensure
+      clear_memoization(:scanners_objects)
+      clear_memoization(:existing_scanner_objects)
     end
 
     def update_vulnerability_finding(vulnerability_finding, update_params)
@@ -175,39 +223,39 @@ module Security
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    def update_finding_fingerprints(finding, vulnerability_finding)
+    def update_finding_signatures(finding, vulnerability_finding)
       to_update = {}
       to_create = []
 
-      poro_fingerprints = finding.fingerprints.index_by(&:algorithm_type)
+      poro_signatures = finding.signatures.index_by(&:algorithm_type)
 
-      vulnerability_finding.fingerprints.each do |fingerprint|
+      vulnerability_finding.signatures.each do |signature|
         # NOTE: index_by takes the last entry if there are duplicates of the same algorithm, which should never occur.
-        poro_fingerprint = poro_fingerprints[fingerprint.algorithm_type]
+        poro_signature = poro_signatures[signature.algorithm_type]
 
-        # We're no longer generating these types of fingerprints. Since
+        # We're no longer generating these types of signatures. Since
         # we're updating the persisted vulnerability, no need to do anything
-        # with these fingerprints now. We will track growth with
+        # with these signatures now. We will track growth with
         # https://gitlab.com/gitlab-org/gitlab/-/issues/322186
-        next if poro_fingerprint.nil?
+        next if poro_signature.nil?
 
-        poro_fingerprints.delete(fingerprint.algorithm_type)
-        to_update[fingerprint.id] = poro_fingerprint.to_h
+        poro_signatures.delete(signature.algorithm_type)
+        to_update[signature.id] = poro_signature.to_h
       end
 
-      # any remaining poro fingerprints left are new
-      poro_fingerprints.values.each do |poro_fingerprint|
-        attributes = poro_fingerprint.to_h.merge(finding_id: vulnerability_finding.id)
-        to_create << ::Vulnerabilities::FindingFingerprint.new(attributes: attributes, created_at: Time.zone.now, updated_at: Time.zone.now)
+      # any remaining poro signatures left are new
+      poro_signatures.values.each do |poro_signature|
+        attributes = poro_signature.to_h.merge(finding_id: vulnerability_finding.id)
+        to_create << ::Vulnerabilities::FindingSignature.new(attributes: attributes, created_at: Time.zone.now, updated_at: Time.zone.now)
       end
 
-      ::Vulnerabilities::FindingFingerprint.transaction do
+      ::Vulnerabilities::FindingSignature.transaction do
         if to_update.count > 0
-          ::Vulnerabilities::FindingFingerprint.update(to_update.keys, to_update.values)
+          ::Vulnerabilities::FindingSignature.update(to_update.keys, to_update.values)
         end
 
         if to_create.count > 0
-          ::Vulnerabilities::FindingFingerprint.bulk_insert!(to_create)
+          ::Vulnerabilities::FindingSignature.bulk_insert!(to_create)
         end
       end
     end
@@ -232,9 +280,9 @@ module Security
 
     def scanners_objects
       strong_memoize(:scanners_objects) do
-        @report.scanners.map do |key, scanner|
+        @report.scanners.to_h do |key, scanner|
           [key, existing_scanner_objects[key] || project.vulnerability_scanners.build(scanner&.to_hash)]
-        end.to_h
+        end
       end
     end
 
@@ -244,17 +292,17 @@ module Security
 
     def existing_scanner_objects
       strong_memoize(:existing_scanner_objects) do
-        project.vulnerability_scanners.with_external_id(all_scanners_external_ids).map do |scanner|
+        project.vulnerability_scanners.with_external_id(all_scanners_external_ids).to_h do |scanner|
           [scanner.external_id, scanner]
-        end.to_h
+        end
       end
     end
 
     def identifiers_objects
       strong_memoize(:identifiers_objects) do
-        @report.identifiers.map do |key, identifier|
+        @report.identifiers.to_h do |key, identifier|
           [key, existing_identifiers_objects[key] || project.vulnerability_identifiers.build(identifier.to_hash)]
-        end.to_h
+        end
       end
     end
 
@@ -264,9 +312,9 @@ module Security
 
     def existing_identifiers_objects
       strong_memoize(:existing_identifiers_objects) do
-        project.vulnerability_identifiers.with_fingerprint(all_identifiers_fingerprints).map do |identifier|
+        project.vulnerability_identifiers.with_fingerprint(all_identifiers_fingerprints).to_h do |identifier|
           [identifier.fingerprint, identifier]
-        end.to_h
+        end
       end
     end
 

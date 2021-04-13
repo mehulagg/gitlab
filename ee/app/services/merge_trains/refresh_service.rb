@@ -13,9 +13,9 @@ module MergeTrains
     include ::Gitlab::ExclusiveLeaseHelpers
     include ::Gitlab::Utils::StrongMemoize
 
-    DEFAULT_CONCURRENCY = 20.freeze
+    DEFAULT_CONCURRENCY = 20
     TRAIN_PROCESSING_LOCK_TIMEOUT = 15.minutes.freeze
-    SIGNAL_FOR_REFRESH_REQUEST = 1.freeze
+    SIGNAL_FOR_REFRESH_REQUEST = 1
 
     def execute(target_project_id, target_branch)
       @target_project_id = target_project_id

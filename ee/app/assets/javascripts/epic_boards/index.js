@@ -12,7 +12,6 @@ import toggleLabels from 'ee_component/boards/toggle_labels';
 
 import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
-import BoardAddIssuesModal from '~/boards/components/modal/index.vue';
 import boardConfigToggle from '~/boards/config_toggle';
 import { issuableTypes } from '~/boards/constants';
 import mountMultipleBoardsSwitcher from '~/boards/mount_multiple_boards_switcher';
@@ -56,7 +55,6 @@ export default () => {
     components: {
       BoardContent,
       BoardSidebar,
-      BoardAddIssuesModal,
       BoardSettingsSidebar: () => import('~/boards/components/board_settings_sidebar.vue'),
     },
     provide: {
@@ -65,6 +63,7 @@ export default () => {
       rootPath: $boardApp.dataset.rootPath,
       currentUserId: gon.current_user_id || null,
       canUpdate: $boardApp.dataset.canUpdate,
+      canAdminList: parseBoolean($boardApp.dataset.canAdminList),
       labelsFetchPath: $boardApp.dataset.labelsFetchPath,
       labelsManagePath: $boardApp.dataset.labelsManagePath,
       labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,

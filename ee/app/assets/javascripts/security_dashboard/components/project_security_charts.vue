@@ -6,10 +6,11 @@ import { formatDate, getDateInPast } from '~/lib/utils/datetime_utility';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { s__, __ } from '~/locale';
 import projectsHistoryQuery from '../graphql/queries/project_vulnerabilities_by_day_and_count.query.graphql';
-import { createProjectLoadingError } from '../helpers';
+import { PROJECT_LOADING_ERROR_MESSAGE } from '../helpers';
 import DashboardNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityChartsLayout from './security_charts_layout.vue';
 
+const CHART_DEFAULT_DAYS = 30;
 const MAX_DAYS = 100;
 const ISO_DATE = 'isoDate';
 const SEVERITIES = [
@@ -58,7 +59,7 @@ export default {
         return data?.project?.vulnerabilitiesCountByDay?.nodes ?? [];
       },
       error() {
-        createFlash({ message: createProjectLoadingError() });
+        createFlash({ message: PROJECT_LOADING_ERROR_MESSAGE });
       },
       skip() {
         return !this.hasVulnerabilities;
@@ -73,6 +74,9 @@ export default {
     };
   },
   computed: {
+    chartStartDate() {
+      return formatDate(getDateInPast(new Date(), CHART_DEFAULT_DAYS), ISO_DATE);
+    },
     startDate() {
       return formatDate(getDateInPast(new Date(), MAX_DAYS), ISO_DATE);
     },
@@ -124,6 +128,20 @@ export default {
           type: 'value',
           minInterval: 1,
         },
+        dataZoom: [
+          {
+            type: 'slider',
+            startValue: this.chartStartDate,
+            handleIcon: this.svgs['scroll-handle'],
+            dataBackground: {
+              lineStyle: {
+                width: 1,
+                color: '#bfbfbf',
+              },
+              areaStyle: null,
+            },
+          },
+        ],
         toolbox: {
           feature: {
             dataZoom: {
@@ -144,7 +162,7 @@ export default {
     this.chartWidth = this.$refs.layout.$el.clientWidth;
   },
   created() {
-    ['marquee-selection', 'redo', 'repeat', 'download'].forEach(this.setSvg);
+    ['marquee-selection', 'redo', 'repeat', 'download', 'scroll-handle'].forEach(this.setSvg);
   },
   methods: {
     async setSvg(name) {

@@ -10,6 +10,10 @@ RSpec.describe Admin::NavbarHelper do
       stub_application_setting(cloud_license_enabled: true)
     end
 
+    it 'returns the correct controller path' do
+      expect(helper.navbar_controller_path).to eq('admin/cloud_licenses')
+    end
+
     it 'returns the correct navbar item name' do
       expect(helper.navbar_item_name).to eq('Cloud License')
     end
@@ -22,6 +26,10 @@ RSpec.describe Admin::NavbarHelper do
   describe 'when cloud license is not enabled' do
     before do
       stub_application_setting(cloud_license_enabled: false)
+    end
+
+    it 'returns the correct controller path' do
+      expect(helper.navbar_controller_path).to eq('admin/licenses')
     end
 
     it 'returns the correct navbar item name' do

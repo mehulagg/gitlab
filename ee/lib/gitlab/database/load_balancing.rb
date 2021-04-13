@@ -84,7 +84,8 @@ module Gitlab
 
       # Returns true if load balancing is to be enabled.
       def self.enable?
-        return false if Gitlab::Runtime.rake? || Gitlab::Runtime.sidekiq?
+        return false if Gitlab::Runtime.rake?
+        return false if Gitlab::Runtime.sidekiq? && !Gitlab::Utils.to_boolean(ENV['ENABLE_LOAD_BALANCING_FOR_SIDEKIQ'], default: false)
         return false unless self.configured?
 
         true
@@ -113,7 +114,6 @@ module Gitlab
         #   -> Set @feature_available  to true
         #   -> return true
         # - Second call: return @feature_available right away
-
         return @feature_available if defined?(@feature_available)
 
         @feature_available = false
@@ -137,19 +137,14 @@ module Gitlab
         ActiveRecord::Base.singleton_class.prepend(ActiveRecordProxy)
       end
 
-      # Clear configuration
-      def self.clear_configuration
-        @proxy = nil
-        remove_instance_variable(:@feature_available) if defined?(@feature_available)
-      end
-
       def self.active_record_models
         ActiveRecord::Base.descendants
       end
 
       DB_ROLES = [
         ROLE_PRIMARY = :primary,
-        ROLE_REPLICA = :replica
+        ROLE_REPLICA = :replica,
+        ROLE_UNKNOWN = :unknown
       ].freeze
 
       # Returns the role (primary/replica) of the database the connection is
@@ -161,7 +156,7 @@ module Gitlab
       def self.db_role_for_connection(connection)
         return ROLE_PRIMARY if !enable? || @proxy.blank?
 
-        proxy.load_balancer.db_role_for_connection(connection) || ROLE_PRIMARY
+        proxy.load_balancer.db_role_for_connection(connection)
       end
     end
   end

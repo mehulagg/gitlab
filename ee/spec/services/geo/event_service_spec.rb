@@ -7,6 +7,7 @@ RSpec.describe Geo::EventService do
 
   let_it_be(:primary) { create(:geo_node, :primary) }
   let_it_be(:secondary) { create(:geo_node) }
+
   let(:model_record) { create(:package_file, :npm) }
 
   subject { described_class.new('package_file', 'created', { 'model_record_id' => model_record.id }) }

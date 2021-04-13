@@ -226,27 +226,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       end
     end
 
-    context 'when reassigned' do
-      it 'schedules for analytics metric update' do
-        expect(Analytics::CodeReviewMetricsWorker)
-          .to receive(:perform_async).with('Analytics::RefreshReassignData', merge_request.id)
-
-        update_merge_request({ assignee_ids: [user2.id] })
-      end
-
-      context 'when code_review_analytics is not available' do
-        before do
-          stub_licensed_features(code_review_analytics: false)
-        end
-
-        it 'does not schedule for analytics metric update' do
-          expect(Analytics::CodeReviewMetricsWorker).not_to receive(:perform_async)
-
-          update_merge_request({ assignee_ids: [user2.id] })
-        end
-      end
-    end
-
     context 'reset_approval_rules_to_defaults param' do
       let!(:existing_any_rule) { create(:any_approver_rule, merge_request: merge_request) }
       let!(:existing_rule) { create(:approval_merge_request_rule, merge_request: merge_request) }
@@ -329,16 +308,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       end
 
       update_merge_request(title: 'Title')
-    end
-
-    context 'updating assignee_ids' do
-      it 'updates the tracking when user ids are valid' do
-        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
-          .to receive(:track_users_assigned_to_mr)
-          .with(users: [user, user2])
-
-        update_merge_request(assignee_ids: [user.id, user2.id])
-      end
     end
 
     context 'updating reviewers_ids' do

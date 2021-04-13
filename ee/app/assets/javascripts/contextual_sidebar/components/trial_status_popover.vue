@@ -103,7 +103,6 @@ export default {
     :container="containerId"
     :target="targetId"
     :disabled="disabled"
-    triggers="hover focus"
     placement="rightbottom"
     boundary="viewport"
     :delay="{ hide: 400 }"

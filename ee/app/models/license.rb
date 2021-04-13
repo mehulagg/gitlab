@@ -8,7 +8,7 @@ class License < ApplicationRecord
   PREMIUM_PLAN = 'premium'
   ULTIMATE_PLAN = 'ultimate'
   CLOUD_LICENSE_TYPE = 'cloud'
-  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0).freeze
+  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
@@ -157,6 +157,7 @@ class License < ApplicationRecord
     group_ci_cd_analytics
     group_level_compliance_dashboard
     incident_management
+    inline_codequality
     insights
     issuable_health_status
     jira_vulnerabilities_integration

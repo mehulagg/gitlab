@@ -4,7 +4,7 @@ require 'faker'
 
 module QA
   RSpec.describe 'Verify' do
-    describe 'Merge train', :runner, :requires_admin do
+    describe 'Merge train', :runner, :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/324122', type: :bug } do
       let(:file_name) { Faker::Lorem.word }
       let(:mr_title) { Faker::Lorem.sentence }
       let(:executor) { "qa-runner-#{Faker::Alphanumeric.alphanumeric(8)}" }

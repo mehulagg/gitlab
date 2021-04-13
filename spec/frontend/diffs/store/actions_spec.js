@@ -17,6 +17,9 @@ import {
   fetchDiffFilesBatch,
   fetchDiffFilesMeta,
   fetchCoverageFiles,
+  clearEtagPoll,
+  stopCodequalityPolling,
+  fetchCodequality,
   assignDiscussionsToDiff,
   removeDiscussionsFromDiff,
   startRenderDiffsQueue,
@@ -80,7 +83,7 @@ describe('DiffsStoreActions', () => {
     jest.spyOn(utils, 'idleCallback').mockImplementation(() => null);
     ['requestAnimationFrame', 'requestIdleCallback'].forEach((method) => {
       global[method] = (cb) => {
-        cb();
+        cb({ timeRemaining: () => 10 });
       };
     });
   });
@@ -98,6 +101,7 @@ describe('DiffsStoreActions', () => {
       const endpointMetadata = '/diffs/set/endpoint/metadata';
       const endpointBatch = '/diffs/set/endpoint/batch';
       const endpointCoverage = '/diffs/set/coverage_reports';
+      const endpointCodequality = '/diffs/set/codequality_diff';
       const projectPath = '/root/project';
       const dismissEndpoint = '/-/user_callouts';
       const showSuggestPopover = false;
@@ -109,6 +113,7 @@ describe('DiffsStoreActions', () => {
           endpointBatch,
           endpointMetadata,
           endpointCoverage,
+          endpointCodequality,
           projectPath,
           dismissEndpoint,
           showSuggestPopover,
@@ -118,6 +123,7 @@ describe('DiffsStoreActions', () => {
           endpointBatch: '',
           endpointMetadata: '',
           endpointCoverage: '',
+          endpointCodequality: '',
           projectPath: '',
           dismissEndpoint: '',
           showSuggestPopover: true,
@@ -130,6 +136,7 @@ describe('DiffsStoreActions', () => {
               endpointMetadata,
               endpointBatch,
               endpointCoverage,
+              endpointCodequality,
               projectPath,
               dismissEndpoint,
               showSuggestPopover,
@@ -198,7 +205,7 @@ describe('DiffsStoreActions', () => {
           { type: types.VIEW_DIFF_FILE, payload: 'test2' },
           { type: types.SET_RETRIEVING_BATCHES, payload: false },
         ],
-        [],
+        [{ type: 'startRenderDiffsQueue' }, { type: 'startRenderDiffsQueue' }],
         done,
       );
     });
@@ -251,6 +258,8 @@ describe('DiffsStoreActions', () => {
           { type: types.SET_LOADING, payload: false },
           { type: types.SET_MERGE_REQUEST_DIFFS, payload: diffMetadata.merge_request_diffs },
           { type: types.SET_DIFF_METADATA, payload: noFilesData },
+          // Workers are synchronous in Jest environment (see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/58805)
+          { type: types.SET_TREE_DATA, payload: utils.generateTreeList(diffMetadata.diff_files) },
         ],
         [],
         () => {
@@ -290,6 +299,47 @@ describe('DiffsStoreActions', () => {
       mock.onGet(endpointCoverage).reply(400);
 
       testAction(fetchCoverageFiles, {}, { endpointCoverage }, [], [], () => {
+        expect(createFlash).toHaveBeenCalledTimes(1);
+        expect(createFlash).toHaveBeenCalledWith(expect.stringMatching('Something went wrong'));
+        done();
+      });
+    });
+  });
+
+  describe('fetchCodequality', () => {
+    let mock;
+    const endpointCodequality = '/fetch';
+
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+    });
+
+    afterEach(() => {
+      stopCodequalityPolling();
+      clearEtagPoll();
+    });
+
+    it('should commit SET_CODEQUALITY_DATA with received response', (done) => {
+      const data = {
+        files: { 'app.js': [{ line: 1, description: 'Unexpected alert.', severity: 'minor' }] },
+      };
+
+      mock.onGet(endpointCodequality).reply(200, { data });
+
+      testAction(
+        fetchCodequality,
+        {},
+        { endpointCodequality },
+        [{ type: types.SET_CODEQUALITY_DATA, payload: { data } }],
+        [],
+        done,
+      );
+    });
+
+    it('should show flash on API error', (done) => {
+      mock.onGet(endpointCodequality).reply(400);
+
+      testAction(fetchCodequality, {}, { endpointCodequality }, [], [], () => {
         expect(createFlash).toHaveBeenCalledTimes(1);
         expect(createFlash).toHaveBeenCalledWith(expect.stringMatching('Something went wrong'));
         done();
@@ -1459,19 +1509,42 @@ describe('DiffsStoreActions', () => {
   });
 
   describe('setFileByFile', () => {
+    const updateUserEndpoint = 'user/prefs';
+    let putSpy;
+    let mock;
+
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+      putSpy = jest.spyOn(axios, 'put');
+
+      mock.onPut(updateUserEndpoint).reply(200, {});
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
     it.each`
       value
       ${true}
       ${false}
-    `('commits SET_FILE_BY_FILE with the new value $value', ({ value }) => {
-      return testAction(
-        setFileByFile,
-        { fileByFile: value },
-        { viewDiffsFileByFile: null },
-        [{ type: types.SET_FILE_BY_FILE, payload: value }],
-        [],
-      );
-    });
+    `(
+      'commits SET_FILE_BY_FILE and persists the File-by-File user preference with the new value $value',
+      async ({ value }) => {
+        await testAction(
+          setFileByFile,
+          { fileByFile: value },
+          {
+            viewDiffsFileByFile: null,
+            endpointUpdateUser: updateUserEndpoint,
+          },
+          [{ type: types.SET_FILE_BY_FILE, payload: value }],
+          [],
+        );
+
+        expect(putSpy).toHaveBeenCalledWith(updateUserEndpoint, { view_diffs_file_by_file: value });
+      },
+    );
   });
 
   describe('reviewFile', () => {

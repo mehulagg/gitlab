@@ -10,6 +10,7 @@ RSpec.describe 'Project issue boards sidebar due date', :js do
   let_it_be(:issue)   { create(:issue, project: project, relative_position: 1) }
   let_it_be(:board)   { create(:board, project: project) }
   let_it_be(:list)    { create(:list, board: board, position: 0) }
+
   let(:card)          { find('.board:nth-child(1)').first('.board-card') }
 
   around do |example|
@@ -29,10 +30,10 @@ RSpec.describe 'Project issue boards sidebar due date', :js do
     it 'updates due date' do
       click_card(card)
 
-      page.within('.due_date') do
+      page.within('[data-testid="sidebar-due-date"]') do
         today = Date.today.day
 
-        click_link 'Edit'
+        click_button 'Edit'
 
         click_button today.to_s
 

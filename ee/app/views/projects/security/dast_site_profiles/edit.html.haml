@@ -5,7 +5,5 @@
 
 .js-dast-site-profile-form{ data: { full_path: @project.path_with_namespace,
 profiles_library_path: project_security_configuration_dast_scans_path(@project, anchor: 'site-profiles'),
-site_profile: { id: @site_profile.to_global_id.to_s, name: @site_profile.name, target_url: @site_profile.dast_site.url,
-excluded_urls: ['https://example.com/logout', 'https://example.com/send_mail'], request_headers: 'new-header',
-auth: { enabled: true, url: 'https://example.com', username: 'admin', usernameField: 'username', passwordField: 'password' }, referenced_in_security_policies: @site_profile.referenced_in_security_policies}.to_json,
+site_profile: @site_profile.to_json,
 on_demand_scans_path: new_project_on_demand_scan_path(@project) } }

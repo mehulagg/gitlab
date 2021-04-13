@@ -1,0 +1,6 @@
+mutation configureDependencyScanning($fullPath: ID!) {
+  configureDependencyScanning(fullPath: $fullPath) {
+    successPath
+    errors
+  }
+}

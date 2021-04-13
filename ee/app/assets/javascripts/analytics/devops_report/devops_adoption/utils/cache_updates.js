@@ -1,9 +1,10 @@
 import produce from 'immer';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 
-export const addSegmentsToCache = (store, segments) => {
+export const addSegmentsToCache = (store, segments, variables) => {
   const sourceData = store.readQuery({
     query: devopsAdoptionSegmentsQuery,
+    variables,
   });
 
   const data = produce(sourceData, (draftData) => {
@@ -15,13 +16,15 @@ export const addSegmentsToCache = (store, segments) => {
 
   store.writeQuery({
     query: devopsAdoptionSegmentsQuery,
+    variables,
     data,
   });
 };
 
-export const deleteSegmentsFromCache = (store, segmentIds) => {
+export const deleteSegmentsFromCache = (store, segmentIds, variables) => {
   const sourceData = store.readQuery({
     query: devopsAdoptionSegmentsQuery,
+    variables,
   });
 
   const updatedData = produce(sourceData, (draftData) => {
@@ -32,6 +35,7 @@ export const deleteSegmentsFromCache = (store, segmentIds) => {
 
   store.writeQuery({
     query: devopsAdoptionSegmentsQuery,
+    variables,
     data: updatedData,
   });
 };

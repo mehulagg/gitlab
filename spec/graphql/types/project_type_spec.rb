@@ -125,8 +125,8 @@ RSpec.describe GitlabSchema.types['Project'] do
 
     it "returns the project's sast configuration for analyzer variables" do
       analyzer = subject.dig('data', 'project', 'sastCiConfiguration', 'analyzers', 'nodes').first
-      expect(analyzer['name']).to eq('brakeman')
-      expect(analyzer['label']).to eq('Brakeman')
+      expect(analyzer['name']).to eq('bandit')
+      expect(analyzer['label']).to eq('Bandit')
       expect(analyzer['enabled']).to eq(true)
     end
 
@@ -243,6 +243,7 @@ RSpec.describe GitlabSchema.types['Project'] do
                                             :assignee_username,
                                             :reviewer_username,
                                             :milestone_title,
+                                            :not,
                                             :sort
                                            )
     end
@@ -370,5 +371,12 @@ RSpec.describe GitlabSchema.types['Project'] do
 
     it { is_expected.to have_graphql_type(Types::Ci::AnalyticsType) }
     it { is_expected.to have_graphql_resolver(Resolvers::ProjectPipelineStatisticsResolver) }
+  end
+
+  describe 'jobs field' do
+    subject { described_class.fields['jobs'] }
+
+    it { is_expected.to have_graphql_type(Types::Ci::JobType.connection_type) }
+    it { is_expected.to have_graphql_arguments(:statuses) }
   end
 end

@@ -20,7 +20,7 @@ describe('ee/BoardContentSidebar', () => {
         issuableType: issuableTypes.issue,
       },
       getters: {
-        activeIssue: () => {
+        activeBoardItem: () => {
           return { ...mockIssue, epic: null };
         },
         projectPathForActiveIssue: () => mockIssueProjectPath,

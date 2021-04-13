@@ -85,6 +85,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:group_members) }
     it { is_expected.to have_many(:groups) }
     it { is_expected.to have_many(:keys).dependent(:destroy) }
+    it { is_expected.to have_many(:expired_today_and_unnotified_keys) }
     it { is_expected.to have_many(:deploy_keys).dependent(:nullify) }
     it { is_expected.to have_many(:group_deploy_keys) }
     it { is_expected.to have_many(:events).dependent(:delete_all) }
@@ -1000,6 +1001,27 @@ RSpec.describe User do
       end
     end
 
+    context 'SSH key expiration scopes' do
+      let_it_be(:user1) { create(:user) }
+      let_it_be(:user2) { create(:user) }
+      let_it_be(:expired_today_not_notified) { create(:key, expires_at: Time.current, user: user1) }
+      let_it_be(:expired_today_already_notified) { create(:key, expires_at: Time.current, user: user2, expiry_notification_delivered_at: Time.current) }
+      let_it_be(:expiring_soon_not_notified) { create(:key, expires_at: 2.days.from_now, user: user2) }
+      let_it_be(:expiring_soon_notified) { create(:key, expires_at: 2.days.from_now, user: user1, before_expiry_notification_delivered_at: Time.current) }
+
+      describe '.with_ssh_key_expired_today' do
+        it 'returns users whose key has expired today' do
+          expect(described_class.with_ssh_key_expired_today).to contain_exactly(user1)
+        end
+      end
+
+      describe '.with_ssh_key_expiring_soon' do
+        it 'returns users whose keys will expire soon' do
+          expect(described_class.with_ssh_key_expiring_soon).to contain_exactly(user2)
+        end
+      end
+    end
+
     describe '.active_without_ghosts' do
       let_it_be(:user1) { create(:user, :external) }
       let_it_be(:user2) { create(:user, state: 'blocked') }
@@ -1777,28 +1799,14 @@ RSpec.describe User do
 
     context 'when user has running CI pipelines' do
       let(:service) { double }
+      let(:pipelines) { build_list(:ci_pipeline, 3, :running) }
 
-      context 'with abort_user_pipelines_on_block feature enabled' do
-        let(:pipelines) { build_list(:ci_pipeline, 3, :running) }
+      it 'aborts all running pipelines and related jobs' do
+        expect(user).to receive(:pipelines).and_return(pipelines)
+        expect(Ci::AbortPipelinesService).to receive(:new).and_return(service)
+        expect(service).to receive(:execute).with(pipelines, :user_blocked)
 
-        it 'aborts all running pipelines and related jobs' do
-          stub_feature_flags(abort_user_pipelines_on_block: true)
-          expect(user).to receive(:pipelines).and_return(pipelines)
-          expect(Ci::AbortPipelinesService).to receive(:new).and_return(service)
-          expect(service).to receive(:execute).with(pipelines)
-
-          user.block
-        end
-      end
-
-      context 'with abort_user_pipelines_on_block feature disabled' do
-        it 'cancels all running pipelines and related jobs' do
-          stub_feature_flags(abort_user_pipelines_on_block: false)
-          expect(Ci::CancelUserPipelinesService).to receive(:new).and_return(service)
-          expect(service).to receive(:execute).with(user)
-
-          user.block
-        end
+        user.block
       end
     end
 
@@ -2522,32 +2530,12 @@ RSpec.describe User do
   describe "#clear_avatar_caches" do
     let(:user) { create(:user) }
 
-    context "when :avatar_cache_for_email flag is enabled" do
-      before do
-        stub_feature_flags(avatar_cache_for_email: true)
-      end
+    it "clears the avatar cache when saving" do
+      allow(user).to receive(:avatar_changed?).and_return(true)
 
-      it "clears the avatar cache when saving" do
-        allow(user).to receive(:avatar_changed?).and_return(true)
+      expect(Gitlab::AvatarCache).to receive(:delete_by_email).with(*user.verified_emails)
 
-        expect(Gitlab::AvatarCache).to receive(:delete_by_email).with(*user.verified_emails)
-
-        user.update(avatar: fixture_file_upload('spec/fixtures/dk.png'))
-      end
-    end
-
-    context "when :avatar_cache_for_email flag is disabled" do
-      before do
-        stub_feature_flags(avatar_cache_for_email: false)
-      end
-
-      it "doesn't attempt to clear the avatar cache" do
-        allow(user).to receive(:avatar_changed?).and_return(true)
-
-        expect(Gitlab::AvatarCache).not_to receive(:delete_by_email)
-
-        user.update(avatar: fixture_file_upload('spec/fixtures/dk.png'))
-      end
+      user.update(avatar: fixture_file_upload('spec/fixtures/dk.png'))
     end
   end
 
@@ -5520,6 +5508,12 @@ RSpec.describe User do
     it_behaves_like 'bot user avatars', :alert_bot, 'alert-bot.png'
     it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
     it_behaves_like 'bot user avatars', :security_bot, 'security-bot.png'
+
+    context 'when bot is the support_bot' do
+      subject { described_class.support_bot }
+
+      it { is_expected.to be_confirmed }
+    end
   end
 
   describe '#confirmation_required_on_sign_in?' do

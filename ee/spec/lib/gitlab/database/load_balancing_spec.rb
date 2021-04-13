@@ -3,15 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Database::LoadBalancing do
+  include_context 'clear DB Load Balancing configuration'
+
   describe '.proxy' do
     context 'when configured' do
       before do
         allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
         subject.configure_proxy
-      end
-
-      after do
-        subject.clear_configuration
       end
 
       it 'returns the connection proxy' do
@@ -133,7 +131,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     let!(:license) { create(:license, plan: ::License::PREMIUM_PLAN) }
 
     before do
-      subject.clear_configuration
+      clear_load_balancing_configuration
       allow(described_class).to receive(:hosts).and_return(%w(foo))
     end
 
@@ -144,7 +142,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     end
 
     it 'returns false when Sidekiq is being used' do
-      allow(described_class).to receive(:hosts).and_return(%w(foo))
       allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
 
       expect(described_class.enable?).to eq(false)
@@ -173,10 +170,22 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       expect(described_class.enable?).to eq(true)
     end
 
+    context 'when ENABLE_LOAD_BALANCING_FOR_SIDEKIQ environment variable is set' do
+      before do
+        stub_env('ENABLE_LOAD_BALANCING_FOR_SIDEKIQ', 'true')
+      end
+
+      it 'returns true when Sidekiq is being used' do
+        allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
+
+        expect(described_class.enable?).to eq(true)
+      end
+    end
+
     context 'without a license' do
       before do
         License.destroy_all # rubocop: disable Cop/DestroyAll
-        subject.clear_configuration
+        clear_load_balancing_configuration
       end
 
       it 'is disabled' do
@@ -207,10 +216,13 @@ RSpec.describe Gitlab::Database::LoadBalancing do
   describe '.configured?' do
     let!(:license) { create(:license, plan: ::License::PREMIUM_PLAN) }
 
+    before do
+      clear_load_balancing_configuration
+    end
+
     it 'returns true when Sidekiq is being used' do
       allow(described_class).to receive(:hosts).and_return(%w(foo))
       allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
-
       expect(described_class.configured?).to eq(true)
     end
 
@@ -238,7 +250,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     context 'without a license' do
       before do
         License.destroy_all # rubocop: disable Cop/DestroyAll
-        subject.clear_configuration
+        clear_load_balancing_configuration
       end
 
       it 'is not configured' do
@@ -248,10 +260,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
   end
 
   describe '.configure_proxy' do
-    after do
-      described_class.clear_configuration
-    end
-
     it 'configures the connection proxy' do
       allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
 
@@ -370,10 +378,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
         subject.configure_proxy(proxy)
       end
 
-      after do
-        subject.clear_configuration
-      end
-
       context 'when the load balancer returns :replica' do
         it 'returns :replica' do
           allow(load_balancer).to receive(:db_role_for_connection).and_return(:replica)
@@ -395,10 +399,10 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       end
 
       context 'when the load balancer returns nil' do
-        it 'returns :primary' do
+        it 'returns nil' do
           allow(load_balancer).to receive(:db_role_for_connection).and_return(nil)
 
-          expect(described_class.db_role_for_connection(connection)).to be(:primary)
+          expect(described_class.db_role_for_connection(connection)).to be(nil)
 
           expect(load_balancer).to have_received(:db_role_for_connection).with(connection)
         end
@@ -445,7 +449,7 @@ RSpec.describe Gitlab::Database::LoadBalancing do
         model.singleton_class.prepend ::Gitlab::Database::LoadBalancing::ActiveRecordProxy
 
         # Setup load balancing
-        subject.clear_configuration
+        clear_load_balancing_configuration
         allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
         subject.configure_proxy(::Gitlab::Database::LoadBalancing::ConnectionProxy.new(hosts))
         allow(ActiveRecord::Base.configurations[Rails.env])
@@ -453,10 +457,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           .with('load_balancing')
           .and_return('hosts' => hosts)
         ::Gitlab::Database::LoadBalancing::Session.clear_session
-      end
-
-      after do
-        subject.clear_configuration
       end
     end
 
@@ -561,10 +561,10 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           false, [:replica, :primary]
         ],
 
-        # use_replica_if_possible
+        # fallback_to_replicas_for_ambiguous_queries
         [
           -> {
-            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+            ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
               model.first
               model.where(name: 'test1').to_a
             end
@@ -572,10 +572,10 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           false, [:replica, :replica]
         ],
 
-        # use_replica_if_possible for read-only transaction
+        # fallback_to_replicas_for_ambiguous_queries for read-only transaction
         [
           -> {
-            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+            ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
               model.transaction do
                 model.first
                 model.where(name: 'test1').to_a
@@ -585,20 +585,20 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           false, [:replica, :replica]
         ],
 
-        # A custom read query inside use_replica_if_possible
+        # A custom read query inside fallback_to_replicas_for_ambiguous_queries
         [
           -> {
-            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+            ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
               model.connection.exec_query("SELECT 1")
             end
           },
           false, [:replica]
         ],
 
-        # A custom read query inside a transaction use_replica_if_possible
+        # A custom read query inside a transaction fallback_to_replicas_for_ambiguous_queries
         [
           -> {
-            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+            ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
               model.transaction do
                 model.connection.exec_query("SET LOCAL statement_timeout = 5000")
                 model.count
@@ -608,33 +608,33 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           true, [:replica, :replica, :replica, :replica]
         ],
 
-        # use_replica_if_possible after a write
+        # fallback_to_replicas_for_ambiguous_queries after a write
         [
           -> {
             model.create!(name: 'Test1')
-            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+            ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
               model.first
             end
           },
           false, [:primary, :primary]
         ],
 
-        # use_replica_if_possible after use_primary!
+        # fallback_to_replicas_for_ambiguous_queries after use_primary!
         [
           -> {
             ::Gitlab::Database::LoadBalancing::Session.current.use_primary!
-            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+            ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
               model.first
             end
           },
           false, [:primary]
         ],
 
-        # use_replica_if_possible inside use_primary
+        # fallback_to_replicas_for_ambiguous_queries inside use_primary
         [
           -> {
             ::Gitlab::Database::LoadBalancing::Session.current.use_primary do
-              ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+              ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
                 model.first
               end
             end
@@ -642,10 +642,10 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           false, [:primary]
         ],
 
-        # use_primary inside use_replica_if_possible
+        # use_primary inside fallback_to_replicas_for_ambiguous_queries
         [
           -> {
-            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+            ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
               ::Gitlab::Database::LoadBalancing::Session.current.use_primary do
                 model.first
               end
@@ -654,10 +654,10 @@ RSpec.describe Gitlab::Database::LoadBalancing do
           false, [:primary]
         ],
 
-        # A write query inside use_replica_if_possible
+        # A write query inside fallback_to_replicas_for_ambiguous_queries
         [
           -> {
-            ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+            ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
               model.first
               model.delete_all
               model.where(name: 'test1').to_a
@@ -702,12 +702,68 @@ RSpec.describe Gitlab::Database::LoadBalancing do
       end
     end
 
-    context 'a write inside a transaction inside use_replica_if_possible block' do
+    context 'custom connection handling' do
+      where(:queries, :expected_role) do
+        [
+          # Reload cache. The schema loading queries should be handled by
+          # primary.
+          [
+            -> {
+              model.connection.clear_cache!
+              model.connection.schema_cache.add('users')
+              model.connection.pool.release_connection
+            },
+            :primary
+          ],
+
+          # Call model's connection method
+          [
+            -> {
+              connection = model.connection
+              connection.select_one('SELECT 1')
+              connection.pool.release_connection
+            },
+            :replica
+          ],
+
+          # Retrieve connection via #retrieve_connection
+          [
+            -> {
+              connection = model.retrieve_connection
+              connection.select_one('SELECT 1')
+              connection.pool.release_connection
+            },
+            :primary
+          ]
+        ]
+      end
+
+      with_them do
+        include_context 'LoadBalancing setup'
+
+        it 'redirects queries to the right roles' do
+          roles = []
+
+          subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
+            role = ::Gitlab::Database::LoadBalancing.db_role_for_connection(event.payload[:connection])
+            roles << role if role.present?
+          end
+
+          self.instance_exec(&queries)
+
+          expect(roles).to all(eql(expected_role))
+        ensure
+          ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+        end
+      end
+    end
+
+    context 'a write inside a transaction inside fallback_to_replicas_for_ambiguous_queries block' do
       include_context 'LoadBalancing setup'
 
       it 'raises an exception' do
         expect do
-          ::Gitlab::Database::LoadBalancing::Session.current.use_replica_if_possible do
+          ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries do
             model.transaction do
               model.first
               model.create!(name: 'hello')

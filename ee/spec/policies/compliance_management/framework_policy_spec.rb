@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ComplianceManagement::FrameworkPolicy do
   let_it_be_with_refind(:framework) { create(:compliance_framework) }
+
   let(:user) { framework.namespace.owner }
 
   subject { described_class.new(user, framework) }

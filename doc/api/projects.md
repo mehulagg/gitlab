@@ -1148,7 +1148,7 @@ POST /projects
 | `namespace_id`                                              | integer | **{dotted-circle}** No | Namespace for the new project (defaults to the current user's namespace). |
 | `operations_access_level`                                   | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `only_allow_merge_if_all_discussions_are_resolved`          | boolean | **{dotted-circle}** No | Set whether merge requests can only be merged when all the discussions are resolved. |
-| `only_allow_merge_if_pipeline_succeeds`                     | boolean | **{dotted-circle}** No | Set whether merge requests can only be merged with successful jobs. |
+| `only_allow_merge_if_pipeline_succeeds`                     | boolean | **{dotted-circle}** No | Set whether merge requests can only be merged with successful pipelines. This setting is named [**Pipelines must succeed**](../user/project/merge_requests/merge_when_pipeline_succeeds.md#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds) in the project settings. |
 | `packages_enabled`                                          | boolean | **{dotted-circle}** No | Enable or disable packages repository feature. |
 | `pages_access_level`                                        | string  | **{dotted-circle}** No | One of `disabled`, `private`, `enabled`, or `public`. |
 | `requirements_access_level`                                 | string  | **{dotted-circle}** No | One of `disabled`, `private`, `enabled` or `public` |
@@ -1196,7 +1196,7 @@ POST /projects/user/:user_id
 | `avatar`                                                    | mixed   | **{dotted-circle}** No | Image file for avatar of the project. |
 | `build_coverage_regex`                                      | string  | **{dotted-circle}** No | Test coverage parsing. |
 | `build_git_strategy`                                        | string  | **{dotted-circle}** No | The Git strategy. Defaults to `fetch`. |
-| `build_timeout`                                             | integer | **{dotted-circle}** No | The maximum amount of time in minutes that a job is able run (in seconds). |
+| `build_timeout`                                             | integer | **{dotted-circle}** No | The maximum amount of time, in seconds, that a job can run. |
 | `builds_access_level`                                       | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `ci_config_path`                                            | string  | **{dotted-circle}** No | The path to CI configuration file. |
 | `container_registry_enabled`                                | boolean | **{dotted-circle}** No | Enable container registry for this project. |
@@ -1269,7 +1269,7 @@ PUT /projects/:id
 | `avatar`                                                    | mixed          | **{dotted-circle}** No | Image file for avatar of the project.                |
 | `build_coverage_regex`                                      | string         | **{dotted-circle}** No | Test coverage parsing. |
 | `build_git_strategy`                                        | string         | **{dotted-circle}** No | The Git strategy. Defaults to `fetch`. |
-| `build_timeout`                                             | integer        | **{dotted-circle}** No | The maximum amount of time in minutes that a job is able run (in seconds). |
+| `build_timeout`                                             | integer        | **{dotted-circle}** No | The maximum amount of time, in seconds, that a job can run. |
 | `builds_access_level`                                       | string         | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `ci_config_path`                                            | string         | **{dotted-circle}** No | The path to CI configuration file. |
 | `ci_default_git_depth`                                      | integer        | **{dotted-circle}** No | Default number of revisions for [shallow cloning](../ci/pipelines/settings.md#git-shallow-clone). |

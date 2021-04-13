@@ -369,7 +369,6 @@ export default {
             <network-policy-editor
               data-testid="network-policy-editor"
               :value="yamlEditorValue"
-              :height="400"
               :read-only="false"
               @input="loadYaml"
             />

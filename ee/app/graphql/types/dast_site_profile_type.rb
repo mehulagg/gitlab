@@ -2,8 +2,12 @@
 
 module Types
   class DastSiteProfileType < BaseObject
+    REDACTED_REQUEST_HEADERS = '[Redacted]'
+
     graphql_name 'DastSiteProfile'
     description 'Represents a DAST Site Profile'
+
+    present_using ::Dast::SiteProfilePresenter
 
     authorize :read_on_demand_scans
 
@@ -65,10 +69,6 @@ module Types
       return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, object.project, default_enabled: :yaml)
 
       object.excluded_urls
-    end
-
-    def request_headers
-      nil
     end
 
     def normalized_target_url

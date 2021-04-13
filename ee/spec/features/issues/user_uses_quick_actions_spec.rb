@@ -8,6 +8,7 @@ RSpec.describe 'Issues > User uses EE quick actions', :js do
   describe 'issue-only commands' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project) }
+
     let(:issue) { create(:issue, project: project) }
 
     before do

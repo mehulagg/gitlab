@@ -9,6 +9,7 @@ import Filters from './first_class_vulnerability_filters.vue';
 import ProjectPipelineStatus from './project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from './project_vulnerabilities.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
+import SurveyRequestBanner from './survey_request_banner.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 
 export default {
@@ -21,6 +22,7 @@ export default {
     VulnerabilitiesCountList,
     CsvExportButton,
     Filters,
+    SurveyRequestBanner,
   },
   mixins: [glFeatureFlagsMixin()],
   inject: ['dashboardDocumentation', 'autoFixDocumentation', 'projectFullPath'],
@@ -34,17 +36,12 @@ export default {
       required: false,
       default: () => ({}),
     },
-    vulnerabilitiesExportEndpoint: {
-      type: String,
-      required: false,
-      default: '',
-    },
   },
   data() {
     const shouldShowAutoFixUserCallout =
       this.glFeatures.securityAutoFix && !Cookies.get('auto_fix_user_callout_dismissed');
     return {
-      filters: {},
+      filters: null,
       shouldShowAutoFixUserCallout,
     };
   },
@@ -63,6 +60,8 @@ export default {
 
 <template>
   <div>
+    <survey-request-banner class="gl-mt-5" />
+
     <template v-if="pipeline.id">
       <auto-fix-user-callout
         v-if="shouldShowAutoFixUserCallout"
@@ -72,8 +71,10 @@ export default {
       <security-dashboard-layout>
         <template #header>
           <div class="gl-mt-6 gl-display-flex">
-            <h4 class="gl-flex-grow-1 gl-my-0">{{ __('Vulnerability Report') }}</h4>
-            <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
+            <h4 class="gl-flex-grow-1 gl-my-0">
+              {{ s__('SecurityReports|Vulnerability Report') }}
+            </h4>
+            <csv-export-button />
           </div>
           <project-pipeline-status :pipeline="pipeline" />
           <vulnerabilities-count-list

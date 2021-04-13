@@ -21,7 +21,8 @@ RSpec.describe EE::IpRestrictions::UpdateService do
 
         it 'builds new ip_restriction records with the provided ranges' do
           expect { subject }
-            .to(change { group.ip_restrictions.map(&:range) }.from([]).to(comma_separated_ranges.split(",")))
+            .to(change { group.ip_restrictions.map(&:range) }
+            .from([]).to(contain_exactly(*comma_separated_ranges.split(","))))
         end
       end
     end
@@ -53,7 +54,7 @@ RSpec.describe EE::IpRestrictions::UpdateService do
           shared_examples 'removes all existing ip_restriction records' do
             it 'marks all the existing ip_restriction records for destruction' do
               records_marked_for_destruction = group.ip_restrictions.select(&:marked_for_destruction?)
-              expect(records_marked_for_destruction.map(&:range)).to eq(ranges)
+              expect(records_marked_for_destruction.map(&:range)).to contain_exactly(*ranges)
             end
           end
 
@@ -65,7 +66,7 @@ RSpec.describe EE::IpRestrictions::UpdateService do
             it 'builds new ip_restriction records with all of the specified ranges' do
               newly_built_ip_restriction_records = group.ip_restrictions.select { |ip_restriction| ip_restriction.id.nil? }
 
-              expect(newly_built_ip_restriction_records.map(&:range)).to eq(comma_separated_ranges.split(","))
+              expect(newly_built_ip_restriction_records.map(&:range)).to contain_exactly(*comma_separated_ranges.split(","))
             end
           end
 
@@ -77,7 +78,7 @@ RSpec.describe EE::IpRestrictions::UpdateService do
             it 'builds new ip_restriction records with only the unique ranges in the specified ranges' do
               newly_built_ip_restriction_records = group.ip_restrictions.select { |ip_restriction| ip_restriction.id.nil? }
 
-              expect(newly_built_ip_restriction_records.map(&:range)).to eq(comma_separated_ranges.split(",").uniq)
+              expect(newly_built_ip_restriction_records.map(&:range)).to contain_exactly(*comma_separated_ranges.split(",").uniq)
             end
           end
         end

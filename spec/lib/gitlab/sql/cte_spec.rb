@@ -14,7 +14,14 @@ RSpec.describe Gitlab::SQL::CTE do
         relation.except(:order).to_sql
       end
 
-      expect(sql).to eq("#{name} AS (#{sql1})")
+      expected = [
+        "#{name} AS ",
+        Gitlab::Database::AsWithMaterialized.materialized_if_supported,
+        (' ' unless Gitlab::Database::AsWithMaterialized.materialized_if_supported.blank?),
+        "(#{sql1})"
+      ].join
+
+      expect(sql).to eq(expected)
     end
   end
 

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Dora::DailyMetrics::RefreshWorker do
   let_it_be(:environment) { create(:environment) }
+
   let(:worker) { described_class.new }
 
   describe '#perform' do

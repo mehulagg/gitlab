@@ -11,7 +11,7 @@ exports[`dashboard has no vulnerabilities empty state matches snapshot 1`] = `
       <p>
         Although it's rare to have no vulnerabilities, it can happen. Check your settings to make sure you've set up your dashboard correctly.
       </p>
-      <div><a href=\\"/path/to/dashboard/documentation\\" class=\\"btn btn-success btn-md gl-button\\">
+      <div class=\\"gl-display-flex gl-flex-wrap gl-justify-content-center\\"><a href=\\"/path/to/dashboard/documentation\\" class=\\"btn gl-mb-3 btn-confirm btn-md gl-button gl-mx-2\\">
           <!---->
           <!----> <span class=\\"gl-button-text\\">Learn more about setting up your dashboard</span></a>
         <!---->

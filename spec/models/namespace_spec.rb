@@ -21,6 +21,7 @@ RSpec.describe Namespace do
     it { is_expected.to have_many :custom_emoji }
     it { is_expected.to have_one :package_setting_relation }
     it { is_expected.to have_one :onboarding_progress }
+    it { is_expected.to have_one :admin_note }
   end
 
   describe 'validations' do
@@ -181,28 +182,6 @@ RSpec.describe Namespace do
       end
 
       it { expect(namespace.traversal_ids).to eq [namespace.id] }
-    end
-  end
-
-  describe 'callbacks' do
-    describe 'before_save :ensure_delayed_project_removal_assigned_to_namespace_settings' do
-      it 'sets the matching value in namespace_settings' do
-        expect { namespace.update!(delayed_project_removal: true) }.to change {
-          namespace.namespace_settings.delayed_project_removal
-        }.from(false).to(true)
-      end
-
-      context 'when the feature flag is disabled' do
-        before do
-          stub_feature_flags(migrate_delayed_project_removal: false)
-        end
-
-        it 'does not set the matching value in namespace_settings' do
-          expect { namespace.update!(delayed_project_removal: true) }.not_to change {
-            namespace.namespace_settings.delayed_project_removal
-          }
-        end
-      end
     end
   end
 
@@ -873,7 +852,51 @@ RSpec.describe Namespace do
     end
   end
 
-  it_behaves_like 'recursive namespace traversal'
+  describe '#use_traversal_ids?' do
+    let_it_be(:namespace) { build(:namespace) }
+
+    subject { namespace.use_traversal_ids? }
+
+    context 'when use_traversal_ids feature flag is true' do
+      before do
+        stub_feature_flags(use_traversal_ids: true)
+      end
+
+      it { is_expected.to eq true }
+    end
+
+    context 'when use_traversal_ids feature flag is false' do
+      before do
+        stub_feature_flags(use_traversal_ids: false)
+      end
+
+      it { is_expected.to eq false }
+    end
+  end
+
+  context 'when use_traversal_ids feature flag is true' do
+    it_behaves_like 'namespace traversal'
+
+    describe '#self_and_descendants' do
+      subject { namespace.self_and_descendants }
+
+      it { expect(subject.to_sql).to include 'traversal_ids @>' }
+    end
+  end
+
+  context 'when use_traversal_ids feature flag is false' do
+    before do
+      stub_feature_flags(use_traversal_ids: false)
+    end
+
+    it_behaves_like 'namespace traversal'
+
+    describe '#self_and_descendants' do
+      subject { namespace.self_and_descendants }
+
+      it { expect(subject.to_sql).not_to include 'traversal_ids @>' }
+    end
+  end
 
   describe '#users_with_descendants' do
     let(:user_a) { create(:user) }
@@ -1390,6 +1413,12 @@ RSpec.describe Namespace do
 
         it_behaves_like 'fetching closest setting'
       end
+    end
+  end
+
+  describe '#paid?' do
+    it 'returns false for a root namespace with a free plan' do
+      expect(namespace.paid?).to eq(false)
     end
   end
 

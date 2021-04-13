@@ -84,6 +84,16 @@ export default {
       required: false,
       default: '',
     },
+    endpointCodequality: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    endpointUpdateUser: {
+      type: String,
+      required: false,
+      default: '',
+    },
     projectPath: {
       type: String,
       required: true,
@@ -160,6 +170,7 @@ export default {
       plainDiffPath: (state) => state.diffs.plainDiffPath,
       emailPatchPath: (state) => state.diffs.emailPatchPath,
       retrievingBatches: (state) => state.diffs.retrievingBatches,
+      codequalityDiff: (state) => state.diffs.codequalityDiff,
     }),
     ...mapState('diffs', [
       'showTreeList',
@@ -173,7 +184,12 @@ export default {
       'viewDiffsFileByFile',
       'mrReviews',
     ]),
-    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
+    ...mapGetters('diffs', [
+      'whichCollapsedTypes',
+      'isParallelView',
+      'currentDiffIndex',
+      'fileCodequalityDiff',
+    ]),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -271,6 +287,8 @@ export default {
       endpointMetadata: this.endpointMetadata,
       endpointBatch: this.endpointBatch,
       endpointCoverage: this.endpointCoverage,
+      endpointCodequality: this.endpointCodequality,
+      endpointUpdateUser: this.endpointUpdateUser,
       projectPath: this.projectPath,
       dismissEndpoint: this.dismissEndpoint,
       showSuggestPopover: this.showSuggestPopover,
@@ -326,6 +344,7 @@ export default {
       'fetchDiffFilesMeta',
       'fetchDiffFilesBatch',
       'fetchCoverageFiles',
+      'fetchCodequality',
       'startRenderDiffsQueue',
       'assignDiscussionsToDiff',
       'setHighlightedRow',
@@ -349,14 +368,6 @@ export default {
     refetchDiffData() {
       this.fetchData(false);
     },
-    startDiffRendering() {
-      requestIdleCallback(
-        () => {
-          this.startRenderDiffsQueue();
-        },
-        { timeout: 1000 },
-      );
-    },
     needsReload() {
       return this.diffFiles.length && isSingleViewStyle(this.diffFiles[0]);
     },
@@ -368,8 +379,6 @@ export default {
         .then(({ real_size }) => {
           this.diffFilesLength = parseInt(real_size, 10);
           if (toggleTree) this.setTreeDisplay();
-
-          this.startDiffRendering();
         })
         .catch(() => {
           createFlash(__('Something went wrong on our end. Please try again!'));
@@ -384,13 +393,16 @@ export default {
           // change when loading the other half of the diff files.
           this.setDiscussions();
         })
-        .then(() => this.startDiffRendering())
         .catch(() => {
           createFlash(__('Something went wrong on our end. Please try again!'));
         });
 
       if (this.endpointCoverage) {
         this.fetchCoverageFiles();
+      }
+
+      if (this.endpointCodequality) {
+        this.fetchCodequality();
       }
 
       if (!this.isNotesFetched) {
@@ -520,6 +532,7 @@ export default {
               :help-page-path="helpPagePath"
               :can-current-user-fork="canCurrentUserFork"
               :view-diffs-file-by-file="viewDiffsFileByFile"
+              :codequality-diff="fileCodequalityDiff(file.file_path)"
             />
             <div
               v-if="showFileByFileNavigation"

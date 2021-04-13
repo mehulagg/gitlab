@@ -60,7 +60,7 @@ module Gitlab
         end
 
         def transaction(*args, &block)
-          if ::Gitlab::Database::LoadBalancing::Session.current.use_replica?
+          if ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries?
             track_read_only_transaction!
             read_using_load_balancer(:transaction, args, &block)
           else
@@ -73,7 +73,7 @@ module Gitlab
 
         # Delegates all unknown messages to a read-write connection.
         def method_missing(name, *args, &block)
-          if ::Gitlab::Database::LoadBalancing::Session.current.use_replica?
+          if ::Gitlab::Database::LoadBalancing::Session.current.fallback_to_replicas_for_ambiguous_queries?
             read_using_load_balancer(name, args, &block)
           else
             write_using_load_balancer(name, args, &block)

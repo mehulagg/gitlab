@@ -29,6 +29,7 @@ RSpec.describe 'EE > Projects > Licenses > Maintainer views policies', :js do
     let_it_be(:mit) { create(:software_license, :mit) }
     let_it_be(:mit_policy) { create(:software_license_policy, :denied, software_license: mit, project: project) }
     let_it_be(:pipeline) { create(:ee_ci_pipeline, project: project, builds: [create(:ee_ci_build, :license_scan_v2, :success)]) }
+
     let(:report) { Gitlab::Json.parse(fixture_file('security_reports/gl-license-scanning-report-v2.json', dir: 'ee')) }
     let(:known_licenses) { report['licenses'].find_all { |license| license['url'].present? } }
 
@@ -51,7 +52,7 @@ RSpec.describe 'EE > Projects > Licenses > Maintainer views policies', :js do
       end
 
       it 'displays the classification' do
-        selector = "div[data-qa-selector='admin_license_compliance_row']"
+        selector = "div[data-testid='admin-license-compliance-row']"
         expect(page).to have_selector(selector)
 
         row = page.find(selector)

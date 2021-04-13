@@ -59,7 +59,7 @@ gem 'akismet', '~> 3.0'
 gem 'invisible_captcha', '~> 1.1.0'
 
 # Two-factor authentication
-gem 'devise-two-factor', '~> 3.1.0'
+gem 'devise-two-factor', '~> 4.0.0'
 gem 'rqrcode-rails3', '~> 0.1.7'
 gem 'attr_encrypted', '~> 3.1.0'
 gem 'u2f', '~> 0.2.1'
@@ -238,9 +238,6 @@ gem 'redis-rails', '~> 5.0.2'
 # Discord integration
 gem 'discordrb-webhooks', '~> 3.4', require: false
 
-# HipChat integration
-gem 'hipchat', '~> 1.5.0'
-
 # Jira integration
 gem 'jira-ruby', '~> 2.1.4'
 gem 'atlassian-jwt', '~> 0.2.0'
@@ -277,7 +274,10 @@ gem 'licensee', '~> 9.14.1'
 gem 'charlock_holmes', '~> 0.7.7'
 
 # Detect mime content type from content
-gem 'mimemagic', '~> 0.3.2'
+gem 'ruby-magic', '~> 0.4'
+
+# Fake version of the gem to trick bundler
+gem 'mimemagic', '0.3.7', path: 'vendor/shims/mimemagic', require: false
 
 # Faster blank
 gem 'fast_blank'
@@ -343,13 +343,13 @@ group :metrics do
 end
 
 group :development do
-  gem 'brakeman', '~> 4.2', require: false
-  gem 'lefthook', '~> 0.7', require: false
+  gem 'brakeman', '~> 4.10.0', require: false
+  gem 'lefthook', '~> 0.7.0', require: false
 
-  gem 'letter_opener_web', '~> 1.3.4'
+  gem 'letter_opener_web', '~> 1.4.0'
 
   # Better errors handler
-  gem 'better_errors', '~> 2.7.1'
+  gem 'better_errors', '~> 2.9.0'
 
   # thin instead webrick
   gem 'thin', '~> 1.8.0'
@@ -399,8 +399,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'danger-gitlab', '~> 8.0', require: false
-  gem 'gitlab-dangerfiles', '~> 0.8.0', require: false
+  gem 'gitlab-dangerfiles', '~> 1.1.1', require: false
 end
 
 group :development, :test, :coverage do
@@ -476,11 +475,11 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.9.0.pre.rc1'
+gem 'gitaly', '~> 13.11.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
-gem 'google-protobuf', '~> 3.12'
+gem 'google-protobuf', '~> 3.14.0'
 
 gem 'toml-rb', '~> 1.0.0'
 
@@ -489,7 +488,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.1'
+gem 'gitlab-experiment', '~> 0.5.3'
 
 # Structured logging
 gem 'lograge', '~> 0.5'
@@ -512,9 +511,10 @@ gem 'erubi', '~> 1.9.0'
 # Monkey-patched in `config/initializers/mail_encoding_patch.rb`
 # See https://gitlab.com/gitlab-org/gitlab/issues/197386
 gem 'mail', '= 2.7.1'
+gem 'mail-smtp_pool', '~> 0.1.0', path: 'vendor/gems/mail-smtp_pool', require: false
 
 # File encryption
-gem 'lockbox', '~> 0.3.3'
+gem 'lockbox', '~> 0.6.2'
 
 # Email validation
 gem 'valid_email', '~> 0.1'

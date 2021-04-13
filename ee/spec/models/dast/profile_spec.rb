@@ -3,13 +3,17 @@
 require 'spec_helper'
 
 RSpec.describe Dast::Profile, type: :model do
-  subject { create(:dast_profile) }
+  let_it_be(:project) { create(:project) }
+
+  subject { create(:dast_profile, project: project) }
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:dast_site_profile) }
     it { is_expected.to belong_to(:dast_scanner_profile) }
     it { is_expected.to have_many(:secret_variables).through(:dast_site_profile).class_name('Dast::SiteProfileSecretVariable') }
+    it { is_expected.to have_many(:dast_profiles_pipelines).class_name('Dast::ProfilesPipeline').with_foreign_key(:dast_profile_id).inverse_of(:dast_profile) }
+    it { is_expected.to have_many(:ci_pipelines).through(:dast_profiles_pipelines).class_name('Ci::Pipeline') }
   end
 
   describe 'validations' do
@@ -24,7 +28,6 @@ RSpec.describe Dast::Profile, type: :model do
     it { is_expected.to validate_presence_of(:name) }
 
     context 'when the project_id and dast_site_profile.project_id do not match' do
-      let(:project) { create(:project) }
       let(:dast_site_profile) { create(:dast_site_profile) }
 
       subject { build(:dast_profile, project: project, dast_site_profile: dast_site_profile) }
@@ -38,7 +41,6 @@ RSpec.describe Dast::Profile, type: :model do
     end
 
     context 'when the project_id and dast_scanner_profile.project_id do not match' do
-      let(:project) { create(:project) }
       let(:dast_scanner_profile) { create(:dast_scanner_profile) }
 
       subject { build(:dast_profile, project: project, dast_scanner_profile: dast_scanner_profile) }
@@ -93,6 +95,22 @@ RSpec.describe Dast::Profile, type: :model do
 
         it 'returns a Dast::Branch' do
           expect(subject.branch).to be_a(Dast::Branch)
+        end
+      end
+    end
+
+    describe '#ci_variables' do
+      context 'when there are no secret_variables' do
+        it 'returns an empty collection' do
+          expect(subject.ci_variables.size).to be_zero
+        end
+      end
+
+      context 'when there are secret_variables' do
+        it 'returns a collection containing that variable' do
+          variable = create(:dast_site_profile_secret_variable, dast_site_profile: subject.dast_site_profile)
+
+          expect(subject.ci_variables.to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
         end
       end
     end

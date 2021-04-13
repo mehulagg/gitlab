@@ -20,6 +20,7 @@ Then you can:
   [merge requests](../project/merge_requests/reviewing_and_managing_merge_requests.md#view-merge-requests-for-all-projects-in-a-group)
   for all projects in the group, together in a single list view.
 - [Bulk edit](../group/bulk_editing/index.md) issues, epics, and merge requests.
+- [Create a wiki](../project/wiki/index.md) for the group.
 
 You can also create [subgroups](subgroups/index.md).
 
@@ -140,7 +141,7 @@ To remove a member from a group:
 1. From the left menu, select **Members**.
 1. Next to the member you want to remove, select **Delete**.
 1. Optional. On the **Remove member** confirmation box, select the
-  **Also unassign this user from related issues and merge requests** checkbox.
+  **Also unassign this user from linked issues and merge requests** checkbox.
 1. Select **Remove member**.
 
 ## Filter and sort members in a group
@@ -261,6 +262,9 @@ To view the activity feed in Atom format, select the
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/18328) in GitLab 12.7.
 
+NOTE:
+In GitLab 13.11, you can [replace this form with a modal window](#share-a-group-modal-window).
+
 Similar to how you [share a project with a group](../project/members/share_project_with_groups.md),
 you can share a group with another group. Members get direct access
 to the shared group. This is not valid for inherited members.
@@ -276,6 +280,27 @@ To share a given group, for example, `Frontend` with another group, for example,
 1. Select **Invite**.
 
 All the members of the `Engineering` group are added to the `Frontend` group.
+
+### Share a group modal window
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247208) in GitLab 13.11.
+> - [Deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - Replaces the existing form with buttons to open a modal window.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](../project/members/index.md#enable-or-disable-modal-window). **(FREE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+In GitLab 13.11, you can optionally replace the sharing form with a modal window.
+To share a group after enabling this feature:
+
+1. Go to your group's page.
+1. In the left sidebar, go to **Members**, and then select **Invite a group**.
+1. Select a group, and select a **Max access level**.
+1. (Optional) Select an **Access expiration date**.
+1. Select **Invite**.
 
 ## Manage group memberships via LDAP **(PREMIUM SELF)**
 
@@ -321,25 +346,6 @@ LDAP user permissions can be manually overridden by an administrator. To overrid
 1. Select the brown **Edit permissions** button in the modal.
 
 Now you can edit the user's permissions from the **Members** page.
-
-## Group wikis **(PREMIUM)**
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13195) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
-
-Group wikis work the same way as [project wikis](../project/wiki/index.md).
-
-Group wikis can be edited by members with [Developer permissions](../../user/permissions.md#group-members-permissions)
-and above.
-
-You can move group wiki repositories by using the [Group repository storage moves API](../../api/group_repository_storage_moves.md).
-
-There are a few limitations compared to project wikis:
-
-- Git LFS is not supported.
-- Group wikis are not included in global search.
-- Changes to group wikis don't show up in the group's activity feed.
-
-For updates, follow [the epic that tracks feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
 
 ## Transfer a group
 
@@ -467,7 +473,7 @@ You should consider these security implications before configuring IP address re
   they cause SSH requests, including Git operations over SSH, to fail. For more information,
   read [issue 271673](https://gitlab.com/gitlab-org/gitlab/-/issues/271673).
 - **Administrators and group owners**: Users with these permission levels can always
-  access the group settings, regardless of IP restriction, but the can't access projects
+  access the group settings, regardless of IP restriction, but they cannot access projects
   belonging to the group when accessing from a disallowed IP address.
 
 To restrict group access by IP address:
@@ -629,6 +635,7 @@ The group's new subgroups have push rules set for them based on either:
 
 ## Related topics
 
+- [Group wikis](../project/wiki/index.md)
 - [Maximum artifacts size](../admin_area/settings/continuous_integration.md#maximum-artifacts-size). **(FREE SELF)**
 - [Repositories analytics](repositories_analytics/index.md): View overall activity of all projects with code coverage. **(PREMIUM)**
 - [Contribution analytics](contribution_analytics/index.md): View the contributions (pushes, merge requests,
@@ -653,3 +660,15 @@ The group's new subgroups have push rules set for them based on either:
 - [Lock the sharing with group feature](#prevent-a-project-from-being-shared-with-groups).
 - [Enforce two-factor authentication (2FA)](../../security/two_factor_authentication.md#enforcing-2fa-for-all-users-in-a-group): Enforce 2FA
   for all group members.
+
+## Troubleshooting
+
+### Verify if access is blocked by IP restriction
+
+If a user sees a 404 when they would normally expect access, and the problem is limited to a specific group, search the `auth.log` rails log for one or more of the following:
+
+- `json.message`: `'Attempting to access IP restricted group'`
+- `json.allowed`: `false`
+
+In viewing the log entries, compare the `remote.ip` with the list of
+[allowed IPs](#restrict-group-access-by-ip-address) for the group.

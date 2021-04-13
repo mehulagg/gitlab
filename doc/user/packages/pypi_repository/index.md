@@ -17,6 +17,9 @@ The Package Registry works with:
 - [pip](https://pypi.org/project/pip/)
 - [twine](https://pypi.org/project/twine/)
 
+For documentation of the specific API endpoints that the `pip` and `twine`
+clients use, see the [PyPI API documentation](../../../api/packages/pypi.md).
+
 ## Build a PyPI package
 
 This section explains how to create a PyPI package.
@@ -356,3 +359,10 @@ characters are removed.
 
 A `pip install` request for `my.package` looks for packages that match any of
 the three characters, such as `my-package`, `my_package`, and `my....package`.
+
+## Supported CLI commands
+
+The GitLab PyPI repository supports the following CLI commands:
+
+- `twine upload`: Upload a package to the registry.
+- `pip install`: Install a PyPI package from the registry.

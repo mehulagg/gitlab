@@ -2,10 +2,10 @@
 
 # Required let variables:
 #
-# - model_record: A valid, unpersisted instance of the model class
-#
-# We do not use `described_class` here, so we can include this in replicator
-# strategy shared examples instead of in *every* model spec.
+# - model_record: A valid, unpersisted instance of the model class. Or a valid,
+#                 persisted instance of the model class in a not-yet loaded let
+#                 variable (so we can trigger creation).
+# - replicator_class
 #
 # Also see ee/spec/lib/gitlab/geo/replicable_model_spec.rb:
 #
@@ -23,7 +23,9 @@ RSpec.shared_examples 'a replicable model' do
   end
 
   it 'invokes replicator.handle_after_create_commit on create' do
-    expect(model_record.replicator).to receive(:handle_after_create_commit)
+    expect_next_instance_of(replicator_class) do |replicator|
+      expect(replicator).to receive(:handle_after_create_commit)
+    end
 
     model_record.save!
   end

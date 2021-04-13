@@ -19,7 +19,7 @@ module Ci
         end
       end
 
-      BATCH_SIZE = 1000.freeze
+      BATCH_SIZE = 1000
 
       def initialize
         @failed_batches = []

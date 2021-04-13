@@ -9,9 +9,10 @@ RSpec.describe Members::InviteService, :aggregate_failures do
   let_it_be(:subgroup) { create(:group, parent: root_ancestor) }
   let_it_be(:subgroup_project) { create(:project, group: subgroup) }
 
-  let(:params) { { email: %w[email@example.org email2@example.org], access_level: Gitlab::Access::GUEST } }
+  let(:base_params) { { access_level: Gitlab::Access::GUEST, source: project } }
+  let(:params) { { email: %w[email@example.org email2@example.org] } }
 
-  subject(:result) { described_class.new(user, params).execute(project) }
+  subject(:result) { described_class.new(user, base_params.merge(params)).execute }
 
   before_all do
     project.add_maintainer(user)
@@ -79,6 +80,22 @@ RSpec.describe Members::InviteService, :aggregate_failures do
       it 'successfully creates members' do
         expect { result }.to change(ProjectMember, :count).by(2)
         expect(result[:status]).to eq(:success)
+      end
+    end
+
+    context 'with Audit Event logging' do
+      context 'when there are valid members created' do
+        it 'creates Audit Events' do
+          expect { result }.to change { AuditEvent.count }.by(2)
+        end
+      end
+
+      context 'when there are some invalid members' do
+        let(:params) { { email: %w[_bogus_ email2@example.org] } }
+
+        it 'only creates Audit Events for valid members' do
+          expect { result }.to change { AuditEvent.count }.by(1)
+        end
       end
     end
   end

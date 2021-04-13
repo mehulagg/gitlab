@@ -172,6 +172,7 @@ a preconfigured `workflow: rules` entry.
 - [`when`](#when): Specify what to do when the `if` rule evaluates to true.
   - To run a pipeline, set to `always`.
   - To prevent pipelines from running, set to `never`.
+- [`variables`](#workflowrulesvariables): If not defined, uses the [variables defined elsewhere](#variables).
 
 When no rules evaluate to true, the pipeline does not run.
 
@@ -221,6 +222,87 @@ request pipelines.
 
 If your rules match both branch pipelines and merge request pipelines,
 [duplicate pipelines](#avoid-duplicate-pipelines) can occur.
+
+#### `workflow:rules:variables`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/294232) in GitLab 13.11.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-workflowrulesvariables). **(CORE ONLY)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can use [`variables`](#variables) in `workflow:rules:` to define variables for specific pipeline conditions.
+
+For example:
+
+```yaml
+variables:
+  DEPLOY_VARIABLE: "default-deploy"
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /master/
+      variables:
+        DEPLOY_VARIABLE: "deploy-production"  # Override globally-defined DEPLOY_VARIABLE
+    - if: $CI_COMMIT_REF_NAME =~ /feature/
+      variables:
+        IS_A_FEATURE: "true"                  # Define a new variable.
+    - when: always                            # Run the pipeline in other cases
+
+job1:
+  variables:
+    DEPLOY_VARIABLE: "job1-default-deploy"
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /master/
+      variables:                                   # Override DEPLOY_VARIABLE defined
+        DEPLOY_VARIABLE: "job1-deploy-production"  # at the job level.
+    - when: on_success                             # Run the job in other cases
+  script:
+    - echo "Run script with $DEPLOY_VARIABLE as an argument"
+    - echo "Run another script if $IS_A_FEATURE exists"
+
+job2:
+  script:
+    - echo "Run script with $DEPLOY_VARIABLE as an argument"
+    - echo "Run another script if $IS_A_FEATURE exists"
+```
+
+When the branch is `master`:
+
+- job1's `DEPLOY_VARIABLE` is `job1-deploy-production`.
+- job2's `DEPLOY_VARIABLE` is `deploy-production`.
+
+When the branch is `feature`:
+
+- job1's `DEPLOY_VARIABLE` is `job1-default-deploy`, and `IS_A_FEATURE` is `true`.
+- job2's `DEPLOY_VARIABLE` is `default-deploy`, and `IS_A_FEATURE` is `true`.
+
+When the branch is something else:
+
+- job1's `DEPLOY_VARIABLE` is `job1-default-deploy`.
+- job2's `DEPLOY_VARIABLE` is `default-deploy`.
+
+##### Enable or disable workflow:rules:variables **(CORE ONLY)**
+
+rules:variables is under development and not ready for production use.
+It is deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_workflow_rules_variables)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_workflow_rules_variables)
+```
 
 #### `workflow:rules` templates
 
@@ -512,7 +594,7 @@ Use `image` to specify [a Docker image](../docker/using_docker_images.md#what-is
 
 For:
 
-- Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
+- Usage examples, see [Define `image` in the `.gitlab-ci.yml` file](../docker/using_docker_images.md#define-image-in-the-gitlab-ciyml-file).
 - Detailed usage information, refer to [Docker integration](../docker/index.md) documentation.
 
 #### `image:name`
@@ -529,11 +611,11 @@ For more information, see [Available settings for `image`](../docker/using_docke
 
 #### `services`
 
-Use `services` to specify a [service Docker image](../docker/using_docker_images.md#what-is-a-service), linked to a base image specified in [`image`](#image).
+Use `services` to specify a [service Docker image](../services/index.md), linked to a base image specified in [`image`](#image).
 
 For:
 
-- Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
+- Usage examples, see [Define `services` in the `.gitlab-ci.yml` file](../services/index.md#define-services-in-the-gitlab-ciyml-file).
 - Detailed usage information, refer to [Docker integration](../docker/index.md) documentation.
 - Example services, see [GitLab CI/CD Services](../services/index.md).
 
@@ -541,25 +623,25 @@ For:
 
 An [extended Docker configuration option](../docker/using_docker_images.md#extended-docker-configuration-options).
 
-For more information, see [Available settings for `services`](../docker/using_docker_images.md#available-settings-for-services).
+For more information, see [Available settings for `services`](../services/index.md#available-settings-for-services).
 
 ##### `services:alias`
 
 An [extended Docker configuration option](../docker/using_docker_images.md#extended-docker-configuration-options).
 
-For more information, see [Available settings for `services`](../docker/using_docker_images.md#available-settings-for-services).
+For more information, see [Available settings for `services`](../services/index.md#available-settings-for-services).
 
 ##### `services:entrypoint`
 
 An [extended Docker configuration option](../docker/using_docker_images.md#extended-docker-configuration-options).
 
-For more information, see [Available settings for `services`](../docker/using_docker_images.md#available-settings-for-services).
+For more information, see [Available settings for `services`](../services/index.md#available-settings-for-services).
 
 ##### `services:command`
 
 An [extended Docker configuration option](../docker/using_docker_images.md#extended-docker-configuration-options).
 
-For more information, see [Available settings for `services`](../docker/using_docker_images.md#available-settings-for-services).
+For more information, see [Available settings for `services`](../services/index.md#available-settings-for-services).
 
 ### `script`
 
@@ -1180,7 +1262,7 @@ expression string per rule, rather than an array of them. Any set of expressions
 evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
 by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-cicd-variable-expressions).
 
-Unlike variables in [`script`](../variables/README.md#syntax-of-cicd-variables-in-job-scripts)
+Unlike variables in [`script`](../variables/README.md#use-cicd-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
 
 `if:` clauses are evaluated based on the values of [predefined CI/CD variables](../variables/predefined_variables.md)
@@ -2149,10 +2231,11 @@ To download artifacts from a job in the current pipeline, use the basic form of 
 #### Optional `needs`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30680) in GitLab 13.10.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-optional-needs). **(FREE SELF)**
+> - [Deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/323891) in GitLab 13.11.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-optional-needs). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -2191,10 +2274,10 @@ rspec:
 
 #### Enable or disable optional needs **(FREE SELF)**
 
-Optional needs is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+Optional needs is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -2699,7 +2782,7 @@ To follow progress on support for GitLab-managed clusters, see the
 
 #### `environment:deployment_tier`
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27630) in GitLab 13.10.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/300741) in GitLab 13.10.
 
 Use the `deployment_tier` keyword to specify the tier of the deployment environment:
 
@@ -4101,6 +4184,8 @@ finishes.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/19298) in GitLab 13.2.
 
 Use `release` to create a [release](../../user/project/releases/index.md).
+Requires the [`release-cli`](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs)
+to be available in your GitLab Runner Docker or shell executor.
 
 These keywords are supported:
 
@@ -4121,6 +4206,99 @@ You must specify the Docker image to use for the `release-cli`:
 ```yaml
 image: registry.gitlab.com/gitlab-org/release-cli:latest
 ```
+
+#### `release-cli` for shell executors
+
+> [Introduced](https://gitlab.com/gitlab-org/release-cli/-/issues/21) in GitLab 13.8.
+
+For GitLab Runner shell executors, you can download and install the `release-cli` manually for your [supported OS and architecture](https://release-cli-downloads.s3.amazonaws.com/latest/index.html).
+Once installed, the `release` keyword should be available to you.
+
+**Install on Unix/Linux**
+
+1. Download the binary for your system, in the following example for amd64 systems:
+
+  ```shell
+  curl --location --output /usr/local/bin/release-cli "https://release-cli-downloads.s3.amazonaws.com/latest/release-cli-linux-amd64"
+  ```
+
+1. Give it permissions to execute:
+
+  ```shell
+  sudo chmod +x /usr/local/bin/release-cli
+  ```
+
+1. Verify `release-cli` is available:
+
+  ```shell
+  $ release-cli -v
+
+  release-cli version 0.6.0
+  ```
+
+**Install on Windows PowerShell**
+
+1. Create a folder somewhere in your system, for example `C:\GitLab\Release-CLI\bin`
+
+  ```shell
+  New-Item -Path 'C:\GitLab\Release-CLI\bin' -ItemType Directory
+  ```
+
+1. Download the executable file:
+
+  ```shell
+  PS C:\> Invoke-WebRequest -Uri "https://release-cli-downloads.s3.amazonaws.com/latest/release-cli-windows-amd64.exe" -OutFile "C:\GitLab\Release-CLI\bin\release-cli.exe"
+
+      Directory: C:\GitLab\Release-CLI
+  Mode                LastWriteTime         Length Name
+  ----                -------------         ------ ----
+  d-----        3/16/2021   4:17 AM                bin
+
+  ```
+
+1. Add the directory to your `$env:PATH`:
+
+  ```shell
+  $env:PATH += ";C:\GitLab\Release-CLI\bin"
+  ```
+
+1. Verify `release-cli` is available:
+
+  ```shell
+  PS C:\> release-cli -v
+
+  release-cli version 0.6.0
+  ```
+
+#### Use a custom SSL CA certificate authority
+
+You can use the `ADDITIONAL_CA_CERT_BUNDLE` CI/CD variable to configure a custom SSL CA certificate authority,
+which is used to verify the peer when the `release-cli` creates a release through the API using HTTPS with custom certificates.
+The `ADDITIONAL_CA_CERT_BUNDLE` value should contain the
+[text representation of the X.509 PEM public-key certificate](https://tools.ietf.org/html/rfc7468#section-5.1)
+or the `path/to/file` containing the certificate authority.
+For example, to configure this value in the `.gitlab-ci.yml` file, use the following:
+
+```yaml
+release:
+  variables:
+    ADDITIONAL_CA_CERT_BUNDLE: |
+        -----BEGIN CERTIFICATE-----
+        MIIGqTCCBJGgAwIBAgIQI7AVxxVwg2kch4d56XNdDjANBgkqhkiG9w0BAQsFADCB
+        ...
+        jWgmPqF3vUbZE0EyScetPJquRFRKIesyJuBFMAs=
+        -----END CERTIFICATE-----
+  script:
+    - echo "Create release"
+  release:
+    name: 'My awesome release'
+    tag_name: '$CI_COMMIT_TAG'
+```
+
+The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a
+[custom variable in the UI](../variables/README.md#custom-cicd-variables),
+either as a `file`, which requires the path to the certificate, or as a variable,
+which requires the text representation of the certificate.
 
 #### `script`
 
@@ -4522,10 +4700,10 @@ meaning it applies to all jobs. If you define a variable in a job, it's availabl
 to that job only.
 
 If a variable of the same name is defined globally and for a specific job, the
-[job-specific variable overrides the global variable](../variables/README.md#priority-of-cicd-variables).
+[job-specific variable overrides the global variable](../variables/README.md#cicd-variable-precedence).
 
 All YAML-defined variables are also set to any linked
-[Docker service containers](../docker/using_docker_images.md#what-is-a-service).
+[Docker service containers](../services/index.md).
 
 You can use [YAML anchors for variables](#yaml-anchors-for-variables).
 
@@ -4832,7 +5010,7 @@ reused in the `test` job:
       - !reference [.teardown, after_script]
   ```
 
-In the following example, `test-vars-1` reuses the all the variables in `.vars`, while `test-vars-2`
+In the following example, `test-vars-1` reuses all the variables in `.vars`, while `test-vars-2`
 selects a specific variable and reuses it as a new `MY_VAR` variable.
 
 ```yaml

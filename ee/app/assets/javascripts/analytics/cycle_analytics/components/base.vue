@@ -6,7 +6,7 @@ import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE } from '../constants';
+import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
 import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
@@ -14,6 +14,7 @@ import Metrics from './metrics.vue';
 import PathNavigation from './path_navigation.vue';
 import StageTable from './stage_table.vue';
 import StageTableNav from './stage_table_nav.vue';
+import StageTableNew from './stage_table_new.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
 import ValueStreamSelect from './value_stream_select.vue';
 
@@ -28,6 +29,7 @@ export default {
     TypeOfWorkCharts,
     CustomStageForm,
     StageTableNav,
+    StageTableNew,
     PathNavigation,
     FilterBar,
     ValueStreamSelect,
@@ -53,6 +55,7 @@ export default {
       'featureFlags',
       'isLoading',
       'isLoadingStage',
+      // NOTE: we can remove the `isEmptyStage` field when we remove the existing stage table
       'isEmptyStage',
       'currentGroup',
       'selectedProjects',
@@ -86,17 +89,28 @@ export default {
     shouldDisplayFilters() {
       return !this.errorCode;
     },
+    isOverviewStageSelected() {
+      return this.selectedStage?.id === OVERVIEW_STAGE_ID;
+    },
     shouldDisplayDurationChart() {
-      return this.featureFlags.hasDurationChart && !this.hasNoAccessError;
+      return (
+        !this.featureFlags.hasPathNavigation ||
+        (this.featureFlags.hasDurationChart &&
+          this.isOverviewStageSelected &&
+          !this.hasNoAccessError)
+      );
     },
     shouldDisplayTypeOfWorkCharts() {
-      return !this.hasNoAccessError;
+      return (
+        !this.featureFlags.hasPathNavigation ||
+        (this.isOverviewStageSelected && !this.hasNoAccessError)
+      );
     },
     selectedStageReady() {
       return !this.hasNoAccessError && this.selectedStage;
     },
     shouldDisplayPathNavigation() {
-      return this.featureFlags.hasPathNavigation && !this.hasNoAccessError;
+      return this.featureFlags.hasPathNavigation && this.selectedStageReady;
     },
     shouldDisplayVerticalNavigation() {
       return !this.featureFlags.hasPathNavigation && this.selectedStageReady;
@@ -134,6 +148,7 @@ export default {
       'fetchStageData',
       'setSelectedProjects',
       'setSelectedStage',
+      'setDefaultSelectedStage',
       'setDateRange',
       'removeStage',
       'updateStage',
@@ -146,8 +161,12 @@ export default {
     },
     onStageSelect(stage) {
       this.hideForm();
-      this.setSelectedStage(stage);
-      this.fetchStageData(this.selectedStage.slug);
+      if (stage.slug === OVERVIEW_STAGE_ID) {
+        this.setDefaultSelectedStage();
+      } else {
+        this.setSelectedStage(stage);
+        this.fetchStageData(stage.slug);
+      }
     },
     onShowAddStageForm() {
       this.showCreateForm();
@@ -235,7 +254,7 @@ export default {
         </div>
       </div>
     </div>
-    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-0">
+    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-2">
       <gl-empty-state
         v-if="hasNoAccessError"
         class="js-empty-state"
@@ -247,9 +266,24 @@ export default {
           )
         "
       />
-      <div v-else>
-        <metrics :group-path="currentGroupPath" :request-params="cycleAnalyticsRequestParams" />
+      <template v-else>
+        <metrics
+          v-if="!featureFlags.hasPathNavigation || isOverviewStageSelected"
+          :group-path="currentGroupPath"
+          :request-params="cycleAnalyticsRequestParams"
+        />
+        <template v-if="featureFlags.hasPathNavigation">
+          <stage-table-new
+            v-if="!isLoading && !isOverviewStageSelected"
+            :is-loading="isLoading || isLoadingStage"
+            :stage-events="currentStageEvents"
+            :current-stage="selectedStage"
+            :empty-state-message="selectedStageError"
+            :no-data-svg-path="noDataSvgPath"
+          />
+        </template>
         <stage-table
+          v-else
           :key="stageCount"
           class="js-stage-table"
           :current-stage="selectedStage"
@@ -287,7 +321,7 @@ export default {
           </template>
         </stage-table>
         <url-sync :query="query" />
-      </div>
+      </template>
       <duration-chart v-if="shouldDisplayDurationChart" class="gl-mt-3" :stages="activeStages" />
       <type-of-work-charts v-if="shouldDisplayTypeOfWorkCharts" />
     </div>

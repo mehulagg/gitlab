@@ -20,7 +20,6 @@ import {
   REMOVE_BILLABLE_MEMBER_MODAL_ID,
 } from 'ee/billings/seat_usage/constants';
 import { s__ } from '~/locale';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import RemoveBillableMemberModal from './remove_billable_member_modal.vue';
 
 export default {
@@ -38,7 +37,6 @@ export default {
     GlSearchBoxByType,
     GlTable,
     RemoveBillableMemberModal,
-    TimeAgoTooltip,
   },
   data() {
     return {
@@ -186,13 +184,8 @@ export default {
       </template>
 
       <template #cell(lastActivityTime)="data">
-        <time-ago-tooltip
-          v-if="data.item.user.last_activity_on"
-          :time="data.item.user.last_activity_on"
-          tooltip-placement="bottom"
-        />
-        <span v-else>
-          {{ __('Never') }}
+        <span>
+          {{ data.item.user.last_activity_on ? data.item.user.last_activity_on : __('Never') }}
         </span>
       </template>
 
