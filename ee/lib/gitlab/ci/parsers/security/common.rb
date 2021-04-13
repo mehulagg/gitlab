@@ -115,7 +115,9 @@ module Gitlab
           end
 
           def create_signatures(location, tracking)
-            tracking ||= { 'items' => [] }
+            tracking ||= { 'type' => 'hash', 'items' => [] }
+
+            create_hash_signatures!(tracking['items']) if tracking['type'] == 'hash'
 
             signature_algorithms = Hash.new { |hash, key| hash[key] = [] }
 
@@ -142,6 +144,18 @@ module Gitlab
                 nil
               end
             end.compact
+          end
+
+          def create_hash_signatures!(items)
+            return if items.nil?
+
+            items.each do |item|
+              item_data = item['data']
+              next if item_data.nil?
+
+              item['signatures'] ||= []
+              item['signatures'] << { 'algorithm' => 'hash', 'value' => Digest::SHA1.hexdigest(item_data) }
+            end
           end
 
           def create_scan
