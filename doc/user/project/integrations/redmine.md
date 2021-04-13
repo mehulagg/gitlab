@@ -37,9 +37,9 @@ You can also disable [GitLab internal issue tracking](../issues/index.md) in thi
 Learn more about the steps and consequences of disabling GitLab issues in
 [Sharing and permissions](../settings/index.md#sharing-and-permissions).
 
-## Reference issues in Redmine
+## Reference Redmine issues in GitLab
 
-You can reference issues in Redmine using:
+You can reference your Redmine issues using:
 
 - `#<ID>`, where `<ID>` is a number (example `#143`).
 - `<PROJECT>-<ID>`, for example `API_32-143`, where:
