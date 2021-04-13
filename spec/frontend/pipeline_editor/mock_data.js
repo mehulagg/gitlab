@@ -139,16 +139,12 @@ export const mergeUnwrappedCiConfig = (mergedConfig) => {
 };
 
 export const mockProjectBranches = {
-  __typename: 'Project',
-  repository: {
-    __typename: 'Repository',
-    branches: [
-      { __typename: 'Branch', name: 'master' },
-      { __typename: 'Branch', name: 'main' },
-      { __typename: 'Branch', name: 'develop' },
-      { __typename: 'Branch', name: 'production' },
-      { __typename: 'Branch', name: 'test' },
-    ],
+  data: {
+    project: {
+      repository: {
+        branchNames: ['master', 'main', 'develop', 'production', 'test'],
+      },
+    },
   },
 };
 

@@ -47,23 +47,6 @@ describe('~/pipeline_editor/graphql/resolvers', () => {
         await expect(result.rawData).resolves.toBe(mockCiYml);
       });
     });
-
-    describe('project', () => {
-      it('resolves project data with type names', async () => {
-        const result = await resolvers.Query.project();
-
-        // eslint-disable-next-line no-underscore-dangle
-        expect(result.__typename).toBe('Project');
-      });
-
-      it('resolves project with available list of branches', async () => {
-        const result = await resolvers.Query.project();
-
-        expect(result.repository.branches).toHaveLength(
-          mockProjectBranches.repository.branches.length,
-        );
-      });
-    });
   });
 
   describe('Mutation', () => {

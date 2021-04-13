@@ -5,6 +5,7 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import BranchSwitcher from '~/pipeline_editor/components/file_nav/branch_switcher.vue';
 import { DEFAULT_FAILURE } from '~/pipeline_editor/constants';
+import getAvailableBranches from '~/pipeline_editor/graphql/queries/available_branches.graphql';
 import { mockDefaultBranch, mockProjectBranches, mockProjectFullPath } from '../../mock_data';
 
 const localVue = createLocalVue();
@@ -16,13 +17,9 @@ describe('Pipeline editor branch switcher', () => {
   let mockAvailableBranchQuery;
 
   const createComponentWithApollo = () => {
-    const resolvers = {
-      Query: {
-        project: mockAvailableBranchQuery,
-      },
-    };
+    const handlers = [[getAvailableBranches, mockAvailableBranchQuery]];
+    mockApollo = createMockApollo(handlers);
 
-    mockApollo = createMockApollo([], resolvers);
     wrapper = shallowMount(BranchSwitcher, {
       localVue,
       apolloProvider: mockApollo,
@@ -67,34 +64,33 @@ describe('Pipeline editor branch switcher', () => {
 
     it('query is called with correct variables', async () => {
       expect(mockAvailableBranchQuery).toHaveBeenCalledTimes(1);
-      expect(mockAvailableBranchQuery).toHaveBeenCalledWith(
-        expect.anything(),
-        {
-          fullPath: mockProjectFullPath,
-        },
-        expect.anything(),
-        expect.anything(),
-      );
+      expect(mockAvailableBranchQuery).toHaveBeenCalledWith({
+        projectFullPath: mockProjectFullPath,
+        searchPattern: '*',
+      });
     });
 
     it('renders list of branches', () => {
       expect(findDropdown().exists()).toBe(true);
-      expect(findDropdownItems()).toHaveLength(mockProjectBranches.repository.branches.length);
+      expect(findDropdownItems()).toHaveLength(
+        mockProjectBranches.data.project.repository.branchNames.length,
+      );
     });
 
-    it('renders current branch at the top of the list with a check mark', () => {
-      const firstDropdownItem = findDropdownItems().at(0);
-      const icon = firstDropdownItem.findComponent(GlIcon);
+    it('renders current branch with a check mark', () => {
+      const defaultBranchInDropdown = findDropdownItems().at(0);
+      const icon = defaultBranchInDropdown.findComponent(GlIcon);
 
-      expect(firstDropdownItem.text()).toBe(mockDefaultBranch);
+      expect(defaultBranchInDropdown.text()).toBe(mockDefaultBranch);
       expect(icon.exists()).toBe(true);
       expect(icon.props('name')).toBe('check');
     });
 
     it('does not render check mark for other branches', () => {
-      const secondDropdownItem = findDropdownItems().at(1);
-      const icon = secondDropdownItem.findComponent(GlIcon);
+      const nonDefaultBranch = findDropdownItems().at(1);
+      const icon = nonDefaultBranch.findComponent(GlIcon);
 
+      expect(nonDefaultBranch.text()).not.toBe(mockDefaultBranch);
       expect(icon.classes()).toContain('gl-visibility-hidden');
     });
   });

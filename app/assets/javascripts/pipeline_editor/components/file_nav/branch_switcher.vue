@@ -23,10 +23,11 @@ export default {
       variables() {
         return {
           projectFullPath: this.projectFullPath,
+          searchPattern: '*',
         };
       },
       update(data) {
-        return data.project?.repository?.branches || [];
+        return data.project?.repository?.branchNames || [];
       },
       error() {
         this.$emit('showError', {
@@ -54,12 +55,12 @@ export default {
     </gl-dropdown-section-header>
     <gl-dropdown-item
       v-for="branch in branches"
-      :key="branch.name"
-      :is-checked="currentBranch === branch.name"
+      :key="branch"
+      :is-checked="currentBranch === branch"
       :is-check-item="true"
     >
       <gl-icon name="check" class="gl-visibility-hidden" />
-      {{ branch.name }}
+      {{ branch }}
     </gl-dropdown-item>
   </gl-dropdown>
 </template>
