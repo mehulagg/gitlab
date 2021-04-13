@@ -79,11 +79,11 @@ class DroneCiService < CiService
   end
 
   def title
-    'Drone CI'
+    'Drone'
   end
 
   def description
-    'Drone is a Continuous Integration platform built on Docker, written in Go'
+    'Run CI/CD pipelines in Drone.'
   end
 
   def self.to_param
@@ -92,8 +92,8 @@ class DroneCiService < CiService
 
   def fields
     [
-      { type: 'text', name: 'token', placeholder: 'Drone CI project specific token', required: true },
-      { type: 'text', name: 'drone_url', title: s_('ProjectService|Drone URL'), placeholder: 'http://drone.example.com', required: true },
+      { type: 'text', name: 'token', placeholder: 'Drone project specific token', required: true },
+      { type: 'text', name: 'drone_url', title: s_('ProjectService|URL to the Drone server.'), placeholder: 'http://drone.example.com', required: true },
       { type: 'checkbox', name: 'enable_ssl_verification', title: "Enable SSL verification" }
     ]
   end
