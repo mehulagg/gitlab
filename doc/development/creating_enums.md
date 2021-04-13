@@ -115,7 +115,9 @@ class Pipeline < ApplicationRecord
 end
 ```
 
-After merging some of the EE and FOSS enums we could end up having a gap between the two group of values:
+## Add new values in the gap
+
+After merging some EE and FOSS enums, there might be a gap between the two groups of values:
 
 ```ruby
 module Enums
