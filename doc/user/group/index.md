@@ -475,10 +475,12 @@ You should consider these security implications before configuring IP address re
 - **Administrators and group owners**: Users with these permission levels can always
   access the group settings, regardless of IP restriction, but they cannot access projects
   belonging to the group when accessing from a disallowed IP address.
-- **GitLab API and Runner Activities**: For API interactions, only the `Groups` and `Projects` 
-  APIs are protected which means that the registering of a runner is not bound by the job.  The 
-  cloning of code during a CI Pipeline, however would be blocked by the IP Address restriction if 
-  the CI Job was not an allowed IP address.
+- **GitLab API and runner activities**: Only the [Groups](../../api/groups.md)
+  and [Projects](../../api/projects.md) APIs are protected by IP address restrictions.
+  When you register a runner, it is not bound by the IP restrictions. When the runner
+  requests a new job or an update to a job's state, it is also not bound by
+  the IP restrictions. But when the running CI/CD job sends requests from a
+  restricted IP address, the IP restriction prevents code from being cloned.
 
 To restrict group access by IP address:
 
