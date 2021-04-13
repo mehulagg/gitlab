@@ -551,3 +551,12 @@ plugins:
     enabled: true
     channel: rubocop-0-67
 ```
+
+### MR Widget
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53068) in GitLab 13.9.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54241) in GitLab 13.10.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/300796) in GitLab 13.11.
+> - Enabled on GitLab.com.
+
+When using a custom tool, if your merge requests do not show any code quality changes you must ensure that the line property is `an integer`.
