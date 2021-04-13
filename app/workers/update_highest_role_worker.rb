@@ -3,7 +3,7 @@
 class UpdateHighestRoleWorker
   include ApplicationWorker
 
-  feature_category :authentication_and_authorization
+  feature_category :license
   urgency :high
   weight 2
 
