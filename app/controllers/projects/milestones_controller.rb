@@ -125,7 +125,7 @@ class Projects::MilestonesController < Projects::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def milestone
-    @milestone ||= @project.milestones.find_by!(iid: params[:id])
+    @noteable = @milestone ||= @project.milestones.find_by!(iid: params[:id])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

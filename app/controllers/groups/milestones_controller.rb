@@ -70,7 +70,7 @@ class Groups::MilestonesController < Groups::ApplicationController
   end
 
   def milestone
-    @milestone = group.milestones.find_by_iid(params[:id])
+    @noteable = @milestone ||= group.milestones.find_by_iid(params[:id])
 
     render_404 unless @milestone
   end
