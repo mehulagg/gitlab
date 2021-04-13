@@ -53,7 +53,7 @@ To create a Markdown file:
 
 1. In a project, go to **Repository**.
 1. Select the `+` button next to the default branch and select **New file**.
-1. Add the name of your issue template to the **File name** text field next to `the default branch.
+1. Add the name of your issue template to the **File name** text field next to the default branch.
    Make sure that your file has the `.md` extension, for
    example `feature_request.md` or `Feature Request.md`.
 1. Commit and push to your default branch.
