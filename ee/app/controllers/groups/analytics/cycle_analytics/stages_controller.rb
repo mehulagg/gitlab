@@ -69,6 +69,12 @@ module Groups
           render json: ::Analytics::CycleAnalytics::DurationChartItemEntity.represent(data_collector.duration_chart_data)
         end
 
+        def average_duration_chart
+          return render_403 unless can?(current_user, :read_group_stage, @group)
+
+          render json: ::Analytics::CycleAnalytics::DurationChartAverageItemEntity.represent(data_collector.duration_chart_average_data)
+        end
+
         private
 
         def data_collector
