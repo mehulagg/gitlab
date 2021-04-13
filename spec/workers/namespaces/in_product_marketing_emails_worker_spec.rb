@@ -21,6 +21,12 @@ RSpec.describe Namespaces::InProductMarketingEmailsWorker, '#perform' do
 
   context 'not on gitlab.com' do
     let(:is_gitlab_com) { false }
+    let(:license) { create(:license) }
+
+    before do
+      allow(License).to receive(:current).and_return(license)
+      allow(license).to receive(:paid?).and_return(paid?)
+    end
 
     where(:in_product_marketing_emails_enabled, :experiment_active, :executes_service) do
       true     | true     | 1
@@ -30,7 +36,18 @@ RSpec.describe Namespaces::InProductMarketingEmailsWorker, '#perform' do
     end
 
     with_them do
-      include_examples 'in-product marketing email'
+      context 'with a free license' do
+        let(:paid?) { false }
+
+        include_examples 'in-product marketing email'
+      end
+
+      context 'with a paid license' do
+        let(:paid?) { true }
+        let(:executes_service) { 0 }
+
+        include_examples 'in-product marketing email'
+      end
     end
   end
 
