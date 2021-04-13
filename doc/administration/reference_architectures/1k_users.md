@@ -20,10 +20,10 @@ many organizations .
 >   follow a modified [3K reference architecture](3k_users.md#supported-modifications-for-lower-user-counts-ha).
 > - **Test requests per second (RPS) rates:** API: 20 RPS, Web: 2 RPS, Git (Pull): 2 RPS, Git (Push): 1 RPS
 
-| Users        | Configuration           | GCP            | AWS             | Azure          |
-|--------------|-------------------------|----------------|-----------------|----------------|
-| Up to 500    | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | `c5.xlarge`       | F4s v2         |
-| Up to 1,000  | 8 vCPU, 7.2 GB memory   | n1-highcpu-8   | `c5.2xlarge`      | F8s v2         |
+| Users        | Configuration           | GCP            | AWS          | Azure    |
+|--------------|-------------------------|----------------|--------------|----------|
+| Up to 500    | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4` | `c5.xlarge`  | `F4s v2` |
+| Up to 1,000  | 8 vCPU, 7.2 GB memory   | `n1-highcpu-8` | `c5.2xlarge` | `F8s v2` |
 
 The Google Cloud Platform (GCP) architectures were built and tested using the
 [Intel Xeon E5 v3 (Haswell)](https://cloud.google.com/compute/docs/cpu-platforms)
