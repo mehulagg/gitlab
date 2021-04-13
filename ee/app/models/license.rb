@@ -589,6 +589,10 @@ class License < ApplicationRecord
     end
   end
 
+  def activated_at
+    super || created_at
+  end
+
   private
 
   def restricted_attr(name, default = nil)

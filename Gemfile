@@ -298,7 +298,7 @@ gem 'gon', '~> 6.2'
 gem 'request_store', '~> 1.5'
 gem 'base32', '~> 0.3.0'
 
-gem "gitlab-license", "~> 1.3"
+gem "gitlab-license", "~> 1.4"
 
 # Protect against bruteforcing
 gem 'rack-attack', '~> 6.3.0'

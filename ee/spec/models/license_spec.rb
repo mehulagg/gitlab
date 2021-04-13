@@ -1523,4 +1523,25 @@ RSpec.describe License do
 
     it { is_expected.to eq('Example Inc.') }
   end
+
+  describe '#activated_at' do
+    subject { license.activated_at }
+
+    let(:license) do
+      gl_license = build(:gitlab_license, activated_at: activated_at)
+      build(:license, data: gl_license.export, created_at: 5.days.ago)
+    end
+
+    context 'when activated_at is set within the license data' do
+      let(:activated_at) { Date.yesterday.to_datetime }
+
+      it { is_expected.to eq(activated_at) }
+    end
+
+    context 'when activated_at is not set within the license data' do
+      let(:activated_at) { nil }
+
+      it { is_expected.to eq(license.created_at) }
+    end
+  end
 end
