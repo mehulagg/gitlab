@@ -10,7 +10,7 @@ require 'securerandom'
 require 'socket'
 require 'logger'
 
-module GitalyTest
+module GitalySetup
   LOGGER = begin
     default_name = ENV['CI'] ? 'DEBUG' : 'WARN'
     level_name = ENV['GITLAB_TESTING_LOG_LEVEL']&.upcase
