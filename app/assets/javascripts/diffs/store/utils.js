@@ -21,6 +21,7 @@ import {
   CONFLICT_MARKER_OUR,
   CONFLICT_MARKER_THEIR,
 } from '../constants';
+import { getDiffFilesByMrId } from '../utils/database';
 import { prepareRawDiffFile } from '../utils/diff_file';
 
 export const isAdded = (line) => ['new', 'new-nonewline'].includes(line.type);
@@ -673,3 +674,23 @@ export const getDefaultWhitespace = (queryString, cookie) => {
   if (cookie === NO_SHOW_WHITESPACE) return false;
   return true;
 };
+
+export async function fetchDiffFiles( { mrId, mrSize, axios, fetchEndpoint } = {} ){
+  const files = await getDiffFilesByMrId( { mrId } );
+  let response = Promise.resolve( {
+    "data": {
+      "diff_files": files,
+      "pagination": {
+        "total_pages": null,
+        "next_page": null
+      }
+    }
+  } );
+
+  if( files.length !== mrSize ){
+    response = axios.get(fetchEndpoint);
+  }
+
+  return response;
+
+}
