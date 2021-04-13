@@ -74,6 +74,7 @@ module EE
       scope :in_issues, -> (issues) { joins(:epic_issues).where(epic_issues: { issue_id: issues }).distinct }
       scope :has_parent, -> { where.not(parent_id: nil) }
       scope :iid_starts_with, -> (query) { where("CAST(iid AS VARCHAR) LIKE ?", "#{sanitize_sql_like(query)}%") }
+      scope :from_id, -> (epic_id) { where('epics.id >= ?', epic_id) }
 
       scope :with_web_entity_associations, -> { preload(:author, group: [:ip_restrictions, :route]) }
 

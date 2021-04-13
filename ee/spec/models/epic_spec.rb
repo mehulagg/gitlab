@@ -76,6 +76,16 @@ RSpec.describe Epic do
         expect(described_class.in_milestone(milestone.id)).to match_array([epic1, epic2])
       end
     end
+
+    describe 'from_id' do
+      let_it_be(:epic1) { create(:epic) }
+      let_it_be(:epic2) { create(:epic) }
+      let_it_be(:epic3) { create(:epic) }
+
+      it 'returns records with id bigger or equal to the provided param' do
+        expect(described_class.from_id(epic2.id)).to match_array([epic2, epic3])
+      end
+    end
   end
 
   describe 'validations' do

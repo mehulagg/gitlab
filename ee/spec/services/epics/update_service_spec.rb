@@ -97,41 +97,97 @@ RSpec.describe Epics::UpdateService do
     end
 
     context 'when repositioning an epic on a board' do
-      let(:epic1) { create(:epic, group: group) }
-      let(:epic2) { create(:epic, group: group) }
+      let_it_be(:group) { create(:group) }
+      let_it_be(:epic) { create(:epic, group: group) }
+      let_it_be(:epic1) { create(:epic, group: group) }
+      let_it_be(:epic2) { create(:epic, group: group) }
+      let_it_be(:epic3) { create(:epic, group: group) }
 
-      let!(:epic_position) { create(:epic_board_position, epic: epic, epic_board: board, relative_position: 10) }
-      let!(:epic1_position) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20) }
-      let!(:epic2_position) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 30) }
+      let_it_be(:board) { create(:epic_board, group: group) }
+      let_it_be(:list) { create(:epic_list, epic_board: board, list_type: :backlog) }
 
-      let(:board) { create(:epic_board, group: group) }
-
-      context 'when moving beetween 2 epics on the board' do
-        it 'moves the epic correctly' do
-          update_epic(move_between_ids: [epic1.id, epic2.id], board_id: board.id)
-
-          expect(epic_position.reload.relative_position)
-            .to be_between(epic1_position.relative_position, epic2_position.relative_position)
-        end
+      def position(epic)
+        epic.epic_board_positions.first
       end
 
-      context 'when moving the epic to the end' do
-        it 'moves the epic correctly' do
-          update_epic(move_between_ids: [nil, epic2.id], board_id: board.id)
-
-          expect(epic_position.reload.relative_position).to be > epic2_position.relative_position
-        end
-      end
-
-      context 'when moving the epic to the beginning' do
+      shared_examples 'board repositioning' do
         before do
-          epic_position.update_column(:relative_position, 25)
+          group.add_maintainer(user)
         end
 
-        it 'moves the epic correctly' do
-          update_epic(move_between_ids: [epic1.id, nil], board_id: board.id)
+        context 'when moving beetween 2 epics on the board' do
+          it 'moves the epic correctly' do
+            update_epic(move_between_ids: [epic1.id, epic2.id], board_id: board.id, list_id: list.id)
 
-          expect(epic_position.reload.relative_position).to be < epic1_position.relative_position
+            expect(position(epic).reload.relative_position)
+              .to be_between(position(epic2).relative_position, position(epic1).relative_position)
+          end
+        end
+
+        context 'when moving the epic to the end' do
+          it 'moves the epic correctly' do
+            update_epic(move_between_ids: [nil, epic2.id], board_id: board.id)
+
+            expect(position(epic).reload.relative_position).to be > position(epic2).relative_position
+          end
+        end
+      end
+
+      context 'when board position records exist for all epics' do
+        let_it_be_with_reload(:epic_position) { create(:epic_board_position, epic: epic, epic_board: board, relative_position: 1) }
+        let_it_be_with_reload(:epic1_position) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 30) }
+        let_it_be_with_reload(:epic2_position) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 20) }
+        let_it_be_with_reload(:epic3_position) { create(:epic_board_position, epic: epic3, epic_board: board, relative_position: 10) }
+
+        it_behaves_like 'board repositioning'
+
+        context 'when moving beetween 2 epics on the board' do
+          it 'keeps epic3 on top of the board' do
+            update_epic(move_between_ids: [epic1.id, epic2.id], board_id: board.id)
+
+            expect(position(epic3).relative_position).to be < position(epic2).relative_position
+            expect(position(epic3).relative_position).to be < position(epic1).relative_position
+          end
+        end
+
+        context 'when moving the epic to the beginning' do
+          before do
+            epic_position.update_column(:relative_position, 25)
+          end
+
+          it 'moves the epic correctly' do
+            update_epic(move_between_ids: [epic3.id, nil], board_id: board.id)
+
+            expect(epic_position.reload.relative_position).to be < epic3_position.relative_position
+          end
+        end
+
+        context 'when moving the epic to the end' do
+          it 'keeps epic3 on top of the board' do
+            update_epic(move_between_ids: [epic1.id, epic2.id], board_id: board.id)
+
+            expect(position(epic3).relative_position).to be < position(epic2).relative_position
+            expect(position(epic3).relative_position).to be < position(epic1).relative_position
+          end
+        end
+      end
+
+      context 'when board position records are missing' do
+        context 'when the position does not exist for any record' do
+          it_behaves_like 'board repositioning'
+        end
+
+        context 'when the position does not exist for the record being moved' do
+          let_it_be_with_reload(:epic1_position) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 30) }
+          let_it_be_with_reload(:epic2_position) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 20) }
+
+          it_behaves_like 'board repositioning'
+        end
+
+        context 'when the position does not exist for the records around the one being moved' do
+          let_it_be_with_reload(:epic_position) { create(:epic_board_position, epic: epic, epic_board: board, relative_position: 10) }
+
+          it_behaves_like 'board repositioning'
         end
       end
     end

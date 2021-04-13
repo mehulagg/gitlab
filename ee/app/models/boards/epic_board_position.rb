@@ -21,5 +21,9 @@ module Boards
     def self.relative_positioning_parent_column
       :epic_board_id
     end
+
+    def self.last_for_board_id(board_id)
+      where(epic_board_id: board_id).order(:relative_position).last
+    end
   end
 end

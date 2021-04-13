@@ -50,5 +50,12 @@ RSpec.describe Boards::Epics::ListService do
 
       expect(epics).to eq([list1_epic2, list1_epic1, list1_epic3])
     end
+
+    it 'returns epics with id bigger or equal to from_id if provided' do
+      epics = described_class
+        .new(group, user, { board_id: board.id, id: list1.id, from_id: list1_epic2.id }).execute
+
+      expect(epics).to match_array([list1_epic2, list1_epic3])
+    end
   end
 end

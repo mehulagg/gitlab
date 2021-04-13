@@ -107,8 +107,8 @@ module Epics
       return unless params[:move_between_ids]
       return unless params[positioning_scope_key]
 
+      fill_missing_positions(epic)
       epic_board_position = issuable_for_positioning(epic.id, params[positioning_scope_key])
-
       handle_move_between_ids(epic_board_position)
 
       epic_board_position.save
@@ -118,6 +118,15 @@ module Epics
       return unless id
 
       Boards::EpicBoardPosition.find_by_epic_id_and_epic_board_id(id, board_id)
+    end
+
+    def fill_missing_positions(epic)
+      service_params = {
+        board_id: params[positioning_scope_key],
+        list_id: params.delete(:list_id), # we need to have positions only for the current list
+        from_id: epic.id  # we need to have positions only for the epic and epics above
+      }
+      Boards::Epics::PositionCreator.new(epic.group, current_user, service_params).execute
     end
 
     def positioning_scope_key
