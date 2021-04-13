@@ -11,5 +11,5 @@ RSpec.describe Security::CiConfiguration::SecretDetectionCreateService, :snowplo
     }
   end
 
-  include_examples 'services security ci configuration create service', true # skip_w_params
+  include_examples 'services security ci configuration create service', true
 end

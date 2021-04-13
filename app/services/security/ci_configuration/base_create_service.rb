@@ -3,6 +3,8 @@
 module Security
   module CiConfiguration
     class BaseCreateService
+      attr_reader :project, :params
+
       def initialize(project, current_user, params)
         @project = project
         @current_user = current_user

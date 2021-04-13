@@ -3,12 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
+  subject(:result) { described_class.new(auto_devops_enabled, params, gitlab_ci_content).generate }
+
   let(:params) { {} }
 
   context 'with existing .gitlab-ci.yml' do
     let(:auto_devops_enabled) { false }
 
-    context 'sast has not been included' do
+    context 'secret_detection has not been included' do
       let(:expected_yml) do
         <<-CI_YML.strip_heredoc
           # You can override the included template(s) by including variable overrides
@@ -34,8 +36,6 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
             "include" => [{ "template" => "existing.yml" }] }
         end
 
-        subject(:result) { described_class.new(auto_devops_enabled, params, gitlab_ci_content).generate }
-
         it 'generates the correct YML' do
           expect(result.first[:action]).to eq('update')
           expect(result.first[:content]).to eq(expected_yml)
@@ -49,8 +49,6 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
             "include" => { "template" => "existing.yml" } }
         end
 
-        subject(:result) { described_class.new(auto_devops_enabled, params, gitlab_ci_content).generate }
-
         it 'generates the correct YML' do
           expect(result.first[:action]).to eq('update')
           expect(result.first[:content]).to eq(expected_yml)
@@ -58,7 +56,7 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
       end
     end
 
-    context 'sast has been included' do
+    context 'secret_detection has been included' do
       let(:expected_yml) do
         <<-CI_YML.strip_heredoc
           # You can override the included template(s) by including variable overrides
@@ -75,55 +73,31 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
         CI_YML
       end
 
-      context 'sast template include are an array' do
+      context 'secret_detection template include are an array' do
         let(:gitlab_ci_content) do
           { "stages" => %w(test),
             "variables" => { "RANDOM" => "make sure this persists" },
             "include" => [{ "template" => "Security/Secret-Detection.gitlab-ci.yml" }] }
         end
 
-        subject(:result) { described_class.new(auto_devops_enabled, params, gitlab_ci_content).generate }
-
         it 'generates the correct YML' do
           expect(result.first[:action]).to eq('update')
           expect(result.first[:content]).to eq(expected_yml)
         end
       end
 
-      context 'sast template include is not an array' do
+      context 'secret_detection template include is not an array' do
         let(:gitlab_ci_content) do
           { "stages" => %w(test),
             "variables" => { "RANDOM" => "make sure this persists" },
             "include" => { "template" => "Security/Secret-Detection.gitlab-ci.yml" } }
         end
 
-        subject(:result) { described_class.new(auto_devops_enabled, params, gitlab_ci_content).generate }
-
         it 'generates the correct YML' do
           expect(result.first[:action]).to eq('update')
           expect(result.first[:content]).to eq(expected_yml)
         end
       end
-    end
-
-    def existing_gitlab_ci_and_single_template_with_sast_and_default_stage
-      { "stages" => %w(test),
-       "variables" => { "SECURE_ANALYZERS_PREFIX" => "localhost:5000/analyzers" },
-       "sast" => { "variables" => { "SAST_ANALYZER_IMAGE_TAG" => 2, "SEARCH_MAX_DEPTH" => 1 }, "stage" => "test" },
-       "include" => { "template" => "Security/SAST.gitlab-ci.yml" } }
-    end
-
-    def existing_gitlab_ci_with_no_variables
-      { "stages" => %w(test security),
-       "sast" => { "variables" => { "SAST_ANALYZER_IMAGE_TAG" => 2, "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
-       "include" => [{ "template" => "Security/SAST.gitlab-ci.yml" }] }
-    end
-
-    def existing_gitlab_ci
-      { "stages" => %w(test security),
-       "variables" => { "RANDOM" => "make sure this persists", "SECURE_ANALYZERS_PREFIX" => "bad_prefix" },
-       "sast" => { "variables" => { "SAST_ANALYZER_IMAGE_TAG" => 2, "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
-       "include" => [{ "template" => "Security/SAST.gitlab-ci.yml" }] }
     end
   end
 
@@ -143,8 +117,6 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
           - template: Security/Secret-Detection.gitlab-ci.yml
         CI_YML
       end
-
-      subject(:result) { described_class.new(auto_devops_enabled, params, gitlab_ci_content).generate }
 
       it 'generates the correct YML' do
         expect(result.first[:action]).to eq('create')
@@ -166,11 +138,9 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
         CI_YML
       end
 
-      subject(:result) { described_class.new(auto_devops_enabled, params, gitlab_ci_content).generate }
-
       before do
-        allow_next_instance_of(described_class) do |sast_build_actions|
-          allow(sast_build_actions).to receive(:auto_devops_stages).and_return(fast_auto_devops_stages)
+        allow_next_instance_of(described_class) do |secret_detection_build_actions|
+          allow(secret_detection_build_actions).to receive(:auto_devops_stages).and_return(fast_auto_devops_stages)
         end
       end
 

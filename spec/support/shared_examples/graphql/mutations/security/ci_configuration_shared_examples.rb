@@ -60,17 +60,19 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
     end
 
     context 'when the user does not have permission to create a new branch' do
-      before_all do
+      before do
         project.add_developer(user)
       end
 
       let(:error_message) { 'You are not allowed to create protected branches on this project.' }
 
-      it 'returns an array of errors' do
+      before do
         allow_next_instance_of(::Files::MultiService) do |multi_service|
           allow(multi_service).to receive(:execute).and_raise(Gitlab::Git::PreReceiveError.new("GitLab: #{error_message}"))
         end
+      end
 
+      it 'returns an array of errors' do
         expect(result).to match(
           status: :error,
           success_path: nil,
@@ -80,16 +82,18 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
     end
 
     context 'when the user can create a merge request' do
-      before_all do
+      before do
         project.add_developer(user)
       end
 
       context 'when service successfully generates a path to create a new merge request' do
-        it 'returns a success path' do
+        before do
           allow_next_instance_of(service) do |service|
             allow(service).to receive(:execute).and_return(service_result_json)
           end
+        end
 
+        it 'returns a success path' do
           expect(result).to match(
             status: 'success',
             success_path: service_result_json[:success_path],
@@ -99,11 +103,13 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
       end
 
       context 'when service can not generate any path to create a new merge request' do
-        it 'returns an array of errors' do
+        before do
           allow_next_instance_of(service) do |service|
             allow(service).to receive(:execute).and_return(service_error_result_json)
           end
+        end
 
+        it 'returns an array of errors' do
           expect(result).to match(
             status: 'error',
             success_path: be_nil,
