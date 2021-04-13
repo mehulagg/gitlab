@@ -1,7 +1,19 @@
 <script>
 import { GlCard } from '@gitlab/ui';
+import { identity } from 'lodash';
+import { formatDate, getTimeago } from '~/lib/utils/datetime_utility';
+import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { detailsLabels } from '../constants';
 import SubscriptionDetailsTable from './subscription_details_table.vue';
+
+const humanReadableDate = (value) => (value ? formatDate(value, 'd mmmm yyyy') : '');
+
+const subscriptionDetailsFormatRules = {
+  expiresAt: getTimeago().format,
+  lastSync: (value) => getTimeago().format(value),
+  plan: capitalizeFirstCharacter,
+  startsAt: humanReadableDate,
+};
 
 export default {
   name: 'SubscriptionDetailsCard',
@@ -26,11 +38,13 @@ export default {
   },
   computed: {
     details() {
-      return this.detailsFields.map((detail) => ({
-        canCopy: detail === 'id',
-        label: detailsLabels[detail],
-        value: this.subscription[detail],
-      }));
+      return this.detailsFields.map((detail) => {
+        const label = detailsLabels[detail];
+        const formatter = subscriptionDetailsFormatRules[detail] || identity;
+        const valueToFormat = this.subscription[detail];
+        const value = valueToFormat ? formatter(valueToFormat) : '';
+        return { canCopy: detail === 'id', label, value };
+      });
     },
   },
 };

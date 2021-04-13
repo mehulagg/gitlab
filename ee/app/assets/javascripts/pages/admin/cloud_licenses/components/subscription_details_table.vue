@@ -73,7 +73,7 @@ export default {
 
     <template #cell(value)="{ item }">
       <p class="gl-relative" data-testid="details-content">
-        {{ item.value }}
+        {{ item.value || '-' }}
         <clipboard-button
           v-if="item.canCopy"
           :text="item.value"

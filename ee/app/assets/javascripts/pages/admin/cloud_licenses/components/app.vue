@@ -1,34 +1,44 @@
 <script>
-import { s__, sprintf } from '~/locale';
+import { subscriptionActivationTitle } from '../constants';
+import getCurrentLicense from '../graphql/queirs/get_current_license.query.graphql';
 import CloudLicenseSubscriptionActivationForm from './subscription_activation_form.vue';
+import SubscriptionBreakdown from './subscription_breakdown.vue';
 
 export default {
   name: 'CloudLicenseApp',
   components: {
+    SubscriptionBreakdown,
     CloudLicenseSubscriptionActivationForm,
   },
   i18n: {
-    mainTitle: s__(`CloudLicense|This instance is currently using the %{planName} plan.`),
+    subscriptionActivationTitle,
   },
   inject: ['planName'],
   props: {
-    subscription: {
+    hasLicense: {
+      type: Boolean,
       required: false,
-      type: Object,
-      default: null,
+      default: true,
+    },
+  },
+  apollo: {
+    currentSubscription: {
+      query: getCurrentLicense,
+      update(data) {
+        const { currentLicense } = data;
+        return currentLicense;
+      },
+      skip() {
+        return !this.hasCurrentLicense;
+      },
     },
   },
   data() {
     return {
-      subscriptionData: this.subscription,
+      currentSubscription: {},
+      subscriptionHistory: [],
+      hasCurrentLicense: this.hasLicense,
     };
-  },
-  computed: {
-    mainTitle() {
-      return sprintf(this.$options.i18n.mainTitle, {
-        planName: this.planName,
-      });
-    },
   },
 };
 </script>
@@ -37,11 +47,18 @@ export default {
   <div class="gl-display-flex gl-justify-content-center gl-flex-direction-column">
     <h4>{{ s__('CloudLicense|Your subscription') }}</h4>
     <hr />
-    <div class="row">
+    <div v-if="!hasCurrentLicense" class="row">
       <div class="col-12 col-lg-8 offset-lg-2">
-        <h3 class="gl-mb-7 gl-mt-6 gl-text-center">{{ mainTitle }}</h3>
-        <cloud-license-subscription-activation-form v-if="!subscriptionData" />
+        <h3 class="gl-mb-7 gl-mt-6 gl-text-center">
+          {{ $options.i18n.subscriptionActivationTitle }}
+        </h3>
+        <cloud-license-subscription-activation-form />
       </div>
     </div>
+    <subscription-breakdown
+      v-else
+      :subscription="currentSubscription"
+      :subscription-list="subscriptionHistory"
+    />
   </div>
 </template>

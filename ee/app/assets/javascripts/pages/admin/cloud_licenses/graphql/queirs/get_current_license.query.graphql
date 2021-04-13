@@ -1,0 +1,18 @@
+query currentLicense {
+  currentLicense {
+    id
+    type
+    plan
+    name
+    email
+    company
+    startsAt
+    expiresAt
+    activatedAt
+    lastSync
+    usersInLicenseCount
+    billableUsersCount
+    maximumUserCount
+    usersOverLicenseCount
+  }
+}

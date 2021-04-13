@@ -91,17 +91,28 @@ describe('Subscription Breakdown', () => {
     });
   });
 
-  describe('with empty data', () => {
+  describe('with no subscription data', () => {
     it('does not show user info', () => {
       createComponent({ props: { subscription: {} } });
 
       expect(findDetailsUserInfo().exists()).toBe(false);
     });
 
-    it('does not show subscription history', () => {
+    it('shows the current subscription as the only history item', () => {
+      createComponent({ props: { subscription: {}, subscriptionList: [] } });
+
+      expect(findDetailsUserInfo().exists()).toBe(false);
+    });
+  });
+
+  describe('with no subscription history data', () => {
+    it('shows the current subscription as the only history item', () => {
       createComponent({ props: { subscriptionList: [] } });
 
-      expect(findDetailsHistory().exists()).toBe(false);
+      expect(findDetailsHistory().props('')).toMatchObject({
+        currentSubscriptionId: license.ULTIMATE.id,
+        subscriptionList: [license.ULTIMATE],
+      });
     });
   });
 });

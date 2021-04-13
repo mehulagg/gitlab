@@ -1,20 +1,23 @@
 import { __, s__ } from '~/locale';
 
-export const subscriptionDetailsHeaderText = s__('CloudLicense|Subscription details');
-export const licensedToHeaderText = s__('CloudLicense|Licensed to');
-export const manageSubscriptionButtonText = s__('CloudLicense|Manage');
-export const syncSubscriptionButtonText = s__('CloudLicense|Sync Subscription details');
+export const subscriptionActivationTitle = s__(
+  `SuperSonics|You do not have an active subscription`,
+);
+export const subscriptionDetailsHeaderText = s__('SuperSonics|Subscription details');
+export const licensedToHeaderText = s__('SuperSonics|Licensed to');
+export const manageSubscriptionButtonText = s__('SuperSonics|Manage');
+export const syncSubscriptionButtonText = s__('SuperSonics|Sync Subscription details');
 export const copySubscriptionIdButtonText = __('Copy');
 export const detailsLabels = {
   address: __('Address'),
-  id: s__('CloudLicense|ID'),
   company: __('Company'),
   email: __('Email'),
-  lastSync: s__('CloudLicense|Last Sync'),
+  id: s__('SuperSonics|ID'),
+  lastSync: s__('SuperSonics|Last Sync'),
   name: __('Name'),
-  plan: s__('CloudLicense|Plan'),
-  startsAt: s__('CloudLicense|Started'),
-  renews: s__('CloudLicense|Renews'),
+  plan: s__('SuperSonics|Plan'),
+  expiresAt: s__('SuperSonics|Renews'),
+  startsAt: s__('SuperSonics|Started'),
 };
 
 export const billableUsersTitle = s__('CloudLicense|Billable users');
