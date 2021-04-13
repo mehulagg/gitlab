@@ -321,7 +321,7 @@ Gets a list of memberships for a billable member of a group.
 Lists all projects and groups a user is a member of. Only projects and groups within the group hierarchy are included.
 For instance, if the requested group is `Root Group`, and the requested user is a direct member of both `Root Group / Sub Group One` and `Other Group / Sub Group Two`, then only `Root Group / Sub Group One` will be returned, because `Other Group / Sub Group Two` is not within the `Root Group` hierarchy.
 
-The response represents only direct memberships. Inherited memberships, for example in subgroups, are not included.
+The response represents only direct memberships. Inherited memberships are not included.
 
 This API endpoint works on top-level groups only. It does not work on subgroups.
 
