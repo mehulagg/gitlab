@@ -43,6 +43,36 @@ module API
           render_api_error!(message: 'Group export could not be started.')
         end
       end
+
+      desc 'Download relations export' do
+        detail 'This feature was introduced in GitLab TBD'
+      end
+      params do
+        requires :relation, type: String, desc: 'Group relation name'
+      end
+      get ':id/export_relations/download' do
+        # TBD
+      end
+
+      desc 'Relations export status' do
+        detail 'This feature was introduced in GitLab TBD'
+      end
+      get ':id/export_relations/status' do
+        # TBD
+      end
+
+      desc 'Start relations export' do
+        detail 'This feature was introduced in GitLab 12.5.'
+      end
+      post ':id/export_relations' do
+        response = ::BulkImports::ExportService.new(exportable: user_group, user: current_user).execute
+
+        if response.success?
+          render json: :ok
+        else
+          render json: { error: response.message }, status: response.http_status
+        end
+      end
     end
   end
 end
