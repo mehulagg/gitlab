@@ -42,6 +42,24 @@ RSpec.describe Boards::EpicBoardPosition do
     end
   end
 
+  describe '.last_for_board_id' do
+    let_it_be(:position1) { create(:epic_board_position, relative_position: 1, epic_board: epic_board) }
+    let_it_be(:position2) { create(:epic_board_position, relative_position: 1900, epic_board: epic_board) }
+    let_it_be(:position3) { create(:epic_board_position, relative_position: 4000) }
+
+    it 'returns the correct record' do
+      expect(described_class.last_for_board_id(epic_board.id)).to eq(position2)
+    end
+
+    context 'with null relative_position record' do
+      let_it_be(:position4) { create(:epic_board_position, epic_board: epic_board, relative_position: nil) }
+
+      it 'returns the correct record' do
+        expect(described_class.last_for_board_id(epic_board.id)).to eq(position4)
+      end
+    end
+  end
+
   context 'relative positioning' do
     let_it_be(:positioning_group) { create(:group) }
     let_it_be(:positioning_board) { create(:epic_board, group: positioning_group) }
