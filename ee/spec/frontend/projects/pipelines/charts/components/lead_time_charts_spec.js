@@ -65,7 +65,7 @@ describe('lead_time_charts.vue', () => {
   });
 
   const findHelpText = () => wrapper.find('[data-testid="help-text"]');
-  const findDocLink = () => findHelpText().find(GlLink);
+  const findAllDocLinks = () => findHelpText().findAll(GlLink);
   const getTooltipValue = () => wrapper.find('[data-testid="tooltip-value"]').text();
   const findCiCdAnalyticsCharts = () => wrapper.find(CiCdAnalyticsCharts);
 
@@ -101,12 +101,18 @@ describe('lead_time_charts.vue', () => {
 
     it('renders description text', () => {
       expect(findHelpText().text()).toMatchInterpolatedText(
-        'These charts display the median time between a merge request being merged and deployed to production, as part of the DORA 4 metrics. Learn more.',
+        'These charts display the median time between a merge request being merged and deployed to the production environment(s), as part of the DORA 4 metrics. Learn more.',
       );
     });
 
-    it('renders a link to the documentation', () => {
-      expect(findDocLink().attributes().href).toBe(
+    it('renders links to the documentation', () => {
+      const [environmentTierLink, learnMoreLink] = findAllDocLinks().wrappers;
+
+      expect(environmentTierLink.attributes().href).toBe(
+        '/help/ci/environments/index.html#deployment-tier-of-environments',
+      );
+
+      expect(learnMoreLink.attributes().href).toBe(
         '/help/user/analytics/ci_cd_analytics.html#lead-time-charts',
       );
     });

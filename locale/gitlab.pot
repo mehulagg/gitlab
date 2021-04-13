@@ -9720,10 +9720,10 @@ msgstr ""
 msgid "DORA4Metrics|Days from merge to deploy"
 msgstr ""
 
-msgid "DORA4Metrics|Deployments"
+msgid "DORA4Metrics|Deployment frequency"
 msgstr ""
 
-msgid "DORA4Metrics|Deployments charts"
+msgid "DORA4Metrics|Deployment frequency charts"
 msgstr ""
 
 msgid "DORA4Metrics|Lead time"
@@ -9735,16 +9735,19 @@ msgstr ""
 msgid "DORA4Metrics|No merge requests were deployed during this period"
 msgstr ""
 
-msgid "DORA4Metrics|Something went wrong while getting deployment frequency data"
+msgid "DORA4Metrics|Number of deployments"
+msgstr ""
+
+msgid "DORA4Metrics|Something went wrong while getting deployment frequency data."
 msgstr ""
 
 msgid "DORA4Metrics|Something went wrong while getting lead time data."
 msgstr ""
 
-msgid "DORA4Metrics|These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named %{codeStart}production%{codeEnd} for its data to appear in these charts."
+msgid "DORA4Metrics|These charts display the frequency of deployments to the %{linkStart}production environment(s)%{linkEnd}, as part of the DORA 4 metrics."
 msgstr ""
 
-msgid "DORA4Metrics|These charts display the median time between a merge request being merged and deployed to production, as part of the DORA 4 metrics."
+msgid "DORA4Metrics|These charts display the median time between a merge request being merged and deployed to the %{linkStart}production environment(s)%{linkEnd}, as part of the DORA 4 metrics."
 msgstr ""
 
 msgid "DORA4|Lead time charts"
@@ -10734,9 +10737,6 @@ msgid "Deploying to AWS is easy with GitLab"
 msgstr ""
 
 msgid "Deployment Frequency"
-msgstr ""
-
-msgid "Deployments"
 msgstr ""
 
 msgid "Deployments|%{deployments} environment impacted."

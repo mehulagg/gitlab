@@ -1,5 +1,5 @@
 <script>
-import { GlLink } from '@gitlab/ui';
+import { GlLink, GlSprintf } from '@gitlab/ui';
 import * as DoraApi from 'ee/api/dora_api';
 import createFlash from '~/flash';
 import { humanizeTimeInterval } from '~/lib/utils/datetime_utility';
@@ -10,6 +10,7 @@ import {
   areaChartOptions,
   chartDescriptionText,
   chartDocumentationHref,
+  environmentTierDocumentationHref,
   LAST_WEEK,
   LAST_MONTH,
   LAST_90_DAYS,
@@ -22,6 +23,7 @@ export default {
   components: {
     GlLink,
     CiCdAnalyticsCharts,
+    GlSprintf,
   },
   inject: {
     projectPath: {
@@ -83,17 +85,23 @@ export default {
       this.tooltipValue = seconds != null ? humanizeTimeInterval(seconds) : null;
     },
   },
-  allChartDefinitions,
   areaChartOptions,
   chartDescriptionText,
   chartDocumentationHref,
+  environmentTierDocumentationHref,
 };
 </script>
 <template>
   <div>
     <h4 class="gl-my-4">{{ s__('DORA4|Lead time charts') }}</h4>
     <p data-testid="help-text">
-      {{ $options.chartDescriptionText }}
+      <gl-sprintf :message="$options.chartDescriptionText">
+        <template #link="{ content }">
+          <gl-link :href="$options.environmentTierDocumentationHref" target="_blank">{{
+            content
+          }}</gl-link>
+        </template>
+      </gl-sprintf>
       <gl-link :href="$options.chartDocumentationHref">
         {{ __('Learn more.') }}
       </gl-link>

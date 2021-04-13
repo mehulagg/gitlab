@@ -27,7 +27,7 @@ export default {
   computed: {
     charts() {
       if (this.shouldRenderDeploymentFrequencyCharts) {
-        return ['pipelines', 'deployments', 'lead-time'];
+        return ['pipelines', 'deployment-frequency', 'lead-time'];
       }
 
       return ['pipelines', 'lead-time'];
@@ -59,7 +59,7 @@ export default {
       <gl-tab :title="__('Pipelines')">
         <pipeline-charts />
       </gl-tab>
-      <gl-tab v-if="shouldRenderDeploymentFrequencyCharts" :title="__('Deployments')">
+      <gl-tab v-if="shouldRenderDeploymentFrequencyCharts" :title="__('Deployment Frequency')">
         <deployment-frequency-charts />
       </gl-tab>
       <gl-tab :title="__('Lead Time')">

@@ -70,7 +70,7 @@ describe('deployment_frequency_charts.vue', () => {
   });
 
   const findHelpText = () => wrapper.find('[data-testid="help-text"]');
-  const findDocLink = () => findHelpText().find(GlLink);
+  const findAllDocLinks = () => findHelpText().findAll(GlLink);
 
   describe('when there are no network errors', () => {
     beforeEach(async () => {
@@ -109,12 +109,18 @@ describe('deployment_frequency_charts.vue', () => {
 
     it('renders description text', () => {
       expect(findHelpText().text()).toMatchInterpolatedText(
-        'These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named production for its data to appear in these charts. Learn more.',
+        'These charts display the frequency of deployments to the production environment(s), as part of the DORA 4 metrics. Learn more.',
       );
     });
 
-    it('renders a link to the documentation', () => {
-      expect(findDocLink().attributes().href).toBe(
+    it('renders links to the documentation', () => {
+      const [environmentTierLink, learnMoreLink] = findAllDocLinks().wrappers;
+
+      expect(environmentTierLink.attributes().href).toBe(
+        '/help/ci/environments/index.html#deployment-tier-of-environments',
+      );
+
+      expect(learnMoreLink.attributes().href).toBe(
         '/help/user/analytics/ci_cd_analytics.html#deployment-frequency-charts',
       );
     });
@@ -139,7 +145,7 @@ describe('deployment_frequency_charts.vue', () => {
     it('shows a flash message', () => {
       expect(createFlash).toHaveBeenCalledTimes(1);
       expect(createFlash).toHaveBeenCalledWith({
-        message: 'Something went wrong while getting deployment frequency data',
+        message: 'Something went wrong while getting deployment frequency data.',
       });
     });
 

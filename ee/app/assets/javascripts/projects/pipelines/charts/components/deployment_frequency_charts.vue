@@ -10,6 +10,7 @@ import {
   areaChartOptions,
   chartDescriptionText,
   chartDocumentationHref,
+  environmentTierDocumentationHref,
   LAST_WEEK,
   LAST_MONTH,
   LAST_90_DAYS,
@@ -64,7 +65,7 @@ export default {
 
     if (requestErrors.length) {
       createFlash({
-        message: s__('DORA4Metrics|Something went wrong while getting deployment frequency data'),
+        message: s__('DORA4Metrics|Something went wrong while getting deployment frequency data.'),
       });
 
       const allErrorMessages = requestErrors.join('\n');
@@ -75,22 +76,24 @@ export default {
       );
     }
   },
-  allChartDefinitions,
   areaChartOptions,
   chartDescriptionText,
   chartDocumentationHref,
+  environmentTierDocumentationHref,
 };
 </script>
 <template>
   <div>
-    <h4 class="gl-my-4">{{ s__('DORA4Metrics|Deployments charts') }}</h4>
+    <h4 class="gl-my-4">{{ s__('DORA4Metrics|Deployment frequency charts') }}</h4>
     <p data-testid="help-text">
       <gl-sprintf :message="$options.chartDescriptionText">
-        <template #code="{ content }">
-          <code>{{ content }}</code>
+        <template #link="{ content }">
+          <gl-link :href="$options.environmentTierDocumentationHref" target="_blank">{{
+            content
+          }}</gl-link>
         </template>
       </gl-sprintf>
-      <gl-link :href="$options.chartDocumentationHref">
+      <gl-link :href="$options.chartDocumentationHref" target="_blank">
         {{ __('Learn more.') }}
       </gl-link>
     </p>

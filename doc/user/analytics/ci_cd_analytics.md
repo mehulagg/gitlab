@@ -61,9 +61,10 @@ The following table shows the supported metrics, at which level they are support
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/275991) in GitLab 13.8.
 
-The **Analytics > CI/CD Analytics** page shows information about the deployment frequency to the
-`production` environment. The environment **must** be named `production` for its deployment
-information to appear on the graphs.
+The **Analytics > CI/CD Analytics** page shows information about the deployment
+frequency to the `production` environment. The environment must be part of the
+[production deployment tier](../../ci/environments/index.md#deployment-tier-of-environments)
+for its deployment information to appear on the graphs.
 
 ![Deployment frequency](img/deployment_frequency_chart_v13_8.png)
 
