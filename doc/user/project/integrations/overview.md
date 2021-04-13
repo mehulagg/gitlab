@@ -28,29 +28,29 @@ Click on the service links to see further configuration instructions and details
 | --------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------- |
 | [Asana](asana.md)                                         | Add commit messages as comments to Asana tasks.                                              | **{dotted-circle}** No |
 | Assembla                                                  | Manage projects.                                                                             | **{dotted-circle}** No |
-| [Atlassian Bamboo CI](bamboo.md)                          | Use the Atlassian Bamboo CI/CD server with GitLab.                                           | **{check-circle}** Yes |
+| [Atlassian Bamboo CI](bamboo.md)                          | Run CI/CD pipelines with Atlassian Bamboo.                                                   | **{check-circle}** Yes |
 | [Bugzilla](bugzilla.md)                                   | Use Bugzilla as the issue tracker.                                                           | **{dotted-circle}** No |
-| Buildkite                                                 | Run CI pipelines.                                                                            | **{check-circle}** Yes |
+| Buildkite                                                 | Run CI/CD pipelines with Buildkite.                                                          | **{check-circle}** Yes |
 | Campfire                                                  | Connect to chat.                                                                             | **{dotted-circle}** No |
 | [Confluence Workspace](../../../api/services.md#confluence-service) | Replace the link to the internal wiki with a link to a Confluence Cloud Workspace. | **{dotted-circle}** No |
 | [Custom issue tracker](custom_issue_tracker.md)           | Use a custom issue tracker.                                                                  | **{dotted-circle}** No |
 | [Discord Notifications](discord_notifications.md)         | Send notifications about project events to a Discord channel.                                | **{dotted-circle}** No |
 | Drone CI                                                  | Run CI/CD pipelines with Drone.                                                              | **{check-circle}** Yes |
-| [Emails on push](emails_on_push.md)                       | Email commits and diff of each push.                                                         | **{dotted-circle}** No |
+| [Emails on push](emails_on_push.md)                       | Send commits and diff of each push by email.                                                 | **{dotted-circle}** No |
 | [EWM](ewm.md)                                             | Use IBM Engineering Workflow Management as the issue tracker.                                | **{dotted-circle}** No |
 | External wiki                                             | Replace internal wiki link with external wiki link.                                          | **{dotted-circle}** No |
 | Flowdock                                                  | Flowdock is a collaboration web app for technical teams.                                     | **{dotted-circle}** No |
 | [GitHub](github.md)                                       | Obtain statuses for commits and pull requests.                                               | **{dotted-circle}** No |
 | [Hangouts Chat](hangouts_chat.md)                         | Receive events notifications.                                                                | **{dotted-circle}** No |
 | [Irker (IRC gateway)](irker.md)                           | Send IRC messages.                                                                           | **{dotted-circle}** No |
-| [Jenkins](../../../integration/jenkins.md)                | Run CI/CD pipelines with Jenkins.                                                              | **{check-circle}** Yes |
+| [Jenkins](../../../integration/jenkins.md)                | Run CI/CD pipelines with Jenkins.                                                            | **{check-circle}** Yes |
 | JetBrains TeamCity CI                                     | Run CI/CD pipelines with TeamCity.                                                           | **{check-circle}** Yes |
 | [Jira](jira.md)                                           | Use Jira as the issue tracker.                                                               | **{dotted-circle}** No |
 | [Mattermost notifications](mattermost.md)                 | Send notifications about project events to Mattermost channels.                              | **{dotted-circle}** No |
 | [Mattermost slash commands](mattermost_slash_commands.md) | Perform common tasks with slash commands.                                                    | **{dotted-circle}** No |
 | [Microsoft Teams notifications](microsoft_teams.md)       | Receive event notifications.                                                                 | **{dotted-circle}** No |
 | Packagist                                                 | Update your projects.                                                                        | **{check-circle}** Yes |
-| Pipelines emails                                          | Email the pipeline status to a list of recipients.                                           | **{dotted-circle}** No |
+| Pipelines emails                                          | Send the pipeline status to a list of recipients by email.                                   | **{dotted-circle}** No |
 | PivotalTracker                                            | Use PivotalTracker as the issue tracker.                                                     | **{dotted-circle}** No |
 | [Prometheus](prometheus.md)                               | Monitor application metrics.                                                                 | **{dotted-circle}** No |
 | Pushover                                                  | Get real-time notifications on your device.                                                  | **{dotted-circle}** No |
