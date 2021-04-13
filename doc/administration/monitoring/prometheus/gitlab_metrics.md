@@ -139,11 +139,11 @@ The following metrics can be controlled by feature flags:
 | `gitlab_method_call_duration_seconds`                          | `prometheus_metrics_method_instrumentation`                        |
 | `gitlab_view_rendering_duration_seconds`                       | `prometheus_metrics_view_instrumentation`                          |
 
-## Gitaly metrics
+## Praefect metrics
 
 You can [configure Praefect to report metrics](../../gitaly/praefect.md#praefect).
-These are some of the Gitaly metrics served from the `/metrics` path on the [configured port](index.md#changing-the-port-and-address-prometheus-listens-on)
-(9090 by default).
+These are some of the Praefect metrics served from the `/metrics` path on the [configured port](index.md#changing-the-port-and-address-prometheus-listens-on)
+(9652 by default).
 
 | Metric | Type | Since | Description | Labels |
 | :----- | :--- | ----: | :---------- | :----- |
