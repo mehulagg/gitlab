@@ -39,7 +39,7 @@ module Projects
       raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
 
       build.artifacts_file.use_file do |artifacts_path|
-        deploy_to_legacy_storage(artifacts_path)
+        deploy_to_legacy_storage(artifacts_path) if Feature.enabled(:pages_deploy_to_legacy_storage, project, default_enabled: :yaml)
 
         create_pages_deployment(artifacts_path, build)
 

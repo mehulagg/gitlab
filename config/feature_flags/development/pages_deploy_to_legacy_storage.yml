@@ -1,0 +1,8 @@
+---
+name: pages_deploy_to_legacy_storage
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.11'
+type: development
+group: group::release
+default_enabled: true
