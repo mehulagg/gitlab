@@ -87,8 +87,8 @@ RSpec.describe 'API-Fuzzing.latest.gitlab-ci.yml' do
         end
 
         context 'by default' do
-          it 'includes no a jobs' do
-            expect(build_names).to match_array(%w[])
+          it 'includes a job' do
+            expect(build_names).to match_array(%w[apifuzzer_fuzz])
           end
         end
 
