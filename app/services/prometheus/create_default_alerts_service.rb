@@ -84,7 +84,7 @@ module Prometheus
 
     def environment
       strong_memoize(:environment) do
-        EnvironmentsFinder.new(project, nil, name: 'production').find.first ||
+        Environments::EnvironmentsFinder.new(project, nil, name: 'production').find.first ||
           project.environments.first
       end
     end
