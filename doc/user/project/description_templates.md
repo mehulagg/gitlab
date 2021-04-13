@@ -51,8 +51,9 @@ directory in your repository. Commit and push to your default branch.
 
 To create a Markdown file:
 
-1. Click the `+` button next to `master` and click **New file**.
-1. Add the name of your issue template to the **File name** text field next to `master`.
+1. In a project, go to **Repository**.
+1. Select the `+` button next to the default branch and select **New file**.
+1. Add the name of your issue template to the **File name** text field next to `the default branch.
    Make sure that your file has the `.md` extension, for
    example `feature_request.md` or `Feature Request.md`.
 1. Commit and push to your default branch.
@@ -61,9 +62,10 @@ If you don't have a `.gitlab/issue_templates` directory in your repository, you 
 
 To create the `.gitlab/issue_templates` directory:
 
-1. Click the `+` button next to `master` and select **New directory**.
+1. In a project, go to **Repository**.
+1. Select the `+` button next to the default branch and select **New directory**.
 1. Name this new directory `.gitlab` and commit to your default branch.
-1. Click the `+` button next to `master` again and select **New directory**.
+1. Select the `+` button next to the default branch again and select **New directory**.
 1. Name your directory `issue_templates` and commit to your default branch.
 
 To check if this has worked correctly, [create a new issue](issues/managing_issues.md#create-a-new-issue)
