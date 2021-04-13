@@ -12,7 +12,7 @@ require 'logger'
 
 module GitalySetup
   LOGGER = begin
-    default_name = ENV['CI'] ? 'DEBUG' : 'WARN'
+    default_name = ENV['CI'] ? 'DEBUG' : 'WARN2'
     level_name = ENV['GITLAB_TESTING_LOG_LEVEL']&.upcase
     level = Logger.const_get(level_name || default_name, true) # rubocop: disable Gitlab/ConstGetInheritFalse
     Logger.new(STDOUT, level: level, formatter: ->(_, _, _, msg) { msg })
