@@ -18,7 +18,7 @@
       "type": ["string", "null"]
     },
     "value_description": {
-      "type": ["number", "null"]
+      "type": ["string", "null"]
     },
     "extra_properties": {
       "type": ["object", "null"]
@@ -48,15 +48,18 @@
       "type": ["string", "null"]
     },
     "introduced_by_url": {
-      "type": ["string", "null"]
+      "type": ["uri", "null"]
     },
     "milestone": {
       "type": ["string", "null"],
       "pattern": "^[0-9]+\\.[0-9]+$"
     },
     "distribution": {
-      "type": "string",
-      "enum": ["ee", "ce"]
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["ee", "ce"]
+      }
     },
     "tier": {
       "type": "array",

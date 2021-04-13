@@ -9,7 +9,7 @@ module Gitlab
 
     source_root File.expand_path('../../../generator_templates/snowplow_event_definition', __dir__)
 
-    desc 'Generates a metric definition yml file'
+    desc 'Generates an event definition yml file'
 
     class_option :ee, type: :boolean, optional: true, default: false, desc: 'Indicates if event is for ee'
     class_option :category, type: :string, optional: false, desc: 'Category of the event'
