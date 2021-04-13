@@ -27,7 +27,7 @@ RSpec.describe AddNewTrailPlans, :migration do
         table(:plan_limits).create!(id: 2, plan_id: 2, storage_size_limit: 1000)
       end
 
-      it 'duplicaes the gold and silvers plan limits entries' do
+      it 'duplicates the gold and silvers plan limits entries' do
         migrate!
 
         ultimate_plan_limits = AddNewTrailPlans::Plan.find_by(name: 'ultimate_trial').limits
