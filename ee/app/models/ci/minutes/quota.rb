@@ -50,6 +50,13 @@ module Ci
         @total_minutes ||= monthly_minutes + purchased_minutes
       end
 
+      def total_minutes_remaining
+        [(total_minutes.to_i - accurate_total_minutes_used).round(2), 0].max
+      end
+
+      # TODO: deprecate this method in favor of accurate_total_minutes_used
+      # which will eventually point to Ci::Minutes::NamespaceMonthlyUsage#amount_used
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/277448
       def total_minutes_used
         @total_minutes_used ||= namespace.shared_runners_seconds.to_i / 60
       end
@@ -66,6 +73,11 @@ module Ci
 
       private
 
+      # Equivalent to Ci::Minutes::BuildConsumption#amount
+      def accurate_total_minutes_used
+        @accurate_total_minutes_used ||= (namespace.shared_runners_seconds.to_f / 60).round(2)
+      end
+
       def minutes_limit
         return monthly_minutes if enabled?
 
@@ -80,10 +92,6 @@ module Ci
         return :disabled unless enabled?
 
         monthly_minutes_used_up? ? :over_quota : :under_quota
-      end
-
-      def total_minutes_remaining
-        [total_minutes.to_i - total_minutes_used, 0].max
       end
 
       def monthly_minutes_used_up?

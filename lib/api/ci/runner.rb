@@ -180,6 +180,9 @@ module API
 
           Gitlab::Metrics.add_event(:update_build)
 
+          # TODO: add specs
+          track_ci_minutes_usage(job, current_runner)
+
           service = ::Ci::UpdateBuildStateService
             .new(job, declared_params(include_missing: false))
 
@@ -205,6 +208,9 @@ module API
 
           error!('400 Missing header Content-Range', 400) unless request.headers.key?('Content-Range')
           content_range = request.headers['Content-Range']
+
+          # TODO: add specs
+          track_ci_minutes_usage(job, current_runner)
 
           result = ::Ci::AppendBuildTraceService
             .new(job, content_range: content_range)

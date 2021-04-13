@@ -29,6 +29,14 @@ module EE
 
           super
         end
+
+        override :track_ci_minutes_usage
+        def track_ci_minutes_usage(build, runner)
+          return unless runner.instance_type?
+          return unless build.running?
+
+          ::Ci::Minutes::TrackLiveConsumptionService.new.execute(build)
+        end
       end
     end
   end

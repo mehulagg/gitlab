@@ -66,4 +66,44 @@ RSpec.describe EE::API::Helpers::Runner do
       expect(helper.current_runner).to eq(runner)
     end
   end
+
+  describe '#track_ci_minutes_usage' do
+    let!(:build) { create(:ci_build, build_status) }
+    let!(:runner) { create(:ci_runner, runner_type) }
+    let(:build_status) { :running }
+    let(:runner_type) { :instance }
+
+    subject { helper.track_ci_minutes_usage(build, runner) }
+
+    context 'when build is running' do
+      context 'when runner is instance type' do
+        it 'calls the service' do
+          service = double(execute: nil)
+          expect(::Ci::Minutes::TrackLiveConsumptionService).to receive(:new).and_return(service)
+
+          subject
+        end
+      end
+
+      context 'when runner is not instance type' do
+        let(:runner_type) { :project }
+
+        it 'does not do anything' do
+          expect(::Ci::Minutes::TrackLiveConsumptionService).not_to receive(:new)
+
+          subject
+        end
+      end
+    end
+
+    context 'when build is not running' do
+      let(:build_status) { :success }
+
+      it 'does not do anything' do
+        expect(::Ci::Minutes::TrackLiveConsumptionService).not_to receive(:new)
+
+        subject
+      end
+    end
+  end
 end

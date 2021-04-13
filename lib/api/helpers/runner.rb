@@ -80,6 +80,11 @@ module API
           project: -> { current_job.project }
         )
       end
+
+      # TODO: write specs
+      def track_ci_minutes_usage(*args)
+        # noop: overridden in EE
+      end
     end
   end
 end
