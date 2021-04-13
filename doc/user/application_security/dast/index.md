@@ -943,11 +943,11 @@ A site profile contains the following:
 - **Excluded URLs**: A comma-separated list of URLs to skip during a scan.
 - **Request headers**: A comma-separated list of HTTP request header with names and values. Headers are added to every request made by DAST.
 - **Authentication**:  
-  - **Authenticated URL**: The URL of the login page on the target website
-  - **Username**: The username to authenticate to in the website
-  - **Password**: The password to authenticate to in the website
-  - **Username form field**: The name of username field at the login page
-  - **Password form field**: The name of password field at the login page
+  - **Authenticated URL**: The URL of the page containing the sign-in HTML form on the target website. The username and password are submitted with the login form to create an authenticated scan. 
+  - **Username**: The username to authenticate to in the website.
+  - **Password**: The password to authenticate to in the website.
+  - **Username form field**: The name of username field at the sign-in HTML form. 
+  - **Password form field**: The name of password field at the sign-in HTML form. 
 
 #### Site profile validation
 
