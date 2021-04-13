@@ -17594,6 +17594,12 @@ msgstr ""
 msgid "IssueTracker|Redmine issue tracker"
 msgstr ""
 
+msgid "IssueTracker|Use a custom issue tracker."
+msgstr ""
+
+msgid "IssueTracker|Use a custom issue tracker. %{docs_link}"
+msgstr ""
+
 msgid "IssueTracker|YouTrack issue tracker"
 msgstr ""
 
