@@ -146,7 +146,7 @@ export default {
     },
     showGraphViewSelector() {
       return Boolean(
-        this.glFeatures.pipelineGraphLayersView && this.pipeline && this.pipeline.usesNeeds,
+        this.glFeatures.pipelineGraphLayersView && this.pipeline?.usesNeeds,
       );
     },
   },

@@ -223,7 +223,7 @@ describe('Pipeline graph wrapper', () => {
   });
 
   describe('view dropdown', () => {
-    describe('when feature flag is off', () => {
+    describe('when pipelineGraphLayersView feature flag is off', () => {
       beforeEach(async () => {
         createComponentWithApollo();
         jest.runOnlyPendingTimers();
@@ -235,7 +235,7 @@ describe('Pipeline graph wrapper', () => {
       });
     });
 
-    describe('when feature flag is on', () => {
+    describe('when pipelineGraphLayersView feature flag is on', () => {
       let layersFn;
       beforeEach(async () => {
         layersFn = jest.spyOn(parsingUtils, 'listByLayers');
