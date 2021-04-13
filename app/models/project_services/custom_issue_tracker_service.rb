@@ -5,7 +5,7 @@ class CustomIssueTrackerService < IssueTrackerService
   validates :project_url, :issues_url, :new_issue_url, presence: true, public_url: true, if: :activated?
 
   def title
-    'Custom issue tracker'
+    s_('IssueTracker|Custom issue tracker')
   end
 
   def description
