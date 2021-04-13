@@ -547,7 +547,6 @@ must disable the **primary** site:
 
 ### Step 2. Promote all **secondary** nodes external to the cluster
 
-
 WARNING:
 If the secondary site [has been paused](../../geo/index.md#pausing-and-resuming-replication), this performs
 a point-in-time recovery to the last known state.
