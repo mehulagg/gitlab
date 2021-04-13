@@ -207,10 +207,6 @@ module Gitlab
             raise NotImplementedError
           end
 
-          def create_tracking_location(tracking_data, signature)
-            Reports::Security::Locations::Tracking.new(tracking_data, signature)
-          end
-
           def finding_name(data, identifiers, location)
             return data['message'] if data['message'].present?
             return data['name'] if data['name'].present?

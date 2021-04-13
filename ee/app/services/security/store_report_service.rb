@@ -74,9 +74,8 @@ module Security
 
       if ::Feature.enabled?(:vulnerability_finding_signatures, project)
         update_feedbacks(vulnerability_finding, vulnerability_params[:uuid])
+        update_finding_signatures(finding, vulnerability_finding)
       end
-
-      update_finding_signatures(finding, vulnerability_finding)
 
       # The maximum number of identifiers is not used in validation
       # we just want to ignore the rest if a finding has more than that.
