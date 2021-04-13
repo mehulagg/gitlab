@@ -37,9 +37,12 @@ const isEveryFieldValid = (form) => Object.values(form.fields).every(({ state })
 
 const createValidator = (context, feedbackMap) => ({ el, reportInvalidInput = false }) => {
   const { form } = context;
-  const { name } = el;
-
-  if (!name) {
+  let element = el;
+  if (!element.name) {
+    element = element.querySelector('input') || {};
+  }
+  const { name } = element;
+  if (!element.name) {
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
       console.warn(
@@ -50,7 +53,7 @@ const createValidator = (context, feedbackMap) => ({ el, reportInvalidInput = fa
   }
 
   const formField = form.fields[name];
-  const isValid = el.checkValidity();
+  const isValid = element.checkValidity();
 
   // This makes sure we always report valid fields - this can be useful for cases where the consuming
   // component's logic depends on certain fields being in a valid state.
