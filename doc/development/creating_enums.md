@@ -138,8 +138,8 @@ module Enums
 end
 ```
 
-When adding a new value we should fill the gap first.
-In the example above we would add `14` instead of `1_003`:
+To add new values, you should fill the gap first.
+In the example above add `14` instead of `1_003`:
 
 ```ruby
 {
