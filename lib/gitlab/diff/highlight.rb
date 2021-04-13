@@ -22,7 +22,7 @@ module Gitlab
       end
 
       def highlight
-        populate_marker_ranges if Feature.enabled?(:use_marker_ranges, project, default_enabled: :yaml)
+        populate_marker_ranges
 
         @diff_lines.map.with_index do |diff_line, index|
           diff_line = diff_line.dup
@@ -59,11 +59,7 @@ module Gitlab
       end
 
       def apply_marker_ranges_highlight(diff_line, rich_line, index)
-        marker_ranges = if Feature.enabled?(:use_marker_ranges, project, default_enabled: :yaml)
-                          diff_line.marker_ranges
-                        else
-                          inline_diffs[index]
-                        end
+        marker_ranges = diff_line.marker_ranges
 
         return rich_line if marker_ranges.blank?
 
@@ -134,12 +130,6 @@ module Gitlab
           line_prefix = diff_line.text =~ /\A(.)/ ? Regexp.last_match(1) : ' '
           "#{line_prefix}#{rich_line}".html_safe
         end
-      end
-
-      # Deprecated: https://gitlab.com/gitlab-org/gitlab/-/issues/324638
-      # ------------------------------------------------------------------------
-      def inline_diffs
-        @inline_diffs ||= InlineDiff.for_lines(@raw_lines)
       end
 
       def old_lines
