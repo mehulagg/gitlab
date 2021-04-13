@@ -26,7 +26,7 @@ RSpec.describe Admin::GroupsController do
         subject
 
         expect(response).to redirect_to(admin_group_path(group))
-        expect(response).to set_flash[:notice]
+        expect(controller).to set_flash[:notice]
       end
     end
 
@@ -37,7 +37,7 @@ RSpec.describe Admin::GroupsController do
         subject
 
         expect(response).to render_template(:edit)
-        expect(response).to set_flash.now[:error]
+        expect(controller).to set_flash.now[:error]
       end
     end
   end

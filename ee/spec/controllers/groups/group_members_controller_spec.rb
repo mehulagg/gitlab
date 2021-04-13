@@ -123,7 +123,7 @@ RSpec.describe Groups::GroupMembersController do
       it 'creates a new access request to the group' do
         post :request_access, params: { group_id: group }
 
-        expect(response).to set_flash.to 'Your request for access has been queued for review.'
+        expect(controller).to set_flash.to 'Your request for access has been queued for review.'
         expect(response).to redirect_to(group_path(group))
         expect(group.requesters.exists?(user_id: requesting_user)).to be_truthy
         expect(group.users).not_to include requesting_user
@@ -156,7 +156,7 @@ RSpec.describe Groups::GroupMembersController do
           it 'does not create a new access request' do
             post :request_access, params: { group_id: group }
 
-            expect(response).to set_flash.to "Your request for access could not be processed: "\
+            expect(controller).to set_flash.to "Your request for access could not be processed: "\
               "User email 'unverified@gitlab.com' is not a verified email."
             expect(response).to redirect_to(group_path(group))
             expect(group.requesters.exists?(user_id: requesting_user)).to be_falsey
@@ -199,7 +199,7 @@ RSpec.describe Groups::GroupMembersController do
           post :request_access, params: { group_id: group }
 
           expect(response).to redirect_to(new_user_session_path)
-          expect(response).to set_flash.to I18n.t('devise.failure.unconfirmed')
+          expect(controller).to set_flash.to I18n.t('devise.failure.unconfirmed')
           expect(group.requesters.exists?(user_id: requesting_user)).to be_falsey
           expect(group.users).not_to include requesting_user
         end
