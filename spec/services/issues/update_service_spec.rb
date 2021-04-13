@@ -41,7 +41,7 @@ RSpec.describe Issues::UpdateService, :mailer do
     end
 
     def update_issue(opts)
-      described_class.new(project, user, opts).execute(issue)
+      described_class.new(container: project, current_user: user, params: opts).execute(issue)
     end
 
     context 'valid params' do
@@ -269,7 +269,7 @@ RSpec.describe Issues::UpdateService, :mailer do
           opts[:move_between_ids] = [issue_1.id, issue_2.id]
           opts[:board_group_id] = group.id
 
-          described_class.new(issue_3.project, user, opts).execute(issue_3)
+          described_class.new(container: issue_3.project, current_user: user, params: opts).execute(issue_3)
           expect(issue_2.relative_position).to be_between(issue_1.relative_position, issue_2.relative_position)
         end
       end
@@ -282,7 +282,7 @@ RSpec.describe Issues::UpdateService, :mailer do
         end
 
         it 'filters out params that cannot be set without the :admin_issue permission' do
-          described_class.new(project, guest, opts.merge(confidential: true)).execute(issue)
+          described_class.new(container: project, current_user: guest, params: opts.merge(confidential: true)).execute(issue)
 
           expect(issue).to be_valid
           expect(issue.title).to eq 'New title'
@@ -650,7 +650,7 @@ RSpec.describe Issues::UpdateService, :mailer do
         opts = { label_ids: [label.id] }
 
         perform_enqueued_jobs do
-          @issue = described_class.new(project, user, opts).execute(issue)
+          @issue = described_class.new(container: project, current_user: user, params: opts).execute(issue)
         end
 
         should_email(subscriber)
@@ -666,7 +666,7 @@ RSpec.describe Issues::UpdateService, :mailer do
           opts = { label_ids: [label.id, label2.id] }
 
           perform_enqueued_jobs do
-            @issue = described_class.new(project, user, opts).execute(issue)
+            @issue = described_class.new(container: project, current_user: user, params: opts).execute(issue)
           end
 
           should_not_email(subscriber)
@@ -677,7 +677,7 @@ RSpec.describe Issues::UpdateService, :mailer do
           opts = { label_ids: [label2.id] }
 
           perform_enqueued_jobs do
-            @issue = described_class.new(project, user, opts).execute(issue)
+            @issue = described_class.new(container: project, current_user: user, params: opts).execute(issue)
           end
 
           should_not_email(subscriber)
@@ -709,7 +709,7 @@ RSpec.describe Issues::UpdateService, :mailer do
               line_number: 1
             }
           }
-          service = described_class.new(project, user, params)
+          service = described_class.new(container: project, current_user: user, params: params)
 
           expect(Spam::SpamActionService).not_to receive(:new)
 
@@ -785,7 +785,7 @@ RSpec.describe Issues::UpdateService, :mailer do
 
     context 'updating labels' do
       let(:label3) { create(:label, project: project) }
-      let(:result) { described_class.new(project, user, params).execute(issue).reload }
+      let(:result) { described_class.new(container: project, current_user: user, params: params).execute(issue).reload }
 
       context 'when add_label_ids and label_ids are passed' do
         let(:params) { { label_ids: [label.id], add_label_ids: [label3.id] } }
@@ -983,14 +983,14 @@ RSpec.describe Issues::UpdateService, :mailer do
       it 'raises an error for invalid move ids within a project' do
         opts = { move_between_ids: [9000, non_existing_record_id] }
 
-        expect { described_class.new(issue.project, user, opts).execute(issue) }
+        expect { described_class.new(container: issue.project, current_user: user, params: opts).execute(issue) }
             .to raise_error(ActiveRecord::RecordNotFound)
       end
 
       it 'raises an error for invalid move ids within a group' do
         opts = { move_between_ids: [9000, non_existing_record_id], board_group_id: create(:group).id }
 
-        expect { described_class.new(issue.project, user, opts).execute(issue) }
+        expect { described_class.new(container: issue.project, current_user: user, params: opts).execute(issue) }
             .to raise_error(ActiveRecord::RecordNotFound)
       end
     end
@@ -1030,7 +1030,7 @@ RSpec.describe Issues::UpdateService, :mailer do
 
     it_behaves_like 'issuable record that supports quick actions' do
       let(:existing_issue) { create(:issue, project: project) }
-      let(:issuable) { described_class.new(project, user, params).execute(existing_issue) }
+      let(:issuable) { described_class.new(container: project, current_user: user, params: params).execute(existing_issue) }
     end
   end
 end

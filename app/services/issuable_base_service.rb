@@ -343,9 +343,9 @@ class IssuableBaseService < ::Projects::BaseProjectService
   def change_state(issuable)
     case params.delete(:state_event)
     when 'reopen'
-      reopen_service.new(project, current_user, {}).execute(issuable)
+      reopen_service.new(container: project, current_user: current_user).execute(issuable)
     when 'close'
-      close_service.new(project, current_user, {}).execute(issuable)
+      close_service.new(container: project, current_user: current_user).execute(issuable)
     end
   end
 

@@ -8,7 +8,7 @@ module Issues
       @request = params.delete(:request)
       @spam_params = Spam::SpamActionService.filter_spam_params!(params, @request)
 
-      @issue = BuildService.new(project, current_user, params).execute
+      @issue = BuildService.new(container: project, current_user: current_user, params: params).execute
 
       filter_resolve_discussion_params
 
@@ -40,7 +40,7 @@ module Issues
 
       if Feature.disabled?(:issue_perform_after_creation_tasks_async, issue.project)
         Issues::AfterCreateService
-          .new(issue.project, current_user)
+          .new(container: issue.project, current_user: current_user)
           .execute(issue)
       end
 

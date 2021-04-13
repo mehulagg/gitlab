@@ -126,7 +126,7 @@ RSpec.describe Issues::CreateService do
         end
 
         it 'calls Issues::AfterCreateService' do
-          expect_next(::Issues::AfterCreateService, project, user).to receive(:execute)
+          expect_next(::Issues::AfterCreateService, container: project, current_user: user).to receive(:execute)
 
           described_class.new(container: project, current_user: user, params: opts).execute
         end
@@ -407,7 +407,7 @@ RSpec.describe Issues::CreateService do
         end
 
         it 'assigns the title and description for the issue' do
-          issue = described_class.new(project, user, opts).execute
+          issue = described_class.new(container: project, current_user: user, params: opts).execute
 
           expect(issue.title).not_to be_nil
           expect(issue.description).not_to be_nil

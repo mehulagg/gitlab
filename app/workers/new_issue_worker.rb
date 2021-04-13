@@ -19,7 +19,7 @@ class NewIssueWorker # rubocop:disable Scalability/IdempotentWorker
 
     if Feature.enabled?(:issue_perform_after_creation_tasks_async, issuable.project)
       Issues::AfterCreateService
-        .new(issuable.project, user)
+        .new(container: issuable.project, current_user: user)
         .execute(issuable)
     end
   end
