@@ -93,7 +93,7 @@ These job keywords can be defined inside a `default:` section:
 - [`timeout`](#timeout)
 
 The following example sets the `ruby:3.0` image as the default for all jobs in the pipeline.
-The `rspec 2.6` job does not use the default, because it overrides the default with
+The `rspec 2.7` job does not use the default, because it overrides the default with
 a job-specific `image:` section:
 
 ```yaml
@@ -103,7 +103,7 @@ default:
 rspec:
   script: bundle exec rspec
 
-rspec 2.6:
+rspec 2.7:
   image: ruby:2.7
   script: bundle exec rspec
 ```
