@@ -1,5 +1,5 @@
 ---
 title: Set projects_post_creation_worker feature flag to default
-merge_request:
+merge_request: 59273
 author:
 type: changed
