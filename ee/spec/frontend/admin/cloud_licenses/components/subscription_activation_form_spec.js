@@ -18,6 +18,8 @@ describe('CloudLicenseApp', () => {
   let wrapper;
 
   const fakeActivationCode = 'gEg959hDCkvM2d4Der5RyktT';
+  const freeTrialPath = 'sample-free-trial-path';
+  const buySubscriptionPath = 'sample-buy-subscription-path';
 
   const createMockApolloProvider = (resolverMock) => {
     localVue.use(VueApollo);
@@ -25,6 +27,8 @@ describe('CloudLicenseApp', () => {
   };
 
   const findActivateButton = () => wrapper.findByTestId('activate-button');
+  const findFreeTrialButton = () => wrapper.findByTestId('free-trial-button');
+  const findBuySubscriptionButton = () => wrapper.findByTestId('buy-subscription-button');
   const findAgreementCheckbox = () => wrapper.findComponent(GlFormCheckbox);
   const findActivationCodeInput = () => wrapper.findComponent(GlFormInput);
   const findActivateSubscriptionForm = () => wrapper.findComponent(GlForm);
@@ -46,6 +50,10 @@ describe('CloudLicenseApp', () => {
         apolloProvider: createMockApolloProvider(resolverMock),
         propsData: {
           ...props,
+        },
+        provide: {
+          freeTrialPath,
+          buySubscriptionPath,
         },
         stubs: {
           GlFormInput: GlFormInputStub,
@@ -75,6 +83,16 @@ describe('CloudLicenseApp', () => {
 
     it('has a checkbox to accept subscription agreement', () => {
       expect(findAgreementCheckbox().exists()).toBe(true);
+    });
+
+    it('has a free trial button', () => {
+      expect(findFreeTrialButton().exists()).toBe(true);
+      expect(findFreeTrialButton().props('href')).toBe(freeTrialPath);
+    });
+
+    it('has a buy subscription button', () => {
+      expect(findBuySubscriptionButton().exists()).toBe(true);
+      expect(findBuySubscriptionButton().props('href')).toBe(buySubscriptionPath);
     });
 
     it('disables the activate button if the agreement is unaccepted', () => {
