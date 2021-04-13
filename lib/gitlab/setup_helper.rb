@@ -107,7 +107,10 @@ module Gitlab
               # Compared to production, tests run in constrained environments. This
               # number is meant to grow with the number of concurrent rails requests /
               # sidekiq jobs, and concurrency will be low anyway in test.
-              git: { catfile_cache_size: 5 },
+              git: {
+                catfile_cache_size: 5,
+                bin_path: File.join(gitaly_dir, '_build', 'deps', 'git', 'install', 'bin', 'git')
+              },
               prometheus_listen_addr: prometheus_listen_addr
             }.compact
 
