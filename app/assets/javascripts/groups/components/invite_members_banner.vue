@@ -3,15 +3,17 @@ import { GlBanner } from '@gitlab/ui';
 import { parseBoolean, setCookie, getCookie } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
 import Tracking from '~/tracking';
+import InviteMembersTrigger from '~/invite_members/components/invite_members_trigger.vue';
 
 const trackingMixin = Tracking.mixin();
 
 export default {
   components: {
     GlBanner,
+    InviteMembersTrigger,
   },
   mixins: [trackingMixin],
-  inject: ['svgPath', 'inviteMembersPath', 'isDismissedKey', 'trackLabel'],
+  inject: ['svgPath', 'isDismissedKey', 'trackLabel'],
   data() {
     return {
       isDismissed: parseBoolean(getCookie(this.isDismissedKey)),
@@ -68,11 +70,15 @@ export default {
     v-if="!isDismissed"
     ref="banner"
     :title="$options.i18n.title"
-    :button-text="$options.i18n.button_text"
     :svg-path="svgPath"
-    :button-link="inviteMembersPath"
     @close="handleClose"
   >
     <p>{{ $options.i18n.body }}</p>
+    <template #actions>
+      <invite-members-trigger
+        classes="btn-confirm"
+        :display-text="$options.i18n.button_text"
+       />
+    </template>
   </gl-banner>
 </template>
