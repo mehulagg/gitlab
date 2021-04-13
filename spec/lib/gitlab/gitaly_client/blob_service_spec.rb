@@ -12,14 +12,14 @@ RSpec.describe Gitlab::GitalyClient::BlobService do
   describe '#batch_lfs_pointers' do
     let(:blob_ids) { ["4206f951d2691c78aac4c0ce9f2b23580b2c92cdcc4336e1028742c0274938e0"] }
     let(:expected_params) do
-      { blob_ids: blob_ids }
+      { revisions: blob_ids }
     end
 
     subject { client.batch_lfs_pointers(blob_ids) }
 
     it 'sends a get_lfs_pointers message' do
       expect_any_instance_of(Gitaly::BlobService::Stub)
-        .to receive(:get_lfs_pointers)
+        .to receive(:list_lfs_pointers)
         .with(gitaly_request_with_params(expected_params), kind_of(Hash))
         .and_return([])
 
@@ -32,14 +32,14 @@ RSpec.describe Gitlab::GitalyClient::BlobService do
     let(:limit) { 5 }
     let(:not_in) { %w[branch-a branch-b] }
     let(:expected_params) do
-      { revision: revision, limit: limit, not_in_refs: not_in, not_in_all: false }
+      { revisions: ["master", "--not", "branch-a", "branch-b"], limit: limit}
     end
 
     subject { client.get_new_lfs_pointers(revision, limit, not_in) }
 
     it 'sends a get_new_lfs_pointers message' do
       expect_any_instance_of(Gitaly::BlobService::Stub)
-        .to receive(:get_new_lfs_pointers)
+        .to receive(:list_lfs_pointers)
         .with(gitaly_request_with_params(expected_params), kind_of(Hash))
         .and_return([])
 
@@ -49,12 +49,12 @@ RSpec.describe Gitlab::GitalyClient::BlobService do
     context 'with not_in = :all' do
       let(:not_in) { :all }
       let(:expected_params) do
-        { revision: revision, limit: limit, not_in_refs: [], not_in_all: true }
+        { revisions: ["master", "--not", "--all"], limit: limit }
       end
 
       it 'sends the correct message' do
         expect_any_instance_of(Gitaly::BlobService::Stub)
-          .to receive(:get_new_lfs_pointers)
+          .to receive(:list_lfs_pointers)
           .with(gitaly_request_with_params(expected_params), kind_of(Hash))
           .and_return([])
 
@@ -91,12 +91,16 @@ RSpec.describe Gitlab::GitalyClient::BlobService do
   end
 
   describe '#get_all_lfs_pointers' do
+    let(:expected_params) do
+      { revisions: ["--all"], limit: 0 }
+    end
+
     subject { client.get_all_lfs_pointers }
 
     it 'sends a get_all_lfs_pointers message' do
       expect_any_instance_of(Gitaly::BlobService::Stub)
-        .to receive(:get_all_lfs_pointers)
-        .with(gitaly_request_with_params({}), kind_of(Hash))
+        .to receive(:list_lfs_pointers)
+        .with(gitaly_request_with_params(expected_params), kind_of(Hash))
         .and_return([])
 
       subject
