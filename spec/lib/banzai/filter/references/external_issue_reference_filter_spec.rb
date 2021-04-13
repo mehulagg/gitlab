@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::ExternalIssueReferenceFilter do
+RSpec.describe Banzai::Filter::References::ExternalIssueReferenceFilter do
   include FilterSpecHelper
 
   let_it_be_with_refind(:project) { create(:project) }

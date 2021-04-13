@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::CommitReferenceFilter do
+RSpec.describe Banzai::Filter::References::CommitReferenceFilter do
   include FilterSpecHelper
 
   let(:project) { create(:project, :public, :repository) }

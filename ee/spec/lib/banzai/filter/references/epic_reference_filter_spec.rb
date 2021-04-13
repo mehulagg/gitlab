@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::EpicReferenceFilter do
+RSpec.describe Banzai::Filter::References::EpicReferenceFilter do
   include FilterSpecHelper
 
   let(:urls) { Gitlab::Routing.url_helpers }

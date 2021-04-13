@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::UserReferenceFilter do
+RSpec.describe Banzai::Filter::References::UserReferenceFilter do
   include FilterSpecHelper
 
   def get_reference(user)

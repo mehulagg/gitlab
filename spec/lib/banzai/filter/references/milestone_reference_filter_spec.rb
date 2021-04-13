@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::MilestoneReferenceFilter do
+RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter do
   include FilterSpecHelper
 
   let_it_be(:parent_group) { create(:group, :public) }

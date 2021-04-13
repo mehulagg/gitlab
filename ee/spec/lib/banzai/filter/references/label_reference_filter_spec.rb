@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::LabelReferenceFilter do
+RSpec.describe Banzai::Filter::References::LabelReferenceFilter do
   include FilterSpecHelper
 
   let(:project) { create(:project, :public, name: 'sample-project') }
