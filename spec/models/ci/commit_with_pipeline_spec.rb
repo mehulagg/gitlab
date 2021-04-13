@@ -31,10 +31,16 @@ RSpec.describe Ci::CommitWithPipeline do
 
     shared_examples_for 'fetching latest pipeline' do |ref|
       it 'returns the latest pipeline for the project' do
-        expect(commit)
-          .to receive(:latest_pipeline_for_project)
-          .with(ref, project)
-          .and_return(pipeline)
+        if ref
+          expect(commit)
+            .to receive(:latest_pipeline_for_project)
+            .with(ref, project)
+            .and_return(pipeline)
+        else
+          expect(commit)
+            .to receive(:lazy_latest_pipeline)
+            .and_return(pipeline)
+        end
 
         expect(result).to eq(pipeline)
       end
