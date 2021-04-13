@@ -5,6 +5,7 @@ module Resolvers
     include BoardIssueFilterable
 
     argument :filters, Types::Boards::BoardIssueInputType,
+             prepare: ->(filters, ctx) { filters.to_h },
              required: false,
              description: 'Filters applied when selecting issues in the board list.'
 

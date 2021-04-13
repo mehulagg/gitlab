@@ -46,9 +46,11 @@ RSpec.describe Resolvers::BoardListIssuesResolver do
     end
 
     context 'filtering by iteration' do
-      let_it_be(:iteration) { create(:iteration, group: group) }
+      let_it_be(:iteration) { create(:iteration, group: group, start_date: 1.week.ago, due_date: 2.days.ago) }
+      let_it_be(:current_iteration) { create(:iteration, :started, group: group, start_date: Date.today, due_date: 1.day.from_now) }
       let_it_be(:issue_with_iteration) { create(:issue, project: project, labels: [label], iteration: iteration) }
       let_it_be(:issue_without_iteration) { create(:issue, project: project, labels: [label]) }
+      let_it_be(:issue_with_current_iteration) { create(:issue, project: project, labels: [label], iteration: current_iteration) }
 
       it 'accepts iteration title' do
         result = resolve_board_list_issues({ filters: { iteration_title: iteration.title } })
@@ -60,6 +62,14 @@ RSpec.describe Resolvers::BoardListIssuesResolver do
         result = resolve_board_list_issues({ filters: { iteration_wildcard_id: 'NONE' } })
 
         expect(result).to contain_exactly(issue_without_iteration)
+      end
+
+      context 'filterning by negated iteration' do
+        it 'accepts iteration wildcard id' do
+          result = resolve_board_list_issues({ filters: { not: { iteration_wildcard_id: 'CURRENT' } } })
+
+          expect(result).to contain_exactly(issue_without_iteration, issue_with_iteration)
+        end
       end
     end
   end
