@@ -2043,7 +2043,7 @@ considered and customer technical support will be considered out of scope.
 
 ## Supported modifications for lower user counts (HA)
 
-The 3k GitLab reference architecture is the smallest one that achieves High Availability.
+The 3k GitLab reference architecture is the smallest we recommend that achieves High Availability.
 However, for environments that need to serve less users but maintain HA there's several
 supported modifications you can make to this architecture to reduce complexity and cost.
 
