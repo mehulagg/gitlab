@@ -24372,9 +24372,6 @@ msgstr ""
 msgid "ProjectService|%{service_title}: status on"
 msgstr ""
 
-msgid "ProjectService|Drone URL"
-msgstr ""
-
 msgid "ProjectService|Enter new API key"
 msgstr ""
 
@@ -24408,10 +24405,16 @@ msgstr ""
 msgid "ProjectService|Perform common operations on GitLab project: %{project_name}"
 msgstr ""
 
+msgid "ProjectService|Run CI/CD pipelines with Drone."
+msgstr ""
+
 msgid "ProjectService|TeamCity URL"
 msgstr ""
 
 msgid "ProjectService|To configure this integration, you should:"
+msgstr ""
+
+msgid "ProjectService|Token for the Drone project."
 msgstr ""
 
 msgid "ProjectService|Trigger event for new comments on confidential issues."
@@ -24448,6 +24451,9 @@ msgid "ProjectService|Trigger event when a wiki page is created or updated."
 msgstr ""
 
 msgid "ProjectService|Trigger event when an issue is created, updated, or closed."
+msgstr ""
+
+msgid "ProjectService|URL to the Drone server"
 msgstr ""
 
 msgid "ProjectSettings|%{link_start}What are description templates?%{link_end}"

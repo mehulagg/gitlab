@@ -83,17 +83,21 @@ class DroneCiService < CiService
   end
 
   def description
-    'Run CI/CD pipelines in Drone.'
+    s_('ProjectService|Run CI/CD pipelines with Drone.')
   end
 
   def self.to_param
     'drone_ci'
   end
 
+  def help
+    s_('ProjectService|Run CI/CD pipelines with Drone.')
+  end
+
   def fields
     [
-      { type: 'text', name: 'token', placeholder: 'Drone project specific token', required: true },
-      { type: 'text', name: 'drone_url', title: s_('ProjectService|URL to the Drone server.'), placeholder: 'http://drone.example.com', required: true },
+      { type: 'text', name: 'token', help: s_('ProjectService|Token for the Drone project.'), required: true },
+      { type: 'text', name: 'drone_url', title: s_('ProjectService|URL to the Drone server'), placeholder: 'http://drone.example.com', required: true },
       { type: 'checkbox', name: 'enable_ssl_verification', title: "Enable SSL verification" }
     ]
   end
