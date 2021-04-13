@@ -106,4 +106,25 @@ RSpec.describe 'Epic boards sidebar', :js do
       expect(card).to have_content(bug.title)
     end
   end
+
+  context 'confidentiality' do
+    it 'make epic confidential' do
+      click_card(card)
+
+      page.within('.confidentiality') do
+        expect(page).to have_content('Not confidential')
+
+        find('[data-testid="edit-button"]').click
+        expect(page).to have_css('.sidebar-item-warning-message')
+
+        within('.sidebar-item-warning-message') do
+          find('[data-testid="confidential-toggle"]').click
+        end
+
+        wait_for_requests
+
+        expect(page).to have_content('This epic is confidential')
+      end
+    end
+  end
 end
