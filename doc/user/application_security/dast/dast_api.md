@@ -9,13 +9,10 @@ type: reference, howto
 
 You can add dynamic application security testing of web APIs to your [GitLab CI/CD](../../../ci/README.md) pipelines.
 This helps you discover bugs and potential security issues that other QA processes may miss.
-DAST API performs fuzz testing of API operation parameters. Fuzz testing sets operation
-parameters to unexpected values in an effort to cause unexpected behavior and errors in the API
-backend.
 
-We recommend that you use fuzz testing in addition to [GitLab Secure](../index.md)'s
+We recommend that you use DAST API testing in addition to [GitLab Secure](../index.md)'s
 other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/README.md),
-you can run fuzz tests as part your CI/CD workflow.
+you can run DAST API tests as part your CI/CD workflow.
 
 ## Requirements
 
@@ -26,8 +23,8 @@ you can run fuzz tests as part your CI/CD workflow.
   - Form bodies, JSON, or XML
 - One of the following assets to provide APIs to test:
   - OpenAPI v2 or v3 API definition
-  - HTTP Archive (HAR) of API requests to test
   - Postman Collection v2.0 or v2.1
+  - HTTP Archive (HAR) of API requests to test
 
 ## When DAST API scans run
 
@@ -56,12 +53,12 @@ There are three ways to perform scans. See the configuration section for the one
 - [HTTP Archive (HAR)](#http-archive-har)
 - [Postman Collection v2.0 or v2.1](#postman-collection)
 
-Examples of both configurations can be found here:
+Examples of various configurations can be found here:
 
-- [Example OpenAPI v2 specification project](https://gitlab.com/gitlab-org/security-products/demos/dast-api/openapi-example)
-- [Example HTTP Archive (HAR) project](https://gitlab.com/gitlab-org/security-products/demos/dast-api/har-example)
-- [Example Postman Collection project](https://gitlab.com/gitlab-org/security-products/demos/dast-api/postman-example)
-- [Example GraphQL project](https://gitlab.com/gitlab-org/security-products/demos/dast-api/graphql-example)
+- [Example OpenAPI v2 specification project](https://gitlab.com/gitlab-org/security-products/demos/api-dast/openapi-example)
+- [Example HTTP Archive (HAR) project](https://gitlab.com/gitlab-org/security-products/demos/api-dast/har-example)
+- [Example Postman Collection project](https://gitlab.com/gitlab-org/security-products/demos/api-dast/postman-example)
+- [Example GraphQL project](https://gitlab.com/gitlab-org/security-products/demos/api-dast/graphql-example)
 
 WARNING:
 GitLab 14.0 will require that you place DAST API configuration files (for example,
