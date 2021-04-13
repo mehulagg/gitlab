@@ -39,9 +39,10 @@ import {
   DIFF_FILE_BY_FILE_COOKIE_NAME,
 } from '../constants';
 import eventHub from '../event_hub';
-import { isCollapsed } from '../utils/diff_file';
+import { cacheDiffFiles, cacheMergeRequestMetadata, getMergeRequestById } from '../utils/database';
+import { isCollapsed, identifier as fileIdentifier } from '../utils/diff_file';
 import { markFileReview, setReviewsForMergeRequest } from '../utils/file_reviews';
-import { getDerivedMergeRequestInformation } from '../utils/merge_request';
+import { getDerivedMergeRequestInformation, identifier as mrIdentifier } from '../utils/merge_request';
 import TreeWorker from '../workers/tree_worker';
 import * as types from './mutation_types';
 import {
@@ -51,6 +52,7 @@ import {
   idleCallback,
   allDiscussionWrappersExpanded,
   prepareLineForRenamedFile,
+  fetchDiffFiles,
 } from './utils';
 
 let eTagPoll;
@@ -90,7 +92,7 @@ export const setBaseConfig = ({ commit }, options) => {
   });
 };
 
-export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
+export const fetchDiffFilesBatch = async ({ commit, state, dispatch }) => {
   const diffsGradualLoad = window.gon?.features?.diffsGradualLoad;
   let perPage = DIFFS_PER_PAGE;
   let increaseAmount = 1.4;
@@ -99,6 +101,12 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
     perPage = state.viewDiffsFileByFile ? 1 : 5;
   }
 
+  const mrId = mrIdentifier({ "metadata": {
+    "latest_version_path": state.endpointMetadata,
+    "merge_request_diff": {
+      "version_index": state.mr.version
+    }
+  } } );
   const startPage = diffsGradualLoad ? 0 : 1;
   const id = window?.location?.hash;
   const isNoteLink = id.indexOf('#note') === 0;
@@ -112,11 +120,26 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
   commit(types.SET_RETRIEVING_BATCHES, true);
   eventHub.$emit(EVT_PERF_MARK_DIFF_FILES_START);
 
-  const getBatch = (page = startPage) =>
-    axios
-      .get(mergeUrlParams({ ...urlParams, page, per_page: perPage }, state.endpointBatch))
+  const getBatch = (page = startPage) => {
+    fetchDiffFiles( {
+      "fetchEndpoint": mergeUrlParams({ ...urlParams, page, per_page: perPage }, state.endpointBatch),
+      "mrSize": Number( state.mr.size ) || -1,
+      axios,
+      mrId,
+    } )
       .then(({ data: { pagination, diff_files } }) => {
         totalLoaded += diff_files.length;
+
+        cacheDiffFiles( {
+          files: diff_files.map( ( file, index ) => {
+            return {
+              "id": fileIdentifier(file),
+              mrId,
+              order: index + 1,
+              ...file
+            }
+          } )
+        } );
 
         commit(types.SET_DIFF_DATA_BATCH, { diff_files });
         commit(types.SET_BATCH_LOADING, false);
@@ -183,17 +206,32 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
         return null;
       })
       .catch(() => commit(types.SET_RETRIEVING_BATCHES, false));
+    }
 
   return getBatch()
     .then(handleLocationHash)
     .catch(() => null);
 };
 
-export const fetchDiffFilesMeta = ({ commit, state }) => {
-  const worker = new TreeWorker();
+export const fetchDiffFilesMeta = async ({ commit, state }) => {
+  const mrId = mrIdentifier({ "metadata": {
+    "latest_version_path": state.endpointMetadata,
+    "merge_request_diff": {
+      "version_index": state.mr.version
+    }
+  } } );
   const urlParams = {
     view: 'inline',
   };
+  const worker = new TreeWorker();
+  let mr = await getMergeRequestById( { mrId } );
+
+  if( !mr ){
+    mr = await axios.get(mergeUrlParams(urlParams, state.endpointMetadata));
+  }
+  else{
+    mr = { data: mr };
+  }
 
   commit(types.SET_LOADING, true);
   eventHub.$emit(EVT_PERF_MARK_FILE_TREE_START);
@@ -205,11 +243,13 @@ export const fetchDiffFilesMeta = ({ commit, state }) => {
     worker.terminate();
   });
 
-  return axios
-    .get(mergeUrlParams(urlParams, state.endpointMetadata))
+  return Promise.resolve(mr)
     .then(({ data }) => {
-      const strippedData = { ...data };
+      const identifiedData = { id: mrIdentifier( { metadata: data } ), ...data };
+      const strippedData = { ...identifiedData };
       delete strippedData.diff_files;
+
+      cacheMergeRequestMetadata( { "metadata": identifiedData } );
 
       commit(types.SET_LOADING, false);
       commit(types.SET_MERGE_REQUEST_DIFFS, data.merge_request_diffs || []);
