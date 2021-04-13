@@ -73,15 +73,15 @@ from outside the Marketplace, which allows you to install the application:
 1. Sign in to your GitLab application as a user with [Administrator](../../user/permissions.md) permissions.
 1. Install the GitLab application from your self-managed GitLab instance, as
    described in the [Atlassian developer guides](https://developer.atlassian.com/cloud/jira/platform/getting-started-with-connect/#step-3--install-and-test-your-app)).
-1. In your Jira instance, go to **Apps > Manage Apps** and click **Upload app**:
+   1. In your Jira instance, go to **Apps > Manage Apps** and click **Upload app**:
 
    ![Image showing button labeled "upload app"](img/jira-upload-app_v13_11.png)
 
-1. For **App descriptor URL**, provide full URL to your manifest file, modifying this
+   1. For **App descriptor URL**, provide full URL to your manifest file, modifying this
    URL based on your instance configuration: `https://your.domain/your-path/-/jira_connect/app_descriptor.json`
-1. Click **Upload**, and Jira fetches the content of your `app_descriptor` file and installs
+   1. Click **Upload**, and Jira fetches the content of your `app_descriptor` file and installs
    it for you.
-1. If the upload is successful, Jira displays a modal panel: **Installed and ready to go!**
+   1. If the upload is successful, Jira displays a modal panel: **Installed and ready to go!**
    Click **Get started** to configure the integration.
 
    ![Image showing success modal](img/jira-upload-app-success_v13_11.png)
