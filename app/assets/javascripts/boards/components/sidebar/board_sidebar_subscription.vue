@@ -21,6 +21,7 @@ export default {
   components: {
     GlToggle,
   },
+  inject: ['emailsDisabled'],
   data() {
     return {
       loading: false,
@@ -29,18 +30,18 @@ export default {
   computed: {
     ...mapGetters(['activeBoardItem', 'projectPathForActiveIssue']),
     notificationText() {
-      return this.activeBoardItem.emailsDisabled
+      return this.emailsDisabled
         ? this.$options.i18n.header.subscribeDisabledDescription
         : this.$options.i18n.header.title;
     },
   },
   methods: {
-    ...mapActions(['setActiveIssueSubscribed']),
+    ...mapActions(['setActiveItemSubscribed']),
     async handleToggleSubscription() {
       this.loading = true;
 
       try {
-        await this.setActiveIssueSubscribed({
+        await this.setActiveItemSubscribed({
           subscribed: !this.activeBoardItem.subscribed,
           projectPath: this.projectPathForActiveIssue,
         });
@@ -61,7 +62,7 @@ export default {
   >
     <span data-testid="notification-header-text"> {{ notificationText }} </span>
     <gl-toggle
-      v-if="!activeBoardItem.emailsDisabled"
+      v-if="!emailsDisabled"
       :value="activeBoardItem.subscribed"
       :is-loading="loading"
       :label="$options.i18n.header.title"

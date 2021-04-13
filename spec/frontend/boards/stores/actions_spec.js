@@ -1118,7 +1118,7 @@ describe('setActiveIssueDueDate', () => {
   });
 });
 
-describe('setActiveIssueSubscribed', () => {
+describe('setActiveItemSubscribed', () => {
   const state = { boardItems: { [mockActiveIssue.id]: mockActiveIssue } };
   const getters = { activeBoardItem: mockActiveIssue };
   const subscribedState = true;
@@ -1146,7 +1146,7 @@ describe('setActiveIssueSubscribed', () => {
     };
 
     testAction(
-      actions.setActiveIssueSubscribed,
+      actions.setActiveItemSubscribed,
       input,
       { ...state, ...getters },
       [
@@ -1165,7 +1165,7 @@ describe('setActiveIssueSubscribed', () => {
       .spyOn(gqlClient, 'mutate')
       .mockResolvedValue({ data: { issueSetSubscription: { errors: ['failed mutation'] } } });
 
-    await expect(actions.setActiveIssueSubscribed({ getters }, input)).rejects.toThrow(Error);
+    await expect(actions.setActiveItemSubscribed({ getters }, input)).rejects.toThrow(Error);
   });
 });
 
