@@ -23,6 +23,22 @@ module Types
       def lfs_oid
         Gitlab::Graphql::Loaders::BatchLfsOidLoader.new(object.repository, object.id).find
       end
+
+      def type
+        if object.is_a?(::Blob)
+          :blob
+        else
+          super
+        end
+      end
+
+      def flat_path
+        if object.is_a?(::Blob)
+          object.path
+        else
+          super
+        end
+      end
     end
     # rubocop: enable Graphql/AuthorizeTypes
   end
