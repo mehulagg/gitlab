@@ -21,6 +21,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
   shared_examples 'custom Value Stream Analytics Stage' do
     let(:params) { { from: Time.new(2019), to: Time.new(2020), current_user: user } }
     let(:data_collector) { described_class.new(stage: stage, params: params) }
+    let(:resource_1_end_time) { Time.new(2019, 3, 15) }
+    let(:resource_2_end_time) { Time.new(2019, 3, 10) }
+    let(:resource_3_end_time) { Time.new(2019, 3, 20) }
 
     let!(:resource1) do
       # takes 10 days
@@ -28,7 +31,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         create_data_for_start_event(self)
       end
 
-      travel_to(Time.new(2019, 3, 15)) do
+      travel_to(resource_1_end_time) do
         create_data_for_end_event(resource, self)
       end
 
@@ -41,7 +44,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         create_data_for_start_event(self)
       end
 
-      travel_to(Time.new(2019, 3, 10)) do
+      travel_to(resource_2_end_time) do
         create_data_for_end_event(resource, self)
       end
 
@@ -54,7 +57,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         create_data_for_start_event(self)
       end
 
-      travel_to(Time.new(2019, 3, 20)) do
+      travel_to(resource_3_end_time) do
         create_data_for_end_event(resource, self)
       end
 
@@ -91,6 +94,20 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         days = subject.map { |item| round_to_days(item.duration_in_seconds) }
 
         expect(days).to eq([15, 10, 5])
+      end
+    end
+
+    describe '#duration_chart_average_data' do
+      subject { data_collector.duration_chart_average_data }
+
+      it 'loads data ordered by event time' do
+        data = subject.map { |item| [item.date, round_to_days(item.average_duration_in_seconds)] }
+
+        expect(Hash[data]).to eq({
+          resource_1_end_time.utc.to_date => 10,
+          resource_2_end_time.utc.to_date => 5,
+          resource_3_end_time.utc.to_date => 15
+        })
       end
     end
   end

@@ -27,6 +27,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       scope module: :cycle_analytics, as: 'cycle_analytics', path: 'value_stream_analytics' do
         resources :stages, only: [:index, :create, :update, :destroy] do
           member do
+            get :average_duration_chart
             get :duration_chart
             get :median
             get :average
@@ -36,6 +37,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         resources :value_streams, only: [:index, :create, :update, :destroy] do
           resources :stages, only: [:index, :create, :update, :destroy] do
             member do
+              get :average_duration_chart
               get :duration_chart
               get :median
               get :average
