@@ -547,11 +547,6 @@ must disable the **primary** site:
 
 ### Step 2. Promote all **secondary** nodes external to the cluster
 
-WARNING:
-In GitLab 13.2 and 13.3, promoting a secondary site to a primary while the
-secondary is paused fails. Do not pause replication before promoting a
-secondary. If the site is paused, be sure to resume before promoting. This
-issue has been fixed in GitLab 13.4 and later.
 
 WARNING:
 If the secondary site [has been paused](../../geo/index.md#pausing-and-resuming-replication), this performs
