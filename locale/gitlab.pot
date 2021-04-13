@@ -17636,6 +17636,51 @@ msgstr ""
 msgid "Iterations cadences"
 msgstr ""
 
+msgid "Iterations|Automated scheduling"
+msgstr ""
+
+msgid "Iterations|Cadence name"
+msgstr ""
+
+msgid "Iterations|Create cadence"
+msgstr ""
+
+msgid "Iterations|Duration"
+msgstr ""
+
+msgid "Iterations|Future iterations"
+msgstr ""
+
+msgid "Iterations|Iteration scheduling will be handled automatically"
+msgstr ""
+
+msgid "Iterations|New iteration cadence"
+msgstr ""
+
+msgid "Iterations|Number of future iterations you would like to have scheduled"
+msgstr ""
+
+msgid "Iterations|Select duration"
+msgstr ""
+
+msgid "Iterations|Select number"
+msgstr ""
+
+msgid "Iterations|Select start date"
+msgstr ""
+
+msgid "Iterations|Start date"
+msgstr ""
+
+msgid "Iterations|The duration for each iteration (in weeks)"
+msgstr ""
+
+msgid "Iterations|The start date of your first iteration"
+msgstr ""
+
+msgid "Iterations|Title"
+msgstr ""
+
 msgid "Iteration|Dates cannot overlap with other existing Iterations within this group"
 msgstr ""
 
