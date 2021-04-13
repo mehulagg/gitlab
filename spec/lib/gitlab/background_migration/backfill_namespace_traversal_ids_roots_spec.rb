@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BackgroundMigration::BackfillTraversalIds::BackfillRoots, :migration, schema: 20210324060135 do
+RSpec.describe Gitlab::BackgroundMigration::BackfillNamespaceTraversalIdsRoots, :migration, schema: 20210324060135 do
   let(:namespaces_table) { table(:namespaces) }
 
   let!(:user_namespace) { namespaces_table.create!(id: 1, name: 'user', path: 'user', type: nil) }
@@ -11,7 +11,7 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillTraversalIds::BackfillRoots,
 
   describe '#perform' do
     it 'backfills traversal_ids for root namespaces' do
-      described_class.new.perform(1, 3)
+      described_class.new.perform(1, 3, 5)
 
       expect(user_namespace.reload.traversal_ids).to eq([user_namespace.id])
       expect(root_group.reload.traversal_ids).to eq([root_group.id])
