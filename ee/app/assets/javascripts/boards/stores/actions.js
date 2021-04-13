@@ -304,13 +304,16 @@ export default {
 
   fetchItemsForList: (
     { state, commit, getters },
-    { listId, fetchNext = false, noEpicIssues = false },
+    { listId, fetchNext = false, noEpicIssues = false, forSwimlanes = false },
   ) => {
     commit(types.REQUEST_ITEMS_FOR_LIST, { listId, fetchNext });
 
     const { epicId, ...filterParams } = state.filterParams;
     if (noEpicIssues && epicId !== undefined) {
       return null;
+    }
+    if (forSwimlanes && epicId === undefined && filterParams.epicWildcardId === undefined) {
+      filterParams.epicWildcardId = EpicFilterType.any.toUpperCase();
     }
 
     const variables = {
@@ -319,7 +322,7 @@ export default {
         ? { ...filterParams, epicWildcardId: EpicFilterType.none.toUpperCase() }
         : { ...filterParams, epicId },
       after: fetchNext ? state.pageInfoByListId[listId].endCursor : undefined,
-      first: 20,
+      first: forSwimlanes ? undefined : 20,
     };
 
     if (getters.isEpicBoard) {
