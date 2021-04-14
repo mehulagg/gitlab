@@ -17,7 +17,6 @@ milestone: "13.11"
 introduced_by_url:
 distribution:
 - ee
-# tier:
-# - free
-# - premium
-# - ultimate
+tier:
+#- premium
+- ultimate

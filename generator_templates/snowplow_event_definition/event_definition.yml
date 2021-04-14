@@ -17,7 +17,11 @@ milestone: "<%= milestone %>"
 introduced_by_url:
 distribution:
 <%= distribution %>
-# tier:
-# - free
-# - premium
-# - ultimate
+tier: <% if ee? %>
+#- premium
+- ultimate
+<% else %>
+- free
+- premium
+- ultimate
+<% end %>

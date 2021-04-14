@@ -37,6 +37,10 @@ module Gitlab
       Gitlab::VERSION.match('(\d+\.\d+)').captures.first
     end
 
+    def ee?
+      options[:ee]
+    end
+
     private
 
     def definition_exists?
@@ -57,10 +61,6 @@ module Gitlab
 
     def file_name
       "#{event_category}_#{event_action}.yml"
-    end
-
-    def ee?
-      options[:ee]
     end
   end
 end
