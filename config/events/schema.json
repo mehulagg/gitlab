@@ -23,14 +23,12 @@
     "extra_properties": {
       "type": ["object", "null"]
     },
-    "project_included": {
-      "type": "boolean"
-    },
-    "user_included": {
-      "type": "boolean"
-    },
-    "namespace_included":  {
-      "type": "boolean"
+    "identifiers": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "string",
+        "enum": ["project", "user", "namespace"]
+      }
     },
     "iglu_schema_url": {
       "type": ["string", "null"]

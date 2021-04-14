@@ -6,9 +6,10 @@ label_description:
 property_description:
 value_description:
 extra_properties:
-project_included:
-user_included:
-namespace_included:
+identifiers:
+#- project
+#- user
+#- namespace
 product_section:
 product_stage:
 product_group:
