@@ -4885,13 +4885,25 @@ msgstr ""
 msgid "BillingPlan|Upgrade for free"
 msgstr ""
 
+msgid "Billing|Access expires"
+msgstr ""
+
+msgid "Billing|Access granted"
+msgstr ""
+
 msgid "Billing|An email address is only visible for users with public emails."
+msgstr ""
+
+msgid "Billing|An error occurred while getting a billable member details"
 msgstr ""
 
 msgid "Billing|An error occurred while loading billable members list"
 msgstr ""
 
 msgid "Billing|An error occurred while removing a billable member"
+msgstr ""
+
+msgid "Billing|Direct memberships"
 msgstr ""
 
 msgid "Billing|Enter at least three characters to search."
@@ -4907,6 +4919,9 @@ msgid "Billing|Private"
 msgstr ""
 
 msgid "Billing|Remove user %{username} from your subscription"
+msgstr ""
+
+msgid "Billing|Toggle seat details"
 msgstr ""
 
 msgid "Billing|Type %{username} to confirm"
