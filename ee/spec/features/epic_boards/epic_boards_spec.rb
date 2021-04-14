@@ -185,7 +185,7 @@ RSpec.describe 'epic boards', :js do
     end
 
     it 'can select a Label and Author in order to filter the board' do
-      page.find('[data-testid="epic-filtered-search"]').click
+      find_field('Search').click
 
       page.within('[data-testid="epic-filtered-search"]') do
         click_link 'Label'
@@ -193,7 +193,6 @@ RSpec.describe 'epic boards', :js do
 
         click_link 'Author'
         click_link user.name
-
 
         find('input').native.send_keys(:return)
 

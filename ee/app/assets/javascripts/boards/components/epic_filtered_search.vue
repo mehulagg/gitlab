@@ -11,6 +11,8 @@ import groupUsersQuery from '../graphql/group_members.query.graphql';
 export default {
   i18n: {
     search: __('Search'),
+    label: __('Label'),
+    author: __('Author'),
   },
   components: { FilteredSearch },
   inject: ['initialFilterParams'],
@@ -25,7 +27,7 @@ export default {
       return [
         {
           icon: 'labels',
-          title: __('Label'),
+          title: this.$options.i18n.label,
           type: 'label_name',
           operators: [{ value: '=', description: 'is' }],
           token: LabelToken,
@@ -35,7 +37,7 @@ export default {
         },
         {
           icon: 'pencil',
-          title: __('Author'),
+          title: this.$options.i18n.author,
           type: 'author_username',
           operators: [{ value: '=', description: 'is' }],
           symbol: '@',
