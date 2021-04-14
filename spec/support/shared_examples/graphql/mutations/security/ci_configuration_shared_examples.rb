@@ -64,6 +64,7 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
 
       before do
         project.add_developer(user)
+
         allow_next_instance_of(::Files::MultiService) do |multi_service|
           allow(multi_service).to receive(:execute).and_raise(Gitlab::Git::PreReceiveError.new("GitLab: #{error_message}"))
         end
