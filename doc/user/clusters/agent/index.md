@@ -169,24 +169,18 @@ the Agent in subsequent steps. You can create an Agent record with GraphQL:
 
 ### Install the Agent into the cluster
 
-Next, install the in-cluster component of the Agent.
-
-NOTE:
-For GitLab.com users, the KAS is available at `wss://kas.gitlab.com`.
-
-If you haven't previously defined or created a namespace, run the following command. Feel free to use custom namespace, the `gitlab-kubernetes-agent` namespace is provided here to make it easer to apply the commands.
+To install the in-cluster component of the Agent, first you need to define a namespace. To create a new namespace,
+for example, `gitlab-kubernetes-agent` run:
 
 ```shell
 kubectl create namespace gitlab-kubernetes-agent
 ```
 
-#### Quick setup
-
 To perform a one-liner installation, run the command below. Make sure to replace:
 
 - `your-agent-token` with the token received from the previous step.
-- `gitlab-kubernetes-agent` with the namespace also defined in the previous step.
-- `wss://kas.gitlab.example.com` with the configured access of the Kubernetes Agent Server.
+- `gitlab-kubernetes-agent` with the namespace you defined in the previous step.
+- `wss://kas.gitlab.example.com` with the configured access of the Kubernetes Agent Server (KAS). For GitLab.com users, the KAS is available under `wss://kas.gitlab.com`.
 
 ```shell
 docker run --pull=always --rm registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:latest generate --agent-token=your-agent-token --kas-address=wss://kas.gitlab.example.com --agent-version latest --namespace gitlab-kubernetes-agent | kubectl apply -f -
@@ -219,7 +213,7 @@ After generating the token, you must apply it to the Kubernetes cluster.
 To create your Secret, run:
 
 ```shell
-kubectl create secret generic -n <YOUR-DESIRED-NAMESPACE> gitlab-agent-token --from-literal=token='YOUR_AGENT_TOKEN'
+kubectl create secret generic -n <YOUR_NAMESPACE> gitlab-agent-token --from-literal=token='YOUR_AGENT_TOKEN'
 ```
 
 The following example file contains the
