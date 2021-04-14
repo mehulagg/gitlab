@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Custom issue tracker service **(FREE)**
 
-Use a custom issue tracker that is not listed in the integration list.
+Use a custom issue tracker that is not in the integration list.
 
 To enable a custom issue tracker in a project:
 
@@ -27,15 +27,15 @@ To enable a custom issue tracker in a project:
 
 1. Select **Save changes** or optionally select **Test settings**.
 
-After you have configured and enabled the custom issue tracker service, you see a link on the GitLab
-project pages, which takes you to the custom issue tracker.
+After you configure and enable the custom issue tracker service, a link appears on the GitLab
+project pages. This link takes you to the custom issue tracker.
 
 ## Reference issues in a custom issue tracker
 
 You can reference issues in a custom issue tracker using:
 
-- `#<ID>`, where `<ID>` is a number (example `#143`).
-- `<PROJECT>-<ID>`, for example `API_32-143`, where:
+- `#<ID>`, where `<ID>` is a number (for example, `#143`).
+- `<PROJECT>-<ID>` (for example `API_32-143`) where:
   - `<PROJECT>` starts with a capital letter, followed by capital letters, numbers, or underscores.
   - `<ID>` is a number.
 
