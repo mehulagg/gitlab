@@ -3,17 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe 'Subscriptions Content Security Policy' do
-  include SubscriptionPortalHelpers
-
   subject { response_headers['Content-Security-Policy'] }
 
   let_it_be(:default_csp_values) { "'self' https://some-cdn.test" }
   let_it_be(:zuora_url) { 'https://*.zuora.com' }
-  let(:plan_tags) { 'CI_1000_MINUTES_PLAN' }
 
   before do
     stub_request(:get, /.*gitlab_plans.*/).to_return(status: 200, body: "{}")
-    stub_plan_data_request(plan_tags)
 
     expect_next_instance_of(SubscriptionsController) do |controller|
       expect(controller).to receive(:current_content_security_policy).and_return(csp)

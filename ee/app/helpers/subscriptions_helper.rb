@@ -8,7 +8,6 @@ module SubscriptionsHelper
       setup_for_company: (current_user.setup_for_company == true).to_s,
       full_name: current_user.name,
       available_plans: subscription_available_plans.to_json,
-      ci_minutes_plans: ci_minutes_plans.to_json,
       plan_id: params[:plan_id],
       namespace_id: params[:namespace_id],
       new_user: new_user?.to_s,
@@ -42,26 +41,6 @@ module SubscriptionsHelper
     return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
 
     plans_data.reject { |plan_data| plan_data[:deprecated] }
-  end
-
-  def ci_minutes_plans
-    return if ::Feature.disabled?(:new_route_ci_minutes_purchase, default_enabled: :yaml)
-
-    strong_memoize(:ci_minutes_plans) do
-      fields = %w[
-        name
-        code
-        active
-        free
-        price_per_month
-        price_per_year
-        features
-        about_page_href
-        hide_deprecated_card
-      ]
-
-      Gitlab::SubscriptionPortal::Client.plan_data("CI_1000_MINUTES_PLAN", fields)[:plans]
-    end
   end
 
   def present_groups(groups)

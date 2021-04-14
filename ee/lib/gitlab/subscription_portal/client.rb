@@ -6,8 +6,6 @@ module Gitlab
       include SubscriptionPortal::Clients::REST
       include SubscriptionPortal::Clients::Graphql
 
-      ResponseError = Class.new(StandardError)
-
       class << self
         private
 
