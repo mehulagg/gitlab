@@ -6,7 +6,10 @@ import { s__ } from '~/locale';
 import getCommitSha from '~/pipeline_editor/graphql/queries/client/commit_sha.graphql';
 import getPipelineQuery from '~/pipeline_editor/graphql/queries/client/pipeline.graphql';
 import getPipelineEtag from '~/pipeline_editor/graphql/queries/client/pipeline_etag.graphql';
-import { getQueryHeaders, toggleQueryPollingByVisibility } from '~/pipelines/components/graph/utils';
+import {
+  getQueryHeaders,
+  toggleQueryPollingByVisibility,
+} from '~/pipelines/components/graph/utils';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 
 const POLL_INTERVAL = 10000;

@@ -9,8 +9,8 @@ module Ci
     end
 
     def js_pipeline_editor_data(project)
-      commit_sha = project.commit ? project.commit.sha : '';
-      return {
+      commit_sha = project.commit ? project.commit.sha : ''
+      {
         "ci-config-path": project.ci_config_path_or_default,
         "commit-sha" => commit_sha,
         "default-branch" => project.default_branch,
