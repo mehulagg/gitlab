@@ -300,6 +300,7 @@ group.
 | View Value Stream analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View Billing **(FREE SAAS)**                           |       |          |           |            | ✓ (4) |
 | View Usage Quotas **(FREE SAAS)**                      |       |          |           |            | ✓ (4) |
+| Manage [group push rules](../group/#group-push-rules) **(PREMIUM)** |         |            |             | ✓        | ✓      |
 | View 2FA status of members                             |       |          |           |            | ✓     |
 | Filter members by 2FA status                           |       |          |           |            | ✓     |
 | Administer project compliance frameworks               |       |          |           |            | ✓     |
