@@ -24,8 +24,8 @@ full list of reference architectures, see
 | Internal load balancing node             | 1           | 4 vCPU, 3.6GB memory    | `n1-highcpu-4`   | `c5.large`   | `F2s v2`  |
 | Redis - Cache**                          | 3           | 4 vCPU, 15 GB memory    | `n1-standard-4`  | `m5.xlarge`  | `D4s v3`  |
 | Redis - Queues / Shared State**          | 3           | 4 vCPU, 15 GB memory    | `n1-standard-4`  | `m5.xlarge`  | `D4s v3`  |
-| Redis Sentinel - Cache**                 | 3           | 1 vCPU, 1.7 GB memory   | `n1-standard-1`  | `t3.small`   | `B1MS`    |
-| Redis Sentinel - Queues / Shared State** | 3           | 1 vCPU, 1.7 GB memory   | `n1-standard-1`  | `t3.small`   | `B1MS`    |
+| Redis Sentinel - Cache**                 | 3           | 1 vCPU, 3.75 GB memory  | `n1-standard-1`  | `c5.large`   | `A1 v2`   |
+| Redis Sentinel - Queues / Shared State** | 3           | 1 vCPU, 3.75 GB memory  | `n1-standard-1`  | `c5.large`   | `A1 v2`   |
 | Gitaly                                   | 3           | 32 vCPU, 120 GB memory  | `n1-standard-32` | `m5.8xlarge` | `D32s v3` |
 | Praefect                                 | 3           | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`   | `c5.xlarge`  | `F4s v2`  |
 | Praefect PostgreSQL*                     | 1+          | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   | `c5.large`   | `F2s v2`  |

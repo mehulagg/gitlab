@@ -24,8 +24,8 @@ full list of reference architectures, see
 | Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   | `c5.large`   | `F2s v2`  |
 | Redis - Cache**                            | 3           | 4 vCPU, 15 GB memory    | `n1-standard-4`  | `m5.xlarge`  | `D4s v3`  |
 | Redis - Queues / Shared State**            | 3           | 4 vCPU, 15 GB memory    | `n1-standard-4`  | `m5.xlarge`  | `D4s v3`  |
-| Redis Sentinel - Cache**                   | 3           | 1 vCPU, 1.7 GB memory   | `n1-standard-1`  | `t3.small`   | `B1MS`    |
-| Redis Sentinel - Queues / Shared State**   | 3           | 1 vCPU, 1.7 GB memory   | `n1-standard-1`  | `t3.small`   | `B1MS`    |
+| Redis Sentinel - Cache**                   | 3           | 1 vCPU, 3.75 GB memory  | `n1-standard-1`  | `c5.large`   | `A1 v2`   |
+| Redis Sentinel - Queues / Shared State**   | 3           | 1 vCPU, 3.75 GB memory  | `n1-standard-1`  | `c5.large`   | `A1 v2`   |
 | Gitaly                                     | 3           | 16 vCPU, 60 GB memory   | `n1-standard-16` | `m5.4xlarge` | `D16s v3` |
 | Praefect                                   | 3           | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   | `c5.large`   | `F2s v2`  |
 | Praefect PostgreSQL*                       | 1+          | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   | `c5.large`   | `F2s v2`  |
@@ -2405,8 +2405,8 @@ services where applicable):
 | Internal load balancing node               | 1     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | Redis - Cache**                            | 3     | 4 vCPU, 15 GB memory    | `n1-standard-4`  |
 | Redis - Queues / Shared State**            | 3     | 4 vCPU, 15 GB memory    | `n1-standard-4`  |
-| Redis Sentinel - Cache**                   | 3     | 1 vCPU, 1.7 GB memory   | `n1-standard-1`  |
-| Redis Sentinel - Queues / Shared State**   | 3     | 1 vCPU, 1.7 GB memory   | `n1-standard-1`  |
+| Redis Sentinel - Cache**                   | 3     | 1 vCPU, 3.75 GB memory   | `n1-standard-1`  |
+| Redis Sentinel - Queues / Shared State**   | 3     | 1 vCPU, 3.75 GB memory   | `n1-standard-1`  |
 | Gitaly                                     | 3     | 16 vCPU, 60 GB memory   | `n1-standard-16` |
 | Praefect                                   | 3     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | Praefect PostgreSQL*                       | 1+    | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
