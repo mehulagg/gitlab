@@ -9,6 +9,8 @@ module Members
 
       return member if member.is_a?(GroupMember) && member.source.last_owner?(member.user)
 
+      @user = member.user
+
       member.destroy
 
       member.user&.invalidate_cache_counts
@@ -28,6 +30,8 @@ module Members
     end
 
     private
+
+    attr_reader :user
 
     def authorized?(member, destroy_bot)
       return can_destroy_bot_member?(member) if destroy_bot

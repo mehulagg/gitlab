@@ -13,7 +13,12 @@ module IncidentManagement
 
       def execute
         ensure_rotation_is_up_to_date
-        remove_user_from_rotation
+        deleted = remove_user_from_rotation
+
+        if deleted
+          save_current_shift!
+          send_notification
+        end
       end
 
       private
@@ -23,7 +28,9 @@ module IncidentManagement
       def remove_user_from_rotation
         participant = oncall_rotation.participants.for_user(user_to_remove).first
 
-        participant.update(is_removed: true)
+        return unless participant
+
+        participant.update!(is_removed: true)
 
         oncall_rotation.touch
       end

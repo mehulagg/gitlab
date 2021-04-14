@@ -14,7 +14,7 @@ module EE
 
         cleanup_group_identity(member)
         cleanup_group_deletion_schedule(member) if member.source.is_a?(Group)
-        cleanup_oncall_rotations(member)
+        cleanup_oncall_rotations(user)
       end
 
       private
@@ -51,8 +51,9 @@ module EE
         deletion_schedule.destroy if deletion_schedule.deleting_user == member.user
       end
 
-      def cleanup_oncall_rotations(member)
-        user = member.user
+      def cleanup_oncall_rotations(user)
+        return unless user
+
         user.oncall_rotations.each do |rotation|
           ::IncidentManagement::OncallRotations::RemoveParticipantService.new(
             rotation,
