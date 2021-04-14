@@ -884,12 +884,12 @@
   :idempotent:
   :tags: []
 - :name: project_import_schedule
-  :feature_category: :importers
+  :feature_category: :source_code_management
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent:
+  :idempotent: true
   :tags: []
 - :name: project_template_export
   :feature_category: :templates
