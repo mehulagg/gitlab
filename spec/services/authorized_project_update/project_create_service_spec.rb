@@ -156,7 +156,7 @@ RSpec.describe AuthorizedProjectUpdate::ProjectCreateService do
           end
 
           expect(ProjectAuthorization).to(
-            receive(:insert_all).with(array_including(attributes)).and_call_original)
+            receive(:insert_all).with(array_including(attributes), unique_by: [:user_id, :project_id, :access_level]).and_call_original)
         end
 
         expect { service.execute }.to(
