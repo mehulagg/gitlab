@@ -81,6 +81,26 @@ RSpec.describe Members::DestroyService do
         end
       end
     end
+
+    context 'on-call rotations' do
+      context 'when user is in an on-call rotation' do
+        let!(:rotation) { create(:incident_management_oncall_participant, user: member_user).rotation }
+
+        it 'calls the remove service' do
+          expect(IncidentManagement::OncallRotations::RemoveParticipantService).to receive(:new).with(rotation, member_user).and_call_original
+
+          subject.execute(member)
+        end
+      end
+
+      context 'when user is not part of an on-call rotation' do
+        it 'does not call the remove serivce' do
+          expect(IncidentManagement::OncallRotations::RemoveParticipantService).not_to receive(:new)
+
+          subject.execute(member)
+        end
+      end
+    end
   end
 
   context 'when current user is not present' do # ie, when the system initiates the destroy
