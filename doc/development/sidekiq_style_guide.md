@@ -471,7 +471,7 @@ everyone.
 Example:
 
 ```ruby
-class HighUrgencyWorker
+class DelayedWorker
   include ApplicationWorker
 
   data_consistency :delayed, feature_flag: :load_balancing_for_delayed_worker
