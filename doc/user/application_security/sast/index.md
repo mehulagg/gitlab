@@ -708,7 +708,8 @@ self-signed certificate or disable certificate verification. Refer to the packag
 documentation for instructions.
 
 ## Running SAST in OpenShift
-By default SAST analyzers are supported in Gitlab instances hosted on OpenShift. Adding a `before_script` in an [overriden SAST job](#overriding-sast-jobs) may not work as runners hosted on OpenShift have restricted permissions.
+
+By default SAST analyzers are supported in GitLab instances hosted on OpenShift. Adding a `before_script` in an [overriden SAST job](#overriding-sast-jobs) may not work as runners hosted on OpenShift have restricted permissions.
 
 ## Troubleshooting
 
