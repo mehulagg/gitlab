@@ -56,7 +56,7 @@ RSpec.describe Gitlab::Utils::SanitizeNodeLink do
             it "removes the unsafe link" do
               node = opts[:node_to_check].call(opts[:doc])
 
-              expect { object.remove_unsafe_links({ node: node }, remove_invalid_links: true) }
+              expect { object.remove_unsafe_links(remove_invalid_links: true, node: node)}
                 .to change { node[opts[:attr]] }
 
               expect(node[opts[:attr]]).to be_blank

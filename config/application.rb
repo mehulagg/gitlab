@@ -36,7 +36,6 @@ module Gitlab
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
-    config.active_record.sqlite3.represent_boolean_as_integer = true
 
     # Sidekiq uses eager loading, but directories not in the standard Rails
     # directories must be added to the eager load paths:
