@@ -25,7 +25,7 @@ module Gitlab
       'de' => 'German - Deutsch (20% translated)',
       'en' => 'English (100% translated)',
       'eo' => 'Esperanto - esperanto (1% translated)',
-      'es' => 'Spanish - español (44% translated)',
+      'es' => 'Spanish - español',
       'fil_PH' => 'Filipino (0% translated)',
       'fr' => 'French - français (14% translated)',
       'gl_ES' => 'Galician - galego (0% translated)',
