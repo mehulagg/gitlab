@@ -15,22 +15,22 @@ This product is an early access and is considered a [beta](https://about.gitlab.
 GitLab DAST's new browser-based crawler is a crawl engine built by GitLab to test Single Page Applications (SPAs) and traditional web applications.
 Due to the reliance of modern web applications on JavaScript, handling SPAs or applications that are dependent on JavaScript is paramount to ensuring proper coverage of an application for Dynamic Application Security Testing (DAST).
 
-The browser-based crawler crawls by loading the target application into a specially instrumented Chromium browser. A snapshot of the page is taken prior to a search to find any actions that a user might perform,
+The browser-based crawler works by loading the target application into a specially-instrumented Chromium browser. A snapshot of the page is taken prior to a search to find any actions that a user might perform,
 such as clicking on a link or filling in a form. For each action found, the crawler will execute it, take a new snapshot and determine what in the page changed from the previous snapshot.
 Crawling continues by taking more snapshots and finding subsequent actions.
 
-The benefit of crawling by following user actions in a browser is that the crawler can interact with the target application much like a real user would, identifying complex flows that traditional web crawlers don’t understand. This results in better coverage of both the user-facing website and their backend APIs.
+The benefit of crawling by following user actions in a browser is that the crawler can interact with the target application much like a real user would, identifying complex flows that traditional web crawlers don’t understand. This results in better coverage of the website.
 
 Scanning a web application with both the browser-based crawler and GitLab DAST should provide greater coverage, compared with only GitLab DAST. The new crawler does not support API scanning or the DAST AJAX crawler.
 
 ## Enable browser-based crawling
 
-The browser-based crawler is an extension to the GitLab DAST product. DAST should be included in the CI configuration and the browser-based cralwer enabled using environment variables:
+The browser-based crawler is an extension to the GitLab DAST product. DAST should be included in the CI/CD configuration and the browser-based crawler enabled using environment variables:
 
-1. Install the DAST [prerequisites](index.md#prerequisite)
-1. Include the [DAST CI template](index.md#include-the-dast-template)
-1. Set the target website using the `DAST_WEBSITE` environment variable
-1. Set the environment variable `DAST_BROWSER_SCAN` to `true`
+1. Install the DAST [prerequisites](index.md#prerequisite).
+1. Include the [DAST CI template](index.md#include-the-dast-template).
+1. Set the target website using the `DAST_WEBSITE` environment variable.
+1. Set the environment variable `DAST_BROWSER_SCAN` to `true`.
  
 An example configuration might look like the following:
 
