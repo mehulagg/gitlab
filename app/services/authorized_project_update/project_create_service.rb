@@ -21,7 +21,7 @@ module AuthorizedProjectUpdate
           { user_id: member.user_id, project_id: project.id, access_level: member.access_level }
         end
 
-        ProjectAuthorization.insert_all(attributes) unless attributes.empty?
+        ProjectAuthorization.insert_all(attributes, unique_by: [:user_id, :project_id, :access_level]) unless attributes.empty?
       end
 
       ServiceResponse.success
