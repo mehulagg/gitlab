@@ -13,7 +13,7 @@
   position: absolute;
   top: 0;
   margin-top: 3px;
-  padding: $gl-padding;
+  padding: $gl-padding $gl-padding 0;
   z-index: $zindex-dropdown-menu;
   width: $award-emoji-width;
   font-size: 14px;
