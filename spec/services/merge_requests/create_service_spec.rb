@@ -23,11 +23,12 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
 
       let(:service) { described_class.new(project, user, opts) }
       let(:merge_request) { service.execute }
+      let(:receive_hooks) { receive(:execute_hooks) }
 
       before do
         project.add_maintainer(user)
         project.add_developer(user2)
-        allow(service).to receive(:execute_hooks)
+        allow(service).to receive_hooks
       end
 
       it 'creates an MR' do
@@ -40,6 +41,28 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
 
       it 'executes hooks with default action' do
         expect(service).to have_received(:execute_hooks).with(merge_request)
+      end
+
+      describe 'hook data payload' do
+        let(:receive_hooks) { receive(:execute_hooks).and_call_original }
+
+        it 'contains all the new attributes' do
+          payload = a_hash_including(
+            changes: include(
+              author_id: { current: user.id, previous: nil }
+            ),
+            object_attributes: include(
+              action: 'open',
+              title: 'Awesome merge_request',
+              author_id: user.id
+            ),
+            event_type: 'merge_request'
+          )
+          expect(project).to receive(:execute_hooks)
+            .with(payload, :merge_request_hooks)
+
+          merge_request
+        end
       end
 
       it 'refreshes the number of open merge requests', :use_clean_rails_memory_store_caching do
