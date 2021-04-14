@@ -9,6 +9,7 @@ module QA
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'file_locking'
+          project.initialize_with_readme = true
         end
       end
 
