@@ -89,14 +89,6 @@ RSpec.describe Mutations::Dast::Profiles::Update do
           end
         end
 
-        context 'when the feature flag dast_branch_selection is disabled' do
-          it 'does not set the branch_name' do
-            stub_feature_flags(dast_branch_selection: false)
-
-            expect(subject[:dast_profile].branch_name).to eq(dast_profile.branch_name)
-          end
-        end
-
         context 'when the dast_profile does not exist' do
           let(:dast_profile_gid) { Gitlab::GlobalId.build(nil, model_name: 'Dast::Profile', id: 'does_not_exist') }
 

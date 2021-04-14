@@ -24,18 +24,11 @@ module Types
             description: 'The associated scanner profile.'
 
       field :branch, Dast::ProfileBranchType, null: true,
-            description: 'The associated branch. Will always return `null` ' \
-                         'if `dast_branch_selection` feature flag is disabled.',
+            description: 'The associated branch.',
             calls_gitaly: true
 
       field :edit_path, GraphQL::STRING_TYPE, null: true,
             description: 'Relative web path to the edit page of a profile.'
-
-      def branch
-        return unless Feature.enabled?(:dast_branch_selection, object.project, default_enabled: :yaml)
-
-        object.branch
-      end
 
       def edit_path
         Gitlab::Routing.url_helpers.edit_project_on_demand_scan_path(object.project, object)

@@ -164,7 +164,7 @@ stages:
   - build
   - dast
 
-include: 
+include:
   - template: DAST.gitlab-ci.yml
 
 # Deploys the container to the GitLab container registry
@@ -831,10 +831,7 @@ An on-demand DAST scan:
 - Is associated with your project's default branch.
 - Is saved on creation so it can be run later.
 
-In GitLab 13.10 and later, you can select to run an on-demand scan against a specific branch. This
-feature is [deployed behind a feature flag](../../feature_flags.md), enabled by default. It's
-enabled on GitLab.com and recommended for production use. [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it with `Feature.disable(:dast_branch_selection)`.
+In GitLab 13.10 and later, you can select to run an on-demand scan against a specific branch.
 
 ### On-demand scan modes
 
@@ -955,7 +952,7 @@ follows:
 - _Header validation_ requires the header `Gitlab-On-Demand-DAST` be added to the target site,
   with a value unique to the project. The validation process checks that the header is present, and
   checks its value.
-  
+
 Both methods are equivalent in functionality. Use whichever is feasible.
 
 #### Create a site profile

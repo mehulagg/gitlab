@@ -21,20 +21,10 @@ RSpec.describe GitlabSchema.types['DastProfile'] do
   it { expect(described_class).to have_graphql_field(:branch, calls_gitaly?: true) }
 
   describe 'branch field' do
-    context 'when the feature flag is disabled' do
-      it 'resolves nil' do
-        stub_feature_flags(dast_branch_selection: false)
+    it 'correctly resolves the field' do
+      expected_result = Dast::Branch.new(object)
 
-        expect(resolve_field(:branch, object, current_user: user)).to eq(nil)
-      end
-    end
-
-    context 'when the feature flag is enabled' do
-      it 'correctly resolves the field' do
-        expected_result = Dast::Branch.new(object)
-
-        expect(resolve_field(:branch, object, current_user: user)).to eq(expected_result)
-      end
+      expect(resolve_field(:branch, object, current_user: user)).to eq(expected_result)
     end
   end
 
