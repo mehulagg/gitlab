@@ -210,17 +210,21 @@ module Gitlab
         Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name.to_s, values: values)
       end
 
-      def maximum_id(model)
+      def maximum_id(model, column = nil)
         key = :"#{model.name.downcase}_maximum_id"
+        column_to_read = column || :id
+
         strong_memoize(key) do
-          model.maximum(:id)
+          model.maximum(column_to_read)
         end
       end
 
-      def minimum_id(model)
+      def minimum_id(model, column = nil)
         key = :"#{model.name.downcase}_minimum_id"
+        column_to_read = column || :id
+
         strong_memoize(key) do
-          model.minimum(:id)
+          model.minimum(column_to_read)
         end
       end
 
