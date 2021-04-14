@@ -166,41 +166,59 @@ RSpec.describe 'epic boards', :js do
       group.add_guest(user)
       sign_in(user)
       visit_epic_boards_page
+
+      # Focus on search field
+      find_field('Search').click
     end
 
-    it 'can select an Author and Label' do
-      page.find('[data-testid="epic-filtered-search"]').click
-
+    it 'can select an Author' do
       page.within('[data-testid="epic-filtered-search"]') do
         click_link 'Author'
         wait_for_requests
         click_link user.name
 
+        expect(page).to have_text("Author = #{user.name}")
+      end
+    end
+
+    it 'can select a Label' do
+      page.within('[data-testid="epic-filtered-search"]') do
         click_link 'Label'
         wait_for_requests
         click_link label.title
 
-        expect(page).to have_text("Author = #{user.name} Label = ~#{label.title}")
+        expect(page).to have_text("Label = ~#{label.title}")
       end
     end
 
-    it 'can select a Label and Author in order to filter the board' do
-      find_field('Search').click
-
+    it 'can select a Label in order to filter the board' do
       page.within('[data-testid="epic-filtered-search"]') do
         click_link 'Label'
         click_link label.title
 
+        find('input').native.send_keys(:return)
+      end
+
+      wait_for_requests
+
+      expect(page).to have_content('Epic1')
+      expect(page).not_to have_content('Epic2')
+      expect(page).not_to have_content('Epic3')
+    end
+
+    it 'can select an Author in order to filter the board' do
+      page.within('[data-testid="epic-filtered-search"]') do
         click_link 'Author'
         click_link user.name
 
         find('input').native.send_keys(:return)
-
-        wait_for_requests
-
-        expect(page).to have_text(label.title)
-        expect(page).not_to have_text(label2.title)
       end
+
+      wait_for_requests
+
+      expect(page).to have_content('Epic1')
+      expect(page).not_to have_content('Epic2')
+      expect(page).not_to have_content('Epic3')
     end
   end
 
