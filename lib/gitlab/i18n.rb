@@ -18,29 +18,55 @@ module Gitlab
       gl_ES
     ].freeze
 
+    # "translated" needs to be externalized
     AVAILABLE_LANGUAGES = {
-      'bg' => 'Bulgarian - български',
-      'cs_CZ' => 'Czech - čeština',
-      'de' => 'German - Deutsch',
-      'en' => 'English',
-      'eo' => 'Esperanto - esperanto',
-      'es' => 'Spanish - español',
-      'fil_PH' => 'Filipino',
-      'fr' => 'French - français',
-      'gl_ES' => 'Galician - galego',
-      'id_ID' => 'Indonesian - Bahasa Indonesia',
-      'it' => 'Italian - italiano',
-      'ja' => 'Japanese - 日本語',
-      'ko' => 'Korean - 한국어',
-      'nl_NL' => 'Dutch - Nederlands',
-      'pl_PL' => 'Polish - polski',
-      'pt_BR' => 'Portuguese (Brazil) - português (Brasil)',
-      'ru' => 'Russian - Русский',
-      'tr_TR' => 'Turkish - Türkçe',
-      'uk' => 'Ukrainian - українська',
-      'zh_CN' => 'Chinese, Simplified - 简体中文',
-      'zh_HK' => 'Chinese, Traditional (Hong Kong) - 繁體中文 (香港)',
-      'zh_TW' => 'Chinese, Traditional (Taiwan) - 繁體中文 (台灣)'
+      'bg' => 'Bulgarian - български (2% translated)',
+      'cs_CZ' => 'Czech - čeština (2% translated)',
+      'de' => 'German - Deutsch (2% translated)',
+      'en' => 'English (2% translated)',
+      'eo' => 'Esperanto - esperanto (2% translated)',
+      'es' => 'Spanish - español (2% translated)',
+      'fil_PH' => 'Filipino (2% translated)',
+      'fr' => 'French - français (2% translated)',
+      'gl_ES' => 'Galician - galego (2% translated)',
+      'id_ID' => 'Indonesian - Bahasa Indonesia (2% translated)',
+      'it' => 'Italian - italiano (2% translated)',
+      'ja' => 'Japanese - 日本語 (2% translated)',
+      'ko' => 'Korean - 한국어 (2% translated)',
+      'nl_NL' => 'Dutch - Nederlands (2% translated)',
+      'pl_PL' => 'Polish - polski (2% translated)',
+      'pt_BR' => 'Portuguese (Brazil) - português (Brasil) (2% translated)',
+      'ru' => 'Russian - Русский (2% translated)',
+      'tr_TR' => 'Turkish - Türkçe (2% translated)',
+      'uk' => 'Ukrainian - українська (2% translated)',
+      'zh_CN' => 'Chinese, Simplified - 简体中文 (2% translated)',
+      'zh_HK' => 'Chinese, Traditional (Hong Kong) - 繁體中文 (香港) (2% translated)',
+      'zh_TW' => 'Chinese, Traditional (Taiwan) - 繁體中文 (台灣) (2% translated)'
+    }.freeze
+
+    TRANSLATION_LEVELS = {
+      'bg' => '2%',
+      'cs_CZ' => '1%',
+      'de' => '31%',
+      'en' => '100%',
+      'eo' => '2%',
+      'es' => '65%',
+      'fil_PH' => '1%',
+      'fr' => '23%',
+      'gl_ES' => '1%',
+      'id_ID' => '0%',
+      'it' => '4%',
+      'ja' => '67%',
+      'ko' => '21%',
+      'nl_NL' => '1%',
+      'pl_PL' => '1%',
+      'pt_BR' => '36%',
+      'ru' => '48%',
+      'tr_TR' => '24%',
+      'uk' => '68%',
+      'zh_CN' => '100%',
+      'zh_HK' => '4%',
+      'zh_TW' => '6%'
     }.freeze
 
     def selectable_locales
