@@ -39,7 +39,7 @@ You can reference issues in a custom issue tracker using:
   - `<PROJECT>` starts with a capital letter, followed by capital letters, numbers, or underscores.
   - `<ID>` is a number.
 
-In links, the `<PROJECT>` part is ignored, and they always point to the address specified in **Issue URL**.
+The `<PROJECT>` part is ignored in links, which always point to the address specified in **Issue URL**.
 
 We suggest using the longer format (`<PROJECT>-<ID>`) if you have both internal and external issue
 trackers enabled. If you use the shorter format, and an issue with the same ID exists in the
