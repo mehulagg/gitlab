@@ -168,7 +168,7 @@ class Gitlab::Seeder::CustomizableCycleAnalytics
 
       begin
         developer = project.team.developers.sample
-        MergeRequests::CreateService.new(project, developer, opts).execute
+        MergeRequests::CreateService.new(container: project, current_user: developer, params: opts).execute
       rescue Gitlab::Access::AccessDeniedError
         nil
       end

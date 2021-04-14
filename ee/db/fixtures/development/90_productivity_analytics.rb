@@ -108,7 +108,7 @@ class Gitlab::Seeder::ProductivityAnalytics
         target_branch: 'master'
       }
       Timecop.travel issue.created_at do
-        MergeRequests::CreateService.new(issue.project, @user, opts).execute
+        MergeRequests::CreateService.new(container: issue.project, current_user: @user, params: opts).execute
       end
     end
   end

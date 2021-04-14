@@ -93,7 +93,7 @@ module CycleAnalyticsHelpers
       target_branch: 'master'
     }
 
-    mr = MergeRequests::CreateService.new(project, user, opts).execute
+    mr = MergeRequests::CreateService.new(container: project, current_user: user, params: opts).execute
     NewMergeRequestWorker.new.perform(mr, user)
     mr
   end

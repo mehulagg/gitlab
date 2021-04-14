@@ -224,7 +224,7 @@ module API
         mr_params[:force_remove_source_branch] = mr_params.delete(:remove_source_branch)
         mr_params = convert_parameters_from_legacy_format(mr_params)
 
-        merge_request = ::MergeRequests::CreateService.new(user_project, current_user, mr_params).execute
+        merge_request = ::MergeRequests::CreateService.new(container: user_project, current_user: current_user, params: mr_params).execute
 
         handle_merge_request_errors!(merge_request)
 

@@ -51,7 +51,7 @@ class ProcessCommitWorker
     # therefore we use IssueCollection here and skip the authorization check in
     # Issues::CloseService#execute.
     IssueCollection.new(issues).updatable_by_user(user).each do |issue|
-      Issues::CloseService.new(project, author)
+      Issues::CloseService.new(container: project, current_user: author)
         .close_issue(issue, closed_via: commit)
     end
   end

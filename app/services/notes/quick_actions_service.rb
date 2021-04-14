@@ -55,7 +55,7 @@ module Notes
         update_params[:spend_time][:note_id] = note.id
       end
 
-      self.class.noteable_update_service(note).new(note.resource_parent, current_user, update_params).execute(note.noteable)
+      self.class.noteable_update_service(note).new(container: note.resource_parent, current_user: current_user, params: update_params).execute(note.noteable)
     end
   end
 end

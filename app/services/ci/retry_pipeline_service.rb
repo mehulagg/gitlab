@@ -29,7 +29,7 @@ module Ci
       pipeline.reset_ancestor_bridges!
 
       ::MergeRequests::AddTodoWhenBuildFailsService
-        .new(project, current_user)
+        .new(container: project, current_user: current_user)
         .close_all(pipeline)
 
       Ci::ProcessPipelineService
