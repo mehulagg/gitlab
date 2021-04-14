@@ -171,26 +171,6 @@ RSpec.describe 'epic boards', :js do
       find_field('Search').click
     end
 
-    it 'can select an Author' do
-      page.within('[data-testid="epic-filtered-search"]') do
-        click_link 'Author'
-        wait_for_requests
-        click_link user.name
-
-        expect(page).to have_text("Author = #{user.name}")
-      end
-    end
-
-    it 'can select a Label' do
-      page.within('[data-testid="epic-filtered-search"]') do
-        click_link 'Label'
-        wait_for_requests
-        click_link label.title
-
-        expect(page).to have_text("Label = ~#{label.title}")
-      end
-    end
-
     it 'can select a Label in order to filter the board' do
       page.within('[data-testid="epic-filtered-search"]') do
         click_link 'Label'
