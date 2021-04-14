@@ -21,8 +21,6 @@ component may increase reliability and availability through redundancy.
 
 When database load balancing is enabled in GitLab, the load is balanced using
 a simple round-robin algorithm, without any external dependencies such as Redis.
-Load balancing is not enabled for Sidekiq as this would lead to consistency
-problems, and Sidekiq mostly performs writes anyway.
 
 In the following image, you can see the load is balanced rather evenly among
 all the secondaries (`db4`, `db5`, `db6`). Because `SELECT` queries are not
@@ -102,8 +100,20 @@ the following. This will balance the load between `host1.example.com` and
          - host1.example.com
          - host2.example.com
    ```
-
 1. Save the file and [restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
+   
+---
+   
+**For Sidekiq**
+
+Load balancing for Sidekiq is not enabled by default. To enable it, define the
+`ENABLE_LOAD_BALANCING_FOR_SIDEKIQ` variable to the environment. 
+
+For example, in Omnibus:
+               
+```ruby
+gitlab_rails['env'] = {"ENABLE_LOAD_BALANCING_FOR_SIDEKIQ" => "true"}
+```
 
 ## Service Discovery
 
@@ -280,3 +290,13 @@ production:
     max_replication_lag_time: 30
     replica_check_interval: 30
 ```
+
+## Sidekiq
+
+Load balancing is not enabled by default. Sidekiq mostly performs writes, which means that all of Sidekiq's database traffic will hit the primary.
+
+For jobs that do not require read-write and up-to date data, we can still benefit from load balancing.
+
+By annotating those workers, we will now hit Replicas for a majority of time.
+
+Once Load Balancing for Sidekiq is [enabled](#enabling-load-balancing), we can define [the data consistency](database_load_balancing.md#job-data-consistency) requirement for a specific job.

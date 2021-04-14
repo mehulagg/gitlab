@@ -124,6 +124,9 @@ A good example of that would be a cache expiration worker.
 A job scheduled for an idempotent worker is [deduplicated](#deduplication) when
 an unstarted job with the same arguments is already in the queue.
 
+WARNING: 
+For [data consistency jobs](#job-data-consistency), the deduplication will not work with `data_consistency` attribute set to `:sticky` or `:delayed`.
+
 ### Ensuring a worker is idempotent
 
 Make sure the worker tests pass using the following shared example:
@@ -425,6 +428,57 @@ If we expect an increase of **less than 5%**, then no further action is needed.
 
 Otherwise, please ping `@gitlab-org/scalability` on the merge request and ask
 for a review.
+
+## Job data consistency
+
+In order to utilize [Sidekiq readonly database replicas capabilities](../administration/database_load_balancing.md#sidekiq), 
+jobs can have a `data_consistency` attribute set, which can be `:always`, `:sticky`, or `:delayed`. 
+
+| **Data Consistency**  | **Description**  |
+|--------------|-----------------------------|
+| `:always`    | The job is required to use primary (a default) |
+| `:sticky`    | The job would use replica as long as possible. It would switch to primary either on write or long replication lag. Should be used on jobs that require to be executed as fast as possible  |
+| `:delayed`   | The job would switch to primary only on write. It would use replica always. if there's a long replication lag the job will be delayed, and only if the replica is not up to date on the next retry, it will switch to the primary. It should be used on jobs where we are fine to delay the execution of a given job, due to their importance: expire caches, or execute hooks... |
+
+To set a job's data consistency, use the `data_consistency` class method:
+
+```ruby
+class DelayedWorker
+  include ApplicationWorker
+
+  data_consistency :delayed
+
+  # ...
+end
+```
+
+WARNING: 
+For [idempotent jobs](#idempotent-jobs), the deduplication will not work with `data_consistency` attribute set to `:sticky` or `:delayed`.
+The reason for this is that deduplication should always take into the account the latest binary replication pointer into account, not the first one.
+There is an [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/325291) to improve this.
+
+### `feature_flag` property
+
+The `feature_flag` property allows you to experimentaly toggle job's `data_consistency`.
+When feature flag is disabled, job will default to `:always`, which means that the job will always use the primary.
+
+The `feature_flag` property does not allow the use of
+[feature gates based on actors](../development/feature_flags/index.md).
+This means that the feature flag cannot be toggled only for particular
+projects, groups, or users, but instead can only be toggled globally for
+everyone.
+
+Example:
+
+```ruby
+class HighUrgencyWorker
+  include ApplicationWorker
+
+  data_consistency :delayed, feature_flag: :load_balancing_for_delayed_worker
+
+  # ...
+end
+```
 
 ## Jobs with External Dependencies
 
