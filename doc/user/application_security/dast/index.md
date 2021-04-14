@@ -498,7 +498,7 @@ WARNING:
 
 - You cannot override the hostname by using the `$DAST_WEBSITE` variable.
 - A host override is _only_ supported when importing the API specification from a URL. An attempt to
-  override the host is ignored when the API specification is imported from a file. This is due to a
+  override the host will throw an error when the API specification is imported from a file. This is due to a
   limitation in the ZAP OpenAPI extension.
 
 For example, with a OpenAPI V3 specification containing:
