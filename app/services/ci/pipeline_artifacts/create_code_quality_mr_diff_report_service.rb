@@ -2,11 +2,11 @@
 module Ci
   module PipelineArtifacts
     class CreateCodeQualityMrDiffReportService
-      def execute(pipeline)
+      def execute(pipeline, new_errors)
         return unless pipeline.can_generate_codequality_reports?
         return if pipeline.has_codequality_mr_diff_report?
 
-        file = build_carrierwave_file(pipeline)
+        file = build_carrierwave_file(new_errors)
 
         pipeline.pipeline_artifacts.create!(
           project_id: pipeline.project_id,
@@ -20,16 +20,16 @@ module Ci
 
       private
 
-      def build_carrierwave_file(pipeline)
+      def build_carrierwave_file(new_errors)
         CarrierWaveStringFile.new_file(
-          file_content: build_quality_mr_diff_report(pipeline),
+          file_content: build_quality_mr_diff_report(new_errors),
           filename: Ci::PipelineArtifact::DEFAULT_FILE_NAMES.fetch(:code_quality_mr_diff),
           content_type: 'application/json'
         )
       end
 
-      def build_quality_mr_diff_report(pipeline)
-        mr_diff_report = Gitlab::Ci::Reports::CodequalityMrDiff.new(pipeline.codequality_reports)
+      def build_quality_mr_diff_report(new_errors)
+        mr_diff_report = Gitlab::Ci::Reports::CodequalityMrDiff.new(new_errors)
 
         Ci::CodequalityMrDiffReportSerializer.new.represent(mr_diff_report).to_json # rubocop: disable CodeReuse/Serializer
       end

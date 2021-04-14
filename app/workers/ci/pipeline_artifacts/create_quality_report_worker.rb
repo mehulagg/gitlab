@@ -10,9 +10,9 @@ module Ci
 
       idempotent!
 
-      def perform(pipeline_id)
+      def perform(pipeline_id, new_errors)
         Ci::Pipeline.find_by_id(pipeline_id).try do |pipeline|
-          Ci::PipelineArtifacts::CreateCodeQualityMrDiffReportService.new.execute(pipeline)
+          Ci::PipelineArtifacts::CreateCodeQualityMrDiffReportService.new.execute(pipeline, new_errors)
         end
       end
     end
