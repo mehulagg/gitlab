@@ -1743,7 +1743,7 @@ class MergeRequest < ApplicationRecord
 
     if project.resolve_outdated_diff_discussions?
       MergeRequests::ResolvedDiscussionNotificationService
-        .new(project, current_user)
+        .new(container: project, current_user: current_user)
         .execute(self)
     end
   end

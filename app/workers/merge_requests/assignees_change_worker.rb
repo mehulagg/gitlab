@@ -19,8 +19,8 @@ class MergeRequests::AssigneesChangeWorker
     return if users.blank?
 
     service = ::MergeRequests::UpdateAssigneesService.new(
-      merge_request.target_project,
-      current_user
+      container: merge_request.target_project,
+      current_user: current_user
     )
 
     service.handle_assignee_changes(merge_request, users)
