@@ -15,7 +15,7 @@ RSpec.describe Issues::UpdateService do
     end
 
     def update_issue(opts)
-      described_class.new(project, user, opts).execute(issue)
+      described_class.new(container: project, current_user: user, params: opts).execute(issue)
     end
 
     context 'refresh epic dates' do
@@ -325,7 +325,7 @@ RSpec.describe Issues::UpdateService do
     end
 
     it_behaves_like 'issue with epic_id parameter' do
-      let(:execute) { described_class.new(project, user, params).execute(issue) }
+      let(:execute) { described_class.new(container: project, current_user: user, params: params).execute(issue) }
       let(:epic) { create(:epic, group: group) }
     end
 
