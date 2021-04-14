@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class EwmService < IssueTrackerService
+  include ActionView::Helpers::UrlHelper
   validates :project_url, :issues_url, :new_issue_url, presence: true, public_url: true, if: :activated?
 
   def self.reference_pattern(only_long: true)
@@ -12,7 +13,12 @@ class EwmService < IssueTrackerService
   end
 
   def description
-    s_('IssueTracker|EWM work items tracker')
+    s_('IssueTracker|Use IBM Engineering Workflow Management as the issue tracker.')
+  end
+
+  def help
+    docs_link = link_to _('Learn more.'), Rails.application.routes.url_helpers.help_page_url('user/project/integrations/ewm'), target: '_blank', rel: 'noopener noreferrer'
+    s_('IssueTracker|Use IBM Engineering Workflow Management as the issue tracker. %{docs_link}').html_safe % { docs_link: docs_link.html_safe }
   end
 
   def self.to_param
