@@ -95,8 +95,8 @@ Follow these steps to configure DAST API in GitLab with an OpenAPI specification
      - template: DAST.latest.gitlab-ci.yml
    ```
 
-1. The [configuration file](#configuration-files) has several testing profiles defined with different amounts of testing. We recommend that you start with the `Quick` profile.
-   Testing with this profile completes quickly, allowing for easier configuration validation.
+1. The [configuration file](#configuration-files) has several testing profiles defined with different checks enabled. We recommend that you start with the `Quick` profile.
+   Testing with this profile completes faster, allowing for easier configuration validation.
 
    Provide the profile by adding the `DAST_API_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file,
    substituting `Quick` for the profile you choose:
@@ -123,7 +123,7 @@ Follow these steps to configure DAST API in GitLab with an OpenAPI specification
      - template: DAST.latest.gitlab-ci.yml
 
    variables:
-     DAST_API_PROFILE: Quick-10
+     DAST_API_PROFILE: Quick
      DAST_API_OPENAPI: test-api-specification.json
    ```
 
@@ -132,7 +132,7 @@ Follow these steps to configure DAST API in GitLab with an OpenAPI specification
 
    Adding the URL in an `environment_url.txt` file at your project's root is great for testing in
    dynamic environments. To run DAST API against an app dynamically created during a GitLab CI/CD
-   pipeline, have the app persist its domain in an `environment_url.txt` file. DAST API
+   pipeline, have the app persist its URL in an `environment_url.txt` file. DAST API
    automatically parses that file to find its scan target. You can see an
    [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
@@ -194,9 +194,8 @@ target API to test:
      - template: DAST.latest.gitlab-ci.yml
    ```
 
-1. The [configuration file](#configuration-files) has several testing profiles defined with varying
-   amounts of testing. We recommend that you start with the `Quick` profile. Testing with this
-   profile completes quickly, allowing for easier configuration validation.
+1. The [configuration file](#configuration-files) has several testing profiles defined with different checks enabled. We recommend that you start with the `Quick` profile.
+   Testing with this profile completes faster, allowing for easier configuration validation.
 
    Provide the profile by adding the `DAST_API_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file,
    substituting `Quick` for the profile you choose:
@@ -232,7 +231,7 @@ target API to test:
 
    Adding the URL in an `environment_url.txt` file at your project's root is great for testing in
    dynamic environments. To run DAST API against an app dynamically created during a GitLab CI/CD
-   pipeline, have the app persist its domain in an `environment_url.txt` file. DAST API
+   pipeline, have the app persist its URL in an `environment_url.txt` file. DAST API
    automatically parses that file to find its scan target. You can see an
    [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
@@ -258,7 +257,7 @@ This is a minimal configuration for DAST API. From here you can:
 - Learn how to [handle false positives](#handling-false-positives).
 
 WARNING:
-**NEVER** run fuzz testing against a production server. Not only can it perform *any* function that
+**NEVER** run DAST API testing against a production server. Not only can it perform *any* function that
 the API can, it may also trigger bugs in the API. This includes actions like modifying and deleting
 data. Only run DAST API against a test server.
 
@@ -295,9 +294,8 @@ information about the target API to test:
      - template: DAST.latest.gitlab-ci.yml
    ```
 
-1. The [configuration file](#configuration-files) has several testing profiles defined with varying
-   amounts of scanning. We recommend that you start with the `Quick` profile. Testing with this
-   profile completes quickly, allowing for easier configuration validation.
+1. The [configuration file](#configuration-files) has several testing profiles defined with different checks enabled. We recommend that you start with the `Quick` profile.
+   Testing with this profile completes faster, allowing for easier configuration validation.
 
    Provide the profile by adding the `DAST_API_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file,
    substituting `Quick` for the profile you choose:
@@ -332,7 +330,7 @@ information about the target API to test:
 
    Adding the URL in an `environment_url.txt` file at your project's root is great for testing in
    dynamic environments. To run DAST API against an app dynamically created during a GitLab CI/CD
-   pipeline, have the app persist its domain in an `environment_url.txt` file. DAST API
+   pipeline, have the app persist its URL in an `environment_url.txt` file. DAST API
    automatically parses that file to find its scan target. You can see an
    [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
@@ -404,8 +402,8 @@ include:
 variables:
   DAST_API_PROFILE: Quick
   DAST_API_POSTMAN_COLLECTION: postman-collection_serviceA.json
-  DAST_API_TARGET_URL: http://test-deployment/
   DAST_API_POSTMAN_COLLECTION_VARIABLES: variable-collection-dictionary.json
+  DAST_API_TARGET_URL: http://test-deployment/
 ```
 
 The file `variable-collection-dictionary.json` is a JSON document. This JSON is an object with
@@ -575,7 +573,7 @@ variables:
   DAST_API_OVERRIDES_INTERVAL: 300
 ```
 
-To validate that authentication is working, run an DAST API test and review the fuzzing logs and
+To validate that authentication is working, run an DAST API test and review the job logs and
 the test API's application logs.
 
 ### Configuration files
@@ -632,7 +630,7 @@ can be added, removed, and modified by creating a custom configuration.
 |------------------------------------------------------|--------------------|
 | `DAST_API_VERSION`                                    | Specify DAST API container version. Defaults to `latest`. |
 | `DAST_API_TARGET_URL`                                 | Base URL of API testing target. |
-|[`DAST_API_CONFIG`](#configuration-files)              | DAST API configuration file. Defaults to `.gitlab-apifuzzer.yml`. |
+|[`DAST_API_CONFIG`](#configuration-files)              | DAST API configuration file. Defaults to `.gitlab-dast-api.yml`. |
 |[`DAST_API_PROFILE`](#configuration-files)             | Configuration profile to use during testing. Defaults to `Quick`. |
 |[`DAST_API_OPENAPI`](#openapi-specification)           | OpenAPI specification file or URL. |
 |[`DAST_API_HAR`](#http-archive-har)                    | HTTP Archive (HAR) file. |
@@ -644,6 +642,9 @@ can be added, removed, and modified by creating a custom configuration.
 |[`DAST_API_OVERRIDES_INTERVAL`](#overrides)            | How often to run overrides command in seconds. Defaults to `0` (once). |
 |[`DAST_API_HTTP_USERNAME`](#http-basic-authentication) | Username for HTTP authentication. |
 |[`DAST_API_HTTP_PASSWORD`](#http-basic-authentication) | Password for HTTP authentication. |
+|`DAST_API_SERVICE_START_TIMEOUT`                       | How long to wait for target API to become available in seconds. Default is 300 seconds. |
+|`DAST_API_TIMEOUT`                                     | How long to wait for API responses in seconds. Default is 30 seconds. |
+
 
 ### Overrides
 
@@ -820,7 +821,7 @@ variables:
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
-  DAST_API_OVERRIDES_FILE: output/api-fuzzing-overrides.json
+  DAST_API_OVERRIDES_FILE: output/dast-api-overrides.json
 ```
 
 #### Using a CI/CD variable
@@ -886,14 +887,14 @@ variables:
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
-  DAST_API_OVERRIDES_FILE: output/api-fuzzing-overrides.json
+  DAST_API_OVERRIDES_FILE: output/dast-api-overrides.json
   DAST_API_OVERRIDES_CMD: renew_token.py
   DAST_API_OVERRIDES_INTERVAL: 300
 ```
 
 ## Running your first scan
 
-When configured correctly, a CI/CD pipeline contains a `dast` stage and an `dast_api` job. The job only fails when an invalid configuration is provided. During normal operation, the job always succeeds even if faults are identified during fuzz testing.
+When configured correctly, a CI/CD pipeline contains a `dast` stage and an `dast_api` job. The job only fails when an invalid configuration is provided. During normal operation, the job always succeeds even if vulnerabilities are identified during testing.
 
 Vulnerabilities are displayed on the **Security** pipeline tab with the suite name. When testing against the repositories default branch, the DAST API vulnerabilities are also shown on the Security & Compliance's Vulnerability Report page.
 
@@ -902,48 +903,37 @@ To prevent an excessive number of reported vulnerabilities, the DAST API scanner
 ## Viewing DAST API vulnerabilities
 
 The DAST API analyzer produces a JSON report that is collected and used
-[to populate the faults into GitLab vulnerability screens](#view-details-of-a-dast-api-vulnerability).
-Fuzzing faults show up as vulnerabilities with a severity of Unknown.
+[to populate the vulnerabilities into GitLab vulnerability screens](#view-details-of-a-dast-api-vulnerability).
 
-The faults that DAST API finds require manual investigation and aren't associated with a specific
-vulnerability type. They require investigation to determine if they are a security issue, and if
-they should be fixed. See [handling false positives](#handling-false-positives)
-for information about configuration changes you can make to limit the number of false positives
-reported.
+See [handling false positives](#handling-false-positives) for information about configuration changes you can make to limit the number of false positives reported.
 
 ### View details of a DAST API vulnerability
 
-Faults detected by DAST API occur in the live web application, and require manual investigation
-to determine if they are vulnerabilities. Fuzzing faults are included as vulnerabilities with a
-severity of Unknown. To facilitate investigation of the fuzzing faults, detailed information is
-provided about the HTTP messages sent and received along with a description of the modification(s)
-made.
+Follow these steps to view details of a vulnerability:
 
-Follow these steps to view details of a fuzzing fault:
-
-1. You can view faults in a project, or a merge request:
+1. You can view vulnerabilities in a project, or a merge request:
 
    - In a project, go to the project's **{shield}** **Security & Compliance > Vulnerability Report**
      page. This page shows all vulnerabilities from the default branch only.
    - In a merge request, go the merge request's **Security** section and click the **Expand**
-     button. DAST API faults are available in a section labeled
-     **DAST API detected N potential vulnerabilities**. Click the title to display the fault
+     button. DAST API vulnerabilities are available in a section labeled
+     **DAST detected N potential vulnerabilities**. Click the title to display the vulnerability
      details.
 
-1. Click the fault's title to display the fault's details. The table below describes these details.
+1. Click the vulnerabilities title to display the details. The table below describes these details.
 
    | Field               | Description                                                                             |
    |:--------------------|:----------------------------------------------------------------------------------------|
-   | Description         | Description of the fault including what was modified.                                   |
+   | Description         | Description of the vulnerability including what was modified.                                   |
    | Project             | Namespace and project in which the vulnerability was detected.                          |
    | Method              | HTTP method used to detect the vulnerability.                                           |
    | URL                 | URL at which the vulnerability was detected.                                            |
-   | Request             | The HTTP request that caused the fault.                                                 |
+   | Request             | The HTTP request that caused the vulnerability.                                                 |
    | Unmodified Response | Response from an unmodified request. This is what a normal working response looks like. |
-   | Actual Response     | Response received from fuzzed request.                                                  |
-   | Evidence            | How we determined a fault occurred.                                                     |
-   | Identifiers         | The fuzzing check used to find this fault.                                              |
-   | Severity            | Severity of the finding is always Unknown.                                              |
+   | Actual Response     | Response received from test request.                                                  |
+   | Evidence            | How we determined a vulnerability occurred.                                                     |
+   | Identifiers         | The DAST API check used to find this vulnerability.                                              |
+   | Severity            | Severity of the vulnerability.                                              |
    | Scanner Type        | Scanner used to perform testing.                                                        |
 
 ### Security Dashboard
@@ -953,19 +943,18 @@ pipelines. For more information, see the [Security Dashboard documentation](../s
 
 ### Interacting with the vulnerabilities
 
-Once a fault is found, you can interact with it. Read more on how to
+Once a vulnerability is found, you can interact with it. Read more on how to
 [address the vulnerabilities](../index.md#addressing-vulnerabilities).
 
 ## Handling False Positives
 
 False positives can be handled in several ways:
 
-- Dismiss the vulnerability. TODO
-- Some checks have several methods of detecting when a fault is identified, called _Assertions_.
+- Dismiss the vulnerability.
+- Some checks have several methods of detecting when a vulnerability is identified, called _Assertions_.
   Assertions can also be turned off and configured. For example, the DAST API scanner by default uses HTTP
   status codes to help identify when something is a real issue. If an API returns a 500 error during
-  testing, this creates a fault. This isn't always desired, as some frameworks return 500 errors
-  often.
+  testing, this creates a vulnerability. This isn't always desired, as some frameworks return 500 errors often.
 - Turn off the Check producing the false positive. This prevents the check from generating any
   vulnerabilities. Example checks are the SQL Injection Check, and JSON Hijacking Check.
 
@@ -982,74 +971,61 @@ Example profile definition:
 ```yaml
 Profiles:
   - Name: Quick
-    DefaultProfile: Quick
+    DefaultProfile: Empty
     Routes:
       - Route: *Route0
         Checks:
-          - Name: FormBodyFuzzingCheck
-            Configuration:
-              FuzzingCount: 10
-              UnicodeFuzzing: true
-          - Name: GeneralFuzzingCheck
-            Configuration:
-              FuzzingCount: 10
-              UnicodeFuzzing: true
-          - Name: JsonFuzzingCheck
-            Configuration:
-              FuzzingCount: 10
-              UnicodeFuzzing: true
-          - Name: XmlFuzzingCheck
-            Configuration:
-              FuzzingCount: 10
-              UnicodeFuzzing: true
+          - Name: ApplicationInformationCheck
+          - Name: CleartextAuthenticationCheck
+          - Name: FrameworkDebugModeCheck
+          - Name: HtmlInjectionCheck
+          - Name: InsecureHttpMethodsCheck
+          - Name: JsonHijackingCheck
+          - Name: JsonInjectionCheck
+          - Name: SensitiveInformationCheck
+          - Name: SessionCookieCheck
+          - Name: SqlInjectionCheck
+          - Name: TokenCheck
+          - Name: XmlInjectionCheck
 ```
 
-To turn off the General Fuzzing Check you can remove these lines:
+To turn off the Json Hijacking Check you can remove these lines:
 
 ```yaml
-- Name: GeneralFuzzingCheck
-  Configuration:
-    FuzzingCount: 10
-    UnicodeFuzzing: true
+          - Name: JsonHijackingCheck
 ```
 
 This results in the following YAML:
 
 ```yaml
-- Name: Quick-10
-  DefaultProfile: Quick
-  Routes:
-    - Route: *Route0
-      Checks:
-        - Name: FormBodyFuzzingCheck
-          Configuration:
-            FuzzingCount: 10
-            UnicodeFuzzing: true
-        - Name: JsonFuzzingCheck
-          Configuration:
-            FuzzingCount: 10
-            UnicodeFuzzing: true
-        - Name: XmlFuzzingCheck
-          Configuration:
-            FuzzingCount: 10
-            UnicodeFuzzing: true
+  - Name: Quick
+    DefaultProfile: Empty
+    Routes:
+      - Route: *Route0
+        Checks:
+          - Name: ApplicationInformationCheck
+          - Name: CleartextAuthenticationCheck
+          - Name: FrameworkDebugModeCheck
+          - Name: HtmlInjectionCheck
+          - Name: InsecureHttpMethodsCheck
+          - Name: JsonInjectionCheck
+          - Name: SensitiveInformationCheck
+          - Name: SessionCookieCheck
+          - Name: SqlInjectionCheck
+          - Name: TokenCheck
+          - Name: XmlInjectionCheck
 ```
 
 ### Turn off an Assertion for a Check
 
-Assertions detect faults in tests produced by checks. Many checks support multiple Assertions such
-as Log Analysis, Response Analysis, and Status Code. When a fault is found, the Assertion used is
-provided. To identify which Assertions are on by default, see the Checks default configuration in
-the configuration file. The section is called `Checks`.
+Assertions detect vulnerabilities in tests produced by checks. Many checks support multiple Assertions such as Log Analysis, Response Analysis, and Status Code. When a vulnerability is found, the Assertion used is provided. To identify which Assertions are on by default, see the Checks default configuration in the configuration file. The section is called `Checks`.
 
-This example shows the FormBody Fuzzing Check:
+This example shows the SQL Injection Check:
 
 ```yaml
-Checks:
-  - Name: FormBodyFuzzingCheck
+  - Name: SqlInjectionCheck
     Configuration:
-      FuzzingCount: 30
-      UnicodeFuzzing: true
+      UserInjections: []
     Assertions:
       - Name: LogAnalysisAssertion
       - Name: ResponseAnalysisAssertion
@@ -1059,41 +1035,37 @@ Checks:
 Here you can see three Assertions are on by default. A common source of false positives is
 `StatusCodeAssertion`. To turn it off, modify its configuration in the `Profiles` section. This
 example provides only the other two Assertions (`LogAnalysisAssertion`,
-`ResponseAnalysisAssertion`). This prevents `FormBodyFuzzingCheck` from using `StatusCodeAssertion`:
+`ResponseAnalysisAssertion`). This prevents `SqlInjectionCheck` from using `StatusCodeAssertion`:
 
 ```yaml
 Profiles:
   - Name: Quick
-    DefaultProfile: Quick
+    DefaultProfile: Empty
     Routes:
       - Route: *Route0
         Checks:
-          - Name: FormBodyFuzzingCheck
-            Configuration:
-              FuzzingCount: 10
-              UnicodeFuzzing: true
+          - Name: ApplicationInformationCheck
+          - Name: CleartextAuthenticationCheck
+          - Name: FrameworkDebugModeCheck
+          - Name: HtmlInjectionCheck
+          - Name: InsecureHttpMethodsCheck
+          - Name: JsonHijackingCheck
+          - Name: JsonInjectionCheck
+          - Name: SensitiveInformationCheck
+          - Name: SessionCookieCheck
+          - Name: SqlInjectionCheck
             Assertions:
               - Name: LogAnalysisAssertion
               - Name: ResponseAnalysisAssertion
-          - Name: GeneralFuzzingCheck
-            Configuration:
-              FuzzingCount: 10
-              UnicodeFuzzing: true
-          - Name: JsonFuzzingCheck
-            Configuration:
-              FuzzingCount: 10
-              UnicodeFuzzing: true
+          - Name: TokenCheck
           - Name: XmlInjectionCheck
-            Configuration:
-              FuzzingCount: 10
-              UnicodeFuzzing: true
 ```
 
 ## Troubleshooting
 
 ### Failed to start scanner session (version header not found)
 
-The DAST API engine outputs an error message when it cannot establish a connection with the scanner application component. The error message is shown in the job output window of the `apifuzzer_fuzz` job. A common cause of this issue is changing the `DAST_API_API` variable from its default.
+The DAST API engine outputs an error message when it cannot establish a connection with the scanner application component. The error message is shown in the job output window of the `dast_api` job. A common cause of this issue is changing the `DAST_API_API` variable from its default.
 
 **Error message**
 
@@ -1107,16 +1079,11 @@ The DAST API engine outputs an error message when it cannot establish a connecti
 
 ## Glossary
 
-- Assert: Assertions are detection modules used by checks to trigger a fault. Many assertions have
+- Assert: Assertions are detection modules used by checks to trigger a vulnerability. Many assertions have
   configurations. A check can use multiple Assertions. For example, Log Analysis, Response Analysis,
   and Status Code are common Assertions used together by checks. Checks with multiple Assertions
   allow them to be turned on and off.
 - Check: Performs a specific type of test, or performed a check for a type of vulnerability. For
-  example, the JSON Fuzzing Check performs fuzz testing of JSON payloads. The DAST API scanner is
-  comprised of several checks. Checks can be turned on and off in a profile.
-- Fault: During fuzzing, a failure identified by an Assert is called a fault. Faults are
-  investigated to determine if they are a security vulnerability, a non-security issue, or a false
-  positive. Faults don't have a known vulnerability type until they are investigated. Example
-  vulnerability types are SQL Injection and Denial of Service.
+  example, the SQL Injection Check performs DAST testing for SQL Injection vulnerabilities. The DAST API scanner is comprised of several checks. Checks can be turned on and off in a profile.
 - Profile: A configuration file has one or more testing profiles, or sub-configurations. You may
   have a profile for feature branches and another with extra testing for a main branch.
