@@ -47,7 +47,7 @@ RSpec.describe API::MavenPackages do
     end
   end
 
-  shared_examples 'rejecting the request for non existing maven path' do |expected_status_when_ff_disabled: nil|
+  shared_examples 'rejecting the request for non existing maven path' do |expected_status: :not_found|
     before do
       if Feature.enabled?(:check_maven_path_first)
         expect(::Packages::Maven::PackageFinder).not_to receive(:new)
@@ -56,12 +56,6 @@ RSpec.describe API::MavenPackages do
 
     it 'rejects the request' do
       subject
-
-      expected_status = :not_found
-
-      if expected_status_when_ff_disabled.present? && !Feature.enabled?(:check_maven_path_first)
-        expected_status = expected_status_when_ff_disabled
-      end
 
       expect(response).to have_gitlab_http_status(expected_status)
     end
@@ -116,7 +110,7 @@ RSpec.describe API::MavenPackages do
       context 'with a non existing maven path' do
         let(:path) { 'foo/bar/1.2.3' }
 
-        it_behaves_like 'rejecting the request for non existing maven path', expected_status_when_ff_disabled: instance_level ? :forbidden : :not_found
+        it_behaves_like 'rejecting the request for non existing maven path', expected_status: instance_level ? :forbidden : :not_found
       end
     end
   end
@@ -196,7 +190,7 @@ RSpec.describe API::MavenPackages do
         context 'with a non existing maven path' do
           subject { download_file(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
 
-          it_behaves_like 'rejecting the request for non existing maven path', expected_status_when_ff_disabled: :forbidden
+          it_behaves_like 'rejecting the request for non existing maven path', expected_status: :forbidden
         end
       end
 
@@ -230,7 +224,7 @@ RSpec.describe API::MavenPackages do
         context 'with a non existing maven path' do
           subject { download_file_with_token(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
 
-          it_behaves_like 'rejecting the request for non existing maven path', expected_status_when_ff_disabled: :forbidden
+          it_behaves_like 'rejecting the request for non existing maven path', expected_status: :forbidden
         end
       end
 
@@ -288,7 +282,7 @@ RSpec.describe API::MavenPackages do
         context 'with a non existing maven path' do
           subject { download_file_with_token(file_name: package_file.file_name, path: 'foo/bar/1.2.3') }
 
-          it_behaves_like 'rejecting the request for non existing maven path', expected_status_when_ff_disabled: :forbidden
+          it_behaves_like 'rejecting the request for non existing maven path', expected_status: :forbidden
         end
       end
 

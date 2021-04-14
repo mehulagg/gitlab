@@ -113,7 +113,8 @@ module API
     end
     route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
     get 'packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
-      not_found!('Package') unless path_exists?(params[:path])
+      # return a similar failure to authorize_read_package!(project)
+      forbidden! unless path_exists?(params[:path])
 
       file_name, format = extract_format(params[:file_name])
 
@@ -153,7 +154,8 @@ module API
       end
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
       get ':id/-/packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
-        not_found!('Package') unless path_exists?(params[:path])
+        # return a similar failure to group = find_group(params[:id])
+        not_found!('Group') unless path_exists?(params[:path])
 
         file_name, format = extract_format(params[:file_name])
 
@@ -194,7 +196,8 @@ module API
       end
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
       get ':id/packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
-        not_found!('Package') unless path_exists?(params[:path])
+        # return a similar failure to user_project
+        not_found!('Project') unless path_exists?(params[:path])
 
         authorize_read_package!(user_project)
 
