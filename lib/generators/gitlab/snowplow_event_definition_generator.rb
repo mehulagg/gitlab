@@ -21,7 +21,7 @@ module Gitlab
       template "event_definition.yml", file_path
     end
 
-    def distribution
+    def distributions
       (ee? ? ['- ee'] : ['- ce', '- ee']).join("\n")
     end
 

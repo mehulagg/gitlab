@@ -16,8 +16,8 @@ product_group:
 product_category:
 milestone: "13.11"
 introduced_by_url:
-distribution:
+distributions:
 - ee
-tier:
+tiers:
 #- premium
 - ultimate

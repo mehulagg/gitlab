@@ -16,9 +16,9 @@ product_group:
 product_category:
 milestone: "<%= milestone %>"
 introduced_by_url:
-distribution:
-<%= distribution %>
-tier: <% if ee? %>
+distributions:
+<%= distributions %>
+tiers: <% if ee? %>
 #- premium
 - ultimate
 <% else %>

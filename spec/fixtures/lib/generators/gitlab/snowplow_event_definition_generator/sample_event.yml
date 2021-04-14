@@ -16,10 +16,10 @@ product_group:
 product_category:
 milestone: "13.11"
 introduced_by_url:
-distribution:
+distributions:
 - ce
 - ee
-tier:
+tiers:
 - free
 - premium
 - ultimate
