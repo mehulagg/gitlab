@@ -91,4 +91,27 @@ RSpec.describe Gitlab::Ci::Reports::Security::Scanner do
       end
     end
   end
+
+  describe '#priority' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:external_id, :expected_priority) do
+      'bundler_audit'    | 1
+      'retire.js'        | 2
+      'gemnasium'        | 3
+      'gemnasium-maven'  | 3
+      'gemnasium-python' | 3
+      'bandit'           | 1
+      'semgrep'          | 2
+      'unknown'          | Float::INFINITY
+    end
+
+    with_them do
+      let(:scanner) { create(:ci_reports_security_scanner, external_id: external_id) }
+
+      subject { scanner.priority }
+
+      it { is_expected.to eql(expected_priority) }
+    end
+  end
 end
