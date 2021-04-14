@@ -59,3 +59,5 @@ export const REPLICATION_STATUS_UI = {
 };
 
 export const STATUS_DELAY_THRESHOLD_MS = 600000;
+
+export const REMOVE_NODE_MODAL_ID = 'remove-node-modal';

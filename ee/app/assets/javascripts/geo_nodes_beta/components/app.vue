@@ -1,18 +1,26 @@
 <script>
-import { GlLink, GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlLink, GlButton, GlLoadingIcon, GlModal } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
-import { GEO_INFO_URL } from '../constants';
+import { __, s__ } from '~/locale';
+import { GEO_INFO_URL, REMOVE_NODE_MODAL_ID } from '../constants';
 import GeoNodes from './geo_nodes.vue';
 import GeoNodesEmptyState from './geo_nodes_empty_state.vue';
 
 export default {
   name: 'GeoNodesBetaApp',
+  i18n: {
+    modalTitle: s__('Geo|Remove secondary node'),
+    modalBody: s__(
+      'Geo|Removing a Geo secondary node stops the synchronization to that node. Are you sure?',
+    ),
+  },
   components: {
     GlLink,
     GlButton,
     GlLoadingIcon,
     GeoNodes,
     GeoNodesEmptyState,
+    GlModal,
   },
   props: {
     newNodeUrl: {
@@ -37,6 +45,16 @@ export default {
     ...mapActions(['fetchNodes']),
   },
   GEO_INFO_URL,
+  MODAL_PRIMARY_ACTION: {
+    text: s__('Geo|Remove node'),
+    attributes: {
+      variant: 'danger',
+    },
+  },
+  MODAL_CANCEL_ACTION: {
+    text: __('Cancel'),
+  },
+  REMOVE_NODE_MODAL_ID,
 };
 </script>
 
@@ -70,5 +88,13 @@ export default {
       <geo-nodes v-for="node in nodes" :key="node.id" :node="node" />
       <geo-nodes-empty-state v-if="noNodes" :svg-path="geoNodesEmptyStateSvg" />
     </div>
+    <gl-modal
+      :modal-id="$options.REMOVE_NODE_MODAL_ID"
+      :title="$options.i18n.modalTitle"
+      :action-primary="$options.MODAL_PRIMARY_ACTION"
+      :action-cancel="$options.MODAL_CANCEL_ACTION"
+    >
+      {{ $options.i18n.modalBody }}
+    </gl-modal>
   </section>
 </template>
