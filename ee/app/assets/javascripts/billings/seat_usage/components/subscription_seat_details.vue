@@ -14,7 +14,7 @@ export default {
   props: {
     seatMemberId: {
       type: Number,
-      required: true
+      required: true,
     },
   },
   computed: {
@@ -26,15 +26,13 @@ export default {
     },
     isLoading() {
       return this.state.isLoading;
-    }
+    },
   },
   created() {
     this.fetchBillableMemberDetails(this.seatMemberId);
   },
   methods: {
-    ...mapActions([
-      'fetchBillableMemberDetails',
-    ]),
+    ...mapActions(['fetchBillableMemberDetails']),
     formatDate,
   },
   fields: DETAILS_FIELDS,
@@ -42,7 +40,12 @@ export default {
 </script>
 
 <template>
-  <gl-table :fields="$options.fields" :items="items" :busy="isLoading" data-testid="seat-usage-details">
+  <gl-table
+    :fields="$options.fields"
+    :items="items"
+    :busy="isLoading"
+    data-testid="seat-usage-details"
+  >
     <template #cell(created_at)="{ item }">
       <span>{{ formatDate(item.created_at, 'yyyy-mm-dd') }}</span>
     </template>

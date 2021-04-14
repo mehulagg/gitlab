@@ -27,7 +27,7 @@ describe('Seat usage table getters', () => {
     describe('when data is not availlable', () => {
       it('returns a base state', () => {
         expect(getters.membershipsById(state)(0)).toEqual({
-          isLoading: false,
+          isLoading: true,
           items: [],
         });
       });

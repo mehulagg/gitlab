@@ -26,7 +26,7 @@ import RemoveBillableMemberModal from './remove_billable_member_modal.vue';
 import SubscriptionSeatDetails from './subscription_seat_details.vue';
 
 export default {
-  directives:{
+  directives: {
     GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
@@ -171,10 +171,13 @@ export default {
             @click="toggleDetails"
             data-testid="toggle-seat-usage-details"
           >
-            <gl-icon :name="detailsShowing ? 'angle-down' : 'angle-right'" class="text-secondary-900" />
+            <gl-icon
+              :name="detailsShowing ? 'angle-down' : 'angle-right'"
+              class="text-secondary-900"
+            />
           </gl-button>
 
-          <gl-avatar-link target="blank" :href="item.web_url" :alt="item.user.name">
+          <gl-avatar-link target="blank" :href="item.user.web_url" :alt="item.user.name">
             <gl-avatar-labeled
               :src="item.user.avatar_url"
               :size="$options.avatarSize"
