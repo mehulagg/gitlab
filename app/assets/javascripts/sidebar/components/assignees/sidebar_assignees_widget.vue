@@ -1,20 +1,17 @@
 <script>
-import { GlDropdownItem, GlDropdownDivider, GlSearchBoxByType, GlLoadingIcon } from '@gitlab/ui';
+import { GlDropdownItem } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
 import Vue from 'vue';
 import createFlash from '~/flash';
-import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
 import { IssuableType } from '~/issue_show/constants';
 import { __, n__ } from '~/locale';
 import SidebarAssigneesRealtime from '~/sidebar/components/assignees/assignees_realtime.vue';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
-import { assigneesQueries, ASSIGNEES_DEBOUNCE_DELAY } from '~/sidebar/constants';
-import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
+import { assigneesQueries } from '~/sidebar/constants';
+import UserSelect from '~/vue_shared/components/user_select/user_select.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import SidebarInviteMembers from './sidebar_invite_members.vue';
-import SidebarParticipant from './sidebar_participant.vue';
-import UserSelect from '~/vue_shared/components/user_select/user_select.vue';
 
 export const assigneesWidget = Vue.observable({
   updateAssignees: null,
@@ -34,13 +31,8 @@ export default {
   components: {
     SidebarEditableItem,
     IssuableAssignees,
-    MultiSelectDropdown,
     GlDropdownItem,
-    GlDropdownDivider,
-    GlSearchBoxByType,
-    GlLoadingIcon,
     SidebarInviteMembers,
-    SidebarParticipant,
     SidebarAssigneesRealtime,
     UserSelect,
   },
@@ -83,12 +75,9 @@ export default {
   },
   data() {
     return {
-      search: '',
       issuable: {},
-      searchUsers: [],
       selected: [],
       isSettingAssignees: false,
-      isSearching: false,
       isDirty: false,
     };
   },
@@ -113,39 +102,6 @@ export default {
         createFlash({ message: __('An error occurred while fetching participants.') });
       },
     },
-    searchUsers: {
-      query: searchUsers,
-      variables() {
-        return {
-          fullPath: this.fullPath,
-          search: this.search,
-        };
-      },
-      update(data) {
-        const searchResults = data.workspace?.users?.nodes.map(({ user }) => user) || [];
-        const mergedSearchResults = this.participants.reduce((acc, current) => {
-          if (
-            !acc.some((user) => current.username === user.username) &&
-            (current.name.includes(this.search) || current.username.includes(this.search))
-          ) {
-            acc.push(current);
-          }
-          return acc;
-        }, searchResults);
-        return mergedSearchResults;
-      },
-      debounce: ASSIGNEES_DEBOUNCE_DELAY,
-      skip() {
-        return this.isSearchEmpty;
-      },
-      error() {
-        createFlash({ message: __('An error occurred while searching users.') });
-        this.isSearching = false;
-      },
-      result() {
-        this.isSearching = false;
-      },
-    },
   },
   computed: {
     shouldEnableRealtime() {
@@ -164,13 +120,6 @@ export default {
         : this.issuable?.assignees?.nodes;
       return currentAssignees || [];
     },
-    participants() {
-      const users =
-        this.isSearchEmpty || this.isSearching
-          ? this.issuable?.participants?.nodes
-          : this.searchUsers;
-      return this.moveCurrentUserToStart(users);
-    },
     assigneeText() {
       const items = this.$apollo.queries.issuable.loading ? this.initialAssignees : this.selected;
       if (!items) {
@@ -178,28 +127,8 @@ export default {
       }
       return n__('Assignee', '%d Assignees', items.length);
     },
-    selectedFiltered() {
-      if (this.isSearchEmpty || this.isSearching) {
-        return this.selected;
-      }
-
-      const foundUsernames = this.searchUsers.map(({ username }) => username);
-      return this.selected.filter(({ username }) => foundUsernames.includes(username));
-    },
-    unselectedFiltered() {
-      return (
-        this.participants?.filter(({ username }) => !this.selectedUserNames.includes(username)) ||
-        []
-      );
-    },
-    selectedIsEmpty() {
-      return this.selectedFiltered.length === 0;
-    },
-    selectedUserNames() {
-      return this.selected.map(({ username }) => username);
-    },
-    isSearchEmpty() {
-      return this.search === '';
+    isAssigneesLoading() {
+      return !this.initialAssignees && this.$apollo.queries.issuable.loading;
     },
     currentUser() {
       return {
@@ -208,34 +137,8 @@ export default {
         avatarUrl: gon?.current_user_avatar_url,
       };
     },
-    isAssigneesLoading() {
-      return !this.initialAssignees && this.$apollo.queries.issuable.loading;
-    },
-    isCurrentUserInParticipants() {
-      const isCurrentUser = (user) => user.username === this.currentUser.username;
-      return this.selected.some(isCurrentUser) || this.participants.some(isCurrentUser);
-    },
-    noUsersFound() {
-      return !this.isSearchEmpty && this.searchUsers.length === 0;
-    },
     signedIn() {
       return this.currentUser.username !== undefined;
-    },
-    showCurrentUser() {
-      return (
-        this.signedIn &&
-        !this.isCurrentUserInParticipants &&
-        (this.isSearchEmpty || this.isSearching)
-      );
-    },
-  },
-  watch: {
-    // We need to add this watcher to track the moment when user is alredy typing
-    // but query is still not started due to debounce
-    search(newVal) {
-      if (newVal) {
-        this.isSearching = true;
-      }
     },
   },
   created() {
@@ -245,14 +148,14 @@ export default {
     assigneesWidget.updateAssignees = null;
   },
   methods: {
-    updateAssignees(assigneeUsernames) {
+    updateAssignees() {
       this.isSettingAssignees = true;
       return this.$apollo
         .mutate({
           mutation: assigneesQueries[this.issuableType].mutation,
           variables: {
             ...this.queryVariables,
-            assigneeUsernames,
+            assigneeUsernames: this.selected.map(({ username }) => username),
           },
         })
         .then(({ data }) => {
@@ -266,41 +169,25 @@ export default {
           this.isSettingAssignees = false;
         });
     },
-    selectAssignee(name) {
-      this.isDirty = true;
-
-      if (!this.multipleAssignees) {
-        this.selected = name ? [name] : [];
-        this.collapseWidget();
-        return;
-      }
-      if (name === undefined) {
-        this.clearSelected();
-        return;
-      }
-      this.selected = this.selected.concat(name);
-    },
-    unselect(name) {
-      this.selected = this.selected.filter((user) => user.username !== name);
-      this.isDirty = true;
-
-      if (!this.multipleAssignees) {
-        this.collapseWidget();
-      }
-    },
     assignSelf() {
       this.updateAssignees(this.currentUser.username);
     },
-    clearSelected() {
-      this.selected = [];
-    },
     saveAssignees() {
       this.isDirty = false;
-      this.updateAssignees(this.selectedUserNames);
+      this.updateAssignees();
       this.$el.dispatchEvent(hideDropdownEvent);
     },
-    isChecked(id) {
-      return this.selectedUserNames.includes(id);
+    collapseWidget() {
+      this.$refs.toggle.collapse();
+    },
+    expandWidget() {
+      this.$refs.toggle.expand();
+    },
+    focusSearch() {
+      this.$refs.userSelect.focusSearch();
+    },
+    showError() {
+      createFlash({ message: __('An error occurred while fetching participants.') });
     },
     moveCurrentUserToStart(users) {
       if (!users) {
@@ -316,14 +203,11 @@ export default {
 
       return usersCopy;
     },
-    collapseWidget() {
-      this.$refs.toggle.collapse();
-    },
-    expandWidget() {
-      this.$refs.toggle.expand();
-    },
-    focusSearch() {
-      this.$refs.userSelect.focusSearch();
+    setDirtyState() {
+      this.isDirty = true;
+      if (!this.multipleAssignees) {
+        this.collapseWidget();
+      }
     },
   },
 };
@@ -367,6 +251,8 @@ export default {
           :full-path="fullPath"
           :multiple-assignees="multipleAssignees"
           class="gl-w-full dropdown-menu-user"
+          @error="showError"
+          @input="setDirtyState"
         >
           <template #footer>
             <gl-dropdown-item>
