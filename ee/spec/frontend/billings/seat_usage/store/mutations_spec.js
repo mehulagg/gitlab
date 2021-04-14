@@ -1,7 +1,7 @@
 import * as types from 'ee/billings/seat_usage/store/mutation_types';
 import mutations from 'ee/billings/seat_usage/store/mutations';
 import createState from 'ee/billings/seat_usage/store/state';
-import { mockDataSeats } from 'ee_jest/billings/mock_data';
+import { mockDataSeats, mockMemberDetails } from 'ee_jest/billings/mock_data';
 
 describe('EE billings seats module mutations', () => {
   let state;
@@ -133,6 +133,47 @@ describe('EE billings seats module mutations', () => {
           hasError: true,
           billableMemberToRemove: null,
         });
+      });
+    });
+  });
+
+  describe('fetching billable member details', () => {
+    const member = mockDataSeats.data[0];
+
+    describe(types.FETCH_BILLABLE_MEMBER_DETAILS, () => {
+      it('sets the state to loading', () => {
+        mutations[types.FETCH_BILLABLE_MEMBER_DETAILS](state, { memberId: member.id });
+
+        expect(state.userDetails).toMatchObject({
+          [member.id.toString()]: {
+            isLoading: true,
+          },
+        });
+      });
+    });
+
+    describe(types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS, () => {
+      beforeEach(() => {
+        mutations[types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS](state, {
+          memberId: member.id,
+          memberships: mockMemberDetails,
+        });
+      });
+
+      it('sets the state to not loading', () => {
+        expect(state.userDetails[member.id.toString()].isLoading).toBe(false);
+      });
+
+      it('sets the memberships to the state', () => {
+        expect(state.userDetails[member.id.toString()].items).toEqual(mockMemberDetails);
+      });
+    });
+
+    describe(types.FETCH_BILLABLE_MEMBER_DETAILS_ERROR, () => {
+      it('sets the state to not loading', () => {
+        mutations[types.FETCH_BILLABLE_MEMBER_DETAILS_ERROR](state, { memberId: member.id });
+
+        expect(state.userDetails[member.id.toString()].isLoading).toBe(false);
       });
     });
   });
