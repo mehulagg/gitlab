@@ -88,7 +88,7 @@ export default {
     fastForwardMergeText() {
       return sprintf(
         __(
-          'Fast-forward merge is not possible. Rebase the source branch onto %{targetBranch} to allow this merge request to be merged.',
+          'Merge blocked: the source branch must be rebased onto the target branch.',
         ),
         {
           targetBranch: `<span class="label-branch">${escape(this.targetBranch)}</span>`,
@@ -188,7 +188,7 @@ export default {
             data-qa-selector="no_fast_forward_message_content"
             >{{
               __(
-                'Fast-forward merge is not possible. Rebase the source branch onto the target branch.',
+                'Merge blocked: the source branch must be rebased onto the target branch.',
               )
             }}</span
           >
