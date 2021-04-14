@@ -110,8 +110,10 @@ module EE
 
       if not_params.filter_by_current_iteration?
         items.not_in_iterations(get_current_iteration)
-      else
+      elsif not_params.filter_by_iteration_title?
         items.without_iteration_title(not_params[:iteration_title])
+      else
+        items.not_in_iterations(not_params[:iteration_id])
       end
     end
 

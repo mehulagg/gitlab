@@ -7,7 +7,7 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
-          argument :iteration_wildcard_id, ::Types::Boards::NegatedIterationWildcardIdEnum,
+          argument :iteration_wildcard_id, ::Types::NegatedIterationWildcardIdEnum,
                    required: false,
                    description: 'Filter by iteration ID wildcard.'
         end
