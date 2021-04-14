@@ -1,4 +1,3 @@
-import { pick } from 'lodash';
 import {
   formatBoardLists,
   formatListIssues,
@@ -6,8 +5,9 @@ import {
   fullBoardId,
   transformNotFilters,
   getMoveData,
+  getSupportedParams,
 } from '~/boards/boards_util';
-import { BoardType } from '~/boards/constants';
+import { BoardType, SupportedFilters } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
 import actionsCE from '~/boards/stores/actions';
@@ -28,7 +28,12 @@ import {
   formatEpicListsPageInfo,
 } from '../boards_util';
 
-import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
+import {
+  EpicFilterType,
+  IterationFilterType,
+  GroupByParamType,
+  SupportedFiltersEE,
+} from '../constants';
 import epicQuery from '../graphql/epic.query.graphql';
 import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
 import epicBoardListsQuery from '../graphql/epic_board_lists.query.graphql';
@@ -116,18 +121,8 @@ export default {
   ...actionsCE,
 
   setFilters: ({ commit, dispatch, getters }, filters) => {
-    const filterParams = pick(filters, [
-      'assigneeUsername',
-      'authorUsername',
-      'epicId',
-      'labelName',
-      'milestoneTitle',
-      'iterationTitle',
-      'releaseTag',
-      'search',
-      'weight',
-      'myReactionEmoji',
-    ]);
+    const supportedFilters = [...SupportedFilters, ...SupportedFiltersEE];
+    const filterParams = getSupportedParams(filters, supportedFilters);
 
     // Temporarily disabled until negated filters are supported for epic boards
     if (!getters.isEpicBoard) {
