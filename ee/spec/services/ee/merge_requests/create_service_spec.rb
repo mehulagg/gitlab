@@ -28,12 +28,8 @@ RSpec.describe MergeRequests::CreateService do
       project.add_maintainer(user)
     end
 
-    it 'refreshes code owners for the merge request' do
-      fake_refresh_service = instance_double(::MergeRequests::SyncCodeOwnerApprovalRules)
-
-      expect(::MergeRequests::SyncCodeOwnerApprovalRules)
-        .to receive(:new).with(kind_of(MergeRequest)).and_return(fake_refresh_service)
-      expect(fake_refresh_service).to receive(:execute)
+    it 'schedules refresh of code owners for the merge request' do
+      expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker).to receive(:perform_async).with(kind_of(MergeRequest))
 
       service.execute
     end
