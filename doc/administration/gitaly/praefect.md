@@ -7,9 +7,14 @@ type: reference
 
 # Configure Gitaly Cluster **(FREE SELF)**
 
-In addition to Gitaly Cluster configuration instructions available as part of
-[reference architectures](../reference_architectures/index.md) for installations for more than
-2000 users, advanced configuration instructions are available below.
+Configure Gitaly Cluster using either:
+
+- The Gitaly Cluster configuration instructions available as part of
+  [reference architectures](../reference_architectures/index.md) for installations for more than
+  2000 users.
+- The advanced configuration instructions that follow.
+
+Smaller GitLab installations may need only [Gitaly itself](index.md).
 
 ## Requirements for configuring a Gitaly Cluster
 
@@ -1298,6 +1303,24 @@ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.t
 
 ## Migrate to Gitaly Cluster
 
+Whether migrating to Gitaly Cluster because of [NFS support deprecation](index.md#nfs-deprecation-notice)
+or to move from single Gitaly nodes, the basic process involves:
+
+1. Create the required storage.
+1. Create and configure Gitaly Cluster.
+1. [Move the repositories](#move-repositories).
+
+The size of the required storage can very between instances. The following table provides some
+basic guidance based on an existing NFS-based or Gitaly-based storage.
+
+| [Storage type](../repository_storage_types.md) | Size          |
+|:-----------------------------------------------|:--------------|
+| [NFS](../nfs.md).                              | 3 GB to 6 GB  |
+| Single [Gitaly](index.md) node.                | 3 GB to 12 GB |
+| [Gitaly Cluster](index.md#gitaly-cluster)      | 3 GB to 30 GB |
+
+### Move Repositories
+
 To migrate to Gitaly Cluster, existing repositories stored outside Gitaly Cluster must be
 moved. There is no automatic migration but the moves can be scheduled with the GitLab API.
 
@@ -1320,7 +1343,7 @@ After creating and configuring Gitaly Cluster:
    - [Snippets](#bulk-schedule-snippets).
    - [Groups](#bulk-schedule-groups). **(PREMIUM SELF)**
 
-### Bulk schedule projects
+#### Bulk schedule project moves
 
 1. [Schedule repository storage moves for all projects on a storage shard](../../api/project_repository_storage_moves.md#schedule-repository-storage-moves-for-all-projects-on-a-storage-shard) using the API. For example:
 
@@ -1353,7 +1376,7 @@ After creating and configuring Gitaly Cluster:
 
 1. Repeat for each storage as required.
 
-### Bulk schedule snippets
+#### Bulk schedule snippet moves
 
 1. [Schedule repository storage moves for all snippets on a storage shard](../../api/snippet_repository_storage_moves.md#schedule-repository-storage-moves-for-all-snippets-on-a-storage-shard) using the API. For example:
 
@@ -1378,7 +1401,7 @@ After creating and configuring Gitaly Cluster:
 
 1. Repeat for each storage as required.
 
-### Bulk schedule groups **(PREMIUM SELF)**
+#### Bulk schedule group moves **(PREMIUM SELF)**
 
 1. [Schedule repository storage moves for all groups on a storage shard](../../api/group_repository_storage_moves.md#schedule-repository-storage-moves-for-all-groups-on-a-storage-shard) using the API.
 
