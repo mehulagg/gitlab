@@ -28,7 +28,7 @@ RSpec.describe Gitlab::SnowplowEventDefinitionGenerator do
 
       described_class.new([], generator_options).invoke_all
 
-      event_definition_path = File.join(ce_temp_dir, 'Groups::EmailCampaignsController_click.yml')
+      event_definition_path = File.join(ce_temp_dir, 'groups__email_campaigns_controller_click.yml')
       expect(::Gitlab::Config::Loader::Yaml.new(File.read(event_definition_path)).load_raw!).to eq(sample_event)
     end
 
@@ -37,7 +37,7 @@ RSpec.describe Gitlab::SnowplowEventDefinitionGenerator do
 
       described_class.new([], generator_options.merge('ee' => true)).invoke_all
 
-      event_definition_path = File.join(ee_temp_dir, 'Groups::EmailCampaignsController_click.yml')
+      event_definition_path = File.join(ee_temp_dir, 'groups__email_campaigns_controller_click.yml')
       expect(::Gitlab::Config::Loader::Yaml.new(File.read(event_definition_path)).load_raw!).to eq(sample_event)
     end
   end

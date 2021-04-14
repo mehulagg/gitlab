@@ -60,7 +60,7 @@ module Gitlab
     end
 
     def file_name
-      "#{event_category}_#{event_action}.yml"
+      "#{event_category}_#{event_action}.yml".underscore.gsub("/", "__")
     end
   end
 end
