@@ -717,11 +717,10 @@ of these variables.
 
 Example: `$STAGING`
 
-To create a job when there is some variable present, meaning it is defined and non-empty,
+To create a job when there is some variable present, meaning it is defined,
 use the variable name as an expression, like `$STAGING`. If the `$STAGING` variable
-is defined, and is non empty, expression evaluates to `true`.
-`$STAGING` value needs to be a string, with length higher than zero.
-Variable that contains only whitespace characters is not an empty variable.
+is defined the expression evaluates to `true`.
+`$STAGING` value needs to be a string, with length higher than zero. A variable that contains only whitespace characters is not an empty variable.
 
 #### Regex pattern matching
 
