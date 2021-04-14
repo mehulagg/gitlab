@@ -2,7 +2,7 @@
 name: pick_into_project
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55970
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/324154
-milestone: '13.10'
+milestone: '13.11'
 type: development
 group: group::source code
-default_enabled: false
+default_enabled: true
