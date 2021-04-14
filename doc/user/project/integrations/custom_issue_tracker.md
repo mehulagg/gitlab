@@ -15,10 +15,10 @@ To enable a custom issue tracker in a project:
 1. Select the checkbox under **Enable integration**.
 1. Fill in the required fields:
 
-   - **Project URL**: The URL to the project in the custom issue tracker to link to this GitLab project.
-   - **Issue URL**: The URL to the issue in the issue tracker project to link to this GitLab project.
-     The URL must contain `:id`. GitLab replaces this ID with the issue number.
-     For example, `https://customissuetracker.com/project-name/:id`.
+   - **Project URL**: The URL to the project in the custom issue tracker.
+   - **Issue URL**: The URL to the issue in the issue tracker project. The URL must contain `:id`.
+   GitLab replaces this ID with the issue number (for example,
+   `https://customissuetracker.com/project-name/:id`).
    - **New issue URL**: The URL to use to create a new issue in the Redmine project linked to
      this GitLab project.
      <!-- The line below was originally added in January 2018: https://gitlab.com/gitlab-org/gitlab/-/commit/778b231f3a5dd42ebe195d4719a26bf675093350 -->
