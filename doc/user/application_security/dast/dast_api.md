@@ -591,38 +591,38 @@ can be added, removed, and modified by creating a custom configuration.
 
 ##### Quick
 
- - Application Information Check
- - Cleartext Authentication Check
- - FrameworkDebugModeCheck
- - Html Injection Check
- - Insecure Http Methods Check
- - Json Hijacking Check
- - Json Injection Check
- - Sensitive Information Check
- - Session Cookie Check
- - Sql Injection Check
- - Token Check
- - Xml Injection Check
+- Application Information Check
+- Cleartext Authentication Check
+- FrameworkDebugModeCheck
+- Html Injection Check
+- Insecure Http Methods Check
+- JSON Hijacking Check
+- JSON Injection Check
+- Sensitive Information Check
+- Session Cookie Check
+- SQL Injection Check
+- Token Check
+- Xml Injection Check
 
 ##### Full
 
- - Application Information Check
- - Cleartext AuthenticationCheck
- - Cors Check
- - Dns Rebinding Check
- - Framework Debug Mode Check
- - Html Injection Check
- - Insecure Http Methods Check
- - Json Hijacking Check
- - Json Injection Check
- - Open Redirect Check
- - Sensitive File Check
- - Sensitive Information Check
- - Session Cookie Check
- - Sql Injection Check
- - Tls Configuration Check
- - Token Check
- - Xml Injection Check
+- Application Information Check
+- Cleartext AuthenticationCheck
+- Cors Check
+- Dns Rebinding Check
+- Framework Debug Mode Check
+- Html Injection Check
+- Insecure Http Methods Check
+- JSON Hijacking Check
+- JSON Injection Check
+- Open Redirect Check
+- Sensitive File Check
+- Sensitive Information Check
+- Session Cookie Check
+- SQL Injection Check
+- Tls Configuration Check
+- Token Check
+- Xml Injection Check
 
 ### Available CI/CD variables
 
@@ -644,7 +644,6 @@ can be added, removed, and modified by creating a custom configuration.
 |[`DAST_API_HTTP_PASSWORD`](#http-basic-authentication) | Password for HTTP authentication. |
 |`DAST_API_SERVICE_START_TIMEOUT`                       | How long to wait for target API to become available in seconds. Default is 300 seconds. |
 |`DAST_API_TIMEOUT`                                     | How long to wait for API responses in seconds. Default is 30 seconds. |
-
 
 ### Overrides
 
@@ -989,7 +988,7 @@ Profiles:
           - Name: XmlInjectionCheck
 ```
 
-To turn off the Json Hijacking Check you can remove these lines:
+To turn off the JSON Hijacking Check you can remove these lines:
 
 ```yaml
           - Name: JsonHijackingCheck
@@ -998,22 +997,22 @@ To turn off the Json Hijacking Check you can remove these lines:
 This results in the following YAML:
 
 ```yaml
-  - Name: Quick
-    DefaultProfile: Empty
-    Routes:
-      - Route: *Route0
-        Checks:
-          - Name: ApplicationInformationCheck
-          - Name: CleartextAuthenticationCheck
-          - Name: FrameworkDebugModeCheck
-          - Name: HtmlInjectionCheck
-          - Name: InsecureHttpMethodsCheck
-          - Name: JsonInjectionCheck
-          - Name: SensitiveInformationCheck
-          - Name: SessionCookieCheck
-          - Name: SqlInjectionCheck
-          - Name: TokenCheck
-          - Name: XmlInjectionCheck
+- Name: Quick
+  DefaultProfile: Empty
+  Routes:
+    - Route: *Route0
+      Checks:
+        - Name: ApplicationInformationCheck
+        - Name: CleartextAuthenticationCheck
+        - Name: FrameworkDebugModeCheck
+        - Name: HtmlInjectionCheck
+        - Name: InsecureHttpMethodsCheck
+        - Name: JsonInjectionCheck
+        - Name: SensitiveInformationCheck
+        - Name: SessionCookieCheck
+        - Name: SqlInjectionCheck
+        - Name: TokenCheck
+        - Name: XmlInjectionCheck
 ```
 
 ### Turn off an Assertion for a Check
@@ -1023,13 +1022,13 @@ Assertions detect vulnerabilities in tests produced by checks. Many checks suppo
 This example shows the SQL Injection Check:
 
 ```yaml
-  - Name: SqlInjectionCheck
-    Configuration:
-      UserInjections: []
-    Assertions:
-      - Name: LogAnalysisAssertion
-      - Name: ResponseAnalysisAssertion
-      - Name: StatusCodeAssertion
+- Name: SqlInjectionCheck
+  Configuration:
+    UserInjections: []
+  Assertions:
+    - Name: LogAnalysisAssertion
+    - Name: ResponseAnalysisAssertion
+    - Name: StatusCodeAssertion
 ```
 
 Here you can see three Assertions are on by default. A common source of false positives is
