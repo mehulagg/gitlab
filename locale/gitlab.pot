@@ -17594,7 +17594,7 @@ msgstr ""
 msgid "IssueTracker|Redmine issue tracker"
 msgstr ""
 
-msgid "IssueTracker|Use a custom issue tracker that is not listed in the integration list. %{docs_link}"
+msgid "IssueTracker|Use a custom issue tracker that is not in the integration list. %{docs_link}"
 msgstr ""
 
 msgid "IssueTracker|Use a custom issue tracker."
