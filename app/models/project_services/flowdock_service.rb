@@ -9,7 +9,7 @@ class FlowdockService < Service
   end
 
   def description
-    s_('FlowdockService|Flowdock is a collaboration web app for technical teams.')
+    s_('FlowdockService|Send event notifications from GitLab to Flowdock flows.')
   end
 
   def self.to_param
@@ -18,7 +18,7 @@ class FlowdockService < Service
 
   def fields
     [
-      { type: 'text', name: 'token', placeholder: s_('FlowdockService|Flowdock Git source token'), required: true }
+      { type: 'text', name: 'token', placeholder: s_('FlowdockService|Enter your Flowdock token.'), required: true }
     ]
   end
 

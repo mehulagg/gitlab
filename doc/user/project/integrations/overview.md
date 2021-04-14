@@ -37,7 +37,7 @@ Click on the service links to see further configuration instructions and details
 | Drone CI | Continuous Integration platform built on Docker, written in Go | Yes |
 | [Emails on push](emails_on_push.md) | Email the commits and diff of each push to a list of recipients | No |
 | External wiki | Replaces the link to the internal wiki with a link to an external wiki | No |
-| Flowdock | Flowdock is a collaboration web app for technical teams | No |
+| [Flowdock](../../../api/services.md#flowdock) |Send notifications from GitLab to Flowdock flows. | No |
 | [Generic alerts](../../../operations/incident_management/integrations.md) **(ULTIMATE)** | Receive alerts on GitLab from any source | No |
 | [GitHub](github.md) **(PREMIUM)** | Sends pipeline notifications to GitHub | No |
 | [Hangouts Chat](hangouts_chat.md) | Receive events notifications in Google Hangouts Chat | No |
