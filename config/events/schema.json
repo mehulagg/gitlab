@@ -65,7 +65,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["free", "starter", "premium", "ultimate", "bronze", "silver", "gold"]
+        "enum": ["free", "premium", "ultimate"]
       }
     }
   }
