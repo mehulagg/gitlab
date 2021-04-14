@@ -495,7 +495,6 @@ This can cause incorrect URLs to be imported, or a scan on an incorrect host.
 Use the `DAST_API_HOST_OVERRIDE` CI/CD variable to override these values.
 
 WARNING:
-
 - You cannot override the hostname by using the `$DAST_WEBSITE` variable.
 - A host override is _only_ supported when importing the API specification from a URL. An attempt to
   override the host will throw an error when the API specification is imported from a file. This is due to a
