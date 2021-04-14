@@ -34,6 +34,10 @@ module IncidentManagement
 
         oncall_rotation.touch
       end
+
+      def send_notification
+        NotificationService.new.oncall_user_removed(oncall_rotation, user_to_remove)
+      end
     end
   end
 end

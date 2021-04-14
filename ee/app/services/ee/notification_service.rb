@@ -76,7 +76,23 @@ module EE
       end
     end
 
+    def oncall_user_removed(rotation, user)
+      project_owners_and_participants(rotation, user).each do |recipient|
+        IncidentManagement::OncallRotationMailer.user_removed_from_rotation_email(user, rotation, [recipient]).deliver_later
+      end
+    end
+
     private
+
+    def project_owners_and_participants(rotation, user)
+      project = rotation.project
+
+      owners = project.members.owners.map(&:user).presence || project.group&.owners
+
+      excluding_user = [owners, rotation.participants.map(&:user)].uniq - [user]
+
+      excluding_user.compact.flatten
+    end
 
     def add_mr_approvers_email(merge_request, approvers, current_user)
       approvers.each do |approver|
