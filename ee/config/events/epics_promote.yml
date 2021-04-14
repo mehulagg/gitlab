@@ -8,17 +8,18 @@ extra_properties:
   weight:
     type: integer
     description: Weight of the issue
-project_included: true
-user_included: true
-namespace_included: true
+identifiers:
+- project
+- user
+- namespace
 product_section: dev
 product_stage: plan
 product_group: group::product planning
 product_category: epics
 milestone: "11.10"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/10537
-distribution:
+distributions:
 - ee
-tier:
+tiers:
 - premium
 - ultimate
