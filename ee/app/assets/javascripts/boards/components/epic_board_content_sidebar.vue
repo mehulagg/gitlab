@@ -7,6 +7,7 @@ import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.v
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
+import SidebarDueDateWidget from '~/sidebar/components/due_date/sidebar_due_date_widget.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -16,6 +17,7 @@ export default {
     BoardSidebarSubscription,
     BoardSidebarTitle,
     SidebarConfidentialityWidget,
+    SidebarDueDateWidget,
   },
   computed: {
     ...mapGetters(['isSidebarOpen', 'activeBoardItem']),
@@ -46,6 +48,12 @@ export default {
     <template #header>{{ __('Epic details') }}</template>
     <template #default>
       <board-sidebar-title data-testid="sidebar-title" />
+      <sidebar-due-date-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        issuable-type="epic"
+        :can-inherit="true"
+      />
       <board-sidebar-labels-select class="labels" />
       <sidebar-confidentiality-widget
         :iid="activeBoardItem.iid"

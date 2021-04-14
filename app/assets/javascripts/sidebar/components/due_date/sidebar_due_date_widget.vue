@@ -1,11 +1,13 @@
 <script>
-import { GlButton, GlIcon, GlDatepicker, GlTooltipDirective } from '@gitlab/ui';
+import { GlIcon, GlDatepicker, GlTooltipDirective } from '@gitlab/ui';
 import createFlash from '~/flash';
 import { IssuableType } from '~/issue_show/constants';
 import { dateInWords, formatDate, parsePikadayDate } from '~/lib/utils/datetime_utility';
 import { __, sprintf } from '~/locale';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import { dueDateQueries } from '~/sidebar/constants';
+import SidebarFormattedDate from './sidebar_formatted_date.vue';
+import SidebarInheritDate from './sidebar_inherit_date.vue';
 
 const hideDropdownEvent = new CustomEvent('hiddenGlDropdown', {
   bubbles: true,
@@ -21,16 +23,30 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   components: {
-    GlButton,
     GlIcon,
     GlDatepicker,
     SidebarEditableItem,
+    SidebarFormattedDate,
+    SidebarInheritDate,
   },
-  inject: ['fullPath', 'iid', 'canUpdate'],
+  inject: ['canUpdate'],
   props: {
+    iid: {
+      type: String,
+      required: true,
+    },
+    fullPath: {
+      type: String,
+      required: true,
+    },
     issuableType: {
       required: true,
       type: String,
+    },
+    canInherit: {
+      required: false,
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -169,26 +185,21 @@ export default {
         <gl-icon :size="16" name="calendar" />
         <span class="collapse-truncated-title">{{ formattedDueDate }}</span>
       </div>
-      <div class="gl-display-flex gl-align-items-center hide-collapsed">
-        <span
-          :class="hasDueDate ? 'gl-text-gray-900 gl-font-weight-bold' : 'gl-text-gray-500'"
-          data-testid="sidebar-duedate-value"
-        >
-          {{ formattedDueDate }}
-        </span>
-        <div v-if="hasDueDate && canUpdate" class="gl-display-flex">
-          <span class="gl-px-2">-</span>
-          <gl-button
-            variant="link"
-            class="gl-text-gray-500!"
-            data-testid="reset-button"
-            :disabled="isLoading"
-            @click="setDueDate(null)"
-          >
-            {{ $options.i18n.removeDueDate }}
-          </gl-button>
-        </div>
-      </div>
+      <sidebar-inherit-date
+        v-if="canInherit"
+        :has-date="hasDueDate"
+        :formatted-date="formattedDueDate"
+        :reset-action="setDueDate"
+        :is-loading="isLoading"
+      />
+      <sidebar-formatted-date
+        v-else
+        :has-date="hasDueDate"
+        :formatted-date="formattedDueDate"
+        :reset-action="setDueDate"
+        :reset-text="$options.i18n.removeDueDate"
+        :is-loading="isLoading"
+      />
     </template>
     <template #default>
       <gl-datepicker

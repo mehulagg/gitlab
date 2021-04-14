@@ -223,14 +223,14 @@ function mountDueDateComponent() {
       SidebarDueDateWidget,
     },
     provide: {
-      iid: String(iid),
-      fullPath,
       canUpdate: editable,
     },
 
     render: (createElement) =>
       createElement('sidebar-due-date-widget', {
         props: {
+          iid: String(iid),
+          fullPath,
           issuableType: IssuableType.Issue,
         },
       }),
