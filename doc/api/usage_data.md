@@ -5,7 +5,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, api
 ---
 
-# UsageData API **(FREE SELF)**
+# Usage Data API **(FREE SELF)**
+
+The Usage Data API is associated with [Usage Ping](../development/usage_ping/index.md).
 
 ## Export metric definitions as a single YAML file
 
@@ -46,15 +48,14 @@ Example response:
 ...
 ```
 
-## UsageDataQueries API
+## Export Usage Ping SQL queries
 
-The UsageDataQueries API, associated with [Usage Ping](../development/usage_ping/index.md), is available only for
-the use of GitLab instance [Administrator](../user/permissions.md) users.
+This action is available only for the GitLab instance [Administrator](../user/permissions.md) users.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57016) in GitLab 13.11.
 > - [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
 
-Return all of the raw SQL queries used to compute usage ping.
+Return all of the raw SQL queries used to compute Usage Ping.
 
 ```plaintext
 GET /usage_data/queries
@@ -63,7 +64,7 @@ GET /usage_data/queries
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/usage_data/queries
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/usage_data/queries"
 ```
 
 Example response:
