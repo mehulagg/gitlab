@@ -648,10 +648,10 @@ Feature.disable(:graphql_board_lists)
 
 ### Enable or disable new add list form **(FREE SELF)**
 
-The new form for adding lists is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+The new form for adding lists is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can disable it.
 
 To enable it:
 
@@ -668,12 +668,12 @@ Feature.disable(:board_new_list)
 ### Enable or disable iteration lists in boards **(PREMIUM SELF)**
 
 NOTE:
-To enable iteration lists in boards, you also need to enable the [new add list form](#enable-or-disable-new-add-list-form).
+When disabling iteration lists in boards, you also need to disable the [new add list form](#enable-or-disable-new-add-list-form).
 
-The iteration list is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+The iteration list is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can disable it.
 
 To enable it:
 
