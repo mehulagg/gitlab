@@ -88,8 +88,8 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
         {
           title: 'backend',
           name: 'backend',
-          color: '#EBECF0',
-          text_color: '#283856'
+          color: '#0052CC',
+          text_color: '#FFFFFF'
         }
       ],
       author: hash_including(

@@ -129,6 +129,9 @@ export default {
         project_ids: selectedProjectIds,
         created_after: toYmd(this.startDate),
         created_before: toYmd(this.endDate),
+        // the `overview` stage is always the default, so dont persist the id if its selected
+        stage_id:
+          this.selectedStage?.id && !this.isOverviewStageSelected ? this.selectedStage.id : null,
       };
     },
     stageCount() {

@@ -33,6 +33,7 @@ const noDataSvgPath = 'path/to/no/data';
 const noAccessSvgPath = 'path/to/no/access';
 const currentGroup = convertObjectPropsToCamelCase(mockData.group);
 const emptyStateSvgPath = 'path/to/empty/state';
+const stage = null;
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -60,6 +61,7 @@ const initialCycleAnalyticsState = {
   createdAfter: mockData.startDate,
   createdBefore: mockData.endDate,
   group: currentGroup,
+  stage,
 };
 
 const mocks = {
@@ -610,6 +612,7 @@ describe('Value Stream Analytics component', () => {
       created_after: toYmd(mockData.startDate),
       created_before: toYmd(mockData.endDate),
       project_ids: null,
+      stage_id: null,
     };
 
     const selectedProjectIds = mockData.selectedProjects.map(({ id }) => getIdFromGraphQLId(id));
@@ -663,7 +666,7 @@ describe('Value Stream Analytics component', () => {
     describe('with selectedProjectIds set', () => {
       beforeEach(async () => {
         wrapper = await createComponent();
-        store.dispatch('setSelectedProjects', mockData.selectedProjects);
+        await store.dispatch('setSelectedProjects', mockData.selectedProjects);
         await wrapper.vm.$nextTick();
       });
 
@@ -673,6 +676,30 @@ describe('Value Stream Analytics component', () => {
           created_after: toYmd(mockData.startDate),
           created_before: toYmd(mockData.endDate),
           project_ids: selectedProjectIds,
+          stage_id: 1,
+        });
+      });
+    });
+
+    describe('with selectedStage set', () => {
+      const selectedStage = {
+        title: 'Plan',
+        id: 2,
+      };
+
+      beforeEach(async () => {
+        wrapper = await createComponent();
+        store.dispatch('setSelectedStage', selectedStage);
+        await wrapper.vm.$nextTick();
+      });
+
+      it('sets the stage_id url parameter', async () => {
+        await shouldMergeUrlParams(wrapper, {
+          ...defaultParams,
+          created_after: toYmd(mockData.startDate),
+          created_before: toYmd(mockData.endDate),
+          project_ids: null,
+          stage_id: 2,
         });
       });
     });

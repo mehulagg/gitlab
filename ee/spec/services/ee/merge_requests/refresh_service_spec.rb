@@ -249,7 +249,7 @@ RSpec.describe MergeRequests::RefreshService do
       end
     end
 
-    describe 'Pipelines for merge requests' do
+    describe 'Pipelines for merge requests', :sidekiq_inline do
       let(:service) { described_class.new(project, current_user) }
       let(:current_user) { merge_request.author }
 

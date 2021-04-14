@@ -373,19 +373,58 @@ describe('Value Stream Analytics actions', () => {
   });
 
   describe('receiveGroupStagesSuccess', () => {
-    it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation and dispatches 'setDefaultSelectedStage'`, () => {
-      return testAction(
-        actions.receiveGroupStagesSuccess,
-        { ...customizableStagesAndEvents.stages },
-        state,
-        [
-          {
-            type: types.RECEIVE_GROUP_STAGES_SUCCESS,
-            payload: { ...customizableStagesAndEvents.stages },
+    describe('when the `hasPathNavigation` feature flag is enabled', () => {
+      beforeEach(() => {
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: true,
           },
-        ],
-        [{ type: 'setDefaultSelectedStage' }],
-      );
+        };
+      });
+
+      it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation'`, () => {
+        return testAction(
+          actions.receiveGroupStagesSuccess,
+          { ...customizableStagesAndEvents.stages },
+          state,
+          [
+            {
+              type: types.RECEIVE_GROUP_STAGES_SUCCESS,
+              payload: { ...customizableStagesAndEvents.stages },
+            },
+          ],
+          [],
+        );
+      });
+    });
+
+    describe('when the `hasPathNavigation` feature flag is disabled', () => {
+      beforeEach(() => {
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: false,
+          },
+        };
+      });
+
+      it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation and dispatches 'setDefaultSelectedStage`, () => {
+        return testAction(
+          actions.receiveGroupStagesSuccess,
+          { ...customizableStagesAndEvents.stages },
+          state,
+          [
+            {
+              type: types.RECEIVE_GROUP_STAGES_SUCCESS,
+              payload: { ...customizableStagesAndEvents.stages },
+            },
+          ],
+          [{ type: 'setDefaultSelectedStage' }],
+        );
+      });
     });
   });
 
@@ -450,7 +489,7 @@ describe('Value Stream Analytics actions', () => {
         ${null}
       `('with $data will flash an error', ({ data }) => {
         actions.setDefaultSelectedStage(
-          { getters: { activeStages: data }, dispatch: () => {} },
+          { state, getters: { activeStages: data }, dispatch: () => {} },
           {},
         );
         expect(createFlash).toHaveBeenCalledWith({ message: flashErrorMessage });
@@ -874,6 +913,30 @@ describe('Value Stream Analytics actions', () => {
         await actions.initializeCycleAnalytics(store, initialData);
         expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
         expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
+      });
+
+      describe('with a selected stage', () => {
+        it('dispatches "setSelectedStage" and "fetchStageData"', async () => {
+          const stage = { id: 2, title: 'plan' };
+          await actions.initializeCycleAnalytics(store, {
+            ...initialData,
+            stage,
+          });
+          expect(mockDispatch).toHaveBeenCalledWith('setSelectedStage', stage);
+          expect(mockDispatch).toHaveBeenCalledWith('fetchStageData', stage.id);
+        });
+      });
+
+      describe('without a selected stage', () => {
+        it('dispatches "setDefaultSelectedStage"', async () => {
+          await actions.initializeCycleAnalytics(store, {
+            ...initialData,
+            stage: null,
+          });
+          expect(mockDispatch).not.toHaveBeenCalledWith('setSelectedStage');
+          expect(mockDispatch).not.toHaveBeenCalledWith('fetchStageData');
+          expect(mockDispatch).toHaveBeenCalledWith('setDefaultSelectedStage');
+        });
       });
 
       it('commits "INITIALIZE_VSA"', async () => {

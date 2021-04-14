@@ -34,8 +34,8 @@ module Integrations
           {
             title: name,
             name: name,
-            color: '#EBECF0',
-            text_color: '#283856'
+            color: '#0052CC',
+            text_color: '#FFFFFF'
           }
         end
       end

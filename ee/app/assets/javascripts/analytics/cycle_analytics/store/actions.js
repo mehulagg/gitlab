@@ -157,12 +157,12 @@ export const receiveGroupStagesError = ({ commit }, error) => {
   });
 };
 
-export const setDefaultSelectedStage = ({ dispatch, getters, state: { featureFlags } = {} }) => {
+export const setDefaultSelectedStage = ({ state: { featureFlags }, dispatch, getters }) => {
+  const { activeStages = [] } = getters;
+
   if (featureFlags?.hasPathNavigation) {
     return dispatch('setSelectedStage', OVERVIEW_STAGE_CONFIG);
   }
-
-  const { activeStages = [] } = getters;
 
   if (activeStages?.length) {
     const [firstActiveStage] = activeStages;
@@ -175,13 +175,21 @@ export const setDefaultSelectedStage = ({ dispatch, getters, state: { featureFla
   createFlash({
     message: __('There was an error while fetching value stream analytics data.'),
   });
+
   return Promise.resolve();
 };
 
-export const receiveGroupStagesSuccess = ({ commit, dispatch }, stages) => {
+export const receiveGroupStagesSuccess = (
+  { state: { featureFlags }, commit, dispatch },
+  stages,
+) => {
   commit(types.RECEIVE_GROUP_STAGES_SUCCESS, stages);
 
-  return dispatch('setDefaultSelectedStage');
+  if (!featureFlags?.hasPathNavigation) {
+    return dispatch('setDefaultSelectedStage');
+  }
+
+  return Promise.resolve();
 };
 
 export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
@@ -309,12 +317,17 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
     selectedMilestone,
     selectedAssigneeList,
     selectedLabelList,
+    stage: selectedStage,
     group,
   } = initialData;
   commit(types.SET_FEATURE_FLAGS, featureFlags);
 
   if (group?.fullPath) {
     return Promise.all([
+      selectedStage
+        ? dispatch('setSelectedStage', selectedStage)
+        : dispatch('setDefaultSelectedStage'),
+      selectedStage?.id ? dispatch('fetchStageData', selectedStage.id) : Promise.resolve(),
       dispatch('setPaths', { groupPath: group.fullPath, milestonesPath, labelsPath }),
       dispatch('filters/initialize', {
         selectedAuthor,

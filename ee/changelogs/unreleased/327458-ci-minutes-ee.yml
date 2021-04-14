@@ -1,0 +1,5 @@
+---
+title: Remove additional minutes when no minutes purchased
+merge_request: 59112
+author: Takuya Noguchi
+type: changed

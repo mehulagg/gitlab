@@ -47,7 +47,7 @@ export default {
     <p class="gl-w-full gl-m-0!" data-testid="compliance-framework-description">
       {{ framework.description }}
     </p>
-    <div class="gl-display-flex">
+    <div v-if="framework.editPath" class="gl-display-flex">
       <gl-button
         v-gl-tooltip="$options.i18n.editFramework"
         :disabled="loading"

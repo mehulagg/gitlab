@@ -71,7 +71,7 @@ export default {
 </script>
 
 <template>
-  <div class="dashboard-filter">
+  <div>
     <strong data-testid="name">{{ name }}</strong>
     <gl-dropdown
       class="gl-mt-2 gl-w-full"

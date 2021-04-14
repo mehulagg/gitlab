@@ -5,6 +5,7 @@ import {
   formatListsPageInfo,
   fullBoardId,
   transformNotFilters,
+  getMoveData,
 } from '~/boards/boards_util';
 import { BoardType } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
@@ -12,7 +13,6 @@ import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
 import actionsCE from '~/boards/stores/actions';
 import boardsStore from '~/boards/stores/boards_store';
 import * as typesCE from '~/boards/stores/mutation_types';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import axios from '~/lib/utils/axios_utils';
 import {
@@ -37,7 +37,6 @@ import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import groupBoardAssigneesQuery from '../graphql/group_board_assignees.query.graphql';
 import groupBoardIterationsQuery from '../graphql/group_board_iterations.query.graphql';
 import groupBoardMilestonesQuery from '../graphql/group_board_milestones.query.graphql';
-import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
 import issueSetEpicMutation from '../graphql/issue_set_epic.mutation.graphql';
 import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
@@ -482,50 +481,35 @@ export default {
     }
   },
 
-  moveIssue: (
-    { state, commit },
-    { itemId, itemIid, itemPath, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
-  ) => {
-    const originalIssue = state.boardItems[itemId];
-    const fromList = state.boardItemsByListId[fromListId];
-    const originalIndex = fromList.indexOf(Number(itemId));
-    commit(types.MOVE_ISSUE, {
-      originalIssue,
-      fromListId,
-      toListId,
-      moveBeforeId,
-      moveAfterId,
-      epicId,
+  moveIssue: ({ dispatch, state }, params) => {
+    const { itemId, epicId } = params;
+    const moveData = getMoveData(state, params);
+
+    dispatch('moveIssueCard', moveData);
+    dispatch('updateMovedIssue', moveData);
+    dispatch('updateEpicForIssue', { itemId, epicId });
+    dispatch('updateIssueOrder', {
+      moveData,
+      mutationVariables: { epicId },
     });
+  },
 
-    const { boardId } = state;
-    const [fullProjectPath] = itemPath.split(/[#]/);
+  updateEpicForIssue: ({ commit, state: { boardItems } }, { itemId, epicId }) => {
+    const issue = boardItems[itemId];
 
-    gqlClient
-      .mutate({
-        mutation: issueMoveListMutation,
-        variables: {
-          projectPath: fullProjectPath,
-          boardId: fullBoardId(boardId),
-          iid: itemIid,
-          fromListId: getIdFromGraphQLId(fromListId),
-          toListId: getIdFromGraphQLId(toListId),
-          moveBeforeId,
-          moveAfterId,
-          epicId,
-        },
-      })
-      .then(({ data }) => {
-        if (data?.issueMoveList?.errors.length) {
-          throw new Error();
-        } else {
-          const issue = data.issueMoveList?.issue;
-          commit(types.MOVE_ISSUE_SUCCESS, { issue });
-        }
-      })
-      .catch(() =>
-        commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex }),
-      );
+    if (epicId === null) {
+      commit(types.UPDATE_BOARD_ITEM_BY_ID, {
+        itemId: issue.id,
+        prop: 'epic',
+        value: null,
+      });
+    } else if (epicId !== undefined) {
+      commit(types.UPDATE_BOARD_ITEM_BY_ID, {
+        itemId: issue.id,
+        prop: 'epic',
+        value: { id: epicId },
+      });
+    }
   },
 
   moveEpic: ({ state, commit }, { itemId, fromListId, toListId, moveBeforeId, moveAfterId }) => {

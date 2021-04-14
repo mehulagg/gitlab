@@ -8,6 +8,7 @@ class License < ApplicationRecord
   PREMIUM_PLAN = 'premium'
   ULTIMATE_PLAN = 'ultimate'
   CLOUD_LICENSE_TYPE = 'cloud'
+  LEGACY_LICENSE_TYPE = 'legacy'
   ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
@@ -236,6 +237,8 @@ class License < ApplicationRecord
     { range: (100..999), percentage: true, value: 8 },
     { range: (1000..nil), percentage: true, value: 5 }
   ].freeze
+
+  LICENSEE_ATTRIBUTES = %w[Name Email Company].freeze
 
   validate :valid_license
   validate :check_users_limit, if: :new_record?, unless: :validate_with_trueup?
@@ -550,6 +553,10 @@ class License < ApplicationRecord
     license&.type == CLOUD_LICENSE_TYPE
   end
 
+  def license_type
+    cloud? ? CLOUD_LICENSE_TYPE : LEGACY_LICENSE_TYPE
+  end
+
   def auto_renew
     false
   end
@@ -574,6 +581,12 @@ class License < ApplicationRecord
 
   def remaining_user_count
     restricted_user_count - daily_billable_users_count
+  end
+
+  LICENSEE_ATTRIBUTES.each do |attribute|
+    define_method "licensee_#{attribute.downcase}" do
+      licensee[attribute]
+    end
   end
 
   private

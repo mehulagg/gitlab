@@ -26,11 +26,13 @@ export default {
   props: {
     addFrameworkPath: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     editFrameworkPath: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     emptyStateSvgPath: {
       type: String,
@@ -177,6 +179,7 @@ export default {
       <gl-tab disabled :title="$options.i18n.regulatedTab" />
       <template #tabs-end>
         <gl-button
+          v-if="addFrameworkPath"
           class="gl-align-self-center gl-ml-auto"
           category="primary"
           variant="confirm"

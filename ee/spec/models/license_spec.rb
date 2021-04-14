@@ -1411,6 +1411,20 @@ RSpec.describe License do
     end
   end
 
+  describe '#license_type' do
+    subject { license.license_type }
+
+    context 'when the license is not a cloud license' do
+      it { is_expected.to eq(described_class::LEGACY_LICENSE_TYPE) }
+    end
+
+    context 'when the license is a cloud license' do
+      let(:gl_license) { build(:gitlab_license, type: described_class::CLOUD_LICENSE_TYPE) }
+
+      it { is_expected.to eq(described_class::CLOUD_LICENSE_TYPE) }
+    end
+  end
+
   describe '#auto_renew' do
     it 'is false' do
       expect(license.auto_renew).to be false
@@ -1484,5 +1498,29 @@ RSpec.describe License do
 
       it { is_expected.to eq(result) }
     end
+  end
+
+  describe '#licensee_name' do
+    subject { license.licensee_name }
+
+    let(:gl_license) { build(:gitlab_license, licensee: { 'Name' => 'User Example' }) }
+
+    it { is_expected.to eq('User Example') }
+  end
+
+  describe '#licensee_email' do
+    subject { license.licensee_email }
+
+    let(:gl_license) { build(:gitlab_license, licensee: { 'Email' => 'user@example.com' }) }
+
+    it { is_expected.to eq('user@example.com') }
+  end
+
+  describe '#licensee_company' do
+    subject { license.licensee_company }
+
+    let(:gl_license) { build(:gitlab_license, licensee: { 'Company' => 'Example Inc.' }) }
+
+    it { is_expected.to eq('Example Inc.') }
   end
 end

@@ -280,7 +280,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
   end
 
-  context 'sign up settings' do
+  context 'sign up settings', :js do
     context 'when license has active user count' do
       let(:license) { create(:license, restrictions: { active_user_count: 1 }) }
 
@@ -288,18 +288,17 @@ RSpec.describe 'Admin updates EE-only settings' do
         allow(License).to receive(:current).and_return(license)
       end
 
-      it 'disallows entering user cap greater then license allows', :js do
+      it 'disallows entering user cap greater then license allows' do
         visit general_admin_application_settings_path
 
         page.within('#js-signup-settings') do
-          fill_in 'User cap', with: 5
+          fill_in 'application_setting[new_user_signups_cap]', with: 5
 
           click_button 'Save changes'
 
-          message =
-            page.find('#application_setting_new_user_signups_cap').native.attribute('validationMessage')
-
-          expect(message).to eq('Value must be less than or equal to 1.')
+          page.within '#error_explanation' do
+            expect(page).to have_text('New user signups cap must be less than or equal to 1')
+          end
         end
       end
     end
@@ -310,7 +309,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(current_settings.new_user_signups_cap).to be_nil
 
       page.within('#js-signup-settings') do
-        fill_in 'User cap', with: 5
+        fill_in 'application_setting[new_user_signups_cap]', with: 5
 
         click_button 'Save changes'
 
@@ -322,7 +321,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       visit general_admin_application_settings_path
 
       page.within('#js-signup-settings') do
-        fill_in 'User cap', with: nil
+        fill_in 'application_setting[new_user_signups_cap]', with: nil
 
         click_button 'Save changes'
 

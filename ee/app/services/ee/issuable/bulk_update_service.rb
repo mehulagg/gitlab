@@ -9,12 +9,9 @@ module EE
 
       override :find_issuables
       def find_issuables(parent, model_class, ids)
-        return super unless model_class == ::Epic
+        return model_class.id_in(ids).in_selected_groups(parent.self_and_descendants) if model_class == ::Epic
 
-        model_class
-          .id_in(ids)
-          .in_selected_groups(parent.self_and_descendants)
-          .includes_for_bulk_update
+        super
       end
 
       override :permitted_attrs

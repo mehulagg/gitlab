@@ -89,6 +89,8 @@ module EE
     #
     # @return [Array] the array of IDs
     def project_issuetype_scheme_ids
+      raise NotImplementedError unless data_fields.deployment_cloud?
+
       query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', 'project')
       query_url.query_values = { 'projectId' => jira_project_id }
 
@@ -103,13 +105,24 @@ module EE
     # @return [Array] the array of IDs
     def project_issuetype_ids
       strong_memoize(:project_issuetype_ids) do
-        query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', 'mapping')
-        query_url.query_values = { 'issueTypeSchemeId' => project_issuetype_scheme_ids }
+        if data_fields.deployment_server?
+          query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'project/', project_key)
 
-        client
-          .get(query_url.to_s)
-          .fetch('values', [])
-          .map { |schemes| schemes['issueTypeId'] }
+          client
+            .get(query_url.to_s)
+            .fetch('issueTypes', [])
+            .map { |issue_type| issue_type['id'] }
+        elsif data_fields.deployment_cloud?
+          query_url = Addressable::URI.join("#{client.options[:rest_base_path]}/", 'issuetypescheme/', 'mapping')
+          query_url.query_values = { 'issueTypeSchemeId' => project_issuetype_scheme_ids }
+
+          client
+            .get(query_url.to_s)
+            .fetch('values', [])
+            .map { |schemes| schemes['issueTypeId'] }
+        else
+          raise NotImplementedError
+        end
       end
     end
 

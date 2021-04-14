@@ -1,6 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Approvals ModalRuleRemove shows message 1`] = `
+exports[`Approvals ModalRuleRemove matches the snapshot for external approval 1`] = `
+<div
+  title="Remove approval gate?"
+>
+  <p>
+    You are about to remove the 
+    <strong>
+      API Gate
+    </strong>
+     approval gate. Approval from this service is not revoked.
+  </p>
+</div>
+`;
+
+exports[`Approvals ModalRuleRemove matches the snapshot for multiple approvers 1`] = `
 <div
   title="Remove approvers?"
 >
@@ -18,7 +32,7 @@ exports[`Approvals ModalRuleRemove shows message 1`] = `
 </div>
 `;
 
-exports[`Approvals ModalRuleRemove shows singular message 1`] = `
+exports[`Approvals ModalRuleRemove matches the snapshot for singular approver 1`] = `
 <div
   title="Remove approvers?"
 >

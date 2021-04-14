@@ -438,7 +438,7 @@ export const transformStagesForPathNavigation = ({ stages, medians, selectedStag
   const formattedStages = stages.map((stage) => {
     return {
       metric: medians[stage?.id],
-      selected: stage.title === selectedStage.title,
+      selected: stage.id === selectedStage.id,
       icon: null,
       ...stage,
     };

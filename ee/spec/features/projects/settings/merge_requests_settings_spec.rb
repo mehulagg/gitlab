@@ -5,15 +5,16 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
   include GitlabRoutingHelper
   include FeatureApprovalHelper
 
-  let(:user) { create(:user) }
-  let(:project) { create(:project) }
-  let(:group) { create(:group) }
-  let(:group_member) { create(:user) }
-  let(:non_member) { create(:user) }
-  let!(:config_selector) { '.js-approval-rules' }
-  let!(:modal_selector) { '#project-settings-approvals-create-modal' }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:group_member) { create(:user) }
+  let_it_be(:non_member) { create(:user) }
+  let_it_be(:config_selector) { '.js-approval-rules' }
+  let_it_be(:modal_selector) { '#project-settings-approvals-create-modal' }
 
   before do
+    stub_licensed_features(compliance_approval_gates: true)
     sign_in(user)
     project.add_maintainer(user)
     group.add_developer(user)
@@ -69,8 +70,8 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
   end
 
   context 'with an approver group' do
-    let(:non_group_approver) { create(:user) }
-    let!(:rule) { create(:approval_project_rule, project: project, groups: [group], users: [non_group_approver]) }
+    let_it_be(:non_group_approver) { create(:user) }
+    let_it_be(:rule) { create(:approval_project_rule, project: project, groups: [group], users: [non_group_approver]) }
 
     before do
       project.add_developer(non_group_approver)
@@ -87,6 +88,64 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
       wait_for_requests
 
       expect_avatar(find('.js-members'), [non_group_approver])
+    end
+  end
+
+  it 'adds an approval gate' do
+    visit edit_project_path(project)
+
+    open_modal(text: 'Add approval rule', expand: false)
+
+    within('.modal-content') do
+      find('button', text: "Users or groups").click
+      find('button', text: "Approval service API").click
+
+      find('[data-qa-selector="rule_name_field"]').set('My new rule')
+      find('[data-qa-selector="external_url_field"]').set('https://api.gitlab.com')
+
+      click_button 'Add approval rule'
+    end
+
+    wait_for_requests
+
+    expect(first('.js-name')).to have_content('My new rule')
+  end
+
+  context 'with an approval gate' do
+    let_it_be(:rule) { create(:external_approval_rule, project: project) }
+
+    it 'updates the approval gate' do
+      visit edit_project_path(project)
+
+      expect(first('.js-name')).to have_content(rule.name)
+
+      open_modal(text: 'Edit', expand: false)
+
+      within('.modal-content') do
+        find('[data-qa-selector="rule_name_field"]').set('Something new')
+
+        click_button 'Update approval rule'
+      end
+
+      wait_for_requests
+
+      expect(first('.js-name')).to have_content('Something new')
+    end
+
+    it 'removes the approval gate' do
+      visit edit_project_path(project)
+
+      expect(first('.js-name')).to have_content(rule.name)
+
+      first('.js-controls').find('[data-testid="remove-icon"]').click
+
+      within('.modal-content') do
+        click_button 'Remove approval gate'
+      end
+
+      wait_for_requests
+
+      expect(first('.js-name')).not_to have_content(rule.name)
     end
   end
 

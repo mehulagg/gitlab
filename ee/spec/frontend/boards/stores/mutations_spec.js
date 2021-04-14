@@ -1,13 +1,11 @@
 import mutations from 'ee/boards/stores/mutations';
-import { mockIssue, mockIssue2, mockEpics, mockEpic, mockLists } from '../mock_data';
+import { mockEpics, mockEpic, mockLists } from '../mock_data';
 
 const expectNotImplemented = (action) => {
   it('is not implemented', () => {
     expect(action).toThrow(new Error('Not implemented!'));
   });
 };
-
-const epicId = mockEpic.id;
 
 const initialBoardListsState = {
   'gid://gitlab/List/1': mockLists[0],
@@ -219,64 +217,6 @@ describe('RESET_EPICS', () => {
     mutations.RESET_EPICS(state);
 
     expect(state.epics).toEqual([]);
-  });
-});
-
-describe('MOVE_ISSUE', () => {
-  beforeEach(() => {
-    const listIssues = {
-      'gid://gitlab/List/1': [mockIssue.id, mockIssue2.id],
-      'gid://gitlab/List/2': [],
-    };
-
-    const issues = {
-      436: mockIssue,
-      437: mockIssue2,
-    };
-
-    state = {
-      ...state,
-      boardItemsByListId: listIssues,
-      boardItems: issues,
-    };
-  });
-
-  it('updates boardItemsByListId, moving issue between lists and updating epic id on issue', () => {
-    expect(state.boardItems['437'].epic.id).toEqual('gid://gitlab/Epic/40');
-
-    mutations.MOVE_ISSUE(state, {
-      originalIssue: mockIssue2,
-      fromListId: 'gid://gitlab/List/1',
-      toListId: 'gid://gitlab/List/2',
-      epicId,
-    });
-
-    const updatedListIssues = {
-      'gid://gitlab/List/1': [mockIssue.id],
-      'gid://gitlab/List/2': [mockIssue2.id],
-    };
-
-    expect(state.boardItemsByListId).toEqual(updatedListIssues);
-    expect(state.boardItems['437'].epic.id).toEqual(epicId);
-  });
-
-  it('removes epic id from issue when epicId is null', () => {
-    expect(state.boardItems['437'].epic.id).toEqual('gid://gitlab/Epic/40');
-
-    mutations.MOVE_ISSUE(state, {
-      originalIssue: mockIssue2,
-      fromListId: 'gid://gitlab/List/1',
-      toListId: 'gid://gitlab/List/2',
-      epicId: null,
-    });
-
-    const updatedListIssues = {
-      'gid://gitlab/List/1': [mockIssue.id],
-      'gid://gitlab/List/2': [mockIssue2.id],
-    };
-
-    expect(state.boardItemsByListId).toEqual(updatedListIssues);
-    expect(state.boardItems['437'].epic).toEqual(null);
   });
 });
 

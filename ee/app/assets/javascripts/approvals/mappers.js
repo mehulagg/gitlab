@@ -70,7 +70,7 @@ export const mapExternalApprovalRuleResponse = (res) => ({
 });
 
 export const mapExternalApprovalResponse = (res) => ({
-  rules: withDefaultEmptyRule(res.map(mapExternalApprovalRuleResponse)),
+  rules: res.map(mapExternalApprovalRuleResponse),
 });
 
 export const mapApprovalSettingsResponse = (res) => ({

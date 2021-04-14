@@ -7,6 +7,7 @@ module Gitlab
         include ActiveModel::Model
         include ActiveModel::Validations
         include ActiveModel::Attributes
+        include Gitlab::Utils::StrongMemoize
 
         MAX_RANGE_DAYS = 180.days.freeze
         DEFAULT_DATE_RANGE = 29.days # 30 including Date.today
@@ -19,6 +20,7 @@ module Gitlab
           :sort,
           :direction,
           :page,
+          :stage_id,
           label_name: [].freeze,
           assignee_username: [].freeze,
           project_ids: [].freeze
@@ -41,6 +43,7 @@ module Gitlab
         attribute :sort
         attribute :direction
         attribute :page
+        attribute :stage_id
 
         FINDER_PARAM_NAMES.each do |param_name|
           attribute param_name
@@ -88,6 +91,7 @@ module Gitlab
             attrs[:milestone] = milestone_title if milestone_title.present?
             attrs[:sort] = sort if sort.present?
             attrs[:direction] = direction if direction.present?
+            attrs[:stage] = stage_data_attributes.to_json if stage_id.present?
           end
         end
 
@@ -133,6 +137,15 @@ module Gitlab
           }
         end
 
+        def stage_data_attributes
+          return unless stage
+
+          {
+            id: stage.id || stage.name,
+            title: stage.name
+          }
+        end
+
         def validate_created_before
           return if created_after.nil? || created_before.nil?
 
@@ -152,6 +165,14 @@ module Gitlab
             (created_before - DEFAULT_DATE_RANGE)
           else
             DEFAULT_DATE_RANGE.ago
+          end
+        end
+
+        def stage
+          return unless value_stream
+
+          strong_memoize(:stage) do
+            ::Analytics::CycleAnalytics::StageFinder.new(parent: group, stage_id: stage_id).execute if stage_id
           end
         end
       end

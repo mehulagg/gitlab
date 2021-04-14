@@ -54,6 +54,7 @@ RSpec.describe Registrations::ProjectsController do
     subject { post :create, params: { project: params }.merge(trial_onboarding_flow_params) }
 
     let_it_be(:trial_onboarding_flow_params) { {} }
+
     let(:params) { { namespace_id: namespace.id, name: 'New project', path: 'project-path', visibility_level: Gitlab::VisibilityLevel::PRIVATE } }
     let(:signup_onboarding_enabled) { true }
 

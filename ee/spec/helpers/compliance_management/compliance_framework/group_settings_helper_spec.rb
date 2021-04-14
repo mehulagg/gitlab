@@ -22,15 +22,23 @@ RSpec.describe ComplianceManagement::ComplianceFramework::GroupSettingsHelper do
     end
 
     context 'the user does not have permission' do
-      before do
-        allow(helper).to receive(:can?).with(current_user, :admin_compliance_framework, group).and_return(false)
-      end
+      context 'group is not a subgroup' do
+        before do
+          allow(helper).to receive(:can?).with(current_user, :admin_compliance_framework, group).and_return(false)
+        end
 
-      it { is_expected.to be false }
+        it { is_expected.to be false }
+      end
     end
   end
 
   describe '#compliance_frameworks_list_data' do
+    subject { helper.compliance_frameworks_list_data(group) }
+
+    before do
+      allow(helper).to receive(:can?).with(current_user, :admin_compliance_framework, group).and_return(true)
+    end
+
     it 'returns the correct data' do
       expect(helper.compliance_frameworks_list_data(group)).to contain_exactly(
         [:empty_state_svg_path, ActionController::Base.helpers.image_path('illustrations/welcome/ee_trial.svg')],
@@ -38,6 +46,19 @@ RSpec.describe ComplianceManagement::ComplianceFramework::GroupSettingsHelper do
         [:add_framework_path, new_group_compliance_framework_path(group)],
         [:edit_framework_path, edit_group_compliance_framework_path(group, :id)]
       )
+    end
+
+    context 'group is a subgroup' do
+      let_it_be(:group) { create(:group, :nested) }
+
+      it 'contains the root ancestor as group_path' do
+        expect(subject[:group_path]).to eq(group.root_ancestor.full_path)
+      end
+
+      it 'does not contain the add_framework_path or edit_framework_path keys' do
+        expect(subject.keys).not_to include('add_framework_path')
+        expect(subject.keys).not_to include('edit_framework_path')
+      end
     end
   end
 
@@ -82,6 +103,16 @@ RSpec.describe ComplianceManagement::ComplianceFramework::GroupSettingsHelper do
 
     context 'the user does not have pipeline configuration permission' do
       it_behaves_like 'returns the correct data', [false]
+    end
+
+    context 'group is a subgroup' do
+      let_it_be(:group) { create(:group, :nested) }
+
+      it 'returns the root ancestor full path as group_path' do
+        allow(helper).to receive(:can?).with(current_user, :admin_compliance_pipeline_configuration, group).and_return(true)
+
+        expect(subject[:group_path]).to eq(group.root_ancestor.full_path)
+      end
     end
   end
 end
