@@ -3,7 +3,7 @@
 module QA
   RSpec.describe 'Create' do
     describe 'Protected branch support' do
-      let(:branch_name) { 'protected-branch' }
+      let(:branch_name) { 'protected-branch/with-slash' }
       let(:commit_message) { 'Protected push commit message' }
       let(:project) do
         Resource::Project.fabricate_via_api! do |resource|
@@ -25,7 +25,7 @@ module QA
 
           push = push_new_file(branch_name)
 
-          expect(push.output).to match(/remote: To create a merge request for protected-branch, visit/)
+          expect(push.output).to match(/remote: To create a merge request for #{branch_name}, visit/)
         end
       end
 

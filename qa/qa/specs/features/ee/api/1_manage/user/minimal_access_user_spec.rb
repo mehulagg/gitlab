@@ -30,7 +30,7 @@ module QA
             push.file_name = 'test.txt'
             push.file_content = "# This is a test project named #{@project.name}"
             push.commit_message = 'Add test.txt'
-            push.branch_name = 'new_branch'
+            push.branch_name = 'NEW_BRANCH'
             push.user = @user_with_minimal_access
           end
         end.to raise_error(QA::Support::Run::CommandError, /You are not allowed to push code to this project/)
@@ -41,7 +41,7 @@ module QA
           Resource::File.fabricate_via_api! do |file|
             file.api_client = @user_api_client
             file.project = @project
-            file.branch = 'new_branch'
+            file.branch = 'New_branch'
             file.commit_message = 'Add new file'
             file.name = 'test.txt'
             file.content = "New file"
@@ -54,7 +54,7 @@ module QA
           Resource::Repository::Commit.fabricate_via_api! do |commit|
             commit.api_client = @user_api_client
             commit.project = @project
-            commit.branch = 'new_branch'
+            commit.branch = 'new_BRANCH'
             commit.start_branch = @project.default_branch
             commit.commit_message = 'Add new file'
             commit.add_files([

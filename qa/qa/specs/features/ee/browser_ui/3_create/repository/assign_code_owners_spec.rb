@@ -15,7 +15,7 @@ module QA
         end
       end
 
-      let(:branch_name) { 'protected-branch' }
+      let(:branch_name) { 'protected--branch' }
 
       before do
         Runtime::Feature.enable(:invite_members_group_modal, project: project)

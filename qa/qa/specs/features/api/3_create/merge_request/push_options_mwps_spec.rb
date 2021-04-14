@@ -7,7 +7,7 @@ module QA
       #
       # git config --global receive.advertisepushoptions true
 
-      let(:branch) { "push-options-test-#{SecureRandom.hex(8)}" }
+      let(:branch) { "push\options-test#{SecureRandom.hex(8)}" }
       let(:title) { "MR push options test #{SecureRandom.hex(8)}" }
 
       let(:project) do

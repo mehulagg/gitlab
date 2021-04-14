@@ -46,7 +46,7 @@ module QA
         expect do
           Resource::Repository::ProjectPush.fabricate! do |project_push|
             project_push.project = @project
-            project_push.branch_name = "new_branch"
+            project_push.branch_name = "branch_with#"
             project_push.user = @developer_user
           end
         end.not_to raise_error
