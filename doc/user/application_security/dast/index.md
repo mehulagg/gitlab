@@ -495,12 +495,10 @@ This can cause incorrect URLs to be imported, or a scan on an incorrect host.
 Use the `DAST_API_HOST_OVERRIDE` CI/CD variable to override these values.
 
 WARNING:
-> Note the following issues when using the API host override feature:
->
-> - You cannot using the `$DAST_WEBSITE` variable to override the hostname.
-> - A host override is _only_ supported when importing the API specification from a URL. An attempt to
-    override the host will throw an error when the API specification is imported from a file. This is due to a
-    limitation in the ZAP OpenAPI extension.
+When using the API host override feature, you cannot use the `$DAST_WEBSITE` variable to override the hostname.
+A host override is _only_ supported when importing the API specification from a URL. An attempt to override the
+host will throw an error when the API specification is imported from a file. This is due to a limitation in the
+ZAP OpenAPI extension.
 
 For example, with a OpenAPI V3 specification containing:
 
