@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import {
   HEADER_TOTAL_ENTRIES,
   HEADER_PAGE_NUMBER,
@@ -66,5 +67,26 @@ export default {
     state.isLoading = false;
     state.hasError = true;
     state.billableMemberToRemove = null;
+  },
+
+  [types.FETCH_BILLABLE_MEMBER_DETAILS](state, { memberId }) {
+    Vue.set(state.userDetails, memberId, {
+      isLoading: true,
+      items: [],
+    });
+  },
+
+  [types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS](state, { memberId, memberships }) {
+    Vue.set(state.userDetails, memberId, {
+      isLoading: false,
+      items: memberships,
+    });
+  },
+
+  [types.FETCH_BILLABLE_MEMBER_DETAILS_ERROR](state, { memberId }) {
+    Vue.set(state.userDetails, memberId, {
+      isLoading: false,
+      items: [],
+    });
   },
 };

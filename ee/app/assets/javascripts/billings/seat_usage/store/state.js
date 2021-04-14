@@ -8,4 +8,5 @@ export default ({ namespaceId = null, namespaceName = null } = {}) => ({
   page: null,
   perPage: null,
   billableMemberToRemove: null,
+  userDetails: {},
 });
