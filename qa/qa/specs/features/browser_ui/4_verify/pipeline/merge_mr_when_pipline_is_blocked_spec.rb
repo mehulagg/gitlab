@@ -39,6 +39,7 @@ module QA
                   needs: [test_blocked_pipeline]
                   script: echo do not click me
                   when: manual
+                  allow_failure: false
 
                 dummy_job:
                   stage: deploy
@@ -71,7 +72,8 @@ module QA
 
       it 'can still merge MR successfully', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/971' do
         Page::MergeRequest::Show.perform do |show|
-          show.wait_until(reload: false) { show.has_pipeline_status?('running') }
+          # waiting for manual action status shows status badge 'blocked' on pipelines page
+          show.wait_until(reload: false) { show.has_pipeline_status?('waiting for manual action') }
           show.merge_immediately!
 
           expect(show).to be_merged
