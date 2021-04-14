@@ -80,6 +80,7 @@ module AtomicInternalId
         return value unless scope_value
 
         if value.nil?
+          raise RuntimeError, 'called inside of transaction' if Gitlab::Database.inside_transaction? && caller.none?(/factory_bot/) && caller.none?(/pipeline\/chain\/seed/);
           # We don't have a value yet and use a InternalId record to generate
           # the next value.
           value = InternalId.generate_next(

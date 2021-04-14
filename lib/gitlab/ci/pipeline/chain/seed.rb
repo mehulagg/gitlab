@@ -14,6 +14,8 @@ module Gitlab
             if ::Feature.enabled?(:ci_workflow_rules_variables, pipeline.project, default_enabled: :yaml)
               raise ArgumentError, 'missing workflow rules result' unless @command.workflow_rules_result
             end
+            # raise RuntimeError, 'the seeding needs to be executed outside of transaction' if ActiveRecord::Base.connection.transaction_manager.open_transactions > 1
+            raise RuntimeError, 'the seeding needs to be executed outside of transaction' if Gitlab::Database.inside_transaction?
 
             # Allocate next IID. This operation must be outside of transactions of pipeline creations.
             pipeline.ensure_project_iid!

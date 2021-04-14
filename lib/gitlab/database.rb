@@ -323,7 +323,7 @@ module Gitlab
     def self.open_transactions_baseline
       @open_transactions_baseline ||= 0
     end
-    private_class_method :open_transactions_baseline
+    # private_class_method :open_transactions_baseline
 
     # Monkeypatch rails with upgraded database observability
     def self.install_monkey_patches

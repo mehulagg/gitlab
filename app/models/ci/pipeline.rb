@@ -47,6 +47,7 @@ module Ci
     belongs_to :ci_ref, class_name: 'Ci::Ref', foreign_key: :ci_ref_id, inverse_of: :pipelines
 
     has_internal_id :iid, scope: :project, presence: false,
+      # raise RuntimeError, 'the seeding needs to be executed outside of transaction' 
       track_if: -> { !importing? },
       ensure_if: -> { !importing? },
       init: ->(pipeline, scope) do
