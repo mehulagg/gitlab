@@ -72,7 +72,7 @@ module AuthorizedProjectUpdate
         end
 
         if authorizations_to_create.any?
-          ProjectAuthorization.insert_all(authorizations_to_create)
+          ProjectAuthorization.insert_all(authorizations_to_create, unique_by: [:user_id, :project_id, :access_level])
         end
       end
     end

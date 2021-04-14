@@ -141,6 +141,8 @@ module BulkInsertSafe
           raise ArgumentError, "returns needs to be :ids or nil"
         end
 
+      unique_by ||= ActiveRecord::Base.connection.schema_cache.primary_keys(table_name)
+
       transaction do
         items.each_slice(batch_size).flat_map do |item_batch|
           attributes = _bulk_insert_item_attributes(
