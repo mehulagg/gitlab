@@ -52,6 +52,10 @@ export default {
       required: false,
       default: false,
     },
+    currentUser: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
@@ -124,13 +128,6 @@ export default {
     isSearchEmpty() {
       return this.search === '';
     },
-    currentUser() {
-      return {
-        username: gon?.current_username,
-        name: gon?.current_user_fullname,
-        avatarUrl: gon?.current_user_avatar_url,
-      };
-    },
     isCurrentUserInList() {
       const isCurrentUser = (user) => user.username === this.currentUser.username;
       return this.users.some(isCurrentUser);
@@ -138,19 +135,21 @@ export default {
     noUsersFound() {
       return !this.isSearchEmpty && this.users.length === 0;
     },
-    signedIn() {
-      return this.currentUser.username !== undefined;
-    },
     showCurrentUser() {
-      return this.signedIn && !this.isCurrentUserInList && (this.isSearchEmpty || this.isSearching);
+      return (
+        this.currentUser.username &&
+        !this.isCurrentUserInList &&
+        (this.isSearchEmpty || this.isSearching)
+      );
     },
     selectedFiltered() {
       if (this.isSearchEmpty || this.isSearching) {
-        return this.value;
+        return this.moveCurrentUserToStart(this.value);
       }
 
       const foundUsernames = this.participants.map(({ username }) => username);
-      return this.value.filter(({ username }) => foundUsernames.includes(username));
+      const filtered = this.value.filter(({ username }) => foundUsernames.includes(username));
+      return this.moveCurrentUserToStart(filtered);
     },
     selectedUserNames() {
       return this.value.map(({ username }) => username);

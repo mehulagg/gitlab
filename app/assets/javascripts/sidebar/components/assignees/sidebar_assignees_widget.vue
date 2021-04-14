@@ -95,7 +95,7 @@ export default {
       result({ data }) {
         const issuable = data.workspace?.issuable;
         if (issuable) {
-          this.selected = this.moveCurrentUserToStart(cloneDeep(issuable.assignees.nodes));
+          this.selected = cloneDeep(issuable.assignees.nodes);
         }
       },
       error() {
@@ -189,20 +189,6 @@ export default {
     showError() {
       createFlash({ message: __('An error occurred while fetching participants.') });
     },
-    moveCurrentUserToStart(users) {
-      if (!users) {
-        return [];
-      }
-      const usersCopy = [...users];
-      const currentUser = usersCopy.find((user) => user.username === this.currentUser.username);
-
-      if (currentUser) {
-        const index = usersCopy.indexOf(currentUser);
-        usersCopy.splice(0, 0, usersCopy.splice(index, 1)[0]);
-      }
-
-      return usersCopy;
-    },
     setDirtyState() {
       this.isDirty = true;
       if (!this.multipleAssignees) {
@@ -250,6 +236,7 @@ export default {
           :iid="iid"
           :full-path="fullPath"
           :multiple-assignees="multipleAssignees"
+          :current-user="currentUser"
           class="gl-w-full dropdown-menu-user"
           @error="showError"
           @input="setDirtyState"
