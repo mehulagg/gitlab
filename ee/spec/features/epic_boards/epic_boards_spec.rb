@@ -16,7 +16,7 @@ RSpec.describe 'epic boards', :js do
   let_it_be(:backlog_list) { create(:epic_list, epic_board: epic_board, list_type: :backlog) }
   let_it_be(:closed_list) { create(:epic_list, epic_board: epic_board, list_type: :closed) }
 
-  let_it_be(:epic1) { create(:epic, group: group, labels: [label], title: 'Epic1') }
+  let_it_be(:epic1) { create(:epic, group: group, labels: [label], author: user, title: 'Epic1') }
   let_it_be(:epic2) { create(:epic, group: group, title: 'Epic2') }
   let_it_be(:epic3) { create(:epic, group: group, labels: [label2], title: 'Epic3') }
 
@@ -184,13 +184,16 @@ RSpec.describe 'epic boards', :js do
       end
     end
 
-    it 'can select a Label and filter the board' do
+    it 'can select a Label and Author in order to filter the board' do
       page.find('[data-testid="epic-filtered-search"]').click
 
       page.within('[data-testid="epic-filtered-search"]') do
         click_link 'Label'
-        wait_for_requests
         click_link label.title
+
+        click_link 'Author'
+        click_link user.name
+
 
         find('input').native.send_keys(:return)
 
