@@ -417,7 +417,7 @@ find_field 'Checkbox label', unchecked: true
 
 ##### Matchers
 
-Where possible, use more specific [matchers](https://rubydoc.info/github/teamcapybara/capybara/master/Capybara/Node/Matchers), such as the ones below.
+Where possible, use more specific [matchers](https://rubydoc.info/github/teamcapybara/capybara/master/Capybara/RSpecMatchers), such as the ones below.
 
 ```ruby
 # bad
@@ -426,11 +426,14 @@ expect(page).to have_selector('[data-testid="submit-review"]')
 
 # good
 expect(page).to have_button 'Submit review'
+expect(page).to have_button 'Submit review', disabled: true
+expect(page).to have_button 'Notifications', class: 'is-checked' # assert the "Notifications" GlToggle is checked
 
 expect(page).to have_link 'UI testing docs'
 expect(page).to have_link 'UI testing docs', href: docs_url # assert the link has an href
 
 expect(page).to have_field 'Search projects'
+expect(page).to have_field 'Search projects', disabled: true
 expect(page).to have_field 'Search projects', with: 'gitlab' # assert the input field has text
 
 expect(page).to have_checked_field 'Checkbox label'
@@ -443,7 +446,33 @@ expect(page).to have_select 'Sort by', with_options: ['Created date', 'Due date'
 
 expect(page).to have_text 'Some paragraph text.'
 expect(page).to have_text 'Some paragraph text.', exact: true # assert exact match
+
+expect(page).to have_current_path 'gitlab/gitlab-test/-/issues'
+
+expect(page).to have_title 'Not Found'
 ```
+
+##### Other useful methods
+
+Once you have retrieved an element using a [finder method](#finders), you can invoke a number of
+[element methods](https://rubydoc.info/github/teamcapybara/capybara/master/Capybara/Node/Element)
+on it such as `hover`.
+
+Capybara tests also have a number of [session methods](https://rubydoc.info/github/teamcapybara/capybara/master/Capybara/Session) available such as `accept_confirm`.
+
+Some other useful methods are shown below.
+
+```ruby
+refresh # refresh the page
+
+send_keys([:shift, 'i']) # press Shift+I keys to go to the Issues dashboard page
+
+current_window.resize_to(1000, 1000) # resize the window
+
+scroll_to(find_field('Comment')) # scroll to an element
+```
+
+You can also find a number of GitLab custom helpers within the `spec/support/helpers/` directory.
 
 #### Live debug
 
