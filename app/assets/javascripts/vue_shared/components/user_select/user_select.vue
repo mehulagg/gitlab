@@ -5,12 +5,13 @@ import {
   GlDropdownDivider,
   GlSearchBoxByType,
   GlDropdownItem,
+  GlLoadingIcon,
 } from '@gitlab/ui';
 import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
-import issueParticipantsQuery from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
-import { ASSIGNEES_DEBOUNCE_DELAY } from '~/sidebar/constants';
 import { __ } from '~/locale';
 import SidebarParticipant from '~/sidebar/components/assignees/sidebar_participant.vue';
+import { ASSIGNEES_DEBOUNCE_DELAY } from '~/sidebar/constants';
+import issueParticipantsQuery from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
 
 export default {
   i18n: {
@@ -23,6 +24,7 @@ export default {
     GlSearchBoxByType,
     GlDropdownItem,
     SidebarParticipant,
+    GlLoadingIcon,
   },
   props: {
     headerText: {
@@ -115,6 +117,10 @@ export default {
     isLoading() {
       return this.$apollo.queries.searchUsers.loading;
     },
+    participants() {
+      const users = this.isSearchEmpty || this.isSearching ? this.users : this.searchUsers;
+      return this.moveCurrentUserToStart(users);
+    },
     isSearchEmpty() {
       return this.search === '';
     },
@@ -136,25 +142,24 @@ export default {
       return this.currentUser.username !== undefined;
     },
     showCurrentUser() {
-      return (
-        this.signedIn &&
-        !this.isCurrentUserInParticipants &&
-        (this.isSearchEmpty || this.isSearching)
-      );
+      return this.signedIn && !this.isCurrentUserInList && (this.isSearchEmpty || this.isSearching);
     },
     selectedFiltered() {
       if (this.isSearchEmpty || this.isSearching) {
         return this.value;
       }
 
-      const foundUsernames = this.users.map(({ username }) => username);
+      const foundUsernames = this.participants.map(({ username }) => username);
       return this.value.filter(({ username }) => foundUsernames.includes(username));
     },
     selectedUserNames() {
       return this.value.map(({ username }) => username);
     },
     unselectedFiltered() {
-      return this.users?.filter(({ username }) => !this.selectedUserNames.includes(username)) || [];
+      return (
+        this.participants?.filter(({ username }) => !this.selectedUserNames.includes(username)) ||
+        []
+      );
     },
     selectedIsEmpty() {
       return this.selectedFiltered.length === 0;
@@ -177,7 +182,6 @@ export default {
       } else {
         selected.push(name);
       }
-
       this.$emit('input', selected);
     },
     unselect(name) {
@@ -189,6 +193,20 @@ export default {
     },
     showDivider(list) {
       return list.length > 0 && this.isSearchEmpty;
+    },
+    moveCurrentUserToStart(users) {
+      if (!users) {
+        return [];
+      }
+      const usersCopy = [...users];
+      const currentUser = usersCopy.find((user) => user.username === this.currentUser.username);
+
+      if (currentUser) {
+        const index = usersCopy.indexOf(currentUser);
+        usersCopy.splice(0, 0, usersCopy.splice(index, 1)[0]);
+      }
+
+      return usersCopy;
     },
   },
 };
@@ -209,7 +227,7 @@ export default {
             :is-checked="selectedIsEmpty"
             :is-check-centered="true"
             data-testid="unassign"
-            @click="this.$emit('input', [])"
+            @click="$emit('input', [])"
           >
             <span :class="selectedIsEmpty ? 'gl-pl-0' : 'gl-pl-6'" class="gl-font-weight-bold">{{
               $options.i18n.unassigned
