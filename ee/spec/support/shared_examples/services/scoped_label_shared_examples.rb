@@ -87,7 +87,7 @@ RSpec.shared_examples 'existing issuable with scoped labels' do
           issuable.reload
 
           described_class.new(
-            parent, user, label_ids: [label1.id, label3.id]
+            container: parent, current_user: user, params: { label_ids: [label1.id, label3.id] }
           ).execute(issuable)
 
           expect(issuable.reload.labels).to match_array([label3])
@@ -102,7 +102,7 @@ RSpec.shared_examples 'existing issuable with scoped labels' do
           issuable.reload
 
           described_class.new(
-            parent, user, labels: [label1.title, label3.title]
+            container: parent, current_user: user, params: { labels: [label1.title, label3.title] }
           ).execute(issuable)
 
           expect(issuable.reload.labels).to match_array([label3])
@@ -118,7 +118,7 @@ RSpec.shared_examples 'existing issuable with scoped labels' do
           issuable.reload
 
           described_class.new(
-            parent, user, label_ids: [label2.id, label3.id]
+            container: parent, current_user: user, params: { label_ids: [label2.id, label3.id] }
           ).execute(issuable)
 
           expect(issuable.reload.labels).to match_array([label2, label3])
@@ -138,7 +138,7 @@ RSpec.shared_examples 'existing issuable with scoped labels' do
         issuable.reload
 
         described_class.new(
-          parent, user, label_ids: [label1.id, label2.id, label3.id]
+          container: parent, current_user: user, params: { label_ids: [label1.id, label2.id, label3.id] }
         ).execute(issuable)
 
         expect(issuable.reload.labels).to match_array([label1, label2, label3])

@@ -329,7 +329,7 @@ RSpec.describe Suggestions::ApplyService do
           suggestion.reload
           expect(result[:status]).to eq(:success)
 
-          refresh = MergeRequests::RefreshService.new(project, user)
+          refresh = MergeRequests::RefreshService.new(container: project, current_user: user)
           refresh.execute(merge_request.diff_head_sha,
                           suggestion.commit_id,
                           merge_request.source_branch_ref)
@@ -365,7 +365,7 @@ RSpec.describe Suggestions::ApplyService do
           expected_suggestion1_diff = <<-CONTENT.strip_heredoc
             @@ -10,7 +10,7 @@ module Popen
                  end
-             
+
                  path ||= Dir.pwd
             -
             +# v1 change
@@ -378,7 +378,7 @@ RSpec.describe Suggestions::ApplyService do
           # rubocop: disable Layout/TrailingWhitespace
           expected_suggestion2_diff = <<-CONTENT.strip_heredoc
             @@ -28,7 +28,7 @@ module Popen
-             
+
                  Open3.popen3(vars, *cmd, options) do |stdin, stdout, stderr, wait_thr|
                    @cmd_output << stdout.read
             -      @cmd_output << stderr.read

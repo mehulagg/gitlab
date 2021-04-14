@@ -2636,7 +2636,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     context 'when the MR has been merged' do
       before do
         MergeRequests::MergeService
-          .new(subject.target_project, subject.author, { sha: subject.diff_head_sha })
+          .new(container: subject.target_project, current_user: subject.author, params: { sha: subject.diff_head_sha })
           .execute(subject)
       end
 
@@ -4824,7 +4824,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     context 'when merge_ref_sha is not present' do
       let!(:result) do
         MergeRequests::MergeToRefService
-          .new(merge_request.project, merge_request.author)
+          .new(container: merge_request.project, current_user: merge_request.author)
           .execute(merge_request)
       end
 

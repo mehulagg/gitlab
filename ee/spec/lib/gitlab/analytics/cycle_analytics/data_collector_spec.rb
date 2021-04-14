@@ -389,9 +389,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           mr = create(:merge_request, source_project: example_class.project, allow_broken: true)
 
           MergeRequests::UpdateService.new(
-            example_class.project,
-            user,
-            label_ids: [label.id]
+            container: example_class.project,
+            current_user: user,
+            params: { label_ids: [label.id] }
           ).execute(mr)
 
           mr
@@ -399,9 +399,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
         def create_data_for_end_event(mr, example_class)
           MergeRequests::UpdateService.new(
-            example_class.project,
-            user,
-            label_ids: []
+            container: example_class.project,
+            current_user: user,
+            params: { label_ids: [] }
           ).execute(mr)
         end
 
@@ -424,9 +424,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
             })
 
             MergeRequests::UpdateService.new(
-              example_class.project,
-              user,
-              assignees: [user]
+              container: example_class.project,
+              current_user: user,
+              params: { assignees: [user] }
             ).execute(mr)
 
             mr.metrics.update!(first_commit_at: Time.zone.now)
@@ -471,9 +471,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
             })
 
             MergeRequests::UpdateService.new(
-              example_class.project,
-              user,
-              label_ids: [label.id, other_label.id]
+              container: example_class.project,
+              current_user: user,
+              params: { label_ids: [label.id, other_label.id] }
             ).execute(mr)
 
             mr
@@ -618,9 +618,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
         before do
           MergeRequests::UpdateService.new(
-            merge_request.project,
-            user,
-            label_ids: [label.id]
+            container: merge_request.project,
+            current_user: user,
+            params: { label_ids: [label.id] }
           ).execute(merge_request)
 
           data_collector_params[:label_name] = [label.name]
@@ -634,9 +634,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
         before do
           MergeRequests::UpdateService.new(
-            merge_request.project,
-            user,
-            label_ids: [label.id]
+            container: merge_request.project,
+            current_user: user,
+            params: { label_ids: [label.id] }
           ).execute(merge_request)
 
           data_collector_params[:label_name] = ['Any']
@@ -651,9 +651,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
         before do
           MergeRequests::UpdateService.new(
-            merge_request.project,
-            user,
-            label_ids: [label1.id, label2.id]
+            container: merge_request.project,
+            current_user: user,
+            params: { label_ids: [label1.id, label2.id] }
           ).execute(merge_request)
 
           data_collector_params[:label_name] = [label1.name, label2.name]
