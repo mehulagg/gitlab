@@ -18,6 +18,20 @@ are accessible.
 - **Jira Cloud**: Your instance must be accessible through the internet.
 - **Jira Server**: Your network must allow access to your instance.
 
+## Smart commits
+
+When connecting GitLab with Jira via DVCS you can process your Jira issues using special commands, called Smart Commits, in your commit messages.
+
+You can:
+
+- comment on issues
+- record time tracking information against issues
+- transition issues to any status defined in the Jira Software project's workflow.
+
+Commands must be in the first line of the commit message. Read more about how smart commits work and what commands are available on the [Jira Software documentation](https://support.atlassian.com/jira-software-cloud/docs/process-issues-with-smart-commits/)
+
+In order to make smart commits work, the committing user on GitLab must have a corresponding user on Jira with the same email address or username.
+
 ## Configure a GitLab application for DVCS
 
 We recommend you create and use a `jira` user in GitLab, and use the account only
