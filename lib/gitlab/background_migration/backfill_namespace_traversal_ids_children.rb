@@ -4,6 +4,7 @@ module Gitlab
   module BackgroundMigration
     # A job to set namespaces.traversal_ids in sub-batches, of all namespaces with
     # a parent and not already set.
+    # rubocop:disable Style/Documentation
     class BackfillNamespaceTraversalIdsChildren
       class Namespace < ActiveRecord::Base
         include ::EachBatch
@@ -12,7 +13,7 @@ module Gitlab
       end
 
       BASE_QUERY = Namespace
-        .where('parent_id IS NOT NULL')
+        .where.not('parent_id IS NULL')
         .where("traversal_ids = '{}'")
       PAUSE_SECONDS = 0.1
 
