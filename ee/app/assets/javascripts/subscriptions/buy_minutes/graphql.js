@@ -1,12 +1,19 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
+import createClient from '~/lib/graphql';
 import { resolvers } from './graphql/resolvers';
 
 Vue.use(VueApollo);
 
-const defaultClient = createDefaultClient(resolvers, { assumeImmutableResults: true });
+const defaultClient = createClient(resolvers, { assumeImmutableResults: true });
+const customerClient = createClient(
+  {},
+  { path: '/-/customers_dot/proxy/graphql', useGet: true, assumeImmutableResults: true },
+);
 
 export default new VueApollo({
   defaultClient,
+  clients: {
+    customerClient,
+  },
 });

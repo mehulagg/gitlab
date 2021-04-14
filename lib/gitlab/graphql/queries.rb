@@ -293,7 +293,8 @@ module Gitlab
       def self.query?(path)
         path.ends_with?('.graphql') &&
           !path.ends_with?('.fragment.graphql') &&
-          !path.ends_with?('typedefs.graphql')
+          !path.ends_with?('typedefs.graphql') &&
+          !path.ends_with?('.customer.graphql')
       end
     end
   end

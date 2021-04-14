@@ -1,3 +1,0 @@
-query getPlans {
-  plans @client
-}

@@ -1,0 +1,15 @@
+query getPlans($tags: [PlanTag!]) {
+  plans(planTags: $tags) {
+    id
+    name
+    code
+    active
+    deprecated
+    free
+    pricePerMonth
+    pricePerYear
+    features
+    aboutPageHref
+    hideDeprecatedCard
+  }
+}

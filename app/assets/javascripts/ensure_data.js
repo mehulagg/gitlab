@@ -8,6 +8,11 @@ const ERROR_FETCHING_DATA_DESCRIPTION = __(
   'Please try and refresh the page. If the problem persists please contact support.',
 );
 
+export const i18n = {
+  ERROR_FETCHING_DATA_HEADER,
+  ERROR_FETCHING_DATA_DESCRIPTION,
+};
+
 /**
  * This function takes a Component and extends it with data from the `parseData` function.
  * The data will be made available through `props` and `proivde`.
