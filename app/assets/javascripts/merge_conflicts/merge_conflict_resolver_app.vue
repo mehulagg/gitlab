@@ -172,7 +172,7 @@ export default {
             <h4 class="gl-mt-0">
               {{ __('Resolve conflicts on source branch') }}
             </h4>
-            <div class="gl-mb-5">
+            <div class="gl-mb-5" data-testid="resolve-info">
               <gl-sprintf :message="$options.i18n.resolveInfo">
                 <template #use_ours>
                   <code>{{ s__('MergeConflict|Use ours') }}</code>
