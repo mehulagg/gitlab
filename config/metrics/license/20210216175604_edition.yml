@@ -1,6 +1,6 @@
 ---
 key_path: edition
-description: Edition of GitLab such as EE, CE
+description: Edition of GitLab such as EE or CE
 product_section: enablement
 product_stage: enablement
 product_group: group::distribution
