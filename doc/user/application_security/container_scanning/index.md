@@ -270,11 +270,11 @@ For those currently using Klar willing to migrate to Container-Scanning before 1
 
 1. Take the following actions in your CI file:
 
-| Variable          | Recommended Action                     | Job scope                              | Notes |
-| ----------------- | -------------------------------------- | -------------------------------------- | --- |
-| CS_MAJOR_VERSION  | Set it to `4`                          | global variables or under `.cs_common` | |
-| CS_PROJECT        | Remove this variable from your CI file | `container_scanning_new`               | Setting it to `container-scanning` under the correct scope will have the same effect as removing it from your CI file |
-| CS_ANALYZER_IMAGE | Remove this variable from your CI file | `.cs_common`                           | Please use CS_MAJOR_VERSION instead of overriding this variable |
+   | Variable          | Recommended Action                     | Job scope                              | Notes |
+   | ----------------- | -------------------------------------- | -------------------------------------- | --- |
+   | CS_MAJOR_VERSION  | Set it to `4`                          | global variables or under `.cs_common` | |
+   | CS_PROJECT        | Remove this variable from your CI file | `container_scanning_new`               | Setting it to `container-scanning` under the correct scope will have the same effect as removing it from your CI file |
+   | CS_ANALYZER_IMAGE | Remove this variable from your CI file | `.cs_common`                           | Please use CS_MAJOR_VERSION instead of overriding this variable |
 
 1. Remove any variables that are only applicable to Klar. For a complete list of these variables, please check the [table of available variables](#available-variables).
 1. Make any [necessary customizations](#customizing-the-container-scanning-settings) to the `Container-Scanning` scanner. It is strongly recommended to minimize customizations whenever possible, as they might require changes in future GitLab major releases.
