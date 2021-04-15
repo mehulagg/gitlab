@@ -301,7 +301,6 @@ RSpec.describe IssuesHelper do
         empty_state_svg_path: '#',
         endpoint: expose_path(api_v4_projects_issues_path(id: project.id)),
         export_csv_path: export_csv_project_issues_path(project),
-        full_path: project.full_path,
         has_issues: project_issues(project).exists?.to_s,
         import_csv_issues_path: '#',
         is_signed_in: current_user.present?.to_s,
@@ -309,7 +308,9 @@ RSpec.describe IssuesHelper do
         jira_integration_path: help_page_url('user/project/integrations/jira', anchor: 'view-jira-issues'),
         max_attachment_size: number_to_human_size(Gitlab::CurrentSettings.max_attachment_size.megabytes),
         new_issue_path: new_project_issue_path(project, issue: { assignee_id: finder.assignee.id, milestone_id: finder.milestones.first.id }),
+        project_id: project.id,
         project_import_jira_path: project_import_jira_path(project),
+        project_path: project.full_path,
         rss_path: '#',
         show_new_issue_link: 'true',
         sign_in_path: new_user_session_path
