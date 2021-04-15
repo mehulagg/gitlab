@@ -264,25 +264,24 @@ GitLab 13.0 and later doesn't support [`only` and `except`](../../../ci/yaml/REA
 When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules)
 instead.
 
-### Migrating from Klar to Container-Scanning
+### Migrating from Klar to Container-Scanning (Trivy)
 
-For those currently using Klar willing to migrate to Container-Scanning before 14.0 can do so by the following:
+For those currently using Klar willing to migrate to Container-Scanning before 14.0 can do so by taking the following steps:
 
-Make sure that either these variables are not overriden or set them to the recommended values under their recommended scope:
+1. Take the following actions in your CI file:
 
-|Variable|Recommended Action| Job scope |
-|---|---|---|
-|CS_MAJOR_VERSION| set it to `4` | global variables or under `.cs_common`|
-| CS_PROJECT | setting it to `container-scanning` will have the same effect as removing it from your CI file| `container_scanning_new` |
-|CS_ANALYZER_IMAGE | please use CS_MAJOR_VERSION instead of overriding this variable| `.cs_common` |
+| Variable          | Recommended Action                     | Job scope                              | Notes |
+| ----------------- | -------------------------------------- | -------------------------------------- | --- |
+| CS_MAJOR_VERSION  | Set it to `4`                          | global variables or under `.cs_common` | |
+| CS_PROJECT        | Remove this variable from your CI file | `container_scanning_new`               | Setting it to `container-scanning` under the correct scope will have the same effect as removing it from your CI file |
+| CS_ANALYZER_IMAGE | Remove this variable from your CI file | `.cs_common`                           | Please use CS_MAJOR_VERSION instead of overriding this variable |
 
-For more details on how to please check [customizing container scanning settings](#customizing-the-container-scanning-settings).
+1. Remove any variables that are only applicable to Klar. For a complete list of these variables, please check the [table of available variables](#available-variables).
+1. Make any [necessary customizations](#customizing-the-container-scanning-settings) to the `Container-Scanning` scanner. It is strongly recommended to minimize customizations whenever possible, as they might require changes in future GitLab major releases.
 
-Note that before 14.0 any variable defined under the scope `container_scanning` won't be considered for Container-Scanning. Therefore make sure the variables are either defined as a global variable or under `.cs_common` and `container_scanning_new` according to the table above.
+**Troubleshooting**
 
-Also variables only applicable to Klar should be removed. For a list of those variables please check the [table of available variables](#available-variables)
-
-It is strongly recommended to minimize customizations and they might require changes when going through GitLab major releases.
+Please note that prior to the GitLab 14.0 release, any variable defined under the scope `container_scanning` won't be considered for Container-Scanning. Verify that all variables for the Container-Scanning analyzer are either defined as a global variable or are defined under `.cs_common` and `container_scanning_new` according to the table above.
 
 ### Using a custom SSL CA certificate authority
 
