@@ -7,10 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # GitLab Kubernetes Agent **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223061) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
-> - [In GitLab 13.10](https://gitlab.com/gitlab-org/gitlab/-/issues/300960), KAS became available on GitLab.com under `wss://kas.gitlab.com` through an Early Adopter Program.
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [In GitLab 13.10](https://gitlab.com/gitlab-org/gitlab/-/issues/300960), KAS became available on GitLab.com under `wss://kas.gitlab.com` through an Early Adopter Program. In GitLab 13.11, this was made available to every project on GitLab.com.
 
 The [GitLab Kubernetes Agent](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent)
 is an active in-cluster component for solving GitLab and Kubernetes integration
