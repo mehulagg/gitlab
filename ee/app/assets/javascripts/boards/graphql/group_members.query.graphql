@@ -1,6 +1,6 @@
 query EpicUsers($fullPath: ID!, $search: String) {
   group(fullPath: $fullPath) {
-    groupMembers(relations: [DIRECT, DESCENDANTS], search: $search) {
+    groupMembers(relations: [DIRECT, DESCENDANTS, INHERITED], search: $search) {
       nodes {
         user {
           id
