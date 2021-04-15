@@ -19,6 +19,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
   with_them do
     before do
       stub_feature_flags(vulnerability_finding_signatures: vulnerability_finding_signatures_enabled)
+      stub_feature_flags(optimize_sql_query_for_security_report: false)
       stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, security_dashboard: true)
       allow(Security::AutoFixWorker).to receive(:perform_async)
     end
@@ -35,18 +36,14 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       context 'for different security reports' do
+        where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures) do
+          'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2
+          'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 1
+          'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 2
+          'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 8
+        end
+
         with_them do
-          before do
-            stub_feature_flags(optimize_sql_query_for_security_report: optimize_sql_query_for_security_report_ff)
-          end
-
-          where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures) do
-            'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2
-            'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 1
-            'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 2
-            'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 8
-          end
-
           it 'inserts all scanners' do
             expect { subject }.to change { Vulnerabilities::Scanner.count }.by(scanners)
           end
