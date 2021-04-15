@@ -62,18 +62,12 @@ RSpec.describe Gitlab::Database do
 
   describe '.disable_prepared_statements' do
     it 'disables prepared statements' do
-      config = {}
-
-      expect(ActiveRecord::Base.configurations).to receive(:[])
-        .with(Rails.env)
-        .and_return(config)
-
       expect(ActiveRecord::Base).to receive(:establish_connection)
-        .with({ 'prepared_statements' => false })
+        .with(a_hash_including({ 'prepared_statements' => false }))
 
       described_class.disable_prepared_statements
 
-      expect(config['prepared_statements']).to eq(false)
+      expect(::Gitlab::Database.config['prepared_statements']).to eq(false)
     end
   end
 

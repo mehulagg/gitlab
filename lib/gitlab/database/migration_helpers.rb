@@ -143,7 +143,7 @@ module Gitlab
 
         options = options.merge({ algorithm: :concurrently })
 
-        if index_exists?(table_name, column_name, options)
+        if index_exists?(table_name, column_name, **options)
           Gitlab::AppLogger.warn "Index not created because it already exists (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
           return
         end
