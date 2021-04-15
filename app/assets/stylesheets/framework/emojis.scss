@@ -19,7 +19,8 @@ gl-emoji {
 
 .emoji-picker-category-header {
   @include gl-sticky;
-  background-color: $white-transparent;
+  background-color: rgba($white, 0.8);
+  z-index: 1;
 }
 
 .emoji-picker-emoji {
