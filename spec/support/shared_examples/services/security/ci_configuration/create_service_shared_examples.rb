@@ -13,8 +13,8 @@ RSpec.shared_examples_for 'services security ci configuration create service' do
 
     context 'user does not belong to project' do
       it 'returns an error status' do
-        expect(result[:status]).to eq(:error)
-        expect(result[:success_path]).to be_nil
+        expect(result.status).to eq(:error)
+        expect(result.payload[:success_path]).to be_nil
       end
 
       it 'does not track a snowplow event' do
@@ -43,8 +43,8 @@ RSpec.shared_examples_for 'services security ci configuration create service' do
 
       context 'with no parameters' do
         it 'returns the path to create a new merge request' do
-          expect(result[:status]).to eq(:success)
-          expect(result[:success_path]).to match(/#{Gitlab::Routing.url_helpers.project_new_merge_request_url(project, {})}(.*)description(.*)source_branch/)
+          expect(result.status).to eq(:success)
+          expect(result.payload[:success_path]).to match(/#{Gitlab::Routing.url_helpers.project_new_merge_request_url(project, {})}(.*)description(.*)source_branch/)
         end
       end
 
@@ -53,8 +53,8 @@ RSpec.shared_examples_for 'services security ci configuration create service' do
           let(:params) { non_empty_params }
 
           it 'returns the path to create a new merge request' do
-            expect(result[:status]).to eq(:success)
-            expect(result[:success_path]).to match(/#{Gitlab::Routing.url_helpers.project_new_merge_request_url(project, {})}(.*)description(.*)source_branch/)
+            expect(result.status).to eq(:success)
+            expect(result.payload[:success_path]).to match(/#{Gitlab::Routing.url_helpers.project_new_merge_request_url(project, {})}(.*)description(.*)source_branch/)
           end
         end
       end

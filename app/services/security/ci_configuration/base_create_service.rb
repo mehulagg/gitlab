@@ -13,27 +13,26 @@ module Security
       end
 
       def execute
+        project.repository.add_branch(current_user, branch_name, project.default_branch)
+
         attributes_for_commit = attributes
+
         result = ::Files::MultiService.new(project, current_user, attributes_for_commit).execute
 
         if result[:status] == :success
-          result[:success_path] = successful_change_path
           track_event(attributes_for_commit)
-        else
-          result[:errors] = result[:message]
+          return ServiceResponse.success(payload: { success_path: successful_change_path })
         end
 
-        result
+        ServiceResponse.error(message: result[:message])
 
       rescue Gitlab::Git::PreReceiveError => e
-        { status: :error, errors: e.message }
+        ServiceResponse.error(message: e.message)
       end
 
       private
 
       def attributes
-        project.repository.add_branch(current_user, branch_name, project.default_branch)
-
         {
           commit_message: message,
           branch_name: branch_name,
@@ -43,8 +42,8 @@ module Security
       end
 
       def existing_gitlab_ci_content
-        gitlab_ci_yml = project.repository.gitlab_ci_yml_for(project.repository.root_ref_sha)
-        YAML.safe_load(gitlab_ci_yml) if gitlab_ci_yml
+        @gitlab_ci_yml ||= project.repository.gitlab_ci_yml_for(project.repository.root_ref_sha)
+        YAML.safe_load(@gitlab_ci_yml) if @gitlab_ci_yml
       end
 
       def successful_change_path

@@ -7,6 +7,10 @@ module Mutations
         include FindsProject
 
         graphql_name 'ConfigureSast'
+        description <<~DESC
+          Configure SAST for a project by creating a Merge Request that creates
+          a .gitlab-ci.yml file with SAST enabled.
+        DESC
 
         argument :project_path, GraphQL::ID_TYPE,
           required: true,
@@ -35,9 +39,9 @@ module Mutations
 
         def prepare_response(result)
           {
-            status: result[:status],
-            success_path: result[:success_path],
-            errors: Array(result[:errors])
+            status: result.status.to_s,
+            success_path: result.payload[:success_path],
+            errors: result.errors
           }
         end
       end

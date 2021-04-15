@@ -6,20 +6,18 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
   let_it_be(:project) { create(:project, :public, :repository) }
   let_it_be(:user) { create(:user) }
 
-  let_it_be(:service_result_json) do
-    {
-      status: "success",
-      success_path: "http://127.0.0.1:3000/root/demo-historic-secrets/-/merge_requests/new?",
-      errors: nil
-    }
+  let(:success_path) do
+    "http://127.0.0.1:3000/root/demo-historic-secrets/-/merge_requests/new?"
   end
 
-  let_it_be(:service_error_result_json) do
-    {
-      status: "error",
-      success_path: nil,
-      errors: %w(error1 error2)
-    }
+  let(:service_response) do
+    ServiceResponse.success(payload: { success_path: success_path })
+  end
+
+  let(:error) { "An error occured!" }
+
+  let(:service_error_response) do
+    ServiceResponse.error(message: error)
   end
 
   let(:context) do
@@ -72,7 +70,7 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
 
       it 'returns an array of errors' do
         expect(result).to match(
-          status: :error,
+          status: 'error',
           success_path: nil,
           errors: match_array([error_message])
         )
@@ -87,14 +85,14 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
       context 'when service successfully generates a path to create a new merge request' do
         before do
           allow_next_instance_of(service) do |service|
-            allow(service).to receive(:execute).and_return(service_result_json)
+            allow(service).to receive(:execute).and_return(service_response)
           end
         end
 
         it 'returns a success path' do
           expect(result).to match(
             status: 'success',
-            success_path: service_result_json[:success_path],
+            success_path: success_path,
             errors: []
           )
         end
@@ -103,7 +101,7 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
       context 'when service can not generate any path to create a new merge request' do
         before do
           allow_next_instance_of(service) do |service|
-            allow(service).to receive(:execute).and_return(service_error_result_json)
+            allow(service).to receive(:execute).and_return(service_error_response)
           end
         end
 
@@ -111,7 +109,7 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
           expect(result).to match(
             status: 'error',
             success_path: be_nil,
-            errors: match_array(service_error_result_json[:errors])
+            errors: match_array([error])
           )
         end
       end
