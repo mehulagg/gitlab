@@ -1,10 +1,19 @@
-import { GlDropdown, GlDropdownItem, GlDatepicker, GlSprintf, GlLink, GlModal } from '@gitlab/ui';
+import {
+  GlDropdown,
+  GlDropdownItem,
+  GlDatepicker,
+  GlFormGroup,
+  GlSprintf,
+  GlLink,
+  GlModal,
+} from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
 import Api from '~/api';
 import ExperimentTracking from '~/experimentation/experiment_tracking';
 import InviteMembersModal from '~/invite_members/components/invite_members_modal.vue';
+import MembersTokenSelect from '~/invite_members/components/members_token_select.vue';
 import { INVITE_MEMBERS_IN_COMMENT } from '~/invite_members/constants';
 
 jest.mock('~/experimentation/experiment_tracking');
@@ -86,6 +95,8 @@ describe('InviteMembersModal', () => {
   const findCancelButton = () => wrapper.findComponent({ ref: 'cancelButton' });
   const findInviteButton = () => wrapper.findComponent({ ref: 'inviteButton' });
   const clickInviteButton = () => findInviteButton().vm.$emit('click');
+  const findFieldAlert = () => wrapper.findComponent(GlFormGroup);
+  const findMembersSelect = () => wrapper.findComponent(MembersTokenSelect);
 
   describe('rendering the modal', () => {
     beforeEach(() => {
@@ -192,12 +203,14 @@ describe('InviteMembersModal', () => {
           expect(Api.addGroupMembersByUserId).toHaveBeenCalledWith(id, postData);
         });
 
-        it('displays the successful toastMessage', () => {
+        it('displays the successful toastMessage', async () => {
+          await waitForPromises();
+
           expect(wrapper.vm.showToastMessageSuccess).toHaveBeenCalled();
         });
       });
 
-      describe('when the invite received an api error message', () => {
+      describe('when adding an existing user id API command fails', () => {
         beforeEach(() => {
           wrapper = createComponent({ newUsersToInvite: [user1] });
 
@@ -205,15 +218,15 @@ describe('InviteMembersModal', () => {
           jest
             .spyOn(Api, 'addGroupMembersByUserId')
             .mockRejectedValue({ response: { data: { message: apiErrorMessage } } });
-          jest.spyOn(wrapper.vm, 'showToastMessageError');
+          jest.spyOn(wrapper.vm, 'showErrorAlertMessage');
 
           clickInviteButton();
         });
 
-        it('displays the apiErrorMessage in the toastMessage', async () => {
+        it('displays the apiErrorMessage in the error alert message', async () => {
           await waitForPromises();
 
-          expect(wrapper.vm.showToastMessageError).toHaveBeenCalledWith({
+          expect(wrapper.vm.showErrorAlertMessage).toHaveBeenCalledWith({
             response: { data: { message: apiErrorMessage } },
           });
         });
@@ -227,15 +240,15 @@ describe('InviteMembersModal', () => {
           jest
             .spyOn(Api, 'addGroupMembersByUserId')
             .mockRejectedValue({ response: { data: { success: false } } });
-          jest.spyOn(wrapper.vm, 'showToastMessageError');
+          jest.spyOn(wrapper.vm, 'showToastMessageUnsuccessful');
 
           clickInviteButton();
         });
 
-        it('displays the generic error toastMessage', async () => {
+        it('displays the generic unsuccessful toastMessage', async () => {
           await waitForPromises();
 
-          expect(wrapper.vm.showToastMessageError).toHaveBeenCalled();
+          expect(wrapper.vm.showToastMessageUnsuccessful).toHaveBeenCalled();
         });
       });
     });
@@ -268,23 +281,58 @@ describe('InviteMembersModal', () => {
         });
       });
 
-      describe('when any invite failed for any reason', () => {
-        beforeEach(() => {
-          wrapper = createComponent({ newUsersToInvite: [user1, user2] });
+      describe('when inviting a new email address API command fails for restricted domain', () => {
+        const expectedErrorMessage = "Invite email domain example.com isn't allowed.";
 
-          wrapper.vm.$toast = { show: jest.fn() };
-          jest
-            .spyOn(Api, 'addGroupMembersByUserId')
-            .mockRejectedValue({ response: { data: { success: false } } });
-          jest.spyOn(wrapper.vm, 'showToastMessageError');
+        describe('when the existing user being added has a restricted email domain', () => {
+          const userApiErrorMembersApi = {
+            user: ["email 'email@example.com' does not match the allowed domains: example1.org"],
+          };
 
-          clickInviteButton();
+          it('displays the apiErrorMessage in the error alert message', async () => {
+            wrapper = createComponent({ newUsersToInvite: [user1] });
+
+            wrapper.vm.$toast = { show: jest.fn() };
+            jest.spyOn(Api, 'addGroupMembersByUserId').mockRejectedValue({
+              response: { data: { success: false, message: userApiErrorMembersApi } },
+            });
+
+            expect(findFieldAlert().attributes('invalid-feedback')).toBe('');
+            expect(findMembersSelect().attributes('state')).toBe('true');
+
+            clickInviteButton();
+
+            await waitForPromises();
+
+            expect(findFieldAlert().attributes('invalid-feedback')).toBe(expectedErrorMessage);
+            expect(findMembersSelect().attributes('state')).not.toBe('true');
+          });
         });
 
-        it('displays the generic error toastMessage', async () => {
-          await waitForPromises();
+        describe('when the new invite email being invited has a restricted email domain', () => {
+          const keyedApiErrorInvitationsApi = {
+            'email@example.com':
+              "Invite email 'email@example.com' does not match the allowed domains: example1.org",
+          };
 
-          expect(wrapper.vm.showToastMessageError).toHaveBeenCalled();
+          fit('displays the apiErrorMessage in the error alert message', async () => {
+            wrapper = createComponent({ newUsersToInvite: [user3] });
+
+            wrapper.vm.$toast = { show: jest.fn() };
+            jest.spyOn(Api, 'inviteGroupMembersByEmail').mockRejectedValue({
+              response: { data: { status: 'error', message: keyedApiErrorInvitationsApi } },
+            });
+
+            expect(findFieldAlert().attributes('invalid-feedback')).toBe('');
+            expect(findMembersSelect().attributes('state')).toBe('true');
+
+            clickInviteButton();
+
+            await waitForPromises();
+
+            expect(findFieldAlert().attributes('invalid-feedback')).toBe(expectedErrorMessage);
+            expect(findMembersSelect().attributes('state')).not.toBe('true');
+          });
         });
       });
     });
@@ -336,7 +384,7 @@ describe('InviteMembersModal', () => {
             .mockRejectedValue({ response: { data: { success: false } } });
 
           jest.spyOn(Api, 'addGroupMembersByUserId').mockResolvedValue({ data: postData });
-          jest.spyOn(wrapper.vm, 'showToastMessageError');
+          jest.spyOn(wrapper.vm, 'showToastMessageUnsuccessful');
 
           clickInviteButton();
         });
@@ -344,7 +392,7 @@ describe('InviteMembersModal', () => {
         it('displays the generic error toastMessage', async () => {
           await waitForPromises();
 
-          expect(wrapper.vm.showToastMessageError).toHaveBeenCalled();
+          expect(wrapper.vm.showToastMessageUnsuccessful).toHaveBeenCalled();
         });
       });
     });
@@ -389,7 +437,7 @@ describe('InviteMembersModal', () => {
             .spyOn(Api, 'groupShareWithGroup')
             .mockRejectedValue({ response: { data: { success: false } } });
 
-          jest.spyOn(wrapper.vm, 'showToastMessageError');
+          jest.spyOn(wrapper.vm, 'showToastMessageUnsuccessful');
 
           clickInviteButton();
         });
@@ -397,7 +445,7 @@ describe('InviteMembersModal', () => {
         it('displays the generic error toastMessage', async () => {
           await waitForPromises();
 
-          expect(wrapper.vm.showToastMessageError).toHaveBeenCalled();
+          expect(wrapper.vm.showToastMessageUnsuccessful).toHaveBeenCalled();
         });
       });
     });

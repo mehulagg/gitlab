@@ -1,5 +1,5 @@
 <script>
-import { GlTokenSelector, GlAvatar, GlAvatarLabeled, GlSprintf } from '@gitlab/ui';
+import { GlTokenSelector, GlAvatar, GlAvatarLabeled, GlIcon, GlSprintf } from '@gitlab/ui';
 import { debounce } from 'lodash';
 import { __ } from '~/locale';
 import { getUsers } from '~/rest_api';
@@ -10,6 +10,7 @@ export default {
     GlTokenSelector,
     GlAvatar,
     GlAvatarLabeled,
+    GlIcon,
     GlSprintf,
   },
   props: {
@@ -45,6 +46,13 @@ export default {
       }
       return '';
     },
+    isInvalid() {
+      if (this.selectedTokens.length === 1) {
+        return true;
+      } else {
+        return false;
+      }
+    },
   },
   methods: {
     handleTextInput(query) {
@@ -61,6 +69,7 @@ export default {
             name: token.name,
             username: token.username,
             avatar_url: token.avatar_url,
+            class: '',
           }));
           this.loading = false;
         })
@@ -95,6 +104,7 @@ export default {
 <template>
   <gl-token-selector
     v-model="selectedTokens"
+    :state="!isInvalid"
     :dropdown-items="users"
     :loading="loading"
     :allow-user-defined-tokens="emailIsValid"
@@ -107,7 +117,8 @@ export default {
     @focus="handleFocus"
   >
     <template #token-content="{ token }">
-      <gl-avatar v-if="token.avatar_url" :src="token.avatar_url" :size="16" />
+      <gl-avatar v-if="token.avatar_url && !isInvalid" :src="token.avatar_url" :size="16" />
+      <gl-icon v-if="isInvalid" name="error" :size="16" class="gl-mr-2" />
       {{ token.name }}
     </template>
 

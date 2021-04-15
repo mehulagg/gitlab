@@ -1,5 +1,6 @@
 <script>
 import {
+  GlFormGroup,
   GlModal,
   GlDropdown,
   GlDropdownItem,
@@ -22,6 +23,7 @@ import eventHub from '../event_hub';
 export default {
   name: 'InviteMembersModal',
   components: {
+    GlFormGroup,
     GlDatepicker,
     GlLink,
     GlModal,
@@ -68,16 +70,38 @@ export default {
       newUsersToInvite: [],
       selectedDate: undefined,
       groupToBeSharedWith: {},
+      inviteLoading: false,
+      errorAlertMessage: '',
+      shouldShowAlert: false,
     };
   },
   computed: {
+    errorFieldState() {
+      return this.isSingleInvite && this.shouldShowAlert && this.errorAlertMessage !== '';
+    },
+    invalidFeedback() {
+      if (this.shouldShowAlert) {
+        return this.errorAlertMessage;
+      }
+      return '';
+    },
+    errorFieldDescription() {
+      if (this.errorFieldState) {
+        return this.$options.labels[this.inviteeType].placeHolder;
+      }
+      return '';
+    },
+    isSingleInvite() {
+      return this.newUsersToInvite.length === 1;
+    },
     isInviteGroup() {
       return this.inviteeType === 'group';
     },
+    inviteTo() {
+      return this.isProject ? 'toProject' : 'toGroup';
+    },
     introText() {
-      const inviteTo = this.isProject ? 'toProject' : 'toGroup';
-
-      return sprintf(this.$options.labels[this.inviteeType][inviteTo].introText, {
+      return sprintf(this.$options.labels[this.inviteeType][this.inviteTo].introText, {
         name: this.name,
       });
     },
@@ -131,6 +155,7 @@ export default {
       this.$root.$emit(BV_SHOW_MODAL, this.modalId);
     },
     closeModal() {
+      this.resetFields();
       this.$root.$emit(BV_HIDE_MODAL, this.modalId);
     },
     sendInvite() {
@@ -139,7 +164,6 @@ export default {
       } else {
         this.submitInviteMembers();
       }
-      this.closeModal();
     },
     trackInvite() {
       if (this.source === INVITE_MEMBERS_IN_COMMENT) {
@@ -147,12 +171,12 @@ export default {
         tracking.event('comment_invite_success');
       }
     },
-    cancelInvite() {
+    resetFields() {
       this.selectedAccessLevel = this.defaultAccessLevel;
       this.selectedDate = undefined;
       this.newUsersToInvite = [];
       this.groupToBeSharedWith = {};
-      this.closeModal();
+      this.errorAlertMessage = '';
     },
     changeSelectedItem(item) {
       this.selectedAccessLevel = item;
@@ -164,9 +188,12 @@ export default {
 
       apiShareWithGroup(this.id, this.shareWithGroupPostData(this.groupToBeSharedWith.id))
         .then(this.showToastMessageSuccess)
-        .catch(this.showToastMessageError);
+        .catch(this.showErrorAlertMessage);
     },
     submitInviteMembers() {
+      this.inviteLoading = true;
+      this.shouldShowAlert = false;
+
       const [usersToInviteByEmail, usersToAddById] = this.partitionNewUsersToInvite();
       const promises = [];
 
@@ -185,10 +212,12 @@ export default {
 
         promises.push(apiAddByUserId(this.id, this.addByUserIdPostData(usersToAddById)));
       }
-
       this.trackInvite();
+      this.inviteLoading = false;
 
-      Promise.all(promises).then(this.showToastMessageSuccess).catch(this.showToastMessageError);
+      Promise.all(promises)
+        .then((response) => this.conditionallyShowToastMessage(response))
+        .catch(this.showErrorAlertMessage);
     },
     inviteByEmailPostData(usersToInviteByEmail) {
       return {
@@ -213,11 +242,91 @@ export default {
     },
     showToastMessageSuccess() {
       this.$toast.show(this.$options.labels.toastMessageSuccessful, this.toastOptions);
+      this.closeModal();
     },
-    showToastMessageError(error) {
-      const message = error.response.data.message || this.$options.labels.toastMessageUnsuccessful;
+    showToastMessageUnsuccessful() {
+      this.$toast.show(this.$options.labels.toastMessageUnsuccessful, this.toastOptions);
+      this.closeModal();
+    },
+    conditionallyShowToastMessage(response) {
+      if (response[0].data && response[0].data.status === 'error') {
+        this.errorAlertMessage = this.parseResponseMessage(response[0].data);
+        this.showErrorAlertMessage(this.errorAlertMessage);
+      } else if (response[0].data.messsage) {
+        this.errorAlertMessage = parseResponseMessage(response.data.message);
+        this.showErrorAlertMessage(this.errorAlertMessage);
+      } else {
+        this.showToastMessageSuccess();
+      }
+    },
+    showErrorAlertMessage(error) {
+      if (this.isSingleInvite) {
+        this.errorAlertMessage = this.parseResponseMessage(error);
+        this.shouldShowAlert = true;
+      } else {
+        this.showToastMessageUnsuccessful();
+      }
+    },
+    parseResponseMessage(error) {
+      let errorMessage = '';
 
-      this.$toast.show(message, this.toastOptions);
+      if (isString(error)) {
+        errorMessage = error;
+      }
+
+// for groups api
+      if (error.message) {
+        if (isString(error.message)) {
+          errorMessage = error.message;
+        } else {
+          errorMessage = this.parseKeyedResponse(error.message);
+        }
+      }
+
+// after here
+      if (error.response) {
+        if (isString(error.response)) {
+          errorMessage = error.response;
+        }
+
+        if (isString(error.response.data.error)) {
+          errorMessage = error.response.data.error;
+        }
+
+        if (error.response.data.message) {
+          if (isString(error.response.data.message)) {
+            errorMessage = error.response.data.message;
+          } else if (error.response.data.message['user']) {
+            errorMessage = this.parseArrayResponse(error.response);
+          } else {
+            errorMessage = this.parseKeyedResponse(error.response);
+          }
+        }
+      }
+
+      if (errorMessage === '') {
+        return this.$options.labels.alertMessageError;
+      }
+
+      return errorMessage;
+    },
+    parseKeyedResponse(response) {
+      try {
+        const [email] = Object.keys(response);
+
+        return sprintf(this.$options.labels[this.inviteeType][this.inviteTo].restrictedMessage, { email: email });
+      } catch {
+        return '';
+      }
+    },
+    parseArrayResponse(response) {
+      try {
+        const email = response.data.message['user'][0];
+
+        return sprintf(this.$options.labels[this.inviteeType][this.inviteTo].restrictedMessage, { email: email });
+      } catch {
+        return '';
+      }
     },
   },
   labels: {
@@ -229,11 +338,14 @@ export default {
         introText: s__(
           "InviteMembersModal|You're inviting members to the %{strongStart}%{name}%{strongEnd} group.",
         ),
+        restrictedMessage: s__("InviteMembersModal|The domain for %{email} is not allowed for this group."),
+        restrictedMessage2: s__("InviteMembersModal|Go to the group’s Settings > General page, and check the permissions."),
       },
       toProject: {
         introText: s__(
           "InviteMembersModal|You're inviting members to the %{strongStart}%{name}%{strongEnd} project.",
         ),
+        restrictedMessage: s__("InviteMembersModal|The domain for %{email} is not allowed for this project."),
       },
     },
     group: {
@@ -255,6 +367,7 @@ export default {
     accessExpireDate: s__('InviteMembersModal|Access expiration date (optional)'),
     toastMessageSuccessful: s__('InviteMembersModal|Members were successfully added'),
     toastMessageUnsuccessful: s__('InviteMembersModal|Some of the members could not be added'),
+    alertMessageError: s__('InviteMembersModal|Something went wrong'),
     readMoreText: s__(`InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions`),
     inviteButtonText: s__('InviteMembersModal|Invite'),
     cancelButtonText: s__('InviteMembersModal|Cancel'),
@@ -280,18 +393,24 @@ export default {
         </gl-sprintf>
       </p>
 
-      <label :id="$options.membersTokenSelectLabelId" class="gl-font-weight-bold gl-mt-5">{{
-        $options.labels[inviteeType].searchField
-      }}</label>
-      <div class="gl-mt-2">
+      <gl-form-group
+        class="gl-mt-2"
+        :invalid-feedback="invalidFeedback"
+        :state="!errorFieldState"
+        label-for="memebers-select-input"
+        :label="$options.labels[inviteeType].searchField"
+        :description="errorFieldDescription"
+      >
         <members-token-select
           v-if="!isInviteGroup"
+          id="members-select-input"
           v-model="newUsersToInvite"
+          :state="errorFieldState"
           :aria-labelledby="$options.membersTokenSelectLabelId"
           :placeholder="$options.labels[inviteeType].placeHolder"
         />
         <group-select v-if="isInviteGroup" v-model="groupToBeSharedWith" />
-      </div>
+      </gl-form-group>
 
       <label class="gl-font-weight-bold gl-mt-3">{{ $options.labels.accessLevel }}</label>
       <div class="gl-mt-2 gl-w-half gl-xs-w-full">
@@ -346,13 +465,14 @@ export default {
 
     <template #modal-footer>
       <div class="gl-display-flex gl-flex-direction-row gl-justify-content-end gl-flex-wrap gl-m-0">
-        <gl-button ref="cancelButton" @click="cancelInvite">
+        <gl-button ref="cancelButton" @click="closeModal">
           {{ $options.labels.cancelButtonText }}
         </gl-button>
         <div class="gl-mr-3"></div>
         <gl-button
           ref="inviteButton"
           :disabled="inviteDisabled"
+          :loading="inviteLoading"
           variant="success"
           data-qa-selector="invite_button"
           @click="sendInvite"

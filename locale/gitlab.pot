@@ -17946,6 +17946,9 @@ msgstr ""
 msgid "InviteMembersModal|Some of the members could not be added"
 msgstr ""
 
+msgid "InviteMembersModal|Something went wrong"
+msgstr ""
+
 msgid "InviteMembersModal|You're inviting a group to the %{strongStart}%{name}%{strongEnd} group."
 msgstr ""
 

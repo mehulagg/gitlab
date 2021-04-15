@@ -519,3 +519,10 @@ table.pipeline-project-metrics tr td {
     text-align: center;
   }
 }
+
+.gl-token.is-invalid {
+  background-color: $red-100;
+  .gl-icon {
+    color: $red-500;
+  }
+}
