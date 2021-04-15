@@ -25,6 +25,8 @@ module Database
 
         run_active_migration if active_migration.active? && active_migration.interval_elapsed?(variance: INTERVAL_VARIANCE)
       end
+
+      report_progress_metrics
     end
 
     private
@@ -52,6 +54,19 @@ module Database
 
     def lease_key
       self.class.name.demodulize.underscore
+    end
+
+    def report_progress_metrics
+      Gitlab::Database::BackgroundMigration::BatchedMigration.alive.each do |migration|
+        self.class.progress_gauge.set(migration.prometheus_labels, migration.progress_estimation)
+      end
+    end
+
+    def self.progress_gauge
+      @progress_gauge ||= Gitlab::Metrics.gauge(
+        :batched_migration_progress,
+        'Progress estimation for a batched migration'
+      )
     end
   end
 end

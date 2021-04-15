@@ -16,6 +16,8 @@ module Gitlab
 
         scope :queue_order, -> { order(id: :asc) }
 
+        scope :alive, -> { where(status: %i(paused active)) }
+
         enum status: {
           paused: 0,
           active: 1,
@@ -56,6 +58,12 @@ module Gitlab
 
         def batch_class_name=(class_name)
           write_attribute(:batch_class_name, class_name.demodulize)
+        end
+
+        def progress_estimation
+          return unless total_tuple_count
+
+          batched_jobs.succeeded.sum(:batch_size) / total_tuple_count.to_f
         end
 
         def prometheus_labels

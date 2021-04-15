@@ -208,4 +208,26 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
       expect(batched_migration.prometheus_labels).to eq(labels)
     end
   end
+
+  describe '#progress_estimation' do
+    subject { batched_migration.progress_estimation }
+
+    let(:batched_migration) { create(:batched_background_migration, total_tuple_count: 10_000) }
+
+    it 'calculates the ratio completed based on the batch_size of succeesful jobs' do
+      create_list(:batched_background_migration_job, 5, batched_migration: batched_migration, batch_size: 1_000, status: :succeeded)
+      create(:batched_background_migration_job, batched_migration: batched_migration, batch_size: 1_000, status: :running)
+      create(:batched_background_migration_job, batched_migration: batched_migration, batch_size: 1_000, status: :failed)
+
+      expect(subject).to eq(0.5)
+    end
+
+    context 'when total_tuple_count is not present' do
+      let(:batched_migration) { create(:batched_background_migration, total_tuple_count: nil) }
+
+      it 'returns nil' do
+        expect(subject).to be_nil
+      end
+    end
+  end
 end

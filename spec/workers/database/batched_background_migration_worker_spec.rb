@@ -116,6 +116,30 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
 
         expect { worker.perform }.to raise_error(RuntimeError, 'I broke')
       end
+
+      context 'always reporting progress metrics' do
+        let!(:migrations) { create_list(:batched_background_migration, 2, status: :active, batch_size: 10_000) }
+        let(:gauge) { double('gauge', set: nil) }
+
+        before do
+          allow(Gitlab::Metrics).to receive(:gauge).with(:batched_migration_progress, any_args).and_return(gauge)
+
+          # First migration: 50% done
+          create_list(:batched_background_migration_job, 5, batched_migration: migrations.first, batch_size: 1_000, status: :succeeded)
+
+          # We're not interested in finished or aborted migrations
+          create(:batched_background_migration, status: :finished)
+          create(:batched_background_migration, status: :aborted)
+        end
+
+        it 'sets progress gauge for each migration' do
+          expect(gauge).to receive(:set).with(migrations.first.prometheus_labels, 0.5)
+          expect(gauge).to receive(:set).with(migrations.second.prometheus_labels, 0.0)
+          expect(gauge).not_to receive(:set)
+
+          worker.perform
+        end
+      end
     end
   end
 end
