@@ -20,6 +20,8 @@ module Gitlab
         (from_id..to_id).each_slice(MAX_BATCH_SIZE) do |batch|
           process_batch(batch.first, batch.last)
         end
+
+        Gitlab::Database::BackgroundMigrationJob.mark_all_as_succeeded('MoveContainerRegistryEnabledToProjectFeature', [from_id, to_id])
       end
 
       private

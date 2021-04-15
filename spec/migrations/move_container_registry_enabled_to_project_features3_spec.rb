@@ -1,10 +1,15 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20210401131948_move_container_registry_enabled_to_project_features2.rb')
+require Rails.root.join('db', 'post_migrate', '20210415155043_move_container_registry_enabled_to_project_features3.rb')
 
-RSpec.describe MoveContainerRegistryEnabledToProjectFeatures2, :migration do
+RSpec.describe MoveContainerRegistryEnabledToProjectFeatures3, :migration do
   let(:namespace) { table(:namespaces).create!(name: 'gitlab', path: 'gitlab-org') }
+
+  let!(:background_jobs) do
+    table(:background_migration_jobs).create!(class_name: described_class::MIGRATION, arguments: [-1, -2])
+    table(:background_migration_jobs).create!(class_name: described_class::MIGRATION, arguments: [-3, -4])
+  end
 
   let!(:projects) do
     [
@@ -28,11 +33,18 @@ RSpec.describe MoveContainerRegistryEnabledToProjectFeatures2, :migration do
   end
 
   it 'schedules jobs for ranges of projects' do
+    # old entries in background_migration_jobs should be deleted.
+    expect(table(:background_migration_jobs).count).to eq(2)
+    expect(table(:background_migration_jobs).first.arguments).to eq([-1, -2])
+    expect(table(:background_migration_jobs).second.arguments).to eq([-3, -4])
+
     migrate!
 
     # Since track_jobs is true, each job should have an entry in the background_migration_jobs
     # table.
     expect(table(:background_migration_jobs).count).to eq(2)
+    expect(table(:background_migration_jobs).first.arguments).to eq([projects[0].id, projects[2].id])
+    expect(table(:background_migration_jobs).second.arguments).to eq([projects[3].id, projects[3].id])
 
     expect(described_class::MIGRATION)
       .to be_scheduled_delayed_migration(2.minutes, projects[0].id, projects[2].id)
