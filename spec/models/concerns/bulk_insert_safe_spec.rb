@@ -30,7 +30,7 @@ RSpec.describe BulkInsertSafe do
     end
   end
 
-  class BulkInsertParentItem < ActiveRecord::Base
+  BulkInsertParentItem = Class.new(ActiveRecord::Base) do
     self.table_name = :bulk_insert_parent_items
     self.inheritance_column = :_type_disabled
 
