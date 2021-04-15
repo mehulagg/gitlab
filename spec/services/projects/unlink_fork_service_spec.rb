@@ -20,7 +20,7 @@ RSpec.describe Projects::UnlinkForkService, :use_clean_rails_memory_store_cachin
 
     before do
       allow(MergeRequests::CloseService).to receive(:new)
-        .with(forked_project, user)
+        .with(container: forked_project, current_user: user)
         .and_return(mr_close_service)
     end
 
@@ -83,7 +83,7 @@ RSpec.describe Projects::UnlinkForkService, :use_clean_rails_memory_store_cachin
 
       before do
         allow(MergeRequests::CloseService).to receive(:new)
-                                                .with(project, user)
+                                                .with(container: project, current_user: user)
                                                 .and_return(mr_close_service)
       end
 
@@ -146,7 +146,7 @@ RSpec.describe Projects::UnlinkForkService, :use_clean_rails_memory_store_cachin
 
         before do
           allow(MergeRequests::CloseService).to receive(:new)
-            .with(forked_project, user)
+            .with(container: forked_project, current_user: user)
             .and_return(mr_close_service)
         end
 

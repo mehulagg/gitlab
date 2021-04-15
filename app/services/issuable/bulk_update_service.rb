@@ -51,7 +51,7 @@ module Issuable
       items.each do |issuable|
         next unless can?(current_user, :"update_#{type}", issuable)
 
-        update_class.new(issuable.issuing_parent, current_user, params).execute(issuable)
+        update_class.new(container: issuable.issuing_parent, current_user: current_user, params: params).execute(issuable)
       end
 
       items
