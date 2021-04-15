@@ -28,7 +28,7 @@ export default {
   cycleAnalyticsStagePath:
     '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id',
   cycleAnalyticsDurationChartPath:
-    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/duration_chart',
+    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/average_duration_chart',
   cycleAnalyticsGroupLabelsPath: '/groups/:namespace_path/-/labels.json',
   codeReviewAnalyticsPath: '/api/:version/analytics/code_review',
   groupActivityIssuesPath: '/api/:version/analytics/group_activity/issues_count',

@@ -157,10 +157,10 @@ export const flattenDurationChartData = (data) =>
   data
     .map((stage) =>
       stage.data.map((event) => {
-        const date = new Date(event.finished_at);
+        const date = new Date(event.date);
         return {
           ...event,
-          finished_at: dateFormat(date, dateFormats.isoDate),
+          date: dateFormat(date, dateFormats.isoDate),
         };
       }),
     )
@@ -208,7 +208,6 @@ export const flattenDurationChartData = (data) =>
 export const getDurationChartData = (data, startDate, endDate) => {
   const flattenedData = flattenDurationChartData(data);
   const eventData = [];
-
   const endOfDay = newDate(endDate);
   endOfDay.setHours(23, 59, 59); // make sure we're at the end of the day
 
@@ -218,8 +217,12 @@ export const getDurationChartData = (data, startDate, endDate) => {
     currentDate = dayAfter(currentDate)
   ) {
     const currentISODate = dateFormat(newDate(currentDate), dateFormats.isoDate);
-    const valuesForDay = flattenedData.filter((object) => object.finished_at === currentISODate);
-    const summedData = valuesForDay.reduce((total, value) => total + value.duration_in_seconds, 0);
+    const valuesForDay = flattenedData.filter((object) => object.date === currentISODate);
+    // We no longer want to dispaly the sumed data, we now need to work out the average
+    // We can do this by dividinng the sumed data by the number of active stages
+    const summedData =
+      valuesForDay.reduce((total, value) => total + value.average_duration_in_seconds, 0) /
+      data.length;
     const summedDataInDays = secondsToDays(summedData);
 
     if (summedDataInDays) eventData.push([currentISODate, summedDataInDays, currentISODate]);
