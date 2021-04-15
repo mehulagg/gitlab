@@ -9,7 +9,7 @@ RSpec.describe Epics::CreateService do
 
   let(:params) { { title: 'new epic', description: 'epic description', parent_id: parent_epic.id, confidential: true } }
 
-  subject { described_class.new(group, user, params).execute }
+  subject { described_class.new(container: group, current_user: user, params: params).execute }
 
   describe '#execute' do
     it 'creates one epic correctly' do
@@ -96,7 +96,7 @@ RSpec.describe Epics::CreateService do
             description = "/parent_epic #{parent_epic.to_reference}"
             params = { title: 'New epic with parent', description: description }
 
-            epic = described_class.new(group, user, params).execute
+            epic = described_class.new(container: group, current_user: user, params: params).execute
 
             expect(epic.parent).to eq(parent_epic)
           end
@@ -108,7 +108,7 @@ RSpec.describe Epics::CreateService do
               description = "/parent_epic #{parent_epic.to_reference(group)}"
               params = { title: 'New epic with parent', description: description }
 
-              epic = described_class.new(group, user, params).execute
+              epic = described_class.new(container: group, current_user: user, params: params).execute
 
               expect(epic.parent).to eq(nil)
             end
@@ -121,7 +121,7 @@ RSpec.describe Epics::CreateService do
             description = "/child_epic #{child_epic.to_reference}"
             params = { title: 'New epic with child', description: description }
 
-            epic = described_class.new(group, user, params).execute
+            epic = described_class.new(container: group, current_user: user, params: params).execute
 
             expect(epic.reload.children).to include(child_epic)
           end
@@ -133,7 +133,7 @@ RSpec.describe Epics::CreateService do
               description = "/child_epic #{child_epic.to_reference(group)}"
               params = { title: 'New epic with child', description: description }
 
-              epic = described_class.new(group, user, params).execute
+              epic = described_class.new(container: group, current_user: user, params: params).execute
 
               expect(epic.reload.children).to be_empty
             end

@@ -7,7 +7,7 @@ RSpec.describe Epics::CloseService do
   let_it_be(:epic, reload: true) { create(:epic, group: group) }
 
   describe '#execute' do
-    subject { described_class.new(group, user) }
+    subject { described_class.new(container: group, current_user: user) }
 
     context 'when epics are disabled' do
       before do

@@ -7,7 +7,7 @@ RSpec.describe Epics::ReopenService do
   let_it_be(:epic, reload: true) { create(:epic, group: group, state: :closed, closed_at: Date.today, closed_by: user) }
 
   describe '#execute' do
-    subject { described_class.new(group, user) }
+    subject { described_class.new(container: group, current_user: user) }
 
     context 'when epics are disabled' do
       before do
