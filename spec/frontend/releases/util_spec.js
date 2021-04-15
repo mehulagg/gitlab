@@ -14,6 +14,9 @@ const originalAllReleasesQueryResponse = getJSONFixture(
 const originalOneReleaseQueryResponse = getJSONFixture(
   'graphql/releases/queries/one_release.query.graphql.json',
 );
+const originalOneReleaseForEditingQueryResponse = getJSONFixture(
+  'graphql/releases/queries/one_release_for_editing.query.graphql.json',
+);
 
 describe('releases/util.js', () => {
   describe('releaseToApiJson', () => {
@@ -171,6 +174,14 @@ describe('releases/util.js', () => {
   describe('convertOneReleaseGraphQLResponse', () => {
     it('matches snapshot', () => {
       expect(convertOneReleaseGraphQLResponse(originalOneReleaseQueryResponse)).toMatchSnapshot();
+    });
+  });
+
+  describe('convertOneReleaseForEditingGraphQLResponse', () => {
+    it('matches snapshot', () => {
+      expect(
+        convertOneReleaseGraphQLResponse(originalOneReleaseForEditingQueryResponse),
+      ).toMatchSnapshot();
     });
   });
 });
