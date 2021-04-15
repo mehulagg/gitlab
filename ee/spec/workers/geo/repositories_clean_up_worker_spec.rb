@@ -7,7 +7,7 @@ RSpec.describe Geo::RepositoriesCleanUpWorker, :geo do
   include ExclusiveLeaseHelpers
 
   describe '#perform' do
-    let_it_be(:secondary) { create(:geo_node) }
+    let_it_be(:secondary, refind: true) { create(:geo_node) }
     let_it_be(:synced_group) { create(:group) }
     let_it_be(:synced_subgroup) { create(:group, parent: synced_group) }
     let_it_be(:unsynced_group) { create(:group) }

@@ -5,10 +5,10 @@ require 'spec_helper'
 RSpec.describe 'Destroy an epic board list' do
   include GraphqlHelpers
 
-  let_it_be(:current_user, reload: true) { create(:user) }
+  let_it_be(:current_user, refind: true) { create(:user) }
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:board) { create(:epic_board, group: group) }
-  let_it_be(:list) { create(:epic_list, epic_board: board) }
+  let_it_be(:list, refind: true) { create(:epic_list, epic_board: board) }
 
   let(:variables) do
     {
