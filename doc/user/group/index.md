@@ -479,7 +479,7 @@ You should consider these security implications before configuring IP address re
   and [Projects](../../api/projects.md) APIs are protected by IP address restrictions.
   When you register a runner, it is not bound by the IP restrictions. When the runner
   requests a new job or an update to a job's state, it is also not bound by
-  the IP restrictions. But when the running CI/CD job sends git requests from a
+  the IP restrictions. But when the running CI/CD job sends Git requests from a
   restricted IP address, the IP restriction prevents code from being cloned.
 
 To restrict group access by IP address:
