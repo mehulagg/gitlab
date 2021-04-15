@@ -1595,6 +1595,14 @@ To configure the Sidekiq nodes, one each one:
    #######################################
    sidekiq['listen_address'] = "0.0.0.0"
 
+   # Set number of Sidekiq queue processes to the same number as available CPUs
+   sidekiq['queue_groups'] = [
+     "*",
+     "*"
+   ]
+   # Set number of Sidekiq threads per queue process to the recommend number of 10
+   sidekiq['max_concurrency'] = 10
+
    #######################################
    ###     Monitoring configuration    ###
    #######################################
@@ -1650,7 +1658,9 @@ To configure the Sidekiq nodes, one each one:
    ```
 
 NOTE:
-You can also run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
+If found that the environment's Sidekiq job processing is slow with long queues
+more nodes can be added as required. You can also tune your Sidekiq nodes to
+run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
