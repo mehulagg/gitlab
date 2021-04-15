@@ -25,3 +25,5 @@ remote:   ssh://git@primary.geo/user/repo.git
 remote:
 Everything up-to-date
 ```
+
+Note that to be able to push to secondary you can't store credentials in the URL like `user:password@URL`. Instead, use [`.netrc` file](https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html) for Unix-like operating systems or `_netrc` for Windows. In that case, the credentials will be stored as a plain text. If you're looking for a more secure way to store credentials, you can use [Git Credential Storage](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage).
