@@ -12041,6 +12041,9 @@ msgstr ""
 msgid "Enforce personal access token expiration"
 msgstr ""
 
+msgid "Enjoying your GitLab %{planNameForTrial} trial? To continue using %{featureName} after your trial ends, upgrade to GitLab %{planNameForUpgrade}."
+msgstr ""
+
 msgid "Ensure connectivity is available from the GitLab server to the Prometheus server"
 msgstr ""
 
@@ -13596,6 +13599,11 @@ msgstr ""
 
 msgid "FeatureFlag|User List"
 msgstr ""
+
+msgid "FeatureHighlight|%{daysRemaining} day remaining to enjoy %{featureName}"
+msgid_plural "FeatureHighlight|%{daysRemaining} days remaining to enjoy %{featureName}"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Feb"
 msgstr ""

@@ -60,4 +60,37 @@ RSpec.describe PaidFeatureCalloutHelper do
       end
     end
   end
+
+  describe '#paid_feature_badge_data_attrs' do
+    subject { helper.paid_feature_badge_data_attrs(feature: 'some feature') }
+
+    it 'returns the set of data attributes needed to bootstrap the PaidFeatureCalloutBadge component' do
+      expected_attrs = {
+        container_id: 'some-feature-callout'
+      }
+
+      is_expected.to eq(expected_attrs)
+    end
+  end
+
+  describe '#paid_feature_popover_data_attrs' do
+    let(:subscription) { instance_double(GitlabSubscription, plan_title: 'Ultimate') }
+    let(:group) { instance_double(Group, trial_days_remaining: 12, gitlab_subscription: subscription) }
+
+    subject { helper.paid_feature_popover_data_attrs(group: group, feature: 'some feature', promo_image_path: 'path/to/an/image.svg') }
+
+    it 'returns the set of data attributes needed to bootstrap the PaidFeatureCalloutPopover component' do
+      expected_attrs = {
+        container_id: 'some-feature-callout',
+        feature_name: 'some feature',
+        days_remaining: 12,
+        plan_name_for_trial: 'Ultimate',
+        plan_name_for_upgrade: 'Premium',
+        promo_image_path: 'path/to/an/image.svg',
+        target_id: 'some-feature-callout'
+      }
+
+      is_expected.to eq(expected_attrs)
+    end
+  end
 end

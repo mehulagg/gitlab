@@ -86,6 +86,10 @@ RSpec.describe 'shared/issuable/_approvals.html.haml' do
       it 'does not render the paid feature badge' do
         expect(rendered).not_to have_css('#js-paid-feature-badge')
       end
+
+      it 'does not render the paid feature popover' do
+        expect(rendered).not_to have_css('#js-paid-feature-popover')
+      end
     end
 
     context 'when user is in the candidate' do
@@ -93,6 +97,10 @@ RSpec.describe 'shared/issuable/_approvals.html.haml' do
 
       it 'renders the paid feature badge' do
         expect(rendered).to have_css('#js-paid-feature-badge')
+      end
+
+      it 'renders the paid feature popover' do
+        expect(rendered).to have_css('#js-paid-feature-popover')
       end
     end
   end
