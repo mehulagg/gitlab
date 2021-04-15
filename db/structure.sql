@@ -14148,7 +14148,7 @@ CREATE TABLE list_user_preferences (
     list_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    collapsed boolean
+    collapsed boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE list_user_preferences_id_seq

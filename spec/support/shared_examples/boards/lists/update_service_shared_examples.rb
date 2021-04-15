@@ -37,7 +37,7 @@ RSpec.shared_examples 'updating list preferences' do
     it 'does not update list preference for user' do
       service.execute(list)
 
-      expect(list.preferences_for(user).collapsed).to be_falsy
+      expect(list.preferences_for(user).collapsed).to eq(false)
     end
   end
 end
