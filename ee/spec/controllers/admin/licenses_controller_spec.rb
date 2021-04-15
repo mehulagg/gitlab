@@ -115,22 +115,24 @@ RSpec.describe Admin::LicensesController do
     context 'with seat link enabled' do
       let(:seat_link_enabled) { true }
 
-      it 'redirects with a successful message' do
-        post :sync_seat_link
+      it 'returns a success response' do
+        post :sync_seat_link, format: :json
 
-        expect(response).to redirect_to(admin_license_path)
-        expect(flash[:notice]).to eq('Your license was successfully synced.')
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.body).to eq({ success: true }.to_json)
       end
     end
 
     context 'with seat link disabled' do
       let(:seat_link_enabled) { false }
 
-      it 'redirects with an error message' do
-        post :sync_seat_link
+      it 'returns a failure response' do
+        post :sync_seat_link, format: :json
 
-        expect(response).to redirect_to(admin_license_path)
-        expect(flash[:error]).to match('There was an error when trying to sync your license.')
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
+
+        message = 'There was an error when trying to sync your license. Please verify that your instance is using an active license key.'
+        expect(response.body).to eq({ success: false, errors: message }.to_json)
       end
     end
   end
