@@ -81,11 +81,9 @@ module Gitlab
 
               vuln_params = { name: vulnerabilities['message'], severity: vulnerabilities['severity'].downcase }
 
-              if Feature.enabled?(:standalone_vuln_dependency_list, project)
-                id = vulnerabilities[:vulnerability_id]
-                standalone_vuln_params = { id: id, url: vulnerability_url(id) }
-                vuln_params.merge!(standalone_vuln_params)
-              end
+              id = vulnerabilities[:vulnerability_id]
+              standalone_vuln_params = { id: id, url: vulnerability_url(id) }
+              vuln_params.merge!(standalone_vuln_params)
 
               [vuln_params]
             end

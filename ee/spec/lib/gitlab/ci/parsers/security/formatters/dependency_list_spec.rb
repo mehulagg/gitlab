@@ -70,38 +70,20 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::DependencyList do
     context 'with vulnerable dependency' do
       let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][1] }
       let(:data) { formatter.format(dependency, package_manager, file_path, vulnerability_data) }
+      let_it_be(:standalone_vulnerability) { create(:vulnerability, report_type: :dependency_scanning) }
 
-      context 'with feature `standalone vulnerabilities` enabled' do
-        let_it_be(:standalone_vulnerability) { create(:vulnerability, report_type: :dependency_scanning) }
-
-        let(:vulnerability_data) do
-          create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: standalone_vulnerability)
-        end
-
-        it 'merge vulnerabilities data' do
-          vulnerability = data[:vulnerabilities].first
-          path = "/security/vulnerabilities/#{standalone_vulnerability.id}"
-
-          expect(vulnerability[:id]).to eq(standalone_vulnerability.id)
-          expect(vulnerability[:url]).to end_with(path)
-          expect(vulnerability[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
-          expect(vulnerability[:severity]).to eq('high')
-        end
+      let(:vulnerability_data) do
+        create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: standalone_vulnerability)
       end
 
-      context 'with disabled feature' do
-        let(:vulnerability_data) { parsed_report['vulnerabilities'].first }
+      it 'merge vulnerabilities data' do
+        vulnerability = data[:vulnerabilities].first
+        path = "/security/vulnerabilities/#{standalone_vulnerability.id}"
 
-        before do
-          stub_feature_flags(standalone_vuln_dependency_list: false)
-        end
-
-        it 'merge vulnerabilities data' do
-          vulnerability = data[:vulnerabilities].first
-
-          expect(vulnerability[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
-          expect(vulnerability[:severity]).to eq('high')
-        end
+        expect(vulnerability[:id]).to eq(standalone_vulnerability.id)
+        expect(vulnerability[:url]).to end_with(path)
+        expect(vulnerability[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
+        expect(vulnerability[:severity]).to eq('high')
       end
     end
   end

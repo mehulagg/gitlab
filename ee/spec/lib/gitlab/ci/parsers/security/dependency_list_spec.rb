@@ -49,45 +49,6 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyList do
       end
     end
 
-    context "with vulnerabilities from report" do
-      let(:artifact) { pipeline.job_artifacts.last }
-
-      before do
-        stub_feature_flags(standalone_vuln_dependency_list: false)
-
-        artifact.each_blob do |blob|
-          parser.parse!(blob, report)
-        end
-      end
-
-      it 'merge vulnerabilities data' do
-        vuln_nokogiri = report.dependencies[1][:vulnerabilities]
-        vuln_debug = report.dependencies[4][:vulnerabilities]
-        vuln_async = report.dependencies[3][:vulnerabilities]
-
-        expect(vuln_nokogiri.size).to eq(4)
-        expect(vuln_nokogiri[0][:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
-        expect(vuln_nokogiri[0][:severity]).to eq('high')
-        expect(vuln_debug.size).to eq(1)
-        expect(vuln_debug[0][:name]).to eq('Regular Expression Denial of Service in debug')
-        expect(vuln_async.size).to eq(0)
-      end
-
-      context 'with dependency scanning artifact without dependency_list' do
-        let(:artifact) { create(:ee_ci_job_artifact, :dependency_scanning) }
-
-        before do
-          artifact.each_blob do |blob|
-            parser.parse!(blob, report)
-          end
-        end
-
-        it 'list of dependencies with vulnerabilities' do
-          expect(report.dependencies.size).to eq(4)
-        end
-      end
-    end
-
     context 'with vulnerabilities in the database' do
       let_it_be(:vulnerability) { create(:vulnerability, report_type: :dependency_scanning) }
       let_it_be(:finding) { create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: vulnerability) }
