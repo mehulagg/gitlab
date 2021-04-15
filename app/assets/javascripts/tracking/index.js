@@ -1,16 +1,7 @@
 import { omitBy, isUndefined } from 'lodash';
 import { TRACKING_CONTEXT_SCHEMA } from '~/experimentation/constants';
 import { getExperimentData } from '~/experimentation/utils';
-
-const standardContext = { ...window.gl?.snowplowStandardContext };
-
-export const STANDARD_CONTEXT = {
-  schema: standardContext.schema,
-  data: {
-    ...(standardContext.data || {}),
-    source: 'gitlab-javascript',
-  },
-};
+import getStandardContext from './get_standard_context';
 
 const DEFAULT_SNOWPLOW_OPTIONS = {
   namespace: 'gl',
@@ -84,8 +75,10 @@ const dispatchEvent = (category = document.body.dataset.page, action = 'generic'
   // eslint-disable-next-line @gitlab/require-i18n-strings
   if (!category) throw new Error('Tracking: no category provided for tracking.');
 
-  const { label, property, value } = data;
-  const contexts = [STANDARD_CONTEXT];
+  const { label, property, value, extra = {} } = data;
+
+  const standardContext = getStandardContext({ extra });
+  const contexts = [standardContext];
 
   if (data.context) {
     contexts.push(data.context);
@@ -194,7 +187,8 @@ export function initDefaultTrackers() {
 
   window.snowplow('enableActivityTracking', 30, 30);
   // must be after enableActivityTracking
-  window.snowplow('trackPageView', null, [STANDARD_CONTEXT]);
+  const standardContext = getStandardContext();
+  window.snowplow('trackPageView', null, [standardContext]);
 
   if (window.snowplowOptions.formTracking) window.snowplow('enableFormTracking');
   if (window.snowplowOptions.linkClickTracking) window.snowplow('enableLinkClickTracking');

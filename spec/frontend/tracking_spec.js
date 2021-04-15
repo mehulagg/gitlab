@@ -1,14 +1,30 @@
 import { setHTMLFixture } from 'helpers/fixtures';
 import { TRACKING_CONTEXT_SCHEMA } from '~/experimentation/constants';
 import { getExperimentData } from '~/experimentation/utils';
-import Tracking, { initUserTracking, initDefaultTrackers, STANDARD_CONTEXT } from '~/tracking';
+import Tracking, { initUserTracking, initDefaultTrackers } from '~/tracking';
+import getStandardContext from '~/tracking/get_standard_context';
 
 jest.mock('~/experimentation/utils', () => ({ getExperimentData: jest.fn() }));
+jest.mock('~/tracking/get_standard_context');
 
 describe('Tracking', () => {
+  let standardContext;
   let snowplowSpy;
   let bindDocumentSpy;
   let trackLoadEventsSpy;
+
+  beforeAll(() => {
+    standardContext = {
+      schema: 'iglu:com.gitlab/gitlab_standard',
+      data: {
+        environment: 'testing',
+        source: 'unknown',
+        extra: {},
+      },
+    };
+
+    getStandardContext.mockImplementation(() => standardContext);
+  });
 
   beforeEach(() => {
     getExperimentData.mockReturnValue(undefined);
@@ -51,7 +67,7 @@ describe('Tracking', () => {
     it('should activate features based on what has been enabled', () => {
       initDefaultTrackers();
       expect(snowplowSpy).toHaveBeenCalledWith('enableActivityTracking', 30, 30);
-      expect(snowplowSpy).toHaveBeenCalledWith('trackPageView', null, [STANDARD_CONTEXT]);
+      expect(snowplowSpy).toHaveBeenCalledWith('trackPageView', null, [standardContext]);
       expect(snowplowSpy).not.toHaveBeenCalledWith('enableFormTracking');
       expect(snowplowSpy).not.toHaveBeenCalledWith('enableLinkClickTracking');
 
@@ -84,34 +100,6 @@ describe('Tracking', () => {
       navigator.msDoNotTrack = undefined;
     });
 
-    describe('builds the standard context', () => {
-      let standardContext;
-
-      beforeAll(async () => {
-        window.gl = window.gl || {};
-        window.gl.snowplowStandardContext = {
-          schema: 'iglu:com.gitlab/gitlab_standard',
-          data: {
-            environment: 'testing',
-            source: 'unknown',
-          },
-        };
-
-        jest.resetModules();
-
-        ({ STANDARD_CONTEXT: standardContext } = await import('~/tracking'));
-      });
-
-      it('uses server data', () => {
-        expect(standardContext.schema).toBe('iglu:com.gitlab/gitlab_standard');
-        expect(standardContext.data.environment).toBe('testing');
-      });
-
-      it('overrides schema source', () => {
-        expect(standardContext.data.source).toBe('gitlab-javascript');
-      });
-    });
-
     it('tracks to snowplow (our current tracking system)', () => {
       Tracking.event('_category_', '_eventName_', { label: '_label_' });
 
@@ -122,7 +110,23 @@ describe('Tracking', () => {
         '_label_',
         undefined,
         undefined,
-        [STANDARD_CONTEXT],
+        [standardContext],
+      );
+    });
+
+    it('allows adding extra data to the default context', () => {
+      const extra = { foo: 'bar' };
+
+      Tracking.event('_category_', '_eventName_', { extra });
+
+      expect(snowplowSpy).toHaveBeenCalledWith(
+        'trackStructEvent',
+        '_category_',
+        '_eventName_',
+        undefined,
+        undefined,
+        undefined,
+        [standardContext],
       );
     });
 
@@ -171,7 +175,7 @@ describe('Tracking', () => {
         '_label_',
         undefined,
         undefined,
-        [STANDARD_CONTEXT],
+        [standardContext],
       );
     });
   });
