@@ -25,12 +25,12 @@ Scanning a web application with both the browser-based crawler and GitLab DAST s
 
 ## Enable browser-based crawling
 
-The browser-based crawler is an extension to the GitLab DAST product. DAST should be included in the CI/CD configuration and the browser-based crawler enabled using environment variables:
+The browser-based crawler is an extension to the GitLab DAST product. DAST should be included in the CI/CD configuration and the browser-based crawler enabled using CI/CD variables:
 
 1. Install the DAST [prerequisites](index.md#prerequisite).
 1. Include the [DAST CI template](index.md#include-the-dast-template).
-1. Set the target website using the `DAST_WEBSITE` environment variable.
-1. Set the environment variable `DAST_BROWSER_SCAN` to `true`.
+1. Set the target website using the `DAST_WEBSITE` CI/CD variable.
+1. Set the CI/CD variable `DAST_BROWSER_SCAN` to `true`.
  
 An example configuration might look like the following:
 
@@ -71,7 +71,7 @@ The [DAST variables](index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `D
 
 #### Selectors
 
-Selectors are used by environment variables to specify the location of an element displayed on a page in a browser.
+Selectors are used by CI/CD variables to specify the location of an element displayed on a page in a browser.
 Selectors have the format `type`:`search string`. The crawler will search for the selector using the search string based on the type.
 
 | Selector type | Example                        | Description |
