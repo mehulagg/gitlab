@@ -13,7 +13,7 @@ module Gitlab
       end
 
       BASE_QUERY = Namespace
-        .where.not('parent_id IS NULL')
+        .where.not(parent_id: nil)
         .where("traversal_ids = '{}'")
       PAUSE_SECONDS = 0.1
 
