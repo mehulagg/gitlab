@@ -88,6 +88,8 @@ const Api = {
   projectNotificationSettingsPath: '/api/:version/projects/:id/notification_settings',
   groupNotificationSettingsPath: '/api/:version/groups/:id/notification_settings',
   notificationSettingsPath: '/api/:version/notification_settings',
+  runnersPath: '/api/:version/runners',
+  runnerPath: '/api/:version/runners/:id',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -946,6 +948,22 @@ const Api = {
     } else if (groupId) {
       url = Api.buildUrl(this.groupNotificationSettingsPath).replace(':id', groupId);
     }
+
+    const result = await axios.get(url);
+
+    return result;
+  },
+
+  async getRunners() {
+    const url = Api.buildUrl(this.runnersPath);
+
+    const result = await axios.get(url);
+
+    return result;
+  },
+
+  async getRunner(id) {
+    const url = Api.buildUrl(this.runnerPath).replace(':id', id);
 
     const result = await axios.get(url);
 

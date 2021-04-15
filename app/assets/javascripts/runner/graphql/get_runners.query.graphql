@@ -1,0 +1,12 @@
+query getRunners {
+  runners @client {
+    id
+    description
+    ipAddress
+    active
+    isShared
+    name
+    online
+    status
+  }
+}
