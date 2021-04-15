@@ -1,0 +1,79 @@
+variables:
+  AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER: 'heroku/buildpacks:20'
+
+.build:set_image_tags:
+  script:
+    - |
+      if [[ -z "$CI_COMMIT_TAG" ]]; then
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_SHA}
+      else
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
+      fi
+
+build:
+  stage: build
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-build-image:v0.5.0"
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  services:
+    - docker:19.03.12-dind
+  script:
+    - !reference ['.build:set_image_tags', script]
+    - /build/build.sh
+  rules:
+    - if: '$AUTO_DEVOPS_PLATFORM_TARGET == "EC2"'
+      when: never
+    - if: '$CI_COMMIT_TAG == null && $CI_COMMIT_BRANCH == null'
+      when: never
+    - if: '$DOCKERFILE_PATH'
+    - exists: [ Dockerfile ]
+    # The CNB lifecycle does not currently include functionality do download
+    # external buildpacks (ones not included in the builder image), so we
+    # fall back on auto-build-image's pack and the dind daemon for this.
+    # See https://github.com/buildpacks/lifecycle/issues/555
+    - if: '$BUILDPACK_URL'
+
+build_cnb:
+  image: $AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER
+  stage: build
+  rules:
+    - if: '$AUTO_DEVOPS_PLATFORM_TARGET == "EC2"'
+      when: never
+    - exists: [ Dockerfile ]
+      when: never
+    - if: $DOCKERFILE_PATH || $BUILDPACK_URL
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+  script:
+    - !reference ['.build:set_image_tags', script ]
+    # work around non-root permissions in $CI_BUILDS_DIR (which contains $CI_PROJECT_DIR)
+    - export CNB_APP_DIR=/workspace
+    - mv "$CI_PROJECT_DIR"/* "$CNB_APP_DIR"
+    - cd "$CNB_APP_DIR"
+    # create platform directory with forwarded environment variables
+    - export CNB_PLATFORM_DIR=/tmp/platform
+    - mkdir -p "$CNB_PLATFORM_DIR/env"
+    - IFS=',' read -ra forwarded_variables <<< "$AUTO_DEVOPS_BUILD_IMAGE_FORWARDED_CI_VARIABLES"
+    - forwarded_variables+=(HTTP_PROXY http_proxy HTTPS_PROXY https_proxy ftp_proxy NO_PROXY no_proxy)
+    - for v in "${forwarded_variables[@]}"; do if [[ -n "${!v}" ]]; then echo "${!v}" > "$CNB_PLATFORM_DIR/env/$v"; fi; done
+    - ls "$CNB_PLATFORM_DIR/env"
+    # authenticate with registry
+    - mkdir "$HOME/.docker"
+    - encoded_credentials=$(echo "$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD" | base64)
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > "$HOME/.docker/config.json"
+    # build
+    - cache_image="${CI_REGISTRY_IMAGE}/cnb_cache_image:latest"
+    - image_latest="${CI_APPLICATION_REPOSITORY}:latest"
+    - image_tagged="${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG}"
+    - /cnb/lifecycle/creator -cache-image "$cache_image" -app "$CNB_APP_DIR" -platform "$CNB_PLATFORM_DIR" -tag "$image_tagged" "$image_latest"
+
+build_artifact:
+  stage: build
+  script:
+    - printf "To build your project, please create a build_artifact job into your .gitlab-ci.yml file.\nMore information at https://docs.gitlab.com/ee/ci/cloud_deployment\n"
+    - exit 1
+  rules:
+    - if: '$AUTO_DEVOPS_PLATFORM_TARGET == "EC2"'
+
