@@ -1,19 +1,10 @@
 <script>
-import {
-  GlDropdown,
-  GlSearchBoxByType,
-  GlIcon,
-  GlLoadingIcon,
-  GlTruncate,
-  GlDropdownText,
-} from '@gitlab/ui';
+import { GlDropdown, GlSearchBoxByType, GlTruncate, GlDropdownText } from '@gitlab/ui';
 
 export default {
   components: {
     GlDropdown,
     GlSearchBoxByType,
-    GlIcon,
-    GlLoadingIcon,
     GlTruncate,
     GlDropdownText,
   },
