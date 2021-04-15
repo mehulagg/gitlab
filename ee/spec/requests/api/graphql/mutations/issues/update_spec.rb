@@ -109,6 +109,7 @@ RSpec.describe 'Update of an existing issue' do
 
   context 'removing epic' do
     let(:epic) { create(:epic, group: group) }
+    let(:issue) { create(:issue, project: project, epic: epic) }
 
     let(:input) do
       { iid: issue.iid.to_s, epic_id: nil }
@@ -117,7 +118,6 @@ RSpec.describe 'Update of an existing issue' do
     before do
       stub_licensed_features(epics: true)
       group.add_developer(current_user)
-      issue.update!(epic: epic)
     end
 
     it 'removes the epic' do
