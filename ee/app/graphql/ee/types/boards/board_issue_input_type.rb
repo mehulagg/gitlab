@@ -15,6 +15,10 @@ module EE
           argument :iteration_wildcard_id, ::Types::IterationWildcardIdEnum,
                    required: false,
                    description: 'Filter by iteration ID wildcard.'
+
+          argument :weight_wildcard_id, ::Types::Boards::WeightWildcardIdEnum,
+                   required: false,
+                   description: 'Filter by weight ID wildcard. Incompatible with weight.'
         end
       end
     end
