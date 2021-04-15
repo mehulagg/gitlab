@@ -47,7 +47,7 @@ GitLab Runner can upload an archive containing the job artifacts to GitLab. By d
 this is done when the job succeeds, but can also be done on failure, or always, via the
 [`artifacts:when`](../ci/yaml/README.md#artifactswhen) parameter.
 
-Most artifacts are compressed by GitLab Runner before being sent to the coordinator. The exception to this is
+Most artifacts are compressed by GitLab Runner before being sent to the [coordinator](https://docs.gitlab.com/runner/faq/#what-does-coordinator-mean). The exception to this is
 [reports artifacts](../ci/yaml/README.md#artifactsreports), which are compressed after uploading.
 
 ### Using local storage
