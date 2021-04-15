@@ -296,7 +296,7 @@ This example excludes from `gl-container-scanning-report.json`:
   - as full image name with registry hostname and sha256 label (ie. `registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256`).
 
 NOTE:
-The string after CVE ID (`cups` and `libxml2` in the previous example) has **no impact**. It is included as a "hint" to help explain what the vulnerability relates to. There is no need to use it, you can leave it blank.
+The string after CVE ID (`cups` and `libxml2` in the previous example) is an optional comment format. It has **no impact** on the handling of vulnerabilities. You can include comments to describe the vulnerability.
 
 ##### Container scanning job log format
 
@@ -305,7 +305,7 @@ at the logs that are produced by the container scanning analyzer in `container_s
 
 The log contains a list of found vulnerabilities as a table, for example:
 
-```text
+```plainttext
 +------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
 |   STATUS   |      CVE SEVERITY       |      PACKAGE NAME      |    PACKAGE VERSION    |                            CVE DESCRIPTION                             |
 +------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
