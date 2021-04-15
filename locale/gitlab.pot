@@ -4911,6 +4911,9 @@ msgstr ""
 msgid "Be careful. Renaming a project's repository can have unintended side effects."
 msgstr ""
 
+msgid "Before enabling this integration, create a webhook for the room in Google Chat where you want to receive notifications from this project. %{docs_link}"
+msgstr ""
+
 msgid "Before inserting code, be sure to read the comment that separated each code group."
 msgstr ""
 
@@ -15951,6 +15954,9 @@ msgid "How do I generate it?"
 msgstr ""
 
 msgid "How do I mirror repositories?"
+msgstr ""
+
+msgid "How do I set up a Google Chat webhook?"
 msgstr ""
 
 msgid "How do I set up this service?"
