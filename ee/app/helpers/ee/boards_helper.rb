@@ -32,7 +32,8 @@ module EE
         show_promotion: show_feature_promotion,
         scoped_labels: current_board_parent.feature_available?(:scoped_labels)&.to_s,
         can_update: can_update?.to_s,
-        can_admin_list: can_admin_list?.to_s
+        can_admin_list: can_admin_list?.to_s,
+        emails_disabled: current_board_parent.emails_disabled?.to_s
       }
 
       super.merge(data)

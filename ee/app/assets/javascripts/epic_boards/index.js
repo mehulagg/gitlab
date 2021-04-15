@@ -76,6 +76,7 @@ export default () => {
       milestoneListsAvailable: false,
       assigneeListsAvailable: false,
       iterationListsAvailable: false,
+      emailsDisabled: parseBoolean($boardApp.dataset.emailsDisabled),
     },
     store,
     apolloProvider,

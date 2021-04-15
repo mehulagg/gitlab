@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSubscriptions::ActivateService do
+  subject(:execute_service) { described_class.new.execute(activation_code) }
+
   let!(:application_settings) do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
     create(:application_setting, cloud_license_enabled: cloud_license_enabled)
@@ -30,16 +32,19 @@ RSpec.describe GitlabSubscriptions::ActivateService do
     end
 
     it 'persists license' do
-      expect(subject.execute(activation_code)).to eq({ success: true })
+      result = execute_service
+      created_license = License.last
 
-      expect(License.last.data).to eq(license_key)
+      expect(result).to eq({ success: true, license: created_license })
+
+      expect(created_license.data).to eq(license_key)
     end
 
     context 'when persisting fails' do
       let(:license_key) { 'invalid key' }
 
       it 'returns error' do
-        expect(subject.execute(activation_code)).to match({ errors: [be_a_kind_of(String)], success: false })
+        expect(execute_service).to match({ errors: [be_a_kind_of(String)], success: false })
       end
     end
   end
@@ -50,7 +55,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
     it 'returns error' do
       stub_client_activate
 
-      expect(subject.execute(activation_code)).to eq(customer_dot_response)
+      expect(execute_service).to eq(customer_dot_response)
 
       expect(License.last&.data).not_to eq(license_key)
     end
@@ -63,7 +68,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
       allow(Gitlab).to receive(:com?).and_return(true)
       expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
 
-      expect(subject.execute(activation_code)).to eq(customer_dot_response)
+      expect(execute_service).to eq(customer_dot_response)
     end
   end
 
@@ -74,7 +79,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
     it 'returns error' do
       expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
 
-      expect(subject.execute(activation_code)).to eq(customer_dot_response)
+      expect(execute_service).to eq(customer_dot_response)
     end
   end
 
@@ -82,7 +87,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
     it 'captures error' do
       expect(Gitlab::SubscriptionPortal::Client).to receive(:activate).and_raise('foo')
 
-      expect(subject.execute(activation_code)).to eq({ success: false, errors: ['foo'] })
+      expect(execute_service).to eq({ success: false, errors: ['foo'] })
     end
   end
 end

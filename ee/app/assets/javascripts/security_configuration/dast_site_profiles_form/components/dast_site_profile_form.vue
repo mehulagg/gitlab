@@ -123,9 +123,7 @@ export default {
         excludedUrls: {
           label: s__('DastProfiles|Excluded URLs (Optional)'),
           description: s__('DastProfiles|Enter URLs in a comma-separated list.'),
-          tooltip: s__(
-            'DastProfiles|URLs to skip during the authenticated scan. Use regular expression syntax to match multiple URLs.',
-          ),
+          tooltip: s__('DastProfiles|URLs to skip during the authenticated scan.'),
           placeholder: 'https://example.com/logout, https://example.com/send_mail',
         },
         requestHeaders: {

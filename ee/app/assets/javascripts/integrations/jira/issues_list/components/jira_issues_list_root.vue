@@ -200,7 +200,7 @@ export default {
     @filter="handleFilterIssues"
   >
     <template #nav-actions>
-      <gl-button :href="issueCreateUrl" target="_blank"
+      <gl-button :href="issueCreateUrl" target="_blank" class="gl-my-5"
         >{{ s__('Integrations|Create new issue in Jira') }}<gl-icon name="external-link"
       /></gl-button>
     </template>

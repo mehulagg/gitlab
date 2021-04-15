@@ -2,7 +2,6 @@
 import { GlCollapse, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ReportItem from './report_item.vue';
-import ReportRow from './report_row.vue';
 import { filterTypesAndLimitListDepth } from './types/utils';
 
 const NESTED_LISTS_MAX_DEPTH = 4;
@@ -15,7 +14,6 @@ export default {
     GlCollapse,
     GlIcon,
     ReportItem,
-    ReportRow,
   },
   props: {
     details: {
@@ -57,11 +55,14 @@ export default {
       </h3>
     </header>
     <gl-collapse :visible="showSection">
-      <div data-testid="reports">
+      <div class="generic-report-container" data-testid="reports">
         <template v-for="[label, item] in detailsEntries">
-          <report-row :key="label" :label="item.name" :data-testid="`report-row-${label}`">
-            <report-item :item="item" />
-          </report-row>
+          <div :key="label" class="generic-report-row" :data-testid="`report-row-${label}`">
+            <strong class="generic-report-column">{{ item.name }}</strong>
+            <div class="generic-report-column" data-testid="reportContent">
+              <report-item :item="item" :data-testid="`report-item-${label}`" />
+            </div>
+          </div>
         </template>
       </div>
     </gl-collapse>

@@ -120,12 +120,29 @@ $selection-summary-with-error-height: 118px;
   }
 }
 
-.generic-report-row {
-  grid-template-columns: minmax(150px, 1fr) 3fr;
-  grid-column-gap: $gl-spacing-scale-5;
+.generic-report-container {
+  @include gl-display-grid;
 
-  &:last-child {
+  grid-template-columns: max-content auto;
+}
+
+.generic-report-row {
+  display: contents;
+
+  &:last-child .generic-report-column {
     @include gl-border-b-0;
+  }
+}
+
+.generic-report-column {
+  @include gl-px-3;
+  @include gl-py-5;
+  @include gl-border-b-1;
+  @include gl-border-b-solid;
+  @include gl-border-gray-100;
+
+  &:first-child {
+    max-width: 15rem;
   }
 }
 
@@ -140,4 +157,3 @@ $selection-summary-with-error-height: 118px;
     list-style-type: disc;
   }
 }
-

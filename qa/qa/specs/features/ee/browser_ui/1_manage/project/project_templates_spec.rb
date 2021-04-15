@@ -148,7 +148,7 @@ module QA
           Page::Project::New.perform(&:go_to_create_from_template_group_tab)
         end
 
-        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1273' do
+        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1768' do
           Page::Project::New.perform do |new_page|
             expect(new_page.group_template_tab_badge_text).to eq "1"
             expect(new_page).to have_text(@template_container_group_name)

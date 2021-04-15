@@ -1,6 +1,21 @@
 mutation($gitlabSubscriptionActivateInput: GitlabSubscriptionActivateInput!) {
   gitlabSubscriptionActivate(input: $gitlabSubscriptionActivateInput) {
-    clientMutationId
     errors
+    license {
+      id
+      type
+      plan
+      name
+      email
+      company
+      startsAt
+      expiresAt
+      activatedAt
+      lastSync
+      usersInLicenseCount
+      billableUsersCount
+      maximumUserCount
+      usersOverLicenseCount
+    }
   }
 }

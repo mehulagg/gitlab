@@ -148,7 +148,7 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
 
         context 'when the oauth_application is missing' do
           before do
-            node.oauth_application.destroy
+            node.oauth_application.destroy!
             node.oauth_application = nil
           end
 
@@ -255,7 +255,7 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
     it 'expires cache when removed' do
       expect(node).to receive(:expire_cache!) # 1 for creation 1 for deletion
 
-      node.destroy
+      node.destroy!
     end
   end
 
@@ -596,7 +596,7 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
 
       expect(status).to be_a(GeoNodeStatus)
 
-      status.save
+      status.save!
 
       expect(new_node.find_or_build_status).to eq(status)
     end

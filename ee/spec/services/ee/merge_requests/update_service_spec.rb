@@ -302,12 +302,13 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       end
     end
 
-    it 'updates code owner approval rules' do
-      expect_next_instance_of(::MergeRequests::SyncCodeOwnerApprovalRules) do |instance|
-        expect(instance).to receive(:execute)
-      end
+    context 'when called inside an ActiveRecord transaction' do
+      it 'does not attempt to update code owner approval rules' do
+        allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(true)
+        expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker).not_to receive(:perform_async)
 
-      update_merge_request(title: 'Title')
+        update_merge_request(title: 'Title')
+      end
     end
 
     context 'updating reviewers_ids' do

@@ -1,8 +1,6 @@
 import { within, fireEvent } from '@testing-library/dom';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import ReportItem from 'ee/vulnerabilities/components/generic_report/report_item.vue';
-import ReportRow from 'ee/vulnerabilities/components/generic_report/report_row.vue';
 import ReportSection from 'ee/vulnerabilities/components/generic_report/report_section.vue';
 import { REPORT_TYPE_URL } from 'ee/vulnerabilities/components/generic_report/types/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -47,9 +45,9 @@ describe('ee/vulnerabilities/components/generic_report/report_section.vue', () =
       name: /evidence/i,
     });
   const findReportsSection = () => wrapper.findByTestId('reports');
-  const findAllReportRows = () => wrapper.findAllComponents(ReportRow);
+  const findAllReportRows = () => wrapper.findAll('[data-testid*="report-row"]');
   const findReportRowByLabel = (label) => wrapper.findByTestId(`report-row-${label}`);
-  const findItemWithinRow = (row) => row.findComponent(ReportItem);
+  const findReportItemByLabel = (label) => wrapper.findByTestId(`report-item-${label}`);
   const supportedReportTypesLabels = Object.keys(TEST_DATA.supportedTypes);
 
   describe('with supported report types', () => {
@@ -77,20 +75,21 @@ describe('ee/vulnerabilities/components/generic_report/report_section.vue', () =
         expect(findAllReportRows()).toHaveLength(supportedReportTypesLabels.length);
       });
 
-      it.each(supportedReportTypesLabels)('passes the correct props to report row: %s', (label) => {
-        expect(findReportRowByLabel(label).props()).toMatchObject({
-          label: TEST_DATA.supportedTypes[label].name,
-        });
-      });
+      it.each(supportedReportTypesLabels)(
+        'renders the correct label for report row: %s',
+        (label) => {
+          expect(within(findReportRowByLabel(label).element).getByText(label)).toBeInstanceOf(
+            HTMLElement,
+          );
+        },
+      );
     });
 
     describe('report items', () => {
       it.each(supportedReportTypesLabels)(
         'passes the correct props to item for row: %s',
         (label) => {
-          const row = findReportRowByLabel(label);
-
-          expect(findItemWithinRow(row).props()).toMatchObject({
+          expect(findReportItemByLabel(label).props()).toMatchObject({
             item: TEST_DATA.supportedTypes[label],
           });
         },

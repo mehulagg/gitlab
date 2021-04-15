@@ -74,6 +74,7 @@ RSpec.describe Security::StoreGroupedScansService do
         let_it_be(:sast_artifact_1) { create(:ee_ci_job_artifact, :sast, job: create(:ee_ci_build)) }
         let_it_be(:sast_artifact_2) { create(:ee_ci_job_artifact, :sast, job: create(:ee_ci_build)) }
         let_it_be(:sast_artifact_3) { create(:ee_ci_job_artifact, :sast, job: create(:ee_ci_build)) }
+
         let(:scanner_1) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'unknown') }
         let(:scanner_2) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'bandit') }
         let(:scanner_3) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'semgrep') }

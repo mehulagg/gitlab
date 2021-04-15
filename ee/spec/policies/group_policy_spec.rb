@@ -1449,21 +1449,23 @@ RSpec.describe GroupPolicy do
 
       let(:policy) { :admin_merge_request_approval_settings }
 
-      where(:role, :licensed, :admin_mode, :allowed) do
-        :guest      | true  | nil   | false
-        :guest      | false | nil   | false
-        :reporter   | true  | nil   | false
-        :reporter   | false | nil   | false
-        :developer  | true  | nil   | false
-        :developer  | false | nil   | false
-        :maintainer | true  | nil   | false
-        :maintainer | false | nil   | false
-        :owner      | true  | nil   | true
-        :owner      | false | nil   | false
-        :admin      | true  | true  | true
-        :admin      | false | true  | false
-        :admin      | true  | false | false
-        :admin      | false | false | false
+      where(:role, :licensed, :admin_mode, :root_group, :allowed) do
+        :guest      | true  | nil   | true  | false
+        :guest      | false | nil   | true  | false
+        :reporter   | true  | nil   | true  | false
+        :reporter   | false | nil   | true  | false
+        :developer  | true  | nil   | true  | false
+        :developer  | false | nil   | true  | false
+        :maintainer | true  | nil   | true  | false
+        :maintainer | false | nil   | true  | false
+        :owner      | true  | nil   | true  | true
+        :owner      | true  | nil   | false | false
+        :owner      | false | nil   | true  | false
+        :admin      | true  | true  | true  | true
+        :admin      | true  | true  | false | false
+        :admin      | false | true  | true  | false
+        :admin      | true  | false | true  | false
+        :admin      | false | false | true  | false
       end
 
       with_them do
@@ -1472,6 +1474,7 @@ RSpec.describe GroupPolicy do
         before do
           stub_licensed_features(group_merge_request_approval_settings: licensed)
           enable_admin_mode!(current_user) if admin_mode
+          group.parent = build(:group) unless root_group
         end
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }

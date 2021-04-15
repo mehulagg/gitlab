@@ -111,7 +111,7 @@ module EE
       end
 
       condition(:group_merge_request_approval_settings_enabled) do
-        @subject.feature_available?(:group_merge_request_approval_settings)
+        @subject.feature_available?(:group_merge_request_approval_settings) && @subject.root?
       end
 
       condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }

@@ -21,7 +21,9 @@ RSpec.describe Gitlab::InstrumentationHelper do
         expect(payload).to include(db_replica_count: 0,
                                    db_replica_cached_count: 0,
                                    db_primary_count: 0,
-                                   db_primary_cached_count: 0)
+                                   db_primary_cached_count: 0,
+                                   db_primary_wal_count: 0,
+                                   db_replica_wal_count: 0)
       end
     end
 
@@ -30,13 +32,15 @@ RSpec.describe Gitlab::InstrumentationHelper do
         allow(Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(false)
       end
 
-      it 'includes DB counts' do
+      it 'does not include DB counts' do
         subject
 
         expect(payload).not_to include(db_replica_count: 0,
                                    db_replica_cached_count: 0,
                                    db_primary_count: 0,
-                                   db_primary_cached_count: 0)
+                                   db_primary_cached_count: 0,
+                                   db_primary_wal_count: 0,
+                                   db_replica_wal_count: 0)
       end
     end
 

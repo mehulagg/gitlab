@@ -867,6 +867,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: merge_requests_sync_code_owner_approval_rules
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: new_epic
   :feature_category: :epics
   :has_external_dependencies:

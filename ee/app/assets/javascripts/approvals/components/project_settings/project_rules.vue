@@ -4,8 +4,13 @@ import RuleName from 'ee/approvals/components/rule_name.vue';
 import { n__, sprintf } from '~/locale';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR } from '../../constants';
+import {
+  RULE_TYPE_EXTERNAL_APPROVAL,
+  RULE_TYPE_ANY_APPROVER,
+  RULE_TYPE_REGULAR,
+} from '../../constants';
 
+import ApprovalGateIcon from '../approval_gate_icon.vue';
 import EmptyRule from '../empty_rule.vue';
 import RuleInput from '../mr_edit/rule_input.vue';
 import RuleBranches from '../rule_branches.vue';
@@ -15,6 +20,7 @@ import UnconfiguredSecurityRules from '../security_configuration/unconfigured_se
 
 export default {
   components: {
+    ApprovalGateIcon,
     RuleControls,
     Rules,
     UserAvatarList,
@@ -95,6 +101,9 @@ export default {
 
       return canEdit && (!allowMultiRule || !rule.hasSource);
     },
+    isExternalApprovalRule({ ruleType }) {
+      return ruleType === RULE_TYPE_EXTERNAL_APPROVAL;
+    },
   },
 };
 </script>
@@ -132,13 +141,14 @@ export default {
               class="js-members"
               :class="settings.allowMultiRule ? 'd-none d-sm-table-cell' : null"
             >
-              <user-avatar-list :items="rule.approvers" :img-size="24" empty-text="" />
+              <approval-gate-icon v-if="isExternalApprovalRule(rule)" :url="rule.externalUrl" />
+              <user-avatar-list v-else :items="rule.approvers" :img-size="24" empty-text="" />
             </td>
             <td v-if="settings.allowMultiRule" class="js-branches">
               <rule-branches :rule="rule" />
             </td>
             <td class="js-approvals-required">
-              <rule-input :rule="rule" />
+              <rule-input v-if="!isExternalApprovalRule(rule)" :rule="rule" />
             </td>
             <td class="text-nowrap px-2 w-0 js-controls">
               <rule-controls v-if="canEdit(rule)" :rule="rule" />

@@ -1,10 +1,10 @@
 import { GlButton, GlCard } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import GeoNodeReplicationCounts from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_counts.vue';
 import GeoNodeReplicationStatus from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_status.vue';
 import GeoNodeReplicationSummary from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_summary.vue';
 import GeoNodeSyncSettings from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_sync_settings.vue';
 import { MOCK_NODES } from 'ee_jest/geo_nodes_beta/mock_data';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('GeoNodeReplicationSummary', () => {
   let wrapper;
@@ -14,15 +14,13 @@ describe('GeoNodeReplicationSummary', () => {
   };
 
   const createComponent = (props) => {
-    wrapper = extendedWrapper(
-      shallowMount(GeoNodeReplicationSummary, {
-        propsData: {
-          ...defaultProps,
-          ...props,
-        },
-        stubs: { GlCard },
-      }),
-    );
+    wrapper = shallowMount(GeoNodeReplicationSummary, {
+      propsData: {
+        ...defaultProps,
+        ...props,
+      },
+      stubs: { GlCard },
+    });
   };
 
   afterEach(() => {
@@ -31,7 +29,7 @@ describe('GeoNodeReplicationSummary', () => {
 
   const findGlButton = () => wrapper.findComponent(GlButton);
   const findGeoNodeReplicationStatus = () => wrapper.findComponent(GeoNodeReplicationStatus);
-  const findGeoNodeReplicationCounts = () => wrapper.findByTestId('replication-counts');
+  const findGeoNodeReplicationCounts = () => wrapper.findComponent(GeoNodeReplicationCounts);
   const findGeoNodeSyncSettings = () => wrapper.findComponent(GeoNodeSyncSettings);
 
   describe('template', () => {

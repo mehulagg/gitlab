@@ -522,6 +522,7 @@ RSpec.describe API::Members do
           'id' => membership.id,
           'source_id' => group.id,
           'source_full_name' => group.full_name,
+          'source_members_url' => group_group_members_url(group),
           'created_at' => membership.created_at.as_json,
           'expires_at' => nil,
           'access_level' => {

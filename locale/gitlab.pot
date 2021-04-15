@@ -2285,9 +2285,6 @@ msgstr ""
 msgid "AdminProjects|Delete Project %{projectName}?"
 msgstr ""
 
-msgid "AdminSettings|Apply integration settings to all Projects"
-msgstr ""
-
 msgid "AdminSettings|Auto DevOps domain"
 msgstr ""
 
@@ -2306,9 +2303,6 @@ msgstr ""
 msgid "AdminSettings|Go to General Settings"
 msgstr ""
 
-msgid "AdminSettings|Integrations configured here will automatically apply to all projects on this instance."
-msgstr ""
-
 msgid "AdminSettings|Keep the latest artifacts for all jobs in the latest successful pipelines"
 msgstr ""
 
@@ -2325,6 +2319,9 @@ msgid "AdminSettings|PlantUML, Slack application, Third party offers, Snowplow, 
 msgstr ""
 
 msgid "AdminSettings|Required pipeline configuration"
+msgstr ""
+
+msgid "AdminSettings|See affected service templates"
 msgstr ""
 
 msgid "AdminSettings|Select a pipeline configuration file"
@@ -2361,6 +2358,9 @@ msgid "AdminSettings|When creating a new environment variable it will be protect
 msgstr ""
 
 msgid "AdminSettings|You can't add new templates. To migrate or remove a Service template, create a new integration at %{settings_link_start}Settings &gt; Integrations%{link_end}. Learn more about %{doc_link_start}Project integration management%{link_end}."
+msgstr ""
+
+msgid "AdminSettings|You should migrate to %{doc_link_start}Project integration management%{link_end}, available at %{settings_link_start}Settings &gt; Integrations.%{link_end}"
 msgstr ""
 
 msgid "AdminStatistics|Active Users"
@@ -3982,6 +3982,9 @@ msgstr ""
 msgid "Applying suggestions..."
 msgstr ""
 
+msgid "Approval Gate"
+msgstr ""
+
 msgid "Approval Status"
 msgstr ""
 
@@ -4004,6 +4007,15 @@ msgid_plural "ApprovalRuleRemove|Approvals from these members are not revoked."
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "ApprovalRuleRemove|Remove approval gate"
+msgstr ""
+
+msgid "ApprovalRuleRemove|Remove approval gate?"
+msgstr ""
+
+msgid "ApprovalRuleRemove|You are about to remove the %{name} approval gate. Approval from this service is not revoked."
+msgstr ""
+
 msgid "ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{nMembers}."
 msgstr ""
 
@@ -4017,19 +4029,34 @@ msgid_plural "ApprovalRuleSummary|%{count} approvals required from %{membersCoun
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "ApprovalRule|Add approvel gate"
+msgstr ""
+
 msgid "ApprovalRule|Add approvers"
 msgstr ""
 
 msgid "ApprovalRule|Approval rules"
 msgstr ""
 
+msgid "ApprovalRule|Approval service API"
+msgstr ""
+
 msgid "ApprovalRule|Approvals required"
+msgstr ""
+
+msgid "ApprovalRule|Approvel gate"
+msgstr ""
+
+msgid "ApprovalRule|Approver Type"
 msgstr ""
 
 msgid "ApprovalRule|Approvers"
 msgstr ""
 
 msgid "ApprovalRule|Examples: QA, Security."
+msgstr ""
+
+msgid "ApprovalRule|Invoke an external API as part of the approvals"
 msgstr ""
 
 msgid "ApprovalRule|Name"
@@ -4039,6 +4066,9 @@ msgid "ApprovalRule|Rule name"
 msgstr ""
 
 msgid "ApprovalRule|Target branch"
+msgstr ""
+
+msgid "ApprovalRule|Users or groups"
 msgstr ""
 
 msgid "ApprovalStatusTooltip|Adheres to separation of duties"
@@ -10106,7 +10136,7 @@ msgstr ""
 msgid "DastProfiles|URL"
 msgstr ""
 
-msgid "DastProfiles|URLs to skip during the authenticated scan. Use regular expression syntax to match multiple URLs."
+msgid "DastProfiles|URLs to skip during the authenticated scan."
 msgstr ""
 
 msgid "DastProfiles|Username"
@@ -11256,7 +11286,7 @@ msgstr ""
 msgid "DiscordService|Discord Notifications"
 msgstr ""
 
-msgid "DiscordService|Receive event notifications in Discord"
+msgid "DiscordService|Send notifications about project events to a Discord channel."
 msgstr ""
 
 msgid "Discover GitLab Geo"
@@ -13013,6 +13043,9 @@ msgstr ""
 msgid "External storage authentication token"
 msgstr ""
 
+msgid "External url has already been taken"
+msgstr ""
+
 msgid "ExternalAuthorizationService|Classification label"
 msgstr ""
 
@@ -14251,6 +14284,9 @@ msgstr ""
 msgid "Geo|Data replication lag"
 msgstr ""
 
+msgid "Geo|Data type"
+msgstr ""
+
 msgid "Geo|Discover GitLab Geo"
 msgstr ""
 
@@ -14380,9 +14416,6 @@ msgstr ""
 msgid "Geo|Replication Details"
 msgstr ""
 
-msgid "Geo|Replication counts"
-msgstr ""
-
 msgid "Geo|Replication details"
 msgstr ""
 
@@ -14437,6 +14470,9 @@ msgstr ""
 msgid "Geo|Synced at"
 msgstr ""
 
+msgid "Geo|Synchronization"
+msgstr ""
+
 msgid "Geo|Synchronization failed - %{error}"
 msgstr ""
 
@@ -14474,6 +14510,9 @@ msgid "Geo|Undefined"
 msgstr ""
 
 msgid "Geo|Unknown state"
+msgstr ""
+
+msgid "Geo|Verification"
 msgstr ""
 
 msgid "Geo|Verification failed - %{error}"
@@ -15418,9 +15457,6 @@ msgstr ""
 msgid "GroupSettings|Allow project access token creation"
 msgstr ""
 
-msgid "GroupSettings|Apply integration settings to all Projects"
-msgstr ""
-
 msgid "GroupSettings|Auto DevOps pipeline was updated for the group"
 msgstr ""
 
@@ -15467,9 +15503,6 @@ msgid "GroupSettings|Export group"
 msgstr ""
 
 msgid "GroupSettings|If the parent group's visibility is lower than the group current visibility, visibility levels for subgroups and projects will be changed to match the new parent group's visibility."
-msgstr ""
-
-msgid "GroupSettings|Integrations configured here will automatically apply to all projects in this group."
 msgstr ""
 
 msgid "GroupSettings|Learn more about group-level project templates."
@@ -17029,10 +17062,19 @@ msgstr ""
 msgid "Integrations"
 msgstr ""
 
+msgid "Integrations|%{integrationTitle}: active"
+msgstr ""
+
 msgid "Integrations|%{integration} settings saved and active."
 msgstr ""
 
 msgid "Integrations|%{integration} settings saved, but not active."
+msgstr ""
+
+msgid "Integrations|Active integrations"
+msgstr ""
+
+msgid "Integrations|Add an integration"
 msgstr ""
 
 msgid "Integrations|Add namespace"
@@ -17045,6 +17087,9 @@ msgid "Integrations|All details"
 msgstr ""
 
 msgid "Integrations|All projects inheriting these settings will also be reset."
+msgstr ""
+
+msgid "Integrations|As a GitLab administrator, you can set default configuration parameters for a given integration that all projects can inherit and use. When you set these parameters, your changes update the integration for all projects that are not already using custom settings. Learn more about %{integrations_link_start}Project integration management%{link_end}."
 msgstr ""
 
 msgid "Integrations|Browser limitations"
@@ -17110,6 +17155,9 @@ msgstr ""
 msgid "Integrations|Note: this integration only works with accounts on GitLab.com (SaaS)."
 msgstr ""
 
+msgid "Integrations|Project integration management"
+msgstr ""
+
 msgid "Integrations|Projects using custom settings will not be affected."
 msgstr ""
 
@@ -17164,10 +17212,16 @@ msgstr ""
 msgid "Integrations|You can now close this window and return to the GitLab for Jira application."
 msgstr ""
 
+msgid "Integrations|You haven't activated any integrations yet."
+msgstr ""
+
 msgid "Integrations|You must have owner or maintainer permissions to link namespaces."
 msgstr ""
 
 msgid "Integrations|You should now see GitLab.com activity inside your Jira Cloud issues. %{linkStart}Learn more%{linkEnd}"
+msgstr ""
+
+msgid "Integrations|You've activated every integration 🎉"
 msgstr ""
 
 msgid "Interactive mode"
@@ -18670,6 +18724,9 @@ msgid "Leave blank for no limit. Once set, existing personal access tokens may b
 msgstr ""
 
 msgid "Leave edit mode? All unsaved changes will be lost."
+msgstr ""
+
+msgid "Leave feedback"
 msgstr ""
 
 msgid "Leave group"
@@ -23540,7 +23597,7 @@ msgstr ""
 msgid "Please enter a valid number"
 msgstr ""
 
-msgid "Please enter or upload a license."
+msgid "Please enter or upload a valid license."
 msgstr ""
 
 msgid "Please fill in a descriptive name for your group."
@@ -24548,13 +24605,7 @@ msgstr ""
 msgid "ProjectSelect|Search for project"
 msgstr ""
 
-msgid "ProjectService|%{service_title}: status off"
-msgstr ""
-
-msgid "ProjectService|%{service_title}: status on"
-msgstr ""
-
-msgid "ProjectService|Drone URL"
+msgid "ProjectService|Drone server URL"
 msgstr ""
 
 msgid "ProjectService|Enter new API key"
@@ -24590,10 +24641,16 @@ msgstr ""
 msgid "ProjectService|Perform common operations on GitLab project: %{project_name}"
 msgstr ""
 
+msgid "ProjectService|Run CI/CD pipelines with Drone."
+msgstr ""
+
 msgid "ProjectService|TeamCity URL"
 msgstr ""
 
 msgid "ProjectService|To configure this integration, you should:"
+msgstr ""
+
+msgid "ProjectService|Token for the Drone project."
 msgstr ""
 
 msgid "ProjectService|Trigger event for new comments on confidential issues."
@@ -28298,6 +28355,9 @@ msgstr ""
 msgid "Send notifications about project events to Mattermost channels. %{docs_link}"
 msgstr ""
 
+msgid "Send notifications about project events to a Discord channel. %{docs_link}"
+msgstr ""
+
 msgid "Send report"
 msgstr ""
 
@@ -31818,6 +31878,9 @@ msgstr ""
 msgid "This epic does not exist or you don't have sufficient permission."
 msgstr ""
 
+msgid "This feature is part of your GitLab Ultimate trial."
+msgstr ""
+
 msgid "This feature requires local storage to be enabled"
 msgstr ""
 
@@ -33349,6 +33412,9 @@ msgid "Unless otherwise agreed to in writing with GitLab, by clicking \"Upload L
 msgstr ""
 
 msgid "Unlimited"
+msgstr ""
+
+msgid "Unlink"
 msgstr ""
 
 msgid "Unlock"
@@ -36244,6 +36310,9 @@ msgid "Your new %{type}"
 msgstr ""
 
 msgid "Your new SCIM token"
+msgstr ""
+
+msgid "Your new comment"
 msgstr ""
 
 msgid "Your new personal access token has been created."

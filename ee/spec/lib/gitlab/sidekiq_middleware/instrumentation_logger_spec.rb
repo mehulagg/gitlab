@@ -9,7 +9,9 @@ RSpec.describe Gitlab::SidekiqMiddleware::InstrumentationLogger do
         :db_replica_count,
         :db_replica_cached_count,
         :db_primary_count,
-        :db_primary_cached_count
+        :db_primary_cached_count,
+        :db_primary_wal_count,
+        :db_replica_wal_count
       ]
 
       expect(described_class.keys).to include(*expected_keys)

@@ -18,7 +18,8 @@ synchronized in real-time. The DVCS connector updates data only once per hour.
 If you are not using both of these environments, use the [Jira DVCS Connector](dvcs.md) method.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For a walkthrough of the integration with GitLab for Jira, watch [Configure GitLab Jira Integration using Marketplace App](https://youtu.be/SwR-g1s1zTo) on YouTube.
+For a walkthrough of the integration with GitLab for Jira, watch
+[Configure GitLab Jira Integration using Marketplace App](https://youtu.be/SwR-g1s1zTo) on YouTube.
 
 1. Go to **Jira Settings > Apps > Find new apps**, then search for GitLab.
 1. Click **GitLab for Jira**, then click **Get it now**, or go to the
@@ -50,8 +51,6 @@ After a namespace is added:
 - From GitLab 13.8, past merge request data is synced to Jira.
 
 Support for syncing past branch and commit data [is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/263240).
-
-For more information, see [Usage](index.md#usage).
 
 ## Install the GitLab Jira Cloud application for self-managed instances **(FREE SELF)**
 

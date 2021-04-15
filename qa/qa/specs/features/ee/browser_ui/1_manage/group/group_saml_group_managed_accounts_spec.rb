@@ -38,7 +38,7 @@ module QA
         Flow::Saml.logout_from_idp(@saml_idp_service)
       end
 
-      it 'removes existing users from the group, forces existing users to create a new account and allows to leave group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/708' do
+      it 'removes existing users from the group, forces existing users to create a new account and allows to leave group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1766' do
         expect(@group.list_members.map { |item| item["username"] }).not_to include(@developer_user.username)
 
         visit_managed_group_url

@@ -1,5 +1,6 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import ApprovalGateIcon from 'ee/approvals/components/approval_gate_icon.vue';
 import RuleInput from 'ee/approvals/components/mr_edit/rule_input.vue';
 import ProjectRules from 'ee/approvals/components/project_settings/project_rules.vue';
 import RuleName from 'ee/approvals/components/rule_name.vue';
@@ -8,7 +9,7 @@ import UnconfiguredSecurityRules from 'ee/approvals/components/security_configur
 import { createStoreOptions } from 'ee/approvals/stores';
 import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
-import { createProjectRules } from '../../mocks';
+import { createProjectRules, createExternalRule } from '../../mocks';
 
 const TEST_RULES = createProjectRules();
 
@@ -147,6 +148,28 @@ describe('Approvals ProjectRules', () => {
 
     it(`should render the unconfigured-security-rules component`, () => {
       expect(wrapper.find(UnconfiguredSecurityRules).exists()).toBe(true);
+    });
+  });
+
+  describe('when the rule is external', () => {
+    const rule = createExternalRule();
+
+    beforeEach(() => {
+      store.modules.approvals.state.rules = [rule];
+
+      factory();
+    });
+
+    it('renders the approval gate component with URL', () => {
+      expect(wrapper.findComponent(ApprovalGateIcon).props('url')).toBe(rule.externalUrl);
+    });
+
+    it('does not render a user avatar component', () => {
+      expect(wrapper.findComponent(UserAvatarList).exists()).toBe(false);
+    });
+
+    it('does not render the approvals required input', () => {
+      expect(wrapper.findComponent(RuleInput).exists()).toBe(false);
     });
   });
 });

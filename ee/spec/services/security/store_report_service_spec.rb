@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Security::StoreReportService, '#execute' do
   let_it_be(:user) { create(:user) }
+
   let(:artifact) { create(:ee_ci_job_artifact, trait) }
   let(:report_type) { artifact.file_type }
   let(:project) { artifact.project }

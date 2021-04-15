@@ -1,0 +1,5 @@
+---
+title: Add load balancing Sidekiq metrics
+merge_request: 58473
+author:
+type: other

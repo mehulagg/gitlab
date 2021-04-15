@@ -2,6 +2,7 @@
 import { GlDrawer } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
+import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
@@ -12,6 +13,7 @@ export default {
   components: {
     GlDrawer,
     BoardSidebarLabelsSelect,
+    BoardSidebarSubscription,
     BoardSidebarTitle,
     SidebarConfidentialityWidget,
   },
@@ -51,6 +53,7 @@ export default {
         issuable-type="epic"
         @confidentialityUpdated="setActiveEpicConfidential($event)"
       />
+      <board-sidebar-subscription class="subscriptions" />
     </template>
   </gl-drawer>
 </template>

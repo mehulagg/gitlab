@@ -15,6 +15,11 @@ RSpec.describe JiraService do
     }
   end
 
+  before do
+    allow(jira_service.data_fields).to receive(:deployment_cloud?).and_return(true)
+    allow(jira_service.data_fields).to receive(:deployment_server?).and_return(false)
+  end
+
   describe 'validations' do
     it 'validates presence of project_key if issues_enabled' do
       jira_service.project_key = ''
@@ -111,80 +116,150 @@ RSpec.describe JiraService do
       end
 
       context 'when vulnerabilities integration is enabled' do
-        let(:project_info_result) { { 'id' => '10000' } }
-
-        let(:issue_type_scheme_response) do
-          {
-            values: [
-              {
-                issueTypeScheme: {
-                  id: '10126',
-                  name: 'GV: Software Development Issue Type Scheme',
-                  defaultIssueTypeId: '10001'
-                },
-                projectIds: [
-                  '10000'
-                ]
-              }
-            ]
-          }
-        end
-
-        let(:issue_type_mapping_response) do
-          {
-            values: [
-              {
-                issueTypeSchemeId: '10126',
-                issueTypeId: '10003'
-              },
-              {
-                issueTypeSchemeId: '10126',
-                issueTypeId: '10001'
-              }
-            ]
-          }
-        end
-
-        let(:issue_types_response) do
-          [
-            {
-              id: '10004',
-              description: 'A new feature of the product, which has yet to be developed.',
-              name: 'New Feature',
-              untranslatedName: 'New Feature',
-              subtask: false,
-              avatarId: 10311
-            },
-            {
-              id: '10001',
-              description: 'Jira Bug',
-              name: 'Bug',
-              untranslatedName: 'Bug',
-              subtask: false,
-              avatarId: 10303
-            },
-            {
-              id: '10003',
-              description: 'A small piece of work thats part of a larger task.',
-              name: 'Sub-task',
-              untranslatedName: 'Sub-task',
-              subtask: true,
-              avatarId: 10316
-            }
-          ]
-        end
-
         before do
           allow(jira_service.project).to receive(:jira_vulnerabilities_integration_enabled?).and_return(true)
-
-          WebMock.stub_request(:get, /api\/2\/project\/GL/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: project_info_result.to_json )
-          WebMock.stub_request(:get, /api\/2\/project\/GL\z/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: { 'id' => '10000' }.to_json, headers: headers)
-          WebMock.stub_request(:get, /api\/2\/issuetype\z/).to_return(body: issue_types_response.to_json, headers: headers)
-          WebMock.stub_request(:get, /api\/2\/issuetypescheme\/project\?projectId\=10000\z/).to_return(body: issue_type_scheme_response.to_json, headers: headers)
-          WebMock.stub_request(:get, /api\/2\/issuetypescheme\/mapping\?issueTypeSchemeId\=10126\z/).to_return(body: issue_type_mapping_response.to_json, headers: headers)
         end
 
-        it { is_expected.to eq(success: true, result: { jira: true }, data: { issuetypes: [{ id: '10001', name: 'Bug', description: 'Jira Bug' }] }) }
+        context 'when deployment type is cloud' do
+          let(:project_info_result) { { 'id' => '10000' } }
+
+          let(:issue_type_scheme_response) do
+            {
+              values: [
+                {
+                  issueTypeScheme: {
+                    id: '10126',
+                    name: 'GV: Software Development Issue Type Scheme',
+                    defaultIssueTypeId: '10001'
+                  },
+                  projectIds: [
+                    '10000'
+                  ]
+                }
+              ]
+            }
+          end
+
+          let(:issue_type_mapping_response) do
+            {
+              values: [
+                {
+                  issueTypeSchemeId: '10126',
+                  issueTypeId: '10003'
+                },
+                {
+                  issueTypeSchemeId: '10126',
+                  issueTypeId: '10001'
+                }
+              ]
+            }
+          end
+
+          let(:issue_types_response) do
+            [
+              {
+                id: '10004',
+                description: 'A new feature of the product, which has yet to be developed.',
+                name: 'New Feature',
+                untranslatedName: 'New Feature',
+                subtask: false,
+                avatarId: 10311
+              },
+              {
+                id: '10001',
+                description: 'Jira Bug',
+                name: 'Bug',
+                untranslatedName: 'Bug',
+                subtask: false,
+                avatarId: 10303
+              },
+              {
+                id: '10003',
+                description: 'A small piece of work thats part of a larger task.',
+                name: 'Sub-task',
+                untranslatedName: 'Sub-task',
+                subtask: true,
+                avatarId: 10316
+              }
+            ]
+          end
+
+          before do
+            WebMock.stub_request(:get, /api\/2\/project\/GL/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: project_info_result.to_json )
+            WebMock.stub_request(:get, /api\/2\/project\/GL\z/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: { 'id' => '10000' }.to_json, headers: headers)
+            WebMock.stub_request(:get, /api\/2\/issuetype\z/).to_return(body: issue_types_response.to_json, headers: headers)
+            WebMock.stub_request(:get, /api\/2\/issuetypescheme\/project\?projectId\=10000\z/).to_return(body: issue_type_scheme_response.to_json, headers: headers)
+            WebMock.stub_request(:get, /api\/2\/issuetypescheme\/mapping\?issueTypeSchemeId\=10126\z/).to_return(body: issue_type_mapping_response.to_json, headers: headers)
+          end
+
+          it { is_expected.to eq(success: true, result: { jira: true }, data: { issuetypes: [{ id: '10001', name: 'Bug', description: 'Jira Bug' }] }) }
+        end
+
+        context 'when deployment type is server' do
+          let(:project_info_result) do
+            {
+              "id": "10000",
+              "issueTypes": issue_types_response
+            }
+          end
+
+          let(:issue_types_response) do
+            [
+              {
+                "avatarId": 10318,
+                "description": "A task that needs to be done.",
+                "iconUrl": "http://jira.reali.sh:8080/secure/viewavatar?size=xsmall&avatarId=10318&avatarType=issuetype",
+                "id": "10003",
+                "name": "Task",
+                "self": "http://jira.reali.sh:8080/rest/api/2/issuetype/10003",
+                "subtask": false
+              },
+              {
+                "description": "The sub-task of the issue",
+                "iconUrl": "http://jira.reali.sh:8080/images/icons/issuetypes/subtask_alternate.png",
+                "id": "10000",
+                "name": "Sub-task",
+                "self": "http://jira.reali.sh:8080/rest/api/2/issuetype/10000",
+                "subtask": true
+              },
+              {
+                "description": "Created by Jira Software - do not edit or delete. Issue type for a user story.",
+                "iconUrl": "http://jira.reali.sh:8080/images/icons/issuetypes/story.svg",
+                "id": "10002",
+                "name": "Story",
+                "self": "http://jira.reali.sh:8080/rest/api/2/issuetype/10002",
+                "subtask": false
+              },
+              {
+                "avatarId": 10303,
+                "description": "A problem which impairs or prevents the functions of the product.",
+                "iconUrl": "http://jira.reali.sh:8080/secure/viewavatar?size=xsmall&avatarId=10303&avatarType=issuetype",
+                "id": "10004",
+                "name": "Bug",
+                "self": "http://jira.reali.sh:8080/rest/api/2/issuetype/10004",
+                "subtask": false
+              },
+              {
+                "description": "Created by Jira Software - do not edit or delete. Issue type for a big user story that needs to be broken down.",
+                "iconUrl": "http://jira.reali.sh:8080/images/icons/issuetypes/epic.svg",
+                "id": "10001",
+                "name": "Epic",
+                "self": "http://jira.reali.sh:8080/rest/api/2/issuetype/10001",
+                "subtask": false
+              }
+            ]
+          end
+
+          before do
+            allow(jira_service.data_fields).to receive(:deployment_cloud?).and_return(false)
+            allow(jira_service.data_fields).to receive(:deployment_server?).and_return(true)
+
+            WebMock.stub_request(:get, /api\/2\/project\/GL/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: project_info_result.to_json, headers: headers)
+            WebMock.stub_request(:get, /api\/2\/issuetype\z/).to_return(body: issue_types_response.to_json, headers: headers)
+          end
+
+          it { is_expected.to eq(success: true, result: { jira: true }, data: { issuetypes: [{ description: "A task that needs to be done.", id: "10003", name: "Task" }, { description: "Created by Jira Software - do not edit or delete. Issue type for a user story.", id: "10002", name: "Story" }, { description: "A problem which impairs or prevents the functions of the product.", id: "10004", name: "Bug" }, { description: "Created by Jira Software - do not edit or delete. Issue type for a big user story that needs to be broken down.", id: "10001", name: "Epic" }] }) }
+        end
       end
     end
   end

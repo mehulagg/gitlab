@@ -19,7 +19,7 @@ module EE
       end
 
       def weights?
-        params[:weight].present? && params[:weight] != ::Issue::WEIGHT_ALL
+        params[:weight].present? && params[:weight].to_s.casecmp(::Issue::WEIGHT_ALL) != 0
       end
 
       def filter_by_no_weight?

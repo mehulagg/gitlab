@@ -39,7 +39,7 @@ module EE
             milestone_id: milestone_id
           }
 
-          movement_args[:sprint_id] = iteration_id(issue) if ::Feature.enabled?(:iteration_board_lists, parent)
+          movement_args[:sprint_id] = iteration_id(issue) if ::Feature.enabled?(:iteration_board_lists, parent, default_enabled: :yaml)
 
           movement_args
         end
