@@ -164,7 +164,7 @@ stages:
   - build
   - dast
 
-include: 
+include:
   - template: DAST.gitlab-ci.yml
 
 # Deploys the container to the GitLab container registry
@@ -449,6 +449,10 @@ configured to act as a remote proxy and add the `Gitlab-DAST-Permission` header.
 
 Using an API specification as a scan's target is a useful way to seed URLs for scanning an API.
 Vulnerability rules in an API scan are different than those in a normal website scan.
+
+> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.10.
+
+A new DAST API scanning engine is available and currently in BETA. To use the new DAST API scanning engine [see it's documentation here](dast_api.md). The new scanning engine supports REST, SOAP, GraphQL, and generic APIs using forms, XML, and JSON. Testing can be performed using OpenAPI, Postman Collections, and HTTP Archive (HAR) documents.
 
 #### Specification format
 
@@ -955,7 +959,7 @@ follows:
 - _Header validation_ requires the header `Gitlab-On-Demand-DAST` be added to the target site,
   with a value unique to the project. The validation process checks that the header is present, and
   checks its value.
-  
+
 Both methods are equivalent in functionality. Use whichever is feasible.
 
 #### Create a site profile
