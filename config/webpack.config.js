@@ -251,8 +251,9 @@ module.exports = {
           {
             loader: 'worker-loader',
             options: {
-              name: '[name].[contenthash:8].worker.js',
-              inline: IS_DEV_SERVER,
+              filename: '[name].[contenthash:8].worker.js',
+              inline: 'fallback',
+              esModule: false,
             },
           },
           'babel-loader',
