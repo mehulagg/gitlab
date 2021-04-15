@@ -3,6 +3,8 @@
 module Gitlab
   module Diff
     class Highlight
+      REGEXP = /\A(.)/.freeze
+
       attr_reader :diff_file, :diff_lines, :repository, :project
 
       delegate :old_path, :new_path, :old_sha, :new_sha, to: :diff_file, prefix: :diff
@@ -25,7 +27,6 @@ module Gitlab
         populate_marker_ranges if Feature.enabled?(:use_marker_ranges, project, default_enabled: :yaml)
 
         @diff_lines.map.with_index do |diff_line, index|
-          diff_line = diff_line.dup
           # ignore highlighting for "match" lines
           next diff_line if diff_line.meta?
 
@@ -97,12 +98,12 @@ module Gitlab
         rich_line = syntax_highlighter(diff_line).highlight(
           diff_line.text(prefix: false),
           context: { line_number: diff_line.line }
-        )&.html_safe
+        )
 
         # Only update text if line is found. This will prevent
         # issues with submodules given the line only exists in diff content.
         if rich_line
-          line_prefix = diff_line.text =~ /\A(.)/ ? Regexp.last_match(1) : ' '
+          line_prefix = diff_line.text =~ REGEXP ? Regexp.last_match(1) : ' '
           rich_line.prepend(line_prefix).concat("\n")
         end
       end
@@ -131,7 +132,7 @@ module Gitlab
         # Only update text if line is found. This will prevent
         # issues with submodules given the line only exists in diff content.
         if rich_line
-          line_prefix = diff_line.text =~ /\A(.)/ ? Regexp.last_match(1) : ' '
+          line_prefix = diff_line.text =~ REGEXP ? Regexp.last_match(1) : ' '
           "#{line_prefix}#{rich_line}".html_safe
         end
       end
