@@ -999,6 +999,29 @@ sudo gitlab-rake gitlab:pages:clean_migrated_zip_storage
 This will not remove any data from the legacy disk storage and the GitLab Pages daemon will automatically fallback
 to using that.
 
+### Migrate Pages deployments to object storage
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/325285) in GitLab 13.11
+
+Existing Pages deployments objects (which store ZIP archives) can similarly be
+migrated to [object storage](#using-object-storage), if
+you've been having them stored locally.
+
+Migrate your existing Pages deployments from local storage to object storage
+by running:
+
+```shell
+sudo gitlab-rails gitlab:pages:deployments:migrate_to_object_storage
+```
+
+### Rolling Pages deployments back to local storage
+
+You can choose to revert your Pages deployments back to local storage, after migration to object storage was performed, by running the following command:
+
+```shell
+sudo gitlab-rails gitlab:pages:deployments:migrate_to_local
+```
+
 ## Backup
 
 GitLab Pages are part of the [regular backup](../../raketasks/backup_restore.md), so there is no separate backup to configure.
