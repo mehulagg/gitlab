@@ -1,7 +1,7 @@
 - return unless ci_cd_projects_available?
 - track_label = local_assigns.fetch(:track_label, 'cicd_for_external_repo')
 
-.tab-pane.js-toggle-container{ id: 'ci-cd-project-pane', class: active_when(active_tab == 'ci_cd_only'), role: 'tabpanel' }
+#ci-cd-project-pane.tab-pane
   = form_for @project, html: { class: 'new_project' } do |f|
     .project-import.row
       .col-lg-12
@@ -28,7 +28,7 @@
                   = sprite_icon('link', css_class: 'gl-button-icon')
                   = _('Repo by URL')
       .col-lg-12
-        .js-toggle-content.toggle-import-form{ class: ('hide' if active_tab != 'ci_cd_only') }
+        .js-toggle-content.toggle-import-form
           %hr
             = render "shared/import_form", f: f, ci_cd_only: true
             = render 'new_project_fields', f: f, project_name_id: "import-url-name", ci_cd_only: true, hide_init_with_readme: true, track_label: track_label
