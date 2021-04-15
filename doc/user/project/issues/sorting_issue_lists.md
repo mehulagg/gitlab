@@ -30,7 +30,6 @@ When you select sorting by **Popularity**, the issue order changes to sort desce
 number of upvotes ([awarded](../../award_emojis.md) "thumbs up" emoji)
 on each issue. You can use this to identify issues that are in high demand.
 
-
 ## Manual sorting
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/62178) in GitLab 12.2.
