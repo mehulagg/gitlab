@@ -13,4 +13,4 @@
     = form_for @project, html: { class: "merge-request-approval-settings-form js-mr-approvals-form" }, authenticity_token: true do |f|
       %input{ name: 'update_section', type: 'hidden', value: 'js-merge-request-approval-settings' }
       = render 'projects/merge_request_approvals_settings_form', form: f, project: @project
-      = f.submit _("Save changes"), class: "btn gl-button btn-success gl-mt-4", data: { qa_selector: 'save_merge_request_approval_settings_button' }
+      = f.submit _("Save changes"), class: "btn gl-button btn-confirm gl-mt-4", data: { qa_selector: 'save_merge_request_approval_settings_button' }
