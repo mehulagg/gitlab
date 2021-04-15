@@ -20,7 +20,6 @@ module PaidFeatureCalloutHelper
     base_attrs = paid_feature_callout_common_data_attrs(feature)
     base_attrs.merge(
       days_remaining: group.trial_days_remaining,
-      feature_name: feature,
       plan_name_for_trial: group.gitlab_subscription&.plan_title,
       plan_name_for_upgrade: 'Premium',
       promo_image_path: promo_image_path,
@@ -32,7 +31,8 @@ module PaidFeatureCalloutHelper
 
   def paid_feature_callout_common_data_attrs(feature)
     {
-      container_id: "#{feature.parameterize}-callout"
+      container_id: "#{feature.parameterize}-callout",
+      feature_name: feature
     }
   end
 end

@@ -66,7 +66,8 @@ RSpec.describe PaidFeatureCalloutHelper do
 
     it 'returns the set of data attributes needed to bootstrap the PaidFeatureCalloutBadge component' do
       expected_attrs = {
-        container_id: 'some-feature-callout'
+        container_id: 'some-feature-callout',
+        feature_name: 'some feature'
       }
 
       is_expected.to eq(expected_attrs)

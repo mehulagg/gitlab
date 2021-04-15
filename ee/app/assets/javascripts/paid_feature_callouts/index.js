@@ -7,7 +7,7 @@ export const initPaidFeatureCalloutBadge = () => {
 
   if (!el) return undefined;
 
-  const { containerId } = el.dataset;
+  const { containerId, featureName } = el.dataset;
 
   return new Vue({
     el,
@@ -15,6 +15,7 @@ export const initPaidFeatureCalloutBadge = () => {
       createElement(PaidFeatureCalloutBadge, {
         props: {
           containerId,
+          featureName,
         },
       }),
   });

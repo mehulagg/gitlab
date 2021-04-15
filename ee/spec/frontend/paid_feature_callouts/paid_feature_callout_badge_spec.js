@@ -14,6 +14,7 @@ describe('PaidFeatureCalloutBadge component', () => {
 
   const defaultProps = {
     containerId: 'some-feature-callout',
+    featureName: 'some feature',
   };
 
   const createComponent = (props = defaultProps) => {
@@ -34,7 +35,7 @@ describe('PaidFeatureCalloutBadge component', () => {
     it('sets attributes on the GlBadge component', () => {
       expect(findGlBadge().attributes()).toMatchObject({
         id: 'some-feature-callout',
-        title: 'This feature is part of your GitLab Ultimate trial.',
+        title: 'The some feature feature is part of your GitLab Ultimate trial.',
         tabindex: '0',
         size: 'sm',
         class: 'feature-highlight-badge',
@@ -59,6 +60,32 @@ describe('PaidFeatureCalloutBadge component', () => {
       expect(trackingSpy).toHaveBeenCalledWith(undefined, 'display_badge', {
         label: 'feature_highlight_badge',
         property: 'experiment:highlight_paid_features_during_active_trial',
+      });
+    });
+  });
+
+  describe('title', () => {
+    describe('when no featureName is provided', () => {
+      beforeEach(() => {
+        wrapper = createComponent({});
+      });
+
+      it('sets the title to a sensible default', () => {
+        expect(findGlBadge().attributes('title')).toBe(
+          'This feature is part of your GitLab Ultimate trial.',
+        );
+      });
+    });
+
+    describe('when a featureName is provided', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ featureName: 'fantastical thing' });
+      });
+
+      it('sets the title using the given feature name', () => {
+        expect(findGlBadge().attributes('title')).toBe(
+          'The fantastical thing feature is part of your GitLab Ultimate trial.',
+        );
       });
     });
   });
