@@ -27,7 +27,13 @@ export default {
   <div class="gl-my-7 gl-display-flex">
     <div v-for="stat in stats" :key="stat.title">
       <gl-skeleton-loader v-if="isLoading" :height="$options.loaderHeight" />
-      <gl-single-stat v-else :value="stat.value" :title="stat.title" :unit="stat.unit" />
+      <gl-single-stat
+        v-else
+        :value="stat.value"
+        :title="stat.title"
+        :unit="stat.unit"
+        :should-animate="true"
+      />
     </div>
   </div>
 </template>
