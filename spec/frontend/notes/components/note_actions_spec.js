@@ -1,6 +1,6 @@
 import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import Vue from 'vue';
+import Vue, { nextTick } from 'vue';
 import { TEST_HOST } from 'spec/test_constants';
 import axios from '~/lib/utils/axios_utils';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
@@ -150,6 +150,25 @@ describe('noteActions', () => {
       it('should not be possible to assign or unassign the comment author in a merge request', () => {
         const assignUserButton = wrapper.find('[data-testid="assign-user"]');
         expect(assignUserButton.exists()).toBe(false);
+      });
+
+      it('should render the correct (unescaped) name in the Resolved By tooltip', async () => {
+        const complexUnescapedName = 'This is a Ǝ\'𝞓\'E "cat"?';
+        wrapper.setProps({
+          ...props,
+          author: { ...props.author },
+          canResolve: true,
+          isResolving: false,
+          isResolved: true,
+          resolvedBy: {
+            name: complexUnescapedName,
+          },
+        });
+
+        await nextTick();
+
+        const { resolveButton } = wrapper.vm.$refs;
+        expect(resolveButton.$el.getAttribute('title')).toBe(`Resolved by ${complexUnescapedName}`);
       });
     });
   });

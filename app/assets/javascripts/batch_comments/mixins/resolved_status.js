@@ -57,7 +57,11 @@ export default {
       let title = __('Resolve thread');
 
       if (this.resolvedBy) {
-        title = sprintf(__('Resolved by %{name}'), { name: this.resolvedBy.name }, escapeParameters);
+        title = sprintf(
+          __('Resolved by %{name}'),
+          { name: this.resolvedBy.name },
+          escapeParameters,
+        );
       }
 
       return title;
