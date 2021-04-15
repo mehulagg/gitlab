@@ -1,0 +1,15 @@
+export default () => ({
+  requestPath: '',
+  startDate: 30,
+  stages: [],
+  summary: [],
+  analytics: [],
+  stats: [],
+  currentStage: {},
+  currentStageEvents: [],
+  medians: {},
+  hasError: false,
+  isLoading: false,
+  isLoadingStage: false,
+  isEmptyStage: false,
+});
