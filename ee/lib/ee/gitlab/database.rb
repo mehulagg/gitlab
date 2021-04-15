@@ -19,8 +19,9 @@ module EE
 
         # Disables prepared statements for the current database connection.
         def disable_prepared_statements
-          config = Gitlab::Database.config.merge({ prepared_statements: false })
-          ActiveRecord::Base.establish_connection(config)
+          ActiveRecord::Base.establish_connection(
+            config.merge({ prepared_statements: false })
+          )
         end
 
         def geo_uncached_queries(&block)
