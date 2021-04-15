@@ -5,6 +5,8 @@ require 'spec_helper'
 RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gitlab_redis_shared_state do
   include ExclusiveLeaseHelpers
 
+  subject { worker.perform }
+
   let(:worker) { described_class.new }
 
   context 'when the feature flag is disabled' do
@@ -16,7 +18,7 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
       expect(worker).not_to receive(:active_migration)
       expect(worker).not_to receive(:run_active_migration)
 
-      worker.perform
+      subject
     end
   end
 
@@ -31,7 +33,7 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
       it 'does nothing' do
         expect(worker).not_to receive(:run_active_migration)
 
-        worker.perform
+        subject
       end
     end
 
@@ -59,7 +61,7 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
 
           expect(worker).not_to receive(:run_active_migration)
 
-          worker.perform
+          subject
         end
       end
 
@@ -71,7 +73,7 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
 
           expect(worker).not_to receive(:run_active_migration)
 
-          worker.perform
+          subject
         end
       end
 
@@ -85,7 +87,7 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
 
           expect(worker).to receive(:run_active_migration).and_call_original
 
-          worker.perform
+          subject
         end
       end
 
@@ -102,7 +104,7 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
 
           expect(worker).to receive(:run_active_migration).and_call_original
 
-          worker.perform
+          subject
         end
       end
 
@@ -114,7 +116,7 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
         expect(worker).to receive(:run_active_migration).and_raise(RuntimeError, 'I broke')
         expect(lease).to receive(:cancel)
 
-        expect { worker.perform }.to raise_error(RuntimeError, 'I broke')
+        expect { subject }.to raise_error(RuntimeError, 'I broke')
       end
 
       context 'always reporting progress metrics' do
@@ -137,7 +139,7 @@ RSpec.describe Database::BatchedBackgroundMigrationWorker, '#perform', :clean_gi
           expect(gauge).to receive(:set).with(migrations.second.prometheus_labels, 0.0)
           expect(gauge).not_to receive(:set)
 
-          worker.perform
+          subject
         end
       end
     end
