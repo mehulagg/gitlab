@@ -10,6 +10,17 @@ class SessionsController < Devise::SessionsController
   include KnownSignIn
   include Gitlab::Utils::StrongMemoize
 
+  content_security_policy do |p|
+    next if p.directives.blank?
+
+    script_src_values = Array.wrap(p.directives['script-src']) | %w('self' 'nonce-value_of_nonce')
+    style_src_values = Array.wrap(p.directives['style-src']) | %w('self' 'nonce-value_of_nonce')
+
+    p.script_src(*script_src_values)
+    p.style_src(*style_src_values)
+  end
+
+
   skip_before_action :check_two_factor_requirement, only: [:destroy]
   skip_before_action :check_password_expiration, only: [:destroy]
 

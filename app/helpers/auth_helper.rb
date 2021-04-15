@@ -170,10 +170,7 @@ module AuthHelper
   end
 
   def google_tag_manager_enabled?
-    Gitlab.com? &&
-      extra_config.has_key?('google_tag_manager_id') &&
-      extra_config.google_tag_manager_id.present? &&
-      !current_user
+    true
   end
 
   extend self
