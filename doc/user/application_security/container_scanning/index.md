@@ -303,8 +303,9 @@ The string after CVE ID (`cups` and `libxml2` in the previous example) has **no 
 You can verify the results of your scan and the correctness of your `vulnerability-allowlist.yml` file by looking
 at the logs that are produced by the container scanning analyzer in `container_scanning` job details.
 
-The log will contain a list of found vulnerabilities as a table:
+The log contains a list of found vulnerabilities as a table, for example:
 
+```
 +------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
 |   STATUS   |      CVE SEVERITY       |      PACKAGE NAME      |    PACKAGE VERSION    |                            CVE DESCRIPTION                             |
 +------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
@@ -325,6 +326,7 @@ The log will contain a list of found vulnerabilities as a table:
 |            |                         |                        |                       | ersion 2.1.2 could result in denial of service when processing special |
 |            |                         |                        |                       |                         ly crafted deb files.                          |
 +------------+-------------------------+------------------------+-----------------------+------------------------------------------------------------------------+
+```
 
 Vulnerabilities in the log are marked as `Approved` when the corresponding CVE ID is added to the `vulnerability-allowlist.yml` file.
 
