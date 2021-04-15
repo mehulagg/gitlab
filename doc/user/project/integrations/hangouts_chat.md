@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/43756) in GitLab 11.2.
 
-Integrate your project to send notifications from your project in GitLab to a
+Integrate your project to send notifications from GitLab to a
 room of your choice in [Google Chat](https://chat.google.com/) (former Google
 Hangouts).
 
