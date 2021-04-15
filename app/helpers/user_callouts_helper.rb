@@ -7,7 +7,6 @@ module UserCalloutsHelper
   SUGGEST_POPOVER_DISMISSED = 'suggest_popover_dismissed'
   SERVICE_TEMPLATES_DEPRECATED_CALLOUT = 'service_templates_deprecated_callout'
   TABS_POSITION_HIGHLIGHT = 'tabs_position_highlight'
-  WEBHOOKS_MOVED = 'webhooks_moved'
   CUSTOMIZE_HOMEPAGE = 'customize_homepage'
   FEATURE_FLAGS_NEW_VERSION = 'feature_flags_new_version'
   REGISTRATION_ENABLED_CALLOUT = 'registration_enabled_callout'
@@ -48,9 +47,10 @@ module UserCalloutsHelper
     !user_dismissed?(SERVICE_TEMPLATES_DEPRECATED_CALLOUT)
   end
 
-  def show_webhooks_moved_alert?
-    !user_dismissed?(WEBHOOKS_MOVED)
-  end
+
+
+
+  
 
   def show_customize_homepage_banner?
     !user_dismissed?(CUSTOMIZE_HOMEPAGE)
