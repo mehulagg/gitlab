@@ -426,8 +426,13 @@ echo 'unixsocketperm 770' | sudo tee -a /etc/redis/redis.conf
 
 # Add git to the redis group
 sudo usermod -aG redis git
+```
 
-## If you use systemd
+### Have systemd supervise Redis
+
+Use this if your distribution uses systemd as init.
+
+```shell
 # Configure Redis to not daemonize, but be supervised by systemd instead and disable the pidfile
 sed -e 's/^daemonize yes$/daemonize no/' \
     -e 's/^supervised no$/supervided systemd/' \
@@ -443,8 +448,13 @@ EOF
 
 # Activate the changes to redis.conf
 sudo systemctl restart redis-server.service
+```
 
-## If you use SysV init
+### Leave Redis unsupervised
+
+Use this if your distribution uses SysV init.
+
+```shell
 # Create the directory which contains the socket
 sudo mkdir -p /var/run/redis
 sudo chown redis:redis /var/run/redis
