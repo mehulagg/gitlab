@@ -51,12 +51,12 @@ export default {
   },
   data() {
     return {
-      dueDate: null,
+      issuable: {},
       loading: false,
     };
   },
   apollo: {
-    dueDate: {
+    issuable: {
       query() {
         return dueDateQueries[this.issuableType].query;
       },
@@ -67,7 +67,7 @@ export default {
         };
       },
       update(data) {
-        return data.workspace?.issuable?.dueDate || null;
+        return data.workspace?.issuable || {};
       },
       result({ data }) {
         this.$emit('dueDateUpdated', data.workspace?.issuable?.dueDate);
@@ -82,8 +82,11 @@ export default {
     },
   },
   computed: {
+    dueDate() {
+      return this.issuable?.dueDate || null;
+    },
     isLoading() {
-      return this.$apollo.queries.dueDate.loading || this.loading;
+      return this.$apollo.queries.issuable.loading || this.loading;
     },
     hasDueDate() {
       return this.dueDate !== null;
@@ -121,7 +124,11 @@ export default {
     openDatePicker() {
       this.$refs.datePicker.calendar.show();
     },
-    setDueDate(date) {
+    setFixedDate(date, isFixed) {
+      this.setDueDate(date, isFixed);
+    },
+    setDueDate(date, isFixed = true) {
+      const formattedDate = date ? formatDate(date, 'yyyy-mm-dd') : null;
       this.loading = true;
       this.$refs.editable.collapse();
       this.$apollo
@@ -131,7 +138,14 @@ export default {
             input: {
               ...this.workspacePath,
               iid: this.iid,
-              dueDate: date ? formatDate(date, 'yyyy-mm-dd') : null,
+              ...(this.canInherit
+                ? {
+                    dueDateFixed: isFixed ? formattedDate : undefined,
+                    dueDateIsFixed: isFixed,
+                  }
+                : {
+                    dueDate: formattedDate,
+                  }),
             },
           },
         })
@@ -187,10 +201,11 @@ export default {
       </div>
       <sidebar-inherit-date
         v-if="canInherit"
-        :has-date="hasDueDate"
+        :issuable="issuable"
         :formatted-date="formattedDueDate"
         :reset-action="setDueDate"
         :is-loading="isLoading"
+        :set-date="setFixedDate"
       />
       <sidebar-formatted-date
         v-else

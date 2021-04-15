@@ -27,6 +27,11 @@ export default {
       required: true,
       type: Boolean,
     },
+    canDelete: {
+      required: false,
+      type: Boolean,
+      default: true,
+    },
   },
 };
 </script>
@@ -39,7 +44,7 @@ export default {
     >
       {{ formattedDate }}
     </span>
-    <div v-if="hasDate && canUpdate" class="gl-display-flex">
+    <div v-if="hasDate && canUpdate && canDelete" class="gl-display-flex">
       <span class="gl-px-2">-</span>
       <gl-button
         variant="link"
