@@ -459,6 +459,18 @@ You can run a gRPC trace with:
 sudo GRPC_TRACE=all GRPC_VERBOSITY=DEBUG gitlab-rake gitlab:gitaly:check
 ```
 
+### Server side gRPC logs
+
+gRPC tracing can also be enabled in Gitaly itself with the `GODEBUG=http2debug`
+environment variable.  This can be set in Omnibus installs by adding the
+following to your `gitlab.rb` and [reconfiguring](../restart_gitlab.md#omnibus-gitlab-reconfigure):
+
+```rb
+gitaly['env'] = {
+  "GODEBUG=http2debug" => "2"
+}
+```
+
 ### Correlating Git processes with RPCs
 
 Sometimes you need to find out which Gitaly RPC created a particular Git process.
