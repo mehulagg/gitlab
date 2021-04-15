@@ -250,7 +250,7 @@ To allowlist specific vulnerabilities, follow these steps:
 1. Set `GIT_STRATEGY: fetch` in your `.gitlab-ci.yml` file by following the instructions in
    [overriding the container scanning template](#overriding-the-container-scanning-template).
 1. Define the allowlisted vulnerabilities in a YAML file named `vulnerability-allowlist.yml`. This must use
-   the format described [below](#vulnerability-allowlistyml-data-format).
+   the format described in [vulnerability-allowlist.yml data format](#vulnerability-allowlistyml-data-format).
 1. Add the `vulnerability-allowlist.yml` file to the root folder of your project's Git repository.
 
 #### vulnerability-allowlist.yml data format
