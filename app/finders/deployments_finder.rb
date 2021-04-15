@@ -14,8 +14,13 @@
 #     order_by: String (see ALLOWED_SORT_VALUES constant)
 #     sort: String (asc | desc)
 class DeploymentsFinder
-  attr_reader :params
+  attr_reader :params, :errors
 
+  # Warning:
+  # Before you add more sort values, make sure that the new query will still be
+  # performant with the other filtering parameters.
+  # The query could go significantly slower when the filtering and sorting columns are different.
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/325627 for example.
   ALLOWED_SORT_VALUES = %w[id iid created_at updated_at ref finished_at].freeze
   DEFAULT_SORT_VALUE = 'id'
 
@@ -27,6 +32,10 @@ class DeploymentsFinder
   end
 
   def execute
+    if error = validate_parameter_performance
+      return error
+    end
+
     items = init_collection
     items = by_updated_at(items)
     items = by_finished_at(items)
@@ -35,10 +44,18 @@ class DeploymentsFinder
     items = preload_associations(items)
     items = sort(items)
 
-    items
+    success(deployments: items)
   end
 
   private
+
+  # This method validates the the given parameters don't cause an inefficient
+  # database query.
+  def validate_parameter_performance
+    if updated_at_filter_specified? && finished_at_filter_specified?
+      return error('updated_at and finished_at filters can not be combined due to performance reason')
+    end
+  end
 
   def init_collection
     if params[:project]
@@ -49,6 +66,8 @@ class DeploymentsFinder
   end
 
   def sort(items)
+    sort_params = build_sort_params
+    overwrite_sort_params!(sort_params)
     items.order(sort_params) # rubocop: disable CodeReuse/ActiveRecord
   end
 
@@ -84,14 +103,39 @@ class DeploymentsFinder
     items.for_status(params[:status])
   end
 
-  def sort_params
+  def build_sort_params
     order_by = ALLOWED_SORT_VALUES.include?(params[:order_by]) ? params[:order_by] : DEFAULT_SORT_VALUE
     order_direction = ALLOWED_SORT_DIRECTIONS.include?(params[:sort]) ? params[:sort] : DEFAULT_SORT_DIRECTION
 
-    { order_by => order_direction }.tap do |sort_values|
-      sort_values['id'] = 'desc' if sort_values['updated_at']
-      sort_values['id'] = sort_values.delete('created_at') if sort_values['created_at'] # Sorting by `id` produces the same result as sorting by `created_at`
+    { order_by => order_direction }
+  end
+
+  # Overwriting sort parameters for optimizaing database queries.
+  # Keep in mind that this technically ignores the user specified ordering
+  # parameter silently. So you should be careful that users might get an
+  # unexpected results.
+  # We should return an explicit error message to users when they specify
+  # under-performant parameters. See <Issue-link>
+  def overwrite_sort_params!(sort_params)
+    if updated_at_filter_specified?
+      sort_params['updated_at'] = sort_params.values.first
+    elsif finished_at_filter_specified?
+      sort_params['finished_at'] = sort_params.values.first
+    elsif sort_params['updated_at']
+      # Introduced in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20848.
+      sort_params['id'] = 'desc'
+    elsif sort_params['created_at']
+      # Sorting by `id` produces the same result as sorting by `created_at`
+      sort_params['id'] = sort_params.delete('created_at')
     end
+  end
+
+  def updated_at_filter_specified?
+    params.key?(:updated_before) || params.key?(:updated_after)
+  end
+
+  def finished_at_filter_specified?
+    params.key?(:finished_before) || params.key?(:finished_after)
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
