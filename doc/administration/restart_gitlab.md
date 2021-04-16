@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# How to restart GitLab
+# How to restart GitLab **(FREE SELF)**
 
 Depending on how you installed GitLab, there are different methods to restart
 its service(s).
