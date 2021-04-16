@@ -9,13 +9,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Depending on how you installed GitLab, there are different methods to restart
 its service(s).
 
-If you want the TL;DR versions, jump to:
-
-- [Omnibus GitLab restart](#omnibus-gitlab-restart)
-- [Omnibus GitLab reconfigure](#omnibus-gitlab-reconfigure)
-- [Source installation restart](#installations-from-source)
-- [Helm chart installation restart](#helm-chart-installations)
-
 ## Omnibus installations
 
 If you have used the [Omnibus packages](https://about.gitlab.com/install/) to install GitLab, then
