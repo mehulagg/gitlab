@@ -19,5 +19,13 @@ module Admin
       flash.keep
       redirect_to new_admin_license_path
     end
+
+    def check_license_type
+      if @license.cloud?
+        flash[:error] = _('Cloud licenses can not be removed.')
+
+        redirect_to admin_license_path
+      end
+    end
   end
 end

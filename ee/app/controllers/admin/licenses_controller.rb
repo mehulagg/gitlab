@@ -5,6 +5,7 @@ class Admin::LicensesController < Admin::ApplicationController
 
   before_action :license, only: [:show, :download, :destroy]
   before_action :require_license, only: [:download, :destroy]
+  before_action :check_license_type, only: :destroy
 
   respond_to :html
 
