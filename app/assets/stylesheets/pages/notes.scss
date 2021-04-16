@@ -448,8 +448,8 @@ $system-note-svg-size: 16px;
   .notes_holder {
     font-family: $regular-font;
 
-    .diff-td,
-    td {
+    .diff-td:not(.no-border),
+    td:not(.no-border) {
       border: 1px solid $border-color;
       border-left: 0;
 

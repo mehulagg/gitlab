@@ -58,12 +58,23 @@ export default {
       required: false,
       default: false,
     },
+    showCompareButton: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    onClickCompareButton: {
+      type: Function,
+      required: false,
+      default: () => {},
+    },
   },
   data() {
     return {
       isUsernameLinkHovered: false,
       emojiTitle: '',
       authorStatusHasTooltip: false,
+      compareLinesExpanded: false,
     };
   },
   computed: {
@@ -95,6 +106,9 @@ export default {
     },
     authorName() {
       return this.author.name;
+    },
+    toggleCompareChevronName() {
+      return this.compareLinesExpanded ? 'chevron-up' : 'chevron-down';
     },
   },
   mounted() {
@@ -131,6 +145,10 @@ export default {
     },
     userAvailability(selectedAuthor) {
       return selectedAuthor?.availability || '';
+    },
+    handleCompareClick() {
+      this.compareLinesExpanded = !this.compareLinesExpanded;
+      this.onClickCompareButton();
     },
   },
 };
@@ -203,6 +221,16 @@ export default {
         </a>
         <time-ago-tooltip v-else ref="noteTimestamp" :time="createdAt" tooltip-placement="bottom" />
       </template>
+      <span v-if="showCompareButton">&#xB7;</span>
+      <button
+        v-if="showCompareButton"
+        type="button"
+        class="btn-blank btn-link"
+        @click.prevent="handleCompareClick"
+      >
+        {{ __('Compare with previous version') }}
+        <gl-icon :name="toggleCompareChevronName" :size="12" />
+      </button>
       <gl-icon
         v-if="isConfidential"
         v-gl-tooltip:tooltipcontainer.bottom

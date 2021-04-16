@@ -951,6 +951,10 @@ const Api = {
 
     return result;
   },
+
+  changedDiff(url) {
+    return axios.get(Api.buildUrl(url)).then(({ data }) => data);
+  },
 };
 
 export default Api;

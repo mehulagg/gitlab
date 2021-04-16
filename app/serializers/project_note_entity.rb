@@ -32,4 +32,11 @@ class ProjectNoteEntity < NoteEntity
   expose :delete_attachment_path, if: -> (note, _) { note.attachment? } do |note|
     delete_attachment_project_note_path(note.project, note)
   end
+
+  expose :diff_note_diff_path, if: -> (note, _) { note.type == "DiffNote" } do |note|
+    project_blob_diff_path(
+      note.project,
+      "#{note.original_position.head_sha}/#{note.original_position.file_path}"
+    )
+  end
 end
