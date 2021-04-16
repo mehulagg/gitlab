@@ -4,4 +4,5 @@ require 'spec_helper'
 
 RSpec.describe Vulnerabilities::FindingEvidence do
   it { is_expected.to belong_to(:finding).class_name('Vulnerabilities::Finding').required }
+  it { is_expected.to have_many(:finding_evidence_responses).class_name('Vulnerabilities::FindingEvidenceResponse').with_foreign_key('vulnerability_finding_evidences_id') }
 end
