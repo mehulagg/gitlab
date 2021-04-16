@@ -201,3 +201,42 @@ grep "fatal: " /var/log/gitlab/gitaly/current | \
     jq '."grpc.request.glProjectPath"' | \
     sort | uniq
 ```
+
+### Parsing `gitlab-shell.log`
+
+For investigating git calls via SSH.
+
+#### Finding the top 20 calls by project and user
+
+```shell
+jq --raw-output --slurp '
+  map(
+    select(
+      .username != null and
+      .gl_project_path !=null
+    )
+  )
+  | group_by(.username+.gl_project_path)
+  |  sort_by(-length)
+  | limit(20; .[]) 
+  | "count: \(length)\tuser: \(.[0].username)\tproject: \(.[0].gl_project_path)" ' \
+  /var/log/gitlab/gitlab-shell/gitlab-shell.log
+```
+
+#### Finding the top 20 calls by project, user, and command
+
+```shell
+jq --raw-output --slurp '
+  map(
+    select(
+      .command  != null and
+      .username != null and
+      .gl_project_path !=null
+    )
+  )
+  | group_by(.username+.gl_project_path+.command)
+  |  sort_by(-length)
+  | limit(20; .[]) 
+  | "count: \(length)\tuser: \(.[0].username)\tproject: \(.[0].gl_project_path)\tcommand: \(.[0].command)" ' \
+  /var/log/gitlab/gitlab-shell/gitlab-shell.log
+```
