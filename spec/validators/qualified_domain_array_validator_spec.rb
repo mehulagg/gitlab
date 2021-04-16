@@ -52,7 +52,7 @@ RSpec.describe QualifiedDomainArrayValidator do
       subject
 
       expect(record.errors).to be_present
-      expect(record.errors.first[1]).to eq('entries cannot be nil')
+      expect(record.errors.values.first).to eq('entries cannot be nil')
     end
 
     it 'allows when domain is valid' do
@@ -67,7 +67,7 @@ RSpec.describe QualifiedDomainArrayValidator do
       subject
 
       expect(record.errors).to be_present
-      expect(record.errors.first[1]).to eq 'unicode domains should use IDNA encoding'
+      expect(record.errors.values.first).to eq 'unicode domains should use IDNA encoding'
     end
 
     it 'returns error when entry is larger than 255 chars' do
@@ -76,7 +76,7 @@ RSpec.describe QualifiedDomainArrayValidator do
       subject
 
       expect(record.errors).to be_present
-      expect(record.errors.first[1]).to eq 'entries cannot be larger than 255 characters'
+      expect(record.errors.values.first).to eq 'entries cannot be larger than 255 characters'
     end
 
     it 'returns error when entry contains HTML tags' do
@@ -85,7 +85,7 @@ RSpec.describe QualifiedDomainArrayValidator do
       subject
 
       expect(record.errors).to be_present
-      expect(record.errors.first[1]).to eq 'entries cannot contain HTML tags'
+      expect(record.errors.values.first).to eq 'entries cannot contain HTML tags'
     end
   end
 

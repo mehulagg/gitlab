@@ -124,7 +124,7 @@ module Routable
 
   def set_path_errors
     route_path_errors = self.errors.delete(:"route.path")
-    self.errors[:path].concat(route_path_errors) if route_path_errors
+    self.errors.add(:path, route_path_errors.first) if route_path_errors
   end
 
   def full_name_changed?

@@ -19,18 +19,20 @@ RSpec.describe AddressableUrlValidator do
 
     it 'returns error when url is nil' do
       expect(validator.validate_each(badge, :link_url, nil)).to be_falsey
-      expect(badge.errors.first[1]).to eq validator.options.fetch(:message)
+      expect(badge.errors.values.first).to eq validator.options.fetch(:message)
     end
 
     it 'returns error when url is empty' do
       expect(validator.validate_each(badge, :link_url, '')).to be_falsey
-      expect(badge.errors.first[1]).to eq validator.options.fetch(:message)
+      expect(badge.errors.values.first).to eq validator.options.fetch(:message)
     end
 
     it 'does not allow urls with CR or LF characters' do
       aggregate_failures do
         urls_with_CRLF.each do |url|
-          expect(validator.validate_each(badge, :link_url, url)[0]).to eq 'is blocked: URI is invalid'
+          validator.validate_each(badge, :link_url, url)
+
+          expect(badge.errors.values.first).to eq 'is blocked: URI is invalid'
         end
       end
     end
@@ -113,7 +115,7 @@ RSpec.describe AddressableUrlValidator do
 
     it 'does block nil url with provided error message' do
       expect(validator.validate_each(badge, :link_url, nil)).to be_falsey
-      expect(badge.errors.first[1]).to eq message
+      expect(badge.errors.values.first).to eq message
     end
   end
 
@@ -126,7 +128,7 @@ RSpec.describe AddressableUrlValidator do
 
       subject
 
-      expect(badge.errors.first[1]).to eq 'is not allowed due to: Only allowed schemes are http, https'
+      expect(badge.errors.values.first).to eq 'is not allowed due to: Only allowed schemes are http, https'
     end
   end
 
