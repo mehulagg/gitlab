@@ -60,16 +60,11 @@ RSpec.describe Mutations::Boards::Destroy do
     end
 
     context 'when there is only 1 board for the parent' do
-      before do
-        other_board.destroy!
-      end
+      let(:project) { create(:project) }
+      let!(:board) { create(:board, project: project) }
 
-      it 'does not destroy the board' do
-        expect { subject }.not_to change { Board.count }.from(1)
-      end
-
-      it 'returns an error and not nil board' do
-        subject
+      it 'does not destroy the board and returns an error' do
+        expect { subject }.not_to change { project.boards.count }.from(1)
 
         expect(mutation_response['errors']).not_to be_empty
         expect(mutation_response['board']).not_to be_nil
