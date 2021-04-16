@@ -65,7 +65,7 @@ module Gitlab
 
           # Simplify with https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/646
           if @queue_selector || @experimental_queue_selector
-            SidekiqConfig::CliMethods.query_workers(queues_or_query_string, worker_metadatas)
+            SidekiqConfig::CliMethods.query_queues(queues_or_query_string, worker_metadatas)
           else
             SidekiqConfig::CliMethods.expand_queues(queues_or_query_string.split(','), worker_queues)
           end

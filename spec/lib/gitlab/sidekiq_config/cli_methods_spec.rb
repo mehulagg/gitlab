@@ -121,7 +121,7 @@ RSpec.describe Gitlab::SidekiqConfig::CliMethods do
     end
   end
 
-  describe '.query_workers' do
+  describe '.query_queues' do
     let(:worker_metadatas) do
       [
         {
@@ -168,7 +168,7 @@ RSpec.describe Gitlab::SidekiqConfig::CliMethods do
     end
 
     it 'returns the queue names of matched workers' do
-      expect(described_class.query_workers(query, worker_metadatas)).to match(%w(a a:2 c))
+      expect(described_class.query_queues(query, worker_metadatas)).to match(%w(a a:2 c))
     end
   end
 end

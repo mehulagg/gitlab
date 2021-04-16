@@ -46,7 +46,7 @@ module Gitlab
         end
       end
 
-      def query_workers(query_string, worker_metadatas)
+      def query_queues(query_string, worker_metadatas)
         selected_metadatas = worker_metadatas.select do |worker_metadata|
           SidekiqConfig::WorkerMatcher.new(query_string).match?(worker_metadata)
         end
