@@ -12,6 +12,9 @@ module Gitlab
       # rubocop:disable Gitlab/ModuleWithInstanceVariables
       extend self
 
+      # The file names are misleading. Those files contain the metadata of the
+      # workers. They should be renamed to all_workers instead.
+      # https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/1018
       QUEUE_CONFIG_PATHS = begin
         result = %w[app/workers/all_queues.yml]
         result << 'ee/app/workers/all_queues.yml' if Gitlab.ee?
@@ -37,10 +40,10 @@ module Gitlab
       UnknownOperator = Class.new(QueryError)
       UnknownPredicate = Class.new(QueryError)
 
-      def all_queues(rails_path = Rails.root.to_s)
-        @worker_queues ||= {}
+      def worker_metadatas(rails_path = Rails.root.to_s)
+        @worker_metadatas ||= {}
 
-        @worker_queues[rails_path] ||= QUEUE_CONFIG_PATHS.flat_map do |path|
+        @worker_metadatas[rails_path] ||= QUEUE_CONFIG_PATHS.flat_map do |path|
           full_path = File.join(rails_path, path)
 
           File.exist?(full_path) ? YAML.load_file(full_path) : []
@@ -49,7 +52,7 @@ module Gitlab
       # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
       def worker_queues(rails_path = Rails.root.to_s)
-        worker_names(all_queues(rails_path))
+        worker_names(worker_metadatas(rails_path))
       end
 
       def expand_queues(queues, all_queues = self.worker_queues)
@@ -62,13 +65,13 @@ module Gitlab
         end
       end
 
-      def query_workers(query_string, queues)
-        worker_names(queues.select(&query_string_to_lambda(query_string)))
+      def query_workers(query_string, worker_metadatas)
+        worker_names(worker_metadatas.select(&query_string_to_lambda(query_string)))
       end
 
       def clear_memoization!
-        if instance_variable_defined?('@worker_queues')
-          remove_instance_variable('@worker_queues')
+        if instance_variable_defined?('@worker_metadatas')
+          remove_instance_variable('@worker_metadatas')
         end
       end
 
