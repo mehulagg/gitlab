@@ -9,16 +9,13 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 In GitLab, you use groups to manage one or more related projects at the same time.
 
-You can use groups to:
+You can use groups to manage permissions for your projects. If someone has access to
+the group, they get access to all the projects in the group.
 
-- Manage permissions. If someone [has access to the group](#add-users-to-a-group),
-  they get access to the projects in the group. You can override
-  this access at the project-level if needed.
-- [Communicate](#mention-a-group-in-an-issue-or-merge-request) with all of the members of the group at once.
-- View and [edit](../group/bulk_editing/index.md) all of the [issues](../project/issues/index.md)
-  and [merge requests](../project/merge_requests/reviewing_and_managing_merge_requests.md#view-merge-requests-for-all-projects-in-a-group)
-  for the projects in the group.
-- View [analytics](#group-activity-analytics) for the group.
+You can also view all of the issues and merge requests for the projects in the group,
+and view analytics that show the group's activity.
+
+You can use groups to communicate with all of the members of the group at once.
 
 For larger organizations, you can also create [subgroups](subgroups/index.md).
 
