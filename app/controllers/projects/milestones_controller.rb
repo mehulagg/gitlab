@@ -39,7 +39,7 @@ class Projects::MilestonesController < Projects::ApplicationController
   end
 
   def new
-    @milestone = @project.milestones.new
+    @noteable = @milestone = @project.milestones.new
     respond_with(@milestone)
   end
 
