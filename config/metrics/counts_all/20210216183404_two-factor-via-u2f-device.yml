@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.manage.user_auth_by_provider.two-factor-via-u2f-device
-description: ''
+description: Number of users logging in using two factor authentication with a U2F device
 product_section: dev
 product_stage: manage
 product_group: group::access

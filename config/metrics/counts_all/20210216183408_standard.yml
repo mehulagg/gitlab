@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.manage.user_auth_by_provider.standard
-description: ''
+description: Number of users logging in using password authentication
 product_section: dev
 product_stage: manage
 product_group: group::access
