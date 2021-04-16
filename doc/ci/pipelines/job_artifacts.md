@@ -128,7 +128,7 @@ You can download the latest job artifacts by using a URL.
 | Browse the latest job artifacts | `https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/browse?job=<job_name>` |
 | Download specific files, including HTML files that are shown in [GitLab Pages](../../administration/pages/index.md) | `https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/file/<path>?job=<job_name>` |
 
-#### URL examples
+### URL examples
 
 To download the latest artifacts of the job named `coverage` of
 the `main` branch of the `gitlab` project that belongs to the `gitlab-org`
