@@ -3,6 +3,7 @@
 module Gitlab
   module SidekiqConfig
     class WorkerMatcher
+      WILDCARD_MATCH = '*'
       QUERY_OR_OPERATOR = '|'
       QUERY_AND_OPERATOR = '&'
       QUERY_CONCATENATE_OPERATOR = ','
@@ -33,6 +34,8 @@ module Gitlab
       private
 
       def query_string_to_lambda(query_string)
+        return lambda { |_worker| true } if query_string.strip == WILDCARD_MATCH
+
         or_clauses = query_string.split(QUERY_OR_OPERATOR).map do |and_clauses_string|
           and_clauses_predicates = and_clauses_string.split(QUERY_AND_OPERATOR).map do |term|
             predicate_for_term(term)

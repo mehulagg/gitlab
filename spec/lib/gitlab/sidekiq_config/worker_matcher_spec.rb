@@ -93,6 +93,9 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerMatcher do
         # combinations
         'feature_category=category_a&urgency=high' | %w(a:2)
         'feature_category=category_a&urgency=high|feature_category=category_c' | %w(a:2 c)
+
+        # Match all
+        '*' | %w(a a:2 b c)
       end
 
       with_them do
