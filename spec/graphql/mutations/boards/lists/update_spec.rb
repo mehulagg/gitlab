@@ -9,6 +9,7 @@ RSpec.describe Mutations::Boards::Lists::Update do
   let_it_be(:guest)    { create(:user) }
   let_it_be(:list)     { create(:list, board: board, position: 0) }
   let_it_be(:list2)    { create(:list, board: board) }
+
   let(:mutation) { described_class.new(object: nil, context: { current_user: current_user }, field: nil) }
   let(:list_update_params) { { position: 1, collapsed: true } }
 
@@ -24,12 +25,26 @@ RSpec.describe Mutations::Boards::Lists::Update do
     context 'with permission to admin board lists' do
       let(:current_user) { reporter }
 
-      it 'updates the list position and collapsed state as expected' do
-        subject
+      context 'with correct params' do
+        it 'updates the list position and collapsed state as expected' do
+          subject
 
-        reloaded_list = list.reload
-        expect(reloaded_list.position).to eq(1)
-        expect(reloaded_list.collapsed?(current_user)).to eq(true)
+          reloaded_list = list.reload
+          expect(reloaded_list.position).to eq(1)
+          expect(reloaded_list.collapsed?(current_user)).to eq(true)
+        end
+
+        it 'returns the correct response' do
+          expect(subject.keys).to match_array([:list, :errors])
+        end
+      end
+
+      context 'with invalid position' do
+        let(:list_update_params) { { position: 7 } }
+
+        it 'returns an error response' do
+          expect(subject[:errors]).not_to be_empty
+        end
       end
     end
 

@@ -5,9 +5,15 @@ module Boards
     class BaseUpdateService < Boards::BaseService
       def execute(list)
         if execute_by_params(list)
-          success(list: list)
+          ServiceResponse.success(payload: { list: list })
         else
-          error(list.errors.messages, 422)
+          error = if list.errors.empty?
+                    'The update was not successful.'
+                  else
+                    list.errors.messages
+                  end
+
+          ServiceResponse.error(message: error, http_status: :unprocessable_entity)
         end
       end
 
