@@ -94,3 +94,23 @@ gitops:
       # If 'paths' is not specified or is an empty list, the configuration below is used
     - glob: '/**/*.{yaml,yml,json}'
 ```
+
+## Surface network security alerts from cluster to GitLab
+
+NOTE:
+If your Cilium integration was performed through GitLab Managed Apps, you can use `hubble-relay.gitlab-managed-apps.svc.cluster.local:80`.
+
+```
+cilium:
+  hubble_relay_address: "<hubble-relay-host>:<hubble-relay-port>"
+```
+
+## Debugging
+
+An `agentk` pods' log level can be specified using
+
+```
+observability:
+  logging:
+    level: off | warning | error | info | debug
+```
