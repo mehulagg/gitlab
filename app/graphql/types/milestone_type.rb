@@ -19,11 +19,9 @@ module Types
 
     field :title, GraphQL::STRING_TYPE, null: false,
           description: 'Title of the milestone.'
-    markdown_field :title_html, null: true
 
     field :description, GraphQL::STRING_TYPE, null: true,
           description: 'Description of the milestone.'
-    markdown_field :description_html, null: true
 
     field :state, Types::MilestoneStateEnum, null: false,
           description: 'State of the milestone.'
