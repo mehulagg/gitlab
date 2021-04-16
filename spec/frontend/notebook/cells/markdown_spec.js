@@ -27,7 +27,7 @@ describe('Markdown component', () => {
     return vm.$nextTick();
   });
 
-  it('does not render promot', () => {
+  it('does not render prompt', () => {
     expect(vm.$el.querySelector('.prompt span')).toBeNull();
   });
 
@@ -48,6 +48,36 @@ describe('Markdown component', () => {
 
     return vm.$nextTick().then(() => {
       expect(vm.$el.querySelector('a').getAttribute('href')).toBeNull();
+    });
+  });
+
+  describe('tables', () => {
+    beforeEach(() => {
+      json = getJSONFixture('blob/notebook/markdown-table.json');
+    });
+
+    it('renders images and text', () => {
+      vm = new Component({
+        propsData: {
+          cell: json.cells[0],
+        },
+      }).$mount();
+
+      return vm.$nextTick().then(() => {
+        const images = vm.$el.querySelectorAll('img');
+        expect(images.length).toBe(3);
+
+        const columns = vm.$el.querySelectorAll('td');
+        expect(images.length).toBe(3);
+
+        expect(columns[0].textContent).toEqual('Hello ');
+        expect(columns[1].textContent).toEqual('Test ');
+        expect(columns[2].textContent).toEqual('World ');
+
+        expect(columns[0].innerHTML).toContain('<img src="data:image/jpeg;base64');
+        expect(columns[1].innerHTML).toContain('<img src="data:image/png;base64');
+        expect(columns[2].innerHTML).toContain('<img src="data:image/jpeg;base64');
+      });
     });
   });
 

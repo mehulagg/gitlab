@@ -3,6 +3,8 @@
 import katex from 'katex';
 import marked from 'marked';
 import { sanitize } from '~/lib/dompurify';
+import { hasContent } from '~/lib/utils/text_utility';
+import { __ } from '~/locale';
 import Prompt from './prompt.vue';
 
 const renderer = new marked.Renderer();
@@ -85,6 +87,31 @@ renderer.listitem = (t) => {
   const [text, inline] = renderKatex(t);
   return `<li class="${inline ? 'inline-katex' : ''}">${text}</li>`;
 };
+renderer.image = function image(href) {
+  const attachmentHeader = __(`attachment:`);
+  let img = ``;
+
+  if (!this.attachments || !href.startsWith(attachmentHeader)) {
+    return img;
+  }
+
+  const filename = href.substring(attachmentHeader.length);
+
+  if (hasContent(filename)) {
+    const attachment = this.attachments[filename];
+
+    if (attachment) {
+      const imageType = Object.keys(attachment)[0];
+
+      if (hasContent(imageType)) {
+        const data = attachment[imageType];
+        img = `<img src="data:${imageType};base64,${data}" />`;
+      }
+    }
+  }
+
+  return sanitize(img);
+};
 
 marked.setOptions({
   renderer,
@@ -102,6 +129,8 @@ export default {
   },
   computed: {
     markdown() {
+      renderer.attachments = this.cell.attachments;
+
       return sanitize(marked(this.cell.source.join('').replace(/\\/g, '\\\\')), {
         // allowedTags from GitLab's inline HTML guidelines
         // https://docs.gitlab.com/ee/user/markdown.html#inline-html
