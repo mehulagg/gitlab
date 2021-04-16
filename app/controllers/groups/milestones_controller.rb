@@ -21,7 +21,7 @@ class Groups::MilestonesController < Groups::ApplicationController
   end
 
   def new
-    @milestone = Milestone.new
+    @noteable = @milestone = Milestone.new
   end
 
   def create
