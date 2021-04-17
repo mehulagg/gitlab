@@ -6,13 +6,7 @@ export default {
   components: {
     GlEmptyState,
   },
-  inject: ['emptyStateSvgPath', 'securityConfigurationPath'],
-  props: {
-    helpPath: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: ['emptyStateSvgPath', 'securityConfigurationPath', 'securityDashboardHelpPath'],
   i18n: {
     title: s__('SecurityReports|Monitor vulnerabilities in your project'),
     description: s__(
@@ -32,6 +26,6 @@ export default {
     :primary-button-text="$options.i18n.primaryButtonText"
     :primary-button-link="securityConfigurationPath"
     :secondary-button-text="$options.i18n.secondaryButtonText"
-    :secondary-button-link="helpPath"
+    :secondary-button-link="securityDashboardHelpPath"
   />
 </template>

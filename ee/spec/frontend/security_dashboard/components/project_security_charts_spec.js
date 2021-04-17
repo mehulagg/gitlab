@@ -137,7 +137,7 @@ describe('Project Security Charts component', () => {
     });
 
     it('should display the empty state', () => {
-      expect(findEmptyState().props()).toEqual({ helpPath });
+      expect(findEmptyState().exists()).toBe(true);
     });
 
     it('should not display the chart', () => {

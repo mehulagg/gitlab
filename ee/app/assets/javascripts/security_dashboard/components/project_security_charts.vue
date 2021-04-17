@@ -40,10 +40,6 @@ export default {
       required: false,
       default: false,
     },
-    helpPath: {
-      type: String,
-      required: true,
-    },
   },
   apollo: {
     trendsByDay: {
@@ -180,7 +176,7 @@ export default {
 <template>
   <security-charts-layout ref="layout">
     <template v-if="shouldShowEmptyState" #empty-state>
-      <dashboard-not-configured :help-path="helpPath" />
+      <dashboard-not-configured />
     </template>
     <template v-else-if="shouldShowCharts" #default>
       <gl-line-chart
