@@ -411,7 +411,7 @@ function mountCopyEmailComponent() {
 }
 
 export function mountSidebar(mediator) {
-  if (isInIssuePage() || isInDesignPage()) {
+  if ((isInIssuePage() || isInDesignPage()) && gon.features.issueAssigneesWidget) {
     mountAssigneesComponent();
   } else {
     mountAssigneesComponentDeprecated(mediator);

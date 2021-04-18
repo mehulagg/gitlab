@@ -1,0 +1,8 @@
+---
+name: issue_assignees_widget
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.11'
+type: development
+group: group::project management
+default_enabled: false
