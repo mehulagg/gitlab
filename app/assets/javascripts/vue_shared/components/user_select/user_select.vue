@@ -60,13 +60,13 @@ export default {
   data() {
     return {
       search: '',
-      users: [],
+      participants: [],
       searchUsers,
       isSearching: false,
     };
   },
   apollo: {
-    users: {
+    participants: {
       query() {
         return issueParticipantsQuery;
       },
@@ -93,7 +93,7 @@ export default {
       },
       update(data) {
         const searchResults = data.workspace?.users?.nodes.map(({ user }) => user) || [];
-        const mergedSearchResults = this.users.reduce((acc, current) => {
+        const mergedSearchResults = this.participants.reduce((acc, current) => {
           if (
             !acc.some((user) => current.username === user.username) &&
             (current.name.includes(this.search) || current.username.includes(this.search))
@@ -105,9 +105,9 @@ export default {
         return mergedSearchResults;
       },
       debounce: ASSIGNEES_DEBOUNCE_DELAY,
-      skip() {
-        return this.isSearchEmpty;
-      },
+      // skip() {
+      //   return this.isSearchEmpty;
+      // },
       error() {
         this.$emit('error');
         this.isSearching = false;
@@ -121,8 +121,8 @@ export default {
     isLoading() {
       return this.$apollo.queries.searchUsers.loading;
     },
-    participants() {
-      const users = this.isSearchEmpty || this.isSearching ? this.users : this.searchUsers;
+    users() {
+      const users = this.searchUsers;
       return this.moveCurrentUserToStart(users);
     },
     isSearchEmpty() {
@@ -147,7 +147,7 @@ export default {
         return this.moveCurrentUserToStart(this.value);
       }
 
-      const foundUsernames = this.participants.map(({ username }) => username);
+      const foundUsernames = this.users.map(({ username }) => username);
       const filtered = this.value.filter(({ username }) => foundUsernames.includes(username));
       return this.moveCurrentUserToStart(filtered);
     },
@@ -155,10 +155,7 @@ export default {
       return this.value.map(({ username }) => username);
     },
     unselectedFiltered() {
-      return (
-        this.participants?.filter(({ username }) => !this.selectedUserNames.includes(username)) ||
-        []
-      );
+      return this.users?.filter(({ username }) => !this.selectedUserNames.includes(username)) || [];
     },
     selectedIsEmpty() {
       return this.selectedFiltered.length === 0;
