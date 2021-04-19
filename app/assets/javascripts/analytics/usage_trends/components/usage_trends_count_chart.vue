@@ -1,5 +1,5 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlChartSkeleton } from '@gitlab/ui';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import * as Sentry from '@sentry/browser';
 import { some, every } from 'lodash';
@@ -8,7 +8,6 @@ import {
   formatDateAsMonth,
   getDayDifference,
 } from '~/lib/utils/datetime_utility';
-import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { TODAY, START_DATE } from '../constants';
 import { getAverageByMonth, getEarliestDate, generateDataKeys } from '../utils';
 
@@ -19,7 +18,7 @@ export default {
   components: {
     GlLineChart,
     GlAlert,
-    ChartSkeletonLoader,
+    GlChartSkeleton,
   },
   startDate: START_DATE,
   endDate: TODAY,
@@ -191,7 +190,7 @@ export default {
       {{ errorMessage }}
     </gl-alert>
     <div v-if="!allQueriesFailed">
-      <chart-skeleton-loader v-if="isLoading" />
+      <gl-chart-skeleton v-if="isLoading" />
       <gl-alert v-else-if="hasEmptyDataSet" variant="info" :dismissible="false" class="gl-mt-3">
         {{ noDataMessage }}
       </gl-alert>

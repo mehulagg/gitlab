@@ -1,4 +1,9 @@
-import { GlColumnChart, GlLineChart, GlStackedColumnChart } from '@gitlab/ui/dist/charts';
+import {
+  GlColumnChart,
+  GlLineChart,
+  GlStackedColumnChart,
+  GlChartSkeleton,
+} from '@gitlab/ui/dist/charts';
 import { shallowMount } from '@vue/test-utils';
 
 import InsightsChart from 'ee/insights/components/insights_chart.vue';
@@ -11,7 +16,6 @@ import {
   stackedBarChartData,
 } from 'ee_jest/insights/mock_data';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
-import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 
 const DEFAULT_PROPS = {
   loaded: false,
@@ -38,7 +42,7 @@ describe('Insights chart component', () => {
     it('displays the chart loader in the container', () => {
       wrapper = factory(DEFAULT_PROPS);
 
-      expect(wrapper.find(ChartSkeletonLoader).exists()).toBe(true);
+      expect(wrapper.find(GlChartSkeleton).exists()).toBe(true);
       expect(wrapper.find(ResizableChartContainer).exists()).toBe(true);
     });
   });
@@ -58,7 +62,7 @@ describe('Insights chart component', () => {
         data,
       });
 
-      expect(wrapper.find(ChartSkeletonLoader).exists()).toBe(false);
+      expect(wrapper.find(GlChartSkeleton).exists()).toBe(false);
       expect(wrapper.find(ResizableChartContainer).exists()).toBe(true);
       expect(wrapper.find(component).exists()).toBe(true);
     });
@@ -76,7 +80,7 @@ describe('Insights chart component', () => {
     });
 
     it('displays info about the error', () => {
-      expect(wrapper.find(ChartSkeletonLoader).exists()).toBe(false);
+      expect(wrapper.find(GlChartSkeleton).exists()).toBe(false);
       expect(wrapper.find(ResizableChartContainer).exists()).toBe(false);
       expect(wrapper.find(InsightsChartError).exists()).toBe(true);
     });

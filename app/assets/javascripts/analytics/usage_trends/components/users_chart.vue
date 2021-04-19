@@ -1,12 +1,11 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlChartSkeleton } from '@gitlab/ui';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import * as Sentry from '@sentry/browser';
 import produce from 'immer';
 import { sortBy } from 'lodash';
 import { formatDateAsMonth } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
-import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import usersQuery from '../graphql/queries/users.query.graphql';
 import { getAverageByMonth } from '../utils';
 
@@ -14,7 +13,7 @@ const sortByDate = (data) => sortBy(data, (item) => new Date(item[0]).getTime())
 
 export default {
   name: 'UsersChart',
-  components: { GlAlert, GlAreaChart, ChartSkeletonLoader },
+  components: { GlAlert, GlAreaChart, GlChartSkeleton },
   props: {
     startDate: {
       type: Date,
@@ -124,7 +123,7 @@ export default {
     <gl-alert v-if="loadingError" variant="danger" :dismissible="false" class="gl-mt-3">
       {{ this.$options.i18n.loadUserChartError }}
     </gl-alert>
-    <chart-skeleton-loader v-else-if="isLoading" />
+    <gl-chart-skeleton v-else-if="isLoading" />
     <gl-alert v-else-if="!chartUserData.length" variant="info" :dismissible="false" class="gl-mt-3">
       {{ $options.i18n.noDataMessage }}
     </gl-alert>

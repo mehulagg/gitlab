@@ -1,9 +1,8 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlChartSkeleton } from '@gitlab/ui';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import { mapState } from 'vuex';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { THROUGHPUT_CHART_STRINGS } from '../constants';
 import throughputChartQueryBuilder from '../graphql/throughput_chart_query_builder';
 import { formatThroughputChartData, computeMttmData } from '../utils';
@@ -14,7 +13,7 @@ export default {
   components: {
     GlAreaChart,
     GlAlert,
-    ChartSkeletonLoader,
+    GlChartSkeleton,
     ThroughputStats,
   },
   inject: ['fullPath'],
@@ -121,7 +120,7 @@ export default {
     <div class="gl-text-gray-500" data-testid="chartDescription">
       {{ $options.strings.chartDescription }}
     </div>
-    <chart-skeleton-loader v-if="isLoading" />
+    <gl-chart-skeleton v-if="isLoading" />
     <gl-area-chart
       v-else-if="chartDataAvailable"
       :data="formattedThroughputChartData"

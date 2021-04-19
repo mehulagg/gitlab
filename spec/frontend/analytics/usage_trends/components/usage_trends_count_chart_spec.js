@@ -1,11 +1,10 @@
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlChartSkeleton } from '@gitlab/ui';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import UsageTrendsCountChart from '~/analytics/usage_trends/components/usage_trends_count_chart.vue';
 import statsQuery from '~/analytics/usage_trends/graphql/queries/usage_count.query.graphql';
-import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { mockQueryResponse, mockApolloResponse } from '../apollo_mock_data';
 import { mockCountsData1 } from '../mock_data';
 
@@ -50,7 +49,7 @@ describe('UsageTrendsCountChart', () => {
     wrapper = null;
   });
 
-  const findLoader = () => wrapper.find(ChartSkeletonLoader);
+  const findLoader = () => wrapper.find(GlChartSkeleton);
   const findChart = () => wrapper.find(GlLineChart);
   const findAlert = () => wrapper.find(GlAlert);
 

@@ -1,8 +1,7 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlChartSkeleton } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { __ } from '~/locale';
-import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import Scatterplot from '../../shared/components/scatterplot.vue';
 import { dateFormats } from '../../shared/constants';
 import StageDropdownFilter from './stage_dropdown_filter.vue';
@@ -13,7 +12,7 @@ export default {
     GlAlert,
     Scatterplot,
     StageDropdownFilter,
-    ChartSkeletonLoader,
+    GlChartSkeleton,
   },
   props: {
     stages: {
@@ -44,7 +43,7 @@ export default {
 </script>
 
 <template>
-  <chart-skeleton-loader v-if="isLoading" size="md" class="gl-my-4 gl-py-4" />
+  <gl-chart-skeleton v-if="isLoading" size="md" class="gl-my-4 gl-py-4" />
   <div v-else class="gl-display-flex gl-flex-direction-column" data-testid="vsa-duration-chart">
     <h4 class="gl-mt-0">{{ s__('CycleAnalytics|Days to completion') }}</h4>
     <p>
