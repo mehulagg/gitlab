@@ -27,7 +27,7 @@ Landing pages are top-level topics that serve two purposes:
 
 - They act as navigation for those who use the in-product help.
   (The in-product help does not have a left nav.)
-- They introduce the concept and its four main tasks:
+- They introduce the concept and its four main tasks, if applicable:
   - View
   - Create
   - Edit/update
