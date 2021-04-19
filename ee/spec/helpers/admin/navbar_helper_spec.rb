@@ -15,7 +15,7 @@ RSpec.describe Admin::NavbarHelper do
     end
 
     it 'returns the correct navbar item name' do
-      expect(helper.navbar_item_name).to eq('Cloud License')
+      expect(helper.navbar_item_name).to eq('Subscription')
     end
 
     it 'returns the correct navbar item path' do
