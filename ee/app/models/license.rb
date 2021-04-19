@@ -360,12 +360,6 @@ class License < ApplicationRecord
     end
   end
 
-  def data_filename
-    company_name = self.licensee_company || self.licensee.each_value.first
-    clean_company_name = company_name.gsub(/[^A-Za-z0-9]/, "")
-    "#{clean_company_name}.gitlab-license"
-  end
-
   def data_file=(file)
     self.data = file.read
   end

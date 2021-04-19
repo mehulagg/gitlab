@@ -755,24 +755,6 @@ RSpec.describe License do
     end
   end
 
-  describe "#data_filename" do
-    subject { license.data_filename }
-
-    context 'when licensee includes company information' do
-      let(:gl_license) do
-        build(:gitlab_license, licensee: { 'Company' => ' Example & Partner Inc. 2 ', 'Name' => 'User Example' })
-      end
-
-      it { is_expected.to eq('ExamplePartnerInc2.gitlab-license') }
-    end
-
-    context 'when licensee does not include company information' do
-      let(:gl_license) { build(:gitlab_license, licensee: { 'Name' => 'User Example' }) }
-
-      it { is_expected.to eq('UserExample.gitlab-license') }
-    end
-  end
-
   describe "#md5" do
     it "returns the same MD5 for licenses with carriage returns and those without" do
       other_license = build(:license, data: license.data.gsub("\n", "\r\n"))

@@ -3,8 +3,8 @@
 class Admin::LicensesController < Admin::ApplicationController
   include Admin::LicenseRequest
 
-  before_action :license, only: [:show, :download, :destroy]
-  before_action :require_license, only: [:download, :destroy]
+  before_action :license, only: [:show, :destroy]
+  before_action :require_license, only: :destroy
 
   respond_to :html
 
@@ -16,10 +16,6 @@ class Admin::LicensesController < Admin::ApplicationController
     else
       render :missing
     end
-  end
-
-  def download
-    send_data @license.data, filename: @license.data_filename, disposition: 'attachment'
   end
 
   def new
