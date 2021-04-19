@@ -148,9 +148,15 @@ module Gitlab
             @needs_attributes.flat_map do |need|
               next if ::Feature.enabled?(:ci_needs_optional, default_enabled: :yaml) && need[:optional]
 
-              result = @previous_and_current_stages.any? do |stage|
-                stage.seeds_names.include?(need[:name])
-              end
+              result = if ::Feature.enabled?(:same_stage_job_needs)
+                         @previous_and_current_stages.any? do |stage|
+                           stage.seeds_names.include?(need[:name])
+                         end
+                       else
+                         @previous_stages.any? do |stage|
+                           stage.seeds_names.include?(need[:name])
+                         end
+                       end
 
               "'#{name}' job needs '#{need[:name]}' job, but it was not added to the pipeline" unless result
             end.compact

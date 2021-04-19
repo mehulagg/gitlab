@@ -63,6 +63,10 @@ module Gitlab
       def self.gldropdown_tags_enabled?
         ::Feature.enabled?(:gldropdown_tags, default_enabled: :yaml)
       end
+
+      def self.same_stage_job_needs?
+        ::Feature.enabled?(:same_stage_job_needs, default_enabled: :yaml)
+      end
     end
   end
 end

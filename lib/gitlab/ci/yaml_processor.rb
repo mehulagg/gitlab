@@ -43,7 +43,9 @@ module Gitlab
         @stages = @ci_config.stages
         @jobs = @ci_config.normalized_jobs
 
-        check_circular_dependency!
+        if ::Feature.enabled?(:same_stage_job_needs, default_enabled: :yaml)
+          check_circular_dependency!
+        end
 
         @jobs.each do |name, job|
           validate_job!(name, job)

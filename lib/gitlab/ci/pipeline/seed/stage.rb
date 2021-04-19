@@ -17,7 +17,11 @@ module Gitlab
             @previous_stages = previous_stages
 
             @builds = attributes.fetch(:builds).map do |attributes|
-              Seed::Build.new(context, attributes, previous_stages, self)
+              if ::Feature.enabled?(:same_stage_job_needs)
+                Seed::Build.new(context, attributes, previous_stages, self)
+              else
+                Seed::Build.new(context, attributes, previous_stages)
+              end
             end
           end
 
