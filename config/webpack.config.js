@@ -42,6 +42,7 @@ const WEBPACK_MEMORY_TEST =
   process.env.WEBPACK_MEMORY_TEST && process.env.WEBPACK_MEMORY_TEST !== 'false';
 const NO_COMPRESSION = process.env.NO_COMPRESSION && process.env.NO_COMPRESSION !== 'false';
 const NO_SOURCEMAPS = process.env.NO_SOURCEMAPS && process.env.NO_SOURCEMAPS !== 'false';
+const WATCH_GITLAB_UI = process.env.WATCH_GITLAB_UI && process.env.WATCH_GITLAB_UI !== 'false';
 
 const WEBPACK_OUTPUT_PATH = path.join(ROOT_PATH, 'public/assets/webpack');
 const WEBPACK_PUBLIC_PATH = '/assets/webpack/';
@@ -135,6 +136,10 @@ const alias = {
     'app/assets/javascripts/lib/utils/icons_path.js',
   ),
 };
+
+if (WATCH_GITLAB_UI) {
+  alias['@gitlab/ui'] = path.join(ROOT_PATH, '../gitlab-ui');
+}
 
 if (IS_EE) {
   Object.assign(alias, {
