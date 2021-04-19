@@ -1596,10 +1596,8 @@ To configure the Sidekiq nodes, one each one:
    sidekiq['listen_address'] = "0.0.0.0"
 
    # Set number of Sidekiq queue processes to the same number as available CPUs
-   sidekiq['queue_groups'] = [
-     "*",
-     "*"
-   ]
+   sidekiq['queue_groups'] = ['*'] * 2
+
    # Set number of Sidekiq threads per queue process to the recommend number of 10
    sidekiq['max_concurrency'] = 10
 
