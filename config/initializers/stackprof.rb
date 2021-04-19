@@ -10,7 +10,8 @@ module Gitlab
     DEFAULT_TIMEOUT_SEC = 30
     DEFAULT_MODE = :cpu
     # Sample interval as a frequency in microseconds (~99hz); appropriate for CPU profiles
-    DEFAULT_INTERVAL_US = 9_999
+    # Sample frequency interval in microseconds (~99hz); appropriate for CPU profiles
+    DEFAULT_INTERVAL_US = 10_100
     # Sample interval in event occurrences (n = every nth event); appropriate for allocation profiles
     DEFAULT_INTERVAL_EVENTS = 100
 
