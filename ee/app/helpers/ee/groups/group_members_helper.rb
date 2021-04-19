@@ -9,7 +9,7 @@ module EE::Groups::GroupMembersHelper
   end
 
   override :group_members_list_data_attributes
-  def group_members_list_data_attributes(group, _members)
+  def group_members_list_data_attributes(group, _members, _pagination = {})
     super.merge!({
       ldap_override_path: override_group_group_member_path(group, ':id')
     })
