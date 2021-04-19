@@ -162,6 +162,24 @@ RSpec.describe Geo::FileUploadService do
       include_examples 'no decoded params'
     end
 
+    context 'incident metrics upload' do
+      let(:incident_metric_image) { create(:issuable_metric_image) }
+      let(:upload) { Upload.find_by(model: incident_metric_image, uploader: ::IssuableMetricImageUploader.name) }
+      let(:params) { { id: upload.id, type: 'issuable_metric_image' } }
+      let(:request_data) { Gitlab::Geo::Replication::FileTransfer.new(:file, upload).request_data }
+
+      it 'sends the file' do
+        service = described_class.new(params, request_data)
+
+        response = service.execute
+
+        expect(response[:code]).to eq(:ok)
+        expect(response[:file].path).to eq(incident_metric_image.file.path)
+      end
+
+      include_examples 'no decoded params'
+    end
+
     context 'LFS Object' do
       let(:lfs_object) { create(:lfs_object, :with_file) }
       let(:params) { { id: lfs_object.id, type: 'lfs' } }
