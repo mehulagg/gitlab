@@ -43,7 +43,7 @@ export default {
       required: false,
       default: () => ({
         hasNextPage: false,
-        currentPage: 0,
+        currentPage: 1,
       }),
     },
   },
@@ -190,11 +190,12 @@ export default {
         <total-time :time="item.totalTime" data-testid="vsa-stage-event-time" />
       </template>
     </gl-table>
+    <!-- :prev-page="pagination.prevPage"
+      :next-page="pagination.nextPage" -->
     <gl-pagination
-      v-model="page"
-      :value="pagination.currentPage"
-      :prev-page="pagination.prevPage"
-      :next-page="pagination.nextPage"
+      :value="5"
+      :prev-page="4"
+      :next-page="6"
       align="center"
       class="gl-mt-3"
       @input="handlePageChange"
