@@ -3,7 +3,11 @@ import Vuex from 'vuex';
 import GeoNodeActions from 'ee/geo_nodes_beta/components/header/geo_node_actions.vue';
 import GeoNodeActionsDesktop from 'ee/geo_nodes_beta/components/header/geo_node_actions_desktop.vue';
 import GeoNodeActionsMobile from 'ee/geo_nodes_beta/components/header/geo_node_actions_mobile.vue';
-import { MOCK_PRIMARY_VERSION, MOCK_REPLICABLE_TYPES } from 'ee_jest/geo_nodes_beta/mock_data';
+import {
+  MOCK_NODES,
+  MOCK_PRIMARY_VERSION,
+  MOCK_REPLICABLE_TYPES,
+} from 'ee_jest/geo_nodes_beta/mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -12,7 +16,7 @@ describe('GeoNodeActions', () => {
   let wrapper;
 
   const defaultProps = {
-    primary: true,
+    node: MOCK_NODES[0],
   };
 
   const createComponent = (initialState, props) => {

@@ -2,7 +2,11 @@ import { GlButton } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import GeoNodeActionsDesktop from 'ee/geo_nodes_beta/components/header/geo_node_actions_desktop.vue';
-import { MOCK_PRIMARY_VERSION, MOCK_REPLICABLE_TYPES } from 'ee_jest/geo_nodes_beta/mock_data';
+import {
+  MOCK_NODES,
+  MOCK_PRIMARY_VERSION,
+  MOCK_REPLICABLE_TYPES,
+} from 'ee_jest/geo_nodes_beta/mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -11,7 +15,7 @@ describe('GeoNodeActionsDesktop', () => {
   let wrapper;
 
   const defaultProps = {
-    primary: true,
+    node: MOCK_NODES[0],
   };
 
   const createComponent = (initialState, props) => {
@@ -54,6 +58,12 @@ describe('GeoNodeActionsDesktop', () => {
           'Remove',
         ]);
       });
+
+      it('renders edit link correctly', () => {
+        expect(findGeoDesktopActionsButtons().at(0).attributes('href')).toBe(
+          MOCK_NODES[0].webEditUrl,
+        );
+      });
     });
 
     describe.each`
@@ -62,11 +72,11 @@ describe('GeoNodeActionsDesktop', () => {
       ${false} | ${undefined}
     `(`conditionally`, ({ primary, disabled }) => {
       beforeEach(() => {
-        createComponent(null, { primary });
+        createComponent(null, { node: { primary } });
       });
 
       describe(`when primary is ${primary}`, () => {
-        it('disables the Desktop Remove button', () => {
+        it(`does ${primary ? '' : 'not '}disable the Desktop Remove button`, () => {
           expect(findGeoDesktopActionsRemoveButton().attributes('disabled')).toBe(disabled);
         });
       });
