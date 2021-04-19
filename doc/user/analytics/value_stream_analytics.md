@@ -64,7 +64,7 @@ The "Time" metrics near the top of the page are measured as follows:
 
 Value Stream Analytics measures each stage from its start event to its stop event.
 For example, a stage might start when one label is added to an issue, and end when another label is added.
-Value Stream Analytics excludes work in progress, meaning it ignores any items that have not reached the stop event.
+Items are not included in the stage time calculation if they have not reached the stop event.
 
 Most stages are based on issue events.
 However, the Staging stage is based on merge request events, so it is unique.
