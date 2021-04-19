@@ -5,7 +5,7 @@ class ApplicationSetting
     include CacheMarkdownField
     has_many :term_agreements
 
-    validates :terms, presence: true
+    validates :terms, presence: true, if: :enforced?
 
     cache_markdown_field :terms
 
@@ -18,6 +18,12 @@ class ApplicationSetting
 
       user.accepted_term_id == id ||
         term_agreements.accepted.where(user: user).exists?
+    end
+
+    private
+
+    def enforced?
+      ApplicationSetting.current.enforce_terms?
     end
   end
 end

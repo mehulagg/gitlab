@@ -67,8 +67,6 @@ module ApplicationSettings
     end
 
     def update_terms(terms)
-      return unless terms.present?
-
       # Avoid creating a new terms record if the text is exactly the same.
       terms = terms.strip
       return if terms == @application_setting.terms

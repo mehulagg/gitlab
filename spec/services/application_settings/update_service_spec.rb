@@ -23,8 +23,24 @@ RSpec.describe ApplicationSettings::UpdateService do
     context 'when the passed terms are blank' do
       let(:params) { { terms: '' } }
 
-      it 'does not create terms' do
-        expect { subject.execute }.not_to change { ApplicationSetting::Term.count }
+      context 'when enforcement is enabled' do
+        before do
+          stub_application_setting(enforce_terms: true)
+        end
+
+        it 'does not create terms' do
+          expect { subject.execute }.not_to change { ApplicationSetting::Term.count }
+        end
+      end
+
+      context 'when enforcement is disabled' do
+        before do
+          stub_application_setting(enforce_terms: false)
+        end
+
+        it 'does create terms' do
+          expect { subject.execute }.to change { ApplicationSetting::Term.count }.by(1)
+        end
       end
     end
 
