@@ -26,8 +26,6 @@ Are there any other stages or teams involved that need to be kept in the loop?
 
 ## The Rollout Plan
 
-<!-- Describe how the feature should be rolled out, and check the right boxes. You can check multiple if applicable -->
-
 - Partial Rollout on GitLab.com with beta groups
 - Rollout on GitLab.com for a certain period (How long)
 - Percentage Rollout on GitLab.com
@@ -78,6 +76,8 @@ Are there any other stages or teams involved that need to be kept in the loop?
 - [ ] Verify behaviour (See Beta Groups) and add details with screenshots as a comment on this issue
 
 - [ ] If it is possible to perform an incremental rollout, this should be preferred. Proposed increments are: `10%`, `50%`, `100%`. Proposed minimum time between increments is 15 minutes.
+  - For actor-based rollout: `/chatops run feature set feature_name 10 --actors`
+  - For time-based rollout: `/chatops run feature set feature_name 10`
 
 - [ ] Make the feature flag enabled by default i.e. Change `default_enabled` to `true`
 
