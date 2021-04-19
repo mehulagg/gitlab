@@ -86,7 +86,7 @@ module Namespaces
         raise UnboundedSearch.new('Must bound search by a top') unless top
 
         without_sti_condition
-          .traversal_ids_contains(latest_traversal_ids(top))
+          .traversal_ids_contains("{#{top.id}}")
       end
 
       # traversal_ids are a cached value.
