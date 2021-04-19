@@ -69,6 +69,7 @@ export default {
       'isLoadingValueStreams',
       'selectedStageError',
       'selectedValueStream',
+      'pagination',
     ]),
     // NOTE: formEvents are fetched in the same request as the list of stages (fetchGroupStagesAndEvents)
     // so i think its ok to bind formEvents here even though its only used as a prop to the custom-stage-form
@@ -282,6 +283,7 @@ export default {
             :current-stage="selectedStage"
             :empty-state-message="selectedStageError"
             :no-data-svg-path="noDataSvgPath"
+            :pagination="pagination"
           />
         </template>
         <stage-table

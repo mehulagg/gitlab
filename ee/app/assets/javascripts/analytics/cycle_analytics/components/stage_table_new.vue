@@ -193,9 +193,9 @@ export default {
     <!-- :prev-page="pagination.prevPage"
       :next-page="pagination.nextPage" -->
     <gl-pagination
-      :value="5"
-      :prev-page="4"
-      :next-page="6"
+      :value="pagination.currentPage"
+      :prev-page="pagination.prevPage"
+      :next-page="pagination.nextPage"
       align="center"
       class="gl-mt-3"
       @input="handlePageChange"

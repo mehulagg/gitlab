@@ -34,4 +34,11 @@ export default () => ({
   summary: [],
   medians: {},
   valueStreams: [],
+
+  pagination: {
+    currentPage: 3,
+    // TODO: probably only need to store current and has next, calculate the others
+    prevPage: 2,
+    nextPage: 4,
+  },
 });
