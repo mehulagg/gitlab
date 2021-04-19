@@ -2388,11 +2388,16 @@ time use Google Cloud’s Kubernetes Engine (GKE) and associated machine types, 
 and CPU requirements should translate to most other providers. We hope to update this in the
 future with further specific cloud provider details.
 
-| Service                                               | Nodes | Configuration           | GCP              | Allocatable CPUs and Memory |
+| Service                                               | Nodes* | Configuration           | GCP              | Allocatable CPUs and Memory |
 |-------------------------------------------------------|-------|-------------------------|------------------|-----------------------------|
 | Webservice                                            | 4     | 32 vCPU, 28.8 GB memory | `n1-standard-32` | 127.5 vCPU, 118 GB memory   |
 | Sidekiq                                               | 4     | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 15.5 vCPU, 50 GB memory     |
 | Supporting services such as NGINX, Prometheus, etc... | 2     | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 7.75 vCPU, 25 GB memory     |
+
+NOTE:
+\* Nodes configuration is given as it is fixed for performance testing to ensure pod vcpu / memory ratios and avoid scaling during testing.
+In production deployments there is no need to assign pods to nodes - as long as the same aggregated vCPU and Memory are available
+within the cluster and the number of nodes and their location takes into account the desired availability.
 
 Next are the backend components that run on static compute VMs via Omnibus (or External PaaS
 services where applicable):
