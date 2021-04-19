@@ -9,8 +9,12 @@ module Members
 
       return member if member.is_a?(GroupMember) && member.source.last_owner?(member.user)
 
-      @user = member.user
+      process_destroy(member, skip_subresources, unassign_issuables)
+    end
 
+    private
+
+    def process_destroy(member, skip_subresources, unassign_issuables)
       member.destroy
 
       member.user&.invalidate_cache_counts
@@ -28,10 +32,6 @@ module Members
 
       member
     end
-
-    private
-
-    attr_reader :user
 
     def authorized?(member, destroy_bot)
       return can_destroy_bot_member?(member) if destroy_bot

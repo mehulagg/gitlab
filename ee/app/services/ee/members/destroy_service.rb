@@ -19,6 +19,14 @@ module EE
 
       private
 
+      attr_reader :user
+
+      def process_destroy(member, skip_subresources, unassign_issuables)
+        @user = member.user # rubocop:disable Gitlab/ModuleWithInstanceVariables
+
+        super
+      end
+
       def removed_due_to_expiry?(member)
         member.expired?
       end
