@@ -21,7 +21,7 @@ full list of reference architectures, see
 | Consul*                                    | 3           | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   | `c5.large`   | `F2s v2`  |
 | PostgreSQL*                                | 3           | 8 vCPU, 30 GB memory    | `n1-standard-8`  | `m5.2xlarge` | `D8s v3`  |
 | PgBouncer*                                 | 3           | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   | `c5.large`   | `F2s v2`  |
-| Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   | `c5.large`   | `F2s v2`  |
+| Internal load balancing node***            | 1           | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   | `c5.large`   | `F2s v2`  |
 | Redis - Cache**                            | 3           | 4 vCPU, 15 GB memory    | `n1-standard-4`  | `m5.xlarge`  | `D4s v3`  |
 | Redis - Queues / Shared State**            | 3           | 4 vCPU, 15 GB memory    | `n1-standard-4`  | `m5.xlarge`  | `D4s v3`  |
 | Redis Sentinel - Cache**                   | 3           | 1 vCPU, 3.75 GB memory  | `n1-standard-1`  | `c5.large`   | `A1 v2`   |
@@ -33,14 +33,16 @@ full list of reference architectures, see
 | GitLab Rails                               | 3           | 32 vCPU, 28.8 GB memory | `n1-highcpu-32`  | `c5.9xlarge` | `F32s v2` |
 | Monitoring node                            | 1           | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`   | `c5.xlarge`  | `F4s v2`  |
 | Object storage                             | n/a         | n/a                     | n/a              | n/a          | n/a       |
-| NFS server***                              | 1           | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`   | `c5.xlarge`  | `F4s v2`  |
+| NFS server****                             | 1           | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`   | `c5.xlarge`  | `F4s v2`  |
 
 NOTE:
 Components marked with * can be optionally run on reputable
 third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work.
 Components marked with ** can be optionally run on reputable
 third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
-Components marked with *** can be optionally run on reputable third party object storage (storage PaaS). 
+Components marked with *** can be optionally run on reputable third party load balancing services (LB PaaS). 
+AWS ELB is known to work.
+Components marked with **** can be optionally run on reputable third party object storage (storage PaaS). 
 Google Cloud Storage and AWS S3 are known to work.
 
 ```plantuml
@@ -2416,7 +2418,7 @@ services where applicable):
 | Consul*                                    | 3     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | PostgreSQL*                                | 3     | 8 vCPU, 30 GB memory    | `n1-standard-8`  |
 | PgBouncer*                                 | 3     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
-| Internal load balancing node               | 1     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
+| Internal load balancing node***            | 1     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | Redis - Cache**                            | 3     | 4 vCPU, 15 GB memory    | `n1-standard-4`  |
 | Redis - Queues / Shared State**            | 3     | 4 vCPU, 15 GB memory    | `n1-standard-4`  |
 | Redis Sentinel - Cache**                   | 3     | 1 vCPU, 3.75 GB memory   | `n1-standard-1`  |
@@ -2431,6 +2433,8 @@ Components marked with * can be optionally run on reputable
 third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work.
 Components marked with ** can be optionally run on reputable
 third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
+Components marked with *** can be optionally run on reputable third party load balancing services (LB PaaS). 
+AWS ELB is known to work.
 
 ```plantuml
 @startuml 10k
