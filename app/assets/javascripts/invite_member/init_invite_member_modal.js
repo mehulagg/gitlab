@@ -8,7 +8,7 @@ Vue.use(GlToast);
 export default function initInviteMembersModal() {
   const el = document.querySelector('.js-invite-member-modal');
 
-  if (!el || isInDesignPage() || isInIssuePage()) {
+  if (!el || ((isInIssuePage() || isInDesignPage()) && gon.features.issueAssigneesWidget)) {
     return false;
   }
 
