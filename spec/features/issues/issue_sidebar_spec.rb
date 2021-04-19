@@ -32,7 +32,7 @@ RSpec.describe 'Issue Sidebar' do
 
       context 'when GraphQL assignees widget feature flag is disabled' do
         before do
-           stub_feature_flags(issue_assignees_widget: false)
+          stub_feature_flags(issue_assignees_widget: false)
         end
 
         include_examples 'issuable invite members experiments' do
