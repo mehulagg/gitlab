@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::ProjectHousekeepingService do
+RSpec.describe Geo::ProjectHousekeepingService, let_it_be_light_freeze: false do
   include ExclusiveLeaseHelpers
   include ::EE::GeoHelpers
 

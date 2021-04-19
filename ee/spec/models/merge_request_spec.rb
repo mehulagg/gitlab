@@ -7,7 +7,7 @@ require 'spec_helper'
 #
 # For instance, `ee/spec/models/merge_request/blocking_spec.rb` tests the
 # "blocking MRs" feature.
-RSpec.describe MergeRequest do
+RSpec.describe MergeRequest, let_it_be_light_freeze: false do
   using RSpec::Parameterized::TableSyntax
   include ReactiveCachingHelpers
 

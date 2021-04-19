@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::PackageFileReplicator do
+RSpec.describe Geo::PackageFileReplicator, let_it_be_light_freeze: false do
   let(:model_record) { build(:package_file, :npm) }
 
   include_examples 'a blob replicator'

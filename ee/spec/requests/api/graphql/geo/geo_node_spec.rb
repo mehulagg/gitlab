@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Getting the current Geo node' do
+RSpec.describe 'Getting, let_it_be_light_freeze: false the current Geo node' do
   include GraphqlHelpers
   include EE::GeoHelpers
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Releases::CreateEvidenceService do
+RSpec.describe Releases::CreateEvidenceService, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project) }
   let(:release) { create(:release, project: project) }
   let(:service) { described_class.new(release) }

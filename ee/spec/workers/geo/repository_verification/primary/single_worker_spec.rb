@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::RepositoryVerification::Primary::SingleWorker, :clean_gitlab_redis_cache do
+RSpec.describe Geo::RepositoryVerification::Primary::SingleWorker, let_it_be_light_freeze: false, :clean_gitlab_redis_cache do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 

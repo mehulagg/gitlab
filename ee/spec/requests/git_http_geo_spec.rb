@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe "Git HTTP requests (Geo)", :geo do
+RSpec.describe "Git, let_it_be_light_freeze: false HTTP requests (Geo)", :geo do
   include TermsHelper
   include ::EE::GeoHelpers
   include GitHttpHelpers

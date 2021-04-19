@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Admin::Users::User' do
+RSpec.describe 'Admin::Users::User', let_it_be_light_freeze: false do
   let_it_be(:user) { create(:omniauth_user, provider: 'twitter', extern_uid: '123456') }
   let_it_be(:current_user) { create(:admin, last_activity_on: 5.days.ago) }
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::SearchResults do
+RSpec.describe Gitlab::SearchResults, let_it_be_light_freeze: false do
   include ProjectForksHelper
   include SearchHelpers
   using RSpec::Parameterized::TableSyntax

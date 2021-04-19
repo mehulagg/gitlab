@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Namespace::PackageSetting do
+RSpec.describe Namespace::PackageSetting, let_it_be_light_freeze: false do
   describe 'relationships' do
     it { is_expected.to belong_to(:namespace) }
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ProjectWiki, :elastic do
+RSpec.describe ProjectWiki, let_it_be_light_freeze: false, :elastic do
   let_it_be(:project) { create(:project, :wiki_repo) }
 
   before do

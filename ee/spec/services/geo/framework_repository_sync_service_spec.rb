@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::FrameworkRepositorySyncService, :geo do
+RSpec.describe Geo::FrameworkRepositorySyncService, let_it_be_light_freeze: false, :geo do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 

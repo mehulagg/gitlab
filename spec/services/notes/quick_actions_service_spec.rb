@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Notes::QuickActionsService do
+RSpec.describe Notes::QuickActionsService, let_it_be_light_freeze: false do
   shared_context 'note on noteable' do
     let_it_be(:project) { create(:project, :repository) }
     let_it_be(:maintainer) { create(:user).tap { |u| project.add_maintainer(u) } }

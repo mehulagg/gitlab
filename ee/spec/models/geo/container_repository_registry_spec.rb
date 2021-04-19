@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::ContainerRepositoryRegistry, :geo do
+RSpec.describe Geo::ContainerRepositoryRegistry, let_it_be_light_freeze: false, :geo do
   include ::EE::GeoHelpers
 
   it_behaves_like 'a BulkInsertSafe model', Geo::ContainerRepositoryRegistry do

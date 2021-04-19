@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::DeleteObjectsService, :aggregate_failure do
+RSpec.describe Ci::DeleteObjectsService, let_it_be_light_freeze: false, :aggregate_failure do
   let(:service) { described_class.new }
   let(:artifact) { create(:ci_job_artifact, :archive) }
   let(:data) { [artifact] }

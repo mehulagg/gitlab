@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::ImportExport::ProjectExportPresenter do
+RSpec.describe Projects::ImportExport::ProjectExportPresenter, let_it_be_light_freeze: false do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
   let_it_be(:user) { create(:user) }

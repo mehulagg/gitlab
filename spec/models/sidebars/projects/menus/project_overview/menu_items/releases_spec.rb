@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Sidebars::Projects::Menus::ProjectOverview::MenuItems::Releases do
+RSpec.describe Sidebars::Projects::Menus::ProjectOverview::MenuItems::Releases, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project, :repository) }
 
   let(:user) { project.owner }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Todos::Destroy::EntityLeaveService do
+RSpec.describe Todos::Destroy::EntityLeaveService, let_it_be_light_freeze: false do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:subgroup) { create(:group, parent: group) }

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe EE::NamespaceStorageLimitAlertHelper do
+RSpec.describe EE::NamespaceStorageLimitAlertHelper, let_it_be_light_freeze: false do
   using RSpec::Parameterized::TableSyntax
 
   let!(:admin) { create(:admin) }

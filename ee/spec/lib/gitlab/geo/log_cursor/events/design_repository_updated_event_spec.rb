@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Geo::LogCursor::Events::DesignRepositoryUpdatedEvent, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::Geo::LogCursor::Events::DesignRepositoryUpdatedEvent, let_it_be_light_freeze: false, :clean_gitlab_redis_shared_state do
   include ::EE::GeoHelpers
 
   let_it_be(:secondary) { create(:geo_node) }

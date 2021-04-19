@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe MemberUserEntity do
+RSpec.describe MemberUserEntity, let_it_be_light_freeze: false do
   let_it_be(:user) { create(:user) }
   let_it_be(:emoji) { 'slight_smile' }
   let_it_be(:user_status) { create(:user_status, user: user, emoji: emoji) }

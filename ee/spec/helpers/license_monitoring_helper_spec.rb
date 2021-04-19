@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe LicenseMonitoringHelper do
+RSpec.describe LicenseMonitoringHelper, let_it_be_light_freeze: false do
   describe '#show_active_user_count_threshold_banner?' do
     let_it_be(:admin) { create(:admin) }
     let_it_be(:user) { create(:user) }

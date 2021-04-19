@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Epic do
+RSpec.describe Epic, let_it_be_light_freeze: false do
   include NestedEpicsHelper
 
   let_it_be(:user) { create(:user) }

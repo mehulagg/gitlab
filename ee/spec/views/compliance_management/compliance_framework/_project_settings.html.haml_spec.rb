@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'projects/edit.html.haml' do
+RSpec.describe 'projects/edit.html.haml', let_it_be_light_freeze: false do
   let_it_be(:group) { create(:group) }
   let_it_be(:group_owner) { create(:user) }
   let_it_be(:project) { create(:project, namespace: group) }

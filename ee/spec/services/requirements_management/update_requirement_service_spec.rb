@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe RequirementsManagement::UpdateRequirementService do
+RSpec.describe RequirementsManagement::UpdateRequirementService, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project)}
   let_it_be(:user) { create(:user) }
   let_it_be(:requirement) { create(:requirement, project: project) }

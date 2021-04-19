@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Email::Handler::CreateNoteOnIssuableHandler do
+RSpec.describe Gitlab::Email::Handler::CreateNoteOnIssuableHandler, let_it_be_light_freeze: false do
   include_context :email_shared_context
 
   let_it_be(:user)      { create(:user, email: 'jake@adventuretime.ooo', incoming_email_token: 'auth_token') }

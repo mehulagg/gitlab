@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe MergeRequests::AfterCreateService do
+RSpec.describe MergeRequests::AfterCreateService, let_it_be_light_freeze: false do
   let_it_be(:merge_request) { create(:merge_request) }
 
   let(:service_object) { described_class.new(merge_request.target_project, merge_request.author) }

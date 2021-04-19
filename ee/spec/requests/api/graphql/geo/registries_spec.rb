@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Gets registries' do
+RSpec.describe 'Gets, let_it_be_light_freeze: false registries' do
   it_behaves_like 'gets registries for', {
     field_name: 'mergeRequestDiffRegistries',
     registry_class_name: 'MergeRequestDiffRegistry',

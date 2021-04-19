@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Admin Groups' do
+RSpec.describe 'Admin, let_it_be_light_freeze: false Groups' do
   include Select2Helper
   include Spec::Support::Helpers::Features::MembersHelpers
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ComplianceManagement::Framework do
+RSpec.describe ComplianceManagement::Framework, let_it_be_light_freeze: false do
   context 'validation' do
     let_it_be(:framework) { create(:compliance_framework) }
 

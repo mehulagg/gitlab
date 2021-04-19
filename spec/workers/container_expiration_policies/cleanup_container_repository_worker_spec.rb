@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
+RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker, let_it_be_light_freeze: false do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:repository, reload: true) { create(:container_repository, :cleanup_scheduled) }

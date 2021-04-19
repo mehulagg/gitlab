@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Resolvers::VulnerabilitiesResolver do
+RSpec.describe Resolvers::VulnerabilitiesResolver, let_it_be_light_freeze: false do
   include GraphqlHelpers
 
   describe '#resolve' do

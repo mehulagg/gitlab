@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::MergeRequests::SetAssignees do
+RSpec.describe Mutations::MergeRequests::SetAssignees, let_it_be_light_freeze: false do
   context 'when the user does not have permissions' do
     let_it_be(:merge_request) { create(:merge_request) }
     let_it_be(:user) { create(:user) }

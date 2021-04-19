@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'shared/mirror_update_button' do
+RSpec.describe 'shared/mirror_update_button', let_it_be_light_freeze: false do
   let(:partial) { 'shared/mirror_update_button' }
 
   let_it_be(:project) { create(:project, :mirror) }

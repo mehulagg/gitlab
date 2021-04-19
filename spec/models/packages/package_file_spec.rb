@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe Packages::PackageFile, type: :model do
+RSpec.describe Packages::PackageFile, let_it_be_light_freeze: false, type: :model do
   describe 'relationships' do
     it { is_expected.to belong_to(:package) }
     it { is_expected.to have_one(:conan_file_metadatum) }

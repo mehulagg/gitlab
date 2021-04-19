@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Geo do
+RSpec.describe API::Geo, let_it_be_light_freeze: false do
   include TermsHelper
   include ApiHelpers
   include ::EE::GeoHelpers

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::SystemNotes::AlertManagementService do
+RSpec.describe ::SystemNotes::AlertManagementService, let_it_be_light_freeze: false do
   let_it_be(:author)   { create(:user) }
   let_it_be(:project)  { create(:project, :repository) }
   let_it_be(:noteable) { create(:alert_management_alert, :with_issue, :acknowledged, project: project) }

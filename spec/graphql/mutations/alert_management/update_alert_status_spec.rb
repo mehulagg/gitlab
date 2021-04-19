@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::AlertManagement::UpdateAlertStatus do
+RSpec.describe Mutations::AlertManagement::UpdateAlertStatus, let_it_be_light_freeze: false do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:alert) { create(:alert_management_alert, :triggered) }
   let_it_be(:project) { alert.project }

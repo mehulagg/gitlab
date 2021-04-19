@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BulkImports::Pipeline::EpicBase do
+RSpec.describe BulkImports::Pipeline::EpicBase, let_it_be_light_freeze: false do
   let(:pipeline_class) do
     Class.new(BulkImports::Pipeline::EpicBase) do
       def extract(_)

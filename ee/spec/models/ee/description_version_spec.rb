@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe DescriptionVersion do
+RSpec.describe DescriptionVersion, let_it_be_light_freeze: false do
   describe 'associations' do
     it { is_expected.to belong_to :epic }
   end

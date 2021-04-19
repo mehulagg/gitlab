@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe Gitlab::Graphql::MarkdownField do
+RSpec.describe Gitlab::Graphql::MarkdownField, let_it_be_light_freeze: false do
   include Gitlab::Routing
 
   describe '.markdown_field' do

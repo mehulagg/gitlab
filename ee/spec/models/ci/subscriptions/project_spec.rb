@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::Subscriptions::Project do
+RSpec.describe Ci::Subscriptions::Project, let_it_be_light_freeze: false do
   let_it_be(:upstream_project) { create(:project, :public) }
   let_it_be(:downstream_project) { create(:project) }
 

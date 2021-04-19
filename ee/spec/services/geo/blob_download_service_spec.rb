@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Geo::BlobDownloadService do
+RSpec.describe Geo::BlobDownloadService, let_it_be_light_freeze: false do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 

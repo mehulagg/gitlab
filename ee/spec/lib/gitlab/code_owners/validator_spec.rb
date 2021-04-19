@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::CodeOwners::Validator do
+RSpec.describe Gitlab::CodeOwners::Validator, let_it_be_light_freeze: false do
   include FakeBlobHelpers
 
   let_it_be(:group) { create(:group) }

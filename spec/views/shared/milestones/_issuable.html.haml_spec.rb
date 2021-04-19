@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'shared/milestones/_issuable.html.haml' do
+RSpec.describe 'shared/milestones/_issuable.html.haml', let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
   let_it_be(:milestone) { create(:milestone, project: project) }

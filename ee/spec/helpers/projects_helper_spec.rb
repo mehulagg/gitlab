@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ProjectsHelper do
+RSpec.describe ProjectsHelper, let_it_be_light_freeze: false do
   let_it_be_with_refind(:project) { create(:project) }
 
   before do

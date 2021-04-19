@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Alert Management index', :js do
+RSpec.describe 'Alert, let_it_be_light_freeze: false Management index', :js do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
 

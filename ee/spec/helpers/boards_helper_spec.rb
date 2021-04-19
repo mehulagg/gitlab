@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BoardsHelper do
+RSpec.describe BoardsHelper, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project) }
   let_it_be(:group) { create(:group) }
   let_it_be(:user) { create(:user) }

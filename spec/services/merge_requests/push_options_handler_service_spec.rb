@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe MergeRequests::PushOptionsHandlerService do
+RSpec.describe MergeRequests::PushOptionsHandlerService, let_it_be_light_freeze: false do
   include ProjectForksHelper
 
   let_it_be(:project) { create(:project, :public, :repository) }

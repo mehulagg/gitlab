@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::ContainerRepositorySyncDispatchWorker, :geo, :use_sql_query_cache_for_tracking_db do
+RSpec.describe Geo::ContainerRepositorySyncDispatchWorker, let_it_be_light_freeze: false, :geo, :use_sql_query_cache_for_tracking_db do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 

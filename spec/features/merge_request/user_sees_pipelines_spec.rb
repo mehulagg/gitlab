@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Merge request > User sees pipelines', :js do
+RSpec.describe 'Merge, let_it_be_light_freeze: false request > User sees pipelines', :js do
   describe 'pipeline tab' do
     let(:merge_request) { create(:merge_request) }
     let(:project) { merge_request.target_project }

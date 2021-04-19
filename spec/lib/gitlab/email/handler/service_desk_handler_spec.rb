@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
+RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler, let_it_be_light_freeze: false do
   include_context :email_shared_context
 
   before do

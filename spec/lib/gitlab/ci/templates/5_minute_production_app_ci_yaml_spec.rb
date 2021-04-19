@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe '5-Minute-Production-App.gitlab-ci.yml' do
+RSpec.describe '5-Minute-Production-App.gitlab-ci.yml', let_it_be_light_freeze: false do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('5-Minute-Production-App') }
 
   describe 'the created pipeline' do

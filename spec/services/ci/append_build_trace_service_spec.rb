@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::AppendBuildTraceService do
+RSpec.describe Ci::AppendBuildTraceService, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
   let_it_be(:build) { create(:ci_build, :running, pipeline: pipeline) }

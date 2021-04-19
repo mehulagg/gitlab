@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::Runner do
+RSpec.describe Ci::Runner, let_it_be_light_freeze: false do
   it_behaves_like 'having unique enum values'
 
   describe 'validation' do

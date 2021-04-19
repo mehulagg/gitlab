@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::GitAccessWiki do
+RSpec.describe Gitlab::GitAccessWiki, let_it_be_light_freeze: false do
   include WikiHelpers
 
   let_it_be(:user) { create(:user) }

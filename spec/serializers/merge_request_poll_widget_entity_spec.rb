@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe MergeRequestPollWidgetEntity do
+RSpec.describe MergeRequestPollWidgetEntity, let_it_be_light_freeze: false do
   include ProjectForksHelper
   using RSpec::Parameterized::TableSyntax
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::HookData::GroupBuilder do
+RSpec.describe Gitlab::HookData::GroupBuilder, let_it_be_light_freeze: false do
   let_it_be(:group) { create(:group) }
 
   describe '#build' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::SystemNotes::TimeTrackingService do
+RSpec.describe ::SystemNotes::TimeTrackingService, let_it_be_light_freeze: false do
   let_it_be(:author)   { create(:user) }
   let_it_be(:project)  { create(:project, :repository) }
 

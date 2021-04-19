@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'dashboard/projects/index.html.haml' do
+RSpec.describe 'dashboard/projects/index.html.haml', let_it_be_light_freeze: false do
   let_it_be(:user) { build(:user) }
 
   before do

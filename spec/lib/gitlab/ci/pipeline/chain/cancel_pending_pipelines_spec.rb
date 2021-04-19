@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Ci::Pipeline::Chain::CancelPendingPipelines do
+RSpec.describe Gitlab::Ci::Pipeline::Chain::CancelPendingPipelines, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
   let(:prev_pipeline) { create(:ci_pipeline, project: project) }

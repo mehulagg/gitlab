@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Checks::DiffCheck do
+RSpec.describe Gitlab::Checks::DiffCheck, let_it_be_light_freeze: false do
   include FakeBlobHelpers
 
   include_context 'push rules checks context'

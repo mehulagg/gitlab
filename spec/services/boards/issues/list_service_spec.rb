@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Boards::Issues::ListService do
+RSpec.describe Boards::Issues::ListService, let_it_be_light_freeze: false do
   describe '#execute' do
     let_it_be(:user) { create(:user) }
 

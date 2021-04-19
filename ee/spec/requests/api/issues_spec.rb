@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Issues, :mailer do
+RSpec.describe API::Issues, let_it_be_light_freeze: false, :mailer do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) do
     create(:project, :public, creator_id: user.id, namespace: user.namespace)

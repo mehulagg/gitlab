@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe API::MergeRequests do
+RSpec.describe API::MergeRequests, let_it_be_light_freeze: false do
   include ProjectForksHelper
 
   let_it_be(:user)       { create(:user) }

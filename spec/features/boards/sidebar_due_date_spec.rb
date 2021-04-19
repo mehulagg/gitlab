@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Project issue boards sidebar due date', :js do
+RSpec.describe 'Project, let_it_be_light_freeze: false issue boards sidebar due date', :js do
   include BoardHelpers
 
   let_it_be(:user)    { create(:user) }

@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe EE::UserCalloutsHelper do
+RSpec.describe EE::UserCalloutsHelper, let_it_be_light_freeze: false do
   include Devise::Test::ControllerHelpers
   using RSpec::Parameterized::TableSyntax
 

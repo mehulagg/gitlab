@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::HookData::ReleaseBuilder do
+RSpec.describe Gitlab::HookData::ReleaseBuilder, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project, :public, :repository) }
 
   let(:release) { create(:release, project: project) }

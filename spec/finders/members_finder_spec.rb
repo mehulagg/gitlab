@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe MembersFinder, '#execute' do
+RSpec.describe MembersFinder, let_it_be_light_freeze: false, '#execute' do
   let_it_be(:group) { create(:group) }
   let_it_be(:nested_group) { create(:group, parent: group) }
   let_it_be(:project, reload: true) { create(:project, namespace: nested_group) }

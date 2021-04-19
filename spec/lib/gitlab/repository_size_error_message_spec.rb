@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::RepositorySizeErrorMessage do
+RSpec.describe Gitlab::RepositorySizeErrorMessage, let_it_be_light_freeze: false do
   let_it_be(:namespace) { build(:namespace) }
   let(:checker) do
     Gitlab::RepositorySizeChecker.new(

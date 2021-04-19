@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe IssuePolicy do
+RSpec.describe IssuePolicy, let_it_be_light_freeze: false do
   let_it_be(:owner) { create(:user) }
   let_it_be(:namespace) { create(:group) }
   let_it_be(:project) { create(:project, group: namespace) }

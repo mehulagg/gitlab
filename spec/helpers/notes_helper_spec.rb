@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe NotesHelper do
+RSpec.describe NotesHelper, let_it_be_light_freeze: false do
   include RepoHelpers
 
   let_it_be(:owner) { create(:owner) }

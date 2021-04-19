@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe Geo::ProjectRegistryStatusFinder, :geo, :geo_tracking_db do
+RSpec.describe Geo::ProjectRegistryStatusFinder, let_it_be_light_freeze: false, :geo, :geo_tracking_db do
   include ::EE::GeoHelpers
 
   let_it_be(:secondary) { create(:geo_node) }

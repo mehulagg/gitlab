@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe GitlabSchema.types['Scan'] do
+RSpec.describe GitlabSchema.types['Scan'], let_it_be_light_freeze: false do
   include GraphqlHelpers
 
   let(:fields) { %i(name errors) }

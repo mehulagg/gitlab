@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Todos::Destroy::DestroyedIssuableService do
+RSpec.describe Todos::Destroy::DestroyedIssuableService, let_it_be_light_freeze: false do
   describe '#execute' do
     let_it_be(:target) { create(:merge_request) }
     let_it_be(:pending_todo) { create(:todo, :pending, project: target.project, target: target, user: create(:user)) }

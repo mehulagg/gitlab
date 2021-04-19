@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe GroupMember do
+RSpec.describe GroupMember, let_it_be_light_freeze: false do
   context 'scopes' do
     let_it_be(:user_1) { create(:user) }
     let_it_be(:user_2) { create(:user) }

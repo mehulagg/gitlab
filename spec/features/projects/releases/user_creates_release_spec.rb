@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User creates release', :js do
+RSpec.describe 'User, let_it_be_light_freeze: false creates release', :js do
   include Spec::Support::Helpers::Features::ReleasesHelpers
 
   let_it_be(:project) { create(:project, :repository) }

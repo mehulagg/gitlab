@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BoardSimpleEntity do
+RSpec.describe BoardSimpleEntity, let_it_be_light_freeze: false do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project) }
   let_it_be(:board) { create(:board, project: project) }

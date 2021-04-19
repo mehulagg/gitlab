@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User filters Alert Management table by status', :js do
+RSpec.describe 'User, let_it_be_light_freeze: false filters Alert Management table by status', :js do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:alert1, reload: true) { create(:alert_management_alert, :triggered, project: project) }

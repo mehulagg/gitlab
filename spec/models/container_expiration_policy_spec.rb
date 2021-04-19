@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ContainerExpirationPolicy, type: :model do
+RSpec.describe ContainerExpirationPolicy, let_it_be_light_freeze: false, type: :model do
   describe 'relationships' do
     it { is_expected.to belong_to(:project) }
   end

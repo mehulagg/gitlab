@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Appearance do
+RSpec.describe Appearance, let_it_be_light_freeze: false do
   include ::EE::GeoHelpers
 
   subject { build(:appearance) }

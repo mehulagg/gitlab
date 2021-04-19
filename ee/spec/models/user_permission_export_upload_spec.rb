@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe UserPermissionExportUpload, type: :model do
+RSpec.describe UserPermissionExportUpload, let_it_be_light_freeze: false, type: :model do
   let_it_be(:upload) { build(:user_permission_export_upload) }
 
   subject { upload }

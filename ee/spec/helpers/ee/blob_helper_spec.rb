@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BlobHelper do
+RSpec.describe BlobHelper, let_it_be_light_freeze: false do
   include TreeHelper
 
   describe '#licenses_for_select' do

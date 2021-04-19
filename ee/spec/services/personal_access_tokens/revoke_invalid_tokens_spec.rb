@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
+RSpec.describe PersonalAccessTokens::RevokeInvalidTokens, let_it_be_light_freeze: false do
   subject(:service) { described_class.new(user, expiration_date) }
 
   describe '#execute' do

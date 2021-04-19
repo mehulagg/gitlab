@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::EventService do
+RSpec.describe Geo::EventService, let_it_be_light_freeze: false do
   include ::EE::GeoHelpers
 
   let_it_be(:primary) { create(:geo_node, :primary) }

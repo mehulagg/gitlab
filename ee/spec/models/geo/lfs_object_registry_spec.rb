@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::LfsObjectRegistry, :geo do
+RSpec.describe Geo::LfsObjectRegistry, let_it_be_light_freeze: false, :geo do
   include EE::GeoHelpers
 
   it_behaves_like 'a BulkInsertSafe model', Geo::LfsObjectRegistry do

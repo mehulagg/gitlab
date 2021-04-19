@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Issues > User creates issue by email' do
+RSpec.describe 'Issues, let_it_be_light_freeze: false > User creates issue by email' do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public) }
 

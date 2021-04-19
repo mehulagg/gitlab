@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::RepositoryCreatedEventStore do
+RSpec.describe Geo::RepositoryCreatedEventStore, let_it_be_light_freeze: false do
   include EE::GeoHelpers
 
   let_it_be(:project) { create(:project) }

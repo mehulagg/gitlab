@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'projects/tracings/show' do
+RSpec.describe 'projects/tracings/show', let_it_be_light_freeze: false do
   let_it_be_with_reload(:project) { create(:project) }
   let_it_be(:error_tracking_setting) { create(:project_error_tracking_setting, project: project) }
 

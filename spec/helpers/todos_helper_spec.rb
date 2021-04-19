@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe TodosHelper do
+RSpec.describe TodosHelper, let_it_be_light_freeze: false do
   let_it_be(:user) { create(:user) }
   let_it_be(:author) { create(:user) }
   let_it_be(:issue) { create(:issue, title: 'Issue 1') }

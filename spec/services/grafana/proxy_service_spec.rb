@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Grafana::ProxyService do
+RSpec.describe Grafana::ProxyService, let_it_be_light_freeze: false do
   include ReactiveCachingHelpers
 
   let_it_be(:project) { create(:project) }

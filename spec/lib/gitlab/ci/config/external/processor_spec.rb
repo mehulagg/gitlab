@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Ci::Config::External::Processor do
+RSpec.describe Gitlab::Ci::Config::External::Processor, let_it_be_light_freeze: false do
   include StubRequests
 
   let_it_be(:project) { create(:project, :repository) }

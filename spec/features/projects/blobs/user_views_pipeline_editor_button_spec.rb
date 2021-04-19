@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User views pipeline editor button on root ci config file', :js do
+RSpec.describe 'User, let_it_be_light_freeze: false views pipeline editor button on root ci config file', :js do
   include BlobSpecHelpers
 
   let_it_be(:user) { create(:user) }

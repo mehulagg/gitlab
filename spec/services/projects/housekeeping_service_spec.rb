@@ -13,7 +13,7 @@ require 'spec_helper'
 # We can get rid of this class in 13.10
 # https://gitlab.com/gitlab-org/gitlab/-/issues/297580
 #
-RSpec.describe Projects::HousekeepingService do
+RSpec.describe Projects::HousekeepingService, let_it_be_light_freeze: false do
   it_behaves_like 'housekeeps repository' do
     let_it_be(:resource) { create(:project, :repository) }
   end

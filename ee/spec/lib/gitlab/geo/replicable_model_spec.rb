@@ -8,7 +8,7 @@ require 'spec_helper'
 #   against a DummyModel.
 # - Place tests in replicable_model_shared_examples.rb if you want them to be
 #   run against every real Model.
-RSpec.describe Gitlab::Geo::ReplicableModel do
+RSpec.describe Gitlab::Geo::ReplicableModel, let_it_be_light_freeze: false do
   include ::EE::GeoHelpers
 
   let_it_be(:primary_node) { create(:geo_node, :primary) }

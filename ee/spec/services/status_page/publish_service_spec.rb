@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe StatusPage::PublishService do
+RSpec.describe StatusPage::PublishService, let_it_be_light_freeze: false do
   let_it_be(:user) { create(:user) }
   let_it_be(:project, refind: true) { create(:project) }
   let_it_be(:issue) { create(:issue, :published, project: project) }

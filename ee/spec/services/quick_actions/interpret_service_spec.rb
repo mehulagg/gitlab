@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe QuickActions::InterpretService do
+RSpec.describe QuickActions::InterpretService, let_it_be_light_freeze: false do
   let(:current_user) { create(:user) }
   let(:developer) { create(:user) }
   let(:developer2) { create(:user) }

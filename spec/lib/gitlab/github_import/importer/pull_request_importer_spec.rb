@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::GithubImport::Importer::PullRequestImporter, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::GithubImport::Importer::PullRequestImporter, let_it_be_light_freeze: false, :clean_gitlab_redis_cache do
   let(:project) { create(:project, :repository) }
   let(:client) { double(:client) }
   let(:user) { create(:user) }

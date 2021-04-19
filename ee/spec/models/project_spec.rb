@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Project do
+RSpec.describe Project, let_it_be_light_freeze: false do
   include ProjectForksHelper
   include ::EE::GeoHelpers
   using RSpec::Parameterized::TableSyntax

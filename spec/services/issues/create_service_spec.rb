@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Issues::CreateService do
+RSpec.describe Issues::CreateService, let_it_be_light_freeze: false do
   include AfterNextHelpers
 
   let_it_be_with_reload(:project) { create(:project) }

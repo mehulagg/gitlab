@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::RepositoryUpdatedService do
+RSpec.describe Geo::RepositoryUpdatedService, let_it_be_light_freeze: false do
   include ::EE::GeoHelpers
 
   let_it_be(:project) { create(:project) }

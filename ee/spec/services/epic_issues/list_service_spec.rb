@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EpicIssues::ListService do
+RSpec.describe EpicIssues::ListService, let_it_be_light_freeze: false do
   let_it_be(:user) { create :user }
   let_it_be(:group, refind: true) { create(:group, :private) }
   let_it_be(:project, refind: true) { create(:project_empty_repo, group: group) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ProjectsFinder do
+RSpec.describe ProjectsFinder, let_it_be_light_freeze: false do
   include AdminModeHelper
 
   describe '#execute' do

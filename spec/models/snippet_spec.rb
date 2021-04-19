@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Snippet do
+RSpec.describe Snippet, let_it_be_light_freeze: false do
   describe 'modules' do
     subject { described_class }
 

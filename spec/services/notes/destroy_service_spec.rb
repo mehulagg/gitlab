@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Notes::DestroyService do
+RSpec.describe Notes::DestroyService, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project, :public) }
   let_it_be(:issue) { create(:issue, project: project) }
   let(:user) { issue.author }

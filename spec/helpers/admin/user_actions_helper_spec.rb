@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Admin::UserActionsHelper do
+RSpec.describe Admin::UserActionsHelper, let_it_be_light_freeze: false do
   describe '#admin_actions' do
     let_it_be(:current_user) { build(:user) }
 

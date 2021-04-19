@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ChatTeam do
+RSpec.describe ChatTeam, let_it_be_light_freeze: false do
   let_it_be(:chat_team) { create(:chat_team) }
   subject { chat_team }
 

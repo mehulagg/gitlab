@@ -6,7 +6,7 @@ def match_mr1_note(content_regex)
   MergeRequest.find_by(title: 'MR1').notes.select { |n| n.note.match(/#{content_regex}/)}.first
 end
 
-RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
+RSpec.describe Gitlab::ImportExport::Project::TreeRestorer, let_it_be_light_freeze: false do
   include ImportExport::CommonUtil
   using RSpec::Parameterized::TableSyntax
 

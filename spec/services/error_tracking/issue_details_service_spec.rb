@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ErrorTracking::IssueDetailsService do
+RSpec.describe ErrorTracking::IssueDetailsService, let_it_be_light_freeze: false do
   include_context 'sentry error tracking context'
 
   subject { described_class.new(project, user, params) }

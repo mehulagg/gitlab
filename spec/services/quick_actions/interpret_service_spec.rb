@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe QuickActions::InterpretService do
+RSpec.describe QuickActions::InterpretService, let_it_be_light_freeze: false do
   let_it_be(:public_project) { create(:project, :public) }
   let_it_be(:repository_project) { create(:project, :repository) }
   let_it_be(:project) { public_project }

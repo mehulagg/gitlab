@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Milestone, 'Milestoneish', factory_default: :keep do
+RSpec.describe Milestone, let_it_be_light_freeze: false, 'Milestoneish', factory_default: :keep do
   let_it_be(:author) { create(:user) }
   let_it_be(:assignee) { create(:user) }
   let_it_be(:non_member) { create(:user) }

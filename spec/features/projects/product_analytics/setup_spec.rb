@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Product Analytics > Setup' do
+RSpec.describe 'Product, let_it_be_light_freeze: false Analytics > Setup' do
   let_it_be(:project) { create(:project_empty_repo) }
   let_it_be(:user) { create(:user) }
 

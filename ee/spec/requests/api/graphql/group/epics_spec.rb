@@ -4,7 +4,7 @@ require 'spec_helper'
 
 # Based on ee/spec/requests/api/epics_spec.rb
 # Should follow closely in order to ensure all situations are covered
-RSpec.describe 'Epics through GroupQuery' do
+RSpec.describe 'Epics, let_it_be_light_freeze: false through GroupQuery' do
   include GraphqlHelpers
 
   let(:user)        { create(:user) }

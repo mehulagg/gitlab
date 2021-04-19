@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe User do
+RSpec.describe User, let_it_be_light_freeze: false do
   subject(:user) { described_class.new }
 
   describe 'user creation' do

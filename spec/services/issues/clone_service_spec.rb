@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Issues::CloneService do
+RSpec.describe Issues::CloneService, let_it_be_light_freeze: false do
   include DesignManagementTestHelpers
 
   let_it_be(:user) { create(:user) }

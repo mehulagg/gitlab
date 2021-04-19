@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Checks::ForcePush do
+RSpec.describe Gitlab::Checks::ForcePush, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project, :repository) }
 
   describe '.force_push?' do

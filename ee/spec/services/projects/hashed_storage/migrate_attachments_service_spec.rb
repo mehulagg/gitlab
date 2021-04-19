@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::HashedStorage::MigrateAttachmentsService do
+RSpec.describe Projects::HashedStorage::MigrateAttachmentsService, let_it_be_light_freeze: false do
   include EE::GeoHelpers
 
   let(:project) { create(:project, storage_version: 1) }

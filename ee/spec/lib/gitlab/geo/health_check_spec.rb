@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Geo::HealthCheck, :geo do
+RSpec.describe Gitlab::Geo::HealthCheck, let_it_be_light_freeze: false, :geo do
   include ::EE::GeoHelpers
   using RSpec::Parameterized::TableSyntax
 

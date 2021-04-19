@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::RepositoryVerification::Secondary::ShardWorker, :geo, :request_store, :clean_gitlab_redis_cache, :use_sql_query_cache_for_tracking_db do
+RSpec.describe Geo::RepositoryVerification::Secondary::ShardWorker, let_it_be_light_freeze: false, :geo, :request_store, :clean_gitlab_redis_cache, :use_sql_query_cache_for_tracking_db do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 

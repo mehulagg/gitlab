@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Projects > Snippets > User updates a snippet', :js do
+RSpec.describe 'Projects, let_it_be_light_freeze: false > Snippets > User updates a snippet', :js do
   include Spec::Support::Helpers::Features::SnippetSpecHelpers
 
   let_it_be(:user) { create(:user) }

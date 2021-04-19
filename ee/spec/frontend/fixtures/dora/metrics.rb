@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'DORA Metrics (JavaScript fixtures)' do
+RSpec.describe 'DORA, let_it_be_light_freeze: false Metrics (JavaScript fixtures)' do
   include ApiHelpers
   include JavaScriptFixturesHelpers
 

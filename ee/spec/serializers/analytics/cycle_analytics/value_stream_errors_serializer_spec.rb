@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Analytics::CycleAnalytics::ValueStreamErrorsSerializer do
+RSpec.describe Analytics::CycleAnalytics::ValueStreamErrorsSerializer, let_it_be_light_freeze: false do
   let_it_be(:group) { create(:group) }
   let_it_be(:value_stream) { create(:cycle_analytics_group_value_stream, name: 'name', group: group) }
 

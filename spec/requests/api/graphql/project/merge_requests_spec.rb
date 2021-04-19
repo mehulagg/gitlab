@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'getting merge request listings nested in a project' do
+RSpec.describe 'getting, let_it_be_light_freeze: false merge request listings nested in a project' do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project, :repository, :public) }

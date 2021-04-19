@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Lfs::Client do
+RSpec.describe Gitlab::Lfs::Client, let_it_be_light_freeze: false do
   let(:base_url) { "https://example.com" }
   let(:username) { 'user' }
   let(:password) { 'password' }

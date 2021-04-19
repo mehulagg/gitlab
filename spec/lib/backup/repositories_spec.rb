@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Backup::Repositories do
+RSpec.describe Backup::Repositories, let_it_be_light_freeze: false do
   let(:progress) { StringIO.new }
 
   subject { described_class.new(progress) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::JobArtifact do
+RSpec.describe Ci::JobArtifact, let_it_be_light_freeze: false do
   using RSpec::Parameterized::TableSyntax
   include EE::GeoHelpers
 

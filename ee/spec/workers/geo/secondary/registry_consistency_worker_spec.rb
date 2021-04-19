@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
+RSpec.describe Geo::Secondary::RegistryConsistencyWorker, let_it_be_light_freeze: false, :geo do
   include EE::GeoHelpers
   include ExclusiveLeaseHelpers
 

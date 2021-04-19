@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::UpdateService, '#execute' do
+RSpec.describe Projects::UpdateService, let_it_be_light_freeze: false, '#execute' do
   include EE::GeoHelpers
 
   let(:user) { create(:user) }

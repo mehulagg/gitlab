@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::RepositoryCheck::BatchWorker do
+RSpec.describe EE::RepositoryCheck::BatchWorker, let_it_be_light_freeze: false do
   include ::EE::GeoHelpers
 
   let(:shard_name) { 'default' }

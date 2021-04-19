@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ProjectRepositoryState do
+RSpec.describe ProjectRepositoryState, let_it_be_light_freeze: false do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:project) { create(:project) }

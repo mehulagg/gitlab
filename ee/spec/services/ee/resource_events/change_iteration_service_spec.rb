@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ResourceEvents::ChangeIterationService do
+RSpec.describe ResourceEvents::ChangeIterationService, let_it_be_light_freeze: false do
   let_it_be(:timebox) { create(:iteration) }
 
   let(:created_at_time) { Time.utc(2019, 12, 30) }

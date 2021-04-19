@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::EE::Gitlab::Scim::ReprovisionService do
+RSpec.describe ::EE::Gitlab::Scim::ReprovisionService, let_it_be_light_freeze: false do
   describe '#execute' do
     let_it_be(:identity) { create(:scim_identity, active: false) }
     let_it_be(:group) { identity.group }

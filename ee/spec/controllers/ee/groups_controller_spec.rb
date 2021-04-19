@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe GroupsController do
+RSpec.describe GroupsController, let_it_be_light_freeze: false do
   include ExternalAuthorizationServiceHelpers
   using RSpec::Parameterized::TableSyntax
 

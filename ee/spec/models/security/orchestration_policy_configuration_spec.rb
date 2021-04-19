@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Security::OrchestrationPolicyConfiguration do
+RSpec.describe Security::OrchestrationPolicyConfiguration, let_it_be_light_freeze: false do
   let_it_be(:security_policy_management_project) { create(:project, :repository) }
   let_it_be(:security_orchestration_policy_configuration) do
     create( :security_orchestration_policy_configuration, security_policy_management_project: security_policy_management_project)

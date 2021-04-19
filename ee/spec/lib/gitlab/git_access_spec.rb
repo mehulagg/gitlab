@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::GitAccess do
+RSpec.describe Gitlab::GitAccess, let_it_be_light_freeze: false do
   include GitHelpers
   include EE::GeoHelpers
   include AdminModeHelper

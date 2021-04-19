@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Auth::ContainerRegistryAuthenticationService do
+RSpec.describe Auth::ContainerRegistryAuthenticationService, let_it_be_light_freeze: false do
   include AdminModeHelper
 
   context 'in maintenance mode' do

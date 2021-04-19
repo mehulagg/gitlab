@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User searches their settings', :js do
+RSpec.describe 'User, let_it_be_light_freeze: false searches their settings', :js do
   let_it_be(:user) { create(:user) }
 
   before do

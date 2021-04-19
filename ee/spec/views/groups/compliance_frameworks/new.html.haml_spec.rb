@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'groups/compliance_frameworks/new.html.haml' do
+RSpec.describe 'groups/compliance_frameworks/new.html.haml', let_it_be_light_freeze: false do
   let_it_be(:group) { build(:group) }
   let_it_be(:user) { build(:user) }
 

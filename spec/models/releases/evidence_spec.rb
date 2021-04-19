@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Releases::Evidence do
+RSpec.describe Releases::Evidence, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project) }
   let(:release) { create(:release, project: project) }
 

@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe EE::Ci::RunnersHelper do
+RSpec.describe EE::Ci::RunnersHelper, let_it_be_light_freeze: false do
   let_it_be(:user, refind: true) { create(:user) }
   let_it_be(:namespace) { create(:namespace, owner: user) }
   let_it_be(:project) { create(:project, namespace: namespace) }

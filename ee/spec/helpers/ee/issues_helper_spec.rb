@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe EE::IssuesHelper do
+RSpec.describe EE::IssuesHelper, let_it_be_light_freeze: false do
   let(:group) { create :group }
   let(:project) { create :project, group: group }
   let(:issue) { create :issue, project: project }

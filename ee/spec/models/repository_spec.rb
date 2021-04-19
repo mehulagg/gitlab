@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Repository do
+RSpec.describe Repository, let_it_be_light_freeze: false do
   include RepoHelpers
   include ::EE::GeoHelpers
   include GitHelpers

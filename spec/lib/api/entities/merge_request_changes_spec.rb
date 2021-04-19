@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::API::Entities::MergeRequestChanges do
+RSpec.describe ::API::Entities::MergeRequestChanges, let_it_be_light_freeze: false do
   let_it_be(:user) { create(:user) }
   let_it_be(:merge_request) { create(:merge_request) }
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Admin::Geo::NodesBetaController, :geo do
+RSpec.describe Admin::Geo::NodesBetaController, let_it_be_light_freeze: false, :geo do
   include AdminModeHelper
 
   let_it_be(:admin) { create(:admin) }

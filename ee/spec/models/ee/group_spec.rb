@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Group do
+RSpec.describe Group, let_it_be_light_freeze: false do
   let(:group) { create(:group) }
 
   it { is_expected.to include_module(EE::Group) }

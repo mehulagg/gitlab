@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::TreeSummary do
+RSpec.describe Gitlab::TreeSummary, let_it_be_light_freeze: false do
   include RepoHelpers
   using RSpec::Parameterized::TableSyntax
 

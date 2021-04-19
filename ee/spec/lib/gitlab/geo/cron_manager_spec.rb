@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Geo::CronManager, :geo do
+RSpec.describe Gitlab::Geo::CronManager, let_it_be_light_freeze: false, :geo do
   include ::EE::GeoHelpers
 
   jobs = %w[

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ForkNamespaceEntity do
+RSpec.describe ForkNamespaceEntity, let_it_be_light_freeze: false do
   include Gitlab::Routing.url_helpers
   include ProjectForksHelper
 

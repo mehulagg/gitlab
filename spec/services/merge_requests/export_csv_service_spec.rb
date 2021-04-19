@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe MergeRequests::ExportCsvService do
+RSpec.describe MergeRequests::ExportCsvService, let_it_be_light_freeze: false do
   let_it_be(:merge_request) { create(:merge_request) }
 
   let(:csv) { CSV.parse(subject.csv_data, headers: true).first }

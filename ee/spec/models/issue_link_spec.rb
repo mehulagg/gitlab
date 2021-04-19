@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe IssueLink do
+RSpec.describe IssueLink, let_it_be_light_freeze: false do
   context 'callbacks' do
     let_it_be(:target) { create(:issue) }
     let_it_be(:source) { create(:issue) }

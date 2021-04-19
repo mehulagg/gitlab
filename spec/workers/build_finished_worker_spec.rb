@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BuildFinishedWorker do
+RSpec.describe BuildFinishedWorker, let_it_be_light_freeze: false do
   subject { described_class.new.perform(build.id) }
 
   describe '#perform' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::Issues::Update do
+RSpec.describe Mutations::Issues::Update, let_it_be_light_freeze: false do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
   let_it_be(:project_label) { create(:label, project: project) }

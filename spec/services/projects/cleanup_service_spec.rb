@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::CleanupService do
+RSpec.describe Projects::CleanupService, let_it_be_light_freeze: false do
   subject(:service) { described_class.new(project) }
 
   describe '.enqueue' do

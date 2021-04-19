@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::WikiSyncService, :geo do
+RSpec.describe Geo::WikiSyncService, let_it_be_light_freeze: false, :geo do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Issue do
+RSpec.describe Issue, let_it_be_light_freeze: false do
   include ExternalAuthorizationServiceHelpers
 
   using RSpec::Parameterized::TableSyntax

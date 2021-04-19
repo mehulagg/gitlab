@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Auth::Otp::Strategies::Devise do
+RSpec.describe Gitlab::Auth::Otp::Strategies::Devise, let_it_be_light_freeze: false do
   let_it_be(:user) { create(:user) }
 
   let(:otp_code) { 42 }
