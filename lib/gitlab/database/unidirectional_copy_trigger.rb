@@ -7,8 +7,6 @@ module Gitlab
         new(table_name, connection)
       end
 
-      attr_reader :table_name
-
       def name(from_column_names, to_column_names)
         from_column_names, to_column_names = check_column_names!(from_column_names, to_column_names)
 
@@ -26,7 +24,7 @@ module Gitlab
           RETURNS trigger AS
           $BODY$
           BEGIN
-            #{assignment_clauses.join(";\n  ")};
+            #{assignment_clauses};
             RETURN NEW;
           END;
           $BODY$
@@ -55,7 +53,7 @@ module Gitlab
 
       private
 
-      attr_reader :connection
+      attr_reader :table_name, :connection
 
       def initialize(table_name, connection)
         @table_name = table_name
@@ -85,12 +83,14 @@ module Gitlab
       def assignment_clauses_for_columns(from_column_names, to_column_names)
         combined_column_names = to_column_names.zip(from_column_names)
 
-        combined_column_names.map do |(new_name, old_name)|
+        assignment_clauses = combined_column_names.map do |(new_name, old_name)|
           new_name = connection.quote_column_name(new_name)
           old_name = connection.quote_column_name(old_name)
 
           "NEW.#{new_name} := NEW.#{old_name}"
         end
+
+        assignment_clauses.join(";\n  ")
       end
     end
   end
