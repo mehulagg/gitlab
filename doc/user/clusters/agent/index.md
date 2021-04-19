@@ -100,27 +100,23 @@ To use the KAS:
 
 ### Define a configuration repository
 
-Next, you need a GitLab repository to contain your Agent configuration. The minimal
-repository layout looks like this:
+You need a GitLab repository to contain your Agent configuration. Once the Agent is installed in the cluster, it will grab its configuration from GitLab. Whenever you update the configuration, the Agent will be notified, and will adjust itself automatically without downtime. The Agent configuration is expected under the following place in a GitLab repository:
 
 ```plaintext
 .gitlab/agents/<agent-name>/config.yaml
 ```
 
-Your `config.yaml` file can specify multiple manifest projects in the
-section `manifest_projects`:
+Your `config.yaml` file specifies all the GitLab integration configurations of the Agent, like the manifest projects to synchronize or the address of the `hubble-relay` for the Network Security policy integrations. A minimal Agent configuration that set up only manifest synchronisations is the following:
 
 ```yaml
 gitops:
   manifest_projects:
-  - id: "path-to/your-manifest-project-number1"
-  ...
+  - id: "path-to/your-manifest-project-1"
+    paths:
+    - glob: '/**/*.{yaml,yml,json}'
 ```
 
-GitLab [versions 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) also
-supports manifest projects containing
-multiple directories (or subdirectories) of YAML files. For more information see our
-documentation on the [Kubernetes Agent configuration repository](repository.md).
+All the options for the [Kubernetes Agent configuration repository](repository.md) are documented separately.
 
 ### Create an Agent record in GitLab
 
