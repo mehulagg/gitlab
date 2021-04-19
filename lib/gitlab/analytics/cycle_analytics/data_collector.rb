@@ -12,6 +12,8 @@ module Gitlab
       class DataCollector
         include Gitlab::Utils::StrongMemoize
 
+        MAX_COUNT = 1001
+
         delegate :serialized_records, to: :records_fetcher
 
         def initialize(stage:, params: {})
@@ -37,12 +39,22 @@ module Gitlab
           end
         end
 
+        def count
+          strong_memoize(:count) do
+            limit_count
+          end
+        end
+
         private
 
         attr_reader :stage, :params
 
         def query
           BaseQueryBuilder.new(stage: stage, params: params).build
+        end
+
+        def limit_count
+          query.limit(MAX_COUNT).count
         end
       end
     end

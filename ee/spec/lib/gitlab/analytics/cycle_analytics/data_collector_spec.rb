@@ -93,6 +93,12 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         expect(days).to eq([15, 10, 5])
       end
     end
+
+    describe '#count' do
+      subject(:count) { data_collector.count }
+
+      it { is_expected.to eq(3) }
+    end
   end
 
   shared_examples 'test various start and end event combinations' do
@@ -672,6 +678,54 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         end
 
         it_behaves_like 'filter examples'
+      end
+    end
+  end
+
+  describe 'limit count' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, :repository, group: group) }
+
+    let(:merge_request) { merge_requests.first }
+
+    let(:stage) do
+      Analytics::CycleAnalytics::GroupStage.new(
+        name: 'My Stage',
+        group: group,
+        start_event_identifier: :merge_request_created,
+        end_event_identifier: :merge_request_merged
+      )
+    end
+
+    before do
+      merge_requests = create_list(:merge_request, 3, :unique_branches, target_project: project, source_project: project)
+      merge_requests.each { |mr| mr.metrics.update!(merged_at: 10.days.from_now) }
+
+      project.add_user(user, Gitlab::Access::DEVELOPER)
+    end
+
+    subject(:count) do
+      described_class.new(stage: stage, params: {
+        from: 5.months.ago,
+        to: 5.months.from_now,
+        current_user: user
+      }).count
+    end
+
+    context 'when limit is reached' do
+      before do
+        stub_const('Gitlab::Analytics::CycleAnalytics::DataCollector::MAX_COUNT', 2)
+      end
+
+      it 'shows the MAX COUNT' do
+        is_expected.to eq(2)
+      end
+    end
+
+    context 'when limit is not reached' do
+      it 'shows the actual count' do
+        is_expected.to eq(3)
       end
     end
   end

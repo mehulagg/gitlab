@@ -264,6 +264,20 @@ RSpec.shared_examples 'Value Stream Analytics Stages controller' do
       include_examples 'Value Stream Analytics data endpoint examples'
       include_examples 'group permission check on the controller level'
     end
+
+    describe 'GET #count' do
+      subject { get :count, params: params }
+
+      it 'matches the response schema' do
+        subject
+
+        expect(response).to be_successful
+        expect(json_response['count']).to eq(0)
+      end
+
+      include_examples 'Value Stream Analytics data endpoint examples'
+      include_examples 'group permission check on the controller level'
+    end
   end
 end
 
