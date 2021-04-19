@@ -90,6 +90,7 @@ export default {
   <div class="gl-relative gl-display-flex gl-align-items-center gl-w-max-content gl-my-4">
     <gl-loading-icon
       v-if="isSwitcherLoading"
+      data-testid="switcher-loading-state"
       class="gl-absolute gl-w-full gl-bg-white gl-opacity-5 gl-z-index-2"
       size="lg"
     />
@@ -106,6 +107,7 @@ export default {
     <div v-if="showLinksToggle">
       <gl-toggle
         v-model="showLinks"
+        data-testid="show-links-toggle"
         class="gl-mx-4"
         :label="$options.i18n.linksLabelText"
         :is-loading="isToggleLoading"

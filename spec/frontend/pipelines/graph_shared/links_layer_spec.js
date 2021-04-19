@@ -27,6 +27,7 @@ describe('links layer component', () => {
     containerMeasurements: { width: 400, height: 400 },
     pipelineId: pipeline.id,
     pipelineData: pipeline.stages,
+    showLinks: false,
   };
 
   const createComponent = ({ mountFn = shallowMount, props = {} } = {}) => {
@@ -49,9 +50,27 @@ describe('links layer component', () => {
     wrapper = null;
   });
 
-  describe('with data under max stages', () => {
+  describe('with show links off', () => {
     beforeEach(() => {
       createComponent();
+    });
+
+    it('renders the default slot', () => {
+      expect(wrapper.html()).toContain(slotContent);
+    });
+
+    it('does not render inner links component', () => {
+      expect(findLinksInner().exists()).toBe(false);
+    });
+  });
+
+  describe('with show links on', () => {
+    beforeEach(() => {
+      createComponent({
+        props: {
+          showLinks: true,
+        },
+      });
     });
 
     it('renders the default slot', () => {
@@ -63,58 +82,17 @@ describe('links layer component', () => {
     });
   });
 
-  describe('with more than the max number of stages', () => {
-    describe('rendering', () => {
-      beforeEach(() => {
-        createComponent({ props: { pipelineData: tooManyStages } });
-      });
-
-      it('renders the default slot', () => {
-        expect(wrapper.html()).toContain(slotContent);
-      });
-
-      it('renders the alert component', () => {
-        expect(findAlert().exists()).toBe(true);
-      });
-
-      it('does not render the inner links component', () => {
-        expect(findLinksInner().exists()).toBe(false);
-      });
+  describe('with width or height measurement at 0', () => {
+    beforeEach(() => {
+      createComponent({ props: { containerMeasurements: { width: 0, height: 100 } } });
     });
 
-    describe('with width or height measurement at 0', () => {
-      beforeEach(() => {
-        createComponent({ props: { containerMeasurements: { width: 0, height: 100 } } });
-      });
-
-      it('renders the default slot', () => {
-        expect(wrapper.html()).toContain(slotContent);
-      });
-
-      it('does not render the alert component', () => {
-        expect(findAlert().exists()).toBe(false);
-      });
-
-      it('does not render the inner links component', () => {
-        expect(findLinksInner().exists()).toBe(false);
-      });
+    it('renders the default slot', () => {
+      expect(wrapper.html()).toContain(slotContent);
     });
 
-    describe('interactions', () => {
-      beforeEach(() => {
-        createComponent({ mountFn: mount, props: { pipelineData: tooManyStages } });
-      });
-
-      it('renders the disable button', () => {
-        expect(findShowAnyways()).not.toBe(null);
-      });
-
-      it('shows links when override is clicked', async () => {
-        expect(findLinksInner().exists()).toBe(false);
-        fireEvent(findShowAnyways(), new MouseEvent('click', { bubbles: true }));
-        await wrapper.vm.$nextTick();
-        expect(findLinksInner().exists()).toBe(true);
-      });
+    it('does not render the inner links component', () => {
+      expect(findLinksInner().exists()).toBe(false);
     });
   });
 });
