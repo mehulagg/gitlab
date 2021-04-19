@@ -9,10 +9,10 @@ module Gitlab
     DEFAULT_FILE_PREFIX = Dir.tmpdir
     DEFAULT_TIMEOUT_SEC = 30
     DEFAULT_MODE = :cpu
-    # Sample interval as a frequency in microseconds (~100hz); appropriate for CPU profiles
-    DEFAULT_INTERVAL_US = 10_000
+    # Sample interval as a frequency in microseconds (~99hz); appropriate for CPU profiles
+    DEFAULT_INTERVAL_US = 9_999
     # Sample interval in event occurrences (n = every nth event); appropriate for allocation profiles
-    DEFAULT_INTERVAL_EVENTS = 1_000
+    DEFAULT_INTERVAL_EVENTS = 100
 
     # this is a workaround for sidekiq, which defines its own SIGUSR2 handler.
     # by defering to the sidekiq startup event, we get to set up our own
@@ -28,10 +28,10 @@ module Gitlab
             on_worker_start
           end
         end
+      elsif Gitlab::Runtime.puma_in_clustered_mode?
+        Gitlab::Cluster::LifecycleEvents.on_worker_start { on_worker_start }
       else
-        Gitlab::Cluster::LifecycleEvents.on_worker_start do
-          on_worker_start
-        end
+        on_worker_start
       end
     end
 
