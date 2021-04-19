@@ -6,10 +6,12 @@ import NavigationTabs from '~/vue_shared/components/navigation_tabs.vue';
 import eventHub from '../eventhub';
 import DeployKeysService from '../service';
 import DeployKeysStore from '../store';
+import ConfirmModal from './confirm_modal.vue';
 import KeysPanel from './keys_panel.vue';
 
 export default {
   components: {
+    ConfirmModal,
     KeysPanel,
     NavigationTabs,
     GlLoadingIcon,
@@ -30,6 +32,8 @@ export default {
       currentTab: 'enabled_keys',
       isLoading: false,
       store: new DeployKeysStore(),
+      removeKey: () => {},
+      cancel: () => {},
     };
   },
   scopes: {
@@ -61,8 +65,8 @@ export default {
     this.service = new DeployKeysService(this.endpoint);
 
     eventHub.$on('enable.key', this.enableKey);
-    eventHub.$on('remove.key', this.disableKey);
-    eventHub.$on('disable.key', this.disableKey);
+    eventHub.$on('remove.key', this.confirmRemoveKey);
+    eventHub.$on('disable.key', this.confirmRemoveKey);
   },
   mounted() {
     this.fetchKeys();
@@ -97,26 +101,32 @@ export default {
         .then(this.fetchKeys)
         .catch(() => new Flash(s__('DeployKeys|Error enabling deploy key')));
     },
-    disableKey(deployKey, callback) {
-      if (
-        // eslint-disable-next-line no-alert
-        window.confirm(s__('DeployKeys|You are going to remove this deploy key. Are you sure?'))
-      ) {
+    confirmRemoveKey(deployKey, callback) {
+      this.removeKey = () => {
         this.service
           .disableKey(deployKey.id)
           .then(this.fetchKeys)
           .then(callback)
           .catch(() => new Flash(s__('DeployKeys|Error removing deploy key')));
-      } else {
-        callback();
-      }
+      };
+      this.cancel = () => callback?.();
+      this.$root.$emit('bv::show::modal', this.$options.removeConfirmModalId);
+    },
+    disableKey(deployKey, callback) {
+      this.service
+        .disableKey(deployKey.id)
+        .then(this.fetchKeys)
+        .then(callback)
+        .catch(() => new Flash(s__('DeployKeys|Error removing deploy key')));
     },
   },
+  removeConfirmModalId: 'delete-confirm-modal-id',
 };
 </script>
 
 <template>
   <div class="gl-mb-3 deploy-keys">
+    <confirm-modal :modal-id="$options.removeConfirmModalId" @remove="removeKey" @cancel="cancel" />
     <gl-loading-icon
       v-if="isLoading && !hasKeys"
       :label="s__('DeployKeys|Loading deploy keys')"
@@ -124,8 +134,12 @@ export default {
     />
     <template v-else-if="hasKeys">
       <div class="top-area scrolling-tabs-container inner-page-scroll-tabs">
-        <div class="fade-left"><gl-icon name="chevron-lg-left" :size="12" /></div>
-        <div class="fade-right"><gl-icon name="chevron-lg-right" :size="12" /></div>
+        <div class="fade-left">
+          <gl-icon name="chevron-lg-left" :size="12" />
+        </div>
+        <div class="fade-right">
+          <gl-icon name="chevron-lg-right" :size="12" />
+        </div>
 
         <navigation-tabs :tabs="tabs" scope="deployKeys" @onChangeTab="onChangeTab" />
       </div>

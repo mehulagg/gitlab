@@ -1,0 +1,27 @@
+import { GlModal } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import ConfirmModal from '~/deploy_keys/components/confirm_modal.vue';
+
+describe('~/deploy_keys/components/confirm_modal.vue', () => {
+  let wrapper;
+  let modal;
+
+  beforeEach(() => {
+    wrapper = mount(ConfirmModal, { propsData: { modalId: 'test', visible: true } });
+    modal = wrapper.find(GlModal);
+  });
+
+  it('emits a remove event if the primary button is clicked', () => {
+    modal.vm.$emit('primary');
+    expect(wrapper.emitted('remove')).toEqual([[]]);
+  });
+
+  it('emits a cancel event if the secondary button is clicked', () => {
+    modal.vm.$emit('secondary');
+    expect(wrapper.emitted('cancel')).toEqual([[]]);
+  });
+
+  it('displays the warning about removing the deploy key', () => {
+    expect(modal.text()).toContain('Are you sure you want to remove this deploy key?');
+  });
+});
