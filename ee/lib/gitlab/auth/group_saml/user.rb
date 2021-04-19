@@ -44,7 +44,7 @@ module Gitlab
 
         def identity
           strong_memoize(:identity) do
-            ::Auth::GroupSamlIdentityFinder.new(@saml_provider, auth_hash).first
+            ::Auth::GroupSamlIdentityFinder.new(saml_provider, auth_hash).first
           end
         end
 
