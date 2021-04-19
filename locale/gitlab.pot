@@ -30414,6 +30414,12 @@ msgstr ""
 msgid "SuperSonics|Sync Subscription details"
 msgstr ""
 
+msgid "SuperSonics|The subscription details synced successfully."
+msgstr ""
+
+msgid "SuperSonics|There is a connectivity Issue. You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}."
+msgstr ""
+
 msgid "SuperSonics|Type"
 msgstr ""
 

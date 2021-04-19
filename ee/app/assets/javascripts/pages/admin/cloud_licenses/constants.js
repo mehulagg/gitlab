@@ -49,6 +49,13 @@ export const subscriptionTable = {
   title: __('Subscription History'),
   type: s__('SuperSonics|Type'),
 };
+export const userNotifications = {
+  manualSyncSuccessfulText: s__('SuperSonics|The subscription details synced successfully.'),
+  manualSyncFailureText: s__(
+    'SuperSonics|There is a connectivity Issue. You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}.',
+  ),
+};
+
 export const subscriptionType = {
   CLOUD: 'cloud',
   LEGACY: 'legacy',
