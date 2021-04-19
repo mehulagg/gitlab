@@ -109,10 +109,11 @@ RSpec.describe Resolvers::NamespaceProjectsResolver do
     end
 
     context 'ids filtering' do
+      let_it_be(:project_3) { create(:project, name: 'Project', path: 'project', namespace: namespace) }
+
       subject(:projects) { resolve_projects(args) }
 
       let(:include_subgroups) { false }
-      let(:project_3) { create(:project, name: 'Project', path: 'project', namespace: namespace) }
 
       context 'when ids is provided' do
         let(:ids) { [project_3.to_global_id.to_s] }
