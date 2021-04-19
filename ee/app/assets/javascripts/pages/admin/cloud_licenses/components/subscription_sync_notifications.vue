@@ -25,7 +25,7 @@ export default {
     notification: {
       type: String,
       required: false,
-      default: () => '',
+      default: '',
       validator: notificationTypeValidator,
     },
   },
