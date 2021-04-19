@@ -234,6 +234,11 @@ RSpec.configure do |config|
     Gitlab::Database.reset_open_transactions_baseline
   end
 
+  config.define_derived_metadata(let_it_be_light_freeze: false) do |metadata|
+    metadata[:let_it_be_modifiers] ||= {}
+    metadata[:let_it_be_modifiers][:light_freeze] = false
+  end
+
   config.before do |example|
     if example.metadata.fetch(:stub_feature_flags, true)
       # The following can be removed when we remove the staged rollout strategy
