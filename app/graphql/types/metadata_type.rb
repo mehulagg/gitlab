@@ -10,5 +10,8 @@ module Types
           description: 'Version.'
     field :revision, GraphQL::STRING_TYPE, null: false,
           description: 'Revision.'
+    field :kas_external_address, GraphQL::STRING_TYPE, description: 'The address used by KAS to communicate with Agents.'
+    field :kas_enabled, GraphQL::BOOLEAN_TYPE,
+          null: false, description: 'Indicates whether the Kubernetes Agent Server is enabled.'
   end
 end
