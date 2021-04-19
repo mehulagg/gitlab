@@ -410,8 +410,11 @@ function mountCopyEmailComponent() {
   });
 }
 
+const isAssigneesWidgetShown =
+  (isInIssuePage() || isInDesignPage()) && gon.features.issueAssigneesWidget;
+
 export function mountSidebar(mediator) {
-  if ((isInIssuePage() || isInDesignPage()) && gon.features.issueAssigneesWidget) {
+  if (isAssigneesWidgetShown) {
     mountAssigneesComponent();
   } else {
     mountAssigneesComponentDeprecated(mediator);
