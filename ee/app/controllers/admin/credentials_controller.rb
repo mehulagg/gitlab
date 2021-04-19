@@ -22,7 +22,7 @@ class Admin::CredentialsController < Admin::ApplicationController
   end
 
   def check_gpg_keys_list_enabled!
-    render_404 if show_gpg_keys? && Feature.disabled?(:credential_inventory_gpg_keys, default_enabled: :yaml)
+    render_404 unless show_gpg_keys?
   end
 
   override :credentials_inventory_path
@@ -52,7 +52,7 @@ class Admin::CredentialsController < Admin::ApplicationController
 
   override :gpg_keys_available?
   def gpg_keys_available?
-    Feature.enabled?(:credential_inventory_gpg_keys, default_enabled: :yaml)
+    true
   end
 
   override :users
