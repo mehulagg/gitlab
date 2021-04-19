@@ -23,6 +23,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       render
 
       expect(rendered).to have_link('Project overview', href: project_path(project), class: %w(shortcuts-project rspec-project-link))
+      expect(rendered).to have_selector('[aria-label="Project overview"]')
     end
 
     describe 'Details' do
@@ -30,6 +31,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         render
 
         expect(rendered).to have_link('Details', href: project_path(project), class: 'shortcuts-project')
+        expect(rendered).to have_selector('[aria-label="Project details"]')
       end
     end
 

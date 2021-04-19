@@ -14,7 +14,7 @@ module Sidebars
             override :extra_container_html_options
             def extra_container_html_options
               {
-                title: _('Project details'),
+                aria: { label: _('Project details') },
                 class: 'shortcuts-project'
               }
             end
