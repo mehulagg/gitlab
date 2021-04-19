@@ -38,15 +38,15 @@ Landing page topics should be in this format:
 ```markdown
 # Title (a noun, like "Analytics")
 
-This topic uses the same format as a [concept](#concept).
+This topic uses the same format as a concept.
 
-## "View" task, for example, View Analytics
+## "View" task, for example, View analytics
 
-This topic uses the same format as a [task](#task).
+This topic uses the same format as a task.
 
 ## "Create" task, for example, Create a report
 
-This topic also uses the same format as a [task](#task).
+This topic also uses the same format as a task.
 
 ## "Edit" task, for example, Edit a report
 
