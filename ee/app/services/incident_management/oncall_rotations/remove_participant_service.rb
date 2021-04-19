@@ -4,8 +4,8 @@ module IncidentManagement
   module OncallRotations
     class RemoveParticipantService < OncallRotations::BaseService
       include IncidentManagement::OncallRotations::SharedRotationLogic
-      # @param rotation [IncidentManagement::OncallRotation]
-      # @param user [User]
+      # @param oncall_rotation [IncidentManagement::OncallRotation]
+      # @param user_to_remove [User]
       def initialize(oncall_rotation, user_to_remove)
         @oncall_rotation = oncall_rotation
         @user_to_remove = user_to_remove
