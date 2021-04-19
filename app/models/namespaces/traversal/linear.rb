@@ -70,6 +70,12 @@ module Namespaces
         lineage(bottom: latest_parent_id, hierarchy_order: hierarchy_order)
       end
 
+      def descendants
+        return super unless use_traversal_ids?
+
+        self_and_descendants.where.not(id: id)
+      end
+
       private
 
       # Update the traversal_ids for the full hierarchy.
