@@ -13,3 +13,14 @@ export const mockCiMinutesPlans = [
     hideDeprecatedCard: false,
   },
 ];
+
+export const mockNamespaces =
+  '[{"id":22,"name":"Gitlab Org","users":5,"guests":2},{"id":23,"name":"Gnuwget","users":5,"guests":0}]';
+export const mockParsedNamespaces = [
+  { __typename: 'Namespace', id: 22, name: 'Gitlab Org', users: 5, guests: 2 },
+  { __typename: 'Namespace', id: 23, name: 'Gnuwget', users: 5, guests: 0 },
+];
+
+export const mockNewUser = 'false';
+export const mockFullName = 'John Admin';
+export const mockSetupForCompany = 'true';

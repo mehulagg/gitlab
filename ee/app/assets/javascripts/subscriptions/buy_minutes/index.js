@@ -1,33 +1,36 @@
+import emptySvg from '@gitlab/svgs/dist/illustrations/security-dashboard-empty-state.svg';
+import { GlEmptyState } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import Vue from 'vue';
-import { parseBoolean } from '~/lib/utils/common_utils';
+import { i18n as errorMessages } from '~/ensure_data';
 import App from './components/app.vue';
 import apolloProvider from './graphql';
-import seedQuery from './graphql/queries/seed.query.graphql';
+import { writeInitialDataToApolloProvider } from './utils';
 
-const arrayToGraphqlArray = (arr, typename) =>
-  Array.from(arr, (item) => Object.assign(item, { __typename: typename }));
-
-const writeInitialDataToApolloProvider = (dataset) => {
-  const { newUser, fullName, setupForCompany } = dataset;
-
-  apolloProvider.clients.defaultClient.cache.writeQuery({
-    query: seedQuery,
-    data: {
-      // eslint-disable-next-line @gitlab/require-i18n-strings
-      namespaces: arrayToGraphqlArray(JSON.parse(dataset.groupData), 'Namespace'),
-      newUser: parseBoolean(newUser),
-      setupForCompany: parseBoolean(setupForCompany),
-      fullName,
-    },
-  });
-};
+const { ERROR_FETCHING_DATA_HEADER, ERROR_FETCHING_DATA_DESCRIPTION } = errorMessages;
 
 export default (el) => {
   if (!el) {
     return null;
   }
 
-  writeInitialDataToApolloProvider(el.dataset);
+  try {
+    writeInitialDataToApolloProvider(apolloProvider, el.dataset);
+  } catch (error) {
+    Sentry.captureException(error);
+    return new Vue({
+      el,
+      render(createElement) {
+        return createElement(GlEmptyState, {
+          props: {
+            title: ERROR_FETCHING_DATA_HEADER,
+            description: ERROR_FETCHING_DATA_DESCRIPTION,
+            svgPath: `data:image/svg+xml;utf8,${encodeURIComponent(emptySvg)}`,
+          },
+        });
+      },
+    });
+  }
 
   return new Vue({
     el,
