@@ -162,6 +162,7 @@ This example [includes](../../../ci/yaml/README.md#include) the container scanni
 enables verbose output to both analyzers:
 
 Klar:
+
 ```yaml
 include:
   - template: Container-Scanning.gitlab-ci.yml
@@ -171,6 +172,7 @@ variables:
 ```
 
 Container-Scanning:
+
 ```yaml
 include:
   - template: Container-Scanning.gitlab-ci.yml
@@ -402,8 +404,8 @@ To use container scanning in an offline environment, you need:
 
 | GitLab Analyzer | Container Registry |
 | --- | --- |
-|[Klar](https://gitlab.com/gitlab-org/security-products/analyzers/klar/)| https://gitlab.com/gitlab-org/security-products/analyzers/klar/container_registry |
-|[Container-Scanning](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning)|https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/container_registry/1741162|
+|[Klar](https://gitlab.com/gitlab-org/security-products/analyzers/klar/)| [registry URL](https://gitlab.com/gitlab-org/security-products/analyzers/klar/container_registry) |
+|[Container-Scanning](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning)|[registry URL](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/container_registry/1741162)|
 
 Note that GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
 meaning the runner tries to pull Docker images from the GitLab container registry even if a local
@@ -427,12 +429,14 @@ For container scanning, import the following default images from `registry.gitla
 [local Docker container registry](../../packages/container_registry/index.md):
 
 Klar:
+
 ```plaintext
 registry.gitlab.com/gitlab-org/security-products/analyzers/klar
 https://hub.docker.com/r/arminc/clair-db
 ```
 
 Container-Scanning:
+
 ```plaintext
 registry.gitlab.com/gitlab-org/security-products/analyzers/container-scanning
 ```
@@ -454,6 +458,7 @@ For details on saving and transporting Docker images as a file, see Docker's doc
 1. [Override the container scanning template](#overriding-the-container-scanning-template) in your `.gitlab-ci.yml` file to refer to the Docker images hosted on your local Docker container registry:
 
    Klar:
+
    ```yaml
    include:
      - template: Container-Scanning.gitlab-ci.yml
@@ -465,6 +470,7 @@ For details on saving and transporting Docker images as a file, see Docker's doc
    ```
 
    Container-Scanning:
+
    ```yaml
    include:
      - template: Container-Scanning.gitlab-ci.yml
