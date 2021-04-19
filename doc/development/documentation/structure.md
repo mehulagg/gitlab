@@ -54,7 +54,7 @@ This topic also uses the same format as a task.
 
 ## Related topics
 
-A bulleted list of important related topics.
+A bulleted list of related topics.
 ```
 
 ## Concept
