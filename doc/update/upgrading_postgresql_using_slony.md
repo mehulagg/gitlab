@@ -232,7 +232,7 @@ Now run the following commands:
 \i /tmp/migrations.sql
 ```
 
-To verify if the structure is in place close the session, start it again, then
+To verify if the structure is in place close the session (`\q`), start it again, then
 run `\d`. If all went well you should see output along the lines of the
 following:
 
