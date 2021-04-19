@@ -67,7 +67,7 @@ RSpec.describe MergeRequests::RefreshService do
     describe '#update_approvers_for_target_branch_merge_requests' do
       shared_examples_for 'does not refresh the code owner rules' do
         specify do
-          expect(::MergeRequests::SyncCodeOwnerApprovalRules).not_to receive(:new)
+          expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker).not_to receive(:perform_async)
           subject
         end
       end
@@ -90,14 +90,11 @@ RSpec.describe MergeRequests::RefreshService do
 
             context 'when not on the merge train' do
               it 'refreshes the code owner rules for all relevant merge requests' do
-                fake_refresh_service = instance_double(::MergeRequests::SyncCodeOwnerApprovalRules)
+                expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker)
+                  .to receive(:perform_async).with(relevant_merge_request.id)
 
-                expect(::MergeRequests::SyncCodeOwnerApprovalRules)
-                  .to receive(:new).with(relevant_merge_request).and_return(fake_refresh_service)
-                expect(fake_refresh_service).to receive(:execute)
-
-                expect(::MergeRequests::SyncCodeOwnerApprovalRules)
-                  .not_to receive(:new).with(irrelevant_merge_request)
+                expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker)
+                  .not_to receive(:perform_async).with(irrelevant_merge_request)
 
                 subject
               end
@@ -173,10 +170,10 @@ RSpec.describe MergeRequests::RefreshService do
         subject
       end
 
-      context "creating approval_rules" do
+      context "creating approval_rules", :sidekiq_inline do
         shared_examples_for 'creates an approval rule based on current diff' do
           it "creates expected approval rules" do
-            expect(another_merge_request.approval_rules.size).to eq(approval_rules_size)
+            expect(another_merge_request.reload.approval_rules.reload.size).to eq(approval_rules_size)
             expect(another_merge_request.approval_rules.first.rule_type).to eq('code_owner')
           end
         end
@@ -222,12 +219,9 @@ RSpec.describe MergeRequests::RefreshService do
         let(:relevant_merge_requests) { [merge_request, another_merge_request] }
 
         it 'refreshes the code owner rules for all relevant merge requests' do
-          fake_refresh_service = instance_double(::MergeRequests::SyncCodeOwnerApprovalRules)
-
           relevant_merge_requests.each do |merge_request|
-            expect(::MergeRequests::SyncCodeOwnerApprovalRules)
-              .to receive(:new).with(merge_request).and_return(fake_refresh_service)
-            expect(fake_refresh_service).to receive(:execute)
+            expect(::MergeRequests::SyncCodeOwnerApprovalRulesWorker)
+              .to receive(:perform_async).with(merge_request.id)
           end
 
           subject

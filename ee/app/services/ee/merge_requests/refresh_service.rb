@@ -31,7 +31,7 @@ module EE
 
       def update_approvers_for_source_branch_merge_requests
         merge_requests_for_source_branch.each do |merge_request|
-          ::MergeRequests::SyncCodeOwnerApprovalRules.new(merge_request).execute if project.feature_available?(:code_owners)
+          ::MergeRequests::SyncCodeOwnerApprovalRulesWorker.perform_async(merge_request.id) if project.feature_available?(:code_owners)
           ::MergeRequests::SyncReportApproverApprovalRules.new(merge_request).execute if project.feature_available?(:report_approver_rules)
         end
       end
@@ -39,7 +39,7 @@ module EE
       def update_approvers_for_target_branch_merge_requests
         if project.feature_available?(:code_owners) && branch_protected? && code_owners_updated?
           merge_requests_for_target_branch.each do |merge_request|
-            ::MergeRequests::SyncCodeOwnerApprovalRules.new(merge_request).execute unless merge_request.on_train?
+            ::MergeRequests::SyncCodeOwnerApprovalRulesWorker.perform_async(merge_request.id) unless merge_request.on_train?
           end
         end
       end
