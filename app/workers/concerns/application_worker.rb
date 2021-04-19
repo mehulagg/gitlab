@@ -50,17 +50,8 @@ module ApplicationWorker
     end
 
     def set_queue
-      queue_name = [queue_namespace, base_queue_name].compact.join(':')
-
+      queue_name = ::Gitlab::SidekiqConfig::WorkerRouter.global.route(self)
       sidekiq_options queue: queue_name # rubocop:disable Cop/SidekiqOptionsQueue
-    end
-
-    def base_queue_name
-      name
-        .sub(/\AGitlab::/, '')
-        .sub(/Worker\z/, '')
-        .underscore
-        .tr('/', '_')
     end
 
     def queue_namespace(new_namespace = nil)

@@ -5,6 +5,11 @@ module Gitlab
     class WorkerRouter
       InvalidRoutingRule = Class.new(StandardError)
       RuleEvalurator = Struct.new(:matcher, :queue_name)
+
+      def self.global
+        @global_worker_router ||= new(::Gitlab.config.sidekiq.routing_rules)
+      end
+
       # call-seq:
       #   router = WorkerRouter.new([
       #     ["resource_boundary=cpu", 'cpu_boundary'],
@@ -44,11 +49,11 @@ module Gitlab
         worker_metadata = generate_worker_metadata(worker_klass)
         @rule_evaluators.each do |evaluator|
           if evaluator.matcher.match?(worker_metadata)
-            return evaluator.queue_name.presence || queue_from_worker_name(worker_klass)
+            return evaluator.queue_name.presence || queue_name_from_worker_name(worker_klass)
           end
         end
 
-        queue_from_worker_name(worker_klass)
+        queue_name_from_worker_name(worker_klass)
       end
 
       private
@@ -75,8 +80,14 @@ module Gitlab
         ::Gitlab::SidekiqConfig::Worker.new(worker_klass, ee: false).to_yaml
       end
 
-      def queue_from_worker_name(worker_klass)
-        [worker_klass.queue_namespace, worker_klass.base_queue_name].compact.join(':')
+      def queue_name_from_worker_name(worker_klass)
+        base_queue_name =
+          worker_klass.name
+            .sub(/\AGitlab::/, '')
+            .sub(/Worker\z/, '')
+            .underscore
+            .tr('/', '_')
+        [worker_klass.queue_namespace, base_queue_name].compact.join(':')
       end
     end
   end
