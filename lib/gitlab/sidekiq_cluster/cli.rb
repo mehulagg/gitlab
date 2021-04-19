@@ -57,7 +57,7 @@ module Gitlab
         worker_queues = SidekiqConfig::CliMethods.worker_queues(@rails_path)
 
         queue_groups = argv.map do |queues_or_query_string|
-          next worker_queues if queues_or_query_string == '*'
+          next worker_queues if queues_or_query_string == SidekiqConfig::WorkerMatcher::WILDCARD_MATCH
 
           # When using the queue query syntax, we treat each queue group
           # as a worker attribute query, and resolve the queues for the
