@@ -23,7 +23,7 @@ module Banzai
         # Yields the String match and the String issue reference.
         #
         # Returns a String replaced with the return of the block.
-        def self.references_in(text, pattern)
+        def references_in(text, pattern = object_reference_pattern)
           text.gsub(pattern) do |match|
             yield match, $~[:issue]
           end
@@ -47,7 +47,7 @@ module Banzai
         # Returns a String with `JIRA-123` references replaced with links. All
         # links have `gfm` and `gfm-issue` class names attached for styling.
         def object_link_filter(text, pattern, link_content: nil, link_reference: false)
-          self.class.references_in(text, object_reference_pattern) do |match, id|
+          references_in(text) do |match, id|
             url = url_for_issue(id)
             klass = reference_class(:issue)
             data  = data_attribute(project: project.id, external_issue: id)

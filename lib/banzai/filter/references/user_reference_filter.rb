@@ -21,8 +21,8 @@ module Banzai
         # Yields the String match, and the String user name.
         #
         # Returns a String replaced with the return of the block.
-        def self.references_in(text)
-          text.gsub(User.reference_pattern) do |match|
+        def references_in(text, pattern = object_reference_pattern)
+          text.gsub(pattern) do |match|
             yield match, $~[:user]
           end
         end
@@ -44,7 +44,7 @@ module Banzai
         # Returns a String with `@user` references replaced with links. All links
         # have `gfm` and `gfm-project_member` class names attached for styling.
         def object_link_filter(text, pattern, link_content: nil, link_reference: false)
-          self.class.references_in(text) do |match, username|
+          references_in(text, pattern) do |match, username|
             if username == 'all' && !skip_project_check?
               link_to_all(link_content: link_content)
             else

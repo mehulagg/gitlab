@@ -57,6 +57,10 @@ module Banzai
           doc
         end
 
+        def references_in(text, pattern = object_reference_pattern)
+          raise NotImplementedError, "#{self.class} must implement method: #{__callee__}"
+        end
+
         # Iterates over all <a> and text() nodes in a document.
         #
         # Nodes are skipped whenever their ancestor is one of the nodes returned

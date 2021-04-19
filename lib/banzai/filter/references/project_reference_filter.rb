@@ -19,8 +19,8 @@ module Banzai
         # Yields the String match, and the String project name.
         #
         # Returns a String replaced with the return of the block.
-        def self.references_in(text)
-          text.gsub(Project.markdown_reference_pattern) do |match|
+        def references_in(text, pattern = object_reference_pattern)
+          text.gsub(pattern) do |match|
             yield match, "#{$~[:namespace]}/#{$~[:project]}"
           end
         end
@@ -40,7 +40,7 @@ module Banzai
         # Returns a String with `namespace/project>` references replaced with links. All links
         # have `gfm` and `gfm-project` class names attached for styling.
         def object_link_filter(text, pattern, link_content: nil, link_reference: false)
-          self.class.references_in(text) do |match, project_path|
+          references_in(text) do |match, project_path|
             cached_call(:banzai_url_for_object, match, path: [Project, project_path.downcase]) do
               if project = projects_hash[project_path.downcase]
                 link_to_project(project, link_content: link_content) || match
