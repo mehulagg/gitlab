@@ -62,7 +62,7 @@ The "Time" metrics near the top of the page are measured as follows:
 
 ## How the stages are measured
 
-Value Stream Analytics measures each stage from its start event to its stop event.
+Value Stream Analytics uses start events and stop events to measure the time that an Issue or MR spends in each stage.
 For example, a stage might start when one label is added to an issue, and end when another label is added.
 Items are not included in the stage time calculation if they have not reached the stop event.
 
