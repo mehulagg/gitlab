@@ -22733,6 +22733,9 @@ msgstr ""
 msgid "PackageRegistry|Show PyPi commands"
 msgstr ""
 
+msgid "PackageRegistry|Show Yarn commands"
+msgstr ""
+
 msgid "PackageRegistry|Sorry, your filter produced no results"
 msgstr ""
 
@@ -22775,13 +22778,7 @@ msgstr ""
 msgid "PackageRegistry|npm"
 msgstr ""
 
-msgid "PackageRegistry|npm command"
-msgstr ""
-
 msgid "PackageRegistry|published by %{author}"
-msgstr ""
-
-msgid "PackageRegistry|yarn command"
 msgstr ""
 
 msgid "Packages"
