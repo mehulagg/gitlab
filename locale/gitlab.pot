@@ -37527,6 +37527,9 @@ msgstr ""
 msgid "mrWidget|Merged by"
 msgstr ""
 
+msgid "mrWidget|Merging your work now! 🎉"
+msgstr ""
+
 msgid "mrWidget|More information"
 msgstr ""
 
@@ -37618,9 +37621,6 @@ msgid "mrWidget|This action will start a merge train when pipeline %{pipelineLin
 msgstr ""
 
 msgid "mrWidget|This merge request failed to be merged automatically"
-msgstr ""
-
-msgid "mrWidget|This merge request is in the process of being merged"
 msgstr ""
 
 msgid "mrWidget|This project is archived, write access has been disabled"
