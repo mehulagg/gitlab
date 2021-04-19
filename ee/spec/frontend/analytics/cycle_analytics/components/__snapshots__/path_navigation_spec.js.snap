@@ -70,13 +70,35 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
       >
          
         <div
-          class="gl-display-table"
+          class="gl-px-4"
         >
           <div
-            class="gl-display-table-row"
+            class="gl-display-flex gl-justify-content-space-between"
           >
             <div
-              class="gl-display-table-cell gl-pr-4 gl-pb-4"
+              class="gl-pr-4 gl-pb-4"
+            >
+              
+            Stage time (median)
+          
+            </div>
+             
+            <div
+              class="gl-pb-4 gl-font-weight-bold"
+            >
+              
+            </div>
+          </div>
+        </div>
+         
+        <div
+          class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50"
+        >
+          <div
+            class="gl-display-flex gl-flex-direction-row"
+          >
+            <div
+              class="gl-display-flex gl-flex-direction-column gl-pr-4 gl-pb-4 metric-label"
             >
               
             Start
@@ -84,7 +106,7 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
             </div>
              
             <div
-              class="gl-display-table-cell gl-pb-4 stage-event-description"
+              class="gl-display-flex gl-flex-direction-column gl-pb-4 stage-event-description"
             >
               <p
                 data-sourcepos="1:1-1:13"
@@ -96,16 +118,18 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
           </div>
            
           <div
-            class="gl-display-table-row"
+            class="gl-display-flex gl-flex-direction-row"
           >
             <div
-              class="gl-display-table-cell gl-pr-4"
+              class="gl-display-flex gl-flex-direction-column gl-pr-4 metric-label"
             >
-              Stop
+              
+            Stop
+          
             </div>
              
             <div
-              class="gl-display-table-cell stage-event-description"
+              class="gl-display-flex gl-flex-direction-column stage-event-description"
             >
               <p
                 data-sourcepos="1:1-1:71"
@@ -138,13 +162,35 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
       >
          
         <div
-          class="gl-display-table"
+          class="gl-px-4"
         >
           <div
-            class="gl-display-table-row"
+            class="gl-display-flex gl-justify-content-space-between"
           >
             <div
-              class="gl-display-table-cell gl-pr-4 gl-pb-4"
+              class="gl-pr-4 gl-pb-4"
+            >
+              
+            Stage time (median)
+          
+            </div>
+             
+            <div
+              class="gl-pb-4 gl-font-weight-bold"
+            >
+              
+            </div>
+          </div>
+        </div>
+         
+        <div
+          class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50"
+        >
+          <div
+            class="gl-display-flex gl-flex-direction-row"
+          >
+            <div
+              class="gl-display-flex gl-flex-direction-column gl-pr-4 gl-pb-4 metric-label"
             >
               
             Start
@@ -152,7 +198,7 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
             </div>
              
             <div
-              class="gl-display-table-cell gl-pb-4 stage-event-description"
+              class="gl-display-flex gl-flex-direction-column gl-pb-4 stage-event-description"
             >
               <p
                 data-sourcepos="1:1-1:71"
@@ -164,16 +210,18 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
           </div>
            
           <div
-            class="gl-display-table-row"
+            class="gl-display-flex gl-flex-direction-row"
           >
             <div
-              class="gl-display-table-cell gl-pr-4"
+              class="gl-display-flex gl-flex-direction-column gl-pr-4 metric-label"
             >
-              Stop
+              
+            Stop
+          
             </div>
              
             <div
-              class="gl-display-table-cell stage-event-description"
+              class="gl-display-flex gl-flex-direction-column stage-event-description"
             >
               <p
                 data-sourcepos="1:1-1:33"
@@ -206,13 +254,35 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
       >
          
         <div
-          class="gl-display-table"
+          class="gl-px-4"
         >
           <div
-            class="gl-display-table-row"
+            class="gl-display-flex gl-justify-content-space-between"
           >
             <div
-              class="gl-display-table-cell gl-pr-4 gl-pb-4"
+              class="gl-pr-4 gl-pb-4"
+            >
+              
+            Stage time (median)
+          
+            </div>
+             
+            <div
+              class="gl-pb-4 gl-font-weight-bold"
+            >
+              
+            </div>
+          </div>
+        </div>
+         
+        <div
+          class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50"
+        >
+          <div
+            class="gl-display-flex gl-flex-direction-row"
+          >
+            <div
+              class="gl-display-flex gl-flex-direction-column gl-pr-4 gl-pb-4 metric-label"
             >
               
             Start
@@ -220,7 +290,7 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
             </div>
              
             <div
-              class="gl-display-table-cell gl-pb-4 stage-event-description"
+              class="gl-display-flex gl-flex-direction-column gl-pb-4 stage-event-description"
             >
               <p
                 data-sourcepos="1:1-1:33"
@@ -232,16 +302,18 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
           </div>
            
           <div
-            class="gl-display-table-row"
+            class="gl-display-flex gl-flex-direction-row"
           >
             <div
-              class="gl-display-table-cell gl-pr-4"
+              class="gl-display-flex gl-flex-direction-column gl-pr-4 metric-label"
             >
-              Stop
+              
+            Stop
+          
             </div>
              
             <div
-              class="gl-display-table-cell stage-event-description"
+              class="gl-display-flex gl-flex-direction-column stage-event-description"
             >
               <p
                 data-sourcepos="1:1-1:21"
