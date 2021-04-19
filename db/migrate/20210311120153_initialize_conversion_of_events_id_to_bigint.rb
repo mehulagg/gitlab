@@ -9,6 +9,7 @@ class InitializeConversionOfEventsIdToBigint < ActiveRecord::Migration[6.0]
     # Initialize the conversion of events.id to bigint
     # Primary Key of the Events table
     initialize_conversion_of_integer_to_bigint :events, :id
+    install_rename_triggers_for_conversion_of_integer_to_bigint :events, :id
   end
 
   def down

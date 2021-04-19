@@ -958,9 +958,13 @@ module Gitlab
           else
             add_column(table, tmp_column, :bigint, default: old_column.default)
           end
-
-          install_rename_triggers(table, column, tmp_column)
         end
+      end
+
+      # Install triggers to keep columns consistent while migration integer columns to bigint
+      def install_rename_triggers_for_conversion_of_integer_to_bigint(table, columns)
+        target_columns = Array(columns).map { |column| "#{column}_convert_to_bigint" }
+        install_rename_triggers(table, columns, target_columns)
       end
 
       # Backfills the new column used in the conversion of an integer column to bigint using background migrations.

@@ -9,6 +9,7 @@ class InitializeConversionOfPushEventPayloadsEventIdToBigint < ActiveRecord::Mig
     # Foreign key that references events.id
     # Also Primary key of the push_event_payloads table
     initialize_conversion_of_integer_to_bigint :push_event_payloads, :event_id, primary_key: :event_id
+    install_rename_triggers_for_conversion_of_integer_to_bigint :push_event_payloads, :event_id
   end
 
   def down
