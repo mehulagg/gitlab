@@ -61,7 +61,7 @@ export default {
     return {
       search: '',
       participants: [],
-      searchUsers,
+      searchUsers: [],
       isSearching: false,
     };
   },
@@ -92,22 +92,9 @@ export default {
         };
       },
       update(data) {
-        const searchResults = data.workspace?.users?.nodes.map(({ user }) => user) || [];
-        const mergedSearchResults = this.participants.reduce((acc, current) => {
-          if (
-            !acc.some((user) => current.username === user.username) &&
-            (current.name.includes(this.search) || current.username.includes(this.search))
-          ) {
-            acc.push(current);
-          }
-          return acc;
-        }, searchResults);
-        return mergedSearchResults;
+        return data.workspace?.users?.nodes.map(({ user }) => user) || [];
       },
       debounce: ASSIGNEES_DEBOUNCE_DELAY,
-      // skip() {
-      //   return this.isSearchEmpty;
-      // },
       error() {
         this.$emit('error');
         this.isSearching = false;
@@ -122,8 +109,16 @@ export default {
       return this.$apollo.queries.searchUsers.loading;
     },
     users() {
-      const users = this.searchUsers;
-      return this.moveCurrentUserToStart(users);
+      const mergedSearchResults = this.participants.reduce((acc, current) => {
+        if (
+          !acc.some((user) => current.username === user.username) &&
+          (current.name.includes(this.search) || current.username.includes(this.search))
+        ) {
+          acc.push(current);
+        }
+        return acc;
+      }, this.searchUsers);
+      return this.moveCurrentUserToStart(mergedSearchResults);
     },
     isSearchEmpty() {
       return this.search === '';
