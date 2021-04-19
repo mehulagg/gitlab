@@ -1,7 +1,7 @@
 ---
 name: issue_assignees_widget
-introduced_by_url:
-rollout_issue_url:
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/59620/
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/328185
 milestone: '13.11'
 type: development
 group: group::project management
