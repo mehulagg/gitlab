@@ -19,6 +19,13 @@ module SystemNotes
       note
     end
 
+    def create_notes(notes_summary_objects)
+      note = Note.insert_all(notes_summary_objects.map { |note_summary_object| note_summary_object.note.merge(system: true) })
+      note.system_note_metadata = SystemNoteMetadata.new(note_summary.metadata) if note_summary.metadata?
+
+      note
+    end
+
     def content_tag(*args)
       ActionController::Base.helpers.content_tag(*args)
     end

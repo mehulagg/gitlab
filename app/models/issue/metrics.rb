@@ -24,6 +24,6 @@ class Issue::Metrics < ApplicationRecord
   private
 
   def issue_assigned_to_list_label?
-    issue.labels.any? { |label| label.lists.present? }
+    issue.labels.preload(:lists).any? { |label| label.lists.present? }
   end
 end

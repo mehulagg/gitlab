@@ -18,6 +18,13 @@ module Banzai
       processor.process(html_documents)
     end
 
+    def reference_ids(type, project, current_user = nil)
+      context = RenderContext.new(project, current_user)
+      processor = Banzai::ReferenceParser[type].new(context)
+
+      processor.process_ids(html_documents)
+    end
+
     def reset_memoized_values
       @html_documents     = nil
       @texts_and_contexts = []

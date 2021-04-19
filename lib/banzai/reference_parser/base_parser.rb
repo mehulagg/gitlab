@@ -76,6 +76,11 @@ module Banzai
       end
 
       # Returns an Array of objects referenced by any of the given HTML nodes.
+      def referenced_by_ids(nodes)
+        unique_attribute_values(nodes, self.class.data_attribute)
+      end
+
+      # Returns an Array of objects referenced by any of the given HTML nodes.
       def referenced_by(nodes)
         ids = unique_attribute_values(nodes, self.class.data_attribute)
 
@@ -205,6 +210,17 @@ module Banzai
         gather_references(nodes)
       end
 
+      def process_ids(documents)
+        type = self.class.reference_type
+        reference_options = self.class.reference_options
+
+        nodes = documents.flat_map do |document|
+          Querying.css(document, "a[data-reference-type='#{type}'].gfm", reference_options).to_a
+        end
+
+        gather_reference_ids(nodes)
+      end
+
       # Gathers the references for the given HTML nodes.  Returns visible
       # references and a list of nodes which are not visible to the user
       def gather_references(nodes)
@@ -213,6 +229,14 @@ module Banzai
         not_visible = nodes - visible
 
         { visible: referenced_by(visible), not_visible: not_visible }
+      end
+
+      def gather_reference_ids(nodes)
+        nodes = nodes_user_can_reference(current_user, nodes)
+        visible = nodes_visible_to_user(current_user, nodes)
+        not_visible = nodes - visible
+
+        { visible: referenced_by_ids(visible), not_visible: not_visible }
       end
 
       # Returns a Hash containing the projects for a given list of HTML nodes.

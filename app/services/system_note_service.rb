@@ -221,6 +221,10 @@ module SystemNoteService
     ::SystemNotes::IssuablesService.new(noteable: noteable).cross_reference_exists?(mentioner)
   end
 
+  def change_status_for_tasks(noteable, project, author, new_tasks)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).change_status_for_tasks(new_tasks)
+  end
+
   def change_task_status(noteable, project, author, new_task)
     ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).change_task_status(new_task)
   end

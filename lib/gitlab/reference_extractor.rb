@@ -31,6 +31,13 @@ module Gitlab
       refs[:visible]
     end
 
+    def reference_ids(type)
+      refs = super(type, project, current_user)
+      @stateful_not_visible_counter += refs[:not_visible].count
+
+      refs[:visible]
+    end
+
     def reset_memoized_values
       @references = {}
       @stateful_not_visible_counter = 0
@@ -40,6 +47,10 @@ module Gitlab
     REFERABLES.each do |type|
       define_method(type.to_s.pluralize) do
         @references[type] ||= references(type)
+      end
+
+      define_method("#{type}_ids") do
+        @references[type] ||= reference_ids(type)
       end
     end
 

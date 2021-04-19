@@ -219,6 +219,15 @@ module SystemNotes
       create_note(NoteSummary.new(noteable, project, author, body, action: 'task'))
     end
 
+    def change_status_for_tasks(new_tasks)
+      status_label = new_task.complete? ? Taskable::COMPLETED : Taskable::INCOMPLETE
+      body = "marked the task **#{new_task.source}** as #{status_label}"
+
+      issue_activity_counter.track_issue_description_changed_action(author: author) if noteable.is_a?(Issue)
+
+      create_note(NoteSummary.new(noteable, project, author, body, action: 'task'))
+    end
+
     # Called when noteable has been moved to another project
     #
     # noteable_ref - Referenced noteable
