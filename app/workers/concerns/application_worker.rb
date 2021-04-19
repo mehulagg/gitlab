@@ -16,6 +16,7 @@ module ApplicationWorker
 
   included do
     set_queue
+    after_set_class_attribute { set_queue }
 
     def structured_payload(payload = {})
       context = Gitlab::ApplicationContext.current.merge(
@@ -47,6 +48,7 @@ module ApplicationWorker
   class_methods do
     def inherited(subclass)
       subclass.set_queue
+      subclass.after_set_class_attribute { subclass.set_queue }
     end
 
     def set_queue

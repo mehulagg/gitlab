@@ -6,6 +6,16 @@ module Gitlab
       InvalidRoutingRule = Class.new(StandardError)
       RuleEvalurator = Struct.new(:matcher, :queue_name)
 
+      def self.queue_name_from_worker_name(worker_klass)
+        base_queue_name =
+          worker_klass.name
+            .delete_prefix('Gitlab::')
+            .delete_suffix('Worker')
+            .underscore
+            .tr('/', '_')
+        [worker_klass.queue_namespace, base_queue_name].compact.join(':')
+      end
+
       def self.global
         @global_worker_router ||= new(::Gitlab.config.sidekiq.routing_rules)
       end
@@ -81,13 +91,7 @@ module Gitlab
       end
 
       def queue_name_from_worker_name(worker_klass)
-        base_queue_name =
-          worker_klass.name
-            .sub(/\AGitlab::/, '')
-            .sub(/Worker\z/, '')
-            .underscore
-            .tr('/', '_')
-        [worker_klass.queue_namespace, base_queue_name].compact.join(':')
+        self.class.queue_name_from_worker_name(worker_klass)
       end
     end
   end
