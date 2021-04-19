@@ -9,7 +9,7 @@ export default (apolloProvider) => {
   const initialFilterParams = {
     ...convertObjectPropsToCamelCase(rawFilterParams, {}),
   };
-
+  const { fullPath } = el.dataset;
   if (!el) {
     return null;
   }
@@ -18,6 +18,7 @@ export default (apolloProvider) => {
     el,
     provide: {
       initialFilterParams,
+      fullPath,
     },
     store, // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/324094
     apolloProvider,
