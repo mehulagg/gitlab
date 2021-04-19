@@ -89,6 +89,7 @@ export default {
         return {
           fullPath: this.fullPath,
           search: this.search,
+          first: 20,
         };
       },
       update(data) {

@@ -148,14 +148,14 @@ export default {
     assigneesWidget.updateAssignees = null;
   },
   methods: {
-    updateAssignees() {
+    updateAssignees(assigneeUsernames) {
       this.isSettingAssignees = true;
       return this.$apollo
         .mutate({
           mutation: assigneesQueries[this.issuableType].mutation,
           variables: {
             ...this.queryVariables,
-            assigneeUsernames: this.selected.map(({ username }) => username),
+            assigneeUsernames,
           },
         })
         .then(({ data }) => {
@@ -170,11 +170,11 @@ export default {
         });
     },
     assignSelf() {
-      this.updateAssignees(this.currentUser.username);
+      this.updateAssignees([this.currentUser.username]);
     },
     saveAssignees() {
       this.isDirty = false;
-      this.updateAssignees();
+      this.updateAssignees(this.selected.map(({ username }) => username));
       this.$el.dispatchEvent(hideDropdownEvent);
     },
     collapseWidget() {
