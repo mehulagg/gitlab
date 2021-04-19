@@ -38,6 +38,7 @@ export default {
     :text="$options.i18n.artifacts"
     :aria-label="$options.i18n.artifacts"
     icon="ellipsis_v"
+    data-testid="pipeline-multi-actions-dropdown"
     right
     lazy
     text-sr-only
