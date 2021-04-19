@@ -1,0 +1,5 @@
+---
+title: Update Docker used in CI templates to 19.03.15
+merge_request: 59622
+author: Takuya Noguchi
+type: other

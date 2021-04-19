@@ -4,7 +4,7 @@ build:
   variables:
     DOCKER_TLS_CERTDIR: ""
   services:
-    - docker:19.03.12-dind
+    - docker:19.03.15-dind
   script:
     - |
       if [[ -z "$CI_COMMIT_TAG" ]]; then

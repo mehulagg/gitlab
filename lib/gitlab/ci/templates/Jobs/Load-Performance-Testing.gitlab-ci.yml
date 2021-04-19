@@ -1,6 +1,6 @@
 load_performance:
   stage: performance
-  image: docker:19.03.11
+  image: docker:19.03.15
   allow_failure: true
   variables:
     DOCKER_TLS_CERTDIR: ""
@@ -10,7 +10,7 @@ load_performance:
     K6_OPTIONS: ''
     K6_DOCKER_OPTIONS: ''
   services:
-    - docker:19.03.11-dind
+    - docker:19.03.15-dind
   script:
     - |
       if ! docker info &>/dev/null; then
