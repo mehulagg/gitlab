@@ -52,7 +52,10 @@ function create_project_for_user() {
 
 function trigger_proj_user_creation(){
     local u1=$(create_user "user1")
-    create_project_for_user $u1
     create_group_for_user $u1
+    create_project_for_user $u1
+    local u2=($create_user "user2")
+    create_group_for_user $u2
+    create_project_for_user $u2
 }
 
