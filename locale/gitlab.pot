@@ -3637,9 +3637,6 @@ msgstr ""
 msgid "An error occurred while saving changes: %{error}"
 msgstr ""
 
-msgid "An error occurred while searching users."
-msgstr ""
-
 msgid "An error occurred while subscribing to notifications."
 msgstr ""
 
