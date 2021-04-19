@@ -27,12 +27,15 @@ module Gitlab
           end
         end
 
+        def violates?(filenames)
+          files.select { |key| filenames.include?(key) }.any?
+        end
+
         private
 
         def combine_lines(name, line, hits)
           if files[name][line].present?
             files[name][line] += hits
-
           else
             files[name][line] = hits
           end

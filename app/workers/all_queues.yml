@@ -1419,6 +1419,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: security_scans:ci_update_approval_rules
+  :feature_category: :static_application_security_testing
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :cpu
+  :weight: 2
+  :idempotent:
+  :tags: []
 - :name: todos_destroyer:todos_destroyer_confidential_issue
   :feature_category: :issue_tracking
   :has_external_dependencies:

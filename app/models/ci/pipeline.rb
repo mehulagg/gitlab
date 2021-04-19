@@ -252,6 +252,7 @@ module Ci
         pipeline.run_after_commit do
           ::Ci::PipelineArtifacts::CoverageReportWorker.perform_async(pipeline.id)
           ::Ci::PipelineArtifacts::CreateQualityReportWorker.perform_async(pipeline.id)
+          ::Ci::UpdateApprovalRulesWorker.perform_async(pipeline.id)
         end
       end
 

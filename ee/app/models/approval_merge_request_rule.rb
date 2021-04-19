@@ -56,9 +56,11 @@ class ApprovalMergeRequestRule < ApplicationRecord
 
   enum report_type: {
     vulnerability: 1,
-    license_scanning: 2
+    license_scanning: 2,
+    code_coverage: 3
   }
 
+  scope :coverage_report, -> { report_approver.code_coverage }
   scope :vulnerability_report, -> { report_approver.vulnerability }
   scope :license_compliance, -> { report_approver.license_scanning }
   scope :with_head_pipeline, -> { includes(merge_request: [:head_pipeline]) }
