@@ -70,7 +70,7 @@ Assuming the hook code is properly implemented, the hook code is executed as app
 
 To create a Git hook that applies to all of the repositories in your instance, set a global server
 hook. The default global server hook directory is in the GitLab Shell directory. Any
-hook added there applies to all repositories.
+hook added there applies to all repositories, including [project/group wiki](../user/project/wiki.md) or [design management](../user/project/issues/design_management.md) type repositories under a project.
 
 The default directory:
 
