@@ -133,6 +133,22 @@ Introductory sentence.
 | **Name** | Descriptive sentence about the setting. |
 ```
 
+### Feature prerequisites
+
+Features or concepts themselves can have prerequisites for their overall use,
+greater than the prerequisites for specific tasks. In these cases, use the
+reference topic type to create a **Prequisites** header close to (or immediately
+following) the feature's concept topic.
+
+```markdown
+# Prerequisites
+
+Directive to install or obtain these required items:
+
+- First prequisite
+- Second prerequisite
+```
+
 ## Troubleshooting
 
 Troubleshooting topics can be one of two categories:
