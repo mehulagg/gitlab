@@ -100,7 +100,7 @@ gitops:
 NOTE:
 If your Cilium integration was performed through GitLab Managed Apps, you can use `hubble-relay.gitlab-managed-apps.svc.cluster.local:80`.
 
-```
+```yaml
 cilium:
   hubble_relay_address: "<hubble-relay-host>:<hubble-relay-port>"
 ```
@@ -109,7 +109,7 @@ cilium:
 
 An `agentk` pods' log level can be specified using
 
-```
+```yaml
 observability:
   logging:
     level: off | warning | error | info | debug
