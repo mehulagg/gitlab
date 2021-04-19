@@ -23,24 +23,38 @@ GitLab also uses high-level landing pages.
 
 ## Landing pages
 
-Landing pages are topics that group other topics and help a user to navigate a section.
+Landing pages are top-level topics that serve two purposes:
 
-Users who are using the in-product help do not have a left nav,
-and need these topics to navigate the documentation.
-
-These topics can also help other users find the most important topics
-in a section.
+- They act as navigation for those who use the in-product help.
+  (The in-product help does not have a left nav.)
+- They introduce the concept and its four main tasks:
+  - View.
+  - Create.
+  - Edit/update.
+  - Delete.
 
 Landing page topics should be in this format:
 
 ```markdown
-# Title (a noun, like "CI/CD or "Analytics")
+# Title (a noun, like "Analytics")
 
-Brief introduction to the concept or product area.
-Include the reason why someone would use this thing.
+This topic is a [concept](#concept).
 
-- Bulleted list of important related topics.
-- These links are needed because users of in-product help do not have left navigation.
+## "View" task, for example, View Analytics
+
+This topic is a [task](#task).
+
+## "Create" task, for example, Create a report
+
+This topic is also a [task](#task).
+
+## "Edit" task, for example, Edit a report
+
+## "Delete" task, for example, Delete a report
+
+## Related topics
+
+A bulleted list of important related topics.
 ```
 
 ## Concept
