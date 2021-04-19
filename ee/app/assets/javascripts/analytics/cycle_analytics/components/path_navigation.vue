@@ -66,8 +66,8 @@ export default {
         </div>
         <div class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50">
           <div
-            class="gl-display-flex gl-flex-direction-row"
             v-if="pathItem.startEventHtmlDescription"
+            class="gl-display-flex gl-flex-direction-row"
           >
             <div class="gl-display-flex gl-flex-direction-column gl-pr-4 gl-pb-4 metric-label">
               {{ s__('ValueStreamEvent|Start') }}
@@ -78,8 +78,8 @@ export default {
             ></div>
           </div>
           <div
-            class="gl-display-flex gl-flex-direction-row"
             v-if="pathItem.endEventHtmlDescription"
+            class="gl-display-flex gl-flex-direction-row"
           >
             <div class="gl-display-flex gl-flex-direction-column gl-pr-4 metric-label">
               {{ s__('ValueStreamEvent|Stop') }}
