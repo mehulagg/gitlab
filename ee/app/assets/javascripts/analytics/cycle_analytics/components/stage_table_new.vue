@@ -1,5 +1,5 @@
 <script>
-import { GlEmptyState, GlIcon, GlLink, GlLoadingIcon, GlTable } from '@gitlab/ui';
+import { GlEmptyState, GlIcon, GlLink, GlLoadingIcon, GlPagination, GlTable } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { NOT_ENOUGH_DATA_ERROR } from '../constants';
 import TotalTime from './total_time_component.vue';
@@ -11,6 +11,7 @@ export default {
     GlIcon,
     GlLink,
     GlLoadingIcon,
+    GlPagination,
     GlTable,
     TotalTime,
   },
@@ -36,6 +37,15 @@ export default {
       required: false,
       default: '',
     },
+    pagination: {
+      // TODO: cleanup these props
+      type: Object,
+      required: false,
+      default: () => ({
+        hasNextPage: false,
+        currentPage: 0,
+      }),
+    },
   },
   computed: {
     isEmptyStage() {
@@ -49,6 +59,14 @@ export default {
       const { currentStage } = this;
       return !currentStage.custom && currentStage.name.toLowerCase().trim() === 'test';
     },
+    prevPage() {
+      return Math.max(this.pagination.currentPage - 1, 0);
+    },
+    nextPage() {
+      // TODO: detect the next page using the 'Link' header
+      // https://docs.gitlab.com/ee/api/#keyset-based-pagination
+      return this.pagination?.hasNextPage ? this.pagination.currentPage + 1 : null;
+    },
   },
   methods: {
     isMrLink(url = '') {
@@ -56,6 +74,9 @@ export default {
     },
     itemTitle(item) {
       return item.title || item.name;
+    },
+    handlePageChange() {
+      console.log('todo::pagination');
     },
   },
   fields: [
@@ -169,5 +190,14 @@ export default {
         <total-time :time="item.totalTime" data-testid="vsa-stage-event-time" />
       </template>
     </gl-table>
+    <gl-pagination
+      v-model="page"
+      :value="pagination.currentPage"
+      :prev-page="pagination.prevPage"
+      :next-page="pagination.nextPage"
+      align="center"
+      class="gl-mt-3"
+      @input="handlePageChange"
+    />
   </div>
 </template>
