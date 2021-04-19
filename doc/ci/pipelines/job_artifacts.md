@@ -14,12 +14,8 @@ Jobs can output an archive of files and directories. This output is known as a j
 
 You can download job artifacts by using the GitLab UI or the [API](../../api/job_artifacts.md#get-job-artifacts).
 
-The latest job artifacts are those created by the most recent successful pipeline
-for a specific ref. If you run two types of pipelines (like branch and scheduled) for the same ref,
-the pipeline that finishes later creates the job artifact.
-
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview, watch the video [GitLab CI pipelines, artifacts, and environments](https://www.youtube.com/watch?v=PCKDICEe10s).
+For an overview of job artifacts, watch the video [GitLab CI pipelines, artifacts, and environments](https://www.youtube.com/watch?v=PCKDICEe10s).
 Or, for an introduction, watch [GitLab CI pipeline tutorial for beginners](https://www.youtube.com/watch?v=Jav4vbUrqII).
 
 For administrator information about job artifact storage, see [administering job artifacts](../../administration/job_artifacts.md).
@@ -48,6 +44,9 @@ You can also [use the UI to keep job artifacts from expiring](#download-job-arti
 If `expire_in` is not defined, the
 [instance-wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration)
 is used.
+
+If you run two types of pipelines (like branch and scheduled) for the same ref,
+the pipeline that finishes later creates the job artifact.
 
 For more examples, view the [keyword reference for the `.gitlab-ci.yml` file](../yaml/README.md#artifacts).
 
@@ -121,17 +120,20 @@ job with the same name, the job artifact from the parent pipeline is returned.
 
 You can download the latest job artifacts by using a URL.
 
-| To | Run this command |
-|----|------------------|
-| Download the whole artifacts archive | `https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/download?job=<job_name>` |
-| Download a single file from the artifacts | `https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/raw/<path_to_file>?job=<job_name>` |
-| Browse the latest job artifacts | `https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/browse?job=<job_name>` |
-| Download specific files, including HTML files that are shown in [GitLab Pages](../../administration/pages/index.md) | `https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/file/<path>?job=<job_name>` |
+To download the whole artifacts archive:
 
-### URL examples
+```plaintext
+https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/download?job=<job_name>
+```
 
-To download the latest artifacts of the job named `coverage` of
-the `main` branch of the `gitlab` project that belongs to the `gitlab-org`
+To download a single file from the artifacts:
+
+```plaintext
+https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/raw/<path_to_file>?job=<job_name>
+```
+
+For example, to download the latest artifacts of the job named `coverage` in
+the `main` branch of the `gitlab` project in the `gitlab-org`
 namespace:
 
 ```plaintext
@@ -147,10 +149,23 @@ https://gitlab.com/gitlab-org/gitlab/-/jobs/artifacts/master/raw/coverage/index.
 To browse the latest job artifacts:
 
 ```plaintext
+https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/browse?job=<job_name>
+```
+
+For example:
+
+```plaintext
 https://gitlab.com/gitlab-org/gitlab/-/jobs/artifacts/master/browse?job=coverage
 ```
 
-Access the artifact `htmlcov/index.html` created by the job `coverage`:
+To download specific files, including HTML files that
+are shown in [GitLab Pages](../../administration/pages/index.md):
+
+```plaintext
+https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/file/<path>?job=<job_name>
+```
+
+For example, when a job `coverage` creates the artifact `htmlcov/index.html`:
 
 ```plaintext
 https://gitlab.com/gitlab-org/gitlab/-/jobs/artifacts/master/file/htmlcov/index.html?job=coverage
@@ -191,15 +206,3 @@ generated. Check the job log for these messages.
 If you find no helpful messages, retry the failed job after activating
 [CI/CD debug logging](../variables/README.md#debug-logging).
 This logging should provide information to help you investigate further.
-
-<!-- ## Troubleshooting
-
-Include any troubleshooting steps that you can foresee. If you know beforehand what issues
-one might have when setting this up, or when something is changed, or on upgrading, it's
-important to describe those, too. Think of things that may go wrong and include them here.
-This is important to minimize requests for support, and to avoid doc comments with
-questions that you know someone might ask.
-
-Each scenario can be a third-level heading, e.g. `### Getting error message X`.
-If you have none to add when creating a doc, leave this section in place
-but commented out to help encourage others to add to it in the future. -->
