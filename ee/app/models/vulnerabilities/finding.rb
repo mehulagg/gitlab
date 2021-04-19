@@ -338,7 +338,7 @@ module Vulnerabilities
     def eql?(other)
       return false unless other.report_type == report_type && other.primary_identifier_fingerprint == primary_identifier_fingerprint
 
-      if ::Feature.enabled?(:vulnerability_finding_signatures, project)
+      if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
         matches_signatures(other.signatures, other.uuid)
       else
         other.location_fingerprint == location_fingerprint
