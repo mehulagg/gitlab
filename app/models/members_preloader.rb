@@ -9,7 +9,8 @@ class MembersPreloader
 
   def preload_all
     ActiveRecord::Associations::Preloader.new.preload(members, :user)
-    # ActiveRecord::Associations::Preloader.new.preload(members, :created_by)
+    # this resolves the last of them for the expose :created_by
+    ActiveRecord::Associations::Preloader.new.preload(members, :created_by)
     ActiveRecord::Associations::Preloader.new.preload(members, :source)
     ActiveRecord::Associations::Preloader.new.preload(members.map(&:user), :status)
     ActiveRecord::Associations::Preloader.new.preload(members.map(&:user), :u2f_registrations)

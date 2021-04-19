@@ -18,6 +18,37 @@ RSpec.describe Groups::GroupMembersController do
   end
 
   describe 'GET index' do
+    context 'with queries and templates' do
+      render_views
+
+      before do
+        group.add_owner(user)
+        sign_in(user)
+      end
+
+      context 'with members, invites and requests' do
+        let(:requester) { create(:user) }
+        let!(:invited) { create(:group_member, :invited, :developer, group: group) }
+        let!(:requested) { create(:group_member, :access_request, group: group, user: requester) }
+
+        it 'records queries', :use_sql_query_cache do
+          get :index, params: { group_id: group }
+
+          control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get :index, params: { group_id: group } }
+          create_list(:group_member, 5, group: group, created_by: user)
+          # access requests try to mail to all members, even invited ones, stepping through :user_id attribute
+          # since an invited member by definition can only be a non user, let's short circuit that here
+          # and invite them as developer instead of the default owner - perhaps this is a bug...
+          create_list(:group_member, 5, :invited, :developer, group: group, created_by: user)
+          create_list(:group_member, 5, :access_request, group: group)
+
+          expect do
+            get :index, params: { group_id: group.reload }
+          end.not_to exceed_all_query_limit(control.count).with_threshold(4)
+        end
+      end
+    end
+
     it 'renders index with 200 status code' do
       get :index, params: { group_id: group }
 

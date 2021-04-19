@@ -861,6 +861,7 @@ class NotificationService
   end
 
   def deliver_access_request_email(recipient, member)
+    # there is a bug here where we should be filtering by recipients who aren't invited and owners/maintainers
     mailer.member_access_requested_email(member.real_source_type, member.id, recipient.user.id).deliver_later
   end
 

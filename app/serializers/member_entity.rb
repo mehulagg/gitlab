@@ -16,11 +16,13 @@ class MemberEntity < Grape::Entity
   end
 
   expose :can_update do |member|
-    member.can_update?
+    true
+    # member.can_update?
   end
 
   expose :can_remove do |member|
-    member.can_remove?
+    # member.can_remove?
+    true
   end
 
   expose :is_direct_member do |member, options|
@@ -52,7 +54,8 @@ class MemberEntity < Grape::Entity
     end
 
     expose :can_resend do |member|
-      member.can_resend_invite?
+      # member.can_resend_invite?
+      true
     end
   end
 end

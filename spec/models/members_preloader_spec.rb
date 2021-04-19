@@ -11,6 +11,7 @@ RSpec.describe MembersPreloader do
       MembersPreloader.new(members).preload_all
       MembersPresenter.new(members, current_user: nil).each do |member|
         next unless member.created_by.present?
+
         UserEntity.represent(member.created_by, only: [:name, :web_url])
       end
     end
