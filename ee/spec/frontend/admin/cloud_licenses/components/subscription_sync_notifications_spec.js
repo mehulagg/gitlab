@@ -2,6 +2,7 @@ import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import SubscriptionSyncNotifications, {
   notificationType,
+  SUCCESS_ALERT_DISMISSED_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_sync_notifications.vue';
 import { userNotifications } from 'ee/pages/admin/cloud_licenses/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -39,12 +40,20 @@ describe('Subscription Sync Notifications', () => {
   });
 
   describe('sync success notification', () => {
-    it('displays an alert with success message', () => {
+    beforeEach(() => {
       createComponent({
         props: { notification: notificationType.SYNC_SUCCESS },
       });
+    });
 
+    it('displays an alert with success message', () => {
       expect(findSuccessAlert().text()).toBe(userNotifications.manualSyncSuccessfulText);
+    });
+
+    it('emits an event when dismissed', () => {
+      findSuccessAlert().vm.$emit('dismiss');
+
+      expect(wrapper.emitted(SUCCESS_ALERT_DISMISSED_EVENT)).toEqual([[]]);
     });
   });
 

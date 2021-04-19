@@ -7,6 +7,8 @@ export const notificationType = {
   SYNC_SUCCESS: 'SYNC_SUCCESS',
 };
 
+export const SUCCESS_ALERT_DISMISSED_EVENT = 'success-alert-dismissed';
+
 const notificationTypeValidator = (value) =>
   !value || Object.values(notificationType).includes(value);
 
@@ -37,12 +39,22 @@ export default {
       return this.notification === notificationType.SYNC_FAILURE;
     },
   },
+  methods: {
+    didDismissSuccessAlert() {
+      this.$emit(SUCCESS_ALERT_DISMISSED_EVENT);
+    },
+  },
 };
 </script>
 
 <template>
   <div>
-    <gl-alert v-if="syncDidSuccess" variant="success" data-testid="sync-success-alert">
+    <gl-alert
+      v-if="syncDidSuccess"
+      variant="success"
+      data-testid="sync-success-alert"
+      @dismiss="didDismissSuccessAlert"
+    >
       {{ $options.i18n.userNotifications.manualSyncSuccessfulText }}
     </gl-alert>
     <gl-alert
