@@ -23,6 +23,8 @@ module Resolvers
               description: 'List time-logs within a time range where the logged time is equal to or before endTime.'
 
     def resolve_with_lookahead(**args)
+      return project_timelogs if object.is_a?(Project)
+
       return Timelog.none unless timelogs_available_for_user?
 
       validate_params_presence!(args)
@@ -107,6 +109,10 @@ module Resolvers
 
     def group
       @group ||= object.respond_to?(:sync) ? object.sync : object
+    end
+
+    def project_timelogs
+      Timelog.in_project(object)
     end
   end
 end

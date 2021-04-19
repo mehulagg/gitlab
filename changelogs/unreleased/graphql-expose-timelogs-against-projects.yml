@@ -1,0 +1,5 @@
+---
+title: Expose timelogs against projects in graphql
+merge_request: 59588
+author: Lee Tickett @leetickett
+type: added

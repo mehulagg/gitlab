@@ -352,6 +352,13 @@ module Types
           description: 'Labels available on this project.',
           resolver: Resolvers::LabelsResolver
 
+    field :timelogs,
+          Types::TimelogType.connection_type, null: false,
+          description: 'Time logged on issues and merge requests in the project.',
+          extras: [:lookahead],
+          complexity: 5,
+          resolver: ::Resolvers::TimelogResolver
+
     def avatar_url
       object.avatar_url(only_path: false)
     end

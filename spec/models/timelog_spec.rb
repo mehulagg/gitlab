@@ -64,6 +64,19 @@ RSpec.describe Timelog do
       end
     end
 
+    describe 'in_project' do
+      it 'returns timelogs created for project issues and merge requests' do
+        project = create(:project, :empty_repo)
+
+        create(:issue_timelog)
+        create(:merge_request_timelog)
+        timelog1 = create(:issue_timelog, issue: create(:issue, project: project))
+        timelog2 = create(:merge_request_timelog, merge_request: create(:merge_request, source_project: project))
+
+        expect(described_class.in_project(project)).to contain_exactly(timelog1, timelog2)
+      end
+    end
+
     describe 'between_times' do
       it 'returns collection of timelogs within given times' do
         create(:issue_timelog, spent_at: 65.days.ago)

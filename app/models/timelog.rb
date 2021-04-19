@@ -2,6 +2,7 @@
 
 class Timelog < ApplicationRecord
   include Importable
+  include FromUnion
 
   validates :time_spent, :user, presence: true
   validate :issuable_id_is_present, unless: :importing?
@@ -17,6 +18,13 @@ class Timelog < ApplicationRecord
       Project.select(1).where(namespace: group.self_and_descendants)
         .where('issues.project_id = projects.id')
     )
+  end
+
+  scope :in_project, -> (project) do
+    issue_timelogs = joins(:issue).where("issues.project_id = ?", project.id)
+    merge_request_timelogs = joins(:merge_request).where("merge_requests.target_project_id = ?", project.id)
+
+    from_union([issue_timelogs, merge_request_timelogs])
   end
 
   scope :between_times, -> (start_time, end_time) do
