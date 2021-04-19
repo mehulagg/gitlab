@@ -155,7 +155,7 @@ RSpec.describe Banzai::Filter::References::ReferenceFilter do
       let(:nodes) { [node] }
 
       it 'skips node' do
-        expect { |b| filter.replace_text_when_pattern_matches(filter.nodes[0], 0, ref_pattern, &b) }.not_to yield_control
+        expect { |b| filter.send(:replace_text_when_pattern_matches, filter.nodes[0], 0, ref_pattern, &b) }.not_to yield_control
       end
     end
 

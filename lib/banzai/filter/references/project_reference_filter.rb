@@ -6,6 +6,7 @@ module Banzai
       # HTML filter that replaces project references with links.
       class ProjectReferenceFilter < ReferenceFilter
         self.reference_type = :project
+        self.object_class   = Project
 
         # Public: Find `namespace/project>` project references in text
         #
@@ -24,27 +25,10 @@ module Banzai
           end
         end
 
-        def call
-          ref_pattern = Project.markdown_reference_pattern
-          ref_pattern_start = /\A#{ref_pattern}\z/
+        private
 
-          nodes.each_with_index do |node, index|
-            if text_node?(node)
-              replace_text_when_pattern_matches(node, index, ref_pattern) do |content|
-                project_link_filter(content)
-              end
-            elsif element_node?(node)
-              yield_valid_link(node) do |link, inner_html|
-                if link =~ ref_pattern_start
-                  replace_link_node_with_href(node, index, link) do
-                    project_link_filter(link, link_content: inner_html)
-                  end
-                end
-              end
-            end
-          end
-
-          doc
+        def object_reference_pattern
+          @object_reference_pattern ||= Project.markdown_reference_pattern
         end
 
         # Replace `namespace/project>` project references in text with links to the referenced
@@ -55,7 +39,7 @@ module Banzai
         #
         # Returns a String with `namespace/project>` references replaced with links. All links
         # have `gfm` and `gfm-project` class names attached for styling.
-        def project_link_filter(text, link_content: nil)
+        def object_link_filter(text, pattern, link_content: nil, link_reference: false)
           self.class.references_in(text) do |match, project_path|
             cached_call(:banzai_url_for_object, match, path: [Project, project_path.downcase]) do
               if project = projects_hash[project_path.downcase]
@@ -91,8 +75,6 @@ module Banzai
 
           refs.to_a
         end
-
-        private
 
         def urls
           Gitlab::Routing.url_helpers

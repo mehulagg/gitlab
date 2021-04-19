@@ -139,7 +139,7 @@ module Banzai
         def call
           return doc unless project || group || user
 
-          ref_pattern = object_class.reference_pattern
+          ref_pattern = object_reference_pattern
           link_pattern = object_class.link_reference_pattern
 
           # Compile often used regexps only once outside of the loop

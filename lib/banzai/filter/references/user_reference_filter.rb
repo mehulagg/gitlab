@@ -8,6 +8,7 @@ module Banzai
       # A special `@all` reference is also supported.
       class UserReferenceFilter < ReferenceFilter
         self.reference_type = :user
+        self.object_class   = User
 
         # Public: Find `@user` user references in text
         #
@@ -29,27 +30,10 @@ module Banzai
         def call
           return doc if project.nil? && group.nil? && !skip_project_check?
 
-          ref_pattern = User.reference_pattern
-          ref_pattern_start = /\A#{ref_pattern}\z/
-
-          nodes.each_with_index do |node, index|
-            if text_node?(node)
-              replace_text_when_pattern_matches(node, index, ref_pattern) do |content|
-                user_link_filter(content)
-              end
-            elsif element_node?(node)
-              yield_valid_link(node) do |link, inner_html|
-                if link =~ ref_pattern_start
-                  replace_link_node_with_href(node, index, link) do
-                    user_link_filter(link, link_content: inner_html)
-                  end
-                end
-              end
-            end
-          end
-
-          doc
+          super
         end
+
+        private
 
         # Replace `@user` user references in text with links to the referenced
         # user's profile page.
@@ -59,7 +43,7 @@ module Banzai
         #
         # Returns a String with `@user` references replaced with links. All links
         # have `gfm` and `gfm-project_member` class names attached for styling.
-        def user_link_filter(text, link_content: nil)
+        def object_link_filter(text, pattern, link_content: nil, link_reference: false)
           self.class.references_in(text) do |match, username|
             if username == 'all' && !skip_project_check?
               link_to_all(link_content: link_content)
@@ -99,8 +83,6 @@ module Banzai
 
           refs.to_a
         end
-
-        private
 
         def urls
           Gitlab::Routing.url_helpers
