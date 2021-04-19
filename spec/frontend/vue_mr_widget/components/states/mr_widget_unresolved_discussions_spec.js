@@ -43,7 +43,7 @@ describe('UnresolvedDiscussions', () => {
 
     it('should have correct elements', () => {
       expect(wrapper.element.innerText).toContain(
-        `Before this can be merged, one or more threads must be resolved.`,
+        `Merge blocked: all threads must be resolved.`,
       );
 
       expect(wrapper.element.innerText).toContain('Jump to first unresolved thread');
@@ -57,7 +57,7 @@ describe('UnresolvedDiscussions', () => {
   describe('without threads path', () => {
     it('should not show create issue link if user cannot create issue', () => {
       expect(wrapper.element.innerText).toContain(
-        `Before this can be merged, one or more threads must be resolved.`,
+        `Merge blocked: all threads must be resolved.`,
       );
 
       expect(wrapper.element.innerText).toContain('Jump to first unresolved thread');

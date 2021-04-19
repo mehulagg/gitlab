@@ -37446,9 +37446,6 @@ msgstr ""
 msgid "mrWidget|Are you adding technical debt or code vulnerabilities?"
 msgstr ""
 
-msgid "mrWidget|Before this can be merged, one or more threads must be resolved."
-msgstr ""
-
 msgid "mrWidget|Cancel automatic merge"
 msgstr ""
 
@@ -37513,6 +37510,9 @@ msgid "mrWidget|Mentions"
 msgstr ""
 
 msgid "mrWidget|Merge"
+msgstr ""
+
+msgid "mrWidget|Merge blocked: all threads must be resolved."
 msgstr ""
 
 msgid "mrWidget|Merge failed."
