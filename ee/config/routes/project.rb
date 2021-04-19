@@ -40,7 +40,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :subscriptions, only: [:create, :destroy]
 
         resource :threat_monitoring, only: [:show], controller: :threat_monitoring do
-          get '/alerts/:id', action: 'alert_details'
+          get '/alerts/:id', action: 'alert_details', constraints: { id: /\d+/ }
           resources :policies, only: [:new, :edit], controller: :threat_monitoring
         end
 

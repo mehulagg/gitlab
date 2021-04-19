@@ -237,7 +237,8 @@ RSpec.describe Projects::ThreatMonitoringController do
   end
 
   describe 'GET threat monitoring alerts' do
-    subject { get :alert_details, params: { namespace_id: project.namespace, project_id: project, id: '5' } }
+    let(:alert_id) { '5' }
+    subject { get :alert_details, params: { namespace_id: project.namespace, project_id: project, id: alert_id } }
 
     context 'with authorized user' do
       before do
@@ -255,6 +256,14 @@ RSpec.describe Projects::ThreatMonitoringController do
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template(:alert_details)
+        end
+
+        context 'when id is invalid' do
+          let(:alert_id) { nil }
+
+          it 'raises an error' do
+            expect{subject}.to raise_error(ActionController::UrlGenerationError)
+          end
         end
       end
 
