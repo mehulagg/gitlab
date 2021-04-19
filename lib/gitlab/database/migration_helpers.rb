@@ -577,7 +577,7 @@ module Gitlab
       # old_column - The name of the old column.
       # new_column - The name of the new column.
       def install_rename_triggers(table, old_column, new_column)
-        install_rename_triggers_for_postgresql(nil, table, old_column, new_column)
+        install_rename_triggers_for_postgresql(table, old_column, new_column)
       end
 
       # Changes the type of a column concurrently.
@@ -1044,8 +1044,8 @@ module Gitlab
       end
 
       # Performs a concurrent column rename when using PostgreSQL.
-      def install_rename_triggers_for_postgresql(trigger, table, old, new)
-        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).create(old, new, trigger_name: trigger)
+      def install_rename_triggers_for_postgresql(table, old, new, trigger_name: nil)
+        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).create(old, new, trigger_name: trigger_name)
       end
 
       # Removes the triggers used for renaming a PostgreSQL column concurrently.

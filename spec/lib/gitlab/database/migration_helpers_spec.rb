@@ -835,7 +835,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           expect(model).to receive(:check_trigger_permissions!).with(:users)
 
           expect(model).to receive(:install_rename_triggers_for_postgresql)
-            .with(nil, :users, :old, :new)
+            .with(:users, :old, :new)
 
           expect(model).to receive(:add_column)
             .with(:users, :new, :integer,
@@ -1000,7 +1000,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         expect(model).to receive(:check_trigger_permissions!).with(:users)
 
         expect(model).to receive(:install_rename_triggers_for_postgresql)
-          .with(nil, :users, :old, :new)
+          .with(:users, :old, :new)
 
         expect(model).to receive(:add_column)
           .with(:users, :old, :integer,
@@ -1160,7 +1160,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           .with(:users, temp_undo_cleanup_column, :old)
 
         expect(model).to receive(:install_rename_triggers_for_postgresql)
-          .with(nil, :users, :old, 'old_for_type_change')
+          .with(:users, :old, 'old_for_type_change')
 
         model.undo_cleanup_concurrent_column_type_change(:users, :old, :string)
       end
@@ -1186,7 +1186,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           .with(:users, temp_undo_cleanup_column, :old)
 
         expect(model).to receive(:install_rename_triggers_for_postgresql)
-          .with(nil, :users, :old, 'old_for_type_change')
+          .with(:users, :old, 'old_for_type_change')
 
         model.undo_cleanup_concurrent_column_type_change(
           :users,
@@ -1215,7 +1215,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
       expect(copy_trigger).to receive(:create).with(:old, :new, trigger_name: 'foo')
 
-      model.install_rename_triggers_for_postgresql('foo', :users, :old, :new)
+      model.install_rename_triggers_for_postgresql(:users, :old, :new, trigger_name: 'foo')
     end
   end
 
