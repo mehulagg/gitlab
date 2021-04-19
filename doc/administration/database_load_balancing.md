@@ -90,16 +90,17 @@ the following. This will balance the load between `host1.example.com` and
 
 1. Edit `/home/git/gitlab/config/database.yml` and add or amend the following lines:
 
-   ```yaml
-   production:
-     username: gitlab
-     database: gitlab
-     encoding: unicode
-     load_balancing:
-       hosts:
-         - host1.example.com
-         - host2.example.com
-   ```
+```yaml
+production:
+ username: gitlab
+ database: gitlab
+ encoding: unicode
+ load_balancing:
+   hosts:
+     - host1.example.com
+     - host2.example.com
+```
+
 1. Save the file and [restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
    
 ---
