@@ -22,7 +22,7 @@ describe('MRWidgetPipelineBlocked', () => {
     createWrapper();
 
     expect(wrapper.text()).toBe(
-      'Pipeline blocked. The pipeline for this merge request requires a manual action to proceed',
+      'Merge blocked: fix the blocked pipeline to enable merge.',
     );
   });
 });
