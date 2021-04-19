@@ -124,7 +124,7 @@ A good example of that would be a cache expiration worker.
 A job scheduled for an idempotent worker is [deduplicated](#deduplication) when
 an unstarted job with the same arguments is already in the queue.
 
-WARNING: 
+WARNING:
 For [data consistency jobs](#job-data-consistency), the deduplication will not work with `data_consistency` attribute set to `:sticky` or `:delayed`.
 
 ### Ensuring a worker is idempotent
@@ -452,7 +452,7 @@ class DelayedWorker
 end
 ```
 
-WARNING: 
+WARNING:
 For [idempotent jobs](#idempotent-jobs), the deduplication will not work with `data_consistency` attribute set to `:sticky` or `:delayed`.
 The reason for this is that deduplication should always take into the account the latest binary replication pointer into account, not the first one.
 There is an [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/325291) to improve this.

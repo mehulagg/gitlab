@@ -299,4 +299,4 @@ For jobs that do not require read-write and up-to date data, we can still benefi
 
 By annotating those workers, we will now hit Replicas for a majority of time.
 
-Once Load Balancing for Sidekiq is [enabled](#enabling-load-balancing), we can define [the data consistency](database_load_balancing.md#job-data-consistency) requirement for a specific job.
+Once Load Balancing for Sidekiq is [enabled](#enabling-load-balancing), we can define [the data consistency](../development/sidekiq_style_guide.md#job-data-consistency) requirement for a specific job.
