@@ -6635,9 +6635,6 @@ msgstr ""
 msgid "Closes this %{quick_action_target}."
 msgstr ""
 
-msgid "Cloud License"
-msgstr ""
-
 msgid "CloudLicense|Activate"
 msgstr ""
 
