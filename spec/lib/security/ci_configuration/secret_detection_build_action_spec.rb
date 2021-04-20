@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
+RSpec.describe Security::CiConfiguration::SecretDetectionBuildAction do
   subject(:result) { described_class.new(auto_devops_enabled, gitlab_ci_content).generate }
 
   let(:params) { {} }
@@ -37,8 +37,8 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
         end
 
         it 'generates the correct YML' do
-          expect(result.first[:action]).to eq('update')
-          expect(result.first[:content]).to eq(expected_yml)
+          expect(result[:action]).to eq('update')
+          expect(result[:content]).to eq(expected_yml)
         end
       end
 
@@ -50,8 +50,8 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
         end
 
         it 'generates the correct YML' do
-          expect(result.first[:action]).to eq('update')
-          expect(result.first[:content]).to eq(expected_yml)
+          expect(result[:action]).to eq('update')
+          expect(result[:content]).to eq(expected_yml)
         end
       end
     end
@@ -81,8 +81,8 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
         end
 
         it 'generates the correct YML' do
-          expect(result.first[:action]).to eq('update')
-          expect(result.first[:content]).to eq(expected_yml)
+          expect(result[:action]).to eq('update')
+          expect(result[:content]).to eq(expected_yml)
         end
       end
 
@@ -94,8 +94,8 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
         end
 
         it 'generates the correct YML' do
-          expect(result.first[:action]).to eq('update')
-          expect(result.first[:content]).to eq(expected_yml)
+          expect(result[:action]).to eq('update')
+          expect(result[:content]).to eq(expected_yml)
         end
       end
     end
@@ -119,8 +119,8 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
       end
 
       it 'generates the correct YML' do
-        expect(result.first[:action]).to eq('create')
-        expect(result.first[:content]).to eq(expected_yml)
+        expect(result[:action]).to eq('create')
+        expect(result[:content]).to eq(expected_yml)
       end
     end
 
@@ -145,8 +145,8 @@ RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
       end
 
       it 'generates the correct YML' do
-        expect(result.first[:action]).to eq('create')
-        expect(result.first[:content]).to eq(expected_yml)
+        expect(result[:action]).to eq('create')
+        expect(result[:content]).to eq(expected_yml)
       end
     end
   end

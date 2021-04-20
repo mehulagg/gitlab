@@ -2,7 +2,7 @@
 
 module Security
   module CiConfiguration
-    class SecretDetectionBuildActions < BaseBuildActions
+    class SecretDetectionBuildAction < BaseBuildAction
       private
 
       def update_existing_content!

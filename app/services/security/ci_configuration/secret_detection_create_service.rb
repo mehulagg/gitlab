@@ -5,8 +5,8 @@ module Security
     class SecretDetectionCreateService < ::Security::CiConfiguration::BaseCreateService
       private
 
-      def actions
-        Security::CiConfiguration::SecretDetectionBuildActions.new(project.auto_devops_enabled?, existing_gitlab_ci_content).generate
+      def action
+        Security::CiConfiguration::SecretDetectionBuildAction.new(project.auto_devops_enabled?, existing_gitlab_ci_content).generate
       end
 
       def next_branch

@@ -33,7 +33,7 @@ module Security
           commit_message: message,
           branch_name: branch_name,
           start_branch: branch_name,
-          actions: actions
+          actions: [action]
         }
       end
 

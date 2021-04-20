@@ -12,8 +12,8 @@ module Security
 
       private
 
-      def actions
-        Security::CiConfiguration::SastBuildActions.new(project.auto_devops_enabled?, params, existing_gitlab_ci_content).generate
+      def action
+        Security::CiConfiguration::SastBuildAction.new(project.auto_devops_enabled?, params, existing_gitlab_ci_content).generate
       end
 
       def next_branch
