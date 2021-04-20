@@ -41,7 +41,7 @@ module Geo
     end
 
     def lfs?
-      object_type == :lfs
+      object_type == :lfs || object_type == :lfs_object
     end
 
     # This is called by LogHelpers to build json log with context info

@@ -31,6 +31,60 @@ RSpec.describe Geo::FileUploadService do
 
       expect(subject.retriever).to be_a(Gitlab::Geo::Replication::JobArtifactRetriever)
     end
+
+    context 'for every GitLab uploader' do
+      it 'returns a valid retriever for the given object_type', :aggregate_failures do
+        uploaders.each do |uploader|
+          object_type = uploader.name.sub(/Uploader\z/, '').underscore
+          subject     = described_class.new({ type: object_type, id: 1 }, 'request-data')
+
+          expect { subject.retriever }.not_to raise_error
+        end
+      end
+
+      def uploaders
+        @uploaders ||= begin
+          result = []
+          result.concat(find_uploaders(Rails.root.join('app', 'uploaders'), ee: false))
+          result.concat(find_uploaders(Rails.root.join('ee', 'app', 'uploaders'), ee: true))
+        end
+      end
+
+      def find_uploaders(root, ee:)
+        concerns = root.join('concerns').to_s
+
+        Dir[root.join('**', '*.rb')]
+          .reject { |path| path.start_with?(concerns) }
+          .map { |path| uplaoder_from_path(path, root) }
+          .select { |uploader| uploader < ::GitlabUploader }
+          .reject { |uploader| known_unimplemented_uploader?(uploader) || handled_by_ssf?(uploader) }
+      end
+
+      def uplaoder_from_path(path, root)
+        ns = Pathname.new(path).relative_path_from(root).to_s.gsub('.rb', '')
+        ns.camelize.constantize
+      end
+
+      def handled_by_ssf?(uploader)
+        [
+          ExternalDiffUploader,
+          Ci::PipelineArtifactUploader,
+          Packages::PackageFileUploader,
+          Terraform::StateUploader
+        ].include?(uploader)
+      end
+
+      def known_unimplemented_uploader?(uploader)
+        [
+          DeletedObjectUploader,
+          DependencyProxy::FileUploader,
+          Packages::Composer::CacheUploader,
+          Packages::Debian::ComponentFileUploader,
+          Packages::Debian::DistributionReleaseFileUploader,
+          Pages::DeploymentUploader
+        ].include?(uploader)
+      end
+    end
   end
 
   shared_examples 'no decoded params' do
