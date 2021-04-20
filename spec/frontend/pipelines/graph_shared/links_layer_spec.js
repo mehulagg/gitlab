@@ -1,6 +1,4 @@
-import { GlAlert } from '@gitlab/ui';
-import { fireEvent, within } from '@testing-library/dom';
-import { mount, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import LinksInner from '~/pipelines/components/graph_shared/links_inner.vue';
 import LinksLayer from '~/pipelines/components/graph_shared/links_layer.vue';
 import { generateResponse, mockPipelineResponse } from '../graph/mock_data';
@@ -8,19 +6,11 @@ import { generateResponse, mockPipelineResponse } from '../graph/mock_data';
 describe('links layer component', () => {
   let wrapper;
 
-  const withinComponent = () => within(wrapper.element);
-  const findAlert = () => wrapper.find(GlAlert);
-  const findShowAnyways = () =>
-    withinComponent().getByText(wrapper.vm.$options.i18n.showLinksAnyways);
   const findLinksInner = () => wrapper.find(LinksInner);
 
   const pipeline = generateResponse(mockPipelineResponse, 'root/fungi-xoxo');
   const containerId = `pipeline-links-container-${pipeline.id}`;
   const slotContent = "<div>Ceci n'est pas un graphique</div>";
-
-  const tooManyStages = Array(101)
-    .fill(0)
-    .flatMap(() => pipeline.stages);
 
   const defaultProps = {
     containerId,

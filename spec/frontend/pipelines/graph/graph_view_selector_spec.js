@@ -1,4 +1,4 @@
-import { GlLoadingIcon, GlSegmentedControl, GlToggle } from '@gitlab/ui';
+import { GlLoadingIcon, GlSegmentedControl } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import { LAYER_VIEW, STAGE_VIEW } from '~/pipelines/components/graph/constants';
 import GraphViewSelector from '~/pipelines/components/graph/graph_view_selector.vue';

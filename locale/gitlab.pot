@@ -416,9 +416,6 @@ msgstr ""
 msgid "%{board_target} not found"
 msgstr ""
 
-msgid "%{codeStart}needs:%{codeEnd} relationships"
-msgstr ""
-
 msgid "%{code_open}Masked:%{code_close} Hidden in job logs. Must match masking requirements."
 msgstr ""
 
@@ -15163,6 +15160,15 @@ msgstr ""
 msgid "Group is required when cluster_type is :group"
 msgstr ""
 
+msgid "Group jobs by"
+msgstr ""
+
+msgid "Group jobs by configured dependencies"
+msgstr ""
+
+msgid "Group jobs into stages"
+msgstr ""
+
 msgid "Group maintainers can register group runners in the %{link}"
 msgstr ""
 
@@ -18119,6 +18125,9 @@ msgid "Job artifact"
 msgstr ""
 
 msgid "Job artifacts"
+msgstr ""
+
+msgid "Job dependencies"
 msgstr ""
 
 msgid "Job has been erased"
@@ -22407,9 +22416,6 @@ msgid "Options"
 msgstr ""
 
 msgid "Or you can choose one of the suggested colors below"
-msgstr ""
-
-msgid "Order jobs by"
 msgstr ""
 
 msgid "Orphaned member"
@@ -28919,6 +28925,9 @@ msgstr ""
 msgid "Show complete raw log"
 msgstr ""
 
+msgid "Show dependencies"
+msgstr ""
+
 msgid "Show details"
 msgstr ""
 
@@ -34648,9 +34657,6 @@ msgstr ""
 msgid "View the documentation"
 msgstr ""
 
-msgid "View the jobs grouped into stages"
-msgstr ""
-
 msgid "View the latest successful deployment to this environment"
 msgstr ""
 
@@ -34661,9 +34667,6 @@ msgid "View usage details"
 msgstr ""
 
 msgid "View users statistics"
-msgstr ""
-
-msgid "View what jobs are needed for a job to run"
 msgstr ""
 
 msgid "Viewed"
