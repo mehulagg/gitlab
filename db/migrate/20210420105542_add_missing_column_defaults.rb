@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class AddMissingColumnDefaults < ActiveRecord::Migration[6.0]
+  include Gitlab::Database::MigrationHelpers
+
   def up
     # This migration sets default column values where
     # missing/incorrect for long running instances that migrated from MySQL database.
@@ -83,7 +85,7 @@ class AddMissingColumnDefaults < ActiveRecord::Migration[6.0]
       change_column_default :users, :confirmation_token, nil
       change_column_default :users, :unconfirmed_email, nil
       change_column_default :users, :hide_no_ssh_key, false
-    end  
+    end
 
     change_column_default :web_hooks, :push_events, true
     change_column_default :web_hooks, :issues_events, false
