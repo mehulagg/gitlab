@@ -28,7 +28,7 @@ module Resolvers
       private
 
       def preloads
-        { tokens: [:last_used_agent_tokens, { last_used_agent_tokens: :agent }] }
+        { tokens: :last_used_agent_tokens }
       end
     end
   end
