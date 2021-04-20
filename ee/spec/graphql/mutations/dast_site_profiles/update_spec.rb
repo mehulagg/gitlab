@@ -13,6 +13,7 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
   let(:new_target_url) { generate(:url) }
   let(:new_excluded_urls) { ["#{new_target_url}/signout"] }
   let(:new_request_headers) { "Authorization: Bearer #{SecureRandom.hex}" }
+  let(:new_target_type) { 'api' }
 
   let(:new_auth) do
     {
@@ -40,6 +41,7 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
         id: dast_site_profile.to_global_id,
         profile_name: new_profile_name,
         target_url: new_target_url,
+        target_type: new_target_type,
         excluded_urls: new_excluded_urls,
         request_headers: new_request_headers,
         auth: new_auth
@@ -68,6 +70,7 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
             id: dast_site_profile.id.to_s,
             name: new_profile_name,
             target_url: new_target_url,
+            target_type: new_target_type,
             excluded_urls: new_excluded_urls,
             request_headers: new_request_headers,
             auth_enabled: new_auth[:enabled],
@@ -169,6 +172,16 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
             )
 
             expect(dast_site_profile.secret_variables).to be_empty
+          end
+        end
+
+        context 'when the feature flag security_dast_site_profiles_api_option is disabled' do
+          it 'does not update the feature flagged attributes', :aggregate_failures do
+            stub_feature_flags(security_dast_site_profiles_api_option: false)
+
+            updated_dast_site_profile = subject[:id].find
+
+            expect(updated_dast_site_profile.target_type).to eq(dast_site_profile.target_type)
           end
         end
       end

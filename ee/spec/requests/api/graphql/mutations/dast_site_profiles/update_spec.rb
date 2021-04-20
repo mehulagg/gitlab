@@ -18,6 +18,7 @@ RSpec.describe 'Creating a DAST Site Profile' do
       id: dast_site_profile.to_global_id.to_s,
       profile_name: new_profile_name,
       target_url: new_target_url,
+      target_type: 'API',
       excluded_urls: ["#{new_target_url}/signout"],
       request_headers: 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0',
       auth: {
