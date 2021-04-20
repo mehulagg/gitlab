@@ -274,7 +274,7 @@ GitLab 13.0 and later doesn't support [`only` and `except`](../../../ci/yaml/REA
 When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules)
 instead.
 
-### Migrating from Klar to Container-Scanning (Trivy)
+### Migrating from Clair to Trivy
 
 For those currently using Klar willing to migrate to Container-Scanning before 14.0 can do so by taking the following steps:
 
