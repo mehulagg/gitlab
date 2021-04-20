@@ -171,7 +171,7 @@ export const listByLayers = ({ stages }) => {
   }, []);
 };
 
-const generateColumnsFromLayersListBare = ({ stages, stagesLookup }, pipelineLayers) => {
+export const generateColumnsFromLayersListBare = ({ stages, stagesLookup }, pipelineLayers) => {
   return pipelineLayers.map((layers, idx) => {
     /*
       Look up the groups in each layer,
