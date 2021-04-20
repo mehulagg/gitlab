@@ -72,9 +72,10 @@ To create a Git hook that applies to all of the repositories in your instance, s
 hook. The default global server hook directory is in the GitLab Shell directory. Any
 hook added there applies to all repositories, including:
 
-- [Project and group wiki](../user/project/wiki/index.md) repositories.
+- [Project and group wiki](../user/project/wiki/index.md) repositories,
+  whose storage directory names carry the form `<id>.wiki.git`.
 - [Design management](../user/project/issues/design_management.md) repositories under a
-  project.
+  project, whose storage directory names carry the form `<id>.design.git`.
 
 The default directory:
 
