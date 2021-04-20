@@ -8,7 +8,11 @@ query getJobs($fullPath: ID!, $statuses: [CiJobStatus!]) {
         startCursor
       }
       nodes {
+        allowFailure
+        status
         detailedStatus {
+          detailsPath
+          group
           icon
           label
           text
