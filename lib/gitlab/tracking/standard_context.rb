@@ -7,6 +7,7 @@ module Gitlab
       GITLAB_RAILS_SOURCE = 'gitlab-rails'
 
       def initialize(namespace: nil, project: nil, user: nil, **extra)
+        @namespace = namespace
         @extra = extra
       end
 
@@ -30,12 +31,17 @@ module Gitlab
         GITLAB_RAILS_SOURCE
       end
 
+      def plan
+        @namespace&.actual_plan&.name
+      end
+
       private
 
       def to_h
         {
           environment: environment,
           source: source,
+          plan: plan,
           extra: @extra
         }
       end
