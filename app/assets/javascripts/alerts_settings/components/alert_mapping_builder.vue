@@ -12,7 +12,11 @@ import Vue from 'vue';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { s__, __ } from '~/locale';
 import { mappingFields } from '../constants';
-import { getMappingData, transformForSave } from '../utils/mapping_transformations';
+import {
+  getMappingData,
+  transformForSave,
+  setFieldsLabels,
+} from '../utils/mapping_transformations';
 
 export const i18n = {
   columns: {
@@ -68,11 +72,12 @@ export default {
   data() {
     return {
       gitlabFields: cloneDeep(this.alertFields),
+      formattedParsedPayload: setFieldsLabels(this.parsedPayload),
     };
   },
   computed: {
     mappingData() {
-      return getMappingData(this.gitlabFields, this.parsedPayload, this.savedMapping);
+      return getMappingData(this.gitlabFields, this.formattedParsedPayload, this.savedMapping);
     },
     hasFallbackColumn() {
       return this.gitlabFields.some(({ numberOfFallbacks }) => Boolean(numberOfFallbacks));
@@ -92,14 +97,16 @@ export default {
     },
     filterFields(searchTerm = '', fields) {
       const search = searchTerm.toLowerCase();
-      return fields.filter((field) => field.label.toLowerCase().includes(search));
+      return fields.filter((field) =>
+        field.displayLabel.replace('...', '').toLowerCase().includes(search),
+      );
     },
     isSelected(fieldValue, mapping) {
       return isEqual(fieldValue, mapping);
     },
     selectedValue(mapping) {
       return (
-        this.parsedPayload.find((item) => isEqual(item.path, mapping))?.label ||
+        this.formattedParsedPayload.find((item) => isEqual(item.path, mapping))?.displayLabel ||
         this.$options.i18n.makeSelection
       );
     },
@@ -171,7 +178,7 @@ export default {
             is-check-item
             @click="setMapping(gitlabField.name, mappingField.path)"
           >
-            {{ mappingField.label }}
+            <div v-gl-tooltip :title="mappingField.tooltip">{{ mappingField.displayLabel }}</div>
           </gl-dropdown-item>
           <gl-dropdown-item v-if="noResults(gitlabField.searchTerm, gitlabField.mappingFields)">
             {{ $options.i18n.noResults }}
@@ -203,7 +210,7 @@ export default {
               setMapping(gitlabField.name, mappingField.path, $options.mappingFields.fallback)
             "
           >
-            {{ mappingField.label }}
+            <div v-gl-tooltip :title="mappingField.tooltip">{{ mappingField.displayLabel }}</div>
           </gl-dropdown-item>
           <gl-dropdown-item
             v-if="noResults(gitlabField.fallbackSearchTerm, gitlabField.mappingFields)"
