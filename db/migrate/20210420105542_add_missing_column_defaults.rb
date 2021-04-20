@@ -9,7 +9,9 @@ class AddMissingColumnDefaults < ActiveRecord::Migration[6.0]
     change_column_default :broadcast_messages, :color, nil
     change_column_default :broadcast_messages, :font, nil
 
-    change_column_default :issues, :title, nil
+    with_lock_retries do
+      change_column_default :issues, :title, nil
+    end
 
     change_column_default :keys, :title, nil
     change_column_default :keys, :type, nil
@@ -22,9 +24,13 @@ class AddMissingColumnDefaults < ActiveRecord::Migration[6.0]
 
     change_column_default :members, :type, nil
 
-    change_column_default :merge_request_diffs, :state, nil
+    with_lock_retries do
+      change_column_default :merge_request_diffs, :state, nil
+    end
 
-    change_column_default :merge_requests, :title, nil
+    with_lock_retries do
+      change_column_default :merge_requests, :title, nil
+    end
 
     change_column_default :milestones, :state, nil
 
@@ -55,19 +61,21 @@ class AddMissingColumnDefaults < ActiveRecord::Migration[6.0]
 
     change_column_default :tags, :name, nil
 
-    change_column_default :users, :reset_password_token, nil
-    change_column_default :users, :current_sign_in_ip, nil
-    change_column_default :users, :last_sign_in_ip, nil
-    change_column_default :users, :name, nil
-    change_column_default :users, :admin, false
-    change_column_default :users, :username, nil
-    change_column_default :users, :can_create_group, true
-    change_column_default :users, :can_create_team, true
-    change_column_default :users, :state, nil
-    change_column_default :users, :avatar, nil
-    change_column_default :users, :confirmation_token, nil
-    change_column_default :users, :unconfirmed_email, nil
-    change_column_default :users, :hide_no_ssh_key, false
+    with_lock_retries do
+      change_column_default :users, :reset_password_token, nil
+      change_column_default :users, :current_sign_in_ip, nil
+      change_column_default :users, :last_sign_in_ip, nil
+      change_column_default :users, :name, nil
+      change_column_default :users, :admin, false
+      change_column_default :users, :username, nil
+      change_column_default :users, :can_create_group, true
+      change_column_default :users, :can_create_team, true
+      change_column_default :users, :state, nil
+      change_column_default :users, :avatar, nil
+      change_column_default :users, :confirmation_token, nil
+      change_column_default :users, :unconfirmed_email, nil
+      change_column_default :users, :hide_no_ssh_key, false
+    end  
 
     change_column_default :web_hooks, :push_events, true
     change_column_default :web_hooks, :issues_events, false
