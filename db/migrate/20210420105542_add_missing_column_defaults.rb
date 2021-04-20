@@ -34,19 +34,25 @@ class AddMissingColumnDefaults < ActiveRecord::Migration[6.0]
 
     change_column_default :milestones, :state, nil
 
-    change_column_default :namespaces, :type, nil
-    change_column_default :namespaces, :avatar, nil
+    with_lock_retries do
+      change_column_default :namespaces, :type, nil
+      change_column_default :namespaces, :avatar, nil
+    end
 
-    change_column_default :notes, :noteable_type, nil
-    change_column_default :notes, :attachment, nil
-    change_column_default :notes, :line_code, nil
-    change_column_default :notes, :commit_id, nil
-    change_column_default :notes, :system, false
+    with_lock_retries do
+      change_column_default :notes, :noteable_type, nil
+      change_column_default :notes, :attachment, nil
+      change_column_default :notes, :line_code, nil
+      change_column_default :notes, :commit_id, nil
+      change_column_default :notes, :system, false
+    end
 
-    change_column_default :projects, :name, nil
-    change_column_default :projects, :path, nil
-    change_column_default :projects, :import_url, nil
-    change_column_default :projects, :archived, false
+    with_lock_retries do
+      change_column_default :projects, :name, nil
+      change_column_default :projects, :path, nil
+      change_column_default :projects, :import_url, nil
+      change_column_default :projects, :archived, false
+    end
 
     change_column_default :services, :type, nil
     change_column_default :services, :active, false
@@ -55,9 +61,11 @@ class AddMissingColumnDefaults < ActiveRecord::Migration[6.0]
     change_column_default :snippets, :file_name, nil
     change_column_default :snippets, :type, nil
 
-    change_column_default :taggings, :taggable_type, nil
-    change_column_default :taggings, :tagger_type, nil
-    change_column_default :taggings, :context, nil
+    with_lock_retries do
+      change_column_default :taggings, :taggable_type, nil
+      change_column_default :taggings, :tagger_type, nil
+      change_column_default :taggings, :context, nil
+    end
 
     change_column_default :tags, :name, nil
 
