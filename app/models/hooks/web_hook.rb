@@ -21,6 +21,8 @@ class WebHook < ApplicationRecord
   validates :token, format: { without: /\n/ }
   validates :push_events_branch_filter, branch_filter: true
 
+  scope :by_project, -> (project) { where(project_id: project.id) }
+
   # rubocop: disable CodeReuse/ServiceClass
   def execute(data, hook_name)
     WebHookService.new(self, data, hook_name).execute

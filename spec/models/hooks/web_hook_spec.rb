@@ -59,6 +59,18 @@ RSpec.describe WebHook do
     end
   end
 
+  describe 'scopes' do
+    describe '.by_project' do
+      subject { described_class.by_project(project) }
+
+      let!(:project) { create(:project_empty_repo) }
+      let!(:hook1) { create(:project_hook, project: project) }
+      let!(:hook2) { create(:project_hook) }
+
+      it { is_expected.to contain_exactly(hook1) }
+    end
+  end
+
   describe 'encrypted attributes' do
     subject { described_class.encrypted_attributes.keys }
 
