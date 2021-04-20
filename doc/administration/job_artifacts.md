@@ -492,7 +492,7 @@ list = arts.order('sort DESC').limit(50).each do |art|
 end
 ```
 
-You can change the number of projects listed by modifying `.limit(50)`.
+To change the number of projects listed, change the number in `limit(50)`.
 
 #### Delete job artifacts from jobs completed before a specific date
 
