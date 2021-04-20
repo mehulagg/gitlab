@@ -10,6 +10,14 @@ module Geo
       include ::Gitlab::Utils::StrongMemoize
       include GeoBackoffDelay
 
+      # These workers are enqueued regularly by sidekiq-cron or by an per-shard
+      # worker which is enqueued by sidekiq-cron. If one of these workers is
+      # already enqueued or running, then there isn't a strong case for
+      # enqueuing another. And there are edge cases where enqueuing another
+      # would exacerbate a problem. See
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/328057.
+      deduplicate :until_executed
+
       DB_RETRIEVE_BATCH_SIZE = 1000
       LEASE_TIMEOUT = 60.minutes
       RUN_TIME = 60.minutes.to_i
