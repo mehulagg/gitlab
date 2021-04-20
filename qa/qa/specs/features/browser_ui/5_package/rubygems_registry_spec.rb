@@ -33,14 +33,14 @@ module QA
       end
 
       before do
-        Feature.enable(:rubygem_packages)
+        Runtime::Feature.enable(:rubygem_packages, project: project)
       end
 
       after do
         runner.remove_via_api!
         package.remove_via_api!
         project.remove_via_api!
-        Feature.disable(:rubygem_packages)
+        Runtime::Feature.disable(:rubygem_packages, project: project)
       end
 
       it 'publishes and deletes a Ruby gem', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1131' do
