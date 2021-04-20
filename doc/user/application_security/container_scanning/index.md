@@ -276,7 +276,8 @@ instead.
 
 ### Migrating from Clair to Trivy
 
-For those currently using Klar willing to migrate to Container-Scanning before 14.0 can do so by taking the following steps:
+If you are currently using Clair and want to migrate to Trivy before GitLab 14.0, you can do so by
+taking the following steps:
 
 1. Take the following actions in your CI file:
 
