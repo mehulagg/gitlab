@@ -54,12 +54,20 @@ module EE
         def new_group_member_with_confirmation_email
           ::Notify.provisioned_member_access_granted_email(member.id).message
         end
+
+        def new_epic_email
+          ::Notify.new_epic_email(user.id, epic.id).message
+        end
       end
 
       private
 
       def approver
         @user ||= ::User.first
+      end
+
+      def epic
+        @epic ||= project.group.epics.first
       end
     end
   end

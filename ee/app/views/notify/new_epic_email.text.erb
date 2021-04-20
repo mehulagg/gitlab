@@ -1,4 +1,6 @@
-<%= sanitize_name(@epic.author_name) %> created an epic:
+<%= _('%{user} created an epic: %{epicLink}') % { user: sanitize_name(@epic.author_name),
+                                                  epicLink: url_for(group_epic_url(@epic.group, @epic)) }
+%>
 
 <% if @epic.assignee %>
   <%= assignees_label(@issue) %>
