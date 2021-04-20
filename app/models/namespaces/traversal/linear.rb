@@ -52,7 +52,9 @@ module Namespaces
       end
 
       def use_traversal_ids?
-        Feature.enabled?(:use_traversal_ids, root_ancestor, default_enabled: :yaml)
+        return false unless Feature.enabled?(:use_traversal_ids, root_ancestor, default_enabled: :yaml)
+
+        traversal_ids.present?
       end
 
       def self_and_descendants
