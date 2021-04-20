@@ -65,8 +65,14 @@ describe('Subscription Sync Notifications', () => {
       });
     });
 
+    it('displays an alert with a failure title', () => {
+      expect(findFailureAlert().props('title')).toBe('There is a connectivity issue.');
+    });
+
     it('displays an alert with a failure message', () => {
-      expect(findFailureAlert().text()).toContain('There is a connectivity issue');
+      expect(findFailureAlert().text()).toContain(
+        'You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by',
+      );
     });
 
     it('displays a link', () => {

@@ -52,8 +52,9 @@ export const subscriptionTable = {
 export const userNotifications = {
   manualSyncSuccessfulText: s__('SuperSonics|The subscription details synced successfully.'),
   manualSyncFailureText: s__(
-    'SuperSonics|There is a connectivity issue. You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}.',
+    'SuperSonics|You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}.',
   ),
+  manualSyncFailTitle: s__('There is a connectivity issue.'),
 };
 
 export const subscriptionType = {
