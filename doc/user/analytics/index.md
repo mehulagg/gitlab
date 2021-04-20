@@ -12,13 +12,12 @@ When we describe GitLab analytics, we use the following terms:
 
 - Cycle time: The duration of your value stream, from start to finish. Often displayed in combination with "lead time." GitLab measures cycle time from issue creation to issue close. GitLab displays cycle time in [Value Stream Analytics](value_stream_analytics.md).
 - DORA (DevOps Research and Assessment) ["Four Keys"](https://cloud.google.com/blog/products/devops-sre/using-the-four-keys-to-measure-your-devops-performance):
-  - Speed
-    - Deployment Frequency: How often an organization successfully releases to production.
-    - Lead Time for Changes: The time it takes for a commit to get into production. This differs from ordinary "lead time" as it "focuses on measuring only the time to deliver a feature once it has been developed",
-as described in ([Measuring DevOps Performance](https://devops.com/measuring-devops-performance/)).
+  - Speed/Velocity
+    - Deployment Frequency: How often an organization successfully releases to production. GitLab measures this as the number of deployments to a [production environment](../../ci/environments/index.md#deployment-tier-of-environments) in the given time period.
+    - Lead Time for Changes: The time it takes for a commit to get into production. This differs from ordinary "lead time" as it "focuses on measuring only the time to deliver a feature once it has been developed", as described in ([Measuring DevOps Performance](https://devops.com/measuring-devops-performance/)).  GitLab measures this as the median duration between merge request merge and deployment to a [production environment](../../ci/environments/index.md#deployment-tier-of-environments) for all MRs deployed in the given time period. This differs from the standard definition as it measures from the merge request merge time instead of measuring from the median commit time.
   - Stability
-    - Change Failure Rate: The percentage of deployments causing a failure in production.
-    - Time to Restore Service: How long it takes an organization to recover from a failure in production.
+    - Change Failure Rate: The percentage of deployments causing a failure in production. GitLab measures this as the number of [incidents](../../operations/incident_management/incidents.md) divided by the number of deployments to a [production environment](../../ci/environments/index.md#deployment-tier-of-environments) in the given time period. This assumes all incidents are related to a production environment, and that incidents and deployments have a strictly one-to-one relationship.
+    - Time to Restore Service: How long it takes an organization to recover from a failure in production. GitLab measures this as the average time required to close the [incidents](../../operations/incident_management/incidents.md) that were closed in the given time period. This assumes all incidents are related to a [production environment](../../ci/environments/index.md#deployment-tier-of-environments), and that incidents and deployments have a strictly one-to-one relationship.
 - MTTC (Mean Time to Change): The average duration between idea and delivery. GitLab measures MTTC from issue creation to the issue's latest related merge request's deployment to production.
 - MTTD (Mean Time to Detect): The average duration that a bug goes undetected in production. GitLab measures MTTD from deployment of bug to issue creation.
 - MTTM (Mean Time To Merge): The average lifespan of a merge request. GitLab measures MTTM from merge request creation to merge request merge (and closed/un-merged merge requests are excluded). For more information, see [Merge Request Analytics](merge_request_analytics.md).
