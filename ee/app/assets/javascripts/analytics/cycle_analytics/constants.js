@@ -73,3 +73,7 @@ export const OVERVIEW_STAGE_CONFIG = {
 export const NOT_ENOUGH_DATA_ERROR = s__(
   "ValueStreamAnalyticsStage|We don't have enough data to show this stage.",
 );
+
+export const PAGINATION_TYPE = 'keyset';
+export const PAGINATION_MAX_ITEMS = 50;
+export const PAGINATION_SORT_FIELD = 'created_at';

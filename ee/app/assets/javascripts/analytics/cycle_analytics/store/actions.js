@@ -54,14 +54,22 @@ export const receiveStageDataError = ({ commit }, error) => {
 };
 
 export const fetchStageData = ({ dispatch, getters }, stageId) => {
-  const { cycleAnalyticsRequestParams = {}, currentValueStreamId, currentGroupPath } = getters;
+  const {
+    cycleAnalyticsRequestParams = {},
+    currentValueStreamId,
+    currentGroupPath,
+    paginationParams,
+  } = getters;
   dispatch('requestStageData');
 
   return Api.cycleAnalyticsStageEvents({
     groupId: currentGroupPath,
     valueStreamId: currentValueStreamId,
     stageId,
-    params: cycleAnalyticsRequestParams,
+    params: {
+      ...cycleAnalyticsRequestParams,
+      ...paginationParams,
+    },
   })
     .then(checkForDataError)
     .then(({ data }) => dispatch('receiveStageDataSuccess', data))
