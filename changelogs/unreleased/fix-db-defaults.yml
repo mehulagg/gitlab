@@ -1,5 +1,5 @@
 ---
 title: Fix database default values where missing due to past MySQL migration
-merge_request:
+merge_request: 59749
 author: Ben Bodenmiller @bbodenmiller
 type: fixed
