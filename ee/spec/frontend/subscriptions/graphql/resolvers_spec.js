@@ -1,6 +1,6 @@
 import Api from 'ee/api';
 import * as SubscriptionsApi from 'ee/api/subscriptions_api';
-import { resolvers } from 'ee/subscriptions/graphql/resolvers';
+import { resolvers } from 'ee/subscriptions/buy_minutes/graphql/resolvers';
 import { ERROR_FETCHING_COUNTRIES, ERROR_FETCHING_STATES } from 'ee/subscriptions/constants';
 import createFlash from '~/flash';
 

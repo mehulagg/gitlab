@@ -4,7 +4,7 @@ import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import SubscriptionDetails from 'ee/subscriptions/components/checkout/subscription_details.vue';
 import stateQuery from 'ee/subscriptions/graphql/queries/state.query.graphql';
-import subscriptionsResolvers from 'ee/subscriptions/graphql/resolvers';
+import subscriptionsResolvers from 'ee/subscriptions/buy_minutes/graphql/resolvers';
 import { NEW_GROUP } from 'ee/subscriptions/new/constants';
 import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import purchaseFlowResolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers';

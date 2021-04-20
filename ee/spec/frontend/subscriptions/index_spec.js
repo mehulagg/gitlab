@@ -1,13 +1,12 @@
 import { GlEmptyState } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { createWrapper } from '@vue/test-utils';
-
+import * as utils from 'ee/subscriptions/buy_minutes/utils';
 import initBuyMinutesApp from 'ee/subscriptions/';
-import * as utils from 'ee/subscriptions/graphql/utils';
 import StepOrderApp from 'ee/vue_shared/purchase_flow/components/step_order_app.vue';
 import { mockCiMinutesPlans, mockParsedCiMinutesPlans } from './mock_data';
 
-jest.mock('ee/subscriptions/graphql/utils');
+jest.mock('ee/subscriptions/buy_minutes/utils');
 
 describe('initBuyMinutesApp', () => {
   let vm;

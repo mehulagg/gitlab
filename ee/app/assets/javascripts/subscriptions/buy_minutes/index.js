@@ -2,10 +2,10 @@ import Vue from 'vue';
 import { STEPS } from 'ee/subscriptions/new/constants';
 import ensureData from '~/ensure_data';
 import { convertObjectPropsToCamelCase, parseBoolean } from '~/lib/utils/common_utils';
-import App from './components/app.vue';
+import App from '../components/app.vue';
+import stateQuery from '../graphql/queries/state.query.graphql';
 import apolloProvider from './graphql';
-import stateQuery from './graphql/queries/state.query.graphql';
-import { parseData } from './graphql/utils';
+import { parseData } from './utils';
 
 const arrayToGraphqlArray = (arr, typename) =>
   Array.from(arr, (item) =>

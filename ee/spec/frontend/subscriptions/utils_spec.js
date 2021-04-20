@@ -1,4 +1,4 @@
-import { parseData } from 'ee/subscriptions/graphql/utils';
+import { parseData } from 'ee/subscriptions/buy_minutes/utils';
 import { mockCiMinutesPlans, mockParsedCiMinutesPlans } from './mock_data';
 
 describe('utils', () => {
