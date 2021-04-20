@@ -15,7 +15,7 @@ const notificationTypeValidator = (value) =>
 export default {
   name: 'SubscriptionSyncNotifications',
   i18n: {
-    userNotifications,
+    ...userNotifications,
   },
   components: {
     GlAlert,
@@ -52,18 +52,18 @@ export default {
     <gl-alert
       v-if="syncDidSuccess"
       variant="success"
+      :title="$options.i18n.manualSyncSuccessfulText"
       data-testid="sync-success-alert"
       @dismiss="didDismissSuccessAlert"
-    >
-      {{ $options.i18n.userNotifications.manualSyncSuccessfulText }}
-    </gl-alert>
+    />
     <gl-alert
       v-else-if="syncDidFail"
       variant="danger"
       :dismissible="false"
+      :title="$options.i18n.manualSyncFailTitle"
       data-testid="sync-failure-alert"
     >
-      <gl-sprintf :message="$options.i18n.userNotifications.manualSyncFailureText">
+      <gl-sprintf :message="$options.i18n.manualSyncFailureText">
         <template #connectivityHelpLink="{ content }">
           <gl-link :href="connectivityHelpURL" target="_blank">{{ content }}</gl-link>
         </template>
