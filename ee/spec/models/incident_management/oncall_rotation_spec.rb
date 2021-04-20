@@ -121,6 +121,15 @@ RSpec.describe IncidentManagement::OncallRotation do
     end
   end
 
+  describe '.for_project' do
+    let_it_be(:schedule_rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
+    let_it_be(:another_rotation) { create(:incident_management_oncall_rotation) }
+
+    subject { described_class.for_project(schedule_rotation.project) }
+
+    it { is_expected.to contain_exactly(schedule_rotation) }
+  end
+
   describe '#shift_cycle_duration' do
     let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule, length: 5, length_unit: :days) }
 

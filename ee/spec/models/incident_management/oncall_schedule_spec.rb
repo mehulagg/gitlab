@@ -35,6 +35,17 @@ RSpec.describe IncidentManagement::OncallSchedule do
     end
   end
 
+  describe 'scopes' do
+    let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
+    let_it_be(:other_schedule) { create(:incident_management_oncall_schedule) }
+
+    describe '.for_project' do
+      subject { described_class.for_project(project) }
+
+      it { is_expected.to contain_exactly(schedule) }
+    end
+  end
+
   it_behaves_like 'AtomicInternalId' do
     let(:internal_id_attribute) { :iid }
     let(:instance) { build(:incident_management_oncall_schedule) }

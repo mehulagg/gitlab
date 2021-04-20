@@ -83,17 +83,50 @@ RSpec.describe Members::DestroyService do
     end
 
     context 'on-call rotations' do
-      context 'when user is in an on-call rotation' do
-        let!(:rotation) { create(:incident_management_oncall_participant, user: member_user).rotation }
+      let!(:project) { create(:project, group: group) }
 
-        it 'calls the remove service' do
-          expect(IncidentManagement::OncallRotations::RemoveParticipantService).to receive(:new).with(rotation, member_user).and_call_original
+      context 'when member is in an on-call rotation' do
+        let(:project_1_schedule) {  create(:incident_management_oncall_schedule, project: project) }
+        let(:project_1_rotation) {  create(:incident_management_oncall_rotation, schedule: project_1_schedule) }
+        let!(:project_1_participant) { create(:incident_management_oncall_participant, rotation: project_1_rotation, user: member_user) }
 
-          subject.execute(member)
+        let(:project_2) { create(:project, group: group) }
+        let(:project_2_schedule) {  create(:incident_management_oncall_schedule, project: project_2) }
+        let(:project_2_rotation) {  create(:incident_management_oncall_rotation, schedule: project_2_schedule) }
+        let!(:project_2_participant) { create(:incident_management_oncall_participant, rotation: project_2_rotation, user: member_user) }
+
+        context 'when group member is removed' do
+          it 'calls the remove service for each project in the group' do
+            expect(IncidentManagement::OncallRotations::RemoveParticipantService).to receive(:new).with(project_1_rotation, member_user).and_call_original
+            expect(IncidentManagement::OncallRotations::RemoveParticipantService).to receive(:new).with(project_2_rotation, member_user).and_call_original
+
+            subject.execute(member)
+
+            expect(project_1_participant.reload.is_removed).to eq(true)
+            expect(project_2_participant.reload.is_removed).to eq(true)
+          end
+        end
+
+        context 'when project memeber is removed' do
+          let!(:project_member) { create(:project_member, source: project, user: member_user) }
+
+          it 'calls the remove service for that project only' do
+            expect(IncidentManagement::OncallRotations::RemoveParticipantService).to receive(:new).with(project_1_rotation, member_user).and_call_original
+
+            subject.execute(project_member)
+
+            expect(project_1_participant.reload.is_removed).to eq(true)
+            expect(project_2_participant.reload.is_removed).to eq(false)
+          end
         end
       end
 
-      context 'when user is not part of an on-call rotation' do
+      context 'when member is not part of an on-call rotation for the group' do
+        before do
+          # Creates a rotation for another project in another group
+          create(:incident_management_oncall_participant, user: member_user)
+        end
+
         it 'does not call the remove serivce' do
           expect(IncidentManagement::OncallRotations::RemoveParticipantService).not_to receive(:new)
 

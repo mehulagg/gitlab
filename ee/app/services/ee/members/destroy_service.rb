@@ -14,18 +14,10 @@ module EE
 
         cleanup_group_identity(member)
         cleanup_group_deletion_schedule(member) if member.source.is_a?(Group)
-        cleanup_oncall_rotations(user)
+        cleanup_oncall_rotations(member)
       end
 
       private
-
-      attr_reader :user
-
-      def process_destroy(member, skip_subresources, unassign_issuables)
-        @user = member.user # rubocop:disable Gitlab/ModuleWithInstanceVariables
-
-        super
-      end
 
       def removed_due_to_expiry?(member)
         member.expired?
@@ -59,10 +51,15 @@ module EE
         deletion_schedule.destroy if deletion_schedule.deleting_user == member.user
       end
 
-      def cleanup_oncall_rotations(user)
+      def cleanup_oncall_rotations(member)
+        user = member.user
+
         return unless user
 
-        user.oncall_rotations.each do |rotation|
+        projects = member.source.is_a?(Group) ? member.source.projects : member.source
+        user_rotations = user.oncall_rotations.for_project(projects)
+
+        user_rotations.each do |rotation|
           ::IncidentManagement::OncallRotations::RemoveParticipantService.new(
             rotation,
             user
