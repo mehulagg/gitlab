@@ -19,8 +19,8 @@ Migrations are **not** allowed to require GitLab installations to be taken
 offline ever. Migrations always must be written in such a way to avoid
 downtime. In the past we had a process for defining migrations that allowed for
 downtime by setting a `DOWNTIME` constant. You may see this when looking at
-older migrations. This process was in place for 4 years without every being
-used and as such we've learnt we can always figure out how to write a migration
+older migrations. This process was in place for 4 years without ever being
+used and as such we've learned we can always figure out how to write a migration
 differently to avoid downtime.
 
 When writing your migrations, also consider that databases might have stale data
