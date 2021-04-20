@@ -3993,7 +3993,7 @@ An edge in a connection.
 | `approvalsRequired` | [`Int`](#int) | Number of approvals required. |
 | `approved` | [`Boolean!`](#boolean) | Indicates if the merge request has all the required approvals. Returns true if no required approvals are configured. |
 | `approvedBy` | [`UserConnection`](#userconnection) | Users who approved the merge request. |
-| `assignees` | [`UserConnection`](#userconnection) | Assignees of the merge request. |
+| `assignees` | [`MergeRequestReviewerConnection`](#mergerequestreviewerconnection) | Assignees of the merge request. |
 | `author` | [`User`](#user) | User who created this merge request. |
 | `autoMergeEnabled` | [`Boolean!`](#boolean) | Indicates if auto merge is enabled for the merge request. |
 | `autoMergeStrategy` | [`String`](#string) | Selected auto merge strategy. |
