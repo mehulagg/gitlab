@@ -22,8 +22,14 @@ module Gitlab
         def build
           query = finder.execute
           query = stage.start_event.apply_query_customization(query)
-          query = stage.end_event.apply_query_customization(query)
-          query.where(duration_condition)
+          if params[:end_event_filter].blank? || params[:end_event_filter] == :finished
+            query = stage.end_event.apply_query_customization(query)
+            query = query.where(duration_condition)
+          elsif params[:end_event_filter] == :in_progress
+            query = stage.end_event.apply_negated_query_customization(query)
+          end
+
+          query
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
@@ -46,6 +52,7 @@ module Gitlab
         def build_finder_params(params)
           {}.tap do |finder_params|
             finder_params[:current_user] = params[:current_user]
+            finder_params[:end_event_filter] = params[:end_event_filter] || :finished
 
             add_parent_model_params!(finder_params)
             add_time_range_params!(finder_params, params[:from], params[:to])

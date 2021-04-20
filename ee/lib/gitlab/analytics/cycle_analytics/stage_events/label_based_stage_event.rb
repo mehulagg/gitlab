@@ -20,13 +20,8 @@ module Gitlab
             true
           end
 
-          def timestamp_projection
-            Arel.sql("#{join_expression_name}.created_at")
-          end
-
-          override :column_list
           def column_list
-            [timestamp_projection]
+            [Arel.sql("#{join_expression_name}.created_at")]
           end
 
           # rubocop: disable CodeReuse/ActiveRecord
@@ -36,6 +31,10 @@ module Gitlab
               .joins("INNER JOIN LATERAL (#{subquery.to_sql}) #{join_expression_name} ON TRUE")
           end
           # rubocop: enable CodeReuse/ActiveRecord
+
+          def apply_negated_query_customization(query)
+            query.where('NOT EXISTS (?)', subquery)
+          end
 
           private
 

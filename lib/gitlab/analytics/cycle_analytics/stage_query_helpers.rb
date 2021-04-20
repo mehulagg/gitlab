@@ -17,10 +17,17 @@ module Gitlab
         end
 
         def duration
-          Arel::Nodes::Subtraction.new(
-            stage.end_event.timestamp_projection,
-            stage.start_event.timestamp_projection
-          )
+          if params[:end_event_filter] == :in_progress
+            Arel::Nodes::Subtraction.new(
+              Arel::Nodes::NamedFunction.new('TO_TIMESTAMP', [Time.current.to_i]),
+              stage.start_event.timestamp_projection
+            )
+          else
+            Arel::Nodes::Subtraction.new(
+              stage.end_event.timestamp_projection,
+              stage.start_event.timestamp_projection
+            )
+          end
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
