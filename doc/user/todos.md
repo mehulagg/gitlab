@@ -34,8 +34,6 @@ next to the search bar in the top navigation. If the to-do item count is:
 - *100 or more*, the number displays as 99+. The exact number displays in the
   To-Do List.
 
-![To Do icon](img/todos_icon.png)
-
 ## What triggers a to-do item
 
 A to-do item appears on your To-Do List when:
