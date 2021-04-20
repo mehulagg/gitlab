@@ -112,7 +112,7 @@ be embedded into incidents making problem resolving easier. Additionally, it can
 
 Recommended example [configuration](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/blob/main/docs/configuration_syntax.md):
 
-```
+```shell
 $ vim config.yml
 
 gitlab:
