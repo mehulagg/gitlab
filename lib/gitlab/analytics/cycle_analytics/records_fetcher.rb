@@ -32,7 +32,7 @@ module Gitlab
           @sort = params[:sort] || :end_event
           @direction = params[:direction] || :desc
           @page = params[:page] || 1
-          @per_page = MAX_RECORDS
+          @per_page = params[:per_page] || MAX_RECORDS
         end
 
         # rubocop: disable CodeReuse/ActiveRecord

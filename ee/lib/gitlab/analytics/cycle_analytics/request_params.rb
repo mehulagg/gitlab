@@ -20,6 +20,7 @@ module Gitlab
           :sort,
           :direction,
           :page,
+          :per_page,
           :stage_id,
           label_name: [].freeze,
           assignee_username: [].freeze,
@@ -43,6 +44,7 @@ module Gitlab
         attribute :sort
         attribute :direction
         attribute :page
+        attribute :per_page
         attribute :stage_id
 
         FINDER_PARAM_NAMES.each do |param_name|
@@ -74,7 +76,8 @@ module Gitlab
             project_ids: project_ids,
             sort: sort&.to_sym,
             direction: direction&.to_sym,
-            page: page
+            page: page,
+            per_page: per_page
           }.merge(attributes.symbolize_keys.slice(*FINDER_PARAM_NAMES))
         end
 
