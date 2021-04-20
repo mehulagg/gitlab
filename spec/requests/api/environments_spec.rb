@@ -3,10 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe API::Environments do
-  let(:user)          { create(:user) }
-  let(:non_member)    { create(:user) }
-  let(:project)       { create(:project, :private, :repository, namespace: user.namespace) }
-  let!(:environment)  { create(:environment, project: project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:non_member) { create(:user) }
+  let_it_be(:project) { create(:project, :private, :repository, namespace: user.namespace) }
+  let_it_be_with_reload(:environment) { create(:environment, project: project) }
 
   before do
     project.add_maintainer(user)
@@ -74,7 +74,7 @@ RSpec.describe API::Environments do
       end
 
       context 'when filtering' do
-        let!(:environment2) { create(:environment, project: project) }
+        let_it_be(:environment2) { create(:environment, project: project) }
 
         it 'returns environment by name' do
           get api("/projects/#{project.id}/environments?name=#{environment.name}", user)
