@@ -198,3 +198,7 @@ export default {
   <img :src="svgIllustrationPath" />
 </template>
 ```
+
+### Minimizing SVGs
+
+Whenever you develop or export a new SVG illustration, you may minimize it to save space using an [online tool SVGO](https://jakearchibald.github.io/svgomg/)
