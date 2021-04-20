@@ -31,7 +31,8 @@ module AlertManagement
     end
 
     def details_url
-      details_project_alert_management_url(project, alert.iid)
+      return details_project_alert_management_url(project, alert.iid) if alert.operations?
+      return threat_monitoring_alert_project_threat_monitoring_url(project, alert.iid) if alert.threat_monitoring?
     end
 
     def details
