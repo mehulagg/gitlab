@@ -7,6 +7,7 @@ module Security
     self.table_name = 'security_orchestration_policy_configurations'
 
     POLICY_PATH = '.gitlab/security-policies/policy.yml'
+    POLICY_SCHEMA_PATH = 'ee/app/validators/json_schemas/security_orchestration_policy.json'
     POLICY_LIMIT = 5
 
     ON_DEMAND_SCANS = %w[dast].freeze
@@ -21,10 +22,20 @@ module Security
       ::Feature.enabled?(:security_orchestration_policies_configuration, project)
     end
 
+    def policy_configuration_exists?
+      policy_hash.present?
+    end
+
+    def policy_configuration_valid?
+      JSONSchemer
+        .schema(Rails.root.join(POLICY_SCHEMA_PATH))
+        .valid?(policy_hash.deep_stringify_keys)
+    end
+
     def active_policies
       return [] unless enabled?
 
-      scan_execution_policy_at(POLICY_PATH).select { |config| config[:enabled] }.first(POLICY_LIMIT)
+      scan_execution_policy.select { |config| config[:enabled] }.first(POLICY_LIMIT)
     end
 
     def on_demand_scan_actions(branch)
@@ -69,9 +80,18 @@ module Security
       end
     end
 
-    def scan_execution_policy_at(path)
-      policy_repo.blob_data_at(default_branch_or_master, path)
-        .then { |config| Gitlab::Config::Loader::Yaml.new(config).load!.fetch(:scan_execution_policy, []) }
+    def scan_execution_policy
+      policy_hash
+        .fetch(:scan_execution_policy, [])
+    end
+
+    def policy_hash
+      strong_memoize(:policy_hash) do
+        blob_data = policy_repo.blob_data_at(default_branch_or_master, POLICY_PATH)
+        return if blob_data.blank?
+
+        Gitlab::Config::Loader::Yaml.new(blob_data).load!
+      end
     end
 
     def applicable_for_branch?(policy, ref)
