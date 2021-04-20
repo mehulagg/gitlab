@@ -433,10 +433,32 @@ without resulting in increased number of broken master.
 To identify the minimal set of tests needed, we use [Crystalball gem](https://github.com/toptal/crystalball) to create a test mapping.
 The test mapping contains a map of each source files to a list of test files which is dependent of the source file.
 This mapping is currently generated using a combination of test coverage tracing and a static mapping.
+In the `detect-tests` job, we use this mapping to identify the minimal tests needed for the current Merge Request.
 
 In this experiment, each `rspec` job is accompanied with a `minimal` version.
 For example, `rspec unit` job has a corresponding `rspec unit minimal` job. 
 During the experiment, each Merge Request pipeline will contain both versions of the job, running in parallel.
+
+To illustrate this:
+
+```mermaid
+graph LR
+    subgraph "prepare stage";
+        A["detect-tests"]
+    end
+
+    subgraph "test stage";
+        C["rspec migration"];
+        C1["rspec migration minimal"];
+        D["rspec unit"];
+        D1["rspec unit minimal"];
+        E["rspec integration"];
+        E1["rspec integration minimal"];
+        F["rspec system"];
+        F1["rspec system minimal"];
+    end
+```
+
 The result of both set of jobs in the pipeline is then compared to identify any false positive.
 A list of such pipeline can be found in [Sisense](https://app.periscopedata.com/app/gitlab/496118/Engineering-Productivity-Sandbox?widget=10492739&udv=833427). 
 
