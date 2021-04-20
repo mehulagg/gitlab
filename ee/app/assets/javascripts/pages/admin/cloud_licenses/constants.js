@@ -70,6 +70,17 @@ export const subscriptionActivationForm = {
   activateLabel: s__('CloudLicense|Activate'),
 };
 
+export const userNotifications = {
+  manualSyncSuccessfulTitle: s__('SuperSonics|The subscription details synced successfully.'),
+  manualSyncFailureText: s__(
+    'SuperSonics|You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}.',
+  ),
+  manualSyncFailureTitle: s__('SuperSonics|There is a connectivity issue.'),
+};
+export const notificationType = {
+  SYNC_FAILURE: 'SYNC_FAILURE',
+  SYNC_SUCCESS: 'SYNC_SUCCESS',
+};
 export const subscriptionType = {
   CLOUD: 'cloud',
   LEGACY: 'legacy',
