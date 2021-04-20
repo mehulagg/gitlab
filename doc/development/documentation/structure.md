@@ -117,7 +117,9 @@ To create an issue:
 
 The issue is created. You can view it by going to **Issues > List**.
 ```
-If you have multiple tasks on a page and they share prerequisites, you can make a topic with the title `Prerequisites` and link to it.
+
+If you have several tasks on a page that share prerequisites, you can make a
+reference topic with the title **Prerequisites**, and link to it.
 
 ## Reference
 
@@ -134,21 +136,8 @@ Introductory sentence.
 | **Name** | Descriptive sentence about the setting. |
 ```
 
-### Feature prerequisites
-
-Features or concepts themselves can have prerequisites for their overall use,
-greater than the prerequisites for specific tasks. In these cases, use the
-reference topic type to create a **Prequisites** header close to (or immediately
-following) the feature's concept topic.
-
-```markdown
-# Prerequisites
-
-Directive to install or obtain these required items:
-
-- First prequisite
-- Second prerequisite
-```
+If a feature or concept has its own prerequisites, you can use the reference
+topic type to create a **Prequisites** header for the information.
 
 ## Troubleshooting
 
