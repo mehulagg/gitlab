@@ -2863,10 +2863,11 @@ RSpec.describe Project do
     context 'on update' do
       let(:project) { create(:project, :public) }
       let!(:issue) { create(:issue, project: project) }
+      let!(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
 
       context 'when updating the visibility_level' do
-        it 'triggers ElasticAssociationIndexerWorker to update issues and notes' do
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues notes])
+        it 'triggers ElasticAssociationIndexerWorker to update issues, merge_requests and notes' do
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues merge_requests notes])
 
           project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
         end
@@ -2880,6 +2881,18 @@ RSpec.describe Project do
           ensure_elasticsearch_index!
 
           results = Issue.elastic_search('*', options: { public_and_internal_projects: true })
+          expect(results.count).to eq(0)
+        end
+
+        it 'ensures all visibility_level updates are correctly applied in merge_request searches', :sidekiq_inline do
+          ensure_elasticsearch_index!
+          results = MergeRequest.elastic_search('*', options: { public_and_internal_projects: true })
+          expect(results.count).to eq(1)
+
+          project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
+          ensure_elasticsearch_index!
+
+          results = MergeRequest.elastic_search('*', options: { public_and_internal_projects: true })
           expect(results.count).to eq(0)
         end
       end

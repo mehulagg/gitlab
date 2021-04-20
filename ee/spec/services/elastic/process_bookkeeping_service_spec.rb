@@ -108,10 +108,12 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
     it 'calls track! for each associated object' do
       issue_1 = create(:issue, project: project)
       issue_2 = create(:issue, project: project)
+      merge_request1 = create(:merge_request, source_project: project, target_project: project)
 
-      expect(described_class).to receive(:track!).with(issue_1, issue_2)
+      expect(described_class).to receive(:track!).with(issue_1, issue_2).ordered
+      expect(described_class).to receive(:track!).with(merge_request1).ordered
 
-      described_class.maintain_indexed_associations(project, ['issues'])
+      described_class.maintain_indexed_associations(project, %w[issues merge_requests])
     end
 
     it 'correctly scopes associated note objects to not include system notes' do
