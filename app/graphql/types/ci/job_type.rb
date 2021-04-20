@@ -63,8 +63,16 @@ module Types
             description: 'Indicates the job can be canceled.'
       field :active, GraphQL::BOOLEAN_TYPE, null: false, method: :active?,
             description: 'Indicates the job is active.'
+      field :schedulable, GraphQL::BOOLEAN_TYPE, null: false, method: :schedulable?,
+            description: 'Indicates the job is schedulable.'
       field :coverage, GraphQL::FLOAT_TYPE, null: true,
             description: 'Coverage level of the job.'
+      field :has_tag, GraphQL::BOOLEAN_TYPE, null: false,
+            description: 'Whether the job was created by a git tag.'
+      field :has_action, GraphQL::BOOLEAN_TYPE, null: false,
+            description: 'Whether the job has a manual action.'
+      field :triggered, GraphQL::BOOLEAN_TYPE, null: true,
+            description: 'Whether the job was triggered.'
 
       def pipeline
         Gitlab::Graphql::Loaders::BatchModelLoader.new(::Ci::Pipeline, object.pipeline_id).find
@@ -122,6 +130,20 @@ module Types
 
       def coverage
         object&.coverage
+      end
+
+      # rubocop:disable Naming/PredicateName
+      def has_tag
+        object.tag?
+      end
+
+      def has_action
+        object.action?
+      end
+      # rubocop: enable Naming/PredicateName
+
+      def triggered
+        object&.trigger_request
       end
     end
   end

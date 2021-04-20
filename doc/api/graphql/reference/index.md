@@ -1254,6 +1254,8 @@ An edge in a connection.
 | `detailedStatus` | [`DetailedStatus`](#detailedstatus) | Detailed status of the job. |
 | `duration` | [`Int`](#int) | Duration of the job in seconds. |
 | `finishedAt` | [`Time`](#time) | When a job has finished running. |
+| `hasAction` | [`Boolean!`](#boolean) | Whether the job has a manual action. |
+| `hasTag` | [`Boolean!`](#boolean) | Whether the job was created by a git tag. |
 | `id` | [`JobID`](#jobid) | ID of the job. |
 | `name` | [`String`](#string) | Name of the job. |
 | `needs` | [`CiBuildNeedConnection`](#cibuildneedconnection) | References to builds that must complete before the jobs run. |
@@ -1263,6 +1265,7 @@ An edge in a connection.
 | `refName` | [`String`](#string) | Ref name of the job. |
 | `refPath` | [`String`](#string) | Path to the ref. |
 | `retryable` | [`Boolean!`](#boolean) | Indicates the job can be retried. |
+| `schedulable` | [`Boolean!`](#boolean) | Indicates the job is schedulable. |
 | `scheduledAt` | [`Time`](#time) | Schedule for the build. |
 | `schedulingType` | [`String`](#string) | Type of pipeline scheduling. Value is `dag` if the pipeline uses the `needs` keyword, and `stage` otherwise. |
 | `shortSha` | [`String!`](#string) | Short SHA1 ID of the commit. |
@@ -1270,6 +1273,7 @@ An edge in a connection.
 | `startedAt` | [`Time`](#time) | When the job was started. |
 | `status` | [`CiJobStatus`](#cijobstatus) | Status of the job. |
 | `tags` | [`[String!]`](#string) | Tags for the current job. |
+| `triggered` | [`Boolean`](#boolean) | Whether the job was triggered. |
 
 ### `CiJobArtifact`
 

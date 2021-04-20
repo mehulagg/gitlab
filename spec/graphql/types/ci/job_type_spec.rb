@@ -18,6 +18,8 @@ RSpec.describe Types::Ci::JobType do
       detailedStatus
       duration
       finished_at
+      hasAction
+      hasTag
       id
       name
       needs
@@ -27,6 +29,7 @@ RSpec.describe Types::Ci::JobType do
       refName
       refPath
       retryable
+      schedulable
       scheduledAt
       schedulingType
       shortSha
@@ -34,6 +37,7 @@ RSpec.describe Types::Ci::JobType do
       started_at
       status
       tags
+      triggered
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)
