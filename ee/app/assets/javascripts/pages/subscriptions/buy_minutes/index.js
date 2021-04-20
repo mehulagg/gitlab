@@ -1,3 +1,3 @@
-import mountSubscriptionsApplication from 'ee/subscriptions/buy_minutes';
+import mountSubscriptionsApplication from 'ee/subscriptions';
 
 mountSubscriptionsApplication(document.getElementById('js-buy-minutes'));

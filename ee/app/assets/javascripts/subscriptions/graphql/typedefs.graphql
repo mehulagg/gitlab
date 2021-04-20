@@ -1,0 +1,29 @@
+input UpdateStateInput {
+  plans: [Plan]!
+  namespaces: [Namespace]!
+  isNewUser: Boolean!
+  fullName: String
+  isSetupForCompany: Boolean!
+  customer: Customer!
+  subscription: Subscription!
+}
+
+type Namespace {
+  id: ID!
+  name: String!
+  users: Int!
+}
+
+type Plan {
+  code: String!
+  name: String!
+  pricePerYear: Int!
+}
+
+type Subscription {
+  planId: Plan!
+  paymentMethodId: Int
+  quantity: Int!
+  namespaceId: ID
+  namespaceName: String
+}

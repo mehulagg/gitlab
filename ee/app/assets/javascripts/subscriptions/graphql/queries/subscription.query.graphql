@@ -1,0 +1,8 @@
+query subscription {
+  subscription @client {
+    planId
+    quantity
+    namespaceId
+    namespaceName
+  }
+}
