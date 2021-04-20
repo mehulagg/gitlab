@@ -98,6 +98,14 @@ module AvatarsHelper
     end
   end
 
+  def avatar_without_link(resource, options = {})
+    if resource.is_a?(User)
+      user_avatar_without_link(options.merge(user: resource))
+    elsif resource.is_a?(Group)
+      group_icon(resource, options)
+    end
+  end
+
   private
 
   def avatar_icon_by_user_email_or_gravatar(email, size, scale, only_path:)
