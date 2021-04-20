@@ -29,17 +29,12 @@ class NewProjectReadmeExperiment < ApplicationExperiment # rubocop:disable Gitla
   private
 
   def commit_count_for(project)
-    raw_repo = project.repository&.raw_repository
-    return INITIAL_WRITE_LIMIT unless raw_repo&.root_ref
-
-    begin
-      Gitlab::GitalyClient::CommitService.new(raw_repo).commit_count(raw_repo.root_ref, {
-        all: true, # include all branches
-        max_count: INITIAL_WRITE_LIMIT # limit as an optimization
-      })
-    rescue StandardError => e
-      Gitlab::ErrorTracking.track_exception(e, experiment: name)
-      INITIAL_WRITE_LIMIT
-    end
+    Gitlab::ProjectCommitCount.commit_count_for(project,
+      default_count: INITIAL_WRITE_LIMIT,
+      max_count: INITIAL_WRITE_LIMIT
+    )
+  rescue StandardError => e
+    Gitlab::ErrorTracking.track_exception(e, experiment: name)
+    INITIAL_WRITE_LIMIT
   end
 end
