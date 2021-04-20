@@ -5,9 +5,7 @@ stages:
   - fixtures
   - test
   - post-test
-  - review-prepare
   - review
-  - dast
   - qa
   - post-qa
   - pages
@@ -111,7 +109,6 @@ include:
   - local: .gitlab/ci/yaml.gitlab-ci.yml
   - local: .gitlab/ci/releases.gitlab-ci.yml
   - local: .gitlab/ci/notify.gitlab-ci.yml
-  - local: .gitlab/ci/dast.gitlab-ci.yml
   - local: .gitlab/ci/workhorse.gitlab-ci.yml
   - local: .gitlab/ci/graphql.gitlab-ci.yml
   # switch the remote include to a local include until this is resolved:
