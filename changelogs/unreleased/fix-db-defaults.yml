@@ -1,0 +1,5 @@
+---
+title: Fix database default values where missing due to past MySQL migration
+merge_request:
+author: Ben Bodenmiller @bbodenmiller
+type: fixed
