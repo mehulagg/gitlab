@@ -31,8 +31,7 @@ module AlertManagement
     end
 
     def details_url
-      return details_project_alert_management_url(project, alert.iid) if alert.operations?
-      return threat_monitoring_alert_project_threat_monitoring_url(project, alert.iid) if alert.threat_monitoring?
+      details_project_alert_management_url(project, alert.iid)
     end
 
     def details
@@ -113,3 +112,5 @@ module AlertManagement
     end
   end
 end
+
+AlertManagement::AlertPresenter.prepend_if_ee('EE::AlertManagement::AlertPresenter')

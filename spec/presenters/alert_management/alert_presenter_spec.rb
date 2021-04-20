@@ -44,21 +44,6 @@ RSpec.describe AlertManagement::AlertPresenter do
       end
     end
 
-    context 'with an empty payload' do
-      let_it_be(:alert) { create(:alert_management_alert, :threat_monitoring, project: project, payload: {}) }
-
-      it do
-        is_expected.to eq(
-          <<~MARKDOWN.chomp
-            **Start time:** #{presenter.start_time}#{markdown_line_break}
-            **Severity:** #{presenter.severity}#{markdown_line_break}
-            **GitLab alert:** http://localhost/#{project.full_path}/-/threat_monitoring/alerts/#{alert.iid}
-
-          MARKDOWN
-        )
-      end
-    end
-
     context 'with optional alert attributes' do
       let_it_be(:alert) do
         create(:alert_management_alert, :with_description, :with_host, :with_service, :with_monitoring_tool, project: project, payload: payload)
@@ -134,18 +119,8 @@ RSpec.describe AlertManagement::AlertPresenter do
   end
 
   describe '#details_url' do
-    context 'when alert has operations domain' do
-      it 'returns the details URL' do
-        expect(presenter.details_url).to match(%r{#{project.web_url}/-/alert_management/#{alert.iid}/details})
-      end
-    end
-
-    context 'when alert has threat_monitoring domain' do
-      let_it_be(:alert) { create(:alert_management_alert, :threat_monitoring, project: project, payload: payload) }
-
-      it 'returns the details URL' do
-        expect(presenter.details_url).to match(%r{#{project.web_url}/-/threat_monitoring/alerts/#{alert.iid}})
-      end
+    it 'returns the details URL' do
+      expect(presenter.details_url).to match(%r{#{project.web_url}/-/alert_management/#{alert.iid}/details})
     end
   end
 
