@@ -1292,18 +1292,6 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
-### `counts.groups_hipchat_active`
-
-Count of groups with active integrations for HipChat
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175912_groups_hipchat_active.yml)
-
-Group: `group::ecosystem`
-
-Status: `data_available`
-
-Tiers: `free`, `premium`, `ultimate`
-
 ### `counts.groups_inheriting_asana_active`
 
 Count of active groups inheriting integrations for Asana
@@ -1501,18 +1489,6 @@ Tiers: `free`, `premium`, `ultimate`
 Count of active groups inheriting integrations for Hangouts Chat
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175908_groups_inheriting_hangouts_chat_active.yml)
-
-Group: `group::ecosystem`
-
-Status: `data_available`
-
-Tiers: `free`, `premium`, `ultimate`
-
-### `counts.groups_inheriting_hipchat_active`
-
-Count of active groups inheriting integrations for HipChat
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175919_groups_inheriting_hipchat_active.yml)
 
 Group: `group::ecosystem`
 
@@ -2341,18 +2317,6 @@ Tiers: `free`, `premium`, `ultimate`
 Count of active instance-level integrations for Hangouts Chat
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175904_instances_hangouts_chat_active.yml)
-
-Group: `group::ecosystem`
-
-Status: `data_available`
-
-Tiers: `free`, `premium`, `ultimate`
-
-### `counts.instances_hipchat_active`
-
-Count of active instance-level integrations for HipChat
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175915_instances_hipchat_active.yml)
 
 Group: `group::ecosystem`
 
@@ -3944,18 +3908,6 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
-### `counts.projects_hipchat_active`
-
-Count of projects with active integrations for HipChat
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175910_projects_hipchat_active.yml)
-
-Group: `group::ecosystem`
-
-Status: `data_available`
-
-Tiers: `free`, `premium`, `ultimate`
-
 ### `counts.projects_imported_from_github`
 
 Missing description
@@ -4165,18 +4117,6 @@ Tiers: `free`, `premium`, `ultimate`
 Count of active projects inheriting integrations for Hangouts Chat
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175906_projects_inheriting_hangouts_chat_active.yml)
-
-Group: `group::ecosystem`
-
-Status: `data_available`
-
-Tiers: `free`, `premium`, `ultimate`
-
-### `counts.projects_inheriting_hipchat_active`
-
-Count of active projects inheriting integrations for HipChat
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175917_projects_inheriting_hipchat_active.yml)
 
 Group: `group::ecosystem`
 
@@ -5624,18 +5564,6 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
-### `counts.templates_hipchat_active`
-
-Count of active service templates for HipChat
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175913_templates_hipchat_active.yml)
-
-Group: `group::ecosystem`
-
-Status: `data_available`
-
-Tiers: `free`, `premium`, `ultimate`
-
 ### `counts.templates_irker_active`
 
 Count of active service templates for Irker
@@ -6360,13 +6288,13 @@ Tiers: `free`
 
 The version of the PostgreSQL database.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210216175609_version.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216175609_version.yml)
 
 Group: `group::distribution`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `dependency_proxy_enabled`
 
@@ -6384,7 +6312,7 @@ Tiers: `free`
 
 Edition of GitLab such as EE or CE
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210216175604_edition.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216175604_edition.yml)
 
 Group: `group::distribution`
 
