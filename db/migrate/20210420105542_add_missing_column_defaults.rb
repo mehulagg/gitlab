@@ -3,8 +3,7 @@
 class AddMissingColumnDefaults < ActiveRecord::Migration[6.0]
   def up
     # This migration sets default column values where
-    # missing/incorrect for old instances that migrated from MySQL database.
-
+    # missing/incorrect for long running instances that migrated from MySQL database.
     change_column_default :application_settings, :polling_interval_multiplier, 1.0
 
     change_column_default :broadcast_messages, :color, nil
