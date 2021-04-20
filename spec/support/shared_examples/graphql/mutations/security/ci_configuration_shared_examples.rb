@@ -6,26 +6,22 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
   let_it_be(:project) { create(:project, :public, :repository) }
   let_it_be(:user) { create(:user) }
 
+  let(:branch) do
+    "set-secret-config"
+  end
+
   let(:success_path) do
     "http://127.0.0.1:3000/root/demo-historic-secrets/-/merge_requests/new?"
   end
 
   let(:service_response) do
-    ServiceResponse.success(payload: { success_path: success_path })
+    ServiceResponse.success(payload: { branch: branch, success_path: success_path })
   end
 
   let(:error) { "An error occured!" }
 
   let(:service_error_response) do
     ServiceResponse.error(message: error)
-  end
-
-  let(:context) do
-    GraphQL::Query::Context.new(
-      query: OpenStruct.new(schema: nil),
-      values: { current_user: user },
-      object: nil
-    )
   end
 
   specify { expect(described_class).to require_graphql_authorizations(:push_code) }
@@ -70,8 +66,8 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
 
       it 'returns an array of errors' do
         expect(result).to match(
-          status: 'error',
-          success_path: nil,
+          branch: be_nil,
+          success_path: be_nil,
           errors: match_array([error_message])
         )
       end
@@ -91,7 +87,7 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
 
         it 'returns a success path' do
           expect(result).to match(
-            status: 'success',
+            branch: branch,
             success_path: success_path,
             errors: []
           )
@@ -107,7 +103,7 @@ RSpec.shared_examples_for 'graphql mutations security ci configuration' do
 
         it 'returns an array of errors' do
           expect(result).to match(
-            status: 'error',
+            branch: be_nil,
             success_path: be_nil,
             errors: match_array([error])
           )

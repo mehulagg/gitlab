@@ -3,12 +3,11 @@
 module Security
   module CiConfiguration
     class BaseCreateService
-      attr_reader :branch_name, :current_user, :project, :params
+      attr_reader :branch_name, :current_user, :project
 
-      def initialize(project, current_user, params)
+      def initialize(project, current_user)
         @project = project
         @current_user = current_user
-        @params = params
         @branch_name = project.repository.next_branch(next_branch)
       end
 
@@ -19,13 +18,10 @@ module Security
 
         result = ::Files::MultiService.new(project, current_user, attributes_for_commit).execute
 
-        if result[:status] == :success
-          track_event(attributes_for_commit)
-          return ServiceResponse.success(payload: { success_path: successful_change_path })
-        end
+        return ServiceResponse.error(message: result[:message]) unless result[:status] == :success
 
-        ServiceResponse.error(message: result[:message])
-
+        track_event(attributes_for_commit)
+        ServiceResponse.success(payload: { branch: branch_name, success_path: successful_change_path })
       rescue Gitlab::Git::PreReceiveError => e
         ServiceResponse.error(message: e.message)
       end

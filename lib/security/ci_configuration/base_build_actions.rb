@@ -3,7 +3,7 @@
 module Security
   module CiConfiguration
     class BaseBuildActions
-      def initialize(auto_devops_enabled, params, existing_gitlab_ci_content)
+      def initialize(auto_devops_enabled, existing_gitlab_ci_content)
         @auto_devops_enabled = auto_devops_enabled
         @existing_gitlab_ci_content = existing_gitlab_ci_content || {}
       end
@@ -18,21 +18,21 @@ module Security
 
       private
 
-      def set_includes
+      def generate_includes
         includes = @existing_gitlab_ci_content['include'] || []
-        includes = includes.is_a?(Array) ? includes : [includes]
+        includes = Array.wrap(includes)
         includes << { 'template' => template }
         includes.uniq
       end
 
       def prepare_existing_content
         content = @existing_gitlab_ci_content.to_yaml
-        content = remove_document_delimeter(content)
+        content = remove_document_delimiter(content)
 
         content.prepend(comment)
       end
 
-      def remove_document_delimeter(content)
+      def remove_document_delimiter(content)
         content.gsub(/^---\n/, '')
       end
 

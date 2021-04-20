@@ -3,11 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::Security::CiConfiguration::ConfigureSast do
-  let(:mutation) { described_class.new(object: nil, context: context, field: nil) }
+  include GraphqlHelpers
 
   let(:service) { ::Security::CiConfiguration::SastCreateService }
 
-  subject { mutation.resolve(project_path: project.full_path, configuration: {}) }
+  subject { resolve(described_class, args: { project_path: project.full_path, configuration: {} }, ctx: { current_user: user }) }
 
   include_examples 'graphql mutations security ci configuration'
 end

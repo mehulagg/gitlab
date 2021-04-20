@@ -7,8 +7,6 @@ RSpec.shared_examples_for 'services security ci configuration create service' do
   let_it_be(:user) { create(:user) }
 
   describe '#execute' do
-    subject(:result) { described_class.new(project, user, params).execute }
-
     let(:params) { {} }
 
     context 'user does not belong to project' do

@@ -3,6 +3,13 @@
 module Security
   module CiConfiguration
     class SastCreateService < ::Security::CiConfiguration::BaseCreateService
+      attr_reader :params
+
+      def initialize(project, current_user, params)
+        super(project, current_user)
+        @params = params
+      end
+
       private
 
       def actions

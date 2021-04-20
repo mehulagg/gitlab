@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Security::CiConfiguration::SecretDetectionCreateService, :snowplow do
+  subject(:result) { described_class.new(project, user).execute }
+
   let(:snowplow_event) do
     {
       category: 'Security::CiConfiguration::SecretDetectionCreateService',

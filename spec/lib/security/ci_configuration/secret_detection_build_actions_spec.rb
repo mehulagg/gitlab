@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Security::CiConfiguration::SecretDetectionBuildActions do
-  subject(:result) { described_class.new(auto_devops_enabled, params, gitlab_ci_content).generate }
+  subject(:result) { described_class.new(auto_devops_enabled, gitlab_ci_content).generate }
 
   let(:params) { {} }
 

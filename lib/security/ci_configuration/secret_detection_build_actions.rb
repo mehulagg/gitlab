@@ -6,7 +6,7 @@ module Security
       private
 
       def update_existing_content!
-        @existing_gitlab_ci_content['include'] = set_includes
+        @existing_gitlab_ci_content['include'] = generate_includes
       end
 
       def template

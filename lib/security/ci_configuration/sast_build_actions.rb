@@ -6,7 +6,7 @@ module Security
       SAST_DEFAULT_ANALYZERS = 'bandit, brakeman, eslint, flawfinder, gosec, kubesec, nodejs-scan, phpcs-security-audit, pmd-apex, security-code-scan, sobelow, spotbugs'
 
       def initialize(auto_devops_enabled, params, existing_gitlab_ci_content)
-        super(auto_devops_enabled, params, existing_gitlab_ci_content)
+        super(auto_devops_enabled, existing_gitlab_ci_content)
         @variables = variables(params)
         @default_sast_values = default_sast_values(params)
         @default_values_overwritten = false
@@ -62,7 +62,7 @@ module Security
         @existing_gitlab_ci_content['stages'] = set_stages
         @existing_gitlab_ci_content['variables'] = set_variables(global_variables, @existing_gitlab_ci_content)
         @existing_gitlab_ci_content['sast'] = set_sast_block
-        @existing_gitlab_ci_content['include'] = set_includes
+        @existing_gitlab_ci_content['include'] = generate_includes
 
         @existing_gitlab_ci_content.select! { |k, v| v.present? }
         @existing_gitlab_ci_content['sast'].select! { |k, v| v.present? }
