@@ -53,13 +53,13 @@ module RelativePositioning
 
       return [size, starting_from] if size >= MIN_GAP
 
+      terminus = context.at_position(starting_from)
+
       if at_end
-        terminus = context.max_sibling
         terminus.shift_left
         max_relative_position = terminus.relative_position
         [[(MAX_POSITION - max_relative_position) / gaps, IDEAL_DISTANCE].min, max_relative_position]
       else
-        terminus = context.min_sibling
         terminus.shift_right
         min_relative_position = terminus.relative_position
         [[(min_relative_position - MIN_POSITION) / gaps, IDEAL_DISTANCE].min, min_relative_position]

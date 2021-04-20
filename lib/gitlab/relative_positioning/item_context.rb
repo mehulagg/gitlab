@@ -129,6 +129,10 @@ module Gitlab
         neighbour(sib)
       end
 
+      def at_position(position)
+        scoped_items.where(relative_position: position).first
+      end
+
       def shift_left
         move_sequence_before(true)
         object.reset_relative_position
