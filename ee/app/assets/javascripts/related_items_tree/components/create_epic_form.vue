@@ -51,7 +51,7 @@ export default {
       return this.isSubmitting ? __('Creating epic') : __('Create epic');
     },
     dropdownPlaceholderText() {
-      return this.selectedGroup?.name || __('Search a group');
+      return this.selectedGroup?.name || this.parentItem?.groupName || __('Search a group');
     },
     canRenderNoResults() {
       return !this.descendantGroupsFetchInProgress && !this.descendantGroups?.length;
