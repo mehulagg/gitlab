@@ -15,4 +15,11 @@ describe('DirtySubmitCollection', () => {
 
     expect(dirtySubmitFactory(forms) instanceof DirtySubmitCollection).toBe(true);
   });
+
+  it('passes `onChange` argument to `DirtySubmitForm` instance', () => {
+    const { form } = createForm();
+    const onChange = jest.fn();
+
+    expect(dirtySubmitFactory(form, onChange).onChange).toBe(onChange);
+  });
 });

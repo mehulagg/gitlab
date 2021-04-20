@@ -1,3 +1,4 @@
+import { within, fireEvent } from '@testing-library/dom';
 import SamlSettingsForm from 'ee/saml_providers/saml_settings_form';
 import 'bootstrap';
 
@@ -7,68 +8,84 @@ describe('SamlSettingsForm', () => {
   let samlSettingsForm;
   beforeEach(() => {
     loadFixtures(FIXTURE);
-    samlSettingsForm = new SamlSettingsForm('#js-saml-settings-form');
+    samlSettingsForm = new SamlSettingsForm('.js-saml-settings-form');
     samlSettingsForm.init();
   });
 
+  const findEnforcedGroupManagedAccountSetting = () =>
+    samlSettingsForm.settings.find((s) => s.name === 'enforced-group-managed-accounts');
+  const findProhibitForksSetting = () =>
+    samlSettingsForm.settings.find((s) => s.name === 'prohibited-outer-forks');
+
+  const getEnableSamlAuthenticationCheckbox = () =>
+    within(document).getByLabelText('Enable SAML authentication for this group.');
+  const getProviderUrlInput = () =>
+    within(document).getByLabelText('Identity provider single sign-on URL');
+
+  const expectTestButtonEnabled = () => {
+    expect(samlSettingsForm.testButton.hasAttribute('style')).toBe(false);
+    expect(samlSettingsForm.testButtonDisabled.style.display).toBe('none');
+  };
+  const expectTestButtonDisabled = () => {
+    expect(samlSettingsForm.testButton.style.display).toBe('none');
+    expect(samlSettingsForm.testButtonDisabled.hasAttribute('style')).toBe(false);
+  };
+
   describe('updateView', () => {
-    it('disables Test button when form has changes', () => {
-      samlSettingsForm.dirtyFormChecker.isDirty = true;
+    it('disables `Verify SAML Configuration` button when form has changes', () => {
+      expectTestButtonEnabled();
 
-      expect(samlSettingsForm.testButton.hasAttribute('disabled')).toBe(false);
+      fireEvent.input(getProviderUrlInput(), { target: { value: 'foo bar' } });
 
-      samlSettingsForm.updateView();
-
-      expect(samlSettingsForm.testButton.hasAttribute('disabled')).toBe(true);
+      expectTestButtonDisabled();
     });
 
-    it('re-enables Test button when form is returned to starting state', () => {
-      samlSettingsForm.testButton.setAttribute('disabled', true);
+    it('re-enables `Verify SAML Configuration` button when form is returned to starting state', () => {
+      const providerUrlInput = getProviderUrlInput();
+      const providerUrlValue = providerUrlInput.value;
 
-      samlSettingsForm.updateView();
+      expectTestButtonEnabled();
 
-      expect(samlSettingsForm.testButton.hasAttribute('disabled')).toBe(false);
+      fireEvent.input(getProviderUrlInput(), { target: { value: 'foo bar' } });
+
+      expectTestButtonDisabled();
+
+      fireEvent.input(getProviderUrlInput(), { target: { value: providerUrlValue } });
+
+      expectTestButtonEnabled();
     });
 
-    it('keeps Test button disabled when SAML disabled for the group', () => {
-      samlSettingsForm.settings.find((s) => s.name === 'group-saml').value = false;
-      samlSettingsForm.testButton.setAttribute('disabled', true);
+    it('disables `Verify SAML Configuration` button when SAML disabled for the group', () => {
+      expectTestButtonEnabled();
 
-      samlSettingsForm.updateView();
+      fireEvent.click(getEnableSamlAuthenticationCheckbox());
 
-      expect(samlSettingsForm.testButton.hasAttribute('disabled')).toBe(true);
+      expectTestButtonDisabled();
     });
   });
 
-  it('correctly disables dependent toggle', () => {
+  it('correctly disables dependent checkboxes', () => {
     samlSettingsForm.settings.forEach((s) => {
-      const { input } = s;
-      input.value = true;
+      const { el } = s;
+      el.checked = true;
     });
 
-    const findEnforcedGroupManagedAccountSetting = () =>
-      samlSettingsForm.settings.find((s) => s.name === 'enforced-group-managed-accounts');
-    const findProhibitForksSetting = () =>
-      samlSettingsForm.settings.find((s) => s.name === 'prohibited-outer-forks');
-
     samlSettingsForm.updateSAMLSettings();
     samlSettingsForm.updateView();
-    expect(findProhibitForksSetting().toggle.hasAttribute('disabled')).toBe(false);
-    expect(findProhibitForksSetting().toggle.classList.contains('is-disabled')).toBe(false);
+    expect(findProhibitForksSetting().el.hasAttribute('disabled')).toBe(false);
 
-    findEnforcedGroupManagedAccountSetting().input.value = false;
+    findEnforcedGroupManagedAccountSetting().el.checked = false;
     samlSettingsForm.updateSAMLSettings();
     samlSettingsForm.updateView();
 
-    expect(findProhibitForksSetting().toggle.hasAttribute('disabled')).toBe(true);
-    expect(findProhibitForksSetting().toggle.classList.contains('is-disabled')).toBe(true);
+    expect(findProhibitForksSetting().el.hasAttribute('disabled')).toBe(true);
     expect(findProhibitForksSetting().value).toBe(true);
   });
 
   it('correctly disables multiple dependent toggles', () => {
     samlSettingsForm.settings.forEach((s) => {
-      const { input } = s;
-      input.value = true;
+      const { el } = s;
+      el.checked = true;
     });
 
     let groupSamlSetting;
@@ -78,16 +95,16 @@ describe('SamlSettingsForm', () => {
     samlSettingsForm.updateView();
     [groupSamlSetting, ...otherSettings] = samlSettingsForm.settings;
     expect(samlSettingsForm.settings.every((s) => s.value)).toBe(true);
-    expect(samlSettingsForm.settings.some((s) => s.toggle.hasAttribute('disabled'))).toBe(false);
+    expect(samlSettingsForm.settings.some((s) => s.el.hasAttribute('disabled'))).toBe(false);
 
-    groupSamlSetting.input.value = false;
+    groupSamlSetting.el.checked = false;
     samlSettingsForm.updateSAMLSettings();
     samlSettingsForm.updateView();
 
     return new Promise(window.requestAnimationFrame).then(() => {
       [groupSamlSetting, ...otherSettings] = samlSettingsForm.settings;
       expect(otherSettings.every((s) => s.value)).toBe(true);
-      expect(otherSettings.every((s) => s.toggle.hasAttribute('disabled'))).toBe(true);
+      expect(otherSettings.every((s) => s.el.hasAttribute('disabled'))).toBe(true);
     });
   });
 });

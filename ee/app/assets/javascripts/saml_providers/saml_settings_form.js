@@ -1,13 +1,10 @@
 import $ from 'jquery';
-import { parseBoolean } from '~/lib/utils/common_utils';
+import dirtySubmitFactory from '~/dirty_submit/dirty_submit_factory';
 import { __ } from '~/locale';
-import setupToggleButtons from '~/toggle_buttons';
 import { fixTitle } from '~/tooltips';
-import DirtyFormChecker from './dirty_form_checker';
 
 const CALLOUT_SELECTOR = '.js-callout';
 const HELPER_SELECTOR = '.js-helper-text';
-const TOGGLE_SELECTOR = '.js-project-feature-toggle';
 
 function getHelperText(el) {
   return el.parentNode.querySelector(HELPER_SELECTOR);
@@ -17,51 +14,46 @@ function getCallout(el) {
   return el.parentNode.querySelector(CALLOUT_SELECTOR);
 }
 
-function getToggle(el) {
-  return el.querySelector(TOGGLE_SELECTOR);
-}
-
 export default class SamlSettingsForm {
   constructor(formSelector) {
     this.form = document.querySelector(formSelector);
     this.settings = [
       {
         name: 'group-saml',
-        el: this.form.querySelector('.js-group-saml-enabled-toggle-area'),
+        el: this.form.querySelector('.js-group-saml-enabled-input'),
       },
       {
         name: 'enforced-sso',
-        el: this.form.querySelector('.js-group-saml-enforced-sso-toggle-area'),
+        el: this.form.querySelector('.js-group-saml-enforced-sso-input'),
         dependsOn: 'group-saml',
       },
       {
         name: 'enforced-group-managed-accounts',
-        el: this.form.querySelector('.js-group-saml-enforced-group-managed-accounts-toggle-area'),
+        el: this.form.querySelector('.js-group-saml-enforced-group-managed-accounts-input'),
         dependsOn: 'enforced-sso',
       },
       {
         name: 'enforced-git-activity-check',
-        el: this.form.querySelector('.js-group-saml-enforced-git-check-toggle-area'),
+        el: this.form.querySelector('.js-group-saml-enforced-git-check-input'),
         dependsOn: 'enforced-sso',
       },
       {
         name: 'prohibited-outer-forks',
-        el: this.form.querySelector('.js-group-saml-prohibited-outer-forks-toggle-area'),
+        el: this.form.querySelector('.js-group-saml-prohibited-outer-forks-input'),
         dependsOn: 'enforced-group-managed-accounts',
       },
     ]
       .filter((s) => s.el)
       .map((setting) => ({
         ...setting,
-        toggle: getToggle(setting.el),
         helperText: getHelperText(setting.el),
         callout: getCallout(setting.el),
-        input: setting.el.querySelector('input'),
       }));
 
     this.testButtonTooltipWrapper = this.form.querySelector('#js-saml-test-button');
     this.testButton = this.testButtonTooltipWrapper.querySelector('a');
-    this.dirtyFormChecker = new DirtyFormChecker(formSelector, () => this.updateView());
+    this.testButtonDisabled = this.testButtonTooltipWrapper.querySelector('button');
+    this.dirtyFormChecker = dirtySubmitFactory(this.form, this.handleInputChange);
   }
 
   findSetting(name) {
@@ -84,49 +76,53 @@ export default class SamlSettingsForm {
   }
 
   init() {
-    this.dirtyFormChecker.init();
-    setupToggleButtons(this.form);
-    $(this.form).on('trigger-change', () => this.onEnableToggle());
     this.updateSAMLSettings();
     this.updateView();
   }
 
-  onEnableToggle() {
+  handleInputChange = () => {
     this.updateSAMLSettings();
     this.updateView();
+  };
+
+  formIsDirty() {
+    return this.dirtyFormChecker.dirtyInputs.length;
   }
 
   updateSAMLSettings() {
     this.settings = this.settings.map((setting) => ({
       ...setting,
-      value: parseBoolean(setting.el.querySelector('input').value),
+      value: setting.el.checked,
     }));
   }
 
+  groupSamlEnabled() {
+    return this.findSetting('group-saml').el.checked;
+  }
+
   testButtonTooltip() {
-    if (!this.samlProviderEnabled) {
+    if (!this.groupSamlEnabled()) {
       return __('Group SAML must be enabled to test');
     }
 
-    if (this.dirtyFormChecker.isDirty) {
+    if (this.formIsDirty()) {
       return __('Save changes before testing');
     }
 
     return __('Redirect to SAML provider to test configuration');
   }
 
-  updateToggles() {
+  updateCheckboxes() {
     this.settings
       .filter((setting) => setting.dependsOn)
       .forEach((setting) => {
-        const { helperText, callout, toggle } = setting;
+        const { helperText, callout, el } = setting;
         const isRelatedToggleOn = this.getValueWithDeps(setting.dependsOn);
         if (helperText) {
           helperText.style.display = isRelatedToggleOn ? 'none' : 'block';
         }
 
-        toggle.classList.toggle('is-disabled', !isRelatedToggleOn);
-        toggle.disabled = !isRelatedToggleOn;
+        el.disabled = !isRelatedToggleOn;
 
         if (callout) {
           callout.style.display = setting.value && isRelatedToggleOn ? 'block' : 'none';
@@ -134,14 +130,29 @@ export default class SamlSettingsForm {
       });
   }
 
+  handleTestButtonClick = (event) => {
+    event.preventDefault();
+  };
+
+  disableTestButton() {
+    this.testButtonDisabled.removeAttribute('style');
+    this.testButton.style.display = 'none';
+  }
+
+  enableTestButton() {
+    this.testButton.removeAttribute('style');
+    this.testButtonDisabled.style.display = 'none';
+  }
+
   updateView() {
-    if (this.getValueWithDeps('group-saml') && !this.dirtyFormChecker.isDirty) {
-      this.testButton.removeAttribute('disabled');
+    if (this.getValueWithDeps('group-saml') && !this.formIsDirty()) {
+      console.log('test');
+      this.enableTestButton();
     } else {
-      this.testButton.setAttribute('disabled', true);
+      this.disableTestButton();
     }
 
-    this.updateToggles();
+    this.updateCheckboxes();
 
     // Update tooltip using wrapper so it works when input disabled
     this.testButtonTooltipWrapper.setAttribute('title', this.testButtonTooltip());

@@ -2,8 +2,9 @@ import $ from 'jquery';
 import { memoize, throttle } from 'lodash';
 
 class DirtySubmitForm {
-  constructor(form) {
+  constructor(form, onChange = () => {}) {
     this.form = form;
+    this.onChange = onChange;
     this.dirtyInputs = [];
     this.isDisabled = true;
 
@@ -41,6 +42,7 @@ class DirtySubmitForm {
 
     if (!target.dataset.isDirtySubmitInput) return;
 
+    this.onChange(event);
     this.updateDirtyInputs(target);
     this.toggleSubmission();
   }

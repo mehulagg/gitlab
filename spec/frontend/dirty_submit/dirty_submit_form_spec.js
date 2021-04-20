@@ -52,6 +52,27 @@ describe('DirtySubmitForm', () => {
     });
   });
 
+  describe('`onChange` argument', () => {
+    it('defaults to a function that returns `undefined`', () => {
+      const { form } = createForm('checkbox');
+
+      const dirtySubmitForm = new DirtySubmitForm(form); // eslint-disable-line no-new
+
+      expect(dirtySubmitForm.onChange()).toBeUndefined();
+    });
+
+    it('is called when an input changes', () => {
+      const { form, input } = createForm();
+      const onChange = jest.fn();
+
+      new DirtySubmitForm(form, onChange); // eslint-disable-line no-new
+
+      setInputValue(input, 'changed');
+
+      expect(onChange).toHaveBeenCalled();
+    });
+  });
+
   describe('throttling tests', () => {
     beforeEach(() => {
       throttle.mockImplementation(lodash.throttle);

@@ -3,7 +3,7 @@
 module GroupSaml
   module SamlProvider
     class UpdateService
-      include BaseService
+      include GroupSaml::SamlProvider::BaseService
     end
   end
 end

@@ -10,5 +10,5 @@ export default function initSAML() {
     '.js-scim-token-container',
     groupPath,
   );
-  new SamlSettingsForm('#js-saml-settings-form').init();
+  new SamlSettingsForm('.js-saml-settings-form').init();
 }

@@ -1,1 +1,3 @@
-= saml_link_for_provider _('Verify SAML Configuration'), saml_provider, redirect: ::OmniAuth::Strategies::GroupSaml::VERIFY_SAML_RESPONSE, html_class: "gl-button btn btn-default qa-saml-settings-test-button #{ 'd-none' unless saml_provider.persisted? }"
+= saml_link_for_provider _('Verify SAML Configuration'), saml_provider, redirect: ::OmniAuth::Strategies::GroupSaml::VERIFY_SAML_RESPONSE, html_class: "gl-button btn btn-default #{ 'gl-display-none' unless saml_provider.persisted? }"
+%button.gl-button.btn.btn-default{ type: :button, disabled: true, style: 'display: none;' }
+  =_('Verify SAML Configuration')

@@ -5,9 +5,7 @@ export default class DirtyFormChecker {
     this.isDirty = false;
 
     this.editableInputs = Array.from(this.form.querySelectorAll('input[name]')).filter(
-      (el) =>
-        (el.type !== 'submit' && el.type !== 'hidden') ||
-        el.classList.contains('js-project-feature-toggle-input'),
+      (el) => el.type !== 'submit' && el.type !== 'hidden',
     );
 
     this.startingStates = {};
@@ -17,12 +15,15 @@ export default class DirtyFormChecker {
   }
 
   init() {
-    this.form.addEventListener('input', (event) => {
-      if (event.target.matches('input[name]')) {
-        this.recalculate();
-      }
-    });
+    this.form.addEventListener('change', this.handleChangeEvent);
+    this.form.addEventListener('input', this.handleChangeEvent);
   }
+
+  handleChangeEvent = (event) => {
+    if (event.target.matches('input[name]')) {
+      this.recalculate();
+    }
+  };
 
   recalculate() {
     const wasDirty = this.isDirty;
