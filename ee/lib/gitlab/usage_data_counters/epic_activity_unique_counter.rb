@@ -29,6 +29,7 @@ module Gitlab
       EPIC_VISIBLE = 'g_project_management_users_setting_epic_visible'
       EPIC_LABELS = 'g_project_management_epic_users_changing_labels'
       EPIC_DESTROYED = 'g_project_management_epic_destroyed'
+      EPIC_CROSS_REFERENCED = 'g_project_management_epic_cross_referenced'
 
       class << self
         def track_epic_created_action(author:)
@@ -117,6 +118,10 @@ module Gitlab
 
         def track_epic_destroyed(author:)
           track_unique_action(EPIC_DESTROYED, author)
+        end
+
+        def track_epic_cross_referenced(author:)
+          track_unique_action(EPIC_CROSS_REFERENCED, author)
         end
 
         private
