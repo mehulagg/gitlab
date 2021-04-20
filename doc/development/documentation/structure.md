@@ -117,6 +117,7 @@ To create an issue:
 
 The issue is created. You can view it by going to **Issues > List**.
 ```
+If you have multiple tasks on a page and they share prerequisites, you can make a topic with the title `Prerequisites` and link to it.
 
 ## Reference
 
