@@ -8,6 +8,7 @@ resources :pipelines, only: [:index, :new, :create, :show, :destroy] do
       get :latest, action: :show, defaults: { latest: true }
     end
     get :config_variables
+    get :downloadable_artifacts
   end
 
   member do

@@ -1247,4 +1247,62 @@ RSpec.describe Projects::PipelinesController do
                              format: :json
     end
   end
+
+  describe 'GET downloadable_artifacts.json' do
+    context 'when pipeline does not exist' do
+      let(:pipeline) { nil }
+
+      it 'returns status not_found' do
+        get_downloadable_artifacts_json
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when pipeline exists' do
+      context 'when pipeline does not have any downloable artifacts' do
+        let(:pipeline) { create(:ci_pipeline, project: project) }
+
+        it 'returns an empty array' do
+          get_downloadable_artifacts_json
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['artifacts']).to be_empty
+        end
+      end
+
+      context 'when pipeline has downloable artifacts' do
+        let(:pipeline) { create(:ci_pipeline, :with_terraform_reports, project: project) }
+
+        before do
+          create(:ci_build, name: 'rspec', pipeline: pipeline).tap do |build|
+            create(:ci_job_artifact, :junit, job: build)
+          end
+
+          create(:ci_build, name: 'karma', pipeline: pipeline).tap do |build|
+            create(:ci_job_artifact, :junit, job: build)
+          end
+        end
+
+        it 'returns an array of artifacts' do
+          get_downloadable_artifacts_json
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['artifacts']).size.to eq(2)
+        end
+      end
+    end
+
+    private
+
+    def get_downloadable_artifacts_json
+      get :downloadable_artifacts,
+        params: {
+          namespace_id: project.namespace,
+          project_id: project,
+          id: pipeline&.id
+        },
+        format: :json
+    end
+  end
 end

@@ -206,6 +206,15 @@ class Projects::PipelinesController < Projects::ApplicationController
     end
   end
 
+  def downloadable_artifacts
+    return not_found unless @pipeline
+
+    render json: Ci::PipelineDownlodableArtifactsSerializer.new(
+      project: project,
+      current_user: current_user
+    ).represent(@pipeline)
+  end
+
   private
 
   def serialize_pipelines
