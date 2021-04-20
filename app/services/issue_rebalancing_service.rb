@@ -3,6 +3,7 @@
 class IssueRebalancingService
   MAX_ISSUE_COUNT = 10_000
   BATCH_SIZE = 100
+  RETRIES = 10
   TooManyIssues = Class.new(StandardError)
 
   def initialize(issue)
@@ -11,6 +12,8 @@ class IssueRebalancingService
   end
 
   def execute
+    batch = BATCH_SIZE
+    retries = 0
     gates = [issue.project, issue.project.group].compact
     return unless gates.any? { |gate| Feature.enabled?(:rebalance_issues, gate) }
 
@@ -20,17 +23,34 @@ class IssueRebalancingService
 
     if Feature.enabled?(:issue_rebalancing_optimization)
       Issue.transaction do
-        assign_positions(start, indexed_ids)
-          .sort_by(&:first)
-          .each_slice(BATCH_SIZE) do |pairs_with_position|
-          update_positions(pairs_with_position, 'rebalance issue positions in batches ordered by id')
+        retries = 0
+        begin
+          assign_positions(start, indexed_ids)
+            .sort_by(&:first)
+            .each_slice(batch) do |pairs_with_position|
+            update_positions(pairs_with_position, 'rebalance issue positions in batches ordered by id')
+          rescue ActiveRecord::StatementTimeout
+            if (retries += 1) <= RETRIES
+              batch = (batch / 3).to_i if retries % 3 == 0 # shrink the batch size in half every 3rd retry
+              # replace the first item in the list with 2 arrays of half the size
+              retry
+            end
+          end
         end
       end
     else
       Issue.transaction do
-        indexed_ids.each_slice(BATCH_SIZE) do |pairs|
-          pairs_with_position = assign_positions(start, pairs)
-          update_positions(pairs_with_position, 'rebalance issue positions')
+        retries = 0
+        begin
+          indexed_ids.each_slice(batch) do |pairs|
+            pairs_with_position = assign_positions(start, pairs)
+            update_positions(pairs_with_position, 'rebalance issue positions')
+          rescue ActiveRecord::StatementTimeout
+            if (retries += 1) <= RETRIES
+              batch = (batch / 3).to_i if retries % 3 == 0 # shrink the batch size in half every 3rd retry
+              retry
+            end
+          end
         end
       end
     end
