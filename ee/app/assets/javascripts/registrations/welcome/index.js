@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import 'ee/registrations/welcome/other_role';
+import 'ee/registrations/welcome/jobs_to_be_done';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import ProgressBar from '../components/progress_bar.vue';
 import { STEPS, SUBSCRIPTON_FLOW_STEPS, SIGNUP_ONBOARDING_FLOW_STEPS } from '../constants';
