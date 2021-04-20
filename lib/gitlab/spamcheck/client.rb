@@ -25,7 +25,6 @@ module Gitlab
 
       def issue_spam?(spam_issue:, user:, context: nil)
         issue = build_issue_pb(issue: spam_issue, user: user, context: context)
-
         response = @stub.check_for_spam_issue(issue)
         verdict = convert_verdict_to_gitlab_constant(response.verdict)
         [verdict, response.error]
@@ -44,6 +43,7 @@ module Gitlab
         issue_pb.created_at = convert_to_pb_timestamp(issue.created_at) unless issue.created_at.nil?
         issue_pb.updated_at = convert_to_pb_timestamp(issue.updated_at) unless issue.updated_at.nil?
         issue_pb.user_in_project = user.authorized_project?(issue.project)
+        issue_pb.project_id = issue.project_id
         issue_pb.action = action_to_enum(context.fetch(:action)) unless context.nil?
         issue_pb.user = build_user_pb(user)
         issue_pb
