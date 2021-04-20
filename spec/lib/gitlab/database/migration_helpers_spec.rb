@@ -1730,6 +1730,13 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       end
     end
 
+    context 'when the column to migrate does not exist' do
+      it 'raises an error' do
+        expect { model.initialize_conversion_of_integer_to_bigint(table, :this_column_is_not_real) }
+          .to raise_error(ArgumentError, "Column this_column_is_not_real does not exist on #{table}")
+      end
+    end
+
     context 'when the column to convert is the primary key' do
       it 'creates a not-null bigint column and installs triggers' do
         expect(model).to receive(:add_column).with(table, tmp_column, :bigint, default: 0, null: false)

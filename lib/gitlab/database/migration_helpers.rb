@@ -928,7 +928,7 @@ module Gitlab
       #   3. remaining steps TBD, see #288005
       #
       # table - The name of the database table containing the column
-      # column - The name, or array of names, of the column(s) that we want to convert to bigint.
+      # columns - The name, or array of names, of the column(s) that we want to convert to bigint.
       # primary_key - The name of the primary key column (most often :id)
       def initialize_conversion_of_integer_to_bigint(table, columns, primary_key: :id)
         unless table_exists?(table)
@@ -943,12 +943,17 @@ module Gitlab
 
         columns = Array.wrap(columns)
 
-        column_definitions = columns.map { |column| column_for(table, column) }
-        temporary_columns = columns.map { |column| "#{column}_convert_to_bigint" }
+        columns.each do |column|
+          unless column_exists?(table, column)
+            raise ArgumentError, "Column #{column} does not exist on #{table}"
+          end
+        end
+
+        conversions = columns.to_h { |column| [column, "#{column}_convert_to_bigint"] }
 
         with_lock_retries do
-          column_definitions.each_with_index do |column, i|
-            temporary_name = temporary_columns[i]
+          conversions.each do |(source_column, temporary_name)|
+            column = column_for(table, source_column)
 
             if (column.name.to_s == primary_key.to_s) || !column.null
               # If the column to be converted is either a PK or is defined as NOT NULL,
@@ -961,7 +966,7 @@ module Gitlab
             end
           end
 
-          install_rename_triggers(table, columns, temporary_columns)
+          install_rename_triggers(table, conversions.keys, conversions.values)
         end
       end
 
