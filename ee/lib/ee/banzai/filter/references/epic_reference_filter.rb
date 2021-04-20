@@ -11,15 +11,13 @@ module EE
         module EpicReferenceFilter
           extend ActiveSupport::Concern
 
-          class_methods do
-            def references_in(text, pattern = object_class.reference_pattern)
-              text.gsub(pattern) do |match|
-                symbol = $~[object_sym]
-                if object_class.reference_valid?(symbol)
-                  yield match, symbol.to_i, nil, $~[:group], $~
-                else
-                  match
-                end
+          def references_in(text, pattern = object_class.reference_pattern)
+            text.gsub(pattern) do |match|
+              symbol = $~[object_sym]
+              if object_class.reference_valid?(symbol)
+                yield match, symbol.to_i, nil, $~[:group], $~
+              else
+                match
               end
             end
           end
