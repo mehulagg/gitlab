@@ -1,3 +1,0 @@
-mutation updateSubscription($planId: String!, $quantity: Number!, $namespaceId: ID!, $namespaceName: String!) {
-  updateSubscription(planId: $planId, quantity: $quantity, namespaceId: $namespaceId, namespaceName: $namespaceName) @client
-}
