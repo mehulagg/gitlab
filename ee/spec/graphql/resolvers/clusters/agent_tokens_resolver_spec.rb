@@ -14,8 +14,8 @@ RSpec.describe Resolvers::Clusters::AgentTokensResolver do
     let(:feature_available) { true }
     let(:ctx) { Hash(current_user: user) }
 
-    let!(:matching_token1) { create(:cluster_agent_token, agent: agent) }
-    let!(:mathcing_token2) { create(:cluster_agent_token, agent: agent) }
+    let!(:matching_token1) { create(:cluster_agent_token, agent: agent, last_used_at: 5.days.ago) }
+    let!(:matching_token2) { create(:cluster_agent_token, agent: agent, last_used_at: 2.days.ago) }
     let!(:other_token) { create(:cluster_agent_token) }
 
     subject { resolve(described_class, obj: agent, ctx: ctx) }
@@ -24,8 +24,8 @@ RSpec.describe Resolvers::Clusters::AgentTokensResolver do
       stub_licensed_features(cluster_agents: feature_available)
     end
 
-    it 'returns tokens associated with the agent' do
-      expect(subject).to contain_exactly(matching_token1, mathcing_token2)
+    it 'returns tokens associated with the agent, ordered by last_used_at' do
+      expect(subject).to eq([matching_token2, matching_token1])
     end
 
     context 'feature is not available' do
