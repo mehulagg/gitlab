@@ -17,6 +17,7 @@ You can:
 - [Set appropriate roles to your project](#setting-appropriate-roles-to-your-project)
 - [Protect production secrets](#protect-production-secrets)
 - [Separate project for deployments](#separate-project-for-deployments)
+- [Specify environment is used for production](#specify-environment-is-used-for-production)
 
 If you are using a continuous deployment workflow and want to ensure that concurrent deployments to the same environment do not happen, you should enable the following options:
 
@@ -162,3 +163,17 @@ build:service-b:
 
 The [Skip outdated deployment jobs](../pipelines/settings.md#skip-outdated-deployment-jobs) might
 not work well with this configuration, and must be disabled.
+
+## Specify environment is used for production
+
+Production environments can be named anything, for example: `customer portal` and do not have to follow a specific naming convention. This is especially true for multiple produciton environments. This naming flexability makes it hard for internal users to now which environment is indeed used for produciton. We have added a new keyword called `deployment_tier`, which can be used directly in the `.gitlab-ci.yml` file to indicate the use of a specific environment. 
+
+For example:
+
+```
+deploy:
+  script: echo
+  environment:
+    name: customer-portal
+    deployment_tier: production
+```
