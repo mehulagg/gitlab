@@ -6262,6 +6262,12 @@ An edge in a connection.
 | `cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | `node` | [`Submodule`](#submodule) | The item at the end of the edge. |
 
+### `Subscription`
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `issuableAssigneesUpdated` | [`Issuable`](#issuable) | Triggered when the assignees of an issuable are updated. |
+
 ### `TaskCompletionStatus`
 
 Completion status of tasks.
@@ -9003,6 +9009,12 @@ An example `IncidentManagementOncallRotationID` is: `"gid://gitlab/IncidentManag
 
 Represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.
 
+### `IssuableID`
+
+A `IssuableID` is a global ID. It is encoded as a string.
+
+An example `IssuableID` is: `"gid://gitlab/Issuable/1"`.
+
 ### `IssueID`
 
 A `IssueID` is a global ID. It is encoded as a string.
@@ -9211,6 +9223,16 @@ See the [GraphQL documentation](https://graphql.org/learn/) for more information
 abstract types.
 
 ### Unions
+
+#### `Issuable`
+
+Represents an issuable.
+
+One of:
+
+- [`Epic`](#epic)
+- [`Issue`](#issue)
+- [`MergeRequest`](#mergerequest)
 
 #### `PackageMetadata`
 

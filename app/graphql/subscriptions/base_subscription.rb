@@ -18,6 +18,12 @@ module Subscriptions
 
     private
 
+    def unauthorized!
+      unsubscribe if context.query.subscription_update?
+
+      raise GraphQL::ExecutionError, 'Unauthorized subscription'
+    end
+
     def current_user
       context[:current_user]
     end
