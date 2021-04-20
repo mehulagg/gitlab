@@ -36,7 +36,7 @@ RSpec.describe Gitlab::Tracking do
   end
 
   describe '.event' do
-    let(:namespace) { create(:namespace_with_plan, plan: :gold_plan) }
+    let(:namespace) { create(:namespace) }
 
     shared_examples 'delegates to destination' do |klass|
       before do
