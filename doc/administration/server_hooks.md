@@ -73,9 +73,9 @@ hook. The default global server hook directory is in the GitLab Shell directory.
 hook added there applies to all repositories, including:
 
 - [Project and group wiki](../user/project/wiki/index.md) repositories,
-  whose storage directory names carry the form `<id>.wiki.git`.
+  whose storage directory names are in the format `<id>.wiki.git`.
 - [Design management](../user/project/issues/design_management.md) repositories under a
-  project, whose storage directory names carry the form `<id>.design.git`.
+  project, whose storage directory names are in the format `<id>.design.git`.
 
 The default directory:
 
