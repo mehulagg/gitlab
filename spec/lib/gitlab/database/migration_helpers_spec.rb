@@ -1819,14 +1819,14 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
       it 'raises an error' do
         expect { model.backfill_conversion_of_integer_to_bigint(table, column) }
-          .to raise_error("Column #{column} does not exist on #{table}")
+          .to raise_error(ArgumentError, "Column #{column} does not exist on #{table}")
       end
     end
 
     context 'when the temporary column does not exist' do
       it 'raises an error' do
         expect { model.backfill_conversion_of_integer_to_bigint(table, column) }
-          .to raise_error("Column #{tmp_column} does not exist on #{table}")
+          .to raise_error(ArgumentError, "Column #{tmp_column} does not exist on #{table}")
       end
     end
 
@@ -1865,7 +1865,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
             interval: 120,
             batch_size: 2,
             sub_batch_size: 1,
-            job_arguments: [column.to_s, "#{column}_convert_to_bigint"]
+            job_arguments: [[column.to_s], ["#{column}_convert_to_bigint"]]
           )
         end
       end
@@ -1891,7 +1891,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
             interval: 120,
             batch_size: 2,
             sub_batch_size: 1,
-            job_arguments: [column.to_s, tmp_column, other_column.to_s, other_tmp_column]
+            job_arguments: [[column.to_s, other_column.to_s], [tmp_column, other_tmp_column]]
           )
         end
       end

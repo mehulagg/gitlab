@@ -66,13 +66,23 @@ RSpec.describe Gitlab::BackgroundMigration::CopyColumnUsingBackgroundMigrationJo
     end
 
     it 'copies multiple columns when given' do
-      columns_to_copy = %w[id id_convert_to_bigint fk fk_convert_to_bigint]
+      columns_to_copy_from = %w[id fk]
+      columns_to_copy_to = %w[id_convert_to_bigint fk_convert_to_bigint]
 
-      subject.perform(10, 15, table_name, 'id', sub_batch_size, *columns_to_copy)
+      subject.perform(10, 15, table_name, 'id', sub_batch_size, columns_to_copy_from, columns_to_copy_to)
 
       expect(test_table.where('id = id_convert_to_bigint AND fk = fk_convert_to_bigint').pluck(:id)).to contain_exactly(11, 12, 15)
       expect(test_table.where(id_convert_to_bigint: 0).where(fk_convert_to_bigint: 0).pluck(:id)).to contain_exactly(19)
       expect(test_table.all.count).to eq(4)
+    end
+
+    it 'raises error when number of source and target columns does nto match' do
+      columns_to_copy_from = %w[id fk]
+      columns_to_copy_to = %w[id_convert_to_bigint]
+
+      expect do
+        subject.perform(10, 15, table_name, 'id', sub_batch_size, columns_to_copy_from, columns_to_copy_to)
+      end.to raise_error(ArgumentError, 'number of source and destination columns must match')
     end
 
     it 'tracks timings of queries' do

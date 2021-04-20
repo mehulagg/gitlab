@@ -1018,19 +1018,21 @@ module Gitlab
           raise "Column #{primary_key} does not exist on #{table}"
         end
 
-        columns = Array.wrap(columns)
-        temporary_columns = columns.map { |column| "#{column}_convert_to_bigint" }
-        job_arguments = columns.zip(temporary_columns).flatten
+        conversions = Array.wrap(columns).to_h do |column|
+          raise ArgumentError, "Column #{column} does not exist on #{table}" unless column_exists?(table, column)
 
-        job_arguments.each do |column|
-          raise "Column #{column} does not exist on #{table}" unless column_exists?(table, column)
+          temporary_name = "#{column}_convert_to_bigint"
+          raise ArgumentError, "Column #{temporary_name} does not exist on #{table}" unless column_exists?(table, temporary_name)
+
+          [column, temporary_name]
         end
 
         batched_migration = queue_batched_background_migration(
           'CopyColumnUsingBackgroundMigrationJob',
           table,
           primary_key,
-          *job_arguments,
+          conversions.keys,
+          conversions.values,
           job_interval: interval,
           batch_size: batch_size,
           sub_batch_size: sub_batch_size)
