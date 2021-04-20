@@ -97,6 +97,8 @@ gitops:
 
 ## Surface network security alerts from cluster to GitLab
 
+The GitLab Agent also provides an [integration with Cilium](https://docs.gitlab.com/ee/user/clusters/agent/#kubernetes-network-security-alerts). Your `config.yaml` file should contain a top-level `cilium` section. Currently, the only configuration option is the Hubble relay address.
+
 NOTE:
 If your Cilium integration was performed through GitLab Managed Apps, you can use `hubble-relay.gitlab-managed-apps.svc.cluster.local:80`.
 
@@ -107,7 +109,7 @@ cilium:
 
 ## Debugging
 
-An `agentk` pods' log level can be specified using
+In order to debug the cluster-side component (`agentk`) of the GitLab Kubernetes Agent, its log level can be set in the configuration. The default log level is `info`. The log level can be set using a top level `observability` section as shown below.
 
 ```yaml
 observability:
