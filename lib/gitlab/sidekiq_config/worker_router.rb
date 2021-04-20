@@ -3,7 +3,7 @@
 module Gitlab
   module SidekiqConfig
     class WorkerRouter
-      InvalidRoutingRule = Class.new(StandardError)
+      InvalidRoutingRuleError = Class.new(StandardError)
       RuleEvalurator = Struct.new(:matcher, :queue_name)
 
       def self.queue_name_from_worker_name(worker_klass)
@@ -69,11 +69,11 @@ module Gitlab
       private
 
       def parse_routing_rules(routing_rules)
-        raise InvalidRoutingRule, 'The set of routing rule should be an array' unless routing_rules.is_a?(Array)
+        raise InvalidRoutingRuleError, 'The set of routing rule should be an array' unless routing_rules.is_a?(Array)
 
         routing_rules.map do |rule_tuple|
-          if !rule_tuple.is_a?(Array) || !rule_tuple.length == 2
-            raise InvalidRoutingRule, "Routing rule `#{rule_tuple.inspect}` is invalid"
+          if !rule_tuple.is_a?(Array) || rule_tuple.length != 2
+            raise InvalidRoutingRuleError, "Routing rule `#{rule_tuple.inspect}` is invalid"
           end
 
           RuleEvalurator.new(
