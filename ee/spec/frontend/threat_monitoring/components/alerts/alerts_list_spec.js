@@ -44,6 +44,9 @@ describe('AlertsList component', () => {
   const findStartedAtColumnHeader = () => wrapper.findByTestId('threat-alerts-started-at-header');
   const findIdColumn = () => wrapper.findByTestId('threat-alerts-id');
   const findEventCountColumn = () => wrapper.findByTestId('threat-alerts-event-count');
+  const findIssueColumn = () => wrapper.findByTestId('threat-alerts-issue');
+  const findIssueColumnTextAt = (id) =>
+    wrapper.findAll('[data-testid="threat-alerts-issue"').at(id).text();
   const findStatusColumn = () => wrapper.findComponent(AlertStatus);
   const findStatusColumnHeader = () => wrapper.findByTestId('threat-alerts-status-header');
   const findEmptyState = () => wrapper.findByTestId('threat-alerts-empty-state');
@@ -128,6 +131,7 @@ describe('AlertsList component', () => {
       expect(findStartedAtColumn().exists()).toBe(true);
       expect(findIdColumn().exists()).toBe(true);
       expect(findEventCountColumn().exists()).toBe(true);
+      expect(findIssueColumn().exists()).toBe(true);
       expect(findStatusColumn().exists()).toBe(true);
     });
 
@@ -170,6 +174,17 @@ describe('AlertsList component', () => {
 
     it('navigates to the alert details page on title click', () => {
       expect(findIdColumn().attributes('href')).toBe('/alerts/01');
+    });
+
+    describe('issue column', () => {
+      it.each`
+        description                                 | id   | text
+        ${'when an issue is created and is open'}   | ${0} | ${'#5'}
+        ${'when an issue is created and is closed'} | ${1} | ${'#6 (closed)'}
+        ${'when an issue is not created'}           | ${2} | ${'None'}
+      `('displays the correct text $description', ({ id, text }) => {
+        expect(findIssueColumnTextAt(id)).toBe(text);
+      });
     });
   });
 

@@ -16,7 +16,15 @@ import { joinPaths } from '~/lib/utils/url_utility';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
-import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES, DOMAIN } from './constants';
+import {
+  DEFAULT_FILTERS,
+  FIELDS,
+  MESSAGES,
+  PAGE_SIZE,
+  STATUSES,
+  DOMAIN,
+  CLOSED,
+} from './constants';
 
 export default {
   PAGE_SIZE,
@@ -25,6 +33,7 @@ export default {
     FIELDS,
     MESSAGES,
     STATUSES,
+    CLOSED,
   },
   components: {
     AlertStatus,
@@ -119,6 +128,12 @@ export default {
 
       this.sort = `${sortingColumn}_${sortingDirection}`;
     },
+    getIssueMeta({ issue: { iid, state } }) {
+      return {
+        state: state === 'closed' ? `(${this.$options.i18n.CLOSED})` : '',
+        link: joinPaths('/', this.projectPath, '-', 'issues/incident', iid),
+      };
+    },
     handleAlertError(msg) {
       this.errored = true;
       this.errorMsg = msg;
@@ -196,6 +211,19 @@ export default {
         <div data-testid="threat-alerts-event-count">
           {{ item.eventCount }}
         </div>
+      </template>
+
+      <template #cell(issue)="{ item }">
+        <gl-link
+          v-if="item.issue"
+          v-gl-tooltip
+          :title="item.issue.title"
+          data-testid="threat-alerts-issue"
+          :href="getIssueMeta(item).link"
+        >
+          #{{ item.issue.iid }} {{ getIssueMeta(item).state }}
+        </gl-link>
+        <div v-else data-testid="threat-alerts-issue">{{ __('None') }}</div>
       </template>
 
       <template #cell(status)="{ item }">
