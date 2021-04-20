@@ -102,7 +102,7 @@ module AvatarsHelper
     if resource.is_a?(User)
       user_avatar_without_link(options.merge(user: resource))
     elsif resource.is_a?(Group)
-      group_icon(resource, options)
+      group_icon(resource, options.merge(class: 'avatar'))
     end
   end
 
@@ -144,9 +144,14 @@ module AvatarsHelper
 
   def source_identicon(source, options = {})
     bg_key = (source.id % 7) + 1
+    identicon_size = options[:size]
 
     options[:class] =
       [*options[:class], "identicon bg#{bg_key}"].join(' ')
+
+    unless identicon_size.nil?
+      options[:class] = [*options[:class], "s#{identicon_size}"].join(' ')
+    end
 
     content_tag(:div, class: options[:class].strip) do
       source.name[0, 1].upcase
