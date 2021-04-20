@@ -170,7 +170,7 @@ Production environments can be named anything, for example: `customer portal` an
 
 For example:
 
-```
+```yaml
 deploy:
   script: echo
   environment:
