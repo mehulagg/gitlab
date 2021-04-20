@@ -66,7 +66,7 @@ describe('Subscription Sync Notifications', () => {
     });
 
     it('displays an alert with a failure message', () => {
-      expect(findFailureAlert().text()).toContain('There is a connectivity Issue');
+      expect(findFailureAlert().text()).toContain('There is a connectivity issue');
     });
 
     it('displays a link', () => {
