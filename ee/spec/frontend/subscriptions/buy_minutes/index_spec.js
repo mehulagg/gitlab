@@ -2,7 +2,7 @@ import { GlEmptyState } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { createWrapper } from '@vue/test-utils';
 import * as utils from 'ee/subscriptions/buy_minutes/utils';
-import initBuyMinutesApp from 'ee/subscriptions/';
+import initBuyMinutesApp from 'ee/subscriptions/buy_minutes';
 import StepOrderApp from 'ee/vue_shared/purchase_flow/components/step_order_app.vue';
 import { mockCiMinutesPlans, mockParsedCiMinutesPlans } from './mock_data';
 

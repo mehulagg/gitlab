@@ -2,7 +2,7 @@ import { mount, createLocalVue } from '@vue/test-utils';
 import { merge } from 'lodash';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
-import SubscriptionDetails from 'ee/subscriptions/components/checkout/subscription_details.vue';
+import SubscriptionDetails from 'ee/subscriptions/buy_minutes/components/checkout/subscription_details.vue';
 import stateQuery from 'ee/subscriptions/graphql/queries/state.query.graphql';
 import subscriptionsResolvers from 'ee/subscriptions/buy_minutes/graphql/resolvers';
 import { NEW_GROUP } from 'ee/subscriptions/new/constants';
@@ -11,7 +11,7 @@ import purchaseFlowResolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers
 import {
   stateData as initialStateData,
   namespaces as defaultNamespaces,
-} from 'ee_jest/subscriptions/mock_data';
+} from 'ee_jest/subscriptions/buy_minutes/mock_data';
 import createMockApollo from 'helpers/mock_apollo_helper';
 
 const localVue = createLocalVue();

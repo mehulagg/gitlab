@@ -3,10 +3,10 @@ import { merge } from 'lodash';
 import VueApollo from 'vue-apollo';
 import ProgressBar from 'ee/registrations/components/progress_bar.vue';
 import subscriptionsResolvers from 'ee/subscriptions/buy_minutes/graphql/resolvers';
-import Checkout from 'ee/subscriptions/components/checkout.vue';
+import Checkout from 'ee/subscriptions/buy_minutes/components/checkout.vue';
 import stateQuery from 'ee/subscriptions/graphql/queries/state.query.graphql';
 import purchaseFlowResolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers';
-import { stateData as initialStateData } from 'ee_jest/subscriptions/mock_data';
+import { stateData as initialStateData } from 'ee_jest/subscriptions/buy_minutes/mock_data';
 import createMockApollo from 'helpers/mock_apollo_helper';
 
 const localVue = createLocalVue();
