@@ -38,3 +38,5 @@ module Types
     end
   end
 end
+
+Types::Repository::BlobType.prepend_if_ee('::EE::Types::Repository::BlobType')
