@@ -1,0 +1,43 @@
+- title: GitLab Kubernetes Agent available on GitLab.com
+  body: | 
+    The GitLab Kubernetes Agent is finally available on GitLab.com. By using the Agent, you can benefit from fast, pull-based deployments to your cluster, while GitLab.com manages the necessary server-side components of the Agent. The GitLab Kubernetes Agent is the core building block of GitLab's Kubernetes integrations. The Agent-based integration today supports pull-based deployments and Network Security policy integration and alerts, and will soon receive support for push-based deployments too.
+
+    Unlike the legacy, certificate-based Kubernetes integration, the GitLab Kubernetes Agent does not require opening up your cluster towards GitLab and allows fine-tuned RBAC controls around GitLab's capabilities within your clusters.
+  stage: Configure
+  self-managed: true
+  gitlab-com: true
+  packages: [Premium, Ultimate]
+  url: https://docs.gitlab.com/ee/user/clusters/agent/
+  image_url: https://img.youtube.com/vi/4Sh5bghbAjY/hqdefault.jpg
+  published_at: 2021-04-22
+  release: 13.11
+- title: Compliance pipeline configurations 
+  body: | 
+    We are thrilled to announce that it is now possible to define enforceable pipelines that will run for any project assigned a corresponding [compliance framework](https://docs.gitlab.com/ee/user/project/settings/#compliance-framework).
+
+    For teams looking to implement compliance requirements in the pipeline workflow, they can now enforce even more separation of duties by setting up a single pipeline definition for a specific compliance framework. All projects using that framework will include the predefined pipeline automatically. Users extend, but cannot modify, the pipeline configuration in the downstream projects, ensuring that compliance steps are run the same way every time.
+
+    This saves security and compliance teams time by eliminating the need to manually copy a pipeline configuration to every project that needs it and then monitoring to prevent edits or removal. It also helps development teams follow policies without requiring them to become experts in compliance.
+
+    Check out the [video walkthrough](https://www.youtube.com/embed/upLJ_equomw) to see its setup and implementation!
+  stage: Manage
+  self-managed: true
+  gitlab-com: true
+  packages: [Ultimate]
+  url: https://docs.gitlab.com/ee/user/project/settings/#compliance-pipeline-configuration
+  image_url: https://img.youtube.com/vi/upLJ_equomw/hqdefault.jpg 
+  published_at: 2021-04-22
+  release: 13.11
+- title: On-call schedule management
+  body: | 
+    Software services do not get "turned off" at the end of the business day. Your customers expect 24/7 availability. When things go wrong, you need a team (or multiple teams!) that can quickly and effectively respond to service outages.
+
+    Being on-call can be a stressful job. To better manage stress and burn-out, most teams rotate this on-call responsibility. GitLab's **on-call schedule management** allows you and your team to create and manage schedules for on-call responsibilities. Alerts received in GitLab through an HTTP endpoint are routed to the on-call engineer in the schedule for that specific project.
+  stage: Monitor
+  self-managed: true
+  gitlab-com: true
+  packages: [Premium, Ultimate]
+  url: https://docs.gitlab.com/ee/operations/incident_management/oncall_schedules.html
+  image_url:  https://img.youtube.com/vi/QXfCQ24-Ufo/hqdefault.jpg
+  published_at: 2021-04-22
+  release: 13.11
