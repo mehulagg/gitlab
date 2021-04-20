@@ -14,6 +14,12 @@ working on the GitLab codebase.
 This documentation does not yet include the internal API used by
 GitLab Pages.
 
+## Adding new endpoints
+
+API endpoints should be externally accessible by default, with proper authentication and authorization.
+Before adding a new internal endpoint, consider if the API would potentially be
+useful to the wider GitLab community and can be made externally accessible.
+
 ## Authentication
 
 These methods are all authenticated using a shared secret. This secret
