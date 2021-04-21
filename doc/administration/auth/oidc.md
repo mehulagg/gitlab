@@ -193,6 +193,90 @@ Example Omnibus configuration block:
 
 Microsoft has documented how its platform works with [the OIDC protocol](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc).
 
+### Microsoft Azure Active Directory B2C
+
+GitLab works with Azure Active Directory B2C, but it requires special
+configuration to work. To get started, sign in to the [Azure Portal](https://portal.azure.com).
+For your app, you'll need the following information:
+
+- A tenant ID. You may already have one. For more information, review the
+  [Microsoft Azure Tenant](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-create-new-tenant) documentation.
+- A client ID and a client secret. Follow the instructions in the
+  [Microsoft tutorial](https://docs.microsoft.com/en-us/azure/active-directory-b2c/tutorial-register-applications?tabs=app-reg-ga) documentation to obtian the
+  client ID and client secret for your app.
+- The user flow ID. Follow the instructions in the [Microsoft tutorial](https://docs.microsoft.com/en-us/azure/active-directory-b2c/tutorial-create-user-flows?pivots=b2c-user-flow).
+
+If your GitLab domain is `gitlab.example.com`, ensure the app has a `Redirect URI` with the following:
+
+`https://gitlab.example.com/users/auth/openid_connect/callback`
+
+In addition, ensure that [ID tokens are enabled](https://docs.microsoft.com/en-us/azure/active-directory-b2c/tutorial-register-applications?tabs=app-reg-ga#enable-id-token-implicit-grant).
+
+Add the following API permissions to the app:
+
+1. `openid`
+1. `offline_access`
+
+#### Issuer URL
+
+For OIDC discovery to work with B2C, the user flow will have to be
+configured with an issuer compatible with the [OIDC specification](https://openid.net/specs/openid-connect-discovery-1_0.html#rfc.section.4.3).
+Under the [`Token compatibility settings`](https://docs.microsoft.com/en-us/azure/active-directory-b2c/configure-tokens?pivots=b2c-user-flow#token-compatibility-settings) in the `User flows -> Properties` setting, click on the `Issuer (iss) claim`. You should see a dropdown with two items:
+
+![Azure B2C issuer claim](img/azure_b2c_issuer_dropdown.png)
+
+Select the issuer that contains `tfp`. Note that this endpoint
+contains both the tenant ID and user flow policy name.
+
+Once you click on that issuer, the `Token compatibility settings` should look something like this:
+
+![Azure B2C issuer claim](img/azure_b2c_token_compatibilty.png)
+
+The issuer URL will now be in the form:
+
+`https://<YOUR-DOMAIN>/tfp/<YOUR-TENANT-ID>/<YOUR-POLICY-NAME>/v2.0/`
+
+Note that the trailing backslash is required.
+
+To verify the OIDC discovery URL and issuer URL is working, append `.well-known/openid-configuration`
+to the issuer URL:
+
+`https://<YOUR-DOMAIN>/tfp/<YOUR-TENANT-ID>/<YOUR-POLICY-NAME>/v2.0/.well-known/openid-configuration``
+
+For example, if `domain` is `example.b2clogin.com` and tenant ID is
+`fc40c736-476c-4da1-b489-ee48cee84386`, you can use `curl` and `jq` to
+extract the issuer:
+
+```sh
+$ curl -s "https://example.b2clogin.com/tfp/fc40c736-476c-4da1-b489-ee48cee84386/b2c_1_test/v2.0/.well-known/openid-configuration" | jq .issuer
+"https://example.b2clogin.com/tfp/fc40c736-476c-4da1-b489-ee48cee84386/b2c_1_test/v2.0/"
+```
+
+Example Omnibus configuration block:
+
+```ruby
+gitlab_rails['omniauth_providers'] = [
+{
+  'name' => 'openid_connect',
+  'label' => 'Azure B2C OIDC',
+  'args' => {
+    'name' => 'openid_connect',
+    'scope' => ['openid'],
+    'response_mode' => 'query',
+    'response_type' => 'id_token',
+    'issuer' =>  'https://<YOUR-DOMAIN>/tfp/<YOUR-TENANT-ID>/<YOUR-POLICY-NAME>/v2.0/',
+    'client_auth_method' => 'query',
+    'discovery' => true,
+    'send_scope_to_token_endpoint' => true,
+    'client_options' => {
+      'identifier' => '<YOUR APP CLIENT ID>',
+      'secret' => '<YOUR APP CLIENT SECRET>',
+      'redirect_uri' => 'https://gitlab.example.com/users/auth/openid_connect/callback'
+    }
+  }
+}
+```
+
 ## Troubleshooting
 
 If you're having trouble, here are some tips:
