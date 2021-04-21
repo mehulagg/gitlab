@@ -1,5 +1,5 @@
 ---
-title: Add clone issue to api
+title: Add API endpoint for cloning an existing issue
 merge_request: 57740
 author:
 type: added
