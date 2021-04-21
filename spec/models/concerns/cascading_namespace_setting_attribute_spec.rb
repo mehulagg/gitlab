@@ -164,13 +164,13 @@ RSpec.describe NamespaceSetting, 'CascadingNamespaceSettingAttribute' do
     end
   end
 
-  describe '#delayed_projet_removal=' do
+  describe '#delayed_project_removal=' do
     before do
       subgroup_settings.update!(delayed_project_removal: nil)
       group_settings.update!(delayed_project_removal: true)
     end
 
-    it 'does not save the value locally when it maches the cascaded value' do
+    it 'does not save the value locally when it matches the cascaded value' do
       subgroup_settings.update!(delayed_project_removal: true)
 
       expect(subgroup_settings.read_attribute(:delayed_project_removal)).to eq(nil)
