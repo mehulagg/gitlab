@@ -1,6 +1,10 @@
 .detail-page-description.milestone-detail
   %h2.gl-m-0{ data: { qa_selector: "milestone_title_content" } }
     = markdown_field(milestone, :title)
+    - if can?(current_user, :read_milestone, @milestone)
+      - button_class = "btn gl-button btn-sm btn-tertiary btn-default-tertiary home-panel-metadata"
+      - button_text = s_('MilestonePage|Milestone ID: %{milestone_id}') % { milestone_id: @milestone.id }
+      = clipboard_button(title: s_('MilestonePage|Copy milestone ID'), text: @milestone.id, hide_button_icon: true, button_text: button_text, class: button_class, qa_selector: 'milestone_id_content', itemprop: 'identifier')
 
   - if milestone.try(:description).present?
     %div{ data: { qa_selector: "milestone_description_content" } }
