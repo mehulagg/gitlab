@@ -6360,13 +6360,13 @@ Tiers: `free`
 
 The version of the PostgreSQL database.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210216175609_version.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216175609_version.yml)
 
 Group: `group::distribution`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `dependency_proxy_enabled`
 
@@ -6384,7 +6384,7 @@ Tiers: `free`
 
 Edition of GitLab such as EE or CE
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210216175604_edition.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216175604_edition.yml)
 
 Group: `group::distribution`
 
@@ -6506,11 +6506,11 @@ Whether shared runners is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124902_gitlab_shared_runners_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::runner`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `gitpod_enabled`
 
@@ -16212,11 +16212,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.verify.clusters_applications_runner`
 
-Total GitLab Managed clusters with Runner enabled
+Count of users creating managed clusters with Runner enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181949_clusters_applications_runner.yml)
 
-Group: `group::runner`
+Group: `group::configure`
 
 Status: `data_available`
 
