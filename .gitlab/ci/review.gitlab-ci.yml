@@ -67,6 +67,7 @@ review-deploy:
     - export GITLAB_WORKHORSE_VERSION=$(<GITLAB_WORKHORSE_VERSION)
     - echo "${CI_ENVIRONMENT_URL}" > environment_url.txt
     - *base-before_script
+    - install_gitlab_gem
   script:
     - check_kube_domain
     - ensure_namespace
