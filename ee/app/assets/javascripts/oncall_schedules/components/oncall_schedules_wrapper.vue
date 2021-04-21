@@ -2,6 +2,7 @@
 import { GlAlert, GlButton, GlEmptyState, GlLoadingIcon, GlModalDirective } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import AddScheduleModal from './add_edit_schedule_modal.vue';
 import OncallSchedule from './oncall_schedule.vue';
@@ -37,15 +38,16 @@ export default {
   directives: {
     GlModal: GlModalDirective,
   },
+  mixins: [glFeatureFlagMixin()],
   inject: ['emptyOncallSchedulesSvgPath', 'projectPath'],
   data() {
     return {
-      schedule: {},
+      schedules: [],
       showSuccessNotification: false,
     };
   },
   apollo: {
-    schedule: {
+    schedules: {
       query: getOncallSchedulesWithRotationsQuery,
       variables() {
         return {
@@ -54,7 +56,10 @@ export default {
       },
       update(data) {
         const nodes = data.project?.incidentManagementOncallSchedules?.nodes ?? [];
-        return nodes.length ? nodes[nodes.length - 1] : null;
+        if (this.glFeatures.multipleOncallSchedules) {
+          return nodes;
+        }
+        return nodes.length ? [nodes[nodes.length - 1]] : [];
       },
       error(error) {
         Sentry.captureException(error);
@@ -63,7 +68,10 @@ export default {
   },
   computed: {
     isLoading() {
-      return this.$apollo.queries.schedule.loading;
+      return this.$apollo.queries.schedules.loading;
+    },
+    hasSchedules() {
+      return this.schedules.length;
     },
   },
 };
@@ -73,8 +81,19 @@ export default {
   <div>
     <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3" />
 
-    <template v-else-if="schedule">
-      <h2>{{ $options.i18n.title }}</h2>
+    <template v-else-if="hasSchedules">
+      <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
+        <h2>{{ $options.i18n.title }}</h2>
+        <gl-button
+          v-if="glFeatures.multipleOncallSchedules"
+          v-gl-modal="$options.addScheduleModalId"
+          category="secondary"
+          variant="confirm"
+          class="gl-mt-5"
+        >
+          {{ $options.i18n.emptyState.button }}
+        </gl-button>
+      </div>
       <gl-alert
         v-if="showSuccessNotification"
         variant="tip"
@@ -84,7 +103,7 @@ export default {
       >
         {{ $options.i18n.successNotification.description }}
       </gl-alert>
-      <oncall-schedule :schedule="schedule" />
+      <oncall-schedule v-for="schedule in schedules" :key="schedule.iid" :schedule="schedule" />
     </template>
 
     <gl-empty-state
@@ -94,7 +113,7 @@ export default {
       :svg-path="emptyOncallSchedulesSvgPath"
     >
       <template #actions>
-        <gl-button v-gl-modal="$options.addScheduleModalId" variant="info">
+        <gl-button v-gl-modal="$options.addScheduleModalId" variant="confirm">
           {{ $options.i18n.emptyState.button }}
         </gl-button>
       </template>

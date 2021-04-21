@@ -22311,6 +22311,9 @@ msgstr ""
 msgid "OnCallSchedules|Are you sure you want to delete the \"%{deleteSchedule}\" schedule? This action cannot be undone."
 msgstr ""
 
+msgid "OnCallSchedules|Collapse schedule"
+msgstr ""
+
 msgid "OnCallSchedules|Create on-call schedules  in GitLab"
 msgstr ""
 
@@ -22330,6 +22333,9 @@ msgid "OnCallSchedules|Edit schedule"
 msgstr ""
 
 msgid "OnCallSchedules|Enable end date"
+msgstr ""
+
+msgid "OnCallSchedules|Expand schedule"
 msgstr ""
 
 msgid "OnCallSchedules|Failed to add rotation"

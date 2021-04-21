@@ -29,8 +29,8 @@ export default {
       validator: (rotation) =>
         isEmpty(rotation) || [rotation.id, rotation.name, rotation.startsAt].every(Boolean),
     },
-    scheduleIid: {
-      type: String,
+    schedule: {
+      type: Object,
       required: true,
     },
     modalId: {
@@ -65,7 +65,7 @@ export default {
       const {
         projectPath,
         rotation: { id },
-        scheduleIid,
+        schedule: { iid },
       } = this;
 
       this.loading = true;
@@ -74,14 +74,14 @@ export default {
           mutation: destroyOncallRotationMutation,
           variables: {
             id,
-            scheduleIid,
+            scheduleIid: iid,
             projectPath,
           },
           update(store, { data }) {
             updateStoreAfterRotationDelete(
               store,
               getOncallSchedulesQuery,
-              { ...data, scheduleIid },
+              { ...data, scheduleIid: iid },
               {
                 projectPath,
               },
@@ -93,6 +93,7 @@ export default {
           if (error) {
             throw error;
           }
+          this.$emit('fetch-rotation-shifts');
           this.$refs.deleteRotationModal.hide();
         })
         .catch((error) => {
