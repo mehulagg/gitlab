@@ -186,5 +186,15 @@ RSpec.describe PipelineDetailsEntity do
     end
 
     it_behaves_like 'public artifacts'
+
+    context 'when pipeline has artifacts' do
+      let(:pipeline) { create(:ci_pipeline, :with_codequality_reports) }
+
+      it 'excludes artifacts data when disabled' do
+        entity = described_class.represent(pipeline, request: request, disable_artifacts: true)
+
+        expect(entity.as_json[:details]).not_to include(:artifacts)
+      end
+    end
   end
 end
