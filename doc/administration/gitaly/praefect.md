@@ -16,6 +16,11 @@ Configure Gitaly Cluster using either:
 
 Smaller GitLab installations may need only [Gitaly itself](index.md).
 
+NOTE:
+[Priority Support](https://about.gitlab.com/support/#priority-support) is required to receive GitLab Support assistance 
+in troubleshooting [scaled architectures](https://about.gitlab.com/support/#definition-of-scaled-architecture),
+including Gitaly Cluster.
+
 ## Requirements for configuring a Gitaly Cluster
 
 The minimum recommended configuration for a Gitaly Cluster requires:
