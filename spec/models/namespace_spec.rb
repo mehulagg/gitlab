@@ -224,6 +224,40 @@ RSpec.describe Namespace do
     it { expect(namespace.human_name).to eq(namespace.owner_name) }
   end
 
+  describe '#any_project_has_container_registry_tags?' do
+    subject { namespace.any_project_has_container_registry_tags? }
+
+    let!(:project_without_registry) { create(:project, namespace: namespace) }
+
+    context 'without tags' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'with tags' do
+      let!(:container_repositories) { create_list(:container_repository, 3) }
+      let!(:container_repositories2) { create_list(:container_repository, 2) }
+      let!(:project_with_registries) { create(:project, namespace: namespace, container_repositories: container_repositories) }
+      let!(:project_with_registries2) { create(:project, namespace: namespace, container_repositories: container_repositories2) }
+
+      before do
+        stub_container_registry_config(enabled: true)
+        stub_container_registry_tags(repository: :any, tags: ['tag'])
+      end
+
+      it { is_expected.to be_truthy }
+
+      it 'reduces queries' do
+        control_count = ActiveRecord::QueryRecorder.new { namespace.any_project_has_container_registry_tags? }.count
+
+        c1 = create(:container_repository)
+        c2 = create(:container_repository)
+        create(:project, namespace: namespace, container_repositories: [c1, c2])
+
+        expect { namespace.any_project_has_container_registry_tags? }.not_to exceed_query_limit(control_count)
+      end
+    end
+  end
+
   describe '#first_project_with_container_registry_tags' do
     let(:container_repository) { create(:container_repository) }
     let!(:project) { create(:project, namespace: namespace, container_repositories: [container_repository]) }
