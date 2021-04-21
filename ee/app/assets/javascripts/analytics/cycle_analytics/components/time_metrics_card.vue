@@ -1,7 +1,7 @@
 <script>
-import Api from 'ee/api';
 import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { GlSingleStat } from '@gitlab/ui/dist/charts';
+import Api from 'ee/api';
 import createFlash from '~/flash';
 import { sprintf, __, s__ } from '~/locale';
 import { OVERVIEW_METRICS } from '../constants';
@@ -88,9 +88,9 @@ export default {
   <gl-skeleton-loading v-if="loading" class="gl-h-auto gl-py-3 gl-pr-6" />
   <div v-else>
     <gl-single-stat
-      class="gl-pr-6"
       v-for="metric in data"
       :key="metric.key"
+      class="gl-pr-6"
       :value="metric.value"
       :title="metric.label"
       :unit="metric.unit || ''"
