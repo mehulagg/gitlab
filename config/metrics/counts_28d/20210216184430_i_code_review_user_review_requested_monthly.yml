@@ -6,7 +6,7 @@ product_group: group::code review
 product_category: code_review
 value_type: number
 status: data_available
-time_frame: 7d
+time_frame: 28d
 data_source: redis_hll
 distribution:
 - ce
