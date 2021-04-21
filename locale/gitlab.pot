@@ -11334,16 +11334,31 @@ msgstr ""
 msgid "DevopsReport|Adoption"
 msgstr ""
 
-msgid "DevopsReport|DevOps"
-msgstr ""
-
 msgid "DevopsReport|DevOps Score"
 msgstr ""
 
 msgid "DevopsReport|DevOps score metrics are based on usage over the last 30 days. Last updated: %{timestamp}."
 msgstr ""
 
+msgid "DevopsReport|High"
+msgstr ""
+
+msgid "DevopsReport|Leader usage"
+msgstr ""
+
+msgid "DevopsReport|Low"
+msgstr ""
+
+msgid "DevopsReport|Moderate"
+msgstr ""
+
 msgid "DevopsReport|Score"
+msgstr ""
+
+msgid "DevopsReport|Your score"
+msgstr ""
+
+msgid "DevopsReport|Your usage"
 msgstr ""
 
 msgid "Didn't receive a confirmation email?"
@@ -18921,9 +18936,6 @@ msgid "Latest pipeline for the most recent commit on this branch"
 msgstr ""
 
 msgid "Launch a ready-to-code development environment for your project."
-msgstr ""
-
-msgid "Lead"
 msgstr ""
 
 msgid "Lead Time"

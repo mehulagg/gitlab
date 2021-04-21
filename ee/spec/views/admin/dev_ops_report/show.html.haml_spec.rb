@@ -27,16 +27,6 @@ RSpec.describe 'admin/dev_ops_report/show.html.haml' do
 
       expect(rendered).not_to have_selector('#devops-adoption')
     end
-
-    it 'shows the timestamp of the latest record' do
-      assign(:metric, create(:dev_ops_report_metric, created_at: Time.utc(2012, 5, 1, 14, 30)).present)
-
-      render
-
-      page = Capybara.string(rendered)
-      note_node = page.find("div[data-testid='devops-score-note-text']")
-      expect(note_node.text).to include('Last updated: 2012-05-01 14:30.')
-    end
   end
 
   context 'when show_adoption? returns true' do
