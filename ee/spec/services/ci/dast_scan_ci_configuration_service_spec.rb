@@ -12,7 +12,7 @@ RSpec.describe Ci::DastScanCiConfigurationService do
           spider_timeout: 1000,
           target_timeout: 100,
           target_url: 'https://gitlab.local',
-          api_specification: 'https://gitlab.local/api.json',
+          api_specification_url: 'https://gitlab.local/api.json',
           use_ajax_spider: true,
           show_debug_messages: true,
           full_scan_enabled: true,
@@ -52,7 +52,7 @@ RSpec.describe Ci::DastScanCiConfigurationService do
       end
     end
 
-    context 'when additional, unknown, variables are provided' do
+    context 'when unknown variables are provided' do
       let(:params) do
         {
           target_url: 'https://gitlab.local',
@@ -77,7 +77,7 @@ RSpec.describe Ci::DastScanCiConfigurationService do
         YAML
       end
 
-      it 'they are ignored' do
+      it 'returns the YAML configuration of the On-Demand DAST scan' do
         expect(yaml_configuration).to eq(expected_yaml_configuration)
       end
     end
@@ -86,7 +86,7 @@ RSpec.describe Ci::DastScanCiConfigurationService do
       let(:params) do
         {
           target_url: 'https://gitlab.local',
-          api_specification: nil
+          api_specification_url: nil
         }
       end
 
@@ -102,7 +102,7 @@ RSpec.describe Ci::DastScanCiConfigurationService do
         YAML
       end
 
-      it 'is ignored' do
+      it 'returns the YAML configuration of the On-Demand DAST scan' do
         expect(yaml_configuration).to eq(expected_yaml_configuration)
       end
     end
@@ -121,7 +121,7 @@ RSpec.describe Ci::DastScanCiConfigurationService do
         YAML
       end
 
-      it 'specifies an empty dictionary for the variables field' do
+      it 'returns the YAML configuration of the On-Demand DAST scan' do
         expect(yaml_configuration).to eq(expected_yaml_configuration)
       end
     end

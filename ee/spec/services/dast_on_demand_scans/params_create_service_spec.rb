@@ -113,8 +113,8 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
       context 'when target_type=api' do
         let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project, target_type: :api) }
 
-        it 'returns params including the api_specificastion and omitting the target_url', :aggregate_failures do
-          expect(subject.payload[:api_specification]).to eq(dast_site_profile.dast_site.url)
+        it 'returns params including the api_specification_url and omitting the target_url', :aggregate_failures do
+          expect(subject.payload[:api_specification_url]).to eq(dast_site_profile.dast_site.url)
           expect(subject.payload[:target_url]).to be_nil
         end
       end
