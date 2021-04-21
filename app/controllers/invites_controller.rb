@@ -16,14 +16,14 @@ class InvitesController < ApplicationController
   feature_category :authentication_and_authorization
 
   def show
-    experiment('members/invite_email', actor: member).track(:opened) if initial_invite_email?
+    experiment('members/invite_email', actor: member).track(:opened) if Members::InviteEmailExperiment.initial_invite_email?(session[:invite_type])
 
     accept if skip_invitation_prompt?
   end
 
   def accept
     if member.accept_invite!(current_user)
-      experiment('members/invite_email', actor: member).track(:accepted) if initial_invite_email?
+      experiment('members/invite_email', actor: member).track(:accepted) if Members::InviteEmailExperiment.initial_invite_email?(session[:invite_type])
       session.delete(:invite_type)
 
       redirect_to invite_details[:path], notice: _("You have been granted %{member_human_access} access to %{title} %{name}.") %
@@ -55,10 +55,6 @@ class InvitesController < ApplicationController
 
   def set_invite_type
     session[:invite_type] = params[:invite_type] if params[:invite_type].in?([Members::InviteEmailExperiment::INVITE_TYPE])
-  end
-
-  def initial_invite_email?
-    session[:invite_type] == Members::InviteEmailExperiment::INVITE_TYPE
   end
 
   def skip_invitation_prompt?
@@ -94,6 +90,10 @@ class InvitesController < ApplicationController
     store_location_for :user, request.fullpath
 
     if user_sign_up?
+      set_invite_type
+      session[:invite_email] = member.invite_email
+      session[:originating_member_id] = member.id
+
       redirect_to new_user_registration_path(invite_email: member.invite_email), notice: _("To accept this invitation, create an account or sign in.")
     else
       redirect_to new_user_session_path(sign_in_redirect_params), notice: sign_in_notice

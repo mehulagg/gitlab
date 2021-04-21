@@ -96,7 +96,7 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
     context 'when registering using invitation email' do
       before do
         stub_application_setting(send_user_confirmation_email: send_email_confirmation)
-        visit invite_path(group_invite.raw_invite_token)
+        visit invite_path(group_invite.raw_invite_token, invite_type: Members::InviteEmailExperiment::INVITE_TYPE)
       end
 
       context 'with admin approval required enabled' do
@@ -151,16 +151,16 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
 
           it 'signs up and redirects to root page with all the project/groups invitation automatically accepted' do
             fill_in_sign_up_form(new_user)
-            confirm_email(new_user)
-            fill_in_sign_in_form(new_user)
             fill_in_welcome_form
 
-            expect(current_path).to eq(root_path)
+            expect(current_path).to eq(dashboard_projects_path)
             expect(page).to have_content(project.full_name)
 
             visit group_path(group)
 
             expect(page).to have_content(group.full_name)
+
+            # in here somewhere we can go to invites path first and properly track these items
           end
         end
 
