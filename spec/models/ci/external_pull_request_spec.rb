@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ExternalPullRequest do
+RSpec.describe ::Ci::ExternalPullRequest do
   let(:project) { create(:project) }
   let(:source_branch) { 'the-branch' }
   let(:status) { :open }

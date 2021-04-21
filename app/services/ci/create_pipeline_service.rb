@@ -41,7 +41,7 @@ module Ci
     # @param [Ci::TriggerRequest] trigger_request        The pipeline trigger triggers the pipeline creation.
     # @param [Ci::PipelineSchedule] schedule             The pipeline schedule triggers the pipeline creation.
     # @param [MergeRequest] merge_request                The merge request triggers the pipeline creation.
-    # @param [ExternalPullRequest] external_pull_request The external pull request triggers the pipeline creation.
+    # @param [Ci::ExternalPullRequest] external_pull_request The external pull request triggers the pipeline creation.
     # @param [Ci::Bridge] bridge                         The bridge job that triggers the downstream pipeline creation.
     # @param [String] content                            The content of .gitlab-ci.yml to override the default config
     #                                                    contents (e.g. .gitlab-ci.yml in repostiry). Mainly used for

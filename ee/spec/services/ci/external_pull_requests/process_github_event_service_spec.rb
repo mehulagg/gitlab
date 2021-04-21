@@ -67,7 +67,7 @@ RSpec.describe Ci::ExternalPullRequests::ProcessGithubEventService do
             expect(create_pipeline_service).to receive(:execute)
               .with(:external_pull_request_event, any_args)
 
-            expect { subject.execute(params) }.to change { ExternalPullRequest.count }.by(1)
+            expect { subject.execute(params) }.to change { ::Ci::ExternalPullRequest.count }.by(1)
           end
         end
 
@@ -78,9 +78,9 @@ RSpec.describe Ci::ExternalPullRequests::ProcessGithubEventService do
           it 'only saves pull request info' do
             expect(Ci::CreatePipelineService).not_to receive(:new)
 
-            expect { subject.execute(params) }.to change { ExternalPullRequest.count }.by(1)
+            expect { subject.execute(params) }.to change { ::Ci::ExternalPullRequest.count }.by(1)
 
-            pull_request = ExternalPullRequest.last
+            pull_request = ::Ci::ExternalPullRequest.last
 
             expect(pull_request).to be_persisted
             expect(pull_request.project).to eq(project)
