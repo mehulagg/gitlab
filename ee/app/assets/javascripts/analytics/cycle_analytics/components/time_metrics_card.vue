@@ -1,6 +1,7 @@
 <script>
 import Api from 'ee/api';
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
+import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import createFlash from '~/flash';
 import { sprintf, __, s__ } from '~/locale';
 import { OVERVIEW_METRICS } from '../constants';
@@ -20,7 +21,8 @@ const requestData = ({ requestType, groupPath, additionalParams }) => {
 export default {
   name: 'TimeMetricsCard',
   components: {
-    MetricCard,
+    GlSkeletonLoading,
+    GlSingleStat,
   },
   props: {
     groupPath: {
@@ -79,11 +81,20 @@ export default {
         });
     },
   },
-  render() {
-    return this.$scopedSlots.default({
-      metrics: this.data,
-      loading: this.loading,
-    });
-  },
 };
 </script>
+
+<template>
+  <gl-skeleton-loading v-if="loading" class="gl-h-auto gl-py-3 gl-pr-6" />
+  <div v-else>
+    <gl-single-stat
+      class="gl-pr-6"
+      v-for="metric in data"
+      :key="metric.key"
+      :value="metric.value"
+      :title="metric.label"
+      :unit="metric.unit || ''"
+      :should-animate="true"
+    />
+  </div>
+</template>
