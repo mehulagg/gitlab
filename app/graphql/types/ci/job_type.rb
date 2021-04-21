@@ -46,10 +46,6 @@ module Types
             type: Types::DurationType,
             null: true,
             description: 'How long this job was enqueued before starting.'
-      field :duration,
-            type: Types::DurationType,
-            null: true,
-            description: 'How long this job ran for, if it has started.'
 
       field :detailed_status, Types::Ci::DetailedStatusType, null: true,
             description: 'Detailed status of the job.'
