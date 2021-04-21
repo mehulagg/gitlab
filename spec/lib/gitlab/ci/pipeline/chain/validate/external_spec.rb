@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::External do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
+
   let(:pipeline) { build(:ci_empty_pipeline, user: user, project: project) }
   let!(:step) { described_class.new(pipeline, command) }
 
@@ -60,11 +61,35 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::External do
       allow(Labkit::Correlation::CorrelationId).to receive(:current_id).and_return('correlation-id')
     end
 
+    context 'with configuration values in ApplicationSetting' do
+      let(:alternate_validation_service_url) { 'https://alternate-validation-service.external/' }
+      let(:validation_service_token) { 'SECURE_TOKEN' }
+      let(:shorter_timeout) { described_class::DEFAULT_VALIDATION_REQUEST_TIMEOUT - 1 }
+
+      before do
+        stub_env('EXTERNAL_VALIDATION_SERVICE_TOKEN', 'TOKEN_IN_ENV')
+        allow(Gitlab::CurrentSettings.current_application_settings).to receive(:external_pipeline_validation_service_timeout).and_return(shorter_timeout)
+        allow(Gitlab::CurrentSettings.current_application_settings).to receive(:external_pipeline_validation_service_token).and_return(validation_service_token)
+        allow(Gitlab::CurrentSettings.current_application_settings).to receive(:external_pipeline_validation_service_url).and_return(alternate_validation_service_url)
+      end
+
+      it 'uses those values rather than env vars or defaults' do
+        expect(::Gitlab::HTTP).to receive(:post) do |url, params|
+          expect(url).to eq(alternate_validation_service_url)
+          expect(params[:timeout]).to eq(shorter_timeout)
+          expect(params[:headers]).to include('X-Gitlab-Token' => validation_service_token)
+          expect(params[:timeout]).to eq(shorter_timeout)
+        end
+
+        perform!
+      end
+    end
+
     it 'respects the defined payload schema' do
       expect(::Gitlab::HTTP).to receive(:post) do |_url, params|
         expect(params[:body]).to match_schema('/external_validation')
         expect(params[:timeout]).to eq(described_class::DEFAULT_VALIDATION_REQUEST_TIMEOUT)
-        expect(params[:headers]).to eq({ 'X-Request-ID' => 'correlation-id' })
+        expect(params[:headers]).to eq({ 'X-Gitlab-Correlation-id' => 'correlation-id' })
       end
 
       perform!

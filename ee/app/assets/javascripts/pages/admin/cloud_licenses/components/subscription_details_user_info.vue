@@ -12,7 +12,7 @@ import {
   usersOverSubscriptionTitle,
 } from '../constants';
 
-export const billableUsersURL = helpPagePath('subscriptions/self_managed/index');
+export const billableUsersURL = helpPagePath('licenses/self_managed/index');
 export const trueUpURL = 'https://about.gitlab.com/license-faq/';
 
 export default {
@@ -44,16 +44,16 @@ export default {
   },
   computed: {
     usersInSubscription() {
-      return this.subscription.usersInLicense;
+      return this.subscription.usersInLicenseCount;
     },
     billableUsers() {
-      return this.subscription.billableUsers;
+      return this.subscription.billableUsersCount;
     },
     maximumUsers() {
-      return this.subscription.maximumUsers;
+      return this.subscription.maximumUserCount;
     },
     usersOverSubscription() {
-      return this.subscription.usersOverSubscription;
+      return this.subscription.usersOverLicenseCount;
     },
   },
 };
@@ -110,7 +110,7 @@ export default {
     </div>
 
     <div class="col-md-6 gl-mb-5">
-      <gl-card data-testid="users-over-subscription">
+      <gl-card data-testid="users-over-license">
         <header>
           <h2>{{ usersOverSubscription }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">

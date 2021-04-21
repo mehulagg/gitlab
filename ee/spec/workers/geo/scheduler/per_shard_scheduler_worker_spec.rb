@@ -56,6 +56,13 @@ RSpec.describe Geo::Scheduler::PerShardSchedulerWorker do
       it "returns an array of healthy shard names" do
         expect(per_shard_scheduler_worker.healthy_ready_shards).to eq(healthy_ready_shards)
       end
+
+      it "logs unhealthy shards" do
+        log_data = { message: "Excluding unhealthy shards", failed_checks: [{ labels: { shard: unhealthy_shard_name }, message: '14:Connect Failed', status: 'failed' }], class: described_class.name }
+        expect(Gitlab::AppLogger).to receive(:error).with(a_hash_including(log_data))
+
+        per_shard_scheduler_worker.healthy_ready_shards
+      end
     end
 
     describe '#healthy_shard_names' do

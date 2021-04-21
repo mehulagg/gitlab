@@ -19,7 +19,19 @@ module Elastic
       self.class.get_pause_indexing
     end
 
+    def space_requirements?
+      self.class.get_space_requirements
+    end
+
     class_methods do
+      def space_requirements!
+        class_attributes[:space_requirements] = true
+      end
+
+      def get_space_requirements
+        class_attributes[:space_requirements]
+      end
+
       def batched!
         class_attributes[:batched] = true
       end

@@ -38,7 +38,7 @@ RSpec.describe AlertManagement::ExtractAlertPayloadFieldsService do
             field = fields.first
 
             expect(fields.count).to eq(1)
-            expect(field.label).to eq('Foo')
+            expect(field.label).to eq('foo')
             expect(field.type).to eq('string')
             expect(field.path).to eq(%w[foo])
           end

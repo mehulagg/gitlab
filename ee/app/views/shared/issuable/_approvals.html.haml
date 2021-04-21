@@ -6,6 +6,11 @@
 - if !Feature.enabled?(:mr_collapsed_approval_rules, @project)
   .form-group.row
     .col-sm-2.col-form-label
-      = form.label :approver_ids, "Approval rules"
+      .gl-display-flex.gl-align-items-center.gl-justify-content-end
+        - root_group = @project.group&.root_ancestor
+        - run_highlight_paid_features_during_active_trial_experiment(root_group) do
+          .gl-mr-3.gl-mb-2
+            #js-paid-feature-badge
+        = form.label :approver_ids, "Approval rules"
     .col-sm-10
       = render_if_exists 'shared/issuable/approver_suggestion', issuable: issuable, presenter: presenter

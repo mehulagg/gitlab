@@ -33,6 +33,7 @@ RSpec.describe 'Value stream analytics charts', :js do
   context 'Duration chart' do
     duration_stage_selector = '.js-dropdown-stages'
     stage_nav_selector = '.stage-nav'
+    stage_table_selector = '.js-stage-table'
 
     let(:duration_chart_dropdown) { page.find(duration_stage_selector) }
     let(:first_default_stage) { page.find('.stage-nav-item-cell', text: 'Issue').ancestor('.stage-nav-item') }
@@ -55,7 +56,7 @@ RSpec.describe 'Value stream analytics charts', :js do
 
     before do
       stub_feature_flags(value_stream_analytics_path_navigation: false)
-      select_group(group)
+      select_group(group, stage_table_selector)
     end
 
     it 'has all the default stages' do

@@ -46,8 +46,6 @@ Rails/SaveBang:
   Exclude:
     - 'ee/spec/controllers/projects/merge_requests_controller_spec.rb'
     - 'ee/spec/controllers/subscriptions_controller_spec.rb'
-    - 'ee/spec/frontend/fixtures/analytics.rb'
-    - 'ee/spec/graphql/resolvers/vulnerabilities_resolver_spec.rb'
     - 'ee/spec/initializers/fog_google_https_private_urls_spec.rb'
     - 'ee/spec/lib/analytics/merge_request_metrics_calculator_spec.rb'
     - 'ee/spec/lib/ee/gitlab/auth/ldap/sync/group_spec.rb'
@@ -75,9 +73,6 @@ Rails/SaveBang:
     - 'ee/spec/models/elasticsearch_indexed_namespace_spec.rb'
     - 'ee/spec/models/environment_spec.rb'
     - 'ee/spec/models/epic_spec.rb'
-    - 'ee/spec/models/geo/project_registry_spec.rb'
-    - 'ee/spec/models/geo_node_spec.rb'
-    - 'ee/spec/models/geo_node_status_spec.rb'
     - 'ee/spec/models/gitlab_subscription_spec.rb'
     - 'ee/spec/models/issue_spec.rb'
     - 'ee/spec/models/label_note_spec.rb'
@@ -156,12 +151,8 @@ Rails/SaveBang:
     - 'spec/controllers/boards/issues_controller_spec.rb'
     - 'spec/controllers/sent_notifications_controller_spec.rb'
     - 'spec/controllers/sessions_controller_spec.rb'
-    - 'spec/factories_spec.rb'
     - 'spec/frontend/fixtures/issues.rb'
     - 'spec/frontend/fixtures/merge_requests.rb'
-    - 'spec/graphql/mutations/merge_requests/set_locked_spec.rb'
-    - 'spec/graphql/mutations/merge_requests/set_wip_spec.rb'
-    - 'spec/graphql/resolvers/boards_resolver_spec.rb'
     - 'spec/lib/after_commit_queue_spec.rb'
     - 'spec/lib/backup/manager_spec.rb'
     - 'spec/lib/gitlab/alerting/alert_spec.rb'
@@ -172,18 +163,12 @@ Rails/SaveBang:
     - 'spec/lib/gitlab/auth_spec.rb'
     - 'spec/lib/gitlab/authorized_keys_spec.rb'
     - 'spec/lib/gitlab/bitbucket_server_import/importer_spec.rb'
-    - 'spec/lib/gitlab/ci/ansi2json/style_spec.rb'
-    - 'spec/lib/gitlab/ci/status/build/common_spec.rb'
     - 'spec/lib/gitlab/cycle_analytics/base_event_fetcher_spec.rb'
     - 'spec/lib/gitlab/database/custom_structure_spec.rb'
     - 'spec/lib/gitlab/database/partitioning_migration_helpers/table_management_helpers_spec.rb'
     - 'spec/lib/gitlab/database_importers/self_monitoring/project/create_service_spec.rb'
-    - 'spec/lib/gitlab/email/handler/create_note_handler_spec.rb'
-    - 'spec/lib/gitlab/email/handler/unsubscribe_handler_spec.rb'
     - 'spec/lib/gitlab/gfm/reference_rewriter_spec.rb'
     - 'spec/lib/gitlab/git_access_spec.rb'
-    - 'spec/lib/gitlab/gitaly_client/object_pool_service_spec.rb'
-    - 'spec/lib/gitlab/gitaly_client/repository_service_spec.rb'
     - 'spec/lib/gitlab/import_export/avatar_saver_spec.rb'
     - 'spec/lib/gitlab/import_export/base/relation_factory_spec.rb'
     - 'spec/lib/gitlab/import_export/design_repo_restorer_spec.rb'
@@ -422,9 +407,6 @@ Rails/TimeZone:
 # WIP: https://gitlab.com/gitlab-org/gitlab/-/issues/325836
 RSpec/EmptyLineAfterFinalLetItBe:
   Exclude:
-    - ee/spec/controllers/admin/geo/projects_controller_spec.rb
-    - ee/spec/controllers/admin/projects_controller_spec.rb
-    - ee/spec/controllers/ee/projects/jobs_controller_spec.rb
     - ee/spec/controllers/groups/analytics/cycle_analytics/stages_controller_spec.rb
     - ee/spec/controllers/groups/analytics/cycle_analytics/summary_controller_spec.rb
     - ee/spec/controllers/groups/analytics/cycle_analytics/value_streams_controller_spec.rb
@@ -432,20 +414,9 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/controllers/groups/autocomplete_sources_controller_spec.rb
     - ee/spec/controllers/groups/insights_controller_spec.rb
     - ee/spec/controllers/groups/todos_controller_spec.rb
-    - ee/spec/controllers/projects/branches_controller_spec.rb
-    - ee/spec/controllers/projects/incident_management/oncall_schedules_controller_spec.rb
-    - ee/spec/controllers/projects/insights_controller_spec.rb
-    - ee/spec/controllers/projects/licenses_controller_spec.rb
-    - ee/spec/controllers/projects/merge_requests_controller_spec.rb
-    - ee/spec/controllers/projects/mirrors_controller_spec.rb
-    - ee/spec/controllers/projects/threat_monitoring_controller_spec.rb
-    - ee/spec/controllers/registrations/groups_controller_spec.rb
-    - ee/spec/controllers/registrations/projects_controller_spec.rb
     - ee/spec/controllers/subscriptions_controller_spec.rb
-    - ee/spec/features/admin/admin_show_new_user_signups_cap_alert_spec.rb
     - ee/spec/features/boards/group_boards/multiple_boards_spec.rb
     - ee/spec/features/ci_shared_runner_warnings_spec.rb
-    - ee/spec/features/dashboards/todos_spec.rb
     - ee/spec/features/groups/groups_security_credentials_spec.rb
     - ee/spec/features/groups/hooks/user_edits_hooks_spec.rb
     - ee/spec/features/groups/iterations/user_edits_iteration_spec.rb
@@ -510,12 +481,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/lib/gitlab/graphql/aggregations/vulnerability_statistics/lazy_aggregate_spec.rb
     - ee/spec/lib/gitlab/insights/project_insights_config_spec.rb
     - ee/spec/lib/gitlab/sitemaps/url_extractor_spec.rb
-    - ee/spec/policies/clusters/agent_token_policy_spec.rb
-    - ee/spec/policies/compliance_management/framework_policy_spec.rb
-    - ee/spec/policies/group_policy_spec.rb
-    - ee/spec/policies/merge_request_policy_spec.rb
-    - ee/spec/policies/project_policy_spec.rb
-    - ee/spec/policies/vulnerabilities/issue_link_policy_spec.rb
     - ee/spec/requests/api/analytics/code_review_analytics_spec.rb
     - ee/spec/requests/api/audit_events_spec.rb
     - ee/spec/requests/api/commits_spec.rb
@@ -581,15 +546,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/award_emojis/destroy_service_spec.rb
     - ee/spec/services/billable_members/destroy_service_spec.rb
     - ee/spec/services/boards/epic_boards/destroy_service_spec.rb
-    - ee/spec/services/ci/audit_variable_change_service_spec.rb
-    - ee/spec/services/ci/compare_license_scanning_reports_service_spec.rb
-    - ee/spec/services/ci/compare_metrics_reports_service_spec.rb
-    - ee/spec/services/ci/compare_security_reports_service_spec.rb
-    - ee/spec/services/ci/create_pipeline_service/needs_spec.rb
-    - ee/spec/services/ci/create_pipeline_service_spec.rb
-    - ee/spec/services/ci/external_pull_requests/process_github_event_service_spec.rb
-    - ee/spec/services/ci/pipeline_bridge_status_service_spec.rb
-    - ee/spec/services/ci/register_job_service_spec.rb
     - ee/spec/services/clusters/agent_tokens/create_service_spec.rb
     - ee/spec/services/compliance_management/frameworks/create_service_spec.rb
     - ee/spec/services/compliance_management/frameworks/update_service_spec.rb
@@ -605,10 +561,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/incident_management/incidents/upload_metric_service_spec.rb
     - ee/spec/services/incident_management/oncall_rotations/edit_service_spec.rb
     - ee/spec/services/merge_request_approval_settings/update_service_spec.rb
-    - ee/spec/services/merge_trains/check_status_service_spec.rb
-    - ee/spec/services/merge_trains/create_pipeline_service_spec.rb
-    - ee/spec/services/merge_trains/refresh_merge_request_service_spec.rb
-    - ee/spec/services/merge_trains/refresh_service_spec.rb
     - ee/spec/services/personal_access_tokens/create_service_audit_log_spec.rb
     - ee/spec/services/personal_access_tokens/groups/update_lifetime_service_spec.rb
     - ee/spec/services/projects/after_rename_service_spec.rb
@@ -625,15 +577,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/requirements_management/update_requirement_service_spec.rb
     - ee/spec/services/resource_access_tokens/create_service_spec.rb
     - ee/spec/services/resource_access_tokens/revoke_service_spec.rb
-    - ee/spec/services/security/auto_fix_label_service_spec.rb
-    - ee/spec/services/security/store_grouped_scans_service_spec.rb
-    - ee/spec/services/security/store_report_service_spec.rb
-    - ee/spec/services/status_page/publish_attachments_service_spec.rb
-    - ee/spec/services/status_page/publish_details_service_spec.rb
-    - ee/spec/services/status_page/publish_list_service_spec.rb
-    - ee/spec/services/status_page/publish_service_spec.rb
-    - ee/spec/services/status_page/trigger_publish_service_spec.rb
-    - ee/spec/services/status_page/unpublish_details_service_spec.rb
     - ee/spec/services/todo_service_spec.rb
     - ee/spec/support/shared_examples/graphql/geo/geo_registries_resolver_shared_examples.rb
     - ee/spec/support/shared_examples/graphql/mutations/set_multiple_assignees_shared_examples.rb
@@ -656,26 +599,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/features/merge_request/user_posts_notes_spec.rb
     - spec/features/operations_sidebar_link_spec.rb
     - spec/features/participants_autocomplete_spec.rb
-    - spec/features/projects/badges/pipeline_badge_spec.rb
-    - spec/features/projects/branches/user_deletes_branch_spec.rb
-    - spec/features/projects/commit/cherry_pick_spec.rb
-    - spec/features/projects/commit/user_comments_on_commit_spec.rb
-    - spec/features/projects/commit/user_reverts_commit_spec.rb
-    - spec/features/projects/commit/user_views_user_status_on_commit_spec.rb
-    - spec/features/projects/confluence/user_views_confluence_page_spec.rb
-    - spec/features/projects/files/gitlab_ci_syntax_yml_dropdown_spec.rb
-    - spec/features/projects/issues/design_management/user_views_design_images_spec.rb
-    - spec/features/projects/labels/user_sees_links_to_issuables_spec.rb
-    - spec/features/projects/labels/user_views_labels_spec.rb
-    - spec/features/projects/members/master_adds_member_with_expiration_date_spec.rb
-    - spec/features/projects/merge_request_button_spec.rb
-    - spec/features/projects/pages/user_adds_domain_spec.rb
-    - spec/features/projects/pipelines/pipeline_spec.rb
-    - spec/features/projects/product_analytics/events_spec.rb
-    - spec/features/projects/settings/project_settings_spec.rb
-    - spec/features/projects/settings/repository_settings_spec.rb
-    - spec/features/projects/snippets/user_views_snippets_spec.rb
-    - spec/features/projects/user_sees_user_popover_spec.rb
     - spec/features/snippets/embedded_snippet_spec.rb
     - spec/finders/alert_management/alerts_finder_spec.rb
     - spec/finders/ci/commit_statuses_finder_spec.rb
@@ -724,76 +647,24 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/graphql/resolvers/project_pipeline_resolver_spec.rb
     - spec/graphql/resolvers/project_pipelines_resolver_spec.rb
     - spec/graphql/resolvers/timelog_resolver_spec.rb
-    - spec/graphql/types/admin/analytics/usage_trends/measurement_type_spec.rb
-    - spec/graphql/types/global_id_type_spec.rb
-    - spec/graphql/types/snippet_type_spec.rb
-    - spec/helpers/blob_helper_spec.rb
-    - spec/helpers/broadcast_messages_helper_spec.rb
-    - spec/helpers/ci/runners_helper_spec.rb
-    - spec/helpers/invite_members_helper_spec.rb
-    - spec/helpers/jira_connect_helper_spec.rb
-    - spec/helpers/labels_helper_spec.rb
-    - spec/helpers/markup_helper_spec.rb
-    - spec/helpers/notes_helper_spec.rb
-    - spec/helpers/projects/alert_management_helper_spec.rb
-    - spec/helpers/projects/issues/service_desk_helper_spec.rb
-    - spec/helpers/projects/project_members_helper_spec.rb
-    - spec/helpers/projects/terraform_helper_spec.rb
-    - spec/helpers/projects_helper_spec.rb
-    - spec/helpers/search_helper_spec.rb
     - spec/lib/bulk_imports/groups/loaders/group_loader_spec.rb
     - spec/lib/extracts_path_spec.rb
     - spec/lib/extracts_ref_spec.rb
     - spec/lib/gitlab/cache/ci/project_pipeline_status_spec.rb
-    - spec/lib/gitlab/ci/build/policy/changes_spec.rb
-    - spec/lib/gitlab/ci/config/external/file/local_spec.rb
-    - spec/lib/gitlab/ci/config/external/file/project_spec.rb
-    - spec/lib/gitlab/ci/config/external/file/template_spec.rb
-    - spec/lib/gitlab/ci/config/external/mapper_spec.rb
-    - spec/lib/gitlab/ci/config/external/processor_spec.rb
-    - spec/lib/gitlab/ci/pipeline/chain/build_spec.rb
-    - spec/lib/gitlab/ci/pipeline/chain/cancel_pending_pipelines_spec.rb
-    - spec/lib/gitlab/ci/pipeline/chain/template_usage_spec.rb
-    - spec/lib/gitlab/ci/pipeline/chain/validate/external_spec.rb
-    - spec/lib/gitlab/ci/pipeline/chain/validate/repository_spec.rb
-    - spec/lib/gitlab/ci/pipeline/seed/build_spec.rb
-    - spec/lib/gitlab/ci/pipeline/seed/deployment_spec.rb
-    - spec/lib/gitlab/ci/pipeline/seed/environment_spec.rb
-    - spec/lib/gitlab/ci/pipeline/seed/processable/resource_group_spec.rb
-    - spec/lib/gitlab/ci/reports/test_failure_history_spec.rb
-    - spec/lib/gitlab/ci/syntax_templates_spec.rb
-    - spec/lib/gitlab/ci/trace/chunked_io_spec.rb
-    - spec/lib/gitlab/ci/trace_spec.rb
     - spec/lib/gitlab/closing_issue_extractor_spec.rb
     - spec/lib/gitlab/composer/cache_spec.rb
     - spec/lib/gitlab/data_builder/wiki_page_spec.rb
-    - spec/lib/gitlab/database/partitioning_migration_helpers/foreign_key_helpers_spec.rb
-    - spec/lib/gitlab/database/partitioning_migration_helpers/table_management_helpers_spec.rb
     - spec/lib/gitlab/deploy_key_access_spec.rb
     - spec/lib/gitlab/email/handler/service_desk_handler_spec.rb
-    - spec/lib/gitlab/git/lfs_changes_spec.rb
-    - spec/lib/gitlab/git/merge_base_spec.rb
-    - spec/lib/gitlab/git/push_spec.rb
-    - spec/lib/gitlab/git_access_design_spec.rb
-    - spec/lib/gitlab/git_access_project_spec.rb
-    - spec/lib/gitlab/git_access_wiki_spec.rb
     - spec/lib/gitlab/gitaly_client/operation_service_spec.rb
     - spec/lib/gitlab/gl_repository/repo_type_spec.rb
     - spec/lib/gitlab/group_search_results_spec.rb
-    - spec/lib/gitlab/hook_data/issue_builder_spec.rb
-    - spec/lib/gitlab/hook_data/merge_request_builder_spec.rb
-    - spec/lib/gitlab/hook_data/release_builder_spec.rb
     - spec/lib/gitlab/json_cache_spec.rb
     - spec/lib/gitlab/language_detection_spec.rb
     - spec/lib/gitlab/project_search_results_spec.rb
     - spec/lib/gitlab/prometheus/query_variables_spec.rb
     - spec/lib/gitlab/reactive_cache_set_cache_spec.rb
     - spec/lib/gitlab/reference_extractor_spec.rb
-    - spec/lib/gitlab/repository_cache_spec.rb
-    - spec/lib/gitlab/repository_hash_cache_spec.rb
-    - spec/lib/gitlab/repository_set_cache_spec.rb
-    - spec/lib/gitlab/repository_size_checker_spec.rb
-    - spec/lib/gitlab/repository_size_error_message_spec.rb
     - spec/lib/gitlab/search_results_spec.rb
     - spec/lib/gitlab/shell_spec.rb
     - spec/models/abuse_report_spec.rb
@@ -816,16 +687,9 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/models/note_spec.rb
     - spec/models/notification_setting_spec.rb
     - spec/models/operations/feature_flag_spec.rb
-    - spec/models/packages/dependency_spec.rb
-    - spec/models/packages/go/module_version_spec.rb
-    - spec/models/packages/package_spec.rb
-    - spec/models/packages/tag_spec.rb
     - spec/models/plan_limits_spec.rb
     - spec/models/prometheus_alert_spec.rb
     - spec/models/protected_branch/push_access_level_spec.rb
-    - spec/models/release_spec.rb
-    - spec/models/releases/evidence_spec.rb
-    - spec/models/releases/source_spec.rb
     - spec/models/repository_spec.rb
     - spec/models/service_spec.rb
     - spec/models/snippet_repository_spec.rb
@@ -835,18 +699,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/models/user_spec.rb
     - spec/models/wiki_page/meta_spec.rb
     - spec/models/wiki_page_spec.rb
-    - spec/presenters/alert_management/alert_presenter_spec.rb
-    - spec/presenters/ci/pipeline_presenter_spec.rb
-    - spec/presenters/label_presenter_spec.rb
-    - spec/presenters/packages/composer/packages_presenter_spec.rb
-    - spec/presenters/packages/conan/package_presenter_spec.rb
-    - spec/presenters/packages/detail/package_presenter_spec.rb
-    - spec/presenters/packages/npm/package_presenter_spec.rb
-    - spec/presenters/packages/nuget/search_results_presenter_spec.rb
-    - spec/presenters/project_presenter_spec.rb
-    - spec/presenters/prometheus_alert_presenter_spec.rb
-    - spec/presenters/release_presenter_spec.rb
-    - spec/presenters/user_presenter_spec.rb
     - spec/requests/api/api_spec.rb
     - spec/requests/api/award_emoji_spec.rb
     - spec/requests/api/branches_spec.rb
@@ -939,109 +791,30 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/requests/lfs_http_spec.rb
     - spec/requests/product_analytics/collector_app_spec.rb
     - spec/requests/rack_attack_global_spec.rb
-    - spec/serializers/admin/user_entity_spec.rb
-    - spec/serializers/ci/lint/result_serializer_spec.rb
-    - spec/serializers/ci/pipeline_entity_spec.rb
-    - spec/serializers/container_repository_entity_spec.rb
-    - spec/serializers/container_tag_entity_spec.rb
-    - spec/serializers/deployment_serializer_spec.rb
-    - spec/serializers/diff_file_entity_spec.rb
-    - spec/serializers/evidences/evidence_entity_spec.rb
-    - spec/serializers/fork_namespace_entity_spec.rb
-    - spec/serializers/group_link/group_group_link_entity_spec.rb
-    - spec/serializers/group_link/project_group_link_entity_spec.rb
-    - spec/serializers/issue_board_entity_spec.rb
-    - spec/serializers/member_entity_spec.rb
-    - spec/serializers/member_user_entity_spec.rb
-    - spec/serializers/merge_request_diff_entity_spec.rb
-    - spec/serializers/merge_request_poll_cached_widget_entity_spec.rb
-    - spec/serializers/merge_request_user_entity_spec.rb
-    - spec/serializers/namespace_basic_entity_spec.rb
-    - spec/serializers/pipeline_details_entity_spec.rb
-    - spec/serializers/project_import_entity_spec.rb
-    - spec/serializers/project_serializer_spec.rb
-    - spec/serializers/review_app_setup_entity_spec.rb
     - spec/services/admin/propagate_service_template_spec.rb
     - spec/services/alert_management/create_alert_issue_service_spec.rb
     - spec/services/audit_event_service_spec.rb
     - spec/services/auth/dependency_proxy_authentication_service_spec.rb
     - spec/services/auto_merge_service_spec.rb
-    - spec/services/award_emojis/add_service_spec.rb
-    - spec/services/award_emojis/destroy_service_spec.rb
-    - spec/services/award_emojis/toggle_service_spec.rb
-    - spec/services/boards/destroy_service_spec.rb
-    - spec/services/boards/issues/move_service_spec.rb
     - spec/services/bulk_create_integration_service_spec.rb
-    - spec/services/ci/change_variable_service_spec.rb
-    - spec/services/ci/change_variables_service_spec.rb
-    - spec/services/ci/create_pipeline_service/cross_project_pipeline_spec.rb
-    - spec/services/ci/create_pipeline_service/custom_config_content_spec.rb
-    - spec/services/ci/create_pipeline_service/dry_run_spec.rb
-    - spec/services/ci/create_pipeline_service/environment_spec.rb
-    - spec/services/ci/create_pipeline_service/parameter_content_spec.rb
-    - spec/services/ci/create_pipeline_service/parent_child_pipeline_spec.rb
-    - spec/services/ci/create_pipeline_service_spec.rb
-    - spec/services/ci/create_web_ide_terminal_service_spec.rb
-    - spec/services/ci/expire_pipeline_cache_service_spec.rb
-    - spec/services/ci/external_pull_requests/create_pipeline_service_spec.rb
-    - spec/services/ci/find_exposed_artifacts_service_spec.rb
-    - spec/services/ci/job_artifacts/create_service_spec.rb
-    - spec/services/ci/parse_dotenv_artifact_service_spec.rb
-    - spec/services/ci/pipeline_bridge_status_service_spec.rb
-    - spec/services/ci/pipeline_trigger_service_spec.rb
-    - spec/services/ci/prometheus_metrics/observe_histograms_service_spec.rb
-    - spec/services/ci/register_job_service_spec.rb
-    - spec/services/ci/resource_groups/assign_resource_from_resource_group_service_spec.rb
-    - spec/services/ci/retry_build_service_spec.rb
-    - spec/services/ci/stop_environments_service_spec.rb
     - spec/services/clusters/applications/prometheus_health_check_service_spec.rb
     - spec/services/container_expiration_policy_service_spec.rb
     - spec/services/dependency_proxy/find_or_create_manifest_service_spec.rb
-    - spec/services/design_management/copy_design_collection/copy_service_spec.rb
-    - spec/services/design_management/delete_designs_service_spec.rb
-    - spec/services/design_management/save_designs_service_spec.rb
     - spec/services/discussions/resolve_service_spec.rb
     - spec/services/discussions/unresolve_service_spec.rb
-    - spec/services/environments/auto_stop_service_spec.rb
-    - spec/services/environments/canary_ingress/update_service_spec.rb
-    - spec/services/environments/reset_auto_stop_service_spec.rb
-    - spec/services/feature_flags/create_service_spec.rb
-    - spec/services/feature_flags/destroy_service_spec.rb
-    - spec/services/feature_flags/disable_service_spec.rb
-    - spec/services/feature_flags/enable_service_spec.rb
-    - spec/services/feature_flags/update_service_spec.rb
     - spec/services/git/branch_push_service_spec.rb
-    - spec/services/groups/auto_devops_service_spec.rb
-    - spec/services/groups/group_links/update_service_spec.rb
-    - spec/services/groups/transfer_service_spec.rb
-    - spec/services/groups/update_shared_runners_service_spec.rb
-    - spec/services/ide/base_config_service_spec.rb
-    - spec/services/ide/schemas_config_service_spec.rb
-    - spec/services/ide/terminal_config_service_spec.rb
     - spec/services/import/bitbucket_server_service_spec.rb
     - spec/services/incident_management/incidents/create_service_spec.rb
     - spec/services/incident_management/pager_duty/create_incident_issue_service_spec.rb
     - spec/services/incident_management/pager_duty/process_webhook_service_spec.rb
     - spec/services/integrations/test/project_service_spec.rb
     - spec/services/issuable/bulk_update_service_spec.rb
-    - spec/services/issues/build_service_spec.rb
-    - spec/services/issues/clone_service_spec.rb
-    - spec/services/issues/create_service_spec.rb
-    - spec/services/issues/export_csv_service_spec.rb
-    - spec/services/issues/move_service_spec.rb
-    - spec/services/issues/related_branches_service_spec.rb
     - spec/services/jira_connect/sync_service_spec.rb
     - spec/services/jira_import/start_import_service_spec.rb
     - spec/services/jira_import/users_importer_spec.rb
     - spec/services/markdown_content_rewriter_service_spec.rb
     - spec/services/members/create_service_spec.rb
     - spec/services/members/invite_service_spec.rb
-    - spec/services/merge_requests/base_service_spec.rb
-    - spec/services/merge_requests/create_pipeline_service_spec.rb
-    - spec/services/merge_requests/export_csv_service_spec.rb
-    - spec/services/merge_requests/merge_orchestration_service_spec.rb
-    - spec/services/merge_requests/merge_service_spec.rb
-    - spec/services/merge_requests/merge_to_ref_service_spec.rb
     - spec/services/metrics/dashboard/annotations/create_service_spec.rb
     - spec/services/metrics/dashboard/gitlab_alert_embed_service_spec.rb
     - spec/services/metrics/users_starred_dashboards/create_service_spec.rb
@@ -1117,27 +890,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/views/search/_results.html.haml_spec.rb
     - spec/views/shared/_label_row.html.haml_spec.rb
     - spec/views/shared/milestones/_top.html.haml_spec.rb
-    - spec/workers/ci/create_cross_project_pipeline_worker_spec.rb
-    - spec/workers/cluster_update_app_worker_spec.rb
-    - spec/workers/environments/canary_ingress/update_worker_spec.rb
-    - spec/workers/expire_job_cache_worker_spec.rb
-    - spec/workers/gitlab/jira_import/import_issue_worker_spec.rb
-    - spec/workers/gitlab/jira_import/stage/start_import_worker_spec.rb
-    - spec/workers/gitlab/jira_import/stuck_jira_import_jobs_worker_spec.rb
-    - spec/workers/import_issues_csv_worker_spec.rb
-    - spec/workers/incident_management/add_severity_system_note_worker_spec.rb
-    - spec/workers/incident_management/process_alert_worker_spec.rb
-    - spec/workers/incident_management/process_prometheus_alert_worker_spec.rb
-    - spec/workers/jira_connect/sync_project_worker_spec.rb
-    - spec/workers/namespaces/onboarding_issue_created_worker_spec.rb
-    - spec/workers/packages/composer/cache_update_worker_spec.rb
-    - spec/workers/pages_domain_ssl_renewal_cron_worker_spec.rb
-    - spec/workers/projects/git_garbage_collect_worker_spec.rb
-    - spec/workers/prometheus/create_default_alerts_worker_spec.rb
-    - spec/workers/propagate_integration_group_worker_spec.rb
-    - spec/workers/propagate_integration_project_worker_spec.rb
-    - spec/workers/run_pipeline_schedule_worker_spec.rb
-    - spec/workers/update_external_pull_requests_worker_spec.rb
 
 RSpec/TimecopFreeze:
   Exclude:
@@ -1452,8 +1204,8 @@ RSpec/AnyInstanceOf:
     - 'spec/lib/backup/files_spec.rb'
     - 'spec/lib/backup/manager_spec.rb'
     - 'spec/lib/banzai/commit_renderer_spec.rb'
-    - 'spec/lib/banzai/filter/external_issue_reference_filter_spec.rb'
-    - 'spec/lib/banzai/filter/issue_reference_filter_spec.rb'
+    - 'spec/lib/banzai/filter/references/external_issue_reference_filter_spec.rb'
+    - 'spec/lib/banzai/filter/references/issue_reference_filter_spec.rb'
     - 'spec/lib/banzai/filter/repository_link_filter_spec.rb'
     - 'spec/lib/banzai/pipeline/gfm_pipeline_spec.rb'
     - 'spec/lib/extracts_ref_spec.rb'
@@ -3011,33 +2763,6 @@ Gitlab/NamespacedClass:
     - 'spec/tasks/gitlab/task_helpers_spec.rb'
     - 'spec/uploaders/object_storage_spec.rb'
 
-# WIP: https://gitlab.com/gitlab-org/gitlab/-/issues/322739
-Style/HashTransformation:
-  Exclude:
-    - 'ee/app/models/ee/ci/build.rb'
-    - 'ee/app/models/productivity_analytics.rb'
-    - 'ee/app/models/sca/license_compliance.rb'
-    - 'ee/app/services/security/store_report_service.rb'
-    - 'ee/lib/ee/gitlab/auth/ldap/sync/group.rb'
-    - 'ee/lib/ee/gitlab/usage_data.rb'
-    - 'ee/lib/gitlab/custom_file_templates.rb'
-    - 'ee/spec/elastic_integration/global_search_spec.rb'
-    - 'ee/spec/lib/ee/gitlab/application_context_spec.rb'
-    - 'spec/lib/atlassian/jira_connect/serializers/pull_request_entity_spec.rb'
-    - 'spec/lib/gitlab/ci/status/composite_spec.rb'
-    - 'spec/lib/gitlab/conflict/file_spec.rb'
-    - 'spec/lib/gitlab/import_export/project/tree_restorer_spec.rb'
-    - 'spec/models/concerns/featurable_spec.rb'
-    - 'spec/models/event_spec.rb'
-    - 'spec/models/packages/dependency_spec.rb'
-    - 'spec/requests/api/graphql/project/alert_management/alert/assignees_spec.rb'
-    - 'spec/requests/api/graphql/project/alert_management/alert/notes_spec.rb'
-    - 'spec/requests/api/graphql/project/alert_management/alert/todos_spec.rb'
-    - 'spec/requests/api/projects_spec.rb'
-    - 'spec/support/helpers/graphql_helpers.rb'
-    - 'spec/support/import_export/project_tree_expectations.rb'
-    - 'spec/support/shared_contexts/services/projects/container_repository/delete_tags_service_shared_context.rb'
-
 Style/ClassEqualityComparison:
   Exclude:
     - spec/lib/peek/views/active_record_spec.rb
@@ -3382,3 +3107,60 @@ Gitlab/FeatureAvailableUsage:
     - 'ee/spec/models/project_spec.rb'
     - 'lib/api/helpers/related_resources_helpers.rb'
     - 'spec/models/concerns/featurable_spec.rb'
+
+# WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/327490
+Style/RegexpLiteralMixedPreserve:
+  Exclude:
+    - 'app/controllers/projects/repositories_controller.rb'
+    - 'app/helpers/ci/variables_helper.rb'
+    - 'app/models/alert_management/alert.rb'
+    - 'app/models/application_setting.rb'
+    - 'app/models/blob_viewer/go_mod.rb'
+    - 'app/models/concerns/ci/maskable.rb'
+    - 'app/models/operations/feature_flag.rb'
+    - 'app/models/packages/go/module.rb'
+    - 'app/models/project_services/chat_message/base_message.rb'
+    - 'app/services/packages/conan/search_service.rb'
+    - 'app/services/projects/update_remote_mirror_service.rb'
+    - 'config/initializers/rspec_profiling.rb'
+    - 'ee/app/models/status_page/project_setting.rb'
+    - 'ee/app/presenters/vulnerability_presenter.rb'
+    - 'ee/lib/api/geo_nodes.rb'
+    - 'ee/lib/gitlab/vulnerabilities/standard_vulnerability.rb'
+    - 'ee/spec/controllers/concerns/ee/routable_actions/sso_enforcement_redirect_spec.rb'
+    - 'ee/spec/controllers/concerns/routable_actions_spec.rb'
+    - 'ee/spec/controllers/groups/groups_controller_spec.rb'
+    - 'ee/spec/features/groups/saml_enforcement_spec.rb'
+    - 'ee/spec/features/markdown/metrics_spec.rb'
+    - 'ee/spec/lib/gitlab/database/load_balancing/load_balancer_spec.rb'
+    - 'ee/spec/models/project_services/jira_service_spec.rb'
+    - 'ee/spec/services/jira/requests/issues/list_service_spec.rb'
+    - 'lib/api/invitations.rb'
+    - 'lib/gitlab/ci/pipeline/expression/lexeme/pattern.rb'
+    - 'lib/gitlab/metrics/requests_rack_middleware.rb'
+    - 'lib/gitlab/metrics/subscribers/active_record.rb'
+    - 'lib/gitlab/regex.rb'
+    - 'lib/gitlab/utils.rb'
+    - 'lib/product_analytics/tracker.rb'
+    - 'qa/qa/page/project/settings/advanced.rb'
+    - 'qa/spec/service/docker_run/gitlab_runner_spec.rb'
+    - 'rubocop/cop/gitlab/duplicate_spec_location.rb'
+    - 'spec/features/clusters/cluster_health_dashboard_spec.rb'
+    - 'spec/features/markdown/metrics_spec.rb'
+    - 'spec/features/search/user_searches_for_code_spec.rb'
+    - 'spec/features/snippets/embedded_snippet_spec.rb'
+    - 'spec/helpers/diff_helper_spec.rb'
+    - 'spec/helpers/releases_helper_spec.rb'
+    - 'spec/lib/gitlab/ci/reports/test_case_spec.rb'
+    - 'spec/lib/gitlab/consul/internal_spec.rb'
+    - 'spec/lib/gitlab/import_export/shared_spec.rb'
+    - 'spec/lib/gitlab/utils/usage_data_spec.rb'
+    - 'spec/presenters/ci/build_runner_presenter_spec.rb'
+    - 'spec/requests/api/projects_spec.rb'
+    - 'spec/services/jira/requests/projects/list_service_spec.rb'
+    - 'spec/support/capybara.rb'
+    - 'spec/support/helpers/grafana_api_helpers.rb'
+    - 'spec/support/helpers/query_recorder.rb'
+    - 'spec/support/helpers/require_migration.rb'
+    - 'spec/support/shared_examples/models/slack_mattermost_notifications_shared_examples.rb'
+    - 'spec/views/layouts/_head.html.haml_spec.rb'

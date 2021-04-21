@@ -9,9 +9,7 @@ module EE
     def filter_items(items)
       items = super(items)
       items = by_approvers(items)
-      items = by_merge_commit_sha(items)
-
-      items
+      by_merge_commit_sha(items)
     end
 
     # Filter by merge requests approval list that contains specified user directly or as part of group membership

@@ -20,8 +20,7 @@ module EE
         return ::Ci::DailyBuildGroupReportResult.none unless query_allowed?
 
         collection = ::Ci::DailyBuildGroupReportResult.by_group(params[:group])
-        collection = filter_report_results(collection)
-        collection
+        filter_report_results(collection)
       end
 
       private
@@ -29,8 +28,7 @@ module EE
       override :filter_report_results
       def filter_report_results(collection)
         collection = super(collection)
-        collection = by_activity_per_group(collection)
-        collection
+        by_activity_per_group(collection)
       end
 
       def by_activity_per_group(items)

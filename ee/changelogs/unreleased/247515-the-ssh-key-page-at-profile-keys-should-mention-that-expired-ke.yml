@@ -1,0 +1,5 @@
+---
+title: SSH key page text now reflects the expiration enforcement setting being used on the instance
+merge_request: 57494
+author:
+type: changed

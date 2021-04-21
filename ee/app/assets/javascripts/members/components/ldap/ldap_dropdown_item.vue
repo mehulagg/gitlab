@@ -6,6 +6,7 @@ import { s__ } from '~/locale';
 export default {
   name: 'LdapDropdownItem',
   components: { GlDropdownItem, GlDropdownDivider },
+  inject: ['namespace'],
   props: {
     memberId: {
       type: Number,
@@ -13,7 +14,11 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['updateLdapOverride']),
+    ...mapActions({
+      updateLdapOverride(dispatch, payload) {
+        return dispatch(`${this.namespace}/updateLdapOverride`, payload);
+      },
+    }),
     handleClick() {
       this.updateLdapOverride({ memberId: this.memberId, override: false })
         .then(() => {

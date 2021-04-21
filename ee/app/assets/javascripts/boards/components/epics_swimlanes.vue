@@ -111,7 +111,7 @@ export default {
       handler() {
         Promise.all(
           this.lists.map((list) => {
-            return this.fetchItemsForList({ listId: list.id });
+            return this.fetchItemsForList({ listId: list.id, forSwimlanes: true });
           }),
         )
           .then(() => this.doneLoadingSwimlanesItems())

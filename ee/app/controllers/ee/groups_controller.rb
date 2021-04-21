@@ -79,8 +79,12 @@ module EE
         params_ee << :allowed_email_domains_list if current_group&.feature_available?(:group_allowed_email_domains)
         params_ee << :max_pages_size if can?(current_user, :update_max_pages_size)
         params_ee << :max_personal_access_token_lifetime if current_group&.personal_access_token_expiration_policy_available?
-        params_ee << :delayed_project_removal if current_group&.feature_available?(:adjourned_deletion_for_projects_and_groups)
         params_ee << :prevent_forking_outside_group if can_change_prevent_forking?(current_user, current_group)
+
+        if current_group&.feature_available?(:adjourned_deletion_for_projects_and_groups)
+          params_ee << :delayed_project_removal
+          params_ee << :lock_delayed_project_removal
+        end
       end
     end
 

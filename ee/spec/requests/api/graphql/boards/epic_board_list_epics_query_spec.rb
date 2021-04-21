@@ -56,7 +56,7 @@ RSpec.describe 'get list of epics for an epic  board list' do
     end
   end
 
-  context 'filters' do
+  context 'with filters' do
     let(:epic_fields) { 'id' }
 
     it 'finds only epics matching the filter' do
@@ -67,6 +67,18 @@ RSpec.describe 'get list of epics for an epic  board list' do
 
       boards = graphql_data_at(*data_path, :nodes, :id)
       expect(boards).to contain_exactly(global_id_of(epic3))
+    end
+
+    context 'when negated' do
+      it 'finds only epics matching the negated filter' do
+        filter_params = { filters: { not: { label_name: [staging.title] } } }
+        query = pagination_query(filter_params)
+
+        post_graphql(query, current_user: current_user)
+
+        boards = graphql_data_at(*data_path, :nodes, :id)
+        expect(boards).to contain_exactly(global_id_of(epic1), global_id_of(epic2))
+      end
     end
   end
 end

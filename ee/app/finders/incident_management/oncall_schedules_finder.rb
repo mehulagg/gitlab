@@ -12,9 +12,7 @@ module IncidentManagement
       return IncidentManagement::OncallSchedule.none unless allowed?
 
       collection = project.incident_management_oncall_schedules
-      collection = by_iid(collection)
-
-      collection
+      by_iid(collection)
     end
 
     private

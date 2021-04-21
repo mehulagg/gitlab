@@ -1840,7 +1840,7 @@ RSpec.describe Project do
   end
 
   describe '#protected_environment_by_name' do
-    let_it_be(:project) { create(:project) }
+    let_it_be(:project, reload: true) { create(:project) }
 
     subject { project.protected_environment_by_name('production') }
 

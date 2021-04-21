@@ -8,7 +8,7 @@ query instance(
   $severity: [VulnerabilitySeverity!]
   $reportType: [VulnerabilityReportType!]
   $scanner: [String!]
-  $scannerId: [Int!]
+  $scannerId: [ID!]
   $state: [VulnerabilityState!]
   $sort: VulnerabilitySort
   $hasIssues: Boolean

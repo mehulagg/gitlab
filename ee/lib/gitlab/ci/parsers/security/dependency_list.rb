@@ -26,24 +26,16 @@ module Gitlab
           end
 
           def parse_vulnerabilities(report_data, report)
-            if Feature.enabled?(:standalone_vuln_dependency_list, project)
-              vuln_findings = pipeline.vulnerability_findings.dependency_scanning
-              vuln_findings.each do |finding|
-                dependency = finding.location.dig("dependency")
+            vuln_findings = pipeline.vulnerability_findings.dependency_scanning
+            vuln_findings.each do |finding|
+              dependency = finding.location.dig("dependency")
 
-                next unless dependency
+              next unless dependency
 
-                file = finding.file
-                vulnerability = finding.metadata.merge(vulnerability_id: finding.vulnerability_id)
+              file = finding.file
+              vulnerability = finding.metadata.merge(vulnerability_id: finding.vulnerability_id)
 
-                report.add_dependency(formatter.format(dependency, '', file, vulnerability))
-              end
-            else
-              report_data.fetch('vulnerabilities', []).each do |vulnerability|
-                dependency = vulnerability.dig("location", "dependency")
-                file = vulnerability.dig("location", "file")
-                report.add_dependency(formatter.format(dependency, '', file, vulnerability))
-              end
+              report.add_dependency(formatter.format(dependency, '', file, vulnerability))
             end
           end
 

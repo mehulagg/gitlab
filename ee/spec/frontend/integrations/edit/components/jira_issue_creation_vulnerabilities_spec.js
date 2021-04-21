@@ -51,7 +51,6 @@ describe('JiraIssuesFields', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('content', () => {
@@ -98,6 +97,16 @@ describe('JiraIssuesFields', () => {
     it.each([true, false])('toggles the Jira issue-type selection section', async (isChecked) => {
       await setEnableJiraVulnerabilitiesChecked(isChecked);
       expect(findIssueTypeSection().exists()).toBe(isChecked);
+    });
+  });
+
+  describe('when showFullFeature is off', () => {
+    beforeEach(() => {
+      wrapper = createShallowComponent({ props: { showFullFeature: false } });
+    });
+
+    it('does not show the issue type section', () => {
+      expect(findIssueTypeSection().exists()).toBe(false);
     });
   });
 

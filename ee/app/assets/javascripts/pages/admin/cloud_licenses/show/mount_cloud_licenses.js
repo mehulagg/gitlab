@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import CloudLicenseShowApp from '../components/app.vue';
 
 Vue.use(VueApollo);
@@ -16,14 +17,16 @@ export default () => {
     return null;
   }
 
-  const { planName } = el.dataset;
+  const { hasActiveLicense } = el.dataset;
 
   return new Vue({
     el,
     apolloProvider,
-    provide: {
-      planName,
-    },
-    render: (h) => h(CloudLicenseShowApp),
+    render: (h) =>
+      h(CloudLicenseShowApp, {
+        props: {
+          hasActiveLicense: parseBoolean(hasActiveLicense),
+        },
+      }),
   });
 };

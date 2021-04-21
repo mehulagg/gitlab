@@ -20,7 +20,7 @@ const last90DaysData = getJSONFixture(
   'api/dora/metrics/daily_deployment_frequency_for_last_90_days.json',
 );
 
-describe('ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue', () => {
+describe('deployment_frequency_charts.vue', () => {
   useFixturesFakeDate();
 
   let DeploymentFrequencyCharts;

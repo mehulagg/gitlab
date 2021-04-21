@@ -22,7 +22,7 @@ module Security
         @source_reports.first.type,
         @source_reports.first.pipeline,
         @source_reports.first.created_at
-      )
+      ).tap { |report| report.errors = source_reports.flat_map(&:errors) }
       @findings = []
     end
 
@@ -70,7 +70,8 @@ module Security
 
     def sort_findings!
       @findings.sort! do |a, b|
-        a_severity, b_severity = a.severity, b.severity
+        a_severity = a.severity
+        b_severity = b.severity
 
         if a_severity == b_severity
           a.compare_key <=> b.compare_key
@@ -99,7 +100,8 @@ module Security
       return unless reports_sortable?
 
       @source_reports.sort! do |a, b|
-        a_scanner_id, b_scanner_id = a.scanners.values[0].external_id, b.scanners.values[0].external_id
+        a_scanner_id = a.scanners.values[0].external_id
+        b_scanner_id = b.scanners.values[0].external_id
 
         a_scanner_id = "unknown" if ANALYZER_ORDER[a_scanner_id].nil?
         b_scanner_id = "unknown" if ANALYZER_ORDER[b_scanner_id].nil?

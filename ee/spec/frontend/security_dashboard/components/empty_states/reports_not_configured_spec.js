@@ -3,17 +3,17 @@ import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/
 
 describe('reports not configured empty state', () => {
   let wrapper;
-  const helpPath = '/help';
   const emptyStateSvgPath = '/placeholder.svg';
   const securityConfigurationPath = '/configuration';
+  const securityDashboardHelpPath = '/help';
 
   const createComponent = () => {
     wrapper = shallowMount(ReportsNotConfigured, {
       provide: {
         emptyStateSvgPath,
         securityConfigurationPath,
+        securityDashboardHelpPath,
       },
-      propsData: { helpPath },
     });
   };
 

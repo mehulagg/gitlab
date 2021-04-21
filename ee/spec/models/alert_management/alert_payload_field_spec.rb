@@ -16,7 +16,7 @@ RSpec.describe AlertManagement::AlertPayloadField do
       shared_examples 'has invalid path' do
         it 'is invalid' do
           expect(alert_payload_field.valid?).to eq(false)
-          expect(alert_payload_field.errors.full_messages).to eq(['Path must be a list of strings'])
+          expect(alert_payload_field.errors.full_messages).to eq(['Path must be a list of strings or integers'])
         end
       end
 
@@ -32,10 +32,16 @@ RSpec.describe AlertManagement::AlertPayloadField do
         it_behaves_like 'has invalid path'
       end
 
-      context 'when path does not contain only strings' do
-        let(:alert_payload_field) { build(:alert_management_alert_payload_field, path: ['title', 1]) }
+      context 'when path does not contain only strings or integers' do
+        let(:alert_payload_field) { build(:alert_management_alert_payload_field, path: ['title', {}]) }
 
         it_behaves_like 'has invalid path'
+      end
+
+      context 'when path contains only strings and integers' do
+        let(:alert_payload_field) { build(:alert_management_alert_payload_field, path: ['title', 1]) }
+
+        it { is_expected.to be_valid }
       end
     end
   end

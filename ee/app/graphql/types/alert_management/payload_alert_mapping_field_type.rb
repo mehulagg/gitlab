@@ -14,7 +14,7 @@ module Types
             description: 'A GitLab alert field name.'
 
       field :path,
-            [GraphQL::STRING_TYPE],
+            [::Types::AlertManagement::PayloadAlertFieldPathSegmentType],
             null: true,
             description: 'Path to value inside payload JSON.'
 

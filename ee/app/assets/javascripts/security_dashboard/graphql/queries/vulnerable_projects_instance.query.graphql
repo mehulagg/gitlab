@@ -1,0 +1,10 @@
+query vulnerableProjects {
+  instanceSecurityDashboard {
+    projects {
+      nodes {
+        id
+        name
+      }
+    }
+  }
+}

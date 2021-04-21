@@ -7,6 +7,7 @@ RSpec.describe Admin::Geo::ProjectsController, :geo do
 
   let_it_be(:admin) { create(:admin) }
   let_it_be(:geo_primary) { create(:geo_node, :primary) }
+
   let(:synced_registry) { create(:geo_project_registry, :synced) }
 
   before do

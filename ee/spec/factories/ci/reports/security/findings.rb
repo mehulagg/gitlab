@@ -39,6 +39,7 @@ FactoryBot.define do
         project_id: n
       )
     end
+    vulnerability_finding_signatures_enabled { false }
 
     skip_create
 

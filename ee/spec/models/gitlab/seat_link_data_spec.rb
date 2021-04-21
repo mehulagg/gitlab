@@ -120,40 +120,82 @@ RSpec.describe Gitlab::SeatLinkData do
   describe '#should_sync_seats?' do
     let_it_be(:historical_data) { create(:historical_data, recorded_at: timestamp) }
 
+    let(:license) { build(:license, :cloud) }
+
+    before do
+      allow(License).to receive(:current).and_return(license)
+    end
+
     subject { super().should_sync_seats? }
 
     context 'when all the pre conditions are valid' do
       it { is_expected.to eq(true) }
     end
 
-    context 'when seat link is disabled' do
-      before do
-        allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(false)
-      end
-
-      it { is_expected.to be_falsey }
-    end
-
     context 'when license key is missing' do
-      before do
-        allow(License).to receive(:current).and_return(nil)
-      end
+      let(:license) { nil }
 
       it { is_expected.to be_falsey }
     end
 
-    context 'when license is trial' do
-      before do
-        allow(License).to receive(:current).and_return(create(:license, trial: true))
-      end
+    context 'when expires_at is not set' do
+      let(:license) { build(:license, expires_at: nil) }
 
       it { is_expected.to be_falsey }
     end
 
-    context 'when timestamp is out of the range' do
-      let(:timestamp) { Time.iso8601('2015-03-22T06:09:18Z') }
+    context 'cloud license' do
+      context 'when license is trial' do
+        let(:license) { build(:license, trial: true) }
 
-      it { is_expected.to be_falsey }
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when timestamp is out of the range' do
+        let(:timestamp) { license.starts_at - 1.day }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when historical data not found' do
+        before do
+          historical_data.destroy!
+        end
+
+        it { is_expected.to eq(true) }
+      end
+    end
+
+    context 'legacy license' do
+      let(:license) { build(:license) }
+
+      context 'when seat link is disabled' do
+        before do
+          allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when license is trial' do
+        let(:license) { build(:license, trial: true) }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when timestamp is out of the range' do
+        let(:timestamp) { license.starts_at - 1.day }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when historical data not found' do
+        before do
+          historical_data.destroy!
+        end
+
+        it { is_expected.to eq(false) }
+      end
     end
   end
 end

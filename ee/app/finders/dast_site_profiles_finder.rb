@@ -9,8 +9,7 @@ class DastSiteProfilesFinder
     relation = DastSiteProfile.with_dast_site_and_validation
     relation = by_id(relation)
     relation = by_project(relation)
-    relation = by_name(relation)
-    relation
+    by_name(relation)
   end
 
   private

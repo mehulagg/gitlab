@@ -5,6 +5,7 @@ module Vulnerabilities
     include ShaAttribute
     include ::Gitlab::Utils::StrongMemoize
     include Presentable
+    include ::VulnerabilityFindingHelpers
 
     # https://gitlab.com/groups/gitlab-org/-/epics/3148
     # https://gitlab.com/gitlab-org/gitlab/-/issues/214563#note_370782508 is why the table names are not renamed
@@ -332,12 +333,16 @@ module Vulnerabilities
       end
     end
 
-    alias_method :==, :eql? # eql? is necessary in some cases like array intersection
+    alias_method :==, :eql?
 
     def eql?(other)
-      other.report_type == report_type &&
-        other.location_fingerprint == location_fingerprint &&
-        other.first_fingerprint == first_fingerprint
+      return false unless other.report_type == report_type && other.primary_identifier_fingerprint == primary_identifier_fingerprint
+
+      if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
+        matches_signatures(other.signatures, other.uuid)
+      else
+        other.location_fingerprint == location_fingerprint
+      end
     end
 
     # Array.difference (-) method uses hash and eql? methods to do comparison
@@ -348,7 +353,7 @@ module Vulnerabilities
       # when Finding is persisted and identifiers are not preloaded.
       return super if persisted? && !identifiers.loaded?
 
-      report_type.hash ^ location_fingerprint.hash ^ first_fingerprint.hash
+      report_type.hash ^ location_fingerprint.hash ^ primary_identifier_fingerprint.hash
     end
 
     def severity_value
@@ -380,7 +385,7 @@ module Vulnerabilities
 
     protected
 
-    def first_fingerprint
+    def primary_identifier_fingerprint
       identifiers.first&.fingerprint
     end
 

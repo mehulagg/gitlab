@@ -13,7 +13,7 @@ This guide describes Usage Ping's purpose and how it's implemented.
 For more information about Product Intelligence, see:
 
 - [Product Intelligence Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
-- [Snowplow Guide](../snowplow.md)
+- [Snowplow Guide](../snowplow/index.md)
 
 More links:
 
@@ -1409,37 +1409,6 @@ bin/rake gitlab:usage_data:dump_sql_in_json
 
 # You may pipe the output into a file
 bin/rake gitlab:usage_data:dump_sql_in_yaml > ~/Desktop/usage-metrics-2020-09-02.yaml
-```
-
-## Export metric definitions as a single YAML file
-
-Use this API endpoint to export all metric definitions as a single YAML file, similar to the [Metrics Dictionary](dictionary.md), for easier importing.
-
-```plaintext
-GET /usage_data/metric_definitions
-```
-
-Response
-
-```yaml
----
-- key_path: redis_hll_counters.search.i_search_paid_monthly
-  description: Calculated unique users to perform a search with a paid license enabled
-    by month
-  product_section: enablement
-  product_stage: enablement
-  product_group: group::global search
-  product_category: global_search
-  value_type: number
-  status: data_available
-  time_frame: 28d
-  data_source: redis_hll
-  distribution:
-  - ee
-  tier:
-  - premium
-  - ultimate
-...
 ```
 
 ## Generating and troubleshooting usage ping

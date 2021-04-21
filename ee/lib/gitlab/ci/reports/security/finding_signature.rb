@@ -5,6 +5,8 @@ module Gitlab
     module Reports
       module Security
         class FindingSignature
+          include VulnerabilityFindingSignatureHelpers
+
           attr_accessor :algorithm_type, :signature_value
 
           def initialize(params = {})
@@ -12,11 +14,19 @@ module Gitlab
             @signature_value = params.dig(:signature_value)
           end
 
+          def priority
+            ::Vulnerabilities::FindingSignature.priority(algorithm_type)
+          end
+
           def signature_sha
             Digest::SHA1.digest(signature_value)
           end
 
-          def to_h
+          def signature_hex
+            signature_sha.unpack1("H*")
+          end
+
+          def to_hash
             {
               algorithm_type: algorithm_type,
               signature_sha: signature_sha
@@ -26,6 +36,13 @@ module Gitlab
           def valid?
             ::Vulnerabilities::FindingSignature.algorithm_types.key?(algorithm_type)
           end
+
+          def eql?(other)
+            other.algorithm_type == algorithm_type &&
+              other.signature_sha == signature_sha
+          end
+
+          alias_method :==, :eql?
         end
       end
     end

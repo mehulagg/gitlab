@@ -67,23 +67,25 @@ When you're creating a new issue, these are the fields you can fill in:
 - Milestone
 - Labels
 
-### New issue from the group-level Issue Tracker
+### New issue from the group-level issue tracker
 
-Go to the Group dashboard and click **Issues** in the sidebar to visit the Issue Tracker
-for all projects in your Group. Select the project you'd like to add an issue for
-using the dropdown button at the top-right of the page.
+To visit the issue tracker for all projects in your group:
 
-![Select project to create issue](img/select_project_from_group_level_issue_tracker.png)
+1. Go to the group dashboard.
+1. In the left sidebar, select **Issues**.
+1. In the top-right, select the **Select project to create issue** button.
+1. Select the project you'd like to create an issue for. The button now appears as **New issue in <selected project>**.
+1. Select **New issue in <selected project>**.
+
+![Select project to create issue](img/select_project_from_group_level_issue_tracker_v13_11.png)
 
 The project you selected most recently becomes the default for your next visit.
 This should save you a lot of time and clicks, if you mostly create issues for the same project.
 
-![Create issue from group-level issue tracker](img/create_issue_from_group_level_issue_tracker.png)
-
 ### New issue via Service Desk
 
 Enable [Service Desk](../service_desk.md) for your project and offer email support.
-By doing so, when your customer sends a new email, a new issue can be created in
+Now, when your customer sends a new email, a new issue can be created in
 the appropriate project and followed up from there.
 
 ### New issue via email
@@ -207,7 +209,7 @@ description, issues `#4` and `#6` are closed automatically when the MR is merged
 Using `Related to` flags `#5` as a [related issue](related_issues.md),
 but is not closed automatically.
 
-![merge request closing issue when merged](img/merge_request_closes_issue.png)
+![merge request closing issue when merged](img/merge_request_closes_issue_v13_11.png)
 
 If the issue is in a different repository than the MR, add the full URL for the issue(s):
 
@@ -278,12 +280,10 @@ of your installation.
 
 ## Deleting issues
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/2982) in GitLab 8.6.
-
 Users with [project owner permission](../../permissions.md) can delete an issue by
-editing it and clicking on the delete button.
+editing it and selecting **Delete issue**.
 
-![delete issue - button](img/delete_issue.png)
+![delete issue - button](img/delete_issue_v13_11.png)
 
 ## Promote an issue to an epic **(PREMIUM)**
 
@@ -323,21 +323,6 @@ in a comment or description field.
 Assignees in the sidebar are updated in real time. This feature is **disabled by default**.
 To enable it, you need to enable [ActionCable in-app mode](https://docs.gitlab.com/omnibus/settings/actioncable.html).
 
-## Cached issue count **(FREE SELF)**
-
-> - [Introduced]([link-to-issue](https://gitlab.com/gitlab-org/gitlab/-/issues/243753)) in GitLab 13.9.
-> - It was [deployed behind a feature flag](../../feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/323493) in GitLab 13.10.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-cached-issue-count) **(FREE SELF)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
-
-In a group, the sidebar displays the total count of open issues and this value is cached if higher
-than 1000. The cached value is rounded to thousands (or millions) and updated every 24 hours.
-
 ## Similar issues
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22866) in GitLab 11.6.
@@ -371,22 +356,3 @@ until the issue is reopened.
 
 You can then see issue statuses in the issues list and the
 [epic tree](../../group/epics/index.md#issue-health-status-in-epic-tree).
-
-## Enable or disable cached issue count **(FREE SELF)**
-
-Cached issue count in the left sidebar is under development but ready for production use. It is
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can disable it.
-
-To disable it:
-
-```ruby
-Feature.disable(:cached_sidebar_open_issues_count)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:cached_sidebar_open_issues_count)
-```

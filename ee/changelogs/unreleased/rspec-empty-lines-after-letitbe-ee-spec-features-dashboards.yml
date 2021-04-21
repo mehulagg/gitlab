@@ -1,0 +1,5 @@
+---
+title: Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/features/dashboards
+merge_request: 58399
+author: Abdul Wadood @abdulwd
+type: fixed

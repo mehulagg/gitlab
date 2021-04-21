@@ -90,6 +90,7 @@ describe('buildCycleAnalyticsInitialData', () => {
     ${'selectedProjects'} | ${[]}
     ${'labelsPath'}       | ${''}
     ${'milestonesPath'}   | ${''}
+    ${'stage'}            | ${null}
   `('will set a default value for "$field" if is not present', ({ field, value }) => {
     expect(buildCycleAnalyticsInitialData()).toMatchObject({
       [field]: value,

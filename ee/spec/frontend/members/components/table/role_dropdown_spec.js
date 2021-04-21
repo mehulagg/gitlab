@@ -4,12 +4,16 @@ import LdapDropdownItem from 'ee/members/components/ldap/ldap_dropdown_item.vue'
 import waitForPromises from 'helpers/wait_for_promises';
 import { member } from 'jest/members/mock_data';
 import RoleDropdown from '~/members/components/table/role_dropdown.vue';
+import { MEMBER_TYPES } from '~/members/constants';
 
 describe('RoleDropdown', () => {
   let wrapper;
 
   const createComponent = (propsData = {}) => {
     wrapper = shallowMount(RoleDropdown, {
+      provide: {
+        namespace: MEMBER_TYPES.user,
+      },
       propsData: {
         member,
         permissions: {},

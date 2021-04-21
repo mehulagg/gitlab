@@ -23,6 +23,11 @@ module Mutations
                required: false,
                description: 'The URL of the target to be scanned.'
 
+      argument :target_type, Types::DastTargetTypeEnum,
+               required: false,
+               description: 'The type of target to be scanned. Will be ignored ' \
+                            'if `security_dast_site_profiles_api_option` feature flag is disabled.'
+
       argument :excluded_urls, [GraphQL::STRING_TYPE],
                required: false,
                default_value: [],
@@ -45,13 +50,14 @@ module Mutations
       def resolve(full_path:, profile_name:, target_url: nil, **params)
         project = authorized_find!(full_path)
 
-        auth_params = feature_flagged(project, params[:auth], default: {})
+        auth_params = feature_flagged(project, :security_dast_site_profiles_additional_fields, params[:auth], default: {})
 
         dast_site_profile_params = {
           name: profile_name,
           target_url: target_url,
-          excluded_urls: feature_flagged(project, params[:excluded_urls]),
-          request_headers: feature_flagged(project, params[:request_headers]),
+          target_type: feature_flagged(project, :security_dast_site_profiles_api_option, params[:target_type]),
+          excluded_urls: feature_flagged(project, :security_dast_site_profiles_additional_fields, params[:excluded_urls]),
+          request_headers: feature_flagged(project, :security_dast_site_profiles_additional_fields, params[:request_headers]),
           auth_enabled: auth_params[:enabled],
           auth_url: auth_params[:url],
           auth_username_field: auth_params[:username_field],
@@ -67,8 +73,8 @@ module Mutations
 
       private
 
-      def feature_flagged(project, value, opts = {})
-        return opts[:default] unless Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
+      def feature_flagged(project, flag, value, opts = {})
+        return opts[:default] unless Feature.enabled?(flag, project, default_enabled: :yaml)
 
         value || opts[:default]
       end

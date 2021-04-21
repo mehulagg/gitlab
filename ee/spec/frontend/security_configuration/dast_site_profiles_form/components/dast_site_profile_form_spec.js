@@ -186,20 +186,14 @@ describe('DastSiteProfileForm', () => {
       expect(findRequestHeadersInput().attributes('maxlength')).toBe('2048');
     });
 
-    describe('should have correct placeholders', () => {
-      const defaultPlaceholder = 'Cache-control: no-cache, User-Agent: DAST/1.0';
-
+    describe('request-headers and password fields renders correctly', () => {
       it('when creating a new profile', async () => {
-        expect(findRequestHeadersInput().attributes('placeholder')).toBe(defaultPlaceholder);
-      });
+        expect(findRequestHeadersInput().attributes('placeholder')).toBe(
+          'Cache-control: no-cache, User-Agent: DAST/1.0',
+        );
 
-      it('when updating an existing profile with no request headers set', () => {
-        createFullComponent({
-          propsData: {
-            siteProfile: { ...siteProfileOne, requestHeaders: '' },
-          },
-        });
-        expect(findRequestHeadersInput().attributes('placeholder')).toBe(defaultPlaceholder);
+        expect(findRequestHeadersInput().element.value).toBe('');
+        expect(findByNameAttribute('password').exists()).toBe(false);
       });
 
       it('when updating an existing profile', () => {
@@ -208,8 +202,18 @@ describe('DastSiteProfileForm', () => {
             siteProfile: siteProfileOne,
           },
         });
-        expect(findRequestHeadersInput().attributes('placeholder')).toBe('[Redacted]');
-        expect(findByNameAttribute('password').attributes('placeholder')).toBe('••••••••');
+        expect(findRequestHeadersInput().element.value).toBe(siteProfileOne.requestHeaders);
+        expect(findByNameAttribute('password').element.value).toBe(siteProfileOne.auth.password);
+      });
+
+      it('when updating an existing profile with no request-header & password', () => {
+        createFullComponent({
+          propsData: {
+            siteProfile: { ...siteProfileOne, requestHeaders: null, auth: { enabled: true } },
+          },
+        });
+        expect(findRequestHeadersInput().element.value).toBe('');
+        expect(findByNameAttribute('password').element.value).toBe('');
       });
     });
   });

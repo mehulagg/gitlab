@@ -40,5 +40,9 @@ module Security
     scope :latest_successful_by_build, -> { joins(:build).where(ci_builds: { status: 'success', retried: [nil, false] }) }
 
     delegate :project, :name, to: :build
+
+    def has_errors?
+      info&.fetch('errors', []).present?
+    end
   end
 end

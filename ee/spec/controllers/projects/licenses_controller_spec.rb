@@ -6,6 +6,7 @@ RSpec.describe Projects::LicensesController do
   describe "GET #index" do
     let_it_be(:project) { create(:project, :repository, :private) }
     let_it_be(:user) { create(:user) }
+
     let(:params) { { namespace_id: project.namespace, project_id: project } }
     let(:get_licenses) { get :index, params: params, format: :json }
 

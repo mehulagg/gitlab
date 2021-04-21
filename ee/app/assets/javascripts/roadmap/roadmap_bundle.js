@@ -77,6 +77,10 @@ export default () => {
         ...(rawFilterParams.confidential && {
           confidential: parseBoolean(rawFilterParams.confidential),
         }),
+
+        ...(rawFilterParams.epicIid && {
+          epicIid: parseInt(rawFilterParams.epicIid, 10),
+        }),
       };
       const timeframe = getTimeframeForPreset(
         presetType,

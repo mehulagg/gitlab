@@ -18,6 +18,7 @@ RSpec.shared_examples 'namespace storage limit alert' do
     end
 
     allow(controller).to receive(:current_user).and_return(user)
+    namespace.add_owner(user)
   end
 
   render_views

@@ -13,6 +13,7 @@ import PathNavigation from 'ee/analytics/cycle_analytics/components/path_navigat
 import StageNavItem from 'ee/analytics/cycle_analytics/components/stage_nav_item.vue';
 import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import StageTableNav from 'ee/analytics/cycle_analytics/components/stage_table_nav.vue';
+import StageTableNew from 'ee/analytics/cycle_analytics/components/stage_table_new.vue';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
 import createStore from 'ee/analytics/cycle_analytics/store';
@@ -32,6 +33,7 @@ const noDataSvgPath = 'path/to/no/data';
 const noAccessSvgPath = 'path/to/no/access';
 const currentGroup = convertObjectPropsToCamelCase(mockData.group);
 const emptyStateSvgPath = 'path/to/empty/state';
+const stage = null;
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -59,6 +61,7 @@ const initialCycleAnalyticsState = {
   createdAfter: mockData.startDate,
   createdBefore: mockData.endDate,
   group: currentGroup,
+  stage,
 };
 
 const mocks = {
@@ -166,8 +169,8 @@ describe('Value Stream Analytics component', () => {
     expect(wrapper.find(Metrics).exists()).toBe(flag);
   };
 
-  const displaysStageTable = (flag) => {
-    expect(wrapper.find(StageTable).exists()).toBe(flag);
+  const displaysStageTable = (flag, component = StageTable) => {
+    expect(wrapper.find(component).exists()).toBe(flag);
   };
 
   const displaysDurationChart = (flag) => {
@@ -233,6 +236,7 @@ describe('Value Stream Analytics component', () => {
 
     it('does not display the stage table', () => {
       displaysStageTable(false);
+      displaysStageTable(false, StageTableNew);
     });
 
     it('does not display the duration chart', () => {
@@ -289,6 +293,7 @@ describe('Value Stream Analytics component', () => {
 
     it('does not display the stage table', () => {
       displaysStageTable(false);
+      displaysStageTable(false, StageTableNew);
     });
 
     it('does not display the add stage button', () => {
@@ -394,6 +399,7 @@ describe('Value Stream Analytics component', () => {
 
     it('hides the stage table', () => {
       displaysStageTable(false);
+      displaysStageTable(false, StageTableNew);
     });
 
     it('hides the add stage button', () => {
@@ -402,28 +408,25 @@ describe('Value Stream Analytics component', () => {
 
     describe('Without the overview stage selected', () => {
       beforeEach(async () => {
+        mock = new MockAdapter(axios);
+        mockRequiredRoutes(mock);
+        wrapper = await createComponent({
+          withStageSelected: true,
+          featureFlags: {
+            hasPathNavigation: true,
+          },
+        });
+
         await store.dispatch('setSelectedStage', mockData.issueStage);
         await wrapper.vm.$nextTick();
       });
 
       it('displays the stage table', () => {
-        displaysStageTable(true);
+        displaysStageTable(true, StageTableNew);
       });
 
-      it('displays the add stage button', async () => {
-        wrapper = await createComponent({
-          opts: {
-            stubs: {
-              StageTable,
-              StageTableNav,
-              AddStageButton,
-            },
-          },
-          withStageSelected: true,
-        });
-
-        await wrapper.vm.$nextTick();
-        displaysAddStageButton(true);
+      it('does not display the add stage button', () => {
+        displaysAddStageButton(false);
       });
     });
 
@@ -441,6 +444,65 @@ describe('Value Stream Analytics component', () => {
         it('does not display the path navigation', () => {
           displaysPathNavigation(false);
         });
+
+        describe('StageTable', () => {
+          beforeEach(async () => {
+            mock = new MockAdapter(axios);
+            mockRequiredRoutes(mock);
+
+            wrapper = await createComponent({
+              opts: {
+                stubs: {
+                  StageTable,
+                  StageTableNav,
+                  StageNavItem,
+                },
+              },
+              withStageSelected: true,
+            });
+          });
+
+          it('has the first stage selected by default', () => {
+            const first = findStageNavItemAtIndex(0);
+            const second = findStageNavItemAtIndex(1);
+
+            expect(first.props('isActive')).toBe(true);
+            expect(second.props('isActive')).toBe(false);
+          });
+
+          it('can navigate to different stages', async () => {
+            findStageNavItemAtIndex(2).trigger('click');
+
+            await wrapper.vm.$nextTick();
+            const first = findStageNavItemAtIndex(0);
+            const third = findStageNavItemAtIndex(2);
+            expect(third.props('isActive')).toBe(true);
+            expect(first.props('isActive')).toBe(false);
+          });
+
+          describe('Add stage button', () => {
+            beforeEach(async () => {
+              wrapper = await createComponent({
+                opts: {
+                  stubs: {
+                    StageTable,
+                    StageTableNav,
+                    AddStageButton,
+                  },
+                },
+                withStageSelected: true,
+              });
+            });
+
+            it('can navigate to the custom stage form', async () => {
+              expect(wrapper.find(CustomStageForm).exists()).toBe(false);
+              findAddStageButton().trigger('click');
+
+              await wrapper.vm.$nextTick();
+              expect(wrapper.find(CustomStageForm).exists()).toBe(true);
+            });
+          });
+        });
       });
 
       describe('enabled', () => {
@@ -455,65 +517,6 @@ describe('Value Stream Analytics component', () => {
 
         it('displays the path navigation', () => {
           displaysPathNavigation(true);
-        });
-      });
-    });
-
-    describe('StageTable', () => {
-      beforeEach(async () => {
-        mock = new MockAdapter(axios);
-        mockRequiredRoutes(mock);
-
-        wrapper = await createComponent({
-          opts: {
-            stubs: {
-              StageTable,
-              StageTableNav,
-              StageNavItem,
-            },
-          },
-          withStageSelected: true,
-        });
-      });
-
-      it('has the first stage selected by default', () => {
-        const first = findStageNavItemAtIndex(0);
-        const second = findStageNavItemAtIndex(1);
-
-        expect(first.props('isActive')).toBe(true);
-        expect(second.props('isActive')).toBe(false);
-      });
-
-      it('can navigate to different stages', async () => {
-        findStageNavItemAtIndex(2).trigger('click');
-
-        await wrapper.vm.$nextTick();
-        const first = findStageNavItemAtIndex(0);
-        const third = findStageNavItemAtIndex(2);
-        expect(third.props('isActive')).toBe(true);
-        expect(first.props('isActive')).toBe(false);
-      });
-
-      describe('Add stage button', () => {
-        beforeEach(async () => {
-          wrapper = await createComponent({
-            opts: {
-              stubs: {
-                StageTable,
-                StageTableNav,
-                AddStageButton,
-              },
-            },
-            withStageSelected: true,
-          });
-        });
-
-        it('can navigate to the custom stage form', async () => {
-          expect(wrapper.find(CustomStageForm).exists()).toBe(false);
-          findAddStageButton().trigger('click');
-
-          await wrapper.vm.$nextTick();
-          expect(wrapper.find(CustomStageForm).exists()).toBe(true);
         });
       });
     });
@@ -609,6 +612,7 @@ describe('Value Stream Analytics component', () => {
       created_after: toYmd(mockData.startDate),
       created_before: toYmd(mockData.endDate),
       project_ids: null,
+      stage_id: null,
     };
 
     const selectedProjectIds = mockData.selectedProjects.map(({ id }) => getIdFromGraphQLId(id));
@@ -662,7 +666,7 @@ describe('Value Stream Analytics component', () => {
     describe('with selectedProjectIds set', () => {
       beforeEach(async () => {
         wrapper = await createComponent();
-        store.dispatch('setSelectedProjects', mockData.selectedProjects);
+        await store.dispatch('setSelectedProjects', mockData.selectedProjects);
         await wrapper.vm.$nextTick();
       });
 
@@ -672,6 +676,30 @@ describe('Value Stream Analytics component', () => {
           created_after: toYmd(mockData.startDate),
           created_before: toYmd(mockData.endDate),
           project_ids: selectedProjectIds,
+          stage_id: 1,
+        });
+      });
+    });
+
+    describe('with selectedStage set', () => {
+      const selectedStage = {
+        title: 'Plan',
+        id: 2,
+      };
+
+      beforeEach(async () => {
+        wrapper = await createComponent();
+        store.dispatch('setSelectedStage', selectedStage);
+        await wrapper.vm.$nextTick();
+      });
+
+      it('sets the stage_id url parameter', async () => {
+        await shouldMergeUrlParams(wrapper, {
+          ...defaultParams,
+          created_after: toYmd(mockData.startDate),
+          created_before: toYmd(mockData.endDate),
+          project_ids: null,
+          stage_id: 2,
         });
       });
     });

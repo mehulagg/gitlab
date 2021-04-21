@@ -20,8 +20,6 @@ module Gitlab
 
             alias_method :fingerprint_path, :path
 
-            private
-
             def fingerprint_data
               "#{path}:#{method_name}:#{param}"
             end

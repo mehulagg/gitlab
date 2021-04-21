@@ -10,6 +10,10 @@ module EE
       before_action :log_archive_audit_event, only: [:archive]
       before_action :log_unarchive_audit_event, only: [:unarchive]
 
+      before_action only: :edit do
+        push_frontend_feature_flag(:ff_compliance_approval_gates, project, default_enabled: :yaml)
+      end
+
       before_action only: :show do
         push_frontend_feature_flag(:cve_id_request_button, project)
       end

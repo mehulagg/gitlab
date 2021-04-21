@@ -17,12 +17,16 @@ describe('PathNavigation', () => {
     });
   };
 
-  const pathNavigationItems = () => {
+  const pathNavigationTitles = () => {
     return wrapper.findAll('.gl-path-button');
   };
 
+  const pathNavigationItems = () => {
+    return wrapper.findAll('.gl-path-nav-list-item');
+  };
+
   const clickItemAt = (index) => {
-    pathNavigationItems().at(index).trigger('click');
+    pathNavigationTitles().at(index).trigger('click');
   };
 
   beforeEach(() => {
@@ -62,21 +66,20 @@ describe('PathNavigation', () => {
         });
 
         describe('popovers', () => {
-          const modifiedStages = [
-            ...transformedStagePathData.slice(0, 3),
-            {
-              ...transformedStagePathData[3],
-              startEventHtmlDescription: null,
-              endEventHtmlDescription: null,
-            },
-          ];
-
           beforeEach(() => {
-            wrapper = createComponent({ stages: modifiedStages });
+            wrapper = createComponent({ stages: transformedStagePathData });
           });
 
-          it('renders popovers only for stages with either a start event and/or and end event', () => {
-            expect(wrapper.findAll('[data-testid="stage-item-popover"]')).toHaveLength(2);
+          it('renders popovers for all stages except for the overview stage', () => {
+            const pathItemContent = pathNavigationItems().wrappers;
+            const [overviewStage, ...popoverStages] = pathItemContent;
+
+            expect(overviewStage.text()).toContain('Overview');
+            expect(overviewStage.find('[data-testid="stage-item-popover"]').exists()).toBe(false);
+
+            popoverStages.forEach((stage) => {
+              expect(stage.find('[data-testid="stage-item-popover"]').exists()).toBe(true);
+            });
           });
 
           it('shows the sanitized start event description for the first stage item', () => {
@@ -90,6 +93,11 @@ describe('PathNavigation', () => {
             const expectedStartEventDescription =
               'Issue first associated with a milestone or issue first added to a board';
             expect(firstPopover.text()).toContain(expectedStartEventDescription);
+          });
+
+          it('shows the median stage time for the first stage item', () => {
+            const firstPopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
+            expect(firstPopover.text()).toContain('Stage time (median)');
           });
         });
       });

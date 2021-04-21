@@ -184,6 +184,19 @@ RSpec.describe EpicsFinder do
                 it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic, epic1, epic2, epic3) }
               end
             end
+
+            context 'when user is a guest of top level group' do
+              it 'does not have N+1 queries for subgroups' do
+                GroupMember.where(user_id: search_user.id).delete_all
+                group.add_guest(search_user)
+
+                control = ActiveRecord::QueryRecorder.new(skip_cached: false) { epics.to_a }
+
+                create_list(:group, 5, :private, parent: group)
+
+                expect { epics.to_a }.not_to exceed_all_query_limit(control)
+              end
+            end
           end
 
           it 'does not execute more than 5 SQL queries' do
@@ -590,6 +603,16 @@ RSpec.describe EpicsFinder do
             end
           end
 
+          context 'when user is a guest in the base group' do
+            before do
+              base_group.add_guest(search_user)
+            end
+
+            it 'does not return any confidential epics in the base or subgroups' do
+              expect(subject).to match_array([base_epic2, private_epic1, public_epic1])
+            end
+          end
+
           context 'when user is member of public subgroup' do
             before do
               public_group1.add_developer(search_user)
@@ -647,6 +670,25 @@ RSpec.describe EpicsFinder do
 
             it 'returns epics that include negated params' do
               expect(epics(params)).to contain_exactly(authored_epic, epic1, epic2, epic3)
+            end
+          end
+        end
+
+        context 'with negated reaction emoji' do
+          let_it_be(:awarded_emoji) { create(:award_emoji, name: 'thumbsup', awardable: epic3, user: search_user) }
+          let_it_be(:params) { { not: { my_reaction_emoji: awarded_emoji.name } } }
+
+          it 'returns all epics without given emoji name' do
+            expect(epics(params)).to contain_exactly(epic1, epic2)
+          end
+
+          context 'when not_issuable_queries is disabled' do
+            before do
+              stub_feature_flags(not_issuable_queries: false)
+            end
+
+            it 'returns epics that include negated params' do
+              expect(epics(params)).to contain_exactly(epic1, epic2, epic3)
             end
           end
         end

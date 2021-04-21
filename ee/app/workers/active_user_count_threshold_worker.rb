@@ -21,7 +21,7 @@ class ActiveUserCountThresholdWorker # rubocop:disable Scalability/IdempotentWor
         .to_set
       # rubocop:enable CodeReuse/ActiveRecord
 
-      recipients << license.licensee["Email"] if license.licensee["Email"]
+      recipients << license.licensee_email if license.licensee_email
 
       LicenseMailer.approaching_active_user_count_limit(recipients.to_a)
     end

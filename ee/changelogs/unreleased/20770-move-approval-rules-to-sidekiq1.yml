@@ -1,0 +1,5 @@
+---
+title: Sync code owner approval rules asynchronously after creating merge request
+merge_request: 59395
+author:
+type: performance

@@ -71,7 +71,7 @@ export default {
       </div>
     </div>
     <div class="gl-display-flex gl-align-items-center gl-justify-content-end">
-      <geo-node-actions :primary="node.primary" />
+      <geo-node-actions :node="node" />
     </div>
   </div>
 </template>

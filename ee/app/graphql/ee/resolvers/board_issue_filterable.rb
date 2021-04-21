@@ -10,6 +10,9 @@ module EE
       def set_filter_values(filters)
         filter_by_epic(filters)
         filter_by_iteration(filters)
+        filter_by_weight(filters)
+
+        super
       end
 
       private
@@ -35,6 +38,17 @@ module EE
         if iteration_wildcard_id
           filters[:iteration_id] = iteration_wildcard_id
         end
+      end
+
+      def filter_by_weight(filters)
+        weight = filters[:weight]
+        weight_wildcard = filters.delete(:weight_wildcard_id)
+
+        if weight && weight_wildcard
+          raise ::Gitlab::Graphql::Errors::ArgumentError, 'Incompatible arguments: weight, weightWildcardId.'
+        end
+
+        filters[:weight] = weight_wildcard if weight_wildcard
       end
     end
   end

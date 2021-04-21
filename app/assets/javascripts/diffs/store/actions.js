@@ -1,5 +1,4 @@
 import Cookies from 'js-cookie';
-import Visibility from 'visibilityjs';
 import Vue from 'vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { diffViewerModes } from '~/ide/constants';
@@ -53,15 +52,12 @@ import {
   prepareLineForRenamedFile,
 } from './utils';
 
-let eTagPoll;
-
 export const setBaseConfig = ({ commit }, options) => {
   const {
     endpoint,
     endpointMetadata,
     endpointBatch,
     endpointCoverage,
-    endpointCodequality,
     endpointUpdateUser,
     projectPath,
     dismissEndpoint,
@@ -75,7 +71,6 @@ export const setBaseConfig = ({ commit }, options) => {
     endpointMetadata,
     endpointBatch,
     endpointCoverage,
-    endpointCodequality,
     endpointUpdateUser,
     projectPath,
     dismissEndpoint,
@@ -238,48 +233,6 @@ export const fetchCoverageFiles = ({ commit, state }) => {
   coveragePoll.makeRequest();
 };
 
-export const clearEtagPoll = () => {
-  eTagPoll = null;
-};
-
-export const stopCodequalityPolling = () => {
-  if (eTagPoll) eTagPoll.stop();
-};
-
-export const restartCodequalityPolling = () => {
-  if (eTagPoll) eTagPoll.restart();
-};
-
-export const fetchCodequality = ({ commit, state, dispatch }) => {
-  eTagPoll = new Poll({
-    resource: {
-      getCodequalityDiffReports: (endpoint) => axios.get(endpoint),
-    },
-    data: state.endpointCodequality,
-    method: 'getCodequalityDiffReports',
-    successCallback: ({ status, data }) => {
-      if (status === httpStatusCodes.OK) {
-        commit(types.SET_CODEQUALITY_DATA, data);
-
-        eTagPoll.stop();
-      }
-    },
-    errorCallback: () => createFlash(__('Something went wrong on our end. Please try again!')),
-  });
-
-  if (!Visibility.hidden()) {
-    eTagPoll.makeRequest();
-  }
-
-  Visibility.change(() => {
-    if (!Visibility.hidden()) {
-      dispatch('restartCodequalityPolling');
-    } else {
-      dispatch('stopCodequalityPolling');
-    }
-  });
-};
-
 export const setHighlightedRow = ({ commit }, lineCode) => {
   const fileHash = lineCode.split('_')[0];
   commit(types.SET_HIGHLIGHTED_ROW, lineCode);
@@ -366,16 +319,19 @@ export const startRenderDiffsQueue = ({ state, commit }) => {
     const nextFile = diffFilesToRender[currentDiffFileIndex];
 
     if (nextFile) {
+      let retryCount = 0;
       currentDiffFileIndex += 1;
       commit(types.RENDER_FILE, nextFile);
 
       const requestIdle = () =>
         requestIdleCallback((idleDeadline) => {
           // Wait for at least 5ms before trying to render
-          if (idleDeadline.timeRemaining() >= 6) {
+          // or for 5 tries and then force render the file
+          if (idleDeadline.timeRemaining() >= 5 || retryCount > 4) {
             checkItem();
           } else {
             requestIdle();
+            retryCount += 1;
           }
         });
 

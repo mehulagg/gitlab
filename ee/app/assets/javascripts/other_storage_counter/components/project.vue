@@ -97,7 +97,7 @@ export default {
       @click="toggleProject"
     >
       <div
-        class="table-section gl-white-space-normal! gl-flex-sm-wrap section-70 gl-text-truncate"
+        class="table-section gl-white-space-normal! gl-sm-flex-wrap section-70 gl-text-truncate"
         role="gridcell"
       >
         <div class="table-mobile-header gl-font-weight-bold" role="rowheader">
@@ -119,7 +119,7 @@ export default {
         </div>
       </div>
       <div
-        class="table-section gl-white-space-normal! gl-flex-sm-wrap section-30 gl-text-truncate"
+        class="table-section gl-white-space-normal! gl-sm-flex-wrap section-30 gl-text-truncate"
         role="gridcell"
       >
         <div class="table-mobile-header gl-font-weight-bold" role="rowheader">

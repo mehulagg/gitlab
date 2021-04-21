@@ -3,6 +3,7 @@ import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { member as memberMock, directMember, members } from 'jest/members/mock_data';
 import MembersTable from '~/members/components/table/members_table.vue';
+import { MEMBER_TYPES } from '~/members/constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -12,14 +13,19 @@ describe('MemberList', () => {
 
   const createStore = (state = {}) => {
     return new Vuex.Store({
-      state: {
-        members: [],
-        tableFields: [],
-        tableAttrs: {
-          table: { 'data-qa-selector': 'members_list' },
-          tr: { 'data-qa-selector': 'member_row' },
+      modules: {
+        [MEMBER_TYPES.user]: {
+          namespaced: true,
+          state: {
+            members: [],
+            tableFields: [],
+            tableAttrs: {
+              table: { 'data-qa-selector': 'members_list' },
+              tr: { 'data-qa-selector': 'member_row' },
+            },
+            ...state,
+          },
         },
-        ...state,
       },
     });
   };
@@ -31,6 +37,7 @@ describe('MemberList', () => {
       provide: {
         sourceId: 1,
         currentUserId: 1,
+        namespace: MEMBER_TYPES.user,
       },
       stubs: [
         'member-avatar',

@@ -62,15 +62,14 @@ describe('Subscription Details History', () => {
       });
 
       it.each`
-        testId                | key
-        ${'name'}             | ${'name'}
-        ${'email'}            | ${'email'}
-        ${'company'}          | ${'company'}
-        ${'plan'}             | ${'plan'}
-        ${'starts-at'}        | ${'startsAt'}
-        ${'valid-from'}       | ${'validFrom'}
-        ${'expires-at'}       | ${'expiresAt'}
-        ${'users-in-license'} | ${'usersInLicense'}
+        testId                      | key
+        ${'name'}                   | ${'name'}
+        ${'email'}                  | ${'email'}
+        ${'company'}                | ${'company'}
+        ${'starts-at'}              | ${'startsAt'}
+        ${'starts-at'}              | ${'startsAt'}
+        ${'expires-at'}             | ${'expiresAt'}
+        ${'users-in-license-count'} | ${'usersInLicenseCount'}
       `('displays the correct value for the $testId cell', ({ testId, key }) => {
         const cellTestId = `subscription-cell-${testId}`;
         expect(findCellByTestid(cellTestId).text()).toBe(subscriptionHistory[0][key]);
@@ -79,6 +78,11 @@ describe('Subscription Details History', () => {
       it('displays the correct value for the type cell', () => {
         const cellTestId = `subscription-cell-type`;
         expect(findCellByTestid(cellTestId).text()).toBe('Cloud License');
+      });
+
+      it('displays the correct value for the plan cell', () => {
+        const cellTestId = `subscription-cell-plan`;
+        expect(findCellByTestid(cellTestId).text()).toBe('Ultimate');
       });
     });
   });

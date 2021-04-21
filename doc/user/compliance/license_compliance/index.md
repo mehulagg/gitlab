@@ -115,7 +115,7 @@ the `license_management` job, so you must migrate to the `license_scanning` job 
 `License-Scanning.gitlab-ci.yml` template.
 
 The results are saved as a
-[License Compliance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportslicense_scanning)
+[License Compliance report artifact](../../../ci/yaml/README.md#artifactsreportslicense_scanning)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest License Compliance artifact available. Behind the scenes, the
 [GitLab License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/license-finder)
@@ -157,7 +157,7 @@ The `license_management` image already embeds many auto-detection scripts, langu
 and packages. Nevertheless, it's almost impossible to cover all cases for all projects.
 That's why sometimes it's necessary to install extra packages, or to have extra steps
 in the project automated setup, like the download and installation of a certificate.
-For that, a `LICENSE_MANAGEMENT_SETUP_CMD` CI/CD variable can be passed to the container,
+For that, a `SETUP_CMD` CI/CD variable can be passed to the container,
 with the required commands to run before the license detection.
 
 If present, this variable overrides the setup step necessary to install all the packages
@@ -171,7 +171,7 @@ include:
   - template: Security/License-Scanning.gitlab-ci.yml
 
 variables:
-  LICENSE_MANAGEMENT_SETUP_CMD: sh my-custom-install-script.sh
+  SETUP_CMD: sh my-custom-install-script.sh
 ```
 
 In this example, `my-custom-install-script.sh` is a shell script at the root

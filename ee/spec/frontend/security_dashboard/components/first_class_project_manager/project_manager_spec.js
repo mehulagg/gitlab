@@ -32,11 +32,6 @@ describe('Project Manager component', () => {
     },
   };
 
-  const defaultProps = {
-    isManipulatingProjects: false,
-    projects: [],
-  };
-
   const createWrapper = ({ data = {}, mocks = {}, props = {} }) => {
     spyQuery = defaultMocks.$apollo.query;
     spyMutate = defaultMocks.$apollo.mutate;
@@ -45,7 +40,7 @@ describe('Project Manager component', () => {
         return { ...data };
       },
       mocks: { ...defaultMocks, ...mocks },
-      propsData: { ...defaultProps, ...props },
+      propsData: props,
     });
   };
 

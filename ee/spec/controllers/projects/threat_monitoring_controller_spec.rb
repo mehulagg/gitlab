@@ -138,6 +138,7 @@ RSpec.describe Projects::ThreatMonitoringController do
     end
 
     let_it_be(:environment) { create(:environment, :with_review_app, project: project) }
+
     let(:environment_id) { environment.id }
 
     context 'with authorized user' do

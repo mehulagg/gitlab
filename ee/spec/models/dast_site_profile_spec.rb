@@ -122,6 +122,14 @@ RSpec.describe DastSiteProfile, type: :model do
     end
   end
 
+  describe 'enums' do
+    let(:target_types) do
+      { website: 0, api: 1 }
+    end
+
+    it { is_expected.to define_enum_for(:target_type).with_values(**target_types) }
+  end
+
   describe 'instance methods' do
     describe '#destroy!' do
       context 'when the associated dast_site has no dast_site_profiles' do

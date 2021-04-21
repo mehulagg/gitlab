@@ -1,0 +1,5 @@
+---
+title: Remove standalone_vuln_dependency_list Feature Flag
+merge_request: 59124
+author:
+type: changed

@@ -1,15 +1,15 @@
 ---
 key_path: redis_hll_counters.quickactions.i_quickactions_remove_parent_epic_weekly
-description:
+description: Count of WAU using the `/remove_parent_epic` quick action 
 product_section: dev
 product_stage: plan
-product_group: group::project management
-product_category:
+product_group: group::product planning 
+product_category: epics 
 value_type: number
 status: data_available
 time_frame: 7d
 data_source: redis_hll
 distribution:
 - ee
-tier: []
-skip_validation: true
+tier:
+- ultimate 

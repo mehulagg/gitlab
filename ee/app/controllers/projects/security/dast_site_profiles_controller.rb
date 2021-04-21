@@ -4,6 +4,7 @@ module Projects
   module Security
     class DastSiteProfilesController < Projects::ApplicationController
       include SecurityAndCompliancePermissions
+      include API::Helpers::GraphqlHelpers
 
       before_action do
         authorize_read_on_demand_scans!
@@ -16,7 +17,31 @@ module Projects
       end
 
       def edit
-        @site_profile = DastSiteProfilesFinder.new(project_id: @project.id, id: params[:id]).execute.first! # rubocop: disable CodeReuse/ActiveRecord
+        global_id = Gitlab::GlobalId.as_global_id(params[:id], model_name: 'DastSiteProfile')
+
+        query = %(
+          {
+            project(fullPath: "#{project.full_path}") {
+              dastSiteProfile(id: "#{global_id}") {
+                id
+                name: profileName
+                targetUrl
+                excludedUrls
+                requestHeaders
+                auth { enabled url username usernameField password passwordField }
+                referencedInSecurityPolicies
+              }
+            }
+          }
+        )
+
+        @site_profile = run_graphql!(
+          query: query,
+          context: { current_user: current_user },
+          transform: -> (result) { result.dig('data', 'project', 'dastSiteProfile') }
+        )
+
+        return render_404 unless @site_profile
       end
     end
   end

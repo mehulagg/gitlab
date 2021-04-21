@@ -72,6 +72,13 @@ To include the DAST template:
    For more information about template versioning, see the
    [CI/CD documentation](../../../development/cicd/templates.md#latest-version).
 
+1. Add a `dast` stage to your GitLab CI stages configuration:
+
+    ```yaml
+    stages:
+      - dast
+    ```
+
 1. Add the template to GitLab, based on your version of GitLab:
 
    - In GitLab 11.9 and later, [include](../../../ci/yaml/README.md#includetemplate)
@@ -119,7 +126,7 @@ The included template creates a `dast` job in your CI/CD pipeline and scans
 your project's running application for possible vulnerabilities.
 
 The results are saved as a
-[DAST report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportsdast)
+[DAST report artifact](../../../ci/yaml/README.md#artifactsreportsdast)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest DAST artifact available. Behind the scenes, the
 [GitLab DAST Docker image](https://gitlab.com/gitlab-org/security-products/dast)
@@ -164,7 +171,7 @@ stages:
   - build
   - dast
 
-include: 
+include:
   - template: DAST.gitlab-ci.yml
 
 # Deploys the container to the GitLab container registry
@@ -293,11 +300,11 @@ variables:
   DAST_SUBMIT_FIELD: login # the `id` or `name` of the element that when clicked will submit the login form or the password form of a multi-page login process
   DAST_FIRST_SUBMIT_FIELD: next # the `id` or `name` of the element that when clicked will submit the username form of a multi-page login process
   DAST_EXCLUDE_URLS: http://example.com/sign-out,http://example.com/sign-out-2  # optional, URLs to skip during the authenticated scan; comma-separated, no spaces in between
-  DAST_AUTH_VALIDATION_URL: http://example.com/loggedin_page  # optional, a URL only accessible to logged in users that DAST can use to confirm successful authentication
+  DAST_AUTH_VERIFICATION_URL: http://example.com/loggedin_page  # optional, a URL only accessible to logged in users that DAST can use to confirm successful authentication
 ```
 
 The results are saved as a
-[DAST report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportsdast)
+[DAST report artifact](../../../ci/yaml/README.md#artifactsreportsdast)
 that you can later download and analyze.
 Due to implementation limitations, we always take the latest DAST artifact available.
 
@@ -469,16 +476,14 @@ variables:
 
 #### Import API specification from a file
 
-If your API specification is in your repository, you can provide the specification's
-filename directly as the target. The specification file is expected to be in the
-`/zap/wrk` directory.
+If your API specification file is in your repository, you can provide its filename as the target.
+The API specification file must be in the `/zap/wrk` directory.
 
 ```yaml
 dast:
-  script:
+  before_script:
     - mkdir -p /zap/wrk
     - cp api-specification.yml /zap/wrk/api-specification.yml
-    - /analyze -t $DAST_WEBSITE
   variables:
     GIT_STRATEGY: fetch
     DAST_API_SPECIFICATION: api-specification.yml
@@ -495,6 +500,12 @@ Specifications often define a host, which contains a domain name and a port. The
 host referenced may be different than the host of the API's review instance.
 This can cause incorrect URLs to be imported, or a scan on an incorrect host.
 Use the `DAST_API_HOST_OVERRIDE` CI/CD variable to override these values.
+
+WARNING:
+When using the API host override feature, you cannot use the `$DAST_WEBSITE` variable to override the hostname.
+A host override is _only_ supported when importing the API specification from a URL. Attempts to override the
+host throw an error when the API specification is imported from a file. This is due to a limitation in the
+ZAP OpenAPI extension.
 
 For example, with a OpenAPI V3 specification containing:
 
@@ -514,10 +525,6 @@ variables:
   DAST_API_SPECIFICATION: http://api-test.host.com/api-specification.yml
   DAST_API_HOST_OVERRIDE: api-test.host.com
 ```
-
-Note that using a host override is ONLY supported when importing the API specification from a URL.
-It doesn't work and is ignored when importing the specification from a file. This is due to a
-limitation in the ZAP OpenAPI extension.
 
 #### Authentication using headers
 
@@ -638,7 +645,7 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_API_SPECIFICATION`     | URL or string | The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
 | `DAST_SPIDER_START_AT_HOST`  | boolean | Set to `false` to prevent DAST from resetting the target to its host before scanning. When `true`, non-host targets `http://test.site/some_path` is reset to `http://test.site` before scan. Default: `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/258805) in GitLab 13.6. |
 | `DAST_AUTH_URL`              | URL     | The URL of the page containing the sign-in HTML form on the target website. `DAST_USERNAME` and `DAST_PASSWORD` are submitted with the login form to create an authenticated scan. Not supported for API scans. |
-| `DAST_AUTH_VALIDATION_URL`   | URL     | A URL only accessible to logged in users that DAST can use to confirm successful authentication. If provided, DAST will exit if it cannot access the URL. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207335) in GitLab 13.8.
+| `DAST_AUTH_VERIFICATION_URL`   | URL     | A URL only accessible to logged in users that DAST can use to confirm successful authentication. If provided, DAST will exit if it cannot access the URL. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207335) in GitLab 13.8.
 | `DAST_USERNAME`              | string  | The username to authenticate to in the website. |
 | `DAST_PASSWORD`              | string  | The password to authenticate to in the website. |
 | `DAST_USERNAME_FIELD`        | string  | The name of username field at the sign-in HTML form. |
@@ -820,6 +827,7 @@ Alternatively, you can use the CI/CD variable `SECURE_ANALYZERS_PREFIX` to overr
 > - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/218465) in GitLab 13.3.
 > - The saved scans feature was [introduced](https://gitlab.com/groups/gitlab-org/-/epics/5100) in GitLab 13.9.
 > - The option to select a branch was [introduced](https://gitlab.com/groups/gitlab-org/-/epics/4847) in GitLab 13.10.
+> - DAST branch selection [feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/322672) in GitLab 13.11.
 
 An on-demand DAST scan runs outside the DevOps life cycle. Changes in your repository don't trigger
 the scan. You must start it manually.
@@ -831,10 +839,7 @@ An on-demand DAST scan:
 - Is associated with your project's default branch.
 - Is saved on creation so it can be run later.
 
-In GitLab 13.10 and later, you can select to run an on-demand scan against a specific branch. This
-feature is [deployed behind a feature flag](../../feature_flags.md), enabled by default. It's
-enabled on GitLab.com and recommended for production use. [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it with `Feature.disable(:dast_branch_selection)`.
+In GitLab 13.10 and later, you can select to run an on-demand scan against a specific branch.
 
 ### On-demand scan modes
 
@@ -940,6 +945,14 @@ A site profile contains the following:
 
 - **Profile name**: A name you assign to the site to be scanned.
 - **Target URL**: The URL that DAST runs against.
+- **Excluded URLs**: A comma-separated list of URLs to exclude from the scan.
+- **Request headers**: A comma-separated list of HTTP request headers, including names and values. These headers are added to every request made by DAST.
+- **Authentication**:  
+  - **Authenticated URL**: The URL of the page containing the sign-in HTML form on the target website. The username and password are submitted with the login form to create an authenticated scan. 
+  - **Username**: The username used to authenticate to the website.
+  - **Password**: The password used to authenticate to the website.
+  - **Username form field**: The name of username field at the sign-in HTML form. 
+  - **Password form field**: The name of password field at the sign-in HTML form. 
 
 #### Site profile validation
 
@@ -955,7 +968,7 @@ follows:
 - _Header validation_ requires the header `Gitlab-On-Demand-DAST` be added to the target site,
   with a value unique to the project. The validation process checks that the header is present, and
   checks its value.
-  
+
 Both methods are equivalent in functionality. Use whichever is feasible.
 
 #### Create a site profile

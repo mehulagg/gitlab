@@ -6,6 +6,7 @@ RSpec.describe Admin::ProjectsController, :geo do
   include EE::GeoHelpers
 
   let_it_be(:geo_primary) { create(:geo_node, :primary) }
+
   let!(:project_registry) { create(:geo_project_registry) }
   let(:project) { project_registry.project }
 

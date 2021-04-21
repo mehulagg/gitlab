@@ -50,7 +50,7 @@ module Security
     # and `INFINITY` for all the other scan types. There is no problem with
     # calling this method for all the scan types to get rid of branching.
     def scanner_order_for(artifact)
-      MergeReportsService::ANALYZER_ORDER.fetch(artifact.security_report.primary_scanner&.external_id, Float::INFINITY)
+      MergeReportsService::ANALYZER_ORDER.fetch(artifact.security_report(validate: true).primary_scanner&.external_id, Float::INFINITY)
     end
 
     def store_scan_for(artifact, deduplicate)

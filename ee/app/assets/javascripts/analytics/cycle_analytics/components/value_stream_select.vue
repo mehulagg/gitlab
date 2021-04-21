@@ -40,13 +40,6 @@ export default {
   directives: {
     GlModalDirective,
   },
-  props: {
-    hasExtendedFormFields: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
   data() {
     return {
       showCreateModal: false,
@@ -176,7 +169,6 @@ export default {
       v-if="showCreateModal"
       :initial-data="initialData"
       :initial-form-errors="initialFormErrors"
-      :has-extended-form-fields="hasExtendedFormFields"
       :default-stage-config="defaultStageConfig"
       :is-editing="isEditing"
       @hidden="showCreateModal = false"

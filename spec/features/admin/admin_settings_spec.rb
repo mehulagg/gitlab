@@ -129,7 +129,7 @@ RSpec.describe 'Admin updates settings' do
 
       context 'Change Sign-up restrictions' do
         context 'Require Admin approval for new signup setting' do
-          it 'changes the setting' do
+          it 'changes the setting', :js do
             page.within('.as-signup') do
               check 'Require admin approval for new sign-ups'
               click_button 'Save changes'
@@ -248,6 +248,14 @@ RSpec.describe 'Admin updates settings' do
 
         expect(page).to have_content "Application settings saved successfully"
         expect(current_settings.hide_third_party_offers).to be true
+      end
+    end
+
+    context 'when the Slack Notifications Service template is active' do
+      before do
+        create(:service, :template, type: 'SlackService', active: true)
+
+        visit general_admin_application_settings_path
       end
 
       it 'change Slack Notifications Service template settings', :js do
@@ -588,7 +596,7 @@ RSpec.describe 'Admin updates settings' do
 
     context 'Nav bar' do
       it 'shows default help links in nav' do
-        default_support_url = 'https://about.gitlab.com/getting-help/'
+        default_support_url = "https://#{ApplicationHelper.promo_host}/getting-help/"
 
         visit root_dashboard_path
 

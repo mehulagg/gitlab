@@ -1,0 +1,5 @@
+---
+title: Remove default stages definition from latest API Fuzzing CI template
+merge_request: 59154
+author:
+type: changed

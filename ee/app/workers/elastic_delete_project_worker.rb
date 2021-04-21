@@ -12,6 +12,7 @@ class ElasticDeleteProjectWorker
 
   def perform(project_id, es_id)
     remove_project_and_children_documents(project_id, es_id)
+    IndexStatus.for_project(project_id).delete_all
   end
 
   private
@@ -48,6 +49,12 @@ class ElasticDeleteProjectWorker
               {
                 term: {
                   project_id: project_id
+                }
+              },
+              {
+                term: {
+                  # We never set `project_id` for commits instead they have a nested rid which is the project_id
+                  "commit.rid" => project_id
                 }
               },
               {

@@ -14,9 +14,10 @@ RSpec.describe Gitlab::Database::LoadBalancing::HostList do
   end
 
   let(:load_balancer) { double(:load_balancer) }
+  let(:host_count) { 2 }
 
   let(:host_list) do
-    hosts = Array.new(2) do
+    hosts = Array.new(host_count) do
       Gitlab::Database::LoadBalancing::Host.new('localhost', load_balancer, port: 5432)
     end
 
@@ -111,6 +112,15 @@ RSpec.describe Gitlab::Database::LoadBalancing::HostList do
     end
   end
 
+  describe '#hosts' do
+    it 'returns a copy of the host' do
+      first = host_list.hosts
+
+      expect(host_list.hosts).to eq(first)
+      expect(host_list.hosts.object_id).not_to eq(first.object_id)
+    end
+  end
+
   describe '#hosts=' do
     it 'updates the list of hosts to use' do
       host_list.hosts = [
@@ -158,6 +168,21 @@ RSpec.describe Gitlab::Database::LoadBalancing::HostList do
 
     it 'returns nil if no hosts are available' do
       expect(described_class.new.next).to be_nil
+    end
+  end
+
+  describe '#shuffle' do
+    let(:host_count) { 3 }
+
+    it 'randomizes the list' do
+      2.times do
+        all_hosts = host_list.hosts
+
+        host_list.shuffle
+
+        expect(host_list.length).to eq(host_count)
+        expect(host_list.hosts).to contain_exactly(*all_hosts)
+      end
     end
   end
 end

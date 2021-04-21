@@ -27,6 +27,8 @@ module Gitlab
           @use_primary = false
           @performed_write = false
           @ignore_writes = false
+          @fallback_to_replicas_for_ambiguous_queries = false
+          @use_replicas_for_read_queries = false
         end
 
         def use_primary?
@@ -55,22 +57,48 @@ module Gitlab
           @ignore_writes = false
         end
 
-        # Indicate that all the SQL statements from anywhere inside this block
-        # should use a replica. This is a weak enforcement. The queries
-        # prioritize using a primary over a replica in those cases:
+        # Indicates that the read SQL statements from anywhere inside this
+        # blocks should use a replica, regardless of the current primary
+        # stickiness or whether a write query is already performed in the
+        # current session. This interface is reserved mostly for performance
+        # purpose. This is a good tool to push expensive queries, which can
+        # tolerate the replica lags, to the replicas.
+        #
+        # Write and ambiguous queries inside this block are still handled by
+        # the primary.
+        def use_replicas_for_read_queries(&blk)
+          previous_flag = @use_replicas_for_read_queries
+          @use_replicas_for_read_queries = true
+          yield
+        ensure
+          @use_replicas_for_read_queries = previous_flag
+        end
+
+        def use_replicas_for_read_queries?
+          @use_replicas_for_read_queries == true
+        end
+
+        # Indicate that the ambiguous SQL statements from anywhere inside this
+        # block should use a replica. The ambiguous statements include:
+        # - Transactions.
+        # - Custom queries (via exec_query, execute, etc.)
+        # - In-flight connection configuration change (SET LOCAL statement_timeout = 5000)
+        #
+        # This is a weak enforcement. This helper incorporates well with
+        # primary stickiness:
         # - If the queries are about to write
         # - The current session already performed writes
         # - It prefers to use primary, aka, use_primary or use_primary! were called
-        def use_replica_if_possible(&blk)
-          used_replica = @use_replica
-          @use_replica = true
+        def fallback_to_replicas_for_ambiguous_queries(&blk)
+          previous_flag = @fallback_to_replicas_for_ambiguous_queries
+          @fallback_to_replicas_for_ambiguous_queries = true
           yield
         ensure
-          @use_replica = used_replica
+          @fallback_to_replicas_for_ambiguous_queries = previous_flag
         end
 
-        def use_replica?
-          @use_replica == true && !use_primary? && !performed_write?
+        def fallback_to_replicas_for_ambiguous_queries?
+          @fallback_to_replicas_for_ambiguous_queries == true && !use_primary? && !performed_write?
         end
 
         def write!

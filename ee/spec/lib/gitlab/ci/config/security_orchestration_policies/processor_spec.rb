@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
   subject { described_class.new(config, project, ref).perform }
 
-  let_it_be(:config) { { image: 'ruby:2.5.3' } }
+  let_it_be(:config) { { image: 'ruby:3.0.1' } }
 
   let_it_be(:ref) { 'master' }
   let_it_be_with_refind(:project) { create(:project, :repository) }
@@ -74,7 +74,7 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
         context 'when DAST profiles are not found' do
           it 'does not modify the config' do
             expect(subject).to eq(
-              image: 'ruby:2.5.3',
+              image: 'ruby:3.0.1',
               'dast-on-demand-0': { allow_failure: true, script: 'echo "Error during On-Demand Scan execution: Dast site profile was not provided" && false' }
             )
           end
@@ -86,7 +86,7 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
 
           let(:expected_configuration) do
             {
-              image: 'ruby:2.5.3',
+              image: 'ruby:3.0.1',
               'dast-on-demand-0': {
                 stage: 'test',
                 image: {

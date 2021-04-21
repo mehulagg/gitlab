@@ -139,4 +139,38 @@ RSpec.describe Gitlab::Ci::Reports::Security::Report do
 
     it { is_expected.to eq(scanner_1) }
   end
+
+  describe '#add_error' do
+    context 'when the message is not given' do
+      it 'adds a new error to report with the generic error message' do
+        expect { report.add_error('foo') }.to change { report.errors }
+                                          .from([])
+                                          .to([{ type: 'foo', message: 'An unexpected error happened!' }])
+      end
+    end
+
+    context 'when the message is given' do
+      it 'adds a new error to report' do
+        expect { report.add_error('foo', 'bar') }.to change { report.errors }
+                                                 .from([])
+                                                 .to([{ type: 'foo', message: 'bar' }])
+      end
+    end
+  end
+
+  describe 'errored?' do
+    subject { report.errored? }
+
+    context 'when the report does not have any errors' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the report has errors' do
+      before do
+        report.add_error('foo', 'bar')
+      end
+
+      it { is_expected.to be_truthy }
+    end
+  end
 end

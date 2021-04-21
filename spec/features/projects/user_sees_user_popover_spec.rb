@@ -6,6 +6,7 @@ RSpec.describe 'User sees user popover', :js do
   include Spec::Support::Helpers::Features::NotesHelpers
 
   let_it_be(:project) { create(:project, :repository) }
+
   let(:user) { project.creator }
   let(:merge_request) do
     create(:merge_request, source_project: project, target_project: project)
@@ -35,7 +36,7 @@ RSpec.describe 'User sees user popover', :js do
       end
     end
 
-    it "displays user popover in system note" do
+    it 'displays user popover in system note', :sidekiq_inline do
       add_note("/assign @#{user.username}")
 
       find('.system-note-message .js-user-link').hover

@@ -17,8 +17,7 @@ module EE
     def filter_projects(collection)
       collection = super(collection)
       collection = by_plans(collection)
-      collection = by_aimed_for_deletion(collection)
-      collection
+      by_aimed_for_deletion(collection)
     end
 
     def by_plans(collection)

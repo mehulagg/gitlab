@@ -121,14 +121,13 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
   end
 
   shared_examples 'group value stream analytics' do
-    context 'stage panel' do
+    context 'stage table' do
       before do
         select_stage("Issue")
       end
 
-      it 'displays the stage table headers' do
-        expect(page).to have_selector('.event-header', visible: true)
-        expect(page).to have_selector('.total-time-header', visible: true)
+      it 'displays the stage table' do
+        expect(page).to have_selector('[data-testid="vsa-stage-table"]')
       end
     end
 
@@ -176,7 +175,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
     before do
       stub_feature_flags(value_stream_analytics_path_navigation: false)
 
-      select_group(group)
+      select_group(group, '.js-stage-table')
     end
 
     it 'does not show the path navigation' do
@@ -323,28 +322,16 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       { title: 'Test', description: 'Total test time for all commits/merges', events_count: 0, time: "-" }
     ]
 
-    it 'each stage will display the events description when selected', :sidekiq_might_not_need_inline do
-      stages_without_data.each do |stage|
-        select_stage(stage[:title])
-        expect(page).not_to have_selector('.stage-events .events-description')
-      end
-
-      stages_with_data.each do |stage|
-        select_stage(stage[:title])
-        expect(page.find('.stage-events .events-description').text).to have_text(_(stage[:description]))
-      end
-    end
-
     it 'each stage with events will display the stage events list when selected', :sidekiq_might_not_need_inline do
       stages_without_data.each do |stage|
         select_stage(stage[:title])
-        expect(page).not_to have_selector('.stage-events .stage-event-item')
+        expect(page).not_to have_selector('[data-testid="vsa-stage-event"]')
       end
 
       stages_with_data.each do |stage|
         select_stage(stage[:title])
-        expect(page).to have_selector('.stage-events .stage-event-list')
-        expect(page.all('.stage-events .stage-event-item').length).to eq(stage[:events_count])
+        expect(page).to have_selector('[data-testid="vsa-stage-table"]')
+        expect(page.all('[data-testid="vsa-stage-event"]').length).to eq(stage[:events_count])
       end
     end
 

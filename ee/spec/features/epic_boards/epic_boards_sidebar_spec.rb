@@ -45,7 +45,7 @@ RSpec.describe 'Epic boards sidebar', :js do
 
     expect(page).to have_selector('[data-testid="epic-boards-sidebar"]')
 
-    find('[data-testid="close-icon"]').click
+    find('.gl-drawer-close-button [data-testid="close-icon"]').click
 
     expect(page).not_to have_selector('[data-testid="epic-boards-sidebar"]')
   end
@@ -105,5 +105,72 @@ RSpec.describe 'Epic boards sidebar', :js do
       expect(card).to have_selector('.gl-label', count: 1)
       expect(card).to have_content(bug.title)
     end
+  end
+
+  context 'confidentiality' do
+    it 'make epic confidential' do
+      click_card(card)
+
+      page.within('.confidentiality') do
+        expect(page).to have_content('Not confidential')
+
+        click_button 'Edit'
+        expect(page).to have_css('.sidebar-item-warning-message')
+
+        within('.sidebar-item-warning-message') do
+          click_button 'Turn on'
+        end
+
+        wait_for_requests
+
+        expect(page).to have_content('This epic is confidential')
+      end
+    end
+  end
+
+  context 'in notifications subscription' do
+    it 'displays notifications toggle', :aggregate_failures do
+      click_card(card)
+
+      page.within('[data-testid="sidebar-notifications"]') do
+        expect(page).to have_button('Notifications')
+        expect(page).not_to have_content('Notifications have been disabled by the project or group owner')
+      end
+    end
+
+    it 'shows toggle as on then as off as user toggles to subscribe and unsubscribe', :aggregate_failures do
+      click_card(card)
+
+      click_button 'Notifications'
+
+      expect(page).to have_button('Notifications', class: 'is-checked')
+
+      click_button 'Notifications'
+
+      expect(page).not_to have_button('Notifications', class: 'is-checked')
+    end
+
+    context 'when notifications have been disabled' do
+      before do
+        group.update_attribute(:emails_disabled, true)
+
+        refresh_and_click_first_card
+      end
+
+      it 'displays a message that notifications have been disabled' do
+        page.within('[data-testid="sidebar-notifications"]') do
+          expect(page).not_to have_selector('[data-testid="notification-subscribe-toggle"]')
+          expect(page).to have_content('Notifications have been disabled by the project or group owner')
+        end
+      end
+    end
+  end
+
+  def refresh_and_click_first_card
+    page.refresh
+
+    wait_for_requests
+
+    click_card(card)
   end
 end

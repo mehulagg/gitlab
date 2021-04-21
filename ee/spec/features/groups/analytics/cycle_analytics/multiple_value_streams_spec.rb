@@ -135,30 +135,6 @@ RSpec.describe 'Multiple value streams', :js do
     end
   end
 
-  describe 'with the `value_stream_analytics_extended_form` feature flag disabled' do
-    before do
-      stub_licensed_features(cycle_analytics_for_groups: true, type_of_work_analytics: true)
-      stub_feature_flags(value_stream_analytics_extended_form: false)
-
-      sign_in(user)
-
-      select_group(group)
-      toggle_value_stream_dropdown
-
-      page.find_button(_('Create new Value Stream')).click
-    end
-
-    it 'does not include additional form fields' do
-      expect(page).not_to have_selector(extended_form_fields_selector)
-    end
-
-    it 'can create a value stream' do
-      create_value_stream
-
-      expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })
-    end
-  end
-
   describe 'Delete value stream' do
     before do
       value_stream = create(:cycle_analytics_group_value_stream, name: custom_value_stream_name, group: group)

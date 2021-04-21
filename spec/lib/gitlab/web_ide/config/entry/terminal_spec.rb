@@ -132,7 +132,7 @@ RSpec.describe Gitlab::WebIde::Config::Entry::Terminal do
           { before_script: %w[ls pwd],
             script: 'sleep 100',
             tags: ['webide'],
-            image: 'ruby:2.5',
+            image: 'ruby:3.0',
             services: ['mysql'],
             variables: { KEY: 'value' } }
         end
@@ -144,32 +144,12 @@ RSpec.describe Gitlab::WebIde::Config::Entry::Terminal do
               yaml_variables: [{ key: 'KEY', value: 'value', public: true }],
               job_variables: [{ key: 'KEY', value: 'value', public: true }],
               options: {
-                image: { name: "ruby:2.5" },
+                image: { name: "ruby:3.0" },
                 services: [{ name: "mysql" }],
                 before_script: %w[ls pwd],
                 script: ['sleep 100']
               }
             )
-        end
-
-        context 'when FF ci_workflow_rules_variables is disabled' do
-          before do
-            stub_feature_flags(ci_workflow_rules_variables: false)
-          end
-
-          it 'returns correct value without job_variables' do
-            expect(entry.value)
-              .to eq(
-                tag_list: ['webide'],
-                yaml_variables: [{ key: 'KEY', value: 'value', public: true }],
-                options: {
-                  image: { name: "ruby:2.5" },
-                  services: [{ name: "mysql" }],
-                  before_script: %w[ls pwd],
-                  script: ['sleep 100']
-                }
-              )
-          end
         end
       end
     end

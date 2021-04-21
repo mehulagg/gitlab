@@ -56,12 +56,12 @@ module Gitlab
         ::Feature.enabled?(:codequality_mr_diff, project, default_enabled: false)
       end
 
-      def self.display_codequality_backend_comparison?(project)
-        ::Feature.enabled?(:codequality_backend_comparison, project, default_enabled: :yaml)
-      end
-
       def self.multiple_cache_per_job?
         ::Feature.enabled?(:multiple_cache_per_job, default_enabled: :yaml)
+      end
+
+      def self.gldropdown_tags_enabled?
+        ::Feature.enabled?(:gldropdown_tags, default_enabled: :yaml)
       end
     end
   end

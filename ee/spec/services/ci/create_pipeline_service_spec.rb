@@ -8,6 +8,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   let_it_be(:plan_limits) { create(:plan_limits, plan: ultimate_plan) }
   let_it_be(:project, reload: true) { create(:project, :repository, namespace: namespace) }
   let_it_be(:user) { create(:user) }
+
   let(:ref_name) { 'master' }
 
   let(:service) do

@@ -45,6 +45,10 @@ const fetchGroupEpics = (
       ...filterParams,
       first: gon.roadmap_epics_limit + 1,
     };
+
+    if (filterParams?.epicIid) {
+      variables.iid = filterParams.epicIid;
+    }
   }
 
   return epicUtils.gqClient

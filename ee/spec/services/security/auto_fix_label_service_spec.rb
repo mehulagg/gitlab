@@ -8,6 +8,7 @@ RSpec.describe Security::AutoFixLabelService do
 
     let_it_be(:project) { create(:project) }
     let_it_be(:bot) { create(:user, :security_bot) }
+
     let(:label_attributes) { described_class::LABEL_PROPERTIES }
     let(:title) { label_attributes[:title] }
     let(:color) { label_attributes[:color] }

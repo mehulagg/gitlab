@@ -4,7 +4,7 @@ import { isNumeric } from '~/lib/utils/number_utils';
 import { EDIT_PATH_ID_FORMAT, PIPELINE_CONFIGURATION_PATH_FORMAT } from './constants';
 
 export const injectIdIntoEditPath = (path, id) => {
-  if (!path.match(EDIT_PATH_ID_FORMAT) || !isNumeric(id)) {
+  if (!path || !path.match(EDIT_PATH_ID_FORMAT) || !isNumeric(id)) {
     return '';
   }
 
@@ -45,7 +45,7 @@ export const fetchPipelineConfigurationFileExists = async (path) => {
   }
 
   try {
-    const { status } = await Api.getRawFile(`${group}/${project}`, file, { ref: undefined });
+    const { status } = await Api.getRawFile(`${group}/${project}`, file);
 
     return status === httpStatus.OK;
   } catch (e) {

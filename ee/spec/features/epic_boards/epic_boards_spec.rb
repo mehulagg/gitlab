@@ -16,7 +16,7 @@ RSpec.describe 'epic boards', :js do
   let_it_be(:backlog_list) { create(:epic_list, epic_board: epic_board, list_type: :backlog) }
   let_it_be(:closed_list) { create(:epic_list, epic_board: epic_board, list_type: :closed) }
 
-  let_it_be(:epic1) { create(:epic, group: group, labels: [label], title: 'Epic1') }
+  let_it_be(:epic1) { create(:epic, group: group, labels: [label], author: user, title: 'Epic1') }
   let_it_be(:epic2) { create(:epic, group: group, title: 'Epic2') }
   let_it_be(:epic3) { create(:epic, group: group, labels: [label2], title: 'Epic3') }
 
@@ -155,6 +155,50 @@ RSpec.describe 'epic boards', :js do
           expect(page).not_to have_button('Cancel')
         end
       end
+    end
+  end
+
+  context 'filtered search' do
+    before do
+      stub_licensed_features(epics: true)
+      stub_feature_flags(boards_filtered_search: true)
+
+      group.add_guest(user)
+      sign_in(user)
+      visit_epic_boards_page
+
+      # Focus on search field
+      find_field('Search').click
+    end
+
+    it 'can select a Label in order to filter the board' do
+      page.within('[data-testid="epic-filtered-search"]') do
+        click_link 'Label'
+        click_link label.title
+
+        find('input').native.send_keys(:return)
+      end
+
+      wait_for_requests
+
+      expect(page).to have_content('Epic1')
+      expect(page).not_to have_content('Epic2')
+      expect(page).not_to have_content('Epic3')
+    end
+
+    it 'can select an Author in order to filter the board' do
+      page.within('[data-testid="epic-filtered-search"]') do
+        click_link 'Author'
+        click_link user.name
+
+        find('input').native.send_keys(:return)
+      end
+
+      wait_for_requests
+
+      expect(page).to have_content('Epic1')
+      expect(page).not_to have_content('Epic2')
+      expect(page).not_to have_content('Epic3')
     end
   end
 

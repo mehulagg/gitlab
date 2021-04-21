@@ -14,8 +14,7 @@ module EE
     override :filter_projects
     def filter_projects(collection)
       collection = super(collection)
-      collection = by_security_reports_presence(collection)
-      collection
+      by_security_reports_presence(collection)
     end
 
     def by_security_reports_presence(collection)

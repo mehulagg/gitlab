@@ -8,6 +8,7 @@ class License < ApplicationRecord
   PREMIUM_PLAN = 'premium'
   ULTIMATE_PLAN = 'ultimate'
   CLOUD_LICENSE_TYPE = 'cloud'
+  LEGACY_LICENSE_TYPE = 'legacy'
   ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
@@ -25,7 +26,6 @@ class License < ApplicationRecord
     group_activity_analytics
     group_bulk_edit
     group_webhooks
-    group_level_devops_adoption
     instance_level_devops_adoption
     group_level_devops_adoption
     issuable_default_templates
@@ -180,6 +180,7 @@ class License < ApplicationRecord
     subepics
     threat_monitoring
     vulnerability_auto_fix
+    vulnerability_finding_signatures
   ]
   EEU_FEATURES.freeze
 
@@ -237,6 +238,8 @@ class License < ApplicationRecord
     { range: (100..999), percentage: true, value: 8 },
     { range: (1000..nil), percentage: true, value: 5 }
   ].freeze
+
+  LICENSEE_ATTRIBUTES = %w[Name Email Company].freeze
 
   validate :valid_license
   validate :check_users_limit, if: :new_record?, unless: :validate_with_trueup?
@@ -358,7 +361,7 @@ class License < ApplicationRecord
   end
 
   def data_filename
-    company_name = self.licensee["Company"] || self.licensee.each_value.first
+    company_name = self.licensee_company || self.licensee.each_value.first
     clean_company_name = company_name.gsub(/[^A-Za-z0-9]/, "")
     "#{clean_company_name}.gitlab-license"
   end
@@ -551,6 +554,10 @@ class License < ApplicationRecord
     license&.type == CLOUD_LICENSE_TYPE
   end
 
+  def license_type
+    cloud? ? CLOUD_LICENSE_TYPE : LEGACY_LICENSE_TYPE
+  end
+
   def auto_renew
     false
   end
@@ -575,6 +582,16 @@ class License < ApplicationRecord
 
   def remaining_user_count
     restricted_user_count - daily_billable_users_count
+  end
+
+  LICENSEE_ATTRIBUTES.each do |attribute|
+    define_method "licensee_#{attribute.downcase}" do
+      licensee[attribute]
+    end
+  end
+
+  def activated_at
+    super || created_at
   end
 
   private

@@ -62,7 +62,7 @@ describe('AddScheduleModal', () => {
   }
 
   async function updateSchedule(localWrapper) {
-    localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
+    localWrapper.findComponent(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
   const createComponentWithApollo = ({
@@ -111,11 +111,10 @@ describe('AddScheduleModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
-  const findModal = () => wrapper.find(GlModal);
-  const findAlert = () => wrapper.find(GlAlert);
+  const findModal = () => wrapper.findComponent(GlModal);
+  const findAlert = () => wrapper.findComponent(GlAlert);
 
   describe('Schedule create', () => {
     beforeEach(() => {

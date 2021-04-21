@@ -94,7 +94,6 @@ describe('ValueStreamForm', () => {
   const findExtendedFormFields = () => wrapper.findByTestId('extended-form-fields');
   const findPresetSelector = () => wrapper.findByTestId('vsa-preset-selector');
   const findBtn = (btn) => findModal().props(btn);
-  const findSubmitAttribute = (attribute) => findBtn('actionPrimary').attributes[1][attribute];
   const expectFieldError = (testId, error = '') =>
     expect(wrapper.findByTestId(testId).attributes('invalid-feedback')).toBe(error);
 
@@ -106,30 +105,6 @@ describe('ValueStreamForm', () => {
   describe('default state', () => {
     beforeEach(() => {
       wrapper = createComponent();
-    });
-
-    it('submit button is enabled', () => {
-      expect(findSubmitAttribute('disabled')).toBeUndefined();
-    });
-
-    it('does not include extended fields', () => {
-      expect(findExtendedFormFields().exists()).toBe(false);
-    });
-
-    it('does not include add stage button', () => {
-      expect(findBtn('actionSecondary').attributes).toContainEqual({
-        class: 'gl-display-none',
-      });
-    });
-
-    it('does not include the preset selector', () => {
-      expect(findPresetSelector().exists()).toBe(false);
-    });
-  });
-
-  describe('with hasExtendedFormFields=true', () => {
-    beforeEach(() => {
-      wrapper = createComponent({ props: { hasExtendedFormFields: true } });
     });
 
     it('has the extended fields', () => {
@@ -149,7 +124,6 @@ describe('ValueStreamForm', () => {
     describe('Add stage button', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          props: { hasExtendedFormFields: true },
           stubs: {
             CustomStageFields,
           },
@@ -180,7 +154,6 @@ describe('ValueStreamForm', () => {
     describe('form errors', () => {
       const commonExtendedData = {
         props: {
-          hasExtendedFormFields: true,
           initialFormErrors: initialFormStageErrors,
         },
       };
@@ -223,7 +196,6 @@ describe('ValueStreamForm', () => {
             initialPreset,
             initialData,
             isEditing: true,
-            hasExtendedFormFields: true,
           },
         });
       });
@@ -243,7 +215,6 @@ describe('ValueStreamForm', () => {
               initialPreset,
               initialData,
               isEditing: true,
-              hasExtendedFormFields: true,
             },
             stubs: {
               CustomStageFields,
@@ -280,7 +251,6 @@ describe('ValueStreamForm', () => {
               initialPreset,
               initialData,
               isEditing: true,
-              hasExtendedFormFields: true,
             },
           });
         });
@@ -362,7 +332,20 @@ describe('ValueStreamForm', () => {
       it('calls the "createValueStream" event when submitted', () => {
         expect(createValueStreamMock).toHaveBeenCalledWith(expect.any(Object), {
           name: streamName,
-          stages: [],
+          stages: [
+            {
+              custom: false,
+              name: 'issue',
+            },
+            {
+              custom: false,
+              name: 'plan',
+            },
+            {
+              custom: false,
+              name: 'code',
+            },
+          ],
         });
       });
 

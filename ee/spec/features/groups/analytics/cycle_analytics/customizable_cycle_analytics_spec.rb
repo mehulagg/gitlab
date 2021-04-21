@@ -41,6 +41,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   start_field_label = 'custom-stage-start-event-label-0'
   end_field_label = 'custom-stage-end-event-label-0'
   name_field = 'custom-stage-name-0'
+  stage_table_selector = '.js-stage-table'
 
   let(:add_stage_button) { '.js-add-stage-button' }
   let(:params) { { name: custom_stage_name, start_event_identifier: start_event_identifier, end_event_identifier: end_event_identifier } }
@@ -86,7 +87,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   context 'Manual ordering' do
     before do
       stub_feature_flags(value_stream_analytics_path_navigation: false)
-      select_group(group)
+      select_group(group, stage_table_selector)
     end
 
     let(:default_stage_order) { %w[Issue Plan Code Test Review Staging].freeze }
@@ -299,7 +300,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     context 'with a group' do
       context 'selected' do
         before do
-          select_group(group)
+          select_group(group, stage_table_selector)
         end
 
         it_behaves_like 'can create custom stages' do
@@ -312,7 +313,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
       context 'with a custom stage created', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273045' do
         before do
           create_custom_stage
-          select_group(group)
+          select_group(group, stage_table_selector)
 
           expect(page).to have_text custom_stage_name
         end
@@ -324,7 +325,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     context 'with a sub group' do
       context 'selected' do
         before do
-          select_group(sub_group)
+          select_group(sub_group, stage_table_selector)
         end
 
         it_behaves_like 'can create custom stages' do
@@ -337,7 +338,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
       context 'with a custom stage created' do
         before do
           create_custom_stage(sub_group)
-          select_group(sub_group)
+          select_group(sub_group, stage_table_selector)
 
           expect(page).to have_text custom_stage_name
         end
@@ -349,7 +350,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     context 'Add a stage button' do
       before do
         stub_feature_flags(value_stream_analytics_path_navigation: false)
-        select_group(group)
+        select_group(group, stage_table_selector)
       end
 
       it 'displays the custom stage form when clicked' do
@@ -378,7 +379,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
       before do
         stub_feature_flags(value_stream_analytics_path_navigation: false)
-        select_group(group)
+        select_group(group, stage_table_selector)
 
         toggle_more_options(first_default_stage)
       end
@@ -431,7 +432,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
       before do
         stub_feature_flags(value_stream_analytics_path_navigation: false)
         create_custom_stage
-        select_group(group)
+        select_group(group, stage_table_selector)
 
         expect(page).to have_text custom_stage_name
 
@@ -487,7 +488,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     context 'hidden stage' do
       before do
         stub_feature_flags(value_stream_analytics_path_navigation: false)
-        select_group(group)
+        select_group(group, stage_table_selector)
         toggle_more_options(first_default_stage)
 
         click_button(_('Hide stage'))

@@ -7,6 +7,7 @@ RSpec.describe Projects::IncidentManagement::OncallSchedulesController do
   let_it_be(:user_with_read_permissions) { create(:user) }
   let_it_be(:user_with_admin_permissions) { create(:user) }
   let_it_be(:project) { create(:project) }
+
   let(:current_user) { user_with_admin_permissions }
 
   describe 'GET #index' do

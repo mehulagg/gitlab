@@ -225,7 +225,7 @@ export const mockIssues = [mockIssue, mockIssue2];
 
 export const mockEpic = {
   id: 'gid://gitlab/Epic/41',
-  iid: 1,
+  iid: '1',
   title: 'Epic title',
   state: 'opened',
   webUrl: '/groups/gitlab-org/-/epics/1',

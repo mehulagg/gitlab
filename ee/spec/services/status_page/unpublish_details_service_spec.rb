@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe StatusPage::UnpublishDetailsService do
   let_it_be(:project, refind: true) { create(:project) }
+
   let(:issue) { instance_double(Issue, iid: incident_id) }
   let(:incident_id) { 1 }
   let(:key) { Gitlab::StatusPage::Storage.details_path(incident_id) }

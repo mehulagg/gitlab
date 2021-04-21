@@ -9,7 +9,7 @@ import {
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
-import activateSubscriptionMutation from 'ee/pages/admin/cloud_licenses/graphql/mutations/activate_subscription.mutation.graphql';
+import { subscriptionQueries } from '../constants';
 
 export const SUBSCRIPTION_ACTIVATION_EVENT = 'subscription-activation';
 
@@ -42,7 +42,7 @@ export default {
       this.isLoading = true;
       this.$apollo
         .mutate({
-          mutation: activateSubscriptionMutation,
+          mutation: subscriptionQueries.mutation,
           variables: {
             gitlabSubscriptionActivateInput: {
               activationCode: this.activationCode,
@@ -58,7 +58,7 @@ export default {
             if (errors.length) {
               throw new Error();
             }
-            this.$emit(SUBSCRIPTION_ACTIVATION_EVENT, this.activationCode);
+            this.$emit(SUBSCRIPTION_ACTIVATION_EVENT, true);
           },
         )
         .catch(() => {
@@ -112,9 +112,9 @@ export default {
               "
             >
               <template #link="{ content }">
-                <gl-link href="https://about.gitlab.com/terms/" target="_blank">{{
-                  content
-                }}</gl-link>
+                <gl-link href="https://about.gitlab.com/terms/" target="_blank"
+                  >{{ content }}
+                </gl-link>
               </template>
             </gl-sprintf>
           </gl-form-checkbox>

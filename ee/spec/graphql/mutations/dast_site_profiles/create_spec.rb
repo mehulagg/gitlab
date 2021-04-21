@@ -11,7 +11,9 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
   let(:profile_name) { SecureRandom.hex }
   let(:target_url) { generate(:url) }
   let(:excluded_urls) { ["#{target_url}/signout"] }
-  let(:request_headers) { 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0' }
+
+  let_it_be(:request_headers) { 'Authorization: token' }
+  let_it_be(:target_type) { 'api' }
 
   let(:auth) do
     {
@@ -40,6 +42,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
         full_path: full_path,
         profile_name: profile_name,
         target_url: target_url,
+        target_type: target_type,
         excluded_urls: excluded_urls,
         request_headers: request_headers,
         auth: auth
@@ -71,7 +74,8 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
             auth_username_field: auth[:username_field],
             auth_password_field: auth[:password_field],
             auth_username: auth[:username],
-            dast_site: have_attributes(url: target_url)
+            dast_site: have_attributes(url: target_url),
+            target_type: target_type
           )
 
           password_variable = dast_site_profile.secret_variables.find_by!(key: Dast::SiteProfileSecretVariable::PASSWORD)
@@ -92,6 +96,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
           service_params = {
             name: profile_name,
             target_url: target_url,
+            target_type: target_type,
             excluded_urls: excluded_urls,
             request_headers: request_headers,
             auth_enabled: auth[:enabled],
@@ -143,6 +148,21 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
               auth_password_field: nil,
               auth_username: nil
             )
+          end
+        end
+
+        context 'when the feature flag security_dast_site_profiles_api_option is disabled' do
+          before do
+            stub_feature_flags(security_dast_site_profiles_api_option: false)
+          end
+
+          it 'ignores target_type and uses the default target_type', :aggregate_failures do
+            subject
+
+            default_target_type = dast_site_profile.class.new.target_type
+
+            expect(default_target_type).not_to eq(target_type)
+            expect(dast_site_profile.target_type).to eq(default_target_type)
           end
         end
 

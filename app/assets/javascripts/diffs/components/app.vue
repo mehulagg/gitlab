@@ -184,12 +184,8 @@ export default {
       'viewDiffsFileByFile',
       'mrReviews',
     ]),
-    ...mapGetters('diffs', [
-      'whichCollapsedTypes',
-      'isParallelView',
-      'currentDiffIndex',
-      'fileCodequalityDiff',
-    ]),
+    ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
+    ...mapGetters('batchComments', ['draftsCount']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -287,7 +283,6 @@ export default {
       endpointMetadata: this.endpointMetadata,
       endpointBatch: this.endpointBatch,
       endpointCoverage: this.endpointCoverage,
-      endpointCodequality: this.endpointCodequality,
       endpointUpdateUser: this.endpointUpdateUser,
       projectPath: this.projectPath,
       dismissEndpoint: this.dismissEndpoint,
@@ -296,6 +291,10 @@ export default {
       defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
       mrReviews: this.rehydratedMrReviews,
     });
+
+    if (this.endpointCodequality) {
+      this.setCodequalityEndpoint(this.endpointCodequality);
+    }
 
     if (this.shouldShow) {
       this.fetchData();
@@ -341,6 +340,7 @@ export default {
     ...mapActions('diffs', [
       'moveToNeighboringCommit',
       'setBaseConfig',
+      'setCodequalityEndpoint',
       'fetchDiffFilesMeta',
       'fetchDiffFilesBatch',
       'fetchCoverageFiles',
@@ -501,6 +501,7 @@ export default {
         <div
           v-if="renderFileTree"
           :style="{ width: `${treeWidth}px` }"
+          :class="{ 'review-bar-visible': draftsCount > 0 }"
           class="diff-tree-list js-diff-tree-list px-3 pr-md-0"
         >
           <panel-resizer
@@ -532,7 +533,6 @@ export default {
               :help-page-path="helpPagePath"
               :can-current-user-fork="canCurrentUserFork"
               :view-diffs-file-by-file="viewDiffsFileByFile"
-              :codequality-diff="fileCodequalityDiff(file.file_path)"
             />
             <div
               v-if="showFileByFileNavigation"

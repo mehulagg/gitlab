@@ -2,6 +2,7 @@
 
 module Registrations
   class ProjectsController < ApplicationController
+    include LearnGitlabHelper
     layout 'checkout'
 
     LEARN_GITLAB_TEMPLATE = 'learn_gitlab.tar.gz'
@@ -40,7 +41,11 @@ module Registrations
 
           redirect_to trial_getting_started_users_sign_up_welcome_path(learn_gitlab_project_id: learn_gitlab_project.id)
         else
-          redirect_to users_sign_up_experience_level_path(namespace_path: @project.namespace)
+          if continous_onboarding_experiment_enabled_for_user?
+            redirect_to continuous_onboarding_getting_started_users_sign_up_welcome_path(project_id: @project.id)
+          else
+            redirect_to users_sign_up_experience_level_path(namespace_path: @project.namespace)
+          end
         end
       else
         render :new
@@ -54,7 +59,7 @@ module Registrations
     end
 
     def create_learn_gitlab_project
-      learn_gitlab_project = File.open(learn_gitlab_template_path) do |archive|
+      File.open(learn_gitlab_template_path) do |archive|
         ::Projects::GitlabProjectsImportService.new(
           current_user,
           namespace_id: @project.namespace_id,
@@ -62,8 +67,6 @@ module Registrations
           name: learn_gitlab_project_name
         ).execute
       end
-
-      learn_gitlab_project
     end
 
     def authorize_create_project!

@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import InstanceSecurityDashboardSettings from './components/first_class_instance_security_dashboard_settings.vue';
+import ProjectManager from './components/first_class_project_manager/project_manager.vue';
 import apolloProvider from './graphql/provider';
 
 export default (el) => {
@@ -11,7 +11,7 @@ export default (el) => {
     el,
     apolloProvider,
     render(createElement) {
-      return createElement(InstanceSecurityDashboardSettings);
+      return createElement(ProjectManager);
     },
   });
 };

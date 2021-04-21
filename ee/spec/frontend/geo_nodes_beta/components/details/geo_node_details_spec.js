@@ -3,6 +3,7 @@ import GeoNodeCoreDetails from 'ee/geo_nodes_beta/components/details/geo_node_co
 import GeoNodeDetails from 'ee/geo_nodes_beta/components/details/geo_node_details.vue';
 import GeoNodePrimaryOtherInfo from 'ee/geo_nodes_beta/components/details/primary_node/geo_node_primary_other_info.vue';
 import GeoNodeVerificationInfo from 'ee/geo_nodes_beta/components/details/primary_node/geo_node_verification_info.vue';
+import GeoNodeReplicationDetails from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_details.vue';
 import GeoNodeReplicationSummary from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_summary.vue';
 import GeoNodeSecondaryOtherInfo from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_secondary_other_info.vue';
 import { MOCK_NODES } from 'ee_jest/geo_nodes_beta/mock_data';
@@ -37,7 +38,7 @@ describe('GeoNodeDetails', () => {
     wrapper.findComponent(GeoNodeReplicationSummary);
   const findGeoNodeSecondaryOtherInfo = () => wrapper.findComponent(GeoNodeSecondaryOtherInfo);
   const findGeoNodeSecondaryReplicationDetails = () =>
-    wrapper.findByTestId('secondary-replication-details');
+    wrapper.findComponent(GeoNodeReplicationDetails);
 
   describe('template', () => {
     describe('always', () => {

@@ -128,7 +128,7 @@ module CommitsHelper
     %w(btn gpg-status-box) + Array(additional_classes)
   end
 
-  def conditionally_paginate_diff_files(diffs, paginate:, per: Projects::CommitController::COMMIT_DIFFS_PER_PAGE)
+  def conditionally_paginate_diff_files(diffs, paginate:, per:)
     if paginate
       Kaminari.paginate_array(diffs.diff_files.to_a).page(params[:page]).per(per)
     else
@@ -139,7 +139,7 @@ module CommitsHelper
   def cherry_pick_projects_data(project)
     return [] unless Feature.enabled?(:pick_into_project, project, default_enabled: :yaml)
 
-    target_projects(project).map do |project|
+    [project, project.forked_from_project].compact.map do |project|
       {
         id: project.id.to_s,
         name: project.full_path,

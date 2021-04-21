@@ -92,19 +92,19 @@ These job keywords can be defined inside a `default:` section:
 - [`tags`](#tags)
 - [`timeout`](#timeout)
 
-The following example sets the `ruby:2.5` image as the default for all jobs in the pipeline.
-The `rspec 2.6` job does not use the default, because it overrides the default with
+The following example sets the `ruby:3.0` image as the default for all jobs in the pipeline.
+The `rspec 2.7` job does not use the default, because it overrides the default with
 a job-specific `image:` section:
 
 ```yaml
 default:
-  image: ruby:2.5
+  image: ruby:3.0
 
 rspec:
   script: bundle exec rspec
 
-rspec 2.6:
-  image: ruby:2.6
+rspec 2.7:
+  image: ruby:2.7
   script: bundle exec rspec
 ```
 
@@ -476,6 +476,41 @@ include: '.gitlab-ci-production.yml'
 ```
 
 Use local includes instead of symbolic links.
+
+##### `include:local` with wildcard file paths
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25921) in GitLab 13.11.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to enable it. **(CORE ONLY)**
+
+You can use wildcard paths (`*`) with `include:local`.
+
+Example:
+
+```yaml
+include: 'configs/*.yml'
+```
+
+When the pipeline runs, it adds all `.yml` files in the `configs` folder into the pipeline configuration.
+
+The wildcard file paths feature is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_wildcard_file_paths)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_wildcard_file_paths)
+```
 
 #### `include:file`
 
@@ -1439,7 +1474,9 @@ job:
 
 Paths are relative to the project directory (`$CI_PROJECT_DIR`) and can't directly link outside it.
 
-You can use glob patterns to match multiple files in any directory in the repository:
+You can use [glob](https://en.wikipedia.org/wiki/Glob_(programming))
+patterns to match multiple files in any directory
+in the repository:
 
 ```yaml
 job:
@@ -1876,7 +1913,8 @@ WARNING:
 If you use `only:changes` with [only allow merge requests to be merged if the pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds),
 you should [also use `only:merge_requests`](#use-onlychanges-with-pipelines-for-merge-requests). Otherwise it may not work as expected.
 
-You can also use glob patterns to match multiple files in either the root directory
+You can also use [glob](https://en.wikipedia.org/wiki/Glob_(programming))
+patterns to match multiple files in either the root directory
 of the repository, or in _any_ directory in the repository. However, they must be wrapped
 in double quotes or GitLab can't parse them:
 
@@ -2717,8 +2755,8 @@ The `stop_review_app` job is **required** to have the following keywords defined
 - `environment:name`
 - `environment:action`
 
-Additionally, both jobs should have matching [`rules`](../yaml/README.md#onlyexcept-basic)
-or [`only/except`](../yaml/README.md#onlyexcept-basic) configuration.
+Additionally, both jobs should have matching [`rules`](#onlyexcept-basic)
+or [`only/except`](#onlyexcept-basic) configuration.
 
 In the examples above, if the configuration is not identical:
 
@@ -2918,13 +2956,11 @@ You can specify a [fallback cache key](#fallback-cache-key) to use if the specif
 ##### Multiple caches
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32814) in GitLab 13.10.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-multiple-caches). **(FREE SELF)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/321877) in GitLab 13.11.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-multiple-caches). **(FREE SELF)**
 
 You can have a maximum of four caches:
 
@@ -2953,10 +2989,10 @@ the fallback is fetched multiple times if multiple caches are not found.
 
 ##### Enable or disable multiple caches **(FREE SELF)**
 
-The multiple caches feature is under development and not ready for production use.
-It is deployed behind a feature flag that is **disabled by default**.
+The multiple caches feature is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -3171,93 +3207,75 @@ artifacts are restored after [caches](#cache).
 
 [Read more about artifacts](../pipelines/job_artifacts.md).
 
-#### `artifacts:paths`
+#### `dependencies`
 
-Paths are relative to the project directory (`$CI_PROJECT_DIR`) and can't directly
-link outside it. You can use Wildcards that use [glob](https://en.wikipedia.org/wiki/Glob_(programming))
-patterns and:
+By default, all `artifacts` from previous stages
+are passed to each job. However, you can use the `dependencies` keyword to
+define a limited list of jobs to fetch artifacts from. You can also set a job to download no artifacts at all.
 
-- In [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620) and later,
-[`doublestar.Glob`](https://pkg.go.dev/github.com/bmatcuk/doublestar@v1.2.2?tab=doc#Match).
-- In GitLab Runner 12.10 and earlier,
-[`filepath.Match`](https://pkg.go.dev/path/filepath#Match).
+To use this feature, define `dependencies` in context of the job and pass
+a list of all previous jobs the artifacts should be downloaded from.
 
-To restrict which jobs a specific job fetches artifacts from, see [dependencies](#dependencies).
+You can define jobs from stages that were executed before the current one.
+An error occurs if you define jobs from the current or an upcoming stage.
 
-Send all files in `binaries` and `.config`:
+To prevent a job from downloading artifacts, define an empty array.
+
+When you use `dependencies`, the status of the previous job is not considered.
+If a job fails or it's a manual job that isn't triggered, no error occurs.
+
+The following example defines two jobs with artifacts: `build:osx` and
+`build:linux`. When the `test:osx` is executed, the artifacts from `build:osx`
+are downloaded and extracted in the context of the build. The same happens
+for `test:linux` and artifacts from `build:linux`.
+
+The job `deploy` downloads artifacts from all previous jobs because of
+the [stage](#stages) precedence:
 
 ```yaml
-artifacts:
-  paths:
-    - binaries/
-    - .config
-```
-
-To disable artifact passing, define the job with empty [dependencies](#dependencies):
-
-```yaml
-job:
+build:osx:
   stage: build
-  script: make build
-  dependencies: []
-```
-
-You may want to create artifacts only for tagged releases to avoid filling the
-build server storage with temporary build artifacts.
-
-Create artifacts only for tags (`default-job` doesn't create artifacts):
-
-```yaml
-default-job:
-  script:
-    - mvn test -U
-  except:
-    - tags
-
-release-job:
-  script:
-    - mvn package -U
+  script: make build:osx
   artifacts:
     paths:
-      - target/*.war
-  only:
-    - tags
-```
+      - binaries/
 
-You can use wildcards for directories too. For example, if you want to get all the files inside the directories that end with `xyz`:
-
-```yaml
-job:
+build:linux:
+  stage: build
+  script: make build:linux
   artifacts:
     paths:
-      - path/*xyz/*
+      - binaries/
+
+test:osx:
+  stage: test
+  script: make test:osx
+  dependencies:
+    - build:osx
+
+test:linux:
+  stage: test
+  script: make test:linux
+  dependencies:
+    - build:linux
+
+deploy:
+  stage: deploy
+  script: make deploy
 ```
 
-#### `artifacts:public`
+##### When a dependent job fails
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49775) in GitLab 13.8
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
+> Introduced in GitLab 10.3.
 
-Use `artifacts:public` to determine whether the job artifacts should be
-publicly available.
+If the artifacts of the job that is set as a dependency are
+[expired](#artifactsexpire_in) or
+[deleted](../pipelines/job_artifacts.md#delete-job-artifacts), then
+the dependent job fails.
 
-The default for `artifacts:public` is `true` which means that the artifacts in
-public pipelines are available for download by anonymous and guest users:
-
-```yaml
-artifacts:
-  public: true
-```
-
-To deny read access for anonymous and guest users to artifacts in public
-pipelines, set `artifacts:public` to `false`:
-
-```yaml
-artifacts:
-  public: false
-```
+You can ask your administrator to
+[flip this switch](../../administration/job_artifacts.md#validation-for-dependencies)
+and bring back the old behavior.
 
 #### `artifacts:exclude`
 
@@ -3270,7 +3288,7 @@ archive.
 Similar to [`artifacts:paths`](#artifactspaths), `exclude` paths are relative
 to the project directory. You can use Wildcards that use
 [glob](https://en.wikipedia.org/wiki/Glob_(programming)) or
-[`filepath.Match`](https://golang.org/pkg/path/filepath/#Match) patterns.
+[`doublestar.PathMatch`](https://pkg.go.dev/github.com/bmatcuk/doublestar@v1.2.2?tab=doc#PathMatch) patterns.
 
 For example, to store all files in `binaries/`, but not `*.o` files located in
 subdirectories of `binaries/`:
@@ -3283,8 +3301,67 @@ artifacts:
     - binaries/**/*.o
 ```
 
+Unlike [`artifacts:paths`](#artifactspaths), `exclude` paths are not recursive. To exclude all of the contents of a directory, you can match them explicitly rather than matching the directory itself.
+
+For example, to store all files in `binaries/` but nothing located in the `temp/` subdirectory:
+
+```yaml
+artifacts:
+  paths:
+    - binaries/
+  exclude:
+    - binaries/temp/**/*
+```
+
 Files matched by [`artifacts:untracked`](#artifactsuntracked) can be excluded using
 `artifacts:exclude` too.
+
+#### `artifacts:expire_in`
+
+Use `expire_in` to specify how long artifacts are active before they
+expire and are deleted.
+
+The expiration time period begins when the artifact is uploaded and
+stored on GitLab. If the expiry time is not defined, it defaults to the
+[instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration)
+(30 days by default).
+
+To override the expiration date and protect artifacts from being automatically deleted:
+
+- Use the **Keep** button on the job page.
+- Set the value of `expire_in` to `never`. [Available](https://gitlab.com/gitlab-org/gitlab/-/issues/22761)
+  in GitLab 13.3 and later.
+
+After their expiry, artifacts are deleted hourly by default (via a cron job),
+and are not accessible anymore.
+
+The value of `expire_in` is an elapsed time in seconds, unless a unit is
+provided. Examples of valid values:
+
+- `'42'`
+- `42 seconds`
+- `3 mins 4 sec`
+- `2 hrs 20 min`
+- `2h20min`
+- `6 mos 1 day`
+- `47 yrs 6 mos and 4d`
+- `3 weeks and 2 days`
+- `never`
+
+To expire artifacts 1 week after being uploaded:
+
+```yaml
+job:
+  artifacts:
+    expire_in: 1 week
+```
+
+The latest artifacts for refs are locked against deletion, and kept regardless of
+the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
+GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
+in GitLab 13.4.
+
+In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior at the project level in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs). In [GitLab 13.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/276583), you can [disable this behavior instance-wide](../../user/admin_area/settings/continuous_integration.md#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines).
 
 #### `artifacts:expose_as`
 
@@ -3406,6 +3483,348 @@ job:
       - binaries/
 ```
 
+#### `artifacts:paths`
+
+Paths are relative to the project directory (`$CI_PROJECT_DIR`) and can't directly
+link outside it. You can use Wildcards that use [glob](https://en.wikipedia.org/wiki/Glob_(programming))
+patterns and:
+
+- In [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620) and later,
+[`doublestar.Glob`](https://pkg.go.dev/github.com/bmatcuk/doublestar@v1.2.2?tab=doc#Match).
+- In GitLab Runner 12.10 and earlier,
+[`filepath.Match`](https://pkg.go.dev/path/filepath#Match).
+
+To restrict which jobs a specific job fetches artifacts from, see [dependencies](#dependencies).
+
+Send all files in `binaries` and `.config`:
+
+```yaml
+artifacts:
+  paths:
+    - binaries/
+    - .config
+```
+
+To disable artifact passing, define the job with empty [dependencies](#dependencies):
+
+```yaml
+job:
+  stage: build
+  script: make build
+  dependencies: []
+```
+
+You may want to create artifacts only for tagged releases to avoid filling the
+build server storage with temporary build artifacts.
+
+Create artifacts only for tags (`default-job` doesn't create artifacts):
+
+```yaml
+default-job:
+  script:
+    - mvn test -U
+  except:
+    - tags
+
+release-job:
+  script:
+    - mvn package -U
+  artifacts:
+    paths:
+      - target/*.war
+  only:
+    - tags
+```
+
+You can use wildcards for directories too. For example, if you want to get all the files inside the directories that end with `xyz`:
+
+```yaml
+job:
+  artifacts:
+    paths:
+      - path/*xyz/*
+```
+
+#### `artifacts:public`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49775) in GitLab 13.8
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+
+Use `artifacts:public` to determine whether the job artifacts should be
+publicly available.
+
+The default for `artifacts:public` is `true` which means that the artifacts in
+public pipelines are available for download by anonymous and guest users:
+
+```yaml
+artifacts:
+  public: true
+```
+
+To deny read access for anonymous and guest users to artifacts in public
+pipelines, set `artifacts:public` to `false`:
+
+```yaml
+artifacts:
+  public: false
+```
+
+#### `artifacts:reports`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20390) in GitLab 11.2.
+> - Requires GitLab Runner 11.2 and above.
+
+Use [`artifacts:reports`](#artifactsreports)
+to collect test reports, code quality reports, and security reports from jobs.
+It also exposes these reports in the GitLab UI (merge requests, pipeline views, and security dashboards).
+
+The test reports are collected regardless of the job results (success or failure).
+You can use [`artifacts:expire_in`](#artifactsexpire_in) to set up an expiration
+date for their artifacts.
+
+If you also want the ability to browse the report output files, include the
+[`artifacts:paths`](#artifactspaths) keyword.
+
+##### `artifacts:reports:api_fuzzing` **(ULTIMATE)**
+
+> - Introduced in GitLab 13.4.
+> - Requires GitLab Runner 13.4 or later.
+
+The `api_fuzzing` report collects [API Fuzzing bugs](../../user/application_security/api_fuzzing/index.md)
+as artifacts.
+
+The collected API Fuzzing report uploads to GitLab as an artifact and is summarized in merge
+requests and the pipeline view. It's also used to provide data for security dashboards.
+
+##### `artifacts:reports:cobertura`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3708) in GitLab 12.9.
+> - Requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 and above.
+
+The `cobertura` report collects [Cobertura coverage XML files](../../user/project/merge_requests/test_coverage_visualization.md).
+The collected Cobertura coverage reports upload to GitLab as an artifact
+and display in merge requests.
+
+Cobertura was originally developed for Java, but there are many
+third party ports for other languages like JavaScript, Python, Ruby, and so on.
+
+##### `artifacts:reports:codequality`
+
+> - Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 11.5.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in GitLab 13.2.
+> - Requires GitLab Runner 11.5 and above.
+
+The `codequality` report collects [Code Quality issues](../../user/project/merge_requests/code_quality.md)
+as artifacts.
+
+The collected Code Quality report uploads to GitLab as an artifact and is summarized in merge requests.
+
+##### `artifacts:reports:container_scanning` **(ULTIMATE)**
+
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+The `container_scanning` report collects [Container Scanning vulnerabilities](../../user/application_security/container_scanning/index.md)
+as artifacts.
+
+The collected Container Scanning report uploads to GitLab as an artifact and
+is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:coverage_fuzzing` **(ULTIMATE)**
+
+> - Introduced in GitLab 13.4.
+> - Requires GitLab Runner 13.4 or later.
+
+The `coverage_fuzzing` report collects [coverage fuzzing bugs](../../user/application_security/coverage_fuzzing/index.md)
+as artifacts.
+
+The collected coverage fuzzing report uploads to GitLab as an artifact and is summarized in merge
+requests and the pipeline view. It's also used to provide data for security dashboards.
+
+##### `artifacts:reports:dast` **(ULTIMATE)**
+
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+The `dast` report collects [DAST vulnerabilities](../../user/application_security/dast/index.md)
+as artifacts.
+
+The collected DAST report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:dependency_scanning` **(ULTIMATE)**
+
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+The `dependency_scanning` report collects [Dependency Scanning vulnerabilities](../../user/application_security/dependency_scanning/index.md)
+as artifacts.
+
+The collected Dependency Scanning report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:dotenv`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17066) in GitLab 12.9.
+> - Requires GitLab Runner 11.5 and later.
+
+The `dotenv` report collects a set of environment variables as artifacts.
+
+The collected variables are registered as runtime-created variables of the job,
+which is useful to [set dynamic environment URLs after a job finishes](../environments/index.md#set-dynamic-environment-urls-after-a-job-finishes).
+
+There are a couple of exceptions to the [original dotenv rules](https://github.com/motdotla/dotenv#rules):
+
+- The variable key can contain only letters, digits, and underscores (`_`).
+- The maximum size of the `.env` file is 5 KB.
+- In GitLab 13.5 and older, the maximum number of inherited variables is 10.
+- In [GitLab 13.6 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/247913),
+  the maximum number of inherited variables is 20.
+- Variable substitution in the `.env` file is not supported.
+- The `.env` file can't have empty lines or comments (starting with `#`).
+- Key values in the `env` file cannot have spaces or newline characters (`\n`), including when using single or double quotes.
+- Quote escaping during parsing (`key = 'value'` -> `{key: "value"}`) is not supported.
+
+##### `artifacts:reports:junit`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20390) in GitLab 11.2.
+> - Requires GitLab Runner 11.2 and above.
+
+The `junit` report collects [JUnit report format XML files](https://www.ibm.com/support/knowledgecenter/en/SSQ2R2_14.1.0/com.ibm.rsar.analysis.codereview.cobol.doc/topics/cac_useresults_junit.html)
+as artifacts. Although JUnit was originally developed in Java, there are many
+third party ports for other
+languages like JavaScript, Python, Ruby, and so on.
+
+See [Unit test reports](../unit_test_reports.md) for more details and examples.
+Below is an example of collecting a JUnit report format XML file from Ruby's RSpec test tool:
+
+```yaml
+rspec:
+  stage: test
+  script:
+    - bundle install
+    - rspec --format RspecJunitFormatter --out rspec.xml
+  artifacts:
+    reports:
+      junit: rspec.xml
+```
+
+The collected Unit test reports upload to GitLab as an artifact and display in merge requests.
+
+If the JUnit tool you use exports to multiple XML files, specify
+multiple test report paths within a single job to
+concatenate them into a single file. Use a filename pattern (`junit: rspec-*.xml`),
+an array of filenames (`junit: [rspec-1.xml, rspec-2.xml, rspec-3.xml]`), or a
+combination thereof (`junit: [rspec.xml, test-results/TEST-*.xml]`).
+
+##### `artifacts:reports:license_management` **(ULTIMATE)**
+
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+WARNING:
+This artifact is still valid but is **deprecated** in favor of the
+[artifacts:reports:license_scanning](#artifactsreportslicense_scanning)
+introduced in GitLab 12.8.
+
+The `license_management` report collects [Licenses](../../user/compliance/license_compliance/index.md)
+as artifacts.
+
+The collected License Compliance report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:license_scanning` **(ULTIMATE)**
+
+> - Introduced in GitLab 12.8.
+> - Requires GitLab Runner 11.5 and above.
+
+The `license_scanning` report collects [Licenses](../../user/compliance/license_compliance/index.md)
+as artifacts.
+
+The License Compliance report uploads to GitLab as an artifact and displays automatically in merge requests and the pipeline view, and provide data for security
+dashboards.
+
+##### `artifacts:reports:load_performance` **(PREMIUM)**
+
+> - Introduced in [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35260) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+> - Requires GitLab Runner 11.5 and above.
+
+The `load_performance` report collects [Load Performance Testing metrics](../../user/project/merge_requests/load_performance_testing.md)
+as artifacts.
+
+The report is uploaded to GitLab as an artifact and is
+shown in merge requests automatically.
+
+##### `artifacts:reports:metrics` **(PREMIUM)**
+
+> Introduced in GitLab 11.10.
+
+The `metrics` report collects [Metrics](../metrics_reports.md)
+as artifacts.
+
+The collected Metrics report uploads to GitLab as an artifact and displays in merge requests.
+
+##### `artifacts:reports:performance` **(PREMIUM)**
+
+> - Introduced in GitLab 11.5.
+> - Requires GitLab Runner 11.5 and above.
+
+The `performance` report collects [Browser Performance Testing metrics](../../user/project/merge_requests/browser_performance_testing.md)
+as artifacts.
+
+The collected Browser Performance report uploads to GitLab as an artifact and displays in merge requests.
+
+##### `artifacts:reports:requirements` **(ULTIMATE)**
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2859) in GitLab 13.1.
+> - Requires GitLab Runner 11.5 and above.
+
+The `requirements` report collects `requirements.json` files as artifacts.
+
+The collected Requirements report uploads to GitLab as an artifact and
+existing [requirements](../../user/project/requirements/index.md) are
+marked as Satisfied.
+
+##### `artifacts:reports:sast`
+
+> - Introduced in GitLab 11.5.
+> - Made [available in all tiers](https://gitlab.com/groups/gitlab-org/-/epics/2098) in GitLab 13.3.
+> - Requires GitLab Runner 11.5 and above.
+
+The `sast` report collects [SAST vulnerabilities](../../user/application_security/sast/index.md)
+as artifacts.
+
+The collected SAST report uploads to GitLab as an artifact and is summarized
+in merge requests and the pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:secret_detection`
+
+> - Introduced in GitLab 13.1.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/222788) in GitLab
+    13.3.
+> - Requires GitLab Runner 11.5 and above.
+
+The `secret-detection` report collects [detected secrets](../../user/application_security/secret_detection/index.md)
+as artifacts.
+
+The collected Secret Detection report is uploaded to GitLab as an artifact and summarized
+in the merge requests and pipeline view. It's also used to provide data for security
+dashboards.
+
+##### `artifacts:reports:terraform`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207528) in GitLab 13.0.
+> - Requires [GitLab Runner](https://docs.gitlab.com/runner/) 11.5 and above.
+
+The `terraform` report obtains a Terraform `tfplan.json` file. [JQ processing required to remove credentials](../../user/infrastructure/mr_integration.md#setup). The collected Terraform
+plan report uploads to GitLab as an artifact and displays
+in merge requests. For more information, see
+[Output `terraform plan` information into a merge request](../../user/infrastructure/mr_integration.md).
+
 #### `artifacts:untracked`
 
 Use `artifacts:untracked` to add all Git untracked files as artifacts (along
@@ -3455,148 +3874,6 @@ job:
   artifacts:
     when: on_failure
 ```
-
-#### `artifacts:expire_in`
-
-Use `expire_in` to specify how long artifacts are active before they
-expire and are deleted.
-
-The expiration time period begins when the artifact is uploaded and
-stored on GitLab. If the expiry time is not defined, it defaults to the
-[instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration)
-(30 days by default).
-
-To override the expiration date and protect artifacts from being automatically deleted:
-
-- Use the **Keep** button on the job page.
-- Set the value of `expire_in` to `never`. [Available](https://gitlab.com/gitlab-org/gitlab/-/issues/22761)
-  in GitLab 13.3 and later.
-
-After their expiry, artifacts are deleted hourly by default (via a cron job),
-and are not accessible anymore.
-
-The value of `expire_in` is an elapsed time in seconds, unless a unit is
-provided. Examples of valid values:
-
-- `'42'`
-- `42 seconds`
-- `3 mins 4 sec`
-- `2 hrs 20 min`
-- `2h20min`
-- `6 mos 1 day`
-- `47 yrs 6 mos and 4d`
-- `3 weeks and 2 days`
-- `never`
-
-To expire artifacts 1 week after being uploaded:
-
-```yaml
-job:
-  artifacts:
-    expire_in: 1 week
-```
-
-The latest artifacts for refs are locked against deletion, and kept regardless of
-the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
-GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
-in GitLab 13.4.
-
-In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior at the project level in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs). In [GitLab 13.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/276583), you can [disable this behavior instance-wide](../../user/admin_area/settings/continuous_integration.md#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines).
-
-#### `artifacts:reports`
-
-Use [`artifacts:reports`](../pipelines/job_artifacts.md#artifactsreports)
-to collect test reports, code quality reports, and security reports from jobs.
-It also exposes these reports in the GitLab UI (merge requests, pipeline views, and security dashboards).
-
-These are the available report types:
-
-| Keyword                                                                                                                     | Description                                                                      |
-|-----------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| [`artifacts:reports:cobertura`](../pipelines/job_artifacts.md#artifactsreportscobertura)                                    | The `cobertura` report collects Cobertura coverage XML files.                    |
-| [`artifacts:reports:codequality`](../pipelines/job_artifacts.md#artifactsreportscodequality)                                | The `codequality` report collects Code Quality issues.                            |
-| [`artifacts:reports:container_scanning`](../pipelines/job_artifacts.md#artifactsreportscontainer_scanning) **(ULTIMATE)**   | The `container_scanning` report collects Container Scanning vulnerabilities.     |
-| [`artifacts:reports:dast`](../pipelines/job_artifacts.md#artifactsreportsdast) **(ULTIMATE)**                               | The `dast` report collects Dynamic Application Security Testing vulnerabilities. |
-| [`artifacts:reports:dependency_scanning`](../pipelines/job_artifacts.md#artifactsreportsdependency_scanning) **(ULTIMATE)** | The `dependency_scanning` report collects Dependency Scanning vulnerabilities.   |
-| [`artifacts:reports:dotenv`](../pipelines/job_artifacts.md#artifactsreportsdotenv)                                          | The `dotenv` report collects a set of environment variables.                     |
-| [`artifacts:reports:junit`](../pipelines/job_artifacts.md#artifactsreportsjunit)                                            | The `junit` report collects JUnit XML files.                                     |
-| [`artifacts:reports:license_management`](../pipelines/job_artifacts.md#artifactsreportslicense_management) **(ULTIMATE)**   | The `license_management` report collects Licenses (*removed from GitLab 13.0*).  |
-| [`artifacts:reports:license_scanning`](../pipelines/job_artifacts.md#artifactsreportslicense_scanning) **(ULTIMATE)**       | The `license_scanning` report collects Licenses.                                 |
-| [`artifacts:reports:load_performance`](../pipelines/job_artifacts.md#artifactsreportsload_performance) **(PREMIUM)**        | The `load_performance` report collects load performance metrics.                 |
-| [`artifacts:reports:metrics`](../pipelines/job_artifacts.md#artifactsreportsmetrics) **(PREMIUM)**                          | The `metrics` report collects Metrics.                                           |
-| [`artifacts:reports:performance`](../pipelines/job_artifacts.md#artifactsreportsperformance) **(PREMIUM)**                  | The `performance` report collects Browser Performance metrics.                   |
-| [`artifacts:reports:sast`](../pipelines/job_artifacts.md#artifactsreportssast)                                              | The `sast` report collects Static Application Security Testing vulnerabilities.  |
-| [`artifacts:reports:terraform`](../pipelines/job_artifacts.md#artifactsreportsterraform)                                    | The `terraform` report collects Terraform `tfplan.json` files.                   |
-
-#### `dependencies`
-
-By default, all [`artifacts`](#artifacts) from previous [stages](#stages)
-are passed to each job. However, you can use the `dependencies` keyword to
-define a limited list of jobs to fetch artifacts from. You can also set a job to download no artifacts at all.
-
-To use this feature, define `dependencies` in context of the job and pass
-a list of all previous jobs the artifacts should be downloaded from.
-
-You can define jobs from stages that were executed before the current one.
-An error occurs if you define jobs from the current or an upcoming stage.
-
-To prevent a job from downloading artifacts, define an empty array.
-
-When you use `dependencies`, the status of the previous job is not considered.
-If a job fails or it's a manual job that isn't triggered, no error occurs.
-
-The following example defines two jobs with artifacts: `build:osx` and
-`build:linux`. When the `test:osx` is executed, the artifacts from `build:osx`
-are downloaded and extracted in the context of the build. The same happens
-for `test:linux` and artifacts from `build:linux`.
-
-The job `deploy` downloads artifacts from all previous jobs because of
-the [stage](#stages) precedence:
-
-```yaml
-build:osx:
-  stage: build
-  script: make build:osx
-  artifacts:
-    paths:
-      - binaries/
-
-build:linux:
-  stage: build
-  script: make build:linux
-  artifacts:
-    paths:
-      - binaries/
-
-test:osx:
-  stage: test
-  script: make test:osx
-  dependencies:
-    - build:osx
-
-test:linux:
-  stage: test
-  script: make test:linux
-  dependencies:
-    - build:linux
-
-deploy:
-  stage: deploy
-  script: make deploy
-```
-
-##### When a dependent job fails
-
-> Introduced in GitLab 10.3.
-
-If the artifacts of the job that is set as a dependency are
-[expired](#artifactsexpire_in) or
-[erased](../pipelines/job_artifacts.md#erase-job-artifacts), then
-the dependent job fails.
-
-You can ask your administrator to
-[flip this switch](../../administration/job_artifacts.md#validation-for-dependencies)
-and bring back the old behavior.
 
 ### `coverage`
 
@@ -5078,13 +5355,14 @@ Use [`default:`](#custom-default-keyword-values) instead. For example:
 
 ```yaml
 default:
-  image: ruby:2.5
+  image: ruby:3.0
   services:
     - docker:dind
   cache:
     paths: [vendor/]
   before_script:
-    - bundle install --path vendor/
+    - bundle config set path vendor/bundle
+    - bundle install
   after_script:
     - rm -rf tmp/
 ```

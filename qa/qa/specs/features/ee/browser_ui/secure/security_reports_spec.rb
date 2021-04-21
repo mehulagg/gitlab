@@ -49,7 +49,7 @@ module QA
         @project.visit!
       end
 
-      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565' do
+      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565', quarantine: { only: { pipeline: [:master, :nightly] }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/325612', type: :bug } do
         Flow::Pipeline.visit_latest_pipeline
 
         Page::Project::Pipeline::Show.perform do |pipeline|
@@ -130,7 +130,7 @@ module QA
         end
       end
 
-      it 'displays the Dependency List', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/564' do
+      it 'displays the Dependency List', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/564', quarantine: { only: { pipeline: [:master, :nightly] }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/328059', type: :bug } do
         Page::Project::Menu.perform(&:click_on_dependency_list)
 
         EE::Page::Project::Secure::DependencyList.perform do |dependency_list|

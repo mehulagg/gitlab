@@ -22,7 +22,7 @@ module EE
         end
 
         def merge_request_params_attributes
-          attrs = super.push(
+          super.push(
             { blocking_merge_request_references: [] },
             :update_blocking_merge_request_refs,
             :remove_hidden_blocking_merge_requests,
@@ -32,8 +32,6 @@ module EE
             :approver_ids,
             :reset_approval_rules_to_defaults
           )
-
-          attrs
         end
 
         def approval_rule_attributes

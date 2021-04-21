@@ -13,28 +13,42 @@ RSpec.describe Admin::LicensesController do
     render_views
 
     it 'redirects back when no license is entered/uploaded' do
-      post :create, params: { license: { data: '' } }
+      expect do
+        post :create, params: { license: { data: '' } }
+      end.not_to change(License, :count)
+
       expect(response).to redirect_to new_admin_license_path
-      expect(flash[:alert]).to include 'Please enter or upload a license.'
+      expect(flash[:alert]).to include 'Please enter or upload a valid license.'
+    end
+
+    context 'when the license is for a cloud license' do
+      it 'redirects back' do
+        license = build_license(type: 'cloud')
+
+        expect do
+          post :create, params: { license: { data: license.data } }
+        end.not_to change(License, :count)
+
+        expect(response).to redirect_to new_admin_license_path
+        expect(flash[:alert]).to include 'Please enter or upload a valid license.'
+      end
     end
 
     it 'renders new with an alert when an invalid license is entered/uploaded' do
-      post :create, params: { license: { data: 'GA!89-)GaRBAGE' } }
+      expect do
+        post :create, params: { license: { data: 'GA!89-)GaRBAGE' } }
+      end.not_to change(License, :count)
 
       expect(response).to render_template(:new)
       expect(response.body).to include('The license key is invalid. Make sure it is exactly as you received it from GitLab Inc.')
     end
 
     it 'redirects to show when a valid license is entered/uploaded' do
-      gl_license = build(:gitlab_license, restrictions: {
-                           trial: false,
-                           plan: License::PREMIUM_PLAN,
-                           active_user_count: 1,
-                           previous_user_count: 1
-                         })
-      license = build(:license, data: gl_license.export)
+      license = build_license
 
-      post :create, params: { license: { data: license.data } }
+      expect do
+        post :create, params: { license: { data: license.data } }
+      end.to change(License, :count).by(1)
 
       expect(response).to redirect_to(admin_license_path)
     end
@@ -45,20 +59,26 @@ RSpec.describe Admin::LicensesController do
       end
 
       it 'redirects to show when a valid trial license is entered/uploaded' do
-        gl_license = build(:gitlab_license,
-                           expires_at: Date.tomorrow,
-                           restrictions: {
-                             trial: true,
-                             plan: License::PREMIUM_PLAN,
-                             active_user_count: 1,
-                             previous_user_count: 1
-                           })
-        license = build(:license, data: gl_license.export)
+        license = build_license(restrictions: { trial: true })
 
-        post :create, params: { license: { data: license.data } }
+        expect do
+          post :create, params: { license: { data: license.data } }
+        end.to change(License, :count).by(1)
 
         expect(response).to redirect_to(admin_license_path)
       end
+    end
+
+    def build_license(type: nil, restrictions: {})
+      license_restrictions = {
+        trial: false,
+        plan: License::PREMIUM_PLAN,
+        active_user_count: 1,
+        previous_user_count: 1
+      }.merge(restrictions)
+      gl_license = build(:gitlab_license, type: type, restrictions: license_restrictions)
+
+      build(:license, data: gl_license.export)
     end
   end
 

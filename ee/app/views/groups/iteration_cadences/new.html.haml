@@ -1,0 +1,5 @@
+- add_to_breadcrumbs _("Iteration cadences"), group_iteration_cadences_path(@group)
+- breadcrumb_title _("New")
+- page_title _("New iteration cadence")
+
+.js-iteration-cadence-form{ data: { group_full_path: @group.full_path, cadences_list_path: group_iteration_cadences_path(@group) } }

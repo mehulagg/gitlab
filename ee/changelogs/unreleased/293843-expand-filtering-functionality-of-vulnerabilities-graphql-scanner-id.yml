@@ -1,0 +1,5 @@
+---
+title: Expose vulnerability Scanner ID through GraphQL query
+merge_request: 58595
+author:
+type: changed

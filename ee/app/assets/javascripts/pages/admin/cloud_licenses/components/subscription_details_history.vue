@@ -59,21 +59,22 @@ export default {
         },
         {
           key: 'plan',
+          formatter: (v, k, item) => capitalizeFirstCharacter(item.plan),
           label: detailsLabels.plan,
           tdAttr,
           tdClass: this.cellClass,
           thClass,
         },
         {
-          key: 'startsAt',
-          label: subscriptionTable.activatedOn,
+          key: 'activatedAt',
+          label: subscriptionTable.activatedAt,
           tdAttr,
           tdClass: this.cellClass,
           thClass,
         },
         {
-          key: 'validFrom',
-          label: subscriptionTable.validFrom,
+          key: 'startsAt',
+          label: subscriptionTable.startsAt,
           tdAttr,
           tdClass: this.cellClass,
           thClass,
@@ -86,7 +87,7 @@ export default {
           thClass,
         },
         {
-          key: 'usersInLicense',
+          key: 'usersInLicenseCount',
           label: subscriptionTable.seats,
           tdAttr,
           tdClass: this.cellClass,
@@ -94,6 +95,8 @@ export default {
         },
         {
           key: 'type',
+          formatter: (v, k, item) =>
+            sprintf(subscriptionTypeText, { type: capitalizeFirstCharacter(item.type) }),
           label: subscriptionTable.type,
           tdAttr,
           tdClass: this.cellClass,
@@ -105,9 +108,6 @@ export default {
   methods: {
     cellClass(_, x, item) {
       return item.id === this.currentSubscriptionId ? tdClassHighlight : tdClassBase;
-    },
-    getType(type) {
-      return sprintf(subscriptionTypeText, { type: capitalizeFirstCharacter(type) });
     },
     rowAttr() {
       return {
@@ -135,8 +135,8 @@ export default {
       responsive
       stacked="sm"
     >
-      <template #cell(type)="{ item }">
-        <gl-badge size="md" variant="info">{{ getType(item.type) }}</gl-badge>
+      <template #cell(type)="{ value }">
+        <gl-badge size="md" variant="info">{{ value }}</gl-badge>
       </template>
     </gl-table>
   </section>

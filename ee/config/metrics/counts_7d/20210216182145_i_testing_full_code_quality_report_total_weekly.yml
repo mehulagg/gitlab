@@ -1,6 +1,6 @@
 ---
 key_path: redis_hll_counters.testing.i_testing_full_code_quality_report_total_weekly
-description: Count of unique users per week|month who visit the full code quality
+description: Count of unique users per week who visit the full code quality
   report
 product_section: ops
 product_stage: verify
@@ -15,4 +15,3 @@ distribution:
 tier:
 - premium
 - ultimate
-skip_validation: true

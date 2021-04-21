@@ -193,3 +193,33 @@ export const mockProjectSecurityChartsWithData = () => ({
     },
   },
 });
+
+export const mockVulnerableProjectsInstance = () => ({
+  data: {
+    instanceSecurityDashboard: {
+      projects: {
+        nodes: [
+          {
+            id: 'gid://gitlab/Project/2',
+            name: 'Gitlab Shell',
+          },
+        ],
+      },
+    },
+  },
+});
+
+export const mockVulnerableProjectsGroup = () => ({
+  data: {
+    group: {
+      projects: {
+        nodes: [
+          {
+            id: 'gid://gitlab/Project/2',
+            name: 'Gitlab Shell',
+          },
+        ],
+      },
+    },
+  },
+});

@@ -1,0 +1,5 @@
+---
+title: Atomically select an available replica if all caught up
+merge_request: 49294
+author:
+type: fixed

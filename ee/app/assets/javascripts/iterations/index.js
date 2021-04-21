@@ -98,7 +98,7 @@ export function initCadenceForm() {
     return null;
   }
 
-  const { groupFullPath: groupPath, canEdit, cadenceId, cadenceListPath } = el;
+  const { groupFullPath: groupPath, cadenceId, cadenceListPath } = el;
 
   return new Vue({
     el,
@@ -107,7 +107,6 @@ export function initCadenceForm() {
       return createElement(IterationCadenceForm, {
         props: {
           groupPath,
-          canEdit,
           cadenceId,
           cadenceListPath,
         },

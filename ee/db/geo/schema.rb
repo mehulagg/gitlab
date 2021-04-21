@@ -70,9 +70,9 @@ ActiveRecord::Schema.define(version: 2021_03_25_150435) do
     t.bigint "group_wiki_repository_id", null: false
     t.integer "state", limit: 2, default: 0, null: false
     t.integer "retry_count", limit: 2, default: 0
+    t.text "last_sync_failure"
     t.boolean "force_to_redownload"
     t.boolean "missing_on_primary"
-    t.text "last_sync_failure"
     t.index ["group_wiki_repository_id"], name: "index_g_wiki_repository_registry_on_group_wiki_repository_id", unique: true
     t.index ["retry_at"], name: "index_group_wiki_repository_registry_on_retry_at"
     t.index ["state"], name: "index_group_wiki_repository_registry_on_state"
@@ -258,6 +258,9 @@ ActiveRecord::Schema.define(version: 2021_03_25_150435) do
     t.index ["retry_at"], name: "index_snippet_repository_registry_on_retry_at"
     t.index ["snippet_repository_id"], name: "index_snippet_repository_registry_on_snippet_repository_id", unique: true
     t.index ["state"], name: "index_snippet_repository_registry_on_state"
+    t.index ["verification_retry_at"], name: "snippet_repository_registry_failed_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 3))"
+    t.index ["verification_state"], name: "snippet_repository_registry_needs_verification", where: "((state = 2) AND (verification_state = ANY (ARRAY[0, 3])))"
+    t.index ["verified_at"], name: "snippet_repository_registry_pending_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
   end
 
   create_table "terraform_state_version_registry", force: :cascade do |t|

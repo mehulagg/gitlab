@@ -108,6 +108,7 @@ The following table depicts the various user permission levels in a project.
 | Upload [Design Management](project/issues/design_management.md) files |  |  | ✓        | ✓        | ✓      |
 | Create/edit [releases](project/releases/index.md)|   |            | ✓           | ✓        | ✓      |
 | Delete [releases](project/releases/index.md)|   |            |            | ✓        | ✓      |
+| Manage merge approval rules (project settings)    |         |            |             | ✓        | ✓      |
 | Create new merge request                          |         |            | ✓           | ✓        | ✓      |
 | Create new branches                               |         |            | ✓           | ✓        | ✓      |
 | Push to non-protected branches                    |         |            | ✓           | ✓        | ✓      |
@@ -300,6 +301,7 @@ group.
 | View Value Stream analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View Billing **(FREE SAAS)**                           |       |          |           |            | ✓ (4) |
 | View Usage Quotas **(FREE SAAS)**                      |       |          |           |            | ✓ (4) |
+| Manage [group push rules](group/index.md#group-push-rules) **(PREMIUM)** |         |            |             | ✓        | ✓      |
 | View 2FA status of members                             |       |          |           |            | ✓     |
 | Filter members by 2FA status                           |       |          |           |            | ✓     |
 | Administer project compliance frameworks               |       |          |           |            | ✓     |
@@ -333,7 +335,7 @@ project and should only have access to that project.
 
 External users:
 
-- Cannot create projects (including forks), groups, or snippets.
+- Can only create projects (including forks), subgroups, and snippets within the top-level group to which they belong.
 - Can only access public projects and projects to which they are explicitly granted access,
   thus hiding all other internal or private ones from them (like being
   logged out).

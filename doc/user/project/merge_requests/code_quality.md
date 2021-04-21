@@ -33,7 +33,7 @@ Code Quality:
 Going a step further, GitLab can show the Code Quality report right
 in the merge request widget area if a report from the target branch is available to compare to:
 
-![Code Quality Widget](img/code_quality.png)
+![Code Quality Widget](img/code_quality_widget_13_11.png)
 
 Watch a quick walkthrough of Code Quality in action:
 
@@ -48,6 +48,26 @@ NOTE:
 For one customer, the auditor found that having Code Quality, SAST, and Container Scanning all automated in GitLab CI/CD was almost better than a manual review! [Read more](https://about.gitlab.com/customers/bi_worldwide/).
 
 See also the Code Climate list of [Supported Languages for Maintainability](https://docs.codeclimate.com/docs/supported-languages-for-maintainability).
+
+## Code Quality in diff view **(ULTIMATE)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/267612) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.11.
+> - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
+
+Changes to files in merge requests can cause Code Quality to fall if merged. In these cases,
+an indicator is displayed (**{information-o}** **Code Quality**) on the file in the merge request's diff view. For example:
+
+![Code Quality MR diff report](img/code_quality_mr_diff_report_v13_11.png)
+
+To enable this feature, a GitLab administrator can run the following in a
+[Rails console](../../../administration/operations/rails_console.md):
+
+```ruby
+# For the instance
+Feature.enable(:codequality_mr_diff)
+# For a single project
+Feature.enable(:codequality_mr_diff, Project.find(<project id>))
+```
 
 ## Use cases
 
@@ -85,7 +105,7 @@ include:
 
 The above example creates a `code_quality` job in your CI/CD pipeline which
 scans your source code for code quality issues. The report is saved as a
-[Code Quality report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportscodequality)
+[Code Quality report artifact](../../../ci/yaml/README.md#artifactsreportscodequality)
 that you can later download and analyze.
 
 It's also possible to override the URL to the Code Quality image by
@@ -308,7 +328,7 @@ do this:
 
 1. Define a job in your `.gitlab-ci.yml` file that generates the
    [Code Quality report
-   artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportscodequality).
+   artifact](../../../ci/yaml/README.md#artifactsreportscodequality).
 1. Configure your tool to generate the Code Quality report artifact as a JSON
    file that implements a subset of the [Code Climate
    spec](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md#data-types).
@@ -346,7 +366,11 @@ NOTE:
 Although the Code Climate spec supports more properties, those are ignored by
 GitLab.
 
-## Code Quality reports
+## Code Quality reports **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21527) in GitLab Premium 12.9.
+
+![Code Quality Report](img/code_quality_report_13_11.png)
 
 After the Code Quality job completes:
 
@@ -551,3 +575,8 @@ plugins:
     enabled: true
     channel: rubocop-0-67
 ```
+
+### No Code Quality appears on merge requests when using custom tool
+
+If your merge requests do not show any code quality changes when using a custom tool,
+ensure that the line property is an `integer`.

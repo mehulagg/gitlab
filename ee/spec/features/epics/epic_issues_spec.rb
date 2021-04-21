@@ -30,7 +30,6 @@ RSpec.describe 'Epic Issues', :js do
 
   before do
     stub_licensed_features(epics: true, subepics: true)
-    stub_const('Epic', ::Epic, transfer_nested_constants: true)
   end
 
   def visit_epic

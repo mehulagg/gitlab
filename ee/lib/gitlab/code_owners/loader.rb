@@ -6,7 +6,9 @@ module Gitlab
       include ::Gitlab::Utils::StrongMemoize
 
       def initialize(project, ref, paths)
-        @project, @ref, @paths = project, ref, Array(paths)
+        @project = project
+        @ref = ref
+        @paths = Array(paths)
       end
 
       def entries

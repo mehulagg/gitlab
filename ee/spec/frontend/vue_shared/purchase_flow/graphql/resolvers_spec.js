@@ -1,35 +1,22 @@
-import { createMockClient } from 'mock-apollo-client';
 import activateNextStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/activate_next_step.mutation.graphql';
 import updateStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/update_active_step.mutation.graphql';
 import activeStepQuery from 'ee/vue_shared/purchase_flow/graphql/queries/active_step.query.graphql';
 import stepListQuery from 'ee/vue_shared/purchase_flow/graphql/queries/step_list.query.graphql';
-import resolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers';
-import typeDefs from 'ee/vue_shared/purchase_flow/graphql/typedefs.graphql';
 import { STEPS } from '../mock_data';
+import { createMockApolloProvider } from '../spec_helper';
 
 describe('ee/vue_shared/purchase_flow/graphql/resolvers', () => {
-  let mockClient;
-
-  beforeEach(async () => {
-    mockClient = createMockClient({ resolvers, typeDefs });
-    mockClient.cache.writeQuery({
-      query: stepListQuery,
-      data: {
-        stepList: STEPS,
-      },
-    });
-    mockClient.cache.writeQuery({
-      query: activeStepQuery,
-      data: {
-        activeStep: STEPS[0],
-      },
-    });
-  });
+  let mockApolloClient;
 
   describe('Query', () => {
+    beforeEach(async () => {
+      const mockApollo = createMockApolloProvider(STEPS, 0);
+      mockApolloClient = mockApollo.clients.defaultClient;
+    });
+
     describe('stepListQuery', () => {
       it('stores the stepList', async () => {
-        const queryResult = await mockClient.query({ query: stepListQuery });
+        const queryResult = await mockApolloClient.query({ query: stepListQuery });
         expect(queryResult.data.stepList).toMatchObject(
           STEPS.map(({ id }) => {
             return { id };
@@ -38,8 +25,8 @@ describe('ee/vue_shared/purchase_flow/graphql/resolvers', () => {
       });
 
       it('throws an error when cache is not initiated properly', async () => {
-        mockClient.clearStore();
-        await mockClient.query({ query: stepListQuery }).catch((e) => {
+        mockApolloClient.clearStore();
+        await mockApolloClient.query({ query: stepListQuery }).catch((e) => {
           expect(e instanceof Error).toBe(true);
         });
       });
@@ -47,13 +34,13 @@ describe('ee/vue_shared/purchase_flow/graphql/resolvers', () => {
 
     describe('activeStepQuery', () => {
       it('stores the activeStep', async () => {
-        const queryResult = await mockClient.query({ query: activeStepQuery });
+        const queryResult = await mockApolloClient.query({ query: activeStepQuery });
         expect(queryResult.data.activeStep).toMatchObject({ id: STEPS[0].id });
       });
 
       it('throws an error when cache is not initiated properly', async () => {
-        mockClient.clearStore();
-        await mockClient.query({ query: activeStepQuery }).catch((e) => {
+        mockApolloClient.clearStore();
+        await mockApolloClient.query({ query: activeStepQuery }).catch((e) => {
           expect(e instanceof Error).toBe(true);
         });
       });
@@ -62,18 +49,23 @@ describe('ee/vue_shared/purchase_flow/graphql/resolvers', () => {
 
   describe('Mutation', () => {
     describe('updateActiveStep', () => {
+      beforeEach(async () => {
+        const mockApollo = createMockApolloProvider(STEPS, 0);
+        mockApolloClient = mockApollo.clients.defaultClient;
+      });
+
       it('updates the active step', async () => {
-        await mockClient.mutate({
+        await mockApolloClient.mutate({
           mutation: updateStepMutation,
           variables: { id: STEPS[1].id },
         });
-        const queryResult = await mockClient.query({ query: activeStepQuery });
+        const queryResult = await mockApolloClient.query({ query: activeStepQuery });
         expect(queryResult.data.activeStep).toMatchObject({ id: STEPS[1].id });
       });
 
       it('throws an error when STEP is not present', async () => {
         const id = 'does not exist';
-        await mockClient
+        await mockApolloClient
           .mutate({
             mutation: updateStepMutation,
             variables: { id },
@@ -84,8 +76,8 @@ describe('ee/vue_shared/purchase_flow/graphql/resolvers', () => {
       });
 
       it('throws an error when cache is not initiated properly', async () => {
-        mockClient.clearStore();
-        await mockClient
+        mockApolloClient.clearStore();
+        await mockApolloClient
           .mutate({
             mutation: updateStepMutation,
             variables: { id: STEPS[1].id },
@@ -98,19 +90,20 @@ describe('ee/vue_shared/purchase_flow/graphql/resolvers', () => {
 
     describe('activateNextStep', () => {
       it('updates the active step to the next', async () => {
-        await mockClient.mutate({
+        const mockApollo = createMockApolloProvider(STEPS, 0);
+        mockApolloClient = mockApollo.clients.defaultClient;
+        await mockApolloClient.mutate({
           mutation: activateNextStepMutation,
         });
-        const queryResult = await mockClient.query({ query: activeStepQuery });
+        const queryResult = await mockApolloClient.query({ query: activeStepQuery });
         expect(queryResult.data.activeStep).toMatchObject({ id: STEPS[1].id });
       });
 
       it('throws an error when out of bounds', async () => {
-        await mockClient.mutate({
-          mutation: activateNextStepMutation,
-        });
+        const mockApollo = createMockApolloProvider(STEPS, 2);
+        mockApolloClient = mockApollo.clients.defaultClient;
 
-        await mockClient
+        await mockApolloClient
           .mutate({
             mutation: activateNextStepMutation,
           })
@@ -120,8 +113,8 @@ describe('ee/vue_shared/purchase_flow/graphql/resolvers', () => {
       });
 
       it('throws an error when cache is not initiated properly', async () => {
-        mockClient.clearStore();
-        await mockClient
+        mockApolloClient.clearStore();
+        await mockApolloClient
           .mutate({
             mutation: activateNextStepMutation,
           })

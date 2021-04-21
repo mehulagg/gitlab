@@ -263,13 +263,11 @@ export default {
         fullPath: this.projectPath,
         dastScannerProfileId: this.selectedScannerProfile.id,
         dastSiteProfileId: this.selectedSiteProfile.id,
+        branchName: this.selectedBranch,
         ...(this.isEdit ? { id: this.dastScan.id } : {}),
         ...serializeFormObject(this.form.fields),
         [this.isEdit ? 'runAfterUpdate' : 'runAfterCreate']: runAfter,
       };
-      if (this.glFeatures.dastBranchSelection) {
-        input.branchName = this.selectedBranch;
-      }
 
       this.$apollo
         .mutate({
@@ -429,7 +427,7 @@ export default {
         />
       </gl-form-group>
 
-      <gl-form-group v-if="glFeatures.dastBranchSelection" :label="__('Branch')">
+      <gl-form-group :label="__('Branch')">
         <ref-selector
           v-model="selectedBranch"
           data-testid="dast-scan-branch-input"
@@ -468,11 +466,11 @@ export default {
           <div class="row">
             <profile-selector-summary-cell
               :label="s__('DastProfiles|Spider timeout')"
-              :value="n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout)"
+              :value="n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout || 0)"
             />
             <profile-selector-summary-cell
               :label="s__('DastProfiles|Target timeout')"
-              :value="n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout)"
+              :value="n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout || 0)"
             />
           </div>
           <div class="row">

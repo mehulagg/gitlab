@@ -7,9 +7,9 @@ description: Count of WAU creating epics
 product_section: dev
 product_stage: plan
 product_group: group::product planning
-product_category: epics_usage
+product_category: epics
 value_type: number
-status: implemented
+status: data_available
 milestone: "13.10"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53651
 time_frame: 7d

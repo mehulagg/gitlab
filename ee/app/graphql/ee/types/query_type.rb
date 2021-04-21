@@ -61,6 +61,16 @@ module EE
               null: true,
               description: 'Get configured DevOps adoption segments on the instance.',
               resolver: ::Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver
+
+        field :current_license, ::Types::Admin::CloudLicenses::CurrentLicenseType,
+              null: true,
+              resolver: ::Resolvers::Admin::CloudLicenses::CurrentLicenseResolver,
+              description: 'Fields related to the current license.'
+
+        field :license_history_entries, ::Types::Admin::CloudLicenses::LicenseHistoryEntryType.connection_type,
+              null: true,
+              resolver: ::Resolvers::Admin::CloudLicenses::LicenseHistoryEntriesResolver,
+              description: 'Fields related to entries in the license history.'
       end
 
       def vulnerability(id:)

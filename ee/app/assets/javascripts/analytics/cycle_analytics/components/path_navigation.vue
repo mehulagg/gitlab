@@ -5,6 +5,7 @@ import {
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
+import { OVERVIEW_STAGE_ID } from '../constants';
 
 export default {
   name: 'PathNavigation',
@@ -33,8 +34,8 @@ export default {
     },
   },
   methods: {
-    showPopover({ startEventHtmlDescription, endEventHtmlDescription }) {
-      return startEventHtmlDescription || endEventHtmlDescription;
+    showPopover({ id }) {
+      return id && id !== OVERVIEW_STAGE_ID;
     },
   },
   popoverOptions: {
@@ -51,24 +52,41 @@ export default {
         v-if="showPopover(pathItem)"
         v-bind="$options.popoverOptions"
         :target="pathId"
+        :css-classes="['stage-item-popover']"
         data-testid="stage-item-popover"
       >
         <template #title>{{ pathItem.title }}</template>
-        <div class="gl-display-table">
-          <div v-if="pathItem.startEventHtmlDescription" class="gl-display-table-row">
-            <div class="gl-display-table-cell gl-pr-4 gl-pb-4">
+        <div class="gl-px-4">
+          <div class="gl-display-flex gl-justify-content-space-between">
+            <div class="gl-pr-4 gl-pb-4">
+              {{ s__('ValueStreamEvent|Stage time (median)') }}
+            </div>
+            <div class="gl-pb-4 gl-font-weight-bold">{{ pathItem.metric }}</div>
+          </div>
+        </div>
+        <div class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50">
+          <div
+            v-if="pathItem.startEventHtmlDescription"
+            class="gl-display-flex gl-flex-direction-row"
+          >
+            <div class="gl-display-flex gl-flex-direction-column gl-pr-4 gl-pb-4 metric-label">
               {{ s__('ValueStreamEvent|Start') }}
             </div>
             <div
               v-safe-html="pathItem.startEventHtmlDescription"
-              class="gl-display-table-cell gl-pb-4 stage-event-description"
+              class="gl-display-flex gl-flex-direction-column gl-pb-4 stage-event-description"
             ></div>
           </div>
-          <div v-if="pathItem.endEventHtmlDescription" class="gl-display-table-row">
-            <div class="gl-display-table-cell gl-pr-4">{{ s__('ValueStreamEvent|Stop') }}</div>
+          <div
+            v-if="pathItem.endEventHtmlDescription"
+            class="gl-display-flex gl-flex-direction-row"
+          >
+            <div class="gl-display-flex gl-flex-direction-column gl-pr-4 metric-label">
+              {{ s__('ValueStreamEvent|Stop') }}
+            </div>
             <div
               v-safe-html="pathItem.endEventHtmlDescription"
-              class="gl-display-table-cell stage-event-description"
+              class="gl-display-flex gl-flex-direction-column stage-event-description"
             ></div>
           </div>
         </div>

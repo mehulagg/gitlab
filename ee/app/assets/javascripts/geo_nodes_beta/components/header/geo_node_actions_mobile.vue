@@ -14,15 +14,14 @@ export default {
     GlIcon,
   },
   props: {
-    primary: {
-      type: Boolean,
-      required: false,
-      default: false,
+    node: {
+      type: Object,
+      required: true,
     },
   },
   computed: {
     dropdownRemoveClass() {
-      return this.primary ? 'gl-text-gray-400' : 'gl-text-red-500';
+      return this.node.primary ? 'gl-text-gray-400' : 'gl-text-red-500';
     },
   },
 };
@@ -33,8 +32,8 @@ export default {
     <template #button-content>
       <gl-icon name="ellipsis_h" />
     </template>
-    <gl-dropdown-item>{{ $options.i18n.editButtonLabel }}</gl-dropdown-item>
-    <gl-dropdown-item :disabled="primary" data-testid="geo-mobile-remove-action">
+    <gl-dropdown-item :href="node.webEditUrl">{{ $options.i18n.editButtonLabel }}</gl-dropdown-item>
+    <gl-dropdown-item :disabled="node.primary" data-testid="geo-mobile-remove-action">
       <span :class="dropdownRemoveClass">{{ $options.i18n.removeButtonLabel }}</span>
     </gl-dropdown-item>
   </gl-dropdown>

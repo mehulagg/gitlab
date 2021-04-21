@@ -118,8 +118,6 @@ class Group < Namespace
       .where("project_authorizations.user_id IN (?)", user_ids)
   end
 
-  delegate :default_branch_name, to: :namespace_settings
-
   class << self
     def sort_by_attribute(method)
       if method == 'storage_size_desc'
@@ -346,6 +344,10 @@ class Group < Namespace
     members_with_parents.owners.exists?(user_id: user)
   end
 
+  def blocked_owners
+    members.blocked.where(access_level: Gitlab::Access::OWNER)
+  end
+
   def has_maintainer?(user)
     return false unless user
 
@@ -358,14 +360,29 @@ class Group < Namespace
 
   # Check if user is a last owner of the group.
   def last_owner?(user)
-    has_owner?(user) && members_with_parents.owners.size == 1
+    has_owner?(user) && single_owner?
   end
 
-  def last_blocked_owner?(user)
+  def member_last_owner?(member)
+    return member.last_owner unless member.last_owner.nil?
+
+    last_owner?(member.user)
+  end
+
+  def single_owner?
+    members_with_parents.owners.size == 1
+  end
+
+  def single_blocked_owner?
+    blocked_owners.size == 1
+  end
+
+  def member_last_blocked_owner?(member)
+    return member.last_blocked_owner unless member.last_blocked_owner.nil?
+
     return false if members_with_parents.owners.any?
 
-    blocked_owners = members.blocked.where(access_level: Gitlab::Access::OWNER)
-    blocked_owners.size == 1 && blocked_owners.exists?(user_id: user)
+    single_blocked_owner? && blocked_owners.exists?(user_id: member.user)
   end
 
   def ldap_synced?
@@ -805,13 +822,11 @@ class Group < Namespace
     variables = Ci::GroupVariable.where(group: list_of_ids)
     variables = variables.unprotected unless project.protected_for?(ref)
 
-    if Feature.enabled?(:scoped_group_variables, self, default_enabled: :yaml)
-      variables = if environment
-                    variables.on_environment(environment)
-                  else
-                    variables.where(environment_scope: '*')
-                  end
-    end
+    variables = if environment
+                  variables.on_environment(environment)
+                else
+                  variables.where(environment_scope: '*')
+                end
 
     variables = variables.group_by(&:group_id)
     list_of_ids.reverse.flat_map { |group| variables[group.id] }.compact

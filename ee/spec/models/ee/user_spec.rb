@@ -28,6 +28,9 @@ RSpec.describe User do
     it { is_expected.to have_many(:board_preferences) }
     it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference') }
     it { is_expected.to have_many(:user_permission_export_uploads) }
+    it { is_expected.to have_many(:oncall_participants).class_name('IncidentManagement::OncallParticipant') }
+    it { is_expected.to have_many(:oncall_rotations).class_name('IncidentManagement::OncallRotation').through(:oncall_participants) }
+    it { is_expected.to have_many(:oncall_schedules).class_name('IncidentManagement::OncallSchedule').through(:oncall_rotations) }
   end
 
   describe 'nested attributes' do

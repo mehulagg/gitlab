@@ -6,10 +6,4 @@ export const SURVEY_BANNER_LOCAL_STORAGE_KEY = 'vulnerability_management_survey_
 // word 'survey' and the number, or else it will parse to a valid date.
 export const SURVEY_BANNER_CURRENT_ID = 'survey1';
 
-export const vulnerabilitiesSeverityCountScopes = {
-  instance: 'instance',
-  group: 'group',
-  project: 'project',
-};
-
 export const DEFAULT_SCANNER = 'GitLab';

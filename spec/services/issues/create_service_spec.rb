@@ -11,6 +11,7 @@ RSpec.describe Issues::CreateService do
   describe '#execute' do
     let_it_be(:assignee) { create(:user) }
     let_it_be(:milestone) { create(:milestone, project: project) }
+
     let(:issue) { described_class.new(project, user, opts).execute }
 
     context 'when params are valid' do
@@ -117,30 +118,6 @@ RSpec.describe Issues::CreateService do
         expect(IssuePlacementWorker).to receive(:perform_async).with(be_nil, Integer)
 
         described_class.new(project, user, opts).execute
-      end
-
-      context 'with issue_perform_after_creation_tasks_async feature disabled' do
-        before do
-          stub_feature_flags(issue_perform_after_creation_tasks_async: false)
-        end
-
-        it 'calls Issues::AfterCreateService' do
-          expect_next(::Issues::AfterCreateService, project, user).to receive(:execute)
-
-          described_class.new(project, user, opts).execute
-        end
-      end
-
-      context 'with issue_perform_after_creation_tasks_async feature enabled' do
-        before do
-          stub_feature_flags(issue_perform_after_creation_tasks_async: true)
-        end
-
-        it 'does not call Issues::AfterCreateService' do
-          expect(::Issues::AfterCreateService).not_to receive(:new)
-
-          described_class.new(project, user, opts).execute
-        end
       end
 
       context 'when label belongs to project group' do

@@ -2,7 +2,11 @@ import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import GeoNodeActionsMobile from 'ee/geo_nodes_beta/components/header/geo_node_actions_mobile.vue';
-import { MOCK_PRIMARY_VERSION, MOCK_REPLICABLE_TYPES } from 'ee_jest/geo_nodes_beta/mock_data';
+import {
+  MOCK_NODES,
+  MOCK_PRIMARY_VERSION,
+  MOCK_REPLICABLE_TYPES,
+} from 'ee_jest/geo_nodes_beta/mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -11,7 +15,7 @@ describe('GeoNodeActionsMobile', () => {
   let wrapper;
 
   const defaultProps = {
-    primary: true,
+    node: MOCK_NODES[0],
   };
 
   const createComponent = (initialState, props) => {
@@ -59,6 +63,12 @@ describe('GeoNodeActionsMobile', () => {
           'Remove',
         ]);
       });
+
+      it('renders edit link correctly', () => {
+        expect(findGeoMobileActionsDropdownItems().at(0).attributes('href')).toBe(
+          MOCK_NODES[0].webEditUrl,
+        );
+      });
     });
 
     describe.each`
@@ -67,11 +77,13 @@ describe('GeoNodeActionsMobile', () => {
       ${false} | ${undefined} | ${'gl-text-red-500'}
     `(`conditionally`, ({ primary, disabled, dropdownClass }) => {
       beforeEach(() => {
-        createComponent(null, { primary });
+        createComponent(null, { node: { primary } });
       });
 
       describe(`when primary is ${primary}`, () => {
-        it('disables the Mobile Remove dropdown item and adds proper class', () => {
+        it(`does ${
+          primary ? '' : 'not '
+        }disable the Mobile Remove dropdown item and adds proper class`, () => {
           expect(findGeoMobileActionsRemoveDropdownItem().attributes('disabled')).toBe(disabled);
           expect(findGeoMobileActionsRemoveDropdownItem().find('span').classes(dropdownClass)).toBe(
             true,

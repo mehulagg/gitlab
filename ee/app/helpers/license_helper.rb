@@ -16,6 +16,10 @@ module LicenseHelper
     License.current&.plan&.titleize || 'Core'
   end
 
+  def has_active_license?
+    License.current.present?
+  end
+
   def new_trial_url
     return_to_url = CGI.escape(Gitlab.config.gitlab.url)
     uri = URI.parse(::EE::SUBSCRIPTIONS_URL)
@@ -50,7 +54,7 @@ module LicenseHelper
 
   def cloud_license_view_data
     {
-      plan_name: current_license_title
+      has_active_license: (has_active_license? ? 'true' : 'false')
     }
   end
 

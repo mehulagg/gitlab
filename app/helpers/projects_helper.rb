@@ -729,14 +729,6 @@ module ProjectsHelper
     ]
   end
 
-  def sidebar_projects_paths
-    %w[
-      projects#show
-      projects#activity
-      releases#index
-    ]
-  end
-
   def sidebar_settings_paths
     %w[
       projects#edit
@@ -751,25 +743,6 @@ module ProjectsHelper
       operations#show
       badges#index
       pages#show
-    ]
-  end
-
-  def sidebar_repository_paths
-    %w[
-      tree
-      blob
-      blame
-      edit_tree
-      new_tree
-      find_file
-      commit
-      commits
-      compare
-      projects/repositories
-      tags
-      branches
-      graphs
-      network
     ]
   end
 

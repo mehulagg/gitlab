@@ -5,6 +5,7 @@ class MigrateNotesToSeparateIndex < Elastic::Migration
 
   pause_indexing!
   batched!
+  space_requirements!
   throttle_delay 1.minute
 
   MAX_ATTEMPTS_PER_SLICE = 30
@@ -90,6 +91,12 @@ class MigrateNotesToSeparateIndex < Elastic::Migration
     log "Checking to see if migration is completed based on index counts: original_count:#{original_count}, new_count:#{new_count}"
 
     original_count == new_count
+  end
+
+  def space_required_bytes
+    # notes index on GitLab.com takes 0.31% of the main index storage
+    # this migration will require 5 times that value to give a buffer
+    (helper.index_size_bytes * 0.0155).ceil
   end
 
   private

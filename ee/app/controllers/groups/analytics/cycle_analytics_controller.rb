@@ -15,7 +15,6 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
   before_action do
     push_frontend_feature_flag(:cycle_analytics_scatterplot_enabled, default_enabled: true)
     push_frontend_feature_flag(:value_stream_analytics_path_navigation, @group, default_enabled: :yaml)
-    push_frontend_feature_flag(:value_stream_analytics_extended_form, @group, default_enabled: :yaml)
     render_403 unless can?(current_user, :read_group_cycle_analytics, @group)
   end
 

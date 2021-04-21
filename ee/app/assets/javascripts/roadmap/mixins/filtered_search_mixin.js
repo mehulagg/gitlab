@@ -6,18 +6,25 @@ import { __ } from '~/locale';
 
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
+import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 
 import { FilterTokenOperators } from '../constants';
 
 export default {
-  inject: ['groupFullPath', 'groupMilestonesPath'],
+  inject: ['groupFullPath', 'groupMilestonesPath', 'listEpicsPath'],
   computed: {
     urlParams() {
-      const { search, authorUsername, labelName, milestoneTitle, confidential, myReactionEmoji } =
-        this.filterParams || {};
-
+      const {
+        search,
+        authorUsername,
+        labelName,
+        milestoneTitle,
+        confidential,
+        myReactionEmoji,
+        epicIid,
+      } = this.filterParams || {};
       return {
         state: this.currentState || this.epicsState,
         page: this.currentPage,
@@ -29,6 +36,7 @@ export default {
         milestone_title: milestoneTitle,
         confidential,
         my_reaction_emoji: myReactionEmoji,
+        epic_iid: epicIid && Number(epicIid),
         search,
       };
     },
@@ -104,6 +112,23 @@ export default {
             { icon: 'eye', value: false, title: __('No') },
           ],
         },
+        {
+          type: 'epic_iid',
+          icon: 'epic',
+          title: __('Epic'),
+          unique: true,
+          symbol: '&',
+          token: EpicToken,
+          operators: FilterTokenOperators,
+          fetchEpics: (search = '') => {
+            return axios.get(this.listEpicsPath, { params: { search } }).then(({ data }) => {
+              return { data };
+            });
+          },
+          fetchSingleEpic: (iid) => {
+            return axios.get(`${this.listEpicsPath}/${iid}`).then(({ data }) => ({ data }));
+          },
+        },
       ];
 
       if (gon.current_user_id) {
@@ -133,8 +158,15 @@ export default {
       return tokens;
     },
     getFilteredSearchValue() {
-      const { authorUsername, labelName, milestoneTitle, confidential, myReactionEmoji, search } =
-        this.filterParams || {};
+      const {
+        authorUsername,
+        labelName,
+        milestoneTitle,
+        confidential,
+        myReactionEmoji,
+        search,
+        epicIid,
+      } = this.filterParams || {};
       const filteredSearchValue = [];
 
       if (authorUsername) {
@@ -174,6 +206,13 @@ export default {
         });
       }
 
+      if (epicIid) {
+        filteredSearchValue.push({
+          type: 'epic_iid',
+          value: { data: epicIid },
+        });
+      }
+
       if (search) {
         filteredSearchValue.push(search);
       }
@@ -201,6 +240,9 @@ export default {
             break;
           case 'my_reaction_emoji':
             filterParams.myReactionEmoji = filter.value.data;
+            break;
+          case 'epic_iid':
+            filterParams.epicIid = Number(filter.value.data.split('::&')[1]);
             break;
           case 'filtered-search-term':
             if (filter.value.data) plainText.push(filter.value.data);

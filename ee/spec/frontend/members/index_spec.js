@@ -1,4 +1,5 @@
 import { membersJsonString } from 'jest/members/mock_data';
+import { MEMBER_TYPES } from '~/members/constants';
 import { initMembersApp } from '~/members/index';
 
 describe('initMembersApp', () => {
@@ -6,7 +7,9 @@ describe('initMembersApp', () => {
   let vm;
 
   const createVm = () => {
-    vm = initMembersApp(el, {});
+    vm = initMembersApp(el, {
+      namespace: MEMBER_TYPES.user,
+    });
   };
 
   beforeEach(() => {
@@ -24,7 +27,7 @@ describe('initMembersApp', () => {
   it('sets `ldapOverridePath` in Vuex store', () => {
     createVm();
 
-    expect(vm.$store.state.ldapOverridePath).toBe(
+    expect(vm.$store.state[MEMBER_TYPES.user].ldapOverridePath).toBe(
       '/groups/ldap-group/-/group_members/:id/override',
     );
   });

@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import LdapOverrideButton from 'ee/members/components/ldap/ldap_override_button.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { member } from 'jest/members/mock_data';
+import { MEMBER_TYPES } from '~/members/constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -17,7 +18,14 @@ describe('LdapOverrideButton', () => {
       showLdapOverrideConfirmationModal: jest.fn(),
     };
 
-    return new Vuex.Store({ actions });
+    return new Vuex.Store({
+      modules: {
+        [MEMBER_TYPES.user]: {
+          namespaced: true,
+          actions,
+        },
+      },
+    });
   };
 
   const createComponent = (propsData = {}) => {
@@ -28,6 +36,9 @@ describe('LdapOverrideButton', () => {
         ...propsData,
       },
       store: createStore(),
+      provide: {
+        namespace: MEMBER_TYPES.user,
+      },
       directives: {
         GlTooltip: createMockDirective(),
       },

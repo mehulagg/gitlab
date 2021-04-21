@@ -62,7 +62,8 @@ RSpec.describe 'EE > Projects > Licenses > Maintainer views policies', :js do
     end
 
     def label_for(dependency)
-      name, version = dependency['name'], dependency['version']
+      name = dependency['name']
+      version = dependency['version']
       version ? "#{name} (#{version})" : name
     end
 

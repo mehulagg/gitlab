@@ -29,18 +29,20 @@ RSpec.describe ::Gitlab::Metrics::Subscribers::ActiveRecord do
   end
 
   shared_examples 'track sql events for each role' do
-    where(:name, :sql_query, :record_query, :record_write_query, :record_cached_query) do
-      'SQL' | 'SELECT * FROM users WHERE id = 10' | true | false | false
-      'SQL' | 'WITH active_milestones AS (SELECT COUNT(*), state FROM milestones GROUP BY state) SELECT * FROM active_milestones' | true | false | false
-      'SQL' | 'SELECT * FROM users WHERE id = 10 FOR UPDATE' | true | true | false
-      'SQL' | 'WITH archived_rows AS (SELECT * FROM users WHERE archived = true) INSERT INTO products_log SELECT * FROM archived_rows' | true | true | false
-      'SQL' | 'DELETE FROM users where id = 10' | true | true | false
-      'SQL' | 'INSERT INTO project_ci_cd_settings (project_id) SELECT id FROM projects' | true | true | false
-      'SQL' | 'UPDATE users SET admin = true WHERE id = 10' | true | true | false
-      'CACHE' | 'SELECT * FROM users WHERE id = 10' | true | false | true
-      'SCHEMA' | "SELECT attr.attname FROM pg_attribute attr INNER JOIN pg_constraint cons ON attr.attrelid = cons.conrelid AND attr.attnum = any(cons.conkey) WHERE cons.contype = 'p' AND cons.conrelid = '\"projects\"'::regclass" | false | false | false
-      nil | 'BEGIN' | false | false | false
-      nil | 'COMMIT' | false | false | false
+    where(:name, :sql_query, :record_query, :record_write_query, :record_cached_query, :record_wal_query) do
+      'SQL' | 'SELECT * FROM users WHERE id = 10' | true | false | false | false
+      'SQL' | 'WITH active_milestones AS (SELECT COUNT(*), state FROM milestones GROUP BY state) SELECT * FROM active_milestones' | true | false | false | false
+      'SQL' | 'SELECT * FROM users WHERE id = 10 FOR UPDATE' | true | true | false | false
+      'SQL' | 'WITH archived_rows AS (SELECT * FROM users WHERE archived = true) INSERT INTO products_log SELECT * FROM archived_rows' | true | true | false | false
+      'SQL' | 'DELETE FROM users where id = 10' | true | true | false | false
+      'SQL' | 'INSERT INTO project_ci_cd_settings (project_id) SELECT id FROM projects' | true | true | false | false
+      'SQL' | 'UPDATE users SET admin = true WHERE id = 10' | true | true | false | false
+      'SQL' | 'SELECT pg_current_wal_insert_lsn()::text AS location' | true | false | false | true
+      'SQL' | 'SELECT pg_last_wal_replay_lsn()::text AS location' | true | false | false | true
+      'CACHE' | 'SELECT * FROM users WHERE id = 10' | true | false | true | false
+      'SCHEMA' | "SELECT attr.attname FROM pg_attribute attr INNER JOIN pg_constraint cons ON attr.attrelid = cons.conrelid AND attr.attnum = any(cons.conkey) WHERE cons.contype = 'p' AND cons.conrelid = '\"projects\"'::regclass" | false | false | false | false
+      nil | 'BEGIN' | false | false | false | false
+      nil | 'COMMIT' | false | false | false | false
     end
 
     with_them do

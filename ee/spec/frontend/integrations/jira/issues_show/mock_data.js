@@ -20,8 +20,8 @@ export const mockJiraIssue = {
     {
       title: 'In Progress',
       description: 'Work that is still in progress',
-      color: '#EBECF0',
-      text_color: '#283856',
+      color: '#0052CC',
+      text_color: '#FFFFFF',
     },
   ],
   references: {

@@ -157,9 +157,6 @@ describe('OnDemandScansForm', () => {
             siteProfilesLibraryPath,
             newScannerProfilePath,
             newSiteProfilePath,
-            glFeatures: {
-              dastBranchSelection: true,
-            },
           },
           stubs: {
             GlFormInput: GlFormInputStub,
@@ -660,101 +657,6 @@ describe('OnDemandScansForm', () => {
       expect(wrapper.text()).toContain(
         'You must create a repository within your project to run an on-demand scan.',
       );
-    });
-  });
-
-  describe('dastBranchSelection feature flag disabled', () => {
-    describe.each`
-      action      | actionFunction | runAfter
-      ${'submit'} | ${submitForm}  | ${true}
-      ${'save'}   | ${saveScan}    | ${false}
-    `('on $action', ({ actionFunction, runAfter }) => {
-      describe('when creating a new scan', () => {
-        beforeEach(async () => {
-          createShallowComponent({
-            provide: {
-              glFeatures: {
-                dastBranchSelection: false,
-              },
-            },
-          });
-          wrapper.vm.$apollo.mutate.mockResolvedValue({
-            data: {
-              dastProfileCreate: {
-                dastProfile: { editPath },
-                pipelineUrl,
-                errors: [],
-              },
-            },
-          });
-          findNameInput().vm.$emit('input', 'My daily scan');
-          findScannerProfilesSelector().vm.$emit('input', passiveScannerProfile.id);
-          findSiteProfilesSelector().vm.$emit('input', nonValidatedSiteProfile.id);
-          await wrapper.vm.$nextTick();
-          actionFunction();
-        });
-
-        it(`triggers dastProfileCreateMutation mutation without the branch name and runAfterCreate set to ${runAfter}`, async () => {
-          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-            mutation: dastProfileCreateMutation,
-            variables: {
-              input: {
-                name: 'My daily scan',
-                dastScannerProfileId: passiveScannerProfile.id,
-                dastSiteProfileId: nonValidatedSiteProfile.id,
-                fullPath: projectPath,
-                runAfterCreate: runAfter,
-              },
-            },
-          });
-        });
-      });
-
-      describe('when editing an existing scan', () => {
-        beforeEach(async () => {
-          createShallowComponent({
-            propsData: {
-              dastScan,
-            },
-            provide: {
-              glFeatures: {
-                dastBranchSelection: false,
-              },
-            },
-          });
-          wrapper.vm.$apollo.mutate.mockResolvedValue({
-            data: {
-              dastProfileUpdate: {
-                dastProfile: { editPath },
-                pipelineUrl,
-                errors: [],
-              },
-            },
-          });
-          findNameInput().vm.$emit('input', 'My daily scan');
-          findScannerProfilesSelector().vm.$emit('input', passiveScannerProfile.id);
-          findSiteProfilesSelector().vm.$emit('input', nonValidatedSiteProfile.id);
-          await wrapper.vm.$nextTick();
-          actionFunction();
-        });
-
-        it(`triggers dastProfileUpdateMutation mutation without the branch name and runAfterUpdate set to ${runAfter}`, async () => {
-          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-            mutation: dastProfileUpdateMutation,
-            variables: {
-              input: {
-                id: 1,
-                name: 'My daily scan',
-                description: 'Tests for SQL injections',
-                dastScannerProfileId: passiveScannerProfile.id,
-                dastSiteProfileId: nonValidatedSiteProfile.id,
-                fullPath: projectPath,
-                runAfterUpdate: runAfter,
-              },
-            },
-          });
-        });
-      });
     });
   });
 });

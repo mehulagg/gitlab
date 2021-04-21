@@ -141,7 +141,7 @@ export default {
       );
     },
     isSubmitDisabled() {
-      return this.isPolicyProfile;
+      return this.formHasErrors || this.requiredFieldEmpty || this.isPolicyProfile;
     },
     isPolicyProfile() {
       return Boolean(this.profile?.referencedInSecurityPolicies?.length);

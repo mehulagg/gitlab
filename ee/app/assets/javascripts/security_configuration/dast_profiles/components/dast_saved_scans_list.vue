@@ -107,11 +107,7 @@ export default {
   >
     <template #cell(name)="{ item: { name, branch, editPath } }">
       {{ name }}
-      <dast-scan-branch
-        v-if="glFeatures.dastBranchSelection"
-        :branch="branch"
-        :edit-path="editPath"
-      />
+      <dast-scan-branch :branch="branch" :edit-path="editPath" />
     </template>
 
     <!-- eslint-disable-next-line vue/valid-v-slot -->

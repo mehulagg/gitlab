@@ -1,0 +1,5 @@
+---
+title: Fix N+1 query in Epics search for guest in private group
+merge_request: 58863
+author:
+type: performance

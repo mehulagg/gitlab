@@ -162,9 +162,7 @@ module MergeRequests
     end
 
     def refresh_pipelines_on_merge_requests(merge_request)
-      create_pipeline_for(merge_request, current_user)
-
-      UpdateHeadPipelineForMergeRequestWorker.perform_async(merge_request.id)
+      create_pipeline_for(merge_request, current_user, async: true)
     end
 
     def abort_auto_merges(merge_request)

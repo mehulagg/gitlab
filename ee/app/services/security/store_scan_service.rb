@@ -19,6 +19,8 @@ module Security
     end
 
     def execute
+      return deduplicate if security_scan.has_errors?
+
       StoreFindingsMetadataService.execute(security_scan, security_report)
       deduplicate_findings? ? update_deduplicated_findings : register_finding_keys
 
@@ -31,7 +33,9 @@ module Security
     delegate :security_report, :project, to: :artifact, private: true
 
     def security_scan
-      @security_scan ||= Security::Scan.safe_find_or_create_by!(build: artifact.job, scan_type: artifact.file_type)
+      @security_scan ||= Security::Scan.safe_find_or_create_by!(build: artifact.job, scan_type: artifact.file_type) do |scan|
+        scan.info['errors'] = security_report.errors.map(&:stringify_keys) if security_report.errored?
+      end
     end
 
     def deduplicate_findings?

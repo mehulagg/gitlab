@@ -164,7 +164,7 @@ RSpec.describe Vulnerabilities::FeedbackEntity do
   end
 
   context 'when finding_uuid is not present' do
-    let(:feedback) { build_stubbed(:vulnerability_feedback, :issue, project: project) }
+    let(:feedback) { build_stubbed(:vulnerability_feedback, :issue, project: project, finding_uuid: nil) }
 
     it 'has a nil finding_uuid' do
       expect(subject[:finding_uuid]).to be_nil

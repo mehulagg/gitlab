@@ -19,6 +19,7 @@ RSpec.describe MigrateNotesToSeparateIndex do
       expect(migration.batched?).to be_truthy
       expect(migration.throttle_delay).to eq(1.minute)
       expect(migration.pause_indexing?).to be_truthy
+      expect(migration.space_requirements?).to be_truthy
     end
   end
 
@@ -193,5 +194,15 @@ RSpec.describe MigrateNotesToSeparateIndex do
         is_expected.to be_falsey
       end
     end
+  end
+
+  describe 'space_required_bytes' do
+    subject { migration.space_required_bytes }
+
+    before do
+      allow(helper).to receive(:index_size_bytes).and_return(300)
+    end
+
+    it { is_expected.to eq(5) }
   end
 end

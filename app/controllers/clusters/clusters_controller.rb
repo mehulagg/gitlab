@@ -61,7 +61,7 @@ class Clusters::ClustersController < Clusters::BaseController
 
   def show
     if params[:tab] == 'integrations'
-      @prometheus_integration = Clusters::IntegrationPresenter.new(@cluster.find_or_build_application(Clusters::Applications::Prometheus))
+      @prometheus_integration = Clusters::IntegrationPresenter.new(@cluster.find_or_build_integration_prometheus)
     end
   end
 
@@ -308,7 +308,8 @@ class Clusters::ClustersController < Clusters::BaseController
   def proxy_variable_substitution_service
     @empty_service ||= Class.new(BaseService) do
       def initialize(proxyable, params)
-        @proxyable, @params = proxyable, params
+        @proxyable = proxyable
+        @params = params
       end
 
       def execute

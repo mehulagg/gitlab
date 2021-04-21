@@ -1,0 +1,5 @@
+---
+title: Fix updating value stream without persisted stages
+merge_request: 59176
+author:
+type: fixed

@@ -213,7 +213,9 @@ In this example:
 - Each repository is stored on one of three Gitaly storages: `storage-1`, `storage-2`,
   or `storage-3`.
 - Each storage is serviced by a Gitaly node.
-- The three Gitaly nodes store data in three separate hashed storage locations.
+- The three Gitaly nodes share data in three separate hashed storage locations.
+- The [replication factor](praefect.md#replication-factor) is `3`. There are three copies maintained
+  of each repository.
 
 Generally, virtual storage with Gitaly Cluster can replace direct Gitaly storage configurations, at
 the expense of additional storage needed to store each repository on multiple Gitaly nodes. The
@@ -458,6 +460,21 @@ You can run a gRPC trace with:
 ```shell
 sudo GRPC_TRACE=all GRPC_VERBOSITY=DEBUG gitlab-rake gitlab:gitaly:check
 ```
+
+### Server side gRPC logs
+
+gRPC tracing can also be enabled in Gitaly itself with the `GODEBUG=http2debug`
+environment variable. To set this in an Omnibus GitLab install:
+
+1. Add the following to your `gitlab.rb` file:
+
+   ```ruby
+   gitaly['env'] = {
+     "GODEBUG=http2debug" => "2"
+   }
+   ```
+
+1. [Reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure) GitLab.
 
 ### Correlating Git processes with RPCs
 

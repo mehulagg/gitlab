@@ -21,6 +21,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
   shared_examples 'custom Value Stream Analytics Stage' do
     let(:params) { { from: Time.new(2019), to: Time.new(2020), current_user: user } }
     let(:data_collector) { described_class.new(stage: stage, params: params) }
+    let(:resource_1_end_time) { Time.new(2019, 3, 15) }
+    let(:resource_2_end_time) { Time.new(2019, 3, 10) }
+    let(:resource_3_end_time) { Time.new(2019, 3, 20) }
 
     let!(:resource1) do
       # takes 10 days
@@ -28,7 +31,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         create_data_for_start_event(self)
       end
 
-      travel_to(Time.new(2019, 3, 15)) do
+      travel_to(resource_1_end_time) do
         create_data_for_end_event(resource, self)
       end
 
@@ -41,7 +44,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         create_data_for_start_event(self)
       end
 
-      travel_to(Time.new(2019, 3, 10)) do
+      travel_to(resource_2_end_time) do
         create_data_for_end_event(resource, self)
       end
 
@@ -54,7 +57,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         create_data_for_start_event(self)
       end
 
-      travel_to(Time.new(2019, 3, 20)) do
+      travel_to(resource_3_end_time) do
         create_data_for_end_event(resource, self)
       end
 
@@ -92,6 +95,26 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
 
         expect(days).to eq([15, 10, 5])
       end
+    end
+
+    describe '#duration_chart_average_data' do
+      subject { data_collector.duration_chart_average_data }
+
+      it 'loads data ordered by event time' do
+        data = subject.map { |item| [item.date, round_to_days(item.average_duration_in_seconds)] }
+
+        expect(Hash[data]).to eq({
+          resource_1_end_time.utc.to_date => 10,
+          resource_2_end_time.utc.to_date => 5,
+          resource_3_end_time.utc.to_date => 15
+        })
+      end
+    end
+
+    describe '#count' do
+      subject(:count) { data_collector.count }
+
+      it { is_expected.to eq(3) }
     end
   end
 
@@ -672,6 +695,54 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         end
 
         it_behaves_like 'filter examples'
+      end
+    end
+  end
+
+  describe 'limit count' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, :repository, group: group) }
+
+    let(:merge_request) { merge_requests.first }
+
+    let(:stage) do
+      Analytics::CycleAnalytics::GroupStage.new(
+        name: 'My Stage',
+        group: group,
+        start_event_identifier: :merge_request_created,
+        end_event_identifier: :merge_request_merged
+      )
+    end
+
+    before do
+      merge_requests = create_list(:merge_request, 3, :unique_branches, target_project: project, source_project: project)
+      merge_requests.each { |mr| mr.metrics.update!(merged_at: 10.days.from_now) }
+
+      project.add_user(user, Gitlab::Access::DEVELOPER)
+    end
+
+    subject(:count) do
+      described_class.new(stage: stage, params: {
+        from: 5.months.ago,
+        to: 5.months.from_now,
+        current_user: user
+      }).count
+    end
+
+    context 'when limit is reached' do
+      before do
+        stub_const('Gitlab::Analytics::CycleAnalytics::DataCollector::MAX_COUNT', 2)
+      end
+
+      it 'shows the MAX COUNT' do
+        is_expected.to eq(2)
+      end
+    end
+
+    context 'when limit is not reached' do
+      it 'shows the actual count' do
+        is_expected.to eq(3)
       end
     end
   end

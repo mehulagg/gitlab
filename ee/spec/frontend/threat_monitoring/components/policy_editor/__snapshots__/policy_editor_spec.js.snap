@@ -111,7 +111,9 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
     <div
       class="col-md-auto"
     >
-      <gl-form-group-stub>
+      <gl-form-group-stub
+        data-testid="policy-enable"
+      >
         <gl-toggle-stub
           label="Policy status"
           labelposition="top"

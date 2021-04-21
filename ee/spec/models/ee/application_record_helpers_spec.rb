@@ -8,7 +8,7 @@ RSpec.describe ApplicationRecord do
 
     before do
       allow(::Gitlab::Database::LoadBalancing::Session).to receive(:current).and_return(session)
-      allow(session).to receive(:use_replica_if_possible).and_yield
+      allow(session).to receive(:fallback_to_replicas_for_ambiguous_queries).and_yield
     end
 
     it 'yields control' do

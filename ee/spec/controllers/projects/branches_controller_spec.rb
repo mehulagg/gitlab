@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Projects::BranchesController do
   let_it_be(:project) { create(:project, :repository) }
+
   let(:user) { project.owner }
 
   before do
