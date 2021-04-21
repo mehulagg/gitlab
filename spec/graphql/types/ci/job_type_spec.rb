@@ -15,12 +15,12 @@ RSpec.describe Types::Ci::JobType do
       commitPath
       coverage
       created_at
+      created_by_tag
       detailedStatus
       duration
       finished_at
-      hasAction
-      hasTag
       id
+      manual_job
       name
       needs
       pipeline
@@ -29,7 +29,6 @@ RSpec.describe Types::Ci::JobType do
       refName
       refPath
       retryable
-      schedulable
       scheduledAt
       schedulingType
       shortSha
