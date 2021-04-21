@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# To be removed as :graphql_board_lists defaults on
+# https://gitlab.com/gitlab-org/gitlab/-/issues/248908
+
 require 'spec_helper'
 
 RSpec.describe 'Issue Boards', :js do
@@ -20,11 +23,9 @@ RSpec.describe 'Issue Boards', :js do
   let!(:list)        { create(:list, board: board, label: development, position: 0) }
   let(:card1) { find('.board:nth-child(2)').find('.board-card:nth-child(2)') }
   let(:card2) { find('.board:nth-child(2)').find('.board-card:nth-child(1)') }
-  let(:epic1) { create(:epic, group: group, title: 'Foo') }
-  let!(:epic2) { create(:epic, group: group, title: 'Bar') }
-  let!(:epic_issue) { create(:epic_issue, issue: issue2, epic: epic1) }
 
   before do
+    stub_feature_flags(graphql_board_lists: false)
     stub_licensed_features(multiple_issue_assignees: true)
 
     project.add_maintainer(user)
@@ -168,24 +169,28 @@ RSpec.describe 'Issue Boards', :js do
         click_card(card1)
         wait_for_requests
 
-        expect(find('[data-testid="sidebar-epic"]').text).to have_content('None')
+        expect(find('.js-epic-label').text).to have_content('None')
       end
     end
 
     context 'when the issue is associated with an epic' do
+      let(:epic1)         { create(:epic, group: group, title: 'Foo') }
+      let!(:epic2)        { create(:epic, group: group, title: 'Bar') }
+      let!(:epic_issue)   { create(:epic_issue, issue: issue1, epic: epic1) }
+
       it 'displays name of epic and links to it' do
-        click_card(card2)
+        click_card(card1)
         wait_for_requests
 
-        expect(find('[data-testid="sidebar-epic"]')).to have_link(epic1.title, href: epic_path(epic1))
+        expect(find('.js-epic-label')).to have_link(epic1.title, href: epic_path(epic1))
       end
 
       it 'updates the epic associated with the issue' do
-        click_card(card2)
+        click_card(card1)
         wait_for_requests
 
-        page.within(find('[data-testid="sidebar-epic"]')) do
-          click_button 'Edit'
+        page.within(find('.js-epic-block')) do
+          page.find('.sidebar-dropdown-toggle').click
           wait_for_requests
 
           find('.gl-new-dropdown-item', text: epic2.title).click
@@ -193,6 +198,15 @@ RSpec.describe 'Issue Boards', :js do
 
           expect(page.find('.value')).to have_content(epic2.title)
         end
+
+        # Ensure that boards_store is also updated the epic associated with the issue.
+        click_card(card1)
+        wait_for_requests
+
+        click_card(card1)
+        wait_for_requests
+
+        expect(find('.js-epic-label')).to have_content(epic2.title)
       end
     end
   end
@@ -202,16 +216,16 @@ RSpec.describe 'Issue Boards', :js do
       click_card(card1)
       wait_for_requests
 
-      expect(find('[data-testid="sidebar-weight"]').text).to have_content(issue1.weight)
+      expect(find('.js-weight-weight-label').text).to have_content(issue1.weight)
     end
 
     it 'updates weight in sidebar to 1' do
       click_card(card1)
       wait_for_requests
 
-      page.within '[data-testid="sidebar-weight"]' do
-        click_button 'Edit'
-        find('.weight input').send_keys 1, :enter
+      page.within '.weight' do
+        click_link 'Edit'
+        find('.block.weight input').send_keys 1, :enter
 
         page.within '.value' do
           expect(page).to have_content '1'
@@ -225,7 +239,7 @@ RSpec.describe 'Issue Boards', :js do
       click_card(card1)
       wait_for_requests
 
-      page.within '[data-testid="sidebar-weight"]' do
+      page.within '.weight' do
         page.within '.value' do
           expect(page).to have_content '1'
         end
@@ -236,8 +250,8 @@ RSpec.describe 'Issue Boards', :js do
       click_card(card1)
       wait_for_requests
 
-      page.within '[data-testid="sidebar-weight"]' do
-        click_button 'remove weight'
+      page.within '.weight' do
+        click_link 'remove weight'
 
         page.within '.value' do
           expect(page).to have_content 'None'
@@ -269,7 +283,7 @@ RSpec.describe 'Issue Boards', :js do
         click_card(card1)
         wait_for_requests
 
-        expect(page).not_to have_selector('[data-testid="sidebar-weight"]')
+        expect(page).not_to have_selector('.js-weight-weight-label')
       end
     end
   end
@@ -285,8 +299,8 @@ RSpec.describe 'Issue Boards', :js do
     it 'adds multiple scoped labels' do
       click_card(card1)
 
-      page.within('[data-testid="sidebar-labels"]') do
-        click_button 'Edit'
+      page.within('.labels') do
+        click_link 'Edit'
 
         wait_for_requests
 
@@ -298,7 +312,7 @@ RSpec.describe 'Issue Boards', :js do
 
         wait_for_requests
 
-        find('[data-testid="close-icon"]').click
+        find('.dropdown-menu-close-icon').click
 
         page.within('.value') do
           expect(page).to have_selector('.gl-label-scoped', count: 2)
@@ -325,8 +339,8 @@ RSpec.describe 'Issue Boards', :js do
       it 'removes existing scoped label' do
         click_card(card3)
 
-        page.within('[data-testid="sidebar-labels"]') do
-          click_button 'Edit'
+        page.within('.labels') do
+          click_link 'Edit'
 
           wait_for_requests
 
@@ -334,7 +348,7 @@ RSpec.describe 'Issue Boards', :js do
 
           wait_for_requests
 
-          find('[data-testid="close-icon"]').click
+          find('.dropdown-menu-close-icon').click
 
           page.within('.value') do
             expect(page).to have_selector('.gl-label-scoped', count: 1)
@@ -359,12 +373,12 @@ RSpec.describe 'Issue Boards', :js do
     it 'closes card sidebar when opening settings sidebar' do
       click_card(card1)
 
-      expect(page).to have_selector('[data-testid="issue-boards-sidebar"]')
+      expect(page).to have_selector('.right-sidebar')
 
       settings_button.click
 
       expect(page).to have_selector('.js-board-settings-sidebar')
-      expect(page).not_to have_selector('[data-testid="issue-boards-sidebar"]')
+      expect(page).not_to have_selector('.right-sidebar')
     end
 
     it 'closes settings sidebar when opening card sidebar' do
@@ -374,7 +388,7 @@ RSpec.describe 'Issue Boards', :js do
 
       click_card(card1)
 
-      expect(page).to have_selector('[data-testid="issue-boards-sidebar"]')
+      expect(page).to have_selector('.right-sidebar')
       expect(page).not_to have_selector('.js-board-settings-sidebar')
     end
   end
