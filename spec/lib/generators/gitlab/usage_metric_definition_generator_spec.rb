@@ -38,7 +38,7 @@ RSpec.describe Gitlab::UsageMetricDefinitionGenerator do
       end
     end
 
-    context 'with ee is true' do
+    context 'with ee option' do
       let(:sample_filename) { 'sample_metric_with_ee.yml' }
       let(:metric_definition_path) { Dir.glob(File.join(temp_dir, 'ee/config/metrics/counts_7d/*_test_metric.yml')).first }
 

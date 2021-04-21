@@ -53,10 +53,7 @@ module Gitlab
     end
 
     def distribution
-      value = []
-      value << '- ce' unless ee?
-      value << '- ee'
-      value.join("\n")
+      (ee? ? ['- ee'] : ['- ce', '- ee']).join("\n")
     end
 
     def tier

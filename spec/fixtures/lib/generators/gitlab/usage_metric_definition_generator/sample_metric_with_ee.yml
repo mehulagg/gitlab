@@ -1,5 +1,4 @@
 ---
-# See Usage Ping metrics dictionary docs https://docs.gitlab.com/ee/development/usage_ping/metrics_dictionary.html
 key_path: counts_weekly.test_metric
 name: test metric name
 description:
