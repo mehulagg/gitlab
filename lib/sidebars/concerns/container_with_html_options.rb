@@ -12,9 +12,23 @@ module Sidebars
         }.merge(extra_container_html_options)
       end
 
+      # The attributes returned from this method
+      # will be applied to helper methods like
+      # `link_to` or the div containing the container
+      # when it is collapsed.
+      def collapsed_container_html_options
+        {}.merge(extra_collapsed_container_html_options)
+      end
+
       # Classes will override mostly this method
       # and not `container_html_options`.
       def extra_container_html_options
+        {}
+      end
+
+      # Classes should mostly override this method
+      # and not `collapsed_container_html_options`.
+      def extra_collapsed_container_html_options
         {}
       end
 
