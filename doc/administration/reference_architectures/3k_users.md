@@ -15,7 +15,7 @@ than 3,000 users. For fewer users, reduce the stated node sizes as needed.
 If maintaining a high level of uptime for your GitLab environment isn't a
 requirement, or if you don't have the expertise to maintain this sort of
 environment, we recommend using the non HA [2,000-user reference architecture](2k_users.md)
-for your GitLab installation. If HA is still a requirement there's several supported
+for your GitLab installation. If HA is still a requirement, there's several supported
 tweaks you can make to this architecture to reduce complexity as detailed here.
 
 For a full list of reference architectures, see
@@ -2049,24 +2049,24 @@ considered and customer technical support will be considered out of scope.
 
 ## Supported modifications for lower user counts (HA)
 
-The 3k GitLab reference architecture is the smallest we recommend that achieves High Availability.
+The 3k GitLab reference architecture is the smallest we recommend that achieves High Availability (HA).
 However, for environments that need to serve less users but maintain HA there's several
 supported modifications you can make to this architecture to reduce complexity and cost.
 
-It should be noted that to achieve HA with GitLab this architecture's makeup is ultimately what is
+It should be noted that to achieve HA with GitLab, this architecture's makeup is ultimately what is
 required. Each component has various considerations and rules to follow and this architecture
-meets all of these. Smaller versions of this architecture then will be fundamentally the same
+meets all of these. Smaller versions of this architecture will be fundamentally the same,
 but with smaller performance requirements, several modifications can be considered as follows:
 
-- Lowering Node Specs - Depending on your user count you can lower all suggested node specs as desired. We recommend that you don't go lower than the [general requirements](../../install/requirements.md) however.
-- Combining select nodes - Some nodes can be combined to reduce complexity at the cost of some performance as follows:
-  - GitLab Rails and Sidekiq - Sidekiq nodes can be removed and the component instead enabled on the GitLab Rails nodes
-  - Postgres and PgBouncer - PgBouncer nodes can be removed and the component instead enabled on Postgres with the Internal Load Balancer pointing to them instead
-- Running select components in reputable Cloud PaaS solutions - Select components of the GitLab setup can instead be run on Cloud Provider PaaS solutions instead. By doing this additional dependent components can also be removed:
-  - PostgreSQL - Can be run on reputable Cloud PaaS solutions such as Google Cloud SQL or AWS RDS. In this setup the PgBouncer and Consul nodes are no longer required.
-    - Consul may still be desired if [Prometheus](../monitoring/prometheus/index.md) auto discovery is a requirement.
+- Lowering node specs: Depending on your user count, you can lower all suggested node specs as desired. However, it's recommended that you don't go lower than the [general requirements](../../install/requirements.md).
+- Combining select nodes: Some nodes can be combined to reduce complexity at the cost of some performance:
+  - GitLab Rails and Sidekiq: Sidekiq nodes can be removed and the component instead enabled on the GitLab Rails nodes.
+  - PostgreSQL and PgBouncer: PgBouncer nodes can be removed and the component instead enabled on PostgreSQL with the Internal Load Balancer pointing to them instead.
+- Running select components in reputable Cloud PaaS solutions: Select components of the GitLab setup can instead be run on Cloud Provider PaaS solutions. By doing this, additional dependent components can also be removed:
+  - PostgreSQL: Can be run on reputable Cloud PaaS solutions such as Google Cloud SQL or AWS RDS. In this setup, the PgBouncer and Consul nodes are no longer required:
+    - Consul may still be desired if [Prometheus](../monitoring/prometheus/index.md) auto discovery is a requirement, otherwise you would need to [manually add scrape configurations](../monitoring/prometheus/index.md#adding-custom-scrape-configurations) for all nodes.
       - As Redis Sentinel runs on the same box as Consul in this architecture it may need to be run on a separate box if Redis is still being run via Omnibus.
-  - Redis - Can be run on reputable Cloud PaaS solutions such as Google Memorystore and AWS Elasticache. In this setup the Redis Sentinel is no longer required.
+  - Redis: Can be run on reputable Cloud PaaS solutions such as Google Memorystore and AWS Elasticache. In this setup, the Redis Sentinel is no longer required.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
