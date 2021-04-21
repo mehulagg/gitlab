@@ -7,9 +7,9 @@ module Sidebars
       def configure_menus
         set_scope_menu(Sidebars::Projects::Menus::Scope::Menu.new(context))
 
-        add_menu(Sidebars::Projects::Menus::ProjectOverview::Menu.new(context))
-        add_menu(Sidebars::Projects::Menus::LearnGitlab::Menu.new(context))
-        add_menu(Sidebars::Projects::Menus::Repository::Menu.new(context))
+        add_menu(Sidebars::Projects::Menus::ProjectOverviewMenu.new(context))
+        add_menu(Sidebars::Projects::Menus::LearnGitlabMenu.new(context))
+        add_menu(Sidebars::Projects::Menus::RepositoryMenu.new(context))
       end
 
       override :render_raw_menus_partial

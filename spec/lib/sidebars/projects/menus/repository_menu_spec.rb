@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Sidebars::Projects::Menus::Repository::Menu do
+RSpec.describe Sidebars::Projects::Menus::RepositoryMenu do
   let_it_be(:project) { create(:project, :repository) }
 
   let(:user) { project.owner }
