@@ -5,14 +5,13 @@ import {
   REPORT_TYPE_URL,
   REPORT_TYPE_LIST,
 } from 'ee/vulnerabilities/components/generic_report/types/constants';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const TEST_DATA = {
   [REPORT_TYPE_URL]: {
     href: 'http://foo.com',
   },
   [REPORT_TYPE_LIST]: {
-    items: [{ type: 'foo' }],
+    items: [{ type: 'url', href: 'http://foo.com' }],
   },
 };
 
@@ -20,16 +19,12 @@ describe('ee/vulnerabilities/components/generic_report/report_item.vue', () => {
   let wrapper;
 
   const createWrapper = ({ props } = {}) =>
-    extendedWrapper(
-      shallowMount(ReportItem, {
-        propsData: {
-          item: {},
-          ...props,
-        },
-      }),
-    );
-
-  const findReportComponent = () => wrapper.findByTestId('reportComponent');
+    shallowMount(ReportItem, {
+      propsData: {
+        item: {},
+        ...props,
+      },
+    });
 
   describe.each(REPORT_TYPES)('with report type "%s"', (reportType) => {
     const reportItem = { type: reportType, ...TEST_DATA[reportType] };
@@ -39,11 +34,11 @@ describe('ee/vulnerabilities/components/generic_report/report_item.vue', () => {
     });
 
     it('renders the corresponding component', () => {
-      expect(findReportComponent().exists()).toBe(true);
+      expect(wrapper.exists()).toBe(true);
     });
 
     it('passes the report data as props', () => {
-      expect(findReportComponent().props()).toMatchObject({
+      expect(wrapper.props()).toMatchObject({
         item: reportItem,
       });
     });
