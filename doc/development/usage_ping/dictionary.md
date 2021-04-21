@@ -14892,7 +14892,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.suggestions`
 
-Count of suggestions created in merge request comments
+Count of unique users who create suggestions in merge request comments
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175053_suggestions.yml)
 
@@ -16836,7 +16836,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.suggestions`
 
-Count of suggestions created in merge request comments
+Count of unique users per month who create suggestions in merge request comments
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175109_suggestions.yml)
 
