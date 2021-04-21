@@ -42,7 +42,7 @@ module Spam
       return if endpoint_url.blank?
 
       begin
-        result, _error = client.issue_spam?(spam_issue: target, user: user)
+        result, _state, _error = client.issue_spam?(spam_issue: target, user: user)
         return unless result
 
         # @TODO metrics/logging
