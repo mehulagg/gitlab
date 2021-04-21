@@ -157,9 +157,11 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
         end
 
         context 'when the feature flag security_dast_site_profiles_additional_fields is disabled' do
-          it 'does not update the feature flagged attributes', :aggregate_failures do
+          before do
             stub_feature_flags(security_dast_site_profiles_additional_fields: false)
+          end
 
+          it 'does not update the feature flagged attributes', :aggregate_failures do
             dast_site_profile = subject[:id].find
 
             expect(dast_site_profile).not_to have_attributes(
@@ -176,12 +178,12 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
         end
 
         context 'when the feature flag security_dast_site_profiles_api_option is disabled' do
-          it 'does not update the feature flagged attributes', :aggregate_failures do
+          before do
             stub_feature_flags(security_dast_site_profiles_api_option: false)
+          end
 
-            updated_dast_site_profile = subject[:id].find
-
-            expect(updated_dast_site_profile.target_type).to eq(dast_site_profile.target_type)
+          it 'does not update the target_type' do
+            expect { subject }.not_to change { dast_site_profile.reload.target_type }
           end
         end
       end
