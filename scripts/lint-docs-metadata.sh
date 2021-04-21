@@ -17,9 +17,9 @@ done
 
 if [ "$counter" -gt 0 ]
 then
-  false
   printf "\n%sDocumentation metadata is missing in changed documentation files.%s For more information, see https://docs.gitlab.com/ee/development/documentation/#metadata.\n" "$(tput setaf 1)" "$(tput sgr0)" >&2
+  exit 1
 else
   printf "\n%sDocumentation metadata found in all changed documentation files.%s\n" "$(tput setaf 2)" "$(tput sgr0)"
-  true
+  exit 0
 fi
