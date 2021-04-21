@@ -199,7 +199,9 @@ export default {
 </template>
 ```
 
-### Minimizing SVGs
+### Minimize SVGs
 
-Whenever you develop or export a new SVG illustration, you may minimize it to save space using an [online tool SVGO](https://jakearchibald.github.io/svgomg/).
-When adding the illustration to [GitLab SVG](https://gitlab.com/gitlab-org/gitlab-svgs) illustrations will automatically be minimized so no manual action is needed.
+When you develop or export a new SVG illustration, minimize it with
+[online tool SVGO](https://jakearchibald.github.io/svgomg/) to save space. Illustrations
+added to [GitLab SVG](https://gitlab.com/gitlab-org/gitlab-svgs) are automatically
+minimized, so no manual action is needed.
