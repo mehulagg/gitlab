@@ -13,7 +13,7 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
   let_it_be(:policies_repository) { create(:project, :repository) }
   let_it_be(:security_orchestration_policy_configuration) { create(:security_orchestration_policy_configuration, project: project, security_policy_management_project: policies_repository) }
 
-  let_it_be(:policy_yml) do
+  let(:policy_yml) do
     <<-EOS
     scan_execution_policy:
       -  name: Run DAST in every pipeline
@@ -60,6 +60,46 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
     context 'when feature is enabled' do
       before do
         stub_feature_flags(security_orchestration_policies_configuration: true)
+      end
+
+      context 'when policy file is missing' do
+        before do
+          allow_next_instance_of(Repository) do |repository|
+            allow(repository).to receive(:blob_data_at).and_return(nil)
+          end
+        end
+
+        it 'modifies the config with failing job' do
+          expect(subject).to eq(
+            image: 'ruby:3.0.1',
+            'scan-execution-policy': { script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is missing" && false' }
+          )
+        end
+      end
+
+      context 'when policy is invalid' do
+        let(:policy_yml) do
+          <<-EOS
+          scan_execution_policy:
+            -  name: Run DAST in every pipeline
+               description: This policy enforces to run DAST for every pipeline within the project
+               enabled: true
+               rules:
+               - type: pipeline
+                 branch: "production"
+               actions:
+               - scan: dast
+                 site_profile: Site Profile
+                 scanner_profile: Scanner Profile
+          EOS
+        end
+
+        it 'modifies the config with failing job' do
+          expect(subject).to eq(
+            image: 'ruby:3.0.1',
+            'scan-execution-policy': { script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is invalid" && false' }
+          )
+        end
       end
 
       context 'when policy is not applicable on branch from the pipeline' do

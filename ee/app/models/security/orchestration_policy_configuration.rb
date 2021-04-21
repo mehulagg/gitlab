@@ -27,6 +27,8 @@ module Security
     end
 
     def policy_configuration_valid?
+      return false unless policy_configuration_exists?
+
       JSONSchemer
         .schema(Rails.root.join(POLICY_SCHEMA_PATH))
         .valid?(policy_hash.deep_stringify_keys)
@@ -81,17 +83,16 @@ module Security
     end
 
     def scan_execution_policy
-      policy_hash
-        .fetch(:scan_execution_policy, [])
+      return [] if policy_hash.blank?
+
+      policy_hash.fetch(:scan_execution_policy, [])
     end
 
     def policy_hash
-      strong_memoize(:policy_hash) do
-        blob_data = policy_repo.blob_data_at(default_branch_or_master, POLICY_PATH)
-        return if blob_data.blank?
+      blob_data = policy_repo.blob_data_at(default_branch_or_master, POLICY_PATH)
+      return if blob_data.blank?
 
-        Gitlab::Config::Loader::Yaml.new(blob_data).load!
-      end
+      Gitlab::Config::Loader::Yaml.new(blob_data).load!
     end
 
     def applicable_for_branch?(policy, ref)
