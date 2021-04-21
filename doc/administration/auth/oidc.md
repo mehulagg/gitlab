@@ -234,20 +234,24 @@ Once you click on that issuer, the `Token compatibility settings` should look so
 
 The issuer URL will now be in the form:
 
-`https://<YOUR-DOMAIN>/tfp/<YOUR-TENANT-ID>/<YOUR-POLICY-NAME>/v2.0/`
+```markdown
+https://<YOUR-DOMAIN>/tfp/<YOUR-TENANT-ID>/<YOUR-POLICY-NAME>/v2.0/
+```
 
 Note that the trailing backslash is required.
 
 To verify the OIDC discovery URL and issuer URL is working, append `.well-known/openid-configuration`
 to the issuer URL:
 
-`https://<YOUR-DOMAIN>/tfp/<YOUR-TENANT-ID>/<YOUR-POLICY-NAME>/v2.0/.well-known/openid-configuration``
+```markdown
+https://<YOUR-DOMAIN>/tfp/<YOUR-TENANT-ID>/<YOUR-POLICY-NAME>/v2.0/.well-known/openid-configuration
+```
 
 For example, if `domain` is `example.b2clogin.com` and tenant ID is
 `fc40c736-476c-4da1-b489-ee48cee84386`, you can use `curl` and `jq` to
 extract the issuer:
 
-```sh
+```shell
 $ curl -s "https://example.b2clogin.com/tfp/fc40c736-476c-4da1-b489-ee48cee84386/b2c_1_test/v2.0/.well-known/openid-configuration" | jq .issuer
 "https://example.b2clogin.com/tfp/fc40c736-476c-4da1-b489-ee48cee84386/b2c_1_test/v2.0/"
 ```
