@@ -14,6 +14,11 @@ module Security
     belongs_to :project, inverse_of: :security_orchestration_policy_configuration
     belongs_to :security_policy_management_project, class_name: 'Project', foreign_key: 'security_policy_management_project_id'
 
+    has_many :rule_schedules,
+              class_name: 'Security::OrchestrationPolicyRuleSchedule',
+              foreign_key: :security_orchestration_policy_configuration_id,
+              inverse_of: :security_orchestration_policy_configuration
+
     validates :project, presence: true, uniqueness: true
     validates :security_policy_management_project, presence: true
 

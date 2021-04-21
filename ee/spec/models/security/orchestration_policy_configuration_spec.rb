@@ -14,6 +14,7 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
   describe 'associations' do
     it { is_expected.to belong_to(:project).inverse_of(:security_orchestration_policy_configuration) }
     it { is_expected.to belong_to(:security_policy_management_project).class_name('Project') }
+    it { is_expected.to have_many(:rule_schedules).class_name('Security::OrchestrationPolicyRuleSchedule').inverse_of(:security_orchestration_policy_configuration) }
   end
 
   describe 'validations' do
