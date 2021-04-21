@@ -178,7 +178,7 @@ RSpec.describe Repository do
                                      %w(HEAD .gitlab/CODEOWNERS)])
                               .and_call_original
 
-      repository.code_owners_blob
+      repository.code_owners_blob(ref: 'master')
     end
   end
 
