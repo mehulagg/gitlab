@@ -8266,7 +8266,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.code_review.i_code_review_user_assigned_monthly`
 
-Count of unique users per month who are assigned to a  merge request
+Count of unique users per month who are assigned to a merge request
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184418_i_code_review_user_assigned_monthly.yml)
 
@@ -8278,7 +8278,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.code_review.i_code_review_user_assigned_weekly`
 
-Count of unique users per week who are assigned to a  merge request
+Count of unique users per week who are assigned to a merge request
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184416_i_code_review_user_assigned_weekly.yml)
 
