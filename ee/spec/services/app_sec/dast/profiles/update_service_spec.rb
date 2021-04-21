@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Dast::Profiles::UpdateService do
+RSpec.describe AppSec::Dast::Profiles::UpdateService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
   let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project, branch_name: 'orphaned-branch') }

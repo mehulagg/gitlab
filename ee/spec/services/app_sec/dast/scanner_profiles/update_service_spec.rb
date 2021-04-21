@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe DastScannerProfiles::UpdateService do
+RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
   let_it_be(:user) { create(:user) }
   let_it_be(:dast_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
   let_it_be(:dast_profile_2, reload: true) { create(:dast_scanner_profile) }
@@ -13,6 +13,7 @@ RSpec.describe DastScannerProfiles::UpdateService do
   let_it_be(:new_target_timeout) { dast_profile.target_timeout + 1 }
   let_it_be(:new_spider_timeout) { dast_profile.spider_timeout + 1 }
   let_it_be(:new_scan_type) { (DastScannerProfile.scan_types.keys - [DastScannerProfile.last.scan_type]).first }
+
   let(:new_use_ajax_spider) { !dast_profile.use_ajax_spider }
   let(:new_show_debug_messages) { !dast_profile.show_debug_messages }
 
@@ -120,6 +121,7 @@ RSpec.describe DastScannerProfiles::UpdateService do
 
       context 'when setting properties to false' do
         let_it_be(:dast_scanner_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000, use_ajax_spider: true, show_debug_messages: true) }
+
         let(:new_use_ajax_spider) { false }
         let(:new_show_debug_messages) { false }
 

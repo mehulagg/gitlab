@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-RSpec.describe DastScannerProfiles::DestroyService do
+RSpec.describe AppSec::Dast::SiteProfiles::DestroyService do
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
+  let_it_be(:dast_profile, reload: true) { create(:dast_site_profile) }
+
   let(:project) { dast_profile.project }
 
   before do
@@ -14,11 +15,11 @@ RSpec.describe DastScannerProfiles::DestroyService do
   describe '#execute' do
     subject do
       described_class.new(project, user).execute(
-        id: dast_scanner_profile_id
+        id: dast_site_profile_id
       )
     end
 
-    let(:dast_scanner_profile_id) { dast_profile.id }
+    let(:dast_site_profile_id) { dast_profile.id }
     let(:status) { subject.status }
     let(:message) { subject.message }
     let(:payload) { subject.payload }
@@ -29,7 +30,7 @@ RSpec.describe DastScannerProfiles::DestroyService do
       end
 
       it 'populates message' do
-        expect(message).to eq('You are not authorized to update this scanner profile')
+        expect(message).to eq('You are not authorized to delete this site profile')
       end
     end
 
@@ -42,17 +43,17 @@ RSpec.describe DastScannerProfiles::DestroyService do
         expect(status).to eq(:success)
       end
 
-      it 'deletes the dast_scanner_profile' do
-        expect { subject }.to change { DastScannerProfile.count }.by(-1)
+      it 'deletes the dast_site_profile' do
+        expect { subject }.to change { DastSiteProfile.count }.by(-1)
       end
 
-      it 'returns a dast_scanner_profile payload' do
-        expect(payload).to be_a(DastScannerProfile)
+      it 'returns a dast_site_profile payload' do
+        expect(payload).to be_a(DastSiteProfile)
       end
 
-      context 'when the dast_scanner_profile doesn\'t exist' do
-        let(:dast_scanner_profile_id) do
-          Gitlab::GlobalId.build(nil, model_name: 'DastScannerProfile', id: 'does_not_exist')
+      context 'when the dast_site_profile does not exist' do
+        let(:dast_site_profile_id) do
+          Gitlab::GlobalId.build(nil, model_name: 'DastSiteProfile', id: 'does_not_exist')
         end
 
         it 'returns an error status' do
@@ -60,7 +61,7 @@ RSpec.describe DastScannerProfiles::DestroyService do
         end
 
         it 'populates message' do
-          expect(message).to eq('Scanner profile not found for given parameters')
+          expect(message).to eq('Site profile not found for given parameters')
         end
       end
 
@@ -74,7 +75,7 @@ RSpec.describe DastScannerProfiles::DestroyService do
         end
 
         it 'populates message' do
-          expect(message).to eq('You are not authorized to update this scanner profile')
+          expect(message).to eq('You are not authorized to delete this site profile')
         end
       end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Dast::Profiles::DestroyService do
+RSpec.describe AppSec::Dast::Profiles::DestroyService do
   include GraphqlHelpers
 
   let_it_be(:user) { create(:user) }

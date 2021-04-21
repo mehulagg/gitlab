@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe DastScannerProfiles::CreateService do
+RSpec.describe AppSec::Dast::ScannerProfiles::CreateService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, creator: user) }
   let(:name) { FFaker::Company.catch_phrase }
