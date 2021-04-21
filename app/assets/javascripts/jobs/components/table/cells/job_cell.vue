@@ -32,7 +32,10 @@ export default {
     jobTags() {
       return this.job.tags;
     },
-    tag() {
+    createdByTag() {
+      return false;
+    },
+    triggered() {
       return false;
     },
     isManualJob() {
@@ -41,8 +44,11 @@ export default {
     successfulJob() {
       return this.job.status === 'SUCCESS';
     },
-    showAllowedToFailLabel() {
+    allowedToFail() {
       return this.job.allowedToFail && !this.successfulJob;
+    },
+    scheduledJob() {
+      return this.job.scheduledAt;
     },
   },
 };
@@ -50,26 +56,36 @@ export default {
 
 <template>
   <div>
-    <div class="gl-display-flex gl-align-items-center">
+    <div class="gl-text-truncate">
       <gl-link class="gl-text-gray-500!" :href="jobPath">{{ `#${jobId}` }}</gl-link>
 
-      <div v-if="jobRef">
-        <gl-icon v-if="tag" name="label" :size="$options.iconSize" />
-        <gl-icon v-else name="fork" :size="$options.iconSize" />
-      </div>
+      <div class="gl-display-flex gl-align-items-center">
+        <div v-if="jobRef">
+          <gl-icon v-if="createdByTag" name="label" :size="$options.iconSize" />
+          <gl-icon v-else name="fork" :size="$options.iconSize" />
+          <gl-link class="gl-font-weight-bold gl-text-gray-500!" :href="job.refPath">{{
+            job.refName
+          }}</gl-link>
+        </div>
 
-      <gl-icon name="commit" class="gl-vertical-align-middle" :size="$options.iconSize" />
+        <gl-icon class="gl-ml-2 gl-mr-2" name="commit" :size="$options.iconSize" />
+
+        <gl-link :href="job.commitPath">{{ job.shortSha }}</gl-link>
+      </div>
     </div>
 
     <div>
       <gl-badge v-for="tag in jobTags" :key="tag" variant="info" :size="$options.badgeSize">
         {{ tag }}
       </gl-badge>
-      <gl-badge variant="info" :size="$options.badgeSize">{{ __('triggered') }}</gl-badge>
-      <gl-badge v-if="showAllowedToFailLabel" variant="warning" :size="$options.badgeSize">{{
+
+      <gl-badge v-if="triggered" variant="info" :size="$options.badgeSize">{{
+        __('triggered')
+      }}</gl-badge>
+      <gl-badge v-if="allowedToFail" variant="warning" :size="$options.badgeSize">{{
         __('allowed to fail')
       }}</gl-badge>
-      <gl-badge variant="info" :size="$options.badgeSize">{{
+      <gl-badge v-if="scheduledJob" variant="info" :size="$options.badgeSize">{{
         s__('DelayedJobs|delayed')
       }}</gl-badge>
       <gl-badge v-if="isManualJob" variant="info" :size="$options.badgeSize">

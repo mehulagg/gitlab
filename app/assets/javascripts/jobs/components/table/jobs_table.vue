@@ -2,9 +2,9 @@
 import { GlTable } from '@gitlab/ui';
 import { __ } from '~/locale';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
+import ActionsCell from './cells/actions_cell.vue';
 import JobCell from './cells/job_cell.vue';
 import PipelineCell from './cells/pipeline_cell.vue';
-import Pipeline from '../../../../../../ee/app/assets/javascripts/compliance_dashboard/components/merge_requests/statuses/pipeline.vue';
 
 const defaultTableClasses = {
   tdClass: 'gl-p-5!',
@@ -63,11 +63,11 @@ export default {
     },
   ],
   components: {
+    ActionsCell,
     CiBadge,
     GlTable,
     JobCell,
     PipelineCell,
-    Pipeline,
   },
   props: {
     jobs: {
@@ -110,7 +110,7 @@ export default {
     </template>
 
     <template #cell(duration)="{ item }">
-      <ci-badge :status="item.detailedStatus" />
+      <div>{{ item.duration }}</div>
     </template>
 
     <template #cell(coverage)="{ item }">
@@ -118,7 +118,7 @@ export default {
     </template>
 
     <template #cell(actions)="{ item }">
-      <ci-badge :status="item.detailedStatus" />
+      <actions-cell :job="item" />
     </template>
   </gl-table>
 </template>
