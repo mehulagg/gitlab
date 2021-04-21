@@ -70,6 +70,7 @@ module Packages
         nuget_packages.select(select_sql)
                       .with_name(paginated_matching_package_names)
                       .where(project_id: project_ids)
+                      .displayable
         # rubocop: enable CodeReuse/ActiveRecord
       end
 

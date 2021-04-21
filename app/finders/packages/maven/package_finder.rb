@@ -35,7 +35,7 @@ module Packages
       end
 
       def packages_with_path
-        matching_packages = base.only_maven_packages_with_path(@path, use_cte: @group.present?)
+        matching_packages = base.displayable.only_maven_packages_with_path(@path, use_cte: @group.present?)
 
         if group_level_improvements?
           matching_packages = matching_packages.order_by_package_file if @order_by_package_file

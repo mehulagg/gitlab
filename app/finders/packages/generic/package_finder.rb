@@ -11,6 +11,7 @@ module Packages
         project
           .packages
           .generic
+          .displayable
           .by_name_and_version!(package_name, package_version)
       end
 
