@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.manage.groups
-description:
+description: Number of groups
 product_section: dev
 product_stage: manage
 product_group: group::access
