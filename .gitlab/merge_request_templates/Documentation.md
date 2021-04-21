@@ -1,9 +1,12 @@
-<!-- Follow the documentation workflow https://docs.gitlab.com/ee/development/documentation/workflow.html -->
-<!-- Additional information is located at https://docs.gitlab.com/ee/development/documentation/ -->
-<!-- To find the designated Tech Writer for the stage/group, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers -->
+<!--
+  Follow the documentation workflow https://docs.gitlab.com/ee/development/documentation/workflow.html
+  Additional information is located at https://docs.gitlab.com/ee/development/documentation/
+  To find the designated Tech Writer for the stage/group, see
+  https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 
-<!-- Mention "documentation" or "docs" in the MR title -->
-<!-- For changing documentation location use the "Change documentation location" template -->
+  Mention "documentation" or "docs" in the MR title
+  For changing documentation location use the Change Documentation Location.md template
+-->
 
 ## What does this MR do?
 
@@ -25,14 +28,15 @@
     - ~"development guidelines" and ~"Description templates (.gitlab/\*)" when creating/updating issue and MR description templates.
   - [ ] Assign the [designated Technical Writer](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments).
 
-Do not add the ~"feature", ~"frontend", ~"backend", ~"bug", or ~"database" labels if you are only updating documentation. These labels will cause the MR to be added to code verification QA issues.
+Do not add the ~"feature", ~"frontend", ~"backend", ~"bug", or ~"database" labels if you are only updating documentation.
+These labels cause the MR to be added to code verification QA issues.
 
 When applicable:
 
 - [ ] Update the [permissions table](https://docs.gitlab.com/ee/user/permissions.html).
 - [ ] Link docs to and from the higher-level index page, plus other related docs where helpful.
 - [ ] Add the [product tier badge](https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#product-tier-badges) accordingly.
-- [ ] Add [GitLab's version history note(s)](https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#gitlab-versions).
+- [ ] Add [GitLab version history note(s)](https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#gitlab-versions).
 - [ ] Add/update the [feature flag section](https://docs.gitlab.com/ee/development/documentation/feature_flags.html).
 
 ## Review checklist
@@ -69,4 +73,4 @@ For more information, see our documentation on [Merging a merge request](https:/
 1. [ ] Ensure a release milestone is set.
 1. [ ] If there has not been a technical writer review, [create an issue for one using the Doc Review template](https://gitlab.com/gitlab-org/gitlab/issues/new?issuable_template=Doc%20Review).
 
-/label ~documentation
+/label ~documentation ~"Technical Writing"
