@@ -56,8 +56,7 @@ module EE
 
         return unless user
 
-        projects = member.source.is_a?(Group) ? member.source.projects : member.source
-        user_rotations = user.oncall_rotations.for_project(projects)
+        user_rotations = ::IncidentManagement::MemberOncallRotationsFinder.new(member).execute
 
         user_rotations.each do |rotation|
           ::IncidentManagement::OncallRotations::RemoveParticipantService.new(

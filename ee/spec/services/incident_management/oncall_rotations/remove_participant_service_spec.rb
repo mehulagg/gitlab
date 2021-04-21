@@ -40,26 +40,26 @@ RSpec.describe IncidentManagement::OncallRotations::RemoveParticipantService do
     end
 
     # Create an historial shift (other participant)
-    let!(:historial_shift) { create(:incident_management_oncall_shift, rotation: rotation, participant: other_participant, starts_at: rotation.starts_at, ends_at: ends_at(rotation.starts_at)) }
+    let!(:historical_shift) { create(:incident_management_oncall_shift, rotation: rotation, participant: other_participant, starts_at: rotation.starts_at, ends_at: ends_at(rotation.starts_at)) }
 
     context 'with historial and current shift' do
       # Create a current shift (particpant being removed)
-      let!(:current_shift) { create(:incident_management_oncall_shift, rotation: rotation, participant: participant, starts_at: historial_shift.ends_at, ends_at: ends_at(historial_shift.ends_at)) }
+      let!(:current_shift) { create(:incident_management_oncall_shift, rotation: rotation, participant: participant, starts_at: historical_shift.ends_at, ends_at: ends_at(historical_shift.ends_at)) }
 
       it 'does not affect existing shifts, ends the current shift, and starts the new shift', :aggregate_failures do
-        historial_shift, current_shift = rotation.shifts.order(starts_at: :asc)
-        expect(historial_shift.participant).to eq(other_participant)
+        historical_shift, current_shift = rotation.shifts.order(starts_at: :asc)
+        expect(historical_shift.participant).to eq(other_participant)
         expect(current_shift.participant).to eq(participant)
         expect(current_shift.ends_at).not_to be_like_time(Time.current)
 
-        expect { execute }.not_to change { historial_shift.reload }
+        expect { execute }.not_to change { historical_shift.reload }
 
         new_shift = rotation.shifts.order(starts_at: :asc).last
 
         expect(current_shift.reload.ends_at).to be_like_time(Time.current)
         expect(new_shift.participant).to eq(other_participant)
         expect(new_shift.starts_at).to be_like_time(Time.current)
-        expect(new_shift.ends_at).to be_like_time(ends_at(historial_shift.ends_at))
+        expect(new_shift.ends_at).to be_like_time(ends_at(historical_shift.ends_at))
       end
     end
 
