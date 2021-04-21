@@ -15,12 +15,15 @@ issue](https://gitlab.com/gitlab-org/gitlab/-/issues/8767) and its usage was
 discussed few times since then, for example in [incident
 management](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55532).
 
+We are in process of making issue types [extensible](https://gitlab.com/groups/gitlab-org/-/epics/3354)
+and [convert Plan-related resources into issue types](https://gitlab.com/gitlab-org/gitlab/-/issues/271171).
+
 ## What is an Issue Type
 
-Issue Type is a resource type which extends the existing Issue type and can be
+Issue Type is a resource type which extends the existing Issue type and is
 used anywhere where Issue is used - for example when listing or searching
-issues or when linking objects of the type from Epics. It should use the same
-`issues` table, additional fields can be stored in a separate table.
+issues or when linking objects of the type from Epics. It uses the same
+`issues` table, additional fields are implemented as [widgets](https://gitlab.com/groups/gitlab-org/-/epics/3354)
 
 ## When an Issue Type should be used
 
@@ -49,3 +52,20 @@ components to make them work with the new type.
 
 Usage of the Issue type limits what fields, functionality, or both is available
 for the type. However, this functionality is provided by default.
+
+## Issue Type implementation guidance
+
+- The new issue type should be accessed and managed through the existing Issue UI/API.
+  TODO: there is currently an option to
+  [exclude issues of some type](https://gitlab.com/gitlab-org/gitlab/-/issues/271171#note_502662414)
+  when listing issues, but this exclusion is not perfect (and on some other places these are still available).
+  Excluding an issue type goes against the benefits of reusing issue types logic and is discouraged.
+- UI/API should support filtering issues by issue type.
+- If needed, there can be additional "special" UI for listing or managing the new issue type, but
+  this UI should still re-use the existing generic Issue Vue components and generic issue API for
+  listing and managing resources (currently Test case issue type is listed separately).
+- Any extra logic for the new issue type should be implemented as a widget. TODO: add
+  link to sample implementation of widget, we should avoid mixing issue-type specific logic with
+  generic issue logic (in all layers of code), related to [discussion](https://gitlab.com/gitlab-org/gitlab/-/issues/271171#note_521989053).
+- Widget specific logic should be exposed in a unified way in GraphQL API (TBD:
+  related to [discussion](https://gitlab.com/gitlab-org/gitlab/-/issues/222954#note_554859137)).
