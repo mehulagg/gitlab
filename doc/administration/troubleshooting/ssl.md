@@ -241,7 +241,7 @@ but the object storage will respond with plain HTTP.
 
 ## schannel: SEC_E_UNTRUSTED_ROOT
 
-On Windows, you may need to specify that git should use OpenSSL: `git config --system http.sslbackend openssl`.
+On Windows, you may need to specify that Git should use OpenSSL: `git config --system http.sslbackend openssl`.
 
 This resolves the following error: `Fatal: unable to access 'https://gitlab.domain.tld/group/project.git': schannel: SEC_E_UNTRUSTED_ROOT (0x80090325) - The certificate chain was issued by an authority that is not trusted."`
 
