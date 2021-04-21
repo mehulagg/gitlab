@@ -72,7 +72,10 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
         it 'modifies the config with failing job' do
           expect(subject).to eq(
             image: 'ruby:3.0.1',
-            'scan-execution-policy': { script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is missing" && false' }
+            'scan-execution-policy': {
+              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is missing" && false',
+              allow_failure: true
+            }
           )
         end
       end
@@ -97,7 +100,10 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
         it 'modifies the config with failing job' do
           expect(subject).to eq(
             image: 'ruby:3.0.1',
-            'scan-execution-policy': { script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is invalid" && false' }
+            'scan-execution-policy': {
+              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is invalid" && false',
+              allow_failure: true
+            }
           )
         end
       end

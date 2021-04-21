@@ -20,8 +20,8 @@ module Gitlab
           end
 
           def on_demand_scans_template
-            return EMPTY_POLICY_TEMPLATE unless security_orchestration_policy_configuration.policy_configuration_exists?
-            return INVALID_POLICY_TEMPLATE unless security_orchestration_policy_configuration.policy_configuration_valid?
+            return EMPTY_POLICY_JOB_TEMPLATE unless security_orchestration_policy_configuration.policy_configuration_exists?
+            return INVALID_POLICY_JOB_TEMPLATE unless security_orchestration_policy_configuration.policy_configuration_valid?
 
             ::Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConfigurationService
               .new(project)
@@ -34,15 +34,17 @@ module Gitlab
 
           delegate :security_orchestration_policy_configuration, to: :project, allow_nil: true
 
-          EMPTY_POLICY_TEMPLATE = {
+          EMPTY_POLICY_JOB_TEMPLATE = {
             'scan-execution-policy': {
-              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is missing" && false'
+              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is missing" && false',
+              allow_failure: true
             }
           }.freeze
 
-          INVALID_POLICY_TEMPLATE = {
+          INVALID_POLICY_JOB_TEMPLATE = {
             'scan-execution-policy': {
-              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is invalid" && false'
+              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is invalid" && false',
+              allow_failure: true
             }
           }.freeze
         end
