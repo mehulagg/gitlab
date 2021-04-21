@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-RSpec.describe Sidebars::Projects::Menus::Repository::Menu do
+RSpec.describe Sidebars::Projects::Menus::RepositoryMenu do
   let_it_be(:project) { create(:project, :repository) }
 
   let(:user) { project.owner }
-  let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project) }
+  let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project, current_ref: 'master') }
 
   subject { described_class.new(context) }
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Sidebars::Projects::Menus::LearnGitlab::Menu do
+RSpec.describe Sidebars::Projects::Menus::LearnGitlabMenu do
   let(:project) { build(:project) }
   let(:experiment_enabled) { true }
   let(:context) { Sidebars::Projects::Context.new(current_user: nil, container: project, learn_gitlab_experiment_enabled: experiment_enabled) }
