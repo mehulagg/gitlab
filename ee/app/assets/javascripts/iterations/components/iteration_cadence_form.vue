@@ -230,7 +230,11 @@ export default {
         label-for="cadence-automated-scheduling"
         :description="i18n.automatedScheduling.description"
       >
-        <gl-form-checkbox v-model="automatic" @change="clearValidation">
+        <gl-form-checkbox
+          id="cadence-automated-scheduling"
+          v-model="automatic"
+          @change="clearValidation"
+        >
           <span class="gl-font-weight-bold">{{ i18n.automatedScheduling.label }}</span>
         </gl-form-checkbox>
       </gl-form-group>
@@ -239,14 +243,14 @@ export default {
         :label="i18n.startDate.label"
         :label-cols-md="2"
         label-class="text-right-md gl-pt-3!"
-        label-for="start-date"
+        label-for="cadence-start-date"
         :description="i18n.startDate.description"
         :invalid-feedback="i18n.requiredField"
         :validated="touched.startDate"
       >
         <gl-datepicker :target="null">
           <gl-form-input
-            id="start-date"
+            id="cadence-start-date"
             v-model="startDate"
             :placeholder="i18n.startDate.placeholder"
             class="datepicker gl-datepicker-input"
@@ -312,7 +316,7 @@ export default {
         >
           {{ i18n.create }}
         </gl-button>
-        <gl-button class="ml-auto" data-testid="cancel-create" @click="cancel">
+        <gl-button class="ml-auto" data-testid="cancel-create-cadence" @click="cancel">
           {{ i18n.cancel }}
         </gl-button>
       </div>
