@@ -382,7 +382,11 @@ export default {
     }
 
     const {
-      epic: { id, iid },
+      epic: {
+        id,
+        iid,
+        group: { fullPath },
+      },
     } = getters.activeBoardItem;
 
     if (state.epicsCacheById[id]) {
@@ -399,7 +403,7 @@ export default {
       } = await gqlClient.query({
         query: epicQuery,
         variables: {
-          fullPath: getters.groupPathForActiveIssue,
+          fullPath,
           iid,
         },
       });

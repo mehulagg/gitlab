@@ -21,6 +21,9 @@ fragment IssueNode on Issue {
   epic {
     id
     iid
+    group {
+      fullPath
+    }
   }
   milestone {
     id
