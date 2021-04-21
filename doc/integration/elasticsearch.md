@@ -954,7 +954,8 @@ filtering out projects that a user does not have access to at search time.
 ### What are the actions required in access policy when using AWS Elasticsearch Service
 
 When using AWS hosted Elasticsearch Service, the actions below are needed by GitLab instance in AWS Elasticsearch access policy. Please refer to [Identity and Access Management in Amazon Elasticsearch Service](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-ac.html) for details of AWS hosted Elasticsearch domain access policy configuration.
-```
+
+```plaintext
 es:ESHttpDelete
 es:ESHttpGet
 es:ESHttpHead
