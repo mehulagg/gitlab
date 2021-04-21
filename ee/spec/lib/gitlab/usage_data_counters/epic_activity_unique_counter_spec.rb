@@ -269,4 +269,28 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
 
     it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
   end
+
+  context 'for margin epic task as complete' do
+    def track_action(params)
+      described_class.track_epic_task_complete(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_TASK_COMPLETE }
+    end
+
+    it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
+  end
+
+  context 'for margin epic task as incomplete' do
+    def track_action(params)
+      described_class.track_epic_task_incomplete(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_TASK_INCOMPLETE }
+    end
+
+    it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
+  end
 end
