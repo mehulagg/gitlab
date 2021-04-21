@@ -7,7 +7,7 @@ module Ci
     expose :artifacts do |pipeline, options|
       artifacts = pipeline.downloadable_artifacts
 
-      if Feature.enabled?(:non_public_artifacts, type: :development)
+      if Feature.enabled?(:non_public_artifacts)
         artifacts = artifacts.select { |artifact| can?(request.current_user, :read_job_artifacts, artifact.job) }
       end
 

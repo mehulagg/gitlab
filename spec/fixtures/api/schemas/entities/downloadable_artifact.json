@@ -1,5 +1,4 @@
 {
-  "description": "Downloadable artifacts exposed for the pipeline index page",
   "type": "object",
   "required": ["artifacts"],
   "properties": {

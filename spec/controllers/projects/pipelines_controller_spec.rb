@@ -1260,7 +1260,7 @@ RSpec.describe Projects::PipelinesController do
     end
 
     context 'when pipeline exists' do
-      context 'when pipeline does not have any downloable artifacts' do
+      context 'when pipeline does not have any downloadable artifacts' do
         let(:pipeline) { create(:ci_pipeline, project: project) }
 
         it 'returns an empty array' do
@@ -1271,7 +1271,7 @@ RSpec.describe Projects::PipelinesController do
         end
       end
 
-      context 'when pipeline has downloable artifacts' do
+      context 'when pipeline has downloadable artifacts' do
         let(:pipeline) { create(:ci_pipeline, :with_codequality_reports, project: project) }
 
         before do
