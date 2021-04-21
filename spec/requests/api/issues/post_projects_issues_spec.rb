@@ -557,7 +557,7 @@ RSpec.describe API::Issues do
     end
 
     context 'when the user does not have the permission to clone issues' do
-      it 'returns 400 when trying to clone an issue' do
+      it 'returns 400' do
         post api("/projects/#{project.id}/issues/#{issue.iid}/clone", user),
           params: { to_project_id: target_project2.id }
 
@@ -566,7 +566,7 @@ RSpec.describe API::Issues do
       end
     end
 
-    it 'clones the issue to another namespace if I am admin' do
+    it 'clones the issue to another namespace if user is admin' do
       post api("/projects/#{project.id}/issues/#{issue.iid}/clone", admin),
         params: { to_project_id: target_project2.id }
 
@@ -575,7 +575,7 @@ RSpec.describe API::Issues do
     end
 
     context 'when using the issue ID instead of iid' do
-      it 'returns 404 when trying to move an issue' do
+      it 'returns 404' do
         post api("/projects/#{project.id}/issues/#{issue.id}/clone", user),
           params: { to_project_id: target_project.id }
 
@@ -585,7 +585,7 @@ RSpec.describe API::Issues do
     end
 
     context 'when issue does not exist' do
-      it 'returns 404 when trying to clone an issue' do
+      it 'returns 404' do
         post api("/projects/#{project.id}/issues/123/clone", user),
           params: { to_project_id: target_project.id }
 
@@ -595,7 +595,7 @@ RSpec.describe API::Issues do
     end
 
     context 'when source project does not exist' do
-      it 'returns 404 when trying to clone an issue' do
+      it 'returns 404' do
         post api("/projects/0/issues/#{issue.iid}/clone", user),
           params: { to_project_id: target_project.id }
 
@@ -605,7 +605,7 @@ RSpec.describe API::Issues do
     end
 
     context 'when target project does not exist' do
-      it 'returns 404 when trying to clone an issue' do
+      it 'returns 404' do
         post api("/projects/#{project.id}/issues/#{issue.iid}/clone", user),
           params: { to_project_id: 0 }
 

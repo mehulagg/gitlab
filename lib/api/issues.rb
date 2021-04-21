@@ -378,8 +378,8 @@ module API
         issue = user_project.issues.find_by(iid: params[:issue_iid])
         not_found!('Issue') unless issue
 
-        new_project = Project.find_by(id: params[:to_project_id])
-        not_found!('Project') unless new_project
+        target_project = Project.find_by(id: params[:to_project_id])
+        not_found!('Project') unless target_project
 
         begin
           issue = ::Issues::CloneService.new(user_project, current_user).execute(issue, new_project, with_notes: params[:with_notes])
