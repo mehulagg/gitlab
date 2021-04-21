@@ -41,6 +41,16 @@ module Types
       field :scheduled_at, Types::TimeType, null: true,
             description: 'Schedule for the build.'
 
+      # Life-cycle durations:
+      field :queued_duration,
+            type: Types::DurationType,
+            null: true,
+            description: 'How long this job was enqueued before starting.'
+      field :duration,
+            type: Types::DurationType,
+            null: true,
+            description: 'How long this job ran for, if it has started.'
+
       field :detailed_status, Types::Ci::DetailedStatusType, null: true,
             description: 'Detailed status of the job.'
       field :artifacts, Types::Ci::JobArtifactType.connection_type, null: true,

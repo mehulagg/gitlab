@@ -34,6 +34,7 @@ RSpec.describe Types::Ci::JobType do
       started_at
       status
       tags
+      queued_duration
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)
