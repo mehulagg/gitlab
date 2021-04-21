@@ -21,7 +21,7 @@ fi
 # Documentation pages need front matter for tracking purposes.
 echo '=> Checking documentation for front matter...'
 echo
-if [ ! "${scripts/lint-docs-metadata.sh "${find doc -name '*.md'}"}" ]
+if [ ! "$(scripts/lint-docs-metadata.sh "$(find doc -name '*.md')")" ]
 then
   echo '✖ ERROR: These documentation pages need front matter. See https://docs.gitlab.com/ee/development/documentation/index.html#stage-and-group-metadata for how to add it.' >&2
   echo
