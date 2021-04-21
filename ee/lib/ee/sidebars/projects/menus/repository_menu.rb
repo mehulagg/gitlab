@@ -9,9 +9,11 @@ module EE
 
           override :configure_menu_items
           def configure_menu_items
-            super
+            return false unless super
 
             add_item(file_locks_menu_item)
+
+            true
           end
 
           private

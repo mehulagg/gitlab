@@ -25,6 +25,7 @@ module Sidebars
 
     def configure_menu_items
       # No-op
+      true
     end
 
     override :render?

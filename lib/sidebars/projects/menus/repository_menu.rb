@@ -6,6 +6,9 @@ module Sidebars
       class RepositoryMenu < ::Sidebars::Menu
         override :configure_menu_items
         def configure_menu_items
+          return false unless can?(context.current_user, :download_code, context.project)
+          return false if context.project.empty_repo?
+
           add_item(files_menu_item)
           add_item(commits_menu_item)
           add_item(branches_menu_item)
@@ -13,6 +16,8 @@ module Sidebars
           add_item(contributors_menu_item)
           add_item(graphs_menu_item)
           add_item(compare_menu_item)
+
+          true
         end
 
         override :link
@@ -42,12 +47,6 @@ module Sidebars
         override :sprite_icon
         def sprite_icon
           'doc-text'
-        end
-
-        override :render?
-        def render?
-          can?(context.current_user, :download_code, context.project) &&
-            !context.project.empty_repo?
         end
 
         private

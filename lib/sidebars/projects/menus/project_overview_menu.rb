@@ -9,6 +9,8 @@ module Sidebars
           add_item(details_menu_item)
           add_item(activity_menu_item)
           add_item(releases_menu_item)
+
+          true
         end
 
         override :link
