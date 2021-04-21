@@ -67,6 +67,12 @@ export default {
     };
   },
   computed: {
+    editRotationModalId() {
+      return `${this.$options.editRotationModalId}-${this.scheduleIid}`;
+    },
+    deleteRotationModalId() {
+      return `${this.$options.deleteRotationModalId}-${this.scheduleIid}`;
+    },
     timelineStyles() {
       return {
         width: `calc(${100}% - ${TIMELINE_CELL_WIDTH}px)`,
@@ -117,7 +123,7 @@ export default {
           >
           <gl-button-group class="gl-px-2">
             <gl-button
-              v-gl-modal="$options.editRotationModalId"
+              v-gl-modal="editRotationModalId"
               v-gl-tooltip
               category="tertiary"
               :title="$options.i18n.editRotationLabel"
@@ -126,7 +132,7 @@ export default {
               @click="setRotationToUpdate(rotation)"
             />
             <gl-button
-              v-gl-modal="$options.deleteRotationModalId"
+              v-gl-modal="deleteRotationModalId"
               v-gl-tooltip
               category="tertiary"
               :title="$options.i18n.deleteRotationLabel"
