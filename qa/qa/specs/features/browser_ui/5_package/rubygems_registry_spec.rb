@@ -37,10 +37,10 @@ module QA
       end
 
       after do
+        Runtime::Feature.disable(:rubygem_packages, project: project)
         runner.remove_via_api!
         package.remove_via_api!
-        project.remove_via_api!
-        Runtime::Feature.disable(:rubygem_packages, project: project)
+        #project.remove_via_api!
       end
 
       it 'publishes and deletes a Ruby gem', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1131' do
@@ -54,7 +54,7 @@ module QA
                             content:
                               <<~RUBY
                                 Gem::Specification.new do |s|
-                                  s.name = #{package.name}
+                                  s.name = "#{package.name}"
                                   s.authors = ['Tanuki Steve', 'Hal 9000']
                                   s.author = 'Tanuki Steve'
                                   s.version = '0.0.1'
@@ -94,16 +94,16 @@ module QA
                                   s.add_dependency 'dependency_4'
                                 end
                               RUBY
-                          }])
-          commit.add_files([{
+                          },
+                          {
                             file_path: '.gem/credentials',
                             content:
                               <<~SHELL
                                 ---
                                 #{gitlab_address_with_port}/api/v4/projects/${env.CI_PROJECT_ID}/packages/rubygems: '${env.CI_JOB_TOKEN}'
                               SHELL
-                          }])
-          commit.add_files([{
+                          },
+                          {
                             file_path: '.gitlab-ci.yml',
                             content:
                               <<~YAML
