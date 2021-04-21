@@ -75,4 +75,44 @@ describe('Group settings store mutations', () => {
       expect(state.isLoading).toBe(false);
     });
   });
+
+  describe('SET_SETTING_PREVENT_AUTHOR_APPROVAL', () => {
+    it('sets the value', () => {
+      mutations.SET_SETTING_PREVENT_AUTHOR_APPROVAL(state, true);
+
+      expect(state.settings.preventAuthorApproval).toBe(true);
+    });
+  });
+
+  describe('SET_SETTING_PREVENT_MR_APPROVAL_RULE_EDIT', () => {
+    it('sets the value', () => {
+      mutations.SET_SETTING_PREVENT_MR_APPROVAL_RULE_EDIT(state, true);
+
+      expect(state.settings.preventMrApprovalRuleEdit).toBe(true);
+    });
+  });
+
+  describe('SET_SETTING_REQUIRE_USER_PASSWORD', () => {
+    it('sets the value', () => {
+      mutations.SET_SETTING_REQUIRE_USER_PASSWORD(state, true);
+
+      expect(state.settings.requireUserPassword).toBe(true);
+    });
+  });
+
+  describe('SET_SETTING_REMOVE_APPROVALS_ON_PUSH', () => {
+    it('sets the value', () => {
+      mutations.SET_SETTING_REMOVE_APPROVALS_ON_PUSH(state, true);
+
+      expect(state.settings.removeApprovalsOnPush).toBe(true);
+    });
+  });
+
+  describe('SET_SETTING_PREVENT_COMMITTERS_APPROVAL', () => {
+    it('sets the value', () => {
+      mutations.SET_SETTING_PREVENT_COMMITTERS_APPROVAL(state, true);
+
+      expect(state.settings.preventCommittersApproval).toBe(true);
+    });
+  });
 });

@@ -23,6 +23,10 @@ export const fetchSettings = ({ commit }, endpoint) => {
     });
 };
 
+export const setSetting = ({ commit }, { type, value }) => {
+  commit(type, value);
+};
+
 export const updateSettings = ({ commit, state }, endpoint) => {
   const payload = {
     allow_author_approval: !state.settings.preventAuthorApproval,
