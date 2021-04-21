@@ -1,21 +1,10 @@
+import Link from '@tiptap/extension-link';
+import { defaultExtensions as createDefaultExtensions } from '@tiptap/starter-kit';
+import { Editor } from '@tiptap/vue-2';
 import { isFunction, isString } from 'lodash';
-import { Editor } from 'tiptap';
-import {
-  Bold,
-  Italic,
-  Code,
-  Link,
-  Image,
-  Heading,
-  Blockquote,
-  HorizontalRule,
-  BulletList,
-  OrderedList,
-  ListItem,
-  HardBreak,
-} from 'tiptap-extensions';
 import { PROVIDE_SERIALIZER_OR_RENDERER_ERROR } from '../constants';
 import CodeBlockHighlight from '../extensions/code_block_highlight';
+import Image from '../extensions/image';
 import createMarkdownSerializer from './markdown_serializer';
 
 const createEditor = async ({ content, renderMarkdown, serializer: customSerializer } = {}) => {
@@ -23,22 +12,27 @@ const createEditor = async ({ content, renderMarkdown, serializer: customSeriali
     throw new Error(PROVIDE_SERIALIZER_OR_RENDERER_ERROR);
   }
 
+  /**
+   * TipTap default extensions provide support for the following
+   * Commonmark content types:
+   *
+   * Text
+   * Paragraph
+   * Bold
+   * Italic
+   * Code
+   * CodeBlock
+   * Heading
+   * HardBreak
+   * Strike
+   * Blockquote
+   * HorizontalRule
+   * BulletList
+   * OrderedList
+   */
+  const defaultExtensions = createDefaultExtensions();
   const editor = new Editor({
-    extensions: [
-      new Bold(),
-      new Italic(),
-      new Code(),
-      new Link(),
-      new Image(),
-      new Heading({ levels: [1, 2, 3, 4, 5, 6] }),
-      new Blockquote(),
-      new HorizontalRule(),
-      new BulletList(),
-      new ListItem(),
-      new OrderedList(),
-      new CodeBlockHighlight(),
-      new HardBreak(),
-    ],
+    extensions: [...defaultExtensions, Link, Image, CodeBlockHighlight],
     editorProps: {
       attributes: {
         /*
@@ -53,7 +47,7 @@ const createEditor = async ({ content, renderMarkdown, serializer: customSeriali
   const serializer = customSerializer || createMarkdownSerializer({ render: renderMarkdown });
 
   editor.setSerializedContent = async (serializedContent) => {
-    editor.setContent(
+    editor.commands.setContent(
       await serializer.deserialize({ schema: editor.schema, content: serializedContent }),
     );
   };

@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlTooltipDirective as GlTooltip } from '@gitlab/ui';
+import { startCase } from 'lodash';
 
 export default {
   components: {
@@ -33,7 +34,7 @@ export default {
   },
   computed: {
     isActive() {
-      return this.editor.isActive[this.contentType]() && this.editor.focused;
+      return this.editor.isActive(this.contentType) && this.editor.isFocused;
     },
   },
   methods: {
@@ -41,7 +42,7 @@ export default {
       const { contentType } = this;
 
       if (this.executeCommand) {
-        this.editor.commands[contentType]();
+        this.editor.commands[`toggle${startCase(contentType)}`]();
       }
 
       this.$emit('click', { contentType });

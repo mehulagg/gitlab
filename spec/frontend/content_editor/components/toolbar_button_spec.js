@@ -11,9 +11,7 @@ describe('content_editor/components/toolbar_button', () => {
 
   const buildEditor = () => {
     editor = {
-      isActive: {
-        [CONTENT_TYPE]: jest.fn(),
-      },
+      isActive: jest.fn(),
       commands: {
         [CONTENT_TYPE]: jest.fn(),
       },
@@ -56,11 +54,12 @@ describe('content_editor/components/toolbar_button', () => {
     ${{ isActive: false, focused: true }} | ${'button is not active'}  | ${false}
     ${{ isActive: true, focused: false }} | ${'button is not active '} | ${false}
   `('$outcomeDescription when when editor state is $editorState', ({ editorState, outcome }) => {
-    editor.isActive[CONTENT_TYPE].mockReturnValueOnce(editorState.isActive);
+    editor.isActive.mockReturnValueOnce(editorState.isActive);
     editor.focused = editorState.focused;
     buildWrapper();
 
     expect(findButton().classes().includes('active')).toBe(outcome);
+    expect(editor.isActive).toHaveBeenCalledWith(CONTENT_TYPE);
   });
 
   describe('when button is clicked', () => {
