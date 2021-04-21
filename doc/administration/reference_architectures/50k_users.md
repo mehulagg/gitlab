@@ -1970,7 +1970,7 @@ To configure the Sidekiq nodes, on each one:
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 NOTE:
-If found that the environment's Sidekiq job processing is slow with long queues
+If you find that the environment's Sidekiq job processing is slow with long queues,
 more nodes can be added as required. You can also tune your Sidekiq nodes to
 run [multiple Sidekiq processes](../operations/extra_sidekiq_processes.md).
 
