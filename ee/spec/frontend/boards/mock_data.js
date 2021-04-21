@@ -170,6 +170,9 @@ export const mockIssue = {
   epic: {
     id: 'gid://gitlab/Epic/41',
     iid: 2,
+    group: {
+      fullPath: 'gitlab-org',
+    }
   },
 };
 

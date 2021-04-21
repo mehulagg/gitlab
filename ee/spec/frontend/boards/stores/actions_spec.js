@@ -657,8 +657,7 @@ describe('resetEpics', () => {
 
 describe('fetchEpicForActiveIssue', () => {
   const assignedEpic = {
-    id: mockIssue.epic.id,
-    iid: mockIssue.epic.iid,
+    ...mockIssue.epic,
   };
 
   describe("when active issue doesn't have an assigned epic", () => {
