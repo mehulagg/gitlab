@@ -1260,6 +1260,7 @@ An edge in a connection.
 | `pipeline` | [`Pipeline`](#pipeline) | Pipeline the job belongs to. |
 | `playable` | [`Boolean!`](#boolean) | Indicates the job can be played. |
 | `queuedAt` | [`Time`](#time) | When the job was enqueued and marked as pending. |
+| `queuedDuration` | [`Duration`](#duration) | How long this job was enqueued before starting. |
 | `refName` | [`String`](#string) | Ref name of the job. |
 | `refPath` | [`String`](#string) | Path to the ref. |
 | `retryable` | [`Boolean!`](#boolean) | Indicates the job can be retried. |
@@ -4820,6 +4821,7 @@ Information about pagination in a connection.
 | `jobs` | [`CiJobConnection`](#cijobconnection) | Jobs belonging to the pipeline. |
 | `path` | [`String`](#string) | Relative path to the pipeline's page. |
 | `project` | [`Project`](#project) | Project the pipeline belongs to. |
+| `queuedDuration` | [`Duration`](#duration) | How long the pipeline was queued before starting. |
 | `retryable` | [`Boolean!`](#boolean) | Specifies if a pipeline can be retried. |
 | `securityReportFindings` | [`PipelineSecurityReportFindingConnection`](#pipelinesecurityreportfindingconnection) | Vulnerability findings reported on the pipeline. |
 | `securityReportSummary` | [`SecurityReportSummary`](#securityreportsummary) | Vulnerability and scanned resource counts for each security scanner of the pipeline. |
@@ -8935,6 +8937,12 @@ An example `DiffNoteID` is: `"gid://gitlab/DiffNote/1"`.
 A `DiscussionID` is a global ID. It is encoded as a string.
 
 An example `DiscussionID` is: `"gid://gitlab/Discussion/1"`.
+
+### `Duration`
+
+Duration between two instants, represented as a fractional number of seconds.
+
+For example: 12.3334.
 
 ### `EnvironmentID`
 
