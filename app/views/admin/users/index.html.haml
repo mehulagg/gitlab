@@ -1,17 +1,16 @@
 - page_title _("Users")
 
-%ul.nav-links.nav-tabs.nav.js-users-tabs{ role: 'tablist' }
-  %li.nav-item.js-users-tab-item{ role: 'presentation' }
-    %a.nav-link{ href: '#users', class: active_when(params[:tab] != 'cohorts'), data: { toggle: 'tab' }, role: 'tab' }
+%ul.nav-links.nav-tabs.nav{ role: 'tablist' }
+  %li.nav-item{ role: 'presentation' }
+    %a.nav-link{ href: admin_users_path, class: active_when(params[:tab] != 'cohorts'), role: 'tab' }
       = s_('AdminUsers|Users')
-  %li.nav-item.js-users-tab-item{ role: 'presentation' }
-    %a.nav-link{ href: '#cohorts', class: active_when(params[:tab] == 'cohorts'), data: { toggle: 'tab' }, role: 'tab' }
+  %li.nav-item{ role: 'presentation' }
+    %a.nav-link{ href: admin_users_path(tab: 'cohorts'), class: active_when(params[:tab] == 'cohorts'), role: 'tab' }
       = s_('AdminUsers|Cohorts')
 
 .tab-content
-  .tab-pane{ id: 'users', class: ('active' if params[:tab] != 'cohorts') }
-    = render 'users'
-  .tab-pane{ id: 'cohorts', class: ('active' if params[:tab] == 'cohorts') }
-    = render 'cohorts'
-
-
+  .tab-pane{ class: 'active' }
+    - if params[:tab] == 'cohorts'
+      = render 'cohorts'
+    - else
+      = render 'users'
