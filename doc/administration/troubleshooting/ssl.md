@@ -238,3 +238,10 @@ remote server that is serving only HTTP.
 One scenario is that you're using [object storage](../object_storage.md), which
 isn't served under HTTPS. GitLab is misconfigured and attempts a TLS handshake,
 but the object storage will respond with plain HTTP.
+
+## schannel: SEC_E_UNTRUSTED_ROOT
+
+On Windows, you may need to specify that git should use OpenSSL: `git config --system http.sslbackend openssl`.
+
+This resolves the following error: `Fatal: unable to access 'https://gitlab.domain.tld/group/project.git': schannel: SEC_E_UNTRUSTED_ROOT (0x80090325) - The certificate chain was issued by an authority that is not trusted."`
+
