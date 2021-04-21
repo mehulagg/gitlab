@@ -148,3 +148,5 @@ module MergeRequests
     end
   end
 end
+
+MergeRequests::MergeService.prepend_if_ee('::EE::MergeRequests::MergeService')
