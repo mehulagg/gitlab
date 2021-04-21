@@ -51,6 +51,10 @@
       "type": "string",
       "enum": ["database", "redis", "redis_hll", "prometheus", "ruby"]
     },
+    "instrumentation_class": {
+      "type": "string",
+      "pattern": "^(Gitlab::Usage::Metrics::Instrumentations::)([a-zA-Z]+::)*([a-zA-Z]+)$"
+    },
     "distribution": {
       "type": "array",
       "items": {
