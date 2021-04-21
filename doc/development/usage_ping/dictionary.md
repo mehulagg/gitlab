@@ -4756,7 +4756,7 @@ Count of projects that have enabled the Alerts service
 
 Group: `group::health`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
