@@ -2,9 +2,10 @@
 %tr
   %td
     = project.name
-  %td.gl-display-flex.gl-align-items-center
-    = avatar_without_link(project.owner, size: 32)
-    = project.owner.name
+  %td
+    .gl-display-flex.gl-align-items-center
+      = avatar_without_link(project.owner, size: 32)
+      = project.owner.name
   %td.gl-text-right
     = link_to project_subscription_path(@project, subscription.id), method: :delete, data: { toggle: 'tooltip', title: tooltip, container: 'body', testid: 'delete-subscription' }, class: "gl-button btn btn-danger" do
       = sprite_icon('close', size: 16, css_class: 'gl-icon')
