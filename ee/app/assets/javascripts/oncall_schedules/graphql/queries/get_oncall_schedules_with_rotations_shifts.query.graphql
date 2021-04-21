@@ -1,8 +1,8 @@
 #import "../fragments/oncall_schedule_rotation_with_shifts.fragment.graphql"
 
-query getShiftsForRotations($projectPath: ID!, $startsAt: Time!, $endsAt: Time!) {
+query getShiftsForRotations($projectPath: ID!, $startsAt: Time!, $endsAt: Time!, $iids: [ID!]) {
   project(fullPath: $projectPath) {
-    incidentManagementOncallSchedules {
+    incidentManagementOncallSchedules(iids: $iids) {
       nodes {
         rotations {
           nodes {
