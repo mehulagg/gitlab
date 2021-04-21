@@ -26,6 +26,7 @@
 #     last_activity_before: datetime
 #     repository_storage: string
 #     without_deleted: boolean
+#     topic: string
 #
 class ProjectsFinder < UnionFinder
   include CustomAttributesFilter
@@ -177,7 +178,16 @@ class ProjectsFinder < UnionFinder
   # rubocop: enable CodeReuse/ActiveRecord
 
   def by_tags(items)
-    params[:tag].present? ? items.tagged_with(params[:tag]) : items
+    # We are in the middle of renaming tags to topics.
+    # Until transition is done we support both tag and topic in params.
+    # See https://gitlab.com/groups/gitlab-org/-/epics/552.
+    if params[:tag].present?
+      items.tagged_with(params[:tag])
+    elsif params[:topic].present?
+      items.tagged_with(params[:topic])
+    else
+     items
+    end
   end
 
   def by_search(items)

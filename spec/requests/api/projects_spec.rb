@@ -223,6 +223,29 @@ RSpec.describe API::Projects do
         expect(json_response.find { |hash| hash['id'] == project.id }.keys).not_to include('open_issues_count')
       end
 
+      context 'filter by topic (column tag_list)' do
+        it 'returns no projects' do
+          get api('/projects', user), params: { topic: 'foo' }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response).to be_empty
+        end
+
+        it 'returns matching project' do
+          project.update!(tag_list: %w(ruby javascript))
+
+          get api('/projects', user), params: { topic: 'ruby' }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response.size).to eq(1)
+          expect(json_response.first['id']).to eq(project.id)
+        end
+      end
+
       context 'and with_issues_enabled=true' do
         it 'only returns projects with issues enabled' do
           project.project_feature.update_attribute(:issues_access_level, ProjectFeature::DISABLED)

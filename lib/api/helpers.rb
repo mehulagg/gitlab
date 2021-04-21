@@ -604,6 +604,7 @@ module API
       finder_params[:last_activity_after] = params[:last_activity_after] if params[:last_activity_after]
       finder_params[:last_activity_before] = params[:last_activity_before] if params[:last_activity_before]
       finder_params[:repository_storage] = params[:repository_storage] if params[:repository_storage]
+      finder_params[:topic] = params[:topic] if params[:topic].present?
       finder_params
     end
 
