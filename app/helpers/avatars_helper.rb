@@ -144,14 +144,10 @@ module AvatarsHelper
 
   def source_identicon(source, options = {})
     bg_key = (source.id % 7) + 1
-    identicon_size = options[:size]
+    size_class = "s#{options[:size]}" if options[:size]
 
     options[:class] =
-      [*options[:class], "identicon bg#{bg_key}"].join(' ')
-
-    unless identicon_size.nil?
-      options[:class] = [*options[:class], "s#{identicon_size}"].join(' ')
-    end
+      [*options[:class], "identicon bg#{bg_key}", size_class].compact.join(' ')
 
     content_tag(:div, class: options[:class].strip) do
       source.name[0, 1].upcase

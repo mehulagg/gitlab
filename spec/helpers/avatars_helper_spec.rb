@@ -434,7 +434,7 @@ RSpec.describe AvatarsHelper do
       let(:resource) { create(:group, name: 'foo') }
 
       it 'displays group avatar' do
-        is_expected.to match(%r{<div class="identicon bg\d+">F</div>})
+        is_expected.to match(%r{<div class="avatar identicon bg\d+ s32">F</div>})
       end
     end
   end
