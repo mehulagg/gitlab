@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Job logs
+# Job logs **(FREE SELF)**
 
 > [Renamed from job traces to job logs](https://gitlab.com/gitlab-org/gitlab/-/issues/29121) in GitLab 12.5.
 
@@ -128,9 +128,7 @@ This command permanently deletes the log files and is irreversible.
 find /var/opt/gitlab/gitlab-rails/shared/artifacts -name "job.log" -mtime +60 -delete
 ```
 
-## New incremental logging architecture
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18169) in GitLab 10.4.
+## Incremental logging architecture
 
 NOTE:
 This beta feature is off by default. See below for how to [enable or disable](#enabling-incremental-logging) it.
