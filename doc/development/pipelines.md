@@ -443,8 +443,10 @@ To illustrate this:
 
 ```mermaid
 graph LR
+    A --"artifact: list of test files"--> C1 & D1 & E1 & F1
+
     subgraph "prepare stage";
-        A["detect-tests"]
+        A["detect-tests"];
     end
 
     subgraph "test stage";
