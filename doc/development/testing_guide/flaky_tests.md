@@ -78,7 +78,7 @@ For instance `RETRIES=1 bin/rspec ...` would retry the failing examples once.
 
 ### Order-dependent flaky tests
 
-These are tests that fail when run in conjunction with another test, in a specific order. For example:
+These are tests that fail when run in conjunction with other tests, in a specific order. For example:
 
 - <https://gitlab.com/gitlab-org/gitlab/-/issues/327668>
 
