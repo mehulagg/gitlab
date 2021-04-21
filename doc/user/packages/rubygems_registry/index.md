@@ -84,6 +84,9 @@ image: ruby:latest
 
 run:
   script:
+    - echo "---" > .gem/credentials
+    - echo "https://gitlab.example.com/api/v4/projects/${CI_PROJECT_ID}/packages/rubygems: '${CI_JOB_TOKEN}'" >> .gem/credentials
+    - gem push my_gem-0.0.1.gem --host https://gitlab.example.com/api/v4/projects/${CI_PROJECT_ID}/packages/rubygems
 ```
 
 You can also use `CI_JOB_TOKEN` in a `~/.gem/credentials` file that you check in to
