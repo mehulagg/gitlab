@@ -1,5 +1,5 @@
 ---
 title: Fix cascading settings attr writer behavior
-merge_request:
+merge_request: 59910
 author:
 type: fixed
