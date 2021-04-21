@@ -14,9 +14,9 @@ RSpec.describe Projects::Settings::CiCdController do
   end
 
   describe 'GET show' do
-    let(:parent_group) { create(:group) }
-    let(:group) { create(:group, parent: parent_group) }
-    let(:other_project) { create(:project, group: group) }
+    let_it_be(:parent_group) { create(:group) }
+    let_it_be(:group) { create(:group, parent: parent_group) }
+    let_it_be(:other_project) { create(:project, group: group) }
 
     it 'renders show with 200 status code' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
@@ -26,9 +26,9 @@ RSpec.describe Projects::Settings::CiCdController do
     end
 
     context 'with group runners' do
-      let(:group_runner) { create(:ci_runner, :group, groups: [group]) }
-      let!(:project_runner) { create(:ci_runner, :project, projects: [other_project]) }
-      let!(:shared_runner) { create(:ci_runner, :instance) }
+      let_it_be(:group_runner) { create(:ci_runner, :group, groups: [group]) }
+      let_it_be(:project_runner) { create(:ci_runner, :project, projects: [other_project]) }
+      let_it_be(:shared_runner) { create(:ci_runner, :instance) }
 
       it 'sets assignable project runners only' do
         group.add_maintainer(user)
