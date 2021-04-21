@@ -3,6 +3,8 @@
 module RequirementsManagement
   class ImportRequirementsCsvWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include Gitlab::Utils::StrongMemoize
 
     idempotent!

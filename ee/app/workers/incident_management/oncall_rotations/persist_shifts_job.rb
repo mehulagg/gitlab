@@ -9,6 +9,8 @@ module IncidentManagement
     class PersistShiftsJob
       include ApplicationWorker
 
+      sidekiq_options retry: 3
+
       idempotent!
       feature_category :incident_management
 

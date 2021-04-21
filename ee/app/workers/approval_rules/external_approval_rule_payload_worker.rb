@@ -3,6 +3,8 @@
 module ApprovalRules
   class ExternalApprovalRulePayloadWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     idempotent!
 
     feature_category :source_code_management

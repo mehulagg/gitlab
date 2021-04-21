@@ -7,6 +7,8 @@ module Geo
     # sync work only have to query the registry table for never-synced records.
     class RegistryConsistencyWorker
       include ApplicationWorker
+
+      sidekiq_options retry: 3
       prepend Reenqueuer
       include ::Gitlab::Geo::LogHelpers
 

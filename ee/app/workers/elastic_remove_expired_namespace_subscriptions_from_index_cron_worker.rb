@@ -2,6 +2,8 @@
 
 class ElasticRemoveExpiredNamespaceSubscriptionsFromIndexCronWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include Gitlab::ExclusiveLeaseHelpers
   include CronjobQueue
 

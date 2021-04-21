@@ -4,6 +4,8 @@ module TodosDestroyer
   class ConfidentialEpicWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     queue_namespace :todos_destroyer
     feature_category :epics
 

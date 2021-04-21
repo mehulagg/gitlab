@@ -3,6 +3,8 @@
 module Geo
   class ReverificationBatchWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include GeoQueue
     include LimitedCapacity::Worker
     include ::Gitlab::Geo::LogHelpers

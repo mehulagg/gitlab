@@ -3,6 +3,8 @@
 class IssuePlacementWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   idempotent!
   feature_category :issue_tracking
   urgency :high

@@ -7,6 +7,8 @@ module Analytics
     class CreateSnapshotWorker
       include ApplicationWorker
 
+      sidekiq_options retry: 3
+
       feature_category :devops_reports
       idempotent!
 

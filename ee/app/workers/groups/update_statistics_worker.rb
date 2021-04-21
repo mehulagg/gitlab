@@ -5,6 +5,8 @@ module Groups
   class UpdateStatisticsWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     feature_category :source_code_management
     idempotent!
     loggable_arguments 0, 1

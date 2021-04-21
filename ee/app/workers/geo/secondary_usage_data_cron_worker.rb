@@ -5,6 +5,8 @@ module Geo
     LEASE_TIMEOUT = 24.hours.freeze
 
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
     include ::Gitlab::Geo::LogHelpers
     include ExclusiveLeaseGuard

@@ -3,6 +3,8 @@
 class ElasticAssociationIndexerWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :global_search
   loggable_arguments 0, 2
 

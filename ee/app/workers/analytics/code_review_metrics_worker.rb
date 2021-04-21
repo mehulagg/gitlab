@@ -4,6 +4,8 @@ module Analytics
   class CodeReviewMetricsWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     feature_category :code_analytics
     idempotent!
     loggable_arguments 0

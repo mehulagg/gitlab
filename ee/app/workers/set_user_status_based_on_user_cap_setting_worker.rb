@@ -2,6 +2,8 @@
 
 class SetUserStatusBasedOnUserCapSettingWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include ::Gitlab::Utils::StrongMemoize
 
   feature_category :users

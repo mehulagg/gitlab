@@ -4,6 +4,8 @@ module IncidentManagement
   class ApplyIncidentSlaExceededLabelWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     idempotent!
     feature_category :incident_management
 

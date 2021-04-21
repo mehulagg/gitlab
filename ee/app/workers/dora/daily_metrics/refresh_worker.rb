@@ -5,6 +5,8 @@ module Dora
     class RefreshWorker
       include ApplicationWorker
 
+      sidekiq_options retry: 3
+
       deduplicate :until_executing
       idempotent!
       queue_namespace :dora_metrics

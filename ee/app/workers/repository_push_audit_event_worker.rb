@@ -3,6 +3,8 @@
 class RepositoryPushAuditEventWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :authentication_and_authorization
 
   def perform(changes, project_id, user_id)
