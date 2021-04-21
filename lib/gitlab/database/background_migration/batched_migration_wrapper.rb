@@ -16,13 +16,11 @@ module Gitlab
         def perform(batch_tracking_record)
           start_tracking_execution(batch_tracking_record)
 
+          batch_tracking_record.status = :failed
+
           execute_batch(batch_tracking_record)
 
           batch_tracking_record.status = :succeeded
-        rescue => e
-          batch_tracking_record.status = :failed
-
-          raise e
         ensure
           finish_tracking_execution(batch_tracking_record)
           track_prometheus_metrics(batch_tracking_record)
