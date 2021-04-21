@@ -14125,6 +14125,9 @@ msgstr ""
 msgid "Generate new token"
 msgstr ""
 
+msgid "Generate project access tokens scoped to this project for each application that needs access to the GitLab API. %{link_start}Learn more.%{link_end}"
+msgstr ""
+
 msgid "Generic package file size in bytes"
 msgstr ""
 
@@ -24593,7 +24596,7 @@ msgstr ""
 msgid "Project access must be granted explicitly to each user. If this project is part of a group, access will be granted to members of the group."
 msgstr ""
 
-msgid "Project access token creation is disabled in this group. You can still use and manage existing tokens."
+msgid "Project access token creation is disabled in this group. You can still use and manage existing tokens. %{link_start}Learn more.%{link_end}"
 msgstr ""
 
 msgid "Project already deleted"
@@ -35880,6 +35883,9 @@ msgstr ""
 msgid "You can also upload existing files from your computer using the instructions below."
 msgstr ""
 
+msgid "You can also use project access tokens with Git to authenticate over HTTP(S)."
+msgstr ""
+
 msgid "You can always edit this later"
 msgstr ""
 
@@ -35923,9 +35929,6 @@ msgid "You can filter by 'days to merge' by clicking on the columns in the chart
 msgstr ""
 
 msgid "You can find more information about GitLab subscriptions in %{subscriptions_doc_link}."
-msgstr ""
-
-msgid "You can generate an access token scoped to this project for each application to use the GitLab API."
 msgstr ""
 
 msgid "You can get started by cloning the repository or start adding files to it with one of the following options."
