@@ -18542,7 +18542,7 @@ CREATE TABLE vulnerability_finding_evidence_responses (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    vulnerability_finding_evidences_id bigint NOT NULL,
+    vulnerability_finding_evidence_id bigint NOT NULL,
     status_code integer,
     reason_phrase text,
     CONSTRAINT check_58b124ab48 CHECK ((char_length(reason_phrase) <= 2048))
@@ -21733,7 +21733,7 @@ CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions US
 
 CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (date(timezone('UTC'::text, created_at)) < '2020-06-22'::date));
 
-CREATE INDEX finding_evidence_responses_on_finding_evidences_id ON vulnerability_finding_evidence_responses USING btree (vulnerability_finding_evidences_id);
+CREATE INDEX finding_evidence_responses_on_finding_evidences_id ON vulnerability_finding_evidence_responses USING btree (vulnerability_finding_evidence_id);
 
 CREATE INDEX finding_evidences_on_vulnerability_occurrence_id ON vulnerability_finding_evidences USING btree (vulnerability_occurrence_id);
 
@@ -25650,6 +25650,9 @@ ALTER TABLE ONLY service_desk_settings
 ALTER TABLE ONLY saml_group_links
     ADD CONSTRAINT fk_rails_22e312c530 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY vulnerability_finding_evidence_responses
+    ADD CONSTRAINT fk_rails_2390a09723 FOREIGN KEY (vulnerability_finding_evidence_id) REFERENCES vulnerability_finding_evidences(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY dast_profiles
     ADD CONSTRAINT fk_rails_23cae5abe1 FOREIGN KEY (dast_scanner_profile_id) REFERENCES dast_scanner_profiles(id) ON DELETE CASCADE;
 
@@ -25865,9 +25868,6 @@ ALTER TABLE ONLY merge_requests_closing_issues
 
 ALTER TABLE ONLY protected_environment_deploy_access_levels
     ADD CONSTRAINT fk_rails_45cc02a931 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY vulnerability_finding_evidence_responses
-    ADD CONSTRAINT fk_rails_466b1de8c5 FOREIGN KEY (vulnerability_finding_evidences_id) REFERENCES vulnerability_finding_evidences(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY prometheus_alert_events
     ADD CONSTRAINT fk_rails_4675865839 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
