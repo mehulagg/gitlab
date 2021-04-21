@@ -10,12 +10,17 @@ class Admin::UsersController < Admin::ApplicationController
 
   feature_category :users
 
+  PAGINATION_WITH_COUNT_LIMIT = 1000
+
   def index
     @users = User.filter_items(params[:filter]).order_name_asc
     @users = @users.search_with_secondary_emails(params[:search_query]) if params[:search_query].present?
     @users = users_with_included_associations(@users)
     @users = @users.sort_by_attribute(@sort = params[:sort])
     @users = @users.page(params[:page])
+
+    limited_total_count = @users.total_count_with_limit(:all, limit: PAGINATION_WITH_COUNT_LIMIT)
+    @users.without_count if limited_total_count > PAGINATION_WITH_COUNT_LIMIT
 
     @cohorts = load_cohorts
 
