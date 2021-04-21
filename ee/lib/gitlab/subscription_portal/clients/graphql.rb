@@ -31,10 +31,14 @@ module Gitlab
 
             response = execute_graphql_query(
               { query: query, variables: variables }
-            )
+            ).with_indifferent_access
 
-            if !response[:success] || response.dig(:data, 'errors').present?
-              return error(response.dig(:data, 'errors'))
+            # connection level error
+            unless response[:success]
+              return {
+                success: false,
+                connection_error: response.dig(:data, 'errors')
+              }.compact
             end
 
             response = response.dig(:data, 'data', 'cloudActivationActivate')
