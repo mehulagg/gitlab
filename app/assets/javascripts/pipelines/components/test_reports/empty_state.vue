@@ -8,7 +8,7 @@ export const i18n = {
   noTestsTitle: s__('TestReports|There are no tests to display'),
   noReportsButton: s__('TestReports|Learn how to upload pipeline test reports'),
   noReportsDescription: s__(
-    'TestReports|You can configure your job to use unit test reports, and GitLab will display a report here and in the related merge request.',
+    'TestReports|You can configure your job to use unit test reports, and GitLab displays a report here and in the related merge request.',
   ),
   noReportsTitle: s__('TestReports|There are no test reports for this pipeline'),
 };
