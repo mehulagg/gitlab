@@ -18,7 +18,8 @@ variables:
     # available (non 500 response to HTTP(s))
     FUZZAPI_SERVICE_START_TIMEOUT: "300"
     #
-    FUZZAPI_IMAGE: registry.gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing:${FUZZAPI_VERSION}-engine
+    SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
+    FUZZAPI_IMAGE: ${SECURE_ANALYZERS_PREFIX}/api-fuzzing:${FUZZAPI_VERSION}
     #
 
 apifuzzer_fuzz_unlicensed:
@@ -34,9 +35,7 @@ apifuzzer_fuzz_unlicensed:
 
 apifuzzer_fuzz:
     stage: fuzz
-    image:
-        name: $FUZZAPI_IMAGE
-        entrypoint: ["/bin/bash", "-l", "-c"]
+    image: $FUZZAPI_IMAGE
     variables:
         FUZZAPI_PROJECT: $CI_PROJECT_PATH
         FUZZAPI_API: http://localhost:80
