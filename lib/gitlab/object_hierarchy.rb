@@ -248,10 +248,10 @@ module Gitlab
       cte << base_query
 
       # Recursively get all the descendants of the base set.
-      descendants_query = model
-        .from(from_tables(cte))
-        .where(descendant_conditions(cte))
-        .except(:order)
+      descendants_query =
+        from(from_tables(cte))
+          .where(descendant_conditions(cte))
+          .except(:order)
 
       if with_depth
         quoted_objects_table_name = model.connection.quote_table_name(objects_table.name)
