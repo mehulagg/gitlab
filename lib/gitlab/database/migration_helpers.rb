@@ -1048,6 +1048,25 @@ module Gitlab
         end
       end
 
+      # Reverts `backfill_conversion_of_integer_to_bigint`
+      #
+      # table - The name of the database table containing the column
+      # columns - The name, or an array of names, of the column(s) we want to convert to bigint.
+      # primary_key - The name of the primary key column (most often :id)
+      def revert_backfill_conversion_of_integer_to_bigint(table, columns, primary_key: :id)
+        columns = Array.wrap(columns)
+
+        conditions = ActiveRecord::Base.sanitize_sql([
+          'job_class_name = :job_class_name AND table_name = :table_name AND column_name = :column_name AND job_arguments = :job_arguments',
+          job_class_name: 'CopyColumnUsingBackgroundMigrationJob',
+          table_name: table,
+          column_name: primary_key,
+          job_arguments: [columns, columns.map { |c| "#{c}_convert_to_bigint" }].to_json
+        ])
+
+        execute("DELETE FROM batched_background_migrations WHERE #{conditions}")
+      end
+
       # Performs a concurrent column rename when using PostgreSQL.
       def install_rename_triggers_for_postgresql(table, old, new, trigger_name: nil)
         Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).create(old, new, trigger_name: trigger_name)

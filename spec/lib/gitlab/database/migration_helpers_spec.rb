@@ -1921,6 +1921,54 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     end
   end
 
+  describe '#revert_backfill_conversion_of_integer_to_bigint' do
+    let(:table) { :_test_backfill_table }
+    let(:primary_key) { :id }
+
+    before do
+      model.create_table table, id: false do |t|
+        t.integer primary_key, primary_key: true
+        t.text :message, null: false
+        t.integer :other_id
+        t.timestamps
+      end
+
+      model.initialize_conversion_of_integer_to_bigint(table, columns, primary_key: primary_key)
+      model.backfill_conversion_of_integer_to_bigint(table, columns, primary_key: primary_key)
+    end
+
+    context 'when a single column is being converted' do
+      let(:columns) { :id }
+
+      it 'deletes the batched migration tracking record' do
+        expect do
+          model.revert_backfill_conversion_of_integer_to_bigint(table, columns)
+        end.to change { Gitlab::Database::BackgroundMigration::BatchedMigration.count }.by(-1)
+      end
+    end
+
+    context 'when a multiple columns are being converted' do
+      let(:columns) { [:id, :other_id] }
+
+      it 'deletes the batched migration tracking record' do
+        expect do
+          model.revert_backfill_conversion_of_integer_to_bigint(table, columns)
+        end.to change { Gitlab::Database::BackgroundMigration::BatchedMigration.count }.by(-1)
+      end
+    end
+
+    context 'when primary key column has custom name' do
+      let(:primary_key) { :other_pk }
+      let(:columns) { :other_id }
+
+      it 'deletes the batched migration tracking record' do
+        expect do
+          model.revert_backfill_conversion_of_integer_to_bigint(table, columns, primary_key: primary_key)
+        end.to change { Gitlab::Database::BackgroundMigration::BatchedMigration.count }.by(-1)
+      end
+    end
+  end
+
   describe '#index_exists_by_name?' do
     it 'returns true if an index exists' do
       ActiveRecord::Base.connection.execute(
