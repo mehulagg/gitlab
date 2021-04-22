@@ -187,7 +187,7 @@ RSpec.describe Users::BuildService do
             params.merge!({ user_type: :alert_bot })
           end
 
-          it { expect(user.user_type).to be 'human' }
+          it { expect(user.user_type).to eq('human') }
         end
       end
 

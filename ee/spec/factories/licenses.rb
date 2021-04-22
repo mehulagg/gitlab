@@ -60,7 +60,6 @@ FactoryBot.define do
       attrs = [:gitlab_license]
       attrs << :trial if trial
       attrs << :expired if expired
-      attrs << :cloud if cloud
 
       build(*attrs, plan: plan).export
     end
