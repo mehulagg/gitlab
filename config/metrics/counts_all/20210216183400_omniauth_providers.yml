@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.manage.omniauth_providers
-description: Number of unique user logins using OmniAuth provider authentication
+description: Number of unique user logins using OmniAuth provider authentication `https://docs.gitlab.com/ee/integration/omniauth.html#omniauth`
 product_section: dev
 product_stage: manage
 product_group: group::access

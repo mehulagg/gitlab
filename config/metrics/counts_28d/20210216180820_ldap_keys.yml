@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage_monthly.manage.ldap_keys
-description: Number of user SHH public keys synced from LDAP
+description: Number of user SHH public keys synced from LDAP `https://docs.gitlab.com/ee/administration/auth/ldap/#ldap-sync-configuration-settings`
 product_section: dev
 product_stage: manage
 product_group: group::access
