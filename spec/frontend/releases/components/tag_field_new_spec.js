@@ -19,7 +19,10 @@ const RefSelectorStub = Vue.component('RefSelectorStub', {
       footerSlotProps: {
         isLoading: false,
         matches: {
-          tags: { totalCount: 0 },
+          tags: {
+            totalCount: 0,
+            list: [{ name: TEST_TAG_NAME }],
+          },
         },
         query: NONEXISTENT_TAG_NAME,
       },
@@ -112,6 +115,34 @@ describe('releases/components/tag_field_new', () => {
 
         it('shows the "Create from" field', () => {
           expect(findCreateFromFormGroup().exists()).toBe(false);
+        });
+      });
+    });
+
+    describe('"Create tag" option', () => {
+      beforeEach(() => {
+        createComponent(mount);
+      });
+
+      describe('when the search query exactly matches one of the search results', () => {
+        beforeEach(async () => {
+          wrapper.find(RefSelectorStub).setData({
+            footerSlotProps: {
+              query: TEST_TAG_NAME,
+            },
+          });
+
+          await wrapper.vm.$nextTick();
+        });
+
+        it('does not show the "Create tag" option', () => {
+          expect(findCreateNewTagOption().exists()).toBe(false);
+        });
+      });
+
+      describe('when the search query does not exactly match one of the search results', () => {
+        it('shows the "Create tag" option', () => {
+          expect(findCreateNewTagOption().exists()).toBe(true);
         });
       });
     });
