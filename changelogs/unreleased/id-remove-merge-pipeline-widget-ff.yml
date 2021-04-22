@@ -1,0 +1,5 @@
+---
+title: Move merge-request merge_pipeline to cached_widget
+merge_request: 59968
+author:
+type: performance
