@@ -126,4 +126,36 @@ RSpec.describe DeviseMailer do
       is_expected.to have_link("Reset password", href: "#{Gitlab.config.gitlab.url}/users/password/edit?reset_password_token=faketoken")
     end
   end
+
+  describe '#unlock_instructions' do
+    subject { described_class.unlock_instructions(user, 'faketoken') }
+
+    let_it_be(:user) { create(:user) }
+
+    it_behaves_like 'an email sent from GitLab'
+    it_behaves_like 'it should not have Gmail Actions links'
+    it_behaves_like 'a user cannot unsubscribe through footer link'
+
+    it 'is sent to the user' do
+      is_expected.to deliver_to user.email
+    end
+
+    it 'has the correct subject' do
+      is_expected.to have_subject 'Unlock instructions'
+    end
+
+    it 'greets the user' do
+      is_expected.to have_body_text /Hello, #{user.name}!/
+    end
+
+    it 'includes the correct content' do
+      is_expected.to have_text /Your GitLab account has been locked due to an excessive amount of unsuccessful sign in attempts./
+      is_expected.to have_body_text /Your account will automatically unlock in #{distance_of_time_in_words(Devise.unlock_in)}/
+      is_expected.to have_body_text /or you may click the link below to unlock now./
+    end
+
+    it 'includes a link to unlock the account' do
+      is_expected.to have_link("Unlock account", href: described_class.unlock_url(user, unlock_token: 'fake_token'))
+    end
+  end
 end
