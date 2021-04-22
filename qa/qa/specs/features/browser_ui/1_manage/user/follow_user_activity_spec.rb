@@ -15,30 +15,50 @@ module QA
         Runtime::API::Client.new(:gitlab, user: user)
       end
 
+      let!(:group) do
+        group = QA::Resource::Group.fabricate_via_api!
+        group.add_member(user)
+        group
+      end
+
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
+          project.name = 'project-for-tags'
           project.initialize_with_readme = true
           project.api_client = user_api_client
+          project.group = group
         end
       end
 
       it 'can be followed and their activity seen', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1663' do
-        Flow::Login.sign_in
-        project.visit!
+        navigate_to_user_profile(user)
 
-        Page::Project::Show.perform do |project|
-          project.click_file('README.md')
+        Page::User::Show.perform(&:click_follow_user_link)
+
+        expect(page).to have_text("No activities found")
+
+        project
+
+        Flow::Login.sign_in_unless_signed_in
+
+        Page::Main::Menu.perform(&:click_user_profile_link)
+
+        Page::User::Show.perform do |show|
+          show.click_following_link
+          show.click_user_link(user.username)
+          expect(show).to have_activity('created project')
         end
+      end
 
-        Page::File::Show.perform(&:click_edit)
-
-        expect(page).to have_text("You're not allowed to edit files in this project directly.")
+      def navigate_to_user_profile(user)
+        Flow::Login.sign_in_unless_signed_in
+        page.visit Runtime::Scenario.gitlab_address + "/#{user.username}"
       end
 
       after do
-        user.remove_via_api!
+        project.api_client = admin_api_client
         project.remove_via_api!
-        group.remove_via_api!
+        user.remove_via_api!
       end
     end
   end

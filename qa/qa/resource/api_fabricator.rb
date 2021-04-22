@@ -135,6 +135,8 @@ module QA
         response = delete(request.url)
 
         unless [HTTP_STATUS_NO_CONTENT, HTTP_STATUS_ACCEPTED].include? response.code
+          require 'pry-byebug'
+          binding.pry
           raise ResourceNotDeletedError, "Resource at #{request.mask_url} could not be deleted (#{response.code}): `#{response}`."
         end
 

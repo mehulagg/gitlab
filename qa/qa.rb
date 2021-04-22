@@ -412,6 +412,11 @@ module QA
       end
     end
 
+
+    module User
+      autoload :Show, 'qa/page/user/show'
+    end
+
     module Issuable
       autoload :New, 'qa/page/issuable/new'
     end

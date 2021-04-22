@@ -125,6 +125,16 @@ module QA
           end
         end
 
+        def click_user_profile_link
+          retry_until(reload: false) do
+            within_user_menu do
+              click_element(:user_profile_link)
+            end
+
+            has_text?('Member since')
+          end
+        end
+
         def search_for(term)
           fill_element :search_term_field, "#{term}\n"
         end
