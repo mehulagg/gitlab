@@ -230,7 +230,7 @@ module GroupsHelper
   end
 
   def multiple_members?(group)
-    group.member_count > 1
+    group.member_count > 1 || (group.subgroup? && group.parent.member_count > 1)
   end
 
   def get_group_sidebar_links
