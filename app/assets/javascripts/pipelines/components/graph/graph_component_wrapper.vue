@@ -5,7 +5,7 @@ import { __ } from '~/locale';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { DEFAULT, DRAW_FAILURE, LOAD_FAILURE } from '../../constants';
-import DismissPipelineNotification from '../../graphql/mutations/dismiss_pipeline_notification.graphql';
+import DismissPipelineGraphCallout from '../../graphql/mutations/dismiss_pipeline_notification.graphql';
 import getUserCallouts from '../../graphql/queries/get_user_callouts.query.graphql';
 import { reportToSentry } from '../../utils';
 import { listByLayers } from '../parsing_utils';
@@ -197,7 +197,7 @@ export default {
       try {
         console.log('in try');
         this.$apollo.mutate({
-          mutation: DismissPipelineNotification,
+          mutation: DismissPipelineGraphCallout,
           variables: {
             featureName,
           },
