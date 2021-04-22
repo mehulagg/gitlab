@@ -14,7 +14,7 @@ than 3,000 users. For fewer users, reduce the stated node sizes as needed.
 
 If maintaining a high level of uptime for your GitLab environment isn't a
 requirement, or if you don't have the expertise to maintain this sort of
-environment, we recommend using the non HA [2,000-user reference architecture](2k_users.md)
+environment, we recommend using the non-HA [2,000-user reference architecture](2k_users.md)
 for your GitLab installation. If HA is still a requirement, there's several supported
 tweaks you can make to this architecture to reduce complexity as detailed here.
 
@@ -2050,7 +2050,7 @@ considered and customer technical support will be considered out of scope.
 ## Supported modifications for lower user counts (HA)
 
 The 3k GitLab reference architecture is the smallest we recommend that achieves High Availability (HA).
-However, for environments that need to serve less users but maintain HA there's several
+However, for environments that need to serve less users but maintain HA, there's several
 supported modifications you can make to this architecture to reduce complexity and cost.
 
 It should be noted that to achieve HA with GitLab, this architecture's makeup is ultimately what is
