@@ -8,7 +8,8 @@ module Gitlab
         :walltime,
         :success,
         :total_database_size_change,
-        :query_statistics
+        :query_statistics,
+        :query_log
       )
     end
   end
