@@ -22,8 +22,7 @@ module EE
           .join(later_deployments, Arel::Nodes::OuterJoin)
           .on(join_conditions)
 
-        model
-          .joins(:successful_deployments)
+        joins(:successful_deployments)
           .joins(join.join_sources)
           .where(later_deployments[:id].eq(nil))
           .where(deployments[:cluster_id].eq(cluster.id))
