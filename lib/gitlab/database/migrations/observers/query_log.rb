@@ -8,18 +8,17 @@ module Gitlab
           def initialize
             super
 
-            @log = StringIO.new
+            @logs = []
           end
 
           def before
             ActiveSupport::Notifications.subscribe("sql.active_record") do |_, _, _, _, data|
-              @log << data[:sql]
-              @log << "\n"
+              @logs << data[:sql]
             end
           end
 
           def record(observation)
-            observation.query_log = @log.string
+            observation.query_log = @logs
           end
         end
       end
