@@ -39,7 +39,7 @@ You can also disable [GitLab internal issue tracking](../issues/index.md) in thi
 Learn more about the steps and consequences of disabling GitLab issues in
 [Sharing and permissions](../settings/index.md#sharing-and-permissions).
 
-## Referencing issues in Bugzilla
+## Reference Bugzilla issues in GitLab
 
 You can reference issues in Bugzilla using:
 
