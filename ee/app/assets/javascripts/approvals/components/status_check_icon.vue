@@ -16,14 +16,14 @@ export default {
   },
   computed: {
     iconId() {
-      return uniqueId('approval-icon-');
+      return uniqueId('status-check-icon-');
     },
     containerId() {
-      return uniqueId('approva-icon-container-');
+      return uniqueId('status-check-icon-container-');
     },
   },
   i18n: {
-    title: __('Approval Gate'),
+    title: __('Status check'),
   },
 };
 </script>

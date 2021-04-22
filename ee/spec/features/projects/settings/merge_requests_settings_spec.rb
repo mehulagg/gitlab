@@ -91,7 +91,7 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
     end
   end
 
-  it 'adds an approval gate' do
+  it 'adds a status check' do
     visit edit_project_path(project)
 
     open_modal(text: 'Add approval rule', expand: false)
@@ -111,10 +111,10 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
     expect(first('.js-name')).to have_content('My new rule')
   end
 
-  context 'with an approval gate' do
+  context 'with a status check' do
     let_it_be(:rule) { create(:external_approval_rule, project: project) }
 
-    it 'updates the approval gate' do
+    it 'updates the status check' do
       visit edit_project_path(project)
 
       expect(first('.js-name')).to have_content(rule.name)
@@ -132,7 +132,7 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
       expect(first('.js-name')).to have_content('Something new')
     end
 
-    it 'removes the approval gate' do
+    it 'removes the status check' do
       visit edit_project_path(project)
 
       expect(first('.js-name')).to have_content(rule.name)
@@ -140,7 +140,7 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
       first('.js-controls').find('[data-testid="remove-icon"]').click
 
       within('.modal-content') do
-        click_button 'Remove approval gate'
+        click_button 'Remove status check'
       end
 
       wait_for_requests

@@ -1,17 +1,17 @@
 import { GlPopover, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import ApprovalGateIcon from 'ee/approvals/components/approval_gate_icon.vue';
+import StatusCheckIcon from 'ee/approvals/components/status_check_icon.vue';
 
 jest.mock('lodash/uniqueId', () => (id) => `${id}mock`);
 
-describe('ApprovalGateIcon', () => {
+describe('StatusCheckIcon', () => {
   let wrapper;
 
   const findPopover = () => wrapper.findComponent(GlPopover);
   const findIcon = () => wrapper.findComponent(GlIcon);
 
   const createComponent = () => {
-    return shallowMount(ApprovalGateIcon, {
+    return shallowMount(StatusCheckIcon, {
       propsData: {
         url: 'https://gitlab.com/',
       },
@@ -28,15 +28,15 @@ describe('ApprovalGateIcon', () => {
 
   it('renders the icon', () => {
     expect(findIcon().props('name')).toBe('api');
-    expect(findIcon().attributes('id')).toBe('approval-icon-mock');
+    expect(findIcon().attributes('id')).toBe('status-check-icon-mock');
   });
 
   it('renders the popover with the URL for the icon', () => {
     expect(findPopover().exists()).toBe(true);
     expect(findPopover().attributes()).toMatchObject({
       content: 'https://gitlab.com/',
-      title: 'Approval Gate',
-      target: 'approval-icon-mock',
+      title: 'Status check',
+      target: 'status-check-icon-mock',
     });
   });
 });

@@ -92,7 +92,7 @@ export default {
     groupIds() {
       return this.groups.map((x) => x.id);
     },
-    invalidApprovalGateUrl() {
+    invalidStatusCheckUrl() {
       if (this.serverValidationErrors.includes('External url has already been taken')) {
         return this.$options.i18n.validations.externalUrlTaken;
       } else if (!this.externalUrl || !isSafeURL(this.externalUrl)) {
@@ -154,7 +154,7 @@ export default {
       );
     },
     isValidExternalApprovalRule() {
-      return this.isValidName && this.isValidBranches && this.isValidApprovalGateUrl;
+      return this.isValidName && this.isValidBranches && this.isValidStatusCheckUrl;
     },
     isValidName() {
       return !this.showValidation || !this.invalidName;
@@ -168,8 +168,8 @@ export default {
     isValidApprovers() {
       return !this.showValidation || !this.invalidApprovers;
     },
-    isValidApprovalGateUrl() {
-      return !this.showValidation || !this.invalidApprovalGateUrl;
+    isValidStatusCheckUrl() {
+      return !this.showValidation || !this.invalidStatusCheckUrl;
     },
     isMultiSubmission() {
       return this.settings.allowMultiRule && !this.isFallbackSubmission;
@@ -229,9 +229,9 @@ export default {
         externalUrl: this.externalUrl,
       };
     },
-    approvalGateLabel() {
-      const { approvalGate, addApprovalGate } = this.$options.i18n.form;
-      return this.isEditing ? approvalGate : addApprovalGate;
+    statusCheckLabel() {
+      const { statusCheck, addStatusCheck } = this.$options.i18n.form;
+      return this.isEditing ? statusCheck : addStatusCheck;
     },
   },
   watch: {
@@ -380,9 +380,9 @@ export default {
   },
   i18n: {
     form: {
-      addApprovalGate: s__('ApprovalRule|Add approvel gate'),
-      approvalGate: s__('ApprovalRule|Approvel gate'),
-      approvalGateDescription: s__('ApprovalRule|Invoke an external API as part of the approvals'),
+      addStatusCheck: s__('ApprovalRule|Add status check'),
+      statusCheck: s__('ApprovalRule|Status check'),
+      statusCheckDescription: s__('ApprovalRule|Invoke an external API as part of the approvals'),
       approvalsRequiredLabel: s__('ApprovalRule|Approvals required'),
       approvalTypeLabel: s__('ApprovalRule|Approver Type'),
       approversLabel: s__('ApprovalRule|Add approvers'),
@@ -480,20 +480,18 @@ export default {
       <span class="invalid-feedback">{{ isValidApprovers ? '' : invalidApprovers }}</span>
     </div>
     <div v-if="isExternalApprovalRule" class="form-group gl-form-group">
-      <label class="col-form-label">{{ approvalGateLabel }}</label>
+      <label class="col-form-label">{{ statusCheckLabel }}</label>
       <input
         v-model="externalUrl"
-        :class="{ 'is-invalid': !isValidApprovalGateUrl }"
+        :class="{ 'is-invalid': !isValidStatusCheckUrl }"
         class="gl-form-input form-control"
-        name="approval_gate_url"
+        name="status_check_url"
         type="url"
         data-qa-selector="external_url_field"
       />
-      <span class="invalid-feedback">{{
-        isValidApprovalGateUrl ? '' : invalidApprovalGateUrl
-      }}</span>
+      <span class="invalid-feedback">{{ isValidStatusCheckUrl ? '' : invalidStatusCheckUrl }}</span>
       <small class="form-text text-gl-muted">
-        {{ $options.i18n.form.approvalGateDescription }}
+        {{ $options.i18n.form.statusCheckDescription }}
       </small>
     </div>
     <div v-if="!isExternalApprovalRule" class="bordered-box overflow-auto h-12em">

@@ -15,11 +15,9 @@ const i18n = {
     ),
   },
   externalRule: {
-    primaryButtonText: s__('ApprovalRuleRemove|Remove approval gate'),
-    modalTitle: s__('ApprovalRuleRemove|Remove approval gate?'),
-    removeWarningText: s__(
-      'ApprovalRuleRemove|You are about to remove the %{name} approval gate. Approval from this service is not revoked.',
-    ),
+    primaryButtonText: s__('ApprovalRuleRemove|Remove status check'),
+    modalTitle: s__('ApprovalRuleRemove|Remove status check?'),
+    removeWarningText: s__('ApprovalRuleRemove|You are about to remove the %{name} status check.'),
   },
 };
 

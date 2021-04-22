@@ -1,11 +1,11 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import ApprovalGateIcon from 'ee/approvals/components/approval_gate_icon.vue';
 import RuleInput from 'ee/approvals/components/mr_edit/rule_input.vue';
 import ProjectRules from 'ee/approvals/components/project_settings/project_rules.vue';
 import RuleName from 'ee/approvals/components/rule_name.vue';
 import Rules from 'ee/approvals/components/rules.vue';
 import UnconfiguredSecurityRules from 'ee/approvals/components/security_configuration/unconfigured_security_rules.vue';
+import StatusCheckIcon from 'ee/approvals/components/status_check_icon.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
@@ -160,8 +160,8 @@ describe('Approvals ProjectRules', () => {
       factory();
     });
 
-    it('renders the approval gate component with URL', () => {
-      expect(wrapper.findComponent(ApprovalGateIcon).props('url')).toBe(rule.externalUrl);
+    it('renders the status check component with URL', () => {
+      expect(wrapper.findComponent(StatusCheckIcon).props('url')).toBe(rule.externalUrl);
     });
 
     it('does not render a user avatar component', () => {
