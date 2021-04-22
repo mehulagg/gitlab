@@ -96,7 +96,7 @@ In the previous example, the chart shows statistics only for vulnerabilities of 
 To customize the view of the vulnerability chart, you can select:
 
 - A specific time frame by using the time range handles (**{scroll-handle}**).
-- A specific area of the chart by using the the left-most icon (**{marquee-selection}**) then drag
+- A specific area of the chart by using the left-most icon (**{marquee-selection}**) then drag
   across the chart. To reset to the original range, select **Remove Selection** (**{redo}**).
 
 ### Download a copy of the vulnerabilities chart
