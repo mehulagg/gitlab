@@ -743,6 +743,7 @@ module ProjectsHelper
       operations#show
       badges#index
       pages#show
+      packages_and_registries#index
     ]
   end
 
