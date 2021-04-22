@@ -195,7 +195,6 @@ create  config/metrics/counts_7d/i_closed_weekly.yml
 create  config/metrics/counts_28d/i_closed_monthly.yml
 ```
 
-NOTE:
 To create a metric definition used in EE, add the `--ee` flag.
 
 ```shell
