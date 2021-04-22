@@ -43,7 +43,7 @@ describe('Vulnerability Header', () => {
       id: 2,
       createdAt: new Date().toISOString(),
       url: 'pipeline_url',
-      sourceBranch: 'master',
+      sourceBranch: 'main',
     },
     description: 'description',
     identifiers: 'identifiers',
@@ -341,7 +341,7 @@ describe('Vulnerability Header', () => {
   });
 
   describe('when the vulnerability is no longer detected on the default branch', () => {
-    const branchName = 'master';
+    const branchName = 'main';
 
     beforeEach(() => {
       createWrapper({

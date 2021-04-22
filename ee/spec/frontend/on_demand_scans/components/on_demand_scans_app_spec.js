@@ -6,7 +6,7 @@ import { TEST_HOST } from 'helpers/test_constants';
 
 const helpPagePath = `${TEST_HOST}/application_security/dast/index#on-demand-scans`;
 const projectPath = 'group/project';
-const defaultBranch = 'master';
+const defaultBranch = 'main';
 const emptyStateSvgPath = `${TEST_HOST}/assets/illustrations/alert-management-empty-state.svg`;
 const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/security/configuration/dast_scans`;
 
