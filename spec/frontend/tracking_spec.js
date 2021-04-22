@@ -165,6 +165,14 @@ describe('Tracking', () => {
         '_passed_context_',
       ]);
     });
+
+    it('throws an error if no whitelist rules are provided', () => {
+      const expectedError = new Error('Unable to enable form event tracking without whitelist rules.');
+
+      expect(() => Tracking.enableFormTracking()).toThrow(expectedError);
+      expect(() => Tracking.enableFormTracking({ fields: { whitelist: [] } })).toThrow(expectedError);
+      expect(() => Tracking.enableFormTracking({ fields: { whitelist: [1] } })).not.toThrow(expectedError);
+    })
   });
 
   describe('.flushPendingEvents', () => {
