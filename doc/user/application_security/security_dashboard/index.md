@@ -75,26 +75,29 @@ CSV file containing details of the resources scanned.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285476) in GitLab 13.10, options to zoom in on a date range, and download the vulnerabilities chart.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285477) in GitLab 13.11, date range slider to visualize data between given dates.
 
-A project's Security Dashboard displays a chart with the number of vulnerabilities over time. It displays historical
-data up to 365 days old, and is updated daily. By default, statistics for vulnerabilities of all severity are shown.
+A project's Security Dashboard displays a chart with the total number of vulnerabilities
+over time. It updates daily with up to 365 days of historical data. By default,
+it shows statistics for all vulnerability severities.
 
-From your project's home page, go to **Security & Compliance > Security Dashboard**.
+To access the dashboard, from your project's home page go to **Security & Compliance > Security Dashboard**.
 
 ![Project Security Dashboard](img/project_security_dashboard_chart_v13_11.png)
 
 ### Filter the vulnerabilities chart
 
-To exclude or include vulnerabilities of specific severity, select the corresponding legend name.
+To filter the chart by vulnerability severity, select the corresponding legend name.
 
-In the previous example, the chart shows statistics only for vulnerabilities of medium and unknown severity.
+In the previous example, the chart shows statistics only for vulnerabilities of medium or unknown severity.
 
 ### Focus on part of the vulnerabilities chart
 
-To focus the view of vulnerabilities, you can select a specific time frame, or a specific area of the chart.
+### Customize vulnerabilities chart display
 
-To select a specific time frame, drag the time range handles (**{scroll-handle}**).
+To customize the view of the vulnerability chart, you can select:
 
-To select an area of the chart, select the left-most icon (**{marquee-selection}**), then select the desired range by dragging across the chart. To reset to the original range, select **Remove Selection** (**{redo}**).
+- A specific time frame by using the time range handles (**{scroll-handle}**).
+- A specific area of the chart by using the the left-most icon (**{marquee-selection}**) then drag
+  across the chart. To reset to the original range, select **Remove Selection** (**{redo}**).
 
 ### Download a copy of the vulnerabilities chart
 
