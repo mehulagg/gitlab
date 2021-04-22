@@ -5,8 +5,11 @@ module Security
     class OnDemandScanPipelineConfigurationService
       include Gitlab::Utils::StrongMemoize
 
+      attr_reader :project, :warnings
+
       def initialize(project)
         @project = project
+        @warnings = []
       end
 
       def execute(actions)
@@ -19,17 +22,19 @@ module Security
 
       DAST_ON_DEMAND_TEMPLATE_NAME = 'DAST-On-Demand-Scan'
 
-      attr_reader :project
-
       def prepare_policy_configuration(action, index)
         {
-          "dast-on-demand-#{index}" => prepare_on_demand_scan_configuration(action)
-        }.deep_symbolize_keys
+          "dast-on-demand-#{index}" => prepare_on_demand_scan_configuration(action, index)
+        }.compact.deep_symbolize_keys
       end
 
-      def prepare_on_demand_scan_configuration(action)
+      def prepare_on_demand_scan_configuration(action, index)
         result = prepare_on_demand_scan_params(action[:site_profile], action[:scanner_profile])
-        return error_script(result.message) unless result.success?
+
+        unless result.success?
+          @warnings << _('scan-execution-policy-%{index}: %{error_message}') % { index: index, error_message: result.message }
+          return
+        end
 
         ci_configuration = YAML.safe_load(::Ci::DastScanCiConfigurationService.execute(result.payload))
 
@@ -53,13 +58,6 @@ module Security
           template = ::TemplateFinder.build(:gitlab_ci_ymls, nil, name: DAST_ON_DEMAND_TEMPLATE_NAME).execute
           Gitlab::Config::Loader::Yaml.new(template.content).load!
         end
-      end
-
-      def error_script(error_message)
-        {
-          'script' => "echo \"Error during On-Demand Scan execution: #{error_message}\" && false",
-          'allow_failure' => true
-        }
       end
     end
   end

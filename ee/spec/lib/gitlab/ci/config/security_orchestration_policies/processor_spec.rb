@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
-  subject { described_class.new(config, project, ref).perform }
+  let(:policy_processor) { described_class.new(config, project, ref) }
+  subject { policy_processor.perform }
 
   let_it_be(:config) { { image: 'ruby:3.0.1' } }
 
@@ -69,14 +70,11 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
           end
         end
 
-        it 'modifies the config with failing job' do
-          expect(subject).to eq(
-            image: 'ruby:3.0.1',
-            'scan-execution-policy': {
-              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is missing" && false',
-              allow_failure: true
-            }
-          )
+        it 'does not modify the config and return warning messages', :aggregate_failures do
+          subject
+
+          expect(subject).to eq(config)
+          expect(policy_processor.warnings).to eq(['scan-execution-policy: policy not applied, .gitlab/security-policies/policy.yml file is missing'])
         end
       end
 
@@ -97,14 +95,11 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
           EOS
         end
 
-        it 'modifies the config with failing job' do
-          expect(subject).to eq(
-            image: 'ruby:3.0.1',
-            'scan-execution-policy': {
-              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is invalid" && false',
-              allow_failure: true
-            }
-          )
+        it 'does not modify the config and return warning messages', :aggregate_failures do
+          subject
+
+          expect(subject).to eq(config)
+          expect(policy_processor.warnings).to eq(['scan-execution-policy: policy not applied, .gitlab/security-policies/policy.yml file is invalid'])
         end
       end
 
@@ -118,11 +113,11 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
         let_it_be(:ref) { 'production' }
 
         context 'when DAST profiles are not found' do
-          it 'does not modify the config' do
-            expect(subject).to eq(
-              image: 'ruby:3.0.1',
-              'dast-on-demand-0': { allow_failure: true, script: 'echo "Error during On-Demand Scan execution: Dast site profile was not provided" && false' }
-            )
+          it 'does not modify the config and return warning messages', :aggregate_failures do
+            subject
+
+            expect(subject).to eq(config)
+            expect(policy_processor.warnings).to eq(['scan-execution-policy-0: Dast site profile was not provided'])
           end
         end
 

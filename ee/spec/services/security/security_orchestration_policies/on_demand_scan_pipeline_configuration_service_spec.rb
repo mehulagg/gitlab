@@ -76,7 +76,7 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
       pipeline_configuration
     end
 
-    it 'returns prepared CI configuration with DAST On-Demand scans defined' do
+    it 'returns prepared CI configuration with DAST On-Demand scans defined', :aggregate_failures do
       expected_configuration = {
         'dast-on-demand-0': {
           stage: 'test',
@@ -97,14 +97,11 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
           allow_failure: true,
           script: ['/analyze'],
           artifacts: { reports: { dast: 'gl-dast-report.json' } }
-        },
-        'dast-on-demand-1': {
-          script: 'echo "Error during On-Demand Scan execution: Dast site profile was not provided" && false',
-          allow_failure: true
         }
       }
 
       expect(pipeline_configuration).to eq(expected_configuration)
+      expect(service.warnings).to eq(['scan-execution-policy-1: Dast site profile was not provided'])
     end
   end
 end

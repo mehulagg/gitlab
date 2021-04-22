@@ -25,7 +25,11 @@ module EE
         end
 
         def process_security_orchestration_policy_includes(config)
-          ::Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor.new(config, context.project, ref).perform
+          policy_processor = ::Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor.new(config, context.project, ref)
+          config_with_policies = policy_processor.perform
+          add_config_warning(policy_processor.warnings)
+
+          config_with_policies
         end
       end
     end

@@ -25,6 +25,7 @@ module Gitlab
 
         @ref = ref
 
+        @config_warnings = []
         @config = expand_config(config)
 
         @root = Entry::Root.new(@config)
@@ -43,7 +44,7 @@ module Gitlab
       end
 
       def warnings
-        @root.warnings
+        @root.warnings + @config_warnings
       end
 
       def to_hash
@@ -118,6 +119,10 @@ module Gitlab
 
       def track_and_raise_for_dev_exception(error)
         Gitlab::ErrorTracking.track_and_raise_for_dev_exception(error, @context.sentry_payload)
+      end
+
+      def add_config_warning(warning)
+        @config_warnings += Array.wrap(warning)
       end
 
       # Overridden in EE

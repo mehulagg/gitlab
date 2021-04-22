@@ -27,11 +27,9 @@ module Security
     end
 
     def policy_configuration_valid?
-      return false unless policy_configuration_exists?
-
       JSONSchemer
         .schema(Rails.root.join(POLICY_SCHEMA_PATH))
-        .valid?(policy_hash.deep_stringify_keys)
+        .valid?(policy_hash.to_h.deep_stringify_keys)
     end
 
     def active_policies

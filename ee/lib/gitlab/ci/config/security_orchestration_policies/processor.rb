@@ -5,48 +5,45 @@ module Gitlab
     class Config
       module SecurityOrchestrationPolicies
         class Processor
+          attr_reader :project, :warnings
+
+          delegate :security_orchestration_policy_configuration, to: :project, allow_nil: true
+
           def initialize(config, project, ref)
             @config = config
             @project = project
             @ref = ref
+            @warnings = []
           end
 
           def perform
             return @config unless project&.feature_available?(:security_orchestration_policies)
             return @config unless security_orchestration_policy_configuration&.enabled?
 
-            @config
-              .deep_merge(on_demand_scans_template)
-          end
+            validate_policy_configuration!
+            return @config if @warnings.present?
 
-          def on_demand_scans_template
-            return EMPTY_POLICY_JOB_TEMPLATE unless security_orchestration_policy_configuration.policy_configuration_exists?
-            return INVALID_POLICY_JOB_TEMPLATE unless security_orchestration_policy_configuration.policy_configuration_valid?
-
-            ::Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConfigurationService
-              .new(project)
-              .execute(security_orchestration_policy_configuration.on_demand_scan_actions(@ref))
+            @config.deep_merge(on_demand_scans_template)
           end
 
           private
 
-          attr_reader :project
+          def on_demand_scans_template
+            configuration_service = ::Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConfigurationService.new(project)
+            template = configuration_service.execute(security_orchestration_policy_configuration.on_demand_scan_actions(@ref))
 
-          delegate :security_orchestration_policy_configuration, to: :project, allow_nil: true
+            @warnings += configuration_service.warnings
 
-          EMPTY_POLICY_JOB_TEMPLATE = {
-            'scan-execution-policy': {
-              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is missing" && false',
-              allow_failure: true
-            }
-          }.freeze
+            template
+          end
 
-          INVALID_POLICY_JOB_TEMPLATE = {
-            'scan-execution-policy': {
-              script: 'echo "Scan Policies were not applied, .gitlab/security-policies/policy.yml file is invalid" && false',
-              allow_failure: true
-            }
-          }.freeze
+          def validate_policy_configuration!
+            if !security_orchestration_policy_configuration.policy_configuration_exists?
+              @warnings << _('scan-execution-policy: policy not applied, %{policy_path} file is missing') % { policy_path: Security::OrchestrationPolicyConfiguration::POLICY_PATH }
+            elsif !security_orchestration_policy_configuration.policy_configuration_valid?
+              @warnings << _('scan-execution-policy: policy not applied, %{policy_path} file is invalid') % { policy_path: Security::OrchestrationPolicyConfiguration::POLICY_PATH }
+            end
+          end
         end
       end
     end
