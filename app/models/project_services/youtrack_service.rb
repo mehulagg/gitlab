@@ -29,4 +29,11 @@ class YoutrackService < IssueTrackerService
   def self.to_param
     'youtrack'
   end
+
+  def fields
+    [
+      { type: 'text', name: 'project_url', title: _('Project URL'), required: true },
+      { type: 'text', name: 'issues_url', title: s_('ProjectService|Issue URL'), required: true }
+    ]
+  end
 end
