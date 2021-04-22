@@ -43,19 +43,6 @@ module EE
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    override :by_assignee
-    def by_assignee(items)
-      if params.assignees.any?
-        params.assignees.each do |assignee|
-          items = items.assigned_to(assignee)
-        end
-
-        return items
-      end
-
-      super
-    end
-
     def by_epic(items)
       return items unless params.by_epic?
 

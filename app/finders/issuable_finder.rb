@@ -376,26 +376,12 @@ class IssuableFinder
   end
 
   def by_assignee(items)
-    if params.filter_by_no_assignee?
-      items.unassigned
-    elsif params.filter_by_any_assignee?
-      items.assigned
-    elsif params.assignee
-      items.assigned_to(params.assignee)
-    elsif params.assignee_id? || params.assignee_username? # assignee not found
-      items.none
-    else
-      items
-    end
-  end
-
-  def by_negated_assignee(items)
-    # We want CE users to be able to say "Issues not assigned to either PersonA nor PersonB"
-    if not_params.assignees.present?
-      items.not_assigned_to(not_params.assignees)
-    else
-      items
-    end
+    Issuables::AssigneeFilter.new(
+      items,
+      params: original_params,
+      or_filters_enabled: or_filters_enabled?,
+      not_filters_enabled: not_filters_enabled?
+    ).filter
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
