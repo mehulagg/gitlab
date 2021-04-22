@@ -5,6 +5,8 @@ import {
 import { DOMParser as ProseMirrorDOMParser } from 'prosemirror-model';
 
 const wrapHtmlPayload = (payload) => `<div>${payload}</div>`;
+const nodeSerializerAlias = (serializerFn) => (...args) => serializerFn(...args);
+const markSerializerAlias = (serializerSpec) => ({ ...serializerSpec });
 
 /**
  * A markdown serializer converts arbitrary Markdown content
@@ -54,14 +56,24 @@ const create = ({ render = () => null }) => {
      */
     serialize: ({ schema, content }) => {
       const document = schema.nodeFromJSON(content);
-      const serializer = new ProseMirrorMarkdownSerializer(defaultMarkdownSerializer.nodes, {
-        ...defaultMarkdownSerializer.marks,
-        bold: {
-          // creates a bold alias for the strong mark converter
-          ...defaultMarkdownSerializer.marks.strong,
+      const { nodes, marks } = defaultMarkdownSerializer;
+
+      const serializer = new ProseMirrorMarkdownSerializer(
+        {
+          ...defaultMarkdownSerializer.nodes,
+          horizontalRule: nodeSerializerAlias(nodes.horizontal_rule),
+          bulletList: nodeSerializerAlias(nodes.bullet_list),
+          listItem: nodeSerializerAlias(nodes.list_item),
+          orderedList: nodeSerializerAlias(nodes.ordered_list),
+          codeBlock: nodeSerializerAlias(nodes.code_block),
+          hardBreak: nodeSerializerAlias(nodes.hard_break),
         },
-        italic: { open: '_', close: '_', mixable: true, expelEnclosingWhitespace: true },
-      });
+        {
+          ...defaultMarkdownSerializer.marks,
+          bold: markSerializerAlias(marks.strong),
+          italic: { open: '_', close: '_', mixable: true, expelEnclosingWhitespace: true },
+        },
+      );
 
       return serializer.serialize(document, {
         tightLists: true,
