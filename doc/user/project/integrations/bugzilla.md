@@ -22,7 +22,6 @@ To enable the Bugzilla integration in a project:
    - **Project URL**: The URL to the project in Bugzilla.
      For example, for a product named "Fire Tanuki":
      `https://bugzilla.example.org/describecomponents.cgi?product=Fire+Tanuki`.
-     The URL requires PRODUCT_NAME to be updated with the product/project name in Bugzilla.
    - **Issue URL**: The URL to view an issue in the Bugzilla project.
      The URL must contain `:id`. GitLab replaces `:id` with the issue number (for example,
      `https://bugzilla.example.org/show_bug.cgi?id=:id`, which becomes
