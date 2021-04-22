@@ -1,0 +1,5 @@
+query getRunner($id: ID!) {
+  runner(id: $id) {
+    runnerType
+  }
+}
