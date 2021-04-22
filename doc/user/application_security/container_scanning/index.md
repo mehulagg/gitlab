@@ -271,11 +271,12 @@ taking the following steps:
 
 1. Take the following actions in your CI file:
 
-   | Variable          | Recommended Action                     | Job scope                              | Notes |
-   | ----------------- | -------------------------------------- | -------------------------------------- | --- |
-   | CS_MAJOR_VERSION  | Set it to `4`                          | global variables or under `.cs_common` | |
-   | CS_PROJECT        | Remove this variable from your CI file | `container_scanning_new`               | Setting it to `container-scanning` under the correct scope will have the same effect as removing it from your CI file |
-   | CS_ANALYZER_IMAGE | Remove this variable from your CI file | `.cs_common`                           | Please use CS_MAJOR_VERSION instead of overriding this variable |
+   - Set the variable `CS_MAJOR_VERSION` to `4`. The job scope is global variables, or under `.cs_common`.
+   - Remove the variable `CS_PROJECT` from your CI file. The job scope is `container_scanning_new`.
+     Setting this variable to `container-scanning` under the correct scope has the same effect as
+     removing it from your CI file.
+   - Remove the `CS_ANALYZER_IMAGE` variable from your CI file. The job scope is `.cs_common`. Note
+     that instead of overriding this variable, you can use `CS_MAJOR_VERSION`.
 
 1. Remove any variables that are only applicable to Klar. For a complete list of these variables, please check the [table of available variables](#available-variables).
 1. Make any [necessary customizations](#customizing-the-container-scanning-settings) to the `Trivy` scanner. It is strongly recommended to minimize customizations whenever possible, as they might require changes in future GitLab major releases.
