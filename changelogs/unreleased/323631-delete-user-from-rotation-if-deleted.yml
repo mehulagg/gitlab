@@ -1,0 +1,5 @@
+---
+title: Delete user from rotation if user is deleted
+merge_request:
+author:
+type: added

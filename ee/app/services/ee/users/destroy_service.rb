@@ -9,6 +9,7 @@ module EE
       def execute(user, options = {})
         result = super(user, options) do |delete_user|
           mirror_cleanup(delete_user)
+          oncall_rotations_cleanup(delete_user)
         end
 
         log_audit_event(user) if result.try(:destroyed?)
@@ -28,6 +29,15 @@ module EE
           )
 
           ::NotificationService.new.mirror_was_disabled(mirror, user.name)
+        end
+      end
+
+      def oncall_rotations_cleanup(user)
+        user.oncall_rotations.each do |rotation|
+          ::IncidentManagement::OncallRotations::RemoveParticipantService.new(
+            rotation,
+            user
+          ).execute
         end
       end
 
