@@ -782,6 +782,10 @@ module ProjectsHelper
   end
 
   def settings_container_registry_expiration_policy_available?(project)
+    Feature.disabled?(:project_sidebar_refactor) &&
+    Gitlab.config.registry.enabled &&
+      can?(current_user, :destroy_container_image, project)
+  end
     Gitlab.config.registry.enabled &&
       can?(current_user, :destroy_container_image, project)
   end
