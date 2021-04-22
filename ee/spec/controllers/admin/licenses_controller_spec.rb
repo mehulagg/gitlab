@@ -134,4 +134,36 @@ RSpec.describe Admin::LicensesController do
       end
     end
   end
+
+  describe 'DELETE destroy' do
+    let(:cloud_licenses) { License.where(cloud: true) }
+
+    before do
+      allow(License).to receive(:current).and_return(create(:license, cloud: is_cloud_license))
+    end
+
+    context 'with a cloud license' do
+      let(:is_cloud_license) { true }
+
+      it 'is can not be removed' do
+        delete :destroy
+
+        expect(response).to redirect_to(admin_license_path)
+        expect(flash[:error]).to match('Cloud licenses can not be removed.')
+        expect(cloud_licenses).to be_present
+      end
+    end
+
+    context 'with a legacy license' do
+      let(:is_cloud_license) { false }
+
+      it 'is can be removed' do
+        delete :destroy
+
+        expect(response).to redirect_to(admin_license_path)
+        expect(flash[:notice]).to match('The license was removed. GitLab has fallen back on the previous license.')
+        expect(cloud_licenses).to be_empty
+      end
+    end
+  end
 end
