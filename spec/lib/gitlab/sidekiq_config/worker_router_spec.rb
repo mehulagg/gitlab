@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
+require 'spec_helper'
 require 'rspec-parameterized'
 
 RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
@@ -17,6 +17,8 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
     where(:worker, :expected_name) do
       create_worker('PagesWorker') | 'pages'
       create_worker('PipelineNotificationWorker') | 'pipeline_notification'
+      create_worker('PostReceive') | 'post_receive'
+      create_worker('PostReceive', :git) | 'git:post_receive'
       create_worker('PipelineHooksWorker', :pipeline_hooks) | 'pipeline_hooks:pipeline_hooks'
       create_worker('Gitlab::JiraImport::AdvanceStageWorker') | 'jira_import_advance_stage'
       create_worker('Gitlab::JiraImport::AdvanceStageWorker') | 'jira_import_advance_stage'
@@ -64,6 +66,12 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
         ['resource_boundary=cpu', nil],
         ['tags=cheap', 'queue_c']
       ] | 'foo_bar'
+      # Match an empty string, fallback to named queue
+      [
+        ['feature_category=feature_b|urgency=high', 'queue_a'],
+        ['resource_boundary=cpu', ''],
+        ['tags=cheap', 'queue_c']
+      ] | 'foo_bar'
       # Match the first criteria
       [
         ['feature_category=feature_a|urgency=high', 'queue_a'],
@@ -88,6 +96,12 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
         ['resource_boundary=cpu', 'queue_b'],
         ['tags=expensive', 'queue_c']
       ] | 'queue_a'
+      # Match the same criteria multiple times, the first match wins
+      [
+        ['feature_category=feature_a', 'queue_a'],
+        ['feature_category=feature_a', 'queue_b'],
+        ['feature_category=feature_a', 'queue_c']
+      ] | 'queue_a'
       # Match wildcard
       [
         ['feature_category=feature_b|urgency=high', 'queue_a'],
@@ -95,6 +109,13 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
         ['tags=cheap', 'queue_c'],
         ['*', 'default']
       ] | 'default'
+      # Match wildcard at the top of the chain. It makes the following rules useless
+      [
+        ['*', 'queue_foo'],
+        ['feature_category=feature_b|urgency=high', 'queue_a'],
+        ['resource_boundary=memory', 'queue_b'],
+        ['tags=cheap', 'queue_c']
+      ] | 'queue_foo'
     end
   end
 
