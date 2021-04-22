@@ -15,6 +15,7 @@ describe('the graph view selector component', () => {
 
   const defaultProps = {
     showLinks: false,
+    tipPreviouslyDismissed: false,
     type: STAGE_VIEW,
   };
 

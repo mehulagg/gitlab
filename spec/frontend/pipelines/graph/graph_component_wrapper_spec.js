@@ -17,7 +17,8 @@ import GraphViewSelector from '~/pipelines/components/graph/graph_view_selector.
 import StageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
 import LinksLayer from '~/pipelines/components/graph_shared/links_layer.vue';
 import * as parsingUtils from '~/pipelines/components/parsing_utils';
-import { mockPipelineResponse } from './mock_data';
+import getUserCallouts from '~/pipelines/graphql/queries/get_user_callouts.query.graphql';
+import { mapCallouts, mockCalloutsResponse, mockPipelineResponse } from './mock_data';
 
 const defaultProvide = {
   graphqlResourceEtag: 'frog/amphibirama/etag/',
@@ -62,12 +63,19 @@ describe('Pipeline graph wrapper', () => {
   };
 
   const createComponentWithApollo = ({
+    calloutsList = [],
     data = {},
     getPipelineDetailsHandler = jest.fn().mockResolvedValue(mockPipelineResponse),
     mountFn = shallowMount,
     provide = {},
   } = {}) => {
-    const requestHandlers = [[getPipelineDetails, getPipelineDetailsHandler]];
+    const callouts = mapCallouts(calloutsList);
+    const getUserCalloutsHandler = jest.fn().mockResolvedValue(mockCalloutsResponse(callouts));
+
+    const requestHandlers = [
+      [getPipelineDetails, getPipelineDetailsHandler],
+      [getUserCallouts, getUserCalloutsHandler],
+    ];
 
     const apolloProvider = createMockApollo(requestHandlers);
     createComponent({ apolloProvider, data, provide, mountFn });
