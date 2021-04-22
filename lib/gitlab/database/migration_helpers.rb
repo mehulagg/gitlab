@@ -969,6 +969,20 @@ module Gitlab
         end
       end
 
+      # Reverts `initialize_conversion_of_integer_to_bigint`
+      #
+      # table - The name of the database table containing the columns
+      # columns - The name, or array of names, of the column(s) that we're converting to bigint.
+      def revert_initialize_conversion_of_integer_to_bigint(table, columns)
+        columns = Array.wrap(columns)
+        temporary_columns = columns.map { |column| "#{column}_convert_to_bigint" }
+
+        trigger_name = rename_trigger_name(table, columns, temporary_columns)
+        remove_rename_triggers_for_postgresql(table, trigger_name)
+
+        temporary_columns.each { |column| remove_column(table, column) }
+      end
+
       # Backfills the new columns used in an integer-to-bigint conversion using background migrations.
       #
       # - This helper should be called from a post-deployment migration.

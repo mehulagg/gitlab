@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Database::MigrationHelpers do
   include Database::TableSchemaHelpers
+  include Database::TriggerHelpers
 
   let(:model) do
     ActiveRecord::Migration.new.extend(described_class)
@@ -1787,6 +1788,48 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         expect(model).to receive(:install_rename_triggers).with(table, columns_to_convert, temporary_columns)
 
         model.initialize_conversion_of_integer_to_bigint(table, columns_to_convert)
+      end
+    end
+  end
+
+  describe '#revert_initialize_conversion_of_integer_to_bigint' do
+    let(:table) { :test_table }
+
+    before do
+      model.create_table table, id: false do |t|
+        t.integer :id, primary_key: true
+        t.integer :other_id
+      end
+
+      model.initialize_conversion_of_integer_to_bigint(table, columns)
+    end
+
+    context 'when single column is given' do
+      let(:columns) { :id }
+
+      it 'removes column, trigger, and function' do
+        trigger_name = model.rename_trigger_name(table, :id, :id_convert_to_bigint)
+
+        model.revert_initialize_conversion_of_integer_to_bigint(table, columns)
+
+        expect(model.column_exists?(table, :id_convert_to_bigint)).to eq(false)
+        expect_trigger_not_to_exist(table, trigger_name)
+        expect_function_not_to_exist(trigger_name)
+      end
+    end
+
+    context 'when multiple columns are given' do
+      let(:columns) { [:id, :other_id] }
+
+      it 'removes column, trigger, and function' do
+        trigger_name = model.rename_trigger_name(table, columns, [:id_convert_to_bigint, :other_id_convert_to_bigint])
+
+        model.revert_initialize_conversion_of_integer_to_bigint(table, columns)
+
+        expect(model.column_exists?(table, :id_convert_to_bigint)).to eq(false)
+        expect(model.column_exists?(table, :other_id_convert_to_bigint)).to eq(false)
+        expect_trigger_not_to_exist(table, trigger_name)
+        expect_function_not_to_exist(trigger_name)
       end
     end
   end
