@@ -31,7 +31,8 @@ module QA
       end
 
       it 'can be followed and their activity seen', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1663' do
-        navigate_to_user_profile(user)
+        Flow::Login.sign_in_unless_signed_in
+        page.visit Runtime::Scenario.gitlab_address + "/#{user.username}"
 
         Page::User::Show.perform(&:click_follow_user_link)
 
@@ -48,11 +49,6 @@ module QA
           show.click_user_link(user.username)
           expect(show).to have_activity('created project')
         end
-      end
-
-      def navigate_to_user_profile(user)
-        Flow::Login.sign_in_unless_signed_in
-        page.visit Runtime::Scenario.gitlab_address + "/#{user.username}"
       end
 
       after do
