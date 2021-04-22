@@ -186,7 +186,7 @@ describe('Standard Filter component', () => {
   });
 
   describe('filter querystring', () => {
-    const updateRouteQuery = async (ids) => {
+    const updateQueryString = async (ids) => {
       // window.history.back() won't change the location nor fire the popstate event, so we need
       // to fake it by doing it manually.
       router.replace({ query: { [filter.id]: ids } });
@@ -221,7 +221,7 @@ describe('Standard Filter component', () => {
 
     describe('querystring on page load', () => {
       it('selects correct items', () => {
-        updateRouteQuery(optionIdsAt([1, 3, 5, 7]));
+        updateQueryString(optionIdsAt([1, 3, 5, 7]));
         createWrapper();
 
         expectSelectedItems([1, 3, 5, 7]);
@@ -229,21 +229,21 @@ describe('Standard Filter component', () => {
 
       it('selects only valid items when querystring has valid and invalid IDs', async () => {
         const ids = optionIdsAt([2, 4, 6]).concat(['some', 'invalid', 'ids']);
-        updateRouteQuery(ids);
+        updateQueryString(ids);
         createWrapper();
 
         expectSelectedItems([2, 4, 6]);
       });
 
       it('selects default options if querystring only has invalid items', async () => {
-        updateRouteQuery(['some', 'invalid', 'ids']);
+        updateQueryString(['some', 'invalid', 'ids']);
         createWrapper({ defaultOptions: optionsAt([4, 5, 8]) });
 
         expectSelectedItems([4, 5, 8]);
       });
 
       it('selects All option if querystring only has invalid IDs and there are no default options', async () => {
-        updateRouteQuery(['some', 'invalid', 'ids']);
+        updateQueryString(['some', 'invalid', 'ids']);
         createWrapper();
 
         expectAllOptionSelected();
@@ -254,7 +254,7 @@ describe('Standard Filter component', () => {
       it('selects the correct options', async () => {
         createWrapper();
         const indexes = [3, 5, 7];
-        await updateRouteQuery(optionIdsAt(indexes));
+        await updateQueryString(optionIdsAt(indexes));
 
         expectSelectedItems(indexes);
       });
@@ -265,7 +265,7 @@ describe('Standard Filter component', () => {
         await clickItemAt(3);
         expectSelectedItems([2, 3, 5, 8]);
 
-        await updateRouteQuery([]);
+        await updateQueryString([]);
         expectSelectedItems([2, 5, 8]);
       });
 
@@ -275,7 +275,7 @@ describe('Standard Filter component', () => {
         await clickItemAt(3);
         expectSelectedItems([3]);
 
-        await updateRouteQuery([]);
+        await updateQueryString([]);
         expectAllOptionSelected();
       });
 
@@ -283,13 +283,13 @@ describe('Standard Filter component', () => {
         createWrapper({ defaultOptions: optionsAt([2, 4, 8]) });
         expectSelectedItems([2, 4, 8]);
 
-        await updateRouteQuery([filter.allOption.id]);
+        await updateQueryString([filter.allOption.id]);
         expectAllOptionSelected();
       });
 
       it('selects All option if querystring has all option ID as well as other IDs', async () => {
         createWrapper({ defaultOptions: optionsAt([5, 6, 9]) });
-        await updateRouteQuery([filter.allOption.id, ...optionIdsAt([1, 2])]);
+        await updateQueryString([filter.allOption.id, ...optionIdsAt([1, 2])]);
 
         expectAllOptionSelected();
       });
@@ -297,7 +297,7 @@ describe('Standard Filter component', () => {
       it('selects only valid items when querystring has valid and invalid IDs', async () => {
         createWrapper();
         const ids = optionIdsAt([3, 7, 9]).concat(['some', 'invalid', 'ids']);
-        await updateRouteQuery(ids);
+        await updateQueryString(ids);
 
         expectSelectedItems([3, 7, 9]);
       });
@@ -308,7 +308,7 @@ describe('Standard Filter component', () => {
         await clickItemAt(8);
         expectSelectedItems([1, 3, 4, 8]);
 
-        await updateRouteQuery(['some', 'invalid', 'ids']);
+        await updateQueryString(['some', 'invalid', 'ids']);
         expectSelectedItems([1, 3, 4]);
       });
 
@@ -318,7 +318,7 @@ describe('Standard Filter component', () => {
         await clickItemAt(8);
         expectSelectedItems([8]);
 
-        await updateRouteQuery(['some', 'invalid', 'ids']);
+        await updateQueryString(['some', 'invalid', 'ids']);
         expectAllOptionSelected();
       });
 

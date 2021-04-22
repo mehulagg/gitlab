@@ -47,20 +47,20 @@ export default {
     },
     filterObject() {
       // This is the object used by the GraphQL query.
-      return { [this.filter.id]: this.selectedOptions.map((x) => x.id) };
+      return { [this.filter.id]: this.selectedOptions?.map((x) => x.id) };
     },
     filteredOptions() {
       return this.options.filter((option) =>
         option.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
       );
     },
-    routeQueryIds() {
+    queryStringIds() {
       const ids = this.$route?.query[this.filter.id] || [];
       return Array.isArray(ids) ? ids : [ids];
     },
-    routeQueryOptions() {
-      const options = this.options.filter((x) => this.routeQueryIds.includes(x.id));
-      const hasAllId = this.routeQueryIds.includes(this.filter.allOption.id);
+    queryStringOptions() {
+      const options = this.options.filter((x) => this.queryStringIds.includes(x.id));
+      const hasAllId = this.queryStringIds.includes(this.filter.allOption.id);
 
       if (options.length && !hasAllId) {
         return options;
@@ -75,6 +75,7 @@ export default {
   watch: {
     selectedOptions() {
       this.$emit('filter-changed', this.filterObject);
+      this.updateQueryString();
     },
   },
   created() {
@@ -88,22 +89,18 @@ export default {
     toggleOption(option) {
       // Toggle the option's existence in the array.
       this.selectedOptions = xor(this.selectedOptions, [option]);
-      this.updateRouteQuery();
     },
     deselectAllOptions() {
       this.selectedOptions = [];
-      this.updateRouteQuery();
     },
-    updateRouteQuery() {
-      if (!this.$router) {
+    updateQueryString() {
+      // To avoid a console error, don't update the query string if it's the same as the current one.
+      if (!this.$router || isEqual(this.queryStringIds, this.queryObject[this.filter.id])) {
         return;
       }
 
       const query = { query: { ...this.$route?.query, ...this.queryObject } };
-      // To avoid a console error, don't update the querystring if it's the same as the current one.
-      if (!isEqual(this.routeQueryIds, this.queryObject[this.filter.id])) {
-        this.$router.push(query);
-      }
+      this.$router.push(query);
     },
     isSelected(option) {
       return this.selectedSet.has(option);

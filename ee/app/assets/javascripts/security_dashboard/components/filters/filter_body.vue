@@ -73,7 +73,7 @@ export default {
       @show="emitDropdownShow"
       @hide="$emit('dropdown-hide')"
     >
-      <template #button-text>
+      <template v-if="!loading" #button-text>
         <gl-truncate
           :text="firstSelectedOption"
           class="gl-min-w-0 gl-mr-2"

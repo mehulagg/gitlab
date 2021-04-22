@@ -106,14 +106,20 @@ describe('Filter Body component', () => {
   });
 
   describe('loading icon', () => {
-    it.each`
-      phrase     | loading
-      ${'shows'} | ${true}
-      ${'hides'} | ${false}
-    `('$phrase the loading icon when the loading prop is $loading', ({ loading }) => {
-      createComponent({ loading });
+    const option = { name: 'Option Name' };
 
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(loading);
-    });
+    it.each`
+      loading  | buttonText
+      ${true}  | ${''}
+      ${false} | ${option.name}
+    `(
+      'shows expected loading icon and button text when the loading prop is $loading',
+      ({ loading, buttonText }) => {
+        createComponent({ loading, selectedOptions: [option] });
+
+        expect(wrapper.find(GlLoadingIcon).exists()).toBe(loading);
+        expect(dropdownButton().text()).toBe(buttonText);
+      },
+    );
   });
 });
