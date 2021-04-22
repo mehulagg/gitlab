@@ -31,7 +31,7 @@ class Admin::LicensesController < Admin::ApplicationController
 
     @license = License.new(license_params)
 
-    return upload_license_error if @license.cloud?
+    return upload_license_error if @license.cloud_license?
 
     respond_with(@license, location: admin_license_path) do
       if @license.save

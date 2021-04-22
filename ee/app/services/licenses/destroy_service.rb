@@ -10,7 +10,7 @@ module Licenses
     def execute
       raise ActiveRecord::RecordNotFound unless license
       raise Gitlab::Access::AccessDeniedError unless can?(user, :destroy_licenses)
-      raise DestroyCloudLicenseError.new(_('Cloud licenses can not be removed.')) if license.cloud?
+      raise DestroyCloudLicenseError.new(_('Cloud licenses can not be removed.')) if license.cloud_license?
 
       license.destroy
     end

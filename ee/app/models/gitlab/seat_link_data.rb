@@ -29,7 +29,7 @@ module Gitlab
     def should_sync_seats?
       return false unless license
 
-      if license.cloud?
+      if license.cloud_license?
         !license.trial? &&
           license.expires_at.present? # Skip sync if license has no expiration
       else
