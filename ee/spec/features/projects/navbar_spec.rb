@@ -61,6 +61,7 @@ RSpec.describe 'Project navbar' do
   context 'when packages are available' do
     before do
       stub_config(packages: { enabled: true }, registry: { enabled: false })
+      stub_feature_flags(project_sidebar_refactor: false)
 
       visit project_path(project)
     end
