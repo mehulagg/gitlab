@@ -1,3 +1,5 @@
+# FIXME: Hack to trigger PG12 rspec jobs
+
 #######################
 # rspec job base specs
 .rails-job-base:
