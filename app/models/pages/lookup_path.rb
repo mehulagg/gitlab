@@ -65,16 +65,12 @@ module Pages
     end
 
     def legacy_source
-      raise LegacyStorageDisabledError unless Feature.enabled?(:pages_serve_from_legacy_storage, default_enabled: true)
+      return unless ::Settings.pages.local_store.enabled
 
       {
         type: 'file',
         path: File.join(project.full_path, 'public/')
       }
-    rescue LegacyStorageDisabledError => e
-      Gitlab::ErrorTracking.track_exception(e, project_id: project.id)
-
-      nil
     end
   end
 end
