@@ -50,7 +50,7 @@ More detailed information on how the gem and its commands work is available in t
 
 ## Encryption keys
 
-If your license was created in your local development or staging env for CustomersDot or LicenseDot, an environment variable called `GITLAB_LICENSE_MODE` with the value `test` needs to be set to use the correct decryption key.
+If your license was created in your local development or staging environment for Customers Portal or License App, an environment variable called `GITLAB_LICENSE_MODE` with the value `test` needs to be set to use the correct decryption key.
 
 Those projects are set to use a test license encryption key by default.
 
