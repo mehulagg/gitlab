@@ -61,6 +61,10 @@ In each place, if you hover over the failed job you can see the reason it failed
 In [GitLab 10.8](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17814) and later,
 you can also see the reason it failed on the Job detail page.
 
+> For a quick, visual walkthrough of how to find your failed jobs in GitLab:
+>
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch [Is your CI pipeline failing? Use GitLab to find failed jobs on your merge requests.](https://youtu.be/kCTHba_CEwA).
+
 ## The order of jobs in a pipeline
 
 The order of jobs in a pipeline depends on the type of pipeline graph.
