@@ -23,7 +23,7 @@ want to enforce everyone to set up 2FA, you can choose from two different ways:
 - Enforce on next login.
 - Suggest on next login, but allow a grace period before enforcing.
 
-After the configured grace period has elapsed, users will be able to sign in but
+After the configured grace period has elapsed, users can sign in but
 won't be able to leave the 2FA configuration area at `/profile/two_factor_auth`.
 
 To enable 2FA for all users:
@@ -66,7 +66,7 @@ The following are important notes about 2FA:
 - If you add additional members to a project within a group or subgroup that has
   2FA enabled, 2FA is **not** required for those individually added members.
 - If there are multiple 2FA requirements (for example, group + all users, or multiple
-  groups) the shortest grace period will be used.
+  groups) the shortest grace period is used.
 - It is possible to disallow subgroups from setting up their own 2FA requirements.
   Navigate to the top-level group's **Settings > General > Permissions, LFS, 2FA > Two-factor authentication** and uncheck the **Allow subgroups to set up their own two-factor authentication rule** field. This action will cause all subgroups with 2FA requirements to stop requiring that from their members.
 
