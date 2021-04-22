@@ -3,17 +3,23 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlDropdownSectionHeader,
+  GlLoadingIcon,
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { __ } from '~/locale';
+import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { __, s__ } from '~/locale';
+
+export const i18n = {
+  artifacts: __('Artifacts'),
+  downloadArtifact: __('Download %{name} artifact'),
+  artifactSectionHeader: __('Download artifacts'),
+  artifactsFetchErrorMessage: s__('Pipelines|Could not load the artifacts for the pipeline.'),
+};
 
 export default {
-  i18n: {
-    artifacts: __('Artifacts'),
-    downloadArtifact: __('Download %{name} artifact'),
-    artifactSectionHeader: __('Download artifacts'),
-  },
+  i18n,
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -21,12 +27,42 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlDropdownSectionHeader,
+    GlLoadingIcon,
     GlSprintf,
   },
+  inject: {
+    artifactsEndpoint: {
+      default: '',
+    },
+  },
   props: {
-    artifacts: {
-      type: Array,
+    pipelineId: {
+      type: Number,
       required: true,
+    },
+  },
+  data() {
+    return {
+      artifacts: [],
+      isLoading: false,
+    };
+  },
+  methods: {
+    fetchArtifacts() {
+      this.isLoading = true;
+      // Replace the placeholder with the ID of the pipeline we are viewing
+      const endpoint = this.artifactsEndpoint.replace(':REPLACE_ME:', this.pipelineId);
+      return axios
+        .get(endpoint)
+        .then(({ data }) => {
+          this.artifacts = data?.artifacts || [];
+        })
+        .catch(() => {
+          createFlash({ message: this.$options.i18n.artifactsFetchErrorMessage });
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
     },
   },
 };
@@ -43,10 +79,13 @@ export default {
     lazy
     text-sr-only
     no-caret
+    @show.once="fetchArtifacts"
   >
     <gl-dropdown-section-header>{{
       $options.i18n.artifactSectionHeader
     }}</gl-dropdown-section-header>
+
+    <gl-loading-icon v-if="isLoading" />
 
     <gl-dropdown-item
       v-for="(artifact, i) in artifacts"

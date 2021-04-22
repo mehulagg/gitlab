@@ -23420,6 +23420,9 @@ msgstr ""
 msgid "Pipelines|Could not load merged YAML content"
 msgstr ""
 
+msgid "Pipelines|Could not load the artifacts for the pipeline."
+msgstr ""
+
 msgid "Pipelines|Description"
 msgstr ""
 

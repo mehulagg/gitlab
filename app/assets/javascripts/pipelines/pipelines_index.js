@@ -22,6 +22,7 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
 
   const {
     endpoint,
+    artifactsEndpoint,
     pipelineScheduleUrl,
     emptyStateSvgPath,
     errorStateSvgPath,
@@ -41,6 +42,7 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
     el,
     provide: {
       addCiYmlPath,
+      artifactsEndpoint,
       suggestedCiTemplates: JSON.parse(suggestedCiTemplates),
     },
     data() {

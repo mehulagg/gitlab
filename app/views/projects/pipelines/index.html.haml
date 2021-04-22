@@ -7,6 +7,7 @@
 #pipelines-list-vue{ data: { endpoint: project_pipelines_path(@project, format: :json),
   project_id: @project.id,
   params: params.to_json,
+  "artifacts-endpoint" => downloadable_artifacts_project_pipeline_path(@project, ':REPLACE_ME:', format: :json),
   "pipeline-schedule-url" => pipeline_schedules_path(@project),
   "empty-state-svg-path" => image_path('illustrations/pipelines_empty.svg'),
   "error-state-svg-path" => image_path('illustrations/pipelines_failed.svg'),
