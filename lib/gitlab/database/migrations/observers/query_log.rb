@@ -12,7 +12,10 @@ module Gitlab
           end
 
           def before
-            ActiveRecord::Base.logger = Logger.new(@log)
+            ActiveSupport::Notifications.subscribe("sql.active_record") do |_, _, _, _, data|
+              @log << data[:sql]
+              @log << "\n"
+            end
           end
 
           def record(observation)
