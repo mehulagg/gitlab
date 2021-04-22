@@ -26,8 +26,6 @@ class License < ApplicationRecord
     group_activity_analytics
     group_bulk_edit
     group_webhooks
-    instance_level_devops_adoption
-    group_level_devops_adoption
     issuable_default_templates
     issue_weights
     iterations
@@ -156,9 +154,11 @@ class License < ApplicationRecord
     evaluate_group_level_compliance_pipeline
     group_ci_cd_analytics
     group_level_compliance_dashboard
+    group_level_devops_adoption
     incident_management
     inline_codequality
     insights
+    instance_level_devops_adoption
     issuable_health_status
     jira_vulnerabilities_integration
     jira_issue_association_enforcement
