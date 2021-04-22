@@ -18,6 +18,10 @@ module Gitlab
 
       def self.global
         @global_worker_router ||= new(::Gitlab.config.sidekiq.routing_rules)
+      rescue InvalidRoutingRuleError, ::Gitlab::SidekiqConfig::WorkerMatcher::UnknownPredicate => e
+        ::Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
+
+        @global_worker_router = new([])
       end
 
       # call-seq:

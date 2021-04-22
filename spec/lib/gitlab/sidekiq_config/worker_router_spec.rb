@@ -99,21 +99,62 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
   end
 
   describe '.global' do
+    before do
+      described_class.remove_instance_variable(:@global_worker_router) if described_class.instance_variable_defined?(:@global_worker_router)
+    end
+
+    after do
+      described_class.remove_instance_variable(:@global_worker_router)
+    end
+
     context 'valid routing rules' do
       include_context 'router examples setup'
 
       with_them do
         before do
-          described_class.remove_instance_variable(:@global_worker_router) if described_class.instance_variable_defined?(:@global_worker_router)
           stub_config(sidekiq: { routing_rules: routing_rules })
-        end
-
-        after do
-          described_class.remove_instance_variable(:@global_worker_router)
         end
 
         it 'routes the worker to the correct queue' do
           expect(described_class.global.route(worker)).to eql(expected_queue)
+        end
+      end
+    end
+
+    context 'invalid routing rules' do
+      let(:worker) do
+        Class.new do
+          def self.name
+            'Gitlab::Foo::BarWorker'
+          end
+
+          include ApplicationWorker
+        end
+      end
+
+      before do
+        stub_config(sidekiq: { routing_rules: routing_rules })
+      end
+
+      context 'invalid routing rules format' do
+        let(:routing_rules) { ['feature_category=a'] }
+
+        it 'captures the error and falls back to an empty route' do
+          expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).with(be_a(described_class::InvalidRoutingRuleError))
+
+          expect(described_class.global.route(worker)).to eql('foo_bar')
+        end
+      end
+
+      context 'invalid predicate' do
+        let(:routing_rules) { [['invalid_term=a', 'queue_a']] }
+
+        it 'captures the error and falls back to an empty route' do
+          expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).with(
+            be_a(Gitlab::SidekiqConfig::WorkerMatcher::UnknownPredicate)
+          )
+
+          expect(described_class.global.route(worker)).to eql('foo_bar')
         end
       end
     end
