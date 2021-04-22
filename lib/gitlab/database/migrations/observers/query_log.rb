@@ -12,8 +12,11 @@ module Gitlab
           end
 
           def before
-            ActiveSupport::Notifications.subscribe("sql.active_record") do |_, _, _, _, data|
-              @logs << data[:sql]
+            ActiveSupport::Notifications.subscribe("sql.active_record") do |_, start, finish, _, data|
+              @logs << {
+                query: data[:sql],
+                duration: (finish - start) * 1000.0
+              }
             end
           end
 
