@@ -9,7 +9,7 @@ module Gitlab
             @config = config
             @project = project
             @ref = ref
-            @start = Time.now.utc
+            @start = Time.current
           end
 
           def perform
@@ -17,15 +17,9 @@ module Gitlab
             return @config unless security_orchestration_policy_configuration&.enabled?
 
             merged_config = @config.deep_merge(on_demand_scans_template)
-            observe_processing_duration(Time.now.utc - @start)
+            observe_processing_duration(Time.current - @start)
 
             merged_config
-          end
-
-          def on_demand_scans_template
-            ::Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConfigurationService
-              .new(project)
-              .execute(security_orchestration_policy_configuration.on_demand_scan_actions(@ref))
           end
 
           private
@@ -33,6 +27,12 @@ module Gitlab
           attr_reader :project
 
           delegate :security_orchestration_policy_configuration, to: :project, allow_nil: true
+
+          def on_demand_scans_template
+            ::Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConfigurationService
+              .new(project)
+              .execute(security_orchestration_policy_configuration.on_demand_scan_actions(@ref))
+          end
 
           def observe_processing_duration(duration)
             ::Gitlab::Ci::Pipeline::Metrics

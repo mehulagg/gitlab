@@ -16,10 +16,8 @@ module Gitlab
         def self.pipeline_security_orchestration_policy_processing_duration_histogram
           name = :gitlab_ci_pipeline_security_orchestration_policy_processing_duration_seconds
           comment = 'Pipeline security orchestration policy processing duration'
-          labels = {}
-          buckets = [0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0, 20.0, 50.0, 240.0]
 
-          ::Gitlab::Metrics.histogram(name, comment, labels, buckets)
+          ::Gitlab::Metrics.histogram(name, comment)
         end
 
         def self.pipeline_size_histogram
