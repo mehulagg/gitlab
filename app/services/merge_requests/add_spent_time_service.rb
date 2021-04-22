@@ -3,7 +3,7 @@
 module MergeRequests
   class AddSpentTimeService < UpdateService
     def execute(merge_request)
-      old_associations = associations_before_update(merge_request)
+      old_associations = { total_time_spent: merge_request.total_time_spent }
 
       merge_request.spend_time(params[:spend_time])
 
