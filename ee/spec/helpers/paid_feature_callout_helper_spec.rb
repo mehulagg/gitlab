@@ -84,6 +84,8 @@ RSpec.describe PaidFeatureCalloutHelper do
         plan_name_for_upgrade: 'Premium',
         target_id: 'first-feature-callout'
       }
+
+      is_expected.to eq(expected_attrs)
     end
   end
 end
