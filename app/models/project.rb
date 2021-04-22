@@ -618,7 +618,7 @@ class Project < ApplicationRecord
   mount_uploader :bfg_object_map, AttachmentUploader
 
   def self.with_api_entity_associations
-    preload(:project_feature, :route, :tags, :group, namespace: [:route, :owner])
+    preload(:project_feature, :route, :tags, :group, :timelogs, namespace: [:route, :owner])
   end
 
   def self.with_web_entity_associations

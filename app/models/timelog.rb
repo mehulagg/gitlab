@@ -3,11 +3,12 @@
 class Timelog < ApplicationRecord
   include Importable
 
-  validates :time_spent, :user, presence: true
+  validates :time_spent, :user, :project, presence: true
   validate :issuable_id_is_present, unless: :importing?
 
   belongs_to :issue, touch: true
   belongs_to :merge_request, touch: true
+  belongs_to :project
   belongs_to :user
   belongs_to :note
 
