@@ -2,8 +2,6 @@
 
 module Security
   class OrchestrationPolicyRuleSchedule < ApplicationRecord
-    include Gitlab::Utils::StrongMemoize
-
     self.table_name = 'security_orchestration_policy_rule_schedules'
 
     belongs_to :owner, class_name: 'User', foreign_key: 'user_id'
