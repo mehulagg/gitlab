@@ -4,6 +4,7 @@ module Issuables
   class AssigneeFilter < BaseFilter
     def filter
       filtered = by_assignee(issuables)
+      filtered = by_assignee_union(filtered)
       by_negated_assignee(filtered)
     end
 
@@ -19,6 +20,12 @@ module Issuables
       else
         issuables
       end
+    end
+
+    def by_assignee_union(issuables)
+      return issuables unless or_filters_enabled? && has_assignee_param?(or_params)
+
+      issuables.assigned_to(assignee_ids(or_params))
     end
 
     def by_negated_assignee(issuables)
