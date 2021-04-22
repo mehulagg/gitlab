@@ -14,6 +14,7 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
   subject { visit project_settings_ci_cd_path(project) }
 
   before do
+    stub_feature_flags(project_sidebar_refactor: false)
     project.update!(container_registry_enabled: container_registry_enabled_on_project)
     project.container_expiration_policy.update!(enabled: true)
 
