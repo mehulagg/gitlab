@@ -256,6 +256,29 @@ These route prefixes guarantee a higher rate limit:
 /api/v4/groups/:group_id/-/packages/
 ```
 
+### MVC Checklist
+
+These are all aspects of a package manager that are expected to be delivered in the first iteration.
+They may span accross many merge requests due to the size of the work, but they should all be implemented
+by the time the feature flag is removed.
+
+- Project-level API
+- Push event tracking
+- Pull event tracking
+- Authentication with Personal Access Tokens
+- Authentication with Job Tokens
+- Authentication with Deploy Tokens (group and project)
+- File size [limit](#file-size-limits)
+- File format filter
+- Name regex with validation
+- Version regex with validation
+- Workhorse route for [accelerated](uploads.html#how-to-add-a-new-upload-route) uploads
+- Documentation
+- API Documentation
+- Seeding in [`db/fixtures/development/26_packages.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/db/fixtures/development/26_packages.rb)
+- Update the [runbook](https://gitlab.com/gitlab-com/runbooks/-/blob/31fb4959e89db25fddf865bc81734c222daf32dd/dashboards/stage-groups/package.dashboard.jsonnet#L74) for the grafana charts
+- End-to-end feature tests for at the minimum publishing and installing a package
+
 ### Future Work
 
 While working on the MVC, contributors might find features that are not mandatory for the MVC but can provide a better user experience. It's generally a good idea to keep an eye on those and open issues.
