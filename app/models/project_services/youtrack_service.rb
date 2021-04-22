@@ -29,5 +29,4 @@ class YoutrackService < IssueTrackerService
   def self.to_param
     'youtrack'
   end
-
 end
