@@ -1,0 +1,5 @@
+---
+title: Add hide-collapsed class for elements under the else-if scope
+merge_request: 60021
+author:
+type: fixed
