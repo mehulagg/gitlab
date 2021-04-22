@@ -1,11 +1,12 @@
 <script>
-import { GlLoadingIcon, GlSegmentedControl, GlToggle } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon, GlSegmentedControl, GlToggle } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { STAGE_VIEW, LAYER_VIEW } from './constants';
 
 export default {
   name: 'GraphViewSelector',
   components: {
+    GlAlert,
     GlLoadingIcon,
     GlSegmentedControl,
     GlToggle,
@@ -22,15 +23,16 @@ export default {
   },
   data() {
     return {
-      currentViewType: this.type,
+      segmentSelectedType: this.type,
       showLinksActive: false,
       isToggleLoading: false,
       isSwitcherLoading: false,
     };
   },
   i18n: {
-    viewLabelText: __('Group jobs by'),
+    hoverTipText: __('Tip: Hover over a job to see the jobs it depends on to run.'),
     linksLabelText: __('Show dependencies'),
+    viewLabelText: __('Group jobs by'),
   },
   views: {
     [STAGE_VIEW]: {
@@ -48,7 +50,10 @@ export default {
   },
   computed: {
     showLinksToggle() {
-      return this.currentViewType === LAYER_VIEW;
+      return this.segmentSelectedType === LAYER_VIEW;
+    },
+    showTip() {
+      return this.showLinksActive && this.showLinks;
     },
     viewTypesList() {
       return Object.keys(this.$options.views).map((key) => {
@@ -108,33 +113,38 @@ export default {
 </script>
 
 <template>
-  <div class="gl-relative gl-display-flex gl-align-items-center gl-w-max-content gl-my-4">
-    <gl-loading-icon
-      v-if="isSwitcherLoading"
-      data-testid="switcher-loading-state"
-      class="gl-absolute gl-w-full gl-bg-white gl-opacity-5 gl-z-index-2"
-      size="lg"
-    />
-    <span class="gl-font-weight-bold">{{ $options.i18n.viewLabelText }}</span>
-    <gl-segmented-control
-      v-model="currentViewType"
-      :options="viewTypesList"
-      :disabled="isSwitcherLoading"
-      data-testid="pipeline-view-selector"
-      class="gl-mx-4"
-      @input="toggleView"
-    />
-
-    <div v-if="showLinksToggle">
-      <gl-toggle
-        v-model="showLinksActive"
-        data-testid="show-links-toggle"
-        class="gl-mx-4"
-        :label="$options.i18n.linksLabelText"
-        :is-loading="isToggleLoading"
-        label-position="left"
-        @change="toggleShowLinksActive"
+  <div>
+    <div class="gl-relative gl-display-flex gl-align-items-center gl-w-max-content gl-my-4">
+      <gl-loading-icon
+        v-if="isSwitcherLoading"
+        data-testid="switcher-loading-state"
+        class="gl-absolute gl-w-full gl-bg-white gl-opacity-5 gl-z-index-2"
+        size="lg"
       />
+      <span class="gl-font-weight-bold">{{ $options.i18n.viewLabelText }}</span>
+      <gl-segmented-control
+        v-model="segmentSelectedType"
+        :options="viewTypesList"
+        :disabled="isSwitcherLoading"
+        data-testid="pipeline-view-selector"
+        class="gl-mx-4"
+        @input="toggleView"
+      />
+
+      <div v-if="showLinksToggle" class=" gl-display-flex gl-align-items-center">
+        <gl-toggle
+          v-model="showLinksActive"
+          data-testid="show-links-toggle"
+          class="gl-mx-4"
+          :label="$options.i18n.linksLabelText"
+          :is-loading="isToggleLoading"
+          label-position="left"
+          @change="toggleShowLinksActive"
+        />
+      </div>
     </div>
+    <gl-alert v-if="showTip" class="gl-my-5" variant="tip">
+      {{ $options.i18n.hoverTipText }}
+    </gl-alert>
   </div>
 </template>
