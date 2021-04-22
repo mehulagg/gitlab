@@ -300,7 +300,12 @@ To fix this, verify that the user is a member of the project.
 
 ### Cannot play media content on Safari
 
-Safari requires webserver to support [Range](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/CreatingVideoforSafarioniPhone/CreatingVideoforSafarioniPhone.html#//apple_ref/doc/uid/TP40006514-SW6) request header in order to play your media content. For GitLab Pages to serve HTTP Range requests, artifacts should use the `ARTIFACT_COMPRESSION_LEVEL: fastest` setting, as only uncompressed zip archives support this feature. Users can [enable the `FF_USE_FAST_ZIP` feature flag](https://docs.gitlab.com/ee/ci/runners/#artifact-and-cache-settings) for their own runners (starting from 13.9). 
+Safari requires webserver to support [Range](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/CreatingVideoforSafarioniPhone/CreatingVideoforSafarioniPhone.html#//apple_ref/doc/uid/TP40006514-SW6)
+request header in order to play your media content. For GitLab Pages to serve
+HTTP Range requests, artifacts should use the `ARTIFACT_COMPRESSION_LEVEL: fastest`
+setting, as only uncompressed zip archives support this feature. Users can
+[enable the `FF_USE_FAST_ZIP` feature flag](../../../ci/runners/README.md#artifact-and-cache-settings)
+for their own runners (starting from 13.9).
 
 See this [issue](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/504#note_557457689) for more context. 
 
