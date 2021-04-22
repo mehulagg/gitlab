@@ -1376,6 +1376,9 @@ msgstr ""
 msgid "A description is required"
 msgstr ""
 
+msgid "A different reason"
+msgstr ""
+
 msgid "A file has been changed."
 msgstr ""
 
@@ -16043,7 +16046,22 @@ msgstr ""
 msgid "I have read and agree to the Let's Encrypt %{link_start}Terms of Service%{link_end} (PDF)"
 msgstr ""
 
+msgid "I want to explore GitLab to see if it’s worth switching to"
+msgstr ""
+
+msgid "I want to learn the basics of Git"
+msgstr ""
+
+msgid "I want to move my repository to GitLab from somewhere else"
+msgstr ""
+
+msgid "I want to use GitLab CI with my existing repository"
+msgstr ""
+
 msgid "I'd like to receive updates about GitLab via email"
+msgstr ""
+
+msgid "I'm signing up for GitLab because:"
 msgstr ""
 
 msgid "ID"
@@ -17939,6 +17957,9 @@ msgid "Iteration|cannot be more than 500 years in the future"
 msgstr ""
 
 msgid "I’m familiar with the basics of DevOps."
+msgstr ""
+
+msgid "I’m joining my team who’s already on GitLab"
 msgstr ""
 
 msgid "I’m not familiar with the basics of DevOps."
@@ -23790,6 +23811,9 @@ msgid "Please select at least one filter to see results"
 msgstr ""
 
 msgid "Please select what should be included in each exported requirement."
+msgstr ""
+
+msgid "Please select..."
 msgstr ""
 
 msgid "Please set a new password before proceeding."
@@ -35485,6 +35509,9 @@ msgid "Who will be using this GitLab subscription?"
 msgstr ""
 
 msgid "Who will be using this GitLab trial?"
+msgstr ""
+
+msgid "Why are you signing up? (Optional)"
 msgstr ""
 
 msgid "Wiki"
