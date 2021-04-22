@@ -1,19 +1,24 @@
-import { isFunction, isString } from 'lodash';
-import { Editor } from 'tiptap';
-import {
-  Bold,
-  Italic,
-  Code,
-  Link,
-  Image,
-  Heading,
-  Blockquote,
-  HorizontalRule,
-  BulletList,
-  OrderedList,
-  ListItem,
-  HardBreak,
-} from 'tiptap-extensions';
+import Blockquote from '@tiptap/extension-blockquote';
+import Bold from '@tiptap/extension-bold';
+import BulletList from '@tiptap/extension-bullet-list';
+import Code from '@tiptap/extension-code';
+import Document from '@tiptap/extension-document';
+import Dropcursor from '@tiptap/extension-dropcursor';
+import Gapcursor from '@tiptap/extension-gapcursor';
+import HardBreak from '@tiptap/extension-hard-break';
+import Heading from '@tiptap/extension-heading';
+import History from '@tiptap/extension-history';
+import HorizontalRule from '@tiptap/extension-horizontal-rule';
+import Image from '@tiptap/extension-image';
+import Italic from '@tiptap/extension-italic';
+import Link from '@tiptap/extension-link';
+import ListItem from '@tiptap/extension-list-item';
+import OrderedList from '@tiptap/extension-ordered-list';
+import Paragraph from '@tiptap/extension-paragraph';
+import Strike from '@tiptap/extension-strike';
+import Text from '@tiptap/extension-text';
+import { Editor } from '@tiptap/vue-2';
+import { isFunction, isString, upperFirst } from 'lodash';
 import { PROVIDE_SERIALIZER_OR_RENDERER_ERROR } from '../constants';
 import CodeBlockHighlight from '../extensions/code_block_highlight';
 import createMarkdownSerializer from './markdown_serializer';
@@ -30,19 +35,26 @@ const createEditor = async ({
 
   const editor = new Editor({
     extensions: [
-      new Bold(),
-      new Italic(),
-      new Code(),
-      new Link(),
-      new Image(),
-      new Heading({ levels: [1, 2, 3, 4, 5, 6] }),
-      new Blockquote(),
-      new HorizontalRule(),
-      new BulletList(),
-      new ListItem(),
-      new OrderedList(),
-      new CodeBlockHighlight(),
-      new HardBreak(),
+      Dropcursor,
+      Gapcursor,
+      History,
+      Document,
+      Text,
+      Paragraph,
+      Bold,
+      Italic,
+      Code,
+      Link,
+      Heading,
+      HardBreak,
+      Strike,
+      Blockquote,
+      HorizontalRule,
+      BulletList,
+      OrderedList,
+      ListItem,
+      Image.configure({ inline: true }),
+      CodeBlockHighlight,
     ],
     editorProps: {
       attributes: {
@@ -53,15 +65,21 @@ const createEditor = async ({
   });
   const serializer = customSerializer || createMarkdownSerializer({ render: renderMarkdown });
 
-  editor.setSerializedContent = async (serializedContent) => {
-    editor.setContent(
-      await serializer.deserialize({ schema: editor.schema, content: serializedContent }),
-    );
-  };
+  Object.assign(editor, {
+    toggleContentType: (contentTypeName) => {
+      const commandName = `toggle${upperFirst(contentTypeName)}`;
 
-  editor.getSerializedContent = () => {
-    return serializer.serialize({ schema: editor.schema, content: editor.getJSON() });
-  };
+      editor.chain()[commandName]().focus().run();
+    },
+    setSerializedContent: async (serializedContent) => {
+      editor.commands.setContent(
+        await serializer.deserialize({ schema: editor.schema, content: serializedContent }),
+      );
+    },
+    getSerializedContent: () => {
+      return serializer.serialize({ schema: editor.schema, content: editor.getJSON() });
+    },
+  });
 
   if (isString(content)) {
     await editor.setSerializedContent(content);

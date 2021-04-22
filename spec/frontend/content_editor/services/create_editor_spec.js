@@ -10,6 +10,27 @@ describe('content_editor/services/create_editor', () => {
     serialize: jest.fn(),
     deserialize: jest.fn(),
   });
+  const spyOnChainOfCommands = (editor, commands = []) => {
+    jest.spyOn(editor, 'chain');
+
+    const chainOfCommands = commands.reduce((chain, command) => {
+      return Object.assign(chain, {
+        [command]: jest.fn(() => chain),
+      });
+    }, {});
+
+    editor.chain.mockReturnValue(chainOfCommands);
+  };
+  const assertChainOfCommandsExecution = (editor, commands = []) => {
+    expect(editor.chain).toHaveBeenCalled();
+
+    commands.forEach((command) => {
+      expect(editor.chain()[command]).toHaveBeenCalled();
+    });
+  };
+  const restoreChainOfCommands = (editor) => {
+    editor.chain.mockRestore();
+  };
 
   it('sets gl-outline-0! class selector to editor attributes', async () => {
     const editor = await createEditor({ renderMarkdown });
@@ -44,6 +65,19 @@ describe('content_editor/services/create_editor', () => {
 
     it('throws an error when neither a serializer or renderMarkdown fn are provided', async () => {
       await expect(createEditor()).rejects.toThrow(PROVIDE_SERIALIZER_OR_RENDERER_ERROR);
+    });
+  });
+
+  describe('toggleContentType', () => {
+    it('runs the content type toggle command and focus command', async () => {
+      const contentType = 'bold';
+      const expectedCommands = ['toggleBold', 'focus', 'run'];
+      const editor = await createEditor({ renderMarkdown });
+
+      spyOnChainOfCommands(editor, expectedCommands);
+      editor.toggleContentType(contentType);
+      assertChainOfCommandsExecution(editor, expectedCommands);
+      restoreChainOfCommands(editor, expectedCommands);
     });
   });
 });
