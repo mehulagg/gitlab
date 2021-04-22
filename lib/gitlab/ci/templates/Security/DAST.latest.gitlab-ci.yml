@@ -11,7 +11,7 @@ variables:
   SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
   #
   DAST_API_PROFILE: Full
-  DAST_API_VERSION: latest
+  DAST_API_VERSION: "1"
   DAST_API_CONFIG: .gitlab-dast-api.yml
   DAST_API_TIMEOUT: 30
   DAST_API_REPORT: gl-dast-api-report.json
