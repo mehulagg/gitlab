@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class YoutrackService < IssueTrackerService
+  include ActionView::Helpers::UrlHelper
   validates :project_url, :issues_url, presence: true, public_url: true, if: :activated?
 
   # {PROJECT-KEY}-{NUMBER} Examples: YT-1, PRJ-1, gl-030
@@ -17,17 +18,16 @@ class YoutrackService < IssueTrackerService
   end
 
   def description
-    s_('IssueTracker|YouTrack issue tracker')
+    s_("IssueTracker|Use YouTrack as this project's issue tracker.")
+  end
+
+  def help
+    docs_link = link_to _('Learn more.'), Rails.application.routes.url_helpers.help_page_url('user/project/integrations/youtrack'), target: '_blank', rel: 'noopener noreferrer'
+    s_("IssueTracker|Use YouTrack as this project's issue tracker. %{docs_link}").html_safe % { docs_link: docs_link.html_safe }
   end
 
   def self.to_param
     'youtrack'
   end
 
-  def fields
-    [
-      { type: 'text', name: 'project_url', title: _('Project URL'), required: true },
-      { type: 'text', name: 'issues_url', title: s_('ProjectService|Issue URL'), required: true }
-    ]
-  end
 end

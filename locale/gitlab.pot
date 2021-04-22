@@ -17917,13 +17917,16 @@ msgstr ""
 msgid "IssueTracker|Use Redmine as the issue tracker. %{docs_link}"
 msgstr ""
 
+msgid "IssueTracker|Use YouTrack as this project's issue tracker."
+msgstr ""
+
+msgid "IssueTracker|Use YouTrack as this project's issue tracker. %{docs_link}"
+msgstr ""
+
 msgid "IssueTracker|Use a custom issue tracker that is not in the integration list. %{docs_link}"
 msgstr ""
 
 msgid "IssueTracker|Use a custom issue tracker."
-msgstr ""
-
-msgid "IssueTracker|YouTrack issue tracker"
 msgstr ""
 
 msgid "Issues"
