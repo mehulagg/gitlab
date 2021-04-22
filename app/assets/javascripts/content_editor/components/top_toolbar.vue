@@ -50,14 +50,14 @@ export default {
     />
     <toolbar-button
       data-testid="bullet-list"
-      content-type="bullet_list"
+      content-type="bulletList"
       icon-name="list-bulleted"
       :label="__('Add a bullet list')"
       :editor="editor"
     />
     <toolbar-button
       data-testid="ordered-list"
-      content-type="ordered_list"
+      content-type="orderedList"
       icon-name="list-numbered"
       :label="__('Add a numbered list')"
       :editor="editor"

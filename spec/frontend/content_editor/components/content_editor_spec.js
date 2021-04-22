@@ -1,6 +1,5 @@
-import { mount } from '@vue/test-utils';
-import { EditorContent } from 'tiptap';
-import waitForPromises from 'helpers/wait_for_promises';
+import { EditorContent } from '@tiptap/vue-2';
+import { shallowMount } from '@vue/test-utils';
 import ContentEditor from '~/content_editor/components/content_editor.vue';
 import TopToolbar from '~/content_editor/components/top_toolbar.vue';
 import createEditor from '~/content_editor/services/create_editor';
@@ -10,7 +9,7 @@ describe('ContentEditor', () => {
   let editor;
 
   const createWrapper = async (_editor) => {
-    wrapper = mount(ContentEditor, {
+    wrapper = shallowMount(ContentEditor, {
       propsData: {
         editor: _editor,
       },
@@ -20,8 +19,6 @@ describe('ContentEditor', () => {
   beforeEach(async () => {
     editor = await createEditor({ renderMarkdown: () => 'sample text' });
     createWrapper(editor);
-
-    await waitForPromises();
   });
 
   afterEach(() => {

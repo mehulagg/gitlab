@@ -29,16 +29,16 @@ describe('content_editor/components/top_toolbar', () => {
   });
 
   it.each`
-    testId            | button
-    ${'bold'}         | ${{ contentType: 'bold', iconName: 'bold', label: 'Bold' }}
-    ${'italic'}       | ${{ contentType: 'italic', iconName: 'italic', label: 'Italic' }}
-    ${'code'}         | ${{ contentType: 'code', iconName: 'code', label: 'Code' }}
-    ${'blockquote'}   | ${{ contentType: 'blockquote', iconName: 'quote', label: 'Insert a quote' }}
-    ${'bullet-list'}  | ${{ contentType: 'bullet_list', iconName: 'list-bulleted', label: 'Add a bullet list' }}
-    ${'ordered-list'} | ${{ contentType: 'ordered_list', iconName: 'list-numbered', label: 'Add a numbered list' }}
+    testId            | buttonProps
+    ${'bold'}         | ${{ contentType: 'bold', iconName: 'bold', label: 'Bold text', executeCommand: true }}
+    ${'italic'}       | ${{ contentType: 'italic', iconName: 'italic', label: 'Italic text', executeCommand: true }}
+    ${'code'}         | ${{ contentType: 'code', iconName: 'code', label: 'Code', executeCommand: true }}
+    ${'blockquote'}   | ${{ contentType: 'blockquote', iconName: 'quote', label: 'Insert a quote', executeCommand: true }}
+    ${'bullet-list'}  | ${{ contentType: 'bulletList', iconName: 'list-bulleted', label: 'Add a bullet list', executeCommand: true }}
+    ${'ordered-list'} | ${{ contentType: 'orderedList', iconName: 'list-numbered', label: 'Add a numbered list', executeCommand: true }}
   `('renders $testId button', ({ testId, buttonProps }) => {
     buildWrapper();
-    expect(wrapper.findByTestId(testId).props()).toMatchObject({
+    expect(wrapper.findByTestId(testId).props()).toEqual({
       ...buttonProps,
       editor,
     });

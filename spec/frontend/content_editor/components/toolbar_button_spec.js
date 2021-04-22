@@ -11,12 +11,8 @@ describe('content_editor/components/toolbar_button', () => {
 
   const buildEditor = () => {
     editor = {
-      isActive: {
-        [CONTENT_TYPE]: jest.fn(),
-      },
-      commands: {
-        [CONTENT_TYPE]: jest.fn(),
-      },
+      isActive: jest.fn(),
+      toggleContentType: jest.fn(),
     };
   };
 
@@ -56,11 +52,12 @@ describe('content_editor/components/toolbar_button', () => {
     ${{ isActive: false, focused: true }} | ${'button is not active'}  | ${false}
     ${{ isActive: true, focused: false }} | ${'button is not active '} | ${false}
   `('$outcomeDescription when when editor state is $editorState', ({ editorState, outcome }) => {
-    editor.isActive[CONTENT_TYPE].mockReturnValueOnce(editorState.isActive);
-    editor.focused = editorState.focused;
+    editor.isActive.mockReturnValueOnce(editorState.isActive);
+    editor.isFocused = editorState.focused;
     buildWrapper();
 
     expect(findButton().classes().includes('active')).toBe(outcome);
+    expect(editor.isActive).toHaveBeenCalledWith(CONTENT_TYPE);
   });
 
   describe('when button is clicked', () => {
@@ -69,7 +66,7 @@ describe('content_editor/components/toolbar_button', () => {
 
       await findButton().trigger('click');
 
-      expect(editor.commands[CONTENT_TYPE]).toHaveBeenCalled();
+      expect(editor.toggleContentType).toHaveBeenCalledWith(CONTENT_TYPE);
       expect(wrapper.emitted().click).toHaveLength(1);
     });
 
@@ -78,7 +75,7 @@ describe('content_editor/components/toolbar_button', () => {
 
       await findButton().trigger('click');
 
-      expect(editor.commands[CONTENT_TYPE]).not.toHaveBeenCalled();
+      expect(editor.toggleContentType).not.toHaveBeenCalled();
       expect(wrapper.emitted().click).toHaveLength(1);
     });
   });
