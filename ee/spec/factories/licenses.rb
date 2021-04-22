@@ -50,10 +50,7 @@ FactoryBot.define do
       plan { nil }
       expired { false }
       trial { false }
-    end
-
-    trait :cloud do
-      cloud { true }
+      cloud { false }
     end
 
     data do

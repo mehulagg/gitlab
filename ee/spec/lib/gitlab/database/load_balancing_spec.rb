@@ -120,7 +120,10 @@ RSpec.describe Gitlab::Database::LoadBalancing do
 
   describe '.pool_size' do
     it 'returns a Fixnum' do
-      expect(described_class.pool_size).to be_a_kind_of(Integer)
+      pool = double
+      allow(Gitlab::Database).to receive(:config).and_return({ pool: pool })
+
+      expect(described_class.pool_size).to eq(pool)
     end
   end
 
