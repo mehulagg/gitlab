@@ -744,3 +744,5 @@ issuable_sla:
   - issue
 push_rule:
   - group
+bulk_import_export:
+  - group
