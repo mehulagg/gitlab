@@ -16,6 +16,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    tipPreviouslyDismissed: {
+      type: Boolean,
+      required: true,
+    },
     type: {
       type: String,
       required: true,
@@ -23,10 +27,11 @@ export default {
   },
   data() {
     return {
-      segmentSelectedType: this.type,
-      showLinksActive: false,
+      hoverTipDismissed: false,
       isToggleLoading: false,
       isSwitcherLoading: false,
+      segmentSelectedType: this.type,
+      showLinksActive: false,
     };
   },
   i18n: {
@@ -53,7 +58,12 @@ export default {
       return this.segmentSelectedType === LAYER_VIEW;
     },
     showTip() {
-      return this.showLinksActive && this.showLinks;
+      return (
+        this.showLinks &&
+        this.showLinksActive &&
+        !this.tipPreviouslyDismissed &&
+        !this.hoverTipDismissed
+      );
     },
     viewTypesList() {
       return Object.keys(this.$options.views).map((key) => {
@@ -82,6 +92,10 @@ export default {
     },
   },
   methods: {
+    dismissTip() {
+      this.hoverTipDismissed = true;
+      this.$emit('dismissHoverTip');
+    },
     /*
       In both toggle methods, we use setTimeout so that the loading indicator displays,
       then the work is done to update the DOM. The process is:
@@ -131,7 +145,7 @@ export default {
         @input="toggleView"
       />
 
-      <div v-if="showLinksToggle" class=" gl-display-flex gl-align-items-center">
+      <div v-if="showLinksToggle" class="gl-display-flex gl-align-items-center">
         <gl-toggle
           v-model="showLinksActive"
           data-testid="show-links-toggle"
@@ -143,7 +157,7 @@ export default {
         />
       </div>
     </div>
-    <gl-alert v-if="showTip" class="gl-my-5" variant="tip">
+    <gl-alert v-if="showTip" class="gl-my-5" variant="tip" @dismiss="dismissTip">
       {{ $options.i18n.hoverTipText }}
     </gl-alert>
   </div>
