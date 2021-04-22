@@ -27,8 +27,6 @@ of top-performing instances based on [usage ping data](../settings/usage_statist
 collected. Your score is compared to the lead score of each feature and then expressed as a percentage at the bottom of said feature.
 Your overall **DevOps Score** is an average of your feature scores. You can use this score to compare your DevOps status to other organizations.
 
-![DevOps Report](img/dev_ops_report_v13_4.png)
-
 The page also provides helpful links to articles and GitLab docs, to help you
 improve your scores.
 
