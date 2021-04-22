@@ -99,6 +99,23 @@ module Gitlab
     def group_config_file
       Rails.root.join('lib/gitlab/import_export/group/import_export.yml')
     end
+
+    def top_level_relations(exportable_class)
+      config = Gitlab::ImportExport::Config.new(config: import_export_yaml(exportable_class)).to_h
+
+      config.dig(:tree, exportable_class.to_s.downcase.to_sym).keys.map(&:to_s)
+    end
+
+    def import_export_yaml(exportable_class)
+      case exportable_class
+      when ::Project.name
+        config_file
+      when ::Group.name
+        group_config_file
+      else
+        raise Gitlab::ImportExport::Error.unsupported_object_type_error
+      end
+    end
   end
 end
 

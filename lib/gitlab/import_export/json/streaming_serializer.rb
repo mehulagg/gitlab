@@ -38,10 +38,6 @@ module Gitlab
           end
         end
 
-        private
-
-        attr_reader :json_writer, :relations_schema, :exportable
-
         def serialize_root
           attributes = exportable.as_json(
             relations_schema.merge(include: nil, preloads: nil))
@@ -63,6 +59,10 @@ module Gitlab
             serialize_single_relation(key, record, options)
           end
         end
+
+        private
+
+        attr_reader :json_writer, :relations_schema, :exportable
 
         def serialize_many_relations(key, records, options)
           enumerator = Enumerator.new do |items|
