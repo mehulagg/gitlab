@@ -144,8 +144,8 @@ the Subgroup Y to the Project A so that their members also become eligible
 Code Owners:
 
 NOTE:
-Not inviting Subgroup Y to Project A, and making them Code Owners will cause the approbal to become optional for the merge request
-
+If you do not invite Subgroup Y to Project A, but make them Code Owners, their approval
+of the merge request becomes optional.
 
 ![Invite subgroup members to become eligible Code Owners](img/code_owners_invite_members_v13_4.png)
 
