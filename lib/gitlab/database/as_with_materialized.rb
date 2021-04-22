@@ -29,7 +29,7 @@ module Gitlab
 
       # Note: to be deleted after the minimum PG version is set to 12.0
       def self.materialized_if_supported
-        materialized_supported? ? 'MATERIALIZED ' : ''
+        materialized_supported? ? 'MATERIALIZED' : ''
       end
     end
   end
