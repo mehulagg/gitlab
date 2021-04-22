@@ -19,7 +19,7 @@ export default {
   <div class="mr-widget-body mr-state-locked media">
     <status-icon status="loading" />
     <div class="media-body">
-      <h4>{{ s__('mrWidget|Merging your work now! 🎉') }}</h4>
+      <h4>{{ s__('mrWidget|Merging! Drum roll, please… 🥁') }}</h4>
       <section class="mr-info-list">
         <p>
           {{ s__('mrWidget|The changes will be merged into') }}
