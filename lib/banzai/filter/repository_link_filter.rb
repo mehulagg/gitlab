@@ -19,7 +19,10 @@ module Banzai
         return doc if context[:system_note]
 
         clear_memoization(:linkable_files)
-        clear_memoization(:linkable_attributes)
+
+        if Feature.disabled?(:optimize_linkable_attributes, project, default_enabled: :yaml)
+          clear_memoization(:linkable_attributes)
+        end
 
         load_uri_types
 
