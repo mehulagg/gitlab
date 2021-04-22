@@ -32007,6 +32007,9 @@ msgstr ""
 msgid "This application was created by %{link_to_owner}."
 msgstr ""
 
+msgid "This application was created for group %{link_to_group}."
+msgstr ""
+
 msgid "This application will be able to:"
 msgstr ""
 
