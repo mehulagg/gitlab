@@ -11,6 +11,7 @@ RSpec.describe 'Project navbar' do
   let_it_be(:project) { create(:project, :repository) }
 
   before do
+    stub_feature_flags(sidebar_refactor: false)
     insert_package_nav(_('Operations'))
     insert_infrastructure_registry_nav
     stub_config(registry: { enabled: false })
@@ -84,7 +85,37 @@ RSpec.describe 'Project navbar' do
       stub_licensed_features(requirements: true)
     end
 
+    context 'with flag disabled' do
+      before do
+        insert_after_nav_item(
+          _('Merge requests'),
+          new_nav_item: {
+            nav_item: _('Requirements'),
+            nav_sub_items: [_('List')]
+          }
+        )
+
+        visit project_path(project)
+      end
+
+      it_behaves_like 'verified navigation bar'
+    end
+
     context 'with flag enabled' do
+      let(:operations_menu_items) do
+        [
+          _('Metrics'),
+          _('Logs'),
+          _('Tracing'),
+          _('Error Tracking'),
+          _('Alerts'),
+          _('Incidents'),
+          _('Environments'),
+          _('Feature Flags'),
+          _('Product Analytics')
+        ]
+      end
+
       before do
         stub_feature_flags(sidebar_refactor: true)
 
@@ -96,21 +127,15 @@ RSpec.describe 'Project navbar' do
           }
         )
 
-        visit project_path(project)
-      end
-
-      it_behaves_like 'verified navigation bar'
-    end
-
-    context 'with flag disabled' do
-      before do
-        stub_feature_flags(sidebar_refactor: false)
-
         insert_after_nav_item(
-          _('Merge requests'),
+          _('Operations'),
           new_nav_item: {
-            nav_item: _('Requirements'),
-            nav_sub_items: [_('List')]
+            nav_item: _('Infrastructure'),
+            nav_sub_items: [
+              _('Kubernetes clusters'),
+              _('Serverless platform'),
+              _('Terraform')
+            ]
           }
         )
 

@@ -17317,6 +17317,9 @@ msgstr ""
 msgid "Information about additional Pages templates and how to install them can be found in our %{pages_getting_started_guide}."
 msgstr ""
 
+msgid "Infrastructure"
+msgstr ""
+
 msgid "Infrastructure Registry"
 msgstr ""
 
@@ -18766,6 +18769,9 @@ msgid "Kubernetes cluster integration was successfully removed."
 msgstr ""
 
 msgid "Kubernetes cluster was successfully updated."
+msgstr ""
+
+msgid "Kubernetes clusters"
 msgstr ""
 
 msgid "Kubernetes deployment not found"
@@ -29093,6 +29099,9 @@ msgid "Serverless"
 msgstr ""
 
 msgid "Serverless domain"
+msgstr ""
+
+msgid "Serverless platform"
 msgstr ""
 
 msgid "ServerlessDetails|Function invocation metrics require Prometheus to be installed first."
