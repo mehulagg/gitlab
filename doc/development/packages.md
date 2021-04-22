@@ -269,12 +269,13 @@ by the time the feature flag is removed.
 - Authentication with Job Tokens
 - Authentication with Deploy Tokens (group and project)
 - File size [limit](#file-size-limits)
-- File format filter
+- File format guards (only accept valid file formats for the package type)
 - Name regex with validation
 - Version regex with validation
 - Workhorse route for [accelerated](uploads.html#how-to-add-a-new-upload-route) uploads
-- Documentation
-- API Documentation
+- Background workers for extracting package metadata (if applicable)
+- Documentation (how to use the feature)
+- API Documentation (individual endpoints with curl examples)
 - Seeding in [`db/fixtures/development/26_packages.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/db/fixtures/development/26_packages.rb)
 - Update the [runbook](https://gitlab.com/gitlab-com/runbooks/-/blob/31fb4959e89db25fddf865bc81734c222daf32dd/dashboards/stage-groups/package.dashboard.jsonnet#L74) for the grafana charts
 - End-to-end feature tests for at the minimum publishing and installing a package
