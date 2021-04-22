@@ -786,6 +786,9 @@ module ProjectsHelper
     Gitlab.config.registry.enabled &&
       can?(current_user, :destroy_container_image, project)
   end
+
+  def settings_packages_and_registries_enabled?(project)
+    Feature.enabled?(:project_sidebar_refactor) &&
     Gitlab.config.registry.enabled &&
       can?(current_user, :destroy_container_image, project)
   end
