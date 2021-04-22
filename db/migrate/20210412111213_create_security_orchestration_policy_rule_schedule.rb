@@ -15,7 +15,7 @@ class CreateSecurityOrchestrationPolicyRuleSchedule < ActiveRecord::Migration[6.
       t.references :security_orchestration_policy_configuration, null: false, foreign_key: { to_table: :security_orchestration_policy_configurations, on_delete: :cascade }, index: { name: INDEX_PREFIX + 'on_sop_configuration_id' }
       t.references :user, null: false, foreign_key: { on_delete: :cascade }, index: { name: INDEX_PREFIX + 'on_user_id' }
       t.integer :policy_index, null: false
-      t.text :cron
+      t.text :cron, null: false
       t.datetime_with_timezone :next_run_at, null: true
 
       t.timestamps_with_timezone

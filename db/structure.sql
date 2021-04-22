@@ -17379,7 +17379,7 @@ CREATE TABLE security_orchestration_policy_rule_schedules (
     security_orchestration_policy_configuration_id bigint NOT NULL,
     user_id bigint NOT NULL,
     policy_index integer NOT NULL,
-    cron text,
+    cron text NOT NULL,
     next_run_at timestamp with time zone,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
