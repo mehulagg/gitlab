@@ -23,8 +23,14 @@ export const namespaces = [
 ];
 
 export const plans = [
-  { id: 'firstPlanId', code: 'bronze', pricePerYear: 48, name: 'bronze', __typename: 'Plan' },
-  { id: 'secondPlanId', code: 'silver', pricePerYear: 228, name: 'silver', __typename: 'Plan' },
+  { code: 'bronze', pricePerYear: 48, name: 'bronze plan', __typename: 'Plan' },
+  {
+    code: 'silver',
+    pricePerYear: 228,
+    name: 'silver plan',
+    __typename: 'Plan',
+  },
+  { code: 'gold', pricePerYear: 1188, name: 'gold plan', __typename: 'Plan' },
 ];
 
 export const stateData = {
