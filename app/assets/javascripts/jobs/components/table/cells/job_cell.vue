@@ -18,7 +18,8 @@ export default {
   },
   computed: {
     jobId() {
-      return getIdFromGraphQLId(this.job.id);
+      const id = getIdFromGraphQLId(this.job.id);
+      return `#${id}`;
     },
     jobPath() {
       return this.job.detailedStatus?.detailsPath;
@@ -39,7 +40,7 @@ export default {
       return false;
     },
     isManualJob() {
-      return this.job.detailedStatus.action.title === 'Play';
+      return false;
     },
     successfulJob() {
       return this.job.status === 'SUCCESS';
@@ -57,10 +58,10 @@ export default {
 <template>
   <div>
     <div class="gl-text-truncate">
-      <gl-link class="gl-text-gray-500!" :href="jobPath">{{ `#${jobId}` }}</gl-link>
+      <gl-link class="gl-text-gray-500!" :href="jobPath">{{ jobId }}</gl-link>
 
       <div class="gl-display-flex gl-align-items-center">
-        <div v-if="jobRef">
+        <div v-if="jobRef" class="gl-max-w-15 gl-text-truncate">
           <gl-icon v-if="createdByTag" name="label" :size="$options.iconSize" />
           <gl-icon v-else name="fork" :size="$options.iconSize" />
           <gl-link class="gl-font-weight-bold gl-text-gray-500!" :href="job.refPath">{{

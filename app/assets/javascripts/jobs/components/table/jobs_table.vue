@@ -3,6 +3,7 @@ import { GlTable } from '@gitlab/ui';
 import { __ } from '~/locale';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
 import ActionsCell from './cells/actions_cell.vue';
+import DurationCell from './cells/duration_cell.vue';
 import JobCell from './cells/job_cell.vue';
 import PipelineCell from './cells/pipeline_cell.vue';
 
@@ -23,7 +24,7 @@ export default {
       key: 'job',
       label: __('Job'),
       ...defaultTableClasses,
-      columnClass: 'gl-w-20p',
+      columnClass: 'gl-w-15p',
     },
     {
       key: 'pipeline',
@@ -47,7 +48,7 @@ export default {
       key: 'duration',
       label: __('Duration'),
       ...defaultTableClasses,
-      columnClass: 'gl-w-10p',
+      columnClass: 'gl-w-15p',
     },
     {
       key: 'coverage',
@@ -65,6 +66,7 @@ export default {
   components: {
     ActionsCell,
     CiBadge,
+    DurationCell,
     GlTable,
     JobCell,
     PipelineCell,
@@ -110,7 +112,7 @@ export default {
     </template>
 
     <template #cell(duration)="{ item }">
-      <div>{{ item.duration }}</div>
+      <duration-cell :job="item" />
     </template>
 
     <template #cell(coverage)="{ item }">

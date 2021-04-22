@@ -1487,6 +1487,9 @@ msgstr ""
 msgid "ACTION REQUIRED: Something went wrong while obtaining the Let's Encrypt certificate for GitLab Pages domain '%{domain}'"
 msgstr ""
 
+msgid "API"
+msgstr ""
+
 msgid "API Fuzzing"
 msgstr ""
 
@@ -37558,6 +37561,9 @@ msgid "created %{timeAgoString} by %{user} in Jira"
 msgstr ""
 
 msgid "created %{timeAgo}"
+msgstr ""
+
+msgid "created by"
 msgstr ""
 
 msgid "data"
