@@ -308,4 +308,3 @@ setting, as only uncompressed zip archives support this feature. Users can
 for their own runners (starting from 13.9).
 
 See this [issue](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/504#note_557457689) for more context. 
-
