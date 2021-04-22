@@ -49,7 +49,7 @@
   gitlab-com: true
   packages: [Free, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/ci/yaml/README.html#multiple-caches
-  image_url:  https://about.gitlab.com/images/13_11/cache.png'
+  image_url:  https://about.gitlab.com/images/13_11/cache.png
   published_at: 2021-04-22
   release: 13.11
 - title:  Group SAML Enforcement for Git activity
@@ -112,6 +112,6 @@
   gitlab-com: true
   packages: [Free, Premium, Ultimate]
   url: https://gitlab.com/gitlab-org/gl-openshift/gitlab-operator/-/tree/master/doc
-  image_url:  https://about.gitlab.com/images/sdlc-icons/manage.svg
+  image_url:  https://about.gitlab.com/images/13_11/gitlab-operator.png
   published_at: 2021-04-22
   release: 13.11
