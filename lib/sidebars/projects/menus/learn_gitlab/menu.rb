@@ -27,7 +27,7 @@ module Sidebars
 
           override :sprite_icon
           def sprite_icon
-            'home'
+            'graduation-hat'
           end
 
           override :render?
