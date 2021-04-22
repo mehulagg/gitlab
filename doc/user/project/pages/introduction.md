@@ -297,3 +297,10 @@ Files listed under the public directory can be accessed through the Pages URL fo
 A 404 can also be related to incorrect permissions. If [Pages Access Control](pages_access_control.md) is enabled, and a user
 navigates to the Pages URL and receives a 404 response, it is possible that the user does not have permission to view the site.
 To fix this, verify that the user is a member of the project.
+
+### Cannot play embedded videos on Safari and Internet Explore (IE)
+
+For GitLab Pages to serve HTTP Range requests, artifacts should use the `ARTIFACT_COMPRESSION_LEVEL: fastest` setting, as only uncompressed zip archives support this feature. Users can [enable the `FF_USE_FAST_ZIP` feature flag](https://docs.gitlab.com/ee/ci/runners/#artifact-and-cache-settings) for their own runners (starting from 13.9). 
+
+See this [issue](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/504#note_557457689) for more context. 
+
