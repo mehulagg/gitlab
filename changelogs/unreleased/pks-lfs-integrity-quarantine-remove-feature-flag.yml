@@ -1,0 +1,5 @@
+---
+title: Remove feature flag for LFS integrity check via quarantined objects
+merge_request: 59991
+author:
+type: performance
