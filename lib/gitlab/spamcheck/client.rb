@@ -44,6 +44,10 @@ module Gitlab
         issue_pb.updated_at = convert_to_pb_timestamp(issue.updated_at) unless issue.updated_at.nil?
         issue_pb.user_in_project = user.authorized_project?(issue.project)
         issue_pb.project_id = issue.project_id
+
+        project = ::Project.find_by_id(issue.project_id)
+        issue_pb.project_path = project.full_path
+
         issue_pb.action = action_to_enum(context.fetch(:action)) unless context.nil?
         issue_pb.user = build_user_pb(user)
         issue_pb
