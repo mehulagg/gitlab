@@ -81,6 +81,28 @@ RSpec.describe API::EpicIssues do
             expect { perform_request }.not_to exceed_query_limit(control_count + 2)
           end
         end
+
+        context 'when include_subepics is true' do
+          let(:parent_epic) { create(:epic, children: [epic], group: group) }
+          let(:url) { "/groups/#{group.path}/epics/#{parent_epic.iid}/issues" }
+
+          it 'includes issues of subepics' do
+            perform_request(include_subepics: true)
+
+            expect(response.parsed_body.size).to eq(2)
+          end
+        end
+
+        context 'when include_subepics is false' do
+          let(:parent_epic) { create(:epic, children: [epic], group: group) }
+          let(:url) { "/groups/#{group.path}/epics/#{parent_epic.iid}/issues" }
+
+          it 'excludes issues of subepics' do
+            perform_request(include_subepics: false)
+
+            expect(response.parsed_body.size).to eq(0)
+          end
+        end
       end
     end
   end

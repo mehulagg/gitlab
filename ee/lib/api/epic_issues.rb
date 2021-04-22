@@ -18,8 +18,8 @@ module API
         @link ||= epic.epic_issues.find(params[:epic_issue_id])
       end
 
-      def related_issues(epic)
-        IssuesFinder.new(current_user, { epic_id: epic.id }).execute
+      def related_issues(epic, include_subepics: false)
+        IssuesFinder.new(current_user, { epic_id: epic.id, include_subepics: include_subepics }).execute
           .with_api_entity_associations
           .sorted_by_epic_position
       end
@@ -63,13 +63,14 @@ module API
       end
       params do
         requires :epic_iid, type: Integer, desc: 'The IID of the epic'
+        optional :include_subepics, type: Boolean, desc: 'Whether to include issues of subepics'
         use :pagination
       end
       [':id/epics/:epic_iid/issues', ':id/-/epics/:epic_iid/issues'].each do |path|
         get path do
           authorize_can_read!
 
-          present paginate(related_issues(epic)),
+          present paginate(related_issues(epic, include_subepics: params[:include_subepics])),
             with: EE::API::Entities::EpicIssue,
             current_user: current_user
         end
