@@ -36,8 +36,6 @@ export default (el, dashboardType) => {
     securityConfigurationPath: el.dataset.securityConfigurationPath,
     surveyRequestSvgPath: el.dataset.surveyRequestSvgPath,
     securityDashboardHelpPath: el.dataset.securityDashboardHelpPath,
-    hasProjects: parseBoolean(el.dataset.hasProjects),
-    hasVulnerabilities: parseBoolean(el.dataset.hasVulnerabilities),
   };
 
   let component;
