@@ -194,3 +194,12 @@ bundle exec rails generate gitlab:usage_metric_definition:redis_hll issues i_clo
 create  config/metrics/counts_7d/i_closed_weekly.yml
 create  config/metrics/counts_28d/i_closed_monthly.yml
 ```
+
+NOTE:
+To create a metric definition used in EE, add the `--ee` flag.
+
+```shell
+bundle exec rails generate gitlab:usage_metric_definition:redis_hll issues i_closed --ee
+create  config/metrics/counts_7d/i_closed_weekly.yml
+create  config/metrics/counts_28d/i_closed_monthly.yml
+```
