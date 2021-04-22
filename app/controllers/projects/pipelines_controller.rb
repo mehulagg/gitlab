@@ -19,7 +19,7 @@ class Projects::PipelinesController < Projects::ApplicationController
     push_frontend_feature_flag(:graphql_pipeline_details_users, current_user, type: :development, default_enabled: :yaml)
     push_frontend_feature_flag(:jira_for_vulnerabilities, project, type: :development, default_enabled: :yaml)
   end
-  before_action :ensure_pipeline, only: [:show]
+  before_action :ensure_pipeline, only: [:show, :downloadable_artifacts]
 
   # Will be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/225596
   before_action :redirect_for_legacy_scope_filter, only: [:index], if: -> { request.format.html? }
@@ -206,8 +206,6 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def downloadable_artifacts
-    return not_found unless @pipeline
-
     render json: Ci::DownloadableArtifactSerializer.new(
       project: project,
       current_user: current_user

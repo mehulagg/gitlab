@@ -1284,6 +1284,7 @@ RSpec.describe Projects::PipelinesController do
           get_downloadable_artifacts_json
 
           expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['artifacts']).to be_kind_of(Array)
           expect(json_response['artifacts'].size).to eq(2)
         end
       end
