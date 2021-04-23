@@ -1,0 +1,17 @@
+query timeTrackingReport($id: IssueID!) {
+  issue(id: $id) {
+    id
+    title
+    timelogs { 
+      nodes {
+        timeSpent
+        user { username }
+        spentAt
+        note { 
+          id
+          body 
+        } 
+      } 
+    }
+  }
+}

@@ -385,6 +385,7 @@ module IssuablesHelper
       currentUser: issuable[:current_user],
       rootPath: root_path,
       fullPath: issuable[:project_full_path],
+      issuableGid: Gitlab::GlobalId.build(model_name: issuable[:type], id: issuable[:id]),
       iid: issuable[:iid],
       severity: issuable[:severity],
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours,
