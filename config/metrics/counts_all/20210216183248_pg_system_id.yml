@@ -1,9 +1,9 @@
 ---
 key_path: database.pg_system_id
 description: ''
-product_section: ''
+product_section: enablement
 product_stage: ''
-product_group: ''
+product_group: distribution
 product_category: ''
 value_type: number
 status: data_available
