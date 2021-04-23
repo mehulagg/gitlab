@@ -62,6 +62,7 @@ module Gitlab
 
           metric_for(:gauge_batch_size).set(base_labels, tracking_record.batch_size)
           metric_for(:gauge_sub_batch_size).set(base_labels, tracking_record.sub_batch_size)
+          metric_for(:gauge_interval).set(base_labels, tracking_record.batched_migration.interval)
           metric_for(:counter_updated_tuples).increment(base_labels, tracking_record.batch_size)
           metric_for(:gauge_total_tuple_count).set(base_labels, tracking_record.batched_migration.total_tuple_count)
 
@@ -95,6 +96,10 @@ module Gitlab
               gauge_sub_batch_size: Gitlab::Metrics.gauge(
                 :batched_migration_job_sub_batch_size,
                 'Sub-batch size for a batched migration job'
+              ),
+              gauge_interval: Gitlab::Metrics.gauge(
+                :batched_migration_job_interval,
+                'Interval for a batched migration job'
               ),
               counter_updated_tuples: Gitlab::Metrics.counter(
                 :batched_migration_job_updated_tuples_total,

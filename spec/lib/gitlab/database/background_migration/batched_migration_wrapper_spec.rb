@@ -68,6 +68,12 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
       subject
     end
 
+    it 'reports interval' do
+      expect(described_class.metrics[:gauge_interval]).to receive(:set).with(labels, job_record.batched_migration.interval)
+
+      subject
+    end
+
     it 'reports updated tuples (currently based on batch_size)' do
       expect(described_class.metrics[:counter_updated_tuples]).to receive(:increment).with(labels, job_record.batch_size)
 
