@@ -24,10 +24,11 @@ module Issues
     def filter_params(issue)
       super
 
-      # filter confidential in `Issues::UpdateService` and not in `IssuableBaseService#filtr_params`
+      # filter confidential in `Issues::UpdateService` and not in `IssuableBaseService#filter_params`
       # because we do allow users that cannot admin issues to set confidential flag when creating an issue
       unless can_admin_issuable?(issue)
         params.delete(:confidential)
+        params.delete(:issue_type)
       end
     end
 
@@ -82,6 +83,10 @@ module Issues
 
       if added_mentions.present?
         notification_service.async.new_mentions_in_issue(issue, added_mentions, current_user)
+      end
+
+      if issue.previous_changes.include?('issue_type')
+        ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute
       end
     end
 
