@@ -16,4 +16,6 @@ OptionParser.new do |opts|
   end
 end.parse!
 
+$stdout.puts "Knaspack log level: #{ENV['KNAPSACK_LOG_LEVEL']}"
+
 Tooling::ParallelRSpecRunner.run(options)

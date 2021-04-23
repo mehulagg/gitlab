@@ -27,6 +27,7 @@ module Tooling
     end
 
     def run
+      $stdout.puts "Knaspack log level: #{ENV['KNAPSACK_LOG_LEVEL']}"
       Knapsack.logger.info
       Knapsack.logger.info 'Knapsack node specs:'
       Knapsack.logger.info node_tests
