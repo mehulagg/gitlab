@@ -15,7 +15,6 @@ class IssuePlacementWorker
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(issue_id, project_id = nil)
     issue = find_issue(issue_id, project_id)
-
     return unless issue
 
     # Temporary disable moving null elements because of performance problems

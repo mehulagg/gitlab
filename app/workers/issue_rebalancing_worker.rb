@@ -12,7 +12,7 @@ class IssueRebalancingWorker
 
     project = Project.find(project_id)
 
-    # Temporary disable moving reabalancing for performance reasons
+    # Temporary disable reabalancing for performance reasons
     # For more information check https://gitlab.com/gitlab-com/gl-infra/production/-/issues/4321
     return if project.root_namespace&.issue_repositioning_disabled?
 

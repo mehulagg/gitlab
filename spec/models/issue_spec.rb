@@ -1126,6 +1126,24 @@ RSpec.describe Issue do
       let(:factory) { :issue }
       let(:default_params) { { project: project } }
     end
+
+    context 'when block_issue_repositioning flag is enabled for group' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:project) { create(:project, group: group) }
+      let_it_be(:issue1) { create(:issue, project: project, relative_position: nil) }
+      let_it_be(:issue2) { create(:issue, project: project, relative_position: nil) }
+
+      before do
+        stub_feature_flags(block_issue_repositioning: group)
+      end
+
+      it 'does not move issues with null position' do
+        payload = [issue1, issue2]
+
+        expect(described_class.move_nulls_to_end(payload)).to eq(nil)
+        expect(described_class.move_nulls_to_start(payload)).to eq(nil)
+      end
+    end
   end
 
   it_behaves_like 'versioned description'
