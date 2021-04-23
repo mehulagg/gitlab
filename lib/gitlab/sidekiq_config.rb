@@ -20,12 +20,12 @@ module Gitlab
     # The default queue should be unused, which is why it maps to an
     # invalid class name. We keep it in the YAML file for safety, just
     # in case anything does get scheduled to run there.
-    DEFAULT_WORKERS = [
-      DummyWorker.new(
+    DEFAULT_WORKERS = {
+      '_' => DummyWorker.new(
         queue: 'default',
         weight: 1, tags: []
       ),
-      DummyWorker.new(
+      'ActionMailer::MailDeliveryJob' => DummyWorker.new(
         name: 'ActionMailer::MailDeliveryJob',
         queue: 'mailers',
         feature_category: :issue_tracking,
@@ -33,7 +33,7 @@ module Gitlab
         weight: 2,
         tags: []
       )
-    ].map { |worker| Gitlab::SidekiqConfig::Worker.new(worker, ee: false) }.freeze
+    }.transform_values { |worker| Gitlab::SidekiqConfig::Worker.new(worker, ee: false) }.freeze
 
     class << self
       include Gitlab::SidekiqConfig::CliMethods
@@ -57,7 +57,7 @@ module Gitlab
       def workers
         @workers ||= begin
           result = []
-          result.concat(DEFAULT_WORKERS)
+          result.concat(DEFAULT_WORKERS.values)
           result.concat(find_workers(Rails.root.join('app', 'workers'), ee: false))
 
           if Gitlab.ee?
