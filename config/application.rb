@@ -31,6 +31,7 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_malformed_strings')
     require_dependency Rails.root.join('lib/gitlab/middleware/rack_multipart_tempfile_factory')
     require_dependency Rails.root.join('lib/gitlab/runtime')
+    require_dependency Rails.root.join('lib/gitlab/database/dynamic_shards')
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -162,6 +163,8 @@ module Gitlab
     # This is necessary if your schema can't be completely dumped by the schema dumper,
     # like if you have constraints or database-specific column types
     config.active_record.schema_format = :sql
+
+    config.active_record.legacy_connection_handling = false
 
     config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
 
