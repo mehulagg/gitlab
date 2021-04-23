@@ -45,6 +45,15 @@
         "DEBIAN"
       ]
     },
+    "status": {
+      "type": ["string"],
+      "enum": [
+        "DEFAULT",
+        "HIDDEN",
+        "PROCESSING",
+        "ERROR"
+      ]
+    },
     "tags": {
       "type": "object",
       "additionalProperties": false,
