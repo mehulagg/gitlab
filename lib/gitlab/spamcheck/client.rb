@@ -11,7 +11,8 @@ module Gitlab
         ::Spamcheck::SpamVerdict::Verdict::ALLOW => ALLOW,
         ::Spamcheck::SpamVerdict::Verdict::CONDITIONAL_ALLOW => CONDITIONAL_ALLOW,
         ::Spamcheck::SpamVerdict::Verdict::DISALLOW => DISALLOW,
-        ::Spamcheck::SpamVerdict::Verdict::BLOCK => BLOCK_USER
+        ::Spamcheck::SpamVerdict::Verdict::BLOCK => BLOCK_USER,
+        ::Spamcheck::SpamVerdict::Verdict::NOOP => NOOP
       }.freeze
 
       def initialize(endpoint_url:)
