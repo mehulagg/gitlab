@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage_monthly.monitor.projects_with_error_tracking_enabled
-description: Count of projects with error tracking enabled
+description: Count of users creating projects with error tracking enabled.
 product_section: ops
 product_stage:
 product_group: group::monitor
