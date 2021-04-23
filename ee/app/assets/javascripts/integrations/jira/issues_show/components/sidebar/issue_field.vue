@@ -1,6 +1,7 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
+import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import IssueFieldDropdown from './issue_field_dropdown.vue';
 
 export default {
@@ -10,6 +11,11 @@ export default {
   components: {
     GlIcon,
     IssueFieldDropdown,
+    SidebarEditableItem,
+  },
+  provide: {
+    isClassicSidebar: true,
+    canUpdate: true,
   },
   props: {
     dropdownTitle: {
@@ -51,21 +57,40 @@ export default {
   i18n: {
     none: __('None'),
   },
+  methods: {
+    showDropdown() {
+      this.$refs.dropdown.showDropdown();
+    },
+    expandSidebarAndOpenDropdown() {
+      this.$emit('expand-sidebar', this.$refs.editableItem);
+    },
+  },
 };
 </script>
 
 <template>
   <div class="block">
-    <div v-gl-tooltip="tooltipProps" class="sidebar-collapsed-icon" data-testid="field-collapsed">
-      <gl-icon :name="icon" />
-    </div>
+    <sidebar-editable-item ref="editableItem" :title="title" @open="showDropdown">
+      <template #collapsed>
+        <div
+          v-gl-tooltip="tooltipProps"
+          class="sidebar-collapsed-icon"
+          data-testid="field-collapsed"
+          @click="expandSidebarAndOpenDropdown"
+        >
+          <gl-icon :name="icon" />
+        </div>
 
-    <div class="hide-collapsed">
-      <div class="title" data-testid="field-title">{{ title }}</div>
-      <div class="value">
-        <span :class="valueClass" data-testid="field-value">{{ valueWithFallback }}</span>
-      </div>
-      <issue-field-dropdown :text="valueWithFallback" :title="dropdownTitle" />
-    </div>
+        <div class="hide-collapsed">
+          <div class="value">
+            <span :class="valueClass" data-testid="field-value">{{ valueWithFallback }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #default>
+        <issue-field-dropdown ref="dropdown" :text="valueWithFallback" :title="dropdownTitle" />
+      </template>
+    </sidebar-editable-item>
   </div>
 </template>

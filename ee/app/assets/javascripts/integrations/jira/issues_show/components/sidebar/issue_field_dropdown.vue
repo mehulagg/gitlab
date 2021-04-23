@@ -32,14 +32,17 @@ export default {
     },
   },
   mounted() {
-    this.$refs.dropdown.show();
-
     // We are using mock data here which should come from the backend
     setTimeout(() => {
       // eslint-disable-next-line @gitlab/require-i18n-strings
       this.items = [{ title: 'In Progress' }, { title: 'Done' }];
       this.isLoading = false;
     }, 1000);
+  },
+  methods: {
+    showDropdown() {
+      this.$refs.dropdown.show();
+    },
   },
 };
 </script>

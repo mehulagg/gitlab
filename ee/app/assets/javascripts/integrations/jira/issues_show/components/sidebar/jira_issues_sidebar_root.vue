@@ -46,6 +46,33 @@ export default {
     statusDropdownTitle: __('Change status'),
     referenceName: __('Reference'),
   },
+  mounted() {
+    this.sidebarEl = document.querySelector('aside.right-sidebar');
+    this.sidebarToggleEl = document.querySelector('.js-toggle-right-sidebar-button');
+  },
+  methods: {
+    toggleSidebar() {
+      this.sidebarToggleEl.dispatchEvent(new Event('click'));
+    },
+    expandSidebarAndOpenDropdown(dropdownRef = null) {
+      // Expand the sidebar if not already expanded.
+      if (!this.sidebarExpanded) {
+        this.toggleSidebar();
+      }
+
+      if (dropdownRef) {
+        // Wait for sidebar expand animation to complete
+        // before revealing the dropdown.
+        this.sidebarEl.addEventListener(
+          'transitionend',
+          () => {
+            dropdownRef.expand();
+          },
+          { once: true },
+        );
+      }
+    },
+  },
 };
 </script>
 
@@ -58,6 +85,7 @@ export default {
       :title="$options.i18n.statusTitle"
       :value="issue.status"
       :dropdown-title="$options.i18n.statusDropdownTitle"
+      @expand-sidebar="expandSidebarAndOpenDropdown"
     />
     <labels-select
       :selected-labels="issue.labels"
