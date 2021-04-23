@@ -7,10 +7,10 @@ module Mutations
 
       argument :due_date,
                Types::TimeType,
-               required: true,
+               required: false,
                description: 'The desired due date for the issue.'
 
-      def resolve(project_path:, iid:, due_date:)
+      def resolve(project_path:, iid:, due_date: nil)
         issue = authorized_find!(project_path: project_path, iid: iid)
         project = issue.project
 

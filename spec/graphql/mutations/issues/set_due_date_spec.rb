@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::Issues::SetDueDate do
-  let(:issue) { create(:issue) }
+  let(:issue) { create(:issue, due_date: '2021-05-01') }
   let(:user) { create(:user) }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
@@ -29,11 +29,27 @@ RSpec.describe Mutations::Issues::SetDueDate do
         expect(subject[:errors]).to be_empty
       end
 
+      context 'when due date is omitted' do
+        subject { mutation.resolve(project_path: issue.project.full_path, iid: issue.iid) }
+
+        it 'updates due date to be nil' do
+          expect(mutated_issue.due_date).to be nil
+        end
+      end
+
+      context 'when due date is nil' do
+        let(:due_date) { nil }
+
+        it 'updates due date to be nil' do
+          expect(mutated_issue.due_date).to be nil
+        end
+      end
+
       context 'when passing incorrect due date value' do
         let(:due_date) { 'test' }
 
-        it 'does not update due date' do
-          expect(mutated_issue.due_date).to eq(issue.due_date)
+        it 'updates due date to be nil' do
+          expect(mutated_issue.due_date).to be nil
         end
       end
     end
