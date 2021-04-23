@@ -42,12 +42,21 @@ module Gitlab
       detect && detect[:type] == :binary && detect[:confidence] == 100
     end
 
-    def detect_libgit2_binary?(data)
-      # EncodingDetector checks the first 1024 * 1024 bytes for NUL byte, libgit2 checks
-      # only the first 8000 (https://github.com/libgit2/libgit2/blob/2ed855a9e8f9af211e7274021c2264e600c0f86b/src/filter.h#L15),
-      # which is what we use below to keep a consistent behavior.
-      detect = CharlockHolmes::EncodingDetector.new(8000).detect(data)
-      detect && detect[:type] == :binary
+    # EncodingDetector checks the first 1024 * 1024 bytes for NUL byte, libgit2 checks
+    # only the first 8000 (https://github.com/libgit2/libgit2/blob/2ed855a9e8f9af211e7274021c2264e600c0f86b/src/filter.h#L15),
+    # which is what we use below to keep a consistent behavior.
+    def detect_libgit2_binary?(data, limit: 8000)
+      if Feature.enabled?(:cached_libgit2_binary_detection, type: :development, default_enabled: :yaml)
+        hash = Digest::SHA1.hexdigest(data[0..limit])
+
+        Rails.cache.fetch([:detect_libgit2_binary, hash], expires_in: 1.week) do
+          detect = CharlockHolmes::EncodingDetector.new(limit).detect(data)
+          detect && detect[:type] == :binary
+        end
+      else
+        detect = CharlockHolmes::EncodingDetector.new(limit).detect(data)
+        detect && detect[:type] == :binary
+      end
     end
 
     def encode_utf8(message, replace: "")
