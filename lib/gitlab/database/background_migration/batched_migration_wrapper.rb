@@ -95,7 +95,7 @@ module Gitlab
                 'Sub-batch size for a batched migration job'
               ),
               gauge_interval: Gitlab::Metrics.gauge(
-                :batched_migration_job_interval,
+                :batched_migration_job_interval_seconds,
                 'Interval for a batched migration job'
               ),
               gauge_job_duration: Gitlab::Metrics.gauge(
@@ -107,8 +107,8 @@ module Gitlab
                 'Number of tuples updated by batched migration job'
               ),
               histogram_timings: Gitlab::Metrics.histogram(
-                :batched_migration_job_duration_seconds,
-                'Timings for a batched migration job',
+                :batched_migration_job_query_duration_seconds,
+                'Query timings for a batched migration job',
                 {},
                 [0.1, 0.25, 0.5, 1, 5].freeze
               ),
