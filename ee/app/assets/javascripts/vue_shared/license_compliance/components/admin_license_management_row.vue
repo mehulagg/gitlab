@@ -102,6 +102,8 @@ export default {
             {{ $options[$options.LICENSE_APPROVAL_ACTION.DENY] }}
           </gl-dropdown-item>
         </gl-dropdown>
+
+        <!-- eslint-disable @gitlab/vue-no-data-toggle -->
         <gl-button
           v-gl-tooltip
           v-gl-modal.modal-license-delete-confirmation
@@ -114,6 +116,7 @@ export default {
           data-toggle="modal"
           @click="setLicenseInModal(license)"
         />
+        <!-- eslint-enable @gitlab/vue-no-data-toggle -->
       </div>
     </div>
   </div>
