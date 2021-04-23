@@ -44,6 +44,8 @@ module Gitlab
             else
               error(response['errors'])
             end
+          rescue
+            error(CONNECTIVITY_ERROR)
           end
 
           def plan_upgrade_offer(namespace_id)

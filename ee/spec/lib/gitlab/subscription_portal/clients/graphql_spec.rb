@@ -50,8 +50,16 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
       expect(result).to eq({ errors: ["invalid activation code"], success: false })
     end
 
-    it 'returns connectivity error' do
+    it 'returns connectivity error when remote server returns error' do
       stub_request(:any, EE::SUBSCRIPTIONS_GRAPHQL_URL).to_return(status: [500, "Internal Server Error"])
+
+      result = client.activate('activation_code_abc')
+
+      expect(result).to eq({ errors: described_class::CONNECTIVITY_ERROR, success: false })
+    end
+
+    it 'returns connectivity error when remote server unreachable' do
+      stub_request(:any, EE::SUBSCRIPTIONS_GRAPHQL_URL).to_timeout
 
       result = client.activate('activation_code_abc')
 
