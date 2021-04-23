@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Groups > Members > Owner adds member with expiration date', :js do
-  include Select2Helper
   include Spec::Support::Helpers::Features::MembersHelpers
+  include Spec::Support::Helpers::Features::InviteMembersModalHelper
 
   let_it_be(:user1) { create(:user, name: 'John Doe') }
   let_it_be(:group) { create(:group) }
@@ -20,14 +20,7 @@ RSpec.describe 'Groups > Members > Owner adds member with expiration date', :js 
   it 'expiration date is displayed in the members list' do
     visit group_group_members_path(group)
 
-    page.within invite_users_form do
-      select2(new_member.id, from: '#user_ids', multiple: true)
-
-      fill_in 'expires_at', with: 5.days.from_now.to_date
-      find_field('expires_at').native.send_keys :enter
-
-      click_on 'Invite'
-    end
+    add_member(new_member.name "Guest", 5.days.from_now.to_date)
 
     page.within second_row do
       expect(page).to have_content(/in \d days/)

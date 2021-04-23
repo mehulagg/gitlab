@@ -5,39 +5,25 @@ require 'spec_helper'
 RSpec.describe 'Groups > Members > Manage members' do
   include Select2Helper
   include Spec::Support::Helpers::Features::MembersHelpers
+  include Spec::Support::Helpers::Features::InviteMembersModalHelper
 
   let(:user1) { create(:user, name: 'John Doe') }
   let(:user2) { create(:user, name: 'Mary Jane') }
   let(:group) { create(:group) }
 
   before do
-    stub_feature_flags(invite_members_group_modal: false)
     sign_in(user1)
   end
 
-  shared_examples 'includes the correct Invite link' do |should_include, should_not_include|
-    it 'includes either the form or the modal trigger' do
+  shared_examples 'includes the correct Invite modal triggers' do |should_include, should_not_include|
+    it 'includes the invite members and invite a group triggers' do
       group.add_owner(user1)
 
       visit group_group_members_path(group)
 
-      expect(page).to have_selector(should_include)
-      expect(page).not_to have_selector(should_not_include)
+      expect(page).to have_selector('.js-invite-members-trigger')
+      expect(page).to have_selector('.js-invite-group-trigger')
     end
-  end
-
-  context 'when Invite Members modal is enabled' do
-    before do
-      stub_feature_flags(invite_members_group_modal: true)
-    end
-
-    it_behaves_like 'includes the correct Invite link', '.js-invite-members-trigger', '.invite-users-form'
-    it_behaves_like 'includes the correct Invite link', '.js-invite-group-trigger', '.invite-group-form'
-  end
-
-  context 'when Invite Members modal is disabled' do
-    it_behaves_like 'includes the correct Invite link', '.invite-users-form', '.js-invite-members-trigger'
-    it_behaves_like 'includes the correct Invite link', '.invite-group-form', '.js-invite-group-trigger'
   end
 
   it 'update user to owner level', :js do
@@ -59,7 +45,7 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     visit group_group_members_path(group)
 
-    add_user(user2.id, 'Reporter')
+    add_member(user2.name, 'Reporter')
 
     page.within(second_row) do
       expect(page).to have_content(user2.name)
@@ -115,7 +101,7 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     visit group_group_members_path(group)
 
-    add_user(user1.id, 'Reporter')
+    add_member(user1.name, 'Reporter')
 
     page.within(first_row) do
       expect(page).to have_content(user1.name)
@@ -128,7 +114,7 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     visit group_group_members_path(group)
 
-    add_user('test@example.com', 'Reporter')
+    add_member('test@example.com', 'Reporter')
 
     expect(page).to have_link 'Invited'
     click_link 'Invited'
@@ -155,14 +141,6 @@ RSpec.describe 'Groups > Members > Manage members' do
 
       # Can not remove user2
       expect(page).not_to have_selector 'button[title="Remove member"]'
-    end
-  end
-
-  def add_user(id, role)
-    page.within ".invite-users-form" do
-      select2(id, from: "#user_ids", multiple: true)
-      select(role, from: "access_level")
-      click_button "Invite"
     end
   end
 end

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe "Admin::Projects" do
   include Spec::Support::Helpers::Features::MembersHelpers
-  include Select2Helper
+  include Spec::Support::Helpers::Features::InviteMembersModalHelper
 
   let(:user) { create :user }
   let(:project) { create(:project) }
@@ -95,18 +95,12 @@ RSpec.describe "Admin::Projects" do
   describe 'admin adds themselves to the project', :js do
     before do
       project.add_maintainer(user)
-      stub_feature_flags(invite_members_group_modal: false)
     end
 
     it 'adds admin to the project as developer' do
       visit project_project_members_path(project)
 
-      page.within '.invite-users-form' do
-        select2(current_user.id, from: '#user_ids', multiple: true)
-        select 'Developer', from: 'access_level'
-      end
-
-      click_button 'Invite'
+      add_member(current_user.email, 'Developer')
 
       expect(find_member_row(current_user)).to have_content('Developer')
     end

@@ -42,17 +42,6 @@ RSpec.describe InviteMembersHelper do
           expect(helper.can_invite_members_for_project?(project)).to eq true
           expect(helper).to have_received(:can_import_members?)
         end
-
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(invite_members_group_modal: false)
-          end
-
-          it 'returns false' do
-            expect(helper.can_invite_members_for_project?(project)).to eq false
-            expect(helper).not_to have_received(:can_import_members?)
-          end
-        end
       end
 
       context 'when the user can not invite members' do
@@ -142,19 +131,6 @@ RSpec.describe InviteMembersHelper do
         it 'returns true' do
           expect(helper.can_invite_members_for_group?(group)).to eq true
           expect(helper).to have_received(:can?).with(user, :admin_group_member, group)
-        end
-
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(invite_members_group_modal: false)
-          end
-
-          it 'returns false' do
-            stub_feature_flags(invite_members_group_modal: false)
-
-            expect(helper.can_invite_members_for_group?(group)).to eq false
-            expect(helper).not_to have_received(:can?)
-          end
         end
       end
 
