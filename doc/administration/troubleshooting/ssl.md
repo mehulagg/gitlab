@@ -249,6 +249,6 @@ Fatal: unable to access 'https://gitlab.domain.tld/group/project.git': schannel:
 
 You may need to specify that Git should use OpenSSL:
 
-```sh
+```shell
 git config --system http.sslbackend openssl
 ```
