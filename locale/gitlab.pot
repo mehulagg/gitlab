@@ -8561,7 +8561,7 @@ msgstr ""
 msgid "ContainerRegistry|Delete image repository?"
 msgstr ""
 
-msgid "ContainerRegistry|Delete selected"
+msgid "ContainerRegistry|Delete selected tags"
 msgstr ""
 
 msgid "ContainerRegistry|Deleting the image repository will delete all images and tags inside. This action cannot be undone."
@@ -10517,6 +10517,9 @@ msgid "Delete comment"
 msgstr ""
 
 msgid "Delete domain"
+msgstr ""
+
+msgid "Delete image repository"
 msgstr ""
 
 msgid "Delete label"
