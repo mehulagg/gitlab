@@ -100,13 +100,29 @@ To use the KAS:
 
 ### Define a configuration repository
 
-You need a GitLab repository to contain your Agent configuration. Once the Agent is installed in the cluster, it will grab its configuration from GitLab. Whenever you update the configuration, the Agent will be notified, and will adjust itself automatically without downtime. The Agent configuration is expected under the following place in a GitLab repository:
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) in GitLab 13.7, the Agent manifest configuration can be added to multiple directories (or subdirectories) of its repository. 
+
+To configure an Agent, you need:
+
+1. A GitLab repository to hold the configuration file.
+1. Install the Agent in a cluster.
+
+After installed, when you update the configuration file, GitLab transmits the
+information to the cluster automatically without downtime.
+
+In your repository, add the Agent configuration file under:
 
 ```plaintext
 .gitlab/agents/<agent-name>/config.yaml
 ```
 
-Your `config.yaml` file specifies all the GitLab integration configurations of the Agent, like the manifest projects to synchronize or the address of the `hubble-relay` for the Network Security policy integrations. A minimal Agent configuration that set up only manifest synchronisations is the following:
+Your `config.yaml` file specifies all configurations of the Agent, such as:
+
+- The manifest projects to synchronize.
+- The address of the `hubble-relay` for the Network Security policy integrations.
+
+As an example, a minimal Agent configuration that sets up only the manifest
+synchronizations is:
 
 ```yaml
 gitops:
