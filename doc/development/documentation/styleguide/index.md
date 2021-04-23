@@ -1132,7 +1132,7 @@ To be consistent, use this format when you refer to the left sidebar.
 
 - Go to your project and select **Settings > CI/CD**.
 - Go to your group and select **Settings > CI/CD**.
-- Go to the Admin Area (**{wrench}**) and select **Overview > Projects**.
+- Go to the Admin Area (**{admin}**) and select **Overview > Projects**.
 
 For expandable menus, use this format:
 
