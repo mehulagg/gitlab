@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'shared/runners/show.html.haml' do
+RSpec.describe 'shared/runners/_runner_details.html.haml' do
   include PageLayoutHelper
 
   let(:runner) do
@@ -24,7 +24,7 @@ RSpec.describe 'shared/runners/show.html.haml' do
 
   describe 'Page title' do
     before do
-      expect_any_instance_of(PageLayoutHelper).to receive(:page_title).with("#{runner.description} ##{runner.id}", 'Runners')
+      expect_any_instance_of(PageLayoutHelper).to receive(:page_title).with("#{runner.description} ##{runner.id}", runner.short_sha)
     end
 
     it 'sets proper page title' do

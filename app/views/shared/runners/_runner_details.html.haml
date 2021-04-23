@@ -1,4 +1,4 @@
-- page_title "#{@runner.description} ##{@runner.id}", _("Runners")
+- page_title "#{@runner.description} ##{@runner.id}", "#{@runner.short_sha}"
 
 %h2.page-title
   = s_('Runners|Runner #%{runner_id}' % { runner_id: @runner.id })
