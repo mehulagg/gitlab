@@ -96,7 +96,7 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
 
         ratio = 5 / job_record.batched_migration.interval.to_f
 
-        expect(described_class.metrics[:histogram_time_efficiency]).to receive(:observe).with(labels, ratio)
+        expect(described_class.metrics[:gauge_time_efficiency]).to receive(:set).with(labels, ratio)
 
         subject
       end
