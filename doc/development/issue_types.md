@@ -15,8 +15,8 @@ issue](https://gitlab.com/gitlab-org/gitlab/-/issues/8767) and its usage was
 discussed few times since then, for example in [incident
 management](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55532).
 
-We are in process of making issue types [extensible](https://gitlab.com/groups/gitlab-org/-/epics/3354)
-and [convert Plan-related resources into issue types](https://gitlab.com/gitlab-org/gitlab/-/issues/271171).
+We are in the process of making issue types [extensible](https://gitlab.com/groups/gitlab-org/-/epics/3354)
+and [converting Plan-related resources into issue types](https://gitlab.com/gitlab-org/gitlab/-/issues/271171).
 
 ## What is an Issue Type
 
@@ -56,10 +56,12 @@ for the type. However, this functionality is provided by default.
 ## Issue Type implementation guidance
 
 - The new issue type should be accessed and managed through the existing Issue UI/API.
-  TODO: there is currently an option to
+  All issue types should be included in the response unless deliberately filtered out in the request params.
+  There is currently an option to
   [exclude issues of some type](https://gitlab.com/gitlab-org/gitlab/-/issues/271171#note_502662414)
   when listing issues, but this exclusion is not perfect (and on some other places these are still available).
-  Excluding an issue type goes against the benefits of reusing issue types logic and is discouraged.
+  Excluding an issue type goes against the benefits of reusing issue types logic and is discouraged and this
+  option will be deprecated.
 - UI/API should support filtering issues by issue type.
 - If needed, there can be additional "special" UI for listing or managing the new issue type, but
   this UI should still re-use the existing generic Issue Vue components and generic issue API for
