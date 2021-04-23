@@ -3,7 +3,8 @@
 require "spec_helper"
 
 RSpec.describe IssuesHelper do
-  let(:project) { create(:project) }
+  let_it_be(:group) { create(:group) }
+  let(:project) { create(:project, group: group) }
   let(:issue) { create :issue, project: project }
   let(:ext_project) { create :redmine_project }
 
@@ -293,6 +294,7 @@ RSpec.describe IssuesHelper do
       allow(helper).to receive(:url_for).and_return('#')
 
       expected = {
+        autocomplete_award_emojis_path: autocomplete_award_emojis_path,
         autocomplete_users_path: autocomplete_users_path(active: true, current_user: true, project_id: project.id, format: :json),
         calendar_path: '#',
         can_bulk_update: 'true',
@@ -311,6 +313,7 @@ RSpec.describe IssuesHelper do
         new_issue_path: new_project_issue_path(project, issue: { assignee_id: finder.assignee.id, milestone_id: finder.milestones.first.id }),
         project_import_jira_path: project_import_jira_path(project),
         project_labels_path: project_labels_path(project, include_ancestor_groups: true, format: :json),
+        project_milestones_path: project_milestones_path(project, format: :json),
         project_path: project.full_path,
         rss_path: '#',
         show_new_issue_link: 'true',
