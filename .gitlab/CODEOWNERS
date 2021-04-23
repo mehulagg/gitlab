@@ -224,12 +224,16 @@ Dangerfile @gl-quality/eng-prod
 
 [Container Security]
 /ee/app/views/projects/threat_monitoring/** @gitlab-org/threat-management/defend/container-security/frontend
+/ee/app/views/projects/security/policies/** @gitlab-org/threat-management/defend/container-security/frontend
+/ee/spec/views/projects/security/policies/** @gitlab-org/threat-management/defend/container-security/frontend
 /ee/app/assets/javascripts/pages/projects/threat_monitoring/** @gitlab-org/threat-management/defend/container-security/frontend
 /ee/app/assets/javascripts/threat_monitoring/** @gitlab-org/threat-management/defend/container-security/frontend
 /ee/spec/frontend/threat_monitoring/** @gitlab-org/threat-management/defend/container-security/frontend
 
 /ee/app/controllers/projects/threat_monitoring_controller.rb @gitlab-org/threat-management/defend/container-security/backend
 /ee/spec/controllers/projects/threat_monitoring_controller_spec.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/app/controllers/projects/security/policies_controller.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/requests/projects/security/policies_controller_spec.rb @gitlab-org/threat-management/defend/container-security/backend
 /lib/gitlab/kubernetes/cilium_network_policy.rb @gitlab-org/threat-management/defend/container-security/backend
 /spec/lib/gitlab/kubernetes/cilium_network_policy_spec.rb @gitlab-org/threat-management/defend/container-security/backend
 /lib/gitlab/kubernetes/network_policy_common.rb @gitlab-org/threat-management/defend/container-security/backend
@@ -246,8 +250,12 @@ Dangerfile @gl-quality/eng-prod
 /ee/spec/controllers/projects/security/network_policies_controller_spec.rb  @gitlab-org/threat-management/defend/container-security/backend
 /ee/app/workers/network_policy_metrics_worker.rb   @gitlab-org/threat-management/defend/container-security/backend
 /ee/spec/workers/network_policy_metrics_worker_spec.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/app/workers/ingress_modsecurity_counter_metrics_worker.rb @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/workers/ingress_modsecurity_counter_metrics_worker_spec.rb @gitlab-org/threat-management/defend/container-security/backend
 /ee/app/services/network_policies/** @gitlab-org/threat-management/defend/container-security/backend
 /ee/spec/services/network_policies/** @gitlab-org/threat-management/defend/container-security/backend
+/ee/app/services/security/orchestration/** @gitlab-org/threat-management/defend/container-security/backend
+/ee/spec/services/security/orchestration/** @gitlab-org/threat-management/defend/container-security/backend
 /ee/lib/gitlab/usage_data_counters/network_policy_counter.rb @gitlab-org/threat-management/defend/container-security/backend
 /ee/spec/lib/gitlab/usage_data_counters/network_policy_counter_spec.rb @gitlab-org/threat-management/defend/container-security/backend
 
