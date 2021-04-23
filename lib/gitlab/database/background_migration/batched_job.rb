@@ -17,6 +17,16 @@ module Gitlab
 
         delegate :aborted?, :job_class, :table_name, :column_name, :job_arguments,
           to: :batched_migration, prefix: :migration
+
+        def time_efficiency
+          return unless succeeded?
+          return unless finished_at && started_at
+
+          duration = (finished_at - started_at).to_i
+
+          # TODO: Switch to individual job interval (prereq: https://gitlab.com/gitlab-org/gitlab/-/issues/328801)
+          duration.to_f / batched_migration.interval
+        end
       end
     end
   end
