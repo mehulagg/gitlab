@@ -4,11 +4,12 @@ module Gitlab
   module Database
     module Migrations
       class Instrumentation
-        attr_reader :observations
+        attr_reader :observations, :logs
 
         def initialize(observers = ::Gitlab::Database::Migrations::Observers.all_observers)
           @observers = observers
           @observations = []
+          @logs = []
         end
 
         def observe(migration, &block)
@@ -19,11 +20,13 @@ module Gitlab
 
           on_each_observer { |observer| observer.before }
 
-          observation.walltime = Benchmark.realtime do
-            yield
-          rescue => e
-            exception = e
-            observation.success = false
+          record_log(migration) do
+            observation.walltime = Benchmark.realtime do
+              yield
+            rescue => e
+              exception = e
+              observation.success = false
+            end
           end
 
           on_each_observer { |observer| observer.after }
@@ -42,6 +45,17 @@ module Gitlab
 
         def record_observation(observation)
           @observations << observation
+        end
+
+        def record_log(migration, &block)
+          log = Log.new(migration, StringIO.new)
+          logger_was = ActiveRecord::Base.logger
+          ActiveRecord::Base.logger = Logger.new(log.content)
+
+          yield
+
+          ActiveRecord::Base.logger = logger_was
+          @logs << log
         end
 
         def on_each_observer(&block)

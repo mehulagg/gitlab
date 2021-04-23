@@ -246,9 +246,9 @@ namespace :gitlab do
           io << instrumentation.observations.to_json
         end
 
-        instrumentation.observations.each do |observation|
-          File.open(File.join(result_dir, "#{observation.migration}.log"), 'wb+') do |io|
-            io << observation.query_log
+        instrumentation.logs.each do |log|
+          File.open(File.join(result_dir, "#{log.migration}.log"), 'wb+') do |io|
+            io << log.to_s
           end
         end
       end
