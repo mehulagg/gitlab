@@ -137,7 +137,8 @@ RSpec.describe EE::IssuesHelper do
       expected = {
         has_blocked_issues_feature: 'true',
         has_issuable_health_status_feature: 'true',
-        has_issue_weights_feature: 'true'
+        has_issue_weights_feature: 'true',
+        project_iterations_path: api_v4_projects_iterations_path(id: project.id)
       }
 
       expect(helper.issues_list_data(project, current_user, finder)).to include(expected)

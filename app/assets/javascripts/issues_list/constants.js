@@ -308,4 +308,14 @@ export const filters = {
       [OPERATOR_IS_NOT]: 'not[label_name][]',
     },
   },
+  iteration: {
+    apiParam: {
+      [OPERATOR_IS]: 'iteration_title',
+      [OPERATOR_IS_NOT]: 'not[iteration_title]',
+    },
+    urlParam: {
+      [OPERATOR_IS]: 'iteration_title',
+      [OPERATOR_IS_NOT]: 'not[iteration_title]',
+    },
+  },
 };

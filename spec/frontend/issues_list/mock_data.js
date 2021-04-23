@@ -10,6 +10,8 @@ export const locationSearch = [
   'label_name[]=tv',
   'not[label_name][]=live action',
   'not[label_name][]=drama',
+  'iteration_title=season:+%234',
+  'not[iteration_title]=season:+%2320',
 ].join('&');
 
 export const filteredTokens = [
@@ -21,6 +23,8 @@ export const filteredTokens = [
   { type: 'labels', value: { data: 'tv', operator: OPERATOR_IS } },
   { type: 'labels', value: { data: 'live action', operator: OPERATOR_IS_NOT } },
   { type: 'labels', value: { data: 'drama', operator: OPERATOR_IS_NOT } },
+  { type: 'iteration', value: { data: 'season: #4', operator: OPERATOR_IS } },
+  { type: 'iteration', value: { data: 'season: #20', operator: OPERATOR_IS_NOT } },
   { type: 'filtered-search-term', value: { data: 'find' } },
   { type: 'filtered-search-term', value: { data: 'issues' } },
 ];

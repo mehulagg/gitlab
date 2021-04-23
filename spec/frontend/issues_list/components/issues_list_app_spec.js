@@ -565,6 +565,8 @@ describe('IssuesListApp component', () => {
           'not[assignee_username]': 'lisa',
           labels: 'cartoon,tv',
           'not[labels]': 'live action,drama',
+          iteration_title: 'season: #4',
+          'not[iteration_title]': 'season: #20',
         });
       });
 
@@ -576,6 +578,8 @@ describe('IssuesListApp component', () => {
           'not[assignee_username][]': ['lisa'],
           'label_name[]': ['cartoon', 'tv'],
           'not[label_name][]': ['live action', 'drama'],
+          iteration_title: ['season: #4'],
+          'not[iteration_title]': ['season: #20'],
         });
       });
     });

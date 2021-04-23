@@ -5,6 +5,7 @@ import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/auth
 import BranchToken from '~/vue_shared/components/filtered_search_bar/tokens/branch_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
 import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
+import IterationToken from '~/vue_shared/components/filtered_search_bar/tokens/iteration_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 
@@ -96,6 +97,15 @@ export const mockAuthorToken = {
   operators: [{ value: '=', description: 'is', default: 'true' }],
   fetchPath: 'gitlab-org/gitlab-test',
   fetchAuthors: Api.projectUsers.bind(Api),
+};
+
+export const mockIterationToken = {
+  type: 'iteration',
+  icon: 'iteration',
+  title: 'Iteration',
+  unique: true,
+  token: IterationToken,
+  fetchIterations: () => Promise.resolve(),
 };
 
 export const mockLabelToken = {

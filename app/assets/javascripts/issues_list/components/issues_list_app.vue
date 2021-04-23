@@ -26,6 +26,7 @@ import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase, getParameterByName } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import IterationToken from '~/vue_shared/components/filtered_search_bar/tokens/iteration_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import eventHub from '../eventhub';
 import IssueCardTimeInfo from './issue_card_time_info.vue';
@@ -85,6 +86,9 @@ export default {
     newIssuePath: {
       default: '',
     },
+    projectIterationsPath: {
+      default: '',
+    },
     projectLabelsPath: {
       default: '',
     },
@@ -134,7 +138,7 @@ export default {
       return convertToSearchQuery(this.filterTokens) || undefined;
     },
     searchTokens() {
-      return [
+      const tokens = [
         {
           type: 'author_username',
           title: __('Author'),
@@ -164,6 +168,20 @@ export default {
           fetchLabels: this.fetchLabels,
         },
       ];
+
+      if (this.projectIterationsPath) {
+        tokens.push({
+          type: 'iteration',
+          title: __('Iteration'),
+          icon: 'iteration',
+          token: IterationToken,
+          unique: true,
+          defaultIterations: [],
+          fetchIterations: this.fetchIterations,
+        });
+      }
+
+      return tokens;
     },
     showPaginationControls() {
       return this.issues.length > 0;
@@ -209,6 +227,9 @@ export default {
         this.labelsCache = data;
         return data.slice(0, MAX_LIST_SIZE);
       });
+    },
+    fetchIterations(search) {
+      return axios.get(this.projectIterationsPath, { params: { search } });
     },
     fetchUsers(search) {
       return axios.get(this.autocompleteUsersPath, { params: { search } });
