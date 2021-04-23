@@ -1,17 +1,12 @@
 import { GlPopover, GlLink, GlIcon } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeLastUpdated from 'ee/geo_nodes_beta/components/header/geo_node_last_updated.vue';
 import {
   HELP_NODE_HEALTH_URL,
   GEO_TROUBLESHOOTING_URL,
   STATUS_DELAY_THRESHOLD_MS,
 } from 'ee/geo_nodes_beta/constants';
-import { MOCK_PRIMARY_VERSION, MOCK_REPLICABLE_TYPES } from 'ee_jest/geo_nodes_beta/mock_data';
 import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
-
-const localVue = createLocalVue();
-localVue.use(Vuex);
 
 describe('GeoNodeLastUpdated', () => {
   let wrapper;
@@ -24,19 +19,8 @@ describe('GeoNodeLastUpdated', () => {
     statusCheckTimestamp: staleStatusTime,
   };
 
-  const createComponent = (initialState, props) => {
-    const store = new Vuex.Store({
-      state: {
-        primaryVersion: MOCK_PRIMARY_VERSION.version,
-        primaryRevision: MOCK_PRIMARY_VERSION.revision,
-        replicableTypes: MOCK_REPLICABLE_TYPES,
-        ...initialState,
-      },
-    });
-
+  const createComponent = (props) => {
     wrapper = shallowMount(GeoNodeLastUpdated, {
-      localVue,
-      store,
       propsData: {
         ...defaultProps,
         ...props,
@@ -92,7 +76,7 @@ describe('GeoNodeLastUpdated', () => {
     });
 
     it('when sync is not stale popover link renders correctly', () => {
-      createComponent(null, { statusCheckTimestamp: nonStaleStatusTime });
+      createComponent({ statusCheckTimestamp: nonStaleStatusTime });
 
       expect(findPopoverLink().text()).toBe('Learn more about Geo node statuses');
       expect(findPopoverLink().attributes('href')).toBe(HELP_NODE_HEALTH_URL);
