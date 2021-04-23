@@ -13,6 +13,7 @@ export const manageSubscriptionButtonText = s__('SuperSonics|Manage');
 export const syncSubscriptionButtonText = s__('SuperSonics|Sync subscription details');
 export const copySubscriptionIdButtonText = __('Copy');
 export const subscriptionTypeText = __('%{type} License');
+export const usersInSubscriptionUnlimited = __('Unlimited');
 export const detailsLabels = {
   address: __('Address'),
   company: __('Company'),
