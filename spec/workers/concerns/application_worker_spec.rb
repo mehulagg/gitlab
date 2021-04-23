@@ -4,7 +4,12 @@ require 'spec_helper'
 
 RSpec.describe ApplicationWorker do
   # We depend on the lazy-load characteristic of rspec. If the worker is loaded
-  # before setting up, it's likely to go wrong.
+  # before setting up, it's likely to go wrong. Consider this catcha:
+  # before do
+  #   allow(router).to receive(:route).with(worker).and_return('queue_1')
+  # end
+  # As worker is triggered, it includes ApplicationWorker, and the router is
+  # called before it is stubbed. That makes the stubbing useless.
   let(:worker) do
     Class.new do
       def self.name
