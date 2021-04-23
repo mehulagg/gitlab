@@ -16,6 +16,9 @@ query getJobs($fullPath: ID!, $statuses: [CiJobStatus!]) {
         allowFailure
         status
         scheduledAt
+        manualJob
+        triggered
+        createdByTag
         detailedStatus {
           detailsPath
           group

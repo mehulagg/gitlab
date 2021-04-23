@@ -3,6 +3,7 @@ import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 export default {
+  iconSize: 12,
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -30,11 +31,11 @@ export default {
 <template>
   <div>
     <div v-if="duration">
-      <gl-icon name="timer" :size="12" />
+      <gl-icon name="timer" :size="$options.iconSize" />
       {{ durationTimeFormatted(duration) }}
     </div>
     <div v-if="finishedTime">
-      <gl-icon name="calendar" :size="12" />
+      <gl-icon name="calendar" :size="$options.iconSize" />
       <time
         v-gl-tooltip
         :title="tooltipTitle(finishedTime)"

@@ -19,7 +19,7 @@ export default {
       return `#${id}`;
     },
     pipelinePath() {
-      return this.job.pipeline.path;
+      return this.job.pipeline?.path;
     },
     pipelineUserAvatar() {
       return this.job.pipeline?.user?.avatarUrl;

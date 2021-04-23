@@ -86,7 +86,13 @@ export default {
 </script>
 
 <template>
-  <gl-table :items="jobs" :fields="$options.fields" stacked="lg" fixed>
+  <gl-table
+    :items="jobs"
+    :fields="$options.fields"
+    :tbody-tr-attr="{ 'data-testid': 'jobs-table-row' }"
+    stacked="lg"
+    fixed
+  >
     <template #table-colgroup="{ fields }">
       <col v-for="field in fields" :key="field.key" :class="field.columnClass" />
     </template>
@@ -104,11 +110,11 @@ export default {
     </template>
 
     <template #cell(stage)="{ item }">
-      {{ item.stage.name }}
+      <span data-testid="job-stage-name">{{ item.stage.name }}</span>
     </template>
 
     <template #cell(name)="{ item }">
-      {{ item.name }}
+      <span data-testid="job-name">{{ item.name }}</span>
     </template>
 
     <template #cell(duration)="{ item }">
@@ -116,7 +122,9 @@ export default {
     </template>
 
     <template #cell(coverage)="{ item }">
-      {{ formatCoverage(item.coverage) }}
+      <span v-if="item.coverage" data-testid="job-coverage">{{
+        formatCoverage(item.coverage)
+      }}</span>
     </template>
 
     <template #cell(actions)="{ item }">
