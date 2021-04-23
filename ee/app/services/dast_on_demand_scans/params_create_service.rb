@@ -71,7 +71,7 @@ module DastOnDemandScans
       if dast_site_profile.target_type == 'website'
         { target_url: url }
       else
-        { api_specification_url: url }
+        { api_specification_url: url, api_host_override: URI(dast_site_profile.dast_site.url).host }
       end
     end
 
