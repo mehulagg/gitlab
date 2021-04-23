@@ -42,7 +42,7 @@ const WEBPACK_MEMORY_TEST =
   process.env.WEBPACK_MEMORY_TEST && process.env.WEBPACK_MEMORY_TEST !== 'false';
 const NO_COMPRESSION = process.env.NO_COMPRESSION && process.env.NO_COMPRESSION !== 'false';
 const NO_SOURCEMAPS = process.env.NO_SOURCEMAPS && process.env.NO_SOURCEMAPS !== 'false';
-const WATCH_GITLAB_UI = process.env.WATCH_GITLAB_UI && process.env.WATCH_GITLAB_UI !== 'false';
+const WATCH_GITLAB_UI = process.env.GITLAB_UI_WATCH && process.env.GITLAB_UI_WATCH !== 'false';
 
 const WEBPACK_OUTPUT_PATH = path.join(ROOT_PATH, 'public/assets/webpack');
 const WEBPACK_PUBLIC_PATH = '/assets/webpack/';
