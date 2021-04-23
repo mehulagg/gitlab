@@ -17872,13 +17872,16 @@ msgstr ""
 msgid "IssueBoards|Switch board"
 msgstr ""
 
-msgid "IssueTracker|Bugzilla issue tracker"
-msgstr ""
-
 msgid "IssueTracker|Custom issue tracker"
 msgstr ""
 
 msgid "IssueTracker|EWM work items tracker"
+msgstr ""
+
+msgid "IssueTracker|Use Bugzilla as this project's issue tracker."
+msgstr ""
+
+msgid "IssueTracker|Use Bugzilla as this project's issue tracker. %{docs_link}"
 msgstr ""
 
 msgid "IssueTracker|Use Redmine as the issue tracker."
