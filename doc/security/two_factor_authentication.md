@@ -37,7 +37,7 @@ change the grace period to `0`.
 
 ## Enforcing 2FA for all users in a group
 
-> [From](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24965) GitLab 12.0, 2FA settings for a group are also applied to subgroups.
+> [Introduced in](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24965) GitLab 12.0, 2FA settings for a group are also applied to subgroups.
 
 If you want to enforce 2FA only for certain groups, you can:
 
