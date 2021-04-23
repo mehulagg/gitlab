@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe MergeTrains::CreatePipelineService do
   let_it_be(:project) { create(:project, :repository, :auto_devops, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:maintainer) { create(:user) }
+
   let(:service) { described_class.new(project, maintainer) }
   let(:previous_ref) { 'refs/heads/master' }
 

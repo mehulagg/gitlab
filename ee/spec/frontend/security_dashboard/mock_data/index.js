@@ -193,3 +193,52 @@ export const mockProjectSecurityChartsWithData = () => ({
     },
   },
 });
+
+export const mockVulnerableProjectsInstance = () => ({
+  data: {
+    instanceSecurityDashboard: {
+      projects: {
+        nodes: [
+          {
+            id: 'gid://gitlab/Project/2',
+            name: 'Gitlab Shell',
+          },
+        ],
+      },
+    },
+  },
+});
+
+export const mockVulnerableProjectsGroup = () => ({
+  data: {
+    group: {
+      projects: {
+        nodes: [
+          {
+            id: 'gid://gitlab/Project/2',
+            name: 'Gitlab Shell',
+          },
+        ],
+      },
+    },
+  },
+});
+
+export const mockVulnerabilitySeveritiesGraphQLResponse = ({ dashboardType }) => ({
+  data: {
+    [dashboardType]: {
+      vulnerabilitySeveritiesCount: {
+        __typename: 'VulnerabilitySeveritiesCount',
+        critical: 0,
+        high: 0,
+        info: 0,
+        low: 0,
+        medium: 4,
+        unknown: 2,
+      },
+    },
+    __typename: { project: 'Project', instance: 'InstanceSecurityDashboard', group: 'Group' }[
+      dashboardType
+    ],
+  },
+});

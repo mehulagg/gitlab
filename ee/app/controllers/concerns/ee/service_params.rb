@@ -6,10 +6,8 @@ module EE
 
     ALLOWED_PARAMS_EE = [
       :issues_enabled,
-      :jenkins_url,
       :multiproject_enabled,
       :pass_unstable,
-      :project_name,
       :repository_url,
       :static_context,
       :vulnerabilities_enabled,

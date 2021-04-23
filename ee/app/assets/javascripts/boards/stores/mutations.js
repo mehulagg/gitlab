@@ -150,25 +150,6 @@ export default {
     Vue.set(state, 'epics', []);
   },
 
-  [mutationTypes.MOVE_ISSUE]: (
-    state,
-    { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
-  ) => {
-    const fromList = state.boardLists[fromListId];
-    const toList = state.boardLists[toListId];
-
-    const issue = moveItemListHelper(originalIssue, fromList, toList);
-
-    if (epicId === null) {
-      Vue.set(state.boardItems, issue.id, { ...issue, epic: null });
-    } else if (epicId !== undefined) {
-      Vue.set(state.boardItems, issue.id, { ...issue, epic: { id: epicId } });
-    }
-
-    removeItemFromList({ state, listId: fromListId, itemId: issue.id });
-    addItemToList({ state, listId: toListId, itemId: issue.id, moveBeforeId, moveAfterId });
-  },
-
   [mutationTypes.MOVE_EPIC]: (
     state,
     { originalEpic, fromListId, toListId, moveBeforeId, moveAfterId },

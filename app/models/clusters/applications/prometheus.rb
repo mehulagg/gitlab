@@ -3,7 +3,7 @@
 module Clusters
   module Applications
     class Prometheus < ApplicationRecord
-      include PrometheusAdapter
+      include ::Clusters::Concerns::PrometheusClient
 
       VERSION = '10.4.1'
 
@@ -22,7 +22,7 @@ module Clusters
 
       attr_encrypted :alert_manager_token,
         mode: :per_attribute_iv,
-        key: Settings.attr_encrypted_db_key_base_truncated,
+        key: Settings.attr_encrypted_db_key_base_32,
         algorithm: 'aes-256-gcm'
 
       after_destroy do
@@ -44,6 +44,10 @@ module Clusters
         end
       end
 
+      def managed_prometheus?
+        !externally_installed? && !uninstalled?
+      end
+
       def updated_since?(timestamp)
         last_update_started_at &&
           last_update_started_at > timestamp &&
@@ -58,14 +62,6 @@ module Clusters
         'https://gitlab-org.gitlab.io/cluster-integration/helm-stable-archive'
       end
 
-      def service_name
-        'prometheus-prometheus-server'
-      end
-
-      def service_port
-        80
-      end
-
       def install_command
         helm_command_module::InstallCommand.new(
           name: name,
@@ -78,6 +74,7 @@ module Clusters
         )
       end
 
+      # Deprecated, to be removed in %14.0 as part of https://gitlab.com/groups/gitlab-org/-/epics/4280
       def patch_command(values)
         helm_command_module::PatchCommand.new(
           name: name,
@@ -106,29 +103,6 @@ module Clusters
         files.merge('values.yaml': replaced_values)
       end
 
-      def prometheus_client
-        return unless kube_client
-
-        proxy_url = kube_client.proxy_url('service', service_name, service_port, Gitlab::Kubernetes::Helm::NAMESPACE)
-
-        # ensures headers containing auth data are appended to original k8s client options
-        options = kube_client.rest_client.options
-          .merge(prometheus_client_default_options)
-          .merge(headers: kube_client.headers)
-        Gitlab::PrometheusClient.new(proxy_url, options)
-      rescue Kubeclient::HttpError, Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ENETUNREACH
-        # If users have mistakenly set parameters or removed the depended clusters,
-        # `proxy_url` could raise an exception because gitlab can not communicate with the cluster.
-        # Since `PrometheusAdapter#can_query?` is eargely loaded on environement pages in gitlab,
-        # we need to silence the exceptions
-      end
-
-      def configured?
-        kube_client.present? && available?
-      rescue Gitlab::UrlBlocker::BlockedUrlError
-        false
-      end
-
       def generate_alert_manager_token!
         unless alert_manager_token.present?
           update!(alert_manager_token: generate_token)
@@ -144,10 +118,6 @@ module Clusters
       def disable_prometheus_integration
         ::Clusters::Applications::DeactivateServiceWorker
           .perform_async(cluster_id, ::PrometheusService.to_param) # rubocop:disable CodeReuse/ServiceClass
-      end
-
-      def kube_client
-        cluster&.kubeclient&.core_client
       end
 
       def install_knative_metrics

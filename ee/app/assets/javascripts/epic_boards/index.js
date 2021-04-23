@@ -44,7 +44,7 @@ export default () => {
   if (gon?.features?.boardsFilteredSearch) {
     import('ee/boards/epic_filtered_search')
       .then(({ default: initFilteredSearch }) => {
-        initFilteredSearch();
+        initFilteredSearch(apolloProvider);
       })
       .catch(() => {});
   }
@@ -76,6 +76,7 @@ export default () => {
       milestoneListsAvailable: false,
       assigneeListsAvailable: false,
       iterationListsAvailable: false,
+      emailsDisabled: parseBoolean($boardApp.dataset.emailsDisabled),
     },
     store,
     apolloProvider,

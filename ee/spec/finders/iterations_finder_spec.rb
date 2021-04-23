@@ -8,9 +8,11 @@ RSpec.describe IterationsFinder do
   let_it_be(:project_1) { create(:project, namespace: group) }
   let_it_be(:project_2) { create(:project, namespace: group) }
   let_it_be(:user) { create(:user) }
+  let_it_be(:iteration_cadence1) { create(:iterations_cadence, group: group, active: true, duration_in_weeks: 1, title: 'one week iterations') }
+  let_it_be(:iteration_cadence2) { create(:iterations_cadence, group: group, active: true, duration_in_weeks: 2, title: 'two week iterations') }
 
-  let!(:started_group_iteration) { create(:started_iteration, :skip_future_date_validation, group: group, title: 'one test', start_date: now - 1.day, due_date: now) }
-  let!(:upcoming_group_iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now) }
+  let!(:started_group_iteration) { create(:started_iteration, :skip_future_date_validation, iterations_cadence: iteration_cadence2, group: iteration_cadence2.group, title: 'one test', start_date: now - 1.day, due_date: now) }
+  let!(:upcoming_group_iteration) { create(:iteration, iterations_cadence: iteration_cadence1, group: iteration_cadence1.group, start_date: 1.day.from_now, due_date: 2.days.from_now) }
   let!(:iteration_from_project_1) { create(:started_iteration, :skip_project_validation, project: project_1, start_date: 3.days.from_now, due_date: 4.days.from_now) }
   let!(:iteration_from_project_2) { create(:started_iteration, :skip_project_validation, project: project_2, start_date: 5.days.from_now, due_date: 6.days.from_now) }
   let(:project_ids) { [project_1.id, project_2.id] }
@@ -119,6 +121,18 @@ RSpec.describe IterationsFinder do
         params[:id] = iteration_from_project_1.id
 
         expect(subject).to contain_exactly(iteration_from_project_1)
+      end
+
+      it 'filters by cadence' do
+        params[:iteration_cadence_ids] = iteration_cadence1.id
+
+        expect(subject).to contain_exactly(upcoming_group_iteration)
+      end
+
+      it 'filters by multiple cadences' do
+        params[:iteration_cadence_ids] = [iteration_cadence1.id, iteration_cadence2.id]
+
+        expect(subject).to contain_exactly(started_group_iteration, upcoming_group_iteration)
       end
 
       context 'by timeframe' do

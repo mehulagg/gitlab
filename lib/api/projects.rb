@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_dependency 'declarative_policy'
-
 module API
   class Projects < ::API::Base
     include PaginationParams
@@ -71,10 +69,10 @@ module API
       # This is to help determine which projects to use in https://gitlab.com/gitlab-org/gitlab/-/issues/325788
       def log_if_upload_exceed_max_size(user_project, file)
         return if file.size <= user_project.max_attachment_size
-        return if exempt_from_global_attachment_size?(user_project)
 
         if file.size > user_project.max_attachment_size
-          Gitlab::AppLogger.info({ message: "File exceeds maximum size", file_bytes: file.size, project_id: user_project.id, project_path: user_project.full_path })
+          allowed = exempt_from_global_attachment_size?(user_project)
+          Gitlab::AppLogger.info({ message: "File exceeds maximum size", file_bytes: file.size, project_id: user_project.id, project_path: user_project.full_path, upload_allowed: allowed })
         end
       end
     end
@@ -119,6 +117,7 @@ module API
         optional :last_activity_after, type: DateTime, desc: 'Limit results to projects with last_activity after specified time. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ'
         optional :last_activity_before, type: DateTime, desc: 'Limit results to projects with last_activity before specified time. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ'
         optional :repository_storage, type: String, desc: 'Which storage shard the repository is on. Available only to admins'
+        optional :topic, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of topics. Limit results to projects having all topics'
 
         use :optional_filter_params_ee
       end

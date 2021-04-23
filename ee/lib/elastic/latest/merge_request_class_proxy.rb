@@ -26,6 +26,12 @@ module Elastic
 
         search(query_hash, options)
       end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def preload_indexing_data(relation)
+        relation.includes(target_project: [:project_feature])
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

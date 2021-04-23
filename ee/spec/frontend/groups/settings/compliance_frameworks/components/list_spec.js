@@ -12,7 +12,6 @@ import { PIPELINE_CONFIGURATION_PATH_FORMAT } from 'ee/groups/settings/complianc
 import getComplianceFrameworkQuery from 'ee/groups/settings/compliance_frameworks/graphql/queries/get_compliance_framework.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-
 import { validFetchResponse, emptyFetchResponse } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -44,7 +43,7 @@ describe('List', () => {
     return createMockApollo(requestHandlers);
   }
 
-  function createComponentWithApollo(resolverMock) {
+  function createComponentWithApollo(resolverMock, props = {}) {
     return shallowMount(List, {
       localVue,
       apolloProvider: createMockApolloProvider(resolverMock),
@@ -53,6 +52,7 @@ describe('List', () => {
         editFrameworkPath: 'group/framework/id/edit',
         emptyStateSvgPath: 'dir/image.svg',
         groupPath: 'group-1',
+        ...props,
       },
       stubs: {
         GlLoadingIcon,
@@ -192,6 +192,19 @@ describe('List', () => {
 
     it('renders the delete modal', () => {
       expect(findDeleteModal().exists()).toBe(true);
+    });
+
+    describe('when no paths are provided', () => {
+      beforeEach(() => {
+        wrapper = createComponentWithApollo(fetch, {
+          addFrameworkPath: null,
+          editFrameworkPath: null,
+        });
+      });
+
+      it('does not show the add framework button', () => {
+        expect(findAddBtn().exists()).toBe(false);
+      });
     });
   });
 

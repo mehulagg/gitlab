@@ -8,11 +8,12 @@ FactoryBot.define do
 
     trait(:attachment) { file_type { :attachment } }
     trait(:avatar) { file_type { :avatar } }
+    trait(:favicon) { file_type { :favicon } }
     trait(:file) { file_type { :file } }
+    trait(:import_export) { file_type { :import_export } }
+    trait(:issuable_metric_image) { file_type { :issuable_metric_image } }
     trait(:namespace_file) { file_type { :namespace_file } }
     trait(:personal_file) { file_type { :personal_file } }
-    trait(:favicon) { file_type { :favicon } }
-    trait(:import_export) { file_type { :import_export } }
 
     trait :failed do
       success { false }

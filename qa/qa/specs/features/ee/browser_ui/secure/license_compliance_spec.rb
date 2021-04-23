@@ -106,7 +106,7 @@ module QA
         Page::Project::Menu.perform(&:click_on_license_compliance)
       end
 
-      it 'can approve and deny licenses in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1272' do
+      it 'can approve and deny licenses in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1767' do
         EE::Page::Project::Secure::LicenseCompliance.perform do |license_compliance|
           license_compliance.open_tab
           license_compliance.approve_license approved_license_name

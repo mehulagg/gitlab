@@ -13,7 +13,7 @@ module DastSiteProfiles
     attr_reader :dast_site_profile
 
     def execute(name:, target_url:, **params)
-      return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
+      return ServiceResponse.error(message: _('Insufficient permissions')) unless allowed?
 
       ActiveRecord::Base.transaction do
         dast_site = DastSites::FindOrCreateService.new(project, current_user).execute!(url: target_url)

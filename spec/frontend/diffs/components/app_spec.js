@@ -56,7 +56,7 @@ describe('diffs/components/app', () => {
         endpointMetadata: `${TEST_HOST}/diff/endpointMetadata`,
         endpointBatch: `${TEST_HOST}/diff/endpointBatch`,
         endpointCoverage: `${TEST_HOST}/diff/endpointCoverage`,
-        endpointCodequality: `${TEST_HOST}/diff/endpointCodequality`,
+        endpointCodequality: '',
         projectPath: 'namespace/project',
         currentUser: {},
         changesEmptyStateIllustration: '',
@@ -143,16 +143,8 @@ describe('diffs/components/app', () => {
   });
 
   describe('codequality diff', () => {
-    it('fetches code quality data when endpoint is provided', () => {
+    it('does not fetch code quality data on FOSS', async () => {
       createComponent();
-      jest.spyOn(wrapper.vm, 'fetchCodequality');
-      wrapper.vm.fetchData(false);
-
-      expect(wrapper.vm.fetchCodequality).toHaveBeenCalled();
-    });
-
-    it('does not fetch code quality data when endpoint is blank', async () => {
-      createComponent({ endpointCodequality: '' });
       jest.spyOn(wrapper.vm, 'fetchCodequality');
       wrapper.vm.fetchData(false);
 
@@ -711,6 +703,26 @@ describe('diffs/components/app', () => {
           expect(wrapper.vm.navigateToDiffFileIndex).toHaveBeenCalledWith(targetFile - 1);
         },
       );
+    });
+  });
+
+  describe('diff file tree is aware of review bar', () => {
+    it('it does not have review-bar-visible class when review bar is not visible', () => {
+      createComponent({}, ({ state }) => {
+        state.diffs.diffFiles = [{ file_hash: '111', file_path: '111.js' }];
+      });
+
+      expect(wrapper.find('.js-diff-tree-list').exists()).toBe(true);
+      expect(wrapper.find('.js-diff-tree-list.review-bar-visible').exists()).toBe(false);
+    });
+
+    it('it does have review-bar-visible class when review bar is visible', () => {
+      createComponent({}, ({ state }) => {
+        state.diffs.diffFiles = [{ file_hash: '111', file_path: '111.js' }];
+        state.batchComments.drafts = ['draft message'];
+      });
+
+      expect(wrapper.find('.js-diff-tree-list.review-bar-visible').exists()).toBe(true);
     });
   });
 });

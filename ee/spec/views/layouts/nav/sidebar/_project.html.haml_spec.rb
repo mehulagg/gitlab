@@ -5,10 +5,25 @@ require 'spec_helper'
 RSpec.describe 'layouts/nav/sidebar/_project' do
   let_it_be_with_refind(:project) { create(:project, :repository) }
 
+  let(:user) { project.owner }
+
   before do
     assign(:project, project)
     assign(:repository, project.repository)
+
     allow(view).to receive(:current_ref).and_return('master')
+  end
+
+  describe 'Repository' do
+    describe 'Files' do
+      it 'has a link to the project file locks path' do
+        allow(view).to receive(:current_user).and_return(user)
+
+        render
+
+        expect(rendered).to have_link('Locked Files', href: project_path_locks_path(project))
+      end
+    end
   end
 
   describe 'issue boards' do

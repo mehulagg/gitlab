@@ -52,18 +52,8 @@ RSpec.describe Mutations::Dast::Profiles::Create do
         end
 
         context "when branch_name='orphaned_branch'" do
-          context 'when the feature flag dast_branch_selection is disabled' do
-            it 'does not set the branch_name' do
-              stub_feature_flags(dast_branch_selection: false)
-
-              expect(subject[:dast_profile].branch_name).to be_nil
-            end
-          end
-
-          context 'when the feature flag dast_branch_selection is enabled' do
-            it 'sets the branch_name' do
-              expect(subject[:dast_profile].branch_name).to eq(project.default_branch)
-            end
+          it 'sets the branch_name' do
+            expect(subject[:dast_profile].branch_name).to eq(project.default_branch)
           end
         end
       end

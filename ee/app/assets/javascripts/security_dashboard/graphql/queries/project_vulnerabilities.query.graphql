@@ -8,6 +8,7 @@ query project(
   $severity: [VulnerabilitySeverity!]
   $reportType: [VulnerabilityReportType!]
   $scanner: [String!]
+  $scannerId: [ID!]
   $state: [VulnerabilityState!]
   $sort: VulnerabilitySort
   $hasIssues: Boolean
@@ -21,6 +22,7 @@ query project(
       severity: $severity
       reportType: $reportType
       scanner: $scanner
+      scannerId: $scannerId
       state: $state
       sort: $sort
       hasIssues: $hasIssues

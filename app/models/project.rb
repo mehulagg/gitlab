@@ -161,7 +161,6 @@ class Project < ApplicationRecord
   has_one :pipelines_email_service
   has_one :irker_service
   has_one :pivotaltracker_service
-  has_one :hipchat_service
   has_one :flowdock_service
   has_one :assembla_service
   has_one :asana_service
@@ -1378,7 +1377,7 @@ class Project < ApplicationRecord
   def find_or_initialize_service(name)
     return if disabled_services.include?(name)
 
-    find_service(services, name) || build_from_instance_or_template(name) || public_send("build_#{name}_service") # rubocop:disable GitlabSecurity/PublicSend
+    find_service(services, name) || build_from_instance_or_template(name) || build_service(name)
   end
 
   # rubocop: disable CodeReuse/ServiceClass
@@ -2172,17 +2171,18 @@ class Project < ApplicationRecord
   end
 
   def default_merge_request_target
-    return self unless forked_from_project
-    return self unless forked_from_project.merge_requests_enabled?
+    return self if project_setting.mr_default_target_self
+    return self unless mr_can_target_upstream?
 
-    # When our current visibility is more restrictive than the source project,
-    # (e.g., the fork is `private` but the parent is `public`), target the less
-    # permissive project
-    if visibility_level_value < forked_from_project.visibility_level_value
-      self
-    else
-      forked_from_project
-    end
+    forked_from_project
+  end
+
+  def mr_can_target_upstream?
+    # When our current visibility is more restrictive than the upstream project,
+    # (e.g., the fork is `private` but the parent is `public`), don't allow target upstream
+    forked_from_project &&
+      forked_from_project.merge_requests_enabled? &&
+      forked_from_project.visibility_level_value <= visibility_level_value
   end
 
   def multiple_issue_boards_available?
@@ -2594,6 +2594,10 @@ class Project < ApplicationRecord
 
     template = find_service(services_templates, name)
     return Service.build_from_integration(template, project_id: id) if template
+  end
+
+  def build_service(name)
+    "#{name}_service".classify.constantize.new(project_id: id)
   end
 
   def services_templates

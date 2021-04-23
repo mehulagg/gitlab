@@ -53,9 +53,11 @@ module Gitlab
     end
 
     def distribution
-      value = ['- ce']
-      value << '- ee' if ee?
-      value.join("\n")
+      (ee? ? ['- ee'] : ['- ce', '- ee']).join("\n")
+    end
+
+    def tier
+      (ee? ? ['#- premium', '- ultimate'] : ['- free', '- premium', '- ultimate']).join("\n")
     end
 
     def milestone
@@ -65,8 +67,6 @@ module Gitlab
     private
 
     def metric_name_suggestion
-      return unless Feature.enabled?(:product_intelligence_metrics_names_suggestions, default_enabled: :yaml)
-
       "\nname: \"#{Usage::Metrics::NamesSuggestions::Generator.generate(key_path)}\""
     end
 

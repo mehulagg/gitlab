@@ -77,7 +77,9 @@ RSpec.describe 'Creating an Iteration' do
         end
       end
 
-      context 'when a project_path is given' do
+      # Skipping creation of project level iterations.
+      # Pending https://gitlab.com/gitlab-org/gitlab/-/issues/299864
+      xcontext 'when a project_path is given' do
         let_it_be(:project) { create(:project, namespace: group) }
         let(:params) { { project_path: project.full_path } }
 

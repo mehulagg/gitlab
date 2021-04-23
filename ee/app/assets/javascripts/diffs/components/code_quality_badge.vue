@@ -12,7 +12,7 @@ export default {
   i18n: {
     badgeTitle: __('Code Quality'),
     badgeTooltip: __(
-      'The merge request has been updated, and the number of code quality violations in this file has changed.',
+      'The merge request has made changes to this file that affect the number of code quality violations in it.',
     ),
   },
 };

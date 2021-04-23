@@ -10,6 +10,7 @@ module EE
       extend ActiveSupport::Concern
       extend ::Gitlab::Utils::Override
 
+      VALIDATE_SCHEMA_VARIABLE_NAME = 'VALIDATE_SCHEMA'
       LICENSED_PARSER_FEATURES = {
         sast: :sast,
         secret_detection: :secret_detection,
@@ -82,8 +83,8 @@ module EE
             next unless project.feature_available?(LICENSED_PARSER_FEATURES.fetch(file_type))
 
             parse_security_artifact_blob(security_report, blob)
-          rescue => e
-            security_report.error = e
+          rescue
+            security_report.add_error('ParsingError')
           end
         end
       end
@@ -161,12 +162,16 @@ module EE
         variables_hash.fetch(key, default)
       end
 
+      def validate_schema?
+        variables[VALIDATE_SCHEMA_VARIABLE_NAME]&.value&.casecmp?('true')
+      end
+
       private
 
       def variables_hash
-        @variables_hash ||= variables.map do |variable|
+        @variables_hash ||= variables.to_h do |variable|
           [variable[:key], variable[:value]]
-        end.to_h
+        end
       end
 
       def parse_security_artifact_blob(security_report, blob)

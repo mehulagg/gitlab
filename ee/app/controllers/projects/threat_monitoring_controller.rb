@@ -10,11 +10,12 @@ module Projects
       push_frontend_feature_flag(:threat_monitoring_alerts, project, default_enabled: :yaml)
     end
 
+    before_action :threat_monitoring_ff_enabled, only: [:alert_details]
+
     feature_category :web_firewall
 
     def alert_details
-      render_404 unless Feature.enabled?(:threat_monitoring_alerts, project, default_enabled: :yaml)
-      @alert_id = params[:id]
+      @alert_id = project.alert_management_alerts.find(params[:id]).id
     end
 
     def edit
@@ -31,6 +32,12 @@ module Projects
       else
         render_404
       end
+    end
+
+    private
+
+    def threat_monitoring_ff_enabled
+      render_404 unless Feature.enabled?(:threat_monitoring_alerts, project, default_enabled: :yaml)
     end
   end
 end

@@ -311,7 +311,7 @@ class ProjectsController < Projects::ApplicationController
   def unfoldered_environment_names
     respond_to do |format|
       format.json do
-        render json: EnvironmentNamesFinder.new(@project, current_user).execute
+        render json: Environments::EnvironmentNamesFinder.new(@project, current_user).execute
       end
     end
   end
@@ -404,6 +404,7 @@ class ProjectsController < Projects::ApplicationController
       show_default_award_emojis
       squash_option
       allow_editing_commit_messages
+      mr_default_target_self
     ]
   end
 

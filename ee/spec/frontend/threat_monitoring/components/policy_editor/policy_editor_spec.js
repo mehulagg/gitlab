@@ -15,6 +15,7 @@ import PolicyEditorApp from 'ee/threat_monitoring/components/policy_editor/polic
 import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
 import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
 import createStore from 'ee/threat_monitoring/store';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility');
@@ -53,33 +54,37 @@ spec:
 
     jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
 
-    wrapper = shallowMount(PolicyEditorApp, {
-      propsData: {
-        threatMonitoringPath: '/threat-monitoring',
-        projectId: '21',
-        ...propsData,
-      },
-      provide: {
-        glFeatures: { threatMonitoringAlerts: false },
-        ...provide,
-      },
-      store,
-      data,
-      stubs: { NetworkPolicyEditor: true },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(PolicyEditorApp, {
+        propsData: {
+          threatMonitoringPath: '/threat-monitoring',
+          projectId: '21',
+          ...propsData,
+        },
+        provide: {
+          glFeatures: { threatMonitoringAlerts: false },
+          ...provide,
+        },
+        store,
+        data,
+        stubs: { NetworkPolicyEditor: true },
+      }),
+    );
   };
 
-  const findRuleEditor = () => wrapper.find('[data-testid="rule-editor"]');
-  const findYamlEditor = () => wrapper.find('[data-testid="yaml-editor"]');
+  const findRuleEditor = () => wrapper.findByTestId('rule-editor');
+  const findYamlEditor = () => wrapper.findByTestId('yaml-editor');
   const findPreview = () => wrapper.find(PolicyPreview);
-  const findAddRuleButton = () => wrapper.find('[data-testid="add-rule"]');
-  const findYAMLParsingAlert = () => wrapper.find('[data-testid="parsing-alert"]');
-  const findNetworkPolicyEditor = () => wrapper.find('[data-testid="network-policy-editor"]');
+  const findAddRuleButton = () => wrapper.findByTestId('add-rule');
+  const findYAMLParsingAlert = () => wrapper.findByTestId('parsing-alert');
+  const findNetworkPolicyEditor = () => wrapper.findByTestId('network-policy-editor');
   const findPolicyAlertPicker = () => wrapper.find(PolicyAlertPicker);
+  const findPolicyDescription = () => wrapper.find("[id='policyDescription']");
+  const findPolicyEnableContainer = () => wrapper.findByTestId('policy-enable');
   const findPolicyName = () => wrapper.find("[id='policyName']");
-  const findSavePolicy = () => wrapper.find("[data-testid='save-policy']");
-  const findDeletePolicy = () => wrapper.find("[data-testid='delete-policy']");
-  const findEditorModeToggle = () => wrapper.find("[data-testid='editor-mode']");
+  const findSavePolicy = () => wrapper.findByTestId('save-policy');
+  const findDeletePolicy = () => wrapper.findByTestId('delete-policy');
+  const findEditorModeToggle = () => wrapper.findByTestId('editor-mode');
 
   const modifyPolicyAlert = async ({ isAlertEnabled }) => {
     const policyAlertPicker = findPolicyAlertPicker();
@@ -213,7 +218,7 @@ spec:
 
     beforeEach(() => {
       initialValue = findPreview().props('policyDescription');
-      wrapper.find("[data-testid='add-rule']").vm.$emit('click');
+      wrapper.findByTestId('add-rule').vm.$emit('click');
     });
 
     it('updates policy description preview', () => {
@@ -273,20 +278,32 @@ spec:
       });
     });
 
+    it('disables policy name field', () => {
+      expect(findPolicyName().attributes().disabled).toBe('true');
+    });
+
+    it('disables policy description field', () => {
+      expect(findPolicyDescription().attributes().disabled).toBe('true');
+    });
+
+    it('disables policy enable/disable toggle', () => {
+      expect(findPolicyEnableContainer().attributes().disabled).toBe('true');
+    });
+
     it('renders parsing error alert', () => {
       expect(findYAMLParsingAlert().exists()).toBe(true);
     });
 
     it('disables rule builder', () => {
-      expect(wrapper.find("[data-testid='rule-builder-container']").props().disabled).toBe(true);
+      expect(wrapper.findByTestId('rule-builder-container').props().disabled).toBe(true);
     });
 
     it('disables action picker', () => {
-      expect(wrapper.find("[data-testid='policy-action-container']").props().disabled).toBe(true);
+      expect(wrapper.findByTestId('policy-action-container').props().disabled).toBe(true);
     });
 
     it('disables policy preview', () => {
-      expect(wrapper.find("[data-testid='policy-preview-container']").props().disabled).toBe(true);
+      expect(wrapper.findByTestId('policy-preview-container').props().disabled).toBe(true);
     });
 
     it('does not update yaml editor value on switch to yaml editor', async () => {

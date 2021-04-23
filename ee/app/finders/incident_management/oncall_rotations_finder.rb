@@ -13,9 +13,7 @@ module IncidentManagement
       return IncidentManagement::OncallRotation.none unless schedule && allowed?
 
       collection = schedule.rotations
-      collection = by_id(collection)
-
-      collection
+      by_id(collection)
     end
 
     private

@@ -553,6 +553,7 @@ RSpec.describe ProjectPolicy do
 
   describe 'permissions for security bot' do
     let_it_be(:current_user) { create(:user, :security_bot) }
+
     let(:project) { private_project }
 
     let(:permissions) do
@@ -1125,6 +1126,13 @@ RSpec.describe ProjectPolicy do
       stub_licensed_features(commit_committer_check: true)
     end
 
+    context 'when the user is an admin', :enable_admin_mode do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:change_commit_committer_check) }
+      it { is_expected.to be_allowed(:read_commit_committer_check) }
+    end
+
     context 'the user is a maintainer' do
       let(:current_user) { maintainer }
 
@@ -1137,46 +1145,6 @@ RSpec.describe ProjectPolicy do
 
       it { is_expected.not_to be_allowed(:change_commit_committer_check) }
       it { is_expected.to be_allowed(:read_commit_committer_check) }
-    end
-
-    context 'it is enabled on global level' do
-      before do
-        create(:push_rule_sample, commit_committer_check: true)
-      end
-
-      context 'when the user is a maintainer' do
-        let(:current_user) { maintainer }
-
-        it { is_expected.not_to be_allowed(:change_commit_committer_check) }
-        it { is_expected.to be_allowed(:read_commit_committer_check) }
-      end
-
-      context 'when the user is a developer' do
-        let(:current_user) { developer }
-
-        it { is_expected.not_to be_allowed(:change_commit_committer_check) }
-        it { is_expected.to be_allowed(:read_commit_committer_check) }
-      end
-    end
-
-    context 'it is enabled on group level' do
-      let(:push_rule) { create(:push_rule, commit_committer_check: true) }
-      let(:group) { create(:group, push_rule: push_rule) }
-      let(:project) { create(:project, namespace_id: group.id) }
-
-      context 'when the user is a maintainer' do
-        let(:current_user) { maintainer }
-
-        it { is_expected.not_to be_allowed(:change_commit_committer_check) }
-        it { is_expected.to be_allowed(:read_commit_committer_check) }
-      end
-
-      context 'when the user is a developer' do
-        let(:current_user) { developer }
-
-        it { is_expected.not_to be_allowed(:change_commit_committer_check) }
-        it { is_expected.to be_allowed(:read_commit_committer_check) }
-      end
     end
   end
 
@@ -1196,6 +1164,13 @@ RSpec.describe ProjectPolicy do
       stub_licensed_features(reject_unsigned_commits: true)
     end
 
+    context 'when the user is an admin', :enable_admin_mode do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:change_reject_unsigned_commits) }
+      it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
+    end
+
     context 'when the user is a maintainer' do
       let(:current_user) { maintainer }
 
@@ -1208,46 +1183,6 @@ RSpec.describe ProjectPolicy do
 
       it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
       it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
-    end
-
-    context 'it is enabled on global level' do
-      before do
-        create(:push_rule_sample, reject_unsigned_commits: true)
-      end
-
-      context 'when the user is a maintainer' do
-        let(:current_user) { maintainer }
-
-        it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
-        it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
-      end
-
-      context 'when the user is a developer' do
-        let(:current_user) { developer }
-
-        it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
-        it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
-      end
-    end
-
-    context 'it is enabled on group level' do
-      let(:push_rule) { create(:push_rule_without_project, reject_unsigned_commits: true) }
-      let(:group) { create(:group, push_rule: push_rule) }
-      let(:project) { create(:project, namespace_id: group.id) }
-
-      context 'when the user is a maintainer' do
-        let(:current_user) { maintainer }
-
-        it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
-        it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
-      end
-
-      context 'when the user is a developer' do
-        let(:current_user) { developer }
-
-        it { is_expected.not_to be_allowed(:change_reject_unsigned_commits) }
-        it { is_expected.to be_allowed(:read_reject_unsigned_commits) }
-      end
     end
   end
 
@@ -1721,6 +1656,37 @@ RSpec.describe ProjectPolicy do
           it { is_expected.to be_allowed(:read_issue_analytics) }
         end
       end
+    end
+  end
+
+  describe ':build_read_project' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :build_read_project }
+
+    where(:role, :project_visibility, :allowed) do
+      :guest      | 'public'  | true
+      :reporter   | 'public'  | true
+      :developer  | 'public'  | true
+      :maintainer | 'public'  | true
+      :owner      | 'public'  | true
+      :admin      | 'public'  | true
+      :guest      | 'private' | false
+      :reporter   | 'private' | true
+      :developer  | 'private' | true
+      :maintainer | 'private' | true
+      :owner      | 'private' | true
+      :admin      | 'private' | false
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      before do
+        project.update_column(:visibility_level, Gitlab::VisibilityLevel.level_value(project_visibility))
+      end
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
     end
   end
 end

@@ -11,12 +11,16 @@ module Mutations
                required: true,
                description: 'Activation code received after purchasing a GitLab subscription.'
 
+      field :license, Types::Admin::CloudLicenses::CurrentLicenseType,
+            null: true,
+            description: 'The current license.'
+
       def resolve(activation_code:)
         authorize! :global
 
         result = ::GitlabSubscriptions::ActivateService.new.execute(activation_code)
 
-        { errors: Array(result[:errors]) }
+        { errors: Array(result[:errors]), license: result[:license] }
       end
     end
   end

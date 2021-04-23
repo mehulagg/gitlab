@@ -18,7 +18,13 @@ module Gitlab
         end
 
         def hosts
-          @mutex.synchronize { @hosts }
+          @mutex.synchronize { @hosts.dup }
+        end
+
+        def shuffle
+          @mutex.synchronize do
+            unsafe_shuffle
+          end
         end
 
         def length
@@ -35,9 +41,9 @@ module Gitlab
 
         def hosts=(hosts)
           @mutex.synchronize do
-            @hosts = hosts.shuffle
+            @hosts = hosts
+            unsafe_shuffle
             update_pools
-            @index = 0
           end
 
           set_metrics!
@@ -51,6 +57,11 @@ module Gitlab
         end
 
         private
+
+        def unsafe_shuffle
+          @hosts = @hosts.shuffle
+          @index = 0
+        end
 
         # Returns the next available host.
         #

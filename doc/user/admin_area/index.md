@@ -28,7 +28,7 @@ The Admin Area is made up of the following sections:
 | **{messages}** Messages                        | Send and manage [broadcast messages](broadcast_messages.md) for your users. |
 | **{hook}** System Hooks                        | Configure [system hooks](../../system_hooks/system_hooks.md) for many events. |
 | **{applications}** Applications                | Create system [OAuth applications](../../integration/oauth_provider.md) for integrations with other services. |
-| **{slight-frown}** Abuse Reports               | Manage [abuse reports](abuse_reports.md) submitted by your users. |
+| **{slight-frown}** Abuse Reports               | Manage [abuse reports](review_abuse_reports.md) submitted by your users. |
 | **{license}** License                          | Upload, display, and remove [licenses](license.md). |
 | **{cloud-gear}** Kubernetes                    | Create and manage instance-level [Kubernetes clusters](../instance/clusters/index.md). |
 | **{push-rules}** Push rules | Configure pre-defined Git [push rules](../../push_rules/push_rules.md) for projects. Also, configure [merge requests approvers rules](merge_requests_approvals.md). |
@@ -172,6 +172,8 @@ The following data is included in the export:
 - Type
 - Path
 - Access level ([Project](../permissions.md#project-members-permissions) and [Group](../permissions.md#group-members-permissions))
+
+![user permission export button](img/export_permissions_v13_11.png)
 
 #### Users statistics
 

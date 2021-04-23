@@ -60,8 +60,8 @@ export default {
   data() {
     const {
       profileName = '',
-      spiderTimeout = '',
-      targetTimeout = '',
+      spiderTimeout = 1,
+      targetTimeout = 60,
       scanType = SCAN_TYPE.PASSIVE,
       useAjaxSpider = false,
       showDebugMessages = false,
@@ -141,7 +141,7 @@ export default {
       );
     },
     isSubmitDisabled() {
-      return this.isPolicyProfile;
+      return this.formHasErrors || this.requiredFieldEmpty || this.isPolicyProfile;
     },
     isPolicyProfile() {
       return Boolean(this.profile?.referencedInSecurityPolicies?.length);

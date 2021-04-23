@@ -207,6 +207,7 @@ In these cases, use the following workflow:
 - [Newlines style guide](newlines_styleguide.md)
 - [Image scaling guide](image_scaling.md)
 - [Export to CSV](export_csv.md)
+- [Cascading Settings](cascading_settings.md)
 
 ## Performance guides
 
@@ -263,7 +264,7 @@ See [database guidelines](database/index.md).
 
 - [Product Intelligence guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
 - [Usage Ping guide](usage_ping/index.md)
-- [Snowplow guide](snowplow.md)
+- [Snowplow guide](snowplow/index.md)
 
 ## Experiment guide
 

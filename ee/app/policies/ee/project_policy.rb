@@ -24,16 +24,6 @@ module EE
       condition(:is_development) { Rails.env.development? }
 
       with_scope :global
-      condition(:reject_unsigned_commits_disabled_globally) do
-        !PushRule.global&.reject_unsigned_commits
-      end
-
-      with_scope :global
-      condition(:commit_committer_check_disabled_globally) do
-        !PushRule.global&.commit_committer_check
-      end
-
-      with_scope :global
       condition(:locked_approvers_rules) do
         License.feature_available?(:admin_merge_request_approvers_rules) &&
           ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request
@@ -75,39 +65,8 @@ module EE
       end
 
       with_scope :subject
-      condition(:reject_unsigned_commits_disabled_by_group) do
-        if group_push_rule_present?
-          !subject.group.push_rule.reject_unsigned_commits
-        else
-          true
-        end
-      end
-
-      condition(:can_change_reject_unsigned_commits) do
-        admin? ||
-          (can?(:maintainer_access) &&
-            reject_unsigned_commits_disabled_globally? &&
-            reject_unsigned_commits_disabled_by_group?)
-      end
-
-      condition(:commit_committer_check_disabled_by_group) do
-        if group_push_rule_present?
-          !subject.group.push_rule.commit_committer_check
-        else
-          true
-        end
-      end
-
-      with_scope :subject
       condition(:commit_committer_check_available) do
         @subject.feature_available?(:commit_committer_check)
-      end
-
-      condition(:can_change_commit_commiter_check) do
-        admin? ||
-          (can?(:maintainer_access) &&
-            commit_committer_check_disabled_globally? &&
-            commit_committer_check_disabled_by_group?)
       end
 
       with_scope :subject
@@ -322,19 +281,19 @@ module EE
 
       rule { ~can?(:push_code) }.prevent :push_code_to_protected_branches
 
-      rule { can_change_reject_unsigned_commits }.enable :change_reject_unsigned_commits
+      rule { admin | maintainer }.enable :change_reject_unsigned_commits
 
       rule { reject_unsigned_commits_available }.enable :read_reject_unsigned_commits
 
       rule { ~reject_unsigned_commits_available }.prevent :change_reject_unsigned_commits
 
-      rule { can_change_commit_commiter_check }.enable :change_commit_committer_check
+      rule { admin | maintainer }.enable :change_commit_committer_check
 
       rule { commit_committer_check_available }.enable :read_commit_committer_check
 
       rule { ~commit_committer_check_available }.prevent :change_commit_committer_check
 
-      rule { owner | reporter }.enable :build_read_project
+      rule { owner | reporter | public_project }.enable :build_read_project
 
       rule { ~admin & owner & owner_cannot_destroy_project }.prevent :remove_project
 

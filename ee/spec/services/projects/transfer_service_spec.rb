@@ -74,7 +74,7 @@ RSpec.describe Projects::TransferService do
 
       it 'reindexes the project and associated issues and notes' do
         expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
-        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues notes])
+        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues merge_requests notes])
 
         subject.execute(group)
       end

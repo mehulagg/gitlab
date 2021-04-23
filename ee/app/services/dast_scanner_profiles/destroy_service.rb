@@ -8,13 +8,13 @@ module DastScannerProfiles
       return unauthorized unless can_delete_scanner_profile?
 
       dast_scanner_profile = find_dast_scanner_profile(id)
-      return ServiceResponse.error(message: "Scanner profile not found for given parameters") unless dast_scanner_profile
-      return ServiceResponse.error(message: "Cannot delete #{dast_scanner_profile.name} referenced in security policy") if referenced_in_security_policy?(dast_scanner_profile)
+      return ServiceResponse.error(message: _('Scanner profile not found for given parameters')) unless dast_scanner_profile
+      return ServiceResponse.error(message: _('Cannot delete %{profile_name} referenced in security policy') % { profile_name: dast_scanner_profile.name }) if referenced_in_security_policy?(dast_scanner_profile)
 
       if dast_scanner_profile.destroy
         ServiceResponse.success(payload: dast_scanner_profile)
       else
-        ServiceResponse.error(message: 'Scanner profile failed to delete')
+        ServiceResponse.error(message: _('Scanner profile failed to delete'))
       end
     end
 

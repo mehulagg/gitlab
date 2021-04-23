@@ -1,9 +1,9 @@
 - page_title _('Your GitLab group')
 - form_params = { trial_onboarding_flow: params[:trial_onboarding_flow], glm_source: params[:glm_source], glm_content: params[:glm_content] }
 
-.row.flex-grow-1
-  .d-flex.flex-column.align-items-center.w-100.p-3.gl-bg-gray-10
-    .edit-group.d-flex.flex-column.align-items-center.pt-5
+.row.gl-flex-grow-1
+  .gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-w-full.gl-p-5.gl-bg-gray-10
+    .edit-group.gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-pt-7
       - unless in_trial_onboarding_flow?
         #progress-bar
       %h2.center= _('Create your group')
@@ -13,7 +13,7 @@
         = render 'layouts/flash'
         .row
           .form-group.group-name-holder.col-sm-12
-            = f.label :name, class: 'label-bold' do
+            = f.label :name, class: 'gl-font-weight-bold' do
               = _('Group name (your organization)')
             = f.text_field :name, class: 'form-control js-autofill-group-name',
               required: true,
@@ -22,7 +22,7 @@
             .form-text.text-muted= _('You can always edit this later')
         .row
           .form-group.col-sm-12
-            = f.label :path, class: 'label-bold' do
+            = f.label :path, class: 'gl-font-weight-bold' do
               = _('Group URL')
             .input-group.gl-field-error-anchor
               .group-root-path.input-group-prepend.has-tooltip{ title: root_url, :'data-placement' => 'bottom' }
@@ -49,6 +49,6 @@
               = render partial: 'shared/groups/invite_members'
             - experiment_instance.try(:invite_page) {}
         .row
-          .form-group.col-sm-12.mb-0
-            = button_tag class: %w[btn gl-button btn-success w-100] do
+          .form-group.col-sm-12.gl-mb-0
+            = button_tag class: %w[btn gl-button btn-success gl-w-full!] do
               = _('Create group')

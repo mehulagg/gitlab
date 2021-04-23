@@ -4,7 +4,7 @@ import VueApollo from 'vue-apollo';
 import CloudLicenseSubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
-import activateSubscriptionMutation from 'ee/pages/admin/cloud_licenses/graphql/mutations/activate_subscription.mutation.graphql';
+import { subscriptionQueries } from 'ee/pages/admin/cloud_licenses/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { stubComponent } from 'helpers/stub_component';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -21,7 +21,7 @@ describe('CloudLicenseApp', () => {
 
   const createMockApolloProvider = (resolverMock) => {
     localVue.use(VueApollo);
-    return createMockApollo([[activateSubscriptionMutation, resolverMock]]);
+    return createMockApollo([[subscriptionQueries.mutation, resolverMock]]);
   };
 
   const findActivateButton = () => wrapper.findByTestId('activate-button');
@@ -123,7 +123,7 @@ describe('CloudLicenseApp', () => {
       });
 
       it('emits a successful event', () => {
-        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_EVENT)).toEqual([[fakeActivationCode]]);
+        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_EVENT)).toEqual([[true]]);
       });
     });
 

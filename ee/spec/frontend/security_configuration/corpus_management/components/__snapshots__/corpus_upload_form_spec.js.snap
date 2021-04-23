@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Corpus upload modal corpus modal uploading state does show the upload progress 1`] = `
+<div
+  class="gl-mt-2"
+  data-testid="upload-status"
+>
+  <span
+    class="gl-spinner-container"
+  >
+    <span
+      aria-label="Loading"
+      class="align-text-bottom gl-spinner gl-spinner-dark gl-spinner-sm"
+    />
+  </span>
+  
+    Attaching File - 25%
+    
+  <button
+    class="btn btn-default btn-sm gl-button"
+    type="button"
+  >
+    <!---->
+     
+    <!---->
+      
+    <span
+      class="gl-button-text"
+    >
+       Cancel 
+    </span>
+  </button>
+</div>
+`;

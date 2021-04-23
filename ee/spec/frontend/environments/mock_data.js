@@ -9,8 +9,8 @@ export const environment = {
     iid: 6,
     sha: '500aabcb17c97bdcf2d0c410b70cb8556f0362dd',
     ref: {
-      name: 'master',
-      ref_url: 'root/ci-folders/tree/master',
+      name: 'main',
+      ref_url: 'root/ci-folders/tree/main',
     },
     tag: true,
     'last?': true,

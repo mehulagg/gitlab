@@ -579,7 +579,9 @@ RSpec.describe Group do
 
     it "is false if avatar is html page" do
       group.update_attribute(:avatar, 'uploads/avatar.html')
-      expect(group.avatar_type).to eq(["file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp"])
+      group.avatar_type
+
+      expect(group.errors.added?(:avatar, "file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp")).to be true
     end
   end
 
@@ -681,39 +683,178 @@ RSpec.describe Group do
     end
   end
 
-  describe '#last_blocked_owner?' do
-    let(:blocked_user) { create(:user, :blocked) }
+  describe '#member_last_blocked_owner?' do
+    let_it_be(:blocked_user) { create(:user, :blocked) }
+
+    let(:member) { blocked_user.group_members.last }
 
     before do
       group.add_user(blocked_user, GroupMember::OWNER)
     end
 
-    it { expect(group.last_blocked_owner?(blocked_user)).to be_truthy }
-
-    context 'with another active owner' do
+    context 'when last_blocked_owner is set' do
       before do
-        group.add_user(create(:user), GroupMember::OWNER)
+        expect(group).not_to receive(:members_with_parents)
       end
 
-      it { expect(group.last_blocked_owner?(blocked_user)).to be_falsy }
+      it 'returns true' do
+        member.last_blocked_owner = true
+
+        expect(group.member_last_blocked_owner?(member)).to be(true)
+      end
+
+      it 'returns false' do
+        member.last_blocked_owner = false
+
+        expect(group.member_last_blocked_owner?(member)).to be(false)
+      end
     end
 
-    context 'with 2 blocked owners' do
-      before do
-        group.add_user(create(:user, :blocked), GroupMember::OWNER)
+    context 'when last_blocked_owner is not set' do
+      it { expect(group.member_last_blocked_owner?(member)).to be(true) }
+
+      context 'with another active owner' do
+        before do
+          group.add_user(create(:user), GroupMember::OWNER)
+        end
+
+        it { expect(group.member_last_blocked_owner?(member)).to be(false) }
       end
 
-      it { expect(group.last_blocked_owner?(blocked_user)).to be_falsy }
+      context 'with 2 blocked owners' do
+        before do
+          group.add_user(create(:user, :blocked), GroupMember::OWNER)
+        end
+
+        it { expect(group.member_last_blocked_owner?(member)).to be(false) }
+      end
+
+      context 'with owners from a parent' do
+        before do
+          parent_group = create(:group)
+          create(:group_member, :owner, group: parent_group)
+          group.update(parent: parent_group)
+        end
+
+        it { expect(group.member_last_blocked_owner?(member)).to be(false) }
+      end
+    end
+  end
+
+  context 'when analyzing blocked owners' do
+    let_it_be(:blocked_user) { create(:user, :blocked) }
+
+    describe '#single_blocked_owner?' do
+      context 'when there is only one blocked owner' do
+        before do
+          group.add_user(blocked_user, GroupMember::OWNER)
+        end
+
+        it 'returns true' do
+          expect(group.single_blocked_owner?).to eq(true)
+        end
+      end
+
+      context 'when there are multiple blocked owners' do
+        let_it_be(:blocked_user_2) { create(:user, :blocked) }
+
+        before do
+          group.add_user(blocked_user, GroupMember::OWNER)
+          group.add_user(blocked_user_2, GroupMember::OWNER)
+        end
+
+        it 'returns true' do
+          expect(group.single_blocked_owner?).to eq(false)
+        end
+      end
+
+      context 'when there are no blocked owners' do
+        it 'returns false' do
+          expect(group.single_blocked_owner?).to eq(false)
+        end
+      end
     end
 
-    context 'with owners from a parent' do
+    describe '#blocked_owners' do
+      let_it_be(:user) { create(:user) }
+
       before do
-        parent_group = create(:group)
-        create(:group_member, :owner, group: parent_group)
-        group.update(parent: parent_group)
+        group.add_user(blocked_user, GroupMember::OWNER)
+        group.add_user(user, GroupMember::OWNER)
       end
 
-      it { expect(group.last_blocked_owner?(blocked_user)).to be_falsy }
+      it 'has only blocked owners' do
+        expect(group.blocked_owners.map(&:user)).to match([blocked_user])
+      end
+    end
+  end
+
+  describe '#single_owner?' do
+    let_it_be(:user) { create(:user) }
+
+    context 'when there is only one owner' do
+      before do
+        group.add_user(user, GroupMember::OWNER)
+      end
+
+      it 'returns true' do
+        expect(group.single_owner?).to eq(true)
+      end
+    end
+
+    context 'when there are multiple owners' do
+      let_it_be(:user_2) { create(:user) }
+
+      before do
+        group.add_user(user, GroupMember::OWNER)
+        group.add_user(user_2, GroupMember::OWNER)
+      end
+
+      it 'returns true' do
+        expect(group.single_owner?).to eq(false)
+      end
+    end
+
+    context 'when there are no owners' do
+      it 'returns false' do
+        expect(group.single_owner?).to eq(false)
+      end
+    end
+  end
+
+  describe '#member_last_owner?' do
+    let_it_be(:user) { create(:user) }
+
+    let(:member) { group.members.last }
+
+    before do
+      group.add_user(user, GroupMember::OWNER)
+    end
+
+    context 'when last_owner is set' do
+      before do
+        expect(group).not_to receive(:last_owner?)
+      end
+
+      it 'returns true' do
+        member.last_owner = true
+
+        expect(group.member_last_owner?(member)).to be(true)
+      end
+
+      it 'returns false' do
+        member.last_owner = false
+
+        expect(group.member_last_owner?(member)).to be(false)
+      end
+    end
+
+    context 'when last_owner is not set' do
+      it 'returns true' do
+        expect(group).to receive(:last_owner?).and_call_original
+
+        expect(group.member_last_owner?(member)).to be(true)
+      end
     end
   end
 
@@ -1616,30 +1757,6 @@ RSpec.describe Group do
              perfectly_matched_variable])
         end
       end
-
-      context 'when :scoped_group_variables feature flag is disabled' do
-        before do
-          stub_feature_flags(scoped_group_variables: false)
-        end
-
-        context 'when environment scope is exactly matched' do
-          let(:environment_scope) { 'review/name' }
-
-          it { is_expected.to contain_exactly(ci_variable) }
-        end
-
-        context 'when environment scope is partially matched' do
-          let(:environment_scope) { 'review/*' }
-
-          it { is_expected.to contain_exactly(ci_variable) }
-        end
-
-        context 'when environment scope does not match' do
-          let(:environment_scope) { 'review/*/special' }
-
-          it { is_expected.to contain_exactly(ci_variable) }
-        end
-      end
     end
 
     context 'when group has children' do
@@ -2099,17 +2216,17 @@ RSpec.describe Group do
   end
 
   describe "#default_branch_name" do
-    context "group.namespace_settings does not have a default branch name" do
+    context "when group.namespace_settings does not have a default branch name" do
       it "returns nil" do
         expect(group.default_branch_name).to be_nil
       end
     end
 
-    context "group.namespace_settings has a default branch name" do
+    context "when group.namespace_settings has a default branch name" do
       let(:example_branch_name) { "example_branch_name" }
 
       before do
-        expect(group.namespace_settings)
+        allow(group.namespace_settings)
           .to receive(:default_branch_name)
           .and_return(example_branch_name)
       end

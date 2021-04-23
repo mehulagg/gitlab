@@ -20,6 +20,10 @@ RSpec.describe User do
     it { is_expected.to include_module(AsyncDeviseEmail) }
   end
 
+  describe 'constants' do
+    it { expect(described_class::COUNT_CACHE_VALIDITY_PERIOD).to be_a(Integer) }
+  end
+
   describe 'delegations' do
     it { is_expected.to delegate_method(:path).to(:namespace).with_prefix }
 
@@ -1056,6 +1060,21 @@ RSpec.describe User do
           .to contain_exactly(user)
       end
     end
+
+    describe '.for_todos' do
+      let_it_be(:user1) { create(:user) }
+      let_it_be(:user2) { create(:user) }
+      let_it_be(:issue) { create(:issue) }
+
+      let_it_be(:todo1) { create(:todo, target: issue, author: user1, user: user1) }
+      let_it_be(:todo2) { create(:todo, target: issue, author: user1, user: user1) }
+      let_it_be(:todo3) { create(:todo, target: issue, author: user2, user: user2) }
+
+      it 'returns users for the given todos' do
+        expect(described_class.for_todos(issue.todos))
+          .to contain_exactly(user1, user2)
+      end
+    end
   end
 
   describe "Respond to" do
@@ -1803,8 +1822,8 @@ RSpec.describe User do
 
       it 'aborts all running pipelines and related jobs' do
         expect(user).to receive(:pipelines).and_return(pipelines)
-        expect(Ci::AbortPipelinesService).to receive(:new).and_return(service)
-        expect(service).to receive(:execute).with(pipelines)
+        expect(Ci::DropPipelineService).to receive(:new).and_return(service)
+        expect(service).to receive(:execute_async_for_all).with(pipelines, :user_blocked, user)
 
         user.block
       end
@@ -2511,8 +2530,9 @@ RSpec.describe User do
 
     it 'is false if avatar is html page' do
       user.update_attribute(:avatar, 'uploads/avatar.html')
+      user.avatar_type
 
-      expect(user.avatar_type).to eq(['file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp'])
+      expect(user.errors.added?(:avatar, "file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp")).to be true
     end
   end
 
@@ -5508,6 +5528,12 @@ RSpec.describe User do
     it_behaves_like 'bot user avatars', :alert_bot, 'alert-bot.png'
     it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
     it_behaves_like 'bot user avatars', :security_bot, 'security-bot.png'
+
+    context 'when bot is the support_bot' do
+      subject { described_class.support_bot }
+
+      it { is_expected.to be_confirmed }
+    end
   end
 
   describe '#confirmation_required_on_sign_in?' do

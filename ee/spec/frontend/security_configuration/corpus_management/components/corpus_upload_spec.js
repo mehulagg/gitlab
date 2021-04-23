@@ -2,6 +2,9 @@ import { GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import CorpusUpload from 'ee/security_configuration/corpus_management/components/corpus_upload.vue';
 
+const TEST_PROJECT_FULL_PATH = '/namespace/project';
+const TEST_CORPUS_HELP_PATH = '/docs/corpus-management';
+
 describe('Corpus Upload', () => {
   let wrapper;
 
@@ -9,6 +12,10 @@ describe('Corpus Upload', () => {
     const defaultProps = { totalSize: 4e8 };
     wrapper = mountFn(CorpusUpload, {
       propsData: defaultProps,
+      provide: {
+        projectFullPath: TEST_PROJECT_FULL_PATH,
+        corpusHelpPath: TEST_CORPUS_HELP_PATH,
+      },
       ...options,
     });
   };
@@ -24,13 +31,6 @@ describe('Corpus Upload', () => {
       createComponent();
       expect(wrapper.findComponent(GlButton).exists()).toBe(true);
       expect(wrapper.element).toMatchSnapshot();
-    });
-
-    it('calls the `uploadCorpus` callback on `new corpus` button click', async () => {
-      createComponent({ stubs: { GlButton } });
-      await wrapper.findComponent(GlButton).trigger('click');
-
-      expect(wrapper.emitted().newcorpus).toEqual([[]]);
     });
   });
 });

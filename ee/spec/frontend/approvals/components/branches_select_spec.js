@@ -1,6 +1,6 @@
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
-import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
-import { nextTick } from 'vue';
+import { shallowMount, mount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import Api from 'ee/api';
 import BranchesSelect from 'ee/approvals/components/branches_select.vue';
@@ -15,9 +15,8 @@ const TEST_PROTECTED_BRANCHES = [
 const TEST_BRANCHES_SELECTIONS = [TEST_DEFAULT_BRANCH, ...TEST_PROTECTED_BRANCHES];
 const branchNames = () => TEST_BRANCHES_SELECTIONS.map((branch) => branch.name);
 const protectedBranchNames = () => TEST_PROTECTED_BRANCHES.map((branch) => branch.name);
-const localVue = createLocalVue();
 
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('Branches Select', () => {
   let wrapper;
@@ -33,7 +32,6 @@ describe('Branches Select', () => {
         projectId: '1',
         ...props,
       },
-      localVue,
       store: new Vuex.Store(store),
       attachTo: document.body,
     });
@@ -83,7 +81,7 @@ describe('Branches Select', () => {
 
   it('displays all the protected branches and any branch', async () => {
     createComponent();
-    await nextTick();
+    await Vue.nextTick();
     expect(findDropdown().props('loading')).toBe(true);
     await waitForPromises();
 
@@ -101,7 +99,7 @@ describe('Branches Select', () => {
       const term = 'lorem';
 
       findSearch().vm.$emit('input', term);
-      await nextTick();
+      await Vue.nextTick();
       expect(findSearch().props('isLoading')).toBe(true);
       await waitForPromises();
 

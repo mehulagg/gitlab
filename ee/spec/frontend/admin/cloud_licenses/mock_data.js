@@ -2,47 +2,47 @@ import { subscriptionType } from 'ee/pages/admin/cloud_licenses/constants';
 
 export const license = {
   ULTIMATE: {
-    billableUsers: '8',
+    activatedAt: '2022-03-16',
+    billableUsersCount: '8',
+    expiresAt: '2022-03-16',
     company: 'ACME Corp',
     email: 'user@acmecorp.com',
-    id: '1309188',
-    lastSync: 'just now - actual date',
-    maximumUsers: '8',
+    id: 'gid://gitlab/License/13',
+    lastSync: '2021-03-16T00:00:00.000',
+    maximumUserCount: '8',
     name: 'Jane Doe',
-    plan: 'Ultimate',
-    startsAt: '22 February',
-    renews: 'in 11 months',
-    usersInLicense: '10',
-    usersOverSubscription: '0',
+    plan: 'ultimate',
+    startsAt: '2021-03-11',
+    type: subscriptionType.CLOUD,
+    usersInLicenseCount: '10',
+    usersOverLicenseCount: '0',
   },
 };
 
 export const subscriptionHistory = [
   {
+    activatedAt: '2022-03-16',
     company: 'ACME Corp',
     email: 'user@acmecorp.com',
-    expiresAt: '15-03-2022',
-    // TODO: verify presence in graphQL response
-    id: '1309188',
+    expiresAt: '2022-03-16',
+    id: 'gid://gitlab/License/13',
     name: 'Jane Doe',
-    plan: 'Ultimate',
-    startsAt: '16-03-2021',
+    plan: 'ultimate',
+    startsAt: '2021-03-11',
     type: subscriptionType.CLOUD,
-    validFrom: '16-03-2021',
-    usersInLicense: '10',
+    usersInLicenseCount: '10',
   },
   {
+    activatedAt: '2020-11-05',
     company: 'ACME Corp',
     email: 'user@acmecorp.com',
-    expiresAt: '30-06-2021',
-    // TODO: verify presence in graphQL response
-    id: '000000000',
+    expiresAt: '2021-03-16',
+    id: 'gid://gitlab/License/11',
     name: 'Jane Doe',
-    plan: 'Ultimate',
-    startsAt: '01-07-2020',
+    plan: 'premium',
+    startsAt: '2020-03-16',
     type: subscriptionType.LEGACY,
-    validFrom: '01-07-2020',
-    usersInLicense: '5',
+    usersInLicenseCount: '5',
   },
 ];
 
@@ -75,7 +75,7 @@ export const activateLicenseMutationResponse = {
   FAILURE_IN_DISGUISE: {
     data: {
       gitlabSubscriptionActivate: {
-        clientMutationId: null,
+        license: null,
         errors: ["undefined method `[]' for nil:NilClass"],
         __typename: 'GitlabSubscriptionActivatePayload',
       },
@@ -84,7 +84,22 @@ export const activateLicenseMutationResponse = {
   SUCCESS: {
     data: {
       gitlabSubscriptionActivate: {
-        clientMutationId: null,
+        license: {
+          id: 'gid://gitlab/License/3',
+          type: 'legacy',
+          plan: 'ultimate',
+          name: 'Test license',
+          email: 'user@example.com',
+          company: 'Example Inc',
+          startsAt: '2020-01-01',
+          expiresAt: '2022-01-01',
+          activatedAt: '2021-01-02',
+          lastSync: null,
+          usersInLicenseCount: 100,
+          billableUsersCount: 50,
+          maximumUserCount: 50,
+          usersOverLicenseCount: 0,
+        },
         errors: [],
       },
     },

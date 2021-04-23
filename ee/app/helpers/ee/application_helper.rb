@@ -20,14 +20,12 @@ module EE
     end
 
     def maintenance_mode_message
-      html = tag.div do
+      tag.div do
         tag.p(class: 'gl-mb-3') do
           concat(sprite_icon('information-o', css_class: 'gl-icon gl-mr-3'))
           concat(custom_maintenance_mode_message)
         end
       end
-
-      html
     end
 
     def geo_secondary_read_only_message

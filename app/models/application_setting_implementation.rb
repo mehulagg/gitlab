@@ -72,6 +72,9 @@ module ApplicationSettingImplementation
         eks_secret_access_key: nil,
         email_restrictions_enabled: false,
         email_restrictions: nil,
+        external_pipeline_validation_service_timeout: nil,
+        external_pipeline_validation_service_token: nil,
+        external_pipeline_validation_service_url: nil,
         first_day_of_week: 0,
         gitaly_timeout_default: 55,
         gitaly_timeout_fast: 10,
@@ -153,6 +156,9 @@ module ApplicationSettingImplementation
         throttle_authenticated_web_enabled: false,
         throttle_authenticated_web_period_in_seconds: 3600,
         throttle_authenticated_web_requests_per_period: 7200,
+        throttle_authenticated_packages_api_enabled: false,
+        throttle_authenticated_packages_api_period_in_seconds: 15,
+        throttle_authenticated_packages_api_requests_per_period: 1000,
         throttle_incident_management_notification_enabled: false,
         throttle_incident_management_notification_per_period: 3600,
         throttle_incident_management_notification_period_in_seconds: 3600,
@@ -162,6 +168,9 @@ module ApplicationSettingImplementation
         throttle_unauthenticated_enabled: false,
         throttle_unauthenticated_period_in_seconds: 3600,
         throttle_unauthenticated_requests_per_period: 3600,
+        throttle_unauthenticated_packages_api_enabled: false,
+        throttle_unauthenticated_packages_api_period_in_seconds: 15,
+        throttle_unauthenticated_packages_api_requests_per_period: 800,
         time_tracking_limit_to_hours: false,
         two_factor_grace_period: 48,
         unique_ips_limit_enabled: false,
@@ -435,11 +444,14 @@ module ApplicationSettingImplementation
   def parse_addr_and_port(str)
     case str
     when /\A\[(?<address> .* )\]:(?<port> \d+ )\z/x      # string like "[::1]:80"
-      address, port = $~[:address], $~[:port]
+      address = $~[:address]
+      port = $~[:port]
     when /\A(?<address> [^:]+ ):(?<port> \d+ )\z/x       # string like "127.0.0.1:80"
-      address, port = $~[:address], $~[:port]
+      address = $~[:address]
+      port = $~[:port]
     else                                                 # string with no port number
-      address, port = str, nil
+      address = str
+      port = nil
     end
 
     [address, port&.to_i]

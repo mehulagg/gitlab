@@ -382,6 +382,36 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host do
     end
   end
 
+  describe '#database_replica_location' do
+    let(:connection) { double(:connection) }
+
+    it 'returns the write ahead location of the replica', :aggregate_failures do
+      expect(host)
+        .to receive(:query_and_release)
+              .and_return({ 'location' => '0/D525E3A8' })
+
+      expect(host.database_replica_location).to be_an_instance_of(String)
+    end
+
+    it 'returns nil when the database query returned no rows' do
+      expect(host)
+        .to receive(:query_and_release)
+              .and_return({})
+
+      expect(host.database_replica_location).to be_nil
+    end
+
+    it 'returns nil when the database connection fails' do
+      wrapped_error = wrapped_exception(ActionView::Template::Error, StandardError)
+
+      allow(host)
+        .to receive(:connection)
+              .and_raise(wrapped_error)
+
+      expect(host.database_replica_location).to be_nil
+    end
+  end
+
   describe '#query_and_release' do
     it 'executes a SQL query' do
       results = host.query_and_release('SELECT 10 AS number')

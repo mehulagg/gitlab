@@ -19,8 +19,7 @@ RSpec.describe 'Group value stream analytics' do
 
     expect(page).to have_pushed_frontend_feature_flags(
       cycleAnalyticsScatterplotEnabled: true,
-      valueStreamAnalyticsPathNavigation: true,
-      valueStreamAnalyticsExtendedForm: true
+      valueStreamAnalyticsPathNavigation: true
     )
   end
 
@@ -33,18 +32,6 @@ RSpec.describe 'Group value stream analytics' do
       visit group_analytics_cycle_analytics_path(group)
 
       expect(page).to have_pushed_frontend_feature_flags(valueStreamAnalyticsPathNavigation: false)
-    end
-  end
-
-  context 'when `value_stream_analytics_extended_form` is disabled for a group' do
-    before do
-      stub_feature_flags(value_stream_analytics_extended_form: false, thing: group)
-    end
-
-    it 'pushes disabled feature flag to the frontend' do
-      visit group_analytics_cycle_analytics_path(group)
-
-      expect(page).to have_pushed_frontend_feature_flags(valueStreamAnalyticsExtendedForm: false)
     end
   end
 end

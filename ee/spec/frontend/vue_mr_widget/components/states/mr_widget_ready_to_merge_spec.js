@@ -49,7 +49,7 @@ describe('ReadyToMerge', () => {
     commitMessageWithDescription: 'This is the commit message description',
     shouldRemoveSourceBranch: true,
     canRemoveSourceBranch: false,
-    targetBranch: 'master',
+    targetBranch: 'main',
     preferredAutoMergeStrategy: MWPS_MERGE_STRATEGY,
     availableAutoMergeStrategies: [MWPS_MERGE_STRATEGY],
     mergeImmediatelyDocsPath: 'path/to/merge/immediately/docs',

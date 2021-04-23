@@ -31,7 +31,7 @@ export default {
   },
   data() {
     const {
-      enabled,
+      enabled = false,
       url,
       username,
       password,
@@ -59,14 +59,6 @@ export default {
       isEditMode,
       isSensitiveFieldRequired: !isEditMode,
     };
-  },
-  computed: {
-    showValidationOrInEditMode() {
-      return this.showValidation || this.isEditMode;
-    },
-    passwordFieldPlaceholder() {
-      return this.isEditMode ? '••••••••' : '';
-    },
   },
   watch: {
     form: { handler: 'emitUpdate', immediate: true, deep: true },
@@ -96,7 +88,7 @@ export default {
           >
             <gl-form-input
               v-model="form.fields.url.value"
-              v-validation:[showValidationOrInEditMode]
+              v-validation:[showValidation]
               name="url"
               type="url"
               required
@@ -112,7 +104,7 @@ export default {
           >
             <gl-form-input
               v-model="form.fields.username.value"
-              v-validation:[showValidationOrInEditMode]
+              v-validation:[showValidation]
               autocomplete="off"
               name="username"
               type="text"
@@ -127,11 +119,10 @@ export default {
           >
             <gl-form-input
               v-model="form.fields.password.value"
-              v-validation:[showValidationOrInEditMode]
+              v-validation:[showValidation]
               autocomplete="off"
               name="password"
               type="password"
-              :placeholder="passwordFieldPlaceholder"
               :required="isSensitiveFieldRequired"
               :state="form.fields.password.state"
             />
@@ -145,7 +136,7 @@ export default {
           >
             <gl-form-input
               v-model="form.fields.usernameField.value"
-              v-validation:[showValidationOrInEditMode]
+              v-validation:[showValidation]
               name="usernameField"
               type="text"
               required
@@ -159,7 +150,7 @@ export default {
           >
             <gl-form-input
               v-model="form.fields.passwordField.value"
-              v-validation:[showValidationOrInEditMode]
+              v-validation:[showValidation]
               name="passwordField"
               type="text"
               required

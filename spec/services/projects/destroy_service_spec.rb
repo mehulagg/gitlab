@@ -109,7 +109,7 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
       pipelines = build_list(:ci_pipeline, 3, :running)
       allow(project).to receive(:all_pipelines).and_return(pipelines)
 
-      expect(::Ci::AbortPipelinesService).to receive_message_chain(:new, :execute).with(pipelines)
+      expect(::Ci::AbortPipelinesService).to receive_message_chain(:new, :execute).with(pipelines, :project_deleted)
 
       destroy_project(project, user, {})
     end
@@ -414,6 +414,54 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
 
         expect(destroy_project(project, user)).to be_falsey
         expect(project.gitlab_shell.repository_exists?(project.repository_storage, path + '.git')).to be_truthy
+      end
+    end
+  end
+
+  context 'when project has webhooks' do
+    let!(:web_hook1) { create(:project_hook, project: project) }
+    let!(:web_hook2) { create(:project_hook, project: project) }
+    let!(:another_project_web_hook) { create(:project_hook) }
+    let!(:web_hook_log) { create(:web_hook_log, web_hook: web_hook1) }
+
+    it 'deletes webhooks and logs related to project' do
+      expect_next_instance_of(WebHooks::DestroyService, user) do |instance|
+        expect(instance).to receive(:sync_destroy).with(web_hook1).and_call_original
+      end
+      expect_next_instance_of(WebHooks::DestroyService, user) do |instance|
+        expect(instance).to receive(:sync_destroy).with(web_hook2).and_call_original
+      end
+
+      expect do
+        destroy_project(project, user)
+      end.to change(WebHook, :count).by(-2)
+         .and change(WebHookLog, :count).by(-1)
+    end
+
+    context 'when an error is raised deleting webhooks' do
+      before do
+        allow_next_instance_of(WebHooks::DestroyService) do |instance|
+          allow(instance).to receive(:sync_destroy).and_return(message: 'foo', status: :error)
+        end
+      end
+
+      it_behaves_like 'handles errors thrown during async destroy', "Failed to remove webhooks"
+    end
+
+    context 'when "destroy_webhooks_before_the_project" flag is disabled' do
+      before do
+        stub_feature_flags(destroy_webhooks_before_the_project: false)
+      end
+
+      it 'does not call WebHooks::DestroyService' do
+        expect(WebHooks::DestroyService).not_to receive(:new)
+
+        expect do
+          destroy_project(project, user)
+        end.to change(WebHook, :count).by(-2)
+           .and change(WebHookLog, :count).by(-1)
+
+        expect(another_project_web_hook.reload).to be
       end
     end
   end

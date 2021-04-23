@@ -18,8 +18,8 @@ export const mockJiraIssue1 = {
   labels: [
     {
       name: 'backend',
-      color: '#EBECF0',
-      text_color: '#283856',
+      color: '#0052CC',
+      text_color: '#FFFFFF',
     },
   ],
   author: {

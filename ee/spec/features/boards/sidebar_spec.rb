@@ -48,7 +48,7 @@ RSpec.describe 'Issue Boards', :js do
           first('.gl-avatar-labeled').click
         end
 
-        click_button('Edit')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_content(assignee)
@@ -73,7 +73,7 @@ RSpec.describe 'Issue Boards', :js do
           all('.gl-avatar-labeled')[1].click
         end
 
-        click_button('Edit')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_link(nil, title: user.name)
@@ -94,7 +94,7 @@ RSpec.describe 'Issue Boards', :js do
           find('[data-testid="unassign"]').click
         end
 
-        click_button('Edit')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_content('None')
@@ -134,7 +134,7 @@ RSpec.describe 'Issue Boards', :js do
           first('.gl-avatar-labeled').click
         end
 
-        click_button('Edit')
+        click_button('Apply')
         wait_for_requests
 
         expect(page).to have_content(assignee)

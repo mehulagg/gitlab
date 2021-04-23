@@ -39,11 +39,6 @@ describe('EE - DastSavedScansList', () => {
         Component,
         merge(
           {
-            provide: {
-              glFeatures: {
-                dastBranchSelection: true,
-              },
-            },
             propsData: defaultProps,
           },
           options,
@@ -193,21 +188,6 @@ describe('EE - DastSavedScansList', () => {
       expect(findProfileList().props('errorMessage')).toBe(ERROR_MESSAGES[ERROR_RUN_SCAN]);
       expect(findProfileList().props('errorDetails')).toBe(errors);
       expect(redirectTo).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('dastBranchSelection feature flag disabled', () => {
-    it('does not render branch information', () => {
-      createFullComponent({
-        provide: {
-          glFeatures: {
-            dastBranchSelection: false,
-          },
-        },
-        propsData: { profiles: savedScans },
-      });
-
-      expect(wrapper.findAll(DastScanBranch)).toHaveLength(0);
     });
   });
 });

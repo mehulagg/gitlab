@@ -685,7 +685,7 @@ describe('Grouped security reports app', () => {
       createWrapper({
         ...props,
         ...extraProp,
-        targetBranch: 'master',
+        targetBranch: 'main',
         enabledReports: {
           sast: true,
         },
@@ -703,7 +703,7 @@ describe('Grouped security reports app', () => {
 
       it('should display out of date message', () => {
         expect(wrapper.vm.$el.textContent).toContain(
-          'Security report is out of date. Run a new pipeline for the target branch (master)',
+          'Security report is out of date. Run a new pipeline for the target branch (main)',
         );
       });
     });
@@ -715,7 +715,7 @@ describe('Grouped security reports app', () => {
 
       it('should display out of date message', () => {
         expect(wrapper.vm.$el.textContent).toContain(
-          'Security report is out of date. Please update your branch with the latest changes from the target branch (master)',
+          'Security report is out of date. Please update your branch with the latest changes from the target branch (main)',
         );
       });
     });

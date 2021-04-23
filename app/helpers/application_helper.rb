@@ -165,7 +165,7 @@ module ApplicationHelper
     css_classes = [short_format ? 'js-short-timeago' : 'js-timeago']
     css_classes << html_class unless html_class.blank?
 
-    element = content_tag :time, l(time, format: "%b %d, %Y"),
+    content_tag :time, l(time, format: "%b %d, %Y"),
       class: css_classes.join(' '),
       title: l(time.to_time.in_time_zone, format: :timeago_tooltip),
       datetime: time.to_time.getutc.iso8601,
@@ -174,8 +174,6 @@ module ApplicationHelper
         placement: placement,
         container: 'body'
       }
-
-    element
   end
 
   def edited_time_ago_with_tooltip(object, placement: 'top', html_class: 'time_ago', exclude_author: false)
@@ -194,8 +192,14 @@ module ApplicationHelper
     end
   end
 
-  def promo_host
+  # This needs to be used outside of Rails
+  def self.promo_host
     'about.gitlab.com'
+  end
+
+  # Convenient method for Rails helper
+  def promo_host
+    ApplicationHelper.promo_host
   end
 
   def promo_url
@@ -406,3 +410,4 @@ module ApplicationHelper
 end
 
 ApplicationHelper.prepend_if_ee('EE::ApplicationHelper')
+ApplicationHelper.prepend_if_jh('JH::ApplicationHelper')

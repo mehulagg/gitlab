@@ -5,8 +5,10 @@ module EE
     module UpdateService
       extend ::Gitlab::Utils::Override
 
-      override :execute
-      def execute(merge_request)
+      private
+
+      override :general_fallback
+      def general_fallback(merge_request)
         unless update_task_event?
           old_approvers = merge_request.overall_approvers(exclude_code_owners: true)
         end
@@ -33,13 +35,13 @@ module EE
         merge_request
       end
 
-      private
-
       override :after_update
       def after_update(merge_request)
         super
 
-        ::MergeRequests::SyncCodeOwnerApprovalRules.new(merge_request).execute
+        merge_request.run_after_commit do
+          ::MergeRequests::SyncCodeOwnerApprovalRulesWorker.perform_async(merge_request)
+        end
       end
 
       override :create_branch_change_note
@@ -47,15 +49,6 @@ module EE
         super
 
         reset_approvals(merge_request)
-      end
-
-      override :handle_assignees_change
-      def handle_assignees_change(merge_request, _old_assignees)
-        super
-
-        return unless merge_request.project.feature_available?(:code_review_analytics)
-
-        ::Analytics::RefreshReassignData.new(merge_request).execute_async
       end
 
       def reset_approval_rules(merge_request)

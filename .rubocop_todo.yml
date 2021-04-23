@@ -354,8 +354,6 @@ Performance/Sum:
     - 'ee/spec/lib/gitlab/elastic/bulk_indexer_spec.rb'
     - 'lib/api/entities/issuable_time_stats.rb'
     - 'lib/container_registry/tag.rb'
-    - 'lib/declarative_policy/rule.rb'
-    - 'lib/declarative_policy/runner.rb'
     - 'lib/gitlab/ci/reports/test_suite_comparer.rb'
     - 'lib/gitlab/diff/file.rb'
     - 'lib/gitlab/sherlock/transaction.rb'
@@ -845,11 +843,6 @@ Style/Next:
 Style/NumericLiteralPrefix:
   Enabled: false
 
-# Offense count: 140
-# Cop supports --auto-correct.
-Style/ParallelAssignment:
-  Enabled: false
-
 # Offense count: 2698
 # Cop supports --auto-correct.
 # Configuration parameters: PreferredDelimiters.
@@ -863,11 +856,6 @@ Style/PercentLiteralDelimiters:
 Style/RaiseArgs:
   Enabled: false
   EnforcedStyle: exploded
-
-# Offense count: 73
-# Cop supports --auto-correct.
-Style/RedundantAssignment:
-  Enabled: false
 
 # Offense count: 2
 # Cop supports --auto-correct.
@@ -887,11 +875,6 @@ Style/RedundantFetchBlock:
     - 'spec/lib/gitlab/metrics/dashboard/cache_spec.rb'
     - 'spec/lib/gitlab/null_request_store_spec.rb'
     - 'spec/lib/gitlab/safe_request_store_spec.rb'
-
-# Offense count: 26
-# Cop supports --auto-correct.
-Style/RedundantFileExtensionInRequire:
-  Enabled: false
 
 # Offense count: 206
 # Cop supports --auto-correct.
@@ -920,13 +903,6 @@ Style/RedundantRegexpEscape:
 # Offense count: 968
 # Cop supports --auto-correct.
 Style/RedundantSelf:
-  Enabled: false
-
-# Offense count: 213
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, AllowInnerSlashes.
-# SupportedStyles: slashes, percent_r, mixed
-Style/RegexpLiteral:
   Enabled: false
 
 # Offense count: 53

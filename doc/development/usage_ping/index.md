@@ -13,7 +13,7 @@ This guide describes Usage Ping's purpose and how it's implemented.
 For more information about Product Intelligence, see:
 
 - [Product Intelligence Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
-- [Snowplow Guide](../snowplow.md)
+- [Snowplow Guide](../snowplow/index.md)
 
 More links:
 
@@ -492,39 +492,32 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    Example event:
 
    ```yaml
-   - name: i_compliance_credential_inventory
-     category: compliance
-     redis_slot: compliance
-     expiry: 42  # 6 weeks
+   - name: users_creating_epics
+     category: epics_usage
+     redis_slot: users
      aggregation: weekly
-     feature_flag: usage_data_i_compliance_credential_inventory
+     feature_flag: track_epics_activity
    ```
 
    Keys:
 
    - `name`: unique event name.
 
-     Name format `<prefix>_<redis_slot>_name`.
+     Name format for Redis HLL events `<name>_<redis_slot>`.
 
-     Use one of the following prefixes for the event's name:
-
-        - `g_` for group, as an event which is tracked for group.
-        - `p_` for project, as an event which is tracked for project.
-        - `i_` for instance, as an event which is tracked for instance.
-        - `a_` for events encompassing all `g_`, `p_`, `i_`.
-        - `o_` for other.
+     [See Metric name](metrics_dictionary.md#metric-name) for a complete guide on metric naming suggestion.
 
      Consider including in the event's name the Redis slot to be able to count totals for a specific category.
 
-     Example names: `i_compliance_credential_inventory`, `g_analytics_contribution`.
+     Example names: `users_creating_epics`, `users_triggering_security_scans`.
 
    - `category`: event category. Used for getting total counts for events in a category, for easier
      access to a group of events.
    - `redis_slot`: optional Redis slot; default value: event name. Used if needed to calculate totals
      for a group of metrics. Ensure keys are in the same slot. For example:
-     `i_compliance_credential_inventory` with `redis_slot: 'compliance'` builds Redis key
-     `i_{compliance}_credential_inventory-2020-34`. If `redis_slot` is not defined the Redis key will
-     be `{i_compliance_credential_inventory}-2020-34`.
+     `users_creating_epics` with `redis_slot: 'users'` builds Redis key
+     `{users}_creating_epics-2020-34`. If `redis_slot` is not defined the Redis key will
+     be `{users_creating_epics}-2020-34`.
    - `expiry`: expiry time in days. Default: 29 days for daily aggregation and 6 weeks for weekly
      aggregation.
    - `aggregation`: may be set to a `:daily` or `:weekly` key. Defines how counting data is stored in Redis.
@@ -581,7 +574,7 @@ Use one of the following methods to track events:
        user: current_user, subject: user_group
      ).execute
 
-     increment_unique_values('i_list_repositories', current_user.id)
+     increment_unique_values('users_listing_repositories', current_user.id)
 
      present paginate(repositories), with: Entities::ContainerRegistry::Repository, tags: params[:tags], tags_count: params[:tags_count]
    end
@@ -655,15 +648,15 @@ Use one of the following methods to track events:
 Trigger events in rails console by using `track_event` method
 
    ```ruby
-   Gitlab::UsageDataCounters::HLLRedisCounter.track_event('g_compliance_audit_events', values: 1)
-   Gitlab::UsageDataCounters::HLLRedisCounter.track_event('g_compliance_audit_events', values: [2, 3])
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event('users_viewing_compliance_audit_events', values: 1)
+   Gitlab::UsageDataCounters::HLLRedisCounter.track_event('users_viewing_compliance_audit_events', values: [2, 3])
    ```
 
 Next, get the unique events for the current week.
 
    ```ruby
    # Get unique events for metric for current_week
-   Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_audit_events',
+   Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'users_viewing_compliance_audit_events',
    start_date: Date.current.beginning_of_week, end_date: Date.current.next_week)
    ```
 
@@ -824,7 +817,6 @@ We return fallback values in these cases:
 
 Add the metric in one of the top level keys
 
-- `license`: for license related metrics.
 - `settings`: for settings related metrics.
 - `counts_weekly`: for counters that have data for the most recent 7 days.
 - `counts_monthly`: for counters that have data for the most recent 28 days.
@@ -913,9 +905,9 @@ On GitLab.com, the Product Intelligence team regularly monitors Usage Ping. They
 
 To set up Usage Ping locally, you must:
 
-1. [Set up local repositories]#(set-up-local-repositories)
-1. [Test local setup](#test-local-setup)
-1. (Optional) [Test Prometheus-based usage ping](#test-prometheus-based-usage-ping)
+1. [Set up local repositories](#set-up-local-repositories).
+1. [Test local setup](#test-local-setup).
+1. (Optional) [Test Prometheus-based usage ping](#test-prometheus-based-usage-ping).
 
 #### Set up local repositories
 
@@ -1409,37 +1401,6 @@ bin/rake gitlab:usage_data:dump_sql_in_json
 
 # You may pipe the output into a file
 bin/rake gitlab:usage_data:dump_sql_in_yaml > ~/Desktop/usage-metrics-2020-09-02.yaml
-```
-
-## Export metric definitions as a single YAML file
-
-Use this API endpoint to export all metric definitions as a single YAML file, similar to the [Metrics Dictionary](dictionary.md), for easier importing.
-
-```plaintext
-GET /usage_data/metric_definitions
-```
-
-Response
-
-```yaml
----
-- key_path: redis_hll_counters.search.i_search_paid_monthly
-  description: Calculated unique users to perform a search with a paid license enabled
-    by month
-  product_section: enablement
-  product_stage: enablement
-  product_group: group::global search
-  product_category: global_search
-  value_type: number
-  status: data_available
-  time_frame: 28d
-  data_source: redis_hll
-  distribution:
-  - ee
-  tier:
-  - premium
-  - ultimate
-...
 ```
 
 ## Generating and troubleshooting usage ping

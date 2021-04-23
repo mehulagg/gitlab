@@ -6,6 +6,8 @@ RSpec.describe Ci::JobArtifact do
   using RSpec::Parameterized::TableSyntax
   include EE::GeoHelpers
 
+  it { is_expected.to delegate_method(:validate_schema?).to(:job) }
+
   describe '#destroy' do
     let_it_be(:primary) { create(:geo_node, :primary) }
     let_it_be(:secondary) { create(:geo_node) }
@@ -223,7 +225,8 @@ RSpec.describe Ci::JobArtifact do
 
   describe '#security_report' do
     let(:job_artifact) { create(:ee_ci_job_artifact, :sast) }
-    let(:security_report) { job_artifact.security_report }
+    let(:validate) { false }
+    let(:security_report) { job_artifact.security_report(validate: validate) }
 
     subject(:findings_count) { security_report.findings.length }
 
@@ -246,6 +249,44 @@ RSpec.describe Ci::JobArtifact do
         subject { security_report.is_a?(::Gitlab::Ci::Reports::Security::Report) }
 
         it { is_expected.to be(security_report?) }
+      end
+    end
+
+    context 'when the parsing fails' do
+      let(:job_artifact) { create(:ee_ci_job_artifact, :sast) }
+      let(:errors) { security_report.errors }
+
+      before do
+        allow(::Gitlab::Ci::Parsers).to receive(:fabricate!).and_raise(:foo)
+      end
+
+      it 'returns an errored report instance' do
+        expect(errors).to eql([{ type: 'ParsingError', message: 'An unexpected error happened!' }])
+      end
+    end
+
+    describe 'schema validation' do
+      where(:validate, :build_is_subject_to_validation?, :expected_validate_flag) do
+        false | false | false
+        false | true  | false
+        true  | false | false
+        true  | true  | true
+      end
+
+      with_them do
+        let(:mock_parser) { double(:parser, parse!: true) }
+        let(:expected_parser_args) { ['sast', instance_of(String), instance_of(::Gitlab::Ci::Reports::Security::Report), validate: expected_validate_flag] }
+
+        before do
+          allow(job_artifact.job).to receive(:validate_schema?).and_return(build_is_subject_to_validation?)
+          allow(::Gitlab::Ci::Parsers).to receive(:fabricate!).and_return(mock_parser)
+        end
+
+        it 'calls the parser with the correct arguments' do
+          security_report
+
+          expect(::Gitlab::Ci::Parsers).to have_received(:fabricate!).with(*expected_parser_args)
+        end
       end
     end
   end

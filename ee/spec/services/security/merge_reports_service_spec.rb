@@ -40,6 +40,15 @@ RSpec.describe Security::MergeReportsService, '#execute' do
          )
   end
 
+  let(:finding_id_2_loc_1_extra) do
+    build(:ci_reports_security_finding,
+          identifiers: [identifier_2_primary, identifier_2_cve],
+          location: build(:ci_reports_security_locations_sast, start_line: 32, end_line: 34),
+          scanner: scanner_2,
+          severity: :medium
+         )
+  end
+
   let(:finding_id_2_loc_2) do
     build(:ci_reports_security_finding,
           identifiers: [identifier_2_primary, identifier_2_cve],
@@ -81,7 +90,7 @@ RSpec.describe Security::MergeReportsService, '#execute' do
          )
   end
 
-  let(:report_1_findings) { [finding_id_1, finding_id_2_loc_1, finding_cwe_2, finding_wasc_1] }
+  let(:report_1_findings) { [finding_id_1, finding_id_2_loc_1, finding_id_2_loc_1_extra, finding_cwe_2, finding_wasc_1] }
 
   let(:scanned_resource) do
     ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com'), 'GET')
@@ -135,6 +144,17 @@ RSpec.describe Security::MergeReportsService, '#execute' do
   let(:merge_service) { described_class.new(report_1, report_2, report_3) }
 
   subject(:merged_report) { merge_service.execute }
+
+  describe 'errors on target report' do
+    subject { merged_report.errors }
+
+    before do
+      report_1.add_error('foo', 'bar')
+      report_2.add_error('zoo', 'baz')
+    end
+
+    it { is_expected.to eq([{ type: 'foo', message: 'bar' }, { type: 'zoo', message: 'baz' }]) }
+  end
 
   it 'copies scanners into target report and eliminates duplicates' do
     expect(merged_report.scanners.values).to contain_exactly(scanner_1, scanner_2, scanner_3)
@@ -274,7 +294,7 @@ RSpec.describe Security::MergeReportsService, '#execute' do
 
       subject(:merged_report) { described_class.new(pre_merged_report, retirejs_report).execute }
 
-      it 'keeps the finding from `retirejs` as it has higher priority', pending: 'https://gitlab.com/gitlab-org/gitlab/-/issues/296520' do
+      it 'keeps the finding from `retirejs` as it has higher priority' do
         expect(merged_report.findings).to include(finding_id_5)
       end
     end

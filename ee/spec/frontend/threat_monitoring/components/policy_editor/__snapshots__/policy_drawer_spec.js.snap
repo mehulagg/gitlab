@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PolicyDrawer component renders policy preview tabs 1`] = `
+exports[`PolicyDrawer component supported YAML renders policy preview tabs 1`] = `
 <div>
   <h4>
     Policy description
@@ -16,16 +16,18 @@ exports[`PolicyDrawer component renders policy preview tabs 1`] = `
     Network Policy
   </p>
    
-  <h5
-    class="gl-mt-6"
-  >
-    Description
-  </h5>
-   
-  <gl-form-textarea-stub
-    noresize="true"
-    value="test description"
-  />
+  <div>
+    <h5
+      class="gl-mt-6"
+    >
+      Description
+    </h5>
+     
+    <gl-form-textarea-stub
+      noresize="true"
+      value="test description"
+    />
+  </div>
    
   <policy-preview-stub
     class="gl-mt-4"
@@ -41,6 +43,32 @@ spec:
     matchLabels:
       network-policy.gitlab.com/disabled_by: gitlab
 "
+  />
+</div>
+`;
+
+exports[`PolicyDrawer component unsupported YAML renders policy preview tabs 1`] = `
+<div>
+  <h4>
+    Policy description
+  </h4>
+   
+  <h5
+    class="gl-mt-6"
+  >
+    Policy type
+  </h5>
+   
+  <p>
+    Network Policy
+  </p>
+   
+  <!---->
+   
+  <policy-preview-stub
+    class="gl-mt-4"
+    initialtab="0"
+    policyyaml="unsupportedPrimaryKey: test"
   />
 </div>
 `;

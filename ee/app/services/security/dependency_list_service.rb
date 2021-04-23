@@ -23,8 +23,7 @@ module Security
       collection = init_collection
       collection = filter_by_package_manager(collection)
       collection = filter_by_vulnerable(collection)
-      collection = sort(collection)
-      collection
+      sort(collection)
     end
 
     private

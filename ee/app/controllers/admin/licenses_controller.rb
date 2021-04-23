@@ -27,15 +27,11 @@ class Admin::LicensesController < Admin::ApplicationController
   end
 
   def create
-    unless params[:license][:data].present? || params[:license][:data_file].present?
-      flash[:alert] = _('Please enter or upload a license.')
-
-      @license = License.new
-      redirect_to new_admin_license_path
-      return
-    end
+    return upload_license_error if license_params[:data].blank? && license_params[:data_file].blank?
 
     @license = License.new(license_params)
+
+    return upload_license_error if @license.cloud?
 
     respond_with(@license, location: admin_license_path) do
       if @license.save
@@ -63,15 +59,15 @@ class Admin::LicensesController < Admin::ApplicationController
   end
 
   def sync_seat_link
-    sync_result = Gitlab::SeatLinkData.new.sync
-
-    if sync_result
-      flash[:notice] = _('Your license was successfully synced.')
-    else
-      flash[:error] = _('There was an error when trying to sync your license. Please verify that your instance is using an active license key.')
+    respond_to do |format|
+      format.json do
+        if Gitlab::SeatLinkData.new.sync
+          render json: { success: true }
+        else
+          render json: { success: false }, status: :unprocessable_entity
+        end
+      end
     end
-
-    redirect_to admin_license_path
   end
 
   private
@@ -84,5 +80,11 @@ class Admin::LicensesController < Admin::ApplicationController
     license_params = params.require(:license).permit(:data_file, :data)
     license_params.delete(:data) if license_params[:data_file]
     license_params
+  end
+
+  def upload_license_error
+    flash[:alert] = _('Please enter or upload a valid license.')
+    @license = License.new
+    redirect_to new_admin_license_path
   end
 end

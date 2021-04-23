@@ -303,6 +303,7 @@ RSpec.describe TimeboxReportService do
   context 'milestone charts' do
     let_it_be(:timebox, reload: true) { create(:milestone, project: project, start_date: timebox_start_date, due_date: timebox_end_date) }
     let_it_be(:another_timebox) { create(:milestone, project: project) }
+
     let(:timebox_without_dates) { build(:milestone, project: project) }
 
     it_behaves_like 'timebox chart', 'milestone'
@@ -311,6 +312,7 @@ RSpec.describe TimeboxReportService do
   context 'iteration charts' do
     let_it_be(:timebox, reload: true) { create(:iteration, group: group, start_date: timebox_start_date, due_date: timebox_end_date) }
     let_it_be(:another_timebox) { create(:iteration, group: group, start_date: timebox_end_date + 1.day, due_date: timebox_end_date + 15.days) }
+
     let(:timebox_without_dates) { build(:iteration, group: group, start_date: nil, due_date: nil) }
 
     it_behaves_like 'timebox chart', 'iteration'

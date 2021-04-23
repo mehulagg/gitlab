@@ -11,13 +11,20 @@ module API
         success EE::API::Entities::Experiment
       end
       get do
-        experiments = Feature::Definition.definitions.values.select { |d| d.attributes[:type] == 'experiment' }
+        experiments = []
+
+        experiment(:null_hypothesis, canary: true, user: current_user) do |e|
+          e.use { bad_request! 'experimentation may not be working right now' }
+          e.try { experiments = Feature::Definition.definitions.values.select { |d| d.attributes[:type] == 'experiment' } }
+        end
 
         present experiments, with: EE::API::Entities::Experiment, current_user: current_user
       end
     end
 
     helpers do
+      include Gitlab::Experiment::Dsl
+
       def authorize_read_experiments!
         authenticate!
 

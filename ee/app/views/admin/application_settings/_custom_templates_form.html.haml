@@ -16,4 +16,4 @@
           .form-group
             = groups_select_tag('application_setting[custom_project_templates_group_id]', selected: @application_setting.custom_project_templates_group_id, class: 'input-clamp allowClear qa-custom-project-template-select', multiple: false)
 
-        = f.submit _('Save changes'), class: "gl-button btn btn-success qa-save-changes-button"
+        = f.submit _('Save changes'), class: "gl-button btn btn-confirm qa-save-changes-button"

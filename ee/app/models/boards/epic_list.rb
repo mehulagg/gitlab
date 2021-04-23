@@ -29,5 +29,9 @@ module Boards
         end
       end
     end
+
+    def board
+      epic_board
+    end
   end
 end

@@ -15,6 +15,9 @@ Warning[:deprecated] = true unless ENV.key?('SILENCE_DEPRECATIONS')
 require './spec/deprecation_toolkit_env'
 DeprecationToolkitEnv.configure!
 
+require './spec/knapsack_env'
+KnapsackEnv.configure!
+
 require './spec/simplecov_env'
 SimpleCovEnv.start!
 
@@ -47,16 +50,12 @@ if rspec_profiling_is_configured && (!ENV.key?('CI') || branch_can_be_profiled)
   require 'rspec_profiling/rspec'
 end
 
-if ENV['CI'] && ENV['KNAPSACK_GENERATE_REPORT'] && !ENV['NO_KNAPSACK']
-  require 'knapsack'
-  Knapsack::Adapters::RSpecAdapter.bind
-end
-
 # require rainbow gem String monkeypatch, so we can test SystemChecks
 require 'rainbow/ext/string'
 Rainbow.enabled = false
 
 require_relative('../ee/spec/spec_helper') if Gitlab.ee?
+require_relative('../jh/spec/spec_helper') if Gitlab.jh?
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
@@ -81,7 +80,7 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
 
   config.use_transactional_fixtures = true
-  config.use_instantiated_fixtures  = false
+  config.use_instantiated_fixtures = false
   config.fixture_path = Rails.root
 
   config.verbose_retry = true
@@ -266,12 +265,6 @@ RSpec.configure do |config|
       stub_feature_flags(file_identifier_hash: false)
 
       stub_feature_flags(unified_diff_components: false)
-
-      # Disable this feature flag as we iterate and
-      # refactor filtered search to use gitlab ui
-      # components to meet feature parody. More details found
-      # https://gitlab.com/groups/gitlab-org/-/epics/5501
-      stub_feature_flags(boards_filtered_search: false)
 
       # The following `vue_issues_list` stub can be removed once the
       # Vue issues page has feature parity with the current Haml page

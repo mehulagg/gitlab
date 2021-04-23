@@ -45,7 +45,7 @@ GitLab, but users can also integrate their own **custom images**.
 
 ## SAST analyzer features
 
-For an analyzer to be considered Generally Available, it is expected to minimally 
+For an analyzer to be considered Generally Available, it is expected to minimally
 support the following features:
 
 - [Customizable configuration](index.md#available-variables)
@@ -54,6 +54,7 @@ support the following features:
 - [Multi-project support](index.md#multi-project-support)
 - [Offline support](index.md#running-sast-in-an-offline-environment)
 - [Emits JSON report format](index.md#reports-json-format)
+- [SELinux support](index.md#running-sast-in-selinux)
 
 ## Official default analyzers
 

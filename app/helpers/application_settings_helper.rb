@@ -229,6 +229,9 @@ module ApplicationSettingsHelper
       :email_author_in_body,
       :enabled_git_access_protocol,
       :enforce_terms,
+      :external_pipeline_validation_service_timeout,
+      :external_pipeline_validation_service_token,
+      :external_pipeline_validation_service_url,
       :first_day_of_week,
       :force_pages_access_control,
       :gitaly_timeout_default,
@@ -307,9 +310,15 @@ module ApplicationSettingsHelper
       :throttle_authenticated_web_enabled,
       :throttle_authenticated_web_period_in_seconds,
       :throttle_authenticated_web_requests_per_period,
+      :throttle_authenticated_packages_api_enabled,
+      :throttle_authenticated_packages_api_period_in_seconds,
+      :throttle_authenticated_packages_api_requests_per_period,
       :throttle_unauthenticated_enabled,
       :throttle_unauthenticated_period_in_seconds,
       :throttle_unauthenticated_requests_per_period,
+      :throttle_unauthenticated_packages_api_enabled,
+      :throttle_unauthenticated_packages_api_period_in_seconds,
+      :throttle_unauthenticated_packages_api_requests_per_period,
       :throttle_protected_paths_enabled,
       :throttle_protected_paths_period_in_seconds,
       :throttle_protected_paths_requests_per_period,
@@ -384,7 +393,7 @@ module ApplicationSettingsHelper
   end
 
   def integration_expanded?(substring)
-    @application_setting.errors.any? { |k| k.to_s.start_with?(substring) }
+    @application_setting.errors.messages.any? { |k, _| k.to_s.start_with?(substring) }
   end
 
   def instance_clusters_enabled?

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.shared_examples 'languages and percentages JSON response' do
-  let(:expected_languages) { project.repository.languages.map { |language| language.values_at(:label, :value)}.to_h }
+  let(:expected_languages) { project.repository.languages.to_h { |language| language.values_at(:label, :value) } }
 
   before do
     allow(project.repository).to receive(:languages).and_return(
@@ -221,6 +221,52 @@ RSpec.describe API::Projects do
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.find { |hash| hash['id'] == project.id }.keys).not_to include('open_issues_count')
+      end
+
+      context 'filter by topic (column tag_list)' do
+        before do
+          project.update!(tag_list: %w(ruby javascript))
+        end
+
+        it 'returns no projects' do
+          get api('/projects', user), params: { topic: 'foo' }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_empty
+        end
+
+        it 'returns matching project for a single topic' do
+          get api('/projects', user), params: { topic: 'ruby' }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to contain_exactly a_hash_including('id' => project.id)
+        end
+
+        it 'returns matching project for multiple topics' do
+          get api('/projects', user), params: { topic: 'ruby, javascript' }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to contain_exactly a_hash_including('id' => project.id)
+        end
+
+        it 'returns no projects if project match only some topic' do
+          get api('/projects', user), params: { topic: 'ruby, foo' }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_empty
+        end
+
+        it 'ignores topic if it is empty' do
+          get api('/projects', user), params: { topic: '' }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_present
+        end
       end
 
       context 'and with_issues_enabled=true' do
@@ -1584,19 +1630,28 @@ RSpec.describe API::Projects do
       expect(json_response['alt']).to eq("dk")
       expect(json_response['url']).to start_with("/uploads/")
       expect(json_response['url']).to end_with("/dk.png")
-
       expect(json_response['full_path']).to start_with("/#{project.namespace.path}/#{project.path}/uploads")
     end
 
-    it "logs a warning if file exceeds attachment size" do
-      allow(Gitlab::CurrentSettings).to receive(:max_attachment_size).and_return(0)
+    it "does not leave the temporary file in place after uploading, even when the tempfile reaper does not run" do
+      stub_env('GITLAB_TEMPFILE_IMMEDIATE_UNLINK', '1')
+      tempfile = Tempfile.new('foo')
+      path = tempfile.path
 
-      expect(Gitlab::AppLogger).to receive(:info).with(hash_including(message: 'File exceeds maximum size')).and_call_original
+      allow_any_instance_of(Rack::TempfileReaper).to receive(:call) do |instance, env|
+        instance.instance_variable_get(:@app).call(env)
+      end
 
-      post api("/projects/#{project.id}/uploads", user), params: { file: file }
+      expect(path).not_to be(nil)
+      expect(Rack::Multipart::Parser::TEMPFILE_FACTORY).to receive(:call).and_return(tempfile)
+
+      post api("/projects/#{project.id}/uploads", user), params: { file: fixture_file_upload("spec/fixtures/dk.png", "image/png") }
+
+      expect(tempfile.path).to be(nil)
+      expect(File.exist?(path)).to be(false)
     end
 
-    shared_examples 'capped upload attachments' do
+    shared_examples 'capped upload attachments' do |upload_allowed|
       it "limits the upload to 1 GB" do
         expect_next_instance_of(UploadService) do |instance|
           expect(instance).to receive(:override_max_attachment_size=).with(1.gigabyte).and_call_original
@@ -1606,6 +1661,16 @@ RSpec.describe API::Projects do
 
         expect(response).to have_gitlab_http_status(:created)
       end
+
+      it "logs a warning if file exceeds attachment size" do
+        allow(Gitlab::CurrentSettings).to receive(:max_attachment_size).and_return(0)
+
+        expect(Gitlab::AppLogger).to receive(:info).with(
+          hash_including(message: 'File exceeds maximum size', upload_allowed: upload_allowed))
+            .and_call_original
+
+        post api("/projects/#{project.id}/uploads", user), params: { file: file }
+      end
     end
 
     context 'with exempted project' do
@@ -1613,7 +1678,7 @@ RSpec.describe API::Projects do
         stub_env('GITLAB_UPLOAD_API_ALLOWLIST', project.id)
       end
 
-      it_behaves_like 'capped upload attachments'
+      it_behaves_like 'capped upload attachments', true
     end
 
     context 'with upload size enforcement disabled' do
@@ -1621,7 +1686,7 @@ RSpec.describe API::Projects do
         stub_feature_flags(enforce_max_attachment_size_upload_api: false)
       end
 
-      it_behaves_like 'capped upload attachments'
+      it_behaves_like 'capped upload attachments', false
     end
   end
 

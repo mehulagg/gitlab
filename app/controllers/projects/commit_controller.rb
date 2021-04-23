@@ -20,11 +20,11 @@ class Projects::CommitController < Projects::ApplicationController
   before_action :define_note_vars, only: [:show, :diff_for_path, :diff_files]
   before_action :authorize_edit_tree!, only: [:revert, :cherry_pick]
   before_action do
-    push_frontend_feature_flag(:pick_into_project)
+    push_frontend_feature_flag(:pick_into_project, @project, default_enabled: :yaml)
   end
 
   BRANCH_SEARCH_LIMIT = 1000
-  COMMIT_DIFFS_PER_PAGE = 75
+  COMMIT_DIFFS_PER_PAGE = 20
 
   feature_category :source_code_management
 
@@ -49,13 +49,11 @@ class Projects::CommitController < Projects::ApplicationController
   end
 
   def diff_files
-    render json: { html: view_to_html_string('projects/commit/diff_files', diffs: @diffs, environment: @environment) }
+    render template: 'projects/commit/diff_files', layout: false, locals: { diffs: @diffs, environment: @environment }
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def pipelines
-    set_pipeline_feature_flag
-
     @pipelines = @commit.pipelines.order(id: :desc)
     @pipelines = @pipelines.where(ref: params[:ref]).page(params[:page]).per(30) if params[:ref]
 
@@ -114,7 +112,7 @@ class Projects::CommitController < Projects::ApplicationController
     @branch_name = create_new_branch? ? @commit.revert_branch_name : @start_branch
 
     create_commit(Commits::RevertService, success_notice: "The #{@commit.change_type_title(current_user)} has been successfully reverted.",
-                                          success_path: -> { successful_change_path }, failure_path: failed_change_path)
+                                          success_path: -> { successful_change_path(@project) }, failure_path: failed_change_path)
   end
 
   def cherry_pick
@@ -122,24 +120,25 @@ class Projects::CommitController < Projects::ApplicationController
 
     return render_404 if @start_branch.blank?
 
+    target_project = find_cherry_pick_target_project
+    return render_404 unless target_project
+
     @branch_name = create_new_branch? ? @commit.cherry_pick_branch_name : @start_branch
 
     create_commit(Commits::CherryPickService, success_notice: "The #{@commit.change_type_title(current_user)} has been successfully cherry-picked into #{@branch_name}.",
-                                              success_path: -> { successful_change_path }, failure_path: failed_change_path)
+                                              success_path: -> { successful_change_path(target_project) },
+                                              failure_path: failed_change_path,
+                                              target_project: target_project)
   end
 
   private
-
-  def set_pipeline_feature_flag
-    push_frontend_feature_flag(:new_pipelines_table, @project, default_enabled: :yaml)
-  end
 
   def create_new_branch?
     params[:create_merge_request].present? || !can?(current_user, :push_code, @project)
   end
 
-  def successful_change_path
-    referenced_merge_request_url || project_commits_url(@project, @branch_name)
+  def successful_change_path(target_project)
+    referenced_merge_request_url || project_commits_url(target_project, @branch_name)
   end
 
   def failed_change_path
@@ -168,7 +167,7 @@ class Projects::CommitController < Projects::ApplicationController
     @diffs = commit.diffs(opts)
     @notes_count = commit.notes.count
 
-    @environment = EnvironmentsByDeploymentsFinder.new(@project, current_user, commit: @commit, find_latest: true).execute.last
+    @environment = ::Environments::EnvironmentsByDeploymentsFinder.new(@project, current_user, commit: @commit, find_latest: true).execute.last
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -217,5 +216,15 @@ class Projects::CommitController < Projects::ApplicationController
   def assign_change_commit_vars
     @start_branch = params[:start_branch]
     @commit_params = { commit: @commit }
+  end
+
+  def find_cherry_pick_target_project
+    return @project if params[:target_project_id].blank?
+    return @project unless Feature.enabled?(:pick_into_project, @project, default_enabled: :yaml)
+
+    MergeRequestTargetProjectFinder
+      .new(current_user: current_user, source_project: @project, project_feature: :repository)
+      .execute
+      .find_by_id(params[:target_project_id])
   end
 end

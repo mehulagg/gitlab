@@ -13,11 +13,11 @@ module DastSiteProfiles
     attr_reader :dast_site_profile
 
     def execute(id:, **params)
-      return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
+      return ServiceResponse.error(message: _('Insufficient permissions')) unless allowed?
 
       find_dast_site_profile!(id)
 
-      return ServiceResponse.error(message: "Cannot modify #{dast_site_profile.name} referenced in security policy") if referenced_in_security_policy?
+      return ServiceResponse.error(message: _('Cannot modify %{profile_name} referenced in security policy') % { profile_name: dast_site_profile.name }) if referenced_in_security_policy?
 
       ActiveRecord::Base.transaction do
         if target_url = params.delete(:target_url)
@@ -36,7 +36,7 @@ module DastSiteProfiles
     rescue Rollback => e
       ServiceResponse.error(message: e.errors)
     rescue ActiveRecord::RecordNotFound => e
-      ServiceResponse.error(message: "#{e.model} not found")
+      ServiceResponse.error(message: _('%{model_name} not found') % { model_name: e.model })
     rescue ActiveRecord::RecordInvalid => e
       ServiceResponse.error(message: e.record.errors.full_messages)
     end

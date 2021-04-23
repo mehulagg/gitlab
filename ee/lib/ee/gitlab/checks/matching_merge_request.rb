@@ -9,6 +9,7 @@ module EE
         TOTAL_METRIC = :gitlab_merge_request_match_total
         STALE_METRIC = :gitlab_merge_request_match_stale_secondary
 
+        # rubocop:disable Gitlab/ModuleWithInstanceVariables
         override :match?
         def match?
           return super unless ::Gitlab::Database::LoadBalancing.enable?
@@ -27,11 +28,16 @@ module EE
           # report no matching merge requests. To avoid this, we check
           # the write location to ensure the replica can make this query.
           track_session_metrics do
-            ::Gitlab::Database::LoadBalancing::Sticking.unstick_or_continue_sticking(:project, @project.id) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+            if ::Feature.enabled?(:load_balancing_atomic_replica, @project)
+              ::Gitlab::Database::LoadBalancing::Sticking.select_valid_host(:project, @project.id)
+            else
+              ::Gitlab::Database::LoadBalancing::Sticking.unstick_or_continue_sticking(:project, @project.id)
+            end
           end
 
           super
         end
+        # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
         private
 

@@ -38,28 +38,10 @@ RSpec.describe 'Admin::CredentialsInventory' do
       end
 
       context 'tabs' do
-        context 'when GPG keys feature is enabled' do
-          before_all do
-            stub_feature_flags(credential_inventory_gpg_keys: true)
-          end
-
-          it 'contains the relevant filter tabs' do
-            expect(page).to have_link('Personal Access Tokens', href: admin_credentials_path(filter: 'personal_access_tokens'))
-            expect(page).to have_link('SSH Keys', href: admin_credentials_path(filter: 'ssh_keys'))
-            expect(page).to have_link('GPG Keys', href: admin_credentials_path(filter: 'gpg_keys'))
-          end
-        end
-
-        context 'when GPG keys feature is disabled' do
-          before_all do
-            stub_feature_flags(credential_inventory_gpg_keys: false)
-          end
-
-          it 'contains the relevant filter tabs' do
-            expect(page).to have_link('Personal Access Tokens', href: admin_credentials_path(filter: 'personal_access_tokens'))
-            expect(page).to have_link('SSH Keys', href: admin_credentials_path(filter: 'ssh_keys'))
-            expect(page).not_to have_link('GPG Keys', href: admin_credentials_path(filter: 'gpg_keys'))
-          end
+        it 'contains the relevant filter tabs' do
+          expect(page).to have_link('Personal Access Tokens', href: admin_credentials_path(filter: 'personal_access_tokens'))
+          expect(page).to have_link('SSH Keys', href: admin_credentials_path(filter: 'ssh_keys'))
+          expect(page).to have_link('GPG Keys', href: admin_credentials_path(filter: 'gpg_keys'))
         end
       end
     end

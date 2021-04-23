@@ -9,17 +9,19 @@ export default {
   props: {
     imagePath: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     addFrameworkPath: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   i18n: {
     heading: s__('ComplianceFrameworks|There are no compliance frameworks set up yet'),
     description: s__(
-      'ComplianceFrameworks|Once you have created a compliance framework it will appear here.',
+      'ComplianceFrameworks|Once a compliance framework is added it will appear here.',
     ),
     addButton: s__('ComplianceFrameworks|Add framework'),
   },

@@ -86,10 +86,11 @@ There are several types of users in GitLab:
 ## User activity
 
 You can follow or unfollow other users from their [user profiles](profile/index.md#access-your-user-profile).
-To see their activity in the top-level Activity view, select Follow or Unfollow, and select
-the Followed Users tab:
+To view a user's activity in a top-level Activity view:
 
-![Follow users](img/activity_followed_users_v13_9.png)
+1. From a user's profile, select **Follow**.
+1. In the GitLab menu, select **Activity**.
+1. Select the **Followed users** tab.
 
 ## Projects
 
@@ -119,7 +120,7 @@ to enjoy the best of GitLab.
   user type (guest, reporter, developer, maintainer, owner).
 - [Feature highlight](feature_highlight.md): Learn more about the little blue dots
   around the app that explain certain features.
-- [Abuse reports](abuse_reports.md): Report abuse from users to GitLab administrators.
+- [Abuse reports](report_abuse.md): Report abuse from users to GitLab administrators.
 
 ## Groups
 

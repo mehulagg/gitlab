@@ -119,7 +119,13 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
   end
 
   describe '#create_batched_job!' do
-    let(:batched_migration) { create(:batched_background_migration) }
+    let(:batched_migration) do
+      create(:batched_background_migration,
+             batch_size: 999,
+             sub_batch_size: 99,
+             pause_ms: 250
+            )
+    end
 
     it 'creates a batched_job with the correct batch configuration' do
       batched_job = batched_migration.create_batched_job!(1, 5)
@@ -128,7 +134,9 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
         min_value: 1,
         max_value: 5,
         batch_size: batched_migration.batch_size,
-        sub_batch_size: batched_migration.sub_batch_size)
+        sub_batch_size: batched_migration.sub_batch_size,
+        pause_ms: 250
+      )
     end
   end
 
@@ -194,5 +202,18 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
 
   describe '#batch_class_name=' do
     it_behaves_like 'an attr_writer that demodulizes assigned class names', :batch_class_name
+  end
+
+  describe '#prometheus_labels' do
+    let(:batched_migration) { create(:batched_background_migration, job_class_name: 'TestMigration', table_name: 'foo', column_name: 'bar') }
+
+    it 'returns a hash with labels for the migration' do
+      labels = {
+        migration_id: batched_migration.id,
+        migration_identifier: 'TestMigration/foo.bar'
+      }
+
+      expect(batched_migration.prometheus_labels).to eq(labels)
+    end
   end
 end

@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Upgrading GitLab
+# Upgrading GitLab **(FREE SELF)**
 
 Upgrading GitLab is a relatively straightforward process, but the complexity
 can increase based on the installation method you have used, how old your
@@ -177,7 +177,7 @@ Find where your version sits in the upgrade path below, and upgrade GitLab
 accordingly, while also consulting the
 [version-specific upgrade instructions](#version-specific-upgrading-instructions):
 
-`8.11.Z` -> `8.12.0` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.1.11`  -> `13.5.4` - > [latest `13.Y.Z`](https://about.gitlab.com/releases/categories/releases/)
+`8.11.Z` -> `8.12.0` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.1.11`  -> [latest `13.Y.Z`](https://about.gitlab.com/releases/categories/releases/)
 
 The following table, while not exhaustive, shows some examples of the supported
 upgrade paths.
@@ -351,6 +351,11 @@ installation-specific upgrade instructions, based on how you installed GitLab:
 NOTE:
 Specific information that follow related to Ruby and Git versions do not apply to [Omnibus installations](https://docs.gitlab.com/omnibus/)
 and [Helm Chart deployments](https://docs.gitlab.com/charts/). They come with appropriate Ruby and Git versions and are not using system binaries for Ruby and Git. There is no need to install Ruby or Git when utilizing these two approaches.
+
+### 13.11.0
+
+Git 2.31.x and later is required. We recommend you use the
+[Git version provided by Gitaly](../install/installation.md#git).
 
 ### 13.6.0
 

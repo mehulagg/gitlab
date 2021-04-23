@@ -37,13 +37,14 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:default_merge_ref_for_diffs, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:core_security_mr_widget_counts, @project)
     push_frontend_feature_flag(:diffs_gradual_load, @project, default_enabled: true)
-    push_frontend_feature_flag(:codequality_backend_comparison, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:local_file_reviews, default_enabled: :yaml)
     push_frontend_feature_flag(:paginated_notes, @project, default_enabled: :yaml)
-    push_frontend_feature_flag(:new_pipelines_table, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:confidential_notes, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:usage_data_i_testing_summary_widget_total, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:improved_emoji_picker, project, default_enabled: :yaml)
+
+    # Usage data feature flags
+    push_frontend_feature_flag(:users_expanding_widgets_usage_data, @project, default_enabled: :yaml)
 
     record_experiment_user(:invite_members_version_b)
 
@@ -67,16 +68,19 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   feature_category :code_review, [
                      :assign_related_issues, :bulk_update, :cancel_auto_merge,
-                     :ci_environments_status, :commit_change_content, :commits,
-                     :context_commits, :destroy, :diff_for_path, :discussions,
-                     :edit, :exposed_artifacts, :index, :merge,
-                     :pipeline_status, :pipelines, :rebase, :remove_wip, :show,
-                     :toggle_award_emoji, :toggle_subscription, :update
+                     :commit_change_content, :commits, :context_commits, :destroy,
+                     :discussions, :edit, :index, :merge, :rebase, :remove_wip,
+                     :show, :toggle_award_emoji, :toggle_subscription, :update
                    ]
 
-  feature_category :code_testing, [:test_reports, :coverage_reports, :codequality_mr_diff_reports]
+  feature_category :code_testing, [
+                     :test_reports, :coverage_reports, :codequality_reports,
+                     :codequality_mr_diff_reports
+                   ]
+
   feature_category :accessibility_testing, [:accessibility_reports]
   feature_category :infrastructure_as_code, [:terraform_reports]
+  feature_category :continuous_integration, [:pipeline_status, :pipelines, :exposed_artifacts]
 
   def index
     @merge_requests = @issuables

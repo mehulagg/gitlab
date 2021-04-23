@@ -163,6 +163,16 @@ module Gitlab
           load_balancer.release_primary_connection
         end
 
+        def database_replica_location
+          row = query_and_release(<<-SQL.squish)
+            SELECT pg_last_wal_replay_lsn()::text AS location
+          SQL
+
+          row['location'] if row.any?
+        rescue *CONNECTION_ERRORS
+          nil
+        end
+
         # Returns true if this host has caught up to the given transaction
         # write location.
         #

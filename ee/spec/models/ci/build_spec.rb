@@ -374,20 +374,14 @@ RSpec.describe Ci::Build do
 
       before do
         stub_licensed_features(dependency_scanning: true)
-        stub_feature_flags(standalone_vuln_dependency_list: false)
       end
 
       subject { job.collect_dependency_list_reports!(dependency_list_report) }
 
       it 'parses blobs and add the results to the report' do
         subject
-        blob_path = "/#{project.full_path}/-/blob/#{job.sha}/sast-sample-rails/Gemfile.lock"
-        netty = dependency_list_report.dependencies.first
-        ffi = dependency_list_report.dependencies.last
 
-        expect(dependency_list_report.dependencies.count).to eq(4)
-        expect(netty[:name]).to eq('io.netty/netty')
-        expect(ffi[:location][:blob_path]).to eq(blob_path)
+        expect(dependency_list_report.dependencies.count).to eq(0)
       end
     end
 
@@ -642,6 +636,36 @@ RSpec.describe Ci::Build do
         expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
 
         create(:ci_build, secrets: {})
+      end
+    end
+  end
+
+  describe '#validate_schema?' do
+    let(:ci_build) { build(:ci_build) }
+
+    subject { ci_build.validate_schema? }
+
+    before do
+      ci_build.yaml_variables = variables
+    end
+
+    context 'when the yaml variables does not have the configuration' do
+      let(:variables) { [] }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the yaml variables has the configuration' do
+      context 'when the configuration is set as `false`' do
+        let(:variables) { [{ key: 'VALIDATE_SCHEMA', value: 'false' }] }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the configuration is set as `true`' do
+        let(:variables) { [{ key: 'VALIDATE_SCHEMA', value: 'true' }] }
+
+        it { is_expected.to be_truthy }
       end
     end
   end

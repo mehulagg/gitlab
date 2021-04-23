@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '~> 6.0.3.1'
+gem 'rails', '~> 6.0.3.6'
 
 gem 'bootsnap', '~> 1.4.6'
 
@@ -23,11 +23,16 @@ gem 'grape-path-helpers', '~> 1.6.1'
 gem 'faraday', '~> 1.0'
 gem 'marginalia', '~> 1.10.0'
 
+# Authorization
+gem 'declarative_policy', '~> 1.0.0'
+
 # Authentication libraries
 gem 'devise', '~> 4.7.2'
 gem 'bcrypt', '~> 3.1', '>= 3.1.14'
 gem 'doorkeeper', '~> 5.5.0.rc2'
 gem 'doorkeeper-openid_connect', '~> 1.7.5'
+gem 'rexml', '~> 3.2.5'
+gem 'ruby-saml', '~> 1.12.1'
 gem 'omniauth', '~> 1.8'
 gem 'omniauth-auth0', '~> 2.0.0'
 gem 'omniauth-azure-activedirectory-v2', '~> 0.1'
@@ -108,7 +113,7 @@ gem 'hashie-forbidden_attributes'
 gem 'kaminari', '~> 1.0'
 
 # HAML
-gem 'hamlit', '~> 2.14.4'
+gem 'hamlit', '~> 2.15.0'
 
 # Files attachments
 gem 'carrierwave', '~> 1.3'
@@ -262,7 +267,7 @@ gem 'kubeclient', '~> 4.9.1'
 
 # Sanitize user input
 gem 'sanitize', '~> 5.2.1'
-gem 'babosa', '~> 1.0.2'
+gem 'babosa', '~> 1.0.4'
 
 # Sanitizes SVG input
 gem 'loofah', '~> 2.2'
@@ -275,9 +280,6 @@ gem 'charlock_holmes', '~> 0.7.7'
 
 # Detect mime content type from content
 gem 'ruby-magic', '~> 0.4'
-
-# Fake version of the gem to trick bundler
-gem 'mimemagic', '0.3.7', path: 'vendor/shims/mimemagic', require: false
 
 # Faster blank
 gem 'fast_blank'
@@ -294,11 +296,11 @@ gem 'terser', '1.0.2'
 
 gem 'addressable', '~> 2.7'
 gem 'gemojione', '~> 3.3'
-gem 'gon', '~> 6.2'
+gem 'gon', '~> 6.4.0'
 gem 'request_store', '~> 1.5'
 gem 'base32', '~> 0.3.0'
 
-gem "gitlab-license", "~> 1.3"
+gem "gitlab-license", "~> 1.4"
 
 # Protect against bruteforcing
 gem 'rack-attack', '~> 6.3.0'
@@ -343,8 +345,8 @@ group :metrics do
 end
 
 group :development do
-  gem 'brakeman', '~> 4.10.0', require: false
   gem 'lefthook', '~> 0.7.0', require: false
+  gem 'solargraph', '~> 0.40.4', require: false
 
   gem 'letter_opener_web', '~> 1.4.0'
 
@@ -366,7 +368,7 @@ group :development, :test do
 
   gem 'database_cleaner', '~> 1.7.0'
   gem 'factory_bot_rails', '~> 6.1.0'
-  gem 'rspec-rails', '~> 4.0.2'
+  gem 'rspec-rails', '~> 5.0.1'
 
   # Prevent occasions where minitest is not bundled in packaged versions of ruby (see #3826)
   gem 'minitest', '~> 5.11.0'
@@ -384,7 +386,7 @@ group :development, :test do
 
   gem 'benchmark-ips', '~> 2.3.0', require: false
 
-  gem 'knapsack', '~> 1.17'
+  gem 'knapsack', '~> 1.21.1'
   gem 'crystalball', '~> 0.7.0', require: false
 
   gem 'simple_po_parser', '~> 1.1.2', require: false
@@ -396,6 +398,8 @@ group :development, :test do
   gem 'parallel', '~> 1.19', require: false
 
   gem 'rblineprof', '~> 0.3.6', platform: :mri, require: false
+
+  gem 'test_file_finder', '~> 0.1.3'
 end
 
 group :development, :test, :danger do
@@ -475,7 +479,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.9.0.pre.rc1'
+gem 'gitaly', '~> 13.11.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 

@@ -7,7 +7,9 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
 
   let_it_be(:project) { create(:project) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project, iid: '1234', sha: 'sha') }
+  let_it_be(:other_project_pipeline) { create(:ci_pipeline, project: project, iid: '1235', sha: 'sha2') }
   let_it_be(:other_pipeline) { create(:ci_pipeline) }
+
   let(:current_user) { create(:user) }
 
   specify do
@@ -23,6 +25,11 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
   end
 
   it 'resolves pipeline for the passed iid' do
+    expect(Ci::PipelinesFinder)
+      .to receive(:new)
+      .with(project, current_user, iids: ['1234'])
+      .and_call_original
+
     result = batch_sync do
       resolve_pipeline(project, { iid: '1234' })
     end
@@ -31,6 +38,11 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
   end
 
   it 'resolves pipeline for the passed sha' do
+    expect(Ci::PipelinesFinder)
+      .to receive(:new)
+      .with(project, current_user, sha: ['sha'])
+      .and_call_original
+
     result = batch_sync do
       resolve_pipeline(project, { sha: 'sha' })
     end
@@ -39,8 +51,6 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
   end
 
   it 'keeps the queries under the threshold for iid' do
-    create(:ci_pipeline, project: project, iid: '1235')
-
     control = ActiveRecord::QueryRecorder.new do
       batch_sync { resolve_pipeline(project, { iid: '1234' }) }
     end
@@ -54,8 +64,6 @@ RSpec.describe Resolvers::ProjectPipelineResolver do
   end
 
   it 'keeps the queries under the threshold for sha' do
-    create(:ci_pipeline, project: project, sha: 'sha2')
-
     control = ActiveRecord::QueryRecorder.new do
       batch_sync { resolve_pipeline(project, { sha: 'sha' }) }
     end

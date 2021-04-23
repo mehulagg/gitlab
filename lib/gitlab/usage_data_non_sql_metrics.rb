@@ -24,6 +24,19 @@ module Gitlab
       def histogram(relation, column, buckets:, bucket_size: buckets.size)
         SQL_METRIC_DEFAULT
       end
+
+      def maximum_id(model, column = nil)
+      end
+
+      def minimum_id(model, column = nil)
+      end
+
+      def jira_service_data
+        {
+          projects_jira_server_active: 0,
+          projects_jira_cloud_active: 0
+        }
+      end
     end
   end
 end

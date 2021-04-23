@@ -8,6 +8,7 @@ RSpec.describe MergeTrains::RefreshService do
   let(:project) { create(:project) }
   let_it_be(:maintainer_1) { create(:user) }
   let_it_be(:maintainer_2) { create(:user) }
+
   let(:service) { described_class.new(project, maintainer_1) }
 
   before do

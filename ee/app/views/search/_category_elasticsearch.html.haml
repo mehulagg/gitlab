@@ -1,4 +1,4 @@
-- if search_service.use_elasticsearch?
+- if search_service.show_elasticsearch_tabs?
   = search_filter_link 'notes', _("Comments")
   = search_filter_link 'blobs', _("Code"), data: { qa_selector: 'code_tab' }
   = search_filter_link 'commits', _("Commits")

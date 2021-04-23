@@ -26,7 +26,7 @@ describe('ListEmptyState', () => {
 
     expect(findEmptyState().props()).toMatchObject({
       title: 'There are no compliance frameworks set up yet',
-      description: 'Once you have created a compliance framework it will appear here.',
+      description: 'Once a compliance framework is added it will appear here.',
       svgPath: 'dir/image.svg',
       primaryButtonLink: 'group/framework/new',
       primaryButtonText: 'Add framework',

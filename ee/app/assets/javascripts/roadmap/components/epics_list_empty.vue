@@ -3,7 +3,11 @@ import { GlButton, GlSafeHtmlDirective } from '@gitlab/ui';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 import { s__, sprintf } from '~/locale';
 
-import { emptyStateDefault, emptyStateWithFilters } from '../constants';
+import {
+  emptyStateDefault,
+  emptyStateWithFilters,
+  emptyStateWithEpicIidFiltered,
+} from '../constants';
 import CommonMixin from '../mixins/common_mixin';
 
 export default {
@@ -40,6 +44,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    filterParams: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
   },
   computed: {
@@ -98,6 +107,10 @@ export default {
           },
           false,
         );
+      }
+
+      if (this.hasFiltersApplied && Boolean(this.filterParams?.epicIid)) {
+        return emptyStateWithEpicIidFiltered;
       }
 
       if (this.hasFiltersApplied) {

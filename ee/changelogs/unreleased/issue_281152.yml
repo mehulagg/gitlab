@@ -1,5 +1,0 @@
----
-title: Fix backward keyset pagination for epics start_date/end_date
-merge_request: 50579
-author:
-type: fixed

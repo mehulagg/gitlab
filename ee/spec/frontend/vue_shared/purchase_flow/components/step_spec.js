@@ -3,12 +3,17 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import StepSummary from 'ee/vue_shared/purchase_flow/components/step_summary.vue';
+import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';
 import updateStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/update_active_step.mutation.graphql';
+import waitForPromises from 'helpers/wait_for_promises';
+import flash from '~/flash';
 import { STEPS } from '../mock_data';
 import { createMockApolloProvider } from '../spec_helper';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
+
+jest.mock('~/flash');
 
 describe('Step', () => {
   let wrapper;
@@ -32,11 +37,15 @@ describe('Step', () => {
       localVue,
       propsData: { ...initialProps, ...propsData },
       apolloProvider,
+      stubs: {
+        StepSummary,
+      },
     });
   }
 
   afterEach(() => {
     wrapper.destroy();
+    flash.mockClear();
   });
 
   describe('Step Body', () => {
@@ -61,7 +70,27 @@ describe('Step', () => {
       const mockApollo = createMockApolloProvider(STEPS, 1);
       await activateFirstStep(mockApollo);
       wrapper = createComponent({ apolloProvider: mockApollo });
-      expect(wrapper.find(StepSummary).exists()).toBe(true);
+      expect(wrapper.findComponent(StepSummary).exists()).toBe(true);
+    });
+
+    it('displays an error when editing a wrong step', async () => {
+      const mockApollo = createMockApolloProvider(STEPS, 1);
+
+      await activateFirstStep(mockApollo);
+      wrapper = createComponent({
+        propsData: { stepId: 'does not exist' },
+        apolloProvider: mockApollo,
+      });
+
+      wrapper.findComponent(StepSummary).findComponent(GlButton).vm.$emit('click');
+      await waitForPromises();
+
+      expect(flash.mock.calls).toHaveLength(1);
+      expect(flash.mock.calls[0][0]).toMatchObject({
+        message: GENERAL_ERROR_MESSAGE,
+        captureError: true,
+        error: expect.any(Error),
+      });
     });
 
     it('should not be shown when this step is not valid and not active', async () => {
@@ -69,21 +98,21 @@ describe('Step', () => {
       await activateFirstStep(mockApollo);
       wrapper = createComponent({ propsData: { isValid: false }, apolloProvider: mockApollo });
 
-      expect(wrapper.find(StepSummary).exists()).toBe(false);
+      expect(wrapper.findComponent(StepSummary).exists()).toBe(false);
     });
 
     it('should not be shown when this step is valid and active', () => {
       const mockApollo = createMockApolloProvider(STEPS, 1);
       wrapper = createComponent({ apolloProvider: mockApollo });
 
-      expect(wrapper.find(StepSummary).exists()).toBe(false);
+      expect(wrapper.findComponent(StepSummary).exists()).toBe(false);
     });
 
     it('should not be shown when this step is not valid and active', () => {
       const mockApollo = createMockApolloProvider(STEPS, 1);
       wrapper = createComponent({ propsData: { isValid: false }, apolloProvider: mockApollo });
 
-      expect(wrapper.find(StepSummary).exists()).toBe(false);
+      expect(wrapper.findComponent(StepSummary).exists()).toBe(false);
     });
   });
 
@@ -92,7 +121,7 @@ describe('Step', () => {
       const mockApollo = createMockApolloProvider(STEPS, 1);
       wrapper = createComponent({ propsData: { stepId: STEPS[0].id }, apolloProvider: mockApollo });
 
-      expect(wrapper.find(StepSummary).props('isEditable')).toBe(true);
+      expect(wrapper.findComponent(StepSummary).props('isEditable')).toBe(true);
     });
   });
 
@@ -102,14 +131,14 @@ describe('Step', () => {
       await activateFirstStep(mockApollo);
       wrapper = createComponent({ apolloProvider: mockApollo });
 
-      expect(wrapper.find(StepSummary).exists()).toBe(true);
+      expect(wrapper.findComponent(StepSummary).exists()).toBe(true);
     });
 
     it('does not show the summary when this step is not finished', () => {
       const mockApollo = createMockApolloProvider(STEPS, 1);
       wrapper = createComponent({ apolloProvider: mockApollo });
 
-      expect(wrapper.find(StepSummary).exists()).toBe(false);
+      expect(wrapper.findComponent(StepSummary).exists()).toBe(false);
     });
   });
 
@@ -135,7 +164,7 @@ describe('Step', () => {
       const mockApollo = createMockApolloProvider(STEPS, 1);
       wrapper = createComponent({ propsData: { isValid: false }, apolloProvider: mockApollo });
 
-      expect(wrapper.find(GlButton).attributes('disabled')).toBe('true');
+      expect(wrapper.findComponent(GlButton).attributes('disabled')).toBe('true');
     });
 
     it('is enabled when this step is valid', () => {
@@ -143,6 +172,21 @@ describe('Step', () => {
       wrapper = createComponent({ apolloProvider: mockApollo });
 
       expect(wrapper.find(GlButton).attributes('disabled')).toBeUndefined();
+    });
+
+    it('displays an error if navigating too far', async () => {
+      const mockApollo = createMockApolloProvider(STEPS, 2);
+      wrapper = createComponent({ propsData: { stepId: STEPS[2].id }, apolloProvider: mockApollo });
+
+      wrapper.find(GlButton).vm.$emit('click');
+      await waitForPromises();
+
+      expect(flash.mock.calls).toHaveLength(1);
+      expect(flash.mock.calls[0][0]).toMatchObject({
+        message: GENERAL_ERROR_MESSAGE,
+        captureError: true,
+        error: expect.any(Error),
+      });
     });
   });
 });

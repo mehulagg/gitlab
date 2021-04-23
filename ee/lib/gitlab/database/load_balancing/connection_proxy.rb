@@ -60,7 +60,7 @@ module Gitlab
         end
 
         def transaction(*args, &block)
-          if ::Gitlab::Database::LoadBalancing::Session.current.use_replica?
+          if current_session.fallback_to_replicas_for_ambiguous_queries?
             track_read_only_transaction!
             read_using_load_balancer(:transaction, args, &block)
           else
@@ -73,7 +73,7 @@ module Gitlab
 
         # Delegates all unknown messages to a read-write connection.
         def method_missing(name, *args, &block)
-          if ::Gitlab::Database::LoadBalancing::Session.current.use_replica?
+          if current_session.fallback_to_replicas_for_ambiguous_queries?
             read_using_load_balancer(name, args, &block)
           else
             write_using_load_balancer(name, args, &block)
@@ -84,10 +84,15 @@ module Gitlab
         #
         # name - The name of the method to call on a connection object.
         def read_using_load_balancer(name, args, &block)
-          method = ::Gitlab::Database::LoadBalancing::Session.current.use_primary? ? :read_write : :read
-
-          @load_balancer.send(method) do |connection|
-            connection.send(name, *args, &block)
+          if current_session.use_primary? &&
+             !current_session.use_replicas_for_read_queries?
+            @load_balancer.read_write do |connection|
+              connection.send(name, *args, &block)
+            end
+          else
+            @load_balancer.read do |connection|
+              connection.send(name, *args, &block)
+            end
           end
         end
 
@@ -101,19 +106,21 @@ module Gitlab
             raise WriteInsideReadOnlyTransactionError, 'A write query is performed inside a read-only transaction'
           end
 
-          result = @load_balancer.read_write do |connection|
+          @load_balancer.read_write do |connection|
             # Sticking has to be enabled before calling the method. Not doing so
             # could lead to methods called in a block still being performed on a
             # secondary instead of on a primary (when necessary).
-            ::Gitlab::Database::LoadBalancing::Session.current.write! if sticky
+            current_session.write! if sticky
 
             connection.send(name, *args, &block)
           end
-
-          result
         end
 
         private
+
+        def current_session
+          ::Gitlab::Database::LoadBalancing::Session.current
+        end
 
         def track_read_only_transaction!
           Thread.current[READ_ONLY_TRANSACTION_KEY] = true

@@ -6,7 +6,8 @@ module Elastic
       attr_reader :class_name, :record_id
 
       def initialize(class_name, record_id)
-        @class_name, @record_id = class_name, record_id
+        @class_name = class_name
+        @record_id = record_id
       end
 
       def message

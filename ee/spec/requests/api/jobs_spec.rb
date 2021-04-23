@@ -25,6 +25,90 @@ RSpec.describe API::Jobs do
     project.add_developer(developer)
   end
 
+  describe 'GET /job/allowed_agents' do
+    let_it_be(:agent) { create(:cluster_agent, project: project) }
+
+    let(:api_user) { developer }
+    let(:headers) { { API::Helpers::Runner::JOB_TOKEN_HEADER => job.token } }
+    let(:job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user, status: job_status) }
+    let(:job_status) { 'running' }
+    let(:params) { {} }
+
+    subject do
+      get api('/job/allowed_agents'), headers: headers, params: params
+    end
+
+    before do
+      stub_licensed_features(cluster_agents: true)
+      agent
+      subject
+    end
+
+    context 'when token is valid and user is authorized' do
+      it 'returns agent info', :aggregate_failures do
+        expect(response).to have_gitlab_http_status(:ok)
+
+        expect(json_response.dig('job', 'id')).to eq(job.id)
+        expect(json_response.dig('pipeline', 'id')).to eq(job.pipeline_id)
+        expect(json_response.dig('project', 'id')).to eq(job.project_id)
+        expect(json_response.dig('user', 'username')).to eq(api_user.username)
+        expect(json_response['allowed_agents']).to match_array([
+          { 'id' => agent.id, 'config_project' => a_hash_including('id' => agent.project_id) }
+        ])
+      end
+
+      context 'when passing the token as params' do
+        let(:headers) { {} }
+        let(:params) { { job_token: job.token } }
+
+        it 'returns agent info', :aggregate_failures do
+          expect(response).to have_gitlab_http_status(:ok)
+
+          expect(json_response.dig('job', 'id')).to eq(job.id)
+          expect(json_response.dig('pipeline', 'id')).to eq(job.pipeline_id)
+          expect(json_response.dig('project', 'id')).to eq(job.project_id)
+          expect(json_response.dig('user', 'username')).to eq(api_user.username)
+          expect(json_response['allowed_agents']).to match_array([
+            { 'id' => agent.id, 'config_project' => a_hash_including('id' => agent.project_id) }
+          ])
+        end
+      end
+    end
+
+    context 'when user is anonymous' do
+      let(:api_user) { nil }
+
+      it 'returns unauthorized' do
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'when token is invalid because job has finished' do
+      let(:job_status) { 'success' }
+
+      it 'returns unauthorized' do
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'when token is invalid' do
+      let(:headers) { { API::Helpers::Runner::JOB_TOKEN_HEADER => 'bad_token' } }
+
+      it 'returns unauthorized' do
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'when token is valid but not CI_JOB_TOKEN' do
+      let(:token) { create(:personal_access_token, user: developer) }
+      let(:headers) { { 'Private-Token' => token.token } }
+
+      it 'returns not found' do
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
+
   describe 'GET /projects/:id/jobs/:job_id/artifacts' do
     let(:job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user, status: :running) }
 

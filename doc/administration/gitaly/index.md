@@ -213,7 +213,9 @@ In this example:
 - Each repository is stored on one of three Gitaly storages: `storage-1`, `storage-2`,
   or `storage-3`.
 - Each storage is serviced by a Gitaly node.
-- The three Gitaly nodes store data in three separate hashed storage locations.
+- The three Gitaly nodes share data in three separate hashed storage locations.
+- The [replication factor](praefect.md#replication-factor) is `3`. There are three copies maintained
+  of each repository.
 
 Generally, virtual storage with Gitaly Cluster can replace direct Gitaly storage configurations, at
 the expense of additional storage needed to store each repository on multiple Gitaly nodes. The
@@ -459,6 +461,21 @@ You can run a gRPC trace with:
 sudo GRPC_TRACE=all GRPC_VERBOSITY=DEBUG gitlab-rake gitlab:gitaly:check
 ```
 
+### Server side gRPC logs
+
+gRPC tracing can also be enabled in Gitaly itself with the `GODEBUG=http2debug`
+environment variable. To set this in an Omnibus GitLab install:
+
+1. Add the following to your `gitlab.rb` file:
+
+   ```ruby
+   gitaly['env'] = {
+     "GODEBUG=http2debug" => "2"
+   }
+   ```
+
+1. [Reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure) GitLab.
+
 ### Correlating Git processes with RPCs
 
 Sometimes you need to find out which Gitaly RPC created a particular Git process.
@@ -630,11 +647,30 @@ unset http_proxy
 unset https_proxy
 ```
 
-### Permission denied errors appearing in Gitaly logs when accessing repositories from a standalone Gitaly server
+### Permission denied errors appearing in Gitaly or Praefect logs when accessing repositories
 
-If this error occurs even though file permissions are correct, it's likely that
-the Gitaly server is experiencing
+You might see the following in Gitaly and Praefect logs:
+
+```shell
+{
+  ...
+  "error":"rpc error: code = PermissionDenied desc = permission denied",
+  "grpc.code":"PermissionDenied",
+  "grpc.meta.client_name":"gitlab-web",
+  "grpc.request.fullMethod":"/gitaly.ServerService/ServerInfo",
+  "level":"warning",
+  "msg":"finished unary call with code PermissionDenied",
+  ...
+}
+```
+
+This is a GRPC call
+[error response code](https://grpc.github.io/grpc/core/md_doc_statuscodes.html).
+
+If this error occurs, even though
+[the Gitaly auth tokens are correctly setup](../gitaly/praefect.md#debugging-praefect),
+it's likely that the Gitaly servers are experiencing
 [clock drift](https://en.wikipedia.org/wiki/Clock_drift).
 
 Ensure the Gitaly clients and servers are synchronized, and use an NTP time
-server to keep them synchronized, if possible.
+server to keep them synchronized.

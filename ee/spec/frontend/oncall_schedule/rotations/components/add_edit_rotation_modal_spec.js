@@ -42,7 +42,7 @@ describe('AddEditRotationModal', () => {
   }
 
   async function createRotation(localWrapper) {
-    localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
+    localWrapper.findComponent(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
   const createComponent = ({ data = {}, props = {}, loading = false } = {}) => {

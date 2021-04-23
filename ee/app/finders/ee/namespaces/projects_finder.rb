@@ -21,8 +21,7 @@ module EE
         collection = super(collection)
         collection = with_vulnerabilities(collection)
         collection = with_code_coverage(collection)
-        collection = by_storage(collection)
-        collection
+        by_storage(collection)
       end
 
       def by_storage(items)

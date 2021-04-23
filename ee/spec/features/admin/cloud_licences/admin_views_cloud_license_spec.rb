@@ -16,11 +16,11 @@ RSpec.describe "Admin views Cloud License", :js do
     context "#{plan} license" do
       let_it_be(:license) { build(:license, plan: plan) }
 
-      it 'displays the correct license name' do
+      it 'displays the subscription details' do
         visit(admin_cloud_license_path)
 
         page.within(find('#content-body', match: :first)) do
-          expect(page).to have_content("This instance is currently using the #{plan.titleize} plan.")
+          expect(page).to have_content("Subscription details")
         end
       end
     end
@@ -33,9 +33,9 @@ RSpec.describe "Admin views Cloud License", :js do
       visit(admin_cloud_license_path)
     end
 
-    it "displays the fallback license name" do
+    it "displays a message signaling there is not active subscription" do
       page.within(find('#content-body', match: :first)) do
-        expect(page).to have_content("This instance is currently using the Core plan.")
+        expect(page).to have_content("You do not have an active subscription")
       end
     end
   end

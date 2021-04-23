@@ -6,8 +6,11 @@ import Api from 'ee/api';
 import ConfirmOrder from 'ee/subscriptions/new/components/checkout/confirm_order.vue';
 import { STEPS } from 'ee/subscriptions/new/constants';
 import createStore from 'ee/subscriptions/new/store';
-import updateStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/update_active_step.mutation.graphql';
+import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';
 import { createMockApolloProvider } from 'ee_jest/vue_shared/purchase_flow/spec_helper';
+import flash from '~/flash';
+
+jest.mock('~/flash');
 
 describe('Confirm Order', () => {
   const localVue = createLocalVue();
@@ -15,18 +18,10 @@ describe('Confirm Order', () => {
   localVue.use(VueApollo);
 
   let wrapper;
-  let mockApolloProvider;
 
   jest.mock('ee/api.js');
 
   const store = createStore();
-
-  function activateStep(stepId) {
-    return mockApolloProvider.clients.defaultClient.mutate({
-      mutation: updateStepMutation,
-      variables: { id: stepId },
-    });
-  }
 
   function createComponent(options = {}) {
     return shallowMount(ConfirmOrder, {
@@ -39,34 +34,34 @@ describe('Confirm Order', () => {
   const findConfirmButton = () => wrapper.find(GlButton);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
-  beforeEach(() => {
-    mockApolloProvider = createMockApolloProvider(STEPS);
-    wrapper = createComponent({ apolloProvider: mockApolloProvider });
-  });
-
   afterEach(() => {
     wrapper.destroy();
   });
 
   describe('Active', () => {
-    beforeEach(async () => {
-      await activateStep(STEPS[3].id);
-    });
+    describe('when receiving proper step data', () => {
+      beforeEach(async () => {
+        const mockApolloProvider = createMockApolloProvider(STEPS, 3);
+        wrapper = createComponent({ apolloProvider: mockApolloProvider });
+      });
 
-    it('button should be visible', () => {
-      expect(findConfirmButton().exists()).toBe(true);
-    });
+      it('button should be visible', () => {
+        expect(findConfirmButton().exists()).toBe(true);
+      });
 
-    it('shows the text "Confirm purchase"', () => {
-      expect(findConfirmButton().text()).toBe('Confirm purchase');
-    });
+      it('shows the text "Confirm purchase"', () => {
+        expect(findConfirmButton().text()).toBe('Confirm purchase');
+      });
 
-    it('the loading indicator should not be visible', () => {
-      expect(findLoadingIcon().exists()).toBe(false);
+      it('the loading indicator should not be visible', () => {
+        expect(findLoadingIcon().exists()).toBe(false);
+      });
     });
 
     describe('Clicking the button', () => {
       beforeEach(() => {
+        const mockApolloProvider = createMockApolloProvider(STEPS, 3);
+        wrapper = createComponent({ apolloProvider: mockApolloProvider });
         Api.confirmOrder = jest.fn().mockReturnValue(new Promise(jest.fn()));
 
         findConfirmButton().vm.$emit('click');
@@ -84,11 +79,32 @@ describe('Confirm Order', () => {
         expect(findLoadingIcon().exists()).toBe(true);
       });
     });
+
+    describe('when failing to receive step data', () => {
+      beforeEach(async () => {
+        const mockApolloProvider = createMockApolloProvider([]);
+        mockApolloProvider.clients.defaultClient.clearStore();
+        wrapper = createComponent({ apolloProvider: mockApolloProvider });
+      });
+
+      afterEach(() => {
+        flash.mockClear();
+      });
+
+      it('displays an error', () => {
+        expect(flash.mock.calls[0][0]).toMatchObject({
+          message: GENERAL_ERROR_MESSAGE,
+          captureError: true,
+          error: expect.any(Error),
+        });
+      });
+    });
   });
 
   describe('Inactive', () => {
     beforeEach(async () => {
-      await activateStep(STEPS[1].id);
+      const mockApolloProvider = createMockApolloProvider(STEPS, 1);
+      wrapper = createComponent({ apolloProvider: mockApolloProvider });
     });
 
     it('button should not be visible', () => {

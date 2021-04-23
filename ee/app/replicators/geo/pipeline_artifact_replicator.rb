@@ -13,11 +13,6 @@ module Geo
       model_record.file
     end
 
-    override :replication_enabled_by_default?
-    def self.replication_enabled_by_default?
-      false
-    end
-
     override :verification_feature_flag_enabled?
     def self.verification_feature_flag_enabled?
       # We are adding verification at the same time as replication, so we don't

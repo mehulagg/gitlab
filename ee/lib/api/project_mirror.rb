@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_dependency 'declarative_policy'
-
 module API
   class ProjectMirror < ::API::Base
     feature_category :continuous_integration

@@ -4,6 +4,14 @@ import { __ } from '~/locale';
 import { NOT_ENOUGH_DATA_ERROR } from '../constants';
 import TotalTime from './total_time_component.vue';
 
+const DEFAULT_WORKFLOW_TITLE_PROPERTIES = { thClass: 'gl-w-half', key: 'workflowTitleKey' };
+const WORKFLOW_COLUMN_TITLES = {
+  issues: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Issues') },
+  jobs: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Jobs') },
+  deployments: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Deployments') },
+  mergeRequests: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Merge requests') },
+};
+
 export default {
   name: 'StageTableNew',
   components: {
@@ -45,9 +53,30 @@ export default {
       const { emptyStateMessage } = this;
       return emptyStateMessage || NOT_ENOUGH_DATA_ERROR;
     },
-    withBuildStatus() {
+    isDefaultTestStage() {
       const { currentStage } = this;
       return !currentStage.custom && currentStage.name.toLowerCase().trim() === 'test';
+    },
+    isDefaultStagingStage() {
+      const { currentStage } = this;
+      return !currentStage.custom && currentStage.name.toLowerCase().trim() === 'staging';
+    },
+    isMergeRequestStage() {
+      const [firstEvent] = this.stageEvents;
+      return this.isMrLink(firstEvent.url);
+    },
+    workflowTitle() {
+      if (this.isDefaultTestStage) {
+        return WORKFLOW_COLUMN_TITLES.jobs;
+      } else if (this.isDefaultStagingStage) {
+        return WORKFLOW_COLUMN_TITLES.deployments;
+      } else if (this.isMergeRequestStage) {
+        return WORKFLOW_COLUMN_TITLES.mergeRequests;
+      }
+      return WORKFLOW_COLUMN_TITLES.issues;
+    },
+    fields() {
+      return [this.workflowTitle, { key: 'time', label: __('Time'), thClass: 'gl-w-half' }];
     },
   },
   methods: {
@@ -58,10 +87,6 @@ export default {
       return item.title || item.name;
     },
   },
-  fields: [
-    { key: 'issues', label: __('Issues'), thClass: 'gl-w-half' },
-    { key: 'time', label: __('Time'), thClass: 'gl-w-half' },
-  ],
 };
 </script>
 <template>
@@ -74,15 +99,15 @@ export default {
       stacked="lg"
       thead-class="border-bottom"
       show-empty
-      :fields="$options.fields"
+      :fields="fields"
       :items="stageEvents"
       :empty-text="emptyStateMessage"
     >
-      <template #cell(issues)="{ item }">
+      <template #cell(workflowTitleKey)="{ item }">
         <div data-testid="vsa-stage-event">
           <div v-if="item.id" data-testid="vsa-stage-content">
             <p class="gl-m-0">
-              <template v-if="withBuildStatus">
+              <template v-if="isDefaultTestStage">
                 <span
                   class="icon-build-status gl-vertical-align-middle gl-text-green-500"
                   data-testid="vsa-stage-event-build-status"
@@ -119,7 +144,7 @@ export default {
               >
             </p>
             <p class="gl-m-0">
-              <span v-if="withBuildStatus" data-testid="vsa-stage-event-build-status-date">
+              <span v-if="isDefaultTestStage" data-testid="vsa-stage-event-build-status-date">
                 <gl-link class="gl-text-black-normal issue-date" :href="item.url">{{
                   item.date
                 }}</gl-link>

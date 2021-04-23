@@ -31,16 +31,6 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqClientMiddleware do
       end
     end
 
-    shared_examples_for 'mark database_replica_location' do
-      it 'passes database_replica_location' do
-        expect(middleware).not_to receive(:load_balancer)
-
-        middleware.call(worker_class, job, double(:queue), redis_pool) { 10 }
-
-        expect(job['database_replica_location']).to be_truthy
-      end
-    end
-
     shared_examples_for 'does not pass database locations' do
       it 'does not pass database locations', :aggregate_failures do
         middleware.call(worker_class, job, double(:queue), redis_pool) { 10 }
@@ -68,7 +58,13 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqClientMiddleware do
           allow(Gitlab::Database::LoadBalancing::Session.current).to receive(:performed_write?).and_return(false)
         end
 
-        include_examples 'mark database_replica_location'
+        it 'passes database_replica_location' do
+          expect(middleware).to receive_message_chain(:load_balancer, :host, "database_replica_location").and_return(location)
+
+          middleware.call(worker_class, job, double(:queue), redis_pool) { 10 }
+
+          expect(job['database_replica_location']).to eq(location)
+        end
       end
 
       context 'when write was performed' do

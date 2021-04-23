@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import initIntegrationsList from '~/integrations/index';
 import { loadCSSFile } from '~/lib/utils/css_utils';
 import { select2AxiosTransport } from '~/lib/utils/select2_utils';
 import { s__ } from '~/locale';
@@ -40,6 +41,8 @@ const getDropdownConfig = (placeholder, url) => ({
 
 const callout = document.querySelector('.js-admin-integrations-moved');
 PersistentUserCallout.factory(callout);
+
+initIntegrationsList();
 
 // ElasticSearch
 const $container = $('#js-elasticsearch-settings');

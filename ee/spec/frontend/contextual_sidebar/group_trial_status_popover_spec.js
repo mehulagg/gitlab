@@ -9,7 +9,8 @@ describe('TrialStatusPopover component', () => {
   let wrapper;
   let trackingSpy;
 
-  const getGlButton = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+  const findGlPopover = () => wrapper.findComponent(GlPopover);
 
   const createComponent = () => {
     return shallowMount(TrialStatusPopover, {
@@ -34,21 +35,19 @@ describe('TrialStatusPopover component', () => {
     wrapper = null;
   });
 
-  const getGlPopover = () => wrapper.findComponent(GlPopover);
-
   it('matches the snapshot', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
 
   it('renders the upgrade button with correct tracking data attrs', () => {
-    const attrs = getGlButton('upgradeBtn').attributes();
+    const attrs = findByTestId('upgradeBtn').attributes();
     expect(attrs['data-track-event']).toBe('click_button');
     expect(attrs['data-track-label']).toBe('upgrade_to_ultimate');
     expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
   });
 
   it('renders the compare plans button with correct tracking data attrs', () => {
-    const attrs = getGlButton('compareBtn').attributes();
+    const attrs = findByTestId('compareBtn').attributes();
     expect(attrs['data-track-event']).toBe('click_button');
     expect(attrs['data-track-label']).toBe('compare_all_plans');
     expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
@@ -71,14 +70,14 @@ describe('TrialStatusPopover component', () => {
           wrapper.vm.onResize();
           await wrapper.vm.$nextTick();
 
-          expect(getGlPopover().attributes('disabled')).toBe(isDisabled);
+          expect(findGlPopover().attributes('disabled')).toBe(isDisabled);
         },
       );
     });
 
     describe('onShown', () => {
       beforeEach(() => {
-        getGlPopover().vm.$emit('shown');
+        findGlPopover().vm.$emit('shown');
       });
 
       it('dispatches tracking event', () => {

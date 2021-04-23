@@ -7,6 +7,8 @@ module Types
     graphql_name 'DastSiteProfile'
     description 'Represents a DAST Site Profile'
 
+    present_using ::Dast::SiteProfilePresenter
+
     authorize :read_on_demand_scans
 
     expose_permissions Types::PermissionTypes::DastSiteProfile
@@ -20,6 +22,10 @@ module Types
 
     field :target_url, GraphQL::STRING_TYPE, null: true,
           description: 'The URL of the target to be scanned.'
+
+    field :target_type, Types::DastTargetTypeEnum, null: true,
+          description: 'The type of target to be scanned. Will always return `null` ' \
+                       'if `security_dast_site_profiles_api_option` feature flag is disabled.'
 
     field :edit_path, GraphQL::STRING_TYPE, null: true,
           description: 'Relative web path to the edit page of a site profile.'
@@ -53,6 +59,12 @@ module Types
       object.dast_site.url
     end
 
+    def target_type
+      return unless Feature.enabled?(:security_dast_site_profiles_api_option, object.project, default_enabled: :yaml)
+
+      object.target_type
+    end
+
     def edit_path
       Rails.application.routes.url_helpers.edit_project_security_configuration_dast_scans_dast_site_profile_path(object.project, object)
     end
@@ -67,13 +79,6 @@ module Types
       return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, object.project, default_enabled: :yaml)
 
       object.excluded_urls
-    end
-
-    def request_headers
-      return unless Feature.enabled?(:security_dast_site_profiles_additional_fields, object.project, default_enabled: :yaml)
-      return unless object.secret_variables.any? { |variable| variable.key == ::Dast::SiteProfileSecretVariable::REQUEST_HEADERS }
-
-      REDACTED_REQUEST_HEADERS
     end
 
     def normalized_target_url

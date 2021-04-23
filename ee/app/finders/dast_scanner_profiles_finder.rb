@@ -9,8 +9,7 @@ class DastScannerProfilesFinder
     relation = DastScannerProfile.all
     relation = by_id(relation)
     relation = by_project(relation)
-    relation = by_name(relation)
-    relation
+    by_name(relation)
   end
 
   private

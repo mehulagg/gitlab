@@ -1,4 +1,5 @@
 import Api from 'ee/api';
+import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';
 import activateNextStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/activate_next_step.mutation.graphql';
 import createFlash from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
@@ -169,9 +170,13 @@ export const fetchPaymentMethodDetails = ({ state, dispatch, commit }) =>
 export const fetchPaymentMethodDetailsSuccess = ({ commit }, creditCardDetails) => {
   commit(types.UPDATE_CREDIT_CARD_DETAILS, creditCardDetails);
 
-  defaultClient.mutate({
-    mutation: activateNextStepMutation,
-  });
+  defaultClient
+    .mutate({
+      mutation: activateNextStepMutation,
+    })
+    .catch((error) => {
+      createFlash({ message: GENERAL_ERROR_MESSAGE, error, captureError: true });
+    });
 };
 
 export const fetchPaymentMethodDetailsError = () => {

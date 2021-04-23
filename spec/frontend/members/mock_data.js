@@ -20,6 +20,7 @@ export const member = {
     avatarUrl: 'https://www.gravatar.com/avatar/4816142ef496f956a277bedf1a40607b?s=80&d=identicon',
     blocked: false,
     twoFactorEnabled: false,
+    oncallSchedules: [{ name: 'schedule 1' }],
   },
   id: 238,
   createdAt: '2020-07-17T16:22:46.923Z',
@@ -78,3 +79,19 @@ export const directMember = { ...member, isDirectMember: true };
 export const inheritedMember = { ...member, isDirectMember: false };
 
 export const member2faEnabled = { ...member, user: { ...member.user, twoFactorEnabled: true } };
+
+export const paginationJsonString = JSON.stringify({
+  current_page: 1,
+  per_page: 5,
+  total_items: 10,
+  param_name: 'page',
+  params: { search_groups: null },
+});
+
+export const pagination = {
+  currentPage: 1,
+  perPage: 5,
+  totalItems: 10,
+  paramName: 'page',
+  params: { search_groups: null },
+};

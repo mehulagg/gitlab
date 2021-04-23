@@ -1,5 +1,0 @@
----
-title: Do not clear the oncall schedule rotation form if there are validation errors
-merge_request: 56901
-author:
-type: fixed

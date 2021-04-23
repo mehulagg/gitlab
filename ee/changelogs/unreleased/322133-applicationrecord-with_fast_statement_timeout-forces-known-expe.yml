@@ -1,5 +1,0 @@
----
-title: Force ApplicationRecord#with_fast_statement_timeout to use replicas
-merge_request: 56476
-author:
-type: performance

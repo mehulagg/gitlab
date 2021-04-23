@@ -69,12 +69,20 @@ RSpec.describe Subscriptions::GroupsController do
         expect(subject).to redirect_to('/new-path')
       end
 
-      it { is_expected.to set_flash[:notice].to('Subscription successfully applied to "New name"') }
+      it 'sets flash notice' do
+        subject
+
+        expect(controller).to set_flash[:notice].to('Subscription successfully applied to "New name"')
+      end
 
       context 'with new_user param' do
         subject { post :update, params: { id: group.to_param, group: params, new_user: 'true' } }
 
-        it { is_expected.to set_flash[:notice].to("Welcome to GitLab, #{user.first_name}!") }
+        it 'sets flash notice' do
+          subject
+
+          expect(controller).to set_flash[:notice].to("Welcome to GitLab, #{user.first_name}!")
+        end
       end
     end
 

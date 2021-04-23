@@ -22,7 +22,6 @@ RSpec.describe BuildFinishedWorker do
         end
 
         expect(BuildHooksWorker).to receive(:perform_async)
-        expect(ExpirePipelineCacheWorker).to receive(:perform_async)
         expect(ChatNotificationWorker).not_to receive(:perform_async)
         expect(ArchiveTraceWorker).to receive(:perform_in)
 
@@ -38,18 +37,6 @@ RSpec.describe BuildFinishedWorker do
           expect(::Ci::MergeRequests::AddTodoWhenBuildFailsWorker).to receive(:perform_async)
 
           subject
-        end
-
-        context 'when async_add_build_failure_todo disabled' do
-          before do
-            stub_feature_flags(async_add_build_failure_todo: false)
-          end
-
-          it 'does not add a todo' do
-            expect(::Ci::MergeRequests::AddTodoWhenBuildFailsWorker).not_to receive(:perform_async)
-
-            subject
-          end
         end
       end
 

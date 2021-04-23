@@ -14,6 +14,13 @@ module EE
         render locals: { learn_gitlab_project: learn_gitlab_project }
       end
 
+      def continuous_onboarding_getting_started
+        project = ::Project.find(params[:project_id])
+        return access_denied! unless current_user.id == project.creator_id
+
+        render locals: { project: project }
+      end
+
       def trial_onboarding_board
         project = learn_gitlab_project
         return access_denied! unless current_user.id == project.creator_id

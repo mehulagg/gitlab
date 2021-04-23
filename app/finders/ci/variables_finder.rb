@@ -3,7 +3,8 @@
 module Ci
   class VariablesFinder
     def initialize(resource, params)
-      @resource, @params = resource, params
+      @resource = resource
+      @params = params
 
       raise ArgumentError, 'Please provide params[:key]' if params[:key].blank?
     end
@@ -11,8 +12,7 @@ module Ci
     def execute
       variables = resource.variables
       variables = by_key(variables)
-      variables = by_environment_scope(variables)
-      variables
+      by_environment_scope(variables)
     end
 
     private

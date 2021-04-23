@@ -1,5 +1,0 @@
----
-title: Allow oncall schedule timezones to encode special characters correctly
-merge_request: 56792
-author:
-type: fixed

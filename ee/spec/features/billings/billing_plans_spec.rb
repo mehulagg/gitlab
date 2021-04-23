@@ -65,7 +65,7 @@ RSpec.describe 'Billing plan pages', :feature, :js do
 
     it 'displays the contact sales link' do
       # see ApplicationHelper#contact_sales_url
-      contact_sales_url = 'https://about.gitlab.com/sales'
+      contact_sales_url = "https://#{ApplicationHelper.promo_host}/sales"
       page.within('.content') do
         expect(page).to have_link('Contact sales', href: %r{#{contact_sales_url}\?test=inappcontactsales(bronze|premium|gold)})
       end

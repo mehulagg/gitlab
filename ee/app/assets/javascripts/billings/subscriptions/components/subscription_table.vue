@@ -50,6 +50,9 @@ export default {
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
+    canRenew() {
+      return this.isSubscription && !this.plan.trial;
+    },
     canUpgrade() {
       return this.isFreePlan || this.plan.upgradable;
     },
@@ -78,7 +81,7 @@ export default {
       return this.canUpgradeEEPlan ? this.planUpgradeHref : this.customerPortalUrl;
     },
     renewButton() {
-      return this.isSubscription
+      return this.canRenew
         ? createButtonProps(s__('SubscriptionTable|Renew'), this.planRenewHref, 'renew-button')
         : null;
     },

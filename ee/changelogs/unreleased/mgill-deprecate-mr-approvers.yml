@@ -1,5 +1,0 @@
----
-title: Remove /projects/:id/merge_requests/:merge_request_iid/approvers endpoint
-merge_request: 57344
-author:
-type: removed

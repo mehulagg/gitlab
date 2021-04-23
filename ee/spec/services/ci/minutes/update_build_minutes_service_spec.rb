@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
   describe '#perform' do
     let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
-    let(:project) { create(:project, :public, namespace: namespace) }
+    let(:project) { create(:project, :private, namespace: namespace) }
     let(:pipeline) { create(:ci_pipeline, project: project) }
 
     let(:build) do
@@ -33,7 +33,7 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
 
     context 'with shared runner' do
       let(:cost_factor) { 2.0 }
-      let(:runner) { create(:ci_runner, :instance, public_projects_minutes_cost_factor: cost_factor) }
+      let(:runner) { create(:ci_runner, :instance, private_projects_minutes_cost_factor: cost_factor) }
 
       it 'creates a statistics and sets duration with applied cost factor' do
         subject

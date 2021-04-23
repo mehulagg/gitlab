@@ -6,6 +6,8 @@ RSpec.describe 'getting Alert Management HTTP Integrations' do
   include ::Gitlab::Routing.url_helpers
   include GraphqlHelpers
 
+  let(:params) { {} }
+
   let_it_be(:payload_example) do
     {
       alert: {
@@ -51,7 +53,7 @@ RSpec.describe 'getting Alert Management HTTP Integrations' do
     graphql_query_for(
       'project',
       { 'fullPath' => project.full_path },
-      query_graphql_field('alertManagementHttpIntegrations', {}, fields)
+      query_graphql_field('alertManagementHttpIntegrations', params, fields)
     )
   end
 
@@ -98,62 +100,91 @@ RSpec.describe 'getting Alert Management HTTP Integrations' do
         post_graphql(query, current_user: current_user)
       end
 
-      it_behaves_like 'a working graphql query'
+      context 'when no extra params given' do
+        it_behaves_like 'a working graphql query'
 
-      specify { expect(integrations.size).to eq(2) }
+        specify { expect(integrations.size).to eq(2) }
 
-      it 'returns the correct properties of the integrations' do
-        expect(integrations).to include(
-          {
-            'id' => GitlabSchema.id_from_object(active_http_integration).to_s,
-            'type' => 'HTTP',
-            'name' => active_http_integration.name,
-            'active' => active_http_integration.active,
-            'token' => active_http_integration.token,
-            'url' => active_http_integration.url,
-            'apiUrl' => nil,
-            'payloadExample' => payload_example.to_json,
-            'payloadAttributeMappings' => [
-              {
-                'fieldName' => 'TITLE',
-                'label' => nil,
-                'path' => %w(alert name),
-                'type' => 'STRING'
-              },
-              {
-                'fieldName' => 'DESCRIPTION',
-                'label' => 'Description',
-                'path' => %w(alert desc),
-                'type' => 'STRING'
-              }
-            ],
-            'payloadAlertFields' => [
-              {
-                'label' => 'Name',
-                'path' => %w(alert name),
-                'type' => 'STRING'
-              },
-              {
-                'label' => 'Desc',
-                'path' => %w(alert desc),
-                'type' => 'STRING'
-              }
-            ]
-          },
-          {
-            'id' => GitlabSchema.id_from_object(inactive_http_integration).to_s,
-            'type' => 'HTTP',
-            'name' => inactive_http_integration.name,
-            'active' => inactive_http_integration.active,
-            'token' => inactive_http_integration.token,
-            'url' => inactive_http_integration.url,
-            'apiUrl' => nil,
-            'payloadExample' => "{}",
-            'payloadAttributeMappings' => [],
-            'payloadAlertFields' => []
-          }
-        )
+        it 'returns the correct properties of the integrations' do
+          expect(integrations).to include(
+            {
+              'id' => global_id_of(active_http_integration),
+              'type' => 'HTTP',
+              'name' => active_http_integration.name,
+              'active' => active_http_integration.active,
+              'token' => active_http_integration.token,
+              'url' => active_http_integration.url,
+              'apiUrl' => nil,
+              'payloadExample' => payload_example.to_json,
+              'payloadAttributeMappings' => [
+                {
+                  'fieldName' => 'TITLE',
+                  'label' => nil,
+                  'path' => %w(alert name),
+                  'type' => 'STRING'
+                },
+                {
+                  'fieldName' => 'DESCRIPTION',
+                  'label' => 'Description',
+                  'path' => %w(alert desc),
+                  'type' => 'STRING'
+                }
+              ],
+              'payloadAlertFields' => [
+                {
+                  'label' => 'alert/name',
+                  'path' => %w(alert name),
+                  'type' => 'STRING'
+                },
+                {
+                  'label' => 'alert/desc',
+                  'path' => %w(alert desc),
+                  'type' => 'STRING'
+                }
+              ]
+            },
+            {
+              'id' => global_id_of(inactive_http_integration),
+              'type' => 'HTTP',
+              'name' => inactive_http_integration.name,
+              'active' => inactive_http_integration.active,
+              'token' => inactive_http_integration.token,
+              'url' => inactive_http_integration.url,
+              'apiUrl' => nil,
+              'payloadExample' => "{}",
+              'payloadAttributeMappings' => [],
+              'payloadAlertFields' => []
+            }
+          )
+        end
       end
+
+      context 'when HTTP Integration ID is given' do
+        let(:params) { { id: global_id_of(inactive_http_integration) } }
+
+        it_behaves_like 'a working graphql query'
+
+        specify { expect(integrations).to be_one }
+
+        it 'returns the correct properties of the integration' do
+          expect(integrations).to include(
+            {
+              'id' => global_id_of(inactive_http_integration),
+              'type' => 'HTTP',
+              'name' => inactive_http_integration.name,
+              'active' => inactive_http_integration.active,
+              'token' => inactive_http_integration.token,
+              'url' => inactive_http_integration.url,
+              'apiUrl' => nil,
+              'payloadExample' => "{}",
+              'payloadAttributeMappings' => [],
+              'payloadAlertFields' => []
+            }
+          )
+        end
+      end
+
+      it_behaves_like 'GraphQL query with several integrations requested', graphql_query_name: 'alertManagementHttpIntegrations'
     end
   end
 end

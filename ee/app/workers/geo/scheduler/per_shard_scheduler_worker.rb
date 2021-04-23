@@ -13,6 +13,13 @@ module Geo
 
       feature_category :geo_replication
 
+      # These workers are enqueued every minute by sidekiq-cron. If one of them
+      # is already enqueued or running, then there isn't a strong case for
+      # enqueuing another. And there are edge cases where enqueuing another
+      # would exacerbate a problem. See
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/328057.
+      deduplicate :until_executed
+
       def perform
         each_eligible_shard { |shard_name| schedule_job(shard_name) }
       end

@@ -96,13 +96,14 @@ describe('Standard Filter component', () => {
 
   describe('search box', () => {
     it.each`
-      phrase             | showSearchBox
-      ${'shows'}         | ${true}
-      ${'does not show'} | ${false}
-    `('$phrase search box if showSearchBox is $showSearchBox', ({ showSearchBox }) => {
-      createWrapper({}, { showSearchBox });
+      phrase     | count | searchBoxShowThreshold
+      ${'shows'} | ${5}  | ${5}
+      ${'hides'} | ${7}  | ${8}
+    `('$phrase search box if there are $count options', ({ count, searchBoxShowThreshold }) => {
+      createWrapper({ options: generateOptions(count) }, { searchBoxShowThreshold });
+      const shouldShow = count >= searchBoxShowThreshold;
 
-      expect(filterBody().props('showSearchBox')).toBe(showSearchBox);
+      expect(filterBody().props('showSearchBox')).toBe(shouldShow);
     });
 
     it('filters options when something is typed in the search box', async () => {

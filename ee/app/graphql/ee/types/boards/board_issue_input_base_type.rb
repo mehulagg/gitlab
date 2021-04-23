@@ -18,6 +18,10 @@ module EE
           argument :weight, GraphQL::STRING_TYPE,
                    required: false,
                    description: 'Filter by weight.'
+
+          argument :iteration_id, [::Types::GlobalIDType[::Iteration]],
+                   required: false,
+                   description: 'Filter by a list of iteration IDs. Incompatible with iterationWildcardId.'
         end
       end
     end

@@ -164,7 +164,7 @@ module Gitlab
             projects_with_repositories_enabled: count(ProjectFeature.where('repository_access_level > ?', ProjectFeature::DISABLED)),
             projects_with_tracing_enabled: count(ProjectTracingSetting),
             projects_with_error_tracking_enabled: count(::ErrorTracking::ProjectErrorTrackingSetting.where(enabled: true)),
-            projects_with_alerts_service_enabled: count(Service.active.where(type: 'AlertsService')),
+            projects_with_alerts_service_enabled: DEPRECATED_VALUE,
             projects_with_alerts_created: distinct_count(::AlertManagement::Alert, :project_id),
             projects_with_enabled_alert_integrations: distinct_count(::AlertManagement::HttpIntegration.active, :project_id),
             projects_with_prometheus_alerts: distinct_count(PrometheusAlert, :project_id),
@@ -243,7 +243,8 @@ module Gitlab
         {
           settings: {
             ldap_encrypted_secrets_enabled: alt_usage_data(fallback: nil) { Gitlab::Auth::Ldap::Config.encrypted_secrets.active? },
-            operating_system: alt_usage_data(fallback: nil) { operating_system }
+            operating_system: alt_usage_data(fallback: nil) { operating_system },
+            gitaly_apdex: alt_usage_data { gitaly_apdex }
           }
         }
       end
@@ -435,18 +436,10 @@ module Gitlab
           projects_jira_dvcs_server_active: count(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false))
         }
 
-        # rubocop: disable UsageData/LargeTable:
-        JiraService.active.includes(:jira_tracker_data).find_in_batches(batch_size: 100) do |services|
-          counts = services.group_by do |service|
-            # TODO: Simplify as part of https://gitlab.com/gitlab-org/gitlab/issues/29404
-            service_url = service.data_fields&.url || (service.properties && service.properties['url'])
-            service_url&.include?('.atlassian.net') ? :cloud : :server
-          end
+        jira_service_data_hash = jira_service_data
+        results[:projects_jira_server_active] = jira_service_data_hash[:projects_jira_server_active]
+        results[:projects_jira_cloud_active] = jira_service_data_hash[:projects_jira_cloud_active]
 
-          results[:projects_jira_server_active] += counts[:server].size if counts[:server]
-          results[:projects_jira_cloud_active] += counts[:cloud].size if counts[:cloud]
-        end
-        # rubocop: enable UsageData/LargeTable:
         results
       rescue ActiveRecord::StatementInvalid
         { projects_jira_server_active: FALLBACK, projects_jira_cloud_active: FALLBACK }
@@ -766,6 +759,16 @@ module Gitlab
       end
 
       private
+
+      def gitaly_apdex
+        with_prometheus_client(verify: false, fallback: FALLBACK) do |client|
+          result = client.query('avg_over_time(gitlab_usage_ping:gitaly_apdex:ratio_avg_over_time_5m[1w])').first
+
+          break FALLBACK unless result
+
+          result['value'].last.to_f
+        end
+      end
 
       def aggregated_metrics
         @aggregated_metrics ||= ::Gitlab::Usage::Metrics::Aggregates::Aggregate.new(recorded_at)

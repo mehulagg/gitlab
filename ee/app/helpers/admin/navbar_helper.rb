@@ -7,7 +7,7 @@ module Admin
     end
 
     def navbar_item_name
-      cloud_license_enabled? ? _('Cloud License') : _('License')
+      cloud_license_enabled? ? _('Subscription') : _('License')
     end
 
     def navbar_item_path

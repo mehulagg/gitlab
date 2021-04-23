@@ -33,6 +33,8 @@ class User < ApplicationRecord
 
   BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'
 
+  COUNT_CACHE_VALIDITY_PERIOD = 24.hours
+
   add_authentication_token_field :incoming_email_token, token_generator: -> { SecureRandom.hex.to_i(16).to_s(36) }
   add_authentication_token_field :feed_token
   add_authentication_token_field :static_object_token
@@ -127,7 +129,7 @@ class User < ApplicationRecord
 
   # Groups
   has_many :members
-  has_many :group_members, -> { where(requested_at: nil).where("access_level >= ?", Gitlab::Access::GUEST) }, source: 'GroupMember'
+  has_many :group_members, -> { where(requested_at: nil).where("access_level >= ?", Gitlab::Access::GUEST) }, class_name: 'GroupMember'
   has_many :groups, through: :group_members
   has_many :owned_groups, -> { where(members: { access_level: Gitlab::Access::OWNER }) }, through: :group_members, source: :group
   has_many :maintainers_groups, -> { where(members: { access_level: Gitlab::Access::MAINTAINER }) }, through: :group_members, source: :group
@@ -141,7 +143,7 @@ class User < ApplicationRecord
            -> { where(members: { access_level: [Gitlab::Access::REPORTER, Gitlab::Access::DEVELOPER, Gitlab::Access::MAINTAINER, Gitlab::Access::OWNER] }) },
            through: :group_members,
            source: :group
-  has_many :minimal_access_group_members, -> { where(access_level: [Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+  has_many :minimal_access_group_members, -> { where(access_level: [Gitlab::Access::MINIMAL_ACCESS]) }, class_name: 'GroupMember'
   has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
   # Projects
@@ -354,7 +356,7 @@ class User < ApplicationRecord
     # this state transition object in order to do a rollback.
     # For this reason the tradeoff is to disable this cop.
     after_transition any => :blocked do |user|
-      Ci::AbortPipelinesService.new.execute(user.pipelines)
+      Ci::DropPipelineService.new.execute_async_for_all(user.pipelines, :user_blocked, user)
       Ci::DisableUserPipelineSchedulesService.new.execute(user)
     end
     # rubocop: enable CodeReuse/ServiceClass
@@ -376,7 +378,7 @@ class User < ApplicationRecord
   scope :by_name, -> (names) { iwhere(name: Array(names)) }
   scope :by_user_email, -> (emails) { iwhere(email: Array(emails)) }
   scope :by_emails, -> (emails) { joins(:emails).where(emails: { email: Array(emails).map(&:downcase) }) }
-  scope :for_todos, -> (todos) { where(id: todos.select(:user_id)) }
+  scope :for_todos, -> (todos) { where(id: todos.select(:user_id).distinct) }
   scope :with_emails, -> { preload(:emails) }
   scope :with_dashboard, -> (dashboard) { where(dashboard: dashboard) }
   scope :with_public_profile, -> { where(private_profile: false) }
@@ -764,6 +766,7 @@ class User < ApplicationRecord
         u.bio = 'The GitLab support bot used for Service Desk'
         u.name = 'GitLab Support Bot'
         u.avatar = bot_avatar(image: 'support-bot.png')
+        u.confirmed_at = Time.zone.now
       end
     end
 
@@ -1413,7 +1416,9 @@ class User < ApplicationRecord
     if namespace_path_errors.include?('has already been taken') && !User.exists?(username: username)
       self.errors.add(:base, :username_exists_as_a_different_namespace)
     else
-      self.errors[:username].concat(namespace_path_errors)
+      namespace_path_errors.each do |msg|
+        self.errors.add(:username, msg)
+      end
     end
   end
 
@@ -1618,40 +1623,32 @@ class User < ApplicationRecord
     @global_notification_setting
   end
 
-  def count_cache_validity_period
-    if Feature.enabled?(:longer_count_cache_validity, self, default_enabled: :yaml)
-      24.hours
-    else
-      20.minutes
-    end
-  end
-
   def assigned_open_merge_requests_count(force: false)
-    Rails.cache.fetch(['users', id, 'assigned_open_merge_requests_count'], force: force, expires_in: count_cache_validity_period) do
+    Rails.cache.fetch(['users', id, 'assigned_open_merge_requests_count'], force: force, expires_in: COUNT_CACHE_VALIDITY_PERIOD) do
       MergeRequestsFinder.new(self, assignee_id: self.id, state: 'opened', non_archived: true).execute.count
     end
   end
 
   def review_requested_open_merge_requests_count(force: false)
-    Rails.cache.fetch(['users', id, 'review_requested_open_merge_requests_count'], force: force, expires_in: count_cache_validity_period) do
+    Rails.cache.fetch(['users', id, 'review_requested_open_merge_requests_count'], force: force, expires_in: COUNT_CACHE_VALIDITY_PERIOD) do
       MergeRequestsFinder.new(self, reviewer_id: id, state: 'opened', non_archived: true).execute.count
     end
   end
 
   def assigned_open_issues_count(force: false)
-    Rails.cache.fetch(['users', id, 'assigned_open_issues_count'], force: force, expires_in: count_cache_validity_period) do
+    Rails.cache.fetch(['users', id, 'assigned_open_issues_count'], force: force, expires_in: COUNT_CACHE_VALIDITY_PERIOD) do
       IssuesFinder.new(self, assignee_id: self.id, state: 'opened', non_archived: true).execute.count
     end
   end
 
   def todos_done_count(force: false)
-    Rails.cache.fetch(['users', id, 'todos_done_count'], force: force, expires_in: count_cache_validity_period) do
+    Rails.cache.fetch(['users', id, 'todos_done_count'], force: force, expires_in: COUNT_CACHE_VALIDITY_PERIOD) do
       TodosFinder.new(self, state: :done).execute.count
     end
   end
 
   def todos_pending_count(force: false)
-    Rails.cache.fetch(['users', id, 'todos_pending_count'], force: force, expires_in: count_cache_validity_period) do
+    Rails.cache.fetch(['users', id, 'todos_pending_count'], force: force, expires_in: COUNT_CACHE_VALIDITY_PERIOD) do
       TodosFinder.new(self, state: :pending).execute.count
     end
   end

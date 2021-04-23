@@ -4,7 +4,7 @@ module Elastic
   class MigrationRecord
     attr_reader :version, :name, :filename
 
-    delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, :pause_indexing?, to: :migration
+    delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, :pause_indexing?, :space_requirements?, :space_required_bytes, to: :migration
 
     def initialize(version:, name:, filename:)
       @version = version
@@ -43,6 +43,11 @@ module Elastic
 
     def halted?
       !!load_state&.dig('halted')
+    end
+
+    def halt!(additional_options = {})
+      state = { halted: true, halted_indexing_unpaused: false }.merge(additional_options)
+      save_state!(state)
     end
 
     def name_for_key

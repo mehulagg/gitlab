@@ -9,11 +9,19 @@ import {
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
-import activateSubscriptionMutation from 'ee/pages/admin/cloud_licenses/graphql/mutations/activate_subscription.mutation.graphql';
+import { subscriptionActivationForm, subscriptionQueries } from '../constants';
 
 export const SUBSCRIPTION_ACTIVATION_EVENT = 'subscription-activation';
 
 export default {
+  i18n: {
+    title: subscriptionActivationForm.title,
+    howToActivateSubscription: subscriptionActivationForm.howToActivateSubscription,
+    activationCode: subscriptionActivationForm.activationCode,
+    pasteActivationCode: subscriptionActivationForm.pasteActivationCode,
+    acceptTerms: subscriptionActivationForm.acceptTerms,
+    activateLabel: subscriptionActivationForm.activateLabel,
+  },
   name: 'CloudLicenseSubscriptionActivationForm',
   components: {
     GlButton,
@@ -42,7 +50,7 @@ export default {
       this.isLoading = true;
       this.$apollo
         .mutate({
-          mutation: activateSubscriptionMutation,
+          mutation: subscriptionQueries.mutation,
           variables: {
             gitlabSubscriptionActivateInput: {
               activationCode: this.activationCode,
@@ -58,7 +66,7 @@ export default {
             if (errors.length) {
               throw new Error();
             }
-            this.$emit(SUBSCRIPTION_ACTIVATION_EVENT, this.activationCode);
+            this.$emit(SUBSCRIPTION_ACTIVATION_EVENT, true);
           },
         )
         .catch(() => {
@@ -74,15 +82,11 @@ export default {
 <template>
   <gl-card>
     <template #header>
-      <h5 class="gl-my-0 gl-font-weight-bold">{{ s__('CloudLicense|Activate subscription') }}</h5>
+      <h5 class="gl-my-0 gl-font-weight-bold">{{ $options.i18n.title }}</h5>
     </template>
 
     <p>
-      <gl-sprintf
-        :message="
-          s__('CloudLicense|Learn how to %{linkStart}activate your subscription%{linkEnd}.')
-        "
-      >
+      <gl-sprintf :message="$options.i18n.howToActivateSubscription">
         <template #link="{ content }">
           <gl-link href="" target="_blank">{{ content }}</gl-link>
         </template>
@@ -92,29 +96,23 @@ export default {
       <gl-form-group class="gl-mb-0">
         <div class="gl-display-flex gl-flex-wrap">
           <label class="gl-w-full" for="activation-code-group">
-            {{ s__('CloudLicense|Activation code') }}
+            {{ $options.i18n.activationCode }}
           </label>
           <gl-form-input
             id="activation-code-group"
             v-model="activationCode"
             :disabled="isLoading"
-            :placeholder="s__('CloudLicense|Paste your activation code')"
+            :placeholder="$options.i18n.pasteActivationCode"
             class="gl-w-full gl-mb-4"
             required
           />
 
           <gl-form-checkbox v-model="termsAccepted">
-            <gl-sprintf
-              :message="
-                s__(
-                  'CloudLicense|I agree that my use of the GitLab Software is subject to the Subscription Agreement located at the %{linkStart}Terms of Service%{linkEnd}, unless otherwise agreed to in writing with GitLab.',
-                )
-              "
-            >
+            <gl-sprintf :message="$options.i18n.acceptTerms">
               <template #link="{ content }">
-                <gl-link href="https://about.gitlab.com/terms/" target="_blank">{{
-                  content
-                }}</gl-link>
+                <gl-link href="https://about.gitlab.com/terms/" target="_blank"
+                  >{{ content }}
+                </gl-link>
               </template>
             </gl-sprintf>
           </gl-form-checkbox>
@@ -127,7 +125,7 @@ export default {
             type="submit"
             variant="confirm"
           >
-            {{ s__('CloudLicense|Activate') }}
+            {{ $options.i18n.activateLabel }}
           </gl-button>
         </div>
       </gl-form-group>

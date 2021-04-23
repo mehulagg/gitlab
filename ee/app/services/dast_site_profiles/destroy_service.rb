@@ -8,13 +8,13 @@ module DastSiteProfiles
       return unauthorized unless can_delete_site_profile?
 
       dast_site_profile = find_dast_site_profile(id)
-      return ServiceResponse.error(message: "Site profile not found for given parameters") unless dast_site_profile
-      return ServiceResponse.error(message: "Cannot delete #{dast_site_profile.name} referenced in security policy") if referenced_in_security_policy?(dast_site_profile)
+      return ServiceResponse.error(message: _('Site profile not found for given parameters')) unless dast_site_profile
+      return ServiceResponse.error(message: _('Cannot delete %{profile_name} referenced in security policy') % { profile_name: dast_site_profile.name }) if referenced_in_security_policy?(dast_site_profile)
 
       if dast_site_profile.destroy
         ServiceResponse.success(payload: dast_site_profile)
       else
-        ServiceResponse.error(message: 'Site profile failed to delete')
+        ServiceResponse.error(message: _('Site profile failed to delete'))
       end
     end
 

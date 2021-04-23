@@ -7,22 +7,17 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Groups **(FREE)**
 
-In GitLab, you can put related projects together in a group.
+In GitLab, you use groups to manage one or more related projects at the same time.
 
-For example, you might create a group for your company members and a subgroup for each individual team.
-You can name the group `company-team`, and the subgroups `backend-team`, `frontend-team`, and `production-team`.
+You can use groups to manage permissions for your projects. If someone has access to
+the group, they get access to all the projects in the group.
 
-Then you can:
+You can also view all of the issues and merge requests for the projects in the group,
+and view analytics that show the group's activity.
 
-- Grant members access to multiple projects at once.
-- Add to-do items for all of the group members at once.
-- View the [issues](../project/issues/index.md) and
-  [merge requests](../project/merge_requests/reviewing_and_managing_merge_requests.md#view-merge-requests-for-all-projects-in-a-group)
-  for all projects in the group, together in a single list view.
-- [Bulk edit](../group/bulk_editing/index.md) issues, epics, and merge requests.
-- [Create a wiki](../project/wiki/index.md) for the group.
+You can use groups to communicate with all of the members of the group at once.
 
-You can also create [subgroups](subgroups/index.md).
+For larger organizations, you can also create [subgroups](subgroups/index.md).
 
 ## View groups
 
@@ -262,6 +257,9 @@ To view the activity feed in Atom format, select the
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/18328) in GitLab 12.7.
 
+NOTE:
+In GitLab 13.11, you can [replace this form with a modal window](#share-a-group-modal-window).
+
 Similar to how you [share a project with a group](../project/members/share_project_with_groups.md),
 you can share a group with another group. Members get direct access
 to the shared group. This is not valid for inherited members.
@@ -277,6 +275,27 @@ To share a given group, for example, `Frontend` with another group, for example,
 1. Select **Invite**.
 
 All the members of the `Engineering` group are added to the `Frontend` group.
+
+### Share a group modal window
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247208) in GitLab 13.11.
+> - [Deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - Replaces the existing form with buttons to open a modal window.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](../project/members/index.md#enable-or-disable-modal-window). **(FREE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+In GitLab 13.11, you can optionally replace the sharing form with a modal window.
+To share a group after enabling this feature:
+
+1. Go to your group's page.
+1. In the left sidebar, go to **Members**, and then select **Invite a group**.
+1. Select a group, and select a **Max access level**.
+1. (Optional) Select an **Access expiration date**.
+1. Select **Invite**.
 
 ## Manage group memberships via LDAP **(PREMIUM SELF)**
 
@@ -451,6 +470,12 @@ You should consider these security implications before configuring IP address re
 - **Administrators and group owners**: Users with these permission levels can always
   access the group settings, regardless of IP restriction, but they cannot access projects
   belonging to the group when accessing from a disallowed IP address.
+- **GitLab API and runner activities**: Only the [Groups](../../api/groups.md)
+  and [Projects](../../api/projects.md) APIs are protected by IP address restrictions.
+  When you register a runner, it is not bound by the IP restrictions. When the runner
+  requests a new job or an update to a job's state, it is also not bound by
+  the IP restrictions. But when the running CI/CD job sends Git requests from a
+  restricted IP address, the IP restriction prevents code from being cloned.
 
 To restrict group access by IP address:
 
@@ -552,7 +577,8 @@ To disable group mentions:
 
 ## Enable delayed project removal **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
+> - [Inheritance and enforcement added](https://gitlab.com/gitlab-org/gitlab/-/issues/321724) in GitLab 13.11.
 
 By default, projects in a group are deleted immediately.
 Optionally, on [Premium](https://about.gitlab.com/pricing/) or higher tiers,
@@ -566,10 +592,11 @@ To enable delayed deletion of projects:
 1. Go to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section.
 1. Check **Enable delayed project removal**.
+1. Optional. To prevent subgroups from changing this setting, select **Enforce for all subgroups**.
 1. Select **Save changes**.
 
 NOTE:
-The group setting for delayed deletion is not inherited by subgroups and has to be individually defined for each group.
+In GitLab 13.11 and above the group setting for delayed project removal is inherited by subgroups. As discussed in [Cascading settings](../../development/cascading_settings.md) inheritance can be overridden, unless enforced by an ancestor.
 
 ## Prevent project forking outside group **(PREMIUM)**
 

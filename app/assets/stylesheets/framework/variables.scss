@@ -82,7 +82,7 @@ $darken-border-dashed-factor: 25% !default;
 $white: #fff !default;
 $white-normal: #f0f0f0 !default;
 $white-dark: #eaeaea !default;
-$white-transparent: rgba(255, 255, 255, 0.8) !default;
+$white-transparent: rgba($white, 0.8) !default;
 
 $gray-lightest: #fdfdfd !default;
 $gray-light: #fafafa !default;
@@ -352,8 +352,8 @@ $border-gray-normal-dashed: darken($gray-normal, $darken-border-dashed-factor);
  */
 $border-color: $gray-100;
 $shadow-color: $t-gray-a-08;
-$well-expand-item: #e8f2f7;
-$well-inner-border: #eef0f2;
+$well-expand-item: #e8f2f7 !default;
+$well-inner-border: #eef0f2 !default;
 $well-light-border: #f1f1f1;
 $well-light-text-color: #5b6169;
 
@@ -929,6 +929,7 @@ Merge requests
 $mr-tabs-height: 48px;
 $mr-version-controls-height: 56px;
 $mr-widget-margin-left: 40px;
+$mr-review-bar-height: calc(2rem + 13px);
 
 /*
 Compare Branches

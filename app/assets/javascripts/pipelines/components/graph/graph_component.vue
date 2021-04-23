@@ -2,6 +2,7 @@
 import { reportToSentry } from '../../utils';
 import LinkedGraphWrapper from '../graph_shared/linked_graph_wrapper.vue';
 import LinksLayer from '../graph_shared/links_layer.vue';
+import { generateColumnsFromLayersListMemoized } from '../parsing_utils';
 import { DOWNSTREAM, MAIN, UPSTREAM, ONE_COL_WIDTH, STAGE_VIEW } from './constants';
 import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import StageColumnComponent from './stage_column_component.vue';
@@ -23,6 +24,10 @@ export default {
     },
     pipeline: {
       type: Object,
+      required: true,
+    },
+    showLinks: {
+      type: Boolean,
       required: true,
     },
     viewType: {
@@ -54,6 +59,7 @@ export default {
   data() {
     return {
       hoveredJobName: '',
+      hoveredSourceJobName: '',
       highlightedJobs: [],
       measurements: {
         width: 0,
@@ -73,7 +79,9 @@ export default {
       return this.hasDownstreamPipelines ? this.pipeline.downstream : [];
     },
     layout() {
-      return this.isStageView ? this.pipeline.stages : this.generateColumnsFromLayersList();
+      return this.isStageView
+        ? this.pipeline.stages
+        : generateColumnsFromLayersListMemoized(this.pipeline, this.pipelineLayers);
     },
     hasDownstreamPipelines() {
       return Boolean(this.pipeline?.downstream?.length > 0);
@@ -90,8 +98,11 @@ export default {
         collectMetrics: true,
       };
     },
-    shouldHideLinks() {
-      return this.isStageView;
+    showJobLinks() {
+      return !this.isStageView && this.showLinks;
+    },
+    shouldShowStageName() {
+      return !this.isStageView;
     },
     // The show downstream check prevents showing redundant linked columns
     showDownstreamPipelines() {
@@ -116,26 +127,6 @@ export default {
     this.getMeasurements();
   },
   methods: {
-    generateColumnsFromLayersList() {
-      return this.pipelineLayers.map((layers, idx) => {
-        /*
-          look up the groups in each layer,
-          then add each set of layer groups to a stage-like object
-        */
-
-        const groups = layers.map((id) => {
-          const { stageIdx, groupIdx } = this.pipeline.stagesLookup[id];
-          return this.pipeline.stages?.[stageIdx]?.groups?.[groupIdx];
-        });
-
-        return {
-          name: '',
-          id: `layer-${idx}`,
-          status: { action: null },
-          groups: groups.filter(Boolean),
-        };
-      });
-    },
     getMeasurements() {
       this.measurements = {
         width: this.$refs[this.containerId].scrollWidth,
@@ -147,6 +138,9 @@ export default {
     },
     setJob(jobName) {
       this.hoveredJobName = jobName;
+    },
+    setSourceJob(jobName) {
+      this.hoveredSourceJobName = jobName;
     },
     slidePipelineContainer() {
       this.$refs.mainPipelineContainer.scrollBy({
@@ -171,7 +165,7 @@ export default {
   <div class="js-pipeline-graph">
     <div
       ref="mainPipelineContainer"
-      class="gl-display-flex gl-position-relative gl-bg-gray-10 gl-white-space-nowrap"
+      class="gl-display-flex gl-position-relative gl-bg-gray-10 gl-white-space-nowrap gl-border-t-solid gl-border-t-1 gl-border-gray-100"
       :class="{ 'gl-pipeline-min-h gl-py-5 gl-overflow-auto': !isLinkedPipeline }"
     >
       <linked-graph-wrapper>
@@ -181,6 +175,7 @@ export default {
             :config-paths="configPaths"
             :linked-pipelines="upstreamPipelines"
             :column-title="__('Upstream')"
+            :show-links="showJobLinks"
             :type="$options.pipelineTypeConstants.UPSTREAM"
             :view-type="viewType"
             @error="onError"
@@ -195,20 +190,21 @@ export default {
               :container-measurements="measurements"
               :highlighted-job="hoveredJobName"
               :metrics-config="metricsConfig"
-              :never-show-links="shouldHideLinks"
+              :show-links="showJobLinks"
               :view-type="viewType"
-              default-link-color="gl-stroke-transparent"
               @error="onError"
               @highlightedJobsChange="updateHighlightedJobs"
             >
               <stage-column-component
                 v-for="column in layout"
                 :key="column.id || column.name"
-                :title="column.name"
+                :name="column.name"
                 :groups="column.groups"
                 :action="column.status.action"
                 :highlighted-jobs="highlightedJobs"
+                :show-stage-name="shouldShowStageName"
                 :job-hovered="hoveredJobName"
+                :source-job-hovered="hoveredSourceJobName"
                 :pipeline-expanded="pipelineExpanded"
                 :pipeline-id="pipeline.id"
                 @refreshPipelineGraph="$emit('refreshPipelineGraph')"
@@ -225,9 +221,10 @@ export default {
             :config-paths="configPaths"
             :linked-pipelines="downstreamPipelines"
             :column-title="__('Downstream')"
+            :show-links="showJobLinks"
             :type="$options.pipelineTypeConstants.DOWNSTREAM"
             :view-type="viewType"
-            @downstreamHovered="setJob"
+            @downstreamHovered="setSourceJob"
             @pipelineExpandToggle="togglePipelineExpanded"
             @scrollContainer="slidePipelineContainer"
             @error="onError"

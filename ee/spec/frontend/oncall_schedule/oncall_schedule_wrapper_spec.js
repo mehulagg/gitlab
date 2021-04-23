@@ -66,15 +66,14 @@ describe('On-call schedule wrapper', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 
-  const findLoader = () => wrapper.find(GlLoadingIcon);
-  const findEmptyState = () => wrapper.find(GlEmptyState);
-  const findSchedule = () => wrapper.find(OnCallSchedule);
-  const findAlert = () => wrapper.find(GlAlert);
-  const findModal = () => wrapper.find(AddScheduleModal);
+  const findLoader = () => wrapper.findComponent(GlLoadingIcon);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
+  const findSchedule = () => wrapper.findComponent(OnCallSchedule);
+  const findAlert = () => wrapper.findComponent(GlAlert);
+  const findModal = () => wrapper.findComponent(AddScheduleModal);
 
   it('shows a loader while data is requested', () => {
     mountComponent({ loading: true });

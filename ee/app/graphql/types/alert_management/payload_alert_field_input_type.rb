@@ -12,7 +12,7 @@ module Types
                 description: 'A GitLab alert field name.'
 
       argument :path,
-               [GraphQL::STRING_TYPE],
+               [::Types::AlertManagement::PayloadAlertFieldPathSegmentType],
                required: true,
                description: 'Path to value inside payload JSON.'
 

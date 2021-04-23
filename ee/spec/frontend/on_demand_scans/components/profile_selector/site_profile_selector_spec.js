@@ -34,6 +34,7 @@ describe('OnDemandScansSiteProfileSelector', () => {
             newSiteProfilePath: TEST_NEW_PATH,
             glFeatures: {
               securityDastSiteProfilesAdditionalFields: true,
+              securityDastSiteProfilesApiOption: true,
             },
           },
           slots: {

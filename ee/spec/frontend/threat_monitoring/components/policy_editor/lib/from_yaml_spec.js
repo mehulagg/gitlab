@@ -11,7 +11,9 @@ import {
   RuleTypeFQDN,
   EntityTypes,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
-import fromYaml from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
+import fromYaml, {
+  removeUnnecessaryDashes,
+} from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
 import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
 
@@ -309,5 +311,37 @@ spec:
         annotations: { 'app.gitlab.com/alert': 'true' },
       });
     });
+  });
+
+  describe('unsupported attributes', () => {
+    const unsupportedYaml = [
+      'unsupportedPrimaryKey: test',
+      'apiVersion: 1\nunsupportedPrimaryKey: test',
+      'unsupportedPrimaryKey: test\nkind: test',
+      'metadata:\n  unsupportedMetaKey: test',
+      'spec:\n  unsupportedSpecKey: test',
+      'spec:\n  ingress:\n  - unsupportedRuleKey: test',
+      'spec:\n  engress:\n  - toPorts:\n      - unsupportedToPortKey: test',
+      'spec:\n  ingress:\n    - toPorts:\n      - ports:\n        - port: 80\n          unsupportedPortKey: test',
+    ];
+
+    it.each(unsupportedYaml)(
+      'returns the unsupported attributes object for YAML with unsupported attributes',
+      (manifest) => {
+        expect(fromYaml(manifest)).toStrictEqual({ error: true });
+      },
+    );
+  });
+});
+
+describe('removeUnnecessaryDashes', () => {
+  it.each`
+    input          | output
+    ${'---\none'}  | ${'one'}
+    ${'two'}       | ${'two'}
+    ${'--\nthree'} | ${'--\nthree'}
+    ${'four---\n'} | ${'four'}
+  `('returns $output when used on $input', ({ input, output }) => {
+    expect(removeUnnecessaryDashes(input)).toBe(output);
   });
 });

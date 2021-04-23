@@ -10,6 +10,9 @@
 
 = render 'projects/merge_request_merge_suggestions_settings', project: @project, form: form
 
+- if @project.forked?
+  = render_ce 'projects/merge_request_target_project_settings', project: @project, form: form
+
 - if @project.feature_available?(:issuable_default_templates)
   .form-group
     %b= _('Default description template for merge requests')

@@ -140,6 +140,7 @@ export const MOCK_NODES = [
     replicationSlotsUsedCount: 0,
     version: '10.4.0-pre',
     revision: 'b93c51849b',
+    webEditUrl: 'http://127.0.0.1:3001/admin/geo/nodes/1',
   },
   {
     id: 2,
@@ -209,6 +210,7 @@ export const MOCK_NODE_STATUSES_RES = [
     replication_slots_used_count: 0,
     version: '10.4.0-pre',
     revision: 'b93c51849b',
+    web_edit_url: 'http://127.0.0.1:3001/admin/geo/nodes/1',
   },
   {
     geo_node_id: 2,

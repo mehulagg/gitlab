@@ -10,6 +10,8 @@ export const EpicFilterType = {
   none: 'None',
 };
 
+export const SupportedFiltersEE = ['epicId', 'iterationTitle', 'weight'];
+
 export const IterationFilterType = {
   any: 'Any',
   none: 'None',

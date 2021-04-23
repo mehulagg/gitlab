@@ -571,7 +571,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(count_data[:projects_with_repositories_enabled]).to eq(3)
       expect(count_data[:projects_with_error_tracking_enabled]).to eq(1)
       expect(count_data[:projects_with_tracing_enabled]).to eq(1)
-      expect(count_data[:projects_with_alerts_service_enabled]).to eq(1)
+      expect(count_data[:projects_with_alerts_service_enabled]).to eq(Gitlab::UsageData::DEPRECATED_VALUE)
       expect(count_data[:projects_with_enabled_alert_integrations]).to eq(1)
       expect(count_data[:projects_with_prometheus_alerts]).to eq(2)
       expect(count_data[:projects_with_terraform_reports]).to eq(2)
@@ -1158,8 +1158,17 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     end
 
     describe ".system_usage_data_settings" do
+      let(:prometheus_client) { double(Gitlab::PrometheusClient) }
+
       before do
         allow(described_class).to receive(:operating_system).and_return('ubuntu-20.04')
+        expect(prometheus_client).to receive(:query).with(/gitlab_usage_ping:gitaly_apdex:ratio_avg_over_time_5m/).and_return([
+          {
+            'metric' => {},
+            'value' => [1616016381.473, '0.95']
+          }
+        ])
+        expect(described_class).to receive(:with_prometheus_client).and_yield(prometheus_client)
       end
 
       subject { described_class.system_usage_data_settings }
@@ -1170,6 +1179,10 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       it 'populates operating system information' do
         expect(subject[:settings][:operating_system]).to eq('ubuntu-20.04')
+      end
+
+      it 'gathers gitaly apdex', :aggregate_failures do
+        expect(subject[:settings][:gitaly_apdex]).to be_within(0.001).of(0.95)
       end
     end
   end
@@ -1362,7 +1375,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
     let(:categories) { ::Gitlab::UsageDataCounters::HLLRedisCounter.categories }
     let(:ineligible_total_categories) do
-      %w[source_code ci_secrets_management incident_management_alerts snippets terraform incident_management_oncall]
+      %w[source_code ci_secrets_management incident_management_alerts snippets terraform incident_management_oncall secure]
     end
 
     context 'with redis_hll_tracking feature enabled' do

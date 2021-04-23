@@ -7,8 +7,12 @@ RSpec.describe Projects::ProjectMembersController do
   let(:group) { create(:group, :public) }
   let(:project) { create(:project, :public) }
 
-  around do |example|
-    travel_to DateTime.new(2019, 4, 1) { example.run }
+  before do
+    travel_to DateTime.new(2019, 4, 1)
+  end
+
+  after do
+    travel_back
   end
 
   describe 'GET index' do
@@ -195,7 +199,7 @@ RSpec.describe Projects::ProjectMembersController do
                         access_level: Gitlab::Access::GUEST
                       }
 
-        expect(response).to set_flash.to 'Users were successfully added.'
+        expect(controller).to set_flash.to 'Users were successfully added.'
         expect(response).to redirect_to(project_project_members_path(project))
       end
 
@@ -211,7 +215,7 @@ RSpec.describe Projects::ProjectMembersController do
                         access_level: Gitlab::Access::GUEST
                       }
 
-        expect(response).to set_flash.to 'Message'
+        expect(controller).to set_flash.to 'Message'
         expect(response).to redirect_to(project_project_members_path(project))
       end
     end
@@ -272,7 +276,7 @@ RSpec.describe Projects::ProjectMembersController do
         it 'adds user to members' do
           subject
 
-          expect(response).to set_flash.to 'Users were successfully added.'
+          expect(controller).to set_flash.to 'Users were successfully added.'
           expect(response).to redirect_to(project_project_members_path(project))
           expect(project.users).to include project_user
         end
@@ -485,7 +489,7 @@ RSpec.describe Projects::ProjectMembersController do
                            project_id: project
                          }
 
-          expect(response).to set_flash.to "You left the \"#{project.human_name}\" project."
+          expect(controller).to set_flash.to "You left the \"#{project.human_name}\" project."
           expect(response).to redirect_to(dashboard_projects_path)
           expect(project.users).not_to include user
         end
@@ -519,7 +523,7 @@ RSpec.describe Projects::ProjectMembersController do
                            project_id: project
                          }
 
-          expect(response).to set_flash.to 'Your access request to the project has been withdrawn.'
+          expect(controller).to set_flash.to 'Your access request to the project has been withdrawn.'
           expect(response).to redirect_to(project_path(project))
           expect(project.requesters).to be_empty
           expect(project.users).not_to include user
@@ -539,7 +543,7 @@ RSpec.describe Projects::ProjectMembersController do
                               project_id: project
                             }
 
-      expect(response).to set_flash.to 'Your request for access has been queued for review.'
+      expect(controller).to set_flash.to 'Your request for access has been queued for review.'
       expect(response).to redirect_to(
         project_path(project)
       )
@@ -635,7 +639,7 @@ RSpec.describe Projects::ProjectMembersController do
 
       it 'imports source project members' do
         expect(project.team_members).to include member
-        expect(response).to set_flash.to 'Successfully imported'
+        expect(controller).to set_flash.to 'Successfully imported'
         expect(response).to redirect_to(
           project_project_members_path(project)
         )

@@ -3,14 +3,24 @@ import { GlSprintf } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { n__, s__, __ } from '~/locale';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
+import { RULE_TYPE_EXTERNAL_APPROVAL } from '../constants';
 
 const i18n = {
   cancelButtonText: __('Cancel'),
-  primaryButtonText: __('Remove approvers'),
-  modalTitle: __('Remove approvers?'),
-  removeWarningText: s__(
-    'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{nMembers}.',
-  ),
+  regularRule: {
+    primaryButtonText: __('Remove approvers'),
+    modalTitle: __('Remove approvers?'),
+    removeWarningText: s__(
+      'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{nMembers}.',
+    ),
+  },
+  externalRule: {
+    primaryButtonText: s__('ApprovalRuleRemove|Remove approval gate'),
+    modalTitle: s__('ApprovalRuleRemove|Remove approval gate?'),
+    removeWarningText: s__(
+      'ApprovalRuleRemove|You are about to remove the %{name} approval gate. Approval from this service is not revoked.',
+    ),
+  },
 };
 
 export default {
@@ -28,6 +38,9 @@ export default {
     ...mapState('deleteModal', {
       rule: 'data',
     }),
+    isExternalApprovalRule() {
+      return this.rule?.ruleType === RULE_TYPE_EXTERNAL_APPROVAL;
+    },
     membersText() {
       return n__(
         'ApprovalRuleRemove|%d member',
@@ -42,24 +55,38 @@ export default {
         this.rule.approvers.length,
       );
     },
+    modalTitle() {
+      return this.isExternalApprovalRule
+        ? i18n.externalRule.modalTitle
+        : i18n.regularRule.modalTitle;
+    },
     modalText() {
-      return `${i18n.removeWarningText} ${this.revokeWarningText}`;
+      return this.isExternalApprovalRule
+        ? i18n.externalRule.removeWarningText
+        : `${i18n.regularRule.removeWarningText} ${this.revokeWarningText}`;
+    },
+    primaryButtonProps() {
+      const text = this.isExternalApprovalRule
+        ? i18n.externalRule.primaryButtonText
+        : i18n.regularRule.primaryButtonText;
+      return {
+        text,
+        attributes: [{ variant: 'danger' }],
+      };
     },
   },
   methods: {
-    ...mapActions(['deleteRule']),
+    ...mapActions(['deleteRule', 'deleteExternalApprovalRule']),
     submit() {
-      this.deleteRule(this.rule.id);
+      if (this.rule.externalUrl) {
+        this.deleteExternalApprovalRule(this.rule.id);
+      } else {
+        this.deleteRule(this.rule.id);
+      }
     },
   },
-  buttonActions: {
-    primary: {
-      text: i18n.primaryButtonText,
-      attributes: [{ variant: 'danger' }],
-    },
-    cancel: {
-      text: i18n.cancelButtonText,
-    },
+  cancelButtonProps: {
+    text: i18n.cancelButtonText,
   },
   i18n,
 };
@@ -69,9 +96,9 @@ export default {
   <gl-modal-vuex
     modal-module="deleteModal"
     :modal-id="modalId"
-    :title="$options.i18n.modalTitle"
-    :action-primary="$options.buttonActions.primary"
-    :action-cancel="$options.buttonActions.cancel"
+    :title="modalTitle"
+    :action-primary="primaryButtonProps"
+    :action-cancel="$options.cancelButtonProps"
     @ok.prevent="submit"
   >
     <p v-if="rule">
@@ -81,9 +108,6 @@ export default {
         </template>
         <template #nMembers>
           <strong>{{ membersText }}</strong>
-        </template>
-        <template #revokeWarning>
-          {{ revokeWarningText }}
         </template>
       </gl-sprintf>
     </p>

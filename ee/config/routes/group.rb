@@ -27,19 +27,23 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       scope module: :cycle_analytics, as: 'cycle_analytics', path: 'value_stream_analytics' do
         resources :stages, only: [:index, :create, :update, :destroy] do
           member do
+            get :average_duration_chart
             get :duration_chart
             get :median
             get :average
             get :records
+            get :count
           end
         end
         resources :value_streams, only: [:index, :create, :update, :destroy] do
           resources :stages, only: [:index, :create, :update, :destroy] do
             member do
+              get :average_duration_chart
               get :duration_chart
               get :median
               get :average
               get :records
+              get :count
             end
           end
         end
@@ -123,6 +127,8 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     end
 
     resources :iterations, only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }
+
+    resources :iteration_cadences, only: [:index, :new, :edit], path: 'cadences', constraints: { id: /\d+/ }
 
     resources :issues, only: [] do
       collection do

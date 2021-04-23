@@ -1,7 +1,9 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
+import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';
 import activeStepQuery from 'ee/vue_shared/purchase_flow/graphql/queries/active_step.query.graphql';
+import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import { STEPS } from '../../constants';
 
@@ -18,7 +20,10 @@ export default {
   apollo: {
     isActive: {
       query: activeStepQuery,
-      update: ({ activeStep }) => activeStep.id === STEPS[3].id,
+      update: ({ activeStep }) => activeStep?.id === STEPS[3].id,
+      error: (error) => {
+        createFlash({ message: GENERAL_ERROR_MESSAGE, error, captureError: true });
+      },
     },
   },
   computed: {

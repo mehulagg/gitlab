@@ -9,7 +9,7 @@ module Types
       authorize :read_alert_management_alert
 
       field :path,
-            [GraphQL::STRING_TYPE],
+            [Types::AlertManagement::PayloadAlertFieldPathSegmentType],
             null: true,
             description: 'Path to value inside payload JSON.'
 

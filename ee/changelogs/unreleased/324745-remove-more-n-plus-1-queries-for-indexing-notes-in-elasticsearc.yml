@@ -1,5 +1,0 @@
----
-title: Fix more N+1 issues when indexing notes in Elasticsearch
-merge_request: 58751
-author:
-type: performance

@@ -12,6 +12,7 @@ module Gitlab
       # always returns a connection to the primary.
       class LoadBalancer
         CACHE_KEY = :gitlab_load_balancer_host
+        VALID_HOSTS_CACHE_KEY = :gitlab_load_balancer_valid_hosts
 
         attr_reader :host_list
 
@@ -117,7 +118,7 @@ module Gitlab
         # Hosts are scoped per thread so that multiple threads don't
         # accidentally re-use the same host + connection.
         def host
-          RequestStore[CACHE_KEY] ||= @host_list.next
+          RequestStore[CACHE_KEY] ||= current_host_list.next
         end
 
         # Releases the host and connection for the current thread.
@@ -128,6 +129,7 @@ module Gitlab
           end
 
           RequestStore.delete(CACHE_KEY)
+          RequestStore.delete(VALID_HOSTS_CACHE_KEY)
         end
 
         def release_primary_connection
@@ -149,6 +151,33 @@ module Gitlab
         # write location.
         def all_caught_up?(location)
           @host_list.hosts.all? { |host| host.caught_up?(location) }
+        end
+
+        # Returns true if there was at least one host that has caught up with the given transaction.
+        #
+        # In case of a retry, this method also stores the set of hosts that have caught up.
+        def select_caught_up_hosts(location)
+          all_hosts = @host_list.hosts
+          valid_hosts = all_hosts.select { |host| host.caught_up?(location) }
+
+          return false if valid_hosts.empty?
+
+          # Hosts can come online after the time when this scan was done,
+          # so we need to remember the ones that can be used. If the host went
+          # offline, we'll just rely on the retry mechanism to use the primary.
+          set_consistent_hosts_for_request(HostList.new(valid_hosts))
+
+          # Since we will be using a subset from the original list, let's just
+          # pick a random host and mix up the original list to ensure we don't
+          # only end up using one replica.
+          RequestStore[CACHE_KEY] = valid_hosts.sample
+          @host_list.shuffle
+
+          true
+        end
+
+        def set_consistent_hosts_for_request(hosts)
+          RequestStore[VALID_HOSTS_CACHE_KEY] = hosts
         end
 
         # Yields a block, retrying it upon error using an exponential backoff.
@@ -221,6 +250,10 @@ module Gitlab
             @connection_db_roles.delete(connection)
             @connection_db_roles_count.delete(connection)
           end
+        end
+
+        def current_host_list
+          RequestStore[VALID_HOSTS_CACHE_KEY] || @host_list
         end
       end
     end

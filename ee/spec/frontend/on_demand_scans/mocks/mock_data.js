@@ -40,6 +40,7 @@ export const siteProfiles = [
     id: 'gid://gitlab/DastSiteProfile/1',
     profileName: 'Site profile #1',
     targetUrl: 'https://foo.com',
+    targetType: 'WEBSITE',
     normalizedTargetUrl: 'https://foo.com:443',
     editPath: '/site_profiles/edit/1',
     validationStatus: 'PENDING_VALIDATION',
@@ -59,6 +60,7 @@ export const siteProfiles = [
     id: 'gid://gitlab/DastSiteProfile/2',
     profileName: 'Site profile #2',
     targetUrl: 'https://bar.com',
+    targetType: 'API',
     normalizedTargetUrl: 'https://bar.com:443',
     editPath: '/site_profiles/edit/2',
     validationStatus: 'PASSED_VALIDATION',
@@ -87,4 +89,5 @@ export const policySiteProfile = {
   },
   excludedUrls: ['https://bar.com/logout'],
   referencedInSecurityPolicies: ['some_policy'],
+  targetType: 'WEBSITE',
 };

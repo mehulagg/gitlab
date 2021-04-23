@@ -32,4 +32,16 @@ RSpec.describe Elastic::Migration, :elastic do
       expect { bare_migration.migrate }.to raise_error(NotImplementedError)
     end
   end
+
+  describe '#completed?' do
+    it 'raises exception for original class' do
+      expect { bare_migration.completed? }.to raise_error(NotImplementedError)
+    end
+  end
+
+  describe '#space_required_bytes' do
+    it 'raises exception for original class' do
+      expect { bare_migration.space_required_bytes }.to raise_error(NotImplementedError)
+    end
+  end
 end

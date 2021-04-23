@@ -6,10 +6,11 @@ product_stage: ''
 product_group: ''
 product_category: ''
 value_type: number
-status: data_available
+status: removed
 time_frame: 7d
 data_source: redis_hll
 distribution:
 - ee
-tier: []
-skip_validation: true
+tier:
+- premium
+- ultimate

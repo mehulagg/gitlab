@@ -273,16 +273,6 @@ RSpec.describe Projects::CreateService, '#execute' do
       opts[:default_branch] = 'master'
       expect(create_project(user, opts)).to eq(nil)
     end
-
-    it 'sets invalid service as inactive' do
-      create(:service, type: 'JiraService', project: nil, template: true, active: true)
-
-      project = create_project(user, opts)
-      service = project.services.first
-
-      expect(project).to be_persisted
-      expect(service.active).to be false
-    end
   end
 
   context 'wiki_enabled creates repository directory' do
@@ -633,17 +623,6 @@ RSpec.describe Projects::CreateService, '#execute' do
         end
       end
     end
-
-    context 'when there is an invalid integration' do
-      before do
-        create(:service, :template, type: 'DroneCiService', active: true)
-      end
-
-      it 'creates an inactive service' do
-        expect(project).to be_persisted
-        expect(project.services.first.active).to be false
-      end
-    end
   end
 
   context 'when skip_disk_validation is used' do
@@ -724,9 +703,7 @@ RSpec.describe Projects::CreateService, '#execute' do
 
       it 'cleans invalid record and logs warning', :aggregate_failures do
         invalid_service_record = build(:prometheus_service, properties: { api_url: nil, manual_configuration: true }.to_json)
-        allow_next_instance_of(Project) do |instance|
-          allow(instance).to receive(:build_prometheus_service).and_return(invalid_service_record)
-        end
+        allow(PrometheusService).to receive(:new).and_return(invalid_service_record)
 
         expect(Gitlab::ErrorTracking).to receive(:track_exception).with(an_instance_of(ActiveRecord::RecordInvalid), include(extra: { project_id: a_kind_of(Integer) }))
         project = create_project(user, opts)

@@ -8,7 +8,9 @@ module Admin
     LEASE_KEY = 'admin/email_service'
 
     def initialize(recipients, subject, body)
-      @recipients, @subject, @body = recipients, subject, body
+      @recipients = recipients
+      @subject = subject
+      @body = body
     end
 
     def execute

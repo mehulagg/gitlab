@@ -9,9 +9,9 @@ module QA
 
           expect(show).to have_insights_dashboard_title('Issues Dashboard')
 
-          show.select_insights_dashboard('Merge Requests Dashboard')
+          show.select_insights_dashboard('Merge requests dashboard')
 
-          expect(show).to have_insights_dashboard_title('Merge Requests Dashboard')
+          expect(show).to have_insights_dashboard_title('Merge requests dashboard')
         end
       end
     end

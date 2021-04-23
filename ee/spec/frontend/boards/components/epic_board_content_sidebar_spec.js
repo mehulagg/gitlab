@@ -5,6 +5,7 @@ import EpicBoardContentSidebar from 'ee_component/boards/components/epic_board_c
 import { stubComponent } from 'helpers/stub_component';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import { ISSUABLE } from '~/boards/constants';
+import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import { mockEpic } from '../mock_data';
 
 describe('EpicBoardContentSidebar', () => {
@@ -18,6 +19,7 @@ describe('EpicBoardContentSidebar', () => {
         boardItems: { [mockEpic.id]: mockEpic },
         activeId: mockEpic.id,
         issuableType: 'epic',
+        fullPath: 'gitlab-org',
       },
       getters: {
         activeBoardItem: () => {
@@ -72,6 +74,10 @@ describe('EpicBoardContentSidebar', () => {
 
   it('renders BoardSidebarLabelsSelect', () => {
     expect(wrapper.find(BoardSidebarLabelsSelect).exists()).toBe(true);
+  });
+
+  it('renders SidebarConfidentialityWidget', () => {
+    expect(wrapper.find(SidebarConfidentialityWidget).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

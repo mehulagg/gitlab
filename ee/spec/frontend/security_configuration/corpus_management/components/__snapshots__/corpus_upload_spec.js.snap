@@ -17,12 +17,27 @@ exports[`Corpus Upload component renders header 1`] = `
     category="primary"
     class="gl-mr-5"
     icon=""
+    role="button"
     size="medium"
+    tabindex="0"
     variant="confirm"
   >
     
     New corpus
   
   </gl-button-stub>
+   
+  <gl-modal-stub
+    actioncancel="[object Object]"
+    actionprimary="[object Object]"
+    dismisslabel="Close"
+    modalclass=""
+    modalid="corpus-upload-modal"
+    size="sm"
+    title="New corpus"
+    titletag="h4"
+  >
+    <corpus-upload-form-stub />
+  </gl-modal-stub>
 </div>
 `;

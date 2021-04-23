@@ -30,6 +30,7 @@ export default {
     SidebarSubscription,
     SidebarConfidentialityWidget,
   },
+  inject: ['iid'],
   data() {
     return {
       sidebarExpandedOnClick: false,
@@ -225,6 +226,8 @@ export default {
         <ancestors-tree :ancestors="ancestors" :is-fetching="false" data-testid="ancestors" />
       </div>
       <sidebar-confidentiality-widget
+        :iid="String(iid)"
+        :full-path="fullPath"
         issuable-type="epic"
         @closeForm="handleSidebarToggle"
         @expandSidebar="handleSidebarToggle"

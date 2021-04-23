@@ -132,19 +132,21 @@ describe('SubscriptionTable component', () => {
 
   describe('Renew button', () => {
     describe.each`
-      planCode    | expected | testDescription
-      ${'silver'} | ${true}  | ${'renders the button'}
-      ${null}     | ${false} | ${'does not render the button'}
-      ${'free'}   | ${false} | ${'does not render the button'}
+      planCode    | trial    | expected | testDescription
+      ${'silver'} | ${false} | ${true}  | ${'renders the button'}
+      ${'silver'} | ${true}  | ${false} | ${'does not render the button'}
+      ${null}     | ${false} | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false} | ${false} | ${'does not render the button'}
     `(
-      'given a plan with state: planCode = $planCode',
-      ({ planCode, expected, testDescription }) => {
+      'given a plan with state: planCode = $planCode, trial = $trial',
+      ({ planCode, trial, expected, testDescription }) => {
         beforeEach(() => {
           createComponentWithStore({
             state: {
               isLoadingSubscription: false,
               plan: {
                 code: planCode,
+                trial,
               },
             },
           });

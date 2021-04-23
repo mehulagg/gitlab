@@ -3,37 +3,45 @@
 require 'spec_helper'
 
 RSpec.describe ProjectImportScheduleWorker do
+  let!(:project) { create(:project) }
+
   describe '#perform' do
-    it 'does nothing if the database is read-only' do
-      project = create(:project)
+    it_behaves_like 'an idempotent worker' do
+      let!(:import_state) { create(:import_state, :none, project: project) }
 
-      allow(Gitlab::Database).to receive(:read_only?).and_return(true)
-      expect(ProjectImportState).not_to receive(:project_id).with(project_id: project.id)
+      let(:job_args) { [project.id] }
 
-      subject.perform(project.id)
-    end
-
-    it 'schedules an import for a project' do
-      import_state = create(:import_state)
-
-      allow_next_instance_of(EE::Project) do |instance|
-        allow(instance).to receive(:add_import_job).and_return(nil)
+      before do
+        allow(Project).to receive(:find_by_id).with(project.id).and_return(project)
+        allow(project).to receive(:add_import_job)
       end
 
-      expect do
-        subject.perform(import_state.project_id)
-      end.to change { import_state.reload.status }.from("none").to("scheduled")
+      it 'does nothing if the database is read-only' do
+        allow(Gitlab::Database).to receive(:read_only?).and_return(true)
+        expect(ProjectImportState).not_to receive(:project_id).with(project_id: project.id)
+
+        subject
+      end
+
+      it 'schedules an import for a project' do
+        expect(project).to receive(:add_import_job)
+        expect(import_state).to be_none
+
+        subject
+
+        expect(import_state).to be_scheduled
+      end
     end
 
-    context 'when project is not found' do
+    context 'project is not found' do
       it 'raises ImportStateNotFound' do
         expect { subject.perform(-1) }.to raise_error(described_class::ImportStateNotFound)
       end
     end
 
-    context 'when project does not have import state' do
+    context 'project does not have import state' do
       it 'raises ImportStateNotFound' do
-        project = create(:project)
+        expect(project.import_state).to be_nil
 
         expect { subject.perform(project.id) }.to raise_error(described_class::ImportStateNotFound)
       end

@@ -10,6 +10,7 @@ class GitlabSchema < GraphQL::Schema
   DEFAULT_MAX_DEPTH = 15
   AUTHENTICATED_MAX_DEPTH = 20
 
+  use GraphQL::Subscriptions::ActionCableSubscriptions
   use GraphQL::Pagination::Connections
   use BatchLoader::GraphQL
   use Gitlab::Graphql::Pagination::Connections
@@ -24,6 +25,7 @@ class GitlabSchema < GraphQL::Schema
 
   query Types::QueryType
   mutation Types::MutationType
+  subscription Types::SubscriptionType
 
   default_max_page_size 100
 
@@ -111,6 +113,7 @@ class GitlabSchema < GraphQL::Schema
     #
     # Options:
     #  * :expected_type [Class] - the type of object this GlobalID should refer to.
+    #  * :expected_type [[Class]] - array of the types of object this GlobalID should refer to.
     #
     # e.g.
     #
@@ -120,14 +123,14 @@ class GitlabSchema < GraphQL::Schema
     #   gid.model_class == ::Project
     # ```
     def parse_gid(global_id, ctx = {})
-      expected_type = ctx[:expected_type]
+      expected_types = Array(ctx[:expected_type])
       gid = GlobalID.parse(global_id)
 
       raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab ID." unless gid
 
-      if expected_type && gid.model_class.ancestors.exclude?(expected_type)
-        vars = { global_id: global_id, expected_type: expected_type }
-        msg = _('%{global_id} is not a valid ID for %{expected_type}.') % vars
+      if expected_types.any? && expected_types.none? { |type| gid.model_class.ancestors.include?(type) }
+        vars = { global_id: global_id, expected_types: expected_types.join(', ') }
+        msg = _('%{global_id} is not a valid ID for %{expected_types}.') % vars
         raise Gitlab::Graphql::Errors::ArgumentError, msg
       end
 

@@ -130,9 +130,9 @@ module Gitlab
           strong_memoize(:environment) do
             next unless environment_name
 
-            EnvironmentsFinder
+            ::Environments::EnvironmentsFinder
               .new(project, nil, { name: environment_name })
-              .find
+              .execute
               .first
           end
         end

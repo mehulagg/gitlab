@@ -13,6 +13,7 @@ import { visitUrl, mergeUrlParams, updateHistory } from '~/lib/utils/url_utility
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
+import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 
@@ -28,6 +29,7 @@ const createComponent = ({
   epicsState = EPICS_STATES.ALL,
   sortedBy = mockSortedBy,
   groupFullPath = 'gitlab-org',
+  listEpicsPath = '/groups/gitlab-org/-/epics',
   groupMilestonesPath = '/groups/gitlab-org/-/milestones.json',
   timeframe = getTimeframeForMonthsView(mockTimeframeInitialDate),
   filterParams = {},
@@ -51,6 +53,7 @@ const createComponent = ({
     provide: {
       groupFullPath,
       groupMilestonesPath,
+      listEpicsPath,
     },
   });
 };
@@ -205,6 +208,17 @@ describe('RoadmapFilters', () => {
             { icon: 'eye', value: false, title: 'No' },
           ],
         },
+        {
+          type: 'epic_iid',
+          icon: 'epic',
+          title: 'Epic',
+          unique: true,
+          symbol: '&',
+          token: EpicToken,
+          operators,
+          fetchEpics: expect.any(Function),
+          fetchSingleEpic: expect.any(Function),
+        },
       ];
 
       beforeEach(() => {
@@ -217,7 +231,7 @@ describe('RoadmapFilters', () => {
         expect(filteredSearchBar.props('recentSearchesStorageKey')).toBe('epics');
       });
 
-      it('includes `Author`, `Milestone`, `Confidential` and `Label` tokens when user is not logged in', () => {
+      it('includes `Author`, `Milestone`, `Confidential`, `Epic` and `Label` tokens when user is not logged in', () => {
         expect(filteredSearchBar.props('tokens')).toEqual(filterTokens);
       });
 

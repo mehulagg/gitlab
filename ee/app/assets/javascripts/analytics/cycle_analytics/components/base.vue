@@ -14,6 +14,7 @@ import Metrics from './metrics.vue';
 import PathNavigation from './path_navigation.vue';
 import StageTable from './stage_table.vue';
 import StageTableNav from './stage_table_nav.vue';
+import StageTableNew from './stage_table_new.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
 import ValueStreamSelect from './value_stream_select.vue';
 
@@ -28,6 +29,7 @@ export default {
     TypeOfWorkCharts,
     CustomStageForm,
     StageTableNav,
+    StageTableNew,
     PathNavigation,
     FilterBar,
     ValueStreamSelect,
@@ -53,6 +55,7 @@ export default {
       'featureFlags',
       'isLoading',
       'isLoadingStage',
+      // NOTE: we can remove the `isEmptyStage` field when we remove the existing stage table
       'isEmptyStage',
       'currentGroup',
       'selectedProjects',
@@ -126,6 +129,9 @@ export default {
         project_ids: selectedProjectIds,
         created_after: toYmd(this.startDate),
         created_before: toYmd(this.endDate),
+        // the `overview` stage is always the default, so dont persist the id if its selected
+        stage_id:
+          this.selectedStage?.id && !this.isOverviewStageSelected ? this.selectedStage.id : null,
       };
     },
     stageCount() {
@@ -199,7 +205,6 @@ export default {
       <value-stream-select
         v-if="shouldDisplayCreateMultipleValueStreams"
         class="gl-align-self-start gl-sm-align-self-start gl-mt-0 gl-sm-mt-5"
-        :has-extended-form-fields="featureFlags.hasExtendedFormFields"
       />
     </div>
     <gl-empty-state
@@ -263,14 +268,24 @@ export default {
           )
         "
       />
-      <div v-else>
+      <template v-else>
         <metrics
           v-if="!featureFlags.hasPathNavigation || isOverviewStageSelected"
           :group-path="currentGroupPath"
           :request-params="cycleAnalyticsRequestParams"
         />
+        <template v-if="featureFlags.hasPathNavigation">
+          <stage-table-new
+            v-if="!isLoading && !isOverviewStageSelected"
+            :is-loading="isLoading || isLoadingStage"
+            :stage-events="currentStageEvents"
+            :current-stage="selectedStage"
+            :empty-state-message="selectedStageError"
+            :no-data-svg-path="noDataSvgPath"
+          />
+        </template>
         <stage-table
-          v-if="!featureFlags.hasPathNavigation || !isOverviewStageSelected"
+          v-else
           :key="stageCount"
           class="js-stage-table"
           :current-stage="selectedStage"
@@ -308,7 +323,7 @@ export default {
           </template>
         </stage-table>
         <url-sync :query="query" />
-      </div>
+      </template>
       <duration-chart v-if="shouldDisplayDurationChart" class="gl-mt-3" :stages="activeStages" />
       <type-of-work-charts v-if="shouldDisplayTypeOfWorkCharts" />
     </div>

@@ -48,6 +48,10 @@ export const emptyStateWithFilters = s__(
   'GroupRoadmap|To widen your search, change or remove filters; from %{startDate} to %{endDate}.',
 );
 
+export const emptyStateWithEpicIidFiltered = s__(
+  'GroupRoadmap|To make your epics appear in the roadmap, add start or due dates to them.',
+);
+
 export const PRESET_DEFAULTS = {
   QUARTERS: {
     TIMEFRAME_LENGTH: 21,

@@ -28,9 +28,9 @@ describe('DeleteRotationModal', () => {
   let fakeApollo;
   let destroyRotationHandler;
 
-  const findModal = () => wrapper.find(GlModal);
-  const findModalText = () => wrapper.find(GlSprintf);
-  const findAlert = () => wrapper.find(GlAlert);
+  const findModal = () => wrapper.findComponent(GlModal);
+  const findModalText = () => wrapper.findComponent(GlSprintf);
+  const findAlert = () => wrapper.findComponent(GlAlert);
 
   async function awaitApolloDomMock() {
     await wrapper.vm.$nextTick(); // kick off the DOM update
@@ -39,7 +39,7 @@ describe('DeleteRotationModal', () => {
   }
 
   async function destroyRotation(localWrapper) {
-    localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
+    localWrapper.findComponent(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
   const createComponent = ({ data = {}, props = {} } = {}) => {
@@ -109,7 +109,6 @@ describe('DeleteRotationModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders delete rotation modal layout', () => {

@@ -1,11 +1,15 @@
 import Vue from 'vue';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import Translate from '~/vue_shared/translate';
 import PipelineGraphLegacy from './components/graph/graph_component_legacy.vue';
 import TestReports from './components/test_reports/test_reports.vue';
 import GraphBundleMixin from './mixins/graph_pipeline_bundle_mixin';
 import createDagApp from './pipeline_details_dag';
+import { createPipelinesDetailApp } from './pipeline_details_graph';
+import { createPipelineHeaderApp } from './pipeline_details_header';
+import { createPipelineNotificationApp } from './pipeline_details_notification';
 import { apolloProvider } from './pipeline_shared_client';
 import createTestReportsStore from './stores/test_reports';
 import { reportToSentry } from './utils';
@@ -16,6 +20,7 @@ const SELECTORS = {
   PIPELINE_DETAILS: '.js-pipeline-details-vue',
   PIPELINE_GRAPH: '#js-pipeline-graph-vue',
   PIPELINE_HEADER: '#js-pipeline-header-vue',
+  PIPELINE_NOTIFICATION: '#js-pipeline-notification',
   PIPELINE_TESTS: '#js-pipeline-tests-detail',
 };
 
@@ -59,7 +64,8 @@ const createLegacyPipelinesDetailApp = (mediator) => {
 
 const createTestDetails = () => {
   const el = document.querySelector(SELECTORS.PIPELINE_TESTS);
-  const { blobPath, summaryEndpoint, suiteEndpoint } = el?.dataset || {};
+  const { blobPath, emptyStateImagePath, hasTestReport, summaryEndpoint, suiteEndpoint } =
+    el?.dataset || {};
   const testReportsStore = createTestReportsStore({
     blobPath,
     summaryEndpoint,
@@ -72,6 +78,10 @@ const createTestDetails = () => {
     components: {
       TestReports,
     },
+    provide: {
+      emptyStateImagePath,
+      hasTestReport: parseBoolean(hasTestReport),
+    },
     store: testReportsStore,
     render(createElement) {
       return createElement('test-reports');
@@ -80,20 +90,27 @@ const createTestDetails = () => {
 };
 
 export default async function initPipelineDetailsBundle() {
-  createTestDetails();
-  createDagApp(apolloProvider);
-
   const canShowNewPipelineDetails =
     gon.features.graphqlPipelineDetails || gon.features.graphqlPipelineDetailsUsers;
 
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
 
+  try {
+    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER, apolloProvider, dataset.graphqlResourceEtag);
+  } catch {
+    Flash(__('An error occurred while loading a section of this page.'));
+  }
+
+  if (gon.features.pipelineGraphLayersView) {
+    try {
+      createPipelineNotificationApp(SELECTORS.PIPELINE_NOTIFICATION, apolloProvider);
+    } catch {
+      Flash(__('An error occurred while loading a section of this page.'));
+    }
+  }
+
   if (canShowNewPipelineDetails) {
     try {
-      const { createPipelinesDetailApp } = await import(
-        /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
-      );
-
       createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH, apolloProvider, dataset);
     } catch {
       Flash(__('An error occurred while loading the pipeline.'));
@@ -108,12 +125,6 @@ export default async function initPipelineDetailsBundle() {
     createLegacyPipelinesDetailApp(mediator);
   }
 
-  try {
-    const { createPipelineHeaderApp } = await import(
-      /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
-    );
-    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER, apolloProvider, dataset.graphqlResourceEtag);
-  } catch {
-    Flash(__('An error occurred while loading a section of this page.'));
-  }
+  createDagApp(apolloProvider);
+  createTestDetails();
 }

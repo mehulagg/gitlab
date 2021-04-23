@@ -142,9 +142,9 @@ module GraphqlHelpers
     Class.new(::Types::BaseObject) { graphql_name name }
   end
 
-  def resolver_instance(resolver_class, obj: nil, ctx: {}, field: nil, schema: GitlabSchema)
+  def resolver_instance(resolver_class, obj: nil, ctx: {}, field: nil, schema: GitlabSchema, subscription_update: false)
     if ctx.is_a?(Hash)
-      q = double('Query', schema: schema)
+      q = double('Query', schema: schema, subscription_update?: subscription_update)
       ctx = GraphQL::Query::Context.new(query: q, object: obj, values: ctx)
     end
 
@@ -277,11 +277,11 @@ module GraphqlHelpers
   # prepare_input_for_mutation({ 'my_key' => 1 })
   #   => { 'myKey' => 1}
   def prepare_input_for_mutation(input)
-    input.map do |name, value|
+    input.to_h do |name, value|
       value = prepare_input_for_mutation(value) if value.is_a?(Hash)
 
       [GraphqlHelpers.fieldnamerize(name), value]
-    end.to_h
+    end
   end
 
   def input_variable_name_for_mutation(mutation_name)
@@ -307,7 +307,10 @@ module GraphqlHelpers
 
   def query_graphql_field(name, attributes = {}, fields = nil, type = nil)
     type ||= name.to_s.classify
-    attributes, fields = [nil, attributes] if fields.nil? && !attributes.is_a?(Hash)
+    if fields.nil? && !attributes.is_a?(Hash)
+      fields = attributes
+      attributes = nil
+    end
 
     field = field_with_params(name, attributes)
 

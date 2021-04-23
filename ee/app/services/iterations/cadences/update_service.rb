@@ -6,7 +6,9 @@ module Iterations
       include Gitlab::Allowable
 
       def initialize(iteration_cadence, user, params = {})
-        @iteration_cadence, @current_user, @params = iteration_cadence, user, params.dup
+        @iteration_cadence = iteration_cadence
+        @current_user = user
+        @params = params.dup
       end
 
       def execute

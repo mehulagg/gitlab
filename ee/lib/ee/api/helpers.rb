@@ -87,6 +87,8 @@ module EE
       def find_project!(id)
         project = find_project(id)
 
+        return forbidden! unless authorized_project_scope?(project)
+
         # CI job token authentication:
         # this method grants limited privileged for admin users
         # admin users can only access project if they are direct member

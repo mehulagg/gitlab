@@ -37,8 +37,7 @@ module StatusPage
       notes = init_collection
       notes = only_user(notes)
       notes = to_publish(notes)
-      notes = chronological(notes)
-      notes
+      chronological(notes)
     end
 
     def init_collection

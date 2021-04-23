@@ -1,5 +1,0 @@
----
-title: Update oncall schedule rotation names to truncate if they are too long
-merge_request: 56762
-author:
-type: fixed

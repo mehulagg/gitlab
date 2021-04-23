@@ -99,7 +99,7 @@ export default {
 <template>
   <div class="epics-filters epics-roadmap-filters epics-roadmap-filters-gl-ui">
     <div
-      class="epics-details-filters filtered-search-block gl-display-flex gl-flex-direction-column flex-xl-row row-content-block second-block"
+      class="epics-details-filters filtered-search-block gl-display-flex gl-flex-direction-column gl-xl-flex-direction-row row-content-block second-block"
     >
       <gl-form-group class="mb-0">
         <gl-segmented-control

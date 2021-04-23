@@ -246,6 +246,16 @@ RSpec.describe Notify do
           end
         end
 
+        it 'contains a link to epic author' do
+          is_expected.to have_body_text(epic.author_name)
+          is_expected.to have_body_text 'created an epic:'
+          is_expected.to have_link(epic.to_reference, href: group_epic_url(group, epic))
+        end
+
+        it 'contains a link to the epic' do
+          is_expected.to have_body_text(epic.to_reference)
+        end
+
         context 'got deleted before notification' do
           subject { described_class.new_epic_email(recipient.id, 0) }
 

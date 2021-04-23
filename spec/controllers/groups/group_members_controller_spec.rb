@@ -9,8 +9,12 @@ RSpec.describe Groups::GroupMembersController do
   let(:group) { create(:group, :public) }
   let(:membership) { create(:group_member, group: group) }
 
-  around do |example|
-    travel_to DateTime.new(2019, 4, 1) { example.run }
+  before do
+    travel_to DateTime.new(2019, 4, 1)
+  end
+
+  after do
+    travel_back
   end
 
   describe 'GET index' do
@@ -126,7 +130,7 @@ RSpec.describe Groups::GroupMembersController do
                         access_level: Gitlab::Access::GUEST
                       }
 
-        expect(response).to set_flash.to 'Users were successfully added.'
+        expect(controller).to set_flash.to 'Users were successfully added.'
         expect(response).to redirect_to(group_group_members_path(group))
         expect(group.users).to include group_user
       end
@@ -138,7 +142,7 @@ RSpec.describe Groups::GroupMembersController do
                         access_level: Gitlab::Access::GUEST
                       }
 
-        expect(response).to set_flash.to 'No users specified.'
+        expect(controller).to set_flash.to 'No users specified.'
         expect(response).to redirect_to(group_group_members_path(group))
         expect(group.users).not_to include group_user
       end
@@ -176,7 +180,7 @@ RSpec.describe Groups::GroupMembersController do
         it 'adds user to members' do
           subject
 
-          expect(response).to set_flash.to 'Users were successfully added.'
+          expect(controller).to set_flash.to 'Users were successfully added.'
           expect(response).to redirect_to(group_group_members_path(group))
           expect(group.users).to include group_user
         end
@@ -326,7 +330,7 @@ RSpec.describe Groups::GroupMembersController do
         it '[HTML] removes user from members' do
           delete :destroy, params: { group_id: group, id: member }
 
-          expect(response).to set_flash.to 'User was successfully removed from group.'
+          expect(controller).to set_flash.to 'User was successfully removed from group.'
           expect(response).to redirect_to(group_group_members_path(group))
           expect(group.members).not_to include member
           expect(sub_group.members).to include sub_member
@@ -335,7 +339,7 @@ RSpec.describe Groups::GroupMembersController do
         it '[HTML] removes user from members including subgroups and projects' do
           delete :destroy, params: { group_id: group, id: member, remove_sub_memberships: true }
 
-          expect(response).to set_flash.to 'User was successfully removed from group and any subgroups and projects.'
+          expect(controller).to set_flash.to 'User was successfully removed from group and any subgroups and projects.'
           expect(response).to redirect_to(group_group_members_path(group))
           expect(group.members).not_to include member
           expect(sub_group.members).not_to include sub_member
@@ -373,7 +377,7 @@ RSpec.describe Groups::GroupMembersController do
         it 'removes user from members' do
           delete :leave, params: { group_id: group }
 
-          expect(response).to set_flash.to "You left the \"#{group.name}\" group."
+          expect(controller).to set_flash.to "You left the \"#{group.name}\" group."
           expect(response).to redirect_to(dashboard_groups_path)
           expect(group.users).not_to include user
         end
@@ -406,7 +410,7 @@ RSpec.describe Groups::GroupMembersController do
         it 'removes user from members' do
           delete :leave, params: { group_id: group }
 
-          expect(response).to set_flash.to 'Your access request to the group has been withdrawn.'
+          expect(controller).to set_flash.to 'Your access request to the group has been withdrawn.'
           expect(response).to redirect_to(group_path(group))
           expect(group.requesters).to be_empty
           expect(group.users).not_to include user
@@ -423,7 +427,7 @@ RSpec.describe Groups::GroupMembersController do
     it 'creates a new GroupMember that is not a team member' do
       post :request_access, params: { group_id: group }
 
-      expect(response).to set_flash.to 'Your request for access has been queued for review.'
+      expect(controller).to set_flash.to 'Your request for access has been queued for review.'
       expect(response).to redirect_to(group_path(group))
       expect(group.requesters.exists?(user_id: user)).to be_truthy
       expect(group.users).not_to include user

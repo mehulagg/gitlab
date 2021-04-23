@@ -89,8 +89,6 @@ The easiest way to access tracing from a GDK environment is through the
 [performance-bar](../administration/monitoring/performance/performance_bar.md). This can be shown
 by typing `p` `b` in the browser window.
 
-![Jaeger Search UI](img/distributed_tracing_performance_bar.png)
-
 Once the performance bar is enabled, click on the **Trace** link in the performance bar to go to
 the Jaeger UI.
 
@@ -157,7 +155,7 @@ This should start the process with the default listening ports.
 Once you have Jaeger running, configure the `GITLAB_TRACING` variable with the
 appropriate configuration string.
 
-**TL;DR:** If you are running everything on the same host, use the following value:
+If you're running everything on the same host, use the following value:
 
 ```shell
 export GITLAB_TRACING="opentracing://jaeger?http_endpoint=http%3A%2F%2Flocalhost%3A14268%2Fapi%2Ftraces&sampler=const&sampler_param=1"

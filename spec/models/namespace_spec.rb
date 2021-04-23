@@ -141,7 +141,7 @@ RSpec.describe Namespace do
       end
 
       it 'allows updating other attributes for existing record' do
-        namespace = build(:namespace, path: 'j')
+        namespace = build(:namespace, path: 'j', owner: create(:user))
         namespace.save(validate: false)
         namespace.reload
 
@@ -151,6 +151,33 @@ RSpec.describe Namespace do
 
         expect(namespace).to be_valid
         expect(namespace.name).to eq('something new')
+      end
+    end
+  end
+
+  describe 'scopes' do
+    let_it_be(:namespace1) { create(:group, name: 'Namespace 1', path: 'namespace-1') }
+    let_it_be(:namespace2) { create(:group, name: 'Namespace 2', path: 'namespace-2') }
+    let_it_be(:namespace1sub) { create(:group, name: 'Sub Namespace', path: 'sub-namespace', parent: namespace1) }
+    let_it_be(:namespace2sub) { create(:group, name: 'Sub Namespace', path: 'sub-namespace', parent: namespace2) }
+
+    describe '.by_parent' do
+      it 'includes correct namespaces' do
+        expect(described_class.by_parent(namespace1.id)).to eq([namespace1sub])
+        expect(described_class.by_parent(namespace2.id)).to eq([namespace2sub])
+        expect(described_class.by_parent(nil)).to match_array([namespace, namespace1, namespace2])
+      end
+    end
+
+    describe '.filter_by_path' do
+      it 'includes correct namespaces' do
+        expect(described_class.filter_by_path(namespace1.path)).to eq([namespace1])
+        expect(described_class.filter_by_path(namespace2.path)).to eq([namespace2])
+        expect(described_class.filter_by_path('sub-namespace')).to match_array([namespace1sub, namespace2sub])
+      end
+
+      it 'filters case-insensitive' do
+        expect(described_class.filter_by_path(namespace1.path.upcase)).to eq([namespace1])
       end
     end
   end
@@ -853,7 +880,7 @@ RSpec.describe Namespace do
   end
 
   describe '#use_traversal_ids?' do
-    let_it_be(:namespace) { build(:namespace) }
+    let_it_be(:namespace, reload: true) { create(:namespace) }
 
     subject { namespace.use_traversal_ids? }
 
@@ -875,6 +902,8 @@ RSpec.describe Namespace do
   end
 
   context 'when use_traversal_ids feature flag is true' do
+    let_it_be(:namespace, reload: true) { create(:namespace) }
+
     it_behaves_like 'namespace traversal'
 
     describe '#self_and_descendants' do

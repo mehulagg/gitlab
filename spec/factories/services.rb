@@ -62,6 +62,7 @@ FactoryBot.define do
       project_key { nil }
       vulnerabilities_enabled { false }
       vulnerabilities_issuetype { nil }
+      deployment_type { 'cloud' }
     end
 
     before(:create) do |service, evaluator|
@@ -72,7 +73,7 @@ FactoryBot.define do
                jira_issue_transition_id: evaluator.jira_issue_transition_id,
                username: evaluator.username, password: evaluator.password, issues_enabled: evaluator.issues_enabled,
                project_key: evaluator.project_key, vulnerabilities_enabled: evaluator.vulnerabilities_enabled,
-               vulnerabilities_issuetype: evaluator.vulnerabilities_issuetype
+               vulnerabilities_issuetype: evaluator.vulnerabilities_issuetype, deployment_type: evaluator.deployment_type
         )
       end
     end
@@ -156,12 +157,6 @@ FactoryBot.define do
     url { 'https://mysite.atlassian.net' }
     username { 'jira_user' }
     password { 'my-secret-password' }
-  end
-
-  factory :hipchat_service do
-    project
-    type { 'HipchatService' }
-    token { 'test_token' }
   end
 
   factory :slack_service do

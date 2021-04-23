@@ -68,7 +68,7 @@ if Settings.ldap['enabled'] || Rails.env.test?
     server['tls_options'] ||= {}
 
     if server['ssl_version'] || server['ca_file']
-      Rails.logger.warn 'DEPRECATED: LDAP options `ssl_version` and `ca_file` should be nested within `tls_options`' # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.warn 'DEPRECATED: LDAP options `ssl_version` and `ca_file` should be nested within `tls_options`'
     end
 
     if server['ssl_version']
@@ -515,9 +515,6 @@ Settings.cron_jobs['pages_domain_ssl_renewal_cron_worker']['job_class'] = 'Pages
 Settings.cron_jobs['issue_due_scheduler_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['issue_due_scheduler_worker']['cron'] ||= '50 00 * * *'
 Settings.cron_jobs['issue_due_scheduler_worker']['job_class'] = 'IssueDueSchedulerWorker'
-Settings.cron_jobs['prune_web_hook_logs_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['prune_web_hook_logs_worker']['cron'] ||= '0 */1 * * *'
-Settings.cron_jobs['prune_web_hook_logs_worker']['job_class'] = 'PruneWebHookLogsWorker'
 Settings.cron_jobs['metrics_dashboard_schedule_annotations_prune_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['metrics_dashboard_schedule_annotations_prune_worker']['cron'] ||= '0 1 * * *'
 Settings.cron_jobs['metrics_dashboard_schedule_annotations_prune_worker']['job_class'] = 'Metrics::Dashboard::ScheduleAnnotationsPruneWorker'

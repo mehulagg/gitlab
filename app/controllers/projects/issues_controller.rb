@@ -54,6 +54,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
     push_to_gon_attributes(:features, real_time_feature_flag, real_time_enabled)
     push_frontend_feature_flag(:confidential_notes, @project, default_enabled: :yaml)
+    push_frontend_feature_flag(:issue_assignees_widget, @project, default_enabled: :yaml)
 
     record_experiment_user(:invite_members_version_b)
 
@@ -68,9 +69,6 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
-
-  before_action :run_null_hypothesis_experiment,
-                only: [:index, :new, :create]
 
   respond_to :html
 
@@ -398,14 +396,6 @@ class Projects::IssuesController < Projects::ApplicationController
 
   def service_desk?
     action_name == 'service_desk'
-  end
-
-  def run_null_hypothesis_experiment
-    experiment(:null_hypothesis, project: project) do |e|
-      e.use { } # define the control
-      e.try { } # define the candidate
-      e.track(action_name) # track the action so we can build a funnel
-    end
   end
 
   # Overridden in EE

@@ -19,16 +19,15 @@ module Gitlab
           return unless worker_class
           return unless worker_class.include?(::ApplicationWorker)
           return unless worker_class.get_data_consistency_feature_flag_enabled?
+
+          job['worker_data_consistency'] = worker_class.get_data_consistency
+
           return if worker_class.get_data_consistency == :always
 
           if Session.current.performed_write?
             job['database_write_location'] = load_balancer.primary_write_location
           else
-            # It is possible that the current replica has a different write-ahead
-            # replication log location from the sidekiq server replica.
-            # In the follow-up issue https://gitlab.com/gitlab-org/gitlab/-/issues/325519,
-            # we want to pass database replica location as well
-            job['database_replica_location'] = true
+            job['database_replica_location'] = load_balancer.host.database_replica_location
           end
         end
 

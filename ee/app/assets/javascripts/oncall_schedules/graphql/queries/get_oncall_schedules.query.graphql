@@ -1,5 +1,3 @@
-#import "../fragments/oncall_schedule_rotation.fragment.graphql"
-
 query getOncallSchedulesWithRotations($projectPath: ID!) {
   project(fullPath: $projectPath) {
     incidentManagementOncallSchedules {
@@ -10,7 +8,7 @@ query getOncallSchedulesWithRotations($projectPath: ID!) {
         timezone
         rotations {
           nodes {
-            ...OnCallRotation
+            id
           }
         }
       }

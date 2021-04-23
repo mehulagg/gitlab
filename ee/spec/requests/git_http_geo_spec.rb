@@ -534,7 +534,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
               it 'returns a 404' do
                 is_expected.to have_gitlab_http_status(:not_found)
-                expect(response.body).to eql('The project you were looking for could not be found.')
+                expect(response.body).to eql("The project you were looking for could not be found or you don't have permission to view it.")
               end
             end
 

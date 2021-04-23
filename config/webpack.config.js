@@ -395,18 +395,6 @@ module.exports = {
     new webpack.ProvidePlugin({
       $: 'jquery',
       jQuery: 'jquery',
-      Popper: ['popper.js', 'default'],
-      Alert: 'exports-loader?Alert!bootstrap/js/dist/alert',
-      Button: 'exports-loader?Button!bootstrap/js/dist/button',
-      Carousel: 'exports-loader?Carousel!bootstrap/js/dist/carousel',
-      Collapse: 'exports-loader?Collapse!bootstrap/js/dist/collapse',
-      Dropdown: 'exports-loader?Dropdown!bootstrap/js/dist/dropdown',
-      Modal: 'exports-loader?Modal!bootstrap/js/dist/modal',
-      Popover: 'exports-loader?Popover!bootstrap/js/dist/popover',
-      Scrollspy: 'exports-loader?Scrollspy!bootstrap/js/dist/scrollspy',
-      Tab: 'exports-loader?Tab!bootstrap/js/dist/tab',
-      Tooltip: 'exports-loader?Tooltip!bootstrap/js/dist/tooltip',
-      Util: 'exports-loader?Util!bootstrap/js/dist/util',
     }),
 
     // if DLLs are enabled, detect whether the DLL exists and create it automatically if necessary
@@ -463,12 +451,14 @@ module.exports = {
       }),
 
     dll &&
-      new CopyWebpackPlugin([
-        {
-          from: dll.cacheFrom,
-          to: dll.cacheTo,
-        },
-      ]),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: dll.cacheFrom,
+            to: dll.cacheTo,
+          },
+        ],
+      }),
 
     !IS_EE &&
       new webpack.NormalModuleReplacementPlugin(/^ee_component\/(.*)\.vue/, (resource) => {
@@ -479,24 +469,28 @@ module.exports = {
         );
       }),
 
-    new CopyWebpackPlugin([
-      {
-        from: path.join(ROOT_PATH, 'node_modules/pdfjs-dist/cmaps/'),
-        to: path.join(WEBPACK_OUTPUT_PATH, 'cmaps/'),
-      },
-      {
-        from: path.join(ROOT_PATH, 'node_modules', SOURCEGRAPH_PACKAGE, '/'),
-        to: SOURCEGRAPH_OUTPUT_PATH,
-        ignore: ['package.json'],
-      },
-      {
-        from: path.join(
-          ROOT_PATH,
-          'node_modules/@gitlab/visual-review-tools/dist/visual_review_toolbar.js',
-        ),
-        to: WEBPACK_OUTPUT_PATH,
-      },
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.join(ROOT_PATH, 'node_modules/pdfjs-dist/cmaps/'),
+          to: path.join(WEBPACK_OUTPUT_PATH, 'cmaps/'),
+        },
+        {
+          from: path.join(ROOT_PATH, 'node_modules', SOURCEGRAPH_PACKAGE, '/'),
+          to: SOURCEGRAPH_OUTPUT_PATH,
+          globOptions: {
+            ignore: ['package.json'],
+          },
+        },
+        {
+          from: path.join(
+            ROOT_PATH,
+            'node_modules/@gitlab/visual-review-tools/dist/visual_review_toolbar.js',
+          ),
+          to: WEBPACK_OUTPUT_PATH,
+        },
+      ],
+    }),
 
     // compression can require a lot of compute time and is disabled in CI
     IS_PRODUCTION && !NO_COMPRESSION && new CompressionPlugin(),

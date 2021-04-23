@@ -78,6 +78,28 @@ module EE
             present users, with: ::EE::API::Entities::BillableMember, current_user: current_user
           end
 
+          desc 'Get the memberships of a billable user of a root group.' do
+            success ::EE::API::Entities::BillableMembership
+          end
+          params do
+            requires :user_id, type: Integer, desc: 'The user ID of the member'
+            use :pagination
+          end
+          get ":id/billable_members/:user_id/memberships" do
+            group = find_group!(params[:id])
+
+            bad_request! unless can?(current_user, :admin_group_member, group)
+            bad_request! if group.subgroup?
+
+            user = ::User.find(params[:user_id])
+
+            not_found!('User') unless group.billed_user_ids.include?(user.id)
+
+            memberships = user.members.in_hierarchy(group).including_source
+
+            present paginate(memberships), with: ::EE::API::Entities::BillableMembership
+          end
+
           desc 'Removes a billable member from a group or project.'
           params do
             requires :user_id, type: Integer, desc: 'The user ID of the member'

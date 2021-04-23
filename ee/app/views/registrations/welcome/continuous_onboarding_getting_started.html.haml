@@ -1,0 +1,11 @@
+- return unless project
+- page_title _('Get started with GitLab')
+
+.row.gl-flex-grow-1.gl-p-5
+  .gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-w-full
+    .gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-pt-7.gl-mt-7.mw-460
+      = image_tag 'learn-gitlab-avatar.jpg', width: '90'
+      %h2.gl-text-center.gl-my-5= _('Get started with GitLab')
+      %p.gl-text-center.gl-text-gray-700.gl-mb-7= _('Ready to get started with GitLab? Follow these steps to set up your workspace, plan and commit changes, and deploy your project.')
+      = image_tag 'learn_gitlab/get_started.svg', width: '400', class: 'gl-max-w-full'
+      %div= link_to s_("Ok, let's go"), project_learn_gitlab_path(project), class: 'btn btn-success gl-button gl-mt-7'

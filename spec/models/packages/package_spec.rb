@@ -47,6 +47,7 @@ RSpec.describe Packages::Package, type: :model do
   describe '.sort_by_attribute' do
     let_it_be(:group) { create(:group, :public) }
     let_it_be(:project) { create(:project, :public, namespace: group, name: 'project A') }
+
     let!(:package1) { create(:npm_package, project: project, version: '3.1.0', name: "@#{project.root_namespace.path}/foo1") }
     let!(:package2) { create(:nuget_package, project: project, version: '2.0.4') }
     let(:package3) { create(:maven_package, project: project, version: '1.1.1', name: 'zzz') }
@@ -112,18 +113,6 @@ RSpec.describe Packages::Package, type: :model do
       expect(projects).not_to receive(:any?)
 
       expect(subject).to match_array([package1, package2])
-    end
-
-    context 'with maven_packages_group_level_improvements disabled' do
-      before do
-        stub_feature_flags(maven_packages_group_level_improvements: false)
-      end
-
-      it 'returns package1 and package2' do
-        expect(projects).to receive(:any?).and_call_original
-
-        expect(subject).to match_array([package1, package2])
-      end
     end
   end
 
@@ -896,6 +885,7 @@ RSpec.describe Packages::Package, type: :model do
     let_it_be(:package_name) { 'composer-package-name' }
     let_it_be(:json) { { 'name' => package_name } }
     let_it_be(:project) { create(:project, :custom_repo, files: { 'composer.json' => json.to_json } ) }
+
     let!(:package) { create(:composer_package, :with_metadatum, project: project, name: package_name, version: '1.0.0', json: json) }
 
     before do

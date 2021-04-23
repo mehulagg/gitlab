@@ -45,9 +45,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       let(:object) { :issue }
       let(:creation_args) { { project: project, title: 'initial' } }
       let(:path) { search_path(search: 'initial', scope: 'issues') }
-      # N+1 queries still exist and will be fixed per
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/230712
-      let(:query_count_multiplier) { 1 }
+      let(:query_count_multiplier) { 0 }
 
       it_behaves_like 'an efficient database result'
     end

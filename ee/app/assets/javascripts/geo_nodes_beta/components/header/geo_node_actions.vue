@@ -9,10 +9,9 @@ export default {
     GeoNodeActionsDesktop,
   },
   props: {
-    primary: {
-      type: Boolean,
-      required: false,
-      default: false,
+    node: {
+      type: Object,
+      required: true,
     },
   },
 };
@@ -20,7 +19,7 @@ export default {
 
 <template>
   <div>
-    <geo-node-actions-mobile class="gl-lg-display-none" :primary="primary" />
-    <geo-node-actions-desktop class="gl-display-none gl-lg-display-flex" :primary="primary" />
+    <geo-node-actions-mobile class="gl-lg-display-none" :node="node" />
+    <geo-node-actions-desktop class="gl-display-none gl-lg-display-flex" :node="node" />
   </div>
 </template>

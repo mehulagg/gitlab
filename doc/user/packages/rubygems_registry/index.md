@@ -4,7 +4,7 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Ruby gems in the Package Registry
+# Ruby gems in the Package Registry **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/803) in [GitLab Free](https://about.gitlab.com/pricing/) 13.10.
 
@@ -44,7 +44,7 @@ Feature.enable(:rubygem_packages, Project.find(1))
 Feature.disable(:rubygem_packages, Project.find(2))
 ```
 
-## Create a Ruby Gem
+## Create a Ruby gem
 
 If you need help creating a Ruby gem, see the [RubyGems documentation](https://guides.rubygems.org/make-your-own-gem/).
 

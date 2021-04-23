@@ -17,7 +17,7 @@ import {
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { license } from '../mock_data';
 
-describe('Subscription Details Card', () => {
+describe('Subscription Details User Info', () => {
   let wrapper;
 
   const itif = (condition) => (condition ? it : it.skip);
@@ -42,11 +42,11 @@ describe('Subscription Details Card', () => {
   });
 
   describe.each`
-    testId                       | info    | title                         | text                         | link
-    ${'users-in-license'}        | ${'10'} | ${usersInSubscriptionTitle}   | ${usersInSubscriptionText}   | ${false}
-    ${'billable-users'}          | ${'8'}  | ${billableUsersTitle}         | ${billableUsersText}         | ${billableUsersURL}
-    ${'maximum-users'}           | ${'8'}  | ${maximumUsersTitle}          | ${maximumUsersText}          | ${false}
-    ${'users-over-subscription'} | ${'0'}  | ${usersOverSubscriptionTitle} | ${usersOverSubscriptionText} | ${trueUpURL}
+    testId                  | info    | title                         | text                         | link
+    ${'users-in-license'}   | ${'10'} | ${usersInSubscriptionTitle}   | ${usersInSubscriptionText}   | ${false}
+    ${'billable-users'}     | ${'8'}  | ${billableUsersTitle}         | ${billableUsersText}         | ${billableUsersURL}
+    ${'maximum-users'}      | ${'8'}  | ${maximumUsersTitle}          | ${maximumUsersText}          | ${false}
+    ${'users-over-license'} | ${'0'}  | ${usersOverSubscriptionTitle} | ${usersOverSubscriptionText} | ${trueUpURL}
   `('with data for $card', ({ testId, info, title, text, link }) => {
     beforeEach(() => {
       createComponent();

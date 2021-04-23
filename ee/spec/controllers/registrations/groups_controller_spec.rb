@@ -8,7 +8,7 @@ RSpec.describe Registrations::GroupsController do
   shared_examples 'hides email confirmation warning' do
     RSpec::Matchers.define :set_confirm_warning_for do |email|
       match do |response|
-        expect(response).to set_flash.now[:warning].to include("Please check your email (#{email}) to verify that you own this address and unlock the power of CI/CD.")
+        expect(controller).to set_flash.now[:warning].to include("Please check your email (#{email}) to verify that you own this address and unlock the power of CI/CD.")
       end
     end
 
@@ -78,6 +78,7 @@ RSpec.describe Registrations::GroupsController do
     let_it_be(:trial_form_params) { { trial: 'false' } }
     let_it_be(:trial_onboarding_issues_enabled) { false }
     let_it_be(:trial_onboarding_flow_params) { {} }
+
     let(:signup_onboarding_enabled) { true }
     let(:group_params) { { name: 'Group name', path: 'group-path', visibility_level: Gitlab::VisibilityLevel::PRIVATE, emails: ['', ''] } }
     let(:params) do

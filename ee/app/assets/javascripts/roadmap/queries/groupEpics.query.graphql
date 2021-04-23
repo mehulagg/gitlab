@@ -4,6 +4,7 @@ query groupEpics(
   $fullPath: ID!
   $state: EpicState
   $sort: EpicSort
+  $iid: ID
   $startDate: Time
   $dueDate: Time
   $labelName: [String!] = []
@@ -18,6 +19,7 @@ query groupEpics(
     id
     name
     epics(
+      iid: $iid
       state: $state
       sort: $sort
       startDate: $startDate

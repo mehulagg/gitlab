@@ -199,7 +199,7 @@ module IssuablesHelper
     count = issuables_count_for_state(issuable_type, state)
 
     if count != -1
-      html << " " << content_tag(:span, number_with_delimiter(count), class: 'badge badge-pill')
+      html << " " << content_tag(:span, number_with_delimiter(count), class: 'badge badge-muted badge-pill gl-badge gl-tab-counter-badge sm')
     end
 
     html.html_safe
@@ -389,7 +389,8 @@ module IssuablesHelper
       severity: issuable[:severity],
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours,
       createNoteEmail: issuable[:create_note_email],
-      issuableType: issuable[:type]
+      issuableType: issuable[:type],
+      projectMembersPath: project_project_members_path(@project, sort: :access_level_desc)
     }
   end
 

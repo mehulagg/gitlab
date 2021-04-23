@@ -4,7 +4,7 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Container Registry
+# GitLab Container Registry **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/4040) in GitLab 8.8.
 > - Docker Registry manifest `v1` support was added in GitLab 8.9 to support Docker
@@ -635,6 +635,14 @@ Examples:
   ```shell
   curl --request PUT --header 'Content-Type: application/json;charset=UTF-8' --header "PRIVATE-TOKEN: <your_access_token>" --data-binary '{"container_expiration_policy_attributes":{"cadence":"1month","enabled":true,"keep_n":1,"older_than":"14d","name_regex":"","name_regex_delete":".*","name_regex_keep":".*-master"}}' "https://gitlab.example.com/api/v4/projects/2"
   ```
+
+Valid values for `cadence` when using the API are:
+
+- `1d` (every day)
+- `7d` (every week)
+- `14d` (every two weeks)
+- `1month` (every month)
+- `3month` (every quarter)
 
 See the API documentation for further details: [Edit project](../../../api/projects.md#edit-project).
 

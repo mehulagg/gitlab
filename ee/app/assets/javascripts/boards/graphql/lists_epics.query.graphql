@@ -21,6 +21,7 @@ query ListEpics(
                 relativePosition
                 referencePath: reference(full: true)
                 confidential
+                subscribed
                 labels {
                   nodes {
                     ...Label

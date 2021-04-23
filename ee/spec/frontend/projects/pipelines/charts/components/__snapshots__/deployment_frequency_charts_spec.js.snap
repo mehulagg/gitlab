@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue when there are no network errors converts the data from the API into data usable by the chart component 1`] = `
+exports[`deployment_frequency_charts.vue when there are no network errors converts the data from the API into data usable by the chart component 1`] = `
 Array [
   Object {
     "data": Array [

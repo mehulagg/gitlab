@@ -1,12 +1,12 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import MRRulesHiddenInputs from 'ee/approvals/components/mr_edit/mr_rules_hidden_inputs.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import MREditModule from 'ee/approvals/stores/modules/mr_edit';
 import { createMRRule } from '../../mocks';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 const {
   INPUT_ID,
@@ -28,8 +28,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
   let store;
 
   const factory = () => {
-    wrapper = shallowMount(localVue.extend(MRRulesHiddenInputs), {
-      localVue,
+    wrapper = shallowMount(MRRulesHiddenInputs, {
       store: new Vuex.Store(store),
     });
   };

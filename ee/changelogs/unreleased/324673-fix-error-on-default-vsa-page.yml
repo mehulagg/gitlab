@@ -1,5 +1,0 @@
----
-title: Fix 500 error when refreshing Value Stream Analytics page with a default stage
-merge_request: 56761
-author:
-type: fixed

@@ -21,10 +21,14 @@ module Elastic
           :merge_status,
           :source_project_id,
           :target_project_id,
+          :project_id, # Redundant field aliased to target_project_id makes it easier to share searching code
           :author_id
         ].each do |attr|
           data[attr.to_s] = safely_read_attribute_for_elasticsearch(attr)
         end
+
+        data['visibility_level'] = target.project.visibility_level
+        data['merge_requests_access_level'] = safely_read_project_feature_for_elasticsearch(:merge_requests)
 
         data.merge(generic_attributes)
       end

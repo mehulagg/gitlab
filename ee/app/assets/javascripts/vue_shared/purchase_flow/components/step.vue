@@ -4,7 +4,9 @@ import activateNextStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutati
 import updateStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/update_active_step.mutation.graphql';
 import activeStepQuery from 'ee/vue_shared/purchase_flow/graphql/queries/active_step.query.graphql';
 import stepListQuery from 'ee/vue_shared/purchase_flow/graphql/queries/step_list.query.graphql';
+import createFlash from '~/flash';
 import { convertToSnakeCase, dasherize } from '~/lib/utils/text_utility';
+import { GENERAL_ERROR_MESSAGE } from '../constants';
 import StepHeader from './step_header.vue';
 import StepSummary from './step_summary.vue';
 
@@ -44,6 +46,9 @@ export default {
   apollo: {
     activeStep: {
       query: activeStepQuery,
+      error(error) {
+        this.handleError(error);
+      },
     },
     stepList: {
       query: stepListQuery,
@@ -66,6 +71,9 @@ export default {
     },
   },
   methods: {
+    handleError(error) {
+      createFlash({ message: GENERAL_ERROR_MESSAGE, error, captureError: true });
+    },
     async nextStep() {
       if (!this.isValid) {
         return;
@@ -74,6 +82,9 @@ export default {
       await this.$apollo
         .mutate({
           mutation: activateNextStepMutation,
+        })
+        .catch((error) => {
+          this.handleError(error);
         })
         .finally(() => {
           this.loading = false;
@@ -85,6 +96,9 @@ export default {
         .mutate({
           mutation: updateStepMutation,
           variables: { id: this.stepId },
+        })
+        .catch((error) => {
+          this.handleError(error);
         })
         .finally(() => {
           this.loading = false;

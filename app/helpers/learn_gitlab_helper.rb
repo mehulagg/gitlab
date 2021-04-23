@@ -3,7 +3,7 @@
 module LearnGitlabHelper
   def learn_gitlab_experiment_enabled?(project)
     return false unless current_user
-    return false unless experiment_enabled_for_user?
+    return false unless continous_onboarding_experiment_enabled_for_user?
 
     learn_gitlab_onboarding_available?(project)
   end
@@ -21,9 +21,15 @@ module LearnGitlabHelper
     end
   end
 
+  def continous_onboarding_experiment_enabled_for_user?
+    Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_a, subject: current_user) ||
+      Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user)
+  end
+
   private
 
   ACTION_ISSUE_IDS = {
+    issue_created: 4,
     git_write: 6,
     pipeline_created: 7,
     merge_request_created: 9,
@@ -47,11 +53,6 @@ module LearnGitlabHelper
 
   def onboarding_progress(project)
     OnboardingProgress.find_by(namespace: project.namespace) # rubocop: disable CodeReuse/ActiveRecord
-  end
-
-  def experiment_enabled_for_user?
-    Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_a, subject: current_user) ||
-      Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user)
   end
 
   def learn_gitlab_onboarding_available?(project)

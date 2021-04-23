@@ -18,7 +18,10 @@ import {
   SCAN_TYPE_LABEL,
   SCAN_TYPE,
 } from 'ee/security_configuration/dast_scanner_profiles/constants';
-import { EXCLUDED_URLS_SEPARATOR } from 'ee/security_configuration/dast_site_profiles_form/constants';
+import {
+  EXCLUDED_URLS_SEPARATOR,
+  TARGET_TYPES,
+} from 'ee/security_configuration/dast_site_profiles_form/constants';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { initFormField } from 'ee/security_configuration/utils';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
@@ -234,6 +237,9 @@ export default {
     hasExcludedUrls() {
       return this.selectedSiteProfile.excludedUrls?.length > 0;
     },
+    targetTypeValue() {
+      return TARGET_TYPES[this.selectedSiteProfile.targetType].text;
+    },
     storageKey() {
       return `${this.projectPath}/${ON_DEMAND_SCANS_STORAGE_KEY}`;
     },
@@ -263,13 +269,11 @@ export default {
         fullPath: this.projectPath,
         dastScannerProfileId: this.selectedScannerProfile.id,
         dastSiteProfileId: this.selectedSiteProfile.id,
+        branchName: this.selectedBranch,
         ...(this.isEdit ? { id: this.dastScan.id } : {}),
         ...serializeFormObject(this.form.fields),
         [this.isEdit ? 'runAfterUpdate' : 'runAfterCreate']: runAfter,
       };
-      if (this.glFeatures.dastBranchSelection) {
-        input.branchName = this.selectedBranch;
-      }
 
       this.$apollo
         .mutate({
@@ -429,7 +433,7 @@ export default {
         />
       </gl-form-group>
 
-      <gl-form-group v-if="glFeatures.dastBranchSelection" :label="__('Branch')">
+      <gl-form-group :label="__('Branch')">
         <ref-selector
           v-model="selectedBranch"
           data-testid="dast-scan-branch-input"
@@ -468,11 +472,11 @@ export default {
           <div class="row">
             <profile-selector-summary-cell
               :label="s__('DastProfiles|Spider timeout')"
-              :value="n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout)"
+              :value="n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout || 0)"
             />
             <profile-selector-summary-cell
               :label="s__('DastProfiles|Target timeout')"
-              :value="n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout)"
+              :value="n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout || 0)"
             />
           </div>
           <div class="row">
@@ -502,6 +506,11 @@ export default {
               :class="{ 'gl-text-red-500': hasProfilesConflict }"
               :label="s__('DastProfiles|Target URL')"
               :value="selectedSiteProfile.targetUrl"
+            />
+            <profile-selector-summary-cell
+              v-if="glFeatures.securityDastSiteProfilesApiOption"
+              :label="s__('DastProfiles|Site type')"
+              :value="targetTypeValue"
             />
           </div>
           <template v-if="glFeatures.securityDastSiteProfilesAdditionalFields">

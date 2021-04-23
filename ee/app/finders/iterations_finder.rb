@@ -52,6 +52,7 @@ class IterationsFinder
     items = by_search_title(items)
     items = by_state(items)
     items = by_timeframe(items)
+    items = by_iteration_cadences(items)
 
     order(items)
   end
@@ -88,11 +89,9 @@ class IterationsFinder
   end
 
   def by_id(items)
-    if params[:id]
-      items.id_in(params[:id])
-    else
-      items
-    end
+    return items unless params[:id].present?
+
+    items.id_in(params[:id])
   end
 
   def by_iid(items)
@@ -100,25 +99,27 @@ class IterationsFinder
   end
 
   def by_title(items)
-    if params[:title]
-      items.with_title(params[:title])
-    else
-      items
-    end
+    return items unless params[:title].present?
+
+    items.with_title(params[:title])
   end
 
   def by_search_title(items)
-    if params[:search_title].present?
-      items.search_title(params[:search_title])
-    else
-      items
-    end
+    return items unless params[:search_title].present?
+
+    items.search_title(params[:search_title])
   end
 
   def by_state(items)
     return items unless params[:state].present?
 
     Iteration.filter_by_state(items, params[:state])
+  end
+
+  def by_iteration_cadences(items)
+    return items unless params[:iteration_cadence_ids].present?
+
+    items.by_iteration_cadence_ids(params[:iteration_cadence_ids])
   end
 
   # rubocop: disable CodeReuse/ActiveRecord

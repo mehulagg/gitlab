@@ -111,7 +111,7 @@ export default {
       handler() {
         Promise.all(
           this.lists.map((list) => {
-            return this.fetchItemsForList({ listId: list.id });
+            return this.fetchItemsForList({ listId: list.id, forSwimlanes: true });
           }),
         )
           .then(() => this.doneLoadingSwimlanesItems())
@@ -178,7 +178,7 @@ export default {
     data_qa_selector="board_epics_swimlanes"
   >
     <swimlanes-loading-skeleton v-if="isLoading" />
-    <div v-else>
+    <div v-else class="board-swimlanes-content">
       <component
         :is="treeRootWrapper"
         v-bind="treeRootOptions"

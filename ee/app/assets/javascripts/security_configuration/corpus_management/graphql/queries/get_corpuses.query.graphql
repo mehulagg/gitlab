@@ -3,4 +3,8 @@ query getCorpuses($projectPath: ID!) {
     data
     totalSize
   }
+  uploadState(projectPath: $projectPath) @client {
+    isUploading
+    progress
+  }
 }

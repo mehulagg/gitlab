@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import IterationCadenceForm from './components/iteration_cadence_form.vue';
 import IterationForm from './components/iteration_form.vue';
 import IterationReport from './components/iteration_report.vue';
 import Iterations from './components/iterations.vue';
@@ -84,6 +85,30 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
           previewMarkdownPath,
           svgPath,
           initiallyEditing,
+        },
+      });
+    },
+  });
+}
+
+export function initCadenceForm() {
+  const el = document.querySelector('.js-iteration-cadence-form');
+
+  if (!el) {
+    return null;
+  }
+
+  const { groupFullPath: groupPath, cadenceId, cadenceListPath } = el;
+
+  return new Vue({
+    el,
+    apolloProvider,
+    render(createElement) {
+      return createElement(IterationCadenceForm, {
+        props: {
+          groupPath,
+          cadenceId,
+          cadenceListPath,
         },
       });
     },

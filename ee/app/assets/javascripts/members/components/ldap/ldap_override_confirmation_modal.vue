@@ -18,13 +18,21 @@ export default {
   },
   modalId: LDAP_OVERRIDE_CONFIRMATION_MODAL_ID,
   components: { GlModal, GlSprintf },
+  inject: ['namespace'],
   data() {
     return {
       busy: false,
     };
   },
   computed: {
-    ...mapState(['memberToOverride', 'ldapOverrideConfirmationModalVisible']),
+    ...mapState({
+      memberToOverride(state) {
+        return state[this.namespace].memberToOverride;
+      },
+      ldapOverrideConfirmationModalVisible(state) {
+        return state[this.namespace].ldapOverrideConfirmationModalVisible;
+      },
+    }),
     actionPrimary() {
       return {
         text: this.$options.i18n.editPermissions,
@@ -36,7 +44,14 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['updateLdapOverride', 'hideLdapOverrideConfirmationModal']),
+    ...mapActions({
+      updateLdapOverride(dispatch, payload) {
+        return dispatch(`${this.namespace}/updateLdapOverride`, payload);
+      },
+      hideLdapOverrideConfirmationModal(dispatch) {
+        return dispatch(`${this.namespace}/hideLdapOverrideConfirmationModal`);
+      },
+    }),
     handlePrimary() {
       this.busy = true;
 

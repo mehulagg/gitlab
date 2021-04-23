@@ -241,7 +241,6 @@ class Service < ApplicationRecord
     service.project_id = project_id
     service.group_id = group_id
     service.inherit_from_id = integration.id if integration.instance? || integration.group
-    service.active = false if service.invalid?
     service
   end
 
@@ -415,6 +414,14 @@ class Service < ApplicationRecord
 
   def project_level?
     project_id.present?
+  end
+
+  def group_level?
+    group_id.present?
+  end
+
+  def instance_level?
+    instance?
   end
 
   def parent

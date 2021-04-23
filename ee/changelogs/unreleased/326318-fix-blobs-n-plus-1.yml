@@ -1,5 +1,0 @@
----
-title: Fix blobs search N+1
-merge_request: 57826
-author:
-type: performance

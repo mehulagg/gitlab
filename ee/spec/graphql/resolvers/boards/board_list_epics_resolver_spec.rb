@@ -41,43 +41,56 @@ RSpec.describe Resolvers::Boards::BoardListEpicsResolver do
       expect(result.to_a).to eq([list1_epic2, list1_epic1])
     end
 
-    context 'with filters' do
+    context 'when filtering' do
       let_it_be(:production_label) { create(:group_label, group: group, name: 'production') }
       let_it_be(:list1_epic3) { create(:labeled_epic, group: group, labels: [development, production_label], title: 'filter_this 1') }
       let_it_be(:list1_epic4) { create(:labeled_epic, group: group, labels: [development], description: 'filter_this 2') }
+      let_it_be(:awarded_emoji) { create(:award_emoji, name: 'thumbsup', awardable: list1_epic1, user: user) }
 
-      it 'filters epics by label' do
-        args = { filters: { label_name: [production_label.title] } }
+      subject(:results) { resolve(described_class, ctx: { current_user: user }, obj: list1, args: args) }
 
-        result = resolve_board_list_epics(args: args)
+      context 'by label' do
+        let(:args) { { filters: { label_name: [production_label.title] } } }
 
-        expect(result).to contain_exactly(list1_epic3)
+        it { is_expected.to contain_exactly(list1_epic3) }
       end
 
-      it 'filters epics by author' do
-        args = { filters: { author_username: list1_epic4.author.username } }
+      context 'by author' do
+        let(:args) { { filters: { author_username: list1_epic4.author.username } } }
 
-        result = resolve_board_list_epics(args: args)
-
-        expect(result).to contain_exactly(list1_epic4)
+        it { is_expected.to contain_exactly(list1_epic4) }
       end
 
-      it 'filters epics by reaction emoji' do
-        emoji_name = 'thumbsup'
-        create(:award_emoji, name: emoji_name, awardable: list1_epic1, user: user)
-        args = { filters: { my_reaction_emoji: emoji_name } }
+      context 'by reaction emoji' do
+        let(:args) { { filters: { my_reaction_emoji: awarded_emoji.name } } }
 
-        result = resolve_board_list_epics(args: args)
-
-        expect(result).to contain_exactly(list1_epic1)
+        it { is_expected.to contain_exactly(list1_epic1) }
       end
 
-      it 'filters epics by title and description' do
-        args = { filters: { search: 'filter_this' } }
+      context 'by title and description' do
+        let(:args) { { filters: { search: 'filter_this' } } }
 
-        result = resolve_board_list_epics(args: args)
+        it { is_expected.to contain_exactly(list1_epic3, list1_epic4) }
+      end
 
-        expect(result).to contain_exactly(list1_epic3, list1_epic4)
+      context 'with negated filters' do
+        context 'by label' do
+          let(:args) { { filters: { not: { label_name: [production_label.title] } } } }
+
+          it { is_expected.to contain_exactly(list1_epic1, list1_epic2, list1_epic4) }
+        end
+
+        context 'by author' do
+          let(:args) { { filters: { not: { author_username: list1_epic2.author.username } } } }
+
+          it { is_expected.to contain_exactly(list1_epic1, list1_epic3, list1_epic4) }
+        end
+
+        context 'by emoji' do
+          let(:args) { { filters: { not: { my_reaction_emoji: awarded_emoji.name } } } }
+
+          it { is_expected.to contain_exactly(list1_epic2, list1_epic3, list1_epic4) }
+        end
       end
     end
   end

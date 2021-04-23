@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   let_it_be(:admin) { create(:admin) }
+
   let(:page) { Capybara::Node::Simple.new(rendered) }
   let(:pause_indexing) { false }
   let(:pending_migrations) { false }
@@ -30,7 +31,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       it 'hides index button when indexing is disabled' do
         render
 
-        expect(rendered).to have_css('a.btn-success', text: button_text)
+        expect(rendered).to have_css('a.btn-confirm', text: button_text)
       end
 
       it 'renders an enabled pause checkbox' do
@@ -58,7 +59,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       it 'shows index button when indexing is enabled' do
         render
 
-        expect(rendered).not_to have_css('a.btn-success', text: button_text)
+        expect(rendered).not_to have_css('a.btn-confirm', text: button_text)
       end
 
       it 'renders a disabled pause checkbox' do
