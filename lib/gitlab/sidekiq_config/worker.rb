@@ -6,7 +6,7 @@ module Gitlab
       include Comparable
 
       attr_reader :klass
-      delegate :feature_category_not_owned?, :get_feature_category, :get_tags,
+      delegate :name, :feature_category_not_owned?, :get_feature_category, :get_tags,
                :get_urgency, :get_weight, :get_worker_resource_boundary,
                :idempotent?, :queue, :queue_namespace,
                :worker_has_external_dependencies?,
@@ -47,6 +47,7 @@ module Gitlab
       def to_yaml
         {
           name: queue,
+          worker_name: klass.name,
           feature_category: get_feature_category,
           has_external_dependencies: worker_has_external_dependencies?,
           urgency: get_urgency,
