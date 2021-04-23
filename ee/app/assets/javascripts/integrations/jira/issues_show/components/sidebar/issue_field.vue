@@ -1,6 +1,7 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
+import IssueFieldDropdown from './issue_field_dropdown.vue';
 
 export default {
   directives: {
@@ -8,8 +9,14 @@ export default {
   },
   components: {
     GlIcon,
+    IssueFieldDropdown,
   },
   props: {
+    dropdownTitle: {
+      type: String,
+      required: false,
+      default: null,
+    },
     icon: {
       type: String,
       required: true,
@@ -58,6 +65,7 @@ export default {
       <div class="value">
         <span :class="valueClass" data-testid="field-value">{{ valueWithFallback }}</span>
       </div>
+      <issue-field-dropdown :text="valueWithFallback" :title="dropdownTitle" />
     </div>
   </div>
 </template>

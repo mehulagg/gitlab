@@ -43,6 +43,7 @@ export default {
   labelsFilterParam,
   i18n: {
     statusTitle: __('Status'),
+    statusDropdownTitle: __('Change status'),
     referenceName: __('Reference'),
   },
 };
@@ -52,7 +53,12 @@ export default {
   <div>
     <assignee class="block" :assignee="assignee" />
     <issue-due-date :due-date="issue.dueDate" />
-    <issue-field icon="progress" :title="$options.i18n.statusTitle" :value="issue.status" />
+    <issue-field
+      icon="progress"
+      :title="$options.i18n.statusTitle"
+      :value="issue.status"
+      :dropdown-title="$options.i18n.statusDropdownTitle"
+    />
     <labels-select
       :selected-labels="issue.labels"
       :labels-filter-base-path="issuesListPath"
