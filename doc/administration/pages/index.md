@@ -916,6 +916,8 @@ In Omnibus installations:
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure)
    for the changes to take effect.
 
+1. [Migrate existing Pages deployments to object storage.](#migrate-pages-deployments-to-object-storage)
+
 In installations from source:
 
 1. Edit `/home/git/gitlab/config/gitlab.yml` and add or amend the following lines:
@@ -934,6 +936,8 @@ In installations from source:
 
 1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source)
    for the changes to take effect.
+
+1. [Migrate existing Pages deployments to object storage.](#migrate-pages-deployments-to-object-storage)
 
 ## ZIP storage
 
@@ -1036,6 +1040,30 @@ To do that:
 Starting from GitLab 13.12 it also disables [updating legacy storate](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60005)
 and [serving from it](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60010).
 So it allows you to disconnect NFS server used for GitLab Pages.
+
+## Migrating GitLab Pages to 14.0
+
+In GitLab 14.0 we introduce a number of breaking changes which may require some user intervention.
+
+Steps below describe the best way to migrate without causing any downtime for your GitLab instance.
+
+If you run GitLab on the single server, then most likely you will not notice any problem after
+upgrading to GitLab 14.0, but you still may be safer to follow the instructions described below.
+
+If at any point you run into issues, then consult [troubleshooting section](#troubleshooting).
+
+1. If your current GitLab version is lower than 13.12, then you first need to upgrade to 13.12.
+Note that upgrading directly to 14.0 may cause downtime for some web-sites hosted on GitLab pages
+until you finish next steps.
+
+1. Enable [API-based configuration](#gitlab-api-based-configuration).
+It will be a default starting from GitLab 14.0. So you may skip this step,
+if you're already running GitLab 14.0 or above.
+
+1. Decide if you want to store your pages content in the [object storage](#using-object-storage),
+and configure it if you need to. If you want to store pages content locally or continue using NFS server, you can skip this step.
+
+1. [Migrate legacy storage to ZIP storage.](#migrate-legacy-storage-to-zip-storage)
 
 ## Backup
 
