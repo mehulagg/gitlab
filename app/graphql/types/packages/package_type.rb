@@ -16,6 +16,7 @@ module Types
       field :updated_at, Types::TimeType, null: false, description: 'Date of most recent update.'
       field :version, GraphQL::STRING_TYPE, null: true, description: 'Version string.'
       field :package_type, Types::Packages::PackageTypeEnum, null: false, description: 'Package type.'
+      field :status, Types::Packages::PackageStatusEnum, null: false, description: 'Package status.'
       field :tags, Types::Packages::PackageTagType.connection_type, null: true, description: 'Package tags.'
       field :project, Types::ProjectType, null: false, description: 'Project where the package is stored.'
       field :pipelines, Types::Ci::PipelineType.connection_type, null: true,

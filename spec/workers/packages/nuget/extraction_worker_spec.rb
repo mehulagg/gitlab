@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Packages::Nuget::ExtractionWorker, type: :worker do
   describe '#perform' do
-    let!(:package) { create(:nuget_package) }
+    let!(:package) { create(:nuget_package, :processing) }
     let(:package_file) { package.package_files.first }
     let(:package_file_id) { package_file.id }
 
@@ -14,14 +14,13 @@ RSpec.describe Packages::Nuget::ExtractionWorker, type: :worker do
     subject { described_class.new.perform(package_file_id) }
 
     shared_examples 'handling the metadata error' do |exception_class: ::Packages::Nuget::UpdatePackageFromMetadataService::InvalidMetadataError|
-      it 'removes the package and the package file' do
+      it 'updates package status to error' do
         expect(Gitlab::ErrorTracking).to receive(:log_exception).with(
           instance_of(exception_class),
           project_id: package.project_id
         )
         expect { subject }
-          .to change { Packages::Package.count }.by(-1)
-          .and change { Packages::PackageFile.count }.by(-1)
+          .to change { package.status }.from('processing').to('error')
       end
     end
 

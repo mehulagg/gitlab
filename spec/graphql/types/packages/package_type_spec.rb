@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe GitlabSchema.types['Package'] do
   it 'includes all the package fields' do
     expected_fields = %w[
-      id name version package_type
+      id name version package_type status
       created_at updated_at
       project
       tags pipelines metadata versions

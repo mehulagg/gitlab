@@ -16,7 +16,10 @@ module Packages
       end
 
       def execute
-        raise InvalidMetadataError.new('package name and/or package version not found in metadata') unless valid_metadata?
+        unless valid_metadata?
+          package_file.package.update(status: :error)
+          raise InvalidMetadataError.new('package name and/or package version not found in metadata')
+        end
 
         try_obtain_lease do
           @package_file.transaction do
@@ -33,6 +36,7 @@ module Packages
           end
         end
       rescue ActiveRecord::RecordInvalid => e
+        package_file.package.update(status: :error)
         raise InvalidMetadataError.new(e.message)
       end
 

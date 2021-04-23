@@ -9943,6 +9943,7 @@ Represents a package in the Package Registry. Note that this type is in beta and
 | <a id="packagepackagetype"></a>`packageType` | [`PackageTypeEnum!`](#packagetypeenum) | Package type. |
 | <a id="packagepipelines"></a>`pipelines` | [`PipelineConnection`](#pipelineconnection) | Pipelines that built the package. |
 | <a id="packageproject"></a>`project` | [`Project!`](#project) | Project where the package is stored. |
+| <a id="packagestatus"></a>`status` | [`PackageStatusEnum!`](#packagestatusenum) | Package status. |
 | <a id="packagetags"></a>`tags` | [`PackageTagConnection`](#packagetagconnection) | Package tags. |
 | <a id="packageupdatedat"></a>`updatedAt` | [`Time!`](#time) | Date of most recent update. |
 | <a id="packageversion"></a>`version` | [`String`](#string) | Version string. |
@@ -9977,6 +9978,7 @@ Represents a package details in the Package Registry. Note that this type is in 
 | <a id="packagedetailstypepackagetype"></a>`packageType` | [`PackageTypeEnum!`](#packagetypeenum) | Package type. |
 | <a id="packagedetailstypepipelines"></a>`pipelines` | [`PipelineConnection`](#pipelineconnection) | Pipelines that built the package. |
 | <a id="packagedetailstypeproject"></a>`project` | [`Project!`](#project) | Project where the package is stored. |
+| <a id="packagedetailstypestatus"></a>`status` | [`PackageStatusEnum!`](#packagestatusenum) | Package status. |
 | <a id="packagedetailstypetags"></a>`tags` | [`PackageTagConnection`](#packagetagconnection) | Package tags. |
 | <a id="packagedetailstypeupdatedat"></a>`updatedAt` | [`Time!`](#time) | Date of most recent update. |
 | <a id="packagedetailstypeversion"></a>`version` | [`String`](#string) | Version string. |
@@ -13543,6 +13545,15 @@ Rotation length unit of an on-call rotation.
 | <a id="oncallrotationunitenumdays"></a>`DAYS` | Days. |
 | <a id="oncallrotationunitenumhours"></a>`HOURS` | Hours. |
 | <a id="oncallrotationunitenumweeks"></a>`WEEKS` | Weeks. |
+
+### `PackageStatusEnum`
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="packagestatusenumdefault"></a>`DEFAULT` | Packages from the Valid package manager. |
+| <a id="packagestatusenumerror"></a>`ERROR` | Packages from the Error package manager. |
+| <a id="packagestatusenumhidden"></a>`HIDDEN` | Packages from the Hidden package manager. |
+| <a id="packagestatusenumprocessing"></a>`PROCESSING` | Packages from the Processing package manager. |
 
 ### `PackageTypeEnum`
 

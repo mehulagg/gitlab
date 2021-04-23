@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Packages::Rubygems::ExtractionWorker, type: :worker do
   describe '#perform' do
-    let_it_be(:package) { create(:rubygems_package) }
+    let_it_be(:package) { create(:rubygems_package, :processing) }
 
     let(:package_file) { package.package_files.first }
     let(:package_file_id) { package_file.id }
@@ -35,8 +35,7 @@ RSpec.describe Packages::Rubygems::ExtractionWorker, type: :worker do
       )
 
       expect { subject }
-        .to change { Packages::Package.count }.by(-1)
-        .and change { Packages::PackageFile.count }.by(-2)
+        .to change { package.status }.from('processing').to('error')
     end
 
     context 'returns when there is no package file' do

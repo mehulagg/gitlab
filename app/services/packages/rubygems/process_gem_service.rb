@@ -18,6 +18,7 @@ module Packages
       def execute
         return success if process_gem
 
+        package.update(status: :error)
         error('Gem was not processed')
       end
 
@@ -107,6 +108,7 @@ module Packages
           Gem::Package.new(File.open(file_path))
         end
       rescue
+        package.update(status: :error)
         raise ExtractionError.new('Unable to read gem file')
       end
 

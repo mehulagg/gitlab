@@ -20,7 +20,7 @@ module Packages
 
       rescue ::Packages::Rubygems::ProcessGemService::ExtractionError => e
         Gitlab::ErrorTracking.log_exception(e, project_id: package_file.project_id)
-        package_file.package.destroy!
+        package_file.package.update(status: :error)
       end
     end
   end
