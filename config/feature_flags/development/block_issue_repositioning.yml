@@ -1,0 +1,8 @@
+---
+name: block_issue_repositioning
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.12'
+type: development
+group: group::project management
+default_enabled: false

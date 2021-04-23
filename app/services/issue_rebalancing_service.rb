@@ -11,6 +11,8 @@ class IssueRebalancingService
   end
 
   def execute
+    return if issue.project.root_namespace&.issue_repositioning_disabled?
+
     gates = [issue.project, issue.project.group].compact
     return unless gates.any? { |gate| Feature.enabled?(:rebalance_issues, gate) }
 

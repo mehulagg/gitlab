@@ -16,6 +16,7 @@ class IssuePlacementWorker
   def perform(issue_id, project_id = nil)
     issue = find_issue(issue_id, project_id)
     return unless issue
+    return if issue.project.root_namespace&.issue_repositioning_disabled?
 
     # Move the oldest 100 unpositioned items to the end.
     # This is to deal with out-of-order execution of the worker,

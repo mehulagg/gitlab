@@ -87,6 +87,8 @@ module RelativePositioning
       number_of_gaps = objects.size # 1 to the nearest neighbour, and one between each
       representative = RelativePositioning.mover.context(objects.first)
 
+      raise PositioningDisabled if representative.resource_parent.root_namespace&.issue_repositioning_disabled?
+
       position = if at_end
                    representative.max_relative_position
                  else
