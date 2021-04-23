@@ -301,6 +301,10 @@ the Container Registry by themselves, follow the steps below.
 
 ## Configure storage for the Container Registry
 
+NOTE:
+You can use the object versioning to preserve, retrieve, and restore every version of every object stored in your buckets.
+However, this may result in higher storage usage and costs. 
+   
 You can configure the Container Registry to use various storage backends by
 configuring a storage driver. By default the GitLab Container Registry
 is configured to use the [file system driver](#use-file-system)
@@ -321,6 +325,8 @@ Although most S3 compatible services (like [MinIO](https://min.io/)) should work
 
 Read more about the individual driver's configuration options in the
 [Docker Registry docs](https://docs.docker.com/registry/configuration/#storage).
+
+
 
 ### Use file system
 
@@ -373,7 +379,7 @@ driver for the Container Registry.
 WARNING:
 GitLab does not back up Docker images that are not stored on the
 file system. Enable backups with your object storage provider if
-desired.
+desired. 
 
 **Omnibus GitLab installations**
 
