@@ -12,12 +12,38 @@ RSpec.describe "Admin::Users" do
   let!(:current_user) { create(:admin, last_activity_on: 5.days.ago) }
 
   before do
-    stub_feature_flags(vue_admin_users: false)
     sign_in(current_user)
     gitlab_enable_admin_mode_sign_in(current_user)
   end
 
-  describe 'GET /admin/users' do
+  context "when the vue admin users feature is disabled" do
+    before do
+      stub_feature_flags(vue_admin_users: false)
+    end
+
+    describe "GET /admin/users/:id/edit" do
+      before do
+        visit admin_users_path
+
+        click_user_edit_button(user.id)
+      end
+
+      describe 'Update shared runners quota' do
+        let!(:project) { create(:project, namespace: user.namespace, shared_runners_enabled: true) }
+
+        before do
+          fill_in "user_namespace_attributes_shared_runners_minutes_limit", with: "500"
+          click_button "Save changes"
+        end
+
+        it "shows page with new data" do
+          expect(page).to have_content('Pipeline minutes quota: 0 / 500')
+        end
+      end
+    end
+  end
+
+  describe 'GET /admin/users', :js do
     describe 'send emails to users' do
       context 'when `send_emails_from_admin_area` feature is enabled' do
         before do
@@ -71,7 +97,7 @@ RSpec.describe "Admin::Users" do
     end
   end
 
-  describe "GET /admin/users/:id" do
+  describe "GET /admin/users/:id", :js do
     describe 'Shared runners quota status' do
       before do
         user.namespace.update!(shared_runners_minutes_limit: 500)
@@ -107,10 +133,11 @@ RSpec.describe "Admin::Users" do
     end
   end
 
-  describe "GET /admin/users/:id/edit" do
+  describe "GET /admin/users/:id/edit", :js do
     before do
       visit admin_users_path
-      click_link "edit_user_#{user.id}"
+
+      click_user_edit_button(user.id)
     end
 
     describe "Update user account type" do
@@ -120,7 +147,7 @@ RSpec.describe "Admin::Users" do
         click_button "Save changes"
       end
 
-      it "changes account type to be auditor" do
+      it "changes account type to be auditor" do # FAILURE
         user.reload
 
         expect(user).not_to be_admin
@@ -136,13 +163,13 @@ RSpec.describe "Admin::Users" do
         click_button "Save changes"
       end
 
-      it "shows page with new data" do
+      it "shows page with new data" do # FAILURE
         expect(page).to have_content('Pipeline minutes quota: 0 / 500')
       end
     end
   end
 
-  describe 'show user keys for SSH and LDAP' do
+  describe 'show user keys for SSH and LDAP', :js do
     let!(:key1) do
       create(:ldap_key, user: user, title: "LDAP Key1")
     end
@@ -170,6 +197,12 @@ RSpec.describe "Admin::Users" do
         expect(page).to have_content(key1.title)
         expect(page).not_to have_button('Delete')
       end
+    end
+  end
+
+  def click_user_edit_button(user_id)
+    page.within("[data-testid='user-actions-#{user_id}']") do
+      click_link 'Edit'
     end
   end
 end

@@ -9,10 +9,9 @@ RSpec.describe 'Admin::Users::User' do
   before do
     sign_in(current_user)
     gitlab_enable_admin_mode_sign_in(current_user)
-    stub_feature_flags(vue_admin_users: false)
   end
 
-  describe 'GET /admin/users/:id' do
+  describe 'GET /admin/users/:id', :js do
     it 'has user info', :aggregate_failures do
       visit admin_users_path
       click_link user.name
@@ -171,6 +170,8 @@ RSpec.describe 'Admin::Users::User' do
         it 'logs in as the user when impersonate is clicked' do
           subject
 
+          find('[data-qa-selector="user_menu"]').click
+
           expect(page.find(:css, '[data-testid="user-profile-link"]')['data-user']).to eql(another_user.username)
         end
 
@@ -204,6 +205,8 @@ RSpec.describe 'Admin::Users::User' do
 
         it 'logs out of impersonated user back to original user' do
           subject
+
+          find('[data-qa-selector="user_menu"]').click
 
           expect(page.find(:css, '[data-testid="user-profile-link"]')['data-user']).to eq(current_user.username)
         end
@@ -276,7 +279,7 @@ RSpec.describe 'Admin::Users::User' do
     end
   end
 
-  describe 'show user attributes' do
+  describe 'show user attributes', :js do
     it 'has expected attributes', :aggregate_failures do
       visit admin_users_path
 

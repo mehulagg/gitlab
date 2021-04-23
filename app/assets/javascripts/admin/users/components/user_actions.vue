@@ -70,14 +70,14 @@ export default {
 </script>
 
 <template>
-  <div class="gl-display-flex gl-justify-content-end">
-    <gl-button v-if="hasEditAction" data-testid="edit" :href="userPaths.edit">{{
+  <div class="gl-display-flex gl-justify-content-end" :data-testid="`user-actions-${user.id}`">
+    <gl-button v-if="hasEditAction" data-testid="edit-button" :href="userPaths.edit">{{
       $options.i18n.edit
     }}</gl-button>
 
     <gl-dropdown
       v-if="hasDropdownActions"
-      data-testid="actions"
+      data-testid="dropdown-toggle"
       right
       class="gl-ml-2"
       icon="settings"

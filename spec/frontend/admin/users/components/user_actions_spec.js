@@ -14,9 +14,10 @@ describe('AdminUserActions component', () => {
   const user = users[0];
   const userPaths = generateUserPaths(paths, user.username);
 
-  const findEditButton = () => wrapper.find('[data-testid="edit"]');
-  const findActionsDropdown = () => wrapper.find('[data-testid="actions"');
-  const findDropdownDivider = () => wrapper.find(GlDropdownDivider);
+  const findUserActions = (id) => wrapper.findByTestId(`user-actions-${id}`);
+  const findEditButton = (id = user.id) => findUserActions(id).findByTestId('edit-button');
+  const findActionsDropdown = (id = user.id) => findUserActions(id).findByTestId('dropdown-toggle');
+  const findDropdownDivider = () => wrapper.findComponent(GlDropdownDivider);
 
   const initComponent = ({ actions = [] } = {}) => {
     wrapper = shallowMount(AdminUserActions, {

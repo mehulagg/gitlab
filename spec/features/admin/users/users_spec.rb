@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe 'Admin::Users' do
-  include Spec::Support::Helpers::Features::ResponsiveTableHelpers
-
   let_it_be(:user, reload: true) { create(:omniauth_user, provider: 'twitter', extern_uid: '123456') }
   let_it_be(:current_user) { create(:admin, last_activity_on: 5.days.ago) }
 
@@ -13,9 +11,8 @@ RSpec.describe 'Admin::Users' do
     gitlab_enable_admin_mode_sign_in(current_user)
   end
 
-  describe 'GET /admin/users' do
+  describe 'GET /admin/users', :js do
     before do
-      stub_feature_flags(vue_admin_users: false)
       visit admin_users_path
     end
 
@@ -24,6 +21,8 @@ RSpec.describe 'Admin::Users' do
     end
 
     it "has users list" do
+      current_user.reload
+
       expect(page).to have_content(current_user.email)
       expect(page).to have_content(current_user.name)
       expect(page).to have_content(current_user.created_at.strftime('%e %b, %Y'))
@@ -31,6 +30,9 @@ RSpec.describe 'Admin::Users' do
       expect(page).to have_content(user.email)
       expect(page).to have_content(user.name)
       expect(page).to have_content('Projects')
+
+      click_user_dropdown_toggle(user.id)
+
       expect(page).to have_button('Block')
       expect(page).to have_button('Deactivate')
       expect(page).to have_button('Delete user')
@@ -112,7 +114,6 @@ RSpec.describe 'Admin::Users' do
         visit admin_users_path(search_query: 'Foo')
 
         sort_by('Name')
-
         expect(page).not_to have_content('Dmitriy')
         expect(first_row.text).to include('Foo Bar')
         expect(second_row.text).to include('Foo Baz')
@@ -283,9 +284,9 @@ RSpec.describe 'Admin::Users' do
     end
 
     def click_action_in_user_dropdown(user_id, action)
-      find("[data-testid='user-action-button-#{user_id}']").click
+      click_user_dropdown_toggle(user_id)
 
-      within find("[data-testid='user-action-dropdown-#{user_id}']") do
+      within find("[data-testid='user-actions-#{user_id}']") do
         find('li button', text: action).click
       end
 
@@ -417,11 +418,10 @@ RSpec.describe 'Admin::Users' do
     end
   end
 
-  describe 'GET /admin/users/:id/edit' do
+  describe 'GET /admin/users/:id/edit', :js do
     before do
-      stub_feature_flags(vue_admin_users: false)
       visit admin_users_path
-      click_link "edit_user_#{user.id}"
+      click_user_edit_button(user.id)
     end
 
     it 'has user edit page' do
@@ -547,9 +547,30 @@ RSpec.describe 'Admin::Users' do
     expect(find('.breadcrumbs-sub-title')).to have_content(content)
   end
 
-  def sort_by(text)
-    page.within('.user-sort-dropdown') do
-      click_link text
+  def click_user_edit_button(user_id)
+    page.within("[data-testid='user-actions-#{user_id}']") do
+      click_link 'Edit'
+    end
+  end
+
+  def click_user_dropdown_toggle(user_id)
+    page.within("[data-testid='user-actions-#{user_id}']") do
+      find("[data-testid='dropdown-toggle']").click
+    end
+  end
+
+  def first_row
+    page.all('[role="row"]')[1]
+  end
+
+  def second_row
+    page.all('[role="row"]')[2]
+  end
+
+  def sort_by(option)
+    page.within('.filtered-search-block') do
+      find('.dropdown-menu-toggle').click
+      click_link option
     end
   end
 end
