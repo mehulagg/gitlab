@@ -135,7 +135,7 @@ module Gitlab
         #
         # (id < 3 AND created_at IS NULL) OR (created_at IS NOT NULL)
         def build_where_values(values)
-          return if values.blank?
+          return [] if values.blank?
 
           verify_incoming_values!(values)
 
@@ -156,13 +156,31 @@ module Gitlab
             end
           end
 
-          build_or_query(where_values)
+          where_values
+        end
+
+        def where_values_with_or_query(values)
+          build_or_query(build_where_values(values.with_indifferent_access))
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
-        def apply_cursor_conditions(scope, values = {})
+        def apply_cursor_conditions(scope, values, use_union_optimization: false)
+          values ||= {}
+          transformed_values = values.with_indifferent_access
           scope = apply_custom_projections(scope)
-          scope.where(build_where_values(values.with_indifferent_access))
+
+          where_values = build_where_values(transformed_values)
+
+          if use_union_optimization && where_values.size > 1
+            scopes = where_values.map do |where_value|
+              scope.dup.where(where_value).reorder(self)
+            end
+            scope.model.from_union(scopes, remove_duplicates: false, remove_order: false)
+          elsif where_values.blank?
+            scope
+          else
+            scope.where(where_values_with_or_query(transformed_values))
+          end
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
