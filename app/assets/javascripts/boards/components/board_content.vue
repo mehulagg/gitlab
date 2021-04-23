@@ -48,7 +48,7 @@ export default {
         : this.lists;
     },
     canDragColumns() {
-      return !this.isEpicBoard && this.glFeatures.graphqlBoardLists && this.canAdminList;
+      return (this.isEpicBoard || this.glFeatures.graphqlBoardLists) && this.canAdminList;
     },
     boardColumnWrapper() {
       return this.canDragColumns ? Draggable : 'div';
@@ -79,8 +79,6 @@ export default {
 
     handleDragOnEnd(params) {
       sortableEnd();
-      if (this.isEpicBoard) return;
-
       const { item, newIndex, oldIndex, to } = params;
 
       const listId = item.dataset.id;

@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/browser';
 import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create.mutation.graphql';
 import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
+import updateEpicBoardListMutation from 'ee_else_ce/boards/graphql/epic_board_list_update.mutation.graphql';
 import issueMoveListMutation from 'ee_else_ce/boards/graphql/issue_move_list.mutation.graphql';
 import {
   BoardType,
@@ -238,10 +239,10 @@ export default {
     dispatch('updateList', { listId, position: newPosition, backupList });
   },
 
-  updateList: ({ commit }, { listId, position, collapsed, backupList }) => {
+  updateList: ({ commit, getters }, { listId, position, collapsed, backupList }) => {
     gqlClient
       .mutate({
-        mutation: updateBoardListMutation,
+        mutation: getters.isEpicBoard ? updateEpicBoardListMutation : updateBoardListMutation,
         variables: {
           listId,
           position,
