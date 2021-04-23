@@ -868,13 +868,6 @@ configuration is tried to be resolved automatically before reporting an error.
 
 ### Object storage settings
 
-WARNING:
-With the following settings, Pages uses both NFS and Object Storage locations when deploying the
-site. **Do not remove the existing NFS mount used by Pages** when applying these settings. For more
-information, see the epics
-[3901](https://gitlab.com/groups/gitlab-org/-/epics/3901#how-to-test-object-storage-integration-in-beta)
-and [3910](https://gitlab.com/groups/gitlab-org/-/epics/3910).
-
 The following settings are:
 
 - Nested under `pages:` and then `object_store:` on source installations.
@@ -885,6 +878,10 @@ The following settings are:
 | `enabled` | Whether object storage is enabled. | `false` |
 | `remote_directory` | The name of the bucket where Pages site content is stored. | |
 | `connection` | Various connection options described below. | |
+
+NOTE:
+if you want to disconnect NFS server, then you need to [explicitly disable
+local store](#disabling-pages-local-storage), and it's only possible after upgrading to GitLab 13.12.
 
 #### S3-compatible connection settings
 
@@ -1020,6 +1017,25 @@ After the migration to object storage is performed, you can choose to revert you
 ```shell
 sudo gitlab-rake gitlab:pages:deployments:migrate_to_local
 ```
+
+### Disabling Pages local storage
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/301159) in GitLab 13.11.
+
+If you use [object storage](#using-object-storage) you may also want to completelly disable local storage.
+To do that:
+
+1. Add the following to your `/etc/gitlab/gitlab.rb` file:
+
+   ```ruby
+   gitlab_rails['pages_local_store_enabled'] = false
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+Starting from GitLab 13.12 it also disables [updating legacy storate](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60005)
+and [serving from it](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60010).
+So it allows you to disconnect NFS server used for GitLab Pages.
 
 ## Backup
 
