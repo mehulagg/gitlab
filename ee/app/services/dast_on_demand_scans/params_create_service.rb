@@ -68,9 +68,11 @@ module DastOnDemandScans
     def target_config
       url = dast_site&.url
 
-      return { api_specification_url: url } if dast_site_profile.target_type == 'api'
-
-      { target_url: url }
+      if dast_site_profile.target_type == 'website'
+        { target_url: url }
+      else
+        { api_specification_url: url }
+      end
     end
 
     def site_profile_config
