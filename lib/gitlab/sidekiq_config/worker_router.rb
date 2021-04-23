@@ -78,9 +78,7 @@ module Gitlab
         raise InvalidRoutingRuleError, 'The set of routing rule must be an array' unless routing_rules.is_a?(Array)
 
         routing_rules.map do |rule_tuple|
-          if !rule_tuple.is_a?(Array) || rule_tuple.length != 2
-            raise InvalidRoutingRuleError, "Routing rule `#{rule_tuple.inspect}` is invalid"
-          end
+          raise InvalidRoutingRuleError, "Routing rule `#{rule_tuple.inspect}` is invalid" unless valid_routing_rule?(rule_tuple)
 
           selector, destination_queue = rule_tuple
           RuleEvaluator.new(
@@ -88,6 +86,10 @@ module Gitlab
             destination_queue
           )
         end
+      end
+
+      def valid_routing_rule?(rule_tuple)
+        rule_tuple.is_a?(Array) && rule_tuple.length == 2
       end
 
       def generate_worker_metadata(worker_klass)
