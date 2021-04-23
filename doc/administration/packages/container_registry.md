@@ -326,8 +326,6 @@ Although most S3 compatible services (like [MinIO](https://min.io/)) should work
 Read more about the individual driver's configuration options in the
 [Docker Registry docs](https://docs.docker.com/registry/configuration/#storage).
 
-
-
 ### Use file system
 
 If you want to store your images on the file system, you can change the storage
