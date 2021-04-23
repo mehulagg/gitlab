@@ -10,6 +10,10 @@ module Ci
     include TokenAuthenticatable
     include IgnorableColumns
     include FeatureGate
+    include Limitable
+
+    self.limit_name = 'ci_registered_runners'
+    self.limit_scope = :runner_scope
 
     add_authentication_token_field :token, encrypted: -> { Feature.enabled?(:ci_runners_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
 
@@ -194,6 +198,13 @@ module Ci
       else
         order_created_at_desc
       end
+    end
+
+    def runner_scope
+      return Limitable::Scope.new(Plan.default.actual_limits, all) if instance_type?
+      return Limitable::Scope.new(groups.first.actual_limits, groups.first.runners) if group_type?
+
+      Limitable::Scope.new(projects.first.actual_limits, projects.first.runners) if projects.first
     end
 
     def assign_to(project, current_user = nil)
