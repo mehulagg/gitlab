@@ -30,7 +30,7 @@ module EE
             result[project_id] = {
               average_coverage: average_coverage,
               coverage_count: coverage_count,
-              last_updated_on: date
+              last_updated_on: Date.parse(date.to_s)
             }
           end
         end
