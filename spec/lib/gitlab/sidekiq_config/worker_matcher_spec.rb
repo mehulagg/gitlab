@@ -11,6 +11,7 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerMatcher do
       [
         {
           name: 'a',
+          worker_name: 'WorkerA',
           feature_category: :category_a,
           has_external_dependencies: false,
           urgency: :low,
@@ -19,6 +20,7 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerMatcher do
         },
         {
           name: 'a:2',
+          worker_name: 'WorkerA2',
           feature_category: :category_a,
           has_external_dependencies: false,
           urgency: :high,
@@ -27,6 +29,7 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerMatcher do
         },
         {
           name: 'b',
+          worker_name: 'WorkerB',
           feature_category: :category_b,
           has_external_dependencies: true,
           urgency: :high,
@@ -35,6 +38,7 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerMatcher do
         },
         {
           name: 'c',
+          worker_name: 'WorkerC',
           feature_category: :category_c,
           has_external_dependencies: false,
           urgency: :throttled,
@@ -46,6 +50,12 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerMatcher do
 
     context 'with valid input' do
       where(:query, :expected_metadatas) do
+        # worker_name
+        'worker_name=WorkerA' | %w(a)
+        'worker_name=WorkerA2' | %w(a:2)
+        'worker_name=WorkerB|worker_name=WorkerD' | %w(b)
+        'worker_name!=WorkerA' | %w(a:2 b c)
+
         # feature_category
         'feature_category=category_a' | %w(a a:2)
         'feature_category=category_a,category_c' | %w(a a:2 c)
@@ -113,7 +123,7 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerMatcher do
         'feature_category="category_a"' | described_class::InvalidTerm
         'feature_category=' | described_class::InvalidTerm
         'feature_category~category_a' | described_class::InvalidTerm
-        'worker_name=a' | described_class::UnknownPredicate
+        'invalid_term=a' | described_class::UnknownPredicate
       end
 
       with_them do
