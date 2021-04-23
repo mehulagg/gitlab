@@ -80,26 +80,6 @@ If necessary, you can disable **Admin Mode** as an administrator by using one of
   ```ruby
   ::Gitlab::CurrentSettings.update_attributes!(admin_mode: false)
   ```
-  
-## Enable or disable Admin Mode
-
-Admin Mode is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:user_mode_in_session)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:user_mode_in_session)
-```
-
 ## Two-factor authentication
 
 When this feature is enabled, all users must use the [two-factor authentication](../../profile/account/two_factor_authentication.md).
