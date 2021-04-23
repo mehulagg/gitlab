@@ -90,6 +90,7 @@ module API
         optional :due_date, type: String, desc: 'Date string in the format YEAR-MONTH-DAY'
         optional :confidential, type: Boolean, desc: 'Boolean parameter if the issue should be confidential'
         optional :discussion_locked, type: Boolean, desc: " Boolean parameter indicating if the issue's discussion is locked"
+        optional :issue_type, type: String, values: Issue.issue_types.keys, desc: "The type of the issue. Accepts: #{Issue.issue_types.keys.join(', ')}"
 
         use :optional_issue_params_ee
       end
