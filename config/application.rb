@@ -31,6 +31,7 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_malformed_strings')
     require_dependency Rails.root.join('lib/gitlab/middleware/rack_multipart_tempfile_factory')
     require_dependency Rails.root.join('lib/gitlab/runtime')
+    require_dependency Rails.root.join('lib/gitlab/database/dynamic_shards')
 
     config.autoloader = :classic
 

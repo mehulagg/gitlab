@@ -41,6 +41,10 @@ module Gitlab
       def endpoint_id
         Labkit::Context.current&.get_attribute(:caller_id)
       end
+
+      def shard_id
+        NamespaceShard.current_shard
+      end
     end
   end
 end

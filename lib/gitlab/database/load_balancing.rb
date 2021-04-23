@@ -84,6 +84,9 @@ module Gitlab
 
       # Returns true if load balancing is to be enabled.
       def self.enable?
+        # TODO(kamil): not supported for Sharding, yet
+        return false
+
         return false if Gitlab::Runtime.rake?
         return false if Gitlab::Runtime.sidekiq? && !Gitlab::Utils.to_boolean(ENV['ENABLE_LOAD_BALANCING_FOR_SIDEKIQ'], default: false)
         return false unless self.configured?
