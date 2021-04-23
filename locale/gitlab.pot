@@ -17962,9 +17962,6 @@ msgstr ""
 msgid "Iterations"
 msgstr ""
 
-msgid "Iterations cadences"
-msgstr ""
-
 msgid "Iterations|Automated scheduling"
 msgstr ""
 
@@ -32173,6 +32170,9 @@ msgid "This feature requires local storage to be enabled"
 msgstr ""
 
 msgid "This feature should be used with an index that was created after 13.0"
+msgstr ""
+
+msgid "This field is required"
 msgstr ""
 
 msgid "This field is required."

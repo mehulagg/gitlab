@@ -11,6 +11,7 @@ import {
 import { visitUrl } from '~/lib/utils/url_utility';
 import { s__, __ } from '~/locale';
 import createCadence from '../queries/create_cadence.mutation.graphql';
+import { truncateWidth } from '../../../../../../app/assets/javascripts/lib/utils/text_utility';
 
 const i18n = Object.freeze({
   title: {
@@ -92,7 +93,7 @@ export default {
       },
       touched: {
         title: null,
-        startDate: null,
+        startDate: true,
         durationInWeeks: null,
         iterationsInAdvance: null,
       },
@@ -246,7 +247,7 @@ export default {
         label-for="cadence-start-date"
         :description="i18n.startDate.description"
         :invalid-feedback="i18n.requiredField"
-        :validated="touched.startDate"
+        :validated="true"
       >
         <gl-datepicker :target="null">
           <gl-form-input
@@ -270,7 +271,7 @@ export default {
         label-for="cadence-duration"
         :description="i18n.duration.description"
         :invalid-feedback="i18n.requiredField"
-        :validated="touched.startDate"
+        :validated="touched.duration"
       >
         <gl-form-select
           id="cadence-duration"

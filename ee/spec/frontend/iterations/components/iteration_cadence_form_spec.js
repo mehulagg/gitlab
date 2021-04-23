@@ -1,4 +1,4 @@
-import { GlForm } from '@gitlab/ui';
+import { GlForm, GlFormGroup } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { ApolloMutation } from 'vue-apollo';
@@ -39,7 +39,7 @@ describe('Iteration cadence form', () => {
         propsData: props,
         stubs: {
           ApolloMutation,
-          MarkdownField: { template: '<div><slot name="textarea"></slot></div>' },
+          GlFormGroup,
         },
         mocks: {
           $apollo: {
@@ -68,7 +68,7 @@ describe('Iteration cadence form', () => {
     expect(wrapper.find(GlForm).exists()).toBe(true);
   });
 
-  describe('New iteration', () => {
+  describe('Create cadence', () => {
     beforeEach(() => {
       createComponent();
     });
@@ -77,6 +77,16 @@ describe('Iteration cadence form', () => {
       clickCancel();
 
       expect(visitUrl).toHaveBeenCalledWith(TEST_HOST);
+    });
+
+    describe('required fields', () => {
+      it('requires title', () => {
+        clickSave();
+
+        console.log(wrapper.html());
+
+        expect(wrapper.findComponent(GlFormGroup)).toHaveText('This field is required');
+      });
     });
 
     describe('save', () => {
