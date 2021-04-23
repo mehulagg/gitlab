@@ -1,5 +1,12 @@
 <script>
-import { GlAlert, GlButton, GlEmptyState, GlLoadingIcon, GlModalDirective } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlButton,
+  GlEmptyState,
+  GlLoadingIcon,
+  GlModalDirective,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -11,10 +18,13 @@ export const addScheduleModalId = 'addScheduleModal';
 
 export const i18n = {
   title: s__('OnCallSchedules|On-call schedules'),
+  add: {
+    button: s__('OnCallSchedules|Add a schedule'),
+    tooltip: s__('OnCallSchedules|Add an additional schedule to your project'),
+  },
   emptyState: {
     title: s__('OnCallSchedules|Create on-call schedules  in GitLab'),
     description: s__('OnCallSchedules|Route alerts directly to specific members of your team'),
-    button: s__('OnCallSchedules|Add a schedule'),
   },
   successNotification: {
     title: s__('OnCallSchedules|Try adding a rotation'),
@@ -37,6 +47,7 @@ export default {
   },
   directives: {
     GlModal: GlModalDirective,
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [glFeatureFlagMixin()],
   inject: ['emptyOncallSchedulesSvgPath', 'projectPath'],
@@ -87,11 +98,15 @@ export default {
         <gl-button
           v-if="glFeatures.multipleOncallSchedules"
           v-gl-modal="$options.addScheduleModalId"
+          v-gl-tooltip.left.viewport.hover
+          :title="$options.i18n.add.tooltip"
+          :aria-label="$options.i18n.add.tooltip"
           category="secondary"
           variant="confirm"
           class="gl-mt-5"
+          data-testid="add-additional-schedules-button"
         >
-          {{ $options.i18n.emptyState.button }}
+          {{ $options.i18n.add.button }}
         </gl-button>
       </div>
       <gl-alert
@@ -114,7 +129,7 @@ export default {
     >
       <template #actions>
         <gl-button v-gl-modal="$options.addScheduleModalId" variant="confirm">
-          {{ $options.i18n.emptyState.button }}
+          {{ $options.i18n.add.button }}
         </gl-button>
       </template>
     </gl-empty-state>
