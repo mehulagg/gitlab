@@ -63,6 +63,7 @@ module Gitlab
           metric_for(:gauge_batch_size).set(base_labels, tracking_record.batch_size)
           metric_for(:gauge_sub_batch_size).set(base_labels, tracking_record.sub_batch_size)
           metric_for(:counter_updated_tuples).increment(base_labels, tracking_record.batch_size)
+          metric_for(:gauge_total_tuple_count).set(base_labels, tracking_record.batched_migration.total_tuple_count)
 
           # Time efficiency: Ratio of duration to interval (ideal: less than, but close to 1)
           efficiency = (tracking_record.finished_at - tracking_record.started_at).to_i / migration.interval.to_f
@@ -110,6 +111,10 @@ module Gitlab
                 'Ratio of job duration to interval',
                 {},
                 [0.5, 0.9, 1, 1.5, 2].freeze
+              ),
+              gauge_total_tuple_count: Gitlab::Metrics.gauge(
+                :batched_migration_total_tuple_count,
+                'Total tuple count the migration needs to touch'
               )
             }
           end

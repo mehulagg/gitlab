@@ -101,6 +101,12 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
         subject
       end
     end
+
+    it 'reports the total tuple count for the migration' do
+      expect(described_class.metrics[:gauge_total_tuple_count]).to receive(:set).with(labels, job_record.batched_migration.total_tuple_count)
+
+      subject
+    end
   end
 
   context 'when the migration job does not raise an error' do
