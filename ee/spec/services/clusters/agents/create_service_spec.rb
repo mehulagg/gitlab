@@ -66,57 +66,6 @@ RSpec.describe Clusters::Agents::CreateService do
           message: ["Name can contain only lowercase letters, digits, and '-', but cannot start or end with '-'"]
         })
       end
-
-      context 'not on GitLab.com' do
-        before do
-          allow(::Gitlab).to receive(:com?).and_return(false)
-        end
-
-        context 'kubernetes_agent_on_gitlab_com feature flag disabled' do
-          before do
-            stub_feature_flags(kubernetes_agent_on_gitlab_com: project)
-          end
-
-          it 'returns success status', :aggregate_failures do
-            result = service.execute(name: 'success')
-
-            expect(result[:status]).to eq(:success)
-            expect(result[:message]).to be_nil
-          end
-        end
-      end
-
-      context 'on GitLab.com' do
-        before do
-          allow(::Gitlab).to receive(:com?).and_return(true)
-        end
-
-        context 'kubernetes_agent_on_gitlab_com feature flag disabled' do
-          before do
-            stub_feature_flags(kubernetes_agent_on_gitlab_com: false)
-          end
-
-          it 'returns errors when project is not in rollout' do
-            expect(service.execute(name: 'not-in-rollout')).to eq({
-              status: :error,
-              message: 'This project is not included in the GitLab.com rollout for Kubernetes agent'
-            })
-          end
-        end
-
-        context 'kubernetes_agent_on_gitlab_com feature flag enabled' do
-          before do
-            stub_feature_flags(kubernetes_agent_on_gitlab_com: project)
-          end
-
-          it 'returns success status', :aggregate_failures do
-            result = service.execute(name: 'success')
-
-            expect(result[:status]).to eq(:success)
-            expect(result[:message]).to be_nil
-          end
-        end
-      end
     end
   end
 end

@@ -34,32 +34,6 @@ RSpec.describe ClustersHelper do
           expect(subject).to be_falsey
         end
       end
-
-      context 'GitLab.com' do
-        before do
-          allow(Gitlab).to receive(:com?).and_return(true)
-        end
-
-        context 'when kubernetes_agent_on_gitlab_com feature flag is disabled' do
-          before do
-            stub_feature_flags(kubernetes_agent_on_gitlab_com: false)
-          end
-
-          it 'does not allows agents to display' do
-            expect(subject).to be_falsey
-          end
-        end
-
-        context 'kubernetes_agent_on_gitlab_com feature flag enabled' do
-          before do
-            stub_feature_flags(kubernetes_agent_on_gitlab_com: clusterable)
-          end
-
-          it 'allows agents to display' do
-            expect(subject).to be_truthy
-          end
-        end
-      end
     end
   end
 end
