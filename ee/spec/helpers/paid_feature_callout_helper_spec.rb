@@ -73,19 +73,40 @@ RSpec.describe PaidFeatureCalloutHelper do
     let(:subscription) { instance_double(GitlabSubscription, plan_title: 'Ultimate') }
     let(:group) { instance_double(Group, trial_days_remaining: 12, gitlab_subscription: subscription) }
 
-    subject { helper.paid_feature_popover_data_attrs(group: group, feature_name: 'first feature') }
+    context 'when given group & feature_name params' do
+      subject { helper.paid_feature_popover_data_attrs(group: group, feature_name: 'first feature') }
 
-    it 'returns the set of data attributes needed to bootstrap the PaidFeatureCalloutPopover component' do
-      expected_attrs = {
-        container_id: 'first-feature-callout',
-        feature_name: 'first feature',
-        days_remaining: 12,
-        plan_name_for_trial: 'Ultimate',
-        plan_name_for_upgrade: 'Premium',
-        target_id: 'first-feature-callout'
-      }
+      it 'returns the set of data attributes needed to bootstrap the PaidFeatureCalloutPopover component' do
+        expected_attrs = {
+          container_id: 'first-feature-callout',
+          feature_name: 'first feature',
+          days_remaining: 12,
+          plan_name_for_trial: 'Ultimate',
+          plan_name_for_upgrade: 'Premium',
+          promo_image_path: nil,
+          target_id: 'first-feature-callout'
+        }
 
-      is_expected.to eq(expected_attrs)
+        is_expected.to eq(expected_attrs)
+      end
+    end
+
+    context 'when given group, feature_name, & promo_image_path params' do
+      subject { helper.paid_feature_popover_data_attrs(group: group, feature_name: 'second feature', promo_image_path: 'path/to/an/image.svg') }
+
+      it 'returns the set of data attributes needed to bootstrap the PaidFeatureCalloutPopover component' do
+        expected_attrs = {
+          container_id: 'second-feature-callout',
+          feature_name: 'second feature',
+          days_remaining: 12,
+          plan_name_for_trial: 'Ultimate',
+          plan_name_for_upgrade: 'Premium',
+          promo_image_path: 'path/to/an/image.svg',
+          target_id: 'second-feature-callout'
+        }
+
+        is_expected.to eq(expected_attrs)
+      end
     end
   end
 end

@@ -26,6 +26,7 @@ export const initPaidFeatureCalloutPopover = () => {
     featureName,
     planNameForTrial,
     planNameForUpgrade,
+    promoImagePath,
     targetId,
   } = el.dataset;
 
@@ -39,6 +40,7 @@ export const initPaidFeatureCalloutPopover = () => {
           featureName,
           planNameForTrial,
           planNameForUpgrade,
+          promoImagePath,
           targetId,
         },
       }),

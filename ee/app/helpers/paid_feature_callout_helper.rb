@@ -17,7 +17,7 @@ module PaidFeatureCalloutHelper
     { id: feature_callout_container_id(feature_name) }
   end
 
-  def paid_feature_popover_data_attrs(group:, feature_name:)
+  def paid_feature_popover_data_attrs(group:, feature_name:, promo_image_path: nil)
     container_id = feature_callout_container_id(feature_name)
 
     {
@@ -26,6 +26,7 @@ module PaidFeatureCalloutHelper
       feature_name: feature_name,
       plan_name_for_trial: group.gitlab_subscription&.plan_title,
       plan_name_for_upgrade: 'Premium',
+      promo_image_path: promo_image_path,
       target_id: container_id
     }
   end

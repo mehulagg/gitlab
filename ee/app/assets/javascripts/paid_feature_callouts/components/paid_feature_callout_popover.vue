@@ -34,6 +34,11 @@ export default {
       type: String,
       required: true,
     },
+    promoImagePath: {
+      type: String,
+      required: false,
+      default: undefined,
+    },
     targetId: {
       type: String,
       required: true,
@@ -106,6 +111,10 @@ export default {
     @shown="onShown"
   >
     <template #title>{{ popoverTitle }}</template>
+
+    <div v-if="promoImagePath" class="gl-display-flex gl-justify-content-center gl-mt-n3 gl-mb-3">
+      <img :src="promoImagePath" width="48" class="svg" />
+    </div>
 
     {{ popoverContent }}
   </gl-popover>

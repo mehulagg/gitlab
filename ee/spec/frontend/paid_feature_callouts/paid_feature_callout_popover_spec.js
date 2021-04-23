@@ -64,6 +64,33 @@ describe('PaidFeatureCalloutPopover', () => {
     });
   });
 
+  describe('promo image', () => {
+    const findPromoImage = () => wrapper.find('img');
+
+    describe('with the optional promoImagePath prop', () => {
+      beforeEach(() => {
+        wrapper = createComponent({
+          ...defaultProps,
+          promoImagePath: 'path/to/some/image.svg',
+        });
+      });
+
+      it('renders the promo image', () => {
+        expect(findPromoImage().exists()).toBe(true);
+      });
+    });
+
+    describe('without the optional promoImagePath prop', () => {
+      beforeEach(() => {
+        wrapper = createComponent();
+      });
+
+      it('does not render a promo image', () => {
+        expect(findPromoImage().exists()).toBe(false);
+      });
+    });
+  });
+
   describe('onShown', () => {
     beforeEach(() => {
       trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
