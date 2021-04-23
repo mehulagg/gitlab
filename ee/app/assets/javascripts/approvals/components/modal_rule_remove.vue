@@ -10,9 +10,12 @@ const i18n = {
   regularRule: {
     primaryButtonText: __('Remove approvers'),
     modalTitle: __('Remove approvers?'),
-    removeWarningText: s__(
-      'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{nMembers}.',
-    ),
+    removeWarningText: (i) =>
+      n__(
+        'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{strongStart}%d member%{strongEnd}. Approvals from this member are not revoked.',
+        'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{strongStart}%d members%{strongEnd}. Approvals from these members are not revoked.',
+        i,
+      ),
   },
   externalRule: {
     primaryButtonText: s__('ApprovalRuleRemove|Remove approval gate'),
@@ -48,13 +51,6 @@ export default {
         this.rule.approvers.length,
       );
     },
-    revokeWarningText() {
-      return n__(
-        'ApprovalRuleRemove|Approvals from this member are not revoked.',
-        'ApprovalRuleRemove|Approvals from these members are not revoked.',
-        this.rule.approvers.length,
-      );
-    },
     modalTitle() {
       return this.isExternalApprovalRule
         ? i18n.externalRule.modalTitle
@@ -63,7 +59,7 @@ export default {
     modalText() {
       return this.isExternalApprovalRule
         ? i18n.externalRule.removeWarningText
-        : `${i18n.regularRule.removeWarningText} ${this.revokeWarningText}`;
+        : i18n.regularRule.removeWarningText(this.rule.approvers.length);
     },
     primaryButtonProps() {
       const text = this.isExternalApprovalRule
@@ -106,8 +102,8 @@ export default {
         <template #name>
           <strong>{{ rule.name }}</strong>
         </template>
-        <template #nMembers>
-          <strong>{{ membersText }}</strong>
+        <template #strong="{ content }">
+          <strong>{{ content }}</strong>
         </template>
       </gl-sprintf>
     </p>
