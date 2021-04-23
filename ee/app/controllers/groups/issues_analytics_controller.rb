@@ -31,7 +31,7 @@ class Groups::IssuesAnalyticsController < Groups::ApplicationController
   private
 
   def authorize_read_issue_analytics!
-    render_404 unless group.feature_available?(:issues_analytics)
+    render_404 unless group.licensed_feature_available?(:issues_analytics)
   end
 
   def authorize_read_group!

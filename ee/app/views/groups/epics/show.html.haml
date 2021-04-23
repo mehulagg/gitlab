@@ -3,8 +3,8 @@
 - @content_class = 'limit-container-width' unless fluid_layout
 
 - epic_reference = @epic.to_reference
-- sub_epics_feature_available = @group.feature_available?(:subepics)
-- issuable_health_status_feature_available = @group.feature_available?(:issuable_health_status)
+- sub_epics_feature_available = @group.licensed_feature_available?(:subepics)
+- issuable_health_status_feature_available = @group.licensed_feature_available?(:issuable_health_status)
 
 - allow_sub_epics = sub_epics_feature_available ? 'true' : 'false'
 - allow_issuable_health_status = issuable_health_status_feature_available ? 'true' : 'false'

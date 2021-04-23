@@ -56,7 +56,7 @@ module EE
 
       with_scope :subject
       condition(:group_push_rules_enabled) do
-        @subject.group && @subject.group.feature_available?(:push_rules)
+        @subject.group && @subject.group.licensed_feature_available?(:push_rules)
       end
 
       with_scope :subject

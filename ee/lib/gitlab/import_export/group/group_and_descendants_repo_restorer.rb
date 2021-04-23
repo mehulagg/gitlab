@@ -26,7 +26,7 @@ module Gitlab
           # If, at some point, we add more repositories to groups, we should
           # move this check inside the loop, along with the other checks
           # for the new repository type.
-          return true unless group.feature_available?(:group_wikis)
+          return true unless group.licensed_feature_available?(:group_wikis)
           return true if group_mapping.empty?
 
           group.self_and_descendants.find_each.all? do |subgroup|

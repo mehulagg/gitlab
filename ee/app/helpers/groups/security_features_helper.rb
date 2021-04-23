@@ -2,11 +2,11 @@
 
 module Groups::SecurityFeaturesHelper
   def group_level_security_dashboard_available?(group)
-    group.feature_available?(:security_dashboard)
+    group.licensed_feature_available?(:security_dashboard)
   end
 
   def group_level_compliance_dashboard_available?(group)
-    group.feature_available?(:group_level_compliance_dashboard) &&
+    group.licensed_feature_available?(:group_level_compliance_dashboard) &&
     can?(current_user, :read_group_compliance_dashboard, group)
   end
 
@@ -16,7 +16,7 @@ module Groups::SecurityFeaturesHelper
 
   def group_level_credentials_inventory_available?(group)
     can?(current_user, :read_group_credentials_inventory, group) &&
-    group.feature_available?(:credentials_inventory) &&
+    group.licensed_feature_available?(:credentials_inventory) &&
     group.enforced_group_managed_accounts?
   end
 
@@ -33,7 +33,7 @@ module Groups::SecurityFeaturesHelper
   end
 
   def group_level_audit_events_available?(group)
-    group.feature_available?(:audit_events) &&
+    group.licensed_feature_available?(:audit_events) &&
       can?(current_user, :read_group_audit_events, group)
   end
 
