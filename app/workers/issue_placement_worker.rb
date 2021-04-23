@@ -15,7 +15,11 @@ class IssuePlacementWorker
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(issue_id, project_id = nil)
     issue = find_issue(issue_id, project_id)
+
     return unless issue
+
+    # Temporary disable moving null elements because of performance problems
+    # For more information check https://gitlab.com/gitlab-com/gl-infra/production/-/issues/4321
     return if issue.project.root_namespace&.issue_repositioning_disabled?
 
     # Move the oldest 100 unpositioned items to the end.

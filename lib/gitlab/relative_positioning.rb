@@ -15,7 +15,7 @@ module Gitlab
     NoSpaceLeft = Class.new(StandardError)
     InvalidPosition = Class.new(StandardError)
     IllegalRange = Class.new(ArgumentError)
-    PositioningDisabled = Class.new(ArgumentError)
+    PositioningDisabled = Class.new(StandardError)
 
     def self.range(lhs, rhs)
       if lhs && rhs

@@ -1,6 +1,6 @@
 ---
 name: block_issue_repositioning
-introduced_by_url:
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60141
 rollout_issue_url:
 milestone: '13.12'
 type: development

@@ -421,7 +421,7 @@ class Namespace < ApplicationRecord
   end
 
   def issue_repositioning_disabled?
-    Feature.enabled?(:block_issue_repositioning, self, default_value: true)
+    Feature.enabled?(:block_issue_repositioning, self, default_enabled: :yaml)
   end
 
   private
