@@ -95,14 +95,12 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
       subject
     end
 
-    it 'reports time efficiency' do
+    it 'reports job duration' do
       freeze_time do
         expect(Time).to receive(:current).and_return(Time.zone.now - 5.seconds).ordered
         expect(Time).to receive(:current).and_return(Time.zone.now).ordered
 
-        ratio = 5 / job_record.batched_migration.interval.to_f
-
-        expect(described_class.metrics[:gauge_time_efficiency]).to receive(:set).with(labels, ratio)
+        expect(described_class.metrics[:gauge_job_duration]).to receive(:set).with(labels, 5.seconds)
 
         subject
       end
