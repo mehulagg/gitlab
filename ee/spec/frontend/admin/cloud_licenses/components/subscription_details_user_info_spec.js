@@ -21,6 +21,8 @@ describe('Subscription Details User Info', () => {
   let wrapper;
 
   const itif = (condition) => (condition ? it : it.skip);
+  const findSubscriptionText = () =>
+    wrapper.findByTestId('users-in-subscription').find('h2').text();
 
   const createComponent = (props = {}, stubGlSprintf = false) => {
     wrapper = extendedWrapper(
@@ -86,14 +88,14 @@ describe('Subscription Details User Info', () => {
       const subscription = { ...license.ULTIMATE, usersInLicenseCount: 0 };
       createComponent({ subscription });
 
-      expect(wrapper.findByTestId('users-in-subscription').find('h2').text()).toBe('0');
+      expect(findSubscriptionText()).toBe('0');
     });
 
     it('should display Unlimited when users in license is null', () => {
       const subscription = { ...license.ULTIMATE, usersInLicenseCount: null };
       createComponent({ subscription });
 
-      expect(wrapper.findByTestId('users-in-subscription').find('h2').text()).toBe('Unlimited');
+      expect(findSubscriptionText()).toBe('Unlimited');
     });
   });
 });
