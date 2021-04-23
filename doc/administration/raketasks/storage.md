@@ -77,7 +77,7 @@ To have a summary and then a list of projects and their attachments using hashed
 WARNING:
 In GitLab 13.0, [hashed storage](../repository_storage_types.md#hashed-storage)
 is enabled by default and the legacy storage is deprecated.
-Support for legacy storage will be removed in GitLab 14.0. If you're on GitLab
+Support for legacy storage is removed in GitLab 14.0. If you're on GitLab
 13.0 and later, switching new projects to legacy storage is not possible.
 The option to choose between hashed and legacy storage in the admin area has
 been disabled.
