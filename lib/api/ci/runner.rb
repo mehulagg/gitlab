@@ -30,6 +30,7 @@ module API
           attributes = attributes_for_keys([:description, :active, :locked, :run_untagged, :tag_list, :access_level, :maximum_timeout])
             .merge(get_runner_details_from_request)
 
+          target_class = ::Ci::InstanceRunner
           attributes =
             if runner_registration_token_valid?
               # Create shared runner. Requires admin access
@@ -37,14 +38,16 @@ module API
             elsif @project = Project.find_by_runners_token(params[:token])
               # Create a specific runner for the project
               attributes.merge(runner_type: :project_type, projects: [@project])
+              target_class = ::Ci::ProjectRunner
             elsif @group = Group.find_by_runners_token(params[:token])
               # Create a specific runner for the group
               attributes.merge(runner_type: :group_type, groups: [@group])
+              target_class = ::Ci::GroupRunner
             else
               forbidden!
             end
 
-          @runner = ::Ci::Runner.create(attributes)
+          @runner = target_class.create(attributes)
 
           if @runner.persisted?
             present @runner, with: Entities::RunnerRegistrationDetails

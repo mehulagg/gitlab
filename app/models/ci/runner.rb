@@ -10,6 +10,10 @@ module Ci
     include TokenAuthenticatable
     include IgnorableColumns
     include FeatureGate
+    include Limitable
+
+    self.limit_name = 'registered_runners'
+    self.limit_scope = Limitable::GLOBAL_SCOPE
 
     add_authentication_token_field :token, encrypted: -> { Feature.enabled?(:ci_runners_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
 
@@ -402,6 +406,21 @@ module Ci
     def accepting_tags?(build)
       (run_untagged? || build.has_tags?) && (build.tag_list - tag_list).empty?
     end
+  end
+
+  class InstanceRunner < Runner
+    self.limit_scope = Limitable::GLOBAL_SCOPE
+    @model_name = ActiveModel::Name.new(Runner, nil, Runner.name.demodulize)
+  end
+
+  class GroupRunner < Runner
+    self.limit_scope = :group
+    @model_name = ActiveModel::Name.new(Runner, nil, Runner.name.demodulize)
+  end
+
+  class ProjectRunner < Runner
+    self.limit_scope = :project
+    @model_name = ActiveModel::Name.new(Runner, nil, Runner.name.demodulize)
   end
 end
 
