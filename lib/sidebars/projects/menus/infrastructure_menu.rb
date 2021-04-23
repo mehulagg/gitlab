@@ -6,6 +6,8 @@ module Sidebars
       class Infrastructure < ::Sidebars::Menu
         override :configure_menu_items
         def configure_menu_items
+          return false unless context.project.licensed_feature_available?(:operations, context.current_user)
+
           add_item(kubernetes_menu_item)
           add_item(serverless_menu_item)
           add_item(terraform_menu_item)
