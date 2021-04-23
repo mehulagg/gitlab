@@ -245,6 +245,12 @@ namespace :gitlab do
         File.open(File.join(result_dir, 'migration-stats.json'), 'wb+') do |io|
           io << instrumentation.observations.to_json
         end
+
+        instrumentation.observations.each do |observation|
+          File.open(File.join(result_dir, "#{observation.migration}.log"), 'wb+') do |io|
+            io << observation.query_log
+          end
+        end
       end
 
       ActiveRecord::Base.clear_cache!
