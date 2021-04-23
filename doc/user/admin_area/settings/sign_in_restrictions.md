@@ -80,6 +80,7 @@ If necessary, you can disable **Admin Mode** as an administrator by using one of
   ```ruby
   ::Gitlab::CurrentSettings.update_attributes!(admin_mode: false)
   ```
+  
 ## Two-factor authentication
 
 When this feature is enabled, all users must use the [two-factor authentication](../../profile/account/two_factor_authentication.md).
