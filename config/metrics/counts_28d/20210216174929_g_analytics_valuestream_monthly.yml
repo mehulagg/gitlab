@@ -9,6 +9,7 @@ value_type: number
 status: data_available
 time_frame: 28d
 data_source: redis_hll
+instrumentation_class: 'Gitlab::Usage::Metrics::Instrumentations::CountUsersVisitingAnalyticsValuestreamMetric'
 distribution:
 - ce
 tier:

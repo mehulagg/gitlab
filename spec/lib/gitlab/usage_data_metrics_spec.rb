@@ -1,3 +1,4 @@
+
 # frozen_string_literal: true
 
 require 'spec_helper'
@@ -19,6 +20,11 @@ RSpec.describe Gitlab::UsageDataMetrics do
     context 'whith instrumentation_class' do
       it 'includes top level keys' do
         expect(subject).to include(:uuid)
+      end
+
+      it 'includes g_analytics_valuestream monthly and weekly key' do
+        expect(subject[:redis_hll_counters][:analytics]).to include(:g_analytics_valuestream_monthly)
+        expect(subject[:redis_hll_counters][:analytics]).to include(:g_analytics_valuestream_weekly)
       end
     end
   end
