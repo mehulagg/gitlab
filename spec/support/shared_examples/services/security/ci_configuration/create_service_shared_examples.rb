@@ -39,6 +39,36 @@ RSpec.shared_examples_for 'services security ci configuration create service' do
         expect { subject }.to raise_error(Gitlab::Git::PreReceiveError)
       end
 
+      context 'when exception is raised' do
+        let_it_be(:project) { create(:project, :repository) }
+
+        before do
+          allow(project.repository).to receive(:add_branch).and_raise(StandardError, "The unexpected happened!")
+        end
+
+        context 'when branch was created' do
+          before do
+            allow(project.repository).to receive(:branch_exists?).and_return(true)
+          end
+
+          it 'tries to rm branch' do
+            expect(project.repository).to receive(:rm_branch).with(user, branch_name)
+            expect { subject }.to raise_error(StandardError)
+          end
+        end
+
+        context 'when branch was not created' do
+          before do
+            allow(project.repository).to receive(:branch_exists?).and_return(false)
+          end
+
+          it 'does not try to rm branch' do
+            expect(project.repository).not_to receive(:rm_branch)
+            expect { subject }.to raise_error(StandardError)
+          end
+        end
+      end
+
       context 'with no parameters' do
         it 'returns the path to create a new merge request' do
           expect(result.status).to eq(:success)

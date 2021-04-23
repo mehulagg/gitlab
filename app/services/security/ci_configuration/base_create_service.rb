@@ -24,6 +24,9 @@ module Security
         ServiceResponse.success(payload: { branch: branch_name, success_path: successful_change_path })
       rescue Gitlab::Git::PreReceiveError => e
         ServiceResponse.error(message: e.message)
+      rescue StandardError
+        project.repository.rm_branch(current_user, branch_name) if project.repository.branch_exists?(branch_name)
+        raise
       end
 
       private

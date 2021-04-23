@@ -5,6 +5,8 @@ require 'spec_helper'
 RSpec.describe Security::CiConfiguration::SastCreateService, :snowplow do
   subject(:result) { described_class.new(project, user, params).execute }
 
+  let(:branch_name) { 'set-sast-config-1' }
+
   let(:non_empty_params) do
     { 'stage' => 'security',
       'SEARCH_MAX_DEPTH' => 1,
