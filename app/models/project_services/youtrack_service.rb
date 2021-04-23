@@ -2,6 +2,7 @@
 
 class YoutrackService < IssueTrackerService
   include ActionView::Helpers::UrlHelper
+
   validates :project_url, :issues_url, presence: true, public_url: true, if: :activated?
 
   # {PROJECT-KEY}-{NUMBER} Examples: YT-1, PRJ-1, gl-030
