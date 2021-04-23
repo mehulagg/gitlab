@@ -17,13 +17,13 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
     let_it_be(:group_to_add) { create(:group) }
 
     before do
-      stub_feature_flags(invite_members_group_modal: false)
+      stub_feature_flags(invite_members_group_modal: true)
       group.add_owner(user)
       visit group_group_members_path(group)
     end
 
-    it 'add group to group' do
-      add_group(group_to_add.id, 'Reporter')
+    it 'adds an invited group to the groups tab' do
+      add_group(group_to_add.name, 'Reporter')
 
       click_groups_tab
 
@@ -117,13 +117,26 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
     end
   end
 
-  def add_group(id, role)
-    page.click_link 'Invite group'
-    page.within ".invite-group-form" do
-      select2(id, from: "#shared_with_group_id")
-      select(role, from: "shared_group_access")
-      click_button "Invite"
-    end
+  def add_group(group_name, role)
+    # open modal
+    click_button 'Invite a group'
+    wait_for_requests
+
+    # click first access level option in dropdown
+    click_button 'Guest'
+    wait_for_requests
+    click_button role
+
+    click_button 'Select a group'
+    fill_in 'Search groups', with: group_name
+    wait_for_requests
+
+    click_button group_name
+
+    click_button 'Invite'
+    wait_for_requests
+
+    page.refresh
   end
 
   def click_groups_tab
