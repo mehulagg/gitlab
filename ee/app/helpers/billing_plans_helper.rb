@@ -115,6 +115,8 @@ module BillingPlansHelper
   end
 
   def billing_available_plans(plans_data, current_plan)
+    plans_data.reject! { |plan| plan.hide_billing_page }
+
     return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
 
     plans_data.reject do |plan_data|
