@@ -12904,10 +12904,10 @@ Alert status values.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="alertmanagementstatusacknowledged"></a>`ACKNOWLEDGED` | Acknowledged status. |
-| <a id="alertmanagementstatusignored"></a>`IGNORED` | Ignored status. |
-| <a id="alertmanagementstatusresolved"></a>`RESOLVED` | Resolved status. |
-| <a id="alertmanagementstatustriggered"></a>`TRIGGERED` | Triggered status. |
+| <a id="alertmanagementstatusacknowledged"></a>`ACKNOWLEDGED` | Someone is actively investigating the problem. |
+| <a id="alertmanagementstatusignored"></a>`IGNORED` | No action will be taken on the alert. |
+| <a id="alertmanagementstatusresolved"></a>`RESOLVED` | No further work is required. |
+| <a id="alertmanagementstatustriggered"></a>`TRIGGERED` | No one has begun investigation. |
 
 ### `ApiFuzzingScanMode`
 
