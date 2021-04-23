@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Namespace < ApplicationRecord
+class Namespace < NamespaceShard
   include CacheMarkdownField
   include Sortable
   include Gitlab::VisibilityLevel
