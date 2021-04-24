@@ -30,7 +30,7 @@ export default {
     diffData() {
       return createDiffData(this.before, this.after);
     },
-    visibleDiffData(){
+    visibleDiffData() {
       return this.diffData.filter(this.shouldShowLine);
     },
     isDiffView() {
@@ -80,7 +80,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-rounded-base gl-border-solid gl-border-1 gl-border-gray-100 ">
+  <div class="gl-rounded-base gl-border-solid gl-border-1 gl-border-gray-100">
     <div class="gl-overflow-hidden gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-3">
       <gl-button-group class="gl-display-flex gl-float-right">
         <gl-button

@@ -17,7 +17,7 @@ function actionType(action) {
 }
 
 function checkLineActions(line, actionSpecs) {
-  const lineActions = line.actions.map(action => actionType(action));
+  const lineActions = line.actions.map((action) => actionType(action));
   expect(lineActions).toEqual(actionSpecs);
   expect(line.actions.length).toEqual(actionSpecs.length);
 }
@@ -38,7 +38,11 @@ describe('Report Items Diff Utils', () => {
       const actions = diffChars(before, after);
       const lines = groupActionsByLines(actions);
       expect(lines.length).toEqual(1);
-      checkLineActions(lines[0], [['removed', 'hello'], ['added', 'HELLO'], ['normal', ' world']]);
+      checkLineActions(lines[0], [
+        ['removed', 'hello'],
+        ['added', 'HELLO'],
+        ['normal', ' world'],
+      ]);
     });
 
     it('Correctly groups whole-line deletions by lines', () => {
@@ -63,7 +67,10 @@ describe('Report Items Diff Utils', () => {
 
       checkLineActions(lines[0], [['normal', 'x']]);
       checkLineActions(lines[1], [['normal', 'y']]);
-      checkLineActions(lines[2], [['added', 'y\n'], ['normal', 'z']]);
+      checkLineActions(lines[2], [
+        ['added', 'y\n'],
+        ['normal', 'z'],
+      ]);
     });
 
     it('Correctly groups empty line deletions', () => {
@@ -99,8 +106,14 @@ describe('Report Items Diff Utils', () => {
       const lines = createDiffData(before, after);
       expect(lines.length).toEqual(2);
       expect(lines[0].type).toEqual('removed');
-      checkLine(lines[0], 1, undefined, 'removed', [['removed', 'hello'], ['normal', ' world']]);
-      checkLine(lines[1], undefined, 1, 'added', [['added', 'HELLO'], ['normal', ' world']]);
+      checkLine(lines[0], 1, undefined, 'removed', [
+        ['removed', 'hello'],
+        ['normal', ' world'],
+      ]);
+      checkLine(lines[1], undefined, 1, 'added', [
+        ['added', 'HELLO'],
+        ['normal', ' world'],
+      ]);
     });
 
     it('Correctly creates diff lines for single line deletions', () => {

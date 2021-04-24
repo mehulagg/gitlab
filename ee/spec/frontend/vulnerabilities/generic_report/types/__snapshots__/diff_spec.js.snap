@@ -1,0 +1,663 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ee/vulnerabilities/components/generic_report/types/diff.vue renders the after tab 1`] = `
+<table
+  class="code"
+>
+  <tr
+    class="line_holder"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        1
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        1
+      
+    </td>
+     
+    <td
+      class="line_content"
+    >
+      <span
+        class="left right"
+      >
+        
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder new"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        2
+      
+    </td>
+     
+    <td
+      class="line_content new"
+    >
+      <span
+        class="left right"
+      >
+          Hello Wo
+      </span>
+      <span
+        class="left right idiff"
+      >
+        5
+      </span>
+      <span
+        class="left right"
+      >
+        ld
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        3
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        3
+      
+    </td>
+     
+    <td
+      class="line_content"
+    >
+      <span
+        class="left right"
+      >
+          Hello Again
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        4
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        4
+      
+    </td>
+     
+    <td
+      class="line_content"
+    >
+      <span
+        class="left right"
+      >
+          
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder new"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        5
+      
+    </td>
+     
+    <td
+      class="line_content new"
+    >
+      <span
+        class="left right"
+      >
+          Hello With a Sp
+      </span>
+      <span
+        class="left right idiff"
+      >
+        A
+      </span>
+      <span
+        class="left right"
+      >
+        ce
+      </span>
+      <span
+        class="left right idiff"
+      >
+        
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder new"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        6
+      
+    </td>
+     
+    <td
+      class="line_content new"
+    >
+      <span
+        class="left right idiff"
+      >
+          Additional Hello
+      </span>
+    </td>
+  </tr>
+</table>
+`;
+
+exports[`ee/vulnerabilities/components/generic_report/types/diff.vue renders the before tab 1`] = `
+<table
+  class="code"
+>
+  <tr
+    class="line_holder"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        1
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        1
+      
+    </td>
+     
+    <td
+      class="line_content"
+    >
+      <span
+        class="left right"
+      >
+        
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder old"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 old"
+    >
+      
+        2
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 old"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="line_content old"
+    >
+      <span
+        class="left right"
+      >
+          Hello Wo
+      </span>
+      <span
+        class="left right idiff"
+      >
+        r
+      </span>
+      <span
+        class="left right"
+      >
+        ld
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        3
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        3
+      
+    </td>
+     
+    <td
+      class="line_content"
+    >
+      <span
+        class="left right"
+      >
+          Hello Again
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        4
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        4
+      
+    </td>
+     
+    <td
+      class="line_content"
+    >
+      <span
+        class="left right"
+      >
+          
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder old"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 old"
+    >
+      
+        5
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 old"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="line_content old"
+    >
+      <span
+        class="left right"
+      >
+          Hello With a Sp
+      </span>
+      <span
+        class="left right idiff"
+      >
+        a
+      </span>
+      <span
+        class="left right"
+      >
+        ce
+      </span>
+    </td>
+  </tr>
+</table>
+`;
+
+exports[`ee/vulnerabilities/components/generic_report/types/diff.vue renders the diff tab 1`] = `
+<table
+  class="code"
+>
+  <tr
+    class="line_holder"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        1
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        1
+      
+    </td>
+     
+    <td
+      class="line_content"
+    >
+      <span
+        class="left right"
+      >
+        
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder old"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 old"
+    >
+      
+        2
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 old"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="line_content old"
+    >
+      <span
+        class="left right"
+      >
+          Hello Wo
+      </span>
+      <span
+        class="left right idiff"
+      >
+        r
+      </span>
+      <span
+        class="left right"
+      >
+        ld
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder new"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        2
+      
+    </td>
+     
+    <td
+      class="line_content new"
+    >
+      <span
+        class="left right"
+      >
+          Hello Wo
+      </span>
+      <span
+        class="left right idiff"
+      >
+        5
+      </span>
+      <span
+        class="left right"
+      >
+        ld
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        3
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        3
+      
+    </td>
+     
+    <td
+      class="line_content"
+    >
+      <span
+        class="left right"
+      >
+          Hello Again
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        4
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0"
+    >
+      
+        4
+      
+    </td>
+     
+    <td
+      class="line_content"
+    >
+      <span
+        class="left right"
+      >
+          
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder new"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        5
+      
+    </td>
+     
+    <td
+      class="line_content new"
+    >
+      <span
+        class="left right"
+      >
+          Hello With a Sp
+      </span>
+      <span
+        class="left right idiff"
+      >
+        A
+      </span>
+      <span
+        class="left right"
+      >
+        ce
+      </span>
+      <span
+        class="left right idiff"
+      >
+        
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder old"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 old"
+    >
+      
+        5
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 old"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="line_content old"
+    >
+      <span
+        class="left right"
+      >
+          Hello With a Sp
+      </span>
+      <span
+        class="left right idiff"
+      >
+        a
+      </span>
+      <span
+        class="left right"
+      >
+        ce
+      </span>
+    </td>
+  </tr>
+  <tr
+    class="line_holder new"
+  >
+    <td
+      class="diff-line-num old_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        
+      
+    </td>
+     
+    <td
+      class="diff-line-num new_line gl-border-t-0 gl-border-b-0 new"
+    >
+      
+        6
+      
+    </td>
+     
+    <td
+      class="line_content new"
+    >
+      <span
+        class="left right idiff"
+      >
+          Additional Hello
+      </span>
+    </td>
+  </tr>
+</table>
+`;

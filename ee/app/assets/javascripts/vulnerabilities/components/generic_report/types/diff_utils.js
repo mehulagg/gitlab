@@ -15,7 +15,7 @@ export function splitAction(action) {
     splitValues.pop();
   }
   const res = [];
-  splitValues.forEach(splitValue => {
+  splitValues.forEach((splitValue) => {
     res.push({
       added: action.added,
       removed: action.removed,
@@ -28,7 +28,7 @@ export function splitAction(action) {
 function setLineNumbers(lines) {
   let beforeLineNo = 1;
   let afterLineNo = 1;
-  lines.forEach(l => {
+  lines.forEach((l) => {
     const line = l;
     if (line.type === 'normal') {
       line.old_line = beforeLineNo;
@@ -47,7 +47,7 @@ function setLineNumbers(lines) {
 
 function splitLinesInline(lines) {
   const res = [];
-  const createLine = type => {
+  const createLine = (type) => {
     return { type, actions: [], old_line: undefined, new_line: undefined };
   };
   const hasNonEmpty = (line, type) => {
@@ -64,7 +64,7 @@ function splitLinesInline(lines) {
     return typeCount === line.actions.length;
   };
 
-  lines.forEach(line => {
+  lines.forEach((line) => {
     const beforeLine = createLine('normal');
     let afterLine = createLine('added');
 
@@ -77,7 +77,7 @@ function splitLinesInline(lines) {
       }
     };
 
-    line.actions.forEach(action => {
+    line.actions.forEach((action) => {
       if (!action.added && !action.removed) {
         totalNormal += 1;
         beforeLine.actions.push(action);
@@ -87,7 +87,7 @@ function splitLinesInline(lines) {
         beforeLine.actions.push(action);
         beforeLine.type = 'removed';
       } else if (action.added) {
-        splitAction(action).forEach(split => {
+        splitAction(action).forEach((split) => {
           if (split.value === '\n') {
             maybeAddAfter();
             totalAdded = 0;
@@ -120,11 +120,11 @@ export function groupActionsByLines(actions) {
   };
   newLine();
 
-  actions.forEach(action => {
+  actions.forEach((action) => {
     if (action.added) {
       currLine.actions.push(action);
     } else {
-      splitAction(action).forEach(split => {
+      splitAction(action).forEach((split) => {
         if (split.value === '\n') {
           newLine();
         } else {
