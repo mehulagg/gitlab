@@ -2,7 +2,7 @@ import { diffChars } from 'diff';
 import {
   groupActionsByLines,
   createDiffData,
-} from 'ee/vue_shared/security_reports/components/report_items/diff_utils';
+} from 'ee/vulnerabilities/components/generic_report/types/diff.vue';
 
 function actionType(action) {
   let type;

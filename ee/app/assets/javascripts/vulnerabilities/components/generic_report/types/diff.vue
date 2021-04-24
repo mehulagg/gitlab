@@ -1,9 +1,9 @@
 <script>
 import { GlButtonGroup, GlButton } from '@gitlab/ui';
-import { createDiffData } from '../diff_utils';
+import { createDiffData } from './diff_utils';
+import { DIFF, BEFORE, AFTER } from './constants';
 
 export default {
-  name: 'ReportItemDiff',
   components: {
     GlButtonGroup,
     GlButton,
@@ -20,31 +20,36 @@ export default {
   },
   data() {
     return {
-      view: 'diff',
+      view: DIFF,
     };
+  },
+  viewType: {
+    DIFF,
   },
   computed: {
     diffData() {
-      debugger;
       return createDiffData(this.before, this.after);
     },
+    visibleDiffData(){
+      return this.diffData.filter(this.shouldShowLine);
+    },
     isDiffView() {
-      return this.view === 'diff';
+      return this.view === DIFF;
     },
     isBeforeView() {
-      return this.view === 'before';
+      return this.view === BEFORE;
     },
     isAfterView() {
-      return this.view === 'after';
+      return this.view === AFTER;
     },
   },
   methods: {
     shouldShowLine(line) {
       return (
-        this.view === 'diff' ||
+        this.view === DIFF ||
         line.type === 'normal' ||
-        (line.type === 'removed' && this.view === 'before') ||
-        (line.type === 'added' && this.view === 'after')
+        (line.type === 'removed' && this.view === BEFORE) ||
+        (line.type === 'added' && this.view === AFTER)
       );
     },
     changeClass(change) {
@@ -61,13 +66,13 @@ export default {
       return '';
     },
     setDiffViewType() {
-      this.view = 'diff';
+      this.view = DIFF;
     },
     setBeforeViewType() {
-      this.view = 'before';
+      this.view = BEFORE;
     },
     setAfterViewType() {
-      this.view = 'after';
+      this.view = AFTER;
     },
   },
   userColorScheme: window.gon.user_color_scheme,
@@ -75,50 +80,43 @@ export default {
 </script>
 
 <template>
-  <div class="file-holder rounded border">
-    <div class="overflow-hidden border-bottom report-item-diff-header">
-      <gl-button-group class="gl-display-flex report-item-diff-buttons float-right">
+  <div class="gl-rounded-base gl-border-solid gl-border-1 gl-border-gray-100 ">
+    <div class="gl-overflow-hidden gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-3">
+      <gl-button-group class="gl-display-flex gl-float-right">
         <gl-button
-          id="inline-diff-btn"
           :class="{ selected: isDiffView }"
-          class="gl-w-half"
-          data-view-type="diff"
+          :data-view-type="$options.viewType.DIFF"
           @click="setDiffViewType"
         >
-          {{ __('Diff') }}
+          {{ s__('GenericReport|Diff') }}
         </gl-button>
         <gl-button
-          id="inline-diff-btn"
           :class="{ selected: isBeforeView }"
-          class="gl-w-half"
-          data-view-type="diff"
+          :data-view-type="$options.viewType.DIFF"
           @click="setBeforeViewType"
         >
-          {{ __('Before') }}
+          {{ s__('GenericReport|Before') }}
         </gl-button>
         <gl-button
-          id="inline-diff-btn"
           :class="{ selected: isAfterView }"
-          class="gl-w-half"
-          data-view-type="diff"
+          :data-view-type="$options.viewType.DIFF"
           @click="setAfterViewType"
         >
-          {{ __('After') }}
+          {{ s__('Genericreport|After') }}
         </gl-button>
       </gl-button-group>
     </div>
     <table class="code" :class="$options.userColorScheme">
       <tr
-        v-for="(line, idx) in diffData"
-        v-if="shouldShowLine(line)"
+        v-for="(line, idx) in visibleDiffData"
         :key="idx"
         :class="changeClass(line)"
         class="line_holder"
       >
-        <td class="diff-line-num old_line border-top-0 border-bottom-0" :class="changeClass(line)">
+        <td class="diff-line-num old_line gl-border-t-0 gl-border-b-0" :class="changeClass(line)">
           {{ line.old_line }}
         </td>
-        <td class="diff-line-num new_line border-top-0 border-bottom-0" :class="changeClass(line)">
+        <td class="diff-line-num new_line gl-border-t-0 gl-border-b-0" :class="changeClass(line)">
           {{ line.new_line }}
         </td>
         <td class="line_content" :class="changeClass(line)">
