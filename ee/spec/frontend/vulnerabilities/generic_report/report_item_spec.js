@@ -4,6 +4,7 @@ import {
   REPORT_TYPES,
   REPORT_TYPE_URL,
   REPORT_TYPE_LIST,
+  REPORT_TYPE_DIFF,
 } from 'ee/vulnerabilities/components/generic_report/types/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
@@ -13,6 +14,9 @@ const TEST_DATA = {
   },
   [REPORT_TYPE_LIST]: {
     items: [{ type: 'foo' }],
+  },
+  [REPORT_TYPE_DIFF]: {
+    items: [{ before: 'foo', after: 'bar' }],
   },
 };
 
