@@ -5,6 +5,8 @@ require 'spec_helper'
 RSpec.describe 'File blob', :js do
   include MobileHelpers
 
+  let(:dev_branch) { 'dev' }
+  let(:development_branch) { 'development' }
   let(:project) { create(:project, :public, :repository) }
 
   def visit_blob(path, anchor: nil, ref: 'master')
@@ -168,6 +170,27 @@ RSpec.describe 'File blob', :js do
 
         page.within '.blob-content' do
           expect(page).not_to have_css('.hll')
+        end
+      end
+
+      context 'sucessfully change ref of similar name' do
+        before do
+          project.repository.create_branch(dev_branch)
+          project.repository.create_branch(development_branch)
+        end
+
+        it 'switch ref from longer to shorter ref name' do
+          visit_blob('files/js/application.js', ref: 'development')
+          switch_ref_to('dev')
+
+          expect(page).not_to have_css('flash-container')
+        end
+
+        it 'witch ref from shorter to longer ref name' do
+          visit_blob('files/js/application.js', ref: 'dev')
+          switch_ref_to('development')
+
+          expect(page).not_to have_css('flash-container')
         end
       end
     end
