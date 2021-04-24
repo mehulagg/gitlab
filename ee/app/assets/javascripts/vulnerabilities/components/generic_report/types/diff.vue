@@ -1,7 +1,7 @@
 <script>
 import { GlButtonGroup, GlButton } from '@gitlab/ui';
-import { createDiffData } from './diff_utils';
 import { DIFF, BEFORE, AFTER } from './constants';
+import { createDiffData } from './diff_utils';
 
 export default {
   components: {

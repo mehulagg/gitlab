@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import Diff from 'ee/vulnerabilities/components/generic_report/types/diff.vue';
 import { BEFORE, AFTER } from 'ee/vulnerabilities/components/generic_report/types/constants';
+import Diff from 'ee/vulnerabilities/components/generic_report/types/diff.vue';
 
 const TEST_DATA = {
   before: `
