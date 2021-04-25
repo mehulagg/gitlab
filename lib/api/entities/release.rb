@@ -29,7 +29,7 @@ module API
         expose :assets_count, as: :count
         expose :sources, using: Entities::Releases::Source, if: ->(_, _) { can_download_code? }
         expose :links, using: Entities::Releases::Link do |release, options|
-          release.links.sorted
+          release.sorted_links
         end
       end
       expose :evidences, using: Entities::Releases::Evidence, expose_nil: false, if: ->(_, _) { can_download_code? }
