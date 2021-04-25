@@ -123,7 +123,7 @@ module Gitlab
                 # there is an extra node, so there is a previous page
                 @has_previous_page = paginated_nodes.count > limit_value
                 @has_previous_page ? paginated_nodes.last(limit_value) : paginated_nodes
-              elsif loaded?(sliced_nodes)
+              elsif loaded?(sliced_nodes) && sliced_nodes.is_a?(Array)
                 sliced_nodes.take(limit_value) # rubocop: disable CodeReuse/ActiveRecord
               else
                 sliced_nodes.limit(limit_value) # rubocop: disable CodeReuse/ActiveRecord

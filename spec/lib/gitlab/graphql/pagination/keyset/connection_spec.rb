@@ -28,7 +28,8 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
 
     before do
       project = create(:project)
-      create_list(:issue, 3, project: project)
+      create(:issue, id: 11, project: project)
+      create_list(:issue, 2, project: project)
     end
 
     it 'is loaded' do
@@ -42,6 +43,10 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
         has_previous_page: false,
         has_next_page: true
       )
+    end
+
+    it 'orders nodes' do
+      expect(connection.send(:nodes)).to match(nodes.sort.reverse)
     end
 
     it 'can generate cursors' do
