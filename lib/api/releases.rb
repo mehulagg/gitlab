@@ -29,7 +29,16 @@ module API
       get ':id/releases' do
         releases = ::ReleasesFinder.new(user_project, current_user, declared_params.slice(:order_by, :sort)).execute
 
-        present paginate(releases), with: Entities::Release, current_user: current_user
+        if Feature.enabled?(:api_caching_releases, user_project)
+          present_cached paginate(releases),
+                         with: Entities::Release,
+                         current_user: current_user,
+                         cache_context: -> (_release) do
+                           [user_project.cache_key, current_user.cache_key, can_download_code?, can_read_milestone?]
+                         end
+        else
+          present paginate(releases), with: Entities::Release, current_user: current_user
+        end
       end
 
       desc 'Get a single project release' do
@@ -163,6 +172,14 @@ module API
 
       def release
         @release ||= user_project.releases.find_by_tag(params[:tag])
+      end
+
+      def can_download_code?
+        Ability.allowed?(current_user, :download_code, user_project)
+      end
+
+      def can_read_milestone?
+        Ability.allowed?(current_user, :read_milestone, user_project)
       end
 
       def log_release_created_audit_event(release)

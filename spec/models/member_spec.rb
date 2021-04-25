@@ -8,7 +8,7 @@ RSpec.describe Member do
   using RSpec::Parameterized::TableSyntax
 
   describe "Associations" do
-    it { is_expected.to belong_to(:user) }
+    it { is_expected.to belong_to(:user).touch(true) }
   end
 
   describe "Validation" do
