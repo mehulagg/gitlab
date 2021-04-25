@@ -37,22 +37,42 @@ RSpec.describe 'Projects > Settings > User manages project members' do
     expect(members_table).not_to have_content(user_dmitriy.username)
   end
 
-  it 'imports a team from another project', :js do
-    stub_feature_flags(invite_members_group_modal: false)
+  describe 'when the :invite_members_group_modal is enabled' do
+    it 'imports a team from another project', :js do
+      stub_feature_flags(invite_members_group_modal: true)
 
-    project2.add_maintainer(user)
-    project2.add_reporter(user_mike)
+      project2.add_maintainer(user)
+      project2.add_reporter(user_mike)
 
-    visit(project_project_members_path(project))
+      visit(project_project_members_path(project))
 
-    page.within('.invite-users-form') do
-      click_link('Import')
+      click_link('Import a project')
+
+      select2(project2.id, from: '#source_project_id')
+      click_button('Import project members')
+
+      expect(find_member_row(user_mike)).to have_content('Reporter')
     end
+  end
 
-    select2(project2.id, from: '#source_project_id')
-    click_button('Import project members')
+  describe 'when the :invite_members_group_modal is disabled' do
+    it 'imports a team from another project', :js do
+      stub_feature_flags(invite_members_group_modal: false)
 
-    expect(find_member_row(user_mike)).to have_content('Reporter')
+      project2.add_maintainer(user)
+      project2.add_reporter(user_mike)
+
+      visit(project_project_members_path(project))
+
+      page.within('.invite-users-form') do
+        click_link('Import')
+      end
+
+      select2(project2.id, from: '#source_project_id')
+      click_button('Import project members')
+
+      expect(find_member_row(user_mike)).to have_content('Reporter')
+    end
   end
 
   it 'shows all members of project shared group', :js do
