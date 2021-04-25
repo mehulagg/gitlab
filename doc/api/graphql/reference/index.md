@@ -165,7 +165,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 ### `Query.issue`
 
-Find an Issue.
+Find an issue.
 
 Returns [`Issue`](#issue).
 
@@ -173,7 +173,7 @@ Returns [`Issue`](#issue).
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="queryissueid"></a>`id` | [`IssueID!`](#issueid) | The global ID of the Issue. |
+| <a id="queryissueid"></a>`id` | [`IssueID!`](#issueid) | The global ID of the issue. |
 
 ### `Query.iteration`
 
@@ -196,6 +196,18 @@ Returns [`LicenseHistoryEntryConnection`](#licensehistoryentryconnection).
 This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
 `before: String`, `after: String`, `first: Int`, `last: Int`.
+
+### `Query.mergeRequest`
+
+Find a merge request.
+
+Returns [`MergeRequest`](#mergerequest).
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="querymergerequestid"></a>`id` | [`MergeRequestID!`](#mergerequestid) | The global ID of the merge request. |
 
 ### `Query.metadata`
 
