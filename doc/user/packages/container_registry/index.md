@@ -729,20 +729,47 @@ As a workaround, you should include the architecture in the tag name of individu
 
 ### The cleanup policy doesn't delete any tags
 
-In GitLab 13.6 and earlier, when you run the cleanup policy,
-you may expect it to delete tags and it does not.
+There can be different reasons behind this:
 
-This issue occurs when the cleanup policy was saved without
-editing the value in the **Remove tags matching** field.
+- In GitLab 13.6 and earlier, when you run the cleanup policy,
+  you may expect it to delete tags and it does not. 
+  
+  This issue occurs when the cleanup policy was saved without
+  editing the value in the **Remove tags matching** field.
 
-This field had a grayed out `.*` value as a placeholder.
-Unless `.*` (or other regex pattern) was entered explicitly into the
-field, a `nil` value was submitted. This value prevents the
-saved cleanup policy from matching any tags.
+  This field had a grayed out `.*` value as a placeholder. 
+  
+  Unless `.*` (or other regex pattern) was entered explicitly into the
+  field, a `nil` value was submitted. This value prevents the
+  saved cleanup policy from matching any tags.
+  
+  As a workaround, edit the cleanup policy. In the **Remove tags matching**
+  field, enter `.*` and save. This value indicates that all tags should
+  be removed.
 
-As a workaround, edit the cleanup policy. In the **Remove tags matching**
-field, enter `.*` and save. This value indicates that all tags should
-be removed.
+- If you are on GitLab self-managed instances, and you have 1000+ tags in a container repository, you might run into a 
+  [container registry token expiry issue](https://calendar.google.com/calendar/u/0/r/week/2021/4/19), throwing a 
+  `error authorizing context: invalid token` error in the logs. 
+
+  To fix this, there are two workarounds:
+  1. If you are on GitLab 13.9 or later, you can [set limits for the cleanup policy](#set-cleanup-limits-to-conserve-resources). 
+     This will limit the cleanup execution in time, and hence avoid the issue of the expired token.
+  2. If the previous fix didn't work or you are on earlier versions of GitLab, you may use the following script:
+
+     ```Shell
+     # Get a list of all tags in a certain container repository while considering [pagination](https://docs.gitlab.com/ee/api/README.html#pagination)
+
+     list_o_tags.out; for i in {1..N}; do curl --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags?per_page=100&page=${i}" | jq '.[].name' | tr -d '"' >> list_o_tags.out; done # N stands for the number of tags/100 rounded to the next whole number.
+
+     **Note:** The command just before the for loop is just to make sure that list_o_tags.out is always empty when going into the loop.
+
+     # Remove the tags that you want to keep from the file. N here stands for the number of tags to be kept
+     sed -i '1,Nd' list_o_tags.out
+
+     # loop over list_o_tags.out to delete a single tag at a time
+     while read -r LINE || [[ -n $LINE ]]; do echo ${LINE}; curl --request DELETE --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags/${LINE}"; sleep 0.1; echo; done < list_o_tags.out > delete.logs
+
+     ```
 
 ### Troubleshoot as a GitLab server admin
 
