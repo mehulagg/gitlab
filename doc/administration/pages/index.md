@@ -1138,6 +1138,15 @@ date > /var/opt/gitlab/gitlab-rails/shared/pages/.update
 
 If you've customized the Pages storage path, adjust the command above to use your custom path.
 
+### 404 error after promoting a Geo secondary to a primary node
+
+These are due to the Pages files not being among the supported data types.
+Please find more details in the [Geo documentation](../../../administration/geo/replication/datatypes.md#limitations-on-replicationverification).
+
+It is possible to copy the subfolders and files in the [Pages path](#change-storage-path)
+to the new primary node to resolve this.
+Alternatively, run the CI pipelines of those projects that contain a `pages` job again.
+
 ### Failed to connect to the internal GitLab API
 
 If you have enabled [API-based configuration](#gitlab-api-based-configuration) and see the following error:
