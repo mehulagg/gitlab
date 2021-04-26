@@ -63,6 +63,23 @@ module EE
       self
     end
 
+    def for_dast_scanner_profile(profile)
+      action = @details[:action]
+
+      @details =
+        case action
+        when :create
+          {
+            add: 'dast_scanner_profile',
+            target_id: profile.id,
+            target_type: 'DastScannerProfile',
+            target_details: profile.name
+          }
+        end
+
+      self
+    end
+
     # Builds the @details attribute for project group link
     #
     # This expects [String] :action of :destroy, :create, :update to be
