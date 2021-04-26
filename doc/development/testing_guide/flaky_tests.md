@@ -78,12 +78,12 @@ For instance `RETRIES=1 bin/rspec ...` would retry the failing examples once.
 
 ### Order-dependent flaky tests
 
-These are tests that fail when run in conjunction with other tests, in a specific order. For example:
+These flaky tests can fail depending on the order they run with other tests. For example:
 
 - <https://gitlab.com/gitlab-org/gitlab/-/issues/327668>
 
-To identify the tests that lead to such failure, we could use `rspec --bisect`.
-This would give us the minimal test combination to reproduce the failure.
+To identify the tests that lead to such failure, we can use `rspec --bisect`,
+which would give us the minimal test combination to reproduce the failure:
 
 ```shell
 rspec --bisect ee/spec/services/ee/merge_requests/update_service_spec.rb ee/spec/services/ee/notes/quick_actions_service_spec.rb ee/spec/services/epic_links/create_service_spec.rb  ee/spec/services/ee/issuable/bulk_update_service_spec.rb
@@ -100,6 +100,8 @@ Bisect complete! Reduced necessary non-failing examples from 144 to 1 in 8 minut
 The minimal reproduction command is:
   rspec ./ee/spec/services/ee/issuable/bulk_update_service_spec.rb[1:2:1:1:1:1,1:2:1:2:1:1,1:2:1:3:1] ./ee/spec/services/epic_links/create_service_spec.rb[1:1:2:2:6:4]
 ```
+
+We can reproduce the test failure with the reproduction command above. If we change the order of the tests, the test would pass.
 
 ### Time-sensitive flaky tests
 
