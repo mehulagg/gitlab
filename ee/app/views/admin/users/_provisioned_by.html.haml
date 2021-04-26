@@ -1,0 +1,9 @@
+- group_id = @user.provisioned_by_group_id
+- group = Group.find(group_id)
+- if group_id
+  %li
+    %span.light Provisioned by:
+    %strong
+      = link_to group.name, admin_group_path(group)
+    %span.light
+      = s_('(%{gid})') % {gid: group_id}
