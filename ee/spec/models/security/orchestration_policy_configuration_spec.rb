@@ -8,7 +8,7 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     create( :security_orchestration_policy_configuration, security_policy_management_project: security_policy_management_project)
   end
 
-  let(:default_branch) { security_policy_management_project.default_branch_or_master }
+  let(:default_branch) { security_policy_management_project.default_branch }
   let(:repository) { instance_double(Repository, root_ref: 'master') }
 
   describe 'associations' do

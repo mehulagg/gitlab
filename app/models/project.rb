@@ -2532,8 +2532,8 @@ class Project < ApplicationRecord
       .exists?
   end
 
-  def default_branch_or_master
-    default_branch || 'master'
+  def default_branch_or_main
+    default_branch || 'main'
   end
 
   def ci_config_path_or_default

@@ -48,8 +48,8 @@ module Security
       security_policy_management_project.repository
     end
 
-    def default_branch_or_master
-      security_policy_management_project.default_branch_or_master
+    def default_branch_or_main
+      security_policy_management_project.default_branch_or_main
     end
 
     def active_policy_names_with_dast_profiles
@@ -70,7 +70,7 @@ module Security
     end
 
     def scan_execution_policy_at(path)
-      policy_repo.blob_data_at(default_branch_or_master, path)
+      policy_repo.blob_data_at(default_branch_or_main, path)
         .then { |config| Gitlab::Config::Loader::Yaml.new(config).load!.fetch(:scan_execution_policy, []) }
     end
 
