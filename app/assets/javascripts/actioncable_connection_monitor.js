@@ -25,7 +25,7 @@ class ConnectionMonitor {
       this.startPolling();
       addEventListener('visibilitychange', this.visibilityDidChange);
       logger.log(
-        `ConnectionMonitor started. stale threshold = ${this.constructor.staleThreshold} s`,
+        `ConnectionMonitor started! stale threshold = ${this.constructor.staleThreshold} s`,
       );
     }
   }
