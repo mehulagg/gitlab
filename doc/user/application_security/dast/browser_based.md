@@ -104,7 +104,6 @@ You can manage the trade-off between coverage and scan time with the following m
 - Limit the page depth that the browser-based crawler will check coverage on with the [variable](#available-variables) `DAST_BROWSER_MAX_DEPTH`. The crawler uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
 - Vertically scaling the runner and using a higher number of browsers with [variable](#available-variables) `DAST_BROWSER_NUMBER_OF_BROWSERS`. The default is `3`.
 
-
 ## Debugging scans using logging
 
 Logging can be used to facilitate further analysis of what is happening with a scan. 
@@ -125,12 +124,11 @@ variables:
 
 Log messages have the format `[time] [log level] [log module] [message] [additional properties]`. For example, the following log entry has level `INFO`, is part of the `CRAWL` log module and has message `Crawled path`.
 
-```
+```txt
 2021-04-21T00:34:04.000 INF CRAWL Crawled path nav_id=0cc7fd path="LoadURL [https://my.site.com:8090]"
 ```
 
 The modules that can be configured for logging are as follows:
-
 
 | Log module | Component overview |
 | ---------- | ----------- |
