@@ -30,6 +30,7 @@ RSpec.describe "User manages members" do
     end
 
     it { expect(page).to have_no_selector(".invite-users-form") }
+    it { expect(page).to have_no_selector(".invite-group-form") }
   end
 
   context "as project maintainer" do
