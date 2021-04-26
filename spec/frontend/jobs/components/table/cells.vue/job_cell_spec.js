@@ -7,7 +7,7 @@ import { mockJobsInTable } from '../../../mock_data';
 const mockJob = mockJobsInTable[0];
 const mockJobCreatedByTag = mockJobsInTable[1];
 
-describe('Jobs Table', () => {
+describe('Job Cell', () => {
   let wrapper;
 
   const findJobId = () => wrapper.findByTestId('job-id');

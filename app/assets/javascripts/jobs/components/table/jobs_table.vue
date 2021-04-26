@@ -110,11 +110,15 @@ export default {
     </template>
 
     <template #cell(stage)="{ item }">
-      <span data-testid="job-stage-name">{{ item.stage.name }}</span>
+      <div class="gl-text-truncate">
+        <span data-testid="job-stage-name">{{ item.stage.name }}</span>
+      </div>
     </template>
 
     <template #cell(name)="{ item }">
-      <span data-testid="job-name">{{ item.name }}</span>
+      <div class="gl-text-truncate">
+        <span data-testid="job-name">{{ item.name }}</span>
+      </div>
     </template>
 
     <template #cell(duration)="{ item }">

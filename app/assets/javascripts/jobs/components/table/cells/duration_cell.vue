@@ -30,12 +30,12 @@ export default {
 
 <template>
   <div>
-    <div v-if="duration">
-      <gl-icon name="timer" :size="$options.iconSize" />
+    <div v-if="duration" data-testid="job-duration">
+      <gl-icon name="timer" :size="$options.iconSize" data-testid="duration-icon" />
       {{ durationTimeFormatted(duration) }}
     </div>
-    <div v-if="finishedTime">
-      <gl-icon name="calendar" :size="$options.iconSize" />
+    <div v-if="finishedTime" data-testid="job-finished-time">
+      <gl-icon name="calendar" :size="$options.iconSize" data-testid="finished-time-icon" />
       <time
         v-gl-tooltip
         :title="tooltipTitle(finishedTime)"
