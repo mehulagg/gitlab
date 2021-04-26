@@ -15,74 +15,10 @@ RSpec.describe IncidentManagement::ProcessAlertWorker do
 
     subject { described_class.new.perform(nil, nil, alert.id) }
 
-    before do
-      allow(Gitlab::AppLogger).to receive(:warn).and_call_original
+    it 'does nothing' do
+      expect(AlertManagement::CreateAlertIssueService).not_to receive(:new)
 
-      allow(AlertManagement::CreateAlertIssueService)
-        .to receive(:new).with(alert, User.alert_bot)
-        .and_call_original
-    end
-
-    shared_examples 'creates issue successfully' do
-      it 'creates an issue' do
-        expect(AlertManagement::CreateAlertIssueService)
-          .to receive(:new).with(alert, User.alert_bot)
-
-        expect { subject }.to change { Issue.count }.by(1)
-      end
-
-      it 'updates AlertManagement::Alert#issue_id' do
-        subject
-
-        expect(alert.reload.issue_id).to eq(created_issue.id)
-      end
-
-      it 'does not write a warning to log' do
-        subject
-
-        expect(Gitlab::AppLogger).not_to have_received(:warn)
-      end
-    end
-
-    context 'with valid alert' do
-      it_behaves_like 'creates issue successfully'
-
-      context 'when alert cannot be updated' do
-        let_it_be(:alert) { create(:alert_management_alert, :with_validation_errors, project: project, payload: payload) }
-
-        it 'updates AlertManagement::Alert#issue_id' do
-          expect { subject }.not_to change { alert.reload.issue_id }
-        end
-
-        it 'logs a warning' do
-          subject
-
-          expect(Gitlab::AppLogger).to have_received(:warn).with(
-            message: 'Cannot process an Incident',
-            issue_id: created_issue.id,
-            alert_id: alert.id,
-            errors: 'Hosts hosts array is over 255 chars'
-          )
-        end
-      end
-
-      context 'prometheus alert' do
-        let_it_be(:alert) { create(:alert_management_alert, :prometheus, project: project, started_at: started_at) }
-
-        it_behaves_like 'creates issue successfully'
-      end
-    end
-
-    context 'with invalid alert' do
-      let(:invalid_alert_id) { non_existing_record_id }
-
-      subject { described_class.new.perform(nil, nil, invalid_alert_id) }
-
-      it 'does not create issues' do
-        expect(AlertManagement::CreateAlertIssueService).not_to receive(:new)
-
-        expect { subject }.not_to change { Issue.count }
-      end
+      expect { subject }.not_to change { Issue.count }
     end
   end
 end

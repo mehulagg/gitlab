@@ -80,9 +80,9 @@ RSpec.shared_examples 'processes incident issues' do
   end
 
   it 'processes issues' do
-    expect(IncidentManagement::ProcessAlertWorker)
+    expect(IncidentManagement::ProcessAlertWorkerV2)
       .to receive(:perform_async)
-      .with(nil, nil, kind_of(Integer))
+      .with(kind_of(Integer))
       .once
 
     Sidekiq::Testing.inline! do
@@ -93,7 +93,7 @@ end
 
 RSpec.shared_examples 'does not process incident issues' do
   it 'does not process issues' do
-    expect(IncidentManagement::ProcessAlertWorker)
+    expect(IncidentManagement::ProcessAlertWorkerV2)
       .not_to receive(:perform_async)
 
     expect(subject).to be_success
@@ -102,7 +102,7 @@ end
 
 RSpec.shared_examples 'does not process incident issues due to error' do |http_status:|
   it 'does not process issues' do
-    expect(IncidentManagement::ProcessAlertWorker)
+    expect(IncidentManagement::ProcessAlertWorkerV2)
       .not_to receive(:perform_async)
 
     expect(subject).to be_error
