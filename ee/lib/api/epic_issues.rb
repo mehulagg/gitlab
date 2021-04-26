@@ -63,7 +63,7 @@ module API
       end
       params do
         requires :epic_iid, type: Integer, desc: 'The IID of the epic'
-        optional :include_subepics, type: Boolean, desc: 'Whether to include issues of subepics'
+        optional :include_subepics, type: Boolean, default: false, desc: 'Whether to include issues of subepics'
         use :pagination
       end
       [':id/epics/:epic_iid/issues', ':id/-/epics/:epic_iid/issues'].each do |path|
