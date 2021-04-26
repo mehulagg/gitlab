@@ -36,7 +36,6 @@ module EE
         super
 
         handle_iteration_change(issue)
-        handle_issue_type_change(issue)
       end
 
       private
@@ -56,9 +55,7 @@ module EE
       end
 
       def handle_issue_type_change(issue)
-        return unless issue.previous_changes.include?('issue_type')
-
-        ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute
+        super && ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute
       end
 
       def handle_promotion(issue)

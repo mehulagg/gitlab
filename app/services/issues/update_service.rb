@@ -84,6 +84,8 @@ module Issues
       if added_mentions.present?
         notification_service.async.new_mentions_in_issue(issue, added_mentions, current_user)
       end
+
+      handle_issue_type_change(issue)
     end
 
     def handle_assignee_changes(issue, old_assignees)
@@ -206,6 +208,12 @@ module Issues
 
     def create_confidentiality_note(issue)
       SystemNoteService.change_issue_confidentiality(issue, issue.project, current_user)
+    end
+
+    def handle_issue_type_change(issue)
+      return unless issue.previous_changes.include?('issue_type')
+
+      SystemNoteService.change_issue_type(issue, current_user)
     end
   end
 end
