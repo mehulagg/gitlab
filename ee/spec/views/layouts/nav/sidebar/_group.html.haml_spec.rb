@@ -93,7 +93,7 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
       it 'is visible' do
         render
 
-        expect(rendered).to have_text 'DevOps Adoption'
+        expect(rendered).to have_text 'DevOps adoption'
       end
 
       context 'feature flag is disabled' do
@@ -104,7 +104,7 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
         it 'is not visible' do
           render
 
-          expect(rendered).not_to have_text 'DevOps Adoption'
+          expect(rendered).not_to have_text 'DevOps adoption'
         end
       end
     end
@@ -117,7 +117,7 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
       it 'is not visible' do
         render
 
-        expect(rendered).not_to have_text 'DevOps Adoption'
+        expect(rendered).not_to have_text 'DevOps adoption'
       end
 
       context 'feature flag is disabled' do
@@ -128,7 +128,7 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
         it 'is not visible' do
           render
 
-          expect(rendered).not_to have_text 'DevOps Adoption'
+          expect(rendered).not_to have_text 'DevOps adoption'
         end
       end
     end
