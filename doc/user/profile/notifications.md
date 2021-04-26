@@ -39,30 +39,31 @@ You can tune the notifications you receive by combining your notification settin
 - [Notification scope](#notification-scope)
 - [Notification levels](#notification-levels)
 
-### Editing notification settings
+## Editing notification settings
 
 To edit your notification settings:
 
-1. Click on your profile picture and select **Preferences**.
-1. Click **Notifications** in the left sidebar.
+1. In the top-right corner, select your avatar.
+1. Select **Preferences**.
+1. In the left sidebar, select **Notifications**.
 1. Edit the desired notification settings. Edited settings are automatically saved and enabled.
 
 These notification settings apply only to you. They do not affect the notifications received by anyone else in the same project or group.
-
-![notification settings](img/notification_global_settings.png)
 
 ## Global notification settings
 
 Your **Global notification settings** are the default settings unless you select
 different values for a project or a group.
 
-- **Notification email**: The email address your notifications are sent to.
-- **Global notification level**: The default [notification level](#notification-levels)
+- **Notification email**: the email address your notifications are sent to.
+- **Receive product marketing emails**: select this check box to receive
+  [periodic emails](#product-marketing-emails) about GitLab features.
+- **Global notification level**: the default [notification level](#notification-levels)
   which applies to all your notifications.
-- **Receive product marketing emails**: Select this check box to receive periodic
-  emails about GitLab features.
-- **Receive notifications about your own activity**: Select this check box to receive
+- **Receive notifications about your own activity**: select this check box to receive
   notifications about your own activity. Not selected by default.
+
+![notification settings](img/notification_global_settings_v13_12.png)
 
 ### Notification scope
 
@@ -85,15 +86,16 @@ You can select a notification level for each project to help you closely monitor
 
 To select a notification level for a project, use either of these methods:
 
-1. Click on your profile picture and select **Preferences**.
-1. Click **Notifications** in the left sidebar.
+1. In the top-right corner, select your avatar.
+1. Select **Preferences**.
+1. In the left sidebar, select **Notifications**.
 1. Locate the project in the **Projects** section.
 1. Select the desired [notification level](#notification-levels).
 
 Or:
 
-1. Navigate to the project's page.
-1. Click the notification dropdown, marked with a bell icon.
+1. Go to your project.
+1. Select the notification dropdown, marked with a bell icon (**{notifications}**).
 1. Select the desired [notification level](#notification-levels).
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
@@ -109,15 +111,16 @@ You can select a notification level and email address for each group.
 
 To select a notification level for a group, use either of these methods:
 
-1. Click on your profile picture and select **Preferences**.
-1. Click **Notifications** in the left sidebar.
+1. In the top-right corner, select your avatar.
+1. Select **Preferences**.
+1. In the left sidebar, select **Notifications**.
 1. Locate the project in the **Groups** section.
 1. Select the desired [notification level](#notification-levels).
 
 ---
 
-1. Navigate to the group's page.
-1. Click the notification dropdown, marked with a bell icon.
+1. Go to your group.
+1. Select the notification dropdown, marked with a bell icon (**{notifications}**).
 1. Select the desired [notification level](#notification-levels).
 
 ##### Group notification email address
@@ -126,8 +129,9 @@ To select a notification level for a group, use either of these methods:
 
 You can select an email address to receive notifications for each group you belong to. This could be useful, for example, if you work freelance, and want to keep email about clients' projects separate.
 
-1. Click on your profile picture and select **Preferences**.
-1. Click **Notifications** in the left sidebar.
+1. In the top-right corner, select your avatar.
+1. Select **Preferences**.
+1. In the left sidebar, select **Notifications**.
 1. Locate the project in the **Groups** section.
 1. Select the desired email address.
 
@@ -229,7 +233,7 @@ If the title or description of an issue or merge request is
 changed, notifications are sent to any **new** mentions by `@username` as
 if they had been mentioned in the original text.
 
-You don't receive notifications for Issues, Merge Requests or Milestones created
+You don't receive notifications for issues, merge requests or milestones created
 by yourself (except when an issue is due). You only receive automatic
 notifications when somebody else comments or adds changes to the ones that
 you've created or mentions you.
