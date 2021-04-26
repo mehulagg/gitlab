@@ -26,7 +26,7 @@ functionality of a project.
 
 ### General project settings
 
-Adjust your project's name, description, avatar, [default branch](../repository/branches/default.md), and topics:
+Adjust your project's name, topics, compliance framework, description, avatar, and [default branch](../repository/branches/default.md) :
 
 ![general project settings](img/general_settings_v13_11.png)
 
@@ -34,36 +34,11 @@ The project description also partially supports [standard Markdown](../../markdo
 
 #### Compliance framework **(PREMIUM)**
 
-You can select a framework label to identify that your project has certain compliance requirements or needs additional oversight. Available labels include:
+You can select a compliance framework to identify that your project has certain compliance requirements or needs additional oversight. The list of available options is set by the group. [How to setup a compliance framework?](../../group/compliance/compliance_framework/index.md)
 
-- GDPR (General Data Protection Regulation)
-- HIPAA (Health Insurance Portability and Accountability Act)
-- PCI-DSS (Payment Card Industry-Data Security Standard)
-- SOC 2 (Service Organization Control 2)
-- SOX (Sarbanes-Oxley)
+Compliance frameworks will appear as a badge next to a project name. If a compliance framework has assigned a compliance pipeline configuration, then your project will be required to combine its .yml with it.
 
-NOTE:
-Compliance framework labels do not affect your project settings.
-
-#### Custom compliance frameworks
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276221) in GitLab 13.9.
-> - [Deployed behind a feature flag](../../feature_flags.md).
-> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/287779) in GitLab 13.11.
-> - Enabled on GitLab.com.
-> - Recommended for production use.
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
-
-GitLab 13.9 introduces custom compliance frameworks at the group-level. A group owner can create a compliance framework label
-and assign it to any number of projects within that group or subgroups. When this feature is enabled, projects can only
-be assigned compliance framework labels that already exist within that group.
-
-If existing [Compliance frameworks](#compliance-framework) are not sufficient, project and group owners
-can now create their own.
-
-New compliance framework labels can be created and updated using GraphQL.
+![Compliance framework displayed as a label](../../group/compliance/compliance_frameworks/img/badge_example.png)
 
 #### Compliance pipeline configuration **(ULTIMATE)**
 
@@ -388,21 +363,5 @@ Add the URL of a Jaeger server to allow your users to [easily access the Jaeger 
 [Add Storage credentials](../../../operations/incident_management/status_page.md#sync-incidents-to-the-status-page)
 to enable the syncing of public Issues to a [deployed status page](../../../operations/incident_management/status_page.md#create-a-status-page-project).
 
-### Enable or disable custom compliance frameworks **(PREMIUM)**
 
-Enabling or disabling custom compliance frameworks is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:ff_custom_compliance_frameworks, Group.find(<group id>))
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:ff_custom_compliance_frameworks, Group.find(<group id>))
 ```
