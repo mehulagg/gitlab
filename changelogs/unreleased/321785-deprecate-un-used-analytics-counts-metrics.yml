@@ -1,0 +1,5 @@
+---
+title: Mark 2 analytics feature count metrics as removed
+merge_request: 60176
+author:
+type: deprecated
