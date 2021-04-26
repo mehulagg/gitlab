@@ -11,7 +11,6 @@ module Mutations
                description: 'The desired due date for the issue, ' \
                'due date will be removed if absent or set to null'
 
-
       def resolve(project_path:, iid:, due_date: nil)
         issue = authorized_find!(project_path: project_path, iid: iid)
         project = issue.project
