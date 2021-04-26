@@ -210,6 +210,9 @@ RSpec.describe PlanLimits do
         ci_active_jobs
         storage_size_limit
         daily_invites
+        ci_registered_instance_runners
+        ci_registered_group_runners
+        ci_registered_project_runners
       ] + disabled_max_artifact_size_columns
     end
 
