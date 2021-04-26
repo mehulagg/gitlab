@@ -832,7 +832,7 @@ Missing description
 
 Group: `group::analytics`
 
-Status: `data_available`
+Status: `removed`
 
 Tiers: `free`
 
@@ -3676,7 +3676,7 @@ Missing description
 
 Group: `group::analytics`
 
-Status: `data_available`
+Status: `removed`
 
 Tiers: `free`
 
