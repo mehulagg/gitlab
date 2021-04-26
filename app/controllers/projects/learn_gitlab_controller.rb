@@ -9,6 +9,8 @@ class Projects::LearnGitlabController < Projects::ApplicationController
   def index
     push_frontend_experiment(:learn_gitlab_a, subject: current_user)
     push_frontend_experiment(:learn_gitlab_b, subject: current_user)
+    track_experiment_event(:learn_gitlab_a, 'page:view:learn_gitlab_a')
+    track_experiment_event(:learn_gitlab_b, 'page:view:learn_gitlab_a')
   end
 
   private

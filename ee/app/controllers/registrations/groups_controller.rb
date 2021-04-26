@@ -13,6 +13,8 @@ module Registrations
 
     def new
       record_experiment_user(:trial_during_signup)
+      record_experiment_user(:learn_gitlab_a, learn_gitlab_context)
+      record_experiment_user(:learn_gitlab_b, learn_gitlab_context)
       @group = Group.new(visibility_level: helpers.default_group_visibility)
     end
 
@@ -73,6 +75,8 @@ module Registrations
 
     def registration_onboarding_flow
       record_experiment_user(:trial_during_signup, trial_chosen: helpers.in_trial_during_signup_flow?, namespace_id: @group.id)
+      record_experiment_conversion_event(:learn_gitlab_a, namespace_id: @group.id)
+      record_experiment_conversion_event(:learn_gitlab_b, namespace_id: @group.id)
 
       if experiment_enabled?(:trial_during_signup)
         trial_during_signup_flow
@@ -156,6 +160,13 @@ module Registrations
       flash[:alert] = result&.dig(:errors) unless result&.dig(:success)
 
       result&.dig(:success)
+    end
+
+    def learn_gitlab_context
+      in_a_experiment_group = Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_a, subject: current_user)
+      in_b_experiment_group = Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user) && !in_a_experiment_group
+
+      { in_a_experiment_group: in_a_experiment_group, in_b_experiment_group: in_b_experiment_group }
     end
   end
 end
