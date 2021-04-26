@@ -12,6 +12,16 @@ module Limitable
     validate :validate_plan_limit_not_exceeded, on: :create
   end
 
+  class Scope
+    attr_reader :name, :actual_limits, :relation
+
+    def initialize(name, actual_limits, relation)
+      @name = name
+      @actual_limits = actual_limits
+      @relation = relation
+    end
+  end
+
   private
 
   def validate_plan_limit_not_exceeded
@@ -22,27 +32,29 @@ module Limitable
     end
   end
 
+  def default_limitable_scope(scope_relation)
+    Scope.new(limit_name, scope_relation.actual_limits, self.class.where(limit_scope => scope_relation))
+  end
+
   def validate_scoped_plan_limit_not_exceeded
     scope_relation = self.public_send(limit_scope) # rubocop:disable GitlabSecurity/PublicSend
     return unless scope_relation
 
-    relation = self.class.where(limit_scope => scope_relation)
-    limits = scope_relation.actual_limits
+    scope = scope_relation.is_a?(Scope) ? scope_relation : default_limitable_scope(scope_relation)
 
-    check_plan_limit_not_exceeded(limits, relation)
+    check_plan_limit_not_exceeded(scope)
   end
 
   def validate_global_plan_limit_not_exceeded
-    relation = self.class.all
-    limits = Plan.default.actual_limits
+    scope = Scope.new(limit_name, Plan.default.actual_limits, self.class.all)
 
-    check_plan_limit_not_exceeded(limits, relation)
+    check_plan_limit_not_exceeded(scope)
   end
 
-  def check_plan_limit_not_exceeded(limits, relation)
-    return unless limits.exceeded?(limit_name, relation)
+  def check_plan_limit_not_exceeded(scope)
+    return unless scope.actual_limits.exceeded?(scope.name, scope.relation)
 
     errors.add(:base, _("Maximum number of %{name} (%{count}) exceeded") %
-        { name: limit_name.humanize(capitalize: false), count: limits.public_send(limit_name) }) # rubocop:disable GitlabSecurity/PublicSend
+        { name: scope.name.humanize(capitalize: false), count: scope.actual_limits.public_send(scope.name) }) # rubocop:disable GitlabSecurity/PublicSend
   end
 end
