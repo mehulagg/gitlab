@@ -325,19 +325,48 @@ Pipelines can be complex structures with many sequential and parallel jobs.
 To make it easier to understand the flow of a pipeline, GitLab has pipeline graphs for viewing pipelines
 and their statuses.
 
-Pipeline graphs can be displayed in two different ways, depending on the page you
+Pipeline graphs can be displayed as a large graph or a miniature representation, depending on the page you
 access the graph from.
 
 GitLab capitalizes the stages' names in the pipeline graphs.
 
-### Regular pipeline graphs
+### View full pipeline graph
 
-> - [Visualization improved](https://gitlab.com/gitlab-org/gitlab/-/issues/276949) in GitLab 13.11.
+> - [Visualization improvements introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276949) in GitLab 13.11.
+> - [Job dependency view introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328538) in GitLab 13.12, disabled by default.
 
-Regular pipeline graphs show the names of the jobs in each stage. Regular pipeline graphs can
-be found when you are on a [single pipeline page](#view-pipelines). For example:
+The [pipeline details page](#view-pipelines) displays the full pipeline graph of
+all the jobs in the pipeline.
 
-![Pipelines example](img/pipelines_v13_11.png)
+You can group the jobs by:
+
+- **Stage**: Arrange jobs in the same stage together in the same column.
+
+  ![jobs grouped by stage](img/pipelines_graph_stage_view_v13_12.png)
+
+- **Job dependencies**: Arrange jobs based on their [`needs`](../yaml/README.md#needs)
+  dependencies. Jobs in the left column run first, and jobs that depend on them are
+  grouped in the next columns.
+
+  For example, a `build-job2` depends only on jobs in the first column, so it displays
+  in the second column. `deploy-job2` depends on jobs in both the first and second column
+  and displays in the third column:
+
+  ![jobs grouped by needs dependency](img/pipelines_graph_dependency_view_v13_12.png)
+
+  To add lines that show the `needs` relationships between jobs, toggle **Show dependencies.
+  These lines are similar to the [needs visualization](../directed_acyclic_graph/index.md#needs-visualization):
+
+  ![jobs grouped by needs dependency with lines displayed](img/pipelines_graph_dependency_view_links_v13_12.png)
+
+  To see the full `needs` dependency tree for a job, hover over it:
+
+  ![single job dependency tree highlighted](img/pipelines_graph_dependency_view_hover_v13_12.png)
+
+NOTE:
+The **Job dependencies** view is [deployed behind a feature flag](../../user/feature_flags.md),
+disabled by default on self-managed instances. To enable this view, administrators can
+[enable the `pipeline_graph_layers_view` feature flag](../../administration/feature_flags.md).
 
 [Multi-project pipeline graphs](../multi_project_pipelines.md#multi-project-pipeline-visualization) help
 you visualize the entire pipeline, including all cross-project inter-dependencies. **(PREMIUM)**
@@ -355,6 +384,8 @@ be found when you navigate to:
 Pipeline mini graphs allow you to see all related jobs for a single commit and the net result
 of each stage of your pipeline. This allows you to quickly see what failed and
 fix it.
+
+Pipeline mini graphs only display jobs by stage.
 
 Stages in pipeline mini graphs are collapsible. Hover your mouse over them and click to expand their jobs.
 
