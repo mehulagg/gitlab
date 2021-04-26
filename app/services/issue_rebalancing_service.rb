@@ -5,14 +5,13 @@ class IssueRebalancingService
   BATCH_SIZE = 100
   TooManyIssues = Class.new(StandardError)
 
-  def initialize(issue)
-    @issue = issue
-    @base = Issue.relative_positioning_query_base(issue)
+  def initialize(root_namespace)
+    @root_namespace = root_namespace
+    @base = Issue.in_projects(root_namespace.all_projects)
   end
 
   def execute
-    gates = [issue.project, issue.project.group].compact
-    return unless gates.any? { |gate| Feature.enabled?(:rebalance_issues, gate) }
+    return unless Feature.enabled?(:rebalance_issues, root_namespace)
 
     raise TooManyIssues, "#{issue_count} issues" if issue_count > MAX_ISSUE_COUNT
 
@@ -38,7 +37,7 @@ class IssueRebalancingService
 
   private
 
-  attr_reader :issue, :base
+  attr_reader :root_namespace, :base
 
   # rubocop: disable CodeReuse/ActiveRecord
   def indexed_ids

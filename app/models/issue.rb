@@ -502,7 +502,7 @@ class Issue < ApplicationRecord
 
   def could_not_move(exception)
     # Symptom of running out of space - schedule rebalancing
-    IssueRebalancingWorker.perform_async(nil, project_id)
+    IssueRebalancingWorker.perform_async(nil, nil, project.root_namespace.id)
   end
 end
 

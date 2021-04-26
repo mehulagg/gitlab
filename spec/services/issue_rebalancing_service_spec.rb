@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 
+
 RSpec.describe IssueRebalancingService do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { project.creator }
@@ -35,7 +36,7 @@ RSpec.describe IssueRebalancingService do
   shared_examples 'IssueRebalancingService shared examples' do
     it 'rebalances a set of issues with clumps at the end and start' do
       all_issues = start_clump + unclumped + end_clump.reverse
-      service = described_class.new(project.issues.first)
+      service = described_class.new(project.root_namespace)
 
       expect { service.execute }.not_to change { issues_in_position_order.map(&:id) }
 
@@ -51,7 +52,7 @@ RSpec.describe IssueRebalancingService do
     end
 
     it 'is idempotent' do
-      service = described_class.new(project.issues.first)
+      service = described_class.new(project.root_namespace)
 
       expect do
         service.execute
@@ -66,17 +67,17 @@ RSpec.describe IssueRebalancingService do
       issue.project.group
       old_pos = issue.relative_position
 
-      service = described_class.new(issue)
+      service = described_class.new(project.root_namespace)
 
       expect { service.execute }.not_to exceed_query_limit(0)
       expect(old_pos).to eq(issue.reload.relative_position)
     end
 
-    it 'acts if the flag is enabled for the project' do
+    it 'acts if the flag is enabled for the root namespace' do
       issue = create(:issue, project: project, author: user, relative_position: max_pos)
-      stub_feature_flags(rebalance_issues: issue.project)
+      stub_feature_flags(rebalance_issues: project.root_namespace)
 
-      service = described_class.new(issue)
+      service = described_class.new(project.root_namespace)
 
       expect { service.execute }.to change { issue.reload.relative_position }
     end
@@ -86,18 +87,17 @@ RSpec.describe IssueRebalancingService do
       project.update!(group: create(:group))
       stub_feature_flags(rebalance_issues: issue.project.group)
 
-      service = described_class.new(issue)
+      service = described_class.new(project.root_namespace)
 
       expect { service.execute }.to change { issue.reload.relative_position }
     end
 
     it 'aborts if there are too many issues' do
-      issue = project.issues.first
       base = double(count: 10_001)
 
-      allow(Issue).to receive(:relative_positioning_query_base).with(issue).and_return(base)
+      allow(Issue).to receive(:in_projects).and_return(base)
 
-      expect { described_class.new(issue).execute }.to raise_error(described_class::TooManyIssues)
+      expect { described_class.new(project.root_namespace).execute }.to raise_error(described_class::TooManyIssues)
     end
   end
 

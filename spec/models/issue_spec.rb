@@ -1244,10 +1244,11 @@ RSpec.describe Issue do
     let(:project) { build_stubbed(:project_empty_repo) }
     let(:issue) { build_stubbed(:issue, relative_position: 100, project: project) }
 
+
     it 'schedules rebalancing if we time-out when moving' do
       lhs = build_stubbed(:issue, relative_position: 99, project: project)
       to_move = build(:issue, project: project)
-      expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project.id)
+      expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, nil, project.root_namespace.id)
 
       expect { to_move.move_between(lhs, issue) }.to raise_error(ActiveRecord::QueryCanceled)
     end
