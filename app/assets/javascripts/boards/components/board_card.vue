@@ -31,7 +31,6 @@ export default {
   },
   computed: {
     ...mapState(['selectedBoardItems', 'activeId']),
-    ...mapGetters(['isSwimlanesOn']),
     isActive() {
       return this.item.id === this.activeId;
     },
