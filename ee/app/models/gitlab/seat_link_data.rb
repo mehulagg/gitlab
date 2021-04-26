@@ -49,6 +49,7 @@ module Gitlab
 
     def data
       {
+        gitlab_version: Gitlab::VERSION,
         timestamp: timestamp.iso8601,
         date: timestamp.to_date.to_s,
         license_key: key,
