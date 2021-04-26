@@ -2165,6 +2165,9 @@ msgstr ""
 msgid "Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information."
 msgstr ""
 
+msgid "Admin"
+msgstr ""
+
 msgid "Admin Area"
 msgstr ""
 
@@ -9340,6 +9343,9 @@ msgstr ""
 msgid "Create new label"
 msgstr ""
 
+msgid "Create new project"
+msgstr ""
+
 msgid "Create new..."
 msgstr ""
 
@@ -15204,6 +15210,9 @@ msgstr ""
 msgid "Go to previous page"
 msgstr ""
 
+msgid "Go to primary node"
+msgstr ""
+
 msgid "Go to project"
 msgstr ""
 
@@ -20129,6 +20138,9 @@ msgid "Member|Revoke invite"
 msgstr ""
 
 msgid "Memory Usage"
+msgstr ""
+
+msgid "Menu"
 msgstr ""
 
 msgid "Merge"

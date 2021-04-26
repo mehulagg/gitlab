@@ -1,3 +1,6 @@
+-# WAIT! This file is being migrated to `top_nav_helper` to support the top nav
+-# redesign. Please see https://gitlab.com/gitlab-org/gitlab-foss/issues/49713
+-# for more information.
 - if Gitlab::Geo.secondary? && Gitlab::Geo.primary_node_configured?
   %li
     = link_to Gitlab::Geo.primary_node.url, title: 'Go to primary node', data: {toggle: 'tooltip', placement: 'bottom', container: 'body'} do

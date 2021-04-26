@@ -1,3 +1,6 @@
+-# WAIT! This file is being migrated to `top_nav_helper` to support the top nav
+-# redesign. Please see https://gitlab.com/gitlab-org/gitlab-foss/issues/49713
+-# for more information.
 - project_meta = { id: @project.id, name: @project.name, namespace: @project.full_name, web_url: project_path(@project), avatar_url: @project.avatar_url } if @project&.persisted?
 .frequent-items-dropdown-container
   .frequent-items-dropdown-sidebar.qa-projects-dropdown-sidebar
