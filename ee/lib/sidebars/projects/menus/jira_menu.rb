@@ -6,12 +6,7 @@ module Sidebars
       class JiraMenu < ::Sidebars::Menu
         override :configure_menu_items
         def configure_menu_items
-<<<<<<< HEAD
           return false unless external_issue_tracker
-=======
-          return false unless external_issue_tracker.is_a?(JiraService)
-          return false unless context.jira_issues_integration
->>>>>>> 24259e1d5ba (Add External Issue Tracker, Jira, and Labels menus)
 
           add_item(issue_list_menu_item)
           add_item(open_jira_menu_item)

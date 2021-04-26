@@ -122,6 +122,33 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
+  describe 'CI/CD' do
+    describe 'Test Cases' do
+      let(:license_feature_status) { true }
+
+      before do
+        stub_licensed_features(quality_management: license_feature_status)
+        allow(view).to receive(:current_user).and_return(user)
+      end
+
+      it 'has a link to the test cases page' do
+        render
+
+        expect(rendered).to have_link('Test Cases', href: project_quality_test_cases_path(project))
+      end
+
+      context 'when license feature :quality_management is not enabled' do
+        let(:license_feature_status) { false }
+
+        it 'does not have a link to the test cases page' do
+          render
+
+          expect(rendered).not_to have_link('Test Cases', href: project_quality_test_cases_path(project))
+        end
+      end
+    end
+  end
+
   describe 'Operations main link' do
     let(:user) { create(:user) }
 
