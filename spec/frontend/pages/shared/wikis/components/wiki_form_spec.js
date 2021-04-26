@@ -337,7 +337,7 @@ describe('WikiForm', () => {
           // wait for content editor to load
           await waitForPromises();
 
-          wrapper.vm.editor.setContent('<p>hello __world__ from content editor</p>', true);
+          wrapper.vm.editor.commands.setContent('<p>hello __world__ from content editor</p>', true);
 
           await waitForPromises();
 
@@ -378,7 +378,7 @@ describe('WikiForm', () => {
           // wait for content editor to load
           await waitForPromises();
 
-          wrapper.vm.editor.setContent('<p>hello __world__ from content editor</p>', true);
+          wrapper.vm.editor.commands.setContent('<p>hello __world__ from content editor</p>', true);
           wrapper.findComponent(GlAlert).findComponent(GlButton).trigger('click');
 
           await wrapper.vm.$nextTick();
