@@ -6,17 +6,25 @@ module AppSec
       class UpdateService < BaseService
         include Gitlab::Allowable
 
-        def execute(**args)
+        def execute(**params)
           return unauthorized unless can_update_scanner_profile?
 
-          dast_scanner_profile = find_dast_scanner_profile(args[:id])
+          dast_scanner_profile = find_dast_scanner_profile(params[:id])
           return ServiceResponse.error(message: _('Scanner profile not found for given parameters')) unless dast_scanner_profile
           return ServiceResponse.error(message: _('Cannot modify %{profile_name} referenced in security policy') % { profile_name: dast_scanner_profile.name }) if referenced_in_security_policy?(dast_scanner_profile)
 
-          update_args, old_args = construct_update_args(args, dast_scanner_profile)
+          old_params = dast_scanner_profile.attributes.symbolize_keys
+          update_params = {
+            name: params[:profile_name],
+            target_timeout: params[:target_timeout],
+            spider_timeout: params[:spider_timeout]
+          }
+          update_params[:scan_type] = params[:scan_type] if params[:scan_type]
+          update_params[:use_ajax_spider] = params[:use_ajax_spider] unless params[:use_ajax_spider].nil?
+          update_params[:show_debug_messages] = params[:show_debug_messages] unless params[:show_debug_messages].nil?
 
-          if dast_scanner_profile.update(update_args)
-            audit_update(dast_scanner_profile, update_args, old_args)
+          if dast_scanner_profile.update(update_params)
+            audit_update(dast_scanner_profile, update_params, old_params)
 
             ServiceResponse.success(payload: dast_scanner_profile)
           else
@@ -42,31 +50,9 @@ module AppSec
           DastScannerProfilesFinder.new(project_ids: [project.id], ids: [id]).execute.first
         end
 
-        def construct_update_args(args, profile)
-          old_args = {
-            name: profile.name,
-            scan_type: profile.scan_type,
-            show_debug_messages: profile.show_debug_messages,
-            spider_timeout: profile.spider_timeout,
-            target_timeout: profile.target_timeout,
-            use_ajax_spider: profile.use_ajax_spider
-          }
-          update_args = {
-            name: args[:profile_name],
-            target_timeout: args[:target_timeout],
-            spider_timeout: args[:spider_timeout]
-          }
-
-          update_args[:scan_type] = args[:scan_type] if args[:scan_type]
-          update_args[:use_ajax_spider] = args[:use_ajax_spider] unless args[:use_ajax_spider].nil?
-          update_args[:show_debug_messages] = args[:show_debug_messages] unless args[:show_debug_messages].nil?
-
-          [update_args, old_args]
-        end
-
-        def audit_update(profile, update_args, old_args)
-          update_args.each do |property, new_value|
-            old_value = old_args[property]
+        def audit_update(profile, params, old_params)
+          params.each do |property, new_value|
+            old_value = old_params[property]
 
             next if old_value == new_value
 
