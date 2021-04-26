@@ -55,11 +55,11 @@ export default {
     },
     isDefaultTestStage() {
       const { currentStage } = this;
-      return !currentStage.custom && currentStage.name.toLowerCase().trim() === 'test';
+      return !currentStage.custom && currentStage.title?.toLowerCase().trim() === 'test';
     },
     isDefaultStagingStage() {
       const { currentStage } = this;
-      return !currentStage.custom && currentStage.name.toLowerCase().trim() === 'staging';
+      return !currentStage.custom && currentStage.title?.toLowerCase().trim() === 'staging';
     },
     isMergeRequestStage() {
       const [firstEvent] = this.stageEvents;
