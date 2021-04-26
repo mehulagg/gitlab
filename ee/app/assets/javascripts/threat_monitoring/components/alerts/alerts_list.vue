@@ -17,6 +17,7 @@ import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { joinPaths } from '~/lib/utils/url_utility';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
+import AlertDrawer from './alert_drawer.vue';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
 import {
@@ -39,6 +40,7 @@ export default {
     CLOSED,
   },
   components: {
+    AlertDrawer,
     AlertStatus,
     AlertFilters,
     GlAlert,
@@ -84,8 +86,10 @@ export default {
       errored: false,
       errorMsg: '',
       filters: DEFAULT_FILTERS,
+      isAlertDrawerOpen: false,
       isErrorAlertDismissed: false,
       pageInfo: {},
+      selectedAlert: {},
       sort: 'STARTED_AT_DESC',
       sortBy: 'startedAt',
       sortDesc: true,
@@ -146,6 +150,10 @@ export default {
         ),
       };
     },
+    handleAlertDeselect() {
+      this.isAlertDrawerOpen = false;
+      this.selectedAlert = {};
+    },
     handleAlertError(msg) {
       this.errored = true;
       this.errorMsg = msg;
@@ -161,6 +169,10 @@ export default {
     },
     alertDetailsUrl({ iid }) {
       return joinPaths(window.location.pathname, 'alerts', iid);
+    },
+    openAlertDrawer(data) {
+      this.isAlertDrawerOpen = true;
+      this.selectedAlert = data;
     },
   },
 };
@@ -201,6 +213,7 @@ export default {
       sort-icon-left
       responsive
       show-empty
+      @row-clicked="openAlertDrawer"
       @sort-changed="fetchSortedData"
     >
       <template #cell(startedAt)="{ item }">
@@ -304,5 +317,11 @@ export default {
       <gl-loading-icon v-if="isLoadingAlerts" size="md" />
       <span v-else>&nbsp;</span>
     </gl-intersection-observer>
+    <alert-drawer
+      :is-alert-drawer-open="isAlertDrawerOpen"
+      :selected-alert="selectedAlert"
+      @deselect-alert="handleAlertDeselect"
+      @alert-update="handleStatusUpdate"
+    />
   </div>
 </template>

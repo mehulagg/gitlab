@@ -59,12 +59,12 @@ export default {
 </script>
 
 <template>
-  <div class="dropdown dropdown-menu-selectable">
+  <div class="dropdown dropdown-menu-selectable gl-display-inline-block">
     <gl-dropdown
       :loading="isUpdating"
       right
       :text="$options.i18n.STATUSES[alert.status]"
-      class="gl-w-full"
+      class="gl-w-full gl-display-inline-block"
       toggle-class="dropdown-menu-toggle"
     >
       <div class="dropdown-content dropdown-body">
