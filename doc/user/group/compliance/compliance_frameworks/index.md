@@ -16,7 +16,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-GitLab 13.9 introduces customizable compliance frameworks at the group-level. A group owner can create a compliance framework label and assign it to any number of projects within that group or subgroups. When this feature is enabled, projects can only be assigned compliance frameworks that already exist within that group.
+GitLab 13.9 introduces customizable compliance frameworks at the group-level. A group owner can create a compliance framework label and assign it to any number of projects within that group or subgroups. When this feature is enabled, projects can only be assigned compliance frameworks that already exist within that group. 
 
 New compliance frameworks can be created and updated using GraphQL.
 
