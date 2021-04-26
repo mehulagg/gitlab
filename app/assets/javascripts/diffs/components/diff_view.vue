@@ -34,6 +34,11 @@ export default {
       required: false,
       default: false,
     },
+    active: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
     return {
@@ -128,6 +133,7 @@ export default {
         :is-commented="index >= commentedLines.startLine && index <= commentedLines.endLine"
         :inline="inline"
         :index="index"
+        :active="active"
         @enterdragging="onDragOver"
         @startdragging="onStartDragging"
         @stopdragging="onStopDragging"

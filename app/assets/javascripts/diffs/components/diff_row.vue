@@ -56,6 +56,11 @@ export default {
       type: Number,
       required: true,
     },
+    active: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
     return {
@@ -67,11 +72,15 @@ export default {
     ...mapGetters(['isLoggedIn']),
     ...mapState({
       isHighlighted(state) {
+        if (!this.active) return null;
+
         const line = this.line.left?.line_code ? this.line.left : this.line.right;
         return utils.isHighlighted(state, line, false);
       },
     }),
     classNameMap() {
+      if (!this.active) return null;
+
       return {
         [CONTEXT_LINE_CLASS_NAME]: this.line.isContextLineLeft,
         [PARALLEL_DIFF_VIEW_TYPE]: !this.inline,
@@ -79,17 +88,21 @@ export default {
       };
     },
     parallelViewLeftLineType() {
+      if (!this.active) return [];
+
       return utils.parallelViewLeftLineType(this.line, this.isHighlighted || this.isCommented);
     },
     coverageStateLeft() {
-      if (!this.inline || !this.line.left) return {};
+      if (!this.inline || !this.line.left || !this.active) return {};
       return this.fileLineCoverage(this.filePath, this.line.left.new_line);
     },
     coverageStateRight() {
-      if (!this.line.right) return {};
+      if (!this.line.right || !this.active) return {};
       return this.fileLineCoverage(this.filePath, this.line.right.new_line);
     },
     classNameMapCellLeft() {
+      if (!this.active) return null;
+
       return utils.classNameMapCell({
         line: this.line.left,
         hll: this.isHighlighted || this.isCommented,
@@ -97,6 +110,8 @@ export default {
       });
     },
     classNameMapCellRight() {
+      if (!this.active) return null;
+
       return utils.classNameMapCell({
         line: this.line.right,
         hll: this.isHighlighted || this.isCommented,
@@ -104,21 +119,33 @@ export default {
       });
     },
     addCommentTooltipLeft() {
+      if (!this.active) return null;
+
       return utils.addCommentTooltip(this.line.left, this.glFeatures.dragCommentSelection);
     },
     addCommentTooltipRight() {
+      if (!this.active) return null;
+
       return utils.addCommentTooltip(this.line.right, this.glFeatures.dragCommentSelection);
     },
     emptyCellRightClassMap() {
+      if (!this.active) return null;
+
       return { conflict_their: this.line.left?.type === CONFLICT_OUR };
     },
     emptyCellLeftClassMap() {
+      if (!this.active) return null;
+
       return { conflict_our: this.line.right?.type === CONFLICT_THEIR };
     },
     shouldRenderCommentButton() {
+      if (!this.active) return null;
+
       return this.isLoggedIn && !this.line.isContextLineLeft && !this.line.isMetaLineLeft;
     },
     isLeftConflictMarker() {
+      if (!this.active) return null;
+
       return [CONFLICT_MARKER_OUR, CONFLICT_MARKER_THEIR].includes(this.line.left?.type);
     },
     interopLeftAttributes() {
@@ -129,6 +156,8 @@ export default {
       return getInteropOldSideAttributes(this.line.left);
     },
     interopRightAttributes() {
+      if (!this.active) return null;
+
       return getInteropNewSideAttributes(this.line.right);
     },
   },
@@ -207,10 +236,9 @@ export default {
           data-testid="leftLineNumber"
           class="diff-td diff-line-num"
         >
-          <template v-if="!isLeftConflictMarker">
+          <template v-if="!isLeftConflictMarker && active">
             <span
               v-if="shouldRenderCommentButton && !line.hasDiscussionsLeft"
-              v-gl-tooltip
               data-testid="leftCommentButton"
               class="add-diff-note tooltip-wrapper"
               :title="addCommentTooltipLeft"
@@ -258,7 +286,6 @@ export default {
           </a>
         </div>
         <div
-          v-gl-tooltip.hover
           :title="coverageStateLeft.text"
           :class="[...parallelViewLeftLineType, coverageStateLeft.class]"
           class="diff-td line-coverage left-side"
@@ -311,8 +338,7 @@ export default {
         <div :class="classNameMapCellRight" class="diff-td diff-line-num new_line">
           <template v-if="line.right.type !== $options.CONFLICT_MARKER_THEIR">
             <span
-              v-if="shouldRenderCommentButton && !line.hasDiscussionsRight"
-              v-gl-tooltip
+              v-if="shouldRenderCommentButton && !line.hasDiscussionsRight && active"
               data-testid="rightCommentButton"
               class="add-diff-note tooltip-wrapper"
               :title="addCommentTooltipRight"
@@ -350,7 +376,6 @@ export default {
           />
         </div>
         <div
-          v-gl-tooltip.hover
           :title="coverageStateRight.text"
           :class="[
             line.right.type,

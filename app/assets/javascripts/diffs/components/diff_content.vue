@@ -47,11 +47,14 @@ export default {
       required: false,
       default: '',
     },
+    active: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   computed: {
-    ...mapState({
-      projectPath: (state) => state.diffs.projectPath,
-    }),
+    ...mapState('diffs', ['projectPath']),
     ...mapGetters('diffs', [
       'isInlineView',
       'isParallelView',
@@ -133,6 +136,7 @@ export default {
           :diff-lines="mappedLines"
           :help-page-path="helpPagePath"
           :inline="isInlineView"
+          :active="active"
         />
         <gl-loading-icon v-if="diffFile.renderingLines" size="md" class="mt-3" />
       </template>

@@ -3,6 +3,7 @@ import { GlLoadingIcon, GlPagination, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Mousetrap from 'mousetrap';
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { DynamicScroller, DynamicScrollerItem } from 'vendor/vue-virtual-scroller';
 import {
   keysFor,
   MR_PREVIOUS_FILE_IN_DIFF,
@@ -59,6 +60,8 @@ export default {
     PanelResizer,
     GlPagination,
     GlSprintf,
+    DynamicScroller,
+    DynamicScrollerItem,
   },
   mixins: [glFeatureFlagsMixin()],
   alerts: {
@@ -523,17 +526,42 @@ export default {
           <commit-widget v-if="commit" :commit="commit" :collapsible="false" />
           <div v-if="isBatchLoading" class="loading"><gl-loading-icon size="lg" /></div>
           <template v-else-if="renderDiffFiles">
-            <diff-file
-              v-for="(file, index) in diffs"
-              :key="file.newPath"
-              :file="file"
-              :reviewed="fileReviews[file.id]"
-              :is-first-file="index === 0"
-              :is-last-file="index === diffFilesLength - 1"
-              :help-page-path="helpPagePath"
-              :can-current-user-fork="canCurrentUserFork"
-              :view-diffs-file-by-file="viewDiffsFileByFile"
-            />
+            <dynamic-scroller
+              v-if="glFeatures.diffsVirtualScrolling"
+              :items="diffs"
+              :min-item-size="100"
+              :buffer="1000"
+              :use-transform="true"
+              page-mode
+            >
+              <template #default="{ item, index, active }">
+                <dynamic-scroller-item :item="item" :active="active">
+                  <diff-file
+                    :file="item"
+                    :active="active"
+                    :reviewed="fileReviews[item.id]"
+                    :is-first-file="index === 0"
+                    :is-last-file="index === diffFilesLength - 1"
+                    :help-page-path="helpPagePath"
+                    :can-current-user-fork="canCurrentUserFork"
+                    :view-diffs-file-by-file="viewDiffsFileByFile"
+                  />
+                </dynamic-scroller-item>
+              </template>
+            </dynamic-scroller>
+            <template v-else>
+              <diff-file
+                v-for="(file, index) in diffs"
+                :key="file.new_path"
+                :file="file"
+                :reviewed="fileReviews[file.id]"
+                :is-first-file="index === 0"
+                :is-last-file="index === diffFilesLength - 1"
+                :help-page-path="helpPagePath"
+                :can-current-user-fork="canCurrentUserFork"
+                :view-diffs-file-by-file="viewDiffsFileByFile"
+              />
+            </template>
             <div
               v-if="showFileByFileNavigation"
               data-testid="file-by-file-navigation"

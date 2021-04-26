@@ -7,7 +7,7 @@ import { hasDiff } from '~/helpers/diffs_helper';
 import { diffViewerErrors } from '~/ide/constants';
 import { sprintf } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import notesEventHub from '../../notes/event_hub';
+// import notesEventHub from '../../notes/event_hub';
 
 import {
   DIFF_FILE_AUTOMATIC_COLLAPSE,
@@ -66,6 +66,11 @@ export default {
     viewDiffsFileByFile: {
       type: Boolean,
       required: true,
+    },
+    active: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
   },
   data() {
@@ -165,7 +170,7 @@ export default {
         this.isCollapsed = isCollapsed(this.file);
 
         if (newHash && oldHash && !this.hasDiff) {
-          this.requestDiff();
+          // this.requestDiff();
         }
       },
       immediate: true,
@@ -188,7 +193,7 @@ export default {
     },
   },
   created() {
-    notesEventHub.$on(`loadCollapsedDiff/${this.file.file_hash}`, this.requestDiff);
+    // notesEventHub.$on(`loadCollapsedDiff/${this.file.file_hash}`, this.requestDiff);
     eventHub.$on(EVT_EXPAND_ALL_FILES, this.expandAllListener);
   },
   mounted() {
@@ -244,7 +249,7 @@ export default {
       });
 
       if (!this.hasDiff && currentCollapsedFlag) {
-        this.requestDiff();
+        // this.requestDiff();
       }
     },
     requestDiff() {
@@ -286,6 +291,7 @@ export default {
       'is-active': currentDiffFileId === file.file_hash,
       'comments-disabled': Boolean(file.brokenSymlink),
       'has-body': showBody,
+      'is-virtual-scrolling': glFeatures.diffsVirtualScrolling,
     }"
     :data-path="file.new_path"
     class="diff-file file-holder gl-border-none"
@@ -370,6 +376,7 @@ export default {
             :class="hasBodyClasses.content"
             :diff-file="file"
             :help-page-path="helpPagePath"
+            :active="active"
           />
         </template>
       </div>
