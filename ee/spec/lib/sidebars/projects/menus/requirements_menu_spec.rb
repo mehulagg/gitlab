@@ -9,24 +9,8 @@ RSpec.describe Sidebars::Projects::Menus::RequirementsMenu do
 
   subject { described_class.new(context) }
 
-  context 'when feature flag :sidebar_refactor is enabled' do
-    before do
-      stub_feature_flags(sidebar_refactor: false)
-    end
-
-    it 'does not contain any menu_item' do
-      expect(subject.instance_variable_get(:@items)).to be_empty
-    end
-  end
-
-  context 'when feature flag :sidebar_refactor is disabled' do
-    before do
-      stub_feature_flags(sidebar_refactor: false)
-    end
-
-    it 'contains list menu item' do
-      expect(subject.instance_variable_get(:@items)[0].item_id).to eq :requirements_list
-    end
+  before do
+    stub_licensed_features(requirements: true)
   end
 
   describe '#render?' do
@@ -47,15 +31,23 @@ RSpec.describe Sidebars::Projects::Menus::RequirementsMenu do
         it 'returns true' do
           expect(subject.render?).to eq true
         end
+
+        it 'does not contain any menu item' do
+          expect(subject.instance_variable_get(:@items)).to be_empty
+        end
       end
 
-      context 'when feature flag :sidebar_refactor is enabled' do
+      context 'when feature flag :sidebar_refactor is disabled' do
         before do
           stub_feature_flags(sidebar_refactor: false)
         end
 
         it 'returns true' do
           expect(subject.render?).to eq true
+        end
+
+        it 'contains list menu item' do
+          expect(subject.instance_variable_get(:@items)[0].item_id).to eq :requirements_list
         end
       end
     end

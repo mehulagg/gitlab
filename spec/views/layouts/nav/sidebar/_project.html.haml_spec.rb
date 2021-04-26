@@ -247,7 +247,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     it 'has a link to the merge request list path' do
       render
 
-      expect(rendered).to have_link('Merge Requests', href: project_merge_requests_path(project), class: 'shortcuts-merge_requests')
+      expect(rendered).to have_link('Merge requests', href: project_merge_requests_path(project), class: 'shortcuts-merge_requests')
     end
 
     it 'shows pill with the number of merge requests' do
