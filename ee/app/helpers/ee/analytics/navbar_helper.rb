@@ -47,7 +47,7 @@ module EE
         return unless project_nav_tab?(:merge_request_analytics)
 
         navbar_sub_item(
-          title: _('Merge Request'),
+          title: _('Merge request'),
           path: 'projects/analytics/merge_request_analytics#show',
           link: project_analytics_merge_request_analytics_path(project)
         )
@@ -59,7 +59,7 @@ module EE
         return unless group_sidebar_link?(:merge_request_analytics) # rubocop: disable Lint/UnreachableCode
 
         navbar_sub_item(
-          title: _('Merge Request'),
+          title: _('Merge request'),
           path: 'groups/analytics/merge_request_analytics#show',
           link: group_analytics_merge_request_analytics_path(group)
         )
@@ -69,7 +69,7 @@ module EE
         return unless group_sidebar_link?(:cycle_analytics)
 
         navbar_sub_item(
-          title: _('Value Stream'),
+          title: _('Value stream'),
           path: 'groups/analytics/cycle_analytics#show',
           link: group_analytics_cycle_analytics_path(group)
         )
@@ -79,7 +79,7 @@ module EE
         return unless group_sidebar_link?(:group_devops_adoption)
 
         navbar_sub_item(
-          title: _('DevOps Adoption'),
+          title: _('DevOps adoption'),
           path: 'groups/analytics/devops_adoption#show',
           link: group_analytics_devops_adoption_path(group)
         )
@@ -164,7 +164,7 @@ module EE
         return unless project_nav_tab?(:code_review)
 
         navbar_sub_item(
-          title: _('Code Review'),
+          title: _('Code review'),
           path: 'projects/analytics/code_reviews#index',
           link: project_analytics_code_reviews_path(project)
         )
