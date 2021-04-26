@@ -33,9 +33,12 @@ module AppSec
         end
 
         def audit_creation(profile)
-          AuditEventService.new(
-            current_user, project, { action: :create }
-          ).for_dast_scanner_profile(profile).security_event
+          AuditEventService.new(current_user, project, {
+            add: 'dast_scanner_profile',
+            target_id: profile.id,
+            target_type: 'DastScannerProfile',
+            target_details: profile.name
+          }).security_event
         end
       end
     end

@@ -23,6 +23,8 @@ module AppSec
           update_args[:show_debug_messages] = show_debug_messages unless show_debug_messages.nil?
 
           if dast_scanner_profile.update(update_args)
+            audit_update(dast_scanner_profile)
+
             ServiceResponse.success(payload: dast_scanner_profile)
           else
             ServiceResponse.error(message: dast_scanner_profile.errors.full_messages)
@@ -45,6 +47,15 @@ module AppSec
 
         def find_dast_scanner_profile(id)
           DastScannerProfilesFinder.new(project_ids: [project.id], ids: [id]).execute.first
+        end
+
+        def audit_update(profile)
+          AuditEventService.new(current_user, project, {
+            change: 'dast_scanner_profile',
+            target_id: profile.id,
+            target_type: 'DastScannerProfile',
+            target_details: profile.name
+          }).security_event
         end
       end
     end

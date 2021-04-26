@@ -41,9 +41,12 @@ module AppSec
         end
 
         def audit_deletion(profile)
-          AuditEventService.new(
-            current_user, project, { action: :destroy }
-          ).for_dast_scanner_profile(profile).security_event
+          AuditEventService.new(current_user, project, {
+            remove: 'dast_scanner_profile',
+            target_id: profile.id,
+            target_type: 'DastScannerProfile',
+            target_details: profile.name
+          }).security_event
         end
       end
     end
