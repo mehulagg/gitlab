@@ -58,7 +58,8 @@ to display, add a file to your repository.
 
 ## Highlight lines
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56159) in GitLab 13.11.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56159) in GitLab 13.10 for GitLab SaaS instances.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56159) in GitLab 13.11 for self-managed instances.
 
 Web Editor enables you to highlight a single line by adding specially formatted
 hash information to the URL's file path segment. For example, the file path segment
