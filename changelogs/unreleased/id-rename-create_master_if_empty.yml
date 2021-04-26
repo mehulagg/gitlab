@@ -1,0 +1,5 @@
+---
+title: Create main branch if no branches exist
+merge_request: 60270
+author:
+type: changed

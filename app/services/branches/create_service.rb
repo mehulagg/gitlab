@@ -2,8 +2,8 @@
 
 module Branches
   class CreateService < BaseService
-    def execute(branch_name, ref, create_master_if_empty: true)
-      create_master_branch if create_master_if_empty && project.empty_repo?
+    def execute(branch_name, ref, create_main_if_empty: true)
+      create_main_branch if create_main_if_empty && project.empty_repo?
 
       result = ::Branches::ValidateNewService.new(project).execute(branch_name)
 
@@ -27,13 +27,13 @@ module Branches
 
     private
 
-    def create_master_branch
+    def create_main_branch
       project.repository.create_file(
         current_user,
         '/README.md',
         '',
         message: 'Add README.md',
-        branch_name: 'master'
+        branch_name: 'main'
       )
     end
   end
