@@ -3,6 +3,7 @@ import activateSubscriptionMutation from './graphql/mutations/activate_subscript
 import getCurrentLicense from './graphql/queries/get_current_license.query.graphql';
 import getLicenseHistory from './graphql/queries/get_license_history.query.graphql';
 
+export const fieldRequiredMessage = s__('SuperSonics|This field is required.');
 export const subscriptionMainTitle = s__('SuperSonics|Your subscription');
 export const subscriptionActivationTitle = s__(
   `SuperSonics|You do not have an active subscription`,
