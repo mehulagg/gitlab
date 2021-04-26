@@ -1330,8 +1330,8 @@ Parameters:
 | --------- | ---- | -------- | ----------- |
 | `jenkins_url` | string | true | Jenkins URL like `http://jenkins.example.com`. |
 | `project_name` | string | true | The URL-friendly project name. Example: `my_project_name`. |
-| `username` | string | false | A user with access to the Jenkins server, if applicable. |
-| `password` | string | false | The password of the user. |
+| `username` | string | false | Username for authentication with the Jenkins server, if authentication is required by the server. |
+| `password` | string | false | Password for authentication with the Jenkins server, if authentication is required by the server. |
 | `push_events` | boolean | false | Enable notifications for push events. |
 | `merge_requests_events` | boolean | false | Enable notifications for merge request events. |
 | `tag_push_events` | boolean | false | Enable notifications for tag push events. |
