@@ -40,8 +40,7 @@ final transfer inside the maintenance window) will then transfer only the
 
 Repository-centric strategies for using `rsync` effectively can be found in the
 [moving repositories](../../operations/moving_repositories.md) documentation; these strategies can
-be adapted for use with any other file-based data, such as GitLab Pages (to
-be found in `/var/opt/gitlab/gitlab-rails/shared/pages` if using Omnibus).
+be adapted for use with any other file-based data, such as [GitLab Pages](../../pages/index.md#change-storage-path).
 
 ## Preflight checks
 
