@@ -22,7 +22,8 @@ module Gitlab
 
           Sticking.unstick_or_continue_sticking(namespace, id)
 
-          env[STICK_OBJECT] = [namespace, id]
+          env[STICK_OBJECT] ||= Set.new
+          env[STICK_OBJECT] << [namespace, id]
         end
 
         def initialize(app)
@@ -50,18 +51,18 @@ module Gitlab
         # Typically this code will only be reachable for Rails requests as
         # Grape data is not yet available at this point.
         def unstick_or_continue_sticking(env)
-          namespace, id = sticking_namespace_and_id(env)
+          namespaces_and_ids = sticking_namespaces_and_ids(env)
 
-          if namespace && id
+          namespaces_and_ids.each do |namespace, id|
             Sticking.unstick_or_continue_sticking(namespace, id)
           end
         end
 
         # Determine if we need to stick after handling a request.
         def stick_if_necessary(env)
-          namespace, id = sticking_namespace_and_id(env)
+          namespaces_and_ids = sticking_namespaces_and_ids(env)
 
-          if namespace && id
+          namespaces_and_ids.each do |namespace, id|
             Sticking.stick_if_necessary(namespace, id)
           end
         end
@@ -80,13 +81,13 @@ module Gitlab
         #
         # For Rails requests this uses warden, but Grape and others have to
         # manually set the right environment variable.
-        def sticking_namespace_and_id(env)
+        def sticking_namespaces_and_ids(env)
           warden = env['warden']
 
           if warden && warden.user
-            [:user, warden.user.id]
-          elsif env[STICK_OBJECT]
-            env[STICK_OBJECT]
+            [[:user, warden.user.id]]
+          elsif env[STICK_OBJECT].present?
+            env[STICK_OBJECT].to_a
           else
             []
           end
