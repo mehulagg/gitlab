@@ -3,19 +3,35 @@
 module Gitlab
   module Auth
     class TwoFactorAuthVerifier
-      attr_reader :current_user
+      attr_reader :current_user, :request
 
-      def initialize(current_user)
+      def initialize(current_user, request)
         @current_user = current_user
+        @request = request
       end
 
       def two_factor_authentication_required?
+        return false if provider_exempt?
+
         Gitlab::CurrentSettings.require_two_factor_authentication? ||
           current_user&.require_two_factor_authentication_from_group?
       end
 
       def current_user_needs_to_setup_two_factor?
         current_user && !current_user.temp_oauth_email? && !current_user.two_factor_enabled?
+      end
+
+      def provider_exempt?
+        auth_hash = request.env['omniauth.auth']
+
+        return false unless auth_hash
+        return false unless auth_hash.provider.present?
+
+        providers = Gitlab.config.omniauth.allow_bypass_two_factor
+        return providers if [true, false].include?(providers)
+        return false unless providers.is_a?(Array)
+
+        providers.include?(auth_hash.provider)
       end
 
       def two_factor_grace_period
