@@ -58,6 +58,7 @@ The browser-based crawler can be configured using CI/CD variables.
 | `DAST_BROWSER_MAX_DEPTH`          | number          | `10`                              | The maximum number of chained actions that the crawler takes. For example, `Click -> Form Fill -> Click` is a depth of three. |
 | `DAST_BROWSER_NUMBER_OF_BROWSERS` | number          | `3`                               | The maximum number of concurrent browser instances to use. For shared runners on GitLab.com we recommended a maximum of three. Private runners with more resources may benefit from a higher number, but will likely produce little benefit after five to seven instances. |
 | `DAST_BROWSER_COOKIES`            | dictionary      | `abtesting_group:3,region:locked` | A cookie name and value to be added to every request. |
+| `DAST_BROWSER_LOG`                | List of strings | `brows:debug,auth:debug`          | A list of modules and their intended log level. |
 | `DAST_AUTH_URL`                      | string          | `https://example.com/sign-in`     | The URL of page that hosts the sign-in form. |
 | `DAST_USERNAME`                      | string          | `user123`                         | The username to enter into the username field on the sign-in HTML form. |
 | `DAST_PASSWORD`                      | string          | `p@55w0rd`                        | The password to enter into the password field on the sign-in HTML form. |
@@ -102,3 +103,44 @@ You can manage the trade-off between coverage and scan time with the following m
 - Limit the number of actions executed by the browser with the [variable](#available-variables) `DAST_BROWSER_MAX_ACTIONS`. The default is `10,000`.
 - Limit the page depth that the browser-based crawler will check coverage on with the [variable](#available-variables) `DAST_BROWSER_MAX_DEPTH`. The crawler uses a breadth-first search strategy, so pages with smaller depth are crawled first. The default is `10`.
 - Vertically scaling the runner and using a higher number of browsers with [variable](#available-variables) `DAST_BROWSER_NUMBER_OF_BROWSERS`. The default is `3`.
+
+
+## Debugging scans using logging
+
+Logging can be used to facilitate further analysis of what is happening with a scan. 
+
+The CI/CD variable `DAST_BROWSER_LOG` configures the logging level for particular modules of the crawler. Each module represents a component of the browser-based crawler and is separated so that debug logs can be configured just for the area of the crawler that requires further inspection. 
+
+For example, the following job definition enables the browsing module and the authentication module to be logged in debug-mode:
+
+```yaml
+include:
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  DAST_WEBSITE: "https://my.site.com"
+  DAST_BROWSER_SCAN: "true"
+  DAST_BROWSER_LOG: "brows:debug,auth:debug"
+```
+
+Log messages have the format `[time] [log level] [log module] [message] [additional properties]`. For example, the following log entry has level `INFO`, is part of the `CRAWL` log module and has message `Crawled path`.
+
+```
+2021-04-21T00:34:04.000 INF CRAWL Crawled path nav_id=0cc7fd path="LoadURL [https://my.site.com:8090]"
+```
+
+The modules that can be configured for logging are as follows:
+
+
+| Log module | Component overview |
+| ---------- | ----------- |
+| `AUTH`     | Used for creating an authenticated scan. |
+| `BROWS`    | Used for querying the state/page of the browser. |
+| `BPOOL`    | The set of browsers that are leased out for crawling. |
+| `CRAWL`    | Used for the core crawler algorithm. |
+| `DATAB`    | Used for persisting data to the internal database. |
+| `LEASE`    | Used to create browsers to add them to the browser pool. |
+| `MAIN`     | Used for the flow of the main event loop of the crawler. |
+| `NAVDB`    | Used for persistence mechanisms to store navigation entries. |
+| `REPT`     | Used for generating reports. |
+| `STAT`     | Used for general statistics while running the scan. |
