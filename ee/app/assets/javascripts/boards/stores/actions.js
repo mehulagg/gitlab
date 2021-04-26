@@ -124,10 +124,7 @@ export default {
     const supportedFilters = [...SupportedFilters, ...SupportedFiltersEE];
     const filterParams = getSupportedParams(filters, supportedFilters);
 
-    // Temporarily disabled until negated filters are supported for epic boards
-    if (!getters.isEpicBoard) {
-      filterParams.not = transformNotFilters(filters);
-    }
+    filterParams.not = transformNotFilters(filters);
 
     if (filters.groupBy === GroupByParamType.epic) {
       dispatch('setEpicSwimlanes');
