@@ -1145,6 +1145,8 @@ Please find more details in the [Geo documentation](../../../administration/geo/
 
 It is possible to copy the subfolders and files in the [Pages path](#change-storage-path)
 to the new primary node to resolve this.
+For example, you can adapt the `rsync` strategy from our
+[moving repositories documenation](../operations/moving_repositories.md).
 Alternatively, run the CI pipelines of those projects that contain a `pages` job again.
 
 ### Failed to connect to the internal GitLab API
