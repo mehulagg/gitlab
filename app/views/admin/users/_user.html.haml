@@ -62,7 +62,8 @@
                   %button.js-delete-user-modal-button.gl-button.btn.btn-danger-tertiary{ data: { 'gl-modal-action': 'delete',
                     delete_user_url: admin_user_path(user),
                     block_user_url: block_admin_user_path(user),
-                    username: sanitize_name(user.name) } }
+                    username: sanitize_name(user.name),
+                    oncall_schedules: user.oncall_schedules.to_json } }
                     = s_('AdminUsers|Delete user')
                 %li
                   %button.js-delete-user-modal-button.gl-button.btn.btn-danger-tertiary{ data: { 'gl-modal-action': 'delete-with-contributions',

@@ -1,6 +1,8 @@
 <script>
 import { GlModal, GlButton, GlFormInput, GlSprintf } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { s__, sprintf } from '~/locale';
+import OncallSchedulesList from '~/vue_shared/components/oncall_schedules_list.vue';
 
 export default {
   components: {
@@ -8,6 +10,7 @@ export default {
     GlButton,
     GlFormInput,
     GlSprintf,
+    OncallSchedulesList,
   },
   props: {
     title: {
@@ -42,6 +45,11 @@ export default {
       type: String,
       required: true,
     },
+    oncallSchedules: {
+      type: String,
+      required: false,
+      default: '[]',
+    },
   },
   data() {
     return {
@@ -57,6 +65,15 @@ export default {
     },
     canSubmit() {
       return this.enteredUsername === this.username;
+    },
+    schedules() {
+      let schedules = [];
+      try {
+        schedules = JSON.parse(this.oncallSchedules);
+      } catch (e) {
+        Sentry.captureException(e);
+      }
+      return schedules;
     },
   },
   methods: {
@@ -95,6 +112,8 @@ export default {
         </template>
       </gl-sprintf>
     </p>
+
+    <oncall-schedules-list v-if="schedules.length" :schedules="schedules" />
 
     <p>
       <gl-sprintf :message="s__('AdminUsers|To confirm, type %{username}')">
