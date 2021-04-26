@@ -34,7 +34,7 @@ module AppSec
 
         def audit_creation(profile)
           AuditEventService.new(current_user, project, {
-            add: 'dast_scanner_profile',
+            add: 'DAST scanner profile',
             target_id: profile.id,
             target_type: 'DastScannerProfile',
             target_details: profile.name
