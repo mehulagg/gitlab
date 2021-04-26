@@ -165,4 +165,4 @@ If the job status is `stuck`, check to ensure a runner is properly configured fo
 
 > To learn more about GitLab CI, check out this video walkthrough:
 >
-> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch [Intro to GitLab CI](https://youtu.be/l5705U8s_nQ).
+> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Watch [Intro to GitLab CI](https://www.youtube.com/watch?v=l5705U8s_nQ&t=358s).
