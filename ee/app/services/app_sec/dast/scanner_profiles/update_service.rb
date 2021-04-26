@@ -6,24 +6,17 @@ module AppSec
       class UpdateService < BaseService
         include Gitlab::Allowable
 
-        def execute(id:, profile_name:, target_timeout:, spider_timeout:, scan_type: nil, use_ajax_spider: nil, show_debug_messages: nil)
+        def execute(**args)
           return unauthorized unless can_update_scanner_profile?
 
-          dast_scanner_profile = find_dast_scanner_profile(id)
+          dast_scanner_profile = find_dast_scanner_profile(args[:id])
           return ServiceResponse.error(message: _('Scanner profile not found for given parameters')) unless dast_scanner_profile
           return ServiceResponse.error(message: _('Cannot modify %{profile_name} referenced in security policy') % { profile_name: dast_scanner_profile.name }) if referenced_in_security_policy?(dast_scanner_profile)
 
-          update_args = {
-            name: profile_name,
-            target_timeout: target_timeout,
-            spider_timeout: spider_timeout
-          }
-          update_args[:scan_type] = scan_type if scan_type
-          update_args[:use_ajax_spider] = use_ajax_spider unless use_ajax_spider.nil?
-          update_args[:show_debug_messages] = show_debug_messages unless show_debug_messages.nil?
+          update_args, old_args = construct_update_args(args, dast_scanner_profile)
 
           if dast_scanner_profile.update(update_args)
-            audit_update(dast_scanner_profile)
+            audit_update(dast_scanner_profile, update_args, old_args)
 
             ServiceResponse.success(payload: dast_scanner_profile)
           else
@@ -49,13 +42,43 @@ module AppSec
           DastScannerProfilesFinder.new(project_ids: [project.id], ids: [id]).execute.first
         end
 
-        def audit_update(profile)
-          AuditEventService.new(current_user, project, {
-            change: 'dast_scanner_profile',
-            target_id: profile.id,
-            target_type: 'DastScannerProfile',
-            target_details: profile.name
-          }).security_event
+        def construct_update_args(args, profile)
+          old_args = {
+            name: profile.name,
+            scan_type: profile.scan_type,
+            show_debug_messages: profile.show_debug_messages,
+            spider_timeout: profile.spider_timeout,
+            target_timeout: profile.target_timeout,
+            use_ajax_spider: profile.use_ajax_spider
+          }
+          update_args = {
+            name: args[:profile_name],
+            target_timeout: args[:target_timeout],
+            spider_timeout: args[:spider_timeout]
+          }
+
+          update_args[:scan_type] = args[:scan_type] if args[:scan_type]
+          update_args[:use_ajax_spider] = args[:use_ajax_spider] unless args[:use_ajax_spider].nil?
+          update_args[:show_debug_messages] = args[:show_debug_messages] unless args[:show_debug_messages].nil?
+
+          [update_args, old_args]
+        end
+
+        def audit_update(profile, update_args, old_args)
+          update_args.each do |property, new_value|
+            old_value = old_args[property]
+
+            next if old_value == new_value
+
+            AuditEventService.new(current_user, project, {
+              change: "DAST scanner profile #{property}",
+              from: old_value,
+              to: new_value,
+              target_id: profile.id,
+              target_type: 'DastScannerProfile',
+              target_details: profile.name
+            }).security_event
+          end
         end
       end
     end

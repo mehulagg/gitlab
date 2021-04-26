@@ -100,6 +100,41 @@ RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
             expect(updated_dast_scanner_profile.show_debug_messages).to eq(dast_profile.show_debug_messages)
           end
         end
+
+        it 'omits those elements from the audit' do
+          profile = payload.reload
+          audit_events = AuditEvent.all
+          audit_events_details = audit_events.map(&:details)
+
+          aggregate_failures do
+            expect(audit_events_details).to eq([
+              {
+                change: "DAST scanner profile name",
+                from: dast_profile.name,
+                to: new_profile_name,
+                target_id: profile.id,
+                target_type: 'DastScannerProfile',
+                target_details: new_profile_name
+              },
+              {
+                change: "DAST scanner profile target_timeout",
+                from: dast_profile.target_timeout,
+                to: new_target_timeout,
+                target_id: profile.id,
+                target_type: 'DastScannerProfile',
+                target_details: new_profile_name
+              },
+              {
+                change: "DAST scanner profile spider_timeout",
+                from: dast_profile.spider_timeout,
+                to: new_spider_timeout,
+                target_id: profile.id,
+                target_type: 'DastScannerProfile',
+                target_details: new_profile_name
+              }
+            ])
+          end
+        end
       end
 
       it 'returns a success status' do
@@ -116,6 +151,72 @@ RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
           expect(updated_dast_scanner_profile.scan_type).to eq(new_scan_type)
           expect(updated_dast_scanner_profile.use_ajax_spider).to eq(new_use_ajax_spider)
           expect(updated_dast_scanner_profile.show_debug_messages).to eq(new_show_debug_messages)
+        end
+      end
+
+      it 'audits the update' do
+        profile = payload.reload
+        audit_events = AuditEvent.all
+        audit_events_details = audit_events.map(&:details)
+
+        aggregate_failures do
+          audit_events.each do |event|
+            expect(event.author).to eq(user)
+            expect(event.entity).to eq(project)
+            expect(event.target_id).to eq(profile.id)
+            expect(event.target_type).to eq('DastScannerProfile')
+            expect(event.target_details).to eq(profile.name)
+          end
+          expect(audit_events_details).to eq([
+            {
+              change: "DAST scanner profile name",
+              from: dast_profile.name,
+              to: new_profile_name,
+              target_id: profile.id,
+              target_type: 'DastScannerProfile',
+              target_details: new_profile_name
+            },
+            {
+              change: "DAST scanner profile target_timeout",
+              from: dast_profile.target_timeout,
+              to: new_target_timeout,
+              target_id: profile.id,
+              target_type: 'DastScannerProfile',
+              target_details: new_profile_name
+            },
+            {
+              change: "DAST scanner profile spider_timeout",
+              from: dast_profile.spider_timeout,
+              to: new_spider_timeout,
+              target_id: profile.id,
+              target_type: 'DastScannerProfile',
+              target_details: new_profile_name
+            },
+            {
+              change: "DAST scanner profile scan_type",
+              from: dast_profile.scan_type,
+              to: new_scan_type,
+              target_id: profile.id,
+              target_type: 'DastScannerProfile',
+              target_details: new_profile_name
+            },
+            {
+              change: "DAST scanner profile use_ajax_spider",
+              from: dast_profile.use_ajax_spider,
+              to: new_use_ajax_spider,
+              target_id: profile.id,
+              target_type: 'DastScannerProfile',
+              target_details: new_profile_name
+            },
+            {
+              change: "DAST scanner profile show_debug_messages",
+              from: dast_profile.show_debug_messages,
+              to: new_show_debug_messages,
+              target_id: profile.id,
+              target_type: 'DastScannerProfile',
+              target_details: new_profile_name
+            }
+          ])
         end
       end
 
