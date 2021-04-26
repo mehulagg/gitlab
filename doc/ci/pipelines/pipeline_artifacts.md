@@ -15,4 +15,7 @@ Pipeline artifacts are used by the [test coverage visualization feature](../../u
 
 Pipeline artifacts are saved to disk or object storage. They count towards a project's [storage usage quota](../../user/usage_quotas.md#storage-usage-quota). The **Artifacts** on the Usage Quotas page is the sum of all job artifacts and pipeline artifacts.
 
-Pipeline artifacts are erased after one week.
+## When pipeline artifacts are deleted
+
+By default, the latest pipeline artifacts from the most recent successful jobs are never deleted. If a job is configured with [`expire_in`](../yaml/README.md#artifactsexpire_in),
+its artifacts only expire if a more recent artifact exists.
