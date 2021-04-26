@@ -56,7 +56,6 @@ module Gitlab
         print_container_repositories_status
         print_design_repositories_status
         print_replicators_status
-        print_repositories_checked_status
         print_replicators_verification_status
       end
 
