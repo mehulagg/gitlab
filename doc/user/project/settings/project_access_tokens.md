@@ -21,6 +21,8 @@ Project access tokens are scoped to a project and can be used to authenticate wi
 
 Project access tokens expire on the date you define, at midnight UTC.
 
+Only users with Maintainer access or above can create or revoke project access tokens.
+
 For examples of how you can use a project access token to authenticate with the API, see the following section from our [API Docs](../../../api/README.md#personalproject-access-tokens).
 
 ## Creating a project access token
