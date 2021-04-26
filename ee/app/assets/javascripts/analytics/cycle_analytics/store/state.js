@@ -4,6 +4,7 @@ export default () => ({
 
   startDate: null,
   endDate: null,
+  inProgressStatus: null,
 
   isLoading: false,
   isLoadingStage: false,

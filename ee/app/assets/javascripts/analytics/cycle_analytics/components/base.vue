@@ -69,6 +69,7 @@ export default {
       'isLoadingValueStreams',
       'selectedStageError',
       'selectedValueStream',
+      'inProgressStatus',
     ]),
     // NOTE: formEvents are fetched in the same request as the list of stages (fetchGroupStagesAndEvents)
     // so i think its ok to bind formEvents here even though its only used as a prop to the custom-stage-form
@@ -132,6 +133,7 @@ export default {
         // the `overview` stage is always the default, so dont persist the id if its selected
         stage_id:
           this.selectedStage?.id && !this.isOverviewStageSelected ? this.selectedStage.id : null,
+        in_progress: this.inProgressStatus, // sync the progress status in the url so it persists when navigating the UI
       };
     },
     stageCount() {

@@ -2,6 +2,7 @@ import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { buildCycleAnalyticsInitialData } from '../shared/utils';
 import CycleAnalytics from './components/base.vue';
@@ -29,6 +30,7 @@ export default () => {
     milestone_title = null,
     assignee_username = [],
     label_name = [],
+    in_progress = null, // the returned object has the shape { value: 'true', operator:'='}
   } = urlQueryToFilter(window.location.search);
 
   store.dispatch('initializeCycleAnalytics', {
@@ -41,6 +43,10 @@ export default () => {
       hasDurationChart,
       hasPathNavigation,
     },
+    // initialize the application with the extracted value, ensure we parse the boolean correctly
+    // `urlQueryToFilter` will return an object with the operator and value, if there is
+    // no value we should default `inProgressStatus` to an expected value
+    inProgressStatus: parseBoolean(in_progress?.value) || false,
   });
 
   return new Vue({

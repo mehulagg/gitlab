@@ -97,6 +97,7 @@ export default {
       selectedProjects = [],
       selectedValueStream = {},
       defaultStageConfig = [],
+      inProgressStatus,
     } = {},
   ) {
     state.isLoading = true;
@@ -106,6 +107,7 @@ export default {
     state.startDate = startDate;
     state.endDate = endDate;
     state.defaultStageConfig = defaultStageConfig;
+    state.inProgressStatus = inProgressStatus; // set the value in state
   },
   [types.INITIALIZE_VALUE_STREAM_SUCCESS](state) {
     state.isLoading = false;

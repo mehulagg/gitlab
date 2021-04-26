@@ -27,6 +27,7 @@ export const cycleAnalyticsRequestParams = (state, getters) => {
       assignees: { selectedList: selectedAssigneeList },
       labels: { selectedList: selectedLabelList },
     },
+    inProgressStatus = null,
   } = state;
 
   const filterBarQuery = filterToQueryObject({
@@ -40,6 +41,7 @@ export const cycleAnalyticsRequestParams = (state, getters) => {
     project_ids: getters.selectedProjectIds,
     created_after: startDate ? dateFormat(startDate, dateFormats.isoDate) : null,
     created_before: endDate ? dateFormat(endDate, dateFormats.isoDate) : null,
+    in_progress: inProgressStatus,
     ...filterBarQuery,
   };
 };
