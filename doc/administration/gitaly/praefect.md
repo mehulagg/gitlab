@@ -1445,3 +1445,10 @@ Here are common errors and potential causes:
   - **GRPC::Unavailable (14:all SubCons are in TransientFailure...)**
     - Praefect cannot reach one or more of its child Gitaly nodes. Try running
       the Praefect connection checker to diagnose.
+
+### Determining the primary Gitaly without Grafana
+
+The `Shard Primary Election` chart on the `Gitlab Omnibus - Praefect` dashboard is the recommended
+way to determine the current primary Gitaly node. If you have not enabled Grafana, you can find the
+primary Gitaly by SSHing into each Praefect node and running
+`curl localhost:9652/metrics | grep gitaly_praefect_primaries`.
