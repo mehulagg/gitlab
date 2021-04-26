@@ -103,7 +103,7 @@ export default {
       return this.$options.i18n.pipelineConfigurationInputUnknownFile;
     },
     scopedLabelsHelpPath() {
-      return helpPagePath('user/project/labels.md', { anchor: 'scoped-labels' });
+      return helpPagePath('user/group/compliance/compliance_frameworks/index.md', { anchor: 'scoped-compliance-frameworks' });
     },
   },
   async created() {
