@@ -17376,13 +17376,13 @@ ALTER SEQUENCE security_orchestration_policy_configurations_id_seq OWNED BY secu
 
 CREATE TABLE security_orchestration_policy_rule_schedules (
     id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    next_run_at timestamp with time zone,
     security_orchestration_policy_configuration_id bigint NOT NULL,
     user_id bigint NOT NULL,
     policy_index integer NOT NULL,
     cron text NOT NULL,
-    next_run_at timestamp with time zone,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
     CONSTRAINT check_915825a76e CHECK ((char_length(cron) <= 255))
 );
 
