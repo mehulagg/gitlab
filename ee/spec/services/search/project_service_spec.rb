@@ -1,14 +1,16 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-
+# rubocop:disable Rails/TimeZone
 RSpec.describe Search::ProjectService do
   include SearchResultHelpers
   include ProjectHelpers
   using RSpec::Parameterized::TableSyntax
 
   before do
+    puts "[#{Time.now}] -1"
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
+    puts "[#{Time.now}] 0"
   end
 
   it_behaves_like 'EE search service shared examples', ::Gitlab::ProjectSearchResults, ::Gitlab::Elastic::ProjectSearchResults do
@@ -47,15 +49,21 @@ RSpec.describe Search::ProjectService do
 
     shared_examples 'search respects visibility' do
       it 'respects visibility' do
+        puts "[#{Time.now}] 1"
         enable_admin_mode!(user) if admin_mode
+        puts "[#{Time.now}] 2"
         projects.each do |project|
           update_feature_access_level(project, feature_access_level)
         end
+        puts "[#{Time.now}] 3"
         ensure_elasticsearch_index!
+        puts "[#{Time.now}] 4"
 
         expect_search_results(user, scope, expected_count: expected_count) do |user|
           described_class.new(project, user, search: search).execute
+          puts "[#{Time.now}] #{user}"
         end
+        puts "[#{Time.now}] 5"
       end
     end
 
@@ -316,3 +324,4 @@ RSpec.describe Search::ProjectService do
     end
   end
 end
+# rubocop:enable Rails/TimeZone
