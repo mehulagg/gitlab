@@ -23,7 +23,7 @@ module AlertManagement
     private_constant :STATUSES
 
     STATUS_DESCRIPTIONS = {
-      triggered: 'No one has begun investigation',
+      triggered: 'Investigation has not started',
       acknowledged: 'Someone is actively investigating the problem',
       resolved: 'No further work is required',
       ignored: 'No action will be taken on the alert'
