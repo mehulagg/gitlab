@@ -148,6 +148,29 @@ For each project and group you can select one of the following levels:
 | Disabled    | Turns off notifications. |
 | Custom      | Receive notifications for custom selected events. |
 
+### Product marketing emails
+
+You can receive emails that teach you about various GitLab features.
+This is enabled by default.
+
+To opt out, [edit your notification settings](#editing-notification-settings) and clear the
+**Receive product marketing emails** checkbox.
+
+Disabling these emails does not disable all emails.
+Learn how to [opt out of all emails from GitLab](#opt-out-of-all-gitlab-emails).
+
+#### Self-managed product marketing emails **(FREE SELF)**
+
+These emails are generated and automatically sent by the self-managed installation and sent based on
+actions of the user.
+At no time is any personal information sent to GitLab Inc. by your GitLab instance or by your
+company because of turning this on.
+
+An instance administrator can configure this setting for all users.
+
+If you choose to opt out, your setting overrides the instance-wide setting, even when an
+administrator later enables these emails for all users.
+
 ## Notification events
 
 Users are notified of the following events:
@@ -180,7 +203,11 @@ To enable notifications on one specific issue, merge request or epic, you need t
 - **Disable**: If you are receiving notifications for updates to that issue but no
   longer want to receive them, unsubscribe from it.
 
-Configuring this notification on an epic doesn't make you automatically subscribed to the issue that are linked to the epic.
+Disabling this toggle only unsubscribes you from updates related to this issue, merge request, or epic.
+Learn how to [opt out of all emails from GitLab](#opt-out-of-all-gitlab-emails).
+
+Enabling this notification on an epic doesn't make you automatically subscribed to the issues linked
+to the epic.
 
 For most events, the notification is sent to:
 
@@ -253,6 +280,20 @@ The participants are:
 - Authors of the design (can be multiple people if different authors have uploaded different versions of the design).
 - Authors of comments on the design.
 - Anyone that is `@mentioned` in a comment on the design.
+
+## Opt out of all GitLab emails
+
+If you no longer wish to receive any email notifications:
+
+1. [Go to the Notifications settings page.](#editing-notification-settings)
+1. Clear the **Receive product marketing emails** checkbox.
+1. Set your **Global notification level** to **Disabled**.
+1. Clear the **Receive notifications about your own activity** checkbox.
+1. If you belong to any groups or projects, set their notification setting to **Global** or
+   **Disabled**.
+
+On self-managed installations, even after doing this, your instance administrator
+[can still email you](../../tools/email.md).
 
 ## Filtering email
 
