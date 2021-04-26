@@ -75,6 +75,13 @@ module EE
             target_type: 'DastScannerProfile',
             target_details: profile.name
           }
+        when :destroy
+          {
+            remove: 'dast_scanner_profile',
+            target_id: profile.id,
+            target_type: 'DastScannerProfile',
+            target_details: profile.name
+          }
         end
 
       self
