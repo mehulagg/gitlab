@@ -14,9 +14,11 @@ module Projects
 
     feature_category :web_firewall
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def alert_details
-      @alert_id = project.alert_management_alerts.find(params[:id]).id
+      @alert_iid = project.alert_management_alerts.with_threat_monitoring_alerts.find_by!(iid: params[:iid]).iid
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def edit
       @environment = project.environments.find(params[:environment_id])
