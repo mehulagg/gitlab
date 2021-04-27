@@ -69,7 +69,7 @@ Required approvals enable multiple use cases:
 
 - Enforcing review of all code that gets merged into a repository.
 - Specifying reviewers for a given proposed code change, as well as a minimum number
-  of reviewers, through [Approval rules](#approval-rules).
+  of reviewers, through [Approval rules](rules.md).
 - Specifying categories of reviewers, such as backend, frontend, quality assurance,
   database, and so on, for all proposed code changes.
 - Designating [Code Owners as eligible approvers](#code-owners-as-eligible-approvers),
