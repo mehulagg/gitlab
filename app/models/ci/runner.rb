@@ -202,10 +202,8 @@ module Ci
 
     def runner_scope
       strong_memoize(:runner_scope) do
-        next Limitable::Scope.new('ci_registered_instance_runners', Plan.default.actual_limits, self.class.all) if instance_type?
-        next Limitable::Scope.new('ci_registered_group_runners', groups.first.actual_limits, groups.first.runners) if group_type?
-
-        Limitable::Scope.new('ci_registered_project_runners', projects.first.actual_limits, projects.first.runners) if projects.first
+        next Limitable::Scope.new('ci_registered_instance_runners', Plan.default.actual_limits, self.class.instance_type) if instance_type?
+        next Limitable::Scope.new('ci_registered_group_runners', groups.first.actual_limits, self.class.belonging_to_group(groups.first.id)) if group_type?
       end
     end
 
