@@ -1,6 +1,9 @@
 <script>
 import {
   GlAlert,
+  GlAvatar,
+  GlAvatarLink,
+  GlAvatarsInline,
   GlIntersectionObserver,
   GlLoadingIcon,
   GlTable,
@@ -39,6 +42,9 @@ export default {
     AlertStatus,
     AlertFilters,
     GlAlert,
+    GlAvatar,
+    GlAvatarLink,
+    GlAvatarsInline,
     GlIntersectionObserver,
     GlLink,
     GlLoadingIcon,
@@ -150,6 +156,9 @@ export default {
     handleStatusUpdate() {
       this.$apollo.queries.alerts.refetch();
     },
+    hasAssignees(assignees) {
+      return Boolean(assignees.nodes?.length);
+    },
     alertDetailsUrl({ iid }) {
       return joinPaths(window.location.pathname, 'alerts', iid);
     },
@@ -229,6 +238,33 @@ export default {
         >
           #{{ item.issue.iid }} {{ getIssueMeta(item).state }}
         </gl-link>
+      </template>
+
+      <template #cell(assignees)="{ item }">
+        <div class="gl-disply-flex">
+          <gl-avatars-inline
+            v-if="hasAssignees(item.assignees)"
+            data-testid="assigneesField"
+            :avatars="item.assignees.nodes"
+            :collapsed="true"
+            :max-visible="4"
+            :avatar-size="24"
+            badge-tooltip-prop="name"
+            :badge-tooltip-max-chars="100"
+          >
+            <template #avatar="{ avatar }">
+              <gl-avatar-link
+                :key="avatar.username"
+                v-gl-tooltip
+                target="_blank"
+                :href="avatar.webUrl"
+                :title="avatar.name"
+              >
+                <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
+              </gl-avatar-link>
+            </template>
+          </gl-avatars-inline>
+        </div>
       </template>
 
       <template #cell(status)="{ item }">
