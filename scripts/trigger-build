@@ -336,7 +336,7 @@ module Trigger
     end
 
     def ref
-      ENV['GITLABCOM_DATABASE_TESTING_TRIGGER_REF'] || 'master'
+      '150/add_status_and_id_to_output'
     end
   end
 
