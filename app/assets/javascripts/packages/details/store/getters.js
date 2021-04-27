@@ -126,4 +126,18 @@ export const gradleGroovyAddSourceCommand = ({ mavenPath }) =>
   url '${mavenPath}'
 }`;
 
+export const gradleKotlinInstalCommand = ({ packageEntity }) => {
+  const {
+    app_group: group = '',
+    app_name: name = '',
+    app_version: version = '',
+  } = packageEntity.maven_metadatum;
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  return `implementation("${group}:${name}:${version}")`;
+};
+
+export const gradleKotlinAddSourceCommand = ({ mavenPath }) =>
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  `maven("${mavenPath}")`;
+
 export const groupExists = ({ groupListUrl }) => groupListUrl.length > 0;
