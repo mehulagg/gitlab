@@ -236,6 +236,7 @@ export default {
     <pipeline-editor-empty-state
       v-else-if="showStartScreen"
       @createEmptyConfigFile="setNewEmptyCiConfigFile"
+      @refetchContent="refetchContent"
     />
     <div v-else>
       <pipeline-editor-messages
