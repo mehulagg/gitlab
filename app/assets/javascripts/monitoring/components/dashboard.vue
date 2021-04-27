@@ -1,16 +1,25 @@
 <script>
-import { GlButton, GlModalDirective, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlButton,
+  GlLink,
+  GlModalDirective,
+  GlSprintf,
+  GlTooltipDirective,
+  GlIcon,
+} from '@gitlab/ui';
 import Mousetrap from 'mousetrap';
 import VueDraggable from 'vuedraggable';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import invalidUrl from '~/lib/utils/invalid_url';
 import { ESC_KEY } from '~/lib/utils/keys';
 import { mergeUrlParams, updateHistory } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import { defaultTimeRange } from '~/vue_shared/constants';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
-import { metricStates, keyboardShortcutKeys } from '../constants';
+import { metricStates, keyboardShortcutKeys, ALERTS_DEPRECATION_TEXT } from '../constants';
 import {
   timeRangeFromUrl,
   panelToUrl,
@@ -31,8 +40,11 @@ export default {
     VueDraggable,
     DashboardHeader,
     DashboardPanel,
-    GlIcon,
+    GlAlert,
     GlButton,
+    GlIcon,
+    GlLink,
+    GlSprintf,
     GraphGroup,
     EmptyState,
     GroupEmptyState,
@@ -235,6 +247,7 @@ export default {
       'setExpandedPanel',
       'clearExpandedPanel',
     ]),
+    helpPagePath,
     updatePanels(key, panels) {
       this.setPanelGroupMetrics({
         panels,
@@ -386,6 +399,7 @@ export default {
     },
   },
   i18n: {
+    ALERTS_DEPRECATION_TEXT,
     collapsePanelLabel: s__('Metrics|Collapse panel'),
     collapsePanelTooltip: s__('Metrics|Collapse panel (Esc)'),
   },
@@ -394,6 +408,26 @@ export default {
 
 <template>
   <div class="prometheus-graphs" data-qa-selector="prometheus_graphs">
+    <gl-alert variant="warning" class="my-2">
+      <gl-sprintf :message="$options.i18n.ALERTS_DEPRECATION_TEXT">
+        <template #docsLink="{ content }">
+          <gl-link
+            :href="
+              helpPagePath('operations/metrics/alerts.html', {
+                anchor: 'managed-prometheus-instances',
+              })
+            "
+            target="_blank"
+            >{{ content }}</gl-link
+          >
+        </template>
+        <template #issueLink="{ content }">
+          <gl-link href="https://gitlab.com/gitlab-org/gitlab/-/issues/327655" target="_blank">{{
+            content
+          }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
     <dashboard-header
       v-if="showHeader"
       ref="prometheusGraphsHeader"
