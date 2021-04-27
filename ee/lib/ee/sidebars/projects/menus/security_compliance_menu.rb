@@ -29,8 +29,9 @@ module EE
             return project_security_discover_path(context.project) unless has_items?
             return security_dashboard_menu_item.link if security_dashboard_menu_item
             return audit_events_menu_item.link if audit_events_menu_item
+            return dependencies_menu_item.link if dependencies_menu_item
 
-            dependencies_menu_item
+            items.first.link
           end
 
           override :render?
@@ -158,13 +159,13 @@ module EE
           def audit_events_menu_item
             strong_memoize(:audit_events_menu_item) do
               next unless can?(context.current_user, :read_project_audit_events, context.project)
-              next if !context.project.licensed_feature_available?(:audit_events) && !show_promotions
+              next unless context.project.licensed_feature_available?(:audit_events) && context.show_promotions
 
               ::Sidebars::MenuItem.new(
                 title: _('Audit Events'),
                 link: project_audit_events_path(context.project),
                 active_routes: { controller: :audit_events },
-                item_id: :threat_monitoring
+                item_id: :audit_events
               )
             end
           end

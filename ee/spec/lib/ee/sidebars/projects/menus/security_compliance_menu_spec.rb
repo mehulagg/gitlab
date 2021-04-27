@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Sidebars::Projects::Menus::SecurityComplianceMenu do
-  let(:project) { build(:project) }
+  let_it_be(:project) { create(:project) }
+
   let(:user) { project.owner }
   let(:show_promotions) { true }
   let(:show_discover_project_security) { true }
@@ -11,144 +12,196 @@ RSpec.describe Sidebars::Projects::Menus::SecurityComplianceMenu do
 
   subject { described_class.new(context) }
 
-  it { is_expected.not_to be_nil }
+  describe 'render?' do
+    context 'when user can access security and compliance' do
+      it 'returns true' do
+        expect(subject.render?).to eq true
+      end
+    end
 
-  # describe '#link' do
+    context 'when user cannot access security and compliance' do
+      let(:user) { nil }
 
-  # end
+      context 'when show discover project security is enabled' do
+        it 'returns true' do
+          expect(subject.render?).to eq true
+        end
+      end
 
-  # describe '#top_level_link' do
-  #   context 'when user can read project security dashboard and audit events' do
-  #     before do
-  #       allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(true)
-  #       allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
-  #     end
+      context 'when show discover project security is disabled' do
+        let(:show_discover_project_security) { false }
 
-  #     it 'returns security dashboard link' do
-  #       is_expected.to eq("/#{project.full_path}/-/security/dashboard") }
-  #     end
-  #   end
+        it 'returns false' do
+          expect(subject.render?).to eq false
+        end
+      end
+    end
+  end
 
-  #   subject { helper.top_level_link(project) }
+  describe '#link' do
+    using RSpec::Parameterized::TableSyntax
 
-  #   before do
-  #     # allow(helper).to receive(:can?).and_return(false)
-  #     # allow(helper).to receive(:can?).with(user, :access_security_and_compliance, project).and_return(true)
-  #   end
+    where(:security_dashboard_feature, :audit_events_feature, :dependency_scanning_feature, :expected_link) do
+      true  | true  | true  | "/-/security/dashboard"
+      false | true  | true  | "/-/audit_events"
+      false | false | true  | "/-/dependencies"
+      false | false | false | "/-/security/configuration"
+    end
 
-  #   context 'when user can read project security dashboard and audit events' do
-  #     before do
-  #       allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(true)
-  #       allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
-  #     end
+    with_them do
+      it 'returns the expected link' do
+        stub_licensed_features(security_dashboard: security_dashboard_feature, audit_events: audit_events_feature, dependency_scanning: dependency_scanning_feature)
 
-  #     it { is_expected.to eq("/#{project.full_path}/-/security/dashboard") }
-  #   end
+        expect(subject.link).to include(expected_link)
+      end
+    end
 
-  #   context 'when user can read audit events' do
-  #     before do
-  #       allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
-  #       allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
-  #     end
+    context 'when no security menu item and show promotions' do
+      let(:user) { nil }
 
-  #     context 'when the feature is enabled' do
-  #       before do
-  #         stub_licensed_features(audit_events: true)
-  #       end
+      it 'returns the link to the discover security path', :aggregate_failures do
+        expect(subject.items).to be_empty
+        expect(subject.link).to eq("/#{project.full_path}/-/security/discover")
+      end
+    end
+  end
 
-  #       it { is_expected.to eq("/#{project.full_path}/-/audit_events") }
-  #     end
+  describe 'Configuration' do
+    describe '#sidebar_security_configuration_paths' do
+      let(:expected_security_configuration_paths) do
+        %w[
+          projects/security/configuration#show
+          projects/security/sast_configuration#show
+          projects/security/api_fuzzing_configuration#show
+          projects/security/dast_profiles#show
+          projects/security/dast_site_profiles#new
+          projects/security/dast_site_profiles#edit
+          projects/security/dast_scanner_profiles#new
+          projects/security/dast_scanner_profiles#edit
+        ]
+      end
 
-  #     context 'when the feature is disabled' do
-  #       before do
-  #         stub_licensed_features(audit_events: false)
-  #       end
+      subject { described_class.new(context).items.find { |i| i.item_id == :configuration } }
 
-  #       it { is_expected.to eq("/#{project.full_path}/-/dependencies") }
-  #     end
-  #   end
+      it 'includes all the security configuration paths' do
+        expect(subject.active_routes[:path]).to eq expected_security_configuration_paths
+      end
+    end
+  end
 
-  #   context "when user can't read both project security dashboard and audit events" do
-  #     before do
-  #       allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
-  #       allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(false)
-  #     end
+  describe 'Security Dashboard' do
+    before do
+      stub_licensed_features(security_dashboard: true)
+    end
 
-  #     it { is_expected.to eq("/#{project.full_path}/-/dependencies") }
-  #   end
-  # end
+    subject { described_class.new(context).items.find { |i| i.item_id == :dashboard } }
 
-  # describe '#sidebar_security_paths' do
-  #   let(:expected_security_paths) do
-  #     %w[
-  #       projects/security/configuration#show
-  #       projects/security/sast_configuration#show
-  #       projects/security/api_fuzzing_configuration#show
-  #       projects/security/vulnerabilities#show
-  #       projects/security/vulnerability_report#index
-  #       projects/security/dashboard#index
-  #       projects/on_demand_scans#index
-  #       projects/on_demand_scans#new
-  #       projects/on_demand_scans#edit
-  #       projects/security/dast_profiles#show
-  #       projects/security/dast_site_profiles#new
-  #       projects/security/dast_site_profiles#edit
-  #       projects/security/dast_scanner_profiles#new
-  #       projects/security/dast_scanner_profiles#edit
-  #       projects/dependencies#index
-  #       projects/licenses#index
-  #       projects/threat_monitoring#show
-  #       projects/threat_monitoring#new
-  #       projects/threat_monitoring#edit
-  #       projects/threat_monitoring#alert_details
-  #       projects/security/policies#show
-  #       projects/audit_events#index
-  #     ]
-  #   end
+    context 'when user can access security dashboard' do
+      it { is_expected.not_to be_nil }
+    end
 
-  #   subject { helper.sidebar_security_paths }
+    context 'when user cannot access security dashboard' do
+      let(:user) { nil }
 
-  #   it { is_expected.to eq(expected_security_paths) }
-  # end
+      it { is_expected.to be_nil }
+    end
+  end
 
-  # describe 'Configuration' do
-  #   describe '#sidebar_security_configuration_paths' do
-  #     let(:expected_security_configuration_paths) do
-  #       %w[
-  #         projects/security/configuration#show
-  #         projects/security/sast_configuration#show
-  #         projects/security/api_fuzzing_configuration#show
-  #         projects/security/dast_profiles#show
-  #         projects/security/dast_site_profiles#new
-  #         projects/security/dast_site_profiles#edit
-  #         projects/security/dast_scanner_profiles#new
-  #         projects/security/dast_scanner_profiles#edit
-  #       ]
-  #     end
+  describe 'Vulnerability Report' do
+    subject { described_class.new(context).items.find { |i| i.item_id == :vulnerability_report } }
 
-  #     subject { helper.sidebar_security_configuration_paths }
+    context 'when user can access vulnerabilities report' do
+      it { is_expected.not_to be_nil }
+    end
 
-  #     it { is_expected.to eq(expected_security_configuration_paths) }
-  #   end
-  # end
+    context 'when user cannot access vulnerabilities report' do
+      let(:user) { nil }
 
-  # describe 'On Demand Scans' do
+      it { is_expected.to be_nil }
+    end
+  end
 
-  #   describe '#sidebar_on_demand_scans_paths' do
-  #     let(:expected_on_demand_scans_paths) do
-  #       %w[
-  #         projects/on_demand_scans#index
-  #         projects/on_demand_scans#new
-  #         projects/on_demand_scans#edit
-  #       ]
-  #     end
+  describe 'On Demand Scans' do
+    subject { described_class.new(context).items.find { |i| i.item_id == :on_demand_scans } }
 
-  #     subject { helper.sidebar_on_demand_scans_paths }
+    context 'when user can access vulnerabilities report' do
+      it { is_expected.not_to be_nil }
+    end
 
-  #     it { is_expected.to eq(expected_on_demand_scans_paths) }
-  #   end
-  # end
+    context 'when user cannot access vulnerabilities report' do
+      let(:user) { nil }
 
-  # describe 'Audit Events' do
-  # end
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe 'Dependency List' do
+    subject { described_class.new(context).items.find { |i| i.item_id == :dependency_list } }
+
+    context 'when user can access dependency list' do
+      it { is_expected.not_to be_nil }
+    end
+
+    context 'when user cannot access dependency list' do
+      let(:user) { nil }
+
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe 'License Compliance' do
+    subject { described_class.new(context).items.find { |i| i.item_id == :license_compliance } }
+
+    context 'when user can access license compliance' do
+      it { is_expected.not_to be_nil }
+    end
+
+    context 'when user cannot access license compliance' do
+      let(:user) { nil }
+
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe 'Threat monitoring' do
+    subject { described_class.new(context).items.find { |i| i.item_id == :threat_monitoring } }
+
+    context 'when user can access threat monitoring' do
+      it { is_expected.not_to be_nil }
+    end
+
+    context 'when user cannot access threat monitoring' do
+      let(:user) { nil }
+
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe 'Scan Policies' do
+    subject { described_class.new(context).items.find { |i| i.item_id == :scan_policies } }
+
+    context 'when user can access scan policies' do
+      it { is_expected.not_to be_nil }
+    end
+
+    context 'when user cannot access scan policies' do
+      let(:user) { nil }
+
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe 'Audit Events' do
+    subject { described_class.new(context).items.find { |i| i.item_id == :audit_events } }
+
+    context 'when user can access audit events' do
+      it { is_expected.not_to be_nil }
+    end
+
+    context 'when user cannot access audit events' do
+      let(:user) { nil }
+
+      it { is_expected.to be_nil }
+    end
+  end
 end
