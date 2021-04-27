@@ -64,6 +64,18 @@ function importMermaidModule() {
     });
 }
 
+function shouldLazyLoadMermaidBlock(source) {
+  /**
+   * If source contains `&`, which means that it might
+   * contain Chaining of links a new syntax in Mermaid.
+   * **/
+  if (source?.includes('&')) {
+    return true;
+  }
+
+  return false;
+}
+
 function fixElementSource(el) {
   // Mermaid doesn't like `<br />` tags, so collapse all like tags into `<br>`, which is parsed correctly.
   const source = el.textContent.replace(/<br\s*\/>/g, '<br>');
@@ -128,7 +140,8 @@ function renderMermaids($els) {
         if (
           (source && source.length > MAX_CHAR_LIMIT) ||
           renderedChars > MAX_CHAR_LIMIT ||
-          renderedMermaidBlocks >= MAX_MERMAID_BLOCK_LIMIT
+          renderedMermaidBlocks >= MAX_MERMAID_BLOCK_LIMIT ||
+          shouldLazyLoadMermaidBlock(source)
         ) {
           const html = `
           <div class="alert gl-alert gl-alert-warning alert-dismissible lazy-render-mermaid-container js-lazy-render-mermaid-container fade show" role="alert">
