@@ -5,7 +5,6 @@
 export const useGraphQLEndpoint = (rootState) => {
   return Boolean(
     rootState.featureFlags.graphqlReleaseData &&
-      rootState.featureFlags.graphqlReleasesPage &&
       rootState.featureFlags.graphqlMilestoneStats,
   );
 };

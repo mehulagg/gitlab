@@ -147,15 +147,5 @@ RSpec.describe 'User views releases', :js do
     end
   end
 
-  context 'when the graphql_releases_page feature flag is enabled' do
-    it_behaves_like 'releases page'
-  end
-
-  context 'when the graphql_releases_page feature flag is disabled' do
-    before do
-      stub_feature_flags(graphql_releases_page: false)
-    end
-
-    it_behaves_like 'releases page'
-  end
+  it_behaves_like 'releases page'
 end

@@ -17,7 +17,6 @@ export default () => {
       },
       featureFlags: {
         graphqlReleaseData: Boolean(gon.features?.graphqlReleaseData),
-        graphqlReleasesPage: Boolean(gon.features?.graphqlReleasesPage),
         graphqlMilestoneStats: Boolean(gon.features?.graphqlMilestoneStats),
       },
     }),
