@@ -4,7 +4,7 @@ module Search
   class GlobalService
     include Gitlab::Utils::StrongMemoize
 
-    ALLOWED_SCOPES = %w(issues merge_requests milestones users).freeze
+    ALLOWED_SCOPES = %w(issues merge_requests milestones users).freeze  # test change
 
     attr_accessor :current_user, :params
 
