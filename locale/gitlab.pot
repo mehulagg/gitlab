@@ -14574,7 +14574,7 @@ msgstr ""
 msgid "Geo|Node name should be between 1 and 255 characters"
 msgstr ""
 
-msgid "Geo|Node's status was updated %{timeAgo}."
+msgid "Geo|Node's status was updated"
 msgstr ""
 
 msgid "Geo|Not synced yet"
@@ -14749,9 +14749,6 @@ msgid "Geo|Undefined"
 msgstr ""
 
 msgid "Geo|Unknown state"
-msgstr ""
-
-msgid "Geo|Updated %{timeAgo}"
 msgstr ""
 
 msgid "Geo|Verification"
