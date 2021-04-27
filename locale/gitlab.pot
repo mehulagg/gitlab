@@ -22888,6 +22888,9 @@ msgstr ""
 msgid "PackageRegistry|Add Gradle Groovy DSL repository command"
 msgstr ""
 
+msgid "PackageRegistry|Add Gradle Kotlin DSL repository command"
+msgstr ""
+
 msgid "PackageRegistry|Add NuGet Source"
 msgstr ""
 
@@ -22930,6 +22933,9 @@ msgstr ""
 msgid "PackageRegistry|Copy Gradle Groovy DSL install command"
 msgstr ""
 
+msgid "PackageRegistry|Copy Gradle Kotlin DSL install command"
+msgstr ""
+
 msgid "PackageRegistry|Copy Maven XML"
 msgstr ""
 
@@ -22949,6 +22955,9 @@ msgid "PackageRegistry|Copy Pip command"
 msgstr ""
 
 msgid "PackageRegistry|Copy add Gradle Groovy DSL repository command"
+msgstr ""
+
+msgid "PackageRegistry|Copy add Gradle Kotlin DSL repository command"
 msgstr ""
 
 msgid "PackageRegistry|Copy and paste this inside your %{codeStart}pom.xml%{codeEnd} %{codeStart}dependencies%{codeEnd} block."
@@ -23003,6 +23012,9 @@ msgid "PackageRegistry|GitLab Packages allows organizations to utilize GitLab as
 msgstr ""
 
 msgid "PackageRegistry|Gradle Groovy DSL install command"
+msgstr ""
+
+msgid "PackageRegistry|Gradle Kotlin DSL install command"
 msgstr ""
 
 msgid "PackageRegistry|If you haven't already done so, you will need to add the below to your %{codeStart}.pypirc%{codeEnd} file."
@@ -23087,6 +23099,9 @@ msgid "PackageRegistry|Show Conan commands"
 msgstr ""
 
 msgid "PackageRegistry|Show Gradle Groovy DSL commands"
+msgstr ""
+
+msgid "PackageRegistry|Show Gradle Kotlin DSL commands"
 msgstr ""
 
 msgid "PackageRegistry|Show Maven commands"
