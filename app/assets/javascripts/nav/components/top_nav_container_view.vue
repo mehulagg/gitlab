@@ -2,12 +2,12 @@
 import FrequentItemsApp from '~/frequent_items/components/app.vue';
 import eventHub from '~/frequent_items/event_hub';
 import VuexModuleProvider from '~/vue_shared/components/vuex_module_provider.vue';
-import TopNavMenuItem from './top_nav_menu_item.vue';
+import TopNavMenuGroups from './top_nav_menu_groups.vue';
 
 export default {
   components: {
     FrequentItemsApp,
-    TopNavMenuItem,
+    TopNavMenuGroups,
     VuexModuleProvider,
   },
   inheritAttrs: false,
@@ -19,6 +19,11 @@ export default {
     frequentItemsDropdownType: {
       type: String,
       required: true,
+    },
+    frequentItemsContainerClass: {
+      type: String,
+      required: false,
+      default: '',
     },
     linksPrimary: {
       type: Array,
@@ -32,11 +37,11 @@ export default {
     },
   },
   computed: {
-    linkGroups() {
+    menuGroups() {
       return [
-        { key: 'primary', links: this.linksPrimary },
-        { key: 'secondary', links: this.linksSecondary },
-      ].filter((x) => x.links?.length);
+        { key: 'primary', menuItems: this.linksPrimary },
+        { key: 'secondary', menuItems: this.linksSecondary },
+      ].filter((x) => x.menuItems?.length);
     },
   },
   mounted() {
@@ -50,26 +55,13 @@ export default {
 
 <template>
   <div class="top-nav-container-view gl-display-flex gl-flex-direction-column">
-    <div class="frequent-items-dropdown-container gl-w-auto">
+    <div class="frequent-items-dropdown-container gl-w-auto" :class="frequentItemsContainerClass">
       <div class="frequent-items-dropdown-content gl-w-full! gl-pt-0!">
         <vuex-module-provider :vuex-module="frequentItemsVuexModule">
           <frequent-items-app v-bind="$attrs" />
         </vuex-module-provider>
       </div>
     </div>
-    <div
-      v-for="({ key, links }, groupIndex) in linkGroups"
-      :key="key"
-      :class="{ 'gl-mt-3': groupIndex !== 0 }"
-      class="gl-mt-auto gl-pt-3 gl-border-1 gl-border-t-solid gl-border-gray-100"
-      data-testid="menu-item-group"
-    >
-      <top-nav-menu-item
-        v-for="(link, linkIndex) in links"
-        :key="link.title"
-        :menu-item="link"
-        :class="{ 'gl-mt-1': linkIndex !== 0 }"
-      />
-    </div>
+    <top-nav-menu-groups class="gl-mt-auto" :groups="menuGroups" with-top-border />
   </div>
 </template>

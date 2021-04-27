@@ -4,20 +4,61 @@ module Nav
   module TopNavHelper
     PROJECTS_VIEW = :projects
     GROUPS_VIEW = :groups
+    NEW_VIEW = :new
 
     def top_nav_view_model(project:, group:)
       builder = ::Gitlab::Nav::TopNavViewModelBuilder.new
 
-      if current_user
-        build_view_model(builder: builder, project: project, group: group)
-      else
-        build_anonymous_view_model(builder: builder)
+      build_base_view_model(builder: builder, project: project, group: group)
+
+      builder.build
+    end
+
+    def top_nav_responsive_view_model(project:, group:)
+      builder = ::Gitlab::Nav::TopNavViewModelBuilder.new
+
+      build_base_view_model(builder: builder, project: project, group: group)
+
+      new_view_model = new_dropdown_view_model(project: project, group: group)
+      search_menu_item_attrs = top_nav_search_menu_item_attrs
+
+      if new_view_model
+        builder.add_header_menu_item(
+          id: 'new',
+          title: new_view_model.fetch(:title),
+          icon: 'plus',
+          view: NEW_VIEW
+        )
+        builder.add_view(NEW_VIEW, new_view_model)
+      end
+
+      if search_menu_item_attrs
+        builder.add_header_menu_item(**search_menu_item_attrs)
       end
 
       builder.build
     end
 
+    def top_nav_search_menu_item_attrs
+      return unless header_link?(:search)
+
+      {
+        id: 'search',
+        title: _('Search'),
+        icon: 'search',
+        href: search_context.search_url
+      }
+    end
+
     private
+
+    def build_base_view_model(builder:, project:, group:)
+      if current_user
+        build_view_model(builder: builder, project: project, group: group)
+      else
+        build_anonymous_view_model(builder: builder)
+      end
+    end
 
     def build_anonymous_view_model(builder:)
       # These come from `app/views/layouts/nav/_explore.html.ham`

@@ -13,6 +13,7 @@
     = header_message
     = render partial: "layouts/header/default", locals: { project: @project, group: @group }
     = render 'layouts/page', sidebar: sidebar, nav: nav
+    = render "layouts/nav/top_nav_responsive", class: 'layout-page'
     = footer_message
 
     = render 'layouts/img_loader'

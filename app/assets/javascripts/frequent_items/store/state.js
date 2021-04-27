@@ -1,4 +1,4 @@
-export default ({ dropdownType = '' } = {}) => ({
+export default ({ dropdownType = '', withDeprecatedStyle = false } = {}) => ({
   namespace: '',
   dropdownType,
   storageKey: '',
@@ -6,4 +6,5 @@ export default ({ dropdownType = '' } = {}) => ({
   isLoadingItems: false,
   isFetchFailed: false,
   items: [],
+  withDeprecatedStyle,
 });

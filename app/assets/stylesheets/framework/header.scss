@@ -668,6 +668,7 @@ $top-nav-hover-bg: var(--indigo-900-alpha-008, $indigo-900-alpha-008) !important
 
 .top-nav-responsive {
   display: none;
+  color: var(--indigo-900, $theme-indigo-900);
 }
 
 .top-nav-responsive-open {

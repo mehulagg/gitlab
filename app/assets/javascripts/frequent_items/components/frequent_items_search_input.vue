@@ -19,7 +19,7 @@ export default {
     };
   },
   computed: {
-    ...mapVuexModuleState((vm) => vm.vuexModule, ['dropdownType']),
+    ...mapVuexModuleState((vm) => vm.vuexModule, ['dropdownType', 'withDeprecatedStyle']),
     translations() {
       return this.getTranslations(['searchInputPlaceholder']);
     },
@@ -39,7 +39,7 @@ export default {
 </script>
 
 <template>
-  <div class="search-input-container d-none d-sm-block">
+  <div :class="['search-input-container', withDeprecatedStyle ? 'd-none d-sm-block' : '']">
     <gl-search-box-by-type
       v-model="searchQuery"
       :placeholder="translations.searchInputPlaceholder"

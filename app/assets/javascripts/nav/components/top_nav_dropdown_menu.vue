@@ -1,17 +1,23 @@
 <script>
 import { FREQUENT_ITEMS_PROJECTS, FREQUENT_ITEMS_GROUPS } from '~/frequent_items/constants';
 import KeepAliveSlots from '~/vue_shared/components/keep_alive_slots.vue';
+import eventHub from '../event_hub';
 import TopNavContainerView from './top_nav_container_view.vue';
 import TopNavMenuItem from './top_nav_menu_item.vue';
 
 const ACTIVE_CLASS = 'gl-shadow-none! gl-font-weight-bold! active';
 const SECONDARY_GROUP_CLASS = 'gl-pt-3 gl-mt-3 gl-border-1 gl-border-t-solid gl-border-gray-100';
 
+const MENU_ITEM_EVENT = 'main:menu-item-click';
+
 export default {
   components: {
     KeepAliveSlots,
     TopNavContainerView,
     TopNavMenuItem,
+  },
+  provide: {
+    menuItemEvent: MENU_ITEM_EVENT,
   },
   props: {
     primary: {
@@ -66,14 +72,13 @@ export default {
   created() {
     // Initialize activeId based on initialization prop
     this.activeId = this.allMenuItems.find((x) => x.active)?.id;
+    eventHub.$on(MENU_ITEM_EVENT, this.onMenuItem);
+  },
+  beforeDestroy() {
+    eventHub.$off(MENU_ITEM_EVENT, this.onMenuItem);
   },
   methods: {
-    onClick({ id, href }) {
-      // If we're a link, let's just do the default behavior so the view won't change
-      if (href) {
-        return;
-      }
-
+    onMenuItem({ id }) {
       this.activeId = id;
     },
     menuItemClasses(menuItem) {
@@ -114,7 +119,6 @@ export default {
             data-testid="menu-item"
             :class="[{ 'gl-mt-1': index !== 0 }, menuItemClasses(menu)]"
             :menu-item="menu"
-            @click="onClick(menu)"
           />
         </div>
       </div>

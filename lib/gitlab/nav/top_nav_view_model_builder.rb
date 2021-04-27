@@ -7,6 +7,7 @@ module Gitlab
         @menu_builder = ::Gitlab::Nav::TopNavMenuBuilder.new
         @views = {}
         @shortcuts = []
+        @header_menu_items = []
       end
 
       # Using delegate hides the stacktrace for some errors, so we choose to be explicit.
@@ -17,6 +18,12 @@ module Gitlab
 
       def add_secondary_menu_item(**args)
         @menu_builder.add_secondary_menu_item(**args)
+      end
+
+      def add_header_menu_item(**args)
+        item = ::Gitlab::Nav::TopNavMenuItem.build(**args)
+
+        @header_menu_items.push(item)
       end
 
       def add_shortcut(**args)
@@ -45,6 +52,7 @@ module Gitlab
         menu.merge({
           views: @views,
           shortcuts: @shortcuts,
+          header_menu_items: @header_menu_items,
           activeTitle: _('Menu')
         })
       end
