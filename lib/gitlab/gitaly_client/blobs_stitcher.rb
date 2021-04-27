@@ -18,8 +18,7 @@ module Gitlab
           elsif msg.oid.present?
             yield new_blob(current_blob_data) if current_blob_data
 
-            current_blob_data = msg.to_h.slice(:oid, :path, :size, :revision, :mode)
-            current_blob_data[:data] = msg.data.dup
+            current_blob_data = msg.to_h.slice(:oid, :path, :size, :revision, :mode, :data)
           else
             current_blob_data[:data] << msg.data
           end
