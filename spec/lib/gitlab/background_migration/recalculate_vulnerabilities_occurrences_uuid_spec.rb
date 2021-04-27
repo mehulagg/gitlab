@@ -73,6 +73,14 @@ RSpec.describe Gitlab::BackgroundMigration::RecalculateVulnerabilitiesOccurrence
 
       expect(vulnerabilities_findings.pluck(:uuid)).to eq([desired_uuid_v5])
     end
+
+    it 'logs recalculation' do
+      expect_next_instance_of(Gitlab::BackgroundMigration::Logger) do |instance|
+        expect(instance).to receive(:info).once
+      end
+
+      subject
+    end
   end
 
   context "when finding has a UUIDv5" do
