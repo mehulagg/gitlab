@@ -118,7 +118,12 @@ export default {
       >
         {{ $options.i18n.successNotification.description }}
       </gl-alert>
-      <oncall-schedule v-for="(schedule, scheduleIndex) in schedules" :key="schedule.iid" :schedule="schedule" :schedule-index="scheduleIndex" />
+      <oncall-schedule
+        v-for="(schedule, scheduleIndex) in schedules"
+        :key="schedule.iid"
+        :schedule="schedule"
+        :schedule-index="scheduleIndex"
+      />
     </template>
 
     <gl-empty-state

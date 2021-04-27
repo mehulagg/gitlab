@@ -1,4 +1,4 @@
-import { GlCard, GlButton } from '@gitlab/ui';
+import { GlButton, GlCard, GlCollapse } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import OnCallSchedule, { i18n } from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import RotationsListSection from 'ee/oncall_schedules/components/schedule/components/rotations_list_section.vue';
@@ -32,7 +32,7 @@ describe('On-call schedule', () => {
   ];
   const formattedTimezone = '(UTC-09:00) AKST Alaska';
 
-  function createComponent({ schedule, loading } = {}) {
+  function createComponent({ schedule, loading, scheduleIndex } = {}) {
     const $apollo = {
       queries: {
         rotations: {
@@ -44,6 +44,7 @@ describe('On-call schedule', () => {
       shallowMount(OnCallSchedule, {
         propsData: {
           schedule,
+          scheduleIndex,
         },
         provide: {
           timezones: mockTimezones,
@@ -65,7 +66,7 @@ describe('On-call schedule', () => {
   beforeEach(() => {
     jest.spyOn(utils, 'getTimeframeForWeeksView').mockReturnValue(mockWeeksTimeFrame);
     jest.spyOn(commonUtils, 'getFormattedTimezone').mockReturnValue(formattedTimezone);
-    createComponent({ schedule: mockSchedule, loading: false });
+    createComponent({ schedule: mockSchedule, loading: false, scheduleIndex: 0 });
   });
 
   afterEach(() => {
@@ -83,6 +84,7 @@ describe('On-call schedule', () => {
   const findRotationsList = () => findRotations().find(RotationsListSection);
   const findLoadPreviousTimeframeBtn = () => wrapper.findByTestId('previous-timeframe-btn');
   const findLoadNextTimeframeBtn = () => wrapper.findByTestId('next-timeframe-btn');
+  const findCollapsible = () => wrapper.findComponent(GlCollapse);
 
   it('shows schedule title', () => {
     expect(findScheduleHeader().text()).toBe(mockSchedule.name);
@@ -102,7 +104,11 @@ describe('On-call schedule', () => {
     });
 
     it('does not show schedule description if none present', () => {
-      createComponent({ schedule: { ...mockSchedule, description: null }, loading: false });
+      createComponent({
+        schedule: { ...mockSchedule, description: null },
+        loading: false,
+        scheduleIndex: 0,
+      });
       expect(findScheduleDescription()).not.toContain(mockSchedule.description);
     });
   });
@@ -131,6 +137,15 @@ describe('On-call schedule', () => {
       scheduleIid: mockSchedule.iid,
       loading: wrapper.vm.$apollo.queries.rotations.loading,
     });
+  });
+
+  it('renders a open card for the first in the list by default', () => {
+    expect(findCollapsible().attributes('visible')).toBe('true');
+  });
+
+  it('renders a collapsed card if not the first in the list by default', () => {
+    createComponent({ schedule: mockSchedule, loading: false, scheduleIndex: 1 });
+    expect(findCollapsible().attributes('visible')).toBeUndefined();
   });
 
   describe('Timeframe shift preset type', () => {

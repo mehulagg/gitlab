@@ -24,7 +24,7 @@ import {
   editRotationModalId,
   PRESET_TYPES,
 } from '../constants';
-import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
+import getShiftsForRotationsQuery from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
@@ -87,7 +87,7 @@ export default {
   },
   apollo: {
     rotations: {
-      query: getShiftsForRotations,
+      query: getShiftsForRotationsQuery,
       skip() {
         return !this.scheduleVisible;
       },
@@ -325,27 +325,25 @@ export default {
         </gl-card>
       </gl-collapse>
     </gl-card>
-    <div v-if="scheduleVisible">
-      <delete-schedule-modal :schedule="schedule" :modal-id="deleteScheduleModalId" />
-      <edit-schedule-modal :schedule="schedule" :modal-id="editScheduleModalId" is-edit-mode />
-      <add-edit-rotation-modal
-        :schedule="schedule"
-        :modal-id="addRotationModalId"
-        @fetch-rotation-shifts="fetchRotationShifts"
-      />
-      <add-edit-rotation-modal
-        :schedule="schedule"
-        :modal-id="editRotationModalId"
-        :rotation="rotationToUpdate"
-        is-edit-mode
-        @fetch-rotation-shifts="fetchRotationShifts"
-      />
-      <delete-rotation-modal
-        :rotation="rotationToUpdate"
-        :schedule="schedule"
-        :modal-id="deleteRotationModalId"
-        @fetch-rotation-shifts="fetchRotationShifts"
-      />
-    </div>
+    <delete-schedule-modal :schedule="schedule" :modal-id="deleteScheduleModalId" />
+    <edit-schedule-modal :schedule="schedule" :modal-id="editScheduleModalId" is-edit-mode />
+    <add-edit-rotation-modal
+      :schedule="schedule"
+      :modal-id="addRotationModalId"
+      @fetch-rotation-shifts="fetchRotationShifts"
+    />
+    <add-edit-rotation-modal
+      :schedule="schedule"
+      :modal-id="editRotationModalId"
+      :rotation="rotationToUpdate"
+      is-edit-mode
+      @fetch-rotation-shifts="fetchRotationShifts"
+    />
+    <delete-rotation-modal
+      :rotation="rotationToUpdate"
+      :schedule="schedule"
+      :modal-id="deleteRotationModalId"
+      @fetch-rotation-shifts="fetchRotationShifts"
+    />
   </div>
 </template>
