@@ -134,7 +134,7 @@ module QA
           has_element?(:project_name_content, text: name)
         end
 
-        def has_readme_content?(text)
+        def has_content?(text)
           has_element?(:blob_viewer_content, text: text)
         end
 
