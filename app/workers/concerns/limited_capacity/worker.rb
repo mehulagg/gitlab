@@ -67,7 +67,6 @@ module LimitedCapacity
       return unless has_capacity?
 
       job_tracker.register(jid)
-      report_running_jobs_metrics
       perform_work(*args)
     rescue StandardError => exception
       raise
@@ -109,13 +108,8 @@ module LimitedCapacity
     end
 
     def report_prometheus_metrics(*args)
-      report_running_jobs_metrics
       set_metric(:remaining_work_gauge, remaining_work_count(*args))
       set_metric(:max_running_jobs_gauge, max_running_jobs)
-    end
-
-    def report_running_jobs_metrics
-      set_metric(:running_jobs_gauge, running_jobs_count)
     end
 
     def required_jobs_count(*args)
@@ -147,7 +141,6 @@ module LimitedCapacity
     def set_metric(name, value)
       metrics = strong_memoize(:metrics) do
         {
-          running_jobs_gauge: Gitlab::Metrics.gauge(:limited_capacity_worker_running_jobs, 'Number of running jobs'),
           max_running_jobs_gauge: Gitlab::Metrics.gauge(:limited_capacity_worker_max_running_jobs, 'Maximum number of running jobs'),
           remaining_work_gauge: Gitlab::Metrics.gauge(:limited_capacity_worker_remaining_work_count, 'Number of jobs waiting to be enqueued')
         }
