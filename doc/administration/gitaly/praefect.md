@@ -1446,8 +1446,6 @@ Here are common errors and potential causes:
     - Praefect cannot reach one or more of its child Gitaly nodes. Try running
       the Praefect connection checker to diagnose.
 
-### Determining the primary Gitaly without Grafana
-
 ### Determine primary Gitaly node
 
 To determine the current primary Gitaly node for a specific Praefect node:
