@@ -1122,11 +1122,15 @@ to define the explicit address that the GitLab Pages daemon should listen on:
 gitlab_pages['listen_proxy'] = '127.0.0.1:8090'
 ```
 
-### Intermittent 502 error "dial tcp: lookup gitlab.example.com on [::1]:53 connect: no route to host"
+### Intermittent 502 errors or after a few days
 
 If you run Pages on a system that uses `systemd` and
 [`tmpfiles.d`](https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html)
-you may encounter intermittent 502 errors trying to serve Pages.
+you may encounter intermittent 502 errors trying to serve Pages with a similar error:
+
+```plaintext
+dial tcp: lookup gitlab.example.com on [::1]:53: dial udp [::1]:53: connect: no route to host"
+```
 
 GitLab Pages creates a [bind mount](https://man7.org/linux/man-pages/man8/mount.8.html)
 inside `/tmp/gitlab-pages-*` that includes files like `/etc/hosts`.
@@ -1136,7 +1140,7 @@ configuration may be lost.
 To stop `systemd` from cleaning the Pages related content, run the following command:
 
 ```shell
-$ echo 'x /tmp/gitlab-pages-*' >> /etc/tmpfiles.d/gitlab-pages-jail.conf
+echo 'x /tmp/gitlab-pages-*' >> /etc/tmpfiles.d/gitlab-pages-jail.conf
 ```
 
 Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab with
