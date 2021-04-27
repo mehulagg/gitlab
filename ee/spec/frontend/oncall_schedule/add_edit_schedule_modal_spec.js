@@ -4,6 +4,7 @@ import VueApollo from 'vue-apollo';
 import AddEditScheduleModal, {
   i18n,
 } from 'ee/oncall_schedules/components/add_edit_schedule_modal.vue';
+import AddEditScheduleForm from 'ee/oncall_schedules/components/add_edit_schedule_form.vue';
 import { editScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule';
 import { addScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedules_wrapper';
 import updateOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule.mutation.graphql';
@@ -115,6 +116,7 @@ describe('AddScheduleModal', () => {
 
   const findModal = () => wrapper.findComponent(GlModal);
   const findAlert = () => wrapper.findComponent(GlAlert);
+  const findModalForm = () => wrapper.findComponent(AddEditScheduleForm);
 
   describe('Schedule create', () => {
     beforeEach(() => {
@@ -163,6 +165,16 @@ describe('AddScheduleModal', () => {
       expect(mockHideModal).not.toHaveBeenCalled();
       expect(alert.exists()).toBe(true);
       expect(alert.text()).toContain(error);
+    });
+
+    it('should clear the schedule form on a successful creation', () => {
+      mutate.mockResolvedValueOnce({});
+      findModal().vm.$emit('primary', { preventDefault: jest.fn() });
+      expect(findModalForm().props('form')).toMatchObject({
+        name: '',
+        description: '',
+        timezone: {},
+      });
     });
   });
 

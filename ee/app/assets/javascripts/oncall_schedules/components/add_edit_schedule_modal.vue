@@ -125,6 +125,7 @@ export default {
             }
             this.$refs.addUpdateScheduleModal.hide();
             this.$emit('scheduleCreated');
+            this.clearScheduleForm();
           },
         )
         .catch((error) => {
@@ -188,6 +189,11 @@ export default {
       } else if (key === 'timezone') {
         this.validationState.timezone = !isEmpty(this.form.timezone);
       }
+    },
+    clearScheduleForm() {
+      this.form.name = '';
+      this.form.description = '';
+      this.form.timezone = {};
     },
   },
 };
