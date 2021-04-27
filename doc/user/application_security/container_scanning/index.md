@@ -692,7 +692,7 @@ the security vulnerabilities in your groups, projects and pipelines.
 ## Vulnerabilities database update
 
 If you're using Klar and want more information about the vulnerabilities database update, see the
-[maintenance table](../index.md#maintenance-and-update-of-the-vulnerabilities-database).
+[maintenance table](../vulnerabilities/index.md#vulnerability-scanner-maintenance).
 
 ## Interacting with the vulnerabilities
 
