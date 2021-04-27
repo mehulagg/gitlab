@@ -931,6 +931,25 @@
     - <<: *if-merge-request
       changes: [".gitlab/ci/rails.gitlab-ci.yml"]
 
+#########################
+# Static analysis rules #
+#########################
+
+.static-analysis:rules:ee-and-foss:
+  rules:
+    - changes: *code-backstage-qa-patterns
+
+.static-analysis:rules:as-if-foss:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-merge-request-title-as-if-foss
+      changes: *code-backstage-qa-patterns
+    - <<: *if-security-merge-request
+      changes: *code-backstage-qa-patterns
+    - <<: *if-merge-request
+      changes: *ci-patterns
+
 #######################
 # Vendored gems rules #
 #######################
