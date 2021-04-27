@@ -7,6 +7,7 @@ RSpec.describe Boards::EpicBoard do
     it { is_expected.to belong_to(:group).required.inverse_of(:epic_boards) }
     it { is_expected.to have_many(:epic_board_labels).inverse_of(:epic_board) }
     it { is_expected.to have_many(:epic_board_positions).inverse_of(:epic_board) }
+    it { is_expected.to have_many(:epic_board_recent_visits).inverse_of(:epic_board) }
     it { is_expected.to have_many(:epic_lists).order(list_type: :asc, position: :asc).inverse_of(:epic_board) }
   end
 
