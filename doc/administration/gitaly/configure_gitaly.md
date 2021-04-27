@@ -386,6 +386,7 @@ server (with `gitaly_address`) unless you use
      'storage1' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
      'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075' },
    })
+   ```
 
    Alternatively, if each Gitaly server is configured to use a different authentication token:
 
@@ -395,7 +396,6 @@ server (with `gitaly_address`) unless you use
      'storage1' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075', 'gitaly_token' => '<AUTH_TOKEN_1>' },
      'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075', 'gitaly_token' => '<AUTH_TOKEN_2>' },
    })
-   ```
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
