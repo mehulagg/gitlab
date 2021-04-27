@@ -754,7 +754,8 @@ There can be different reasons behind this:
   To fix this, there are two workarounds:
   1. If you are on GitLab 13.9 or later, you can [set limits for the cleanup policy](#set-cleanup-limits-to-conserve-resources). 
      This will limit the cleanup execution in time, and hence avoid the issue of the expired token.
-  2. If the previous fix didn't work or you are on earlier versions of GitLab, you may use the following script:
+  1. Another option is to extend the expiration delay of the Container Registry authentication tokens. This defaults to 5 minutes and a custom value can be set by running `ApplicationSetting.last.update(container_registry_token_expire_delay: <integer>)` in the Rails console, where `<integer>` is the desired number of minutes. For reference, 15 minutes is the value we currently use for GitLab.com. Please be aware that by extending this value you are increasing the time required to revoke permissions.
+  1. If the previous fixes didn't work or you are on earlier versions of GitLab, you may use the following script:
 
      ```Shell
      # Get a list of all tags in a certain container repository while considering [pagination](../../../api/README.md#pagination)
