@@ -13919,6 +13919,9 @@ CREATE TABLE iterations_cadences (
     active boolean DEFAULT true NOT NULL,
     automatic boolean DEFAULT true NOT NULL,
     title text NOT NULL,
+    roll_over boolean DEFAULT false NOT NULL,
+    description text,
+    CONSTRAINT check_5c5d2b44bd CHECK ((char_length(description) <= 255)),
     CONSTRAINT check_fedff82d3b CHECK ((char_length(title) <= 255))
 );
 
