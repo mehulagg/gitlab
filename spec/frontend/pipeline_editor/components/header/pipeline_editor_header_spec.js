@@ -56,18 +56,4 @@ describe('Pipeline editor header', () => {
       expect(findValidationSegment().exists()).toBe(true);
     });
   });
-
-  describe('with pipeline status feature flag off', () => {
-    beforeEach(() => {
-      createComponent({
-        provide: {
-          glFeatures: { pipelineStatusForPipelineEditor: false },
-        },
-      });
-    });
-
-    it('does not render the pipeline status', () => {
-      expect(findPipelineStatus().exists()).toBe(false);
-    });
-  });
 });

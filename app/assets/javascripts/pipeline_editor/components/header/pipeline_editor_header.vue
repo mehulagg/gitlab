@@ -1,5 +1,4 @@
 <script>
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import PipelineStatus from './pipeline_status.vue';
 import ValidationSegment from './validation_segment.vue';
 
@@ -12,9 +11,7 @@ const pipelineStatusClasses = [
   'gl-rounded-top-base',
 ];
 
-const validationSegmentClasses = [...baseClasses, 'gl-border-1', 'gl-rounded-base'];
-
-const validationSegmentWithPipelineStatusClasses = [
+const validationSegmentClasses = [
   ...baseClasses,
   'gl-border-1',
   'gl-rounded-bottom-left-base',
@@ -24,12 +21,10 @@ const validationSegmentWithPipelineStatusClasses = [
 export default {
   pipelineStatusClasses,
   validationSegmentClasses,
-  validationSegmentWithPipelineStatusClasses,
   components: {
     PipelineStatus,
     ValidationSegment,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     ciConfigData: {
       type: Object,
@@ -40,23 +35,11 @@ export default {
       required: true,
     },
   },
-  computed: {
-    showPipelineStatus() {
-      return this.glFeatures.pipelineStatusForPipelineEditor && !this.isNewCiConfigFile;
-    },
-    // make sure corners are rounded correctly depending on if
-    // pipeline status is rendered
-    validationStyling() {
-      return this.showPipelineStatus
-        ? this.$options.validationSegmentWithPipelineStatusClasses
-        : this.$options.validationSegmentClasses;
-    },
-  },
 };
 </script>
 <template>
   <div class="gl-mb-5">
-    <pipeline-status v-if="showPipelineStatus" :class="$options.pipelineStatusClasses" />
-    <validation-segment :class="validationStyling" :ci-config="ciConfigData" />
+    <pipeline-status v-if="!isNewCiConfigFile" :class="$options.pipelineStatusClasses" />
+    <validation-segment :class="$options.validationSegmentClasses" :ci-config="ciConfigData" />
   </div>
 </template>
