@@ -757,10 +757,10 @@ There can be different reasons behind this:
   1. Another option is to extend the expiration delay of the Container Registry authentication tokens. This defaults to 5 minutes and a custom value can be set by running `ApplicationSetting.last.update(container_registry_token_expire_delay: <integer>)` in the Rails console, where `<integer>` is the desired number of minutes. For reference, 15 minutes is the value we currently use for GitLab.com. Please be aware that by extending this value you are increasing the time required to revoke permissions.
   1. If the previous fixes didn't work or you are on earlier versions of GitLab, you may use the following script:
 
-     ```Shell
+     ```shell
      # Get a list of all tags in a certain container repository while considering [pagination](../../../api/README.md#pagination)
 
-     list_o_tags.out; for i in {1..N}; do curl --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags?per_page=100&page=${i}" | jq '.[].name' | tr -d '"' >> list_o_tags.out; done # N stands for the number of tags/100 rounded to the next whole number.
+     > list_o_tags.out; for i in {1..N}; do curl --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags?per_page=100&page=${i}" | jq '.[].name' | tr -d '"' >> list_o_tags.out; done # N stands for the number of tags/100 rounded to the next whole number.
 
      NOTE:
      The command just before the for loop is just to make sure that list_o_tags.out is always empty when going into the loop.
