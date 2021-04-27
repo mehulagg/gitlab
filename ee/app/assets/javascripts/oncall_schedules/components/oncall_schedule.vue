@@ -80,10 +80,17 @@ export default {
       type: Object,
       required: true,
     },
+    scheduleIndex: {
+      type: Number,
+      required: true,
+    },
   },
   apollo: {
     rotations: {
       query: getShiftsForRotations,
+      skip() {
+        return !this.scheduleVisible;
+      },
       variables() {
         this.timeframeStartDate.setHours(0, 0, 0, 0);
         const startsAt = this.timeframeStartDate;
@@ -115,7 +122,7 @@ export default {
       timeframeStartDate: getStartOfWeek(new Date()),
       rotations: this.schedule.rotations.nodes,
       rotationToUpdate: {},
-      scheduleVisible: true,
+      scheduleVisible: this.scheduleIndex === 0,
     };
   },
   computed: {
