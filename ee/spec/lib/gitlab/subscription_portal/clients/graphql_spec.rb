@@ -58,7 +58,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
       expect(result).to eq({ errors: described_class::CONNECTIVITY_ERROR, success: false })
     end
 
-    it 'returns connectivity error when remote server unreachable' do
+    it 'returns connectivity error when the remote server is unreachable' do
       stub_request(:any, EE::SUBSCRIPTIONS_GRAPHQL_URL).to_timeout
 
       result = client.activate('activation_code_abc')
