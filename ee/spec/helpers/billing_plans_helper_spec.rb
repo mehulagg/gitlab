@@ -372,9 +372,8 @@ RSpec.describe BillingPlansHelper do
   end
 
   describe '#billing_available_plans' do
-    let(:plan) { double('Plan', deprecated?: false, code: 'premium', hide_billing_page: false, hide_deprecated_card?: false) }
-    let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_billing_page: false, hide_deprecated_card?: false) }
-    let(:hidden_plan) { double('Plan', code: 'trial', hide_billing_page: true) }
+    let(:plan) { double('Plan', deprecated?: false, code: 'premium', hide_deprecated_card?: false) }
+    let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: false) }
     let(:plans_data) { [plan, deprecated_plan] }
 
     context 'when namespace is not on a plan' do
@@ -391,14 +390,6 @@ RSpec.describe BillingPlansHelper do
       end
     end
 
-    context 'when the namespace is on an trial plan' do
-      let(:current_plan) { OpenStruct.new(code: 'trial') }
-
-      it 'returns plans without hide_billing_page' do
-        expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
-      end
-    end
-
     context 'when namespace is on a deprecated plan' do
       let(:current_plan) { OpenStruct.new(code: 'bronze') }
 
@@ -409,7 +400,7 @@ RSpec.describe BillingPlansHelper do
 
     context 'when namespace is on a deprecated plan that has hide_deprecated_card set to true' do
       let(:current_plan) { OpenStruct.new(code: 'bronze') }
-      let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: true, hide_billing_page: false) }
+      let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: true) }
 
       it 'returns plans without the deprecated plan' do
         expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
@@ -418,7 +409,7 @@ RSpec.describe BillingPlansHelper do
 
     context 'when namespace is on a plan that has hide_deprecated_card set to true, but deprecated? is false' do
       let(:current_plan) { OpenStruct.new(code: 'premium') }
-      let(:plan) { double('Plan', deprecated?: false, code: 'premium', hide_deprecated_card?: true, hide_billing_page: false) }
+      let(:plan) { double('Plan', deprecated?: false, code: 'premium', hide_deprecated_card?: true) }
 
       it 'returns plans with the deprecated plan' do
         expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
