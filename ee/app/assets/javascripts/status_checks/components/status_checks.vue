@@ -1,5 +1,6 @@
 <script>
 import { GlTable } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { __ } from '~/locale';
 
 const DEFAULT_TH_CLASSES =
@@ -9,6 +10,20 @@ const thWidthClass = (width) => `gl-w-${width}p ${DEFAULT_TH_CLASSES}`;
 export default {
   components: {
     GlTable,
+  },
+  computed: {
+    ...mapState({
+      settings: 'settings',
+      isLoading: (state) => state.isLoading,
+      hasLoaded: (state) => state.hasLoaded,
+      targetBranch: (state) => state.targetBranch,
+    }),
+  },
+  mounted() {
+    return this.fetchStatusChecks({ targetBranch: this.targetBranch });
+  },
+  methods: {
+    ...mapActions(['fetchStatusChecks']),
   },
   fields: [
     {
@@ -30,7 +45,7 @@ export default {
       key: 'actions',
       label: '',
       thClass: thWidthClass(15),
-    }
+    },
   ],
 };
 </script>
