@@ -99,12 +99,13 @@ gitops:
 
 The GitLab Agent provides an [integration with Cilium](index.md#kubernetes-network-security-alerts).
 To integrate, add a top-level `cilium` section to your `config.yml` file. Currently, the
-only configuration option is the Hubble relay address.
+only configuration option is the Hubble relay address:
 
 ```yaml
 cilium:
   hubble_relay_address: "<hubble-relay-host>:<hubble-relay-port>"
 ```
+
 If your Cilium integration was performed through GitLab Managed Apps, you can use `hubble-relay.gitlab-managed-apps.svc.cluster.local:80` as the address:
 
 ```yaml
