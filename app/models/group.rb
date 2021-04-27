@@ -691,6 +691,10 @@ class Group < Namespace
     Gitlab::ServiceDesk.supported? && all_projects.service_desk_enabled.exists?
   end
 
+  def activity_path
+    Gitlab::Routing.url_helpers.activity_group_path(self)
+  end
+
   private
 
   def update_two_factor_requirement

@@ -58,14 +58,7 @@ module Registrations
     def members_activity_path(user)
       return dashboard_projects_path unless user.members.count >= 1
 
-      case user.members.last.source
-      when Project
-        activity_project_path(user.members.last.source)
-      when Group
-        activity_group_path(user.members.last.source)
-      else
-        dashboard_projects_path
-      end
+      user.members.last.source.activity_path
     end
 
     def show_signup_onboarding?

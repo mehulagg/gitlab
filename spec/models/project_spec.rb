@@ -6890,6 +6890,14 @@ RSpec.describe Project, factory_default: :keep do
         end
       end
     end
+
+    describe '.activity_path' do
+      it 'returns the group_activity_path' do
+        expected_path = '/namespace1/project1/activity'
+
+        expect(project.activity_path).to eq(expected_path)
+      end
+    end
   end
 
   def finish_job(export_job)

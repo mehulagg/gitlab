@@ -2363,4 +2363,12 @@ RSpec.describe Group do
 
     it { is_expected.to eq(Set.new([child_1.id])) }
   end
+
+  describe '.activity_path' do
+    it 'returns the group_activity_path' do
+      expected_path = '/groups/group1/-/activity'
+
+      expect(group.activity_path).to eq(expected_path)
+    end
+  end
 end
