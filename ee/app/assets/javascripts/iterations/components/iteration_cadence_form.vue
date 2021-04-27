@@ -271,6 +271,7 @@ export default {
         label-for="cadence-duration"
         :description="i18n.duration.description"
         :invalid-feedback="i18n.requiredField"
+        :state="validationState.durationInWeeks"
       >
         <gl-form-select
           id="cadence-duration"
