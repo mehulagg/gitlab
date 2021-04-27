@@ -125,6 +125,14 @@ module EE
       { data: data }
     end
 
+    def status_checks_app_data(project)
+      {
+        project_id: project.id,
+        project_path: expose_path(api_v4_projects_path(id: project.id)),
+        external_approval_rules_path: expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+      }
+    end
+
     def can_modify_approvers(project = @project)
       can?(current_user, :modify_approvers_rules, project)
     end
