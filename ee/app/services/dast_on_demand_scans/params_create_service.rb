@@ -9,7 +9,7 @@ module DastOnDemandScans
       return ServiceResponse.error(message: 'Cannot run active scan against unvalidated target') unless active_scan_allowed?
 
       ServiceResponse.success(
-        payload: default_config.merge(site_profile_config, scanner_profile_config)
+        payload: default_config.merge(target_config, site_profile_config, scanner_profile_config)
       )
     end
 
@@ -45,7 +45,7 @@ module DastOnDemandScans
 
     def dast_site
       strong_memoize(:dast_site) do
-        dast_site_profile&.dast_site
+        dast_site_profile.dast_site
       end
     end
 
@@ -62,11 +62,17 @@ module DastOnDemandScans
     end
 
     def default_config
-      {
-        dast_profile: dast_profile,
-        branch: branch,
-        target_url: dast_site&.url
-      }
+      { dast_profile: dast_profile, branch: branch }
+    end
+
+    def target_config
+      url = dast_site.url
+
+      if dast_site_profile.target_type == 'website'
+        { target_url: url }
+      else
+        { api_specification_url: url, api_host_override: URI(url).host }
+      end
     end
 
     def site_profile_config

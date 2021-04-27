@@ -72,7 +72,7 @@ module QA
 
       Support::Retrier.retry_on_exception do
         Flow::Saml.visit_saml_sso_settings(@group)
-        ensure_enforced_sso_button_shown
+        ensure_enforced_sso_checkbox_shown
 
         managed_group_url = EE::Page::Group::Settings::SamlSSO.perform do |saml_sso|
           saml_sso.enforce_sso
@@ -86,7 +86,7 @@ module QA
         end
 
         Flow::Saml.visit_saml_sso_settings(@group, direct: true)
-        ensure_enforced_sso_button_shown
+        ensure_enforced_sso_checkbox_shown
 
         unless EE::Page::Group::Settings::SamlSSO.perform(&:enforce_sso_enabled?)
           QA::Runtime::Logger.debug "Enforced SSO not setup correctly. About to raise failure."
@@ -100,12 +100,12 @@ module QA
       end
     end
 
-    def ensure_enforced_sso_button_shown
-      # Sometimes, the toggle button for SAML SSO does not appear and only appears after a refresh
+    def ensure_enforced_sso_checkbox_shown
+      # Sometimes, the checkbox for SAML SSO does not appear and only appears after a refresh
       # This issue can only be reproduced manually if you are too quick to go to the group setting page
       # after enabling the feature flags.
       Support::Retrier.retry_until(sleep_interval: 1, raise_on_failure: true) do
-        condition_met = EE::Page::Group::Settings::SamlSSO.perform(&:has_enforced_sso_button?)
+        condition_met = EE::Page::Group::Settings::SamlSSO.perform(&:has_enforced_sso_checkbox?)
         page.refresh unless condition_met
         condition_met
       end

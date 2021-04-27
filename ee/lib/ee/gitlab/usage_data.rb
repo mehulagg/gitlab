@@ -479,7 +479,7 @@ module EE
             ::Security::Scan.scan_types.each do |name, scan_type|
               relation = ::Ci::Build.joins(:security_scans)
                            .where(status: 'success', retried: [nil, false])
-                           .where('security_scans.scan_type = ?', scan_type)
+                           .where(security_scans: { scan_type: scan_type })
                            .where(time_period)
               pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
             end

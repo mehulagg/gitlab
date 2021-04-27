@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public, :repository) }
+
   let(:query) { 'hello world' }
   let(:repository_ref) { nil }
   let(:filters) { {} }
@@ -58,6 +59,7 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
 
     context 'visibility checks' do
       let_it_be(:project) { create(:project, :public, :wiki_repo) }
+
       let(:query) { 'term' }
 
       before do

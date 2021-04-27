@@ -108,10 +108,12 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
     it 'calls track! for each associated object' do
       issue_1 = create(:issue, project: project)
       issue_2 = create(:issue, project: project)
+      merge_request1 = create(:merge_request, source_project: project, target_project: project)
 
-      expect(described_class).to receive(:track!).with(issue_1, issue_2)
+      expect(described_class).to receive(:track!).with(issue_1, issue_2).ordered
+      expect(described_class).to receive(:track!).with(merge_request1).ordered
 
-      described_class.maintain_indexed_associations(project, ['issues'])
+      described_class.maintain_indexed_associations(project, %w[issues merge_requests])
     end
 
     it 'correctly scopes associated note objects to not include system notes' do
@@ -261,6 +263,20 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
         issues += create_list(:issue, 3)
 
         described_class.track!(*issues)
+
+        expect { described_class.new.execute }.not_to exceed_all_query_limit(control)
+      end
+
+      it 'does not have N+1 queries for merge_requests' do
+        merge_requests = create_list(:merge_request, 2)
+
+        described_class.track!(*merge_requests)
+
+        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { described_class.new.execute }
+
+        merge_requests += create_list(:merge_request, 3)
+
+        described_class.track!(*merge_requests)
 
         expect { described_class.new.execute }.not_to exceed_all_query_limit(control)
       end

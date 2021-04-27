@@ -9,6 +9,8 @@ export default {
   name: 'GeoNodeHeader',
   i18n: {
     currentNodeLabel: __('Current'),
+    expand: __('Expand'),
+    collapse: __('Collapse'),
   },
   components: {
     GlButton,
@@ -33,7 +35,7 @@ export default {
       return this.collapsed ? 'chevron-right' : 'chevron-down';
     },
     chevronLabel() {
-      return this.collapsed ? __('Expand') : __('Collapse');
+      return this.collapsed ? this.$options.i18n.expand : this.$options.i18n.collapse;
     },
     statusCheckTimestamp() {
       return this.node.lastSuccessfulStatusCheckTimestamp * 1000;

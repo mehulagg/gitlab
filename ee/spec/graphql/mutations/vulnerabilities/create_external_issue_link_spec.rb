@@ -44,6 +44,7 @@ RSpec.describe Mutations::Vulnerabilities::CreateExternalIssueLink do
 
           context 'when issue creation succeeds' do
             let_it_be(:external_issue_link) { build(:vulnerabilities_external_issue_link) }
+
             let(:result) { double(success?: true, payload: { record: external_issue_link }, errors: []) }
 
             it 'returns empty external issue link' do

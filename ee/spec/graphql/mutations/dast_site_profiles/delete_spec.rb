@@ -45,7 +45,7 @@ RSpec.describe Mutations::DastSiteProfiles::Delete do
 
         context 'when there is an issue deleting the dast_site_profile' do
           it 'returns an error' do
-            allow_next_instance_of(::DastSiteProfiles::DestroyService) do |service|
+            allow_next_instance_of(::AppSec::Dast::SiteProfiles::DestroyService) do |service|
               allow(service).to receive(:execute).and_return(double(success?: false, errors: ['Name is weird']))
             end
 

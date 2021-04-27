@@ -7,6 +7,7 @@ import {
   MOCK_PRIMARY_VERSION,
   MOCK_REPLICABLE_TYPES,
 } from 'ee_jest/geo_nodes_beta/mock_data';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -28,23 +29,24 @@ describe('GeoNodeActionsDesktop', () => {
       },
     });
 
-    wrapper = shallowMount(GeoNodeActionsDesktop, {
-      localVue,
-      store,
-      propsData: {
-        ...defaultProps,
-        ...props,
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(GeoNodeActionsDesktop, {
+        localVue,
+        store,
+        propsData: {
+          ...defaultProps,
+          ...props,
+        },
+      }),
+    );
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findGeoDesktopActionsButtons = () => wrapper.findAll(GlButton);
-  const findGeoDesktopActionsRemoveButton = () =>
-    wrapper.find('[data-testid="geo-desktop-remove-action"]');
+  const findGeoDesktopActionsButtons = () => wrapper.findAllComponents(GlButton);
+  const findGeoDesktopActionsRemoveButton = () => wrapper.findByTestId('geo-desktop-remove-action');
 
   describe('template', () => {
     describe('always', () => {

@@ -6,6 +6,8 @@ module Gitlab
       module Graphql
         extend ActiveSupport::Concern
 
+        CONNECTIVITY_ERROR = 'CONNECTIVITY_ERROR'
+
         class_methods do
           def activate(activation_code)
             uuid = Gitlab::CurrentSettings.uuid
@@ -33,9 +35,7 @@ module Gitlab
               { query: query, variables: variables }
             )
 
-            if !response[:success] || response.dig(:data, 'errors').present?
-              return error(response.dig(:data, 'errors'))
-            end
+            return error(CONNECTIVITY_ERROR) unless response[:success]
 
             response = response.dig(:data, 'data', 'cloudActivationActivate')
 

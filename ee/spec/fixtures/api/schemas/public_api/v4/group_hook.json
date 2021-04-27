@@ -25,7 +25,7 @@
     "id": { "type": "integer" },
     "group_id": { "type": "integer" },
     "url": { "type": "string" },
-    "created_at": { "type": "date" },
+    "created_at": { "type": "string", "format": "date-time" },
     "push_events": { "type": "boolean" },
     "tag_push_events": { "type": "boolean" },
     "merge_requests_events": { "type": "boolean" },

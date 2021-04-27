@@ -2,7 +2,8 @@
 import { GlFormGroup, GlFormSelect, GlFormInput, GlSprintf, GlLink } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { NEW_GROUP, STEPS } from 'ee/subscriptions/new/constants';
+import { STEPS } from 'ee/subscriptions/constants';
+import { NEW_GROUP } from 'ee/subscriptions/new/constants';
 import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import { sprintf, s__ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';

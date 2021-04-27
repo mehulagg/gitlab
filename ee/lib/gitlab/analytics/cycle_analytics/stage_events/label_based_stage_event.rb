@@ -20,13 +20,8 @@ module Gitlab
             true
           end
 
-          def timestamp_projection
-            Arel.sql("#{join_expression_name}.created_at")
-          end
-
-          override :column_list
           def column_list
-            [timestamp_projection]
+            [Arel.sql("#{join_expression_name}.created_at")]
           end
 
           # rubocop: disable CodeReuse/ActiveRecord

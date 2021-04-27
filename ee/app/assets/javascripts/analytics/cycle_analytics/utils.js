@@ -132,8 +132,8 @@ export const prepareStageErrors = (stages, errors) =>
  *    selected: true,
  *    data: [
  *      {
- *        'duration_in_seconds': 1234,
- *        'finished_at': '2019-09-02T18:25:43.511Z'
+ *        'average_duration_in_seconds': 1234,
+ *        'date': '2019-09-02T18:25:43.511Z'
  *      },
  *      ...
  *    ]
@@ -144,31 +144,31 @@ export const prepareStageErrors = (stages, errors) =>
  * The data is then transformed and flattened into the following format;
  * [
  *  {
- *    'duration_in_seconds': 1234,
- *    'finished_at': '2019-09-02'
+ *    'average_duration_in_seconds': 1234,
+ *    'date': '2019-09-02'
  *  },
  *  ...
  * ]
  *
  * @param {Array} data - The duration data for selected stages
- * @returns {Array} An array with each item being an object containing the duration_in_seconds and finished_at values for an event
+ * @returns {Array} An array with each item being an object containing the average_duration_in_seconds and date values for an event
  */
 export const flattenDurationChartData = (data) =>
   data
     .map((stage) =>
       stage.data.map((event) => {
-        const date = new Date(event.finished_at);
+        const date = new Date(event.date);
         return {
           ...event,
-          finished_at: dateFormat(date, dateFormats.isoDate),
+          date: dateFormat(date, dateFormats.isoDate),
         };
       }),
     )
     .flat();
 
 /**
- * Takes the duration data for selected stages, groups the data by day and calculates the total duration
- * per day.
+ * Takes the duration data for selected stages, groups the data by day and calculates the average duration
+ * per day, for stages with values on that specific day.
  *
  * The received data is expected to be the following format; One top level object in the array per stage,
  * each potentially having multiple data entries.
@@ -178,8 +178,8 @@ export const flattenDurationChartData = (data) =>
  *    selected: true,
  *    data: [
  *      {
- *        'duration_in_seconds': 1234,
- *        'finished_at': '2019-09-02T18:25:43.511Z'
+ *        'average_duration_in_seconds': 1234,
+ *        'date': '2019-09-02T18:25:43.511Z'
  *      },
  *      ...
  *    ]
@@ -203,12 +203,11 @@ export const flattenDurationChartData = (data) =>
  * @param {Array} data - The duration data for selected stages
  * @param {Date} startDate - The globally selected Value Stream Analytics start date
  * @param {Date} endDate - The globally selected Value Stream Analytics end date
- * @returns {Array} An array with each item being another arry of three items (plottable date, computed total, tooltip display date)
+ * @returns {Array} An array with each item being another arry of three items (plottable date, computed average, tooltip display date)
  */
 export const getDurationChartData = (data, startDate, endDate) => {
   const flattenedData = flattenDurationChartData(data);
   const eventData = [];
-
   const endOfDay = newDate(endDate);
   endOfDay.setHours(23, 59, 59); // make sure we're at the end of the day
 
@@ -218,11 +217,13 @@ export const getDurationChartData = (data, startDate, endDate) => {
     currentDate = dayAfter(currentDate)
   ) {
     const currentISODate = dateFormat(newDate(currentDate), dateFormats.isoDate);
-    const valuesForDay = flattenedData.filter((object) => object.finished_at === currentISODate);
-    const summedData = valuesForDay.reduce((total, value) => total + value.duration_in_seconds, 0);
-    const summedDataInDays = secondsToDays(summedData);
+    const valuesForDay = flattenedData.filter((object) => object.date === currentISODate);
+    const averagedData =
+      valuesForDay.reduce((total, value) => total + value.average_duration_in_seconds, 0) /
+      valuesForDay.length;
+    const averagedDataInDays = secondsToDays(averagedData);
 
-    if (summedDataInDays) eventData.push([currentISODate, summedDataInDays, currentISODate]);
+    if (averagedDataInDays) eventData.push([currentISODate, averagedDataInDays, currentISODate]);
   }
 
   return eventData;

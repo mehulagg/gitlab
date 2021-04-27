@@ -25,6 +25,7 @@ module EE
       has_many :labels, through: :board_labels
 
       scope :with_associations, -> { preload(:destroyable_lists, :labels, :assignee) }
+      scope :in_iterations, ->(iterations) { where(iteration: iterations) }
     end
 
     override :scoped?

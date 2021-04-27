@@ -85,7 +85,7 @@ RSpec.describe 'Project navbar' do
 
     context 'with flag enabled' do
       before do
-        stub_feature_flags(project_sidebar_refactor: true)
+        stub_feature_flags(sidebar_refactor: true)
 
         insert_after_nav_item(
           _('Merge requests'),
@@ -103,7 +103,7 @@ RSpec.describe 'Project navbar' do
 
     context 'with flag disabled' do
       before do
-        stub_feature_flags(project_sidebar_refactor: false)
+        stub_feature_flags(sidebar_refactor: false)
 
         insert_after_nav_item(
           _('Merge requests'),

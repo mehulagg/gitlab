@@ -187,7 +187,6 @@ module ObjectStorage
             hash[:TempPath] = workhorse_local_upload_path
           end
 
-          hash[:FeatureFlagExtractBase] = Feature.enabled?(:workhorse_extract_filename_base, default_enabled: :yaml)
           hash[:MaximumSize] = maximum_size if maximum_size.present?
         end
       end
@@ -484,7 +483,7 @@ module ObjectStorage
       end
 
       file
-    rescue => e
+    rescue StandardError => e
       # in case of failure delete new file
       new_file.delete unless new_file.nil?
       # revert back to the old file

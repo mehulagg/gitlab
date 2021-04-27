@@ -1,5 +1,13 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.11.1 (2021-04-22)
+
+### Fixed (2 changes)
+
+- Geo - Sync incident metrics uploads. !59674
+- Fix zero count of vulnerability severity count. !59680
+
+
 ## 13.11.0 (2021-04-22)
 
 ### Removed (3 changes)

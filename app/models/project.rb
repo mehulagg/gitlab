@@ -104,16 +104,13 @@ class Project < ApplicationRecord
 
   after_save :create_import_state, if: ->(project) { project.import? && project.import_state.nil? }
 
-  after_create :create_project_feature, unless: :project_feature
+  after_create -> { create_or_load_association(:project_feature) }
 
-  after_create :create_ci_cd_settings,
-    unless: :ci_cd_settings
+  after_create -> { create_or_load_association(:ci_cd_settings) }
 
-  after_create :create_container_expiration_policy,
-               unless: :container_expiration_policy
+  after_create -> { create_or_load_association(:container_expiration_policy) }
 
-  after_create :create_pages_metadatum,
-               unless: :pages_metadatum
+  after_create -> { create_or_load_association(:pages_metadatum) }
 
   after_create :set_timestamps_for_create
   after_update :update_forks_visibility_level
@@ -1097,7 +1094,7 @@ class Project < ApplicationRecord
     else
       super
     end
-  rescue
+  rescue StandardError
     super
   end
 
@@ -1559,7 +1556,7 @@ class Project < ApplicationRecord
     repository.after_create
 
     true
-  rescue => err
+  rescue StandardError => err
     Gitlab::ErrorTracking.track_exception(err, project: { id: id, full_path: full_path, disk_path: disk_path })
     errors.add(:base, _('Failed to create repository'))
     false

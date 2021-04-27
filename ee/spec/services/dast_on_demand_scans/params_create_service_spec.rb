@@ -7,6 +7,9 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
+  let(:excluded_urls) { dast_site_profile.excluded_urls.join(',') }
+  let(:target_url) { dast_site_profile.dast_site.url }
+
   let(:params) { { dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile } }
 
   subject { described_class.new(container: project, params: params).execute }
@@ -45,8 +48,8 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
             auth_url: dast_site_profile.auth_url,
             branch: project.default_branch,
             dast_profile: nil,
-            excluded_urls: dast_site_profile.excluded_urls.join(','),
-            target_url: dast_site_profile.dast_site.url
+            excluded_urls: excluded_urls,
+            target_url: target_url
           )
         end
       end
@@ -62,12 +65,12 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
             auth_url: dast_site_profile.auth_url,
             branch: project.default_branch,
             dast_profile: nil,
-            excluded_urls: dast_site_profile.excluded_urls.join(','),
+            excluded_urls: excluded_urls,
             full_scan_enabled: false,
             show_debug_messages: false,
             spider_timeout: nil,
             target_timeout: nil,
-            target_url: dast_site_profile.dast_site.url,
+            target_url: target_url,
             use_ajax_spider: false
           )
         end
@@ -99,14 +102,27 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
           expect(subject.payload).to eq(
             branch: project.default_branch,
             dast_profile: nil,
-            excluded_urls: dast_site_profile.excluded_urls.join(','),
+            excluded_urls: excluded_urls,
             full_scan_enabled: false,
             show_debug_messages: false,
             spider_timeout: nil,
             target_timeout: nil,
-            target_url: dast_site_profile.dast_site.url,
+            target_url: target_url,
             use_ajax_spider: false
           )
+        end
+      end
+
+      context 'when target_type=api' do
+        let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project, target_type: :api) }
+
+        it 'returns params including the api_specification_url and omitting the target_url' do
+          expected_payload = hash_including(
+            api_specification_url: target_url,
+            api_host_override: URI(target_url).host
+          )
+
+          expect(subject.payload).to match(expected_payload).and exclude(:target_url)
         end
       end
     end
@@ -124,12 +140,12 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
           branch: dast_profile.branch_name,
           auth_url: dast_site_profile.auth_url,
           dast_profile: dast_profile,
-          excluded_urls: dast_site_profile.excluded_urls.join(','),
+          excluded_urls: excluded_urls,
           full_scan_enabled: false,
           show_debug_messages: false,
           spider_timeout: nil,
           target_timeout: nil,
-          target_url: dast_site_profile.dast_site.url,
+          target_url: target_url,
           use_ajax_spider: false
         )
       end

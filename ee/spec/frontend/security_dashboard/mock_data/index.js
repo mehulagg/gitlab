@@ -202,6 +202,7 @@ export const mockVulnerableProjectsInstance = () => ({
           {
             id: 'gid://gitlab/Project/2',
             name: 'Gitlab Shell',
+            nameWithNamespace: 'Group / Gitlab Shell',
           },
         ],
       },

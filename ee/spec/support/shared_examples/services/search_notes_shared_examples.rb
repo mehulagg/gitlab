@@ -3,6 +3,7 @@
 RSpec.shared_examples 'search notes shared examples' do
   context 'notes confidentiality', :elastic, :sidekiq_inline do
     let_it_be(:user) { create(:user) }
+
     let(:commit_id) { noteable.is_a?(Commit) ? noteable.id : nil }
     let(:noteable_id) { noteable.is_a?(Issuable) ? noteable.id : nil }
     let!(:not_confidential_note) { create(:note, confidential: false, noteable_id: noteable_id, commit_id: commit_id, noteable_type: noteable.class.name, project: noteable.project, note: 'note 1') }

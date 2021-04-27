@@ -141,9 +141,9 @@ module GroupsHelper
   def projects_lfs_status(group)
     lfs_status =
       if group.lfs_enabled?
-        group.projects.select(&:lfs_enabled?).size
+        group.projects.count(&:lfs_enabled?)
       else
-        group.projects.reject(&:lfs_enabled?).size
+        group.projects.count { |project| !project.lfs_enabled? }
       end
 
     size = group.projects.size
@@ -206,10 +206,9 @@ module GroupsHelper
   end
 
   def show_invite_banner?(group)
-    Feature.enabled?(:invite_your_teammates_banner_a, group) &&
-      can?(current_user, :admin_group, group) &&
-      !just_created? &&
-      !multiple_members?(group)
+    can?(current_user, :admin_group, group) &&
+    !just_created? &&
+    !multiple_members?(group)
   end
 
   def render_setting_to_allow_project_access_token_creation?(group)
@@ -231,7 +230,7 @@ module GroupsHelper
   end
 
   def multiple_members?(group)
-    group.member_count > 1
+    group.member_count > 1 || group.members_with_parents.count > 1
   end
 
   def get_group_sidebar_links

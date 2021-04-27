@@ -3,14 +3,16 @@ import { propsUnion } from '~/vue_shared/components/lib/utils/props_utils';
 import {
   REPORT_TYPE_SAST,
   REPORT_TYPE_DAST_PROFILES,
+  REPORT_TYPE_SECRET_DETECTION,
 } from '~/vue_shared/security_reports/constants';
 import StatusDastProfiles from './status_dast_profiles.vue';
 import StatusGeneric from './status_generic.vue';
-import StatusSast from './status_sast.vue';
+import StatusViewHistory from './status_view_history.vue';
 
 const scannerComponentMap = {
-  [REPORT_TYPE_SAST]: StatusSast,
+  [REPORT_TYPE_SAST]: StatusViewHistory,
   [REPORT_TYPE_DAST_PROFILES]: StatusDastProfiles,
+  [REPORT_TYPE_SECRET_DETECTION]: StatusViewHistory,
 };
 
 export default {

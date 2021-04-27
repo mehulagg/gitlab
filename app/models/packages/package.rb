@@ -74,6 +74,7 @@ class Packages::Package < ApplicationRecord
 
   enum status: { default: 0, hidden: 1, processing: 2, error: 3 }
 
+  scope :for_projects, ->(project_ids) { where(project_id: project_ids) }
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }
   scope :with_normalized_pypi_name, ->(name) { where("LOWER(regexp_replace(name, '[-_.]+', '-', 'g')) = ?", name.downcase) }
@@ -121,14 +122,14 @@ class Packages::Package < ApplicationRecord
   scope :select_distinct_name, -> { select(:name).distinct }
 
   # Sorting
-  scope :order_created, -> { reorder('created_at ASC') }
-  scope :order_created_desc, -> { reorder('created_at DESC') }
-  scope :order_name, -> { reorder('name ASC') }
-  scope :order_name_desc, -> { reorder('name DESC') }
-  scope :order_version, -> { reorder('version ASC') }
-  scope :order_version_desc, -> { reorder('version DESC') }
-  scope :order_type, -> { reorder('package_type ASC') }
-  scope :order_type_desc, -> { reorder('package_type DESC') }
+  scope :order_created, -> { reorder(created_at: :asc) }
+  scope :order_created_desc, -> { reorder(created_at: :desc) }
+  scope :order_name, -> { reorder(name: :asc) }
+  scope :order_name_desc, -> { reorder(name: :desc) }
+  scope :order_version, -> { reorder(version: :asc) }
+  scope :order_version_desc, -> { reorder(version: :desc) }
+  scope :order_type, -> { reorder(package_type: :asc) }
+  scope :order_type_desc, -> { reorder(package_type: :desc) }
   scope :order_project_name, -> { joins(:project).reorder('projects.name ASC') }
   scope :order_project_name_desc, -> { joins(:project).reorder('projects.name DESC') }
   scope :order_project_path, -> { joins(:project).reorder('projects.path ASC, id ASC') }
@@ -136,14 +137,6 @@ class Packages::Package < ApplicationRecord
   scope :order_by_package_file, -> { joins(:package_files).order('packages_package_files.created_at ASC') }
 
   after_commit :update_composer_cache, on: :destroy, if: -> { composer? }
-
-  def self.for_projects(projects)
-    unless Feature.enabled?(:maven_packages_group_level_improvements, default_enabled: :yaml)
-      return none unless projects.any?
-    end
-
-    where(project_id: projects)
-  end
 
   def self.only_maven_packages_with_path(path, use_cte: false)
     if use_cte && Feature.enabled?(:maven_metadata_by_path_with_optimization_fence, default_enabled: :yaml)

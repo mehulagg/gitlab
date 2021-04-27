@@ -1,4 +1,5 @@
 <script>
+import { GlFormGroup, GlFormInput } from '@gitlab/ui';
 import { groupBy, isNumber } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import { isSafeURL } from '~/lib/utils/url_utility';
@@ -27,10 +28,12 @@ function mapServerResponseToValidationErrors(messages) {
 
 export default {
   components: {
+    ApproverTypeSelect,
     ApproversList,
     ApproversSelect,
     BranchesSelect,
-    ApproverTypeSelect,
+    GlFormGroup,
+    GlFormInput,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -92,10 +95,12 @@ export default {
     groupIds() {
       return this.groups.map((x) => x.id);
     },
-    invalidApprovalGateUrl() {
+    invalidStatusChecksUrl() {
       if (this.serverValidationErrors.includes('External url has already been taken')) {
         return this.$options.i18n.validations.externalUrlTaken;
-      } else if (!this.externalUrl || !isSafeURL(this.externalUrl)) {
+      }
+
+      if (!this.externalUrl || !isSafeURL(this.externalUrl)) {
         return this.$options.i18n.validations.invalidUrl;
       }
 
@@ -154,7 +159,7 @@ export default {
       );
     },
     isValidExternalApprovalRule() {
-      return this.isValidName && this.isValidBranches && this.isValidApprovalGateUrl;
+      return this.isValidName && this.isValidBranches && this.isValidStatusChecksUrl;
     },
     isValidName() {
       return !this.showValidation || !this.invalidName;
@@ -168,8 +173,8 @@ export default {
     isValidApprovers() {
       return !this.showValidation || !this.invalidApprovers;
     },
-    isValidApprovalGateUrl() {
-      return !this.showValidation || !this.invalidApprovalGateUrl;
+    isValidStatusChecksUrl() {
+      return !this.showValidation || !this.invalidStatusChecksUrl;
     },
     isMultiSubmission() {
       return this.settings.allowMultiRule && !this.isFallbackSubmission;
@@ -229,10 +234,6 @@ export default {
         externalUrl: this.externalUrl,
       };
     },
-    approvalGateLabel() {
-      const { approvalGate, addApprovalGate } = this.$options.i18n.form;
-      return this.isEditing ? approvalGate : addApprovalGate;
-    },
   },
   watch: {
     approversToAdd(value) {
@@ -266,7 +267,7 @@ export default {
      * - Single rule?
      * - Multi rule?
      */
-    submit() {
+    async submit() {
       let submission;
 
       this.serverValidationErrors = [];
@@ -275,16 +276,18 @@ export default {
       const valid = this.isExternalApprovalRule ? this.isValidExternalApprovalRule : this.isValid;
 
       if (!valid) {
-        submission = Promise.resolve();
+        submission = Promise.resolve;
       } else if (this.isFallbackSubmission) {
-        submission = this.submitFallback();
+        submission = this.submitFallback;
       } else if (!this.isMultiSubmission) {
-        submission = this.submitSingleRule();
+        submission = this.submitSingleRule;
       } else {
-        submission = this.submitRule();
+        submission = this.submitRule;
       }
 
-      submission.catch((failureResponse) => {
+      try {
+        await submission();
+      } catch (failureResponse) {
         if (this.isExternalApprovalRule) {
           this.serverValidationErrors = failureResponse?.response?.data?.message || [];
         } else {
@@ -292,9 +295,7 @@ export default {
             failureResponse?.response?.data?.message || {},
           );
         }
-      });
-
-      return submission;
+      }
     },
     /**
      * Submit the rule, by either put-ing or post-ing.
@@ -304,10 +305,13 @@ export default {
         const data = this.externalRuleSubmissionData;
         return data.id ? this.putExternalApprovalRule(data) : this.postExternalApprovalRule(data);
       }
+
       const data = this.submissionData;
+
       if (!this.settings.allowMultiRule && this.settings.prefix === 'mr-edit') {
         return data.id ? this.putRule(data) : this.postRegularRule(data);
       }
+
       return data.id ? this.putRule(data) : this.postRule(data);
     },
     /**
@@ -380,9 +384,9 @@ export default {
   },
   i18n: {
     form: {
-      addApprovalGate: s__('ApprovalRule|Add approvel gate'),
-      approvalGate: s__('ApprovalRule|Approvel gate'),
-      approvalGateDescription: s__('ApprovalRule|Invoke an external API as part of the approvals'),
+      addStatusChecks: s__('StatusCheck|API to check'),
+      statusChecks: s__('StatusCheck|Status to check'),
+      statusChecksDescription: s__('StatusCheck|Invoke an external API as part of the approvals'),
       approvalsRequiredLabel: s__('ApprovalRule|Approvals required'),
       approvalTypeLabel: s__('ApprovalRule|Approver Type'),
       approversLabel: s__('ApprovalRule|Add approvers'),
@@ -409,93 +413,99 @@ export default {
   },
   approverTypeOptions: [
     { type: RULE_TYPE_USER_OR_GROUP_APPROVER, text: s__('ApprovalRule|Users or groups') },
-    { type: RULE_TYPE_EXTERNAL_APPROVAL, text: s__('ApprovalRule|Approval service API') },
+    { type: RULE_TYPE_EXTERNAL_APPROVAL, text: s__('ApprovalRule|Status check') },
   ],
 };
 </script>
 
 <template>
   <form novalidate @submit.prevent.stop="submit">
-    <div v-if="showName" class="form-group gl-form-group">
-      <label class="col-form-label">{{ $options.i18n.form.nameLabel }}</label>
-      <input
+    <gl-form-group
+      v-if="showName"
+      :label="$options.i18n.form.nameLabel"
+      :description="$options.i18n.form.nameDescription"
+      :state="isValidName"
+      :invalid-feedback="invalidName"
+      data-testid="name-group"
+    >
+      <gl-form-input
         v-model="name"
-        :class="{ 'is-invalid': !isValidName }"
         :disabled="isNameDisabled"
-        class="gl-form-input form-control"
-        name="name"
-        type="text"
+        :state="isValidName"
         data-qa-selector="rule_name_field"
+        data-testid="name"
       />
-      <span class="invalid-feedback">{{ isValidName ? '' : invalidName }}</span>
-      <small class="form-text text-gl-muted">
-        {{ $options.i18n.form.nameDescription }}
-      </small>
-    </div>
-    <div v-if="showProtectedBranch" class="form-group gl-form-group">
-      <label class="col-form-label">{{ $options.i18n.form.protectedBranchLabel }}</label>
+    </gl-form-group>
+    <gl-form-group
+      v-if="showProtectedBranch"
+      :label="$options.i18n.form.protectedBranchLabel"
+      :description="$options.i18n.form.protectedBranchDescription"
+      :state="isValidBranches"
+      :invalid-feedback="invalidBranches"
+      data-testid="branches-group"
+    >
       <branches-select
         v-model="branchesToAdd"
         :project-id="settings.projectId"
         :is-invalid="!isValidBranches"
         :init-rule="rule"
       />
-      <span class="invalid-feedback">{{ isValidBranches ? '' : invalidBranches }}</span>
-      <small class="form-text text-gl-muted">
-        {{ $options.i18n.form.protectedBranchDescription }}
-      </small>
-    </div>
-    <div v-if="showApproverTypeSelect" class="form-group gl-form-group">
-      <label class="col-form-label">{{ $options.i18n.form.approvalTypeLabel }}</label>
+    </gl-form-group>
+    <gl-form-group v-if="showApproverTypeSelect" :label="$options.i18n.form.approvalTypeLabel">
       <approver-type-select
         v-model="ruleType"
         :approver-type-options="$options.approverTypeOptions"
       />
-    </div>
-    <div v-if="!isExternalApprovalRule" class="form-group gl-form-group">
-      <label class="col-form-label">{{ $options.i18n.form.approvalsRequiredLabel }}</label>
-      <input
-        v-model.number="approvalsRequired"
-        :class="{ 'is-invalid': !isValidApprovalsRequired }"
-        class="gl-form-input form-control mw-6em"
-        name="approvals_required"
-        type="number"
-        :min="minApprovalsRequired"
-        data-qa-selector="approvals_required_field"
-      />
-      <span class="invalid-feedback">{{
-        isValidApprovalsRequired ? '' : invalidApprovalsRequired
-      }}</span>
-    </div>
-    <div v-if="!isExternalApprovalRule" class="form-group gl-form-group">
-      <label class="col-form-label">{{ $options.i18n.form.approversLabel }}</label>
-      <approvers-select
-        v-model="approversToAdd"
-        :project-id="settings.projectId"
-        :skip-user-ids="userIds"
-        :skip-group-ids="groupIds"
-        :is-invalid="!isValidApprovers"
-        data-qa-selector="member_select_field"
-      />
-      <span class="invalid-feedback">{{ isValidApprovers ? '' : invalidApprovers }}</span>
-    </div>
-    <div v-if="isExternalApprovalRule" class="form-group gl-form-group">
-      <label class="col-form-label">{{ approvalGateLabel }}</label>
-      <input
+    </gl-form-group>
+    <template v-if="!isExternalApprovalRule">
+      <gl-form-group
+        :label="$options.i18n.form.approvalsRequiredLabel"
+        :state="isValidApprovalsRequired"
+        :invalid-feedback="invalidApprovalsRequired"
+        data-testid="approvals-required-group"
+      >
+        <gl-form-input
+          v-model.number="approvalsRequired"
+          :state="isValidApprovalsRequired"
+          :min="minApprovalsRequired"
+          class="mw-6em"
+          type="number"
+          data-testid="approvals-required"
+          data-qa-selector="approvals_required_field"
+        />
+      </gl-form-group>
+      <gl-form-group
+        :label="$options.i18n.form.approversLabel"
+        :state="isValidApprovers"
+        :invalid-feedback="invalidApprovers"
+        data-testid="approvers-group"
+      >
+        <approvers-select
+          v-model="approversToAdd"
+          :project-id="settings.projectId"
+          :skip-user-ids="userIds"
+          :skip-group-ids="groupIds"
+          :is-invalid="!isValidApprovers"
+          data-qa-selector="member_select_field"
+        />
+      </gl-form-group>
+    </template>
+    <gl-form-group
+      v-if="isExternalApprovalRule"
+      :label="$options.i18n.form.addStatusChecks"
+      :description="$options.i18n.form.statusChecksDescription"
+      :state="isValidStatusChecksUrl"
+      :invalid-feedback="invalidStatusChecksUrl"
+      data-testid="status-checks-url-group"
+    >
+      <gl-form-input
         v-model="externalUrl"
-        :class="{ 'is-invalid': !isValidApprovalGateUrl }"
-        class="gl-form-input form-control"
-        name="approval_gate_url"
+        :state="isValidStatusChecksUrl"
         type="url"
         data-qa-selector="external_url_field"
+        data-testid="status-checks-url"
       />
-      <span class="invalid-feedback">{{
-        isValidApprovalGateUrl ? '' : invalidApprovalGateUrl
-      }}</span>
-      <small class="form-text text-gl-muted">
-        {{ $options.i18n.form.approvalGateDescription }}
-      </small>
-    </div>
+    </gl-form-group>
     <div v-if="!isExternalApprovalRule" class="bordered-box overflow-auto h-12em">
       <approvers-list v-model="approvers" />
     </div>

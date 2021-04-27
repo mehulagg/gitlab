@@ -60,8 +60,8 @@ export default {
   data() {
     const {
       profileName = '',
-      spiderTimeout = '',
-      targetTimeout = '',
+      spiderTimeout = 1,
+      targetTimeout = 60,
       scanType = SCAN_TYPE.PASSIVE,
       useAjaxSpider = false,
       showDebugMessages = false,

@@ -1,4 +1,5 @@
 - return unless project_nav_tab? :requirements
+- refactoring_enabled = Feature.enabled?(:sidebar_refactor, current_user)
 
 = nav_link(path: 'requirements#index') do
   = link_to project_requirements_management_requirements_path(project), class: 'qa-project-requirements-link' do
@@ -6,12 +7,13 @@
       = sprite_icon('requirements')
     %span.nav-item-name
       = _('Requirements')
-  - if Feature.disabled?(:project_sidebar_refactor)
-    %ul.sidebar-sub-level-items
-      = nav_link(path: 'requirements#index', html_options: { class: "fly-out-top-item" } ) do
-        = link_to project_requirements_management_requirements_path(project) do
-          %strong.fly-out-top-item-name= _('Requirements')
+  %ul.sidebar-sub-level-items{ class: ('is-fly-out-only' if refactoring_enabled) }
+    = nav_link(path: 'requirements#index', html_options: { class: "fly-out-top-item" } ) do
+      = link_to project_requirements_management_requirements_path(project) do
+        %strong.fly-out-top-item-name= _('Requirements')
+    - if !refactoring_enabled
       %li.divider.fly-out-top-item
       = nav_link(path: 'requirements#index', html_options: { class: 'home' }) do
         = link_to project_requirements_management_requirements_path(project), title: 'List' do
           %span= _('List')
+- refactoring_enabled = Feature.enabled?(:sidebar_refactor, current_user)

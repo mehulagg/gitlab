@@ -89,7 +89,7 @@ module QA
           Page::Group::Menu.perform(&:go_to_ldap_sync_settings)
 
           EE::Page::Group::Settings::LDAPSync.perform do |settings|
-            settings.set_sync_method('LDAP Group cn')
+            settings.set_ldap_group_sync_method
             settings.set_group_cn('Engineering')
             settings.click_add_sync_button
           end

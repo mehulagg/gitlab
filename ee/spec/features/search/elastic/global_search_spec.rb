@@ -102,6 +102,23 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
         expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
       end
     end
+
+    context 'searching commits' do
+      let(:path_for_one) { search_path(search: '*', scope: 'commits', per_page: 1) }
+      let(:path_for_multiple) { search_path(search: '*', scope: 'commits', per_page: 5) }
+
+      it 'avoids N+1 database queries' do
+        project.repository.index_commits_and_blobs
+
+        ensure_elasticsearch_index!
+
+        control = ActiveRecord::QueryRecorder.new { visit path_for_one }
+        expect(page).to have_css('.results') # Confirm there are search results to prevent false positives
+
+        expect { visit path_for_multiple }.not_to exceed_query_limit(control.count).with_threshold(2) # We still have users N+1 here
+        expect(page).to have_css('.results') # Confirm there are search results to prevent false positives
+      end
+    end
   end
 
   describe 'I search through the issues and I see pagination' do

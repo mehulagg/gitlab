@@ -131,7 +131,7 @@ module API
           ::EE::Gitlab::Scim::ReprovisionService.new(identity).execute
 
           true
-        rescue => e
+        rescue StandardError => e
           logger.error(identity: identity, error: e.class.name, message: e.message, source: "#{__FILE__}:#{__LINE__}")
 
           false

@@ -7,6 +7,7 @@ RSpec.describe Projects::TransferService do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
+
   let(:project) { create(:project, :repository, :public, :legacy_storage, namespace: user.namespace) }
 
   subject { described_class.new(project, user) }
@@ -74,7 +75,7 @@ RSpec.describe Projects::TransferService do
 
       it 'reindexes the project and associated issues and notes' do
         expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
-        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues notes])
+        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues merge_requests notes])
 
         subject.execute(group)
       end

@@ -33,6 +33,7 @@ module EE
         scoped_labels: current_board_parent.feature_available?(:scoped_labels)&.to_s,
         can_update: can_update?.to_s,
         can_admin_list: can_admin_list?.to_s,
+        disabled: disabled?.to_s,
         emails_disabled: current_board_parent.emails_disabled?.to_s
       }
 
@@ -56,6 +57,13 @@ module EE
     override :board_base_url
     def board_base_url
       return group_epic_boards_url(@group) if board.is_a?(::Boards::EpicBoard)
+
+      super
+    end
+
+    override :disabled?
+    def disabled?
+      return false if board.is_a?(::Boards::EpicBoard)
 
       super
     end

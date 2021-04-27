@@ -50,7 +50,7 @@ export default {
     <p>
       {{
         s__(
-          'CycleAnalytics|The total time spent in the selected stage for the items that were completed on each date. Data limited to the last 500 items.',
+          'CycleAnalytics|The average time spent in the selected stage for the items that were completed on each date. Data limited to the last 500 items.',
         )
       }}
     </p>
@@ -63,7 +63,7 @@ export default {
     <scatterplot
       v-if="hasData"
       :x-axis-title="s__('CycleAnalytics|Date')"
-      :y-axis-title="s__('CycleAnalytics|Total days to completion')"
+      :y-axis-title="s__('CycleAnalytics|Average days to completion')"
       :tooltip-date-format="$options.durationChartTooltipDateFormat"
       :scatter-data="durationChartPlottableData"
     />

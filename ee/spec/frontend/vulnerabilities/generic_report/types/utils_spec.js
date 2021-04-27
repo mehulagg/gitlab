@@ -1,36 +1,33 @@
-import {
-  REPORT_TYPE_LIST,
-  REPORT_TYPE_URL,
-} from 'ee/vulnerabilities/components/generic_report/types/constants';
+import { REPORT_TYPES } from 'ee/vulnerabilities/components/generic_report/types/constants';
 import { filterTypesAndLimitListDepth } from 'ee/vulnerabilities/components/generic_report/types/utils';
 
 const MOCK_REPORT_TYPE_UNSUPPORTED = 'MOCK_REPORT_TYPE_UNSUPPORTED';
 
 const TEST_DATA = {
   url: {
-    type: REPORT_TYPE_URL,
+    type: REPORT_TYPES.url,
     name: 'url1',
   },
   list: {
-    type: REPORT_TYPE_LIST,
+    type: REPORT_TYPES.list,
     name: 'rootList',
     items: [
-      { type: REPORT_TYPE_URL, name: 'url2' },
+      { type: REPORT_TYPES.url, name: 'url2' },
       {
-        type: REPORT_TYPE_LIST,
+        type: REPORT_TYPES.list,
         name: 'listDepthOne',
         items: [
-          { type: REPORT_TYPE_URL, name: 'url3' },
+          { type: REPORT_TYPES.url, name: 'url3' },
           {
-            type: REPORT_TYPE_LIST,
+            type: REPORT_TYPES.list,
             name: 'listDepthTwo',
             items: [
-              { type: REPORT_TYPE_URL, name: 'url4' },
+              { type: REPORT_TYPES.url, name: 'url4' },
               {
-                type: REPORT_TYPE_LIST,
+                type: REPORT_TYPES.list,
                 name: 'listDepthThree',
                 items: [
-                  { type: REPORT_TYPE_URL, name: 'url5' },
+                  { type: REPORT_TYPES.url, name: 'url5' },
                   { type: MOCK_REPORT_TYPE_UNSUPPORTED },
                 ],
               },
@@ -52,7 +49,7 @@ describe('ee/vulnerabilities/components/generic_report/types/utils', () => {
     const getListWithDepthTwo = (reportsData) => reportsData.list.items[1].items[1];
     const includesType = (type) => (items) =>
       items.find(({ type: currentType }) => currentType === type) !== undefined;
-    const includesListItem = includesType(REPORT_TYPE_LIST);
+    const includesListItem = includesType(REPORT_TYPES.list);
     const includesUnsupportedType = includesType(MOCK_REPORT_TYPE_UNSUPPORTED);
 
     describe.each`

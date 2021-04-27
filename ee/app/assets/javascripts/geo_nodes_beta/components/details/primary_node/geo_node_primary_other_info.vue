@@ -9,6 +9,7 @@ export default {
   i18n: {
     otherInformation: __('Other information'),
     replicationSlotWAL: s__('Geo|Replication slot WAL'),
+    replicationSlots: s__('Geo|Replication slots'),
   },
   components: {
     GlCard,
@@ -26,7 +27,7 @@ export default {
     },
     replicationSlots() {
       return {
-        title: s__('Geo|Replication slots'),
+        title: this.$options.i18n.replicationSlots,
         values: {
           total: this.node.replicationSlotsCount || 0,
           success: this.node.replicationSlotsUsedCount || 0,

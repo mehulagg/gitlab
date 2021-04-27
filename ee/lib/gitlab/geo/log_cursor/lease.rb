@@ -38,7 +38,7 @@ module Gitlab
             logger.debug('Finished fetching events.')
 
             renew!
-          rescue => e
+          rescue StandardError => e
             logger.error("Lease canceled due to error: #{e.message}")
 
             Gitlab::ExclusiveLease.cancel(LEASE_KEY, lease[:uuid])

@@ -228,9 +228,11 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         find('.merge-request').click_on 'Edit'
         open_modal
 
-        expect(page).to have_field 'approvals_required', exact: 2
+        within_fieldset('Approvals required') do
+          expect(find_field.value).to eq '2'
 
-        fill_in 'approvals_required', with: '3'
+          fill_in with: '3'
+        end
 
         click_button 'Update approval rule'
         click_on('Save changes')
@@ -245,7 +247,9 @@ RSpec.describe 'Merge request > User sets approvers', :js do
 
         open_modal
 
-        expect(page).to have_field 'approvals_required', exact: 3
+        within_fieldset('Approvals required') do
+          expect(find_field.value).to eq '3'
+        end
       end
     end
   end

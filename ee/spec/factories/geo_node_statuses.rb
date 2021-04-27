@@ -11,10 +11,6 @@ FactoryBot.define do
       attachments_failed_count { 13 }
       attachments_synced_count { 141 }
       attachments_synced_missing_on_primary_count { 89 }
-      lfs_objects_count { 256 }
-      lfs_objects_failed_count { 12 }
-      lfs_objects_synced_count { 123 }
-      lfs_objects_synced_missing_on_primary_count { 90 }
       job_artifacts_count { 580 }
       job_artifacts_failed_count { 3 }
       job_artifacts_synced_count { 577 }
@@ -76,7 +72,6 @@ FactoryBot.define do
 
     trait :replicated_and_verified do
       attachments_failed_count { 0 }
-      lfs_objects_failed_count { 0 }
       job_artifacts_failed_count { 0 }
       container_repositories_failed_count { 0 }
       design_repositories_failed_count { 0 }
@@ -97,7 +92,6 @@ FactoryBot.define do
       wikis_checksum_total_count { 10 }
       wikis_verified_count { 10 }
       wikis_verification_total_count { 10 }
-      lfs_objects_synced_count { 10 }
       job_artifacts_synced_count { 10 }
       attachments_synced_count { 10 }
       replication_slots_used_count { 10 }
@@ -106,7 +100,6 @@ FactoryBot.define do
 
       repositories_count { 10 }
       wikis_count { 10 }
-      lfs_objects_count { 10 }
       job_artifacts_count { 10 }
       attachments_count { 10 }
       replication_slots_count { 10 }

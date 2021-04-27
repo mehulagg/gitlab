@@ -1,9 +1,9 @@
 <script>
 import { GlSprintf } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { STEPS } from 'ee/subscriptions/constants';
 import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import { sprintf, s__ } from '~/locale';
-import { STEPS } from '../../constants';
 import Zuora from './zuora.vue';
 
 export default {

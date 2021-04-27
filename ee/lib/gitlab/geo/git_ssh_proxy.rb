@@ -63,7 +63,7 @@ module Gitlab
         resp.body = remove_upload_pack_http_service_fragment_from(resp.body) if resp.is_a?(Net::HTTPSuccess)
 
         APIResponse.from_http_response(resp, primary_repo)
-      rescue => e
+      rescue StandardError => e
         handle_exception(e)
       end
 
@@ -78,7 +78,7 @@ module Gitlab
         resp = post(url, decoded_response, headers)
 
         APIResponse.from_http_response(resp, primary_repo)
-      rescue => e
+      rescue StandardError => e
         handle_exception(e)
       end
 
@@ -93,7 +93,7 @@ module Gitlab
         resp.body = remove_receive_pack_http_service_fragment_from(resp.body) if resp.is_a?(Net::HTTPSuccess)
 
         APIResponse.from_http_response(resp, primary_repo)
-      rescue => e
+      rescue StandardError => e
         handle_exception(e)
       end
 
@@ -107,7 +107,7 @@ module Gitlab
         resp = post(url, decoded_response, headers)
 
         APIResponse.from_http_response(resp, primary_repo)
-      rescue => e
+      rescue StandardError => e
         handle_exception(e)
       end
 

@@ -160,7 +160,7 @@ RSpec.describe UpdateAllMirrorsWorker do
     context 'when the instance checks namespace plans' do
       def scheduled_mirror(at:, licensed:, public: false, subgroup: nil)
         group_args = [:group, :public, subgroup && :nested].compact
-        namespace = create(*group_args)
+        namespace = create(*group_args) # rubocop:disable Rails/SaveBang
         project = create(:project, :public, :mirror, namespace: namespace)
 
         create(:gitlab_subscription, (licensed ? :bronze : :free), namespace: namespace.root_ancestor)

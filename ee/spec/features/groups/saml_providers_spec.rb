@@ -80,7 +80,7 @@ RSpec.describe 'SAML provider settings' do
       it 'allows provider to be disabled', :js do
         visit group_saml_providers_path(group)
 
-        find('.js-group-saml-enabled-toggle-area button').click
+        uncheck 'Enable SAML authentication for this group'
 
         expect { submit }.to change { saml_provider.reload.enabled }.to false
       end
@@ -97,7 +97,7 @@ RSpec.describe 'SAML provider settings' do
       it 'updates the enforced sso setting', :js do
         visit group_saml_providers_path(group)
 
-        find('.js-group-saml-enforced-sso-toggle').click
+        check 'Enforce SSO-only authentication for web activity for this group'
 
         expect { submit }.to change { saml_provider.reload.enforced_sso }.to(true)
       end
@@ -111,8 +111,8 @@ RSpec.describe 'SAML provider settings' do
         it 'updates the enforced_group_managed_accounts flag' do
           visit group_saml_providers_path(group)
 
-          find('.js-group-saml-enforced-sso-toggle').click
-          find('.js-group-saml-enforced-group-managed-accounts-toggle').click
+          check 'Enforce SSO-only authentication for web activity for this group'
+          check 'Enforce users to have dedicated group-managed accounts for this group'
 
           expect { submit }.to change { saml_provider.reload.enforced_group_managed_accounts }.to(true)
         end
@@ -120,9 +120,9 @@ RSpec.describe 'SAML provider settings' do
         it 'updates the prohibited_outer_forks flag' do
           visit group_saml_providers_path(group)
 
-          find('.js-group-saml-enforced-sso-toggle').click
-          find('.js-group-saml-enforced-group-managed-accounts-toggle').click
-          find('.js-group-saml-prohibited-outer-forks-toggle').click
+          check 'Enforce SSO-only authentication for web activity for this group'
+          check 'Enforce users to have dedicated group-managed accounts for this group'
+          check 'Prohibit outer forks for this group'
 
           expect { submit }.to change { saml_provider.reload.prohibited_outer_forks }.to(true)
         end
@@ -134,8 +134,8 @@ RSpec.describe 'SAML provider settings' do
 
           visit group_saml_providers_path(group)
 
-          expect(page).not_to have_selector('.js-group-saml-enforced-group-managed-accounts-toggle')
-          expect(page).not_to have_selector('.js-group-saml-prohibited-outer-forks-toggle')
+          expect(page).not_to have_field('Enforce users to have dedicated group-managed accounts for this group')
+          expect(page).not_to have_field('Prohibit outer forks for this group')
         end
       end
     end

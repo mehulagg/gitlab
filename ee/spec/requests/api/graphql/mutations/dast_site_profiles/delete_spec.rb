@@ -25,7 +25,7 @@ RSpec.describe 'Creating a DAST Site Profile' do
 
     context 'when there is an issue deleting the dast_site_profile' do
       before do
-        allow_next_instance_of(::DastSiteProfiles::DestroyService) do |service|
+        allow_next_instance_of(::AppSec::Dast::SiteProfiles::DestroyService) do |service|
           allow(service).to receive(:execute).and_return(double(success?: false, errors: ['Name is weird']))
         end
       end

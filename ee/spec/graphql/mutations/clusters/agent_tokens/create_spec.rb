@@ -7,6 +7,7 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
 
   let_it_be(:cluster_agent) { create(:cluster_agent) }
   let_it_be(:user) { create(:user) }
+
   let(:context) do
     GraphQL::Query::Context.new(
       query: OpenStruct.new(schema: nil),

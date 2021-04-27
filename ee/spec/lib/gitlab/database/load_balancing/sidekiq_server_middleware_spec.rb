@@ -31,11 +31,31 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       end
     end
 
+    shared_examples_for 'job marked with chosen database' do
+      it 'yields and sets database chosen', :aggregate_failures do
+        expect { |b| middleware.call(worker, job, double(:queue), &b) }.to yield_control
+
+        expect(job[:database_chosen]).to eq('primary')
+      end
+    end
+
     shared_examples_for 'stick to the primary' do
       it 'sticks to the primary' do
         middleware.call(worker, job, double(:queue)) do
           expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).to be_truthy
         end
+      end
+    end
+
+    shared_examples_for 'replica is up to date' do |location|
+      it 'do not stick to the primary', :aggregate_failures do
+        expect(middleware).to receive(:replica_caught_up?).with(location).and_return(true)
+
+        middleware.call(worker, job, double(:queue)) do
+          expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).not_to be_truthy
+        end
+
+        expect(job[:database_chosen]).to eq('replica')
       end
     end
 
@@ -50,43 +70,37 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
         include_examples 'stick to the primary'
       end
 
-      context 'database replica location is set' do
-        let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e', 'database_replica_location' => 'true' } }
+      context 'when database replica location is set' do
+        let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e', 'database_replica_location' => '0/D525E3A8' } }
 
-        it 'do not stick to the primary' do
-          middleware.call(worker, job, double(:queue)) do
-            expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).not_to be_truthy
-          end
-        end
-      end
-
-      context 'write was not performed' do
-        let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e' } }
-
-        it 'do not stick to the primary' do
-          middleware.call(worker, job, double(:queue)) do
-            expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).not_to be_truthy
-          end
-        end
-      end
-
-      context 'replica is up to date' do
         before do
           allow(middleware).to receive(:replica_caught_up?).and_return(true)
         end
 
-        it 'do not stick to the primary' do
-          middleware.call(worker, job, double(:queue)) do
-            expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).not_to be_truthy
-          end
+        it_behaves_like 'replica is up to date', '0/D525E3A8'
+      end
+
+      context 'when database primary location is set' do
+        let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e', 'database_write_location' => '0/D525E3A8' } }
+
+        before do
+          allow(middleware).to receive(:replica_caught_up?).and_return(true)
         end
+
+        it_behaves_like 'replica is up to date', '0/D525E3A8'
+      end
+
+      context 'when database location is not set' do
+        let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e' } }
+
+        it_behaves_like 'replica is up to date', nil
       end
     end
 
     let(:queue) { 'default' }
     let(:redis_pool) { Sidekiq.redis_pool }
     let(:worker) { worker_class.new }
-    let(:job) { { "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", 'primary_write_location' => '0/D525E3A8' } }
+    let(:job) { { "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e" } }
     let(:block) { 10 }
 
     before do
@@ -128,6 +142,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
           end
 
           include_examples 'stick to the primary'
+          include_examples 'job marked with chosen database'
         end
       end
     end
@@ -141,6 +156,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
         end
 
         include_examples 'stick to the primary'
+        include_examples 'job marked with chosen database'
       end
     end
   end

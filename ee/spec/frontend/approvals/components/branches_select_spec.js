@@ -9,7 +9,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 const TEST_DEFAULT_BRANCH = { name: 'Any branch' };
 const TEST_PROJECT_ID = '1';
 const TEST_PROTECTED_BRANCHES = [
-  { id: 1, name: 'master' },
+  { id: 1, name: 'main' },
   { id: 2, name: 'development' },
 ];
 const TEST_BRANCHES_SELECTIONS = [TEST_DEFAULT_BRANCH, ...TEST_PROTECTED_BRANCHES];
@@ -61,7 +61,7 @@ describe('Branches Select', () => {
           protectedBranches: [
             {
               id: 1,
-              name: 'master',
+              name: 'main',
             },
           ],
         },
@@ -70,10 +70,10 @@ describe('Branches Select', () => {
     );
     await waitForPromises();
 
-    expect(findDropdown().props('text')).toBe('master');
+    expect(findDropdown().props('text')).toBe('main');
     expect(
       findDropdownItems()
-        .filter((item) => item.text() === 'master')
+        .filter((item) => item.text() === 'main')
         .at(0)
         .props('isChecked'),
     ).toBe(true);
@@ -108,7 +108,7 @@ describe('Branches Select', () => {
     });
 
     it('fetches protected branches with no any branch if there is a search', async () => {
-      findSearch().vm.$emit('input', 'master');
+      findSearch().vm.$emit('input', 'main');
       await waitForPromises();
 
       expect(findDropdownItems()).toHaveLength(protectedBranchNames().length);

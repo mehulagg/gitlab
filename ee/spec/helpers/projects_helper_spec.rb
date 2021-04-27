@@ -655,7 +655,7 @@ RSpec.describe ProjectsHelper do
       allow(helper).to receive(:can?).and_return(true)
     end
 
-    context 'with the approval gate feature flag' do
+    context 'with the status check feature flag' do
       where(feature_flag_enabled: [true, false])
       with_them do
         before do

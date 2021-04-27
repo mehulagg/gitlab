@@ -67,12 +67,8 @@
     "enable_advanced_logs_querying": {
       "type": "boolean"
     },
-    "created_at": {
-      "type": "date"
-    },
-    "updated_at": {
-      "type": "date"
-    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
     "can_stop": {
       "type": "boolean"
     },

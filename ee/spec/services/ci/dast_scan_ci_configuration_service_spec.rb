@@ -12,6 +12,8 @@ RSpec.describe Ci::DastScanCiConfigurationService do
           spider_timeout: 1000,
           target_timeout: 100,
           target_url: 'https://gitlab.local',
+          api_specification_url: 'https://gitlab.local/api.json',
+          api_host_override: 'gitlab.local',
           use_ajax_spider: true,
           show_debug_messages: true,
           full_scan_enabled: true,
@@ -34,6 +36,8 @@ RSpec.describe Ci::DastScanCiConfigurationService do
           DAST_SPIDER_MINS: 1000
           DAST_TARGET_AVAILABILITY_TIMEOUT: 100
           DAST_WEBSITE: https://gitlab.local
+          DAST_API_SPECIFICATION: https://gitlab.local/api.json
+          DAST_API_HOST_OVERRIDE: gitlab.local
           DAST_USE_AJAX_SPIDER: 'true'
           DAST_DEBUG: 'true'
           DAST_FULL_SCAN_ENABLED: 'true'
@@ -45,12 +49,12 @@ RSpec.describe Ci::DastScanCiConfigurationService do
         YAML
       end
 
-      it 'return YAML configuration of the On-Demand DAST scan' do
+      it 'returns the YAML configuration of the On-Demand DAST scan' do
         expect(yaml_configuration).to eq(expected_yaml_configuration)
       end
     end
 
-    context 'when additional variables are provided' do
+    context 'when unknown variables are provided' do
       let(:params) do
         {
           target_url: 'https://gitlab.local',
@@ -75,12 +79,37 @@ RSpec.describe Ci::DastScanCiConfigurationService do
         YAML
       end
 
-      it 'return YAML configuration of the On-Demand DAST scan' do
+      it 'returns the YAML configuration of the On-Demand DAST scan' do
         expect(yaml_configuration).to eq(expected_yaml_configuration)
       end
     end
 
-    context 'when no variable is provided' do
+    context 'when a variable is set to nil' do
+      let(:params) do
+        {
+          target_url: 'https://gitlab.local',
+          api_specification_url: nil
+        }
+      end
+
+      let(:expected_yaml_configuration) do
+        <<~YAML
+        ---
+        stages:
+        - dast
+        include:
+        - template: DAST-On-Demand-Scan.gitlab-ci.yml
+        variables:
+          DAST_WEBSITE: https://gitlab.local
+        YAML
+      end
+
+      it 'returns the YAML configuration of the On-Demand DAST scan' do
+        expect(yaml_configuration).to eq(expected_yaml_configuration)
+      end
+    end
+
+    context 'when no variables are provided' do
       let(:params) { {} }
 
       let(:expected_yaml_configuration) do
@@ -94,7 +123,7 @@ RSpec.describe Ci::DastScanCiConfigurationService do
         YAML
       end
 
-      it 'return YAML configuration of the On-Demand DAST scan' do
+      it 'returns the YAML configuration of the On-Demand DAST scan' do
         expect(yaml_configuration).to eq(expected_yaml_configuration)
       end
     end

@@ -317,6 +317,29 @@ RSpec.describe 'geo rake tasks', :geo do
       let!(:primary_node) { create(:geo_node, :primary) }
       let!(:geo_event_log) { create(:geo_event_log) }
       let!(:geo_node_status) { build(:geo_node_status, :healthy, geo_node: current_node) }
+      let(:checks) do
+        [
+          /Name: /,
+          /URL: /,
+          /GitLab Version: /,
+          /Geo Role: /,
+          /Health Status: /,
+          /Sync Settings: /,
+          /Database replication lag: /,
+          /Repositories: /,
+          /Verified Repositories: /,
+          /Wikis: /,
+          /Verified Wikis: /,
+          /Attachments: /,
+          /CI job artifacts: /,
+          /Container repositories: /,
+          /Design repositories: /,
+          /Repositories Checked: /,
+          /Last event ID seen from primary: /,
+          /Last status report was: /
+        ] + Gitlab::Geo.verification_enabled_replicator_classes.map { |k| /#{k.replicable_title_plural} Verified:/ } +
+          Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural}:/ }
+      end
 
       before do
         stub_licensed_features(geo: true)
@@ -343,32 +366,23 @@ RSpec.describe 'geo rake tasks', :geo do
           expect { run_rake_task('geo:status') }.not_to output(/Health Status Summary/).to_stdout
         end
 
-        it 'prints messages for all the checks' do
-          checks = [
-            /Name: /,
-            /URL: /,
-            /GitLab Version: /,
-            /Geo Role: /,
-            /Health Status: /,
-            /Sync Settings: /,
-            /Database replication lag: /,
-            /Repositories: /,
-            /Verified Repositories: /,
-            /Wikis: /,
-            /Verified Wikis: /,
-            /LFS Objects: /,
-            /Attachments: /,
-            /CI job artifacts: /,
-            /Container repositories: /,
-            /Design repositories: /,
-            /Repositories Checked: /,
-            /Last event ID seen from primary: /,
-            /Last status report was: /
-          ] + Gitlab::Geo.verification_enabled_replicator_classes.map { |k| /#{k.replicable_title_plural} Verified:/ } +
-              Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural}:/ }
+        context 'with legacy LFS replication enabled' do
+          before do
+            stub_feature_flags(geo_lfs_object_replication: false)
+          end
 
-          checks.each do |text|
-            expect { run_rake_task('geo:status') }.to output(text).to_stdout
+          it 'prints messages for all the checks' do
+            (checks << /LFS Objects: /).each do |text|
+              expect { run_rake_task('geo:status') }.to output(text).to_stdout
+            end
+          end
+        end
+
+        context 'with SSF LFS replication eneabled' do
+          it 'prints messages for all the checks' do
+            checks.each do |text|
+              expect { run_rake_task('geo:status') }.to output(text).to_stdout
+            end
           end
         end
       end

@@ -51,15 +51,14 @@ describe('GeoNodesBetaApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGeoNodesBetaContainer = () => wrapper.find('section');
-  const findGeoLearnMoreLink = () => wrapper.find(GlLink);
-  const findGeoAddSiteButton = () => wrapper.find(GlButton);
-  const findGlLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findGeoEmptyState = () => wrapper.find(GeoNodesEmptyState);
-  const findGeoNodes = () => wrapper.findAll(GeoNodes);
+  const findGeoLearnMoreLink = () => wrapper.findComponent(GlLink);
+  const findGeoAddSiteButton = () => wrapper.findComponent(GlButton);
+  const findGlLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findGeoEmptyState = () => wrapper.findComponent(GeoNodesEmptyState);
+  const findGeoNodes = () => wrapper.findAllComponents(GeoNodes);
 
   describe('template', () => {
     describe('always', () => {
@@ -91,19 +90,19 @@ describe('GeoNodesBetaApp', () => {
         });
 
         describe(`when isLoading is ${isLoading} & nodes length ${nodes.length}`, () => {
-          it(`does ${!showLoadingIcon ? 'not ' : ''}render GlLoadingIcon`, () => {
+          it(`does ${showLoadingIcon ? '' : 'not '}render GlLoadingIcon`, () => {
             expect(findGlLoadingIcon().exists()).toBe(showLoadingIcon);
           });
 
-          it(`does ${!showNodes ? 'not ' : ''}render GeoNodes`, () => {
+          it(`does ${showNodes ? '' : 'not '}render GeoNodes`, () => {
             expect(findGeoNodes().exists()).toBe(showNodes);
           });
 
-          it(`does ${!showEmptyState ? 'not ' : ''}render EmptyState`, () => {
+          it(`does ${showEmptyState ? '' : 'not '}render EmptyState`, () => {
             expect(findGeoEmptyState().exists()).toBe(showEmptyState);
           });
 
-          it(`does ${!showAddButton ? 'not ' : ''}render AddSiteButton`, () => {
+          it(`does ${showAddButton ? '' : 'not '}render AddSiteButton`, () => {
             expect(findGeoAddSiteButton().exists()).toBe(showAddButton);
           });
         });

@@ -43,8 +43,8 @@ describe('GeoNodeActions', () => {
     wrapper.destroy();
   });
 
-  const findGeoMobileActions = () => wrapper.find(GeoNodeActionsMobile);
-  const findGeoDesktopActions = () => wrapper.find(GeoNodeActionsDesktop);
+  const findGeoMobileActions = () => wrapper.findComponent(GeoNodeActionsMobile);
+  const findGeoDesktopActions = () => wrapper.findComponent(GeoNodeActionsDesktop);
 
   describe('template', () => {
     beforeEach(() => {

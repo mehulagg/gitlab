@@ -17,8 +17,8 @@ module Gitlab
             Issue
           end
 
-          def timestamp_projection
-            issue_metrics_table[:first_added_to_board_at]
+          def column_list
+            [issue_metrics_table[:first_added_to_board_at]]
           end
         end
       end

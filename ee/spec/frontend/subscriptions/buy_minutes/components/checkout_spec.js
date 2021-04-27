@@ -6,14 +6,18 @@ import Checkout from 'ee/subscriptions/buy_minutes/components/checkout.vue';
 import subscriptionsResolvers from 'ee/subscriptions/buy_minutes/graphql/resolvers';
 import stateQuery from 'ee/subscriptions/graphql/queries/state.query.graphql';
 import purchaseFlowResolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers';
-import { stateData as initialStateData } from 'ee_jest/subscriptions/buy_minutes/mock_data';
+import {
+  stateData as initialStateData,
+  mockCiMinutesPlans,
+} from 'ee_jest/subscriptions/buy_minutes/mock_data';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
 describe('Checkout', () => {
-  const resolvers = { ...purchaseFlowResolvers, ...subscriptionsResolvers };
+  const resolvers = merge({}, purchaseFlowResolvers, subscriptionsResolvers);
   let wrapper;
 
   const createMockApolloProvider = (stateData = {}) => {
@@ -35,6 +39,9 @@ describe('Checkout', () => {
     wrapper = shallowMount(Checkout, {
       apolloProvider,
       localVue,
+      propsData: {
+        plans: mockCiMinutesPlans,
+      },
     });
   };
 
@@ -48,8 +55,8 @@ describe('Checkout', () => {
     [true, true],
     [false, false],
   ])('when isNewUser=%s', (isNewUser, visible) => {
-    beforeEach(() => {
-      createComponent({ state: { isNewUser } });
+    beforeEach(async () => {
+      createComponent({ isNewUser });
     });
 
     it(`progress bar visibility is ${visible}`, () => {
@@ -58,8 +65,9 @@ describe('Checkout', () => {
   });
 
   describe('passing the correct options to the progress bar component', () => {
-    beforeEach(() => {
-      createComponent({ state: { isNewUser: true } });
+    beforeEach(async () => {
+      createComponent({ isNewUser: true });
+      await waitForPromises();
     });
 
     it('passes the steps', () => {

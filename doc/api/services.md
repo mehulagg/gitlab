@@ -572,7 +572,9 @@ GET /projects/:id/services/external-wiki
 
 ## Flowdock
 
-Flowdock is a collaboration web app for technical teams.
+Flowdock is a ChatOps application for collaboration in software engineering
+companies. You can send notifications from GitLab events to Flowdock flows.
+For integration instructions, see the [Flowdock documentation](https://www.flowdock.com/help/gitlab).
 
 ### Create/Edit Flowdock service
 
@@ -1326,10 +1328,15 @@ PUT /projects/:id/services/jenkins
 
 Parameters:
 
-- `jenkins_url` (**required**) - Jenkins URL like `http://jenkins.example.com`
-- `project_name` (**required**) - The URL-friendly project name. Example: my_project_name
-- `username` (optional) - A user with access to the Jenkins server, if applicable
-- `password` (optional) - The password of the user
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `jenkins_url` | string | true | Jenkins URL like `http://jenkins.example.com`. |
+| `project_name` | string | true | The URL-friendly project name. Example: `my_project_name`. |
+| `username` | string | false | Username for authentication with the Jenkins server, if authentication is required by the server. |
+| `password` | string | false | Password for authentication with the Jenkins server, if authentication is required by the server. |
+| `push_events` | boolean | false | Enable notifications for push events. |
+| `merge_requests_events` | boolean | false | Enable notifications for merge request events. |
+| `tag_push_events` | boolean | false | Enable notifications for tag push events. |
 
 ### Delete Jenkins CI service
 

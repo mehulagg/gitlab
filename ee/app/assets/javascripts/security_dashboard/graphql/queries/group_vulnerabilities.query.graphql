@@ -9,6 +9,7 @@ query group(
   $severity: [VulnerabilitySeverity!]
   $reportType: [VulnerabilityReportType!]
   $scanner: [String!]
+  $scannerId: [ID!]
   $state: [VulnerabilityState!]
   $sort: VulnerabilitySort
   $hasIssues: Boolean
@@ -21,6 +22,7 @@ query group(
       severity: $severity
       reportType: $reportType
       scanner: $scanner
+      scannerId: $scannerId
       state: $state
       projectId: $projectId
       sort: $sort

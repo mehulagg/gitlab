@@ -68,7 +68,7 @@ module Geo
 
               sleep(1)
             end
-          rescue => err
+          rescue StandardError => err
             reason = :error
             log_error(err.message)
             raise err

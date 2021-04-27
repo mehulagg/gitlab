@@ -32,7 +32,7 @@ RSpec.describe ProjectFeature do
       'issues'                      | true        | %w[issues notes]
       'wiki'                        | false       | nil
       'builds'                      | false       | nil
-      'merge_requests'              | true        | %w[notes]
+      'merge_requests'              | true        | %w[merge_requests notes]
       'repository'                  | true        | %w[notes]
       'snippets'                    | true        | %w[notes]
       'operations'                  | false       | nil

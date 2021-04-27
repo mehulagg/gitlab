@@ -167,6 +167,8 @@ describe('DAST Scanner Profile', () => {
     it('populates the fields with the data passed in via the profile prop or default values', () => {
       expect(findProfileNameInput().element.value).toBe(profile?.profileName ?? '');
       expect(findScanType().vm.$attrs.checked).toBe(profile?.scanType ?? SCAN_TYPE.PASSIVE);
+      expect(findSpiderTimeoutInput().props('value')).toBe(profile?.spiderTimeout ?? 1);
+      expect(findTargetTimeoutInput().props('value')).toBe(profile?.targetTimeout ?? 60);
     });
 
     describe('submission', () => {

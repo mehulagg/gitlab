@@ -34,7 +34,7 @@ class SyncSeatLinkRequestWorker
 
   def create_license(license_data)
     License.create!(data: license_data, cloud: true)
-  rescue => e
+  rescue StandardError => e
     Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
   end
 

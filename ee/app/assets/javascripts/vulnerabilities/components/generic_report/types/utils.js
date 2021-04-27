@@ -1,5 +1,5 @@
 import { overEvery } from 'lodash';
-import { REPORT_TYPES, REPORT_TYPE_LIST } from './constants';
+import { REPORT_TYPES } from './constants';
 
 /**
  * Check if the given report is of a type that can be rendered (i.e, is mapped to a component and can be rendered)
@@ -7,7 +7,7 @@ import { REPORT_TYPES, REPORT_TYPE_LIST } from './constants';
  * @param {{ type: string }} reportItem
  * @returns boolean
  */
-const isSupportedType = ({ type }) => REPORT_TYPES.includes(type);
+const isSupportedType = ({ type }) => Object.values(REPORT_TYPES).includes(type);
 
 /**
  * Check if the given report is of type list
@@ -15,7 +15,7 @@ const isSupportedType = ({ type }) => REPORT_TYPES.includes(type);
  * @param {{ type: string } } reportItem
  * @returns boolean
  */
-export const isListType = ({ type }) => type === REPORT_TYPE_LIST;
+export const isListType = ({ type }) => type === REPORT_TYPES.list;
 
 /**
  * Check if the current report item is of that list and is not nested deeper than the maximum depth

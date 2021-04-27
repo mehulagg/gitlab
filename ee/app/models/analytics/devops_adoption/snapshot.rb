@@ -13,6 +13,8 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
   validates :pipeline_succeeded, inclusion: { in: [true, false] }
   validates :deploy_succeeded, inclusion: { in: [true, false] }
   validates :security_scan_succeeded, inclusion: { in: [true, false] }
+  validates :total_projects_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :code_owners_used_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   scope :latest_snapshot_for_segment_ids, -> (ids) do
     inner_select = model

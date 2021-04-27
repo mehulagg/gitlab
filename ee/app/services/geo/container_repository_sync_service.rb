@@ -29,7 +29,7 @@ module Geo
       mark_sync_as_successful
 
       log_info('Finished sync')
-    rescue => e
+    rescue StandardError => e
       fail_registry_sync!("Container repository sync failed", e)
     end
 

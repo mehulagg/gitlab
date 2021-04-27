@@ -1,4 +1,9 @@
+import { issuableTypes } from '~/boards/constants';
+import updateBoardListMutation from '~/boards/graphql/board_list_update.mutation.graphql';
+
 import { s__ } from '~/locale';
+
+import updateEpicBoardListMutation from './graphql/epic_board_list_update.mutation.graphql';
 
 export const DRAGGABLE_TAG = 'div';
 
@@ -52,6 +57,15 @@ export const ErrorMessages = {
   fetchEpicsError: s__(
     'Boards|An error occurred while fetching the board epics. Please reload the page.',
   ),
+};
+
+export const updateListQueries = {
+  [issuableTypes.issue]: {
+    mutation: updateBoardListMutation,
+  },
+  [issuableTypes.epic]: {
+    mutation: updateEpicBoardListMutation,
+  },
 };
 
 export default {

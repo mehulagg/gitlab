@@ -131,7 +131,7 @@ module Geo
         ::Gitlab::Geo.primary_node.snapshot_url(temp_repo),
         ::Gitlab::Geo::RepoSyncRequest.new(scope: ::Gitlab::Geo::API_SCOPE).authorization
       )
-    rescue => err
+    rescue StandardError => err
       log_error('Snapshot attempt failed', err)
       false
     end

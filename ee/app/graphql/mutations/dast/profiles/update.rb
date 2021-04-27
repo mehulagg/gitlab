@@ -75,7 +75,7 @@ module Mutations
             run_after_update: run_after_update
           }.compact
 
-          response = ::Dast::Profiles::UpdateService.new(
+          response = ::AppSec::Dast::Profiles::UpdateService.new(
             container: project,
             current_user: current_user,
             params: params

@@ -23,7 +23,7 @@ module Geo
       created_above, deleted_above = create_missing_above(end_of_batch: range.last)
 
       [created_in_range, deleted_in_range, created_above, deleted_above].flatten.compact.any?
-    rescue => e
+    rescue StandardError => e
       log_error("Error while backfilling #{registry_class}", e)
 
       raise

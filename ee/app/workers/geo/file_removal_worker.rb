@@ -18,7 +18,7 @@ module Geo
       if File.file?(file_path)
         begin
           File.unlink(file_path)
-        rescue => ex
+        rescue StandardError => ex
           log_error("Failed to remove file", ex, file_path: file_path)
         end
 

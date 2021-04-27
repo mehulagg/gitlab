@@ -35,7 +35,7 @@ module EE
           return self.all unless ::Gitlab::Geo.current_node.selective_sync?
 
           self.joins(:package)
-              .where('packages_packages.project_id IN (?)', ::Gitlab::Geo.current_node.projects.select(:id))
+              .where(packages_packages: { project_id: ::Gitlab::Geo.current_node.projects.select(:id) })
         end
       end
 

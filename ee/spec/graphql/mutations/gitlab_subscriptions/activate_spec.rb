@@ -9,6 +9,7 @@ RSpec.describe Mutations::GitlabSubscriptions::Activate do
 
   let_it_be(:user) { create(:admin) }
   let_it_be(:created_license) { License.last }
+
   let(:activation_code) { 'activation_code' }
   let(:result) { { success: true, license: created_license } }
 

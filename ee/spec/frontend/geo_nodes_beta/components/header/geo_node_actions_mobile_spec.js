@@ -7,6 +7,7 @@ import {
   MOCK_PRIMARY_VERSION,
   MOCK_REPLICABLE_TYPES,
 } from 'ee_jest/geo_nodes_beta/mock_data';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -28,24 +29,26 @@ describe('GeoNodeActionsMobile', () => {
       },
     });
 
-    wrapper = shallowMount(GeoNodeActionsMobile, {
-      localVue,
-      store,
-      propsData: {
-        ...defaultProps,
-        ...props,
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(GeoNodeActionsMobile, {
+        localVue,
+        store,
+        propsData: {
+          ...defaultProps,
+          ...props,
+        },
+      }),
+    );
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findGeoMobileActionsDropdown = () => wrapper.find(GlDropdown);
-  const findGeoMobileActionsDropdownItems = () => wrapper.findAll(GlDropdownItem);
+  const findGeoMobileActionsDropdown = () => wrapper.findComponent(GlDropdown);
+  const findGeoMobileActionsDropdownItems = () => wrapper.findAllComponents(GlDropdownItem);
   const findGeoMobileActionsRemoveDropdownItem = () =>
-    wrapper.find('[data-testid="geo-mobile-remove-action"]');
+    wrapper.findByTestId('geo-mobile-remove-action');
 
   describe('template', () => {
     describe('always', () => {

@@ -10,10 +10,7 @@ module Types
 
       argument :not, NegatedEpicBoardIssueInputType,
                required: false,
-               description: <<~DESC
-                 Negated epic arguments.
-                 Warning: this argument is experimental and a subject to change in the future.
-               DESC
+               description: 'Negated epic arguments.'
 
       argument :search, GraphQL::STRING_TYPE,
                required: false,

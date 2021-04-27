@@ -63,7 +63,7 @@ describe('epicUtils', () => {
       const tooltipText = epicUtils.getDateFromMilestonesTooltip({
         dateType: 'start',
         startDateSourcingMilestoneTitle:
-          '<svg width="100"><use xlink:href="/h5bp/html5-boilerplate/-/raw/master/demo.svg#x" /></svg>',
+          '<svg width="100"><use xlink:href="/h5bp/html5-boilerplate/-/raw/main/demo.svg#x" /></svg>',
         startDateSourcingMilestoneDates: {
           startDate: '2020-12-23',
           dueDate: '2021-01-28',

@@ -8,6 +8,7 @@ import {
   STATUS_DELAY_THRESHOLD_MS,
 } from 'ee/geo_nodes_beta/constants';
 import { MOCK_PRIMARY_VERSION, MOCK_REPLICABLE_TYPES } from 'ee_jest/geo_nodes_beta/mock_data';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
 
 const localVue = createLocalVue();
@@ -34,25 +35,27 @@ describe('GeoNodeLastUpdated', () => {
       },
     });
 
-    wrapper = shallowMount(GeoNodeLastUpdated, {
-      localVue,
-      store,
-      propsData: {
-        ...defaultProps,
-        ...props,
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(GeoNodeLastUpdated, {
+        localVue,
+        store,
+        propsData: {
+          ...defaultProps,
+          ...props,
+        },
+      }),
+    );
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findMainText = () => wrapper.find('[data-testid="last-updated-main-text"]');
-  const findGlIcon = () => wrapper.find(GlIcon);
-  const findGlPopover = () => wrapper.find(GlPopover);
+  const findMainText = () => wrapper.findByTestId('last-updated-main-text');
+  const findGlIcon = () => wrapper.findComponent(GlIcon);
+  const findGlPopover = () => wrapper.findComponent(GlPopover);
   const findPopoverText = () => findGlPopover().find('p');
-  const findPopoverLink = () => findGlPopover().find(GlLink);
+  const findPopoverLink = () => findGlPopover().findComponent(GlLink);
 
   describe('template', () => {
     describe('always', () => {
@@ -75,12 +78,12 @@ describe('GeoNodeLastUpdated', () => {
       });
 
       it('renders the popover text correctly', () => {
-        expect(findPopoverText().exists()).toBeTruthy();
+        expect(findPopoverText().exists()).toBe(true);
         expect(findPopoverText().text()).toBe("Node's status was updated 10 minutes ago.");
       });
 
       it('renders the popover link always', () => {
-        expect(findPopoverLink().exists()).toBeTruthy();
+        expect(findPopoverLink().exists()).toBe(true);
       });
     });
 

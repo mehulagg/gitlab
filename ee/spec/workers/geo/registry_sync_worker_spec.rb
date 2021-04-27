@@ -74,7 +74,7 @@ RSpec.describe Geo::RegistrySyncWorker, :geo, :use_sql_query_cache_for_tracking_
     expect(Geo::EventWorker).to receive(:perform_async).with('package_file', :created, { model_record_id: package_file_1.package_file.id }).once do
       Thread.new do
         # Rails will invalidate the query cache if the update happens in the same thread
-        Geo::PackageFileRegistry.update(state: Geo::PackageFileRegistry::STATE_VALUES[:synced])
+        Geo::PackageFileRegistry.update(state: Geo::PackageFileRegistry::STATE_VALUES[:synced]) # rubocop:disable Rails/SaveBang
       end
     end
 

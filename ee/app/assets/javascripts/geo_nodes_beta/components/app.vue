@@ -1,12 +1,21 @@
 <script>
 import { GlLink, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
+import { s__, __ } from '~/locale';
 import { GEO_INFO_URL } from '../constants';
 import GeoNodes from './geo_nodes.vue';
 import GeoNodesEmptyState from './geo_nodes_empty_state.vue';
 
 export default {
   name: 'GeoNodesBetaApp',
+  i18n: {
+    geoSites: s__('Geo|Geo sites'),
+    helpText: s__(
+      'Geo|With GitLab Geo, you can install a special read-only and replicated instance anywhere.',
+    ),
+    learnMore: __('Learn more'),
+    addSite: s__('Geo|Add site'),
+  },
   components: {
     GlLink,
     GlButton,
@@ -42,18 +51,14 @@ export default {
 
 <template>
   <section>
-    <h3>{{ s__('Geo|Geo sites') }}</h3>
+    <h3>{{ $options.i18n.geoSites }}</h3>
     <div
       class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-md-align-items-center gl-pb-5 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
     >
       <div class="gl-mr-5">
-        <span>{{
-          s__(
-            'Geo|With GitLab Geo, you can install a special read-only and replicated instance anywhere.',
-          )
-        }}</span>
+        <span>{{ $options.i18n.helpText }}</span>
         <gl-link class="gl-ml-2" :href="$options.GEO_INFO_URL" target="_blank">{{
-          __('Learn more')
+          $options.i18n.learnMore
         }}</gl-link>
       </div>
       <gl-button
@@ -62,7 +67,7 @@ export default {
         variant="confirm"
         :href="newNodeUrl"
         target="_blank"
-        >{{ s__('Geo|Add site') }}
+        >{{ $options.i18n.addSite }}
       </gl-button>
     </div>
     <gl-loading-icon v-if="isLoading" size="xl" class="gl-mt-5" />

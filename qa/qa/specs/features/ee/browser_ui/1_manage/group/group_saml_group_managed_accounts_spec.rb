@@ -152,7 +152,7 @@ module QA
           # Once the feature flags are enabled, it takes some time for the toggle buttons to show on the UI.
           # This issue does not happen manually. Only happens with the test as they are too fast.
           Support::Retrier.retry_until(sleep_interval: 1, raise_on_failure: true) do
-            condition_met = saml_sso.has_enforced_sso_button? && saml_sso.has_group_managed_accounts_button?
+            condition_met = saml_sso.has_enforced_sso_checkbox? && saml_sso.has_group_managed_accounts_checkbox?
             page.refresh unless condition_met
 
             condition_met

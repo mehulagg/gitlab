@@ -39,8 +39,8 @@ describe('GeoNodeHealthStatus', () => {
     wrapper.destroy();
   });
 
-  const findGeoStatusBadge = () => wrapper.find(GlBadge);
-  const findGeoStatusIcon = () => wrapper.find(GlIcon);
+  const findGeoStatusBadge = () => wrapper.findComponent(GlBadge);
+  const findGeoStatusIcon = () => wrapper.findComponent(GlIcon);
   const findGeoStatusText = () => wrapper.find('span');
 
   describe.each`

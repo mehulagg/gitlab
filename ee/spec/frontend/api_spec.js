@@ -553,7 +553,7 @@ describe('Api', () => {
         const params = { ...defaultParams };
         const expectedUrl = valueStreamBaseUrl({
           id: valueStreamId,
-          resource: `stages/${stageId}/duration_chart`,
+          resource: `stages/${stageId}/average_duration_chart`,
         });
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 

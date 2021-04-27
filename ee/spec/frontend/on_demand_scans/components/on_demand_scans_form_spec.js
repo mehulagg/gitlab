@@ -22,7 +22,7 @@ import { scannerProfiles, siteProfiles } from '../mocks/mock_data';
 const URL_HOST = 'https://localhost/';
 const helpPagePath = '/application_security/dast/index#on-demand-scans';
 const projectPath = 'group/project';
-const defaultBranch = 'master';
+const defaultBranch = 'main';
 const profilesLibraryPath = '/security/configuration/dast_scans';
 const scannerProfilesLibraryPath = '/security/configuration/dast_scans#scanner-profiles';
 const siteProfilesLibraryPath = '/security/configuration/dast_scans#site-profiles';
