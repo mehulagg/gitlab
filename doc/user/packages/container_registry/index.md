@@ -760,7 +760,7 @@ There can be different reasons behind this:
      ```shell
      # Get a list of all tags in a certain container repository while considering [pagination](../../../api/README.md#pagination)
 
-     > list_o_tags.out; for i in {1..N}; do curl --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags?per_page=100&page=${i}" | jq '.[].name' | tr -d '"' >> list_o_tags.out; done # N stands for the number of tags/100 rounded to the next whole number.
+     > list_o_tags.out; for i in {1..N}; do curl --request GET --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags?per_page=100&page=${i}" | jq '.[].name' | tr -d '"' >> list_o_tags.out; done # N stands for the number of tags/100 rounded to the next whole number.
 
      NOTE:
      The command just before the for loop is just to make sure that list_o_tags.out is always empty when going into the loop.
