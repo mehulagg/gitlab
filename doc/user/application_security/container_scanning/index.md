@@ -462,8 +462,8 @@ registry.gitlab.com/gitlab-org/security-products/analyzers/container-scanning
 The process for importing Docker images into a local offline Docker registry depends on
 **your network security policy**. Please consult your IT staff to find an accepted and approved
 process by which you can import or temporarily access external resources. Note that these scanners
-are [updated periodically](../index.md#maintenance-and-update-of-the-vulnerabilities-database)
-with new definitions, so consider if you are able to make periodic updates yourself.
+are [updated periodically](../vulnerabilities/index.md#vulnerability-scanner-maintenance), so
+consider if you are able to make periodic updates yourself.
 
 For more information, see [the specific steps on how to update an image with a pipeline](#automating-container-scanning-vulnerability-database-updates-with-a-pipeline).
 

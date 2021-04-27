@@ -244,7 +244,7 @@ vulnerabilities in your groups, projects and pipelines. Read more about the
 ## Vulnerabilities database update
 
 For more information about the vulnerabilities database update, check the
-[maintenance table](../index.md#maintenance-and-update-of-the-vulnerabilities-database).
+[maintenance table](../vulnerabilities/index.md#vulnerability-scanner-maintenance).
 
 ## Dependency List
 

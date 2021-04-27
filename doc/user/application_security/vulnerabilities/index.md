@@ -127,7 +127,7 @@ generates for you. [Read more about the automatic remediation for vulnerabilitie
 
 ## Vulnerability scanner maintenance
 
-The vulnerability scanning tools, and their databases, are updated regularly.
+The vulnerability scanners, and their databases, are updated regularly.
 
 | Secure scanning tool                                         | Vulnerabilities database updates          |
 |:-------------------------------------------------------------|-------------------------------------------|
