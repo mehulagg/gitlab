@@ -3736,9 +3736,6 @@ msgstr ""
 msgid "An example showing how to use Jsonnet with GitLab dynamic child pipelines"
 msgstr ""
 
-msgid "An extendable open source CI/CD server."
-msgstr ""
-
 msgid "An instance-level serverless domain already exists."
 msgstr ""
 
@@ -4938,13 +4935,13 @@ msgstr ""
 msgid "BambooService|Bamboo service root URL."
 msgstr ""
 
+msgid "BambooService|Run CI/CD pipelines with Atlassian Bamboo."
+msgstr ""
+
+msgid "BambooService|Run CI/CD pipelines with Atlassian Bamboo. You must set up automatic revision labeling and a repository trigger in Bamboo. %{docs_link}"
+msgstr ""
+
 msgid "BambooService|The user with API access to the Bamboo server."
-msgstr ""
-
-msgid "BambooService|Use Atlassian Bamboo to run CI/CD pipelines. You must set up automatic revision labeling and a repository trigger in Bamboo. %{docs_link}"
-msgstr ""
-
-msgid "BambooService|Use the Atlassian Bamboo CI/CD server with GitLab."
 msgstr ""
 
 msgid "Based on"
@@ -27654,6 +27651,12 @@ msgstr ""
 msgid "Run CI/CD pipelines for external repositories"
 msgstr ""
 
+msgid "Run CI/CD pipelines with Jenkins when you push to a repository, or when a merge request is created, updated, or merged. %{docs_link}"
+msgstr ""
+
+msgid "Run CI/CD pipelines with Jenkins."
+msgstr ""
+
 msgid "Run housekeeping"
 msgstr ""
 
@@ -33705,9 +33708,6 @@ msgid "Trial|We will activate your trial on your group after you complete this s
 msgstr ""
 
 msgid "Trigger"
-msgstr ""
-
-msgid "Trigger Jenkins builds when you push to a repository, or when a merge request is created, updated, or merged. %{docs_link}"
 msgstr ""
 
 msgid "Trigger a pipeline for a branch or tag by generating a trigger token and using it with an API call. The token impersonates a user's project access and permissions."
