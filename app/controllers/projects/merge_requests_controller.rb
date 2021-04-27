@@ -46,8 +46,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     # Usage data feature flags
     push_frontend_feature_flag(:users_expanding_widgets_usage_data, @project, default_enabled: :yaml)
 
-    record_experiment_user(:invite_members_version_b)
-
     experiment(:invite_members_in_comment, namespace: @project.root_ancestor) do |experiment_instance|
       experiment_instance.exclude! unless helpers.can_import_members?
 

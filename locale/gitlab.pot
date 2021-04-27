@@ -17850,22 +17850,10 @@ msgstr ""
 msgid "InviteMember|Invited users will be added with developer level permissions. %{linkStart}View the documentation%{linkEnd} to see how to change this later."
 msgstr ""
 
-msgid "InviteMember|Oops, this feature isn't ready yet"
-msgstr ""
-
-msgid "InviteMember|See who can invite members for you"
-msgstr ""
-
 msgid "InviteMember|Send invitations"
 msgstr ""
 
 msgid "InviteMember|Skip this for now"
-msgstr ""
-
-msgid "InviteMember|Until then, ask an owner to invite new project members for you"
-msgstr ""
-
-msgid "InviteMember|We're working to allow everyone to invite new members, making it easier for teams to get started with GitLab"
 msgstr ""
 
 msgid "InviteReminderEmail|%{inviter} is still waiting for you to join GitLab"
