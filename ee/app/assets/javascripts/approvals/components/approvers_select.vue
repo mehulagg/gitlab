@@ -125,6 +125,11 @@ export default {
   beforeDestroy() {
     $(this.$refs.input).select2('destroy');
   },
+  computed: {
+    isFeatureEnabled() {
+      return Boolean(gon.features?.showRelevantApprovalRuleApprovers);
+    },
+  },
   methods: {
     fetchGroupsAndUsers(term) {
       const groupsAsync = this.fetchGroups(term).then(addType(TYPE_GROUP));
@@ -135,6 +140,16 @@ export default {
         .then((results) => ({ results }));
     },
     fetchGroups(term) {
+      if (this.isFeatureEnabled) {
+        const hasTerm = term.trim().length > 0;
+
+        return Api.projectGroups(this.projectId, {
+          skip_groups: this.skipGroupIds,
+          ...(hasTerm ? { search: term } : {}),
+          with_shared: true,
+        });
+      }
+
       // Don't includeAll when search is empty. Otherwise, the user could get a lot of garbage choices.
       // https://gitlab.com/gitlab-org/gitlab/issues/11566
       const includeAll = term.trim().length > 0;

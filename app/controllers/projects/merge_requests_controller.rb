@@ -42,6 +42,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:confidential_notes, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:usage_data_i_testing_summary_widget_total, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:improved_emoji_picker, project, default_enabled: :yaml)
+    # push_frontend_feature_flag(:show_relevant_approval_rule_approvers, project, default_enabled: :yaml)
 
     # Usage data feature flags
     push_frontend_feature_flag(:users_expanding_widgets_usage_data, @project, default_enabled: :yaml)
@@ -60,6 +61,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   before_action do
     push_frontend_feature_flag(:mr_collapsed_approval_rules, @project)
+    push_frontend_feature_flag(:show_relevant_approval_rule_approvers, @project, default_enabled: :yaml)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show, :discussions]

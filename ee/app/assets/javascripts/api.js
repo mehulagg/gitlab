@@ -46,6 +46,7 @@ export default {
   descendantGroupsPath: '/api/:version/groups/:group_id/descendant_groups',
   projectDeploymentFrequencyAnalyticsPath:
     '/api/:version/projects/:id/analytics/deployment_frequency',
+  projectGroupsPath: '/api/:version/projects/:id/groups.json',
   issueMetricImagesPath: '/api/:version/projects/:id/issues/:issue_iid/metric_images',
   issueMetricSingleImagePath:
     '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id',
@@ -422,6 +423,20 @@ export default {
       .then(({ data, headers }) => {
         callback(data);
         return { data, headers };
+      });
+  },
+
+  projectGroups(id, options) {
+    const url = Api.buildUrl(this.projectGroupsPath).replace(':id', encodeURIComponent(id));
+
+    return axios
+      .get(url, {
+        params: {
+          ...options,
+        },
+      })
+      .then(({ data }) => {
+        return data;
       });
   },
 };
