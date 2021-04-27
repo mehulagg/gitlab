@@ -6,12 +6,21 @@ module API
       include ::API::ProjectsRelationBuilder
 
       expose :default_branch, if: -> (project, options) { Ability.allowed?(options[:current_user], :download_code, project) }
-      # Avoids an N+1 query: https://github.com/mbleigh/acts-as-taggable-on/issues/91#issuecomment-168273770
+
+      # Tag is ambiguous term so we deprecate it in favor of topics.
+      # Documentation will mention topics but we keep exposing both
+      # topics and tag_list in API until 15.0. After that we remove tag_list.
+      # Issue for deprecation: https://gitlab.com/gitlab-org/gitlab/-/issues/328702
+      # Epic for Project topics: https://gitlab.com/groups/gitlab-org/-/epics/552
       expose :tag_list do |project|
-        # Tags is a preloaded association. If we perform then sorting
-        # through the database, it will trigger a new query, ending up
-        # in an N+1 if we have several projects
-        project.tags.pluck(:name).sort # rubocop:disable CodeReuse/ActiveRecord
+        # Avoids an N+1 query: https://github.com/mbleigh/acts-as-taggable-on/issues/91#issuecomment-168273770
+        project.topic_names_sorted
+      end
+
+      # Duplicate of tag_list above. See the comment for tag_list.
+      expose :topics do |project|
+        # Avoids an N+1 query: https://github.com/mbleigh/acts-as-taggable-on/issues/91#issuecomment-168273770
+        project.topic_names_sorted
       end
 
       expose :ssh_url_to_repo, :http_url_to_repo, :web_url, :readme_url

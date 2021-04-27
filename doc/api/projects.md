@@ -82,7 +82,7 @@ When `simple=true` or the user is unauthenticated this returns something like:
     "http_url_to_repo": "http://example.com/diaspora/diaspora-client.git",
     "web_url": "http://example.com/diaspora/diaspora-client",
     "readme_url": "http://example.com/diaspora/diaspora-client/blob/master/README.md",
-    "tag_list": [
+    "topics": [
       "example",
       "disapora client"
     ],
@@ -116,7 +116,7 @@ When the user is authenticated and `simple` is not set this returns something li
     "http_url_to_repo": "http://example.com/diaspora/diaspora-client.git",
     "web_url": "http://example.com/diaspora/diaspora-client",
     "readme_url": "http://example.com/diaspora/diaspora-client/blob/master/README.md",
-    "tag_list": [
+    "topics": [
       "example",
       "disapora client"
     ],
@@ -200,7 +200,7 @@ When the user is authenticated and `simple` is not set this returns something li
     "http_url_to_repo": "http://example.com/brightbox/puppet.git",
     "web_url": "http://example.com/brightbox/puppet",
     "readme_url": "http://example.com/brightbox/puppet/blob/master/README.md",
-    "tag_list": [
+    "topics": [
       "example",
       "puppet"
     ],
@@ -378,7 +378,7 @@ GET /users/:user_id/projects
     "http_url_to_repo": "http://example.com/diaspora/diaspora-client.git",
     "web_url": "http://example.com/diaspora/diaspora-client",
     "readme_url": "http://example.com/diaspora/diaspora-client/blob/master/README.md",
-    "tag_list": [
+    "topics": [
       "example",
       "disapora client"
     ],
@@ -462,7 +462,7 @@ GET /users/:user_id/projects
     "http_url_to_repo": "http://example.com/brightbox/puppet.git",
     "web_url": "http://example.com/brightbox/puppet",
     "readme_url": "http://example.com/brightbox/puppet/blob/master/README.md",
-    "tag_list": [
+    "topics": [
       "example",
       "puppet"
     ],
@@ -606,7 +606,7 @@ Example response:
     "http_url_to_repo": "http://example.com/diaspora/diaspora-client.git",
     "web_url": "http://example.com/diaspora/diaspora-client",
     "readme_url": "http://example.com/diaspora/diaspora-client/blob/master/README.md",
-    "tag_list": [
+    "topics": [
       "example",
       "disapora client"
     ],
@@ -683,7 +683,7 @@ Example response:
     "http_url_to_repo": "http://example.com/brightbox/puppet.git",
     "web_url": "http://example.com/brightbox/puppet",
     "readme_url": "http://example.com/brightbox/puppet/blob/master/README.md",
-    "tag_list": [
+    "topics": [
       "example",
       "puppet"
     ],
@@ -804,7 +804,7 @@ GET /projects/:id
   "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
   "web_url": "http://example.com/diaspora/diaspora-project-site",
   "readme_url": "http://example.com/diaspora/diaspora-project-site/blob/master/README.md",
-  "tag_list": [
+  "topics": [
     "example",
     "disapora project"
   ],
@@ -975,7 +975,7 @@ If the project is a fork, and you provide a valid token to authenticate, the
       "path_with_namespace":"gitlab-org/gitlab-foss",
       "created_at":"2013-09-26T06:02:36.000Z",
       "default_branch":"master",
-      "tag_list":[],
+      "topics":[],
       "ssh_url_to_repo":"git@gitlab.com:gitlab-org/gitlab-foss.git",
       "http_url_to_repo":"https://gitlab.com/gitlab-org/gitlab-foss.git",
       "web_url":"https://gitlab.com/gitlab-org/gitlab-foss",
@@ -1393,7 +1393,7 @@ Example responses:
     "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
     "web_url": "http://example.com/diaspora/diaspora-project-site",
     "readme_url": "http://example.com/diaspora/diaspora-project-site/blob/master/README.md",
-    "tag_list": [
+    "topics": [
       "example",
       "disapora project"
     ],
@@ -1480,7 +1480,7 @@ Example response:
   "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
   "web_url": "http://example.com/diaspora/diaspora-project-site",
   "readme_url": "http://example.com/diaspora/diaspora-project-site/blob/master/README.md",
-  "tag_list": [
+  "topics": [
     "example",
     "disapora project"
   ],
@@ -1573,7 +1573,7 @@ Example response:
   "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
   "web_url": "http://example.com/diaspora/diaspora-project-site",
   "readme_url": "http://example.com/diaspora/diaspora-project-site/blob/master/README.md",
-  "tag_list": [
+  "topics": [
     "example",
     "disapora project"
   ],
@@ -1741,7 +1741,7 @@ Example response:
   "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
   "web_url": "http://example.com/diaspora/diaspora-project-site",
   "readme_url": "http://example.com/diaspora/diaspora-project-site/blob/master/README.md",
-  "tag_list": [
+  "topics": [
     "example",
     "disapora project"
   ],
@@ -1855,7 +1855,7 @@ Example response:
   "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
   "web_url": "http://example.com/diaspora/diaspora-project-site",
   "readme_url": "http://example.com/diaspora/diaspora-project-site/blob/master/README.md",
-  "tag_list": [
+  "topics": [
     "example",
     "disapora project"
   ],
@@ -2439,7 +2439,7 @@ Example response:
   "path_with_namespace": "cute-cats/hello-world",
   "created_at": "2020-10-15T16:25:22.415Z",
   "default_branch": "master",
-  "tag_list": [],
+  "topics": [],
   "ssh_url_to_repo": "git@gitlab.example.com:cute-cats/hello-world.git",
   "http_url_to_repo": "https://gitlab.example.com/cute-cats/hello-world.git",
   "web_url": "https://gitlab.example.com/cute-cats/hello-world",

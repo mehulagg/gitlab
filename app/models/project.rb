@@ -2566,6 +2566,14 @@ class Project < ApplicationRecord
     Feature.enabled?(:inherited_issuable_templates, self, default_enabled: :yaml)
   end
 
+  # Avoids an N+1 query: https://github.com/mbleigh/acts-as-taggable-on/issues/91#issuecomment-168273770
+  def topic_names_sorted
+    # Tags is a preloaded association. If we perform then sorting
+    # through the database, it will trigger a new query, ending up
+    # in an N+1 if we have several projects
+    tags.pluck(:name).sort
+  end
+
   private
 
   def set_container_registry_access_level

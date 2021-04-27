@@ -11,7 +11,7 @@
       "path_with_namespace": { "type": "string" },
       "created_at": { "type": "string", "format": "date-time" },
       "default_branch": { "type": ["string", "null"] },
-      "tag_list": {
+      "topics": {
         "type": "array",
         "items": {
           "type": "string"
@@ -39,7 +39,7 @@
     },
     "required": [
       "id", "name", "name_with_namespace", "description", "path",
-      "path_with_namespace", "created_at", "default_branch", "tag_list",
+      "path_with_namespace", "created_at", "default_branch", "topics",
       "ssh_url_to_repo", "http_url_to_repo", "web_url", "avatar_url",
       "star_count", "last_activity_at", "namespace"
     ],

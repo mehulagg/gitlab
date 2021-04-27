@@ -184,13 +184,13 @@ RSpec.describe API::Projects do
         end
       end
 
-      it 'includes the project labels as the tag_list' do
+      it 'includes the project topics (column tag_list)' do
         get api('/projects', user)
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
-        expect(json_response.first.keys).to include('tag_list')
+        expect(json_response.first.keys).to include('topics')
       end
 
       it 'includes open_issues_count' do
@@ -349,7 +349,7 @@ RSpec.describe API::Projects do
       context 'and with simple=true' do
         it 'returns a simplified version of all the projects' do
           expected_keys = %w(
-            id description default_branch tag_list
+            id description default_branch topics
             ssh_url_to_repo http_url_to_repo web_url readme_url
             name name_with_namespace
             path path_with_namespace
@@ -1061,12 +1061,12 @@ RSpec.describe API::Projects do
       expect(json_response['readme_url']).to eql("#{Gitlab.config.gitlab.url}/#{json_response['namespace']['full_path']}/somewhere/-/blob/master/README.md")
     end
 
-    it 'sets tag list to a project' do
+    it 'sets topics to a project' do
       project = attributes_for(:project, tag_list: %w[tagFirst tagSecond])
 
       post api('/projects', user), params: project
 
-      expect(json_response['tag_list']).to eq(%w[tagFirst tagSecond])
+      expect(json_response['topics']).to eq(%w[tagFirst tagSecond])
     end
 
     it 'uploads avatar for project a project' do
@@ -1912,7 +1912,7 @@ RSpec.describe API::Projects do
         expect(json_response['id']).to eq(project.id)
         expect(json_response['description']).to eq(project.description)
         expect(json_response['default_branch']).to eq(project.default_branch)
-        expect(json_response['tag_list']).to be_an Array
+        expect(json_response['topics']).to be_an Array
         expect(json_response['archived']).to be_falsey
         expect(json_response['visibility']).to be_present
         expect(json_response['ssh_url_to_repo']).to be_present
@@ -1989,7 +1989,7 @@ RSpec.describe API::Projects do
         expect(json_response['id']).to eq(project.id)
         expect(json_response['description']).to eq(project.description)
         expect(json_response['default_branch']).to eq(project.default_branch)
-        expect(json_response['tag_list']).to be_an Array
+        expect(json_response['topics']).to be_an Array
         expect(json_response['archived']).to be_falsey
         expect(json_response['visibility']).to be_present
         expect(json_response['ssh_url_to_repo']).to be_present
