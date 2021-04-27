@@ -304,7 +304,22 @@ LIMIT 20
 
 ##### Tooling
 
-Using keyset pagination outside of GraphQL is not straightforward. We have the low-level blocks for building keyset pagination database queries, however, the usage in application code is still not streamlined yet.
+Keyset based pagination utilities are built within the GitLab project, it can be used in feature development.
+
+Example:
+
+```ruby
+# first page
+paginator = Project.order(:created_at, :id).keyset_paginate(per_page: 20)
+puts paginator.to_a # records
+
+# next page
+cursor = paginator.cursor_for_next_page
+paginator = Project.order(:created_at, :id).keyset_paginate(cursor: cursor, per_page: 20)
+puts paginator.to_a # records
+```
+
+For a comprehensive overview, take a look at the [keyset pagination tutorial](keyset_pagination_tutorial.md) page.
 
 #### Performance
 
