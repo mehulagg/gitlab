@@ -27,5 +27,8 @@ RSpec.describe Boards::EpicBoards::CreateService, services: true do
     let(:epic_boards_enabled) { true }
 
     it_behaves_like 'create a board', :epic_boards
+
+    it 'tracks epic board creation' do
+    end
   end
 end

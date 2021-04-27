@@ -45,6 +45,13 @@ RSpec.describe Groups::EpicBoardsController do
       let(:parent) { group }
     end
 
+    it_behaves_like 'tracking unique hll events' do
+      subject(:request) { list_boards }
+
+      let(:target_id) { 'g_project_management_epic_board_viewed' }
+      let(:expected_type) { instance_of(String) }
+    end
+
     def list_boards(format: :html)
       get :index, params: { group_id: group }, format: format
     end
@@ -113,6 +120,13 @@ RSpec.describe Groups::EpicBoardsController do
 
     it_behaves_like 'disabled when using an external authorization service' do
       subject { read_board board: board }
+    end
+
+    it_behaves_like 'tracking unique hll events' do
+      subject(:request) { read_board(board: board) }
+
+      let(:target_id) { 'g_project_management_epic_board_viewed' }
+      let(:expected_type) { instance_of(String) }
     end
 
     def read_board(board:, format: :html)
