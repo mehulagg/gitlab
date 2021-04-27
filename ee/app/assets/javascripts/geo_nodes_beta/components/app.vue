@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlButton, GlLoadingIcon, GlModal } from '@gitlab/ui';
+import { GlLink, GlButton, GlLoadingIcon, GlModal, GlSprintf } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { s__, __ } from '~/locale';
 import { GEO_INFO_URL, REMOVE_NODE_MODAL_ID } from '../constants';
@@ -11,9 +11,8 @@ export default {
   i18n: {
     geoSites: s__('Geo|Geo sites'),
     helpText: s__(
-      'Geo|With GitLab Geo, you can install a special read-only and replicated instance anywhere.',
+      'Geo|With GitLab Geo, you can install a special read-only and replicated instance anywhere. %{linkStart}Learn more%{linkEnd}',
     ),
-    learnMore: __('Learn more'),
     addSite: s__('Geo|Add site'),
     modalTitle: s__('Geo|Remove secondary node'),
     modalBody: s__(
@@ -27,6 +26,7 @@ export default {
     GeoNodes,
     GeoNodesEmptyState,
     GlModal,
+    GlSprintf,
   },
   props: {
     newNodeUrl: {
@@ -71,10 +71,13 @@ export default {
       class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-md-align-items-center gl-pb-5 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
     >
       <div class="gl-mr-5">
-        <span>{{ $options.i18n.helpText }}</span>
-        <gl-link class="gl-ml-2" :href="$options.GEO_INFO_URL" target="_blank">{{
-          $options.i18n.learnMore
-        }}</gl-link>
+        <gl-sprintf :message="$options.i18n.helpText">
+          <template #link="{ content }">
+            <gl-link :href="$options.GEO_INFO_URL" target="_blank">
+              {{ content }}
+            </gl-link>
+          </template>
+        </gl-sprintf>
       </div>
       <gl-button
         v-if="!noNodes"

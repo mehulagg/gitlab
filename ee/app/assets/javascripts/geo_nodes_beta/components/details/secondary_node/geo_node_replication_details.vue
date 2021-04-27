@@ -81,7 +81,6 @@ export default {
       </gl-button>
       <gl-icon
         ref="replicationDetails"
-        tabindex="0"
         name="question"
         class="gl-text-blue-500 gl-cursor-pointer gl-ml-2"
       />
@@ -90,7 +89,7 @@ export default {
         placement="top"
         triggers="hover focus"
       >
-        <p>
+        <p class="gl-font-base">
           {{ $options.i18n.popoverText }}
         </p>
         <gl-link :href="$options.GEO_REPLICATION_TYPES_URL" target="_blank">{{

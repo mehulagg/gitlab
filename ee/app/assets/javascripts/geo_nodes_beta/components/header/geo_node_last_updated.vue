@@ -63,14 +63,9 @@ export default {
     <span class="gl-text-gray-500" data-testid="last-updated-main-text">{{
       syncTimeAgo.mainText
     }}</span>
-    <gl-icon
-      ref="lastUpdated"
-      tabindex="0"
-      name="question"
-      class="gl-text-blue-500 gl-cursor-pointer gl-ml-2"
-    />
+    <gl-icon ref="lastUpdated" name="question" class="gl-text-blue-500 gl-cursor-pointer gl-ml-2" />
     <gl-popover :target="() => $refs.lastUpdated.$el" placement="top">
-      <p>{{ syncTimeAgo.popoverText }}</p>
+      <p class="gl-font-base">{{ syncTimeAgo.popoverText }}</p>
       <gl-link :href="syncHelp.link" target="_blank">{{ syncHelp.text }}</gl-link>
     </gl-popover>
   </div>

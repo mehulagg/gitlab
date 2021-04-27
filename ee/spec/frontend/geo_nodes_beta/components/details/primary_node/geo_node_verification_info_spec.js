@@ -1,5 +1,5 @@
 import { GlCard, GlIcon, GlPopover, GlLink } from '@gitlab/ui';
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import GeoNodeProgressBar from 'ee/geo_nodes_beta/components/details/geo_node_progress_bar.vue';
@@ -25,12 +25,13 @@ describe('GeoNodeVerificationInfo', () => {
     });
 
     wrapper = extendedWrapper(
-      mount(GeoNodeVerificationInfo, {
+      shallowMount(GeoNodeVerificationInfo, {
         store,
         propsData: {
           ...defaultProps,
           ...props,
         },
+        stubs: { GlCard },
       }),
     );
   };
