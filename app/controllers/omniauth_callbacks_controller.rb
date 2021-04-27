@@ -8,6 +8,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   include KnownSignIn
 
   after_action :verify_known_sign_in
+  skip_before_action :check_two_factor_requirement, only: AuthHelper.providers_for_base_controller
 
   protect_from_forgery except: [:kerberos, :saml, :cas3, :failure], with: :exception, prepend: true
 
@@ -166,15 +167,12 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
       set_remember_me(user)
 
-      if user.two_factor_enabled? && !auth_user.bypass_two_factor?
+      if auth_user.bypass_two_factor?
+        handle_user_sign_in(user)
+      elsif user.two_factor_enabled?
         prompt_for_two_factor(user)
       else
-        if user.deactivated?
-          user.activate
-          flash[:notice] = _('Welcome back! Your account had been deactivated due to inactivity but is now reactivated.')
-        end
-
-        sign_in_and_redirect(user, event: :authentication)
+        handle_user_sign_in(user)
       end
     else
       fail_login(user)
@@ -183,6 +181,15 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     handle_disabled_provider
   rescue Gitlab::Auth::OAuth::User::SignupDisabledError
     handle_signup_error
+  end
+
+  def handle_user_sign_in(user)
+    if user.deactivated?
+      user.activate
+      flash[:notice] = _('Welcome back! Your account had been deactivated due to inactivity but is now reactivated.')
+    end
+
+    sign_in_and_redirect(user, event: :authentication)
   end
 
   def handle_signup_error

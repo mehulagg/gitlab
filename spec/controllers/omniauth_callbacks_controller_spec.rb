@@ -408,7 +408,10 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
     end
 
     context 'with GitLab initiated request' do
+      let(:require_two_factor_authentication) { false }
+
       before do
+        stub_application_setting(require_two_factor_authentication: require_two_factor_authentication)
         post :saml, params: { SAMLResponse: mock_saml_response }
       end
 
@@ -420,6 +423,15 @@ RSpec.describe OmniauthCallbacksController, type: :controller do
 
         it 'expects user to be signed_in' do
           expect(request.env['warden']).to be_authenticated
+        end
+
+        context 'when 2FA is required on application level' do
+          let(:require_two_factor_authentication) { true }
+
+          it 'expects user to be signed_in' do
+            expect(response).not_to render_template('devise/sessions/two_factor')
+            expect(request.env['warden']).to be_authenticated
+          end
         end
       end
 
