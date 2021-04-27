@@ -24,7 +24,7 @@ displays them in a merge request, you can use GitLab to audit your Docker-based 
 GitLab provides integration with two different open-source tools for vulnerability static analysis
 in containers:
 
-- [Clair](https://github.com/quay/claircore)/[Klar](https://github.com/optiopay/klar)
+- [Clair](https://github.com/quay/claircore)
 - [Trivy](https://github.com/aquasecurity/trivy)
 
 To integrate GitLab with security scanners other than those listed here, see
@@ -166,7 +166,7 @@ The variables you set in your `.gitlab-ci.yml` overwrite those in
 This example [includes](../../../ci/yaml/README.md#include) the container scanning template and
 enables verbose output for both analyzers:
 
-Clair/Klar:
+Clair:
 
 ```yaml
 include:
@@ -208,24 +208,24 @@ You can [configure](#customizing-the-container-scanning-settings) both analyzers
 | CI/CD Variable                 | Default       | Description | Supported by|
 | ------------------------------ | ------------- | ----------- | ------------ |
 | `ADDITIONAL_CA_CERT_BUNDLE`    | `""`          | Bundle of CA certs that you want to trust. See [Using a custom SSL CA certificate authority](#using-a-custom-ssl-ca-certificate-authority) for more details. | Both |
-| `CLAIR_DB_CONNECTION_STRING`   | `postgresql://postgres:password@clair-vulnerabilities-db:5432/postgres?sslmode=disable&statement_timeout=60000` | This variable represents the [connection string](https://www.postgresql.org/docs/9.3/libpq-connect.html#AEN39692) to the [PostgreSQL server hosting the vulnerability definitions](https://hub.docker.com/r/arminc/clair-db) database. **Do not change this** unless you're running the image locally as described in [Running the standalone container scanning tool](#running-the-standalone-container-scanning-tool). The host value for the connection string must match the [alias](https://gitlab.com/gitlab-org/gitlab/-/blob/898c5da43504eba87b749625da50098d345b60d6/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L23) value of the `Container-Scanning.gitlab-ci.yml` template file, which defaults to `clair-vulnerabilities-db`. | Clair/Klar |
-| `CLAIR_DB_IMAGE`               | `arminc/clair-db:latest` | The Docker image name and tag for the [PostgreSQL server hosting the vulnerability definitions](https://hub.docker.com/r/arminc/clair-db). It can be useful to override this value with a specific version (for example, to provide a consistent set of vulnerabilities for integration testing purposes, or to refer to a locally hosted vulnerability database for an on-premise offline installation). | Clair/Klar |
-| `CLAIR_DB_IMAGE_TAG`           | `latest`      | (**DEPRECATED - use `CLAIR_DB_IMAGE` instead**) The Docker image tag for the [PostgreSQL server hosting the vulnerability definitions](https://hub.docker.com/r/arminc/clair-db). It can be useful to override this value with a specific version (for example, to provide a consistent set of vulnerabilities for integration testing purposes). | Clair/Klar |
-| `CLAIR_OUTPUT`                 | `Unknown`     | Severity level threshold. Vulnerabilities with severity level higher than or equal to this threshold are output. Supported levels are `Unknown`, `Negligible`, `Low`, `Medium`, `High`, `Critical`, and `Defcon1`. | Clair/Klar |
-| `CLAIR_TRACE`                  | `"false"`     | Set to true to enable more verbose output from the Clair server process. | Clair/Klar |
-| `CLAIR_VULNERABILITIES_DB_URL` | `clair-vulnerabilities-db` | (**DEPRECATED - use `CLAIR_DB_CONNECTION_STRING` instead**) This variable is explicitly set in the [services section](https://gitlab.com/gitlab-org/gitlab/-/blob/898c5da43504eba87b749625da50098d345b60d6/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L23) of the `Container-Scanning.gitlab-ci.yml` file and defaults to `clair-vulnerabilities-db`. This value represents the address that the [PostgreSQL server hosting the vulnerability definitions](https://hub.docker.com/r/arminc/clair-db) is running on. **Do not change this** unless you're running the image locally as described in [Running the standalone container scanning tool](#running-the-standalone-container-scanning-tool). | Clair/Klar |
+| `CLAIR_DB_CONNECTION_STRING`   | `postgresql://postgres:password@clair-vulnerabilities-db:5432/postgres?sslmode=disable&statement_timeout=60000` | This variable represents the [connection string](https://www.postgresql.org/docs/9.3/libpq-connect.html#AEN39692) to the [PostgreSQL server hosting the vulnerability definitions](https://hub.docker.com/r/arminc/clair-db) database. **Do not change this** unless you're running the image locally as described in [Running the standalone container scanning tool](#running-the-standalone-container-scanning-tool). The host value for the connection string must match the [alias](https://gitlab.com/gitlab-org/gitlab/-/blob/898c5da43504eba87b749625da50098d345b60d6/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L23) value of the `Container-Scanning.gitlab-ci.yml` template file, which defaults to `clair-vulnerabilities-db`. | Clair |
+| `CLAIR_DB_IMAGE`               | `arminc/clair-db:latest` | The Docker image name and tag for the [PostgreSQL server hosting the vulnerability definitions](https://hub.docker.com/r/arminc/clair-db). It can be useful to override this value with a specific version (for example, to provide a consistent set of vulnerabilities for integration testing purposes, or to refer to a locally hosted vulnerability database for an on-premise offline installation). | Clair |
+| `CLAIR_DB_IMAGE_TAG`           | `latest`      | (**DEPRECATED - use `CLAIR_DB_IMAGE` instead**) The Docker image tag for the [PostgreSQL server hosting the vulnerability definitions](https://hub.docker.com/r/arminc/clair-db). It can be useful to override this value with a specific version (for example, to provide a consistent set of vulnerabilities for integration testing purposes). | Clair |
+| `CLAIR_OUTPUT`                 | `Unknown`     | Severity level threshold. Vulnerabilities with severity level higher than or equal to this threshold are output. Supported levels are `Unknown`, `Negligible`, `Low`, `Medium`, `High`, `Critical`, and `Defcon1`. | Clair |
+| `CLAIR_TRACE`                  | `"false"`     | Set to true to enable more verbose output from the Clair server process. | Clair |
+| `CLAIR_VULNERABILITIES_DB_URL` | `clair-vulnerabilities-db` | (**DEPRECATED - use `CLAIR_DB_CONNECTION_STRING` instead**) This variable is explicitly set in the [services section](https://gitlab.com/gitlab-org/gitlab/-/blob/898c5da43504eba87b749625da50098d345b60d6/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L23) of the `Container-Scanning.gitlab-ci.yml` file and defaults to `clair-vulnerabilities-db`. This value represents the address that the [PostgreSQL server hosting the vulnerability definitions](https://hub.docker.com/r/arminc/clair-db) is running on. **Do not change this** unless you're running the image locally as described in [Running the standalone container scanning tool](#running-the-standalone-container-scanning-tool). | Clair |
 | `CI_APPLICATION_REPOSITORY`    | `$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG` | Docker repository URL for the image to be scanned. | Both |
 | `CI_APPLICATION_TAG`           | `$CI_COMMIT_SHA` | Docker repository tag for the image to be scanned. | Both |
 | `CS_ANALYZER_IMAGE`             | `$SECURE_ANALYZERS_PREFIX/$CS_PROJECT:$CS_MAJOR_VERSION`           | Docker image of the analyzer. | Both |
 | `CS_MAJOR_VERSION`             | `3`           | The major version of the Docker image tag. | Both |
 | `CS_PROJECT`             | Depends on `$CS_MAJOR_VERSION`. `klar` if `$CS_MAJOR_VERSION` is set to `1`, `2` or `3`, and `container-scanning` otherwise. | Analyzer project to be used. | Both |
 | `DOCKER_IMAGE`                 | `$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG` | The Docker image to be scanned. If set, this variable overrides the `$CI_APPLICATION_REPOSITORY` and `$CI_APPLICATION_TAG` variables. | Both |
-| `DOCKER_INSECURE`              | `"false"`     | Allow [Klar](https://github.com/optiopay/klar) to access secure Docker registries using HTTPS with bad (or self-signed) SSL certificates. | Clair/Klar |
-| `DOCKER_PASSWORD`              | `$CI_REGISTRY_PASSWORD` | Password for accessing a Docker registry requiring authentication. | Clair/Klar |
-| `DOCKER_USER`                  | `$CI_REGISTRY_USER` | Username for accessing a Docker registry requiring authentication. | Clair/Klar |
+| `DOCKER_INSECURE`              | `"false"`     | Allow [Klar](https://github.com/optiopay/klar) to access secure Docker registries using HTTPS with bad (or self-signed) SSL certificates. | Clair |
+| `DOCKER_PASSWORD`              | `$CI_REGISTRY_PASSWORD` | Password for accessing a Docker registry requiring authentication. | Clair |
+| `DOCKER_USER`                  | `$CI_REGISTRY_USER` | Username for accessing a Docker registry requiring authentication. | Clair |
 | `DOCKERFILE_PATH`              | `Dockerfile`  | The path to the `Dockerfile` to use for generating remediations. By default, the scanner looks for a file named `Dockerfile` in the root directory of the project. You should configure this variable only if your `Dockerfile` is in a non-standard location, such as a subdirectory. See [Solutions for vulnerabilities](#solutions-for-vulnerabilities-auto-remediation) for more details. | Both |
-| `KLAR_TRACE`                   | `"false"`     | Set to true to enable more verbose output from Klar. | Clair/Klar |
-| `REGISTRY_INSECURE`            | `"false"`     | Allow [Klar](https://github.com/optiopay/klar) to access insecure registries (HTTP only). Should only be set to `true` when testing the image locally. | Clair/Klar |
+| `KLAR_TRACE`                   | `"false"`     | Set to true to enable more verbose output from Klar. | Clair |
+| `REGISTRY_INSECURE`            | `"false"`     | Allow [Klar](https://github.com/optiopay/klar) to access insecure registries (HTTP only). Should only be set to `true` when testing the image locally. | Clair |
 | `SECURE_ANALYZERS_PREFIX`      | `"registry.gitlab.com/gitlab-org/security-products/analyzers"` | Set the Docker registry base address from which to download the analyzer. | Both |
 | `SECURE_LOG_LEVEL`             | `info`        | Set the minimum logging level. Messages of this logging level or higher are output. From highest to lowest severity, the logging levels are: `fatal`, `error`, `warn`, `info`, `debug`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10880) in GitLab 13.1. | Both |
 | `TRIVY_DEBUG`                  | `"false"`     | Set to true to enable more verbose output from the Trivy process. | Trivy |
@@ -236,7 +236,7 @@ If you want to override the job definition (for example, to change properties li
 must declare and override a job after the template inclusion, and then
 specify any additional keys.
 
-This example sets `GIT_STRATEGY` to `fetch` to be considered by both Clair/Klar and Trivy:
+This example sets `GIT_STRATEGY` to `fetch` to be considered by both Clair and Trivy:
 
 ```yaml
 include:
@@ -247,7 +247,7 @@ include:
     GIT_STRATEGY: fetch
 ```
 
-This example sets `KLAR_TRACE` to `true`, which is specific to Clair/Klar:
+This example sets `KLAR_TRACE` to `true`, which is specific to Clair:
 
 ```yaml
 include:
@@ -274,7 +274,7 @@ GitLab 13.0 and later doesn't support [`only` and `except`](../../../ci/yaml/REA
 When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules)
 instead.
 
-### Migrating from Clair/Klar to Trivy
+### Migrating from Clair to Trivy
 
 If you are currently using Clair and want to migrate to Trivy before GitLab 14.0, you can do so by
 taking the following steps:
@@ -288,7 +288,7 @@ taking the following steps:
    - Remove the `CS_ANALYZER_IMAGE` variable from your CI file. The job scope is `.cs_common`. Note
      that instead of overriding this variable, you can use `CS_MAJOR_VERSION`.
 
-1. Remove any variables that are only applicable to Clair/Klar. For a complete list of these variables,
+1. Remove any variables that are only applicable to Clair. For a complete list of these variables,
    see the [available variables](#available-variables).
 1. Make any [necessary customizations](#customizing-the-container-scanning-settings) to the
    `Trivy` scanner. We strongly recommended that you minimize customizations, as they
@@ -434,9 +434,9 @@ enables the use of updated scanners in your CI/CD pipelines.
 
 Support for custom certificate authorities was introduced in the following versions:
 
-| Analyzer | Version |
+| Scanner | Version |
 | -------- | ------- |
-| `Clair/Klar` | [v2.3.0](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/releases/v2.3.0) |
+| `Clair` | [v2.3.0](https://gitlab.com/gitlab-org/security-products/analyzers/klar/-/releases/v2.3.0) |
 | `Trivy` | [4.0.0](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/-/releases/4.0.0) |
 
 #### Make GitLab container scanning analyzer images available inside your Docker registry
@@ -444,7 +444,7 @@ Support for custom certificate authorities was introduced in the following versi
 For container scanning, import the following default images from `registry.gitlab.com` into your
 [local Docker container registry](../../packages/container_registry/index.md):
 
-Clair/Klar:
+Clair:
 
 ```plaintext
 registry.gitlab.com/gitlab-org/security-products/analyzers/klar
@@ -473,7 +473,7 @@ For details on saving and transporting Docker images as a file, see Docker's doc
 
 1. [Override the container scanning template](#overriding-the-container-scanning-template) in your `.gitlab-ci.yml` file to refer to the Docker images hosted on your local Docker container registry:
 
-   Clair/Klar:
+   Clair:
 
    ```yaml
    include:
@@ -497,11 +497,11 @@ For details on saving and transporting Docker images as a file, see Docker's doc
 
 1. If your local Docker container registry is running securely over `HTTPS`, but you're using a
    self-signed certificate, then you must set `DOCKER_INSECURE: "true"` in the above
-   `container_scanning` section of your `.gitlab-ci.yml`. This only applies to Clair/Klar.
+   `container_scanning` section of your `.gitlab-ci.yml`. This only applies to Clair.
 
 #### Automating container scanning vulnerability database updates with a pipeline
 
-For those using Clair/Klar, it can be worthwhile to set up a [scheduled pipeline](../../../ci/pipelines/schedules.md)
+For those using Clair, it can be worthwhile to set up a [scheduled pipeline](../../../ci/pipelines/schedules.md)
 to build a new version of the vulnerabilities database on a preset schedule. Automating
 this with a pipeline means you do not have to do it manually each time. You can use the following
 `.gitlab-yml.ci` as a template:
@@ -527,7 +527,7 @@ The above template works for a GitLab Docker registry running on a local install
 
 ## Running the standalone container scanning tool
 
-### Clair/Klar
+### Clair
 
 It's possible to run [Klar](https://gitlab.com/gitlab-org/security-products/analyzers/klar)
 against a Docker container without needing to run it within the context of a CI job. To scan an
@@ -689,7 +689,7 @@ the security vulnerabilities in your groups, projects and pipelines.
 
 ## Vulnerabilities database update
 
-If you're using Clair/Klar and want more information about the vulnerabilities database update, see the
+If you're using Clair and want more information about the vulnerabilities database update, see the
 [maintenance table](../index.md#maintenance-and-update-of-the-vulnerabilities-database).
 
 ## Interacting with the vulnerabilities
