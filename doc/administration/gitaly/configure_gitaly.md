@@ -379,7 +379,7 @@ server (with `gitaly_address`) unless you use
 
    ```ruby
    # Use the same token value configured on all Gitaly servers
-   gitlab_rails['gitaly_token'] = 'AUTH_TOKEN'
+   gitlab_rails['gitaly_token'] = '<AUTH_TOKEN>'
 
    git_data_dirs({
      'default'  => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
@@ -387,12 +387,15 @@ server (with `gitaly_address`) unless you use
      'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075' },
    })
 
-   # Or alternatively, if each Gitaly server is configured to use a different auth token:
-   # git_data_dirs({
-   #   'default'  => { 'gitaly_address' => 'tcp://gitaly1.internal:8075', 'gitaly_token' => 'AUTH_TOKEN_1' },
-   #   'storage1' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075', 'gitaly_token' => 'AUTH_TOKEN_1' },
-   #   'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075', 'gitaly_token' => 'AUTH_TOKEN_2' },
-   # })
+   Alternatively, if each Gitaly server is configured to use a different authentication token:
+
+   ```ruby
+   git_data_dirs({
+     'default'  => { 'gitaly_address' => 'tcp://gitaly1.internal:8075', 'gitaly_token' => '<AUTH_TOKEN_1>' },
+     'storage1' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075', 'gitaly_token' => '<AUTH_TOKEN_1>' },
+     'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075', 'gitaly_token' => '<AUTH_TOKEN_2>' },
+   })
+   ```
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
