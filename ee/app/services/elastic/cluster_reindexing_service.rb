@@ -134,12 +134,9 @@ module Elastic
           if reindexing_error
             slices_failed += 1
 
-            message = "Task #{slice.elastic_task} has failed with an Elasticsearch error."
-            if slice.retry_attempt < REINDEX_MAX_RETRY_LIMIT
-              retry_slice(subtask, slice, "#{message} Retrying." )
-            else
-              abort_reindexing!("#{message}. Retry limit reached. Aborting reindexing.", additional_logs: { elasticsearch_error_type: reindexing_error, elastic_slice: slice.elastic_slice })
-            end
+            message = "Task #{slice.elastic_task} has failed with an Elasticsearch error: #{reindexing_error}."
+            retry_or_abort_after_limit(subtask, slice, message, { elasticsearch_error_type: reindexing_error, elastic_slice: slice.elastic_slice })
+            slices_in_progress += 1
 
             next
           end
@@ -147,13 +144,9 @@ module Elastic
           # Check totals match if task complete
           response = task_status['response']
           if task_status['completed'] && response['total'] != (response['created'] + response['updated'] + response['deleted'])
-            message = "Task #{slice.elastic_task} total is not equal to updated + created + deleted."
-            if slice.retry_attempt < REINDEX_MAX_RETRY_LIMIT
-              retry_slice(subtask, slice, "#{message} Retrying.")
-            else
-              abort_reindexing!("#{message} Retry limit reached. Aborting reindexing.", additional_logs: { elastic_slice: slice.elastic_slice })
-            end
-
+            message = "Task #{slice.elastic_task} total: #{response['total']} is not equal to updated: #{response['updated']} + created: #{response['created']} + deleted: #{response['deleted']}."
+            retry_or_abort_after_limit(subtask, slice, message, { elastic_slice: slice.elastic_slice })
+            slices_in_progress += 1
             totals_do_not_match += 1
           end
         end
@@ -167,6 +160,14 @@ module Elastic
       abort_reindexing!("Couldn't load task status")
 
       false
+    end
+
+    def retry_or_abort_after_limit(subtask, slice, message, additional_logs)
+      if slice.retry_attempt < REINDEX_MAX_RETRY_LIMIT
+        retry_slice(subtask, slice, "#{message} Retrying." )
+      else
+        abort_reindexing!("#{message}. Retry limit reached. Aborting reindexing.", additional_logs: additional_logs)
+      end
     end
 
     def retry_slice(subtask, slice, message, additional_options = {})

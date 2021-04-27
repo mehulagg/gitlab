@@ -3,7 +3,6 @@
 FactoryBot.define do
   factory :elastic_reindexing_slice, class: 'Elastic::ReindexingSlice' do
     association :elastic_reindexing_subtask
-    sequence(:elastic_task) { |n| "elastic_task_#{n}" }
     sequence(:elastic_slice) { |n| n - 1 }
     sequence(:elastic_max_slice) { 5 }
   end
