@@ -1,5 +1,6 @@
 <script>
-import { EditorContent, Editor } from '@tiptap/vue-2';
+import { Editor } from '@tiptap/core';
+import { EditorContent } from '@tiptap/vue-2';
 import TopToolbar from './top_toolbar.vue';
 
 export default {

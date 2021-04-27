@@ -1,3 +1,4 @@
+import { Editor } from '@tiptap/core';
 import Blockquote from '@tiptap/extension-blockquote';
 import Bold from '@tiptap/extension-bold';
 import BulletList from '@tiptap/extension-bullet-list';
@@ -17,7 +18,6 @@ import OrderedList from '@tiptap/extension-ordered-list';
 import Paragraph from '@tiptap/extension-paragraph';
 import Strike from '@tiptap/extension-strike';
 import Text from '@tiptap/extension-text';
-import { Editor } from '@tiptap/vue-2';
 import { isFunction, isString, upperFirst } from 'lodash';
 import { PROVIDE_SERIALIZER_OR_RENDERER_ERROR } from '../constants';
 import CodeBlockHighlight from '../extensions/code_block_highlight';
