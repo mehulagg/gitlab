@@ -1,6 +1,7 @@
 import { find } from 'lodash';
 import { issuableTypes, ListType } from '~/boards/constants';
 import gettersCE from '~/boards/stores/getters';
+import { transformBoardConfig } from '../boards_util';
 
 export default {
   ...gettersCE,
@@ -58,4 +59,21 @@ export default {
   shouldUseGraphQL: (state) => {
     return state.isShowingEpicsSwimlanes || gon?.features?.graphqlBoardLists;
   },
+
+  // paramsFromBoardConfig: (state) => {
+  //   return transformBoardConfig(state.boardConfig);
+  // },
+
+  // searchParams: (_, getters) => {
+  //   if (!getters.paramsFromBoardConfig) {
+  //     const filterPath = window.location.search ? `${window.location.search}&` : '?';
+  //     updateHistory({
+  //       url: `${filterPath}${paramsFromBoardConfig}`,
+  //     });
+  //   }
+  //   const groupByParam = new URLSearchParams(window.location.search).get('group_by');
+  //   updateHistory({
+  //     url: `?${path.substr(1)}${groupByParam ? `&group_by=${groupByParam}` : ''}`,
+  //   });
+  // }
 };

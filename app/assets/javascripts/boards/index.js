@@ -167,16 +167,17 @@ export default () => {
 
       this.filterManager.setup();
 
-      this.performSearch();
-
-      boardsStore.disabled = this.disabled;
-
       if (!this.shouldUseGraphQL) {
+        boardsStore.disabled = this.disabled;
         this.initialBoardLoad();
+
+        return;
       }
+
+      this.searchIssues();
     },
     methods: {
-      ...mapActions(['setInitialBoardData', 'performSearch']),
+      ...mapActions(['setInitialBoardData', 'searchIssues']),
       initialBoardLoad() {
         boardsStore
           .all()

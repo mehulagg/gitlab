@@ -51,9 +51,10 @@ import projectBoardIterationsQuery from '../graphql/project_board_iterations.que
 import projectBoardMilestonesQuery from '../graphql/project_board_milestones.query.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/update_board_epic_user_preferences.mutation.graphql';
 import updateEpicLabelsMutation from '../graphql/update_epic_labels.mutation.graphql';
-
+import { updateHistory } from '~/lib/utils/url_utility';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
+import { dispatch } from 'codesandbox-api';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -120,7 +121,10 @@ const fetchAndFormatListEpics = (state, extraVariables) => {
 export default {
   ...actionsCE,
 
-  setFilters: ({ commit, dispatch, getters }, filters) => {
+  setFilters: (
+    { commit, dispatch, getters },
+    filters = convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
+  ) => {
     const supportedFilters = [...SupportedFilters, ...SupportedFiltersEE];
     const filterParams = getSupportedParams(filters, supportedFilters);
 
@@ -154,21 +158,22 @@ export default {
     commit(types.SET_FILTERS, filterParams);
   },
 
-  performSearch({ dispatch, getters }) {
-    dispatch(
-      'setFilters',
-      convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
-    );
+  searchIssues({ dispatch, getters }) {
+    dispatch('setFilters');
+    dispatch('resetIssues');
+    dispatch('fetchIssueLists');
 
     if (getters.isSwimlanesOn) {
       dispatch('resetEpics');
-      dispatch('resetIssues');
       dispatch('fetchEpicsSwimlanes');
-      dispatch('fetchIssueLists');
-    } else if (gon.features.graphqlBoardLists || getters.isEpicBoard) {
-      dispatch('fetchLists');
-      dispatch('resetIssues');
     }
+  },
+
+  searchEpics() {
+    dispatch('setFilters');
+    dispatch('resetIssues');
+
+    dispatch('fetchEpicLists');
   },
 
   fetchEpicsSwimlanes({ state, commit, dispatch }, { endCursor = null } = {}) {
@@ -539,14 +544,6 @@ export default {
       .catch(() =>
         commit(types.MOVE_EPIC_FAILURE, { originalEpic, fromListId, toListId, originalIndex }),
       );
-  },
-
-  fetchLists: ({ getters, dispatch }) => {
-    if (!getters.isEpicBoard) {
-      dispatch('fetchIssueLists');
-    } else {
-      dispatch('fetchEpicLists');
-    }
   },
 
   fetchEpicLists: ({ commit, state }) => {

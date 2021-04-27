@@ -1,7 +1,5 @@
-import { transformBoardConfig } from 'ee_else_ce/boards/boards_util';
 import FilteredSearchManager from 'ee_else_ce/filtered_search/filtered_search_manager';
 import IssuableFilteredSearchTokenKeys from 'ee_else_ce/filtered_search/issuable_filtered_search_token_keys';
-import { updateHistory } from '~/lib/utils/url_utility';
 import FilteredSearchContainer from '../filtered_search/container';
 import vuexstore from './stores';
 import boardsStore from './stores/boards_store';
@@ -25,16 +23,6 @@ export default class FilteredSearchBoards extends FilteredSearchManager {
     this.isHandledAsync = true;
     this.cantEdit = cantEdit.filter((i) => typeof i === 'string');
     this.cantEditWithValue = cantEdit.filter((i) => typeof i === 'object');
-
-    if (vuexstore.getters.shouldUseGraphQL && vuexstore.state.boardConfig) {
-      const boardConfigPath = transformBoardConfig(vuexstore.state.boardConfig);
-      if (boardConfigPath !== '') {
-        const filterPath = window.location.search ? `${window.location.search}&` : '?';
-        updateHistory({
-          url: `${filterPath}${transformBoardConfig(vuexstore.state.boardConfig)}`,
-        });
-      }
-    }
   }
 
   updateObject(path) {
@@ -42,10 +30,8 @@ export default class FilteredSearchBoards extends FilteredSearchManager {
     this.store.path = `${path.substr(1)}${groupByParam ? `&group_by=${groupByParam}` : ''}`;
 
     if (vuexstore.getters.shouldUseGraphQL) {
-      updateHistory({
-        url: `?${path.substr(1)}${groupByParam ? `&group_by=${groupByParam}` : ''}`,
-      });
-      vuexstore.dispatch('performSearch');
+      vuexstore.dispatch('setFilters');
+      vuexstore.dispatch('searchIssues');
     } else if (this.updateUrl) {
       boardsStore.updateFiltersUrl();
     }

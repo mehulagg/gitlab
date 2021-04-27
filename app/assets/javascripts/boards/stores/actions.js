@@ -74,19 +74,9 @@ export default {
     commit(types.SET_FILTERS, filterParams);
   },
 
-  performSearch({ dispatch }) {
-    dispatch(
-      'setFilters',
-      convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
-    );
-
-    if (gon.features.graphqlBoardLists) {
-      dispatch('fetchLists');
-      dispatch('resetIssues');
-    }
-  },
-
-  fetchLists: ({ dispatch }) => {
+  searchIssueBoards({ dispatch }) {
+    dispatch('setFilters');
+    dispatch('resetIssues');
     dispatch('fetchIssueLists');
   },
 

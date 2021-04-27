@@ -215,11 +215,6 @@ export function getSupportedParams(filters, supportedFilters) {
   }, {});
 }
 
-// EE-specific feature. Find the implementation in the `ee/`-folder
-export function transformBoardConfig() {
-  return '';
-}
-
 export default {
   getMilestone,
   formatIssue,

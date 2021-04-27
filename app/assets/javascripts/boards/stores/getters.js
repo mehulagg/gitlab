@@ -55,4 +55,8 @@ export default {
   shouldUseGraphQL: () => {
     return gon?.features?.graphqlBoardLists;
   },
+
+  boardConfigPath: () => {
+    return;
+  },
 };
