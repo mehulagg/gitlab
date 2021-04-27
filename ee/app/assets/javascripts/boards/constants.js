@@ -5,6 +5,8 @@ import { s__ } from '~/locale';
 
 import updateEpicBoardListMutation from './graphql/epic_board_list_update.mutation.graphql';
 
+export * from '~/boards/constants';
+
 export const DRAGGABLE_TAG = 'div';
 
 export const EPIC_LANE_BASE_HEIGHT = 40;
@@ -59,7 +61,7 @@ export const ErrorMessages = {
   ),
 };
 
-export const updateListQueries = {
+const updateListQueries = {
   [issuableTypes.issue]: {
     mutation: updateBoardListMutation,
   },
@@ -69,6 +71,7 @@ export const updateListQueries = {
 };
 
 export default {
+  updateListQueries,
   DRAGGABLE_TAG,
   EpicFilterType,
 };
