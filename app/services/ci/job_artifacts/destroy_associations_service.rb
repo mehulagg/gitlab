@@ -16,7 +16,7 @@ module Ci
         @job_artifacts_relation.each_batch(of: BATCH_SIZE) do |relation|
           service = Ci::JobArtifacts::DestroyBatchService.new(relation)
           result = service.execute(update_stats: false)
-          @statistics.merge!(result[:statstics_updates]) { |_key, oldval, newval| newval + oldval }
+          @statistics.merge!(result[:statistics_updates]) { |_key, oldval, newval| newval + oldval }
         end
       end
 

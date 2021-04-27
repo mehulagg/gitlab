@@ -33,10 +33,10 @@ module Ci
         end
 
         # This is executed outside of the transaction because it depends on Redis
-        statstics_updates = update_project_statistics(perform_updates: update_stats)
+        statistics_updates = update_project_statistics(perform_updates: update_stats)
         increment_monitoring_statistics(artifacts_count)
 
-        success(destroyed_artifacts_count: artifacts_count, statstics_updates: statstics_updates)
+        success(destroyed_artifacts_count: artifacts_count, statistics_updates: statistics_updates)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
