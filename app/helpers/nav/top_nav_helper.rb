@@ -3,6 +3,9 @@
 module Nav
   module TopNavHelper
     PROJECTS_VIEW = 'projects-view'
+    GROUPS_VIEW = 'groups-view'
+    PROJECTS_TYPE = :projects
+    GROUPS_TYPE = :groups
 
     def top_nav_view_model
       builder = ::Gitlab::Nav::TopNavViewModelBuilder.new
@@ -20,8 +23,6 @@ module Nav
 
     def build_anonymous_view_model(builder)
       # These come from `app/views/layouts/nav/_explore.html.ham`
-      # TODO: We will move the rest of them shortly
-      # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56587
       if explore_nav_link?(:projects)
         builder.add_primary_menu_item(
           **projects_menu_item_attrs.merge({
@@ -30,12 +31,28 @@ module Nav
           })
         )
       end
+
+      if explore_nav_link?(:groups)
+        builder.add_primary_menu_item(
+          **groups_menu_item_attrs.merge({
+            active: active_nav_link?(controller: [:groups, 'groups/milestones', 'groups/group_members']),
+            href: explore_groups_path
+          })
+        )
+      end
+
+      if explore_nav_link?(:snippets)
+        builder.add_primary_menu_item(
+          **snippets_menu_item_attrs.merge({
+            active: active_nav_link?(controller: :snippets),
+            href: explore_snippets_path
+          })
+        )
+      end
     end
 
     def build_view_model(builder)
       # These come from `app/views/layouts/nav/_dashboard.html.haml`
-      # TODO: We will move the rest of them shortly
-      # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56587
       if dashboard_nav_link?(:projects)
         builder
           .add_primary_menu_item(
@@ -46,7 +63,20 @@ module Nav
               view: PROJECTS_VIEW
             })
           )
-          .add_view(PROJECTS_VIEW, container_view_props)
+          .add_view(PROJECTS_VIEW, container_view_props(container_type: PROJECTS_TYPE))
+      end
+
+      if dashboard_nav_link?(:groups)
+        builder
+          .add_primary_menu_item(
+            **groups_menu_item_attrs.merge({
+              active: active_nav_link?(path: ['dashboard/groups', 'explore/groups']),
+              css_class: 'qa-groups-dropdown',
+              data: { track_label: "groups_dropdown", track_event: "click_dropdown" },
+              view: GROUPS_VIEW
+            })
+          )
+          .add_view(GROUPS_VIEW, container_view_props(container_type: GROUPS_TYPE))
       end
 
       if dashboard_nav_link?(:milestones)
@@ -57,6 +87,27 @@ module Nav
           icon: 'clock',
           data: { qa_selector: 'milestones_link' },
           href: dashboard_milestones_path
+        )
+      end
+
+      if dashboard_nav_link?(:snippets)
+        builder.add_primary_menu_item(
+          **snippets_menu_item_attrs.merge({
+            active: active_nav_link?(controller: 'dashboard/snippets'),
+            data: { qa_selector: 'snippets_link' },
+            href: dashboard_snippets_path
+          })
+        )
+      end
+
+      if dashboard_nav_link?(:activity)
+        builder.add_primary_menu_item(
+          id: 'activity',
+          title: 'Activity',
+          active: active_nav_link?(path: 'dashboard#activity'),
+          icon: 'history',
+          data: { qa_selector: 'activity_link' },
+          href: activity_dashboard_path
         )
       end
 
@@ -96,6 +147,15 @@ module Nav
         end
       end
       # rubocop: enable Cop/UserAdmin
+
+      if Gitlab::Sherlock.enabled?
+        builder.add_secondary_menu_item(
+          id: 'sherlock',
+          title: _('Sherlock Transactions'),
+          icon: 'admin',
+          href: sherlock_transactions_path
+        )
+      end
     end
 
     def projects_menu_item_attrs
@@ -106,12 +166,25 @@ module Nav
       }
     end
 
-    def container_view_props
-      # TODO: We will be adding a conditional here for when we build the `container_view_props`
-      # for groups.
-      # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56587
-      container = current_project
-      submenu = projects_submenu
+    def groups_menu_item_attrs
+      {
+        id: 'groups',
+        title: 'Groups',
+        icon: 'group'
+      }
+    end
+
+    def snippets_menu_item_attrs
+      {
+        id: 'snippets',
+        title: _('Snippets'),
+        icon: 'snippet'
+      }
+    end
+
+    def container_view_props(container_type:)
+      container = container_type == PROJECTS_TYPE ? current_project : current_group
+      submenu = container_type == PROJECTS_TYPE ? projects_submenu : groups_submenu
 
       {
         namespace: container_type,
@@ -134,6 +207,18 @@ module Nav
       }
     end
 
+    def current_group
+      return {} unless @group&.persisted?
+
+      {
+        id: @group.id,
+        name: @group.name,
+        namespace: @group.full_name,
+        webUrl: group_path(@group),
+        avatarUrl: @group.avatar_url
+      }
+    end
+
     def projects_submenu
       # These project links come from `app/views/layouts/nav/projects_dropdown/_show.html.haml`
       ::Gitlab::Nav::TopNavMenuBuilder.new
@@ -141,6 +226,15 @@ module Nav
         .add_primary_menu_item(id: 'starred', title: _('Starred projects'), href: starred_dashboard_projects_path)
         .add_primary_menu_item(id: 'explore', title: _('Explore projects'), href: explore_root_path)
         .add_secondary_menu_item(id: 'create', title: _('Create new project'), href: new_project_path)
+        .build
+    end
+
+    def groups_submenu
+      # These group links come from `app/views/layouts/nav/groups_dropdown/_show.html.haml`
+      ::Gitlab::Nav::TopNavMenuBuilder.new
+        .add_primary_menu_item(id: 'your', title: _('Your groups'), href: dashboard_groups_path)
+        .add_primary_menu_item(id: 'explore', title: _('Explore groups'), href: explore_groups_path)
+        .add_secondary_menu_item(id: 'create', title: _('Create group'), href: new_group_path(anchor: 'create-group-pane'))
         .build
     end
   end
