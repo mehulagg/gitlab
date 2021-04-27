@@ -2194,6 +2194,14 @@ RSpec.describe API::MergeRequests do
         expect(json_response['title']).to eq('Updated merge request')
         expect(json_response['reviewers']).to be_empty
       end
+
+      it 'adds multiple reviewers in array form' do
+        put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}?reviewer_ids[]=#{user.id}&reviewer_ids[]=#{user2.id}", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+
+        expect(json_response['reviewers'].map(&:name)).to match_array([user.name, user2.name])
+      end
     end
   end
 
