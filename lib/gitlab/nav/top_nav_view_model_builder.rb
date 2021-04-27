@@ -30,7 +30,7 @@ module Gitlab
         menu = @menu_builder.build
 
         menu.merge({
-          views: @views.clone.freeze,
+          views: @views.clone,
           activeTitle: _('Menu')
         })
       end

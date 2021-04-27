@@ -18,8 +18,8 @@ module Gitlab
 
       def build
         {
-          primary: @primary.clone.freeze,
-          secondary: @secondary.clone.freeze,
+          primary: @primary.clone,
+          secondary: @secondary.clone
         }
       end
 
