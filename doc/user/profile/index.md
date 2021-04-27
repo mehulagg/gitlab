@@ -173,23 +173,6 @@ To set the busy status indicator, either:
   | --- | --- |
   | ![Busy status - notes](img/busy_indicator_notes_v13_9.png) | ![Busy status - note header](img/busy_indicator_note_header_v13_9.png) |
 
-### Disable busy status feature
-
-The busy status feature is deployed behind a feature flag and is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md) can disable it for your instance from the [rails console](../../administration/feature_flags.md#start-the-gitlab-rails-console).
-
-To disable it:
-
-```ruby
-Feature.disable(:set_user_availability_status)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:set_user_availability_status)
-```
-
 ## Change the email displayed on your commits
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21598) in GitLab 11.4.
