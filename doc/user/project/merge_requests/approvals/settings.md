@@ -30,7 +30,7 @@ even if there are changes added to the merge request. To enable this feature:
 1. Click **Save changes**.
 
 NOTE:
-Approvals do not get reset when [rebasing a merge request](fast_forward_merge.md)
+Approvals do not get reset when [rebasing a merge request](../fast_forward_merge.md)
 from the UI. However, approvals are reset if the target branch is changed.
 
 ### Allowing merge request authors to approve their own merge requests **(PREMIUM)**
@@ -48,7 +48,7 @@ their own authors. To change this setting:
 Note that users can edit the approval rules in every merge request and override pre-defined settings unless it's set [**not to allow** overrides](#prevent-overriding-default-approvals).
 
 You can prevent authors from approving their own merge requests
-[at the instance level](../../admin_area/merge_requests_approvals.md). When enabled,
+[at the instance level](../../../admin_area/merge_requests_approvals.md). When enabled,
 this setting is disabled on the project level, and not editable.
 
 ### Prevent approval of merge requests by their committers **(PREMIUM)**
@@ -58,13 +58,13 @@ this setting is disabled on the project level, and not editable.
 
 You can prevent users who have committed to a merge request from approving it,
 though code authors can still approve. You can enable this feature
-[at the instance level](../../admin_area/merge_requests_approvals.md), which
+[at the instance level](../../../admin_area/merge_requests_approvals.md), which
 disables changes to this feature at the project level. If you prefer to manage
 this feature at the project level, you can:
 
 1. Check the **Prevent MR approvals from users who make commits to the MR.** checkbox.
    If this check box is disabled, this feature has been disabled
-   [at the instance level](../../admin_area/merge_requests_approvals.md).
+   [at the instance level](../../../admin_area/merge_requests_approvals.md).
 1. Click **Save changes**.
 
 Read the official Git documentation for an explanation of the
@@ -77,7 +77,7 @@ Read the official Git documentation for an explanation of the
 
 NOTE:
 To require authentication when approving a merge request, you must enable
-**Password authentication enabled for web interface** under [sign-in restrictions](../../admin_area/settings/sign_in_restrictions.md#password-authentication-enabled).
+**Password authentication enabled for web interface** under [sign-in restrictions](../../../admin_area/settings/sign_in_restrictions.md#password-authentication-enabled).
 in the Admin Area.
 
 You can force the approver to enter a password in order to authenticate before adding
@@ -94,4 +94,4 @@ Merge Request Approvals can be configured to require approval from a member
 of your security team when a vulnerability would be introduced by a merge request.
 
 For more information, see
-[Security approvals in merge requests](../../application_security/index.md#security-approvals-in-merge-requests).
+[Security approvals in merge requests](../../../application_security/index.md#security-approvals-in-merge-requests).

@@ -13,13 +13,13 @@ type: reference, concepts
 Code review is an essential practice of every successful project. Approving a
 merge request is an important part of the review
 process, as it clearly communicates the ability to merge the change.
-A [merge request approvals API](../../../api/merge_request_approvals.md) is also available.
+A [merge request approvals API](../../../../api/merge_request_approvals.md) is also available.
 
 ## Optional Approvals
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27426) in GitLab 13.2.
 
-Any user with Developer or greater [permissions](../../permissions.md) can approve a merge request in GitLab Free and higher tiers.
+Any user with Developer or greater [permissions](../../../permissions.md) can approve a merge request in GitLab Free and higher tiers.
 This provides a consistent mechanism for reviewers to approve merge requests, and ensures
 maintainers know a change is ready to merge. Approvals in Free are optional, and do
 not prevent a merge request from being merged when there is no approval.
@@ -27,10 +27,10 @@ not prevent a merge request from being merged when there is no approval.
 ## External approvals **(ULTIMATE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3869) in GitLab Ultimate 13.10.
-> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - It's [deployed behind a feature flag](../../../feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](../../../api/merge_request_approvals.md#enable-or-disable-external-project-level-mr-approvals). **(ULTIMATE SELF)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](../../../../api/merge_request_approvals.md#enable-or-disable-external-project-level-mr-approvals). **(ULTIMATE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -55,7 +55,7 @@ The intention for this feature is to allow those 3rd party tools to approve a me
 NOTE:
 The lack of an external approval does not block the merging of a merge request.
 
-You can modify external approval rules through the [REST API](../../../api/merge_request_approvals.md#external-project-level-mr-approvals).
+You can modify external approval rules through the [REST API](../../../../api/merge_request_approvals.md#external-project-level-mr-approvals).
 
 ## Required Approvals **(PREMIUM)**
 
@@ -108,8 +108,8 @@ is enabled in the project settings.
 
 After the approval rules have been met, the merge request can be merged if there is nothing
 else blocking it. Note that the merge request could still be blocked by other conditions,
-such as merge conflicts, [pending discussions](../../discussions/index.md#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolved),
-or a [failed CI/CD pipeline](merge_when_pipeline_succeeds.md).
+such as merge conflicts, [pending discussions](../../../discussions/index.md#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolved),
+or a [failed CI/CD pipeline](../merge_when_pipeline_succeeds.md).
 
 <!-- ## Troubleshooting
 

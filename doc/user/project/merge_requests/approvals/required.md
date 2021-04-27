@@ -15,7 +15,7 @@ be merged, and optionally which users should do the approving. Approvals can be 
 
 If no approval rules are defined, any user can approve a merge request. However, the default
 minimum number of required approvers can still be set in the
-[settings for merge request approvals](#approval-settings).
+[settings for merge request approvals](settings.md).
 
 You can opt to define one single rule to approve a merge request among the available rules
 or choose more than one with [multiple approval rules](#multiple-approval-rules).
@@ -31,15 +31,15 @@ group is public.
 The following users can approve merge requests:
 
 - Users who have been added as approvers at the project or merge request levels with
-  developer or higher [permissions](../../permissions.md).
+  developer or higher [permissions](../..///permissions.md).
 - [Code owners](#code-owners-as-eligible-approvers) of the files changed by the merge request
-  that have developer or higher [permissions](../../permissions.md).
+  that have developer or higher [permissions](../../../permissions.md).
 
 An individual user can be added as an approver for a project if they are a member of:
 
 - The project.
 - The project's immediate parent group.
-- A group that has access to the project via a [share](../members/share_project_with_groups.md).
+- A group that has access to the project via a [share](../../members/share_project_with_groups.md).
 
 A group of users can also be added as approvers, though they only count as approvers if
 they have direct membership to the group. In the future, group approvers may be
@@ -61,7 +61,7 @@ to if they have any questions about the content of the merge request.
 
 If the number of required approvals is greater than the number of assigned approvers,
 approvals from other users counts towards meeting the requirement. These would be
-users with developer [permissions](../../permissions.md) or higher in the project who
+users with developer [permissions](../../../permissions.md) or higher in the project who
 were not explicitly listed in the approval rules.
 
 ### Code Owners as eligible approvers
@@ -69,9 +69,9 @@ were not explicitly listed in the approval rules.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/7933) in GitLab 11.5.
 > - Moved to GitLab Premium in 13.9.
 
-If you add [Code Owners](../code_owners.md) to your repository, the owners to the
+If you add [Code Owners](../../code_owners.md) to your repository, the owners to the
 corresponding files become eligible approvers, together with members with Developer
-or higher [permissions](../../permissions.md).
+or higher [permissions](../../../permissions.md).
 
 To enable this merge request approval rule:
 
@@ -87,29 +87,29 @@ users with Developer or higher permissions, as well as by Code Owners,
 indistinguishably.
 
 Alternatively, you can **require**
-[Code Owner's approvals for protected branches](../protected_branches.md#protected-branches-approval-by-code-owners). **(PREMIUM)**
+[Code Owner's approvals for protected branches](../../protected_branches.md#protected-branches-approval-by-code-owners). **(PREMIUM)**
 
 ## Merge Request approval segregation of duties
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40491) in GitLab 13.4.
 > - Moved to Premium in 13.9.
 
-Managers or operators with [Reporter permissions](../../permissions.md#project-members-permissions)
+Managers or operators with [Reporter permissions](../../../permissions.md#project-members-permissions)
 to a project sometimes need to be required approvers of a merge request,
 before a merge to a protected branch begins. These approvers aren't allowed
 to push or merge code to any branches.
 
 To enable this access:
 
-1. [Create a new group](../../group/index.md#create-a-group), and then
-   [add the user to the group](../../group/index.md#add-users-to-a-group),
+1. [Create a new group](../../../group/index.md#create-a-group), and then
+   [add the user to the group](../../../group/index.md#add-users-to-a-group),
    ensuring you select the Reporter role for the user.
-1. [Share the project with your group](../members/share_project_with_groups.md#sharing-a-project-with-a-group-of-users),
+1. [Share the project with your group](../../members/share_project_with_groups.md#sharing-a-project-with-a-group-of-users),
    based on the Reporter role.
 1. Navigate to your project's **Settings > General**, and in the
    **Merge request (MR) approvals** section, click **Expand**.
 1. Select **Add approval rule** or **Update approval rule**.
-1. [Add the group](../../group/index.md#create-a-group) to the permission list.
+1. [Add the group](../../../group/index.md#create-a-group) to the permission list.
 
 ![Update approval rule](img/update_approval_rule_v13_10.png)
 
@@ -150,7 +150,7 @@ source (fork).
 > Introduced in GitLab Enterprise Edition 9.4.
 
 By default, the merge request approval rule listed in each merge request (MR) can be
-edited by the MR author or a user with sufficient [permissions](../../permissions.md).
+edited by the MR author or a user with sufficient [permissions](../../../permissions.md).
 This ability can be disabled in the [merge request approvals settings](#prevent-overriding-default-approvals).
 
 One possible scenario would be to add more approvers than were defined in the default
@@ -166,7 +166,7 @@ on a team where approvals are appreciated, but not required.
 
 To configure an approval to be optional, set the number of required approvals in **Approvals required** to `0`.
 
-You can also set an optional approval rule through the [Merge requests approvals API](../../../api/merge_request_approvals.md#update-merge-request-level-rule), by setting the `approvals_required` attribute to `0`.
+You can also set an optional approval rule through the [Merge requests approvals API](../../../../api/merge_request_approvals.md#update-merge-request-level-rule), by setting the `approvals_required` attribute to `0`.
 
 ## Multiple approval rules **(PREMIUM)**
 
@@ -204,4 +204,4 @@ Alternatively, you can select a very specific protected branch from the **Target
 
 ![Scoped to protected branch](img/scoped_to_protected_branch_v13_10.png)
 
-To enable this configuration, see [Code Owner's approvals for protected branches](../protected_branches.md#protected-branches-approval-by-code-owners).
+To enable this configuration, see [Code Owner's approvals for protected branches](../../protected_branches.md#protected-branches-approval-by-code-owners).
