@@ -1,12 +1,7 @@
-import {
-  MarkdownSerializer as ProseMirrorMarkdownSerializer,
-  defaultMarkdownSerializer,
-} from 'prosemirror-markdown/src/to_markdown';
+import { MarkdownSerializer as ProseMirrorMarkdownSerializer } from 'prosemirror-markdown/src/to_markdown';
 import { DOMParser as ProseMirrorDOMParser } from 'prosemirror-model';
 
 const wrapHtmlPayload = (payload) => `<div>${payload}</div>`;
-const nodeSerializerAlias = (serializerFn) => (...args) => serializerFn(...args);
-const markSerializerAlias = (serializerSpec) => ({ ...serializerSpec });
 
 /**
  * A markdown serializer converts arbitrary Markdown content
@@ -20,66 +15,45 @@ const markSerializerAlias = (serializerSpec) => ({ ...serializerSpec });
  * that parses the Markdown and converts it into HTML.
  * @returns a markdown serializer
  */
-const create = ({ render = () => null }) => {
-  return {
-    /**
-     * Converts a Markdown string into a ProseMirror JSONDocument based
-     * on a ProseMirror schema.
-     * @param {ProseMirror.Schema} params.schema A ProseMirror schema that defines
-     * the types of content supported in the document
-     * @param {String} params.content An arbitrary markdown string
-     * @returns A ProseMirror JSONDocument
-     */
-    deserialize: async ({ schema, content }) => {
-      const html = await render(content);
+export default ({ render = () => null }) => ({
+  /**
+   * Converts a Markdown string into a ProseMirror JSONDocument based
+   * on a ProseMirror schema.
+   * @param {ProseMirror.Schema} params.schema A ProseMirror schema that defines
+   * the types of content supported in the document
+   * @param {String} params.content An arbitrary markdown string
+   * @returns A ProseMirror JSONDocument
+   */
+  deserialize: async ({ schema, content }) => {
+    const html = await render(content);
 
-      if (!html) {
-        return null;
-      }
+    if (!html) {
+      return null;
+    }
 
-      const parser = new DOMParser();
-      const {
-        body: { firstElementChild },
-      } = parser.parseFromString(wrapHtmlPayload(html), 'text/html');
-      const state = ProseMirrorDOMParser.fromSchema(schema).parse(firstElementChild);
+    const parser = new DOMParser();
+    const {
+      body: { firstElementChild },
+    } = parser.parseFromString(wrapHtmlPayload(html), 'text/html');
+    const state = ProseMirrorDOMParser.fromSchema(schema).parse(firstElementChild);
 
-      return state.toJSON();
-    },
+    return state.toJSON();
+  },
 
-    /**
-     * Converts a ProseMirror JSONDocument based
-     * on a ProseMirror schema into Markdown
-     * @param {ProseMirror.Schema} params.schema A ProseMirror schema that defines
-     * the types of content supported in the document
-     * @param {String} params.content A ProseMirror JSONDocument
-     * @returns A Markdown string
-     */
-    serialize: ({ schema, content }) => {
-      const document = schema.nodeFromJSON(content);
-      const { nodes, marks } = defaultMarkdownSerializer;
+  /**
+   * Converts a ProseMirror JSONDocument based
+   * on a ProseMirror schema into Markdown
+   * @param {ProseMirror.Schema} params.schema A ProseMirror schema that defines
+   * the types of content supported in the document
+   * @param {String} params.content A ProseMirror JSONDocument
+   * @returns A Markdown string
+   */
+  serialize: ({ serializerSpec: { nodes, marks }, schema, content }) => {
+    const document = schema.nodeFromJSON(content);
+    const serializer = new ProseMirrorMarkdownSerializer(nodes, marks);
 
-      const serializer = new ProseMirrorMarkdownSerializer(
-        {
-          ...defaultMarkdownSerializer.nodes,
-          horizontalRule: nodeSerializerAlias(nodes.horizontal_rule),
-          bulletList: nodeSerializerAlias(nodes.bullet_list),
-          listItem: nodeSerializerAlias(nodes.list_item),
-          orderedList: nodeSerializerAlias(nodes.ordered_list),
-          codeBlock: nodeSerializerAlias(nodes.code_block),
-          hardBreak: nodeSerializerAlias(nodes.hard_break),
-        },
-        {
-          ...defaultMarkdownSerializer.marks,
-          bold: markSerializerAlias(marks.strong),
-          italic: { open: '_', close: '_', mixable: true, expelEnclosingWhitespace: true },
-        },
-      );
-
-      return serializer.serialize(document, {
-        tightLists: true,
-      });
-    },
-  };
-};
-
-export default create;
+    return serializer.serialize(document, {
+      tightLists: true,
+    });
+  },
+});

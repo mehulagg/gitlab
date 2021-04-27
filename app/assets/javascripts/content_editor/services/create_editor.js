@@ -1,27 +1,48 @@
 import { Editor } from '@tiptap/core';
-import Blockquote from '@tiptap/extension-blockquote';
-import Bold from '@tiptap/extension-bold';
-import BulletList from '@tiptap/extension-bullet-list';
-import Code from '@tiptap/extension-code';
 import Document from '@tiptap/extension-document';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import Gapcursor from '@tiptap/extension-gapcursor';
-import HardBreak from '@tiptap/extension-hard-break';
-import Heading from '@tiptap/extension-heading';
 import History from '@tiptap/extension-history';
-import HorizontalRule from '@tiptap/extension-horizontal-rule';
-import Image from '@tiptap/extension-image';
-import Italic from '@tiptap/extension-italic';
-import Link from '@tiptap/extension-link';
-import ListItem from '@tiptap/extension-list-item';
-import OrderedList from '@tiptap/extension-ordered-list';
-import Paragraph from '@tiptap/extension-paragraph';
-import Strike from '@tiptap/extension-strike';
-import Text from '@tiptap/extension-text';
 import { isFunction, isString, upperFirst } from 'lodash';
 import { PROVIDE_SERIALIZER_OR_RENDERER_ERROR } from '../constants';
+import Blockquote from '../extensions/blockquote';
+import Bold from '../extensions/bold';
+import BulletList from '../extensions/bullet_list';
+import Code from '../extensions/code';
 import CodeBlockHighlight from '../extensions/code_block_highlight';
-import createMarkdownSerializer from './markdown_serializer';
+import HardBreak from '../extensions/hard_break';
+import Heading from '../extensions/heading';
+import HorizontalRule from '../extensions/horizontal_rule';
+import Image from '../extensions/image';
+import Italic from '../extensions/italic';
+import Link from '../extensions/link';
+import ListItem from '../extensions/list_item';
+import OrderedList from '../extensions/ordered_list';
+import Paragraph from '../extensions/paragraph';
+import Text from '../extensions/text';
+import markdownSerializer from './markdown_serializer';
+
+const createSerializerSpecs = (editorExtensions) => {
+  return editorExtensions
+    .filter(({ config }) => config.serializer)
+    .reduce(
+      (serializers, { name, type, config: { serializer } }) => {
+        const collection = `${type}s`;
+
+        return {
+          ...serializers,
+          [collection]: {
+            ...serializers[collection],
+            [name]: serializer,
+          },
+        };
+      },
+      {
+        nodes: {},
+        marks: {},
+      },
+    );
+};
 
 const createEditor = async ({
   content,
@@ -33,29 +54,29 @@ const createEditor = async ({
     throw new Error(PROVIDE_SERIALIZER_OR_RENDERER_ERROR);
   }
 
+  const extensions = [
+    Dropcursor,
+    Gapcursor,
+    History,
+    Document,
+    Text,
+    HardBreak,
+    Paragraph,
+    Bold,
+    Italic,
+    Code,
+    Link,
+    Heading,
+    BulletList,
+    OrderedList,
+    ListItem,
+    Blockquote,
+    HorizontalRule,
+    Image,
+    CodeBlockHighlight,
+  ];
   const editor = new Editor({
-    extensions: [
-      Dropcursor,
-      Gapcursor,
-      History,
-      Document,
-      Text,
-      Paragraph,
-      Bold,
-      Italic,
-      Code,
-      Link,
-      Heading,
-      HardBreak,
-      Strike,
-      Blockquote,
-      HorizontalRule,
-      BulletList,
-      OrderedList,
-      ListItem,
-      Image.configure({ inline: true }),
-      CodeBlockHighlight,
-    ],
+    extensions,
     editorProps: {
       attributes: {
         class: 'gl-outline-0!',
@@ -63,7 +84,8 @@ const createEditor = async ({
     },
     ...options,
   });
-  const serializer = customSerializer || createMarkdownSerializer({ render: renderMarkdown });
+  const serializer = customSerializer || markdownSerializer({ render: renderMarkdown });
+  const serializerSpec = createSerializerSpecs(extensions);
 
   Object.assign(editor, {
     toggleContentType: (contentTypeName) => {
@@ -73,11 +95,18 @@ const createEditor = async ({
     },
     setSerializedContent: async (serializedContent) => {
       editor.commands.setContent(
-        await serializer.deserialize({ schema: editor.schema, content: serializedContent }),
+        await serializer.deserialize({
+          schema: editor.schema,
+          content: serializedContent,
+        }),
       );
     },
     getSerializedContent: () => {
-      return serializer.serialize({ schema: editor.schema, content: editor.getJSON() });
+      return serializer.serialize({
+        serializerSpec,
+        schema: editor.schema,
+        content: editor.getJSON(),
+      });
     },
   });
 

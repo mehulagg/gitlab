@@ -1,4 +1,5 @@
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import { defaultMarkdownSerializer } from 'prosemirror-markdown/src/to_markdown';
 
 const extractLanguage = (element) => element.firstElementChild?.getAttribute('lang');
 
@@ -31,4 +32,5 @@ export default CodeBlockLowlight.extend({
       },
     };
   },
+  serializer: defaultMarkdownSerializer.nodes.code_block,
 });
