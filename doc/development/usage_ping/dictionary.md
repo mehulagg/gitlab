@@ -6602,11 +6602,11 @@ Whether auto DevOps is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124856_instance_auto_devops_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `ldap_enabled`
 
