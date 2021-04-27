@@ -19,12 +19,18 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       }
     )
 
+    allow(Gitlab).to receive(:com?).and_return(is_gitlab_com)
+
+    request.headers['DNT'] = do_not_track if do_not_track.present?
+
     Feature.enable_percentage_of_time(:backwards_compatible_test_experiment_experiment_percentage, enabled_percentage)
     Feature.enable_percentage_of_time(:test_experiment_experiment_percentage, enabled_percentage)
   end
 
   let(:enabled_percentage) { 10 }
   let(:rollout_strategy) { nil }
+  let(:is_gitlab_com) { true }
+  let(:do_not_track) { nil }
 
   controller(ApplicationController) do
     include Gitlab::Experimentation::ControllerConcern
@@ -35,12 +41,9 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
   end
 
   describe '#set_experimentation_subject_id_cookie' do
-    let(:do_not_track) { nil }
     let(:cookie) { cookies.permanent.signed[:experimentation_subject_id] }
 
     before do
-      request.headers['DNT'] = do_not_track if do_not_track.present?
-
       get :index
     end
 
@@ -73,6 +76,14 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
         it 'does nothing' do
           expect(cookie).not_to be_present
         end
+      end
+    end
+
+    context 'not on gitlab.com' do
+      let(:is_gitlab_com) { false }
+
+      it 'does nothing' do
+        expect(cookie).not_to be_present
       end
     end
   end
@@ -139,17 +150,13 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
 
       context 'when do not track is disabled' do
-        before do
-          controller.request.headers['DNT'] = '0'
-        end
+        let(:do_not_track) { '0' }
 
         it { is_expected.to eq(true) }
       end
 
       context 'when do not track is enabled' do
-        before do
-          controller.request.headers['DNT'] = '1'
-        end
+        let(:do_not_track) { '1' }
 
         it { is_expected.to eq(false) }
       end
@@ -215,9 +222,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
 
       context 'do not track is disabled' do
-        before do
-          request.headers['DNT'] = '0'
-        end
+        let(:do_not_track) { '0' }
 
         it 'does track the event' do
           controller.track_experiment_event(:test_experiment, 'start', 1)
@@ -232,9 +237,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
 
       context 'do not track enabled' do
-        before do
-          request.headers['DNT'] = '1'
-        end
+        let(:do_not_track) { '1' }
 
         it 'does not track the event' do
           controller.track_experiment_event(:test_experiment, 'start', 1)
@@ -365,9 +368,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
 
       context 'do not track disabled' do
-        before do
-          request.headers['DNT'] = '0'
-        end
+        let(:do_not_track) { '0' }
 
         it 'pushes the right parameters to gon' do
           controller.frontend_experimentation_tracking_data(:test_experiment, 'start')
@@ -383,9 +384,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
 
       context 'do not track enabled' do
-        before do
-          request.headers['DNT'] = '1'
-        end
+        let(:do_not_track) { '1' }
 
         it 'does not push data to gon' do
           controller.frontend_experimentation_tracking_data(:test_experiment, 'start')
@@ -494,8 +493,9 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
 
       context 'is disabled' do
+        let(:do_not_track) { '0' }
+
         before do
-          request.headers['DNT'] = '0'
           stub_experiment_for_subject(test_experiment: false)
         end
 
@@ -507,9 +507,7 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
 
       context 'is enabled' do
-        before do
-          request.headers['DNT'] = '1'
-        end
+        let(:do_not_track) { '1' }
 
         it 'does not call add_user on the Experiment model' do
           expect(::Experiment).not_to receive(:add_user)
@@ -523,13 +521,11 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
   describe '#record_experiment_group' do
     let(:group) { 'a group object' }
     let(:experiment_key) { :some_experiment_key }
-    let(:dnt_enabled) { false }
     let(:experiment_active) { true }
     let(:rollout_strategy) { :whatever }
     let(:variant) { 'variant' }
 
     before do
-      allow(controller).to receive(:dnt_enabled?).and_return(dnt_enabled)
       allow(::Gitlab::Experimentation).to receive(:active?).and_return(experiment_active)
       allow(::Gitlab::Experimentation).to receive(:rollout_strategy).and_return(rollout_strategy)
       allow(controller).to receive(:tracking_group).and_return(variant)
@@ -559,8 +555,14 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
     end
 
-    context 'when DNT is enabled' do
-      let(:dnt_enabled) { true }
+    context 'when DNT is set' do
+      let(:do_not_track) { '1' }
+
+      include_examples 'exits early without recording'
+    end
+
+    context 'when not on gitlab.com' do
+      let(:is_gitlab_com) { false }
 
       include_examples 'exits early without recording'
     end
@@ -596,7 +598,6 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
     let(:user) { build(:user) }
 
     before do
-      allow(controller).to receive(:dnt_enabled?).and_return(false)
       allow(controller).to receive(:current_user).and_return(user)
       stub_experiment(test_experiment: true)
     end
@@ -617,10 +618,14 @@ RSpec.describe Gitlab::Experimentation::ControllerConcern, type: :controller do
       end
     end
 
-    context 'when DNT is enabled' do
-      before do
-        allow(controller).to receive(:dnt_enabled?).and_return(true)
-      end
+    context 'when DNT is set' do
+      let(:do_not_track) { '1' }
+
+      include_examples 'does not record the conversion event'
+    end
+
+    context 'when not on gitlab.com' do
+      let(:is_gitlab_com) { false }
 
       include_examples 'does not record the conversion event'
     end

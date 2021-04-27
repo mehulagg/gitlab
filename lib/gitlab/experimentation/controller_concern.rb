@@ -14,7 +14,7 @@ module Gitlab
       extend ActiveSupport::Concern
 
       included do
-        before_action :set_experimentation_subject_id_cookie, unless: :dnt_enabled?
+        before_action :set_experimentation_subject_id_cookie, unless: :experimentation_disabled?
         helper_method :experiment_enabled?, :experiment_tracking_category_and_group, :record_experiment_group, :tracking_label
       end
 
@@ -38,7 +38,7 @@ module Gitlab
 
       def experiment_enabled?(experiment_key, subject: nil)
         return true if forced_enabled?(experiment_key)
-        return false if dnt_enabled?
+        return false if experimentation_disabled?
 
         Experimentation.log_invalid_rollout(experiment_key, subject)
 
@@ -48,7 +48,7 @@ module Gitlab
       end
 
       def track_experiment_event(experiment_key, action, value = nil, subject: nil)
-        return if dnt_enabled?
+        return if experimentation_disabled?
 
         track_experiment_event_for(experiment_key, action, value, subject: subject) do |tracking_data|
           ::Gitlab::Tracking.event(tracking_data.delete(:category), tracking_data.delete(:action), **tracking_data)
@@ -56,7 +56,7 @@ module Gitlab
       end
 
       def frontend_experimentation_tracking_data(experiment_key, action, value = nil, subject: nil)
-        return if dnt_enabled?
+        return if experimentation_disabled?
 
         track_experiment_event_for(experiment_key, action, value, subject: subject) do |tracking_data|
           gon.push(tracking_data: tracking_data)
@@ -64,7 +64,7 @@ module Gitlab
       end
 
       def record_experiment_user(experiment_key, context = {})
-        return if dnt_enabled?
+        return if experimentation_disabled?
         return unless Experimentation.active?(experiment_key) && current_user
 
         subject = Experimentation.rollout_strategy(experiment_key) == :cookie ? nil : current_user
@@ -73,7 +73,7 @@ module Gitlab
       end
 
       def record_experiment_group(experiment_key, group)
-        return if dnt_enabled?
+        return if experimentation_disabled?
         return unless Experimentation.active?(experiment_key) && group
 
         variant_subject = Experimentation.rollout_strategy(experiment_key) == :cookie ? nil : group
@@ -83,7 +83,7 @@ module Gitlab
       end
 
       def record_experiment_conversion_event(experiment_key, context = {})
-        return if dnt_enabled?
+        return if experimentation_disabled?
         return unless current_user
         return unless Experimentation.active?(experiment_key)
 
@@ -96,7 +96,9 @@ module Gitlab
 
       private
 
-      def dnt_enabled?
+      def experimentation_disabled?
+        return true unless Gitlab.com?
+
         Gitlab::Utils.to_boolean(request.headers['DNT'])
       end
 
