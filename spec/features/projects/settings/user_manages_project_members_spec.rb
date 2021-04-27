@@ -51,10 +51,32 @@ RSpec.describe 'Projects > Settings > User manages project members' do
     expect(find_member_row(user_mike)).to have_content('Reporter')
   end
 
-  describe 'when the :invite_members_group_modal is disabled' do
-    it 'imports a team from another project', :js do
-      stub_feature_flags(invite_members_group_modal: false)
+  describe 'when the :invite_members_group_modal is enabled' do
+    before do
+      stub_feature_flags(invite_members_group_modal: true)
+    end
 
+    it 'imports a team from another project', :js do
+      project2.add_maintainer(user)
+      project2.add_reporter(user_mike)
+
+      visit(project_project_members_path(project))
+
+      click_link('Import a project')
+
+      select2(project2.id, from: '#source_project_id')
+      click_button('Import project members')
+
+      expect(find_member_row(user_mike)).to have_content('Reporter')
+    end
+  end
+
+  describe 'when the :invite_members_group_modal is disabled' do
+    before do
+      stub_feature_flags(invite_members_group_modal: false)
+    end
+
+    it 'imports a team from another project', :js do
       project2.add_maintainer(user)
       project2.add_reporter(user_mike)
 

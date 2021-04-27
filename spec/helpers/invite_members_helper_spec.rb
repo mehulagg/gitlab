@@ -32,14 +32,14 @@ RSpec.describe InviteMembersHelper do
       assign(:project, project)
     end
 
-    describe "#can_invite_members_for_project?" do
+    describe "#can_invite_members?" do
       context 'when the user can_import_members' do
         before do
           allow(helper).to receive(:can_import_members?).and_return(true)
         end
 
         it 'returns true' do
-          expect(helper.can_invite_members_for_project?(project)).to eq true
+          expect(helper.can_invite_members?(project)).to eq true
           expect(helper).to have_received(:can_import_members?)
         end
 
@@ -49,19 +49,19 @@ RSpec.describe InviteMembersHelper do
           end
 
           it 'returns false' do
-            expect(helper.can_invite_members_for_project?(project)).to eq false
+            expect(helper.can_invite_members?(project)).to eq false
             expect(helper).not_to have_received(:can_import_members?)
           end
         end
       end
 
-      context 'when the user can not invite members' do
+      context 'when the user can not import members' do
         before do
           expect(helper).to receive(:can_import_members?).and_return(false)
         end
 
-        it 'returns false' do
-          expect(helper.can_invite_members_for_project?(project)).to eq false
+        it 'returns true' do
+          expect(helper.can_invite_members?(project)).to eq false
         end
       end
     end
@@ -124,7 +124,7 @@ RSpec.describe InviteMembersHelper do
   context 'with group' do
     let_it_be(:group) { create(:group) }
 
-    describe "#can_invite_members_for_group?" do
+    describe "#can_invite_members?" do
       include Devise::Test::ControllerHelpers
 
       let_it_be(:user) { create(:user) }
@@ -140,7 +140,7 @@ RSpec.describe InviteMembersHelper do
         end
 
         it 'returns true' do
-          expect(helper.can_invite_members_for_group?(group)).to eq true
+          expect(helper.can_invite_members?(group)).to eq true
           expect(helper).to have_received(:can?).with(user, :admin_group_member, group)
         end
 
@@ -152,7 +152,7 @@ RSpec.describe InviteMembersHelper do
           it 'returns false' do
             stub_feature_flags(invite_members_group_modal: false)
 
-            expect(helper.can_invite_members_for_group?(group)).to eq false
+            expect(helper.can_invite_members?(group)).to eq false
             expect(helper).not_to have_received(:can?)
           end
         end
@@ -164,7 +164,7 @@ RSpec.describe InviteMembersHelper do
         end
 
         it 'returns false' do
-          expect(helper.can_invite_members_for_group?(group)).to eq false
+          expect(helper.can_invite_members?(group)).to eq false
         end
       end
     end

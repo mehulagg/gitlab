@@ -3,12 +3,8 @@
 module InviteMembersHelper
   include Gitlab::Utils::StrongMemoize
 
-  def can_invite_members_for_group?(group)
-    Feature.enabled?(:invite_members_group_modal, group) && can?(current_user, :admin_group_member, group)
-  end
-
-  def can_invite_members_for_project?(project)
-    Feature.enabled?(:invite_members_group_modal, project.group) && can_import_members?
+  def can_invite_members?(source)
+    Feature.enabled?(:invite_members_group_modal) && can?(current_user, :admin_group_member, source)
   end
 
   def directly_invite_members?
