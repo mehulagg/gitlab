@@ -8305,6 +8305,18 @@ msgstr ""
 msgid "Configure Prometheus"
 msgstr ""
 
+msgid "Configure SAST in `.gitlab-ci.yml` using the GitLab managed template. You can [add variable overrides](https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings) to customize SAST settings."
+msgstr ""
+
+msgid "Configure SAST in `.gitlab-ci.yml`, creating this file if it does not already exist"
+msgstr ""
+
+msgid "Configure Secret Detection in `.gitlab-ci.yml` using the GitLab managed template. You can [add variable overrides](https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings) to customize Secret Detection settings."
+msgstr ""
+
+msgid "Configure Secret Detection in `.gitlab-ci.yml`, creating this file if it does not already exist"
+msgstr ""
+
 msgid "Configure Tracing"
 msgstr ""
 
@@ -29084,18 +29096,6 @@ msgid "Session duration (minutes)"
 msgstr ""
 
 msgid "Set %{epic_ref} as the parent epic."
-msgstr ""
-
-msgid "Set .gitlab-ci.yml to configure Secret Detection"
-msgstr ""
-
-msgid "Set .gitlab-ci.yml to enable or configure SAST"
-msgstr ""
-
-msgid "Set .gitlab-ci.yml to enable or configure SAST security scanning using the GitLab managed template. You can [add variable overrides](https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings) to customize SAST settings."
-msgstr ""
-
-msgid "Set .gitlab-ci.yml to enable or configure Secret Detection security scanning using the GitLab managed template. You can [add variable overrides](https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings) to customize Secret Detection settings."
 msgstr ""
 
 msgid "Set a default description template to be used for new issues. %{link_start}What are description templates?%{link_end}"

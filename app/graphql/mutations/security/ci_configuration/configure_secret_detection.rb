@@ -10,7 +10,7 @@ module Mutations
         description <<~DESC
           Configure Secret Detection for a project by enabling Secret Detection
           in a new or modified `.gitlab-ci.yml` file in a new branch. The new
-          branch and a url to create a Merge Request are a part of the
+          branch and a URL to create a Merge Request are a part of the
           response.
         DESC
 

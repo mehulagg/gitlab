@@ -14,11 +14,11 @@ module Security
       end
 
       def message
-        _('Set .gitlab-ci.yml to configure Secret Detection')
+        _('Configure Secret Detection in `.gitlab-ci.yml`, creating this file if it does not already exist')
       end
 
       def description
-        _('Set .gitlab-ci.yml to enable or configure Secret Detection security scanning using the GitLab managed template. You can [add variable overrides](https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings) to customize Secret Detection settings.')
+        _('Configure Secret Detection in `.gitlab-ci.yml` using the GitLab managed template. You can [add variable overrides](https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings) to customize Secret Detection settings.')
       end
     end
   end

@@ -21,11 +21,11 @@ module Security
       end
 
       def message
-        _('Set .gitlab-ci.yml to enable or configure SAST')
+        _('Configure SAST in `.gitlab-ci.yml`, creating this file if it does not already exist')
       end
 
       def description
-        _('Set .gitlab-ci.yml to enable or configure SAST security scanning using the GitLab managed template. You can [add variable overrides](https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings) to customize SAST settings.')
+        _('Configure SAST in `.gitlab-ci.yml` using the GitLab managed template. You can [add variable overrides](https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings) to customize SAST settings.')
       end
     end
   end

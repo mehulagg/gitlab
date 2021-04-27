@@ -9,7 +9,7 @@ module Mutations
         graphql_name 'ConfigureSast'
         description <<~DESC
           Configure SAST for a project by enabling SAST in a new or modified
-          `.gitlab-ci.yml` file in a new branch. The new branch and a url to
+          `.gitlab-ci.yml` file in a new branch. The new branch and a URL to
           create a Merge Request are a part of the response.
         DESC
 
