@@ -4303,17 +4303,35 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
   end
 
-  describe 'reset_ancestor_bridges!' do
-    let_it_be(:pipeline) { create(:ci_pipeline, :created) }
+  shared_examples 'resetting source bridge' do |legacy|
+    let(:pipeline) { create(:ci_pipeline, :created, project: project) }
+
+    subject { pipeline.reset_source_bridge!(project.owner) }
 
     context 'when the pipeline is a child pipeline and the bridge is depended' do
       let!(:parent_pipeline) { create(:ci_pipeline) }
       let!(:bridge) { create_bridge(parent_pipeline, pipeline, true) }
 
       it 'marks source bridge as pending' do
-        pipeline.reset_ancestor_bridges!
+        subject
 
         expect(bridge.reload).to be_pending
+      end
+
+      context 'when the parent pipeline has subsequent jobs after the bridge' do
+        let!(:after_bridge_job) { create(:ci_build, :skipped, pipeline: parent_pipeline, stage_idx: bridge.stage_idx + 1) }
+
+        # This is a technical debt and will be solved by https://gitlab.com/gitlab-org/gitlab/-/issues/TODO
+        # The test title will be changed and the condition below will be removed.
+        it 'marks subsequent jobs as processable based on the feature flag' do
+          subject
+
+          if ::Feature.enabled?(:ci_reset_bridge_with_subsequent_jobs)
+            expect(after_bridge_job.reload).to be_created
+          else
+            expect(after_bridge_job.reload).to be_skipped
+          end
+        end
       end
 
       context 'when the parent pipeline has a dependent upstream pipeline' do
@@ -4322,7 +4340,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         end
 
         it 'marks all source bridges as pending' do
-          pipeline.reset_ancestor_bridges!
+          subject
 
           expect(bridge.reload).to be_pending
           expect(upstream_bridge.reload).to be_pending
@@ -4335,7 +4353,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       let!(:bridge) { create_bridge(parent_pipeline, pipeline, false) }
 
       it 'does not touch source bridge' do
-        pipeline.reset_ancestor_bridges!
+        subject
 
         expect(bridge.reload).to be_success
       end
@@ -4346,7 +4364,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         end
 
         it 'does not touch any source bridge' do
-          pipeline.reset_ancestor_bridges!
+          subject
 
           expect(bridge.reload).to be_success
           expect(upstream_bridge.reload).to be_success
@@ -4364,6 +4382,18 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
       bridge
     end
+  end
+
+  describe '#reset_source_bridge!', :focus do
+    it_behaves_like 'resetting source bridge', false
+  end
+
+  describe 'LEGACY #reset_source_bridge!', :focus do
+    before do
+      stub_feature_flags(ci_reset_bridge_with_subsequent_jobs: false)
+    end
+
+    it_behaves_like 'resetting source bridge', true
   end
 
   describe 'test failure history processing' do
