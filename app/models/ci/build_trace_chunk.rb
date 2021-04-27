@@ -39,6 +39,8 @@ module Ci
     scope :live, -> { redis }
     scope :persisted, -> { not_redis.order(:chunk_index) }
 
+    ignore_columns :build_id_convert_to_bigint, remove_with: '14.1', remove_after: '2021-07-22'
+
     class << self
       def all_stores
         STORE_TYPES.keys
