@@ -7192,6 +7192,7 @@ Represents the total number of issues and their weights for a particular day.
 | <a id="cijobstatus"></a>`status` | [`CiJobStatus`](#cijobstatus) | Status of the job. |
 | <a id="cijobtags"></a>`tags` | [`[String!]`](#string) | Tags for the current job. |
 | <a id="cijobtriggered"></a>`triggered` | [`Boolean`](#boolean) | Whether the job was triggered. |
+| <a id="cijobuserpermissions"></a>`userPermissions` | [`JobPermissions!`](#jobpermissions) | Permissions for the current user on the resource. |
 
 ### `CiJobArtifact`
 
@@ -9404,6 +9405,16 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="jirauserjiraaccountid"></a>`jiraAccountId` | [`String!`](#string) | Account ID of the Jira user. |
 | <a id="jirauserjiradisplayname"></a>`jiraDisplayName` | [`String!`](#string) | Display name of the Jira user. |
 | <a id="jirauserjiraemail"></a>`jiraEmail` | [`String`](#string) | Email of the Jira user, returned only for users with public emails. |
+
+### `JobPermissions`
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="jobpermissionsreadbuild"></a>`readBuild` | [`Boolean!`](#boolean) | Indicates the user can perform `read_build` on this resource. |
+| <a id="jobpermissionsreadjobartifacts"></a>`readJobArtifacts` | [`Boolean!`](#boolean) | Indicates the user can perform `read_job_artifacts` on this resource. |
+| <a id="jobpermissionsupdatebuild"></a>`updateBuild` | [`Boolean!`](#boolean) | Indicates the user can perform `update_build` on this resource. |
 
 ### `Label`
 
