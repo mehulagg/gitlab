@@ -748,7 +748,7 @@ There can be different reasons behind this:
   be removed.
 
 - If you are on GitLab self-managed instances, and you have 1000+ tags in a container repository, you might run into a 
-  [container registry token expiry issue](https://calendar.google.com/calendar/u/0/r/week/2021/4/19), throwing a 
+  [Container Registry token expiration issue](https://gitlab.com/gitlab-org/gitlab/-/issues/288814), throwing a 
   `error authorizing context: invalid token` error in the logs. 
 
   To fix this, there are two workarounds:
@@ -768,7 +768,6 @@ There can be different reasons behind this:
 
      # loop over list_o_tags.out to delete a single tag at a time
      while read -r LINE || [[ -n $LINE ]]; do echo ${LINE}; curl --request DELETE --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags/${LINE}"; sleep 0.1; echo; done < list_o_tags.out > delete.logs
-
      ```
 
 ### Troubleshoot as a GitLab server admin
