@@ -520,7 +520,7 @@ We can make use of the named slots `control` and `candidate` in the Vue componen
 
 ```vue
 <script>
-import Experiment from '~/experimentation/components/experiment.vue';
+import Experiment from '~/experimentation/components/gitlab_experiment.vue';
 
 export default {
   components: { Experiment }
@@ -528,7 +528,7 @@ export default {
 </script>
 
 <template>
-  <experiment name="pill_color">
+  <gitlab-experiment name="pill_color">
     <template #control>
       <button class="bg-default">Click default button</button>
     </template>
@@ -536,7 +536,7 @@ export default {
     <template #candidate>
       <button class="bg-red">Click red button</button>
     </template>
-  </experiment>
+  </gitlab-experiment>
 </template>
 ```
 
@@ -545,7 +545,7 @@ For example, the Vue component for the previously-defined `pill_color` experimen
 
 ```vue
 <template>
-  <experiment name="pill_color">
+  <gitlab-experiment name="pill_color">
     <template #control>
       <button class="bg-default">Click default button</button>
     </template>
@@ -557,7 +557,7 @@ For example, the Vue component for the previously-defined `pill_color` experimen
     <template #blue>
       <button class="bg-blue">Click blue button</button>
     </template>
-  </experiment>
+  </gitlab-experiment>
 </template>
 ```
 
