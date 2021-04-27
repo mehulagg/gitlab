@@ -44,6 +44,8 @@ RSpec.describe LimitedCapacity::Worker, :clean_gitlab_redis_queues, :aggregate_f
   describe '.perform_with_capacity' do
     subject(:perform_with_capacity) { worker_class.perform_with_capacity(:arg) }
 
+    let(:job_tracker) { double(:job_tracker) }
+
     before do
       expect_next_instance_of(worker_class) do |instance|
         expect(instance).to receive(:remove_failed_jobs)
@@ -65,6 +67,17 @@ RSpec.describe LimitedCapacity::Worker, :clean_gitlab_redis_queues, :aggregate_f
 
         perform_with_capacity
       end
+
+      it 'registers the jobs' do
+        allow(worker_class)
+          .to receive(:job_tracker)
+          .and_return(job_tracker)
+        expect(job_tracker)
+          .to receive(:register)
+          .with(->(actual) { actual.size == 2 })
+
+        perform_with_capacity
+      end
     end
 
     context 'when capacity is lower than work' do
@@ -78,6 +91,17 @@ RSpec.describe LimitedCapacity::Worker, :clean_gitlab_redis_queues, :aggregate_f
 
         perform_with_capacity
       end
+
+      it 'registers the jobs' do
+        allow(worker_class)
+          .to receive(:job_tracker)
+          .and_return(job_tracker)
+        expect(job_tracker)
+          .to receive(:register)
+          .with(->(actual) { actual.size == 3 })
+
+        perform_with_capacity
+      end
     end
   end
 
@@ -87,7 +111,7 @@ RSpec.describe LimitedCapacity::Worker, :clean_gitlab_redis_queues, :aggregate_f
     context 'with capacity' do
       before do
         allow(worker).to receive(:max_running_jobs).and_return(10)
-        allow(worker).to receive(:running_jobs_count).and_return(0)
+        allow(worker).to receive(:in_flight_jobs_count).and_return(0)
         allow(worker).to receive(:remaining_work_count).and_return(0)
       end
 
@@ -100,13 +124,6 @@ RSpec.describe LimitedCapacity::Worker, :clean_gitlab_redis_queues, :aggregate_f
       it 're-enqueues itself' do
         allow(worker).to receive(:perform_work)
         expect(worker).to receive(:re_enqueue).with(:arg)
-
-        perform
-      end
-
-      it 'registers itself in the running set' do
-        allow(worker).to receive(:perform_work)
-        expect(job_tracker).to receive(:register).with('my-jid')
 
         perform
       end
@@ -130,7 +147,7 @@ RSpec.describe LimitedCapacity::Worker, :clean_gitlab_redis_queues, :aggregate_f
     context 'with capacity and without work' do
       before do
         allow(worker).to receive(:max_running_jobs).and_return(10)
-        allow(worker).to receive(:running_jobs_count).and_return(0)
+        allow(worker).to receive(:in_flight_jobs_count).and_return(0)
         allow(worker).to receive(:remaining_work_count).and_return(0)
         allow(worker).to receive(:perform_work)
       end
@@ -145,7 +162,7 @@ RSpec.describe LimitedCapacity::Worker, :clean_gitlab_redis_queues, :aggregate_f
     context 'without capacity' do
       before do
         allow(worker).to receive(:max_running_jobs).and_return(10)
-        allow(worker).to receive(:running_jobs_count).and_return(15)
+        allow(worker).to receive(:in_flight_jobs_count).and_return(15)
         allow(worker).to receive(:remaining_work_count).and_return(10)
       end
 
@@ -224,25 +241,14 @@ RSpec.describe LimitedCapacity::Worker, :clean_gitlab_redis_queues, :aggregate_f
       it { expect(remaining_capacity).to eq(1) }
     end
 
-    context 'with jobs in the queue' do
-      let(:max_capacity) { 2 }
-
-      before do
-        expect(worker_class).to receive(:queue_size).and_return(1)
-      end
-
-      it { expect(remaining_capacity).to eq(1) }
-    end
-
-    context 'with both running jobs and queued jobs' do
+    context 'with in-flight jobs' do
       let(:max_capacity) { 10 }
 
       before do
-        expect(worker_class).to receive(:queue_size).and_return(5)
-        expect(worker).to receive(:running_jobs_count).and_return(3)
+        expect(worker).to receive(:in_flight_jobs_count).and_return(3)
       end
 
-      it { expect(remaining_capacity).to eq(2) }
+      it { expect(remaining_capacity).to eq(7) }
     end
   end
 
@@ -267,7 +273,7 @@ RSpec.describe LimitedCapacity::Worker, :clean_gitlab_redis_queues, :aggregate_f
     subject(:report_prometheus_metrics) { worker.report_prometheus_metrics }
 
     before do
-      allow(worker).to receive(:running_jobs_count).and_return(5)
+      allow(worker).to receive(:in_flight_jobs_count).and_return(5)
       allow(worker).to receive(:max_running_jobs).and_return(7)
       allow(worker).to receive(:remaining_work_count).and_return(9)
     end

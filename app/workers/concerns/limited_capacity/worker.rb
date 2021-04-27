@@ -59,14 +59,18 @@ module LimitedCapacity
         required_jobs_count = worker.required_jobs_count(*args)
 
         arguments = Array.new(required_jobs_count) { args }
-        self.bulk_perform_async(arguments) # rubocop:disable Scalability/BulkPerformWithContext
+        jids = self.bulk_perform_async(arguments) # rubocop:disable Scalability/BulkPerformWithContext
+        job_tracker.register(jids)
+      end
+
+      def job_tracker
+        JobTracker.new(self.name)
       end
     end
 
     def perform(*args)
       return unless has_capacity?
 
-      job_tracker.register(jid)
       perform_work(*args)
     rescue StandardError => exception
       raise
@@ -94,7 +98,7 @@ module LimitedCapacity
 
     def remaining_capacity
       [
-        max_running_jobs - running_jobs_count - self.class.queue_size,
+        max_running_jobs - in_flight_jobs_count,
         0
       ].max
     end
@@ -121,13 +125,13 @@ module LimitedCapacity
 
     private
 
-    def running_jobs_count
+    def in_flight_jobs_count
       job_tracker.count
     end
 
     def job_tracker
       strong_memoize(:job_tracker) do
-        JobTracker.new(self.class.name)
+        self.class.job_tracker
       end
     end
 
