@@ -24,8 +24,8 @@ displays them in a merge request, you can use GitLab to audit your Docker-based 
 GitLab provides integration with two different open-source tools for vulnerability static analysis
 in containers:
 
-1. [Clair](https://github.com/quay/claircore)/[Klar](https://github.com/optiopay/klar)
-1. [Trivy](https://github.com/aquasecurity/trivy)
+- [Clair](https://github.com/quay/claircore)/[Klar](https://github.com/optiopay/klar)
+- [Trivy](https://github.com/aquasecurity/trivy)
 
 To integrate GitLab with security scanners other than those listed here, see
 [Security scanner integration](../../../development/integrations/secure.md).
@@ -55,10 +55,10 @@ To enable container scanning in your pipeline, you need the following:
   shared runners on GitLab.com, then this is already the case.
 - An image matching the following supported distributions (depending on the analyzer being used):
 
-| Scanning Engine | Supported distributions |
-| --- | --- |
-| [Clair](https://github.com/quay/claircore) | [Supported operating systems and languages](https://quay.github.io/claircore/) |
-| [Trivy](https://github.com/aquasecurity/trivy) | Supported [operating systems](https://aquasecurity.github.io/trivy/latest/vuln-detection/os/) and [languages](https://aquasecurity.github.io/trivy/latest/vuln-detection/library/) |
+  | Scanning Engine | Supported distributions |
+  | --- | --- |
+  | [Clair](https://github.com/quay/claircore) | [Supported operating systems and languages](https://quay.github.io/claircore/) |
+  | [Trivy](https://github.com/aquasecurity/trivy) | Supported [operating systems](https://aquasecurity.github.io/trivy/latest/vuln-detection/os/) and [languages](https://aquasecurity.github.io/trivy/latest/vuln-detection/library/) |
 
 - [Build and push](../../packages/container_registry/index.md#build-and-push-by-using-gitlab-cicd)
   your Docker image to your project's container registry. The name of the Docker image should use
@@ -420,8 +420,8 @@ To use container scanning in an offline environment, you need:
 
 | GitLab Analyzer | Container Registry |
 | --- | --- |
-| [Klar](https://gitlab.com/gitlab-org/security-products/analyzers/klar/) (used to run Clair) | https://gitlab.com/gitlab-org/security-products/analyzers/klar/container_registry |
-| [Container-Scanning](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning) (used to run Trivy) | https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/container_registry/1741162 |
+| [Klar](https://gitlab.com/gitlab-org/security-products/analyzers/klar/) (used to run Clair) | [Klar container registry](https://gitlab.com/gitlab-org/security-products/analyzers/klar/container_registry) |
+| [Container-Scanning](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning) (used to run Trivy) | [Container-Scanning container registry](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/container_registry/1741162) |
 
 Note that GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
 meaning the runner tries to pull Docker images from the GitLab container registry even if a local
