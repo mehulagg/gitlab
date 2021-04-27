@@ -8,7 +8,7 @@ module Sidebars
 
         override :configure_menu_items
         def configure_menu_items
-          return unless can?(context.current_user, :access_security_and_compliance, context.project)
+          return false unless can?(context.current_user, :access_security_and_compliance, context.project)
 
           add_item(configuration_menu_item)
 

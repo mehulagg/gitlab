@@ -9,16 +9,17 @@ module EE
 
           override :configure_menu_items
           def configure_menu_items
-            return false unless super
+            return false unless return unless can?(context.current_user, :access_security_and_compliance, context.project)
 
-            insert_item_before(nil, security_dashboard_menu_item)
-            insert_item_after(security_dashboard_menu_item.item_id, vulnerability_report_menu_item)
-            insert_item_after(vulnerability_report_menu_item.item_id, on_demand_scans_menu_item)
-            insert_item_after(on_demand_scans_menu_item.item_id, dependencies_menu_item)
-            insert_item_after(dependencies_menu_item.item_id, license_compliance_menu_item)
-            insert_item_after(license_compliance_menu_item.item_id, threat_monitoring_menu_item)
-            insert_item_after(threat_monitoring_menu_item.item_id, scan_policies_menu_item)
-            insert_item_after(configuration_menu_item.item_id, audit_events_menu_item)
+            add_item(security_dashboard_menu_item)
+            add_item(vulnerability_report_menu_item)
+            add_item(on_demand_scans_menu_item)
+            add_item(dependencies_menu_item)
+            add_item(license_compliance_menu_item)
+            add_item(threat_monitoring_menu_item)
+            add_item(scan_policies_menu_item)
+            add_item(configuration_menu_item)
+            add_item(audit_events_menu_item)
 
             true
           end
