@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'spec_helper' # test change
 
 RSpec.describe Search::GlobalService do
   include SearchResultHelpers
