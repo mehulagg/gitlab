@@ -1,3 +1,6 @@
+-# WAIT! This file is being migrated to `top_nav_helper` to support the top nav
+-# redesign. Please see https://gitlab.com/gitlab-org/gitlab-foss/issues/49713
+-# for more information.
 - if dashboard_nav_link?(:environments)
   = link_to operations_environments_path, class: 'dropdown-item', data: { qa_selector: 'environment_link' } do
     = _('Environments')

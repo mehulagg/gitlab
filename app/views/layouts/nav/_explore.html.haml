@@ -1,3 +1,6 @@
+-# WAIT! This file is being migrated to `top_nav_helper` to support the top nav
+-# redesign. Please see https://gitlab.com/gitlab-org/gitlab-foss/issues/49713
+-# for more information.
 %ul.list-unstyled.navbar-sub-nav
   - if explore_nav_link?(:projects)
     = nav_link(path: ['dashboard#show', 'root#show', 'projects#trending', 'projects#starred', 'projects#index'], html_options: {class: 'home'}) do
