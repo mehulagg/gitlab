@@ -53,8 +53,6 @@ reflected in the CI lint. It displays the same results as the existing [CI Lint 
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241722) in GitLab 13.5.
 > - [Moved to **CI/CD > Editor**](https://gitlab.com/gitlab-org/gitlab/-/issues/263141) in GitLab 13.7.
-> - It was [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/290117) in GitLab 13.8.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/290117) in GitLab 13.12.
 
 To view a visualization of your `gitlab-ci.yml` configuration, in your project,
