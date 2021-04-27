@@ -18006,6 +18006,22 @@ CREATE SEQUENCE terraform_states_id_seq
 
 ALTER SEQUENCE terraform_states_id_seq OWNED BY terraform_states.id;
 
+CREATE TABLE tests (
+    id bigint NOT NULL,
+    columns_are_great integer,
+    heres_more_data text,
+    CONSTRAINT check_32700ecc3a CHECK ((char_length(heres_more_data) <= 255))
+);
+
+CREATE SEQUENCE tests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE tests_id_seq OWNED BY tests.id;
+
 CREATE TABLE timelogs (
     id integer NOT NULL,
     time_spent integer NOT NULL,
@@ -19905,6 +19921,8 @@ ALTER TABLE ONLY terraform_state_versions ALTER COLUMN id SET DEFAULT nextval('t
 
 ALTER TABLE ONLY terraform_states ALTER COLUMN id SET DEFAULT nextval('terraform_states_id_seq'::regclass);
 
+ALTER TABLE ONLY tests ALTER COLUMN id SET DEFAULT nextval('tests_id_seq'::regclass);
+
 ALTER TABLE ONLY timelogs ALTER COLUMN id SET DEFAULT nextval('timelogs_id_seq'::regclass);
 
 ALTER TABLE ONLY todos ALTER COLUMN id SET DEFAULT nextval('todos_id_seq'::regclass);
@@ -21503,6 +21521,9 @@ ALTER TABLE ONLY terraform_state_versions
 
 ALTER TABLE ONLY terraform_states
     ADD CONSTRAINT terraform_states_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY tests
+    ADD CONSTRAINT tests_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY timelogs
     ADD CONSTRAINT timelogs_pkey PRIMARY KEY (id);
