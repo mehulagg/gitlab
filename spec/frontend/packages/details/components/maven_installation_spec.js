@@ -17,8 +17,10 @@ describe('MavenInstallation', () => {
   const xmlCodeBlock = 'foo/xml';
   const mavenCommandStr = 'foo/command';
   const mavenSetupXml = 'foo/setup';
-  const gradleGroovyInstallCommandText = 'foo/gradle/install';
-  const gradleGroovyAddSourceCommandText = 'foo/gradle/add/source';
+  const gradleGroovyInstallCommandText = 'foo/gradle/groovy/install';
+  const gradleGroovyAddSourceCommandText = 'foo/gradle/groovy/add/source';
+  const gradleKotlinInstallCommandText = 'foo/gradle/kotlin/install';
+  const gradleKotlinAddSourceCommandText = 'foo/gradle/kotlin/add/source';
 
   const store = new Vuex.Store({
     state: {
@@ -31,6 +33,8 @@ describe('MavenInstallation', () => {
       mavenSetupXml: () => mavenSetupXml,
       gradleGroovyInstalCommand: () => gradleGroovyInstallCommandText,
       gradleGroovyAddSourceCommand: () => gradleGroovyAddSourceCommandText,
+      gradleKotlinInstalCommand: () => gradleKotlinInstallCommandText,
+      gradleKotlinAddSourceCommand: () => gradleKotlinAddSourceCommandText,
     },
   });
 
@@ -61,6 +65,7 @@ describe('MavenInstallation', () => {
         options: [
           { value: 'maven', label: 'Show Maven commands' },
           { value: 'groovy', label: 'Show Gradle Groovy DSL commands' },
+          { value: 'kotlin', label: 'Show Gradle Kotlin DSL commands' },
         ],
       });
     });
@@ -117,9 +122,9 @@ describe('MavenInstallation', () => {
     });
   });
 
-  describe('gradle', () => {
+  describe('groovy', () => {
     beforeEach(() => {
-      createComponent({ data: { instructionType: 'gradle' } });
+      createComponent({ data: { instructionType: 'groovy' } });
     });
 
     it('renders all the messages', () => {
@@ -140,6 +145,36 @@ describe('MavenInstallation', () => {
       it('renders the correct gradle command', () => {
         expect(findCodeInstructions().at(1).props()).toMatchObject({
           instruction: gradleGroovyAddSourceCommandText,
+          multiline: true,
+          trackingAction: TrackingActions.COPY_GRADLE_ADD_TO_SOURCE_COMMAND,
+        });
+      });
+    });
+  });
+
+  describe('kotlin', () => {
+    beforeEach(() => {
+      createComponent({ data: { instructionType: 'kotlin' } });
+    });
+
+    it('renders all the messages', () => {
+      expect(wrapper.element).toMatchSnapshot();
+    });
+
+    describe('installation commands', () => {
+      it('renders the gradle install command', () => {
+        expect(findCodeInstructions().at(0).props()).toMatchObject({
+          instruction: gradleKotlinInstallCommandText,
+          multiline: false,
+          trackingAction: TrackingActions.COPY_GRADLE_INSTALL_COMMAND,
+        });
+      });
+    });
+
+    describe('setup commands', () => {
+      it('renders the correct gradle command', () => {
+        expect(findCodeInstructions().at(1).props()).toMatchObject({
+          instruction: gradleKotlinAddSourceCommandText,
           multiline: true,
           trackingAction: TrackingActions.COPY_GRADLE_ADD_TO_SOURCE_COMMAND,
         });
