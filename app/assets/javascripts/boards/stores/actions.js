@@ -1,3 +1,4 @@
+/* eslint-disable no-duplicate-imports */
 import * as Sentry from '@sentry/browser';
 import { updateListQueries } from 'ee_else_ce/boards/constants';
 import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create.mutation.graphql';
