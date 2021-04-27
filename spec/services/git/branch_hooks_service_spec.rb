@@ -133,19 +133,6 @@ RSpec.describe Git::BranchHooksService do
             .to have_received(:track_event).with(*tracking_params)
         end
 
-        context 'when the FF usage_data_unique_users_committing_ciconfigfile is disabled' do
-          before do
-            stub_feature_flags(usage_data_unique_users_committing_ciconfigfile: false)
-          end
-
-          it 'does not track the event' do
-            execute_service
-
-            expect(Gitlab::UsageDataCounters::HLLRedisCounter)
-              .not_to have_received(:track_event).with(*tracking_params)
-          end
-        end
-
         context 'when usage ping is disabled' do
           before do
             stub_application_setting(usage_ping_enabled: false)
