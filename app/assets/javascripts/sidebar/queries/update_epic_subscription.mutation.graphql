@@ -1,6 +1,6 @@
 mutation epicSetSubscription($input: EpicSetSubscriptionInput!) {
   updateIssuableSubscription: epicSetSubscription(input: $input) {
-    epic {
+    issuable: epic {
       subscribed
     }
     errors

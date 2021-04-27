@@ -40,6 +40,11 @@ export default {
         property: null,
       }),
     },
+    canEdit: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
     return {
@@ -109,8 +114,9 @@ export default {
         inline
         class="gl-mx-auto gl-my-0 hide-expanded"
       />
+      <slot name="collapsed-right"></slot>
       <gl-button
-        v-if="canUpdate && !initialLoading"
+        v-if="canUpdate && !initialLoading && canEdit"
         variant="link"
         class="gl-text-gray-900! gl-hover-text-blue-800! gl-ml-auto hide-collapsed"
         data-testid="edit-button"
