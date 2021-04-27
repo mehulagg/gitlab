@@ -34,6 +34,9 @@ export default {
     },
   },
   computed: {
+    activationSucceeded() {
+      return this.notification === notificationType.ACTIVATION_SUCCESS;
+    },
     syncDidSuccess() {
       return this.notification === notificationType.SYNC_SUCCESS;
     },

@@ -84,7 +84,6 @@ export default {
     <template #header>
       <h5 class="gl-my-0 gl-font-weight-bold">{{ $options.i18n.title }}</h5>
     </template>
-
     <p>
       <gl-sprintf :message="$options.i18n.howToActivateSubscription">
         <template #link="{ content }">

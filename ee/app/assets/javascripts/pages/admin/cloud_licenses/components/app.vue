@@ -48,9 +48,10 @@ export default {
   },
   data() {
     return {
+      canShowSubscriptionDetails: this.hasActiveLicense,
       currentSubscription: {},
       subscriptionHistory: [],
-      canShowSubscriptionDetails: this.hasActiveLicense,
+      notification: null,
     };
   },
   methods: {
