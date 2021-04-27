@@ -10,6 +10,7 @@ RSpec.describe EncryptPlaintextAttributesOnApplicationSettings do
 
   plaintext_attributes = %w[
     akismet_api_key
+    spam_check_api_key
     elasticsearch_aws_secret_access_key
     recaptcha_private_key
     recaptcha_site_key
