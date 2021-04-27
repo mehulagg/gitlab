@@ -19,8 +19,8 @@ class Admin::UsersController < Admin::ApplicationController
     @users = @users.search_with_secondary_emails(params[:search_query]) if params[:search_query].present?
     @users = users_with_included_associations(@users)
     @users = @users.sort_by_attribute(@sort = params[:sort])
-    @users = @users.page(params[:page])
-    @users = @users.without_count if paginate_without_count?
+    @users = @users.keyset_paginate(cursor: params[:cursor])
+    # @users = @users.without_count if paginate_without_count?
   end
 
   def cohorts

@@ -83,6 +83,11 @@
 
     = render partial: 'admin/users/user', collection: @users
 
-= paginate_collection @users
+- if @users.has_previous_page?
+  = link_to 'Previous', url_for(params.to_unsafe_h.merge(cursor: @users.cursor_for_previous_page))
+  = link_to 'First', url_for(params.to_unsafe_h.merge(cursor: @users.cursor_for_first_page))
+- if @users.has_next_page?
+  = link_to 'Next', url_for(params.to_unsafe_h.merge(cursor: @users.cursor_for_next_page))
+  = link_to 'Last', url_for(params.to_unsafe_h.merge(cursor: @users.cursor_for_last_page))
 
 = render partial: 'admin/users/modals'
