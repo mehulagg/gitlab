@@ -1,0 +1,5 @@
+---
+title: Fix bug when board card label is clicked
+merge_request:
+author:
+type: fixed
