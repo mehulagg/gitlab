@@ -1,4 +1,6 @@
-%aside.nav-sidebar{ class: ('sidebar-collapsed-desktop' if collapsed_sidebar?), **sidebar_tracking_attributes_by_object(sidebar.container), 'aria-label': sidebar.aria_label }
+- refactoring_enabled = Feature.enabled?(:sidebar_refactor, current_user)
+
+%aside.nav-sidebar{ class: [('sidebar-collapsed-desktop' if collapsed_sidebar?), ('sidebar-refactoring' if refactoring_enabled)], **sidebar_tracking_attributes_by_object(sidebar.container), 'aria-label': sidebar.aria_label }
   .nav-sidebar-inner-scroll
     - if sidebar.scope_menu
       = render partial: 'shared/nav/scope_menu', object: sidebar.scope_menu
