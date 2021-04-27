@@ -4,7 +4,8 @@ module Nav
   module TopNavHelper
     PROJECTS_VIEW = 'projects-view'
     GROUPS_VIEW = 'groups-view'
-
+    PROJECTS_TYPE = :projects
+    GROUPS_TYPE = :groups
 
     def top_nav_view_model
       builder = ::Gitlab::Nav::TopNavViewModelBuilder.new
@@ -25,7 +26,7 @@ module Nav
     private
 
     def build_anonymous_view_model(builder)
-      # These come from `app/views/layouts/nav/_explore.html.ham `
+      # These come from `app/views/layouts/nav/_explore.html.ham`
       if explore_nav_link?(:projects)
         builder.add_primary_menu_item(
           **projects_menu_item_attrs.merge({
@@ -57,23 +58,29 @@ module Nav
     def build_view_model(builder)
       # These come from `app/views/layouts/nav/_dashboard.html.haml`
       if dashboard_nav_link?(:projects)
-        builder.add_primary_menu_item(
-          **projects_menu_item_attrs.merge({
-            active: active_nav_link?(path: ['root#index', 'projects#trending', 'projects#starred', 'dashboard/projects#index']),
-            view: PROJECTS_VIEW
-          })
-        )
-        builder.add_view(PROJECTS_VIEW, container_view_props(container_type: 'projects'))
+        builder
+          .add_primary_menu_item(
+            **projects_menu_item_attrs.merge({
+              active: active_nav_link?(path: ['root#index', 'projects#trending', 'projects#starred', 'dashboard/projects#index']),
+              class: 'qa-projects-dropdown',
+              data: { track_label: "projects_dropdown", track_event: "click_dropdown", track_experiment: "new_repo" },
+              view: PROJECTS_VIEW
+            })
+          )
+          .add_view(PROJECTS_VIEW, container_view_props(container_type: PROJECTS_TYPE))
       end
 
       if dashboard_nav_link?(:groups)
-        builder.add_primary_menu_item(
-          **groups_menu_item_attrs.merge({
-            active: active_nav_link?(path: ['dashboard/groups', 'explore/groups']),
-            view: GROUPS_VIEW
-          })
-        )
-        builder.add_view(GROUPS_VIEW, container_view_props(container_type: 'groups'))
+        builder
+          .add_primary_menu_item(
+            **groups_menu_item_attrs.merge({
+              active: active_nav_link?(path: ['dashboard/groups', 'explore/groups']),
+              class: 'qa-groups-dropdown',
+              data: { track_label: "groups_dropdown", track_event: "click_dropdown" },
+              view: GROUPS_VIEW
+            })
+          )
+          .add_view(GROUPS_VIEW, container_view_props(container_type: GROUPS_TYPE))
       end
 
       if dashboard_nav_link?(:milestones)
@@ -82,14 +89,16 @@ module Nav
           title: 'Milestones',
           active: active_nav_link?(controller: 'dashboard/milestones'),
           icon: 'clock',
+          data: { qa_selector: 'milestones_link' },
           href: dashboard_milestones_path
         )
       end
 
-      if dashboard_nav_link?(:milestones)
+      if dashboard_nav_link?(:snippets)
         builder.add_primary_menu_item(
           **snippets_menu_item_attrs.merge({
             active: active_nav_link?(controller: 'dashboard/snippets'),
+            data: { qa_selector: 'snippets_link' },
             href: dashboard_snippets_path
           })
         )
@@ -101,17 +110,54 @@ module Nav
           title: 'Activity',
           active: active_nav_link?(path: 'dashboard#activity'),
           icon: 'history',
+          data: { qa_selector: 'activity_link' },
           href: activity_dashboard_path
         )
       end
 
-      if current_user&.can_admin_all_resources?
+      # Using admin? is generally discouraged because it does not check for
+      # "admin_mode". In this case we are migrating code and check both, so
+      # we should be good.
+      # rubocop: disable Cop/UserAdmin
+      if current_user&.admin?
         builder.add_secondary_menu_item(
           id: 'admin',
-          title: 'Admin',
+          title: _('Admin'),
           active: active_nav_link?(controller: 'admin/dashboard'),
           icon: 'admin',
+          class: 'qa-admin-area-link',
           href: admin_root_path
+        )
+      end
+
+      if Gitlab::CurrentSettings.admin_mode
+        if header_link?(:admin_mode)
+          builder.add_secondary_menu_item(
+            id: 'leave_admin_mode',
+            title: _('Leave Admin Mode'),
+            active: active_nav_link?(controller: 'admin/sessions'),
+            icon: 'lock-open',
+            href: destroy_admin_session_path,
+            method: :post
+          )
+        elsif current_user.admin?
+          builder.add_secondary_menu_item(
+            id: 'enter_admin_mode',
+            title: _('Enter Admin Mode'),
+            active: active_nav_link?(controller: 'admin/sessions'),
+            icon: 'lock',
+            href: new_admin_session_path
+          )
+        end
+      end
+      # rubocop: enable Cop/UserAdmin
+
+      if Gitlab::Sherlock.enabled?
+        builder.add_secondary_menu_item(
+          id: 'sherlock',
+          title: _('Sherlock Transactions'),
+          icon: 'admin',
+          href: sherlock_transactions_path
         )
       end
     end
@@ -120,7 +166,7 @@ module Nav
       {
         id: 'project',
         title: _('Projects'),
-        icon: 'project',
+        icon: 'project'
       }
     end
 
@@ -128,7 +174,7 @@ module Nav
       {
         id: 'groups',
         title: 'Groups',
-        icon: 'group',
+        icon: 'group'
       }
     end
 
@@ -136,13 +182,13 @@ module Nav
       {
         id: 'snippets',
         title: _('Snippets'),
-        icon: 'snippet',
+        icon: 'snippet'
       }
     end
 
     def container_view_props(container_type:)
-      container = container_type == 'projects' ? current_project : current_group
-      submenu = container_type == 'project' ? projects_submenu : groups_submenu
+      container = container_type == PROJECTS_TYPE ? current_project : current_group
+      submenu = container_type == PROJECTS_TYPE ? projects_submenu : groups_submenu
 
       {
         namespace: container_type,
@@ -178,27 +224,22 @@ module Nav
     end
 
     def projects_submenu
-      builder = ::Gitlab::Nav::TopNavMenuBuilder.new
-
       # These project links come from `app/views/layouts/nav/projects_dropdown/_show.html.haml`
-      builder.add_primary_menu_item(id: 'your', title: _('Your projects'), href: dashboard_projects_path)
-      builder.add_primary_menu_item(id: 'starred', title: _('Starred projects'), href: starred_dashboard_projects_path)
-      builder.add_primary_menu_item(id: 'explore', title: _('Explore projects'), href: explore_root_path)
-      builder.add_secondary_menu_item(id: 'create', title: _('Create new project'), href: new_project_path)
-
-      builder.build
+      ::Gitlab::Nav::TopNavMenuBuilder.new
+        .add_primary_menu_item(id: 'your', title: _('Your projects'), href: dashboard_projects_path)
+        .add_primary_menu_item(id: 'starred', title: _('Starred projects'), href: starred_dashboard_projects_path)
+        .add_primary_menu_item(id: 'explore', title: _('Explore projects'), href: explore_root_path)
+        .add_secondary_menu_item(id: 'create', title: _('Create new project'), href: new_project_path)
+        .build
     end
 
     def groups_submenu
-      builder = ::Gitlab::Nav::TopNavMenuBuilder.new
-
       # These group links come from `app/views/layouts/nav/groups_dropdown/_show.html.haml`
-      builder.add_primary_menu_item(id: 'your', title: _('Your groups'), href: dashboard_groups_path)
-      builder.add_primary_menu_item(id: 'explore', title: _('Explore groups'), href: explore_groups_path)
-      builder.add_secondary_menu_item(id: 'create', title: _('Create group'), href: new_group_path(anchor: 'create-group-pane'))
-      builder.add_primary_menu_item(id: 'explore', title: _('Explore groups'), href: new_group_path(anchor: 'import-group-pane'))
-
-      builder.build
+      ::Gitlab::Nav::TopNavMenuBuilder.new
+        .add_primary_menu_item(id: 'your', title: _('Your groups'), href: dashboard_groups_path)
+        .add_primary_menu_item(id: 'explore', title: _('Explore groups'), href: explore_groups_path)
+        .add_secondary_menu_item(id: 'create', title: _('Create group'), href: new_group_path(anchor: 'create-group-pane'))
+        .build
     end
   end
 end
