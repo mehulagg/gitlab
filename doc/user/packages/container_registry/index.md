@@ -757,11 +757,12 @@ There can be different reasons behind this:
   2. If the previous fix didn't work or you are on earlier versions of GitLab, you may use the following script:
 
      ```Shell
-     # Get a list of all tags in a certain container repository while considering [pagination](https://docs.gitlab.com/ee/api/README.html#pagination)
+     # Get a list of all tags in a certain container repository while considering [pagination](../../../api/README.md#pagination)
 
      list_o_tags.out; for i in {1..N}; do curl --header 'PRIVATE-TOKEN: <PAT>' "https://gitlab.example.com/api/v4/projects/<Project_id>/registry/repositories/<container_repo_id>/tags?per_page=100&page=${i}" | jq '.[].name' | tr -d '"' >> list_o_tags.out; done # N stands for the number of tags/100 rounded to the next whole number.
 
-     **Note:** The command just before the for loop is just to make sure that list_o_tags.out is always empty when going into the loop.
+     NOTE:
+     The command just before the for loop is just to make sure that list_o_tags.out is always empty when going into the loop.
 
      # Remove the tags that you want to keep from the file. N here stands for the number of tags to be kept
      sed -i '1,Nd' list_o_tags.out
