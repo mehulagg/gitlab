@@ -23,7 +23,7 @@ module Ci
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
-      def execute
+      def execute(update_stats: true)
         return success(destroyed_artifacts_count: artifacts_count) if @job_artifacts.empty?
 
         Ci::DeletedObject.transaction do
@@ -33,10 +33,10 @@ module Ci
         end
 
         # This is executed outside of the transaction because it depends on Redis
-        update_project_statistics
+        statstics_updates = update_project_statistics(perform_updates: update_stats)
         increment_monitoring_statistics(artifacts_count)
 
-        success(destroyed_artifacts_count: artifacts_count)
+        success(destroyed_artifacts_count: artifacts_count, statstics_updates: statstics_updates)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -45,10 +45,13 @@ module Ci
       # This method is implemented in EE and it must do only database work
       def destroy_related_records(artifacts); end
 
-      def update_project_statistics
+      def update_project_statistics(perform_updates:)
         artifacts_by_project = @job_artifacts.group_by(&:project)
-        artifacts_by_project.each do |project, artifacts|
+        artifacts_by_project.each.with_object({}) do |(project, artifacts), result|
           delta = -artifacts.sum { |artifact| artifact.size.to_i }
+          result[project] = delta
+          next unless perform_updates
+
           ProjectStatistics.increment_statistic(
             project, Ci::JobArtifact.project_statistics_name, delta)
         end
