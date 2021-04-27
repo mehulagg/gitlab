@@ -3,6 +3,8 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import { isListDraggable } from '../boards_util';
 import BoardList from './board_list.vue';
+import { updateHistory } from '~/lib/utils/url_utility';
+import eventHub from '../eventhub';
 
 export default {
   components: {
@@ -72,7 +74,24 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['fetchItemsForList']),
+    ...mapActions(['fetchItemsForList', 'performSearch']),
+    filterByLabel(e) {
+      e.stopPropagation();
+
+      if(!e.target?.closest('[data-label-title]')) return;
+
+      const { dataset } = e.target.closest('[data-label-title]');
+      const filterPath = window.location.search ? `${window.location.search}&` : '?';
+      const filter = `label_name[]=${encodeURIComponent(dataset.labelTitle)}`;
+
+      if (!filterPath.includes(filter)) {
+        updateHistory({
+          url: `${filterPath}${filter}`,
+        });
+        this.performSearch();
+        eventHub.$emit('updateTokens');
+      }
+    }
   },
 };
 </script>
@@ -87,6 +106,7 @@ export default {
     :data-id="list.id"
     class="board gl-display-inline-block gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal is-expandable"
     data-qa-selector="board_list"
+    @click="filterByLabel"
   >
     <div
       class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base"

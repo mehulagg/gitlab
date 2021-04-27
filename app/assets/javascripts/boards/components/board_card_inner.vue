@@ -4,12 +4,10 @@ import { sortBy } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import boardCardInner from 'ee_else_ce/boards/mixins/board_card_inner';
 import { isScopedLabel } from '~/lib/utils/common_utils';
-import { updateHistory } from '~/lib/utils/url_utility';
 import { sprintf, __, n__ } from '~/locale';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import { ListType } from '../constants';
-import eventHub from '../eventhub';
 import BoardBlockedIcon from './board_blocked_icon.vue';
 import IssueDueDate from './issue_due_date.vue';
 import IssueTimeEstimate from './issue_time_estimate.vue';
@@ -116,7 +114,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['performSearch', 'setError']),
+    ...mapActions(['setError']),
     isIndexLessThanlimit(index) {
       return index < this.limitBeforeCounter;
     },
@@ -142,19 +140,6 @@ export default {
           this.list.title === label.title
         )
       );
-    },
-    filterByLabel(label) {
-      if (!this.updateFilters) return;
-      const filterPath = window.location.search ? `${window.location.search}&` : '?';
-      const filter = `label_name[]=${encodeURIComponent(label.title)}`;
-
-      if (!filterPath.includes(filter)) {
-        updateHistory({
-          url: `${filterPath}${filter}`,
-        });
-        this.performSearch();
-        eventHub.$emit('updateTokens');
-      }
     },
     showScopedLabel(label) {
       return this.scopedLabelsAvailable && isScopedLabel(label);
@@ -194,8 +179,8 @@ export default {
           :title="label.title"
           :description="label.description"
           size="sm"
+          :data-label-title="label.title"
           :scoped="showScopedLabel(label)"
-          @click="filterByLabel(label)"
         />
       </template>
     </div>
