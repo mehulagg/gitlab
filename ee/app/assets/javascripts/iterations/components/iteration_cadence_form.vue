@@ -1,5 +1,6 @@
 <script>
 import {
+  GlAlert,
   GlButton,
   GlDatepicker,
   GlForm,
@@ -11,7 +12,6 @@ import {
 import { visitUrl } from '~/lib/utils/url_utility';
 import { s__, __ } from '~/locale';
 import createCadence from '../queries/create_cadence.mutation.graphql';
-import { truncateWidth } from '../../../../../../app/assets/javascripts/lib/utils/text_utility';
 
 const i18n = Object.freeze({
   title: {
@@ -56,6 +56,7 @@ export default {
   ],
 
   components: {
+    GlAlert,
     GlButton,
     GlDatepicker,
     GlForm,
@@ -79,6 +80,7 @@ export default {
     return {
       cadences: [],
       loading: false,
+      errorMessage: '',
       title: '',
       automatic: true,
       startDate: null,
@@ -91,12 +93,6 @@ export default {
         durationInWeeks: null,
         iterationsInAdvance: null,
       },
-      touched: {
-        title: null,
-        startDate: true,
-        durationInWeeks: null,
-        iterationsInAdvance: null,
-      },
       i18n,
     };
   },
@@ -105,19 +101,19 @@ export default {
       return !Object.values(this.validationState).includes(false);
     },
     variables() {
-      let vars = {
+      const vars = {
         input: {
           groupPath: this.groupPath,
           title: this.title,
           automatic: this.automatic,
           startDate: this.startDate,
           durationInWeeks: this.durationInWeeks,
-          active: true, // TODO: where is this toggled?
+          active: true,
         },
       };
       if (this.automatic) {
-        vars = {
-          ...vars,
+        vars.input = {
+          ...vars.input,
           iterationsInAdvance: this.iterationsInAdvance,
         };
       }
@@ -127,7 +123,6 @@ export default {
   methods: {
     validate(field) {
       this.validationState[field] = Boolean(this[field]);
-      this.touched[field] = true;
     },
     validateAllFields() {
       Object.keys(this.validationState)
@@ -172,25 +167,25 @@ export default {
         })
         .then(({ data, errors: topLevelErrors = [] }) => {
           if (topLevelErrors.length > 0) {
-            throw new Error(topLevelErrors[0].message);
-            // createFlash(errors[0]);
+            this.errorMessage = topLevelErrors[0].message;
+            return;
           }
 
-          // todo: this also may have errors
-          const { cadence, errors } = data.iterationCadenceCreate;
+          const { errors } = data.iterationCadenceCreate;
 
           if (errors.length > 0) {
-            this.loading = false;
-            throw new Error(errors[0]);
-            // createFlash(errors[0]);
+            [this.errorMessage] = errors;
+            return;
           }
 
-          visitUrl(cadence.webUrl);
+          visitUrl(this.cadencesListPath);
         })
         .catch((e) => {
-          this.loading = false;
+          this.errorMessage = __('Unable to save cadence. Please try again');
           throw e;
-          // createFlash(__('Unable to save cadence. Please try again'));
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
   },
@@ -205,22 +200,26 @@ export default {
       </h3>
     </div>
     <gl-form>
+      <gl-alert v-if="errorMessage" class="gl-mb-5" variant="danger" @dismiss="errorMessage = ''">{{
+        errorMessage
+      }}</gl-alert>
+
       <gl-form-group
         :label="i18n.title.label"
         :label-cols-md="2"
         label-class="text-right-md gl-pt-3!"
         label-for="cadence-title"
         :invalid-feedback="i18n.requiredField"
-        :validated="touched.title"
+        :state="validationState.title"
       >
         <gl-form-input
           id="cadence-title"
           v-model="title"
-          required
           autocomplete="off"
           data-qa-selector="iteration_cadence_title_field"
           :placeholder="i18n.title.placeholder"
           size="xl"
+          :state="validationState.title"
           @blur="validate('title')"
         />
       </gl-form-group>
@@ -247,7 +246,7 @@ export default {
         label-for="cadence-start-date"
         :description="i18n.startDate.description"
         :invalid-feedback="i18n.requiredField"
-        :validated="true"
+        :state="validationState.startDate"
       >
         <gl-datepicker :target="null">
           <gl-form-input
@@ -258,6 +257,7 @@ export default {
             autocomplete="off"
             inputmode="none"
             required
+            :state="validationState.startDate"
             data-qa-selector="cadence_start_date"
             @blur="validate('startDate')"
           />
@@ -271,7 +271,6 @@ export default {
         label-for="cadence-duration"
         :description="i18n.duration.description"
         :invalid-feedback="i18n.requiredField"
-        :validated="touched.duration"
       >
         <gl-form-select
           id="cadence-duration"
@@ -293,7 +292,6 @@ export default {
         :description="i18n.futureIterations.description"
         :invalid-feedback="i18n.requiredField"
         :state="validationState.iterationsInAdvance"
-        :validated="touched.iterationsInAdvance"
       >
         <gl-form-select
           id="cadence-schedule-future-iterations"
