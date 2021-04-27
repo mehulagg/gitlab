@@ -1448,7 +1448,15 @@ Here are common errors and potential causes:
 
 ### Determining the primary Gitaly without Grafana
 
-The `Shard Primary Election` chart on the `Gitlab Omnibus - Praefect` dashboard is the recommended
-way to determine the current primary Gitaly node. If you have not enabled Grafana, you can find the
-primary Gitaly by SSHing into each Praefect node and running
-`curl localhost:9652/metrics | grep gitaly_praefect_primaries`.
+### Determine primary Gitaly node
+
+To determine the current primary Gitaly node for a specific Praefect node:
+
+- Use the `Shard Primary Election` [Grafana chart](https://docs.gitlab.com/ee/administration/monitoring/performance/grafana_configuration.html) on the [`Gitlab Omnibus - Praefect` dashboard](https://gitlab.com/gitlab-org/grafana-dashboards/-/blob/master/omnibus/praefect.json).
+  This is recommended.
+- If you do not have Grafana set up, use the following command on each host of each
+  Praefect node: 
+
+  ```shell
+  curl localhost:9652/metrics | grep gitaly_praefect_primaries`
+  ```
