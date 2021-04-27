@@ -31,7 +31,7 @@ group is public.
 The following users can approve merge requests:
 
 - Users who have been added as approvers at the project or merge request levels with
-  developer or higher [permissions](../..///permissions.md).
+  developer or higher [permissions](../../../permissions.md).
 - [Code owners](#code-owners-as-eligible-approvers) of the files changed by the merge request
   that have developer or higher [permissions](../../../permissions.md).
 
@@ -48,8 +48,8 @@ they have direct membership to the group. In the future, group approvers may be
 If a user is added as an individual approver and is also part of a group approver,
 then that user is just counted once. The merge request author, and users who have committed
 to the merge request, do not count as eligible approvers,
-if [**Prevent author approval**](#allowing-merge-request-authors-to-approve-their-own-merge-requests) (enabled by default)
-and [**Prevent committers approval**](#prevent-approval-of-merge-requests-by-their-committers) (disabled by default)
+if [**Prevent author approval**](settings.md#allowing-merge-request-authors-to-approve-their-own-merge-requests) (enabled by default)
+and [**Prevent committers approval**](settings.md#prevent-approval-of-merge-requests-by-their-committers) (disabled by default)
 are enabled on the project settings.
 
 When an eligible approver comments on a merge request, it displays in the
@@ -130,7 +130,7 @@ To add or edit the default merge request approval rule:
      the rule.
 1. Click **Add approval rule** or **Update approval rule**.
 
-When [approval rule overrides](#prevent-overriding-default-approvals) are allowed,
+When [approval rule overrides](settings.md#prevent-overriding-default-approvals) are allowed,
 changes to these default rules are not applied to existing merge
 requests, except for changes to the [target branch](#scoped-to-protected-branch) of
 the rule.
@@ -151,7 +151,7 @@ source (fork).
 
 By default, the merge request approval rule listed in each merge request (MR) can be
 edited by the MR author or a user with sufficient [permissions](../../../permissions.md).
-This ability can be disabled in the [merge request approvals settings](#prevent-overriding-default-approvals).
+This ability can be disabled in the [merge request approvals settings](settings.md#prevent-overriding-default-approvals).
 
 One possible scenario would be to add more approvers than were defined in the default
 settings.

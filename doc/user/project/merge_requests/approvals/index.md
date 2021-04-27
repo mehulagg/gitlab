@@ -72,14 +72,14 @@ Required approvals enable multiple use cases:
   of reviewers, through [Approval rules](rules.md).
 - Specifying categories of reviewers, such as backend, frontend, quality assurance,
   database, and so on, for all proposed code changes.
-- Designating [Code Owners as eligible approvers](#code-owners-as-eligible-approvers),
+- Designating [Code Owners as eligible approvers](rules.md#code-owners-as-eligible-approvers),
   determined by the files changed in a merge request.
-- [Requiring approval from a security team](#security-approvals-in-merge-requests)
+- [Requiring approval from a security team](../../../application_security/index.md#security-approvals-in-merge-requests)
   before merging code that could introduce a vulnerability.**(ULTIMATE)**
 
 ### Adding or removing an approval
 
-When an [eligible approver](#eligible-approvers) visits an open merge request,
+When an [eligible approver](rules.md#eligible-approvers) visits an open merge request,
 one of the following is possible:
 
 - If the required number of approvals has _not_ been yet met, they can approve
@@ -96,14 +96,14 @@ one of the following is possible:
 
   ![Remove approval](img/remove_approval.png)
 
-When [approval rule overrides](#prevent-overriding-default-approvals) are allowed,
+When [approval rule overrides](settings.md#prevent-overriding-default-approvals) are allowed,
 changes to default approval rules will **not** be applied to existing
-merge requests, except for changes to the [target branch](#scoped-to-protected-branch)
+merge requests, except for changes to the [target branch](rules.md#scoped-to-protected-branch)
 of the rule.
 
 NOTE:
 The merge request author is not allowed to approve their own merge request if
-[**Prevent author approval**](#allowing-merge-request-authors-to-approve-their-own-merge-requests)
+[**Prevent author approval**](settings.md#allowing-merge-request-authors-to-approve-their-own-merge-requests)
 is enabled in the project settings.
 
 After the approval rules have been met, the merge request can be merged if there is nothing
