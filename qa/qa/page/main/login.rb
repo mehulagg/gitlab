@@ -60,7 +60,7 @@ module QA
               sign_in_using_gitlab_credentials(user: user || Runtime::User, skip_page_validation: skip_page_validation)
             end
 
-            set_initial_password_if_present
+            # set_initial_password_if_present
           end
         end
 
