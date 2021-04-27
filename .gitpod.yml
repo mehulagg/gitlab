@@ -1,4 +1,4 @@
-image: registry.gitlab.com/gitlab-org/gitlab-development-kit/gitpod-workspace:stable
+image: registry.gitlab.com/gitlab-org/gitlab-development-kit/gitpod-workspace:main
 
 tasks:
 
