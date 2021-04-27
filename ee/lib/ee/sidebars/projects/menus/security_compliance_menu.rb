@@ -9,7 +9,7 @@ module EE
 
           override :configure_menu_items
           def configure_menu_items
-            return false unless return unless can?(context.current_user, :access_security_and_compliance, context.project)
+            return false unless can?(context.current_user, :access_security_and_compliance, context.project)
 
             add_item(security_dashboard_menu_item)
             add_item(vulnerability_report_menu_item)
