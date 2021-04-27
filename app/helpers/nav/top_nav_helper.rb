@@ -2,66 +2,20 @@
 
 module Nav
   module TopNavHelper
-    def  top_nav_view_model
-      return top_nav_anonymous_view_model unless current_user
+    PROJECTS_VIEW = 'projects-view'
+    GROUPS_VIEW = 'groups-view'
 
-      primary = top_nav_view_model_primary
-      secondary = top_nav_view_model_secondary
 
-      active = find_active(primary + secondary)
-      active_title = active ? active[:title] : 'Menu'
+    def top_nav_view_model
+      builder = ::Gitlab::Nav::TopNavViewModelBuilder.new
 
-      {
-        primary: primary,
-        secondary: secondary,
-        active_title: active_title,
-        views: {
-          projects_view: container_view_props(container_type: 'projects'),
-          groups_view: container_view_props(container_type: 'groups')
-        }
-      }
-    end
-
-    def top_nav_anonymous_view_model
-      primary = []
-
-      if explore_nav_link?(:projects)
-        primary.push({
-                       id: 'projects',
-                       title: _('Projects'),
-                       active: active_nav_link?(path: ['dashboard#show', 'root#show', 'projects#trending', 'projects#starred', 'projects#index']),
-                       icon: 'project',
-                       href: explore_root_path
-                     })
+      if current_user
+        build_view_model(builder)
+      else
+        build_anonymous_view_model(builder)
       end
 
-      if explore_nav_link?(:groups)
-        primary.push({
-                       id: 'groups',
-                       title: _('Groups'),
-                       active: active_nav_link?(controller: [:groups, 'groups/milestones', 'groups/group_members']),
-                       icon: 'group',
-                       href: explore_groups_path
-                     })
-      end
-
-      if explore_nav_link?(:snippets)
-        primary.push({
-                       id: 'snippets',
-                       title: _('Snippets'),
-                       active: active_nav_link?(controller: :snippets),
-                       icon: 'snippet',
-                       href: explore_snippets_path
-                     })
-      end
-
-      active = find_active(primary)
-      active_title = active ? active[:title] : 'Menu'
-
-      {
-        primary: primary,
-        active_title: active_title,
-      }
+      builder.build
     end
 
     def top_nav_responsive_view_model
@@ -70,92 +24,132 @@ module Nav
 
     private
 
-    def top_nav_view_model_primary
-      primary = []
+    def build_anonymous_view_model(builder)
+      # These come from `app/views/layouts/nav/_explore.html.ham `
+      if explore_nav_link?(:projects)
+        builder.add_primary_menu_item(
+          **projects_menu_item_attrs.merge({
+            active: active_nav_link?(path: ['dashboard#show', 'root#show', 'projects#trending', 'projects#starred', 'projects#index']),
+            href: explore_root_path
+          })
+        )
+      end
 
-      # TODO: Pull out a PORO object to encapsulate properties of a link
+      if explore_nav_link?(:groups)
+        builder.add_primary_menu_item(
+          **groups_menu_item_attrs.merge({
+            active: active_nav_link?(controller: [:groups, 'groups/milestones', 'groups/group_members']),
+            href: explore_groups_path
+          })
+        )
+      end
+
+      if explore_nav_link?(:snippets)
+        builder.add_primary_menu_item(
+          **snippets_menu_item_attrs.merge({
+            active: active_nav_link?(controller: :snippets),
+            href: explore_snippets_path
+          })
+        )
+      end
+    end
+
+    def build_view_model(builder)
+      # These come from `app/views/layouts/nav/_dashboard.html.haml`
       if dashboard_nav_link?(:projects)
-        primary.push({
-                       id: 'project',
-                       title: 'Projects',
-                       icon: 'project',
-                       active: active_nav_link?(path: ['root#index', 'projects#trending', 'projects#starred', 'dashboard/projects#index']),
-                       view: 'projects-view'
-                     })
+        builder.add_primary_menu_item(
+          **projects_menu_item_attrs.merge({
+            active: active_nav_link?(path: ['root#index', 'projects#trending', 'projects#starred', 'dashboard/projects#index']),
+            view: PROJECTS_VIEW
+          })
+        )
+        builder.add_view(PROJECTS_VIEW, container_view_props(container_type: 'projects'))
       end
 
       if dashboard_nav_link?(:groups)
-        primary.push({
-                       id: 'groups',
-                       title: 'Groups',
-                       icon: 'group',
-                       active: active_nav_link?(path: ['dashboard/groups', 'explore/groups']),
-                       view: 'groups-view'
-                     })
+        builder.add_primary_menu_item(
+          **groups_menu_item_attrs.merge({
+            active: active_nav_link?(path: ['dashboard/groups', 'explore/groups']),
+            view: GROUPS_VIEW
+          })
+        )
+        builder.add_view(GROUPS_VIEW, container_view_props(container_type: 'groups'))
       end
 
       if dashboard_nav_link?(:milestones)
-        primary.push({
-                       id: 'milestones',
-                       title: 'Milestones',
-                       active: active_nav_link?(controller: 'dashboard/milestones'),
-                       icon: 'clock',
-                       href: dashboard_milestones_path
-                     })
+        builder.add_primary_menu_item(
+          id: 'milestones',
+          title: 'Milestones',
+          active: active_nav_link?(controller: 'dashboard/milestones'),
+          icon: 'clock',
+          href: dashboard_milestones_path
+        )
       end
 
       if dashboard_nav_link?(:milestones)
-        primary.push({
-                       id: 'snippets',
-                       title: 'Snippets',
-                       active: active_nav_link?(controller: 'dashboard/snippets'),
-                       icon: 'snippet',
-                       href: dashboard_snippets_path
-                     })
+        builder.add_primary_menu_item(
+          **snippets_menu_item_attrs.merge({
+            active: active_nav_link?(controller: 'dashboard/snippets'),
+            href: dashboard_snippets_path
+          })
+        )
       end
 
       if dashboard_nav_link?(:activity)
-        primary.push({
-                       id: 'activity',
-                       title: 'Activity',
-                       active: active_nav_link?(path: 'dashboard#activity'),
-                       icon: 'history',
-                       href: activity_dashboard_path
-                     })
+        builder.add_primary_menu_item(
+          id: 'activity',
+          title: 'Activity',
+          active: active_nav_link?(path: 'dashboard#activity'),
+          icon: 'history',
+          href: activity_dashboard_path
+        )
       end
-
-      primary
-    end
-
-    def top_nav_view_model_secondary
-      secondary = []
 
       if current_user&.can_admin_all_resources?
-        secondary.push({
-                         id: 'admin',
-                         title: 'Admin',
-                         active: active_nav_link?(controller: 'admin/dashboard'),
-                         icon: 'admin',
-                         href: admin_root_path
-                       })
+        builder.add_secondary_menu_item(
+          id: 'admin',
+          title: 'Admin',
+          active: active_nav_link?(controller: 'admin/dashboard'),
+          icon: 'admin',
+          href: admin_root_path
+        )
       end
-
-      secondary
     end
 
-    def find_active(items)
-      items.find { |x| x[:active] }
+    def projects_menu_item_attrs
+      {
+        id: 'project',
+        title: _('Projects'),
+        icon: 'project',
+      }
+    end
+
+    def groups_menu_item_attrs
+      {
+        id: 'groups',
+        title: 'Groups',
+        icon: 'group',
+      }
+    end
+
+    def snippets_menu_item_attrs
+      {
+        id: 'snippets',
+        title: _('Snippets'),
+        icon: 'snippet',
+      }
     end
 
     def container_view_props(container_type:)
       container = container_type == 'projects' ? current_project : current_group
+      submenu = container_type == 'project' ? projects_submenu : groups_submenu
 
       {
         namespace: container_type,
         currentUserName: current_user&.username,
         currentItem: container,
-        linksPrimary: container_type == 'projects' ? projects_links_primary : groups_links_primary,
-        linksSecondary: container_type == 'projects' ? projects_links_secondary : groups_links_secondary
+        linksPrimary: submenu[:primary],
+        linksSecondary: submenu[:secondary]
       }
     end
 
@@ -183,58 +177,28 @@ module Nav
       }
     end
 
-    # These project links come from `app/views/layouts/nav/projects_dropdown/_show.html.haml`
-    def projects_links_primary
-      [
-        {
-          title: _('Your projects'),
-          href: dashboard_projects_path
-        },
-        {
-          title: _('Starred projects'),
-          href: starred_dashboard_projects_path
-        },
-        {
-          title: _('Explore projects'),
-          href: explore_root_path
-        }
-      ]
+    def projects_submenu
+      builder = ::Gitlab::Nav::TopNavMenuBuilder.new
+
+      # These project links come from `app/views/layouts/nav/projects_dropdown/_show.html.haml`
+      builder.add_primary_menu_item(id: 'your', title: _('Your projects'), href: dashboard_projects_path)
+      builder.add_primary_menu_item(id: 'starred', title: _('Starred projects'), href: starred_dashboard_projects_path)
+      builder.add_primary_menu_item(id: 'explore', title: _('Explore projects'), href: explore_root_path)
+      builder.add_secondary_menu_item(id: 'create', title: _('Create new project'), href: new_project_path)
+
+      builder.build
     end
 
-    def projects_links_secondary
-      [
-        {
-          title: _('Create new project'),
-          href: new_project_path
-        }
-      ]
-    end
+    def groups_submenu
+      builder = ::Gitlab::Nav::TopNavMenuBuilder.new
 
-    # These group links come from `app/views/layouts/nav/groups_dropdown/_show.html.haml`
-    def groups_links_primary
-      [
-        {
-          title: _('Your groups'),
-          href: dashboard_groups_path
-        },
-        {
-          title: _('Explore groups'),
-          href: explore_groups_path
-        }
-      ]
-    end
+      # These group links come from `app/views/layouts/nav/groups_dropdown/_show.html.haml`
+      builder.add_primary_menu_item(id: 'your', title: _('Your groups'), href: dashboard_groups_path)
+      builder.add_primary_menu_item(id: 'explore', title: _('Explore groups'), href: explore_groups_path)
+      builder.add_secondary_menu_item(id: 'create', title: _('Create group'), href: new_group_path(anchor: 'create-group-pane'))
+      builder.add_primary_menu_item(id: 'explore', title: _('Explore groups'), href: new_group_path(anchor: 'import-group-pane'))
 
-    def groups_links_secondary
-      [
-        {
-          title: _('Create group'),
-          href: new_group_path(anchor: 'create-group-pane')
-        },
-        {
-          title: _('Import group'),
-          href: new_group_path(anchor: 'import-group-pane')
-        }
-      ]
+      builder.build
     end
   end
 end
