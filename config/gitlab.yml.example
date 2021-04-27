@@ -1264,6 +1264,9 @@ production: &base
     # matomo_site_id: '_your_matomo_site_id'
     # matomo_disable_cookies: false
 
+    # Maximum text highlighting size for diffs (in kilobytes)
+    # maximum_text_highlight_size: 512
+
   rack_attack:
     git_basic_auth:
       # Rack Attack IP banning enabled
