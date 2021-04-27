@@ -14,7 +14,7 @@ RSpec.describe Nav::TopNavHelper do
     let(:with_geo_secondary) { false }
     let(:with_geo_primary_node_configured) { false }
 
-    let(:subject) { helper.top_nav_view_model(project: nil) }
+    let(:subject) { helper.top_nav_view_model(project: nil, group: nil) }
 
     before do
       allow(helper).to receive(:current_user) { current_user }

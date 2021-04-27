@@ -16,7 +16,7 @@ RSpec.describe Nav::TopNavHelper do
     let(:with_projects) { false }
     let(:with_milestones) { false }
 
-    let(:subject) { helper.top_nav_view_model(project: current_project) }
+    let(:subject) { helper.top_nav_view_model(project: current_project, group: nil) }
 
     let(:active_title) { 'Menu' }
 
@@ -81,6 +81,7 @@ RSpec.describe Nav::TopNavHelper do
 
         context 'projects' do
           it 'has expected :currentUserName' do
+            p subject
             expect(projects_view[:currentUserName]).to eq(current_user.username)
           end
 
