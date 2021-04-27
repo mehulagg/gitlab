@@ -24,6 +24,11 @@ module Resolvers
              required: false,
              description: 'Sort order of results.'
 
+    argument :topic, type: [GraphQL::STRING_TYPE],
+             required: false,
+             as: :topic,
+             description: 'Filter by user-defined topics.'
+
     def resolve(**args)
       ProjectsFinder
         .new(current_user: current_user, params: project_finder_params(args), project_ids_relation: parse_gids(args[:ids]))
@@ -38,7 +43,8 @@ module Resolvers
         non_public: params[:membership],
         search: params[:search],
         search_namespaces: params[:search_namespaces],
-        sort: params[:sort]
+        sort: params[:sort],
+        tag: params[:topic]
       }.compact
     end
 
