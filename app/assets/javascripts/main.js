@@ -203,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('.navbar-toggler').on('click', () => {
     $('.header-content').toggleClass('menu-expanded');
+    $body.toggleClass('top-nav-responsive-open');
   });
 
   /**

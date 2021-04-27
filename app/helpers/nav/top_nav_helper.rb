@@ -17,6 +17,10 @@ module Nav
       builder.build
     end
 
+    def top_nav_responsive_view_model(**args)
+      top_nav_view_model(**args)
+    end
+
     private
 
     def build_anonymous_view_model(builder:)
