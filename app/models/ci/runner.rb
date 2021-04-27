@@ -3,6 +3,7 @@
 module Ci
   class Runner < ApplicationRecord
     extend Gitlab::Ci::Model
+    include Gitlab::Utils::StrongMemoize
     include Gitlab::SQL::Pattern
     include RedisCacheable
     include ChronicDurationAttribute
@@ -200,10 +201,12 @@ module Ci
     end
 
     def runner_scope
-      return Limitable::Scope.new('ci_registered_instance_runners', Plan.default.actual_limits, self.class.all) if instance_type?
-      return Limitable::Scope.new('ci_registered_group_runners', groups.first.actual_limits, groups.first.runners) if group_type?
+      strong_memoize(:runner_scope) do
+        next Limitable::Scope.new('ci_registered_instance_runners', Plan.default.actual_limits, self.class.all) if instance_type?
+        next Limitable::Scope.new('ci_registered_group_runners', groups.first.actual_limits, groups.first.runners) if group_type?
 
-      Limitable::Scope.new('ci_registered_project_runners', projects.first.actual_limits, projects.first.runners) if projects.first
+        Limitable::Scope.new('ci_registered_project_runners', projects.first.actual_limits, projects.first.runners) if projects.first
+      end
     end
 
     def assign_to(project, current_user = nil)

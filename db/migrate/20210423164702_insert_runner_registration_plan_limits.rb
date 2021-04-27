@@ -6,19 +6,11 @@ class InsertRunnerRegistrationPlanLimits < ActiveRecord::Migration[6.0]
   DOWNTIME = false
 
   def up
-    create_or_update_plan_limit('ci_registered_instance_runners', 'default', 10000)
-    create_or_update_plan_limit('ci_registered_instance_runners', 'free', 20)
-    create_or_update_plan_limit('ci_registered_instance_runners', 'bronze', 1000)
-    create_or_update_plan_limit('ci_registered_instance_runners', 'silver', 10000)
-    create_or_update_plan_limit('ci_registered_instance_runners', 'gold', 10000)
-
-    create_or_update_plan_limit('ci_registered_group_runners', 'default', 2000)
     create_or_update_plan_limit('ci_registered_group_runners', 'free', 20)
     create_or_update_plan_limit('ci_registered_group_runners', 'bronze', 2000)
     create_or_update_plan_limit('ci_registered_group_runners', 'silver', 2000)
     create_or_update_plan_limit('ci_registered_group_runners', 'gold', 2000)
 
-    create_or_update_plan_limit('ci_registered_project_runners', 'default', 100)
     create_or_update_plan_limit('ci_registered_project_runners', 'free', 5)
     create_or_update_plan_limit('ci_registered_project_runners', 'bronze', 100)
     create_or_update_plan_limit('ci_registered_project_runners', 'silver', 100)
@@ -26,7 +18,7 @@ class InsertRunnerRegistrationPlanLimits < ActiveRecord::Migration[6.0]
   end
 
   def down
-    %w[instance group project].each do |scope|
+    %w[group project].each do |scope|
       create_or_update_plan_limit("ci_registered_#{scope}_runners", 'default', 0)
       create_or_update_plan_limit("ci_registered_#{scope}_runners", 'free', 0)
       create_or_update_plan_limit("ci_registered_#{scope}_runners", 'bronze', 0)
