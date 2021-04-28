@@ -211,11 +211,11 @@ parallel-spec-reports:
     expire_in: 31d
 
 non-existent-job:
-  stage: prepare
+  stage: sync
   script:
     - echo 'boo'
   rules:
-    - when: always
+    - when: never
 
 danger-review:
   extends:
@@ -223,7 +223,9 @@ danger-review:
     - .danger-review-cache
     - .review:rules:danger
   stage: test
-  needs: ["retrieve-tests-metadata", "non-existent-job"]
+  needs:
+    - job: "non-existent-job"
+      optional: true
   before_script:
     - source ./scripts/utils.sh
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --with danger"
