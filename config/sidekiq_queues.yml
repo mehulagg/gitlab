@@ -190,6 +190,8 @@
   - 1
 - - issuable_export_csv
   - 1
+- - issuable_label_links_destroy
+  - 1
 - - issue_placement
   - 2
 - - issue_rebalancing

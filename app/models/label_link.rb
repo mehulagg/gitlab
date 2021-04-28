@@ -9,4 +9,6 @@ class LabelLink < ApplicationRecord
 
   validates :target, presence: true, unless: :importing?
   validates :label, presence: true, unless: :importing?
+
+  scope :for_target, -> (id, type) { where(target_id: id, target_type: type) }
 end
