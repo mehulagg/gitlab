@@ -166,7 +166,7 @@ describe('MavenInstallation', () => {
         expect(findCodeInstructions().at(0).props()).toMatchObject({
           instruction: gradleKotlinInstallCommandText,
           multiline: false,
-          trackingAction: TrackingActions.COPY_GRADLE_INSTALL_COMMAND,
+          trackingAction: TrackingActions.COPY_KOTLIN_INSTALL_COMMAND,
         });
       });
     });
@@ -176,7 +176,7 @@ describe('MavenInstallation', () => {
         expect(findCodeInstructions().at(1).props()).toMatchObject({
           instruction: gradleKotlinAddSourceCommandText,
           multiline: true,
-          trackingAction: TrackingActions.COPY_GRADLE_ADD_TO_SOURCE_COMMAND,
+          trackingAction: TrackingActions.COPY_KOTLIN_ADD_TO_SOURCE_COMMAND,
         });
       });
     });

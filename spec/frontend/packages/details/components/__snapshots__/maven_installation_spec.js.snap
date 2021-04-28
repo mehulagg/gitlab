@@ -39,7 +39,7 @@ exports[`MavenInstallation kotlin renders all the messages 1`] = `
     copytext="Copy Gradle Kotlin DSL install command"
     instruction="foo/gradle/kotlin/install"
     label="Gradle Kotlin DSL install command"
-    trackingaction="copy_gradle_install_command"
+    trackingaction="copy_kotlin_install_command"
     trackinglabel="code_instruction"
   />
    
@@ -48,7 +48,7 @@ exports[`MavenInstallation kotlin renders all the messages 1`] = `
     instruction="foo/gradle/kotlin/add/source"
     label="Add Gradle Kotlin DSL repository command"
     multiline="true"
-    trackingaction="copy_gradle_add_to_source_command"
+    trackingaction="copy_kotlin_add_to_source_command"
     trackinglabel="code_instruction"
   />
 </div>

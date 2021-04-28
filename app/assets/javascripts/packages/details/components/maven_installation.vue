@@ -137,14 +137,14 @@ export default {
         :label="s__('PackageRegistry|Gradle Kotlin DSL install command')"
         :instruction="gradleKotlinInstalCommand"
         :copy-text="s__('PackageRegistry|Copy Gradle Kotlin DSL install command')"
-        :tracking-action="$options.trackingActions.COPY_GRADLE_INSTALL_COMMAND"
+        :tracking-action="$options.trackingActions.COPY_KOTLIN_INSTALL_COMMAND"
         :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
       />
       <code-instruction
         :label="s__('PackageRegistry|Add Gradle Kotlin DSL repository command')"
         :instruction="gradleKotlinAddSourceCommand"
         :copy-text="s__('PackageRegistry|Copy add Gradle Kotlin DSL repository command')"
-        :tracking-action="$options.trackingActions.COPY_GRADLE_ADD_TO_SOURCE_COMMAND"
+        :tracking-action="$options.trackingActions.COPY_KOTLIN_ADD_TO_SOURCE_COMMAND"
         :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
         multiline
       />
