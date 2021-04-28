@@ -543,7 +543,7 @@ Use one of the following methods to track events:
      include RedisTracking
 
      skip_before_action :authenticate_user!, only: :show
-     track_redis_hll_event :index, :show, name: 'users_visting_projects'
+     track_redis_hll_event :index, :show, name: 'users_visiting_projects'
 
      def index
        render html: 'index'
