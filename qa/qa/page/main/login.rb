@@ -4,6 +4,12 @@ module QA
   module Page
     module Main
       class Login < Page::Base
+        view 'app/views/devise/passwords/edit.html.haml' do
+          element :password_field
+          element :password_confirmation_field
+          element :change_password_button
+        end
+
         view 'app/views/devise/sessions/_new_base.html.haml' do
           element :login_field
           element :password_field
@@ -44,6 +50,8 @@ module QA
           return if Page::Main::Menu.perform(&:signed_in?)
 
           using_wait_time 0 do
+            set_initial_password_if_present
+
             if Runtime::User.ldap_user? && user && user.username != Runtime::User.ldap_username
               raise 'If an LDAP user is provided, it must be used for sign-in', QA::Resource::User::InvalidUserError
             end
@@ -65,6 +73,7 @@ module QA
           end
 
           using_wait_time 0 do
+            set_initial_password_if_present
             sign_in_using_gitlab_credentials(user: admin)
           end
 
@@ -118,6 +127,7 @@ module QA
         end
 
         def switch_to_register_page
+          set_initial_password_if_present
           click_element :register_link
         end
 
@@ -130,6 +140,7 @@ module QA
         end
 
         def sign_in_with_saml
+          set_initial_password_if_present
           click_element :saml_login_button
         end
 
@@ -167,6 +178,16 @@ module QA
           Profile::Password.perform do |new_password_page|
             new_password_page.set_new_password(Runtime::User.password, Runtime::User.password)
           end
+
+          sign_in_using_credentials
+        end
+
+        def set_initial_password_if_present
+          return unless has_content?('Change your password')
+
+          fill_element :password_field, Runtime::User.password
+          fill_element :password_confirmation_field, Runtime::User.password
+          click_element :change_password_button
         end
       end
     end
