@@ -5,6 +5,7 @@ module WebHooks
     include ApplicationWorker
 
     feature_category :integrations
+    tags :exclude_from_kubernetes
     urgency :low
     idempotent!
 

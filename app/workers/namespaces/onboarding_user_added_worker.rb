@@ -5,6 +5,7 @@ module Namespaces
     include ApplicationWorker
 
     feature_category :users
+    tags :exclude_from_kubernetes
     urgency :low
 
     idempotent!

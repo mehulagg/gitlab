@@ -5,6 +5,8 @@ module Ci
     include ApplicationWorker
     include PipelineQueue
 
+    tags :exclude_from_kubernetes
+
     idempotent!
 
     def perform(pipeline_id, failure_reason)

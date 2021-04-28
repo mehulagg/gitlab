@@ -6,6 +6,7 @@ module Metrics
       include ApplicationWorker
 
       feature_category :metrics
+      tags :exclude_from_kubernetes
 
       idempotent!
 

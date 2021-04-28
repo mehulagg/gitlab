@@ -5,6 +5,7 @@ class GeoRepositoryDestroyWorker # rubocop:disable Scalability/IdempotentWorker
   include GeoQueue
   include ::Gitlab::Geo::LogHelpers
 
+  tags :exclude_from_kubernetes
   loggable_arguments 1, 2, 3
 
   def perform(id, name = nil, disk_path = nil, storage_name = nil)

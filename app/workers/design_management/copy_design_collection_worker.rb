@@ -5,6 +5,7 @@ module DesignManagement
     include ApplicationWorker
 
     feature_category :design_management
+    tags :exclude_from_kubernetes
     idempotent!
     urgency :low
 

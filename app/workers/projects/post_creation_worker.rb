@@ -5,6 +5,7 @@ module Projects
     include ApplicationWorker
 
     feature_category :source_code_management
+    tags :exclude_from_kubernetes
     idempotent!
 
     def perform(project_id)

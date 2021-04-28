@@ -4,6 +4,7 @@ class MergeRequestCleanupRefsWorker
   include ApplicationWorker
 
   feature_category :code_review
+  tags :exclude_from_kubernetes
   idempotent!
 
   def perform(merge_request_id)

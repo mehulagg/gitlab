@@ -5,6 +5,7 @@ module Namespaces
     include ApplicationWorker
 
     feature_category :issue_tracking
+    tags :exclude_from_kubernetes
     urgency :low
 
     deduplicate :until_executing

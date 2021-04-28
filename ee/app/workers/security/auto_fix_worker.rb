@@ -5,6 +5,7 @@ module Security
     include ApplicationWorker
 
     feature_category :vulnerability_management
+    tags :exclude_from_kubernetes
 
     idempotent!
 

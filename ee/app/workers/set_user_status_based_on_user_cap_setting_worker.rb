@@ -5,6 +5,7 @@ class SetUserStatusBasedOnUserCapSettingWorker
   include ::Gitlab::Utils::StrongMemoize
 
   feature_category :users
+  tags :exclude_from_kubernetes
 
   idempotent!
 

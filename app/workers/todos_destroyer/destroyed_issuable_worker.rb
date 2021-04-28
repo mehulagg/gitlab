@@ -5,6 +5,8 @@ module TodosDestroyer
     include ApplicationWorker
     include TodosDestroyerQueue
 
+    tags :exclude_from_kubernetes
+
     idempotent!
 
     def perform(target_id, target_type)

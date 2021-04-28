@@ -9,6 +9,7 @@ module UserStatusCleanup
     # rubocop:enable Scalability/CronWorkerContext
 
     feature_category :users
+    tags :exclude_from_kubernetes
 
     idempotent!
 

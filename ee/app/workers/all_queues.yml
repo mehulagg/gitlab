@@ -18,7 +18,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: cronjob:adjourned_group_deletion
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -42,7 +43,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: cronjob:clear_shared_runners_minutes
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -90,7 +92,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: cronjob:geo_container_repository_sync_dispatch
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -202,7 +205,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: cronjob:geo_sidekiq_cron_config
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -218,7 +222,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: cronjob:geo_verification_cron
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -250,7 +255,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: cronjob:incident_management_oncall_rotations_persist_all_rotations_shifts_job
   :feature_category: :incident_management
   :has_external_dependencies:
@@ -258,7 +264,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: cronjob:ingress_modsecurity_counter_metrics
   :feature_category: :web_firewall
   :has_external_dependencies: true
@@ -338,7 +345,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: cronjob:vulnerabilities_statistics_schedule
   :feature_category: :vulnerability_management
   :has_external_dependencies:
@@ -354,7 +362,8 @@
   :resource_boundary: :unknown
   :weight: 3
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: dora_metrics:dora_daily_metrics_refresh
   :feature_category: :continuous_delivery
   :has_external_dependencies:
@@ -362,7 +371,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: epics:epics_update_epics_dates
   :feature_category: :epics
   :has_external_dependencies:
@@ -506,7 +516,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: geo:geo_repository_shard_sync
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -546,7 +557,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: geo:geo_scheduler_primary_scheduler
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -578,7 +590,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: geo:geo_verification_batch
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -586,7 +599,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: geo:geo_verification_timeout
   :feature_category: :geo_replication
   :has_external_dependencies:
@@ -594,7 +608,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: personal_access_tokens:personal_access_tokens_groups_policy
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -634,7 +649,8 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: security_scans:store_security_reports
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -666,7 +682,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: adjourned_project_deletion
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -698,7 +715,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: approval_rules_external_approval_rule_payload
   :feature_category: :source_code_management
   :has_external_dependencies:
@@ -706,7 +724,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: ci_batch_reset_minutes
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -730,7 +749,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: elastic_association_indexer
   :feature_category: :global_search
   :has_external_dependencies:
@@ -738,7 +758,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: elastic_commit_indexer
   :feature_category: :global_search
   :has_external_dependencies:
@@ -802,7 +823,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: group_wikis_git_garbage_collect
   :feature_category: :gitaly
   :has_external_dependencies:
@@ -810,7 +832,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: groups_schedule_bulk_repository_shard_moves
   :feature_category: :gitaly
   :has_external_dependencies:
@@ -834,7 +857,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: incident_management_apply_incident_sla_exceeded_label
   :feature_category: :incident_management
   :has_external_dependencies:
@@ -842,7 +866,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: incident_management_oncall_rotations_persist_shifts_job
   :feature_category: :incident_management
   :has_external_dependencies:
@@ -850,7 +875,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: ldap_group_sync
   :feature_category: :authentication_and_authorization
   :has_external_dependencies: true
@@ -898,7 +924,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: refresh_license_compliance_checks
   :feature_category: :license_compliance
   :has_external_dependencies:
@@ -930,7 +957,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: requirements_management_process_requirements_reports
   :feature_category: :requirements_management
   :has_external_dependencies:
@@ -946,7 +974,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: set_user_status_based_on_user_cap_setting
   :feature_category: :users
   :has_external_dependencies:
@@ -954,7 +983,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :exclude_from_kubernetes
 - :name: status_page_publish
   :feature_category: :incident_management
   :has_external_dependencies: true

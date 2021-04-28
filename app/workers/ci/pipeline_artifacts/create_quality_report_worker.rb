@@ -7,6 +7,7 @@ module Ci
 
       queue_namespace :pipeline_background
       feature_category :code_testing
+      tags :exclude_from_kubernetes
 
       idempotent!
 

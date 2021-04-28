@@ -7,6 +7,7 @@ module Packages
       include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
       feature_category :package_registry
+      tags :exclude_from_kubernetes
 
       idempotent!
 

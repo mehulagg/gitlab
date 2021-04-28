@@ -10,6 +10,7 @@ module Geo
     include ExclusiveLeaseGuard
 
     feature_category :geo_replication
+    tags :exclude_from_kubernetes
 
     def perform
       return unless Gitlab::Geo.secondary?
