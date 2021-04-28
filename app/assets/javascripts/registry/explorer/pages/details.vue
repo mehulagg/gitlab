@@ -208,7 +208,7 @@ export default {
       <tags-list
         v-else
         :id="$route.params.id"
-        :is-loading="isLoading"
+        :is-image-loading="isLoading"
         :is-mobile="isMobile"
         :disabled="pageActionsAreDisabled"
         @delete="deleteTags"

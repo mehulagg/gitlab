@@ -284,4 +284,28 @@ describe('Tags List', () => {
       );
     });
   });
+
+  describe('loading state', () => {
+    it.each`
+      isImageLoading | queryExecuting | loadingVisible
+      ${true}        | ${true}        | ${true}
+      ${true}        | ${false}       | ${true}
+      ${false}       | ${true}        | ${true}
+      ${false}       | ${false}       | ${false}
+    `(
+      'when the isImageLoading is $isImageLoading, and is $queryExecuting that the query is still executing is $loadingVisible that the loader is shown',
+      async ({ isImageLoading, queryExecuting, loadingVisible }) => {
+        mountComponent({ propsData: { isImageLoading, isMobile: false, id: 1 } });
+
+        if (!queryExecuting) {
+          await waitForApolloRequestRender();
+        }
+
+        expect(findTagsLoader().exists()).toBe(loadingVisible);
+        expect(findTagsListRow().exists()).toBe(!loadingVisible);
+        expect(findListTitle().exists()).toBe(!loadingVisible);
+        expect(findPagination().exists()).toBe(!loadingVisible);
+      },
+    );
+  });
 });

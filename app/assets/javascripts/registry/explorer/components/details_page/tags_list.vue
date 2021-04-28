@@ -38,7 +38,7 @@ export default {
       default: false,
       required: false,
     },
-    isLoading: {
+    isImageLoading: {
       type: Boolean,
       default: false,
       required: false,
@@ -94,8 +94,8 @@ export default {
     hasNoTags() {
       return this.tags.length === 0;
     },
-    internalLoading() {
-      return this.isLoading || this.$apollo.queries.tags.loading;
+    isLoading() {
+      return this.isImageLoading || this.$apollo.queries.tags.loading;
     },
   },
   methods: {
@@ -106,31 +106,27 @@ export default {
       return this.tags.filter((tag) => items[tag.name]);
     },
     fetchNextPage() {
-      if (this.tagsPageInfo?.hasNextPage) {
-        this.$apollo.queries.tags.fetchMore({
-          variables: {
-            after: this.tagsPageInfo?.endCursor,
-            first: GRAPHQL_PAGE_SIZE,
-          },
-          updateQuery(previousResult, { fetchMoreResult }) {
-            return fetchMoreResult;
-          },
-        });
-      }
+      this.$apollo.queries.tags.fetchMore({
+        variables: {
+          after: this.tagsPageInfo?.endCursor,
+          first: GRAPHQL_PAGE_SIZE,
+        },
+        updateQuery(previousResult, { fetchMoreResult }) {
+          return fetchMoreResult;
+        },
+      });
     },
     fetchPreviousPage() {
-      if (this.tagsPageInfo?.hasPreviousPage) {
-        this.$apollo.queries.tags.fetchMore({
-          variables: {
-            first: null,
-            before: this.tagsPageInfo?.startCursor,
-            last: GRAPHQL_PAGE_SIZE,
-          },
-          updateQuery(previousResult, { fetchMoreResult }) {
-            return fetchMoreResult;
-          },
-        });
-      }
+      this.$apollo.queries.tags.fetchMore({
+        variables: {
+          first: null,
+          before: this.tagsPageInfo?.startCursor,
+          last: GRAPHQL_PAGE_SIZE,
+        },
+        updateQuery(previousResult, { fetchMoreResult }) {
+          return fetchMoreResult;
+        },
+      });
     },
   },
 };
@@ -138,7 +134,7 @@ export default {
 
 <template>
   <div>
-    <tags-loader v-if="internalLoading" />
+    <tags-loader v-if="isLoading" />
     <template v-else>
       <empty-state v-if="hasNoTags" :no-containers-image="config.noContainersImage" />
       <template v-else>
