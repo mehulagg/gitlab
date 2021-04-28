@@ -4,12 +4,6 @@ module QA
   module Page
     module Main
       class Login < Page::Base
-        view 'app/views/devise/passwords/edit.html.haml' do
-          element :password_field
-          element :password_confirmation_field
-          element :change_password_button
-        end
-
         view 'app/views/devise/sessions/_new_base.html.haml' do
           element :login_field
           element :password_field
@@ -60,7 +54,7 @@ module QA
               sign_in_using_gitlab_credentials(user: user || Runtime::User, skip_page_validation: skip_page_validation)
             end
 
-            set_initial_password_if_present
+            set_up_new_password_if_required
           end
         end
 
@@ -124,7 +118,6 @@ module QA
         end
 
         def switch_to_register_page
-          set_initial_password_if_present
           click_element :register_link
         end
 
@@ -137,7 +130,6 @@ module QA
         end
 
         def sign_in_with_saml
-          set_initial_password_if_present
           click_element :saml_login_button
         end
 
@@ -166,7 +158,10 @@ module QA
           Page::Main::Menu.validate_elements_present! unless skip_page_validation
         end
 
-        def set_initial_password_if_present
+        # Handle request for password change
+        # Happens on clean GDK installations when seeded root admin password is expired
+        #
+        def set_up_new_password_if_required
           return unless has_content?('Set up new password')
 
           Profile::Password.perform do |new_password_page|
