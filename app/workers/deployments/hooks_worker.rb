@@ -10,7 +10,7 @@ module Deployments
 
     def perform(params = {})
       if (deploy = Deployment.find_by_id(params[:deployment_id]))
-        deploy.execute_hooks(params[:event_at])
+        deploy.execute_hooks(params[:status_changed_at])
       end
     end
   end

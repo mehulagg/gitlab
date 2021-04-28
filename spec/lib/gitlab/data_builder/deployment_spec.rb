@@ -21,12 +21,12 @@ RSpec.describe Gitlab::DataBuilder::Deployment do
       expected_deployable_url = Gitlab::Routing.url_helpers.project_job_url(deployable.project, deployable)
       expected_user_url = Gitlab::Routing.url_helpers.user_url(deployment.deployed_by)
       expected_commit_url = Gitlab::UrlBuilder.build(commit)
-      event_at = Time.current
+      status_changed_at = Time.current
 
-      data = described_class.build(deployment, event_at)
+      data = described_class.build(deployment, status_changed_at)
 
       expect(data[:status]).to eq('failed')
-      expect(data[:status_changed_at]).to eq(event_at)
+      expect(data[:status_changed_at]).to eq(status_changed_at)
       expect(data[:deployable_id]).to eq(deployable.id)
       expect(data[:deployable_url]).to eq(expected_deployable_url)
       expect(data[:environment]).to eq("somewhere")

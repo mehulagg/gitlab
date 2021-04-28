@@ -110,7 +110,7 @@ RSpec.describe Deployment do
       it 'executes Deployments::HooksWorker asynchronously' do
         freeze_time do
           expect(Deployments::HooksWorker)
-            .to receive(:perform_async).with(deployment_id: deployment.id, event_at: Time.current)
+            .to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
           deployment.run!
         end
@@ -146,7 +146,7 @@ RSpec.describe Deployment do
       it 'executes Deployments::HooksWorker asynchronously' do
         freeze_time do
           expect(Deployments::HooksWorker)
-          .to receive(:perform_async).with(deployment_id: deployment.id, event_at: Time.current)
+          .to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
           deployment.succeed!
         end
@@ -175,7 +175,7 @@ RSpec.describe Deployment do
       it 'executes Deployments::HooksWorker asynchronously' do
         freeze_time do
           expect(Deployments::HooksWorker)
-            .to receive(:perform_async).with(deployment_id: deployment.id, event_at: Time.current)
+            .to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
           deployment.drop!
         end
@@ -204,7 +204,7 @@ RSpec.describe Deployment do
       it 'executes Deployments::HooksWorker asynchronously' do
         freeze_time do
           expect(Deployments::HooksWorker)
-            .to receive(:perform_async).with(deployment_id: deployment.id, event_at: Time.current)
+            .to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
           deployment.cancel!
         end
@@ -231,7 +231,7 @@ RSpec.describe Deployment do
       it 'does not execute Deployments::ExecuteHooksWorker' do
         freeze_time do
           expect(Deployments::ExecuteHooksWorker)
-            .not_to receive(:perform_async).with(deployment_id: deployment.id, event_at: Time.current)
+            .not_to receive(:perform_async).with(deployment_id: deployment.id, status_changed_at: Time.current)
 
           deployment.skip!
         end
