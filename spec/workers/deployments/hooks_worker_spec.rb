@@ -17,7 +17,7 @@ RSpec.describe Deployments::HooksWorker do
 
       expect(ProjectServiceWorker).to receive(:perform_async).with(service.id, an_instance_of(Hash))
 
-      worker.perform(deployment_id: deployment.id)
+      worker.perform(deployment_id: deployment.id, status_changed_at: Time.current)
     end
 
     it 'does not execute an inactive service' do
@@ -27,13 +27,13 @@ RSpec.describe Deployments::HooksWorker do
 
       expect(ProjectServiceWorker).not_to receive(:perform_async)
 
-      worker.perform(deployment_id: deployment.id)
+      worker.perform(deployment_id: deployment.id, status_changed_at: Time.current)
     end
 
     it 'does not execute if a deployment does not exist' do
       expect(ProjectServiceWorker).not_to receive(:perform_async)
 
-      worker.perform(deployment_id: non_existing_record_id)
+      worker.perform(deployment_id: non_existing_record_id, status_changed_at: Time.current)
     end
 
     it 'execute webhooks' do
@@ -41,13 +41,13 @@ RSpec.describe Deployments::HooksWorker do
       project = deployment.project
       web_hook = create(:project_hook, deployment_events: true, project: project)
 
-      event_at = Time.current
+      status_changed_at = Time.current
 
-      expect_next_instance_of(WebHookService, web_hook, an_instance_of(Hash), "deployment_hooks") do |service|
+      expect_next_instance_of(WebHookService, web_hook, hash_including(status_changed_at: status_changed_at), "deployment_hooks") do |service|
         expect(service).to receive(:async_execute)
       end
 
-      worker.perform(deployment_id: deployment.id, event_at: event_at)
+      worker.perform(deployment_id: deployment.id, status_changed_at: status_changed_at)
     end
   end
 end
