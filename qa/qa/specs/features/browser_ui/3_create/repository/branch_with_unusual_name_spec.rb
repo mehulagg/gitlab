@@ -4,7 +4,6 @@ module QA
   RSpec.describe 'Create' do
     describe 'Branch with unusual name' do
       let(:branch_name) { 'unUsually/named#br--anch' }
-      let(:commit_message) { 'Protected push commit message' }
       let(:project) do
         Resource::Project.fabricate_via_api! do |resource|
           resource.name = 'unusually-named-branch-project'
@@ -35,6 +34,9 @@ module QA
             show.click_file('test-folder')
 
             expect(show).to have_file('test-file.md')
+
+            show.click_file('test-file.md')
+
             expect(show).to have_content('new content')
           end
         end
