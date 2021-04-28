@@ -214,6 +214,8 @@ non-existent-job:
   stage: prepare
   script:
     - echo 'boo'
+  rules:
+    - when: always
 
 danger-review:
   extends:
@@ -221,10 +223,7 @@ danger-review:
     - .danger-review-cache
     - .review:rules:danger
   stage: test
-  needs:
-    - job: retrieve-tests-metadata
-    - job: non-existent-job
-      optional: true
+  needs: ["retrieve-tests-metadata", "non-existent-job"]
   before_script:
     - source ./scripts/utils.sh
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --with danger"
