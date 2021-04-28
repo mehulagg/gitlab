@@ -116,6 +116,12 @@ class Namespace < NamespaceShard
   attr_writer :root_ancestor, :emails_disabled_memoized
 
   class << self
+    def find_by_full_path(path, **kwargs)
+      NamespaceShard.sharded_read_from_full_path(path) do
+        Routable.find_by_full_path(path, **kwargs)
+      end
+    end
+
     def by_path(path)
       find_by('lower(path) = :value', value: path.downcase)
     end
