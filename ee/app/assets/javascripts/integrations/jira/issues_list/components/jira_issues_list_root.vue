@@ -11,7 +11,7 @@ import {
   DEFAULT_PAGE_SIZE,
 } from '~/issuable_list/constants';
 import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase, parseIntPagination } from '~/lib/utils/common_utils';
 
 import { __ } from '~/locale';
 import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
@@ -51,7 +51,7 @@ export default {
     return {
       jiraLogo,
       issues: [],
-      issuesListLoading: false,
+      issuesListLoading: true,
       issuesListLoadFailed: false,
       totalIssues: 0,
       currentState: this.initialState,
@@ -108,8 +108,11 @@ export default {
         })
         .then((res) => {
           const { headers, data } = res;
-          this.currentPage = parseInt(headers['x-page'], 10);
-          this.totalIssues = parseInt(headers['x-total'], 10);
+
+          const { page, total } = parseIntPagination(headers);
+          this.currentPage = page;
+          this.totalIssues = total;
+
           this.issues = data.map((rawIssue, index) => {
             const issue = convertObjectPropsToCamelCase(rawIssue, { deep: true });
 
@@ -128,8 +131,11 @@ export default {
         })
         .catch((error) => {
           this.issuesListLoadFailed = true;
+          const errorMessage =
+            (error.response.data.errors || [])[0] || __('An error occurred while loading issues');
+
           createFlash({
-            message: __('An error occurred while loading issues'),
+            message: errorMessage,
             captureError: true,
             error,
           });
@@ -200,9 +206,10 @@ export default {
     @filter="handleFilterIssues"
   >
     <template #nav-actions>
-      <gl-button :href="issueCreateUrl" target="_blank" class="gl-my-5"
-        >{{ s__('Integrations|Create new issue in Jira') }}<gl-icon name="external-link"
-      /></gl-button>
+      <gl-button :href="issueCreateUrl" target="_blank" class="gl-my-5">
+        {{ s__('Integrations|Create new issue in Jira') }}
+        <gl-icon name="external-link" />
+      </gl-button>
     </template>
     <template #reference="{ issuable }">
       <span v-safe-html="jiraLogo" class="svg-container jira-logo-container"></span>
@@ -211,8 +218,8 @@ export default {
     <template #author="{ author }">
       <gl-sprintf message="%{authorName} in Jira">
         <template #authorName>
-          <gl-link class="author-link js-user-link" target="_blank" :href="author.webUrl"
-            >{{ author.name }}
+          <gl-link class="author-link js-user-link" target="_blank" :href="author.webUrl">
+            {{ author.name }}
           </gl-link>
         </template>
       </gl-sprintf>
