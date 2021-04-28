@@ -213,6 +213,8 @@ parallel-spec-reports:
 non-existent-job:
   rules:
     - when: never
+  script:
+    - echo 'boo'
 
 danger-review:
   extends:
