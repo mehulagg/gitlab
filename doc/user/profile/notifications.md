@@ -161,10 +161,9 @@ Learn how to [opt out of all emails from GitLab](#opt-out-of-all-gitlab-emails).
 
 #### Self-managed product marketing emails **(FREE SELF)**
 
-These emails are generated and automatically sent by the self-managed installation and sent based on
-actions of the user.
-At no time is any personal information sent to GitLab Inc. by your GitLab instance or by your
-company because of turning this on.
+The self-managed installation generates and automatically sends these emails based on user actions.
+Turning this on does not cause your GitLab instance or your company to send any personal information to
+GitLab Inc.
 
 An instance administrator can configure this setting for all users. If you choose to opt out, your
 setting overrides the instance-wide setting, even when an administrator later enables these emails
