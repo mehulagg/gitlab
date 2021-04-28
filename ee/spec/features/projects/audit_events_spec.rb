@@ -5,9 +5,9 @@ require 'spec_helper'
 RSpec.describe 'Projects > Audit Events', :js do
   include Spec::Support::Helpers::Features::MembersHelpers
 
-  let_it_be(:user) { create(:user) }
-  let_it_be(:pete) { create(:user, name: 'Pete') }
-  let_it_be(:project) { create(:project, :repository, namespace: user.namespace) }
+  let(:user) { create(:user) }
+  let(:pete) { create(:user, name: 'Pete') }
+  let(:project) { create(:project, :repository, namespace: user.namespace) }
 
   before do
     project.add_maintainer(user)
