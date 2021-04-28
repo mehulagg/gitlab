@@ -11,16 +11,44 @@ RSpec.describe Groups::EpicBoardsController do
   let(:group) { public_group }
 
   before do
+    stub_licensed_features(epics: true)
+
     group.add_maintainer(user)
     sign_in(user)
   end
 
   describe 'GET index' do
-    it 'creates a new board when group does not have one' do
-      expect { list_boards }.to change(group.epic_boards, :count).by(1)
+    context 'with authorized user' do
+      it 'creates a new board when group does not have one' do
+        expect { list_boards }.to change(group.epic_boards, :count).by(1)
+      end
+
+      it 'returns correct response' do
+        list_boards
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      context 'with multiple boards' do
+        let(:boards) { create_list(:epic_board, 3, group: group) }
+
+        before do
+          visit_board(boards[2], Time.current + 1.minute)
+          visit_board(boards[0], Time.current + 2.minutes)
+          visit_board(boards[1], Time.current + 5.minutes)
+        end
+
+        it 'redirects to latest visited board' do
+          list_boards
+
+          expect(response).to redirect_to(group_epic_board_path(group, boards[1]))
+        end
+      end
     end
 
     context 'with unauthorized user' do
+      let(:group) { private_group }
+
       before do
         sign_in(other_user)
       end
@@ -47,6 +75,10 @@ RSpec.describe Groups::EpicBoardsController do
 
     def list_boards(format: :html)
       get :index, params: { group_id: group }, format: format
+    end
+
+    def visit_board(epic_board, time)
+      create(:epic_board_recent_visit, group: group, epic_board: epic_board, user: user, updated_at: time)
     end
   end
 
@@ -87,17 +119,28 @@ RSpec.describe Groups::EpicBoardsController do
         end
       end
 
-      context 'when user is signed out' do
+      context 'when user can see the board' do
         let(:group) { public_group }
 
-        it 'does not save visit' do
-          sign_out(user)
+        context 'when user is signed out' do
+          it 'does not save visit' do
+            sign_out(user)
 
-          # epic board visits not supported yet
-          expect { read_board board: board }.not_to change(BoardGroupRecentVisit, :count)
+            # epic board visits not supported yet
+            expect { read_board board: board }.not_to change(Boards::EpicBoardRecentVisit, :count)
 
-          expect(response).to render_template :show
-          expect(response.media_type).to eq 'text/html'
+            expect(response).to render_template :show
+            expect(response.media_type).to eq 'text/html'
+          end
+        end
+
+        context 'when user is signed in' do
+          it 'saves the visit' do
+            expect { read_board board: board }.to change(Boards::EpicBoardRecentVisit, :count)
+
+            expect(response).to render_template :show
+            expect(response.media_type).to eq 'text/html'
+          end
         end
       end
     end
