@@ -28,7 +28,7 @@ you can run DAST API tests as part your CI/CD workflow.
 
 ## When DAST API scans run
 
-When using the `DAST.latest.gitlab-ci.yml` template, the defined jobs use the `dast` stage by default. To enable your `.gitlab-ci.yml` file must include the `dast` stage in your `stages` definition. To ensure DAST API scans the latest code, your CI pipeline should deploy changes to a test environment in one of the jobs preceding the `dast` job:
+When using the `DAST-API.gitlab-ci.yml` template, the defined jobs use the `dast` stage by default. To enable your `.gitlab-ci.yml` file must include the `dast` stage in your `stages` definition. To ensure DAST API scans the latest code, your CI pipeline should deploy changes to a test environment in one of the jobs preceding the `dast` job:
 
 ```yaml
 stages:
@@ -83,7 +83,7 @@ the body generation is limited to these body types:
 Follow these steps to configure DAST API in GitLab with an OpenAPI specification:
 
 1. To use DAST API, you must [include](../../../ci/yaml/README.md#includetemplate)
-   the [`DAST.latest.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST.latest.gitlab-ci.yml)
+   the [`DAST-API.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST-API.gitlab-ci.yml)
    that's provided as part of your GitLab installation. To do so, add the following to your
    `.gitlab-ci.yml` file:
 
@@ -92,20 +92,7 @@ Follow these steps to configure DAST API in GitLab with an OpenAPI specification
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
-   ```
-
-1. This DAST API scanner is in BETA. To enable this new functionality, you will add a variable `DAST_API_BETA` to your `.gitlab-ci.yml` file:
-
-   ```yaml
-   stages:
-     - dast
-
-   include:
-     - template: DAST.latest.gitlab-ci.yml
-
-   variables:
-     DAST_API_BETA: 1
+     - template: DAST-API.gitlab-ci.yml
    ```
 
 1. The [configuration file](#configuration-files) has several testing profiles defined with different checks enabled. We recommend that you start with the `Quick` profile.
@@ -119,10 +106,9 @@ Follow these steps to configure DAST API in GitLab with an OpenAPI specification
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
    ```
 
@@ -134,10 +120,9 @@ Follow these steps to configure DAST API in GitLab with an OpenAPI specification
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
      DAST_API_OPENAPI: test-api-specification.json
    ```
@@ -158,10 +143,9 @@ Follow these steps to configure DAST API in GitLab with an OpenAPI specification
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
      DAST_API_OPENAPI: test-api-specification.json
      DAST_API_TARGET_URL: http://test-deployment/
@@ -198,7 +182,7 @@ Follow these steps to configure DAST API to use a HAR file that provides informa
 target API to test:
 
 1. To use DAST API, you must [include](../../../ci/yaml/README.md#includetemplate)
-   the [`DAST.latest.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST.latest.gitlab-ci.yml)
+   the [`DAST-API.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST-API.gitlab-ci.yml)
    that's provided as part of your GitLab installation. To do so, add the following to your
    `.gitlab-ci.yml` file:
 
@@ -207,20 +191,7 @@ target API to test:
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
-   ```
-
-1. This DAST API scanner is in BETA. To enable this new functionality, you will add a variable `DAST_API_BETA` to your `.gitlab-ci.yml` file:
-
-   ```yaml
-   stages:
-     - dast
-
-   include:
-     - template: DAST.latest.gitlab-ci.yml
-
-   variables:
-     DAST_API_BETA: 1
+     - template: DAST-API.gitlab-ci.yml
    ```
 
 1. The [configuration file](#configuration-files) has several testing profiles defined with different checks enabled. We recommend that you start with the `Quick` profile.
@@ -234,10 +205,9 @@ target API to test:
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
    ```
 
@@ -249,10 +219,9 @@ target API to test:
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
      DAST_API_HAR: test-api-recording.har
    ```
@@ -273,10 +242,9 @@ target API to test:
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
      DAST_API_HAR: test-api-recording.har
      DAST_API_TARGET_URL: http://test-deployment/
@@ -314,7 +282,7 @@ Follow these steps to configure DAST API to use a Postman Collection file that p
 information about the target API to test:
 
 1. To use DAST API, you must [include](../../../ci/yaml/README.md#includetemplate)
-   the [`DAST.latest.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST.latest.gitlab-ci.yml)
+   the [`DAST-API.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST-API.gitlab-ci.yml)
    that's provided as part of your GitLab installation. To do so, add the following to your
    `.gitlab-ci.yml` file:
 
@@ -323,20 +291,7 @@ information about the target API to test:
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
-   ```
-
-1. This DAST API scanner is in BETA. To enable this new functionality, you will add a variable `DAST_API_BETA` to your `.gitlab-ci.yml` file:
-
-   ```yaml
-   stages:
-     - dast
-
-   include:
-     - template: DAST.latest.gitlab-ci.yml
-
-   variables:
-     DAST_API_BETA: 1
+     - template: DAST-API.gitlab-ci.yml
    ```
 
 1. The [configuration file](#configuration-files) has several testing profiles defined with different checks enabled. We recommend that you start with the `Quick` profile.
@@ -350,10 +305,9 @@ information about the target API to test:
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
    ```
 
@@ -364,10 +318,9 @@ information about the target API to test:
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
      DAST_API_POSTMAN_COLLECTION: postman-collection_serviceA.json
    ```
@@ -388,10 +341,9 @@ information about the target API to test:
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
      DAST_API_POSTMAN_COLLECTION: postman-collection_serviceA.json
      DAST_API_TARGET_URL: http://test-deployment/
@@ -445,10 +397,9 @@ stages:
   - dast
 
 include:
-  - template: DAST.latest.gitlab-ci.yml
+  - template: DAST-API.gitlab-ci.yml
 
 variables:
-  DAST_API_BETA: 1
   DAST_API_PROFILE: Quick
   DAST_API_POSTMAN_COLLECTION: postman-collection_serviceA.json
   DAST_API_POSTMAN_COLLECTION_VARIABLES: variable-collection-dictionary.json
@@ -491,10 +442,9 @@ stages:
   - dast
 
 include:
-  - template: DAST.latest.gitlab-ci.yml
+  - template: DAST-API.gitlab-ci.yml
 
 variables:
-  DAST_API_BETA: 1
   DAST_API_PROFILE: Quick
   DAST_API_HAR: test-api-recording.har
   DAST_API_TARGET_URL: http://test-deployment/
@@ -533,10 +483,9 @@ Follow these steps to provide the bearer token with `DAST_API_OVERRIDES_ENV`:
      - dast
 
    include:
-     - template: DAST.latest.gitlab-ci.yml
+     - template: DAST-API.gitlab-ci.yml
 
    variables:
-     DAST_API_BETA: 1
      DAST_API_PROFILE: Quick
      DAST_API_OPENAPI: test-api-specification.json
      DAST_API_TARGET_URL: http://test-deployment/
@@ -571,10 +520,9 @@ stages:
   - dast
 
 include:
-  - template: DAST.latest.gitlab-ci.yml
+  - template: DAST-API.gitlab-ci.yml
 
 variables:
-  DAST_API_BETA: 1
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
@@ -614,10 +562,9 @@ stages:
   - dast
 
 include:
-  - template: DAST.latest.gitlab-ci.yml
+  - template: DAST-API.gitlab-ci.yml
 
 variables:
-  DAST_API_BETA: 1
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
@@ -867,10 +814,9 @@ stages:
   - dast
 
 include:
-  - template: DAST.latest.gitlab-ci.yml
+  - template: DAST-API.gitlab-ci.yml
 
 variables:
-  DAST_API_BETA: 1
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
@@ -889,10 +835,9 @@ stages:
   - dast
 
 include:
-  - template: DAST.latest.gitlab-ci.yml
+  - template: DAST-API.gitlab-ci.yml
 
 variables:
-  DAST_API_BETA: 1
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
@@ -907,10 +852,9 @@ stages:
   - dast
 
 include:
-  - template: DAST.latest.gitlab-ci.yml
+  - template: DAST-API.gitlab-ci.yml
 
 variables:
-  DAST_API_BETA: 1
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
@@ -936,10 +880,9 @@ stages:
   - dast
 
 include:
-  - template: DAST.latest.gitlab-ci.yml
+  - template: DAST-API.gitlab-ci.yml
 
 variables:
-  DAST_API_BETA: 1
   DAST_API_PROFILE: Quick
   DAST_API_OPENAPI: test-api-specification.json
   DAST_API_TARGET_URL: http://test-deployment/
@@ -1131,7 +1074,7 @@ The DAST API engine outputs an error message when it cannot establish a connecti
 **Solution**
 
 - Remove the `DAST_API_API` variable from the `.gitlab-ci.yml` file. The value will be inherited from the DAST API CI/CD template. We recommend this method instead of manually setting a value.
-- If removing the variable is not possible, check to see if this value has changed in the latest version of the [DAST API CI/CD template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST.latest.gitlab-ci.yml). If so, update the value in the `.gitlab-ci.yml` file.
+- If removing the variable is not possible, check to see if this value has changed in the latest version of the [DAST API CI/CD template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST-API.gitlab-ci.yml). If so, update the value in the `.gitlab-ci.yml` file.
 
 ## Glossary
 
