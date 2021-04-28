@@ -84,7 +84,7 @@ export default {
           isEnabled: false,
           endpointMatchMode: EndpointMatchModeAny,
           endpointLabels: '',
-          rules: [],
+          rules: [buildRule(RuleTypeEndpoint)],
           annotations: '',
           labels: '',
         };

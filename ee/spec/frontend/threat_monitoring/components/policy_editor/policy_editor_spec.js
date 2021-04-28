@@ -112,6 +112,13 @@ spec:
     expect(wrapper.findComponent(GlToggle).props('label')).toBe(PolicyEditorApp.i18n.toggleLabel);
   });
 
+  it('renders a default rule with label', () => {
+    expect(wrapper.findComponent(PolicyRuleBuilder).attributes()).toMatchObject({
+      endpointlabels: '',
+      endpointmatchmode: 'any',
+    });
+  });
+
   it('does not render yaml editor', () => {
     expect(findYamlEditor().exists()).toBe(false);
   });
@@ -227,13 +234,13 @@ spec:
   });
 
   it('adds a new rule', async () => {
-    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(0);
+    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(1);
     const button = findAddRuleButton();
     button.vm.$emit('click');
     button.vm.$emit('click');
     await wrapper.vm.$nextTick();
     const elements = wrapper.findAll(PolicyRuleBuilder);
-    expect(elements.length).toEqual(2);
+    expect(elements.length).toEqual(3);
 
     elements.wrappers.forEach((builder, idx) => {
       expect(builder.props().rule).toMatchObject({
@@ -250,11 +257,11 @@ spec:
   it('removes a new rule', async () => {
     findAddRuleButton().vm.$emit('click');
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(1);
+    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(2);
 
-    wrapper.find(PolicyRuleBuilder).vm.$emit('remove');
+    wrapper.findComponent(PolicyRuleBuilder).vm.$emit('remove');
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(0);
+    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(1);
   });
 
   it('updates yaml editor value on switch to yaml editor', async () => {
