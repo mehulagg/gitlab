@@ -1,4 +1,6 @@
 ---
+# Still not removing as it has migrations that are not run in production yet. Mention migration on hold.
+# Discussion and removal MR: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60322
 name: migrate_user_mentions
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34378
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/231175
