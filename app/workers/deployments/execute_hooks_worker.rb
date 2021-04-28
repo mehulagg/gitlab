@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Deployments
+  # TODO: remove in https://gitlab.com/gitlab-org/gitlab/-/issues/329360
   class ExecuteHooksWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
 
