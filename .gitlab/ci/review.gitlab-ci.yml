@@ -212,8 +212,6 @@ parallel-spec-reports:
 
 non-existent-job:
   stage: prepare
-  rules:
-    - when: never
   script:
     - echo 'boo'
 
