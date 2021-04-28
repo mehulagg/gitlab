@@ -56,6 +56,7 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
             'C++'                  | { 'app.cpp' => '' }                             | {}                                         | %w(flawfinder-sast)
             'C#'                   | { 'app.csproj' => '' }                          | {}                                         | %w(security-code-scan-sast)
             'Elixir'               | { 'mix.exs' => '' }                             | {}                                         | %w(sobelow-sast)
+            'semgrep'              | { 'app.py' => '' }                              | {}                                         | %w(semgrep-sast)
             'Golang'               | { 'main.go' => '' }                             | {}                                         | %w(gosec-sast)
             'Groovy'               | { 'app.groovy' => '' }                          | {}                                         | %w(spotbugs-sast)
             'iOS'                  | { 'a.xcodeproj/x.pbxproj' => '' }               | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-ios-sast)

@@ -168,6 +168,13 @@
             "variables": []
         },
         {
+            "name": "semgrep",
+            "label": "Semgrep",
+            "enabled": true,
+            "description": "Multi-language scanning",
+            "variables": []
+        },
+        {
             "name": "spotbugs",
             "label": "Spotbugs",
             "enabled" : true,
