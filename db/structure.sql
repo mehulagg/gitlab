@@ -9492,8 +9492,6 @@ CREATE TABLE application_settings (
     throttle_unauthenticated_packages_api_enabled boolean DEFAULT false NOT NULL,
     throttle_authenticated_packages_api_enabled boolean DEFAULT false NOT NULL,
     deactivate_dormant_users boolean DEFAULT false NOT NULL,
-    encrypted_spamcheck_api_key text,
-    encrypted_spamcheck_api_key_iv text,
     encrypted_spam_check_api_key text,
     encrypted_spam_check_api_key_iv text,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
