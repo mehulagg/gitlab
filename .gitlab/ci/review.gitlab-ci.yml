@@ -211,6 +211,7 @@ parallel-spec-reports:
     expire_in: 31d
 
 non-existent-job:
+  stage: prepare
   rules:
     - when: never
   script:
