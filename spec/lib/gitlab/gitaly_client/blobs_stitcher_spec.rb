@@ -4,14 +4,16 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::GitalyClient::BlobsStitcher do
   describe 'enumeration' do
-    it 'combines segregated blob messages together' do
-      messages = [
+    let(:messages) do
+      [
         OpenStruct.new(oid: 'abcdef1', path: 'path/to/file', size: 1642, revision: 'f00ba7', mode: 0100644, data: "first-line\n"),
         OpenStruct.new(oid: '', data: 'second-line'),
         OpenStruct.new(oid: '', data: '', revision: 'f00ba7', path: 'path/to/non-existent/file'),
         OpenStruct.new(oid: 'abcdef2', path: 'path/to/another-file', size: 2461, revision: 'f00ba8', mode: 0100644, data: "GIF87a\x90\x01".b)
       ]
+    end
 
+    it 'combines segregated blob messages together' do
       blobs = described_class.new(messages).to_a
 
       expect(blobs.size).to be(2)
@@ -33,6 +35,16 @@ RSpec.describe Gitlab::GitalyClient::BlobsStitcher do
       expect(blobs[1].commit_id).to eq('f00ba8')
       expect(blobs[1].data).to eq("GIF87a\x90\x01".b)
       expect(blobs[1].binary_in_repo?).to be true
+    end
+
+    it 'does not call into binary detection logic more than once per path' do
+      with_duplicate_paths = messages + [OpenStruct.new(
+        oid: 'abcdef3', path: 'path/to/file', size: 1649, revision: 'f00ba4', mode: 0100644, data: "first-line\n"
+      )]
+
+      expect(Gitlab::Git::Blob).to receive(:binary?).twice.and_return(false)
+
+      described_class.new(with_duplicate_paths).to_a
     end
   end
 end

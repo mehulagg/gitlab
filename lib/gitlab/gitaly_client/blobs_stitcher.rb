@@ -12,6 +12,7 @@ module Gitlab
       def each
         current_blob_data = nil
 
+        @binary_check_buffer = {}
         @rpc_response.each do |msg|
           if msg.oid.blank? && msg.data.blank?
             next
@@ -39,8 +40,14 @@ module Gitlab
           size: blob_data[:size],
           commit_id: blob_data[:revision],
           data: blob_data[:data],
-          binary: Gitlab::Git::Blob.binary?(blob_data[:data])
+          binary: binary_by_path?(blob_data[:path], blob_data[:data])
         )
+      end
+
+      def binary_by_path?(path, blob_data)
+        return @binary_check_buffer[path] if @binary_check_buffer.key?(path)
+
+        @binary_check_buffer[path] = Gitlab::Git::Blob.binary?(blob_data)
       end
     end
   end
