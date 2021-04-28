@@ -10,6 +10,7 @@ import {
   GlSprintf,
 } from '@gitlab/ui';
 import { subscriptionActivationForm, subscriptionQueries } from '../constants';
+import getCurrentLicenseQuery from '../graphql/queries/get_current_license.query.graphql';
 
 export const SUBSCRIPTION_ACTIVATION_EVENT = 'subscription-activation';
 
@@ -55,6 +56,23 @@ export default {
             gitlabSubscriptionActivateInput: {
               activationCode: this.activationCode,
             },
+          },
+          update: (cache, { data }) => {
+            const { license } = data;
+            const newLicense = { ...license, __typename: 'CurrentLicense' };
+            // TODO: Update currentLicense
+            cache.writeQuery({
+              query: getCurrentLicenseQuery,
+              data: { currentLicense: newLicense },
+            });
+
+            // TODO: Update history
+            // // Read the data from our cache for this query.
+            // const data = cache.readQuery({ query: TAGS_QUERY })
+            // // Add our tag from the mutation to the end
+            // data.tags.push(addTag)
+            // // Write our data back to the cache.
+            // cache.writeQuery({ query: TAGS_QUERY, data });
           },
         })
         .then(

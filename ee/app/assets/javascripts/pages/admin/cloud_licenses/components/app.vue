@@ -33,11 +33,13 @@ export default {
     currentSubscription: {
       query: subscriptionQueries.query,
       update({ currentLicense }) {
+        console.log(currentLicense);
         return currentLicense;
       },
-      skip() {
-        return !this.canShowSubscriptionDetails;
-      },
+      // skip() {
+      //   // return !this.hasActiveLicense;
+      //   return !this.canShowSubscriptionDetails;
+      // },
     },
     subscriptionHistory: {
       query: subscriptionHistoryQueries.query,
@@ -55,6 +57,7 @@ export default {
   },
   methods: {
     handleActivation(hasLicense) {
+      // TODO: perhaps set new subscriion? Or fire new query, if apollo doesn't do it automatically.
       this.canShowSubscriptionDetails = hasLicense;
     },
   },
