@@ -36,10 +36,40 @@ export default {
       type: String,
       required: true,
     },
+    defaultProject: {
+      type: Object,
+      required: true,
+    },
+    projects: {
+      type: Array,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      from: {
+        projects: this.projects,
+        selectedProject: this.defaultProject,
+        branch: this.paramsFrom,
+        refsProjectPath: this.refsProjectPath,
+      },
+      to: {
+        selectedProject: this.defaultProject,
+        branch: this.paramsTo,
+        refsProjectPath: this.refsProjectPath,
+      },
+    };
   },
   methods: {
     onSubmit() {
       this.$refs.form.submit();
+    },
+    onSelectProject({ direction, project }) {
+      this[direction].refsProjectPath = `/${project.name}/refs`;
+      this[direction].selectedProject = project;
+    },
+    onSwapRevision() {
+      [this.from, this.to] = [this.to, this.from]; // swaps 'from' and 'to'
     },
   },
 };
@@ -57,10 +87,13 @@ export default {
       class="gl-lg-flex-direction-row gl-lg-display-flex gl-align-items-center compare-revision-cards"
     >
       <revision-card
-        :refs-project-path="refsProjectPath"
+        :refs-project-path="to.refsProjectPath"
         revision-text="Source"
         params-name="to"
-        :params-branch="paramsTo"
+        :params-branch="to.branch"
+        :projects="to.projects"
+        :selected-project="to.selectedProject"
+        @selectProject="onSelectProject"
       />
       <div
         class="compare-ellipsis gl-display-flex gl-justify-content-center gl-align-items-center gl-my-4 gl-md-my-0"
@@ -69,15 +102,25 @@ export default {
         ...
       </div>
       <revision-card
-        :refs-project-path="refsProjectPath"
+        :refs-project-path="from.refsProjectPath"
         revision-text="Target"
         params-name="from"
-        :params-branch="paramsFrom"
+        :params-branch="from.branch"
+        :projects="from.projects"
+        :selected-project="from.selectedProject"
+        @selectProject="onSelectProject"
       />
     </div>
     <div class="gl-mt-4">
       <gl-button category="primary" variant="success" @click="onSubmit">
         {{ s__('CompareRevisions|Compare') }}
+      </gl-button>
+      <gl-button
+        data-testid="swapRevisionsButton"
+        class="btn btn-default gl-button gl-ml-3"
+        @click="onSwapRevision"
+      >
+        {{ s__('CompareRevisions|Swap revisions') }}
       </gl-button>
       <gl-button
         v-if="projectMergeRequestPath"
