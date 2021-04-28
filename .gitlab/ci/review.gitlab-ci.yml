@@ -223,7 +223,7 @@ danger-review:
     - .review:rules:danger
   stage: test
   needs:
-    - name: non-existent-job
+    - job: non-existent-job
       optional: true
   before_script:
     - source ./scripts/utils.sh
