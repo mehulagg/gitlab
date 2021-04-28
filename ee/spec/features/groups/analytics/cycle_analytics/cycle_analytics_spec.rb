@@ -17,9 +17,6 @@ RSpec.describe 'Group value stream analytics' do
   it 'pushes frontend feature flags' do
     visit group_analytics_cycle_analytics_path(group)
 
-    expect(page).to have_pushed_frontend_feature_flags(
-      cycleAnalyticsScatterplotEnabled: true,
-      valueStreamAnalyticsPathNavigation: true
-    )
+    expect(page).to have_pushed_frontend_feature_flags(cycleAnalyticsScatterplotEnabled: true)
   end
 end
