@@ -14,7 +14,7 @@ RSpec.shared_examples 'includes Limitable concern' do
 
     context 'with plan limits configured' do
       before do
-        plan_limits.update!(subject.class.limit_name => 1)
+        plan_limits.update!(subject.instance_limit_name => 1)
       end
 
       it 'can create new models' do
@@ -31,7 +31,7 @@ RSpec.shared_examples 'includes Limitable concern' do
             expect { subject.save! }.to raise_error(ActiveRecord::RecordInvalid)
           end
             .not_to change { described_class.count }
-          expect(subject.errors[:base]).to contain_exactly("Maximum number of #{subject.class.limit_name.humanize(capitalize: false)} (1) exceeded")
+          expect(subject.errors[:base]).to contain_exactly("Maximum number of #{subject.instance_limit_name.humanize(capitalize: false)} (1) exceeded")
         end
       end
     end
