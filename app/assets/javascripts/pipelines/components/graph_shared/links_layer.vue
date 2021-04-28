@@ -62,7 +62,8 @@ export default {
       }, 0);
     },
     shouldCollectMetrics() {
-      return this.metricsConfig.collectMetrics && this.metricsConfig.path;
+      /* Inner links will collect metrics if drawn */
+      return !this.showLinks && this.metricsConfig.collectMetrics && this.metricsConfig.path;
     },
     showLinkedLayers() {
       return this.showLinks && !this.containerZero;
