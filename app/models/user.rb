@@ -3,6 +3,8 @@
 require 'carrierwave/orm/activerecord'
 
 class User < ApplicationRecord
+  # test change
+
   extend Gitlab::ConfigHelper
 
   include Gitlab::ConfigHelper
