@@ -38,11 +38,6 @@ dast:
     reports:
       dast: gl-dast-report.json
   rules:
-    - if: $DAST_API_BETA && ( $DAST_API_SPECIFICATION ||
-          $DAST_API_OPENAPI ||
-          $DAST_API_POSTMAN_COLLECTION ||
-          $DAST_API_HAR )
-      when: never
     - if: $DAST_DISABLED
       when: never
     - if: $DAST_DISABLED_FOR_DEFAULT_BRANCH &&
@@ -58,5 +53,4 @@ dast:
     - if: $CI_COMMIT_BRANCH &&
           $DAST_WEBSITE
     - if: $CI_COMMIT_BRANCH &&
-          $DAST_API_BETA == null &&
           $DAST_API_SPECIFICATION

@@ -14,12 +14,6 @@ RSpec.shared_examples 'includes dast job' do
   end
 end
 
-RSpec.shared_examples 'includes dast_api job' do
-  it 'includes dast_api job' do
-    expect(build_names).to match_array(%w[dast_api])
-  end
-end
-
 RSpec.describe 'DAST.latest.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('DAST.latest') }
 
@@ -112,83 +106,6 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
           end
 
           include_examples 'includes dast job'
-        end
-
-        context 'when DAST_API_BETA=1' do
-          before do
-            create(:ci_variable, project: project, key: 'DAST_API_BETA', value: '1')
-          end
-
-          context 'when project has Ultimate license' do
-            let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
-
-            before do
-              allow(License).to receive(:current).and_return(license)
-            end
-
-            context 'when no specification provided' do
-              include_examples 'includes no jobs'
-            end
-
-            context 'when DAST_DISABLED=1' do
-              before do
-                create(:ci_variable, project: project, key: 'DAST_DISABLED', value: '1')
-              end
-
-              include_examples 'includes no jobs'
-            end
-
-            context 'when DAST_WEBSITE is present' do
-              before do
-                create(:ci_variable, project: project, key: 'DAST_WEBSITE', value: 'http://example.com')
-              end
-
-              include_examples 'includes dast job'
-            end
-
-            context 'when DAST_API_SPECIFICATION is present' do
-              before do
-                create(:ci_variable, project: project, key: 'DAST_API_SPECIFICATION', value: 'http://my.api/api-specification.yml')
-              end
-
-              include_examples 'includes dast_api job'
-            end
-
-            context 'when DAST_WEBSITE and DAST_API_SPECIFICATION is present' do
-              before do
-                create(:ci_variable, project: project, key: 'DAST_WEBSITE', value: 'http://example.com')
-                create(:ci_variable, project: project, key: 'DAST_API_SPECIFICATION', value: 'http://my.api/api-specification.yml')
-              end
-
-              it 'includes dast_api job' do
-                expect(build_names).to match_array(%w[dast_api])
-              end
-            end
-
-            context 'when DAST_API_OPENAPI is present' do
-              before do
-                create(:ci_variable, project: project, key: 'DAST_API_OPENAPI', value: 'http://my.api/api-specification.yml')
-              end
-
-              include_examples 'includes dast_api job'
-            end
-
-            context 'when DAST_API_HAR is present' do
-              before do
-                create(:ci_variable, project: project, key: 'DAST_API_HAR', value: 'http://my.api/api-specification.yml')
-              end
-
-              include_examples 'includes dast_api job'
-            end
-
-            context 'when DAST_API_POSTMAN_COLLECTION is present' do
-              before do
-                create(:ci_variable, project: project, key: 'DAST_API_POSTMAN_COLLECTION', value: 'http://my.api/api-specification.yml')
-              end
-
-              include_examples 'includes dast_api job'
-            end
-          end
         end
 
         context 'when project has Ultimate license' do

@@ -10,8 +10,8 @@ RSpec.describe 'DAST-API.gitlab-ci.yml' do
   describe 'the template file' do
     let(:template_filename) { Rails.root.join("lib/gitlab/ci/templates/" + template.full_name) }
     let(:contents) { File.read(template_filename) }
-    let(:production_registry) { '${SECURE_ANALYZERS_PREFIX}/api-fuzzing:$DAST_API_VERSION' }
-    let(:staging_registry) { '${SECURE_ANALYZERS_PREFIX}/api-fuzzing-src:$DAST_API_VERSION' }
+    let(:production_registry) { '$SECURE_ANALYZERS_PREFIX/api-fuzzing:$DAST_API_VERSION' }
+    let(:staging_registry) { '$SECURE_ANALYZERS_PREFIX/api-fuzzing-src:$DAST_API_VERSION' }
 
     # Make sure future changes to the template use the production container registry.
     #
@@ -92,42 +92,9 @@ RSpec.describe 'DAST-API.gitlab-ci.yml' do
           end
         end
 
-        context 'when configured with HAR' do
-          before do
-            create(:ci_variable, project: project, key: 'DAST_API_HAR', value: 'testing.har')
-            create(:ci_variable, project: project, key: 'DAST_API_TARGET_URL', value: 'http://example.com')
-          end
-
-          it 'includes job' do
-            expect(build_names).to match_array(%w[dast_api])
-          end
-        end
-
-        context 'when configured with OpenAPI' do
-          before do
-            create(:ci_variable, project: project, key: 'DAST_API_OPENAPI', value: 'testing.json')
-            create(:ci_variable, project: project, key: 'DAST_API_TARGET_URL', value: 'http://example.com')
-          end
-
-          it 'includes job' do
-            expect(build_names).to match_array(%w[dast_api])
-          end
-        end
-
-        context 'when configured with Postman' do
-          before do
-            create(:ci_variable, project: project, key: 'DAST_API_POSTMAN_COLLECTION', value: 'testing.json')
-            create(:ci_variable, project: project, key: 'DAST_API_TARGET_URL', value: 'http://example.com')
-          end
-
-          it 'includes job' do
-            expect(build_names).to match_array(%w[dast_api])
-          end
-        end
-
         context 'when DAST_API_DISABLED=1' do
           before do
-            create(:ci_variable, project: project, key: 'DAST_APIDISABLED', value: '1')
+            create(:ci_variable, project: project, key: 'DAST_API_DISABLED', value: '1')
             create(:ci_variable, project: project, key: 'DAST_API_HAR', value: 'testing.har')
             create(:ci_variable, project: project, key: 'DAST_API_TARGET_URL', value: 'http://example.com')
           end
