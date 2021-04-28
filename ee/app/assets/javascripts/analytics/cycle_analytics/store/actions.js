@@ -160,10 +160,8 @@ export const receiveGroupStagesError = ({ commit }, error) => {
 export const setDefaultSelectedStage = ({ dispatch }) =>
   dispatch('setSelectedStage', OVERVIEW_STAGE_CONFIG);
 
-export const receiveGroupStagesSuccess = ({ commit, dispatch }, stages) => {
+export const receiveGroupStagesSuccess = ({ commit }, stages) =>
   commit(types.RECEIVE_GROUP_STAGES_SUCCESS, stages);
-  return dispatch('setDefaultSelectedStage');
-};
 
 export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
   const {

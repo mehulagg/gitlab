@@ -3,15 +3,12 @@ import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
-import AddStageButton from 'ee/analytics/cycle_analytics/components/add_stage_button.vue';
 import Component from 'ee/analytics/cycle_analytics/components/base.vue';
-import CustomStageForm from 'ee/analytics/cycle_analytics/components/custom_stage_form.vue';
 import DurationChart from 'ee/analytics/cycle_analytics/components/duration_chart.vue';
 import FilterBar from 'ee/analytics/cycle_analytics/components/filter_bar.vue';
 import Metrics from 'ee/analytics/cycle_analytics/components/metrics.vue';
 import PathNavigation from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
 import StageNavItem from 'ee/analytics/cycle_analytics/components/stage_nav_item.vue';
-import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import StageTableNav from 'ee/analytics/cycle_analytics/components/stage_table_nav.vue';
 import StageTableNew from 'ee/analytics/cycle_analytics/components/stage_table_new.vue';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
@@ -51,7 +48,6 @@ const defaultStubs = {
 
 const defaultFeatureFlags = {
   hasDurationChart: true,
-  hasPathNavigation: false,
 };
 
 const [selectedValueStream] = mockData.valueStreams;
@@ -152,11 +148,6 @@ describe('Value Stream Analytics component', () => {
     return comp;
   }
 
-  const findStageNavItemAtIndex = (index) =>
-    wrapper.find(StageTableNav).findAll(StageNavItem).at(index);
-
-  const findAddStageButton = () => wrapper.find(AddStageButton);
-
   const displaysProjectsDropdownFilter = (flag) => {
     expect(wrapper.find(ProjectsDropdownFilter).exists()).toBe(flag);
   };
@@ -169,8 +160,8 @@ describe('Value Stream Analytics component', () => {
     expect(wrapper.find(Metrics).exists()).toBe(flag);
   };
 
-  const displaysStageTable = (flag, component = StageTable) => {
-    expect(wrapper.find(component).exists()).toBe(flag);
+  const displaysStageTable = (flag) => {
+    expect(wrapper.find(StageTableNew).exists()).toBe(flag);
   };
 
   const displaysDurationChart = (flag) => {
@@ -185,10 +176,6 @@ describe('Value Stream Analytics component', () => {
     expect(wrapper.find(PathNavigation).exists()).toBe(flag);
   };
 
-  const displaysAddStageButton = (flag) => {
-    expect(wrapper.find(AddStageButton).exists()).toBe(flag);
-  };
-
   const displaysFilterBar = (flag) => {
     expect(wrapper.find(FilterBar).exists()).toBe(flag);
   };
@@ -201,12 +188,7 @@ describe('Value Stream Analytics component', () => {
     beforeEach(async () => {
       const { group, ...stateWithoutGroup } = initialCycleAnalyticsState;
       mock = new MockAdapter(axios);
-      wrapper = await createComponent({
-        featureFlags: {
-          hasPathNavigation: true,
-        },
-        initialState: stateWithoutGroup,
-      });
+      wrapper = await createComponent({ initialState: stateWithoutGroup });
     });
 
     afterEach(() => {
@@ -236,15 +218,10 @@ describe('Value Stream Analytics component', () => {
 
     it('does not display the stage table', () => {
       displaysStageTable(false);
-      displaysStageTable(false, StageTableNew);
     });
 
     it('does not display the duration chart', () => {
       displaysDurationChart(false);
-    });
-
-    it('does not display the add stage button', () => {
-      displaysAddStageButton(false);
     });
 
     it('does not display the path navigation', () => {
@@ -261,11 +238,7 @@ describe('Value Stream Analytics component', () => {
       mock = new MockAdapter(axios);
       mockRequiredRoutes(mock);
 
-      wrapper = await createComponent({
-        featureFlags: {
-          hasPathNavigation: true,
-        },
-      });
+      wrapper = await createComponent();
 
       await store.dispatch('receiveCycleAnalyticsDataError', {
         response: { status: httpStatusCodes.FORBIDDEN },
@@ -293,11 +266,6 @@ describe('Value Stream Analytics component', () => {
 
     it('does not display the stage table', () => {
       displaysStageTable(false);
-      displaysStageTable(false, StageTableNew);
-    });
-
-    it('does not display the add stage button', () => {
-      displaysAddStageButton(false);
     });
 
     it('does not display the tasks by type chart', () => {
@@ -308,35 +276,8 @@ describe('Value Stream Analytics component', () => {
       displaysDurationChart(false);
     });
 
-    describe('path navigation', () => {
-      describe('disabled', () => {
-        it('does not display the path navigation', () => {
-          displaysPathNavigation(false);
-        });
-      });
-
-      describe('enabled', () => {
-        beforeEach(async () => {
-          wrapper = await createComponent({
-            withStageSelected: true,
-            pathNavigationEnabled: true,
-          });
-
-          mock = new MockAdapter(axios);
-          mockRequiredRoutes(mock);
-          mock.onAny().reply(httpStatusCodes.FORBIDDEN);
-
-          await waitForPromises();
-        });
-
-        afterEach(() => {
-          mock.restore();
-        });
-
-        it('does not display the path navigation', () => {
-          displaysPathNavigation(false);
-        });
-      });
+    it('does not display the path navigation', () => {
+      displaysPathNavigation(false);
     });
   });
 
@@ -344,12 +285,7 @@ describe('Value Stream Analytics component', () => {
     beforeEach(async () => {
       mock = new MockAdapter(axios);
       mockRequiredRoutes(mock);
-      wrapper = await createComponent({
-        withStageSelected: true,
-        featureFlags: {
-          hasPathNavigation: true,
-        },
-      });
+      wrapper = await createComponent({ withStageSelected: true });
     });
 
     afterEach(() => {
@@ -399,125 +335,24 @@ describe('Value Stream Analytics component', () => {
 
     it('hides the stage table', () => {
       displaysStageTable(false);
-      displaysStageTable(false, StageTableNew);
-    });
-
-    it('hides the add stage button', () => {
-      displaysAddStageButton(false);
     });
 
     describe('Without the overview stage selected', () => {
       beforeEach(async () => {
         mock = new MockAdapter(axios);
         mockRequiredRoutes(mock);
-        wrapper = await createComponent({
-          withStageSelected: true,
-          featureFlags: {
-            hasPathNavigation: true,
-          },
-        });
+        wrapper = await createComponent({ withStageSelected: true });
 
         await store.dispatch('setSelectedStage', mockData.issueStage);
         await wrapper.vm.$nextTick();
       });
 
       it('displays the stage table', () => {
-        displaysStageTable(true, StageTableNew);
+        displaysStageTable(true);
       });
 
-      it('does not display the add stage button', () => {
-        displaysAddStageButton(false);
-      });
-    });
-
-    describe('path navigation', () => {
-      describe('disabled', () => {
-        beforeEach(async () => {
-          wrapper = await createComponent({
-            withStageSelected: true,
-            featureFlags: {
-              hasPathNavigation: false,
-            },
-          });
-        });
-
-        it('does not display the path navigation', () => {
-          displaysPathNavigation(false);
-        });
-
-        describe('StageTable', () => {
-          beforeEach(async () => {
-            mock = new MockAdapter(axios);
-            mockRequiredRoutes(mock);
-
-            wrapper = await createComponent({
-              opts: {
-                stubs: {
-                  StageTable,
-                  StageTableNav,
-                  StageNavItem,
-                },
-              },
-              withStageSelected: true,
-            });
-          });
-
-          it('has the first stage selected by default', () => {
-            const first = findStageNavItemAtIndex(0);
-            const second = findStageNavItemAtIndex(1);
-
-            expect(first.props('isActive')).toBe(true);
-            expect(second.props('isActive')).toBe(false);
-          });
-
-          it('can navigate to different stages', async () => {
-            findStageNavItemAtIndex(2).trigger('click');
-
-            await wrapper.vm.$nextTick();
-            const first = findStageNavItemAtIndex(0);
-            const third = findStageNavItemAtIndex(2);
-            expect(third.props('isActive')).toBe(true);
-            expect(first.props('isActive')).toBe(false);
-          });
-
-          describe('Add stage button', () => {
-            beforeEach(async () => {
-              wrapper = await createComponent({
-                opts: {
-                  stubs: {
-                    StageTable,
-                    StageTableNav,
-                    AddStageButton,
-                  },
-                },
-                withStageSelected: true,
-              });
-            });
-
-            it('can navigate to the custom stage form', async () => {
-              expect(wrapper.find(CustomStageForm).exists()).toBe(false);
-              findAddStageButton().trigger('click');
-
-              await wrapper.vm.$nextTick();
-              expect(wrapper.find(CustomStageForm).exists()).toBe(true);
-            });
-          });
-        });
-      });
-
-      describe('enabled', () => {
-        beforeEach(async () => {
-          wrapper = await createComponent({
-            withStageSelected: true,
-            featureFlags: {
-              hasPathNavigation: true,
-            },
-          });
-        });
-
-        it('displays the path navigation', () => {
-          displaysPathNavigation(true);
-        });
+      it('displays the path navigation', () => {
+        displaysPathNavigation(true);
       });
     });
   });
@@ -528,11 +363,7 @@ describe('Value Stream Analytics component', () => {
 
       mock = new MockAdapter(axios);
       mockRequiredRoutes(mock);
-      wrapper = await createComponent({
-        featureFlags: {
-          hasPathNavigation: true,
-        },
-      });
+      wrapper = await createComponent();
     });
 
     afterEach(() => {
