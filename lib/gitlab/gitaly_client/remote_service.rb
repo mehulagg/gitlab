@@ -43,10 +43,11 @@ module Gitlab
         GitalyClient.call(@storage, :remote_service, :remove_remote, request, timeout: GitalyClient.long_timeout).result
       end
 
-      def find_remote_root_ref(remote_name)
+      def find_remote_root_ref(remote_url, authorization)
         request = Gitaly::FindRemoteRootRefRequest.new(
           repository: @gitaly_repo,
-          remote: remote_name
+          remote_url: remote_url,
+          http_authorization_header: authorization
         )
 
         response = GitalyClient.call(@storage, :remote_service,
