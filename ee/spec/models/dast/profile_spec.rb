@@ -27,30 +27,27 @@ RSpec.describe Dast::Profile, type: :model do
     it { is_expected.to validate_presence_of(:dast_scanner_profile_id) }
     it { is_expected.to validate_presence_of(:name) }
 
-    context 'when the project_id and dast_site_profile.project_id do not match' do
-      let(:dast_site_profile) { create(:dast_site_profile) }
-
-      subject { build(:dast_profile, project: project, dast_site_profile: dast_site_profile) }
-
-      it 'is not valid' do
-        aggregate_failures do
-          expect(subject.valid?).to be_falsey
-          expect(subject.errors.full_messages).to include('Project must match dast_site_profile.project_id')
-        end
+    shared_examples 'the project_id does not match' do
+      it 'is not valid', :aggregate_failures do
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors.full_messages).to include("Project must match #{association.class.underscore}.project_id")
       end
     end
 
+    context 'when the project_id and dast_site_profile.project_id do not match' do
+      let(:association) { build(:dast_site_profile, project_id: 0) }
+
+      subject { build(:dast_profile, project: project, dast_site_profile: association) }
+
+      it_behaves_like 'the project_id does not match'
+    end
+
     context 'when the project_id and dast_scanner_profile.project_id do not match' do
-      let(:dast_scanner_profile) { create(:dast_scanner_profile) }
+      let(:association) { build(:dast_scanner_profile, project_id: 0) }
 
-      subject { build(:dast_profile, project: project, dast_scanner_profile: dast_scanner_profile) }
+      subject { build(:dast_profile, project: project, dast_scanner_profile: association) }
 
-      it 'is not valid' do
-        aggregate_failures do
-          expect(subject.valid?).to be_falsey
-          expect(subject.errors.full_messages).to include('Project must match dast_scanner_profile.project_id')
-        end
-      end
+      it_behaves_like 'the project_id does not match'
     end
 
     context 'when the description is nil' do
