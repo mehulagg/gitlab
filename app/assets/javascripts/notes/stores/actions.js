@@ -12,6 +12,7 @@ import loadAwardsHandler from '../../awards_handler';
 import { deprecatedCreateFlash as Flash } from '../../flash';
 import { isInViewport, scrollToElement, isInMRPage } from '../../lib/utils/common_utils';
 import Poll from '../../lib/utils/poll';
+import { create } from '../../lib/utils/recurrence';
 import { mergeUrlParams } from '../../lib/utils/url_utility';
 import sidebarTimeTrackingEventHub from '../../sidebar/event_hub';
 import TaskList from '../../task_list';
@@ -469,6 +470,13 @@ const getFetchDataParams = (state) => {
 };
 
 export const poll = ({ commit, state, getters, dispatch }) => {
+  const notePollOccurrenceTracking = create();
+  let flashContainer;
+
+  notePollOccurrenceTracking.handle(2, () => {
+    flashContainer = Flash(__('Something went wrong while fetching latest comments.'));
+  });
+
   eTagPoll = new Poll({
     resource: {
       poll: () => {
@@ -477,8 +485,13 @@ export const poll = ({ commit, state, getters, dispatch }) => {
       },
     },
     method: 'poll',
-    successCallback: ({ data }) => pollSuccessCallBack(data, commit, state, getters, dispatch),
-    errorCallback: () => Flash(__('Something went wrong while fetching latest comments.')),
+    successCallback: ({ data }) => {
+      notePollOccurrenceTracking.reset();
+      flashContainer.close();
+
+      pollSuccessCallBack(data, commit, state, getters, dispatch);
+    },
+    errorCallback: () => notePollOccurrenceTracking.occur(),
   });
 
   if (!Visibility.hidden()) {
