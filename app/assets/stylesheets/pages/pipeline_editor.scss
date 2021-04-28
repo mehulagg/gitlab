@@ -1,0 +1,7 @@
+.pipeline-drawer{
+  top: $header-height !important;
+}
+
+.with-performance-bar .pipeline-drawer {
+  top: $header-height + $performance-bar-height !important;
+}
