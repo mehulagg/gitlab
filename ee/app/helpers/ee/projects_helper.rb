@@ -47,6 +47,10 @@ module EE
         nav_tabs << :oncall_schedule
       end
 
+      if can?(current_user, :read_incident_management_escalation_policy, project)
+        nav_tabs << :escalation_policy
+      end
+
       nav_tabs
     end
 
@@ -422,7 +426,8 @@ module EE
     override :view_operations_tab_ability
     def view_operations_tab_ability
       super + [
-        :read_incident_management_oncall_schedule
+        :read_incident_management_oncall_schedule,
+        :read_incident_management_escalation_policy
       ]
     end
   end

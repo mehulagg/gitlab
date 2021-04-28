@@ -5,5 +5,9 @@ module Gitlab
     def self.oncall_schedules_available?(project)
       project.feature_available?(:oncall_schedules)
     end
+
+    def self.escalation_policies_available?(project)
+      project.feature_available?(:escalation_policies)
+    end
   end
 end

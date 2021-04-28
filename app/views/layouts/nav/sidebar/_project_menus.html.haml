@@ -140,6 +140,7 @@
               = _('Incidents')
 
       = render_if_exists 'projects/sidebar/oncall_schedules'
+      = render_if_exists 'projects/sidebar/escalation_policies'
 
       - if project_nav_tab? :serverless
         = nav_link(controller: :functions) do

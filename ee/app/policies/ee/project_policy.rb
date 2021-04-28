@@ -137,6 +137,12 @@ module EE
         ::Gitlab::IncidentManagement.oncall_schedules_available?(@subject)
       end
 
+      with_scope :subject
+      condition(:escalation_policies_available) do
+        ::Feature.enabled?(:escalation_policies_mvc, @subject) &&
+            ::Gitlab::IncidentManagement.escalation_policies_available?(@subject)
+      end
+
       rule { visual_review_bot }.policy do
         prevent :read_note
         enable :create_note
@@ -167,6 +173,7 @@ module EE
       end
 
       rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
+      rule { escalation_policies_available & can?(:reporter_access) }.enable :read_incident_management_escalation_policy
 
       rule { can?(:developer_access) }.policy do
         enable :admin_issue_board
@@ -249,6 +256,7 @@ module EE
       rule { license_scanning_enabled & can?(:maintainer_access) }.enable :admin_software_license_policy
 
       rule { oncall_schedules_available & can?(:maintainer_access) }.enable :admin_incident_management_oncall_schedule
+      rule { escalation_pollicies_available & can?(:maintainer_access) }.enable :admin_incident_management_escalation_policy
 
       rule { auditor }.policy do
         enable :public_user_access
