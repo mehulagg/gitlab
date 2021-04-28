@@ -191,33 +191,11 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
 
         expect(rendered).not_to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
       end
-<<<<<<< HEAD
 
       context 'when user can see discover project security' do
         it 'top level navigation link is visible and pointing to that page' do
           allow(view).to receive(:show_discover_project_security?).and_return(true)
 
-=======
-    end
-  end
-
-  describe 'Security and Compliance' do
-    describe 'when user does not have permissions' do
-      before do
-        allow(view).to receive(:current_user).and_return(nil)
-      end
-
-      it 'top level navigation link is not visible' do
-        render
-
-        expect(rendered).not_to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
-      end
-
-      context 'when user can see discover project security' do
-        it 'top level navigation link is visible and pointing to that page' do
-          allow(view).to receive(:show_discover_project_security?).and_return(true)
-
->>>>>>> 9dd9bde6a0d (Add Security and Compliance menu)
           render
 
           expect(rendered).to have_link('Security & Compliance', href: project_security_discover_path(project))
