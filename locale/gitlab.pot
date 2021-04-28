@@ -31483,6 +31483,9 @@ msgstr ""
 msgid "TestReports|%{rate}%{sign} success rate"
 msgstr ""
 
+msgid "TestReports|Attachment"
+msgstr ""
+
 msgid "TestReports|Jobs"
 msgstr ""
 
