@@ -439,13 +439,13 @@ Plan.default.actual_limits.update!(ci_max_artifact_size_junit: 10)
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/321368) in GitLab 13.12.
 
-The total number of registered runners is limited at the instance, group, and project level.
-This limit is checked each time a new runner is registered. If a new registration
-would cause the total number of registered runners to exceed the limit at the scope
-determined by the runner registration token, the registration will fail.
+The total number of registered runners is limited at the instance, group, and project
+levels. Each time a new runner is registered, GitLab checks these limits. A
+runner's registration fails if it exceeds the limit for the scope determined by
+the runner registration token.
 
-- GitLab SaaS subscribers have different limits defined per plan, and they affect all projects under that plan.
-- On GitLab Premium self-managed or higher installations, this limit is defined under a default plan that affects all projects:
+- GitLab SaaS subscribers have different limits defined per plan, affecting all projects using that plan.
+- Self-managed GitLab Premium and Ultimate limits are defined by a default plan that affects all projects:
 
     | Runner scope                                | Default value |
     |---------------------------------------------|---------------|
@@ -453,7 +453,7 @@ determined by the runner registration token, the registration will fail.
     | `ci_registered_group_runners`               | 2000          |
     | `ci_registered_project_runners`             | 100           |
 
-    To update this limit to a new value on a self-managed installation, run the following in the
+    To update these limits, run the following in the
     [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
     ```ruby
