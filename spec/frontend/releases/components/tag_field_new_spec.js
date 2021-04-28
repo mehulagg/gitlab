@@ -87,8 +87,6 @@ describe('releases/components/tag_field_new', () => {
       describe('when the user selects a new tag name', () => {
         beforeEach(async () => {
           findCreateNewTagOption().vm.$emit('click');
-
-          await wrapper.vm.$nextTick();
         });
 
         it("updates the store's release.tagName property", () => {
@@ -105,8 +103,6 @@ describe('releases/components/tag_field_new', () => {
 
         beforeEach(async () => {
           findTagNameDropdown().vm.$emit('input', updatedTagName);
-
-          await wrapper.vm.$nextTick();
         });
 
         it("updates the store's release.tagName property", () => {
@@ -131,8 +127,6 @@ describe('releases/components/tag_field_new', () => {
               query: TEST_TAG_NAME,
             },
           });
-
-          await wrapper.vm.$nextTick();
         });
 
         it('does not show the "Create tag" option', () => {
@@ -206,8 +200,6 @@ describe('releases/components/tag_field_new', () => {
       it("updates the store's createFrom property", async () => {
         const updatedCreateFrom = 'update-create-from';
         findCreateFromDropdown().vm.$emit('input', updatedCreateFrom);
-
-        await wrapper.vm.$nextTick();
 
         expect(store.state.editNew.createFrom).toBe(updatedCreateFrom);
       });
