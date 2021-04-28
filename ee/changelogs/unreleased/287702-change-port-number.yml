@@ -1,5 +1,0 @@
----
-title: API Fuzzing scanner port changed to non-privileged port
-merge_request: 57628
-author:
-type: changed

@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Manage
+group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -217,8 +217,8 @@ listed in the descriptions of the relevant settings.
 | Attribute                                | Type             | Required                             | Description |
 |------------------------------------------|------------------|:------------------------------------:|-------------|
 | `admin_mode`                             | boolean          | no                                   | Require admins to enable Admin Mode by re-authenticating for administrative tasks. |
-| `admin_notification_email`               | string           | no                                   | Deprecated: Use `abuse_notification_email` instead. If set, [abuse reports](../user/admin_area/abuse_reports.md) are sent to this address. Abuse reports are always available in the Admin Area.  |
-| `abuse_notification_email`               | string           | no                                   | If set, [abuse reports](../user/admin_area/abuse_reports.md) are sent to this address. Abuse reports are always available in the Admin Area. |
+| `admin_notification_email`               | string           | no                                   | Deprecated: Use `abuse_notification_email` instead. If set, [abuse reports](../user/admin_area/review_abuse_reports.md) are sent to this address. Abuse reports are always available in the Admin Area.  |
+| `abuse_notification_email`               | string           | no                                   | If set, [abuse reports](../user/admin_area/review_abuse_reports.md) are sent to this address. Abuse reports are always available in the Admin Area. |
 | `after_sign_out_path`                    | string           | no                                   | Where to redirect users after logout. |
 | `after_sign_up_text`                     | string           | no                                   | Text shown to the user after signing up |
 | `akismet_api_key`                        | string           | required by: `akismet_enabled`       | API key for Akismet spam protection. |
@@ -410,6 +410,7 @@ listed in the descriptions of the relevant settings.
 | `user_oauth_applications`                | boolean          | no                                   | Allow users to register any application to use GitLab as an OAuth provider. |
 | `user_show_add_ssh_key_message`          | boolean          | no                                   | When set to `false` disable the "You won't be able to pull or push project code via SSH" warning shown to users with no uploaded SSH key. |
 | `version_check_enabled`                  | boolean          | no                                   | Let GitLab inform you when an update is available. |
+| `whats_new_variant`                      | string           | no                                   | What's new variant, possible values: `all_tiers`, `current_tier`, and `disabled`. |
 | `web_ide_clientside_preview_enabled`     | boolean          | no                                   | Live Preview (allow live previews of JavaScript projects in the Web IDE using CodeSandbox Live Preview). |
 | `wiki_page_max_content_bytes`            | integer          | no                                   | Maximum wiki page content size in **bytes**. Default: 52428800 Bytes (50 MB). The minimum value is 1024 bytes. |
 

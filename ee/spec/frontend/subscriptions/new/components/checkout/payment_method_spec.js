@@ -1,8 +1,8 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import Vuex from 'vuex';
+import { STEPS } from 'ee/subscriptions/constants';
 import PaymentMethod from 'ee/subscriptions/new/components/checkout/payment_method.vue';
-import { STEPS } from 'ee/subscriptions/new/constants';
 import createStore from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
 import Step from 'ee/vue_shared/purchase_flow/components/step.vue';

@@ -18,7 +18,7 @@ namespace :gitlab do
       IO.write(path, data.to_json, mode: 'w')
 
       puts "Local copy of SPDX catalogue is saved to #{path}"
-    rescue => e
+    rescue StandardError => e
       puts "Import of SPDX catalogue failed: #{e}"
     end
   end

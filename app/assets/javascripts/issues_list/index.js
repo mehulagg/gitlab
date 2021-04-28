@@ -73,6 +73,8 @@ export function initIssuesListApp() {
   }
 
   const {
+    autocompleteAwardEmojisPath,
+    autocompleteUsersPath,
     calendarPath,
     canBulkUpdate,
     canEdit,
@@ -81,7 +83,6 @@ export function initIssuesListApp() {
     emptyStateSvgPath,
     endpoint,
     exportCsvPath,
-    fullPath,
     hasBlockedIssuesFeature,
     hasIssuableHealthStatusFeature,
     hasIssues,
@@ -93,6 +94,9 @@ export function initIssuesListApp() {
     maxAttachmentSize,
     newIssuePath,
     projectImportJiraPath,
+    projectLabelsPath,
+    projectMilestonesPath,
+    projectPath,
     rssPath,
     showNewIssueLink,
     signInPath,
@@ -104,11 +108,12 @@ export function initIssuesListApp() {
     // issue is fixed upstream in https://github.com/vuejs/vue-apollo/pull/1153
     apolloProvider: {},
     provide: {
+      autocompleteAwardEmojisPath,
+      autocompleteUsersPath,
       calendarPath,
       canBulkUpdate: parseBoolean(canBulkUpdate),
       emptyStateSvgPath,
       endpoint,
-      fullPath,
       hasBlockedIssuesFeature: parseBoolean(hasBlockedIssuesFeature),
       hasIssuableHealthStatusFeature: parseBoolean(hasIssuableHealthStatusFeature),
       hasIssues: parseBoolean(hasIssues),
@@ -117,6 +122,9 @@ export function initIssuesListApp() {
       issuesPath,
       jiraIntegrationPath,
       newIssuePath,
+      projectLabelsPath,
+      projectMilestonesPath,
+      projectPath,
       rssPath,
       showNewIssueLink: parseBoolean(showNewIssueLink),
       signInPath,

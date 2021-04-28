@@ -154,7 +154,7 @@ RSpec.describe Gitlab::SeatLinkData do
       context 'when timestamp is out of the range' do
         let(:timestamp) { license.starts_at - 1.day }
 
-        it { is_expected.to be_falsey }
+        it { is_expected.to eq(true) }
       end
 
       context 'when historical data not found' do

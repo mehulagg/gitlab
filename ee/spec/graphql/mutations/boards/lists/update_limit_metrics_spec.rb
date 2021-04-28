@@ -38,6 +38,10 @@ RSpec.describe Mutations::Boards::Lists::UpdateLimitMetrics do
         expect(reloaded_list.max_issue_count).to eq(10)
         expect(reloaded_list.max_issue_weight).to eq(50)
       end
+
+      it 'returns the correct response' do
+        expect(subject.keys).to match_array([:list, :errors])
+      end
     end
 
     context 'without admin rights' do

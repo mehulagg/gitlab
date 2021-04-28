@@ -514,6 +514,7 @@ export default {
       <div class="mr-widget-grouped-section report-block">
         <template v-if="hasSastReports">
           <summary-row
+            :nested-summary="true"
             :status-icon="sastStatusIcon"
             :popover-options="sastPopover"
             class="js-sast-widget"
@@ -526,6 +527,7 @@ export default {
 
           <grouped-issues-list
             v-if="hasSastIssues"
+            :nested-level="2"
             :unresolved-issues="sast.newIssues"
             :resolved-issues="sast.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
@@ -535,6 +537,7 @@ export default {
 
         <template v-if="hasDependencyScanningReports">
           <summary-row
+            :nested-summary="true"
             :status-icon="dependencyScanningStatusIcon"
             :popover-options="dependencyScanningPopover"
             class="js-dependency-scanning-widget"
@@ -547,6 +550,7 @@ export default {
 
           <grouped-issues-list
             v-if="hasDependencyScanningIssues"
+            :nested-level="2"
             :unresolved-issues="dependencyScanning.newIssues"
             :resolved-issues="dependencyScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
@@ -556,6 +560,7 @@ export default {
 
         <template v-if="hasContainerScanningReports">
           <summary-row
+            :nested-summary="true"
             :status-icon="containerScanningStatusIcon"
             :popover-options="containerScanningPopover"
             class="js-container-scanning"
@@ -568,6 +573,7 @@ export default {
 
           <grouped-issues-list
             v-if="hasContainerScanningIssues"
+            :nested-level="2"
             :unresolved-issues="containerScanning.newIssues"
             :resolved-issues="containerScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
@@ -577,6 +583,7 @@ export default {
 
         <template v-if="hasDastReports">
           <summary-row
+            :nested-summary="true"
             :status-icon="dastStatusIcon"
             :popover-options="dastPopover"
             class="js-dast-widget"
@@ -602,6 +609,7 @@ export default {
           </summary-row>
           <grouped-issues-list
             v-if="hasDastIssues"
+            :nested-level="2"
             :unresolved-issues="dast.newIssues"
             :resolved-issues="dast.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
@@ -611,6 +619,7 @@ export default {
 
         <template v-if="hasSecretDetectionReports">
           <summary-row
+            :nested-summary="true"
             :status-icon="secretDetectionStatusIcon"
             :popover-options="secretScanningPopover"
             class="js-secret-scanning"
@@ -623,6 +632,7 @@ export default {
 
           <grouped-issues-list
             v-if="hasSecretDetectionIssues"
+            :nested-level="2"
             :unresolved-issues="secretDetection.newIssues"
             :resolved-issues="secretDetection.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
@@ -632,6 +642,7 @@ export default {
 
         <template v-if="hasCoverageFuzzingReports">
           <summary-row
+            :nested-summary="true"
             :status-icon="coverageFuzzingStatusIcon"
             :popover-options="coverageFuzzingPopover"
             class="js-coverage-fuzzing-widget"
@@ -649,6 +660,7 @@ export default {
 
           <grouped-issues-list
             v-if="hasCoverageFuzzingIssues"
+            :nested-level="2"
             :unresolved-issues="coverageFuzzing.newIssues"
             :resolved-issues="coverageFuzzing.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
@@ -658,6 +670,7 @@ export default {
 
         <template v-if="hasApiFuzzingReports">
           <summary-row
+            :nested-summary="true"
             :status-icon="apiFuzzingStatusIcon"
             :popover-options="apiFuzzingPopover"
             class="js-api-fuzzing-widget"
@@ -677,6 +690,7 @@ export default {
 
           <grouped-issues-list
             v-if="hasApiFuzzingIssues"
+            :nested-level="2"
             :unresolved-issues="apiFuzzing.newIssues"
             :resolved-issues="apiFuzzing.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"

@@ -7,7 +7,7 @@ RSpec.describe StatusPage::IncidentSerializer do
 
   shared_examples 'valid JSON schema' do |schema:|
     it 'matches JSON schema' do
-      expect(json_entity).to match_schema(schema, dir: 'ee')
+      expect(json_entity.to_json).to match_schema(schema, dir: 'ee')
     end
   end
 

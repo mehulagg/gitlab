@@ -59,7 +59,7 @@ class ElasticDeleteProjectWorker
               },
               {
                 term: {
-                  target_project_id: project_id # handle merge_request which aliases project_id to target_project_id
+                  target_project_id: project_id # handle merge_request which previously did not store project_id and only stored target_project_id
                 }
               }
             ]

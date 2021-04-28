@@ -30,7 +30,7 @@ export const endpoints = {
   groupLabels: /groups\/[A-Z|a-z|\d|\-|_]+\/-\/labels.json/,
   recentActivityData: /analytics\/value_stream_analytics\/summary/,
   timeMetricsData: /analytics\/value_stream_analytics\/time_summary/,
-  durationData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/duration_chart/,
+  durationData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/average_duration_chart/,
   stageData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/records/,
   stageMedian: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/median/,
   baseStagesEndpoint: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages$/,
@@ -241,12 +241,12 @@ export const taskByTypeFilters = {
 
 export const rawDurationData = [
   {
-    duration_in_seconds: 1234000,
-    finished_at: '2019-01-01T00:00:00.000Z',
+    average_duration_in_seconds: 1234000,
+    date: '2019-01-01T00:00:00.000Z',
   },
   {
-    duration_in_seconds: 4321000,
-    finished_at: '2019-01-02T00:00:00.000Z',
+    average_duration_in_seconds: 4321000,
+    date: '2019-01-02T00:00:00.000Z',
   },
 ];
 
@@ -264,25 +264,25 @@ export const transformedDurationData = [
 ];
 
 export const flattenedDurationData = [
-  { duration_in_seconds: 1234000, finished_at: '2019-01-01' },
-  { duration_in_seconds: 4321000, finished_at: '2019-01-02' },
-  { duration_in_seconds: 1234000, finished_at: '2019-01-01' },
-  { duration_in_seconds: 4321000, finished_at: '2019-01-02' },
+  { average_duration_in_seconds: 1234000, date: '2019-01-01' },
+  { average_duration_in_seconds: 4321000, date: '2019-01-02' },
+  { average_duration_in_seconds: 1234000, date: '2019-01-01' },
+  { average_duration_in_seconds: 4321000, date: '2019-01-02' },
 ];
 
 export const durationChartPlottableData = [
-  ['2019-01-01', 29, '2019-01-01'],
-  ['2019-01-02', 100, '2019-01-02'],
+  ['2019-01-01', 14, '2019-01-01'],
+  ['2019-01-02', 50, '2019-01-02'],
 ];
 
 export const rawDurationMedianData = [
   {
-    duration_in_seconds: 1234000,
-    finished_at: '2018-12-01T00:00:00.000Z',
+    average_duration_in_seconds: 1234000,
+    date: '2018-12-01T00:00:00.000Z',
   },
   {
-    duration_in_seconds: 4321000,
-    finished_at: '2018-12-02T00:00:00.000Z',
+    average_duration_in_seconds: 4321000,
+    date: '2018-12-02T00:00:00.000Z',
   },
 ];
 

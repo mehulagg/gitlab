@@ -173,4 +173,52 @@ RSpec.describe Gitlab::Ci::Reports::Security::Report do
       it { is_expected.to be_truthy }
     end
   end
+
+  describe '#primary_scanner_order_to' do
+    let(:scanner_1) { build(:ci_reports_security_scanner) }
+    let(:scanner_2) { build(:ci_reports_security_scanner) }
+    let(:report_1) { described_class.new('sast', pipeline, created_at) }
+    let(:report_2) { described_class.new('sast', pipeline, created_at) }
+
+    subject(:compare_based_on_primary_scanners) { report_1.primary_scanner_order_to(report_2) }
+
+    context 'when the primary scanner of the receiver is nil' do
+      context 'when the primary scanner of the other is nil' do
+        it { is_expected.to be(1) }
+      end
+
+      context 'when the primary scanner of the other is not nil' do
+        before do
+          report_2.add_scanner(scanner_2)
+        end
+
+        it { is_expected.to be(1) }
+      end
+    end
+
+    context 'when the primary scanner of the receiver is not nil' do
+      before do
+        report_1.add_scanner(scanner_1)
+      end
+
+      context 'when the primary scanner of the other is nil' do
+        let(:scanner_2) { nil }
+
+        it { is_expected.to be(-1) }
+      end
+
+      context 'when the primary scanner of the other is not nil' do
+        before do
+          report_2.add_scanner(scanner_2)
+
+          allow(scanner_1).to receive(:<=>).and_return(0)
+        end
+
+        it 'compares two scanners' do
+          expect(compare_based_on_primary_scanners).to be(0)
+          expect(scanner_1).to have_received(:<=>).with(scanner_2)
+        end
+      end
+    end
+  end
 end

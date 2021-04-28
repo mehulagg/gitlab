@@ -115,22 +115,54 @@ RSpec.describe Admin::LicensesController do
     context 'with seat link enabled' do
       let(:seat_link_enabled) { true }
 
-      it 'redirects with a successful message' do
-        post :sync_seat_link
+      it 'returns a success response' do
+        post :sync_seat_link, format: :json
 
-        expect(response).to redirect_to(admin_license_path)
-        expect(flash[:notice]).to eq('Your license was successfully synced.')
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq({ 'success' => true })
       end
     end
 
     context 'with seat link disabled' do
       let(:seat_link_enabled) { false }
 
-      it 'redirects with an error message' do
-        post :sync_seat_link
+      it 'returns a failure response' do
+        post :sync_seat_link, format: :json
+
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
+        expect(json_response).to eq({ 'success' => false })
+      end
+    end
+  end
+
+  describe 'DELETE destroy' do
+    let(:cloud_licenses) { License.where(cloud: true) }
+
+    before do
+      allow(License).to receive(:current).and_return(create(:license, cloud: is_cloud_license))
+    end
+
+    context 'with a cloud license' do
+      let(:is_cloud_license) { true }
+
+      it 'is can not be removed' do
+        delete :destroy
 
         expect(response).to redirect_to(admin_license_path)
-        expect(flash[:error]).to match('There was an error when trying to sync your license.')
+        expect(flash[:error]).to match('Cloud licenses can not be removed.')
+        expect(cloud_licenses).to be_present
+      end
+    end
+
+    context 'with a legacy license' do
+      let(:is_cloud_license) { false }
+
+      it 'is can be removed' do
+        delete :destroy
+
+        expect(response).to redirect_to(admin_license_path)
+        expect(flash[:notice]).to match('The license was removed. GitLab has fallen back on the previous license.')
+        expect(cloud_licenses).to be_empty
       end
     end
   end

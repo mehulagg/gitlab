@@ -21,6 +21,8 @@ describe('Subscription Details User Info', () => {
   let wrapper;
 
   const itif = (condition) => (condition ? it : it.skip);
+  const findSubscriptionText = () =>
+    wrapper.findByTestId('users-in-subscription').find('h2').text();
 
   const createComponent = (props = {}, stubGlSprintf = false) => {
     wrapper = extendedWrapper(
@@ -42,11 +44,11 @@ describe('Subscription Details User Info', () => {
   });
 
   describe.each`
-    testId                  | info    | title                         | text                         | link
-    ${'users-in-license'}   | ${'10'} | ${usersInSubscriptionTitle}   | ${usersInSubscriptionText}   | ${false}
-    ${'billable-users'}     | ${'8'}  | ${billableUsersTitle}         | ${billableUsersText}         | ${billableUsersURL}
-    ${'maximum-users'}      | ${'8'}  | ${maximumUsersTitle}          | ${maximumUsersText}          | ${false}
-    ${'users-over-license'} | ${'0'}  | ${usersOverSubscriptionTitle} | ${usersOverSubscriptionText} | ${trueUpURL}
+    testId                     | info    | title                         | text                         | link
+    ${'users-in-subscription'} | ${'10'} | ${usersInSubscriptionTitle}   | ${usersInSubscriptionText}   | ${false}
+    ${'billable-users'}        | ${'8'}  | ${billableUsersTitle}         | ${billableUsersText}         | ${billableUsersURL}
+    ${'maximum-users'}         | ${'8'}  | ${maximumUsersTitle}          | ${maximumUsersText}          | ${false}
+    ${'users-over-license'}    | ${'0'}  | ${usersOverSubscriptionTitle} | ${usersOverSubscriptionText} | ${trueUpURL}
   `('with data for $card', ({ testId, info, title, text, link }) => {
     beforeEach(() => {
       createComponent();
@@ -78,6 +80,22 @@ describe('Subscription Details User Info', () => {
     itif(!link)(`has not a link`, () => {
       createComponent({}, true);
       expect(findUseCard().findComponent(GlLink).exists()).toBe(link);
+    });
+  });
+
+  describe('Users is subscription', () => {
+    it('should display the value when present', () => {
+      const subscription = { ...license.ULTIMATE, usersInLicenseCount: 0 };
+      createComponent({ subscription });
+
+      expect(findSubscriptionText()).toBe('0');
+    });
+
+    it('should display Unlimited when users in license is null', () => {
+      const subscription = { ...license.ULTIMATE, usersInLicenseCount: null };
+      createComponent({ subscription });
+
+      expect(findSubscriptionText()).toBe('Unlimited');
     });
   });
 });

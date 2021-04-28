@@ -6,7 +6,7 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
   include EE::GeoHelpers
 
   it_behaves_like 'a BulkInsertSafe model', Geo::LfsObjectRegistry do
-    let(:valid_items_for_bulk_insertion) { build_list(:geo_lfs_object_registry, 10) }
+    let(:valid_items_for_bulk_insertion) { build_list(:geo_lfs_object_legacy_registry, 10) }
     let(:invalid_items_for_bulk_insertion) { [] } # class does not have any validations defined
   end
 
@@ -41,9 +41,9 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
 
     context 'untracked IDs' do
       before do
-        create(:geo_lfs_object_registry, lfs_object_id: lfs_object_1.id)
-        create(:geo_lfs_object_registry, :failed, lfs_object_id: lfs_object_3.id)
-        create(:geo_lfs_object_registry, lfs_object_id: lfs_object_4.id)
+        create(:geo_lfs_object_legacy_registry, lfs_object_id: lfs_object_1.id)
+        create(:geo_lfs_object_legacy_registry, :failed, lfs_object_id: lfs_object_3.id)
+        create(:geo_lfs_object_legacy_registry, lfs_object_id: lfs_object_4.id)
 
         create(:lfs_objects_project, project: synced_project, lfs_object: lfs_object_1)
         create(:lfs_objects_project, project: synced_project_in_nested_group, lfs_object: lfs_object_2)
@@ -101,7 +101,7 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
 
     context 'unused tracked IDs' do
       context 'with an orphaned registry' do
-        let!(:orphaned) { create(:geo_lfs_object_registry, lfs_object_id: non_existing_record_id) }
+        let!(:orphaned) { create(:geo_lfs_object_legacy_registry, lfs_object_id: non_existing_record_id) }
 
         it 'includes tracked IDs that do not exist in the model table' do
           range = non_existing_record_id..non_existing_record_id
@@ -124,7 +124,7 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
         let(:secondary) { create(:geo_node, selective_sync_type: 'namespaces', namespaces: [synced_group]) }
 
         context 'with a tracked LFS object' do
-          let!(:registry_entry) { create(:geo_lfs_object_registry, lfs_object_id: lfs_object_1.id) }
+          let!(:registry_entry) { create(:geo_lfs_object_legacy_registry, lfs_object_id: lfs_object_1.id) }
           let(:range) { lfs_object_1.id..lfs_object_1.id }
 
           context 'excluded from selective sync' do
@@ -151,7 +151,7 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
         let(:secondary) { create(:geo_node, selective_sync_type: 'shards', selective_sync_shards: ['broken']) }
 
         context 'with a tracked LFS object' do
-          let!(:registry_entry) { create(:geo_lfs_object_registry, lfs_object_id: lfs_object_1.id) }
+          let!(:registry_entry) { create(:geo_lfs_object_legacy_registry, lfs_object_id: lfs_object_1.id) }
           let(:range) { lfs_object_1.id..lfs_object_1.id }
 
           context 'excluded from selective sync' do
@@ -180,7 +180,7 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
         context 'with a tracked LFS object' do
           context 'in object storage' do
             it 'includes tracked LFS object IDs that are in object storage' do
-              create(:geo_lfs_object_registry, lfs_object_id: lfs_object_remote_1.id)
+              create(:geo_lfs_object_legacy_registry, lfs_object_id: lfs_object_remote_1.id)
               range = lfs_object_remote_1.id..lfs_object_remote_1.id
 
               _, unused_tracked_ids = described_class.find_registry_differences(range)
@@ -191,7 +191,7 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
 
           context 'not in object storage' do
             it 'excludes tracked LFS object IDs that are not in object storage' do
-              create(:geo_lfs_object_registry, lfs_object_id: lfs_object_1.id)
+              create(:geo_lfs_object_legacy_registry, lfs_object_id: lfs_object_1.id)
               range = lfs_object_1.id..lfs_object_1.id
 
               _, unused_tracked_ids = described_class.find_registry_differences(range)
@@ -203,4 +203,14 @@ RSpec.describe Geo::LfsObjectRegistry, :geo do
       end
     end
   end
+end
+
+RSpec.describe Geo::LfsObjectRegistry, :geo, type: :model do
+  let_it_be(:registry) { create(:geo_lfs_object_registry) }
+
+  specify 'factory is valid' do
+    expect(registry).to be_valid
+  end
+
+  include_examples 'a Geo framework registry'
 end

@@ -80,13 +80,22 @@ RSpec.describe LicenseHelper do
   end
 
   describe '#cloud_license_view_data' do
+    before do
+      stub_const('::EE::SUBSCRIPTIONS_PLANS_URL', 'subscriptions_plans_url')
+
+      allow(helper).to receive(:new_trial_url).and_return('new_trial_url')
+    end
+
     context 'when there is a current license' do
       it 'returns the data for the view' do
         custom_plan = 'custom plan'
         license = double('License', plan: custom_plan)
         allow(License).to receive(:current).and_return(license)
 
-        expect(cloud_license_view_data).to eq({ has_active_license: 'true' })
+        expect(helper.cloud_license_view_data).to eq({ has_active_license: 'true',
+                                                       free_trial_path: 'new_trial_url',
+                                                       buy_subscription_path: 'subscriptions_plans_url',
+                                                       subscription_sync_path: sync_seat_link_admin_license_path })
       end
     end
 
@@ -94,7 +103,10 @@ RSpec.describe LicenseHelper do
       it 'returns the data for the view' do
         allow(License).to receive(:current).and_return(nil)
 
-        expect(cloud_license_view_data).to eq({ has_active_license: 'false' })
+        expect(helper.cloud_license_view_data).to eq({ has_active_license: 'false',
+                                                       free_trial_path: 'new_trial_url',
+                                                       buy_subscription_path: 'subscriptions_plans_url',
+                                                       subscription_sync_path: sync_seat_link_admin_license_path })
       end
     end
   end

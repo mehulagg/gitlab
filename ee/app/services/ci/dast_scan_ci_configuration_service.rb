@@ -6,6 +6,8 @@ module Ci
       spider_timeout: 'DAST_SPIDER_MINS',
       target_timeout: 'DAST_TARGET_AVAILABILITY_TIMEOUT',
       target_url: 'DAST_WEBSITE',
+      api_specification_url: 'DAST_API_SPECIFICATION',
+      api_host_override: 'DAST_API_HOST_OVERRIDE',
       use_ajax_spider: 'DAST_USE_AJAX_SPIDER',
       show_debug_messages: 'DAST_DEBUG',
       full_scan_enabled: 'DAST_FULL_SCAN_ENABLED',

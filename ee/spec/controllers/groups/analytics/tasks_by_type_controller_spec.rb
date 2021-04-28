@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Groups::Analytics::TasksByTypeController do
   let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group) }
   let(:label) { create(:group_label, group: group) }
   let!(:issue) { create(:labeled_issue, created_at: 5.days.ago, project: create(:project, group: group), labels: [label]) }

@@ -30,6 +30,7 @@ export default {
       category="secondary"
       :disabled="node.primary"
       data-testid="geo-desktop-remove-action"
+      @click="$emit('remove')"
       >{{ $options.i18n.removeButtonLabel }}</gl-button
     >
   </div>

@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/dom';
 import { shallowMount } from '@vue/test-utils';
-import ReportItem from 'ee/vulnerabilities/components/generic_report/report_item.vue';
 import List from 'ee/vulnerabilities/components/generic_report/types/list.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const TEST_DATA = {
   items: [
@@ -13,19 +13,28 @@ const TEST_DATA = {
 describe('ee/vulnerabilities/components/generic_report/types/list.vue', () => {
   let wrapper;
 
-  const createWrapper = () => {
-    return shallowMount(List, {
-      propsData: {
-        items: TEST_DATA.items,
-      },
-      attachTo: document.body,
-    });
-  };
+  const createWrapper = () =>
+    extendedWrapper(
+      shallowMount(List, {
+        propsData: {
+          items: TEST_DATA.items,
+        },
+        attachTo: document.body,
+        // manual stubbing is needed because the component is dynamically imported
+        stubs: {
+          ReportItem: true,
+        },
+      }),
+    );
 
-  const findReportItems = () => wrapper.findAllComponents(ReportItem);
+  const findReportItems = () => wrapper.findAllByTestId('reportItem');
 
   beforeEach(() => {
     wrapper = createWrapper();
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   it('renders a list', () => {

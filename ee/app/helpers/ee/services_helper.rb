@@ -6,7 +6,7 @@ module EE
 
     override :project_jira_issues_integration?
     def project_jira_issues_integration?
-      @project.jira_issues_integration_available? && @project.jira_service.issues_enabled
+      @project.jira_issues_integration_available? && @project.jira_service&.issues_enabled
     end
 
     override :integration_form_data

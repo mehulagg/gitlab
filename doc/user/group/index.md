@@ -577,7 +577,8 @@ To disable group mentions:
 
 ## Enable delayed project removal **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
+> - [Inheritance and enforcement added](https://gitlab.com/gitlab-org/gitlab/-/issues/321724) in GitLab 13.11.
 
 By default, projects in a group are deleted immediately.
 Optionally, on [Premium](https://about.gitlab.com/pricing/) or higher tiers,
@@ -591,10 +592,11 @@ To enable delayed deletion of projects:
 1. Go to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section.
 1. Check **Enable delayed project removal**.
+1. Optional. To prevent subgroups from changing this setting, select **Enforce for all subgroups**.
 1. Select **Save changes**.
 
 NOTE:
-The group setting for delayed deletion is not inherited by subgroups and has to be individually defined for each group.
+In GitLab 13.11 and above the group setting for delayed project removal is inherited by subgroups. As discussed in [Cascading settings](../../development/cascading_settings.md) inheritance can be overridden, unless enforced by an ancestor.
 
 ## Prevent project forking outside group **(PREMIUM)**
 
@@ -643,9 +645,6 @@ The group's new subgroups have push rules set for them based on either:
   and issues) of group members. **(PREMIUM)**
 - [Issue analytics](issues_analytics/index.md): View a bar chart of your group's number of issues per month. **(PREMIUM)**
 - Use GitLab as a [dependency proxy](../packages/dependency_proxy/index.md) for upstream Docker images.
-- [DORA4 Project Analytics API](../../api/dora4_group_analytics.md): View deployment frequency analytics.
-  [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/291747) in GitLab Ultimate 13.9 as a
-  [Beta feature](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta). **(ULTIMATE SELF)**
 - [Epics](epics/index.md): Track groups of issues that share a theme. **(ULTIMATE)**
 - [Security Dashboard](../application_security/security_dashboard/index.md): View the vulnerabilities of all
   the projects in a group and its subgroups. **(ULTIMATE)**

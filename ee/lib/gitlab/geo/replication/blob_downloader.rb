@@ -132,7 +132,7 @@ module Gitlab
 
           begin
             FileUtils.mkdir_p(dir)
-          rescue => e
+          rescue StandardError => e
             log_error("Unable to create directory #{dir}: #{e}")
 
             return false
@@ -215,7 +215,7 @@ module Gitlab
           temp.chmod(default_permissions)
           temp.binmode
           temp
-        rescue => e
+        rescue StandardError => e
           details = { error: e }
           details.merge({ absolute_path: absolute_path }) if absolute_path
 

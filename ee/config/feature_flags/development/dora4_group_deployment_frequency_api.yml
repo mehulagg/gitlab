@@ -1,8 +1,0 @@
----
-name: dora4_group_deployment_frequency_api
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51938
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/300239
-milestone: '13.9'
-type: development
-group: group::release
-default_enabled: false

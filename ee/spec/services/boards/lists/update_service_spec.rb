@@ -36,8 +36,8 @@ RSpec.describe 'EE::Boards::Lists::UpdateService' do
           service = Boards::Lists::UpdateService.new(board, user, { limit_metric: 'foo' })
           result = service.execute(list)
 
-          expect(result[:http_status]).to eq(422)
-          expect(result[:status]).to eq(:error)
+          expect(result.http_status).to eq(:unprocessable_entity)
+          expect(result.status).to eq(:error)
 
           reloaded_list = list.reload
           expect(reloaded_list.limit_metric).to be_nil
@@ -200,7 +200,7 @@ RSpec.describe 'EE::Boards::Lists::UpdateService' do
       service = Boards::Lists::UpdateService.new(board, user, initialization_params)
       result = service.execute(list)
 
-      expect(result[:status]).to eq(expected_service_result)
+      expect(result.status).to eq(expected_service_result)
 
       reloaded_list = list.reload
 

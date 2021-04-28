@@ -408,4 +408,56 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
       end
     end
   end
+
+  describe '#scanner_order_to' do
+    let(:scanner_1) { build(:ci_reports_security_scanner) }
+    let(:scanner_2) { build(:ci_reports_security_scanner) }
+    let(:finding_1) { build(:ci_reports_security_finding, scanner: scanner_1) }
+    let(:finding_2) { build(:ci_reports_security_finding, scanner: scanner_2) }
+
+    subject(:compare_based_on_scanners) { finding_1.scanner_order_to(finding_2) }
+
+    context 'when the scanner of the receiver is nil' do
+      let(:scanner_1) { nil }
+
+      context 'when the scanner of the other is nil' do
+        let(:scanner_2) { nil }
+
+        it { is_expected.to be(1) }
+      end
+
+      context 'when the scanner of the other is not nil' do
+        it { is_expected.to be(1) }
+      end
+    end
+
+    context 'when the scanner of the receiver is not nil' do
+      context 'when the scanner of the other is nil' do
+        let(:scanner_2) { nil }
+
+        it { is_expected.to be(-1) }
+      end
+
+      context 'when the scanner of the other is not nil' do
+        before do
+          allow(scanner_1).to receive(:<=>).and_return(0)
+        end
+
+        it 'compares two scanners' do
+          expect(compare_based_on_scanners).to be(0)
+          expect(scanner_1).to have_received(:<=>).with(scanner_2)
+        end
+      end
+    end
+  end
+
+  describe '#<=>' do
+    let(:finding_1) { build(:ci_reports_security_finding, severity: :critical, compare_key: 'b') }
+    let(:finding_2) { build(:ci_reports_security_finding, severity: :critical, compare_key: 'a') }
+    let(:finding_3) { build(:ci_reports_security_finding, severity: :high) }
+
+    subject { [finding_1, finding_2, finding_3].sort }
+
+    it { is_expected.to eq([finding_2, finding_1, finding_3]) }
+  end
 end

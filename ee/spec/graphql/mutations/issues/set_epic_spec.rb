@@ -12,6 +12,7 @@ RSpec.describe Mutations::Issues::SetEpic do
 
   describe '#resolve' do
     let_it_be_with_reload(:epic) { create(:epic, group: group) }
+
     let(:mutated_issue) { subject[:issue] }
 
     subject { mutation.resolve(project_path: issue.project.full_path, iid: issue.iid, epic: epic) }

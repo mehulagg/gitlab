@@ -382,10 +382,10 @@ export default {
     }
 
     const {
-      epic: { id, iid },
+      epic: { id, iid, group: { fullPath } = {} },
     } = getters.activeBoardItem;
 
-    if (state.epicsCacheById[id]) {
+    if (!iid || !fullPath || state.epicsCacheById[id]) {
       return false;
     }
 
@@ -399,7 +399,7 @@ export default {
       } = await gqlClient.query({
         query: epicQuery,
         variables: {
-          fullPath: getters.groupPathForActiveIssue,
+          fullPath,
           iid,
         },
       });
@@ -440,7 +440,7 @@ export default {
     commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
       itemId: getters.activeBoardItem.id,
       prop: 'epic',
-      value: epic ? { id: epic.id, iid: epic.iid } : null,
+      value: epic ? { id: epic.id, iid: epic.iid, group: { fullPath: epic.group.fullPath } } : null,
     });
     commit(types.SET_EPIC_FETCH_IN_PROGRESS, false);
   },

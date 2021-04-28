@@ -52,7 +52,6 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:pipelines_email_service) }
     it { is_expected.to have_one(:irker_service) }
     it { is_expected.to have_one(:pivotaltracker_service) }
-    it { is_expected.to have_one(:hipchat_service) }
     it { is_expected.to have_one(:flowdock_service) }
     it { is_expected.to have_one(:assembla_service) }
     it { is_expected.to have_one(:slack_slash_commands_service) }
@@ -131,6 +130,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:debian_distributions).class_name('Packages::Debian::ProjectDistribution').dependent(:destroy) }
     it { is_expected.to have_many(:pipeline_artifacts) }
     it { is_expected.to have_many(:terraform_states).class_name('Terraform::State').inverse_of(:project) }
+    it { is_expected.to have_many(:timelogs) }
 
     # GitLab Pages
     it { is_expected.to have_many(:pages_domains) }
@@ -1277,7 +1277,9 @@ RSpec.describe Project, factory_default: :keep do
 
     it 'is false if avatar is html page' do
       project.update_attribute(:avatar, 'uploads/avatar.html')
-      expect(project.avatar_type).to eq(['file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp'])
+      project.avatar_type
+
+      expect(project.errors.added?(:avatar, "file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp")).to be true
     end
   end
 

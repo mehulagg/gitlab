@@ -1,5 +1,0 @@
----
-title: Fix DAST profiles summary for invalid profile ids
-merge_request: 56753
-author:
-type: fixed

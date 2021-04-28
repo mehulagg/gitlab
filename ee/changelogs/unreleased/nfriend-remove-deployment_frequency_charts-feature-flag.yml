@@ -1,5 +1,0 @@
----
-title: Remove deployment_frequency_charts feature flag
-merge_request: 59289
-author:
-type: removed

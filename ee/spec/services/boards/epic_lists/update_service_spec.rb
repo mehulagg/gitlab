@@ -6,7 +6,8 @@ RSpec.describe Boards::EpicLists::UpdateService do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:board) { create(:epic_board, group: group) }
-  let_it_be(:list) { create(:epic_list, epic_board: board, position: 0) }
+  let_it_be_with_reload(:list) { create(:epic_list, epic_board: board, position: 0) }
+  let_it_be_with_reload(:list2) { create(:epic_list, epic_board: board, position: 1) }
 
   before do
     stub_licensed_features(epics: true)

@@ -53,7 +53,7 @@ module Elastic
     def safely_read_attribute_for_elasticsearch(attr_name)
       result = target.send(attr_name) # rubocop:disable GitlabSecurity/PublicSend
       apply_field_limit(result)
-    rescue => err
+    rescue StandardError => err
       target.logger.warn("Elasticsearch failed to read #{attr_name} for #{target.class} #{target.id}: #{err}")
       nil
     end

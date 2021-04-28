@@ -1,5 +1,0 @@
----
-title: Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/lib/gitlab/geo
-merge_request: 58380
-author: Abdul Wadood @abdulwd
-type: fixed

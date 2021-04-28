@@ -1,5 +1,0 @@
----
-title: Fix removing labels when moving an epic between lists
-merge_request: 58145
-author:
-type: fixed

@@ -123,6 +123,22 @@ module Gitlab
             primary_identifier&.fingerprint
           end
 
+          def <=>(other)
+            if severity == other.severity
+              compare_key <=> other.compare_key
+            else
+              ::Enums::Vulnerability.severity_levels[other.severity] <=>
+                ::Enums::Vulnerability.severity_levels[severity]
+            end
+          end
+
+          def scanner_order_to(other)
+            return 1 unless scanner
+            return -1 unless other&.scanner
+
+            scanner <=> other.scanner
+          end
+
           private
 
           def generate_project_fingerprint

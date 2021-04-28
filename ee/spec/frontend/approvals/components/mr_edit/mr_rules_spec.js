@@ -1,4 +1,5 @@
-import { mount, createLocalVue } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import MRRules from 'ee/approvals/components/mr_edit/mr_rules.vue';
 import RuleControls from 'ee/approvals/components/rule_controls.vue';
@@ -10,8 +11,7 @@ import { createEmptyRule, createMRRule, createMRRuleWithSource } from '../../moc
 
 const { HEADERS } = Rules;
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('EE Approvals MRRules', () => {
   let wrapper;
@@ -24,8 +24,7 @@ describe('EE Approvals MRRules', () => {
       store.modules.approvals.state.rules = approvalRules;
     }
 
-    wrapper = mount(localVue.extend(MRRules), {
-      localVue,
+    wrapper = mount(MRRules, {
       store: new Vuex.Store(store),
       attachTo: document.body,
     });
@@ -51,7 +50,7 @@ describe('EE Approvals MRRules', () => {
     store.modules.approvals.state = {
       hasLoaded: true,
       rules: [],
-      targetBranch: 'master',
+      targetBranch: 'main',
     };
     store.modules.approvals.actions.putRule = jest.fn();
   });
@@ -65,7 +64,7 @@ describe('EE Approvals MRRules', () => {
   });
 
   describe('when editing a MR', () => {
-    const initialTargetBranch = 'master';
+    const initialTargetBranch = 'main';
     let targetBranchInputElement;
 
     beforeEach(() => {
@@ -97,7 +96,7 @@ describe('EE Approvals MRRules', () => {
 
     it('re-fetches rules when target branch has changed', () => {
       factory();
-      store.modules.approvals.state.targetBranch = 'master123';
+      store.modules.approvals.state.targetBranch = 'main123';
 
       return wrapper.vm.$nextTick().then(() => {
         expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalled();

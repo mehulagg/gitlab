@@ -28,7 +28,7 @@ class RepositoryUpdateMirrorWorker # rubocop:disable Scalability/IdempotentWorke
   rescue UpdateError => ex
     fail_mirror(project, ex.message)
     raise
-  rescue => ex
+  rescue StandardError => ex
     return unless project
 
     fail_mirror(project, ex.message)

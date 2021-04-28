@@ -1,5 +1,0 @@
----
-title: Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/features/projects
-merge_request: 58395
-author: Abdul Wadood @abdulwd
-type: fixed

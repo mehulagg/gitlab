@@ -9,7 +9,6 @@ class Admin::CredentialsController < Admin::ApplicationController
                 :ssh_key_delete_path, :gpg_keys_available?
 
   before_action :check_license_credentials_inventory_available!, only: [:index, :revoke, :destroy]
-  before_action :check_gpg_keys_list_enabled!, only: [:index]
 
   track_unique_visits :index, target_id: 'i_compliance_credential_inventory'
 
@@ -19,10 +18,6 @@ class Admin::CredentialsController < Admin::ApplicationController
 
   def check_license_credentials_inventory_available!
     render_404 unless credentials_inventory_feature_available?
-  end
-
-  def check_gpg_keys_list_enabled!
-    render_404 if show_gpg_keys? && Feature.disabled?(:credential_inventory_gpg_keys, default_enabled: :yaml)
   end
 
   override :credentials_inventory_path
@@ -52,7 +47,7 @@ class Admin::CredentialsController < Admin::ApplicationController
 
   override :gpg_keys_available?
   def gpg_keys_available?
-    Feature.enabled?(:credential_inventory_gpg_keys, default_enabled: :yaml)
+    true
   end
 
   override :users

@@ -4,6 +4,7 @@ import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 
 export default {
   ...Api,
+  geoNodePath: '/api/:version/geo_nodes/:id',
   geoNodesPath: '/api/:version/geo_nodes',
   geoNodesStatusPath: '/api/:version/geo_nodes/status',
   geoReplicationPath: '/api/:version/geo_replication/:replicable',
@@ -28,7 +29,7 @@ export default {
   cycleAnalyticsStagePath:
     '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id',
   cycleAnalyticsDurationChartPath:
-    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/duration_chart',
+    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/average_duration_chart',
   cycleAnalyticsGroupLabelsPath: '/groups/:namespace_path/-/labels.json',
   codeReviewAnalyticsPath: '/api/:version/analytics/code_review',
   groupActivityIssuesPath: '/api/:version/analytics/group_activity/issues_count',
@@ -344,6 +345,11 @@ export default {
   updateGeoNode(node) {
     const url = Api.buildUrl(this.geoNodesPath);
     return axios.put(`${url}/${node.id}`, node);
+  },
+
+  removeGeoNode(id) {
+    const url = Api.buildUrl(this.geoNodePath).replace(':id', encodeURIComponent(id));
+    return axios.delete(url);
   },
 
   getApplicationSettings() {

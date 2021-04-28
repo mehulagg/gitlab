@@ -32,6 +32,10 @@ module Sidebars
       insert_element_after(@menus, after_menu, new_menu)
     end
 
+    def replace_menu(menu_to_replace, new_menu)
+      replace_element(@menus, menu_to_replace, new_menu)
+    end
+
     def set_scope_menu(scope_menu)
       @scope_menu = scope_menu
     end
@@ -70,6 +74,13 @@ module Sidebars
     # method.
     def render_raw_menus_partial
       # No-op
+    end
+
+    private
+
+    override :index_of
+    def index_of(list, element)
+      list.index { |e| e.is_a?(element) }
     end
   end
 end

@@ -7,12 +7,16 @@ import {
 } from '../constants';
 import CloudLicenseSubscriptionActivationForm from './subscription_activation_form.vue';
 import SubscriptionBreakdown from './subscription_breakdown.vue';
+import SubscriptionPurchaseCard from './subscription_purchase_card.vue';
+import SubscriptionTrialCard from './subscription_trial_card.vue';
 
 export default {
   name: 'CloudLicenseApp',
   components: {
     SubscriptionBreakdown,
     CloudLicenseSubscriptionActivationForm,
+    SubscriptionTrialCard,
+    SubscriptionPurchaseCard,
   },
   i18n: {
     subscriptionActivationTitle,
@@ -72,6 +76,14 @@ export default {
           {{ $options.i18n.subscriptionActivationTitle }}
         </h3>
         <cloud-license-subscription-activation-form @subscription-activation="handleActivation" />
+        <div class="row gl-mt-7">
+          <div class="col-lg-6">
+            <subscription-trial-card />
+          </div>
+          <div class="col-lg-6">
+            <subscription-purchase-card />
+          </div>
+        </div>
       </div>
     </div>
   </div>

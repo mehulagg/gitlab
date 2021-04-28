@@ -60,7 +60,6 @@ Rails/SaveBang:
     - 'ee/spec/lib/gitlab/git_access_spec.rb'
     - 'ee/spec/lib/gitlab/import_export/group/relation_factory_spec.rb'
     - 'ee/spec/lib/gitlab/mirror_spec.rb'
-    - 'ee/spec/mailers/notify_spec.rb'
     - 'ee/spec/models/application_setting_spec.rb'
     - 'ee/spec/models/approval_merge_request_rule_spec.rb'
     - 'ee/spec/models/approval_project_rule_spec.rb'
@@ -126,23 +125,6 @@ Rails/SaveBang:
     - 'ee/spec/services/status_page/trigger_publish_service_spec.rb'
     - 'ee/spec/services/todo_service_spec.rb'
     - 'ee/spec/services/vulnerability_feedback/create_service_spec.rb'
-    - 'ee/spec/support/protected_tags/access_control_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/features/protected_branches_access_control_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/finders/geo/framework_registry_finder_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/graphql/geo/geo_registries_resolver_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/lib/analytics/common_merge_request_metrics_refresh_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/policies/protected_environments_shared_examples.rb'
-    - 'ee/spec/workers/adjourned_project_deletion_worker_spec.rb'
-    - 'ee/spec/workers/clear_shared_runners_minutes_worker_spec.rb'
-    - 'ee/spec/workers/create_github_webhook_worker_spec.rb'
-    - 'ee/spec/workers/elastic_namespace_rollout_worker_spec.rb'
-    - 'ee/spec/workers/geo/container_repository_sync_dispatch_worker_spec.rb'
-    - 'ee/spec/workers/geo/file_download_dispatch_worker_spec.rb'
-    - 'ee/spec/workers/geo/prune_event_log_worker_spec.rb'
-    - 'ee/spec/workers/geo/registry_sync_worker_spec.rb'
-    - 'ee/spec/workers/geo/repository_shard_sync_worker_spec.rb'
-    - 'ee/spec/workers/repository_import_worker_spec.rb'
-    - 'ee/spec/workers/update_all_mirrors_worker_spec.rb'
     - 'qa/qa/specs/features/browser_ui/3_create/repository/push_mirroring_over_http_spec.rb'
     - 'qa/qa/specs/features/browser_ui/3_create/repository/push_mirroring_lfs_over_http_spec.rb'
     - 'qa/qa/specs/features/ee/browser_ui/3_create/repository/pull_mirroring_over_http_spec.rb'
@@ -151,8 +133,6 @@ Rails/SaveBang:
     - 'spec/controllers/boards/issues_controller_spec.rb'
     - 'spec/controllers/sent_notifications_controller_spec.rb'
     - 'spec/controllers/sessions_controller_spec.rb'
-    - 'spec/frontend/fixtures/issues.rb'
-    - 'spec/frontend/fixtures/merge_requests.rb'
     - 'spec/lib/after_commit_queue_spec.rb'
     - 'spec/lib/backup/manager_spec.rb'
     - 'spec/lib/gitlab/alerting/alert_spec.rb'
@@ -245,8 +225,6 @@ Rails/SaveBang:
     - 'spec/models/user_preference_spec.rb'
     - 'spec/models/user_spec.rb'
     - 'spec/models/user_status_spec.rb'
-    - 'spec/models/wiki_page/meta_spec.rb'
-    - 'spec/models/wiki_page_spec.rb'
 
 Rails/TimeZone:
   Enabled: true
@@ -407,15 +385,7 @@ Rails/TimeZone:
 # WIP: https://gitlab.com/gitlab-org/gitlab/-/issues/325836
 RSpec/EmptyLineAfterFinalLetItBe:
   Exclude:
-    - ee/spec/controllers/groups/analytics/cycle_analytics/stages_controller_spec.rb
-    - ee/spec/controllers/groups/analytics/cycle_analytics/summary_controller_spec.rb
-    - ee/spec/controllers/groups/analytics/cycle_analytics/value_streams_controller_spec.rb
-    - ee/spec/controllers/groups/analytics/tasks_by_type_controller_spec.rb
-    - ee/spec/controllers/groups/autocomplete_sources_controller_spec.rb
-    - ee/spec/controllers/groups/insights_controller_spec.rb
-    - ee/spec/controllers/groups/todos_controller_spec.rb
     - ee/spec/controllers/subscriptions_controller_spec.rb
-    - ee/spec/features/boards/group_boards/multiple_boards_spec.rb
     - ee/spec/features/ci_shared_runner_warnings_spec.rb
     - ee/spec/features/groups/groups_security_credentials_spec.rb
     - ee/spec/features/groups/hooks/user_edits_hooks_spec.rb
@@ -427,24 +397,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/features/markdown/metrics_spec.rb
     - ee/spec/features/registrations/group_invites_during_signup_flow_spec.rb
     - ee/spec/features/subscriptions_spec.rb
-    - ee/spec/graphql/ee/mutations/concerns/mutations/resolves_issuable_spec.rb
-    - ee/spec/graphql/mutations/boards/update_epic_user_preferences_spec.rb
-    - ee/spec/graphql/mutations/clusters/agent_tokens/create_spec.rb
-    - ee/spec/graphql/mutations/compliance_management/frameworks/create_spec.rb
-    - ee/spec/graphql/mutations/compliance_management/frameworks/destroy_spec.rb
-    - ee/spec/graphql/mutations/compliance_management/frameworks/update_spec.rb
-    - ee/spec/graphql/mutations/dast_scanner_profiles/delete_spec.rb
-    - ee/spec/graphql/mutations/epics/add_issue_spec.rb
-    - ee/spec/graphql/mutations/gitlab_subscriptions/activate_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_rotation/create_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_rotation/destroy_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_schedule/create_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_schedule/destroy_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_schedule/update_spec.rb
-    - ee/spec/graphql/mutations/issues/set_epic_spec.rb
-    - ee/spec/graphql/mutations/requirements_management/export_requirements_spec.rb
-    - ee/spec/graphql/mutations/vulnerabilities/create_external_issue_link_spec.rb
-    - ee/spec/graphql/types/issue_type_spec.rb
     - ee/spec/helpers/ee/graph_helper_spec.rb
     - ee/spec/helpers/ee/issues_helper_spec.rb
     - ee/spec/helpers/ee/projects/incidents_helper_spec.rb
@@ -473,9 +425,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/lib/gitlab/analytics/cycle_analytics/summary/group/stage_time_summary_spec.rb
     - ee/spec/lib/gitlab/checks/diff_check_spec.rb
     - ee/spec/lib/gitlab/code_owners/loader_spec.rb
-    - ee/spec/lib/gitlab/elastic/document_reference_spec.rb
-    - ee/spec/lib/gitlab/elastic/group_search_results_spec.rb
-    - ee/spec/lib/gitlab/elastic/project_search_results_spec.rb
     - ee/spec/lib/gitlab/git_access_spec.rb
     - ee/spec/lib/gitlab/git_access_wiki_spec.rb
     - ee/spec/lib/gitlab/graphql/aggregations/vulnerability_statistics/lazy_aggregate_spec.rb
@@ -552,7 +501,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/dast_scanner_profiles/destroy_service_spec.rb
     - ee/spec/services/dast_scanner_profiles/update_service_spec.rb
     - ee/spec/services/dast_site_profiles/destroy_service_spec.rb
-    - ee/spec/services/dora/aggregate_metrics_service_spec.rb
     - ee/spec/services/external_approval_rules/create_service_spec.rb
     - ee/spec/services/external_approval_rules/destroy_service_spec.rb
     - ee/spec/services/external_approval_rules/update_service_spec.rb
@@ -563,12 +511,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/merge_request_approval_settings/update_service_spec.rb
     - ee/spec/services/personal_access_tokens/create_service_audit_log_spec.rb
     - ee/spec/services/personal_access_tokens/groups/update_lifetime_service_spec.rb
-    - ee/spec/services/projects/after_rename_service_spec.rb
-    - ee/spec/services/projects/alerting/notify_service_spec.rb
-    - ee/spec/services/projects/destroy_service_spec.rb
-    - ee/spec/services/projects/gitlab_projects_import_service_spec.rb
-    - ee/spec/services/projects/import_export/export_service_spec.rb
-    - ee/spec/services/projects/transfer_service_spec.rb
     - ee/spec/services/push_rules/create_or_update_service_spec.rb
     - ee/spec/services/quality_management/test_cases/create_service_spec.rb
     - ee/spec/services/quick_actions/interpret_service_spec.rb
@@ -577,11 +519,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/requirements_management/update_requirement_service_spec.rb
     - ee/spec/services/resource_access_tokens/create_service_spec.rb
     - ee/spec/services/resource_access_tokens/revoke_service_spec.rb
-    - ee/spec/services/todo_service_spec.rb
-    - ee/spec/support/shared_examples/graphql/geo/geo_registries_resolver_shared_examples.rb
-    - ee/spec/support/shared_examples/graphql/mutations/set_multiple_assignees_shared_examples.rb
-    - ee/spec/support/shared_examples/quick_actions/issue/status_page_quick_actions_shared_examples.rb
-    - ee/spec/support/shared_examples/services/search_notes_shared_examples.rb
     - spec/controllers/confirmations_controller_spec.rb
     - spec/controllers/dashboard/projects_controller_spec.rb
     - spec/controllers/invites_controller_spec.rb
@@ -595,8 +532,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/features/file_uploads/user_avatar_spec.rb
     - spec/features/issues/user_sees_breadcrumb_links_spec.rb
     - spec/features/markdown/metrics_spec.rb
-    - spec/features/merge_request/user_creates_merge_request_spec.rb
-    - spec/features/merge_request/user_posts_notes_spec.rb
     - spec/features/operations_sidebar_link_spec.rb
     - spec/features/participants_autocomplete_spec.rb
     - spec/features/snippets/embedded_snippet_spec.rb
@@ -619,16 +554,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/frontend/fixtures/pipelines.rb
     - spec/graphql/features/authorization_spec.rb
     - spec/graphql/gitlab_schema_spec.rb
-    - spec/graphql/mutations/alert_management/alerts/todo/create_spec.rb
-    - spec/graphql/mutations/alert_management/create_alert_issue_spec.rb
-    - spec/graphql/mutations/alert_management/http_integration/create_spec.rb
-    - spec/graphql/mutations/alert_management/http_integration/destroy_spec.rb
-    - spec/graphql/mutations/alert_management/http_integration/reset_token_spec.rb
-    - spec/graphql/mutations/alert_management/http_integration/update_spec.rb
-    - spec/graphql/mutations/alert_management/prometheus_integration/create_spec.rb
-    - spec/graphql/mutations/alert_management/prometheus_integration/reset_token_spec.rb
-    - spec/graphql/mutations/alert_management/prometheus_integration/update_spec.rb
-    - spec/graphql/mutations/alert_management/update_alert_status_spec.rb
     - spec/graphql/mutations/boards/lists/update_spec.rb
     - spec/graphql/mutations/custom_emoji/create_spec.rb
     - spec/graphql/mutations/discussions/toggle_resolve_spec.rb
@@ -636,17 +561,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/graphql/mutations/issues/set_severity_spec.rb
     - spec/graphql/mutations/labels/create_spec.rb
     - spec/graphql/mutations/notes/reposition_image_diff_note_spec.rb
-    - spec/graphql/resolvers/admin/analytics/usage_trends/measurements_resolver_spec.rb
-    - spec/graphql/resolvers/alert_management/alert_status_counts_resolver_spec.rb
-    - spec/graphql/resolvers/branch_commit_resolver_spec.rb
-    - spec/graphql/resolvers/design_management/designs_resolver_spec.rb
-    - spec/graphql/resolvers/design_management/version/designs_at_version_resolver_spec.rb
-    - spec/graphql/resolvers/group_milestones_resolver_spec.rb
-    - spec/graphql/resolvers/merge_request_pipelines_resolver_spec.rb
-    - spec/graphql/resolvers/metrics/dashboards/annotation_resolver_spec.rb
-    - spec/graphql/resolvers/project_pipeline_resolver_spec.rb
-    - spec/graphql/resolvers/project_pipelines_resolver_spec.rb
-    - spec/graphql/resolvers/timelog_resolver_spec.rb
     - spec/lib/bulk_imports/groups/loaders/group_loader_spec.rb
     - spec/lib/extracts_path_spec.rb
     - spec/lib/extracts_ref_spec.rb
@@ -697,8 +611,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/models/terraform/state_spec.rb
     - spec/models/u2f_registration_spec.rb
     - spec/models/user_spec.rb
-    - spec/models/wiki_page/meta_spec.rb
-    - spec/models/wiki_page_spec.rb
     - spec/requests/api/api_spec.rb
     - spec/requests/api/award_emoji_spec.rb
     - spec/requests/api/branches_spec.rb
@@ -1559,9 +1471,6 @@ Gitlab/NamespacedClass:
     - 'app/finders/context_commits_finder.rb'
     - 'app/finders/contributed_projects_finder.rb'
     - 'app/finders/deployments_finder.rb'
-    - 'app/finders/environment_names_finder.rb'
-    - 'app/finders/environments_finder.rb'
-    - 'app/finders/environments_by_deployments_finder.rb'
     - 'app/finders/events_finder.rb'
     - 'app/finders/feature_flags_finder.rb'
     - 'app/finders/feature_flags_user_lists_finder.rb'

@@ -70,6 +70,22 @@ describe('StageTable', () => {
     });
   });
 
+  describe('with minimal stage data', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ currentStage: { title: 'New stage title' } });
+    });
+
+    it('will render the correct events', () => {
+      const evs = findStageEvents();
+      expect(evs).toHaveLength(issueEvents.length);
+
+      const titles = evs.wrappers.map((ev) => findStageEventTitle(ev).text());
+      issueEvents.forEach((ev, index) => {
+        expect(titles[index]).toBe(ev.title);
+      });
+    });
+  });
+
   describe('default event', () => {
     beforeEach(() => {
       wrapper = createComponent({

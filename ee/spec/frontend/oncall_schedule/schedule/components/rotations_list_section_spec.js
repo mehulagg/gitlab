@@ -11,6 +11,8 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { scheduleIid } from '../../mocks/apollo_mock';
 import mockRotations from '../../mocks/mock_rotation.json';
 
+jest.mock('~/lib/utils/color_utils');
+
 describe('RotationsListSectionComponent', () => {
   let wrapper;
   const mockTimeframeInitialDate = new Date(mockRotations[0].shifts.nodes[0].startsAt);

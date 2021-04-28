@@ -75,18 +75,6 @@ RSpec.describe Admin::CredentialsController, type: :request do
               expect(assigns(:credentials)).to match_array([gpg_key])
             end
 
-            context 'feature flag is disabled' do
-              before do
-                stub_feature_flags(credential_inventory_gpg_keys: false)
-              end
-
-              it 'responds with not found' do
-                get admin_credentials_path(filter: 'gpg_keys')
-
-                expect(response).to have_gitlab_http_status(:not_found)
-              end
-            end
-
             # There is currently N+1 issue when checking verified_emails per user:
             # https://gitlab.com/gitlab-org/gitlab/-/issues/322773
             # Therefore we are currently adding + 1 to the control until this is resolved

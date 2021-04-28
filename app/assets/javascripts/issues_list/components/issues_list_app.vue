@@ -1,5 +1,14 @@
 <script>
-import { GlButton, GlEmptyState, GlIcon, GlLink, GlSprintf, GlTooltipDirective } from '@gitlab/ui';
+import {
+  GlButton,
+  GlEmptyState,
+  GlFilteredSearchToken,
+  GlIcon,
+  GlLink,
+  GlSprintf,
+  GlTooltipDirective,
+} from '@gitlab/ui';
+import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import { toNumber } from 'lodash';
 import createFlash from '~/flash';
 import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
@@ -7,50 +16,37 @@ import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
 import {
   CREATED_DESC,
+  i18n,
+  MAX_LIST_SIZE,
   PAGE_SIZE,
   RELATIVE_POSITION_ASC,
   sortOptions,
   sortParams,
 } from '~/issues_list/constants';
+import {
+  convertToApiParams,
+  convertToSearchQuery,
+  convertToUrlParams,
+  getFilterTokens,
+  getSortKey,
+} from '~/issues_list/utils';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase, getParameterByName } from '~/lib/utils/common_utils';
-import { __, s__ } from '~/locale';
+import { __ } from '~/locale';
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
+import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 import eventHub from '../eventhub';
 import IssueCardTimeInfo from './issue_card_time_info.vue';
 
 export default {
   CREATED_DESC,
+  i18n,
   IssuableListTabs,
   PAGE_SIZE,
   sortOptions,
   sortParams,
-  i18n: {
-    calendarLabel: __('Subscribe to calendar'),
-    jiraIntegrationMessage: s__(
-      'JiraService|%{jiraDocsLinkStart}Enable the Jira integration%{jiraDocsLinkEnd} to view your Jira issues in GitLab.',
-    ),
-    jiraIntegrationSecondaryMessage: s__('JiraService|This feature requires a Premium plan.'),
-    jiraIntegrationTitle: s__('JiraService|Using Jira for issue tracking?'),
-    newIssueLabel: __('New issue'),
-    noClosedIssuesTitle: __('There are no closed issues'),
-    noOpenIssuesDescription: __('To keep this project going, create a new issue'),
-    noOpenIssuesTitle: __('There are no open issues'),
-    noIssuesSignedInDescription: __(
-      'Issues can be bugs, tasks or ideas to be discussed. Also, issues are searchable and filterable.',
-    ),
-    noIssuesSignedInTitle: __(
-      'The Issue Tracker is the place to add things that need to be improved or solved in a project',
-    ),
-    noIssuesSignedOutButtonText: __('Register / Sign In'),
-    noIssuesSignedOutDescription: __(
-      'The Issue Tracker is the place to add things that need to be improved or solved in a project. You can register or sign in to create issues for this project.',
-    ),
-    noIssuesSignedOutTitle: __('There are no issues to show'),
-    noSearchResultsDescription: __('To widen your search, change or remove filters above'),
-    noSearchResultsTitle: __('Sorry, your filter produced no results'),
-    reorderError: __('An error occurred while reordering issues.'),
-    rssLabel: __('Subscribe to RSS feed'),
-  },
   components: {
     CsvImportExportButtons,
     GlButton,
@@ -66,6 +62,12 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   inject: {
+    autocompleteAwardEmojisPath: {
+      default: '',
+    },
+    autocompleteUsersPath: {
+      default: '',
+    },
     calendarPath: {
       default: '',
     },
@@ -79,9 +81,6 @@ export default {
       default: '',
     },
     exportCsvPath: {
-      default: '',
-    },
-    fullPath: {
       default: '',
     },
     hasIssues: {
@@ -99,6 +98,15 @@ export default {
     newIssuePath: {
       default: '',
     },
+    projectLabelsPath: {
+      default: '',
+    },
+    projectMilestonesPath: {
+      default: '',
+    },
+    projectPath: {
+      default: '',
+    },
     rssPath: {
       default: '',
     },
@@ -112,27 +120,15 @@ export default {
   data() {
     const orderBy = getParameterByName('order_by');
     const sort = getParameterByName('sort');
-    const sortKey = Object.keys(sortParams).find(
-      (key) => sortParams[key].order_by === orderBy && sortParams[key].sort === sort,
-    );
-
-    const search = getParameterByName('search') || '';
-    const tokens = search.split(' ').map((searchWord) => ({
-      type: 'filtered-search-term',
-      value: {
-        data: searchWord,
-      },
-    }));
 
     return {
       exportCsvPathWithQuery: this.getExportCsvPathWithQuery(),
-      filters: sortParams[sortKey] || {},
-      filterTokens: tokens,
+      filterTokens: getFilterTokens(window.location.search),
       isLoading: false,
       issues: [],
       page: toNumber(getParameterByName('page')) || 1,
       showBulkEditSidebar: false,
-      sortKey: sortKey || CREATED_DESC,
+      sortKey: getSortKey(orderBy, sort) || CREATED_DESC,
       state: getParameterByName('state') || IssuableStates.Opened,
       totalIssues: 0,
     };
@@ -144,13 +140,77 @@ export default {
     isOpenTab() {
       return this.state === IssuableStates.Opened;
     },
+    apiFilterParams() {
+      return convertToApiParams(this.filterTokens);
+    },
+    urlFilterParams() {
+      return convertToUrlParams(this.filterTokens);
+    },
     searchQuery() {
-      return (
-        this.filterTokens
-          .map((searchTerm) => searchTerm.value.data)
-          .filter((searchWord) => Boolean(searchWord))
-          .join(' ') || undefined
-      );
+      return convertToSearchQuery(this.filterTokens) || undefined;
+    },
+    searchTokens() {
+      return [
+        {
+          type: 'author_username',
+          title: __('Author'),
+          icon: 'pencil',
+          token: AuthorToken,
+          dataType: 'user',
+          unique: true,
+          defaultAuthors: [],
+          fetchAuthors: this.fetchUsers,
+        },
+        {
+          type: 'assignee_username',
+          title: __('Assignee'),
+          icon: 'user',
+          token: AuthorToken,
+          dataType: 'user',
+          unique: true,
+          defaultAuthors: [],
+          fetchAuthors: this.fetchUsers,
+        },
+        {
+          type: 'milestone',
+          title: __('Milestone'),
+          icon: 'clock',
+          token: MilestoneToken,
+          unique: true,
+          defaultMilestones: [],
+          fetchMilestones: this.fetchMilestones,
+        },
+        {
+          type: 'labels',
+          title: __('Label'),
+          icon: 'labels',
+          token: LabelToken,
+          defaultLabels: [],
+          fetchLabels: this.fetchLabels,
+        },
+        {
+          type: 'my_reaction_emoji',
+          title: __('My-Reaction'),
+          icon: 'thumb-up',
+          token: EmojiToken,
+          unique: true,
+          operators: [{ value: '=', description: __('is') }],
+          defaultEmojis: [],
+          fetchEmojis: this.fetchEmojis,
+        },
+        {
+          type: 'confidential',
+          title: __('Confidential'),
+          icon: 'eye-slash',
+          token: GlFilteredSearchToken,
+          unique: true,
+          operators: [{ value: '=', description: __('is') }],
+          options: [
+            { icon: 'eye-slash', value: 'yes', title: __('Yes') },
+            { icon: 'eye', value: 'no', title: __('No') },
+          ],
+        },
+      ];
     },
     showPaginationControls() {
       return this.issues.length > 0;
@@ -169,21 +229,48 @@ export default {
         page: this.page,
         search: this.searchQuery,
         state: this.state,
-        ...this.filters,
+        ...sortParams[this.sortKey],
+        ...this.urlFilterParams,
       };
     },
   },
+  created() {
+    this.cache = {};
+  },
   mounted() {
-    eventHub.$on('issuables:toggleBulkEdit', (showBulkEditSidebar) => {
-      this.showBulkEditSidebar = showBulkEditSidebar;
-    });
+    eventHub.$on('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
     this.fetchIssues();
   },
   beforeDestroy() {
-    // eslint-disable-next-line @gitlab/no-global-event-off
-    eventHub.$off('issuables:toggleBulkEdit');
+    eventHub.$off('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
   },
   methods: {
+    fetchWithCache(path, cacheName, searchKey, search, wrapData = false) {
+      if (this.cache[cacheName]) {
+        const data = search
+          ? fuzzaldrinPlus.filter(this.cache[cacheName], search, { key: searchKey })
+          : this.cache[cacheName].slice(0, MAX_LIST_SIZE);
+        return wrapData ? Promise.resolve({ data }) : Promise.resolve(data);
+      }
+
+      return axios.get(path).then(({ data }) => {
+        this.cache[cacheName] = data;
+        const result = data.slice(0, MAX_LIST_SIZE);
+        return wrapData ? { data: result } : result;
+      });
+    },
+    fetchEmojis(search) {
+      return this.fetchWithCache(this.autocompleteAwardEmojisPath, 'emojis', 'name', search);
+    },
+    fetchLabels(search) {
+      return this.fetchWithCache(this.projectLabelsPath, 'labels', 'title', search);
+    },
+    fetchMilestones(search) {
+      return this.fetchWithCache(this.projectMilestonesPath, 'milestones', 'title', search, true);
+    },
+    fetchUsers(search) {
+      return axios.get(this.autocompleteUsersPath, { params: { search } });
+    },
     fetchIssues() {
       if (!this.hasIssues) {
         return undefined;
@@ -199,7 +286,8 @@ export default {
             search: this.searchQuery,
             state: this.state,
             with_labels_details: true,
-            ...this.filters,
+            ...sortParams[this.sortKey],
+            ...this.apiFilterParams,
           },
         })
         .then(({ data, headers }) => {
@@ -278,8 +366,10 @@ export default {
     },
     handleSort(value) {
       this.sortKey = value;
-      this.filters = sortParams[value];
       this.fetchIssues();
+    },
+    toggleBulkEditSidebar(showBulkEditSidebar) {
+      this.showBulkEditSidebar = showBulkEditSidebar;
     },
   },
 };
@@ -288,10 +378,10 @@ export default {
 <template>
   <issuable-list
     v-if="hasIssues"
-    :namespace="fullPath"
+    :namespace="projectPath"
     recent-searches-storage-key="issues"
     :search-input-placeholder="__('Search or filter results…')"
-    :search-tokens="[]"
+    :search-tokens="searchTokens"
     :initial-filter-value="filterTokens"
     :sort-options="$options.sortOptions"
     :initial-sort-by="sortKey"

@@ -146,8 +146,8 @@ RSpec.describe Geo::RepositoryShardSyncWorker, :geo, :clean_gitlab_redis_cache, 
         abandoned_project.update_column(:last_repository_updated_at, 1.year.ago)
 
         # Neither of these are needed for this spec
-        project_2.destroy
-        project_1.destroy
+        project_2.destroy!
+        project_1.destroy!
 
         allow_next_instance_of(described_class) do |instance|
           allow(instance).to receive(:db_retrieve_batch_size).and_return(2) # Must be >1 because of the Geo::BaseSchedulerWorker#interleave
@@ -191,8 +191,8 @@ RSpec.describe Geo::RepositoryShardSyncWorker, :geo, :clean_gitlab_redis_cache, 
 
       before do
         # Neither of these are needed for this spec
-        project_2.destroy
-        project_1.destroy
+        project_2.destroy!
+        project_1.destroy!
 
         allow_next_instance_of(described_class) do |instance|
           allow(instance).to receive(:db_retrieve_batch_size).and_return(2) # Must be >1 because of the Geo::BaseSchedulerWorker#interleave

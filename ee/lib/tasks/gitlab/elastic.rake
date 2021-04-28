@@ -182,7 +182,7 @@ namespace :gitlab do
       relation = Project.all
 
       unless ENV['UPDATE_INDEX']
-        relation = relation.includes(:index_status).where('index_statuses.id IS NULL').references(:index_statuses)
+        relation = relation.includes(:index_status).where(index_statuses: { id: nil }).references(:index_statuses)
       end
 
       if ::Gitlab::CurrentSettings.elasticsearch_limit_indexing?

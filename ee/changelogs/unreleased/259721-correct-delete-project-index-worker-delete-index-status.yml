@@ -1,5 +1,0 @@
----
-title: Fix ElasticDeleteProjectWorker delete commits, index_status
-merge_request: 59457
-author:
-type: fixed

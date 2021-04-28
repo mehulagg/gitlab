@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import CloudLicenseShowApp from '../components/app.vue';
@@ -17,11 +18,20 @@ export default () => {
     return null;
   }
 
-  const { hasActiveLicense } = el.dataset;
+  const { hasActiveLicense, freeTrialPath, buySubscriptionPath, subscriptionSyncPath } = el.dataset;
+  const connectivityHelpURL = helpPagePath('/user/admin_area/license.html', {
+    anchor: 'activate-gitlab-ee-with-a-license',
+  });
 
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      freeTrialPath,
+      buySubscriptionPath,
+      connectivityHelpURL,
+      subscriptionSyncPath,
+    },
     render: (h) =>
       h(CloudLicenseShowApp, {
         props: {

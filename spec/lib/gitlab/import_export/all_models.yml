@@ -369,7 +369,6 @@ project:
 - packagist_service
 - pivotaltracker_service
 - prometheus_service
-- hipchat_service
 - flowdock_service
 - assembla_service
 - asana_service
@@ -569,6 +568,7 @@ project:
 - debian_distributions
 - merge_request_metrics
 - security_orchestration_policy_configuration
+- timelogs
 award_emoji:
 - awardable
 - user

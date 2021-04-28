@@ -4,19 +4,12 @@ module Analytics
   module DevopsAdoption
     module Snapshots
       class UpdateService
-        ALLOWED_ATTRIBUTES = [
+        ALLOWED_ATTRIBUTES = ([
           :segment,
           :segment_id,
           :end_time,
-          :recorded_at,
-          :issue_opened,
-          :merge_request_opened,
-          :merge_request_approved,
-          :runner_configured,
-          :pipeline_succeeded,
-          :deploy_succeeded,
-          :security_scan_succeeded
-        ].freeze
+          :recorded_at
+        ] + SnapshotCalculator::ADOPTION_METRICS).freeze
 
         def initialize(snapshot:, params: {})
           @snapshot = snapshot

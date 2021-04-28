@@ -1,0 +1,5 @@
+---
+title: Remove :credential_inventory_gpg_keys feature flag
+merge_request: 59658
+author:
+type: added

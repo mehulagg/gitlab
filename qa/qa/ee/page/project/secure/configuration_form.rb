@@ -13,6 +13,10 @@ module QA
               element :submit_button
             end
 
+            view 'ee/app/assets/javascripts/security_configuration/sast/components/analyzer_configuration.vue' do
+              element :entity_checkbox, "`${entity.name}_checkbox`" # rubocop:disable QA/ElementWithPattern
+            end
+
             def click_expand_button
               expand_content(:analyzer_settings_content)
             end
@@ -30,9 +34,7 @@ module QA
             end
 
             def unselect_dynamic_checkbox(checkbox_name)
-              # Workaround until https://gitlab.com/gitlab-org/gitlab/-/issues/323297 is resolved
-              # uncheck_element("#{checkbox_name}_checkbox")
-              page.driver.browser.action.move_to(find_element("#{checkbox_name}_checkbox", visible: false).native).click.perform
+              uncheck_element("#{checkbox_name}_checkbox", true)
             end
 
             def has_sast_status?(status_text)

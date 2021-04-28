@@ -599,7 +599,6 @@ repository's root as `.gitlab-api-fuzzing.yml`.
 | `FUZZAPI_TARGET_URL`                                 | Base URL of API testing target. |
 |[`FUZZAPI_CONFIG`](#configuration-files)              | API Fuzzing configuration file. Defaults to `.gitlab-apifuzzer.yml`. |
 |[`FUZZAPI_PROFILE`](#configuration-files)             | Configuration profile to use during testing. Defaults to `Quick`. |
-| `FUZZAPI_REPORT`                                     | Scan report filename. Defaults to `gl-api_fuzzing-report.xml`. |
 |[`FUZZAPI_OPENAPI`](#openapi-specification)           | OpenAPI specification file or URL. |
 |[`FUZZAPI_HAR`](#http-archive-har)                    | HTTP Archive (HAR) file. |
 |[`FUZZAPI_POSTMAN_COLLECTION`](#postman-collection)   | Postman Collection file. |
@@ -610,18 +609,6 @@ repository's root as `.gitlab-api-fuzzing.yml`.
 |[`FUZZAPI_OVERRIDES_INTERVAL`](#overrides)            | How often to run overrides command in seconds. Defaults to `0` (once). |
 |[`FUZZAPI_HTTP_USERNAME`](#http-basic-authentication) | Username for HTTP authentication. |
 |[`FUZZAPI_HTTP_PASSWORD`](#http-basic-authentication) | Password for HTTP authentication. |
-
-<!--|[`FUZZAPI_D_TARGET_IMAGE`](#target-container) |API target docker image |
-|[`FUZZAPI_D_TARGET_ENV`](#target-container)   |Docker environment options |
-|[`FUZZAPI_D_TARGET_VOLUME`](#target-container) | Docker volume options |
-|[`FUZZAPI_D_TARGET_PORTS`](#target-container) |Docker port options |
-| `FUZZAPI_D_WORKER_IMAGE`    |Custom worker docker image |
-| `FUZZAPI_D_WORKER_ENV`      |Custom worker docker environment options |
-| `FUZZAPI_D_WORKER_VOLUME`   |Custom worker docker volume options |
-| `FUZZAPI_D_WORKER_PORTS`    |Custom worker docker port options |
-| `FUZZAPI_D_NETWORK`         |Name of docker network, defaults to "testing-net"|
-| `FUZZAPI_D_PRE_SCRIPT`      |Pre script runs after docker login and docker network create, but before starting the scanning image container.|
-| `FUZZAPI_D_POST_SCRIPT`     |Post script runs after scanning image container is started. This is the place to start your target(s) and kick off scanning when using an advanced configuration.| -->
 
 ### Overrides
 
@@ -1157,7 +1144,7 @@ For OpenAPI specifications that are generated automatically validation errors ar
   - `OpenAPI 2.0 schema validation error ...`
   - `OpenAPI 3.0.x schema validation error ...`
 
-**Solution** 
+**Solution**
 
 **For generated OpenAPI specifications**
 
@@ -1183,7 +1170,7 @@ The API Fuzzing engine outputs an error message when it cannot establish a conne
 - In [GitLab 13.11 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/323939), `Failed to start scanner session (version header not found).`
 - In GitLab 13.10 and earlier, `API Security version header not found.  Are you sure that you are connecting to the API Security server?`.
 
-**Solution** 
+**Solution**
 
 - Remove the `FUZZAPI_API` variable from the `.gitlab-ci.yml` file. The value will be inherited from the API Fuzzing CI/CD template. We recommend this method instead of manually setting a value.
 - If removing the variable is not possible, check to see if this value has changed in the latest version of the [API Fuzzing CI/CD template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). If so, update the value in the `.gitlab-ci.yml` file.

@@ -108,6 +108,7 @@ RSpec.describe Projects::Security::DastSiteProfilesController, type: :request do
             id: global_id_of(dast_site_profile),
             name: dast_site_profile.name,
             targetUrl:  dast_site_profile.dast_site.url,
+            targetType: dast_site_profile.target_type.upcase,
             excludedUrls:  dast_site_profile.excluded_urls,
             requestHeaders:  Dast::SiteProfilePresenter::REDACTED_REQUEST_HEADERS,
             auth: {

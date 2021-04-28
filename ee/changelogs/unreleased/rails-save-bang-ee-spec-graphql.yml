@@ -1,5 +1,0 @@
----
-title: Fix Rails/SaveBang rubocop offenses in ee/spec/graphql
-merge_request: 58092
-author: Abdul Wadood @abdulwd
-type: fixed

@@ -550,12 +550,12 @@ class License < ApplicationRecord
     starts_at > Date.current
   end
 
-  def cloud?
+  def cloud_license?
     license&.type == CLOUD_LICENSE_TYPE
   end
 
   def license_type
-    cloud? ? CLOUD_LICENSE_TYPE : LEGACY_LICENSE_TYPE
+    cloud_license? ? CLOUD_LICENSE_TYPE : LEGACY_LICENSE_TYPE
   end
 
   def auto_renew
@@ -638,7 +638,7 @@ class License < ApplicationRecord
   end
 
   def check_users_limit
-    return if cloud?
+    return if cloud_license?
     return unless restricted_user_count
 
     if previous_user_count && (prior_historical_max <= previous_user_count)

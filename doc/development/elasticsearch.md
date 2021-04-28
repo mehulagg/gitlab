@@ -25,7 +25,7 @@ Developers making significant changes to Elasticsearch queries should test their
 
 ## Setting up development environment
 
-See the [Elasticsearch GDK setup instructions](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/elasticsearch.md)
+See the [Elasticsearch GDK setup instructions](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/elasticsearch.md)
 
 ## Helpful Rake tasks
 
@@ -241,8 +241,8 @@ cron worker runs. Default value is 5 minutes.
 - `pause_indexing!` - Pause indexing while the migration runs. This setting will record the indexing setting before
 the migration runs and set it back to that value when the migration is completed.
 
-- `space_requirements!` - Verify that enough free space is available in the cluster when the migration runs. This setting 
-  will halt the migration if the storage required is not available when the migration runs. The migration must provide 
+- `space_requirements!` - Verify that enough free space is available in the cluster when the migration runs. This setting
+  will halt the migration if the storage required is not available when the migration runs. The migration must provide
   the space required in bytes by defining a `space_required_bytes` method.
 
 ```ruby

@@ -128,19 +128,53 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
     it { is_expected.to eq false }
   end
 
-  context 'when snapshot already exists' do
-    let_it_be(:snapshot) { create :devops_adoption_snapshot, segment: segment, issue_opened: true, merge_request_opened: false }
+  describe 'total_projects_count' do
+    subject { data[:total_projects_count] }
 
-    subject(:data) { described_class.new(segment: segment, range_end: range_end, snapshot: snapshot).calculate }
+    it { is_expected.to eq 2 }
+  end
 
-    let!(:fresh_merge_request) { create(:merge_request, source_project: project, created_at: 3.weeks.ago(range_end)) }
+  describe 'code_owners_used_count' do
+    let!(:project_with_code_owners) { create(:project, :repository, group: subgroup)}
 
-    it 'calculates metrics which are not true yet' do
-      expect(data[:merge_request_opened]).to eq true
+    subject { data[:code_owners_used_count] }
+
+    before do
+      allow_any_instance_of(Project).to receive(:default_branch).and_return('with-codeowners') # rubocop:disable RSpec/AnyInstanceOf
     end
 
-    it "doesn't change metrics which are true already" do
-      expect(data[:issue_opened]).to eq true
+    it { is_expected.to eq 1 }
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(analytics_devops_adoption_codeowners: false)
+      end
+
+      it { is_expected.to eq nil }
+    end
+  end
+
+  context 'when snapshot already exists' do
+    subject(:data) { described_class.new(segment: segment, range_end: range_end, snapshot: snapshot).calculate }
+
+    let(:snapshot) { create :devops_adoption_snapshot, segment: segment, issue_opened: true, merge_request_opened: false, total_projects_count: 1}
+
+    context 'for boolean metrics' do
+      let!(:fresh_merge_request) { create(:merge_request, source_project: project, created_at: 3.weeks.ago(range_end)) }
+
+      it 'calculates metrics which are not true yet' do
+        expect(data[:merge_request_opened]).to eq true
+      end
+
+      it "doesn't change metrics which are true already" do
+        expect(data[:issue_opened]).to eq true
+      end
+    end
+
+    context 'for numeric metrics' do
+      it 'always recalculates metric' do
+        expect(data[:total_projects_count]).to eq 2
+      end
     end
   end
 end

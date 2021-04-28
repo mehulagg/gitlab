@@ -65,6 +65,7 @@ RSpec.describe Groups::AutocompleteSourcesController do
     let_it_be(:issue) { create(:issue, project: project) }
     let_it_be(:incident) { create(:incident, project: project) }
     let_it_be(:test_case) { create(:quality_test_case, project: project) }
+
     let(:none) { [] }
     let(:all) { [issue, incident, test_case] }
 

@@ -1,5 +1,0 @@
----
-title: Add metric to track querying write ahead log on Request level
-merge_request: 58673
-author:
-type: other

@@ -166,6 +166,16 @@ module GitlabRoutingHelper
     resend_invite_group_group_member_path(group_member.source, group_member)
   end
 
+  # Members
+  def source_members_url(member)
+    case member.source_type
+    when 'Namespace'
+      group_group_members_url(member.source)
+    when 'Project'
+      project_project_members_url(member.source)
+    end
+  end
+
   # Artifacts
 
   # Rails path generators are slow because they need to do large regex comparisons
@@ -352,6 +362,10 @@ module GitlabRoutingHelper
   # GraphQL ETag routes
   def graphql_etag_pipeline_path(pipeline)
     [api_graphql_path, "pipelines/id/#{pipeline.id}"].join(':')
+  end
+
+  def graphql_etag_pipeline_sha_path(sha)
+    [api_graphql_path, "pipelines/sha/#{sha}"].join(':')
   end
 
   private

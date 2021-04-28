@@ -30,9 +30,33 @@ RSpec.describe Admin::UsersController do
       expect(assigns(:users).first.association(:authorized_projects)).to be_loaded
     end
 
-    it_behaves_like 'tracking unique visits', :index do
+    context 'pagination' do
+      context 'when number of users is over the pagination limit' do
+        before do
+          stub_const('Admin::UsersController::PAGINATION_WITH_COUNT_LIMIT', 5)
+          allow(Gitlab::Database::Count).to receive(:approximate_counts).with([User]).and_return({ User => 6 })
+        end
+
+        it 'marks the relation for pagination without counts' do
+          get :index
+
+          expect(assigns(:users)).to be_a(Kaminari::PaginatableWithoutCount)
+        end
+      end
+
+      context 'when number of users is below the pagination limit' do
+        it 'marks the relation for pagination with counts' do
+          get :index
+
+          expect(assigns(:users)).not_to be_a(Kaminari::PaginatableWithoutCount)
+        end
+      end
+    end
+  end
+
+  describe 'GET #cohorts' do
+    it_behaves_like 'tracking unique visits', :cohorts do
       let(:target_id) { 'i_analytics_cohorts' }
-      let(:request_params) { { tab: 'cohorts' } }
     end
   end
 

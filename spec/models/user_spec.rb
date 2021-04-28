@@ -20,6 +20,10 @@ RSpec.describe User do
     it { is_expected.to include_module(AsyncDeviseEmail) }
   end
 
+  describe 'constants' do
+    it { expect(described_class::COUNT_CACHE_VALIDITY_PERIOD).to be_a(Integer) }
+  end
+
   describe 'delegations' do
     it { is_expected.to delegate_method(:path).to(:namespace).with_prefix }
 
@@ -2526,8 +2530,9 @@ RSpec.describe User do
 
     it 'is false if avatar is html page' do
       user.update_attribute(:avatar, 'uploads/avatar.html')
+      user.avatar_type
 
-      expect(user.avatar_type).to eq(['file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp'])
+      expect(user.errors.added?(:avatar, "file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp")).to be true
     end
   end
 
@@ -5612,6 +5617,49 @@ RSpec.describe User do
         it 'is not valid' do
           expect(find_or_initialize_callout).not_to be_valid
         end
+      end
+    end
+  end
+
+  describe '.dormant' do
+    it 'returns dormant users' do
+      freeze_time do
+        not_that_long_ago = (described_class::MINIMUM_INACTIVE_DAYS - 1).days.ago.to_date
+        too_long_ago = described_class::MINIMUM_INACTIVE_DAYS.days.ago.to_date
+
+        create(:user, :deactivated, last_activity_on: too_long_ago)
+
+        User::INTERNAL_USER_TYPES.map do |user_type|
+          create(:user, state: :active, user_type: user_type, last_activity_on: too_long_ago)
+        end
+
+        create(:user, last_activity_on: not_that_long_ago)
+
+        dormant_user = create(:user, last_activity_on: too_long_ago)
+
+        expect(described_class.dormant).to contain_exactly(dormant_user)
+      end
+    end
+  end
+
+  describe '.with_no_activity' do
+    it 'returns users with no activity' do
+      freeze_time do
+        not_that_long_ago = (described_class::MINIMUM_INACTIVE_DAYS - 1).days.ago.to_date
+        too_long_ago = described_class::MINIMUM_INACTIVE_DAYS.days.ago.to_date
+
+        create(:user, :deactivated, last_activity_on: nil)
+
+        User::INTERNAL_USER_TYPES.map do |user_type|
+          create(:user, state: :active, user_type: user_type, last_activity_on: nil)
+        end
+
+        create(:user, last_activity_on: not_that_long_ago)
+        create(:user, last_activity_on: too_long_ago)
+
+        user_with_no_activity = create(:user, last_activity_on: nil)
+
+        expect(described_class.with_no_activity).to contain_exactly(user_with_no_activity)
       end
     end
   end

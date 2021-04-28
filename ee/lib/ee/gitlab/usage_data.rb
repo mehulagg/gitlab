@@ -137,7 +137,7 @@ module EE
         end
 
         def count_approval_rules_with_users(relation)
-          count(relation, batch_size: 10_000, start: ApprovalProjectRule.regular.minimum(:id), finish: ApprovalProjectRule.regular.maximum(:id)).size
+          count(relation, batch_size: 10_000, start: minimum_id(ApprovalProjectRule.regular), finish: maximum_id(ApprovalProjectRule.regular)).size
         end
         # rubocop:enable CodeReuse/ActiveRecord, UsageData/LargeTable
 
@@ -196,15 +196,15 @@ module EE
                 epic_issues: count(::EpicIssue),
                 feature_flags: count(Operations::FeatureFlag),
                 geo_nodes: count(::GeoNode),
-                geo_event_log_max_id: alt_usage_data { Geo::EventLog.maximum(:id) || 0 },
+                geo_event_log_max_id: alt_usage_data { maximum_id(Geo::EventLog) || 0 },
                 ldap_group_links: count(::LdapGroupLink),
                 issues_with_health_status: count(::Issue.with_health_status, start: minimum_id(::Issue), finish: maximum_id(::Issue)),
                 ldap_keys: count(::LDAPKey),
                 ldap_users: count(::User.ldap, 'users.id'),
                 pod_logs_usages_total: redis_usage_data { ::Gitlab::UsageCounters::PodLogs.usage_totals[:total] },
                 merged_merge_requests_using_approval_rules: count(::MergeRequest.merged.joins(:approval_rules), # rubocop: disable CodeReuse/ActiveRecord
-                                                                  start: merge_request_minimum_id,
-                                                                  finish: merge_request_maximum_id),
+                                                                  start: minimum_id(::MergeRequest),
+                                                                  finish: maximum_id(::MergeRequest)),
                 projects_mirrored_with_pipelines_enabled: count(::Project.mirrored_with_enabled_pipelines),
                 projects_reporting_ci_cd_back_to_github: count(::GithubService.active),
                 status_page_projects: count(::StatusPage::ProjectSetting.enabled),
@@ -224,12 +224,6 @@ module EE
           super.merge(
             projects_jira_issuelist_active: projects_jira_issuelist_active
           )
-        end
-
-        def epics_deepest_relationship_level
-          # rubocop: disable UsageData/LargeTable
-          { epics_deepest_relationship_level: ::Epic.deepest_relationship_level.to_i }
-          # rubocop: enable UsageData/LargeTable
         end
 
         # Omitted because no user, creator or author associated: `auto_devops_disabled`, `auto_devops_enabled`
@@ -252,8 +246,8 @@ module EE
             projects_with_sectional_code_owner_rules: projects_with_sectional_code_owner_rules(time_period),
             merge_requests_with_added_rules: distinct_count(::ApprovalMergeRequestRule.where(time_period).with_added_approval_rules,
                                                             :merge_request_id,
-                                                            start: approval_merge_request_rule_minimum_id,
-                                                            finish: approval_merge_request_rule_maximum_id),
+                                                            start: minimum_id(::ApprovalMergeRequestRule, :merge_request_id),
+                                                            finish: maximum_id(::ApprovalMergeRequestRule, :merge_request_id)),
             merge_requests_with_optional_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_optional.where(time_period), :merge_request_id),
             merge_requests_with_overridden_project_rules: merge_requests_with_overridden_project_rules(time_period),
             merge_requests_with_required_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_required.where(time_period), :merge_request_id),
@@ -426,8 +420,8 @@ module EE
         # rubocop:disable CodeReuse/ActiveRecord
         # rubocop: disable UsageData/LargeTable
         def count_secure_scans(time_period)
-          start = ::Security::Scan.minimum(:build_id)
-          finish = ::Security::Scan.maximum(:build_id)
+          start = minimum_id(::Security::Scan, :build_id)
+          finish = maximum_id(::Security::Scan, :build_id)
 
           {}.tap do |secure_jobs|
             ::Security::Scan.scan_types.each do |name, scan_type|
@@ -479,13 +473,13 @@ module EE
                 end
             end
           else
-            start = ::Ci::Pipeline.minimum(:id)
-            finish = ::Ci::Pipeline.maximum(:id)
+            start = minimum_id(::Ci::Pipeline)
+            finish = maximum_id(::Ci::Pipeline)
 
             ::Security::Scan.scan_types.each do |name, scan_type|
               relation = ::Ci::Build.joins(:security_scans)
                            .where(status: 'success', retried: [nil, false])
-                           .where('security_scans.scan_type = ?', scan_type)
+                           .where(security_scans: { scan_type: scan_type })
                            .where(time_period)
               pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
             end
@@ -527,30 +521,6 @@ module EE
           Arel::Nodes::NamedFunction.new('DATE', [locked_timezone])
         end
 
-        def approval_merge_request_rule_minimum_id
-          strong_memoize(:approval_merge_request_rule_minimum_id) do
-            ::ApprovalMergeRequestRule.minimum(:merge_request_id)
-          end
-        end
-
-        def approval_merge_request_rule_maximum_id
-          strong_memoize(:approval_merge_request_rule_maximum_id) do
-            ::ApprovalMergeRequestRule.maximum(:merge_request_id)
-          end
-        end
-
-        def merge_request_minimum_id
-          strong_memoize(:merge_request_minimum_id) do
-            ::MergeRequest.minimum(:id)
-          end
-        end
-
-        def merge_request_maximum_id
-          strong_memoize(:merge_request_maximum_id) do
-            ::MergeRequest.maximum(:id)
-          end
-        end
-
         def ldap_config_present_for_any_provider?(configuration_item)
           ldap_available_servers.any? { |server_config| server_config[configuration_item.to_s] }
         end
@@ -590,15 +560,15 @@ module EE
           distinct_count(
             ::ApprovalMergeRequestRule.where(time_period).where(sql),
             :merge_request_id,
-            start: approval_merge_request_rule_minimum_id,
-            finish: approval_merge_request_rule_maximum_id
+            start: minimum_id(::ApprovalMergeRequestRule, :merge_request_id),
+            finish: maximum_id(::ApprovalMergeRequestRule, :merge_request_id)
           )
         end
 
         def projects_jira_issuelist_active
           # rubocop: disable UsageData/LargeTable:
-          min_id = JiraTrackerData.where(issues_enabled: true).minimum(:service_id)
-          max_id = JiraTrackerData.where(issues_enabled: true).maximum(:service_id)
+          min_id = minimum_id(JiraTrackerData.where(issues_enabled: true), :service_id)
+          max_id = maximum_id(JiraTrackerData.where(issues_enabled: true), :service_id)
           # rubocop: enable UsageData/LargeTable:
           count(::JiraService.active.includes(:jira_tracker_data).where(jira_tracker_data: { issues_enabled: true }), start: min_id, finish: max_id)
         end

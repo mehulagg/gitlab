@@ -23,5 +23,9 @@ module EE
     def show_epics?
       search_service.allowed_scopes.include?('epics')
     end
+
+    def show_elasticsearch_tabs?
+      ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: search_service.elasticsearchable_scope)
+    end
   end
 end

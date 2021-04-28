@@ -1,5 +1,281 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.11.1 (2021-04-22)
+
+### Fixed (2 changes)
+
+- Geo - Sync incident metrics uploads. !59674
+- Fix zero count of vulnerability severity count. !59680
+
+
+## 13.11.0 (2021-04-22)
+
+### Removed (3 changes)
+
+- Remove /projects/:id/merge_requests/:merge_request_iid/approvers endpoint. !57344
+- Remove deprecated project approvers update REST API endpoint. !57473
+- Remove deployment_frequency_charts feature flag. !59289
+
+### Fixed (96 changes, 42 of them are from the community)
+
+- Make AutoDevOps browser performance job work when behind proxy. !48326 (Olaf Meeuwissen (@paddy-hack))
+- Atomically select an available replica if all caught up. !49294
+- Fix backward keyset pagination for epics start_date/end_date. !50579
+- Expand left sidebar when viewing group iteration report. !56358
+- Show loading spinner for security dashboard. !56493
+- Geo: Fail syncs which exceed a timeout. !56538
+- Fix DAST profiles summary for invalid profile ids. !56753
+- Fix 500 error when refreshing Value Stream Analytics page with a default stage. !56761
+- Update oncall schedule rotation names to truncate if they are too long. !56762
+- Allow oncall schedule timezones to encode special characters correctly. !56792
+- Allow oncall schedule to display description. !56796
+- Set default cadences to non-automatic. !56842
+- Hide "New issue" button from Auditors on project issues page. !56877
+- Do not close modal when there are error messages. !56893
+- Hide "Suggest wiki improvement" button from Auditors on project wiki page. !56897
+- Do not clear the oncall schedule rotation form if there are validation errors. !56901
+- Fix vulnerability exports when a finding is missing. !56903
+- Hide "New merge request" button from Auditors on Code Review Analytics page. !56999
+- Require permissions to read vulnerability counts. !57037
+- Prevent deletion of groups with a subscription. !57170
+- Allow SCIM deprovisioning for minimal access users. !57178
+- Catch NoResponseError from Net::DNS in LoadBalancing::Resolver. !57187
+- Fix styling for ellipsis in DAST Profiles. !57200
+- Fix active state for license link in navigation bar. !57214
+- Fix reindexing retry for the notes migration. !57248
+- Make sure all ES indexes are created when setting server URL. !57253
+- Give CI_JOB_TOKEN read access to public projects so public packages can be consumed. !57265
+- Adds stage time calculation to VSA path navigation. !57451
+- Prevent deletion of groups with a subscription via the API. !57533
+- Adjust Button Size on License Compliance widget. !57592
+- Count minimal access users in admin area group page. !57630
+- Remove key parameter check when validating actor in personal access token API. !57675
+- Fix the 'errors' attribute of the 'ScanType' on GraphQL API. !57882
+- Fix inaccurate role classification in DB instrumentation. !57998
+- Fix Rails/SaveBang rubocop offenses in ee/spec/requests. !58078 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in ee/spec/presenters. !58082 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in ee/spec/graphql. !58092 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in ee/spec/models/ci. !58109 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in ee/spec/models/. !58115 (Abdul Wadood @abdulwd)
+- Fix removing labels when moving an epic between lists. !58145
+- Remove push rules locks on group and project level. !58195
+- Land on epics tab when searching within epics search context. !58201
+- Remove mw-90p class from common.scss. !58205 (Takuya Noguchi)
+- Fix header on group billing page. !58252
+- Fix 500 error when cloning a wiki using the Kerberos clone button. !58270
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/workers. !58272 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/views. !58280 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/tasks. !58284 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee vulnerabilities services. !58305 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in timebox_report_service_spec.rb. !58317 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/status_page. !58320 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/security. !58323 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/search. !58326 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/merge_trains. !58333 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/issues. !58336 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/ide. !58341 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/groups. !58343 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/geo. !58348 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/epics. !58350 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/ee. !58351 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/ci. !58354 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/auto_merge. !58358 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/analytics. !58359 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/serializers. !58362 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/requests/projects. !58365 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/presenters. !58369 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/policies. !58371 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/models. !58376 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/migrations. !58378 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/mailers. !58379 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/lib/gitlab/geo. !58380 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/graphsql/resolvers. !58389 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/finders. !58394 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/features/projects. !58395 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/features/analytics. !58402 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/features/admin. !58403 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/controllers/registrations. !58408 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/controllers/ee/projects. !58414 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/controllers/admin. !58417 (Abdul Wadood @abdulwd)
+- Fix broken dismissal descriptions in vulnerability details view. !58431
+- Throw an error when yaml mode contains unparsable attributes. !58457
+- Add aria labels to icon-only buttons. !58460
+- Clone issue card on move when necessary in epic swimlanes. !58644
+- Fix access bug for DevOps Adoption page and free tier groups. !58684
+- Render links in DAST scans errors. !58815
+- Fix Group SAML disabled git enforcement text. !58825
+- Use `getTopFrequentItems` in projects dropdown to show recently used. !58851
+- Correcting typo on the Policies tab of the Threat Monitoring page. !58956 (Lindsay Kerr)
+- Update Geo OAuth redirect URI to use the external primary URL even when an internal URL exists. !58966
+- Fix the oncall schedule timeline width calc. !58973
+- Reduce query timespan to one day in schedule daily view. !58974
+- Make Zen Mode functional while editing Test Case description. !58984
+- Navigate to Manage scans page after saving a DAST Scan. !59027
+- Fix updating value stream without persisted stages. !59176
+- Fix ElasticDeleteProjectWorker delete commits, index_status. !59457
+- Fix zero count of vulnerability severity count. !59680
+
+### Changed (47 changes, 2 of them are from the community)
+
+- Move Notes (Comments) to dedicated ES index. !53013
+- Add storage requirement option to Advanced Search notes migration. !55423
+- Add vulnerability filter for scanner ID. !55909
+- Add GraphQL field for vulnerability scanner ID. !56041
+- Project Settings Operations header Status page expand/collapse on-click/on-tap. !56275 (Daniel Schömer)
+- Return generic vulnerability details in the response of the vulnerability_finding endpoint. !56448
+- Fix for licenses without an url in license issue body. !56534
+- Set credential_inventory_gpg_keys feature-flag to enabled by default. !56764
+- Allow details to be sorted chronologically in the performance bar. !56830
+- Scroll to top of window when API Fuzzing configuration fails. !56890
+- Sort issues in full codequality report by severity. !56892
+- Update routes for DAST profiles to align with user interface. !56966
+- Add last used to cluster token table. !57141
+- Standardize input label for project-level MR rule for overriding approvers. !57194
+- Display active integrations in separate table. !57198
+- Update tab links for DAST Saved Scans. !57205
+- Enable iteration lists and new create list form. !57439
+- SSH key page text now reflects the expiration enforcement setting being used on the instance. !57494
+- Policy Editor: switching the custom editor to Source Editor. !57508
+- Create status filter on policy alerts. !57538
+- Remove the api_fuzzing_configuration_ui feature flag. !57583
+- Call out the inability to run on-demand scans without a repository being created. !57584
+- API Fuzzing scanner port changed to non-privileged port. !57628
+- Add Swimlanes loading skeleton. !57661
+- Hide cluster agent UI if not enabled on GitLab.com. !57668
+- Add billable_members_count to GraphQL Group type. !57712
+- Update copies in API fuzzing configuration form. !57753
+- Updated VSA stage table with simpler layout. !57792
+- Replace deprecated buttons on epic list view. !57873
+- Add error handling feedback inside purchase flow. !58084
+- Add a delay before expanding epic within tree during drag and drop. !58282
+- Make DevOps adoption updates weekly. !58474
+- Replace deprecated button on iteration list view. !58503
+- Expose vulnerability Scanner ID through GraphQL query. !58595
+- Remove info message from legacy milestones. !58617
+- Insert tips as comments in the YAML snippet. !58656
+- Add tips about copied API Fuzzing configuration snippet in the pipeline editor. !58664
+- Remove feature flag value_stream_analytics_extended_form. !58821
+- Remove compliance framework administration abilities from subgroups. !58873
+- Remove additional minutes when no minutes purchased. !59112 (Takuya Noguchi)
+- Remove standalone_vuln_dependency_list Feature Flag. !59124
+- Remove default stages definition from latest API Fuzzing CI template. !59154
+- Update Product Planning Usage Ping metrics. !59171
+- Set API Fuzzing version to 1.6 in CI template. !59181
+- Update label color on Jira issues pages. !59226
+- Change vulnerabilities GraphQL query to use GlobalID for scanner IDs. !59305
+- MR Analyrics, add animation to MTTM stat. !59477
+
+### Performance (20 changes)
+
+- Force ApplicationRecord#with_fast_statement_timeout to use replicas. !56476
+- Improve performance of indexing notes in Elasticsearch. !56808
+- Improve performance of Elasticsearch notes permissions migration. !56823
+- Improve computation of excess repository storage size. !57088
+- Do not stick to primary after recording User#last_activity_on. !57212
+- Skip ordering when using distinct in shared runners CTE query. !57312
+- Do not stick to primary after log Jira DVCS usage. !57328
+- Cache storage alert banner. !57350
+- Reduce SQL requests number for epic issues. !57352
+- Batch-load environments in EE pipelines. !57706
+- Fix N+1 in /projects endpoint. !57746
+- Remove N+1 DB queries from indexing issues in Elasticsearch. !57788
+- Remove N+1 DB queries from indexing projects in Elasticsearch. !57794
+- Fix blobs search N+1. !57826
+- Cache open issues count in group sidebar. !58064
+- Improve performance of on-call schedules SQL queries. !58209
+- Reduce queries on group search API for blobs scope. !58495
+- Fix more N+1 issues when indexing notes in Elasticsearch. !58751
+- Fix N+1 query in Epics search for guest in private group. !58863
+- Sync code owner approval rules asynchronously after creating merge request. !59395
+
+### Added (47 changes)
+
+- Beta version of DAST API scanner API Security. !51824
+- Add confirmation modal for admin signup settings submit button, for cases where pending users could be approved by mistake. !55509
+- Expose dismissal reason and dismissal descriptions in Vulnerability details view. !55525
+- GraphQL - Allow to filter epics on epic lists. !56026
+- Incident Management On-call Schedules. !56263
+- Add reviewers detail to add merge request approver email. !56466
+- Allow customers to extend or reactivate their trial on gitlab.com. !56471
+- Add a form to generate API Fuzzing configuration YAML snippets. !56548
+- Add upgrade link in user menu. !56591
+- Add vulnerability management survey request banner. !56620
+- Adds an overview stage to value stream analytics. !56621
+- Display VSA navigation as a horizontal flow. !56632
+- Add generic reports section and 'url' type to vulnerability details page. !56635
+- Add git fetch counts for geo secondaries to usage ping. !56678
+- New allowed_agents REST endpoint. !56700
+- Add policy name filter to threat alerts. !56708
+- Enable timeline on project security dashboard's trends chart. !56844
+- Add integration to view Jira issue details within GitLab. !56942
+- Add sitemap generation for Gitlab.com and gitlab-org namespace. !56947
+- Pre-populate projects while adding issue to a project in epic tree. !56955
+- Support epic board list negated filter params. !57001
+- Update schedule grid to start at beginning of current week. !57004
+- Update oncall rotation active period after schedule timezone update. !57069
+- Add separate tab tracking for devops adoption. !57104
+- Make epics searchable by my reaction emoji. !57190
+- Fetch iterations by cadence id. !57572
+- Include pipeline artifacts in Geo replication. !57741
+- Provide option to disable project access token creation. !57756
+- Add DORA 4 lead time charts to project-level CI/CD Analytics page. !57872
+- Support negated filtering of issues by epic_id and weight in GraphQL. !58154
+- Add environment scopes to group CI/CD variables. !58200
+- Add recursive list rendering to generic vulnerability reports. !58206
+- Add billable memberships API. !58506
+- Update CiCdSettingsUpdate mutation to accept MR pipelines and merge trains. !58592
+- Add support for array indexing to alert integration custom mappings. !58610
+- Filter by epic in roadmap. !58642
+- Add singular oncall rotation field to oncall schedules type. !58729
+- Enable compliance pipeline configuration by default. !58826
+- Support reaction emoji on Epics Roadmap. !58835
+- Enable DAST on-demand scan authentication, request headers and excluded URLs. !58859
+- Display ultimate or premium upgrade plan banner for jira issues. !58877
+- Expose 'titleHtml' & 'descriptionHtml' in Epic type. !58990
+- Set issue_perform_after_creation_tasks_async feature flag to default. !59040
+- Implement use_replicas_for_read_queries. !59167
+- Geo - Release the pipeline artifacts replication and verification. !59323
+- GraphQL issue filters support 'current' iteration. Board issue filters support negated 'current' iteration. !59325
+- Enable custom compliance frameworks.
+
+### Other (34 changes, 2 of them are from the community)
+
+- Change button to link on Agent table. !55887
+- Track epic status change action on usage ping. !56246
+- Use provide/inject for groupFullPath instead of props. !56472
+- Track epic confidentiality change action on usage ping. !56483
+- Track epic title and description changes via usage ping. !56489
+- Record issues added to epic on usage ping. !56559
+- Track epic labels change action on usage ping. !56571
+- Track epic comment updated. !56610
+- Track epic note destroyed. !56617
+- Track epic start date set to fixed or inherited via usage ping. !56619
+- Apply GitLab UI button and dropdown styles to buttons in ee/app/views/shared/epic directory. !56729
+- Add daily quota limit to invitations API endpoint. !56781
+- Change input type for telephone number field in the Trial flow. !56876
+- Bootstrap button migration. !56968
+- Skip onboarding experience for invited users. !57117
+- Update localStorage key for On-demand scans form. !57224
+- Add spacing between analyzer name and variables in SAST Configuration UI. !57226
+- Add missing audit logging to invite service. !57358
+- Review and revise Integrations/GitHub UI text. !57389
+- Track epic due date set to fixed or inherited via usage ping. !57457
+- Use provide/inject for vulnerabilities export endpoint. !57639
+- Track epic change to fixed start/due dates via usage ping. !57672
+- Use full date in billable members list. !57828
+- Move to confirm from success variant for button in storage quotas page. !57862 (Yogi (@yo))
+- Update URL for license FAQ. !58231 (Takuya Noguchi)
+- Update out-of-storage banner title and button text. !58276
+- Track issue removed from epic on usage ping. !58426
+- Add load balancing Sidekiq metrics. !58473
+- Updated UI text to match style guidelines. !58509
+- Track epic issues moved between projects. !58590
+- Add metric to track querying write ahead log on Request level. !58673
+- Generic vulnerability reports: Remove extra margin between report columns. !58720
+- Track epic destroyed action on usage ping. !59185
+- Remove dast_branch_selection feature flag. !59349
+
+
 ## 13.10.3 (2021-04-13)
 
 - No changes.

@@ -28,7 +28,11 @@ module Gitlab
           return true if worker_class.get_data_consistency == :always
           return true unless worker_class.get_data_consistency_feature_flag_enabled?
 
-          if job['database_replica_location'] || replica_caught_up?(job['database_write_location'])
+          location = job['database_write_location'] || job['database_replica_location']
+
+          return true unless location
+
+          if replica_caught_up?(location)
             job[:database_chosen] = 'replica'
             false
           elsif worker_class.get_data_consistency == :delayed && job['retry_count'].to_i == 0
@@ -46,8 +50,6 @@ module Gitlab
         end
 
         def replica_caught_up?(location)
-          return true unless location
-
           load_balancer.host.caught_up?(location)
         end
       end

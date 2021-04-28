@@ -170,6 +170,7 @@ export const mockIssue = {
   epic: {
     id: 'gid://gitlab/Epic/41',
     iid: 2,
+    group: { fullPath: mockIssueGroupPath },
   },
 };
 
@@ -188,6 +189,7 @@ export const mockIssue2 = {
   epic: {
     id: 'gid://gitlab/Epic/40',
     iid: 1,
+    group: { fullPath: 'gitlab-org' },
   },
 };
 
@@ -229,12 +231,20 @@ export const mockEpic = {
   title: 'Epic title',
   state: 'opened',
   webUrl: '/groups/gitlab-org/-/epics/1',
+  group: { fullPath: 'gitlab-org' },
   descendantCounts: {
     openedIssues: 3,
     closedIssues: 2,
   },
   issues: [mockIssue],
   labels: [],
+};
+
+export const mockEpic2 = {
+  id: 'gid://gitlab/Epic/42',
+  iid: '2',
+  group: { fullPath: 'gitlab-org' },
+  title: 'Epic title 2',
 };
 
 export const mockIssueWithEpic = {

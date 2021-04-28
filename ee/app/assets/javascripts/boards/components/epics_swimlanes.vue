@@ -178,7 +178,7 @@ export default {
     data_qa_selector="board_epics_swimlanes"
   >
     <swimlanes-loading-skeleton v-if="isLoading" />
-    <div v-else>
+    <div v-else class="board-swimlanes-content">
       <component
         :is="treeRootWrapper"
         v-bind="treeRootOptions"

@@ -5,6 +5,8 @@ import {
   inheritedMember,
   membersJsonString,
   members,
+  paginationJsonString,
+  pagination,
 } from 'jest/members/mock_data';
 
 describe('Members Utils', () => {
@@ -59,6 +61,7 @@ describe('Members Utils', () => {
       beforeEach(() => {
         el = document.createElement('div');
         el.setAttribute('data-members', membersJsonString);
+        el.setAttribute('data-pagination', paginationJsonString);
         el.setAttribute('data-source-id', '234');
         el.setAttribute('data-can-manage-members', 'true');
         el.setAttribute(
@@ -74,6 +77,7 @@ describe('Members Utils', () => {
       it('correctly parses the data attributes', () => {
         expect(parseDataAttributes(el)).toEqual({
           members,
+          pagination,
           sourceId: 234,
           canManageMembers: true,
           ldapOverridePath: '/groups/ldap-group/-/group_members/:id/override',

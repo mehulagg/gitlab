@@ -22,7 +22,6 @@ describe('GeoNodes', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGeoNodesContainer = () => wrapper.find('div');

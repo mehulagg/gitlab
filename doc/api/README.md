@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Create
+group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -208,6 +208,7 @@ You can use a GitLab CI/CD job token to authenticate with specific API endpoints
     Package Registry, you can use [deploy tokens](../user/project/deploy_tokens/index.md).
   - [Container Registry](../user/packages/container_registry/index.md)
     (the `$CI_REGISTRY_PASSWORD` is `$CI_JOB_TOKEN`).
+  - [Container Registry API](container_registry.md) (scoped to the job's project, when the `ci_job_token_scope` feature flag is enabled)
 - [Get job artifacts](job_artifacts.md#get-job-artifacts).
 - [Get job token's job](jobs.md#get-job-tokens-job).
 - [Pipeline triggers](pipeline_triggers.md), using the `token=` parameter.
@@ -776,7 +777,3 @@ some API endpoints also support `text/plain`.
 
 In [GitLab 13.10 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/250342),
 API endpoints do not support `text/plain` by default, unless it's explicitly documented.
-
-This change is deployed behind the `:api_always_use_application_json` [feature flag](../user/feature_flags.md),
-enabled by default. On GitLab self-managed instances, GitLab administrators can choose
-to [disable it](../administration/feature_flags.md). **(FREE SELF)**

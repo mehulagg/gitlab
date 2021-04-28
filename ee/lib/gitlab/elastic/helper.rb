@@ -256,7 +256,7 @@ module Gitlab
       # handles unreachable hosts and any other exceptions that may be raised
       def ping?
         client.ping
-      rescue
+      rescue StandardError
         false
       end
 

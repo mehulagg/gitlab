@@ -571,7 +571,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(count_data[:projects_with_repositories_enabled]).to eq(3)
       expect(count_data[:projects_with_error_tracking_enabled]).to eq(1)
       expect(count_data[:projects_with_tracing_enabled]).to eq(1)
-      expect(count_data[:projects_with_alerts_service_enabled]).to eq(1)
       expect(count_data[:projects_with_enabled_alert_integrations]).to eq(1)
       expect(count_data[:projects_with_prometheus_alerts]).to eq(2)
       expect(count_data[:projects_with_terraform_reports]).to eq(2)
@@ -1304,10 +1303,11 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           'p_analytics_repo' => 123,
           'i_analytics_cohorts' => 123,
           'i_analytics_dev_ops_score' => 123,
-          'i_analytics_dev_ops_adoption' => 123,
           'i_analytics_instance_statistics' => 123,
           'p_analytics_merge_request' => 123,
           'g_analytics_merge_request' => 123,
+          'i_analytics_dev_ops_adoption' => 123,
+          'users_viewing_analytics_group_devops_adoption' => 123,
           'analytics_unique_visits_for_any_target' => 543,
           'analytics_unique_visits_for_any_target_monthly' => 987
         }

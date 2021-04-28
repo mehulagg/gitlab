@@ -56,7 +56,7 @@ There are several components that work in concert for the Agent to accomplish Gi
 You can use the same GitLab project or separate projects for configuration and manifest files, as follows:
 
 - Single GitLab project (recommended): when you use a single repository to hold both the manifest and the configuration files, these projects can be either private or public, as you prefer.
-- Two GitLab projects: when you opt to use two different GitLab projects, one for manifest files, and another for configuration files, the manifests project must be private, while the configuration project can be either private or public. Our backlog contains issues for adding support for
+- Two GitLab projects: when you opt to use two different GitLab projects, one for manifest files, and another for configuration files, the manifests project must be public, while the configuration project can be either private or public. Our backlog contains issues for adding support for
 [private manifest repositories outside of the configuration project](https://gitlab.com/gitlab-org/gitlab/-/issues/220912) and
 [group level agents](https://gitlab.com/gitlab-org/gitlab/-/issues/283885) in the future.
 
@@ -100,27 +100,39 @@ To use the KAS:
 
 ### Define a configuration repository
 
-Next, you need a GitLab repository to contain your Agent configuration. The minimal
-repository layout looks like this:
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) in GitLab 13.7, the Agent manifest configuration can be added to multiple directories (or subdirectories) of its repository. 
+
+To configure an Agent, you need:
+
+1. A GitLab repository to hold the configuration file.
+1. Install the Agent in a cluster.
+
+After installed, when you update the configuration file, GitLab transmits the
+information to the cluster automatically without downtime.
+
+In your repository, add the Agent configuration file under:
 
 ```plaintext
 .gitlab/agents/<agent-name>/config.yaml
 ```
 
-Your `config.yaml` file can specify multiple manifest projects in the
-section `manifest_projects`:
+Your `config.yaml` file specifies all configurations of the Agent, such as:
+
+- The manifest projects to synchronize.
+- The address of the `hubble-relay` for the Network Security policy integrations.
+
+As an example, a minimal Agent configuration that sets up only the manifest
+synchronizations is:
 
 ```yaml
 gitops:
   manifest_projects:
-  - id: "path-to/your-manifest-project-number1"
-  ...
+  - id: "path-to/your-manifest-project-1"
+    paths:
+    - glob: '/**/*.{yaml,yml,json}'
 ```
 
-GitLab [versions 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) also
-supports manifest projects containing
-multiple directories (or subdirectories) of YAML files. For more information see our
-documentation on the [Kubernetes Agent configuration repository](repository.md).
+All the options for the [Kubernetes Agent configuration repository](repository.md) are documented separately.
 
 ### Create an Agent record in GitLab
 

@@ -1,0 +1,9 @@
+- provisioning_group = @user.provisioned_by_group
+- return unless provisioning_group
+%li
+  %span.light
+    = _("Provisioned by:")
+  %strong
+    = link_to provisioning_group.name, admin_group_path(provisioning_group)
+  %span.light
+    = '(%{gid})' % {gid: provisioning_group.id}

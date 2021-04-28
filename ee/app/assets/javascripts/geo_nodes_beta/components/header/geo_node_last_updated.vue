@@ -10,6 +10,12 @@ import timeAgoMixin from '~/vue_shared/mixins/timeago';
 
 export default {
   name: 'GeoNodeLastUpdated',
+  i18n: {
+    troubleshootText: s__('Geo|Consult Geo troubleshooting information'),
+    learnMoreText: s__('Geo|Learn more about Geo node statuses'),
+    timeAgoMainText: s__('Geo|Updated %{timeAgo}'),
+    timeAgoPopoverText: s__(`Geo|Node's status was updated %{timeAgo}.`),
+  },
   components: {
     GlPopover,
     GlLink,
@@ -30,13 +36,13 @@ export default {
     syncHelp() {
       if (this.isSyncStale) {
         return {
-          text: s__('GeoNodes|Consult Geo troubleshooting information'),
+          text: this.$options.i18n.troubleshootText,
           link: GEO_TROUBLESHOOTING_URL,
         };
       }
 
       return {
-        text: s__('GeoNodes|Learn more about Geo node statuses'),
+        text: this.$options.i18n.learnMoreText,
         link: HELP_NODE_HEALTH_URL,
       };
     },
@@ -44,8 +50,8 @@ export default {
       const timeAgo = this.timeFormatted(this.statusCheckTimestamp);
 
       return {
-        mainText: sprintf(s__('GeoNodes|Updated %{timeAgo}'), { timeAgo }),
-        popoverText: sprintf(s__("GeoNodes|Node's status was updated %{timeAgo}."), { timeAgo }),
+        mainText: sprintf(this.$options.i18n.timeAgoMainText, { timeAgo }),
+        popoverText: sprintf(this.$options.i18n.timeAgoPopoverText, { timeAgo }),
       };
     },
   },

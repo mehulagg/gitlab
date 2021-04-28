@@ -7,9 +7,14 @@ RSpec.describe Analytics::DevopsAdoption::Snapshots::CreateService do
 
   let(:snapshot) { service_response.payload[:snapshot] }
   let(:params) do
-    params = Analytics::DevopsAdoption::SnapshotCalculator::ADOPTION_FLAGS.each_with_object({}) do |attribute, result|
-      result[attribute] = rand(2).odd?
+    params = {}
+    Analytics::DevopsAdoption::SnapshotCalculator::BOOLEAN_METRICS.each.with_index do |attribute, i|
+      params[attribute] = i.odd?
     end
+    Analytics::DevopsAdoption::SnapshotCalculator::NUMERIC_METRICS.each.with_index do |attribute, i|
+      params[attribute] = i
+    end
+
     params[:recorded_at] = Time.zone.now
     params[:end_time] = 1.month.ago.end_of_month
     params[:segment] = segment

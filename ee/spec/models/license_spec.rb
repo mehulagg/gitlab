@@ -1407,8 +1407,8 @@ RSpec.describe License do
     end
   end
 
-  describe '#cloud?' do
-    subject { license.cloud? }
+  describe '#cloud_license?' do
+    subject { license.cloud_license? }
 
     context 'when no license provided' do
       before do

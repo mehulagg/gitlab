@@ -29,7 +29,9 @@ exports[`NetworkPolicyList component renders policies table 1`] = `
         role="columnheader"
         scope="col"
       >
-        Name
+        <div>
+          Name
+        </div>
       </th>
       <th
         aria-colindex="2"
@@ -37,7 +39,9 @@ exports[`NetworkPolicyList component renders policies table 1`] = `
         role="columnheader"
         scope="col"
       >
-        Status
+        <div>
+          Status
+        </div>
       </th>
       <th
         aria-colindex="3"
@@ -45,7 +49,9 @@ exports[`NetworkPolicyList component renders policies table 1`] = `
         role="columnheader"
         scope="col"
       >
-        Last modified
+        <div>
+          Last modified
+        </div>
       </th>
     </tr>
   </thead>

@@ -378,10 +378,23 @@ server (with `gitaly_address`) unless you use
 1. Edit `/etc/gitlab/gitlab.rb`:
 
    ```ruby
+   # Use the same token value configured on all Gitaly servers
+   gitlab_rails['gitaly_token'] = '<AUTH_TOKEN>'
+
    git_data_dirs({
-     'default' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
+     'default'  => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
      'storage1' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
      'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075' },
+   })
+   ```
+
+   Alternatively, if each Gitaly server is configured to use a different authentication token:
+
+   ```ruby
+   git_data_dirs({
+     'default'  => { 'gitaly_address' => 'tcp://gitaly1.internal:8075', 'gitaly_token' => '<AUTH_TOKEN_1>' },
+     'storage1' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075', 'gitaly_token' => '<AUTH_TOKEN_1>' },
+     'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075', 'gitaly_token' => '<AUTH_TOKEN_2>' },
    })
    ```
 
@@ -404,12 +417,15 @@ server (with `gitaly_address`) unless you use
        storages:
          default:
            gitaly_address: tcp://gitaly1.internal:8075
+           gitaly_token: AUTH_TOKEN_1
            path: /some/local/path
          storage1:
            gitaly_address: tcp://gitaly1.internal:8075
+           gitaly_token: AUTH_TOKEN_1
            path: /some/local/path
          storage2:
            gitaly_address: tcp://gitaly2.internal:8075
+           gitaly_token: AUTH_TOKEN_2
            path: /some/local/path
    ```
 
@@ -979,7 +995,7 @@ identical fetches. It:
 The pack-objects cache is a local cache. It:
 
 - Stores its metadata in the memory of the Gitaly process it is enabled in.
-- Stores the actual Git data it is caching in files on local storage. 
+- Stores the actual Git data it is caching in files on local storage.
 
 Using local files has the benefit that the operating system may
 automatically keep parts of the pack-objects cache files in RAM,

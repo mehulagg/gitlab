@@ -32,7 +32,7 @@ module EE
         # rubocop: disable CodeReuse/ActiveRecord
         def label_links(label_ids)
           if has_valid_milestone?
-            super.where("issues.milestone_id = ?", board.milestone_id)
+            super.where(issues: { milestone_id: board.milestone_id })
           else
             super
           end

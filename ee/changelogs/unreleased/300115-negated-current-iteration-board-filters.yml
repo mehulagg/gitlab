@@ -1,6 +1,0 @@
----
-title: GraphQL issue filters support 'current' iteration.
-  Board issue filters support negated 'current' iteration
-merge_request: 59325
-author:
-type: added

@@ -1,5 +1,6 @@
 %p.details
-  #{link_to @epic.author_name, user_url(@epic.author)} created an epic:
+  = html_escape(_('%{user} created an epic: %{epic_link}')) % { user: link_to(@epic.author_name, user_url(@epic.author)),
+                                                                epic_link: link_to(@epic.to_reference, group_epic_url(@epic.group, @epic)) }
 
 - if @epic.assignee
   %p

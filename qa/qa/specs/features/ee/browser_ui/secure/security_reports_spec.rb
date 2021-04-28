@@ -49,7 +49,7 @@ module QA
         @project.visit!
       end
 
-      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565', quarantine: { only: { pipeline: [:master, :nightly] }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/325612', type: :bug } do
+      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1777', quarantine: { only: { pipeline: [:master, :nightly] }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/325612', type: :bug } do
         Flow::Pipeline.visit_latest_pipeline
 
         Page::Project::Pipeline::Show.perform do |pipeline|

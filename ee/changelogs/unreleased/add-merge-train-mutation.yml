@@ -1,5 +1,0 @@
----
-title: Update CiCdSettingsUpdate mutation to accept MR pipelines and merge trains
-merge_request: 58592
-author:
-type: added

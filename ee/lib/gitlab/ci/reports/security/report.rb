@@ -62,6 +62,13 @@ module Gitlab
           def primary_scanner
             scanners.first&.second
           end
+
+          def primary_scanner_order_to(other)
+            return 1 unless primary_scanner
+            return -1 unless other.primary_scanner
+
+            primary_scanner <=> other.primary_scanner
+          end
         end
       end
     end

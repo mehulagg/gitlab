@@ -1,9 +1,12 @@
 <script>
 import { GlAvatar, GlPopover } from '@gitlab/ui';
-import { uniqueId } from 'lodash';
+import * as cssVariables from '@gitlab/ui/scss_to_js/scss_variables';
+import { uniqueId, startCase } from 'lodash';
+import { darkModeEnabled } from '~/lib/utils/color_utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
+import { LIGHT_TO_DARK_MODE_SHADE_MAPPING } from '../../../constants';
 
 export const SHIFT_WIDTHS = {
   md: 100,
@@ -50,8 +53,21 @@ export default {
 
       return this.assignee.user.username;
     },
-    chevronClass() {
-      return `gl-bg-data-viz-${this.assignee.colorPalette}-${this.assignee.colorWeight}`;
+    colorWeight() {
+      const { colorWeight } = this.assignee;
+      return darkModeEnabled() ? LIGHT_TO_DARK_MODE_SHADE_MAPPING[colorWeight] : colorWeight;
+    },
+    chevronBackground() {
+      const { colorPalette } = this.assignee;
+      const bgColor = `dataViz${startCase(colorPalette)}${this.colorWeight}`;
+      return cssVariables[bgColor];
+    },
+    textClass() {
+      if (darkModeEnabled()) {
+        return this.colorWeight < 500 ? 'gl-text-white' : 'gl-text-gray-900';
+      }
+
+      return 'gl-text-white';
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
@@ -81,10 +97,11 @@ export default {
     <div
       :id="rotationAssigneeUniqueID"
       class="gl-h-6"
-      :class="[chevronClass, $options.ROTATION_CENTER_CLASS]"
+      :style="{ backgroundColor: chevronBackground }"
+      :class="$options.ROTATION_CENTER_CLASS"
       data-testid="rotation-assignee"
     >
-      <div class="gl-text-white" :class="$options.ROTATION_CENTER_CLASS">
+      <div :class="[textClass, $options.ROTATION_CENTER_CLASS]">
         <gl-avatar v-if="!hasRotationMobileViewAvatar" :src="assignee.user.avatarUrl" :size="16" />
         <span
           v-if="!hasRotationMobileViewText"

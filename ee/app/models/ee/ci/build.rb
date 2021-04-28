@@ -83,7 +83,7 @@ module EE
             next unless project.feature_available?(LICENSED_PARSER_FEATURES.fetch(file_type))
 
             parse_security_artifact_blob(security_report, blob)
-          rescue
+          rescue StandardError
             security_report.add_error('ParsingError')
           end
         end

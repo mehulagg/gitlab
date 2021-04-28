@@ -23,6 +23,7 @@ describe('MemberList', () => {
               table: { 'data-qa-selector': 'members_list' },
               tr: { 'data-qa-selector': 'member_row' },
             },
+            pagination: {},
             ...state,
           },
         },

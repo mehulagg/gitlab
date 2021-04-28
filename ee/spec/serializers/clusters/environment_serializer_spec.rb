@@ -18,6 +18,6 @@ RSpec.describe Clusters::EnvironmentSerializer do
   end
 
   it 'matches clusters/environment json schema' do
-    expect(json_entity).to match_schema('clusters/environment', dir: 'ee')
+    expect(json_entity.to_json).to match_schema('clusters/environment', dir: 'ee')
   end
 end

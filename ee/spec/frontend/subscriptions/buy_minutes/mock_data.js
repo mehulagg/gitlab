@@ -1,16 +1,43 @@
-export const mockCiMinutesPlans =
-  '[{"deprecated":false,"name":"1000 CI minutes pack","code":"ci_minutes","active":true,"free":null,"price_per_month":0.8333333333333334,"price_per_year":10.0,"features":null,"about_page_href":null,"hide_deprecated_card":false}]';
-export const mockParsedCiMinutesPlans = [
-  {
-    deprecated: false,
-    name: '1000 CI minutes pack',
-    code: 'ci_minutes',
-    active: true,
-    free: null,
-    pricePerMonth: 0.8333333333333334,
-    pricePerYear: 10.0,
-    features: null,
-    aboutPageHref: null,
-    hideDeprecatedCard: false,
-  },
+import { STEPS } from 'ee/subscriptions/constants';
+
+export const mockCiMinutesPlans = [
+  { id: 'firstPlanId', code: 'bronze', pricePerYear: 48, name: 'bronze', __typename: 'Plan' },
+  { id: 'secondPlanId', code: 'silver', pricePerYear: 228, name: 'silver', __typename: 'Plan' },
 ];
+export const mockNamespaces =
+  '[{"id":132,"name":"Gitlab Org","users":3},{"id":483,"name":"Gnuwget","users":12}]';
+
+export const mockParsedNamespaces = [
+  { __typename: 'Namespace', id: 132, name: 'Gitlab Org', users: 3 },
+  { __typename: 'Namespace', id: 483, name: 'Gnuwget', users: 12 },
+];
+
+export const mockNewUser = 'false';
+export const mockFullName = 'John Admin';
+export const mockSetupForCompany = 'true';
+
+export const stateData = {
+  namespaces: [],
+  subscription: {
+    planId: 'secondPlanId',
+    quantity: 1,
+    namespaceId: null,
+    paymentMethodId: null,
+    __typename: 'Subscription',
+  },
+  customer: {
+    country: null,
+    address1: null,
+    address2: null,
+    city: null,
+    state: null,
+    zipCode: null,
+    company: null,
+    __typename: 'Customer',
+  },
+  fullName: 'Full Name',
+  isNewUser: false,
+  isSetupForCompany: true,
+  stepList: STEPS,
+  activeStep: STEPS[0],
+};

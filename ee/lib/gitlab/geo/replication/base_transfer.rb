@@ -113,7 +113,7 @@ module Gitlab
 
           begin
             FileUtils.mkdir_p(dir)
-          rescue => e
+          rescue StandardError => e
             log_error("Unable to create directory #{dir}: #{e}")
 
             return false
@@ -214,7 +214,7 @@ module Gitlab
 
             log_info("Successfully transferred", file_type: file_type, file_id: file_id,
                      file_size_bytes: file_size)
-          rescue => e
+          rescue StandardError => e
             log_error("Error transferring file", error: e, file_type: file_type, file_id: file_id, url: url)
 
             return failure_result
@@ -254,7 +254,7 @@ module Gitlab
           temp.chmod(default_permissions)
           temp.binmode
           temp
-        rescue => e
+        rescue StandardError => e
           log_error("Error creating temporary file", error: e, filename: target_filename)
           nil
         end

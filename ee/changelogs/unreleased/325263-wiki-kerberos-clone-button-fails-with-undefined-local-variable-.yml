@@ -1,5 +1,0 @@
----
-title: Fix 500 error when cloning a wiki using the Kerberos clone button
-merge_request: 58270
-author:
-type: fixed

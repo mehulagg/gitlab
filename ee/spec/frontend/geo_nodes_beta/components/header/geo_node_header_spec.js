@@ -46,11 +46,11 @@ describe('GeoNodeHeader', () => {
     wrapper.destroy();
   });
 
-  const findHeaderCollapseButton = () => wrapper.find(GlButton);
-  const findCurrentNodeBadge = () => wrapper.find(GlBadge);
-  const findGeoNodeHealthStatus = () => wrapper.find(GeoNodeHealthStatus);
-  const findGeoNodeLastUpdated = () => wrapper.find(GeoNodeLastUpdated);
-  const findGeoNodeActions = () => wrapper.find(GeoNodeActions);
+  const findHeaderCollapseButton = () => wrapper.findComponent(GlButton);
+  const findCurrentNodeBadge = () => wrapper.findComponent(GlBadge);
+  const findGeoNodeHealthStatus = () => wrapper.findComponent(GeoNodeHealthStatus);
+  const findGeoNodeLastUpdated = () => wrapper.findComponent(GeoNodeLastUpdated);
+  const findGeoNodeActions = () => wrapper.findComponent(GeoNodeActions);
 
   describe('template', () => {
     describe('always', () => {

@@ -63,7 +63,7 @@ RSpec.describe Geo::PruneEventLogWorker, :geo do
 
       context 'no Geo secondary nodes' do
         before do
-          secondary.destroy
+          secondary.destroy!
         end
 
         it 'deletes everything from the Geo event log' do
@@ -76,7 +76,7 @@ RSpec.describe Geo::PruneEventLogWorker, :geo do
 
         context 'no Geo primary node' do
           before do
-            primary.destroy
+            primary.destroy!
           end
 
           it 'deletes everything from the Geo event log' do

@@ -4,5 +4,6 @@ const createState = ({ primaryVersion, primaryRevision, replicableTypes }) => ({
   replicableTypes,
   nodes: [],
   isLoading: false,
+  nodeToBeRemoved: null,
 });
 export default createState;

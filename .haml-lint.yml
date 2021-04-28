@@ -110,7 +110,6 @@ linters:
       - Layout/EmptyLineAfterGuardClause
       - Layout/LeadingCommentSpace
       - Layout/SpaceAroundOperators
-      - Layout/SpaceBeforeBlockBraces
       - Layout/SpaceBeforeComma
       - Layout/SpaceBeforeFirstArg
       - Layout/SpaceInsideHashLiteralBraces
@@ -132,7 +131,6 @@ linters:
       - Style/IdenticalConditionalBranches
       - Style/NegatedIf
       - Style/NestedTernaryOperator
-      - Style/ParenthesesAroundCondition
       - Style/SelfAssignment
       - Style/TernaryParentheses
       - Style/TrailingCommaInHashLiteral

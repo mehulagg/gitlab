@@ -6,6 +6,8 @@ module Gitlab
       CONAN_RECIPE_FILES = %w[conanfile.py conanmanifest.txt conan_sources.tgz conan_export.tgz].freeze
       CONAN_PACKAGE_FILES = %w[conaninfo.txt conanmanifest.txt conan_package.tgz].freeze
 
+      API_PATH_REGEX = %r{^/api/v\d+/(projects/[^/]+/|groups?/[^/]+/-/)?packages/[A-Za-z]+}.freeze
+
       def conan_package_reference_regex
         @conan_package_reference_regex ||= %r{\A[A-Za-z0-9]+\z}.freeze
       end
@@ -235,7 +237,7 @@ module Gitlab
     # used as a routing constraint.
     #
     def container_registry_tag_regex
-      @container_registry_tag_regex ||= /[\w][\w.-]{0,127}/
+      @container_registry_tag_regex ||= /\w[\w.-]{0,127}/
     end
 
     def environment_name_regex_chars

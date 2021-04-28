@@ -129,6 +129,7 @@ The following metrics are available:
 | `pipeline_graph_link_calculation_duration_seconds`               | Histogram   | 13.9    | Total time spent calculating links, in seconds                                                                        |                                                           |
 | `pipeline_graph_links_total`                                     | Histogram   | 13.9    | Number of links per graph                                                                                             |                                                           |
 | `pipeline_graph_links_per_job_ratio`                             | Histogram   | 13.9    | Ratio of links to job per graph                                                                                       |                                                           |
+| `gitlab_ci_pipeline_security_orchestration_policy_processing_duration_seconds` | Histogram   | 13.12    | Time in seconds it takes to process Security Policies in CI/CD pipeline                                                                    |                                                           |
 
 ## Metrics controlled by a feature flag
 
@@ -254,7 +255,7 @@ The following metrics are available:
 |:--------------------------------- |:--------- |:------------------------------------------------------------- |:-------------------------------------- |:--------------------------------------------------------- |
 | `db_load_balancing_hosts`         | Gauge     | [12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/13630)   | Current number of load balancing hosts | |
 | `sidekiq_load_balancing_count`    | Counter   | 13.11                                                         | Sidekiq jobs using load balancing with data consistency set to :sticky or :delayed | `queue`, `boundary`, `external_dependencies`, `feature_category`, `job_status`, `urgency`, `data_consistency`, `database_chosen` |
- 
+
 ## Database partitioning metrics **(PREMIUM SELF)**
 
 The following metrics are available:

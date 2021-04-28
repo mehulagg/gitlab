@@ -10,6 +10,7 @@ import { truncate } from '~/lib/utils/text_utility';
 import mockRotations from '../../mocks/mock_rotation.json';
 
 jest.mock('lodash/uniqueId', () => (prefix) => `${prefix}fakeUniqueId`);
+jest.mock('~/lib/utils/color_utils');
 
 describe('RotationAssignee', () => {
   let wrapper;
@@ -72,11 +73,9 @@ describe('RotationAssignee', () => {
       expect(findAvatar().exists()).toBe(false);
     });
 
-    it('should render an assignee color based on the chevron skipping color pallette', () => {
+    it('should render an assignee color based on the chevron skipping color palette', () => {
       const token = findToken();
-      expect(token.classes()).toContain(
-        `gl-bg-data-viz-${assignee.participant.colorPalette}-${assignee.participant.colorWeight}`,
-      );
+      expect(token.attributes('style')).toBe('background-color: rgb(87, 114, 255);');
     });
 
     it('should render an assignee schedule and rotation information in a popover', () => {

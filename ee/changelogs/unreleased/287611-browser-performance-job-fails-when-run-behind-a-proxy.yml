@@ -1,5 +1,0 @@
----
-title: Make AutoDevOps browser performance job work when behind proxy
-merge_request: 48326
-author: Olaf Meeuwissen (@paddy-hack)
-type: fixed

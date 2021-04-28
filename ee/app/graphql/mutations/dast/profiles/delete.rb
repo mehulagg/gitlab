@@ -17,7 +17,7 @@ module Mutations
         def resolve(id:)
           dast_profile = authorized_find!(id)
 
-          response = ::Dast::Profiles::DestroyService.new(
+          response = ::AppSec::Dast::Profiles::DestroyService.new(
             container: dast_profile.project,
             current_user: current_user,
             params: { dast_profile: dast_profile }

@@ -14,6 +14,7 @@ RSpec.describe GitlabSchema.types['GeoNode'] do
       minimum_reverification_interval merge_request_diff_registries
       package_file_registries snippet_repository_registries
       terraform_state_version_registries group_wiki_repository_registries
+      lfs_object_registries
       pipeline_artifact_registries
     ]
 

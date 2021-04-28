@@ -51,5 +51,12 @@ RSpec.describe Groups::Analytics::DevopsAdoptionController do
         expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
+
+    it 'tracks devops_adoption usage event' do
+      expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+        .to receive(:track_event).with('users_viewing_analytics_group_devops_adoption', values: kind_of(String))
+
+      subject
+    end
   end
 end

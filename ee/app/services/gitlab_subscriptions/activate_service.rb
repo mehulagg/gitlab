@@ -24,7 +24,7 @@ module GitlabSubscriptions
       else
         error(license.errors.full_messages)
       end
-    rescue => e
+    rescue StandardError => e
       error(e.message)
     end
 

@@ -62,7 +62,9 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
 
     click_button "Add approval rule"
 
-    fill_in "name", with: rule_name
+    within_fieldset('Rule name') do
+      fill_in with: rule_name
+    end
 
     add_approval_rule_member('user', approver.name)
 

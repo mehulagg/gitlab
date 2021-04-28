@@ -72,4 +72,67 @@ describe('GeoNodesBeta Store Actions', () => {
       });
     });
   });
+
+  describe('removeNode', () => {
+    describe('on success', () => {
+      beforeEach(() => {
+        mock.onDelete(/api\/.*\/geo_nodes/).replyOnce(200, {});
+      });
+
+      it('should dispatch the correct mutations', () => {
+        return testAction({
+          action: actions.removeNode,
+          payload: null,
+          state,
+          expectedMutations: [
+            { type: types.REQUEST_NODE_REMOVAL },
+            { type: types.RECEIVE_NODE_REMOVAL_SUCCESS },
+          ],
+        });
+      });
+    });
+
+    describe('on error', () => {
+      beforeEach(() => {
+        mock.onDelete(/api\/(.*)\/geo_nodes/).reply(500);
+      });
+
+      it('should dispatch the correct mutations', () => {
+        return testAction({
+          action: actions.removeNode,
+          payload: null,
+          state,
+          expectedMutations: [
+            { type: types.REQUEST_NODE_REMOVAL },
+            { type: types.RECEIVE_NODE_REMOVAL_ERROR },
+          ],
+        }).then(() => {
+          expect(createFlash).toHaveBeenCalledTimes(1);
+          createFlash.mockClear();
+        });
+      });
+    });
+  });
+
+  describe('prepNodeRemoval', () => {
+    it('should dispatch the correct mutations', () => {
+      return testAction({
+        action: actions.prepNodeRemoval,
+        payload: 1,
+        state,
+        expectedMutations: [{ type: types.STAGE_NODE_REMOVAL, payload: 1 }],
+      });
+    });
+  });
+
+  describe('cancelNodeRemoval', () => {
+    it('should dispatch the correct mutations', () => {
+      return testAction({
+        action: actions.cancelNodeRemoval,
+        payload: null,
+        state,
+        expectedMutations: [{ type: types.UNSTAGE_NODE_REMOVAL }],
+      });
+    });
+  });
 });

@@ -127,11 +127,119 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'issue boards' do
-    it 'has board tab' do
+  describe 'Issues' do
+    it 'has a link to the issue list path' do
       render
 
-      expect(rendered).to have_css('a[title="Boards"]')
+      expect(rendered).to have_link('Issues', href: project_issues_path(project))
+    end
+
+    it 'shows pill with the number of open issues' do
+      render
+
+      expect(rendered).to have_css('span.badge.badge-pill.issue_counter')
+    end
+
+    describe 'Issue List' do
+      it 'has a link to the issue list path' do
+        render
+
+        expect(rendered).to have_link('List', href: project_issues_path(project))
+      end
+    end
+
+    describe 'Issue Boards' do
+      it 'has a link to the issue boards path' do
+        render
+
+        expect(rendered).to have_link('Boards', href: project_boards_path(project))
+      end
+    end
+
+    describe 'Labels' do
+      it 'has a link to the labels path' do
+        render
+
+        expect(rendered).to have_link('Labels', href: project_labels_path(project))
+      end
+    end
+
+    describe 'Service Desk' do
+      it 'has a link to the service desk path' do
+        render
+
+        expect(rendered).to have_link('Service Desk', href: service_desk_project_issues_path(project))
+      end
+    end
+
+    describe 'Milestones' do
+      it 'has a link to the milestones path' do
+        render
+
+        expect(rendered).to have_link('Milestones', href: project_milestones_path(project))
+      end
+    end
+  end
+
+  describe 'External Issue Tracker' do
+    let_it_be_with_refind(:project) { create(:project, has_external_issue_tracker: true) }
+
+    context 'with custom external issue tracker' do
+      let(:external_issue_tracker_url) { 'http://test.com' }
+
+      let!(:external_issue_tracker) do
+        create(:custom_issue_tracker_service, active: external_issue_tracker_active, project: project, project_url: external_issue_tracker_url)
+      end
+
+      context 'when external issue tracker is configured and active' do
+        let(:external_issue_tracker_active) { true }
+
+        it 'has a link to the external issue tracker' do
+          render
+
+          expect(rendered).to have_link(external_issue_tracker.title, href: external_issue_tracker_url)
+        end
+      end
+
+      context 'when external issue tracker is not configured and active' do
+        let(:external_issue_tracker_active) { false }
+
+        it 'does not have a link to the external issue tracker' do
+          render
+
+          expect(rendered).not_to have_link(external_issue_tracker.title)
+        end
+      end
+    end
+
+    context 'with Jira issue tracker' do
+      let_it_be(:jira) { create(:jira_service, project: project, issues_enabled: false) }
+
+      it 'has a link to the Jira issue tracker' do
+        render
+
+        expect(rendered).to have_link('Jira', href: project.external_issue_tracker.issue_tracker_path)
+      end
+    end
+  end
+
+  describe 'Labels' do
+    context 'when issues are not enabled' do
+      it 'has a link to the labels path' do
+        project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
+
+        render
+
+        expect(rendered).to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+      end
+    end
+
+    context 'when issues are enabled' do
+      it 'does not have a link to the labels path' do
+        render
+
+        expect(rendered).not_to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+      end
     end
   end
 

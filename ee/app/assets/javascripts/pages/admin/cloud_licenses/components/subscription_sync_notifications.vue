@@ -4,12 +4,8 @@ import {
   manualSyncFailureText,
   manualSyncFailureTitle,
   manualSyncSuccessfulTitle,
+  notificationType,
 } from '../constants';
-
-export const notificationType = {
-  SYNC_FAILURE: 'SYNC_FAILURE',
-  SYNC_SUCCESS: 'SYNC_SUCCESS',
-};
 
 export const SUCCESS_ALERT_DISMISSED_EVENT = 'success-alert-dismissed';
 

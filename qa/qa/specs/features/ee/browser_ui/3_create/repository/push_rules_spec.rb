@@ -113,7 +113,7 @@ module QA
           end
         end
 
-        it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1677', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
+        it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1778', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
           non_member_user = Resource::User.new.tap do |user|
             user.username = ''
             user.password = ''

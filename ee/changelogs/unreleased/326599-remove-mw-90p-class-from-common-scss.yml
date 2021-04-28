@@ -1,5 +1,0 @@
----
-title: Remove mw-90p class from common.scss
-merge_request: 58205
-author: Takuya Noguchi
-type: fixed

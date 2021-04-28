@@ -23,6 +23,7 @@ RSpec.describe Projects::DestroyService do
   context 'when project is a mirror' do
     let(:max_capacity) { Gitlab::CurrentSettings.mirror_max_capacity }
     let_it_be(:project_mirror) { create(:project, :mirror, :repository, :import_scheduled) }
+
     let(:result) { described_class.new(project_mirror, project_mirror.owner, {}).execute }
 
     before do

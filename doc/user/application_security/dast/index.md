@@ -658,6 +658,7 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_AUTO_UPDATE_ADDONS`    | boolean | ZAP add-ons are pinned to specific versions in the DAST Docker image. Set to `true` to download the latest versions when the scan starts. Default: `false` |
 | `DAST_API_HOST_OVERRIDE`     | string  | Used to override domains defined in API specification files. Only supported when importing the API specification from a URL. Example: `example.com:8080` |
 | `DAST_EXCLUDE_RULES`         | string  | Set to a comma-separated list of Vulnerability Rule IDs to exclude them from running during the scan. Rule IDs are numbers and can be found from the DAST log or on the [ZAP project](https://github.com/zaproxy/zaproxy/blob/develop/docs/scanners.md). For example, `HTTP Parameter Override` has a rule ID of `10026`. **Note:** In earlier versions of GitLab the excluded rules were executed but alerts they generated were suppressed. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118641) in GitLab 12.10. |
+| `DAST_ONLY_INCLUDE_RULES`    | string  | Set to a comma-separated list of Vulnerability Rule IDs to configure the scan to run only them. Rule IDs are numbers and can be found from the DAST log or on the [ZAP project](https://github.com/zaproxy/zaproxy/blob/develop/docs/scanners.md). [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250651) in GitLab 13.12. |
 | `DAST_REQUEST_HEADERS`       | string  | Set to a comma-separated list of request header names and values. Headers are added to every request made by DAST. For example, `Cache-control: no-cache,User-Agent: DAST/1.0` |
 | `DAST_DEBUG`                 | boolean | Enable debug message output. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
 | `DAST_SPIDER_MINS`           | number  | The maximum duration of the spider scan in minutes. Set to `0` for unlimited. Default: One minute, or unlimited when the scan is a full scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
@@ -948,11 +949,11 @@ A site profile contains the following:
 - **Excluded URLs**: A comma-separated list of URLs to exclude from the scan.
 - **Request headers**: A comma-separated list of HTTP request headers, including names and values. These headers are added to every request made by DAST.
 - **Authentication**:  
-  - **Authenticated URL**: The URL of the page containing the sign-in HTML form on the target website. The username and password are submitted with the login form to create an authenticated scan. 
+  - **Authenticated URL**: The URL of the page containing the sign-in HTML form on the target website. The username and password are submitted with the login form to create an authenticated scan.
   - **Username**: The username used to authenticate to the website.
   - **Password**: The password used to authenticate to the website.
-  - **Username form field**: The name of username field at the sign-in HTML form. 
-  - **Password form field**: The name of password field at the sign-in HTML form. 
+  - **Username form field**: The name of username field at the sign-in HTML form.
+  - **Password form field**: The name of password field at the sign-in HTML form.
 
 #### Site profile validation
 

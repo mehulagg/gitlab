@@ -47,4 +47,62 @@ describe('GeoNodesBeta Store Mutations', () => {
       expect(state.nodes).toEqual([]);
     });
   });
+
+  describe('STAGE_NODE_REMOVAL', () => {
+    it('sets nodeToBeRemoved to node id', () => {
+      mutations[types.STAGE_NODE_REMOVAL](state, 1);
+
+      expect(state.nodeToBeRemoved).toBe(1);
+    });
+  });
+
+  describe('UNSTAGE_NODE_REMOVAL', () => {
+    beforeEach(() => {
+      state.nodeToBeRemoved = 1;
+    });
+
+    it('sets nodeToBeRemoved to null', () => {
+      mutations[types.UNSTAGE_NODE_REMOVAL](state);
+
+      expect(state.nodeToBeRemoved).toBe(null);
+    });
+  });
+
+  describe('REQUEST_NODE_REMOVAL', () => {
+    it('sets isLoading to true', () => {
+      mutations[types.REQUEST_NODE_REMOVAL](state);
+
+      expect(state.isLoading).toBe(true);
+    });
+  });
+
+  describe('RECEIVE_NODE_REMOVAL_SUCCESS', () => {
+    beforeEach(() => {
+      state.isLoading = true;
+      state.nodes = [{ id: 1 }, { id: 2 }];
+      state.nodeToBeRemoved = 1;
+    });
+
+    it('removes node, clears nodeToBeRemoved, and ends loading', () => {
+      mutations[types.RECEIVE_NODE_REMOVAL_SUCCESS](state);
+
+      expect(state.isLoading).toBe(false);
+      expect(state.nodes).toEqual([{ id: 2 }]);
+      expect(state.nodeToBeRemoved).toEqual(null);
+    });
+  });
+
+  describe('RECEIVE_NODE_REMOVAL_ERROR', () => {
+    beforeEach(() => {
+      state.isLoading = true;
+      state.nodeToBeRemoved = 1;
+    });
+
+    it('resets state', () => {
+      mutations[types.RECEIVE_NODE_REMOVAL_ERROR](state);
+
+      expect(state.isLoading).toBe(false);
+      expect(state.nodeToBeRemoved).toEqual(null);
+    });
+  });
 });

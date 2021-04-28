@@ -198,12 +198,6 @@ module EE
       ]
     end
 
-    def sidebar_external_tracker_paths
-      %w[
-        projects/integrations/jira/issues#index
-      ]
-    end
-
     def sidebar_on_demand_scans_paths
       %w[
         projects/on_demand_scans#index

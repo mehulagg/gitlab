@@ -11,7 +11,9 @@ exports[`Corpus table corpus management renders with the correct columns 1`] = `
     role="columnheader"
     scope="col"
   >
-    Corpus name
+    <div>
+      Corpus name
+    </div>
   </th>
   <th
     aria-colindex="2"
@@ -19,7 +21,9 @@ exports[`Corpus table corpus management renders with the correct columns 1`] = `
     role="columnheader"
     scope="col"
   >
-    Target
+    <div>
+      Target
+    </div>
   </th>
   <th
     aria-colindex="3"
@@ -27,7 +31,9 @@ exports[`Corpus table corpus management renders with the correct columns 1`] = `
     role="columnheader"
     scope="col"
   >
-    Last updated
+    <div>
+      Last updated
+    </div>
   </th>
   <th
     aria-colindex="4"
@@ -35,7 +41,9 @@ exports[`Corpus table corpus management renders with the correct columns 1`] = `
     role="columnheader"
     scope="col"
   >
-    Last used
+    <div>
+      Last used
+    </div>
   </th>
   <th
     aria-colindex="5"
@@ -43,7 +51,9 @@ exports[`Corpus table corpus management renders with the correct columns 1`] = `
     role="columnheader"
     scope="col"
   >
-    Actions
+    <div>
+      Actions
+    </div>
   </th>
 </tr>
 `;

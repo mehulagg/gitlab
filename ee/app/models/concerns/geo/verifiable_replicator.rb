@@ -223,7 +223,9 @@ module Geo
     #
     # @abstract
     def primary_checksum
-      model_record.verification_checksum
+      # If verification is not yet setup, then model_record will not have the verification_checksum
+      # attribute yet. Returning nil is fine here
+      model_record.verification_checksum if model_record.respond_to?(:verification_checksum)
     end
 
     def secondary_checksum

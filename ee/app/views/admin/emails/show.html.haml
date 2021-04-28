@@ -26,4 +26,4 @@
     .col-sm-10
       = admin_email_select_tag(:recipients)
   .form-actions
-    = submit_tag _('Send message'), class: 'gl-button btn btn-success', disabled: admin_emails_are_currently_rate_limited?
+    = submit_tag _('Send message'), class: 'gl-button btn btn-confirm', disabled: admin_emails_are_currently_rate_limited?

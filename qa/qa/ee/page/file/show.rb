@@ -30,7 +30,7 @@ module QA
 
             begin
               has_element? :lock_button, text: 'Unlock'
-            rescue
+            rescue StandardError
               raise QA::Page::Base::ElementNotFound, %q(Button did not show expected state)
             end
           end
@@ -42,7 +42,7 @@ module QA
 
             begin
               has_element? :lock_button, text: 'Lock'
-            rescue
+            rescue StandardError
               raise QA::Page::Base::ElementNotFound, %q(Button did not show expected state)
             end
           end

@@ -13,6 +13,8 @@ class ApplicationSetting < ApplicationRecord
   KROKI_URL_ERROR_MESSAGE = 'Please check your Kroki URL setting in ' \
     'Admin Area > Settings > General > Kroki'
 
+  enum whats_new_variant: { all_tiers: 0, current_tier: 1, disabled: 2 }, _prefix: true
+
   add_authentication_token_field :runners_registration_token, encrypted: -> { Feature.enabled?(:application_settings_tokens_optional_encryption) ? :optional : :required }
   add_authentication_token_field :health_check_access_token
   add_authentication_token_field :static_objects_external_storage_auth_token
@@ -434,6 +436,14 @@ class ApplicationSetting < ApplicationRecord
             presence: true,
             numericality: { only_integer: true, greater_than: 0 }
 
+  validates :throttle_unauthenticated_packages_api_requests_per_period,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_unauthenticated_packages_api_period_in_seconds,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
   validates :throttle_authenticated_api_requests_per_period,
             presence: true,
             numericality: { only_integer: true, greater_than: 0 }
@@ -447,6 +457,14 @@ class ApplicationSetting < ApplicationRecord
             numericality: { only_integer: true, greater_than: 0 }
 
   validates :throttle_authenticated_web_period_in_seconds,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_authenticated_packages_api_requests_per_period,
+            presence: true,
+            numericality: { only_integer: true, greater_than: 0 }
+
+  validates :throttle_authenticated_packages_api_period_in_seconds,
             presence: true,
             numericality: { only_integer: true, greater_than: 0 }
 
@@ -475,35 +493,38 @@ class ApplicationSetting < ApplicationRecord
             allow_nil: true,
             numericality: { only_integer: true, greater_than: 0 }
 
+  validates :whats_new_variant,
+            inclusion: { in: ApplicationSetting.whats_new_variants.keys }
+
   attr_encrypted :asset_proxy_secret_key,
                  mode: :per_attribute_iv,
                  key: Settings.attr_encrypted_db_key_base_truncated,
                  algorithm: 'aes-256-cbc',
                  insecure_mode: true
 
-  private_class_method def self.encryption_options_base_truncated_aes_256_gcm
+  private_class_method def self.encryption_options_base_32_aes_256_gcm
     {
       mode: :per_attribute_iv,
-      key: Settings.attr_encrypted_db_key_base_truncated,
+      key: Settings.attr_encrypted_db_key_base_32,
       algorithm: 'aes-256-gcm',
       encode: true
     }
   end
 
-  attr_encrypted :external_auth_client_key, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :external_auth_client_key_pass, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :lets_encrypt_private_key, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :eks_secret_access_key, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :akismet_api_key, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :elasticsearch_aws_secret_access_key, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :recaptcha_private_key, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :recaptcha_site_key, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :slack_app_secret, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :slack_app_verification_token, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :ci_jwt_signing_key, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :secret_detection_token_revocation_token, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :cloud_license_auth_token, encryption_options_base_truncated_aes_256_gcm
-  attr_encrypted :external_pipeline_validation_service_token, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :external_auth_client_key, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :external_auth_client_key_pass, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :lets_encrypt_private_key, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :eks_secret_access_key, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :akismet_api_key, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :elasticsearch_aws_secret_access_key, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :recaptcha_private_key, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :recaptcha_site_key, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :slack_app_secret, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :slack_app_verification_token, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :ci_jwt_signing_key, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :secret_detection_token_revocation_token, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :cloud_license_auth_token, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :external_pipeline_validation_service_token, encryption_options_base_32_aes_256_gcm
 
   validates :disable_feed_token,
             inclusion: { in: [true, false], message: _('must be a boolean value') }

@@ -553,7 +553,7 @@ describe('Api', () => {
         const params = { ...defaultParams };
         const expectedUrl = valueStreamBaseUrl({
           id: valueStreamId,
-          resource: `stages/${stageId}/duration_chart`,
+          resource: `stages/${stageId}/average_duration_chart`,
         });
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
@@ -780,6 +780,22 @@ describe('Api', () => {
         return Api.updateGeoNode(mockNode).then(({ data }) => {
           expect(data).toEqual(mockNode);
           expect(axios.put).toHaveBeenCalledWith(`${expectedUrl}/${mockNode.id}`, mockNode);
+        });
+      });
+    });
+
+    describe('removeGeoNode', () => {
+      it('DELETES with correct ID', () => {
+        mockNode = {
+          id: 1,
+        };
+
+        jest.spyOn(Api, 'buildUrl').mockReturnValue(`${expectedUrl}/${mockNode.id}`);
+        jest.spyOn(axios, 'delete');
+        mock.onDelete(`${expectedUrl}/${mockNode.id}`).replyOnce(httpStatus.OK, {});
+
+        return Api.removeGeoNode(mockNode.id).then(() => {
+          expect(axios.delete).toHaveBeenCalledWith(`${expectedUrl}/${mockNode.id}`);
         });
       });
     });

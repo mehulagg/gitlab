@@ -18,7 +18,10 @@ import {
   SCAN_TYPE_LABEL,
   SCAN_TYPE,
 } from 'ee/security_configuration/dast_scanner_profiles/constants';
-import { EXCLUDED_URLS_SEPARATOR } from 'ee/security_configuration/dast_site_profiles_form/constants';
+import {
+  EXCLUDED_URLS_SEPARATOR,
+  TARGET_TYPES,
+} from 'ee/security_configuration/dast_site_profiles_form/constants';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { initFormField } from 'ee/security_configuration/utils';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
@@ -233,6 +236,9 @@ export default {
     },
     hasExcludedUrls() {
       return this.selectedSiteProfile.excludedUrls?.length > 0;
+    },
+    targetTypeValue() {
+      return TARGET_TYPES[this.selectedSiteProfile.targetType].text;
     },
     storageKey() {
       return `${this.projectPath}/${ON_DEMAND_SCANS_STORAGE_KEY}`;
@@ -500,6 +506,11 @@ export default {
               :class="{ 'gl-text-red-500': hasProfilesConflict }"
               :label="s__('DastProfiles|Target URL')"
               :value="selectedSiteProfile.targetUrl"
+            />
+            <profile-selector-summary-cell
+              v-if="glFeatures.securityDastSiteProfilesApiOption"
+              :label="s__('DastProfiles|Site type')"
+              :value="targetTypeValue"
             />
           </div>
           <template v-if="glFeatures.securityDastSiteProfilesAdditionalFields">

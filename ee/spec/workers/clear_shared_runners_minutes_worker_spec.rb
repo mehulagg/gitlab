@@ -24,7 +24,7 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
         let(:statistics) { project.statistics }
 
         before do
-          statistics.update(shared_runners_seconds: 100)
+          statistics.update!(shared_runners_seconds: 100)
         end
 
         it 'clears counters' do

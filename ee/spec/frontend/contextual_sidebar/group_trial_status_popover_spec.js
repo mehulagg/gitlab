@@ -10,6 +10,7 @@ describe('TrialStatusPopover component', () => {
   let trackingSpy;
 
   const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+  const findGlPopover = () => wrapper.findComponent(GlPopover);
 
   const createComponent = () => {
     return shallowMount(TrialStatusPopover, {
@@ -33,8 +34,6 @@ describe('TrialStatusPopover component', () => {
     wrapper.destroy();
     wrapper = null;
   });
-
-  const getGlPopover = () => wrapper.findComponent(GlPopover);
 
   it('matches the snapshot', () => {
     expect(wrapper.element).toMatchSnapshot();
@@ -71,14 +70,14 @@ describe('TrialStatusPopover component', () => {
           wrapper.vm.onResize();
           await wrapper.vm.$nextTick();
 
-          expect(getGlPopover().attributes('disabled')).toBe(isDisabled);
+          expect(findGlPopover().attributes('disabled')).toBe(isDisabled);
         },
       );
     });
 
     describe('onShown', () => {
       beforeEach(() => {
-        getGlPopover().vm.$emit('shown');
+        findGlPopover().vm.$emit('shown');
       });
 
       it('dispatches tracking event', () => {

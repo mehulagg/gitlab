@@ -1,5 +1,0 @@
----
-title: Prevent deletion of groups with a subscription via the API
-merge_request: 57533
-author:
-type: fixed

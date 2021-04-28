@@ -1,5 +1,0 @@
----
-title: Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in timebox_report_service_spec.rb
-merge_request: 58317
-author: Abdul Wadood @abdulwd
-type: fixed

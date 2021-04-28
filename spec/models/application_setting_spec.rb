@@ -129,6 +129,11 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(nil).for(:notes_create_limit_allowlist) }
     it { is_expected.to allow_value([]).for(:notes_create_limit_allowlist) }
 
+    it { is_expected.to allow_value('all_tiers').for(:whats_new_variant) }
+    it { is_expected.to allow_value('current_tier').for(:whats_new_variant) }
+    it { is_expected.to allow_value('disabled').for(:whats_new_variant) }
+    it { is_expected.not_to allow_value(nil).for(:whats_new_variant) }
+
     context 'help_page_documentation_base_url validations' do
       it { is_expected.to allow_value(nil).for(:help_page_documentation_base_url) }
       it { is_expected.to allow_value('https://docs.gitlab.com').for(:help_page_documentation_base_url) }
@@ -785,6 +790,10 @@ RSpec.describe ApplicationSetting do
           throttle_authenticated_api_period_in_seconds
           throttle_authenticated_web_requests_per_period
           throttle_authenticated_web_period_in_seconds
+          throttle_unauthenticated_packages_api_requests_per_period
+          throttle_unauthenticated_packages_api_period_in_seconds
+          throttle_authenticated_packages_api_requests_per_period
+          throttle_authenticated_packages_api_period_in_seconds
         ]
       end
 

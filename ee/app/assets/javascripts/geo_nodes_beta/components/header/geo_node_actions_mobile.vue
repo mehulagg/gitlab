@@ -33,7 +33,11 @@ export default {
       <gl-icon name="ellipsis_h" />
     </template>
     <gl-dropdown-item :href="node.webEditUrl">{{ $options.i18n.editButtonLabel }}</gl-dropdown-item>
-    <gl-dropdown-item :disabled="node.primary" data-testid="geo-mobile-remove-action">
+    <gl-dropdown-item
+      :disabled="node.primary"
+      data-testid="geo-mobile-remove-action"
+      @click="$emit('remove')"
+    >
       <span :class="dropdownRemoveClass">{{ $options.i18n.removeButtonLabel }}</span>
     </gl-dropdown-item>
   </gl-dropdown>

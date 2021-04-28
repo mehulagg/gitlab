@@ -100,6 +100,10 @@
 .board-swimlanes {
   overflow-x: auto;
 
+  .board-swimlanes-content {
+    height: fit-content;
+  }
+
   .board-add-new-list {
     height: calc(100% - 1rem);
   }

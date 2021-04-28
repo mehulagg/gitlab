@@ -26,6 +26,37 @@ module Elastic
 
         search(query_hash, options)
       end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def preload_indexing_data(relation)
+        relation.includes(target_project: [:project_feature])
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      private
+
+      # Builds an elasticsearch query that will select documents from a
+      # set of projects for Group and Project searches, taking user access
+      # rules for merge_requests into account. Relies upon super for Global searches
+      def project_ids_filter(query_hash, options)
+        return super if options[:public_and_internal_projects]
+
+        current_user = options[:current_user]
+        scoped_project_ids = scoped_project_ids(current_user, options[:project_ids])
+        return super if scoped_project_ids == :any
+
+        context.name(:project) do
+          query_hash[:query][:bool][:filter] ||= []
+          query_hash[:query][:bool][:filter] << {
+            terms: {
+              _name: context.name,
+              target_project_id: filter_ids_by_feature(scoped_project_ids, current_user, 'merge_requests')
+            }
+          }
+        end
+
+        query_hash
+      end
     end
   end
 end

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Elastic::DocumentReference do
   let_it_be(:issue) { create(:issue) }
+
   let(:project) { issue.project }
 
   let(:issue_as_array) { [Issue, issue.id, issue.es_id, issue.es_parent] }

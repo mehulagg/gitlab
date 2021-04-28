@@ -1,6 +1,0 @@
----
-title: Add confirmation modal for admin signup settings submit button, for cases where
-  pending users could be approved by mistake
-merge_request: 55509
-author:
-type: added

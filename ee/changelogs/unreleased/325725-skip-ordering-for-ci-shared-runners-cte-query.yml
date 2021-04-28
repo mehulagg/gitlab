@@ -1,5 +1,0 @@
----
-title: Skip ordering when using distinct in shared runners CTE query
-merge_request: 57312
-author:
-type: performance

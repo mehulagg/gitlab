@@ -1,5 +1,0 @@
----
-title: Change vulnerabilities GraphQL query to use GlobalID for scanner IDs
-merge_request: 59305
-author:
-type: changed

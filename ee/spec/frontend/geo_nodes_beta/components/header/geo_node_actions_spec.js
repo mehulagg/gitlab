@@ -3,17 +3,24 @@ import Vuex from 'vuex';
 import GeoNodeActions from 'ee/geo_nodes_beta/components/header/geo_node_actions.vue';
 import GeoNodeActionsDesktop from 'ee/geo_nodes_beta/components/header/geo_node_actions_desktop.vue';
 import GeoNodeActionsMobile from 'ee/geo_nodes_beta/components/header/geo_node_actions_mobile.vue';
+import { REMOVE_NODE_MODAL_ID } from 'ee/geo_nodes_beta/constants';
 import {
   MOCK_NODES,
   MOCK_PRIMARY_VERSION,
   MOCK_REPLICABLE_TYPES,
 } from 'ee_jest/geo_nodes_beta/mock_data';
+import waitForPromises from 'helpers/wait_for_promises';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('GeoNodeActions', () => {
   let wrapper;
+
+  const actionSpies = {
+    prepNodeRemoval: jest.fn(),
+  };
 
   const defaultProps = {
     node: MOCK_NODES[0],
@@ -27,6 +34,7 @@ describe('GeoNodeActions', () => {
         replicableTypes: MOCK_REPLICABLE_TYPES,
         ...initialState,
       },
+      actions: actionSpies,
     });
 
     wrapper = shallowMount(GeoNodeActions, {
@@ -43,8 +51,8 @@ describe('GeoNodeActions', () => {
     wrapper.destroy();
   });
 
-  const findGeoMobileActions = () => wrapper.find(GeoNodeActionsMobile);
-  const findGeoDesktopActions = () => wrapper.find(GeoNodeActionsDesktop);
+  const findGeoMobileActions = () => wrapper.findComponent(GeoNodeActionsMobile);
+  const findGeoDesktopActions = () => wrapper.findComponent(GeoNodeActionsDesktop);
 
   describe('template', () => {
     beforeEach(() => {
@@ -62,6 +70,51 @@ describe('GeoNodeActions', () => {
         'gl-display-none',
         'gl-lg-display-flex',
       ]);
+    });
+  });
+
+  describe('events', () => {
+    describe('remove', () => {
+      beforeEach(() => {
+        createComponent();
+        jest.spyOn(wrapper.vm.$root, '$emit');
+      });
+
+      it('preps node for removal and opens model after promise returns on desktop', async () => {
+        findGeoDesktopActions().vm.$emit('remove');
+
+        expect(actionSpies.prepNodeRemoval).toHaveBeenCalledWith(
+          expect.any(Object),
+          MOCK_NODES[0].id,
+        );
+
+        expect(wrapper.vm.$root.$emit).not.toHaveBeenCalledWith(
+          BV_SHOW_MODAL,
+          REMOVE_NODE_MODAL_ID,
+        );
+
+        await waitForPromises();
+
+        expect(wrapper.vm.$root.$emit).toHaveBeenCalledWith(BV_SHOW_MODAL, REMOVE_NODE_MODAL_ID);
+      });
+
+      it('preps node for removal and opens model after promise returns on mobile', async () => {
+        findGeoMobileActions().vm.$emit('remove');
+
+        expect(actionSpies.prepNodeRemoval).toHaveBeenCalledWith(
+          expect.any(Object),
+          MOCK_NODES[0].id,
+        );
+
+        expect(wrapper.vm.$root.$emit).not.toHaveBeenCalledWith(
+          BV_SHOW_MODAL,
+          REMOVE_NODE_MODAL_ID,
+        );
+
+        await waitForPromises();
+
+        expect(wrapper.vm.$root.$emit).toHaveBeenCalledWith(BV_SHOW_MODAL, REMOVE_NODE_MODAL_ID);
+      });
     });
   });
 });

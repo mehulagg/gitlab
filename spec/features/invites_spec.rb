@@ -64,13 +64,12 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
       expect(find_field('Email').value).to eq(group_invite.invite_email)
     end
 
-    it 'sign in, grants access and redirects to group page' do
+    it 'sign in, grants access and redirects to group activity page' do
       click_link 'Sign in'
 
       fill_in_sign_in_form(user)
 
-      expect(current_path).to eq(group_path(group))
-      expect(page).to have_content('You have been granted Developer access to group Owned.')
+      expect(current_path).to eq(activity_group_path(group))
     end
   end
 
@@ -91,7 +90,6 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
     let(:new_user) { build_stubbed(:user) }
     let(:invite_email) { new_user.email }
     let(:group_invite) { create(:group_member, :invited, group: group, invite_email: invite_email, created_by: owner) }
-    let!(:project_invite) { create(:project_member, :invited, project: project, invite_email: invite_email) }
 
     context 'when registering using invitation email' do
       before do
@@ -117,26 +115,22 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
       context 'email confirmation disabled' do
         let(:send_email_confirmation) { false }
 
-        it 'signs up and redirects to the dashboard page with all the projects/groups invitations automatically accepted' do
+        it 'signs up and redirects to the most recent membership activity page with all the projects/groups invitations automatically accepted' do
           fill_in_sign_up_form(new_user)
           fill_in_welcome_form
 
-          expect(current_path).to eq(dashboard_projects_path)
-          expect(page).to have_content(project.full_name)
-
-          visit group_path(group)
-
-          expect(page).to have_content(group.full_name)
+          expect(current_path).to eq(activity_group_path(group))
+          expect(page).to have_content('You have been granted Owner access to group Owned.')
         end
 
         context 'the user sign-up using a different email address' do
           let(:invite_email) { build_stubbed(:user).email }
 
-          it 'signs up and redirects to the invitation page' do
+          it 'signs up and redirects to the activity page' do
             fill_in_sign_up_form(new_user)
             fill_in_welcome_form
 
-            expect(current_path).to eq(invite_path(group_invite.raw_invite_token))
+            expect(current_path).to eq(activity_group_path(group))
           end
         end
       end
@@ -149,18 +143,11 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
             allow(User).to receive(:allow_unconfirmed_access_for).and_return 0
           end
 
-          it 'signs up and redirects to root page with all the project/groups invitation automatically accepted' do
+          it 'signs up and redirects to the group activity page with all the project/groups invitation automatically accepted' do
             fill_in_sign_up_form(new_user)
-            confirm_email(new_user)
-            fill_in_sign_in_form(new_user)
             fill_in_welcome_form
 
-            expect(current_path).to eq(root_path)
-            expect(page).to have_content(project.full_name)
-
-            visit group_path(group)
-
-            expect(page).to have_content(group.full_name)
+            expect(current_path).to eq(activity_group_path(group))
           end
         end
 
@@ -169,27 +156,12 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
             allow(User).to receive(:allow_unconfirmed_access_for).and_return 2.days
           end
 
-          it 'signs up and redirects to root page with all the project/groups invitation automatically accepted' do
+          it 'signs up and redirects to to the group activity page with all the project/groups invitation automatically accepted' do
             fill_in_sign_up_form(new_user)
             fill_in_welcome_form
-            confirm_email(new_user)
 
-            expect(current_path).to eq(root_path)
-            expect(page).to have_content(project.full_name)
-
-            visit group_path(group)
-
-            expect(page).to have_content(group.full_name)
+            expect(current_path).to eq(activity_group_path(group))
           end
-        end
-
-        it "doesn't accept invitations until the user confirms their email" do
-          fill_in_sign_up_form(new_user)
-          fill_in_welcome_form
-          sign_in(owner)
-
-          visit project_project_members_path(project)
-          expect(page).to have_content 'Invited'
         end
 
         context 'the user sign-up using a different email address' do
@@ -201,13 +173,13 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
               allow(User).to receive(:allow_unconfirmed_access_for).and_return 0
             end
 
-            it 'signs up and redirects to the invitation page' do
+            it 'signs up and redirects to the group activity page' do
               fill_in_sign_up_form(new_user)
               confirm_email(new_user)
               fill_in_sign_in_form(new_user)
               fill_in_welcome_form
 
-              expect(current_path).to eq(invite_path(group_invite.raw_invite_token))
+              expect(current_path).to eq(activity_group_path(group))
             end
           end
 
@@ -217,11 +189,11 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
               allow(User).to receive(:allow_unconfirmed_access_for).and_return 2.days
             end
 
-            it 'signs up and redirects to the invitation page' do
+            it 'signs up and redirects to the group activity page' do
               fill_in_sign_up_form(new_user)
               fill_in_welcome_form
 
-              expect(current_path).to eq(invite_path(group_invite.raw_invite_token))
+              expect(current_path).to eq(activity_group_path(group))
             end
           end
         end
@@ -273,7 +245,7 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
       end
     end
 
-    context 'when accepting the invitation' do
+    context 'when accepting the invitation as an existing user' do
       let(:send_email_confirmation) { true }
 
       before do
@@ -281,12 +253,12 @@ RSpec.describe 'Group or Project invitations', :aggregate_failures do
         visit invite_path(group_invite.raw_invite_token)
       end
 
-      it 'grants access and redirects to group page' do
+      it 'grants access and redirects to the group activity page' do
         expect(group.users.include?(user)).to be false
 
         page.click_link 'Accept invitation'
 
-        expect(current_path).to eq(group_path(group))
+        expect(current_path).to eq(activity_group_path(group))
         expect(page).to have_content('You have been granted Owner access to group Owned.')
         expect(group.users.include?(user)).to be true
       end

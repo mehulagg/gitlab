@@ -61,7 +61,7 @@ module Gitlab
           sessions = ActiveSession.list_sessions(user)
           sessions.filter_map do |session|
             Gitlab::NamespacedSessionStore.new(SESSION_STORE_KEY, session.with_indifferent_access)[saml_provider.id]
-          end.last
+          end.max
         end
       end
     end

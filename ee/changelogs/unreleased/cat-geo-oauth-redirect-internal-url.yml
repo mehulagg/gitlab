@@ -1,6 +1,0 @@
----
-title: Update Geo OAuth redirect URI to use the external primary URL even when an
-  internal URL exists
-merge_request: 58966
-author:
-type: fixed

@@ -5,6 +5,10 @@ import GeoNodeHeader from './header/geo_node_header.vue';
 
 export default {
   name: 'GeoNodes',
+  i18n: {
+    primarySite: s__('Geo|Primary site'),
+    secondarySite: s__('Geo|Secondary site'),
+  },
   components: {
     GeoNodeHeader,
     GeoNodeDetails,
@@ -24,7 +28,7 @@ export default {
   },
   computed: {
     siteTitle() {
-      return this.node.primary ? s__('Geo|Primary site') : s__('Geo|Secondary site');
+      return this.node.primary ? this.$options.i18n.primarySite : this.$options.i18n.secondarySite;
     },
   },
   methods: {

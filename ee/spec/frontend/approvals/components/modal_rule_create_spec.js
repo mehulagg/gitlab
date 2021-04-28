@@ -1,4 +1,5 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import ModalRuleCreate from 'ee/approvals/components/modal_rule_create.vue';
 import RuleForm from 'ee/approvals/components/rule_form.vue';
@@ -9,8 +10,7 @@ const TEST_MODAL_ID = 'test-modal-create-id';
 const TEST_RULE = { id: 7 };
 const MODAL_MODULE = 'createModal';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('Approvals ModalRuleCreate', () => {
   let createModalState;
@@ -36,9 +36,8 @@ describe('Approvals ModalRuleCreate', () => {
       ...options.propsData,
     };
 
-    wrapper = shallowMount(localVue.extend(ModalRuleCreate), {
+    wrapper = shallowMount(ModalRuleCreate, {
       ...options,
-      localVue,
       store,
       propsData,
       stubs: {

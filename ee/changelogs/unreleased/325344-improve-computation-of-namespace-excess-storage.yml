@@ -1,5 +1,0 @@
----
-title: Improve computation of excess repository storage size
-merge_request: 57088
-author:
-type: performance

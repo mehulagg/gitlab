@@ -5,7 +5,7 @@ module Gitlab
     class Loader
       include ::Gitlab::Utils::StrongMemoize
 
-      def initialize(project, ref, paths)
+      def initialize(project, ref, paths = [])
         @project = project
         @ref = ref
         @paths = Array(paths)

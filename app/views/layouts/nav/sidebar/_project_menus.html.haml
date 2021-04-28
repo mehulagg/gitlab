@@ -1,72 +1,3 @@
-- if project_nav_tab? :issues
-  = nav_link(controller: @project.issues_enabled? ? ['projects/issues', :labels, :milestones, :boards, :iterations] : 'projects/issues') do
-    = link_to project_issues_path(@project), class: 'shortcuts-issues qa-issues-item' do
-      .nav-icon-container
-        = sprite_icon('issues')
-      %span.nav-item-name#js-onboarding-issues-link
-        = _('Issues')
-      - if @project.issues_enabled?
-        %span.badge.badge-pill.count.issue_counter
-          = number_with_delimiter(@project.open_issues_count(current_user))
-
-    %ul.sidebar-sub-level-items
-      = nav_link(controller: 'projects/issues', action: :index, html_options: { class: "fly-out-top-item" } ) do
-        = link_to project_issues_path(@project) do
-          %strong.fly-out-top-item-name
-            = _('Issues')
-          - if @project.issues_enabled?
-            %span.badge.badge-pill.count.issue_counter.fly-out-badge
-              = number_with_delimiter(@project.open_issues_count(current_user))
-      %li.divider.fly-out-top-item
-      = nav_link(controller: :issues, action: :index) do
-        = link_to project_issues_path(@project), title: _('Issues') do
-          %span
-            = _('List')
-
-      = nav_link(controller: :boards) do
-        = link_to project_boards_path(@project), title: boards_link_text, data: { qa_selector: "issue_boards_link" } do
-          %span
-            = boards_link_text
-
-      = nav_link(controller: :labels) do
-        = link_to project_labels_path(@project), title: _('Labels'), class: 'qa-labels-link' do
-          %span
-            = _('Labels')
-
-      = render 'projects/sidebar/issues_service_desk'
-
-      = nav_link(controller: :milestones) do
-        = link_to project_milestones_path(@project), title: _('Milestones'), class: 'qa-milestones-link' do
-          %span
-            = _('Milestones')
-
-      = render_if_exists 'layouts/nav/sidebar/project_iterations_link'
-
-- if project_nav_tab?(:external_issue_tracker)
-  - issue_tracker = @project.external_issue_tracker
-  - if issue_tracker.is_a?(JiraService) && project_jira_issues_integration?
-    = render_if_exists 'layouts/nav/sidebar/project_jira_issues_link', issue_tracker: issue_tracker
-  - else
-    = nav_link do
-      = link_to issue_tracker.issue_tracker_path, target: '_blank', rel: 'noopener noreferrer', class: 'shortcuts-external_tracker' do
-        .nav-icon-container
-          = sprite_icon('external-link')
-        %span.nav-item-name
-          = issue_tracker.title
-      %ul.sidebar-sub-level-items.is-fly-out-only
-        = nav_link(html_options: { class: "fly-out-top-item" } ) do
-          = link_to issue_tracker.issue_tracker_path, target: '_blank', rel: 'noopener noreferrer' do
-            %strong.fly-out-top-item-name
-              = issue_tracker.title
-
-- if (project_nav_tab? :labels) && !@project.issues_enabled?
-  = nav_link(controller: [:labels]) do
-    = link_to project_labels_path(@project), title: _('Labels'), class: 'shortcuts-labels qa-labels-items' do
-      .nav-icon-container
-        = sprite_icon('label')
-      %span.nav-item-name#js-onboarding-labels-link
-        = _('Labels')
-
 - if project_nav_tab? :merge_requests
   = nav_link(controller: @project.issues_enabled? ? :merge_requests : [:merge_requests, :milestones]) do
     = link_to project_merge_requests_path(@project), class: 'shortcuts-merge_requests', data: { qa_selector: 'merge_requests_link' } do
@@ -343,6 +274,11 @@
             = link_to project_pages_path(@project), title: _('Pages') do
               %span
                 = _('Pages')
+        - if settings_packages_and_registries_enabled?(@project)
+          = nav_link(controller: :packages_and_registries) do
+            = link_to project_settings_packages_and_registries_path(@project), title: _('Packages & Registries'), data: { qa_selector: 'project_package_settings_link' } do
+              %span
+                = _('Packages & Registries')
 
 -# Shortcut to Project > Activity
 %li.hidden

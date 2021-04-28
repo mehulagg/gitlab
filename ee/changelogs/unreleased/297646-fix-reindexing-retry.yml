@@ -1,5 +1,0 @@
----
-title: Fix reindexing retry for the notes migration
-merge_request: 57248
-author:
-type: fixed

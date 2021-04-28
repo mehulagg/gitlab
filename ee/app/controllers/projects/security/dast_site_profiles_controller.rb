@@ -9,6 +9,7 @@ module Projects
       before_action do
         authorize_read_on_demand_scans!
         push_frontend_feature_flag(:security_dast_site_profiles_additional_fields, @project, default_enabled: :yaml)
+        push_frontend_feature_flag(:security_dast_site_profiles_api_option, @project, default_enabled: :yaml)
       end
 
       feature_category :dynamic_application_security_testing
@@ -26,6 +27,7 @@ module Projects
                 id
                 name: profileName
                 targetUrl
+                targetType
                 excludedUrls
                 requestHeaders
                 auth { enabled url username usernameField password passwordField }

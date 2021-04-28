@@ -42,6 +42,11 @@ export const FIELDS = [
     sortable: true,
   },
   {
+    key: 'issue',
+    label: s__('ThreatMonitoring|Incident'),
+    thClass: 'gl-bg-white! gl-w-15p',
+  },
+  {
     key: 'status',
     label: s__('ThreatMonitoring|Status'),
     thAttr: { 'data-testid': 'threat-alerts-status-header' },
@@ -60,3 +65,5 @@ export const DOMAIN = 'threat_monitoring';
 export const DEBOUNCE = 250;
 
 export const ALL = { key: 'ALL', value: __('All') };
+
+export const CLOSED = __('closed');
