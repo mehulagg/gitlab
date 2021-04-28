@@ -40,15 +40,17 @@ module Banzai
 
       def fetch_linkable_attributes
         attrs = []
-
-        attr_names = %w[href src data-src]
-        tag_names = %w[a img video audio]
-        # we need to add `not(.gfm)` here
-        xpath_query = tag_names.product(attr_names).map {|a| ".//#{a[0]}[not(@gfm)]/@#{a[1]}"}.join('|')
         attrs += doc.xpath(xpath_query)
-
-        # maybe we could embed this into the xpath query too? (for the next iteration)
         attrs.reject { |attr| attr.blank? || attr.value.start_with?('//') }
+      end
+
+      def xpath_query
+        strong_memoize(:xpath_query) do
+          attr_names = %w[href src data-src]
+          tag_names = %w[a img video audio]
+
+          tag_names.product(attr_names).map {|a| ".//#{a[0]}[not(@gfm)]/@#{a[1]}"}.join('|')
+        end
       end
     end
   end
