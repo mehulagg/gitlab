@@ -307,6 +307,11 @@ module Ci
           build.pipeline.persistent_ref.create
 
           BuildHooksWorker.perform_async(id)
+
+          # TODO: this should probably be done async
+          if build.runner.instance_type?
+            Gitlab::Ci::SharedRunners::Concurrency.new(build).increment
+          end
         end
       end
 
@@ -315,6 +320,11 @@ module Ci
           build.run_status_commit_hooks!
 
           BuildFinishedWorker.perform_async(id)
+
+          # TODO: this should probably be done async
+          if build.runner.instance_type?
+            Gitlab::Ci::SharedRunners::Concurrency.new(build).decrement
+          end
         end
       end
 

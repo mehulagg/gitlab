@@ -139,6 +139,11 @@ module Ci
         return
       end
 
+      if concurrency_exceeded?(runner, build)
+        @metrics.increment_queue_operation(:build_concurrency_limit)
+        return
+      end
+
       if runner.can_pick?(build)
         @metrics.increment_queue_operation(:build_can_pick)
       else
@@ -306,6 +311,10 @@ module Ci
         runner_unsupported: -> (build, params) { !build.supported_runner?(params.dig(:info, :features)) },
         archived_failure: -> (build, _) { build.archived? }
       }
+    end
+
+    def concurrency_exceeded?(_runner, _build)
+      false
     end
   end
 end

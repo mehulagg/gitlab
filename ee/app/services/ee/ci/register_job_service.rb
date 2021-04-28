@@ -104,6 +104,13 @@ module EE
           secrets_provider_not_found: -> (build, _) { build.ci_secrets_management_available? && build.secrets? && !build.secrets_provider? }
         })
       end
+
+      override :concurrency_exceeded?
+      def concurrency_exceeded?(runner, build)
+        return false unless runner.instance_type?
+
+        Gitlab::Ci::SharedRunners::Concurrency.new(build).exceeded?
+      end
     end
   end
 end
