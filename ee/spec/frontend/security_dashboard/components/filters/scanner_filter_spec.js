@@ -27,6 +27,7 @@ const scanners = [
   createScannerConfig(DEFAULT_SCANNER, 'CONTAINER_SCANNING', 'klar'),
   createScannerConfig(DEFAULT_SCANNER, 'COVERAGE_FUZZING', 'libfuzzer'),
   createScannerConfig(DEFAULT_SCANNER, 'SAST', 'pmd-apex'),
+  createScannerConfig(DEFAULT_SCANNER, 'SAST', 'semgrep'),
   createScannerConfig(DEFAULT_SCANNER, 'SAST', 'sobelow'),
   createScannerConfig(DEFAULT_SCANNER, 'SAST', 'tslint'),
   createScannerConfig(DEFAULT_SCANNER, 'DAST', 'zaproxy'),
