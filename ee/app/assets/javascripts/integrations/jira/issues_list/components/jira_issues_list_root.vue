@@ -51,7 +51,7 @@ export default {
     return {
       jiraLogo,
       issues: [],
-      issuesListLoading: false,
+      issuesListLoading: true,
       issuesListLoadFailed: false,
       totalIssues: 0,
       currentState: this.initialState,
@@ -206,19 +206,19 @@ export default {
     </template>
     <template #reference="{ issuable }">
       <span v-safe-html="jiraLogo" class="svg-container jira-logo-container"></span>
-      <span>{{ issuable.references.relative }}</span>
+      <span v-if="issuable">{{ issuable.references.relative }}</span>
     </template>
     <template #author="{ author }">
       <gl-sprintf message="%{authorName} in Jira">
         <template #authorName>
-          <gl-link class="author-link js-user-link" target="_blank" :href="author.webUrl"
-            >{{ author.name }}
+          <gl-link class="author-link js-user-link" target="_blank" :href="author.webUrl">
+            {{ author.name }}
           </gl-link>
         </template>
       </gl-sprintf>
     </template>
     <template #status="{ issuable }">
-      {{ issuable.status }}
+      <template v-if="issuable"> {{ issuable.status }} </template>
     </template>
     <template #empty-state>
       <jira-issues-list-empty-state
