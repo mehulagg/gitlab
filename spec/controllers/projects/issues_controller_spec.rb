@@ -528,6 +528,23 @@ RSpec.describe Projects::IssuesController do
           expect(response).to have_gitlab_http_status(:ok)
           expect(issue1.relative_position)
             .to be_between(issue2.relative_position, issue3.relative_position)
+          expect(assigns(:show_positioning_disabled_alert)).to eq(nil)
+        end
+
+        context 'when block_issue_repositioning flag is enabled' do
+          before do
+            stub_feature_flags(block_issue_repositioning: true)
+          end
+
+          it 'sets instance variable to show alert on UI' do
+            reorder_issue(issue1,
+              move_after_id: issue2.id,
+              move_before_id: issue3.id,
+              group_full_path: group.full_path)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(assigns(:show_positioning_disabled_alert)).to eq(true)
+          end
         end
       end
 

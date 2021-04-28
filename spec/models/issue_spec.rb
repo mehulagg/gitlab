@@ -1140,8 +1140,8 @@ RSpec.describe Issue do
       it 'does not move issues with null position' do
         payload = [issue1, issue2]
 
-        expect(described_class.move_nulls_to_end(payload)).to eq(nil)
-        expect(described_class.move_nulls_to_start(payload)).to eq(nil)
+        expect { described_class.move_nulls_to_end(payload) }.to raise_error(Gitlab::RelativePositioning::IssuePositioningDisabled)
+        expect { described_class.move_nulls_to_start(payload) }.to raise_error(Gitlab::RelativePositioning::IssuePositioningDisabled)
       end
     end
   end

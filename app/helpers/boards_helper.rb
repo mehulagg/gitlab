@@ -5,6 +5,13 @@ module BoardsHelper
     @board ||= @board || @boards.first
   end
 
+  def issue_repositioning_disabled?
+    namespace =
+      board.group_board? ? board.resource_parent : board.resource_parent.root_namespace
+
+    namespace.issue_repositioning_disabled?
+  end
+
   def board_data
     {
       boards_endpoint: @boards_endpoint,

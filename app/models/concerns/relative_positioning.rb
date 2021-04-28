@@ -83,7 +83,8 @@ module RelativePositioning
     def move_nulls(objects, at_end:)
       objects = objects.reject(&:relative_position)
       return 0 if objects.empty?
-      return if RelativePositioning.reposition_blocked_for?(objects.first)
+
+      RelativePositioning.check_repositioning_allowed_for!(objects.first)
 
       number_of_gaps = objects.size # 1 to the nearest neighbour, and one between each
       representative = RelativePositioning.mover.context(objects.first)
@@ -127,10 +128,12 @@ module RelativePositioning
 
   # Temporary disable moving null elements because of performance problems
   # For more information check https://gitlab.com/gitlab-com/gl-infra/production/-/issues/4321
-  def self.reposition_blocked_for?(object)
-    return false unless object.instance_of?(Issue)
+  def self.check_repositioning_allowed_for!(object)
+    return unless object.instance_of?(Issue)
 
-    object.resource_parent.root_namespace&.issue_repositioning_disabled? || false
+    if object.resource_parent.root_namespace&.issue_repositioning_disabled?
+      raise ::Gitlab::RelativePositioning::IssuePositioningDisabled, "Issue relative position changes temporarily disabled."
+    end
   end
 
   def self.mover
