@@ -7,7 +7,7 @@ product_group: group::package
 product_category: container registry
 value_type: number
 status: data_not_available
-time_frame: all
+time_frame: 7d
 data_source:
 distribution:
 - ee

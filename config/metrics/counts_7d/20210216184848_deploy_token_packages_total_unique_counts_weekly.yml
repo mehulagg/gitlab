@@ -1,15 +1,19 @@
 ---
 key_path: redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_weekly
-description: ''
-product_section: ''
-product_stage: ''
-product_group: ''
-product_category: ''
+description: A weekly count of packages published to the registry using a deploy token
+product_section: ops
+product_stage: package
+product_group: group::package
+product_category: package registry
 value_type: number
-status: data_available
+status: data_not_available
 time_frame: 7d
-data_source: redis_hll
+data_source:
 distribution:
 - ee
-tier: []
-skip_validation: true
+- ce
+tier:
+- free
+- premium
+- ultimate
+skip_validation: false
