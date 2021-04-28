@@ -6,7 +6,7 @@ class WebexTeamsService < ChatNotificationService
   end
 
   def description
-    'Receive event notifications in Webex Teams'
+    s_('Integrations|Send notifications about project events to Webex Teams.')
   end
 
   def self.to_param
