@@ -213,14 +213,6 @@ Hovering over a stage item displays a popover with the following information:
 - Start event description for the given stage
 - End event description
 
-Horizontal path navigation is enabled by default. If you have a self-managed instance, an
-administrator can [open a Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md)
-and disable it with the following command:
-
-```ruby
-Feature.disable(:value_stream_analytics_path_navigation)
-```
-
 ### Adding a stage
 
 In the following example we're creating a new stage that measures and tracks issues from creation

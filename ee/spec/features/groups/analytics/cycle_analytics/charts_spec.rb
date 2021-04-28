@@ -42,11 +42,8 @@ RSpec.describe 'Value stream analytics charts', :js do
 
   context 'Duration chart' do
     duration_stage_selector = '.js-dropdown-stages'
-    stage_nav_selector = '.stage-nav'
-    stage_table_selector = '.js-stage-table'
 
     let(:duration_chart_dropdown) { page.find(duration_stage_selector) }
-    let(:first_default_stage) { page.find('.stage-nav-item-cell', text: 'Issue').ancestor('.stage-nav-item') }
     let(:custom_value_stream_name) { "New created value stream" }
 
     let_it_be(:translated_default_stage_names) do
@@ -92,34 +89,6 @@ RSpec.describe 'Value stream analytics charts', :js do
       toggle_duration_chart_dropdown
 
       expect(duration_chart_stages).not_to include(first_stage_name)
-    end
-
-    context 'With the path navigation feature flag disabled' do
-      let(:nav) { page.find(stage_nav_selector) }
-
-      before do
-        stub_feature_flags(value_stream_analytics_path_navigation: false)
-        select_group(group, stage_table_selector)
-      end
-
-      it_behaves_like 'has all the default stages'
-
-      context 'hidden stage' do
-        before do
-          toggle_more_options(first_default_stage)
-
-          click_button(_('Hide stage'))
-        end
-
-        it 'will not appear in the duration chart dropdown' do
-          # wait for the stage list to laod
-          expect(nav).to have_content(s_('CycleAnalyticsStage|Plan'))
-
-          toggle_duration_chart_dropdown
-
-          expect(duration_chart_stages).not_to include(s_('CycleAnalyticsStage|Issue'))
-        end
-      end
     end
   end
 

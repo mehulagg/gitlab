@@ -172,40 +172,11 @@ export const receiveGroupStagesError = ({ commit }, error) => {
   });
 };
 
-export const setDefaultSelectedStage = ({ state: { featureFlags }, dispatch, getters }) => {
-  const { activeStages = [] } = getters;
+export const setDefaultSelectedStage = ({ dispatch }) =>
+  dispatch('setSelectedStage', OVERVIEW_STAGE_CONFIG);
 
-  if (featureFlags?.hasPathNavigation) {
-    return dispatch('setSelectedStage', OVERVIEW_STAGE_CONFIG);
-  }
-
-  if (activeStages?.length) {
-    const [firstActiveStage] = activeStages;
-    return Promise.all([
-      dispatch('setSelectedStage', firstActiveStage),
-      dispatch('fetchStageData', firstActiveStage.slug),
-    ]);
-  }
-
-  createFlash({
-    message: __('There was an error while fetching value stream analytics data.'),
-  });
-
-  return Promise.resolve();
-};
-
-export const receiveGroupStagesSuccess = (
-  { state: { featureFlags }, commit, dispatch },
-  stages,
-) => {
+export const receiveGroupStagesSuccess = ({ commit }, stages) =>
   commit(types.RECEIVE_GROUP_STAGES_SUCCESS, stages);
-
-  if (!featureFlags?.hasPathNavigation) {
-    return dispatch('setDefaultSelectedStage');
-  }
-
-  return Promise.resolve();
-};
 
 export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
   const {

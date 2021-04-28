@@ -177,42 +177,23 @@ describe('Value Stream Analytics mutations', () => {
   });
 
   describe(`${types.RECEIVE_STAGE_MEDIANS_SUCCESS}`, () => {
-    it('sets each id as a key in the median object with the corresponding value and error', () => {
-      const stateWithData = {
+    beforeEach(() => {
+      state = {
         medians: {},
       };
 
-      mutations[types.RECEIVE_STAGE_MEDIANS_SUCCESS](stateWithData, [
-        { id: 1, value: 20 },
-        { id: 2, value: 10 },
+      mutations[types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, [
+        { id: 1, value: 7580 },
+        { id: 2, value: 434340 },
       ]);
-
-      expect(stateWithData.medians).toEqual({
-        1: { value: 20, error: null },
-        2: { value: 10, error: null },
-      });
     });
 
-    describe('with hasPathNavigation set to true', () => {
-      beforeEach(() => {
-        state = {
-          featureFlags: { hasPathNavigation: true },
-          medians: {},
-        };
+    it('formats each stage median for display in the path navigation', () => {
+      expect(state.medians).toMatchObject({ 1: '2h', 2: '5d' });
+    });
 
-        mutations[types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, [
-          { id: 1, value: 7580 },
-          { id: 2, value: 434340 },
-        ]);
-      });
-
-      it('formats each stage median for display in the path navigation', () => {
-        expect(state.medians).toMatchObject({ 1: '2h', 2: '5d' });
-      });
-
-      it('calculates the overview median', () => {
-        expect(state.medians).toMatchObject({ overview: '5d' });
-      });
+    it('calculates the overview median', () => {
+      expect(state.medians).toMatchObject({ overview: '5d' });
     });
   });
 

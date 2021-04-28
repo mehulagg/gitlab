@@ -172,44 +172,6 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
     end
   end
 
-  context 'with path navigation feature flag disabled' do
-    before do
-      stub_feature_flags(value_stream_analytics_path_navigation: false)
-
-      select_group(group, '.js-stage-table')
-    end
-
-    it 'does not show the path navigation' do
-      expect(page).not_to have_selector(path_nav_selector)
-    end
-
-    it 'shows the vertical stage navigation' do
-      expect(page).to have_selector(stage_nav_selector, visible: true)
-    end
-
-    it 'displays the default list of stages' do
-      stage_nav = page.find(stage_nav_selector)
-
-      %w[Issue Plan Code Test Review Staging].each do |item|
-        string_id = "CycleAnalytics|#{item}"
-        expect(stage_nav).to have_content(s_(string_id))
-      end
-    end
-
-    it 'each stage will have median values', :sidekiq_might_not_need_inline do
-      stage_medians = page.all('.stage-nav .stage-median').collect(&:text)
-
-      expect(stage_medians).to eq(["Not enough data"] * 6)
-    end
-
-    it 'displays the stage table headers' do
-      expect(page).to have_selector('.stage-header', visible: true)
-      expect(page).to have_selector('.median-header', visible: true)
-      expect(page).to have_selector('.event-header', visible: true)
-      expect(page).to have_selector('.total-time-header', visible: true)
-    end
-  end
-
   context 'without valid query parameters set' do
     context 'with created_after date > created_before date' do
       before do
