@@ -1,5 +1,6 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
+import { fetchPolicies } from '~/lib/graphql';
 import {
   subscriptionActivationNotificationText,
   subscriptionActivationTitle,
@@ -35,6 +36,7 @@ export default {
   },
   apollo: {
     currentSubscription: {
+      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
       query: subscriptionQueries.query,
       update({ currentLicense }) {
         return currentLicense || {};
