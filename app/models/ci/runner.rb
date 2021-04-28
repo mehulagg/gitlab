@@ -200,13 +200,6 @@ module Ci
       end
     end
 
-    def runner_scope
-      strong_memoize(:runner_scope) do
-        next Limitable::Scope.new('ci_registered_instance_runners', Plan.default.actual_limits, self.class.instance_type) if instance_type?
-        next Limitable::Scope.new('ci_registered_group_runners', groups.first.actual_limits, self.class.belonging_to_group(groups.first.id)) if group_type?
-      end
-    end
-
     def assign_to(project, current_user = nil)
       if instance_type?
         self.runner_type = :project_type
@@ -344,6 +337,12 @@ module Ci
 
     def uncached_contacted_at
       read_attribute(:contacted_at)
+    end
+
+    def runner_scope
+      strong_memoize(:runner_scope) do
+        Limitable::Scope.new('ci_registered_instance_runners', -> { Plan.default.actual_limits }, self.class.instance_type) if instance_type?
+      end
     end
 
     private
