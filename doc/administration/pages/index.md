@@ -1125,8 +1125,8 @@ gitlab_pages['listen_proxy'] = '127.0.0.1:8090'
 ### Intermittent 502 errors or after a few days
 
 If you run Pages on a system that uses `systemd` and
-[`tmpfiles.d`](https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html)
-you may encounter intermittent 502 errors trying to serve Pages with a similar error:
+[`tmpfiles.d`](https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html),
+you may encounter intermittent 502 errors trying to serve Pages with an error similar to:
 
 ```plaintext
 dial tcp: lookup gitlab.example.com on [::1]:53: dial udp [::1]:53: connect: no route to host"
@@ -1137,14 +1137,20 @@ inside `/tmp/gitlab-pages-*` that includes files like `/etc/hosts`.
 However, `systemd` may clean the `/tmp/` directory on a regular basis so the DNS
 configuration may be lost.
 
-To stop `systemd` from cleaning the Pages related content, run the following command:
+To stop `systemd` from cleaning the Pages related content:
 
-```shell
-echo 'x /tmp/gitlab-pages-*' >> /etc/tmpfiles.d/gitlab-pages-jail.conf
-```
+1. Tell `tmpfiles.d` to not remove the Pages `/tmp` directory:
 
-Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab with
-`sudo gitlab-ctl restart`.
+   ```shell
+   echo 'x /tmp/gitlab-pages-*' >> /etc/tmpfiles.d/gitlab-pages-jail.conf
+   ```
+
+1. Reconfigure and restart GitLab:
+
+   ```shell
+   sudo gitlab-ctl reconfigure
+   sudo gitlab-ctl restart
+   ```
 
 ### 404 error after transferring the project to a different group or user, or changing project path
 
