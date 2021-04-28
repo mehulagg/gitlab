@@ -45,6 +45,17 @@ RSpec::Matchers.define :match_response_schema do |schema, dir: nil, **options|
   end
 end
 
+RSpec::Matchers.define :match_snowplow_schema do |schema, dir: nil, **options|
+  match do |response|
+    schema_path = Pathname.new(SchemaPath.expand(schema, dir))
+    validator = SchemaPath.validator(schema_path)
+
+    data = Gitlab::Json.parse(response.body)
+
+    validator.valid?(data)
+  end
+end
+
 RSpec::Matchers.define :match_schema do |schema, dir: nil, **options|
   match do |data|
     schema = SchemaPath.expand(schema, dir)
