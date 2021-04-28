@@ -166,10 +166,9 @@ actions of the user.
 At no time is any personal information sent to GitLab Inc. by your GitLab instance or by your
 company because of turning this on.
 
-An instance administrator can configure this setting for all users.
-
-If you choose to opt out, your setting overrides the instance-wide setting, even when an
-administrator later enables these emails for all users.
+An instance administrator can configure this setting for all users. If you choose to opt out, your
+setting overrides the instance-wide setting, even when an administrator later enables these emails
+for all users.
 
 ## Notification events
 
