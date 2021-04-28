@@ -1,0 +1,5 @@
+---
+title: De-duplicate binary commit diff lookups
+merge_request: 60486
+author:
+type: performance
