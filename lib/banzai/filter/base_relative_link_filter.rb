@@ -41,10 +41,10 @@ module Banzai
       def fetch_linkable_attributes
         attrs = []
 
-        attr_names = ['href', 'src', 'data-src']
-        tag_names = ['a', 'img', 'video', 'audio']
+        attr_names = %w[href src data-src]
+        tag_names = %w[a img video audio]
         # we need to add `not(.gfm)` here
-        xpath_query = tag_names.product(attr_names).map {|a| ".//#{a[0]}/@#{a[1]}"}.join('|')
+        xpath_query = tag_names.product(attr_names).map {|a| ".//#{a[0]}[not(@gfm)]/@#{a[1]}"}.join('|')
         attrs += doc.xpath(xpath_query)
 
         # maybe we could embed this into the xpath query too? (for the next iteration)
