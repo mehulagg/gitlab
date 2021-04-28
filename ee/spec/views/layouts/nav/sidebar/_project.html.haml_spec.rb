@@ -180,41 +180,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'Operations > Pod logs' do
-    before do
-      allow(view).to receive(:can?).with(nil, :read_environment, project).and_return(can_read_environment)
-      allow(view).to receive(:can?).with(nil, :read_pod_logs, project).and_return(can_read_pod_logs)
-      render
-    end
-
-    describe 'when the user can read environments and logs' do
-      let(:can_read_environment) { true }
-      let(:can_read_pod_logs) { true }
-
-      it 'link is visible' do
-        expect(rendered).to have_link('Logs', href: project_logs_path(project))
-      end
-    end
-
-    describe 'when the user cannot read environment or logs' do
-      let(:can_read_environment) { false }
-      let(:can_read_pod_logs) { false }
-
-      it 'link is not visible' do
-        expect(rendered).not_to have_link 'Logs'
-      end
-    end
-
-    describe 'when the user can read environment but not logs' do
-      let(:can_read_environment) { true }
-      let(:can_read_pod_logs) { false }
-
-      it 'link is not visible' do
-        expect(rendered).not_to have_link 'Logs'
-      end
-    end
-  end
-
   describe 'Security and Compliance' do
     describe 'when user does not have permissions' do
       before do
@@ -292,6 +257,31 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
 
       it 'audit events link is visible' do
         expect(rendered).to have_link('Audit Events', href: project_audit_events_path(project))
+      end
+    end
+  end
+
+  describe 'Operations' do
+    describe 'On-call schedules' do
+      before do
+        allow(view).to receive(:current_user).and_return(user)
+        stub_licensed_features(oncall_schedules: true)
+      end
+
+      it 'has a link to the on-call schedules page' do
+        render
+
+        expect(rendered).to have_link('On-call Schedules', href: project_incident_management_oncall_schedules_path(project))
+      end
+
+      describe 'when the user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the on-call schedules page' do
+          render
+
+          expect(rendered).not_to have_link('On-call Schedules')
+        end
       end
     end
   end
