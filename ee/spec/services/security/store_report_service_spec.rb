@@ -106,6 +106,27 @@ RSpec.describe Security::StoreReportService, '#execute' do
         end
       end
 
+      context 'when some attributes are missing in the existing identifiers' do
+        let(:trait) { :sast }
+        let(:valid_record) {{ id: 4, project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM'}}
+        let(:invalid_record_1) {{ project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM'}}
+        let(:invalid_record_2) {{ id: 4, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM'}}
+
+        subject { described_class.new(pipeline, report) }
+
+        it 'only updates the valid identifiers' do
+          expect(Vulnerabilities::Identifier).to receive(:upsert_all).with([valid_record])
+
+          subject.send(:update_existing_vulnerability_identifiers_for, [valid_record, invalid_record_1, invalid_record_2])
+        end
+
+        it 'does not update the invalid identifiers' do
+          expect(Vulnerabilities::Identifier).not_to receive(:upsert_all)
+
+          subject.send(:update_existing_vulnerability_identifiers_for, [invalid_record_1, invalid_record_2])
+        end
+      end
+
       context 'when N+1 database queries have been removed' do
         let(:trait) { :sast }
         let(:bandit_scanner) { build(:ci_reports_security_scanner, external_id: 'bandit', name: 'Bandit') }

@@ -287,7 +287,12 @@ module Security
 
     def update_existing_vulnerability_identifiers_for(identifier_object_records)
       identifier_object_records_with_id = identifier_object_records.select { |identifier| identifier[:id].present? }.uniq
+      identifier_object_records_with_id.select! { |record| valid_identifier_object_record?(record) }
       Vulnerabilities::Identifier.upsert_all(identifier_object_records_with_id) if identifier_object_records_with_id.present?
+    end
+
+    def valid_identifier_object_record?(record)
+      [:project_id, :external_id, :external_type, :name, :url].all? {|key| record[key].present? }
     end
 
     def update_vulnerabilities_finding_identifiers
