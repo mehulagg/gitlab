@@ -17442,7 +17442,7 @@ msgstr ""
 msgid "Integrations|Default settings are inherited from the instance level."
 msgstr ""
 
-msgid "Integrations|Enable GitLab slash commands in a Slack workspace."
+msgid "Integrations|Enable GitLab.com slash commands in a Slack workspace."
 msgstr ""
 
 msgid "Integrations|Enable comments"
