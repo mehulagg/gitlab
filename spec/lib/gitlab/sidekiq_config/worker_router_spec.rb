@@ -21,8 +21,6 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
       create_worker('PostReceive', :git) | 'git:post_receive'
       create_worker('PipelineHooksWorker', :pipeline_hooks) | 'pipeline_hooks:pipeline_hooks'
       create_worker('Gitlab::JiraImport::AdvanceStageWorker') | 'jira_import_advance_stage'
-      create_worker('Gitlab::JiraImport::AdvanceStageWorker') | 'jira_import_advance_stage'
-      create_worker('Gitlab::JiraImport::AdvanceStageWorker') | 'jira_import_advance_stage'
       create_worker('Gitlab::PhabricatorImport::ImportTasksWorker', :importer) | 'importer:phabricator_import_import_tasks'
     end
 
@@ -72,19 +70,19 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
         ['resource_boundary=cpu', ''],
         ['tags=cheap', 'queue_c']
       ] | 'foo_bar'
-      # Match the first criteria
+      # Match the first rule
       [
         ['feature_category=feature_a|urgency=high', 'queue_a'],
         ['resource_boundary=cpu', 'queue_b'],
         ['tags=cheap', 'queue_c']
       ] | 'queue_a'
-      # Match the first criteria 2
+      # Match the first rule 2
       [
         ['feature_category=feature_b|urgency=low', 'queue_a'],
         ['resource_boundary=cpu', 'queue_b'],
         ['tags=cheap', 'queue_c']
       ] | 'queue_a'
-      # Match the second criteria
+      # Match the third rule
       [
         ['feature_category=feature_b|urgency=high', 'queue_a'],
         ['resource_boundary=memory', 'queue_b'],
@@ -96,7 +94,7 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
         ['resource_boundary=cpu', 'queue_b'],
         ['tags=expensive', 'queue_c']
       ] | 'queue_a'
-      # Match the same criteria multiple times, the first match wins
+      # Match the same rule multiple times, the first match wins
       [
         ['feature_category=feature_a', 'queue_a'],
         ['feature_category=feature_a', 'queue_b'],
@@ -112,9 +110,9 @@ RSpec.describe Gitlab::SidekiqConfig::WorkerRouter do
       # Match wildcard at the top of the chain. It makes the following rules useless
       [
         ['*', 'queue_foo'],
-        ['feature_category=feature_b|urgency=high', 'queue_a'],
-        ['resource_boundary=memory', 'queue_b'],
-        ['tags=cheap', 'queue_c']
+        ['feature_category=feature_a|urgency=low', 'queue_a'],
+        ['resource_boundary=cpu', 'queue_b'],
+        ['tags=expensive', 'queue_c']
       ] | 'queue_foo'
     end
   end

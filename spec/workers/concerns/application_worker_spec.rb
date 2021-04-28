@@ -28,7 +28,7 @@ RSpec.describe ApplicationWorker do
     allow(router).to receive(:route).and_return('foo_bar_dummy')
   end
 
-  describe 'Sidekiq attribtues' do
+  describe 'Sidekiq attributes' do
     it 'sets the queue name based on the output of the router' do
       expect(worker.sidekiq_options['queue']).to eq('foo_bar_dummy')
       expect(router).to have_received(:route).with(worker).at_least(:once)
@@ -152,7 +152,7 @@ RSpec.describe ApplicationWorker do
       allow(router).to receive(:route).and_return('foo_bar_dummy', 'some_namespace:foo_bar_dummy')
     end
 
-    it 'updates the quque name from the router again' do
+    it 'updates the queue name from the router again' do
       expect(worker.queue).to eq('foo_bar_dummy')
 
       worker.queue_namespace :some_namespace
