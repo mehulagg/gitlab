@@ -93,6 +93,7 @@
 
 .tab-content {
   overflow: visible;
+  isolation: isolate;
 }
 
 pre {
