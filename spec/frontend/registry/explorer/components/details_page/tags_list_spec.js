@@ -29,7 +29,7 @@ describe('Tags List', () => {
 
   const waitForApolloRequestRender = async () => {
     await waitForPromises();
-    await wrapper.vm.$nextTick();
+    await nextTick();
   };
 
   const mountComponent = ({
@@ -130,7 +130,7 @@ describe('Tags List', () => {
 
         if (doSelect) {
           findTagsListRow().at(0).vm.$emit('select');
-          await wrapper.vm.$nextTick();
+          await nextTick();
         }
 
         expect(findDeleteButton().attributes('disabled')).toBe(buttonDisabled);

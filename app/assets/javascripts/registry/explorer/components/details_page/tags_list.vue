@@ -49,16 +49,10 @@ export default {
     TAGS_LIST_TITLE,
   },
   apollo: {
-    tags: {
+    containerRepository: {
       query: getContainerRepositoryTagsQuery,
       variables() {
         return this.queryVariables;
-      },
-      update(data) {
-        return data.containerRepository?.tags?.nodes || [];
-      },
-      result({ data }) {
-        this.tagsPageInfo = data.containerRepository?.tags?.pageInfo;
       },
       error() {
         createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });
@@ -68,11 +62,16 @@ export default {
   data() {
     return {
       selectedItems: {},
-      tags: [],
-      tagsPageInfo: {},
+      containerRepository: {},
     };
   },
   computed: {
+    tags() {
+      return this.containerRepository?.tags?.nodes || [];
+    },
+    tagsPageInfo() {
+      return this.containerRepository?.tags?.pageInfo;
+    },
     queryVariables() {
       return {
         id: joinPaths(this.config.gidPrefix, `${this.id}`),
@@ -95,7 +94,7 @@ export default {
       return this.tags.length === 0;
     },
     isLoading() {
-      return this.isImageLoading || this.$apollo.queries.tags.loading;
+      return this.isImageLoading || this.$apollo.queries.containerRepository.loading;
     },
   },
   methods: {
@@ -106,7 +105,7 @@ export default {
       return this.tags.filter((tag) => items[tag.name]);
     },
     fetchNextPage() {
-      this.$apollo.queries.tags.fetchMore({
+      this.$apollo.queries.containerRepository.fetchMore({
         variables: {
           after: this.tagsPageInfo?.endCursor,
           first: GRAPHQL_PAGE_SIZE,
@@ -117,7 +116,7 @@ export default {
       });
     },
     fetchPreviousPage() {
-      this.$apollo.queries.tags.fetchMore({
+      this.$apollo.queries.containerRepository.fetchMore({
         variables: {
           first: null,
           before: this.tagsPageInfo?.startCursor,
