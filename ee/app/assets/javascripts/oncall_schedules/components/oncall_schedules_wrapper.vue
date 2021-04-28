@@ -1,7 +1,15 @@
 <script>
-import { GlAlert, GlButton, GlEmptyState, GlLoadingIcon, GlModalDirective } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlButton,
+  GlEmptyState,
+  GlLoadingIcon,
+  GlModalDirective,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import AddScheduleModal from './add_edit_schedule_modal.vue';
 import OncallSchedule from './oncall_schedule.vue';
@@ -10,10 +18,13 @@ export const addScheduleModalId = 'addScheduleModal';
 
 export const i18n = {
   title: s__('OnCallSchedules|On-call schedules'),
+  add: {
+    button: s__('OnCallSchedules|Add a schedule'),
+    tooltip: s__('OnCallSchedules|Add an additional schedule to your project'),
+  },
   emptyState: {
     title: s__('OnCallSchedules|Create on-call schedules  in GitLab'),
     description: s__('OnCallSchedules|Route alerts directly to specific members of your team'),
-    button: s__('OnCallSchedules|Add a schedule'),
   },
   successNotification: {
     title: s__('OnCallSchedules|Try adding a rotation'),
@@ -36,16 +47,18 @@ export default {
   },
   directives: {
     GlModal: GlModalDirective,
+    GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagMixin()],
   inject: ['emptyOncallSchedulesSvgPath', 'projectPath'],
   data() {
     return {
-      schedule: {},
+      schedules: [],
       showSuccessNotification: false,
     };
   },
   apollo: {
-    schedule: {
+    schedules: {
       query: getOncallSchedulesWithRotationsQuery,
       variables() {
         return {
@@ -54,7 +67,10 @@ export default {
       },
       update(data) {
         const nodes = data.project?.incidentManagementOncallSchedules?.nodes ?? [];
-        return nodes.length ? nodes[nodes.length - 1] : null;
+        if (this.glFeatures.multipleOncallSchedules) {
+          return nodes;
+        }
+        return nodes.length ? [nodes[nodes.length - 1]] : [];
       },
       error(error) {
         Sentry.captureException(error);
@@ -63,7 +79,10 @@ export default {
   },
   computed: {
     isLoading() {
-      return this.$apollo.queries.schedule.loading;
+      return this.$apollo.queries.schedules.loading;
+    },
+    hasSchedules() {
+      return this.schedules.length;
     },
   },
 };
@@ -73,8 +92,23 @@ export default {
   <div>
     <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3" />
 
-    <template v-else-if="schedule">
-      <h2>{{ $options.i18n.title }}</h2>
+    <template v-else-if="hasSchedules">
+      <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
+        <h2>{{ $options.i18n.title }}</h2>
+        <gl-button
+          v-if="glFeatures.multipleOncallSchedules"
+          v-gl-modal="$options.addScheduleModalId"
+          v-gl-tooltip.left.viewport.hover
+          :title="$options.i18n.add.tooltip"
+          :aria-label="$options.i18n.add.tooltip"
+          category="secondary"
+          variant="confirm"
+          class="gl-mt-5"
+          data-testid="add-additional-schedules-button"
+        >
+          {{ $options.i18n.add.button }}
+        </gl-button>
+      </div>
       <gl-alert
         v-if="showSuccessNotification"
         variant="tip"
@@ -84,7 +118,7 @@ export default {
       >
         {{ $options.i18n.successNotification.description }}
       </gl-alert>
-      <oncall-schedule :schedule="schedule" />
+      <oncall-schedule v-for="schedule in schedules" :key="schedule.iid" :schedule="schedule" />
     </template>
 
     <gl-empty-state
@@ -94,8 +128,8 @@ export default {
       :svg-path="emptyOncallSchedulesSvgPath"
     >
       <template #actions>
-        <gl-button v-gl-modal="$options.addScheduleModalId" variant="info">
-          {{ $options.i18n.emptyState.button }}
+        <gl-button v-gl-modal="$options.addScheduleModalId" variant="confirm">
+          {{ $options.i18n.add.button }}
         </gl-button>
       </template>
     </gl-empty-state>

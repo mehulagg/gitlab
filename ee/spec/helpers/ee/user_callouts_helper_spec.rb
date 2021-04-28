@@ -135,6 +135,7 @@ RSpec.describe EE::UserCalloutsHelper do
   describe '#render_dashboard_ultimate_trial' do
     let_it_be(:namespace) { create(:namespace) }
     let_it_be(:ultimate_plan) { create(:ultimate_plan) }
+
     let(:user) { namespace.owner }
 
     where(:any_namespace_without_trial?, :show_ultimate_trial?, :user_default_dashboard?, :has_no_trial_or_paid_plan?, :should_render?) do

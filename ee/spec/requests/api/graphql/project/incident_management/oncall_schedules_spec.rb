@@ -72,6 +72,7 @@ RSpec.describe 'getting Incident Management on-call schedules' do
 
     context 'with on-call schedules' do
       let!(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
+      let(:first_oncall_schedule) { oncall_schedules.first }
       let(:last_oncall_schedule) { oncall_schedules.last }
 
       before do
@@ -87,6 +88,15 @@ RSpec.describe 'getting Incident Management on-call schedules' do
           'description' => oncall_schedule.description,
           'timezone' => oncall_schedule.timezone
         )
+      end
+
+      context 'with an array of iids given' do
+        let(:params) { { iids: [oncall_schedule.iid.to_s] } }
+
+        it_behaves_like 'a working graphql query'
+
+        it { expect(oncall_schedules.size).to eq(1) }
+        it { expect(first_oncall_schedule['iid']).to eq(oncall_schedule.iid.to_s) }
       end
     end
   end

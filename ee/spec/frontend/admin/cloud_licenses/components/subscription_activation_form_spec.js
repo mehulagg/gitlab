@@ -1,10 +1,10 @@
-import { GlForm, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
+import { GlForm, GlFormCheckbox, GlFormInput } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import CloudLicenseSubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
-import { subscriptionQueries } from 'ee/pages/admin/cloud_licenses/constants';
+import { fieldRequiredMessage, subscriptionQueries } from 'ee/pages/admin/cloud_licenses/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { stubComponent } from 'helpers/stub_component';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -26,9 +26,10 @@ describe('CloudLicenseApp', () => {
 
   const findActivateButton = () => wrapper.findByTestId('activate-button');
   const findAgreementCheckbox = () => wrapper.findComponent(GlFormCheckbox);
+  const findAgreementCheckboxFormGroup = () => wrapper.findByTestId('form-group-terms');
+  const findActivationCodeFormGroup = () => wrapper.findByTestId('form-group-activation-code');
   const findActivationCodeInput = () => wrapper.findComponent(GlFormInput);
   const findActivateSubscriptionForm = () => wrapper.findComponent(GlForm);
-  const enableAcceptAgreementCheckbox = () => findAgreementCheckbox().vm.$emit('input', true);
 
   const GlFormInputStub = stubComponent(GlFormInput, {
     template: `<input />`,
@@ -39,16 +40,17 @@ describe('CloudLicenseApp', () => {
     stopPropagation,
   });
 
-  const createComponentWithApollo = (props = {}, resolverMock) => {
+  const createComponentWithApollo = ({ props = {}, mutationMock, stubs = {} } = {}) => {
     wrapper = extendedWrapper(
       shallowMount(CloudLicenseSubscriptionActivationForm, {
         localVue,
-        apolloProvider: createMockApolloProvider(resolverMock),
+        apolloProvider: createMockApolloProvider(mutationMock),
         propsData: {
           ...props,
         },
         stubs: {
           GlFormInput: GlFormInputStub,
+          ...stubs,
         },
       }),
     );
@@ -77,25 +79,45 @@ describe('CloudLicenseApp', () => {
       expect(findAgreementCheckbox().exists()).toBe(true);
     });
 
-    it('disables the activate button if the agreement is unaccepted', () => {
-      expect(findActivateButton().props('disabled')).toBe(true);
-    });
-
-    it('enables the activate button if the agreement is accepted', async () => {
-      expect(findActivateButton().props('disabled')).toBe(true);
-      enableAcceptAgreementCheckbox();
-      await wrapper.vm.$nextTick();
-
+    it('has the activate button enabled', () => {
       expect(findActivateButton().props('disabled')).toBe(false);
     });
   });
 
-  describe('Activate the subscription', () => {
+  describe('form errors', () => {
+    const mutationMock = jest.fn();
+    beforeEach(() => {
+      createComponentWithApollo({ mutationMock });
+    });
+
+    it('shows an error for the text field', async () => {
+      await findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
+
+      expect(findActivationCodeFormGroup().attributes('invalid-feedback')).toBe(
+        'Please fill out this field.',
+      );
+    });
+
+    it('shows an error for the checkbox field', async () => {
+      await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
+
+      expect(findAgreementCheckboxFormGroup().attributes('invalid-feedback')).toBe(
+        fieldRequiredMessage,
+      );
+    });
+
+    it('does not perform any mutation', () => {
+      expect(mutationMock).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('activate the subscription', () => {
     describe('when submitting the form', () => {
       const mutationMock = jest.fn().mockResolvedValue(activateLicenseMutationResponse.SUCCESS);
-      beforeEach(() => {
-        createComponentWithApollo({}, mutationMock);
-        findActivationCodeInput().vm.$emit('input', fakeActivationCode);
+      beforeEach(async () => {
+        createComponentWithApollo({ mutationMock });
+        await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
+        await findAgreementCheckbox().vm.$emit('input', true);
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 
@@ -110,17 +132,6 @@ describe('CloudLicenseApp', () => {
           },
         });
       });
-    });
-
-    describe('when the mutation is successful', () => {
-      beforeEach(() => {
-        createComponentWithApollo(
-          {},
-          jest.fn().mockResolvedValue(activateLicenseMutationResponse.SUCCESS),
-        );
-        findActivationCodeInput().vm.$emit('input', fakeActivationCode);
-        findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
-      });
 
       it('emits a successful event', () => {
         expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_EVENT)).toEqual([[true]]);
@@ -128,11 +139,11 @@ describe('CloudLicenseApp', () => {
     });
 
     describe('when the mutation is not successful but looks like it is', () => {
+      const mutationMock = jest
+        .fn()
+        .mockResolvedValue(activateLicenseMutationResponse.ERRORS_AS_DATA);
       beforeEach(() => {
-        createComponentWithApollo(
-          {},
-          jest.fn().mockResolvedValue(activateLicenseMutationResponse.FAILURE_IN_DISGUISE),
-        );
+        createComponentWithApollo({ mutationMock });
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 
@@ -144,11 +155,9 @@ describe('CloudLicenseApp', () => {
     });
 
     describe('when the mutation is not successful', () => {
+      const mutationMock = jest.fn().mockRejectedValue(activateLicenseMutationResponse.FAILURE);
       beforeEach(() => {
-        createComponentWithApollo(
-          {},
-          jest.fn().mockRejectedValue(activateLicenseMutationResponse.FAILURE),
-        );
+        createComponentWithApollo({ mutationMock });
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 

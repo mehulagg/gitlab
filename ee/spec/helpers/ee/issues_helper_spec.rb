@@ -47,6 +47,7 @@ RSpec.describe EE::IssuesHelper do
   describe '#issue_in_subepic?' do
     let_it_be(:epic) { create(:epic) }
     let_it_be(:epic_issue) { create(:epic_issue, epic: epic) }
+
     let(:issue) { build_stubbed(:issue, epic_issue: epic_issue) }
     let(:new_issue) { build_stubbed(:issue) }
 
