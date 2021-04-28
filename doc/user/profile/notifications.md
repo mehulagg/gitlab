@@ -206,7 +206,7 @@ To enable notifications on one specific issue, merge request or epic, you need t
 Disabling this toggle only unsubscribes you from updates related to this issue, merge request, or epic.
 Learn how to [opt out of all emails from GitLab](#opt-out-of-all-gitlab-emails).
 
-Enabling this notification on an epic doesn't make you automatically subscribed to the issues linked
+Enabling this notification on an epic doesn't automatically subscribe you to the issues linked
 to the epic.
 
 For most events, the notification is sent to:
