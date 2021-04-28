@@ -12,8 +12,8 @@ module EE
 
     NAMESPACE_PLANS_TO_LICENSE_PLANS = {
       ::Plan::BRONZE => License::STARTER_PLAN,
-      [::Plan::SILVER, ::Plan::PREMIUM] => License::PREMIUM_PLAN,
-      [::Plan::GOLD, ::Plan::ULTIMATE] => License::ULTIMATE_PLAN
+      [::Plan::SILVER, ::Plan::PREMIUM, ::Plan::PREMIUM_TRIAL] => License::PREMIUM_PLAN,
+      [::Plan::GOLD, ::Plan::ULTIMATE, ::Plan::ULTIMATE_TRIAL] => License::ULTIMATE_PLAN
     }.freeze
 
     LICENSE_PLANS_TO_NAMESPACE_PLANS = NAMESPACE_PLANS_TO_LICENSE_PLANS.invert.freeze
