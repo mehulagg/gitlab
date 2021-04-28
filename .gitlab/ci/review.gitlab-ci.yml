@@ -210,13 +210,19 @@ parallel-spec-reports:
       junit: qa/gitlab-qa-run-*/**/rspec-*.xml
     expire_in: 31d
 
+non-existent-job:
+  rules:
+    - when: never
+
 danger-review:
   extends:
     - .default-retry
     - .danger-review-cache
     - .review:rules:danger
   stage: test
-  needs: []
+  needs:
+    - name: non-existent-job
+      optional: true
   before_script:
     - source ./scripts/utils.sh
     - run_timed_command "bundle install --jobs=$(nproc) --path=vendor --retry=3 --quiet --with danger"
