@@ -66,6 +66,7 @@ The browser-based crawler can be configured using CI/CD variables.
 | `DAST_PASSWORD_FIELD`                | selector        | `css:.password-field`             | A selector describing the password field on the sign-in HTML form. | 
 | `DAST_SUBMIT_FIELD`                  | selector        | `xpath://input[@value='Login']`   | A selector describing the element that when clicked submits the login form or the password form of a multi-page login process. |
 | `DAST_FIRST_SUBMIT_FIELD`            | selector        | `.submit`                         | A selector describing the element that when clicked submits the username form of a multi-page login process. |
+| `DAST_BROWSER_AUTH_REPORT`               | boolean         | `true`                            | Used in combination with exporting the `gl-dast-debug-auth-report.html` artifact to aid in debugging authentication issues. |
 
 The [DAST variables](index.md#available-variables) `SECURE_ANALYZERS_PREFIX`, `DAST_FULL_SCAN_ENABLED`, `DAST_AUTO_UPDATE_ADDONS`, `DAST_EXCLUDE_RULES`, `DAST_REQUEST_HEADERS`, `DAST_HTML_REPORT`, `DAST_MARKDOWN_REPORT`, `DAST_XML_REPORT`,
 `DAST_INCLUDE_ALPHA_VULNERABILITIES`, `DAST_PATHS_FILE`, `DAST_PATHS`, `DAST_ZAP_CLI_OPTIONS`, and `DAST_ZAP_LOG_CONFIGURATION` are also compatible with browser-based crawler scans.   
@@ -92,6 +93,129 @@ When running a full scan, active vulnerability checks executed by DAST/ZAP do no
 
 For example, for a target website that contains forms with Anti-CSRF tokens, a passive scan will scan as intended because the browser displays pages/forms as if a user is viewing the page.
 However, active vulnerability checks run in a full scan will not be able to submit forms containing Anti-CSRF tokens. In such cases we recommend you disable Anti-CSRF tokens when running a full scan.
+
+## Authentication
+
+As most of your application is likely not accessible without authentication, we highly recommended
+that you configure the scanner to authenticate to the application. It is also recommended
+that you periodically confirm the scanner's authentication is still working as this tends to break over
+time due to authentication changes to the application.
+
+Browserker has a number of features to assist in ensuring you can authenticate to your application.
+
+- Automatic login form detection
+- Manual login via CSS Selectors
+- Multi-step authentication support
+- Support for loading and authenticating to URLs outside of the configured target URL
+
+### Automatic Login Form Detection
+
+By providing a username, password and login URL, Browserker will attempt to authenticate to the
+target application. It will attempt to identify login forms by searching for username or password fields.
+
+Automatic Login Process:
+
+- If it finds a username and password field, it will enter the details into the form fields and attempt to click any submit button found.
+- If it finds only a username field, it will assume that the login form is part of a multi-step authentication process.
+  - It will attempt to click any submit button after filling out the username field
+  - It will then search for a password field, filling it out and clicking any submit button found.
+
+After a login is attempted, Browserker will attempt to find the login form. If it finds the login form again,
+it assumes that the login failed. It will also treat any HTTP status code above 400 as a login failure.
+
+NOTE: This process is "best effort" and may not work in many cases. It is highly recommended that you review
+both login success and failure to ensure it works properly for your application.
+
+```yaml
+include:
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  DAST_WEBSITE: "https://example.com"
+  DAST_BROWSER_SCAN: true
+  DAST_AUTH_URL: "https://login.example.com/"
+  DAST_USERNAME: "admin"
+  DAST_PASSWORD: "P@55w0rd!"
+```
+
+### Manual Login via CSS Selectors
+
+Manual login is the preferred method of authenticating to your application, as it allows more precise detection of the login fields.
+
+With manual login, you must provide at least, the following variables:
+
+- `DAST_AUTH_URL`
+- `DAST_USERNAME`
+- `DAST_USERNAME_FIELD`
+- `DAST_PASSWORD`
+- `DAST_PASSWORD_FIELD`
+- `DAST_SUBMIT_FIELD`
+
+To support multi-step authentication flows, you may provide the `DAST_FIRST_SUBMIT_FIELD` which correlates to the submit button for the username data.
+
+Here's how you can add multi-step authentication flows to your scan:
+
+```yaml
+include:
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  DAST_WEBSITE: "https://example.com"
+  DAST_AUTH_URL: "https://login.example.com/"
+  DAST_USERNAME: "admin"
+  DAST_USERNAME_FIELD: "id:user"
+  DAST_FIRST_SUBMIT_FIELD: "css:type=submit"
+  DAST_PASSWORD: "P@55w0rd!"
+  DAST_PASSWORD_FIELD: "css:.password-field"
+  DAST_SUBMIT_FIELD: "css:type=submit"
+```
+
+#### How to find valid CSS Selectors
+
+Finding the correct CSS selectors is important to ensuring the authentication process is as stable as possible.
+
+#### Finding CSS Selectors with Google Chrome
+
+Due to the dynamic nature of Single Page Applications (SPAs) it is recommended to use Chrome DevTools element selector tool to identify the fields necessary for configuring authentication. By bringing up the DevTools view (⌥`+`⌘`+`i in osx ctrl+shift+i in windows), you can use the `Select an element in the page to select it` tool to find the username field:
+
+![search-elements](img/dast_auth_browser_scan_search_elements.png)
+
+Once the tool is active, highlight a field you wish to view the details of.
+
+![highlight](img/dast_auth_browser_scan_highlight.png)
+
+Once highlighted, you will be able to find the elements details, including attributes that would make a good candidate for a CSS Selector.
+
+In the case above, the `id="user_login"` appears to be a good candidate. As a convenience you may add this selector in a few ways: `css:[id=user_login]` or more simply: `id:user_login`.
+
+NOTE:
+Be careful of choosing attributes that are prone to change, such as dynamically generated attribute names.
+
+Here's how you would use this selector in the yaml configuration:
+
+```yaml
+variables:
+  ...
+  DAST_USERNAME: "gitlab-user"
+  DAST_USERNAME_FIELD: "css:[id=user_login]"
+  ...
+```
+
+#### Configuring the authentication debug output
+
+It is often difficult to understand why authentication may fail when running DAST in a CI/CD pipeline. To assist users in debugging authentication issues, an optional debug report can be configured to be saved as a job artifact. This HTML report contains all steps the browser crawler took, along with HTTP requests and responses, the Document Object Model (DOM) and screen shots.
+
+```yaml
+variables:
+  ...
+  DAST_BROWSER_SCAN: "true"
+  DAST_BROWSER_AUTH_REPORT: "true"
+  ...
+artifacts:
+  paths: [gl-dast-debug-auth-report.html]
+  when: always
+  ...
+```
 
 ## Managing scan time
 
