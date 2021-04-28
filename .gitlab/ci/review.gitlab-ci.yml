@@ -224,6 +224,7 @@ danger-review:
     - .review:rules:danger
   stage: test
   needs:
+    - job: retrieve-tests-metadata
     - job: non-existent-job
       optional: true
   before_script:
