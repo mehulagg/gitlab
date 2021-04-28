@@ -122,6 +122,12 @@ class Namespace < NamespaceShard
       end
     end
 
+    def sharded_find(id)
+      NamespaceShard.sharded_read_from_namespace_id(id) do
+        find(id)
+      end
+    end
+
     def by_path(path)
       find_by('lower(path) = :value', value: path.downcase)
     end

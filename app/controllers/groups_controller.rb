@@ -63,7 +63,7 @@ class GroupsController < Groups::ApplicationController
   end
 
   def new
-    @group = Group.new(params.permit(:parent_id))
+    @group = Group.new(parent: parent_group)
   end
 
   def create
@@ -217,9 +217,8 @@ class GroupsController < Groups::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def authorize_create_group!
-    allowed = if params[:parent_id].present?
-                parent = Group.find_by(id: params[:parent_id])
-                can?(current_user, :create_subgroup, parent)
+    allowed = if parent_group
+                can?(current_user, :create_subgroup, parent_group)
               else
                 can?(current_user, :create_group)
               end
@@ -227,6 +226,12 @@ class GroupsController < Groups::ApplicationController
     render_404 unless allowed
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def parent_group
+    return unless params[:parent_id].present?
+
+    @parent_group ||= Group.with_route.sharded_find(params[:parent_id])
+  end
 
   def determine_layout
     if [:new, :create].include?(action_name.to_sym)
