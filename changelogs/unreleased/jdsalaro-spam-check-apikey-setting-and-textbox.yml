@@ -1,0 +1,6 @@
+---
+title: add spam_check_api_key textbox to admin/application_settings/reporting to allow
+  support for a Spamcheck API key
+merge_request: 60385
+author:
+type: changed
