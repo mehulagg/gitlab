@@ -41,11 +41,13 @@ RSpec.describe Deployments::HooksWorker do
       project = deployment.project
       web_hook = create(:project_hook, deployment_events: true, project: project)
 
+      event_at = Time.current
+
       expect_next_instance_of(WebHookService, web_hook, an_instance_of(Hash), "deployment_hooks") do |service|
         expect(service).to receive(:async_execute)
       end
 
-      worker.perform(deployment_id: deployment.id)
+      worker.perform(deployment_id: deployment.id, event_at: event_at)
     end
   end
 end
