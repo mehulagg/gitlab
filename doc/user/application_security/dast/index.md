@@ -452,7 +452,7 @@ Vulnerability rules in an API scan are different than those in a normal website 
 
 > Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.10.
 
-A new DAST API scanning engine is available. To use the new DAST API scanning engine [see it's documentation here](dast_api.md). The new scanning engine supports REST, SOAP, GraphQL, and generic APIs using forms, XML, and JSON. Testing can be performed using OpenAPI, Postman Collections, and HTTP Archive (HAR) documents.
+A new DAST API scanning engine is available. To use the new DAST API scanning engine [see it's documentation here](../dast_api). The new scanning engine supports REST, SOAP, GraphQL, and generic APIs using forms, XML, and JSON. Testing can be performed using OpenAPI, Postman Collections, and HTTP Archive (HAR) documents.
 
 #### Specification format
 
