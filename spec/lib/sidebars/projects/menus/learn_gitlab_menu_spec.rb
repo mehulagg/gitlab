@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Sidebars::Projects::Menus::LearnGitlabMenu do
   let(:project) { build(:project) }
   let(:experiment_enabled) { true }
-  let(:context) { Sidebars::Projects::Context.new(current_user: nil, container: project, learn_gitlab_experiment_enabled: experiment_enabled) }
+  let(:context) { Sidebars::Projects::Context.new(current_user: nil, container: project, learn_gitlab_experiment_enabled: experiment_enabled, learn_gitlab_completed_percentage: 20) }
 
   subject { described_class.new(context) }
 
@@ -26,6 +26,28 @@ RSpec.describe Sidebars::Projects::Menus::LearnGitlabMenu do
       it 'returns false' do
         expect(subject.render?).to eq false
       end
+    end
+  end
+
+  describe '#has_pill?' do
+    context 'when learn gitlab experiment is enabled' do
+      it 'returns true' do
+        expect(subject.has_pill?).to eq true
+      end
+    end
+
+    context 'when learn gitlab experiment is disabled' do
+      let(:experiment_enabled) { false }
+
+      it 'returns false' do
+        expect(subject.has_pill?).to eq false
+      end
+    end
+  end
+
+  describe '#pill_count' do
+    it 'returns pill count' do
+      expect(subject.pill_count).to eq '20%'
     end
   end
 end

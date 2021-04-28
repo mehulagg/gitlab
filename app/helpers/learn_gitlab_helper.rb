@@ -1,11 +1,22 @@
 # frozen_string_literal: true
 
 module LearnGitlabHelper
+  include Gitlab::Utils::StrongMemoize
+
   def learn_gitlab_experiment_enabled?(project)
     return false unless current_user
     return false unless continous_onboarding_experiment_enabled_for_user?
 
     learn_gitlab_onboarding_available?(project)
+  end
+
+  def learn_gitlab_completed_percentage(project)
+    attributes = onboarding_progress(project).attributes.symbolize_keys
+
+    total_actions = action_columns.count
+    completed_actions = action_columns.count { |column| attributes[column].present? }
+
+    (completed_actions.to_f / total_actions.to_f * 100).round
   end
 
   def onboarding_actions_data(project)
@@ -47,12 +58,18 @@ module LearnGitlabHelper
     ACTION_ISSUE_IDS.transform_values { |id| project_issue_url(learn_gitlab_project, id) }.merge(ACTION_DOC_URLS)
   end
 
+  def action_columns
+    (ACTION_ISSUE_IDS.keys + ACTION_DOC_URLS.keys).map { |action_key| OnboardingProgress.column_name(action_key) }
+  end
+
   def learn_gitlab_project
     @learn_gitlab_project ||= LearnGitlab.new(current_user).project
   end
 
   def onboarding_progress(project)
-    OnboardingProgress.find_by(namespace: project.namespace) # rubocop: disable CodeReuse/ActiveRecord
+    strong_memoize(:onboarding_progress) do
+      OnboardingProgress.find_by(namespace: project.namespace) # rubocop: disable CodeReuse/ActiveRecord
+    end
   end
 
   def learn_gitlab_onboarding_available?(project)

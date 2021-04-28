@@ -91,4 +91,12 @@ RSpec.describe LearnGitlabHelper do
       end
     end
   end
+
+  describe '.learn_gitlab_completed_percentage' do
+    subject(:learn_gitlab_completed_percentage) { helper.learn_gitlab_completed_percentage(project) }
+
+    it 'returns the correct percentage' do
+      expect(learn_gitlab_completed_percentage).to eq(11)
+    end
+  end
 end
