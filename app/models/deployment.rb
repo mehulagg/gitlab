@@ -183,7 +183,7 @@ class Deployment < ApplicationRecord
   end
 
   def execute_hooks(event_at)
-    deployment_data = Gitlab::DataBuilder::Deployment.build(self)
+    deployment_data = Gitlab::DataBuilder::Deployment.build(self, event_at)
     project.execute_hooks(deployment_data, :deployment_hooks)
     project.execute_services(deployment_data, :deployment_hooks)
   end
