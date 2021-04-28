@@ -342,12 +342,20 @@ module EE
       actual_plan_name == ::Plan::PREMIUM
     end
 
+    def premium_trial_plan?
+      actual_plan_name == ::Plan::PREMIUM_TRIAL
+    end
+
     def gold_plan?
       actual_plan_name == ::Plan::GOLD
     end
 
     def ultimate_plan?
       actual_plan_name == ::Plan::ULTIMATE
+    end
+
+    def ultimate_trial_plan?
+      actual_plan_name == ::Plan::ULTIMATE_TRIAL
     end
 
     def plan_eligible_for_trial?
