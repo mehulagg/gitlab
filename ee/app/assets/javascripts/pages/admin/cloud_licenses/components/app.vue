@@ -1,5 +1,6 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
+import { fetchPolicies } from '~/lib/graphql';
 import {
   subscriptionActivationNotificationText,
   subscriptionActivationTitle,
@@ -35,12 +36,20 @@ export default {
   },
   apollo: {
     currentSubscription: {
+      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
       query: subscriptionQueries.query,
       update({ currentLicense }) {
-        return currentLicense;
+        if (currentLicense) {
+          return currentLicense;
+        }
+        return {};
       },
-      skip() {
-        return !this.canShowSubscriptionDetails;
+      result({ data }) {
+        // it assumes that receiving a successful response with
+        // no previous active license means a license has been activated
+        if (data?.currentLicense && !this.hasActiveLicense) {
+          this.showActivationNotification = true;
+        }
       },
     },
     subscriptionHistory: {
@@ -52,20 +61,26 @@ export default {
   },
   data() {
     return {
-      canShowSubscriptionDetails: this.hasActiveLicense,
       currentSubscription: {},
-      shouldShowSubscriptionActivationNotification: false,
+      showActivationNotification: false,
       subscriptionHistory: [],
       notification: null,
     };
   },
+  computed: {
+    hasValidSubscriptionData() {
+      return Boolean(Object.keys(this.currentSubscription).length);
+    },
+    canShowSubscriptionDetails() {
+      return this.hasActiveLicense || this.hasValidSubscriptionData;
+    },
+    shouldShowActivationNotification() {
+      return this.showActivationNotification && this.hasValidSubscriptionData;
+    },
+  },
   methods: {
     didDismissSuccessAlert() {
-      this.shouldShowSubscriptionActivationNotification = false;
-    },
-    handleActivation(hasLicense) {
-      this.shouldShowSubscriptionActivationNotification = hasLicense;
-      this.canShowSubscriptionDetails = hasLicense;
+      this.showActivationNotification = false;
     },
   },
 };
@@ -76,7 +91,7 @@ export default {
     <h4 data-testid="subscription-main-title">{{ $options.i18n.subscriptionMainTitle }}</h4>
     <hr />
     <gl-alert
-      v-if="shouldShowSubscriptionActivationNotification"
+      v-if="shouldShowActivationNotification"
       variant="success"
       :title="$options.i18n.subscriptionActivationNotificationText"
       class="mb-4"
@@ -93,7 +108,7 @@ export default {
         <h3 class="gl-mb-7 gl-mt-6 gl-text-center" data-testid="subscription-activation-title">
           {{ $options.i18n.subscriptionActivationTitle }}
         </h3>
-        <cloud-license-subscription-activation-form @subscription-activation="handleActivation" />
+        <cloud-license-subscription-activation-form />
         <div class="row gl-mt-7">
           <div class="col-lg-6">
             <subscription-trial-card />

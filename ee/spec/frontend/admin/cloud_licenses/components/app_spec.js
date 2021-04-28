@@ -52,12 +52,10 @@ describe('CloudLicenseApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    currentSubscriptionResolver.mockRestore();
-    subscriptionHistoryResolver.mockRestore();
   });
 
   describe('Subscription Activation Form', () => {
-    beforeEach(() => {
+    it('shows the main title', () => {
       currentSubscriptionResolver = jest
         .fn()
         .mockResolvedValue({ data: { currentLicense: license.ULTIMATE } });
@@ -65,19 +63,21 @@ describe('CloudLicenseApp', () => {
         .fn()
         .mockResolvedValue({ data: { licenseHistoryEntries: { nodes: subscriptionHistory } } });
       createComponent({}, [currentSubscriptionResolver, subscriptionHistoryResolver]);
-    });
-
-    it('shows the main title', () => {
       expect(findSubscriptionMainTitle().text()).toBe(subscriptionMainTitle);
     });
 
     describe('without an active license', () => {
+      beforeEach(() => {
+        currentSubscriptionResolver = jest
+          .fn()
+          .mockResolvedValue({ data: { currentLicense: null } });
+        subscriptionHistoryResolver = jest
+          .fn()
+          .mockResolvedValue({ data: { licenseHistoryEntries: { nodes: [] } } });
+        createComponent({}, [currentSubscriptionResolver, subscriptionHistoryResolver]);
+      });
       it('shows a title saying there is no active subscription', () => {
         expect(findSubscriptionActivationTitle().text()).toBe(subscriptionActivationTitle);
-      });
-
-      it('does not query for the current license', () => {
-        expect(currentSubscriptionResolver).toHaveBeenCalledTimes(0);
       });
 
       it('queries for the current history', () => {
@@ -88,18 +88,23 @@ describe('CloudLicenseApp', () => {
         expect(findActivateSubscriptionForm().exists()).toBe(true);
       });
 
-      it('does not the activation success notification', () => {
+      it('does not show the activation success notification', () => {
         expect(findSubscriptionActivationSuccessAlert().exists()).toBe(false);
       });
     });
 
-    describe('activate the license', () => {
+    describe('activating the license', () => {
       beforeEach(() => {
+        currentSubscriptionResolver = jest
+          .fn()
+          .mockResolvedValue({ data: { currentLicense: license.ULTIMATE } });
+        subscriptionHistoryResolver = jest
+          .fn()
+          .mockResolvedValue({ data: { licenseHistoryEntries: { nodes: subscriptionHistory } } });
         createComponent({ hasActiveLicense: false }, [
           currentSubscriptionResolver,
           subscriptionHistoryResolver,
         ]);
-        findActivateSubscriptionForm().vm.$emit('subscription-activation', true);
       });
 
       it('passes the correct data to the subscription breakdown', () => {
