@@ -9,7 +9,7 @@
       = text_area_tag 'commit_message',
           (params[:commit_message] || local_assigns[:text] || local_assigns[:placeholder]),
           class: 'form-control gl-form-input js-commit-message', placeholder: local_assigns[:placeholder],
-          data: descriptions,
+          data: descriptions, data: { qa_selector: 'commit_message'},
           required: true, rows: (local_assigns[:rows] || 3),
           id: "commit_message-#{nonce}"
     - if local_assigns[:hint]
