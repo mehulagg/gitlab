@@ -108,22 +108,34 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
       context 'when some attributes are missing in the existing identifiers' do
         let(:trait) { :sast }
-        let(:valid_record) {{ id: 4, project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM'}}
-        let(:invalid_record_1) {{ project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM'}}
-        let(:invalid_record_2) {{ id: 4, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM'}}
+        let(:record_1) {{ id: 4, project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM'}}
+        let(:record_2) {{ project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM'}}
+        let(:record_3) {{ id: 4, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM'}}
 
         subject { described_class.new(pipeline, report) }
 
         it 'only updates the valid identifiers' do
-          expect(Vulnerabilities::Identifier).to receive(:upsert_all).with([valid_record])
+          expect(Vulnerabilities::Identifier).to receive(:upsert_all).with([record_1])
 
-          subject.send(:update_existing_vulnerability_identifiers_for, [valid_record, invalid_record_1, invalid_record_2])
+          subject.send(:update_existing_vulnerability_identifiers_for, [record_1, record_2, record_3])
         end
 
         it 'does not update the invalid identifiers' do
           expect(Vulnerabilities::Identifier).not_to receive(:upsert_all)
 
-          subject.send(:update_existing_vulnerability_identifiers_for, [invalid_record_1, invalid_record_2])
+          subject.send(:update_existing_vulnerability_identifiers_for, [record_2, record_3])
+        end
+
+        it 'only inserts the valid identifiers' do
+          expect(Vulnerabilities::Identifier).to receive(:insert_all).with([record_2])
+
+          subject.send(:update_existing_vulnerability_identifiers_for, [record_1, record_2, record_3])
+        end
+
+        it 'does not invalid the invalid identifiers' do
+          expect(Vulnerabilities::Identifier).not_to receive(:insert_all)
+
+          subject.send(:update_existing_vulnerability_identifiers_for, [record_2, record_3])
         end
       end
 

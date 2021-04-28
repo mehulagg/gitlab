@@ -282,6 +282,7 @@ module Security
 
     def insert_new_vulnerability_identifiers_for(identifier_object_records)
       identifier_object_records_without_id = identifier_object_records.select { |identifier| identifier[:id].nil? }.uniq
+      identifier_object_records_with_id.select! { |record| valid_identifier_object_record?(record) }
       Vulnerabilities::Identifier.insert_all(identifier_object_records_without_id) if identifier_object_records_without_id.present?
     end
 
@@ -292,7 +293,7 @@ module Security
     end
 
     def valid_identifier_object_record?(record)
-      [:project_id, :external_id, :external_type, :name, :url].all? {|key| record[key].present? }
+      [:project_id, :external_id, :external_type, :name, :url, :fingerprint].all? {|key| record[key].present? }
     end
 
     def update_vulnerabilities_finding_identifiers
