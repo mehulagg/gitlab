@@ -35832,9 +35832,6 @@ msgstr ""
 msgid "Webhooks|URL is triggered by a push to the repository"
 msgstr ""
 
-msgid "Webhooks|URL is triggered when a confidential issue is created, updated, or merged"
-msgstr ""
-
 msgid "Webhooks|URL is triggered when a deployment starts, finishes, fails, or is canceled"
 msgstr ""
 
@@ -35859,7 +35856,7 @@ msgstr ""
 msgid "Webhooks|URL is triggered when a wiki page is created or updated"
 msgstr ""
 
-msgid "Webhooks|URL is triggered when an issue is created, updated, or merged"
+msgid "Webhooks|URL is triggered when an issue is created, updated, closed or reopened"
 msgstr ""
 
 msgid "Webhooks|URL is triggered when someone adds a comment"
