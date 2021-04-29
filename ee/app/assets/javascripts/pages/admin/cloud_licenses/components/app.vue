@@ -79,7 +79,7 @@ export default {
     },
   },
   methods: {
-    didDismissSuccessAlert() {
+    dismissSuccessAlert() {
       this.showActivationNotification = false;
     },
   },
@@ -96,7 +96,7 @@ export default {
       :title="$options.i18n.subscriptionActivationNotificationText"
       class="mb-4"
       data-testid="subscription-activation-success-alert"
-      @dismiss="didDismissSuccessAlert"
+      @dismiss="dismissSuccessAlert"
     />
     <subscription-breakdown
       v-if="canShowSubscriptionDetails"
