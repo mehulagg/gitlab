@@ -1,0 +1,22 @@
+.js-git-clone-holder.input-group.btn-group
+  .input-group-prepend
+    - if allowed_protocols_present?
+      .input-group-text.clone-dropdown-btn.btn
+        %span.js-clone-dropdown-label
+          = helpers.enabled_protocol_button(@container, helpers.enabled_protocol)
+    - else
+      %a#clone-dropdown.input-group-text.gl-button.btn.btn-default.btn-icon.clone-dropdown-btn.qa-clone-dropdown{ href: '#', data: { toggle: 'dropdown' } }
+        %span.js-clone-dropdown-label
+          = default_clone_protocol.upcase
+        = helpers.sprite_icon('chevron-down', css_class: 'gl-icon')
+      %ul.dropdown-menu.dropdown-menu-selectable.clone-options-dropdown
+        %li
+          = helpers.ssh_clone_button(@container)
+        %li
+          = helpers.http_clone_button(@container)
+        = helpers.render_if_exists 'shared/kerberos_clone_button', container: @container
+
+  = text_field_tag :clone_url, helpers.default_url_to_repo(@container), class: "js-select-on-focus btn gl-button", readonly: true, aria: { label: _('Repository clone URL') }
+  .input-group-append
+    = helpers.clipboard_button(target: '#clone_url', title: _("Copy URL"), class: "input-group-text gl-button btn-default btn-clipboard")
+
