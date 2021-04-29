@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# DAST API **(ULTIMATE)**
+# Dynamic Application Security Testing of APIs (DAST API) **(ULTIMATE)**
 
 You can add dynamic application security testing of web APIs to your [GitLab CI/CD](../../../ci/README.md) pipelines.
 This helps you discover bugs and potential security issues that other QA processes may miss.
