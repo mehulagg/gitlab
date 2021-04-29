@@ -10,6 +10,7 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
+      # After destroy callbacks are skipped because of FastDestroyAll
       after_destroy :log_geo_deleted_event
 
       SECURITY_REPORT_FILE_TYPES = %w[sast secret_detection dependency_scanning container_scanning dast coverage_fuzzing api_fuzzing].freeze

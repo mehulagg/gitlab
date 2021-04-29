@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Ci::JobArtifacts::DestroyBatchService do
+  include EE::GeoHelpers
+
   describe '.execute' do
     subject { service.execute }
 
@@ -15,6 +17,18 @@ RSpec.describe Ci::JobArtifacts::DestroyBatchService do
     it 'destroys all expired artifacts' do
       expect { subject }.to change { Ci::JobArtifact.count }.by(-1)
                         .and change { Security::Finding.count }.from(1).to(0)
+    end
+
+    context 'with Geo replication' do
+      let_it_be(:primary) { create(:geo_node, :primary) }
+      let_it_be(:secondary) { create(:geo_node) }
+
+      it 'creates a JobArtifactDeletedEvent' do
+        stub_current_geo_node(primary)
+        create(:ee_ci_job_artifact, :archive)
+
+        expect { subject }.to change { Geo::JobArtifactDeletedEvent.count }.by(1)
+      end
     end
   end
 end
