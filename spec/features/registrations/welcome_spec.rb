@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Welcome screen' do
+RSpec.describe 'Welcome screen', :js do
   let_it_be(:user) { create(:user, :unconfirmed) }
   let_it_be(:group) { create(:group) }
 
@@ -21,8 +21,9 @@ RSpec.describe 'Welcome screen' do
     expect(user.reload.email_opted_in).to eq(true)
   end
 
-  it 'allows specifying other for the jobs_to_be_done experiment', :js, :experiment do
+  it 'allows specifying other for the jobs_to_be_done experiment', :experiment do
     stub_experiments(jobs_to_be_done: :candidate)
+
     visit users_sign_up_welcome_path
 
     expect(page).not_to have_content('Why are you signing up? (Optional)')

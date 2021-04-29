@@ -63,7 +63,7 @@ RSpec.describe 'registrations/welcome/show' do
 
         it 'renders a select and text field for additional information' do
           is_expected.to have_selector('select[name="jobs_to_be_done"]')
-          # is_expected.to have_selector('input[name="jobs_to_be_done_other"]', visible: false)
+          is_expected.to have_selector('input[name="jobs_to_be_done_other"]', visible: false)
         end
       end
     end
