@@ -140,15 +140,16 @@ pending_job_classes.each { |job_class| Gitlab::BackgroundMigration.steal(job_cla
 
 ## Dealing with running CI/CD pipelines and jobs
 
-If you upgrade your GitLab instance whilst the GitLab Runner is processing jobs, the trace updates will be failing. Once GitLab is back online, then the trace updates should self-heal. However, depending on the error, the GitLab Runner will either retry or eventually terminate job handling.
+If you upgrade your GitLab instance while the GitLab Runner is processing jobs, the trace updates will fail. Once GitLab is back online, then the trace updates should self-heal. However, depending on the error, the GitLab Runner will either retry or eventually terminate job handling.
 
-Regarding any artifacts, the GitLab Runner will attempt to upload this three times. Failing to do so will eventually fail the job.
+As for the artifacts, the GitLab Runner will attempt to upload them three times, after which the job will eventually fail.
 
 To address the above two scenario's, it is adviced to do the following prior to upgrading:
 
-1. plan your maintenance
-1. pause your GitLab Runners
-1. wait until all jobs are finished
+1. Plan your maintenance.
+1. Pause your runners.
+1. Wait until all jobs are finished.
+1. Upgrade GitLab.
 
 ## Checking for pending Advanced Search migrations
 
