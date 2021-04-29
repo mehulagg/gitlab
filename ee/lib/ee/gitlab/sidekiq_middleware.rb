@@ -13,7 +13,7 @@ module EE
           super.call(chain)
 
           if load_balancing_enabled?
-            chain.insert_after(::Labkit::Middleware::Sidekiq::Server,
+            chain.insert_after(::Gitlab::SidekiqMiddleware::InstrumentationLogger,
                                ::Gitlab::Database::LoadBalancing::SidekiqServerMiddleware)
           end
         end
