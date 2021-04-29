@@ -303,19 +303,52 @@ module EE
     # We are plucking the user_ids from the "Members" table in an array and
     # converting the array of user_ids to a Set which will have unique user_ids.
     def billed_user_ids(requested_hosted_plan = nil)
-      if ([actual_plan_name, requested_hosted_plan] & [::Plan::GOLD, ::Plan::ULTIMATE]).any?
-        strong_memoize(:billed_user_ids) do
-          (billed_group_members.non_guests.distinct.pluck(:user_id) +
-          billed_project_members.non_guests.distinct.pluck(:user_id) +
-          billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id) +
-          billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id)).to_set
+      exclude_guests = ([actual_plan_name, requested_hosted_plan] & [::Plan::GOLD, ::Plan::ULTIMATE]).any?
+
+      strong_memoize(:billed_user_ids) do
+        billed_group_member_user_ids(exclude_guests) +
+        billed_project_member_user_ids(exclude_guests) +
+        billed_shared_group_user_ids(exclude_guests) +
+        billed_shared_project_user_ids(exclude_guests)
+      end
+    end
+
+    def billed_group_member_user_ids(exclude_guests = true)
+      strong_memoize(:billed_group_member_user_ids) do
+        if exclude_guests
+          billed_group_members.non_guests.distinct.pluck(:user_id).to_set
+        else
+          billed_group_members.distinct.pluck(:user_id).to_set
         end
-      else
-        strong_memoize(:non_billed_user_ids) do
-          (billed_group_members.distinct.pluck(:user_id) +
-          billed_project_members.distinct.pluck(:user_id) +
-          billed_shared_group_members.distinct.pluck(:user_id) +
-          billed_invited_group_to_project_members.distinct.pluck(:user_id)).to_set
+      end
+    end
+
+    def billed_project_member_user_ids(exclude_guests = true)
+      strong_memoize(:billed_project_member_user_ids) do
+        if exclude_guests
+          billed_project_members.non_guests.distinct.pluck(:user_id).to_set
+        else
+          billed_project_members.distinct.pluck(:user_id).to_set
+        end
+      end
+    end
+
+    def billed_shared_group_user_ids(exclude_guests = true)
+      strong_memoize(:billed_shared_group_user_ids) do
+        if exclude_guests
+          billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id).to_set
+        else
+          billed_shared_group_members.distinct.pluck(:user_id).to_set
+        end
+      end
+    end
+
+    def billed_shared_project_user_ids(exclude_guests = true)
+      strong_memoize(:billed_shared_project_user_ids) do
+        if exclude_guests
+          billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id).to_set
+        else
+          billed_invited_group_to_project_members.distinct.pluck(:user_id).to_set
         end
       end
     end

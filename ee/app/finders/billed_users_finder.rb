@@ -13,7 +13,13 @@ class BilledUsersFinder
     users = ::User.id_in(group_billed_user_ids)
     users = users.search(search_term) if search_term
 
-    users.sort_by_attribute(order_by)
+    {
+      users: users.sort_by_attribute(order_by),
+      group_member_user_ids: group.billed_group_member_user_ids,
+      project_member_user_ids: group.billed_project_member_user_ids,
+      shared_group_user_ids: group.billed_shared_group_user_ids,
+      shared_project_user_ids: group.billed_shared_project_user_ids
+    }
   end
 
   private

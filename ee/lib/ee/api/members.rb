@@ -54,7 +54,7 @@ module EE
             end
           end
 
-          desc 'Gets a list of billable users of root group.' do
+          desc 'Gets a list of billable members of a root group.' do
             success Entities::Member
           end
           params do
@@ -69,13 +69,18 @@ module EE
             bad_request!(nil) unless ::Ability.allowed?(current_user, :admin_group_member, group)
 
             sorting = params[:sort] || 'id_asc'
-            users = paginate(
-              BilledUsersFinder.new(group,
-                                    search_term: params[:search],
-                                    order_by: sorting).execute
-            )
 
-            present users, with: ::EE::API::Entities::BillableMember, current_user: current_user
+            # TODO: should this use a service instead?
+            response = BilledUsersFinder.new(group,
+                        search_term: params[:search],
+                        order_by: sorting).execute
+
+            present paginate(response[:users]), with: ::EE::API::Entities::BillableMember,
+              current_user: current_user,
+              group_member_user_ids: response[:group_member_user_ids],
+              project_member_user_ids: response[:project_member_user_ids],
+              shared_group_user_ids: response[:shared_group_user_ids],
+              shared_project_user_ids: response[:shared_project_user_ids]
           end
 
           desc 'Get the memberships of a billable user of a root group.' do
