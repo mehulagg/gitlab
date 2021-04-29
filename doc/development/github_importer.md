@@ -60,6 +60,35 @@ sequenceDiagram
     GithubService -->>- GithubController: success
 ```
 
+```mermaid
+stateDiagram-v2
+    state RepositoryImporterWorker
+    state "Projects::ImportService" as ProjectsImportService
+    state "Gitlab::GithubImport::ParallelImporter" as GitlabGithubImportParallelImporter
+    state "Gitlab::GithubImport::Stage::ImportRepositoryWorker" as GitlabGithubImportStageImportRepositoryWorker
+    state "Gitlab::GithubImport::Importer::RepositoryImporter" as GitlabGithubImportImporterRepositoryImporter
+    state "Gitlab::GithubImport::Stage::ImportBaseDataWorker" as GitlabGithubImportStageImportBaseDataWorker
+    state "Importer::LabelsImporter" as ImporterLabelsImporter
+    state "Importer::MilestonesImporter" as ImporterMilestonesImporter
+    state "Importer::ReleasesImporter" as ImporterReleasesImporter
+    state "Gitlab::GithubImport::Stage::ImportPullRequestsWorker" as GitlabGithubImportStageImportPullRequestsWorker
+    state "Gitlab::GithubImport::Importer::PullRequestsImporter" as GitlabGithubImportImporterPullRequestsImporter
+
+
+    [*] --> RepositoryImporterWorker
+    RepositoryImporterWorker --> ProjectsImportService: execute
+    ProjectsImportService --> GitlabGithubImportParallelImporter: execute
+    GitlabGithubImportParallelImporter --> GitlabGithubImportStageImportRepositoryWorker: perform_async 
+
+    GitlabGithubImportStageImportRepositoryWorker --> GitlabGithubImportImporterRepositoryImporter: execute
+    GitlabGithubImportStageImportRepositoryWorker --> GitlabGithubImportStageImportBaseDataWorker: perform_async
+    
+    GitlabGithubImportStageImportBaseDataWorker --> ImporterLabelsImporter: execute
+    GitlabGithubImportStageImportBaseDataWorker --> ImporterMilestonesImporter: execute
+    GitlabGithubImportStageImportBaseDataWorker --> ImporterReleasesImporter: execute
+    GitlabGithubImportStageImportBaseDataWorker --> GitlabGithubImportStageImportPullRequestsWorker: perform_async
+```
+
 </details>
 
 ## Architecture overview
