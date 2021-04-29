@@ -1,5 +1,3 @@
-import { s__ } from '~/locale';
-
 export const PROMETHEUS_TIMEOUT = 120000; // TWO_MINUTES
 
 export const dashboardEmptyStates = {
@@ -283,7 +281,3 @@ export const thresholdModeTypes = {
   ABSOLUTE: 'absolute',
   PERCENTAGE: 'percentage',
 };
-
-export const ALERTS_DEPRECATION_TEXT = s__(
-  'Metrics|GitLab-managed Prometheus is deprecated and %{linkStart}scheduled for removal%{linkEnd}. Following this removal, your existing alerts will continue to function as part of the new cluster integration. However, you will no longer be able to add new alerts or edit existing alerts from the metrics dashboard.',
-);

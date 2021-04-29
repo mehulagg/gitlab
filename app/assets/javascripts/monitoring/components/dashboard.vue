@@ -11,7 +11,7 @@ import { s__ } from '~/locale';
 import AlertsDeprecationWarning from '~/vue_shared/components/alerts_deprecation_warning.vue';
 import { defaultTimeRange } from '~/vue_shared/constants';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
-import { metricStates, keyboardShortcutKeys, ALERTS_DEPRECATION_TEXT } from '../constants';
+import { metricStates, keyboardShortcutKeys } from '../constants';
 import {
   timeRangeFromUrl,
   panelToUrl,
@@ -33,8 +33,8 @@ export default {
     VueDraggable,
     DashboardHeader,
     DashboardPanel,
-    GlButton,
     GlIcon,
+    GlButton,
     GraphGroup,
     EmptyState,
     GroupEmptyState,
@@ -134,11 +134,6 @@ export default {
       default: false,
     },
     rearrangePanelsAvailable: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    hasManagedPrometheus: {
       type: Boolean,
       required: false,
       default: false,
@@ -393,7 +388,6 @@ export default {
     },
   },
   i18n: {
-    ALERTS_DEPRECATION_TEXT,
     collapsePanelLabel: s__('Metrics|Collapse panel'),
     collapsePanelTooltip: s__('Metrics|Collapse panel (Esc)'),
   },
