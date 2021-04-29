@@ -1145,11 +1145,10 @@ To stop `systemd` from cleaning the Pages related content:
    echo 'x /tmp/gitlab-pages-*' >> /etc/tmpfiles.d/gitlab-pages-jail.conf
    ```
 
-1. Reconfigure and restart GitLab:
+1. Restart GitLab Pages:
 
    ```shell
-   sudo gitlab-ctl reconfigure
-   sudo gitlab-ctl restart
+   sudo gitlab-ctl restart gitlab-pages
    ```
 
 ### 404 error after transferring the project to a different group or user, or changing project path
