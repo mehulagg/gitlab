@@ -94,13 +94,13 @@ export default {
       const {
         $options: {
           i18n: {
-            successNotification: { description },
+            successNotification: { description, descriptionMulti, descriptionSingle },
           },
         },
       } = this;
       return this.glFeatures.multipleOncallSchedules
-        ? `${description} ${this.$options.i18n.successNotification.descriptionMulti}`
-        : `${description} ${this.$options.i18n.successNotification.descriptionSingle}`;
+        ? `${description} ${descriptionMulti}`
+        : `${description} ${descriptionSingle}`;
     },
     isLoading() {
       return this.$apollo.queries.schedules.loading;
