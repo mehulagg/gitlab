@@ -10,6 +10,7 @@ import {
   syncSubscriptionButtonText,
   notificationType,
 } from '../constants';
+import SubscriptionActivationModal from './subscription_activation_modal.vue';
 import SubscriptionDetailsCard from './subscription_details_card.vue';
 import SubscriptionDetailsHistory from './subscription_details_history.vue';
 import SubscriptionDetailsUserInfo from './subscription_details_user_info.vue';
@@ -27,6 +28,7 @@ export default {
   name: 'SubscriptionBreakdown',
   components: {
     GlButton,
+    SubscriptionActivationModal,
     SubscriptionDetailsCard,
     SubscriptionDetailsHistory,
     SubscriptionDetailsUserInfo,
@@ -96,6 +98,7 @@ export default {
 
 <template>
   <div>
+    <subscription-activation-modal />
     <subscription-sync-notifications
       v-if="notification"
       class="mb-4"

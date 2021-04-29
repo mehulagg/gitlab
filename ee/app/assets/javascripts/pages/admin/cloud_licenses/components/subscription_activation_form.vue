@@ -1,7 +1,6 @@
 <script>
 import {
   GlButton,
-  GlCard,
   GlForm,
   GlFormCheckbox,
   GlFormGroup,
@@ -36,7 +35,6 @@ export default {
   name: 'CloudLicenseSubscriptionActivationForm',
   components: {
     GlButton,
-    GlCard,
     GlForm,
     GlFormGroup,
     GlFormInput,
@@ -45,7 +43,6 @@ export default {
     GlLink,
   },
   i18n: {
-    title: subscriptionActivationForm.title,
     howToActivateSubscription: subscriptionActivationForm.howToActivateSubscription,
     activationCode: subscriptionActivationForm.activationCode,
     pasteActivationCode: subscriptionActivationForm.pasteActivationCode,
@@ -131,10 +128,7 @@ export default {
 };
 </script>
 <template>
-  <gl-card>
-    <template #header>
-      <h5 class="gl-my-0 gl-font-weight-bold">{{ $options.i18n.title }}</h5>
-    </template>
+  <div>
     <p>
       <gl-sprintf :message="$options.i18n.howToActivateSubscription">
         <template #link="{ content }">
@@ -194,5 +188,5 @@ export default {
         </gl-button>
       </div>
     </gl-form>
-  </gl-card>
+  </div>
 </template>

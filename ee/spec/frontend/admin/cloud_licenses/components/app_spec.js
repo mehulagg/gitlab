@@ -1,6 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import CloudLicenseApp from 'ee/pages/admin/cloud_licenses/components/app.vue';
+import SubscriptionManagementApp from 'ee/pages/admin/cloud_licenses/components/app.vue';
 import SubscriptionActivationForm from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
 import SubscriptionBreakdown from 'ee/pages/admin/cloud_licenses/components/subscription_breakdown.vue';
 import {
@@ -17,7 +17,7 @@ import { license, subscriptionHistory } from '../mock_data';
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
-describe('CloudLicenseApp', () => {
+describe('SubscriptionManagementApp', () => {
   let wrapper;
 
   const findActivateSubscriptionForm = () => wrapper.findComponent(SubscriptionActivationForm);
@@ -40,7 +40,7 @@ describe('CloudLicenseApp', () => {
 
   const createComponent = (props = {}, resolverMock) => {
     wrapper = extendedWrapper(
-      shallowMount(CloudLicenseApp, {
+      shallowMount(SubscriptionManagementApp, {
         localVue,
         apolloProvider: createMockApolloProvider(resolverMock),
         propsData: {

@@ -1,14 +1,15 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlCard } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
 import {
+  subscriptionActivationForm,
   subscriptionActivationNotificationText,
   subscriptionActivationTitle,
   subscriptionHistoryQueries,
   subscriptionMainTitle,
   subscriptionQueries,
 } from '../constants';
-import CloudLicenseSubscriptionActivationForm from './subscription_activation_form.vue';
+import SubscriptionActivationForm from './subscription_activation_form.vue';
 import SubscriptionBreakdown from './subscription_breakdown.vue';
 import SubscriptionPurchaseCard from './subscription_purchase_card.vue';
 import SubscriptionTrialCard from './subscription_trial_card.vue';
@@ -17,12 +18,14 @@ export default {
   name: 'CloudLicenseApp',
   components: {
     GlAlert,
-    CloudLicenseSubscriptionActivationForm,
+    GlCard,
+    SubscriptionActivationForm,
     SubscriptionBreakdown,
     SubscriptionPurchaseCard,
     SubscriptionTrialCard,
   },
   i18n: {
+    subscriptionActivationFormTitle: subscriptionActivationForm.title,
     subscriptionActivationNotificationText,
     subscriptionActivationTitle,
     subscriptionMainTitle,
@@ -105,7 +108,14 @@ export default {
         <h3 class="gl-mb-7 gl-mt-6 gl-text-center" data-testid="subscription-activation-title">
           {{ $options.i18n.subscriptionActivationTitle }}
         </h3>
-        <cloud-license-subscription-activation-form />
+        <gl-card>
+          <template #header>
+            <h5 class="gl-my-0 gl-font-weight-bold">
+              {{ $options.i18n.subscriptionActivationFormTitle }}
+            </h5>
+          </template>
+          <cloud-license-subscription-activation-form />
+        </gl-card>
         <div class="row gl-mt-7">
           <div class="col-lg-6">
             <subscription-trial-card />
