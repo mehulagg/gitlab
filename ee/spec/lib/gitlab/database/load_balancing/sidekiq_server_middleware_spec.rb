@@ -138,7 +138,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
 
         context 'when job is retried more then once' do
           before do
-            job['retry_count'] = 1
+            job['retry_count'] = 0
           end
 
           include_examples 'stick to the primary'
