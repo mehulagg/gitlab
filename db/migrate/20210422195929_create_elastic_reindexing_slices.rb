@@ -16,12 +16,12 @@ class CreateElasticReindexingSlices < ActiveRecord::Migration[6.0]
   def up
     unless table_exists?(:elastic_reindexing_slices)
       create_table_with_constraints :elastic_reindexing_slices do |t|
-        t.references :elastic_reindexing_subtask, foreign_key: { on_delete: :cascade }, null: false, index: { name: 'idx_elastic_reindexing_slices_on_elastic_reindexing_subtask_id' }
+        t.timestamps_with_timezone null: false
         t.text :elastic_task
         t.integer :elastic_slice, null: false, limit: 2, default: 0
         t.integer :elastic_max_slice, null: false, limit: 2, default: 0
         t.integer :retry_attempt, null: false, limit: 2, default: 0
-        t.timestamps_with_timezone null: false
+        t.references :elastic_reindexing_subtask, foreign_key: { on_delete: :cascade }, null: false, index: { name: 'idx_elastic_reindexing_slices_on_elastic_reindexing_subtask_id' }
 
         t.text_limit :elastic_task, 255
       end

@@ -12269,13 +12269,13 @@ ALTER SEQUENCE elastic_index_settings_id_seq OWNED BY elastic_index_settings.id;
 
 CREATE TABLE elastic_reindexing_slices (
     id bigint NOT NULL,
-    elastic_reindexing_subtask_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
     elastic_task text,
     elastic_slice smallint DEFAULT 0 NOT NULL,
     elastic_max_slice smallint DEFAULT 0 NOT NULL,
     retry_attempt smallint DEFAULT 0 NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    elastic_reindexing_subtask_id bigint NOT NULL,
     CONSTRAINT check_ca30e1396e CHECK ((char_length(elastic_task) <= 255))
 );
 
