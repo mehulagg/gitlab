@@ -11,7 +11,8 @@ module Projects::AlertManagementHelper
       'user-can-enable-alert-management' => can?(current_user, :admin_operations, project).to_s,
       'alert-management-enabled' => alert_management_enabled?(project).to_s,
       'text-query': params[:search],
-      'assignee-username-query': params[:assignee_username]
+      'assignee-username-query': params[:assignee_username],
+      'has-managed-prometheus': has_managed_prometheus(project).to_s
     }
   end
 
@@ -26,6 +27,10 @@ module Projects::AlertManagementHelper
   end
 
   private
+
+  def has_managed_prometheus(project)
+    return project.prometheus_service.active && !prometheus_service.properties["manual_configuration"]
+  end
 
   def alert_management_enabled?(project)
     !!(

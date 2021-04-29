@@ -12,6 +12,7 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { fetchPolicies } from '~/lib/graphql';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { joinPaths, visitUrl } from '~/lib/utils/url_utility';
@@ -43,6 +44,9 @@ export default {
     ),
     unassigned: __('Unassigned'),
     closed: __('closed'),
+    alertsDeprecationText: s__(
+      'Metrics|GitLab-managed Prometheus is deprecated and %{linkStart}scheduled for removal%{linkEnd}. Following this removal, your existing alerts will continue to function as part of the new cluster integration. However, you will no longer be able to add new alerts or edit existing alerts from the metrics dashboard.',
+    ),
   },
   fields: [
     {
@@ -112,7 +116,13 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: ['projectPath', 'textQuery', 'assigneeUsernameQuery', 'populatingAlertsHelpUrl'],
+  inject: [
+    'projectPath',
+    'textQuery',
+    'assigneeUsernameQuery',
+    'populatingAlertsHelpUrl',
+    'hasManagedPrometheus',
+  ],
   apollo: {
     alerts: {
       fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
@@ -209,6 +219,7 @@ export default {
     },
   },
   methods: {
+    helpPagePath,
     fetchSortedData({ sortBy, sortDesc }) {
       const sortingDirection = sortDesc ? 'DESC' : 'ASC';
       const sortingColumn = convertToSnakeCase(sortBy).toUpperCase();
@@ -269,6 +280,22 @@ export default {
           <gl-link class="gl-display-inline-block" :href="populatingAlertsHelpUrl" target="_blank">
             {{ content }}
           </gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
+
+    <gl-alert v-if="hasManagedPrometheus" variant="warning" class="my-2">
+      <gl-sprintf :message="$options.i18n.alertsDeprecationText">
+        <template #link="{ content }">
+          <gl-link
+            :href="
+              helpPagePath('operations/metrics/alerts.html', {
+                anchor: 'managed-prometheus-instances',
+              })
+            "
+            target="_blank"
+            >{{ content }}</gl-link
+          >
         </template>
       </gl-sprintf>
     </gl-alert>
