@@ -167,10 +167,10 @@ In case you want to remove a blocked IP, follow these steps:
    del cache:gitlab:rack::attack:allow2ban:ban:<ip>
    ```
 
-1. Confirm that the key with the IP no longer shows up:
+1. Confirm that the key with the IP no longer shows up (If you have [renamed the keys command](https://docs.gitlab.com/omnibus/settings/redis.html#renamed-commands) to GLKEYS):
 
    ```plaintext
-   keys *rack::attack*
+   GLKEYS *rack::attack*
    ```
 
 1. Optionally, add the IP to the whitelist to prevent it from being blacklisted
