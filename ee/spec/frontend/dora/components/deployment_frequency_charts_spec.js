@@ -1,42 +1,43 @@
 import { GlSprintf, GlLink } from '@gitlab/ui';
-import { mount, shallowMount } from '@vue/test-utils';
+import * as Sentry from '@sentry/browser';
+import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { useFixturesFakeDate } from 'helpers/fake_date';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
-import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
+import CiCdAnalyticsCharts from '~/vue_shared/components/ci_cd_analytics/ci_cd_analytics_charts.vue';
 
 jest.mock('~/flash');
 
 const lastWeekData = getJSONFixture(
-  'api/dora/metrics/daily_lead_time_for_changes_for_last_week.json',
+  'api/dora/metrics/daily_deployment_frequency_for_last_week.json',
 );
 const lastMonthData = getJSONFixture(
-  'api/dora/metrics/daily_lead_time_for_changes_for_last_month.json',
+  'api/dora/metrics/daily_deployment_frequency_for_last_month.json',
 );
 const last90DaysData = getJSONFixture(
-  'api/dora/metrics/daily_lead_time_for_changes_for_last_90_days.json',
+  'api/dora/metrics/daily_deployment_frequency_for_last_90_days.json',
 );
 
-describe('lead_time_charts.vue', () => {
+describe('deployment_frequency_charts.vue', () => {
   useFixturesFakeDate();
 
-  let LeadTimeCharts;
+  let DeploymentFrequencyCharts;
 
   // Import the component _after_ the date has been set using `useFakeDate`, so
   // that any calls to `new Date()` during module initialization use the fake date
   beforeAll(async () => {
-    LeadTimeCharts = (
-      await import('ee_component/projects/pipelines/charts/components/lead_time_charts.vue')
+    DeploymentFrequencyCharts = (
+      await import('ee_component/dora/components/deployment_frequency_charts.vue')
     ).default;
   });
 
   let wrapper;
   let mock;
 
-  const createComponent = (mountFn = shallowMount) => {
-    wrapper = mountFn(LeadTimeCharts, {
+  const createComponent = () => {
+    wrapper = shallowMount(DeploymentFrequencyCharts, {
       provide: {
         projectPath: 'test/project',
       },
@@ -44,12 +45,13 @@ describe('lead_time_charts.vue', () => {
     });
   };
 
-  // Initializes the mock endpoint to return a specific set of lead time data for a given "from" date.
-  const setUpMockLeadTime = ({ start_date, data }) => {
+  // Initializes the mock endpoint to return a specific set of deployment
+  // frequency data for a given "from" date.
+  const setUpMockDeploymentFrequencies = ({ start_date, data }) => {
     mock
       .onGet(/projects\/test%2Fproject\/dora\/metrics/, {
         params: {
-          metric: 'lead_time_for_changes',
+          metric: 'deployment_frequency',
           interval: 'daily',
           per_page: 100,
           end_date: '2015-07-04T00:00:00+0000',
@@ -61,27 +63,26 @@ describe('lead_time_charts.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
     mock.restore();
   });
 
   const findHelpText = () => wrapper.find('[data-testid="help-text"]');
   const findDocLink = () => findHelpText().find(GlLink);
-  const getTooltipValue = () => wrapper.find('[data-testid="tooltip-value"]').text();
-  const findCiCdAnalyticsCharts = () => wrapper.find(CiCdAnalyticsCharts);
 
   describe('when there are no network errors', () => {
     beforeEach(async () => {
       mock = new MockAdapter(axios);
 
-      setUpMockLeadTime({
+      setUpMockDeploymentFrequencies({
         start_date: '2015-06-27T00:00:00+0000',
         data: lastWeekData,
       });
-      setUpMockLeadTime({
+      setUpMockDeploymentFrequencies({
         start_date: '2015-06-04T00:00:00+0000',
         data: lastMonthData,
       });
-      setUpMockLeadTime({
+      setUpMockDeploymentFrequencies({
         start_date: '2015-04-05T00:00:00+0000',
         data: last90DaysData,
       });
@@ -95,62 +96,62 @@ describe('lead_time_charts.vue', () => {
       expect(mock.history.get).toHaveLength(3);
     });
 
+    it('converts the data from the API into data usable by the chart component', () => {
+      const chartWrapper = wrapper.find(CiCdAnalyticsCharts);
+      expect(chartWrapper.props().charts).toMatchSnapshot();
+    });
+
     it('does not show a flash message', () => {
       expect(createFlash).not.toHaveBeenCalled();
     });
 
     it('renders description text', () => {
       expect(findHelpText().text()).toMatchInterpolatedText(
-        'These charts display the median time between a merge request being merged and deployed to production, as part of the DORA 4 metrics. Learn more.',
+        'These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named production for its data to appear in these charts. Learn more.',
       );
     });
 
     it('renders a link to the documentation', () => {
       expect(findDocLink().attributes().href).toBe(
-        '/help/user/analytics/ci_cd_analytics.html#lead-time-charts',
+        '/help/user/analytics/ci_cd_analytics.html#deployment-frequency-charts',
       );
-    });
-
-    describe('methods', () => {
-      describe('formatTooltipText', () => {
-        it('displays a humanized version of the time interval in the tooltip', async () => {
-          createComponent(mount);
-
-          await axios.waitForAll();
-
-          const params = { seriesData: [{}, { data: ['Apr 7', 5328] }] };
-
-          // Simulate the child CiCdAnalyticsCharts component calling the
-          // function bound to the `format-tooltip-text`.
-          const formatTooltipText = findCiCdAnalyticsCharts().vm.$attrs['format-tooltip-text'];
-          formatTooltipText(params);
-
-          await wrapper.vm.$nextTick();
-
-          expect(getTooltipValue()).toBe('1.5 hours');
-        });
-      });
     });
   });
 
   describe('when there are network errors', () => {
+    let captureExceptionSpy;
     beforeEach(async () => {
       mock = new MockAdapter(axios);
 
       createComponent();
 
+      captureExceptionSpy = jest.spyOn(Sentry, 'captureException');
+
       await axios.waitForAll();
+    });
+
+    afterEach(() => {
+      captureExceptionSpy.mockRestore();
     });
 
     it('shows a flash message', () => {
       expect(createFlash).toHaveBeenCalledTimes(1);
-      expect(createFlash.mock.calls[0]).toEqual([
-        {
-          message: 'Something went wrong while getting lead time data.',
-          captureError: true,
-          error: expect.any(Error),
-        },
-      ]);
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong while getting deployment frequency data',
+      });
+    });
+
+    it('reports an error to Sentry', () => {
+      expect(captureExceptionSpy).toHaveBeenCalledTimes(1);
+
+      const expectedErrorMessage = [
+        'Something went wrong while getting deployment frequency data:',
+        'Error: Request failed with status code 404',
+        'Error: Request failed with status code 404',
+        'Error: Request failed with status code 404',
+      ].join('\n');
+
+      expect(captureExceptionSpy).toHaveBeenCalledWith(new Error(expectedErrorMessage));
     });
   });
 });

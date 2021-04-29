@@ -1,13 +1,10 @@
-import {
-  apiDataToChartSeries,
-  buildNullSeriesForLeadTimeChart,
-} from 'ee/projects/pipelines/charts/components/util';
+import { apiDataToChartSeries, buildNullSeriesForLeadTimeChart } from 'ee/dora/components/util';
 
 const lastWeekData = getJSONFixture(
   'api/dora/metrics/daily_lead_time_for_changes_for_last_week.json',
 );
 
-describe('ee/projects/pipelines/charts/components/util.js', () => {
+describe('ee/dora/components/util.js', () => {
   describe('apiDataToChartSeries', () => {
     it('transforms the data from the API into data the chart component can use', () => {
       const apiData = [
