@@ -7,7 +7,7 @@ RSpec.describe '1_settings' do
 
   context 'sync_seat_link_worker cron job' do
     it 'schedules the job at the correct time' do
-      expect(cron_jobs.dig('sync_seat_link_worker', 'cron')).to eq('14 3 * * * UTC')
+      expect(cron_jobs.dig('sync_seat_link_worker', 'cron')).to match(/[1-5]{0,1}[0-9]{1,2} 3 \* \* \* UTC/)
     end
   end
 end
