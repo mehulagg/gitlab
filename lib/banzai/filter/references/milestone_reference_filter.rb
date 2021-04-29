@@ -10,13 +10,37 @@ module Banzai
         self.reference_type = :milestone
         self.object_class   = Milestone
 
+        def parent_records(parent, ids)
+          # parent.issues.where(iid: ids.to_a)
+
+          # find_milestone_with_finder(parent, id: ids)
+          ids.map do |id|
+            find_milestone(id[:project], id[:namespace], id[:iid], id[:name])
+          end
+        end
+
+        def parse_symbol(raw, match_data)
+          namespace = match_data[:namespace]
+          project = match_data[:project]
+          name = match_data[:milestone_name]
+          iid = match_data[:milestone_iid].to_i
+          # Identifier.new(filename: CGI.unescape(filename), issue_iid: iid)
+          { namespace: namespace, project: project, name: name, iid: iid }
+        end
+
+        def record_identifier(milestone)
+          # Identifier.new(filename: design.filename, issue_iid: design.issue.iid)
+          { namespace: milestone.group, project: milestone.project, name: milestone.name, iid: milestone.iid }
+        end
+
         # Links to project milestones contain the IID, but when we're handling
         # 'regular' references, we need to use the global ID to disambiguate
         # between group and project milestones.
         def find_object(parent, id)
           return unless valid_context?(parent)
 
-          find_milestone_with_finder(parent, id: id)
+          @cache.records_per_parent(nodes)[parent][id]
+          # find_milestone_with_finder(parent, id: id)
         end
 
         def find_object_from_link(parent, iid)
@@ -43,6 +67,31 @@ module Banzai
           end
         end
 
+        # def loaded_milestones(project, namespace, iid, name)
+        #   BatchLoader.for({ project: project, namespace: namespace, iid: iid, name: name }).batch do |stones, loader|
+        #     # Milestone.where(title: titles).each {|milestone| loader.call(milestone.title, milestone) }
+        #     stones.each do |stone|
+        #       ms = find_milestone(stone[:project], stone[:namespace], stone[:iid], stone[:name])
+        #
+        #       # loader.call({ project: ms.project, namespace: ms.group, iid: ms.iid, name: ms.name }, ms) if ms
+        #       loader.call(stone, ms)
+        #     end
+        #   end
+        # end
+        #
+        # # Returns all milestones referenced in the current document.
+        # def milestone_references
+        #   refs = []
+        #
+        #   nodes.each do |node|
+        #     unescape_html_entities(node.to_html).scan(Milestone.reference_pattern) do
+        #       refs << { project: $~[:project], namespace: $~[:namespace], iid: $~[:milestone_iid], name: $~[:milestone_name] }
+        #     end
+        #   end
+        #
+        #   refs
+        # end
+
         def references_in(text, pattern = Milestone.reference_pattern)
           # We'll handle here the references that follow the `reference_pattern`.
           # Other patterns (for example, the link pattern) are handled by the
@@ -50,20 +99,41 @@ module Banzai
           return super(text, pattern) if pattern != Milestone.reference_pattern
 
           milestones = {}
-          unescaped_html = unescape_html_entities(text).gsub(pattern) do |match|
-            milestone = find_milestone($~[:project], $~[:namespace], $~[:milestone_iid], $~[:milestone_name])
+          unescaped_html = unescape_html_entities(text).gsub(pattern).with_index do |match, index|
+            # binding.pry
+            # symbol = $~[object_sym]
+            # object_class.reference_valid?(symbol)
 
-            if milestone
-              milestones[milestone.id] = yield match, milestone.id, $~[:project], $~[:namespace], $~
-              "#{REFERENCE_PLACEHOLDER}#{milestone.id}"
+            # milestone = find_milestone($~[:project], $~[:namespace], $~[:milestone_iid], $~[:milestone_name])
+
+            if ident = identifier($~)
+              milestones[index] = yield match, ident, $~[:project], $~[:namespace], $~
+              "#{REFERENCE_PLACEHOLDER}#{index}"
             else
               match
             end
           end
 
+          # x = milestone_references.map do |stone|
+          #   loaded_milestones(stone[:project], stone[:namespace], stone[:iid], stone[:name])
+          # end
+          #
+          # binding.pry
+
           return text if milestones.empty?
 
           escape_with_placeholders(unescaped_html, milestones)
+        end
+
+        def references_in2(text, pattern = object_class.reference_pattern)
+          text.gsub(pattern) do |match|
+            symbol = $~[object_sym]
+            if object_class.reference_valid?(symbol)
+              yield match, symbol.to_i, $~[:project], $~[:namespace], $~
+            else
+              match
+            end
+          end
         end
 
         def find_milestone(project_ref, namespace_ref, milestone_id, milestone_name)

@@ -9,11 +9,11 @@ module Banzai
         end
 
         def find_object(parent, iid)
-          records_per_parent[parent][iid]
+          @cache.records_per_parent(nodes)[parent][iid]
         end
 
         def parent_from_ref(ref)
-          parent_per_reference[ref || current_parent_path]
+          @cache.parent_per_reference(nodes)[ref || @cache.current_parent_path]
         end
       end
     end

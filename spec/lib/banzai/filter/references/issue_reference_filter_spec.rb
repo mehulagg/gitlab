@@ -35,6 +35,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter do
 
       control_count = ActiveRecord::QueryRecorder.new { reference_filter(single_reference).to_html }.count
 
+      binding.pry
       expect { reference_filter(multiple_references).to_html }.not_to exceed_query_limit(control_count)
     end
   end
@@ -470,23 +471,24 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter do
     end
   end
 
-  describe '#records_per_parent' do
-    context 'using an internal issue tracker' do
-      it 'returns a Hash containing the issues per project' do
-        doc = Nokogiri::HTML.fragment('')
-        filter = described_class.new(doc, project: project)
-
-        expect(filter).to receive(:parent_per_reference)
-          .and_return({ project.full_path => project })
-
-        expect(filter).to receive(:references_per_parent)
-          .and_return({ project.full_path => Set.new([issue.iid]) })
-
-        expect(filter.records_per_parent)
-          .to eq({ project => { issue.iid => issue } })
-      end
-    end
-  end
+  # TODO:
+  # describe '#records_per_parent' do
+  #   context 'using an internal issue tracker' do
+  #     it 'returns a Hash containing the issues per project' do
+  #       doc = Nokogiri::HTML.fragment('')
+  #       filter = described_class.new(doc, project: project)
+  #
+  #       expect(filter).to receive(:parent_per_reference)
+  #         .and_return({ project.full_path => project })
+  #
+  #       expect(filter).to receive(:references_per_parent)
+  #         .and_return({ project.full_path => Set.new([issue.iid]) })
+  #
+  #       expect(filter.records_per_parent)
+  #         .to eq({ project => { issue.iid => issue } })
+  #     end
+  #   end
+  # end
 
   describe '.references_in' do
     let(:merge_request) { create(:merge_request) }
