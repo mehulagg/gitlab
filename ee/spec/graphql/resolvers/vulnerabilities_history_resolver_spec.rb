@@ -23,15 +23,15 @@ RSpec.describe Resolvers::VulnerabilitiesHistoryResolver do
         ordered_history = subject.sort_by { |count| [count['day'], count['severity']] }
 
         expect(ordered_history.to_json).to eq([
-          { 'id' => nil, 'severity' => 'critical', 'day' => '2019-10-16', 'count' => 1 },
-          { 'id' => nil, 'severity' => 'high', 'day' => '2019-10-16', 'count' => 1 },
-          { 'id' => nil, 'severity' => 'critical', 'day' => '2019-10-17', 'count' => 2 },
-          { 'id' => nil, 'severity' => 'high', 'day' => '2019-10-17', 'count' => 1 },
-          { 'id' => nil, 'severity' => 'critical', 'day' => '2019-10-18', 'count' => 2 },
-          { 'id' => nil, 'severity' => 'high', 'day' => '2019-10-18', 'count' => 1 },
-          { 'id' => nil, 'severity' => 'critical', 'day' => '2019-10-19', 'count' => 1 },
-          { 'id' => nil, 'severity' => 'high', 'day' => '2019-10-19', 'count' => 1 },
-          { 'id' => nil, 'severity' => 'critical', 'day' => '2019-10-20', 'count' => 1 }
+          { 'day' => '2019-10-16', 'severity' => 'critical', 'count' => 1, 'id' => nil },
+          { 'day' => '2019-10-16', 'severity' => 'high', 'count' => 1, 'id' => nil },
+          { 'day' => '2019-10-17', 'severity' => 'critical', 'count' => 2, 'id' => nil },
+          { 'day' => '2019-10-17', 'severity' => 'high', 'count' => 1, 'id' => nil },
+          { 'day' => '2019-10-18', 'severity' => 'critical', 'count' => 2, 'id' => nil },
+          { 'day' => '2019-10-18', 'severity' => 'high', 'count' => 1, 'id' => nil },
+          { 'day' => '2019-10-19', 'severity' => 'critical', 'count' => 1, 'id' => nil },
+          { 'day' => '2019-10-19', 'severity' => 'high', 'count' => 1, 'id' => nil },
+          { 'day' => '2019-10-20', 'severity' => 'critical', 'count' => 1, 'id' => nil }
         ].to_json)
       end
     end
