@@ -7,9 +7,16 @@ type: reference, howto
 
 # Application security **(ULTIMATE)**
 
-GitLab can check your application for security vulnerabilities that may lead to unauthorized access,
-data leaks, denial of services, and more. GitLab reports vulnerabilities in the merge request so you
-can fix them before you merge.
+GitLab can check your application for security vulnerabilities, helping to reduce risk, including:
+
+- unauthorized access
+- data leaks
+- denial of service attacks, and more.
+
+GitLab provides you with statistics and details on vulnerabilities in the merge request. Providing
+actionable information _before_ changes are merged enables you to be proactive.
+
+GitLab also provides high-level statistics of vulnerabilities across projects and groups:
 
 - The [Security Dashboard](security_dashboard/index.md) provides a
   high-level view of vulnerabilities detected in your projects, pipeline, and groups.
@@ -18,8 +25,8 @@ can fix them before you merge.
   you can immediately begin risk analysis and remediation.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview of GitLab application security, see
-[Security Deep Dive](https://www.youtube.com/watch?v=k4vEJnGYy84).
+For an overview of GitLab application security, see [Shifting Security Left](https://www.youtube.com/watch?v=XnYstHObqlA&t),
+which provides an overview of GitLab's capabilities.
 
 ## Quick start
 
