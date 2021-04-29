@@ -12,15 +12,36 @@ RSpec.describe "CI YML Templates" do
   end
 
   with_them do
-    let(:content) do
-      <<~EOS
-        include:
-          - template: #{template_name}
 
-        concrete_build_implemented_by_a_user:
-          stage: test
-          script: do something
-      EOS
+    let(:content) do
+      if template_name == 'Security/DAST-API.gitlab-ci.yml'
+        # The DAST-API template purposly exlucdes a stages
+        # definition.
+
+        $content = <<~EOS
+          include:
+            - template: #{template_name}
+
+          stages:
+            - build
+            - test
+            - deploy
+            - dast
+
+          concrete_build_implemented_by_a_user:
+            stage: test
+            script: do something
+        EOS
+      else
+        $content = <<~EOS
+          include:
+            - template: #{template_name}
+
+          concrete_build_implemented_by_a_user:
+            stage: test
+            script: do something
+        EOS
+      end
     end
 
     it 'is valid' do
