@@ -128,6 +128,50 @@ export const fetchStageMedianValues = ({ dispatch, commit, getters }) => {
     .catch((error) => dispatch('receiveStageMedianValuesError', error));
 };
 
+const fetchStageCount = ({ groupId, valueStreamId, stageId, params }) =>
+  Api.cycleAnalyticsStageCount({ groupId, valueStreamId, stageId, params }).then(({ data }) => {
+    return {
+      id: stageId,
+      ...(data?.error
+        ? {
+            error: data.error,
+            value: null,
+          }
+        : data),
+    };
+  });
+
+export const fetchStageCountValues = ({ state: { featureFlags }, commit, getters }) => {
+  if (!featureFlags?.hasPathNavigation) {
+    return Promise.resolve();
+  }
+
+  const {
+    currentGroupPath,
+    cycleAnalyticsRequestParams,
+    activeStages,
+    currentValueStreamId,
+  } = getters;
+  const stageIds = activeStages.map((s) => s.slug);
+
+  commit(types.REQUEST_STAGE_COUNTS);
+  return Promise.all(
+    stageIds.map((stageId) =>
+      fetchStageCount({
+        groupId: currentGroupPath,
+        valueStreamId: currentValueStreamId,
+        stageId,
+        params: cycleAnalyticsRequestParams,
+      }),
+    ),
+  )
+    .then((data) => commit(types.RECEIVE_STAGE_COUNTS_SUCCESS, data))
+    .catch((error) => {
+      commit(types.RECEIVE_STAGE_COUNTS_ERROR, error);
+      // TODO
+    });
+};
+
 export const requestCycleAnalyticsData = ({ commit }) => commit(types.REQUEST_VALUE_STREAM_DATA);
 
 export const receiveCycleAnalyticsDataSuccess = ({ commit, dispatch }) => {

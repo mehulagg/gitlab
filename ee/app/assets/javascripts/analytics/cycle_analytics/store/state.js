@@ -39,4 +39,5 @@ export default () => ({
     page: null,
     hasNextPage: false,
   },
+  stageCounts: {},
 });

@@ -64,6 +64,23 @@ export default {
   [types.RECEIVE_STAGE_MEDIANS_ERROR](state) {
     state.medians = {};
   },
+  [types.REQUEST_STAGE_COUNTS](state) {
+    state.stageCounts = {};
+  },
+  [types.RECEIVE_STAGE_COUNTS_SUCCESS](state, stageCounts = []) {
+    console.log('RECEIVE_STAGE_COUNTS_SUCCESS :: before : ', stageCounts);
+    state.stageCounts = stageCounts.reduce(
+      (acc, { id, count }) => ({
+        ...acc,
+        [id]: count,
+      }),
+      {},
+    );
+    console.log('RECEIVE_STAGE_COUNTS_SUCCESS :: after : ', state.stageCounts);
+  },
+  [types.RECEIVE_STAGE_COUNTS_ERROR](state) {
+    state.stageCounts = {};
+  },
   [types.REQUEST_GROUP_STAGES](state) {
     state.stages = [];
   },
