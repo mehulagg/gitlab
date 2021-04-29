@@ -9,6 +9,23 @@ module API
 
       feature_category :continuous_integration
 
+      helpers do
+        def replace_msg(error_messages, collection, key)
+          return unless error_messages.has_key?(key)
+
+          collection_messages = collection.map { |rn| rn.errors.messages[:base] }.compact.flatten
+          error_messages[key] = collection_messages if collection_messages.any?
+        end
+
+        def model_error_messages(model)
+          super.tap do |error_messages|
+            # Replace generic error message with the real underlying error from the model
+            replace_msg(error_messages, model.runner_namespaces, :runner_namespaces)
+            replace_msg(error_messages, model.runner_projects, :runner_projects)
+          end
+        end
+      end
+
       resource :runners do
         desc 'Registers a new Runner' do
           success Entities::RunnerRegistrationDetails
