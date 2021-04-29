@@ -19,14 +19,11 @@ export default () => {
       .filter((el) => !el.classList.contains('dropdown'))
       .map((el) => el.querySelector('a'))
       .filter((el) => el);
-    const $expander = $('.js-breadcrumbs-collapsed-expander');
-
     topLevelLinks.forEach((el) => addTooltipToEl(el));
 
+    const $expander = $('.js-breadcrumbs-collapsed-expander');
     $expander.closest('.dropdown').on('show.bs.dropdown hide.bs.dropdown', (e) => {
       const $el = $('.js-breadcrumbs-collapsed-expander', e.currentTarget);
-
-      $el.toggleClass('open');
 
       hide($el);
     });
