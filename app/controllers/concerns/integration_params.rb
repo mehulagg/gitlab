@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ServiceParams
+module IntegrationParams
   extend ActiveSupport::Concern
 
   ALLOWED_PARAMS_CE = [
@@ -79,22 +79,23 @@ module ServiceParams
   # Parameters to ignore if no value is specified
   FILTER_BLANK_PARAMS = [:password].freeze
 
-  def service_params
+  def integration_params
     dynamic_params = @service.event_channel_names + @service.event_names # rubocop:disable Gitlab/ModuleWithInstanceVariables
-    service_params = params.permit(:id, service: allowed_service_params + dynamic_params)
+    return_value = params.permit(:id, integration: allowed_integration_params + dynamic_params)
+    param_values = return_value[:integration]
 
-    if service_params[:service].is_a?(ActionController::Parameters)
+    if param_values.is_a?(ActionController::Parameters)
       FILTER_BLANK_PARAMS.each do |param|
-        service_params[:service].delete(param) if service_params[:service][param].blank?
+        param_values.delete(param) if param_values[param].blank?
       end
     end
 
-    service_params
+    return_value
   end
 
-  def allowed_service_params
+  def allowed_integration_params
     ALLOWED_PARAMS_CE
   end
 end
 
-ServiceParams.prepend_if_ee('EE::ServiceParams')
+IntegrationParams.prepend_if_ee('EE::IntegrationParams')

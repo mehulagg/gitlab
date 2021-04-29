@@ -4,7 +4,7 @@ module IntegrationsActions
   extend ActiveSupport::Concern
 
   included do
-    include ServiceParams
+    include IntegrationParams
 
     before_action :integration, only: [:edit, :update, :test]
   end
@@ -14,7 +14,7 @@ module IntegrationsActions
   end
 
   def update
-    saved = integration.update(service_params[:service])
+    saved = integration.update(integration_params[:integration])
 
     respond_to do |format|
       format.html do
@@ -49,7 +49,8 @@ module IntegrationsActions
   private
 
   def integration
-    # Using instance variable `@service` still required as it's used in ServiceParams.
+    # Using instance variable `@service` still required as it's used in
+    # IntegrationParams.
     # Should be removed once that is refactored to use `@integration`.
     @integration = @service ||= find_or_initialize_non_project_specific_integration(params[:id]) # rubocop:disable Gitlab/ModuleWithInstanceVariables
   end

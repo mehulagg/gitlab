@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module EE
-  module ServiceParams
+  module IntegrationParams
     extend ::Gitlab::Utils::Override
 
     ALLOWED_PARAMS_EE = [
@@ -14,8 +14,8 @@ module EE
       :vulnerabilities_issuetype
     ].freeze
 
-    override :allowed_service_params
-    def allowed_service_params
+    override :allowed_integration_params
+    def allowed_integration_params
       super + ALLOWED_PARAMS_EE
     end
   end

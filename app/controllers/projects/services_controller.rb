@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Projects::ServicesController < Projects::ApplicationController
-  include ServiceParams
+  include IntegrationParams
   include InternalRedirect
 
   # Authorize
@@ -26,8 +26,8 @@ class Projects::ServicesController < Projects::ApplicationController
   end
 
   def update
-    @service.attributes = service_params[:service]
-    @service.inherit_from_id = nil if service_params[:service][:inherit_from_id].blank?
+    @service.attributes = integration_params[:integration]
+    @service.inherit_from_id = nil if integration_params[:integration][:inherit_from_id].blank?
 
     saved = @service.save(context: :manual_change)
 
@@ -60,7 +60,7 @@ class Projects::ServicesController < Projects::ApplicationController
   private
 
   def service_test_response
-    unless @service.update(service_params[:service])
+    unless @service.update(integration_params[:integration])
       return { error: true, message: _('Validations failed.'), service_response: @service.errors.full_messages.join(','), test_failed: false }
     end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Admin::ServicesController < Admin::ApplicationController
-  include ServiceParams
+  include IntegrationParams
 
   before_action :service, only: [:edit, :update]
   before_action :disable_query_limiting, only: [:index]
@@ -21,7 +21,7 @@ class Admin::ServicesController < Admin::ApplicationController
   end
 
   def update
-    if service.update(service_params[:service])
+    if service.update(integration_params[:integration])
       PropagateServiceTemplateWorker.perform_async(service.id) if service.active? # rubocop:disable CodeReuse/Worker
 
       redirect_to admin_application_settings_services_path,
