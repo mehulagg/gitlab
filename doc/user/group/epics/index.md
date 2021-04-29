@@ -92,8 +92,8 @@ New child epics appear at the top of the list of epics in the **Epics and Issues
 
 When you add an epic that's already linked to a parent epic, the link to its current parent is removed.
 
-An epic can have multiple child epics up to a maximum total of seven levels of depth.
-This means that an epic or an issue can have no more than six levels of ancestors.
+Epics can contain multiple nested child epics, up to a total of seven levels deep.
+An issue or epic can have no more than six levels of ancestors.
 For example, in an epic "Epic 1" with a child epic "Epic 2," which has a child epic "Epic 3,"
 and so on, the deepest this can go is either to "Epic 7" or issues attached to "Epic 6."
 
