@@ -104,6 +104,22 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqClientMiddleware do
       include_examples 'does not pass database locations'
     end
 
+    context 'database write location was already provided' do
+      let(:job) { { "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", "database_write_location" => "0/D525E3A8" } }
+
+      it 'returns before setting database location again' do
+        expect(Gitlab::Database::LoadBalancing::Session.current).not_to receive(:performed_write?)
+      end
+    end
+
+    context 'database replica location was already provided' do
+      let(:job) { { "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", "database_replica_location" => "0/D525E3A8" } }
+
+      it 'returns before setting database location again' do
+        expect(Gitlab::Database::LoadBalancing::Session.current).not_to receive(:performed_write?)
+      end
+    end
+
     context 'when worker data consistency is :always' do
       include_context 'data consistency worker class', :always, :load_balancing_for_test_data_consistency_worker
 
