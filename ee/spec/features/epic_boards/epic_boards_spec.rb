@@ -128,6 +128,18 @@ RSpec.describe 'epic boards', :js do
 
         expect(page).to have_selector(selector, text: label.title, count: 1)
       end
+
+      it 'allows user to delete list from list settings sidebar' do
+        expect(page).to have_content(label.name)
+
+        page.within(find('.board:nth-child(2)')) do
+          click_button 'List settings'
+        end
+
+        accept_confirm { click_button 'Remove list' }
+
+        expect(page).not_to have_content(label.name)
+      end
     end
   end
 
@@ -188,6 +200,14 @@ RSpec.describe 'epic boards', :js do
           expect(page).not_to have_button('Cancel')
         end
       end
+    end
+
+    it 'does not show Remove list in list settings sidebar' do
+      page.within(find('.board:nth-child(2)')) do
+        click_button 'List settings'
+      end
+
+      expect(page).not_to have_button('Remove list')
     end
   end
 

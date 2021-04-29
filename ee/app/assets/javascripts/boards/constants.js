@@ -1,8 +1,10 @@
 import { issuableTypes } from '~/boards/constants';
+import destroyBoardListMutation from '~/boards/graphql/board_list_destroy.mutation.graphql';
 import updateBoardListMutation from '~/boards/graphql/board_list_update.mutation.graphql';
 
 import { s__ } from '~/locale';
 
+import destroyEpicBoardListMutation from './graphql/epic_board_list_destroy.mutation.graphql';
 import updateEpicBoardListMutation from './graphql/epic_board_list_update.mutation.graphql';
 
 export const DRAGGABLE_TAG = 'div';
@@ -68,6 +70,15 @@ export const updateListQueries = {
   },
 };
 
+export const deleteListQueries = {
+  [issuableTypes.issue]: {
+    mutation: destroyBoardListMutation,
+  },
+  [issuableTypes.epic]: {
+    mutation: destroyEpicBoardListMutation,
+  },
+};
+
 // re-export some FOSS constants so that lint does not yell
 // https://gitlab.com/gitlab-org/gitlab/-/issues/329164
 export {
@@ -82,6 +93,7 @@ export {
 } from '~/boards/constants';
 
 export default {
+  deleteListQueries,
   updateListQueries,
   DRAGGABLE_TAG,
   EpicFilterType,
