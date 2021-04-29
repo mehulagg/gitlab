@@ -28,6 +28,18 @@ module EnvironmentsHelper
     metrics_data.merge!(project_and_environment_metrics_data(project, environment)) if project && environment
     metrics_data.merge!(static_metrics_data)
 
+    puts 'METRICS_DATA'
+    puts metrics_data
+
+    puts 'PROMETHEUS_SERVICE'
+    puts project.prometheus_service
+    puts project.prometheus_service.active
+    puts project.prometheus_service.properties
+    puts project.prometheus_service.properties.keys
+    puts project.prometheus_service.properties["manual_configuration"]
+    # puts project.prometheus_service.properties[:manual_configuration]
+    # puts project.prometheus_service.properties.manual_configuration
+
     metrics_data
   end
 
@@ -50,6 +62,9 @@ module EnvironmentsHelper
   def project_metrics_data(project)
     return {} unless project
 
+    puts 'has_managed_prometheus'
+    puts has_managed_prometheus(project)
+
     {
       'settings_path'               => edit_project_service_path(project, 'prometheus'),
       'clusters_path'               => project_clusters_path(project),
@@ -62,7 +77,8 @@ module EnvironmentsHelper
       'validate_query_path'         => validate_query_project_prometheus_metrics_path(project),
       'custom_metrics_available'    => "#{custom_metrics_available?(project)}",
       'prometheus_alerts_available' => "#{can?(current_user, :read_prometheus_alerts, project)}",
-      'dashboard_timezone'          => project.metrics_setting_dashboard_timezone.to_s.upcase
+      'dashboard_timezone'          => project.metrics_setting_dashboard_timezone.to_s.upcase,
+      'has_managed_prometheus'      => has_managed_prometheus(project).to_s
     }
   end
 
@@ -76,6 +92,10 @@ module EnvironmentsHelper
       'prometheus_status'           => "#{environment.prometheus_status}",
       'environment_state'           => "#{environment.state}"
     }
+  end
+
+  def has_managed_prometheus(project)
+    return project.prometheus_service.active && !prometheus_service.properties["manual_configuration"]
   end
 
   def metrics_dashboard_base_path(environment, project)
