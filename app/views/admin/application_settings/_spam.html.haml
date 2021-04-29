@@ -81,6 +81,6 @@
     .form-group
       = f.label :spam_check_api_key, _('Spam Check API Key'), class: 'label-bold'
       = f.text_field :spam_check_api_key, class: 'form-control gl-form-input'
-      The API key used by GitLab for accessing the Spam Check service endpoint
+      .form-text.text-muted= _('The API key used by GitLab for accessing the Spam Check service endpoint')
 
   = f.submit _('Save changes'), class: "gl-button btn btn-confirm"

@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 class AddSpamcheckApiKeyToApplicationSetting < ActiveRecord::Migration[6.0]
