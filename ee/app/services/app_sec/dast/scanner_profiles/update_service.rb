@@ -6,22 +6,25 @@ module AppSec
       class UpdateService < BaseService
         include Gitlab::Allowable
 
-        def execute(**params)
+        def execute(id:, profile_name:, target_timeout:, spider_timeout:, scan_type: nil, use_ajax_spider: nil, show_debug_messages: nil)
           return unauthorized unless can_update_scanner_profile?
 
-          dast_scanner_profile = find_dast_scanner_profile(params[:id])
+          dast_scanner_profile = find_dast_scanner_profile(id)
           return ServiceResponse.error(message: _('Scanner profile not found for given parameters')) unless dast_scanner_profile
           return ServiceResponse.error(message: _('Cannot modify %{profile_name} referenced in security policy') % { profile_name: dast_scanner_profile.name }) if referenced_in_security_policy?(dast_scanner_profile)
 
           old_params = dast_scanner_profile.attributes.symbolize_keys
-          update_params = {
-            name: params[:profile_name],
-            target_timeout: params[:target_timeout],
-            spider_timeout: params[:spider_timeout]
+          params = {
+            name: profile_name,
+            target_timeout: target_timeout,
+            spider_timeout: spider_timeout,
+            scan_type: scan_type,
+            use_ajax_spider: use_ajax_spider,
+            show_debug_messages: show_debug_messages
           }.compact
 
-          if dast_scanner_profile.update(update_params)
-            audit_update(dast_scanner_profile, update_params, old_params)
+          if dast_scanner_profile.update(params)
+            audit_update(dast_scanner_profile, params, old_params)
 
             ServiceResponse.success(payload: dast_scanner_profile)
           else
