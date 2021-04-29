@@ -874,6 +874,27 @@ Particular attention should be shown to:
    repository that viewed. If the project is created, and you can see the
    README file, it works!
 
+#### Adding Gitaly Cluster to an existing GitLab instance
+
+When adding Gitaly Cluster to an existing Gitaly instance the existing Gitaly storage
+must use a TCP address. If `gitaly_address` is not specified than a Unix socket is used,
+which will prevent the communication with the cluster.
+
+For example:
+
+```ruby
+git_data_dirs({
+  'default' => { 'gitaly_address' => 'tcp://old-gitaly.internal:8075' },
+  'cluster' => {
+    'gitaly_address' => 'tcp://LOAD_BALANCER_SERVER_ADDRESS:2305',
+    'gitaly_token' => 'PRAEFECT_EXTERNAL_TOKEN'
+  }
+})
+```
+
+See [Mixed Configuration](../configure_gitaly.md#mixed-configuration) for further information on
+running multiple Gitaly storages.
+
 ### Grafana
 
 Grafana is included with GitLab, and can be used to monitor your Praefect
