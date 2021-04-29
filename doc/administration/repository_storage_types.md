@@ -139,8 +139,8 @@ project. Object pool repositories are stored similarly to regular repositories i
 ```
 
 WARNING:
-Do not run `git prune` or `git gc` in object pool repositories. This can cause data loss in the
-regular repositories that depend on the object pool.
+Do not run `git prune` or `git gc` in object pool repositories, which are stored in the `@pools` directory.
+This can cause data loss in the regular repositories that depend on the object pool.
 
 ### Object storage support
 
