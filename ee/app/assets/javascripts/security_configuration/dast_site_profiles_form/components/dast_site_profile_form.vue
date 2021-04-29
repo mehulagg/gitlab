@@ -427,6 +427,7 @@ export default {
       :fields="authSectionFields"
       :disabled="isPolicyProfile"
       :show-validation="form.showValidation"
+      :is-edit="isEdit"
       @onUpdate="updateAuthSection"
     />
 

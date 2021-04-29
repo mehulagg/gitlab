@@ -28,6 +28,11 @@ export default {
       required: false,
       default: false,
     },
+    isEdit: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     const {
@@ -40,8 +45,6 @@ export default {
       passwordField = 'password',
     } = this.fields;
 
-    const isEditMode = Object.keys(this.fields).length > 0;
-
     return {
       form: {
         state: false,
@@ -49,15 +52,14 @@ export default {
           enabled: initFormField({ value: enabled, skipValidation: true }),
           url: initFormField({ value: url }),
           username: initFormField({ value: username }),
-          password: isEditMode
+          password: this.isEdit
             ? initFormField({ value: password, required: false, skipValidation: true })
             : initFormField({ value: password }),
           usernameField: initFormField({ value: usernameField }),
           passwordField: initFormField({ value: passwordField }),
         },
       },
-      isEditMode,
-      isSensitiveFieldRequired: !isEditMode,
+      isSensitiveFieldRequired: !this.isEdit,
     };
   },
   watch: {
