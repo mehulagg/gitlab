@@ -114,6 +114,7 @@ gem 'kaminari', '~> 1.0'
 
 # HAML
 gem 'hamlit', '~> 2.15.0'
+gem 'view_component', require: 'view_component/engine'
 
 # Files attachments
 gem 'carrierwave', '~> 1.3'

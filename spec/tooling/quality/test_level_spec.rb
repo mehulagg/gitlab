@@ -32,6 +32,13 @@ RSpec.describe Quality::TestLevel do
       end
     end
 
+    context 'when level is component' do
+      it 'returns a pattern' do
+        expect(subject.pattern(:component))
+          .to eq("spec/{components}{,/**/}*_spec.rb")
+      end
+    end
+
     context 'when level is migration' do
       it 'returns a pattern' do
         expect(subject.pattern(:migration))
@@ -107,6 +114,13 @@ RSpec.describe Quality::TestLevel do
       end
     end
 
+    context 'when level is component' do
+      it 'returns a regexp' do
+        expect(subject.regexp(:component))
+          .to eq(%r{spec/(components)})
+      end
+    end
+
     context 'when level is migration' do
       it 'returns a regexp' do
         expect(subject.regexp(:migration))
@@ -156,6 +170,10 @@ RSpec.describe Quality::TestLevel do
   describe '#level_for' do
     it 'returns the correct level for a unit test' do
       expect(subject.level_for('spec/models/abuse_report_spec.rb')).to eq(:unit)
+    end
+
+    it 'returns the correct level for a unit test' do
+      expect(subject.level_for('spec/components/label_row_component_spec.rb')).to eq(:component)
     end
 
     it 'returns the correct level for a frontend fixture test' do

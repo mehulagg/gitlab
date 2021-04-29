@@ -52,6 +52,9 @@ module Quality
         workers
         tooling
       ],
+      component: %w[
+        components
+      ],
       integration: %w[
         controllers
         mailers
@@ -87,6 +90,8 @@ module Quality
         :frontend_fixture
       when regexp(:unit)
         :unit
+      when regexp(:component)
+        :component
       when regexp(:integration)
         :integration
       when regexp(:system)
