@@ -180,7 +180,7 @@ class Projects::IssuesController < Projects::ApplicationController
   def reorder
     service = ::Issues::ReorderService.new(project, current_user, reorder_params)
 
-    if issue_reordering_disabled? || service.execute(issue)
+    if service.execute(issue)
       head :ok
     else
       head :unprocessable_entity

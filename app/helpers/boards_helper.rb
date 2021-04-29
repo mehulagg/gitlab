@@ -5,19 +5,12 @@ module BoardsHelper
     @board ||= @board || @boards.first
   end
 
-  def issue_repositioning_disabled?
-    namespace =
-      board.group_board? ? board.resource_parent : board.resource_parent.root_namespace
-
-    namespace.issue_repositioning_disabled?
-  end
-
   def board_data
     {
       boards_endpoint: @boards_endpoint,
       lists_endpoint: board_lists_path(board),
       board_id: board.id,
-      disabled: (!can?(current_user, :create_non_backlog_issues, board)).to_s,
+      disabled: board.disabled?.to_s,
       root_path: root_path,
       full_path: full_path,
       bulk_update_path: @bulk_issues_path,

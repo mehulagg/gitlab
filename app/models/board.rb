@@ -45,6 +45,12 @@ class Board < ApplicationRecord
   def to_type
     self.class.to_type
   end
+
+  def disabled?
+    namespace = group_board? ? resource_parent : resource_parent.root_namespace
+
+    namespace.issue_repositioning_disabled? || !Ability.allowed?(current_user, :create_non_backlog_issues, self)
+  end
 end
 
 Board.prepend_if_ee('EE::Board')
