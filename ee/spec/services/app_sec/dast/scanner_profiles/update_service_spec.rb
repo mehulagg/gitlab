@@ -73,15 +73,40 @@ RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
     end
 
     context 'when the user can run a dast scan' do
+      let(:base_audit_details) do
+        [
+          {
+            change: "DAST scanner profile name",
+            from: dast_profile.name,
+            to: new_profile_name,
+            target_id: dast_profile.id,
+            target_type: 'DastScannerProfile',
+            target_details: new_profile_name
+          },
+          {
+            change: "DAST scanner profile target_timeout",
+            from: dast_profile.target_timeout,
+            to: new_target_timeout,
+            target_id: dast_profile.id,
+            target_type: 'DastScannerProfile',
+            target_details: new_profile_name
+          },
+          {
+            change: "DAST scanner profile spider_timeout",
+            from: dast_profile.spider_timeout,
+            to: new_spider_timeout,
+            target_id: dast_profile.id,
+            target_type: 'DastScannerProfile',
+            target_details: new_profile_name
+          }
+        ]
+      end
+
       before do
         project.add_developer(user)
       end
 
       context 'when the user omits unrequired elements' do
-        before do
-          project.add_developer(user)
-        end
-
         subject do
           described_class.new(project, user).execute(
             id: dast_scanner_profile_id,
@@ -102,38 +127,12 @@ RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
         end
 
         it 'omits those elements from the audit' do
-          profile = payload.reload
+          subject
+
           audit_events = AuditEvent.all
           audit_events_details = audit_events.map(&:details)
 
-          aggregate_failures do
-            expect(audit_events_details).to eq([
-              {
-                change: "DAST scanner profile name",
-                from: dast_profile.name,
-                to: new_profile_name,
-                target_id: profile.id,
-                target_type: 'DastScannerProfile',
-                target_details: new_profile_name
-              },
-              {
-                change: "DAST scanner profile target_timeout",
-                from: dast_profile.target_timeout,
-                to: new_target_timeout,
-                target_id: profile.id,
-                target_type: 'DastScannerProfile',
-                target_details: new_profile_name
-              },
-              {
-                change: "DAST scanner profile spider_timeout",
-                from: dast_profile.spider_timeout,
-                to: new_spider_timeout,
-                target_id: profile.id,
-                target_type: 'DastScannerProfile',
-                target_details: new_profile_name
-              }
-            ])
-          end
+          expect(audit_events_details).to eq(base_audit_details)
         end
       end
 
@@ -167,31 +166,8 @@ RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
             expect(event.target_type).to eq('DastScannerProfile')
             expect(event.target_details).to eq(profile.name)
           end
-          expect(audit_events_details).to eq([
-            {
-              change: "DAST scanner profile name",
-              from: dast_profile.name,
-              to: new_profile_name,
-              target_id: profile.id,
-              target_type: 'DastScannerProfile',
-              target_details: new_profile_name
-            },
-            {
-              change: "DAST scanner profile target_timeout",
-              from: dast_profile.target_timeout,
-              to: new_target_timeout,
-              target_id: profile.id,
-              target_type: 'DastScannerProfile',
-              target_details: new_profile_name
-            },
-            {
-              change: "DAST scanner profile spider_timeout",
-              from: dast_profile.spider_timeout,
-              to: new_spider_timeout,
-              target_id: profile.id,
-              target_type: 'DastScannerProfile',
-              target_details: new_profile_name
-            },
+
+          expect(audit_events_details).to eq(base_audit_details + [
             {
               change: "DAST scanner profile scan_type",
               from: dast_profile.scan_type,
