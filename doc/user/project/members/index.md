@@ -102,11 +102,11 @@ To import users:
 
 1. On the **Invite member** tab, select **Import**.
 
-1. Select the project. You can only view projects you are Maintainer on.
+1. Select the project. You can only view projects you are Maintainer of.
 
    ![Import members from another project](img/add_user_import_members_from_another_project_v13_8.png)
 
-1. Select **Import project members**. A flash message displays, notifying you
+1. Select **Import project members**. A message displays, notifying you
    that the import was successful, and the new members are now in the project's
    members list.
 
