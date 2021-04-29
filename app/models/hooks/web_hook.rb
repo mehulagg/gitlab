@@ -3,6 +3,8 @@
 class WebHook < ApplicationRecord
   include Sortable
 
+  FAILURE_THRESHOLD = 3 # three strikes
+
   attr_encrypted :token,
                  mode:      :per_attribute_iv,
                  algorithm: 'aes-256-gcm',
@@ -21,15 +23,21 @@ class WebHook < ApplicationRecord
   validates :token, format: { without: /\n/ }
   validates :push_events_branch_filter, branch_filter: true
 
+  scope :executable, -> { where('recent_failures <= ? AND (disabled_until IS NULL OR disabled_until < ?)', FAILURE_THRESHOLD, Time.current) }
+
+  def executable?
+    recent_failures <= FAILURE_THRESHOLD && (disabled_until.nil? || disabled_until < Time.current)
+  end
+
   # rubocop: disable CodeReuse/ServiceClass
   def execute(data, hook_name)
-    WebHookService.new(self, data, hook_name).execute
+    WebHookService.new(self, data, hook_name).execute if executable?
   end
   # rubocop: enable CodeReuse/ServiceClass
 
   # rubocop: disable CodeReuse/ServiceClass
   def async_execute(data, hook_name)
-    WebHookService.new(self, data, hook_name).async_execute
+    WebHookService.new(self, data, hook_name).async_execute if executable?
   end
   # rubocop: enable CodeReuse/ServiceClass
 

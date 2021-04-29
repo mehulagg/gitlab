@@ -6,6 +6,18 @@ class WebHookService
 
     attr_reader :body, :headers, :code
 
+    def success?
+      false
+    end
+
+    def redirection?
+      false
+    end
+
+    def internal_server_error?
+      true
+    end
+
     def initialize
       @headers = Gitlab::HTTP::Response::Headers.new({})
       @body = ''
@@ -33,6 +45,8 @@ class WebHookService
   end
 
   def execute
+    return { status: :error, message: 'Hook disabled' } unless hook.executable?
+
     start_time = Gitlab::Metrics::System.monotonic_time
 
     response = if parsed_url.userinfo.blank?
@@ -104,6 +118,14 @@ class WebHookService
   end
 
   def log_execution(trigger:, url:, request_data:, response:, execution_duration:, error_message: nil)
+    if response.success? || response.redirection?
+      hook.update!(recent_failures: 0)
+    elsif response.internal_server_error?
+      hook.update!(disabled_until: 1.day.from_now)
+    else
+      hook.update!(recent_failures: hook.recent_failures + 1)
+    end
+
     WebHookLog.create(
       web_hook: hook,
       trigger: trigger,

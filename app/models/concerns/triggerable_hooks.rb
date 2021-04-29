@@ -33,7 +33,7 @@ module TriggerableHooks
     end
 
     def select_active(hooks_scope, data)
-      select do |hook|
+      executable.select do |hook|
         ActiveHookFilter.new(hook).matches?(hooks_scope, data)
       end
     end

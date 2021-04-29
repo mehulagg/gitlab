@@ -94,4 +94,61 @@ RSpec.describe WebHook do
       expect { web_hook.destroy! }.to change(web_hook.web_hook_logs, :count).by(-3)
     end
   end
+
+  describe '.executable' do
+    it 'finds the correct set of project hooks' do
+      project = create(:project)
+
+      [
+        [0, 1.minute.from_now],
+        [1, 1.minute.from_now],
+        [3, 1.minute.from_now],
+        [4, nil],
+        [4, 1.day.ago],
+        [4, 1.minute.from_now]
+      ].map do |(recent_failures, disabled_until)|
+        create(:project_hook, project: project, recent_failures: recent_failures, disabled_until: disabled_until)
+      end
+
+      executables = [
+        [0, nil],
+        [0, 1.day.ago],
+        [1, nil],
+        [1, 1.day.ago],
+        [3, nil],
+        [3, 1.day.ago]
+      ].map do |(recent_failures, disabled_until)|
+        create(:project_hook, project: project, recent_failures: recent_failures, disabled_until: disabled_until)
+      end
+
+      expect(described_class.executable).to match_array executables
+    end
+  end
+
+  describe '#executable?' do
+    where(:recent_failures, :disabled_until, :executable) do
+      [
+        [0, nil,               true],
+        [0, 1.day.ago,         true],
+        [0, 1.minute.from_now, false],
+        [1, nil,               true],
+        [1, 1.day.ago,         true],
+        [1, 1.minute.from_now, false],
+        [3, nil,               true],
+        [3, 1.day.ago,         true],
+        [3, 1.minute.from_now, false],
+        [4, nil,               false],
+        [4, 1.day.ago,         false],
+        [4, 1.minute.from_now, false]
+      ]
+    end
+
+    with_them do
+      it 'has the correct state' do
+        web_hook = create(:project_hook, recent_failures: recent_failures, disabled_until: disabled_until)
+
+        expect(web_hook.executable?).to eq(executable)
+      end
+    end
+  end
 end
