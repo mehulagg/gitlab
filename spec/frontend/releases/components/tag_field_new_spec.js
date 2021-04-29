@@ -10,32 +10,35 @@ const TEST_PROJECT_ID = '1234';
 const TEST_CREATE_FROM = 'test-create-from';
 const NONEXISTENT_TAG_NAME = 'nonexistent-tag';
 
-// A mock version of the RefSelector component that simulates
-// a scenario where the users has searched for "nonexistent-tag"
-// and the component has found no tags that match.
-const RefSelectorStub = Vue.component('RefSelectorStub', {
-  data() {
-    return {
-      footerSlotProps: {
-        isLoading: false,
-        matches: {
-          tags: {
-            totalCount: 0,
-            list: [{ name: TEST_TAG_NAME }],
-          },
-        },
-        query: NONEXISTENT_TAG_NAME,
-      },
-    };
-  },
-  template: '<div><slot name="footer" v-bind="footerSlotProps"></slot></div>',
-});
-
 describe('releases/components/tag_field_new', () => {
   let store;
   let wrapper;
+  let RefSelectorStub;
 
-  const createComponent = (mountFn = shallowMount) => {
+  const createComponent = (
+    mountFn = shallowMount,
+    { searchQuery } = { searchQuery: NONEXISTENT_TAG_NAME },
+  ) => {
+    // A mock version of the RefSelector component that just renders the
+    // #footer slot, so that the content inside this slot can be tested.
+    RefSelectorStub = Vue.component('RefSelectorStub', {
+      data() {
+        return {
+          footerSlotProps: {
+            isLoading: false,
+            matches: {
+              tags: {
+                totalCount: 1,
+                list: [{ name: TEST_TAG_NAME }],
+              },
+            },
+            query: searchQuery,
+          },
+        };
+      },
+      template: '<div><slot name="footer" v-bind="footerSlotProps"></slot></div>',
+    });
+
     wrapper = mountFn(TagFieldNew, {
       store,
       stubs: {
@@ -116,17 +119,9 @@ describe('releases/components/tag_field_new', () => {
     });
 
     describe('"Create tag" option', () => {
-      beforeEach(() => {
-        createComponent(mount);
-      });
-
       describe('when the search query exactly matches one of the search results', () => {
         beforeEach(async () => {
-          wrapper.find(RefSelectorStub).setData({
-            footerSlotProps: {
-              query: TEST_TAG_NAME,
-            },
-          });
+          createComponent(mount, { searchQuery: TEST_TAG_NAME });
         });
 
         it('does not show the "Create tag" option', () => {
@@ -135,6 +130,10 @@ describe('releases/components/tag_field_new', () => {
       });
 
       describe('when the search query does not exactly match one of the search results', () => {
+        beforeEach(async () => {
+          createComponent(mount, { searchQuery: NONEXISTENT_TAG_NAME });
+        });
+
         it('shows the "Create tag" option', () => {
           expect(findCreateNewTagOption().exists()).toBe(true);
         });
