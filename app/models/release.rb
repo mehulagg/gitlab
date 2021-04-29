@@ -29,7 +29,8 @@ class Release < ApplicationRecord
 
   scope :sorted, -> { order(released_at: :desc) }
   scope :preloaded, -> {
-    includes(:author, :evidences, :milestones, :links, :sorted_links,
+    includes(:author, :evidences, :milestones, :links,
+             sorted_links: { release: { project: [:project_feature, :route, { namespace: :route }] } },
              project: [:project_feature, :route, { namespace: :route }])
   }
   scope :with_project_and_namespace, -> { includes(project: :namespace) }

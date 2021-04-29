@@ -131,6 +131,7 @@ RSpec.describe API::Releases do
 
     it 'avoids N+1 queries' do
       create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create(:release_link, release: project.releases.first)
 
       control_count = ActiveRecord::QueryRecorder.new do
         get api("/projects/#{project.id}/releases", maintainer)
@@ -138,6 +139,8 @@ RSpec.describe API::Releases do
 
       create_list(:release, 2, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
       create_list(:release, 2, project: project)
+      create_list(:release_link, 2, release: project.releases.first)
+      create_list(:release_link, 2, release: project.releases.last)
 
       expect do
         get api("/projects/#{project.id}/releases", maintainer)
