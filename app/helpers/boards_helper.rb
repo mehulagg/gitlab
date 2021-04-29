@@ -10,7 +10,7 @@ module BoardsHelper
       boards_endpoint: @boards_endpoint,
       lists_endpoint: board_lists_path(board),
       board_id: board.id,
-      disabled: board.disabled?.to_s,
+      disabled: board.disabled_for?(current_user).to_s,
       root_path: root_path,
       full_path: full_path,
       bulk_update_path: @bulk_issues_path,

@@ -68,8 +68,6 @@ class Projects::IssuesController < Projects::ApplicationController
     end
   end
 
-  helper_method :issue_repositioning_disabled?
-
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
 
   respond_to :html
@@ -180,7 +178,7 @@ class Projects::IssuesController < Projects::ApplicationController
   def reorder
     service = ::Issues::ReorderService.new(project, current_user, reorder_params)
 
-    if service.execute(issue)
+    if issue_repositioning_disabled? || service.execute(issue)
       head :ok
     else
       head :unprocessable_entity

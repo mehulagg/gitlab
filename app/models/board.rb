@@ -46,7 +46,7 @@ class Board < ApplicationRecord
     self.class.to_type
   end
 
-  def disabled?
+  def disabled_for?(current_user)
     namespace = group_board? ? resource_parent : resource_parent.root_namespace
 
     namespace.issue_repositioning_disabled? || !Ability.allowed?(current_user, :create_non_backlog_issues, self)
