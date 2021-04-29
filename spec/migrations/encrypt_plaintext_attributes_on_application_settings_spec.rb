@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require Rails.root.join('db', 'migrate', '20191120115530_encrypt_plaintext_attributes_on_application_settings.rb')
+require Rails.root.join('db', 'migrate', '20210427125400_add_spamcheck_api_key_to_application_setting.rb')
 
 RSpec.describe EncryptPlaintextAttributesOnApplicationSettings do
   let(:migration) { described_class.new }
