@@ -112,10 +112,10 @@ RSpec.describe 'Group Packages & Registries settings' do
   end
 
   def visit_settings_page
-    visit group_settings_packages_and_registries_path(group)
+    visit group_settings_packages_and_registry_path(group)
   end
 
   def visit_sub_group_settings_page
-    visit group_settings_packages_and_registries_path(sub_group)
+    visit group_settings_packages_and_registry_path(sub_group)
   end
 end

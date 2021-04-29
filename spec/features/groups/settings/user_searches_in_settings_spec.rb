@@ -45,7 +45,7 @@ RSpec.describe 'User searches group settings', :js do
 
   context 'in Packages & Registries page' do
     before do
-      visit group_settings_packages_and_registries_path(group)
+      visit group_settings_packages_and_registry_path(group)
     end
 
     it_behaves_like 'can highlight results', 'GitLab Packages'

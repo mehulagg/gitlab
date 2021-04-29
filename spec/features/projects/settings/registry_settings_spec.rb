@@ -124,7 +124,7 @@ RSpec.describe 'Project > Settings > CI/CD > Container registry tag expiration p
   end
 
   context 'with sidebar feature flag on' do
-    subject { visit project_settings_packages_and_registries_path(project) }
+    subject { visit project_settings_packages_and_registry_path(project) }
 
     before do
       stub_feature_flags(sidebar_refactor: true)

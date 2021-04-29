@@ -52,7 +52,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
 
       resources :applications
 
-      resources :packages_and_registries, only: [:index]
+      resources :packages_and_registries, only: [:show]
     end
 
     resource :variables, only: [:show, :update]
