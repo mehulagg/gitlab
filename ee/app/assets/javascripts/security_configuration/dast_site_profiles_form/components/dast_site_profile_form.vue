@@ -159,8 +159,11 @@ export default {
         .split(EXCLUDED_URLS_SEPARATOR)
         .map((url) => url.trim());
     },
+    authSectionFields() {
+      return serializeFormObject(this.authSection.fields);
+    },
     serializedAuthFields() {
-      const authFields = serializeFormObject(this.authSection.fields);
+      const authFields = this.authSectionFields;
       // not to send password value if unchanged
       if (authFields.password === REDACTED_PASSWORD) {
         delete authFields.password;
@@ -175,10 +178,14 @@ export default {
     },
   },
   methods: {
+    updateAuthSection(form) {
+      this.authSection = form;
+    },
     onSubmit() {
       const isAuthEnabled =
         this.glFeatures.securityDastSiteProfilesAdditionalFields &&
-        this.authSection.fields.enabled.value;
+        this.authSection.fields.enabled.value &&
+        !this.isTargetAPI;
 
       this.form.showValidation = true;
 
@@ -417,9 +424,10 @@ export default {
 
     <dast-site-auth-section
       v-if="glFeatures.securityDastSiteProfilesAdditionalFields && !isTargetAPI"
-      v-model="authSection"
+      :fields="authSectionFields"
       :disabled="isPolicyProfile"
       :show-validation="form.showValidation"
+      @onUpdate="updateAuthSection"
     />
 
     <hr class="gl-border-gray-100" />
