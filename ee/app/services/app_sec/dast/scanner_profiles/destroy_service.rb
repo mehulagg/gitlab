@@ -42,7 +42,7 @@ module AppSec
 
         def audit_deletion(profile)
           AuditEventService.new(current_user, project, {
-            remove: 'DAST scanner profile',
+            remove: _('DAST scanner profile'),
             target_id: profile.id,
             target_type: profile.class.name,
             target_details: profile.name

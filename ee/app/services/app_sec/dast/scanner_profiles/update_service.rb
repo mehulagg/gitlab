@@ -57,7 +57,7 @@ module AppSec
             next if old_value == new_value
 
             AuditEventService.new(current_user, project, {
-              change: "DAST scanner profile #{property}",
+              change: _('DAST scanner profile %{property}') % { property: property },
               from: old_value,
               to: new_value,
               target_id: profile.id,
