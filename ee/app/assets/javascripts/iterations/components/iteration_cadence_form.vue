@@ -40,7 +40,7 @@ const i18n = Object.freeze({
   pageTitle: s__('Iterations|New iteration cadence'),
   create: s__('Iterations|Create cadence'),
   cancel: __('Cancel'),
-  requiredField: __('This field is required'),
+  requiredField: __('This field is required.'),
 });
 
 export default {
