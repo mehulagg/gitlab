@@ -84,6 +84,8 @@ module QA
           Page::Main::Menu.perform(&:sign_out_if_signed_in)
 
           using_wait_time 0 do
+            set_initial_password_if_present
+
             switch_to_ldap_tab
 
             fill_element :username_field, user.ldap_username
