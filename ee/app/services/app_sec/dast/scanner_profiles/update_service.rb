@@ -24,7 +24,7 @@ module AppSec
           }.compact
 
           if dast_scanner_profile.update(params)
-            audit_update(dast_scanner_profile, params, old_params)
+            UpdateAuditEventWorker.perform_async(current_user.id, project.id, dast_scanner_profile.id, params, old_params)
 
             ServiceResponse.success(payload: dast_scanner_profile)
           else
@@ -48,23 +48,6 @@ module AppSec
 
         def find_dast_scanner_profile(id)
           DastScannerProfilesFinder.new(project_ids: [project.id], ids: [id]).execute.first
-        end
-
-        def audit_update(profile, params, old_params)
-          params.each do |property, new_value|
-            old_value = old_params[property]
-
-            next if old_value == new_value
-
-            AuditEventService.new(current_user, project, {
-              change: _('DAST scanner profile %{property}') % { property: property },
-              from: old_value,
-              to: new_value,
-              target_id: profile.id,
-              target_type: profile.class.name,
-              target_details: profile.name
-            }).security_event
-          end
         end
       end
     end

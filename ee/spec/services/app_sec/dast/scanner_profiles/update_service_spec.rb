@@ -126,7 +126,7 @@ RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
           end
         end
 
-        it 'omits those elements from the audit' do
+        it 'omits those elements from the audit', :sidekiq_inline do
           subject
 
           audit_events = AuditEvent.all
@@ -153,7 +153,7 @@ RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
         end
       end
 
-      it 'audits the update' do
+      it 'audits the update', :sidekiq_inline do
         profile = payload.reload
         audit_events = AuditEvent.all
         audit_events_details = audit_events.map(&:details)
