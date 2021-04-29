@@ -102,6 +102,10 @@ class GeoNode < ApplicationRecord
       left_join_status.minimum(:cursor_last_event_id)
     end
 
+    def current?(node)
+      node.present? && current_node_name == node.name
+    end
+
     # Tries to find a GeoNode by oauth_application_id, returning nil if none could be found.
     def find_by_oauth_application_id(oauth_application_id)
       find_by(oauth_application_id: oauth_application_id)
@@ -115,10 +119,6 @@ class GeoNode < ApplicationRecord
 
       joins(join_statement.join_sources)
     end
-  end
-
-  def current?
-    self.class.current_node_name == name
   end
 
   def secondary?
