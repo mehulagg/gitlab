@@ -420,6 +420,7 @@ RSpec.describe Gitlab::UsageData do
         create(:group_member, ldap: true, user: user)
         create(:cycle_analytics_group_stage)
         create(:compliance_framework_project_setting)
+        create(:compliance_framework)
       end
 
       expect(described_class.usage_activity_by_stage_manage({})).to include(
@@ -427,6 +428,7 @@ RSpec.describe Gitlab::UsageData do
         ldap_users: 2,
         value_stream_management_customized_group_stages: 2,
         projects_with_compliance_framework: 2,
+        custom_compliance_frameworks: 4,
         ldap_servers: 2,
         ldap_group_sync_enabled: true,
         ldap_admin_sync_enabled: true,
@@ -437,6 +439,7 @@ RSpec.describe Gitlab::UsageData do
         ldap_users: 1,
         value_stream_management_customized_group_stages: 2,
         projects_with_compliance_framework: 2,
+        custom_compliance_frameworks: 4,
         ldap_servers: 2,
         ldap_group_sync_enabled: true,
         ldap_admin_sync_enabled: true,

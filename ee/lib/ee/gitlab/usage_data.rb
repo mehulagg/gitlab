@@ -313,6 +313,7 @@ module EE
             ldap_users: distinct_count(::GroupMember.of_ldap_type.where(time_period), :user_id),
             value_stream_management_customized_group_stages: count(::Analytics::CycleAnalytics::GroupStage.where(custom: true)),
             projects_with_compliance_framework: count(::ComplianceManagement::ComplianceFramework::ProjectSettings),
+            custom_compliance_frameworks: distinct_count(::ComplianceManagement::Framework),
             ldap_servers: ldap_available_servers.size,
             ldap_group_sync_enabled: ldap_config_present_for_any_provider?(:group_base),
             ldap_admin_sync_enabled: ldap_config_present_for_any_provider?(:admin_group),
