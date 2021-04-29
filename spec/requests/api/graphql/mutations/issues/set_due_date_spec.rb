@@ -62,6 +62,16 @@ RSpec.describe 'Setting Due Date of an issue' do
     end
   end
 
+  context 'when due date argument is not given' do
+    let(:input) { {} }
+
+    it 'returns an error' do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      expect(graphql_errors).to include(a_hash_including('message' => /Argument dueDate must be provided/))
+    end
+  end
+
   context 'when the due date value is not a valid time' do
     let(:input) { { due_date: 'test' } }
 

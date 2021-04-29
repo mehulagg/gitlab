@@ -23,18 +23,10 @@ RSpec.describe Mutations::Issues::SetDueDate do
         issue.project.add_developer(user)
       end
 
-      it 'returns the issue with updated due date' do
+      it 'returns the issue with updated due date', :aggregate_failures do
         expect(mutated_issue).to eq(issue)
         expect(mutated_issue.due_date).to eq(Date.today + 2.days)
         expect(subject[:errors]).to be_empty
-      end
-
-      context 'when due date is omitted' do
-        subject { mutation.resolve(project_path: issue.project.full_path, iid: issue.iid) }
-
-        it 'updates due date to be nil' do
-          expect(mutated_issue.due_date).to be nil
-        end
       end
 
       context 'when due date is nil' do
