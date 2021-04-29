@@ -7,10 +7,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Group DevOps Adoption **(ULTIMATE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/321083) in GitLab 13.11.
-> - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - Disabled on GitLab.com.
+> - [Deployed behind a feature flag](../../../user/feature_flags.md), enabled by default.
 > - Not recommended for production use.
-> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-group-devops-adoption).
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -43,18 +41,18 @@ DevOps Adoption allows you to:
 ## Enable or disable Group DevOps Adoption **(ULTIMATE)**
 
 Group DevOps Adoption is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:group_devops_adoption)
-```
+can disable it.
 
 To disable it:
 
 ```ruby
 Feature.disable(:group_devops_adoption)
+```
+
+To reenable it:
+
+```ruby
+Feature.enable(:group_devops_adoption)
 ```
