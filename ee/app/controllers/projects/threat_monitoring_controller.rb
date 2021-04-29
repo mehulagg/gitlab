@@ -16,7 +16,7 @@ module Projects
 
     # rubocop: disable CodeReuse/ActiveRecord
     def alert_details
-      @alert_iid = project.alert_management_alerts.with_threat_monitoring_alerts.find_by!(iid: params[:iid]).iid
+      @alert_iid = AlertManagement::AlertsFinder.new(current_user, project, params.merge(domain: 'threat_monitoring')).execute.first!.iid
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
