@@ -352,10 +352,12 @@ module QA
         Page::Element.new(name, *attributes).selector_css
       end
 
-      def click_link_with_text(text)
+      def click_link_with_text(text, page = nil)
         wait_for_requests
 
         click_link text
+
+        page.validate_elements_present! if page
       end
 
       def visit_link_in_element(name)

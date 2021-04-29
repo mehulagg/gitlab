@@ -108,6 +108,10 @@ module QA
             element :file_to_commit_content
           end
 
+          view 'app/assets/javascripts/editor/extensions/editor_lite_extension_base.js' do
+            element :line_link
+          end
+
           def has_file?(file_name)
             within_element(:file_list) do
               has_element?(:file_name_content, file_name: file_name)
@@ -304,6 +308,17 @@ module QA
 
           def switch_to_commit_tab
             click_element(:commit_mode_tab)
+          end
+
+          def select_file(file_name)
+            click_element(:file_name_content, file_name: file_name)
+          end
+
+          def link_line(line_number)
+            within_element(:editor_container) do
+              find('.line-numbers', text: line_number).hover
+              find_element(:line_link, number: "#L#{line_number}", visible: false)['href'].to_s
+            end
           end
         end
       end
