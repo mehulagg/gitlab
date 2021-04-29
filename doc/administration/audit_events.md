@@ -157,7 +157,7 @@ on adding these events into GitLab:
 - [Group settings and activity](https://gitlab.com/groups/gitlab-org/-/epics/475)
 - [Instance-level settings and activity](https://gitlab.com/groups/gitlab-org/-/epics/476)
 
-Don't see the event you want in any of the epics linked above?  You can [create an issue to request it](https://gitlab.com/gitlab-org/gitlab/-/issues/new).  Please use the "Audit Event Proposal" template.
+Don't see the event you want in any of the epics linked above? You can [create an issue to request it](https://gitlab.com/gitlab-org/gitlab/-/issues/new). Please use the "Audit Event Proposal" template.
 
 ### Disabled events
 
