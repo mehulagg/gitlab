@@ -30227,6 +30227,9 @@ msgstr ""
 msgid "SourcegraphPreferences|Uses a custom %{linkStart}Sourcegraph instance%{linkEnd}."
 msgstr ""
 
+msgid "Spam Check API Key"
+msgstr ""
+
 msgid "Spam Logs"
 msgstr ""
 
