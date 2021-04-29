@@ -4,6 +4,7 @@ module Events
   class RenderService < BaseRenderer
     def execute(events, atom_request: false)
       notes = events.map(&:note).compact
+      notes = notes.select { |note| !note.confidential }
 
       render_notes(notes, atom_request)
     end

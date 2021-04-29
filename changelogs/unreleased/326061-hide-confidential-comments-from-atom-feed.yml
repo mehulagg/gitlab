@@ -1,0 +1,5 @@
+---
+title: Hide confidential comments from atom feed
+merge_request: 60676
+author: Lee Tickett @leetickett
+type: fixed
