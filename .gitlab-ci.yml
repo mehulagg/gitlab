@@ -118,3 +118,4 @@ include:
   #   https://gitlab.com/gitlab-org/gitlab/-/issues/327299
   # - remote: 'https://gitlab.com/gitlab-org/frontend/untamper-my-lockfile/-/raw/main/.gitlab-ci-template.yml'
   - local: .gitlab/ci/untamper-my-lockfile.yml
+  - template: Container-Scanning.gitlab-ci.yml
