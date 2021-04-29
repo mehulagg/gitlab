@@ -18272,6 +18272,20 @@ CREATE SEQUENCE user_canonical_emails_id_seq
 
 ALTER SEQUENCE user_canonical_emails_id_seq OWNED BY user_canonical_emails.id;
 
+CREATE TABLE user_credit_card_validations (
+    user_id bigint NOT NULL,
+    credit_card_validated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE user_credit_card_validations_user_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE user_credit_card_validations_user_id_seq OWNED BY user_credit_card_validations.user_id;
+
 CREATE TABLE user_custom_attributes (
     id integer NOT NULL,
     created_at timestamp without time zone NOT NULL,
@@ -20022,6 +20036,8 @@ ALTER TABLE ONLY user_callouts ALTER COLUMN id SET DEFAULT nextval('user_callout
 
 ALTER TABLE ONLY user_canonical_emails ALTER COLUMN id SET DEFAULT nextval('user_canonical_emails_id_seq'::regclass);
 
+ALTER TABLE ONLY user_credit_card_validations ALTER COLUMN user_id SET DEFAULT nextval('user_credit_card_validations_user_id_seq'::regclass);
+
 ALTER TABLE ONLY user_custom_attributes ALTER COLUMN id SET DEFAULT nextval('user_custom_attributes_id_seq'::regclass);
 
 ALTER TABLE ONLY user_details ALTER COLUMN user_id SET DEFAULT nextval('user_details_user_id_seq'::regclass);
@@ -21641,6 +21657,9 @@ ALTER TABLE ONLY user_callouts
 
 ALTER TABLE ONLY user_canonical_emails
     ADD CONSTRAINT user_canonical_emails_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY user_credit_card_validations
+    ADD CONSTRAINT user_credit_card_validations_pkey PRIMARY KEY (user_id);
 
 ALTER TABLE ONLY user_custom_attributes
     ADD CONSTRAINT user_custom_attributes_pkey PRIMARY KEY (id);
@@ -24334,6 +24353,8 @@ CREATE UNIQUE INDEX index_user_canonical_emails_on_user_id ON user_canonical_ema
 
 CREATE UNIQUE INDEX index_user_canonical_emails_on_user_id_and_canonical_email ON user_canonical_emails USING btree (user_id, canonical_email);
 
+CREATE INDEX index_user_credit_card_validations_on_user_id ON user_credit_card_validations USING btree (user_id);
+
 CREATE INDEX index_user_custom_attributes_on_key_and_value ON user_custom_attributes USING btree (key, value);
 
 CREATE UNIQUE INDEX index_user_custom_attributes_on_user_id_and_key ON user_custom_attributes USING btree (user_id, key);
@@ -25922,6 +25943,9 @@ ALTER TABLE ONLY lfs_file_locks
 
 ALTER TABLE ONLY project_alerting_settings
     ADD CONSTRAINT fk_rails_27a84b407d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_credit_card_validations
+    ADD CONSTRAINT fk_rails_27ebc03cbf FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY dast_site_validations
     ADD CONSTRAINT fk_rails_285c617324 FOREIGN KEY (dast_site_token_id) REFERENCES dast_site_tokens(id) ON DELETE CASCADE;
