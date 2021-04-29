@@ -310,6 +310,15 @@ module API
           present_carrierwave_file!(job.artifacts_file, supports_direct_download: params[:direct_download])
         end
       end
+
+      def model_error_messages(model)
+        messages = model.runner_namespaces.to_a
+                        .concat(model.runner_projects.to_a)
+                        .map { |rn| rn.errors.messages }
+        return messages.first if messages.any?
+
+        super
+      end
     end
   end
 end

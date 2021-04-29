@@ -3,7 +3,6 @@
 module Ci
   class Runner < ApplicationRecord
     extend Gitlab::Ci::Model
-    include Gitlab::Utils::StrongMemoize
     include Gitlab::SQL::Pattern
     include RedisCacheable
     include ChronicDurationAttribute
@@ -13,7 +12,7 @@ module Ci
     include FeatureGate
     include Limitable
 
-    self.limit_scope = :runner_scope
+    self.limit_scope = :instance_runners_limit_scope
 
     add_authentication_token_field :token, encrypted: -> { Feature.enabled?(:ci_runners_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
 
@@ -339,10 +338,11 @@ module Ci
       read_attribute(:contacted_at)
     end
 
-    def runner_scope
-      strong_memoize(:runner_scope) do
-        Limitable::Scope.new('ci_registered_instance_runners', -> { Plan.default.actual_limits }, self.class.instance_type) if instance_type?
-      end
+    def instance_runners_limit_scope
+      return unless instance_type?
+      return unless ::Feature.enabled?(:ci_runner_limits, default_enabled: :yaml)
+
+      Limitable::Scope.new('ci_registered_instance_runners', -> { Plan.default.actual_limits }, self.class.instance_type)
     end
 
     private
