@@ -10,11 +10,6 @@ export default {
     GlSprintf,
   },
   inject: ['hasManagedPrometheus'],
-  data() {
-    return {
-      showWarning: true,
-    };
-  },
   i18n: {
     alertsDeprecationText: s__(
       'Metrics|GitLab-managed Prometheus is deprecated and %{linkStart}scheduled for removal%{linkEnd}. Following this removal, your existing alerts will continue to function as part of the new cluster integration. However, you will no longer be able to add new alerts or edit existing alerts from the metrics dashboard.',
@@ -27,7 +22,7 @@ export default {
 </script>
 
 <template>
-  <gl-alert v-if="hasManagedPrometheus && showWarning" variant="warning" class="my-2">
+  <gl-alert v-if="hasManagedPrometheus" variant="warning" class="my-2">
     <gl-sprintf :message="$options.i18n.alertsDeprecationText">
       <template #link="{ content }">
         <gl-link
@@ -37,8 +32,9 @@ export default {
             })
           "
           target="_blank"
-          >{{ content }}</gl-link
         >
+          {{ content }}
+        </gl-link>
       </template>
     </gl-sprintf>
   </gl-alert>
