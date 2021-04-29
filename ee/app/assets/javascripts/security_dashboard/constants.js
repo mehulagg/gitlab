@@ -7,3 +7,4 @@ export const SURVEY_BANNER_LOCAL_STORAGE_KEY = 'vulnerability_management_survey_
 export const SURVEY_BANNER_CURRENT_ID = 'survey1';
 
 export const DEFAULT_SCANNER = 'GitLab';
+export const SCANNER_ID_PREFIX = 'gid://gitlab/Vulnerabilities::Scanner/';
