@@ -1,0 +1,29 @@
+- page_title _('Background Migrations')
+
+%ul.nav-links.nav-tabs.nav{ role: 'tablist' }
+  %li.nav-item{ role: 'presentation' }
+    %a.nav-link{ href: admin_background_migrations_path, class: active_when(@current_tab == 'queued'), role: 'tab' }
+      = _('Queued')
+      %span.badge.gl-tab-counter-badge.badge-muted.badge-pill.gl-badge.sm
+        = limited_counter_with_delimiter(@relations_by_tab['queued'])
+  %li.nav-item{ role: 'presentation' }
+    %a.nav-link{ href: admin_background_migrations_path(tab: 'failed'), class: active_when(@current_tab == 'failed'), role: 'tab' }
+      = _('Failed')
+      %span.badge.gl-tab-counter-badge.badge-muted.badge-pill.gl-badge.sm
+        = limited_counter_with_delimiter(@relations_by_tab['failed'])
+  %li.nav-item{ role: 'presentation' }
+    %a.nav-link{ href: admin_background_migrations_path(tab: 'completed'), class: active_when(@current_tab == 'completed'), role: 'tab' }
+      = _('Completed')
+      %span.badge.gl-tab-counter-badge.badge-muted.badge-pill.gl-badge.sm
+        = limited_counter_with_delimiter(@relations_by_tab['completed'])
+
+%table.table.b-table.gl-table{ role: 'table' }
+  %thead{ role: 'rowgroup' }
+    %tr{ role: 'row' }
+      %th.table-th-transparent.border-bottom{ role: 'cell' }= _('Migration')
+      %th.table-th-transparent.border-bottom{ role: 'cell' }= _('Progress')
+      %th.table-th-transparent.border-bottom{ role: 'cell' }= _('Status')
+  %tbody{ role: 'rowgroup' }
+    = render partial: 'migration', collection: @migrations
+
+= paginate_collection @migrations

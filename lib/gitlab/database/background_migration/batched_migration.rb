@@ -15,6 +15,8 @@ module Gitlab
           foreign_key: :batched_background_migration_id
 
         scope :queue_order, -> { order(id: :asc) }
+        scope :queued, -> { where(status: [:active, :paused]) }
+        scope :aborted_or_failed, -> { where(status: [:aborted, :failed]) }
 
         enum status: {
           paused: 0,
@@ -28,6 +30,20 @@ module Gitlab
 
         def self.active_migration
           active.queue_order.first
+        end
+
+        def self.completed_rows_counts(migrations)
+          counts = {}
+
+          BatchedJob
+            .select(:batched_background_migration_id, 'SUM(batch_size) AS completed_rows')
+            .where(batched_background_migration_id: migrations, status: :succeeded)
+            .group(:batched_background_migration_id)
+            .each do |count|
+            counts[count.batched_background_migration_id] = count.completed_rows
+          end
+
+          counts
         end
 
         def interval_elapsed?(variance: 0)

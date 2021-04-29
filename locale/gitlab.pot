@@ -4815,6 +4815,9 @@ msgstr ""
 msgid "Background Jobs"
 msgstr ""
 
+msgid "Background Migrations"
+msgstr ""
+
 msgid "Background color"
 msgstr ""
 
@@ -20869,6 +20872,9 @@ msgid "Migrate your data from an external source like GitHub, Bitbucket, or anot
 msgstr ""
 
 msgid "Migrated %{success_count}/%{total_count} files."
+msgstr ""
+
+msgid "Migration"
 msgstr ""
 
 msgid "Migration has been scheduled to be retried"
