@@ -14,7 +14,7 @@ to block user IP addresses.
 You can prevent brute-force passwords attacks, scrapers, or any other offenders
 by throttling requests from IP addresses that are making large volumes of requests.
 If you find throttling is not enough to protect you against abusive clients,
-Rack Attack offers IP whitelisting, blacklisting, Fail2ban style filtering, and
+Rack Attack offers IP allowlisting, denylisting, Fail2ban style filtering, and
 tracking.
 
 For more information on how to use these options see the [Rack Attack README](https://github.com/kickstarter/rack-attack/blob/master/README.md).
@@ -114,8 +114,8 @@ The following settings can be configured:
 - `maxretry`: The maximum amount of times a request can be made in the
   specified time.
 - `findtime`: The maximum amount of time that failed requests can count against an IP
-  before it's blacklisted (in seconds).
-- `bantime`: The total amount of time that a blacklisted IP is blocked (in
+  before it's denylisted (in seconds).
+- `bantime`: The total amount of time that a denylisted IP is blocked (in
   seconds).
 
 **Installations from source**
@@ -154,17 +154,22 @@ In case you want to remove a blocked IP, follow these steps:
    grep "Rack_Attack" /var/log/gitlab/gitlab-rails/auth.log
    ```
 
-1. Since the blacklist is stored in Redis, you need to open up `redis-cli`:
+1. Since the denylist is stored in Redis, you need to open up `redis-cli`:
 
    ```shell
    /opt/gitlab/embedded/bin/redis-cli -s /var/opt/gitlab/redis/redis.socket
    ```
 
-1. You can remove the block using the following syntax, replacing `<ip>` with
-   the actual IP that is blacklisted:
+1. Find the blocking key (If you have [renamed the keys command](https://docs.gitlab.com/omnibus/settings/redis.html#renamed-commands) to GLKEYS):
 
    ```plaintext
-   del cache:gitlab:rack::attack:allow2ban:ban:<ip>
+   GLKEYS cache:gitlab:rack::attack*
+   ```
+
+1. You can remove the block by deleting the appropriate key from above (example: cache:gitlab:rack::attack:449905:throttle_unauthenticated:IPaddress):
+
+   ```plaintext
+   del [the entire key from the previous step with the IP address] 
    ```
 
 1. Confirm that the key with the IP no longer shows up (If you have [renamed the keys command](https://docs.gitlab.com/omnibus/settings/redis.html#renamed-commands) to GLKEYS):
@@ -173,12 +178,12 @@ In case you want to remove a blocked IP, follow these steps:
    GLKEYS *rack::attack*
    ```
 
-1. Optionally, add the IP to the whitelist to prevent it from being blacklisted
+1. Optionally, add the IP to the whitelist to prevent it from being denylisted
    again (see [settings](#settings)).
 
 ## Troubleshooting
 
-### Rack attack is blacklisting the load balancer
+### Rack attack is denylisting the load balancer
 
 Rack Attack may block your load balancer if all traffic appears to come from
 the load balancer. In that case, you must:
