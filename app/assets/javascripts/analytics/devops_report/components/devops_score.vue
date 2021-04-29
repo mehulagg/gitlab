@@ -54,7 +54,7 @@ export default {
 };
 </script>
 <template>
-  <div class="js-devops-score-app">
+  <div data-testid="devops-score-app">
     <div class="gl-text-gray-400 gl-my-4" data-testid="devops-score-note-text">
       {{ titleHelperText }}
     </div>

@@ -133,7 +133,7 @@ RSpec.describe 'DevOps Report page', :js do
 
           visit admin_dev_ops_report_path
 
-          expect(page).to have_selector('.js-devops-score-app')
+          expect(page).to have_selector('[data-testid="devops-score-app"]')
         end
       end
     end
