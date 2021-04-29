@@ -98,12 +98,12 @@ Any settings or feature limits not listed here are using the defaults listed in 
 | Artifacts maximum size (compressed) | 1G                | 100M          |
 | Artifacts [expiry time](../../ci/yaml/README.md#artifactsexpire_in)   | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry).           | deleted after 30 days unless otherwise specified    |
 | Scheduled Pipeline Cron | `*/5 * * * *` | `3-59/10 * * * *` |
-| [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited
+| [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited |
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
 | Max test cases per [unit test report](../../ci/unit_test_reports.md) | `500_000` | Unlimited |
-| [Max registered runners](../../administration/instance_limits.md#number-of-registered-runners-per-scope) | `10_000` per instance.<br/>`20` per top-level group / `5` per project for Free tier,<br/>`2_000` per top-level group / `100` per project for all paid tiers | `10_000` per instance,<br/>`2_000` per top-level group / `100` per project |
+| [Max registered runners](../../administration/instance_limits.md#number-of-registered-runners-per-scope) | `20` per top-level group / `5` per project for Free tier,<br/>`2_000` per top-level group / `100` per project for all paid tiers | `2_000` per top-level group / `100` per project |
 
 ## Account and limit settings
 

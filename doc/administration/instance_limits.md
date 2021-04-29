@@ -439,7 +439,7 @@ Plan.default.actual_limits.update!(ci_max_artifact_size_junit: 10)
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/321368) in GitLab 13.12.
 
-The total number of registered runners is limited at the instance, group, and project
+The total number of registered runners is limited at the group and project
 levels. Each time a new runner is registered, GitLab checks these limits. A
 runner's registration fails if it exceeds the limit for the scope determined by
 the runner registration token.
@@ -449,7 +449,6 @@ the runner registration token.
 
     | Runner scope                                | Default value |
     |---------------------------------------------|---------------|
-    | `ci_registered_instance_runners`            | 10000         |
     | `ci_registered_group_runners`               | 2000          |
     | `ci_registered_project_runners`             | 100           |
 
@@ -457,9 +456,9 @@ the runner registration token.
     [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
     ```ruby
-    # Use ci_registered_instance_runners, ci_registered_group_runners, or ci_registered_project_runners
+    # Use ci_registered_group_runners or ci_registered_project_runners
     # depending on desired scope
-    Plan.default.actual_limits.update!(ci_registered_instance_runners: 100)
+    Plan.default.actual_limits.update!(ci_registered_project_runners: 100)
     ```
 
 ## Instance monitoring and metrics

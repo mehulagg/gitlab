@@ -65,21 +65,6 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
           it_behaves_like 'not executing any extra queries for the application context' do
             let(:subject_proc) { proc { request } }
           end
-
-          context 'when it exceeds the application limits' do
-            before do
-              create(:ci_runner, runner_type: :instance_type)
-              create(:plan_limits, :default_plan, ci_registered_instance_runners: 1)
-            end
-
-            it 'does not create runner' do
-              request
-
-              expect(response).to have_gitlab_http_status(:bad_request)
-              expect(json_response['message']).to include('base' => ['Maximum number of ci registered instance runners (1) exceeded'])
-              expect(::Ci::Runner.instance_type.reload.size).to eq(1)
-            end
-          end
         end
 
         context 'when project token is used' do

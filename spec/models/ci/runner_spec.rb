@@ -5,10 +5,6 @@ require 'spec_helper'
 RSpec.describe Ci::Runner do
   it_behaves_like 'having unique enum values'
 
-  it_behaves_like 'includes Limitable concern' do
-    subject { build(:ci_runner) }
-  end
-
   describe 'validation' do
     it { is_expected.to validate_presence_of(:access_level) }
     it { is_expected.to validate_presence_of(:runner_type) }

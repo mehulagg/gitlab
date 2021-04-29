@@ -7,7 +7,6 @@ class AddRunnerRegistrationToPlanLimits < ActiveRecord::Migration[6.0]
 
   def up
     with_lock_retries do
-      add_column(:plan_limits, :ci_registered_instance_runners, :integer, default: 10_000, null: false)
       add_column(:plan_limits, :ci_registered_group_runners, :integer, default: 2_000, null: false)
       add_column(:plan_limits, :ci_registered_project_runners, :integer, default: 100, null: false)
     end
@@ -15,7 +14,6 @@ class AddRunnerRegistrationToPlanLimits < ActiveRecord::Migration[6.0]
 
   def down
     with_lock_retries do
-      remove_column(:plan_limits, :ci_registered_instance_runners) if column_exists?(:plan_limits, :ci_registered_instance_runners)
       remove_column(:plan_limits, :ci_registered_group_runners) if column_exists?(:plan_limits, :ci_registered_group_runners)
       remove_column(:plan_limits, :ci_registered_project_runners) if column_exists?(:plan_limits, :ci_registered_project_runners)
     end
