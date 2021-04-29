@@ -75,6 +75,9 @@ RSpec.describe User do
     it { is_expected.to delegate_method(:bio).to(:user_detail).allow_nil }
     it { is_expected.to delegate_method(:bio=).to(:user_detail).with_arguments(:args).allow_nil }
     it { is_expected.to delegate_method(:bio_html).to(:user_detail).allow_nil }
+
+    it { is_expected.to delegate_method(:credit_card_validated_at).to(:user_credit_card_validation) }
+    it { is_expected.to delegate_method(:credit_card_validated_at).to(:user_credit_card_validation).with_arguments(:args) }
   end
 
   describe 'associations' do
@@ -83,6 +86,7 @@ RSpec.describe User do
     it { is_expected.to have_one(:user_detail) }
     it { is_expected.to have_one(:atlassian_identity) }
     it { is_expected.to have_one(:user_highest_role) }
+    it { is_expected.to have_one(:user_credit_card_validation) }
     it { is_expected.to have_many(:snippets).dependent(:destroy) }
     it { is_expected.to have_many(:members) }
     it { is_expected.to have_many(:project_members) }
