@@ -95,7 +95,7 @@ export default {
     <gl-button
       :disabled="settingsLoading"
       class="js-error-tracking-button"
-      variant="success"
+      variant="confirm"
       @click="handleSubmit"
     >
       {{ __('Save changes') }}
