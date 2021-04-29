@@ -35,6 +35,33 @@ The importer's codebase is broken up into the following directories:
 - `app/workers/concerns/gitlab/github_import`: this directory contains a few
   modules reused by the various Sidekiq workers.
 
+<details>
+<summary>Sequence Diagrams</summary>
+
+```mermaid
+sequenceDiagram
+    participant GithubController as Import::GithubController
+    participant GithubService as Import::GithubService
+    participant LegacyGithubImportProjectCreator as Gitlab::LegacyGithubImport::ProjectCreator
+    participant ProjectsCreateService as Projects::CreateService
+
+    GithubController ->>+ GithubService: execute
+    GithubService ->>+ LegacyGithubImportProjectCreator: execute
+    LegacyGithubImportProjectCreator ->>+ ProjectsCreateService: execute
+    ProjectsCreateService ->>+ ProjectImportState: project.import_state.schedule
+    ProjectImportState ->>+ Project: add_import_job
+    Project ->>+ RepositoryImporterWorker: perform_async
+
+    RepositoryImporterWorker -->>- Project: job_id
+    Project -->>- ProjectImportState: job_id
+    ProjectImportState -->>- ProjectsCreateService: true
+    ProjectsCreateService -->>- LegacyGithubImportProjectCreator: project
+    LegacyGithubImportProjectCreator -->>- GithubService: project
+    GithubService -->>- GithubController: success
+```
+
+</details>
+
 ## Architecture overview
 
 When a GitHub project is imported, we schedule and execute a job for the
