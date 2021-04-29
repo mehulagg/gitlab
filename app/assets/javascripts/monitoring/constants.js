@@ -285,5 +285,5 @@ export const thresholdModeTypes = {
 };
 
 export const ALERTS_DEPRECATION_TEXT = s__(
-  'Metrics|GitLab-managed Prometheus is deprecated and %{docsLinkStart}scheduled for removal%{docsLinkEnd}. Following this removal, all alerting functionality on the Metrics dashboard will no longer be available. If you currently use alerts on the Metrics dashboard, your alerts %{issueLinkStart}will be migrated%{issueLinkEnd}. However, you will no longer be able to add or edit existing alerts from this dashboard.',
+  'Metrics|GitLab-managed Prometheus is deprecated and %{linkStart}scheduled for removal%{linkEnd}. Following this removal, your existing alerts will continue to function as part of the new cluster integration. However, you will no longer be able to add new alerts or edit existing alerts from the metrics dashboard.',
 );

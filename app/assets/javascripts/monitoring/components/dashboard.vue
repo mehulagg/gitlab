@@ -415,7 +415,7 @@ export default {
   <div class="prometheus-graphs" data-qa-selector="prometheus_graphs">
     <gl-alert v-if="hasManagedPrometheus" variant="warning" class="my-2">
       <gl-sprintf :message="$options.i18n.ALERTS_DEPRECATION_TEXT">
-        <template #docsLink="{ content }">
+        <template #link="{ content }">
           <gl-link
             :href="
               helpPagePath('operations/metrics/alerts.html', {
@@ -425,11 +425,6 @@ export default {
             target="_blank"
             >{{ content }}</gl-link
           >
-        </template>
-        <template #issueLink="{ content }">
-          <gl-link href="https://gitlab.com/gitlab-org/gitlab/-/issues/327655" target="_blank">{{
-            content
-          }}</gl-link>
         </template>
       </gl-sprintf>
     </gl-alert>
