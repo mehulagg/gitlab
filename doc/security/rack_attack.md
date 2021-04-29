@@ -166,7 +166,7 @@ In case you want to remove a blocked IP, follow these steps:
    GLKEYS cache:gitlab:rack::attack*
    ```
 
-1. You can remove the block by deleting the appropriate key from above (example: cache:gitlab:rack::attack:449905:throttle_unauthenticated:IPaddress):
+1. You can remove the block by deleting the appropriate key from above (example key: `cache:gitlab:rack::attack:449905:throttle_unauthenticated:IPaddress`):
 
    ```plaintext
    del [the entire key from the previous step with the IP address] 
