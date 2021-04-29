@@ -42,7 +42,7 @@ RSpec.describe Search::ProjectService do
     it_behaves_like 'search query applies joins based on migrations shared examples', :add_permissions_data_to_notes_documents
   end
 
-  context 'visibility', :elastic_context, :sidekiq_inline do
+  context 'visibility', :elastic_test, :sidekiq_inline do
     include_context 'ProjectPolicyTable context'
 
     shared_examples 'search respects visibility' do

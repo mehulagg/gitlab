@@ -18,7 +18,7 @@ class ElasticTestHelpers # rubocop:disable Gitlab/NamespacedClass
     measure('create_migrations_index') { helper.create_migrations_index }
     measure('mark_all_as_completed') { ::Elastic::DataMigrationService.mark_all_as_completed! }
     measure('create_standalone_indices') { helper.create_standalone_indices }
-    measure('refresh_index') { refresh_index! }
+    refresh_elasticsearch_index!
   end
 
   def teardown
@@ -28,6 +28,10 @@ class ElasticTestHelpers # rubocop:disable Gitlab/NamespacedClass
 
   def clear_tracking!
     measure('clear_tracking') { Elastic::ProcessBookkeepingService.clear_tracking! }
+  end
+
+  def refresh_elasticsearch_index!
+    measure('refresh_index') { refresh_index! }
   end
 
   def delete_indices!
@@ -43,6 +47,19 @@ class ElasticTestHelpers # rubocop:disable Gitlab/NamespacedClass
 
     yield.tap do
       puts "Done '#{task}' in #{(Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_second) - real_start).round(2)} seconds" if ENV['CI'] || ENV['TIME_ES_SETUP']
+    end
+  end
+
+  def delete_all_data_from_index!
+    measure('delete_all_data_from_index') do
+      helper.client.delete_by_query(
+        {
+          index: indices,
+          body: { query: { match_all: {} } },
+          slices: 5,
+          conflicts: 'proceed'
+        }
+      )
     end
   end
 end
@@ -65,6 +82,24 @@ RSpec.configure do |config|
     ElasticTestHelpers.new.teardown
   end
 
+  config.before(:context, :elastic_test) do
+    ElasticTestHelpers.new.setup
+  end
+
+  config.after(:context, :elastic_test) do
+    ElasticTestHelpers.new.teardown
+  end
+
+  config.around(:each, :elastic_test) do |example|
+    helper = ElasticTestHelpers.new
+    helper.refresh_elasticsearch_index!
+
+    example.run
+
+    helper.delete_all_data_from_index!
+  end
+
   config.include ElasticsearchHelpers, :elastic
   config.include ElasticsearchHelpers, :elastic_context
+  config.include ElasticsearchHelpers, :elastic_test
 end

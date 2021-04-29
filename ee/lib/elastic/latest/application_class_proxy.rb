@@ -351,6 +351,7 @@ module Elastic
       def filter_ids_by_feature(project_ids, user, feature)
         Project
           .id_in(project_ids)
+          .filter_by_feature_visibility(feature, user)
           .pluck_primary_key
       end
 
