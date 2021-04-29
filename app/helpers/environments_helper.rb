@@ -28,18 +28,6 @@ module EnvironmentsHelper
     metrics_data.merge!(project_and_environment_metrics_data(project, environment)) if project && environment
     metrics_data.merge!(static_metrics_data)
 
-    puts 'METRICS_DATA'
-    puts metrics_data
-
-    puts 'PROMETHEUS_SERVICE'
-    puts project.prometheus_service
-    puts project.prometheus_service.active
-    puts project.prometheus_service.properties
-    puts project.prometheus_service.properties.keys
-    puts project.prometheus_service.properties["manual_configuration"]
-    # puts project.prometheus_service.properties[:manual_configuration]
-    # puts project.prometheus_service.properties.manual_configuration
-
     metrics_data
   end
 
@@ -61,9 +49,6 @@ module EnvironmentsHelper
 
   def project_metrics_data(project)
     return {} unless project
-
-    puts 'has_managed_prometheus'
-    puts has_managed_prometheus(project)
 
     {
       'settings_path'               => edit_project_service_path(project, 'prometheus'),
