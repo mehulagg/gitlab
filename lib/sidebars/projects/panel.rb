@@ -19,6 +19,14 @@ module Sidebars
         add_menu(Sidebars::Projects::Menus::OperationsMenu.new(context))
         add_menu(Sidebars::Projects::Menus::PackagesRegistriesMenu.new(context))
         add_menu(Sidebars::Projects::Menus::AnalyticsMenu.new(context))
+
+        if confluence_menu.render?
+          add_menu(confluence_menu)
+        else
+          add_menu(Sidebars::Projects::Menus::WikiMenu.new(context))
+        end
+
+        add_menu(Sidebars::Projects::Menus::ExternalWikiMenu.new(context))
       end
 
       override :render_raw_menus_partial
@@ -29,6 +37,12 @@ module Sidebars
       override :aria_label
       def aria_label
         _('Project navigation')
+      end
+
+      private
+
+      def confluence_menu
+        @confluence_menu ||= ::Sidebars::Projects::Menus::ConfluenceMenu.new(context)
       end
     end
   end
