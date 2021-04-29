@@ -61,7 +61,7 @@ module AppSec
               from: old_value,
               to: new_value,
               target_id: profile.id,
-              target_type: 'DastScannerProfile',
+              target_type: profile.class.name,
               target_details: profile.name
             }).security_event
           end

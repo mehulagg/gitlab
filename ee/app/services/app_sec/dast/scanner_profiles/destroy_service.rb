@@ -44,7 +44,7 @@ module AppSec
           AuditEventService.new(current_user, project, {
             remove: 'DAST scanner profile',
             target_id: profile.id,
-            target_type: 'DastScannerProfile',
+            target_type: profile.class.name,
             target_details: profile.name
           }).security_event
         end
