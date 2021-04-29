@@ -7,9 +7,8 @@ module QA
     describe 'Enable SAST from UI' do
       let(:merge_request_description) do
         <<~DESCRIPTION.tr("\n", ' ').strip
-          Set .gitlab-ci.yml to enable or configure SAST security scanning using the GitLab managed template. You can
-          [add variable overrides](https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings)
-          to customize SAST settings.
+          Configure SAST for a project by enabling SAST in a new or modified `.gitlab-ci.yml` file in a new branch.
+          The new branch and a URL to create a Merge Request are a part of the response.
         DESCRIPTION
       end
 
