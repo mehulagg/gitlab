@@ -45,8 +45,8 @@ reliable decide if an object is no longer needed.
 
 ### Git alternates in GitLab: pool repositories
 
-GitLab organizes this object borrowing by creating special **pool
-repositories** which are hidden from the user. We then use Git
+GitLab organizes this object borrowing by [creating special **pool
+repositories**](../adminstration/repository_storage_types.md) which are hidden from the user. We then use Git
 alternates to let a collection of project repositories borrow from a
 single pool repository. We call such a collection of project
 repositories a pool. Pools form star-shaped networks of repositories

@@ -131,7 +131,7 @@ forks use the object pool for shared objects. For more information, see
 [How Git object deduplication works in GitLab](../development/git_object_deduplication.md).
 
 Objects are moved from the source project to the object pool when housekeeping is run on the source
-project. Object pool repositories are stored similarly to regular repositories:
+project. Object pool repositories are stored similarly to regular repositories in a directory called `@pools` instead of `@hashed`
 
 ```ruby
 # object pool paths
