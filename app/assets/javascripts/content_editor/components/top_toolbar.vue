@@ -1,5 +1,4 @@
 <script>
-import { ContentEditor } from '../services/content_editor';
 import Divider from './divider.vue';
 import ToolbarButton from './toolbar_button.vue';
 
@@ -9,8 +8,8 @@ export default {
     Divider,
   },
   props: {
-    contentEditor: {
-      type: ContentEditor,
+    editor: {
+      type: Object,
       required: true,
     },
   },
@@ -24,50 +23,44 @@ export default {
       data-testid="bold"
       content-type="bold"
       icon-name="bold"
-      editor-command="toggleBold"
       :label="__('Bold text')"
-      :tiptap-editor="contentEditor.tiptapEditor"
+      :editor="editor"
     />
     <toolbar-button
       data-testid="italic"
       content-type="italic"
       icon-name="italic"
-      editor-command="toggleItalic"
       :label="__('Italic text')"
-      :tiptap-editor="contentEditor.tiptapEditor"
+      :editor="editor"
     />
     <toolbar-button
       data-testid="code"
       content-type="code"
       icon-name="code"
-      editor-command="toggleCode"
       :label="__('Code')"
-      :tiptap-editor="contentEditor.tiptapEditor"
+      :editor="editor"
     />
     <divider />
     <toolbar-button
       data-testid="blockquote"
       content-type="blockquote"
       icon-name="quote"
-      editor-command="toggleBlockquote"
       :label="__('Insert a quote')"
-      :tiptap-editor="contentEditor.tiptapEditor"
+      :editor="editor"
     />
     <toolbar-button
       data-testid="bullet-list"
-      content-type="bulletList"
+      content-type="bullet_list"
       icon-name="list-bulleted"
-      editor-command="toggleBulletList"
       :label="__('Add a bullet list')"
-      :tiptap-editor="contentEditor.tiptapEditor"
+      :editor="editor"
     />
     <toolbar-button
       data-testid="ordered-list"
-      content-type="orderedList"
+      content-type="ordered_list"
       icon-name="list-numbered"
-      editor-command="toggleOrderedList"
       :label="__('Add a numbered list')"
-      :tiptap-editor="contentEditor.tiptapEditor"
+      :editor="editor"
     />
   </div>
 </template>

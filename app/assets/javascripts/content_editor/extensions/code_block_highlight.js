@@ -1,23 +1,38 @@
-import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import { CodeBlockHighlight as BaseCodeBlockHighlight } from 'tiptap-extensions';
 
-const extractLanguage = (element) => element.firstElementChild?.getAttribute('lang');
+export default class GlCodeBlockHighlight extends BaseCodeBlockHighlight {
+  get schema() {
+    const baseSchema = super.schema;
 
-export default CodeBlockLowlight.extend({
-  addAttributes() {
     return {
-      ...this.parent(),
-      /* `params` is the name of the attribute that
-        prosemirror-markdown uses to extract the language
-        of a codeblock.
-        https://github.com/ProseMirror/prosemirror-markdown/blob/master/src/to_markdown.js#L62
-      */
-      params: {
-        parseHTML: (element) => {
-          return {
-            params: extractLanguage(element),
-          };
+      ...baseSchema,
+      attrs: {
+        params: {
+          default: null,
         },
       },
+      parseDOM: [
+        {
+          tag: 'pre',
+          preserveWhitespace: 'full',
+          getAttrs: (node) => {
+            const code = node.querySelector('code');
+
+            if (!code) {
+              return null;
+            }
+
+            return {
+              /* `params` is the name of the attribute that
+                prosemirror-markdown uses to extract the language
+                of a codeblock.
+                https://github.com/ProseMirror/prosemirror-markdown/blob/master/src/to_markdown.js#L62
+              */
+              params: code.getAttribute('lang'),
+            };
+          },
+        },
+      ],
     };
-  },
-});
+  }
+}

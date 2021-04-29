@@ -1,33 +1,23 @@
 import { GlButton } from '@gitlab/ui';
-import { Extension } from '@tiptap/core';
 import { shallowMount } from '@vue/test-utils';
 import ToolbarButton from '~/content_editor/components/toolbar_button.vue';
-import { createContentEditor } from '~/content_editor/services/create_content_editor';
 
 describe('content_editor/components/toolbar_button', () => {
   let wrapper;
-  let tiptapEditor;
-  let toggleFooSpy;
+  let editor;
   const CONTENT_TYPE = 'bold';
   const ICON_NAME = 'bold';
   const LABEL = 'Bold';
 
   const buildEditor = () => {
-    toggleFooSpy = jest.fn();
-    tiptapEditor = createContentEditor({
-      extensions: [
-        Extension.create({
-          addCommands() {
-            return {
-              toggleFoo: () => toggleFooSpy,
-            };
-          },
-        }),
-      ],
-      renderMarkdown: () => true,
-    }).tiptapEditor;
-
-    jest.spyOn(tiptapEditor, 'isActive');
+    editor = {
+      isActive: {
+        [CONTENT_TYPE]: jest.fn(),
+      },
+      commands: {
+        [CONTENT_TYPE]: jest.fn(),
+      },
+    };
   };
 
   const buildWrapper = (propsData = {}) => {
@@ -36,7 +26,7 @@ describe('content_editor/components/toolbar_button', () => {
         GlButton,
       },
       propsData: {
-        tiptapEditor,
+        editor,
         contentType: CONTENT_TYPE,
         iconName: ICON_NAME,
         label: LABEL,
@@ -61,35 +51,34 @@ describe('content_editor/components/toolbar_button', () => {
   });
 
   it.each`
-    editorState                             | outcomeDescription         | outcome
-    ${{ isActive: true, isFocused: true }}  | ${'button is active'}      | ${true}
-    ${{ isActive: false, isFocused: true }} | ${'button is not active'}  | ${false}
-    ${{ isActive: true, isFocused: false }} | ${'button is not active '} | ${false}
+    editorState                           | outcomeDescription         | outcome
+    ${{ isActive: true, focused: true }}  | ${'button is active'}      | ${true}
+    ${{ isActive: false, focused: true }} | ${'button is not active'}  | ${false}
+    ${{ isActive: true, focused: false }} | ${'button is not active '} | ${false}
   `('$outcomeDescription when when editor state is $editorState', ({ editorState, outcome }) => {
-    tiptapEditor.isActive.mockReturnValueOnce(editorState.isActive);
-    tiptapEditor.isFocused = editorState.isFocused;
+    editor.isActive[CONTENT_TYPE].mockReturnValueOnce(editorState.isActive);
+    editor.focused = editorState.focused;
     buildWrapper();
 
     expect(findButton().classes().includes('active')).toBe(outcome);
-    expect(tiptapEditor.isActive).toHaveBeenCalledWith(CONTENT_TYPE);
   });
 
   describe('when button is clicked', () => {
     it('executes the content type command when executeCommand = true', async () => {
-      buildWrapper({ editorCommand: 'toggleFoo' });
+      buildWrapper({ executeCommand: true });
 
       await findButton().trigger('click');
 
-      expect(toggleFooSpy).toHaveBeenCalled();
+      expect(editor.commands[CONTENT_TYPE]).toHaveBeenCalled();
       expect(wrapper.emitted().click).toHaveLength(1);
     });
 
     it('does not executes the content type command when executeCommand = false', async () => {
-      buildWrapper();
+      buildWrapper({ executeCommand: false });
 
       await findButton().trigger('click');
 
-      expect(toggleFooSpy).not.toHaveBeenCalled();
+      expect(editor.commands[CONTENT_TYPE]).not.toHaveBeenCalled();
       expect(wrapper.emitted().click).toHaveLength(1);
     });
   });

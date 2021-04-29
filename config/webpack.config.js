@@ -307,11 +307,11 @@ module.exports = {
           chunks: 'initial',
           minChunks: autoEntriesCount * 0.9,
         }),
-        prosemirror: {
+        tiptap: {
           priority: 17,
-          name: 'prosemirror',
+          name: 'tiptap',
           chunks: 'all',
-          test: /[\\/]node_modules[\\/]prosemirror.*?[\\/]/,
+          test: /[\\/]node_modules[\\/](tiptap|prosemirror)-?\w*[\\/]/,
           minChunks: 2,
           reuseExistingChunk: true,
         },

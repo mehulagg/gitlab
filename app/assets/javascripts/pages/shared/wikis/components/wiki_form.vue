@@ -39,7 +39,7 @@ export default {
       isContentEditorLoading: true,
       useContentEditor: false,
       commitMessage: '',
-      contentEditor: null,
+      editor: null,
       isDirty: false,
     };
   },
@@ -102,7 +102,7 @@ export default {
 
     handleFormSubmit() {
       if (this.useContentEditor) {
-        this.content = this.contentEditor.getSerializedContent();
+        this.content = this.editor.getSerializedContent();
       }
 
       this.isDirty = false;
@@ -136,18 +136,16 @@ export default {
       this.isContentEditorLoading = true;
       this.useContentEditor = true;
 
-      const { createContentEditor } = await import(
-        /* webpackChunkName: 'content_editor' */ '~/content_editor/services/create_content_editor'
+      const createEditor = await import(
+        /* webpackChunkName: 'content_editor' */ '~/content_editor/services/create_editor'
       );
-      this.contentEditor =
-        this.contentEditor ||
-        createContentEditor({
+      this.editor =
+        this.editor ||
+        (await createEditor.default({
           renderMarkdown: (markdown) => this.getContentHTML(markdown),
-          tiptapOptions: {
-            onUpdate: () => this.handleContentChange(),
-          },
-        });
-      await this.contentEditor.setSerializedContent(this.content);
+          onUpdate: () => this.handleContentChange(),
+        }));
+      await this.editor.setSerializedContent(this.content);
 
       this.isContentEditorLoading = false;
     },
@@ -298,7 +296,7 @@ export default {
 
         <div v-if="isContentEditorActive">
           <gl-loading-icon v-if="isContentEditorLoading" class="bordered-box gl-w-full gl-py-6" />
-          <content-editor v-else :content-editor="contentEditor" />
+          <content-editor v-else :editor="editor" />
           <input id="wiki_content" v-model.trim="content" type="hidden" name="wiki[content]" />
         </div>
 
