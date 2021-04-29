@@ -18,10 +18,7 @@ module AppSec
             name: params[:profile_name],
             target_timeout: params[:target_timeout],
             spider_timeout: params[:spider_timeout]
-          }
-          update_params[:scan_type] = params[:scan_type] if params[:scan_type]
-          update_params[:use_ajax_spider] = params[:use_ajax_spider] unless params[:use_ajax_spider].nil?
-          update_params[:show_debug_messages] = params[:show_debug_messages] unless params[:show_debug_messages].nil?
+          }.compact
 
           if dast_scanner_profile.update(update_params)
             audit_update(dast_scanner_profile, update_params, old_params)
