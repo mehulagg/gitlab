@@ -59,6 +59,9 @@ export const ErrorMessages = {
   ),
 };
 
+/* eslint-disable import/export */
+export * from '~/boards/constants';
+
 export const updateListQueries = {
   [issuableTypes.issue]: {
     mutation: updateBoardListMutation,
@@ -68,21 +71,7 @@ export const updateListQueries = {
   },
 };
 
-// re-export some FOSS constants so that lint does not yell
-// https://gitlab.com/gitlab-org/gitlab/-/issues/329164
-export {
-  BoardType,
-  ListType,
-  inactiveId,
-  flashAnimationDuration,
-  ISSUABLE,
-  titleQueries,
-  subscriptionQueries,
-  SupportedFilters,
-} from '~/boards/constants';
-
 export default {
-  updateListQueries,
   DRAGGABLE_TAG,
   EpicFilterType,
 };
