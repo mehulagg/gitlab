@@ -87,12 +87,15 @@ Report or respond to the health of issues and epics by setting a red, amber, or 
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8333) in GitLab Ultimate 11.7.
 
-Any epic that belongs to a group, or subgroup of the parent epic's group, is eligible to be added.
+You can add any epic that belongs to a group or subgroup of the parent epic's group.
 New child epics appear at the top of the list of epics in the **Epics and Issues** tab.
 
 When you add an epic that's already linked to a parent epic, the link to its current parent is removed.
 
-An epic can have multiple child epics up to the maximum depth of seven.
+An epic can have multiple child epics up to a maximum total of seven levels of depth.
+This means that an epic or an issue can have no more than six levels of ancestors.
+For example, given an epic "Epic 1" with a child epic "Epic 2", which has a child epic "Epic 3",
+and so on, the deepest this can go is either to "Epic 7" or issues attached to "Epic 6".
 
 See [Manage multi-level child epics](manage_epics.md#manage-multi-level-child-epics) for
 steps to create, move, reorder, or delete child epics.
