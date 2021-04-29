@@ -142,7 +142,7 @@ export default {
           text: s__('ForkProject|Private'),
           value: PRIVATE_VISIBILITY,
           icon: 'lock',
-          help: s__('ForkProject|The project can be accessed without any authentication.'),
+          help: s__('ForkProject|Project access must be granted explicitly to each user. If this project is part of a group, access will be granted to members of the group.'),
           disabled: this.isVisibilityLevelDisabled(PRIVATE_VISIBILITY),
         },
         {
@@ -157,7 +157,7 @@ export default {
           value: PUBLIC_VISIBILITY,
           icon: 'earth',
           help: s__(
-            'ForkProject|Project access must be granted explicitly to each user. If this project is part of a group, access will be granted to members of the group.',
+            'ForkProject|The project can be accessed without any authentication.',
           ),
           disabled: this.isVisibilityLevelDisabled(PUBLIC_VISIBILITY),
         },
