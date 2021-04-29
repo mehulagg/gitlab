@@ -88,11 +88,13 @@ module GroupsHelper
   end
 
   def cached_issuables_count(group, type: nil)
-    count_service = issuables_count_service_class(type)
-    return unless count_service.present?
-
-    issuables_count = count_service.new(group, current_user).count
-    format_issuables_count(count_service, issuables_count)
+    if type == :issues
+      service = Groups::OpenIssuesCountService
+      format_issuables_count(service, service.new(group, current_user).count)
+    elsif type == :merge_requests
+      service = Groups::MergeRequestsCountService
+      format_issuables_count(service, service.new(group, current_user).count('opened'))
+    end
   end
 
   def group_dependency_proxy_url(group)

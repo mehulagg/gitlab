@@ -279,7 +279,20 @@ module IssuablesHelper
   end
 
   def issuables_count_for_state(issuable_type, state)
-    Gitlab::IssuablesCountForState.new(finder)[state]
+    if is_count_cacheable?(issuable_type, state)
+      Groups::MergeRequestsCountService.new(@group, current_user).count(state)
+    else
+      Gitlab::IssuablesCountForState.new(finder)[state]
+    end
+  end
+
+  def is_count_cacheable?(issuable_type, state)
+    @group && issuable_type == :merge_requests && are_params_default_for_finder?
+  end
+
+  # do not call caching service for anything but the front page of a group's merge requests
+  def are_params_default_for_finder?
+    !finder.class.scalar_params.any? { |p| params[p].present? } && !finder.class.array_params.any? { |p| params[p].present? }
   end
 
   def close_issuable_path(issuable)
