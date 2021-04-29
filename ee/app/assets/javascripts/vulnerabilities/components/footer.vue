@@ -31,11 +31,6 @@ export default {
     StatusDescription,
   },
   mixins: [glFeatureFlagMixin()],
-  inject: {
-    createJiraIssueUrl: {
-      default: '',
-    },
-  },
   props: {
     vulnerability: {
       type: Object,
@@ -222,10 +217,7 @@ export default {
         class="card-body"
       />
     </div>
-    <related-jira-issues
-      v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl"
-      class="gl-mt-6"
-    />
+    <related-jira-issues v-if="glFeatures.jiraForVulnerabilities" class="gl-mt-6" />
     <related-issues
       v-else
       :endpoint="issueLinksEndpoint"

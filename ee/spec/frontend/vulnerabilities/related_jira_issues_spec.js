@@ -57,10 +57,11 @@ describe('EE RelatedJiraIssues Component', () => {
   const withinComponent = () => within(wrapper.element);
   const findAlert = () => wrapper.findComponent(GlAlert);
   const findRelatedJiraIssuesCount = () => wrapper.findByTestId('related-jira-issues-count');
-  const findCreateJiraIssueLink = () => wrapper.findByTestId('create-new-jira-issue');
+  const findCreateJiraIssue = () => wrapper.findByTestId('create-new-jira-issue');
   const findRelatedJiraIssuesSection = () => wrapper.findByTestId('related-jira-issues-section');
   const withinRelatedJiraIssuesSection = () => within(findRelatedJiraIssuesSection().element);
-
+  const findShowCreateJiraIssueErrorAlert = () =>
+    wrapper.findByTestId('create-jira-issue-error-alert');
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
@@ -124,13 +125,21 @@ describe('EE RelatedJiraIssues Component', () => {
         ).not.toBe(undefined);
       });
 
-      it('shows a link to create a new Jira issues', () => {
-        const createNewJiraIssueLink = findCreateJiraIssueLink();
-
+      it('shows a button to create a new Jira issues', () => {
+        const createNewJiraIssueLink = findCreateJiraIssue();
         expect(createNewJiraIssueLink.exists()).toBe(true);
-        expect(createNewJiraIssueLink.attributes('href')).toBe(defaultProvide.createJiraIssueUrl);
-        expect(createNewJiraIssueLink.props('icon')).toBe('external-link');
-        expect(createNewJiraIssueLink.text()).toMatch(i18n.createNewIssueLinkText);
+      });
+
+      it('should not show showCreateJiraIssueErrorAlert Banner', () => {
+        expect(findShowCreateJiraIssueErrorAlert().exists()).toBe(false);
+      });
+
+      it('shows showCreateJiraIssueErrorAlert Banner when createJiraIssue emits an error', async () => {
+        findCreateJiraIssue().vm.$emit('createJiraIssueError', 'test-error-message');
+
+        const alert = findShowCreateJiraIssueErrorAlert();
+        expect(alert.exists()).toBe(true);
+        expect(alert.text()).toMatch('test-error-message');
       });
     });
 

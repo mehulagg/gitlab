@@ -2,7 +2,6 @@
 import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
 import {
   GlAlert,
-  GlButton,
   GlCard,
   GlIcon,
   GlLink,
@@ -10,6 +9,7 @@ import {
   GlSafeHtmlDirective as SafeHtml,
   GlSprintf,
 } from '@gitlab/ui';
+import createJiraIssue from 'ee/vue_shared/security_reports/components/create_jira_issue.vue';
 import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
 
@@ -27,8 +27,8 @@ export default {
   i18n,
   jiraLogo,
   components: {
+    createJiraIssue,
     GlAlert,
-    GlButton,
     GlCard,
     GlIcon,
     GlLink,
@@ -39,9 +39,6 @@ export default {
     SafeHtml,
   },
   inject: {
-    createJiraIssueUrl: {
-      default: '',
-    },
     relatedJiraIssuesPath: {
       default: '',
     },
@@ -51,6 +48,9 @@ export default {
     jiraIntegrationSettingsPath: {
       default: '',
     },
+    id: {
+      default: '',
+    },
   },
   data() {
     return {
@@ -58,6 +58,9 @@ export default {
       hasFetchIssuesError: false,
       isFetchErrorDismissed: false,
       relatedIssues: [],
+      showCreateJiraIssueErrorAlertMessage: '',
+      isCreateJiraIssueErrorDismissed: false,
+      hasCreateJiraIssueError: false,
     };
   },
   computed: {
@@ -74,11 +77,18 @@ export default {
     showFetchErrorAlert() {
       return this.hasFetchIssuesError && !this.isFetchErrorDismissed;
     },
+    showCreateJiraIssueErrorAlert() {
+      return this.hasCreateJiraIssueError && !this.isCreateJiraIssueErrorDismissed;
+    },
   },
   created() {
     this.fetchRelatedIssues();
   },
   methods: {
+    createJiraIssueErrorHandler(value) {
+      this.hasCreateJiraIssueError = true;
+      this.showCreateJiraIssueErrorAlertMessage = value;
+    },
     // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
     // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
     async fetchRelatedIssues() {
@@ -111,6 +121,15 @@ export default {
         </template>
       </gl-sprintf>
     </gl-alert>
+    <gl-alert
+      v-if="showCreateJiraIssueErrorAlert"
+      data-testid="create-jira-issue-error-alert"
+      variant="danger"
+      class="gl-mb-4"
+      @dismiss="isCreateJiraIssueErrorDismissed = true"
+    >
+      {{ showCreateJiraIssueErrorAlertMessage }}
+    </gl-alert>
     <gl-card
       :header-class="[
         'gl-py-3',
@@ -138,17 +157,12 @@ export default {
           <gl-icon name="issues" class="gl-mr-2 gl-text-gray-500" />
           {{ issuesCount }}
         </span>
-        <gl-button
-          variant="success"
-          category="secondary"
-          :href="createJiraIssueUrl"
-          icon="external-link"
-          target="_blank"
-          class="gl-ml-auto"
+        <createJiraIssue
           data-testid="create-new-jira-issue"
-        >
-          {{ $options.i18n.createNewIssueLinkText }}
-        </gl-button>
+          :vulnerability-i-d="id"
+          @createJiraIssueError="createJiraIssueErrorHandler"
+          @mutated="fetchRelatedIssues"
+        />
       </template>
       <section
         :hidden="!shouldShowIssuesBody"
