@@ -43,6 +43,7 @@ export const initTrialStatusPopover = () => {
     planName,
     plansHref,
     purchaseHref,
+    showByDefault,
     targetId,
     trialEndDate,
   } = el.dataset;
@@ -59,6 +60,9 @@ export const initTrialStatusPopover = () => {
           purchaseHref,
           targetId,
           trialEndDate: new Date(trialEndDate),
+        },
+        data: {
+          show: showByDefault === 'true',
         },
       }),
   });

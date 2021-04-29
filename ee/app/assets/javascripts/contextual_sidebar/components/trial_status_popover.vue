@@ -51,9 +51,12 @@ export default {
       required: true,
     },
   },
+  // TODO: How do we mutate props? Can we? Or can we only mutate data? If so, how do we pass the show value
+  // through as data?
   data() {
     return {
       disabled: false,
+      show: false,
     };
   },
   i18n: {
@@ -82,6 +85,10 @@ export default {
     window.removeEventListener('resize', this.debouncedResize);
   },
   methods: {
+    close() {
+      this.$refs.popover.$emit('close');
+      this.show = !this.show;
+    },
     onResize() {
       this.updateDisabledState();
     },
@@ -100,17 +107,21 @@ export default {
 
 <template>
   <gl-popover
+    ref="popover"
     :container="containerId"
     :target="targetId"
     :disabled="disabled"
     placement="rightbottom"
     boundary="viewport"
     :delay="{ hide: 400 }"
+    :show="show"
+    :triggers="show ? '' : 'hover focus'"
     @shown="onShown"
   >
     <template #title>
       {{ $options.i18n.popoverTitle }}
       <gl-emoji class="gl-vertical-align-baseline font-size-inherit gl-ml-1" data-name="wave" />
+      <a v-if="show" @click.prevent="close">×</a>
     </template>
 
     <gl-sprintf :message="$options.i18n.popoverContent">

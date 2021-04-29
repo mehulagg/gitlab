@@ -11,6 +11,7 @@ module TrialStatusWidgetHelper
     base_attrs.merge(
       group_name: group.name,
       purchase_href: ultimate_subscription_path_for_group(group),
+      show_by_default: 'true',
       target_id: base_attrs[:container_id],
       trial_end_date: group.trial_ends_on
     )
