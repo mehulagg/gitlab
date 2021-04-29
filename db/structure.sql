@@ -18213,6 +18213,15 @@ CREATE TABLE user_credit_card_validations (
     credit_card_validated_at timestamp without time zone NOT NULL
 );
 
+CREATE SEQUENCE user_credit_card_validations_user_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE user_credit_card_validations_user_id_seq OWNED BY user_credit_card_validations.user_id;
+
 CREATE TABLE user_custom_attributes (
     id integer NOT NULL,
     created_at timestamp without time zone NOT NULL,
@@ -19957,6 +19966,8 @@ ALTER TABLE ONLY user_callouts ALTER COLUMN id SET DEFAULT nextval('user_callout
 
 ALTER TABLE ONLY user_canonical_emails ALTER COLUMN id SET DEFAULT nextval('user_canonical_emails_id_seq'::regclass);
 
+ALTER TABLE ONLY user_credit_card_validations ALTER COLUMN user_id SET DEFAULT nextval('user_credit_card_validations_user_id_seq'::regclass);
+
 ALTER TABLE ONLY user_custom_attributes ALTER COLUMN id SET DEFAULT nextval('user_custom_attributes_id_seq'::regclass);
 
 ALTER TABLE ONLY user_details ALTER COLUMN user_id SET DEFAULT nextval('user_details_user_id_seq'::regclass);
@@ -21567,6 +21578,9 @@ ALTER TABLE ONLY user_callouts
 
 ALTER TABLE ONLY user_canonical_emails
     ADD CONSTRAINT user_canonical_emails_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY user_credit_card_validations
+    ADD CONSTRAINT user_credit_card_validations_pkey PRIMARY KEY (user_id);
 
 ALTER TABLE ONLY user_custom_attributes
     ADD CONSTRAINT user_custom_attributes_pkey PRIMARY KEY (id);
