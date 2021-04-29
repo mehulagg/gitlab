@@ -119,6 +119,10 @@ module QA
           element :commit_with_custom_message_button
         end
 
+        view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_auto_merge_enabled.vue' do
+          element :cancel_auto_merge_button
+        end
+
         def start_review
           click_element(:start_review_button)
 
@@ -384,6 +388,10 @@ module QA
         def revert_change!
           click_element(:revert_button, Page::Component::CommitModal)
           click_element(:submit_commit_button)
+        end
+
+        def cancel_auto_merge!
+          click_element(:cancel_auto_merge_button)
         end
       end
     end

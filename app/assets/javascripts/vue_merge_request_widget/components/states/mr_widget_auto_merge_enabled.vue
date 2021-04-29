@@ -170,6 +170,7 @@ export default {
             href="#"
             class="btn btn-sm btn-default js-cancel-auto-merge"
             data-testid="cancelAutomaticMergeButton"
+            data-qa-selector="cancel_auto_merge_button"
             @click.prevent="cancelAutomaticMerge"
           >
             <gl-loading-icon v-if="isCancellingAutoMerge" inline class="gl-mr-1" />
