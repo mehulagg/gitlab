@@ -18,7 +18,6 @@ swap:
   GitLabbers: GitLab team members
   GitLab-shell: GitLab Shell
   gitlab omnibus: Omnibus GitLab
-  OAuth2: OAuth 2.0
   param: parameter
   params: parameters
   pg: PostgreSQL
