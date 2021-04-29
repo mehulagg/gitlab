@@ -39,10 +39,7 @@ export default {
       fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
       query: subscriptionQueries.query,
       update({ currentLicense }) {
-        if (currentLicense) {
-          return currentLicense;
-        }
-        return {};
+        return currentLicense || {};
       },
       result({ data }) {
         // it assumes that receiving a successful response with
