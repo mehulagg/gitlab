@@ -7,7 +7,7 @@
 - tooltip_title = label_status_tooltip(label, status) if status
 
 %li.label-list-item{ id: label_css_id, data: { id: label.id } }
-  = render "shared/label_row", label: label, force_priority: force_priority
+  = render(LabelRowComponent.new(subject: @project, label: label, force_priority: force_priority))
   %ul.label-actions-list
     - if can?(current_user, :admin_label, @project)
       %li.inline.js-toggle-priority{ data: { url: remove_priority_project_label_path(@project, label),
