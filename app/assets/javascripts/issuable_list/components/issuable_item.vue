@@ -3,7 +3,12 @@ import { GlLink, GlIcon, GlLabel, GlFormCheckbox, GlTooltipDirective } from '@gi
 
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { isScopedLabel } from '~/lib/utils/common_utils';
-import { getTimeago } from '~/lib/utils/datetime_utility';
+import {
+  differenceInSeconds,
+  getTimeago,
+  HOURS_IN_DAY,
+  SECONDS_IN_HOUR,
+} from '~/lib/utils/datetime_utility';
 import { isExternal, setUrlFragment } from '~/lib/utils/url_utility';
 import { __, n__, sprintf } from '~/locale';
 import IssuableAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
@@ -50,6 +55,11 @@ export default {
     },
   },
   computed: {
+    createdInPastDay() {
+      const createdHoursAgo =
+        differenceInSeconds(new Date(this.issuable.createdAt), new Date()) / SECONDS_IN_HOUR;
+      return createdHoursAgo < HOURS_IN_DAY;
+    },
     author() {
       return this.issuable.author;
     },
@@ -152,7 +162,12 @@ export default {
 </script>
 
 <template>
-  <li :id="`issuable_${issuable.id}`" class="issue gl-px-5!" :data-labels="labelIdsString">
+  <li
+    :id="`issuable_${issuable.id}`"
+    class="issue gl-px-5!"
+    :class="{ closed: issuable.closedAt, today: createdInPastDay }"
+    :data-labels="labelIdsString"
+  >
     <div class="issuable-info-container">
       <div v-if="showCheckbox" class="issue-check">
         <gl-form-checkbox

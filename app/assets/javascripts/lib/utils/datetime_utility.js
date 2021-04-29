@@ -4,6 +4,9 @@ import { isString, mapValues, isNumber, reduce } from 'lodash';
 import * as timeago from 'timeago.js';
 import { languageCode, s__, __, n__ } from '../../locale';
 
+export const SECONDS_IN_HOUR = 3600;
+export const HOURS_IN_DAY = 24;
+
 const DAYS_IN_WEEK = 7;
 
 window.timeago = timeago;
