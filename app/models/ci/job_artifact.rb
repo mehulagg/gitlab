@@ -182,6 +182,7 @@ module Ci
 
     scope :downloadable, -> { where(file_type: DOWNLOADABLE_TYPES) }
     scope :unlocked, -> { joins(job: :pipeline).merge(::Ci::Pipeline.unlocked) }
+    scope :not_expired_or_locked, -> { not_expired.or(::Ci::Pipeline.artifacts_locked).joins(job: :pipeline) }
     scope :order_expired_desc, -> { order(expire_at: :desc) }
     scope :with_destroy_preloads, -> { includes(project: [:route, :statistics]) }
 

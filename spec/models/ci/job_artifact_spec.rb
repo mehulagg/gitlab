@@ -259,6 +259,59 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
+  describe '.not_expired_or_locked' do
+    let!(:job_artifact) { create(:ci_job_artifact) }
+
+    subject(:job_artifacts) { described_class.not_expired_or_locked }
+
+    context 'when artifact is not expired nor locked' do
+      it 'returns artifact' do
+        expect(job_artifacts).to eq([job_artifact])
+      end
+    end
+
+    context 'when artifact is expired and unlocked' do
+      before do
+        expired_artifact = create(:ci_job_artifact, :expired)
+        expired_artifact.job.pipeline.unlocked!
+      end
+
+      it 'returns only not expired artifact' do
+        expect(job_artifacts).to eq([job_artifact])
+      end
+    end
+
+    context 'when artifact is expired and locked' do
+      let!(:expired_artifact) { create(:ci_job_artifact, :expired) }
+
+      before do
+        expired_artifact.job.pipeline.artifacts_locked!
+      end
+
+      it 'returns expired and locked artifacts' do
+        expect(job_artifacts).to contain_exactly(job_artifact, expired_artifact)
+      end
+    end
+
+    context 'when artifact is locked' do
+      before do
+        job_artifact.job.pipeline.artifacts_locked!
+      end
+
+      it 'returns artifact' do
+        expect(job_artifacts).to eq([job_artifact])
+      end
+    end
+
+    context 'with not expired artifact' do
+      it 'returns not expired and locked artifacts' do
+        artifact_2 = create(:ci_job_artifact)
+
+        expect(job_artifacts).to eq([artifact, artifact_2])
+      end
+    end
+  end
+
   describe '.order_expired_desc' do
     let_it_be(:first_artifact) { create(:ci_job_artifact, expire_at: 2.days.ago) }
     let_it_be(:second_artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
