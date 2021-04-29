@@ -6,6 +6,7 @@ RSpec.describe Banzai::Pipeline::PostProcessPipeline do
   subject { described_class.call(doc, context) }
 
   let_it_be(:project) { create(:project, :public, :repository) }
+
   let(:context) { { project: project, ref: 'master' } }
 
   context 'when a document only has upload links' do
@@ -37,7 +38,7 @@ RSpec.describe Banzai::Pipeline::PostProcessPipeline do
     let(:doc) { HTML::Pipeline.parse(html) }
 
     it 'searches for attributes only once' do
-      expect(doc).to receive(:xpath).once.and_call_original
+      expect(doc).to receive(:search).once.and_call_original
 
       subject
     end
@@ -48,7 +49,7 @@ RSpec.describe Banzai::Pipeline::PostProcessPipeline do
       end
 
       it 'searches for attributes twice' do
-        expect(doc).to receive(:xpath).twice.and_call_original
+        expect(doc).to receive(:search).twice.and_call_original
 
         subject
       end

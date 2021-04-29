@@ -40,7 +40,7 @@ module Banzai
 
       def fetch_linkable_attributes
         attrs = []
-        attrs += doc.xpath(xpath_query)
+        attrs += doc.search(xpath_query)
         attrs.reject { |attr| attr.blank? || attr.value.start_with?('//') }
       end
 
@@ -49,7 +49,7 @@ module Banzai
           attr_names = %w[href src data-src]
           tag_names = %w[a img video audio]
 
-          tag_names.product(attr_names).map {|a| ".//#{a[0]}[not(@gfm)]/@#{a[1]}"}.join('|')
+          tag_names.product(attr_names).map {|a| ".//#{a[0]}[not(contains(concat(' ', @class, ' '), ' gfm '))]/@#{a[1]}"}.join('|')
         end
       end
     end
