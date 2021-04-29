@@ -106,6 +106,16 @@ RSpec.describe Gitlab::SidekiqLogging::StructuredLogger do
       end
     end
 
+    context 'when the job uses load balancing capabilities' do
+      let(:expected_payload) { { 'database_chosen' => 'retry' } }
+
+      it 'logs the database chosen' do
+        expect(logger).to receive(:info).with(include(expected_payload))
+
+        subject.call(job.merge(database_chosen: 'retry'), 'test_queue') {}
+      end
+    end
+
     def call_subject(job, queue)
       # This structured logger strongly depends on execution of `InstrumentationLogger`
       subject.call(job, queue) do
