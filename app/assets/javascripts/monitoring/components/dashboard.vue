@@ -148,6 +148,11 @@ export default {
       required: false,
       default: false,
     },
+    hasManagedPrometheus: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -408,7 +413,7 @@ export default {
 
 <template>
   <div class="prometheus-graphs" data-qa-selector="prometheus_graphs">
-    <gl-alert v-if="prometheusAlertsAvailable" variant="warning" class="my-2">
+    <gl-alert v-if="hasManagedPrometheus" variant="warning" class="my-2">
       <gl-sprintf :message="$options.i18n.ALERTS_DEPRECATION_TEXT">
         <template #docsLink="{ content }">
           <gl-link
