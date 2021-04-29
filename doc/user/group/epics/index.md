@@ -94,8 +94,8 @@ When you add an epic that's already linked to a parent epic, the link to its cur
 
 An epic can have multiple child epics up to a maximum total of seven levels of depth.
 This means that an epic or an issue can have no more than six levels of ancestors.
-For example, given an epic "Epic 1" with a child epic "Epic 2", which has a child epic "Epic 3",
-and so on, the deepest this can go is either to "Epic 7" or issues attached to "Epic 6".
+For example, in an epic "Epic 1" with a child epic "Epic 2," which has a child epic "Epic 3,"
+and so on, the deepest this can go is either to "Epic 7" or issues attached to "Epic 6."
 
 See [Manage multi-level child epics](manage_epics.md#manage-multi-level-child-epics) for
 steps to create, move, reorder, or delete child epics.
