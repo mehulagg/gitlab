@@ -24,6 +24,22 @@ class NamespaceShard < ApplicationRecord
     NamespaceShard.connected_to(role: :reading, shard: shard, &block)
   end
 
+  def self.sharded_write(namespace: nil, shard: nil, &block)
+    raise "No block given" unless block_given?
+    raise "Namespace or shard must be provided" if namespace.nil? && shard.nil?
+
+    shard ||= find_shard_from_namespace(namespace)
+    Rails.logger.info "SHARD - #{shard}"
+
+    NamespaceShard.connected_to(role: :writing, shard: shard, &block)
+  end
+
+  # The intention is to eventually lookup from a DB
+  def self.find_shard_from_namespace(namespace)
+    # Assumes that the Route was preloaded from the same shard as namespace
+    find_shard_from_full_path(namespace.full_path)
+  end
+
   # The intention is to eventually lookup from a DB
   def self.find_shard_from_full_path(full_path)
     if full_path == 'lost-and-found' || full_path.start_with?('lost-and-found/')

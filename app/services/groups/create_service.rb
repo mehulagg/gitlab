@@ -12,7 +12,7 @@ module Groups
       remove_unallowed_params
       set_visibility_level
 
-      @group = Group.new(params.except(*::NamespaceSetting::NAMESPACE_SETTINGS_PARAMS))
+      @group = Group.new(group_params)
 
       @group.build_namespace_settings
       handle_namespace_settings
@@ -46,6 +46,16 @@ module Groups
     end
 
     private
+
+    def group_params
+      params.except(*::NamespaceSetting::NAMESPACE_SETTINGS_PARAMS).except(:parent_id).merge(parent: parent_group)
+    end
+
+    def parent_group
+      return unless params[:parent_id].present?
+
+      @parent_group ||= Group.with_route.sharded_find(params[:parent_id])
+    end
 
     def after_build_hook(group, params)
       # overridden in EE

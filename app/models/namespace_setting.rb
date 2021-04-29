@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class NamespaceSetting < ApplicationRecord
+class NamespaceSetting < NamespaceShard
   include CascadingNamespaceSettingAttribute
 
   cascading_attr :delayed_project_removal
