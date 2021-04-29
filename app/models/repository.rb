@@ -1164,18 +1164,12 @@ class Repository
     @request_store_cache ||= Gitlab::RepositoryCache.new(self, backend: Gitlab::SafeRequestStore)
   end
 
-  def tags_sorted_by_committed_date
+  def tags_sorted_by_committed_date(default: Time.current)
     tags.sort_by do |tag|
       # Annotated tags can point to any object (e.g. a blob), but generally
       # tags point to a commit. If we don't have a commit, then just default
       # to putting the tag at the end of the list.
-      target = tag.dereferenced_target
-
-      if target
-        target.committed_date
-      else
-        Time.current
-      end
+      tag.dereferenced_target&.committed_date || default
     end
   end
 
