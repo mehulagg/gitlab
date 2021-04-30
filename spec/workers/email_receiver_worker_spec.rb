@@ -70,6 +70,8 @@ RSpec.describe EmailReceiverWorker, :mailer do
         let(:error) { ActiveRecord::StatementTimeout.new("Statement timeout") }
 
         it 'does not report the error to the sender' do
+          expect(Gitlab::ErrorTracking).to receive(:track_exception).with(error).and_call_original
+
           perform_enqueued_jobs do
             expect { described_class.new.perform(raw_message) }.to raise_error(error)
           end

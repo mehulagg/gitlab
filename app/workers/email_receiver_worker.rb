@@ -31,8 +31,6 @@ class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
   end
 
   def log_error(error)
-    Gitlab::ErrorTracking.track_exception(error) unless error.is_a?(Gitlab::Email::ProcessingError)
-
     payload =
       case error
       # Unparsable e-mails don't have metadata we can use
@@ -42,7 +40,14 @@ class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
         mail_metadata
       end
 
-    Gitlab::ExceptionLogFormatter.format!(error, payload)
+    # We don't need the backtrace and more details if the e-mail couldn't be processed
+    if error.is_a?(Gitlab::Email::ProcessingError)
+      payload['exception.class'] = error.class.name
+    else
+      Gitlab::ExceptionLogFormatter.format!(error, payload)
+      Gitlab::ErrorTracking.track_exception(error)
+    end
+
     Sidekiq.logger.error(payload)
   end
 
