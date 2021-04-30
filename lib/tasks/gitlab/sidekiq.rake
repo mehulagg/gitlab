@@ -8,6 +8,17 @@ namespace :gitlab do
       File.write(path, banner + YAML.dump(object).gsub(/ *$/m, ''))
     end
 
+    namespace :migrate do
+      task :scheduled, [:source, :destination] => :environment do
+        ::Gitlab::SidekiqMigrateJobs
+          .new(Sidekiq::RetrySet)
+          .execute(source, destination)
+      end
+
+      task :retry, [:source, :destination] => :environment do
+      end
+    end
+
     namespace :all_queues_yml do
       desc 'GitLab | Sidekiq | Generate all_queues.yml based on worker definitions'
       task generate: :environment do
