@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/textproto"
 	"net/url"
@@ -385,4 +386,37 @@ func bufferResponse(r io.Reader) (*bytes.Buffer, error) {
 
 func validResponseContentType(resp *http.Response) bool {
 	return helper.IsContentType(ResponseContentType, resp.Header.Get("Content-Type"))
+}
+
+func (api *API) GetGeoProxyURL(suffix string, r *http.Request) (geoProxyURL string, outErr error) {
+	authReq, err := api.newRequest(r, suffix)
+	if err != nil {
+		return "", fmt.Errorf("GetGeoProxyURL newUpstreamRequest: %v", err)
+	}
+
+	httpResponse, err := api.doRequestWithoutRedirects(authReq)
+	if err != nil {
+		return "", fmt.Errorf("GetGeoProxyURL: do request: %v", err)
+	}
+	defer func() {
+		if outErr != nil {
+			httpResponse.Body.Close()
+			httpResponse = nil
+		}
+	}()
+	// requestsCounter.WithLabelValues(strconv.Itoa(httpResponse.StatusCode), authReq.Method).Inc()
+
+	log.WithRequest(r).Info(fmt.Errorf("Status code: %d", httpResponse.StatusCode))
+	log.WithRequest(r).Info(ioutil.ReadAll(httpResponse.Body))
+
+	if httpResponse.StatusCode != http.StatusOK {
+		return "", nil
+	}
+
+	// geoProxyResponse := &Response{}
+	// if err := json.NewDecoder(httpResponse.Body).Decode(geoProxyResponse); err != nil {
+	// 	return "", fmt.Errorf("GetGeoProxyURL: decode response: %v", err)
+	// }
+
+	return geoProxyURL, nil
 }

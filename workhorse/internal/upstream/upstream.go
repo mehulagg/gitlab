@@ -8,6 +8,7 @@ package upstream
 
 import (
 	"fmt"
+	"os"
 
 	"net/http"
 	"strings"
@@ -15,8 +16,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/gitlab-org/labkit/correlation"
 
+	apipkg "gitlab.com/gitlab-org/gitlab-workhorse/internal/api"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/config"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/helper"
+	"gitlab.com/gitlab-org/gitlab-workhorse/internal/log"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/rejectmethods"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/upload"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/upstream/roundtripper"
@@ -82,6 +85,7 @@ func (u *upstream) configureURLPrefix() {
 }
 
 func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	logWithRequest := log.WithRequest(r)
 	helper.FixRemoteAddr(r)
 
 	helper.DisableResponseBuffering(w)
@@ -106,6 +110,23 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Developing behind GEO_SECONDARY_PROXY environment variable
+	// See https://gitlab.com/groups/gitlab-org/-/epics/5914#note_564974130
+	if os.Getenv("GEO_SECONDARY_PROXY") == "1" {
+		isGeoSecondary, geoProxyURL, err := getGeoProxyURL(u, r)
+		if err != nil {
+			logWithRequest.WithError(err).Error("Error while determining if this is a Geo secondary site")
+		} else {
+			if isGeoSecondary {
+				fields := log.Fields{"geo_proxy_url":  geoProxyURL}
+				logWithRequest.WithFields(fields).Info("This is a Geo secondary site")
+
+				// TODO: Use Geo-secondary-specific routes instead of `u.Routes`
+				// See https://gitlab.com/gitlab-org/gitlab/-/issues/329672
+			}
+		}
+	}
+
 	// Look for a matching route
 	var route *routeEntry
 	for _, ro := range u.Routes {
@@ -127,4 +148,40 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	route.handler.ServeHTTP(w, r)
+}
+
+// TODO: Cache the result of the API requests
+// See https://gitlab.com/gitlab-org/gitlab/-/issues/329671
+func getGeoProxyURL(u *upstream, r *http.Request) (isGeoSecondary bool, geoProxyURL string, err error) {
+	api := apipkg.NewAPI(
+		u.Backend,
+		u.Version,
+		u.RoundTripper,
+	)
+
+	geoProxyURL, err = api.GetGeoProxyURL("/internal/geo_proxy", r)
+	if err != nil {
+		return false, "", err
+	}
+
+	// if geoProxyURL != "" {
+
+	// }
+
+	// This doesn't work with sockets which is a typical case for GDK
+	// endpoint := u.RoundTripper + "/api/v4/internal/geo_proxy"
+	// resp, err := http.Get(endpoint)
+	// if err != nil {
+	// 	 return false, "", err
+	// }
+  // // Read the response body
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return false, "", err
+	// }
+  // // Convert the body to type string
+	// sb := string(body)
+	// log.Info(sb)
+
+	return true, "http://hello.there", nil
 }
