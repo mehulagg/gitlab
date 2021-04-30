@@ -56,7 +56,7 @@ module Gitlab
               interval =
                 begin
                   refresh_if_necessary
-                rescue => error
+                rescue StandardError => error
                   # Any exceptions that might occur should be reported to
                   # Sentry, instead of silently terminating this thread.
                   Gitlab::ErrorTracking.track_exception(error)

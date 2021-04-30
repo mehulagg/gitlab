@@ -89,7 +89,7 @@ class Namespace < ApplicationRecord
   before_destroy(prepend: true) { prepare_for_destroy }
   after_destroy :rm_dir
 
-  scope :for_user, -> { where('type IS NULL') }
+  scope :for_user, -> { where(type: nil) }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
   scope :include_route, -> { includes(:route) }
   scope :by_parent, -> (parent) { where(parent_id: parent) }
@@ -198,7 +198,7 @@ class Namespace < ApplicationRecord
   end
 
   def any_project_has_container_registry_tags?
-    all_projects.any?(&:has_container_registry_tags?)
+    all_projects.includes(:container_repositories).any?(&:has_container_registry_tags?)
   end
 
   def first_project_with_container_registry_tags

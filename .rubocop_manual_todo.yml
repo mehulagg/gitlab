@@ -60,7 +60,6 @@ Rails/SaveBang:
     - 'ee/spec/lib/gitlab/git_access_spec.rb'
     - 'ee/spec/lib/gitlab/import_export/group/relation_factory_spec.rb'
     - 'ee/spec/lib/gitlab/mirror_spec.rb'
-    - 'ee/spec/mailers/notify_spec.rb'
     - 'ee/spec/models/application_setting_spec.rb'
     - 'ee/spec/models/approval_merge_request_rule_spec.rb'
     - 'ee/spec/models/approval_project_rule_spec.rb'
@@ -126,23 +125,6 @@ Rails/SaveBang:
     - 'ee/spec/services/status_page/trigger_publish_service_spec.rb'
     - 'ee/spec/services/todo_service_spec.rb'
     - 'ee/spec/services/vulnerability_feedback/create_service_spec.rb'
-    - 'ee/spec/support/protected_tags/access_control_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/features/protected_branches_access_control_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/finders/geo/framework_registry_finder_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/graphql/geo/geo_registries_resolver_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/lib/analytics/common_merge_request_metrics_refresh_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/policies/protected_environments_shared_examples.rb'
-    - 'ee/spec/workers/adjourned_project_deletion_worker_spec.rb'
-    - 'ee/spec/workers/clear_shared_runners_minutes_worker_spec.rb'
-    - 'ee/spec/workers/create_github_webhook_worker_spec.rb'
-    - 'ee/spec/workers/elastic_namespace_rollout_worker_spec.rb'
-    - 'ee/spec/workers/geo/container_repository_sync_dispatch_worker_spec.rb'
-    - 'ee/spec/workers/geo/file_download_dispatch_worker_spec.rb'
-    - 'ee/spec/workers/geo/prune_event_log_worker_spec.rb'
-    - 'ee/spec/workers/geo/registry_sync_worker_spec.rb'
-    - 'ee/spec/workers/geo/repository_shard_sync_worker_spec.rb'
-    - 'ee/spec/workers/repository_import_worker_spec.rb'
-    - 'ee/spec/workers/update_all_mirrors_worker_spec.rb'
     - 'qa/qa/specs/features/browser_ui/3_create/repository/push_mirroring_over_http_spec.rb'
     - 'qa/qa/specs/features/browser_ui/3_create/repository/push_mirroring_lfs_over_http_spec.rb'
     - 'qa/qa/specs/features/ee/browser_ui/3_create/repository/pull_mirroring_over_http_spec.rb'
@@ -151,8 +133,6 @@ Rails/SaveBang:
     - 'spec/controllers/boards/issues_controller_spec.rb'
     - 'spec/controllers/sent_notifications_controller_spec.rb'
     - 'spec/controllers/sessions_controller_spec.rb'
-    - 'spec/frontend/fixtures/issues.rb'
-    - 'spec/frontend/fixtures/merge_requests.rb'
     - 'spec/lib/after_commit_queue_spec.rb'
     - 'spec/lib/backup/manager_spec.rb'
     - 'spec/lib/gitlab/alerting/alert_spec.rb'
@@ -216,9 +196,6 @@ Rails/SaveBang:
     - 'spec/models/jira_import_state_spec.rb'
     - 'spec/models/key_spec.rb'
     - 'spec/models/lfs_objects_project_spec.rb'
-    - 'spec/models/member_spec.rb'
-    - 'spec/models/members/group_member_spec.rb'
-    - 'spec/models/members/project_member_spec.rb'
     - 'spec/models/merge_request_spec.rb'
     - 'spec/models/milestone_spec.rb'
     - 'spec/models/namespace_spec.rb'
@@ -245,8 +222,6 @@ Rails/SaveBang:
     - 'spec/models/user_preference_spec.rb'
     - 'spec/models/user_spec.rb'
     - 'spec/models/user_status_spec.rb'
-    - 'spec/models/wiki_page/meta_spec.rb'
-    - 'spec/models/wiki_page_spec.rb'
 
 Rails/TimeZone:
   Enabled: true
@@ -407,53 +382,12 @@ Rails/TimeZone:
 # WIP: https://gitlab.com/gitlab-org/gitlab/-/issues/325836
 RSpec/EmptyLineAfterFinalLetItBe:
   Exclude:
-    - ee/spec/controllers/groups/analytics/cycle_analytics/stages_controller_spec.rb
-    - ee/spec/controllers/groups/analytics/cycle_analytics/summary_controller_spec.rb
-    - ee/spec/controllers/groups/analytics/cycle_analytics/value_streams_controller_spec.rb
-    - ee/spec/controllers/groups/analytics/tasks_by_type_controller_spec.rb
-    - ee/spec/controllers/groups/autocomplete_sources_controller_spec.rb
-    - ee/spec/controllers/groups/insights_controller_spec.rb
-    - ee/spec/controllers/groups/todos_controller_spec.rb
     - ee/spec/controllers/subscriptions_controller_spec.rb
-    - ee/spec/features/boards/group_boards/multiple_boards_spec.rb
     - ee/spec/features/ci_shared_runner_warnings_spec.rb
-    - ee/spec/features/groups/groups_security_credentials_spec.rb
-    - ee/spec/features/groups/hooks/user_edits_hooks_spec.rb
-    - ee/spec/features/groups/iterations/user_edits_iteration_spec.rb
-    - ee/spec/features/groups/usage_quotas_spec.rb
     - ee/spec/features/integrations/jira/jira_issues_list_spec.rb
-    - ee/spec/features/issues/bulk_assignment_epic_spec.rb
-    - ee/spec/features/issues/user_uses_quick_actions_spec.rb
     - ee/spec/features/markdown/metrics_spec.rb
     - ee/spec/features/registrations/group_invites_during_signup_flow_spec.rb
     - ee/spec/features/subscriptions_spec.rb
-    - ee/spec/graphql/ee/mutations/concerns/mutations/resolves_issuable_spec.rb
-    - ee/spec/graphql/mutations/boards/update_epic_user_preferences_spec.rb
-    - ee/spec/graphql/mutations/clusters/agent_tokens/create_spec.rb
-    - ee/spec/graphql/mutations/compliance_management/frameworks/create_spec.rb
-    - ee/spec/graphql/mutations/compliance_management/frameworks/destroy_spec.rb
-    - ee/spec/graphql/mutations/compliance_management/frameworks/update_spec.rb
-    - ee/spec/graphql/mutations/dast_scanner_profiles/delete_spec.rb
-    - ee/spec/graphql/mutations/epics/add_issue_spec.rb
-    - ee/spec/graphql/mutations/gitlab_subscriptions/activate_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_rotation/create_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_rotation/destroy_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_schedule/create_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_schedule/destroy_spec.rb
-    - ee/spec/graphql/mutations/incident_management/oncall_schedule/update_spec.rb
-    - ee/spec/graphql/mutations/issues/set_epic_spec.rb
-    - ee/spec/graphql/mutations/requirements_management/export_requirements_spec.rb
-    - ee/spec/graphql/mutations/vulnerabilities/create_external_issue_link_spec.rb
-    - ee/spec/graphql/types/issue_type_spec.rb
-    - ee/spec/helpers/ee/graph_helper_spec.rb
-    - ee/spec/helpers/ee/issues_helper_spec.rb
-    - ee/spec/helpers/ee/projects/incidents_helper_spec.rb
-    - ee/spec/helpers/ee/projects/security/api_fuzzing_configuration_helper_spec.rb
-    - ee/spec/helpers/ee/projects/security/configuration_helper_spec.rb
-    - ee/spec/helpers/ee/projects/security/sast_configuration_helper_spec.rb
-    - ee/spec/helpers/ee/trial_helper_spec.rb
-    - ee/spec/helpers/ee/user_callouts_helper_spec.rb
-    - ee/spec/helpers/vulnerabilities_helper_spec.rb
     - ee/spec/lib/ee/api/entities/user_with_admin_spec.rb
     - ee/spec/lib/ee/api/entities/vulnerability_spec.rb
     - ee/spec/lib/ee/event_filter_spec.rb
@@ -539,8 +473,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/alert_management/process_prometheus_alert_service_spec.rb
     - ee/spec/services/approval_rules/create_service_spec.rb
     - ee/spec/services/audit_event_service_spec.rb
-    - ee/spec/services/award_emojis/add_service_spec.rb
-    - ee/spec/services/award_emojis/destroy_service_spec.rb
     - ee/spec/services/billable_members/destroy_service_spec.rb
     - ee/spec/services/boards/epic_boards/destroy_service_spec.rb
     - ee/spec/services/clusters/agent_tokens/create_service_spec.rb
@@ -549,7 +481,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/dast_scanner_profiles/destroy_service_spec.rb
     - ee/spec/services/dast_scanner_profiles/update_service_spec.rb
     - ee/spec/services/dast_site_profiles/destroy_service_spec.rb
-    - ee/spec/services/dora/aggregate_metrics_service_spec.rb
     - ee/spec/services/external_approval_rules/create_service_spec.rb
     - ee/spec/services/external_approval_rules/destroy_service_spec.rb
     - ee/spec/services/external_approval_rules/update_service_spec.rb
@@ -560,12 +491,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/merge_request_approval_settings/update_service_spec.rb
     - ee/spec/services/personal_access_tokens/create_service_audit_log_spec.rb
     - ee/spec/services/personal_access_tokens/groups/update_lifetime_service_spec.rb
-    - ee/spec/services/projects/after_rename_service_spec.rb
-    - ee/spec/services/projects/alerting/notify_service_spec.rb
-    - ee/spec/services/projects/destroy_service_spec.rb
-    - ee/spec/services/projects/gitlab_projects_import_service_spec.rb
-    - ee/spec/services/projects/import_export/export_service_spec.rb
-    - ee/spec/services/projects/transfer_service_spec.rb
     - ee/spec/services/push_rules/create_or_update_service_spec.rb
     - ee/spec/services/quality_management/test_cases/create_service_spec.rb
     - ee/spec/services/quick_actions/interpret_service_spec.rb
@@ -574,11 +499,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - ee/spec/services/requirements_management/update_requirement_service_spec.rb
     - ee/spec/services/resource_access_tokens/create_service_spec.rb
     - ee/spec/services/resource_access_tokens/revoke_service_spec.rb
-    - ee/spec/services/todo_service_spec.rb
-    - ee/spec/support/shared_examples/graphql/geo/geo_registries_resolver_shared_examples.rb
-    - ee/spec/support/shared_examples/graphql/mutations/set_multiple_assignees_shared_examples.rb
-    - ee/spec/support/shared_examples/quick_actions/issue/status_page_quick_actions_shared_examples.rb
-    - ee/spec/support/shared_examples/services/search_notes_shared_examples.rb
     - spec/controllers/confirmations_controller_spec.rb
     - spec/controllers/dashboard/projects_controller_spec.rb
     - spec/controllers/invites_controller_spec.rb
@@ -1626,6 +1546,7 @@ Gitlab/NamespacedClass:
     - 'app/models/concerns/uniquify.rb'
     - 'app/models/container_expiration_policy.rb'
     - 'app/models/container_repository.rb'
+    - 'app/models/context_commits_diff.rb'
     - 'app/models/custom_emoji.rb'
     - 'app/models/data_list.rb'
     - 'app/models/deploy_key.rb'
@@ -2040,6 +1961,7 @@ Gitlab/NamespacedClass:
     - 'app/serializers/container_repository_entity.rb'
     - 'app/serializers/container_tag_entity.rb'
     - 'app/serializers/container_tags_serializer.rb'
+    - 'app/serializers/context_commits_diff_entity.rb'
     - 'app/serializers/current_board_entity.rb'
     - 'app/serializers/current_board_serializer.rb'
     - 'app/serializers/current_user_entity.rb'

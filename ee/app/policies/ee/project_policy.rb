@@ -370,6 +370,8 @@ module EE
           prevent(*create_update_admin(feature))
         end
       end
+
+      rule { auditor | can?(:developer_access) }.enable :add_project_to_instance_security_dashboard
     end
 
     override :lookup_access_level!

@@ -72,7 +72,7 @@ export const activateLicenseMutationResponse = {
       ],
     },
   ],
-  FAILURE_IN_DISGUISE: {
+  ERRORS_AS_DATA: {
     data: {
       gitlabSubscriptionActivate: {
         license: null,

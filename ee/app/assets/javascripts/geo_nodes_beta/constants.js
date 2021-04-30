@@ -6,7 +6,8 @@ export const GEO_INFO_URL = helpPagePath('administration/geo/index.md');
 export const GEO_FEATURE_URL = 'https://about.gitlab.com/features/gitlab-geo/';
 
 export const HELP_NODE_HEALTH_URL = helpPagePath(
-  'administration/geo/replication/troubleshooting.html#check-the-health-of-the-secondary-node',
+  'administration/geo/replication/troubleshooting.html',
+  { anchor: 'check-the-health-of-the-secondary-node' },
 );
 
 export const GEO_TROUBLESHOOTING_URL = helpPagePath(
@@ -67,3 +68,5 @@ export const STATUS_DELAY_THRESHOLD_MS = 600000;
 export const REPOSITORY = 'repository';
 
 export const BLOB = 'blob';
+
+export const REMOVE_NODE_MODAL_ID = 'remove-node-modal';

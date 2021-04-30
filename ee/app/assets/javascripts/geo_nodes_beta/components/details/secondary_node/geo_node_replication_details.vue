@@ -3,12 +3,12 @@ import { GlIcon, GlPopover, GlLink, GlButton } from '@gitlab/ui';
 import { mapGetters, mapState } from 'vuex';
 import { GEO_REPLICATION_TYPES_URL } from 'ee/geo_nodes_beta/constants';
 import { s__, __ } from '~/locale';
+import GeoNodeReplicationDetailsResponsive from './geo_node_replication_details_responsive.vue';
+import GeoNodeReplicationStatusMobile from './geo_node_replication_status_mobile.vue';
 
 export default {
   name: 'GeoNodeReplicationDetails',
   i18n: {
-    replicationDetailsDesktop: s__('Geo|Replication Details Desktop'),
-    replicationDetailsMobile: s__('Geo|Replication Details Mobile'),
     replicationDetails: s__('Geo|Replication Details'),
     popoverText: s__('Geo|Geo supports replication of many data types.'),
     learnMore: __('Learn more'),
@@ -18,6 +18,8 @@ export default {
     GlPopover,
     GlLink,
     GlButton,
+    GeoNodeReplicationDetailsResponsive,
+    GeoNodeReplicationStatusMobile,
   },
   props: {
     node: {
@@ -81,7 +83,6 @@ export default {
       </gl-button>
       <gl-icon
         ref="replicationDetails"
-        tabindex="0"
         name="question"
         class="gl-text-blue-500 gl-cursor-pointer gl-ml-2"
       />
@@ -90,7 +91,7 @@ export default {
         placement="top"
         triggers="hover focus"
       >
-        <p>
+        <p class="gl-font-base">
           {{ $options.i18n.popoverText }}
         </p>
         <gl-link :href="$options.GEO_REPLICATION_TYPES_URL" target="_blank">{{
@@ -99,12 +100,25 @@ export default {
       </gl-popover>
     </div>
     <div v-if="!collapsed">
-      <span class="gl-display-none gl-md-display-block" data-testid="replication-details-desktop">{{
-        $options.i18n.replicationDetailsDesktop
-      }}</span>
-      <span class="gl-md-display-none!" data-testid="replication-details-mobile">{{
-        $options.i18n.replicationDetailsMobile
-      }}</span>
+      <geo-node-replication-details-responsive
+        class="gl-display-none gl-md-display-block"
+        :replication-items="replicationItems"
+        data-testid="geo-replication-details-desktop"
+      />
+      <geo-node-replication-details-responsive
+        class="gl-md-display-none!"
+        :replication-items="replicationItems"
+        data-testid="geo-replication-details-mobile"
+      >
+        <template #title="{ translations }">
+          <span class="gl-font-weight-bold">{{ translations.component }}</span>
+          <span class="gl-font-weight-bold">{{ translations.status }}</span>
+        </template>
+        <template #default="{ item, translations }">
+          <span class="gl-mr-5">{{ item.component }}</span>
+          <geo-node-replication-status-mobile :item="item" :translations="translations" />
+        </template>
+      </geo-node-replication-details-responsive>
     </div>
   </div>
 </template>

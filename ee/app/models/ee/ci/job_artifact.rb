@@ -88,7 +88,7 @@ module EE
           each_blob do |blob|
             ::Gitlab::Ci::Parsers.fabricate!(file_type, blob, report, validate: (validate && validate_schema?)).parse!
           end
-        rescue
+        rescue StandardError
           report.add_error('ParsingError')
         end
 

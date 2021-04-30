@@ -13,14 +13,14 @@ export default {
       required: true,
     },
   },
-  apollo: {
-    state: {
-      query: STATE_QUERY,
-    },
+  data() {
+    return {
+      isNewUser: null,
+    };
   },
-  computed: {
-    isNewUser() {
-      return this.state.isNewUser;
+  apollo: {
+    isNewUser: {
+      query: STATE_QUERY,
     },
   },
   currentStep: STEPS.checkout,
@@ -31,7 +31,10 @@ export default {
 };
 </script>
 <template>
-  <div class="checkout gl-flex gl-flex-column gl-justify-content-between w-100">
+  <div
+    v-if="!$apollo.loading"
+    class="checkout gl-flex gl-flex-column gl-justify-content-between w-100"
+  >
     <div class="full-width">
       <progress-bar v-if="isNewUser" :steps="$options.steps" :current-step="$options.currentStep" />
       <div class="flash-container"></div>

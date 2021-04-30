@@ -18,6 +18,7 @@ RSpec.describe GitlabSchema.types['Issue'] do
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, :public, group: group) }
     let_it_be(:project_path) { project.full_path }
+
     let!(:blocking_issue1) { create(:issue, project: project) }
     let!(:blocked_issue1) { create(:issue, project: project) }
     let!(:issue_link1) { create :issue_link, source: blocking_issue1, target: blocked_issue1, link_type: IssueLink::TYPE_BLOCKS }

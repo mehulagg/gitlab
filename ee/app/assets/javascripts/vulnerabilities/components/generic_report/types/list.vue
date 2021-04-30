@@ -27,7 +27,7 @@ export default {
       :key="item.name"
       :class="{ 'gl-list-style-none!': $options.isListType(item) }"
     >
-      <report-item :item="item" />
+      <report-item :item="item" data-testid="reportItem" />
     </li>
   </ul>
 </template>

@@ -1,15 +1,8 @@
 import { GlButton } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeActionsDesktop from 'ee/geo_nodes_beta/components/header/geo_node_actions_desktop.vue';
-import {
-  MOCK_NODES,
-  MOCK_PRIMARY_VERSION,
-  MOCK_REPLICABLE_TYPES,
-} from 'ee_jest/geo_nodes_beta/mock_data';
-
-const localVue = createLocalVue();
-localVue.use(Vuex);
+import { MOCK_NODES } from 'ee_jest/geo_nodes_beta/mock_data';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('GeoNodeActionsDesktop', () => {
   let wrapper;
@@ -18,33 +11,23 @@ describe('GeoNodeActionsDesktop', () => {
     node: MOCK_NODES[0],
   };
 
-  const createComponent = (initialState, props) => {
-    const store = new Vuex.Store({
-      state: {
-        primaryVersion: MOCK_PRIMARY_VERSION.version,
-        primaryRevision: MOCK_PRIMARY_VERSION.revision,
-        replicableTypes: MOCK_REPLICABLE_TYPES,
-        ...initialState,
-      },
-    });
-
-    wrapper = shallowMount(GeoNodeActionsDesktop, {
-      localVue,
-      store,
-      propsData: {
-        ...defaultProps,
-        ...props,
-      },
-    });
+  const createComponent = (props) => {
+    wrapper = extendedWrapper(
+      shallowMount(GeoNodeActionsDesktop, {
+        propsData: {
+          ...defaultProps,
+          ...props,
+        },
+      }),
+    );
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findGeoDesktopActionsButtons = () => wrapper.findAll(GlButton);
-  const findGeoDesktopActionsRemoveButton = () =>
-    wrapper.find('[data-testid="geo-desktop-remove-action"]');
+  const findGeoDesktopActionsButtons = () => wrapper.findAllComponents(GlButton);
+  const findGeoDesktopActionsRemoveButton = () => wrapper.findByTestId('geo-desktop-remove-action');
 
   describe('template', () => {
     describe('always', () => {
@@ -64,6 +47,12 @@ describe('GeoNodeActionsDesktop', () => {
           MOCK_NODES[0].webEditUrl,
         );
       });
+
+      it('emits remove when remove button is clicked', () => {
+        findGeoDesktopActionsRemoveButton().vm.$emit('click');
+
+        expect(wrapper.emitted('remove')).toHaveLength(1);
+      });
     });
 
     describe.each`
@@ -72,7 +61,7 @@ describe('GeoNodeActionsDesktop', () => {
       ${false} | ${undefined}
     `(`conditionally`, ({ primary, disabled }) => {
       beforeEach(() => {
-        createComponent(null, { node: { primary } });
+        createComponent({ node: { primary } });
       });
 
       describe(`when primary is ${primary}`, () => {

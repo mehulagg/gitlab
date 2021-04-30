@@ -292,7 +292,7 @@ module Gitlab
         checksum = yield
 
         track_checksum_result!(checksum, calculation_started_at)
-      rescue => e
+      rescue StandardError => e
         # Reset any potential changes from track_checksum_result, i.e.
         # verification_retry_count may have been cleared.
         reset

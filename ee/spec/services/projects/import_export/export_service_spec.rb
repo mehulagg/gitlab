@@ -9,6 +9,7 @@ RSpec.describe Projects::ImportExport::ExportService do
       let_it_be(:subgroup) { create(:group, :private, parent: group) }
       let_it_be(:project_template) { create(:project, group: subgroup) }
       let_it_be(:user) { create(:user) }
+
       let(:shared) { project_template.import_export_shared }
 
       subject { described_class.new(project_template, user).execute }

@@ -55,7 +55,7 @@ module Mutations
       def resolve(full_path:, profile_name:, spider_timeout: nil, target_timeout: nil, scan_type:, use_ajax_spider:, show_debug_messages:)
         project = authorized_find!(full_path)
 
-        service = ::DastScannerProfiles::CreateService.new(project, current_user)
+        service = ::AppSec::Dast::ScannerProfiles::CreateService.new(project, current_user)
         result = service.execute(
           name: profile_name,
           spider_timeout: spider_timeout,

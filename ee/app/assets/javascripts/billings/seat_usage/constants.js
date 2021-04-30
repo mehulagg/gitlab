@@ -28,6 +28,13 @@ export const FIELDS = [
   },
 ];
 
+export const DETAILS_FIELDS = [
+  { key: 'source_full_name', label: s__('Billing|Direct memberships'), thClass: thWidthClass(40) },
+  { key: 'created_at', label: __('Access granted'), thClass: thWidthClass(40) },
+  { key: 'expires_at', label: __('Access expires'), thClass: thWidthClass(40) },
+  { key: 'role', label: __('Role'), thClass: thWidthClass(40) },
+];
+
 export const REMOVE_BILLABLE_MEMBER_MODAL_ID = 'billable-member-remove-modal';
 export const REMOVE_BILLABLE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE = s__(
   `Billing|You are about to remove user %{username} from your subscription.

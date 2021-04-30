@@ -24,7 +24,7 @@ module Mutations
 
         begin
           epic = ::Epics::IssuePromoteService.new(project, current_user).execute(issue, group)
-        rescue => error
+        rescue StandardError => error
           errors << error.message
         end
 

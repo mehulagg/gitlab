@@ -7,7 +7,7 @@ RSpec.shared_examples "protected tags > access control > EE" do
 
   before do
     users.each { |user| project.add_developer(user) }
-    groups.each { |group| project.project_group_links.create(group: group, group_access: Gitlab::Access::DEVELOPER) }
+    groups.each { |group| project.project_group_links.create!(group: group, group_access: Gitlab::Access::DEVELOPER) }
   end
 
   def access_levels

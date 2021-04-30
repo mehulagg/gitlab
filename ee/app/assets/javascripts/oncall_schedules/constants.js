@@ -8,6 +8,15 @@ export const CHEVRON_SKIPPING_SHADE_ENUM = ['500', '600', '700', '800', '900', '
 
 export const CHEVRON_SKIPPING_PALETTE_ENUM = ['blue', 'orange', 'aqua', 'green', 'magenta'];
 
+export const LIGHT_TO_DARK_MODE_SHADE_MAPPING = {
+  500: 500,
+  600: 400,
+  700: 300,
+  800: 200,
+  900: 100,
+  950: 50,
+};
+
 /**
  * an Array of Objects that represent the 30 possible
  * color combinations for assignees

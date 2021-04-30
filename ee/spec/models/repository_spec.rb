@@ -173,12 +173,12 @@ RSpec.describe Repository do
 
     it 'requests the CODOWNER blobs in batch in the correct order' do
       expect(repository).to receive(:blobs_at)
-                              .with([%w(HEAD CODEOWNERS),
-                                     %w(HEAD docs/CODEOWNERS),
-                                     %w(HEAD .gitlab/CODEOWNERS)])
+                              .with([%w(master CODEOWNERS),
+                                     %w(master docs/CODEOWNERS),
+                                     %w(master .gitlab/CODEOWNERS)])
                               .and_call_original
 
-      repository.code_owners_blob
+      repository.code_owners_blob(ref: 'master')
     end
   end
 

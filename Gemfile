@@ -49,7 +49,7 @@ gem 'omniauth-shibboleth', '~> 1.3.0'
 gem 'omniauth-twitter', '~> 1.4'
 gem 'omniauth_crowd', '~> 2.4.0'
 gem 'omniauth-authentiq', '~> 0.3.3'
-gem 'omniauth_openid_connect', '~> 0.3.5'
+gem 'gitlab-omniauth-openid-connect', '~> 0.4.0', require: 'omniauth_openid_connect'
 gem 'omniauth-salesforce', '~> 1.0.5'
 gem 'omniauth-atlassian-oauth2', '~> 0.2.0'
 gem 'rack-oauth2', '~> 1.16.0'
@@ -417,13 +417,12 @@ group :development, :test, :omnibus do
 end
 
 group :test do
-  gem 'json-schema', '~> 2.8.0'
   gem 'fuubar', '~> 2.2.0'
   gem 'rspec-retry', '~> 0.6.1'
   gem 'rspec_profiling', '~> 0.0.6'
   gem 'rspec-parameterized', require: false
 
-  gem 'capybara', '~> 3.34.0'
+  gem 'capybara', '~> 3.35.3'
   gem 'capybara-screenshot', '~> 1.0.22'
   gem 'selenium-webdriver', '~> 3.142'
 
@@ -483,7 +482,7 @@ gem 'gitaly', '~> 13.11.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
-gem 'google-protobuf', '~> 3.14.0'
+gem 'google-protobuf', '~> 3.15.8'
 
 gem 'toml-rb', '~> 1.0.0'
 

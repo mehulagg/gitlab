@@ -31,7 +31,7 @@ class Admin::LicensesController < Admin::ApplicationController
 
     @license = License.new(license_params)
 
-    return upload_license_error if @license.cloud?
+    return upload_license_error if @license.cloud_license?
 
     respond_with(@license, location: admin_license_path) do
       if @license.save
@@ -47,13 +47,17 @@ class Admin::LicensesController < Admin::ApplicationController
   end
 
   def destroy
-    license.destroy
+    Licenses::DestroyService.new(license, current_user).execute
 
     if License.current
       flash[:notice] = _('The license was removed. GitLab has fallen back on the previous license.')
     else
       flash[:alert] = _('The license was removed. GitLab now no longer has a valid license.')
     end
+
+    redirect_to admin_license_path, status: :found
+  rescue Licenses::DestroyService::DestroyCloudLicenseError => e
+    flash[:error] = e.message
 
     redirect_to admin_license_path, status: :found
   end

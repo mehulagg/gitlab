@@ -19,12 +19,16 @@ export const initSecurityConfiguration = (el) => {
     dependencyScanningHelpPath,
     toggleAutofixSettingEndpoint,
     gitlabCiHistoryPath,
+    projectPath,
   } = el.dataset;
 
   return new Vue({
     el,
     components: {
       SecurityConfigurationApp,
+    },
+    provide: {
+      projectPath,
     },
     render(createElement) {
       return createElement(SecurityConfigurationApp, {

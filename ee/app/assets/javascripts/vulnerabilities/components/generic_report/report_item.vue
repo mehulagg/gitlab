@@ -1,11 +1,9 @@
 <script>
-import List from './types/list.vue';
-import Url from './types/url.vue';
+import { REPORT_COMPONENTS, getComponentNameForType } from './types/constants';
 
 export default {
   components: {
-    List,
-    Url,
+    ...REPORT_COMPONENTS,
   },
   props: {
     item: {
@@ -13,8 +11,13 @@ export default {
       required: true,
     },
   },
+  computed: {
+    componentName() {
+      return getComponentNameForType(this.item.type);
+    },
+  },
 };
 </script>
 <template>
-  <component :is="item.type" v-bind="item" data-testid="reportComponent" />
+  <component :is="componentName" v-bind="item" data-testid="reportComponent" />
 </template>

@@ -48,11 +48,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       context 'for different security reports' do
-        where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures) do
-          'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2
-          'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0
-          'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0
-          'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0
+        where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures, :finding_links) do
+          'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2 | 0
+          'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0 | 0
+          'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0 | 6
+          'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0 | 8
         end
 
         with_them do
@@ -66,6 +66,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
           it 'inserts all findings' do
             expect { subject }.to change { Vulnerabilities::Finding.count }.by(findings)
+          end
+
+          it 'inserts all finding links' do
+            expect { subject }.to change { Vulnerabilities::FindingLink.count }.by(finding_links)
           end
 
           it 'inserts all finding identifiers (join model)' do
@@ -105,6 +109,9 @@ RSpec.describe Security::StoreReportService, '#execute' do
       context 'when N+1 database queries have been removed' do
         let(:trait) { :sast }
         let(:bandit_scanner) { build(:ci_reports_security_scanner, external_id: 'bandit', name: 'Bandit') }
+        let(:link) { build(:ci_reports_security_link) }
+        let(:bandit_finding) { build(:ci_reports_security_finding, scanner: bandit_scanner, links: [link]) }
+        let(:vulnerability_findings) { [] }
 
         subject { described_class.new(pipeline, report) }
 
@@ -113,9 +120,60 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
           control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerability_scanners!, report.findings) }.count
 
-          5.times { report.add_finding(build(:ci_reports_security_finding, scanner: bandit_scanner)) }
+          2.times { add_finding_to_report }
 
-          expect {  described_class.new(pipeline, report).send(:update_vulnerability_scanners!, report.findings) }.not_to exceed_query_limit(control_count)
+          expect { subject.send(:update_vulnerability_scanners!, report.findings) }.not_to exceed_query_limit(control_count)
+        end
+
+        it "avoids N+1 database queries for updating finding_links", :use_sql_query_cache do
+          report.add_scanner(bandit_scanner)
+          add_finding_to_report
+
+          stub_vulnerability_finding_id_to_finding_map
+          control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerability_links_info) }.count
+
+          2.times { add_finding_to_report }
+
+          stub_vulnerability_finding_id_to_finding_map
+          expect { subject.send(:update_vulnerability_links_info) }.not_to exceed_query_limit(control_count)
+        end
+
+        it "avoids N+1 database queries for updating vulnerabilities_identifiers", :use_sql_query_cache do
+          report.add_scanner(bandit_scanner)
+          add_finding_to_report
+
+          stub_vulnerability_finding_id_to_finding_map
+          stub_vulnerability_findings
+          control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerabilities_identifiers) }.count
+
+          2.times { add_finding_to_report }
+
+          stub_vulnerability_finding_id_to_finding_map
+          stub_vulnerability_findings
+          expect { subject.send(:update_vulnerabilities_identifiers) }.not_to exceed_query_limit(control_count)
+        end
+
+        def add_finding_to_report
+          report.add_finding(bandit_finding)
+        end
+
+        def stub_vulnerability_findings
+          allow(subject).to receive(:vulnerability_findings)
+            .and_return(vulnerability_findings)
+        end
+
+        def stub_vulnerability_finding_id_to_finding_map
+          allow(subject).to receive(:vulnerability_finding_id_to_finding_map)
+            .and_return(vulnerability_finding_id_to_finding_map)
+        end
+
+        def vulnerability_finding_id_to_finding_map
+          vulnerability_findings.clear
+          report.findings.to_h do |finding|
+            vulnerability_finding = create(:vulnerabilities_finding)
+            vulnerability_findings << vulnerability_finding
+            [vulnerability_finding.id, finding]
+          end
         end
       end
 

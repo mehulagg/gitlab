@@ -71,11 +71,17 @@ module EE
 
     override :issues_list_data
     def issues_list_data(project, current_user, finder)
-      super.merge!(
+      data = super.merge!(
         has_blocked_issues_feature: project.feature_available?(:blocked_issues).to_s,
         has_issuable_health_status_feature: project.feature_available?(:issuable_health_status).to_s,
         has_issue_weights_feature: project.feature_available?(:issue_weights).to_s
       )
+
+      if project.feature_available?(:iterations)
+        data[:project_iterations_path] = api_v4_projects_iterations_path(id: project.id)
+      end
+
+      data
     end
   end
 end

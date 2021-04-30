@@ -45,7 +45,7 @@ module DastOnDemandScans
 
     def dast_site
       strong_memoize(:dast_site) do
-        dast_site_profile&.dast_site
+        dast_site_profile.dast_site
       end
     end
 
@@ -66,12 +66,12 @@ module DastOnDemandScans
     end
 
     def target_config
-      url = dast_site&.url
+      url = dast_site.url
 
       if dast_site_profile.target_type == 'website'
         { target_url: url }
       else
-        { api_specification_url: url }
+        { api_specification_url: url, api_host_override: URI(url).host }
       end
     end
 

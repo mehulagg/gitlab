@@ -6,6 +6,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Update do
   include GraphqlHelpers
 
   let_it_be(:framework) { create(:compliance_framework) }
+
   let(:user) { framework.namespace.owner }
   let(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
   let(:params) do

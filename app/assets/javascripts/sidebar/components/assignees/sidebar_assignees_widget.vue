@@ -47,9 +47,6 @@ export default {
     directlyInviteMembers: {
       default: false,
     },
-    indirectlyInviteMembers: {
-      default: false,
-    },
   },
   props: {
     iid: {
@@ -72,6 +69,11 @@ export default {
       validator(value) {
         return [IssuableType.Issue, IssuableType.MergeRequest].includes(value);
       },
+    },
+    issuableId: {
+      type: Number,
+      required: false,
+      default: null,
     },
     multipleAssignees: {
       type: Boolean,
@@ -340,9 +342,9 @@ export default {
   <div data-testid="assignees-widget">
     <sidebar-assignees-realtime
       v-if="shouldEnableRealtime"
-      :project-path="fullPath"
-      :issuable-iid="iid"
       :issuable-type="issuableType"
+      :issuable-id="issuableId"
+      :query-variables="queryVariables"
     />
     <sidebar-editable-item
       ref="toggle"
@@ -439,7 +441,7 @@ export default {
           </template>
           <template #footer>
             <gl-dropdown-item>
-              <sidebar-invite-members v-if="directlyInviteMembers || indirectlyInviteMembers" />
+              <sidebar-invite-members v-if="directlyInviteMembers" />
             </gl-dropdown-item>
           </template>
         </multi-select-dropdown>

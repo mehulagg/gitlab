@@ -298,6 +298,16 @@ export const filters = {
       [OPERATOR_IS_NOT]: 'not[assignee_username][]',
     },
   },
+  milestone: {
+    apiParam: {
+      [OPERATOR_IS]: 'milestone',
+      [OPERATOR_IS_NOT]: 'not[milestone]',
+    },
+    urlParam: {
+      [OPERATOR_IS]: 'milestone_title',
+      [OPERATOR_IS_NOT]: 'not[milestone_title]',
+    },
+  },
   labels: {
     apiParam: {
       [OPERATOR_IS]: 'labels',
@@ -306,6 +316,42 @@ export const filters = {
     urlParam: {
       [OPERATOR_IS]: 'label_name[]',
       [OPERATOR_IS_NOT]: 'not[label_name][]',
+    },
+  },
+  my_reaction_emoji: {
+    apiParam: {
+      [OPERATOR_IS]: 'my_reaction_emoji',
+    },
+    urlParam: {
+      [OPERATOR_IS]: 'my_reaction_emoji',
+    },
+  },
+  confidential: {
+    apiParam: {
+      [OPERATOR_IS]: 'confidential',
+    },
+    urlParam: {
+      [OPERATOR_IS]: 'confidential',
+    },
+  },
+  iteration: {
+    apiParam: {
+      [OPERATOR_IS]: 'iteration_title',
+      [OPERATOR_IS_NOT]: 'not[iteration_title]',
+    },
+    urlParam: {
+      [OPERATOR_IS]: 'iteration_title',
+      [OPERATOR_IS_NOT]: 'not[iteration_title]',
+    },
+  },
+  weight: {
+    apiParam: {
+      [OPERATOR_IS]: 'weight',
+      [OPERATOR_IS_NOT]: 'not[weight]',
+    },
+    urlParam: {
+      [OPERATOR_IS]: 'weight',
+      [OPERATOR_IS_NOT]: 'not[weight]',
     },
   },
 };

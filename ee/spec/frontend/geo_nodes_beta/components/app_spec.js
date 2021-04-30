@@ -1,26 +1,22 @@
-import { GlLink, GlButton, GlLoadingIcon } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlLink, GlButton, GlLoadingIcon, GlModal, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import GeoNodesBetaApp from 'ee/geo_nodes_beta/components/app.vue';
 import GeoNodes from 'ee/geo_nodes_beta/components/geo_nodes.vue';
 import GeoNodesEmptyState from 'ee/geo_nodes_beta/components/geo_nodes_empty_state.vue';
 import { GEO_INFO_URL } from 'ee/geo_nodes_beta/constants';
-import {
-  MOCK_PRIMARY_VERSION,
-  MOCK_REPLICABLE_TYPES,
-  MOCK_NODES,
-  MOCK_NEW_NODE_URL,
-  MOCK_EMPTY_STATE_SVG,
-} from '../mock_data';
+import { MOCK_NODES, MOCK_NEW_NODE_URL, MOCK_EMPTY_STATE_SVG } from '../mock_data';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('GeoNodesBetaApp', () => {
   let wrapper;
 
   const actionSpies = {
     fetchNodes: jest.fn(),
+    removeNode: jest.fn(),
+    cancelNodeRemoval: jest.fn(),
   };
 
   const defaultProps = {
@@ -31,35 +27,32 @@ describe('GeoNodesBetaApp', () => {
   const createComponent = (initialState, props) => {
     const store = new Vuex.Store({
       state: {
-        primaryVersion: MOCK_PRIMARY_VERSION.version,
-        primaryRevision: MOCK_PRIMARY_VERSION.revision,
-        replicableTypes: MOCK_REPLICABLE_TYPES,
         ...initialState,
       },
       actions: actionSpies,
     });
 
     wrapper = shallowMount(GeoNodesBetaApp, {
-      localVue,
       store,
       propsData: {
         ...defaultProps,
         ...props,
       },
+      stubs: { GlSprintf },
     });
   };
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGeoNodesBetaContainer = () => wrapper.find('section');
-  const findGeoLearnMoreLink = () => wrapper.find(GlLink);
-  const findGeoAddSiteButton = () => wrapper.find(GlButton);
-  const findGlLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findGeoEmptyState = () => wrapper.find(GeoNodesEmptyState);
-  const findGeoNodes = () => wrapper.findAll(GeoNodes);
+  const findGeoLearnMoreLink = () => wrapper.findComponent(GlLink);
+  const findGeoAddSiteButton = () => wrapper.findComponent(GlButton);
+  const findGlLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findGeoEmptyState = () => wrapper.findComponent(GeoNodesEmptyState);
+  const findGeoNodes = () => wrapper.findAllComponents(GeoNodes);
+  const findGlModal = () => wrapper.findComponent(GlModal);
 
   describe('template', () => {
     describe('always', () => {
@@ -74,6 +67,10 @@ describe('GeoNodesBetaApp', () => {
       it('renders the Learn more link correctly', () => {
         expect(findGeoLearnMoreLink().exists()).toBe(true);
         expect(findGeoLearnMoreLink().attributes('href')).toBe(GEO_INFO_URL);
+      });
+
+      it('renders the GlModal', () => {
+        expect(findGlModal().exists()).toBe(true);
       });
     });
 
@@ -91,19 +88,19 @@ describe('GeoNodesBetaApp', () => {
         });
 
         describe(`when isLoading is ${isLoading} & nodes length ${nodes.length}`, () => {
-          it(`does ${!showLoadingIcon ? 'not ' : ''}render GlLoadingIcon`, () => {
+          it(`does ${showLoadingIcon ? '' : 'not '}render GlLoadingIcon`, () => {
             expect(findGlLoadingIcon().exists()).toBe(showLoadingIcon);
           });
 
-          it(`does ${!showNodes ? 'not ' : ''}render GeoNodes`, () => {
+          it(`does ${showNodes ? '' : 'not '}render GeoNodes`, () => {
             expect(findGeoNodes().exists()).toBe(showNodes);
           });
 
-          it(`does ${!showEmptyState ? 'not ' : ''}render EmptyState`, () => {
+          it(`does ${showEmptyState ? '' : 'not '}render EmptyState`, () => {
             expect(findGeoEmptyState().exists()).toBe(showEmptyState);
           });
 
-          it(`does ${!showAddButton ? 'not ' : ''}render AddSiteButton`, () => {
+          it(`does ${showAddButton ? '' : 'not '}render AddSiteButton`, () => {
             expect(findGeoAddSiteButton().exists()).toBe(showAddButton);
           });
         });
@@ -128,6 +125,24 @@ describe('GeoNodesBetaApp', () => {
 
     it('calls fetchNodes', () => {
       expect(actionSpies.fetchNodes).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Modal Events', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it('calls removeNode when modal primary button clicked', () => {
+      findGlModal().vm.$emit('primary');
+
+      expect(actionSpies.removeNode).toHaveBeenCalled();
+    });
+
+    it('calls cancelNodeRemoval when modal cancel button clicked', () => {
+      findGlModal().vm.$emit('cancel');
+
+      expect(actionSpies.cancelNodeRemoval).toHaveBeenCalled();
     });
   });
 });

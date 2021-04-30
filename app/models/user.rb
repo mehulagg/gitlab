@@ -96,6 +96,12 @@ class User < ApplicationRecord
   # Virtual attribute for impersonator
   attr_accessor :impersonator
 
+  attr_writer :max_access_for_group
+
+  def max_access_for_group
+    @max_access_for_group ||= {}
+  end
+
   #
   # Relations
   #
@@ -337,6 +343,8 @@ class User < ApplicationRecord
     end
 
     event :deactivate do
+      # Any additional changes to this event should be also
+      # reflected in app/workers/users/deactivate_dormant_users_worker.rb
       transition active: :deactivated
     end
 
@@ -418,10 +426,12 @@ class User < ApplicationRecord
   scope :order_recent_last_activity, -> { reorder(Gitlab::Database.nulls_last_order('last_activity_on', 'DESC')) }
   scope :order_oldest_last_activity, -> { reorder(Gitlab::Database.nulls_first_order('last_activity_on', 'ASC')) }
   scope :by_id_and_login, ->(id, login) { where(id: id).where('username = LOWER(:login) OR email = LOWER(:login)', login: login) }
+  scope :dormant, -> { active.where('last_activity_on <= ?', MINIMUM_INACTIVE_DAYS.day.ago.to_date) }
+  scope :with_no_activity, -> { active.where(last_activity_on: nil) }
 
   def preferred_language
     read_attribute('preferred_language') ||
-      I18n.default_locale.to_s.presence_in(Gitlab::I18n::AVAILABLE_LANGUAGES.keys) ||
+      I18n.default_locale.to_s.presence_in(Gitlab::I18n.available_locales) ||
       'en'
   end
 
@@ -1673,6 +1683,12 @@ class User < ApplicationRecord
 
   def invalidate_issue_cache_counts
     Rails.cache.delete(['users', id, 'assigned_open_issues_count'])
+
+    if Feature.enabled?(:assigned_open_issues_cache, default_enabled: :yaml)
+      run_after_commit do
+        Users::UpdateOpenIssueCountWorker.perform_async(self.id)
+      end
+    end
   end
 
   def invalidate_merge_request_cache_counts

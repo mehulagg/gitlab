@@ -10,7 +10,7 @@ import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import purchaseFlowResolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers';
 import {
   stateData as initialStateData,
-  namespaces as defaultNamespaces,
+  mockParsedNamespaces,
   mockCiMinutesPlans,
 } from 'ee_jest/subscriptions/buy_minutes/mock_data';
 import createMockApollo from 'helpers/mock_apollo_helper';
@@ -61,7 +61,7 @@ describe('Subscription Details', () => {
 
   describe('A new user setting up for personal use', () => {
     beforeEach(() => {
-      wrapper = createComponent({ state: { isNewUser: true, isSetupForCompany: false } });
+      wrapper = createComponent({ isNewUser: true, isSetupForCompany: false });
     });
 
     it('should not display an input field for the company or group name', () => {
@@ -87,9 +87,7 @@ describe('Subscription Details', () => {
 
   describe('A new user setting up for a company or group', () => {
     beforeEach(() => {
-      wrapper = createComponent({
-        state: { isNewUser: true, isSetupForCompany: true, namespaces: [] },
-      });
+      wrapper = createComponent({ isNewUser: true, isSetupForCompany: true, namespaces: [] });
     });
 
     it('should display an input field for the company or group name', () => {
@@ -115,9 +113,7 @@ describe('Subscription Details', () => {
 
   describe('An existing user without any groups', () => {
     beforeEach(() => {
-      wrapper = createComponent({
-        state: { isNewUser: false, namespaces: [] },
-      });
+      wrapper = createComponent({ isNewUser: false, namespaces: [] });
     });
 
     it('should display an input field for the company or group name', () => {
@@ -143,7 +139,7 @@ describe('Subscription Details', () => {
 
   describe('An existing user with groups', () => {
     beforeEach(() => {
-      wrapper = createComponent({ state: { isNewUser: false, namespaces: defaultNamespaces } });
+      wrapper = createComponent({ isNewUser: false, namespaces: mockParsedNamespaces });
     });
 
     it('should not display an input field for the company or group name', () => {
@@ -170,7 +166,8 @@ describe('Subscription Details', () => {
   describe('selecting an existing group', () => {
     beforeEach(() => {
       wrapper = createComponent({
-        state: { subscription: { namespaceId: 483 }, namespaces: defaultNamespaces },
+        subscription: { namespaceId: 483 },
+        namespaces: mockParsedNamespaces,
       });
     });
 
@@ -186,7 +183,8 @@ describe('Subscription Details', () => {
   describe('selecting "Create a new group', () => {
     beforeEach(() => {
       wrapper = createComponent({
-        state: { subscription: { namespaceId: NEW_GROUP }, namespaces: defaultNamespaces },
+        subscription: { namespaceId: NEW_GROUP },
+        namespaces: mockParsedNamespaces,
       });
     });
 
@@ -206,12 +204,10 @@ describe('Subscription Details', () => {
   describe('An existing user coming from group billing page', () => {
     beforeEach(() => {
       wrapper = createComponent({
-        state: {
-          isNewUser: false,
-          isSetupForCompany: true,
-          subscription: { namespaceId: 132 },
-          namespaces: defaultNamespaces,
-        },
+        isNewUser: false,
+        isSetupForCompany: true,
+        subscription: { namespaceId: 132 },
+        namespaces: mockParsedNamespaces,
       });
     });
 
@@ -242,7 +238,8 @@ describe('Subscription Details', () => {
     describe('selecting an existing group', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          state: { subscription: { namespaceId: 483 }, namespaces: defaultNamespaces },
+          subscription: { namespaceId: 483 },
+          namespaces: mockParsedNamespaces,
         });
       });
 
@@ -266,10 +263,8 @@ describe('Subscription Details', () => {
     describe('when setting up for a company', () => {
       it('should be valid', () => {
         wrapper = createComponent({
-          state: {
-            subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 14 },
-            customer: { company: 'Organization name' },
-          },
+          subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 14 },
+          customer: { company: 'Organization name' },
         });
 
         expect(isStepValid()).toBe(true);
@@ -277,11 +272,9 @@ describe('Subscription Details', () => {
 
       it('should be invalid when no plan is selected', async () => {
         wrapper = createComponent({
-          state: {
-            isSetupForCompany: true,
-            subscription: { planId: null, namespaceId: 483, quantity: 14 },
-            customer: { company: 'Organization name' },
-          },
+          isSetupForCompany: true,
+          subscription: { planId: null, namespaceId: 483, quantity: 14 },
+          customer: { company: 'Organization name' },
         });
 
         await nextTick();
@@ -291,11 +284,9 @@ describe('Subscription Details', () => {
 
       it('should be invalid when no organization name is given, and no group is selected', async () => {
         wrapper = createComponent({
-          state: {
-            isSetupForCompany: true,
-            subscription: { namespaceId: null },
-            customer: { company: null },
-          },
+          isSetupForCompany: true,
+          subscription: { namespaceId: null },
+          customer: { company: null },
         });
 
         await nextTick();
@@ -305,10 +296,8 @@ describe('Subscription Details', () => {
 
       it('should be invalid when number of users is 0', async () => {
         wrapper = createComponent({
-          state: {
-            isSetupForCompany: true,
-            subscription: { quantity: 0 },
-          },
+          isSetupForCompany: true,
+          subscription: { quantity: 0 },
         });
 
         await nextTick();
@@ -318,10 +307,8 @@ describe('Subscription Details', () => {
 
       it('should be invalid when number of users is smaller than the selected group users', async () => {
         wrapper = createComponent({
-          state: {
-            isSetupForCompany: true,
-            subscription: { namespaceId: 483, quantity: 10 },
-          },
+          isSetupForCompany: true,
+          subscription: { namespaceId: 483, quantity: 10 },
         });
 
         await nextTick();
@@ -333,11 +320,9 @@ describe('Subscription Details', () => {
     describe('when not setting up for a company', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          state: {
-            isSetupForCompany: false,
-            subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 1 },
-            customer: { company: 'Organization name' },
-          },
+          isSetupForCompany: false,
+          subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 1 },
+          customer: { company: 'Organization name' },
         });
       });
 
@@ -347,11 +332,9 @@ describe('Subscription Details', () => {
 
       it('should be invalid when no plan is selected', async () => {
         wrapper = createComponent({
-          state: {
-            isSetupForCompany: false,
-            subscription: { planId: null, namespaceId: 483, quantity: 1 },
-            customer: { company: 'Organization name' },
-          },
+          isSetupForCompany: false,
+          subscription: { planId: null, namespaceId: 483, quantity: 1 },
+          customer: { company: 'Organization name' },
         });
 
         await nextTick();
@@ -361,11 +344,9 @@ describe('Subscription Details', () => {
 
       it('should be invalid when no number of users is 0', async () => {
         wrapper = createComponent({
-          state: {
-            isSetupForCompany: false,
-            subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 0 },
-            customer: { company: 'Organization name' },
-          },
+          isSetupForCompany: false,
+          subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 0 },
+          customer: { company: 'Organization name' },
         });
 
         await nextTick();
@@ -375,11 +356,9 @@ describe('Subscription Details', () => {
 
       it('should be invalid when no number of users is greater than 1', async () => {
         wrapper = createComponent({
-          state: {
-            isSetupForCompany: false,
-            subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 2 },
-            customer: { company: 'Organization name' },
-          },
+          isSetupForCompany: false,
+          subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 2 },
+          customer: { company: 'Organization name' },
         });
 
         await nextTick();

@@ -8,6 +8,7 @@ RSpec.describe Groups::InsightsController do
   let_it_be(:project) { create(:project, :private) }
   let_it_be(:insight) { create(:insight, group: parent_group, project: project) }
   let_it_be(:user) { create(:user) }
+
   let(:query_params) { { type: 'bar', query: { issuable_type: 'issue', collection_labels: ['bug'] }, projects: projects_params } }
   let(:projects_params) { { only: [project.id, project.full_path] } }
   let(:params) { { trailing_slash: true } }

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Groups::Analytics::CycleAnalytics::SummaryController do
   let_it_be(:user) { create(:user) }
   let_it_be(:group, refind: true) { create(:group) }
+
   let(:params) { { group_id: group.full_path, created_after: '2010-01-01', created_before: '2010-01-02' } }
 
   before do

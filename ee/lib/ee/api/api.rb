@@ -45,7 +45,6 @@ module EE
         mount ::API::VisualReviewDiscussions
         mount ::API::Analytics::CodeReviewAnalytics
         mount ::API::Analytics::GroupActivityAnalytics
-        mount ::API::Analytics::GroupDeploymentFrequency
         mount ::API::Analytics::ProjectDeploymentFrequency
         mount ::API::ProtectedEnvironments
         mount ::API::ResourceWeightEvents

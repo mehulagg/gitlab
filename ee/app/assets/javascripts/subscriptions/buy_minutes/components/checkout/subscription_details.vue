@@ -1,9 +1,10 @@
 <script>
 import { GlFormGroup, GlFormSelect, GlFormInput, GlSprintf, GlLink } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
+import { STEPS } from 'ee/subscriptions/constants';
 import UPDATE_STATE from 'ee/subscriptions/graphql/mutations/update_state.mutation.graphql';
 import STATE_QUERY from 'ee/subscriptions/graphql/queries/state.query.graphql';
-import { NEW_GROUP, STEPS } from 'ee/subscriptions/new/constants';
+import { NEW_GROUP } from 'ee/subscriptions/new/constants';
 import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import { sprintf, s__, __ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
@@ -26,21 +27,49 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      subscription: {},
+      namespaces: [],
+      customer: {},
+      isSetupForCompany: null,
+      isNewUser: null,
+    };
+  },
   apollo: {
     state: {
       query: STATE_QUERY,
+      update(data) {
+        const {
+          subscription = {},
+          namespaces = [],
+          customer = {},
+          isSetupForCompany = null,
+          isNewUser = null,
+        } = data;
+        return {
+          subscription,
+          namespaces,
+          customer,
+          isSetupForCompany,
+          isNewUser,
+        };
+      },
+      result({ data }) {
+        const { subscription, namespaces, customer, isSetupForCompany, isNewUser } = data || {};
+
+        this.subscription = subscription;
+        this.namespaces = namespaces;
+        this.customer = customer;
+        this.isSetupForCompany = isSetupForCompany;
+        this.isNewUser = isNewUser;
+      },
     },
   },
   computed: {
-    subscription() {
-      return this.state.subscription;
-    },
-    namespaces() {
-      return this.state.namespaces;
-    },
     selectedPlanModel: {
       get() {
-        return this.subscription.planId;
+        return this.subscription.planId || this.plans[0].code;
       },
       set(planId) {
         this.updateSubscription({ subscription: { planId } });
@@ -67,7 +96,7 @@ export default {
     },
     companyModel: {
       get() {
-        return this.state.customer.company;
+        return this.customer.company;
       },
       set(company) {
         this.updateSubscription({ customer: { company } });
@@ -99,10 +128,10 @@ export default {
       );
     },
     isValid() {
-      if (this.state.isSetupForCompany) {
+      if (this.isSetupForCompany) {
         return (
           !isEmpty(this.subscription.planId) &&
-          (!isEmpty(this.state.customer.company) || this.isNewGroupSelected) &&
+          (!isEmpty(this.customer.company) || this.isNewGroupSelected) &&
           this.isNumberOfUsersValid
         );
       }
@@ -110,13 +139,13 @@ export default {
       return !isEmpty(this.subscription.planId) && this.subscription.quantity === 1;
     },
     isShowingGroupSelector() {
-      return !this.state.isNewUser && this.namespaces.length;
+      return !this.isNewUser && this.namespaces.length;
     },
     isNewGroupSelected() {
       return this.subscription.namespaceId === NEW_GROUP;
     },
     isShowingNameOfCompanyInput() {
-      return this.state.isSetupForCompany && (!this.namespaces.length || this.isNewGroupSelected);
+      return this.isSetupForCompany && (!this.namespaces.length || this.isNewGroupSelected);
     },
     groupOptionsWithDefault() {
       return [
@@ -147,7 +176,7 @@ export default {
       });
     },
     toggleIsSetupForCompany() {
-      this.updateSubscription({ isSetupForCompany: !this.state.isSetupForCompany });
+      this.updateSubscription({ isSetupForCompany: !this.isSetupForCompany });
     },
   },
   i18n: {
@@ -172,6 +201,7 @@ export default {
 </script>
 <template>
   <step
+    v-if="!$apollo.loading"
     :step-id="$options.stepId"
     :title="$options.i18n.stepTitle"
     :is-valid="isValid"
@@ -219,12 +249,12 @@ export default {
             v-model.number="numberOfUsersModel"
             type="number"
             :min="selectedGroupUsers"
-            :disabled="!state.isSetupForCompany"
+            :disabled="!isSetupForCompany"
             data-qa-selector="number_of_users"
           />
         </gl-form-group>
         <gl-form-group
-          v-if="!state.isSetupForCompany"
+          v-if="!isSetupForCompany"
           ref="company-link"
           class="label ml-3 align-self-end"
         >
@@ -240,7 +270,7 @@ export default {
       <strong ref="summary-line-1">
         {{ selectedPlanTextLine }}
       </strong>
-      <div v-if="state.isSetupForCompany" ref="summary-line-2">
+      <div v-if="isSetupForCompany" ref="summary-line-2">
         {{ $options.i18n.group }}: {{ customer.company || selectedGroupName }}
       </div>
       <div ref="summary-line-3">{{ $options.i18n.users }}: {{ subscription.quantity }}</div>

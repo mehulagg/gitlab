@@ -10,9 +10,7 @@ module QA
 
             def self.prepended(base)
               base.class_eval do
-                view 'app/views/shared/nav/_sidebar_menu_item.html.haml' do
-                  element :sidebar_menu_item_link
-                end
+                prepend QA::Page::Project::SubMenus::Common
               end
             end
 

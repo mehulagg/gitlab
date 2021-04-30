@@ -50,7 +50,7 @@ RSpec.describe Mutations::DastScannerProfiles::Create do
         service = double(described_class)
         result = double('result', success?: false, errors: [])
 
-        expect(DastScannerProfiles::CreateService).to receive(:new).and_return(service)
+        expect(::AppSec::Dast::ScannerProfiles::CreateService).to receive(:new).and_return(service)
         expected_args = {
           name: profile_name,
           spider_timeout: nil,

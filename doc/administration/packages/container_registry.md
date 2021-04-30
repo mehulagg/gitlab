@@ -301,6 +301,16 @@ the Container Registry by themselves, follow the steps below.
 
 ## Configure storage for the Container Registry
 
+NOTE:
+For storage backends that support it, you can use object versioning to preserve, retrieve, and
+restore the non-current versions of every object stored in your buckets. However, this may result in
+higher storage usage and costs. Due to how the registry operates, image uploads are first stored in
+a temporary path and then transferred to a final location. For object storage backends, including S3
+and GCS, this transfer is achieved with a copy followed by a delete. With object versioning enabled,
+these deleted temporary upload artifacts are kept as non-current versions, therefore increasing the
+storage bucket size. To ensure that non-current versions are deleted after a given amount of time,
+you should configure an object lifecycle policy with your storage provider.
+
 You can configure the Container Registry to use various storage backends by
 configuring a storage driver. By default the GitLab Container Registry
 is configured to use the [file system driver](#use-file-system)
@@ -1065,15 +1075,15 @@ If the registry fails to authenticate valid login attempts, you get the followin
 ```shell
 # docker login gitlab.company.com:4567
 Username: user
-Password: 
+Password:
 Error response from daemon: login attempt to https://gitlab.company.com:4567/v2/ failed with status: 401 Unauthorized
 ```
 
 And more specifically, this appears in the `/var/log/gitlab/registry/current` log file:
 
 ```plaintext
-level=info msg="token signed by untrusted key with ID: "TOKE:NL6Q:7PW6:EXAM:PLET:OKEN:BG27:RCIB:D2S3:EXAM:PLET:OKEN"" 
-level=warning msg="error authorizing context: invalid token" go.version=go1.12.7 http.request.host="gitlab.company.com:4567" http.request.id=74613829-2655-4f96-8991-1c9fe33869b8 http.request.method=GET http.request.remoteaddr=10.72.11.20 http.request.uri="/v2/" http.request.useragent="docker/19.03.2 go/go1.12.8 git-commit/6a30dfc kernel/3.10.0-693.2.2.el7.x86_64 os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.2 \(linux\))" 
+level=info msg="token signed by untrusted key with ID: "TOKE:NL6Q:7PW6:EXAM:PLET:OKEN:BG27:RCIB:D2S3:EXAM:PLET:OKEN""
+level=warning msg="error authorizing context: invalid token" go.version=go1.12.7 http.request.host="gitlab.company.com:4567" http.request.id=74613829-2655-4f96-8991-1c9fe33869b8 http.request.method=GET http.request.remoteaddr=10.72.11.20 http.request.uri="/v2/" http.request.useragent="docker/19.03.2 go/go1.12.8 git-commit/6a30dfc kernel/3.10.0-693.2.2.el7.x86_64 os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.2 \(linux\))"
 ```
 
 GitLab uses the contents of the certificate key pair's two sides to encrypt the authentication token

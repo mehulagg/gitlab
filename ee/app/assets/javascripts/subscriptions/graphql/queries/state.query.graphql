@@ -1,28 +1,26 @@
 query state {
-  state @client {
-    namespaces {
-      id
-      name
-      users
-    }
-    isNewUser
-    fullName
-    isSetupForCompany
-    customer {
-      country
-      address1
-      address2
-      city
-      state
-      zipCode
-      company
-    }
-    subscription {
-      planId
-      paymentMethodId
-      quantity
-      namespaceId
-    }
+  namespaces @client {
+    id
+    name
+    users
+  }
+  isNewUser @client
+  fullName @client
+  isSetupForCompany @client
+  customer @client {
+    country
+    address1
+    address2
+    city
+    state
+    zipCode
+    company
+  }
+  subscription @client {
+    planId
+    paymentMethodId
+    quantity
+    namespaceId
   }
   activeStep @client {
     id

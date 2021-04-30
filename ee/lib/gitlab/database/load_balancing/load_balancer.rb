@@ -39,7 +39,7 @@ module Gitlab
               track_connection_role(connection, ROLE_REPLICA)
 
               return yield connection
-            rescue => error
+            rescue StandardError => error
               untrack_connection_role(connection)
 
               if serialization_failure?(error)
@@ -188,7 +188,7 @@ module Gitlab
           while retried < retries
             begin
               return yield
-            rescue => error
+            rescue StandardError => error
               raise error unless connection_error?(error)
 
               # We need to release the primary connection as otherwise Rails

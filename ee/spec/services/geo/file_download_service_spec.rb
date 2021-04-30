@@ -441,6 +441,10 @@ RSpec.describe Geo::FileDownloadService do
     end
 
     context 'LFS object' do
+      before do
+        stub_feature_flags(geo_lfs_object_replication: false)
+      end
+
       it_behaves_like "a service that downloads the file and registers the sync result", 'lfs' do
         let(:file) { create(:lfs_object) }
       end

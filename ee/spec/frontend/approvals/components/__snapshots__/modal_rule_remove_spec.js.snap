@@ -2,14 +2,14 @@
 
 exports[`Approvals ModalRuleRemove matches the snapshot for external approval 1`] = `
 <div
-  title="Remove approval gate?"
+  title="Remove status check?"
 >
   <p>
     You are about to remove the 
     <strong>
       API Gate
     </strong>
-     approval gate. Approval from this service is not revoked.
+     status check.
   </p>
 </div>
 `;

@@ -10,6 +10,12 @@ module Sidebars
         add_menu(Sidebars::Projects::Menus::ProjectOverviewMenu.new(context))
         add_menu(Sidebars::Projects::Menus::LearnGitlabMenu.new(context))
         add_menu(Sidebars::Projects::Menus::RepositoryMenu.new(context))
+        add_menu(Sidebars::Projects::Menus::IssuesMenu.new(context))
+        add_menu(Sidebars::Projects::Menus::ExternalIssueTrackerMenu.new(context))
+        add_menu(Sidebars::Projects::Menus::LabelsMenu.new(context))
+        add_menu(Sidebars::Projects::Menus::MergeRequestsMenu.new(context))
+        add_menu(Sidebars::Projects::Menus::CiCdMenu.new(context))
+        add_menu(Sidebars::Projects::Menus::SecurityComplianceMenu.new(context))
       end
 
       override :render_raw_menus_partial
@@ -24,3 +30,5 @@ module Sidebars
     end
   end
 end
+
+Sidebars::Projects::Panel.prepend_if_ee('EE::Sidebars::Projects::Panel')

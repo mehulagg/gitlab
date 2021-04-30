@@ -9,7 +9,7 @@ describe('ee/vue_shared/purchase_flow/graphql/resolvers', () => {
   let mockApolloClient;
 
   describe('Query', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       const mockApollo = createMockApolloProvider(STEPS, 0);
       mockApolloClient = mockApollo.clients.defaultClient;
     });

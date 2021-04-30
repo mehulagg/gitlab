@@ -106,8 +106,8 @@ describe('EE Approvals RuleForm', () => {
   const findApproversList = () => wrapper.findComponent(ApproversList);
   const findBranchesSelect = () => wrapper.findComponent(BranchesSelect);
   const findApproverTypeSelect = () => wrapper.findComponent(ApproverTypeSelect);
-  const findExternalUrlInput = () => wrapper.findByTestId('approval-gate-url');
-  const findExternalUrlValidation = () => wrapper.findByTestId('approval-gate-url-group');
+  const findExternalUrlInput = () => wrapper.findByTestId('status-checks-url');
+  const findExternalUrlValidation = () => wrapper.findByTestId('status-checks-url-group');
   const findBranchesValidation = () => wrapper.findByTestId('branches-group');
 
   const inputsAreValid = (inputs) => inputs.every((x) => x.props('state'));
@@ -848,7 +848,7 @@ describe('EE Approvals RuleForm', () => {
     });
   });
 
-  describe('when the approval gates feature is disabled', () => {
+  describe('when the status check feature is disabled', () => {
     it('does not render the approver type select input', async () => {
       createComponent({ isMrEdit: false }, { ffComplianceApprovalGates: false });
 

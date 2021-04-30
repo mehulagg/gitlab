@@ -64,8 +64,14 @@ RSpec.describe 'Admin updates EE-only settings' do
       page.within('.as-elasticsearch') do
         check 'Elasticsearch indexing'
         check 'Search with Elasticsearch enabled'
-        fill_in 'Number of Elasticsearch shards', with: '120'
-        fill_in 'Number of Elasticsearch replicas', with: '2'
+
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test]', with: '120'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test]', with: '2'
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test-issues]', with: '10'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test-issues]', with: '3'
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test-notes]', with: '20'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test-notes]', with: '4'
+
         fill_in 'Maximum file size indexed (KiB)', with: '5000'
         fill_in 'Maximum field length', with: '100000'
         fill_in 'Maximum bulk request size (MiB)', with: '17'
@@ -78,8 +84,16 @@ RSpec.describe 'Admin updates EE-only settings' do
       aggregate_failures do
         expect(current_settings.elasticsearch_indexing).to be_truthy
         expect(current_settings.elasticsearch_search).to be_truthy
+
         expect(current_settings.elasticsearch_shards).to eq(120)
         expect(current_settings.elasticsearch_replicas).to eq(2)
+        expect(Elastic::IndexSetting['gitlab-test'].number_of_shards).to eq(120)
+        expect(Elastic::IndexSetting['gitlab-test'].number_of_replicas).to eq(2)
+        expect(Elastic::IndexSetting['gitlab-test-issues'].number_of_shards).to eq(10)
+        expect(Elastic::IndexSetting['gitlab-test-issues'].number_of_replicas).to eq(3)
+        expect(Elastic::IndexSetting['gitlab-test-notes'].number_of_shards).to eq(20)
+        expect(Elastic::IndexSetting['gitlab-test-notes'].number_of_replicas).to eq(4)
+
         expect(current_settings.elasticsearch_indexed_file_size_limit_kb).to eq(5000)
         expect(current_settings.elasticsearch_indexed_field_length_limit).to eq(100000)
         expect(current_settings.elasticsearch_max_bulk_size_mb).to eq(17)

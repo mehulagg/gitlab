@@ -74,7 +74,7 @@ module Mutations
           auth_password: auth_params[:password]
         }.compact
 
-        result = ::DastSiteProfiles::UpdateService.new(project, current_user).execute(**dast_site_profile_params)
+        result = ::AppSec::Dast::SiteProfiles::UpdateService.new(project, current_user).execute(**dast_site_profile_params)
 
         { id: result.payload.try(:to_global_id), errors: result.errors }
       end

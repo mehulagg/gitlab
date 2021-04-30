@@ -21,7 +21,7 @@ module Gitlab
       values.to_s.split(',').map do |value|
         ::IPAddr.new(value.strip)
       end
-    rescue => e
+    rescue StandardError => e
       raise ValidationError, e.message
     end
   end

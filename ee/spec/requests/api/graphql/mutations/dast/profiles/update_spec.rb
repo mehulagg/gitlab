@@ -41,7 +41,7 @@ RSpec.describe 'Updating a DAST Profile' do
 
     context 'when updating fails' do
       it 'returns an error' do
-        allow_next_instance_of(::Dast::Profiles::UpdateService) do |service|
+        allow_next_instance_of(::AppSec::Dast::Profiles::UpdateService) do |service|
           allow(service).to receive(:execute).and_return(
             ServiceResponse.error(message: 'Profile failed to update')
           )

@@ -7,6 +7,7 @@ import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.v
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
+import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -16,6 +17,7 @@ export default {
     BoardSidebarSubscription,
     BoardSidebarTitle,
     SidebarConfidentialityWidget,
+    SidebarDateWidget,
   },
   computed: {
     ...mapGetters(['isSidebarOpen', 'activeBoardItem']),
@@ -28,7 +30,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['toggleBoardItem', 'setActiveEpicConfidential']),
+    ...mapActions(['toggleBoardItem', 'setActiveItemConfidential']),
     handleClose() {
       this.toggleBoardItem({ boardItem: this.activeBoardItem, sidebarType: this.sidebarType });
     },
@@ -46,12 +48,26 @@ export default {
     <template #header>{{ __('Epic details') }}</template>
     <template #default>
       <board-sidebar-title data-testid="sidebar-title" />
+      <sidebar-date-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        date-type="startDate"
+        issuable-type="epic"
+        :can-inherit="true"
+      />
+      <sidebar-date-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        date-type="dueDate"
+        issuable-type="epic"
+        :can-inherit="true"
+      />
       <board-sidebar-labels-select class="labels" />
       <sidebar-confidentiality-widget
         :iid="activeBoardItem.iid"
         :full-path="fullPath"
         issuable-type="epic"
-        @confidentialityUpdated="setActiveEpicConfidential($event)"
+        @confidentialityUpdated="setActiveItemConfidential($event)"
       />
       <board-sidebar-subscription class="subscriptions" />
     </template>

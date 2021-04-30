@@ -43,6 +43,9 @@ query groupEpics(
         webUrl
         userDiscussionsCount
         confidential
+        group {
+          fullPath
+        }
         author {
           ...Author
         }

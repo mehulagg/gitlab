@@ -36,7 +36,7 @@ module Geo
 
         def verify_checksum(type)
           Geo::RepositoryVerificationSecondaryService.new(registry, type).execute
-        rescue => e
+        rescue StandardError => e
           log_error('Error verifying the repository checksum', e, type: type)
           raise e
         end

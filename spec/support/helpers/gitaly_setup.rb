@@ -22,6 +22,10 @@ module GitalySetup
     File.expand_path('../../../tmp/tests/gitaly', __dir__)
   end
 
+  def tmp_tests_gitaly_bin_dir
+    File.join(tmp_tests_gitaly_dir, '_build', 'bin')
+  end
+
   def tmp_tests_gitlab_shell_dir
     File.expand_path('../../../tmp/tests/gitlab-shell', __dir__)
   end
@@ -52,7 +56,8 @@ module GitalySetup
       'RUBYOPT' => nil,
 
       # Git hooks can't run during tests as the internal API is not running.
-      'GITALY_TESTING_NO_GIT_HOOKS' => "1"
+      'GITALY_TESTING_NO_GIT_HOOKS' => "1",
+      'GITALY_TESTING_ENABLE_ALL_FEATURE_FLAGS' => "true"
     }
   end
 
@@ -109,14 +114,14 @@ module GitalySetup
   end
 
   def start(service)
-    args = ["#{tmp_tests_gitaly_dir}/#{service_binary(service)}"]
+    args = ["#{tmp_tests_gitaly_bin_dir}/#{service_binary(service)}"]
     args.push("-config") if service == :praefect
     args.push(config_path(service))
     pid = spawn(env, *args, [:out, :err] => "log/#{service}-test.log")
 
     begin
       try_connect!(service)
-    rescue
+    rescue StandardError
       Process.kill('TERM', pid)
       raise
     end

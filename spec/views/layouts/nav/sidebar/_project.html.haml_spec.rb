@@ -127,11 +127,221 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'issue boards' do
-    it 'has board tab' do
+  describe 'Issues' do
+    it 'has a link to the issue list path' do
       render
 
-      expect(rendered).to have_css('a[title="Boards"]')
+      expect(rendered).to have_link('Issues', href: project_issues_path(project))
+    end
+
+    it 'shows pill with the number of open issues' do
+      render
+
+      expect(rendered).to have_css('span.badge.badge-pill.issue_counter')
+    end
+
+    describe 'Issue List' do
+      it 'has a link to the issue list path' do
+        render
+
+        expect(rendered).to have_link('List', href: project_issues_path(project))
+      end
+    end
+
+    describe 'Issue Boards' do
+      it 'has a link to the issue boards path' do
+        render
+
+        expect(rendered).to have_link('Boards', href: project_boards_path(project))
+      end
+    end
+
+    describe 'Labels' do
+      it 'has a link to the labels path' do
+        render
+
+        expect(rendered).to have_link('Labels', href: project_labels_path(project))
+      end
+    end
+
+    describe 'Service Desk' do
+      it 'has a link to the service desk path' do
+        render
+
+        expect(rendered).to have_link('Service Desk', href: service_desk_project_issues_path(project))
+      end
+    end
+
+    describe 'Milestones' do
+      it 'has a link to the milestones path' do
+        render
+
+        expect(rendered).to have_link('Milestones', href: project_milestones_path(project))
+      end
+    end
+  end
+
+  describe 'External Issue Tracker' do
+    let_it_be_with_refind(:project) { create(:project, has_external_issue_tracker: true) }
+
+    context 'with custom external issue tracker' do
+      let(:external_issue_tracker_url) { 'http://test.com' }
+
+      let!(:external_issue_tracker) do
+        create(:custom_issue_tracker_service, active: external_issue_tracker_active, project: project, project_url: external_issue_tracker_url)
+      end
+
+      context 'when external issue tracker is configured and active' do
+        let(:external_issue_tracker_active) { true }
+
+        it 'has a link to the external issue tracker' do
+          render
+
+          expect(rendered).to have_link(external_issue_tracker.title, href: external_issue_tracker_url)
+        end
+      end
+
+      context 'when external issue tracker is not configured and active' do
+        let(:external_issue_tracker_active) { false }
+
+        it 'does not have a link to the external issue tracker' do
+          render
+
+          expect(rendered).not_to have_link(external_issue_tracker.title)
+        end
+      end
+    end
+
+    context 'with Jira issue tracker' do
+      let_it_be(:jira) { create(:jira_service, project: project, issues_enabled: false) }
+
+      it 'has a link to the Jira issue tracker' do
+        render
+
+        expect(rendered).to have_link('Jira', href: project.external_issue_tracker.issue_tracker_path)
+      end
+    end
+  end
+
+  describe 'Labels' do
+    context 'when issues are not enabled' do
+      it 'has a link to the labels path' do
+        project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
+
+        render
+
+        expect(rendered).to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+      end
+    end
+
+    context 'when issues are enabled' do
+      it 'does not have a link to the labels path' do
+        render
+
+        expect(rendered).not_to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+      end
+    end
+  end
+
+  describe 'Merge Requests' do
+    it 'has a link to the merge request list path' do
+      render
+
+      expect(rendered).to have_link('Merge requests', href: project_merge_requests_path(project), class: 'shortcuts-merge_requests')
+    end
+
+    it 'shows pill with the number of merge requests' do
+      render
+
+      expect(rendered).to have_css('span.badge.badge-pill.merge_counter.js-merge-counter')
+    end
+  end
+
+  describe 'CI/CD' do
+    it 'has a link to pipelines page' do
+      render
+
+      expect(rendered).to have_link('CI/CD', href: project_pipelines_path(project))
+    end
+
+    describe 'Artifacts' do
+      it 'has a link to the artifacts page' do
+        render
+
+        expect(rendered).to have_link('Artifacts', href: project_artifacts_path(project))
+      end
+    end
+
+    describe 'Jobs' do
+      it 'has a link to the jobs page' do
+        render
+
+        expect(rendered).to have_link('Jobs', href: project_jobs_path(project))
+      end
+    end
+
+    describe 'Pipeline Schedules' do
+      it 'has a link to the pipeline schedules page' do
+        render
+
+        expect(rendered).to have_link('Schedules', href: pipeline_schedules_path(project))
+      end
+    end
+
+    describe 'Pipelines' do
+      it 'has a link to the pipelines page' do
+        render
+
+        expect(rendered).to have_link('Pipelines', href: project_pipelines_path(project))
+      end
+    end
+
+    describe 'Pipeline Editor' do
+      it 'has a link to the pipeline editor' do
+        render
+
+        expect(rendered).to have_link('Editor', href: project_ci_pipeline_editor_path(project))
+      end
+
+      context 'when user cannot access pipeline editor' do
+        it 'does not has a link to the pipeline editor' do
+          allow(view).to receive(:can_view_pipeline_editor?).and_return(false)
+
+          render
+
+          expect(rendered).not_to have_link('Editor', href: project_ci_pipeline_editor_path(project))
+        end
+      end
+    end
+  end
+
+  describe 'Security and Compliance' do
+    describe 'when user does not have permissions' do
+      before do
+        allow(view).to receive(:current_user).and_return(nil)
+      end
+
+      it 'top level navigation link is not visible' do
+        render
+
+        expect(rendered).not_to have_link('Security & Compliance')
+      end
+    end
+
+    context 'when user has permissions' do
+      before do
+        allow(view).to receive(:current_user).and_return(user)
+
+        render
+      end
+
+      it 'top level navigation link is visible' do
+        expect(rendered).to have_link('Security & Compliance')
+      end
+
+      it 'security configuration link is visible' do
+        expect(rendered).to have_link('Configuration', href: project_security_configuration_path(project))
+      end
     end
   end
 
@@ -294,48 +504,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'shows the GitLab wiki tab' do
         expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
       end
-    end
-  end
-
-  describe 'ci/cd settings tab' do
-    before do
-      project.update!(archived: project_archived)
-    end
-
-    context 'when project is archived' do
-      let(:project_archived) { true }
-
-      it 'does not show the ci/cd settings tab' do
-        render
-
-        expect(rendered).not_to have_link('CI/CD', href: project_settings_ci_cd_path(project))
-      end
-    end
-
-    context 'when project is active' do
-      let(:project_archived) { false }
-
-      it 'shows the ci/cd settings tab' do
-        render
-
-        expect(rendered).to have_link('CI/CD', href: project_settings_ci_cd_path(project))
-      end
-    end
-  end
-
-  describe 'pipeline editor link' do
-    it 'shows the pipeline editor link' do
-      render
-
-      expect(rendered).to have_link('Editor', href: project_ci_pipeline_editor_path(project))
-    end
-
-    it 'does not show the pipeline editor link' do
-      allow(view).to receive(:can_view_pipeline_editor?).and_return(false)
-
-      render
-
-      expect(rendered).not_to have_link('Editor', href: project_ci_pipeline_editor_path(project))
     end
   end
 

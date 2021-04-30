@@ -16,22 +16,28 @@ RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
       allow(Gitlab.config.geo.registry_replication).to receive(:enabled).and_return(true)
     end
 
-    it 'prints messages for all legacy replication and verification checks' do
-      checks = [
-        /Repositories: /,
-        /Verified Repositories: /,
-        /Wikis: /,
-        /Verified Wikis: /,
-        /LFS Objects: /,
-        /Attachments: /,
-        /CI job artifacts: /,
-        /Container repositories: /,
-        /Design repositories: /,
-        /Repositories Checked: /
-      ]
+    context 'with legacy replication' do
+      before do
+        stub_feature_flags(geo_lfs_object_replication: false)
+      end
 
-      checks.each do |text|
-        expect { subject.print_replication_verification_status }.to output(text).to_stdout
+      it 'prints messages for all legacy replication and verification checks' do
+        checks = [
+          /Repositories: /,
+          /Verified Repositories: /,
+          /Wikis: /,
+          /Verified Wikis: /,
+          /LFS Objects: /,
+          /Attachments: /,
+          /CI job artifacts: /,
+          /Container repositories: /,
+          /Design repositories: /,
+          /Repositories Checked: /
+        ]
+
+        checks.each do |text|
+          expect { subject.print_replication_verification_status }.to output(text).to_stdout
+        end
       end
     end
 

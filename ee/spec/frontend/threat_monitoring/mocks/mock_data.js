@@ -94,10 +94,19 @@ export const formattedMockNetworkPolicyStatisticsResponse = {
 export const mockAlerts = [
   {
     iid: '01',
-    assignees: { nodes: [] },
+    assignees: {
+      nodes: [
+        {
+          name: 'Administrator',
+          username: 'root',
+          avatarUrl: '/test-avatar-url',
+          webUrl: 'https://gitlab:3443/root',
+        },
+      ],
+    },
     eventCount: '1',
     issueIid: null,
-    issue: { iid: '1', state: '', title: '' },
+    issue: { iid: '5', state: 'opened', title: 'Issue 01' },
     title: 'Issue 01',
     severity: 'HIGH',
     status: 'TRIGGERED',
@@ -108,7 +117,7 @@ export const mockAlerts = [
     eventCount: '2',
     assignees: { nodes: [] },
     issueIid: null,
-    issue: { iid: '2', state: '', title: '' },
+    issue: { iid: '6', state: 'closed', title: 'Issue 02' },
     severity: 'CRITICAL',
     title: 'Issue 02',
     status: 'ACKNOWLEDGED',
@@ -119,7 +128,7 @@ export const mockAlerts = [
     eventCount: '3',
     assignees: { nodes: [] },
     issueIid: null,
-    issue: { iid: '3', state: '', title: '' },
+    issue: null,
     severity: 'MEDIUM',
     title: 'Issue 03',
     status: 'RESOLVED',
@@ -129,7 +138,7 @@ export const mockAlerts = [
     iid: '04',
     assignees: { nodes: [] },
     issueIid: null,
-    issue: { iid: '4', state: '', title: '' },
+    issue: null,
     severity: 'LOW',
     eventCount: '4',
     title: 'Issue 04',

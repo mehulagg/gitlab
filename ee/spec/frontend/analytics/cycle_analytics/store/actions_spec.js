@@ -78,7 +78,6 @@ describe('Value Stream Analytics actions', () => {
     action                   | type                       | stateKey                | payload
     ${'setFeatureFlags'}     | ${'SET_FEATURE_FLAGS'}     | ${'featureFlags'}       | ${{ hasDurationChart: true }}
     ${'setSelectedProjects'} | ${'SET_SELECTED_PROJECTS'} | ${'selectedProjectIds'} | ${[10, 20, 30, 40]}
-    ${'setSelectedStage'}    | ${'SET_SELECTED_STAGE'}    | ${'selectedStage'}      | ${{ id: 'someStageId' }}
   `('$action should set $stateKey with $payload and type $type', ({ action, type, payload }) => {
     return testAction(
       actions[action],
@@ -92,6 +91,18 @@ describe('Value Stream Analytics actions', () => {
       ],
       [],
     );
+  });
+
+  describe('setSelectedStage', () => {
+    const data = { id: 'someStageId' };
+    const payload = { hasNextPage: null, page: 1 };
+
+    it(`dispatches the ${types.SET_SELECTED_STAGE} and ${types.SET_PAGINATION} actions`, () => {
+      return testAction(actions.setSelectedStage, data, { ...state, selectedValueStream: {} }, [
+        { type: types.SET_SELECTED_STAGE, payload: data },
+        { type: types.SET_PAGINATION, payload },
+      ]);
+    });
   });
 
   describe('setSelectedValueStream', () => {
@@ -144,26 +155,62 @@ describe('Value Stream Analytics actions', () => {
   });
 
   describe('fetchStageData', () => {
+    const headers = {
+      'X-Next-Page': 2,
+      'X-Page': 1,
+    };
+
     beforeEach(() => {
       state = { ...state, currentGroup };
       mock = new MockAdapter(axios);
-      mock.onGet(endpoints.stageData).reply(httpStatusCodes.OK, { events: [] });
+      mock.onGet(endpoints.stageData).reply(httpStatusCodes.OK, stageData, headers);
     });
 
-    it('dispatches receiveStageDataSuccess with received data on success', () => {
+    it(`commits ${types.RECEIVE_STAGE_DATA_SUCCESS} with received data and headers on success`, () => {
       return testAction(
         actions.fetchStageData,
         selectedStageSlug,
         state,
-        [],
         [
-          { type: 'requestStageData' },
           {
-            type: 'receiveStageDataSuccess',
-            payload: { events: [] },
+            type: types.RECEIVE_STAGE_DATA_SUCCESS,
+            payload: stageData,
+          },
+          {
+            type: types.SET_PAGINATION,
+            payload: { page: headers['X-Page'], hasNextPage: true },
           },
         ],
+        [{ type: 'requestStageData' }],
       );
+    });
+
+    describe('without a next page', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios);
+        mock
+          .onGet(endpoints.stageData)
+          .reply(httpStatusCodes.OK, { events: [] }, { ...headers, 'X-Next-Page': null });
+      });
+
+      it('sets hasNextPage to false', () => {
+        return testAction(
+          actions.fetchStageData,
+          selectedStageSlug,
+          state,
+          [
+            {
+              type: types.RECEIVE_STAGE_DATA_SUCCESS,
+              payload: { events: [] },
+            },
+            {
+              type: types.SET_PAGINATION,
+              payload: { page: headers['X-Page'], hasNextPage: false },
+            },
+          ],
+          [{ type: 'requestStageData' }],
+        );
+      });
     });
 
     describe('with a failing request', () => {
@@ -187,18 +234,6 @@ describe('Value Stream Analytics actions', () => {
               payload: error,
             },
           ],
-        );
-      });
-    });
-
-    describe('receiveStageDataSuccess', () => {
-      it(`commits the ${types.RECEIVE_STAGE_DATA_SUCCESS} mutation`, () => {
-        return testAction(
-          actions.receiveStageDataSuccess,
-          { ...stageData },
-          state,
-          [{ type: types.RECEIVE_STAGE_DATA_SUCCESS, payload: { events: [] } }],
-          [],
         );
       });
     });

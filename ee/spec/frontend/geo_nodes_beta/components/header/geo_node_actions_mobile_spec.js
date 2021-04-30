@@ -1,15 +1,8 @@
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeActionsMobile from 'ee/geo_nodes_beta/components/header/geo_node_actions_mobile.vue';
-import {
-  MOCK_NODES,
-  MOCK_PRIMARY_VERSION,
-  MOCK_REPLICABLE_TYPES,
-} from 'ee_jest/geo_nodes_beta/mock_data';
-
-const localVue = createLocalVue();
-localVue.use(Vuex);
+import { MOCK_NODES } from 'ee_jest/geo_nodes_beta/mock_data';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('GeoNodeActionsMobile', () => {
   let wrapper;
@@ -18,34 +11,25 @@ describe('GeoNodeActionsMobile', () => {
     node: MOCK_NODES[0],
   };
 
-  const createComponent = (initialState, props) => {
-    const store = new Vuex.Store({
-      state: {
-        primaryVersion: MOCK_PRIMARY_VERSION.version,
-        primaryRevision: MOCK_PRIMARY_VERSION.revision,
-        replicableTypes: MOCK_REPLICABLE_TYPES,
-        ...initialState,
-      },
-    });
-
-    wrapper = shallowMount(GeoNodeActionsMobile, {
-      localVue,
-      store,
-      propsData: {
-        ...defaultProps,
-        ...props,
-      },
-    });
+  const createComponent = (props) => {
+    wrapper = extendedWrapper(
+      shallowMount(GeoNodeActionsMobile, {
+        propsData: {
+          ...defaultProps,
+          ...props,
+        },
+      }),
+    );
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findGeoMobileActionsDropdown = () => wrapper.find(GlDropdown);
-  const findGeoMobileActionsDropdownItems = () => wrapper.findAll(GlDropdownItem);
+  const findGeoMobileActionsDropdown = () => wrapper.findComponent(GlDropdown);
+  const findGeoMobileActionsDropdownItems = () => wrapper.findAllComponents(GlDropdownItem);
   const findGeoMobileActionsRemoveDropdownItem = () =>
-    wrapper.find('[data-testid="geo-mobile-remove-action"]');
+    wrapper.findByTestId('geo-mobile-remove-action');
 
   describe('template', () => {
     describe('always', () => {
@@ -69,6 +53,12 @@ describe('GeoNodeActionsMobile', () => {
           MOCK_NODES[0].webEditUrl,
         );
       });
+
+      it('emits remove when remove button is clicked', () => {
+        findGeoMobileActionsRemoveDropdownItem().vm.$emit('click');
+
+        expect(wrapper.emitted('remove')).toHaveLength(1);
+      });
     });
 
     describe.each`
@@ -77,7 +67,7 @@ describe('GeoNodeActionsMobile', () => {
       ${false} | ${undefined} | ${'gl-text-red-500'}
     `(`conditionally`, ({ primary, disabled, dropdownClass }) => {
       beforeEach(() => {
-        createComponent(null, { node: { primary } });
+        createComponent({ node: { primary } });
       });
 
       describe(`when primary is ${primary}`, () => {

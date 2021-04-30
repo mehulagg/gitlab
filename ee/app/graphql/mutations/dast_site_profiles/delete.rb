@@ -21,7 +21,7 @@ module Mutations
         # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
         id = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(id)
 
-        service = ::DastSiteProfiles::DestroyService.new(project, current_user)
+        service = ::AppSec::Dast::SiteProfiles::DestroyService.new(project, current_user)
         result = service.execute(id: id.model_id)
 
         return { errors: result.errors } unless result.success?

@@ -783,6 +783,22 @@ describe('Api', () => {
         });
       });
     });
+
+    describe('removeGeoNode', () => {
+      it('DELETES with correct ID', () => {
+        mockNode = {
+          id: 1,
+        };
+
+        jest.spyOn(Api, 'buildUrl').mockReturnValue(`${expectedUrl}/${mockNode.id}`);
+        jest.spyOn(axios, 'delete');
+        mock.onDelete(`${expectedUrl}/${mockNode.id}`).replyOnce(httpStatus.OK, {});
+
+        return Api.removeGeoNode(mockNode.id).then(() => {
+          expect(axios.delete).toHaveBeenCalledWith(`${expectedUrl}/${mockNode.id}`);
+        });
+      });
+    });
   });
 
   describe('Application Settings', () => {
@@ -819,21 +835,32 @@ describe('Api', () => {
   });
 
   describe('Billable members list', () => {
-    let expectedUrl;
-    let namespaceId;
-
-    beforeEach(() => {
-      namespaceId = 1000;
-      expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${namespaceId}/billable_members`;
-    });
+    const namespaceId = 1000;
 
     describe('fetchBillableGroupMembersList', () => {
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${namespaceId}/billable_members`;
+
       it('GETs the right url', () => {
         mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
 
         return Api.fetchBillableGroupMembersList(namespaceId).then(({ data }) => {
           expect(data).toEqual([]);
         });
+      });
+    });
+
+    describe('fetchBillableGroupMemberMemberships', () => {
+      const memberId = 2;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${namespaceId}/billable_members/${memberId}/memberships`;
+
+      it('fetches memberships for the member', async () => {
+        jest.spyOn(axios, 'get');
+        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
+
+        const { data } = await Api.fetchBillableGroupMemberMemberships(namespaceId, memberId);
+
+        expect(data).toEqual([]);
+        expect(axios.get).toHaveBeenCalledWith(expectedUrl);
       });
     });
   });

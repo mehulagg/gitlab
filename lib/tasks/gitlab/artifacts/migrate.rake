@@ -10,13 +10,13 @@ namespace :gitlab do
       logger = Logger.new(STDOUT)
       logger.info('Starting transfer of artifacts to remote storage')
 
-      helper = Gitlab::Artifacts::MigrationHelper.new
+      helper = Gitlab::Ci::Artifacts::MigrationHelper.new
 
       begin
         helper.migrate_to_remote_storage do |artifact|
           logger.info("Transferred artifact ID #{artifact.id} of type #{artifact.file_type} with size #{artifact.size} to object storage")
         end
-      rescue => e
+      rescue StandardError => e
         logger.error(e.message)
       end
     end
@@ -25,13 +25,13 @@ namespace :gitlab do
       logger = Logger.new(STDOUT)
       logger.info('Starting transfer of artifacts to local storage')
 
-      helper = Gitlab::Artifacts::MigrationHelper.new
+      helper = Gitlab::Ci::Artifacts::MigrationHelper.new
 
       begin
         helper.migrate_to_local_storage do |artifact|
           logger.info("Transferred artifact ID #{artifact.id} of type #{artifact.file_type} with size #{artifact.size} to local storage")
         end
-      rescue => e
+      rescue StandardError => e
         logger.error(e.message)
       end
     end

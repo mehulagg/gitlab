@@ -137,6 +137,7 @@ export default {
             data-testid="more-actions-toggle"
           >
             <template #button-content>
+              <!-- eslint-disable @gitlab/vue-no-data-toggle -->
               <span
                 v-gl-tooltip
                 category="tertiary"
@@ -145,6 +146,7 @@ export default {
               >
                 <gl-icon name="ellipsis_v" />
               </span>
+              <!-- eslint-enable @gitlab/vue-no-data-toggle -->
             </template>
             <template v-if="isDefaultStage">
               <gl-dropdown-item

@@ -8,6 +8,8 @@ module Elastic
     validates :number_of_replicas, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
     validates :number_of_shards, presence: true, numericality: { only_integer: true, greater_than: 0 }
 
+    scope :order_by_name, -> { order(:alias_name) }
+
     class << self
       def [](alias_name)
         safe_find_or_create_by(alias_name: alias_name)

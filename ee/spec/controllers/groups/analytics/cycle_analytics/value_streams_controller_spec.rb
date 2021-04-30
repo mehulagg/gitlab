@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
   let_it_be(:user) { create(:user) }
   let_it_be(:group, refind: true) { create(:group) }
+
   let(:params) { { group_id: group } }
 
   before do

@@ -159,18 +159,13 @@ setup-test-env:
     expire_in: 7d
     paths:
       - config/secrets.yml
+      - tmp/tests/gitaly/_build/bin/
       - tmp/tests/gitaly/config.toml
-      - tmp/tests/gitaly/gitaly
       - tmp/tests/gitaly/gitaly2.config.toml
-      - tmp/tests/gitaly/gitaly-git2go
-      - tmp/tests/gitaly/gitaly-hooks
-      - tmp/tests/gitaly/gitaly-lfs-smudge
-      - tmp/tests/gitaly/gitaly-ssh
       - tmp/tests/gitaly/internal/
       - tmp/tests/gitaly/internal_gitaly2/
       - tmp/tests/gitaly/internal_sockets/
       - tmp/tests/gitaly/Makefile
-      - tmp/tests/gitaly/praefect
       - tmp/tests/gitaly/praefect.config.toml
       - tmp/tests/gitaly/ruby/
       - tmp/tests/gitlab-elasticsearch-indexer/bin/gitlab-elasticsearch-indexer
@@ -250,12 +245,18 @@ update-static-analysis-cache:
 static-analysis:
   extends:
     - .static-analysis-base
-    - .rails:rules:code-backstage-qa
+    - .static-analysis:rules:ee-and-foss
   stage: test
   parallel: 4
   script:
     - run_timed_command "retry yarn install --frozen-lockfile"
     - scripts/static-analysis
+
+static-analysis as-if-foss:
+  extends:
+    - static-analysis
+    - .static-analysis:rules:as-if-foss
+    - .as-if-foss
 
 rspec migration pg11:
   extends:
@@ -680,25 +681,25 @@ rspec migration pg12:
   extends:
     - .rspec-base-pg12
     - .rspec-base-migration
-    - .rails:rules:default-branch-schedule-nightly--code-backstage
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage
     - .rspec-migration-parallel
 
 rspec unit pg12:
   extends:
     - .rspec-base-pg12
-    - .rails:rules:default-branch-schedule-nightly--code-backstage
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage
     - .rspec-unit-parallel
 
 rspec integration pg12:
   extends:
     - .rspec-base-pg12
-    - .rails:rules:default-branch-schedule-nightly--code-backstage
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage
     - .rspec-integration-parallel
 
 rspec system pg12:
   extends:
     - .rspec-base-pg12
-    - .rails:rules:default-branch-schedule-nightly--code-backstage
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage
     - .rspec-system-parallel
 # EE/FOSS: default branch nightly scheduled jobs #
 ##########################################
@@ -709,42 +710,42 @@ rspec-ee migration pg12:
   extends:
     - .rspec-ee-base-pg12
     - .rspec-base-migration
-    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage-ee-only
     - .rspec-ee-migration-parallel
 
 rspec-ee unit pg12:
   extends:
     - .rspec-ee-base-pg12
-    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage-ee-only
     - .rspec-ee-unit-parallel
 
 rspec-ee integration pg12:
   extends:
     - .rspec-ee-base-pg12
-    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage-ee-only
     - .rspec-ee-integration-parallel
 
 rspec-ee system pg12:
   extends:
     - .rspec-ee-base-pg12
-    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage-ee-only
     - .rspec-ee-system-parallel
 
 rspec-ee unit pg12 geo:
   extends:
     - .rspec-ee-base-geo-pg12
-    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage-ee-only
     - .rspec-ee-unit-geo-parallel
 
 rspec-ee integration pg12 geo:
   extends:
     - .rspec-ee-base-geo-pg12
-    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage-ee-only
 
 rspec-ee system pg12 geo:
   extends:
     - .rspec-ee-base-geo-pg12
-    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage-ee-only
 # EE: default branch nightly scheduled jobs #
 #####################################
 

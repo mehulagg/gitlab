@@ -5,9 +5,8 @@ require 'spec_helper'
 RSpec.describe Groups::GroupMembersController do
   include ExternalAuthorizationServiceHelpers
 
-  let(:user)  { create(:user) }
-  let(:group) { create(:group, :public) }
-  let(:membership) { create(:group_member, group: group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group, reload: true) { create(:group, :public) }
 
   before do
     group.add_owner(user)
@@ -29,9 +28,13 @@ RSpec.describe Groups::GroupMembersController do
         create_list(:group_member, 5, :invited, :developer, group: group, created_by: user)
         create_list(:group_member, 5, :access_request, group: group)
         # locally 87 vs 128
-        unresolved_n_plus_ones = 36
-        # created_by = 8 # 88 vs 134
-        # oncall_schedules = 6 # 87 vs 128
+        unresolved_n_plus_ones = 8 # 1 in GDK, 5 in CI hard to say - multiple should likely be lower now
+        # using_license 84 vs 115 = ~13
+        # can_update 82 vs 102 = ~13
+        # can_remove 80 vs 89 = ~13
+        # can_resend 80 + 5 = ~4
+        # solving access level reduced from ~80 to ~50
+        # still have a few queries created by can_update/can_remove that should be reduced
         multiple_members_threshold = 5
 
         expect do
@@ -85,7 +88,8 @@ RSpec.describe Groups::GroupMembersController do
     end
 
     describe 'POST #override' do
-      let(:group) { create(:group_with_ldap_group_link) }
+      let_it_be(:group) { create(:group_with_ldap_group_link) }
+      let_it_be(:membership) { create(:group_member, group: group) }
 
       before do
         allow(Ability).to receive(:allowed?).and_call_original
@@ -105,7 +109,7 @@ RSpec.describe Groups::GroupMembersController do
       end
 
       context 'when user has minimal access' do
-        let(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
+        let_it_be(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
 
         it 'is not successful' do
           post :override,
@@ -195,8 +199,8 @@ RSpec.describe Groups::GroupMembersController do
       end
 
       context 'when group has email domain feature disabled' do
-        let(:email) { 'unverified@gitlab.com' }
-        let(:requesting_user) { create(:user, email: email, confirmed_at: nil) }
+        let_it_be(:email) { 'unverified@gitlab.com' }
+        let_it_be(:requesting_user) { create(:user, email: email, confirmed_at: nil) }
 
         before do
           stub_licensed_features(group_allowed_email_domains: false)
@@ -248,8 +252,8 @@ RSpec.describe Groups::GroupMembersController do
       end
 
       context 'when group has email domain feature disabled' do
-        let(:email) { 'unverified@gitlab.com' }
-        let(:requesting_user) { create(:user, email: email, confirmed_at: nil) }
+        let_it_be(:email) { 'unverified@gitlab.com' }
+        let_it_be(:requesting_user) { create(:user, email: email, confirmed_at: nil) }
 
         before do
           stub_licensed_features(group_allowed_email_domains: false)
@@ -272,7 +276,7 @@ RSpec.describe Groups::GroupMembersController do
 
   describe 'POST #resend_invite' do
     context 'when user has minimal access' do
-      let(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
+      let_it_be(:membership) { create(:group_member, :minimal_access, source: group, user: create(:user)) }
 
       it 'is not successful' do
         post :resend_invite, params: { group_id: group, id: membership }

@@ -6,6 +6,7 @@ RSpec.describe Mutations::Epics::AddIssue do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, namespace: group) }
   let_it_be(:epic) { create(:epic, group: group) }
+
   let(:user) { issue.author }
   let(:issue) { create(:issue, project: project) }
 

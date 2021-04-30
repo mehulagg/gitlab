@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Projects::Security::SastConfigurationHelper do
   let_it_be(:project) { create(:project) }
+
   let(:project_path) { project.full_path }
   let(:docs_path) { help_page_path('user/application_security/sast/index', anchor: 'configuration') }
   let(:analyzers_docs_path) { help_page_path('user/application_security/sast/analyzers') }

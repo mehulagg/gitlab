@@ -5,7 +5,22 @@ module Analytics
     class SnapshotCalculator
       attr_reader :segment, :range_end, :range_start, :snapshot
 
-      ADOPTION_FLAGS = %i[issue_opened merge_request_opened merge_request_approved runner_configured pipeline_succeeded deploy_succeeded security_scan_succeeded].freeze
+      BOOLEAN_METRICS = [
+        :issue_opened,
+        :merge_request_opened,
+        :merge_request_approved,
+        :runner_configured,
+        :pipeline_succeeded,
+        :deploy_succeeded,
+        :security_scan_succeeded
+      ].freeze
+
+      NUMERIC_METRICS = [
+        :code_owners_used_count,
+        :total_projects_count
+      ].freeze
+
+      ADOPTION_METRICS = BOOLEAN_METRICS + NUMERIC_METRICS
 
       def initialize(segment:, range_end:, snapshot: nil)
         @segment = segment
@@ -17,8 +32,12 @@ module Analytics
       def calculate
         params = { recorded_at: Time.zone.now, end_time: range_end, segment: segment }
 
-        ADOPTION_FLAGS.each do |flag|
-          params[flag] = snapshot&.public_send(flag) || send(flag) # rubocop:disable GitlabSecurity/PublicSend
+        BOOLEAN_METRICS.each do |metric|
+          params[metric] = snapshot&.public_send(metric) || send(metric) # rubocop:disable GitlabSecurity/PublicSend
+        end
+
+        NUMERIC_METRICS.each do |metric|
+          params[metric] = send(metric) # rubocop:disable GitlabSecurity/PublicSend
         end
 
         params
@@ -32,9 +51,13 @@ module Analytics
 
       # rubocop: disable CodeReuse/ActiveRecord
       def snapshot_project_ids
-        @snapshot_project_ids ||= Project.in_namespace(snapshot_groups).pluck(:id)
+        @snapshot_project_ids ||= snapshot_projects.pluck(:id)
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def snapshot_projects
+        @snapshot_projects ||= Project.in_namespace(snapshot_groups)
+      end
 
       def snapshot_merge_requests
         @snapshot_merge_requests ||= MergeRequest.of_projects(snapshot_project_ids)
@@ -76,6 +99,18 @@ module Analytics
           .exists?
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def total_projects_count
+        snapshot_project_ids.count
+      end
+
+      def code_owners_used_count
+        return unless Feature.enabled?(:analytics_devops_adoption_codeowners, segment.namespace, default_enabled: :yaml)
+
+        snapshot_projects.count do |project|
+          !Gitlab::CodeOwners::Loader.new(project, project.default_branch).empty_code_owners?
+        end
+      end
     end
   end
 end

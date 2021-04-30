@@ -908,7 +908,7 @@ module Ci
 
     def same_family_pipeline_ids
       ::Gitlab::Ci::PipelineObjectHierarchy.new(
-        self.class.where(id: root_ancestor), options: { same_project: true }
+        self.class.default_scoped.where(id: root_ancestor), options: { same_project: true }
       ).base_and_descendants.select(:id)
     end
 
@@ -1074,6 +1074,14 @@ module Ci
 
     def has_exposed_artifacts?
       complete? && builds.latest.with_exposed_artifacts.exists?
+    end
+
+    def has_downloadable_artifacts?
+      if downloadable_artifacts.loaded?
+        downloadable_artifacts.any?
+      else
+        downloadable_artifacts.exists?
+      end
     end
 
     def branch_updated?

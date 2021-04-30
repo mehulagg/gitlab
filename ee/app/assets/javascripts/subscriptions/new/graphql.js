@@ -3,7 +3,7 @@ import stepListQuery from 'ee/vue_shared/purchase_flow/graphql/queries/step_list
 import resolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers';
 import typeDefs from 'ee/vue_shared/purchase_flow/graphql/typedefs.graphql';
 import createDefaultClient from '~/lib/graphql';
-import { STEPS } from './constants';
+import { STEPS } from '../constants';
 
 function createClient(stepList) {
   const client = createDefaultClient(resolvers, {

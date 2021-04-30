@@ -10,17 +10,17 @@ import {
   RULE_TYPE_REGULAR,
 } from '../../constants';
 
-import ApprovalGateIcon from '../approval_gate_icon.vue';
 import EmptyRule from '../empty_rule.vue';
 import RuleInput from '../mr_edit/rule_input.vue';
 import RuleBranches from '../rule_branches.vue';
 import RuleControls from '../rule_controls.vue';
 import Rules from '../rules.vue';
 import UnconfiguredSecurityRules from '../security_configuration/unconfigured_security_rules.vue';
+import StatusChecksIcon from '../status_checks_icon.vue';
 
 export default {
   components: {
-    ApprovalGateIcon,
+    StatusChecksIcon,
     RuleControls,
     Rules,
     UserAvatarList,
@@ -141,7 +141,7 @@ export default {
               class="js-members"
               :class="settings.allowMultiRule ? 'd-none d-sm-table-cell' : null"
             >
-              <approval-gate-icon v-if="isExternalApprovalRule(rule)" :url="rule.externalUrl" />
+              <status-checks-icon v-if="isExternalApprovalRule(rule)" :url="rule.externalUrl" />
               <user-avatar-list v-else :items="rule.approvers" :img-size="24" empty-text="" />
             </td>
             <td v-if="settings.allowMultiRule" class="js-branches">

@@ -137,7 +137,7 @@ module Gitlab
 
       def try_send_bulk
         process_errors(client.bulk(body: body))
-      rescue => err
+      rescue StandardError => err
         # If an exception is raised, treat the entire bulk as failed
         logger.error(message: 'bulk_exception', error_class: err.class.to_s, error_message: err.message)
 

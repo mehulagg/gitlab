@@ -1,5 +1,7 @@
 <script>
+import { GlAlert } from '@gitlab/ui';
 import {
+  subscriptionActivationNotificationText,
   subscriptionActivationTitle,
   subscriptionHistoryQueries,
   subscriptionMainTitle,
@@ -13,12 +15,14 @@ import SubscriptionTrialCard from './subscription_trial_card.vue';
 export default {
   name: 'CloudLicenseApp',
   components: {
-    SubscriptionBreakdown,
+    GlAlert,
     CloudLicenseSubscriptionActivationForm,
-    SubscriptionTrialCard,
+    SubscriptionBreakdown,
     SubscriptionPurchaseCard,
+    SubscriptionTrialCard,
   },
   i18n: {
+    subscriptionActivationNotificationText,
     subscriptionActivationTitle,
     subscriptionMainTitle,
   },
@@ -48,13 +52,19 @@ export default {
   },
   data() {
     return {
-      currentSubscription: {},
-      subscriptionHistory: [],
       canShowSubscriptionDetails: this.hasActiveLicense,
+      currentSubscription: {},
+      shouldShowSubscriptionActivationNotification: false,
+      subscriptionHistory: [],
+      notification: null,
     };
   },
   methods: {
+    didDismissSuccessAlert() {
+      this.shouldShowSubscriptionActivationNotification = false;
+    },
     handleActivation(hasLicense) {
+      this.shouldShowSubscriptionActivationNotification = hasLicense;
       this.canShowSubscriptionDetails = hasLicense;
     },
   },
@@ -65,6 +75,14 @@ export default {
   <div class="gl-display-flex gl-justify-content-center gl-flex-direction-column">
     <h4 data-testid="subscription-main-title">{{ $options.i18n.subscriptionMainTitle }}</h4>
     <hr />
+    <gl-alert
+      v-if="shouldShowSubscriptionActivationNotification"
+      variant="success"
+      :title="$options.i18n.subscriptionActivationNotificationText"
+      class="mb-4"
+      data-testid="subscription-activation-success-alert"
+      @dismiss="didDismissSuccessAlert"
+    />
     <subscription-breakdown
       v-if="canShowSubscriptionDetails"
       :subscription="currentSubscription"

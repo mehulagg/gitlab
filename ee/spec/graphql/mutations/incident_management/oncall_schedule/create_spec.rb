@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Mutations::IncidentManagement::OncallSchedule::Create do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
+
   let(:args) do
     {
       project_path: project.full_path,

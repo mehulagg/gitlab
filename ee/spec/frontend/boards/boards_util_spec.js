@@ -85,6 +85,7 @@ describe('transformBoardConfig', () => {
     assigneeUsername: 'username',
     labels: [
       { id: 5, title: 'Deliverable', color: '#34ebec', type: 'GroupLabel', textColor: '#333333' },
+      { id: 6, title: 'On hold', color: '#34ebec', type: 'GroupLabel', textColor: '#333333' },
     ],
     weight: 0,
   };
@@ -94,12 +95,12 @@ describe('transformBoardConfig', () => {
     const result = transformBoardConfig(boardConfig);
 
     expect(result).toContain(
-      'milestone_title=milestone&weight=0&assignee_username=username&label_name[]=Deliverable',
+      'milestone_title=milestone&weight=0&assignee_username=username&label_name[]=Deliverable&label_name[]=On%20hold',
     );
   });
 
   it('formats url parameters from boardConfig object preventing duplicates with passed filter query', () => {
-    window.location = { search: 'label_name[]=Deliverable' };
+    window.location = { search: '?label_name[]=Deliverable&label_name[]=On%20hold' };
     const result = transformBoardConfig(boardConfig);
 
     expect(result).toContain('milestone_title=milestone&weight=0&assignee_username=username');

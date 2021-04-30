@@ -2,31 +2,32 @@
   - project_template_count = current_user.available_custom_project_templates.count
   - group_id = params[:namespace_id]
 
-  .project-templates-buttons
-    %ul.nav-tabs.nav-links.nav.scrolling-tabs
-      %li.built-in-tab
-        %a.nav-link.active{ href: "#built-in", data: { toggle: 'tab'} }
-          = _('Built-in')
-          %span.badge.badge-pill=  Gitlab::ProjectTemplate.all.count + Gitlab::SampleDataTemplate.all.count
-      %li.custom-instance-project-templates-tab
-        %a.nav-link.js-custom-instance-project-templates-nav-link.qa-instance-templates-tab{ href: "#custom-instance-project-templates", data: { toggle: 'tab'} }
-          = _('Instance')
-          %span.badge.badge-pill.qa-instance-template-tab-badge= project_template_count
-      %li.custom-group-project-templates-tab
-        %a.nav-link.js-custom-group-project-templates-nav-link.qa-group-templates-tab{ href: "#custom-group-project-templates", data: { toggle: 'tab'} }
-          = _('Group')
-          %span.badge.badge-pill.qa-group-template-tab-badge
-            = group_project_templates_count(group_id)
+  - unless Gitlab.com?
+    .project-templates-buttons
+      %ul.nav-tabs.nav-links.nav.scrolling-tabs
+        %li.built-in-tab
+          %a.nav-link.active{ href: "#built-in", data: { toggle: 'tab'} }
+            = _('Built-in')
+            %span.badge.badge-pill=  Gitlab::ProjectTemplate.all.count + Gitlab::SampleDataTemplate.all.count
+        %li.custom-instance-project-templates-tab
+          %a.nav-link.js-custom-instance-project-templates-nav-link.qa-instance-templates-tab{ href: "#custom-instance-project-templates", data: { toggle: 'tab'} }
+            = _('Instance')
+            %span.badge.badge-pill.qa-instance-template-tab-badge= project_template_count
+        %li.custom-group-project-templates-tab
+          %a.nav-link.js-custom-group-project-templates-nav-link.qa-group-templates-tab{ href: "#custom-group-project-templates", data: { toggle: 'tab'} }
+            = _('Group')
+            %span.badge.badge-pill.qa-group-template-tab-badge
+              = group_project_templates_count(group_id)
 
   .tab-content
     .project-templates-buttons.import-buttons.tab-pane.active#built-in
       = render partial: 'projects/project_templates/template', collection: Gitlab::ProjectTemplate.all + Gitlab::SampleDataTemplate.all
     .project-templates-buttons.import-buttons.tab-pane.js-custom-instance-project-templates-tab-content#custom-instance-project-templates{ data: {initial_templates: user_available_project_templates_path(current_user)} }
       .text-center.m-4
-        .spinner.spinner-md
+        .gl-spinner.gl-spinner-md
     .project-templates-buttons.import-buttons.tab-pane.js-custom-group-project-templates-tab-content#custom-group-project-templates{ data: {initial_templates: user_available_group_templates_path(current_user, group_id: group_id)} }
       .text-center.m-4
-        .spinner.spinner-md
+        .gl-spinner.gl-spinner-md
 
   .project-fields-form
     = render 'projects/project_templates/project_fields_form'

@@ -13,7 +13,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::FindOrCreateService do
   subject(:response) { described_class.new(params: params, current_user: current_user).execute }
 
   before do
-    stub_licensed_features(group_level_devops_adoption: true)
+    stub_licensed_features(group_level_devops_adoption: true, instance_level_devops_adoption: true)
   end
 
   context 'when segment for given namespace already exists' do

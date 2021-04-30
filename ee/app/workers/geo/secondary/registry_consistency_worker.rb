@@ -40,7 +40,7 @@ module Geo
         return false unless Gitlab::Geo.secondary?
 
         backfill
-      rescue => e
+      rescue StandardError => e
         log_error("Error while backfilling all", e)
 
         raise

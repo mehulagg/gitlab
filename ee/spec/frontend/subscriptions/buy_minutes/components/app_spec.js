@@ -37,6 +37,41 @@ describe('App', () => {
   });
 
   describe('when data is not received', () => {
+    it('should display the GlEmptyState for empty data', async () => {
+      const mockApollo = createMockApolloProvider({
+        plansQueryMock: jest.fn().mockResolvedValue({ data: null }),
+      });
+      wrapper = createComponent({ apolloProvider: mockApollo });
+      await waitForPromises();
+
+      expect(wrapper.findComponent(StepOrderApp).exists()).toBe(false);
+      expect(wrapper.findComponent(GlEmptyState).exists()).toBe(true);
+    });
+
+    it('should display the GlEmptyState for empty plans', async () => {
+      const mockApollo = createMockApolloProvider({
+        plansQueryMock: jest.fn().mockResolvedValue({ data: { plans: null } }),
+      });
+      wrapper = createComponent({ apolloProvider: mockApollo });
+      await waitForPromises();
+
+      expect(wrapper.findComponent(StepOrderApp).exists()).toBe(false);
+      expect(wrapper.findComponent(GlEmptyState).exists()).toBe(true);
+    });
+
+    it('should display the GlEmptyState for plans data of wrong type', async () => {
+      const mockApollo = createMockApolloProvider({
+        plansQueryMock: jest.fn().mockResolvedValue({ data: { plans: {} } }),
+      });
+      wrapper = createComponent({ apolloProvider: mockApollo });
+      await waitForPromises();
+
+      expect(wrapper.findComponent(StepOrderApp).exists()).toBe(false);
+      expect(wrapper.findComponent(GlEmptyState).exists()).toBe(true);
+    });
+  });
+
+  describe('when an error is received', () => {
     it('should display the GlEmptyState', async () => {
       const mockApollo = createMockApolloProvider({
         plansQueryMock: jest.fn().mockRejectedValue(new Error('An error happened!')),

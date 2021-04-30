@@ -13,7 +13,7 @@ class AsanaService < Service
   end
 
   def description
-    s_('AsanaService|Add commit messages as comments to Asana tasks')
+    s_('AsanaService|Add commit messages as comments to Asana tasks.')
   end
 
   def help
@@ -98,7 +98,7 @@ class AsanaService < Service
         if tuple[0]
           task.update(completed: true)
         end
-      rescue => e
+      rescue StandardError => e
         log_error(e.message)
         next
       end

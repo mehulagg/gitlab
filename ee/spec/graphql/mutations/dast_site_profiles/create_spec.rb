@@ -90,7 +90,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
         end
 
         it 'calls the dast_site_profile creation service' do
-          service = double(DastSiteProfiles::CreateService)
+          service = double(::AppSec::Dast::SiteProfiles::CreateService)
           result = ServiceResponse.error(message: '')
 
           service_params = {
@@ -107,7 +107,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
             auth_password: auth[:password]
           }
 
-          expect(DastSiteProfiles::CreateService).to receive(:new).and_return(service)
+          expect(::AppSec::Dast::SiteProfiles::CreateService).to receive(:new).and_return(service)
           expect(service).to receive(:execute).with(service_params).and_return(result)
 
           subject

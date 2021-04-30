@@ -35,7 +35,7 @@ export const getOncallSchedulesQueryResponse = {
             name: 'Test schedule from query',
             description: 'Description 1 lives here',
             timezone: 'Pacific/Honolulu',
-            rotations: { nodes: [mockRotations] },
+            rotations: { nodes: mockRotations },
           },
         ],
       },

@@ -7,6 +7,7 @@ RSpec.describe 'Groups::Security::Credentials' do
 
   let_it_be(:group_with_managed_accounts) { create(:group_with_managed_accounts, :private) }
   let_it_be(:managed_user) { create(:user, :group_managed, managing_group: group_with_managed_accounts, name: 'abc') }
+
   let(:group_id) { group_with_managed_accounts.to_param }
 
   before do

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Mutations::RequirementsManagement::ExportRequirements do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
+
   let(:fields) { [] }
   let(:args) do
     {

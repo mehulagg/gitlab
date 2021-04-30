@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Mutations::IncidentManagement::OncallSchedule::Destroy do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
+
   let(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
   let(:args) { { project_path: project.full_path, iid: oncall_schedule.iid.to_s } }
 

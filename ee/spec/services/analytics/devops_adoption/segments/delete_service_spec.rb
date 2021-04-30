@@ -11,6 +11,10 @@ RSpec.describe Analytics::DevopsAdoption::Segments::DeleteService do
 
   subject(:response) { described_class.new(segment: segment, current_user: current_user).execute }
 
+  before do
+    stub_licensed_features(group_level_devops_adoption: true, instance_level_devops_adoption: true)
+  end
+
   it 'deletes the segment' do
     expect(response).to be_success
     expect(segment).not_to be_persisted

@@ -95,7 +95,7 @@ export default {
     groupIds() {
       return this.groups.map((x) => x.id);
     },
-    invalidApprovalGateUrl() {
+    invalidStatusChecksUrl() {
       if (this.serverValidationErrors.includes('External url has already been taken')) {
         return this.$options.i18n.validations.externalUrlTaken;
       }
@@ -159,7 +159,7 @@ export default {
       );
     },
     isValidExternalApprovalRule() {
-      return this.isValidName && this.isValidBranches && this.isValidApprovalGateUrl;
+      return this.isValidName && this.isValidBranches && this.isValidStatusChecksUrl;
     },
     isValidName() {
       return !this.showValidation || !this.invalidName;
@@ -173,8 +173,8 @@ export default {
     isValidApprovers() {
       return !this.showValidation || !this.invalidApprovers;
     },
-    isValidApprovalGateUrl() {
-      return !this.showValidation || !this.invalidApprovalGateUrl;
+    isValidStatusChecksUrl() {
+      return !this.showValidation || !this.invalidStatusChecksUrl;
     },
     isMultiSubmission() {
       return this.settings.allowMultiRule && !this.isFallbackSubmission;
@@ -233,10 +233,6 @@ export default {
         protectedBranchIds,
         externalUrl: this.externalUrl,
       };
-    },
-    approvalGateLabel() {
-      const { approvalGate, addApprovalGate } = this.$options.i18n.form;
-      return this.isEditing ? approvalGate : addApprovalGate;
     },
   },
   watch: {
@@ -388,9 +384,9 @@ export default {
   },
   i18n: {
     form: {
-      addApprovalGate: s__('ApprovalRule|Add approvel gate'),
-      approvalGate: s__('ApprovalRule|Approvel gate'),
-      approvalGateDescription: s__('ApprovalRule|Invoke an external API as part of the approvals'),
+      addStatusChecks: s__('StatusCheck|API to check'),
+      statusChecks: s__('StatusCheck|Status to check'),
+      statusChecksDescription: s__('StatusCheck|Invoke an external API as part of the approvals'),
       approvalsRequiredLabel: s__('ApprovalRule|Approvals required'),
       approvalTypeLabel: s__('ApprovalRule|Approver Type'),
       approversLabel: s__('ApprovalRule|Add approvers'),
@@ -417,7 +413,7 @@ export default {
   },
   approverTypeOptions: [
     { type: RULE_TYPE_USER_OR_GROUP_APPROVER, text: s__('ApprovalRule|Users or groups') },
-    { type: RULE_TYPE_EXTERNAL_APPROVAL, text: s__('ApprovalRule|Approval service API') },
+    { type: RULE_TYPE_EXTERNAL_APPROVAL, text: s__('ApprovalRule|Status check') },
   ],
 };
 </script>
@@ -496,18 +492,18 @@ export default {
     </template>
     <gl-form-group
       v-if="isExternalApprovalRule"
-      :label="approvalGateLabel"
-      :description="$options.i18n.form.approvalGateDescription"
-      :state="isValidApprovalGateUrl"
-      :invalid-feedback="invalidApprovalGateUrl"
-      data-testid="approval-gate-url-group"
+      :label="$options.i18n.form.addStatusChecks"
+      :description="$options.i18n.form.statusChecksDescription"
+      :state="isValidStatusChecksUrl"
+      :invalid-feedback="invalidStatusChecksUrl"
+      data-testid="status-checks-url-group"
     >
       <gl-form-input
         v-model="externalUrl"
-        :state="isValidApprovalGateUrl"
+        :state="isValidStatusChecksUrl"
         type="url"
         data-qa-selector="external_url_field"
-        data-testid="approval-gate-url"
+        data-testid="status-checks-url"
       />
     </gl-form-group>
     <div v-if="!isExternalApprovalRule" class="bordered-box overflow-auto h-12em">

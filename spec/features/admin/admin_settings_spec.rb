@@ -266,6 +266,7 @@ RSpec.describe 'Admin updates settings' do
         fill_in 'service[push_channel]', with: '#test_channel'
         page.check('Notify only broken pipelines')
         page.select 'All branches', from: 'Branches to be notified'
+        page.select 'Match any of the labels', from: 'Labels to be notified behavior'
 
         check_all_events
         click_button 'Save changes'
@@ -304,6 +305,10 @@ RSpec.describe 'Admin updates settings' do
         visit integrations_admin_application_settings_path
 
         expect(page).not_to have_content('Some settings have moved')
+      end
+
+      it 'shows integrations table' do
+        expect(page).to have_selector '[data-testid="inactive-integrations-table"]'
       end
     end
 

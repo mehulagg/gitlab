@@ -6,7 +6,7 @@ module Security
   class StoreReportService < ::BaseService
     include Gitlab::Utils::StrongMemoize
 
-    attr_reader :pipeline, :report, :project
+    attr_reader :pipeline, :report, :project, :vulnerability_finding_to_finding_map
 
     BATCH_SIZE = 1000
 
@@ -14,6 +14,7 @@ module Security
       @pipeline = pipeline
       @report = report
       @project = @pipeline.project
+      @vulnerability_finding_to_finding_map = {}
     end
 
     def execute
@@ -34,6 +35,12 @@ module Security
       pipeline.vulnerability_findings.report_type(@report.type).any?
     end
 
+    def optimize_sql_query_for_security_report_enabled?
+      strong_memoize(:optimize_sql_query_for_security_report_enabled) do
+        Feature.enabled?(:optimize_sql_query_for_security_report, project)
+      end
+    end
+
     def create_all_vulnerabilities!
       # Look for existing Findings using UUID
       finding_uuids = @report.findings.map(&:uuid)
@@ -41,11 +48,20 @@ module Security
         .where(uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
         .to_h { |vf| [vf.uuid, vf] }
 
-      update_vulnerability_scanners!(@report.findings) if Feature.enabled?(:optimize_sql_query_for_security_report, project)
+      update_vulnerability_scanners!(@report.findings) if optimize_sql_query_for_security_report_enabled?
 
-      @report.findings.map do |finding|
+      vulnerability_ids = @report.findings.map do |finding|
         create_vulnerability_finding(vulnerability_findings_by_uuid, finding)&.id
       end.compact.uniq
+
+      if optimize_sql_query_for_security_report_enabled?
+        update_vulnerability_links_info
+        create_vulnerability_pipeline_objects
+        update_vulnerabilities_identifiers
+        update_vulnerabilities_finding_identifiers
+      end
+
+      vulnerability_ids
     end
 
     def mark_as_resolved_except(vulnerability_ids)
@@ -67,7 +83,9 @@ module Security
       vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
         find_or_create_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
-      update_vulnerability_scanner(finding) unless Feature.enabled?(:optimize_sql_query_for_security_report, project)
+      vulnerability_finding_to_finding_map[vulnerability_finding] = finding
+
+      update_vulnerability_scanner(finding) unless optimize_sql_query_for_security_report_enabled?
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
@@ -77,15 +95,16 @@ module Security
         update_finding_signatures(finding, vulnerability_finding)
       end
 
-      # The maximum number of identifiers is not used in validation
-      # we just want to ignore the rest if a finding has more than that.
-      finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier| # rubocop: disable CodeReuse/ActiveRecord
-        create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
+      unless optimize_sql_query_for_security_report_enabled?
+        # The maximum number of identifiers is not used in validation
+        # we just want to ignore the rest if a finding has more than that.
+        finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier| # rubocop: disable CodeReuse/ActiveRecord
+          create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
+        end
+
+        create_or_update_vulnerability_links(finding, vulnerability_finding)
+        create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
       end
-
-      create_or_update_vulnerability_links(finding, vulnerability_finding)
-
-      create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
 
       create_vulnerability(vulnerability_finding, pipeline)
     end
@@ -235,11 +254,88 @@ module Security
       vulnerability_finding.update!(update_params)
     end
 
+    def update_vulnerabilities_identifiers
+      vulnerability_finding_to_finding_map.keys.in_groups_of(BATCH_SIZE, false) do |vulnerability_findings|
+        identifier_object_records = get_vulnerability_identifier_objects_for(vulnerability_findings)
+        insert_new_vulnerability_identifiers_for(identifier_object_records)
+        update_existing_vulnerability_identifiers_for(identifier_object_records)
+      end
+    rescue StandardError => e
+      Gitlab::ErrorTracking.track_exception(e)
+    ensure
+      clear_memoization(:identifiers_objects)
+      clear_memoization(:existing_identifiers_objects)
+    end
+
+    def get_vulnerability_identifier_objects_for(vulnerability_findings)
+      timestamps = { created_at: Time.current, updated_at: Time.current }
+
+      vulnerability_findings.flat_map do |vulnerability_finding|
+        finding = vulnerability_finding_to_finding_map[vulnerability_finding]
+        finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier|
+          identifier_object = identifiers_objects[identifier.key]
+          identifier_object.attributes.with_indifferent_access.merge(**timestamps)
+                                                        .merge(identifier.to_hash).compact
+        end
+      end
+    end
+
+    def insert_new_vulnerability_identifiers_for(identifier_object_records)
+      identifier_object_records_without_id = identifier_object_records.select { |identifier| identifier[:id].nil? }.uniq
+      Vulnerabilities::Identifier.insert_all(identifier_object_records_without_id) if identifier_object_records_without_id.present?
+    end
+
+    def update_existing_vulnerability_identifiers_for(identifier_object_records)
+      identifier_object_records_with_id = identifier_object_records.select { |identifier| identifier[:id].present? }.uniq
+      Vulnerabilities::Identifier.upsert_all(identifier_object_records_with_id) if identifier_object_records_with_id.present?
+    end
+
+    def update_vulnerabilities_finding_identifiers
+      vulnerability_finding_to_finding_map.keys.in_groups_of(BATCH_SIZE, false) do |vulnerability_findings|
+        finding_identifier_records = get_finding_identifier_objects_for(vulnerability_findings)
+        finding_identifier_records.uniq!
+        Vulnerabilities::FindingIdentifier.insert_all(finding_identifier_records) if finding_identifier_records.present?
+      end
+    rescue StandardError => e
+      Gitlab::ErrorTracking.track_exception(e)
+    end
+
+    def get_finding_identifier_objects_for(vulnerability_findings)
+      timestamps = { created_at: Time.current, updated_at: Time.current }
+
+      vulnerability_findings.flat_map do |vulnerability_finding|
+        finding = vulnerability_finding_to_finding_map[vulnerability_finding]
+        finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier|
+          identifier_object = identifiers_objects[identifier.key]
+
+          next nil unless identifier_object.id
+
+          { occurrence_id: vulnerability_finding.id, identifier_id: identifier_object.id, **timestamps }.compact
+        end.compact
+      end
+    end
+
     def create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
       identifier_object = identifiers_objects[identifier.key]
       vulnerability_finding.finding_identifiers.find_or_create_by!(identifier: identifier_object)
       identifier_object.update!(identifier.to_hash)
     rescue ActiveRecord::RecordNotUnique
+    end
+
+    def update_vulnerability_links_info
+      timestamps = { created_at: Time.current, updated_at: Time.current }
+
+      vulnerability_finding_to_finding_map.each_slice(BATCH_SIZE) do |vf_to_findings|
+        records = vf_to_findings.flat_map do |vulnerability_finding, finding|
+          finding.links.map { |link| { vulnerability_occurrence_id: vulnerability_finding.id, **link.to_hash, **timestamps } }
+        end
+
+        records.uniq!
+
+        Vulnerabilities::FindingLink.insert_all(records) if records.present?
+      end
+    rescue StandardError => e
+      Gitlab::ErrorTracking.track_exception(e)
     end
 
     def create_or_update_vulnerability_links(finding, vulnerability_finding)
@@ -277,6 +373,22 @@ module Security
 
     def build_vulnerability_remediation(remediation)
       @project.vulnerability_remediations.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum)
+    end
+
+    def create_vulnerability_pipeline_objects
+      timestamps = { created_at: Time.current, updated_at: Time.current }
+
+      vulnerability_finding_to_finding_map.keys.in_groups_of(BATCH_SIZE, false) do |vulnerability_findings|
+        records = vulnerability_findings.map do |vulnerability_finding|
+          { occurrence_id: vulnerability_finding.id, pipeline_id: pipeline.id, **timestamps }
+        end
+
+        records.uniq!
+
+        Vulnerabilities::FindingPipeline.insert_all(records) if records.present?
+      end
+    rescue StandardError => e
+      Gitlab::ErrorTracking.track_exception(e)
     end
 
     def create_vulnerability_pipeline_object(vulnerability_finding, pipeline)

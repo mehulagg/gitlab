@@ -3,7 +3,11 @@ import activateSubscriptionMutation from './graphql/mutations/activate_subscript
 import getCurrentLicense from './graphql/queries/get_current_license.query.graphql';
 import getLicenseHistory from './graphql/queries/get_license_history.query.graphql';
 
+export const fieldRequiredMessage = s__('SuperSonics|This field is required.');
 export const subscriptionMainTitle = s__('SuperSonics|Your subscription');
+export const subscriptionActivationNotificationText = s__(
+  `SuperSonics|Your subscription was successfully activated. You can see the details below.`,
+);
 export const subscriptionActivationTitle = s__(
   `SuperSonics|You do not have an active subscription`,
 );
@@ -13,6 +17,7 @@ export const manageSubscriptionButtonText = s__('SuperSonics|Manage');
 export const syncSubscriptionButtonText = s__('SuperSonics|Sync subscription details');
 export const copySubscriptionIdButtonText = __('Copy');
 export const subscriptionTypeText = __('%{type} License');
+export const usersInSubscriptionUnlimited = __('Unlimited');
 export const detailsLabels = {
   address: __('Address'),
   company: __('Company'),
@@ -70,6 +75,17 @@ export const subscriptionActivationForm = {
   activateLabel: s__('CloudLicense|Activate'),
 };
 
+export const userNotifications = {
+  manualSyncSuccessfulTitle: s__('SuperSonics|The subscription details synced successfully.'),
+  manualSyncFailureText: s__(
+    'SuperSonics|You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}.',
+  ),
+  manualSyncFailureTitle: s__('SuperSonics|There is a connectivity issue.'),
+};
+export const notificationType = {
+  SYNC_FAILURE: 'SYNC_FAILURE',
+  SYNC_SUCCESS: 'SYNC_SUCCESS',
+};
 export const subscriptionType = {
   CLOUD: 'cloud',
   LEGACY: 'legacy',

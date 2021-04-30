@@ -60,7 +60,7 @@ module Mutations
           dast_site_profile = project.dast_site_profiles.find(site_profile_id.model_id)
           dast_scanner_profile = project.dast_scanner_profiles.find(scanner_profile_id.model_id)
 
-          response = ::Dast::Profiles::CreateService.new(
+          response = ::AppSec::Dast::Profiles::CreateService.new(
             container: project,
             current_user: current_user,
             params: {

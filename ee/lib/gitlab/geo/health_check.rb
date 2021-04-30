@@ -14,7 +14,7 @@ module Gitlab
         return "Geo database version (#{database_version}) does not match latest migration (#{migration_version}).\nYou may have to run `gitlab-rake geo:db:migrate` as root on the secondary." unless database_migration_version_match?
 
         ''
-      rescue => e
+      rescue StandardError => e
         e.message
       end
 

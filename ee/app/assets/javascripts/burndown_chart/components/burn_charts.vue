@@ -1,6 +1,7 @@
 <script>
 import { GlAlert, GlButton, GlButtonGroup } from '@gitlab/ui';
 import dateFormat from 'dateformat';
+import BurnupQuery from 'shared_queries/burndown_chart/burnup.query.graphql';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
@@ -8,7 +9,6 @@ import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BurndownChartData from '../burn_chart_data';
 import { Namespace } from '../constants';
-import BurnupQuery from '../graphql/burnup.query.graphql';
 import BurndownChart from './burndown_chart.vue';
 import BurnupChart from './burnup_chart.vue';
 import OpenTimeboxSummary from './open_timebox_summary.vue';

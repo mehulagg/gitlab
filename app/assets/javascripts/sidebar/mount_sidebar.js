@@ -13,7 +13,7 @@ import { __ } from '~/locale';
 import CollapsedAssigneeList from '~/sidebar/components/assignees/collapsed_assignee_list.vue';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
-import SidebarDueDateWidget from '~/sidebar/components/due_date/sidebar_due_date_widget.vue';
+import SidebarDueDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
 import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
 import { apolloProvider } from '~/sidebar/graphql';
 import Translate from '../vue_shared/translate';
@@ -53,7 +53,7 @@ function mountAssigneesComponentDeprecated(mediator) {
 
   if (!el) return;
 
-  const { iid, fullPath } = getSidebarOptions();
+  const { id, iid, fullPath } = getSidebarOptions();
   const assigneeAvailabilityStatus = getSidebarAssigneeAvailabilityData();
   // eslint-disable-next-line no-new
   new Vue({
@@ -74,6 +74,7 @@ function mountAssigneesComponentDeprecated(mediator) {
             isInIssuePage() || isInIncidentPage() || isInDesignPage()
               ? IssuableType.Issue
               : IssuableType.MergeRequest,
+          issuableId: id,
           assigneeAvailabilityStatus,
         },
       }),
@@ -85,7 +86,7 @@ function mountAssigneesComponent() {
 
   if (!el) return;
 
-  const { iid, fullPath, editable, projectMembersPath } = getSidebarOptions();
+  const { id, iid, fullPath, editable } = getSidebarOptions();
   // eslint-disable-next-line no-new
   new Vue({
     el,
@@ -95,9 +96,7 @@ function mountAssigneesComponent() {
     },
     provide: {
       canUpdate: editable,
-      projectMembersPath,
       directlyInviteMembers: el.hasAttribute('data-directly-invite-members'),
-      indirectlyInviteMembers: el.hasAttribute('data-indirectly-invite-members'),
     },
     render: (createElement) =>
       createElement('sidebar-assignees-widget', {
@@ -108,6 +107,7 @@ function mountAssigneesComponent() {
             isInIssuePage() || isInIncidentPage() || isInDesignPage()
               ? IssuableType.Issue
               : IssuableType.MergeRequest,
+          issuableId: id,
           multipleAssignees: !el.dataset.maxAssignees,
         },
         scopedSlots: {
@@ -223,14 +223,14 @@ function mountDueDateComponent() {
       SidebarDueDateWidget,
     },
     provide: {
-      iid: String(iid),
-      fullPath,
       canUpdate: editable,
     },
 
     render: (createElement) =>
       createElement('sidebar-due-date-widget', {
         props: {
+          iid: String(iid),
+          fullPath,
           issuableType: IssuableType.Issue,
         },
       }),

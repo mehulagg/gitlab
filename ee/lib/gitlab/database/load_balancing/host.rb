@@ -198,7 +198,7 @@ module Gitlab
 
         def query_and_release(sql)
           connection.select_all(sql).first || {}
-        rescue
+        rescue StandardError
           {}
         ensure
           release_connection

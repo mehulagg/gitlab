@@ -13,6 +13,7 @@ RSpec.describe Ci::DastScanCiConfigurationService do
           target_timeout: 100,
           target_url: 'https://gitlab.local',
           api_specification_url: 'https://gitlab.local/api.json',
+          api_host_override: 'gitlab.local',
           use_ajax_spider: true,
           show_debug_messages: true,
           full_scan_enabled: true,
@@ -36,6 +37,7 @@ RSpec.describe Ci::DastScanCiConfigurationService do
           DAST_TARGET_AVAILABILITY_TIMEOUT: 100
           DAST_WEBSITE: https://gitlab.local
           DAST_API_SPECIFICATION: https://gitlab.local/api.json
+          DAST_API_HOST_OVERRIDE: gitlab.local
           DAST_USE_AJAX_SPIDER: 'true'
           DAST_DEBUG: 'true'
           DAST_FULL_SCAN_ENABLED: 'true'

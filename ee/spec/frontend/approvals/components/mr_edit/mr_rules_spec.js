@@ -50,7 +50,7 @@ describe('EE Approvals MRRules', () => {
     store.modules.approvals.state = {
       hasLoaded: true,
       rules: [],
-      targetBranch: 'master',
+      targetBranch: 'main',
     };
     store.modules.approvals.actions.putRule = jest.fn();
   });
@@ -64,7 +64,7 @@ describe('EE Approvals MRRules', () => {
   });
 
   describe('when editing a MR', () => {
-    const initialTargetBranch = 'master';
+    const initialTargetBranch = 'main';
     let targetBranchInputElement;
 
     beforeEach(() => {
@@ -96,7 +96,7 @@ describe('EE Approvals MRRules', () => {
 
     it('re-fetches rules when target branch has changed', () => {
       factory();
-      store.modules.approvals.state.targetBranch = 'master123';
+      store.modules.approvals.state.targetBranch = 'main123';
 
       return wrapper.vm.$nextTick().then(() => {
         expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalled();

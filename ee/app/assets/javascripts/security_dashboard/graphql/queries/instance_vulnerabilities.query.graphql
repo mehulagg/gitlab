@@ -1,7 +1,7 @@
 #import "~/graphql_shared/fragments/pageInfoCursorsOnly.fragment.graphql"
 #import "../fragments/vulnerability.fragment.graphql"
 
-query instance(
+query instanceVulnerabilities(
   $after: String
   $first: Int
   $projectId: [ID!]

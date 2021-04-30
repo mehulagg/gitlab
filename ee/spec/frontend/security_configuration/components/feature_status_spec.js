@@ -3,10 +3,11 @@ import { pick } from 'lodash';
 import FeatureStatus from 'ee/security_configuration/components/feature_status.vue';
 import StatusDastProfiles from 'ee/security_configuration/components/status_dast_profiles.vue';
 import StatusGeneric from 'ee/security_configuration/components/status_generic.vue';
-import StatusSast from 'ee/security_configuration/components/status_sast.vue';
+import StatusViewHistory from 'ee/security_configuration/components/status_view_history.vue';
 import {
   REPORT_TYPE_SAST,
   REPORT_TYPE_DAST_PROFILES,
+  REPORT_TYPE_SECRET_DETECTION,
 } from '~/vue_shared/security_reports/constants';
 import { generateFeatures } from './helpers';
 
@@ -43,10 +44,11 @@ describe('FeatureStatus component', () => {
   });
 
   describe.each`
-    type                         | expectedComponent
-    ${REPORT_TYPE_SAST}          | ${StatusSast}
-    ${REPORT_TYPE_DAST_PROFILES} | ${StatusDastProfiles}
-    ${'foo'}                     | ${StatusGeneric}
+    type                            | expectedComponent
+    ${REPORT_TYPE_SECRET_DETECTION} | ${StatusViewHistory}
+    ${REPORT_TYPE_SAST}             | ${StatusViewHistory}
+    ${REPORT_TYPE_DAST_PROFILES}    | ${StatusDastProfiles}
+    ${'foo'}                        | ${StatusGeneric}
   `('given a $type feature', ({ type, expectedComponent }) => {
     let feature;
     let component;

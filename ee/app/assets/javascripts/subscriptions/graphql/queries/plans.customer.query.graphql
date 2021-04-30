@@ -3,13 +3,6 @@ query getPlans($tags: [PlanTag!]) {
     id
     name
     code
-    active
-    deprecated
-    free
-    pricePerMonth
     pricePerYear
-    features
-    aboutPageHref
-    hideDeprecatedCard
   }
 }

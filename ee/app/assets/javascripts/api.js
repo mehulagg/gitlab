@@ -4,6 +4,7 @@ import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 
 export default {
   ...Api,
+  geoNodePath: '/api/:version/geo_nodes/:id',
   geoNodesPath: '/api/:version/geo_nodes',
   geoNodesStatusPath: '/api/:version/geo_nodes/status',
   geoReplicationPath: '/api/:version/geo_replication/:replicable',
@@ -50,6 +51,8 @@ export default {
   issueMetricSingleImagePath:
     '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id',
   billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
+  billableGroupMemberMembershipsPath:
+    '/api/:version/groups/:group_id/billable_members/:member_id/memberships',
 
   userSubscription(namespaceId) {
     const url = Api.buildUrl(this.subscriptionPath).replace(':id', encodeURIComponent(namespaceId));
@@ -346,6 +349,11 @@ export default {
     return axios.put(`${url}/${node.id}`, node);
   },
 
+  removeGeoNode(id) {
+    const url = Api.buildUrl(this.geoNodePath).replace(':id', encodeURIComponent(id));
+    return axios.delete(url);
+  },
+
   getApplicationSettings() {
     const url = Api.buildUrl(this.applicationSettingsPath);
     return axios.get(url);
@@ -423,5 +431,13 @@ export default {
         callback(data);
         return { data, headers };
       });
+  },
+
+  fetchBillableGroupMemberMemberships(namespaceId, memberId) {
+    const url = Api.buildUrl(this.billableGroupMemberMembershipsPath)
+      .replace(':group_id', namespaceId)
+      .replace(':member_id', memberId);
+
+    return axios.get(url);
   },
 };

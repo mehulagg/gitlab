@@ -93,8 +93,8 @@ RSpec.describe Notify do
         subject { described_class.approved_merge_request_email(recipient.id, merge_request.id, last_approver.id) }
 
         before do
-          merge_request.approvals.create(user: assignee)
-          merge_request.approvals.create(user: last_approver)
+          merge_request.approvals.create!(user: assignee)
+          merge_request.approvals.create!(user: last_approver)
         end
 
         it_behaves_like 'a multiple recipients email'
@@ -141,7 +141,7 @@ RSpec.describe Notify do
 
         context 'when merge request has no assignee' do
           before do
-            merge_request.update(assignees: [])
+            merge_request.update!(assignees: [])
           end
 
           it 'does not show the assignee' do
@@ -156,7 +156,7 @@ RSpec.describe Notify do
         subject { described_class.unapproved_merge_request_email(recipient.id, merge_request.id, last_unapprover.id) }
 
         before do
-          merge_request.approvals.create(user: assignee)
+          merge_request.approvals.create!(user: assignee)
         end
 
         it_behaves_like 'a multiple recipients email'
@@ -208,10 +208,6 @@ RSpec.describe Notify do
         let(:last_unapprover) { create(:user) }
 
         subject { described_class.unapproved_merge_request_email(recipient.id, merge_request_without_assignee.id, last_unapprover.id) }
-
-        before do
-          merge_request_without_assignee.approvals.create(user: merge_request_without_assignee.assignees.first)
-        end
 
         it 'contains the new status' do
           is_expected.to have_body_text('unapproved')

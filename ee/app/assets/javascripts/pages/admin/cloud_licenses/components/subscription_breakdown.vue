@@ -1,10 +1,14 @@
 <script>
 import { GlButton } from '@gitlab/ui';
+import { pick, some } from 'lodash';
+import axios from '~/lib/utils/axios_utils';
 import {
   licensedToHeaderText,
   manageSubscriptionButtonText,
   subscriptionDetailsHeaderText,
+  subscriptionType,
   syncSubscriptionButtonText,
+  notificationType,
 } from '../constants';
 import SubscriptionDetailsCard from './subscription_details_card.vue';
 import SubscriptionDetailsHistory from './subscription_details_history.vue';
@@ -22,11 +26,13 @@ export default {
   },
   name: 'SubscriptionBreakdown',
   components: {
-    SubscriptionDetailsHistory,
     GlButton,
     SubscriptionDetailsCard,
+    SubscriptionDetailsHistory,
     SubscriptionDetailsUserInfo,
+    SubscriptionSyncNotifications: () => import('./subscription_sync_notifications.vue'),
   },
+  inject: ['subscriptionSyncPath'],
   props: {
     subscription: {
       type: Object,
@@ -39,11 +45,16 @@ export default {
   },
   data() {
     return {
-      subscriptionDetailsFields,
+      hasAsyncActivity: false,
       licensedToFields,
+      notification: null,
+      subscriptionDetailsFields,
     };
   },
   computed: {
+    canSyncSubscription() {
+      return this.subscriptionSyncPath && this.subscription.type === subscriptionType.CLOUD;
+    },
     canMangeSubscription() {
       return false;
     },
@@ -53,8 +64,31 @@ export default {
     hasSubscriptionHistory() {
       return Boolean(this.subscriptionList.length);
     },
+    shouldShowFooter() {
+      return some(pick(this, ['canSyncSubscription', 'canMangeSubscription']), Boolean);
+    },
     subscriptionHistory() {
       return this.hasSubscriptionHistory ? this.subscriptionList : [this.subscription];
+    },
+  },
+  methods: {
+    didDismissSuccessAlert() {
+      this.notification = null;
+    },
+    syncSubscription() {
+      this.hasAsyncActivity = true;
+      this.notification = null;
+      axios
+        .post(this.subscriptionSyncPath)
+        .then(() => {
+          this.notification = notificationType.SYNC_SUCCESS;
+        })
+        .catch(() => {
+          this.notification = notificationType.SYNC_FAILURE;
+        })
+        .finally(() => {
+          this.hasAsyncActivity = false;
+        });
     },
   },
 };
@@ -62,6 +96,12 @@ export default {
 
 <template>
   <div>
+    <subscription-sync-notifications
+      v-if="notification"
+      class="mb-4"
+      :notification="notification"
+      @success-alert-dismissed="didDismissSuccessAlert"
+    />
     <section class="row gl-mb-5">
       <div class="col-md-6 gl-mb-5">
         <subscription-details-card
@@ -69,11 +109,18 @@ export default {
           :header-text="$options.i18n.subscriptionDetailsHeaderText"
           :subscription="subscription"
         >
-          <template v-if="canMangeSubscription" #footer>
-            <gl-button category="primary" variant="confirm">
+          <template v-if="shouldShowFooter" #footer>
+            <gl-button
+              v-if="canSyncSubscription"
+              category="primary"
+              :loading="hasAsyncActivity"
+              variant="confirm"
+              data-testid="subscription-sync-action"
+              @click="syncSubscription"
+            >
               {{ $options.i18n.syncSubscriptionButtonText }}
             </gl-button>
-            <gl-button>
+            <gl-button v-if="canMangeSubscription">
               {{ $options.i18n.manageSubscriptionButtonText }}
             </gl-button>
           </template>

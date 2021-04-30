@@ -19,6 +19,12 @@ export default {
     ProjectList,
     ProjectSelector,
   },
+  props: {
+    isAuditor: {
+      type: Boolean,
+      required: true,
+    },
+  },
   data() {
     return {
       searchQuery: '',
@@ -217,6 +223,7 @@ export default {
           after: pageInfo.endCursor,
           searchNamespaces: true,
           sort: 'similarity',
+          membership: !this.isAuditor,
         },
       });
     },

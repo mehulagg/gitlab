@@ -7,6 +7,7 @@ RSpec.describe Projects::Alerting::NotifyService do
 
   describe '#execute' do
     let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
+
     let(:service) { described_class.new(project, payload) }
     let(:token) { integration.token }
     let(:payload) do
@@ -68,12 +69,28 @@ RSpec.describe Projects::Alerting::NotifyService do
       let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
       let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
       let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let(:payload) { { 'fingerprint' => 'fingerprint' } }
-      let(:resolving_payload) { { 'fingerprint' => 'fingerprint', "end_time": Time.current.iso8601 } }
-      let(:users) { [participant.user] }
-      let(:fingerprint) { Digest::SHA1.hexdigest('fingerprint') }
+      let_it_be(:fingerprint) { 'fingerprint' }
+      let_it_be(:gitlab_fingerprint) { Digest::SHA1.hexdigest(fingerprint) }
 
-      it_behaves_like 'oncall users are correctly notified'
+      let(:payload) { { 'fingerprint' => fingerprint } }
+      let(:users) { [participant.user] }
+
+      before do
+        stub_licensed_features(oncall_schedules: project)
+      end
+
+      include_examples 'oncall users are correctly notified of firing alert'
+
+      context 'with resolving payload' do
+        let(:payload) do
+          {
+            'fingerprint' => fingerprint,
+            'end_time' => Time.current.iso8601
+          }
+        end
+
+        include_examples 'oncall users are correctly notified of recovery alert'
+      end
     end
   end
 end

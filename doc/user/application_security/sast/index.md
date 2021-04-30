@@ -134,16 +134,16 @@ All open source (OSS) analyzers have been moved to the GitLab Free tier as of Gi
 Different features are available in different [GitLab tiers](https://about.gitlab.com/pricing/),
 as shown in the following table:
 
-| Capability                                                                                                   | In Free             | In Ultimate        |
-|:-------------------------------------------------------------------------------------------------------------|:--------------------|:-------------------|
-| [Configure SAST Scanners](#configuration)                                                                    | **{check-circle}**  | **{check-circle}** |
-| [Customize SAST Settings](#customizing-the-sast-settings)                                                    | **{check-circle}**  | **{check-circle}** |
-| View [JSON Report](#reports-json-format)                                                                     | **{check-circle}**  | **{check-circle}** |
-| Presentation of JSON Report in Merge Request                                                                 | **{dotted-circle}** | **{check-circle}** |
-| [Address vulnerabilities](../../application_security/index.md#addressing-vulnerabilities)                    | **{dotted-circle}** | **{check-circle}** |
-| [Access to Security Dashboard](../../application_security/security_dashboard/index.md)                       | **{dotted-circle}** | **{check-circle}** |
-| [Configure SAST in the UI](#configure-sast-in-the-ui)                                                        | **{dotted-circle}** | **{check-circle}** |
-| [Customize SAST Rulesets](#customize-rulesets)                                                               | **{dotted-circle}** | **{check-circle}** |
+| Capability                                                                             | In Free             | In Ultimate        |
+|:---------------------------------------------------------------------------------------|:--------------------|:-------------------|
+| [Configure SAST Scanners](#configuration)                                              | **{check-circle}**  | **{check-circle}** |
+| [Customize SAST Settings](#customizing-the-sast-settings)                              | **{check-circle}**  | **{check-circle}** |
+| View [JSON Report](#reports-json-format)                                               | **{check-circle}**  | **{check-circle}** |
+| Presentation of JSON Report in Merge Request                                           | **{dotted-circle}** | **{check-circle}** |
+| [Address vulnerabilities](../../application_security/vulnerabilities/index.md)         | **{dotted-circle}** | **{check-circle}** |
+| [Access to Security Dashboard](../../application_security/security_dashboard/index.md) | **{dotted-circle}** | **{check-circle}** |
+| [Configure SAST in the UI](#configure-sast-in-the-ui)                                  | **{dotted-circle}** | **{check-circle}** |
+| [Customize SAST Rulesets](#customize-rulesets)                                         | **{dotted-circle}** | **{check-circle}** |
 
 ## Contribute your scanner
 
@@ -658,8 +658,8 @@ registry.gitlab.com/gitlab-org/security-products/analyzers/spotbugs:2
 
 The process for importing Docker images into a local offline Docker registry depends on
 **your network security policy**. Please consult your IT staff to find an accepted and approved
-process by which external resources can be imported or temporarily accessed. Note that these scanners are [updated periodically](../index.md#maintenance-and-update-of-the-vulnerabilities-database)
-with new definitions, so consider if you're able to make periodic updates yourself.
+process by which external resources can be imported or temporarily accessed. These scanners are [periodically updated](../vulnerabilities/index.md#vulnerability-scanner-maintenance)
+with new definitions, and you may be able to make occasional updates on your own.
 
 For details on saving and transporting Docker images as a file, see Docker's documentation on
 [`docker save`](https://docs.docker.com/engine/reference/commandline/save/), [`docker load`](https://docs.docker.com/engine/reference/commandline/load/),

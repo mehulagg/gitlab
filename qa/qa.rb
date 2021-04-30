@@ -266,6 +266,10 @@ module QA
       autoload :Menu, 'qa/page/project/menu'
       autoload :Members, 'qa/page/project/members'
 
+      module Artifact
+        autoload :Show, 'qa/page/project/artifact/show'
+      end
+
       module Branches
         autoload :Show, 'qa/page/project/branches/show'
       end
@@ -505,6 +509,7 @@ module QA
       autoload :WikiPageForm, 'qa/page/component/wiki_page_form'
       autoload :AccessTokens, 'qa/page/component/access_tokens'
       autoload :CommitModal, 'qa/page/component/commit_modal'
+      autoload :VisibilitySetting, 'qa/page/component/visibility_setting'
 
       module Issuable
         autoload :Common, 'qa/page/component/issuable/common'

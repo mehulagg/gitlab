@@ -8,6 +8,7 @@ import {
   maximumUsersTitle,
   usersInSubscriptionText,
   usersInSubscriptionTitle,
+  usersInSubscriptionUnlimited,
   usersOverSubscriptionText,
   usersOverSubscriptionTitle,
 } from '../constants';
@@ -44,7 +45,7 @@ export default {
   },
   computed: {
     usersInSubscription() {
-      return this.subscription.usersInLicenseCount;
+      return this.subscription.usersInLicenseCount ?? usersInSubscriptionUnlimited;
     },
     billableUsers() {
       return this.subscription.billableUsersCount;
@@ -62,7 +63,7 @@ export default {
 <template>
   <section class="row">
     <div class="col-md-6 gl-mb-5">
-      <gl-card data-testid="users-in-license">
+      <gl-card data-testid="users-in-subscription">
         <header>
           <h2>{{ usersInSubscription }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">

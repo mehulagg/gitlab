@@ -30,7 +30,7 @@ class GitlabSlackApplicationService < Service
   end
 
   def description
-    s_('Integrations|Use the GitLab Slack application')
+    s_('Integrations|Enable GitLab.com slash commands in a Slack workspace.')
   end
 
   def self.to_param

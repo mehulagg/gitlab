@@ -2,19 +2,19 @@ import { within, fireEvent } from '@testing-library/dom';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import ReportSection from 'ee/vulnerabilities/components/generic_report/report_section.vue';
-import { REPORT_TYPE_URL } from 'ee/vulnerabilities/components/generic_report/types/constants';
+import { REPORT_TYPES } from 'ee/vulnerabilities/components/generic_report/types/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const TEST_DATA = {
   supportedTypes: {
     one: {
       name: 'one',
-      type: REPORT_TYPE_URL,
+      type: REPORT_TYPES.url,
       href: 'http://foo.com',
     },
     two: {
       name: 'two',
-      type: REPORT_TYPE_URL,
+      type: REPORT_TYPES.url,
       href: 'http://bar.com',
     },
   },

@@ -65,9 +65,6 @@ class GeoNodeStatus < ApplicationRecord
     repositories_synced_count
     repositories_failed_count
     lfs_objects_replication_enabled
-    lfs_objects_count
-    lfs_objects_synced_count
-    lfs_objects_failed_count
     attachments_replication_enabled
     attachments_count
     attachments_synced_count
@@ -84,7 +81,6 @@ class GeoNodeStatus < ApplicationRecord
     wikis_verified_count
     wikis_verification_failed_count
     wikis_verification_total_count
-    lfs_objects_synced_missing_on_primary_count
     job_artifacts_synced_missing_on_primary_count
     attachments_synced_missing_on_primary_count
     repositories_checksummed_count
@@ -401,7 +397,6 @@ class GeoNodeStatus < ApplicationRecord
   attr_in_percentage :wikis_synced,                  :wikis_synced_count,                  :wikis_count
   attr_in_percentage :wikis_checksummed,             :wikis_checksummed_count,             :wikis_count
   attr_in_percentage :wikis_verified,                :wikis_verified_count,                :wikis_count
-  attr_in_percentage :lfs_objects_synced,            :lfs_objects_synced_count,            :lfs_objects_count
   attr_in_percentage :job_artifacts_synced,          :job_artifacts_synced_count,          :job_artifacts_count
   attr_in_percentage :attachments_synced,            :attachments_synced_count,            :attachments_count
   attr_in_percentage :replication_slots_used,        :replication_slots_used_count,        :replication_slots_count
@@ -497,6 +492,7 @@ class GeoNodeStatus < ApplicationRecord
 
   def load_lfs_objects_data
     return unless lfs_objects_replication_enabled
+    return if Feature.enabled?(:geo_lfs_object_replication)
 
     self.lfs_objects_count = lfs_objects_finder.registry_count
     self.lfs_objects_synced_count = lfs_objects_finder.synced_count
@@ -624,7 +620,7 @@ class GeoNodeStatus < ApplicationRecord
   end
 
   def lfs_objects_finder
-    @lfs_objects_finder ||= Geo::LfsObjectRegistryFinder.new
+    @lfs_objects_finder ||= Geo::LfsObjectLegacyRegistryFinder.new
   end
 
   def job_artifacts_finder

@@ -23,7 +23,7 @@ module GitlabSubscriptions
       )
 
       Gitlab::Json.parse(response.body).map { |plan| Hashie::Mash.new(plan) }
-    rescue => e
+    rescue StandardError => e
       Gitlab::AppLogger.info "Unable to connect to GitLab Customers App #{e}"
 
       nil

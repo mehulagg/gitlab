@@ -121,6 +121,7 @@ RSpec.describe EE::TrialHelper do
 
   describe '#show_trial_namespace_select?' do
     let_it_be(:have_group_namespace) { false }
+
     before do
       allow(helper).to receive(:any_trial_group_namespaces?).and_return(have_group_namespace)
     end

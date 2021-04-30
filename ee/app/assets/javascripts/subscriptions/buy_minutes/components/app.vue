@@ -21,7 +21,7 @@ export default {
   emptySvg,
   data() {
     return {
-      plans: [],
+      plans: null,
       hasError: false,
     };
   },
@@ -33,6 +33,11 @@ export default {
         tags: [planTags.CI_1000_MINUTES_PLAN],
       },
       update(data) {
+        if (!data?.plans?.length) {
+          this.hasError = true;
+          return null;
+        }
+
         return data.plans;
       },
       error(error) {
@@ -50,7 +55,7 @@ export default {
     :description="$options.i18n.ERROR_FETCHING_DATA_DESCRIPTION"
     :svg-path="`data:image/svg+xml;utf8,${encodeURIComponent($options.emptySvg)}`"
   />
-  <step-order-app v-else>
+  <step-order-app v-else-if="!$apollo.loading">
     <template #checkout>
       <checkout :plans="plans" />
     </template>

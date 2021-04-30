@@ -276,10 +276,7 @@ we need to install through the following commands:
 curl --location "https://deb.nodesource.com/setup_14.x" | sudo bash -
 sudo apt-get install -y nodejs
 
-curl --silent --show-error "https://dl.yarnpkg.com/debian/pubkey.gpg" | sudo apt-key add -
-echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-sudo apt-get update
-sudo apt-get install yarn
+npm install --global yarn
 ```
 
 Visit the official websites for [node](https://nodejs.org/en/download/package-manager/) and [yarn](https://classic.yarnpkg.com/en/docs/install/) if you have any trouble with these steps.
@@ -830,6 +827,8 @@ to use. Read all about the needed configuration at the
 [GitLab Pages administration guide](../administration/pages/index.md).
 
 If you want to use HTTPS, replace the `gitlab` NGINX configuration with `gitlab-ssl`. See [Using HTTPS](#using-https) for HTTPS configuration details.
+
+For the NGINX to be able to read the GitLab-Workhorse socket, you need to make sure, that the `www-data` user can read the socket, which will be owned by the GitLab user. This is most easily achieved, if it is world-readable, for example that it has permissions `0755`, which is the default. `www-data` also needs to be able to list the parent directories.
 
 ### Test Configuration
 

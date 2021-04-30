@@ -21,12 +21,28 @@ RSpec.describe 'Group navbar' do
     insert_package_nav(_('Kubernetes'))
   end
 
+  context 'when devops adoption analytics is available' do
+    before do
+      stub_licensed_features(group_level_devops_adoption: true)
+
+      insert_after_sub_nav_item(
+        _('Contribution'),
+        within: _('Analytics'),
+        new_sub_nav_item_name: _('DevOps Adoption')
+      )
+
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
   context 'when productivity analytics is available' do
     before do
       stub_licensed_features(productivity_analytics: true)
 
       insert_after_sub_nav_item(
-        _('DevOps Adoption'),
+        _('Contribution'),
         within: _('Analytics'),
         new_sub_nav_item_name: _('Productivity')
       )
@@ -42,7 +58,7 @@ RSpec.describe 'Group navbar' do
       stub_licensed_features(cycle_analytics_for_groups: true)
 
       insert_after_sub_nav_item(
-        _('DevOps Adoption'),
+        _('Contribution'),
         within: _('Analytics'),
         new_sub_nav_item_name: _('Value Stream')
       )

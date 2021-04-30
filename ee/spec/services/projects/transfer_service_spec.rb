@@ -7,6 +7,7 @@ RSpec.describe Projects::TransferService do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
+
   let(:project) { create(:project, :repository, :public, :legacy_storage, namespace: user.namespace) }
 
   subject { described_class.new(project, user) }

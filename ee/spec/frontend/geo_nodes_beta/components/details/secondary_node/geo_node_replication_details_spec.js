@@ -3,6 +3,8 @@ import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import GeoNodeReplicationDetails from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_details.vue';
+import GeoNodeReplicationDetailsResponsive from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_details_responsive.vue';
+import GeoNodeReplicationStatusMobile from 'ee/geo_nodes_beta/components/details/secondary_node/geo_node_replication_status_mobile.vue';
 import { GEO_REPLICATION_TYPES_URL } from 'ee/geo_nodes_beta/constants';
 import { MOCK_NODES, MOCK_REPLICABLE_TYPES } from 'ee_jest/geo_nodes_beta/mock_data';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -19,7 +21,7 @@ describe('GeoNodeReplicationDetails', () => {
   const createComponent = (initialState, props, getters) => {
     const store = new Vuex.Store({
       state: {
-        replicableTypes: [],
+        replicableTypes: MOCK_REPLICABLE_TYPES,
         ...initialState,
       },
       getters: {
@@ -36,6 +38,7 @@ describe('GeoNodeReplicationDetails', () => {
           ...defaultProps,
           ...props,
         },
+        stubs: { GeoNodeReplicationDetailsResponsive },
       }),
     );
   };
@@ -44,9 +47,12 @@ describe('GeoNodeReplicationDetails', () => {
     wrapper.destroy();
   });
 
-  const findGeoMobileReplicationDetails = () => wrapper.findByTestId('replication-details-mobile');
+  const findGeoMobileReplicationDetails = () =>
+    wrapper.findByTestId('geo-replication-details-mobile');
+  const findGeoMobileReplicationStatus = () =>
+    findGeoMobileReplicationDetails().findComponent(GeoNodeReplicationStatusMobile);
   const findGeoDesktopReplicationDetails = () =>
-    wrapper.findByTestId('replication-details-desktop');
+    wrapper.findByTestId('geo-replication-details-desktop');
   const findGlIcon = () => wrapper.findComponent(GlIcon);
   const findGlPopover = () => wrapper.findComponent(GlPopover);
   const findGlPopoverLink = () => findGlPopover().findComponent(GlLink);
@@ -86,6 +92,10 @@ describe('GeoNodeReplicationDetails', () => {
       it('renders mobile replication details with correct visibility class', () => {
         expect(findGeoMobileReplicationDetails().exists()).toBe(true);
         expect(findGeoMobileReplicationDetails().classes()).toStrictEqual(['gl-md-display-none!']);
+      });
+
+      it('renders mobile replication details with mobile component slot', () => {
+        expect(findGeoMobileReplicationStatus().exists()).toBe(true);
       });
 
       it('renders desktop details with correct visibility class', () => {
@@ -158,12 +168,12 @@ describe('GeoNodeReplicationDetails', () => {
     };
 
     describe.each`
-      description                    | mockSyncData  | mockVerificationData | expectedData
+      description                    | mockSyncData  | mockVerificationData | expectedProps
       ${'with no data'}              | ${[]}         | ${[]}                | ${[mockExpectedNoValues]}
       ${'with no verification data'} | ${[mockSync]} | ${[]}                | ${[mockExpectedOnlySync]}
       ${'with no sync data'}         | ${[]}         | ${[mockVerif]}       | ${[mockExpectedOnlyVerif]}
       ${'with all data'}             | ${[mockSync]} | ${[mockVerif]}       | ${[mockExpectedBothTypes]}
-    `('$description', ({ mockSyncData, mockVerificationData, expectedData }) => {
+    `('$description', ({ mockSyncData, mockVerificationData, expectedProps }) => {
       beforeEach(() => {
         createComponent({ replicableTypes: [MOCK_REPLICABLE_TYPES[0]] }, null, {
           syncInfo: () => () => mockSyncData,
@@ -171,9 +181,16 @@ describe('GeoNodeReplicationDetails', () => {
         });
       });
 
-      // TODO: Replace this spec with a template spec, once the UI has been hooked up in the next MR.
-      it('creates the correct replicationItems array', () => {
-        expect(wrapper.vm.replicationItems).toStrictEqual(expectedData);
+      it('passes the correct props to the mobile replication details', () => {
+        expect(findGeoMobileReplicationDetails().props('replicationItems')).toStrictEqual(
+          expectedProps,
+        );
+      });
+
+      it('passes the correct props to the desktop replication details', () => {
+        expect(findGeoDesktopReplicationDetails().props('replicationItems')).toStrictEqual(
+          expectedProps,
+        );
       });
     });
   });

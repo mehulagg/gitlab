@@ -4,6 +4,7 @@ import CloudLicenseApp from 'ee/pages/admin/cloud_licenses/components/app.vue';
 import SubscriptionActivationForm from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
 import SubscriptionBreakdown from 'ee/pages/admin/cloud_licenses/components/subscription_breakdown.vue';
 import {
+  subscriptionActivationNotificationText,
   subscriptionActivationTitle,
   subscriptionHistoryQueries,
   subscriptionMainTitle,
@@ -24,6 +25,8 @@ describe('CloudLicenseApp', () => {
   const findSubscriptionActivationTitle = () =>
     wrapper.findByTestId('subscription-activation-title');
   const findSubscriptionMainTitle = () => wrapper.findByTestId('subscription-main-title');
+  const findSubscriptionActivationSuccessAlert = () =>
+    wrapper.findByTestId('subscription-activation-success-alert');
 
   let currentSubscriptionResolver;
   let subscriptionHistoryResolver;
@@ -84,6 +87,33 @@ describe('CloudLicenseApp', () => {
       it('shows the subscription activation form', () => {
         expect(findActivateSubscriptionForm().exists()).toBe(true);
       });
+
+      it('does not the activation success notification', () => {
+        expect(findSubscriptionActivationSuccessAlert().exists()).toBe(false);
+      });
+    });
+
+    describe('activate the license', () => {
+      beforeEach(() => {
+        createComponent({ hasActiveLicense: false }, [
+          currentSubscriptionResolver,
+          subscriptionHistoryResolver,
+        ]);
+        findActivateSubscriptionForm().vm.$emit('subscription-activation', true);
+      });
+
+      it('passes the correct data to the subscription breakdown', () => {
+        expect(findSubscriptionBreakdown().props()).toMatchObject({
+          subscription: license.ULTIMATE,
+          subscriptionList: subscriptionHistory,
+        });
+      });
+
+      it('shows the activation success notification', () => {
+        expect(findSubscriptionActivationSuccessAlert().props('title')).toBe(
+          subscriptionActivationNotificationText,
+        );
+      });
     });
 
     describe('with active license', () => {
@@ -113,6 +143,10 @@ describe('CloudLicenseApp', () => {
           subscription: license.ULTIMATE,
           subscriptionList: subscriptionHistory,
         });
+      });
+
+      it('does not the activation success notification', () => {
+        expect(findSubscriptionActivationSuccessAlert().exists()).toBe(false);
       });
     });
   });

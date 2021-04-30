@@ -1,12 +1,12 @@
 import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import SubscriptionSyncNotifications, {
-  notificationType,
   SUCCESS_ALERT_DISMISSED_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_sync_notifications.vue';
 import {
   manualSyncFailureTitle,
   manualSyncSuccessfulTitle,
+  notificationType,
 } from 'ee/pages/admin/cloud_licenses/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 

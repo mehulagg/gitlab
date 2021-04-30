@@ -14,6 +14,7 @@ module EE
           options[:group] = params[:group_id] if params[:group_id]
           options[:from] = params[:from] if params[:from]
           options[:to] = params[:to] if params[:to]
+          options[:end_event_filter] = params[:end_event_filter] if params[:end_event_filter]
           options.merge!(params.slice(*::Gitlab::Analytics::CycleAnalytics::RequestParams::FINDER_PARAM_NAMES))
         end
       end

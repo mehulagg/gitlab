@@ -1,12 +1,12 @@
 import { GlIntersectionObserver, GlSkeletonLoading } from '@gitlab/ui';
-import { createLocalVue, mount } from '@vue/test-utils';
+import { createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import AlertFilters from 'ee/threat_monitoring/components/alerts/alert_filters.vue';
 import AlertStatus from 'ee/threat_monitoring/components/alerts/alert_status.vue';
 import AlertsList from 'ee/threat_monitoring/components/alerts/alerts_list.vue';
 import { DEFAULT_FILTERS } from 'ee/threat_monitoring/components/alerts/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { mountExtended } from 'helpers/vue_test_utils_helper';
 import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { defaultQuerySpy, emptyQuerySpy, loadingQuerySpy } from '../../mocks/mock_apollo';
 import { mockAlerts, mockPageInfo } from '../../mocks/mock_data';
@@ -38,12 +38,16 @@ describe('AlertsList component', () => {
   };
 
   const findAlertFilters = () => wrapper.findComponent(AlertFilters);
+  const findAssigneeColumn = () => wrapper.findByTestId('threat-alerts-assignee');
+  const findAssigneeColumnAt = (id) => wrapper.findAllByTestId('threat-alerts-assignee').at(id);
   const findUnconfiguredAlert = () => wrapper.findByTestId('threat-alerts-unconfigured');
   const findErrorAlert = () => wrapper.findByTestId('threat-alerts-error');
   const findStartedAtColumn = () => wrapper.findByTestId('threat-alerts-started-at');
   const findStartedAtColumnHeader = () => wrapper.findByTestId('threat-alerts-started-at-header');
   const findIdColumn = () => wrapper.findByTestId('threat-alerts-id');
   const findEventCountColumn = () => wrapper.findByTestId('threat-alerts-event-count');
+  const findIssueColumn = () => wrapper.findByTestId('threat-alerts-issue');
+  const findIssueColumnAt = (id) => wrapper.findAllByTestId('threat-alerts-issue').at(id);
   const findStatusColumn = () => wrapper.findComponent(AlertStatus);
   const findStatusColumnHeader = () => wrapper.findByTestId('threat-alerts-status-header');
   const findEmptyState = () => wrapper.findByTestId('threat-alerts-empty-state');
@@ -69,24 +73,22 @@ describe('AlertsList component', () => {
       };
     }
 
-    wrapper = extendedWrapper(
-      mount(AlertsList, {
-        propsData: defaultProps,
-        provide: {
-          documentationPath: '#',
-          projectPath: DEFAULT_PROJECT_PATH,
-        },
-        stubs: {
-          AlertStatus: true,
-          AlertFilters: true,
-          GlAlert: true,
-          GlLoadingIcon: true,
-          GlIntersectionObserver: true,
-          ...stubs,
-        },
-        ...apolloOptions,
-      }),
-    );
+    wrapper = mountExtended(AlertsList, {
+      propsData: defaultProps,
+      provide: {
+        documentationPath: '#',
+        projectPath: DEFAULT_PROJECT_PATH,
+      },
+      stubs: {
+        AlertStatus: true,
+        AlertFilters: true,
+        GlAlert: true,
+        GlLoadingIcon: true,
+        GlIntersectionObserver: true,
+        ...stubs,
+      },
+      ...apolloOptions,
+    });
   };
 
   afterEach(() => {
@@ -124,11 +126,16 @@ describe('AlertsList component', () => {
       expect(wrapper.vm.filters).toEqual(newFilters);
     });
 
-    it('does show all columns', () => {
-      expect(findStartedAtColumn().exists()).toBe(true);
-      expect(findIdColumn().exists()).toBe(true);
-      expect(findEventCountColumn().exists()).toBe(true);
-      expect(findStatusColumn().exists()).toBe(true);
+    it.each`
+      column          | findColumn
+      ${'startedAt'}  | ${findStartedAtColumn}
+      ${'id'}         | ${findIdColumn}
+      ${'eventCount'} | ${findEventCountColumn}
+      ${'issue'}      | ${findIssueColumn}
+      ${'assignee'}   | ${findAssigneeColumn}
+      ${'status'}     | ${findStatusColumn}
+    `('does show the $column column', ({ findColumn }) => {
+      expect(findColumn().exists()).toBe(true);
     });
 
     it('does not show the empty state', () => {
@@ -170,6 +177,59 @@ describe('AlertsList component', () => {
 
     it('navigates to the alert details page on title click', () => {
       expect(findIdColumn().attributes('href')).toBe('/alerts/01');
+    });
+
+    describe('issue column', () => {
+      it('displays a "-" for an alert without an issue', () => {
+        expect(findIssueColumnAt(3).text()).toBe('-');
+      });
+
+      it.each`
+        description                                 | id   | text             | link
+        ${'when an issue is created and is open'}   | ${0} | ${'#5'}          | ${'/#/-/issues/incident/5'}
+        ${'when an issue is created and is closed'} | ${1} | ${'#6 (closed)'} | ${'/#/-/issues/incident/6'}
+      `('displays the correct text $description', ({ id, text, link }) => {
+        expect(findIssueColumnAt(id).text()).toBe(text);
+        expect(findIssueColumnAt(id).find('a').attributes('href')).toBe(link);
+      });
+
+      describe('gon.relative_url_root', () => {
+        beforeAll(() => {
+          gon.relative_url_root = '/test';
+        });
+
+        afterEach(() => {
+          gon.relative_url_root = '';
+        });
+
+        it('creates the correct href when the gon.relative_url_root is set', () => {
+          expect(findIssueColumnAt(0).find('a').attributes('href')).toBe(
+            '/test/#/-/issues/incident/5',
+          );
+        });
+      });
+    });
+
+    describe('assignee column', () => {
+      it('displays an avatar for an alert with an assignee', () => {
+        const index = 0;
+        const { name, avatarUrl, webUrl } = mockAlerts[index].assignees.nodes[0];
+        expect(findAssigneeColumnAt(index).find('a')).toBeDefined();
+        expect(findAssigneeColumnAt(index).find('a').attributes()).toMatchObject({
+          href: webUrl,
+          target: '_blank',
+          title: name,
+        });
+        expect(findAssigneeColumnAt(index).find('img')).toBeDefined();
+        expect(findAssigneeColumnAt(index).find('img').attributes()).toMatchObject({
+          src: avatarUrl,
+          label: name,
+        });
+      });
+
+      it('displays a "-" for an unassigned alert', () => {
+        expect(findAssigneeColumnAt(1).text()).toBe('-');
+      });
     });
   });
 

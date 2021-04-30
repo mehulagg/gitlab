@@ -46,7 +46,7 @@ module EE
         ::Security::WafAnomalySummaryService
           .new(environment: environment, cluster: cluster, from: 7.days.ago.iso8601, options: { timeout: 10 })
           .execute(totals_only: true)
-      rescue => e
+      rescue StandardError => e
         ::Gitlab::ErrorTracking.track_exception(e, environment_id: environment&.id, cluster_id: cluster&.id)
         nil
       end

@@ -4220,16 +4220,45 @@ RSpec.describe User do
   end
 
   describe '#invalidate_issue_cache_counts' do
-    let(:user) { build_stubbed(:user) }
+    let_it_be(:user) { create(:user) }
 
-    it 'invalidates cache for issue counter' do
-      cache_mock = double
-
-      expect(cache_mock).to receive(:delete).with(['users', user.id, 'assigned_open_issues_count'])
-
-      allow(Rails).to receive(:cache).and_return(cache_mock)
-
+    subject do
       user.invalidate_issue_cache_counts
+      user.save!
+    end
+
+    shared_examples 'invalidates the cached value' do
+      it 'invalidates cache for issue counter' do
+        expect(Rails.cache).to receive(:delete).with(['users', user.id, 'assigned_open_issues_count'])
+
+        subject
+      end
+    end
+
+    it_behaves_like 'invalidates the cached value'
+
+    context 'if feature flag assigned_open_issues_cache is enabled' do
+      it 'calls the recalculate worker' do
+        expect(Users::UpdateOpenIssueCountWorker).to receive(:perform_async).with(user.id)
+
+        subject
+      end
+
+      it_behaves_like 'invalidates the cached value'
+    end
+
+    context 'if feature flag assigned_open_issues_cache is disabled' do
+      before do
+        stub_feature_flags(assigned_open_issues_cache: false)
+      end
+
+      it 'does not call the recalculate worker' do
+        expect(Users::UpdateOpenIssueCountWorker).not_to receive(:perform_async).with(user.id)
+
+        subject
+      end
+
+      it_behaves_like 'invalidates the cached value'
     end
   end
 
@@ -5617,6 +5646,49 @@ RSpec.describe User do
         it 'is not valid' do
           expect(find_or_initialize_callout).not_to be_valid
         end
+      end
+    end
+  end
+
+  describe '.dormant' do
+    it 'returns dormant users' do
+      freeze_time do
+        not_that_long_ago = (described_class::MINIMUM_INACTIVE_DAYS - 1).days.ago.to_date
+        too_long_ago = described_class::MINIMUM_INACTIVE_DAYS.days.ago.to_date
+
+        create(:user, :deactivated, last_activity_on: too_long_ago)
+
+        User::INTERNAL_USER_TYPES.map do |user_type|
+          create(:user, state: :active, user_type: user_type, last_activity_on: too_long_ago)
+        end
+
+        create(:user, last_activity_on: not_that_long_ago)
+
+        dormant_user = create(:user, last_activity_on: too_long_ago)
+
+        expect(described_class.dormant).to contain_exactly(dormant_user)
+      end
+    end
+  end
+
+  describe '.with_no_activity' do
+    it 'returns users with no activity' do
+      freeze_time do
+        not_that_long_ago = (described_class::MINIMUM_INACTIVE_DAYS - 1).days.ago.to_date
+        too_long_ago = described_class::MINIMUM_INACTIVE_DAYS.days.ago.to_date
+
+        create(:user, :deactivated, last_activity_on: nil)
+
+        User::INTERNAL_USER_TYPES.map do |user_type|
+          create(:user, state: :active, user_type: user_type, last_activity_on: nil)
+        end
+
+        create(:user, last_activity_on: not_that_long_ago)
+        create(:user, last_activity_on: too_long_ago)
+
+        user_with_no_activity = create(:user, last_activity_on: nil)
+
+        expect(described_class.with_no_activity).to contain_exactly(user_with_no_activity)
       end
     end
   end

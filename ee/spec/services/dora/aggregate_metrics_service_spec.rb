@@ -93,6 +93,7 @@ RSpec.describe Dora::AggregateMetricsService do
       let_it_be(:staging) { create(:environment, :staging, project: project) }
       let_it_be(:maintainer) { create(:user) }
       let_it_be(:guest) { create(:user) }
+
       let(:container) { project }
       let(:user) { maintainer }
       let(:params) { { metric: 'deployment_frequency' }.merge(extra_params) }
@@ -153,6 +154,7 @@ RSpec.describe Dora::AggregateMetricsService do
       let_it_be(:production_2) { create(:environment, :production, project: project_2) }
       let_it_be(:maintainer) { create(:user) }
       let_it_be(:guest) { create(:user) }
+
       let(:container) { group }
       let(:user) { maintainer }
       let(:params) { { metric: 'deployment_frequency' }.merge(extra_params) }

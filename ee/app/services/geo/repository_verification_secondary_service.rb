@@ -56,7 +56,7 @@ module Geo
       else
         update_registry!(checksum: checksum)
       end
-    rescue => e
+    rescue StandardError => e
       update_registry!(failure: "Error calculating #{type} checksum", exception: e)
     end
 

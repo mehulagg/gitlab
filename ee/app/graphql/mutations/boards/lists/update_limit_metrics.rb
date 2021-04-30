@@ -46,8 +46,8 @@ module Mutations
           update_result = update_list(args)
 
           {
-            list: update_result[:list],
-            errors: list.errors.full_messages
+            list: update_result.payload.fetch(:list),
+            errors: update_result.errors
           }
         end
 

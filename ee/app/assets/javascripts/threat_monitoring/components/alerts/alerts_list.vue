@@ -1,6 +1,9 @@
 <script>
 import {
   GlAlert,
+  GlAvatar,
+  GlAvatarLink,
+  GlAvatarsInline,
   GlIntersectionObserver,
   GlLoadingIcon,
   GlTable,
@@ -16,7 +19,15 @@ import { joinPaths } from '~/lib/utils/url_utility';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
-import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES, DOMAIN } from './constants';
+import {
+  DEFAULT_FILTERS,
+  FIELDS,
+  MESSAGES,
+  PAGE_SIZE,
+  STATUSES,
+  DOMAIN,
+  CLOSED,
+} from './constants';
 
 export default {
   PAGE_SIZE,
@@ -25,11 +36,15 @@ export default {
     FIELDS,
     MESSAGES,
     STATUSES,
+    CLOSED,
   },
   components: {
     AlertStatus,
     AlertFilters,
     GlAlert,
+    GlAvatar,
+    GlAvatarLink,
+    GlAvatarsInline,
     GlIntersectionObserver,
     GlLink,
     GlLoadingIcon,
@@ -119,6 +134,18 @@ export default {
 
       this.sort = `${sortingColumn}_${sortingDirection}`;
     },
+    getIssueMeta({ issue: { iid, state } }) {
+      return {
+        state: state === 'closed' ? `(${this.$options.i18n.CLOSED})` : '',
+        link: joinPaths(
+          gon.relative_url_root || '/',
+          this.projectPath,
+          '-',
+          'issues/incident',
+          iid,
+        ),
+      };
+    },
     handleAlertError(msg) {
       this.errored = true;
       this.errorMsg = msg;
@@ -128,6 +155,9 @@ export default {
     },
     handleStatusUpdate() {
       this.$apollo.queries.alerts.refetch();
+    },
+    hasAssignees(assignees) {
+      return Boolean(assignees.nodes?.length);
     },
     alertDetailsUrl({ iid }) {
       return joinPaths(window.location.pathname, 'alerts', iid);
@@ -195,6 +225,48 @@ export default {
       <template #cell(eventCount)="{ item }">
         <div data-testid="threat-alerts-event-count">
           {{ item.eventCount }}
+        </div>
+      </template>
+
+      <template #cell(issue)="{ item }">
+        <div data-testid="threat-alerts-issue">
+          <gl-link
+            v-if="item.issue"
+            v-gl-tooltip
+            :title="item.issue.title"
+            :href="getIssueMeta(item).link"
+          >
+            #{{ item.issue.iid }} {{ getIssueMeta(item).state }}
+          </gl-link>
+          <span v-else>-</span>
+        </div>
+      </template>
+
+      <template #cell(assignees)="{ item }">
+        <div class="gl-display-flex" data-testid="threat-alerts-assignee">
+          <gl-avatars-inline
+            v-if="hasAssignees(item.assignees)"
+            data-testid="assigneesField"
+            :avatars="item.assignees.nodes"
+            :collapsed="true"
+            :max-visible="4"
+            :avatar-size="24"
+            badge-tooltip-prop="name"
+            :badge-tooltip-max-chars="100"
+          >
+            <template #avatar="{ avatar }">
+              <gl-avatar-link
+                :key="avatar.username"
+                v-gl-tooltip
+                target="_blank"
+                :href="avatar.webUrl"
+                :title="avatar.name"
+              >
+                <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
+              </gl-avatar-link>
+            </template>
+          </gl-avatars-inline>
+          <span v-else class="gl-ml-3">-</span>
         </div>
       </template>
 

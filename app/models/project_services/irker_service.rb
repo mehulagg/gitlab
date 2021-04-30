@@ -15,8 +15,7 @@ class IrkerService < Service
   end
 
   def description
-    'Send IRC messages, on update, to a list of recipients through an Irker '\
-    'gateway.'
+    'Send IRC messages.'
   end
 
   def self.to_param
@@ -103,7 +102,7 @@ class IrkerService < Service
       begin
         new_recipient = URI.join(default_irc_uri, '/', recipient).to_s
         uri = consider_uri(URI.parse(new_recipient))
-      rescue
+      rescue StandardError
         log_error("Unable to create a valid URL", default_irc_uri: default_irc_uri, recipient: recipient)
       end
     end

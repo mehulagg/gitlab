@@ -286,7 +286,7 @@ module EE
 
       def with_slack_application_disabled
         joins('LEFT JOIN services ON services.project_id = projects.id AND services.type = \'GitlabSlackApplicationService\' AND services.active IS true')
-          .where('services.id IS NULL')
+          .where(services: { id: nil })
       end
 
       override :with_web_entity_associations

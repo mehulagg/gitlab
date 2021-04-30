@@ -6,6 +6,7 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
+
   let(:args) do
     {
       project_path: project.full_path,

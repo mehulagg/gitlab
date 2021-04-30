@@ -102,6 +102,32 @@ describe('EpicsListRoot', () => {
   });
 
   describe('methods', () => {
+    describe('epicReference', () => {
+      const mockEpicWithPath = {
+        ...mockFormattedEpic,
+        group: {
+          fullPath: 'gitlab-org/marketing',
+        },
+      };
+      const mockEpicWithoutPath = {
+        ...mockFormattedEpic,
+        group: {
+          fullPath: 'gitlab-org',
+        },
+      };
+
+      it.each`
+        epic                   | reference
+        ${mockEpicWithPath}    | ${'gitlab-org/marketing&2'}
+        ${mockEpicWithoutPath} | ${'&2'}
+      `(
+        'returns string "$reference" based on provided `epic.group.fullPath`',
+        ({ epic, reference }) => {
+          expect(wrapper.vm.epicReference(epic)).toBe(reference);
+        },
+      );
+    });
+
     describe('epicTimeframe', () => {
       it.each`
         startDate     | dueDate        | returnValue

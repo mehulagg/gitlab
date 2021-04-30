@@ -43,6 +43,7 @@ Example of response
     "started_at": "2015-12-24T17:54:27.722Z",
     "finished_at": "2015-12-24T17:54:27.895Z",
     "duration": 0.173,
+    "queued_duration": 0.010,
     "artifacts_file": {
       "filename": "artifacts.zip",
       "size": 1000
@@ -67,7 +68,6 @@ Example of response
       "status": "pending"
     },
     "ref": "master",
-    "artifacts": [],
     "runner": null,
     "stage": "test",
     "status": "failed",
@@ -107,6 +107,7 @@ Example of response
     "started_at": "2015-12-24T17:54:24.729Z",
     "finished_at": "2015-12-24T17:54:24.921Z",
     "duration": 0.192,
+    "queued_duration": 0.023,
     "artifacts_expire_at": "2016-01-23T17:54:24.921Z",
     "tag_list": [
       "docker runner", "win10-2004"
@@ -187,6 +188,7 @@ Example of response
     "started_at": "2015-12-24T17:54:24.729Z",
     "finished_at": "2015-12-24T17:54:24.921Z",
     "duration": 0.192,
+    "queued_duration": 0.023,
     "artifacts_expire_at": "2016-01-23T17:54:24.921Z",
     "tag_list": [
       "docker runner", "ubuntu18"
@@ -241,6 +243,7 @@ Example of response
     "started_at": "2015-12-24T17:54:27.722Z",
     "finished_at": "2015-12-24T17:54:27.895Z",
     "duration": 0.173,
+    "queued_duration": 0.023,
     "artifacts_file": {
       "filename": "artifacts.zip",
       "size": 1000
@@ -339,6 +342,7 @@ Example of response
     "started_at": "2015-12-24T17:54:27.722Z",
     "finished_at": "2015-12-24T17:58:27.895Z",
     "duration": 240,
+    "queued_duration": 0.123,
     "id": 7,
     "name": "teaspoon",
     "pipeline": {
@@ -422,6 +426,7 @@ Example of response
   "started_at": "2015-12-24T17:54:30.733Z",
   "finished_at": "2015-12-24T17:54:31.198Z",
   "duration": 0.465,
+  "queued_duration": 0.123,
   "artifacts_expire_at": "2016-01-23T17:54:31.198Z",
   "id": 8,
   "name": "rubocop",
@@ -575,6 +580,7 @@ Example of response
   "started_at": "2015-12-24T17:54:30.733Z",
   "finished_at": "2015-12-24T17:54:31.198Z",
   "duration": 0.465,
+  "queued_duration": 0.010,
   "artifacts_expire_at": "2016-01-23T17:54:31.198Z",
   "tag_list": [
       "docker runner", "macos-10.15"
@@ -675,6 +681,7 @@ Example of response
   "started_at": "2016-01-11T10:14:09.526Z",
   "finished_at": null,
   "duration": 8,
+  "queued_duration": 0.010,
   "id": 42,
   "name": "rubocop",
   "ref": "master",
@@ -724,6 +731,7 @@ Example of response
   "started_at": null,
   "finished_at": null,
   "duration": null,
+  "queued_duration": 0.010,
   "id": 42,
   "name": "rubocop",
   "ref": "master",
@@ -784,6 +792,7 @@ Example of response
   "started_at": "2016-01-11T10:13:33.506Z",
   "finished_at": "2016-01-11T10:15:10.506Z",
   "duration": 97.0,
+  "queued_duration": 0.010,
   "status": "failed",
   "tag": false,
   "web_url": "https://example.com/foo/bar/-/jobs/42",
@@ -827,13 +836,14 @@ Example of response
   "started_at": null,
   "finished_at": null,
   "duration": null,
+  "queued_duration": 0.010,
   "id": 42,
   "name": "rubocop",
   "ref": "master",
   "artifacts": [],
   "runner": null,
   "stage": "test",
-  "status": "started",
+  "status": "pending",
   "tag": false,
   "web_url": "https://example.com/foo/bar/-/jobs/42",
   "user": null

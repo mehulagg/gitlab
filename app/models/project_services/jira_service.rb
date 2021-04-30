@@ -116,7 +116,7 @@ class JiraService < IssueTrackerService
   end
 
   def description
-    s_('JiraService|Track issues in Jira')
+    s_("JiraService|Use Jira as this project's issue tracker.")
   end
 
   def self.to_param
@@ -305,7 +305,7 @@ class JiraService < IssueTrackerService
     )
 
     true
-  rescue => error
+  rescue StandardError => error
     log_error(
       "Issue transition failed",
         error: {
@@ -490,7 +490,7 @@ class JiraService < IssueTrackerService
   # Handle errors when doing Jira API calls
   def jira_request
     yield
-  rescue => error
+  rescue StandardError => error
     @error = error
     log_error("Error sending message", client_url: client_url, error: @error.message)
     nil

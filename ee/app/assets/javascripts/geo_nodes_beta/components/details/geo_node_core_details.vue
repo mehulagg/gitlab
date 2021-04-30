@@ -9,6 +9,7 @@ export default {
     url: __('URL'),
     internalUrl: s__('Geo|Internal URL'),
     gitlabVersion: __('GitLab version'),
+    unknown: __('Unknown'),
   },
   components: {
     GlLink,
@@ -24,7 +25,7 @@ export default {
     ...mapState(['primaryVersion', 'primaryRevision']),
     nodeVersion() {
       if (!this.node.version || !this.node.revision) {
-        return __('Unknown');
+        return this.$options.i18n.unknown;
       }
       return `${this.node.version} (${this.node.revision})`;
     },

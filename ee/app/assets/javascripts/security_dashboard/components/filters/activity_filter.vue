@@ -40,7 +40,7 @@ export default {
         this.selectedOptions = xor(this.selectedOptions, [option]);
       }
 
-      this.updateRouteQuery();
+      this.updateQuerystring();
     },
   },
   NO_ACTIVITY,

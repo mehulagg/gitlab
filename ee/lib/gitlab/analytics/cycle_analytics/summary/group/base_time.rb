@@ -44,6 +44,7 @@ module Gitlab
                   from: @options[:from],
                   to: @options[:to] || DateTime.now,
                   project_ids: @options[:projects],
+                  end_event_filter: @options[:end_event_filter],
                   current_user: @current_user
                 }.merge(@options.slice(*::Gitlab::Analytics::CycleAnalytics::RequestParams::FINDER_PARAM_NAMES))
               )
