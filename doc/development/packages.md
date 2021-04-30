@@ -258,9 +258,9 @@ These route prefixes guarantee a higher rate limit:
 
 ### MVC Checklist
 
-These are all aspects of a package manager that are expected to be delivered in the first iteration.
-They may span accross many merge requests due to the size of the work, but they should all be implemented
-by the time the feature flag is removed.
+When adding support to GitLab for a new package manager, the first iteration must contain the
+following features. You can add the features through many merge requests as needed, but all the
+features must be implemented when the feature flag is removed.
 
 - Project-level API
 - Push event tracking
@@ -278,7 +278,7 @@ by the time the feature flag is removed.
 - API Documentation (individual endpoints with curl examples)
 - Seeding in [`db/fixtures/development/26_packages.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/db/fixtures/development/26_packages.rb)
 - Update the [runbook](https://gitlab.com/gitlab-com/runbooks/-/blob/31fb4959e89db25fddf865bc81734c222daf32dd/dashboards/stage-groups/package.dashboard.jsonnet#L74) for the Grafana charts
-- End-to-end feature tests for at the minimum publishing and installing a package
+- End-to-end feature tests for (at the minimum) publishing and installing a package
 
 ### Future Work
 
