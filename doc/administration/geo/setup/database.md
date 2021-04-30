@@ -461,15 +461,7 @@ data before running `pg_basebackup`.
 
 The replication process is now complete.
 
-## PgBouncer support (optional)
-
-[PgBouncer](https://www.pgbouncer.org/) may be used with GitLab Geo to pool
-PostgreSQL connections. We recommend using PgBouncer if you use GitLab in a
-high-availability configuration with a cluster of nodes supporting a Geo
-**primary** node and another cluster of nodes supporting a Geo **secondary** node. For more
-information, see [High Availability with Omnibus GitLab](../../postgresql/replication_and_failover.md).
-
-## Patroni support
+## Patroni support (optional)
 
 Support for Patroni is intended to replace `repmgr` as a
 [highly available PostgreSQL solution](../../postgresql/replication_and_failover.md)
@@ -490,6 +482,10 @@ This experimental implementation has the following limitations:
 For instructions about how to set up Patroni on the primary site, see the
 [PostgreSQL replication and failover with Omnibus GitLab](../../postgresql/replication_and_failover.md#patroni) page.
 
+### Configuring Patroni cluster for the main PostgreSQL database
+
+The main PostgreSQL database is a read-only replica of the primary node’s PostgreSQL database.
+
 If you are currently using `repmgr` on your Geo primary site, see [these instructions](#migrating-from-repmgr-to-patroni) for migrating from `repmgr` to Patroni.
 
 A production-ready and secure setup requires at least three Consul nodes, three
@@ -498,9 +494,7 @@ configuration for the secondary site. The internal load balancer provides a sing
 endpoint for connecting to the Patroni cluster's leader whenever a new leader is
 elected. Be sure to use [password credentials](../../postgresql/replication_and_failover.md#database-authorization-for-patroni) and other database best practices.
 
-Similar to `repmgr`, using Patroni on a secondary node is optional.
-
-### Step 1. Configure Patroni permanent replication slot on the primary site
+#### Step 1. Configure Patroni permanent replication slot on the primary site
 
 To set up database replication with Patroni on a secondary node, we need to
 configure a _permanent replication slot_ on the primary node's Patroni cluster,
@@ -553,7 +547,7 @@ Leader instance**:
    gitlab-ctl reconfigure
    ```
 
-### Step 2. Configure the internal load balancer on the primary site
+#### Step 2. Configure the internal load balancer on the primary site
 
 To avoid reconfiguring the Standby Leader on the secondary site whenever a new
 Leader is elected on the primary site, we'll need to set up a TCP internal load
@@ -597,7 +591,7 @@ backend postgresql
 
 Refer to your preferred Load Balancer's documentation for further guidance.
 
-### Step 3. Configure a Standby cluster on the secondary site
+#### Step 3. Configure a Standby cluster on the secondary site
 
 NOTE:
 If you are converting a secondary site to a Patroni Cluster, you must start
@@ -668,6 +662,14 @@ For each Patroni instance on the secondary site:
    ```shell
    gitlab-ctl reconfigure
    ```
+
+## PgBouncer support (optional)
+
+[PgBouncer](https://www.pgbouncer.org/) may be used with GitLab Geo to pool
+PostgreSQL connections. We recommend using PgBouncer if you use GitLab in a
+high-availability configuration with a cluster of nodes supporting a Geo
+**primary** node and another cluster of nodes supporting a Geo **secondary** node. For more
+information, see [High Availability with Omnibus GitLab](../../postgresql/replication_and_failover.md).
 
 ## Migrating from repmgr to Patroni
 
