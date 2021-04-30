@@ -29,6 +29,10 @@ module EE
               ::Ci::Runner.instance_type.each(&:tick_runner_queue)
             end
 
+            if params[:extra_shared_runners_minutes_limit].present? || params[:shared_runners_minutes_limit].present?
+              ::Gitlab::Ci::Minutes::CachedQuota.new(namespace).expire!
+            end
+
             namespace.update(update_attrs)
           end
         end

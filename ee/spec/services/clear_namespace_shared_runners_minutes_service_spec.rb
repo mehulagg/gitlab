@@ -24,6 +24,15 @@ RSpec.describe ClearNamespaceSharedRunnersMinutesService do
       it 'successfully clears minutes' do
         expect(subject).to be_truthy
       end
+
+      it 'expires the CachedQuota' do
+        cached_quota = double(:cached_quota)
+
+        expect(Gitlab::Ci::Minutes::CachedQuota).to receive(:new).and_return(cached_quota)
+        expect(cached_quota).to receive(:expire!)
+
+        subject
+      end
     end
 
     context 'when project does not have namespace_statistics' do
