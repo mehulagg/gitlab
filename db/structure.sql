@@ -152,6 +152,15 @@ BEGIN
 END;
 $$;
 
+CREATE FUNCTION trigger_91dc388a5fe6() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW."build_id_convert_to_bigint" := NEW."build_id";
+  RETURN NEW;
+END;
+$$;
+
 CREATE FUNCTION trigger_be1804f21693() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -10455,8 +10464,17 @@ CREATE TABLE ci_build_trace_sections (
     byte_start bigint NOT NULL,
     byte_end bigint NOT NULL,
     build_id integer NOT NULL,
-    section_name_id integer NOT NULL
+    section_name_id integer NOT NULL,
+    build_id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
+    id bigint NOT NULL
 );
+
+CREATE SEQUENCE ci_build_trace_sections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 CREATE TABLE ci_builds (
     id integer NOT NULL,
@@ -24883,6 +24901,8 @@ CREATE TRIGGER trigger_51ab7cef8934 BEFORE INSERT OR UPDATE ON ci_builds_runner_
 CREATE TRIGGER trigger_69523443cc10 BEFORE INSERT OR UPDATE ON events FOR EACH ROW EXECUTE PROCEDURE trigger_69523443cc10();
 
 CREATE TRIGGER trigger_8485e97c00e3 BEFORE INSERT OR UPDATE ON ci_sources_pipelines FOR EACH ROW EXECUTE PROCEDURE trigger_8485e97c00e3();
+
+CREATE TRIGGER trigger_91dc388a5fe6 BEFORE INSERT OR UPDATE ON ci_build_trace_sections FOR EACH ROW EXECUTE PROCEDURE trigger_91dc388a5fe6();
 
 CREATE TRIGGER trigger_be1804f21693 BEFORE INSERT OR UPDATE ON ci_job_artifacts FOR EACH ROW EXECUTE PROCEDURE trigger_be1804f21693();
 

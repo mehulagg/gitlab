@@ -32,7 +32,7 @@ module Gitlab
 
         raise ArgumentError, 'number of source and destination columns must match' unless copy_from.count == copy_to.count
 
-        assignment_clauses = column_assignment_clauses(copy_from, copy_to)
+        assignment_clauses = column_assignment_clauses(copy_from, copy_to).join(', ')
 
         parent_batch_relation = relation_scoped_to_range(batch_table, batch_column, start_id, end_id)
 
@@ -61,14 +61,12 @@ module Gitlab
       end
 
       def column_assignment_clauses(copy_from, copy_to)
-        assignments = copy_from.zip(copy_to).map do |from_column, to_column|
+        copy_from.zip(copy_to).map do |from_column, to_column|
           from_column = connection.quote_column_name(from_column)
           to_column = connection.quote_column_name(to_column)
 
           "#{to_column} = #{from_column}"
         end
-
-        assignments.join(', ')
       end
     end
   end

@@ -1029,7 +1029,8 @@ module Gitlab
         primary_key: :id,
         batch_size: 20_000,
         sub_batch_size: 1000,
-        interval: 2.minutes
+        interval: 2.minutes,
+        job_class_name: 'CopyColumnUsingBackgroundMigrationJob'
       )
 
         unless table_exists?(table)
@@ -1050,7 +1051,7 @@ module Gitlab
         end
 
         queue_batched_background_migration(
-          'CopyColumnUsingBackgroundMigrationJob',
+          job_class_name,
           table,
           primary_key,
           conversions.keys,
@@ -1065,12 +1066,12 @@ module Gitlab
       # table - The name of the database table containing the column
       # columns - The name, or an array of names, of the column(s) we want to convert to bigint.
       # primary_key - The name of the primary key column (most often :id)
-      def revert_backfill_conversion_of_integer_to_bigint(table, columns, primary_key: :id)
+      def revert_backfill_conversion_of_integer_to_bigint(table, columns, primary_key: :id, job_class_name: 'CopyColumnUsingBackgroundMigrationJob')
         columns = Array.wrap(columns)
 
         conditions = ActiveRecord::Base.sanitize_sql([
           'job_class_name = :job_class_name AND table_name = :table_name AND column_name = :column_name AND job_arguments = :job_arguments',
-          job_class_name: 'CopyColumnUsingBackgroundMigrationJob',
+          job_class_name: job_class_name,
           table_name: table,
           column_name: primary_key,
           job_arguments: [columns, columns.map { |column| convert_to_bigint_column(column) }].to_json
