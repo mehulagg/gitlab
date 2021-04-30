@@ -40,6 +40,8 @@ module EE
         :elasticsearch_search,
         :elasticsearch_shards,
         :elasticsearch_url,
+        :elasticsearch_username,
+        :elasticsearch_password,
         :elasticsearch_limit_indexing,
         :elasticsearch_namespace_ids,
         :elasticsearch_project_ids,
