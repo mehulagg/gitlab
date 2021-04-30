@@ -246,6 +246,35 @@ end
 p "#{uploads_deleted} remote objects were destroyed."
 ```
 
+### Delete references to missing artifacts
+
+`gitlab-rake gitlab:artifacts:check VERBOSE=1` detects artifacts files that were deleted, but their
+referenes still exist in the GitLab database.
+
+Example output with error message:
+
+```shell
+$ sudo gitlab-rake gitlab:artifacts:check VERBOSE=1
+Checking integrity of Job artifacts
+- 1817..2016: Failures: 0
+- 2017..2244: Failures: 1
+  - Job artifact: 2133: #<Errno::ENOENT: No such file or directory @ rb_sysopen - /full/path/here/2020_02_06/2190/2133/job.log>
+Done!
+```
+
+To delete the database references, open the [GitLab Rails Console](../operations/rails_console.md#starting-a-rails-console-session) and run:
+
+```ruby
+artifacts_deleted=0
+::Ci::JobArtifact.where.not(file: nil).where(file_store: 1).map do |artifact|
+  next if artifact.file.file.exists?
+  artifacts_deleted = artifacts_deleted + 1
+  puts "id #{artifact.id} type #{artifact.file_type} file #{artifact.file} project #{artifact.project_id}"
+  # puts artifact.destroy           ### uncomment to actually destroy
+end ; nil
+puts "#{artifacts_deleted} artifacts were destroyed"
+```
+
 ### Delete references to missing LFS objects
 
 If `gitlab-rake gitlab:lfs:check VERBOSE=1` detects LFS objects that exist in the database
