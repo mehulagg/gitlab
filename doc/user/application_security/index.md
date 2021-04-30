@@ -266,7 +266,6 @@ You can do it quickly by following the hyperlink given to run a new pipeline.
 
 ![Run a new pipeline](img/outdated_report_pipeline_v12_9.png)
 
-
 ### Getting error message `sast job: stage parameter should be [some stage name here]`
 
 When [including](../../ci/yaml/README.md#includetemplate) a `.gitlab-ci.yml` template
