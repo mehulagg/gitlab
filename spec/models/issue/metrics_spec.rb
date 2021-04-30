@@ -81,7 +81,7 @@ RSpec.describe Issue::Metrics do
       end
     end
 
-    context "#record!" do
+    describe "#record!" do
       it "does not cause an N+1 query" do
         label = create(:label)
         subject.update!(label_ids: [label.id])
