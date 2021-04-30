@@ -272,7 +272,7 @@ by the time the feature flag is removed.
 - File format guards (only accept valid file formats for the package type)
 - Name regex with validation
 - Version regex with validation
-- Workhorse route for [accelerated](uploads.html#how-to-add-a-new-upload-route) uploads
+- Workhorse route for [accelerated](uploads.md#how-to-add-a-new-upload-route) uploads
 - Background workers for extracting package metadata (if applicable)
 - Documentation (how to use the feature)
 - API Documentation (individual endpoints with curl examples)
