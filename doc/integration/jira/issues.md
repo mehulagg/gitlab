@@ -41,10 +41,12 @@ ENTITY_TITLE
 - `PROJECT_NAME`: The GitLab project name.
 - `ENTITY_TITLE`: The title of the merge request, or the first line of the commit.
 
+You can [disable comments](#disable-comments-on-jira-issues) on issues.
+
 ## Close Jira issues
 
 If you have configured GitLab transition IDs, you can close a Jira issue directly
-from GitLab by using a trigger word, followed by a Jira issue ID, in a commit or merge request.
+from GitLab. Use a trigger word followed by a Jira issue ID in a commit or merge request.
 When you push a commit containing a trigger word and Jira issue ID, GitLab:
 
 - Comments in the mentioned Jira issue.
@@ -70,7 +72,7 @@ Consider this example:
    - GitLab closes the Jira issue for you:
      ![The GitLab integration closes Jira issue](img/jira_service_close_issue.png)
    - GitLab adds a formatted comment to Jira, linking back to the commit that
-     resolved the issue.
+     resolved the issue. You can [disable comments](#disable-comments-on-jira-issues).
 
 ## View Jira issues **(PREMIUM)**
 
@@ -79,82 +81,80 @@ Consider this example:
 You can browse, search, and view issues from a selected Jira project directly in GitLab,
 if your GitLab administrator [has configured it](development_panel.md#configure-gitlab):
 
-1. In the left navigation bar, go to **Jira > Issues list**.
-1. The issue list sorts by **Created date** by default, with the newest issues listed at the top:
+1. Go to your project in GitLab.
+1. In the left sidebar, go to **Jira > Issues list**. The issue list sorts by
+   **Created date** by default, with the newest issues listed at the top:
 
    ![Jira issues integration enabled](img/open_jira_issues_list_v13.2.png)
 
-1. To display the most recently updated issues first, click **Last updated**.
-1. In GitLab versions 13.10 and later, you can view [individual Jira issues](#view-a-jira-issue).
+1. To display the most recently updated issues first, select **Last updated**.
+1. You can [search and filter](#search-and-filter-the-issues-list) the issues list.
+1. In GitLab [versions 13.10 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/299832),
+   you can select an issue from the list to view it in GitLab:
+   ![Jira issue detail view](img/jira_issue_detail_view_v13.10.png)
 
-Issues are grouped into tabs based on their [Jira status](https://confluence.atlassian.com/adminjiraserver070/defining-status-field-values-749382903.html):
+Issues are grouped into tabs based on their
+[Jira status](https://confluence.atlassian.com/adminjiraserver070/defining-status-field-values-749382903.html):
 
 - The **Open** tab displays all issues with a Jira status in any category other than Done.
 - The **Closed** tab displays all issues with a Jira status categorized as Done.
 - The **All** tab displays all issues of any status.
 
-## View a Jira issue
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299832) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.10 behind a feature flag, disabled by default.
-> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/299832) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.11.
-
-When viewing the [Jira issues list](#view-jira-issues), select an issue from the
-list to open it in GitLab:
-
-![Jira issue detail view](img/jira_issue_detail_view_v13.10.png)
-
 ## Search and filter the issues list
 
 To refine the list of issues, use the search bar to search for any text
-contained in an issue summary (title) or description.
-
-You can also filter by labels, status, reporter, and assignee using URL parameters.
-Enhancements to be able to use these through the user interface are [planned](https://gitlab.com/groups/gitlab-org/-/epics/3622).
+contained in an issue summary (title) or description. You can use any combination
+of these filters:
 
 - To filter issues by `labels`, specify one or more labels as part of the `labels[]`
-parameter in the URL. When using multiple labels, only issues that contain all specified
-labels are listed. `/-/integrations/jira/issues?labels[]=backend&labels[]=feature&labels[]=QA`
-
-- To filter issues by `status`, specify the `status` parameter in the URL.
-`/-/integrations/jira/issues?status=In Progress`
-
+  parameter in the URL. When using multiple labels, only issues that contain all specified
+  labels are listed: `/-/integrations/jira/issues?labels[]=backend&labels[]=feature&labels[]=QA`
+- To filter issues by `status`, specify the `status` parameter in the URL:
+  `/-/integrations/jira/issues?status=In Progress`
 - To filter issues by `reporter`, specify a reporter's Jira display name for the
-`author_username` parameter in the URL. `/-/integrations/jira/issues?author_username=John Smith`
-
+  `author_username` parameter in the URL: `/-/integrations/jira/issues?author_username=John Smith`
 - To filter issues by `assignee`, specify their Jira display name for the
-`assignee_username` parameter in the URL. `/-/integrations/jira/issues?assignee_username=John Smith`
+  `assignee_username` parameter in the URL: `/-/integrations/jira/issues?assignee_username=John Smith`
+
+Enhancements to use these filters through the user interface
+[are planned](https://gitlab.com/groups/gitlab-org/-/epics/3622).
 
 ## Automatic issue transitions
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/...) in GitLab 13.10.
 
-In this mode the referenced Jira issue is transitioned to the next available status with a category of "Done".
+When you configure automatic issue transitions, you can transition a referenced
+Jira issue to the next available status with a category of **Done**. To configure
+this setting:
 
-See the [Configure GitLab](development_panel.md#configure-gitlab) section, check the **Enable Jira transitions** setting and select the **Move to Done** option.
+1. Refer to the [Configure GitLab](development_panel.md#configure-gitlab) instructions.
+1. Select the **Enable Jira transitions** setting.
+1. Select the **Move to Done** option.
 
 ## Custom issue transitions
 
-For advanced workflows you can specify custom Jira transition IDs.
+For advanced workflows, you can specify custom Jira transition IDs.
 
-See the [Configure GitLab](development_panel.md#configure-gitlab) section, check the **Enable Jira transitions** setting, select the **Custom transitions** option, and enter your transition IDs in the text field.
+1. *(For users of Jira Cloud)* Obtain your transition IDs by editing a workflow
+   in the **Text** view. The transition IDs display in the **Transitions** column.
+1. *(For users of Jira Server)* Obtain your transition IDs in one of these ways:
+   - By using the API, with a request like `https://yourcompany.atlassian.net/rest/api/2/issue/ISSUE-123/transitions`,
+     using an issue that is in the appropriate "open" state.
+   - By mousing over the link for the transition you want and looking for the
+     **action** parameter in the URL.
+   The transition ID may vary between workflows (for example, bug vs. story),
+   even if the status you are changing to is the same.
+1. Refer to the [Configure GitLab](development_panel.md#configure-gitlab) instructions.
+1. Select the **Enable Jira transitions** setting.
+1. Select the **Custom transitions** option.
+1. Enter your transition IDs in the text field. If you insert multiple transition IDs
+   separated by `,` or `;`, the issue is moved to each state, one after another, in the
+   order you specify. If a transition fails the sequence is aborted.
 
-If you insert multiple transition IDs separated by `,` or `;`, the issue is moved to each state, one after another, using the given order. If a transition fails the sequence is aborted.
+## Disable comments on Jira issues
 
-To see the transition IDs on Jira Cloud, edit a workflow in the **Text** view.
-The transition IDs display in the **Transitions** column.
+GitLab can cross-link source commits or merge requests with Jira issues, without
+adding a comment to the Jira issue:
 
-On Jira Server you can get the transition IDs in either of the following ways:
-
-1. By using the API, with a request like `https://yourcompany.atlassian.net/rest/api/2/issue/ISSUE-123/transitions`
-   using an issue that is in the appropriate "open" state
-1. By mousing over the link for the transition you want and looking for the
-   "action" parameter in the URL
-
-Note that the transition ID may vary between workflows (for example, bug vs. story),
-even if the status you are changing to is the same.
-
-## Disabling comments on Jira issues
-
-You can continue to have GitLab cross-link a source commit/MR with a Jira issue while disabling the comment added to the issue.
-
-See the [Configure GitLab](development_panel.md#configure-gitlab) section and uncheck the **Enable comments** setting.
+1. Refer to the [Configure GitLab](development_panel.md#configure-gitlab) instructions.
+1. Deselect the **Enable comments** setting.
