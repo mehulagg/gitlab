@@ -95,6 +95,11 @@ export default {
     highlightedJobs(jobs) {
       this.$emit('highlightedJobsChange', jobs);
     },
+    parsedData(val, oldVal) {
+      if (oldVal !== val) {
+        this.calculateLinkData();
+      }
+    },
     viewType() {
       /*
         We need to wait a tick so that the layout reflows
@@ -109,7 +114,7 @@ export default {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   mounted() {
-    if (!isEmpty(this.pipelineData)) {
+    if (!isEmpty(this.parsedData)) {
       this.calculateLinkData();
     }
   },

@@ -140,7 +140,6 @@ export default {
   <links-inner
     v-if="showLinkedLayers"
     :container-measurements="containerMeasurements"
-    :metrics-config="metricsConfig"
     :parsed-data="parsedData"
     :pipeline-data="pipelineData"
     :total-groups="numGroups"
