@@ -277,7 +277,7 @@ by the time the feature flag is removed.
 - Documentation (how to use the feature)
 - API Documentation (individual endpoints with curl examples)
 - Seeding in [`db/fixtures/development/26_packages.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/db/fixtures/development/26_packages.rb)
-- Update the [runbook](https://gitlab.com/gitlab-com/runbooks/-/blob/31fb4959e89db25fddf865bc81734c222daf32dd/dashboards/stage-groups/package.dashboard.jsonnet#L74) for the grafana charts
+- Update the [runbook](https://gitlab.com/gitlab-com/runbooks/-/blob/31fb4959e89db25fddf865bc81734c222daf32dd/dashboards/stage-groups/package.dashboard.jsonnet#L74) for the Grafana charts
 - End-to-end feature tests for at the minimum publishing and installing a package
 
 ### Future Work
