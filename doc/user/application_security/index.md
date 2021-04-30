@@ -123,10 +123,15 @@ reports are available to download. To download a report, click on the
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9928) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.2.
 
-A merge request that introduces a vulnerability increases risk. To help manage that risk, you can
-enforce additional approval of a merge request that would introduce a vulnerability of `high`,
-`critical`, or `unknown` severity. With the _Vulnerability-Check_ approval
-rule enabled, any such merge request must be approved by selected users or groups.
+You can enforce additional approval of a merge request that would introduce a vulnerability of
+the following severities:
+
+- `high`
+- `critical`
+- `unknown`
+
+With the **Vulnerability-Check** approval rule enabled, any such merge request must be
+approved by selected users or groups.
 
 An approval is required when the latest security report in a merge request:
 
