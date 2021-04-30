@@ -14,9 +14,10 @@ module Gitlab
     class_option :ee, type: :boolean, optional: true, default: false, desc: 'Indicates if event is for ee'
     class_option :category, type: :string, optional: false, desc: 'Category of the event'
     class_option :action, type: :string, optional: false, desc: 'Action of the event'
+    class_option :ff, type: :boolean, optional: true, default: false, desc: 'Force definition override'
 
     def create_event_file
-      raise 'Event definition already exists' if definition_exists?
+      raise 'Event definition already exists' if definition_exists? && !force_definition_override?
 
       template "event_definition.yml", file_path
     end
@@ -39,6 +40,10 @@ module Gitlab
 
     def ee?
       options[:ee]
+    end
+
+    def force_definition_override?
+      options[:ff]
     end
 
     private
