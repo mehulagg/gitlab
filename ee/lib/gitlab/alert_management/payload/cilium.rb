@@ -18,7 +18,10 @@ module Gitlab
           fpayload = fpayload['flow'].except('time', 'Summary')
           fpayload['l4']['TCP'].delete('flags') if fpayload.dig('l4', 'TCP', 'flags')
 
-          fpayload.to_s
+          # ActionController::Parameters class is now prefixed with `#` and we have
+          # to remove the symbol in order to have the same fingerpring for the existing
+          # alerts with the same payload
+          fpayload.to_s.gsub('#<ActionController::Parameters', '<ActionController::Parameters')
         end
       end
     end
