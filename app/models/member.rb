@@ -93,6 +93,13 @@ class Member < ApplicationRecord
       .reorder(nil)
   end
 
+  scope :without_invites_and_requests, -> do
+    non_request
+    .non_invite
+    .non_minimal_access
+    .reorder(nil)
+  end
+
   # Like active, but without invites. For when a User is required.
   scope :active_without_invites_and_requests, -> do
     left_join_users
