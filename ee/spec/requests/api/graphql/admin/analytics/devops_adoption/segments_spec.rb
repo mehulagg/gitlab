@@ -9,7 +9,7 @@ RSpec.describe 'DevopsAdoptionSegments' do
   let_it_be(:group) { create(:group, name: 'my-group') }
 
   let_it_be(:segment) do
-    create(:devops_adoption_segment, namespace: group)
+    create(:devops_adoption_segment, namespace: group, display_namespace: group)
   end
 
   let_it_be(:snapshot) do
@@ -17,10 +17,13 @@ RSpec.describe 'DevopsAdoptionSegments' do
   end
 
   let(:query) do
-    graphql_query_for(:devopsAdoptionSegments, {}, %(
+    graphql_query_for(:devopsAdoptionSegments, { display_namespace_id: group.to_gid.to_s }, %(
       nodes {
         id
         namespace {
+          name
+        }
+        displayNamespace {
           name
         }
         latestSnapshot {
@@ -42,6 +45,7 @@ RSpec.describe 'DevopsAdoptionSegments' do
       {
         'id' => segment.to_gid.to_s,
         'namespace' => { 'name' => group.name },
+        'displayNamespace' => { 'name' => group.name },
         'latestSnapshot' => {
           'mergeRequestOpened' => false,
           'issueOpened' => true

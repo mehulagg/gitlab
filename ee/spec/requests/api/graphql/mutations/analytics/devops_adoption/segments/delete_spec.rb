@@ -5,10 +5,17 @@ require 'spec_helper'
 RSpec.describe Mutations::Analytics::DevopsAdoption::Segments::Delete do
   include GraphqlHelpers
 
-  let_it_be(:group) { create :group }
-  let_it_be(:reporter) { create(:user).tap { |u| group.add_reporter(u) } }
+  let_it_be(:display_group) { create :group }
+  let_it_be(:group) { create :group, parent: display_group }
+  let_it_be(:reporter) do
+    create(:user).tap do |u|
+      display_group.add_reporter(u)
+      group.add_reporter(u)
+    end
+  end
+
   let(:current_user) { reporter }
-  let!(:segment) { create(:devops_adoption_segment, namespace: group) }
+  let!(:segment) { create(:devops_adoption_segment, namespace: group, display_namespace: display_group) }
 
   let(:variables) { { id: segment.to_gid.to_s } }
 
@@ -58,7 +65,9 @@ RSpec.describe Mutations::Analytics::DevopsAdoption::Segments::Delete do
 
     before do
       segment2.namespace.add_reporter(current_user)
+      segment2.display_namespace.add_reporter(current_user)
       segment3.namespace.add_reporter(current_user)
+      segment3.display_namespace.add_reporter(current_user)
     end
 
     it 'deletes the segments specified for deletion' do

@@ -4,11 +4,18 @@ require 'spec_helper'
 
 RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
   let_it_be(:group) { create(:group) }
-  let_it_be(:reporter) { create(:user).tap { |u| group.add_reporter(u) } }
+  let_it_be(:display_group) { create(:group) }
+
+  let_it_be(:reporter) do
+    create(:user).tap do |u|
+      group.add_reporter(u)
+      display_group.add_reporter(u)
+    end
+  end
 
   let(:current_user) { reporter }
 
-  let(:params) { { namespace: group } }
+  let(:params) { { namespace: group, display_namespace: display_group } }
   let(:segment) { subject.payload[:segment] }
 
   subject(:response) { described_class.new(params: params, current_user: current_user).execute }
@@ -20,6 +27,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
   it 'persists the segment' do
     expect(response).to be_success
     expect(segment.namespace).to eq(group)
+    expect(segment.display_namespace).to eq(display_group)
   end
 
   it 'schedules for snapshot creation' do
@@ -32,6 +40,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
 
   it 'authorizes for manage_devops_adoption' do
     expect(::Ability).to receive(:allowed?).with(current_user, :manage_devops_adoption_segments, group).and_return true
+    expect(::Ability).to receive(:allowed?).with(current_user, :manage_devops_adoption_segments, display_group).and_return true
 
     response
   end
