@@ -76,7 +76,7 @@ Consider this example:
    - GitLab adds a formatted comment to Jira, linking back to the commit that
      resolved the issue. You can [disable comments](#disable-comments-on-jira-issues).
 
-## View Jira issues in GitLab **(PREMIUM)**
+## View Jira issues **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3622) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
 

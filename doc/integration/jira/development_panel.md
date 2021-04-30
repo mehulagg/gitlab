@@ -58,7 +58,7 @@ self-managed GitLab) set up the integration to simplify administration.
 Each GitLab project can be configured to connect to an entire Jira instance. That means one GitLab
 project can interact with _all_ Jira projects in that instance, once configured. For:
 
-- The [view Jira issues](issues.md#view-jira-issues-in-gitlab) feature, you must associate a GitLab project with a
+- The [view Jira issues](issues.md#view-jira-issues) feature, you must associate a GitLab project with a
   specific Jira project.
 - Other features, you do not have to explicitly associate a GitLab project with any single Jira
   project.
