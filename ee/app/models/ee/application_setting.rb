@@ -320,7 +320,7 @@ module EE
 
     def elasticsearch_config
       {
-        url:                    elasticsearch_url,
+        url:                    elasticsearch_url_with_credentials,
         aws:                    elasticsearch_aws,
         aws_access_key:         elasticsearch_aws_access_key,
         aws_secret_access_key:  elasticsearch_aws_secret_access_key,
