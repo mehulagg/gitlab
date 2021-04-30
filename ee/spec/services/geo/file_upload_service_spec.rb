@@ -234,5 +234,30 @@ RSpec.describe Geo::FileUploadService do
 
       include_examples 'no decoded params'
     end
+
+    context 'bulk imports export file' do
+      let_it_be(:type) { :'bulk_imports/export' }
+      let_it_be(:export) { create(:bulk_import_export) }
+      let_it_be(:file) { fixture_file_upload('spec/fixtures/bulk_imports/labels.ndjson.gz') }
+
+      let(:upload) { Upload.find_by(model: export, uploader: 'BulkImports::ExportUploader') }
+      let(:request_data) { Gitlab::Geo::Replication::FileTransfer.new(type, upload).request_data }
+      let(:params) { { id: upload.id, type: type } }
+
+      before do
+        BulkImports::ExportUploader.new(export).store!(file)
+      end
+
+      it 'sends the file' do
+        service = described_class.new(params, request_data)
+
+        response = service.execute
+
+        expect(response[:code]).to eq(:ok)
+        expect(response[:file].path).to end_with('ndjson.gz')
+      end
+
+      include_examples 'no decoded params'
+    end
   end
 end

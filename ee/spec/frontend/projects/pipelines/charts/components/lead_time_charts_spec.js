@@ -1,4 +1,4 @@
-import { GlSprintf, GlLink } from '@gitlab/ui';
+import { GlSprintf } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { useFixturesFakeDate } from 'helpers/fake_date';
@@ -23,12 +23,16 @@ describe('lead_time_charts.vue', () => {
   useFixturesFakeDate();
 
   let LeadTimeCharts;
+  let DoraChartHeader;
 
-  // Import the component _after_ the date has been set using `useFakeDate`, so
+  // Import these components _after_ the date has been set using `useFakeDate`, so
   // that any calls to `new Date()` during module initialization use the fake date
   beforeAll(async () => {
     LeadTimeCharts = (
       await import('ee_component/projects/pipelines/charts/components/lead_time_charts.vue')
+    ).default;
+    DoraChartHeader = (
+      await import('ee/projects/pipelines/charts/components/dora_chart_header.vue')
     ).default;
   });
 
@@ -64,10 +68,8 @@ describe('lead_time_charts.vue', () => {
     mock.restore();
   });
 
-  const findHelpText = () => wrapper.find('[data-testid="help-text"]');
-  const findDocLink = () => findHelpText().find(GlLink);
   const getTooltipValue = () => wrapper.find('[data-testid="tooltip-value"]').text();
-  const findCiCdAnalyticsCharts = () => wrapper.find(CiCdAnalyticsCharts);
+  const findCiCdAnalyticsCharts = () => wrapper.findComponent(CiCdAnalyticsCharts);
 
   describe('when there are no network errors', () => {
     beforeEach(async () => {
@@ -99,16 +101,8 @@ describe('lead_time_charts.vue', () => {
       expect(createFlash).not.toHaveBeenCalled();
     });
 
-    it('renders description text', () => {
-      expect(findHelpText().text()).toMatchInterpolatedText(
-        'These charts display the median time between a merge request being merged and deployed to production, as part of the DORA 4 metrics. Learn more.',
-      );
-    });
-
-    it('renders a link to the documentation', () => {
-      expect(findDocLink().attributes().href).toBe(
-        '/help/user/analytics/ci_cd_analytics.html#lead-time-charts',
-      );
+    it('renders a header', () => {
+      expect(wrapper.findComponent(DoraChartHeader).exists()).toBe(true);
     });
 
     describe('methods', () => {

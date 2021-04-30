@@ -302,12 +302,5 @@ module EE
         }
       }
     end
-
-    override :view_operations_tab_ability
-    def view_operations_tab_ability
-      super + [
-        :read_incident_management_oncall_schedule
-      ]
-    end
   end
 end

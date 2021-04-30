@@ -1,4 +1,3 @@
-import { GlSprintf, GlLink } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
@@ -24,14 +23,18 @@ describe('deployment_frequency_charts.vue', () => {
   useFixturesFakeDate();
 
   let DeploymentFrequencyCharts;
+  let DoraChartHeader;
 
-  // Import the component _after_ the date has been set using `useFakeDate`, so
+  // Import these components _after_ the date has been set using `useFakeDate`, so
   // that any calls to `new Date()` during module initialization use the fake date
   beforeAll(async () => {
     DeploymentFrequencyCharts = (
       await import(
         'ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue'
       )
+    ).default;
+    DoraChartHeader = (
+      await import('ee/projects/pipelines/charts/components/dora_chart_header.vue')
     ).default;
   });
 
@@ -43,7 +46,6 @@ describe('deployment_frequency_charts.vue', () => {
       provide: {
         projectPath: 'test/project',
       },
-      stubs: { GlSprintf },
     });
   };
 
@@ -68,9 +70,6 @@ describe('deployment_frequency_charts.vue', () => {
     wrapper = null;
     mock.restore();
   });
-
-  const findHelpText = () => wrapper.find('[data-testid="help-text"]');
-  const findDocLink = () => findHelpText().find(GlLink);
 
   describe('when there are no network errors', () => {
     beforeEach(async () => {
@@ -99,7 +98,7 @@ describe('deployment_frequency_charts.vue', () => {
     });
 
     it('converts the data from the API into data usable by the chart component', () => {
-      const chartWrapper = wrapper.find(CiCdAnalyticsCharts);
+      const chartWrapper = wrapper.findComponent(CiCdAnalyticsCharts);
       expect(chartWrapper.props().charts).toMatchSnapshot();
     });
 
@@ -107,16 +106,8 @@ describe('deployment_frequency_charts.vue', () => {
       expect(createFlash).not.toHaveBeenCalled();
     });
 
-    it('renders description text', () => {
-      expect(findHelpText().text()).toMatchInterpolatedText(
-        'These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named production for its data to appear in these charts. Learn more.',
-      );
-    });
-
-    it('renders a link to the documentation', () => {
-      expect(findDocLink().attributes().href).toBe(
-        '/help/user/analytics/ci_cd_analytics.html#deployment-frequency-charts',
-      );
+    it('renders a header', () => {
+      expect(wrapper.findComponent(DoraChartHeader).exists()).toBe(true);
     });
   });
 
@@ -139,7 +130,7 @@ describe('deployment_frequency_charts.vue', () => {
     it('shows a flash message', () => {
       expect(createFlash).toHaveBeenCalledTimes(1);
       expect(createFlash).toHaveBeenCalledWith({
-        message: 'Something went wrong while getting deployment frequency data',
+        message: 'Something went wrong while getting deployment frequency data.',
       });
     });
 

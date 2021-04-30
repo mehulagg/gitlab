@@ -4,8 +4,8 @@ import {
   GlBadge,
   GlButton,
   GlLabel,
-  GlLoadingIcon,
   GlPagination,
+  GlSkeletonLoader,
   GlTable,
 } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
@@ -31,7 +31,7 @@ describe('Iterations report issues', () => {
   const findGlBadge = () => wrapper.findComponent(GlBadge);
   const findGlButton = () => wrapper.findComponent(GlButton);
   const findGlLabel = () => wrapper.findComponent(GlLabel);
-  const findGlLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findGlSkeletonLoader = () => wrapper.findComponent(GlSkeletonLoader);
   const findGlPagination = () => wrapper.findComponent(GlPagination);
   const findGlTable = () => wrapper.findComponent(GlTable);
 
@@ -64,14 +64,14 @@ describe('Iterations report issues', () => {
       loading: true,
     });
 
-    expect(findGlLoadingIcon().exists()).toBe(true);
+    expect(findGlSkeletonLoader().exists()).toBe(true);
     expect(findGlTable().isVisible()).toBe(false);
   });
 
   it('shows iterations list when not loading', () => {
     mountComponent({ loading: false, mountFunction: mount });
 
-    expect(findGlLoadingIcon().isVisible()).toBe(false);
+    expect(findGlSkeletonLoader().isVisible()).toBe(false);
     expect(findGlTable().exists()).toBe(true);
     expect(wrapper.text()).toContain('No issues found');
   });

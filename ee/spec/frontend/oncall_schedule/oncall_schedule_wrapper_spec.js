@@ -1,4 +1,4 @@
-import { GlEmptyState, GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import { GlEmptyState, GlLoadingIcon, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import AddScheduleModal from 'ee/oncall_schedules/components/add_edit_schedule_modal.vue';
@@ -6,6 +6,7 @@ import OnCallSchedule from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import OnCallScheduleWrapper, {
   i18n,
 } from 'ee/oncall_schedules/components/oncall_schedules_wrapper.vue';
+import { escalationPolicyUrl } from 'ee/oncall_schedules/constants';
 import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
@@ -44,6 +45,9 @@ describe('On-call schedule wrapper', () => {
           GlTooltip: createMockDirective(),
         },
         mocks: { $apollo },
+        stubs: {
+          GlSprintf,
+        },
       }),
     );
   }
@@ -81,6 +85,8 @@ describe('On-call schedule wrapper', () => {
   const findEmptyState = () => wrapper.findComponent(GlEmptyState);
   const findSchedules = () => wrapper.findAllComponents(OnCallSchedule);
   const findAlert = () => wrapper.findComponent(GlAlert);
+  const findAlertDescription = () => wrapper.findComponent(GlSprintf);
+  const findAlertLink = () => wrapper.findComponent(GlLink);
   const findModal = () => wrapper.findComponent(AddScheduleModal);
   const findAddAdditionalButton = () => wrapper.findByTestId('add-additional-schedules-button');
 
@@ -113,12 +119,15 @@ describe('On-call schedule wrapper', () => {
       expect(schedule.exists()).toBe(true);
     });
 
-    it('shows success alert', async () => {
+    it('shows success alert with distinct description for single schedule', async () => {
       await findModal().vm.$emit('scheduleCreated');
       const alert = findAlert();
       expect(alert.exists()).toBe(true);
       expect(alert.props('title')).toBe(i18n.successNotification.title);
-      expect(alert.text()).toBe(i18n.successNotification.description);
+      expect(findAlertLink().attributes('href')).toBe(escalationPolicyUrl);
+      expect(findAlertDescription().text()).toContain(
+        'To create an escalation policy using this schedule',
+      );
     });
 
     it('renders a newly created schedule', async () => {
@@ -170,6 +179,13 @@ describe('On-call schedule wrapper', () => {
       expect(button.exists()).toBe(true);
       const tooltip = getBinding(button.element, 'gl-tooltip');
       expect(tooltip).toBeDefined();
+    });
+
+    it('shows success alert with distinct description for multiple schedules', async () => {
+      await findModal().vm.$emit('scheduleCreated');
+      expect(findAlertDescription().text()).toContain(
+        'To create an escalation policy that defines which schedule is used when',
+      );
     });
   });
 });

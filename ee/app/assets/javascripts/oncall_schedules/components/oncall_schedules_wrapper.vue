@@ -4,12 +4,15 @@ import {
   GlButton,
   GlEmptyState,
   GlLoadingIcon,
+  GlLink,
   GlModalDirective,
   GlTooltipDirective,
+  GlSprintf,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { escalationPolicyUrl } from '../constants';
 import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import AddScheduleModal from './add_edit_schedule_modal.vue';
 import OncallSchedule from './oncall_schedule.vue';
@@ -29,7 +32,13 @@ export const i18n = {
   successNotification: {
     title: s__('OnCallSchedules|Try adding a rotation'),
     description: s__(
-      'OnCallSchedules|Your schedule has been successfully created and all alerts from this project will now be routed to this schedule. Currently, only one schedule can be created per project. More coming soon! To add individual users to this schedule, use the add a rotation button.',
+      'OnCallSchedules|Your schedule has been successfully created. To add individual users to this schedule, use the add a rotation button.',
+    ),
+    descriptionSingle: s__(
+      'OnCallSchedules|To create an escalation policy using this schedule, visit the %{linkStart}escalation policy%{linkEnd} page.',
+    ),
+    descriptionMulti: s__(
+      'OnCallSchedules|To create an escalation policy that defines which schedule is used when, visit the %{linkStart}escalation policy%{linkEnd} page.',
     ),
   },
 };
@@ -37,11 +46,14 @@ export const i18n = {
 export default {
   i18n,
   addScheduleModalId,
+  escalationPolicyUrl,
   components: {
     GlAlert,
     GlButton,
     GlEmptyState,
     GlLoadingIcon,
+    GlLink,
+    GlSprintf,
     AddScheduleModal,
     OncallSchedule,
   },
@@ -78,6 +90,18 @@ export default {
     },
   },
   computed: {
+    alertMessage() {
+      const {
+        $options: {
+          i18n: {
+            successNotification: { description, descriptionMulti, descriptionSingle },
+          },
+        },
+      } = this;
+      return this.glFeatures.multipleOncallSchedules
+        ? `${description} ${descriptionMulti}`
+        : `${description} ${descriptionSingle}`;
+    },
     isLoading() {
       return this.$apollo.queries.schedules.loading;
     },
@@ -116,7 +140,13 @@ export default {
         class="gl-my-3"
         @dismiss="showSuccessNotification = false"
       >
-        {{ $options.i18n.successNotification.description }}
+        <gl-sprintf :message="alertMessage">
+          <template #link="{ content }">
+            <gl-link :href="$options.escalationPolicyUrl" target="_blank">
+              {{ content }}
+            </gl-link>
+          </template>
+        </gl-sprintf>
       </gl-alert>
       <oncall-schedule
         v-for="(schedule, scheduleIndex) in schedules"

@@ -9,6 +9,7 @@ import {
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
+import produce from 'immer';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import validation from '~/vue_shared/directives/validation';
 import {
@@ -17,19 +18,22 @@ import {
   subscriptionQueries,
 } from '../constants';
 
-export const SUBSCRIPTION_ACTIVATION_EVENT = 'subscription-activation';
+const getLicenseFromData = ({
+  data: {
+    gitlabSubscriptionActivate: { license },
+  },
+}) => license;
+
+const getErrorsAsData = ({
+  data: {
+    gitlabSubscriptionActivate: { errors },
+  },
+}) => errors;
+
+export const SUBSCRIPTION_ACTIVATION_FAILURE_EVENT = 'subscription-activation-failure';
 export const adminLicenseUrl = helpPagePath('/user/admin_area/license');
 
 export default {
-  i18n: {
-    title: subscriptionActivationForm.title,
-    howToActivateSubscription: subscriptionActivationForm.howToActivateSubscription,
-    activationCode: subscriptionActivationForm.activationCode,
-    pasteActivationCode: subscriptionActivationForm.pasteActivationCode,
-    acceptTerms: subscriptionActivationForm.acceptTerms,
-    activateLabel: subscriptionActivationForm.activateLabel,
-    fieldRequiredMessage,
-  },
   name: 'CloudLicenseSubscriptionActivationForm',
   components: {
     GlButton,
@@ -41,12 +45,22 @@ export default {
     GlSprintf,
     GlLink,
   },
+  i18n: {
+    title: subscriptionActivationForm.title,
+    howToActivateSubscription: subscriptionActivationForm.howToActivateSubscription,
+    activationCode: subscriptionActivationForm.activationCode,
+    pasteActivationCode: subscriptionActivationForm.pasteActivationCode,
+    acceptTerms: subscriptionActivationForm.acceptTerms,
+    activateLabel: subscriptionActivationForm.activateLabel,
+    fieldRequiredMessage,
+  },
   links: {
     adminLicenseUrl,
   },
   directives: {
     validation: validation(),
   },
+  emits: [SUBSCRIPTION_ACTIVATION_FAILURE_EVENT],
   data() {
     const form = {
       state: false,
@@ -95,21 +109,23 @@ export default {
               activationCode: this.form.fields.activationCode.value,
             },
           },
-        })
-        .then(
-          ({
-            data: {
-              gitlabSubscriptionActivate: { errors },
-            },
-          }) => {
-            if (errors.length) {
-              throw new Error();
-            }
-            this.$emit(SUBSCRIPTION_ACTIVATION_EVENT, true);
+          update: (cache, mutation) => {
+            const license = getLicenseFromData(mutation);
+            const { query } = subscriptionQueries;
+            const data = produce(license, (draftData) => {
+              draftData.currentLicense = license;
+            });
+            cache.writeQuery({ query, data });
           },
-        )
+        })
+        .then((res) => {
+          const errors = getErrorsAsData(res);
+          if (errors.length) {
+            throw new Error();
+          }
+        })
         .catch(() => {
-          this.$emit(SUBSCRIPTION_ACTIVATION_EVENT, null);
+          this.$emit(SUBSCRIPTION_ACTIVATION_FAILURE_EVENT, null);
         })
         .finally(() => {
           this.isLoading = false;

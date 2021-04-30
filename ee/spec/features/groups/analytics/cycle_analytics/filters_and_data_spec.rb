@@ -20,7 +20,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
   stage_nav_selector = '.stage-nav'
   path_nav_selector = '.js-path-navigation'
   filter_bar_selector = '.js-filter-bar'
-  card_metric_selector = '.js-recent-activity .js-metric-card-item'
+  card_metric_selector = '[data-testid="vsa-time-metrics"] .gl-single-stat'
   new_issues_count = 3
 
   new_issues_count.times do |i|
@@ -81,13 +81,6 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
   shared_examples 'has overview metrics' do
     before do
       wait_for_requests
-    end
-
-    it 'will display activity metrics' do
-      page.within(find('.js-recent-activity')) do
-        expect(page).to have_content(_('Recent Activity'))
-        expect(page).to have_content(_('Time'))
-      end
     end
 
     it 'displays the recent activity' do

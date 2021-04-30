@@ -86,9 +86,9 @@ export const activateLicenseMutationResponse = {
       gitlabSubscriptionActivate: {
         license: {
           id: 'gid://gitlab/License/3',
-          type: 'legacy',
+          type: 'cloud',
           plan: 'ultimate',
-          name: 'Test license',
+          name: 'Cloud License',
           email: 'user@example.com',
           company: 'Example Inc',
           startsAt: '2020-01-01',

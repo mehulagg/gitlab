@@ -1,10 +1,10 @@
 <script>
-import { GlLink, GlSprintf } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import * as DoraApi from 'ee/api/dora_api';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
+import DoraChartHeader from './dora_chart_header.vue';
 import {
   allChartDefinitions,
   areaChartOptions,
@@ -20,9 +20,8 @@ import { apiDataToChartSeries } from './util';
 export default {
   name: 'DeploymentFrequencyCharts',
   components: {
-    GlLink,
-    GlSprintf,
     CiCdAnalyticsCharts,
+    DoraChartHeader,
   },
   inject: {
     projectPath: {
@@ -64,7 +63,7 @@ export default {
 
     if (requestErrors.length) {
       createFlash({
-        message: s__('DORA4Metrics|Something went wrong while getting deployment frequency data'),
+        message: s__('DORA4Metrics|Something went wrong while getting deployment frequency data.'),
       });
 
       const allErrorMessages = requestErrors.join('\n');
@@ -75,7 +74,6 @@ export default {
       );
     }
   },
-  allChartDefinitions,
   areaChartOptions,
   chartDescriptionText,
   chartDocumentationHref,
@@ -83,17 +81,11 @@ export default {
 </script>
 <template>
   <div>
-    <h4 class="gl-my-4">{{ s__('DORA4Metrics|Deployments charts') }}</h4>
-    <p data-testid="help-text">
-      <gl-sprintf :message="$options.chartDescriptionText">
-        <template #code="{ content }">
-          <code>{{ content }}</code>
-        </template>
-      </gl-sprintf>
-      <gl-link :href="$options.chartDocumentationHref">
-        {{ __('Learn more.') }}
-      </gl-link>
-    </p>
+    <dora-chart-header
+      :header-text="s__('DORA4Metrics|Deployment frequency')"
+      :chart-description-text="$options.chartDescriptionText"
+      :chart-documentation-href="$options.chartDocumentationHref"
+    />
     <ci-cd-analytics-charts :charts="charts" :chart-options="$options.areaChartOptions" />
   </div>
 </template>

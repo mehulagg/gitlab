@@ -3,7 +3,7 @@ import { s__ } from '~/locale';
 
 export * from './shared';
 
-export const CHART_TITLE = s__('DORA4Metrics|Deployments');
+export const CHART_TITLE = s__('DORA4Metrics|Deployment frequency');
 
 export const areaChartOptions = {
   xAxis: {
@@ -11,14 +11,14 @@ export const areaChartOptions = {
     type: 'category',
   },
   yAxis: {
-    name: s__('DORA4Metrics|Deployments'),
+    name: s__('DORA4Metrics|Number of deployments'),
     type: 'value',
     minInterval: 1,
   },
 };
 
 export const chartDescriptionText = s__(
-  'DORA4Metrics|These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named %{codeStart}production%{codeEnd} for its data to appear in these charts.',
+  'DORA4Metrics|The chart displays the frequency of deployments to production environment(s) that are based on the %{linkStart}deployment_tier%{linkEnd} value.',
 );
 
 export const chartDocumentationHref = helpPagePath('user/analytics/ci_cd_analytics.html', {

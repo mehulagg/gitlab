@@ -1,6 +1,11 @@
 import dateFormat from 'dateformat';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { nDaysBefore, nMonthsBefore, getStartOfDay, dayAfter } from '~/lib/utils/datetime_utility';
 import { __, s__, sprintf } from '~/locale';
+
+export const environmentTierDocumentationHref = helpPagePath('ci/environments/index.html', {
+  anchor: 'deployment-tier-of-environments',
+});
 
 /* eslint-disable @gitlab/require-i18n-strings */
 export const LAST_WEEK = 'LAST_WEEK';

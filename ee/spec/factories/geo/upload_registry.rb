@@ -8,6 +8,7 @@ FactoryBot.define do
 
     trait(:attachment) { file_type { :attachment } }
     trait(:avatar) { file_type { :avatar } }
+    trait(:'bulk_imports/export') { file_type { :'bulk_imports/export' } }
     trait(:favicon) { file_type { :favicon } }
     trait(:file) { file_type { :file } }
     trait(:import_export) { file_type { :import_export } }

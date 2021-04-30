@@ -458,25 +458,25 @@ export const transformStagesForPathNavigation = ({ stages, medians, selectedStag
  * @property {String} label - Title of the metric measured
  * @property {String} value - String representing the decimal point value, e.g '1.5'
  * @property {String} key - Slugified string based on the 'title'
- * @property {String} [tooltipText] - String to display for aa tooltip
- * @property {String} [unit] - String representing the decimal point value, e.g '1.5'
+ * @property {String} description - String to display for a description
+ * @property {String} unit - String representing the decimal point value, e.g '1.5'
  */
 
 /**
  * Prepares metric data to be rendered in the metric_card component
  *
  * @param {MetricData[]} data - The metric data to be rendered
- * @param {Object} [tooltipText] - Key value pair of strings to display in the tooltip
+ * @param {Object} popoverContent - Key value pair of data to display in the popover
  * @returns {TransformedMetricData[]} An array of metrics ready to render in the metric_card
  */
 
-export const prepareTimeMetricsData = (data = [], tooltipText = {}) =>
+export const prepareTimeMetricsData = (data = [], popoverContent = {}) =>
   data.map(({ title: label, ...rest }) => {
     const key = slugify(label);
     return {
       ...rest,
       label,
       key,
-      tooltipText: tooltipText[key] || '',
+      description: popoverContent[key]?.description || '',
     };
   });

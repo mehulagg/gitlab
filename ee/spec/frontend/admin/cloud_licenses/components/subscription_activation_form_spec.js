@@ -2,7 +2,7 @@ import { GlForm, GlFormCheckbox, GlFormInput } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import CloudLicenseSubscriptionActivationForm, {
-  SUBSCRIPTION_ACTIVATION_EVENT,
+  SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
 import { fieldRequiredMessage, subscriptionQueries } from 'ee/pages/admin/cloud_licenses/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
@@ -132,10 +132,6 @@ describe('CloudLicenseApp', () => {
           },
         });
       });
-
-      it('emits a successful event', () => {
-        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_EVENT)).toEqual([[true]]);
-      });
     });
 
     describe('when the mutation is not successful but looks like it is', () => {
@@ -145,10 +141,6 @@ describe('CloudLicenseApp', () => {
       beforeEach(() => {
         createComponentWithApollo({ mutationMock });
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
-      });
-
-      it('emits a successful event', () => {
-        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_EVENT)).toBeUndefined();
       });
 
       it.todo('deals with failures in a meaningful way');
@@ -161,8 +153,8 @@ describe('CloudLicenseApp', () => {
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 
-      it('emits a successful event', () => {
-        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_EVENT)).toBeUndefined();
+      it('emits a unsuccessful event', () => {
+        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_FAILURE_EVENT)).toBeUndefined();
       });
 
       it.todo('deals with failures in a meaningful way');

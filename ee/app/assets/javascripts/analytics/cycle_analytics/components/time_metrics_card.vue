@@ -1,14 +1,24 @@
 <script>
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlPopover } from '@gitlab/ui';
+import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import Api from 'ee/api';
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import createFlash from '~/flash';
 import { sprintf, __, s__ } from '~/locale';
 import { OVERVIEW_METRICS } from '../constants';
 import { removeFlash, prepareTimeMetricsData } from '../utils';
 
-const I18N_TEXT = {
-  'lead-time': s__('ValueStreamAnalytics|Median time from issue created to issue closed.'),
-  'cycle-time': s__('ValueStreamAnalytics|Median time from first commit to issue closed.'),
+const POPOVER_CONTENT = {
+  'lead-time': {
+    description: s__('ValueStreamAnalytics|Median time from issue created to issue closed.'),
+  },
+  'cycle-time': {
+    description: s__('ValueStreamAnalytics|Median time from first commit to issue closed.'),
+  },
+  'new-issues': { description: s__('ValueStreamAnalytics|Number of new issues created.') },
+  deploys: { description: s__('ValueStreamAnalytics|Total number of deploys to production.') },
+  'deployment-frequency': {
+    description: s__('ValueStreamAnalytics|Average number of deployments to production per day.'),
+  },
 };
 
 const requestData = ({ requestType, groupPath, additionalParams }) => {
@@ -20,7 +30,9 @@ const requestData = ({ requestType, groupPath, additionalParams }) => {
 export default {
   name: 'TimeMetricsCard',
   components: {
-    MetricCard,
+    GlSkeletonLoading,
+    GlSingleStat,
+    GlPopover,
   },
   props: {
     groupPath: {
@@ -58,7 +70,7 @@ export default {
       this.loading = true;
       return requestData(this)
         .then(({ data }) => {
-          this.data = prepareTimeMetricsData(data, I18N_TEXT);
+          this.data = prepareTimeMetricsData(data, POPOVER_CONTENT);
         })
         .catch(() => {
           const requestTypeName =
@@ -79,11 +91,32 @@ export default {
         });
     },
   },
-  render() {
-    return this.$scopedSlots.default({
-      metrics: this.data,
-      loading: this.loading,
-    });
-  },
 };
 </script>
+
+<template>
+  <div>
+    <div v-if="loading" class="gl-h-auto gl-py-3 gl-pr-9">
+      <gl-skeleton-loading />
+    </div>
+    <template v-else>
+      <div v-for="metric in data" :key="metric.key" class="gl-pr-9">
+        <gl-single-stat
+          :id="metric.key"
+          :value="`${metric.value}`"
+          :title="metric.label"
+          :unit="metric.unit || ''"
+          :should-animate="true"
+          tabindex="0"
+        />
+        <gl-popover :target="metric.key" placement="bottom">
+          <template #title>
+            <span class="gl-display-block gl-text-left">{{ metric.label }}</span>
+          </template>
+
+          <span v-if="metric.description">{{ metric.description }}</span>
+        </gl-popover>
+      </div>
+    </template>
+  </div>
+</template>

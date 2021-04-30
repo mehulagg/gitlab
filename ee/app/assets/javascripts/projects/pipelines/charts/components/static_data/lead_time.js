@@ -24,7 +24,7 @@ export const areaChartOptions = {
 };
 
 export const chartDescriptionText = s__(
-  'DORA4Metrics|These charts display the median time between a merge request being merged and deployed to production, as part of the DORA 4 metrics.',
+  'DORA4Metrics|The chart displays the median time between a merge request being merged and deployed to production environment(s) that are based on the %{linkStart}deployment_tier%{linkEnd} value.',
 );
 
 export const chartDocumentationHref = helpPagePath('user/analytics/ci_cd_analytics.html', {

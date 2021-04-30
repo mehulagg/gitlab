@@ -1,10 +1,10 @@
 <script>
-import { GlLink } from '@gitlab/ui';
 import * as DoraApi from 'ee/api/dora_api';
 import createFlash from '~/flash';
 import { humanizeTimeInterval } from '~/lib/utils/datetime_utility';
 import { s__ } from '~/locale';
 import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
+import DoraChartHeader from './dora_chart_header.vue';
 import {
   allChartDefinitions,
   areaChartOptions,
@@ -20,8 +20,8 @@ import { buildNullSeriesForLeadTimeChart, apiDataToChartSeries } from './util';
 export default {
   name: 'LeadTimeCharts',
   components: {
-    GlLink,
     CiCdAnalyticsCharts,
+    DoraChartHeader,
   },
   inject: {
     projectPath: {
@@ -83,7 +83,6 @@ export default {
       this.tooltipValue = seconds != null ? humanizeTimeInterval(seconds) : null;
     },
   },
-  allChartDefinitions,
   areaChartOptions,
   chartDescriptionText,
   chartDocumentationHref,
@@ -91,13 +90,11 @@ export default {
 </script>
 <template>
   <div>
-    <h4 class="gl-my-4">{{ s__('DORA4|Lead time charts') }}</h4>
-    <p data-testid="help-text">
-      {{ $options.chartDescriptionText }}
-      <gl-link :href="$options.chartDocumentationHref">
-        {{ __('Learn more.') }}
-      </gl-link>
-    </p>
+    <dora-chart-header
+      :header-text="s__('DORA4Metrics|Lead time')"
+      :chart-description-text="$options.chartDescriptionText"
+      :chart-documentation-href="$options.chartDocumentationHref"
+    />
 
     <!-- Using renderer="canvas" here, otherwise the area chart coloring doesn't work if the
          first value in the series is `null`. This appears to have been fixed in ECharts v5,
