@@ -52,9 +52,6 @@ export default {
     };
   },
   computed: {
-    shouldCollectMetrics() {
-      return this.metricsConfig.collectMetrics && this.metricsConfig.path;
-    },
     hasHighlightedJob() {
       return Boolean(this.highlightedJob);
     },

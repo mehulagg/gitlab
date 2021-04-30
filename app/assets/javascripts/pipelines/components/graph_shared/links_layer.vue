@@ -73,7 +73,7 @@ export default {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   mounted() {
-    if (!this.showLinks && !isEmpty(this.pipelineData)) {
+    if (!isEmpty(this.pipelineData)) {
       window.requestAnimationFrame(() => {
         this.prepareLinkData();
       });
