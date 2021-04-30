@@ -5,6 +5,7 @@ class Release < ApplicationRecord
   include CacheMarkdownField
   include Importable
   include Gitlab::Utils::StrongMemoize
+  include ReactiveCaching
 
   cache_markdown_field :description
 
@@ -22,6 +23,7 @@ class Release < ApplicationRecord
   accepts_nested_attributes_for :links, allow_destroy: true
 
   before_create :set_released_at
+  before_update :expire_cached_description_html, if: :description_changed?
 
   validates :project, :tag, presence: true
   validates :description, length: { maximum: Gitlab::Database::MAX_TEXT_SIZE_LIMIT }, if: :should_validate_description_length?
@@ -100,7 +102,26 @@ class Release < ApplicationRecord
     project.execute_hooks(hook_data, :release_hooks)
   end
 
+  # Post-processed `description_html`
+  def description_html_for(user)
+    key = description_html_cache_key_base + "user:#{user.id}"
+
+    redis.hmset('release_description', self.id)
+
+    MarkupHelper.markdown_field(self, :description, current_user: user)
+  end
+
+  def expire_cached_description_html
+    Gitlab::Redis::SharedState.with do |redis|
+      redis.hdel('release_description', self.id)
+    end
+  end
+
   private
+
+  def description_html_cache_key_base
+    ['release_description', self.id.to_s].join(':')
+  end
 
   def should_validate_description_length?
     description_changed? &&
