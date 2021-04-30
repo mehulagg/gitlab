@@ -175,10 +175,6 @@ export default {
     },
   },
   methods: {
-    updateAuthSection(form) {
-      this.authSection.fields = serializeFormObject(form.fields);
-      this.authSection.state = form.state;
-    },
     onSubmit() {
       const isAuthEnabled =
         this.glFeatures.securityDastSiteProfilesAdditionalFields &&
