@@ -37,6 +37,20 @@ for your use.
 For smart commits to work, the committing user on GitLab must have a corresponding
 user on Jira with the same email address or username.
 
+### Smart commit syntax
+
+Smart commits should follow the pattern of:
+
+```plaintext
+<ISSUE_KEY> <ignored text> #<command> <optional command params>
+```
+
+**Examples:**
+
+- Adding a comment to a Jira issue `KEY-123 fixes a bug #comment Bug is fixed.`
+- Recording time tracking `KEY-123 #time 2w 4d 10h 52m Tracking work time.`
+- Closing an issue `KEY-123 #close Closing issue`
+
 ## Configure a GitLab application for DVCS
 
 We recommend you create and use a `jira` user in GitLab, and use the account only
