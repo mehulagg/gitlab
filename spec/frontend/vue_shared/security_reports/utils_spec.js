@@ -3,7 +3,7 @@ import {
   REPORT_TYPE_SECRET_DETECTION,
   REPORT_FILE_TYPES,
 } from '~/vue_shared/security_reports/constants';
-import { extractSecurityReportArtifacts } from '~/vue_shared/security_reports/utils';
+import { extractSecurityReportArtifactsFromMr } from '~/vue_shared/security_reports/utils';
 import {
   securityReportDownloadPathsQueryResponse,
   sastArtifacts,
@@ -13,7 +13,7 @@ import {
   metadataArtifacts,
 } from './mock_data';
 
-describe('extractSecurityReportArtifacts', () => {
+describe('extractSecurityReportArtifactsFromMr', () => {
   it.each`
     reportTypes                                         | expectedArtifacts
     ${[]}                                               | ${[]}
@@ -28,7 +28,7 @@ describe('extractSecurityReportArtifacts', () => {
     'returns the expected artifacts given report types $reportTypes',
     ({ reportTypes, expectedArtifacts }) => {
       expect(
-        extractSecurityReportArtifacts(reportTypes, securityReportDownloadPathsQueryResponse),
+        extractSecurityReportArtifactsFromMr(reportTypes, securityReportDownloadPathsQueryResponse),
       ).toEqual(expectedArtifacts);
     },
   );

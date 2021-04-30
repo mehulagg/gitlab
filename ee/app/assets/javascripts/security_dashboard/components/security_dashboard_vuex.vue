@@ -28,6 +28,11 @@ export default {
       required: false,
       default: null,
     },
+    pipelineIid: {
+      type: Number,
+      required: false,
+      default: null,
+    },
     loadingErrorIllustrations: {
       type: Object,
       required: false,

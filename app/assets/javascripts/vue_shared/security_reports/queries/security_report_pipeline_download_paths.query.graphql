@@ -1,0 +1,21 @@
+query getCorpuses(
+  $projectPath: ID!
+  $iid: ID
+  $reportTypes: [SecurityReportTypeEnum!]
+) {
+  project(fullPath:$projectPath) {
+    pipeline(iid: $iid) {
+      jobs (securityReportTypes: $reportTypes) {
+        nodes {
+          name
+          artifacts {
+            nodes {
+              downloadPath
+              fileType
+            }
+          }
+        }
+      }
+    }
+  }
+}

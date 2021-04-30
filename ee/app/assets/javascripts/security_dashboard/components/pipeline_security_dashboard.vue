@@ -116,6 +116,7 @@ export default {
       :vulnerabilities-endpoint="vulnerabilitiesEndpoint"
       :lock-to-project="{ id: projectId }"
       :pipeline-id="pipelineId"
+      :pipeline-iid="pipelineIid"
       :loading-error-illustrations="loadingErrorIllustrations"
       :security-report-summary="securityReportSummary"
     >

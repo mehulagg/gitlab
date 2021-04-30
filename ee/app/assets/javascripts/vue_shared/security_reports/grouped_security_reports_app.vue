@@ -12,7 +12,7 @@ import SummaryRow from '~/reports/components/summary_row.vue';
 import { LOADING } from '~/reports/constants';
 import Tracking from '~/tracking';
 import SecuritySummary from '~/vue_shared/security_reports/components/security_summary.vue';
-import ArtifactDownload from './components/artifact_download.vue';
+import ArtifactDownload from './components/artifact_downloads/mr_artifact_download.vue';
 import DastModal from './components/dast_modal.vue';
 import IssueModal from './components/modal.vue';
 import { securityReportTypeEnumToReportType } from './constants';
