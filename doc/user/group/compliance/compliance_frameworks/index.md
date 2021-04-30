@@ -26,7 +26,6 @@ A scoped compliance framework will appear if the name is using the (`::`) syntax
 
 ![List of created compliance frameworks](../compliance_frameworks/img/compliance_framework_example.png)
 
-
 #### Pipeline Compliance
 Any projects using a compliance framework with a location specified for its `compliance pipeline configuration` will be required to include this .yml file during its runtime.
 
