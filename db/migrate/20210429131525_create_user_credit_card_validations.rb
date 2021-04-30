@@ -14,7 +14,7 @@ class CreateUserCreditCardValidations < ActiveRecord::Migration[6.0]
     with_lock_retries do
       create_table :user_credit_card_validations, id: false do |t|
         t.references :user, foreign_key: { on_delete: :cascade }, index: true, null: false, primary_key: true
-        t.timestamp :credit_card_validated_at, null: false
+        t.datetime_with_timezone :credit_card_validated_at, null: false
       end
     end
   end

@@ -1811,6 +1811,7 @@ Gitlab/NamespacedClass:
     - 'app/models/user_preference.rb'
     - 'app/models/user_status.rb'
     - 'app/models/user_synced_attributes_metadata.rb'
+    - 'app/models/user_credit_card_validation.rb'
     - 'app/models/users_star_project.rb'
     - 'app/models/users_statistics.rb'
     - 'app/models/vulnerability.rb'

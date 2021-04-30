@@ -1852,6 +1852,7 @@ class User < ApplicationRecord
   def user_credit_card_validation
     super.presence || build_user_credit_card_validation
   end
+
   def pending_todo_for(target)
     todos.find_by(target: target, state: :pending)
   end
