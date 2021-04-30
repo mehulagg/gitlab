@@ -115,8 +115,8 @@ reviewers/maintainers must not ask authors to use one style or the other, as bot
 are accepted. This isn't an ideal situation since this leaves space for
 [bike-shedding](https://en.wiktionary.org/wiki/bikeshedding), and ideally we
 should enable all RuboCop rules to avoid style-related
-discussions/nitpicking/back-and-forth in reviews. There are some rules that are
-not easily enforced using RuboCop, or that are currently undecided. The
+discussions/nitpicking/back-and-forth in reviews. There are some styles that
+commonly come up in reviews that are not enforced, the
 [bikeshedding section](#bikeshedding) covers some of these topics.
 
 Additionally, we have a dedicated
