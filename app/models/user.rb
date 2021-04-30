@@ -316,11 +316,9 @@ class User < ApplicationRecord
   delegate :bio, :bio=, :bio_html, to: :user_detail, allow_nil: true
   delegate :webauthn_xid, :webauthn_xid=, to: :user_detail, allow_nil: true
 
-  delegate :credit_card_validated_at, :credit_card_validated_at=, to: :user_credit_card_validation, allow_nil: false
-
   accepts_nested_attributes_for :user_preference, update_only: true
   accepts_nested_attributes_for :user_detail, update_only: true
-  accepts_nested_attributes_for :user_credit_card_validation
+  accepts_nested_attributes_for :user_credit_card_validation, update_only: true
 
   state_machine :state, initial: :active do
     event :block do
@@ -1847,10 +1845,6 @@ class User < ApplicationRecord
 
   def user_detail
     super.presence || build_user_detail
-  end
-
-  def user_credit_card_validation
-    super.presence || build_user_credit_card_validation
   end
 
   def pending_todo_for(target)
