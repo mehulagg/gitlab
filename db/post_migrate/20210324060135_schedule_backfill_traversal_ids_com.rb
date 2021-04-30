@@ -17,7 +17,7 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
 
     # Personal namespaces and top-level groups
     final_delay = queue_background_migration_jobs_by_range_at_intervals(
-      ::Gitlab::BackgroundMigration::BackfillNamespaceTraversalIdsRoots::BASE_QUERY,
+      ::Gitlab::BackgroundMigration::BackfillNamespaceTraversalIdsRoots.base_query,
       ROOTS_MIGRATION,
       DELAY_INTERVAL,
       batch_size: BATCH_SIZE,
@@ -28,7 +28,7 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
 
     # Subgroups
     queue_background_migration_jobs_by_range_at_intervals(
-      ::Gitlab::BackgroundMigration::BackfillNamespaceTraversalIdsChildren::BASE_QUERY,
+      ::Gitlab::BackgroundMigration::BackfillNamespaceTraversalIdsChildren.base_query,
       CHILDREN_MIGRATION,
       DELAY_INTERVAL,
       batch_size: BATCH_SIZE,

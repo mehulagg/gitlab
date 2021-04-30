@@ -12,13 +12,16 @@ module Gitlab
         self.table_name = 'namespaces'
       end
 
-      BASE_QUERY = Namespace
-        .where('parent_id IS NULL')
-        .where("traversal_ids = '{}'")
       PAUSE_SECONDS = 0.1
 
+      def self.base_query
+        Namespace
+          .where(parent_id: nil)
+          .where("traversal_ids = '{}'")
+      end
+
       def perform(start_id, end_id, sub_batch_size)
-        ranged_query = BASE_QUERY.where(id: start_id..end_id)
+        ranged_query = self.class.base_query.where(id: start_id..end_id)
         ranged_query.each_batch(of: sub_batch_size) do |sub_batch|
           sub_batch.update_all('traversal_ids = ARRAY[id]')
           sleep PAUSE_SECONDS
