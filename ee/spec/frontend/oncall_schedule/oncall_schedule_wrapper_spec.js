@@ -6,7 +6,7 @@ import OnCallSchedule from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import OnCallScheduleWrapper, {
   i18n,
 } from 'ee/oncall_schedules/components/oncall_schedules_wrapper.vue';
-import { EscalationPolicyHref } from 'ee/oncall_schedules/constants';
+import { escalationPolicyUrl } from 'ee/oncall_schedules/constants';
 import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
@@ -124,7 +124,7 @@ describe('On-call schedule wrapper', () => {
       const alert = findAlert();
       expect(alert.exists()).toBe(true);
       expect(alert.props('title')).toBe(i18n.successNotification.title);
-      expect(findAlertLink().attributes('href')).toBe(EscalationPolicyHref);
+      expect(findAlertLink().attributes('href')).toBe(escalationPolicyUrl);
       expect(findAlertDescription().text()).toContain(
         'To create an escalation policy using this schedule',
       );

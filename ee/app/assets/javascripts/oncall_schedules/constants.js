@@ -56,4 +56,4 @@ export const oneDayOffsetWeekView = 100 / DAYS_IN_WEEK;
 export const oneHourOffsetWeekView = oneDayOffsetWeekView / HOURS_IN_DAY;
 
 // TODO: Replace with href to documentation once https://gitlab.com/groups/gitlab-org/-/epics/4638 is completed
-export const EscalationPolicyHref = 'https://gitlab.com/groups/gitlab-org/-/epics/4638';
+export const escalationPolicyUrl = 'https://gitlab.com/groups/gitlab-org/-/epics/4638';

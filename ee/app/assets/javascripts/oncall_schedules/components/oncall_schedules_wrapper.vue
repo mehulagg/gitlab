@@ -12,7 +12,7 @@ import {
 import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { EscalationPolicyHref } from '../constants';
+import { escalationPolicyUrl } from '../constants';
 import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import AddScheduleModal from './add_edit_schedule_modal.vue';
 import OncallSchedule from './oncall_schedule.vue';
@@ -46,7 +46,7 @@ export const i18n = {
 export default {
   i18n,
   addScheduleModalId,
-  EscalationPolicyHref,
+  escalationPolicyUrl,
   components: {
     GlAlert,
     GlButton,
@@ -144,7 +144,7 @@ export default {
           <template #link="{ content }">
             <gl-link
               class="gl-display-inline-block"
-              :href="$options.EscalationPolicyHref"
+              :href="$options.escalationPolicyUrl"
               target="_blank"
             >
               {{ content }}
