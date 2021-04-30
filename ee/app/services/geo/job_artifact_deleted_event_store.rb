@@ -8,12 +8,13 @@ module Geo
 
     attr_reader :job_artifact
 
-    def self.create(artifacts)
+    def self.bulk_create(artifacts)
       return unless can_create_event?
 
       events = artifacts
         .map { |artifact| new(artifact).build_valid_event }
         .compact
+      return if events.empty?
 
       Geo::EventLog.transaction do
         ids = JobArtifactDeletedEvent.bulk_insert!(events, validate: false, returns: :ids)

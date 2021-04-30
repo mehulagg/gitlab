@@ -21,7 +21,7 @@ module EE
         end
 
         def insert_geo_event_records(artifacts)
-          ::Geo::JobArtifactDeletedEventStore.create(artifacts)
+          ::Geo::JobArtifactDeletedEventStore.bulk_create(artifacts)
         end
       end
     end
