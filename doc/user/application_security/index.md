@@ -28,48 +28,6 @@ GitLab also provides high-level statistics of vulnerabilities across projects an
 For an overview of GitLab application security, see [Shifting Security Left](https://www.youtube.com/watch?v=XnYstHObqlA&t),
 which provides an overview of GitLab's capabilities.
 
-## Quick start
-
-Get started quickly with Dependency Scanning, License Scanning, Static Application Security
-Testing (SAST), and Secret Detection by adding the following to your [`.gitlab-ci.yml`](../../ci/yaml/README.md):
-
-```yaml
-include:
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
-  - template: Security/License-Scanning.gitlab-ci.yml
-  - template: Security/SAST.gitlab-ci.yml
-  - template: Security/Secret-Detection.gitlab-ci.yml
-```
-
-To add Dynamic Application Security Testing (DAST) scanning, add the following to your
-`.gitlab-ci.yml` and replace `https://staging.example.com` with a staging server's web address:
-
-```yaml
-include:
-  - template: Security/DAST.gitlab-ci.yml
-
-variables:
-  DAST_WEBSITE: https://staging.example.com
-```
-
-To ensure the DAST scanner runs *after* deploying the application to the staging server, review the [DAST full documentation](dast/index.md).
-
-To add Container Scanning, follow the steps listed in the [Container Scanning documentation](container_scanning/index.md#requirements).
-
-To further configure any of the other scanners, refer to each scanner's documentation.
-
-### SAST configuration
-
-You can set up and configure Static Application Security Testing
-(SAST) for your project, without opening a text editor. For more details,
-see [configure SAST in the UI](sast/index.md#configure-sast-in-the-ui).
-
-### Override the default registry base address
-
-By default, GitLab security scanners use `registry.gitlab.com/gitlab-org/security-products/analyzers` as the
-base address for Docker images. You can override this globally by setting the CI/CD variable
-`SECURE_ANALYZERS_PREFIX` to another location. Note that this affects all scanners at once.
-
 ## Security scanning tools
 
 GitLab uses the following tools to scan and report known vulnerabilities found in your project.
@@ -86,23 +44,10 @@ GitLab uses the following tools to scan and report known vulnerabilities found i
 | [Static Application Security Testing (SAST)](sast/index.md)                  | Analyze source code for known vulnerabilities.                         |
 | [Coverage fuzzing](coverage_fuzzing/index.md) **(ULTIMATE)**                 | Find unknown bugs and vulnerabilities with coverage-guided fuzzing.    |
 
-### Use security scanning tools with Pipelines for Merge Requests
+## Security scanning with Auto DevOps
 
-The security scanning tools can all be added to pipelines with [templates](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates/Security).
-See each tool for details on how to use include each template in your CI/CD configuration.
-
-By default, the application security jobs are configured to run for branch pipelines only.
-To use them with [pipelines for merge requests](../../ci/merge_request_pipelines/index.md),
-you may need to override the default `rules:` configuration to add:
-
-```yaml
-rules:
-  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-```
-
-## Security Scanning with Auto DevOps
-
-When [Auto DevOps](../../topics/autodevops/) is enabled, all GitLab Security scanning tools are configured using default settings.
+To enable all GitLab Security scanning tools, with default settings, enable
+[Auto DevOps](../../topics/autodevops/):
 
 - [Auto SAST](../../topics/autodevops/stages.md#auto-sast)
 - [Auto Secret Detection](../../topics/autodevops/stages.md#auto-secret-detection)
@@ -112,6 +57,53 @@ When [Auto DevOps](../../topics/autodevops/) is enabled, all GitLab Security sca
 - [Auto Container Scanning](../../topics/autodevops/stages.md#auto-container-scanning)
 
 While you cannot directly customize Auto DevOps, you can [include the Auto DevOps template in your project's `.gitlab-ci.yml` file](../../topics/autodevops/customize.md#customizing-gitlab-ciyml).
+
+## Customize security scanning
+
+To enable all GitLab Security scanning tools, with the option of customizing settings, add the
+GitLab CI/CD templates to your `.gitlab-ci.yml` file.
+
+To enable Static Application Security Testing, Dependency Scanning, License Scanning, and Secret
+Detection, add:
+
+```yaml
+include:
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+```
+
+To enable Dynamic Application Security Testing (DAST) scanning, add the following to your
+`.gitlab-ci.yml`. Replace `https://staging.example.com` with a staging server's web address:
+
+```yaml
+include:
+  - template: Security/DAST.gitlab-ci.yml
+
+variables:
+  DAST_WEBSITE: https://staging.example.com
+```
+
+For more details about each of the security scanning tools, see their respective documentation
+sections.
+
+### Override the default registry base address
+
+By default, GitLab security scanners use `registry.gitlab.com/gitlab-org/security-products/analyzers` as the
+base address for Docker images. You can override this globally by setting the CI/CD variable
+`SECURE_ANALYZERS_PREFIX` to another location. Note that this affects all scanners at once.
+
+### Use security scanning tools with Pipelines for Merge Requests
+
+By default, the application security jobs are configured to run for branch pipelines only.
+To use them with [pipelines for merge requests](../../ci/merge_request_pipelines/index.md),
+you may need to override the default `rules:` configuration to add:
+
+```yaml
+rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+```
 
 ## Maintenance and update of the vulnerabilities database
 
