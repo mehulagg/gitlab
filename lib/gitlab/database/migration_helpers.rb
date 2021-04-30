@@ -581,6 +581,16 @@ module Gitlab
         Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).create(old, new, trigger_name: trigger_name)
       end
 
+      # Removes the triggers used for renaming a column concurrently.
+      def remove_rename_triggers(table, trigger)
+        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).drop(trigger)
+      end
+
+      # Returns the (base) name to use for triggers when renaming columns.
+      def rename_trigger_name(table, old, new)
+        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).name(old, new)
+      end
+
       # Changes the type of a column concurrently.
       #
       # table - The table containing the column.
@@ -1078,16 +1088,6 @@ module Gitlab
         ])
 
         execute("DELETE FROM batched_background_migrations WHERE #{conditions}")
-      end
-
-      # Removes the triggers used for renaming a column concurrently.
-      def remove_rename_triggers(table, trigger)
-        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).drop(trigger)
-      end
-
-      # Returns the (base) name to use for triggers when renaming columns.
-      def rename_trigger_name(table, old, new)
-        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).name(old, new)
       end
 
       # Returns an Array containing the indexes for the given column
