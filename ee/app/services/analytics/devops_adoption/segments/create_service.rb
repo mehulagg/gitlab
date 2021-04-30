@@ -15,7 +15,7 @@ module Analytics
         def execute
           authorize!
 
-          segment.assign_attributes(namespace: namespace, display_namespace: namespace)
+          segment.assign_attributes(namespace: namespace, display_namespace: display_namespace)
 
           if segment.save
             Analytics::DevopsAdoption::CreateSnapshotWorker.perform_async(segment.id)
@@ -28,14 +28,10 @@ module Analytics
 
         private
 
-        attr_reader :segment, :params, :current_user
+        attr_reader :segment
 
         def response_payload
           { segment: segment }
-        end
-
-        def namespace
-          params[:namespace]
         end
       end
     end

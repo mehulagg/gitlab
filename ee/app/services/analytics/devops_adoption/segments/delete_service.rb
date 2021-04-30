@@ -25,14 +25,12 @@ module Analytics
 
         private
 
-        attr_reader :segment, :current_user
+        attr_reader :segment
+
+        delegate :namespace, :display_namespace, to: :segment
 
         def response_payload
           { segment: segment }
-        end
-
-        def namespace
-          segment.namespace
         end
       end
     end

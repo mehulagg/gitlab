@@ -42,6 +42,19 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
     end
   end
 
+  describe '.for_display_namespaces' do
+    subject(:segments) { described_class.for_display_namespaces(namespaces) }
+
+    let_it_be(:segment1) { create(:devops_adoption_segment) }
+    let_it_be(:segment2) { create(:devops_adoption_segment) }
+    let_it_be(:segment3) { create(:devops_adoption_segment) }
+    let_it_be(:namespaces) { [segment1.display_namespace, segment2.display_namespace]}
+
+    it 'selects segments for given namespaces only' do
+      expect(segments).to match_array([segment1, segment2])
+    end
+  end
+
   describe '.for_parent' do
     let_it_be(:group) { create :group }
     let_it_be(:subgroup) { create :group, parent: group }

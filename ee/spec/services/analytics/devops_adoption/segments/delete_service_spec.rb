@@ -4,9 +4,16 @@ require 'spec_helper'
 
 RSpec.describe Analytics::DevopsAdoption::Segments::DeleteService do
   let_it_be(:group) { create(:group) }
-  let_it_be(:reporter) { create(:user).tap { |u| group.add_reporter(u) } }
+  let_it_be(:display_group) { create(:group) }
 
-  let(:segment) { create(:devops_adoption_segment, namespace: group) }
+  let_it_be(:reporter) do
+    create(:user).tap do |u|
+      group.add_reporter(u)
+      display_group.add_reporter(u)
+    end
+  end
+
+  let(:segment) { create(:devops_adoption_segment, namespace: group, display_namespace: display_group) }
   let(:current_user) { reporter }
 
   subject(:response) { described_class.new(segment: segment, current_user: current_user).execute }
@@ -29,8 +36,9 @@ RSpec.describe Analytics::DevopsAdoption::Segments::DeleteService do
     end
   end
 
-  it 'authorizes for manage_devops_adoption' do
+  it 'authorizes for manage_devops_adoption', :aggregate_failures do
     expect(::Ability).to receive(:allowed?).with(current_user, :manage_devops_adoption_segments, group).and_return true
+    expect(::Ability).to receive(:allowed?).with(current_user, :manage_devops_adoption_segments, display_group).and_return true
 
     response
   end
