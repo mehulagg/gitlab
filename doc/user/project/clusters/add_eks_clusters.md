@@ -232,7 +232,7 @@ sequenceDiagram
 First, GitLab must obtain an initial set of credentials to communicate with the AWS API.
 These credentials can be retrieved in one of two ways:
 
-- Statically through the [Administration settings](#administration-settings).
+- Statically through the [Configure Amazon authentication](#configure-amazon-authentication).
 - Dynamically via an IAM instance profile ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/291015) in GitLab 13.7).
 
 After GitLab retrieves the AWS credentials, it makes an
@@ -272,7 +272,7 @@ arn:aws:iam::123456789012:role/gitlab-eks-provision'
 #### Access denied: User `arn:aws:iam::x` is not authorized to perform: `sts:AssumeRole` on resource: `arn:aws:iam::y`
 
 This error occurs when the credentials defined in the
-[Administration settings](#administration-settings) cannot assume the role defined by the
+[Configure Amazon authentication](#configure-amazon-authentication) cannot assume the role defined by the
 Provision Role ARN. Check that:
 
 1. The initial set of AWS credentials [has the AssumeRole policy](#additional-requirements-for-self-managed-instances).
