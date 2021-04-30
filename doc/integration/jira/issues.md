@@ -6,84 +6,71 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Jira integration issue management **(FREE)**
 
-By now you should have [configured Jira](development_panel.md#configuration) and enabled the
-[Jira service in GitLab](development_panel.md#configure-gitlab). If everything is set up correctly
-you should be able to reference and close Jira issues by just mentioning their
-ID in GitLab commits and merge requests.
-
-Jira issue IDs must be formatted in uppercase for the integration to work.
+Integrating issue management with Jira requires you to [configure Jira](development_panel.md#configuration)
+and [enable the Jira service](development_panel.md#configure-gitlab) in GitLab.
+After you configure and enable the integration, you can reference and close Jira
+issues by mentioning the Jira ID in GitLab commits and merge requests. Jira issue IDs
+must be formatted in uppercase.
 
 ## Reference Jira issues
 
-When GitLab project has Jira issue tracker configured and enabled, mentioning
-Jira issues in GitLab automatically adds a comment in Jira issue with the
-link back to GitLab. This means that in comments in merge requests and commits
-referencing an issue, `PROJECT-7` for example, adds a comment in Jira issue in the
-format:
+With this integration, you can cross-reference Jira issues while you work in
+GitLab issues and merge requests. Mention a Jira issue in a GitLab issue,
+merge request, or comment, and GitLab adds a formatted comment to the Jira issue.
+The comment links back to your work in GitLab: For example, this commit references
+the Jira issue `GIT-1`:
+
+```shell
+git commit -m "GIT-1 this is a test commit"
+```
+
+GitLab adds a reference to the **Issue Links** section of Jira issue `GIT-1`:
+
+![Example of mentioning or closing the Jira issue](img/jira_issue_reference.png)
+
+GitLab also adds a comment to the issue, and uses this format:
 
 ```plaintext
-USER mentioned this issue in RESOURCE_NAME of [PROJECT_NAME|LINK_TO_COMMENT]:
+USER mentioned this issue in RESOURCE_NAME of [PROJECT_NAME|COMMENTLINK]:
 ENTITY_TITLE
 ```
 
-- `USER` A user that mentioned the issue. This is the link to the user profile in GitLab.
-- `LINK_TO_THE_COMMENT` Link to the origin of mention with a name of the entity where Jira issue was mentioned.
-- `RESOURCE_NAME` Kind of resource which referenced the issue. Can be a commit or merge request.
-- `PROJECT_NAME` GitLab project name.
-- `ENTITY_TITLE` Merge request title or commit message first line.
-
-![example of mentioning or closing the Jira issue](img/jira_issue_reference.png)
-
-For example, the following commit references the Jira issue with `PROJECT-1` as its ID:
-
-```shell
-git commit -m "PROJECT-1 Fix spelling and grammar"
-```
+- `USER`: The name of the user who mentioned the issue, linked to their GitLab user profile.
+- `COMMENTLINK`: A link to where the Jira issue was mentioned.
+- `RESOURCE_NAME`: The type of resource, such as a commit or merge request, which referenced the issue.
+- `PROJECT_NAME`: The GitLab project name.
+- `ENTITY_TITLE`: The title of the merge request, or the first line of the commit.
 
 ## Close Jira issues
 
-Jira issues can be closed directly from GitLab by using trigger words in
-commits and merge requests. When a commit which contains the trigger word
-followed by the Jira issue ID in the commit message is pushed, GitLab
-adds a comment in the mentioned Jira issue and immediately closes it (provided
-the transition ID was set up correctly).
+If you have configured GitLab transition IDs, you can close a Jira issue directly
+from GitLab by using a trigger word, followed by a Jira issue ID, in a commit or merge request.
+When you push a commit containing a trigger word and Jira issue ID, GitLab:
 
-There are currently three trigger words, and you can use either one to achieve
-the same goal:
+- Comments in the mentioned Jira issue.
+- Closes the Jira issue. If the Jira issue has a resolution, it is not transitioned.
+
+You can use any of these trigger words to close Jira issue `PROJECT-1`:
 
 - `Resolves PROJECT-1`
 - `Closes PROJECT-1`
 - `Fixes PROJECT-1`
 
-where `PROJECT-1` is the ID of the Jira issue.
+The commit, or merge request, must target your project's [default branch](../../user/project/repository/branches/default.md).
+You can change your project's default branch under [project settings](img/jira_project_settings.png).
 
-Note the following:
+### Use case for closing issues
 
-- Only commits and merges into the project's default branch (usually `master`)
-  close an issue in Jira. You can change your project's default branch under
-  [project settings](img/jira_project_settings.png).
-- The Jira issue is not transitioned if it has a resolution.
+Consider this example:
 
-Let's consider the following example:
-
-1. For the project named `PROJECT` in Jira, we implemented a new feature
-   and created a merge request in GitLab.
-1. This feature was requested in Jira issue `PROJECT-7` and the merge request
-   in GitLab contains the improvement
-1. In the merge request description we use the issue closing trigger
-   `Closes PROJECT-7`.
-1. Once the merge request is merged, the Jira issue is automatically closed
-   with a comment and an associated link to the commit that resolved the issue.
-
-In the following screenshot you can see what the link references to the Jira
-issue look like.
-
-![A Git commit that causes the Jira issue to be closed](img/jira_merge_request_close.png)
-
-Once this merge request is merged, the Jira issue is automatically closed
-with a link to the commit that resolved the issue.
-
-![The GitLab integration closes Jira issue](img/jira_service_close_issue.png)
+1. A user creates Jira issue `PROJECT-7` to request a new feature.
+1. You create a merge request in GitLab to build the requested feature.
+1. In the merge request, you add the issue closing trigger `Closes PROJECT-7`.
+1. When the merge request is merged:
+   - GitLab closes the Jira issue for you:
+     ![The GitLab integration closes Jira issue](img/jira_service_close_issue.png)
+   - GitLab adds a formatted comment to Jira, linking back to the commit that
+     resolved the issue.
 
 ## View Jira issues **(PREMIUM)**
 
