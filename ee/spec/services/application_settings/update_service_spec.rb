@@ -170,6 +170,26 @@ RSpec.describe ApplicationSettings::UpdateService do
             end
           end
         end
+
+        context 'setting number_of_shards and number_of_replicas' do
+          it 'accepts hash values' do
+            opts = { elasticsearch_shards: { 'gitlab-test' => 10 }, elasticsearch_replicas: { 'gitlab-test' => 2 } }
+
+            described_class.new(setting, user, opts).execute
+
+            expect(Elastic::IndexSetting.default.number_of_shards).to eq(10)
+            expect(Elastic::IndexSetting.default.number_of_replicas).to eq(2)
+          end
+
+          it 'accepts legacy (integer) values' do
+            opts = { elasticsearch_shards: 32, elasticsearch_replicas: 3 }
+
+            described_class.new(setting, user, opts).execute
+
+            expect(Elastic::IndexSetting.default.number_of_shards).to eq(32)
+            expect(Elastic::IndexSetting.default.number_of_replicas).to eq(3)
+          end
+        end
       end
     end
 
