@@ -1030,10 +1030,10 @@ RSpec.describe Repository do
       end
     end
 
-    context 'when specifying a wildcard path to subfolder with two asterisks and a slash' do
+    context 'when specifying a path to subfolders using two asterisks and a slash' do
       let(:path) { 'files/**/*.md' }
 
-      it 'returns all files in the matching the path' do
+      it 'returns all files matching the path' do
         expect(result).to contain_exactly('files/markdown/ruby-style-guide.md')
       end
     end
@@ -1041,7 +1041,7 @@ RSpec.describe Repository do
     context 'when specifying a wildcard path to subfolder with just two asterisks' do
       let(:path) { 'files/**.md' }
 
-      it 'returns all files in the matching the path' do
+      it 'returns all files in the matching path' do
         expect(result).to contain_exactly('files/markdown/ruby-style-guide.md')
       end
     end
@@ -1049,12 +1049,12 @@ RSpec.describe Repository do
     context 'when specifying a wildcard path to subfolder with one asterisk' do
       let(:path) { 'files/*/*.md' }
 
-      it 'returns all files in the matching the path' do
+      it 'returns all files in the matching path' do
         expect(result).to contain_exactly('files/markdown/ruby-style-guide.md')
       end
     end
 
-    context 'when specifying a wildcard path to unknown level of subfolders' do
+    context 'when specifying a wildcard path for an unknown number of subfolder levels' do
       let(:path) { '**/*.rb' }
 
       it 'returns all matched files in all subfolders' do
@@ -1065,7 +1065,7 @@ RSpec.describe Repository do
       end
     end
 
-    context 'when specifying a wildcard path to a level of subfolders' do
+    context 'when specifying a wildcard path to one level of subfolders' do
       let(:path) { '*/*.rb' }
 
       it 'returns all matched files in one subfolder' do
