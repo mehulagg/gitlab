@@ -103,10 +103,12 @@ export function initCadenceForm() {
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      groupPath,
+    },
     render(createElement) {
       return createElement(IterationCadenceForm, {
         props: {
-          groupPath,
           cadenceId,
           cadencesListPath,
         },

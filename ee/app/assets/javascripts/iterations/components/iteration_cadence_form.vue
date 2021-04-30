@@ -65,11 +65,8 @@ export default {
     GlFormInput,
     GlFormSelect,
   },
+  inject: ['groupPath'],
   props: {
-    groupPath: {
-      type: String,
-      required: true,
-    },
     cadencesListPath: {
       type: String,
       required: false,
