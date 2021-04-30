@@ -10,19 +10,57 @@ class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
   def perform(raw)
     return unless Gitlab::IncomingEmail.enabled?
 
-    begin
-      Gitlab::Email::Receiver.new(raw).execute
-    rescue StandardError => e
-      handle_failure(raw, e)
-    end
+    @raw = raw
+
+    receiver.execute
+    log_success
+  rescue Gitlab::Email::ProcessingError => e
+    log_error(e)
+    handle_failure(e)
+  rescue StandardError => e
+    log_error(e)
+    # If there is an internal error, allow job to retry
+    raise
   end
 
   private
 
-  def handle_failure(raw, error)
-    Gitlab::AppLogger.warn("Email can not be processed: #{error}\n\n#{raw}")
+  def log_success
+    payload = receiver.mail_metadata.merge({ message: "Successfully processed message" })
+    Sidekiq.logger.info(payload)
+  end
 
-    return unless raw.present?
+  def log_error(error)
+    Gitlab::ErrorTracking.track_exception(error) unless error.is_a?(Gitlab::Email::ProcessingError)
+
+    payload =
+      case error
+      # Unparsable e-mails don't have metadata we can use
+      when Gitlab::Email::EmailUnparsableError, Gitlab::Email::EmptyEmailError
+        {}
+      else
+        mail_metadata
+      end
+
+    Gitlab::ExceptionLogFormatter.format!(error, payload)
+    Sidekiq.logger.error(payload)
+  end
+
+  def receiver
+    @receiver ||= Gitlab::Email::Receiver.new(@raw)
+  end
+
+  def mail_metadata
+    receiver.mail_metadata
+  rescue StandardError => e
+    # We should never get here as long as we check EmailUnparsableError, but
+    # let's be defensive in case we did something wrong.
+    Gitlab::ErrorTracking.track_exception(e)
+    {}
+  end
+
+  def handle_failure(error)
+    return unless @raw.present?
 
     can_retry = false
     reason =
@@ -52,7 +90,7 @@ class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
       end
 
     if reason
-      EmailRejectionMailer.rejection(reason, raw, can_retry).deliver_later
+      EmailRejectionMailer.rejection(reason, @raw, can_retry).deliver_later
     end
   end
 end
