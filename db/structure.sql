@@ -18210,7 +18210,7 @@ ALTER SEQUENCE user_canonical_emails_id_seq OWNED BY user_canonical_emails.id;
 
 CREATE TABLE user_credit_card_validations (
     user_id bigint NOT NULL,
-    credit_card_validated_at timestamp without time zone NOT NULL
+    credit_card_validated_at timestamp with time zone NOT NULL
 );
 
 CREATE SEQUENCE user_credit_card_validations_user_id_seq
