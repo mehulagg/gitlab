@@ -17,5 +17,5 @@ following compliance tools are available:
   with your project's license.
 - [Compliance Framework Labels](../project/settings/index.md#compliance-framework): Label your projects that have unique compliance requirements.
 - [Compliance pipelines](../project/settings/index.md#compliance-pipeline-configuration): Ensure that needed compliance jobs are always run for compliance-labeled project.
-- [Audit Events](../administration/audit_events.md): Get visibility into individual actions that have taken place in your GitLab instance, group, or project.
-- [Audit Reports](../administration/audit_reports.md): Create and access reports based on the audit events that have occurred. Use pre-built GitLab reports or the API to build your own.
+- [Audit Events](../administration/audit_events/index.md): Get visibility into individual actions that have taken place in your GitLab instance, group, or project.
+- [Audit Reports](../administration/audit_reports/index.md): Create and access reports based on the audit events that have occurred. Use pre-built GitLab reports or the API to build your own.
