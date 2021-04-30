@@ -307,9 +307,15 @@ module EE
     end
 
     def elasticsearch_url_with_credentials
-      return elasticsearch_url if elasticsearch_username.blank? && elasticsearch_password.blank?
+      return elasticsearch_url if elasticsearch_username.blank?
 
-      elasticsearch_url
+      elasticsearch_url.map do |url|
+        uri = URI.parse(url)
+
+        uri.user = elasticsearch_username
+        uri.password = elasticsearch_password.presence
+        uri.to_s
+      end
     end
 
     def elasticsearch_config
