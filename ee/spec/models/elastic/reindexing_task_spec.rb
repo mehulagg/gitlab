@@ -27,6 +27,15 @@ RSpec.describe Elastic::ReindexingTask, type: :model do
     expect(task.in_progress).to eq(true)
   end
 
+  it 'sets default values for max_slices_running and slice_multiplier' do
+    # supports field not being set and field being set to nil
+    task = described_class.create!(max_slices_running: nil)
+
+    expect(task).to be_valid
+    expect(task.max_slices_running).to eq(60)
+    expect(task.slice_multiplier).to eq(2)
+  end
+
   describe '.drop_old_indices!' do
     let(:task_1) { create(:elastic_reindexing_task, :with_subtask, state: :reindexing, delete_original_index_at: 1.day.ago) }
     let(:task_2) { create(:elastic_reindexing_task, :with_subtask, state: :success, delete_original_index_at: nil) }

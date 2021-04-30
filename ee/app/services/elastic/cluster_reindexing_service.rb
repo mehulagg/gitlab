@@ -13,8 +13,6 @@ module Elastic
     DELETE_ORIGINAL_INDEX_AFTER = 14.days
 
     REINDEX_MAX_RETRY_LIMIT = 10
-    REINDEX_MAX_TOTAL_SLICES_RUNNING = 60
-    REINDEX_SLICE_MULTIPLIER = 2
 
     def execute
       case current_task.state.to_sym
@@ -90,7 +88,7 @@ module Elastic
           documents_count: documents_count
         )
 
-        max_slice = elastic_helper.get_settings(index_name: old_index_name).dig('number_of_shards').to_i * REINDEX_SLICE_MULTIPLIER
+        max_slice = elastic_helper.get_settings(index_name: old_index_name).dig('number_of_shards').to_i * current_task.slice_multiplier
         0.upto(max_slice - 1).to_a.each do |slice|
           subtask.slices.create!(
             elastic_max_slice: max_slice,
@@ -205,7 +203,7 @@ module Elastic
 
     def trigger_reindexing_slices(slices_in_progress = 0)
       current_task.subtasks.each do |subtask|
-        slices_to_start = REINDEX_MAX_TOTAL_SLICES_RUNNING - slices_in_progress
+        slices_to_start = current_task.max_slices_running - slices_in_progress
         break if slices_to_start == 0
 
         subtask.slices.not_started.limit(slices_to_start).each do |slice|
