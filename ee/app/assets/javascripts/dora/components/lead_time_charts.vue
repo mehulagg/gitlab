@@ -3,7 +3,7 @@ import * as DoraApi from 'ee/api/dora_api';
 import createFlash from '~/flash';
 import { humanizeTimeInterval } from '~/lib/utils/datetime_utility';
 import { s__ } from '~/locale';
-import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
+import CiCdAnalyticsCharts from '~/vue_shared/components/ci_cd_analytics/ci_cd_analytics_charts.vue';
 import DoraChartHeader from './dora_chart_header.vue';
 import {
   allChartDefinitions,

@@ -1,6 +1,6 @@
-import DoraChartHeader from 'ee/projects/pipelines/charts/components/dora_chart_header.vue';
-import { chartDescriptionText } from 'ee/projects/pipelines/charts/components/static_data/lead_time';
-import { environmentTierDocumentationHref } from 'ee/projects/pipelines/charts/components/static_data/shared';
+import DoraChartHeader from 'ee/dora/components/dora_chart_header.vue';
+import { chartDescriptionText } from 'ee/dora/components/static_data/lead_time';
+import { environmentTierDocumentationHref } from 'ee/dora/components/static_data/shared';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 
 describe('dora_chart_header.vue', () => {

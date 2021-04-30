@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ee/projects/pipelines/charts/components/util.js lead time data returns the correct lead time chart data after all processing of the API response 1`] = `
+exports[`ee/dora/components/util.js lead time data returns the correct lead time chart data after all processing of the API response 1`] = `
 Array [
   Object {
     "areaStyle": Object {

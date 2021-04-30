@@ -5,7 +5,7 @@ import { useFixturesFakeDate } from 'helpers/fake_date';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
-import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
+import CiCdAnalyticsCharts from '~/vue_shared/components/ci_cd_analytics/ci_cd_analytics_charts.vue';
 
 jest.mock('~/flash');
 
@@ -28,12 +28,8 @@ describe('lead_time_charts.vue', () => {
   // Import these components _after_ the date has been set using `useFakeDate`, so
   // that any calls to `new Date()` during module initialization use the fake date
   beforeAll(async () => {
-    LeadTimeCharts = (
-      await import('ee_component/projects/pipelines/charts/components/lead_time_charts.vue')
-    ).default;
-    DoraChartHeader = (
-      await import('ee/projects/pipelines/charts/components/dora_chart_header.vue')
-    ).default;
+    LeadTimeCharts = (await import('ee_component/dora/components/lead_time_charts.vue')).default;
+    DoraChartHeader = (await import('ee/dora/components/dora_chart_header.vue')).default;
   });
 
   let wrapper;
