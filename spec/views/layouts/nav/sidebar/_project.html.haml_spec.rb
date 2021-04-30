@@ -829,56 +829,58 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'operations settings tab' do
-    describe 'archive projects' do
-      before do
-        project.update!(archived: project_archived)
-      end
-
-      context 'when project is archived' do
-        let(:project_archived) { true }
-
-        it 'does not show the operations settings tab' do
-          render
-
-          expect(rendered).not_to have_link('Operations', href: project_settings_operations_path(project))
+  describe 'Settings' do
+    describe 'operations settings tab' do
+      describe 'archive projects' do
+        before do
+          project.update!(archived: project_archived)
         end
-      end
 
-      context 'when project is active' do
-        let(:project_archived) { false }
+        context 'when project is archived' do
+          let(:project_archived) { true }
 
-        it 'shows the operations settings tab' do
-          render
+          it 'does not show the operations settings tab' do
+            render
 
-          expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+            expect(rendered).not_to have_link('Operations', href: project_settings_operations_path(project))
+          end
+        end
+
+        context 'when project is active' do
+          let(:project_archived) { false }
+
+          it 'shows the operations settings tab' do
+            render
+
+            expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+          end
         end
       end
     end
-  end
 
-  describe 'project access tokens' do
-    context 'self-managed instance' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(false)
+    describe 'project access tokens' do
+      context 'self-managed instance' do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(false)
+        end
+
+        it 'displays "Access Tokens" nav item' do
+          render
+
+          expect(rendered).to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
+        end
       end
 
-      it 'displays "Access Tokens" nav item' do
-        render
+      context 'gitlab.com' do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+        end
 
-        expect(rendered).to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
-      end
-    end
+        it 'displays "Access Tokens" nav item' do
+          render
 
-    context 'gitlab.com' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(true)
-      end
-
-      it 'displays "Access Tokens" nav item' do
-        render
-
-        expect(rendered).to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
+          expect(rendered).to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
+        end
       end
     end
   end
