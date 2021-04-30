@@ -20,7 +20,7 @@ RSpec.describe Gitlab::ConanToken do
     JSONWebToken::HMACToken.new(jwt_secret).tap do |jwt|
       jwt['access_token'] = access_token_id
       jwt['user_id'] = user_id || user_id
-      jwt.expire_time = expire_time || jwt.issued_at + 1.hour
+      jwt.expire_time = expire_time || jwt.issued_at + 25.hour
     end
   end
 

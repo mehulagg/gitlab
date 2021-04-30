@@ -57,7 +57,7 @@ module Gitlab
       JSONWebToken::HMACToken.new(self.class.secret).tap do |token|
         token['access_token'] = access_token_id
         token['user_id'] = user_id
-        token.expire_time = token.issued_at + 1.hour
+        token.expire_time = token.issued_at + 1.day
       end
     end
   end
