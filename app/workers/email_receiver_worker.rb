@@ -25,9 +25,13 @@ class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
 
   private
 
+  def logger
+    Gitlab::ProjectServiceLogger
+  end
+
   def log_success
     payload = receiver.mail_metadata.merge({ message: "Successfully processed message" })
-    Sidekiq.logger.info(payload)
+    logger.info(payload)
   end
 
   def log_error(error)
@@ -48,7 +52,7 @@ class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
       Gitlab::ErrorTracking.track_exception(error)
     end
 
-    Sidekiq.logger.error(payload)
+    logger.error(payload)
   end
 
   def receiver
