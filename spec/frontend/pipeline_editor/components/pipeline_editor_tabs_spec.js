@@ -145,7 +145,7 @@ describe('Pipeline editor tabs component', () => {
         expect(findAlert().text()).toBe(wrapper.vm.$options.errorTexts.loadMergedYaml);
       });
 
-      it('does not render the `meged_preview` component', () => {
+      it('does not render the `merged_preview` component', () => {
         expect(findMergedPreview().exists()).toBe(false);
       });
     });
