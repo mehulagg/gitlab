@@ -10,8 +10,8 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
-      # After destroy callbacks are often skipped because of FastDestroyAl.
-      # All destroy callbackes should be implemented in `Ci::JobArtifacts::DestroyBatchService`
+      # After destroy callbacks are often skipped because of FastDestroyAll.
+      # All destroy callbacks should be implemented in `Ci::JobArtifacts::DestroyBatchService`
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/297472
       after_destroy :log_geo_deleted_event
 
