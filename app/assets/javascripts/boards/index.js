@@ -1,3 +1,4 @@
+import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { mapActions, mapGetters } from 'vuex';
@@ -28,6 +29,7 @@ import boardsStore from '~/boards/stores/boards_store';
 import toggleFocusMode from '~/boards/toggle_focus';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import createDefaultClient from '~/lib/graphql';
+import introspectionQueryResultData from '~/sidebar/fragmentTypes.json';
 import {
   NavigationType,
   convertObjectPropsToCamelCase,
@@ -40,8 +42,20 @@ import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
 
 Vue.use(VueApollo);
 
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData,
+});
+
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      cacheConfig: {
+        fragmentMatcher,
+      },
+      assumeImmutableResults: true,
+    },
+  ),
 });
 
 let issueBoardsApp;
