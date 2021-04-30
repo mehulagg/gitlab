@@ -443,6 +443,30 @@ RSpec.describe Security::StoreReportService, '#execute' do
             expect(issue_link).not_to be_nil
           end
         end
+
+        context 'when there is an issue link created for an issue for a vulnerabiltiy' do
+          let(:issue) { create(:issue, project: project) }
+          let!(:issue_feedback) do
+            create(
+              :vulnerability_feedback,
+              :sast,
+              :issue,
+              issue: issue,
+              project: project,
+              project_fingerprint: new_report.findings.find { |f| f.location.fingerprint == finding.location_fingerprint }.project_fingerprint
+            )
+          end
+
+          let!(:issue_link) { create(:vulnerabilities_issue_link, issue: issue, vulnerability_id: vulnerability.id) }
+
+          it 'will not raise an error' do
+            expect { subject }.not_to raise_error(ActiveRecord::RecordInvalid)
+          end
+
+          it 'does not insert issue link from the new pipeline' do
+            expect { subject }.to change { Vulnerabilities::IssueLink.count }.by(0)
+          end
+        end
       end
     end
 
