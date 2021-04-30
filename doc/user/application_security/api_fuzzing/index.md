@@ -1175,11 +1175,12 @@ The API Fuzzing engine outputs an error message when it cannot establish a conne
 - Remove the `FUZZAPI_API` variable from the `.gitlab-ci.yml` file. The value will be inherited from the API Fuzzing CI/CD template. We recommend this method instead of manually setting a value.
 - If removing the variable is not possible, check to see if this value has changed in the latest version of the [API Fuzzing CI/CD template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). If so, update the value in the `.gitlab-ci.yml` file.
 
-### Application cannot determine the base URL for the target API. For more information about resolving this issue see the trouble shooting section of the documentation.
+### Application cannot determine the base URL for the target API. For more information about resolving this issue see the trouble shooting section of the documentation
 
 The API Fuzzing runner outputs an error message when it cannot determine the target API after inspecting the OpenAPI document. This error message is shown when the target API has not been set in the template, and it could not be inferred from the OpenAPI document. The solutions are either explicitly indicating the base URL in your template or by providing enough information in your OpenAPI document.
 
 **Error message**
+
 - In [GitLab 13.12 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/328733), `Application cannot determine the base URL for the target API.
 For more information about resolving this issue see the trouble shooting section of the documentation.`
 
@@ -1201,9 +1202,10 @@ For more information about resolving this issue see the trouble shooting section
 
 **Updating your OpenAPI document**
 
-1. The OpenAPI specification allow to specify the base URL as part of the document structure. Depending on the OpenAPI version, you should update different sections of your OpenAPI document. If the variable `FUZZAPI_OPENAPI` is set to an absolute URL, the API Fuzzing runner will try to use it to get the data  that the OpenAPI document does not provide.
+1. The OpenAPI specification allow to specify the base URL as part of the document structure. Depending on the OpenAPI version, you should update different sections of your OpenAPI document. If the variable `FUZZAPI_OPENAPI` is set to an absolute URL, the API Fuzzing runner will try to use it to get the data that the OpenAPI document does not provide.
 
    1. For OpenAPI v2, make sure at least `host` node is provided. Additionally, `schemes` and `basePath` could be provided to be more specific about the base URL. If no provide, then `schemes` is default to `http` and `basePath` is default to `/`. When necessary, `host` could contains the port number, for example to use port `8080` then the host should be `target-machine:8080`. If environmental variable `FUZZAPI_OPENAPI` is set to an absolute URL, then the any missed data could be extracted from the absolute URL. For more information on how to set these values checkout the [OpenAPI v2 Specification](https://spec.openapis.org/oas/v2.0)
+   
    1. For OpenAPI v3.0.x make sure at least there is one entry in `servers` collection. Any entry in server must provide `url`. The `url` will be used as the base URL. Additionally, if `url` is a relative URL and the environmental variable `FUZZAPI_OPENAPI` is set to an absolute URL, then the `url` will be relative to the URL provided by environmental variable. For more information on how to set these values checkout the [OpenAPI v3.0.0 Specification](https://spec.openapis.org/oas/v3.0.0)
 <!--
 ### Target Container
