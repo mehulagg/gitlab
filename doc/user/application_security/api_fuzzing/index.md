@@ -1207,6 +1207,7 @@ For more information about resolving this issue see the trouble shooting section
    1. For OpenAPI v2, make sure at least `host` node is provided. The `host` node could contain the port number, for example, to use port `8080`, the host should be `target-machine:8080`. Additionally, `schemes` and `basePath` nodes could be added to provide more information about the base URL. If they are not provided, then `schemes` node is set to `http` and `basePath` node defaults to `/`. If the environmental variable `FUZZAPI_OPENAPI` is set to an absolute URL, then any non-provided value for a node could be extracted from the absolute URL. For more information on how to set these values in your OpenAPI document checkout the [OpenAPI v2 Specification](https://spec.openapis.org/oas/v2.0)
    
    1. For OpenAPI v3.0.x make sure at least there is one entry in `servers` collection. Any entry in the server must provide `url`. The `url` will be used as the base URL. Additionally, if `url` is a relative URL and the environmental variable `FUZZAPI_OPENAPI` is set to an absolute URL, then the `url` will be relative to the URL provided by the environmental variable. For more information on how to set these values in your OpenAPI document checkout the [OpenAPI v3.0.0 Specification](https://spec.openapis.org/oas/v3.0.0)
+   
 <!--
 ### Target Container
 
