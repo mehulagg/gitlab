@@ -29,7 +29,6 @@ import boardsStore from '~/boards/stores/boards_store';
 import toggleFocusMode from '~/boards/toggle_focus';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import createDefaultClient from '~/lib/graphql';
-import introspectionQueryResultData from '~/sidebar/fragmentTypes.json';
 import {
   NavigationType,
   convertObjectPropsToCamelCase,
@@ -37,6 +36,7 @@ import {
 } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
+import introspectionQueryResultData from '~/sidebar/fragmentTypes.json';
 import boardConfigToggle from './config_toggle';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
 
