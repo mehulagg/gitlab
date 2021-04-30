@@ -95,7 +95,7 @@ module QA
 
         def has_visibility_type?(visibility_type)
           within_element(:snippet_container) do
-            has_text?(visibility_type)
+            has_text?(visibility_type.downcase!)
           end
         end
 
