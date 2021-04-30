@@ -65,14 +65,7 @@ export default {
     GlFormInput,
     GlFormSelect,
   },
-  inject: ['groupPath'],
-  props: {
-    cadencesListPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-  },
+  inject: ['groupPath', 'cadencesListPath'],
   data() {
     return {
       cadences: [],
@@ -150,11 +143,7 @@ export default {
       return this.createCadence();
     },
     cancel() {
-      if (this.cadencesListPath) {
-        visitUrl(this.cadencesListPath);
-      } else {
-        this.$emit('cancel');
-      }
+      this.$router.push('index');
     },
     createCadence() {
       return this.$apollo
