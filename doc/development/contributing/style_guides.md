@@ -115,7 +115,9 @@ reviewers/maintainers must not ask authors to use one style or the other, as bot
 are accepted. This isn't an ideal situation since this leaves space for
 [bike-shedding](https://en.wiktionary.org/wiki/bikeshedding), and ideally we
 should enable all RuboCop rules to avoid style-related
-discussions/nitpicking/back-and-forth in reviews.
+discussions/nitpicking/back-and-forth in reviews. There are some rules that are
+not easily enforced using RuboCop, or that are currently undecided. The
+[bikeshedding section](#bikeshedding) covers some of these topics.
 
 Additionally, we have a dedicated
 [newlines style guide](../newlines_styleguide.md), as well as dedicated
@@ -166,6 +168,63 @@ This allows you to reveal existing RuboCop exceptions during your daily work cyc
 
 NOTE:
 Permanent `Exclude`s should be defined in `.rubocop.yml` instead of `.rubocop_manual_todo.yml`.
+
+### Bikeshedding
+
+Generally, if a rubocop rule is not enforcing a style, it does not need to be of concern in
+a review. Consider opening an MR to discuss adding a new cop before adding styles to this
+section.
+
+#### Attributes using `attr_reader`
+
+Attributes can be accessed in a variety of ways in a class:
+
+```ruby
+# public
+class Foo
+  attr_reader :my_var
+
+  def initialize(my_var)
+    @my_var = my_var
+  end
+
+  def do_stuff
+    puts my_var
+  end
+end
+
+# private
+class Foo
+  def initialize(my_var)
+    @my_var = my_var
+  end
+
+  private
+
+  attr_reader :my_var
+
+  def do_stuff
+    puts my_var
+  end
+end
+
+# direct
+class Foo
+  def initialize(my_var)
+    @my_var = my_var
+  end
+
+  private
+
+  def do_stuff
+    puts @my_var
+  end
+end
+```
+
+Public attributes should only be used if they are accessed outside of the class.
+However, when only being accessed internally, there should not be a strong opinion on accessing them directly
+or using `attr_reader` in the private section of the class.
 
 ## Database migrations
 
