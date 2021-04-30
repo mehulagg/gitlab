@@ -1,6 +1,7 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
 import { initFormField } from 'ee/security_configuration/utils';
+import { serializeFormObject } from '~/lib/utils/forms';
 import validation from '~/vue_shared/directives/validation';
 
 export default {
@@ -18,7 +19,7 @@ export default {
       required: false,
       default: false,
     },
-    fields: {
+    value: {
       type: Object,
       required: false,
       default: () => ({}),
@@ -43,7 +44,7 @@ export default {
       // default to commonly used names for `username` and `password` fields in authentcation forms
       usernameField = 'username',
       passwordField = 'password',
-    } = this.fields;
+    } = this.value.fields;
 
     return {
       form: {
@@ -70,7 +71,10 @@ export default {
   },
   methods: {
     emitUpdate() {
-      this.$emit('onUpdate', this.form);
+      this.$emit('input', {
+        fields: serializeFormObject(this.form.fields),
+        state: this.form.state,
+      });
     },
   },
 };
