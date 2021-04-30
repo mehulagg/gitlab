@@ -892,7 +892,7 @@ git_data_dirs({
 })
 ```
 
-See [Mixed Configuration](../configure_gitaly.md#mixed-configuration) for further information on
+See [Mixed Configuration](configure_gitaly.md#mixed-configuration) for further information on
 running multiple Gitaly storages.
 
 ### Grafana
