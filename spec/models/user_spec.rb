@@ -75,9 +75,6 @@ RSpec.describe User do
     it { is_expected.to delegate_method(:bio).to(:user_detail).allow_nil }
     it { is_expected.to delegate_method(:bio=).to(:user_detail).with_arguments(:args).allow_nil }
     it { is_expected.to delegate_method(:bio_html).to(:user_detail).allow_nil }
-
-    it { is_expected.to delegate_method(:credit_card_validated_at).to(:user_credit_card_validation) }
-    it { is_expected.to delegate_method(:credit_card_validated_at).to(:user_credit_card_validation).with_arguments(:args) }
   end
 
   describe 'associations' do
@@ -1385,6 +1382,26 @@ RSpec.describe User do
             )
           end
         end
+      end
+    end
+  end
+
+  describe '#credit_card_validated_at' do
+    let_it_be(:user) { create(:user) }
+
+    context 'when user_credit_card_validation does not exist' do
+      it 'returns nil' do
+        expect(user.credit_card_validated_at).to be nil
+      end
+    end
+
+    context 'when user_credit_card_validation exists' do
+      it 'returns the credit card validated time' do
+        credit_card_validated_time = Time.now - 1.day
+
+        create(:user_credit_card_validation, credit_card_validated_at: credit_card_validated_time, user: user)
+
+        expect(user.credit_card_validated_at).to eq(credit_card_validated_time)
       end
     end
   end
@@ -5288,6 +5305,26 @@ RSpec.describe User do
         email: user.email
       }
       expect(user.hook_attrs).to eq(user_attributes)
+    end
+  end
+
+  describe 'user credit card validation' do
+    context 'when user is initialized' do
+      let(:user) { build(:user) }
+
+      it { expect(user.user_credit_card_validation).not_to be_present }
+    end
+
+    context 'when create user without credit card validation' do
+      let(:user) { create(:user) }
+
+      it { expect(user.user_credit_card_validation).not_to be_present }
+    end
+
+    context 'when user credit card validation exists' do
+      let(:user) { create(:user, :with_user_credit_card_validation) }
+
+      it { expect(user.user_credit_card_validation).to be_persisted }
     end
   end
 

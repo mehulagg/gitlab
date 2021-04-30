@@ -1225,6 +1225,10 @@ class User < ApplicationRecord
     user_highest_role&.highest_access_level || Gitlab::Access::NO_ACCESS
   end
 
+  def credit_card_validated_at
+    user_credit_card_validation&.credit_card_validated_at
+  end
+
   def accessible_deploy_keys
     DeployKey.from_union([
       DeployKey.where(id: project_deploy_keys.select(:deploy_key_id)),
