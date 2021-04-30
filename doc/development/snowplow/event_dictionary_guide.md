@@ -86,6 +86,7 @@ The generator takes three options:
 - `--ee`: Indicates if the event is for EE.
 - `--category=CATEGORY`: Indicates the `category` of the event.
 - `--action=ACTION`: Indicates the `action` of the event.
+- `--ff`: Force flag to overwrite existing event definition.
 
 ```shell
 bundle exec rails generate gitlab:snowplow_event_definition --category Groups::EmailCampaignsController --action click
