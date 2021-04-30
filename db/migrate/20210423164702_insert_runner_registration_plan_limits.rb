@@ -3,8 +3,6 @@
 class InsertRunnerRegistrationPlanLimits < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
 
-  DOWNTIME = false
-
   def up
     create_or_update_plan_limit('ci_registered_group_runners', 'free', 20)
     create_or_update_plan_limit('ci_registered_group_runners', 'bronze', 2000)
