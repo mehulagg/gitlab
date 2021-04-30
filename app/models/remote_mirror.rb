@@ -21,6 +21,7 @@ class RemoteMirror < ApplicationRecord
   belongs_to :project, inverse_of: :remote_mirrors
 
   validates :url, presence: true, public_url: { schemes: %w(ssh git http https), allow_blank: true, enforce_user: true }
+  validate :url_inside_fork_network, on: :create
 
   before_save :set_new_remote_name, if: :mirror_url_changed?
 
@@ -336,6 +337,18 @@ class RemoteMirror < ApplicationRecord
 
   def saved_change_to_mirror_url?
     saved_change_to_url? || saved_change_to_credentials?
+  end
+
+  # If the project is inside a fork network, the mirror URL must
+  # also belong to a member of that fork network
+  def url_inside_fork_network
+    if project.fork_network.present?
+      mirror_project = Project.find_by_url(bare_url)
+
+      unless project.fork_network_projects.include?(mirror_project)
+        errors.add(:url, _("URL must be inside the fork network"))
+      end
+    end
   end
 end
 

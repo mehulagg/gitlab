@@ -35,6 +35,15 @@ module Routable
     route.is_a?(Routable) ? route : route.source
   end
 
+  def self.find_by_url(url)
+    match = Rails.application.routes.recognize_path(url)
+
+    return nil if match[:unmatched_route].present?
+    return nil if match[:namespace_id].blank? || match[:id].blank?
+
+    find_by_full_path(match.values_at(:namespace_id, :id).join("/"))
+  end
+
   included do
     # Remove `inverse_of: source` when upgraded to rails 5.2
     # See https://github.com/rails/rails/pull/28808
