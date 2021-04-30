@@ -57,7 +57,7 @@ RSpec.describe UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker do
     end
   end
 
-  context 'where the DB is -only' do
+  context 'where the DB is read-only' do
     let(:db_is_read_only) { true }
 
     include_examples 'updates nothing'
