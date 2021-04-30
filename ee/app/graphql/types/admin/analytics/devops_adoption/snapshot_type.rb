@@ -9,6 +9,7 @@ module Types
           graphql_name 'DevopsAdoptionSnapshot'
           description 'Snapshot'
 
+          field :namespace, Types::NamespaceType, null: true, description: 'Snapshot namespace.'
           field :issue_opened, GraphQL::BOOLEAN_TYPE, null: false,
                 description: 'At least one issue was opened.'
           field :merge_request_opened, GraphQL::BOOLEAN_TYPE, null: false,

@@ -14,7 +14,7 @@ module Analytics
         def execute
           authorize!
 
-          segment = Analytics::DevopsAdoption::Segment.find_by_namespace_id(namespace.id)
+          segment = Analytics::DevopsAdoption::Segment.find_by(namespace_id: namespace.id, display_namespace_id: namespace.id)
 
           if segment
             ServiceResponse.success(payload: { segment: segment })

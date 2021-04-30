@@ -7,6 +7,8 @@ module Analytics
         ALLOWED_ATTRIBUTES = ([
           :segment,
           :segment_id,
+          :namespace,
+          :namespace_id,
           :end_time,
           :recorded_at
         ] + SnapshotCalculator::ADOPTION_METRICS).freeze

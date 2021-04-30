@@ -13,5 +13,9 @@ FactoryBot.define do
     pipeline_succeeded { false }
     deploy_succeeded { true }
     security_scan_succeeded { false }
+
+    after(:build) do |instance|
+      instance.namespace = instance.segment.namespace
+    end
   end
 end

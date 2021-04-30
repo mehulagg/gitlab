@@ -29,7 +29,8 @@ module Analytics
 
         def services
           @services ||= params[:namespaces].map do |namespace|
-            FindOrCreateService.new(current_user: current_user, params: { namespace: namespace })
+            FindOrCreateService.new(current_user: current_user,
+                                    params: { namespace: namespace, display_namespace: namespace })
           end
         end
       end

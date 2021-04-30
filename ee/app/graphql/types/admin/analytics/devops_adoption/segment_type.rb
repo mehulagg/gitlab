@@ -12,7 +12,11 @@ module Types
           field :id, GraphQL::ID_TYPE, null: false,
                 description: "ID of the segment."
 
-          field :namespace, Types::NamespaceType, null: true, description: 'Segment namespace.'
+          field :namespace, Types::NamespaceType, null: true,
+                description: 'Namespace which should be calculated'
+
+          field :display_namespace, Types::NamespaceType, null: true,
+                description: 'Namespace where data should be displayed'
 
           field :latest_snapshot, SnapshotType, null: true,
                 description: 'The latest adoption metrics for the segment.'

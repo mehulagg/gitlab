@@ -16,7 +16,4 @@ class Analytics::DevopsAdoption::Segment < ApplicationRecord
   scope :ordered_by_name, -> { includes(:namespace).order('"namespaces"."name" ASC') }
   scope :for_namespaces, -> (namespaces) { where(namespace_id: namespaces) }
   scope :for_parent, -> (namespace) { for_namespaces(namespace.self_and_descendants) }
-
-  # Remove in %14.0 with https://gitlab.com/gitlab-org/gitlab/-/issues/329521
-  before_validation -> { self.display_namespace = namespace }
 end
