@@ -59,7 +59,7 @@ export default {
         return STAT_ERROR_PLACEHOLDER;
       }
 
-      if (this.rawStats?.releasesPercentage) {
+      if (this.rawStats?.releasesPercentage != null) {
         return sprintf(s__('CICDAnalytics|%{percent}%{percentSymbol}'), {
           percent: this.rawStats?.releasesPercentage,
           percentSymbol: '%',
