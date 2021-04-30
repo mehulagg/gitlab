@@ -117,7 +117,7 @@ are accepted. This isn't an ideal situation since this leaves space for
 should enable all RuboCop rules to avoid style-related
 discussions/nitpicking/back-and-forth in reviews. There are some styles that
 commonly come up in reviews that are not enforced, the
-[bikeshedding section](#bikeshedding) covers some of these topics.
+[bikeshedding section](#bikeshedding) is a non-exhaustive list of these topics.
 
 Additionally, we have a dedicated
 [newlines style guide](../newlines_styleguide.md), as well as dedicated
@@ -225,8 +225,8 @@ end
 ```
 
 Public attributes should only be used if they are accessed outside of the class.
-However, when only being accessed internally, there should not be a strong opinion on accessing them directly
-or using `attr_reader` in the private section of the class.
+However, when only being accessed internally, there should not be a strong opinion on accessing them directly via `@my_var`
+or by accessing them with an `attr_reader` in the private section of the class.
 
 ## Database migrations
 
