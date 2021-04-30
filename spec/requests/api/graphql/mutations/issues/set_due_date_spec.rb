@@ -54,7 +54,7 @@ RSpec.describe 'Setting Due Date of an issue' do
   context 'when due date value is null' do
     let(:input) { { due_date: nil } }
 
-    it 'updates the issue due date' do
+    it 'updates the issue to remove the due date' do
       post_graphql_mutation(mutation, current_user: current_user)
 
       expect(response).to have_gitlab_http_status(:success)
