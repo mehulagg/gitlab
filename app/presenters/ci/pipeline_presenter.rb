@@ -11,10 +11,10 @@ module Ci
       { unknown_failure: 'The reason for the pipeline failure is unknown.',
         config_error: 'The pipeline failed due to an error on the CI/CD configuration file.',
         external_validation_failure: 'The external pipeline validation failed.',
-        activity_limit_exceeded: 'You exceeded the pipeline activity limit.',
-        size_limit_exceeded: 'You exceeded the pipeline size limit.',
-        job_activity_limit_exceeded: 'You exceeded the pipeline job activity limit.',
-        deployments_limit_exceeded: 'You exceeded the pipeline deployments limit.',
+        activity_limit_exceeded: 'The pipeline activity limit was exceeded.',
+        size_limit_exceeded: 'The pipeline size limit was exceeded.',
+        job_activity_limit_exceeded: 'The pipeline job activity limit was exceeded.',
+        deployments_limit_exceeded: 'The pipeline deployments limit was exceeded.',
         project_deleted: 'The project associated with this pipeline was deleted.',
         user_blocked: 'The user who created this pipeline is blocked.' }
     end
