@@ -2768,9 +2768,6 @@ msgstr ""
 msgid "Advanced Search"
 msgstr ""
 
-msgid "Advanced Search with Elasticsearch"
-msgstr ""
-
 msgid "Advanced Settings"
 msgstr ""
 
@@ -8377,6 +8374,9 @@ msgstr ""
 msgid "Configure repository mirroring."
 msgstr ""
 
+msgid "Configure settings for Advanced Search with Elasticsearch."
+msgstr ""
+
 msgid "Configure specific limits for Packages API requests that supersede the general user and IP rate limits."
 msgstr ""
 
@@ -11888,6 +11888,9 @@ msgstr ""
 msgid "Elasticsearch HTTP client timeout value in seconds."
 msgstr ""
 
+msgid "Elasticsearch Zero-Downtime Reindexing"
+msgstr ""
+
 msgid "Elasticsearch indexing"
 msgstr ""
 
@@ -11904,9 +11907,6 @@ msgid "Elasticsearch reindexing triggered"
 msgstr ""
 
 msgid "Elasticsearch returned status code: %{status_code}"
-msgstr ""
-
-msgid "Elasticsearch zero-downtime reindexing"
 msgstr ""
 
 msgid "Elastic|None. Select namespaces to index."
@@ -26718,7 +26718,7 @@ msgstr ""
 msgid "Regulate approvals by authors/committers. Affects all projects."
 msgstr ""
 
-msgid "Reindexing Status: %{status}"
+msgid "Reindexing Status: %{status} (Slice multiplier: %{multiplier}, Maximum running slices: %{max_slices})"
 msgstr ""
 
 msgid "Rejected (closed)"
@@ -31976,6 +31976,9 @@ msgstr ""
 msgid "The maximum file size is %{size}."
 msgstr ""
 
+msgid "The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Defaults to 60."
+msgstr ""
+
 msgid "The maximum number of tags that a single worker accepts for cleanup. If the number of tags goes above this limit, the list of tags to delete is truncated to this number. To remove this limit, set it to 0."
 msgstr ""
 
@@ -33938,6 +33941,9 @@ msgstr ""
 msgid "Trigger cluster reindexing"
 msgstr ""
 
+msgid "Trigger cluster reindexing."
+msgstr ""
+
 msgid "Trigger manual job"
 msgstr ""
 
@@ -34893,6 +34899,9 @@ msgid "Used by more than 100,000 organizations, GitLab is the most popular solut
 msgstr ""
 
 msgid "Used programming language"
+msgstr ""
+
+msgid "Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Defaults to 2."
 msgstr ""
 
 msgid "Used to help configure your identity provider"

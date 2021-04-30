@@ -25,11 +25,12 @@ class Admin::ElasticsearchController < Admin::ApplicationController
     if Elastic::ReindexingTask.running?
       flash[:warning] = _('Elasticsearch reindexing is already in progress')
     else
-      Elastic::ReindexingTask.create!
+      Elastic::ReindexingTask.create!(max_slices_running: trigger_reindexing_params[:max_slices_running].to_i,
+                                      slice_multiplier: trigger_reindexing_params[:slice_multiplier].to_i)
       flash[:notice] = _('Elasticsearch reindexing triggered')
     end
 
-    redirect_to redirect_path
+    redirect_to redirect_path(anchor: 'js-elasticsearch-reindexing')
   end
 
   # POST
@@ -40,7 +41,7 @@ class Admin::ElasticsearchController < Admin::ApplicationController
 
     flash[:notice] = _('Index deletion is canceled')
 
-    redirect_to redirect_path
+    redirect_to redirect_path(anchor: 'js-elasticsearch-reindexing')
   end
 
   # POST
@@ -58,7 +59,11 @@ class Admin::ElasticsearchController < Admin::ApplicationController
 
   private
 
-  def redirect_path
-    advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+  def redirect_path(anchor: 'js-elasticsearch-settings')
+    advanced_search_admin_application_settings_path(anchor: anchor)
+  end
+
+  def trigger_reindexing_params
+    params.permit(elasticsearch_reindexing_task: %i(max_slices_running slice_multiplier))
   end
 end

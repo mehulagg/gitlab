@@ -51,7 +51,7 @@ RSpec.describe Admin::ElasticsearchController do
       post :trigger_reindexing
 
       expect(controller).to set_flash[:notice].to include('reindexing triggered')
-      expect(response).to redirect_to advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+      expect(response).to redirect_to advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-reindexing')
     end
 
     it 'does not create a reindexing task if there is another one' do
@@ -61,7 +61,7 @@ RSpec.describe Admin::ElasticsearchController do
       post :trigger_reindexing
 
       expect(controller).to set_flash[:warning].to include('already in progress')
-      expect(response).to redirect_to advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+      expect(response).to redirect_to advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-reindexing')
     end
   end
 
@@ -77,7 +77,7 @@ RSpec.describe Admin::ElasticsearchController do
 
       expect(task.reload.delete_original_index_at).to be_nil
       expect(controller).to set_flash[:notice].to include('deletion is canceled')
-      expect(response).to redirect_to advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+      expect(response).to redirect_to advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-reindexing')
     end
   end
 
