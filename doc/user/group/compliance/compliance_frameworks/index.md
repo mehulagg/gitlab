@@ -20,7 +20,8 @@ GitLab 13.9 introduces customizable compliance frameworks at the group-level. A 
 
 New compliance frameworks can be created and updated using GraphQL.
 
-#### Scoped compliance frameworks
+## Scoped compliance frameworks
+
 A scoped compliance framework will appear if the name is using the (`::`) syntax. These do not carry any unique workflow like [scoped labels](../project/../../../project/labels.md#scoped-labels), and only show as a visual flair.
 
 ![List of created compliance frameworks](../compliance_frameworks/img/compliance_framework_example.png)
