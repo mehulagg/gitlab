@@ -11,15 +11,15 @@ Approval rules define how many [approvals](index.md) a merge request must receiv
 be merged, and which users should do the approving. You can define approval rules:
 
 - [As project defaults](#add-an-approval-rule).
-- [Per merge request](#editing--overriding-approval-rules-per-merge-request).
+- [Per merge request](#edit-or-override-merge-request-approval-rules).
 - [At the instance level](../../../admin_area/merge_requests_approvals.md)
 
-If you don't define a [default approval rule](#add-a-default-approval-rule),
+If you don't define a [default approval rule](#add-an-approval-rule),
 any user can approve a merge request. Even if you don't define a rule, you can still
 enforce a [minimum number of required approvers](settings.md) in the project's settings.
 
 You can define a single rule to approve merge requests from among the available
-rules, or you can select [multiple approval rules](#multiple-approval-rules).
+rules, or you can select [multiple approval rules](#add-multiple-approval-rules).
 
 Merge requests that target a different project, such as from a fork to the upstream project,
 use the default approval rules from the target (upstream) project, not the source (fork).
@@ -51,7 +51,7 @@ to existing merge requests:
 
 - If [approval rule overrides](settings.md#prevent-overriding-default-approvals) are allowed,
   changes to these default rules are not applied to existing merge requests, except for
-  changes to the [target branch](#scoped-to-protected-branch) of the rule.
+  changes to the [target branch](#approvals-for-protected-branches) of the rule.
 - If approval rule overrides are not allowed, all changes to default rules
   are applied to existing merge requests. Any approval rules that were previously
   manually [overridden](#editing--overriding-approval-rules-per-merge-request) during the
@@ -192,7 +192,7 @@ can edit the approval rule listed in a merge request. When editing an approval r
 on a merge request, you can either add or remove approvers:
 
 1. In the merge request, find the **Approval rules section**.
-1. TODO Follow the steps described in [Adding / editing a default approval rule](#adding--editing-a-default-approval-rule).
+1. TODO Follow the steps described in [Adding / editing a default approval rule](#add-an-approval-rule).
 
 Administrators can change the [merge request approvals settings](settings.md#prevent-overriding-default-approvals)
 to prevent users from overriding approval rules for merge requests.
