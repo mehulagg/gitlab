@@ -95,10 +95,8 @@ export default {
     highlightedJobs(jobs) {
       this.$emit('highlightedJobsChange', jobs);
     },
-    parsedData(val, oldVal) {
-      if (oldVal !== val) {
-        this.calculateLinkData();
-      }
+    parsedData() {
+      this.calculateLinkData();
     },
     viewType() {
       /*
@@ -106,7 +104,7 @@ export default {
         before the links refresh.
       */
       this.$nextTick(() => {
-        this.setLinks();
+        this.calculateLinkData();
       });
     },
   },
@@ -119,19 +117,16 @@ export default {
     }
   },
   methods: {
+    isLinkHighlighted(linkRef) {
+      return this.highlightedLinks.includes(linkRef);
+    },
     calculateLinkData() {
       try {
-        this.setLinks();
+        this.links = generateLinksData(this.parsedData, this.containerId, `-${this.pipelineId}`);
       } catch (err) {
         this.$emit('error', { type: DRAW_FAILURE, reportToSentry: false });
         reportToSentry(this.$options.name, err);
       }
-    },
-    isLinkHighlighted(linkRef) {
-      return this.highlightedLinks.includes(linkRef);
-    },
-    setLinks() {
-      this.links = generateLinksData(this.parsedData, this.containerId, `-${this.pipelineId}`);
     },
     getLinkClasses(link) {
       return [

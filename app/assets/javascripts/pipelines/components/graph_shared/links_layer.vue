@@ -72,11 +72,9 @@ export default {
   errorCaptured(err, _vm, info) {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
-  mounted() {
+  created() {
     if (!isEmpty(this.pipelineData)) {
-      window.requestAnimationFrame(() => {
-        this.prepareLinkData();
-      });
+      this.prepareLinkData();
     }
   },
   methods: {
