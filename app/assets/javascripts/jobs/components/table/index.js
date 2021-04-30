@@ -16,13 +16,14 @@ export default (containerId = 'js-jobs-table') => {
     return false;
   }
 
-  const { fullPath, jobCounts, jobStatuses } = containerEl.dataset;
+  const { fullPath, jobCounts, jobStatuses, pipelineEditorPath } = containerEl.dataset;
 
   return new Vue({
     el: containerEl,
     apolloProvider,
     provide: {
       fullPath,
+      pipelineEditorPath,
       jobStatuses: JSON.parse(jobStatuses),
       jobCounts: JSON.parse(jobCounts),
     },
