@@ -41,9 +41,9 @@ For example, the following policy document allows assuming a role whose name sta
 }
 ```
 
-### Administration settings
+### Configure Amazon authentication.
 
-Generate an access key for the IAM user, and configure GitLab with the credentials:
+To configure Amazon authentication in Gitlab, generate an access key for the IAM user in the Amazon AWS console, and following the following steps:
 
 1. Navigate to **Admin Area > Settings > General** and expand the **Amazon EKS** section.
 1. Check **Enable Amazon EKS integration**.
