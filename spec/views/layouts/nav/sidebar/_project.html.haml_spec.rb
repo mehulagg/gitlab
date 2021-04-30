@@ -709,61 +709,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'wiki entry tab' do
-    let(:can_read_wiki) { true }
-
-    before do
-      allow(view).to receive(:can?).with(user, :read_wiki, project).and_return(can_read_wiki)
-    end
-
-    describe 'when wiki is enabled' do
-      it 'shows the wiki tab with the wiki internal link' do
-        render
-
-        expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
-      end
-    end
-
-    describe 'when wiki is disabled' do
-      let(:can_read_wiki) { false }
-
-      it 'does not show the wiki tab' do
-        render
-
-        expect(rendered).not_to have_link('Wiki')
-      end
-    end
-  end
-
-  describe 'external wiki entry tab' do
-    let(:properties) { { 'external_wiki_url' => 'https://gitlab.com' } }
-    let(:service_status) { true }
-
-    before do
-      project.create_external_wiki_service(active: service_status, properties: properties)
-      project.reload
-    end
-
-    context 'when it is active' do
-      it 'shows the external wiki tab with the external wiki service link' do
-        render
-
-        expect(rendered).to have_link('External wiki', href: properties['external_wiki_url'])
-      end
-    end
-
-    context 'when it is disabled' do
-      let(:service_status) { false }
-
-      it 'does not show the external wiki tab' do
-        render
-
-        expect(rendered).not_to have_link('External wiki')
-      end
-    end
-  end
-
-  describe 'confluence tab' do
+  describe 'Confluence' do
     let!(:service) { create(:confluence_service, project: project, active: active) }
 
     before do
@@ -791,6 +737,54 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
 
       it 'shows the GitLab wiki tab' do
         expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
+      end
+    end
+  end
+
+  describe 'Wiki' do
+    describe 'when wiki is enabled' do
+      it 'shows the wiki tab with the wiki internal link' do
+        render
+
+        expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
+      end
+    end
+
+    describe 'when wiki is disabled' do
+      let(:user) { nil }
+
+      it 'does not show the wiki tab' do
+        render
+
+        expect(rendered).not_to have_link('Wiki')
+      end
+    end
+  end
+
+  describe 'External Wiki' do
+    let(:properties) { { 'external_wiki_url' => 'https://gitlab.com' } }
+    let(:service_status) { true }
+
+    before do
+      project.create_external_wiki_service(active: service_status, properties: properties)
+      project.reload
+    end
+
+    context 'when it is active' do
+      it 'shows the external wiki tab with the external wiki service link' do
+        render
+
+        expect(rendered).to have_link('External wiki', href: properties['external_wiki_url'])
+      end
+    end
+
+    context 'when it is disabled' do
+      let(:service_status) { false }
+
+      it 'does not show the external wiki tab' do
+        render
+
+        expect(rendered).not_to have_link('External wiki')
       end
     end
   end
