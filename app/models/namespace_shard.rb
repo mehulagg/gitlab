@@ -24,6 +24,15 @@ class NamespaceShard < ApplicationRecord
     NamespaceShard.connected_to(role: :reading, shard: shard, &block)
   end
 
+  def self.sharded_read(namespace: nil, shard: nil, &block)
+    raise "No block given" unless block_given?
+    raise "Namespace or shard must be provided" if namespace.nil? && shard.nil?
+
+    shard ||= find_shard_from_namespace(namespace)
+
+    NamespaceShard.connected_to(role: :reading, shard: shard, &block)
+  end
+
   def self.sharded_write(namespace: nil, shard: nil, &block)
     raise "No block given" unless block_given?
     raise "Namespace or shard must be provided" if namespace.nil? && shard.nil?
