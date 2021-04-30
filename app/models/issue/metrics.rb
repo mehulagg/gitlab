@@ -24,6 +24,7 @@ class Issue::Metrics < ApplicationRecord
   private
 
   def issue_assigned_to_list_label?
+    # test
     return false if issue.labels.length == 0
 
     issue.labels.includes(:lists).any? { |label| label.lists.present? }
