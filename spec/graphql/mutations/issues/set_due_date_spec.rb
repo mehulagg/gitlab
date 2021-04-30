@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::Issues::SetDueDate do
-  let_it_be(:user) { create(:user) }
   let(:issue) { create(:issue, due_date: '2021-05-01') }
+
+  let_it_be(:user) { create(:user) }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
