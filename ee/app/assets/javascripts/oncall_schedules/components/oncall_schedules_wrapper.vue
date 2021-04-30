@@ -142,11 +142,7 @@ export default {
       >
         <gl-sprintf :message="alertMessage">
           <template #link="{ content }">
-            <gl-link
-              class="gl-display-inline-block"
-              :href="$options.escalationPolicyUrl"
-              target="_blank"
-            >
+            <gl-link :href="$options.escalationPolicyUrl" target="_blank">
               {{ content }}
             </gl-link>
           </template>
