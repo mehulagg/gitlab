@@ -1397,7 +1397,7 @@ RSpec.describe User do
 
     context 'when user_credit_card_validation exists' do
       it 'returns the credit card validated time' do
-        credit_card_validated_time = Time.now - 1.day
+        credit_card_validated_time = Time.current - 1.day
 
         create(:user_credit_card_validation, credit_card_validated_at: credit_card_validated_time, user: user)
 
