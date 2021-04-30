@@ -1,5 +1,5 @@
 <script>
-import { GlBadge, GlTable } from '@gitlab/ui';
+import { GlBadge, GlTable, GlLink } from '@gitlab/ui';
 import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import { sprintf, s__ } from '~/locale';
 
@@ -13,10 +13,17 @@ export default {
     GlBadge,
     GlTable,
     GlSingleStat,
+    GlLink,
   },
   inject: {
     devopsScoreMetrics: {
       default: null,
+    },
+    isEmpty: {
+      default: false,
+    },
+    devOpsReportDocsPath: {
+      default: '',
     },
   },
   computed: {
@@ -54,7 +61,19 @@ export default {
 };
 </script>
 <template>
-  <div data-testid="devops-score-app">
+  <div v-if="isEmpty" class="container devops-empty">
+    <div class="col-sm-12 justify-content-center text-center">
+      <!-- = custom_icon('dev_ops_report_no_data') -->
+      <!-- %h4= _('Data is still calculating...') -->
+      <p>
+        {{ __('It may be several days before you see feature usage data.') }}
+        <gl-link :href="devOpsReportDocsPath">{{
+          __('Our documentation includes an example DevOps Score report.')
+        }}</gl-link>
+      </p>
+    </div>
+  </div>
+  <div v-else data-testid="devops-score-app">
     <div class="gl-text-gray-400 gl-my-4" data-testid="devops-score-note-text">
       {{ titleHelperText }}
     </div>

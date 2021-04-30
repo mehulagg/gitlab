@@ -6,12 +6,14 @@ export default () => {
 
   if (!el) return false;
 
-  const { devopsScoreMetrics } = el.dataset;
+  const { isEmpty, devopsScoreMetrics, devOpsReportDocsPath } = el.dataset;
 
   return new Vue({
     el,
     provide: {
+      isEmpty,
       devopsScoreMetrics: JSON.parse(devopsScoreMetrics),
+      devOpsReportDocsPath,
     },
     render(h) {
       return h(DevopsScore);
