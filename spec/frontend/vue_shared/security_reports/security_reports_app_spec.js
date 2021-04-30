@@ -9,8 +9,8 @@ import { trimText } from 'helpers/text_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   expectedDownloadDropdownProps,
-  securityReportDownloadPathsQueryNoArtifactsResponse,
-  securityReportDownloadPathsQueryResponse,
+  securityReportMrDownloadPathsQueryNoArtifactsResponse,
+  securityReportMrDownloadPathsQueryResponse,
   sastDiffSuccessMock,
   secretScanningDiffSuccessMock,
 } from 'jest/vue_shared/security_reports/mock_data';
@@ -59,9 +59,9 @@ describe('Security reports app', () => {
   };
 
   const pendingHandler = () => new Promise(() => {});
-  const successHandler = () => Promise.resolve({ data: securityReportDownloadPathsQueryResponse });
+  const successHandler = () => Promise.resolve({ data: securityReportMrDownloadPathsQueryResponse });
   const successEmptyHandler = () =>
-    Promise.resolve({ data: securityReportDownloadPathsQueryNoArtifactsResponse });
+    Promise.resolve({ data: securityReportMrDownloadPathsQueryNoArtifactsResponse });
   const failureHandler = () => Promise.resolve({ errors: [{ message: 'some error' }] });
   const createMockApolloProvider = (handler) => {
     const requestHandlers = [[securityReportDownloadPathsQuery, handler]];

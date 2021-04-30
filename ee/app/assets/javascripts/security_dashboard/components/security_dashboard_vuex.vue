@@ -3,10 +3,11 @@ import { mapActions, mapState, mapGetters } from 'vuex';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import { vulnerabilityModalMixin } from 'ee/vue_shared/security_reports/mixins/vulnerability_modal_mixin';
 import Filters from './filters.vue';
-import FuzzingArtifactsDownload from './fuzzing_artifacts_download.vue';
 import LoadingError from './loading_error.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import SecurityDashboardTable from './security_dashboard_table.vue';
+import PipelineArtifactDownload from 'ee/vue_shared/security_reports/components/artifact_downloads/pipeline_artifact_download.vue';
+import { securityReportTypeEnumToReportType } from 'ee/vue_shared/security_reports/constants.js';
 
 export default {
   components: {
@@ -14,8 +15,8 @@ export default {
     IssueModal,
     SecurityDashboardLayout,
     SecurityDashboardTable,
-    FuzzingArtifactsDownload,
     LoadingError,
+    PipelineArtifactDownload
   },
   mixins: [vulnerabilityModalMixin('vulnerabilities')],
   props: {
@@ -23,6 +24,10 @@ export default {
       type: String,
       required: true,
     },
+    projectFullPath: {
+      type: String,
+      required: true,
+    },    
     pipelineId: {
       type: Number,
       required: false,
@@ -51,7 +56,9 @@ export default {
     ...mapState('pipelineJobs', ['projectId']),
     ...mapState('filters', ['filters']),
     ...mapGetters('vulnerabilities', ['loadingVulnerabilitiesFailedWithRecognizedErrorCode']),
-    ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
+    shouldShowDownloadGuidance() {
+      return this.projectFullPath && this.pipelineIid;
+    },     
     canCreateIssue() {
       const path = this.vulnerability.create_vulnerability_feedback_issue_path;
       return Boolean(path);
@@ -88,6 +95,7 @@ export default {
     ...mapActions('pipelineJobs', ['fetchPipelineJobs']),
     ...mapActions('filters', ['lockFilter', 'setHideDismissedToggleInitialState']),
   },
+  reportTypes: securityReportTypeEnumToReportType,
 };
 </script>
 
@@ -102,13 +110,12 @@ export default {
       <security-dashboard-layout>
         <template #header>
           <filters>
-            <template v-if="hasFuzzingArtifacts" #buttons>
-              <fuzzing-artifacts-download :jobs="fuzzingJobsWithArtifact" :project-id="projectId">
-                <template #label>
-                  <strong>{{ s__('SecurityReports|Download Report') }}</strong>
-                </template>
-              </fuzzing-artifacts-download>
-            </template>
+            <pipeline-artifact-download
+              v-if="shouldShowDownloadGuidance"
+              :report-types="[$options.reportTypes.COVERAGE_FUZZING]"
+              :target-project-full-path="projectFullPath"
+              :pipeline-iid="pipelineIid"
+            />  
           </filters>
         </template>
 

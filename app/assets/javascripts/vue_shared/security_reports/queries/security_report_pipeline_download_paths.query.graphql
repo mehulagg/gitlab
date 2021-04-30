@@ -5,6 +5,7 @@ query getCorpuses(
 ) {
   project(fullPath:$projectPath) {
     pipeline(iid: $iid) {
+      id
       jobs (securityReportTypes: $reportTypes) {
         nodes {
           name

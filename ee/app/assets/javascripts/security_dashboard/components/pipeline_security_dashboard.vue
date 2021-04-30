@@ -117,6 +117,7 @@ export default {
       :lock-to-project="{ id: projectId }"
       :pipeline-id="pipelineId"
       :pipeline-iid="pipelineIid"
+      :projectFullPath="projectFullPath"
       :loading-error-illustrations="loadingErrorIllustrations"
       :security-report-summary="securityReportSummary"
     >
