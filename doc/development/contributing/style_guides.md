@@ -171,13 +171,15 @@ Permanent `Exclude`s should be defined in `.rubocop.yml` instead of `.rubocop_ma
 
 ### Bikeshedding
 
-Generally, if a rubocop rule is not enforcing a style, it does not need to be of concern in
-a review. Consider opening an MR to discuss adding a new cop before adding styles to this
-section.
+The styles in this section may come up in reviews but should be considered non-blocking items.
 
-#### Attributes using `attr_reader`
+Generally, if a rubocop rule is not enforcing something that could constitute a style, 
+it does not need to be of concern in a review. Consider opening an MR to discuss adding a new 
+cop before adding styles to this section.
 
-Attributes can be accessed in a variety of ways in a class:
+#### Instance variable access using `attr_reader`
+
+Instance variables can be accessed in a variety of ways in a class:
 
 ```ruby
 # public
