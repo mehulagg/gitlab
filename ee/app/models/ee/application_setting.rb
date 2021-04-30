@@ -140,6 +140,8 @@ module EE
           elasticsearch_max_bulk_concurrency: 10,
           elasticsearch_max_bulk_size_bytes: 10.megabytes,
           elasticsearch_url: ENV['ELASTIC_URL'] || 'http://localhost:9200',
+          elasticsearch_username: nil,
+          elasticsearch_password: nil,
           elasticsearch_client_request_timeout: 0,
           elasticsearch_analyzers_smartcn_enabled: false,
           elasticsearch_analyzers_smartcn_search: false,
@@ -302,6 +304,12 @@ module EE
       cleaned = values.split(',').map {|url| url.strip.gsub(%r{/*\z}, '') }
 
       write_attribute(:elasticsearch_url, cleaned.join(','))
+    end
+
+    def elasticsearch_url_with_credentials
+      return elasticsearch_url if elasticsearch_username.blank? && elasticsearch_password.blank?
+
+      elasticsearch_url
     end
 
     def elasticsearch_config

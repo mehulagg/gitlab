@@ -318,6 +318,32 @@ RSpec.describe ApplicationSetting do
     end
   end
 
+  describe '#elasticsearch_url_with_credentials' do
+    it 'embeds credentials in the result' do
+      setting.elasticsearch_url = 'http://example.com,https://example2.com:9200'
+      setting.elasticsearch_username = 'foo'
+      setting.elasticsearch_password = 'bar'
+
+      expect(setting.elasticsearch_url_with_credentials).to eq(%w[http://foo:bar@example.com https://foo:bar@example2.com:9200])
+    end
+
+    it 'overrides existing embedded credentials' do
+      setting.elasticsearch_url = 'http://username:password@example.com,https://test:test@example2.com:9200'
+      setting.elasticsearch_username = 'foo'
+      setting.elasticsearch_password = 'bar'
+
+      expect(setting.elasticsearch_url_with_credentials).to eq(%w[http://foo:bar@example.com https://foo:bar@example2.com:9200])
+    end
+
+    it 'returns original url if credentials blank' do
+      setting.elasticsearch_url = 'http://username:password@example.com,https://test:test@example2.com:9200'
+      setting.elasticsearch_username = ''
+      setting.elasticsearch_password = ''
+
+      expect(setting.elasticsearch_url_with_credentials).to eq(%w[http://username:password@example.com https://test:test@example2.com:9200])
+    end
+  end
+
   describe '#elasticsearch_config' do
     it 'places all elasticsearch configuration values into a hash' do
       setting.update!(

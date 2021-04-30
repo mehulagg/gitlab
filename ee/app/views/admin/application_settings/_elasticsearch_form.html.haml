@@ -71,6 +71,13 @@
                 = _('The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., "http://localhost:9200, http://localhost:9201").')
 
             .form-group
+              = f.label :elasticsearch_username, 'Username', class: 'label-bold'
+              = f.text_field :elasticsearch_username, value: @application_setting.elasticsearch_username, class: 'form-control gl-form-input', data: { qa_selector: 'username_field' }
+            .form-group
+              = f.label :elasticsearch_password, 'Password', class: 'label-bold'
+              = f.password_field :elasticsearch_password, value: @application_setting.elasticsearch_password, class: 'form-control gl-form-input', data: { qa_selector: 'password_field' }
+
+            .form-group
               = f.label :elasticsearch_shards, _('Number of Elasticsearch shards and replicas (per index)'), class: 'gl-font-weight-bold'
 
             %table.table
