@@ -3,8 +3,8 @@ import { reportTypeToSecurityReportTypeEnum } from 'ee/vue_shared/security_repor
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import SecurityReportDownloadDropdown from '~/vue_shared/security_reports/components/security_report_download_dropdown.vue';
-import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
-import { extractSecurityReportArtifactsFromMr } from '~/vue_shared/security_reports/utils';
+import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_pipeline_download_paths.query.graphql';
+import { extractSecurityReportArtifactsFromPipeline } from '~/vue_shared/security_reports/utils';
 
 export default {
   components: {
@@ -22,7 +22,7 @@ export default {
       type: String,
       required: true,
     },
-    mrIid: {
+    pipelineIid: {
       type: Number,
       required: true,
     },
@@ -45,7 +45,7 @@ export default {
         };
       },
       update(data) {
-        return extractSecurityReportArtifactsFromMr(this.reportTypes, data);
+        return extractSecurityReportArtifactsFromPipeline(this.reportTypes, data);
       },
       error(error) {
         this.showError(error);
