@@ -21,7 +21,7 @@ module QA
         @project.visit!
       end
 
-      it 'can load Threat Monitoring page and view the policy alert list', testcase: 'I do not know what to put here' do
+      it 'can load Threat Monitoring page and view the policy alert list', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1786' do
         Page::Project::Menu.perform(&:click_on_threat_monitoring)
 
         EE::Page::Project::ThreatMonitoring::AlertsList.perform do |alerts_list|
