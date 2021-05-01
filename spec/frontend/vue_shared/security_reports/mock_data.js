@@ -322,7 +322,7 @@ export const secretScanningDiffSuccessMock = {
   head_report_created_at: '2020-01-10T10:00:00.000Z',
 };
 
-export const securityReportMrDownloadPathsQueryNoArtifactsResponse = {
+export const securityReportDownloadPathsQueryNoArtifactsResponse = {
   project: {
     mergeRequest: {
       headPipeline: {
