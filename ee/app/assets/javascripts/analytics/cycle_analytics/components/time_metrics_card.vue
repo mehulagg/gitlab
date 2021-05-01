@@ -9,7 +9,9 @@ import { removeFlash, prepareTimeMetricsData } from '../utils';
 
 const POPOVER_CONTENT = {
   'lead-time': {
-    description: s__('ValueStreamAnalytics|Median time from issue first merge request created to issue closed.'),
+    description: s__(
+      'ValueStreamAnalytics|Median time from issue first merge request created to issue closed.',
+    ),
   },
   'cycle-time': {
     description: s__('ValueStreamAnalytics|Median time from issue created to issue closed.'),
