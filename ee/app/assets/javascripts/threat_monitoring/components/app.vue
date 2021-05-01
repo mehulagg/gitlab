@@ -110,6 +110,7 @@ export default {
         v-if="showAlertsTab"
         :title="s__('ThreatMonitoring|Alerts')"
         data-testid="threat-monitoring-alerts-tab"
+        data-qa-selector="alerts_tab"
       >
         <alerts />
       </gl-tab>
