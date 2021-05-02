@@ -81,40 +81,45 @@
                 = link_to todos_filter_path(sort: sort_value_oldest_created) do
                   = sort_title_oldest_created
 
-.todos-list-container.js-todos-all
+.row.js-todos-all
   - if @todos.any?
-    .js-todos-list-container{ data: { qa_selector: "todos_list_container" } }
+    .col.js-todos-list-container{ data: { qa_selector: "todos_list_container" } }
       .js-todos-options{ data: { per_page: @todos.limit_value, current_page: @todos.current_page, total_pages: @todos.total_pages } }
         %ul.content-list.todos-list
           = render @todos
       = paginate @todos, theme: "gitlab"
-    .js-nothing-here-container.todos-all-done.hidden.svg-content
-      = image_tag 'illustrations/todos_all_done.svg'
-      %h4.text-center
-        You're all done!
+    .js-nothing-here-container.empty-state.hidden
+      .svg-content
+        = image_tag 'illustrations/todos_all_done.svg'
+      .text-content
+        %h4.text-center
+          You're all done!
   - elsif current_user.todos.any?
-    .todos-all-done
+    .col.todos-all-done.empty-state
       .svg-content.svg-250
         = image_tag 'illustrations/todos_all_done.svg'
-      - if todos_filter_empty?
-        %h4.text-center
-          = Gitlab.config.gitlab.no_todos_messages.sample
-        %p
-          Are you looking for things to do? Take a look at
-          = succeed "," do
-            = link_to "open issues", issues_dashboard_path
-          contribute to
-          = link_to "a merge request\,", merge_requests_dashboard_path
-          or mention someone in a comment to automatically assign them a new to-do item.
-      - else
-        %h4.text-center
-          Nothing is on your to-do list. Nice work!
+      .text-content
+        - if todos_filter_empty?
+          %h4.text-center
+            = Gitlab.config.gitlab.no_todos_messages.sample
+          %p
+            Are you looking for things to do? Take a look at
+            = succeed "," do
+              %strong
+                = link_to "open issues", issues_dashboard_path
+            contribute to
+            %strong
+              = link_to "a merge request\,", merge_requests_dashboard_path
+            or mention someone in a comment to automatically assign them a new to-do item.
+        - else
+          %h4.text-center
+            Nothing is on your to-do list. Nice work!
   - else
-    .todos-empty
-      .todos-empty-hero.svg-content
+    .col.empty-state
+      .svg-content
         = image_tag 'illustrations/todos_empty.svg'
-      .todos-empty-content.gl-mx-5
-        %h4
+      .text-content
+        %h4.text-center
           Your To-Do List shows what to work on next
         %p
           When an issue or merge request is assigned to you, or when you receive a
