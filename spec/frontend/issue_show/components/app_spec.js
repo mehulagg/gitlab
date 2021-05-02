@@ -1,10 +1,12 @@
 import { GlIntersectionObserver } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import waitForPromises from 'helpers/wait_for_promises';
 import MockAdapter from 'axios-mock-adapter';
 import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import '~/behaviors/markdown/render_gfm';
 import IssuableApp from '~/issue_show/components/app.vue';
 import DescriptionComponent from '~/issue_show/components/description.vue';
+import IssuableAppForm from '~/issue_show/components/form.vue';
 import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
 import PinnedLinks from '~/issue_show/components/pinned_links.vue';
 import { IssuableStatus, IssuableStatusText } from '~/issue_show/constants';
@@ -36,12 +38,10 @@ describe('Issuable output', () => {
   let wrapper;
 
   const findStickyHeader = () => wrapper.find('[data-testid="issue-sticky-header"]');
-
   const findLockedBadge = () => wrapper.find('[data-testid="locked"]');
-
   const findConfidentialBadge = () => wrapper.find('[data-testid="confidential"]');
 
-  const mountComponent = (props = {}, options = {}) => {
+  const mountComponent = (props = {}, options = {}, data = {}) => {
     wrapper = mount(IssuableApp, {
       propsData: { ...appProps, ...props },
       provide: {
@@ -52,6 +52,11 @@ describe('Issuable output', () => {
       stubs: {
         HighlightBar: true,
         IncidentTabs: true,
+      },
+      data() {
+        return {
+          ...data,
+        };
       },
       ...options,
     });
@@ -94,7 +99,6 @@ describe('Issuable output', () => {
 
     wrapper.vm.poll.stop();
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render a title/description/edited and update title/description/edited on update', () => {
@@ -115,7 +119,8 @@ describe('Issuable output', () => {
         expect(formatText(editedText.text())).toMatch(/Edited[\s\S]+?by Some User/);
         expect(editedText.find('.author-link').attributes('href')).toMatch(/\/some_user$/);
         expect(editedText.find('time').text()).toBeTruthy();
-        expect(wrapper.vm.state.lock_version).toEqual(1);
+        expect(wrapper.vm.state.lock_version).toBe(initialRequest.lock_version);
+        expect(wrapper.vm.state.issue_type).toBe(initialRequest.issue_type);
       })
       .then(() => {
         wrapper.vm.poll.makeRequest();
@@ -133,7 +138,8 @@ describe('Issuable output', () => {
 
         expect(editedText.find('.author-link').attributes('href')).toMatch(/\/other_user$/);
         expect(editedText.find('time').text()).toBeTruthy();
-        expect(wrapper.vm.state.lock_version).toEqual(2);
+        expect(wrapper.vm.state.lock_version).toBe(secondRequest.lock_version);
+        expect(wrapper.vm.state.issue_type).toBe(secondRequest.issue_type);
       });
   });
 
@@ -172,7 +178,7 @@ describe('Issuable output', () => {
       ${'zoomMeetingUrl'}       | ${zoomMeetingUrl}
       ${'publishedIncidentUrl'} | ${publishedIncidentUrl}
     `('sets the $prop correctly on underlying pinned links', ({ prop, value }) => {
-      expect(wrapper.vm[prop]).toEqual(value);
+      expect(wrapper.vm[prop]).toBe(value);
       expect(wrapper.find(`[data-testid="${prop}"]`).attributes('href')).toBe(value);
     });
   });
@@ -374,8 +380,8 @@ describe('Issuable output', () => {
           });
         })
         .then(() => {
-          expect(wrapper.vm.formState.lockedWarningVisible).toEqual(true);
-          expect(wrapper.vm.formState.lock_version).toEqual(1);
+          expect(wrapper.vm.formState.lockedWarningVisible).toBe(true);
+          expect(wrapper.vm.formState.lock_version).toBe(1);
           expect(wrapper.find('.alert').exists()).toBe(true);
         });
     });
@@ -562,9 +568,10 @@ describe('Issuable output', () => {
   });
 
   describe('Composable description component', () => {
-    const findIncidentTabs = () => wrapper.find(IncidentTabs);
-    const findDescriptionComponent = () => wrapper.find(DescriptionComponent);
-    const findPinnedLinks = () => wrapper.find(PinnedLinks);
+    const findIncidentTabs = () => wrapper.findComponent(IncidentTabs);
+    const findDescriptionComponent = () => wrapper.findComponent(DescriptionComponent);
+    const findPinnedLinks = () => wrapper.findComponent(PinnedLinks);
+    const findIssuableForm = () => wrapper.findComponent(IssuableAppForm);
     const borderClass = 'gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid gl-mb-6';
 
     describe('when using description component', () => {
@@ -612,6 +619,52 @@ describe('Issuable output', () => {
 
       it('does not add a border below the header', () => {
         expect(findPinnedLinks().attributes('class')).not.toContain(borderClass);
+      });
+    });
+
+    describe('updateStoreFromState', () => {
+      const { location } = window;
+
+      beforeEach(() => {
+        delete window.location;
+        window.location = {
+          reload: jest.fn(),
+          hash: location.hash,
+        };
+
+        mountComponent(
+          {
+            canUpdate: true,
+          },
+          {},
+          {
+            showForm: true,
+          },
+        );
+      });
+
+      afterEach(() => {
+        window.location = location;
+      });
+
+      it('does nothing if the states are equal', async () => {
+        const updateStoreSpy = jest.spyOn(wrapper.vm, 'updateIssuable');
+
+        findIssuableForm().vm.$emit('update-store-from-state', wrapper.vm.store.formState);
+        await waitForPromises();
+        expect(updateStoreSpy).not.toHaveBeenCalled();
+        expect(window.location.reload).not.toHaveBeenCalled();
+      });
+
+      it('updates the state and reloads the page if th states are different', async () => {
+        const updateStoreSpy = jest.spyOn(wrapper.vm, 'updateIssuable');
+
+        findIssuableForm().vm.$emit('update-store-from-state', { ...secondRequest });
+        await waitForPromises();
+        jest.runAllTimers();
+        expect(updateStoreSpy).toHaveBeenCalled();
+        expect(updateStoreSpy).toHaveBeenCalledTimes(1);
+        expect(window.location.reload).toHaveBeenCalled();
       });
     });
   });

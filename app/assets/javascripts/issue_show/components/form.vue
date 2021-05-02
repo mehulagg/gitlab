@@ -6,17 +6,19 @@ import eventHub from '../event_hub';
 import editActions from './edit_actions.vue';
 import descriptionField from './fields/description.vue';
 import descriptionTemplate from './fields/description_template.vue';
-import titleField from './fields/title.vue';
-import lockedWarning from './locked_warning.vue';
+import IssueTitleField from './fields/title.vue';
+import IssueTypeField from './fields/type.vue';
+import LockedWarning from './locked_warning.vue';
 
 export default {
   components: {
-    lockedWarning,
-    titleField,
     descriptionField,
     descriptionTemplate,
     editActions,
     GlAlert,
+    IssueTitleField,
+    IssueTypeField,
+    LockedWarning,
   },
   props: {
     canDestroy: {
@@ -180,7 +182,19 @@ export default {
       }}</gl-alert
     >
     <div class="row">
-      <div v-if="hasIssuableTemplates" class="col-sm-4 col-lg-3">
+      <div
+        :class="{
+          'col-4': hasIssuableTemplates,
+          'col-6': !hasIssuableTemplates,
+        }"
+      >
+        <issue-title-field
+          ref="title"
+          :form-state="formState"
+          :issuable-templates="issuableTemplates"
+        />
+      </div>
+      <div v-if="hasIssuableTemplates" class="col-4">
         <description-template
           :form-state="formState"
           :issuable-templates="issuableTemplates"
@@ -191,11 +205,11 @@ export default {
       </div>
       <div
         :class="{
-          'col-sm-8 col-lg-9': hasIssuableTemplates,
-          'col-12': !hasIssuableTemplates,
+          'col-4': hasIssuableTemplates,
+          'col-6': !hasIssuableTemplates,
         }"
       >
-        <title-field ref="title" :form-state="formState" :issuable-templates="issuableTemplates" />
+        <issue-type-field ref="issue-type" :form-state="formState" v-on="$listeners" />
       </div>
     </div>
     <description-field

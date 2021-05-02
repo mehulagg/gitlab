@@ -10,6 +10,7 @@ export const initialRequest = {
   updated_by_name: 'Some User',
   updated_by_path: '/some_user',
   lock_version: 1,
+  issue_type: 'issue',
 };
 
 export const secondRequest = {
@@ -22,6 +23,7 @@ export const secondRequest = {
   updated_by_name: 'Other User',
   updated_by_path: '/other_user',
   lock_version: 2,
+  issue_type: 'incident',
 };
 
 export const descriptionProps = {
@@ -48,6 +50,7 @@ export const appProps = {
   initialDescriptionHtml: 'test',
   initialDescriptionText: 'test',
   lockVersion: 1,
+  issueType: 'issue',
   markdownPreviewPath: '/',
   markdownDocsPath: '/',
   projectNamespace: '/',

@@ -18090,6 +18090,9 @@ msgstr ""
 msgid "Issue Boards"
 msgstr ""
 
+msgid "Issue Type"
+msgstr ""
+
 msgid "Issue already promoted to epic."
 msgstr ""
 

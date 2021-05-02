@@ -4,6 +4,7 @@ import Visibility from 'visibilityjs';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Poll from '~/lib/utils/poll';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { isEqual } from 'lodash';
 import { __, s__, sprintf } from '~/locale';
 import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
 import eventHub from '../event_hub';
@@ -163,6 +164,11 @@ export default {
       required: false,
       default: 0,
     },
+    issueType: {
+      type: String,
+      required: false,
+      default: 'issue',
+    },
     descriptionComponent: {
       type: Object,
       required: false,
@@ -187,6 +193,7 @@ export default {
       updatedByPath: this.updatedByPath,
       taskStatus: this.initialTaskStatus,
       lock_version: this.lockVersion,
+      issue_type: this.issueType,
     });
 
     return {
@@ -313,6 +320,7 @@ export default {
           title: this.state.titleText,
           description: this.state.descriptionText,
           lock_version: this.state.lock_version,
+          issue_type: this.state.issue_type,
           lockedWarningVisible: false,
           updateLoading: false,
           issuableTemplates: templates,
@@ -378,6 +386,16 @@ export default {
         });
     },
 
+    updateStoreFromState(state) {
+      if (!isEqual(this.store.formState, state)) {
+        this.store.formState = state;
+        this.updateIssuable();
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+    },
+
     deleteIssuable(payload) {
       return this.service
         .deleteIssuable(payload)
@@ -430,6 +448,7 @@ export default {
         :can-attach-file="canAttachFile"
         :enable-autocomplete="enableAutocomplete"
         :issuable-type="issuableType"
+        @update-store-from-state="updateStoreFromState"
       />
     </div>
     <div v-else>
