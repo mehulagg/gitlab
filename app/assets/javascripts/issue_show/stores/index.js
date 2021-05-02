@@ -12,6 +12,7 @@ export default class Store {
       updateLoading: false,
       lock_version: 0,
       issuableTemplates: {},
+      issue_type: '',
     };
   }
 
@@ -31,6 +32,7 @@ export default class Store {
     this.state.descriptionHtml = updateDescription(sanitize(data.description), details);
     this.state.titleHtml = sanitize(data.title);
     this.state.lock_version = data.lock_version;
+    this.state.issue_type = data.issue_type;
   }
 
   stateShouldUpdate(data) {

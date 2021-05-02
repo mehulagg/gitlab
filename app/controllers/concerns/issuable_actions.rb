@@ -48,7 +48,8 @@ module IssuableActions
       description: view_context.markdown_field(issuable, :description),
       description_text: issuable.description,
       task_status: issuable.task_status,
-      lock_version: issuable.lock_version
+      lock_version: issuable.lock_version,
+      issue_type: issuable.issue_type,
     }
 
     if issuable.edited?

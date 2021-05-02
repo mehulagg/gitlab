@@ -25,3 +25,8 @@ export const IssueStateEvent = {
 
 export const STATUS_PAGE_PUBLISHED = __('Published on status page');
 export const JOIN_ZOOM_MEETING = __('Join Zoom meeting');
+
+export const IssuableTypes = [
+  { value: 'issue', text: __('Issue') },
+  { value: 'incident', text: __('Incident') },
+];

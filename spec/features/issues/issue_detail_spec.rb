@@ -74,4 +74,27 @@ RSpec.describe 'Issue Detail', :js do
       end
     end
   end
+
+  context 'when edited by a signed in user' do
+    before do
+      sign_in(user)
+      visit project_issue_path(project, issue)
+      wait_for_requests
+
+      page.find('.js-issuable-edit').click
+    end
+
+    it 'shows the issue type selector with the correct value set' do
+      page.within('.issuable-details') do
+        expect(find('#issuable-type').value).to eq('issue')
+      end
+    end
+
+    it 'sets the new issue_type value when changed' do
+      page.within('.issuable-details') do
+        select 'Incident', from: 'Issue'
+        expect(find('#issuable-type').value).to eq('incident')
+      end
+    end
+  end
 end
