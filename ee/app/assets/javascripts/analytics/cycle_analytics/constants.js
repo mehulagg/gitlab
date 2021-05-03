@@ -76,3 +76,4 @@ export const NOT_ENOUGH_DATA_ERROR = s__(
 
 export const PAGINATION_TYPE = 'keyset';
 export const PAGINATION_SORT_FIELD = 'created_at';
+export const PAGINATION_SORT_DIRECTION = 'asc';

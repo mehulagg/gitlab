@@ -4,7 +4,11 @@ import { __ } from '~/locale';
 import { NOT_ENOUGH_DATA_ERROR } from '../constants';
 import TotalTime from './total_time_component.vue';
 
-const DEFAULT_WORKFLOW_TITLE_PROPERTIES = { thClass: 'gl-w-half', key: 'workflowTitleKey' };
+const DEFAULT_WORKFLOW_TITLE_PROPERTIES = {
+  thClass: 'gl-w-half',
+  key: 'workflowTitleKey',
+  sortable: true,
+};
 const WORKFLOW_COLUMN_TITLES = {
   issues: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Issues') },
   jobs: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Jobs') },
@@ -81,7 +85,10 @@ export default {
       return WORKFLOW_COLUMN_TITLES.issues;
     },
     fields() {
-      return [this.workflowTitle, { key: 'time', label: __('Time'), thClass: 'gl-w-half' }];
+      return [
+        this.workflowTitle,
+        { key: 'time', label: __('Time'), thClass: 'gl-w-half', sortable: true },
+      ];
     },
     prevPage() {
       return Math.max(this.pagination.page - 1, 0);
@@ -113,6 +120,8 @@ export default {
       stacked="lg"
       thead-class="border-bottom"
       show-empty
+      :sort-by="pagination.sort"
+      :sort-direction="pagination.direction"
       :fields="fields"
       :items="stageEvents"
       :empty-text="emptyStateMessage"

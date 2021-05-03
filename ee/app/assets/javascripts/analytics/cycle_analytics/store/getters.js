@@ -4,12 +4,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import httpStatus from '~/lib/utils/http_status';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
-import {
-  DEFAULT_VALUE_STREAM_ID,
-  OVERVIEW_STAGE_CONFIG,
-  PAGINATION_TYPE,
-  PAGINATION_SORT_FIELD,
-} from '../constants';
+import { DEFAULT_VALUE_STREAM_ID, OVERVIEW_STAGE_CONFIG, PAGINATION_TYPE } from '../constants';
 import { transformStagesForPathNavigation } from '../utils';
 
 export const hasNoAccessError = (state) => state.errorCode === httpStatus.FORBIDDEN;
@@ -49,9 +44,10 @@ export const cycleAnalyticsRequestParams = (state, getters) => {
   };
 };
 
-export const paginationParams = ({ pagination: { page } }) => ({
+export const paginationParams = ({ pagination: { page, sort, direction } }) => ({
   pagination: PAGINATION_TYPE,
-  sort: PAGINATION_SORT_FIELD,
+  sort,
+  direction,
   page,
 });
 
