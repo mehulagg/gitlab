@@ -14,7 +14,7 @@ type: index, reference
 As a reviewer, you're able to suggest code changes with a
 Markdown syntax in merge request diff threads. Then, the
 merge request author (or other users with appropriate
-[permission](../permissions.md)) is able to apply these
+[permission](../../..permissions.md)) is able to apply these
 Suggestions with a click, which generates a commit in
 the merge request authored by the user that applied them.
 
@@ -27,7 +27,7 @@ the merge request authored by the user that applied them.
 
    ![Add a suggestion into a code block tagged properly](img/make_suggestion_v13_9.png)
 
-1. Click either **Start a review** or **Add to review** to add your comment to a [review](#merge-request-reviews), or **Add comment now** to add the comment to the thread immediately.
+1. Click either **Start a review** or **Add to review** to add your comment to a [review](index.md), or **Add comment now** to add the comment to the thread immediately.
 
    The Suggestion in the comment can be applied by the merge request author
    directly from the merge request:
@@ -43,7 +43,7 @@ the merge request authored by the user that applied them.
 After the author applies a Suggestion, it is marked with the **Applied** label,
 the thread is automatically resolved, and GitLab creates a new commit
 and push the suggested change directly into the codebase in the merge request's
-branch. [Developer permission](../permissions.md) is required to do so.
+branch. [Developer permission](../../../permissions.md) is required to do so.
 
 ## Multi-line Suggestions
 
@@ -70,7 +70,7 @@ suggestion.
 ## Code block nested in Suggestions
 
 If you need to make a suggestion that involves a
-[fenced code block](../markdown.md#code-spans-and-blocks), wrap your suggestion in four backticks
+[fenced code block](../../../markdown.md#code-spans-and-blocks), wrap your suggestion in four backticks
 instead of the usual three.
 
 ![A comment editor with a suggestion with a fenced code block](img/suggestion_code_block_editor_v12_8.png)
