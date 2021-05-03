@@ -3,28 +3,18 @@
 module Analytics
   module CycleAnalytics
     class StageFinder
-      NUMBERS_ONLY = /\A\d+\z/.freeze
-
       def initialize(parent:, stage_id:)
         @parent = parent
         @stage_id = stage_id
       end
 
       def execute
-        if in_memory_default_stage?
-          build_in_memory_stage_by_name
-        else
-          parent.cycle_analytics_stages.find(stage_id)
-        end
+        build_in_memory_stage_by_name
       end
 
       private
 
       attr_reader :parent, :stage_id
-
-      def in_memory_default_stage?
-        !NUMBERS_ONLY.match?(stage_id.to_s)
-      end
 
       def build_in_memory_stage_by_name
         parent.cycle_analytics_stages.build(find_in_memory_stage)
@@ -43,3 +33,5 @@ module Analytics
     end
   end
 end
+
+Analytics::CycleAnalytics::StageFinder.prepend_if_ee('EE::Analytics::CycleAnalytics::StageFinder')

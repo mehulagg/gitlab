@@ -7,6 +7,7 @@ module Analytics
 
       validates :project, presence: true
       belongs_to :project
+      belongs_to :value_stream, class_name: 'Analytics::CycleAnalytics::ProjectValueStream', foreign_key: :project_value_stream_id
 
       alias_attribute :parent, :project
       alias_attribute :parent_id, :project_id
@@ -14,6 +15,8 @@ module Analytics
       delegate :group, to: :project
 
       validate :validate_project_group_for_label_events, if: -> { start_event_label_based? || end_event_label_based? }
+
+      scope :by_value_stream, -> (value_stream) { where(project_value_stream_id: value_stream.id) }
 
       def self.relative_positioning_query_base(stage)
         where(project_id: stage.project_id)

@@ -2,7 +2,7 @@
 
 module Analytics
   module CycleAnalytics
-    class GroupValueStreamEntity < Grape::Entity
+    class ValueStreamEntity < Grape::Entity
       expose :name
       expose :id
       expose :is_custom do |object|
