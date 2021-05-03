@@ -12,7 +12,7 @@ RSpec.shared_examples GroupInviteMembers do
       it 'does not track the event' do
         subject
 
-        expect_no_snowplow_event
+        expect_no_snowplow_event(category: anything, action: 'invite_members', label: 'new_group_form')
       end
     end
 
