@@ -1,8 +1,8 @@
 ---
 key_path: redis_hll_counters.analytics.i_analytics_cohorts_weekly
 description:
-product_section: growth
-product_stage: growth
+product_section: fulfillment
+product_stage: fulfillment
 product_group: group::utilization
 product_category:
 value_type: number
