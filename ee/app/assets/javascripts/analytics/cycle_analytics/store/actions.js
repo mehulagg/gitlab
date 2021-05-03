@@ -77,7 +77,7 @@ export const fetchStageData = ({ dispatch, getters, commit }, stageId) => {
     .then(({ data, headers }) => {
       const { page = null, nextPage = null } = parseIntPagination(normalizeHeaders(headers));
       commit(types.RECEIVE_STAGE_DATA_SUCCESS, data);
-      commit(types.SET_PAGINATION, { page, hasNextPage: Boolean(nextPage) });
+      commit(types.SET_PAGINATION, { ...paginationParams, page, hasNextPage: Boolean(nextPage) });
     })
     .catch((error) => dispatch('receiveStageDataError', error));
 };
@@ -483,8 +483,8 @@ export const setFilters = ({ dispatch }) => {
 
 export const updateStageTablePagination = (
   { commit, dispatch, state: { selectedStage } },
-  { page },
+  paginationParams,
 ) => {
-  commit(types.SET_PAGINATION, { page });
+  commit(types.SET_PAGINATION, paginationParams);
   return dispatch('fetchStageData', selectedStage.id);
 };

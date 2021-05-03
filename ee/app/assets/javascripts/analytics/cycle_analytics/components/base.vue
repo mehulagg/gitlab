@@ -192,7 +192,7 @@ export default {
     onStageReorder(data) {
       this.reorderStage(data);
     },
-    onHandleSelectPage(data) {
+    onHandleUpdatePagination(data) {
       this.updateStageTablePagination(data);
     },
   },
@@ -287,7 +287,7 @@ export default {
             :empty-state-message="selectedStageError"
             :no-data-svg-path="noDataSvgPath"
             :pagination="pagination"
-            @handleSelectPage="onHandleSelectPage"
+            @handleUpdatePagination="onHandleUpdatePagination"
           />
         </template>
         <stage-table

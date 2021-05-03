@@ -1,4 +1,4 @@
-import { PAGINATION_SORT_FIELD, PAGINATION_SORT_DIRECTION } from '../constants';
+import { PAGINATION_SORT_FIELD_END_EVENT, PAGINATION_SORT_DIRECTION_DESC } from '../constants';
 
 export default () => ({
   featureFlags: {},
@@ -40,8 +40,7 @@ export default () => ({
   pagination: {
     page: null,
     hasNextPage: false,
-    // TODO: this should be set in initialization, in case the sort / direction is in the url on load
-    sort: PAGINATION_SORT_FIELD,
-    direction: PAGINATION_SORT_DIRECTION,
+    sort: PAGINATION_SORT_FIELD_END_EVENT,
+    direction: PAGINATION_SORT_DIRECTION_DESC,
   },
 });

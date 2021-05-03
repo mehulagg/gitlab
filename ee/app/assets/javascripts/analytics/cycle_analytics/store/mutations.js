@@ -1,4 +1,10 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import {
+  PAGINATION_SORT_FIELD_DURATION,
+  PAGINATION_SORT_FIELD_END_EVENT,
+  PAGINATION_SORT_DIRECTION_DESC,
+  PAGINATION_SORT_DIRECTION_ASC,
+} from '../constants';
 import { transformRawStages, prepareStageErrors, formatMedianValuesWithOverview } from '../utils';
 import * as types from './mutation_types';
 
@@ -183,7 +189,15 @@ export default {
         return aName.toUpperCase() > bName.toUpperCase() ? 1 : -1;
       });
   },
-  [types.SET_PAGINATION](state, { page, hasNextPage, sort, direction }) {
+  [types.SET_PAGINATION](
+    state,
+    {
+      page,
+      hasNextPage,
+      sort = PAGINATION_SORT_FIELD_END_EVENT,
+      direction = PAGINATION_SORT_DIRECTION_DESC,
+    },
+  ) {
     state.pagination = {
       page,
       hasNextPage,
