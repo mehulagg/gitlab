@@ -82,6 +82,15 @@ RSpec.describe Issue::Metrics do
     end
 
     describe "#record!" do
+      it "does not load the lists association if there are no labels" do
+        labels = double(:labels, length: 0)
+        expect(labels).not_to receive(:includes).with(:lists)
+
+        issue_metrics = Issue::Metrics.find_by(issue: subject)
+        allow(issue_metrics.issue).to receive(:labels).and_return(labels)
+        issue_metrics.record!
+      end
+
       it "does not cause an N+1 query" do
         label = create(:label)
         subject.update!(label_ids: [label.id])
