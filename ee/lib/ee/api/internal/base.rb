@@ -35,7 +35,7 @@ module EE
 
               return { success: false, message: error_message } if error_message
 
-              return { success: false, message: 'Deploy keys cannot be used for Two Factor' } if actor.key.is_a?(DeployKey)
+              return { success: false, message: 'Deploy keys cannot be used for Two Factor' } if actor.key.type == "DeployKey"
 
               return { success: false, message: 'Two-factor authentication is not enabled for this user' } unless user.two_factor_enabled?
 

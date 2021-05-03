@@ -21,7 +21,7 @@ module Gitlab
     def initialize(actor)
       @actor =
         case actor
-        when DeployKey, User
+        when GroupDeployKey, DeployKey, User
           actor
         when Key
           actor.user
@@ -42,7 +42,7 @@ module Gitlab
     end
 
     def deploy_key_pushable?(project)
-      actor.is_a?(DeployKey) && actor.can_push_to?(project)
+      actor.type == "DeployKey" && actor.can_push_to?(project)
     end
 
     def type
@@ -101,7 +101,7 @@ module Gitlab
 
       def salt
         case actor
-        when DeployKey, Key
+        when GroupDeployKey, DeployKey, Key
           actor.fingerprint.delete(':').first(16)
         when User
           # Take the last 16 characters as they're more unique than the first 16

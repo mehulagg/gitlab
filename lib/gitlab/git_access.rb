@@ -363,7 +363,7 @@ module Gitlab
     end
 
     def deploy_key?
-      actor.is_a?(DeployKey)
+      actor.type == "DeployKey"
     end
 
     def deploy_token
@@ -437,7 +437,7 @@ module Gitlab
         case actor
         when User
           actor
-        when DeployKey
+        when DeployKey, GroupDeployKey
           nil
         when Key
           actor.user

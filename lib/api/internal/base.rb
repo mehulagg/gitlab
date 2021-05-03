@@ -212,7 +212,7 @@ module API
             break { success: false, message: error_message }
           end
 
-          break { success: false, message: 'Deploy keys cannot be used to retrieve recovery codes' } if actor.key.is_a?(DeployKey)
+          break { success: false, message: 'Deploy keys cannot be used to retrieve recovery codes' } if actor.key.type == "DeployKey"
 
           unless user.two_factor_enabled?
             break { success: false, message: 'Two-factor authentication is not enabled for this user' }
@@ -235,7 +235,7 @@ module API
 
           error_message = validate_actor(actor)
 
-          break { success: false, message: 'Deploy keys cannot be used to create personal access tokens' } if actor.key.is_a?(DeployKey)
+          break { success: false, message: 'Deploy keys cannot be used to create personal access tokens' } if actor.key.type == "DeployKey"
 
           if params[:user_id] && user.nil?
             break { success: false, message: 'Could not find the given user' }
@@ -310,7 +310,7 @@ module API
 
           if error_message
             { success: false, message: error_message }
-          elsif actor.key.is_a?(DeployKey)
+          elsif actor.key.type == "DeployKey"
             { success: true, two_factor_required: false }
           else
             {
