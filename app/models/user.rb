@@ -2071,6 +2071,11 @@ class User < ApplicationRecord
   def update_highest_role_attribute
     id
   end
+
+  # To distinguish from DeployKeys and GroupDeployKeys
+  def type
+    "User"
+  end
 end
 
 User.prepend_if_ee('EE::User')
