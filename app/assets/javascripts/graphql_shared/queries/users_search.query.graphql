@@ -3,7 +3,9 @@
 
 query usersSearch($search: String!, $fullPath: ID!) {
   workspace: project(fullPath: $fullPath) {
-    users: projectMembers(search: $search, relations: [DIRECT, INHERITED, INVITED_GROUPS]) {
+    # INVITED_GROUP's been temporarily removed from relations
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/329750
+    users: projectMembers(search: $search, relations: [DIRECT, INHERITED]) {
       nodes {
         user {
           ...User
