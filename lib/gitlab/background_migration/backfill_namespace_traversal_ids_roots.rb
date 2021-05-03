@@ -15,13 +15,14 @@ module Gitlab
       PAUSE_SECONDS = 0.1
 
       def self.base_query
-        Namespace
-          .where(parent_id: nil)
-          .where("traversal_ids = '{}'")
+        Namespace.where(parent_id: nil)
       end
 
       def perform(start_id, end_id, sub_batch_size)
-        ranged_query = self.class.base_query.where(id: start_id..end_id)
+        ranged_query = self.class.base_query
+          .where(id: start_id..end_id)
+          .where("traversal_ids = '{}'")
+
         ranged_query.each_batch(of: sub_batch_size) do |sub_batch|
           sub_batch.update_all('traversal_ids = ARRAY[id]')
           sleep PAUSE_SECONDS
