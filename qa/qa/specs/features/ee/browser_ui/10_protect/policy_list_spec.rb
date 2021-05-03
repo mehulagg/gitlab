@@ -25,7 +25,8 @@ module QA
         Page::Project::Menu.perform(&:click_on_threat_monitoring)
 
         EE::Page::Project::ThreatMonitoring::AlertsList.perform do |alerts_list|
-          expect(alerts_list).to have_alerts_tab have_alerts_list
+          expect(alerts_list).to have_alerts_tab
+          expect(alerts_list).to have_alerts_list
         end
       end
     end

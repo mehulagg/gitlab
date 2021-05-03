@@ -24,7 +24,7 @@ module QA
 
             def click_on_threat_monitoring
               hover_security_compliance do
-                within_sidebar do
+                within_submenu do
                   click_element(:sidebar_menu_item_link, menu_item: 'Threat Monitoring')
                 end
               end
