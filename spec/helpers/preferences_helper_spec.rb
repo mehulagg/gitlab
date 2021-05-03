@@ -122,7 +122,7 @@ RSpec.describe PreferencesHelper do
   end
 
   describe '#language_choices' do
-    it 'lists all the selectable language options with their translation percent' do
+    it 'lists all the selectable language options with their translation percent', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/329744' do
       stub_const(
         'Gitlab::I18n::TRANSLATION_LEVELS',
         'en' => 100,
