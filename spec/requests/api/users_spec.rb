@@ -1468,7 +1468,7 @@ RSpec.describe API::Users do
 
       it "returns 400 error if credit_card_validated_at is missing" do
         invalid_user_id = 'invalid-user-id'
-        put api("/user/#{invalid_user_id}/credit_card_validation", admin), params: { }
+        put api("/user/#{invalid_user_id}/credit_card_validation", admin), params: {}
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
