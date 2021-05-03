@@ -15,7 +15,7 @@ RSpec.describe "CI YML Templates" do
 
     let(:content) do
       if template_name == 'Security/DAST-API.gitlab-ci.yml'
-        # The DAST-API template purposly exlucdes a stages
+        # The DAST-API template purposly excludes a stages
         # definition.
 
         $content = <<~EOS
