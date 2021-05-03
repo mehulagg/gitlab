@@ -78,6 +78,8 @@ An asset that has the potential to be vulnerable, identified in a project by an 
 include but are not restricted to source code, binary packages, containers, dependencies, networks,
 applications, and infrastructure.
 
+Findings are all potential vulnerability items scanners identify in MRs/feature branches. Only after merging to default does a finding become a vulnerability (object)(see [vulnerability](#vulnerability)).
+
 ### Insignificant finding
 
 A legitimate finding that a particular customer doesn't care about.
@@ -149,9 +151,11 @@ is listed as GitLab.
 
 ### Vulnerability
 
-A flaw that has a negative impact on the security of its environment. Vulnerabilities describe the
+Also refered to as a Standalone Vulnerability Object. A flaw that has a negative impact on the security of its environment. Vulnerabilities describe the
 error or weakness, and don't describe where the error is located (see [finding](#finding)).
 Each vulnerability maps to a unique finding.
+
+Vulnerabilities exist in the default branch. Findings (see [finding](#finding)) are all potential vulnerability items scanners identify in MRs/feature branches. Only after merging to default does a finding become a vulnerability (object).
 
 ### Vulnerability finding
 
