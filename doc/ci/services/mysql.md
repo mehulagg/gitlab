@@ -54,6 +54,9 @@ If you want to use a MySQL container, you can use [GitLab Runner](../runners/REA
    Database: <your_mysql_database>
    ```
 
+   In this example, the user is `runner`. You should use a user that has permission to
+   access your database.
+
 ## Use MySQL with the Shell executor
 
 You can also use MySQL on manually-configured servers that use
