@@ -2,10 +2,9 @@
 import { GlBadge, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
-import { __, sprintf } from '~/locale';
+import { sprintf } from '~/locale';
 import Tracking from '~/tracking';
-
-const RESIZE_EVENT_DEBOUNCE_MS = 150;
+import { i18n, RESIZE_EVENT_DEBOUNCE_MS } from '../constants';
 
 export default {
   components: {
@@ -23,12 +22,6 @@ export default {
       default: '',
     },
   },
-  i18n: {
-    title: {
-      generic: __('This feature is part of your GitLab Ultimate trial.'),
-      specific: __('The %{featureName} feature is part of your GitLab Ultimate trial.'),
-    },
-  },
   data() {
     return {
       tooltipDisabled: false,
@@ -36,9 +29,9 @@ export default {
   },
   computed: {
     title() {
-      if (this.featureName === '') return this.$options.i18n.title.generic;
+      if (this.featureName === '') return i18n.badge.title.generic;
 
-      return sprintf(this.$options.i18n.title.specific, { featureName: this.featureName });
+      return sprintf(i18n.badge.title.specific, { featureName: this.featureName });
     },
   },
   created() {

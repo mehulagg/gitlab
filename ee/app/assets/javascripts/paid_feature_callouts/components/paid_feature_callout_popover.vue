@@ -2,10 +2,9 @@
 import { GlButton, GlPopover } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
-import { __, n__, s__, sprintf } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
 import Tracking from '~/tracking';
-
-const RESIZE_EVENT_DEBOUNCE_MS = 150;
+import { i18n, RESIZE_EVENT_DEBOUNCE_MS } from '../constants';
 
 export default {
   tracking: {
@@ -73,22 +72,13 @@ export default {
   },
   computed: {
     popoverTitle() {
-      const i18nPopoverTitle = n__(
-        'FeatureHighlight|%{daysRemaining} day remaining to enjoy %{featureName}',
-        'FeatureHighlight|%{daysRemaining} days remaining to enjoy %{featureName}',
-        this.daysRemaining,
-      );
-
-      return sprintf(i18nPopoverTitle, {
+      return sprintf(i18n.popover.title(this.daysRemaining), {
         daysRemaining: this.daysRemaining,
         featureName: this.featureName,
       });
     },
     popoverContent() {
-      const i18nPopoverContent = s__(`FeatureHighlight|Enjoying your GitLab %{planNameForTrial} trial? To continue
-        using %{featureName} after your trial ends, upgrade to GitLab %{planNameForUpgrade}.`);
-
-      return sprintf(i18nPopoverContent, {
+      return sprintf(i18n.popover.content, {
         featureName: this.featureName,
         planNameForTrial: this.planNameForTrial,
         planNameForUpgrade: this.planNameForUpgrade,
