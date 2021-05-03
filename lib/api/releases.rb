@@ -33,7 +33,18 @@ module API
       get ':id/releases' do
         releases = ::ReleasesFinder.new(user_project, current_user, declared_params.slice(:order_by, :sort)).execute
 
-        present paginate(releases), with: Entities::Release, current_user: current_user
+        if Feature.enabled?(:api_caching_releases, user_project, default_enabled: :yaml)
+          # We cache the serialized payload for each user in order to avoid repeated renderings.
+          # Since the cached result could contain a sensitive information, such as
+          # markdown reference to a confidential project, the cache will expire
+          # in a short interval.
+          present_cached paginate(releases),
+                         with: Entities::Release,
+                         expires_in: 5.minutes,
+                         current_user: current_user
+        else
+          present paginate(releases), with: Entities::Release, current_user: current_user
+        end
       end
 
       desc 'Get a single project release' do

@@ -4,7 +4,7 @@ class MilestoneRelease < ApplicationRecord
   extend SuppressCompositePrimaryKeyWarning
 
   belongs_to :milestone
-  belongs_to :release
+  belongs_to :release, touch: true
 
   validate :same_project_between_milestone_and_release
 
