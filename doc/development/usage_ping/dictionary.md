@@ -6346,7 +6346,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `database.pg_system_id`
 
-Missing description
+TBD
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183248_pg_system_id.yml)
 
@@ -7680,7 +7680,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Number of projects using 5 min production app CI template in last 7 days.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184515_p_ci_templates_5_min_production_app_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184515_p_ci_templates_5_min_production_app_weekly.yml)
 
 Group: `group::5-min-app`
 
@@ -10321,6 +10321,30 @@ Tiers: `premium`, `ultimate`
 Counts of WAU promoting issues to epics
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210331192332_g_project_management_issue_promoted_to_epic_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_awarding_epic_emoji_monthly`
+
+Counts of MAU awarding emoji on epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210503011217_g_project_management_users_awarding_epic_emoji_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_awarding_epic_emoji_weekly`
+
+Counts of WAU awarding emoji on epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210503011355_g_project_management_users_awarding_epic_emoji_weekly.yml)
 
 Group: `group::product planning`
 
@@ -15925,6 +15949,8 @@ Tiers: `free`
 ### `usage_activity_by_stage.monitor.projects_with_enabled_alert_integrations_histogram`
 
 Histogram (buckets 1 to 100) of projects with at least 1 enabled integration.
+
+[Object JSON schema](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/objects_schemas/projects_with_enabled_alert_integrations_histogram.json)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210309165717_projects_with_enabled_alert_integrations_histogram.yml)
 
