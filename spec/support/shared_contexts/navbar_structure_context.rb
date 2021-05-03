@@ -31,7 +31,8 @@ RSpec.shared_context 'project navbar structure' do
         nav_sub_items: [
           _('Details'),
           _('Activity'),
-          _('Releases')
+          _('Releases'),
+          (_('Labels') if Feature.enabled?(:sidebar_refactor))
         ]
       },
       {
@@ -52,7 +53,7 @@ RSpec.shared_context 'project navbar structure' do
         nav_sub_items: [
           _('List'),
           _('Boards'),
-          _('Labels'),
+          (_('Labels') if Feature.disabled?(:sidebar_refactor)),
           _('Service Desk'),
           _('Milestones'),
           (_('Iterations') if Gitlab.ee?)

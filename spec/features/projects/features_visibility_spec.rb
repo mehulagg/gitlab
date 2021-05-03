@@ -10,6 +10,7 @@ RSpec.describe 'Edit Project Settings' do
 
   describe 'project features visibility selectors', :js do
     before do
+      stub_feature_flags(sidebar_refactor: false)
       project.add_maintainer(member)
       sign_in(member)
     end

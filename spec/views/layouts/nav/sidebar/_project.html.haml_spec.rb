@@ -51,6 +51,12 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         expect(rendered).to have_link('Releases', href: project_releases_path(project), class: 'shortcuts-project-releases')
       end
     end
+
+    it 'has a link to the labels path' do
+      render
+
+      expect(rendered).to have_link('Labels', href: project_labels_path(project))
+    end
   end
 
   describe 'Learn GitLab' do
@@ -159,11 +165,15 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       end
     end
 
-    describe 'Labels' do
-      it 'has a link to the labels path' do
-        render
+    context 'when feature flag :sidebar_refactor is disabled' do
+      describe 'Labels' do
+        it 'has a link to the labels path' do
+          stub_feature_flags(sidebar_refactor: false)
 
-        expect(rendered).to have_link('Labels', href: project_labels_path(project))
+          render
+
+          expect(rendered).to have_link('Labels', href: project_labels_path(project))
+        end
       end
     end
 
@@ -227,21 +237,35 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   end
 
   describe 'Labels' do
-    context 'when issues are not enabled' do
-      it 'has a link to the labels path' do
-        project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
+    it 'does not show the labels menu' do
+      project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
 
-        render
+      render
 
-        expect(rendered).to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
-      end
+      expect(rendered).not_to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
     end
 
-    context 'when issues are enabled' do
-      it 'does not have a link to the labels path' do
-        render
+    context 'when feature flag :sidebar_refactor is disabled' do
+      before do
+        stub_feature_flags(sidebar_refactor: false)
+      end
 
-        expect(rendered).not_to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+      context 'when issues are not enabled' do
+        it 'has a link to the labels path' do
+          project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
+
+          render
+
+          expect(rendered).to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+        end
+      end
+
+      context 'when issues are enabled' do
+        it 'does not have a link to the labels path' do
+          render
+
+          expect(rendered).not_to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+        end
       end
     end
   end
