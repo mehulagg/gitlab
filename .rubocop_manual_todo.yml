@@ -14,7 +14,6 @@
 Graphql/Descriptions:
   Exclude:
     - 'app/graphql/types/access_level_enum.rb'
-    - 'app/graphql/types/base_enum.rb'
     - 'app/graphql/types/ci/pipeline_config_source_enum.rb'
     - 'app/graphql/types/ci/pipeline_status_enum.rb'
     - 'app/graphql/types/container_expiration_policy_cadence_enum.rb'
