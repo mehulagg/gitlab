@@ -377,12 +377,6 @@ For example, the configuration below enables validation for only the `sast` job:
     stage: security-scan
   ```
 
-## Terminology
-
-Vulnerabilities (or standalone vulnerability objects) exist in the default branch. 
-
-Findings are all potential vulnerability items scanners identify in MRs/feature branches. Only after merging to default does a finding become a vulnerability (object).
-
 ## Addressing findings
 
 When triaging  or interacting with findings they start out as “detected” - you can change the status to; dismiss, confirm, or resolve. You can also create issues from the findings. In some cases you can also [apply an automatic remediation for a vulnerability](#apply-an-automatic-remediation-for-a-vulnerability)
