@@ -8,9 +8,16 @@ export const subscriptionMainTitle = s__('SuperSonics|Your subscription');
 export const subscriptionActivationNotificationText = s__(
   `SuperSonics|Your subscription was successfully activated. You can see the details below.`,
 );
-export const subscriptionActivationTitle = s__(
-  `SuperSonics|You do not have an active subscription`,
+export const subscriptionActivationInsertCode = __(
+  "If you've purchased or renewed your subscription and have an activation code, please enter it below to start the activation process.",
 );
+export const howToActivateSubscription = s__(
+  'SuperSonics|Learn how to %{linkStart}activate your subscription%{linkEnd}.',
+);
+export const activateLabel = s__('CloudLicense|Activate');
+export const activateSubscription = s__('CloudLicense|Activate subscription');
+export const enterActivationCode = s__('CloudLicense|Enter activation code');
+export const noActiveSubscription = s__(`SuperSonics|You do not have an active subscription`);
 export const subscriptionDetailsHeaderText = s__('SuperSonics|Subscription details');
 export const licensedToHeaderText = s__('SuperSonics|Licensed to');
 export const manageSubscriptionButtonText = s__('SuperSonics|Manage');
@@ -54,34 +61,22 @@ export const subscriptionTable = {
   title: __('Subscription History'),
   type: s__('SuperSonics|Type'),
 };
+export const connectivityIssue = s__('SuperSonics|There is a connectivity issue.');
 export const manualSyncSuccessfulTitle = s__(
   'SuperSonics|The subscription details synced successfully.',
 );
 export const manualSyncFailureText = s__(
   'SuperSonics|You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}.',
 );
-export const manualSyncFailureTitle = s__('SuperSonics|There is a connectivity issue.');
 
 export const subscriptionActivationForm = {
-  title: s__('CloudLicense|Activate subscription'),
-  howToActivateSubscription: s__(
-    'CloudLicense|Learn how to %{linkStart}activate your subscription%{linkEnd}.',
-  ),
   activationCode: s__('CloudLicense|Activation code'),
   pasteActivationCode: s__('CloudLicense|Paste your activation code'),
   acceptTerms: s__(
     'CloudLicense|I agree that my use of the GitLab Software is subject to the Subscription Agreement located at the %{linkStart}Terms of Service%{linkEnd}, unless otherwise agreed to in writing with GitLab.',
   ),
-  activateLabel: s__('CloudLicense|Activate'),
 };
 
-export const userNotifications = {
-  manualSyncSuccessfulTitle: s__('SuperSonics|The subscription details synced successfully.'),
-  manualSyncFailureText: s__(
-    'SuperSonics|You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}.',
-  ),
-  manualSyncFailureTitle: s__('SuperSonics|There is a connectivity issue.'),
-};
 export const notificationType = {
   SYNC_FAILURE: 'SYNC_FAILURE',
   SYNC_SUCCESS: 'SYNC_SUCCESS',
@@ -118,7 +113,6 @@ export const buySubscriptionCard = {
 
 export const CONNECTIVITY_ERROR = 'CONNECTIVITY_ERROR';
 export const connectivityErrorAlert = {
-  title: s__('There is a connectivity issue'),
   subtitle: s__(
     'CloudLicense|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Sync service%{linkEnd}, a hassle-free way to manage your subscription.',
   ),
