@@ -5,8 +5,8 @@ module QA
     module Page
       module Project
         module SubMenus
-          module ThreatMonitoring
-            extend QA::Page::PageConcern
+          module ThreatMonitoring < QA::Page::Base  
+
             view 'ee/app/assets/javascripts/threat_monitoring/components/app.vue' do
               element :alerts_tab
             end
