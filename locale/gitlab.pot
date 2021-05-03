@@ -5040,6 +5040,15 @@ msgstr ""
 msgid "BillingPlan|Upgrade for free"
 msgstr ""
 
+msgid "Billings|Verify User Account"
+msgstr ""
+
+msgid "Billings|Verify account"
+msgstr ""
+
+msgid "Billings|Your user account has been flagged for potential abuse for running a large number of concurrent pipelines. To continue to run a large number of concurrent pipelines, you'll need to validate your account with a credit card. <strong>GitLab will not charge your credit card, it will only be used for validation.</strong>"
+msgstr ""
+
 msgid "Billing|An email address is only visible for users with public emails."
 msgstr ""
 
@@ -37008,6 +37017,9 @@ msgid "Your applications (%{size})"
 msgstr ""
 
 msgid "Your authorized applications"
+msgstr ""
+
+msgid "Your browser does not support iFrames"
 msgstr ""
 
 msgid "Your browser doesn't support U2F. Please use Google Chrome desktop (version 41 or newer)."
