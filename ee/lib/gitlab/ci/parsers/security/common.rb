@@ -96,7 +96,7 @@ module Gitlab
             links = create_links(data['links'])
             location = create_location(data['location'] || {})
             remediations = create_remediations(data['remediations'])
-            signatures = create_signatures(location, tracking_data(data))
+            signatures = create_signatures(tracking_data(data))
 
             if @vulnerability_finding_signatures_enabled && !signatures.empty?
               # NOT the signature_sha - the compare key is hashed
@@ -129,7 +129,7 @@ module Gitlab
                 vulnerability_finding_signatures_enabled: @vulnerability_finding_signatures_enabled))
           end
 
-          def create_signatures(location, tracking)
+          def create_signatures(tracking)
             tracking ||= { 'items' => [] }
 
             signature_algorithms = Hash.new { |hash, key| hash[key] = [] }
