@@ -24,8 +24,9 @@ class Issue::Metrics < ApplicationRecord
   private
 
   def issue_assigned_to_list_label?
-    # test
-    return false if issue.labels.length == 0
+    # Avoid another DB lookup when issue.labels are empty by adding a guard clause here
+    # We can't use issue.labels.empty? because that will cause a `Label Exists?` DB lookup
+    return false if issue.labels.length == 0 # rubocop:disable Style/ZeroLengthPredicate
 
     issue.labels.includes(:lists).any? { |label| label.lists.present? }
   end
