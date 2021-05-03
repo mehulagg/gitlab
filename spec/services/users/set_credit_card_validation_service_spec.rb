@@ -41,14 +41,30 @@ RSpec.describe Users::SetCreditCardValidationService do
       end
     end
 
-    context 'when user id does not exist' do
-      let(:user_id) { 0 }
-
-      it 'returns an error' do
+    shared_examples 'returns an error' do
+      it do
         result = service.execute
 
         expect(result.status).to eq(:error)
       end
+    end
+
+    context 'when user id does not exist' do
+      let(:user_id) { 0 }
+
+      it_behaves_like 'returns an error'
+    end
+
+    context 'when missing credit_card_validated_at' do
+      let(:params) { { user_id: user_id } }
+
+      it_behaves_like 'returns an error'
+    end
+
+    context 'when missing user id' do
+      let(:params) { { credit_card_validated_at: credit_card_validated_time } }
+
+      it_behaves_like 'returns an error'
     end
   end
 end
