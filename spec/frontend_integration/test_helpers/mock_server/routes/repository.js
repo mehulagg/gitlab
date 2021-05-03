@@ -39,7 +39,7 @@ export default (server) => {
     const branch = schema.branches.findBy({ name: branchName });
     const prevCommit = branch
       ? branch.attrs.commit
-      : schema.branches.findBy({ name: 'master' }).attrs.commit;
+      : schema.branches.findBy({ name: 'main' }).attrs.commit;
 
     const commit = {
       ...createNewCommit({ id: commitIdGenerator.next(), message }, prevCommit),

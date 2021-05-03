@@ -280,7 +280,7 @@ describe('Grouped test reports app', () => {
 
       it('renders the recent failures count on the test case', () => {
         expect(findIssueRecentFailures().text()).toBe(
-          'Failed 8 times in master in the last 14 days',
+          'Failed 8 times in main in the last 14 days',
         );
       });
     });

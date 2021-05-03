@@ -23,7 +23,7 @@ describe('Blob viewer', () => {
     loadFixtures('blob/show_readme.html');
     $('#modal-upload-blob').remove();
 
-    mock.onGet(/blob\/master\/README\.md/).reply(200, {
+    mock.onGet(/blob\/main\/README\.md/).reply(200, {
       html: '<div>testing</div>',
     });
 

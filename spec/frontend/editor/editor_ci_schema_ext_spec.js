@@ -98,7 +98,7 @@ describe('~/editor/editor_ci_config_ext', () => {
         });
 
         expect(getConfiguredYmlSchema()).toEqual({
-          uri: `${TEST_HOST}/${mockProjectNamespace}/${mockProjectPath}/-/schema/master/${EXTENSION_CI_SCHEMA_FILE_NAME_MATCH}`,
+          uri: `${TEST_HOST}/${mockProjectNamespace}/${mockProjectPath}/-/schema/main/${EXTENSION_CI_SCHEMA_FILE_NAME_MATCH}`,
           fileMatch: ['another-ci-filename.yml'],
         });
       });
