@@ -226,9 +226,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
           perform_seed(pipeline1, command1)
         end
 
-        expect { perform_seed(pipeline2, command2) }.not_to exceed_query_limit(
-          control.count + expected_extra_queries
-        )
+        expect { perform_seed(pipeline2, command2) }.not_to exceed_query_limit(control)
       end
 
       private
@@ -255,16 +253,6 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
         run_previous_chain(pipeline2, command2)
 
         [pipeline2, command2]
-      end
-
-      def expected_extra_queries
-        extra_jobs = 2
-        non_handled_sql_queries = 2
-
-        # 1. Ci::InstanceVariable Load => `Ci::InstanceVariable#cached_data` => already cached with `fetch_memory_cache`
-        # 2. Ci::Variable Load => `Project#ci_variables_for` => already cached with `Gitlab::SafeRequestStore`
-
-        extra_jobs * non_handled_sql_queries
       end
     end
 
