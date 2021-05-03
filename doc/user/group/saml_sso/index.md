@@ -308,7 +308,7 @@ For example, to unlink the `MyOrg` account:
 For a demo of Group Sync using Azure, see [Demo: SAML Group Sync](https://youtu.be/Iqvo2tJfXjg).
 
 When the SAML response includes a user and their group memberships from the SAML identity provider,
-GitLab uses that information to automatically manage that user's GitLab group memberships. 
+GitLab uses that information to automatically manage that user's GitLab group memberships.
 
 Ensure your SAML identity provider sends an attribute statement named `Groups` or `groups` like the following:
 
@@ -325,8 +325,8 @@ NOTE:
 To inspect the SAML response, you can use one of these [SAML debugging tools](#saml-debugging-tools). 
 
 NOTE:
-Please note that the value for `Groups` or `groups` in the SAML reponse can be either the group name or the group id 
-depending what the IdP sends to GitLab.
+Please note that the value for `Groups` or `groups` in the SAML reponse can be either the group name or 
+the group ID depending what the IdP sends to GitLab.
 
 When SAML SSO is enabled for the top-level group, `Maintainer` and `Owner` level users
 see a new menu item in group **Settings > SAML Group Links**. You can configure one or more **SAML Group Links** to map 
