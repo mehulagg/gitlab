@@ -19085,7 +19085,9 @@ CREATE TABLE web_hooks (
     releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL,
     member_events boolean DEFAULT false NOT NULL,
-    subgroup_events boolean DEFAULT false NOT NULL
+    subgroup_events boolean DEFAULT false NOT NULL,
+    recent_failures integer DEFAULT 0,
+    disabled_until timestamp with time zone
 );
 
 CREATE SEQUENCE web_hooks_id_seq
@@ -24524,9 +24526,13 @@ CREATE INDEX index_web_hook_logs_part_on_created_at_and_web_hook_id ON ONLY web_
 
 CREATE INDEX index_web_hook_logs_part_on_web_hook_id ON ONLY web_hook_logs USING btree (web_hook_id);
 
+CREATE INDEX index_web_hooks_on_disabled_until ON web_hooks USING btree (disabled_until);
+
 CREATE INDEX index_web_hooks_on_group_id ON web_hooks USING btree (group_id) WHERE ((type)::text = 'GroupHook'::text);
 
 CREATE INDEX index_web_hooks_on_project_id ON web_hooks USING btree (project_id);
+
+CREATE INDEX index_web_hooks_on_recent_failures ON web_hooks USING btree (recent_failures);
 
 CREATE INDEX index_web_hooks_on_service_id ON web_hooks USING btree (service_id);
 
