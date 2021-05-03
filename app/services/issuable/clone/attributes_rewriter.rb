@@ -73,7 +73,7 @@ module Issuable
 
         copy_events(ResourceStateEvent.table_name, original_entity.resource_state_events) do |event|
           event.attributes
-            .except('id')
+            .except('id', 'issue_id', 'merge_request_id', 'epic_id')
             .merge(entity_key => new_entity.id,
                    'state' => ResourceStateEvent.states[event.state])
         end
