@@ -1,0 +1,5 @@
+---
+title: Treat GroupDeployKeys like DeployKeys
+merge_request: 60809
+author:
+type: fixed
