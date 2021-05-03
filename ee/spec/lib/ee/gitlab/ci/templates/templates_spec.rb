@@ -18,7 +18,7 @@ RSpec.describe "CI YML Templates" do
         # The DAST-API template purposly excludes a stages
         # definition.
 
-        $content = <<~EOS
+        <<~EOS
           include:
             - template: #{template_name}
 
@@ -33,7 +33,7 @@ RSpec.describe "CI YML Templates" do
             script: do something
         EOS
       else
-        $content = <<~EOS
+        <<~EOS
           include:
             - template: #{template_name}
 
