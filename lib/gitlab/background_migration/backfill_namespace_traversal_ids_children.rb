@@ -15,9 +15,7 @@ module Gitlab
       PAUSE_SECONDS = 0.1
 
       def self.base_query
-        Namespace
-          .where.not(parent_id: nil)
-          .where("traversal_ids = '{}'")
+        Namespace.where.not(parent_id: nil)
       end
 
       def perform(start_id, end_id, sub_batch_size)
@@ -28,6 +26,7 @@ module Gitlab
             SET traversal_ids = calculated_ids.traversal_ids
             FROM #{calculated_traversal_ids(sub_batch)} calculated_ids
             WHERE namespaces.id = calculated_ids.id
+              AND namespaces.traversal_ids = '{}'
           SQL
           ActiveRecord::Base.connection.execute(update_sql)
 
