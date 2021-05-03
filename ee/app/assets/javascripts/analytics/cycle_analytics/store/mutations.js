@@ -1,10 +1,6 @@
+import Vue from 'vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import {
-  PAGINATION_SORT_FIELD_DURATION,
-  PAGINATION_SORT_FIELD_END_EVENT,
-  PAGINATION_SORT_DIRECTION_DESC,
-  PAGINATION_SORT_DIRECTION_ASC,
-} from '../constants';
+import { PAGINATION_SORT_FIELD_END_EVENT, PAGINATION_SORT_DIRECTION_DESC } from '../constants';
 import { transformRawStages, prepareStageErrors, formatMedianValuesWithOverview } from '../utils';
 import * as types from './mutation_types';
 
@@ -103,8 +99,14 @@ export default {
       selectedProjects = [],
       selectedValueStream = {},
       defaultStageConfig = [],
+      pagination = {},
     } = {},
   ) {
+    console.log('initialize::state.pagination', state.pagination);
+    console.log('initialize::pagination', pagination);
+    console.log('page', pagination.page ?? state.pagination.page);
+    console.log('sort', pagination.sort ?? state.pagination.sort);
+    console.log('direction', pagination.direction ?? state.pagination.direction);
     state.isLoading = true;
     state.currentGroup = group;
     state.selectedProjects = selectedProjects;
@@ -112,6 +114,12 @@ export default {
     state.startDate = startDate;
     state.endDate = endDate;
     state.defaultStageConfig = defaultStageConfig;
+
+    Vue.set(state, 'pagination', {
+      page: pagination.page ?? state.pagination.page,
+      sort: pagination.sort ?? state.pagination.sort,
+      direction: pagination.direction ?? state.pagination.direction,
+    });
   },
   [types.INITIALIZE_VALUE_STREAM_SUCCESS](state) {
     state.isLoading = false;
@@ -189,20 +197,12 @@ export default {
         return aName.toUpperCase() > bName.toUpperCase() ? 1 : -1;
       });
   },
-  [types.SET_PAGINATION](
-    state,
-    {
+  [types.SET_PAGINATION](state, { page, hasNextPage, sort, direction }) {
+    Vue.set(state, 'pagination', {
       page,
       hasNextPage,
-      sort = PAGINATION_SORT_FIELD_END_EVENT,
-      direction = PAGINATION_SORT_DIRECTION_DESC,
-    },
-  ) {
-    state.pagination = {
-      page,
-      hasNextPage,
-      sort,
-      direction,
-    };
+      sort: sort || PAGINATION_SORT_FIELD_END_EVENT,
+      direction: direction || PAGINATION_SORT_DIRECTION_DESC,
+    });
   },
 };

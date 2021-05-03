@@ -24,12 +24,20 @@ export default () => {
     valueStreamAnalyticsPathNavigation: hasPathNavigation = false,
   } = gon?.features;
 
+  console.log('filters', urlQueryToFilter(window.location.search));
+
   const {
     author_username = null,
     milestone_title = null,
     assignee_username = [],
     label_name = [],
+    sort,
+    direction,
+    page,
   } = urlQueryToFilter(window.location.search);
+
+  console.log('BASE::sort', sort);
+  console.log('BASE::direction', direction);
 
   store.dispatch('initializeCycleAnalytics', {
     ...initialData,
@@ -40,6 +48,11 @@ export default () => {
     featureFlags: {
       hasDurationChart,
       hasPathNavigation,
+    },
+    pagination: {
+      page: page?.value || 1,
+      sort: sort?.value || null,
+      direction: direction?.value || null,
     },
   });
 
