@@ -4584,6 +4584,29 @@ The edge type for [`CodeCoverageActivity`](#codecoverageactivity).
 | <a id="codecoverageactivityedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="codecoverageactivityedgenode"></a>`node` | [`CodeCoverageActivity`](#codecoverageactivity) | The item at the end of the edge. |
 
+#### `CodeQualityDegradationConnection`
+
+The connection type for [`CodeQualityDegradation`](#codequalitydegradation).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="codequalitydegradationconnectionedges"></a>`edges` | [`[CodeQualityDegradationEdge]`](#codequalitydegradationedge) | A list of edges. |
+| <a id="codequalitydegradationconnectionnodes"></a>`nodes` | [`[CodeQualityDegradation]`](#codequalitydegradation) | A list of nodes. |
+| <a id="codequalitydegradationconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `CodeQualityDegradationEdge`
+
+The edge type for [`CodeQualityDegradation`](#codequalitydegradation).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="codequalitydegradationedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="codequalitydegradationedgenode"></a>`node` | [`CodeQualityDegradation`](#codequalitydegradation) | The item at the end of the edge. |
+
 #### `CommitConnection`
 
 The connection type for [`Commit`](#commit).
@@ -7316,6 +7339,31 @@ Represents the code coverage summary for a project.
 | <a id="codecoveragesummaryaveragecoverage"></a>`averageCoverage` | [`Float`](#float) | Average percentage of the different code coverage results available for the project. |
 | <a id="codecoveragesummarycoveragecount"></a>`coverageCount` | [`Int`](#int) | Number of different code coverage results available. |
 | <a id="codecoveragesummarylastupdatedon"></a>`lastUpdatedOn` | [`Date`](#date) | Latest date when the code coverage was created for the project. |
+
+### `CodeQualityDegradation`
+
+Represents a code quality degradation on the pipeline.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="codequalitydegradationdescription"></a>`description` | [`String!`](#string) | A description of the code quality degradation. |
+| <a id="codequalitydegradationfingerprint"></a>`fingerprint` | [`String!`](#string) | A unique fingerprint to identify the code quality degradation. For example, an MD5 hash. |
+| <a id="codequalitydegradationline"></a>`line` | [`Int!`](#int) | The line on which the code quality degradation occurred. |
+| <a id="codequalitydegradationpath"></a>`path` | [`String!`](#string) | The relative path to the file containing the code quality degradation. |
+| <a id="codequalitydegradationseverity"></a>`severity` | [`String!`](#string) | Status of the degradation (blocker, critical, major, minor, info). |
+
+### `CodeQualityReport`
+
+Represents code quality degradations on the pipeline.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="codequalityreportalldegradations"></a>`allDegradations` | [`CodeQualityDegradationConnection!`](#codequalitydegradationconnection) | All Code Quality degradations. (see [Connections](#connections)) |
+| <a id="codequalityreportdegradationscount"></a>`degradationsCount` | [`Int!`](#int) | The total number of code quality degradations. |
 
 ### `Commit`
 
@@ -10395,6 +10443,7 @@ Information about pagination in a connection.
 | <a id="pipelineactive"></a>`active` | [`Boolean!`](#boolean) | Indicates if the pipeline is active. |
 | <a id="pipelinebeforesha"></a>`beforeSha` | [`String`](#string) | Base SHA of the source branch. |
 | <a id="pipelinecancelable"></a>`cancelable` | [`Boolean!`](#boolean) | Specifies if a pipeline can be canceled. |
+| <a id="pipelinecodequalityreports"></a>`codequalityReports` | [`CodeQualityReport`](#codequalityreport) | Code Quality degradations reported on the pipeline. |
 | <a id="pipelinecommitpath"></a>`commitPath` | [`String`](#string) | Path to the commit that triggered the pipeline. |
 | <a id="pipelinecommittedat"></a>`committedAt` | [`Time`](#time) | Timestamp of the pipeline's commit. |
 | <a id="pipelineconfigsource"></a>`configSource` | [`PipelineConfigSourceEnum`](#pipelineconfigsourceenum) | Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE, COMPLIANCE_SOURCE). |
