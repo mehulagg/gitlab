@@ -321,7 +321,7 @@ Ensure your SAML identity provider sends an attribute statement named `Groups` o
 </saml:AttributeStatement>
 ```
 
-NOTE: 
+NOTE:
 To inspect the SAML response, you can use one of these [SAML debugging tools](#saml-debugging-tools). 
 
 NOTE:
@@ -339,7 +339,7 @@ To link the SAML groups from the `saml:AttributeStatement` example above:
 1. **Save** the group link.
 1. Repeat to add additional group links if desired.
 
-![SAML Group Links](./image.png)
+![SAML Group Links](image.png)
 
 If a user is a member of multiple SAML groups mapped to the same GitLab group,
 the user gets the highest access level from the groups. For example, if one group
