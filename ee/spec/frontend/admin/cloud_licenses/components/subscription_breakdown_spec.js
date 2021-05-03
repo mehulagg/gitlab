@@ -128,8 +128,8 @@ describe('Subscription Breakdown', () => {
         expect(findSubscriptionSyncAction().exists()).toBe(false);
       });
 
-      it('does not show the subscription details footer', () => {
-        expect(findDetailsCardFooter().exists()).toBe(false);
+      it('shows the subscription details footer', () => {
+        expect(findDetailsCardFooter().exists()).toBe(true);
       });
 
       it('does not show the sync subscription notifications', () => {
