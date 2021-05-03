@@ -116,3 +116,5 @@ Adding them to URLs is a security risk. This is especially true when cloning or 
 Instead, API calls can be passed an access token using headers, like [the `Private-Token` header](https://docs.gitlab.com/ee/api/README.html#personalproject-access-tokens).
 
 Tokens can be also be stored using a [Git credential storage](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage).
+
+When creating a scoped token, consider using the most limited scope possible to reduce the impact of accidentally leaking the token.
