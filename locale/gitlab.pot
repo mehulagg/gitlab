@@ -5597,6 +5597,9 @@ msgid_plural "CICDAnalytics|Releases"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "CICDAnalytics|Release statistics"
+msgstr ""
+
 msgid "CICDAnalytics|Releases"
 msgstr ""
 
