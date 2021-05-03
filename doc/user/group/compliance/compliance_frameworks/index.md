@@ -30,7 +30,6 @@ A scoped compliance framework will appear if the name is using the (`::`) syntax
 
 Any projects using a compliance framework with a location specified for its `compliance pipeline configuration` will be required to include this .yml file during its runtime.
 
-
 ```mermaid
 graph LR
   A(Namespace) --> B(Group A)
