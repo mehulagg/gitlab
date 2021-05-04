@@ -273,10 +273,10 @@ module Ci
     def builds_for_critical_shared_runner
       new_builds.
         # don't run projects which have not enabled shared runners and builds
-        joins(:project).where(projects: { shared_runners_enabled: true, pending_delete: false })
+        joins(:project).where(projects: { shared_runners_enabled: true, pending_delete: false }).
 
         # This join is the only difference from #builds_for_shared_runner
-        .joins('INNER JOIN project_features ON ci_builds.project_id = project_features.project_id AND project_features.critical_shared_runners_access_level > 0')
+        joins('INNER JOIN project_features ON ci_builds.project_id = project_features.project_id AND project_features.critical_shared_runners_access_level > 0')
         .where('project_features.builds_access_level IS NULL or project_features.builds_access_level > 0').
 
       # Implement fair scheduling
