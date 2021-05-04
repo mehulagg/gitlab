@@ -36,13 +36,14 @@ describe('deployment_frequency_charts.vue', () => {
 
   let wrapper;
   let mock;
+  const defaultMountOptions = {
+    provide: {
+      projectPath: 'test/project',
+    },
+  };
 
-  const createComponent = () => {
-    wrapper = shallowMount(DeploymentFrequencyCharts, {
-      provide: {
-        projectPath: 'test/project',
-      },
-    });
+  const createComponent = (mountOptions = defaultMountOptions) => {
+    wrapper = shallowMount(DeploymentFrequencyCharts, mountOptions);
   };
 
   // Initializes the mock endpoint to return a specific set of deployment
@@ -141,6 +142,88 @@ describe('deployment_frequency_charts.vue', () => {
       ].join('\n');
 
       expect(captureExceptionSpy).toHaveBeenCalledWith(new Error(expectedErrorMessage));
+    });
+  });
+
+  describe('group/project behavior', () => {
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+
+      mock.onGet(/projects\/test%2Fproject\/dora\/metrics/).reply(httpStatus.OK, lastWeekData);
+      mock.onGet(/groups\/test%2Fgroup\/dora\/metrics/).reply(httpStatus.OK, lastWeekData);
+    });
+
+    describe('when projectPath is provided', () => {
+      beforeEach(async () => {
+        createComponent({
+          provide: {
+            projectPath: 'test/project',
+          },
+        });
+
+        await axios.waitForAll();
+      });
+
+      it('makes a call to the project API endpoint', () => {
+        expect(mock.history.get.length).toBe(3);
+        expect(mock.history.get[0].url).toMatch('/projects/test%2Fproject/dora/metrics');
+      });
+
+      it('does not throw an error', () => {
+        expect(createFlash).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when groupPath is provided', () => {
+      beforeEach(async () => {
+        createComponent({
+          provide: {
+            groupPath: 'test/group',
+          },
+        });
+
+        await axios.waitForAll();
+      });
+
+      it('makes a call to the group API endpoint', () => {
+        expect(mock.history.get.length).toBe(3);
+        expect(mock.history.get[0].url).toMatch('/groups/test%2Fgroup/dora/metrics');
+      });
+
+      it('does not throw an error', () => {
+        expect(createFlash).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when both projectPath and groupPath are provided', () => {
+      beforeEach(async () => {
+        createComponent({
+          provide: {
+            projectPath: 'test/project',
+            groupPath: 'test/group',
+          },
+        });
+
+        await axios.waitForAll();
+      });
+
+      it('throws an error (which shows a flash message)', () => {
+        expect(createFlash).toHaveBeenCalled();
+      });
+    });
+
+    describe('when neither projectPath nor groupPath are provided', () => {
+      beforeEach(async () => {
+        createComponent({
+          provide: {},
+        });
+
+        await axios.waitForAll();
+      });
+
+      it('throws an error (which shows a flash message)', () => {
+        expect(createFlash).toHaveBeenCalled();
+      });
     });
   });
 });
