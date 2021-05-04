@@ -141,7 +141,7 @@ All jobs are permitted to fail by default. This means that if they fail it will 
 
 If you want to prevent vulnerabilities from being merged, you should do this by adding [Security Approvals in Merge Requests](#security-approvals-in-merge-requests) which prevents unknown, high or critical findings from being merged without an approval from a specific group of people that you choose. 
 
-We do not recommend changing the job [`allow_failure` setting](https://docs.gitlab.com/ee/ci/yaml/#allow_failure) as that fails the entire pipeline. We will be introducing [Security Orchestration](https://about.gitlab.com/direction/protect/security_orchestration/) soon to allow more fine control over what you want to allow and prevent from being merged (from a security tools perspective).
+We do not recommend changing the job [`allow_failure` setting](https://docs.gitlab.com/ee/ci/yaml/#allow_failure) as that fails the entire pipeline.
 
 ### JSON Artifact
 
