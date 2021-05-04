@@ -168,13 +168,13 @@ Within a merge request there is a security widget which will display a summary o
 
 It is recommended you run one set of scans before enabling your scans for developers to create a baseline, and not have the first developer get all the results in that first scan.
 
-The merge request security scan display will not match the generated JSON artifact because the JSON arttifact contains both NEW and EXISTING findings.
+The merge request security scan display will not match the generated JSON artifact because the JSON artifact contains both NEW and EXISTING findings.
 
 From the merge request security widget, clicking Expand will unfold the widget, displaying any new and no long detected (removed) findings by scan type. Click View Full Report to go directly to the `Security` tab in the latest branch pipeline.
 
 ## View security scan information in the pipeline Security tab
 
-This list in the security tab of the pipeline shows all findings in the current branch. You will see both new findings introduced by this branch as well as any existing vulnerabilities that were already present when the branch was created (identified through any prior scans). Please do not be alarmed that these numbers do not match the new findings numbers displayed in the Merge Request Security Report as the merge request security scan information does not include the existing vulnerabilities.
+This list in the security tab of the pipeline shows all findings in the current branch. You will see both new findings introduced by this branch as well as any existing vulnerabilities that were already present when the branch was created. These results likely do not match the findings displayed in the Merge Request security widget as those do not include the existing vulnerabilities (with the exception of showing any existing vulnerabilities that are no longer detected in the feature branch).
 
 [Read more about security tab](/security_dashboard/#pipeline-security)
 
