@@ -301,6 +301,13 @@ module Trigger
       ENV['GITLABCOM_DATABASE_TESTING_ACCESS_TOKEN']
     end
 
+    def invoke!(post_comment: false, downstream_job_name: nil)
+      pipeline = super
+
+      puts "In DatabaseTesting"
+      puts "Pipeline: #{pipeline.inspect}"
+    end
+
     private
 
     def gitlab_client(type)
