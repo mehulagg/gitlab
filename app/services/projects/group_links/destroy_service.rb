@@ -13,8 +13,14 @@ module Projects
         end
 
         group_link.destroy.tap do |link|
-          link.group.refresh_members_authorized_projects
+          refresh_project_authorizations_synchronously(link.project)
         end
+      end
+
+      private
+
+      def refresh_project_authorizations_synchronously(project)
+        AuthorizedProjectUpdate::RefreshProjectAuthorizationsService.new(project).execute
       end
     end
   end

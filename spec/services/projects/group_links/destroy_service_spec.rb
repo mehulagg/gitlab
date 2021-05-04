@@ -14,12 +14,22 @@ RSpec.describe Projects::GroupLinks::DestroyService, '#execute' do
     expect { subject.execute(group_link) }.to change { project.project_group_links.count }.from(1).to(0)
   end
 
-  it 'updates authorization' do
-    group.add_maintainer(user)
+  context 'project authorizations refresh' do
+    it 'calls AuthorizedProjectUpdate::RefreshProjectAuthorizationsService synchronously to update project authorizations' do
+      expect_next_instance_of(AuthorizedProjectUpdate::RefreshProjectAuthorizationsService, group_link.project) do |service|
+        expect(service).to(receive(:execute))
+      end
 
-    expect { subject.execute(group_link) }.to(
-      change { Ability.allowed?(user, :read_project, project) }
-        .from(true).to(false))
+      subject.execute(group_link)
+    end
+
+    it 'updates project authorizations of users who had access to the project via the group share' do
+      group.add_maintainer(user)
+
+      expect { subject.execute(group_link) }.to(
+        change { Ability.allowed?(user, :read_project, project) }
+          .from(true).to(false))
+    end
   end
 
   it 'returns false if group_link is blank' do
