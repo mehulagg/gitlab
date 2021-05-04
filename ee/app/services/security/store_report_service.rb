@@ -195,7 +195,10 @@ module Security
 
         vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
-        get_matched_findings(finding, normalized_signatures, find_params).first
+        # the uuid is the only unique constraint on the vulnerability_occurrences
+        # table - no need to use get_matched_findings(...).first here. Fetching
+        # the finding with the same uuid will be enough
+        project.vulnerability_findings.find_by(uuid: finding.uuid)
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
