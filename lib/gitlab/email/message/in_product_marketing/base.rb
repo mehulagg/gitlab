@@ -16,10 +16,6 @@ module Gitlab
 
           attr_accessor :format
 
-          def track
-            self.class.name.demodulize.downcase.to_sym
-          end
-
           def subject_line
             raise NotImplementedError
           end
@@ -108,6 +104,10 @@ module Gitlab
           attr_reader :group, :series
 
           private
+
+          def track
+            self.class.name.demodulize.downcase.to_sym
+          end
 
           def unsubscribe_com
             [
