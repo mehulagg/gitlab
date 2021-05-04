@@ -116,7 +116,7 @@ module Gitlab
             full_job_arguments = [start_id, end_id] + other_job_arguments
 
             track_in_database(job_class_name, full_job_arguments) if track_jobs
-            migrate_in(final_delay, job_class_name, full_job_arguments)
+            BackgroundMigrationWorker.new.perform(job_class_name, full_job_arguments)
 
             batch_counter += 1
           end

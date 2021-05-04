@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 
 module Gitlab
   module BackgroundMigration
@@ -30,12 +29,11 @@ module Gitlab
           SQL
           ActiveRecord::Base.connection.execute(update_sql)
 
-          sleep PAUSE_SECONDS
         end
 
         # We have to add all arguments when marking a job as succeeded as they
         #  are all used to track the job by `queue_background_migration_jobs_by_range_at_intervals`
-        mark_job_as_succeeded(start_id, end_id, sub_batch_size)
+        # mark_job_as_succeeded(start_id, end_id, sub_batch_size)
       end
 
       private
