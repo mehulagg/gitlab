@@ -2,6 +2,7 @@ import { GlCard } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { nextTick } from 'vue';
+import SubscriptionActivationModal from 'ee/pages/admin/cloud_licenses/components/subscription_activation_modal.vue';
 import SubscriptionBreakdown, {
   licensedToFields,
   subscriptionDetailsFields,
@@ -35,6 +36,7 @@ describe('Subscription Breakdown', () => {
   const findDetailsHistory = () => wrapper.findComponent(SubscriptionDetailsHistory);
   const findDetailsUserInfo = () => wrapper.findComponent(SubscriptionDetailsUserInfo);
   const findSubscriptionSyncAction = () => wrapper.findByTestId('subscription-sync-action');
+  const findSubscriptionActivationModal = () => wrapper.findComponent(SubscriptionActivationModal);
   const findSubscriptionSyncNotifications = () =>
     wrapper.findComponent(SubscriptionSyncNotifications);
 
@@ -114,6 +116,10 @@ describe('Subscription Breakdown', () => {
       expect(findSubscriptionSyncAction().exists()).toBe(true);
     });
 
+    it('presents a subscription activation modal', () => {
+      expect(findSubscriptionActivationModal().exists()).toBe(true);
+    });
+
     it.todo('shows a button to manage the subscription');
 
     describe('with a legacy license', () => {
@@ -128,8 +134,8 @@ describe('Subscription Breakdown', () => {
         expect(findSubscriptionSyncAction().exists()).toBe(false);
       });
 
-      it('does not show the subscription details footer', () => {
-        expect(findDetailsCardFooter().exists()).toBe(false);
+      it('shows the subscription details footer', () => {
+        expect(findDetailsCardFooter().exists()).toBe(true);
       });
 
       it('does not show the sync subscription notifications', () => {
@@ -207,6 +213,12 @@ describe('Subscription Breakdown', () => {
       createComponent({ props: { subscription: {}, subscriptionList: [] } });
 
       expect(findDetailsUserInfo().exists()).toBe(false);
+    });
+
+    it('does not present a subscription activation modal', () => {
+      createComponent({ props: { subscription: {} } });
+
+      expect(findSubscriptionActivationModal().exists()).toBe(false);
     });
   });
 
