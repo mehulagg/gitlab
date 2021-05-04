@@ -61,6 +61,7 @@ describe('Dashboard', () => {
           showPanels: true,
         },
         store,
+        provide: { hasManualPrometheus: false },
       });
 
       setupStoreWithData(component.$store);
