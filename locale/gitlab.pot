@@ -2516,6 +2516,9 @@ msgstr ""
 msgid "AdminUsers|Cohorts"
 msgstr ""
 
+msgid "AdminUsers|Could not load user group counts. Please refresh the page to try again."
+msgstr ""
+
 msgid "AdminUsers|Deactivate"
 msgstr ""
 
