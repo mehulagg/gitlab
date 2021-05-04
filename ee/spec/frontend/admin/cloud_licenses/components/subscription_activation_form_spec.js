@@ -116,10 +116,11 @@ describe('CloudLicenseApp', () => {
   });
 
   describe('activate the subscription', () => {
-    describe('when submitting the form', () => {
+    describe('when submitting the mutation is successful', () => {
       const mutationMock = jest.fn().mockResolvedValue(activateLicenseMutationResponse.SUCCESS);
       beforeEach(async () => {
         createComponentWithApollo({ mutationMock });
+        jest.spyOn(wrapper.vm, 'updateSubscriptionAppCache').mockImplementation();
         await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
         await findAgreementCheckbox().vm.$emit('input', true);
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
@@ -139,6 +140,10 @@ describe('CloudLicenseApp', () => {
 
       it('emits a successful event', () => {
         expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT)).toEqual([[]]);
+      });
+
+      it('calls the method to update the cache', () => {
+        expect(wrapper.vm.updateSubscriptionAppCache).toHaveBeenCalledTimes(1);
       });
     });
 

@@ -2,8 +2,10 @@ import { GlCard } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { nextTick } from 'vue';
+import SubscriptionActivationModal from 'ee/pages/admin/cloud_licenses/components/subscription_activation_modal.vue';
 import SubscriptionBreakdown, {
   licensedToFields,
+  modalId,
   subscriptionDetailsFields,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_breakdown.vue';
 import SubscriptionDetailsCard from 'ee/pages/admin/cloud_licenses/components/subscription_details_card.vue';
@@ -25,6 +27,7 @@ import { license, subscriptionHistory } from '../mock_data';
 describe('Subscription Breakdown', () => {
   let axiosMock;
   let wrapper;
+  let glModalDirective;
 
   const [, legacyLicense] = subscriptionHistory;
   const connectivityHelpURL = 'connectivity/help/url';
@@ -34,13 +37,24 @@ describe('Subscription Breakdown', () => {
   const findDetailsCardFooter = () => wrapper.find('.gl-card-footer');
   const findDetailsHistory = () => wrapper.findComponent(SubscriptionDetailsHistory);
   const findDetailsUserInfo = () => wrapper.findComponent(SubscriptionDetailsUserInfo);
+  const findSubscriptionActivationAction = () =>
+    wrapper.findByTestId('subscription-activation-action');
   const findSubscriptionSyncAction = () => wrapper.findByTestId('subscription-sync-action');
+  const findSubscriptionActivationModal = () => wrapper.findComponent(SubscriptionActivationModal);
   const findSubscriptionSyncNotifications = () =>
     wrapper.findComponent(SubscriptionSyncNotifications);
 
   const createComponent = ({ props, stubs } = {}) => {
+    glModalDirective = jest.fn();
     wrapper = extendedWrapper(
       shallowMount(SubscriptionBreakdown, {
+        directives: {
+          glModal: {
+            bind(_, { value }) {
+              glModalDirective(value);
+            },
+          },
+        },
         provide: {
           connectivityHelpURL,
           subscriptionSyncPath,
@@ -114,6 +128,20 @@ describe('Subscription Breakdown', () => {
       expect(findSubscriptionSyncAction().exists()).toBe(true);
     });
 
+    it('shows a button to activate a new subscription', () => {
+      createComponent({ stubs: { GlCard, SubscriptionDetailsCard } });
+
+      expect(findSubscriptionActivationAction().exists()).toBe(true);
+    });
+
+    it('presents a subscription activation modal', () => {
+      expect(findSubscriptionActivationModal().exists()).toBe(true);
+    });
+
+    it('passes the correct modal id', () => {
+      expect(findSubscriptionActivationModal().attributes('modalid')).toBe(modalId);
+    });
+
     it.todo('shows a button to manage the subscription');
 
     describe('with a legacy license', () => {
@@ -128,8 +156,8 @@ describe('Subscription Breakdown', () => {
         expect(findSubscriptionSyncAction().exists()).toBe(false);
       });
 
-      it('does not show the subscription details footer', () => {
-        expect(findDetailsCardFooter().exists()).toBe(false);
+      it('shows the subscription details footer', () => {
+        expect(findDetailsCardFooter().exists()).toBe(true);
       });
 
       it('does not show the sync subscription notifications', () => {
@@ -197,9 +225,11 @@ describe('Subscription Breakdown', () => {
   });
 
   describe('with no subscription data', () => {
-    it('does not show user info', () => {
+    beforeEach(() => {
       createComponent({ props: { subscription: {} } });
+    });
 
+    it('does not show user info', () => {
       expect(findDetailsUserInfo().exists()).toBe(false);
     });
 
@@ -207,6 +237,10 @@ describe('Subscription Breakdown', () => {
       createComponent({ props: { subscription: {}, subscriptionList: [] } });
 
       expect(findDetailsUserInfo().exists()).toBe(false);
+    });
+
+    it('does not show the subscription details footer', () => {
+      expect(findDetailsCardFooter().exists()).toBe(false);
     });
   });
 
@@ -218,6 +252,15 @@ describe('Subscription Breakdown', () => {
         currentSubscriptionId: license.ULTIMATE.id,
         subscriptionList: [license.ULTIMATE],
       });
+    });
+  });
+
+  describe('activating a new subscription', () => {
+    it('shows a modal', () => {
+      createComponent({ stubs: { GlCard, SubscriptionDetailsCard } });
+      findSubscriptionActivationAction().vm.$emit('click');
+
+      expect(glModalDirective).toHaveBeenCalledWith(modalId);
     });
   });
 });
