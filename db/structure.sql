@@ -14465,6 +14465,8 @@ CREATE TABLE merge_request_diff_details (
     verification_retry_count smallint,
     verification_checksum bytea,
     verification_failure text,
+    verification_state smallint DEFAULT 0 NOT NULL,
+    verification_started_at timestamp with time zone,
     CONSTRAINT check_81429e3622 CHECK ((char_length(verification_failure) <= 255))
 );
 
