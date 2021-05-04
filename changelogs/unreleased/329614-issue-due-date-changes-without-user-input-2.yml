@@ -1,0 +1,6 @@
+---
+title: Fix due date not being set initially in date picker and randomly updating on
+  navigation on Chrome
+merge_request: 60973
+author:
+type: fixed
