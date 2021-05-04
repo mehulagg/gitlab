@@ -38,6 +38,20 @@ module LearnGitlabHelper
 
   private
 
+  def onboarding_sections_data
+    {
+      workspace: {
+        svg: image_path("learn_gitlab/section_workspace.svg")
+      },
+      plan: {
+        svg: image_path("learn_gitlab/section_workspace.svg")
+      },
+      deploy: {
+        svg: image_path("learn_gitlab/section_workspace.svg")
+      }
+    }
+  end
+
   def action_urls
     LearnGitlab::Onboarding::ACTION_ISSUE_IDS.transform_values { |id| project_issue_url(learn_gitlab_project, id) }
       .merge(LearnGitlab::Onboarding::ACTION_DOC_URLS)
