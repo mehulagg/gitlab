@@ -10,7 +10,7 @@ module Users
       ::Users::CreditCardValidation.upsert(@params)
 
       ServiceResponse.success(message: 'CreditCardValidation was set')
-    rescue StandardError => e
+    rescue StandardError
       ServiceResponse.error(message: 'Could not set CreditCardValidation: #{e.messages}')
     end
   end
