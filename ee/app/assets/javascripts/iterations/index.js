@@ -99,9 +99,8 @@ export function initCadenceForm() {
     return null;
   }
 
-  const router = createRouter();
-
   const { groupFullPath: groupPath, cadencesListPath } = el.dataset;
+  const router = createRouter(cadencesListPath);
 
   return new Vue({
     el,

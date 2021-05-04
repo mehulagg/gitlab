@@ -8,18 +8,19 @@ Vue.use(VueRouter);
 const routes = [
   {
     name: 'new',
-    path: '*/-/cadences/new',
+    path: '/new',
     component: IterationCadenceForm,
   },
   {
     name: 'index',
-    path: '*/-/cadences',
+    path: '/',
     component: IterationCadenceList,
   },
 ];
 
-export default function createRouter() {
+export default function createRouter(base) {
   const router = new VueRouter({
+    base,
     mode: 'history',
     routes,
   });

@@ -13,6 +13,11 @@ jest.mock('~/lib/utils/url_utility');
 
 const localVue = createLocalVue();
 
+const push = jest.fn();
+const $router = {
+  push,
+};
+
 function createMockApolloProvider(requestHandlers) {
   localVue.use(VueApollo);
 
@@ -39,17 +44,19 @@ describe('Iteration cadence form', () => {
       iterationCadenceCreate: { iterationCadence, errors: ['alas, your data is unchanged'] },
     },
   };
-  const defaultProps = { cadencesListPath: TEST_HOST };
 
-  function createComponent({ props = defaultProps, resolverMock } = {}) {
+  function createComponent({ resolverMock } = {}) {
     const apolloProvider = createMockApolloProvider([[createCadence, resolverMock]]);
     wrapper = extendedWrapper(
       mount(IterationCadenceForm, {
         apolloProvider,
         localVue,
-        propsData: props,
+        mocks: {
+          $router,
+        },
         provide: {
           groupPath,
+          cadencesListPath: TEST_HOST,
         },
       }),
     );
@@ -86,7 +93,7 @@ describe('Iteration cadence form', () => {
     it('cancel button links to list page', () => {
       clickCancel();
 
-      expect(visitUrl).toHaveBeenCalledWith(TEST_HOST);
+      expect(push).toHaveBeenCalledWith('index');
     });
 
     describe('save', () => {
