@@ -518,7 +518,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      `users_creating_epics` with `redis_slot: 'users'` builds Redis key
      `{users}_creating_epics-2020-34`. If `redis_slot` is not defined the Redis key will
      be `{users_creating_epics}-2020-34`.
-     Recommended slots to use are: `users`, `projects`. The value what we count.
+     Recommended slots to use are: `users`, `projects`. This is the value we count.
    - `expiry`: expiry time in days. Default: 29 days for daily aggregation and 6 weeks for weekly
      aggregation.
    - `aggregation`: may be set to a `:daily` or `:weekly` key. Defines how counting data is stored in Redis.
