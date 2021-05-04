@@ -121,7 +121,7 @@ While you cannot directly customize Auto DevOps, you can [include the Auto DevOp
 
 ### Secure jobs in your pipeline
 
-If you add the security scanning jobs as described in [Security scanning with Auto DevOps](#Security-scanning-with-Auto-DevOps) or [Security scanning without Auto DevOps](#Security-scanning-without-Auto-DevOps) to your `.gitlab-ci.yml` each added ]security scanning tool](security-scanning-tools) will behave in the following way (you can follow direction for each tool to customize it).
+If you add the security scanning jobs as described in [Security scanning with Auto DevOps](#Security-scanning-with-Auto-DevOps) or [Security scanning without Auto DevOps](#Security-scanning-without-Auto-DevOps) to your `.gitlab-ci.yml` each added [security scanning tool](#security-scanning-tools) will behave in the following way (you can follow direction for each tool to customize it).
 
 A job, for each compatible analyzer, will be created in the `Test`, `Dast` or `Fuzz` stage of your pipeline and will run on the next new branch pipeline. In some cases (Security Dashboard, Vulnerability List, Dependency List) you will only be able to view the scans that occur on the default branch. Please note that one tool may use many analyzers.
 
@@ -335,7 +335,7 @@ You can do it quickly by following the hyperlink given to run a new pipeline.
 
 ## On-Demand Scans
 
-If you don’t want scans running in your normal DevOps process you can use On-Demand scans instead. Read more about our [on-demand scans](/dast/#on-demand-scans)  functionality. Currently this is only available for DAST, and it will count in the above scenarios as a “successful pipeline” and these results will appear in locations such as the security dashboard and vulnerability report.
+If you don’t want scans running in your normal DevOps process you can use On-Demand scans instead. Read more about our [on-demand scans](/dast/#on-demand-scans)  functionality. Currently this is only available for DAST, and if you run it against the default branch it will as a “successful pipeline” and these results will appear in locations such as the security dashboard and vulnerability report.
 
 ## Security report validation
 
