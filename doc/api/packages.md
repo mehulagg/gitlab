@@ -352,3 +352,33 @@ Can return the following status codes:
 
 - `204 No Content`, if the package was deleted successfully.
 - `404 Not Found`, if the package was not found.
+
+## Delete a package file
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32107) in GitLab 13.12.
+
+WARNING:
+Deleting a package file may corrupt your package making it unusable or unpullable
+using your package manager client. Be sure you understand what you are doing when
+deleting a package file.
+
+Deletes a package file.
+
+```plaintext
+DELETE /projects/:id/packages/:package_id/package_files/:package_file_id
+```
+
+| Attribute | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `id`      | integer/string | yes | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
+| `package_id`      | integer | yes | ID of a package. |
+| `package_file_id` | integer | yes | ID of a package file. |
+
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/packages/:package_id/package_files/:package_file_id"
+```
+
+Can return the following status codes:
+
+- `204 No Content`, if the package was deleted successfully.
+- `404 Not Found`, if the package or package file was not found.
