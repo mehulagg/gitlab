@@ -18,6 +18,7 @@ class ProjectFeature < ApplicationRecord
     operations
     security_and_compliance
     container_registry
+    critical_shared_runners
   ].freeze
 
   EXPORTABLE_FEATURES = (FEATURES - [:security_and_compliance, :pages]).freeze
@@ -67,6 +68,7 @@ class ProjectFeature < ApplicationRecord
   default_value_for :metrics_dashboard_access_level, value: PRIVATE, allows_nil: false
   default_value_for :operations_access_level, value: ENABLED, allows_nil: false
   default_value_for :security_and_compliance_access_level, value: PRIVATE, allows_nil: false
+  default_value_for :critical_shared_runners_access_level, value: DISABLED, allows_nil: false
 
   default_value_for(:pages_access_level, allows_nil: false) do |feature|
     if ::Gitlab::Pages.access_control_is_forced?

@@ -16464,7 +16464,8 @@ CREATE TABLE project_features (
     operations_access_level integer DEFAULT 20 NOT NULL,
     analytics_access_level integer DEFAULT 20 NOT NULL,
     security_and_compliance_access_level integer DEFAULT 10 NOT NULL,
-    container_registry_access_level integer DEFAULT 0 NOT NULL
+    container_registry_access_level integer DEFAULT 0 NOT NULL,
+    critical_shared_runners_access_level integer
 );
 
 CREATE SEQUENCE project_features_id_seq
@@ -23751,6 +23752,8 @@ CREATE INDEX index_project_export_jobs_on_project_id_and_status ON project_expor
 CREATE INDEX index_project_export_jobs_on_status ON project_export_jobs USING btree (status);
 
 CREATE INDEX index_project_feature_usages_on_project_id ON project_feature_usages USING btree (project_id);
+
+CREATE INDEX index_project_features_on_critical_shared_runner_access_level ON project_features USING btree (project_id) WHERE (critical_shared_runners_access_level > 0);
 
 CREATE UNIQUE INDEX index_project_features_on_project_id ON project_features USING btree (project_id);
 

@@ -21,7 +21,8 @@ module Ci
     enum runner_type: {
       instance_type: 1,
       group_type: 2,
-      project_type: 3
+      project_type: 3,
+      instance_critical_type: 4
     }
 
     # This `ONLINE_CONTACT_TIMEOUT` needs to be larger than
