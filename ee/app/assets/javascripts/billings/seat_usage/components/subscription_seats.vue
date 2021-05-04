@@ -3,9 +3,11 @@ import {
   GlAvatarLabeled,
   GlAvatarLink,
   GlBadge,
+  GlButton,
   GlDropdown,
   GlDropdownItem,
   GlModalDirective,
+  GlIcon,
   GlPagination,
   GlSearchBoxByType,
   GlTable,
@@ -21,6 +23,7 @@ import {
 } from 'ee/billings/seat_usage/constants';
 import { s__ } from '~/locale';
 import RemoveBillableMemberModal from './remove_billable_member_modal.vue';
+import SubscriptionSeatDetails from './subscription_seat_details.vue';
 
 export default {
   directives: {
@@ -31,12 +34,15 @@ export default {
     GlAvatarLabeled,
     GlAvatarLink,
     GlBadge,
+    GlButton,
     GlDropdown,
     GlDropdownItem,
+    GlIcon,
     GlPagination,
     GlSearchBoxByType,
     GlTable,
     RemoveBillableMemberModal,
+    SubscriptionSeatDetails,
   },
   data() {
     return {
@@ -156,22 +162,35 @@ export default {
       data-testid="table"
       :empty-text="emptyText"
     >
-      <template #cell(user)="data">
+      <template #cell(user)="{ item, toggleDetails, detailsShowing }">
         <div class="gl-display-flex">
-          <gl-avatar-link target="blank" :href="data.value.web_url" :alt="data.value.name">
+          <gl-button
+            variant="link"
+            class="gl-mr-2"
+            :aria-label="s__('Billing|Toggle seat details')"
+            data-testid="toggle-seat-usage-details"
+            @click="toggleDetails"
+          >
+            <gl-icon
+              :name="detailsShowing ? 'angle-down' : 'angle-right'"
+              class="text-secondary-900"
+            />
+          </gl-button>
+
+          <gl-avatar-link target="blank" :href="item.user.web_url" :alt="item.user.name">
             <gl-avatar-labeled
-              :src="data.value.avatar_url"
+              :src="item.user.avatar_url"
               :size="$options.avatarSize"
-              :label="data.value.name"
-              :sub-label="data.value.username"
+              :label="item.user.name"
+              :sub-label="item.user.username"
             />
           </gl-avatar-link>
         </div>
       </template>
 
-      <template #cell(email)="data">
+      <template #cell(email)="{ item }">
         <div data-testid="email">
-          <span v-if="data.value" class="gl-text-gray-900">{{ data.value }}</span>
+          <span v-if="item.email" class="gl-text-gray-900">{{ item.email }}</span>
           <span
             v-else
             v-gl-tooltip
@@ -198,6 +217,10 @@ export default {
             {{ __('Remove user') }}
           </gl-dropdown-item>
         </gl-dropdown>
+      </template>
+
+      <template #row-details="{ item }">
+        <subscription-seat-details :seat-member-id="item.user.id" />
       </template>
     </gl-table>
 

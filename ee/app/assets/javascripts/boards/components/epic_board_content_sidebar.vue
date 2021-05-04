@@ -2,24 +2,26 @@
 import { GlDrawer } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
-import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
+import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
+import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
   components: {
     GlDrawer,
     BoardSidebarLabelsSelect,
-    BoardSidebarSubscription,
     BoardSidebarTitle,
     SidebarConfidentialityWidget,
+    SidebarDateWidget,
+    SidebarSubscriptionsWidget,
   },
   computed: {
     ...mapGetters(['isSidebarOpen', 'activeBoardItem']),
-    ...mapState(['sidebarType', 'fullPath']),
+    ...mapState(['sidebarType', 'fullPath', 'issuableType']),
     isIssuableSidebar() {
       return this.sidebarType === ISSUABLE;
     },
@@ -28,7 +30,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['toggleBoardItem', 'setActiveEpicConfidential']),
+    ...mapActions(['toggleBoardItem', 'setActiveItemConfidential', 'setActiveItemSubscribed']),
     handleClose() {
       this.toggleBoardItem({ boardItem: this.activeBoardItem, sidebarType: this.sidebarType });
     },
@@ -46,14 +48,32 @@ export default {
     <template #header>{{ __('Epic details') }}</template>
     <template #default>
       <board-sidebar-title data-testid="sidebar-title" />
+      <sidebar-date-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        date-type="startDate"
+        :issuable-type="issuableType"
+        :can-inherit="true"
+      />
+      <sidebar-date-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        date-type="dueDate"
+        :issuable-type="issuableType"
+        :can-inherit="true"
+      />
       <board-sidebar-labels-select class="labels" />
       <sidebar-confidentiality-widget
         :iid="activeBoardItem.iid"
         :full-path="fullPath"
-        issuable-type="epic"
-        @confidentialityUpdated="setActiveEpicConfidential($event)"
+        :issuable-type="issuableType"
+        @confidentialityUpdated="setActiveItemConfidential($event)"
       />
-      <board-sidebar-subscription class="subscriptions" />
+      <sidebar-subscriptions-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+      />
     </template>
   </gl-drawer>
 </template>

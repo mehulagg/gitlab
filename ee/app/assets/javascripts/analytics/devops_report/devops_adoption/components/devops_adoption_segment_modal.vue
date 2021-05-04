@@ -246,7 +246,6 @@ export default {
     <gl-form-group class="gl-mb-0">
       <gl-form-checkbox-tree
         v-if="filteredOptions.length"
-        :key="filteredOptions.length"
         v-model="checkboxValues"
         data-testid="groups"
         :options="filteredOptions"

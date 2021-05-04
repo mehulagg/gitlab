@@ -39,7 +39,7 @@ at least 1 secondary in [hot standby](https://www.postgresql.org/docs/11/hot-sta
 Load balancing also requires that the configured hosts **always** point to the
 primary, even after a database failover. Furthermore, the additional hosts to
 balance load among must **always** point to secondary databases. This means that
-you should put a load balance in front of every database, and have GitLab connect
+you should put a load balancer in front of every database, and have GitLab connect
 to those load balancers.
 
 For example, say you have a primary (`db1.gitlab.com`) and two secondaries,
@@ -208,7 +208,7 @@ response timings.
 ## Primary sticking
 
 After a write has been performed, GitLab sticks to using the primary for a
-certain period of time, scoped to the user that performed the write. GitLab 
+certain period of time, scoped to the user that performed the write. GitLab
 reverts back to using secondaries when they have either caught up, or after 30
 seconds.
 

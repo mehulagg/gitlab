@@ -12,6 +12,7 @@ import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import { toNumber } from 'lodash';
 import createFlash from '~/flash';
 import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
+import IssuableByEmail from '~/issuable/components/issuable_by_email.vue';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
 import {
@@ -20,7 +21,6 @@ import {
   MAX_LIST_SIZE,
   PAGE_SIZE,
   RELATIVE_POSITION_ASC,
-  sortOptions,
   sortParams,
 } from '~/issues_list/constants';
 import {
@@ -29,14 +29,17 @@ import {
   convertToUrlParams,
   getFilterTokens,
   getSortKey,
+  getSortOptions,
 } from '~/issues_list/utils';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase, getParameterByName } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
+import IterationToken from '~/vue_shared/components/filtered_search_bar/tokens/iteration_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
+import WeightToken from '~/vue_shared/components/filtered_search_bar/tokens/weight_token.vue';
 import eventHub from '../eventhub';
 import IssueCardTimeInfo from './issue_card_time_info.vue';
 
@@ -45,7 +48,6 @@ export default {
   i18n,
   IssuableListTabs,
   PAGE_SIZE,
-  sortOptions,
   sortParams,
   components: {
     CsvImportExportButtons,
@@ -54,6 +56,7 @@ export default {
     GlIcon,
     GlLink,
     GlSprintf,
+    IssuableByEmail,
     IssuableList,
     IssueCardTimeInfo,
     BlockingIssuesCount: () => import('ee_component/issues/components/blocking_issues_count.vue'),
@@ -83,8 +86,17 @@ export default {
     exportCsvPath: {
       default: '',
     },
+    hasBlockedIssuesFeature: {
+      default: false,
+    },
     hasIssues: {
       default: false,
+    },
+    hasIssueWeightsFeature: {
+      default: false,
+    },
+    initialEmail: {
+      default: '',
     },
     isSignedIn: {
       default: false,
@@ -96,6 +108,9 @@ export default {
       default: '',
     },
     newIssuePath: {
+      default: '',
+    },
+    projectIterationsPath: {
       default: '',
     },
     projectLabelsPath: {
@@ -134,6 +149,9 @@ export default {
     };
   },
   computed: {
+    isBulkEditButtonDisabled() {
+      return this.showBulkEditSidebar || !this.issues.length;
+    },
     isManualOrdering() {
       return this.sortKey === RELATIVE_POSITION_ASC;
     },
@@ -150,7 +168,7 @@ export default {
       return convertToSearchQuery(this.filterTokens) || undefined;
     },
     searchTokens() {
-      return [
+      const tokens = [
         {
           type: 'author_username',
           title: __('Author'),
@@ -211,9 +229,36 @@ export default {
           ],
         },
       ];
+
+      if (this.projectIterationsPath) {
+        tokens.push({
+          type: 'iteration',
+          title: __('Iteration'),
+          icon: 'iteration',
+          token: IterationToken,
+          unique: true,
+          defaultIterations: [],
+          fetchIterations: this.fetchIterations,
+        });
+      }
+
+      if (this.hasIssueWeightsFeature) {
+        tokens.push({
+          type: 'weight',
+          title: __('Weight'),
+          icon: 'weight',
+          token: WeightToken,
+          unique: true,
+        });
+      }
+
+      return tokens;
     },
     showPaginationControls() {
       return this.issues.length > 0;
+    },
+    sortOptions() {
+      return getSortOptions(this.hasIssueWeightsFeature, this.hasBlockedIssuesFeature);
     },
     tabCounts() {
       return Object.values(IssuableStates).reduce(
@@ -268,6 +313,9 @@ export default {
     fetchMilestones(search) {
       return this.fetchWithCache(this.projectMilestonesPath, 'milestones', 'title', search, true);
     },
+    fetchIterations(search) {
+      return axios.get(this.projectIterationsPath, { params: { search } });
+    },
     fetchUsers(search) {
       return axios.get(this.autocompleteUsersPath, { params: { search } });
     },
@@ -306,6 +354,15 @@ export default {
     getExportCsvPathWithQuery() {
       return `${this.exportCsvPath}${window.location.search}`;
     },
+    getStatus(issue) {
+      if (issue.closedAt && issue.movedToId) {
+        return __('CLOSED (MOVED)');
+      }
+      if (issue.closedAt) {
+        return __('CLOSED');
+      }
+      return undefined;
+    },
     handleUpdateLegacyBulkEdit() {
       // If "select all" checkbox was checked, wait for all checkboxes
       // to be checked before updating IssuableBulkUpdateSidebar class
@@ -313,7 +370,18 @@ export default {
         eventHub.$emit('issuables:updateBulkEdit');
       });
     },
-    handleBulkUpdateClick() {
+    async handleBulkUpdateClick() {
+      if (!this.hasInitBulkEdit) {
+        const initBulkUpdateSidebar = await import('~/issuable_init_bulk_update_sidebar');
+        initBulkUpdateSidebar.default.init('issuable_');
+
+        const usersSelect = await import('~/users_select');
+        const UsersSelect = usersSelect.default;
+        new UsersSelect(); // eslint-disable-line no-new
+
+        this.hasInitBulkEdit = true;
+      }
+
       eventHub.$emit('issuables:enableBulkEdit');
     },
     handleClickTab(state) {
@@ -376,143 +444,151 @@ export default {
 </script>
 
 <template>
-  <issuable-list
-    v-if="hasIssues"
-    :namespace="projectPath"
-    recent-searches-storage-key="issues"
-    :search-input-placeholder="__('Search or filter results…')"
-    :search-tokens="searchTokens"
-    :initial-filter-value="filterTokens"
-    :sort-options="$options.sortOptions"
-    :initial-sort-by="sortKey"
-    :issuables="issues"
-    :tabs="$options.IssuableListTabs"
-    :current-tab="state"
-    :tab-counts="tabCounts"
-    :issuables-loading="isLoading"
-    :is-manual-ordering="isManualOrdering"
-    :show-bulk-edit-sidebar="showBulkEditSidebar"
-    :show-pagination-controls="showPaginationControls"
-    :total-items="totalIssues"
-    :current-page="page"
-    :previous-page="page - 1"
-    :next-page="page + 1"
-    :url-params="urlParams"
-    @click-tab="handleClickTab"
-    @filter="handleFilter"
-    @page-change="handlePageChange"
-    @reorder="handleReorder"
-    @sort="handleSort"
-    @update-legacy-bulk-edit="handleUpdateLegacyBulkEdit"
-  >
-    <template #nav-actions>
-      <gl-button
-        v-gl-tooltip
-        :href="rssPath"
-        icon="rss"
-        :title="$options.i18n.rssLabel"
-        :aria-label="$options.i18n.rssLabel"
-      />
-      <gl-button
-        v-gl-tooltip
-        :href="calendarPath"
-        icon="calendar"
-        :title="$options.i18n.calendarLabel"
-        :aria-label="$options.i18n.calendarLabel"
-      />
-      <csv-import-export-buttons
-        class="gl-mr-3"
-        :export-csv-path="exportCsvPathWithQuery"
-        :issuable-count="totalIssues"
-      />
-      <gl-button
-        v-if="canBulkUpdate"
-        :disabled="showBulkEditSidebar"
-        @click="handleBulkUpdateClick"
-      >
-        {{ __('Edit issues') }}
-      </gl-button>
-      <gl-button v-if="showNewIssueLink" :href="newIssuePath" variant="confirm">
-        {{ $options.i18n.newIssueLabel }}
-      </gl-button>
-    </template>
+  <div v-if="hasIssues">
+    <issuable-list
+      :namespace="projectPath"
+      recent-searches-storage-key="issues"
+      :search-input-placeholder="__('Search or filter results…')"
+      :search-tokens="searchTokens"
+      :initial-filter-value="filterTokens"
+      :sort-options="sortOptions"
+      :initial-sort-by="sortKey"
+      :issuables="issues"
+      :tabs="$options.IssuableListTabs"
+      :current-tab="state"
+      :tab-counts="tabCounts"
+      :issuables-loading="isLoading"
+      :is-manual-ordering="isManualOrdering"
+      :show-bulk-edit-sidebar="showBulkEditSidebar"
+      :show-pagination-controls="showPaginationControls"
+      :total-items="totalIssues"
+      :current-page="page"
+      :previous-page="page - 1"
+      :next-page="page + 1"
+      :url-params="urlParams"
+      @click-tab="handleClickTab"
+      @filter="handleFilter"
+      @page-change="handlePageChange"
+      @reorder="handleReorder"
+      @sort="handleSort"
+      @update-legacy-bulk-edit="handleUpdateLegacyBulkEdit"
+    >
+      <template #nav-actions>
+        <gl-button
+          v-gl-tooltip
+          :href="rssPath"
+          icon="rss"
+          :title="$options.i18n.rssLabel"
+          :aria-label="$options.i18n.rssLabel"
+        />
+        <gl-button
+          v-gl-tooltip
+          :href="calendarPath"
+          icon="calendar"
+          :title="$options.i18n.calendarLabel"
+          :aria-label="$options.i18n.calendarLabel"
+        />
+        <csv-import-export-buttons
+          v-if="isSignedIn"
+          class="gl-mr-3"
+          :export-csv-path="exportCsvPathWithQuery"
+          :issuable-count="totalIssues"
+        />
+        <gl-button
+          v-if="canBulkUpdate"
+          :disabled="isBulkEditButtonDisabled"
+          @click="handleBulkUpdateClick"
+        >
+          {{ __('Edit issues') }}
+        </gl-button>
+        <gl-button v-if="showNewIssueLink" :href="newIssuePath" variant="confirm">
+          {{ $options.i18n.newIssueLabel }}
+        </gl-button>
+      </template>
 
-    <template #timeframe="{ issuable = {} }">
-      <issue-card-time-info :issue="issuable" />
-    </template>
+      <template #timeframe="{ issuable = {} }">
+        <issue-card-time-info :issue="issuable" />
+      </template>
 
-    <template #statistics="{ issuable = {} }">
-      <li
-        v-if="issuable.mergeRequestsCount"
-        v-gl-tooltip
-        class="gl-display-none gl-sm-display-block"
-        :title="__('Related merge requests')"
-        data-testid="issuable-mr"
-      >
-        <gl-icon name="merge-request" />
-        {{ issuable.mergeRequestsCount }}
-      </li>
-      <li
-        v-if="issuable.upvotes"
-        v-gl-tooltip
-        class="gl-display-none gl-sm-display-block"
-        :title="__('Upvotes')"
-        data-testid="issuable-upvotes"
-      >
-        <gl-icon name="thumb-up" />
-        {{ issuable.upvotes }}
-      </li>
-      <li
-        v-if="issuable.downvotes"
-        v-gl-tooltip
-        class="gl-display-none gl-sm-display-block"
-        :title="__('Downvotes')"
-        data-testid="issuable-downvotes"
-      >
-        <gl-icon name="thumb-down" />
-        {{ issuable.downvotes }}
-      </li>
-      <blocking-issues-count
-        class="gl-display-none gl-sm-display-block"
-        :blocking-issues-count="issuable.blockingIssuesCount"
-        :is-list-item="true"
-      />
-    </template>
+      <template #status="{ issuable = {} }">
+        {{ getStatus(issuable) }}
+      </template>
 
-    <template #empty-state>
-      <gl-empty-state
-        v-if="searchQuery"
-        :description="$options.i18n.noSearchResultsDescription"
-        :title="$options.i18n.noSearchResultsTitle"
-        :svg-path="emptyStateSvgPath"
-      >
-        <template #actions>
-          <gl-button v-if="showNewIssueLink" :href="newIssuePath" variant="confirm">
-            {{ $options.i18n.newIssueLabel }}
-          </gl-button>
-        </template>
-      </gl-empty-state>
+      <template #statistics="{ issuable = {} }">
+        <li
+          v-if="issuable.mergeRequestsCount"
+          v-gl-tooltip
+          class="gl-display-none gl-sm-display-block"
+          :title="__('Related merge requests')"
+          data-testid="issuable-mr"
+        >
+          <gl-icon name="merge-request" />
+          {{ issuable.mergeRequestsCount }}
+        </li>
+        <li
+          v-if="issuable.upvotes"
+          v-gl-tooltip
+          class="gl-display-none gl-sm-display-block"
+          :title="__('Upvotes')"
+          data-testid="issuable-upvotes"
+        >
+          <gl-icon name="thumb-up" />
+          {{ issuable.upvotes }}
+        </li>
+        <li
+          v-if="issuable.downvotes"
+          v-gl-tooltip
+          class="gl-display-none gl-sm-display-block"
+          :title="__('Downvotes')"
+          data-testid="issuable-downvotes"
+        >
+          <gl-icon name="thumb-down" />
+          {{ issuable.downvotes }}
+        </li>
+        <blocking-issues-count
+          class="gl-display-none gl-sm-display-block"
+          :blocking-issues-count="issuable.blockingIssuesCount"
+          :is-list-item="true"
+        />
+      </template>
 
-      <gl-empty-state
-        v-else-if="isOpenTab"
-        :description="$options.i18n.noOpenIssuesDescription"
-        :title="$options.i18n.noOpenIssuesTitle"
-        :svg-path="emptyStateSvgPath"
-      >
-        <template #actions>
-          <gl-button v-if="showNewIssueLink" :href="newIssuePath" variant="confirm">
-            {{ $options.i18n.newIssueLabel }}
-          </gl-button>
-        </template>
-      </gl-empty-state>
+      <template #empty-state>
+        <gl-empty-state
+          v-if="searchQuery"
+          :description="$options.i18n.noSearchResultsDescription"
+          :title="$options.i18n.noSearchResultsTitle"
+          :svg-path="emptyStateSvgPath"
+        >
+          <template #actions>
+            <gl-button v-if="showNewIssueLink" :href="newIssuePath" variant="confirm">
+              {{ $options.i18n.newIssueLabel }}
+            </gl-button>
+          </template>
+        </gl-empty-state>
 
-      <gl-empty-state
-        v-else
-        :title="$options.i18n.noClosedIssuesTitle"
-        :svg-path="emptyStateSvgPath"
-      />
-    </template>
-  </issuable-list>
+        <gl-empty-state
+          v-else-if="isOpenTab"
+          :description="$options.i18n.noOpenIssuesDescription"
+          :title="$options.i18n.noOpenIssuesTitle"
+          :svg-path="emptyStateSvgPath"
+        >
+          <template #actions>
+            <gl-button v-if="showNewIssueLink" :href="newIssuePath" variant="confirm">
+              {{ $options.i18n.newIssueLabel }}
+            </gl-button>
+          </template>
+        </gl-empty-state>
+
+        <gl-empty-state
+          v-else
+          :title="$options.i18n.noClosedIssuesTitle"
+          :svg-path="emptyStateSvgPath"
+        />
+      </template>
+    </issuable-list>
+
+    <issuable-by-email v-if="initialEmail" class="gl-text-center gl-pt-5 gl-pb-7" />
+  </div>
 
   <div v-else-if="isSignedIn">
     <gl-empty-state

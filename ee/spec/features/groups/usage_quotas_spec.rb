@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Groups > Usage Quotas' do
   let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group) }
   let!(:project) { create(:project, namespace: group, shared_runners_enabled: true) }
   let(:gitlab_dot_com) { true }

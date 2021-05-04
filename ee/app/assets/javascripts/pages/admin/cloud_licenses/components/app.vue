@@ -1,5 +1,7 @@
 <script>
+import { GlAlert } from '@gitlab/ui';
 import {
+  subscriptionActivationNotificationText,
   subscriptionActivationTitle,
   subscriptionHistoryQueries,
   subscriptionMainTitle,
@@ -13,12 +15,14 @@ import SubscriptionTrialCard from './subscription_trial_card.vue';
 export default {
   name: 'CloudLicenseApp',
   components: {
-    SubscriptionBreakdown,
+    GlAlert,
     CloudLicenseSubscriptionActivationForm,
-    SubscriptionTrialCard,
+    SubscriptionBreakdown,
     SubscriptionPurchaseCard,
+    SubscriptionTrialCard,
   },
   i18n: {
+    subscriptionActivationNotificationText,
     subscriptionActivationTitle,
     subscriptionMainTitle,
   },
@@ -33,10 +37,10 @@ export default {
     currentSubscription: {
       query: subscriptionQueries.query,
       update({ currentLicense }) {
-        return currentLicense;
+        return currentLicense || {};
       },
-      skip() {
-        return !this.canShowSubscriptionDetails;
+      result({ data }) {
+        this.hasNewLicense = data?.currentLicense && !this.hasActiveLicense;
       },
     },
     subscriptionHistory: {
@@ -49,13 +53,26 @@ export default {
   data() {
     return {
       currentSubscription: {},
+      hasDismissedNotification: false,
+      hasNewLicense: false,
       subscriptionHistory: [],
-      canShowSubscriptionDetails: this.hasActiveLicense,
+      notification: null,
     };
   },
+  computed: {
+    hasValidSubscriptionData() {
+      return Boolean(Object.keys(this.currentSubscription).length);
+    },
+    canShowSubscriptionDetails() {
+      return this.hasActiveLicense || this.hasValidSubscriptionData;
+    },
+    shouldShowActivationNotification() {
+      return !this.hasDismissedNotification && this.hasNewLicense && this.hasValidSubscriptionData;
+    },
+  },
   methods: {
-    handleActivation(hasLicense) {
-      this.canShowSubscriptionDetails = hasLicense;
+    dismissSuccessAlert() {
+      this.hasDismissedNotification = true;
     },
   },
 };
@@ -65,6 +82,14 @@ export default {
   <div class="gl-display-flex gl-justify-content-center gl-flex-direction-column">
     <h4 data-testid="subscription-main-title">{{ $options.i18n.subscriptionMainTitle }}</h4>
     <hr />
+    <gl-alert
+      v-if="shouldShowActivationNotification"
+      variant="success"
+      :title="$options.i18n.subscriptionActivationNotificationText"
+      class="mb-4"
+      data-testid="subscription-activation-success-alert"
+      @dismiss="dismissSuccessAlert"
+    />
     <subscription-breakdown
       v-if="canShowSubscriptionDetails"
       :subscription="currentSubscription"
@@ -75,7 +100,7 @@ export default {
         <h3 class="gl-mb-7 gl-mt-6 gl-text-center" data-testid="subscription-activation-title">
           {{ $options.i18n.subscriptionActivationTitle }}
         </h3>
-        <cloud-license-subscription-activation-form @subscription-activation="handleActivation" />
+        <cloud-license-subscription-activation-form />
         <div class="row gl-mt-7">
           <div class="col-lg-6">
             <subscription-trial-card />

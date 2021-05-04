@@ -1,11 +1,16 @@
 <script>
 import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import produce from 'immer';
+import { difference } from 'lodash';
+import { Portal } from 'portal-vue';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import securityScannersQuery from '../graphql/queries/project_security_scanners.query.graphql';
 import vulnerabilitiesQuery from '../graphql/queries/project_vulnerabilities.query.graphql';
 import { preparePageInfo } from '../helpers';
 import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import SecurityScannerAlert from './security_scanner_alert.vue';
 import VulnerabilityList from './vulnerability_list.vue';
 
 export default {
@@ -14,9 +19,15 @@ export default {
     GlAlert,
     GlLoadingIcon,
     GlIntersectionObserver,
+    LocalStorageSync,
+    Portal,
+    SecurityScannerAlert,
     VulnerabilityList,
   },
   inject: {
+    vulnerabilityReportAlertsPortal: {
+      default: '',
+    },
     projectFullPath: {
       default: '',
     },
@@ -35,6 +46,7 @@ export default {
     return {
       pageInfo: {},
       vulnerabilities: [],
+      scannerAlertDismissed: false,
       securityScanners: {},
       errorLoadingVulnerabilities: false,
       sortBy: 'severity',
@@ -97,6 +109,21 @@ export default {
     sort() {
       return `${this.sortBy}_${this.sortDirection}`;
     },
+    notEnabledSecurityScanners() {
+      const { available = [], enabled = [] } = this.securityScanners;
+      return difference(available, enabled);
+    },
+    noPipelineRunSecurityScanners() {
+      const { enabled = [], pipelineRun = [] } = this.securityScanners;
+      return difference(enabled, pipelineRun);
+    },
+    shouldShowScannersAlert() {
+      return (
+        !this.scannerAlertDismissed &&
+        (this.notEnabledSecurityScanners.length > 0 ||
+          this.noPipelineRunSecurityScanners.length > 0)
+      );
+    },
   },
   watch: {
     filters() {
@@ -128,7 +155,11 @@ export default {
       this.sortDirection = sortDesc ? 'desc' : 'asc';
       this.sortBy = sortBy;
     },
+    setScannerAlertDismissed(value) {
+      this.scannerAlertDismissed = parseBoolean(value);
+    },
   },
+  SCANNER_ALERT_DISMISSED_LOCAL_STORAGE_KEY: 'vulnerability_list_scanner_alert_dismissed',
   i18n: {
     API_FUZZING: __('API Fuzzing'),
     CONTAINER_SCANNING: __('Container Scanning'),
@@ -148,21 +179,36 @@ export default {
         )
       }}
     </gl-alert>
-    <vulnerability-list
-      v-else
-      :is-loading="isLoadingFirstVulnerabilities"
-      :filters="filters"
-      :vulnerabilities="vulnerabilities"
-      :security-scanners="securityScanners"
-      @sort-changed="handleSortChange"
-    />
-    <gl-intersection-observer
-      v-if="pageInfo.hasNextPage"
-      class="text-center"
-      @appear="fetchNextPage"
-    >
-      <gl-loading-icon v-if="isLoadingVulnerabilities" size="md" />
-      <span v-else>&nbsp;</span>
-    </gl-intersection-observer>
+
+    <template v-else>
+      <local-storage-sync
+        :value="String(scannerAlertDismissed)"
+        :storage-key="$options.SCANNER_ALERT_DISMISSED_LOCAL_STORAGE_KEY"
+        @input="setScannerAlertDismissed"
+      />
+
+      <portal v-if="shouldShowScannersAlert" :to="vulnerabilityReportAlertsPortal">
+        <security-scanner-alert
+          :not-enabled-scanners="notEnabledSecurityScanners"
+          :no-pipeline-run-scanners="noPipelineRunSecurityScanners"
+          @dismiss="setScannerAlertDismissed('true')"
+        />
+      </portal>
+
+      <vulnerability-list
+        :is-loading="isLoadingFirstVulnerabilities"
+        :filters="filters"
+        :vulnerabilities="vulnerabilities"
+        @sort-changed="handleSortChange"
+      />
+      <gl-intersection-observer
+        v-if="pageInfo.hasNextPage"
+        class="text-center"
+        @appear="fetchNextPage"
+      >
+        <gl-loading-icon v-if="isLoadingVulnerabilities" size="md" />
+        <span v-else>&nbsp;</span>
+      </gl-intersection-observer>
+    </template>
   </div>
 </template>

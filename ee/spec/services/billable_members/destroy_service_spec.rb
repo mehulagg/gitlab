@@ -89,6 +89,18 @@ RSpec.describe BillableMembers::DestroyService do
           expect(multi_project_user.projects).not_to include(project_2)
         end
       end
+
+      context 'when the user has no Member record' do
+        let(:non_member) { create(:user) }
+        let(:user_id) { non_member.id }
+
+        it 'returns an appropriate error' do
+          result = execute
+
+          expect(result[:status]).to eq :error
+          expect(result[:message]).to eq 'No member found for the given user_id'
+        end
+      end
     end
   end
 end

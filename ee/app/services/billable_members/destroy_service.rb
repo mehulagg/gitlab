@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# BillableMembers::DestroyService class
-#
 # Used to find and remove all billable Member records (GroupMember or ProjectMember)
 # within a group's hierarchy for the given user_id, so that a billable member can be completely
 # removed from the group and it's subgroups and projects
@@ -14,6 +12,7 @@ module BillableMembers
     include BaseServiceUtility
 
     InvalidGroupError = Class.new(StandardError)
+    InvalidMemberError = Class.new(StandardError)
 
     def initialize(group, user_id:, current_user:)
       @group = group
@@ -28,7 +27,7 @@ module BillableMembers
       remove_user_from_resources
 
       success
-    rescue InvalidGroupError, Gitlab::Access::AccessDeniedError => e
+    rescue InvalidGroupError, InvalidMemberError, Gitlab::Access::AccessDeniedError => e
       error(e.message)
     end
 
@@ -38,11 +37,15 @@ module BillableMembers
 
     # rubocop: disable CodeReuse/ActiveRecord
     def remove_user_from_resources
+      memberships_found = false
       memberships = ::Member.in_hierarchy(group).where(user_id: user_id)
 
       memberships.find_each do |member|
+        memberships_found = true
         ::Members::DestroyService.new(current_user).execute(member, skip_subresources: true)
       end
+
+      raise InvalidMemberError, 'No member found for the given user_id' unless memberships_found
     end
     # rubocop: enable CodeReuse/ActiveRecord
 

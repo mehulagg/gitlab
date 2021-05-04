@@ -1,4 +1,4 @@
-import { subscriptionType } from 'ee/pages/admin/cloud_licenses/constants';
+import { CONNECTIVITY_ERROR, subscriptionType } from 'ee/pages/admin/cloud_licenses/constants';
 
 export const license = {
   ULTIMATE: {
@@ -72,7 +72,16 @@ export const activateLicenseMutationResponse = {
       ],
     },
   ],
-  FAILURE_IN_DISGUISE: {
+  CONNECTIVITY_ERROR: {
+    data: {
+      gitlabSubscriptionActivate: {
+        license: null,
+        errors: [CONNECTIVITY_ERROR],
+        __typename: 'GitlabSubscriptionActivatePayload',
+      },
+    },
+  },
+  ERRORS_AS_DATA: {
     data: {
       gitlabSubscriptionActivate: {
         license: null,
@@ -86,9 +95,9 @@ export const activateLicenseMutationResponse = {
       gitlabSubscriptionActivate: {
         license: {
           id: 'gid://gitlab/License/3',
-          type: 'legacy',
+          type: 'cloud',
           plan: 'ultimate',
-          name: 'Test license',
+          name: 'Cloud License',
           email: 'user@example.com',
           company: 'Example Inc',
           startsAt: '2020-01-01',

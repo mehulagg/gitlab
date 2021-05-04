@@ -39,7 +39,9 @@ export default {
         const { data } = await this.$apollo.mutate({
           mutation: this.featureSettings.mutation,
           variables: {
-            fullPath: this.projectPath,
+            input: {
+              projectPath: this.projectPath,
+            },
           },
         });
         const { errors, successPath } = data[this.featureSettings.type];

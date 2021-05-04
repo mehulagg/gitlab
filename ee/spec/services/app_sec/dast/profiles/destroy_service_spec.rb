@@ -7,7 +7,7 @@ RSpec.describe AppSec::Dast::Profiles::DestroyService do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
-  let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project) }
+  let_it_be(:dast_profile, refind: true) { create(:dast_profile, project: project) }
 
   subject do
     described_class.new(

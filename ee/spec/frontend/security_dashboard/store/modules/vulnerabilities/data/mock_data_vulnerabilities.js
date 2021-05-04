@@ -177,7 +177,7 @@ export default [
       },
       category: 'sast',
       feedback_type: 'dismissal',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
       destroy_vulnerability_feedback_dismissal_path: 'https://example.com/feedback_dismissal_path',
     },
@@ -258,7 +258,7 @@ export default [
       issue_url: 'http://localhost/namespace1/project1/issues/1',
       category: 'sast',
       feedback_type: 'issue',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
     },
     create_vulnerability_feedback_issue_path: 'https://example.com/vulnerability_feedback',
@@ -336,7 +336,7 @@ export default [
       },
       category: 'sast',
       feedback_type: 'dismissal',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
       destroy_vulnerability_feedback_dismissal_path: 'https://example.com/feedback_dismissal_path',
     },
@@ -362,7 +362,7 @@ export default [
       issue_url: 'http://localhost/namespace1/project1/issues/1',
       category: 'sast',
       feedback_type: 'issue',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
     },
     create_vulnerability_feedback_issue_path: 'https://example.com/vulnerability_feedback',
@@ -496,7 +496,7 @@ export default [
       issue_url: null,
       category: 'sast',
       feedback_type: 'issue',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
     },
     vulnerability_feedback_issue_path: 'https://example.com/vulnerability_feedback',
@@ -562,7 +562,7 @@ export default [
     ],
     location: {
       image:
-        'registry.gitlab.com/groulot/container-scanning-test/master:5f21de6956aee99ddb68ae49498662d9872f50ff',
+        'registry.gitlab.com/groulot/container-scanning-test/main:5f21de6956aee99ddb68ae49498662d9872f50ff',
       operating_system: 'debian:9',
       dependency: {
         package: {
@@ -620,7 +620,7 @@ export default [
     ],
     location: {
       image:
-        'registry.gitlab.com/groulot/container-scanning-test/master:5f21de6956aee99ddb68ae49498662d9872f50ff',
+        'registry.gitlab.com/groulot/container-scanning-test/main:5f21de6956aee99ddb68ae49498662d9872f50ff',
       operating_system: 'debian:9',
       dependency: {
         package: {

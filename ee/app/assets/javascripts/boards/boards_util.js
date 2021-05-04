@@ -124,9 +124,8 @@ export function transformBoardConfig(boardConfig) {
   boardConfig.labels.forEach((label) => {
     const labelTitle = encodeURIComponent(label.title);
     const param = `label_name[]=${labelTitle}`;
-    const labelIndex = passedFilterParams.label_name?.indexOf(labelTitle);
 
-    if (labelIndex === -1 || labelIndex === undefined) {
+    if (!passedFilterParams.label_name?.includes(label.title)) {
       filterPath.push(param);
     }
   });

@@ -257,8 +257,11 @@ module Security
     def update_vulnerabilities_identifiers
       vulnerability_finding_to_finding_map.keys.in_groups_of(BATCH_SIZE, false) do |vulnerability_findings|
         identifier_object_records = get_vulnerability_identifier_objects_for(vulnerability_findings)
-        insert_new_vulnerability_identifiers_for(identifier_object_records)
-        update_existing_vulnerability_identifiers_for(identifier_object_records)
+        records_with_id, records_without_id = identifier_object_records
+                                                .partition { |identifier| identifier[:id].present? }
+
+        update_existing_vulnerability_identifiers_for(records_with_id)
+        insert_new_vulnerability_identifiers_for(records_without_id)
       end
     rescue StandardError => e
       Gitlab::ErrorTracking.track_exception(e)
@@ -281,13 +284,15 @@ module Security
     end
 
     def insert_new_vulnerability_identifiers_for(identifier_object_records)
-      identifier_object_records_without_id = identifier_object_records.select { |identifier| identifier[:id].nil? }.uniq
-      Vulnerabilities::Identifier.insert_all(identifier_object_records_without_id) if identifier_object_records_without_id.present?
+      identifier_object_records = identifier_object_records.uniq.group_by(&:keys).values
+
+      identifier_object_records.each { |records| Vulnerabilities::Identifier.insert_all(records) }
     end
 
     def update_existing_vulnerability_identifiers_for(identifier_object_records)
-      identifier_object_records_with_id = identifier_object_records.select { |identifier| identifier[:id].present? }.uniq
-      Vulnerabilities::Identifier.upsert_all(identifier_object_records_with_id) if identifier_object_records_with_id.present?
+      identifier_object_records = identifier_object_records.uniq.group_by(&:keys).values
+
+      identifier_object_records.each { |records| Vulnerabilities::Identifier.upsert_all(records) }
     end
 
     def update_vulnerabilities_finding_identifiers

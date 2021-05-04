@@ -23,4 +23,10 @@ module SecurityHelper
       is_unavailable: "true"
     }
   end
+
+  def instance_security_settings_data
+    {
+      is_auditor: current_user.auditor?.to_s
+    }
+  end
 end

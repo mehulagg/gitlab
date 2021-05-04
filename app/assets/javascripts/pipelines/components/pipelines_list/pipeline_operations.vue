@@ -41,7 +41,7 @@ export default {
         this.pipeline.flags.retryable ||
         this.pipeline.flags.cancelable ||
         this.pipeline.details.manual_actions.length ||
-        this.pipeline.details.artifacts.length
+        this.pipeline.details.has_downloadable_artifacts
       );
     },
     actions() {
@@ -53,6 +53,9 @@ export default {
     },
     isCancelling() {
       return this.cancelingPipeline === this.pipeline.id;
+    },
+    showArtifacts() {
+      return this.pipeline.details.has_downloadable_artifacts;
     },
   },
   watch: {
@@ -110,10 +113,7 @@ export default {
         @click="handleCancelClick"
       />
 
-      <pipeline-multi-actions
-        v-if="pipeline.details.artifacts.length"
-        :artifacts="pipeline.details.artifacts"
-      />
+      <pipeline-multi-actions v-if="showArtifacts" :pipeline-id="pipeline.id" />
     </div>
   </div>
 </template>

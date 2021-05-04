@@ -49,6 +49,42 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
     end
   end
 
+  context 'when running a job that failed previously' do
+    let!(:job_record) do
+      create(:batched_background_migration_job,
+        batched_migration: active_migration,
+        pause_ms: pause_ms,
+        attempts: 1,
+        status: :failed,
+        finished_at: 1.hour.ago,
+        metrics: { 'my_metrics' => 'some_value' }
+      )
+    end
+
+    it 'increments attempts and updates other fields' do
+      updated_metrics = { 'updated_metrics' => 'some_value' }
+
+      expect(job_instance).to receive(:perform)
+      expect(job_instance).to receive(:batch_metrics).and_return(updated_metrics)
+
+      expect(job_record).to receive(:update!).with(
+        hash_including(attempts: 2, status: :running, finished_at: nil, metrics: {})
+      ).and_call_original
+
+      freeze_time do
+        subject
+
+        job_record.reload
+
+        expect(job_record).not_to be_failed
+        expect(job_record.attempts).to eq(2)
+        expect(job_record.started_at).to eq(Time.current)
+        expect(job_record.finished_at).to eq(Time.current)
+        expect(job_record.metrics).to eq(updated_metrics)
+      end
+    end
+  end
+
   context 'reporting prometheus metrics' do
     let(:labels) { job_record.batched_migration.prometheus_labels }
 
@@ -106,7 +142,7 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
     it 'reports job duration' do
       freeze_time do
         expect(Time).to receive(:current).and_return(Time.zone.now - 5.seconds).ordered
-        expect(Time).to receive(:current).and_return(Time.zone.now).ordered
+        allow(Time).to receive(:current).and_call_original
 
         expect(described_class.metrics[:gauge_job_duration]).to receive(:set).with(labels, 5.seconds)
 
@@ -118,6 +154,14 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper, '
       expect(described_class.metrics[:gauge_total_tuple_count]).to receive(:set).with(labels, job_record.batched_migration.total_tuple_count)
 
       subject
+    end
+
+    it 'reports last updated at timestamp' do
+      freeze_time do
+        expect(described_class.metrics[:gauge_last_update_time]).to receive(:set).with(labels, Time.current.to_i)
+
+        subject
+      end
     end
   end
 

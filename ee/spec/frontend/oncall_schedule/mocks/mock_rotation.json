@@ -27,11 +27,10 @@
       "nodes": [
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/49",
             "colorWeight": "500",
             "colorPalette": "blue",
             "user": {
-              "id": "1",
+              "id": "gid://gitlab/User/1",
               "username": "nora.schaden",
               "avatarUrl": "/url",
               "name": "nora"
@@ -42,11 +41,10 @@
         },
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/232",
             "colorWeight": "500",
             "colorPalette": "orange",
             "user": {
-              "id": "2",
+              "id": "gid://gitlab/User/2",
               "username": "racheal.loving",
               "avatarUrl": "/url",
               "name": "racheal"
@@ -87,10 +85,11 @@
       "nodes": [
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/99",
             "colorWeight": "500",
             "colorPalette": "aqua",
             "user": {
+              "id": "gid://gitlab/User/38",
+              "avatarUrl": "url",
               "username": "david.oregan",
               "name": "david"
             }
@@ -100,10 +99,11 @@
         },
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/300",
             "colorWeight": "500",
             "colorPalette": "green",
             "user": {
+              "id": "gid://gitlab/User/39",
+              "avatarUrl": "url",
               "username": "david.keagan",
               "name": "david k"
             }
@@ -143,10 +143,11 @@
       "nodes": [
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/100",
             "colorWeight": "500",
             "colorPalette": "magenta",
             "user": {
+              "id": "gid://gitlab/User/40",
+              "avatarUrl": "url",
               "username": "root",
               "name": "Administrator"
             }
@@ -156,10 +157,11 @@
         },
         {
           "participant": {
-            "id": "gid://gitlab/IncidentManagement::OncallParticipant/109",
             "colorWeight": "600",
             "colorPalette": "blue",
             "user": {
+              "id": "gid://gitlab/User/41",
+              "avatarUrl": "url",
               "username": "root2",
               "name": "Administrator 2"
             }
@@ -199,10 +201,11 @@
     "nodes": [
       {
         "participant": {
-          "id": "gid://gitlab/IncidentManagement::OncallParticipant/52",
           "colorWeight": "600",
           "colorPalette": "orange",
           "user": {
+            "id": "gid://gitlab/User/43",
+            "avatarUrl": "url",
             "username": "oregand",
             "name": "david"
           }
@@ -212,10 +215,11 @@
       },
       {
         "participant": {
-          "id": "gid://gitlab/IncidentManagement::OncallParticipant/77",
           "colorWeight": "600",
           "colorPalette": "aqua",
           "user": {
+            "id": "gid://gitlab/User/44",
+            "avatarUrl": "url",
             "username": "sarah.w",
             "name": "sarah"
           }

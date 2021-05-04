@@ -1,8 +1,0 @@
-- return unless project.feature_available?(:quality_management)
-- return unless can?(current_user, :read_issue, project)
-
-- if project_nav_tab?(:pipelines)
-  = nav_link(controller: :test_cases) do
-    = link_to project_quality_test_cases_path(project), title: _('Test Cases'), class: 'shortcuts-test-cases' do
-      %span
-        = _('Test Cases')

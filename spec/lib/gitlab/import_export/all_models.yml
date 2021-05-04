@@ -113,6 +113,7 @@ releases:
 - author
 - project
 - links
+- sorted_links
 - milestone_releases
 - milestones
 - evidences
@@ -568,6 +569,7 @@ project:
 - debian_distributions
 - merge_request_metrics
 - security_orchestration_policy_configuration
+- timelogs
 award_emoji:
 - awardable
 - user
@@ -743,4 +745,6 @@ status_page_published_incident:
 issuable_sla:
   - issue
 push_rule:
+  - group
+bulk_import_export:
   - group

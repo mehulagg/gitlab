@@ -114,10 +114,6 @@ module QA
         autoload :Show, 'qa/ee/page/project/show'
         autoload :Menu, 'qa/ee/page/project/menu'
 
-        module Artifact
-          autoload :Show, 'qa/ee/page/project/artifact/show'
-        end
-
         module SubMenus
           autoload :SecurityCompliance, 'qa/ee/page/project/sub_menus/security_compliance'
           autoload :Repository, 'qa/ee/page/project/sub_menus/repository'

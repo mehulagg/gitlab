@@ -266,6 +266,7 @@ RSpec.describe 'Admin updates settings' do
         fill_in 'service[push_channel]', with: '#test_channel'
         page.check('Notify only broken pipelines')
         page.select 'All branches', from: 'Branches to be notified'
+        page.select 'Match any of the labels', from: 'Labels to be notified behavior'
 
         check_all_events
         click_button 'Save changes'
@@ -304,6 +305,10 @@ RSpec.describe 'Admin updates settings' do
         visit integrations_admin_application_settings_path
 
         expect(page).not_to have_content('Some settings have moved')
+      end
+
+      it 'shows integrations table' do
+        expect(page).to have_selector '[data-testid="inactive-integrations-table"]'
       end
     end
 
@@ -420,7 +425,8 @@ RSpec.describe 'Admin updates settings' do
           check 'Enable reCAPTCHA for login'
           fill_in 'IPs per user', with: 15
           check 'Enable Spam Check via external API endpoint'
-          fill_in 'URL of the external Spam Check endpoint', with: 'https://www.example.com/spamcheck'
+          fill_in 'URL of the external Spam Check endpoint', with: 'grpc://www.example.com/spamcheck'
+          fill_in 'Spam Check API Key', with: 'SPAM_CHECK_API_KEY'
           click_button 'Save changes'
         end
 
@@ -429,7 +435,7 @@ RSpec.describe 'Admin updates settings' do
         expect(current_settings.login_recaptcha_protection_enabled).to be true
         expect(current_settings.unique_ips_limit_per_user).to eq(15)
         expect(current_settings.spam_check_endpoint_enabled).to be true
-        expect(current_settings.spam_check_endpoint_url).to eq 'https://www.example.com/spamcheck'
+        expect(current_settings.spam_check_endpoint_url).to eq 'grpc://www.example.com/spamcheck'
       end
     end
 

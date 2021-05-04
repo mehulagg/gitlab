@@ -332,6 +332,18 @@ module IssuablesHelper
     end
   end
 
+  def state_name_with_icon(issuable)
+    if issuable.is_a?(MergeRequest) && issuable.merged?
+      [_("Merged"), "git-merge"]
+    elsif issuable.is_a?(MergeRequest) && issuable.closed?
+      [_("Closed"), "close"]
+    elsif issuable.closed?
+      [_("Closed"), "mobile-issue-close"]
+    else
+      [_("Open"), "issue-open-m"]
+    end
+  end
+
   private
 
   def sidebar_gutter_collapsed?
@@ -390,8 +402,7 @@ module IssuablesHelper
       severity: issuable[:severity],
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours,
       createNoteEmail: issuable[:create_note_email],
-      issuableType: issuable[:type],
-      projectMembersPath: project_project_members_path(@project, sort: :access_level_desc)
+      issuableType: issuable[:type]
     }
   end
 

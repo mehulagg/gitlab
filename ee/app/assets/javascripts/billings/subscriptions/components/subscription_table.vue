@@ -127,9 +127,12 @@ export default {
   <div>
     <div
       v-if="!isLoadingSubscription && !hasErrorSubscription"
-      class="card gl-mt-3 subscription-table js-subscription-table"
+      class="gl-card gl-mt-3 subscription-table js-subscription-table"
     >
-      <div class="card-header" data-testid="subscription-header">
+      <div
+        class="gl-card-header gl-display-flex gl-justify-content-space-between gl-align-items-center"
+        data-testid="subscription-header"
+      >
         <strong>{{ subscriptionHeader }}</strong>
         <div class="controls">
           <gl-button
@@ -146,7 +149,7 @@ export default {
         </div>
       </div>
       <div
-        class="card-body gl-display-flex gl-flex-column gl-sm-flex-direction-row flex-lg-column flex-grid"
+        class="gl-card-body gl-display-flex gl-flex-column gl-sm-flex-direction-row flex-lg-column flex-grid gl-p-0"
       >
         <subscription-table-row
           v-for="(row, i) in visibleRows"

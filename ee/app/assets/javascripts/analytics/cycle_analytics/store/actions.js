@@ -1,5 +1,6 @@
 import Api from 'ee/api';
 import createFlash from '~/flash';
+import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import httpStatus from '~/lib/utils/http_status';
 import { __, sprintf } from '~/locale';
 import { FETCH_VALUE_STREAM_DATA, OVERVIEW_STAGE_CONFIG } from '../constants';
@@ -30,7 +31,10 @@ export const setFeatureFlags = ({ commit }, featureFlags) =>
 export const setSelectedProjects = ({ commit }, projects) =>
   commit(types.SET_SELECTED_PROJECTS, projects);
 
-export const setSelectedStage = ({ commit }, stage) => commit(types.SET_SELECTED_STAGE, stage);
+export const setSelectedStage = ({ commit }, stage) => {
+  commit(types.SET_SELECTED_STAGE, stage);
+  commit(types.SET_PAGINATION, { page: 1, hasNextPage: null });
+};
 
 export const setDateRange = ({ commit, dispatch }, { skipFetch = false, startDate, endDate }) => {
   commit(types.SET_DATE_RANGE, { startDate, endDate });
@@ -41,8 +45,6 @@ export const setDateRange = ({ commit, dispatch }, { skipFetch = false, startDat
 };
 
 export const requestStageData = ({ commit }) => commit(types.REQUEST_STAGE_DATA);
-export const receiveStageDataSuccess = ({ commit }, data) =>
-  commit(types.RECEIVE_STAGE_DATA_SUCCESS, data);
 
 export const receiveStageDataError = ({ commit }, error) => {
   const { message = '' } = error;
@@ -53,18 +55,30 @@ export const receiveStageDataError = ({ commit }, error) => {
   commit(types.RECEIVE_STAGE_DATA_ERROR, message);
 };
 
-export const fetchStageData = ({ dispatch, getters }, stageId) => {
-  const { cycleAnalyticsRequestParams = {}, currentValueStreamId, currentGroupPath } = getters;
+export const fetchStageData = ({ dispatch, getters, commit }, stageId) => {
+  const {
+    cycleAnalyticsRequestParams = {},
+    currentValueStreamId,
+    currentGroupPath,
+    paginationParams,
+  } = getters;
   dispatch('requestStageData');
 
   return Api.cycleAnalyticsStageEvents({
     groupId: currentGroupPath,
     valueStreamId: currentValueStreamId,
     stageId,
-    params: cycleAnalyticsRequestParams,
+    params: {
+      ...cycleAnalyticsRequestParams,
+      ...paginationParams,
+    },
   })
     .then(checkForDataError)
-    .then(({ data }) => dispatch('receiveStageDataSuccess', data))
+    .then(({ data, headers }) => {
+      const { page = null, nextPage = null } = parseIntPagination(normalizeHeaders(headers));
+      commit(types.RECEIVE_STAGE_DATA_SUCCESS, data);
+      commit(types.SET_PAGINATION, { page, hasNextPage: Boolean(nextPage) });
+    })
     .catch((error) => dispatch('receiveStageDataError', error));
 };
 
@@ -465,4 +479,12 @@ export const fetchValueStreams = ({ commit, dispatch, getters }) => {
 
 export const setFilters = ({ dispatch }) => {
   return dispatch('fetchCycleAnalyticsData');
+};
+
+export const updateStageTablePagination = (
+  { commit, dispatch, state: { selectedStage } },
+  { page },
+) => {
+  commit(types.SET_PAGINATION, { page });
+  return dispatch('fetchStageData', selectedStage.id);
 };

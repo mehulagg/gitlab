@@ -227,7 +227,9 @@ RSpec.shared_examples 'Value Stream Analytics Stages controller' do
         end
 
         it 'accepts sort params' do
-          expect(Gitlab::Analytics::CycleAnalytics::Sorting).to receive(:apply).with(kind_of(ActiveRecord::Relation), kind_of(Analytics::CycleAnalytics::GroupStage), :duration, :asc).and_call_original
+          expect_next_instance_of(Gitlab::Analytics::CycleAnalytics::Sorting) do |sort|
+            expect(sort).to receive(:apply).with(:duration, :asc).and_call_original
+          end
 
           subject
 

@@ -378,19 +378,6 @@ module ProjectsHelper
 
   private
 
-  def can_read_security_configuration?(project, current_user)
-    can?(current_user, :access_security_and_compliance, project) &&
-    can?(current_user, :read_security_configuration, project)
-  end
-
-  def get_project_security_nav_tabs(project, current_user)
-    if can_read_security_configuration?(project, current_user)
-      [:security_and_compliance, :security_configuration]
-    else
-      []
-    end
-  end
-
   # rubocop:disable Metrics/CyclomaticComplexity
   def get_project_nav_tabs(project, current_user)
     nav_tabs = [:home]
@@ -399,8 +386,6 @@ module ProjectsHelper
       nav_tabs += [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
       nav_tabs << :releases if can?(current_user, :read_release, project)
     end
-
-    nav_tabs += get_project_security_nav_tabs(project, current_user)
 
     if project.repo_exists? && can?(current_user, :read_merge_request, project)
       nav_tabs << :merge_requests
@@ -417,14 +402,6 @@ module ProjectsHelper
     # Pipelines feature is tied to presence of builds
     if can?(current_user, :read_build, project)
       nav_tabs << :pipelines
-    end
-
-    if can_view_operations_tab?(current_user, project)
-      nav_tabs << :operations
-    end
-
-    if can_view_product_analytics?(current_user, project)
-      nav_tabs << :product_analytics
     end
 
     tab_ability_map.each do |tab, ability|
@@ -483,32 +460,6 @@ module ProjectsHelper
       feature_flags:      :read_feature_flag,
       analytics:          :read_analytics
     }
-  end
-
-  def view_operations_tab_ability
-    [
-      :metrics_dashboard,
-      :read_alert_management_alert,
-      :read_environment,
-      :read_issue,
-      :read_sentry_issue,
-      :read_cluster,
-      :read_feature_flag,
-      :read_terraform_state
-    ]
-  end
-
-  def can_view_operations_tab?(current_user, project)
-    return false unless project.feature_available?(:operations, current_user)
-
-    view_operations_tab_ability.any? do |ability|
-      can?(current_user, ability, project)
-    end
-  end
-
-  def can_view_product_analytics?(current_user, project)
-    Feature.enabled?(:product_analytics, project) &&
-      can?(current_user, :read_product_analytics, project)
   end
 
   def search_tab_ability_map
@@ -575,14 +526,6 @@ module ProjectsHelper
       gitlab_config.protocol
     else
       'ssh'
-    end
-  end
-
-  def sidebar_operations_link_path(project = @project)
-    if can?(current_user, :read_environment, project)
-      metrics_project_environments_path(project)
-    else
-      project_feature_flags_path(project)
     end
   end
 
@@ -723,12 +666,6 @@ module ProjectsHelper
     "#{request.path}?#{options.to_param}"
   end
 
-  def sidebar_security_configuration_paths
-    %w[
-      projects/security/configuration#show
-    ]
-  end
-
   def sidebar_settings_paths
     %w[
       projects#edit
@@ -744,6 +681,8 @@ module ProjectsHelper
       badges#index
       pages#show
       packages_and_registries#index
+      projects/runners#show
+      projects/runners#edit
     ]
   end
 
@@ -767,10 +706,6 @@ module ProjectsHelper
     ]
   end
 
-  def sidebar_security_paths
-    %w[projects/security/configuration#show]
-  end
-
   def user_can_see_auto_devops_implicitly_enabled_banner?(project, user)
     Ability.allowed?(user, :admin_project, project) &&
       project.has_auto_devops_implicitly_enabled? &&
@@ -783,12 +718,12 @@ module ProjectsHelper
   end
 
   def settings_container_registry_expiration_policy_available?(project)
-    Feature.disabled?(:sidebar_refactor) &&
+    Feature.disabled?(:sidebar_refactor, current_user) &&
       can_destroy_container_registry_image?(current_user, project)
   end
 
   def settings_packages_and_registries_enabled?(project)
-    Feature.enabled?(:sidebar_refactor) &&
+    Feature.enabled?(:sidebar_refactor, current_user) &&
       can_destroy_container_registry_image?(current_user, project)
   end
 

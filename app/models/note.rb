@@ -107,6 +107,7 @@ class Note < ApplicationRecord
   scope :fresh, -> { order_created_asc.with_order_id_asc }
   scope :updated_after, ->(time) { where('updated_at > ?', time) }
   scope :with_updated_at, ->(time) { where(updated_at: time) }
+  scope :with_suggestions, -> { joins(:suggestions) }
   scope :inc_author_project, -> { includes(:project, :author) }
   scope :inc_author, -> { includes(:author) }
   scope :with_api_entity_associations, -> { preload(:note_diff_file, :author) }
@@ -495,7 +496,7 @@ class Note < ApplicationRecord
     noteable&.expire_note_etag_cache
   end
 
-  def touch(*args)
+  def touch(*args, **kwargs)
     # We're not using an explicit transaction here because this would in all
     # cases result in all future queries going to the primary, even if no writes
     # are performed.

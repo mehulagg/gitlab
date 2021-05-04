@@ -10,8 +10,8 @@ localVue.use(Vuex);
 describe('Filter component', () => {
   const projectId = 1;
   const jobs = [
-    { ref: 'master', name: 'fuzz' },
-    { ref: 'master', name: 'fuzz 2' },
+    { ref: 'main', name: 'fuzz' },
+    { ref: 'main', name: 'fuzz 2' },
   ];
 
   let wrapper;

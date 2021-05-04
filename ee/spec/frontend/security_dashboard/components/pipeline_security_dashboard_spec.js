@@ -24,6 +24,8 @@ describe('Pipeline Security Dashboard component', () => {
   let store;
   let wrapper;
 
+  const findSecurityDashboard = () => wrapper.findComponent(SecurityDashboard);
+
   const factory = (options) => {
     store = new Vuex.Store({
       modules: {
@@ -85,12 +87,36 @@ describe('Pipeline Security Dashboard component', () => {
     });
 
     it('renders the security dashboard', () => {
-      const dashboard = wrapper.find(SecurityDashboard);
-      expect(dashboard.exists()).toBe(true);
-      expect(dashboard.props()).toMatchObject({
+      expect(findSecurityDashboard().props()).toMatchObject({
         pipelineId,
         vulnerabilitiesEndpoint,
       });
+    });
+  });
+
+  describe(':pipeline_security_dashboard_graphql feature flag', () => {
+    it('does not show the security layout when the feature flag is on', () => {
+      factory({
+        provide: {
+          glFeatures: {
+            pipelineSecurityDashboardGraphql: true,
+          },
+        },
+      });
+
+      expect(findSecurityDashboard().exists()).toBe(false);
+    });
+
+    it('shows the security layout when the feature flag is off', () => {
+      factory({
+        provide: {
+          glFeatures: {
+            pipelineSecurityDashboardGraphql: false,
+          },
+        },
+      });
+
+      expect(findSecurityDashboard().exists()).toBe(true);
     });
   });
 

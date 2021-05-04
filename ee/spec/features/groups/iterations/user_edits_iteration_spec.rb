@@ -8,6 +8,7 @@ RSpec.describe 'User views iteration' do
   let_it_be(:user) { create(:group_member, :maintainer, user: create(:user), group: group ).user }
   let_it_be(:guest_user) { create(:group_member, :guest, user: create(:user), group: group ).user }
   let_it_be(:iteration) { create(:iteration, :skip_future_date_validation, group: group, title: 'Correct Iteration', description: 'Iteration description', start_date: now - 1.day, due_date: now) }
+
   dropdown_selector = '[data-testid="actions-dropdown"]'
 
   context 'with license' do

@@ -69,6 +69,7 @@ export default {
       'isLoadingValueStreams',
       'selectedStageError',
       'selectedValueStream',
+      'pagination',
     ]),
     // NOTE: formEvents are fetched in the same request as the list of stages (fetchGroupStagesAndEvents)
     // so i think its ok to bind formEvents here even though its only used as a prop to the custom-stage-form
@@ -156,6 +157,7 @@ export default {
       'removeStage',
       'updateStage',
       'reorderStage',
+      'updateStageTablePagination',
     ]),
     ...mapActions('customStages', ['hideForm', 'showCreateForm', 'showEditForm', 'createStage']),
     onProjectsSelect(projects) {
@@ -190,9 +192,11 @@ export default {
     onStageReorder(data) {
       this.reorderStage(data);
     },
+    onHandleSelectPage(data) {
+      this.updateStageTablePagination(data);
+    },
   },
   multiProjectSelect: true,
-  dateOptions: [7, 30, 90],
   maxDateRange: DATE_RANGE_LIMIT,
 };
 </script>
@@ -279,9 +283,11 @@ export default {
             v-if="!isLoading && !isOverviewStageSelected"
             :is-loading="isLoading || isLoadingStage"
             :stage-events="currentStageEvents"
-            :current-stage="selectedStage"
+            :selected-stage="selectedStage"
             :empty-state-message="selectedStageError"
             :no-data-svg-path="noDataSvgPath"
+            :pagination="pagination"
+            @handleSelectPage="onHandleSelectPage"
           />
         </template>
         <stage-table

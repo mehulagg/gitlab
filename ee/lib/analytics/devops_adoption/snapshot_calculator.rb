@@ -108,7 +108,7 @@ module Analytics
         return unless Feature.enabled?(:analytics_devops_adoption_codeowners, segment.namespace, default_enabled: :yaml)
 
         snapshot_projects.count do |project|
-          !Gitlab::CodeOwners::Loader.new(project, project.default_branch).empty_code_owners?
+          !Gitlab::CodeOwners::Loader.new(project, project.default_branch || 'HEAD').empty_code_owners?
         end
       end
     end

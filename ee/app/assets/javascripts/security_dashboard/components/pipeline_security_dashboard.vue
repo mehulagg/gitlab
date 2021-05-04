@@ -3,6 +3,7 @@ import { GlEmptyState } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import { fetchPolicies } from '~/lib/graphql';
 import { s__ } from '~/locale';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import pipelineSecurityReportSummaryQuery from '../graphql/queries/pipeline_security_report_summary.query.graphql';
 import SecurityDashboard from './security_dashboard_vuex.vue';
 import SecurityReportsSummary from './security_reports_summary.vue';
@@ -14,6 +15,7 @@ export default {
     SecurityReportsSummary,
     SecurityDashboard,
   },
+  mixins: [glFeatureFlagMixin()],
   apollo: {
     securityReportSummary: {
       query: pipelineSecurityReportSummaryQuery,
@@ -75,6 +77,9 @@ export default {
     },
   },
   computed: {
+    shouldShowGraphqlVulnerabilityReport() {
+      return this.glFeatures.pipelineSecurityDashboardGraphql;
+    },
     emptyStateProps() {
       return {
         svgPath: this.emptyStateSvgPath,
@@ -107,6 +112,7 @@ export default {
       class="gl-my-5"
     />
     <security-dashboard
+      v-if="!shouldShowGraphqlVulnerabilityReport"
       :vulnerabilities-endpoint="vulnerabilitiesEndpoint"
       :lock-to-project="{ id: projectId }"
       :pipeline-id="pipelineId"

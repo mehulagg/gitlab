@@ -19,6 +19,10 @@ RSpec.describe Analytics::DevopsAdoption::Segments::BulkFindOrCreateService do
 
   subject(:response) { described_class.new(params: params, current_user: current_user).execute }
 
+  before do
+    stub_licensed_features(group_level_devops_adoption: true, instance_level_devops_adoption: true)
+  end
+
   it 'authorizes for manage_devops_adoption' do
     expect(::Ability).to receive(:allowed?)
                            .with(current_user, :manage_devops_adoption_segments, group)

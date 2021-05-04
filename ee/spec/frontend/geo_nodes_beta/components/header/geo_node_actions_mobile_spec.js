@@ -1,16 +1,8 @@
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeActionsMobile from 'ee/geo_nodes_beta/components/header/geo_node_actions_mobile.vue';
-import {
-  MOCK_NODES,
-  MOCK_PRIMARY_VERSION,
-  MOCK_REPLICABLE_TYPES,
-} from 'ee_jest/geo_nodes_beta/mock_data';
+import { MOCK_NODES } from 'ee_jest/geo_nodes_beta/mock_data';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-
-const localVue = createLocalVue();
-localVue.use(Vuex);
 
 describe('GeoNodeActionsMobile', () => {
   let wrapper;
@@ -19,20 +11,9 @@ describe('GeoNodeActionsMobile', () => {
     node: MOCK_NODES[0],
   };
 
-  const createComponent = (initialState, props) => {
-    const store = new Vuex.Store({
-      state: {
-        primaryVersion: MOCK_PRIMARY_VERSION.version,
-        primaryRevision: MOCK_PRIMARY_VERSION.revision,
-        replicableTypes: MOCK_REPLICABLE_TYPES,
-        ...initialState,
-      },
-    });
-
+  const createComponent = (props) => {
     wrapper = extendedWrapper(
       shallowMount(GeoNodeActionsMobile, {
-        localVue,
-        store,
         propsData: {
           ...defaultProps,
           ...props,
@@ -86,7 +67,7 @@ describe('GeoNodeActionsMobile', () => {
       ${false} | ${undefined} | ${'gl-text-red-500'}
     `(`conditionally`, ({ primary, disabled, dropdownClass }) => {
       beforeEach(() => {
-        createComponent(null, { node: { primary } });
+        createComponent({ node: { primary } });
       });
 
       describe(`when primary is ${primary}`, () => {

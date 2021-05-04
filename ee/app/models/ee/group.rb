@@ -106,6 +106,8 @@ module EE
         joins("INNER JOIN (#{epics_query.to_sql}) as epics on epics.group_id = namespaces.id")
       end
 
+      scope :user_is_member, -> (user) { id_in(user.authorized_groups(with_minimal_access: false)) }
+
       state_machine :ldap_sync_status, namespace: :ldap_sync, initial: :ready do
         state :ready
         state :started

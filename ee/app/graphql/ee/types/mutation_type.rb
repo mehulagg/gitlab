@@ -44,6 +44,7 @@ module EE
         mount_mutation ::Mutations::Boards::EpicBoards::EpicMoveList
         mount_mutation ::Mutations::Boards::EpicBoards::Update
         mount_mutation ::Mutations::Boards::EpicLists::Create
+        mount_mutation ::Mutations::Boards::EpicLists::Destroy
         mount_mutation ::Mutations::Boards::EpicLists::Update
         mount_mutation ::Mutations::Boards::Lists::UpdateLimitMetrics
         mount_mutation ::Mutations::InstanceSecurityDashboard::AddProject

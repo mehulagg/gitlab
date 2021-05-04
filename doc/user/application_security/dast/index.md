@@ -471,7 +471,7 @@ include:
   - template: DAST.gitlab-ci.yml
 
 variables:
-  DAST_API_SPECIFICATION: http://my.api/api-specification.yml
+  DAST_API_OPENAPI: http://my.api/api-specification.yml
 ```
 
 #### Import API specification from a file
@@ -486,7 +486,7 @@ dast:
     - cp api-specification.yml /zap/wrk/api-specification.yml
   variables:
     GIT_STRATEGY: fetch
-    DAST_API_SPECIFICATION: api-specification.yml
+    DAST_API_OPENAPI: api-specification.yml
 ```
 
 #### Full API scan
@@ -522,7 +522,7 @@ include:
   - template: DAST.gitlab-ci.yml
 
 variables:
-  DAST_API_SPECIFICATION: http://api-test.host.com/api-specification.yml
+  DAST_API_OPENAPI: http://api-test.host.com/api-specification.yml
   DAST_API_HOST_OVERRIDE: api-test.host.com
 ```
 
@@ -537,7 +537,7 @@ include:
   - template: DAST.gitlab-ci.yml
 
 variables:
-  DAST_API_SPECIFICATION: http://api-test.api.com/api-specification.yml
+  DAST_API_OPENAPI: http://api-test.api.com/api-specification.yml
   DAST_REQUEST_HEADERS: "Authorization: Bearer my.token"
 ```
 
@@ -610,6 +610,38 @@ When using `DAST_PATHS` and `DAST_PATHS_FILE`, note the following:
 
 To perform a [full scan](#full-scan) on the listed paths, use the `DAST_FULL_SCAN_ENABLED` CI/CD variable.
 
+### View details of a vulnerability detected by DAST
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36332) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+
+Vulnerabilities detected by DAST occur in the live web application. Addressing these types of
+vulnerabilities requires specific information. DAST provides the information required to
+investigate and rectify the underlying cause.
+
+To view details of vulnerabilities detected by DAST:
+
+1. To see all vulnerabilities detected, either:
+   - Go to your project and select **Security & Compliance**.
+   - Go to the merge request and select the **Security** tab.
+
+1. Select a vulnerability's description. The following details are provided:
+
+   | Field            | Description                                                        |
+   |:-----------------|:------------------------------------------------------------------ |
+   | Description      | Description of the vulnerability.                                  |
+   | Project          | Namespace and project in which the vulnerability was detected.     |
+   | Method           | HTTP method used to detect the vulnerability.                      |
+   | URL              | URL at which the vulnerability was detected.                       |
+   | Request Headers  | Headers of the request.                                            |
+   | Response Status  | Response status received from the application.                     |
+   | Response Headers | Headers of the response received from the application.             |
+   | Evidence         | Evidence of the data found that verified the vulnerability. Often a snippet of the request or response, this can be used to help verify that the finding is a vulnerability. |
+   | Identifiers      | Identifiers of the vulnerability.                                  |
+   | Severity         | Severity of the vulnerability.                                     |
+   | Scanner Type     | Type of vulnerability report.                                      |
+   | Links            | Links to further details of the detected vulnerability.            |
+   | Solution         | Details of a recommended solution to the vulnerability (optional). |
+
 ### Customizing the DAST settings
 
 WARNING:
@@ -641,8 +673,9 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | CI/CD variable               | Type    | Description |
 |------------------------------| --------|-------------|
 | `SECURE_ANALYZERS_PREFIX`    | URL     | Set the Docker registry base address from which to download the analyzer. |
-| `DAST_WEBSITE`               | URL     | The URL of the website to scan. `DAST_API_SPECIFICATION` must be specified if this is omitted. |
-| `DAST_API_SPECIFICATION`     | URL or string | The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
+| `DAST_WEBSITE`               | URL     | The URL of the website to scan. `DAST_API_OPENAPI` must be specified if this is omitted. |
+| `DAST_API_OPENAPI`           | URL or string | The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
+| `DAST_API_SPECIFICATION`     | URL or string | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/290241) in GitLab 13.12 and replaced by `DAST_API_OPENAPI`. To be removed in GitLab 15.0. The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
 | `DAST_SPIDER_START_AT_HOST`  | boolean | Set to `false` to prevent DAST from resetting the target to its host before scanning. When `true`, non-host targets `http://test.site/some_path` is reset to `http://test.site` before scan. Default: `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/258805) in GitLab 13.6. |
 | `DAST_AUTH_URL`              | URL     | The URL of the page containing the sign-in HTML form on the target website. `DAST_USERNAME` and `DAST_PASSWORD` are submitted with the login form to create an authenticated scan. Not supported for API scans. |
 | `DAST_AUTH_VERIFICATION_URL`   | URL     | A URL only accessible to logged in users that DAST can use to confirm successful authentication. If provided, DAST will exit if it cannot access the URL. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207335) in GitLab 13.8.
@@ -658,6 +691,7 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_AUTO_UPDATE_ADDONS`    | boolean | ZAP add-ons are pinned to specific versions in the DAST Docker image. Set to `true` to download the latest versions when the scan starts. Default: `false` |
 | `DAST_API_HOST_OVERRIDE`     | string  | Used to override domains defined in API specification files. Only supported when importing the API specification from a URL. Example: `example.com:8080` |
 | `DAST_EXCLUDE_RULES`         | string  | Set to a comma-separated list of Vulnerability Rule IDs to exclude them from running during the scan. Rule IDs are numbers and can be found from the DAST log or on the [ZAP project](https://github.com/zaproxy/zaproxy/blob/develop/docs/scanners.md). For example, `HTTP Parameter Override` has a rule ID of `10026`. **Note:** In earlier versions of GitLab the excluded rules were executed but alerts they generated were suppressed. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118641) in GitLab 12.10. |
+| `DAST_ONLY_INCLUDE_RULES`    | string  | Set to a comma-separated list of Vulnerability Rule IDs to configure the scan to run only them. Rule IDs are numbers and can be found from the DAST log or on the [ZAP project](https://github.com/zaproxy/zaproxy/blob/develop/docs/scanners.md). [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250651) in GitLab 13.12. |
 | `DAST_REQUEST_HEADERS`       | string  | Set to a comma-separated list of request header names and values. Headers are added to every request made by DAST. For example, `Cache-control: no-cache,User-Agent: DAST/1.0` |
 | `DAST_DEBUG`                 | boolean | Enable debug message output. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
 | `DAST_SPIDER_MINS`           | number  | The maximum duration of the spider scan in minutes. Set to `0` for unlimited. Default: One minute, or unlimited when the scan is a full scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
@@ -794,9 +828,9 @@ For DAST, import the following default DAST analyzer image from `registry.gitlab
 
 The process for importing Docker images into a local offline Docker registry depends on
 **your network security policy**. Please consult your IT staff to find an accepted and approved
-process by which external resources can be imported or temporarily accessed. Note
-that these scanners are [updated periodically](../index.md#maintenance-and-update-of-the-vulnerabilities-database)
-with new definitions, so consider if you're able to make periodic updates yourself.
+process by which external resources can be imported or temporarily accessed.
+These scanners are [periodically updated](../vulnerabilities/index.md#vulnerability-scanner-maintenance)
+with new definitions, and you may be able to make occasional updates on your own.
 
 For details on saving and transporting Docker images as a file, see Docker's documentation on
 [`docker save`](https://docs.docker.com/engine/reference/commandline/save/),

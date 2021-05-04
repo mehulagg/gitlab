@@ -183,4 +183,7 @@ export default {
         return aName.toUpperCase() > bName.toUpperCase() ? 1 : -1;
       });
   },
+  [types.SET_PAGINATION](state, { page, hasNextPage }) {
+    state.pagination = { page, hasNextPage };
+  },
 };

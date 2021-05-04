@@ -253,7 +253,7 @@ RSpec.describe GroupsHelper do
       it 'returns the expected value' do
         allow(helper).to receive(:current_user) { user? ? owner : nil }
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
-        allow(group).to receive(:feature_available?) { security_dashboard_feature_available? }
+        allow(group).to receive(:licensed_feature_available?) { security_dashboard_feature_available? }
         allow(helper).to receive(:can?) { can_admin_group? }
 
         expected_value = user? && gitlab_com? && !security_dashboard_feature_available? && can_admin_group?

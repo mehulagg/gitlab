@@ -5,8 +5,11 @@ module Packages
     class ExtractionWorker # rubocop:disable Scalability/IdempotentWorker
       include ApplicationWorker
 
+      sidekiq_options retry: 3
+
       queue_namespace :package_repositories
       feature_category :package_registry
+      tags :exclude_from_kubernetes
       deduplicate :until_executing
 
       idempotent!

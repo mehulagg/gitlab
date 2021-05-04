@@ -16,6 +16,8 @@ import {
   transformedStagePathData,
   issueStage,
   stageMedians,
+  basePaginationResult,
+  initialPaginationState,
 } from '../mock_data';
 
 let state = null;
@@ -216,6 +218,26 @@ describe('Value Stream Analytics getters', () => {
       };
 
       expect(getters.pathNavigationData(state)).toEqual(transformedStagePathData);
+    });
+  });
+
+  describe('paginationParams', () => {
+    beforeEach(() => {
+      state = { pagination: initialPaginationState };
+    });
+
+    it('returns the `pagination` type', () => {
+      expect(getters.paginationParams(state)).toEqual(basePaginationResult);
+    });
+
+    it('returns the `sort` type', () => {
+      expect(getters.paginationParams(state)).toEqual(basePaginationResult);
+    });
+
+    it('with page=10, sets the `page` property', () => {
+      const page = 10;
+      state = { pagination: { ...initialPaginationState, page } };
+      expect(getters.paginationParams(state)).toEqual({ ...basePaginationResult, page });
     });
   });
 });

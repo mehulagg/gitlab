@@ -48,7 +48,7 @@ const deleteScheduleFromStore = (store, query, { oncallScheduleDestroy }, variab
 
   const data = produce(sourceData, (draftData) => {
     draftData.project.incidentManagementOncallSchedules.nodes = draftData.project.incidentManagementOncallSchedules.nodes.filter(
-      ({ id }) => id !== schedule.id,
+      ({ iid }) => iid !== schedule.iid,
     );
   });
 

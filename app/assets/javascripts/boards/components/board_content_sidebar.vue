@@ -4,12 +4,13 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
-import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import BoardSidebarTimeTracker from '~/boards/components/sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
+import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
+import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
@@ -18,10 +19,11 @@ export default {
     GlDrawer,
     BoardSidebarTitle,
     SidebarAssigneesWidget,
+    SidebarConfidentialityWidget,
     BoardSidebarTimeTracker,
     BoardSidebarLabelsSelect,
     BoardSidebarDueDate,
-    BoardSidebarSubscription,
+    SidebarSubscriptionsWidget,
     BoardSidebarMilestoneSelect,
     BoardSidebarEpicSelect: () =>
       import('ee_component/boards/components/sidebar/board_sidebar_epic_select.vue'),
@@ -50,7 +52,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['toggleBoardItem', 'setAssignees']),
+    ...mapActions(['toggleBoardItem', 'setAssignees', 'setActiveItemConfidential']),
     handleClose() {
       this.toggleBoardItem({ boardItem: this.activeBoardItem, sidebarType: this.sidebarType });
     },
@@ -90,7 +92,18 @@ export default {
       <board-sidebar-due-date />
       <board-sidebar-labels-select class="labels" />
       <board-sidebar-weight-input v-if="glFeatures.issueWeights" class="weight" />
-      <board-sidebar-subscription class="subscriptions" />
+      <sidebar-confidentiality-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+        @confidentialityUpdated="setActiveItemConfidential($event)"
+      />
+      <sidebar-subscriptions-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+        data-testid="sidebar-notifications"
+      />
     </template>
   </gl-drawer>
 </template>

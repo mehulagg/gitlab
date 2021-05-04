@@ -13,6 +13,10 @@ RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
 
   subject(:response) { described_class.new(params: params, current_user: current_user).execute }
 
+  before do
+    stub_licensed_features(group_level_devops_adoption: true, instance_level_devops_adoption: true)
+  end
+
   it 'persists the segment' do
     expect(response).to be_success
     expect(segment.namespace).to eq(group)

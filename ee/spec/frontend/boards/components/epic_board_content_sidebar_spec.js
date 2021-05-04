@@ -6,6 +6,7 @@ import { stubComponent } from 'helpers/stub_component';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import { ISSUABLE } from '~/boards/constants';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
+import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
 import { mockEpic } from '../mock_data';
 
 describe('EpicBoardContentSidebar', () => {
@@ -78,6 +79,10 @@ describe('EpicBoardContentSidebar', () => {
 
   it('renders SidebarConfidentialityWidget', () => {
     expect(wrapper.find(SidebarConfidentialityWidget).exists()).toBe(true);
+  });
+
+  it('renders SidebarSubscriptionsWidget', () => {
+    expect(wrapper.find(SidebarSubscriptionsWidget).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

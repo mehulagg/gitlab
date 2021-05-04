@@ -84,7 +84,7 @@ export default {
         ? without(this.selectedOptions, ...options)
         : union(this.selectedOptions, options);
 
-      this.updateRouteQuery();
+      this.updateQuerystring();
     },
   },
 };

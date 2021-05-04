@@ -14,7 +14,7 @@ module EE
             logger.log_timed(LOG_MESSAGE) do
               unless branch_name_allowed_by_push_rule?
                 message = ERROR_MESSAGE % { branch_name_regex: push_rule.branch_name_regex }
-                raise ::Gitlab::GitAccess::ForbiddenError.new(message)
+                raise ::Gitlab::GitAccess::ForbiddenError, message
               end
             end
 

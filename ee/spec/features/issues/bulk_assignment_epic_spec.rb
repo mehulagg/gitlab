@@ -8,6 +8,7 @@ RSpec.describe 'Issues > Epic bulk assignment', :js do
   let_it_be(:project) { create(:project, :public, group: group) }
   let_it_be(:issue1) { create(:issue, project: project, title: "Issue 1") }
   let_it_be(:issue2) { create(:issue, project: project, title: "Issue 2") }
+
   let!(:epic1) { create(:epic, group: group) }
 
   context 'as an allowed user', :js do

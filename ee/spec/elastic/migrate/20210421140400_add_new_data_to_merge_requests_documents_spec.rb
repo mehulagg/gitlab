@@ -10,6 +10,7 @@ RSpec.describe AddNewDataToMergeRequestsDocuments, :elastic, :sidekiq_inline do
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
+    set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
 
     # ensure merge_requests are indexed
     merge_requests
@@ -20,7 +21,7 @@ RSpec.describe AddNewDataToMergeRequestsDocuments, :elastic, :sidekiq_inline do
   describe 'migration_options' do
     it 'has migration options set', :aggregate_failures do
       expect(migration.batched?).to be_truthy
-      expect(migration.throttle_delay).to eq(5.minutes)
+      expect(migration.throttle_delay).to eq(3.minutes)
     end
   end
 
@@ -33,7 +34,7 @@ RSpec.describe AddNewDataToMergeRequestsDocuments, :elastic, :sidekiq_inline do
       end
 
       it 'does not modify data', :aggregate_failures do
-        expect(::Elastic::ProcessBookkeepingService).not_to receive(:track!)
+        expect(::Elastic::ProcessInitialBookkeepingService).not_to receive(:track!)
 
         subject
       end
@@ -46,7 +47,7 @@ RSpec.describe AddNewDataToMergeRequestsDocuments, :elastic, :sidekiq_inline do
 
       it 'updates all merge_request documents' do
         # track calls are batched in groups of 100
-        expect(::Elastic::ProcessBookkeepingService).to receive(:track!).once do |*tracked_refs|
+        expect(::Elastic::ProcessInitialBookkeepingService).to receive(:track!).once do |*tracked_refs|
           expect(tracked_refs.count).to eq(3)
         end
 
@@ -58,7 +59,7 @@ RSpec.describe AddNewDataToMergeRequestsDocuments, :elastic, :sidekiq_inline do
         add_visibility_level_for_merge_requests(merge_requests[1..-1])
 
         expected = [Gitlab::Elastic::DocumentReference.new(MergeRequest, merge_request.id, merge_request.es_id, merge_request.es_parent)]
-        expect(::Elastic::ProcessBookkeepingService).to receive(:track!).with(*expected).once
+        expect(::Elastic::ProcessInitialBookkeepingService).to receive(:track!).with(*expected).once
 
         subject
       end
@@ -67,7 +68,7 @@ RSpec.describe AddNewDataToMergeRequestsDocuments, :elastic, :sidekiq_inline do
         stub_const("#{described_class}::QUERY_BATCH_SIZE", 2)
         stub_const("#{described_class}::UPDATE_BATCH_SIZE", 1)
 
-        expect(::Elastic::ProcessBookkeepingService).to receive(:track!).exactly(3).times.and_call_original
+        expect(::Elastic::ProcessInitialBookkeepingService).to receive(:track!).exactly(3).times.and_call_original
 
         # cannot use subject in spec because it is memoized
         migration.migrate

@@ -11,20 +11,12 @@ describe('TimeMetricsCard', () => {
   const { full_path: groupPath } = group;
   let wrapper;
 
-  const template = `
-    <div slot-scope="{ metrics }">
-      <span v-for="metric in metrics">{{metric.value}} {{metric.unit}}</span>
-    </div>`;
-
   const createComponent = ({ additionalParams = {}, requestType } = {}) => {
     return shallowMount(TimeMetricsCard, {
       propsData: {
         groupPath,
         additionalParams,
         requestType,
-      },
-      scopedSlots: {
-        default: template,
       },
     });
   };

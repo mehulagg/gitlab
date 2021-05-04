@@ -1,20 +1,14 @@
-import { GlLink, GlButton, GlLoadingIcon, GlModal } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlLink, GlButton, GlLoadingIcon, GlModal, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import GeoNodesBetaApp from 'ee/geo_nodes_beta/components/app.vue';
 import GeoNodes from 'ee/geo_nodes_beta/components/geo_nodes.vue';
 import GeoNodesEmptyState from 'ee/geo_nodes_beta/components/geo_nodes_empty_state.vue';
 import { GEO_INFO_URL } from 'ee/geo_nodes_beta/constants';
-import {
-  MOCK_PRIMARY_VERSION,
-  MOCK_REPLICABLE_TYPES,
-  MOCK_NODES,
-  MOCK_NEW_NODE_URL,
-  MOCK_EMPTY_STATE_SVG,
-} from '../mock_data';
+import { MOCK_NODES, MOCK_NEW_NODE_URL, MOCK_EMPTY_STATE_SVG } from '../mock_data';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('GeoNodesBetaApp', () => {
   let wrapper;
@@ -33,21 +27,18 @@ describe('GeoNodesBetaApp', () => {
   const createComponent = (initialState, props) => {
     const store = new Vuex.Store({
       state: {
-        primaryVersion: MOCK_PRIMARY_VERSION.version,
-        primaryRevision: MOCK_PRIMARY_VERSION.revision,
-        replicableTypes: MOCK_REPLICABLE_TYPES,
         ...initialState,
       },
       actions: actionSpies,
     });
 
     wrapper = shallowMount(GeoNodesBetaApp, {
-      localVue,
       store,
       propsData: {
         ...defaultProps,
         ...props,
       },
+      stubs: { GlSprintf },
     });
   };
 

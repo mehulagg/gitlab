@@ -170,6 +170,31 @@ RSpec.describe ApplicationSettings::UpdateService do
             end
           end
         end
+
+        context 'setting number_of_shards and number_of_replicas' do
+          let(:alias_name) { 'alias-name' }
+
+          it 'accepts hash values' do
+            opts = { elasticsearch_shards: { alias_name => 10 }, elasticsearch_replicas: { alias_name => 2 } }
+
+            described_class.new(setting, user, opts).execute
+
+            setting = Elastic::IndexSetting[alias_name]
+            expect(setting.number_of_shards).to eq(10)
+            expect(setting.number_of_replicas).to eq(2)
+          end
+
+          it 'accepts legacy (integer) values' do
+            opts = { elasticsearch_shards: 32, elasticsearch_replicas: 3 }
+
+            described_class.new(setting, user, opts).execute
+
+            Elastic::IndexSetting.every_alias do |setting|
+              expect(setting.number_of_shards).to eq(32)
+              expect(setting.number_of_replicas).to eq(3)
+            end
+          end
+        end
       end
     end
 

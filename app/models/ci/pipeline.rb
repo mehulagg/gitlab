@@ -908,7 +908,7 @@ module Ci
 
     def same_family_pipeline_ids
       ::Gitlab::Ci::PipelineObjectHierarchy.new(
-        self.class.where(id: root_ancestor), options: { same_project: true }
+        self.class.default_scoped.where(id: root_ancestor), options: { same_project: true }
       ).base_and_descendants.select(:id)
     end
 
@@ -1076,6 +1076,14 @@ module Ci
       complete? && builds.latest.with_exposed_artifacts.exists?
     end
 
+    def has_downloadable_artifacts?
+      if downloadable_artifacts.loaded?
+        downloadable_artifacts.any?
+      else
+        downloadable_artifacts.exists?
+      end
+    end
+
     def branch_updated?
       strong_memoize(:branch_updated) do
         push_details.branch_updated?
@@ -1210,11 +1218,18 @@ module Ci
     # We need `base_and_ancestors` in a specific order to "break" when needed.
     # If we use `find_each`, then the order is broken.
     # rubocop:disable Rails/FindEach
-    def reset_ancestor_bridges!
-      base_and_ancestors.includes(:source_bridge).each do |pipeline|
-        break unless pipeline.bridge_waiting?
+    def reset_source_bridge!(current_user)
+      if ::Feature.enabled?(:ci_reset_bridge_with_subsequent_jobs, project, default_enabled: :yaml)
+        return unless bridge_waiting?
 
-        pipeline.source_bridge.pending!
+        source_bridge.pending!
+        Ci::AfterRequeueJobService.new(project, current_user).execute(source_bridge) # rubocop:disable CodeReuse/ServiceClass
+      else
+        base_and_ancestors.includes(:source_bridge).each do |pipeline|
+          break unless pipeline.bridge_waiting?
+
+          pipeline.source_bridge.pending!
+        end
       end
     end
     # rubocop:enable Rails/FindEach

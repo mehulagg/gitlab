@@ -1,18 +1,14 @@
-import { GlPopover, GlLink, GlIcon } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { GlPopover, GlLink, GlIcon, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeLastUpdated from 'ee/geo_nodes_beta/components/header/geo_node_last_updated.vue';
 import {
   HELP_NODE_HEALTH_URL,
   GEO_TROUBLESHOOTING_URL,
   STATUS_DELAY_THRESHOLD_MS,
 } from 'ee/geo_nodes_beta/constants';
-import { MOCK_PRIMARY_VERSION, MOCK_REPLICABLE_TYPES } from 'ee_jest/geo_nodes_beta/mock_data';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
-
-const localVue = createLocalVue();
-localVue.use(Vuex);
+import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 
 describe('GeoNodeLastUpdated', () => {
   let wrapper;
@@ -25,24 +21,14 @@ describe('GeoNodeLastUpdated', () => {
     statusCheckTimestamp: staleStatusTime,
   };
 
-  const createComponent = (initialState, props) => {
-    const store = new Vuex.Store({
-      state: {
-        primaryVersion: MOCK_PRIMARY_VERSION.version,
-        primaryRevision: MOCK_PRIMARY_VERSION.revision,
-        replicableTypes: MOCK_REPLICABLE_TYPES,
-        ...initialState,
-      },
-    });
-
+  const createComponent = (props) => {
     wrapper = extendedWrapper(
       shallowMount(GeoNodeLastUpdated, {
-        localVue,
-        store,
         propsData: {
           ...defaultProps,
           ...props,
         },
+        stubs: { GlSprintf },
       }),
     );
   };
@@ -65,7 +51,9 @@ describe('GeoNodeLastUpdated', () => {
 
       it('renders main text correctly', () => {
         expect(findMainText().exists()).toBe(true);
-        expect(findMainText().text()).toBe('Updated 10 minutes ago');
+        expect(findMainText().find(TimeAgo).props('time')).toBe(
+          new Date(staleStatusTime).toString(),
+        );
       });
 
       it('renders the question icon correctly', () => {
@@ -79,7 +67,9 @@ describe('GeoNodeLastUpdated', () => {
 
       it('renders the popover text correctly', () => {
         expect(findPopoverText().exists()).toBe(true);
-        expect(findPopoverText().text()).toBe("Node's status was updated 10 minutes ago.");
+        expect(findPopoverText().find(TimeAgo).props('time')).toBe(
+          new Date(staleStatusTime).toString(),
+        );
       });
 
       it('renders the popover link always', () => {
@@ -95,7 +85,7 @@ describe('GeoNodeLastUpdated', () => {
     });
 
     it('when sync is not stale popover link renders correctly', () => {
-      createComponent(null, { statusCheckTimestamp: nonStaleStatusTime });
+      createComponent({ statusCheckTimestamp: nonStaleStatusTime });
 
       expect(findPopoverLink().text()).toBe('Learn more about Geo node statuses');
       expect(findPopoverLink().attributes('href')).toBe(HELP_NODE_HEALTH_URL);

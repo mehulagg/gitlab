@@ -6,8 +6,8 @@ import {
   GlButton,
   GlLabel,
   GlLink,
-  GlLoadingIcon,
   GlPagination,
+  GlSkeletonLoader,
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
@@ -18,12 +18,15 @@ import { Namespace } from '../constants';
 import iterationIssuesQuery from '../queries/iteration_issues.query.graphql';
 import iterationIssuesWithLabelFilterQuery from '../queries/iteration_issues_with_label_filter.query.graphql';
 
+const skeletonLoaderLimit = 5;
+
 const states = {
   opened: 'opened',
   closed: 'closed',
 };
 
 export default {
+  skeletonLoaderLimit,
   fields: [
     {
       key: 'title',
@@ -50,8 +53,8 @@ export default {
     GlButton,
     GlLabel,
     GlLink,
-    GlLoadingIcon,
     GlPagination,
+    GlSkeletonLoader,
     GlTable,
   },
   directives: {
@@ -252,7 +255,11 @@ export default {
       </gl-badge>
     </div>
 
-    <gl-loading-icon v-show="$apollo.queries.issues.loading" class="gl-my-9" size="md" />
+    <div v-show="$apollo.queries.issues.loading">
+      <div v-for="n in $options.skeletonLoaderLimit" :key="n" class="gl-mx-5 gl-my-6">
+        <gl-skeleton-loader />
+      </div>
+    </div>
     <gl-table
       v-show="shouldShowTable"
       :items="issues.list"

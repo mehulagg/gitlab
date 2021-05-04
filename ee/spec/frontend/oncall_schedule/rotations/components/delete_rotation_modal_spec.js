@@ -13,7 +13,6 @@ import {
   getOncallSchedulesQueryResponse,
   destroyRotationResponse,
   destroyRotationResponseWithErrors,
-  scheduleIid,
 } from '../../mocks/apollo_mock';
 import mockRotations from '../../mocks/mock_rotation.json';
 
@@ -22,6 +21,8 @@ const projectPath = 'group/project';
 const mutate = jest.fn();
 const mockHideModal = jest.fn();
 const rotation = mockRotations[0];
+const schedule =
+  getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
 describe('DeleteRotationModal', () => {
   let wrapper;
@@ -51,7 +52,7 @@ describe('DeleteRotationModal', () => {
       },
       propsData: {
         modalId: deleteRotationModalId,
-        scheduleIid,
+        schedule,
         rotation,
         ...props,
       },
@@ -95,7 +96,7 @@ describe('DeleteRotationModal', () => {
       propsData: {
         rotation,
         modalId: deleteRotationModalId,
-        scheduleIid,
+        schedule,
       },
       provide: {
         projectPath,
@@ -128,7 +129,7 @@ describe('DeleteRotationModal', () => {
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
         update: expect.anything(),
-        variables: { id: rotation.id, projectPath, scheduleIid },
+        variables: { id: rotation.id, projectPath, scheduleIid: schedule.iid },
       });
     });
 

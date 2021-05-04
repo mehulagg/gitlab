@@ -78,6 +78,8 @@ describe('Value Stream Analytics mutations', () => {
     stages: [{}, { name: "Can't be blank" }, {}, {}, {}, {}, {}, {}],
   };
 
+  const pagination = { page: 10, hasNextPage: true };
+
   it.each`
     mutation                                     | payload                       | expectedState
     ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }} | ${{ featureFlags: { hasDurationChart: true } }}
@@ -91,6 +93,7 @@ describe('Value Stream Analytics mutations', () => {
     ${types.SET_SELECTED_VALUE_STREAM}           | ${valueStreams[1].id}         | ${{ selectedValueStream: {} }}
     ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}            | ${{ selectedValueStream: valueStreams[1] }}
     ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}            | ${{ selectedValueStream: valueStreams[1] }}
+    ${types.SET_PAGINATION}                      | ${pagination}                 | ${{ pagination }}
   `(
     '$mutation with payload $payload will update state with $expectedState',
     ({ mutation, payload, expectedState }) => {

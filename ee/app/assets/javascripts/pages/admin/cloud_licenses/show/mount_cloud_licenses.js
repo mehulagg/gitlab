@@ -8,7 +8,12 @@ import CloudLicenseShowApp from '../components/app.vue';
 Vue.use(VueApollo);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      assumeImmutableResults: true,
+    },
+  ),
 });
 
 export default () => {

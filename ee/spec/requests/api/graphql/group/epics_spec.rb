@@ -179,12 +179,14 @@ RSpec.describe 'Epics through GroupQuery' do
 
         before do
           group.reload
-          post_graphql(query, current_user: user)
         end
 
         it 'avoids n+1 queries when loading parent field' do
+          # warm up
+          post_graphql(query({ iids: [epic.iid] }), current_user: user)
+
           control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
-            post_graphql(query, current_user: user)
+            post_graphql(query({ iids: [epic.iid] }), current_user: user)
           end.count
 
           epics_with_parent = create_list(:epic, 3, group: group) do |epic|
@@ -192,10 +194,10 @@ RSpec.describe 'Epics through GroupQuery' do
           end
           group.reload
 
-          # Added +1 to control_count due to an existing N+1 with licenses
+          # Added +5 to control_count due to an existing N+1 with licenses
           expect do
             post_graphql(query({ iids: epics_with_parent.pluck(:iid) }), current_user: user)
-          end.not_to exceed_all_query_limit(control_count + 1)
+          end.not_to exceed_all_query_limit(control_count + 5)
         end
       end
     end

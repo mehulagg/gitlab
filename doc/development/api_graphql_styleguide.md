@@ -79,7 +79,7 @@ Requests time out at 30 seconds.
 ## Breaking changes
 
 The GitLab GraphQL API is [versionless](https://graphql.org/learn/best-practices/#versioning) which means
-developers must familiarize themselves with our [deprecation cycle of breaking changes](#breaking-changes).
+developers must familiarize themselves with our [Deprecation and Removal process](../api/graphql/index.md#deprecation-and-removal-process).
 
 Breaking changes are:
 
@@ -770,6 +770,29 @@ argument :title, GraphQL::STRING_TYPE,
           description: copy_field_description(Types::MergeRequestType, :title)
 ```
 
+### Documentation references
+
+Sometimes we want to refer to external URLs in our descriptions. To make this
+easier, and provide proper markup in the generated reference documentation, we
+provide a `see` property on fields. For example:
+
+```ruby
+field :genus,
+      type: GraphQL::STRING_TYPE,
+      null: true,
+      description: 'A taxonomic genus.'
+      see: { 'Wikipedia page on genera' => 'https://wikipedia.org/wiki/Genus' }
+```
+
+This will render in our documentation as:
+
+```markdown
+A taxonomic genus. See: [Wikipedia page on genera](https://wikipedia.org/wiki/Genus)
+```
+
+Multiple documentation references can be provided. The syntax for this property
+is a `HashMap` where the keys are textual descriptions, and the values are URLs.
+
 ## Authorization
 
 See: [GraphQL Authorization](graphql_guide/authorization.md)
@@ -867,7 +890,7 @@ The main use case for this is one resolver to find all items, and another to
 find one specific one. For this, we supply convenience methods:
 
 - `BaseResolver.single`, which constructs a new resolver that selects the first item.
-- `BaseResolver.last`, with constructs a resolver that selects the last item.
+- `BaseResolver.last`, which constructs a resolver that selects the last item.
 
 The correct singular type is inferred from the collection type, so we don't have
 to define the `type` here.
@@ -973,7 +996,7 @@ end
 For this reason, whenever you call a resolver (mainly in tests - as framework
 abstractions Resolvers should not be considered re-usable, finders are to be
 preferred), remember to call the `ready?` method and check the boolean flag
-before calling `resolve`! An example can be seen in our [`GraphQLHelpers`](https://gitlab.com/gitlab-org/gitlab/-/blob/2d395f32d2efbb713f7bc861f96147a2a67e92f2/spec/support/helpers/graphql_helpers.rb#L20-27).
+before calling `resolve`! An example can be seen in our [`GraphqlHelpers`](https://gitlab.com/gitlab-org/gitlab/-/blob/2d395f32d2efbb713f7bc861f96147a2a67e92f2/spec/support/helpers/graphql_helpers.rb#L20-27).
 
 ### Look-Ahead
 
@@ -1161,7 +1184,7 @@ are returned as the result of the mutation.
 
 The service-oriented architecture in GitLab means that most mutations call a Create, Delete, or Update
 service, for example `UpdateMergeRequestService`.
-For Update mutations, a you might want to only update one aspect of an object, and thus only need a
+For Update mutations, you might want to only update one aspect of an object, and thus only need a
 _fine-grained_ mutation, for example `MergeRequest::SetWip`.
 
 It's acceptable to have both fine-grained mutations and coarse-grained mutations, but be aware

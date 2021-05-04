@@ -30,6 +30,28 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
         expect(all('tbody tr').count).to eq(3)
       end
     end
+
+    context 'seat usage details table' do
+      it 'expands the details on click' do
+        first('[data-testid="toggle-seat-usage-details"]').click
+
+        wait_for_requests
+
+        expect(page).to have_selector('[data-testid="seat-usage-details"]')
+      end
+
+      it 'hides the details table on click' do
+        # expand the details table first
+        first('[data-testid="toggle-seat-usage-details"]').click
+
+        wait_for_requests
+
+        # and collapse it
+        first('[data-testid="toggle-seat-usage-details"]').click
+
+        expect(page).not_to have_selector('[data-testid="seat-usage-details"]')
+      end
+    end
   end
 
   context 'when removing user' do

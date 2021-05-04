@@ -81,6 +81,50 @@ RSpec.describe 'Epic boards sidebar', :js do
     end
   end
 
+  context 'start date' do
+    it 'edits fixed start date' do
+      click_card(card)
+
+      wait_for_requests
+
+      page.within('[data-testid="start-date"]') do
+        edit_fixed_date
+      end
+    end
+
+    it 'removes fixed start date' do
+      click_card(card)
+
+      wait_for_requests
+
+      page.within('[data-testid="start-date"]') do
+        remove_fixed_date
+      end
+    end
+  end
+
+  context 'due date' do
+    it 'edits fixed due date' do
+      click_card(card)
+
+      wait_for_requests
+
+      page.within('[data-testid="due-date"]') do
+        edit_fixed_date
+      end
+    end
+
+    it 'removes fixed due date' do
+      click_card(card)
+
+      wait_for_requests
+
+      page.within('[data-testid="due-date"]') do
+        remove_fixed_date
+      end
+    end
+  end
+
   context 'labels' do
     it 'adds a single label' do
       click_card(card)
@@ -132,20 +176,26 @@ RSpec.describe 'Epic boards sidebar', :js do
     it 'displays notifications toggle', :aggregate_failures do
       click_card(card)
 
-      page.within('[data-testid="sidebar-notifications"]') do
+      page.within('.subscriptions') do
         expect(page).to have_button('Notifications')
-        expect(page).not_to have_content('Notifications have been disabled by the project or group owner')
+        expect(page).not_to have_content('Disabled by group owner')
       end
     end
 
     it 'shows toggle as on then as off as user toggles to subscribe and unsubscribe', :aggregate_failures do
       click_card(card)
 
+      wait_for_requests
+
       click_button 'Notifications'
+
+      wait_for_requests
 
       expect(page).to have_button('Notifications', class: 'is-checked')
 
       click_button 'Notifications'
+
+      wait_for_requests
 
       expect(page).not_to have_button('Notifications', class: 'is-checked')
     end
@@ -158,9 +208,9 @@ RSpec.describe 'Epic boards sidebar', :js do
       end
 
       it 'displays a message that notifications have been disabled' do
-        page.within('[data-testid="sidebar-notifications"]') do
-          expect(page).not_to have_selector('[data-testid="notification-subscribe-toggle"]')
-          expect(page).to have_content('Notifications have been disabled by the project or group owner')
+        page.within('.subscriptions') do
+          expect(page).to have_button('Notifications', class: 'is-disabled')
+          expect(page).to have_content('Disabled by group owner')
         end
       end
     end
@@ -172,5 +222,49 @@ RSpec.describe 'Epic boards sidebar', :js do
     wait_for_requests
 
     click_card(card)
+  end
+
+  def pick_a_date
+    click_button 'Edit'
+
+    expect(page).to have_selector('.gl-datepicker')
+    page.within('.pika-lendar') do
+      click_button '25'
+    end
+
+    wait_for_requests
+  end
+
+  def edit_fixed_date
+    page.within('[data-testid="sidebar-inherited-date"]') do
+      expect(find_field('Inherited:')).to be_checked
+    end
+
+    pick_a_date
+
+    page.within('[data-testid="sidebar-fixed-date"]') do
+      expect(find('[data-testid="sidebar-date-value"]').text).to include('25')
+      expect(find_field('Fixed:')).to be_checked
+    end
+  end
+
+  def remove_fixed_date
+    expect(page).not_to have_button('remove')
+    page.within('[data-testid="sidebar-fixed-date"]') do
+      expect(find('[data-testid="sidebar-date-value"]').text).to include('None')
+    end
+
+    pick_a_date
+
+    page.within('[data-testid="sidebar-fixed-date"]') do
+      expect(find('[data-testid="sidebar-date-value"]').text).not_to include('None')
+
+      expect(page).to have_button('remove')
+      find_button('remove').click
+
+      wait_for_requests
+      expect(page).not_to have_button('remove')
+      expect(find('[data-testid="sidebar-date-value"]').text).to include('None')
+    end
   end
 end

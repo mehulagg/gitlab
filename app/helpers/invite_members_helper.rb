@@ -8,26 +8,12 @@ module InviteMembersHelper
   end
 
   def can_invite_members_for_project?(project)
-    Feature.enabled?(:invite_members_group_modal, project.group) && can_import_members?
+    Feature.enabled?(:invite_members_group_modal, project.group) && can_manage_project_members?(project)
   end
 
   def directly_invite_members?
     strong_memoize(:directly_invite_members) do
       can_import_members?
-    end
-  end
-
-  def indirectly_invite_members?
-    strong_memoize(:indirectly_invite_members) do
-      experiment_enabled?(:invite_members_version_b) && !can_import_members?
-    end
-  end
-
-  def show_invite_members_track_event
-    if directly_invite_members?
-      'show_invite_members'
-    elsif indirectly_invite_members?
-      'show_invite_members_version_b'
     end
   end
 

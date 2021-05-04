@@ -8,6 +8,7 @@ module EE
 
       prepended do
         before_action :elasticsearch_reindexing_task, only: [:advanced_search]
+        before_action :elasticsearch_index_settings, only: [:advanced_search]
 
         feature_category :license, [:seat_link_payload]
         feature_category :source_code_management, [:templates]
@@ -15,6 +16,10 @@ module EE
 
         def elasticsearch_reindexing_task
           @elasticsearch_reindexing_task = Elastic::ReindexingTask.last
+        end
+
+        def elasticsearch_index_settings
+          @elasticsearch_index_settings = Elastic::IndexSetting.order_by_name
         end
       end
 
@@ -55,6 +60,13 @@ module EE
 
         if License.feature_available?(:admin_merge_request_approvers_rules)
           attrs += EE::ApplicationSettingsHelper.merge_request_appovers_rules_attributes
+        end
+
+        if License.feature_available?(:elastic_search)
+          attrs += [
+            elasticsearch_shards: {},
+            elasticsearch_replicas: {}
+          ]
         end
 
         if ::Gitlab::Geo.license_allows?

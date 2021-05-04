@@ -106,6 +106,45 @@ RSpec.describe Security::StoreReportService, '#execute' do
         end
       end
 
+      context 'when some attributes are missing in the identifiers' do
+        let(:trait) { :sast }
+        let(:other_params) {{ external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM', created_at: Time.current, updated_at: Time.current }}
+        let(:record_1) {{ id: 4, project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+        let(:record_2) {{ project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+        let(:record_3) {{ id: 4, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+        let(:record_4) {{ id: 5, fingerprint: '6848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+        let(:record_5) {{ fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+        let(:record_6) {{ fingerprint: '6848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+
+        subject { described_class.new(pipeline, report) }
+
+        it 'updates existing vulnerability identifiers in groups' do
+          expect(Vulnerabilities::Identifier).to receive(:upsert_all).with([record_1])
+          expect(Vulnerabilities::Identifier).to receive(:upsert_all).with([record_3, record_4])
+
+          subject.send(:update_existing_vulnerability_identifiers_for, [record_1, record_3, record_4])
+        end
+
+        it 'does not update any identifier for an empty list of records' do
+          expect(Vulnerabilities::Identifier).not_to receive(:upsert_all)
+
+          subject.send(:update_existing_vulnerability_identifiers_for, [])
+        end
+
+        it 'inserts new vulnerability identifiers in groups' do
+          expect(Vulnerabilities::Identifier).to receive(:insert_all).with([record_2])
+          expect(Vulnerabilities::Identifier).to receive(:insert_all).with([record_5, record_6])
+
+          subject.send(:insert_new_vulnerability_identifiers_for, [record_2, record_5, record_6])
+        end
+
+        it 'does not insert any identifier for an empty list of records' do
+          expect(Vulnerabilities::Identifier).not_to receive(:insert_all)
+
+          subject.send(:insert_new_vulnerability_identifiers_for, [])
+        end
+      end
+
       context 'when N+1 database queries have been removed' do
         let(:trait) { :sast }
         let(:bandit_scanner) { build(:ci_reports_security_scanner, external_id: 'bandit', name: 'Bandit') }

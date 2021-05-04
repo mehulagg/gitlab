@@ -93,14 +93,14 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       context 'when database location is not set' do
         let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e' } }
 
-        it_behaves_like 'replica is up to date', nil
+        it_behaves_like 'stick to the primary', nil
       end
     end
 
     let(:queue) { 'default' }
     let(:redis_pool) { Sidekiq.redis_pool }
     let(:worker) { worker_class.new }
-    let(:job) { { "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e" } }
+    let(:job) { { "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", 'database_replica_location' => '0/D525E3A8' } }
     let(:block) { 10 }
 
     before do

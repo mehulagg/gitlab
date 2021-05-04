@@ -1,12 +1,12 @@
 <script>
-import { GlPopover, GlLink, GlIcon } from '@gitlab/ui';
+import { GlPopover, GlLink, GlIcon, GlSprintf } from '@gitlab/ui';
 import {
   HELP_NODE_HEALTH_URL,
   GEO_TROUBLESHOOTING_URL,
   STATUS_DELAY_THRESHOLD_MS,
 } from 'ee/geo_nodes_beta/constants';
-import { sprintf, s__ } from '~/locale';
-import timeAgoMixin from '~/vue_shared/mixins/timeago';
+import { s__ } from '~/locale';
+import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
   name: 'GeoNodeLastUpdated',
@@ -20,8 +20,9 @@ export default {
     GlPopover,
     GlLink,
     GlIcon,
+    GlSprintf,
+    TimeAgo,
   },
-  mixins: [timeAgoMixin],
   props: {
     statusCheckTimestamp: {
       type: Number,
@@ -46,13 +47,9 @@ export default {
         link: HELP_NODE_HEALTH_URL,
       };
     },
-    syncTimeAgo() {
-      const timeAgo = this.timeFormatted(this.statusCheckTimestamp);
-
-      return {
-        mainText: sprintf(this.$options.i18n.timeAgoMainText, { timeAgo }),
-        popoverText: sprintf(this.$options.i18n.timeAgoPopoverText, { timeAgo }),
-      };
+    timeAgo() {
+      const time = this.statusCheckTimestamp;
+      return new Date(time).toString();
     },
   },
 };
@@ -60,9 +57,13 @@ export default {
 
 <template>
   <div class="gl-display-flex gl-align-items-center">
-    <span class="gl-text-gray-500" data-testid="last-updated-main-text">{{
-      syncTimeAgo.mainText
-    }}</span>
+    <span class="gl-text-gray-500" data-testid="last-updated-main-text">
+      <gl-sprintf :message="$options.i18n.timeAgoMainText">
+        <template #timeAgo>
+          <time-ago :time="timeAgo" />
+        </template>
+      </gl-sprintf>
+    </span>
     <gl-icon
       ref="lastUpdated"
       tabindex="0"
@@ -70,7 +71,13 @@ export default {
       class="gl-text-blue-500 gl-cursor-pointer gl-ml-2"
     />
     <gl-popover :target="() => $refs.lastUpdated.$el" placement="top">
-      <p>{{ syncTimeAgo.popoverText }}</p>
+      <p class="gl-font-base">
+        <gl-sprintf :message="$options.i18n.timeAgoPopoverText">
+          <template #timeAgo>
+            <time-ago :time="timeAgo" />
+          </template>
+        </gl-sprintf>
+      </p>
       <gl-link :href="syncHelp.link" target="_blank">{{ syncHelp.text }}</gl-link>
     </gl-popover>
   </div>

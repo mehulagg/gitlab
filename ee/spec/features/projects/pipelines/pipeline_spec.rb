@@ -153,6 +153,7 @@ RSpec.describe 'Pipeline', :js do
 
     before do
       stub_licensed_features(sast: true, security_dashboard: true)
+      stub_feature_flags(pipeline_security_dashboard_graphql: false)
     end
 
     context 'with a sast artifact' do

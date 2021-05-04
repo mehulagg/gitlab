@@ -50,10 +50,11 @@ RSpec.describe 'Project settings > [EE] repository' do
 
     context 'mirrored external repo', :js do
       let(:personal_access_token) { '461171575b95eeb61fba5face8ab838853d0121f' }
+      let(:password) { 'my-secret-pass' }
       let(:external_project) do
         create(:project_empty_repo,
                :mirror,
-               import_url: "https://#{personal_access_token}@github.com/testngalog2/newrepository.git")
+               import_url: "https://#{personal_access_token}:#{password}@github.com/testngalog2/newrepository.git")
       end
 
       before do
@@ -65,7 +66,14 @@ RSpec.describe 'Project settings > [EE] repository' do
         mirror_url = find('.mirror-url').text
 
         expect(mirror_url).not_to include(personal_access_token)
-        expect(mirror_url).to include('https://*****@github.com/')
+        expect(mirror_url).to include('https://*****:*****@github.com/')
+      end
+
+      it 'does not show password and personal access token on the page' do
+        page_content = page.body
+
+        expect(page_content).not_to include(password)
+        expect(page_content).not_to include(personal_access_token)
       end
     end
 

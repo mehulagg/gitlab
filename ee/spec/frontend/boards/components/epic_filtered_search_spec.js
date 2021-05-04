@@ -53,7 +53,10 @@ describe('EpicFilteredSearch', () => {
           icon: 'labels',
           title: __('Label'),
           type: 'label_name',
-          operators: [{ value: '=', description: 'is' }],
+          operators: [
+            { value: '=', description: 'is' },
+            { value: '!=', description: 'is not' },
+          ],
           token: LabelToken,
           unique: false,
           symbol: '~',
@@ -63,7 +66,10 @@ describe('EpicFilteredSearch', () => {
           icon: 'pencil',
           title: __('Author'),
           type: 'author_username',
-          operators: [{ value: '=', description: 'is' }],
+          operators: [
+            { value: '=', description: 'is' },
+            { value: '!=', description: 'is not' },
+          ],
           symbol: '@',
           token: AuthorToken,
           unique: true,
@@ -105,9 +111,9 @@ describe('EpicFilteredSearch', () => {
 
     it('sets the url params to the correct results', async () => {
       const mockFilters = [
-        { type: 'author_username', value: { data: 'root' } },
-        { type: 'label_name', value: { data: 'label' } },
-        { type: 'label_name', value: { data: 'label2' } },
+        { type: 'author_username', value: { data: 'root', operator: '=' } },
+        { type: 'label_name', value: { data: 'label', operator: '=' } },
+        { type: 'label_name', value: { data: 'label2', operator: '!=' } },
       ];
       jest.spyOn(urlUtility, 'updateHistory');
       findFilteredSearch().vm.$emit('onFilter', mockFilters);
@@ -115,7 +121,7 @@ describe('EpicFilteredSearch', () => {
       expect(urlUtility.updateHistory).toHaveBeenCalledWith({
         title: '',
         replace: true,
-        url: 'http://test.host/?author_username=root&label_name[]=label&label_name[]=label2',
+        url: 'http://test.host/?not[label_name][]=label2&author_username=root&label_name[]=label',
       });
     });
   });
@@ -131,8 +137,8 @@ describe('EpicFilteredSearch', () => {
 
     it('passes the correct props to FitlerSearchBar', async () => {
       expect(findFilteredSearch().props('initialFilterValue')).toEqual([
-        { type: 'author_username', value: { data: 'root' } },
-        { type: 'label_name', value: { data: 'label' } },
+        { type: 'author_username', value: { data: 'root', operator: '=' } },
+        { type: 'label_name', value: { data: 'label', operator: '=' } },
       ]);
     });
   });

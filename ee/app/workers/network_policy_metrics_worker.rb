@@ -6,6 +6,8 @@
 class NetworkPolicyMetricsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   queue_namespace :cronjob
   feature_category :container_network_security
 

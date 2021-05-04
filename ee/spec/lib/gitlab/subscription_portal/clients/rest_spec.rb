@@ -6,6 +6,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
   let(:client) { Gitlab::SubscriptionPortal::Client }
   let(:http_response) { nil }
   let(:http_method) { :post }
+  let(:error_message) { 'We encountered an error and our team has been notified. Please try again.' }
   let(:gitlab_http_response) do
     double(code: http_response.code, response: http_response, body: {}, parsed_response: {})
   end
@@ -20,13 +21,29 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
     end
   end
 
+  shared_examples 'when http call raises an exception' do
+    it 'overrides the error message' do
+      exception = Gitlab::HTTP::HTTP_ERRORS.first.new
+      tracked_exception = Gitlab::SubscriptionPortal::Clients::REST::SubscriptionPortalRESTException.new(exception.message)
+      allow(Gitlab::HTTP).to receive(http_method).and_raise(exception)
+      expect(Gitlab::ErrorTracking).to receive(:track_exception).with(tracked_exception)
+
+      result = subject
+
+      expect(result[:success]).to eq(false)
+      expect(result[:data][:errors]).to eq(error_message)
+    end
+  end
+
   shared_examples 'when response code is 422' do
     let(:http_response) { Net::HTTPUnprocessableEntity.new(1.0, '422', 'Error') }
 
     it 'has a unprocessable entity status' do
       allow(Gitlab::HTTP).to receive(http_method).and_return(gitlab_http_response)
+      expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
       expect(subject[:success]).to eq(false)
+      expect(subject[:data][:errors]).to eq(error_message)
     end
   end
 
@@ -35,8 +52,10 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
 
     it 'has a server error status' do
       allow(Gitlab::HTTP).to receive(http_method).and_return(gitlab_http_response)
+      expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
       expect(subject[:success]).to eq(false)
+      expect(subject[:data][:errors]).to eq(error_message)
     end
   end
 
@@ -48,6 +67,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
     it_behaves_like 'when response is successful'
     it_behaves_like 'when response code is 422'
     it_behaves_like 'when response code is 500'
+    it_behaves_like 'when http call raises an exception'
   end
 
   describe '#extend_reactivate_trial' do
@@ -60,6 +80,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
     it_behaves_like 'when response is successful'
     it_behaves_like 'when response code is 422'
     it_behaves_like 'when response code is 500'
+    it_behaves_like 'when http call raises an exception'
   end
 
   describe '#create_subscription' do
@@ -70,6 +91,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
     it_behaves_like 'when response is successful'
     it_behaves_like 'when response code is 422'
     it_behaves_like 'when response code is 500'
+    it_behaves_like 'when http call raises an exception'
   end
 
   describe '#create_customer' do
@@ -80,6 +102,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
     it_behaves_like 'when response is successful'
     it_behaves_like 'when response code is 422'
     it_behaves_like 'when response code is 500'
+    it_behaves_like 'when http call raises an exception'
   end
 
   describe '#payment_form_params' do
@@ -92,6 +115,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
     it_behaves_like 'when response is successful'
     it_behaves_like 'when response code is 422'
     it_behaves_like 'when response code is 500'
+    it_behaves_like 'when http call raises an exception'
   end
 
   describe '#payment_method' do
@@ -104,5 +128,6 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
     it_behaves_like 'when response is successful'
     it_behaves_like 'when response code is 422'
     it_behaves_like 'when response code is 500'
+    it_behaves_like 'when http call raises an exception'
   end
 end

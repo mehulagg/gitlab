@@ -12,7 +12,6 @@ module EE
         expose :internal_url
         expose :primary?, as: :primary
         expose :enabled
-        expose :current?, as: :current
         expose :files_max_capacity
         expose :repos_max_capacity
         expose :verification_max_capacity
@@ -48,6 +47,10 @@ module EE
           expose :repair do |geo_node|
             expose_url api_v4_geo_nodes_repair_path(id: geo_node.id)
           end
+        end
+
+        expose :current do |geo_node|
+          ::GeoNode.current?(geo_node)
         end
       end
     end

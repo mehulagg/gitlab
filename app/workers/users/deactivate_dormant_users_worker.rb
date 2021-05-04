@@ -3,9 +3,11 @@
 module Users
   class DeactivateDormantUsersWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
+
     include CronjobQueue
 
     feature_category :utilization
+    tags :exclude_from_kubernetes
 
     NUMBER_OF_BATCHES = 50
     BATCH_SIZE = 200

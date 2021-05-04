@@ -98,17 +98,19 @@ export function initCadenceForm() {
     return null;
   }
 
-  const { groupFullPath: groupPath, cadenceId, cadenceListPath } = el;
+  const { groupFullPath: groupPath, cadenceId, cadencesListPath } = el.dataset;
 
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      groupPath,
+    },
     render(createElement) {
       return createElement(IterationCadenceForm, {
         props: {
-          groupPath,
           cadenceId,
-          cadenceListPath,
+          cadencesListPath,
         },
       });
     },

@@ -135,7 +135,7 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
   end
 
   describe 'code_owners_used_count' do
-    let!(:project_with_code_owners) { create(:project, :repository, group: subgroup)}
+    let!(:project_with_code_owners) { create(:project, :repository, group: subgroup) }
 
     subject { data[:code_owners_used_count] }
 
@@ -152,12 +152,24 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
 
       it { is_expected.to eq nil }
     end
+
+    context 'when there is no default branch' do
+      before do
+        allow_any_instance_of(Project).to receive(:default_branch).and_return(nil) # rubocop:disable RSpec/AnyInstanceOf
+      end
+
+      it 'uses HEAD as default value' do
+        expect(Gitlab::CodeOwners::Loader).to receive(:new).with(kind_of(Project), 'HEAD').thrice.and_call_original
+
+        expect(subject).to eq 0
+      end
+    end
   end
 
   context 'when snapshot already exists' do
     subject(:data) { described_class.new(segment: segment, range_end: range_end, snapshot: snapshot).calculate }
 
-    let(:snapshot) { create :devops_adoption_snapshot, segment: segment, issue_opened: true, merge_request_opened: false, total_projects_count: 1}
+    let(:snapshot) { create :devops_adoption_snapshot, segment: segment, issue_opened: true, merge_request_opened: false, total_projects_count: 1 }
 
     context 'for boolean metrics' do
       let!(:fresh_merge_request) { create(:merge_request, source_project: project, created_at: 3.weeks.ago(range_end)) }

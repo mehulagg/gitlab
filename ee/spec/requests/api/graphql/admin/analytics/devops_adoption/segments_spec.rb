@@ -30,6 +30,8 @@ RSpec.describe 'DevopsAdoptionSegments' do
   end
 
   before do
+    stub_licensed_features(instance_level_devops_adoption: true, group_level_devops_adoption: true)
+
     post_graphql(query, current_user: current_user)
   end
 

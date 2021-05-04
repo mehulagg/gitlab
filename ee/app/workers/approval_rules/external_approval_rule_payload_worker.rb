@@ -3,9 +3,12 @@
 module ApprovalRules
   class ExternalApprovalRulePayloadWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     idempotent!
 
     feature_category :source_code_management
+    tags :exclude_from_kubernetes
 
     def perform(rule_id, data)
       rule = ApprovalRules::ExternalApprovalRule.find(rule_id)

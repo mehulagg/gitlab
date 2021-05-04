@@ -3,6 +3,8 @@ import {
   DEFAULT_DAYS_IN_PAST,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
   OVERVIEW_STAGE_CONFIG,
+  PAGINATION_TYPE,
+  PAGINATION_SORT_FIELD,
 } from 'ee/analytics/cycle_analytics/constants';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import mutations from 'ee/analytics/cycle_analytics/store/mutations';
@@ -302,3 +304,10 @@ export const selectedProjects = [
 ];
 
 export const pathNavIssueMetric = 172800;
+
+export const initialPaginationState = { page: null, hasNextPage: false };
+export const basePaginationResult = {
+  pagination: PAGINATION_TYPE,
+  sort: PAGINATION_SORT_FIELD,
+  page: null,
+};

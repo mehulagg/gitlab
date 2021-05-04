@@ -2,6 +2,8 @@
 
 class StoreSecurityScansWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include SecurityScansQueue
 
   # rubocop: disable CodeReuse/ActiveRecord

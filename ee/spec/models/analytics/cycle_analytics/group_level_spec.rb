@@ -27,8 +27,13 @@ RSpec.describe Analytics::CycleAnalytics::GroupLevel do
 
   describe '#summary' do
     before do
+      stub_licensed_features(dora4_analytics: true)
+
       create_cycle(user, project, issue, mr, milestone, pipeline)
       deploy_master(user, project)
+
+      environment = project.environments.production.first
+      ::Dora::DailyMetrics::RefreshWorker.new.perform(environment.id, pipeline.created_at.to_date.to_s)
     end
 
     it 'returns medians for each stage for a specific group' do

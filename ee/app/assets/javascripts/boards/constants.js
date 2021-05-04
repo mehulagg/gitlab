@@ -1,9 +1,16 @@
+/* eslint-disable import/export */
 import { issuableTypes } from '~/boards/constants';
+import destroyBoardListMutation from '~/boards/graphql/board_list_destroy.mutation.graphql';
 import updateBoardListMutation from '~/boards/graphql/board_list_update.mutation.graphql';
 
 import { s__ } from '~/locale';
 
+import boardListsQuery from './graphql/board_lists.query.graphql';
+import destroyEpicBoardListMutation from './graphql/epic_board_list_destroy.mutation.graphql';
 import updateEpicBoardListMutation from './graphql/epic_board_list_update.mutation.graphql';
+import epicBoardListsQuery from './graphql/epic_board_lists.query.graphql';
+
+export * from '~/boards/constants';
 
 export const DRAGGABLE_TAG = 'div';
 
@@ -59,6 +66,15 @@ export const ErrorMessages = {
   ),
 };
 
+export const listsQuery = {
+  [issuableTypes.issue]: {
+    query: boardListsQuery,
+  },
+  [issuableTypes.epic]: {
+    query: epicBoardListsQuery,
+  },
+};
+
 export const updateListQueries = {
   [issuableTypes.issue]: {
     mutation: updateBoardListMutation,
@@ -68,8 +84,16 @@ export const updateListQueries = {
   },
 };
 
+export const deleteListQueries = {
+  [issuableTypes.issue]: {
+    mutation: destroyBoardListMutation,
+  },
+  [issuableTypes.epic]: {
+    mutation: destroyEpicBoardListMutation,
+  },
+};
+
 export default {
-  updateListQueries,
   DRAGGABLE_TAG,
   EpicFilterType,
 };

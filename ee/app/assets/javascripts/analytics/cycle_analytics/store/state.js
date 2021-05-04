@@ -34,4 +34,9 @@ export default () => ({
   summary: [],
   medians: {},
   valueStreams: [],
+
+  pagination: {
+    page: null,
+    hasNextPage: false,
+  },
 });

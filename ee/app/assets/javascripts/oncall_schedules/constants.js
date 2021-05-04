@@ -48,12 +48,12 @@ export const addRotationModalId = 'addRotationModal';
 export const editRotationModalId = 'editRotationModal';
 export const deleteRotationModalId = 'deleteRotationModal';
 
-export const ASSIGNEE_SPACER = 2;
-export const ASSIGNEE_SPACER_SMALL = 1;
 export const TIMELINE_CELL_WIDTH = 180;
 export const SHIFT_WIDTH_CALCULATION_DELAY = 250;
-export const CURRENT_DAY_INDICATOR_OFFSET = 2.25;
 
 export const oneHourOffsetDayView = 100 / HOURS_IN_DAY;
 export const oneDayOffsetWeekView = 100 / DAYS_IN_WEEK;
 export const oneHourOffsetWeekView = oneDayOffsetWeekView / HOURS_IN_DAY;
+
+// TODO: Replace with href to documentation once https://gitlab.com/groups/gitlab-org/-/epics/4638 is completed
+export const escalationPolicyUrl = 'https://gitlab.com/groups/gitlab-org/-/epics/4638';

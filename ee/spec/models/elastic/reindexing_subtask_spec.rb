@@ -10,6 +10,5 @@ RSpec.describe Elastic::ReindexingSubtask, type: :model do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:index_name_from) }
     it { is_expected.to validate_presence_of(:index_name_to) }
-    it { is_expected.to validate_presence_of(:elastic_task) }
   end
 end

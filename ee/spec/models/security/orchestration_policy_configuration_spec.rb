@@ -8,12 +8,13 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     create( :security_orchestration_policy_configuration, security_policy_management_project: security_policy_management_project)
   end
 
-  let(:default_branch) { security_policy_management_project.default_branch_or_master }
+  let(:default_branch) { security_policy_management_project.default_branch }
   let(:repository) { instance_double(Repository, root_ref: 'master') }
 
   describe 'associations' do
     it { is_expected.to belong_to(:project).inverse_of(:security_orchestration_policy_configuration) }
     it { is_expected.to belong_to(:security_policy_management_project).class_name('Project') }
+    it { is_expected.to have_many(:rule_schedules).class_name('Security::OrchestrationPolicyRuleSchedule').inverse_of(:security_orchestration_policy_configuration) }
   end
 
   describe 'validations' do

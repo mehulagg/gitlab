@@ -30,6 +30,12 @@ RSpec.describe Search::GlobalService do
     it_behaves_like 'search query applies joins based on migrations shared examples', :add_permissions_data_to_notes_documents
   end
 
+  context 'merge_requests search' do
+    let(:results) { described_class.new(nil, search: '*').execute.objects('merge_requests') }
+
+    it_behaves_like 'search query applies joins based on migrations shared examples', :add_new_data_to_merge_requests_documents
+  end
+
   context 'visibility', :elastic, :sidekiq_inline do
     include_context 'ProjectPolicyTable context'
 
@@ -61,6 +67,28 @@ RSpec.describe Search::GlobalService do
 
       with_them do
         it_behaves_like 'search respects visibility'
+      end
+
+      # Since newly created indices automatically have all migrations as
+      # finished we need a test to verify the old style searches work for
+      # instances which haven't finished the migration yet
+      context 'when add_new_data_to_merge_requests_documents migration is not finished' do
+        before do
+          set_elasticsearch_migration_to :add_new_data_to_merge_requests_documents, including: false
+        end
+
+        # merge_request cannot be defined prior to the migration mocks because it
+        # will cause the incorrect value to be passed to `use_separate_indices` when creating
+        # the proxy
+        let!(:merge_request) { create(:merge_request, target_project: project, source_project: project) }
+
+        where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
+          permission_table_for_reporter_feature_access
+        end
+
+        with_them do
+          it_behaves_like 'search respects visibility'
+        end
       end
     end
 

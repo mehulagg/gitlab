@@ -23,4 +23,20 @@ RSpec.describe SecurityHelper do
       })
     end
   end
+
+  describe '#instance_security_settings_data' do
+    subject { instance_security_settings_data }
+
+    context 'when user is not auditor' do
+      let_it_be(:current_user) { create(:user) }
+
+      it { is_expected.to eq({ is_auditor: "false" }) }
+    end
+
+    context 'when user is auditor' do
+      let_it_be(:current_user) { create(:user, :auditor) }
+
+      it { is_expected.to eq({ is_auditor: "true" }) }
+    end
+  end
 end

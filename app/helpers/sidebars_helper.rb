@@ -39,8 +39,13 @@ module SidebarsHelper
       current_user: user,
       container: project,
       learn_gitlab_experiment_enabled: learn_gitlab_experiment_enabled?(project),
+      learn_gitlab_experiment_tracking_category: learn_gitlab_experiment_tracking_category,
       current_ref: current_ref,
-      jira_issues_integration: project_jira_issues_integration?
+      jira_issues_integration: project_jira_issues_integration?,
+      can_view_pipeline_editor: can_view_pipeline_editor?(project),
+      show_cluster_hint: show_gke_cluster_integration_callout?(project)
     }
   end
 end
+
+SidebarsHelper.prepend_if_ee('EE::SidebarsHelper')

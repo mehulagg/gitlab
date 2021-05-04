@@ -27,6 +27,8 @@ When requested across groups or projects, it's expected to be the same as the `f
 
 ## List issues
 
+> Moved `weight` to [GitLab Premium](https://about.gitlab.com/pricing/) due to Starter/Bronze being [discontinued](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) in 13.9.
+
 Get all issues the authenticated user has access to. By default it
 returns only issues created by the current user. To get all issues,
 use parameter `scope=all`.
@@ -75,7 +77,7 @@ GET /issues?state=opened
 | `state`             | string           | no         | Return `all` issues or just those that are `opened` or `closed`                                                                                       |
 | `updated_after`     | datetime         | no         | Return issues updated on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `updated_before`    | datetime         | no         | Return issues updated on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
-| `weight` **(STARTER)** | integer       | no         | Return issues with the specified `weight`. `None` returns issues with no weight assigned. `Any` returns issues with a weight assigned.              |
+| `weight` **(PREMIUM)** | integer       | no         | Return issues with the specified `weight`. `None` returns issues with no weight assigned. `Any` returns issues with a weight assigned.              |
 | `with_labels_details` | boolean        | no         | If `true`, the response returns more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. The `description_html` attribute was introduced in [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21413)|
 
 ```shell
@@ -169,8 +171,7 @@ Example response:
 ]
 ```
 
-Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
-the `weight` parameter:
+Issues created by users on GitLab Premium or higher include the `weight` property:
 
 ```json
 [
@@ -183,8 +184,25 @@ the `weight` parameter:
 ]
 ```
 
-Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
-the `health_status` parameter:
+Issues created by users on GitLab Premium or higher include the `epic` property:
+
+```json
+{
+   "project_id" : 4,
+   "description" : "Omnis vero earum sunt corporis dolor et placeat.",
+   "epic_iid" : 5, //deprecated, use `iid` of the `epic` attribute
+   "epic": {
+     "id" : 42,
+     "iid" : 5,
+     "title": "My epic epic",
+     "url" : "/groups/h5bp/-/epics/5",
+     "group_id": 8
+   },
+   ...
+}
+```
+
+Issues created by users on GitLab Ultimate include the `health_status` property:
 
 ```json
 [
@@ -201,12 +219,18 @@ WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform
 to the GitLab EE API.
 
+WARNING:
+The `epic_iid` attribute is deprecated and [scheduled for removal in API version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
+Please use `iid` of the `epic` attribute instead.
+
 NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042).
 This value is only present for issues closed after GitLab 10.6 and if the user account
 that closed the issue still exists.
 
 ## List group issues
+
+> Moved `weight` to [GitLab Premium](https://about.gitlab.com/pricing/) due to Starter/Bronze being [discontinued](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) in 13.9.
 
 Get a list of a group's issues.
 
@@ -256,7 +280,7 @@ GET /groups/:id/issues?state=opened
 | `state`             | string           | no         | Return all issues or just those that are `opened` or `closed`                                                                 |
 | `updated_after`     | datetime         | no         | Return issues updated on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `updated_before`    | datetime         | no         | Return issues updated on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
-| `weight` **(STARTER)** | integer       | no         | Return issues with the specified `weight`. `None` returns issues with no weight assigned. `Any` returns issues with a weight assigned. |
+| `weight` **(PREMIUM)** | integer       | no         | Return issues with the specified `weight`. `None` returns issues with no weight assigned. `Any` returns issues with a weight assigned. |
 | `with_labels_details` | boolean        | no         | If `true`, the response returns more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. The `description_html` attribute was introduced in [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21413) |
 
 ```shell
@@ -349,8 +373,7 @@ Example response:
 ]
 ```
 
-Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
-the `weight` parameter:
+Issues created by users on GitLab Premium or higher include the `weight` property:
 
 ```json
 [
@@ -363,8 +386,25 @@ the `weight` parameter:
 ]
 ```
 
-Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
-the `health_status` parameter:
+Issues created by users on GitLab Premium or higher include the `epic` property:
+
+```json
+{
+   "project_id" : 4,
+   "description" : "Omnis vero earum sunt corporis dolor et placeat.",
+   "epic_iid" : 5, //deprecated, use `iid` of the `epic` attribute
+   "epic": {
+     "id" : 42,
+     "iid" : 5,
+     "title": "My epic epic",
+     "url" : "/groups/h5bp/-/epics/5",
+     "group_id": 8
+   },
+   ...
+}
+```
+
+Issues created by users on GitLab Ultimate include the `health_status` property:
 
 ```json
 [
@@ -380,12 +420,18 @@ the `health_status` parameter:
 WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
+WARNING:
+The `epic_iid` attribute is deprecated and [scheduled for removal in API version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
+Please use `iid` of the `epic` attribute instead.
+
 NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042).
 This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
 
 ## List project issues
+
+> Moved `weight` to [GitLab Premium](https://about.gitlab.com/pricing/) due to Starter/Bronze being [discontinued](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) in 13.9.
 
 Get a list of a project's issues.
 
@@ -434,7 +480,7 @@ GET /projects/:id/issues?state=opened
 | `state`             | string           | no         | Return all issues or just those that are `opened` or `closed`                                                                 |
 | `updated_after`     | datetime         | no         | Return issues updated on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `updated_before`    | datetime         | no         | Return issues updated on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
-| `weight` **(STARTER)** | integer       | no         | Return issues with the specified `weight`. `None` returns issues with no weight assigned. `Any` returns issues with a weight assigned. |
+| `weight` **(PREMIUM)** | integer       | no         | Return issues with the specified `weight`. `None` returns issues with no weight assigned. `Any` returns issues with a weight assigned. |
 | `with_labels_details` | boolean        | no         | If `true`, the response returns more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. `description_html` was introduced in [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21413) |
 
 ```shell
@@ -534,8 +580,7 @@ Example response:
 ]
 ```
 
-Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
-the `weight` parameter:
+Issues created by users on GitLab Premium or higher include the `weight` property:
 
 ```json
 [
@@ -548,8 +593,25 @@ the `weight` parameter:
 ]
 ```
 
-Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
-the `health_status` parameter:
+Issues created by users on GitLab Premium or higher include the `epic` property:
+
+```json
+{
+   "project_id" : 4,
+   "description" : "Omnis vero earum sunt corporis dolor et placeat.",
+   "epic_iid" : 5, //deprecated, use `iid` of the `epic` attribute
+   "epic": {
+     "id" : 42,
+     "iid" : 5,
+     "title": "My epic epic",
+     "url" : "/groups/h5bp/-/epics/5",
+     "group_id": 8
+   },
+   ...
+}
+```
+
+Issues created by users on GitLab Ultimate include the `health_status` property:
 
 ```json
 [
@@ -564,6 +626,10 @@ the `health_status` parameter:
 
 WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
+
+WARNING:
+The `epic_iid` attribute is deprecated and [scheduled for removal in API version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
+Please use `iid` of the `epic` attribute instead.
 
 NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
@@ -591,83 +657,79 @@ Example response:
 
 ```json
 {
-   "id" : 1,
-   "milestone" : {
-      "due_date" : null,
-      "project_id" : 4,
-      "state" : "closed",
-      "description" : "Rerum est voluptatem provident consequuntur molestias similique ipsum dolor.",
-      "iid" : 3,
-      "id" : 11,
-      "title" : "v3.0",
-      "created_at" : "2016-01-04T15:31:39.788Z",
-      "updated_at" : "2016-01-04T15:31:39.788Z",
-      "closed_at" : "2016-01-05T15:31:46.176Z"
-   },
-   "author" : {
-      "state" : "active",
-      "web_url" : "https://gitlab.example.com/root",
-      "avatar_url" : null,
-      "username" : "root",
-      "id" : 1,
-      "name" : "Administrator"
-   },
-   "description" : "Omnis vero earum sunt corporis dolor et placeat.",
-   "state" : "closed",
-   "iid" : 1,
-   "assignees" : [{
-      "avatar_url" : null,
-      "web_url" : "https://gitlab.example.com/lennie",
-      "state" : "active",
-      "username" : "lennie",
-      "id" : 9,
-      "name" : "Dr. Luella Kovacek"
-   }],
-   "assignee" : {
-      "avatar_url" : null,
-      "web_url" : "https://gitlab.example.com/lennie",
-      "state" : "active",
-      "username" : "lennie",
-      "id" : 9,
-      "name" : "Dr. Luella Kovacek"
-   },
-   "labels" : [],
-   "upvotes": 4,
-   "downvotes": 0,
-   "merge_requests_count": 0,
-   "title" : "Ut commodi ullam eos dolores perferendis nihil sunt.",
-   "updated_at" : "2016-01-04T15:31:46.176Z",
-   "created_at" : "2016-01-04T15:31:46.176Z",
-   "closed_at" : null,
-   "closed_by" : null,
-   "subscribed": false,
-   "user_notes_count": 1,
-   "due_date": null,
-   "web_url": "http://example.com/my-group/my-project/issues/1",
-   "references": {
-     "short": "#1",
-     "relative": "#1",
-     "full": "my-group/my-project#1"
-   },
-   "time_stats": {
-      "time_estimate": 0,
-      "total_time_spent": 0,
-      "human_time_estimate": null,
-      "human_total_time_spent": null
-   },
-   "confidential": false,
-   "discussion_locked": false,
-   "_links": {
-      "self": "http://example.com/api/v4/projects/1/issues/2",
-      "notes": "http://example.com/api/v4/projects/1/issues/2/notes",
-      "award_emoji": "http://example.com/api/v4/projects/1/issues/2/award_emoji",
-      "project": "http://example.com/api/v4/projects/1"
-   },
-   "task_completion_status":{
-      "count":0,
-      "completed_count":0
-   },
-   "weight": null,
+  "id": 1,
+  "milestone": {
+    "due_date": null,
+    "project_id": 4,
+    "state": "closed",
+    "description": "Rerum est voluptatem provident consequuntur molestias similique ipsum dolor.",
+    "iid": 3,
+    "id": 11,
+    "title": "v3.0",
+    "created_at": "2016-01-04T15:31:39.788Z",
+    "updated_at": "2016-01-04T15:31:39.788Z",
+    "closed_at": "2016-01-05T15:31:46.176Z"
+  },
+  "author": {
+    "state": "active",
+    "web_url": "https://gitlab.example.com/root",
+    "avatar_url": null,
+    "username": "root",
+    "id": 1,
+    "name": "Administrator"
+  },
+  "description": "Omnis vero earum sunt corporis dolor et placeat.",
+  "state": "closed",
+  "iid": 1,
+  "assignees": [
+    {
+      "avatar_url": null,
+      "web_url": "https://gitlab.example.com/lennie",
+      "state": "active",
+      "username": "lennie",
+      "id": 9,
+      "name": "Dr. Luella Kovacek"
+    }
+  ],
+  "assignee": {
+    "avatar_url": null,
+    "web_url": "https://gitlab.example.com/lennie",
+    "state": "active",
+    "username": "lennie",
+    "id": 9,
+    "name": "Dr. Luella Kovacek"
+  },
+  "labels": [],
+  "upvotes": 4,
+  "downvotes": 0,
+  "merge_requests_count": 0,
+  "title": "Ut commodi ullam eos dolores perferendis nihil sunt.",
+  "updated_at": "2016-01-04T15:31:46.176Z",
+  "created_at": "2016-01-04T15:31:46.176Z",
+  "closed_at": null,
+  "closed_by": null,
+  "subscribed": false,
+  "user_notes_count": 1,
+  "due_date": null,
+  "web_url": "http://example.com/my-group/my-project/issues/1",
+  "references": {
+    "short": "#1",
+    "relative": "#1",
+    "full": "my-group/my-project#1"
+  },
+  "time_stats": {
+    "time_estimate": 0,
+    "total_time_spent": 0,
+    "human_time_estimate": null,
+    "human_total_time_spent": null
+  },
+  "confidential": false,
+  "discussion_locked": false,
+  "task_completion_status": {
+    "count": 0,
+    "completed_count": 0
+  },
+  "weight": null,
   "has_tasks": false,
   "_links": {
     "self": "http://gitlab.example:3000/api/v4/projects/1/issues/1",
@@ -675,21 +737,12 @@ Example response:
     "award_emoji": "http://gitlab.example:3000/api/v4/projects/1/issues/1/award_emoji",
     "project": "http://gitlab.example:3000/api/v4/projects/1"
   },
-  "references": {
-    "short": "#1",
-    "relative": "#1",
-    "full": "gitlab-org/gitlab-test#1"
-  },
-  "subscribed": true,
   "moved_to_id": null,
-  "service_desk_reply_to": "service.desk@gitlab.com",
-  "epic_iid": null,
-  "epic": null
+  "service_desk_reply_to": "service.desk@gitlab.com"
 }
 ```
 
-Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
-the `weight` parameter:
+Issues created by users on GitLab Premium or higher include the `weight` property:
 
 ```json
 {
@@ -700,10 +753,9 @@ the `weight` parameter:
 }
 ```
 
-Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
-the `epic` property:
+Issues created by users on GitLab Premium or higher include the `epic` property:
 
-```javascript
+```json
 {
    "project_id" : 4,
    "description" : "Omnis vero earum sunt corporis dolor et placeat.",
@@ -716,8 +768,22 @@ the `epic` property:
      "url" : "/groups/h5bp/-/epics/5",
      "group_id": 8
    },
-   // ...
+   ...
 }
+```
+
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see the `health_status`
+property:
+
+```json
+[
+   {
+      "project_id" : 4,
+      "description" : "Omnis vero earum sunt corporis dolor et placeat.",
+      "health_status": "on_track",
+      ...
+   }
+]
 ```
 
 WARNING:
@@ -837,8 +903,7 @@ Example response:
 }
 ```
 
-Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
-the `weight` parameter:
+Issues created by users on GitLab Premium or higher include the `weight` property:
 
 ```json
 {
@@ -849,10 +914,9 @@ the `weight` parameter:
 }
 ```
 
-Users of [GitLab Premium](https://about.gitlab.com/pricing/) can also see
-the `epic` property:
+Issues created by users on GitLab Premium or higher include the `epic` property:
 
-```javascript
+```json
 {
    "project_id" : 4,
    "description" : "Omnis vero earum sunt corporis dolor et placeat.",
@@ -864,7 +928,7 @@ the `epic` property:
      "url" : "/groups/h5bp/-/epics/5",
      "group_id": 8
    },
-   // ...
+   ...
 }
 ```
 
@@ -895,6 +959,8 @@ the issue still exists.
 
 ## New issue
 
+> Moved `weight` to [GitLab Premium](https://about.gitlab.com/pricing/) due to Starter/Bronze being [discontinued](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) in 13.9.
+
 Creates a new project issue.
 
 ```plaintext
@@ -903,7 +969,8 @@ POST /projects/:id/issues
 
 | Attribute                                 | Type           | Required | Description  |
 |-------------------------------------------|----------------|----------|--------------|
-| `assignee_ids`                            | integer array  | no       | The ID of the user(s) to assign the issue to. |
+| `assignee_id`                             | integer        | no       | The ID of the user to assign the issue to. Only appears on GitLab Free. |
+| `assignee_ids` **(PREMIUM)**              | integer array  | no       | The IDs of the users to assign the issue to. |
 | `confidential`                            | boolean        | no       | Set an issue to be confidential. Default is `false`.  |
 | `created_at`                              | string         | no       | When the issue was created. Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
 | `description`                             | string         | no       | The description of an issue. Limited to 1,048,576 characters. |
@@ -917,7 +984,7 @@ POST /projects/:id/issues
 | `merge_request_to_resolve_discussions_of` | integer        | no       | The IID of a merge request in which to resolve all issues. This fills out the issue with a default description and mark all discussions as resolved. When passing a description or title, these values take precedence over the default values.|
 | `milestone_id`                            | integer        | no       | The global ID of a milestone to assign issue  |
 | `title`                                   | string         | yes      | The title of an issue |
-| `weight` **(STARTER)**                    | integer        | no       | The weight of the issue. Valid values are greater than or equal to 0. |
+| `weight` **(PREMIUM)**                    | integer        | no       | The weight of the issue. Valid values are greater than or equal to 0. |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/4/issues?title=Issues%20with%20auth&labels=bug"
@@ -984,8 +1051,7 @@ Example response:
 }
 ```
 
-Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
-the `weight` parameter:
+Issues created by users on GitLab Premium or higher include the `weight` property:
 
 ```json
 {
@@ -996,8 +1062,25 @@ the `weight` parameter:
 }
 ```
 
-Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
-the `health_status` parameter:
+Issues created by users on GitLab Premium or higher include the `epic` property:
+
+```json
+{
+   "project_id" : 4,
+   "description" : "Omnis vero earum sunt corporis dolor et placeat.",
+   "epic_iid" : 5, //deprecated, use `iid` of the `epic` attribute
+   "epic": {
+     "id" : 42,
+     "iid" : 5,
+     "title": "My epic epic",
+     "url" : "/groups/h5bp/-/epics/5",
+     "group_id": 8
+   },
+   ...
+}
+```
+
+Issues created by users on GitLab Ultimate include the `health_status` property:
 
 ```json
 [
@@ -1013,6 +1096,10 @@ the `health_status` parameter:
 WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
+WARNING:
+The `epic_iid` attribute is deprecated and [scheduled for removal in API version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
+Please use `iid` of the `epic` attribute instead.
+
 NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
@@ -1023,6 +1110,8 @@ To help avoid abuse, users can be limited to a specific number of `Create` reque
 See [Issues rate limits](../user/admin_area/settings/rate_limit_on_issues_creation.md).
 
 ## Edit issue
+
+> Moved `weight` to [GitLab Premium](https://about.gitlab.com/pricing/) due to Starter/Bronze being [discontinued](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) in 13.9.
 
 Updates an existing project issue. This call is also used to mark an issue as
 closed.
@@ -1063,7 +1152,7 @@ PUT /projects/:id/issues/:issue_iid
 | `state_event`  | string  | no       | The state event of an issue. Set `close` to close the issue and `reopen` to reopen it                      |
 | `title`        | string  | no       | The title of an issue                                                                                      |
 | `updated_at`   | string  | no       | When the issue was updated. Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z` (requires administrator or project owner rights). Empty string or null values are not accepted.|
-| `weight` **(STARTER)** | integer | no | The weight of the issue. Valid values are greater than or equal to 0. 0                                                                    |
+| `weight` **(PREMIUM)** | integer | no | The weight of the issue. Valid values are greater than or equal to 0. 0                                                                    |
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/4/issues/85?state_event=close"
@@ -1137,8 +1226,7 @@ Example response:
 }
 ```
 
-Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
-the `weight` parameter:
+Issues created by users on GitLab Premium or higher include the `weight` property:
 
 ```json
 {
@@ -1149,8 +1237,25 @@ the `weight` parameter:
 }
 ```
 
-Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
-the `health_status` parameter:
+Issues created by users on GitLab Premium or higher include the `epic` property:
+
+```json
+{
+   "project_id" : 4,
+   "description" : "Omnis vero earum sunt corporis dolor et placeat.",
+   "epic_iid" : 5, //deprecated, use `iid` of the `epic` attribute
+   "epic": {
+     "id" : 42,
+     "iid" : 5,
+     "title": "My epic epic",
+     "url" : "/groups/h5bp/-/epics/5",
+     "group_id": 8
+   },
+   ...
+}
+```
+
+Issues created by users on GitLab Ultimate include the `health_status` property:
 
 ```json
 [
@@ -1166,6 +1271,10 @@ the `health_status` parameter:
 NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
+
+WARNING:
+The `epic_iid` attribute is deprecated and [scheduled for removal in API version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
+Please use `iid` of the `epic` attribute instead.
 
 WARNING:
 `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
@@ -1302,8 +1411,7 @@ Example response:
 }
 ```
 
-Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
-the `weight` parameter:
+Issues created by users on GitLab Premium or higher include the `weight` property:
 
 ```json
 {
@@ -1314,8 +1422,25 @@ the `weight` parameter:
 }
 ```
 
-Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
-the `health_status` parameter:
+Issues created by users on GitLab Premium or higher include the `epic` property:
+
+```json
+{
+   "project_id" : 4,
+   "description" : "Omnis vero earum sunt corporis dolor et placeat.",
+   "epic_iid" : 5, //deprecated, use `iid` of the `epic` attribute
+   "epic": {
+     "id" : 42,
+     "iid" : 5,
+     "title": "My epic epic",
+     "url" : "/groups/h5bp/-/epics/5",
+     "group_id": 8
+   },
+   ...
+}
+```
+
+Issues created by users on GitLab Ultimate include the `health_status` property:
 
 ```json
 [
@@ -1330,6 +1455,10 @@ the `health_status` parameter:
 
 WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
+
+WARNING:
+The `epic_iid` attribute is deprecated and [scheduled for removal in API version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
+Please use `iid` of the `epic` attribute instead.
 
 NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
@@ -1425,8 +1554,7 @@ Example response:
 }
 ```
 
-Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
-the `weight` parameter:
+Issues created by users on GitLab Premium or higher include the `weight` property:
 
 ```json
 {
@@ -1437,8 +1565,43 @@ the `weight` parameter:
 }
 ```
 
+Issues created by users on GitLab Premium or higher include the `epic` property:
+
+```json
+{
+   "project_id" : 4,
+   "description" : "Omnis vero earum sunt corporis dolor et placeat.",
+   "epic_iid" : 5, //deprecated, use `iid` of the `epic` attribute
+   "epic": {
+     "id" : 42,
+     "iid" : 5,
+     "title": "My epic epic",
+     "url" : "/groups/h5bp/-/epics/5",
+     "group_id": 8
+   },
+   ...
+}
+```
+
+Issues created by users on GitLab Ultimate include the `health_status` property:
+
+```json
+[
+   {
+      "project_id" : 4,
+      "description" : "Omnis vero earum sunt corporis dolor et placeat.",
+      "health_status": "on_track",
+      ...
+   }
+]
+```
+
 WARNING:
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
+
+WARNING:
+The `epic_iid` attribute is deprecated and [scheduled for removal in API version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
+Please use `iid` of the `epic` attribute instead.
 
 NOTE:
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed

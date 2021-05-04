@@ -135,8 +135,8 @@ export default {
   <gl-tabs>
     <gl-tab title="Issues">
       <template #title>
-        <span>{{ __('Issues') }}</span
-        ><gl-badge class="gl-ml-2" variant="neutral">{{ issueCount }}</gl-badge>
+        {{ __('Issues') }}
+        <gl-badge class="gl-ml-2" size="sm" variant="muted">{{ issueCount }}</gl-badge>
       </template>
 
       <div class="card gl-bg-gray-10 gl-display-flex gl-flex-direction-row gl-flex-wrap gl-px-4">
@@ -153,9 +153,9 @@ export default {
 
         <div
           v-if="shouldShowFilterByLabel"
-          class="gl-display-flex gl-align-items-center gl-flex-basis-half gl-white-space-nowrap gl-my-3"
+          class="gl-display-flex gl-align-items-center gl-flex-basis-half gl-my-3"
         >
-          <label class="gl-mb-0 gl-mr-2">{{ __('Filter by label') }}</label>
+          <label class="gl-white-space-nowrap gl-mb-0 gl-mr-2">{{ __('Filter by label') }}</label>
           <labels-select
             :allow-label-create="false"
             :allow-label-edit="true"

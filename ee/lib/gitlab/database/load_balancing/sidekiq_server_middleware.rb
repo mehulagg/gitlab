@@ -30,6 +30,8 @@ module Gitlab
 
           location = job['database_write_location'] || job['database_replica_location']
 
+          return true unless location
+
           if replica_caught_up?(location)
             job[:database_chosen] = 'replica'
             false
@@ -48,8 +50,6 @@ module Gitlab
         end
 
         def replica_caught_up?(location)
-          return true unless location
-
           load_balancer.host.caught_up?(location)
         end
       end

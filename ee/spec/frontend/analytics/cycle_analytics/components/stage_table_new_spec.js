@@ -22,8 +22,10 @@ const [firstIssueEvent] = issueEvents;
 const [firstStagingEvent] = stagingEvents;
 const [firstTestEvent] = testEvents;
 const [firstReviewEvent] = reviewEvents;
+const pagination = { page: 1, hasNextPage: true };
 
 const findStageEvents = () => wrapper.findAllByTestId('vsa-stage-event');
+const findPagination = () => wrapper.findByTestId('vsa-stage-pagination');
 const findStageEventTitle = (ev) => extendedWrapper(ev).findByTestId('vsa-stage-event-title');
 
 function createComponent(props = {}, shallow = false) {
@@ -34,7 +36,8 @@ function createComponent(props = {}, shallow = false) {
         isLoading: false,
         stageEvents: issueEvents,
         noDataSvgPath,
-        currentStage: issueStage,
+        selectedStage: issueStage,
+        pagination,
         ...props,
       },
       stubs: {
@@ -90,7 +93,7 @@ describe('StageTable', () => {
     beforeEach(() => {
       wrapper = createComponent({
         stageEvents: [{ ...firstIssueEvent }],
-        currentStage: { ...issueStage, custom: false },
+        selectedStage: { ...issueStage, custom: false },
       });
     });
 
@@ -131,7 +134,7 @@ describe('StageTable', () => {
     beforeEach(() => {
       wrapper = createComponent({
         stageEvents: [{ ...firstReviewEvent }],
-        currentStage: { ...reviewStage, custom: false },
+        selectedStage: { ...reviewStage, custom: false },
       });
     });
 
@@ -145,7 +148,7 @@ describe('StageTable', () => {
     beforeEach(() => {
       wrapper = createComponent({
         stageEvents: [{ ...firstStagingEvent }],
-        currentStage: { ...stagingStage, custom: false },
+        selectedStage: { ...stagingStage, custom: false },
       });
     });
 
@@ -187,7 +190,7 @@ describe('StageTable', () => {
     beforeEach(() => {
       wrapper = createComponent({
         stageEvents: [{ ...firstTestEvent }],
-        currentStage: { ...testStage, custom: false },
+        selectedStage: { ...testStage, custom: false },
       });
     });
 
@@ -234,9 +237,18 @@ describe('StageTable', () => {
     });
   });
 
-  it('isLoading = true', () => {
-    wrapper = createComponent({ isLoading: true }, true);
-    expect(wrapper.find(GlLoadingIcon).exists()).toEqual(true);
+  describe('isLoading = true', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ isLoading: true }, true);
+    });
+
+    it('will display the loading icon', () => {
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    });
+
+    it('will not display pagination', () => {
+      expect(findPagination().exists()).toBe(false);
+    });
   });
 
   describe('with no stageEvents', () => {
@@ -261,6 +273,33 @@ describe('StageTable', () => {
     it('will display the custom message', () => {
       expect(wrapper.html()).not.toContain(notEnoughDataError);
       expect(wrapper.html()).toContain(emptyStateMessage);
+    });
+  });
+
+  describe('Pagination', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('will display the pagination component', () => {
+      expect(findPagination().exists()).toBe(true);
+    });
+
+    it('clicking prev or next will emit an event', async () => {
+      findPagination().vm.$emit('input', 2);
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.emitted('handleSelectPage')[0]).toEqual([{ page: 2 }]);
+    });
+
+    describe('with `hasNextPage=false', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ pagination: { page: 1, hasNextPage: false } });
+      });
+
+      it('will not display the pagination component', () => {
+        expect(findPagination().exists()).toBe(false);
+      });
     });
   });
 });

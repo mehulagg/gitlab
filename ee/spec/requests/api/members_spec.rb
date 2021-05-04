@@ -657,6 +657,16 @@ RSpec.describe API::Members do
 
           it_behaves_like 'successful deletion'
         end
+
+        context 'with a user that is not a member' do
+          it 'returns a relevant error message' do
+            user = create(:user)
+            delete api("/groups/#{group.id}/billable_members/#{user.id}", owner)
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+            expect(json_response['message']).to eq '400 Bad request - No member found for the given user_id'
+          end
+        end
       end
     end
   end

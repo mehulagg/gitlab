@@ -323,6 +323,10 @@ RSpec.describe GlobalPolicy do
     end
 
     context 'when feature is enabled and license include the feature' do
+      before do
+        stub_licensed_features(instance_level_devops_adoption: true)
+      end
+
       it { is_expected.to be_allowed(:view_instance_devops_adoption, :manage_devops_adoption_segments) }
 
       context 'for non-admins' do

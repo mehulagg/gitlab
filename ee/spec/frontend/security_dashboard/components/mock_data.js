@@ -26,7 +26,7 @@ export const generateVulnerabilities = () => [
     resolvedOnDefaultBranch: true,
     location: {
       image:
-        'registry.gitlab.com/groulot/container-scanning-test/master:5f21de6956aee99ddb68ae49498662d9872f50ff',
+        'registry.gitlab.com/groulot/container-scanning-test/main:5f21de6956aee99ddb68ae49498662d9872f50ff',
     },
     project: {
       nameWithNamespace: 'Administrator / Security reports',

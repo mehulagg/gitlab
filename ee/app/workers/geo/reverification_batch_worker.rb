@@ -3,6 +3,8 @@
 module Geo
   class ReverificationBatchWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include GeoQueue
     include LimitedCapacity::Worker
     include ::Gitlab::Geo::LogHelpers
@@ -13,6 +15,7 @@ module Geo
     MAX_RUNNING_JOBS = 1
 
     idempotent!
+    tags :exclude_from_kubernetes
     loggable_arguments 0
 
     def perform_work(replicable_name)

@@ -32,7 +32,6 @@
     width: 300px !important;
     min-height: none;
     max-height: none;
-    margin-bottom: $gl-spacing-scale-6 !important;
 
     a:not(.btn) {
       @include gl-reset-color;

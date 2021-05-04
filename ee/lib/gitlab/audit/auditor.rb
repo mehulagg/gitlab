@@ -50,7 +50,7 @@ module Gitlab
       private
 
       def record
-        events = ::Gitlab::Audit::EventQueue.current.reverse.map(&method(:build_event))
+        events = ::Gitlab::Audit::EventQueue.current.map { |message| build_event(message) }
 
         log_to_database(events)
         log_to_file(events)

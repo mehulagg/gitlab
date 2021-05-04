@@ -29,6 +29,8 @@ module Gitlab
       EPIC_VISIBLE = 'g_project_management_users_setting_epic_visible'
       EPIC_LABELS = 'g_project_management_epic_users_changing_labels'
       EPIC_DESTROYED = 'g_project_management_epic_destroyed'
+      EPIC_TASK_CHECKED = 'project_management_users_checking_epic_task'
+      EPIC_TASK_UNCHECKED = 'project_management_users_unchecking_epic_task'
 
       class << self
         def track_epic_created_action(author:)
@@ -117,6 +119,14 @@ module Gitlab
 
         def track_epic_destroyed(author:)
           track_unique_action(EPIC_DESTROYED, author)
+        end
+
+        def track_epic_task_checked(author:)
+          track_unique_action(EPIC_TASK_CHECKED, author)
+        end
+
+        def track_epic_task_unchecked(author:)
+          track_unique_action(EPIC_TASK_UNCHECKED, author)
         end
 
         private

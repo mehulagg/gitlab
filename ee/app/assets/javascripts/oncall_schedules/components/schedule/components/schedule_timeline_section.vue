@@ -34,11 +34,16 @@ export default {
   },
   methods: {
     updateShiftStyles() {
+      const timelineWidth = this.$refs.timelineHeaderWrapper.getBoundingClientRect().width;
+      // Don't re-size the schedule grid if we collapse another schedule
+      if (timelineWidth === 0) {
+        return;
+      }
+
       this.$apollo.mutate({
         mutation: updateTimelineWidthMutation,
         variables: {
-          timelineWidth:
-            this.$refs.timelineHeaderWrapper.getBoundingClientRect().width - TIMELINE_CELL_WIDTH,
+          timelineWidth: timelineWidth - TIMELINE_CELL_WIDTH,
         },
       });
     },

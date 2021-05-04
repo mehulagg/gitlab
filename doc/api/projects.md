@@ -94,7 +94,7 @@ When `simple=true` or the user is unauthenticated this returns something like:
     "last_activity_at": "2013-09-30T13:46:02Z",
     "forks_count": 0,
     "avatar_url": "http://example.com/uploads/project/avatar/4/uploads/avatar.png",
-    "star_count": 0,
+    "star_count": 0
   },
   {
     "id": 6,
@@ -189,7 +189,7 @@ When the user is authenticated and `simple` is not set this returns something li
       "labels": "http://example.com/api/v4/projects/1/labels",
       "events": "http://example.com/api/v4/projects/1/events",
       "members": "http://example.com/api/v4/projects/1/members"
-    },
+    }
   },
   {
     "id": 6,
@@ -902,7 +902,6 @@ GET /projects/:id
   "merge_method": "merge",
   "auto_devops_enabled": true,
   "auto_devops_deploy_strategy": "continuous",
-  "repository_storage": "default",
   "approvals_before_merge": 0,
   "mirror": false,
   "mirror_user_id": 45,
@@ -986,7 +985,7 @@ If the project is a fork, and you provide a valid token to authenticate, the
         "name": "MIT License",
         "nickname": null,
         "html_url": "http://choosealicense.com/licenses/mit/",
-        "source_url": "https://opensource.org/licenses/MIT",
+        "source_url": "https://opensource.org/licenses/MIT"
       },
       "star_count":3812,
       "forks_count":3561,
@@ -1113,6 +1112,8 @@ POST /projects
 
 | Attribute                                                   | Type    | Required               | Description |
 |-------------------------------------------------------------|---------|------------------------|-------------|
+| `name`                                                      | string  | **{check-circle}** Yes (if path isn't provided) | The name of the new project. Equals path if not provided. |
+| `path`                                                      | string  | **{check-circle}** Yes (if name isn't provided) | Repository name for new project. Generated based on name if not provided (generated as lowercase with dashes). |
 | `allow_merge_on_skipped_pipeline`                           | boolean | **{dotted-circle}** No | Set whether or not merge requests can be merged with skipped jobs. |
 | `analytics_access_level`                                    | string  | **{dotted-circle}** No | One of `disabled`, `private` or `enabled` |
 | `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. |
@@ -1145,7 +1146,6 @@ POST /projects
 | `merge_requests_enabled`                                    | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable merge requests for this project. Use `merge_requests_access_level` instead. |
 | `mirror_trigger_builds` **(PREMIUM)**                       | boolean | **{dotted-circle}** No | Pull mirroring triggers builds. |
 | `mirror` **(PREMIUM)**                                      | boolean | **{dotted-circle}** No | Enables pull mirroring in a project. |
-| `name`                                                      | string  | **{check-circle}** Yes (if path isn't provided) | The name of the new project. Equals path if not provided. |
 | `namespace_id`                                              | integer | **{dotted-circle}** No | Namespace for the new project (defaults to the current user's namespace). |
 | `operations_access_level`                                   | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `only_allow_merge_if_all_discussions_are_resolved`          | boolean | **{dotted-circle}** No | Set whether merge requests can only be merged when all the discussions are resolved. |
@@ -1153,7 +1153,6 @@ POST /projects
 | `packages_enabled`                                          | boolean | **{dotted-circle}** No | Enable or disable packages repository feature. |
 | `pages_access_level`                                        | string  | **{dotted-circle}** No | One of `disabled`, `private`, `enabled`, or `public`. |
 | `requirements_access_level`                                 | string  | **{dotted-circle}** No | One of `disabled`, `private`, `enabled` or `public` |
-| `path`                                                      | string  | **{check-circle}** Yes (if name isn't provided) | Repository name for new project. Generated based on name if not provided (generated as lowercase with dashes). |
 | `printing_merge_request_link_enabled`                       | boolean | **{dotted-circle}** No | Show link to create/view merge request when pushing from the command line. |
 | `public_builds`                                             | boolean | **{dotted-circle}** No | If `true`, jobs can be viewed by non-project members. |
 | `remove_source_branch_after_merge`                          | boolean | **{dotted-circle}** No | Enable `Delete source branch` option by default for all new merge requests. |
@@ -1187,6 +1186,8 @@ POST /projects/user/:user_id
 
 | Attribute                                                   | Type    | Required               | Description |
 |-------------------------------------------------------------|---------|------------------------|-------------|
+| `user_id`                                                   | integer | **{check-circle}** Yes | The user ID of the project owner. |
+| `name`                                                      | string  | **{check-circle}** Yes | The name of the new project. |
 | `allow_merge_on_skipped_pipeline`                           | boolean | **{dotted-circle}** No | Set whether or not merge requests can be merged with skipped jobs. |
 | `analytics_access_level`                                    | string  | **{dotted-circle}** No | One of `disabled`, `private` or `enabled` |
 | `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. |
@@ -1217,7 +1218,6 @@ POST /projects/user/:user_id
 | `merge_requests_enabled`                                    | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable merge requests for this project. Use `merge_requests_access_level` instead. |
 | `mirror_trigger_builds` **(PREMIUM)**                       | boolean | **{dotted-circle}** No | Pull mirroring triggers builds. |
 | `mirror` **(PREMIUM)**                                      | boolean | **{dotted-circle}** No | Enables pull mirroring in a project. |
-| `name`                                                      | string  | **{check-circle}** Yes | The name of the new project. |
 | `namespace_id`                                              | integer | **{dotted-circle}** No | Namespace for the new project (defaults to the current user's namespace). |
 | `operations_access_level`                                   | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `only_allow_merge_if_all_discussions_are_resolved`          | boolean | **{dotted-circle}** No | Set whether merge requests can only be merged when all the discussions are resolved. |
@@ -1241,7 +1241,6 @@ POST /projects/user/:user_id
 | `tag_list`                                                  | array   | **{dotted-circle}** No | The list of tags for a project; put array of tags, that should be finally assigned to a project. |
 | `template_name`                                             | string  | **{dotted-circle}** No | When used without `use_custom_template`, name of a [built-in project template](../user/project/working_with_projects.md#built-in-templates). When used with `use_custom_template`, name of a custom project template. |
 | `use_custom_template` **(PREMIUM)**                         | boolean | **{dotted-circle}** No | Use either custom [instance](../user/admin_area/custom_project_templates.md) or [group](../user/group/custom_project_templates.md) (with `group_with_project_templates_id`) project template. |
-| `user_id`                                                   | integer | **{check-circle}** Yes | The user ID of the project owner. |
 | `visibility`                                                | string  | **{dotted-circle}** No | See [project visibility level](#project-visibility-level). |
 | `wiki_access_level`                                         | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `wiki_enabled`                                              | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable wiki for this project. Use `wiki_access_level` instead. |
@@ -1661,26 +1660,26 @@ Example responses:
 [
   {
     "starred_since": "2019-01-28T14:47:30.642Z",
-    "user":
-      {
+    "user": {
         "id": 1,
         "username": "jane_smith",
         "name": "Jane Smith",
         "state": "active",
         "avatar_url": "http://localhost:3000/uploads/user/avatar/1/cd8.jpeg",
         "web_url": "http://localhost:3000/jane_smith"
-      }
+    }
   },
+  {
     "starred_since": "2018-01-02T11:40:26.570Z",
-    "user":
-      {
-        "id": 2,
-        "username": "janine_smith",
-        "name": "Janine Smith",
-        "state": "blocked",
-        "avatar_url": "http://gravatar.com/../e32131cd8.jpeg",
-        "web_url": "http://localhost:3000/janine_smith"
-      }
+    "user": {
+      "id": 2,
+      "username": "janine_smith",
+      "name": "Janine Smith",
+      "state": "blocked",
+      "avatar_url": "http://gravatar.com/../e32131cd8.jpeg",
+      "web_url": "http://localhost:3000/janine_smith"
+    }
+  }
 ]
 ```
 

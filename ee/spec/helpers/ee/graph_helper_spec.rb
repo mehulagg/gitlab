@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe EE::GraphHelper do
   let_it_be(:current_user) { create(:user) }
+
   let(:project) { create(:project, :private) }
   let(:is_feature_licensed) { true }
   let(:is_user_authorized) { true }

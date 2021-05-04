@@ -4,10 +4,12 @@ require 'spec_helper'
 
 RSpec.describe Registrations::WelcomeController do
   let_it_be(:user) { create(:user) }
-  let_it_be(:another_user) { create(:user) }
-  let_it_be(:project) { create(:project, creator: user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project) }
 
   describe '#continuous_onboarding_getting_started' do
+    let_it_be(:project) { create(:project, group: group) }
+
     subject(:continuous_onboarding_getting_started) do
       get :continuous_onboarding_getting_started, params: { project_id: project.id }
     end
@@ -16,17 +18,19 @@ RSpec.describe Registrations::WelcomeController do
       it { is_expected.to redirect_to new_user_session_path }
     end
 
-    context 'with the creator user signed in' do
+    context 'with an owner user signed in' do
       before do
         sign_in(user)
+        project.group.add_owner(user)
       end
 
       it { is_expected.to render_template(:continuous_onboarding_getting_started) }
     end
 
-    context 'with any other user signed in except the creator' do
+    context 'with a non-owner user signed in' do
       before do
-        sign_in(another_user)
+        sign_in(user)
+        project.group.add_maintainer(user)
       end
 
       it { is_expected.to have_gitlab_http_status(:not_found) }
@@ -34,6 +38,8 @@ RSpec.describe Registrations::WelcomeController do
   end
 
   describe '#trial_getting_started' do
+    let_it_be(:project) { create(:project, group: group) }
+
     subject(:trial_getting_started) do
       get :trial_getting_started, params: { learn_gitlab_project_id: project.id }
     end
@@ -42,17 +48,19 @@ RSpec.describe Registrations::WelcomeController do
       it { is_expected.to redirect_to new_user_session_path }
     end
 
-    context 'with the creator user signed in' do
+    context 'with an owner user signed in' do
       before do
         sign_in(user)
+        project.group.add_owner(user)
       end
 
       it { is_expected.to render_template(:trial_getting_started) }
     end
 
-    context 'with any other user signed in except the creator' do
+    context 'with a non-owner user signed' do
       before do
-        sign_in(another_user)
+        sign_in(user)
+        project.group.add_maintainer(user)
       end
 
       it { is_expected.to have_gitlab_http_status(:not_found) }
@@ -60,6 +68,8 @@ RSpec.describe Registrations::WelcomeController do
   end
 
   describe '#trial_onboarding_board' do
+    let_it_be(:project) { create(:project, group: group) }
+
     subject(:trial_onboarding_board) do
       get :trial_onboarding_board, params: { learn_gitlab_project_id: project.id }
     end
@@ -68,17 +78,19 @@ RSpec.describe Registrations::WelcomeController do
       it { is_expected.to redirect_to new_user_session_path }
     end
 
-    context 'with any other user signed in except the creator' do
+    context 'with a non-owner user signin' do
       before do
-        sign_in(another_user)
+        sign_in(user)
+        project.group.add_maintainer(user)
       end
 
       it { is_expected.to have_gitlab_http_status(:not_found) }
     end
 
-    context 'with the creator user signed in' do
+    context 'with an owner user signs in' do
       before do
         sign_in(user)
+        project.group.add_owner(user)
       end
 
       context 'gitlab onboarding project is not imported yet' do

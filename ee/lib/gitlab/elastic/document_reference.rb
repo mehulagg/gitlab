@@ -58,7 +58,7 @@ module Gitlab
           when Array
             serialize_array(anything)
           else
-            raise InvalidError.new("Don't know how to serialize #{anything.class}")
+            raise InvalidError, "Don't know how to serialize #{anything.class}"
           end
         end
 
@@ -85,7 +85,7 @@ module Gitlab
         private
 
         def test_array!(array)
-          raise InvalidError.new("Bad array representation: #{array.inspect}") unless
+          raise InvalidError, "Bad array representation: #{array.inspect}" unless
             (3..4).cover?(array.size)
         end
       end
