@@ -46,9 +46,7 @@ describe('Dashboard', () => {
       stubs: {
         DashboardHeader,
       },
-      provide: {
-        hasManagedPrometheus: false,
-      },
+      provide: { hasManagedPrometheus: false },
       ...options,
     });
   };

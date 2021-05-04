@@ -20,9 +20,7 @@ const MockApp = {
   template: `<router-view  :dashboard-props="dashboardProps"/>`,
 };
 
-const provide = {
-  hasManagedPrometheus: false,
-};
+const provide = { hasManagedPrometheus: false };
 
 describe('Monitoring router', () => {
   let router;
