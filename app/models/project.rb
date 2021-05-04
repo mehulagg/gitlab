@@ -2597,7 +2597,7 @@ class Project < ApplicationRecord
   end
 
   def build_service(name)
-    "#{name}_service".classify.constantize.new(project_id: id)
+    Service.service_name_to_model(name).new(project_id: id)
   end
 
   def services_templates
