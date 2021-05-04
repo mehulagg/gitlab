@@ -58,11 +58,10 @@ RSpec.describe ApplicationExperiment, :experiment do
   end
 
   describe "publishing results" do
-    it "doesn't track or push data to the client if we shouldn't track", :snowplow do
+    it "doesn't track an event if we shouldn't", :snowplow do
       allow(subject).to receive(:should_track?).and_return(false)
-      expect(Gon).not_to receive(:push)
 
-      subject.publish(:action)
+      subject.publish(nil)
 
       expect_no_snowplow_event
     end
@@ -70,22 +69,8 @@ RSpec.describe ApplicationExperiment, :experiment do
     it "tracks the assignment" do
       expect(subject).to receive(:track).with(:assignment)
 
-      subject.publish
+      subject.publish(nil)
     end
-
-    it "pushes the experiment knowledge into the client using Gon" do
-      expect(Gon).to receive(:push).with({ experiment: { 'namespaced/stub' => subject.signature } }, true)
-
-      subject.publish
-    end
-
-    it "handles when Gon raises exceptions (like when it can't be pushed into)" do
-      expect(Gon).to receive(:push).and_raise(NoMethodError)
-
-      expect { subject.publish }.not_to raise_error
-    end
-  end
-
   it "can exclude from within the block" do
     expect(described_class.new('namespaced/stub') { |e| e.exclude! }).to be_excluded
   end

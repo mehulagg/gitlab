@@ -1,4 +1,9 @@
-- new_repo_experiment_text = content_for(:new_repo_experiment)
+- new_repo_text = experiment(:new_repo, user: current_user) do |e|
+  - e.use do
+    = _('New project')
+  - e.try do
+    = _('New project/repository')
+
 %li.header-new.dropdown{ data: { track_label: "new_dropdown", track_event: "click_dropdown", track_experiment: "new_repo" } }
   = link_to new_project_path, class: "header-new-dropdown-toggle has-tooltip qa-new-menu-toggle", id: "js-onboarding-new-project-link", title: _("New..."), ref: 'tooltip', aria: { label: _("New...") }, data: { toggle: 'dropdown', placement: 'bottom', container: 'body', display: 'static' } do
     = sprite_icon('plus-square')
@@ -13,7 +18,7 @@
           %li.dropdown-bold-header
             = _('This group')
           - if create_group_project
-            %li= link_to new_repo_experiment_text, new_project_path(namespace_id: @group.id), data: { track_experiment: 'new_repo', track_event: 'click_link_new_project_group', track_label: 'plus_menu_dropdown' }
+            %li= link_to new_repo_text, new_project_path(namespace_id: @group.id), data: { track_experiment: 'new_repo', track_event: 'click_link_new_project_group', track_label: 'plus_menu_dropdown' }
           - if create_group_subgroup
             %li= link_to _('New subgroup'), new_group_path(parent_id: @group.id), data: { track_event: 'click_link_new_subgroup', track_label: 'plus_menu_dropdown' }
           = render_if_exists 'layouts/header/create_epic_new_dropdown_item'
@@ -40,7 +45,7 @@
           %li.divider
           %li.dropdown-bold-header GitLab
       - if current_user.can_create_project?
-        %li= link_to new_repo_experiment_text, new_project_path, class: 'qa-global-new-project-link', data: { track_experiment: 'new_repo', track_event: 'click_link_new_project', track_label: 'plus_menu_dropdown' }
+        %li= link_to new_repo_text, new_project_path, class: 'qa-global-new-project-link', data: { track_experiment: 'new_repo', track_event: 'click_link_new_project', track_label: 'plus_menu_dropdown' }
       - if current_user.can_create_group?
         %li= link_to _('New group'), new_group_path, data: { track_event: 'click_link_new_group', track_label: 'plus_menu_dropdown' }
       - if current_user.can?(:create_snippet)

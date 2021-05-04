@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import { DEFAULT_VARIANT, CANDIDATE_VARIANT, TRACKING_CONTEXT_SCHEMA } from './constants';
 
 export function getExperimentData(experimentName) {
-  return get(window, ['gon', 'experiment', experimentName]);
+  return get(window, ['gl', 'experiments', experimentName]);
 }
 
 export function getExperimentContexts(...experimentNames) {
