@@ -25,7 +25,8 @@ module Types
       field :merge_request_diff_registries, ::Types::Geo::MergeRequestDiffRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::MergeRequestDiffRegistriesResolver,
-            description: 'Find merge request diff registries on this Geo node.'
+            description: 'Find merge request diff registries on this Geo node.',
+            feature_flag: :geo_merge_request_diff_replication
       field :package_file_registries, ::Types::Geo::PackageFileRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::PackageFileRegistriesResolver,
