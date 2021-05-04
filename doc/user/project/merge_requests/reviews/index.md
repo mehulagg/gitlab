@@ -5,61 +5,95 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# Reviewing and managing merge requests **(FREE)**
+# Review and manage merge requests **(FREE)**
 
-Merge requests are the primary method of making changes to files in a GitLab project.
-Changes are proposed by [creating and submitting a merge request](../creating_merge_requests.md),
-which is then reviewed, and accepted (or rejected).
+[Merge requests](../index.md) are the primary method of making changes to files in a
+GitLab project. [Create and submit a merge request](../creating_merge_requests.md)
+to propose changes. Your team makes [suggestions](suggestions.md) and leaves
+[comments](../../../discussions/index.md). When your work is reviewed, your team
+members can choose to accept or reject it.
 
-## View project merge requests
+## View merge requests
 
-View all the merge requests in a project by navigating to **Project > Merge Requests**.
+You can view merge requests for a specific project, or for all projects in a group:
 
-When you access your project's merge requests, GitLab displays them in a list.
-Use the tabs to quickly filter by open and closed. You can also [search and filter the results](../../../search/index.md#filtering-issue-and-merge-request-lists).
+- **Specific project**: In the left sidebar, go to **Project > Merge Requests**.
+- **All projects in a group**: In the left sidebar, go to **Group > Merge Requests**.
+  If your group contains subgroups, this view also displays merge requests from the subgroup projects.
+  GitLab displays a count of open merge requests in the left sidebar, but
+  [caches the value](#cached-merge-request-count) for groups with a large number of
+  open merge requestsion.
+
+GitLab displays open merge requests, with tabs to filter the list by open and closed status:
 
 ![Project merge requests list view](img/project_merge_requests_list_view_v13_5.png)
 
-## View merge requests for all projects in a group
+You can [search and filter](../../../search/index.md#filtering-issue-and-merge-request-lists),
+the results, or select a merge request to begin a review.
 
-View merge requests in all projects in the group, including all projects of all descendant subgroups of the group. Navigate to **Group > Merge Requests** to view these merge requests. This view also has the open and closed merge requests tabs.
+## Review a merge request
 
-You can [search and filter the results](../../../search/index.md#filtering-issue-and-merge-request-lists) from here.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4213) in GitLab Premium 11.4.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/28154) to GitLab Free in 13.1.
 
-![Group Issues list view](img/group_merge_requests_list_view.png)
+When you review a merge request, you can create comments that are visible only
+to you. When you're ready, you can publish them together in a single action.
+To start your review:
 
-## Cached merge request count
+1. Go to the merge request you want to review, and select the **Changes** tab.
+1. Select a line of code, or highlight a set of lines.
+1. Write your first comment, and select **Start a review** below your comment:
+   ![Starting a review](img/mr_review_start.png)
+1. Continue adding comments to lines of code, and select the appropriate button after
+   you write a comment:
+   - **Add to review**: Keep this comment private and add to the current review.
+     These review comments are marked **Pending** and are visible only to you.
+   - **Add comment now**: Submits the specific comment as a regular comment instead of as part of the review.
+1. (Optional) You can use [quick actions](../../quick_actions.md) inside review comments.
+   The comment shows the actions to perform after publication, but does not perform them
+   until you submit your review.
+1. When your review is complete, you can [submit the review](#submit-a-review). Your comments
+   are now visible, and any quick actions included your comments are performed.
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299542) in GitLab 13.11.
-> - It's [deployed behind a feature flag](../../../feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-cached-merge-request-count).
+### Submit a review
 
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+You can submit your completed review in multiple ways:
 
-In a group, the sidebar displays the total count of open merge requests and this value is cached if higher
-than 1000. The cached value is rounded to thousands (or millions) and updated every 24 hours.
+- Use the `/submit_review` [quick action](../project/quick_actions.md) in the text of a non-review comment.
+- When creating a review comment, select **Submit review**.
+- Scroll to the bottom of the screen and select **Submit review**.
 
-### Enable or disable cached merge request count **(FREE SELF)**
+When you submit your review, GitLab:
 
-Cached merge request count in the left sidebar is under development but ready for production use. It is
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../../administration/feature_flags.md)
-can disable it.
+- Publishes the comments in your review.
+- Sends a single email to every notifiable user of the merge request, with your
+  review comments attached. Replying to this email creates a new comment on the merge request.
+- Perform any quick actions you added to your review comments.
 
-To disable it:
+### Resolving/Unresolving threads
 
-```ruby
-Feature.disable(:cached_sidebar_merge_requests_count)
-```
+Review comments can also resolve/unresolve [resolvable threads](#resolvable-comments-and-threads).
+When replying to a comment, a checkbox is displayed that you can click to resolve or unresolve
+the thread after publication.
 
-To enable it:
+![Resolve checkbox](img/mr_review_resolve.png)
 
-```ruby
-Feature.enable(:cached_sidebar_merge_requests_count)
-```
+If a particular pending comment resolves or unresolves the thread, this is shown on the pending
+comment itself.
+
+![Resolve status](img/mr_review_resolve2.png)
+
+![Unresolve status](img/mr_review_unresolve.png)
+
+### Adding a new comment
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8225) in GitLab 13.10.
+
+If you have a review in progress, you will be presented with the option to **Add to review**:
+
+![New thread](img/mr_review_new_comment_v13_11.png)
+
+
 
 ## Semi-linear history merge requests
 
@@ -450,3 +484,36 @@ git checkout origin/merge-requests/1
 ```
 
 All the above can be done with the [`git-mr`](https://gitlab.com/glensc/git-mr) script.
+
+## Cached merge request count
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299542) in GitLab 13.11.
+> - It's [deployed behind a feature flag](../../../feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-cached-merge-request-count).
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+In a group, the sidebar displays the total count of open merge requests and this value is cached if higher
+than 1000. The cached value is rounded to thousands (or millions) and updated every 24 hours.
+
+### Enable or disable cached merge request count **(FREE SELF)**
+
+Cached merge request count in the left sidebar is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../../administration/feature_flags.md)
+can disable it.
+
+To disable it:
+
+```ruby
+Feature.disable(:cached_sidebar_merge_requests_count)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:cached_sidebar_merge_requests_count)
+```

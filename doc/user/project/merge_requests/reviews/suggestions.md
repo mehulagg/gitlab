@@ -5,18 +5,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# Suggest Changes
+# Suggest changes **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/18008) in GitLab 11.6.
 > - Custom commit messages for suggestions was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25381) in GitLab 13.9 behind a [feature flag](../../../feature_flags.md), disabled by default.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/297404) in GitLab 13.10.
 
-As a reviewer, you're able to suggest code changes with a
-Markdown syntax in merge request diff threads. Then, the
-merge request author (or other users with appropriate
-[permission](../../../permissions.md)) is able to apply these
-Suggestions with a click, which generates a commit in
-the merge request authored by the user that applied them.
+As a reviewer, you're able to suggest code changes with a Markdown syntax in merge request
+diff threads. Then, the merge request author (or other users with appropriate
+[permission](../../../permissions.md)) is able to apply these suggestions with a click,
+which generates a commit in the merge request authored by the user that applied them.
 
 1. Choose a line of code to be changed, add a new comment, then click
    on the **Insert suggestion** icon in the toolbar:
@@ -27,7 +25,8 @@ the merge request authored by the user that applied them.
 
    ![Add a suggestion into a code block tagged properly](img/make_suggestion_v13_9.png)
 
-1. Click either **Start a review** or **Add to review** to add your comment to a [review](index.md), or **Add comment now** to add the comment to the thread immediately.
+1. Click either **Start a review** or **Add to review** to add your comment to a
+   [review](index.md), or **Add comment now** to add the comment to the thread immediately.
 
    The Suggestion in the comment can be applied by the merge request author
    directly from the merge request:
@@ -84,11 +83,12 @@ instead of the usual three.
 GitLab uses a default commit message
 when applying Suggestions: `Apply %{suggestions_count} suggestion(s) to %{files_count} file(s)`
 
-For example, consider that a user applied 3 suggestions to 2 different files, the default commit message is: **Apply 3 suggestion(s) to 2 file(s)**
+For example, consider that a user applied 3 suggestions to 2 different files, the
+default commit message is: **Apply 3 suggestion(s) to 2 file(s)**
 
-These commit messages can be customized to follow any guidelines you might have. To do so, expand the **Merge requests**
-tab within your project's **General** settings and change the
-**Merge suggestions** text:
+These commit messages can be customized to follow any guidelines you might have.
+To do so, expand the **Merge requests** tab within your project's **General**
+settings and change the **Merge suggestions** text:
 
 ![Custom commit message for applied Suggestions](img/suggestions_custom_commit_messages_v13_1.jpg)
 
