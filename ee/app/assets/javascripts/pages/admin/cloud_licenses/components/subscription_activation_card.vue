@@ -60,12 +60,9 @@ export default {
       @subscription-activation-failure="handleFormActivationFailure"
     />
     <template #footer>
-      <gl-link
-        v-if="licenseUploadPath"
-        data-testid="upload-license-link"
-        :href="licenseUploadPath"
-        >{{ $options.i18n.uploadLegacyLicense }}</gl-link
-      >
+      <gl-link v-if="licenseUploadPath" data-testid="upload-license-link" :href="licenseUploadPath"
+        >{{ $options.i18n.uploadLegacyLicense }}
+      </gl-link>
     </template>
   </gl-card>
 </template>
