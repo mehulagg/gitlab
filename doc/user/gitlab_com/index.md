@@ -103,7 +103,7 @@ Any settings or feature limits not listed here are using the defaults listed in 
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
 | Max test cases per [unit test report](../../ci/unit_test_reports.md) | `500_000` | Unlimited |
-| [Max registered runners](../../administration/instance_limits.md#number-of-registered-runners-per-scope) | `20` per top-level group / `5` per project for Free tier,<br/>`2_000` per top-level group / `100` per project for all paid tiers | `2_000` per top-level group / `100` per project |
+| [Max registered runners](../../administration/instance_limits.md#number-of-registered-runners-per-scope) | `50` per-project and per-group for Free tier,<br/>`1_000` per-group for all paid tiers / `1_000` per-project for all paid tiers | `1_000` per-group / `1_000` per-project |
 
 ## Account and limit settings
 

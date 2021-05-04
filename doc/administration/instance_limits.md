@@ -449,8 +449,8 @@ the runner registration token.
 
     | Runner scope                                | Default value |
     |---------------------------------------------|---------------|
-    | `ci_registered_group_runners`               | 2000          |
-    | `ci_registered_project_runners`             | 100           |
+    | `ci_registered_group_runners`               | 1000          |
+    | `ci_registered_project_runners`             | 1000          |
 
     To update these limits, run the following in the
     [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
