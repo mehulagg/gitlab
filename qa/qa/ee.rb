@@ -120,7 +120,6 @@ module QA
           autoload :Settings, 'qa/ee/page/project/sub_menus/settings'
           autoload :Project, 'qa/ee/page/project/sub_menus/project'
           autoload :LicenseCompliance, 'qa/ee/page/project/sub_menus/license_compliance'
-          autoload :ThreatMonitoring, 'qa/ee/page/project/sub_menus/threat_monitoring'
         end
 
         module Issue
