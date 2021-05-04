@@ -1,5 +1,5 @@
 <script>
-import { GlIcon, GlIntersectionObserver } from '@gitlab/ui';
+import { GlButton, GlIcon, GlIntersectionObserver } from '@gitlab/ui';
 import Visibility from 'visibilityjs';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Poll from '~/lib/utils/poll';
@@ -17,6 +17,7 @@ import titleComponent from './title.vue';
 
 export default {
   components: {
+    GlButton,
     GlIcon,
     GlIntersectionObserver,
     titleComponent,
@@ -415,7 +416,7 @@ export default {
 
 <template>
   <div>
-    <div v-if="canUpdate && showForm">
+    <div v-if="!isStickyHeaderShowing && canUpdate && showForm">
       <form-component
         :form-state="formState"
         :initial-description-text="initialDescriptionText"
@@ -474,6 +475,33 @@ export default {
               >
                 {{ state.titleText }}
               </p>
+              <gl-button
+                title="Edit"
+                aria-label="Edit"
+                icon="pencil"
+                class="btn-edit js-issuable-edit qa-edit-button"
+                @click="showForm = true"
+              />
+            </div>
+            <div
+              v-if="isStickyHeaderShowing && canUpdate && showForm"
+              class="issue-sticky-header-text gl-mx-auto"
+            >
+              <form-component
+                :form-state="formState"
+                :initial-description-text="initialDescriptionText"
+                :can-destroy="canDestroy"
+                :issuable-templates="issuableTemplates"
+                :markdown-docs-path="markdownDocsPath"
+                :markdown-preview-path="markdownPreviewPath"
+                :project-path="projectPath"
+                :project-id="projectId"
+                :project-namespace="projectNamespace"
+                :show-delete-button="showDeleteButton"
+                :can-attach-file="canAttachFile"
+                :enable-autocomplete="enableAutocomplete"
+                :issuable-type="issuableType"
+              />
             </div>
           </div>
         </transition>
