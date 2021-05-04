@@ -44,6 +44,11 @@ module Mutations
             null: true,
             description: 'The commit after mutation.'
 
+      field :content,
+            [GraphQL::STRING_TYPE],
+            null: true,
+            description: 'Content that was committed.'
+
       authorize :push_code
 
       def resolve(project_path:, branch:, message:, actions:, **args)
@@ -59,6 +64,7 @@ module Mutations
         result = ::Files::MultiService.new(project, current_user, attributes).execute
 
         {
+          content: result[:content],
           commit: (project.repository.commit(result[:result]) if result[:status] == :success),
           commit_pipeline_path: UrlHelpers.new.graphql_etag_pipeline_sha_path(result[:result]),
           errors: Array.wrap(result[:message])

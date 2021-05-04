@@ -27,9 +27,9 @@ module Commits
     def execute
       validate!
 
-      new_commit = create_commit!
+      new_commit, content = create_commit!
 
-      success(result: new_commit)
+      success.merge(result: new_commit, content: content)
     rescue ChangeError => ex
       Gitlab::ErrorTracking.log_exception(ex)
       error(ex.message, pass_back: { error_code: ex.error_code })
