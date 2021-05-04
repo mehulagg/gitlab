@@ -24,8 +24,6 @@ export default () => {
     valueStreamAnalyticsPathNavigation: hasPathNavigation = false,
   } = gon?.features;
 
-  console.log('filters', urlQueryToFilter(window.location.search));
-
   const {
     author_username = null,
     milestone_title = null,
@@ -35,23 +33,14 @@ export default () => {
     direction,
   } = urlQueryToFilter(window.location.search);
 
-  console.log('BASE::sort', sort);
-  console.log('BASE::direction', direction);
-
   store.dispatch('initializeCycleAnalytics', {
     ...initialData,
     selectedAuthor: author_username,
     selectedMilestone: milestone_title,
     selectedAssigneeList: assignee_username,
     selectedLabelList: label_name,
-    featureFlags: {
-      hasDurationChart,
-      hasPathNavigation,
-    },
-    pagination: {
-      sort: sort?.value || null,
-      direction: direction?.value || null,
-    },
+    featureFlags: { hasDurationChart, hasPathNavigation },
+    pagination: { sort: sort?.value || null, direction: direction?.value || null },
   });
 
   return new Vue({

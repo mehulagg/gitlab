@@ -102,11 +102,6 @@ export default {
       pagination = {},
     } = {},
   ) {
-    console.log('initialize::state.pagination', state.pagination);
-    console.log('initialize::pagination', pagination);
-    console.log('page', pagination.page ?? state.pagination.page);
-    console.log('sort', pagination.sort ?? state.pagination.sort);
-    console.log('direction', pagination.direction ?? state.pagination.direction);
     state.isLoading = true;
     state.currentGroup = group;
     state.selectedProjects = selectedProjects;

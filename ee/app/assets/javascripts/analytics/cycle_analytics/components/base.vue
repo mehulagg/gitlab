@@ -126,8 +126,7 @@ export default {
       const selectedProjectIds = this.selectedProjectIds?.length ? this.selectedProjectIds : null;
       const stageParams = !this.isOverviewStageSelected
         ? {
-            // the `overview` stage is always the default, so dont persist the id if its selected
-            stage_id: this.selectedStage?.id || null,
+            stage_id: this.selectedStage?.id || null, // the `overview` stage is always the default, so dont persist the id if its selected
             sort: this.pagination?.sort || null,
             direction: this.pagination?.direction || null,
           }

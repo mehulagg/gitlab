@@ -16,6 +16,10 @@ import StageTableNav from 'ee/analytics/cycle_analytics/components/stage_table_n
 import StageTableNew from 'ee/analytics/cycle_analytics/components/stage_table_new.vue';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
+import {
+  PAGINATION_SORT_FIELD_END_EVENT,
+  PAGINATION_SORT_DIRECTION_DESC,
+} from 'ee/analytics/cycle_analytics/constants';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import Daterange from 'ee/analytics/shared/components/daterange.vue';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
@@ -606,11 +610,13 @@ describe('Value Stream Analytics component', () => {
     });
   });
 
-  describe('Url parameters', () => {
+  describe.only('Url parameters', () => {
     const defaultParams = {
       value_stream_id: selectedValueStream.id,
       created_after: toYmd(mockData.startDate),
       created_before: toYmd(mockData.endDate),
+      sort: PAGINATION_SORT_FIELD_END_EVENT,
+      direction: PAGINATION_SORT_DIRECTION_DESC,
       project_ids: null,
       stage_id: null,
     };
