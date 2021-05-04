@@ -5529,7 +5529,7 @@ msgstr ""
 msgid "By authenticating with an account tied to an Enterprise e-mail address, it is understood that this account is an Enterprise User. "
 msgstr ""
 
-msgid "By clicking Register, I agree that I have read and accepted the %{company_name} %{linkStart}Terms of Use and Privacy Policy%{linkEnd}"
+msgid "By clicking %{buttonText}, I agree that I have read and accepted the %{company_name} %{linkStart}Terms of Use and Privacy Policy%{linkEnd}"
 msgstr ""
 
 msgid "By default GitLab sends emails in HTML and plain text formats so mail clients can choose what format to use. Disable this option if you only want to send emails in plain text format."
@@ -9371,6 +9371,9 @@ msgid "Create your first page"
 msgstr ""
 
 msgid "Create your group"
+msgstr ""
+
+msgid "Create your own profile to collaborate with your teammates in issues, merge requests, and more."
 msgstr ""
 
 msgid "Create/import your first project"
@@ -18667,6 +18670,9 @@ msgid "Job|with"
 msgstr ""
 
 msgid "Join Zoom meeting"
+msgstr ""
+
+msgid "Join your team"
 msgstr ""
 
 msgid "Joined %{time_ago}"

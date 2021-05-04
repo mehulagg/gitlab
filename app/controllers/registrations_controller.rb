@@ -17,10 +17,21 @@ class RegistrationsController < Devise::RegistrationsController
 
   def new
     @resource = build_resource
+
+    experiment(:invite_signup_page_interaction, actor: nil) do |experiment_instance|
+      experiment_instance.use do
+        render template: 'devise/registrations/invite_new', layout: 'invite_signup'
+      end
+      experiment_instance.try do
+        render template: 'devise/registrations/invite_new', layout: 'invite_signup'
+      end
+      experiment_instance.track(:view)
+    end
   end
 
   def create
     set_user_state
+    experiment(:invite_signup_page_interaction, actor: nil).track(:form_submission)
     accept_pending_invitations
 
     super do |new_user|
