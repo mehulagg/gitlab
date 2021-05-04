@@ -31,7 +31,7 @@ You can create as many personal access tokens as you like.
 1. Select **Edit profile**.
 1. In the left sidebar, select **Access Tokens**.
 1. Enter a name and optional expiry date for the token.
-1. Select the [desired scopes](#limiting-scopes-of-a-personal-access-token).
+1. Select the [desired scopes](#personal-access-token-scopes).
 1. Select **Create personal access token**.
 
 Save the personal access token somewhere safe. After you leave the page,
