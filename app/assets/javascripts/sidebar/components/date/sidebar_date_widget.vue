@@ -284,7 +284,7 @@ export default {
       <gl-datepicker
         ref="datePicker"
         class="gl-relative"
-        :value="parsedDate"
+        :default-value="parsedDate"
         show-clear-button
         @input="setDate"
         @clear="setDate(null)"
