@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class AddVerificationToMergeRequestDiffRegistry < ActiveRecord::Migration[6.0]
-
   def change
     add_column :merge_request_diff_registry, :verification_started_at, :datetime_with_timezone
     add_column :merge_request_diff_registry, :verified_at, :datetime_with_timezone
