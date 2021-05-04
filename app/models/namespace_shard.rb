@@ -1,12 +1,21 @@
-# frozen_string_lteral: true
+# frozen_string_literal: true
 
 class NamespaceShard < ApplicationRecord
   self.abstract_class = true
 
-  connects_to shards: {
-    default: { writing: :primary, reading: :primary_replica },
-    shard_one: { writing: :shard_one, reading: :shard_one }
-  }
+  configured_database_names = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env).map(&:name)
+  default_shard = { default: { writing: :primary, reading: :primary } }
+
+  if configured_database_names.size > 1
+    # TODO check that a database named 'primary' exists
+    # TODO use `.default_shard`, `.writing_role`, `.reading_role`, rather then fixed symbols
+    sharded_database_names = configured_database_names - ['primary']
+    connects_to_shards = sharded_database_names.each_with_object({}) { |name, hash| hash[name.to_sym] = { writing: name.to_sym, reading: name.to_sym } }
+
+    connects_to shards: default_shard.merge(connects_to_shards)
+  else
+    connects_to shards: default_shard
+  end
 
   def self.sharded_read_from_namespace_id(namespace_id, &block)
     raise "No block given" unless block_given?
