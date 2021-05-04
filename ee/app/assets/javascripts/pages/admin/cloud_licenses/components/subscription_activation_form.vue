@@ -8,7 +8,6 @@ import {
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
-import produce from 'immer';
 import validation from '~/vue_shared/directives/validation';
 import {
   activateLabel,
@@ -16,18 +15,7 @@ import {
   subscriptionActivationForm,
   subscriptionQueries,
 } from '../constants';
-
-const getLicenseFromData = ({
-  data: {
-    gitlabSubscriptionActivate: { license },
-  },
-}) => license;
-
-const getErrorsAsData = ({
-  data: {
-    gitlabSubscriptionActivate: { errors },
-  },
-}) => errors;
+import { getErrorsAsData, updateSubscriptionAppCache } from '../graphql/utils';
 
 export const SUBSCRIPTION_ACTIVATION_FAILURE_EVENT = 'subscription-activation-failure';
 export const SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT = 'subscription-activation-success';
@@ -109,17 +97,7 @@ export default {
               activationCode: this.form.fields.activationCode.value,
             },
           },
-          update: (cache, mutation) => {
-            const license = getLicenseFromData(mutation);
-            if (!license) {
-              return;
-            }
-            const { query } = subscriptionQueries;
-            const data = produce(license, (draftData) => {
-              draftData.currentLicense = license;
-            });
-            cache.writeQuery({ query, data });
-          },
+          update: this.updateSubscriptionAppCache,
         })
         .then((res) => {
           const errors = getErrorsAsData(res);
@@ -136,6 +114,7 @@ export default {
           this.isLoading = false;
         });
     },
+    updateSubscriptionAppCache,
   },
 };
 </script>
