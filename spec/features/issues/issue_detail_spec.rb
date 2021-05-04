@@ -6,6 +6,7 @@ RSpec.describe 'Issue Detail', :js do
   let(:user)     { create(:user) }
   let(:project)  { create(:project, :public) }
   let(:issue)    { create(:issue, project: project, author: user) }
+  let(:incident) { create(:incident, project: project, author: user) }
 
   context 'when user displays the issue' do
     before do
@@ -21,10 +22,8 @@ RSpec.describe 'Issue Detail', :js do
   end
 
   context 'when user displays the issue as an incident' do
-    let(:issue) { create(:incident, project: project, author: user) }
-
     before do
-      visit project_issue_path(project, issue)
+      visit project_issue_path(project, incident)
       wait_for_requests
     end
 
@@ -60,7 +59,7 @@ RSpec.describe 'Issue Detail', :js do
 
       page.find('.js-issuable-edit').click
       fill_in 'issuable-title', with: 'issue title'
-      click_button 'Save'
+      click_button 'Save changes'
       wait_for_requests
 
       Users::DestroyService.new(user).execute(user)
@@ -75,26 +74,67 @@ RSpec.describe 'Issue Detail', :js do
     end
   end
 
-  context 'when edited by a signed in user' do
-    before do
-      sign_in(user)
-      visit project_issue_path(project, issue)
-      wait_for_requests
+  describe 'user updates `issue_type` via the issue type dropdown' do
+    context 'when an issue `issue_type` is edited by a signed in user' do
+      before do
+        sign_in(user)
 
-      page.find('.js-issuable-edit').click
-    end
+        visit project_issue_path(project, issue)
+        wait_for_requests
+      end
 
-    it 'shows the issue type selector with the correct value set' do
-      page.within('.issuable-details') do
-        expect(find('#issuable-type').value).to eq('issue')
+      it 'shows the issue type selector with the correct details set' do
+        page.find('.js-issuable-edit').click
+
+        page.within('.issuable-details') do
+          expect(find_button('Issue')).to be_present
+        end
+      end
+
+      it 'routes the user to the incident details page when the `issue_type` is set to incident' do
+        page.find('.js-issuable-edit').click
+
+        page.within('.issuable-details') do
+          update_type_select('Issue', 'Incident')
+
+          expect(page).to have_current_path(project_issues_incident_path(project, issue))
+        end
       end
     end
 
-    it 'sets the new issue_type value when changed' do
-      page.within('.issuable-details') do
-        select 'Incident', from: 'Issue'
-        expect(find('#issuable-type').value).to eq('incident')
+    context 'when an incident `issue_type` is edited by a signed in user' do
+      before do
+        sign_in(user)
+
+        visit project_issue_path(project, incident)
+        wait_for_requests
+      end
+
+      it 'shows the issue type selector with the correct details set' do
+        page.find('.js-issuable-edit').click
+
+        page.within('.issuable-details') do
+          expect(find_button('Incident')).to be_present
+        end
+      end
+
+      it 'routes the user to the issue details page when the `issue_type` is set to issue' do
+        page.find('.js-issuable-edit').click
+
+        page.within('.issuable-details') do
+          update_type_select('Incident', 'Issue')
+
+          expect(page).to have_current_path(project_issue_path(project, incident))
+        end
       end
     end
+  end
+
+  def update_type_select(from, to)
+    find('.gl-dropdown-toggle', text: from).click
+    find('.gl-new-dropdown-item', text: to).click
+    click_button 'Save changes'
+
+    wait_for_requests
   end
 end

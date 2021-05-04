@@ -182,17 +182,17 @@ export default {
       }}</gl-alert
     >
     <div class="row">
-      <div
-        :class="{
-          'col-4': hasIssuableTemplates,
-          'col-6': !hasIssuableTemplates,
-        }"
-      >
+      <div class="col-9">
         <issue-title-field
           ref="title"
           :form-state="formState"
           :issuable-templates="issuableTemplates"
         />
+      </div>
+    </div>
+    <div class="row gl-pt-3 gl-mb-n3">
+      <div class="col-4">
+        <issue-type-field ref="issue-type" :form-state="formState" v-on="$listeners" />
       </div>
       <div v-if="hasIssuableTemplates" class="col-4">
         <description-template
@@ -202,14 +202,6 @@ export default {
           :project-id="projectId"
           :project-namespace="projectNamespace"
         />
-      </div>
-      <div
-        :class="{
-          'col-4': hasIssuableTemplates,
-          'col-6': !hasIssuableTemplates,
-        }"
-      >
-        <issue-type-field ref="issue-type" :form-state="formState" v-on="$listeners" />
       </div>
     </div>
     <description-field
