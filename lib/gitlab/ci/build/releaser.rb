@@ -18,8 +18,8 @@ module Gitlab
           command = BASE_COMMAND.dup
           single_flags.each { |k, v| command.concat(" --#{k.to_s.dasherize} \"#{v}\"") }
           array_commands.each { |k, v| v.each { |elem| command.concat(" --#{k.to_s.singularize.dasherize} \"#{elem}\"") } }
-          config[:assets]&.each { |elem| command.concat(" --assets-link #{elem.to_json}" ) }
-
+          command.concat(assets)
+ 
           [command]
         end
 
@@ -31,6 +31,15 @@ module Gitlab
 
         def array_commands
           config.slice(*ARRAY_FLAGS)
+        end
+
+        def assets
+          result = + ""
+          return result if config[:assets].nil?
+
+          config[:assets][:links]&.each { |elem| result.concat(" --assets-link \"#{elem.to_json}\"") }
+
+          result
         end
       end
     end
