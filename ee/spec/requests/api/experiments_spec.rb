@@ -140,7 +140,7 @@ RSpec.describe API::Experiments do
           end
 
           it 'publishes into a collection of experiments that have been run in the request' do
-            pending 'requires gitlab-experiment >= 0.5.4'
+            pending 'requires gitlab-experiment >= 0.5.4 -- resolved in a follow up MR'
 
             get api('/experiments', user)
 
