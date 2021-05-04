@@ -256,4 +256,24 @@ RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
       expect { execute_service }.not_to raise_error
     end
   end
+
+  context 'when group has a plan' do
+    context 'on the free plan' do
+      let(:group) { create(:group_with_plan, plan: :free_plan) }
+
+      it { is_expected.to send_in_product_marketing_email(user.id, group.id, :create, 0) }
+    end
+
+    context 'on a trial' do
+      let(:group) { create(:group_with_plan, trial_ends_on: Time.current + 10.days) }
+
+      it { is_expected.to send_in_product_marketing_email(user.id, group.id, :create, 0) }
+    end
+
+    context 'on a paid plan' do
+      let(:group) { create(:group_with_plan, plan: :bronze_plan) }
+
+      it { is_expected.not_to send_in_product_marketing_email }
+    end
+  end
 end

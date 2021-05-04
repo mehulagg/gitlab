@@ -75,7 +75,11 @@ module Namespaces
       # Filtering out sub-groups is a temporary fix to prevent calling
       # `.root_ancestor` on groups that are not root groups.
       # See https://gitlab.com/groups/gitlab-org/-/epics/5594 for more information.
-      Group.where(parent_id: nil).joins(:onboarding_progress).merge(onboarding_progress_scope)
+      Group
+        .in_default_plan
+        .where(parent_id: nil)
+        .joins(:onboarding_progress)
+        .merge(onboarding_progress_scope)
     end
 
     def users_for_group(group)

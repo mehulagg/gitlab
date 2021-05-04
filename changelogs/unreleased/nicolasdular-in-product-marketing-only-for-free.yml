@@ -1,0 +1,5 @@
+---
+title: Only send in-product emails to non-paid groups
+merge_request: 60906
+author:
+type: changed
