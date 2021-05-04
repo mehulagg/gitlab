@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Gitlab
   module Integrations
     class StiType < ActiveRecord::Type::String

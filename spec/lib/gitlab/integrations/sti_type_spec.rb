@@ -7,11 +7,11 @@ RSpec.describe Gitlab::Integrations::StiType do
 
   describe '#serialize' do
     context 'SQL SELECT' do
-      let(:expected_sql) {
+      let(:expected_sql) do
         <<~SQL.strip
           SELECT "services".* FROM "services" WHERE "services"."type" = 'AsanaService'
         SQL
-      }
+      end
 
       it 'forms SQL SELECT statements correctly' do
         sql_statements = types.map do |type|
@@ -23,11 +23,11 @@ RSpec.describe Gitlab::Integrations::StiType do
     end
 
     context 'SQL CREATE' do
-      let(:expected_sql) {
+      let(:expected_sql) do
         <<~SQL.strip
           INSERT INTO "services" ("type") VALUES ('AsanaService')
         SQL
-      }
+      end
 
       it 'forms SQL CREATE statements correctly' do
         sql_statements = types.map do |type|
@@ -40,11 +40,11 @@ RSpec.describe Gitlab::Integrations::StiType do
     end
 
     context 'SQL UPDATE' do
-      let(:expected_sql) {
+      let(:expected_sql) do
         <<~SQL.strip
           UPDATE "services" SET "type" = 'AsanaService'
         SQL
-      }
+      end
 
       let_it_be(:service) { create(:service) }
 
@@ -59,11 +59,11 @@ RSpec.describe Gitlab::Integrations::StiType do
     end
 
     context 'SQL DELETE' do
-      let(:expected_sql) {
+      let(:expected_sql) do
         <<~SQL.strip
           DELETE FROM "services" WHERE "services"."type" = 'AsanaService'
         SQL
-      }
+      end
 
       let(:service) { create(:service) }
 
