@@ -106,8 +106,9 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
         end
 
         it 'errors if documents count is different' do
-          3.times do
-            cluster_reindexing_service.execute # run to kick off reindexing for each slice
+          # kick off reindexing for each slice
+          slices.count.times do
+            cluster_reindexing_service.execute
           end
 
           expect { cluster_reindexing_service.execute }.to change { task.reload.state }.from('reindexing').to('failure')
@@ -212,8 +213,9 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
           expect(helper).to receive(:switch_alias).with(to: subtask.index_name_to, from: subtask.index_name_from, alias_name: subtask.alias_name)
           expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false)
 
-          3.times do
-            cluster_reindexing_service.execute # run to kick off reindexing for each slice
+          # kick off reindexing for each slice
+          slices.count.times do
+            cluster_reindexing_service.execute
           end
 
           expect { cluster_reindexing_service.execute }.to change { task.reload.state }.from('reindexing').to('success')
