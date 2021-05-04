@@ -1,6 +1,10 @@
 <script>
 import { GlButton, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
+import FirstPipelineCard from './cards/first_pipeline_card.vue';
+import GettingStartedCard from './cards/getting_started_card.vue';
+import PipelineConfigReferenceCard from './cards/pipeline_config_reference_card.vue';
+import VisualizeAndLintCard from './cards/visualize_and_lint_card.vue';
 
 export default {
   width: {
@@ -11,6 +15,10 @@ export default {
     toggleTxt: __('Collapse'),
   },
   components: {
+    FirstPipelineCard,
+    GettingStartedCard,
+    PipelineConfigReferenceCard,
+    VisualizeAndLintCard,
     GlButton,
     GlIcon,
   },
@@ -71,6 +79,11 @@ export default {
       }}</span>
       <gl-icon data-testid="toggle-icon" :name="buttonIconName" />
     </gl-button>
-    <div v-if="isExpanded" class="gl-p-5" data-testid="drawer-content"></div>
+    <div v-if="isExpanded" class="gl-p-5" data-testid="drawer-content">
+      <getting-started-card class="gl-mb-4" />
+      <first-pipeline-card class="gl-mb-4" />
+      <visualize-and-lint-card class="gl-mb-4" />
+      <pipeline-config-reference-card />
+    </div>
   </aside>
 </template>
