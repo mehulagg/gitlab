@@ -485,7 +485,7 @@ Use local includes instead of symbolic links.
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to enable it. **(CORE ONLY)**
 
-You can use wildcard paths (`*` / `**`) with `include:local`.
+You can use wildcard paths (`*` and `**`) with `include:local`.
 
 Example:
 
@@ -493,16 +493,19 @@ Example:
 include: 'configs/*.yml'
 ```
 
-When the pipeline runs, it adds all `.yml` files in the `configs` folder into the pipeline configuration.
-It does not add the files if there are other subfolders in the `configs` folder. To do this, you can do:
+When the pipeline runs, GitLab:
 
-```yaml
-# This will match all files in the root of `configs` and any subfolder in it.
-include: 'configs/**.yml'
+- Adds all `.yml` files in the `configs` directory into the pipeline configuration.
+- Does not add `.yml` files in `configs` if there are other subdirectories in the `configs`
+  directory. To allow this, add the following configuration:
 
-# This will match all files only in subfolders of `configs`
-include: 'configs/**/*.yml'
-```
+  ```yaml
+  # This matches all files in `configs` and any subfolder in it.
+  include: 'configs/**.yml'
+
+  # This matches all files only in subfolders of `configs`.
+  include: 'configs/**/*.yml'
+  ```
 
 The wildcard file paths feature is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.
