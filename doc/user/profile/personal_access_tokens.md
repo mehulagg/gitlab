@@ -8,9 +8,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Personal access tokens
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/3749) in GitLab 8.8.
-> - [Notifications about expiring tokens](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) added in GitLab 12.6.
+> - [Notifications for expiring tokens](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) added in GitLab 12.6.
 > - [Token lifetime limits](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) added in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
-> - [Additional notifications about expiring tokens](https://gitlab.com/gitlab-org/gitlab/-/issues/214721) added in GitLab 13.3.
+> - [Additional notifications for expiring tokens](https://gitlab.com/gitlab-org/gitlab/-/issues/214721) added in GitLab 13.3.
 
 If you're unable to use [OAuth2](../../api/oauth2.md), you can use a personal access token to authenticate with the [GitLab API](../../api/README.md#personalproject-access-tokens). You can also use a personal access token with Git to authenticate over HTTP.
 
@@ -64,13 +64,13 @@ A personal access token can perform actions based on the assigned scopes.
 
 | Scope              | Introduced in | Access      |
 | ------------------ | ------------- | ----------- |
-| `api`              | [8.15](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5951)   | Read-write access to the complete API, including all groups and projects, the Container Registry, and the Package Registry. |
-| `read_user`        | [8.15](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5951)   | Read-only access to endpoints under `/users`. Essentially, access to any of the `GET` requests in the [Users API](../../api/users.md). |
-| `read_api`         | [12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28944)      | Read access to the API, including all groups and projects, the Container Registry, and the Package Registry. |
-| `read_repository`  | [10.7](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17894)  | Read-only access (pull) to the repository through `git clone`. |
-| `write_repository` | [11.11](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/26021) | Read-write access (pull, push) to the repository through `git clone`. Required for accessing Git repositories over HTTP when 2FA is enabled. |
-| `read_registry`    | [9.3](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11845)   | Read (pull) [Container Registry](../packages/container_registry/index.md) image access if a project is private and authorization is required. |
-| `write_registry`    | [12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28958)     | Write (push) [Container Registry](../packages/container_registry/index.md) image access if a project is private and authorization is required. |
+| `api`              | [8.15](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5951)   | Read-write for the complete API, including all groups and projects, the Container Registry, and the Package Registry. |
+| `read_user`        | [8.15](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5951)   | Read-only for endpoints under `/users`. Essentially, access to any of the `GET` requests in the [Users API](../../api/users.md). |
+| `read_api`         | [12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28944)      | Read-only for the complete API, including all groups and projects, the Container Registry, and the Package Registry. |
+| `read_repository`  | [10.7](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17894)  | Read-only (pull) for the repository through `git clone`. |
+| `write_repository` | [11.11](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/26021) | Read-write (pull, push) for the repository through `git clone`. Required for accessing Git repositories over HTTP when 2FA is enabled. |
+| `read_registry`    | [9.3](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11845)   | Read-only (pull) for [Container Registry](../packages/container_registry/index.md) images if a project is private and authorization is required. |
+| `write_registry`    | [12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28958)     | Read-write (push) for [Container Registry](../packages/container_registry/index.md) images if a project is private and authorization is required. |
 | `sudo`             | [10.2](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14838)  | API actions as any user in the system (if the authenticated user is an administrator). |
 
 ## When personal access tokens expire
