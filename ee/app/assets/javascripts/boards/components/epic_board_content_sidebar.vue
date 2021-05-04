@@ -8,6 +8,7 @@ import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
+import SidebarParticipantsWidget from '~/sidebar/components/participants/sidebar_participants_widget.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -18,6 +19,7 @@ export default {
     BoardSidebarTitle,
     SidebarConfidentialityWidget,
     SidebarDateWidget,
+    SidebarParticipantsWidget,
   },
   computed: {
     ...mapGetters(['isSidebarOpen', 'activeBoardItem']),
@@ -63,6 +65,11 @@ export default {
         :can-inherit="true"
       />
       <board-sidebar-labels-select class="labels" />
+      <sidebar-participants-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        issuable-type="epic"
+      />
       <sidebar-confidentiality-widget
         :iid="activeBoardItem.iid"
         :full-path="fullPath"
