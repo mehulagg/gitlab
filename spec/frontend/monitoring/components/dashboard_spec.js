@@ -7,7 +7,6 @@ import axios from '~/lib/utils/axios_utils';
 import { ESC_KEY } from '~/lib/utils/keys';
 import { objectToQuery } from '~/lib/utils/url_utility';
 import Dashboard from '~/monitoring/components/dashboard.vue';
-
 import DashboardHeader from '~/monitoring/components/dashboard_header.vue';
 import DashboardPanel from '~/monitoring/components/dashboard_panel.vue';
 import EmptyState from '~/monitoring/components/empty_state.vue';
@@ -17,6 +16,7 @@ import LinksSection from '~/monitoring/components/links_section.vue';
 import { dashboardEmptyStates, metricStates } from '~/monitoring/constants';
 import { createStore } from '~/monitoring/stores';
 import * as types from '~/monitoring/stores/mutation_types';
+import AlertDeprecationWarning from '~/vue_shared/components/alerts_deprecation_warning.vue';
 import {
   metricsDashboardViewModel,
   metricsDashboardPanelCount,
@@ -46,6 +46,9 @@ describe('Dashboard', () => {
       stubs: {
         DashboardHeader,
       },
+      provide: {
+        hasManagedPrometheus: false,
+      },
       ...options,
     });
   };
@@ -58,6 +61,9 @@ describe('Dashboard', () => {
         'graph-group': true,
         'dashboard-panel': true,
         'dashboard-header': DashboardHeader,
+      },
+      provide: {
+        hasManagedPrometheus: false,
       },
       ...options,
     });
@@ -810,6 +816,17 @@ describe('Dashboard', () => {
       const dashboardPanel = getDashboardPanel();
 
       expect(dashboardPanel.exists()).toBe(true);
+    });
+  });
+
+  describe('deprecation notice', () => {
+    beforeEach(() => {
+      setupStoreWithData(store);
+      createMountedWrapper();
+    });
+
+    it('should render the alert deprecation warning', () => {
+      expect(wrapper.find(AlertDeprecationWarning).exists()).toBe(true);
     });
   });
 });
