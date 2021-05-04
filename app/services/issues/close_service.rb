@@ -24,12 +24,10 @@ module Issues
         return issue
       end
 
-      if !project.issues_enabled?
-        return issue
-      end
+      return issue unless project.issues_enabled?
 
       issue.closed_by = current_user
-      if !issue.close
+      unless issue.close
         issue.closed_by = nil
         return issue
       end
