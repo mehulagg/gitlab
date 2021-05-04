@@ -51,6 +51,7 @@ class ApplicationController < ActionController::Base
 
   after_action :set_page_title_header, if: :json_request?
   after_action :limit_session_time, if: -> { !current_user }
+  after_action :set_floc_opt_out_header, unless: :floc_enabled?
 
   protect_from_forgery with: :exception, prepend: true
 
@@ -552,6 +553,14 @@ class ApplicationController < ActionController::Base
     store_location_for :user, request.fullpath
 
     redirect_to users_sign_up_welcome_path
+  end
+
+  def floc_enabled?
+    Gitlab::CurrentSettings.floc_enabled
+  end
+
+  def set_floc_opt_out_header
+    response.headers['Permissions-Policy'] = 'interest-cohort=()'
   end
 end
 

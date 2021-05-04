@@ -1027,4 +1027,33 @@ RSpec.describe ApplicationController do
       get :index
     end
   end
+
+  describe '#set_floc_opt_out_header' do
+    let(:controller) { described_class.new }
+
+    it 'URI encodes UTF-8 characters in the title' do
+      response = double(headers: {})
+      allow(controller).to receive(:response).and_return(response)
+
+      controller.send(:set_floc_opt_out_header)
+
+      expect(response.headers['Permissions-Policy']).to eq('interest-cohort=()')
+    end
+  end
+
+  describe '#floc_enabled?' do
+    subject { controller.send :floc_enabled? }
+
+    it 'returns true if FloC is enabled in application settings' do
+      stub_application_setting floc_enabled: true
+
+      expect(subject).to be_truthy
+    end
+
+    it 'returns false if FloC is enabled in application settings' do
+      stub_application_setting floc_enabled: false
+
+      expect(subject).to be_falsey
+    end
+  end
 end
