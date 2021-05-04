@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/233149) to GitLab Free in 13.4.
 
-The Jira Development panel integration enables you to reference Jira issues in GitLab.
+With the Jira Development panel integration, you can reference Jira issues in GitLab.
 When configured, activity (such as pipeline, deployment, and feature flags) displays in the issue's
 [Development panel](https://support.atlassian.com/jira-software-cloud/docs/view-development-information-for-an-issue/).
 From the Development panel, you can open a detailed view and
@@ -43,16 +43,16 @@ A [feature comparison](index.md#direct-feature-comparison) is available.
 For an overview of how to configure Jira Development panel integration, see
 [Agile Management - GitLab Jira Development panel integration](https://www.youtube.com/watch?v=VjVTOmMl85M).
 
-We recommend that a GitLab group maintainer or group owner, or instance administrator
-(in the case of self-managed GitLab) set up the integration to simplify administration.
+To simplify administration, we recommend that a GitLab group maintainer or group owner
+(or instance administrator in the case of self-managed GitLab) set up the integration.
 
-| If you use Jira on: | GitLab.com customers need: | GitLab self-managed customers need: |
-|-|-|-|
+| Jira usage | GitLab.com customers need | GitLab self-managed customers need |
+|------------|---------------------------|------------------------------------|
 | [Atlassian cloud](https://www.atlassian.com/cloud) | The [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview) application installed from the [Atlassian Marketplace](https://marketplace.atlassian.com). This offers real-time sync between GitLab and Jira. | The [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview), using a workaround process. See the documentation for [installing the GitLab Jira Cloud application for self-managed instances](connect-app.md#install-the-gitlabcom-for-jira-cloud-application-for-self-managed-instances) for more information. |
 | Your own server | The Jira DVCS (distributed version control system) connector. This syncs data hourly. | The [Jira DVCS Connector](dvcs.md). |
 
-Each GitLab project can be configured to connect to an entire Jira instance. That means one GitLab
-project can interact with _all_ Jira projects in that instance, once configured. For:
+Each GitLab project can be configured to connect to an entire Jira instance. That means after
+configuration, one GitLab project can interact with all Jira projects in that instance. For:
 
 - The [view Jira issues](issues.md#view-jira-issues) feature, you must associate a GitLab project with a
   specific Jira project.
@@ -75,11 +75,11 @@ To enable the integration in your GitLab project, after you
 
 1. Ensure your GitLab installation does not use a relative URL, as described in
    [Limitations](#limitations).
-1. Go to your project's [Integrations page](../../user/project/integrations/overview.md#accessing-integrations)
-   and select the **Jira** service.
+1. Go to your project and select [**Settings > Integrations**](../../user/project/integrations/overview.md#accessing-integrations).
+1. Select **Jira**.
 1. Select **Enable integration**.
 1. Select **Trigger** actions. Your choice determines whether a mention of Jira issue
-   in a GitLab commit, merge request, or both, creates a cross-link in Jira linking back to GitLab.
+   (in a GitLab commit, merge request, or both) creates a cross-link in Jira that  back to GitLab.
 1. To comment in the Jira issue when a **Trigger** action is made in GitLab, select
    **Enable comments**.
 1. To transition Jira issues when a
@@ -118,9 +118,9 @@ After the integration is set up on GitLab and Jira, you can:
   commit messages, and merge request titles.
 - See the linked branches, commits, and merge requests in Jira issues:
 
-  Merge requests are called "pull requests" in Jira issues.
+Merge requests are called "pull requests" in Jira issues.
 
-Click the links to see your GitLab repository data.
+Select the links to see your GitLab repository data.
 
 ![GitLab commits details on a Jira issue](img/jira_dev_panel_jira_setup_4.png)
 
@@ -131,7 +131,7 @@ Click the links to see your GitLab repository data.
 With Jira [Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html),
 you can use GitLab to add Jira comments, log time spent on the issue, or apply any issue transition.
 
-For more information on using Jira Smart Commits to track time against an issue, specify
+For more information about using Jira Smart Commits to track time against an issue, specify
 an issue transition, or add a custom comment, read the Atlassian page
 [Using Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html).
 
@@ -150,5 +150,5 @@ For example, `http://example.com/gitlab`.
 ### Cookies for Oracle's Access Manager
 
 To support Oracle's Access Manager, GitLab sends additional cookies
- to enable Basic Auth. The cookie being added to each request is `OBBasicAuth` with
- a value of `fromDialog`.
+to enable Basic Auth. The cookie being added to each request is `OBBasicAuth` with
+a value of `fromDialog`.
