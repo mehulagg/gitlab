@@ -27,15 +27,39 @@ The information displayed in the Jira Development panel depends on where you men
 
 This integration connects all GitLab projects to projects in the Jira instance in either:
 
-- A top-level group. A top-level GitLab group is one that does not have any parent group itself. All
-  the projects of that top-level group, as well as projects of the top-level group's subgroups nesting
-  down, are connected.
-- A personal namespace, which then connects the projects in that personal namespace to Jira.
+- A top-level GitLab group: Connects the projects in a group with no parent group,
+  including the projects in its subgroups.
+- A personal namespace: Connects the projects in that personal namespace to Jira.
 
 This differs from the [Jira integration](../../user/project/integrations/jira.md),
 where the mapping is between one GitLab project and the entire Jira instance.
 You can install both integrations to take advantage of both sets of features.
 A [feature comparison](index.md#direct-feature-comparison) is available.
+
+## Use the integration
+
+After the integration is [set up on GitLab and Jira](#configure-the-integration), you can:
+
+- Refer to any Jira issue by its ID (in uppercase) in GitLab branch names,
+  commit messages, and merge request titles.
+- See the linked branches, commits, and merge requests in Jira issues:
+
+Merge requests are called "pull requests" in Jira issues.
+
+Select the links to see your GitLab repository data.
+
+![GitLab commits details on a Jira issue](img/jira_dev_panel_jira_setup_4.png)
+
+![GitLab merge requests details on a Jira issue](img/jira_dev_panel_jira_setup_5.png)
+
+### Use Jira Smart Commits
+
+With Jira [Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html),
+you can use GitLab to add Jira comments, log time spent on the issue, or apply any issue transition.
+
+For more information about using Jira Smart Commits to track time against an issue, specify
+an issue transition, or add a custom comment, read the Atlassian page
+[Using Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html).
 
 ## Configure the integration
 
@@ -96,44 +120,20 @@ To enable the integration in your GitLab project, after you
      Use `password` for **Jira Server** or `API token` for **Jira on Atlassian cloud**.
 1. To enable users to view Jira issues inside the GitLab project, select **Enable Jira issues** and
    enter a Jira project key. **(PREMIUM)**
-   You can only display issues from a single Jira project within a given GitLab project.
+
+   You can display issues only from a single Jira project in a given GitLab project.
 
    WARNING:
    If you enable Jira issues with this setting, all users with access to this GitLab project
    can view all issues from the specified Jira project.
 
 1. To enable issue creation for vulnerabilities, select **Enable Jira issues creation from vulnerabilities**.
-   1. Select the **Jira issue type**. If the dropdown is empty, select refresh (**{retry}**) and try again.
+1. Select the **Jira issue type**. If the dropdown is empty, select refresh (**{retry}**) and try again.
 1. To verify the Jira connection is working, select **Test settings**.
 1. Select **Save changes**.
 
 Your GitLab project can now interact with all Jira projects in your instance and the project now
 displays a Jira link that opens the Jira project.
-
-## Use the integration
-
-After the integration is set up on GitLab and Jira, you can:
-
-- Refer to any Jira issue by its ID (in uppercase) in GitLab branch names,
-  commit messages, and merge request titles.
-- See the linked branches, commits, and merge requests in Jira issues:
-
-Merge requests are called "pull requests" in Jira issues.
-
-Select the links to see your GitLab repository data.
-
-![GitLab commits details on a Jira issue](img/jira_dev_panel_jira_setup_4.png)
-
-![GitLab merge requests details on a Jira issue](img/jira_dev_panel_jira_setup_5.png)
-
-## Use Jira Smart Commits
-
-With Jira [Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html),
-you can use GitLab to add Jira comments, log time spent on the issue, or apply any issue transition.
-
-For more information about using Jira Smart Commits to track time against an issue, specify
-an issue transition, or add a custom comment, read the Atlassian page
-[Using Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html).
 
 ## Limitations
 
