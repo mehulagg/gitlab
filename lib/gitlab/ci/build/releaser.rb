@@ -18,6 +18,7 @@ module Gitlab
           command = BASE_COMMAND.dup
           single_flags.each { |k, v| command.concat(" --#{k.to_s.dasherize} \"#{v}\"") }
           array_commands.each { |k, v| v.each { |elem| command.concat(" --#{k.to_s.singularize.dasherize} \"#{elem}\"") } }
+          config[:assets]&.each { |elem| command.concat(" --assets-link #{elem.to_json}" ) }
 
           [command]
         end
