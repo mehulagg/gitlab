@@ -15,7 +15,7 @@ module Gitlab
     end
 
     def storage_path
-      File.join(Settings.shared['path'], 'tmp/gitlab_exports')
+      File.join(Rails.root, 'tmp', 'import_export')
     end
 
     def import_upload_path(filename:)
