@@ -21,7 +21,7 @@ The diff view includes the following:
   - Edit the file in the merge request's branch.
   - Show full file, in case you want to look at the changes in context with the rest of the file.
   - View file at the current commit.
-  - Preview the changes with [Review Apps](../../../../ci/review_apps/index.md).
+  - Preview the changes with [Review Apps](../../../ci/review_apps/index.md).
 - The changed lines, with the specific changes highlighted.
 
 ![Example screenshot of a source code diff](img/merge_request_diff_v12_2.png)
@@ -135,7 +135,7 @@ changes to its content or the checkbox is unchecked.
 
 The file view feature is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../../administration/feature_flags.md)
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
 can opt to enable it for your instance.
 
 To enable it:

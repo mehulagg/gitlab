@@ -74,7 +74,7 @@ When you submit your review, GitLab:
 
 ### Resolving/Unresolving threads
 
-Review comments can also resolve/unresolve [resolvable threads](#resolvable-comments-and-threads).
+Review comments can also resolve/unresolve [resolvable threads](../../../discussions/index.md#resolvable-comments-and-threads).
 When replying to a comment, a checkbox is displayed that you can click to resolve or unresolve
 the thread after publication.
 
@@ -113,7 +113,7 @@ In the Merge Request Diff UI, you can:
 
 - **Comment on a single line**: Click the **{comment}** **comment** icon in the
   gutter to expand the diff lines and display a comment box.
-- [**Comment on multiple lines**](#commenting-on-multiple-lines).
+- [**Comment on multiple lines**](#comment-on-multiple-lines).
 
 ### Comment on multiple lines
 

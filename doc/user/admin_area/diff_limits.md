@@ -9,7 +9,7 @@ type: reference
 
 You can set a maximum size for display of diff files (patches).
 
-For details about diff files, [View changes between files](../project/merge_requests/reviews/index.md#view-changes-between-file-versions).
+For details about diff files, [View changes between files](../project/merge_requests/reviews/changes.md).
 
 ## Maximum diff patch size
 
