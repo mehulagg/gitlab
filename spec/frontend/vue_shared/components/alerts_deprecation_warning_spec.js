@@ -32,7 +32,7 @@ describe('AlertDetails', () => {
       });
     });
 
-    describe('with a ', () => {
+    describe('with manual prometheus', () => {
       beforeEach(() => {
         mountComponent(true);
       });
