@@ -1,5 +1,5 @@
 <script>
-import { GlEmptyState, GlFormCheckbox } from '@gitlab/ui';
+import { GlCollapse, GlEmptyState, GlFormCheckbox } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
 import SecurityDashboardTableRow from './security_dashboard_table_row.vue';
@@ -8,6 +8,7 @@ import SelectionSummary from './selection_summary_vuex.vue';
 export default {
   name: 'SecurityDashboardTable',
   components: {
+    GlCollapse,
     GlEmptyState,
     GlFormCheckbox,
     Pagination,
@@ -61,7 +62,9 @@ export default {
 
 <template>
   <div class="ci-table js-security-dashboard-table" data-qa-selector="security_report_content">
-    <selection-summary v-if="isSelectingVulnerabilities" />
+    <gl-collapse :visible="isSelectingVulnerabilities" data-testid="selection-summary-collapse">
+      <selection-summary />
+    </gl-collapse>
     <div class="gl-responsive-table-row table-row-header gl-bg-gray-50 text-2 px-2" role="row">
       <div class="table-section section-5">
         <gl-form-checkbox
