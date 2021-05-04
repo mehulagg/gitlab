@@ -7,6 +7,7 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import mockAlerts from 'jest/vue_shared/alert_details/mocks/alerts.json';
 import AlertManagementTable from '~/alert_management/components/alert_management_table.vue';
 import { visitUrl } from '~/lib/utils/url_utility';
+import AlertDeprecationWarning from '~/vue_shared/components/alerts_deprecation_warning.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import defaultProvideValues from '../mocks/alerts_provide_config.json';
@@ -39,6 +40,7 @@ describe('AlertManagementTable', () => {
     resolved: 11,
     all: 26,
   };
+  const findDeprecationNotice = () => wrapper.findComponent(AlertDeprecationWarning);
 
   function mountComponent({ provide = {}, data = {}, loading = false, stubs = {} } = {}) {
     wrapper = extendedWrapper(
@@ -47,6 +49,7 @@ describe('AlertManagementTable', () => {
           ...defaultProvideValues,
           alertManagementEnabled: true,
           userCanEnableAlertManagement: true,
+          hasManagedPrometheus: false,
           ...provide,
         },
         data() {
@@ -232,6 +235,12 @@ describe('AlertManagementTable', () => {
       });
 
       expect(visitUrl).toHaveBeenCalledWith('/1527542/details', true);
+    });
+
+    it('deprecation notice', () => {
+      mountComponent();
+
+      expect(findDeprecationNotice().exists()).toBe(true);
     });
 
     describe('alert issue links', () => {
