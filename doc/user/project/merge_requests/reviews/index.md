@@ -61,7 +61,7 @@ To start your review:
 
 You can submit your completed review in multiple ways:
 
-- Use the `/submit_review` [quick action](../project/quick_actions.md) in the text of a non-review comment.
+- Use the `/submit_review` [quick action](../../quick_actions.md) in the text of a non-review comment.
 - When creating a review comment, select **Submit review**.
 - Scroll to the bottom of the screen and select **Submit review**.
 
