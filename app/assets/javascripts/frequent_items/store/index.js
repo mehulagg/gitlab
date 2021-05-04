@@ -1,17 +1,15 @@
-import Vue from 'vue';
 import Vuex from 'vuex';
-import * as actions from './actions';
-import * as getters from './getters';
-import mutations from './mutations';
-import state from './state';
+import { FREQUENT_ITEMS_DROPDOWNS } from '../constants';
+import createFrequentItemsModule from './modules/frequent_items';
 
-Vue.use(Vuex);
-
-export const createStore = (initState = {}) => {
+export const createStore = () => {
   return new Vuex.Store({
-    actions,
-    getters,
-    mutations,
-    state: state(initState),
+    modules: FREQUENT_ITEMS_DROPDOWNS.reduce(
+      (acc, { namespace, vuexModule }) =>
+        Object.assign(acc, {
+          [vuexModule]: createFrequentItemsModule({ dropdownType: namespace }),
+        }),
+      {},
+    ),
   });
 };

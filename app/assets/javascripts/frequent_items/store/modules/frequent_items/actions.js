@@ -1,6 +1,6 @@
+import { getTopFrequentItems } from '~/frequent_items/utils';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { getGroups, getProjects } from '~/rest_api';
-import { getTopFrequentItems } from '../utils';
 import * as types from './mutation_types';
 
 export const setNamespace = ({ commit }, namespace) => {
