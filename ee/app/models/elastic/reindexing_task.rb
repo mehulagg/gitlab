@@ -5,15 +5,12 @@ class Elastic::ReindexingTask < ApplicationRecord
 
   self.table_name = 'elastic_reindexing_tasks'
 
-  DEFAULT_MAX_TOTAL_SLICES_RUNNING = 60
-  DEFAULT_SLICE_MULTIPLIER = 2
+  validates :max_slices_running, presence: true
+  validates :slice_multiplier, presence: true
 
   ignore_columns %i[documents_count index_name_from index_name_to elastic_task documents_count_target], remove_with: '14.0', remove_after: '2021-04-22'
 
   has_many :subtasks, class_name: 'Elastic::ReindexingSubtask', foreign_key: :elastic_reindexing_task_id
-
-  default_value_for :max_slices_running, value: DEFAULT_MAX_TOTAL_SLICES_RUNNING, allows_nil: false
-  default_value_for :slice_multiplier, value: DEFAULT_SLICE_MULTIPLIER, allows_nil: false
 
   enum state: {
     initial:                0,

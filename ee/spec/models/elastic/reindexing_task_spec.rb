@@ -13,6 +13,11 @@ RSpec.describe Elastic::ReindexingTask, type: :model do
     it { is_expected.to have_many(:subtasks) }
   end
 
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:max_slices_running) }
+    it { is_expected.to validate_presence_of(:slice_multiplier) }
+  end
+
   it 'only allows one running task at a time' do
     expect { create(:elastic_reindexing_task, state: :success) }.not_to raise_error
     expect { create(:elastic_reindexing_task) }.not_to raise_error
@@ -25,15 +30,6 @@ RSpec.describe Elastic::ReindexingTask, type: :model do
 
     task.update!(state: :reindexing)
     expect(task.in_progress).to eq(true)
-  end
-
-  it 'sets default values for max_slices_running and slice_multiplier' do
-    # supports field not being set and field being set to nil
-    task = described_class.create!(max_slices_running: nil)
-
-    expect(task).to be_valid
-    expect(task.max_slices_running).to eq(60)
-    expect(task.slice_multiplier).to eq(2)
   end
 
   describe '.drop_old_indices!' do
