@@ -1,49 +1,32 @@
 <script>
-import { GlAlert, GlCard, GlLink, GlSprintf } from '@gitlab/ui';
+import { GlCard, GlLink, GlSprintf } from '@gitlab/ui';
 import { helpPagePath } from '~/helpers/help_page_helper';
-import {
-  activateSubscription,
-  CONNECTIVITY_ERROR,
-  connectivityErrorAlert,
-  connectivityIssue,
-  howToActivateSubscription,
-} from '../constants';
+import { activateSubscription, howToActivateSubscription } from '../constants';
+import SubscriptionActivationErrors from './subscription_activation_errors.vue';
 import SubscriptionActivationForm from './subscription_activation_form.vue';
 
 export const adminLicenseUrl = helpPagePath('/user/admin_area/license');
-export const troubleshootingHelpLink = helpPagePath('user/admin_area/license.html#troubleshooting');
-export const subscriptionActivationHelpLink = helpPagePath('user/admin_area/license.html');
 
 export default {
   name: 'SubscriptionActivationCard',
   i18n: {
     activateSubscription,
-    connectivityIssueTitle: connectivityIssue,
-    connectivityIssueSubtitle: connectivityErrorAlert.subtitle,
-    connectivityIssueHelpText: connectivityErrorAlert.helpText,
     howToActivateSubscription,
   },
   links: {
     adminLicenseUrl,
-    subscriptionActivationHelpLink,
-    troubleshootingHelpLink,
   },
   components: {
-    GlAlert,
     GlCard,
     GlLink,
     GlSprintf,
+    SubscriptionActivationErrors,
     SubscriptionActivationForm,
   },
   data() {
     return {
       error: null,
     };
-  },
-  computed: {
-    hasConnectivityIssue() {
-      return this.error === CONNECTIVITY_ERROR;
-    },
   },
   methods: {
     handleFormActivationFailure(error) {
@@ -60,32 +43,8 @@ export default {
         {{ $options.i18n.activateSubscription }}
       </h5>
     </template>
-    <div
-      v-if="hasConnectivityIssue"
-      class="gl-p-5 gl-border-b-1 gl-border-gray-100 gl-border-b-solid"
-    >
-      <gl-alert variant="danger" :title="$options.i18n.connectivityIssueTitle" :dismissible="false">
-        <gl-sprintf :message="$options.i18n.connectivityIssueSubtitle">
-          <template #link="{ content }">
-            <gl-link
-              :href="$options.links.subscriptionActivationHelpLink"
-              target="_blank"
-              class="gl-text-decoration-none!"
-              >{{ content }}
-            </gl-link>
-          </template>
-        </gl-sprintf>
-        <gl-sprintf :message="$options.i18n.connectivityIssueHelpText">
-          <template #link="{ content }">
-            <gl-link
-              :href="$options.links.troubleshootingHelpLink"
-              target="_blank"
-              class="gl-text-decoration-none!"
-              >{{ content }}
-            </gl-link>
-          </template>
-        </gl-sprintf>
-      </gl-alert>
+    <div v-if="error" class="gl-p-5 gl-border-b-1 gl-border-gray-100 gl-border-b-solid">
+      <subscription-activation-errors v-if="error" class="mb-4" :error="error" />
     </div>
     <p class="gl-mb-0 gl-px-5 gl-pt-5">
       <gl-sprintf :message="$options.i18n.howToActivateSubscription">

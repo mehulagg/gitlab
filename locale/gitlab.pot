@@ -31079,6 +31079,9 @@ msgstr ""
 msgid "SuperSonics|Activated on"
 msgstr ""
 
+msgid "SuperSonics|An error occurred while activating your subscription."
+msgstr ""
+
 msgid "SuperSonics|Expires on"
 msgstr ""
 

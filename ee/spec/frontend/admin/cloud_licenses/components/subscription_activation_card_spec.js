@@ -1,9 +1,6 @@
-import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import SubscriptionActivationCard, {
-  subscriptionActivationHelpLink,
-  troubleshootingHelpLink,
-} from 'ee/pages/admin/cloud_licenses/components/subscription_activation_card.vue';
+import SubscriptionActivationCard from 'ee/pages/admin/cloud_licenses/components/subscription_activation_card.vue';
+import SubscriptionActivationErrors from 'ee/pages/admin/cloud_licenses/components/subscription_activation_errors.vue';
 import SubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
@@ -13,16 +10,16 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 describe('CloudLicenseApp', () => {
   let wrapper;
 
-  const findConnectivityErrorAlert = () => wrapper.findComponent(GlAlert);
   const findSubscriptionActivationForm = () => wrapper.findComponent(SubscriptionActivationForm);
+  const findSubscriptionActivationErrors = () =>
+    wrapper.findComponent(SubscriptionActivationErrors);
 
-  const createComponent = ({ props = {}, stubs = {} } = {}) => {
+  const createComponent = ({ props = {} } = {}) => {
     wrapper = extendedWrapper(
       shallowMount(SubscriptionActivationCard, {
         propsData: {
           ...props,
         },
-        stubs,
       }),
     );
   };
@@ -40,12 +37,12 @@ describe('CloudLicenseApp', () => {
   });
 
   it('does not show any alert', () => {
-    expect(findConnectivityErrorAlert().exists()).toBe(false);
+    expect(findSubscriptionActivationErrors().exists()).toBe(false);
   });
 
   describe('when the forms emits a connectivity error', () => {
     beforeEach(() => {
-      createComponent({ stubs: { GlSprintf } });
+      createComponent();
       findSubscriptionActivationForm().vm.$emit(
         SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
         CONNECTIVITY_ERROR,
@@ -53,14 +50,11 @@ describe('CloudLicenseApp', () => {
     });
 
     it('shows an alert component', () => {
-      expect(findConnectivityErrorAlert().exists()).toBe(true);
+      expect(findSubscriptionActivationErrors().exists()).toBe(true);
     });
 
-    it('shows some help links', () => {
-      const alert = findConnectivityErrorAlert();
-
-      expect(alert.findAll(GlLink).at(0).attributes('href')).toBe(subscriptionActivationHelpLink);
-      expect(alert.findAll(GlLink).at(1).attributes('href')).toBe(troubleshootingHelpLink);
+    it('passes the correct error to the component', () => {
+      expect(findSubscriptionActivationErrors().props('error')).toBe(CONNECTIVITY_ERROR);
     });
   });
 });
