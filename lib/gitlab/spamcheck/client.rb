@@ -44,7 +44,7 @@ module Gitlab
                                               metadata: { 'authorization' =>
                                                            Gitlab::CurrentSettings.spam_check_api_key })
         verdict = convert_verdict_to_gitlab_constant(response.verdict)
-        [verdict, response.error]
+        [verdict, response.extra_attributes.to_h, response.error]
       end
 
       private

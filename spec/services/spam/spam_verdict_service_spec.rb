@@ -170,9 +170,29 @@ RSpec.describe Spam::SpamVerdictService do
         let(:error) { '' }
         let(:verdict) { nil }
 
+        let(:attribs) do
+          extra_attributes = Google::Protobuf::Map.new(:string, :string)
+          extra_attributes["monitorMode"] = "false"
+          extra_attributes
+        end
+
         before do
           allow(service).to receive(:spamcheck_client).and_return(spam_client)
           allow(spam_client).to receive(:issue_spam?).and_return([verdict, error])
+        end
+
+        context 'if attribs - monitorMode is true' do
+          let(:verdict) { nil }
+
+          let(:attribs) do
+            extra_attributes = Google::Protobuf::Map.new(:string, :string)
+            extra_attributes["monitorMode"] = "true"
+            extra_attributes
+          end
+
+          it 'returns the verdict' do
+            expect(subject).to be_nil
+          end
         end
 
         context 'the result is a valid verdict' do
