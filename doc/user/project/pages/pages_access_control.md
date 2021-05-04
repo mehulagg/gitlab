@@ -27,16 +27,15 @@ For a demonstration, see [Pages access controls](https://www.youtube.com/watch?v
 1. The Pages access control dropdown allows you to set who can view pages hosted
    with GitLab Pages, depending on your project's visibility:
 
-   - If your project is private:
+   - If your project is public:
      - **Only project members**: Only project members are able to browse the website.
      - **Everyone**: Everyone, both logged into and logged out of GitLab, is able to browse the website, no matter their project membership.
    - If your project is internal:
      - **Only project members**: Only project members are able to browse the website.
      - **Everyone with access**: Everyone logged into GitLab is able to browse the website, no matter their project membership.
      - **Everyone**: Everyone, both logged into and logged out of GitLab, is able to browse the website, no matter their project membership.
-   - If your project is public:
+   - If your project is private:
      - **Only project members**: Only project members are able to browse the website.
-     - **Everyone with access**: Everyone, both logged into and logged out of GitLab, is able to browse the website, no matter their project membership.
 
 1. Click **Save changes**. Note that your changes may not take effect immediately. GitLab Pages uses
    a caching mechanism for efficiency. Your changes may not take effect until that cache is
