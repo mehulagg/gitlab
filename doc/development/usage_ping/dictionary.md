@@ -4562,11 +4562,11 @@ Projects with repository mirroring enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181920_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::release`
+Group: `group::continuous integration`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `counts.projects_mock_ci_active`
 
@@ -15864,15 +15864,15 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.release.projects_mirrored_with_pipelines_enabled`
 
-Projects with repository mirroring enabled
+Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181934_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::release`
+Group: `group::continuous integration`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.release.releases`
 
@@ -17784,15 +17784,15 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.release.projects_mirrored_with_pipelines_enabled`
 
-Projects with repository mirroring enabled
+Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181943_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::release`
+Group: `group::continuous integration`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.release.releases`
 

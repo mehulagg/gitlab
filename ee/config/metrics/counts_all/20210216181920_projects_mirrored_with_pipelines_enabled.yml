@@ -2,15 +2,16 @@
 key_path: counts.projects_mirrored_with_pipelines_enabled
 description: Projects with repository mirroring enabled
 product_section: ops
-product_stage:
-product_group: group::release
+product_stage: verify
+product_group: group::continuous integration
 product_category:
 value_type: number
 status: data_available
 time_frame: all
 data_source: database
 distribution:
-- ce
+- ee
 tier:
-- free
-skip_validation: true
+- premium
+- ultimate
+
