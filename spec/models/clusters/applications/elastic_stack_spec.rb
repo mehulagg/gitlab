@@ -10,6 +10,36 @@ RSpec.describe Clusters::Applications::ElasticStack do
   include_examples 'cluster application version specs', :clusters_applications_elastic_stack
   include_examples 'cluster application helm specs', :clusters_applications_elastic_stack
 
+  describe 'cluster.integration_elastic_stack state synchronization' do
+    let!(:application) { create(:clusters_applications_elastic_stack) }
+    let(:cluster) { elastic_stack.cluster }
+    let(:integration) { cluster.integration_elastic_stack }
+
+    describe 'after_destroy' do
+      it 'disables the corresponding integration' do
+        application.destroy!
+
+        expect(integration).not_to be_enabled
+      end
+    end
+
+    describe 'on install' do
+      it 'enables the corresponding integration' do
+        application.make_installed!
+
+        expect(integration).to be_enabled
+      end
+    end
+
+    describe 'on uninstall' do
+      it 'disables the corresponding integration' do
+        application.make_uninstalled!
+
+        expect(integration).not_to be_enabled
+      end
+    end
+  end
+
   describe '#install_command' do
     let!(:elastic_stack) { create(:clusters_applications_elastic_stack) }
 

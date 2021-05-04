@@ -14,26 +14,16 @@ module Clusters
       def execute
         return ServiceResponse.error(message: 'Unauthorized') unless authorized?
 
-        integration.enabled = params[:enabled]
-        integration.save!
-
-        if integration.enabled?
-          ServiceResponse.success(message: s_('ClusterIntegration|Integration enabled'), payload: { integration: integration })
-        else
-          ServiceResponse.success(message: s_('ClusterIntegration|Integration disabled'), payload: { integration: integration })
+        integrations = []
+        ApplicationRecord.transaction do
+          integrations << cluster.find_or_build_integration_prometheus.update!(enabled: params[:prometheus_enabled])
+          integrations << cluster.find_or_build_integration_elastic_stack.update!(enabled: params[:elastic_stack_enabled])
         end
+
+        ServiceResponse.success(message: s_('ClusterIntegration|Integrations updated'), payload: { integrations: integrations })
       end
 
       private
-
-      def integration
-        case params[:application_type]
-        when 'prometheus'
-          cluster.find_or_build_integration_prometheus
-        else
-          raise ArgumentError, "invalid application_type: #{params[:application_type]}"
-        end
-      end
 
       def authorized?
         Ability.allowed?(current_user, :admin_cluster, cluster)

@@ -24,7 +24,7 @@ module Clusters
     end
 
     def cluster_integration_params
-      params.require(:integration).permit(:application_type, :enabled)
+      params.require(:integrations).permit(:prometheus, :elastic_stack)
     end
 
     def cluster
