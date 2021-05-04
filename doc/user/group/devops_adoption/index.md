@@ -65,4 +65,3 @@ Group DevOps Adoption can be accessed only:
 
 - On the [Ultimate tier](https://about.gitlab.com/pricing/).
 - By users with [Reporter access](../../permissions.md) and above.
-
