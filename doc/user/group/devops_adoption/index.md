@@ -40,6 +40,50 @@ DevOps Adoption allows you to:
 
 ![DevOps Report](img/group_devops_adoption_v13_11.png)
 
+## How it works
+
+### Enabling data processing
+
+Group DevOps Adoption relies on data that has been gathered by a daily data processing task.
+This task is disabled by default.
+If you want to begin using Group DevOps Adoption,
+simply access the feature for the first time and GitLab will automatically enable the data processing for that group.
+Please note that the group data will not appear immediately,
+because GitLab requires a few moments to process it.
+Generally the group data will be visible in less than one minute.
+
+### What is displayed
+
+DevOps Adoption displays feature adoption data for the given group,
+and any added sub-groups, for the current calendar month.
+Please expect adoption to be lower at the beginning of the month,
+before you have had an opportunity to use all the features listed in the table.
+Understanding this is not ideal behavior, we
+[plan to implement](https://gitlab.com/gitlab-org/gitlab/-/issues/329708)
+a rollling 30-day perspective instead.
+
+### When a feature is considered "adopted"
+
+A feature is considered "adopted" if it has been used anywhere in the group in the time period, even just once.
+For example, if one issue was created in one project in a group, the group is considered to have "adopted" issues in that time period.
+
+### No penalties for normal adoption
+
+DevOps Adoption does not penalize groups with normal adoption.
+Following that guideline, we have developed some specific rules:
+
+1. Don't penalize for having dormant projects. It is normal for groups have a mix of active and dormant projects. That means we should not measure adoption by how many projects within the group have used a feature, only whether a feature was used anywhere in the group.
+1. Don't penalize for GitLab adding new features over time. It is normal for a group's feature usage to be consistent over time. If GitLab adds a new feature, the group's feature adoption has not decreased. That means we should not measure adoption by percentages, only total counts.
+
+### Adding a sub-group
+
+If you want to add a sub-group to your Group DevOps Adoption report,
+just click the button to "Add/remove sub-groups".
+Select the sub-group you want to add and click to save.
+Please note that the sub-group data might not appear immediately,
+because GitLab requires a few moments to collect the data.
+Generally the data will be visible in less than one minute.
+
 ## Enable or disable Group DevOps Adoption **(ULTIMATE)**
 
 Group DevOps Adoption is under development and not ready for production use. It is
