@@ -5,7 +5,7 @@ module EE
     module BuildService
       extend ::Gitlab::Utils::Override
 
-      DISABLED_ISSUE_TYPES = %w[test_case requirement].freeze
+      RESTRICTED_ISSUE_TYPES = %w[test_case requirement].freeze
 
       def issue_params_from_template
         return {} unless project.feature_available?(:issuable_default_templates)
@@ -22,16 +22,9 @@ module EE
         issue_params_from_template.merge(super)
       end
 
-      override :allowed_issue_base_params
-      def allowed_issue_base_params
-        return super - [:issue_type] if DISABLED_ISSUE_TYPES.include?(params[:issue_type])
-
-        super
-      end
-
-      override :allowed_issue_admin_params
-      def allowed_issue_admin_params
-        return super + [:issue_type] if params[:issue_type] == 'test_case'
+      override :issue_type_allowed?
+      def issue_type_allowed?(issue)
+        return true unless RESTRICTED_ISSUE_TYPES.include?(params[:issue_type])
 
         super
       end

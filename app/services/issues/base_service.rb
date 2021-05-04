@@ -37,6 +37,8 @@ module Issues
     def filter_params(issue)
       super
 
+      filter_issue_type(issue)
+
       moved_issue = params.delete(:moved_issue)
 
       # Setting created_at, updated_at and iid is allowed only for admins and owners or
@@ -74,6 +76,14 @@ module Issues
       return unless milestone
 
       Milestones::IssuesCountService.new(milestone).delete_cache
+    end
+
+    def filter_issue_type(issue)
+      params.delete(:issue_type) unless issue_type_allowed?(issue)
+    end
+
+    def issue_type_allowed?(issue)
+      can_admin_issuable?(issue)
     end
   end
 end

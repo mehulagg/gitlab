@@ -8,6 +8,7 @@ module Issues
       filter_resolve_discussion_params
       @issue = project.issues.new(issue_params).tap do |issue|
         ensure_milestone_available(issue)
+        set_issue_type(issue)
       end
     end
 
@@ -84,6 +85,10 @@ module Issues
       { author: current_user }
         .merge(issue_params_with_info_from_discussions)
         .merge(allowed_issue_params)
+    end
+
+    def set_issue_type(issue)
+      issue.issue_type = 'issue' unless issue_type_allowed?(issue)
     end
   end
 end
