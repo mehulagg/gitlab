@@ -13,6 +13,31 @@ RSpec.describe Feature::Definition do
   let(:definition) { described_class.new(path, attributes) }
   let(:yaml_content) { attributes.deep_stringify_keys.to_yaml }
 
+  shared_examples 'tracking and raising exception for development' do |message:|
+    before do
+      expect(Gitlab::ErrorTracking)
+        .to receive(:track_and_raise_for_dev_exception)
+        .with(kind_of(Feature::InvalidFeatureFlagError))
+        .and_call_original
+    end
+
+    context 'when on dev or test environment' do
+      it 'raises an error' do
+        expect { subject }.to raise_error(Feature::InvalidFeatureFlagError, message)
+      end
+    end
+
+    context 'when on production environment' do
+      before do
+        allow(Gitlab::ErrorTracking).to receive(:should_raise_for_dev?).and_return(false)
+      end
+
+      it 'does not raise an error' do
+        expect { subject }.not_to raise_error
+      end
+    end
+  end
+
   describe '#key' do
     subject { definition.key }
 
@@ -37,32 +62,51 @@ RSpec.describe Feature::Definition do
     with_them do
       let(:params) { attributes.merge(path: path) }
 
+      subject(:validate!) { described_class.new(params[:path], params.except(:path)).validate! }
+
       before do
         params[param] = value
+
+        expect(Gitlab::ErrorTracking)
+          .to receive(:track_and_raise_for_dev_exception)
+          .with(kind_of(Feature::InvalidFeatureFlagError))
+          .and_call_original
       end
 
       it do
-        expect do
-          described_class.new(
-            params[:path], params.except(:path)
-          ).validate!
-        end.to raise_error(result)
+        expect { validate! }.to raise_error(result)
+      end
+
+      context 'when on production environment' do
+        before do
+          allow(Gitlab::ErrorTracking).to receive(:should_raise_for_dev?).and_return(false)
+        end
+
+        it 'does not raise an error' do
+          expect { validate! }.not_to raise_error
+        end
       end
     end
   end
 
   describe '#valid_usage!' do
+    subject { definition.valid_usage!(type_in_code: type_in_code, default_enabled_in_code: default_enabled_in_code) }
+
     context 'validates type' do
-      it 'raises exception for invalid type' do
-        expect { definition.valid_usage!(type_in_code: :invalid, default_enabled_in_code: false) }
-          .to raise_error(/The `type:` of `feature_flag` is not equal to config/)
-      end
+      let(:type_in_code) { :invalid }
+      let(:default_enabled_in_code) { false }
+
+      it_behaves_like 'tracking and raising exception for development',
+        message: /The `type:` of `feature_flag` is not equal to config/
     end
 
     context 'validates default enabled' do
-      it 'raises exception for different value' do
-        expect { definition.valid_usage!(type_in_code: :development, default_enabled_in_code: false) }
-          .to raise_error(/The `default_enabled:` of `feature_flag` is not equal to config/)
+      context 'with different value' do
+        let(:type_in_code) { :development }
+        let(:default_enabled_in_code) { false }
+
+        it_behaves_like 'tracking and raising exception for development',
+          message: /The `default_enabled:` of `feature_flag` is not equal to config/
       end
 
       it 'allows passing `default_enabled: :yaml`' do
@@ -79,31 +123,26 @@ RSpec.describe Feature::Definition do
   end
 
   describe '.load_from_file' do
+    subject(:load_from_file) { described_class.send(:load_from_file, path) }
+
     it 'properly loads a definition from file' do
       expect_file_read(path, content: yaml_content)
 
-      expect(described_class.send(:load_from_file, path).attributes)
-        .to eq(definition.attributes)
+      expect(load_from_file.attributes).to eq(definition.attributes)
     end
 
     context 'for missing file' do
       let(:path) { 'missing/feature-flag/file.yml' }
 
-      it 'raises exception' do
-        expect do
-          described_class.send(:load_from_file, path)
-        end.to raise_error(/Invalid definition for/)
-      end
+      it_behaves_like 'tracking and raising exception for development', message: /Invalid definition for/
     end
 
     context 'for invalid definition' do
-      it 'raises exception' do
+      before do
         expect_file_read(path, content: '{}')
-
-        expect do
-          described_class.send(:load_from_file, path)
-        end.to raise_error(/Feature flag is missing name/)
       end
+
+      it_behaves_like 'tracking and raising exception for development', message: /Feature flag is missing name/
     end
   end
 
@@ -133,19 +172,21 @@ RSpec.describe Feature::Definition do
       is_expected.to be_one
     end
 
-    it "when the same feature flag is stored multiple times raises exception" do
-      write_feature_flag(store1, path, yaml_content)
-      write_feature_flag(store2, path, yaml_content)
+    context 'with the same feature flag is stored multiple times' do
+      before do
+        write_feature_flag(store1, path, yaml_content)
+        write_feature_flag(store2, path, yaml_content)
+      end
 
-      expect { subject }
-        .to raise_error(/Feature flag 'feature_flag' is already defined/)
+      it_behaves_like 'tracking and raising exception for development', message: /Feature flag 'feature_flag' is already defined/
     end
 
-    it "when one of the YAMLs is invalid it does raise exception" do
-      write_feature_flag(store1, path, '{}')
+    context 'with one of the YAMLs is invalid' do
+      before do
+        write_feature_flag(store1, path, '{}')
+      end
 
-      expect { subject }
-        .to raise_error(/Feature flag is missing name/)
+      it_behaves_like 'tracking and raising exception for development', message: /Feature flag is missing name/
     end
 
     after do
@@ -178,17 +219,15 @@ RSpec.describe Feature::Definition do
 
     context 'when an unknown feature flag is used' do
       context 'for a type that is required to have all feature flags registered' do
+        subject(:valid_usage!) { described_class.valid_usage!(:unknown_feature_flag, type: :development, default_enabled: false) }
+
         before do
           stub_const('Feature::Shared::TYPES', {
             development: { optional: false }
           })
         end
 
-        it 'raises exception' do
-          expect do
-            described_class.valid_usage!(:unknown_feature_flag, type: :development, default_enabled: false)
-          end.to raise_error(/Missing feature definition for `unknown_feature_flag`/)
-        end
+        it_behaves_like 'tracking and raising exception for development', message: /Missing feature definition for `unknown_feature_flag`/
       end
 
       context 'for a type that is optional' do
@@ -206,11 +245,9 @@ RSpec.describe Feature::Definition do
       end
 
       context 'for an unknown type' do
-        it 'raises exception' do
-          expect do
-            described_class.valid_usage!(:unknown_feature_flag, type: :unknown_type, default_enabled: false)
-          end.to raise_error(/Unknown feature flag type used: `unknown_type`/)
-        end
+        subject(:valid_usage!) { described_class.valid_usage!(:unknown_feature_flag, type: :unknown_type, default_enabled: false) }
+
+        it_behaves_like 'tracking and raising exception for development', message: /Unknown feature flag type used: `unknown_type`/
       end
     end
   end
@@ -249,13 +286,8 @@ RSpec.describe Feature::Definition do
     context 'when feature flag does not exist' do
       let(:key) { :unknown_feature_flag }
 
-      context 'when on dev or test environment' do
-        it 'raises an error' do
-          expect { subject }.to raise_error(
-            Feature::InvalidFeatureFlagError,
-            "The feature flag YAML definition for 'unknown_feature_flag' does not exist")
-        end
-      end
+      it_behaves_like 'tracking and raising exception for development',
+        message: "The feature flag YAML definition for 'unknown_feature_flag' does not exist"
 
       context 'when on production environment' do
         before do
