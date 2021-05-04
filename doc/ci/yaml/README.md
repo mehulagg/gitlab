@@ -496,8 +496,8 @@ include: 'configs/*.yml'
 When the pipeline runs, GitLab:
 
 - Adds all `.yml` files in the `configs` directory into the pipeline configuration.
-- Does not add `.yml` files in `configs` if there are other subdirectories in the `configs`
-  directory. To allow this, add the following configuration:
+- Does not add `.yml` files in subfolders of the `configs` directory. To allow this,
+  add the following configuration:
 
   ```yaml
   # This matches all files in `configs` and any subfolder in it.
