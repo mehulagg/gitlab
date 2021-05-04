@@ -1175,9 +1175,9 @@ The API Fuzzing engine outputs an error message when it cannot establish a conne
 - Remove the `FUZZAPI_API` variable from the `.gitlab-ci.yml` file. The value will be inherited from the API Fuzzing CI/CD template. We recommend this method instead of manually setting a value.
 - If removing the variable is not possible, check to see if this value has changed in the latest version of the [API Fuzzing CI/CD template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). If so, update the value in the `.gitlab-ci.yml` file.
 
-### Application cannot determine the base URL for the target API. For more information about resolving this issue see the trouble shooting section of the documentation
+### Application cannot determine the base URL for the target API
 
-The API Fuzzing runner outputs an error message when it cannot determine the target API after inspecting the OpenAPI document. This error message is shown when the target API has not been set in the template, and it could not be inferred from the OpenAPI document. The solutions are either explicitly indicating the base URL in your template or by providing enough information in your OpenAPI document.
+The API Fuzzing analyzer outputs an error message when it cannot determine the target API after inspecting the OpenAPI document. This error message is shown when the target API has not been set in the `.gitlab-ci.yml` and it could not be inferred from the OpenAPI document. The solutions are either explicitly providing the base URL in your `.gitlab-ci.yml` file or by providing enough information in your OpenAPI document.
 
 **Error message**
 
@@ -1186,19 +1186,18 @@ For more information about resolving this issue see the trouble shooting section
 
 **Solution**
 
-**Updating the CI/CD template**
+**Updating the .gitlab-ci.yml**
 
-1. In your `.gitlab-ci.yml`, there are two possible options:
-     1. Add a variable `FUZZAPI_TARGET_URL`. The variable must be set to the base URL of API testing target. As for example:
+1. In your `.gitlab-ci.yml`, add a variable `FUZZAPI_TARGET_URL`. The variable must be set to the base URL of API testing target. As for example:
 
-        ```yaml
-        include:
-            - template: API-Fuzzing.gitlab-ci.yml
+  ```yaml
+  include:
+      - template: API-Fuzzing.gitlab-ci.yml
 
-          variables:
-            FUZZAPI_TARGET_URL: http://test-deployment/
-            FUZZAPI_OPENAPI: test-api-specification.json
-        ```
+    variables:
+      FUZZAPI_TARGET_URL: http://test-deployment/
+      FUZZAPI_OPENAPI: test-api-specification.json
+  ```
 
 **Updating your OpenAPI document**
 
