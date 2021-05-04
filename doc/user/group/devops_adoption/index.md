@@ -61,8 +61,8 @@ Feature.disable(:group_devops_adoption)
 
 ## Permissions
 
-**DevOps Adoption** can be accessed only:
+Group DevOps Adoption can be accessed only:
 
-- On the [Ultimate tier](https://about.gitlab.com/pricing/) and above.
-- By users with [Reporter access](../permissions.md) and above.
+- On the [Ultimate tier](https://about.gitlab.com/pricing/).
+- By users with [Reporter access](../../permissions.md) and above.
 
