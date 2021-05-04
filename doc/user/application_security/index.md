@@ -188,7 +188,7 @@ Security Dashboards show vulnerabilities present in project default branches. Da
 
 The vulnerability report shows the results of the last completed pipeline on the default branch. It is updated on every pipeline completion. All detected vulnerabilities are shown as well as any previous ones that are no longer detected in the latest scan. Vulnerabilities that are no longer detected may have been remediated or otherwise removed and can be marked as `Resolved` after proper verification. Vulnerabilities that are no longer detected are denoted with an icon for easy filtering and review.
 
-By default the vulnerability report does not show “dismissed” or “resolved” however you can edit the status filter to see these.
+By default, the vulnerability report does not show “dismissed” or “resolved” so you can focus on open vulnerabilities. You can easily change the Status filter to see these.
 
 [Read more about the Vulnerability report](/vulnerability_report/)
 
