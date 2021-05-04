@@ -112,6 +112,9 @@ export const buySubscriptionCard = {
 };
 
 export const CONNECTIVITY_ERROR = 'CONNECTIVITY_ERROR';
+export const generalActivationError = s__(
+  'SuperSonics|An error occurred while activating your subscription.',
+);
 export const connectivityErrorAlert = {
   subtitle: s__(
     'CloudLicense|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Sync service%{linkEnd}, a hassle-free way to manage your subscription.',

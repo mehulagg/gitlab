@@ -30,6 +30,7 @@ const getErrorsAsData = ({
 }) => errors;
 
 export const SUBSCRIPTION_ACTIVATION_FAILURE_EVENT = 'subscription-activation-failure';
+export const SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT = 'subscription-activation-success';
 
 export default {
   name: 'CloudLicenseSubscriptionActivationForm',
@@ -52,7 +53,14 @@ export default {
   directives: {
     validation: validation(),
   },
-  emits: [SUBSCRIPTION_ACTIVATION_FAILURE_EVENT],
+  props: {
+    hideSubmitButton: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
+  emits: [SUBSCRIPTION_ACTIVATION_FAILURE_EVENT, SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT],
   data() {
     const form = {
       state: false,
@@ -119,6 +127,7 @@ export default {
             const [error] = errors;
             throw new Error(error);
           }
+          this.$emit(SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT);
         })
         .catch((error) => {
           this.$emit(SUBSCRIPTION_ACTIVATION_FAILURE_EVENT, error.message);
@@ -172,6 +181,7 @@ export default {
       </gl-form-group>
 
       <gl-button
+        v-if="!hideSubmitButton"
         :loading="isRequestingActivation"
         category="primary"
         class="gl-mt-6 js-no-auto-disable"

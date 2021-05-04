@@ -3,6 +3,7 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import SubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
+  SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
 import {
   CONNECTIVITY_ERROR,
@@ -134,6 +135,10 @@ describe('CloudLicenseApp', () => {
             activationCode: fakeActivationCode,
           },
         });
+      });
+
+      it('emits a successful event', () => {
+        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT)).toEqual([[]]);
       });
     });
 
