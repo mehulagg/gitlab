@@ -210,6 +210,16 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
     end
   end
 
+  context 'for adding issue to epic from epic page event' do
+    def track_action(params)
+      described_class.track_epic_issue_added_from_epic(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_ISSUE_ADDED_FROM_EPIC }
+    end
+  end
+
   context 'for changing labels epic event' do
     def track_action(params)
       described_class.track_epic_labels_changed_action(**params)

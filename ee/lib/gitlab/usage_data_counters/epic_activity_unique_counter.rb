@@ -20,6 +20,7 @@ module Gitlab
       EPIC_FIXED_START_DATE_UPDATED = 'g_project_management_users_updating_fixed_epic_start_date'
       EPIC_FIXED_DUE_DATE_UPDATED = 'g_project_management_users_updating_fixed_epic_due_date'
       EPIC_ISSUE_ADDED = 'g_project_management_epic_issue_added'
+      EPIC_ISSUE_ADDED_FROM_EPIC = 'g_project_management_epic_issue_added_from_epic'
       EPIC_ISSUE_REMOVED = 'g_project_management_epic_issue_removed'
       EPIC_ISSUE_MOVED_FROM_PROJECT = 'g_project_management_epic_issue_moved_from_project'
       EPIC_CLOSED = 'g_project_management_epic_closed'
@@ -81,6 +82,10 @@ module Gitlab
 
         def track_epic_issue_added(author:)
           track_unique_action(EPIC_ISSUE_ADDED, author)
+        end
+
+        def track_epic_issue_added_from_epic(author:)
+          track_unique_action(EPIC_ISSUE_ADDED_FROM_EPIC, author)
         end
 
         def track_epic_issue_removed(author:)
