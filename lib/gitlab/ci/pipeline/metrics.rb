@@ -70,6 +70,14 @@ module Gitlab
 
           Gitlab::Metrics.counter(name, comment)
         end
+
+        def ci_minutes_comparison_histogram
+          name = :gitlab_ci_minutes_comparison
+          comment = 'Comparison between CI minutes consumption from live tracking vs actual consumption'
+          labels = {}
+          buckets = [-10.0, -5.0, -3.0, -1.0, 0.0, 1.0, 3.0, 5.0, 10.0]
+          ::Gitlab::Metrics.histogram(name, comment, labels, buckets)
+        end
       end
     end
   end

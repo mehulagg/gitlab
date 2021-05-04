@@ -16,6 +16,8 @@ module Ci
         legacy_track_usage_of_monthly_minutes(consumption_in_seconds)
 
         track_usage_of_monthly_minutes(consumption)
+
+        compare_with_live_consumption(build, consumption)
       end
 
       private
@@ -40,6 +42,14 @@ module Ci
         end
       end
 
+      def compare_with_live_consumption(build, consumption)
+        live_consumption = ::Ci::Minutes::TrackLiveConsumptionService.new(build).live_consumption
+        return if live_consumption == 0
+
+        difference = consumption.to_f - live_consumption.to_f
+        metrics.ci_minutes_comparison_histogram.observe({}, difference)
+      end
+
       def namespace_statistics
         namespace.namespace_statistics || namespace.create_namespace_statistics
       end
@@ -50,6 +60,10 @@ module Ci
 
       def namespace
         project.shared_runners_limit_namespace
+      end
+
+      def metrics
+        @metrics ||= ::Gitlab::Ci::Pipeline::Metrics.new
       end
     end
   end

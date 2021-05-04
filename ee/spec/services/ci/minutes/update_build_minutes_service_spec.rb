@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
+  include AfterNextHelpers
+
   describe '#perform' do
     let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
     let(:project) { create(:project, :private, namespace: namespace) }
@@ -137,6 +139,42 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
 
           expect(project_amount_used)
             .to eq((project.statistics.reload.shared_runners_seconds.to_f / 60).round(2))
+        end
+      end
+
+      context 'when live tracking exists for the build', :redis do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+
+          build.update!(status: :running)
+
+          freeze_time do
+            ::Ci::Minutes::TrackLiveConsumptionService.new(build).tap do |service|
+              service.time_last_tracked_consumption!((build.duration.to_i - 5.minutes).ago)
+              service.execute
+            end
+          end
+
+          build.update!(status: :success)
+        end
+
+        it 'observe the difference between actual vs live consumption' do
+          histogram = double(:histogram)
+          expect_next(::Gitlab::Ci::Pipeline::Metrics)
+            .to receive(:ci_minutes_comparison_histogram)
+            .and_return(histogram)
+
+          expect(histogram).to receive(:observe).with({}, 5 * cost_factor)
+
+          subject
+        end
+      end
+
+      context 'when live tracking does not exist for the build' do
+        it 'does not observe the difference' do
+          expect(::Gitlab::Ci::Pipeline::Metrics).not_to receive(:new)
+
+          subject
         end
       end
     end
