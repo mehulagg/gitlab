@@ -144,10 +144,10 @@ describe('Value Stream Analytics component', () => {
     });
 
     if (withStageSelected) {
-      await Promise.all([
-        store.dispatch('receiveGroupStagesSuccess', mockData.customizableStagesAndEvents.stages),
-        store.dispatch('receiveStageDataSuccess', mockData.issueEvents),
-      ]);
+      await store.dispatch(
+        'receiveGroupStagesSuccess',
+        mockData.customizableStagesAndEvents.stages,
+      );
     }
     return comp;
   }

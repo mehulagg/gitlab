@@ -2,9 +2,9 @@
 
 class AddNewDataToMergeRequestsDocuments < Elastic::Migration
   batched!
-  throttle_delay 5.minutes
+  throttle_delay 3.minutes
 
-  QUERY_BATCH_SIZE = 5000
+  QUERY_BATCH_SIZE = 6000
   UPDATE_BATCH_SIZE = 100
 
   def migrate
@@ -38,7 +38,7 @@ class AddNewDataToMergeRequestsDocuments < Elastic::Migration
     end
 
     document_references.each_slice(UPDATE_BATCH_SIZE) do |refs|
-      Elastic::ProcessBookkeepingService.track!(*refs)
+      Elastic::ProcessInitialBookkeepingService.track!(*refs)
     end
 
     log "Adding visibility_level field to merge_requests documents is completed for batch of #{document_references.size} documents"

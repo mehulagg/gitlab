@@ -5,10 +5,13 @@ module Analytics
     # Schedules update of snapshots for all segments
     class CreateAllSnapshotsWorker
       include ApplicationWorker
+
+      sidekiq_options retry: 3
       # This worker does not perform work scoped to a context
       include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
       feature_category :devops_reports
+      tags :exclude_from_kubernetes
       idempotent!
 
       WORKERS_GAP = 5.seconds

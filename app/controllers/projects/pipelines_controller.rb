@@ -32,7 +32,12 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   POLLING_INTERVAL = 10_000
 
-  feature_category :continuous_integration
+  feature_category :continuous_integration, [
+                     :charts, :show, :config_variables, :stage, :cancel, :retry,
+                     :builds, :dag, :failures, :status, :downloadable_artifacts,
+                     :index, :create, :new, :destroy
+                   ]
+  feature_category :code_testing, [:test_report]
 
   def index
     @pipelines = Ci::PipelinesFinder
@@ -218,7 +223,7 @@ class Projects::PipelinesController < Projects::ApplicationController
     PipelineSerializer
       .new(project: @project, current_user: @current_user)
       .with_pagination(request, response)
-      .represent(@pipelines, disable_coverage: true, preload: true)
+      .represent(@pipelines, disable_coverage: true, preload: true, disable_artifacts: true)
   end
 
   def render_show

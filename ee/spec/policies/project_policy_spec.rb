@@ -1102,6 +1102,30 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'add_project_to_instance_security_dashboard' do
+    let(:policy) { :add_project_to_instance_security_dashboard }
+
+    context 'when user is auditor' do
+      let(:current_user) { create(:user, :auditor) }
+
+      it { is_expected.to be_allowed(policy) }
+    end
+
+    context 'when user is not auditor' do
+      context 'with developer access' do
+        let(:current_user) { developer }
+
+        it { is_expected.to be_allowed(policy) }
+      end
+
+      context 'without developer access' do
+        let(:current_user) { create(:user) }
+
+        it { is_expected.to be_disallowed(policy) }
+      end
+    end
+  end
+
   context 'visual review bot' do
     let(:current_user) { User.visual_review_bot }
 

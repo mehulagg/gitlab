@@ -112,7 +112,7 @@ module EE
             if result[:status] == :success
               no_content!
             else
-              bad_request!(nil)
+              bad_request!(result[:message])
             end
           end
         end

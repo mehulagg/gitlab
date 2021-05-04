@@ -1,18 +1,10 @@
 import { GlButton, GlBadge } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { shallowMount } from '@vue/test-utils';
 import GeoNodeActions from 'ee/geo_nodes_beta/components/header/geo_node_actions.vue';
 import GeoNodeHeader from 'ee/geo_nodes_beta/components/header/geo_node_header.vue';
 import GeoNodeHealthStatus from 'ee/geo_nodes_beta/components/header/geo_node_health_status.vue';
 import GeoNodeLastUpdated from 'ee/geo_nodes_beta/components/header/geo_node_last_updated.vue';
-import {
-  MOCK_PRIMARY_VERSION,
-  MOCK_REPLICABLE_TYPES,
-  MOCK_NODES,
-} from 'ee_jest/geo_nodes_beta/mock_data';
-
-const localVue = createLocalVue();
-localVue.use(Vuex);
+import { MOCK_NODES } from 'ee_jest/geo_nodes_beta/mock_data';
 
 describe('GeoNodeHeader', () => {
   let wrapper;
@@ -22,19 +14,8 @@ describe('GeoNodeHeader', () => {
     collapsed: false,
   };
 
-  const createComponent = (initialState, props) => {
-    const store = new Vuex.Store({
-      state: {
-        primaryVersion: MOCK_PRIMARY_VERSION.version,
-        primaryRevision: MOCK_PRIMARY_VERSION.revision,
-        replicableTypes: MOCK_REPLICABLE_TYPES,
-        ...initialState,
-      },
-    });
-
+  const createComponent = (props) => {
     wrapper = shallowMount(GeoNodeHeader, {
-      localVue,
-      store,
       propsData: {
         ...defaultProps,
         ...props,
@@ -84,7 +65,7 @@ describe('GeoNodeHeader', () => {
 
       describe('when collapsed', () => {
         beforeEach(() => {
-          createComponent(null, { collapsed: true });
+          createComponent({ collapsed: true });
         });
 
         it('renders the chevron-right icon', () => {
@@ -118,7 +99,7 @@ describe('GeoNodeHeader', () => {
 
       describe('when current node is false', () => {
         beforeEach(() => {
-          createComponent(null, { node: MOCK_NODES[1] });
+          createComponent({ node: MOCK_NODES[1] });
         });
 
         it('does not render', () => {

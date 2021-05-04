@@ -124,10 +124,7 @@ export default {
     const supportedFilters = [...SupportedFilters, ...SupportedFiltersEE];
     const filterParams = getSupportedParams(filters, supportedFilters);
 
-    // Temporarily disabled until negated filters are supported for epic boards
-    if (!getters.isEpicBoard) {
-      filterParams.not = transformNotFilters(filters);
-    }
+    filterParams.not = transformNotFilters(filters);
 
     if (filters.groupBy === GroupByParamType.epic) {
       dispatch('setEpicSwimlanes');
@@ -779,15 +776,6 @@ export default {
       itemId: activeBoardItem.id,
       prop: 'labels',
       value: data.updateEpic.epic.labels.nodes,
-    });
-  },
-
-  setActiveEpicConfidential: ({ commit, getters }, confidential) => {
-    const { activeBoardItem } = getters;
-    commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
-      itemId: activeBoardItem.id,
-      prop: 'confidential',
-      value: confidential,
     });
   },
 };

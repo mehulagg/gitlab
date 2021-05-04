@@ -19,3 +19,18 @@ export const REPORT_COMPONENTS = Object.fromEntries(
     component,
   ]),
 );
+
+/*
+ * Diff component
+ */
+const DIFF = 'diff';
+const BEFORE = 'before';
+const AFTER = 'after';
+
+export const VIEW_TYPES = { DIFF, BEFORE, AFTER };
+
+const NORMAL = 'normal';
+const REMOVED = 'removed';
+const ADDED = 'added';
+
+export const LINE_TYPES = { NORMAL, REMOVED, ADDED };

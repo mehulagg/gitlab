@@ -71,7 +71,7 @@ For more details on the specific data persisted in a group export, see the
    ![Export group panel](img/export_panel_v13_0.png)
 
 1. After the export is generated, you should receive an e-mail with a link to the [exported contents](#exported-contents)
-   in a compressed tar archive, with contents in JSON format.
+   in a compressed tar archive, with contents in NDJSON format.
 
 1. Alternatively, you can come back to the project settings and download the
    file from there by clicking **Download export**, or generate a new file by clicking **Regenerate export**.
@@ -108,6 +108,14 @@ on an existing group's page.
 1. Click **Import group** to begin importing. Your newly imported group page appears after the operation completes.
 
 ## Version history
+
+### 14.0+
+
+In GitLab 14.0, the JSON format is no longer supported for project and group exports. To allow for a
+transitional period, you can still import any JSON exports. The new format for imports and exports
+is NDJSON.
+
+### 13.0+
 
 GitLab can import bundles that were exported from a different GitLab deployment.
 This ability is limited to two previous GitLab [minor](../../../policy/maintenance.md#versioning)

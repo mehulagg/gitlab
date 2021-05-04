@@ -81,6 +81,7 @@ RSpec.describe Gitlab::SeatLinkData do
     it 'returns payload data as a JSON string' do
       expect(subject.to_json).to eq(
         {
+          gitlab_version: Gitlab::VERSION,
           timestamp: timestamp.iso8601,
           date: timestamp.to_date.iso8601,
           license_key: key,
@@ -118,7 +119,7 @@ RSpec.describe Gitlab::SeatLinkData do
   end
 
   describe '#should_sync_seats?' do
-    let_it_be(:historical_data) { create(:historical_data, recorded_at: timestamp) }
+    let_it_be(:historical_data, refind: true) { create(:historical_data, recorded_at: timestamp) }
 
     let(:license) { build(:license, :cloud) }
 

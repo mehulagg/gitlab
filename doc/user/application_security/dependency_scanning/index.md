@@ -77,6 +77,7 @@ The following languages and dependency managers are supported:
 1. Support for [sbt](https://www.scala-sbt.org/) 1.3 and above was added in GitLab 13.9.
 
 Plans are underway for supporting the following languages, dependency managers, and dependency files. For details, see the issue link for each.
+For workarounds, see the [Troubleshooting section](#troubleshooting)
 
 | Package Managers    | Languages | Supported files | Scan tools | Issue |
 | ------------------- | --------- | --------------- | ---------- | ----- |
@@ -227,13 +228,13 @@ Read more on [how to use private Maven repositories](../index.md#using-private-m
 ## Interacting with the vulnerabilities
 
 Once a vulnerability is found, you can interact with it. Read more on how to
-[address the vulnerabilities](../index.md#addressing-vulnerabilities).
+[address the vulnerabilities](../vulnerabilities/index.md).
 
 ## Solutions for vulnerabilities (auto-remediation)
 
 Some vulnerabilities can be fixed by applying the solution that GitLab
 automatically generates. Read more about the
-[solutions for vulnerabilities](../index.md#apply-an-automatic-remediation-for-a-vulnerability).
+[solutions for vulnerabilities](../vulnerabilities/index.md#remediate-a-vulnerability-automatically).
 
 ## Security Dashboard
 
@@ -243,8 +244,8 @@ vulnerabilities in your groups, projects and pipelines. Read more about the
 
 ## Vulnerabilities database update
 
-For more information about the vulnerabilities database update, check the
-[maintenance table](../index.md#maintenance-and-update-of-the-vulnerabilities-database).
+For more information about the vulnerabilities database update, see the
+[maintenance table](../vulnerabilities/index.md#vulnerability-scanner-maintenance).
 
 ## Dependency List
 
@@ -420,8 +421,8 @@ registry.gitlab.com/gitlab-org/security-products/analyzers/bundler-audit:2
 The process for importing Docker images into a local offline Docker registry depends on
 **your network security policy**. Please consult your IT staff to find an accepted and approved
 process by which external resources can be imported or temporarily accessed.
-Note that these scanners are [updated periodically](../index.md#maintenance-and-update-of-the-vulnerabilities-database)
-with new definitions, so consider if you can make periodic updates yourself.
+These scanners are [periodically updated](../vulnerabilities/index.md#vulnerability-scanner-maintenance)
+with new definitions, and you may be able to make occasional updates on your own.
 
 For details on saving and transporting Docker images as a file, see Docker's documentation on
 [`docker save`](https://docs.docker.com/engine/reference/commandline/save/), [`docker load`](https://docs.docker.com/engine/reference/commandline/load/),
@@ -567,6 +568,53 @@ As a workaround, remove the [`retire.js`](analyzers.md#selecting-specific-analyz
 [DS_DEFAULT_ANALYZERS](#configuring-dependency-scanning).
 
 ## Troubleshooting
+
+### Working around missing support for certain languages or package managers
+
+As noted in the ["Supported languages" section](#supported-languages-and-package-managers)
+some dependency definition files are not yet supported.
+However, Dependency Scanning can be achieved if
+the language, a package manager, or a third-party tool
+can convert the definition file
+into a supported format.
+
+Generally, the approach is the following:
+
+1. Define a dedicated converter job in your `.gitlab-ci.yml` file.
+   Use a suitable Docker image, script, or both to facilitate the conversion.
+1. Let that job upload the converted, supported file as an artifact.
+1. Add [`dependencies: [<your-converter-job>]`](../../../ci/yaml/README.md#dependencies)
+   to your `dependency_scanning` job to make use of the converted definitions files.
+
+For example, the currently unsupported `poetry.lock` file can be
+[converted](https://python-poetry.org/docs/cli/#export)
+to the supported `requirements.txt` as follows.
+
+```yaml
+include:
+  - template: Dependency-Scanning.gitlab-ci.yml
+
+stages:
+  - .pre
+  - test
+
+variables:
+  PIP_REQUIREMENTS_FILE: "requirements-converted.txt"
+
+convert-poetry:
+  stage: .pre
+  image: python:3-slim
+  script:
+    - pip install poetry  # Or via another method: https://python-poetry.org/docs/#installation
+    - poetry export --output "$PIP_REQUIREMENTS_FILE"
+  artifacts:
+    paths:
+      - "$PIP_REQUIREMENTS_FILE"
+
+dependency_scanning:
+  stage: test
+  dependencies: ["convert-poetry"]
+```
 
 ### `Error response from daemon: error processing tar file: docker-tar: relocation error`
 

@@ -5,7 +5,10 @@ module Packages
     class CacheUpdateWorker
       include ApplicationWorker
 
+      sidekiq_options retry: 3
+
       feature_category :package_registry
+      tags :exclude_from_kubernetes
 
       idempotent!
 

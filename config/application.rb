@@ -36,8 +36,6 @@ module Gitlab
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
-    config.active_record.sqlite3.represent_boolean_as_integer = true
-
     # Sidekiq uses eager loading, but directories not in the standard Rails
     # directories must be added to the eager load paths:
     # https://github.com/mperham/sidekiq/wiki/FAQ#why-doesnt-sidekiq-autoload-my-rails-application-code
@@ -172,8 +170,6 @@ module Gitlab
     # Support legacy unicode file named img emojis, `1F939.png`
     config.assets.paths << Gemojione.images_path
     config.assets.paths << "#{config.root}/vendor/assets/fonts"
-
-    config.assets.paths << "#{config.root}/vendor/speedscope"
 
     config.assets.precompile << "application_utilities.css"
     config.assets.precompile << "application_utilities_dark.css"

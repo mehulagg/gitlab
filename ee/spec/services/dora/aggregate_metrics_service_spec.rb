@@ -144,6 +144,15 @@ RSpec.describe Dora::AggregateMetricsService do
           expect(subject[:data]).to eq([{ Time.current.to_date.to_s => 1, 'date' => Time.current.to_date.to_s, 'value' => 1 }])
         end
       end
+
+      context 'when group_project_ids parameter is given' do
+        let(:extra_params) { { interval: Dora::DailyMetrics::INTERVAL_ALL, group_project_ids: [1] } }
+
+        it_behaves_like 'request failure' do
+          let(:message) { 'The group_project_ids parameter is only allowed for a group' }
+          let(:http_status) { :bad_request }
+        end
+      end
     end
 
     context 'when container is a group' do
@@ -194,6 +203,15 @@ RSpec.describe Dora::AggregateMetricsService do
         it 'returns the aggregated data' do
           expect(subject[:status]).to eq(:success)
           expect(subject[:data]).to eq(3)
+        end
+      end
+
+      context 'when group_project_ids parameter is given' do
+        let(:extra_params) { { interval: Dora::DailyMetrics::INTERVAL_ALL, group_project_ids: [project_2.id] } }
+
+        it 'returns the aggregated data' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:data]).to eq(1)
         end
       end
     end

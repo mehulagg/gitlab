@@ -378,7 +378,7 @@ RSpec.describe Namespace do
     it 'only checks the plan once' do
       expect(group).to receive(:load_feature_available).once.and_call_original
 
-      2.times { group.feature_available?(:push_rules) }
+      2.times { group.licensed_feature_available?(:push_rules) }
     end
 
     context 'when checking namespace plan' do
@@ -403,7 +403,7 @@ RSpec.describe Namespace do
           let(:child_group) { create :group, parent: group }
 
           it 'child group has feature available' do
-            expect(child_group.feature_available?(feature)).to be_truthy
+            expect(child_group.licensed_feature_available?(feature)).to be_truthy
           end
         end
       end
@@ -420,7 +420,7 @@ RSpec.describe Namespace do
   end
 
   describe '#feature_available?' do
-    subject { group.feature_available?(feature) }
+    subject { group.licensed_feature_available?(feature) }
 
     it_behaves_like 'feature available'
   end

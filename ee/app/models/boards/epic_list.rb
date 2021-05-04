@@ -16,6 +16,7 @@ module Boards
     scope :movable, -> { where(list_type: list_types.slice(*movable_types).values) }
 
     alias_method :preferences, :epic_list_user_preferences
+    alias_method :board, :epic_board
 
     def preferences_for(user)
       return preferences.build unless user
@@ -28,10 +29,6 @@ module Boards
           loader.call({ epic_list_id: preference.epic_list_id, user_id: preference.user_id }, preference)
         end
       end
-    end
-
-    def board
-      epic_board
     end
   end
 end

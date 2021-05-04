@@ -51,7 +51,7 @@ module Gitlab
               allow_null: options[:null]
             )
           else
-            add_column(table_name, column_name, :datetime_with_timezone, options)
+            add_column(table_name, column_name, :datetime_with_timezone, **options)
           end
         end
       end
@@ -143,13 +143,13 @@ module Gitlab
 
         options = options.merge({ algorithm: :concurrently })
 
-        if index_exists?(table_name, column_name, options)
+        if index_exists?(table_name, column_name, **options)
           Gitlab::AppLogger.warn "Index not created because it already exists (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
           return
         end
 
         disable_statement_timeout do
-          add_index(table_name, column_name, options)
+          add_index(table_name, column_name, **options)
         end
       end
 
@@ -169,13 +169,13 @@ module Gitlab
 
         options = options.merge({ algorithm: :concurrently })
 
-        unless index_exists?(table_name, column_name, options)
+        unless index_exists?(table_name, column_name, **options)
           Gitlab::AppLogger.warn "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
           return
         end
 
         disable_statement_timeout do
-          remove_index(table_name, options.merge({ column: column_name }))
+          remove_index(table_name, **options.merge({ column: column_name }))
         end
       end
 
@@ -205,7 +205,7 @@ module Gitlab
         end
 
         disable_statement_timeout do
-          remove_index(table_name, options.merge({ name: index_name }))
+          remove_index(table_name, **options.merge({ name: index_name }))
         end
       end
 
@@ -565,7 +565,7 @@ module Gitlab
 
         check_trigger_permissions!(table)
 
-        remove_rename_triggers_for_postgresql(table, trigger_name)
+        remove_rename_triggers(table, trigger_name)
 
         remove_column(table, new)
       end
@@ -576,8 +576,19 @@ module Gitlab
       # table - The name of the table to install the trigger in.
       # old_column - The name of the old column.
       # new_column - The name of the new column.
-      def install_rename_triggers(table, old_column, new_column)
-        install_rename_triggers_for_postgresql(table, old_column, new_column)
+      # trigger_name - The name of the trigger to use (optional).
+      def install_rename_triggers(table, old, new, trigger_name: nil)
+        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).create(old, new, trigger_name: trigger_name)
+      end
+
+      # Removes the triggers used for renaming a column concurrently.
+      def remove_rename_triggers(table, trigger)
+        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).drop(trigger)
+      end
+
+      # Returns the (base) name to use for triggers when renaming columns.
+      def rename_trigger_name(table, old, new)
+        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).name(old, new)
       end
 
       # Changes the type of a column concurrently.
@@ -690,7 +701,7 @@ module Gitlab
 
         check_trigger_permissions!(table)
 
-        remove_rename_triggers_for_postgresql(table, trigger_name)
+        remove_rename_triggers(table, trigger_name)
 
         remove_column(table, old)
       end
@@ -982,7 +993,7 @@ module Gitlab
         temporary_columns = columns.map { |column| convert_to_bigint_column(column) }
 
         trigger_name = rename_trigger_name(table, columns, temporary_columns)
-        remove_rename_triggers_for_postgresql(table, trigger_name)
+        remove_rename_triggers(table, trigger_name)
 
         temporary_columns.each { |column| remove_column(table, column) }
       end
@@ -1077,21 +1088,6 @@ module Gitlab
         ])
 
         execute("DELETE FROM batched_background_migrations WHERE #{conditions}")
-      end
-
-      # Performs a concurrent column rename when using PostgreSQL.
-      def install_rename_triggers_for_postgresql(table, old, new, trigger_name: nil)
-        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).create(old, new, trigger_name: trigger_name)
-      end
-
-      # Removes the triggers used for renaming a PostgreSQL column concurrently.
-      def remove_rename_triggers_for_postgresql(table, trigger)
-        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).drop(trigger)
-      end
-
-      # Returns the (base) name to use for triggers when renaming columns.
-      def rename_trigger_name(table, old, new)
-        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).name(old, new)
       end
 
       # Returns an Array containing the indexes for the given column
@@ -1198,8 +1194,8 @@ module Gitlab
         end
       end
 
-      def remove_foreign_key_without_error(*args)
-        remove_foreign_key(*args)
+      def remove_foreign_key_without_error(*args, **kwargs)
+        remove_foreign_key(*args, **kwargs)
       rescue ArgumentError
       end
 

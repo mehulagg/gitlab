@@ -11,6 +11,10 @@ RSpec.describe Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver do
     resolve(described_class, args: args, ctx: context)
   end
 
+  before do
+    stub_licensed_features(instance_level_devops_adoption: true, group_level_devops_adoption: true)
+  end
+
   describe '#resolve' do
     let_it_be(:user) { create(:user) }
     let_it_be(:root_group_1) { create(:group, name: 'bbb') }
@@ -26,11 +30,6 @@ RSpec.describe Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver do
     let_it_be(:indirect_subgroup) { create(:group, name: 'ddd', parent: direct_subgroup) }
     let_it_be(:indirect_subgroup_segment) do
       create(:devops_adoption_segment, namespace: indirect_subgroup)
-    end
-
-    before do
-      stub_licensed_features(instance_level_devops_adoption: true)
-      stub_licensed_features(group_level_devops_adoption: true)
     end
 
     subject(:resolved_segments) { resolve_segments(params, { current_user: current_user }) }

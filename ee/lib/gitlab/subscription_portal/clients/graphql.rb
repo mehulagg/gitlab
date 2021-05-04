@@ -44,6 +44,9 @@ module Gitlab
             else
               error(response['errors'])
             end
+          rescue Gitlab::HTTP::BlockedUrlError, HTTParty::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError, Timeout::Error => e
+            Gitlab::ErrorTracking.log_exception(e)
+            error(CONNECTIVITY_ERROR)
           end
 
           def plan_upgrade_offer(namespace_id)
@@ -57,7 +60,7 @@ module Gitlab
               }
             GQL
 
-            response = execute_graphql_query({ query: query })[:data]
+            response = execute_graphql_query({ query: query }).dig(:data)
 
             if response['errors'].blank?
               eligible = response.dig('data', 'subscription', 'eoaStarterBronzeEligible')
@@ -73,31 +76,6 @@ module Gitlab
             else
               error
             end
-          end
-
-          def plan_data(plan_tags, fields)
-            query = <<~GQL
-              query($tags: [PlanTag!]) {
-                plans(planTags: $tags) {
-                  deprecated
-                  #{(fields - ['deprecated']).map { |field| "#{field}: #{field.to_s.camelize(:lower)}" }.join(" ")}
-                }
-              }
-            GQL
-
-            response = execute_graphql_query({ query: query, variables: { tags: plan_tags } })[:data]
-
-            if response['errors'].present?
-              track_error(query, response)
-
-              return error
-            end
-
-            {
-              success: true,
-              plans: response.dig('data', 'plans')
-                .reject { |plan| plan['deprecated'] }
-            }
           end
 
           def subscription_last_term(namespace_id)

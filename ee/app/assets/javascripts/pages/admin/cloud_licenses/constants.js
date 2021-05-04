@@ -3,7 +3,11 @@ import activateSubscriptionMutation from './graphql/mutations/activate_subscript
 import getCurrentLicense from './graphql/queries/get_current_license.query.graphql';
 import getLicenseHistory from './graphql/queries/get_license_history.query.graphql';
 
+export const fieldRequiredMessage = s__('SuperSonics|This field is required.');
 export const subscriptionMainTitle = s__('SuperSonics|Your subscription');
+export const subscriptionActivationNotificationText = s__(
+  `SuperSonics|Your subscription was successfully activated. You can see the details below.`,
+);
 export const subscriptionActivationTitle = s__(
   `SuperSonics|You do not have an active subscription`,
 );
@@ -110,4 +114,15 @@ export const buySubscriptionCard = {
     'CloudLicense|Ready to get started? A GitLab plan is ideal for scaling organizations and for multi team usage.',
   ),
   buttonLabel: s__('CloudLicense|Buy subscription'),
+};
+
+export const CONNECTIVITY_ERROR = 'CONNECTIVITY_ERROR';
+export const connectivityErrorAlert = {
+  title: s__('There is a connectivity issue'),
+  subtitle: s__(
+    'CloudLicense|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Sync service%{linkEnd}, a hassle-free way to manage your subscription.',
+  ),
+  helpText: s__(
+    'CloudLicense|Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}.',
+  ),
 };

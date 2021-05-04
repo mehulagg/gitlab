@@ -1682,6 +1682,7 @@ RSpec.describe GroupPolicy do
         end
 
         before do
+          stub_licensed_features(group_level_devops_adoption: true)
           allow(group).to receive(:feature_available?).with(:group_level_devops_adoption).and_return(false)
           enable_admin_mode!(current_user) if current_user.admin?
         end

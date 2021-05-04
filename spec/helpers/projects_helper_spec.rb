@@ -400,25 +400,6 @@ RSpec.describe ProjectsHelper do
       helper.send(:get_project_nav_tabs, project, user)
     end
 
-    context 'Security & Compliance tabs' do
-      before do
-        allow(helper).to receive(:can?).with(user, :read_security_configuration, project).and_return(can_read_security_configuration)
-      end
-
-      context 'when user cannot read security configuration' do
-        let(:can_read_security_configuration) { false }
-
-        it { is_expected.not_to include(:security_configuration) }
-      end
-
-      context 'when user can read security configuration' do
-        let(:can_read_security_configuration) { true }
-        let(:feature_flag_enabled) { true }
-
-        it { is_expected.to include(:security_configuration) }
-      end
-    end
-
     context 'when builds feature is enabled' do
       before do
         allow(project).to receive(:builds_enabled?).and_return(true)
@@ -492,43 +473,6 @@ RSpec.describe ProjectsHelper do
 
       context 'when it is not enabled' do
         it { is_expected.not_to include(:learn_gitlab) }
-      end
-    end
-  end
-
-  describe '#can_view_operations_tab?' do
-    before do
-      allow(helper).to receive(:current_user).and_return(user)
-      allow(helper).to receive(:can?).and_return(false)
-    end
-
-    subject { helper.send(:can_view_operations_tab?, user, project) }
-
-    where(:ability) do
-      [
-        :metrics_dashboard,
-        :read_alert_management_alert,
-        :read_environment,
-        :read_issue,
-        :read_sentry_issue,
-        :read_cluster
-      ]
-    end
-
-    with_them do
-      it 'includes operations tab' do
-        allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
-
-        is_expected.to be(true)
-      end
-
-      context 'when operations feature is disabled' do
-        it 'does not include operations tab' do
-          allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
-          project.project_feature.update_attribute(:operations_access_level, ProjectFeature::DISABLED)
-
-          is_expected.to be(false)
-        end
       end
     end
   end

@@ -2,7 +2,7 @@
 import { GlPopover } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
-import { n__, s__, sprintf } from '~/locale';
+import { __, n__, s__, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
@@ -33,6 +33,16 @@ export default {
     planNameForUpgrade: {
       type: String,
       required: true,
+    },
+    promoImageAltText: {
+      type: String,
+      required: false,
+      default: __('SVG illustration'),
+    },
+    promoImagePath: {
+      type: String,
+      required: false,
+      default: undefined,
     },
     targetId: {
       type: String,
@@ -106,6 +116,16 @@ export default {
     @shown="onShown"
   >
     <template #title>{{ popoverTitle }}</template>
+
+    <div v-if="promoImagePath" class="gl-display-flex gl-justify-content-center gl-mt-n3 gl-mb-4">
+      <img
+        :src="promoImagePath"
+        :alt="promoImageAltText"
+        height="40"
+        width="40"
+        data-testid="promo-img"
+      />
+    </div>
 
     {{ popoverContent }}
   </gl-popover>

@@ -18,6 +18,7 @@ module Elastic
           end
 
         options[:features] = 'merge_requests'
+        options[:no_join_project] = Elastic::DataMigrationService.migration_has_finished?(:add_new_data_to_merge_requests_documents)
         context.name(:merge_request) do
           query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
           query_hash = context.name(:match) { state_filter(query_hash, options) }

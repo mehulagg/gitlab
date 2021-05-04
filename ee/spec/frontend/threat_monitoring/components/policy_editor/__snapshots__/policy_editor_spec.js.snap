@@ -155,7 +155,14 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
       <dim-disable-container-stub
         data-testid="rule-builder-container"
       >
-           
+          
+        <policy-rule-builder-stub
+          class="gl-mb-4"
+          endpointlabels=""
+          endpointmatchmode="any"
+          rule="[object Object]"
+        />
+         
         <div
           class="gl-p-3 gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-mb-5"
         >
@@ -191,7 +198,7 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
           
         <policy-preview-stub
           initialtab="0"
-          policydescription="Deny all traffic"
+          policydescription="Allow all inbound traffic to <strong>all</strong> pods from <strong>all</strong> pods on <strong>any</strong> port"
           policyyaml="apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -202,6 +209,9 @@ spec:
   endpointSelector:
     matchLabels:
       network-policy.gitlab.com/disabled_by: gitlab
+  ingress:
+  - fromEndpoints:
+    - matchLabels: {}
 "
         />
       </dim-disable-container-stub>

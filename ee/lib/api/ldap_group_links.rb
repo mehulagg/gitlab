@@ -40,7 +40,7 @@ module API
       post ":id/ldap_group_links" do
         group = find_group(params[:id])
         authorize! :admin_group, group
-        break not_found! if params[:filter] && !group.feature_available?(:ldap_group_sync_filter)
+        break not_found! if params[:filter] && !group.licensed_feature_available?(:ldap_group_sync_filter)
 
         ldap_group_link = group.ldap_group_links.new(declared_params(include_missing: false))
 
@@ -107,7 +107,7 @@ module API
       delete ":id/ldap_group_links" do
         group = find_group(params[:id])
         authorize! :admin_group, group
-        break not_found! if params[:filter] && !group.feature_available?(:ldap_group_sync_filter)
+        break not_found! if params[:filter] && !group.licensed_feature_available?(:ldap_group_sync_filter)
 
         ldap_group_link = group.ldap_group_links.find_by(declared_params(include_missing: false))
 

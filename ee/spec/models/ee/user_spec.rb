@@ -753,11 +753,31 @@ RSpec.describe User do
   describe '#allow_password_authentication_for_web?' do
     context 'when user has managing group linked' do
       before do
-        user.managing_group = Group.new
+        user.managing_group = build(:group)
       end
 
       it 'is false' do
         expect(user.allow_password_authentication_for_web?).to eq false
+      end
+    end
+
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.provisioned_by_group = build(:group)
+      end
+
+      it 'is false' do
+        expect(user.allow_password_authentication_for_web?).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is true' do
+          expect(user.allow_password_authentication_for_web?).to eq true
+        end
       end
     end
   end
@@ -765,11 +785,115 @@ RSpec.describe User do
   describe '#allow_password_authentication_for_git?' do
     context 'when user has managing group linked' do
       before do
-        user.managing_group = Group.new
+        user.managing_group = build(:group)
       end
 
       it 'is false' do
         expect(user.allow_password_authentication_for_git?).to eq false
+      end
+    end
+
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.provisioned_by_group = build(:group)
+      end
+
+      it 'is false' do
+        expect(user.allow_password_authentication_for_git?).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is true' do
+          expect(user.allow_password_authentication_for_git?).to eq true
+        end
+      end
+    end
+  end
+
+  describe '#user_authorized_by_provisioning_group?' do
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.provisioned_by_group = build(:group)
+      end
+
+      it 'is true' do
+        expect(user.user_authorized_by_provisioning_group?).to eq true
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.user_authorized_by_provisioning_group?).to eq false
+        end
+      end
+    end
+
+    context 'when user is not provisioned by group' do
+      it 'is false' do
+        expect(user.user_authorized_by_provisioning_group?).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.user_authorized_by_provisioning_group?).to eq false
+        end
+      end
+    end
+  end
+
+  describe '#authorized_by_provisioning_group?' do
+    let_it_be(:group) { create(:group) }
+
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.provisioned_by_group = group
+      end
+
+      it 'is true' do
+        expect(user.authorized_by_provisioning_group?(group)).to eq true
+      end
+
+      context 'when other group is provided' do
+        it 'is false' do
+          expect(user.authorized_by_provisioning_group?(create(:group))).to eq false
+        end
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.authorized_by_provisioning_group?(group)).to eq false
+        end
+      end
+    end
+
+    context 'when user is not provisioned by group' do
+      it 'is false' do
+        expect(user.authorized_by_provisioning_group?(group)).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.authorized_by_provisioning_group?(group)).to eq false
+        end
       end
     end
   end

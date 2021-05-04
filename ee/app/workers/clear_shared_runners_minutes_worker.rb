@@ -2,6 +2,8 @@
 
 class ClearSharedRunnersMinutesWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   # rubocop:disable Scalability/CronWorkerContext
   # This worker does not perform work scoped to a context
   # all queries are scoped across multiple namespaces

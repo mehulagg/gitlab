@@ -47,6 +47,11 @@ export const FIELDS = [
     thClass: 'gl-bg-white! gl-w-15p',
   },
   {
+    key: 'assignees',
+    label: __('Assignees'),
+    thClass: 'gl-bg-white! gl-w-10p gl-pointer-events-none',
+  },
+  {
     key: 'status',
     label: s__('ThreatMonitoring|Status'),
     thAttr: { 'data-testid': 'threat-alerts-status-header' },

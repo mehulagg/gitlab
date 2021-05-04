@@ -4,6 +4,7 @@ import CloudLicenseApp from 'ee/pages/admin/cloud_licenses/components/app.vue';
 import SubscriptionActivationForm from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
 import SubscriptionBreakdown from 'ee/pages/admin/cloud_licenses/components/subscription_breakdown.vue';
 import {
+  subscriptionActivationNotificationText,
   subscriptionActivationTitle,
   subscriptionHistoryQueries,
   subscriptionMainTitle,
@@ -24,6 +25,8 @@ describe('CloudLicenseApp', () => {
   const findSubscriptionActivationTitle = () =>
     wrapper.findByTestId('subscription-activation-title');
   const findSubscriptionMainTitle = () => wrapper.findByTestId('subscription-main-title');
+  const findSubscriptionActivationSuccessAlert = () =>
+    wrapper.findByTestId('subscription-activation-success-alert');
 
   let currentSubscriptionResolver;
   let subscriptionHistoryResolver;
@@ -49,12 +52,10 @@ describe('CloudLicenseApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    currentSubscriptionResolver.mockRestore();
-    subscriptionHistoryResolver.mockRestore();
   });
 
   describe('Subscription Activation Form', () => {
-    beforeEach(() => {
+    it('shows the main title', () => {
       currentSubscriptionResolver = jest
         .fn()
         .mockResolvedValue({ data: { currentLicense: license.ULTIMATE } });
@@ -62,19 +63,21 @@ describe('CloudLicenseApp', () => {
         .fn()
         .mockResolvedValue({ data: { licenseHistoryEntries: { nodes: subscriptionHistory } } });
       createComponent({}, [currentSubscriptionResolver, subscriptionHistoryResolver]);
-    });
-
-    it('shows the main title', () => {
       expect(findSubscriptionMainTitle().text()).toBe(subscriptionMainTitle);
     });
 
     describe('without an active license', () => {
+      beforeEach(() => {
+        currentSubscriptionResolver = jest
+          .fn()
+          .mockResolvedValue({ data: { currentLicense: null } });
+        subscriptionHistoryResolver = jest
+          .fn()
+          .mockResolvedValue({ data: { licenseHistoryEntries: { nodes: [] } } });
+        createComponent({}, [currentSubscriptionResolver, subscriptionHistoryResolver]);
+      });
       it('shows a title saying there is no active subscription', () => {
         expect(findSubscriptionActivationTitle().text()).toBe(subscriptionActivationTitle);
-      });
-
-      it('does not query for the current license', () => {
-        expect(currentSubscriptionResolver).toHaveBeenCalledTimes(0);
       });
 
       it('queries for the current history', () => {
@@ -83,6 +86,38 @@ describe('CloudLicenseApp', () => {
 
       it('shows the subscription activation form', () => {
         expect(findActivateSubscriptionForm().exists()).toBe(true);
+      });
+
+      it('does not show the activation success notification', () => {
+        expect(findSubscriptionActivationSuccessAlert().exists()).toBe(false);
+      });
+    });
+
+    describe('activating the license', () => {
+      beforeEach(() => {
+        currentSubscriptionResolver = jest
+          .fn()
+          .mockResolvedValue({ data: { currentLicense: license.ULTIMATE } });
+        subscriptionHistoryResolver = jest
+          .fn()
+          .mockResolvedValue({ data: { licenseHistoryEntries: { nodes: subscriptionHistory } } });
+        createComponent({ hasActiveLicense: false }, [
+          currentSubscriptionResolver,
+          subscriptionHistoryResolver,
+        ]);
+      });
+
+      it('passes the correct data to the subscription breakdown', () => {
+        expect(findSubscriptionBreakdown().props()).toMatchObject({
+          subscription: license.ULTIMATE,
+          subscriptionList: subscriptionHistory,
+        });
+      });
+
+      it('shows the activation success notification', () => {
+        expect(findSubscriptionActivationSuccessAlert().props('title')).toBe(
+          subscriptionActivationNotificationText,
+        );
       });
     });
 
@@ -113,6 +148,10 @@ describe('CloudLicenseApp', () => {
           subscription: license.ULTIMATE,
           subscriptionList: subscriptionHistory,
         });
+      });
+
+      it('does not the activation success notification', () => {
+        expect(findSubscriptionActivationSuccessAlert().exists()).toBe(false);
       });
     });
   });

@@ -94,7 +94,16 @@ export const formattedMockNetworkPolicyStatisticsResponse = {
 export const mockAlerts = [
   {
     iid: '01',
-    assignees: { nodes: [] },
+    assignees: {
+      nodes: [
+        {
+          name: 'Administrator',
+          username: 'root',
+          avatarUrl: '/test-avatar-url',
+          webUrl: 'https://gitlab:3443/root',
+        },
+      ],
+    },
     eventCount: '1',
     issueIid: null,
     issue: { iid: '5', state: 'opened', title: 'Issue 01' },

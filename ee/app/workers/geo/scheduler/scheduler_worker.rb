@@ -4,6 +4,8 @@ module Geo
   module Scheduler
     class SchedulerWorker # rubocop:disable Scalability/IdempotentWorker
       include ApplicationWorker
+
+      sidekiq_options retry: 3
       include GeoQueue
       include ExclusiveLeaseGuard
       include ::Gitlab::Geo::LogHelpers

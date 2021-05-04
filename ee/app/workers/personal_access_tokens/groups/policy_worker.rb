@@ -5,6 +5,8 @@ module PersonalAccessTokens
     class PolicyWorker
       include ApplicationWorker
 
+      sidekiq_options retry: 3
+
       idempotent!
 
       queue_namespace :personal_access_tokens

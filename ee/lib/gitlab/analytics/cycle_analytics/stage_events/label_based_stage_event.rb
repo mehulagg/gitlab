@@ -32,6 +32,12 @@ module Gitlab
           end
           # rubocop: enable CodeReuse/ActiveRecord
 
+          # rubocop: disable CodeReuse/ActiveRecord
+          def apply_negated_query_customization(query)
+            query.where('NOT EXISTS (?)', subquery)
+          end
+          # rubocop: enable CodeReuse/ActiveRecord
+
           private
 
           def resource_label_events_table

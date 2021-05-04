@@ -4,6 +4,7 @@ import { shallowMount } from '@vue/test-utils';
 
 import PaidFeatureCalloutPopover from 'ee/paid_feature_callouts/components/paid_feature_callout_popover.vue';
 import { mockTracking } from 'helpers/tracking_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('PaidFeatureCalloutPopover', () => {
   let trackingSpy;
@@ -20,9 +21,11 @@ describe('PaidFeatureCalloutPopover', () => {
   };
 
   const createComponent = (props = defaultProps) => {
-    return shallowMount(PaidFeatureCalloutPopover, {
-      propsData: props,
-    });
+    return extendedWrapper(
+      shallowMount(PaidFeatureCalloutPopover, {
+        propsData: props,
+      }),
+    );
   };
 
   afterEach(() => {
@@ -60,6 +63,60 @@ describe('PaidFeatureCalloutPopover', () => {
         container: 'some-container-id',
         placement: 'top',
         target: 'some-feature-callout-target',
+      });
+    });
+  });
+
+  describe('promo image', () => {
+    const findPromoImage = () => wrapper.findByTestId('promo-img');
+
+    describe('with the optional promoImagePath prop', () => {
+      beforeEach(() => {
+        wrapper = createComponent({
+          ...defaultProps,
+          promoImagePath: 'path/to/some/image.svg',
+        });
+      });
+
+      it('renders the promo image', () => {
+        expect(findPromoImage().exists()).toBe(true);
+      });
+
+      describe('with the optional promoImageAltText prop', () => {
+        beforeEach(() => {
+          wrapper = createComponent({
+            ...defaultProps,
+            promoImagePath: 'path/to/some/image.svg',
+            promoImageAltText: 'My fancy alt text',
+          });
+        });
+
+        it('renders the promo image with the given alt text', () => {
+          expect(findPromoImage().attributes('alt')).toBe('My fancy alt text');
+        });
+      });
+
+      describe('without the optional promoImageAltText prop', () => {
+        beforeEach(() => {
+          wrapper = createComponent({
+            ...defaultProps,
+            promoImagePath: 'path/to/some/image.svg',
+          });
+        });
+
+        it('renders the promo image with default alt text', () => {
+          expect(findPromoImage().attributes('alt')).toBe('SVG illustration');
+        });
+      });
+    });
+
+    describe('without the optional promoImagePath prop', () => {
+      beforeEach(() => {
+        wrapper = createComponent();
+      });
+
+      it('does not render a promo image', () => {
+        expect(findPromoImage().exists()).toBe(false);
       });
     });
   });

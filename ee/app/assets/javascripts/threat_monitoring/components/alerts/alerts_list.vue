@@ -1,6 +1,9 @@
 <script>
 import {
   GlAlert,
+  GlAvatar,
+  GlAvatarLink,
+  GlAvatarsInline,
   GlIntersectionObserver,
   GlLoadingIcon,
   GlTable,
@@ -39,6 +42,9 @@ export default {
     AlertStatus,
     AlertFilters,
     GlAlert,
+    GlAvatar,
+    GlAvatarLink,
+    GlAvatarsInline,
     GlIntersectionObserver,
     GlLink,
     GlLoadingIcon,
@@ -150,6 +156,9 @@ export default {
     handleStatusUpdate() {
       this.$apollo.queries.alerts.refetch();
     },
+    hasAssignees(assignees) {
+      return Boolean(assignees.nodes?.length);
+    },
     alertDetailsUrl({ iid }) {
       return joinPaths(window.location.pathname, 'alerts', iid);
     },
@@ -220,15 +229,45 @@ export default {
       </template>
 
       <template #cell(issue)="{ item }">
-        <gl-link
-          v-if="item.issue"
-          v-gl-tooltip
-          :title="item.issue.title"
-          data-testid="threat-alerts-issue"
-          :href="getIssueMeta(item).link"
-        >
-          #{{ item.issue.iid }} {{ getIssueMeta(item).state }}
-        </gl-link>
+        <div data-testid="threat-alerts-issue">
+          <gl-link
+            v-if="item.issue"
+            v-gl-tooltip
+            :title="item.issue.title"
+            :href="getIssueMeta(item).link"
+          >
+            #{{ item.issue.iid }} {{ getIssueMeta(item).state }}
+          </gl-link>
+          <span v-else>-</span>
+        </div>
+      </template>
+
+      <template #cell(assignees)="{ item }">
+        <div class="gl-display-flex" data-testid="threat-alerts-assignee">
+          <gl-avatars-inline
+            v-if="hasAssignees(item.assignees)"
+            data-testid="assigneesField"
+            :avatars="item.assignees.nodes"
+            :collapsed="true"
+            :max-visible="4"
+            :avatar-size="24"
+            badge-tooltip-prop="name"
+            :badge-tooltip-max-chars="100"
+          >
+            <template #avatar="{ avatar }">
+              <gl-avatar-link
+                :key="avatar.username"
+                v-gl-tooltip
+                target="_blank"
+                :href="avatar.webUrl"
+                :title="avatar.name"
+              >
+                <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
+              </gl-avatar-link>
+            </template>
+          </gl-avatars-inline>
+          <span v-else class="gl-ml-3">-</span>
+        </div>
       </template>
 
       <template #cell(status)="{ item }">

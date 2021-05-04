@@ -4,7 +4,7 @@ import * as GroupsApi from 'ee/api/groups_api';
 import * as actions from 'ee/billings/seat_usage/store/actions';
 import * as types from 'ee/billings/seat_usage/store/mutation_types';
 import State from 'ee/billings/seat_usage/store/state';
-import { mockDataSeats } from 'ee_jest/billings/mock_data';
+import { mockDataSeats, mockMemberDetails } from 'ee_jest/billings/mock_data';
 import testAction from 'helpers/vuex_action_helper';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
@@ -216,6 +216,115 @@ describe('seats actions', () => {
 
       expect(createFlash).toHaveBeenCalledWith({
         message: 'An error occurred while removing a billable member',
+      });
+    });
+  });
+
+  describe('fetchBillableMemberDetails', () => {
+    const member = mockDataSeats.data[0];
+
+    beforeAll(() => {
+      Api.fetchBillableGroupMemberMemberships = jest
+        .fn()
+        .mockResolvedValue({ data: mockMemberDetails });
+    });
+
+    it('commits fetchBillableMemberDetails', async () => {
+      await testAction({
+        action: actions.fetchBillableMemberDetails,
+        payload: member.id,
+        state,
+        expectedMutations: [
+          { type: types.FETCH_BILLABLE_MEMBER_DETAILS, payload: member.id },
+          {
+            type: types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS,
+            payload: { memberId: member.id, memberships: mockMemberDetails },
+          },
+        ],
+      });
+    });
+
+    it('calls fetchBillableGroupMemberMemberships api', async () => {
+      await testAction({
+        action: actions.fetchBillableMemberDetails,
+        payload: member.id,
+        state,
+        expectedMutations: [
+          { type: types.FETCH_BILLABLE_MEMBER_DETAILS, payload: member.id },
+          {
+            type: types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS,
+            payload: { memberId: member.id, memberships: mockMemberDetails },
+          },
+        ],
+      });
+
+      expect(Api.fetchBillableGroupMemberMemberships).toHaveBeenCalledWith(null, 2);
+    });
+
+    it('calls fetchBillableGroupMemberMemberships api only once', async () => {
+      await testAction({
+        action: actions.fetchBillableMemberDetails,
+        payload: member.id,
+        state,
+        expectedMutations: [
+          { type: types.FETCH_BILLABLE_MEMBER_DETAILS, payload: member.id },
+          {
+            type: types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS,
+            payload: { memberId: member.id, memberships: mockMemberDetails },
+          },
+        ],
+      });
+
+      state.userDetails[member.id] = { items: mockMemberDetails, isLoading: false };
+
+      await testAction({
+        action: actions.fetchBillableMemberDetails,
+        payload: member.id,
+        state,
+        expectedMutations: [
+          {
+            type: types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS,
+            payload: { memberId: member.id, memberships: mockMemberDetails },
+          },
+        ],
+      });
+
+      expect(Api.fetchBillableGroupMemberMemberships).toHaveBeenCalledTimes(1);
+    });
+
+    describe('on API error', () => {
+      beforeAll(() => {
+        Api.fetchBillableGroupMemberMemberships = jest.fn().mockRejectedValue();
+      });
+
+      it('dispatches fetchBillableMemberDetailsError', async () => {
+        await testAction({
+          action: actions.fetchBillableMemberDetailsError,
+          state,
+          expectedMutations: [{ type: types.FETCH_BILLABLE_MEMBER_DETAILS_ERROR }],
+        });
+      });
+    });
+  });
+
+  describe('fetchBillableMemberDetailsError', () => {
+    it('commits fetch billable member details error', async () => {
+      await testAction({
+        action: actions.fetchBillableMemberDetailsError,
+        state,
+        expectedMutations: [{ type: types.FETCH_BILLABLE_MEMBER_DETAILS_ERROR }],
+      });
+    });
+
+    it('calls createFlash', async () => {
+      await testAction({
+        action: actions.fetchBillableMemberDetailsError,
+        state,
+        expectedMutations: [{ type: types.FETCH_BILLABLE_MEMBER_DETAILS_ERROR }],
+      });
+
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'An error occurred while getting a billable member details',
       });
     });
   });

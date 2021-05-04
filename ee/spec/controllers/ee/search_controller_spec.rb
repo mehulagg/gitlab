@@ -113,10 +113,46 @@ RSpec.describe SearchController, :elastic do
       end
     end
 
+    shared_examples 'search tabs displayed in consistent order' do
+      render_views
+
+      let(:scope) { 'issues' }
+
+      subject { get :show, params: request_params, format: :html }
+
+      it 'keeps search tab order' do
+        subject
+
+        # this order should be consistent across global, group, and project scoped searches
+        # though all tabs may not be available depending on the search scope and features enabled (epics, advanced search)
+        global_expected_order = %w[projects blobs epics issues merge_requests wiki_blobs commits notes milestones users]
+        tabs = response.body.scan(/search\?.*scope=(\w*)&amp/).flatten
+        expect(tabs).to eq(global_expected_order & tabs)
+      end
+    end
+
     context 'global search' do
       let(:request_params) { { scope: scope, search: 'term' } }
 
       it_behaves_like 'renders the elasticsearch tabs if elasticsearch is enabled'
+
+      context 'scope tab order' do
+        context 'when elasticsearch is disabled' do
+          before do
+            stub_ee_application_setting(elasticsearch_search: false, elasticsearch_indexing: false)
+          end
+
+          it_behaves_like 'search tabs displayed in consistent order'
+        end
+
+        context 'when elasticsearch is enabled' do
+          before do
+            stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
+          end
+
+          it_behaves_like 'search tabs displayed in consistent order'
+        end
+      end
     end
 
     context 'group search' do
@@ -125,6 +161,81 @@ RSpec.describe SearchController, :elastic do
       let(:request_params) { { group_id: group.id, scope: scope, search: 'term' } }
 
       it_behaves_like 'renders the elasticsearch tabs if elasticsearch is enabled'
+
+      context 'scope tab order' do
+        context 'when elasticsearch is disabled' do
+          before do
+            stub_ee_application_setting(elasticsearch_search: false, elasticsearch_indexing: false)
+          end
+
+          context 'when epics are disabled' do
+            before do
+              stub_licensed_features(epics: false)
+            end
+
+            it_behaves_like 'search tabs displayed in consistent order'
+          end
+
+          context 'when epics are enabled' do
+            before do
+              stub_licensed_features(epics: true)
+            end
+
+            it_behaves_like 'search tabs displayed in consistent order'
+          end
+        end
+
+        context 'when elasticsearch is enabled' do
+          before do
+            stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
+          end
+
+          context 'when epics are disabled' do
+            before do
+              stub_licensed_features(epics: false)
+            end
+
+            it_behaves_like 'search tabs displayed in consistent order'
+          end
+
+          context 'when epics are enabled' do
+            before do
+              stub_licensed_features(epics: true)
+            end
+
+            it_behaves_like 'search tabs displayed in consistent order'
+          end
+        end
+      end
+    end
+
+    context 'project search' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:project) { create(:project, group: group) }
+
+      let(:request_params) { { project_id: project.id, group_id: project.group, scope: scope, search: 'term' } }
+
+      before do
+        project.add_developer(user)
+      end
+
+      context 'scope tab order' do
+        context 'when elasticsearch is disabled' do
+          before do
+            stub_ee_application_setting(elasticsearch_search: false, elasticsearch_indexing: false)
+          end
+
+          it_behaves_like 'search tabs displayed in consistent order'
+        end
+
+        context 'when elasticsearch is enabled' do
+          before do
+            stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
+          end
+
+          it_behaves_like 'search tabs displayed in consistent order'
+        end
+      end
     end
   end
 end

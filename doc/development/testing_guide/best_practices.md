@@ -168,7 +168,7 @@ can be used:
 
 ```ruby
 RSpec.describe API::Search, factory_default: :keep do
-  let_it_be(:namespace) { create_default(:namespace).freeze }
+  let_it_be(:namespace) { create_default(:namespace) }
 ```
 
 Then every project we create uses this `namespace`, without us having to pass
@@ -186,7 +186,7 @@ projects we create are ones we ask for (76/208). There is benefit in setting
 a default value for projects as well:
 
 ```ruby
-  let_it_be(:project) { create_default(:project).freeze }
+  let_it_be(:project) { create_default(:project) }
 ```
 
 In this case, the `total time` and `top-level time` numbers match more closely:
@@ -451,7 +451,7 @@ expect(page).to have_current_path 'gitlab/gitlab-test/-/issues'
 
 expect(page).to have_title 'Not Found'
 
-# acceptable when a more specific matcher above is not possible 
+# acceptable when a more specific matcher above is not possible
 expect(page).to have_css 'h2', text: 'Issue title'
 expect(page).to have_css 'p', text: 'Issue description', exact: true
 expect(page).to have_css '[data-testid="weight"]', text: 2

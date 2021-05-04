@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Projects::ThreatMonitoringController do
   let_it_be(:project) { create(:project, :repository, :private) }
-  let_it_be(:alert) { create(:alert_management_alert, :cilium, project: project) }
+  let_it_be(:alert) { create(:alert_management_alert, :threat_monitoring, project: project) }
   let_it_be(:user) { create(:user) }
 
   describe 'GET show' do
@@ -239,9 +239,9 @@ RSpec.describe Projects::ThreatMonitoringController do
   end
 
   describe 'GET threat monitoring alerts' do
-    let(:alert_id) { alert.id }
+    let(:alert_iid) { alert.iid }
 
-    subject { get :alert_details, params: { namespace_id: project.namespace, project_id: project, id: alert_id } }
+    subject { get :alert_details, params: { namespace_id: project.namespace, project_id: project, iid: alert_iid } }
 
     context 'with authorized user' do
       before do
@@ -284,7 +284,7 @@ RSpec.describe Projects::ThreatMonitoringController do
         end
 
         context 'when id is invalid' do
-          let(:alert_id) { nil }
+          let(:alert_iid) { nil }
 
           it 'raises an error' do
             expect { subject }.to raise_error(ActionController::UrlGenerationError)
@@ -292,7 +292,7 @@ RSpec.describe Projects::ThreatMonitoringController do
         end
 
         context 'when id is not found' do
-          let(:alert_id) { non_existing_record_id }
+          let(:alert_iid) { non_existing_record_id }
 
           it 'renders not found' do
             subject

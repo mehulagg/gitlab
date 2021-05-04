@@ -20,7 +20,7 @@
 
 %template.js-pull-mirrors-form
   = f.hidden_field :mirror, value: '1'
-  = f.hidden_field :username_only_import_url, class: 'js-mirror-url-hidden', required: true, pattern: "(#{protocols}):\/\/.+"
+  = f.hidden_field :username_only_import_url, class: 'js-mirror-url-hidden', required: true, pattern: "(#{protocols}):\/\/.+", value: ''
   = f.hidden_field :only_mirror_protected_branches, class: 'js-mirror-protected-hidden'
 
   = f.fields_for :import_data, import_data, include_id: false do |import_form|

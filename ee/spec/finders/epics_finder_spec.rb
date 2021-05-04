@@ -638,16 +638,6 @@ RSpec.describe EpicsFinder do
           it 'returns all epics without negated label' do
             expect(epics(params)).to contain_exactly(epic1, epic2, epic3)
           end
-
-          context 'when not_issuable_queries is disabled' do
-            before do
-              stub_feature_flags(not_issuable_queries: false)
-            end
-
-            it 'returns epics that include negated params' do
-              expect(epics(params)).to contain_exactly(negated_epic, negated_epic2, epic1, epic2, epic3)
-            end
-          end
         end
 
         context 'with negated author' do
@@ -662,16 +652,6 @@ RSpec.describe EpicsFinder do
           it 'returns all epics without given author' do
             expect(epics(params)).to contain_exactly(epic1, epic2, epic3)
           end
-
-          context 'when not_issuable_queries is disabled' do
-            before do
-              stub_feature_flags(not_issuable_queries: false)
-            end
-
-            it 'returns epics that include negated params' do
-              expect(epics(params)).to contain_exactly(authored_epic, epic1, epic2, epic3)
-            end
-          end
         end
 
         context 'with negated reaction emoji' do
@@ -680,16 +660,6 @@ RSpec.describe EpicsFinder do
 
           it 'returns all epics without given emoji name' do
             expect(epics(params)).to contain_exactly(epic1, epic2)
-          end
-
-          context 'when not_issuable_queries is disabled' do
-            before do
-              stub_feature_flags(not_issuable_queries: false)
-            end
-
-            it 'returns epics that include negated params' do
-              expect(epics(params)).to contain_exactly(epic1, epic2, epic3)
-            end
           end
         end
       end

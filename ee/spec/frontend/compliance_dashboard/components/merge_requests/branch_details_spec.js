@@ -18,7 +18,7 @@ describe('BranchDetails component', () => {
           uri: sourceUri,
         },
         targetBranch: {
-          name: 'master',
+          name: 'main',
           uri: targetUri,
         },
       },
@@ -40,13 +40,13 @@ describe('BranchDetails component', () => {
       });
 
       it('has the correct text', () => {
-        expect(getText()).toEqual('feature into master');
+        expect(getText()).toEqual('feature into main');
       });
     });
 
     describe('and one branch URI', () => {
       beforeEach(() => {
-        wrapper = createComponent({ targetUri: '/master-uri' });
+        wrapper = createComponent({ targetUri: '/main-uri' });
       });
 
       it('has one link', () => {
@@ -58,13 +58,13 @@ describe('BranchDetails component', () => {
       });
 
       it('has the correct text', () => {
-        expect(getText()).toEqual('feature into master');
+        expect(getText()).toEqual('feature into main');
       });
     });
 
     describe('and both branch URIs', () => {
       beforeEach(() => {
-        wrapper = createComponent({ sourceUri: '/feature-uri', targetUri: '/master-uri' });
+        wrapper = createComponent({ sourceUri: '/feature-uri', targetUri: '/main-uri' });
       });
 
       it('has two links', () => {
@@ -80,7 +80,7 @@ describe('BranchDetails component', () => {
       });
 
       it('has the correct text', () => {
-        expect(getText()).toEqual('feature into master');
+        expect(getText()).toEqual('feature into main');
       });
     });
   });

@@ -34,7 +34,7 @@ module Iterations
       end
 
       def can_create_single_or_multiple_iteration_cadences?
-        group.feature_available?(:iterations) && (group.iterations_cadences.empty? || group.multiple_iteration_cadences_available?)
+        group.licensed_feature_available?(:iterations) && (group.iterations_cadences.empty? || group.multiple_iteration_cadences_available?)
       end
     end
   end

@@ -25,22 +25,24 @@ module Registrations
 
       if @project.saved?
         learn_gitlab_project = create_learn_gitlab_project
+        onboarding_context = {
+          namespace_id: learn_gitlab_project.namespace_id,
+          project_id: @project.id,
+          learn_gitlab_project_id: learn_gitlab_project.id
+        }
 
         experiment(:registrations_group_invite, actor: current_user)
           .track(:signup_successful, property: @project.namespace_id.to_s)
 
         if helpers.in_trial_onboarding_flow?
-          trial_onboarding_context = {
-            namespace_id: learn_gitlab_project.namespace_id,
-            project_id: @project.id,
-            learn_gitlab_project_id: learn_gitlab_project.id
-          }
-
-          record_experiment_user(:trial_onboarding_issues, trial_onboarding_context)
+          record_experiment_user(:trial_onboarding_issues, onboarding_context)
           record_experiment_conversion_event(:trial_onboarding_issues)
 
           redirect_to trial_getting_started_users_sign_up_welcome_path(learn_gitlab_project_id: learn_gitlab_project.id)
         else
+          record_experiment_user(:learn_gitlab_a, onboarding_context)
+          record_experiment_user(:learn_gitlab_b, onboarding_context)
+
           if continous_onboarding_experiment_enabled_for_user?
             redirect_to continuous_onboarding_getting_started_users_sign_up_welcome_path(project_id: @project.id)
           else

@@ -27,30 +27,31 @@ RSpec.describe Dast::Profile, type: :model do
     it { is_expected.to validate_presence_of(:dast_scanner_profile_id) }
     it { is_expected.to validate_presence_of(:name) }
 
-    context 'when the project_id and dast_site_profile.project_id do not match' do
-      let(:dast_site_profile) { create(:dast_site_profile) }
+    shared_examples 'the project_id does not match' do
+      let(:association_name) { association.class.underscore }
 
-      subject { build(:dast_profile, project: project, dast_site_profile: dast_site_profile) }
+      subject { build(:dast_profile, project: project, association_name => association) }
 
-      it 'is not valid' do
-        aggregate_failures do
-          expect(subject.valid?).to be_falsey
-          expect(subject.errors.full_messages).to include('Project must match dast_site_profile.project_id')
-        end
+      before do
+        association.project_id = non_existing_record_id
+      end
+
+      it 'is not valid', :aggregate_failures do
+        expect(subject).not_to be_valid
+        expect(subject.errors.full_messages).to include("Project must match #{association_name}.project_id")
       end
     end
 
+    context 'when the project_id and dast_site_profile.project_id do not match' do
+      let(:association) { build(:dast_site_profile) }
+
+      it_behaves_like 'the project_id does not match'
+    end
+
     context 'when the project_id and dast_scanner_profile.project_id do not match' do
-      let(:dast_scanner_profile) { create(:dast_scanner_profile) }
+      let(:association) { build(:dast_scanner_profile) }
 
-      subject { build(:dast_profile, project: project, dast_scanner_profile: dast_scanner_profile) }
-
-      it 'is not valid' do
-        aggregate_failures do
-          expect(subject.valid?).to be_falsey
-          expect(subject.errors.full_messages).to include('Project must match dast_scanner_profile.project_id')
-        end
-      end
+      it_behaves_like 'the project_id does not match'
     end
 
     context 'when the description is nil' do
@@ -58,7 +59,7 @@ RSpec.describe Dast::Profile, type: :model do
 
       it 'is not valid' do
         aggregate_failures do
-          expect(subject.valid?).to be_falsey
+          expect(subject).not_to be_valid
           expect(subject.errors.full_messages).to include('Description can\'t be nil')
         end
       end

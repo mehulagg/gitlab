@@ -376,7 +376,7 @@ describe('Value Stream Analytics utils', () => {
 
     beforeEach(() => {
       prepared = prepareTimeMetricsData(timeMetricsData, {
-        [firstKey]: 'Is a value that is good',
+        [firstKey]: { description: 'Is a value that is good' },
       });
     });
 
@@ -388,10 +388,10 @@ describe('Value Stream Analytics utils', () => {
       expect(prepared).toMatchObject([{ label: 'Lead Time' }, { label: 'Cycle Time' }]);
     });
 
-    it('will add a tooltip text using the key if it is provided', () => {
+    it('will add a popover description using the key if it is provided', () => {
       expect(prepared).toMatchObject([
-        { tooltipText: 'Is a value that is good' },
-        { tooltipText: '' },
+        { description: 'Is a value that is good' },
+        { description: '' },
       ]);
     });
   });

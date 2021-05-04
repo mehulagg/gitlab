@@ -128,6 +128,18 @@ RSpec.describe 'epic boards', :js do
 
         expect(page).to have_selector(selector, text: label.title, count: 1)
       end
+
+      it 'allows user to delete list from list settings sidebar' do
+        expect(page).to have_content(label.name)
+
+        page.within(find('.board:nth-child(2)')) do
+          click_button 'List settings'
+        end
+
+        accept_confirm { click_button 'Remove list' }
+
+        expect(page).not_to have_content(label.name)
+      end
     end
   end
 
@@ -189,6 +201,14 @@ RSpec.describe 'epic boards', :js do
         end
       end
     end
+
+    it 'does not show Remove list in list settings sidebar' do
+      page.within(find('.board:nth-child(2)')) do
+        click_button 'List settings'
+      end
+
+      expect(page).not_to have_button('Remove list')
+    end
   end
 
   context 'filtered search' do
@@ -204,9 +224,26 @@ RSpec.describe 'epic boards', :js do
       find_field('Search').click
     end
 
-    it 'can select a Label in order to filter the board' do
+    it 'can select a Label in order to filter the board by not equals' do
       page.within('[data-testid="epic-filtered-search"]') do
         click_link 'Label'
+        click_link '!='
+        click_link label.title
+
+        find('input').native.send_keys(:return)
+      end
+
+      wait_for_requests
+
+      expect(page).not_to have_content('Epic1')
+      expect(page).to have_content('Epic2')
+      expect(page).to have_content('Epic3')
+    end
+
+    it 'can select a Label in order to filter the board by equals' do
+      page.within('[data-testid="epic-filtered-search"]') do
+        click_link 'Label'
+        click_token_equals
         click_link label.title
 
         find('input').native.send_keys(:return)
@@ -219,9 +256,10 @@ RSpec.describe 'epic boards', :js do
       expect(page).not_to have_content('Epic3')
     end
 
-    it 'can select an Author in order to filter the board' do
+    it 'can select an Author in order to filter the board by equals' do
       page.within('[data-testid="epic-filtered-search"]') do
         click_link 'Author'
+        click_token_equals
         click_link user.name
 
         find('input').native.send_keys(:return)
@@ -232,6 +270,22 @@ RSpec.describe 'epic boards', :js do
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')
+    end
+
+    it 'can select an Author in order to filter the board by not equals' do
+      page.within('[data-testid="epic-filtered-search"]') do
+        click_link 'Author'
+        click_link '!='
+        click_link user.name
+
+        find('input').native.send_keys(:return)
+      end
+
+      wait_for_requests
+
+      expect(page).not_to have_content('Epic1')
+      expect(page).to have_content('Epic2')
+      expect(page).to have_content('Epic3')
     end
   end
 
@@ -321,6 +375,12 @@ RSpec.describe 'epic boards', :js do
   #
   def click_on_board_modal
     find('.board-config-modal .modal-content').click
+  end
+
+  # This isnt the "best" matcher but because we have opts
+  # != and = the find function returns both links when finding by =
+  def click_token_equals
+    first('a', text: '=').click
   end
 
   def find_board_list(board_number)

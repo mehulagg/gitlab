@@ -115,11 +115,10 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       let!(:task) { create(:elastic_reindexing_task, state: :reindexing, error_message: 'error-message') }
       let!(:subtask) { create(:elastic_reindexing_subtask, elastic_reindexing_task: task, documents_count_target: 5, documents_count: 10) }
 
-      it 'renders the task' do
+      it 'renders the task information' do
         render
 
         expect(rendered).to include("Reindexing Status: #{task.state}")
-        expect(rendered).to include("Task ID: #{subtask.elastic_task}")
         expect(rendered).to include("Error: #{task.error_message}")
         expect(rendered).to include("Expected documents: #{subtask.documents_count}")
         expect(rendered).to include("Documents reindexed: #{subtask.documents_count_target} (50.0%)")
@@ -130,11 +129,10 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       let!(:task) { create(:elastic_reindexing_task, state: :reindexing) }
       let!(:subtask) { create(:elastic_reindexing_subtask, elastic_reindexing_task: task, documents_count: 10) }
 
-      it 'renders the task' do
+      it 'renders the task information' do
         render
 
         expect(rendered).to include("Reindexing Status: #{task.state}")
-        expect(rendered).to include("Task ID: #{subtask.elastic_task}")
         expect(rendered).to include("Expected documents: #{subtask.documents_count}")
         expect(rendered).not_to include("Error:")
         expect(rendered).not_to include("Documents reindexed:")

@@ -5,7 +5,7 @@ module Mutations
     class AddProject < BaseMutation
       graphql_name 'AddProjectToSecurityDashboard'
 
-      authorize :developer_access
+      authorize :add_project_to_instance_security_dashboard
 
       field :project, Types::ProjectType,
             null: true,

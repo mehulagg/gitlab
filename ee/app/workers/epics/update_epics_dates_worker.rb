@@ -4,6 +4,8 @@ module Epics
   class UpdateEpicsDatesWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     queue_namespace :epics
     feature_category :epics
 

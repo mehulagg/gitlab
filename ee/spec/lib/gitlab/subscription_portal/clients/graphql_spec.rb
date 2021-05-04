@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
-  include SubscriptionPortalHelpers
-
   let(:client) { Gitlab::SubscriptionPortal::Client }
 
   describe '#activate' do
@@ -50,12 +48,22 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
       expect(result).to eq({ errors: ["invalid activation code"], success: false })
     end
 
-    it 'returns connectivity error' do
+    it 'returns connectivity error when remote server returns error' do
       stub_request(:any, EE::SUBSCRIPTIONS_GRAPHQL_URL).to_return(status: [500, "Internal Server Error"])
 
       result = client.activate('activation_code_abc')
 
       expect(result).to eq({ errors: described_class::CONNECTIVITY_ERROR, success: false })
+    end
+
+    it 'returns connectivity error when the remote server is unreachable' do
+      stub_request(:any, EE::SUBSCRIPTIONS_GRAPHQL_URL).to_timeout
+      allow(Gitlab::ErrorTracking).to receive(:log_exception)
+
+      result = client.activate('activation_code_abc')
+
+      expect(result).to eq({ errors: described_class::CONNECTIVITY_ERROR, success: false })
+      expect(Gitlab::ErrorTracking).to have_received(:log_exception).with(kind_of(Timeout::Error))
     end
   end
 
@@ -129,63 +137,6 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Graphql do
             assisted_upgrade_plan_id: nil,
             free_upgrade_plan_id: nil
           })
-        end
-      end
-    end
-  end
-
-  describe '#plan_data' do
-    let(:plan_tags) { 'CI_1000_MINUTES_PLAN' }
-
-    subject(:plan_data) { client.plan_data(plan_tags, stubbed_plan_data_query_fields) }
-
-    context 'when the response contains errors' do
-      before do
-        expect(client).to receive(:execute_graphql_query).and_return(response)
-      end
-
-      let(:response) do
-        {
-          success: true,
-          data: {
-            'errors' => [{ 'message' => 'this will be ignored' }]
-          }
-        }
-      end
-
-      it 'logs an error and returns a failure' do
-        expect(Gitlab::ErrorTracking)
-          .to receive(:track_and_raise_for_dev_exception)
-          .with(
-            a_kind_of(Gitlab::SubscriptionPortal::Client::ResponseError),
-          query: include(*stubbed_plan_data_query_fields_camelized), response: response[:data])
-
-        expect(plan_data).to eq({ success: false })
-      end
-    end
-
-    context 'when the response does not contain errors' do
-      before do
-        allow(client).to receive(:execute_graphql_query).and_return({ data: Gitlab::Json.parse(stubbed_plan_data_response_body) })
-      end
-
-      it 'filters out the deprecated plans' do
-        expect(plan_data).to match({
-          success: true,
-          plans: contain_exactly(include('deprecated' => false))
-        })
-      end
-
-      context 'when plans is an empty array' do
-        before do
-          allow(client).to receive(:execute_graphql_query).and_return({
-            success: true,
-            data: { "data" => { "plans" => [] } }
-          })
-        end
-
-        it 'returns the correct response' do
-          expect(plan_data).to eq({ success: true, plans: [] })
         end
       end
     end

@@ -18,6 +18,7 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
       expect(WebMock).to have_requested(:post, seat_link_url).with(
         headers: { 'Content-Type' => 'application/json' },
         body: {
+          gitlab_version: Gitlab::VERSION,
           timestamp: '2019-12-31T23:20:12Z',
           date: '2019-12-31',
           license_key: '123',
@@ -71,6 +72,7 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
         expect(WebMock).to have_requested(:post, seat_link_url).with(
           headers: { 'Content-Type' => 'application/json' },
           body: {
+            gitlab_version: Gitlab::VERSION,
             timestamp: '2020-01-01T00:00:00Z',
             date: '2020-01-01',
             license_key: '123',

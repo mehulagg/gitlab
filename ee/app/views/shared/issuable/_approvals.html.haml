@@ -12,7 +12,7 @@
           - feature_name = 'merge request approvals'
           .gl-xs-ml-3.gl-sm-mr-3.gl-mb-2.gl-order-1.gl-sm-order-init
             #js-paid-feature-badge{ data: paid_feature_badge_data_attrs(feature_name) }
-          #js-paid-feature-popover{ data: paid_feature_popover_data_attrs(group: root_group, feature_name: feature_name) }
+          #js-paid-feature-popover{ data: paid_feature_popover_data_attrs(group: root_group, feature_name: feature_name).merge(promo_image_path: image_path('illustrations/golden_tanuki.svg'), promo_image_alt_text: s_('ImageAltText|Sparkling golden tanuki logo')) }
         = form.label :approver_ids, "Approval rules"
     .col-sm-10
       = render_if_exists 'shared/issuable/approver_suggestion', issuable: issuable, presenter: presenter

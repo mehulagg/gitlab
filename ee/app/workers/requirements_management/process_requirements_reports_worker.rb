@@ -4,6 +4,8 @@ module RequirementsManagement
   class ProcessRequirementsReportsWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     feature_category :requirements_management
     idempotent!
 

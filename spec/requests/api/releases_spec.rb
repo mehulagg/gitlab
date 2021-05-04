@@ -129,19 +129,22 @@ RSpec.describe API::Releases do
       expect(json_response.first['upcoming_release']).to eq(false)
     end
 
-    it 'avoids N+1 queries' do
+    it 'avoids N+1 queries', :use_sql_query_cache do
       create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create(:release_link, release: project.releases.first)
 
-      control_count = ActiveRecord::QueryRecorder.new do
+      control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
         get api("/projects/#{project.id}/releases", maintainer)
       end.count
 
-      create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
-      create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create_list(:release, 2, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create_list(:release, 2, project: project)
+      create_list(:release_link, 2, release: project.releases.first)
+      create_list(:release_link, 2, release: project.releases.last)
 
       expect do
         get api("/projects/#{project.id}/releases", maintainer)
-      end.not_to exceed_query_limit(control_count)
+      end.not_to exceed_all_query_limit(control_count)
     end
 
     context 'when tag does not exist in git repository' do
@@ -1133,8 +1136,33 @@ RSpec.describe API::Releases do
     end
   end
 
+  describe 'Track API events', :snowplow do
+    context 'when tracking event with labels from User-Agent' do
+      it 'adds the tracked User-Agent to the label of the tracked event' do
+        get api("/projects/#{project.id}/releases", maintainer), headers: { 'User-Agent' => described_class::RELEASE_CLI_USER_AGENT }
+
+        assert_snowplow_event('get_releases', true)
+      end
+
+      it 'skips label when User-Agent is invalid' do
+        get api("/projects/#{project.id}/releases", maintainer), headers: { 'User-Agent' => 'invalid_user_agent' }
+        assert_snowplow_event('get_releases', false)
+      end
+    end
+  end
+
   def initialize_tags
     project.repository.add_tag(maintainer, 'v0.1', commit.id)
     project.repository.add_tag(maintainer, 'v0.2', commit.id)
+  end
+
+  def assert_snowplow_event(action, release_cli, user = maintainer)
+    expect_snowplow_event(
+      category: described_class.name,
+      action: action,
+      project: project,
+      user: user,
+      release_cli: release_cli
+    )
   end
 end

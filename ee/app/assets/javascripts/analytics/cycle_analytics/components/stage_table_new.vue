@@ -1,5 +1,5 @@
 <script>
-import { GlEmptyState, GlIcon, GlLink, GlLoadingIcon, GlTable } from '@gitlab/ui';
+import { GlEmptyState, GlIcon, GlLink, GlLoadingIcon, GlPagination, GlTable } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { NOT_ENOUGH_DATA_ERROR } from '../constants';
 import TotalTime from './total_time_component.vue';
@@ -19,11 +19,12 @@ export default {
     GlIcon,
     GlLink,
     GlLoadingIcon,
+    GlPagination,
     GlTable,
     TotalTime,
   },
   props: {
-    currentStage: {
+    selectedStage: {
       type: Object,
       required: true,
     },
@@ -44,6 +45,10 @@ export default {
       required: false,
       default: '',
     },
+    pagination: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
     isEmptyStage() {
@@ -54,12 +59,12 @@ export default {
       return emptyStateMessage || NOT_ENOUGH_DATA_ERROR;
     },
     isDefaultTestStage() {
-      const { currentStage } = this;
-      return !currentStage.custom && currentStage.title?.toLowerCase().trim() === 'test';
+      const { selectedStage } = this;
+      return !selectedStage.custom && selectedStage.title?.toLowerCase().trim() === 'test';
     },
     isDefaultStagingStage() {
-      const { currentStage } = this;
-      return !currentStage.custom && currentStage.title?.toLowerCase().trim() === 'staging';
+      const { selectedStage } = this;
+      return !selectedStage.custom && selectedStage.title?.toLowerCase().trim() === 'staging';
     },
     isMergeRequestStage() {
       const [firstEvent] = this.stageEvents;
@@ -78,6 +83,12 @@ export default {
     fields() {
       return [this.workflowTitle, { key: 'time', label: __('Time'), thClass: 'gl-w-half' }];
     },
+    prevPage() {
+      return Math.max(this.pagination.page - 1, 0);
+    },
+    nextPage() {
+      return this.pagination.hasNextPage ? this.pagination.page + 1 : null;
+    },
   },
   methods: {
     isMrLink(url = '') {
@@ -85,6 +96,9 @@ export default {
     },
     itemTitle(item) {
       return item.title || item.name;
+    },
+    onSelectPage(page) {
+      this.$emit('handleSelectPage', { page });
     },
   },
 };
@@ -194,5 +208,15 @@ export default {
         <total-time :time="item.totalTime" data-testid="vsa-stage-event-time" />
       </template>
     </gl-table>
+    <gl-pagination
+      v-if="!isLoading"
+      :value="pagination.page"
+      :prev-page="prevPage"
+      :next-page="nextPage"
+      align="center"
+      class="gl-mt-3"
+      data-testid="vsa-stage-pagination"
+      @input="onSelectPage"
+    />
   </div>
 </template>

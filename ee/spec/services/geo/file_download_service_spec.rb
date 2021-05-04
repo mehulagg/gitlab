@@ -463,6 +463,13 @@ RSpec.describe Geo::FileDownloadService do
       it_behaves_like 'a service that handles orphaned uploads', 'import_export'
     end
 
+    context 'with bulk imports export upload' do
+      let(:file) { create(:upload, model: build(:bulk_import_export_upload)) }
+
+      it_behaves_like 'a service that downloads the file and registers the sync result', :'bulk_imports/export'
+      it_behaves_like 'a service that handles orphaned uploads', :'bulk_imports/export'
+    end
+
     context 'bad object type' do
       it 'raises an error' do
         expect { described_class.new(:bad, 1).execute }.to raise_error(NotImplementedError)

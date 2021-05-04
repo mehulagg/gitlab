@@ -225,7 +225,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
       expect(data_collector_params[:direction]).to eq(:asc)
     end
 
-    it 'adds corting params to data attributes' do
+    it 'adds sorting params to data attributes' do
       data_attributes = subject.to_data_attributes
 
       expect(data_attributes[:sort]).to eq('duration')

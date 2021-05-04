@@ -124,8 +124,6 @@ class EpicsFinder < IssuableFinder
   end
 
   def filter_negated_items(items)
-    return items unless not_filters_enabled?
-
     # API endpoints send in `nil` values so we test if there are any non-nil
     return items unless not_params&.values&.any?
 

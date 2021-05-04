@@ -4,9 +4,12 @@ module Packages
   module Composer
     class CacheCleanupWorker
       include ApplicationWorker
+
+      sidekiq_options retry: 3
       include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
       feature_category :package_registry
+      tags :exclude_from_kubernetes
 
       idempotent!
 

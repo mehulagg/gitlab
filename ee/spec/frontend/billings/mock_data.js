@@ -102,6 +102,17 @@ export const mockDataSeats = {
   },
 };
 
+export const mockMemberDetails = [
+  {
+    id: 173,
+    source_id: 155,
+    source_full_name: 'group_with_ultimate_plan / subgroup',
+    created_at: '2021-02-25T08:21:32.257Z',
+    expires_at: null,
+    access_level: { string_value: 'Owner', integer_value: 50 },
+  },
+];
+
 export const mockTableItems = [
   {
     email: 'administrator@email.com',

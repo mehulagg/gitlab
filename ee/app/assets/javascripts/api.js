@@ -51,6 +51,8 @@ export default {
   issueMetricSingleImagePath:
     '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id',
   billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
+  billableGroupMemberMembershipsPath:
+    '/api/:version/groups/:group_id/billable_members/:member_id/memberships',
 
   userSubscription(namespaceId) {
     const url = Api.buildUrl(this.subscriptionPath).replace(':id', encodeURIComponent(namespaceId));
@@ -429,5 +431,13 @@ export default {
         callback(data);
         return { data, headers };
       });
+  },
+
+  fetchBillableGroupMemberMemberships(namespaceId, memberId) {
+    const url = Api.buildUrl(this.billableGroupMemberMembershipsPath)
+      .replace(':group_id', namespaceId)
+      .replace(':member_id', memberId);
+
+    return axios.get(url);
   },
 };

@@ -6,6 +6,7 @@ RSpec.describe EE::Projects::Security::ConfigurationHelper do
   include ActionView::Helpers::UrlHelper
 
   let_it_be(:project) { create(:project) }
+
   let(:current_user) { create(:user) }
 
   subject { helper.security_upgrade_path }

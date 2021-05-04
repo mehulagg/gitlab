@@ -16,6 +16,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::BulkDeleteService do
 
   before do
     enable_admin_mode!(admin)
+    stub_licensed_features(group_level_devops_adoption: true, instance_level_devops_adoption: true)
   end
 
   it 'deletes the segments' do

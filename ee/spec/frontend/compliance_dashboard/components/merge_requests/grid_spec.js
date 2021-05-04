@@ -80,7 +80,7 @@ describe('MergeRequestsGrid component', () => {
         wrapper = createComponent(
           createMergeRequests({
             count: 2,
-            props: { target_branch: 'master', source_branch: 'feature' },
+            props: { target_branch: 'main', source_branch: 'feature' },
           }),
         );
         expect(findBranchDetails().exists()).toBe(true);

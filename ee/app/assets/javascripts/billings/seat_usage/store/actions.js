@@ -55,3 +55,30 @@ export const removeBillableMemberError = ({ commit }) => {
   });
   commit(types.REMOVE_BILLABLE_MEMBER_ERROR);
 };
+
+export const fetchBillableMemberDetails = ({ dispatch, commit, state }, memberId) => {
+  if (state.userDetails[memberId]) {
+    commit(types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS, {
+      memberId,
+      memberships: state.userDetails[memberId].items,
+    });
+
+    return Promise.resolve();
+  }
+
+  commit(types.FETCH_BILLABLE_MEMBER_DETAILS, memberId);
+
+  return Api.fetchBillableGroupMemberMemberships(state.namespaceId, memberId)
+    .then(({ data }) =>
+      commit(types.FETCH_BILLABLE_MEMBER_DETAILS_SUCCESS, { memberId, memberships: data }),
+    )
+    .catch(() => dispatch('fetchBillableMemberDetailsError', memberId));
+};
+
+export const fetchBillableMemberDetailsError = ({ commit }, memberId) => {
+  commit(types.FETCH_BILLABLE_MEMBER_DETAILS_ERROR, memberId);
+
+  createFlash({
+    message: s__('Billing|An error occurred while getting a billable member details'),
+  });
+};

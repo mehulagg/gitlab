@@ -169,6 +169,41 @@ RSpec.describe Issues::UpdateService do
       end
     end
 
+    context 'changing issue_type' do
+      let!(:sla_setting) { create(:project_incident_management_setting, :sla_enabled, project: project) }
+
+      before do
+        stub_licensed_features(incident_sla: true)
+      end
+
+      context 'from issue to incident' do
+        it 'creates an SLA' do
+          expect { update_issue(issue_type: 'incident') }.to change(IssuableSla, :count).by(1)
+          expect(issue.reload.issuable_sla).to be_present
+        end
+      end
+
+      context 'from incident to issue' do
+        let(:issue) { create(:incident, project: project) }
+        let!(:sla) { create(:issuable_sla, issue: issue) }
+
+        it 'does not remove the SLA or create a new one' do
+          expect { update_issue(issue_type: 'issue') }.not_to change(IssuableSla, :count)
+          expect(issue.reload.issuable_sla).to be_present
+        end
+      end
+
+      # Not an expected scenario, but covers an SLA-agnostic hypothetical
+      context 'from test_case to issue' do
+        let(:issue) { create(:quality_test_case, project: project) }
+
+        it 'does nothing' do
+          expect { update_issue(issue_type: 'issue') }.not_to change(IssuableSla, :count)
+          expect(issue.reload.issuable_sla).to be_nil
+        end
+      end
+    end
+
     context 'assigning epic' do
       before do
         stub_licensed_features(epics: true)

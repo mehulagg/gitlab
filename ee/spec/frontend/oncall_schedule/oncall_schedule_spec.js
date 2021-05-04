@@ -1,26 +1,36 @@
-import { GlCard, GlButton } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { GlButton, GlCard, GlCollapse } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import VueApollo from 'vue-apollo';
 import OnCallSchedule, { i18n } from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import RotationsListSection from 'ee/oncall_schedules/components/schedule/components/rotations_list_section.vue';
 import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/components/schedule_timeline_section.vue';
 import * as utils from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
+import getShiftsForRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import * as dateTimeUtility from '~/lib/utils/datetime_utility';
+import { getOncallSchedulesQueryResponse } from './mocks/apollo_mock';
 import mockTimezones from './mocks/mock_timezones.json';
+
+const localVue = createLocalVue();
+localVue.use(VueApollo);
 
 describe('On-call schedule', () => {
   let wrapper;
+  let fakeApollo;
+
   const lastTz = mockTimezones[mockTimezones.length - 1];
-  const mockRotations = [{ name: 'rotation1' }, { name: 'rotation2' }];
   const mockSchedule = {
     description: 'monitor description',
     iid: '3',
     name: 'monitor schedule',
     timezone: lastTz.identifier,
     rotations: {
-      nodes: mockRotations,
+      nodes: [],
     },
   };
 
@@ -32,44 +42,54 @@ describe('On-call schedule', () => {
   ];
   const formattedTimezone = '(UTC-09:00) AKST Alaska';
 
-  function createComponent({ schedule, loading } = {}) {
-    const $apollo = {
-      queries: {
-        rotations: {
-          loading,
-        },
-      },
-    };
+  const createComponent = ({
+    schedule = mockSchedule,
+    scheduleIndex = 0,
+    getShiftsForRotationsQueryHandler = jest
+      .fn()
+      .mockResolvedValue(getOncallSchedulesQueryResponse),
+    props = {},
+    provide = {},
+  } = {}) => {
+    fakeApollo = createMockApollo([
+      [getShiftsForRotationsQuery, getShiftsForRotationsQueryHandler],
+    ]);
+
     wrapper = extendedWrapper(
       shallowMount(OnCallSchedule, {
+        localVue,
+        apolloProvider: fakeApollo,
         propsData: {
           schedule,
+          scheduleIndex,
+          ...props,
+        },
+        data() {
+          return {
+            rotations: schedule.rotations.nodes,
+          };
         },
         provide: {
           timezones: mockTimezones,
           projectPath,
-        },
-        data() {
-          return {
-            rotations: mockRotations,
-          };
+          ...provide,
         },
         stubs: {
           GlCard,
         },
-        mocks: { $apollo },
       }),
     );
-  }
+  };
 
   beforeEach(() => {
     jest.spyOn(utils, 'getTimeframeForWeeksView').mockReturnValue(mockWeeksTimeFrame);
     jest.spyOn(commonUtils, 'getFormattedTimezone').mockReturnValue(formattedTimezone);
-    createComponent({ schedule: mockSchedule, loading: false });
+    createComponent();
   });
 
   afterEach(() => {
     wrapper.destroy();
+    fakeApollo = null;
   });
 
   const findScheduleHeader = () => wrapper.findByTestId('scheduleHeader');
@@ -83,6 +103,7 @@ describe('On-call schedule', () => {
   const findRotationsList = () => findRotations().find(RotationsListSection);
   const findLoadPreviousTimeframeBtn = () => wrapper.findByTestId('previous-timeframe-btn');
   const findLoadNextTimeframeBtn = () => wrapper.findByTestId('next-timeframe-btn');
+  const findCollapsible = () => wrapper.findComponent(GlCollapse);
 
   it('shows schedule title', () => {
     expect(findScheduleHeader().text()).toBe(mockSchedule.name);
@@ -102,7 +123,11 @@ describe('On-call schedule', () => {
     });
 
     it('does not show schedule description if none present', () => {
-      createComponent({ schedule: { ...mockSchedule, description: null }, loading: false });
+      createComponent({
+        schedule: { ...mockSchedule, description: null },
+        loading: false,
+        scheduleIndex: 0,
+      });
       expect(findScheduleDescription()).not.toContain(mockSchedule.description);
     });
   });
@@ -131,6 +156,15 @@ describe('On-call schedule', () => {
       scheduleIid: mockSchedule.iid,
       loading: wrapper.vm.$apollo.queries.rotations.loading,
     });
+  });
+
+  it('renders a open card for the first in the list by default', () => {
+    expect(findCollapsible().attributes('visible')).toBe('true');
+  });
+
+  it('renders a collapsed card if not the first in the list by default', () => {
+    createComponent({ scheduleIndex: 1 });
+    expect(findCollapsible().attributes('visible')).toBeUndefined();
   });
 
   describe('Timeframe shift preset type', () => {
@@ -194,6 +228,29 @@ describe('On-call schedule', () => {
         expect(dateTimeUtility.nDaysBefore).toHaveBeenCalledWith(expect.any(Date), 1);
         expect(wrapper.vm.timeframeStartDate).toEqual(mockDate);
       });
+    });
+  });
+
+  describe('with Apollo mock', () => {
+    it('renders rotations list from API response when resolved', async () => {
+      createComponent();
+      await waitForPromises();
+
+      expect(findRotationsList().props('rotations')).toHaveLength(4);
+
+      expect(findRotationsList().props('rotations')).toEqual(
+        getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0]
+          .rotations.nodes,
+      );
+    });
+
+    it('does not renders rotations list from API response when skipped', async () => {
+      createComponent({ scheduleIndex: 1 });
+      await nextTick();
+      await waitForPromises();
+
+      expect(findRotationsList().props('rotations')).toHaveLength(0);
+      expect(findRotationsList().props('rotations')).toEqual([]);
     });
   });
 });

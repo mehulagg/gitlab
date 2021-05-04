@@ -33,7 +33,7 @@ class SamlProvider < ApplicationRecord
   end
 
   def enforced_sso?
-    enabled? && super && group.feature_available?(:group_saml)
+    enabled? && super && group.licensed_feature_available?(:group_saml)
   end
 
   def git_check_enforced?

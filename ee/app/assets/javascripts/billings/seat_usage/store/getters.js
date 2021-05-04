@@ -20,3 +20,7 @@ export const tableItems = (state) => {
   }
   return [];
 };
+
+export const membershipsById = (state) => (memberId) => {
+  return state.userDetails[memberId] || { isLoading: true, items: [] };
+};

@@ -361,17 +361,17 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
     end
   end
 
-  describe '#current?' do
+  describe '.current?' do
     it 'returns true when node is the current node' do
       node = described_class.new(name: described_class.current_node_name)
 
-      expect(node.current?).to be_truthy
+      expect(described_class.current?(node)).to be_truthy
     end
 
     it 'returns false when node is not the current node' do
       node = described_class.new(name: 'some other node')
 
-      expect(node.current?).to be_falsy
+      expect(described_class.current?(node)).to be_falsy
     end
   end
 

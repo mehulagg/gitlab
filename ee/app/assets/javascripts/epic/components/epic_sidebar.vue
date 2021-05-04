@@ -222,9 +222,6 @@ export default {
         :sidebar-collapsed="sidebarCollapsed"
         data-testid="labels-select"
       />
-      <div v-if="allowSubEpics" class="block ancestors">
-        <ancestors-tree :ancestors="ancestors" :is-fetching="false" data-testid="ancestors" />
-      </div>
       <sidebar-confidentiality-widget
         :iid="String(iid)"
         :full-path="fullPath"
@@ -233,6 +230,9 @@ export default {
         @expandSidebar="handleSidebarToggle"
         @confidentialityUpdated="updateConfidentialityOnIssuable($event)"
       />
+      <div v-if="allowSubEpics" class="block ancestors">
+        <ancestors-tree :ancestors="ancestors" :is-fetching="false" data-testid="ancestors" />
+      </div>
       <div class="block participants">
         <sidebar-participants
           :participants="participants"

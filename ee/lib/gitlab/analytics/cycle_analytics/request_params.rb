@@ -21,6 +21,7 @@ module Gitlab
           :direction,
           :page,
           :stage_id,
+          :end_event_filter,
           label_name: [].freeze,
           assignee_username: [].freeze,
           project_ids: [].freeze
@@ -44,6 +45,7 @@ module Gitlab
         attribute :direction
         attribute :page
         attribute :stage_id
+        attribute :end_event_filter
 
         FINDER_PARAM_NAMES.each do |param_name|
           attribute param_name
@@ -59,7 +61,8 @@ module Gitlab
           super(params)
 
           self.created_before = (self.created_before || Time.current).at_end_of_day
-          self.created_after  = (created_after || default_created_after).at_beginning_of_day
+          self.created_after = (created_after || default_created_after).at_beginning_of_day
+          self.end_event_filter ||= Gitlab::Analytics::CycleAnalytics::BaseQueryBuilder::DEFAULT_END_EVENT_FILTER
         end
 
         def project_ids
@@ -74,7 +77,8 @@ module Gitlab
             project_ids: project_ids,
             sort: sort&.to_sym,
             direction: direction&.to_sym,
-            page: page
+            page: page,
+            end_event_filter: end_event_filter.to_sym
           }.merge(attributes.symbolize_keys.slice(*FINDER_PARAM_NAMES))
         end
 

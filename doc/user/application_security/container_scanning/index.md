@@ -459,9 +459,9 @@ registry.gitlab.com/gitlab-org/security-products/analyzers/container-scanning
 
 The process for importing Docker images into a local offline Docker registry depends on
 **your network security policy**. Please consult your IT staff to find an accepted and approved
-process by which you can import or temporarily access external resources. Note that these scanners
-are [updated periodically](../index.md#maintenance-and-update-of-the-vulnerabilities-database)
-with new definitions, so consider if you are able to make periodic updates yourself.
+process by which you can import or temporarily access external resources. These scanners
+are [periodically updated](../vulnerabilities/index.md#vulnerability-scanner-maintenance),
+and you may be able to make occasional updates on your own.
 
 For more information, see [the specific steps on how to update an image with a pipeline](#automating-container-scanning-vulnerability-database-updates-with-a-pipeline).
 
@@ -689,12 +689,12 @@ the security vulnerabilities in your groups, projects and pipelines.
 
 ## Vulnerabilities database update
 
-If you're using Clair and want more information about the vulnerabilities database update, see the
-[maintenance table](../index.md#maintenance-and-update-of-the-vulnerabilities-database).
+If you're using Klar and want more information about the vulnerabilities database update, see the
+[maintenance table](../vulnerabilities/index.md#vulnerability-scanner-maintenance).
 
 ## Interacting with the vulnerabilities
 
-After a vulnerability is found, you can [address it](../index.md#addressing-vulnerabilities).
+After a vulnerability is found, you can [address it](../vulnerabilities/index.md).
 
 ## Solutions for vulnerabilities (auto-remediation)
 
@@ -708,7 +708,7 @@ file, it's necessary to set [`GIT_STRATEGY: fetch`](../../../ci/runners/README.m
 your `.gitlab-ci.yml` file by following the instructions described in this document's
 [overriding the container scanning template](#overriding-the-container-scanning-template) section.
 
-Read more about the [solutions for vulnerabilities](../index.md#apply-an-automatic-remediation-for-a-vulnerability).
+Read more about the [solutions for vulnerabilities](../vulnerabilities/index.md#remediate-a-vulnerability-automatically).
 
 ## Troubleshooting
 

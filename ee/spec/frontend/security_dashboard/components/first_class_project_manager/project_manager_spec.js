@@ -32,6 +32,10 @@ describe('Project Manager component', () => {
     },
   };
 
+  const defaultProps = {
+    isAuditor: false,
+  };
+
   const createWrapper = ({ data = {}, mocks = {}, props = {} }) => {
     spyQuery = defaultMocks.$apollo.query;
     spyMutate = defaultMocks.$apollo.mutate;
@@ -40,7 +44,7 @@ describe('Project Manager component', () => {
         return { ...data };
       },
       mocks: { ...defaultMocks, ...mocks },
-      propsData: props,
+      propsData: { ...defaultProps, ...props },
     });
   };
 
@@ -83,6 +87,7 @@ describe('Project Manager component', () => {
           after: '',
           searchNamespaces: true,
           sort: 'similarity',
+          membership: true,
         },
       });
     });
@@ -215,6 +220,20 @@ describe('Project Manager component', () => {
       createWrapper({ data: { pageInfo: { hasNextPage: false, endCursor: '' } } });
       findProjectSelector().vm.$emit('bottomReached');
       expect(spyQuery).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('membership prop', () => {
+    it.each([true, false])('calls the expected query when membership prop is $s', (isAuditor) => {
+      createWrapper({ props: { isAuditor } });
+      findProjectSelector().vm.$emit('searched', 'test');
+
+      expect(spyQuery).toHaveBeenCalledTimes(1);
+      expect(spyQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: expect.objectContaining({ membership: !isAuditor }),
+        }),
+      );
     });
   });
 });

@@ -67,6 +67,8 @@ class Group < Namespace
 
   has_one :import_state, class_name: 'GroupImportState', inverse_of: :group
 
+  has_many :bulk_import_exports, class_name: 'BulkImports::Export', inverse_of: :group
+
   has_many :group_deploy_keys_groups, inverse_of: :group
   has_many :group_deploy_keys, through: :group_deploy_keys_groups
   has_many :group_deploy_tokens
@@ -551,11 +553,22 @@ class Group < Namespace
   def max_member_access_for_user(user, only_concrete_membership: false)
     return GroupMember::NO_ACCESS unless user
     return GroupMember::OWNER if user.can_admin_all_resources? && !only_concrete_membership
+    # Use the preloaded value that exists instead of performing the db query again(cached or not).
+    # Groups::GroupMembersController#preload_max_access makes use of this by
+    # calling Group#max_member_access. This helps when we have a process
+    # that may query this multiple times from the outside through a policy query
+    # like the GroupPolicy#lookup_access_level! does as a condition for any role
+    return user.max_access_for_group[id] if user.max_access_for_group[id]
 
-    max_member_access = members_with_parents.where(user_id: user)
-                                            .reorder(access_level: :desc)
-                                            .first
-                                            &.access_level
+    max_member_access(user)
+  end
+
+  def max_member_access(user)
+    max_member_access = members_with_parents
+                          .where(user_id: user)
+                          .reorder(access_level: :desc)
+                          .first
+                          &.access_level
 
     max_member_access || GroupMember::NO_ACCESS
   end

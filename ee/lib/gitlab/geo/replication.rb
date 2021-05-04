@@ -6,6 +6,7 @@ module Gitlab
       USER_UPLOADS_OBJECT_TYPES = %i[
         attachment
         avatar
+        bulk_imports/export
         design_management/design_v432x230
         favicon
         file

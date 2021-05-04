@@ -1,9 +1,7 @@
 - return unless License.feature_available?(:elastic_search)
 
-- recreate_index_url = help_page_url('integration/elasticsearch.md')
-- recreate_index_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: recreate_index_url }
-- recreate_index_text = _("Changes won't take place until the index is %{link_start}recreated%{link_end}.").html_safe % { link_start: recreate_index_link_start, link_end: '</a>'.html_safe }
-- elasticsearch_available = Gitlab::Elastic::Helper.default.ping?
+- elastic_helper = Gitlab::Elastic::Helper.default
+- elasticsearch_available = elastic_helper.ping?
 
 %section.settings.expanded.as-elasticsearch.no-animate#js-elasticsearch-settings{ data: { qa_selector: 'elasticsearch_tab' } }
   .settings-header
@@ -73,18 +71,31 @@
                 = _('The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., "http://localhost:9200, http://localhost:9201").')
 
             .form-group
-              = f.label :elasticsearch_shards, _('Number of Elasticsearch shards'), class: 'label-bold'
-              = f.number_field :elasticsearch_shards, value: Elastic::IndexSetting.number_of_shards, class: 'form-control gl-form-input'
-              .form-text.gl-text-gray-600.gl-mt-0
-                = _('How many shards to split the Elasticsearch index over.')
-                = recreate_index_text
+              = f.label :elasticsearch_shards, _('Number of Elasticsearch shards and replicas (per index)'), class: 'gl-font-weight-bold'
 
+            %table.table
+              %thead
+                %tr
+                  %th= _('Index')
+                  %th= _('Number of shards')
+                  %th= _('Number of replicas')
+              %tbody
+                - aliases = [elastic_helper.target_name] + elastic_helper.standalone_indices_proxies.map(&:index_name)
+                - aliases.each do |alias_name|
+                  %tr
+                    - setting = Elastic::IndexSetting[alias_name]
+                    %td= alias_name
+                    %td
+                      = f.number_field :elasticsearch_shards, name: "application_setting[elasticsearch_shards][#{setting.alias_name}]", value: setting.number_of_shards, class: 'form-control gl-form-input', id: "application_setting_elasticsearch_shards[#{setting.alias_name}]"
+                    %td
+                      = f.number_field :elasticsearch_replicas, name: "application_setting[elasticsearch_replicas][#{setting.alias_name}]", value: setting.number_of_replicas, class: 'form-control gl-form-input', id: "application_setting_elasticsearch_replicas[#{setting.alias_name}]"
             .form-group
-              = f.label :elasticsearch_replicas, _('Number of Elasticsearch replicas'), class: 'label-bold'
-              = f.number_field :elasticsearch_replicas, value: Elastic::IndexSetting.number_of_replicas, class: 'form-control gl-form-input'
               .form-text.gl-text-gray-600.gl-mt-0
-                = _('How many replicas each Elasticsearch shard has.')
-                = recreate_index_text
+                - configuration_link_url = help_page_url('integration/elasticsearch.md', anchor: 'advanced-search-configuration')
+                - configuration_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: configuration_link_url }
+                - recreated_link_url = help_page_url('integration/elasticsearch.md', anchor: 'zero-downtime-reindexing')
+                - recreated_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: recreated_link_url }
+                = _("Learn more about shards and replicas in the %{configuration_link_start}Advanced search configuration%{configuration_link_end} documentation. Changes won't take place until the index is %{recreated_link_start}recreated%{recreated_link_end}.").html_safe % { configuration_link_start: configuration_link_start, configuration_link_end: '</a>'.html_safe, recreated_link_start: recreated_link_start, recreated_link_end: '</a>'.html_safe }
 
             .form-group
               = f.label :elasticsearch_indexed_file_size_limit_kb, _('Maximum file size indexed (KiB)'), class: 'label-bold'
