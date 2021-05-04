@@ -33,7 +33,6 @@ export default () => {
     label_name = [],
     sort,
     direction,
-    page,
   } = urlQueryToFilter(window.location.search);
 
   console.log('BASE::sort', sort);
@@ -50,7 +49,6 @@ export default () => {
       hasPathNavigation,
     },
     pagination: {
-      page: page?.value || 1,
       sort: sort?.value || null,
       direction: direction?.value || null,
     },

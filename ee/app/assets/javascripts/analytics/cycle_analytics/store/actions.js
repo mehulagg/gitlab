@@ -31,9 +31,9 @@ export const setFeatureFlags = ({ commit }, featureFlags) =>
 export const setSelectedProjects = ({ commit }, projects) =>
   commit(types.SET_SELECTED_PROJECTS, projects);
 
-export const setSelectedStage = ({ commit }, stage) => {
+export const setSelectedStage = ({ commit, getters: { paginationParams } }, stage) => {
   commit(types.SET_SELECTED_STAGE, stage);
-  commit(types.SET_PAGINATION, { page: 1, hasNextPage: null });
+  commit(types.SET_PAGINATION, { ...paginationParams, page: 1, hasNextPage: null });
 };
 
 export const setDateRange = ({ commit, dispatch }, { skipFetch = false, startDate, endDate }) => {
