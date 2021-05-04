@@ -18,7 +18,7 @@ RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_st
 
     {
       Geo::DesignRegistry => :project_with_design,
-      Geo::MergeRequestDiffRegistry => :external_merge_request_diff,
+      Geo::MergeRequestDiffRegistry => :external_merge_request_diff, # TODO should this be something else?
       Geo::PackageFileRegistry => :package_file_with_file,
       Geo::SnippetRepositoryRegistry => :snippet_repository,
       Geo::TerraformStateVersionRegistry => :terraform_state_version,

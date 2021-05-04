@@ -1,0 +1,8 @@
+---
+name: geo_merge_request_diff_verification
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.12'
+type: development
+group: group::geo
+default_enabled: false
