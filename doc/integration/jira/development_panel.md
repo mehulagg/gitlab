@@ -79,7 +79,7 @@ To enable the integration in your GitLab project, after you
 1. Select **Jira**.
 1. Select **Enable integration**.
 1. Select **Trigger** actions. Your choice determines whether a mention of Jira issue
-   (in a GitLab commit, merge request, or both) creates a cross-link in Jira that  back to GitLab.
+   (in a GitLab commit, merge request, or both) creates a cross-link in Jira back to GitLab.
 1. To comment in the Jira issue when a **Trigger** action is made in GitLab, select
    **Enable comments**.
 1. To transition Jira issues when a
