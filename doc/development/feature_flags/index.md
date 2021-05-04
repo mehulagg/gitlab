@@ -15,17 +15,29 @@ This document provides guidelines on how to use feature flags
 in the GitLab codebase to conditionally enable features
 and test them.
 
-Features that are developed and merged behind a feature flag
-should not include a changelog entry. A changelog entry with `type: added` should be included in the merge
-request removing the feature flag or the merge request where the default value of
-the feature flag is set to enabled. If the feature contains any database migrations, it
-*should* include a changelog entry for the database changes.
-
 WARNING:
 All newly-introduced feature flags should be [disabled by default](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/#feature-flags-in-gitlab-development).
 
 NOTE:
 This document is the subject of continued work as part of an epic to [improve internal usage of Feature Flags](https://gitlab.com/groups/gitlab-org/-/epics/3551). Raise any suggestions as new issues and attach them to the epic.
+
+## Changelog
+
+- Any change behind a feature flag **disabled** by default **should not** have a changelog entry.
+- Database migration chanages **should** include a changelog entry for the database changes.
+- Any change related to a feature flag itself (flag removal, default-on setting) **should** have a changelog entry.
+  Use the flowchart to determine the changelog entry type.
+  
+  ```mermaid
+  graph LR
+      A[flag: default off] -->|'added' / 'changed'| B(flag: default on)
+      B -->|'other'| C(remove flag, keep new code)
+      B -->|'removed' / 'changed'| D(remove flag, keep old code)
+      A -->|'added' / 'changed'| C
+      A -->|no changelog| D
+  ```
+  
+- Any change behind a feature flag that is **enabled** by default **should** have a changelog entry.
 
 ## Feature flags in GitLab development
 
