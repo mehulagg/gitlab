@@ -128,5 +128,16 @@ RSpec.describe SessionsController, :geo do
         end
       end
     end
+
+    context 'when user is not allowed to log in using password' do
+      let(:user) { create(:user, provisioned_by_group: create(:group)) }
+
+      it 'does not authenticate the user' do
+        post(:create, params: { user: { login: user.username, password: user.password } })
+
+        expect(@request.env['warden']).not_to be_authenticated
+        expect(flash[:alert]).to include('You are not allowed to log in using password')
+      end
+    end
   end
 end

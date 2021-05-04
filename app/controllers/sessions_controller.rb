@@ -76,6 +76,13 @@ class SessionsController < Devise::SessionsController
         flash[:notice] = nil
       end
 
+      if password_based_login? && !resource.allow_password_authentication_for_web?
+        sign_out
+        flash[:alert] = _('You are not allowed to log in using password')
+        redirect_to new_user_session_path
+        break
+      end
+
       log_audit_event(current_user, resource, with: authentication_method)
       log_user_activity(current_user)
     end
