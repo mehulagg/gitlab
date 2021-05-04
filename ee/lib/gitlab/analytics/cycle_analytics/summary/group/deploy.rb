@@ -19,7 +19,7 @@ module Gitlab
             private
 
             def deployments_count
-              @deployments_count ||= if Feature.enabled?(:dora_deployment_frequency_in_vsa)
+              @deployments_count ||= if Feature.enabled?(:dora_deployment_frequency_in_vsa, default_enabled: :yaml)
                                        deployment_count_via_dora_api
                                      else
                                        deployment_count_via_finder
