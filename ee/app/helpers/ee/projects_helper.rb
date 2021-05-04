@@ -4,13 +4,6 @@ module EE
   module ProjectsHelper
     extend ::Gitlab::Utils::Override
 
-    override :sidebar_settings_paths
-    def sidebar_settings_paths
-      super + %w[
-        operations#show
-      ]
-    end
-
     override :sidebar_operations_paths
     def sidebar_operations_paths
       super + %w[
