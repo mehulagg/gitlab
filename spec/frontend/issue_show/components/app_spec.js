@@ -1,8 +1,8 @@
 import { GlIntersectionObserver } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import waitForPromises from 'helpers/wait_for_promises';
 import MockAdapter from 'axios-mock-adapter';
 import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
+import waitForPromises from 'helpers/wait_for_promises';
 import '~/behaviors/markdown/render_gfm';
 import IssuableApp from '~/issue_show/components/app.vue';
 import DescriptionComponent from '~/issue_show/components/description.vue';
