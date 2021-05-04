@@ -15,14 +15,15 @@ class NetworkPolicyMetricsWorker # rubocop:disable Scalability/IdempotentWorker
                  .with_clusters_with_cilium
     service_metrics = count_adapter_metrics(services)
 
-    cluster_apps = Clusters::Applications::Prometheus
+    cluster_integrations = Clusters::Integrations::Prometheus
                      .preload_cluster_platform
                      .with_clusters_with_cilium
-    cluster_app_metrics = count_adapter_metrics(cluster_apps)
+
+    cluster_integration_metrics = count_adapter_metrics(cluster_integrations)
 
     Gitlab::UsageDataCounters::NetworkPolicyCounter.add(
-      service_metrics[:forwards] + cluster_app_metrics[:forwards],
-      service_metrics[:drops] + cluster_app_metrics[:drops]
+      service_metrics[:forwards] + cluster_integration_metrics[:forwards],
+      service_metrics[:drops] + cluster_integration_metrics[:drops]
     )
   end
 
