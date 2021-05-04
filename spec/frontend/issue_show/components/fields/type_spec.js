@@ -1,4 +1,4 @@
-import { GlFormGroup, GlFormSelect } from '@gitlab/ui';
+import { GlFormGroup, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import IssueTypeField, { i18n } from '~/issue_show/components/fields/type.vue';
 import { IssuableTypes } from '~/issue_show/constants';
@@ -7,7 +7,8 @@ describe('Issue type field component', () => {
   let wrapper;
 
   const findTypeFromGroup = () => wrapper.findComponent(GlFormGroup);
-  const findTypeFromSelect = () => wrapper.findComponent(GlFormSelect);
+  const findTypeFromDropDown = () => wrapper.findComponent(GlDropdown);
+  const findTypeFromDropDownItems = () => wrapper.findAllComponents(GlDropdownItem);
 
   beforeEach(() => {
     wrapper = shallowMount(IssueTypeField, {
@@ -28,15 +29,15 @@ describe('Issue type field component', () => {
   });
 
   it('renders a form select with the `issue_type` value', () => {
-    expect(findTypeFromSelect().attributes('value')).toBe(IssuableTypes.issue);
+    expect(findTypeFromDropDown().attributes('value')).toBe(IssuableTypes.issue);
   });
 
   it('emits an event when the `issue_type` value is changed', () => {
-    findTypeFromSelect().vm.$emit('change', IssuableTypes.incident);
+    findTypeFromDropDownItems().at(1).vm.$emit('click', IssuableTypes.incident);
 
     expect(wrapper.emitted('update-store-from-state')).toBeTruthy();
     expect(wrapper.emitted('update-store-from-state')[0][0]).toEqual({
-      issue_type: IssuableTypes.incident,
+      issue_type: 'incident',
     });
   });
 });

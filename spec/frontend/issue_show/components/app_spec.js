@@ -1,7 +1,7 @@
 import { GlIntersectionObserver } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import waitForPromises from 'helpers/wait_for_promises';
 import MockAdapter from 'axios-mock-adapter';
+import { nextTick } from 'vue';
 import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import '~/behaviors/markdown/render_gfm';
 import IssuableApp from '~/issue_show/components/app.vue';
@@ -96,7 +96,6 @@ describe('Issuable output', () => {
   afterEach(() => {
     mock.restore();
     realtimeRequestCount = 0;
-
     wrapper.vm.poll.stop();
     wrapper.destroy();
   });
@@ -536,7 +535,7 @@ describe('Issuable output', () => {
       `('$title', async ({ state }) => {
         wrapper.setProps({ issuableStatus: state });
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         expect(findStickyHeader().text()).toContain(IssuableStatusText[state]);
       });
@@ -548,7 +547,7 @@ describe('Issuable output', () => {
       `('$title', async ({ isConfidential }) => {
         wrapper.setProps({ isConfidential });
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         expect(findConfidentialBadge().exists()).toBe(isConfidential);
       });
@@ -560,7 +559,7 @@ describe('Issuable output', () => {
       `('$title', async ({ isLocked }) => {
         wrapper.setProps({ isLocked });
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         expect(findLockedBadge().exists()).toBe(isLocked);
       });
@@ -623,15 +622,7 @@ describe('Issuable output', () => {
     });
 
     describe('updateStoreFromState', () => {
-      const { location } = window;
-
       beforeEach(() => {
-        delete window.location;
-        window.location = {
-          reload: jest.fn(),
-          hash: location.hash,
-        };
-
         mountComponent(
           {
             canUpdate: true,
@@ -643,28 +634,9 @@ describe('Issuable output', () => {
         );
       });
 
-      afterEach(() => {
-        window.location = location;
-      });
-
-      it('does nothing if the states are equal', async () => {
-        const updateStoreSpy = jest.spyOn(wrapper.vm, 'updateIssuable');
-
-        findIssuableForm().vm.$emit('update-store-from-state', wrapper.vm.store.formState);
-        await waitForPromises();
-        expect(updateStoreSpy).not.toHaveBeenCalled();
-        expect(window.location.reload).not.toHaveBeenCalled();
-      });
-
-      it('updates the state and reloads the page if th states are different', async () => {
-        const updateStoreSpy = jest.spyOn(wrapper.vm, 'updateIssuable');
-
+      it('updates the state if emitted states are different', () => {
         findIssuableForm().vm.$emit('update-store-from-state', { ...secondRequest });
-        await waitForPromises();
-        jest.runAllTimers();
-        expect(updateStoreSpy).toHaveBeenCalled();
-        expect(updateStoreSpy).toHaveBeenCalledTimes(1);
-        expect(window.location.reload).toHaveBeenCalled();
+        expect(wrapper.vm.store.formState).toEqual(secondRequest);
       });
     });
   });

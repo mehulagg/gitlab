@@ -1,10 +1,10 @@
 <script>
 import { GlIcon, GlIntersectionObserver } from '@gitlab/ui';
+import { isEqual } from 'lodash';
 import Visibility from 'visibilityjs';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Poll from '~/lib/utils/poll';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { isEqual } from 'lodash';
 import { __, s__, sprintf } from '~/locale';
 import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
 import eventHub from '../event_hub';
@@ -202,6 +202,7 @@ export default {
       showForm: false,
       templatesRequested: false,
       isStickyHeaderShowing: false,
+      issueTypeChanged: false,
     };
   },
   computed: {
@@ -362,6 +363,14 @@ export default {
           if (!window.location.pathname.includes(data.web_url)) {
             visitUrl(data.web_url);
           }
+
+          if (this.issueTypeChanged) {
+            const URI =
+              this.store.formState.issue_type === 'incident'
+                ? data.web_url.replace('issues', 'issues/incident')
+                : data.web_url;
+            visitUrl(URI);
+          }
         })
         .then(this.updateStoreState)
         .then(() => {
@@ -387,13 +396,12 @@ export default {
     },
 
     updateStoreFromState(state) {
-      if (!isEqual(this.store.formState, state)) {
-        this.store.formState = state;
-        this.updateIssuable();
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+      if (isEqual(this.store.formState, state)) {
+        return;
       }
+
+      this.store.formState = state;
+      this.issueTypeChanged = true;
     },
 
     deleteIssuable(payload) {
