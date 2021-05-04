@@ -34,21 +34,26 @@ This integration connects all GitLab projects to projects in the Jira instance i
   down, are connected.
 - A personal namespace, which then connects the projects in that personal namespace to Jira.
 
-This differs from the [Jira integration](../../user/project/integrations/jira.md), where the mapping is between one GitLab project and the entire Jira instance.
+This differs from the [Jira integration](../../user/project/integrations/jira.md),
+where the mapping is between one GitLab project and the entire Jira instance.
 
 Additional features provided by the Jira Development Panel integration include:
 
-- In a Jira issue, display relevant GitLab information in the [development panel](https://support.atlassian.com/jira-software-cloud/docs/view-development-information-for-an-issue/), including related branches, commits, and merge requests.
-- Use Jira [Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html) in GitLab to add Jira comments, log time spent on the issue, or apply any issue transition.
+- In a Jira issue, display relevant GitLab information in the
+  [development panel](https://support.atlassian.com/jira-software-cloud/docs/view-development-information-for-an-issue/),
+  including related branches, commits, and merge requests.
+- Use Jira [Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html)
+  in GitLab to add Jira comments, log time spent on the issue, or apply any issue transition.
 - Showing pipeline, deployment, and feature flags in Jira issues.
 
 ## Configuration
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview of how to configure Jira Development panel integration, see [Agile Management - GitLab Jira Development panel integration](https://www.youtube.com/watch?v=VjVTOmMl85M&feature=youtu.be).
+For an overview of how to configure Jira Development panel integration, see
+[Agile Management - GitLab Jira Development panel integration](https://www.youtube.com/watch?v=VjVTOmMl85M&feature=youtu.be).
 
-We recommend that a GitLab group maintainer or group owner, or instance administrator (in the case of
-self-managed GitLab) set up the integration to simplify administration.
+We recommend that a GitLab group maintainer or group owner, or instance administrator
+(in the case of self-managed GitLab) set up the integration to simplify administration.
 
 | If you use Jira on: | GitLab.com customers need: | GitLab self-managed customers need: |
 |-|-|-|
@@ -84,32 +89,27 @@ To enable the Jira integration in a project:
 
 1. Go to the project's [Integrations page](../../user/project/integrations/overview.md#accessing-integrations) and select the
    **Jira** service.
-
 1. Select **Enable integration**.
-
 1. Select **Trigger** actions.
    This determines whether a mention of a Jira issue in GitLab commits, merge requests, or both,
    should link the Jira issue back to that source commit/MR and transition the Jira issue, if
    indicated.
-
 1. To include a comment on the Jira issue when the above reference is made in GitLab, select
    **Enable comments**.
-
 1. To transition Jira issues when a [closing reference](../../user/project/issues/managing_issues.md#closing-issues-automatically) is made in GitLab,
    select **Enable Jira transitions**.
-
-1. Enter the further details on the page as described in the following table.
-
-   | Field | Description |
-   | ----- | ----------- |
-   | `Web URL` | The base URL to the Jira instance web interface which is being linked to this GitLab project. For example, `https://jira.example.com`. |
-   | `Jira API URL` | The base URL to the Jira instance API. Web URL value is used if not set. For example, `https://jira-api.example.com`. Leave this field blank (or use the same value of `Web URL`) if using **Jira on Atlassian cloud**. |
-   | `Username or Email` | Created in [configure Jira](dvcs.md#configure-jira-for-dvcs) step. Use `username` for **Jira Server** or `email` for **Jira on Atlassian cloud**. |
-   | `Password/API token` | Created in [configure Jira](dvcs.md#configure-jira-for-dvcs) step. Use `password` for **Jira Server** or `API token` for **Jira on Atlassian cloud**. |
-
+1. Enter the further details on the page:
+   - **Web URL**: The base URL to the Jira instance web interface which is being
+     linked to this GitLab project. For example, `https://jira.example.com`.
+   - **Jira API URL**: The base URL to the Jira instance API. Web URL value is
+     used if not set. For example, `https://jira-api.example.com`. Leave this field
+     blank (or use the same value of `Web URL`) if using **Jira on Atlassian cloud**.
+   - **Username or Email**: Created in [configure Jira](dvcs.md#configure-jira-for-dvcs)
+     step. Use `username` for **Jira Server** or `email` for **Jira on Atlassian cloud**.
+   - **Password/API token**: Created in [configure Jira](dvcs.md#configure-jira-for-dvcs)
+     step. Use `password` for **Jira Server** or `API token` for **Jira on Atlassian cloud**.
 1. To enable users to view Jira issues inside the GitLab project, select **Enable Jira issues** and
    enter a Jira project key. **(PREMIUM)**
-
    You can only display issues from a single Jira project within a given GitLab project.
 
    WARNING:
@@ -117,11 +117,8 @@ To enable the Jira integration in a project:
    are able to view all issues from the specified Jira project.
 
 1. To enable creation of issues for vulnerabilities, select **Enable Jira issues creation from vulnerabilities**.
-
    1. Select the **Jira issue type**. If the dropdown is empty, select refresh (**{retry}**) and try again.
-
 1. To verify the Jira connection is working, select **Test settings**.
-
 1. Select **Save changes**.
 
 Your GitLab project can now interact with all Jira projects in your instance and the project now
@@ -146,7 +143,9 @@ Click the links to see your GitLab repository data.
 
 ![GitLab merge requests details on a Jira issue](img/jira_dev_panel_jira_setup_5.png)
 
-For more information on using Jira Smart Commits to track time against an issue, specify an issue transition, or add a custom comment, see the Atlassian page [Using Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html).
+For more information on using Jira Smart Commits to track time against an issue, specify
+an issue transition, or add a custom comment, see the Atlassian page
+[Using Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html).
 
 ## Limitations
 
